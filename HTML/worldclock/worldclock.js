@@ -497,6 +497,7 @@
 
         let manualOffset = 0; // in minutes
         let debugDayOffset = 0; // DEBUG: step the displayed date (Arrow keys) to watch the Moon, in days
+        let skyT = 0;           // planetarium mode 0…1 (0 = clock + dim stars, 1 = clock hidden + full stars); toggled by 's'
         let autoRotation = 0;
         let autoRotationEnabled = false;
         let isMouseDown = false;
@@ -1758,6 +1759,50 @@
                 }
                 ctx.restore();
             });
+        }
+
+        // Celestial backdrop: constellation lines + figure stars, pole-centred (pol-wheel), rotating with sidereal time.
+        // Centre = the celestial pole (matches the clock's polar view); radius ∝ colatitude; angle = RA − LST.
+        function drawStarfield(w, h, cx, cy) {
+            if (typeof CONSTELLATION_LINES === 'undefined' || typeof siderealTimeDeg !== 'function') return;
+            const north = !CW;                                       // CCW → north celestial pole; CW → south
+            const refLon = (targetCity && (targetCity.globeLon ?? targetCity.lon)) || 0;
+            const lst = siderealTimeDeg(getDisplayTime(), refLon);   // rotates the sky with time/longitude
+            const Req = Math.max(w, h) * 0.62;                       // screen radius of the celestial equator (zoom — tunable)
+            const D2R = Math.PI / 180;
+            const a = 0.35 + 0.65 * skyT;                            // dim behind the clock; full in sky mode
+            const proj = (ra, dec) => {
+                const colat = north ? (90 - dec) : (90 + dec);       // 0 = visible pole … 90 = equator … 180 = opposite pole
+                const rr = (colat / 90) * Req;
+                const ang = dirSign * (ra - lst) * D2R - Math.PI / 2; // direction/offset tunable
+                return [cx + rr * Math.cos(ang), cy + rr * Math.sin(ang)];
+            };
+            ctx.save();
+            ctx.lineJoin = "round";
+            ctx.strokeStyle = `rgba(120, 160, 220, ${a * 0.5})`;     // constellation lines
+            ctx.lineWidth = 1;
+            for (const con of CONSTELLATION_LINES) {
+                for (const path of con.paths) {
+                    ctx.beginPath();
+                    for (let i = 0; i < path.length; i += 2) {
+                        const p = proj(path[i], path[i + 1]);
+                        if (i === 0) ctx.moveTo(p[0], p[1]); else ctx.lineTo(p[0], p[1]);
+                    }
+                    ctx.stroke();
+                }
+            }
+            ctx.fillStyle = `rgba(235, 242, 255, ${a})`;             // figure stars (path vertices)
+            for (const con of CONSTELLATION_LINES) {
+                for (const path of con.paths) {
+                    for (let i = 0; i < path.length; i += 2) {
+                        const p = proj(path[i], path[i + 1]);
+                        ctx.beginPath();
+                        ctx.arc(p[0], p[1], 1.3, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                }
+            }
+            ctx.restore();
         }
 
         function draw() {
