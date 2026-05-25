@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>VGP — Krypto-Tests</title>
+<link rel="stylesheet" href="theme.css?v=1">
+<style>
+  body{font-family:'Helvetica Neue',Helvetica,Arial,system-ui,sans-serif;background:var(--vgp-bg);color:var(--vgp-text2);margin:0;padding:28px;max-width:760px}
+  h1{font-size:20px;color:var(--vgp-accent);margin:0 0 4px}
+  .note{color:var(--vgp-text-dim);font-size:13px;margin:0 0 18px;line-height:1.5}
+  .t{padding:8px 12px;border-radius:8px;margin:4px 0;font-size:14px;background:var(--vgp-panel)}
+  .t.ok{color:var(--vgp-green)}
+  .t.no{color:var(--vgp-error);background:rgba(var(--vgp-forged-bg-rgb),.25)}
+  .sum{margin-top:16px;padding:12px 14px;border-radius:10px;font-weight:700;font-size:15px}
+  .sum.ok{background:rgba(var(--vgp-accent-rgb),.12);color:var(--vgp-accent)}
+  .sum.no{background:rgba(var(--vgp-red-rgb),.18);color:var(--vgp-error)}
+</style>
+</head>
+<body>
+<h1>VGP — Krypto-Tests</h1>
+<p class="note">Testet die <b>echten</b> Funktionen aus <code>js/vgp-crypto.js</code> (seiteneffekt-frei ladbar) mit ein paar
+Mini-Stubs für die App-Abhängigkeiten. Datei einfach öffnen → grün = ok. Kein Build, kein Node.</p>
+<div id="out"></div>
+
+<!-- Minimal stubs so vgp-crypto.js's functions run outside the full app.
+     NOTE: do NOT declare myPrivKey/b64/unb64 here — vgp-crypto.js declares those (would clash). -->
+<script>
+  function dbg() {}
+  function bufToHex(buf) { return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join(''); }
+  // initCrypto() calls deriveHmacKey(); the room key doesn't depend on it, so any HMAC key works here.
+  async function deriveHmacKey() { return crypto.subtle.generateKey({ name: 'HMAC', hash: 'SHA-256' }, false, ['sign']); }
+  let hmacKey, dirKey, roomKey, myGroupId; // assigned by initCrypto (declared in the app's setup file)
+</script>
+<script src="js/vgp-crypto.js?v=20260524-5"></script>
+
+<script>
+const out = document.getElementById('out');
+let pass = 0, fail = 0;
+function row(ok, name, info) {
+  ok ? pass++ : fail++;
+  const d = document.createElement('div');
+  d.className = 't ' + (ok ? 'ok' : 'no');
+  d.textContent = (ok ? '✓ ' : '✗ ') + name + (info ? ' — ' + info : '');
+  out.appendChild(d);
+}
+// A test returns `true` on success, or a string explaining the failure.
+async function t(name, fn) {
+  try { const r = await fn(); row(r === true, name, r === true ? '' : String(r)); }
+  catch (e) { row(false, name, 'EXCEPTION: ' + (e && e.message ? e.message : e)); }
+}
+
+(async () => {
+  await t('group_id ist deterministisch + 64-stelliger Hex', async () => {
+    const a = await deriveGroupId('familie-pw'), b = await deriveGroupId('familie-pw');
+    if (a !== b) return 'nicht deterministisch';
+    if (!/^[0-9a-f]{64}$/.test(a)) return 'kein 64-Hex: ' + a;
+    return (a !== await deriveGroupId('andere-pw')) || 'gleicher group_id für anderes Passwort';
+  });
+
+  await t('AES-256-GCM Round-Trip (encryptText → decryptText)', async () => {
+    const k = await deriveDirKey('pw');
+    const ct = await encryptText('Hallo € 🤫', k);
+    if (!ct.startsWith('ENC:')) return 'kein ENC:-Präfix';
+    return (await decryptText(ct, k)) === 'Hallo € 🤫' || 'Round-Trip falsch';
+  });
+
+  await t('Falscher Schlüssel → "[falscher Schlüssel]" (kein Crash)', async () => {
+    const ct = await encryptText('geheim', await deriveDirKey('pw'));
+    return (await decryptText(ct, await deriveDirKey('falsch'))) === '[falscher Schlüssel]' || 'kein sauberer Fehlerwert';
+  });
+
+  await t('Raum-Schlüssel: gleiches Gruppen-Pwd → jedes Mitglied kann lesen', async () => {
+    await initCrypto('gruppe-geheim'); const rkA = roomKey;          // Mitglied A
+    const ct = await encryptText('an alle', rkA);
+    await initCrypto('gruppe-geheim'); const rkB = roomKey;          // Mitglied B (gleiches Pwd, eigenes Gerät)
+    if ((await decryptText(ct, rkB)) !== 'an alle') return 'Mitglied B kann nicht lesen';
+    await initCrypto('andere-gruppe');                               // Fremde Gruppe
+    return (await decryptText(ct, roomKey)) === '[falscher Schlüssel]' || 'FREMDE Gruppe kann mitlesen!';
+  });
+
+  await t('Verzeichnis (encDir/decDir): Round-Trip + Klartext-Durchlass', async () => {
+    dirKey = await deriveDirKey('gpw');
+    if ((await decDir(await encDir('Müller'))) !== 'Müller') return 'encDir/decDir Round-Trip falsch';
+    return (await decDir('Klartext-Altzeile')) === 'Klartext-Altzeile' || 'Klartext nicht durchgelassen';
+  });
+
+  await t('ECDSA: gültige Signatur akzeptiert, Manipulation + fremder Key abgelehnt', async () => {
+    const kp = await crypto.subtle.generateKey({ name: 'ECDSA', namedCurve: 'P-256' }, true, ['sign', 'verify']);
+    myPrivKey = kp.privateKey;
+    const pub = b64(await crypto.subtle.exportKey('spki', kp.publicKey));
+    const sig = await signText('original-nachricht');
+    if (!(await verifyText('original-nachricht', sig, pub))) return 'gültige Signatur abgelehnt';
+    if (await verifyText('MANIPULIERT', sig, pub)) return 'manipulierter Text akzeptiert!';
+    const other = await crypto.subtle.generateKey({ name: 'ECDSA', namedCurve: 'P-256' }, true, ['sign', 'verify']);
+    const otherPub = b64(await crypto.subtle.exportKey('spki', other.publicKey));
+    return !(await verifyText('original-nachricht', sig, otherPub)) || 'fremder Schlüssel akzeptiert!';
+  });
+
+  const sum = document.createElement('div');
+  sum.className = 'sum ' + (fail ? 'no' : 'ok');
+  sum.textContent = `${pass}/${pass + fail} bestanden` + (fail ? ` · ${fail} FEHLER` : ' · alles grün ✓');
+  out.appendChild(sum);
+})();
+</script>
+</body>
+</html>
