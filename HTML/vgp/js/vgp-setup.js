@@ -137,6 +137,22 @@ function setOwnAvatarDisplay() {
 }
 setOwnAvatarDisplay();
 
+// On a fresh device my own avatar/emoji lives only in some OTHER device's localStorage — but it is
+// also published (encrypted) to my identity row. Pull it from there so my picture shows on EVERY
+// device. Never wipe a valid local value with garbage/empty (e.g. on a decryption miss).
+async function syncOwnAvatarFromIdentity(r, dk) {
+  const av = await decDirWith(r.avatar, dk);
+  if (av && av.startsWith('data:')) {                                   // a valid published picture
+    if (av !== myAvatar) { myAvatar = av; myEmoji = ''; localStorage.setItem(AVATAR_KEY, av); localStorage.removeItem(EMOJI_KEY); setOwnAvatarDisplay(); }
+    return;
+  }
+  const em = await decDirWith(r.emoji, dk);
+  if (em && em.length <= 12 && em !== '[falscher Schlüssel]') {         // a single published emoji (not garbage)
+    if (em !== myEmoji || myAvatar) { myEmoji = em; myAvatar = ''; localStorage.setItem(EMOJI_KEY, em); localStorage.removeItem(AVATAR_KEY); setOwnAvatarDisplay(); }
+  }
+  // else: nothing valid published → keep whatever is local (don't wipe it)
+}
+
 // WhatsApp-style picker (emoji-picker-element): a click delivers the emoji to pickEmoji().
 // GUARD: if the <emoji-picker> isn't found (e.g. a stale-cached HTML with an older structure),
 // don't let a null deref abort this whole file — that would silently kill the avatar/emoji wiring below.

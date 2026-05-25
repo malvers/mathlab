@@ -98,6 +98,7 @@ async function loadContacts() {
   // so the sidebar can show all my groups with their members underneath.
   const me = (myNameEl.value || '').toLowerCase();
   const next = [];
+  let syncedOwn = false;   // pull my own published avatar/emoji onto this device once per load
   for (const g of myGroups) {
     const gid = await deriveGroupId(g.pwd);
     const dk = await deriveDirKey(g.pwd);
@@ -106,6 +107,7 @@ async function loadContacts() {
     const members = [];
     for (const r of (data || [])) {
       const name = await decDirWith(r.name, dk);
+      if (!syncedOwn && r.pubkey === myPubB64) { syncedOwn = true; await syncOwnAvatarFromIdentity(r, dk); }
       if (!name || name.toLowerCase() === me || !r.ecdh_pubkey || !r.owner) continue;
       members.push({ name, pubkey: r.pubkey, ecdh_pubkey: r.ecdh_pubkey,
                      emoji: await decDirWith(r.emoji, dk), avatar: await decDirWith(r.avatar, dk), groupPwd: g.pwd });
