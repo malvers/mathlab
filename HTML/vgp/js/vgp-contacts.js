@@ -338,36 +338,9 @@ async function createVault(name, accountPwd, groupPwd, groupLabel) {
 // ===========================================================================
 // BACKUP & SESSION — server envelope backup, restore, activate vault, initChat
 // ===========================================================================
-// --- Server backup (multi-device, "envelope"): a random master key encrypts the vault; the master
-// key is wrapped twice (by account+room password, and by a one-time recovery code). Server holds
-// only ciphertext — it can read nothing. Restore on any device via password OR recovery code. ---
-const BACKUP_ITERS = 600000;          // PBKDF2 work factor for the wrapping keys (login/restore only)
-const RECOVERY_SALT = 'vgp-recovery-salt-v1';
-function normCode(c) { return (c || '').toUpperCase().replace(/[^A-Z0-9]/g, ''); }
-async function kdfKEK(str, saltBytes) {
-  const km = await crypto.subtle.importKey('raw', new TextEncoder().encode(str), 'PBKDF2', false, ['deriveKey']);
-  return crypto.subtle.deriveKey({ name: 'PBKDF2', salt: saltBytes, iterations: BACKUP_ITERS, hash: 'SHA-256' },
-    km, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']);
-}
-async function wrapMaster(masterKey, kek) {
-  const raw = new Uint8Array(await crypto.subtle.exportKey('raw', masterKey));
-  const iv = crypto.getRandomValues(new Uint8Array(12));
-  const ct = new Uint8Array(await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, kek, raw));
-  const c = new Uint8Array(iv.length + ct.length); c.set(iv); c.set(ct, iv.length);
-  return b64(c);
-}
-async function unwrapMaster(wrapB64, kek) {
-  const c = unb64(wrapB64);
-  const raw = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: c.slice(0, 12) }, kek, c.slice(12));
-  return crypto.subtle.importKey('raw', new Uint8Array(raw), { name: 'AES-GCM', length: 256 }, true, ['encrypt', 'decrypt']);
-}
-// Readable 100-bit code, e.g. ABCD-EFGH-JKLM-NPQR-STUV (no ambiguous chars 0/O/1/I)
-function genRecoveryCode() {
-  const bytes = crypto.getRandomValues(new Uint8Array(20));
-  const A = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-  let s = ''; for (const b of bytes) s += A[b & 31];
-  return s.match(/.{1,4}/g).join('-');
-}
+// --- Server backup (multi-device, "envelope"). The pure crypto primitives (kdfKEK / wrapMaster /
+// unwrapMaster / genRecoveryCode / normCode + BACKUP_ITERS / RECOVERY_SALT) live in vgp-backup-core.js
+// (loaded just before this file) so they're unit-testable in isolation. Restore via password OR code. ---
 // Create/refresh the server backup. One random master key encrypts the full vault (incl. ALL groups);
 // it's wrapped per group (so restore works with ANY group's password) + once by the recovery code.
 // Writes one vaults row per group (same enc + wrap_recovery, per-group wrap_pwd). Returns recovery code.

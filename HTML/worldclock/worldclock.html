@@ -1536,11 +1536,11 @@
             {
                 const dlAngle = dirSign * (-(-172.5)) * Math.PI / 180 - Math.PI / 2; // angular midpoint of the two cities
                 const dlMarkerR = (r * 0.9) - markerInset;
-                const dlR = dlMarkerR * 0.82;            // a bit inside the bubble ring, in the gap between the two
                 const Rt = r * 0.016;                    // circumradius of the small equilateral triangle (side = Rt·√3)
+                const dlR = r * 0.773 - Rt;              // centre placed so the TIP sits on the world-disc rim (= MAP_SCALE)
                 const cx0 = Math.cos(dlAngle) * dlR, cy0 = Math.sin(dlAngle) * dlR;
                 ctx.save();
-                ctx.fillStyle = "rgb(176, 36, 24)";      // CLAUDE.md red (Υ)
+                ctx.fillStyle = "rgb(200, 200, 200)";    // light grey (triangle + label)
                 ctx.beginPath();
                 for (let k = 0; k < 3; k++) {            // 3 vertices 120° apart → equilateral; k=0 points radially outward
                     const a = dlAngle + k * (2 * Math.PI / 3);
@@ -1549,13 +1549,17 @@
                 }
                 ctx.closePath();
                 ctx.fill();
-                // "DATUMSGRENZE" written radially, from the triangle toward the clock centre
+                // "DATUMSGRENZE" radial from the triangle toward the centre — kept upright (accounts for map rotation)
+                const mapRot = mapRotation * Math.PI / 180;
+                let R = Math.atan2(Math.sin(dlAngle + mapRot), Math.cos(dlAngle + mapRot)); // on-screen radial (outward)
+                const flip = Math.abs(R) > Math.PI / 2;  // pointing left → would be upside-down, use inward direction
+                if (flip) R = Math.atan2(Math.sin(R + Math.PI), Math.cos(R + Math.PI));
                 ctx.translate(cx0, cy0);
-                ctx.rotate(dlAngle + Math.PI);           // local +x → toward the centre
-                ctx.font = `${r * 0.02}px Orbitron`;
-                ctx.textAlign = "left";
+                ctx.rotate(R - mapRot);                  // net on-screen rotation = R ∈ (-90°,90°) → upright
+                ctx.font = `${r * 0.028}px Orbitron`;
                 ctx.textBaseline = "middle";
-                ctx.fillText("DATUMSGRENZE", Rt * 1.4, 0);
+                ctx.textAlign = flip ? "left" : "right";
+                ctx.fillText("DATUMSGRENZE", flip ? Rt * 1.6 : -Rt * 1.6, 0);
                 ctx.restore();
             }
             ctx.restore(); // End map rotation (Earth + Glued Markers)
