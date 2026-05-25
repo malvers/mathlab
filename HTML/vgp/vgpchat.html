@@ -58,6 +58,8 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,system-ui,sans-serif;backgroun
 /* Own-profile strip at the top of the sidebar (avatar + name + ⋮) */
 #sidebar-head{display:flex;gap:8px;padding:8px 12px;min-height:62px;background:var(--vgp-panel);align-items:center;border-bottom:1px solid rgba(var(--vgp-accent-rgb),.12)}
 #sidebar-head #my-name{flex:1;min-width:0;padding:0;border:none;background:transparent;color:var(--vgp-text);font-size:16px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#push-bell{flex:0 0 auto;font-size:15px;line-height:1;cursor:default}
+#push-bell.hidden{display:none}
 #sidebar-head #my-name:focus{outline:none}
 #name-emoji{flex:0 0 auto;position:static;transform:none;width:36px;height:36px;border:none;border-radius:50%;background:transparent;font-size:34px;line-height:36px;cursor:pointer;padding:0;text-align:center}
 #contact-search{margin:12px 12px 8px;padding:9px 14px;border:none;border-radius:12px;background:var(--vgp-field);color:var(--vgp-text2);font-size:14px;font-family:inherit;line-height:1.4;resize:none;overflow:hidden}
@@ -325,11 +327,14 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
     <div id="sidebar-head">
       <button id="name-emoji" type="button" aria-label="Emoji wählen" title="Emoji wählen"><span style="pointer-events:none">🙂</span></button>
       <input id="my-name" aria-label="Dein Name" placeholder="Dein Name" maxlength="30" autocomplete="off" readonly>
+      <span id="push-bell" class="hidden" title="Benachrichtigungen aktiv" aria-label="Benachrichtigungen aktiv">🔔</span>
       <button id="menu-btn" type="button" aria-label="Menü" title="Menü">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"></circle><circle cx="12" cy="12" r="2"></circle><circle cx="19" cy="12" r="2"></circle></svg>
       </button>
     </div>
     <div id="head-menu" class="hidden" role="menu">
+      <button type="button" id="menu-push" role="menuitem">🔔 Benachrichtigungen aktivieren</button>
+      <div class="menu-sep"></div>
       <button type="button" id="menu-logout" role="menuitem">Auf diesem Gerät abmelden</button>
       <button type="button" id="menu-delete" class="danger" role="menuitem">Konto endgültig löschen</button>
       <div class="menu-sep"></div>
@@ -484,12 +489,13 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
   <button id="stats-close">SCHLIESSEN</button>
 </div>
 
-<script src="js/vgp-setup.js?v=20260524-8"></script>
-<script src="js/vgp-auth.js?v=20260524-8"></script>
-<script src="js/vgp-crypto.js?v=20260524-8"></script>
-<script src="js/vgp-backup-core.js?v=20260524-8"></script>
-<script src="js/vgp-contacts.js?v=20260524-8"></script>
-<script src="js/vgp-messages.js?v=20260524-8"></script>
+<script src="js/vgp-setup.js?v=20260524-11"></script>
+<script src="js/vgp-auth.js?v=20260524-11"></script>
+<script src="js/vgp-crypto.js?v=20260524-11"></script>
+<script src="js/vgp-backup-core.js?v=20260524-11"></script>
+<script src="js/vgp-contacts.js?v=20260524-11"></script>
+<script src="js/vgp-messages.js?v=20260524-11"></script>
+<script src="js/vgp-push.js?v=20260524-11"></script>
 <script>
 // Local-vs-live indicator: mark the page red ONLY when served locally. No red = you're on the live site.
 (function () {
