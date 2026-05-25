@@ -15,20 +15,6 @@
 if (new URLSearchParams(location.search).get('debug') === '1') {
   document.write('<scr' + 'ipt src="../js/debug-window.js"></scr' + 'ipt>');
 }
-// TEMP diagnostic: surface any top-level script error (file:line) into the DEBUG window.
-window.addEventListener('error', e => {
-  const msg = 'JS-Fehler: ' + e.message + ' @ ' + ((e.filename || '').split('/').pop()) + ':' + e.lineno;
-  try { (window.DebugWindow && DebugWindow.log) ? DebugWindow.log(msg) : console.error(msg); } catch (_) { console.error(msg); }
-});
-// TEMP diagnostic: which element actually receives a click (capture phase, before any handler)?
-document.addEventListener('click', e => {
-  try {
-    const t = e.target;
-    const inEmoji = !!(t.closest && t.closest('#name-emoji'));
-    const m = 'CLICK→ ' + (t.id || t.tagName) + (t.className ? '.' + String(t.className).slice(0, 30) : '') + ' | inEmoji=' + inEmoji;
-    (window.DebugWindow && DebugWindow.log) ? DebugWindow.log(m) : console.log(m);
-  } catch (_) {}
-}, true);
 </script>
 <script src="../js/ui.js"></script>
 <script>
@@ -57,10 +43,10 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,system-ui,sans-serif;backgroun
 #menu-btn:hover{color:var(--vgp-accent);background:rgba(var(--vgp-accent-rgb),.08)}
 #menu-btn:focus{outline:none}
 /* Profile-header overflow menu (⋮) — account actions; grows over time */
-#head-menu{position:absolute;top:58px;right:10px;z-index:60;min-width:180px;background:var(--vgp-panel);border:1px solid rgba(var(--vgp-accent-rgb),.3);border-radius:10px;padding:6px;display:flex;flex-direction:column;gap:2px;box-shadow:0 8px 26px rgba(0,0,0,.55)}
+#head-menu{position:absolute;top:58px;right:10px;z-index:60;min-width:180px;background:var(--vgp-panel);border:1px solid rgba(var(--vgp-accent-rgb),.3);border-radius:10px;padding:6px;display:flex;flex-direction:column;gap:2px;box-shadow:0 8px 26px rgba(var(--vgp-shadow),.55)}
 #head-menu.hidden,#grp-actions.hidden{display:none}
 /* group-actions popup — positioned next to the active group's ⋮ via JS */
-#grp-actions{position:fixed;z-index:70;min-width:180px;background:var(--vgp-panel);border:1px solid rgba(var(--vgp-accent-rgb),.3);border-radius:10px;padding:6px;display:flex;flex-direction:column;gap:2px;box-shadow:0 8px 26px rgba(0,0,0,.55)}
+#grp-actions{position:fixed;z-index:70;min-width:180px;background:var(--vgp-panel);border:1px solid rgba(var(--vgp-accent-rgb),.3);border-radius:10px;padding:6px;display:flex;flex-direction:column;gap:2px;box-shadow:0 8px 26px rgba(var(--vgp-shadow),.55)}
 #grp-actions button{text-align:left;padding:10px 12px;border:none;background:transparent;color:var(--vgp-accent);font-family:inherit;font-size:14px;cursor:pointer;border-radius:8px}
 #grp-actions button#ga-rename{color:var(--vgp-text2)}
 #grp-actions button:hover{background:rgba(var(--vgp-accent-rgb),.1)}
@@ -93,7 +79,7 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,system-ui,sans-serif;backgroun
 .contact{display:flex;align-items:center;gap:10px;margin:2px 12px;padding:10px 12px;border-radius:12px;background:transparent;cursor:pointer}
 .contact:hover{background:rgba(var(--vgp-accent-rgb),.06)}
 .contact.active{background:var(--vgp-selected)}
-.contact.room.active{background:rgb(58,20,24)}  /* TEST: "an alle" selected → red box (broadcast) */
+.contact.room.active{background:var(--vgp-broadcast-box)}  /* TEST: "an alle" selected → red box (broadcast) */
 /* collapsible group section header in the sidebar (one per group I'm in) */
 .grp-head{display:flex;align-items:center;gap:7px;margin:14px 12px 2px;padding:4px 6px;cursor:pointer;color:var(--vgp-text)}
 .grp-head:first-child{margin-top:6px}
@@ -124,7 +110,7 @@ img.joypixels{display:inline-block;height:1em;width:1em;vertical-align:-0.12em;m
 /* Styled confirm dialog */
 #confirm-modal,#prompt-modal{position:fixed;inset:0;background:rgba(var(--vgp-ink-rgb),.8);display:flex;align-items:center;justify-content:center;z-index:180;padding:24px}
 #confirm-modal.hidden,#prompt-modal.hidden{display:none}
-#confirm-modal .cf-box,#prompt-modal .cf-box{background:var(--vgp-panel);border:1px solid rgba(var(--vgp-accent-rgb),.3);border-radius:16px;padding:24px 26px;max-width:360px;width:100%;display:flex;flex-direction:column;gap:18px;box-shadow:0 10px 30px rgba(0,0,0,.55)}
+#confirm-modal .cf-box,#prompt-modal .cf-box{background:var(--vgp-panel);border:1px solid rgba(var(--vgp-accent-rgb),.3);border-radius:16px;padding:24px 26px;max-width:360px;width:100%;display:flex;flex-direction:column;gap:18px;box-shadow:0 10px 30px rgba(var(--vgp-shadow),.55)}
 #confirm-modal #cf-text,#prompt-modal #pr-text{color:var(--vgp-text2);font-size:15px;line-height:1.55;white-space:pre-line;text-align:center}
 #prompt-modal #pr-input{border:none;border-radius:10px;background:var(--vgp-field);color:var(--vgp-text2);font-family:inherit;font-size:15px;padding:12px 14px;outline:none}
 #prompt-modal #pr-input:focus{box-shadow:0 0 0 1px rgba(var(--vgp-accent-rgb),.45)}
@@ -138,12 +124,12 @@ img.joypixels{display:inline-block;height:1em;width:1em;vertical-align:-0.12em;m
 #confirm-modal #cf-no,#prompt-modal #pr-no{border:1px solid rgba(var(--vgp-accent-rgb),.3);background:transparent;color:var(--vgp-accent)}
 #confirm-modal #cf-no:hover,#prompt-modal #pr-no:hover{background:rgba(var(--vgp-accent-rgb),.1)}
 #confirm-modal #cf-yes,#prompt-modal #pr-yes{border:none;background:var(--vgp-accent);color:var(--vgp-ink)}
-#confirm-modal #cf-yes.danger{background:var(--vgp-red);color:#fff}
+#confirm-modal #cf-yes.danger{background:var(--vgp-red);color:var(--vgp-white)}
 #prompt-modal .cf-btns{display:flex;gap:12px}
 /* New-group dialog (group name + password in one modal) */
 #group-modal{position:fixed;inset:0;background:rgba(var(--vgp-ink-rgb),.8);display:flex;align-items:center;justify-content:center;z-index:180;padding:24px}
 #group-modal.hidden{display:none}
-#group-modal .cf-box{background:var(--vgp-panel);border:1px solid rgba(var(--vgp-accent-rgb),.3);border-radius:16px;padding:24px 26px;max-width:360px;width:100%;display:flex;flex-direction:column;gap:14px;box-shadow:0 10px 30px rgba(0,0,0,.55)}
+#group-modal .cf-box{background:var(--vgp-panel);border:1px solid rgba(var(--vgp-accent-rgb),.3);border-radius:16px;padding:24px 26px;max-width:360px;width:100%;display:flex;flex-direction:column;gap:14px;box-shadow:0 10px 30px rgba(var(--vgp-shadow),.55)}
 #group-modal h3{color:var(--vgp-accent);font-family:'Orbitron',sans-serif;font-size:16px;letter-spacing:1px;text-align:center;font-weight:700}
 #group-modal .fld{display:flex;flex-direction:column;gap:5px;position:relative}
 #group-modal label{color:rgba(var(--vgp-accent-rgb),.7);font-size:11px;letter-spacing:1px;text-transform:uppercase}
@@ -169,10 +155,10 @@ img.joypixels{display:inline-block;height:1em;width:1em;vertical-align:-0.12em;m
 /* Right column: last-message time on top, green unread badge below (WhatsApp-style) */
 .contact .c-meta,.grp-head .c-meta{flex:0 0 auto;display:flex;flex-direction:row;align-items:center;gap:8px;min-width:42px;justify-content:flex-end}
 .contact .c-meta{flex-direction:column;align-items:flex-end;gap:5px}
-.contact .c-time,.grp-head .c-time{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:11px;line-height:1;color:rgba(233,237,239,.45);white-space:nowrap}
+.contact .c-time,.grp-head .c-time{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:11px;line-height:1;color:rgba(var(--vgp-text-rgb),.45);white-space:nowrap}
 .contact .c-time.unread,.grp-head .c-time.unread{color:var(--vgp-green)}
 /* Green unread indicator — shows the number of new messages from this contact */
-.contact .c-badge,.grp-head .c-badge{flex:0 0 auto;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--vgp-green);color:#04230f;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:11px;font-weight:700;line-height:1;display:flex;align-items:center;justify-content:center;text-align:center}
+.contact .c-badge,.grp-head .c-badge{flex:0 0 auto;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--vgp-green);color:var(--vgp-badge-ink);font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:11px;font-weight:700;line-height:1;display:flex;align-items:center;justify-content:center;text-align:center}
 .grp-head .c-meta{margin-left:auto}
 /* Chat panel */
 #chat-panel{flex:1;display:flex;flex-direction:column;min-width:0;position:relative}
@@ -206,7 +192,7 @@ img.joypixels{display:inline-block;height:1em;width:1em;vertical-align:-0.12em;m
 /* Firefox only: it ignores ::-webkit-scrollbar, so give it the standard properties here */
 @supports (-moz-appearance:none){#messages,#contact-list{scrollbar-width:thin;scrollbar-color:rgba(var(--vgp-accent-rgb),.3) transparent}}
 /* WhatsApp-style bubbles (blue), dark theme — self right, other left */
-.msg{max-width:75%;padding:6px 9px 8px;border-radius:8px;word-wrap:break-word;white-space:pre-wrap;line-height:1.32;font-family:'Helvetica Neue',Helvetica,Arial,system-ui,sans-serif;font-size:14.5px;color:var(--vgp-text);position:relative;box-shadow:0 1px .5px rgba(0,0,0,.2)}
+.msg{max-width:75%;padding:6px 9px 8px;border-radius:8px;word-wrap:break-word;white-space:pre-wrap;line-height:1.32;font-family:'Helvetica Neue',Helvetica,Arial,system-ui,sans-serif;font-size:14.5px;color:var(--vgp-text);position:relative;box-shadow:0 1px .5px rgba(var(--vgp-shadow),.2)}
 .msg.self{align-self:flex-end;background:var(--vgp-bubble);border-top-right-radius:0}
 .msg.other{align-self:flex-start;background:var(--vgp-bubble-other);border-top-left-radius:0}
 /* Original WhatsApp tail shapes (tail-out right, tail-in left) as inline SVG */
@@ -214,13 +200,13 @@ img.joypixels{display:inline-block;height:1em;width:1em;vertical-align:-0.12em;m
 .msg.other::before{content:'';position:absolute;top:0;left:-8px;width:8px;height:13px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='13' viewBox='0 0 8 13'%3E%3Cpath fill='%231a2740' d='M2.812 0H8v11.193L1.533 2.568C.474 1.156 1.042 0 2.812 0z'/%3E%3C/svg%3E") no-repeat}
 .msg .sender{display:block;font-size:12.8px;font-weight:600;margin-bottom:2px;line-height:1.25}
 /* unverified / forged message: signature invalid or key doesn't match the claimed name */
-.msg.forged{outline:1px solid rgba(255,80,80,.6);background:rgba(120,20,20,.35)!important}
+.msg.forged{outline:1px solid rgba(var(--vgp-forged-rgb),.6);background:rgba(var(--vgp-forged-bg-rgb),.35)!important}
 .msg .sender .unverified{font-weight:700}
 .msg .text{word-wrap:break-word}
-.msg .sender{display:block;font-size:12px;font-weight:700;color:#7fd4ff;margin-bottom:2px}
-.msg .time{display:inline-block;float:right;font-size:11px;color:rgba(233,237,239,.5);margin:4px 0 -3px 10px;white-space:nowrap}
+.msg .sender{display:block;font-size:12px;font-weight:700;color:var(--vgp-accent-light);margin-bottom:2px}
+.msg .time{display:inline-block;float:right;font-size:11px;color:rgba(var(--vgp-text-rgb),.5);margin:4px 0 -3px 10px;white-space:nowrap}
 /* Delivery/read ticks on own messages: ✓ sent · ✓✓ delivered (gray) · ✓✓ read (blue) */
-.msg .ticks{margin-left:3px;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:rgba(233,237,239,.55);letter-spacing:-3px}
+.msg .ticks{margin-left:3px;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:rgba(var(--vgp-text-rgb),.55);letter-spacing:-3px}
 .msg .ticks.read{color:var(--vgp-accent)}
 #input-row{display:flex;gap:8px;padding:12px;background:var(--vgp-bg2);align-items:center}
 /* Wrapper keeps the emoji button inside the message field, independent of the send button */
@@ -230,8 +216,8 @@ img.joypixels{display:inline-block;height:1em;width:1em;vertical-align:-0.12em;m
 .msg-field-wrap input:disabled{opacity:.45;cursor:not-allowed}
 .msg-field-wrap input:focus{outline:none;border-color:rgba(var(--vgp-accent-rgb),.25)}
 /* broadcasting to the whole group ("an alle") → tint the compose field dark red as a warning */
-#app.room-mode .msg-field-wrap input{background:rgb(58,20,20)}
-#app.room-mode .msg-field-wrap input::placeholder{color:rgba(255,120,110,.4)}
+#app.room-mode .msg-field-wrap input{background:var(--vgp-broadcast-field)}
+#app.room-mode .msg-field-wrap input::placeholder{color:rgba(var(--vgp-broadcast-ph-rgb),.4)}
 #msg-emoji{flex:0 0 auto;width:44px;height:44px;border:none;border-radius:50%;background:transparent;font-size:36px;line-height:44px;cursor:pointer;padding:0;text-align:center}
 #msg-emoji:focus{outline:none}
 /* Send button — visible only when message field has text */
@@ -241,7 +227,7 @@ img.joypixels{display:inline-block;height:1em;width:1em;vertical-align:-0.12em;m
 #send-btn:disabled{opacity:.35;cursor:default}
 #input-row{position:relative;z-index:10}
 /* Slash-command autocomplete — opens upward, above the input */
-#cmd-box{position:absolute;left:12px;right:12px;bottom:calc(100% - 4px);background:var(--vgp-chat);border:1px solid rgba(var(--vgp-accent-rgb),.25);border-radius:10px;overflow:hidden;z-index:30;box-shadow:0 -6px 24px rgba(0,0,0,.45)}
+#cmd-box{position:absolute;left:12px;right:12px;bottom:calc(100% - 4px);background:var(--vgp-chat);border:1px solid rgba(var(--vgp-accent-rgb),.25);border-radius:10px;overflow:hidden;z-index:30;box-shadow:0 -6px 24px rgba(var(--vgp-shadow),.45)}
 #cmd-box.hidden{display:none}
 #cmd-box .cmd-item{display:flex;gap:10px;align-items:baseline;padding:8px 14px;cursor:pointer}
 #cmd-box .cmd-item.active,#cmd-box .cmd-item:hover{background:rgba(var(--vgp-accent-rgb),.12)}
@@ -258,7 +244,7 @@ img.joypixels{display:inline-block;height:1em;width:1em;vertical-align:-0.12em;m
 #auth-panel input{width:100%;max-width:400px;padding:11px 14px;border:1px solid rgba(var(--vgp-accent-rgb),.3);border-radius:8px;background:var(--vgp-field);color:var(--vgp-text2);font-size:14px}
 #auth-panel input:focus{outline:none;border-color:var(--vgp-accent)}
 #auth-panel .pwd-wrap{max-width:400px}
-#auth-err{color:#ff6b6b;font-size:13px;text-align:center;max-width:360px;margin:0}
+#auth-err{color:var(--vgp-error);font-size:13px;text-align:center;max-width:360px;margin:0}
 #auth-err.hidden{display:none}
 #auth-go{width:100%;max-width:400px;padding:13px;border:none;border-radius:8px;background:var(--vgp-accent);color:var(--vgp-ink);font-weight:700;font-size:15px;cursor:pointer}
 #auth-forgot{margin-top:4px;padding:6px;border:none;background:transparent;color:rgba(var(--vgp-accent-rgb),.55);font-size:13px;cursor:pointer;font-family:inherit;text-decoration:underline;text-underline-offset:3px}
@@ -277,7 +263,7 @@ img.joypixels{display:inline-block;height:1em;width:1em;vertical-align:-0.12em;m
 .pwd-wrap{position:relative;width:100%;max-width:400px;display:flex}
 .pwd-wrap input{padding-right:44px!important}
 .enc-badge{position:relative;font-size:12px;color:rgba(var(--vgp-accent-rgb),.55);background:rgba(var(--vgp-accent-rgb),.07);padding:3px 7px;border-radius:4px;margin-left:4px;user-select:none;cursor:help;outline:none}
-.e2e-tip{display:none;position:absolute;top:calc(100% + 8px);right:0;width:240px;background:var(--vgp-chat);color:var(--vgp-text-dim);border:1px solid rgba(var(--vgp-accent-rgb),.25);border-radius:8px;padding:8px 10px;font-size:11px;line-height:1.45;font-weight:400;text-align:left;z-index:50;box-shadow:0 6px 20px rgba(0,0,0,.45)}
+.e2e-tip{display:none;position:absolute;top:calc(100% + 8px);right:0;width:240px;background:var(--vgp-chat);color:var(--vgp-text-dim);border:1px solid rgba(var(--vgp-accent-rgb),.25);border-radius:8px;padding:8px 10px;font-size:11px;line-height:1.45;font-weight:400;text-align:left;z-index:50;box-shadow:0 6px 20px rgba(var(--vgp-shadow),.45)}
 .enc-badge:hover .e2e-tip,.enc-badge:focus .e2e-tip{display:block}
 /* (own emoji avatar styled in the sidebar-head rule above) */
 #name-emoji:focus{outline:none}
@@ -285,14 +271,14 @@ img.joypixels{display:inline-block;height:1em;width:1em;vertical-align:-0.12em;m
 /* WhatsApp-style emoji picker — appears just above the input row, dark theme */
 #emoji-panel{position:absolute;top:0;left:0;right:0;bottom:0;z-index:150;display:flex;align-items:flex-end;justify-content:flex-end;background:transparent}
 #emoji-panel.hidden{display:none}
-#emoji-panel emoji-picker{width:100%;max-width:380px;height:50vh;max-height:420px;margin:0 12px 60px 0;border-radius:12px;overflow:hidden;box-shadow:0 8px 30px rgba(0,0,0,.5);
+#emoji-panel emoji-picker{width:100%;max-width:380px;height:50vh;max-height:420px;margin:0 12px 60px 0;border-radius:12px;overflow:hidden;box-shadow:0 8px 30px rgba(var(--vgp-shadow),.5);
   --background:var(--vgp-chat);
   --border-color:rgba(var(--vgp-accent-rgb),.12);
   --indicator-color:var(--vgp-accent);
   --input-background:var(--vgp-field);
   --input-border-color:rgba(var(--vgp-accent-rgb),.2);
   --input-font-color:var(--vgp-text);
-  --input-placeholder-color:rgba(160,170,180,.55);
+  --input-placeholder-color:var(--vgp-picker-ph);
   --input-padding:0.4rem 0.6rem;
   --input-line-height:1.3;
   --button-active-background:rgba(var(--vgp-accent-rgb),.18);
@@ -340,7 +326,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 /* LOCAL marker via an inset box-shadow ring on #app — box-shadow is purely visual and can NEVER
    intercept clicks (unlike a full-viewport overlay). */
 .env-local #app{box-shadow:inset 0 0 0 4px var(--vgp-red)}
-.env-local .env-badge{position:fixed;top:0;left:50%;transform:translateX(-50%);background:var(--vgp-red);color:#fff;font:700 12px/1 system-ui,sans-serif;letter-spacing:2px;padding:6px 14px;border-radius:0 0 8px 8px;z-index:100000;pointer-events:none}
+.env-local .env-badge{position:fixed;top:0;left:50%;transform:translateX(-50%);background:var(--vgp-red);color:var(--vgp-white);font:700 12px/1 system-ui,sans-serif;letter-spacing:2px;padding:6px 14px;border-radius:0 0 8px 8px;z-index:100000;pointer-events:none}
 </style>
 </head>
 <body>
@@ -508,11 +494,11 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
   <button id="stats-close">SCHLIESSEN</button>
 </div>
 
-<script src="js/vgp-setup.js?v=20260524-3"></script>
-<script src="js/vgp-auth.js?v=20260524-3"></script>
-<script src="js/vgp-crypto.js?v=20260524-3"></script>
-<script src="js/vgp-contacts.js?v=20260524-3"></script>
-<script src="js/vgp-messages.js?v=20260524-3"></script>
+<script src="js/vgp-setup.js?v=20260524-4"></script>
+<script src="js/vgp-auth.js?v=20260524-4"></script>
+<script src="js/vgp-crypto.js?v=20260524-4"></script>
+<script src="js/vgp-contacts.js?v=20260524-4"></script>
+<script src="js/vgp-messages.js?v=20260524-4"></script>
 <script>
 // Local-vs-live indicator: mark the page red ONLY when served locally. No red = you're on the live site.
 (function () {
