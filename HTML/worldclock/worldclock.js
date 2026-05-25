@@ -1479,7 +1479,7 @@
             ctx.font = _emFont;
             const _emM = ctx.measureText(_emoji);
             const _emOff = (_emM.actualBoundingBoxRight !== undefined) ? -(_emM.actualBoundingBoxRight - _emM.actualBoundingBoxLeft) / 2 : 0;
-            ctx.fillText(_emoji, _side + _emOff + _dx - 1, _cityY);   // emoji nudged 1px left
+            ctx.fillText(_emoji, _side + _emOff + _dx - 3, _cityY);   // emoji nudged 3px left
             // Highlight checkbox, centred at -_side (checked = red/highlighted)
             const _cbX = -_side - _cbS / 2 + _dx, _cbY = _cityY - 11;
             ctx.save();
