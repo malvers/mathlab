@@ -111,6 +111,7 @@ async function loadContacts() {
       if (!name || name.toLowerCase() === me || !r.ecdh_pubkey || !r.owner) continue;
       members.push({ name, pubkey: r.pubkey, ecdh_pubkey: r.ecdh_pubkey,
                      emoji: await decDirWith(r.emoji, dk), avatar: await decDirWith(r.avatar, dk), groupPwd: g.pwd });
+      dbg('🔎 ' + name + ' = …' + (r.pubkey || '').slice(-6));
     }
     members.sort((a, b) => a.name.localeCompare(b.name));
     next.push({ pwd: g.pwd, label: g.label, groupId: gid, members, roomUnread: 0, roomLastTime: null });

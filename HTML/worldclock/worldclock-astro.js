@@ -40,3 +40,15 @@ function moonBrightLimbRotation(date, latDeg, lonDeg) {
     // bright limb angle from zenith = chi - q; map to canvas (bright drawn at +x, up = -90°)
     return -Math.PI / 2 - (chi - q);
 }
+
+// Local sidereal time (degrees) at longitude lonDeg for the given instant (Schlyter low-precision).
+// = which right ascension is on the local meridian; rotates the star field over a sidereal day.
+function siderealTimeDeg(date, lonDeg) {
+    const rev = x => ((x % 360) + 360) % 360;
+    const d = (date.getTime() - Date.UTC(1999, 11, 31, 0, 0, 0)) / 86400000;
+    const ws = 282.9404 + 4.70935e-5 * d;
+    const Ms = rev(356.0470 + 0.9856002585 * d);
+    const Ls = rev(ws + Ms);                                  // Sun's mean longitude
+    const UT = date.getUTCHours() + date.getUTCMinutes() / 60 + date.getUTCSeconds() / 3600;
+    return rev(rev(Ls + 180) + UT * 15 + lonDeg);
+}
