@@ -501,31 +501,8 @@
         let skyTarget = 0;      // animation target for skyT (0/1), toggled by the 's' key
         let skyLon = 0;         // animated sky longitude (deg) — eases toward the selected city for a smooth sky pan
         let skyLat = 0;         // animated sky latitude (deg) — for the city-dome (alt-az) view
-        let skyView = 0;        // 0 = pol-wheel (pole-centred), 1 = city dome (alt-az horizon); toggled by 'v'
+        let skyView = 1;        // 0 = pol-wheel (pole-centred), 1 = city dome (alt-az horizon); toggled by 'v'. Default: dome.
         let starLangDE = true;  // constellation labels: true = German, false = Latin (toggled by 'n')
-
-        // Standalone orbit loader (lifted from voicerecorder). API: wcLoader.show(text, hint) / wcLoader.hide().
-        const wcLoader = (function () {
-            let t0 = 0, iv = 0;
-            const fmt = s => String((s / 60) | 0).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0');
-            return {
-                show(text, hint) {
-                    const box = document.getElementById('wc-loader'); if (!box) return;
-                    box.querySelector('.wcl-text').textContent = text || 'LADEN…';
-                    box.querySelector('.wcl-hint').textContent = hint || '';
-                    const tm = box.querySelector('.wcl-timer'); t0 = Date.now();
-                    if (tm) tm.textContent = '00:00';
-                    box.classList.add('visible');
-                    clearInterval(iv);
-                    if (tm) iv = setInterval(() => { tm.textContent = fmt(Math.floor((Date.now() - t0) / 1000)); }, 250);
-                },
-                hide() {
-                    const box = document.getElementById('wc-loader'); if (box) box.classList.remove('visible');
-                    clearInterval(iv);
-                }
-            };
-        })();
-        window.wcLoader = wcLoader;
         let autoRotation = 0;
         let autoRotationEnabled = false;
         let isMouseDown = false;
@@ -611,11 +588,88 @@
             else if (e.key === 's' || e.key === 'S') { skyTarget = skyTarget ? 0 : 1; e.preventDefault(); return; }  // planetarium toggle
             else if (e.key === 'v' || e.key === 'V') { skyView = skyView ? 0 : 1; e.preventDefault(); return; }     // pol-wheel ↔ city dome
             else if (e.key === 'n' || e.key === 'N') { starLangDE = !starLangDE; e.preventDefault(); return; }       // labels: German ↔ Latin
-            else if (e.key === 'l' || e.key === 'L') { wcLoader.show('LADEN…', 'Demo — Taste l'); setTimeout(() => wcLoader.hide(), 3000); e.preventDefault(); return; }  // demo the orbit loader
             else return;
             e.preventDefault();
             try { DebugWindow.log('[debug] Datum-Offset ' + debugDayOffset.toFixed(3) + ' d → ' + getDisplayTime().toLocaleString('de-DE')); } catch (_) {}
         });
+
+        // --- Radial touch control popup (right-click / long-press) ---
+        // Standalone port of the voicerecorder neon popup; exposes the keyboard-only
+        // sky toggles (s/v/n/0) to touch devices. Same scope as the state lets above,
+        // so the buttons read/write skyTarget / skyView / starLangDE / debugDayOffset directly.
+        (function () {
+            const stack = document.getElementById('mini-stack');
+            if (!stack) return;
+            const bSky   = document.getElementById('wc-mb-sky');
+            const bView  = document.getElementById('wc-mb-view');
+            const bLang  = document.getElementById('wc-mb-lang');
+            const bGlobe = document.getElementById('wc-mb-globe');
+            const bDir   = document.getElementById('wc-mb-dir');
+            const bToday = document.getElementById('wc-mb-today');
+
+            function refreshLabels() {
+                if (bSky)   bSky.textContent   = skyTarget       ? 'UHR'     : 'STERNE';   // on/off → next action
+                if (bView)  bView.textContent  = skyView         ? 'STADTHIMMEL' : 'POL-RAD';   // current projection
+                if (bLang)  bLang.textContent  = starLangDE      ? 'DEUTSCH' : 'LATEIN';   // current label language
+                if (bGlobe) bGlobe.textContent = window.useGlobe ? 'UHR'     : 'GLOBUS';   // 3D globe ↔ clock
+                if (bDir)   bDir.textContent   = CW              ? 'SÜD-VIEW'    : 'NORD-VIEW';  // CW = south sky, CCW = north sky
+            }
+
+            function clearPositions() {
+                stack.querySelectorAll('.mini-btn').forEach(b => { b.style.left = ''; b.style.top = ''; });
+            }
+
+            function open(clientX, clientY) {
+                const W = 320, H = 260, rx = 105, ry = 95;
+                const x = Math.max(8, Math.min(clientX - W / 2, window.innerWidth  - W - 8));
+                const y = Math.max(8, Math.min(clientY - H / 2, window.innerHeight - H - 8));
+                stack.style.left = x + 'px';
+                stack.style.top  = y + 'px';
+                refreshLabels();
+                stack.classList.add('popup');
+                const btns = Array.from(stack.querySelectorAll('.mini-btn'));
+                const n = btns.length;
+                btns.forEach((b, i) => {
+                    const angle = (i / n) * 2 * Math.PI - Math.PI / 2; // start at top, go clockwise
+                    b.style.left = (W / 2 + Math.cos(angle) * rx) + 'px';
+                    b.style.top  = (H / 2 + Math.sin(angle) * ry) + 'px';
+                });
+            }
+            function close() { stack.classList.remove('popup'); clearPositions(); }
+
+            // open via right-click (desktop)
+            window.addEventListener('contextmenu', e => { e.preventDefault(); open(e.clientX, e.clientY); });
+
+            // open via long-press (touch); a drag of >8px cancels it (so ring-rotation still works)
+            let lpTimer = null, lpX = 0, lpY = 0;
+            document.addEventListener('touchstart', e => {
+                if (e.target.closest('button, input, label')) return;
+                if (stack.classList.contains('popup')) return;
+                const t = e.touches[0]; lpX = t.clientX; lpY = t.clientY;
+                clearTimeout(lpTimer);
+                lpTimer = setTimeout(() => { open(lpX, lpY); lpTimer = null; }, 550);
+            }, { passive: true });
+            document.addEventListener('touchmove', e => {
+                const t = e.touches[0];
+                if (Math.abs(t.clientX - lpX) > 8 || Math.abs(t.clientY - lpY) > 8) { clearTimeout(lpTimer); lpTimer = null; }
+            }, { passive: true });
+            document.addEventListener('touchend',    () => { clearTimeout(lpTimer); lpTimer = null; });
+            document.addEventListener('touchcancel', () => { clearTimeout(lpTimer); lpTimer = null; });
+
+            // close on button tap inside (after the action) or on a click/tap outside
+            stack.addEventListener('click', e => { if (e.target.tagName === 'BUTTON') close(); });
+            document.addEventListener('mousedown', e => {
+                if (stack.classList.contains('popup') && !stack.contains(e.target)) close();
+            });
+
+            // actions — mirror the keyboard handlers exactly
+            if (bSky)   bSky.addEventListener('click',   () => { skyTarget = skyTarget ? 0 : 1; refreshLabels(); });
+            if (bView)  bView.addEventListener('click',  () => { skyView = skyView ? 0 : 1;     refreshLabels(); });
+            if (bLang)  bLang.addEventListener('click',  () => { starLangDE = !starLangDE;       refreshLabels(); });
+            if (bGlobe) bGlobe.addEventListener('click', () => { window.toggleGlobe();            refreshLabels(); });
+            if (bDir)   bDir.addEventListener('click',   () => { setDirection(!CW);               refreshLabels(); });
+            if (bToday) bToday.addEventListener('click', () => { debugDayOffset = 0; });
+        })();
 
         function getMouseAngle(e) {
             const rect = canvas.getBoundingClientRect();
