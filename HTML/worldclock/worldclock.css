@@ -161,3 +161,58 @@ html body.clock-only-mode:has(#side-panel.collapsed),
 html body.clock-only-mode:not(:has(#side-panel)) {
     grid-template-columns: 0 0 minmax(0, 1fr) !important;
 }
+
+
+/* ── Standalone orbit loader (lifted from voicerecorder) ─────────── */
+#wc-loader {
+    position: fixed; inset: 0;
+    display: none;
+    align-items: center; justify-content: center;
+    background: rgba(0, 0, 20, 0.55);
+    backdrop-filter: blur(2px);
+    z-index: 5000;
+}
+#wc-loader.visible { display: flex; }
+#wc-loader .wcl-box {
+    padding: 40px 56px;
+    border-radius: 16px;
+    background: rgba(8, 18, 38, 0.95);
+    text-align: center;
+    min-width: 260px;
+    box-shadow: 0 0 40px rgba(0, 210, 255, 0.25);
+}
+#wc-loader .wcl-orbit {
+    position: relative;
+    width: 80px; height: 80px;
+    margin: 0 auto 24px;
+    animation: wcl-spin 1.6s linear infinite;
+}
+#wc-loader .wcl-dot {
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 12px; height: 12px;
+    margin: -6px 0 0 -6px;
+    border-radius: 50%;
+    background: rgb(0, 210, 255);
+    box-shadow: 0 0 10px rgba(0, 210, 255, 0.9);
+}
+#wc-loader .wcl-dot:nth-child(1) { transform: rotate(  0deg) translateX(34px); }
+#wc-loader .wcl-dot:nth-child(2) { transform: rotate( 72deg) translateX(34px); }
+#wc-loader .wcl-dot:nth-child(3) { transform: rotate(144deg) translateX(34px); }
+#wc-loader .wcl-dot:nth-child(4) { transform: rotate(216deg) translateX(34px); }
+#wc-loader .wcl-dot:nth-child(5) { transform: rotate(288deg) translateX(34px); }
+#wc-loader .wcl-text {
+    font-family: 'Raleway', sans-serif; font-weight: 500; font-size: 1.1rem;
+    letter-spacing: 0.35em; color: rgba(0, 210, 255, 0.95);
+    text-shadow: 0 0 8px rgba(0, 210, 255, 0.5); margin-bottom: 8px;
+}
+#wc-loader .wcl-hint {
+    font-family: 'Raleway', sans-serif; font-size: 0.78rem;
+    color: rgba(180, 210, 230, 0.65); letter-spacing: 0.05em;
+}
+#wc-loader .wcl-timer {
+    font-family: 'Raleway', sans-serif; font-size: 0.78rem;
+    font-variant-numeric: tabular-nums; color: rgba(180, 210, 230, 0.65);
+    letter-spacing: 0.05em; margin-top: 4px;
+}
+@keyframes wcl-spin { to { transform: rotate(360deg); } }

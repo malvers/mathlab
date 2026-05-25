@@ -502,6 +502,30 @@
         let skyLon = 0;         // animated sky longitude (deg) — eases toward the selected city for a smooth sky pan
         let skyLat = 0;         // animated sky latitude (deg) — for the city-dome (alt-az) view
         let skyView = 0;        // 0 = pol-wheel (pole-centred), 1 = city dome (alt-az horizon); toggled by 'v'
+        let starLangDE = true;  // constellation labels: true = German, false = Latin (toggled by 'n')
+
+        // Standalone orbit loader (lifted from voicerecorder). API: wcLoader.show(text, hint) / wcLoader.hide().
+        const wcLoader = (function () {
+            let t0 = 0, iv = 0;
+            const fmt = s => String((s / 60) | 0).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0');
+            return {
+                show(text, hint) {
+                    const box = document.getElementById('wc-loader'); if (!box) return;
+                    box.querySelector('.wcl-text').textContent = text || 'LADEN…';
+                    box.querySelector('.wcl-hint').textContent = hint || '';
+                    const tm = box.querySelector('.wcl-timer'); t0 = Date.now();
+                    if (tm) tm.textContent = '00:00';
+                    box.classList.add('visible');
+                    clearInterval(iv);
+                    if (tm) iv = setInterval(() => { tm.textContent = fmt(Math.floor((Date.now() - t0) / 1000)); }, 250);
+                },
+                hide() {
+                    const box = document.getElementById('wc-loader'); if (box) box.classList.remove('visible');
+                    clearInterval(iv);
+                }
+            };
+        })();
+        window.wcLoader = wcLoader;
         let autoRotation = 0;
         let autoRotationEnabled = false;
         let isMouseDown = false;
@@ -586,6 +610,8 @@
             else if (e.key === '0')          debugDayOffset = 0;
             else if (e.key === 's' || e.key === 'S') { skyTarget = skyTarget ? 0 : 1; e.preventDefault(); return; }  // planetarium toggle
             else if (e.key === 'v' || e.key === 'V') { skyView = skyView ? 0 : 1; e.preventDefault(); return; }     // pol-wheel ↔ city dome
+            else if (e.key === 'n' || e.key === 'N') { starLangDE = !starLangDE; e.preventDefault(); return; }       // labels: German ↔ Latin
+            else if (e.key === 'l' || e.key === 'L') { wcLoader.show('LADEN…', 'Demo — Taste l'); setTimeout(() => wcLoader.hide(), 3000); e.preventDefault(); return; }  // demo the orbit loader
             else return;
             e.preventDefault();
             try { DebugWindow.log('[debug] Datum-Offset ' + debugDayOffset.toFixed(3) + ' d → ' + getDisplayTime().toLocaleString('de-DE')); } catch (_) {}
@@ -1829,6 +1855,25 @@
                         if (!p[2]) continue;
                         ctx.beginPath(); ctx.arc(p[0], p[1], 1.3, 0, Math.PI * 2); ctx.fill();
                     }
+                }
+            }
+            // Constellation names at each (visible) constellation's centroid — fade in with sky mode (clean backdrop otherwise).
+            const nameA = a * 0.85;   // always on; brightness tracks the stars (dim behind clock, bright in sky mode)
+            if (nameA > 0.02 && typeof CONSTELLATION_NAMES !== 'undefined') {
+                ctx.fillStyle = `rgba(150, 185, 235, ${nameA})`;
+                ctx.font = '9px Orbitron';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                const _nm = (starLangDE && typeof CONSTELLATION_NAMES_DE !== 'undefined') ? CONSTELLATION_NAMES_DE : CONSTELLATION_NAMES;
+                for (const con of CONSTELLATION_LINES) {
+                    let sx = 0, sy = 0, n = 0;
+                    for (const path of con.paths) {
+                        for (let i = 0; i < path.length; i += 2) {
+                            const p = proj(path[i], path[i + 1]);
+                            if (p[2]) { sx += p[0]; sy += p[1]; n++; }
+                        }
+                    }
+                    if (n) ctx.fillText(_nm[con.id] || con.id, sx / n, sy / n);
                 }
             }
             ctx.restore();
