@@ -7,15 +7,19 @@ class CyberUI {
     /** Tear down document listeners for an open floating context menu (if any). */
     static _contextMenuDocCleanup = null;
 
-    static init() {
+    static init(options = {}) {
         console.log("⚛️ Cyber-UI Engine v5.3.8 initialized.");
         this.installResourceGuard();
         this.injectStyles();
-        this.ensureScreenWarning({
-            minWidth: 980,
-            minHeight: 620,
-            message: "Bildschirm zu klein für optimale Labor-Ansicht (empfohlen: mind. 980 × 620)"
-        });
+        // Opt-out: pass { screenWarning: false } to skip the small-screen banner (e.g. the chat app,
+        // which is fine on phones). Default behavior is unchanged for every other lab.
+        if (options.screenWarning !== false) {
+            this.ensureScreenWarning({
+                minWidth: 980,
+                minHeight: 620,
+                message: "Bildschirm zu klein für optimale Labor-Ansicht (empfohlen: mind. 980 × 620)"
+            });
+        }
 
         // Mini-rail (labs): language + coffee. Without mini-rail but with #sidebar-header (tools, …): language in cyber-nav row.
         const tryInject = () => {

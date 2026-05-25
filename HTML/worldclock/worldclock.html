@@ -1942,7 +1942,7 @@
                 const parts = localStr.split(':'); // [HH, MM, SS]
                 
                 const boxW = 160;
-                const boxH = 100; // More height: top reserved for HIGHLIGHT button
+                const boxH = 118; // top: HIGHLIGHT button · extra room for the local date above the time
                 const rBox = 5;
                 const teamYOffset = -62; // Recalculated to center the larger team
                 
@@ -2041,11 +2041,19 @@
                 ctx.font = "bold 12px Orbitron"; // Larger city name
                 ctx.fillText(targetCity.name.replace(/\n/g, ' ').toUpperCase(), 0, y + 60);
 
+                // Local date at that city's timezone (above the time) — e.g. "MO 25. Mai 2026"
+                const _now = new Date();
+                const _wd = _now.toLocaleDateString('de-DE', { timeZone: targetCity.tz, weekday: 'short' }).replace('.', '').toUpperCase();
+                const _dm = _now.toLocaleDateString('de-DE', { timeZone: targetCity.tz, day: 'numeric', month: 'long', year: 'numeric' });
+                ctx.fillStyle = "rgba(210, 225, 240, 0.85)";
+                ctx.font = "600 11px Orbitron";
+                ctx.fillText(_wd + ' ' + _dm, 0, y + 76);
+
                 // --- Digit Widgets ---
                 const drawDigitBox = (val, xPos) => {
                     ctx.fillStyle = "#fff";
                     ctx.font = "900 20px Orbitron";
-                    ctx.fillText(val, xPos, y + 85);
+                    ctx.fillText(val, xPos, y + 101);
                 };
 
                 drawDigitBox(parts[0], -40); // HH
@@ -2055,8 +2063,8 @@
                 // Colons (Restored) — kept 4px above the digit baseline (digits use y+85)
                 ctx.fillStyle = "#00d2ff";
                 ctx.font = "bold 14px Orbitron";
-                ctx.fillText(":", -20, y + 81);
-                ctx.fillText(":", 20, y + 81);
+                ctx.fillText(":", -20, y + 97);
+                ctx.fillText(":", 20, y + 97);
                 
                 // --- Neighborhood Cities (Full Map Database with Flags) ---
                 const neighbors = RELATED_CITIES_DB[targetCity.tz] || (window._neighborCache?.[targetCity.tz]) || [];
