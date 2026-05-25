@@ -1212,7 +1212,13 @@
             ctx.font = `${r * 0.022}px Orbitron`;
             ctx.textBaseline = "middle";
             ctx.textAlign = flip ? "left" : "right";
-            ctx.fillText("DATUMSGRENZE", flip ? Rt * 1.6 : -Rt * 1.6, 0);
+            const dlx = flip ? Rt * 1.6 : -Rt * 1.6;
+            ctx.lineJoin = "round";                       // dark halo for legibility — like the NORDPOL/SÜDPOL labels
+            ctx.lineWidth = Math.max(1.2, r * 0.006);
+            ctx.strokeStyle = "rgba(0,0,0,0.5)";
+            ctx.strokeText("DATUMSGRENZE", dlx, 0);
+            ctx.fillStyle = "rgb(128, 128, 128)";
+            ctx.fillText("DATUMSGRENZE", dlx, 0);
             ctx.restore();
         }
 
