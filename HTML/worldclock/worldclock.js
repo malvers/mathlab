@@ -1461,29 +1461,36 @@
             // Highlight state — toggled by tapping the city name now (checkbox + hitbox set below).
             const isHighlightOn = !!(targetCity && targetCity.red);
 
-            // City name + season icon (☀️/❄️) + highlight checkbox. Tap the name → toggle highlight.
-            ctx.textAlign = "center"; ctx.textBaseline = "alphabetic";
+            // City name + season icon + highlight checkbox. Name centred at 0; checkbox & icon mirrored ±_side → equal margins.
+            ctx.textBaseline = "alphabetic";
             const _cityY = y + 32;
-            ctx.fillStyle = "#00d2ff";          // always cyan — the season is shown by the ☀️/❄️ icon, not the colour
-            ctx.font = "bold 14px Orbitron";
             const _cityLbl = targetCity.name.replace(/\n/g, ' ').toUpperCase();
-            ctx.fillText(_cityLbl, 0, _cityY);
+            const _emoji = isSZ ? "☀️" : "❄️";
+            const _emFont = (isSZ ? "12px" : "10px") + " sans-serif";   // snowflake reads bigger → a touch smaller
+            const _cbS = 13, _gap = 8, _slot = 16, _dx = 3;   // _dx = debug nudge (shift whole row right)
+            // Name, centred at x = 0
+            ctx.fillStyle = "#00d2ff";              // always cyan — season shown by the icon, not the colour
+            ctx.font = "bold 14px Orbitron"; ctx.textAlign = "center";
             const _cityW = ctx.measureText(_cityLbl).width;
-            ctx.textAlign = "left";
-            ctx.font = (isSZ ? "12px" : "10px") + " sans-serif";   // snowflake reads bigger → draw it a touch smaller
-            ctx.fillText(isSZ ? "☀️" : "❄️", _cityW / 2 + 6, _cityY);
-            ctx.textAlign = "center";
-            // Highlight checkbox to the left of the name (checked = red/highlighted).
-            const _cbS = 13, _cbX = -_cityW / 2 - 8 - _cbS, _cbY = _cityY - 11;
+            ctx.fillText(_cityLbl, _dx, _cityY);
+            // Symmetric offset to each side element's centre (so left/right margins are equal regardless of glyph metrics)
+            const _side = _cityW / 2 + _gap + _slot / 2;
+            // Season emoji, glyph-centred at +_side (measure & draw both at center align — consistent)
+            ctx.font = _emFont;
+            const _emM = ctx.measureText(_emoji);
+            const _emOff = (_emM.actualBoundingBoxRight !== undefined) ? -(_emM.actualBoundingBoxRight - _emM.actualBoundingBoxLeft) / 2 : 0;
+            ctx.fillText(_emoji, _side + _emOff + _dx - 1, _cityY);   // emoji nudged 1px left
+            // Highlight checkbox, centred at -_side (checked = red/highlighted)
+            const _cbX = -_side - _cbS / 2 + _dx, _cbY = _cityY - 11;
             ctx.save();
             ctx.lineWidth = 1.5; ctx.lineJoin = "round";
-            ctx.strokeStyle = isHighlightOn ? "#dd1144" : "rgba(0, 210, 255, 0.55)";
+            ctx.strokeStyle = isHighlightOn ? "rgb(176, 36, 24)" : "rgba(0, 210, 255, 0.55)";
             ctx.beginPath();
             ctx.roundRect(_cbX, _cbY, _cbS, _cbS, 3);
-            if (isHighlightOn) { ctx.fillStyle = "rgba(221, 17, 68, 0.22)"; ctx.fill(); }
+            if (isHighlightOn) { ctx.fillStyle = "rgba(176, 36, 24, 0.22)"; ctx.fill(); }
             ctx.stroke();
             if (isHighlightOn) {                                    // a clean check mark
-                ctx.strokeStyle = "#ff6688"; ctx.lineWidth = 2; ctx.lineCap = "round";
+                ctx.strokeStyle = "rgb(232, 100, 86)"; ctx.lineWidth = 2; ctx.lineCap = "round";   // brightened base red, visible on the dark fill
                 ctx.beginPath();
                 ctx.moveTo(_cbX + _cbS * 0.24, _cbY + _cbS * 0.52);
                 ctx.lineTo(_cbX + _cbS * 0.43, _cbY + _cbS * 0.72);
@@ -1491,8 +1498,8 @@
                 ctx.stroke();
             }
             ctx.restore();
-            // Tap target = checkbox + name row → toggles highlight (reuses the existing highlightBtnHitbox handler).
-            highlightBtnHitbox = { x: popupX + _cbX - 4, y: popupY + (_cityY - 14), w: _cityW + 45, h: 22 };
+            // Tap target = whole symmetric group → toggles highlight
+            highlightBtnHitbox = { x: popupX + (-_side - _slot / 2) + _dx - 4, y: popupY + (_cityY - 14), w: 2 * (_side + _slot / 2) + 8, h: 22 };
 
             // Local date at that city's timezone (above the time) — follows the displayed (debug-stepped) time
             const _now = time;
@@ -1670,8 +1677,8 @@
                 } else {
                     const grad = ctx.createRadialGradient(mx, my, 0, mx, my, circleRadius);
                     if (city.red) {
-                        grad.addColorStop(0, '#dd1144');
-                        grad.addColorStop(1, '#1c0008');
+                        grad.addColorStop(0, 'rgb(176, 36, 24)');   // CLAUDE.md base red (Υ)
+                        grad.addColorStop(1, 'rgb(40, 9, 6)');
                     } else if (city.highlight) {
                         {
                             grad.addColorStop(0, '#ffaa00');
@@ -1738,10 +1745,16 @@
 
                     // Season icon under the name: ☀️ Summer Time, ❄️ Winter Time (native emoji = Apple look on macOS)
                     const seasonEmoji = (dst === "SZ") ? "☀️" : "❄️";
-                    const emojiSize = r * ((dst === "SZ") ? 0.03 : 0.0257);  // snowflake smaller (it looks bigger than the sun)
+                    const emojiSize = r * ((dst === "SZ") ? 0.0315 : 0.0257);  // sun +5%; snowflake smaller (it looks bigger than the sun)
                     const lastLineY = ((lines.length - 1) / 2) * cityLineHeight;  // baseline of the last name line
                     ctx.font = `${emojiSize}px sans-serif`;
-                    ctx.fillText(seasonEmoji, 0, lastLineY + cityLineHeight * 0.85 + r * 0.02 + labelYShift);  // clearly below the name
+                    // Center by the emoji's actual glyph box — color emoji have an asymmetric advance, so textAlign:center looks off-left.
+                    const _ey = lastLineY + cityLineHeight * 0.85 + r * 0.02 + labelYShift;
+                    const _em = ctx.measureText(seasonEmoji);
+                    const _epen = (_em.actualBoundingBoxRight !== undefined)
+                        ? -(_em.actualBoundingBoxRight - _em.actualBoundingBoxLeft) / 2
+                        : 0;
+                    ctx.fillText(seasonEmoji, _epen, _ey);  // textAlign stays "center" → glyph box centered at 0
                 }
                 ctx.restore();
             });
