@@ -1506,9 +1506,9 @@
                     if (city.highlight) {
                         ctx.fillStyle = "rgb(0,0,40)";
                     } else if (dst === "SZ") {
-                        ctx.fillStyle = "#ffaa00"; // Orange for Summer Time
+                        ctx.fillStyle = "rgba(255,255,255,0.95)"; // white for Summer Time (sun icon below)
                     } else {
-                        ctx.fillStyle = "rgba(220, 220, 220, 0.9)"; // Light gray for Winter Time
+                        ctx.fillStyle = "rgba(220, 220, 220, 0.9)"; // light gray for Winter Time (snowflake below)
                     }
                     ctx.font = (city.highlight)
                         ? `900 ${cityFontHighlight}px Orbitron`
@@ -1519,6 +1519,13 @@
                     lines.forEach((line, i) => {
                         ctx.fillText(line, 0, (i - (lines.length-1)/2) * cityLineHeight);
                     });
+
+                    // Season icon under the name: ☀️ Summer Time, ❄️ Winter Time (native emoji = Apple look on macOS)
+                    const seasonEmoji = (dst === "SZ") ? "☀️" : "❄️";
+                    const emojiSize = r * 0.03;
+                    const lastLineY = ((lines.length - 1) / 2) * cityLineHeight;  // baseline of the last name line
+                    ctx.font = `${emojiSize}px sans-serif`;
+                    ctx.fillText(seasonEmoji, 0, lastLineY + cityLineHeight * 0.85);  // clearly below the name
                 }
                 ctx.restore();
             });
