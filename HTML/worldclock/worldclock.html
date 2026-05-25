@@ -1792,111 +1792,9 @@
             ctx.restore();
         }
 
-        function draw() {
-            // Loop muss IMMER weiterlaufen — auch bei Fehlern, sonst friert die Uhr ein.
-            try {
-                drawFrame();
-            } catch (e) {
-                console.error('draw error:', e);
-            }
-            requestAnimationFrame(draw);
-        }
-
-        function drawFrame() {
-            // DEBUG overlay (zum Aktivieren das /* … */ entfernen)
-            /*
-            const _dbg = document.getElementById('size-debug') || (function () {
-                const d = document.createElement('div');
-                d.id = 'size-debug';
-                d.style.cssText = 'position:fixed;top:8px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.85);color:#0ff;padding:6px 10px;font:11px monospace;z-index:99999;border:1px solid #0ff;border-radius:4px;pointer-events:none;white-space:pre;text-align:left;';
-                document.body.appendChild(d);
-                return d;
-            })();
-            const _vv = window.visualViewport;
-            const _cr = canvas.getBoundingClientRect();
-            const _mc = document.querySelector('#main-content');
-            const _mcR = _mc ? _mc.getBoundingClientRect() : { width: 0, height: 0 };
-            const _ch = document.querySelector('#cyber-left-chrome');
-            const _chR = _ch ? _ch.getBoundingClientRect() : { width: 0, height: 0 };
-            const _scale = getComputedStyle(document.documentElement).getPropertyValue('--cyber-left-scale').trim();
-            const _nat = getComputedStyle(document.documentElement).getPropertyValue('--cyber-left-natural-w').trim();
-            */
-
-            if (!mapLoaded) return;
-
-            // Smooth Return Logic
-            if (isReturning && !isMouseDown) {
-                if (Math.abs(manualOffset) < 0.1) {
-                    manualOffset = 0;
-                    isReturning = false;
-                } else {
-                    manualOffset *= 0.92; // Smooth exponential decay back to 0
-                }
-            }
-
-
-            const time = getDisplayTime();
-            const utcHours = time.getUTCHours() + time.getUTCMinutes() / 60 + time.getUTCSeconds() / 3600;
-
-            const rect = canvas.getBoundingClientRect();
-            const w = Math.max(80, rect.width || 0);
-            const h = Math.max(80, rect.height || 0);
-            const size = Math.min(w, h) * 0.8;
-            const r = size / 2;
-            const cx = w / 2;
-            const cy = h / 2;
-
-            // Sicherheitsnetz: bei degenerierten Maßen Frame überspringen.
-            if (!Number.isFinite(r) || r < 1) return;
-
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
-            ctx.save();
-            ctx.translate(cx, cy);
-
-            // (Glow removed)
-
-            // 1. Draw Map (Rotating)
-            if (autoRotationEnabled) autoRotation -= dirSign * 0.02;
-            // Add +1 to account for Summer Time (CEST is UTC+2, Lon 15 is UTC+1)
-            const mapRotation = dirSign * (12 - (utcHours + 1)) * 15 + autoRotation;
-            
-            ctx.save();
-            ctx.rotate(mapRotation * Math.PI / 180);
-            
-            // Draw Map Image (Slightly Darker)
-            ctx.save();
-            ctx.globalAlpha = 0.8;
-            ctx.rotate(-Math.PI / 2);
-            
-            // Clip to circle to remove dark blue corners
-            ctx.beginPath();
-            ctx.arc(0, 0, r, 0, Math.PI * 2);
-            ctx.clip();
-            
-            if (!window.useGlobe) {
-                // Globe edge = inner rim of the city bubbles: (markerR - diskR)/r = (0.9 - 0.022) - 0.105
-                const MAP_SCALE = 0.773;
-                const ms = size * MAP_SCALE, mo = -ms / 2;
-                if (CW && southMapReady) {
-                    ctx.drawImage(southMapImg, mo, mo, ms, ms);   // real South-Pole view
-                } else {
-                    if (CW) ctx.scale(-1, 1);                     // fallback until the south map loads
-                    ctx.drawImage(mapImg, mo, mo, ms, ms);
-                }
-            }
-            ctx.restore();
-            if (window.useGlobe && globeInstance) {
-                if (!lockedCity && !isMouseDown && !globeManuallyDragged) {
-                    globeLat = CW ? -90 : 90;   // no city selected: CW → South Pole, CCW → North Pole
-                    globeLng = -mapRotation;
-                    globeInstance.pointOfView({ lat: globeLat, lng: globeLng, altitude: 2.65 }, 0);
-                }
-                if (!lockedCity) drawPoleMarker(w, h, r);   // pole label + red dot at centre (no city selected)
-            }
-            if (!window.useGlobe) drawPoleMarker(w, h, r);  // clock mode: pole is always at the centre
-
-            // 2. Draw City Markers (Plaques) - GLUED TO EARTH
+        // City markers (plaques) glued to the rotating Earth — triangle pointer, coloured disc, name + season icon.
+        // Inputs: r, mapRotation. Reads top-level cities / ctx / dirSign / wkoeLogoImg / getDSTLabel.
+        function drawCityMarkers(r, mapRotation) {
             // All sizes relative to r (clock radius) for responsive scaling
             const diskR = r * 0.105;
             const markerInset = r * 0.022;
@@ -2016,9 +1914,117 @@
                 }
                 ctx.restore();
             });
+        }
+
+        function draw() {
+            // Loop muss IMMER weiterlaufen — auch bei Fehlern, sonst friert die Uhr ein.
+            try {
+                drawFrame();
+            } catch (e) {
+                console.error('draw error:', e);
+            }
+            requestAnimationFrame(draw);
+        }
+
+        function drawFrame() {
+            // DEBUG overlay (zum Aktivieren das /* … */ entfernen)
+            /*
+            const _dbg = document.getElementById('size-debug') || (function () {
+                const d = document.createElement('div');
+                d.id = 'size-debug';
+                d.style.cssText = 'position:fixed;top:8px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.85);color:#0ff;padding:6px 10px;font:11px monospace;z-index:99999;border:1px solid #0ff;border-radius:4px;pointer-events:none;white-space:pre;text-align:left;';
+                document.body.appendChild(d);
+                return d;
+            })();
+            const _vv = window.visualViewport;
+            const _cr = canvas.getBoundingClientRect();
+            const _mc = document.querySelector('#main-content');
+            const _mcR = _mc ? _mc.getBoundingClientRect() : { width: 0, height: 0 };
+            const _ch = document.querySelector('#cyber-left-chrome');
+            const _chR = _ch ? _ch.getBoundingClientRect() : { width: 0, height: 0 };
+            const _scale = getComputedStyle(document.documentElement).getPropertyValue('--cyber-left-scale').trim();
+            const _nat = getComputedStyle(document.documentElement).getPropertyValue('--cyber-left-natural-w').trim();
+            */
+
+            if (!mapLoaded) return;
+
+            // Smooth Return Logic
+            if (isReturning && !isMouseDown) {
+                if (Math.abs(manualOffset) < 0.1) {
+                    manualOffset = 0;
+                    isReturning = false;
+                } else {
+                    manualOffset *= 0.92; // Smooth exponential decay back to 0
+                }
+            }
+
+
+            const time = getDisplayTime();
+            const utcHours = time.getUTCHours() + time.getUTCMinutes() / 60 + time.getUTCSeconds() / 3600;
+
+            const rect = canvas.getBoundingClientRect();
+            const w = Math.max(80, rect.width || 0);
+            const h = Math.max(80, rect.height || 0);
+            const size = Math.min(w, h) * 0.8;
+            const r = size / 2;
+            const cx = w / 2;
+            const cy = h / 2;
+
+            // Sicherheitsnetz: bei degenerierten Maßen Frame überspringen.
+            if (!Number.isFinite(r) || r < 1) return;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.save();
+            ctx.translate(cx, cy);
+
+            // (Glow removed)
+
+            // 1. Draw Map (Rotating)
+            if (autoRotationEnabled) autoRotation -= dirSign * 0.02;
+            // Add +1 to account for Summer Time (CEST is UTC+2, Lon 15 is UTC+1)
+            const mapRotation = dirSign * (12 - (utcHours + 1)) * 15 + autoRotation;
+            
+            ctx.save();
+            ctx.rotate(mapRotation * Math.PI / 180);
+            
+            // Draw Map Image (Slightly Darker)
+            ctx.save();
+            ctx.globalAlpha = 0.8;
+            ctx.rotate(-Math.PI / 2);
+            
+            // Clip to circle to remove dark blue corners
+            ctx.beginPath();
+            ctx.arc(0, 0, r, 0, Math.PI * 2);
+            ctx.clip();
+            
+            if (!window.useGlobe) {
+                // Globe edge = inner rim of the city bubbles: (markerR - diskR)/r = (0.9 - 0.022) - 0.105
+                const MAP_SCALE = 0.773;
+                const ms = size * MAP_SCALE, mo = -ms / 2;
+                if (CW && southMapReady) {
+                    ctx.drawImage(southMapImg, mo, mo, ms, ms);   // real South-Pole view
+                } else {
+                    if (CW) ctx.scale(-1, 1);                     // fallback until the south map loads
+                    ctx.drawImage(mapImg, mo, mo, ms, ms);
+                }
+            }
+            ctx.restore();
+            if (window.useGlobe && globeInstance) {
+                if (!lockedCity && !isMouseDown && !globeManuallyDragged) {
+                    globeLat = CW ? -90 : 90;   // no city selected: CW → South Pole, CCW → North Pole
+                    globeLng = -mapRotation;
+                    globeInstance.pointOfView({ lat: globeLat, lng: globeLng, altitude: 2.65 }, 0);
+                }
+                if (!lockedCity) drawPoleMarker(w, h, r);   // pole label + red dot at centre (no city selected)
+            }
+            if (!window.useGlobe) drawPoleMarker(w, h, r);  // clock mode: pole is always at the centre
+
+            // 2. City markers (plaques glued to the rotating Earth) + the date line
+            drawCityMarkers(r, mapRotation);
 
             // International Date Line (red triangle + "DATUMSGRENZE" between Samoa and Wellington)
-            drawDateLine(r, markerInset, mapRotation);
+            drawDateLine(r, r * 0.022, mapRotation);   // 2nd arg = markerInset (only feeds a dead var inside)
             ctx.restore(); // End map rotation (Earth + Glued Markers)
             // 3. Draw Numbers Ring (Static) - relative sizes
             drawNumbersRing(r);
