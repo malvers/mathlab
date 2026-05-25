@@ -1259,274 +1259,9 @@
             }
         }
 
-        function draw() {
-            // Loop muss IMMER weiterlaufen — auch bei Fehlern, sonst friert die Uhr ein.
-            try {
-                drawFrame();
-            } catch (e) {
-                console.error('draw error:', e);
-            }
-            requestAnimationFrame(draw);
-        }
-
-        function drawFrame() {
-            // DEBUG overlay (zum Aktivieren das /* … */ entfernen)
-            /*
-            const _dbg = document.getElementById('size-debug') || (function () {
-                const d = document.createElement('div');
-                d.id = 'size-debug';
-                d.style.cssText = 'position:fixed;top:8px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.85);color:#0ff;padding:6px 10px;font:11px monospace;z-index:99999;border:1px solid #0ff;border-radius:4px;pointer-events:none;white-space:pre;text-align:left;';
-                document.body.appendChild(d);
-                return d;
-            })();
-            const _vv = window.visualViewport;
-            const _cr = canvas.getBoundingClientRect();
-            const _mc = document.querySelector('#main-content');
-            const _mcR = _mc ? _mc.getBoundingClientRect() : { width: 0, height: 0 };
-            const _ch = document.querySelector('#cyber-left-chrome');
-            const _chR = _ch ? _ch.getBoundingClientRect() : { width: 0, height: 0 };
-            const _scale = getComputedStyle(document.documentElement).getPropertyValue('--cyber-left-scale').trim();
-            const _nat = getComputedStyle(document.documentElement).getPropertyValue('--cyber-left-natural-w').trim();
-            */
-
-            if (!mapLoaded) return;
-
-            // Smooth Return Logic
-            if (isReturning && !isMouseDown) {
-                if (Math.abs(manualOffset) < 0.1) {
-                    manualOffset = 0;
-                    isReturning = false;
-                } else {
-                    manualOffset *= 0.92; // Smooth exponential decay back to 0
-                }
-            }
-
-
-            const time = getDisplayTime();
-            const utcHours = time.getUTCHours() + time.getUTCMinutes() / 60 + time.getUTCSeconds() / 3600;
-
-            const rect = canvas.getBoundingClientRect();
-            const w = Math.max(80, rect.width || 0);
-            const h = Math.max(80, rect.height || 0);
-            const size = Math.min(w, h) * 0.8;
-            const r = size / 2;
-            const cx = w / 2;
-            const cy = h / 2;
-
-            // Sicherheitsnetz: bei degenerierten Maßen Frame überspringen.
-            if (!Number.isFinite(r) || r < 1) return;
-
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
-            ctx.save();
-            ctx.translate(cx, cy);
-
-            // (Glow removed)
-
-            // 1. Draw Map (Rotating)
-            if (autoRotationEnabled) autoRotation -= dirSign * 0.02;
-            // Add +1 to account for Summer Time (CEST is UTC+2, Lon 15 is UTC+1)
-            const mapRotation = dirSign * (12 - (utcHours + 1)) * 15 + autoRotation;
-            
-            ctx.save();
-            ctx.rotate(mapRotation * Math.PI / 180);
-            
-            // Draw Map Image (Slightly Darker)
-            ctx.save();
-            ctx.globalAlpha = 0.8;
-            ctx.rotate(-Math.PI / 2);
-            
-            // Clip to circle to remove dark blue corners
-            ctx.beginPath();
-            ctx.arc(0, 0, r, 0, Math.PI * 2);
-            ctx.clip();
-            
-            if (!window.useGlobe) {
-                // Globe edge = inner rim of the city bubbles: (markerR - diskR)/r = (0.9 - 0.022) - 0.105
-                const MAP_SCALE = 0.773;
-                const ms = size * MAP_SCALE, mo = -ms / 2;
-                if (CW && southMapReady) {
-                    ctx.drawImage(southMapImg, mo, mo, ms, ms);   // real South-Pole view
-                } else {
-                    if (CW) ctx.scale(-1, 1);                     // fallback until the south map loads
-                    ctx.drawImage(mapImg, mo, mo, ms, ms);
-                }
-            }
-            ctx.restore();
-            if (window.useGlobe && globeInstance) {
-                if (!lockedCity && !isMouseDown && !globeManuallyDragged) {
-                    globeLat = CW ? -90 : 90;   // no city selected: CW → South Pole, CCW → North Pole
-                    globeLng = -mapRotation;
-                    globeInstance.pointOfView({ lat: globeLat, lng: globeLng, altitude: 2.65 }, 0);
-                }
-                if (!lockedCity) drawPoleMarker(w, h, r);   // pole label + red dot at centre (no city selected)
-            }
-            if (!window.useGlobe) drawPoleMarker(w, h, r);  // clock mode: pole is always at the centre
-
-            // 2. Draw City Markers (Plaques) - GLUED TO EARTH
-            // All sizes relative to r (clock radius) for responsive scaling
-            const diskR = r * 0.105;
-            const markerInset = r * 0.022;
-            const tipExtend = r * 0.019;
-            const baseInset = r * 0.038;
-            const cityFontNormal = Math.max(5, r * 0.030);
-            const cityFontHighlight = Math.max(6, r * 0.034);
-            const cityLineHeight = r * 0.038;
-            const cityShadowBlur = r * 0.031;
-            const isWkoeMode = document.documentElement.dataset.school === 'wkoe';
-            cities.forEach(city => {
-                const cityAngle = dirSign * (-city.lon) * Math.PI / 180 - Math.PI / 2;
-                const markerR = (r * 0.9) - markerInset;
-                const circleRadius = diskR;
-                const mx = Math.cos(cityAngle) * markerR;
-                const my = Math.sin(cityAngle) * markerR;
-                const isWkoeDresden = isWkoeMode && city.name === 'Dresden';
-
-                // Draw Precision Triangle (Pointer)
-                ctx.save();
-                ctx.fillStyle = "white";
-                ctx.beginPath();
-                const tipR = markerR + circleRadius + tipExtend;
-                const baseR = markerR + circleRadius - baseInset;
-                const spread = 0.06; // angular, no scaling needed
-
-                ctx.moveTo(Math.cos(cityAngle) * tipR, Math.sin(cityAngle) * tipR);
-                ctx.lineTo(Math.cos(cityAngle - spread) * baseR, Math.sin(cityAngle - spread) * baseR);
-                ctx.lineTo(Math.cos(cityAngle + spread) * baseR, Math.sin(cityAngle + spread) * baseR);
-                ctx.closePath();
-                ctx.fill();
-                ctx.restore();
-
-                if (isWkoeDresden) {
-                    // Light gray disc for Dresden in WKOE mode
-                    ctx.save();
-                    ctx.fillStyle = 'rgb(180, 180, 180)';
-                    ctx.beginPath();
-                    ctx.arc(mx, my, circleRadius, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.restore();
-                } else {
-                    const grad = ctx.createRadialGradient(mx, my, 0, mx, my, circleRadius);
-                    if (city.red) {
-                        grad.addColorStop(0, '#dd1144');
-                        grad.addColorStop(1, '#1c0008');
-                    } else if (city.highlight) {
-                        {
-                            grad.addColorStop(0, '#ffaa00');
-                            grad.addColorStop(0.2, '#ffaa00');
-                            grad.addColorStop(1, '#a05000');
-
-                            ctx.save();
-                            ctx.shadowBlur = cityShadowBlur;
-                            ctx.shadowColor = '#e68a00';
-                        }
-                    } else {
-                        grad.addColorStop(0, '#0033aa');
-                        grad.addColorStop(1, '#000811');
-                    }
-
-                    ctx.fillStyle = grad;
-                    ctx.beginPath();
-                    ctx.arc(mx, my, circleRadius, 0, Math.PI * 2);
-                    ctx.fill();
-                    if (city.highlight && !city.red) ctx.restore();
-                }
-
-                ctx.save();
-                ctx.translate(mx, my);
-                // Inverse the map rotation to keep text/logo level
-                ctx.rotate(-mapRotation * Math.PI / 180);
-
-                if (isWkoeDresden) {
-                    if (wkoeLogoImg.complete && wkoeLogoImg.naturalWidth) {
-                        // Fit logo inside the disc (diameter = 2*circleRadius), with margin.
-                        // Logo PNG has a drop-shadow on the right/bottom, so visible shield is
-                        // off-center inside its bounding box → compensate with a small shift.
-                        const maxSide = circleRadius * 1.3;
-                        const iw = wkoeLogoImg.naturalWidth;
-                        const ih = wkoeLogoImg.naturalHeight;
-                        const scale = Math.min(maxSide / iw, maxSide / ih);
-                        const dw = iw * scale;
-                        const dh = ih * scale;
-                        const shadowShiftX = dw * 0.03; // shift right to counter shadow on left
-                        const shadowShiftY = dh * 0.04; // shift down to counter shadow on top
-                        ctx.drawImage(wkoeLogoImg, -dw / 2 + shadowShiftX, -dh / 2 + shadowShiftY, dw, dh);
-                    }
-                } else {
-                    let lines = city.name.split('\n');
-
-                    const dst = getDSTLabel(city.tz);
-                    if (city.highlight) {
-                        ctx.fillStyle = "rgb(0,0,40)";
-                    } else if (dst === "SZ") {
-                        ctx.fillStyle = "rgba(255,255,255,0.95)"; // white for Summer Time (sun icon below)
-                    } else {
-                        ctx.fillStyle = "rgba(220, 220, 220, 0.9)"; // light gray for Winter Time (snowflake below)
-                    }
-                    ctx.font = (city.highlight)
-                        ? `900 ${cityFontHighlight}px Orbitron`
-                        : `bold ${cityFontNormal}px Orbitron`;
-                    ctx.textAlign = "center";
-                    ctx.textBaseline = "middle";
-
-                    const labelYShift = -r * 0.01;  // nudge name + icon up together (~5%)
-                    lines.forEach((line, i) => {
-                        ctx.fillText(line, 0, (i - (lines.length-1)/2) * cityLineHeight + labelYShift);
-                    });
-
-                    // Season icon under the name: ☀️ Summer Time, ❄️ Winter Time (native emoji = Apple look on macOS)
-                    const seasonEmoji = (dst === "SZ") ? "☀️" : "❄️";
-                    const emojiSize = r * ((dst === "SZ") ? 0.03 : 0.0257);  // snowflake smaller (it looks bigger than the sun)
-                    const lastLineY = ((lines.length - 1) / 2) * cityLineHeight;  // baseline of the last name line
-                    ctx.font = `${emojiSize}px sans-serif`;
-                    ctx.fillText(seasonEmoji, 0, lastLineY + cityLineHeight * 0.85 + r * 0.02 + labelYShift);  // clearly below the name
-                }
-                ctx.restore();
-            });
-
-            // International Date Line (red triangle + "DATUMSGRENZE" between Samoa and Wellington)
-            drawDateLine(r, markerInset, mapRotation);
-            ctx.restore(); // End map rotation (Earth + Glued Markers)
-            // 3. Draw Numbers Ring (Static) - relative sizes
-            drawNumbersRing(r);
-
-            // Open/Closed arc ring (?open=1 mode) — green for open hours, red for closed
-            if (window.__openMode) {
-                const ranges = window.__openRanges || [];
-                const arcR = r * 1.00;
-                const lineW = Math.max(1, r * 0.010);
-                const hourToAngle = h => dirSign * (12 - h) * (Math.PI * 2 / 24) - Math.PI / 2;
-                const anticlockwise = (dirSign === 1);
-                ctx.save();
-                ctx.lineWidth = lineW;
-                ctx.lineCap = 'butt';
-                // Red full ring (closed)
-                ctx.strokeStyle = 'rgba(176, 36, 24, 0.85)';
-                ctx.beginPath();
-                ctx.arc(0, 0, arcR, 0, Math.PI * 2);
-                ctx.stroke();
-                // Green arcs (open)
-                ctx.strokeStyle = 'rgba(121, 158, 49, 0.95)';
-                ranges.forEach(([a, b]) => {
-                    ctx.beginPath();
-                    ctx.arc(0, 0, arcR, hourToAngle(a), hourToAngle(b), anticlockwise);
-                    ctx.stroke();
-                });
-                ctx.restore();
-            }
-
-            // Thin circle at tic base (both modes)
-            ctx.save();
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
-            ctx.lineWidth = 0.5;
-            ctx.beginPath();
-            ctx.arc(0, 0, r * 1.02 - r * 0.016, 0, Math.PI * 2);   // tickInset = r*0.016 (was a numbers-ring local)
-            ctx.stroke();
-            ctx.restore();
-
-            ctx.restore(); // Restore from main translation
-            
-            // --- Legend (Top Left) - responsive to clock radius ---
+        // Legend (top-left) + search/link overlay + globe & direction mode icons.
+        // Input: r. Writes globeIconHitbox / dirIconHitbox (top-level).
+        function drawLegendAndIcons(r) {
             ctx.save();
             ctx.textAlign = "left";
             ctx.textBaseline = "top";
@@ -1796,6 +1531,533 @@
             dirIconHitbox = { cx: dirCx, cy: dirCy, r: iconR * 1.4 };
 
             ctx.restore();
+        }
+
+        // Central selection panel: time box, neighbor city list, moon box, hover tooltip.
+        // Inputs: r, cx, cy, mapRotation, time. Writes highlightBtnHitbox / flagHitboxes (top-level).
+        function drawSelectionPanel(r, cx, cy, mapRotation, time) {
+            ctx.save();
+            ctx.globalAlpha = displayAlpha;
+
+            // Position: center in normal mode, right side in globe mode
+            const popupX = window.useGlobe ? cx + r * 1.2 + 90 : cx;
+            const popupY = cy;
+            ctx.translate(popupX, popupY);
+
+            // Connecting Line (only in normal mode)
+            if (!window.useGlobe) {
+                const cityAngle = (dirSign * (-targetCity.lon) + mapRotation - 90) * Math.PI / 180;
+                const startX = Math.cos(cityAngle) * (r * 0.78);
+                const startY = Math.sin(cityAngle) * (r * 0.78);
+
+                ctx.beginPath();
+                ctx.strokeStyle = "#aaaaaa"; // Solid Gray
+                ctx.lineWidth = 1;
+                ctx.moveTo(startX, startY);
+                ctx.lineTo(0, 0);
+                ctx.stroke();
+            }
+            // -----------------------
+
+            const localStr = time.toLocaleTimeString('de-DE', {
+                timeZone: targetCity.tz,
+                hour: '2-digit', minute: '2-digit', second: '2-digit'
+            });
+            const parts = localStr.split(':'); // [HH, MM, SS]
+
+            const boxW = 160;
+            const boxH = 118; // top: HIGHLIGHT button · extra room for the local date above the time
+            const rBox = 5;
+            const teamYOffset = -(100 + 150 + 2) / 2; // center the 3-box group in y: -(nH + mH + 2 gaps)/2
+
+            // Background Box (Harmonized Style)
+            ctx.fillStyle = "rgba(0, 10, 30, 0.98)";
+            ctx.strokeStyle = "rgba(0, 210, 255, 0.4)";
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            const x = -boxW/2, y = -boxH/2 + teamYOffset;
+            ctx.moveTo(x + rBox, y);
+            ctx.lineTo(x + boxW - rBox, y);
+            ctx.quadraticCurveTo(x + boxW, y, x + boxW, y + rBox);
+            ctx.lineTo(x + boxW, y + boxH - rBox);
+            ctx.quadraticCurveTo(x + boxW, y + boxH, x + boxW - rBox, y + boxH);
+            ctx.lineTo(x + rBox, y + boxH);
+            ctx.quadraticCurveTo(x, y + boxH, x, y + boxH - rBox);
+            ctx.lineTo(x, y + rBox);
+            ctx.quadraticCurveTo(x, y, x + rBox, y);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+
+
+            ctx.textAlign = "center";
+
+            // Status (Sommerzeit/Normalzeit) — compute first so HIGHLIGHT button can match its colors
+            const dstStatus = getDSTLabel(targetCity.tz);
+            const isSZ = (dstStatus === "SZ");
+            const dstColor = isSZ ? "#ffaa00" : "rgba(220, 220, 220, 0.9)";
+            const dstColorDim = isSZ ? "rgba(255, 170, 0, 0.6)" : "rgba(220, 220, 220, 0.5)";
+            const dstColorBg = isSZ ? "rgba(255, 170, 0, 0.18)" : "rgba(220, 220, 220, 0.10)";
+
+            // HIGHLIGHT Button (over SOMMERZEIT/NORMALZEIT line, full box width)
+            const isHighlightOn = !!(targetCity && targetCity.red);
+            const hbX = -boxW/2 + 6;
+            const hbY = y + 4;
+            const hbW = boxW - 12;
+            const hbH = 22;
+            ctx.save();
+            // Background: red radial gradient when active (matches city marker sphere), else transparent
+            if (isHighlightOn) {
+                // Gradient spans full button width with softer falloff (no harsh black edges)
+                const hbGrad = ctx.createRadialGradient(
+                    0, hbY + hbH/2, 0,
+                    0, hbY + hbH/2, hbW/2
+                );
+                hbGrad.addColorStop(0, '#dd1144');
+                hbGrad.addColorStop(0.5, '#88001f');
+                hbGrad.addColorStop(1, '#440011');
+                ctx.fillStyle = hbGrad;
+            } else {
+                ctx.fillStyle = "transparent";
+            }
+            ctx.strokeStyle = isHighlightOn ? dstColor : dstColorDim;
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            const hbR = 4;
+            ctx.moveTo(hbX + hbR, hbY);
+            ctx.lineTo(hbX + hbW - hbR, hbY);
+            ctx.quadraticCurveTo(hbX + hbW, hbY, hbX + hbW, hbY + hbR);
+            ctx.lineTo(hbX + hbW, hbY + hbH - hbR);
+            ctx.quadraticCurveTo(hbX + hbW, hbY + hbH, hbX + hbW - hbR, hbY + hbH);
+            ctx.lineTo(hbX + hbR, hbY + hbH);
+            ctx.quadraticCurveTo(hbX, hbY + hbH, hbX, hbY + hbH - hbR);
+            ctx.lineTo(hbX, hbY + hbR);
+            ctx.quadraticCurveTo(hbX, hbY, hbX + hbR, hbY);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+            ctx.fillStyle = isHighlightOn ? "#fff" : dstColorDim;
+            ctx.font = "900 11px Orbitron";
+            ctx.textBaseline = "middle";
+            ctx.fillText("HIGHLIGHT", 0, hbY + hbH/2);
+            ctx.textBaseline = "alphabetic";
+            ctx.restore();
+            highlightBtnHitbox = {
+                x: popupX + hbX,
+                y: popupY + hbY,
+                w: hbW,
+                h: hbH
+            };
+
+            ctx.fillStyle = (dstStatus === "SZ") ? "#ffaa00" : "rgba(220, 220, 220, 0.9)";
+            ctx.font = "900 10px Orbitron";
+            ctx.fillText((dstStatus === "SZ") ? "SOMMERZEIT" : "NORMALZEIT", 0, y + 38);
+
+            // Querstrich (Separator)
+            ctx.strokeStyle = "rgba(0, 210, 255, 0.2)";
+            ctx.beginPath();
+            ctx.moveTo(-boxW/2 + 20, y + 46);
+            ctx.lineTo(boxW/2 - 20, y + 46);
+            ctx.stroke();
+
+            // City Name (Top)
+            ctx.fillStyle = (dstStatus === "SZ") ? "#ffaa00" : "#00d2ff";
+            ctx.font = "bold 12px Orbitron"; // Larger city name
+            ctx.fillText(targetCity.name.replace(/\n/g, ' ').toUpperCase(), 0, y + 60);
+
+            // Local date at that city's timezone (above the time) — e.g. "MO 25. Mai 2026"
+            const _now = new Date();
+            const _wd = _now.toLocaleDateString('de-DE', { timeZone: targetCity.tz, weekday: 'short' }).replace('.', '').toUpperCase();
+            const _dm = _now.toLocaleDateString('de-DE', { timeZone: targetCity.tz, day: 'numeric', month: 'long', year: 'numeric' });
+            ctx.fillStyle = "rgba(210, 225, 240, 0.85)";
+            ctx.font = "600 11px Orbitron";
+            ctx.fillText(_wd + ' ' + _dm, 0, y + 76);
+
+            // --- Digit Widgets ---
+            const drawDigitBox = (val, xPos) => {
+                ctx.fillStyle = "#fff";
+                ctx.font = "900 20px Orbitron";
+                ctx.fillText(val, xPos, y + 101);
+            };
+
+            drawDigitBox(parts[0], -40); // HH
+            drawDigitBox(parts[1], 0);   // MM
+            drawDigitBox(parts[2], 40);  // SS
+
+            // Colons (Restored) — kept 4px above the digit baseline (digits use y+85)
+            ctx.fillStyle = "#00d2ff";
+            ctx.font = "bold 14px Orbitron";
+            ctx.fillText(":", -20, y + 97);
+            ctx.fillText(":", 20, y + 97);
+
+            // --- Neighborhood Cities (Full Map Database with Flags) ---
+            const neighbors = RELATED_CITIES_DB[targetCity.tz] || (window._neighborCache?.[targetCity.tz]) || [];
+            const nW = 160, nH = 100; // Increased height for larger font
+            const nx = -nW/2, ny = y + boxH + 1;   // 1px gap below the time box
+
+            // Dark Background for the list (same frame as the time box above)
+            ctx.fillStyle = "rgba(0, 10, 30, 0.98)";
+            ctx.strokeStyle = "rgba(0, 210, 255, 0.4)";
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.roundRect(nx, ny, nW, nH, 5);
+            ctx.fill();
+            ctx.stroke();
+
+            flagHitboxes = []; // clear hitboxes
+
+            // Set uniform baseline for perfect vertical alignment
+            ctx.textBaseline = "middle";
+
+            neighbors.forEach((item, i) => {
+                const centerY = ny + 16 + (i * 18);
+
+                // City Name (Left)
+                ctx.fillStyle = (dstStatus === "SZ") ? "#ffaa00" : "rgba(0, 210, 255, 0.9)";
+                ctx.font = "400 14px Orbitron";
+                ctx.textAlign = "left";
+                ctx.fillText(item.name, nx + 10, centerY);
+
+                // Flag (Right)
+                ctx.font = "22px Arial"; // Standard Arial for Emojis
+                ctx.textAlign = "right";
+                // Emojis often need a small 1-2px vertical tweak to visually center
+                ctx.fillText(item.f, nx + nW - 10, centerY + 1);
+
+                // Save hitbox perfectly centered on the row
+                // x/y: popup-translate-relative (for legacy hover check)
+                // absX/absY: canvas-absolute (for click hit-test, account for popupX/popupY translate)
+                const hbX = nx + 10;       // covers entire row (city name + flag area)
+                const hbY = centerY - 13;
+                const hbW = nW - 20;
+                const hbH = 26;
+                flagHitboxes.push({
+                    x: hbX,
+                    y: hbY,
+                    w: hbW,
+                    h: hbH,
+                    absX: popupX + hbX,
+                    absY: popupY + hbY,
+                    countryCode: item.f,
+                    index: i,
+                    centerY: centerY,
+                    lat: item.lat ?? null,
+                    lng: item.lng ?? null,
+                    globeLat: item.lat ?? null,
+                    globeLng: item.lng ?? null,
+                    name: item.name
+                });
+            });
+
+            // Moon box under the city list (same frame)
+            {
+                const mW = nW, mH = 150;
+                const mmx = nx, mmy = ny + nH + 1;    // 1px gap below the list
+                drawMoon(mmx, mmy, mW, mH);
+            }
+
+            // Draw tooltip if flag is hovered
+            if (hoveredFlagIndex !== null) {
+                const hoveredBox = flagHitboxes.find(b => b.index === hoveredFlagIndex);
+                if (hoveredBox) {
+                    const countryName = getCountryName(hoveredBox.countryCode);
+                    ctx.save();
+                    ctx.font = "400 14px Orbitron";
+                    const tw = ctx.measureText(countryName).width;
+                    const tooltipW = tw + 20;
+                    const tooltipH = 26;
+
+                    const tx = nx + nW + 6; // Right of the box, 4px closer (was 10)
+                    const ty = hoveredBox.centerY - tooltipH / 2; // Perfectly align with row
+
+                    ctx.fillStyle = "rgba(0, 15, 30, 0.98)";
+                    ctx.strokeStyle = "rgba(0, 210, 255, 0.4)"; // Match the list box border exactly
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.roundRect(tx, ty, tooltipW, tooltipH, 5);
+                    ctx.fill();
+                    ctx.stroke();
+
+                    ctx.fillStyle = (dstStatus === "SZ") ? "#ffaa00" : "rgba(0, 210, 255, 0.9)";
+                    ctx.textAlign = "left";
+                    ctx.textBaseline = "middle";
+                    ctx.fillText(countryName, tx + 10, hoveredBox.centerY);
+                    ctx.restore();
+                }
+            }
+
+            ctx.restore();
+        }
+
+        function draw() {
+            // Loop muss IMMER weiterlaufen — auch bei Fehlern, sonst friert die Uhr ein.
+            try {
+                drawFrame();
+            } catch (e) {
+                console.error('draw error:', e);
+            }
+            requestAnimationFrame(draw);
+        }
+
+        function drawFrame() {
+            // DEBUG overlay (zum Aktivieren das /* … */ entfernen)
+            /*
+            const _dbg = document.getElementById('size-debug') || (function () {
+                const d = document.createElement('div');
+                d.id = 'size-debug';
+                d.style.cssText = 'position:fixed;top:8px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.85);color:#0ff;padding:6px 10px;font:11px monospace;z-index:99999;border:1px solid #0ff;border-radius:4px;pointer-events:none;white-space:pre;text-align:left;';
+                document.body.appendChild(d);
+                return d;
+            })();
+            const _vv = window.visualViewport;
+            const _cr = canvas.getBoundingClientRect();
+            const _mc = document.querySelector('#main-content');
+            const _mcR = _mc ? _mc.getBoundingClientRect() : { width: 0, height: 0 };
+            const _ch = document.querySelector('#cyber-left-chrome');
+            const _chR = _ch ? _ch.getBoundingClientRect() : { width: 0, height: 0 };
+            const _scale = getComputedStyle(document.documentElement).getPropertyValue('--cyber-left-scale').trim();
+            const _nat = getComputedStyle(document.documentElement).getPropertyValue('--cyber-left-natural-w').trim();
+            */
+
+            if (!mapLoaded) return;
+
+            // Smooth Return Logic
+            if (isReturning && !isMouseDown) {
+                if (Math.abs(manualOffset) < 0.1) {
+                    manualOffset = 0;
+                    isReturning = false;
+                } else {
+                    manualOffset *= 0.92; // Smooth exponential decay back to 0
+                }
+            }
+
+
+            const time = getDisplayTime();
+            const utcHours = time.getUTCHours() + time.getUTCMinutes() / 60 + time.getUTCSeconds() / 3600;
+
+            const rect = canvas.getBoundingClientRect();
+            const w = Math.max(80, rect.width || 0);
+            const h = Math.max(80, rect.height || 0);
+            const size = Math.min(w, h) * 0.8;
+            const r = size / 2;
+            const cx = w / 2;
+            const cy = h / 2;
+
+            // Sicherheitsnetz: bei degenerierten Maßen Frame überspringen.
+            if (!Number.isFinite(r) || r < 1) return;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.save();
+            ctx.translate(cx, cy);
+
+            // (Glow removed)
+
+            // 1. Draw Map (Rotating)
+            if (autoRotationEnabled) autoRotation -= dirSign * 0.02;
+            // Add +1 to account for Summer Time (CEST is UTC+2, Lon 15 is UTC+1)
+            const mapRotation = dirSign * (12 - (utcHours + 1)) * 15 + autoRotation;
+            
+            ctx.save();
+            ctx.rotate(mapRotation * Math.PI / 180);
+            
+            // Draw Map Image (Slightly Darker)
+            ctx.save();
+            ctx.globalAlpha = 0.8;
+            ctx.rotate(-Math.PI / 2);
+            
+            // Clip to circle to remove dark blue corners
+            ctx.beginPath();
+            ctx.arc(0, 0, r, 0, Math.PI * 2);
+            ctx.clip();
+            
+            if (!window.useGlobe) {
+                // Globe edge = inner rim of the city bubbles: (markerR - diskR)/r = (0.9 - 0.022) - 0.105
+                const MAP_SCALE = 0.773;
+                const ms = size * MAP_SCALE, mo = -ms / 2;
+                if (CW && southMapReady) {
+                    ctx.drawImage(southMapImg, mo, mo, ms, ms);   // real South-Pole view
+                } else {
+                    if (CW) ctx.scale(-1, 1);                     // fallback until the south map loads
+                    ctx.drawImage(mapImg, mo, mo, ms, ms);
+                }
+            }
+            ctx.restore();
+            if (window.useGlobe && globeInstance) {
+                if (!lockedCity && !isMouseDown && !globeManuallyDragged) {
+                    globeLat = CW ? -90 : 90;   // no city selected: CW → South Pole, CCW → North Pole
+                    globeLng = -mapRotation;
+                    globeInstance.pointOfView({ lat: globeLat, lng: globeLng, altitude: 2.65 }, 0);
+                }
+                if (!lockedCity) drawPoleMarker(w, h, r);   // pole label + red dot at centre (no city selected)
+            }
+            if (!window.useGlobe) drawPoleMarker(w, h, r);  // clock mode: pole is always at the centre
+
+            // 2. Draw City Markers (Plaques) - GLUED TO EARTH
+            // All sizes relative to r (clock radius) for responsive scaling
+            const diskR = r * 0.105;
+            const markerInset = r * 0.022;
+            const tipExtend = r * 0.019;
+            const baseInset = r * 0.038;
+            const cityFontNormal = Math.max(5, r * 0.030);
+            const cityFontHighlight = Math.max(6, r * 0.034);
+            const cityLineHeight = r * 0.038;
+            const cityShadowBlur = r * 0.031;
+            const isWkoeMode = document.documentElement.dataset.school === 'wkoe';
+            cities.forEach(city => {
+                const cityAngle = dirSign * (-city.lon) * Math.PI / 180 - Math.PI / 2;
+                const markerR = (r * 0.9) - markerInset;
+                const circleRadius = diskR;
+                const mx = Math.cos(cityAngle) * markerR;
+                const my = Math.sin(cityAngle) * markerR;
+                const isWkoeDresden = isWkoeMode && city.name === 'Dresden';
+
+                // Draw Precision Triangle (Pointer)
+                ctx.save();
+                ctx.fillStyle = "white";
+                ctx.beginPath();
+                const tipR = markerR + circleRadius + tipExtend;
+                const baseR = markerR + circleRadius - baseInset;
+                const spread = 0.06; // angular, no scaling needed
+
+                ctx.moveTo(Math.cos(cityAngle) * tipR, Math.sin(cityAngle) * tipR);
+                ctx.lineTo(Math.cos(cityAngle - spread) * baseR, Math.sin(cityAngle - spread) * baseR);
+                ctx.lineTo(Math.cos(cityAngle + spread) * baseR, Math.sin(cityAngle + spread) * baseR);
+                ctx.closePath();
+                ctx.fill();
+                ctx.restore();
+
+                if (isWkoeDresden) {
+                    // Light gray disc for Dresden in WKOE mode
+                    ctx.save();
+                    ctx.fillStyle = 'rgb(180, 180, 180)';
+                    ctx.beginPath();
+                    ctx.arc(mx, my, circleRadius, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.restore();
+                } else {
+                    const grad = ctx.createRadialGradient(mx, my, 0, mx, my, circleRadius);
+                    if (city.red) {
+                        grad.addColorStop(0, '#dd1144');
+                        grad.addColorStop(1, '#1c0008');
+                    } else if (city.highlight) {
+                        {
+                            grad.addColorStop(0, '#ffaa00');
+                            grad.addColorStop(0.2, '#ffaa00');
+                            grad.addColorStop(1, '#a05000');
+
+                            ctx.save();
+                            ctx.shadowBlur = cityShadowBlur;
+                            ctx.shadowColor = '#e68a00';
+                        }
+                    } else {
+                        grad.addColorStop(0, '#0033aa');
+                        grad.addColorStop(1, '#000811');
+                    }
+
+                    ctx.fillStyle = grad;
+                    ctx.beginPath();
+                    ctx.arc(mx, my, circleRadius, 0, Math.PI * 2);
+                    ctx.fill();
+                    if (city.highlight && !city.red) ctx.restore();
+                }
+
+                ctx.save();
+                ctx.translate(mx, my);
+                // Inverse the map rotation to keep text/logo level
+                ctx.rotate(-mapRotation * Math.PI / 180);
+
+                if (isWkoeDresden) {
+                    if (wkoeLogoImg.complete && wkoeLogoImg.naturalWidth) {
+                        // Fit logo inside the disc (diameter = 2*circleRadius), with margin.
+                        // Logo PNG has a drop-shadow on the right/bottom, so visible shield is
+                        // off-center inside its bounding box → compensate with a small shift.
+                        const maxSide = circleRadius * 1.3;
+                        const iw = wkoeLogoImg.naturalWidth;
+                        const ih = wkoeLogoImg.naturalHeight;
+                        const scale = Math.min(maxSide / iw, maxSide / ih);
+                        const dw = iw * scale;
+                        const dh = ih * scale;
+                        const shadowShiftX = dw * 0.03; // shift right to counter shadow on left
+                        const shadowShiftY = dh * 0.04; // shift down to counter shadow on top
+                        ctx.drawImage(wkoeLogoImg, -dw / 2 + shadowShiftX, -dh / 2 + shadowShiftY, dw, dh);
+                    }
+                } else {
+                    let lines = city.name.split('\n');
+
+                    const dst = getDSTLabel(city.tz);
+                    if (city.highlight) {
+                        ctx.fillStyle = "rgb(0,0,40)";
+                    } else if (dst === "SZ") {
+                        ctx.fillStyle = "rgba(255,255,255,0.95)"; // white for Summer Time (sun icon below)
+                    } else {
+                        ctx.fillStyle = "rgba(220, 220, 220, 0.9)"; // light gray for Winter Time (snowflake below)
+                    }
+                    ctx.font = (city.highlight)
+                        ? `900 ${cityFontHighlight}px Orbitron`
+                        : `bold ${cityFontNormal}px Orbitron`;
+                    ctx.textAlign = "center";
+                    ctx.textBaseline = "middle";
+
+                    const labelYShift = -r * 0.01;  // nudge name + icon up together (~5%)
+                    lines.forEach((line, i) => {
+                        ctx.fillText(line, 0, (i - (lines.length-1)/2) * cityLineHeight + labelYShift);
+                    });
+
+                    // Season icon under the name: ☀️ Summer Time, ❄️ Winter Time (native emoji = Apple look on macOS)
+                    const seasonEmoji = (dst === "SZ") ? "☀️" : "❄️";
+                    const emojiSize = r * ((dst === "SZ") ? 0.03 : 0.0257);  // snowflake smaller (it looks bigger than the sun)
+                    const lastLineY = ((lines.length - 1) / 2) * cityLineHeight;  // baseline of the last name line
+                    ctx.font = `${emojiSize}px sans-serif`;
+                    ctx.fillText(seasonEmoji, 0, lastLineY + cityLineHeight * 0.85 + r * 0.02 + labelYShift);  // clearly below the name
+                }
+                ctx.restore();
+            });
+
+            // International Date Line (red triangle + "DATUMSGRENZE" between Samoa and Wellington)
+            drawDateLine(r, markerInset, mapRotation);
+            ctx.restore(); // End map rotation (Earth + Glued Markers)
+            // 3. Draw Numbers Ring (Static) - relative sizes
+            drawNumbersRing(r);
+
+            // Open/Closed arc ring (?open=1 mode) — green for open hours, red for closed
+            if (window.__openMode) {
+                const ranges = window.__openRanges || [];
+                const arcR = r * 1.00;
+                const lineW = Math.max(1, r * 0.010);
+                const hourToAngle = h => dirSign * (12 - h) * (Math.PI * 2 / 24) - Math.PI / 2;
+                const anticlockwise = (dirSign === 1);
+                ctx.save();
+                ctx.lineWidth = lineW;
+                ctx.lineCap = 'butt';
+                // Red full ring (closed)
+                ctx.strokeStyle = 'rgba(176, 36, 24, 0.85)';
+                ctx.beginPath();
+                ctx.arc(0, 0, arcR, 0, Math.PI * 2);
+                ctx.stroke();
+                // Green arcs (open)
+                ctx.strokeStyle = 'rgba(121, 158, 49, 0.95)';
+                ranges.forEach(([a, b]) => {
+                    ctx.beginPath();
+                    ctx.arc(0, 0, arcR, hourToAngle(a), hourToAngle(b), anticlockwise);
+                    ctx.stroke();
+                });
+                ctx.restore();
+            }
+
+            // Thin circle at tic base (both modes)
+            ctx.save();
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+            ctx.lineWidth = 0.5;
+            ctx.beginPath();
+            ctx.arc(0, 0, r * 1.02 - r * 0.016, 0, Math.PI * 2);   // tickInset = r*0.016 (was a numbers-ring local)
+            ctx.stroke();
+            ctx.restore();
+
+            ctx.restore(); // Restore from main translation
+            
+            // --- Legend + mode icons (top-left); writes globeIconHitbox + dirIconHitbox ---
+            drawLegendAndIcons(r);
 
             // --- Impressum (left bottom corner) ---
             drawImprint(r, h);
@@ -1811,260 +2073,8 @@
             redCheckHitbox = null; // Reset; will be set when popup is drawn
             highlightBtnHitbox = null; // Reset; will be set when popup is drawn
 
-            // 7. Draw Central Selection Time Box
-            if (displayAlpha > 0 && targetCity) {
-                ctx.save();
-                ctx.globalAlpha = displayAlpha;
-
-                // Position: center in normal mode, right side in globe mode
-                const popupX = window.useGlobe ? cx + r * 1.2 + 90 : cx;
-                const popupY = cy;
-                ctx.translate(popupX, popupY);
-
-                // Connecting Line (only in normal mode)
-                if (!window.useGlobe) {
-                    const cityAngle = (dirSign * (-targetCity.lon) + mapRotation - 90) * Math.PI / 180;
-                    const startX = Math.cos(cityAngle) * (r * 0.78);
-                    const startY = Math.sin(cityAngle) * (r * 0.78);
-
-                    ctx.beginPath();
-                    ctx.strokeStyle = "#aaaaaa"; // Solid Gray
-                    ctx.lineWidth = 1;
-                    ctx.moveTo(startX, startY);
-                    ctx.lineTo(0, 0);
-                    ctx.stroke();
-                }
-                // -----------------------
-
-                const localStr = time.toLocaleTimeString('de-DE', { 
-                    timeZone: targetCity.tz, 
-                    hour: '2-digit', minute: '2-digit', second: '2-digit' 
-                });
-                const parts = localStr.split(':'); // [HH, MM, SS]
-                
-                const boxW = 160;
-                const boxH = 118; // top: HIGHLIGHT button · extra room for the local date above the time
-                const rBox = 5;
-                const teamYOffset = -(100 + 150 + 2) / 2; // center the 3-box group in y: -(nH + mH + 2 gaps)/2
-                
-                // Background Box (Harmonized Style)
-                ctx.fillStyle = "rgba(0, 10, 30, 0.98)";
-                ctx.strokeStyle = "rgba(0, 210, 255, 0.4)";
-                ctx.lineWidth = 1;
-                ctx.beginPath();
-                const x = -boxW/2, y = -boxH/2 + teamYOffset;
-                ctx.moveTo(x + rBox, y);
-                ctx.lineTo(x + boxW - rBox, y);
-                ctx.quadraticCurveTo(x + boxW, y, x + boxW, y + rBox);
-                ctx.lineTo(x + boxW, y + boxH - rBox);
-                ctx.quadraticCurveTo(x + boxW, y + boxH, x + boxW - rBox, y + boxH);
-                ctx.lineTo(x + rBox, y + boxH);
-                ctx.quadraticCurveTo(x, y + boxH, x, y + boxH - rBox);
-                ctx.lineTo(x, y + rBox);
-                ctx.quadraticCurveTo(x, y, x + rBox, y);
-                ctx.closePath();
-                ctx.fill();
-                ctx.stroke();
-
-
-                ctx.textAlign = "center";
-
-                // Status (Sommerzeit/Normalzeit) — compute first so HIGHLIGHT button can match its colors
-                const dstStatus = getDSTLabel(targetCity.tz);
-                const isSZ = (dstStatus === "SZ");
-                const dstColor = isSZ ? "#ffaa00" : "rgba(220, 220, 220, 0.9)";
-                const dstColorDim = isSZ ? "rgba(255, 170, 0, 0.6)" : "rgba(220, 220, 220, 0.5)";
-                const dstColorBg = isSZ ? "rgba(255, 170, 0, 0.18)" : "rgba(220, 220, 220, 0.10)";
-
-                // HIGHLIGHT Button (over SOMMERZEIT/NORMALZEIT line, full box width)
-                const isHighlightOn = !!(targetCity && targetCity.red);
-                const hbX = -boxW/2 + 6;
-                const hbY = y + 4;
-                const hbW = boxW - 12;
-                const hbH = 22;
-                ctx.save();
-                // Background: red radial gradient when active (matches city marker sphere), else transparent
-                if (isHighlightOn) {
-                    // Gradient spans full button width with softer falloff (no harsh black edges)
-                    const hbGrad = ctx.createRadialGradient(
-                        0, hbY + hbH/2, 0,
-                        0, hbY + hbH/2, hbW/2
-                    );
-                    hbGrad.addColorStop(0, '#dd1144');
-                    hbGrad.addColorStop(0.5, '#88001f');
-                    hbGrad.addColorStop(1, '#440011');
-                    ctx.fillStyle = hbGrad;
-                } else {
-                    ctx.fillStyle = "transparent";
-                }
-                ctx.strokeStyle = isHighlightOn ? dstColor : dstColorDim;
-                ctx.lineWidth = 1;
-                ctx.beginPath();
-                const hbR = 4;
-                ctx.moveTo(hbX + hbR, hbY);
-                ctx.lineTo(hbX + hbW - hbR, hbY);
-                ctx.quadraticCurveTo(hbX + hbW, hbY, hbX + hbW, hbY + hbR);
-                ctx.lineTo(hbX + hbW, hbY + hbH - hbR);
-                ctx.quadraticCurveTo(hbX + hbW, hbY + hbH, hbX + hbW - hbR, hbY + hbH);
-                ctx.lineTo(hbX + hbR, hbY + hbH);
-                ctx.quadraticCurveTo(hbX, hbY + hbH, hbX, hbY + hbH - hbR);
-                ctx.lineTo(hbX, hbY + hbR);
-                ctx.quadraticCurveTo(hbX, hbY, hbX + hbR, hbY);
-                ctx.closePath();
-                ctx.fill();
-                ctx.stroke();
-                ctx.fillStyle = isHighlightOn ? "#fff" : dstColorDim;
-                ctx.font = "900 11px Orbitron";
-                ctx.textBaseline = "middle";
-                ctx.fillText("HIGHLIGHT", 0, hbY + hbH/2);
-                ctx.textBaseline = "alphabetic";
-                ctx.restore();
-                highlightBtnHitbox = {
-                    x: popupX + hbX,
-                    y: popupY + hbY,
-                    w: hbW,
-                    h: hbH
-                };
-
-                ctx.fillStyle = (dstStatus === "SZ") ? "#ffaa00" : "rgba(220, 220, 220, 0.9)";
-                ctx.font = "900 10px Orbitron";
-                ctx.fillText((dstStatus === "SZ") ? "SOMMERZEIT" : "NORMALZEIT", 0, y + 38);
-
-                // Querstrich (Separator)
-                ctx.strokeStyle = "rgba(0, 210, 255, 0.2)";
-                ctx.beginPath();
-                ctx.moveTo(-boxW/2 + 20, y + 46);
-                ctx.lineTo(boxW/2 - 20, y + 46);
-                ctx.stroke();
-
-                // City Name (Top)
-                ctx.fillStyle = (dstStatus === "SZ") ? "#ffaa00" : "#00d2ff";
-                ctx.font = "bold 12px Orbitron"; // Larger city name
-                ctx.fillText(targetCity.name.replace(/\n/g, ' ').toUpperCase(), 0, y + 60);
-
-                // Local date at that city's timezone (above the time) — e.g. "MO 25. Mai 2026"
-                const _now = new Date();
-                const _wd = _now.toLocaleDateString('de-DE', { timeZone: targetCity.tz, weekday: 'short' }).replace('.', '').toUpperCase();
-                const _dm = _now.toLocaleDateString('de-DE', { timeZone: targetCity.tz, day: 'numeric', month: 'long', year: 'numeric' });
-                ctx.fillStyle = "rgba(210, 225, 240, 0.85)";
-                ctx.font = "600 11px Orbitron";
-                ctx.fillText(_wd + ' ' + _dm, 0, y + 76);
-
-                // --- Digit Widgets ---
-                const drawDigitBox = (val, xPos) => {
-                    ctx.fillStyle = "#fff";
-                    ctx.font = "900 20px Orbitron";
-                    ctx.fillText(val, xPos, y + 101);
-                };
-
-                drawDigitBox(parts[0], -40); // HH
-                drawDigitBox(parts[1], 0);   // MM
-                drawDigitBox(parts[2], 40);  // SS
-                
-                // Colons (Restored) — kept 4px above the digit baseline (digits use y+85)
-                ctx.fillStyle = "#00d2ff";
-                ctx.font = "bold 14px Orbitron";
-                ctx.fillText(":", -20, y + 97);
-                ctx.fillText(":", 20, y + 97);
-                
-                // --- Neighborhood Cities (Full Map Database with Flags) ---
-                const neighbors = RELATED_CITIES_DB[targetCity.tz] || (window._neighborCache?.[targetCity.tz]) || [];
-                const nW = 160, nH = 100; // Increased height for larger font
-                const nx = -nW/2, ny = y + boxH + 1;   // 1px gap below the time box
-                
-                // Dark Background for the list (same frame as the time box above)
-                ctx.fillStyle = "rgba(0, 10, 30, 0.98)";
-                ctx.strokeStyle = "rgba(0, 210, 255, 0.4)";
-                ctx.lineWidth = 1;
-                ctx.beginPath();
-                ctx.roundRect(nx, ny, nW, nH, 5);
-                ctx.fill();
-                ctx.stroke();
-
-                flagHitboxes = []; // clear hitboxes
-                
-                // Set uniform baseline for perfect vertical alignment
-                ctx.textBaseline = "middle";
-
-                neighbors.forEach((item, i) => {
-                    const centerY = ny + 16 + (i * 18);
-                    
-                    // City Name (Left)
-                    ctx.fillStyle = (dstStatus === "SZ") ? "#ffaa00" : "rgba(0, 210, 255, 0.9)";
-                    ctx.font = "400 14px Orbitron";
-                    ctx.textAlign = "left";
-                    ctx.fillText(item.name, nx + 10, centerY);
-                    
-                    // Flag (Right)
-                    ctx.font = "22px Arial"; // Standard Arial for Emojis
-                    ctx.textAlign = "right";
-                    // Emojis often need a small 1-2px vertical tweak to visually center
-                    ctx.fillText(item.f, nx + nW - 10, centerY + 1);
-
-                    // Save hitbox perfectly centered on the row
-                    // x/y: popup-translate-relative (for legacy hover check)
-                    // absX/absY: canvas-absolute (for click hit-test, account for popupX/popupY translate)
-                    const hbX = nx + 10;       // covers entire row (city name + flag area)
-                    const hbY = centerY - 13;
-                    const hbW = nW - 20;
-                    const hbH = 26;
-                    flagHitboxes.push({
-                        x: hbX,
-                        y: hbY,
-                        w: hbW,
-                        h: hbH,
-                        absX: popupX + hbX,
-                        absY: popupY + hbY,
-                        countryCode: item.f,
-                        index: i,
-                        centerY: centerY,
-                        lat: item.lat ?? null,
-                        lng: item.lng ?? null,
-                        globeLat: item.lat ?? null,
-                        globeLng: item.lng ?? null,
-                        name: item.name
-                    });
-                });
-
-                // Moon box under the city list (same frame)
-                {
-                    const mW = nW, mH = 150;
-                    const mmx = nx, mmy = ny + nH + 1;    // 1px gap below the list
-                    drawMoon(mmx, mmy, mW, mH);
-                }
-
-                // Draw tooltip if flag is hovered
-                if (hoveredFlagIndex !== null) {
-                    const hoveredBox = flagHitboxes.find(b => b.index === hoveredFlagIndex);
-                    if (hoveredBox) {
-                        const countryName = getCountryName(hoveredBox.countryCode);
-                        ctx.save();
-                        ctx.font = "400 14px Orbitron";
-                        const tw = ctx.measureText(countryName).width;
-                        const tooltipW = tw + 20;
-                        const tooltipH = 26;
-                        
-                        const tx = nx + nW + 6; // Right of the box, 4px closer (was 10)
-                        const ty = hoveredBox.centerY - tooltipH / 2; // Perfectly align with row
-                        
-                        ctx.fillStyle = "rgba(0, 15, 30, 0.98)";
-                        ctx.strokeStyle = "rgba(0, 210, 255, 0.4)"; // Match the list box border exactly
-                        ctx.lineWidth = 1;
-                        ctx.beginPath();
-                        ctx.roundRect(tx, ty, tooltipW, tooltipH, 5);
-                        ctx.fill();
-                        ctx.stroke();
-                        
-                        ctx.fillStyle = (dstStatus === "SZ") ? "#ffaa00" : "rgba(0, 210, 255, 0.9)";
-                        ctx.textAlign = "left";
-                        ctx.textBaseline = "middle";
-                        ctx.fillText(countryName, tx + 10, hoveredBox.centerY);
-                        ctx.restore();
-                    }
-                }
-                
-                ctx.restore();
-            }
+            // 7. Central selection panel (time box + neighbor list + moon + hover tooltip)
+            if (displayAlpha > 0 && targetCity) drawSelectionPanel(r, cx, cy, mapRotation, time);
         }
 
         function setupUI() {
