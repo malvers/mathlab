@@ -1522,10 +1522,10 @@
 
                     // Season icon under the name: ☀️ Summer Time, ❄️ Winter Time (native emoji = Apple look on macOS)
                     const seasonEmoji = (dst === "SZ") ? "☀️" : "❄️";
-                    const emojiSize = r * 0.03;
+                    const emojiSize = r * ((dst === "SZ") ? 0.03 : 0.0257);  // snowflake smaller (it looks bigger than the sun)
                     const lastLineY = ((lines.length - 1) / 2) * cityLineHeight;  // baseline of the last name line
                     ctx.font = `${emojiSize}px sans-serif`;
-                    ctx.fillText(seasonEmoji, 0, lastLineY + cityLineHeight * 0.85);  // clearly below the name
+                    ctx.fillText(seasonEmoji, 0, lastLineY + cityLineHeight * 0.85 + r * 0.02);  // clearly below the name
                 }
                 ctx.restore();
             });

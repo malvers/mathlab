@@ -1,34 +1,6 @@
 // VGP — part of the chat app, loaded in order (classic scripts share one global scope).
 // Do NOT reorder the <script> tags in vgpchat.html; top-level code runs in document order.
 
-// === LAST-TRY DIAGNOSTIC: log every pointerdown's target, attached FIRST (before anything can throw) ===
-document.addEventListener('pointerdown', e => {
-  const t = e.target;
-  try { (window.DebugWindow && DebugWindow.log) ? DebugWindow.log('HIT→ ' + (t.id || t.tagName) + (t.className ? '.' + String(t.className).slice(0, 24) : '')) : console.log('HIT→', t); } catch (_) {}
-}, true);
-
-// === SELF-HEAL: drop stale service worker + caches that pin an OLD index.html ===
-// Some browsers (FF/Safari/Opera) keep serving a cached, outdated vgpchat.html even after a hard
-// reload — which then mismatches these fresh (?v=) JS files. This runs from the cache-busted JS, so
-// it's always current: unregister any SW, wipe all caches, then reload ONCE to fetch fresh HTML.
-(async () => {
-  try {
-    let cleared = false;
-    if ('serviceWorker' in navigator) {
-      const regs = await navigator.serviceWorker.getRegistrations();
-      if (regs.length) { await Promise.all(regs.map(r => r.unregister())); cleared = true; }
-    }
-    if (typeof caches !== 'undefined') {
-      const ks = await caches.keys();
-      if (ks.length) { await Promise.all(ks.map(k => caches.delete(k))); cleared = true; }
-    }
-    if (cleared && !sessionStorage.getItem('vgp-healed')) {
-      sessionStorage.setItem('vgp-healed', '1');
-      location.reload();
-    }
-  } catch (_) {}
-})();
-
 const NAME_KEY = 'eocr-chat-name';
 const EMOJI_KEY = 'eocr-chat-emoji';
 const AVATAR_KEY = 'vgp-avatar'; // local copy of my chosen avatar picture (data URL)
@@ -60,10 +32,9 @@ let subscription = null;
 // Failsafe: if Anonymous sign-ins aren't enabled in Supabase yet, the app keeps working (old RLS).
 let myUid = null; // our auth.uid() — used as message author/recipient id
 async function ensureClient() {
-  dbg('ensureClient: client=' + (client ? 'ok' : 'null') + ' · window.supabase=' + (typeof window.supabase));
   if (!client) {
-    try { client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY); dbg('ensureClient: createClient OK'); }
-    catch (e) { dbg('ensureClient: createClient WARF → ' + e.message); }
+    try { client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY); }
+    catch (e) { dbg('Supabase-Client konnte nicht erstellt werden: ' + e.message); }
   }
   try {
     let { data: { session } } = await client.auth.getSession();
@@ -191,7 +162,7 @@ customElements.whenDefined('emoji-picker').then(() => {
 // Where a picked emoji goes: 'avatar' (header button) changes the personal emoji;
 // 'text' (input button) inserts the emoji into the message text, like WhatsApp.
 let emojiTarget = 'avatar';
-function openEmojiPanel() { dbg('openEmojiPanel — Panel zeigen'); emojiPanel.classList.remove('hidden'); }
+function openEmojiPanel() { emojiPanel.classList.remove('hidden'); }
 async function pickEmoji(e) {
   // Input button: insert into the message text at the caret, keep the sheet open (like WhatsApp)
   if (emojiTarget === 'text') {

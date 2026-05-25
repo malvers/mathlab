@@ -38,7 +38,6 @@ async function deriveDirKey(password) {
 async function readGroupMeta(password) {
   await ensureClient(); // may run before initChat() created the client (onboarding) → self-protect
   const gid = await deriveGroupId(password);
-  dbg('readGroupMeta: client=' + (client ? 'ok' : 'NULL') + ' · gid=' + String(gid || '').slice(0, 10));
   let { data, error } = await client.from('group_meta').select('enc_name').eq('group_id', gid).maybeSingle();
   if (error) { dbg('group_meta-Lookup: ' + error.message); return 'NOMETA'; } // table missing → legacy fallback
   if (!data) return null;                                                     // table exists, no such group
