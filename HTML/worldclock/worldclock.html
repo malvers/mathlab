@@ -422,6 +422,53 @@
         southMapImg.onload = () => { southMapReady = true; };
         southMapImg.src = '../resources/worldmap_polar_south.png';
 
+        // Round Moon disc (pre-rendered, public-domain NASA texture) — shown in a box under the city list
+        const moonImg = new Image();
+        let moonReady = false;
+        moonImg.onload = () => { moonReady = true; };
+        moonImg.src = '../resources/moon.png';
+
+        // Orientation of the Moon's bright limb as seen from (lat,lon) right now (Schlyter ephemeris).
+        // Returns the on-screen rotation so a "bright-on-the-right" disc points the bright limb correctly.
+        function moonBrightLimbRotation(date, latDeg, lonDeg) {
+            const R = Math.PI / 180, DEG = 180 / Math.PI;
+            const rev = x => ((x % 360) + 360) % 360;
+            const d = (date.getTime() - Date.UTC(1999, 11, 31, 0, 0, 0)) / 86400000; // days since 1999-12-31 0h UT
+            const ecl = (23.4393 - 3.563e-7 * d) * R;
+            // --- Sun ---
+            const ws = 282.9404 + 4.70935e-5 * d, es = 0.016709 - 1.151e-9 * d;
+            const Ms = rev(356.0470 + 0.9856002585 * d);
+            const Esun = Ms + es * DEG * Math.sin(Ms * R) * (1 + es * Math.cos(Ms * R));
+            const xs0 = Math.cos(Esun * R) - es, ys0 = Math.sin(Esun * R) * Math.sqrt(1 - es * es);
+            const rs = Math.hypot(xs0, ys0), vs = Math.atan2(ys0, xs0) * DEG, lons = rev(vs + ws);
+            const xss = rs * Math.cos(lons * R), yss = rs * Math.sin(lons * R);
+            const RAs = Math.atan2(yss * Math.cos(ecl), xss);
+            const Decs = Math.atan2(yss * Math.sin(ecl), Math.hypot(xss, yss * Math.cos(ecl)));
+            const Ls = rev(ws + Ms);
+            // --- Moon ---
+            const Nm = 125.1228 - 0.0529538083 * d, im = 5.1454, wm = 318.0634 + 0.1643573223 * d;
+            const am = 60.2666, em = 0.054900, Mm = rev(115.3654 + 13.0649929509 * d);
+            let Em = Mm + em * DEG * Math.sin(Mm * R) * (1 + em * Math.cos(Mm * R));
+            for (let k = 0; k < 4; k++) Em = Em - (Em - em * DEG * Math.sin(Em * R) - Mm) / (1 - em * Math.cos(Em * R));
+            const xv = am * (Math.cos(Em * R) - em), yv = am * Math.sqrt(1 - em * em) * Math.sin(Em * R);
+            const vm = Math.atan2(yv, xv) * DEG, rm = Math.hypot(xv, yv), vw = (vm + wm) * R;
+            const xh = rm * (Math.cos(Nm * R) * Math.cos(vw) - Math.sin(Nm * R) * Math.sin(vw) * Math.cos(im * R));
+            const yh = rm * (Math.sin(Nm * R) * Math.cos(vw) + Math.cos(Nm * R) * Math.sin(vw) * Math.cos(im * R));
+            const zh = rm * (Math.sin(vw) * Math.sin(im * R));
+            const xe = xh, ye = yh * Math.cos(ecl) - zh * Math.sin(ecl), ze = yh * Math.sin(ecl) + zh * Math.cos(ecl);
+            const RAm = Math.atan2(ye, xe), Decm = Math.atan2(ze, Math.hypot(xe, ye));
+            // --- hour angle + parallactic angle + bright-limb position angle ---
+            const UT = date.getUTCHours() + date.getUTCMinutes() / 60 + date.getUTCSeconds() / 3600;
+            const LST = rev(rev(Ls + 180) + UT * 15 + lonDeg);          // local sidereal time (deg)
+            const HA = rev(LST - RAm * DEG) * R;                        // hour angle (rad)
+            const lat = latDeg * R;
+            const q = Math.atan2(Math.sin(HA), Math.tan(lat) * Math.cos(Decm) - Math.sin(Decm) * Math.cos(HA));
+            const chi = Math.atan2(Math.cos(Decs) * Math.sin(RAs - RAm),
+                Math.sin(Decs) * Math.cos(Decm) - Math.cos(Decs) * Math.sin(Decm) * Math.cos(RAs - RAm));
+            // bright limb angle from zenith = chi - q; map to canvas (bright drawn at +x, up = -90°)
+            return -Math.PI / 2 - (chi - q);
+        }
+
         // Pole label ("NORDPOL"/"SÜDPOL") + small red dot, drawn at the centre (= the pole) in screen space.
         function drawPoleMarker(w, h, r) {
             ctx.save();
@@ -1997,7 +2044,7 @@
                 const boxW = 160;
                 const boxH = 118; // top: HIGHLIGHT button · extra room for the local date above the time
                 const rBox = 5;
-                const teamYOffset = -62; // Recalculated to center the larger team
+                const teamYOffset = -(100 + 150 + 2) / 2; // center the 3-box group in y: -(nH + mH + 2 gaps)/2
                 
                 // Background Box (Harmonized Style)
                 ctx.fillStyle = "rgba(0, 10, 30, 0.98)";
@@ -2122,7 +2169,7 @@
                 // --- Neighborhood Cities (Full Map Database with Flags) ---
                 const neighbors = RELATED_CITIES_DB[targetCity.tz] || (window._neighborCache?.[targetCity.tz]) || [];
                 const nW = 160, nH = 100; // Increased height for larger font
-                const nx = -nW/2, ny = y + boxH;   // flush against the time box (no gap) 
+                const nx = -nW/2, ny = y + boxH + 1;   // 1px gap below the time box
                 
                 // Dark Background for the list (same frame as the time box above)
                 ctx.fillStyle = "rgba(0, 10, 30, 0.98)";
@@ -2177,7 +2224,44 @@
                         name: item.name
                     });
                 });
-                
+
+                // Moon box under the city list (same frame); phase darkening comes later
+                {
+                    const mW = nW, mH = 150;
+                    const mmx = nx, mmy = ny + nH + 1;    // 1px gap below the list
+                    ctx.fillStyle = "rgba(0, 10, 30, 0.98)";
+                    ctx.strokeStyle = "rgba(0, 210, 255, 0.4)";
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.roundRect(mmx, mmy, mW, mH, 5);
+                    ctx.fill();
+                    ctx.stroke();
+                    if (moonReady) {
+                        const moonSize = Math.min(mW, mH) - 30;
+                        const mcx = 0, mcy = mmy + mH / 2, mR = moonSize / 2;
+                        // Bright-limb orientation for the selected city, right now (continuous, lat/lon/time based).
+                        const mLat = (targetCity.globeLat ?? targetCity.lat) ?? 0;
+                        const mLon = (targetCity.globeLon ?? targetCity.lon) ?? 0;
+                        const rot = moonBrightLimbRotation(new Date(), mLat, mLon);
+                        // Phase is global (same instant everywhere); only the orientation depends on location.
+                        const synodic = 29.530588853;
+                        const knownNew = Date.UTC(2000, 0, 6, 18, 14) / 86400000;  // reference new moon (days)
+                        const phase = (((Date.now() / 86400000 - knownNew) / synodic) % 1 + 1) % 1;
+                        const a = Math.cos(phase * 2 * Math.PI) * mR;              // signed terminator x-extent
+                        ctx.save();
+                        // Draw everything in a canonical "bright limb on the right" frame, then rotate it into place.
+                        ctx.translate(mcx, mcy); ctx.rotate(rot); ctx.translate(-mcx, -mcy);
+                        ctx.drawImage(moonImg, mcx - mR, mcy - mR, moonSize, moonSize);
+                        ctx.beginPath(); ctx.arc(mcx, mcy, mR, 0, Math.PI * 2); ctx.clip();
+                        ctx.fillStyle = "rgba(2, 4, 14, 0.86)";
+                        ctx.beginPath();
+                        ctx.arc(mcx, mcy, mR, -Math.PI / 2, Math.PI / 2, true);    // left semicircle = always shadowed half
+                        ctx.ellipse(mcx, mcy, Math.abs(a), mR, 0, Math.PI / 2, -Math.PI / 2, a > 0); // terminator
+                        ctx.fill();
+                        ctx.restore();
+                    }
+                }
+
                 // Draw tooltip if flag is hovered
                 if (hoveredFlagIndex !== null) {
                     const hoveredBox = flagHitboxes.find(b => b.index === hoveredFlagIndex);
