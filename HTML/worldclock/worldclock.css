@@ -1,0 +1,163 @@
+/* Worldclock — lab-specific styles (overrides of the shared cyber layout). */
+
+body, #side-panel {
+    background: #000616 !important;
+}
+#canvas-container {
+    background: radial-gradient(circle at 50% 50%,
+        rgba(0, 210, 255, 0.35) 0%,
+        rgba(0, 100, 180, 0.15) 30%,
+        #000616 65%) !important;
+}
+.cyber-grid {
+    display: none;
+}
+#math-coach-box {
+    background: rgba(0, 6, 22, 0.9);
+    border-color: rgba(0, 255, 255, 0.2);
+    pointer-events: none; /* Don't block clicks */
+}
+/* --- School Scheme: ?school=ibb --- */
+body.has-school,
+body.has-school #side-panel {
+    background: #e30613 !important;
+}
+body.has-school #canvas-container {
+    background: #000616 !important;
+}
+body.has-school .canvas-branding {
+    display: none !important;
+}
+#canvas-container { position: relative; }
+/* Centered greeting for ?name=… in normal mode — anchored to clock area, not viewport */
+#visitor-greeting {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, calc(-50% - 15vmin));
+    padding: clamp(8px, 1.6vmin, 16px) clamp(14px, 2.8vmin, 28px);
+    background: rgba(0, 6, 22, 0.78);
+    border: 1px solid rgba(0, 210, 255, 0.45);
+    border-radius: 1.2vmin;
+    box-shadow: 0 0 28px rgba(0, 210, 255, 0.25);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    font-family: 'Raleway', sans-serif;
+    font-weight: 300;
+    letter-spacing: 0.08em;
+    font-size: clamp(10px, 1.5vmin, 17px);
+    color: #00d2ff;
+    text-shadow: 0 0 18px rgba(0, 210, 255, 0.45);
+    text-align: center;
+    white-space: normal;
+    width: clamp(200px, 37vmin, 460px);
+    height: clamp(76px, 17.6vmin, 176px);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    z-index: 2400;
+    display: none;
+}
+#visitor-greeting .vg-comma {
+    margin-left: -0.18em;
+    letter-spacing: 0;
+}
+.school-logo {
+    display: none;
+}
+body.school-ibb #school-logo-ibb,
+body.school-wkoe #school-logo-wkoe,
+body.school-alema #school-logo-alema {
+    display: block;
+    position: fixed;
+    top: 4vmin;
+    right: 2vmin;
+    height: 14.4vmin;
+    width: auto;
+    z-index: 2500;
+    cursor: pointer;
+    filter: drop-shadow(0.5vmin 0.5vmin 0.8vmin rgba(0, 0, 0, 0.85));
+}
+body.school-ibb #school-logo-ibb {
+    height: 11.52vmin;
+}
+body.school-alema #school-logo-alema {
+    filter: none;
+    background: #fff;
+    border-radius: 1.2vmin;
+    padding: 1vmin;
+    box-sizing: content-box;
+}
+/* --- Opening hours: ?open=1 --- */
+#opening-hours {
+    display: none;
+    position: fixed;
+    top: calc(4vmin + 14.4vmin + 0.6vmin);
+    right: calc(2vmin + 14px);
+    padding: 0;
+    background: none;
+    border: 0;
+    box-shadow: none;
+    font-family: 'Raleway', sans-serif;
+    font-weight: 200;
+    color: rgba(230, 237, 243, 0.7);
+    font-size: clamp(0.94rem, 1.56vmin, 1.33rem);
+    letter-spacing: 0.06em;
+    line-height: 1.4;
+    text-align: right;
+    z-index: 2500;
+    pointer-events: none;
+}
+body.school-ibb #opening-hours {
+    top: calc(4vmin + 11.52vmin + 0.6vmin);
+}
+#opening-hours .oh-title { display: none; }
+#opening-hours .oh-row {
+    display: grid;
+    grid-template-columns: 2.4em 1fr;
+    gap: 0.6em;
+    justify-content: end;
+}
+#opening-hours .oh-day { color: rgba(230, 237, 243, 0.55); }
+#opening-hours .oh-hours { text-align: right; }
+#opening-hours .oh-row.is-today .oh-day,
+#opening-hours .oh-row.is-today .oh-hours {
+    color: rgb(121, 158, 49);
+    font-weight: 400;
+}
+#opening-hours.is-visible { display: block; }
+/* --- Globe Mode: ?globe=1 --- */
+#globe-stage {
+    position: absolute;
+    inset: 0;
+    display: none;
+    z-index: 0;
+    pointer-events: none;
+}
+body.use-globe #globe-stage { display: block; filter: brightness(0.8); }
+body.use-globe #canvas { position: relative; z-index: 1; background: transparent; }
+/* --- DEBUG: Clock-only cover (fades in 2s after load) --- */
+:root { --fade-out-ms: 3000ms; --fade-in-ms: 250ms; }
+#debug-clock-cover {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 9000;
+    opacity: 0;
+    transition: opacity var(--fade-out-ms) ease;
+}
+#debug-clock-cover.show { opacity: 1; }
+#debug-clock-cover .cover-piece {
+    position: absolute;
+    background: #000616;
+}
+/* Clock-only mode (toggled by 'D'): collapse the mini-rail/side-panel grid
+   columns so main-content (radial gradient) fills the viewport edge to edge. */
+html body.clock-only-mode,
+html body.clock-only-mode:has(#side-panel),
+html body.clock-only-mode:has(#side-panel.collapsed),
+html body.clock-only-mode:not(:has(#side-panel)) {
+    grid-template-columns: 0 0 minmax(0, 1fr) !important;
+}

@@ -201,13 +201,13 @@ img.joypixels{display:inline-block;height:1em;width:1em;vertical-align:-0.12em;m
 #input-row{display:flex;gap:8px;padding:12px;background:var(--vgp-bg2);align-items:center}
 /* Wrapper keeps the emoji button inside the message field, independent of the send button */
 .msg-field-wrap{flex:1;position:relative;display:flex}
-.msg-field-wrap input{flex:1;padding:10px 14px;border:none;border-radius:12px;background:var(--vgp-field);color:var(--vgp-text2);font-size:14px}
-.msg-field-wrap input::placeholder{color:rgba(var(--vgp-accent-rgb),.3)}
-.msg-field-wrap input:disabled{opacity:.45;cursor:not-allowed}
-.msg-field-wrap input:focus{outline:none;border-color:rgba(var(--vgp-accent-rgb),.25)}
+.msg-field-wrap textarea{flex:1;padding:10px 14px;border:none;border-radius:12px;background:var(--vgp-field);color:var(--vgp-text2);font-size:14px;font-family:inherit;line-height:1.4;resize:none;overflow:hidden}
+.msg-field-wrap textarea::placeholder{color:rgba(var(--vgp-accent-rgb),.3)}
+.msg-field-wrap textarea:disabled{opacity:.45;cursor:not-allowed}
+.msg-field-wrap textarea:focus{outline:none;border-color:rgba(var(--vgp-accent-rgb),.25)}
 /* broadcasting to the whole group ("an alle") → tint the compose field dark red as a warning */
-#app.room-mode .msg-field-wrap input{background:var(--vgp-broadcast-field)}
-#app.room-mode .msg-field-wrap input::placeholder{color:rgba(var(--vgp-broadcast-ph-rgb),.4)}
+#app.room-mode .msg-field-wrap textarea{background:var(--vgp-broadcast-field)}
+#app.room-mode .msg-field-wrap textarea::placeholder{color:rgba(var(--vgp-broadcast-ph-rgb),.4)}
 #msg-emoji{flex:0 0 auto;width:44px;height:44px;border:none;border-radius:50%;background:transparent;font-size:36px;line-height:44px;cursor:pointer;padding:0;text-align:center}
 #msg-emoji:focus{outline:none}
 /* Send button — visible only when message field has text */
@@ -305,7 +305,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
   .msg{font-size:22px}
   .msg .sender{font-size:18px}
   .msg .time{font-size:15px}
-  header input,.msg-field-wrap input{font-size:19px}
+  header input,.msg-field-wrap textarea{font-size:19px}
   /* match the bigger message text on touch: header name, contact names, search */
   #chat-peer{font-size:21px}
   .contact .nm{font-size:19px}
@@ -362,7 +362,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
       <div id="cmd-box" class="hidden" role="listbox" aria-label="Befehle"></div>
       <button id="msg-emoji" type="button" aria-label="Emoji wählen" title="Emoji"><span style="pointer-events:none">🙂</span></button>
       <div class="msg-field-wrap">
-        <input id="msg-input" aria-label="Nachricht" placeholder="Nachricht" disabled autocomplete="off" autocorrect="on" autocapitalize="sentences">
+        <textarea id="msg-input" rows="1" wrap="off" aria-label="Nachricht" placeholder="Nachricht" autocomplete="off" autocorrect="on" autocapitalize="sentences" disabled></textarea>
       </div>
       <button id="send-btn" aria-label="Senden" title="Senden">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
@@ -484,12 +484,12 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
   <button id="stats-close">SCHLIESSEN</button>
 </div>
 
-<script src="js/vgp-setup.js?v=20260524-6"></script>
-<script src="js/vgp-auth.js?v=20260524-6"></script>
-<script src="js/vgp-crypto.js?v=20260524-6"></script>
-<script src="js/vgp-backup-core.js?v=20260524-6"></script>
-<script src="js/vgp-contacts.js?v=20260524-6"></script>
-<script src="js/vgp-messages.js?v=20260524-6"></script>
+<script src="js/vgp-setup.js?v=20260524-7"></script>
+<script src="js/vgp-auth.js?v=20260524-7"></script>
+<script src="js/vgp-crypto.js?v=20260524-7"></script>
+<script src="js/vgp-backup-core.js?v=20260524-7"></script>
+<script src="js/vgp-contacts.js?v=20260524-7"></script>
+<script src="js/vgp-messages.js?v=20260524-7"></script>
 <script>
 // Local-vs-live indicator: mark the page red ONLY when served locally. No red = you're on the live site.
 (function () {
