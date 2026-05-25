@@ -1631,7 +1631,7 @@
             const legendX = r * 0.0625;
             const legendY1 = r * 0.10;
             const legendY2 = legendY1 + legendFontSize * 1.5;
-            ctx.font = `800 ${legendFontSize}px Orbitron`;
+            ctx.font = `500 ${legendFontSize}px Orbitron`;
 
             // Debug: fade canvas legend in clock-only mode (toggled by 'D')
             if ((window.__clockOnlyAlpha ?? 1) > 0.001) {
@@ -1647,12 +1647,14 @@
                 const _szW = ctx.measureText("SOMMERZEIT").width;   // measured with the Orbitron font still active
                 const _nzW = ctx.measureText("NORMALZEIT").width;
                 const _gap = legendFontSize * 0.25;
-                const _emo = legendFontSize * 0.62;
-                const _emoDy = (legendFontSize - _emo) * 0.5;       // re-center the smaller icon on the text line
-                ctx.globalAlpha *= 0.7;                             // lighter
-                ctx.font = `${_emo}px sans-serif`;
-                ctx.fillText("☀️", legendX + _szW + _gap, legendY1 + _emoDy);
-                ctx.fillText("❄️", legendX + _nzW + _gap, legendY2 + _emoDy);
+                const _emoX = legendX + Math.max(_szW, _nzW) + _gap;  // both icons aligned after the wider label
+                const _sunSize = legendFontSize * 0.95;               // bigger sun
+                const _snowSize = legendFontSize * 0.62;
+                ctx.globalAlpha *= 0.7;                               // lighter
+                ctx.font = `${_sunSize}px sans-serif`;
+                ctx.fillText("☀️", _emoX, legendY1 + (legendFontSize - _sunSize) * 0.5);
+                ctx.font = `${_snowSize}px sans-serif`;
+                ctx.fillText("❄️", _emoX + (_sunSize - _snowSize) * 0.5, legendY2 + (legendFontSize - _snowSize) * 0.5);  // nudge right so it visually lines up with the bigger sun
                 ctx.restore();
             }
 
@@ -1807,7 +1809,7 @@
             */
 
             const iconR = legendFontSize * 0.9;
-            const iconCx = legendX + legendW + iconR * 2.2;
+            const iconCx = legendX + legendW + iconR * 3.2;
             const iconCy = (legendY1 + legendY2 + legendFontSize) / 2;
 
             // Debug: fade globe-toggle icon in clock-only mode (toggled by 'D')
@@ -2088,7 +2090,7 @@
                 // --- Neighborhood Cities (Full Map Database with Flags) ---
                 const neighbors = RELATED_CITIES_DB[targetCity.tz] || (window._neighborCache?.[targetCity.tz]) || [];
                 const nW = 160, nH = 100; // Increased height for larger font
-                const nx = -nW/2, ny = y + boxH + 5; 
+                const nx = -nW/2, ny = y + boxH;   // flush against the time box (no gap) 
                 
                 // Dark Background for the list (Harmonized)
                 ctx.fillStyle = "rgba(0, 15, 30, 0.98)";
