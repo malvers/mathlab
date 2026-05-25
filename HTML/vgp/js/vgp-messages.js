@@ -113,7 +113,7 @@ function subscribeMessages() {
         const openHere = activeRoom && gd.pwd === activeGroupPwd; // this room is the one on screen
         if (openHere) {
           await renderMsg(m);
-          messagesEl.scrollTop = messagesEl.scrollHeight;
+          if (m.pubkey === myPubB64) messagesEl.scrollTop = messagesEl.scrollHeight; else glideToBottom(messagesEl);
         } else if (m.pubkey !== myPubB64) {
           gd.roomUnread++;
         }
@@ -128,7 +128,7 @@ function subscribeMessages() {
       if (peer && ((m.pubkey === myPubB64 && m.recipient_pubkey === peer) ||
                    (m.pubkey === peer      && m.recipient_pubkey === myPubB64))) {
         await renderMsg(m);
-        messagesEl.scrollTop = messagesEl.scrollHeight;
+        if (m.pubkey === myPubB64) messagesEl.scrollTop = messagesEl.scrollHeight; else glideToBottom(messagesEl);
         if (m.pubkey === peer) { markRead(peer); publishRead(peer); } // received in open chat → read
       } else if (m.recipient_pubkey === myPubB64) {
         // Message for me in a chat I don't have open → bump badge + confirm delivery to the sender
@@ -158,9 +158,55 @@ function subscribeMessages() {
     .on('postgres_changes', { event: '*', schema: 'public', table: 'group_meta' }, async payload => {
       if (payload.new && payload.new.group_id === myGroupId) { dbg('Gruppenname geändert — übernehme'); refreshGroupName(); }
     })
+    // Ephemeral "is typing" pings (broadcast, no DB). Show only if it's for the chat currently on screen.
+    .on('broadcast', { event: 'typing' }, ({ payload }) => {
+      if (!payload || payload.from === myPubB64) return;
+      const forOpen = payload.room
+        ? (activeRoom && payload.room === myGroupId)
+        : (activePeer && payload.to === myPubB64 && payload.from === activePeer.pubkey);
+      if (forOpen) showTyping();
+    })
     .subscribe(status => {
       dbg('Realtime-Status: ' + JSON.stringify(status));
     });
+}
+
+// --- "tippt gerade…" indicator (ephemeral, via Realtime broadcast — no DB writes) ---
+const typingEl = document.getElementById('typing-indicator');
+let typingHideTimer = null, lastTypingSent = 0;
+function showTyping() {
+  if (typingEl) typingEl.classList.add('on');               // fade the bubble in; the list never moves
+  clearTimeout(typingHideTimer);
+  typingHideTimer = setTimeout(hideTyping, 4000);           // auto-hide if no further keystrokes
+}
+function hideTyping() { if (typingEl) typingEl.classList.remove('on'); }
+function sendTyping() {
+  if (!subscription) return;
+  const now = Date.now();
+  if (now - lastTypingSent < 1500) return;                  // throttle: at most every 1.5s
+  lastTypingSent = now;
+  const payload = activeRoom ? { from: myPubB64, room: myGroupId }
+                : activePeer ? { from: myPubB64, to: activePeer.pubkey }
+                : null;
+  if (payload) subscription.send({ type: 'broadcast', event: 'typing', payload });
+}
+
+// Ultra-gentle auto-scroll: glide #messages to the bottom over GLIDE_MS instead of snapping —
+// but only if the reader is already near the bottom (never yank them off older messages).
+let glideRAF = 0;
+const GLIDE_MS = 8000;
+function glideToBottom(el) {
+  if (!el) return;
+  if (el.scrollHeight - el.scrollTop - el.clientHeight > 160) return;   // reader scrolled up → leave them be
+  cancelAnimationFrame(glideRAF);
+  const startTop = el.scrollTop, t0 = performance.now();
+  const step = (now) => {
+    const target = el.scrollHeight - el.clientHeight;                   // re-read (content may have grown)
+    const p = Math.min(1, (now - t0) / GLIDE_MS);
+    el.scrollTop = startTop + (target - startTop) * (1 - Math.pow(1 - p, 3));   // ease-out
+    if (p < 1) glideRAF = requestAnimationFrame(step);
+  };
+  glideRAF = requestAnimationFrame(step);
 }
 // If this device's own identity was deleted elsewhere (Konto gelöscht) → log out automatically.
 async function checkAccountAlive() {
@@ -329,7 +375,7 @@ msgInput.onkeydown = e => {
 // Send button: visible only while the field has text
 const sendBtn = document.getElementById('send-btn');
 function updateSendBtn() { sendBtn.classList.toggle('visible', msgInput.value.trim().length > 0); }
-msgInput.addEventListener('input', () => { updateSendBtn(); refreshCmdBox(); });
+msgInput.addEventListener('input', () => { updateSendBtn(); refreshCmdBox(); sendTyping(); });
 msgInput.addEventListener('blur', () => setTimeout(hideCmdBox, 120));
 sendBtn.onclick = () => sendMsg();
 
