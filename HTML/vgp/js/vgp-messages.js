@@ -140,6 +140,17 @@ function subscribeMessages() {
     .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'messages' }, () => {
       if (activePeer || activeRoom) loadMessages();
     })
+    // A message was edited (UPDATE) → if its bubble is on screen, replace the text in place.
+    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'messages' }, async payload => {
+      const m = payload.new;
+      const el = messagesEl.querySelector(`[data-id="${m.id}"]`);
+      if (!el) return;                                   // not in the open conversation
+      const key = m.room_id ? roomKey : activeChatKey;
+      let raw = (m.content && m.content.startsWith('ENC:')) ? await decryptText(m.content, key) : (m.content || '');
+      if (raw === '[falscher Schlüssel]') return;
+      const mk = raw.match(/^(\u2063+)/); if (mk) raw = raw.slice(mk[1].length);
+      applyEdit(m.id, raw);
+    })
     // A receipt changed → if it's the open peer acknowledging MY messages, recolor the ticks live
     .on('postgres_changes', { event: '*', schema: 'public', table: 'receipts' }, payload => {
       const r = payload.new;
@@ -255,8 +266,9 @@ async function renderMsg(msg) {
   let jumboScale = 0;
   if (!decryptFailed) {
     const mk = content.match(/^(\u2063+)/);
-    if (mk) { jumboScale = Math.min(5, mk[1].length); content = content.slice(mk[1].length); }
+    if (mk) { jumboScale = Math.min(10, mk[1].length); content = content.slice(mk[1].length); }
   }
+  if (isSelf && !decryptFailed) div.dataset.raw = content;   // plain text for ArrowUp "edit last message"
   // Emoji-only message (1–3) → render big, no bubble (WhatsApp/Signal style)
   if (!decryptFailed) {
     const ec = emojiOnlyCount(content);
@@ -369,11 +381,33 @@ const CMD_LIST = [
   { cmd: '/sorry',     desc: 'Sorry! 🙈',                       text: 'Sorry! 🙈' }
 ];
 const cmdBox = document.getElementById('cmd-box');
-let cmdMatches = [], cmdActive = -1, cmdNavigated = false;
+let cmdMatches = [], cmdActive = -1, cmdNavigated = false, cmdMode = 'cmd';
+
+// "//" cheat-sheet: one row per emoji with all its emoticon tags (e.g. 🙂 ← ":-)  :)").
+function emoticonCheatsheet() {
+  const byEmoji = new Map();
+  for (const [tag, emo] of Object.entries(EMOTICONS)) {
+    if (!byEmoji.has(emo)) byEmoji.set(emo, []);
+    byEmoji.get(emo).push(tag);
+  }
+  return [...byEmoji.entries()].map(([emoji, tags]) => ({ emoji, tags: tags.join('  ') }));
+}
 
 function refreshCmdBox() {
   const v = msgInput.value;
   if (!v.startsWith('/')) return hideCmdBox();
+  // "//" → emoticon reference (tags → emoji); clicking/Enter inserts the emoji.
+  if (v === '//') {
+    cmdMode = 'emo';
+    cmdMatches = emoticonCheatsheet();
+    cmdActive = 0; cmdNavigated = false;
+    cmdBox.innerHTML = cmdMatches.map((c, i) =>
+      `<div class="cmd-item${i === 0 ? ' active' : ''}" role="option" data-i="${i}"><code>${escapeHtml(c.tags)}</code><span>${emojiImg(escapeHtml(c.emoji))}</span></div>`
+    ).join('');
+    cmdBox.classList.remove('hidden');
+    return;
+  }
+  cmdMode = 'cmd';
   cmdMatches = CMD_LIST.filter(c => !c.hidden && c.cmd.startsWith(v.toLowerCase()));
   if (!cmdMatches.length) return hideCmdBox();
   cmdActive = 0; cmdNavigated = false;   // fresh list → no explicit pick yet
@@ -382,7 +416,7 @@ function refreshCmdBox() {
   ).join('');
   cmdBox.classList.remove('hidden');
 }
-function hideCmdBox() { cmdBox.classList.add('hidden'); cmdMatches = []; cmdActive = -1; cmdNavigated = false; }
+function hideCmdBox() { cmdBox.classList.add('hidden'); cmdMatches = []; cmdActive = -1; cmdNavigated = false; cmdMode = 'cmd'; }
 function markCmdActive() {
   [...cmdBox.children].forEach((el, i) => el.classList.toggle('active', i === cmdActive));
 }
@@ -401,24 +435,89 @@ function sendCmd(i) {
   hideCmdBox();
   sendMsg();
 }
+// "//" mode: put the chosen emoji into the field (don't send) so you can add to it or hit Enter
+function insertEmoji(i) {
+  if (i < 0 || i >= cmdMatches.length) return;
+  msgInput.value = cmdMatches[i].emoji;
+  hideCmdBox();
+  msgInput.focus();
+  updateSendBtn();
+}
+// Click/Enter → emoji insert in "//" mode, otherwise send the command
+function chooseRow(i) { if (cmdMode === 'emo') insertEmoji(i); else sendCmd(i); }
 cmdBox.addEventListener('mousedown', e => {
   // mousedown (not click) so the input doesn't lose focus before we act
   const item = e.target.closest('.cmd-item');
-  if (item) { e.preventDefault(); sendCmd(+item.dataset.i); }
+  if (item) { e.preventDefault(); chooseRow(+item.dataset.i); }
 });
 // Quick way into the command list from an empty field: type "/" + open the popup
 function openCmd() { msgInput.value = '/'; msgInput.focus(); refreshCmdBox(); updateSendBtn(); }
 // Double-click in the (empty) input also opens the command list
 msgInput.addEventListener('dblclick', () => { if (!msgInput.value.trim()) openCmd(); });
 
+// --- Edit last own message (ArrowUp in empty field → load it; Enter saves via UPDATE; Esc cancels) ---
+let editingId = null;
+const editHint = document.getElementById('edit-hint');
+function startEdit(el) {
+  editingId = el.dataset.id;
+  msgInput.value = el.dataset.raw || '';
+  msgInput.focus();
+  const n = msgInput.value.length; msgInput.setSelectionRange(n, n);   // caret at end
+  if (editHint) editHint.classList.remove('hidden');
+  document.getElementById('input-row').classList.add('editing');
+  updateSendBtn();
+}
+function cancelEdit() {
+  editingId = null;
+  msgInput.value = '';
+  if (editHint) editHint.classList.add('hidden');
+  document.getElementById('input-row').classList.remove('editing');
+  updateSendBtn();
+}
+// Replace an on-screen bubble's text in place (used by local save + realtime UPDATE) + mark "edited".
+function applyEdit(id, rawText) {
+  const el = messagesEl.querySelector(`[data-id="${id}"]`);
+  if (!el) return;
+  el.dataset.raw = rawText;
+  const textSpan = el.querySelector('.text');
+  if (textSpan) textSpan.innerHTML = emojiImg(escapeHtml(rawText));
+  el.classList.remove('jumbo'); el.style.removeProperty('--jx');
+  const ec = emojiOnlyCount(rawText);
+  if (ec >= 1 && ec <= 3) el.classList.add('jumbo');
+  const timeEl = el.querySelector('.time');
+  if (timeEl && !timeEl.querySelector('.edited')) {
+    timeEl.insertAdjacentHTML('afterbegin', '<span class="edited" title="bearbeitet">✎ </span>');
+  }
+}
+// Persist an edit: re-encrypt + re-sign the SAME row (room or 1:1), then update locally.
+async function saveEdit(content) {
+  const id = editingId;
+  let enc, sig;
+  if (activeRoom) {
+    enc = await encryptText(content, roomKey);
+    sig = await signText(enc + '|' + myGroupId);
+  } else if (activePeer) {
+    const chatKey = await deriveChatKey(activePeer.ecdh_pubkey);
+    enc = await encryptText(content, chatKey);
+    sig = await signText(enc + '|' + activePeer.pubkey);
+  } else { cancelEdit(); return; }
+  const { error } = await client.from('messages').update({ content: enc, sig }).eq('id', id);
+  if (error) { dbg('Bearbeiten fehlgeschlagen (UPDATE-Policy in Supabase vorhanden?): ' + error.message); return; }
+  dbg('Nachricht bearbeitet (id ' + id + ')');
+  applyEdit(id, content);
+  cancelEdit();
+}
+
 msgInput.onkeydown = e => {
   if (!cmdBox.classList.contains('hidden') && cmdMatches.length) {
     if (e.key === 'ArrowUp') { e.preventDefault(); cmdActive = (cmdActive - 1 + cmdMatches.length) % cmdMatches.length; cmdNavigated = true; markCmdActive(); return; }
     if (e.key === 'ArrowDown') { e.preventDefault(); cmdActive = (cmdActive + 1) % cmdMatches.length; cmdNavigated = true; markCmdActive(); return; }
-    if (e.key === 'Tab') { e.preventDefault(); applyCmd(cmdActive); return; }
+    if (e.key === 'Tab') { e.preventDefault(); if (cmdMode === 'emo') insertEmoji(cmdActive); else applyCmd(cmdActive); return; }
     if (e.key === 'Escape') { e.preventDefault(); hideCmdBox(); return; }
     if (e.key === 'Enter') {
       e.preventDefault();
+      // "//" mode → insert the highlighted emoji (don't send).
+      if (cmdMode === 'emo') { insertEmoji(cmdActive); return; }
       // Bare "/" with no arrow-pick → its own shortcut: send "Ich bin unterwegs" (the "/" alias).
       if (msgInput.value.trim() === '/' && !cmdNavigated) { hideCmdBox(); sendMsg(); return; }
       // Otherwise send the highlighted match directly.
@@ -428,6 +527,13 @@ msgInput.onkeydown = e => {
   }
   // Tab in an empty field → jump straight into the command list (instead of moving focus away)
   if (e.key === 'Tab' && !msgInput.value.trim()) { e.preventDefault(); openCmd(); return; }
+  // ArrowUp in an empty field → load my last message for editing (only the last one)
+  if (e.key === 'ArrowUp' && !msgInput.value && editingId == null) {
+    const last = [...messagesEl.querySelectorAll('.msg.self[data-id]')].pop();
+    if (last && last.dataset.raw != null) { e.preventDefault(); startEdit(last); return; }
+  }
+  // Esc cancels an in-progress edit
+  if (e.key === 'Escape' && editingId != null) { e.preventDefault(); cancelEdit(); return; }
   if (e.key === 'Enter') { e.preventDefault(); sendMsg(); }
 };
 
@@ -460,6 +566,8 @@ async function sendMsg() {
   hideCmdBox();
   let content = msgInput.value.trim();
   if (!content) return;
+  // Edit mode → update the existing message instead of sending a new one (emoticons still apply, no commands/jumbo)
+  if (editingId != null) { await saveEdit(emoticonsToEmoji(content)); return; }
   // Dispatch slash commands — no name required
   const cmd = CMD_LIST.find(c => c.cmd === content.toLowerCase());
   if (cmd) {
@@ -473,7 +581,7 @@ async function sendMsg() {
   // "/N <emoji>" (N=2–5) → send that emoji N× big. Strip the prefix before emoticon conversion
   // (so /3:-) works), then prepend N invisible markers so the size travels E2E (old clients: invisible).
   let jumboScale = 0;
-  const sm = content.match(/^\/([2-5])\s*(.+)$/s);
+  const sm = content.match(/^\/([2-9]|10)\s*(.+)$/s);
   if (sm) { jumboScale = +sm[1]; content = sm[2].trim(); }
   content = emoticonsToEmoji(content);   // :-) → 🙂 etc. (commands already carry real emoji)
   if (jumboScale) { const n = emojiOnlyCount(content); if (n >= 1 && n <= 3) content = JUMBO_MARK.repeat(jumboScale) + content; }
