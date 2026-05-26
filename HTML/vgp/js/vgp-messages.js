@@ -250,9 +250,18 @@ async function renderMsg(msg) {
   const msgKey = isRoom ? roomKey : activeChatKey;
   const rawContent = msg.content && msg.content.startsWith('ENC:') ? await decryptText(msg.content, msgKey) : (msg.content || '');
   const decryptFailed = rawContent === '[falscher Schlüssel]';
-  const content = decryptFailed ? '🔒' : rawContent;
+  let content = decryptFailed ? '🔒' : rawContent;
+  // Leading invisible size markers (from "/N emoji") → scale 2–5; strip them before display.
+  let jumboScale = 0;
+  if (!decryptFailed) {
+    const mk = content.match(/^(\u2063+)/);
+    if (mk) { jumboScale = Math.min(5, mk[1].length); content = content.slice(mk[1].length); }
+  }
   // Emoji-only message (1–3) → render big, no bubble (WhatsApp/Signal style)
-  if (!decryptFailed) { const ec = emojiOnlyCount(content); if (ec >= 1 && ec <= 3) div.classList.add('jumbo'); }
+  if (!decryptFailed) {
+    const ec = emojiOnlyCount(content);
+    if (ec >= 1 && ec <= 3) { div.classList.add('jumbo'); if (jumboScale >= 2) div.style.setProperty('--jx', jumboScale); }
+  }
   // Anti-impersonation: the signature is bound to recipient (1:1) or room (group). For a 1:1 the
   // signer must also be the expected peer/me; in the room any valid member key is fine (the displayed
   // sender name is resolved from the pubkey → forging someone else's name is not possible).
@@ -429,6 +438,8 @@ msgInput.addEventListener('input', () => { updateSendBtn(); refreshCmdBox(); sen
 msgInput.addEventListener('blur', () => setTimeout(hideCmdBox, 120));
 sendBtn.onclick = () => sendMsg();
 
+// Invisible size marker for "/N emoji" jumbo: U+2063 (INVISIBLE SEPARATOR), repeated N times, prepended.
+const JUMBO_MARK = '\u2063';
 // Text emoticons → emoji, applied on send so the stored message holds real emoji unicode.
 const EMOTICONS = {
   ':-)':'🙂', ':)':'🙂', ':-D':'😃', ':D':'😃', ';-)':'😉', ';)':'😉',
@@ -459,7 +470,13 @@ async function sendMsg() {
     }
     content = cmd.text;                  // phrase command → send the canned text below
   }
+  // "/N <emoji>" (N=2–5) → send that emoji N× big. Strip the prefix before emoticon conversion
+  // (so /3:-) works), then prepend N invisible markers so the size travels E2E (old clients: invisible).
+  let jumboScale = 0;
+  const sm = content.match(/^\/([2-5])\s*(.+)$/s);
+  if (sm) { jumboScale = +sm[1]; content = sm[2].trim(); }
   content = emoticonsToEmoji(content);   // :-) → 🙂 etc. (commands already carry real emoji)
+  if (jumboScale) { const n = emojiOnlyCount(content); if (n >= 1 && n <= 3) content = JUMBO_MARK.repeat(jumboScale) + content; }
   // Group room → encrypt once with the shared roomKey, one row addressed to the group (room_id).
   if (activeRoom) {
     const encrypted = await encryptText(content, roomKey);
