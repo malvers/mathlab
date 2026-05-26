@@ -493,6 +493,9 @@
         let skyView = 1;        // 0 = pol-wheel (pole-centred), 1 = city dome (alt-az horizon); toggled by 'v'. Default: dome.
         let starLangDE = true;  // constellation labels: true = German, false = Latin (toggled by 'n')
         let starHover = { x: 0, y: 0, on: false };  // pointer pos (canvas px) for the constellation hover-highlight (planetarium mode)
+        let skyZoom = 1;  // planetarium zoom factor (mouse wheel / two-finger pinch); >1 = zoomed in
+        let skyInfoClosed = false;  // user dismissed the planetarium info box (re-shown when the planetarium is re-opened)
+        let _prevSkyTarget = 0;     // edge-detect planetarium open to reset skyInfoClosed
         let autoRotation = 0;
         let autoRotationEnabled = false;
         let isMouseDown = false;
@@ -633,7 +636,7 @@
 
             // Half-circle anchored at the left-edge hamburger: items fan out to the right (−90°…+90°).
             function open() {
-                const H = 260, cxC = 56, rx = 164, ry = 70;   // flat wide ellipse (rx > ry): tight in y, no overlap with the 108×44 buttons
+                const H = 260, cxC = 56, bulge = 120, rowGap = 56;  // even vertical gaps + a gentle sin bulge to the right (rowGap > button height ⇒ never overlaps)
                 stack.style.left = '8px';
                 stack.style.top  = (window.innerHeight / 2 - H / 2) + 'px';
                 refreshLabels();
@@ -642,9 +645,9 @@
                 const btns = Array.from(stack.querySelectorAll('.mini-btn'));
                 const n = btns.length;
                 btns.forEach((b, i) => {
-                    const angle = -Math.PI / 2 + (n > 1 ? (i / (n - 1)) : 0.5) * Math.PI; // top → right → bottom
-                    b.style.left = (cxC + Math.cos(angle) * rx) + 'px';
-                    b.style.top  = (H / 2 + Math.sin(angle) * ry) + 'px';
+                    const t = n > 1 ? i / (n - 1) : 0.5;                          // 0 (top) … 1 (bottom)
+                    b.style.left = (cxC + Math.sin(t * Math.PI) * bulge) + 'px';  // ends flush left, middle bulges right
+                    b.style.top  = (H / 2 + (i - (n - 1) / 2) * rowGap) + 'px';   // equal vertical gaps
                 });
             }
             function close() {
@@ -690,6 +693,9 @@
             if (bDir)   bDir.addEventListener('click',   () => { setDirection(!CW);               refreshLabels(); });
             if (bToday) bToday.addEventListener('click', () => { debugDayOffset = 0; });
         })();
+
+        // Planetarium info box: ✕ closes it (stays closed until the planetarium is re-opened).
+        document.getElementById('sky-info-x')?.addEventListener('click', () => { skyInfoClosed = true; });
 
         function getMouseAngle(e) {
             const rect = canvas.getBoundingClientRect();
@@ -1040,7 +1046,26 @@
         canvas.addEventListener('mousemove', (e) => setStarHover(e.clientX, e.clientY));
         canvas.addEventListener('mouseleave', () => { starHover.on = false; });
         canvas.addEventListener('touchstart', (e) => { if (e.touches.length) setStarHover(e.touches[0].clientX, e.touches[0].clientY); }, { passive: true });
-        canvas.addEventListener('touchmove',  (e) => { if (e.touches.length) setStarHover(e.touches[0].clientX, e.touches[0].clientY); }, { passive: true });
+        canvas.addEventListener('touchmove',  (e) => { if (e.touches.length === 1) setStarHover(e.touches[0].clientX, e.touches[0].clientY); }, { passive: true });
+
+        // --- Planetarium zoom: mouse wheel + two-finger pinch (only while the planetarium is active) ---
+        canvas.addEventListener('wheel', (e) => {
+            if (!skyTarget) return;                                  // outside planetarium: leave the wheel alone
+            e.preventDefault();
+            skyZoom = Math.max(0.4, Math.min(12, skyZoom * Math.exp(-e.deltaY * 0.0015)));  // scroll up = zoom in
+        }, { passive: false });
+        let pinchDist0 = 0, pinchZoom0 = 1;
+        const pinchSpan = (e) => Math.hypot(e.touches[0].clientX - e.touches[1].clientX,
+                                            e.touches[0].clientY - e.touches[1].clientY);
+        canvas.addEventListener('touchstart', (e) => {
+            if (skyTarget && !window.useGlobe && e.touches.length === 2) { pinchDist0 = pinchSpan(e) || 1; pinchZoom0 = skyZoom; }
+        }, { passive: true });
+        canvas.addEventListener('touchmove', (e) => {
+            if (skyTarget && !window.useGlobe && e.touches.length === 2 && pinchDist0) {
+                skyZoom = Math.max(0.4, Math.min(12, pinchZoom0 * (pinchSpan(e) / pinchDist0)));
+                e.preventDefault();
+            }
+        }, { passive: false });
 
         // --- Render helpers extracted from drawFrame (intra-file; read/write top-level state directly) ---
         function drawNumbersRing(r) {
@@ -1876,7 +1901,7 @@
             const a = 0.35 + 0.65 * skyT;                            // dim behind the clock; full in sky mode
             const lst = siderealTimeDeg(getDisplayTime(), skyLon);   // skyLon eases toward the selected city → smooth pan
             const dome = skyView >= 0.5;
-            const Rdome = Math.max(w, h) * 0.62;                     // horizon radius — large enough that the horizon ring sits past the window corners → sky fills the whole window
+            const Rdome = Math.max(w, h) * 0.62 * skyZoom;           // horizon radius (× zoom) — large enough that the horizon ring sits past the window corners → sky fills the whole window
 
             let proj;                                                // (ra,dec) → [x, y, visible]
             if (dome) {
@@ -1892,7 +1917,7 @@
                 };
             } else {
                 const north = !CW;                                   // CCW → north celestial pole; CW → south
-                const Req = Math.max(w, h) * 0.62;
+                const Req = Math.max(w, h) * 0.62 * skyZoom;
                 proj = (ra, dec) => {
                     const colat = north ? (90 - dec) : (90 + dec);
                     const rr = (colat / 90) * Req;
@@ -1945,8 +1970,8 @@
                 }
             }
             ctx.lineWidth = 1;
-            for (const con of CONSTELLATION_LINES) {                 // figure stars (path vertices; hovered one in red)
-                ctx.fillStyle = (con.id === hoverId) ? HL : `rgba(235, 242, 255, ${a})`;
+            for (const con of CONSTELLATION_LINES) {                 // figure stars (path vertices; hovered one in cyan)
+                ctx.fillStyle = (con.id === hoverId) ? `rgba(0, 210, 255, ${Math.max(a, 0.95)})` : `rgba(235, 242, 255, ${a})`;
                 for (const path of con.paths) {
                     for (let i = 0; i < path.length; i += 2) {
                         const p = proj(path[i], path[i + 1]);
@@ -1962,6 +1987,7 @@
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
                 const _nm = (starLangDE && typeof CONSTELLATION_NAMES_DE !== 'undefined') ? CONSTELLATION_NAMES_DE : CONSTELLATION_NAMES;
+                const labels = [];
                 for (const con of CONSTELLATION_LINES) {
                     let sx = 0, sy = 0, n = 0;
                     for (const path of con.paths) {
@@ -1970,10 +1996,19 @@
                             if (p[2]) { sx += p[0]; sy += p[1]; n++; }
                         }
                     }
-                    if (n) {
-                        ctx.fillStyle = (con.id === hoverId) ? HL : `rgba(150, 185, 235, ${nameA})`;
-                        ctx.fillText(_nm[con.id] || con.id, sx / n, sy / n);
-                    }
+                    if (n) labels.push({ t: _nm[con.id] || con.id, x: sx / n, y: sy / n, hot: con.id === hoverId });
+                }
+                // (1) 50% dark-blue backdrop boxes behind the labels, no border
+                const padX = 6, boxH = 19;
+                ctx.fillStyle = `rgba(8, 20, 42, ${0.5 * a})`;
+                for (const L of labels) {
+                    const bw = ctx.measureText(L.t).width + padX * 2;
+                    ctx.fillRect(L.x - bw / 2, L.y - boxH / 2, bw, boxH);
+                }
+                // (2) the labels themselves, hovered one red
+                for (const L of labels) {
+                    ctx.fillStyle = L.hot ? `rgba(0, 210, 255, ${Math.max(nameA, 0.95)})` : `rgba(150, 185, 235, ${nameA})`;
+                    ctx.fillText(L.t, L.x, L.y);
                 }
             }
             ctx.restore();
@@ -2046,6 +2081,24 @@
             skyLon = ((skyLon + 180) % 360 + 360) % 360 - 180;
             const _skyTgtLat = (targetCity && (targetCity.globeLat ?? targetCity.lat)) || 0;
             skyLat += (_skyTgtLat - skyLat) * 0.08;   // dome tilts smoothly toward the city's latitude
+
+            // Planetarium top-center info box: selected city + its local date & time.
+            if (skyTarget && !_prevSkyTarget) skyInfoClosed = false;   // reopening the planetarium re-shows it
+            _prevSkyTarget = skyTarget;
+            const _sib = document.getElementById('sky-info');
+            if (_sib) {
+                if (skyTarget && targetCity && !skyInfoClosed) {
+                    _sib.style.display = 'block';
+                    const _cEl = document.getElementById('sky-info-city');
+                    const _dEl = document.getElementById('sky-info-date');
+                    const _tEl = document.getElementById('sky-info-time');
+                    if (_cEl) _cEl.textContent = targetCity.name || '';
+                    if (_dEl) _dEl.textContent = time.toLocaleDateString('de-DE', { timeZone: targetCity.tz, day: '2-digit', month: '2-digit', year: 'numeric' });
+                    if (_tEl) _tEl.textContent = time.toLocaleTimeString('de-DE', { timeZone: targetCity.tz, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                } else {
+                    _sib.style.display = 'none';
+                }
+            }
 
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             drawStarfield(w, h, cx, cy);   // celestial backdrop behind everything (pol-wheel)
