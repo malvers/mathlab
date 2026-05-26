@@ -2226,13 +2226,14 @@
             }
             // Ecliptic — the Sun/Moon/planet highway; faint dashed arc, broken at the horizon.
             ctx.save();
+            if (dome) { ctx.beginPath(); ctx.arc(cx, cy, Rdome, 0, Math.PI * 2); ctx.clip(); }   // so it reaches exactly to the horizon
             ctx.setLineDash([4, 4]);
             ctx.strokeStyle = `rgba(245, 194, 66, ${a * 0.5})`;
             ctx.lineWidth = 1.4;
             let _ePrev = null;
             for (const _ep of ECLIPTIC_PTS) {
                 const q = proj(_ep[0], _ep[1]);
-                if (_ePrev && _ePrev[2] && q[2]) { ctx.beginPath(); ctx.moveTo(_ePrev[0], _ePrev[1]); ctx.lineTo(q[0], q[1]); ctx.stroke(); }
+                if (_ePrev && (_ePrev[2] || q[2])) { ctx.beginPath(); ctx.moveTo(_ePrev[0], _ePrev[1]); ctx.lineTo(q[0], q[1]); ctx.stroke(); }
                 _ePrev = q;
             }
             ctx.restore();
@@ -2314,6 +2315,8 @@
                     ctx.fillText(L.t, L.x, L.y);
                 }
             }
+            // Horizon fade: bodies fade out over the last ~5° as they set (and in as they rise) instead of popping.
+            const horizonFade = (px, py) => dome ? Math.max(0, Math.min(1, (Rdome - Math.hypot(px - cx, py - cy)) / (Rdome * 0.06))) : 1;
             // Planets (Schlyter ephemeris): bright coloured markers + names; they sit on the ecliptic and drift over days.
             if (typeof planetPositions === 'function') {
                 const _pls = planetPositions(getDisplayTime());
@@ -2323,14 +2326,15 @@
                 for (const _pl of _pls) {
                     const _pp = proj(_pl.ra, _pl.dec);
                     if (!_pp[2]) continue;
+                    const _f = horizonFade(_pp[0], _pp[1]);
                     ctx.save();
                     ctx.shadowColor = _pl.color;
                     ctx.shadowBlur = 8;
-                    ctx.globalAlpha = a;
+                    ctx.globalAlpha = a * _f;
                     ctx.fillStyle = _pl.color;
                     ctx.beginPath(); ctx.arc(_pp[0], _pp[1], 2.8, 0, Math.PI * 2); ctx.fill();
                     ctx.restore();
-                    ctx.fillStyle = `rgba(245, 194, 66, ${a})`;   // λ orange (CLAUDE.md palette)
+                    ctx.fillStyle = `rgba(245, 194, 66, ${a * _f})`;   // λ orange (CLAUDE.md palette)
                     ctx.fillText(_pl.name, _pp[0], _pp[1] + 5);
                 }
             }
@@ -2339,12 +2343,13 @@
                 const _su = sunPosition(getDisplayTime());
                 const _sp = proj(_su.ra, _su.dec);
                 if (_sp[2]) {
+                    const _f = horizonFade(_sp[0], _sp[1]);
                     ctx.save();
-                    ctx.shadowColor = 'rgba(255, 210, 90, 0.9)'; ctx.shadowBlur = 16; ctx.globalAlpha = a;
+                    ctx.shadowColor = 'rgba(255, 210, 90, 0.9)'; ctx.shadowBlur = 16; ctx.globalAlpha = a * _f;
                     ctx.fillStyle = 'rgba(255, 224, 120, 1)';
                     ctx.beginPath(); ctx.arc(_sp[0], _sp[1], 6, 0, Math.PI * 2); ctx.fill();
                     ctx.restore();
-                    ctx.fillStyle = `rgba(245, 194, 66, ${a})`;
+                    ctx.fillStyle = `rgba(245, 194, 66, ${a * _f})`;
                     ctx.font = '600 10px Orbitron'; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
                     ctx.fillText('Sonne', _sp[0], _sp[1] + 9);
                 }
@@ -2353,10 +2358,11 @@
                 const _mo = moonPosition(getDisplayTime());
                 const _mp = proj(_mo.ra, _mo.dec);
                 if (_mp[2]) {
+                    const _f = horizonFade(_mp[0], _mp[1]);
                     let _ba = -Math.PI / 2;     // bright limb faces the Sun's on-screen direction
                     if (typeof sunPosition === 'function') { const _s2 = sunPosition(getDisplayTime()), _s2p = proj(_s2.ra, _s2.dec); _ba = Math.atan2(_s2p[1] - _mp[1], _s2p[0] - _mp[0]); }
-                    drawMoonPhase(ctx, _mp[0], _mp[1], 7, _mo.illum, _ba, a);
-                    ctx.fillStyle = `rgba(220, 230, 245, ${a})`;
+                    drawMoonPhase(ctx, _mp[0], _mp[1], 7, _mo.illum, _ba, a * _f);
+                    ctx.fillStyle = `rgba(220, 230, 245, ${a * _f})`;
                     ctx.font = '600 10px Orbitron'; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
                     ctx.fillText('Mond', _mp[0], _mp[1] + 10);
                 }
