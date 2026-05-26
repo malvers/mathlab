@@ -72,7 +72,7 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,system-ui,sans-serif;backgroun
 .contact:hover{background:rgba(var(--vgp-accent-rgb),.06)}
 .contact.active{background:var(--vgp-selected)}
 .contact.room.active{background:var(--vgp-broadcast-box)}  /* "an alle" selected → orange box (broadcast warning) */
-.contact.room.active .nm{color:var(--vgp-chat)}  /* dark text on the orange box */
+.contact.room.active .nm{color:#1c1402}  /* warm-neutral dark on the orange box (no blue → no shimmer) */
 /* collapsible group section header in the sidebar (one per group I'm in) */
 .grp-head{display:flex;align-items:center;gap:7px;margin:14px 12px 2px;padding:4px 6px;cursor:pointer;color:var(--vgp-text)}
 .grp-head:first-child{margin-top:6px}
@@ -150,6 +150,7 @@ img.joypixels{display:inline-block;height:1em;width:1em;vertical-align:-0.12em;m
 .contact .c-meta{flex-direction:column;align-items:flex-end;gap:5px}
 .contact .c-time,.grp-head .c-time{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:11px;line-height:1;color:rgba(var(--vgp-text-rgb),.45);white-space:nowrap}
 .contact .c-time.unread,.grp-head .c-time.unread{color:var(--vgp-green)}
+.contact.room.active .c-time{color:rgba(28,20,2,.8)}  /* dark time/date on the orange box (no faint light-on-orange glow) */
 /* Green unread indicator — shows the number of new messages from this contact */
 .contact .c-badge,.grp-head .c-badge{flex:0 0 auto;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--vgp-green);color:var(--vgp-badge-ink);font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:11px;font-weight:700;line-height:1;display:flex;align-items:center;justify-content:center;text-align:center}
 .grp-head .c-meta{margin-left:auto}
@@ -212,13 +213,13 @@ img.joypixels{display:inline-block;height:1em;width:1em;vertical-align:-0.12em;m
 #input-row{display:flex;gap:8px;padding:12px;background:var(--vgp-bg2);align-items:center}
 /* Wrapper keeps the emoji button inside the message field, independent of the send button */
 .msg-field-wrap{flex:1;position:relative;display:flex}
-.msg-field-wrap textarea{flex:1;padding:10px 14px;border:none;border-radius:12px;background:var(--vgp-field);color:var(--vgp-text2);font-size:14px;font-family:inherit;line-height:1.4;resize:none;overflow:hidden}
+.msg-field-wrap textarea{flex:1;padding:10px 14px;border:none;border-radius:12px;background:var(--vgp-field);color:var(--vgp-text2);font-family:'Helvetica Neue',Helvetica,Arial,system-ui,sans-serif;font-size:14.5px;font-weight:450;line-height:1.32;resize:none;overflow:hidden}
 .msg-field-wrap textarea::placeholder{color:rgba(var(--vgp-accent-rgb),.3)}
 .msg-field-wrap textarea:disabled{opacity:.45;cursor:not-allowed}
 .msg-field-wrap textarea:focus{outline:none;border-color:rgba(var(--vgp-accent-rgb),.25)}
 /* broadcasting to the whole group ("an alle") → tint the compose field dark red as a warning */
-#app.room-mode .msg-field-wrap textarea{background:var(--vgp-broadcast-field);color:var(--vgp-chat)}
-#app.room-mode .msg-field-wrap textarea::placeholder{color:rgba(8,16,28,.85)}
+#app.room-mode .msg-field-wrap textarea{background:var(--vgp-broadcast-field);color:#1c1402}
+#app.room-mode .msg-field-wrap textarea::placeholder{color:rgba(28,20,2,.85)}
 #msg-emoji{flex:0 0 auto;width:44px;height:44px;border:none;border-radius:50%;background:transparent;font-size:36px;line-height:44px;cursor:pointer;padding:0;text-align:center}
 #msg-emoji:focus{outline:none}
 /* Send button — visible only when message field has text */

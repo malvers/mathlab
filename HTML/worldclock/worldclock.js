@@ -488,8 +488,8 @@
         let debugDayOffset = 0; // DEBUG: step the displayed date (Arrow keys) to watch the Moon, in days
         let skyT = 0;           // planetarium mode 0…1 (0 = clock + dim stars, 1 = clock hidden + full stars); toggled by 's'
         let skyTarget = 0;      // animation target for skyT (0/1), toggled by the 's' key
-        let skyLon = 0;         // animated sky longitude (deg) — eases toward the selected city for a smooth sky pan
-        let skyLat = 0;         // animated sky latitude (deg) — for the city-dome (alt-az) view
+        let skyLon = (localCity && (localCity.globeLon ?? localCity.lon)) || 0;  // eases toward the selected city; starts on the local-timezone city (Dresden)
+        let skyLat = (localCity && (localCity.globeLat ?? localCity.lat)) || 0;  // for the city-dome (alt-az) view
         let skyView = 1;        // 0 = pol-wheel (pole-centred), 1 = city dome (alt-az horizon); toggled by 'v'. Default: dome.
         let starLangDE = true;  // constellation labels: true = German, false = Latin (toggled by 'n')
         let starHover = { x: 0, y: 0, on: false };  // pointer pos (canvas px) for the constellation hover-highlight (planetarium mode)
@@ -541,7 +541,7 @@
 
         let selectedCity = null; // Currently clicked city
         let hoveredCity = null; // New for hover preview
-        let targetCity = null;  // Last city to show during fade-out
+        let targetCity = localCity || null;  // Last city to show during fade-out; default = local-timezone city (Dresden) so the planetarium opens oriented + labelled
         let displayAlpha = 0;   // For smooth fade in/out
         let flagHitboxes = [];
         let hoveredFlagIndex = null; // Use index to distinguish same flags
@@ -1977,6 +1977,28 @@
                     }
                 }
             }
+            // Pulsating Polaris (north celestial pole star). In dome mode its altitude = observer latitude,
+            // so south of the equator proj() reports it below the horizon and it's skipped automatically.
+            {
+                const _pol = proj(37.95, 89.26);                     // Polaris: RA 2h31m ≈ 37.95°, Dec +89.26°
+                if (_pol[2]) {
+                    const _pt = (typeof performance !== 'undefined' ? performance.now() : Date.now()) / 1000;
+                    const _pulse = 0.5 + 0.5 * Math.sin(_pt * 2);    // 0…1, ~3 s cycle
+                    ctx.save();
+                    ctx.shadowColor = `rgba(150, 200, 255, ${a})`;
+                    ctx.shadowBlur = 5 + _pulse * 11;
+                    ctx.fillStyle = `rgba(245, 250, 255, ${a * (0.7 + 0.3 * _pulse)})`;
+                    ctx.beginPath();
+                    ctx.arc(_pol[0], _pol[1], 2.4 + _pulse * 2.6, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.restore();
+                    ctx.fillStyle = `rgba(200, 220, 245, ${a * (0.45 + 0.5 * _pulse)})`;   // tiny label centred below the star, pulses with it
+                    ctx.font = '8px Orbitron';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'top';
+                    ctx.fillText(starLangDE ? 'POLARSTERN' : 'POLARIS', _pol[0], _pol[1] + 9);
+                }
+            }
             // Constellation names at each (visible) constellation's centroid — always on, +36% size, hovered one red.
             const nameA = a * 0.85;   // brightness tracks the stars (dim behind clock, bright in sky mode)
             if (nameA > 0.02 && typeof CONSTELLATION_NAMES !== 'undefined') {
@@ -2116,7 +2138,7 @@
                     }
                     const _tEl = document.getElementById('sky-info-time');
                     if (_tEl && window.CyberClock) {
-                        if (!_tEl.dataset.mounted) { CyberClock.mount(_tEl, { size: '1.3rem' }); _tEl.dataset.mounted = '1'; }
+                        if (!_tEl.dataset.mounted) { CyberClock.mount(_tEl, { size: '1.05rem' }); _tEl.dataset.mounted = '1'; }
                         CyberClock.set(_tEl, time.toLocaleTimeString('de-DE', { timeZone: targetCity.tz, hour: '2-digit', minute: '2-digit', second: '2-digit' }));
                     }
                 } else {
