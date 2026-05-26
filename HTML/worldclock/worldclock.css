@@ -207,6 +207,25 @@ html body.clock-only-mode:not(:has(#side-panel)) {
 }
 #mini-stack.popup .mini-btn:hover  { background: rgba(0, 210, 255, 0.1); }
 #mini-stack.popup .mini-btn:active { transform: translate(-50%, -50%) scale(0.95); }
+/* two-line toggle buttons: both states stacked, active one cyan, the other dimmed */
+#mini-stack.popup .mini-btn.two-line {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1px;
+    line-height: 1.05;
+    padding: 0;
+}
+#mini-stack.popup .mini-btn.two-line .opt {
+    display: block;
+    white-space: nowrap;
+    color: rgba(150, 165, 185, 0.5);    /* inactive: dim grey */
+    transition: color 0.12s;
+}
+#mini-stack.popup .mini-btn.two-line .opt.is-active {
+    color: rgba(0, 210, 255, 0.95);     /* active: cyan */
+}
 /* HEUTE (date reset) in λ orange to set it apart from the cyan sky toggles */
 #mini-stack.popup #wc-mb-today {
     color: rgb(245, 194, 66);
