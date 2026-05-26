@@ -537,6 +537,15 @@
             }
             return pts;
         })();
+        // Zodiac signs: symbol (♈…♓) at the centre of each 30° ecliptic segment (RA/Dec on the ecliptic).
+        const ZODIAC = (() => {
+            const ecl = 23.4393 * Math.PI / 180, out = [];
+            for (let i = 0; i < 12; i++) {
+                const L = (i * 30 + 15) * Math.PI / 180, x = Math.cos(L), y = Math.sin(L) * Math.cos(ecl), z = Math.sin(L) * Math.sin(ecl);
+                out.push({ sym: String.fromCodePoint(0x2648 + i), ra: ((Math.atan2(y, x) * 180 / Math.PI) + 360) % 360, dec: Math.atan2(z, Math.hypot(x, y)) * 180 / Math.PI });
+            }
+            return out;
+        })();
         let STAR_FIELD = null;      // full colour star catalog (loaded async from starcatalog.json); null → figure-vertex fallback
         (function loadStarCatalog() {
             fetch('starcatalog.json').then(r => r.ok ? r.json() : Promise.reject(r.status)).then(data => {
@@ -2260,6 +2269,16 @@
                 _ePrev = q;
             }
             ctx.restore();
+            // Zodiac signs along the ecliptic (symbol at each 30° sign centre).
+            ctx.save();
+            ctx.fillStyle = `rgba(245, 210, 130, ${a * 0.7})`;
+            ctx.font = '16px sans-serif';   // astrological glyphs (Orbitron lacks them)
+            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            for (const z of ZODIAC) {
+                const q = proj(z.ra, z.dec);
+                if (q[2]) ctx.fillText(z.sym, q[0], q[1]);
+            }
+            ctx.restore();
             // Twilight glow at the Sun's position, fading from horizon into night (subtle — keeps the stars visible).
             if (dome && typeof sunPosition === 'function') {
                 const _sun = sunPosition(getDisplayTime());
@@ -2429,6 +2448,15 @@
                     ctx.restore();
                     _phi -= (_hw[i] / 2 + _hls) / _hr;
                 }
+                // Cardinal directions (N top, O/east left, S bottom, W/west right — view looking up; frame is fixed).
+                const _cr = Rdome - 16;
+                ctx.fillStyle = `rgba(150, 190, 240, ${a * 0.85})`;
+                ctx.font = '700 14px Orbitron';
+                ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                ctx.fillText('N', cx, cy - _cr);
+                ctx.fillText('S', cx, cy + _cr);
+                ctx.fillText('O', cx - _cr, cy);
+                ctx.fillText('W', cx + _cr, cy);
             }
             ctx.restore();
         }

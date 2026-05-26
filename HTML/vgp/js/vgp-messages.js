@@ -297,7 +297,7 @@ async function renderMsg(msg) {
     const mk = content.match(/^(\u2063+)/);
     if (mk) { jumboScale = Math.min(5, mk[1].length); content = content.slice(mk[1].length); }
   }
-  if (isSelf && !decryptFailed) div.dataset.raw = content;   // plain text for ArrowUp "edit last message"
+  if (!decryptFailed) div.dataset.raw = content;   // plain text (for ArrowUp edit + reply quotes)
   // Emoji-only message (1–3) → render big, no bubble (WhatsApp/Signal style)
   if (!decryptFailed) {
     const ec = emojiOnlyCount(content);
@@ -323,7 +323,15 @@ async function renderMsg(msg) {
   const timeStr = new Date(msg.created_at).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
   // Read receipts are per-pair → ticks only in 1:1, not in the group room.
   const ticks = (!isRoom && isSelf) ? (s => ` <span class="ticks ${s}">${tickGlyph(s)}</span>`)(tickState(msg.created_at)) : '';
-  div.innerHTML = `${sender}${badge}<span class="text">${emojiImg(escapeHtml(content))}</span><span class="time">${timeStr}${ticks}</span>`;
+  // Reply: show a quote of the referenced message (author + short preview), tap → jump to it.
+  let quote = '';
+  if (msg.reply_to) {
+    const orig = messagesEl.querySelector(`[data-id="${msg.reply_to}"]`);
+    const qa = orig ? (orig.classList.contains('self') ? 'Du' : nameForPubkey(orig.dataset.pub || '')) : '';
+    const qt = orig ? (orig.dataset.raw || '').slice(0, 90) : '…';
+    quote = `<div class="quote" data-to="${msg.reply_to}"><span class="q-au">${escapeHtml(qa)}</span>${emojiImg(escapeHtml(qt))}</div>`;
+  }
+  div.innerHTML = `${quote}${sender}${badge}<span class="text">${emojiImg(escapeHtml(content))}</span><span class="time">${timeStr}${ticks}</span>`;
   // Actions trigger (⋯ on hover; touch uses long-press) → reactions + (own) delete; plus a reactions container.
   if (msg.id != null) {
     const act = document.createElement('button');
@@ -588,6 +596,32 @@ msgActions.querySelector('.react-row').addEventListener('click', e => {
   closeMsgActions();
 });
 maDel.onclick = () => { const id = actionTargetId; closeMsgActions(); deleteMessage(id); };
+// --- Reply: quote a message, compose, jump-to-original ---
+let replyTo = null;
+const replyBar = document.getElementById('reply-bar');
+const replyTextEl = document.getElementById('reply-text');
+function startReply(bubble) {
+  if (!bubble || bubble.dataset.id == null) return;
+  replyTo = bubble.dataset.id;
+  const au = bubble.classList.contains('self') ? 'Du' : nameForPubkey(bubble.dataset.pub || '');
+  replyTextEl.textContent = '↩ ' + au + ': ' + (bubble.dataset.raw || '').slice(0, 80);
+  replyBar.classList.remove('hidden');
+  msgInput.focus();
+}
+function cancelReply() { replyTo = null; if (replyBar) replyBar.classList.add('hidden'); }
+document.getElementById('reply-cancel').onclick = cancelReply;
+document.getElementById('ma-reply').onclick = () => {
+  const b = messagesEl.querySelector(`[data-id="${actionTargetId}"]`);
+  closeMsgActions();
+  if (b) startReply(b);
+};
+// Tap a quote → scroll to the original + flash it
+messagesEl.addEventListener('click', e => {
+  const q = e.target.closest('.quote');
+  if (!q) return;
+  const orig = messagesEl.querySelector(`[data-id="${q.dataset.to}"]`);
+  if (orig) { orig.scrollIntoView({ behavior: 'smooth', block: 'center' }); orig.classList.remove('flash'); void orig.offsetWidth; orig.classList.add('flash'); }
+});
 document.addEventListener('click', e => {                   // click outside closes the popover
   if (!msgActions.classList.contains('hidden') && !msgActions.contains(e.target) && !e.target.closest('.act-btn')) closeMsgActions();
 });
@@ -756,10 +790,10 @@ async function sendMsg() {
     const encrypted = await encryptText(content, roomKey);
     const sig = await signText(encrypted + '|' + myGroupId); // signature bound to the room
     dbg(`Sende (Gruppen-Chat, verschlüsselt + signiert) an „${activeGroupLabel()}"`);
-    const { data, error } = await client.from('messages').insert({ content: encrypted, room_id: myGroupId, recipient_pubkey: null, pubkey: myPubB64, sig }).select().single();
+    const { data, error } = await client.from('messages').insert({ content: encrypted, room_id: myGroupId, recipient_pubkey: null, pubkey: myPubB64, sig, reply_to: replyTo }).select().single();
     if (error) { dbg('Sendefehler (Gruppen-Chat): ' + error.message); return; }
     dbg('Gruppen-Chat-Nachricht gesendet');
-    msgInput.value = ''; updateSendBtn();
+    msgInput.value = ''; updateSendBtn(); cancelReply();
     if (data) { try { await renderMsg(data); } catch (e) { dbg('Render-Fehler (ignoriert): ' + (e && e.message || e)); } messagesEl.scrollTop = messagesEl.scrollHeight; } // show own msg instantly; realtime echo is deduped by id
     return;
   }
@@ -771,10 +805,10 @@ async function sendMsg() {
   // Sign the ciphertext bound to the recipient's identity → receiver verifies it's really from us
   const sig = await signText(encrypted + '|' + activePeer.pubkey);
   dbg(`Sende (1:1, verschlüsselt + signiert) an ${activePeer.name}`);
-  const { data, error } = await client.from('messages').insert({ content: encrypted, recipient_pubkey: activePeer.pubkey, pubkey: myPubB64, sig }).select().single();
+  const { data, error } = await client.from('messages').insert({ content: encrypted, recipient_pubkey: activePeer.pubkey, pubkey: myPubB64, sig, reply_to: replyTo }).select().single();
   if (error) { dbg('Sendefehler: ' + error.message); return; }
   dbg('Nachricht gesendet');
-  msgInput.value = ''; updateSendBtn();
+  msgInput.value = ''; updateSendBtn(); cancelReply();
   if (data) { try { await renderMsg(data); } catch (e) { dbg('Render-Fehler (ignoriert): ' + (e && e.message || e)); } messagesEl.scrollTop = messagesEl.scrollHeight; } // show own msg instantly; realtime echo is deduped by id
 }
 
