@@ -636,7 +636,7 @@
 
             // Half-circle anchored at the left-edge hamburger: items fan out to the right (−90°…+90°).
             function open() {
-                const H = 260, cxC = 56, bulge = 120, rowGap = 56;  // even vertical gaps + a gentle sin bulge to the right (rowGap > button height ⇒ never overlaps)
+                const H = 260, cxC = 56, bulge = 106, rowGap = 50;  // even vertical gaps + a gentle sin bulge to the right (rowGap > button height ⇒ never overlaps); ends (top/bottom) sit at cxC, only the bulged middle three move with `bulge`
                 stack.style.left = '8px';
                 stack.style.top  = (window.innerHeight / 2 - H / 2) + 'px';
                 refreshLabels();
@@ -693,9 +693,6 @@
             if (bDir)   bDir.addEventListener('click',   () => { setDirection(!CW);               refreshLabels(); });
             if (bToday) bToday.addEventListener('click', () => { debugDayOffset = 0; });
         })();
-
-        // Planetarium info box: ✕ closes it (stays closed until the planetarium is re-opened).
-        document.getElementById('sky-info-x')?.addEventListener('click', () => { skyInfoClosed = true; });
 
         function getMouseAngle(e) {
             const rect = canvas.getBoundingClientRect();
@@ -1952,7 +1949,7 @@
             }
             const HL = `rgba(176, 36, 24, ${Math.max(a, 0.9)})`;     // Υ red highlight (project palette)
 
-            if (dome) {                                              // horizon circle
+            if (dome) {                                              // horizon circle (the "HORIZONT" label is drawn last → always on top)
                 ctx.strokeStyle = `rgba(120, 160, 220, ${a * 0.45})`;
                 ctx.beginPath(); ctx.arc(cx, cy, Rdome, 0, Math.PI * 2); ctx.stroke();
             }
@@ -1970,8 +1967,8 @@
                 }
             }
             ctx.lineWidth = 1;
-            for (const con of CONSTELLATION_LINES) {                 // figure stars (path vertices; hovered one in cyan)
-                ctx.fillStyle = (con.id === hoverId) ? `rgba(0, 210, 255, ${Math.max(a, 0.95)})` : `rgba(235, 242, 255, ${a})`;
+            for (const con of CONSTELLATION_LINES) {                 // figure stars (path vertices; hovered one bright white)
+                ctx.fillStyle = (con.id === hoverId) ? `rgba(255, 255, 255, ${Math.max(a, 0.95)})` : `rgba(235, 242, 255, ${a})`;
                 for (const path of con.paths) {
                     for (let i = 0; i < path.length; i += 2) {
                         const p = proj(path[i], path[i + 1]);
@@ -2009,6 +2006,26 @@
                 for (const L of labels) {
                     ctx.fillStyle = L.hot ? `rgba(0, 210, 255, ${Math.max(nameA, 0.95)})` : `rgba(150, 185, 235, ${nameA})`;
                     ctx.fillText(L.t, L.x, L.y);
+                }
+            }
+            // "HORIZONT" curved along the bottom of the horizon — drawn last so it always sits on top.
+            if (dome) {
+                ctx.fillStyle = `rgba(255, 255, 255, ${a * 0.7})`;
+                ctx.font = '9px Orbitron';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                const _hz = (starLangDE ? 'HORIZONT' : 'HORIZON'), _hls = 3, _hr = Rdome - 9;  // DE/Latin; baseline just inside the line
+                const _hw = [..._hz].map(c => ctx.measureText(c).width);
+                const _harc = _hw.reduce((s, w) => s + w, 0) + _hls * (_hz.length - 1);
+                let _phi = Math.PI / 2 + (_harc / 2) / _hr;          // start at the left, walk right (decreasing φ; bottom = π/2, y down)
+                for (let i = 0; i < _hz.length; i++) {
+                    _phi -= (_hw[i] / 2) / _hr;
+                    ctx.save();
+                    ctx.translate(cx + _hr * Math.cos(_phi), cy + _hr * Math.sin(_phi));
+                    ctx.rotate(_phi - Math.PI / 2);                  // tangent; tops point toward the centre → readable
+                    ctx.fillText(_hz[i], 0, 0);
+                    ctx.restore();
+                    _phi -= (_hw[i] / 2 + _hls) / _hr;
                 }
             }
             ctx.restore();
@@ -2091,10 +2108,17 @@
                     _sib.style.display = 'block';
                     const _cEl = document.getElementById('sky-info-city');
                     const _dEl = document.getElementById('sky-info-date');
-                    const _tEl = document.getElementById('sky-info-time');
                     if (_cEl) _cEl.textContent = targetCity.name || '';
-                    if (_dEl) _dEl.textContent = time.toLocaleDateString('de-DE', { timeZone: targetCity.tz, day: '2-digit', month: '2-digit', year: 'numeric' });
-                    if (_tEl) _tEl.textContent = time.toLocaleTimeString('de-DE', { timeZone: targetCity.tz, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                    if (_dEl) {
+                        const _wd = time.toLocaleDateString('de-DE', { timeZone: targetCity.tz, weekday: 'short' }).replace('.', '').toUpperCase();
+                        const _dm = time.toLocaleDateString('de-DE', { timeZone: targetCity.tz, day: 'numeric', month: 'long', year: 'numeric' });
+                        _dEl.textContent = _wd + ' ' + _dm;
+                    }
+                    const _tEl = document.getElementById('sky-info-time');
+                    if (_tEl && window.CyberClock) {
+                        if (!_tEl.dataset.mounted) { CyberClock.mount(_tEl, { size: '1.3rem' }); _tEl.dataset.mounted = '1'; }
+                        CyberClock.set(_tEl, time.toLocaleTimeString('de-DE', { timeZone: targetCity.tz, hour: '2-digit', minute: '2-digit', second: '2-digit' }));
+                    }
                 } else {
                     _sib.style.display = 'none';
                 }
