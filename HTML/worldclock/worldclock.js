@@ -127,6 +127,24 @@
         let globeIconHitbox = null;
         let dirIconHitbox = null;   // direction-toggle icon, drawn right of the globe icon
 
+        // Static red dot + pulsating ring at (lat, lng). Single source for the focus marker —
+        // every "city selected" path (startup, reset, click, search) calls this.
+        function setGlobeMarker(lat, lng) {
+            if (!globeInstance) return;
+            globeInstance
+                .pointsData([{ lat, lng }])
+                .pointLat('lat')
+                .pointLng('lng')
+                .pointColor(() => 'red')
+                .pointAltitude(0.01)
+                .pointRadius(0.6)
+                .ringsData([{ lat, lng }])
+                .ringColor(() => 'rgba(255, 0, 0, 1)')
+                .ringMaxRadius(5)
+                .ringPropagationSpeed(5)
+                .ringRepeatPeriod(1000);
+        }
+
         function initGlobeNow() {
             if (globeInstance) return;
             const stage = document.getElementById('globe-stage');
@@ -149,18 +167,7 @@
                         globeInstance.pointOfView({ lat: globeLat, lng: globeLon, altitude: fitGlobeAltitude() }, 1000);
                     }
                 });
-                globeInstance
-                    .pointsData([{ lat: globeLat, lng: globeLon }])
-                    .pointLat('lat')
-                    .pointLng('lng')
-                    .pointColor(() => 'red')
-                    .pointAltitude(0.01)
-                    .pointRadius(0.6)
-                    .ringsData([{ lat: globeLat, lng: globeLon }])
-                    .ringColor(() => 'rgba(255, 0, 0, 1)')
-                    .ringMaxRadius(5)
-                    .ringPropagationSpeed(5)
-                    .ringRepeatPeriod(1000);
+                setGlobeMarker(globeLat, globeLon);
             }
             syncGlobeSize();
             requestAnimationFrame(syncGlobeSize);
@@ -176,14 +183,7 @@
             lockedCity = _dresden;
             globeManuallyDragged = false;
             globeInstance.pointOfView({ lat: gLat, lng: gLon, altitude: fitGlobeAltitude() }, 1000);
-            globeInstance
-                .pointsData([{ lat: gLat, lng: gLon }])
-                .pointLat('lat').pointLng('lng')
-                .pointColor(() => 'red')
-                .pointAltitude(0.01).pointRadius(0.6)
-                .ringsData([{ lat: gLat, lng: gLon }])
-                .ringColor(() => 'rgba(255, 0, 0, 1)')
-                .ringMaxRadius(5).ringPropagationSpeed(5).ringRepeatPeriod(1000);
+            setGlobeMarker(gLat, gLon);
         };
 
         window.toggleGlobe = function() {
@@ -449,18 +449,7 @@
                                 globeInstance.pointOfView({ lat: globeLat, lng: globeLon, altitude: fitGlobeAltitude() }, 1000);
                             }
                         });
-                        globeInstance
-                            .pointsData([{ lat: globeLat, lng: globeLon }])
-                            .pointLat('lat')
-                            .pointLng('lng')
-                            .pointColor(() => 'red')
-                            .pointAltitude(0.01)
-                            .pointRadius(0.6)
-                            .ringsData([{ lat: globeLat, lng: globeLon }])
-                            .ringColor(() => 'rgba(255, 0, 0, 1)')
-                            .ringMaxRadius(5)
-                            .ringPropagationSpeed(5)
-                            .ringRepeatPeriod(1000);
+                        setGlobeMarker(globeLat, globeLon);
                     }
                     // Force exact size & re-sync after layout settles
                     syncGlobeSize();
@@ -586,22 +575,21 @@
             else if (e.key === 'ArrowDown')  debugDayOffset -= 1 / 24;
             else if (e.key === '0')          debugDayOffset = 0;
             else if (e.key === 's' || e.key === 'S') { skyTarget = skyTarget ? 0 : 1; e.preventDefault(); return; }  // planetarium toggle
-            else if (e.key === 'v' || e.key === 'V') { skyView = skyView ? 0 : 1; e.preventDefault(); return; }     // pol-wheel ↔ city dome
             else if (e.key === 'n' || e.key === 'N') { starLangDE = !starLangDE; e.preventDefault(); return; }       // labels: German ↔ Latin
             else return;
             e.preventDefault();
             try { DebugWindow.log('[debug] Datum-Offset ' + debugDayOffset.toFixed(3) + ' d → ' + getDisplayTime().toLocaleString('de-DE')); } catch (_) {}
         });
 
-        // --- Radial touch control popup (right-click / long-press) ---
-        // Standalone port of the voicerecorder neon popup; exposes the keyboard-only
-        // sky toggles (s/v/n/0) to touch devices. Same scope as the state lets above,
-        // so the buttons read/write skyTarget / skyView / starLangDE / debugDayOffset directly.
+        // --- Touch control menu: a left-edge hamburger opens a right-facing half-circle of buttons. ---
+        // Standalone (no imports); same scope as the state lets above, so the buttons read/write
+        // skyTarget / starLangDE / useGlobe / CW / debugDayOffset directly. (skyView is fixed at 1 =
+        // Stadthimmel/dome — the astronomically correct local sky — so there is no projection toggle.)
         (function () {
             const stack = document.getElementById('mini-stack');
             if (!stack) return;
+            const hamb   = document.getElementById('wc-menu-btn');
             const bSky   = document.getElementById('wc-mb-sky');
-            const bView  = document.getElementById('wc-mb-view');
             const bLang  = document.getElementById('wc-mb-lang');
             const bGlobe = document.getElementById('wc-mb-globe');
             const bDir   = document.getElementById('wc-mb-dir');
@@ -616,47 +604,67 @@
                 opts[1].classList.toggle('is-active', !firstActive);
             }
             function refreshLabels() {
-                setActive(bSky,   !!skyTarget);        // STERNE (on) ↔ UHR
-                setActive(bView,  !!skyView);          // STADTHIMMEL (dome) ↔ POL-RAD
+                setActive(bSky,   !!skyTarget);        // PLANETARIUM (on) ↔ UHR
                 setActive(bLang,  !!starLangDE);       // DEUTSCH ↔ LATEIN
                 setActive(bGlobe, !!window.useGlobe);  // GLOBUS ↔ UHR
                 setActive(bDir,   !!CW);               // SÜD-VIEW (CW) ↔ NORD-VIEW (CCW)
-                if (bToday) bToday.disabled = (debugDayOffset === 0);  // grey out when the clock already shows today
+                if (bToday) {
+                    const to = bToday.querySelectorAll('.opt');
+                    if (to.length >= 2) {
+                        if (debugDayOffset === 0) {           // already on today → show the date, active (cyan)
+                            const d = getDisplayTime();
+                            to[0].textContent = 'HEUTE';
+                            to[1].textContent = String(d.getDate()).padStart(2, '0') + '.' +
+                                                String(d.getMonth() + 1).padStart(2, '0') + '.' + d.getFullYear();
+                            bToday.classList.remove('action');
+                        } else {                              // stepped away → offer the reset (orange action)
+                            to[0].textContent = 'ZURÜCK ZU';
+                            to[1].textContent = 'HEUTE';
+                            bToday.classList.add('action');
+                        }
+                    }
+                }
             }
 
             function clearPositions() {
                 stack.querySelectorAll('.mini-btn').forEach(b => { b.style.left = ''; b.style.top = ''; });
             }
 
-            function open(clientX, clientY) {
-                const W = 320, H = 260, rx = 105, ry = 95;
-                const x = Math.max(8, Math.min(clientX - W / 2, window.innerWidth  - W - 8));
-                const y = Math.max(8, Math.min(clientY - H / 2, window.innerHeight - H - 8));
-                stack.style.left = x + 'px';
-                stack.style.top  = y + 'px';
+            // Half-circle anchored at the left-edge hamburger: items fan out to the right (−90°…+90°).
+            function open() {
+                const H = 260, cxC = 66, rx = 140, ry = 180;  // wide vertical spread so the 120×44 buttons never overlap; cxC clears the left edge
+                stack.style.left = '8px';
+                stack.style.top  = (window.innerHeight / 2 - H / 2) + 'px';
                 refreshLabels();
                 stack.classList.add('popup');
+                if (hamb) hamb.classList.add('open');
                 const btns = Array.from(stack.querySelectorAll('.mini-btn'));
                 const n = btns.length;
                 btns.forEach((b, i) => {
-                    const angle = (i / n) * 2 * Math.PI - Math.PI / 2; // start at top, go clockwise
-                    b.style.left = (W / 2 + Math.cos(angle) * rx) + 'px';
+                    const angle = -Math.PI / 2 + (n > 1 ? (i / (n - 1)) : 0.5) * Math.PI; // top → right → bottom
+                    b.style.left = (cxC + Math.cos(angle) * rx) + 'px';
                     b.style.top  = (H / 2 + Math.sin(angle) * ry) + 'px';
                 });
             }
-            function close() { stack.classList.remove('popup'); clearPositions(); }
+            function close() {
+                stack.classList.remove('popup');
+                if (hamb) hamb.classList.remove('open');
+                clearPositions();
+            }
+            function toggle() { stack.classList.contains('popup') ? close() : open(); }
 
-            // open via right-click (desktop)
-            window.addEventListener('contextmenu', e => { e.preventDefault(); open(e.clientX, e.clientY); });
+            // primary trigger: the hamburger (tap)
+            if (hamb) hamb.addEventListener('click', () => toggle());
 
-            // open via long-press (touch); a drag of >8px cancels it (so ring-rotation still works)
+            // alternates: right-click (desktop) + long-press (touch) open the same left-anchored menu
+            window.addEventListener('contextmenu', e => { e.preventDefault(); open(); });
             let lpTimer = null, lpX = 0, lpY = 0;
             document.addEventListener('touchstart', e => {
                 if (e.target.closest('button, input, label')) return;
                 if (stack.classList.contains('popup')) return;
                 const t = e.touches[0]; lpX = t.clientX; lpY = t.clientY;
                 clearTimeout(lpTimer);
-                lpTimer = setTimeout(() => { open(lpX, lpY); lpTimer = null; }, 550);
+                lpTimer = setTimeout(() => { open(); lpTimer = null; }, 550);
             }, { passive: true });
             document.addEventListener('touchmove', e => {
                 const t = e.touches[0];
@@ -665,15 +673,17 @@
             document.addEventListener('touchend',    () => { clearTimeout(lpTimer); lpTimer = null; });
             document.addEventListener('touchcancel', () => { clearTimeout(lpTimer); lpTimer = null; });
 
-            // close on button tap inside (after the action) or on a click/tap outside
+            // close on button tap inside (after the action) or on a click/tap outside (but not on the hamburger)
             stack.addEventListener('click', e => { if (e.target.tagName === 'BUTTON') close(); });
             document.addEventListener('mousedown', e => {
-                if (stack.classList.contains('popup') && !stack.contains(e.target)) close();
+                if (!stack.classList.contains('popup')) return;
+                if (stack.contains(e.target)) return;
+                if (hamb && hamb.contains(e.target)) return;   // the hamburger toggles itself
+                close();
             });
 
             // actions — mirror the keyboard handlers exactly
             if (bSky)   bSky.addEventListener('click',   () => { skyTarget = skyTarget ? 0 : 1; refreshLabels(); });
-            if (bView)  bView.addEventListener('click',  () => { skyView = skyView ? 0 : 1;     refreshLabels(); });
             if (bLang)  bLang.addEventListener('click',  () => { starLangDE = !starLangDE;       refreshLabels(); });
             if (bGlobe) bGlobe.addEventListener('click', () => { window.toggleGlobe();            refreshLabels(); });
             if (bDir)   bDir.addEventListener('click',   () => { setDirection(!CW);               refreshLabels(); });
@@ -724,18 +734,7 @@
                             if (globeInstance) globeInstance.pointOfView({ lat, lng, altitude: fitGlobeAltitude() }, 1000);
                         });
                         // Update red dot + pulsating ring to new city
-                        globeInstance
-                            .pointsData([{ lat, lng }])
-                            .pointLat('lat')
-                            .pointLng('lng')
-                            .pointColor(() => 'red')
-                            .pointAltitude(0.01)
-                            .pointRadius(0.6)
-                            .ringsData([{ lat, lng }])
-                            .ringColor(() => 'rgba(255, 0, 0, 1)')
-                            .ringMaxRadius(5)
-                            .ringPropagationSpeed(5)
-                            .ringRepeatPeriod(1000);
+                        setGlobeMarker(lat, lng);
                     }
                     return;
                 }
@@ -800,18 +799,7 @@
                         });
 
                         // Static red dot + pulsating ring (1s) at city location
-                        globeInstance
-                            .pointsData([{ lat: gLat, lng: gLon }])
-                            .pointLat('lat')
-                            .pointLng('lng')
-                            .pointColor(() => 'red')
-                            .pointAltitude(0.01)
-                            .pointRadius(0.6)
-                            .ringsData([{ lat: gLat, lng: gLon }])
-                            .ringColor(() => 'rgba(255, 0, 0, 1)')
-                            .ringMaxRadius(5)
-                            .ringPropagationSpeed(5)
-                            .ringRepeatPeriod(1000);
+                        setGlobeMarker(gLat, gLon);
                     }
                     hit = true;
                 }
@@ -2245,13 +2233,7 @@
                                 globeManuallyDragged = false;
                                 const gLat = item.city.globeLat, gLng = item.city.globeLon;
                                 globeInstance.pointOfView({ lat: gLat, lng: gLng, altitude: fitGlobeAltitude() }, 1000);
-                                globeInstance
-                                    .pointsData([{ lat: gLat, lng: gLng }])
-                                    .pointLat('lat').pointLng('lng')
-                                    .pointColor(() => 'red').pointAltitude(0.01).pointRadius(0.6)
-                                    .ringsData([{ lat: gLat, lng: gLng }])
-                                    .ringColor(() => 'rgba(255,0,0,1)')
-                                    .ringMaxRadius(5).ringPropagationSpeed(5).ringRepeatPeriod(1000);
+                                setGlobeMarker(gLat, gLng);
                             }
                         } else if (item.nominatim) {
                             // Zeitzone via timeapi.io nachladen
@@ -2262,13 +2244,7 @@
                                 lockedCity = loadingCity;
                                 globeManuallyDragged = false;
                                 globeInstance.pointOfView({ lat, lng: lon, altitude: fitGlobeAltitude() }, 1000);
-                                globeInstance
-                                    .pointsData([{ lat, lng: lon }])
-                                    .pointLat('lat').pointLng('lng')
-                                    .pointColor(() => 'red').pointAltitude(0.01).pointRadius(0.6)
-                                    .ringsData([{ lat, lng: lon }])
-                                    .ringColor(() => 'rgba(255,0,0,1)')
-                                    .ringMaxRadius(5).ringPropagationSpeed(5).ringRepeatPeriod(1000);
+                                setGlobeMarker(lat, lon);
                             }
                             DebugWindow.log(`▶ Search-Klick: ${name} (lat=${lat}, lon=${lon})`);
                             fetch(`https://timeapi.io/api/TimeZone/coordinate?latitude=${lat}&longitude=${lon}`)
