@@ -67,6 +67,7 @@ async function loadMessages() {
     messagesEl.innerHTML = '';
     for (const msg of rows) await renderMsg(msg);
     messagesEl.scrollTop = messagesEl.scrollHeight;
+    loadReactions();
     return;
   }
   if (!activePeer) { messagesEl.innerHTML = ''; activeReceipt = null; return; }
@@ -90,6 +91,7 @@ async function loadMessages() {
   messagesEl.innerHTML = '';
   for (const msg of rows) await renderMsg(msg);
   messagesEl.scrollTop = messagesEl.scrollHeight;
+  loadReactions();
 }
 
 // SECURITY / PRIVACY NOTE (bewusste Entscheidung beim pubkey-Routing, 2026-05-23):
@@ -154,6 +156,13 @@ function subscribeMessages() {
       const mk = raw.match(/^(\u2063+)/); if (mk) raw = raw.slice(mk[1].length);
       applyEdit(m.id, raw);
      } catch (e) { dbg('Realtime-UPDATE-Fehler (ignoriert): ' + (e && e.message || e)); }
+    })
+    // A reaction was added/changed/removed → refresh that message's chips live
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'reactions' }, payload => {
+      try {
+        const mid = (payload.new && payload.new.message_id) || (payload.old && payload.old.message_id);
+        if (mid != null && messagesEl.querySelector(`[data-id="${mid}"]`)) refreshReactionsFor(mid);
+      } catch (e) { dbg('Realtime-Reaktion-Fehler (ignoriert): ' + (e && e.message || e)); }
     })
     // A receipt changed → if it's the open peer acknowledging MY messages, recolor the ticks live
     .on('postgres_changes', { event: '*', schema: 'public', table: 'receipts' }, payload => {
@@ -315,12 +324,15 @@ async function renderMsg(msg) {
   // Read receipts are per-pair → ticks only in 1:1, not in the group room.
   const ticks = (!isRoom && isSelf) ? (s => ` <span class="ticks ${s}">${tickGlyph(s)}</span>`)(tickState(msg.created_at)) : '';
   div.innerHTML = `${sender}${badge}<span class="text">${emojiImg(escapeHtml(content))}</span><span class="time">${timeStr}${ticks}</span>`;
-  // Own messages get a delete affordance (✕ on hover; touch uses long-press, see below)
-  if (isSelf && msg.id != null) {
-    const del = document.createElement('button');
-    del.className = 'del-btn'; del.title = 'Für alle löschen'; del.setAttribute('aria-label', 'Nachricht löschen'); del.textContent = '✕';
-    del.onclick = e => { e.stopPropagation(); deleteMessage(msg.id); };
-    div.appendChild(del);
+  // Actions trigger (⋯ on hover; touch uses long-press) → reactions + (own) delete; plus a reactions container.
+  if (msg.id != null) {
+    const act = document.createElement('button');
+    act.className = 'act-btn'; act.title = 'Aktionen'; act.setAttribute('aria-label', 'Nachricht-Aktionen'); act.textContent = '⋯';
+    act.onclick = e => { e.stopPropagation(); openMsgActions(div); };
+    div.appendChild(act);
+    const reacts = document.createElement('div');
+    reacts.className = 'reacts';
+    div.appendChild(reacts);
   }
   messagesEl.appendChild(div);
 }
@@ -534,27 +546,133 @@ async function saveEdit(content) {
   applyEdit(id, content);
   cancelEdit();
 }
-// Delete a message for everyone (confirm → DELETE row; recipients drop it via the realtime DELETE handler).
+// Delete a message for everyone (confirm → DELETE row + its reactions; recipients drop it via the realtime DELETE handler).
 async function deleteMessage(id) {
   if (id == null) return;
   if (!(await uiConfirm('Diese Nachricht für alle löschen?', { okText: 'Löschen', danger: true }))) return;
   const { error } = await client.from('messages').delete().eq('id', id);
   if (error) { dbg('Löschen fehlgeschlagen (DELETE-Policy in Supabase vorhanden?): ' + error.message); return; }
+  try { await client.from('reactions').delete().eq('message_id', id); } catch (_) {}   // best-effort cleanup
   const el = messagesEl.querySelector(`[data-id="${id}"]`);
   if (el) el.remove();
   dbg('Nachricht gelöscht (id ' + id + ')');
 }
-// Touch: long-press on an own bubble → delete (desktop uses the hover ✕ button)
-let lpTimer = null;
-messagesEl.addEventListener('touchstart', e => {
-  const bubble = e.target.closest('.msg.self');
+
+// ===========================================================================
+// REACTIONS — emoji comments under a message (plaintext; content stays E2E)
+// ===========================================================================
+const msgActions = document.getElementById('msg-actions');
+const maDel = document.getElementById('ma-del');
+let actionTargetId = null;
+let reactionsByMsg = {};   // { message_id: [{pubkey, emoji}] }
+
+// Open the actions popover near a bubble (reactions for all; delete only for own).
+function openMsgActions(bubble) {
   if (!bubble || bubble.dataset.id == null) return;
-  lpTimer = setTimeout(() => deleteMessage(bubble.dataset.id), 550);
+  actionTargetId = bubble.dataset.id;
+  maDel.classList.toggle('hidden', !bubble.classList.contains('self'));
+  msgActions.classList.remove('hidden');                    // show first so we can measure
+  const r = bubble.getBoundingClientRect();
+  const aw = msgActions.offsetWidth, ah = msgActions.offsetHeight;
+  let top = r.top - ah - 6; if (top < 8) top = r.bottom + 6; // prefer above, else below
+  let left = bubble.classList.contains('self') ? r.right - aw : r.left;
+  left = Math.max(8, Math.min(left, window.innerWidth - aw - 8));
+  msgActions.style.top = top + 'px';
+  msgActions.style.left = left + 'px';
+}
+function closeMsgActions() { msgActions.classList.add('hidden'); actionTargetId = null; }
+msgActions.querySelector('.react-row').addEventListener('click', e => {
+  const btn = e.target.closest('button[data-emoji]');
+  if (!btn || actionTargetId == null) return;
+  toggleReaction(actionTargetId, btn.dataset.emoji);
+  closeMsgActions();
+});
+maDel.onclick = () => { const id = actionTargetId; closeMsgActions(); deleteMessage(id); };
+document.addEventListener('click', e => {                   // click outside closes the popover
+  if (!msgActions.classList.contains('hidden') && !msgActions.contains(e.target) && !e.target.closest('.act-btn')) closeMsgActions();
+});
+// Click an existing chip → toggle that reaction (delegated)
+messagesEl.addEventListener('click', e => {
+  const chip = e.target.closest('.react-chip');
+  if (!chip) return;
+  const bubble = chip.closest('.msg[data-id]');
+  if (bubble) toggleReaction(bubble.dataset.id, chip.dataset.emoji);
+});
+// Touch: long-press OR horizontal swipe on a bubble → actions popover (react/delete)
+let lpTimer = null, tStartX = 0, tStartY = 0, tBubble = null, tHandled = false;
+messagesEl.addEventListener('touchstart', e => {
+  tBubble = e.target.closest('.msg[data-id]'); tHandled = false;
+  if (!tBubble) return;
+  tStartX = e.touches[0].clientX; tStartY = e.touches[0].clientY;
+  lpTimer = setTimeout(() => { tHandled = true; openMsgActions(tBubble); }, 500);
 }, { passive: true });
-const clearLP = () => { clearTimeout(lpTimer); lpTimer = null; };
+messagesEl.addEventListener('touchmove', e => {
+  if (!tBubble || tHandled) { clearTimeout(lpTimer); return; }
+  const dx = e.touches[0].clientX - tStartX, dy = e.touches[0].clientY - tStartY;
+  if (Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy) * 1.5) {   // clear horizontal swipe → react
+    tHandled = true; clearTimeout(lpTimer); openMsgActions(tBubble);
+  } else if (Math.abs(dy) > 10) {
+    clearTimeout(lpTimer);                                        // it's a vertical scroll → no long-press
+  }
+}, { passive: true });
+const clearLP = () => { clearTimeout(lpTimer); lpTimer = null; tBubble = null; };
 messagesEl.addEventListener('touchend', clearLP);
-messagesEl.addEventListener('touchmove', clearLP);
 messagesEl.addEventListener('touchcancel', clearLP);
+// Mac/desktop: two-finger horizontal trackpad swipe over a bubble → actions popover (also stops back-nav)
+let wheelAcc = 0, wheelBubble = null, wheelCooldown = 0;
+messagesEl.addEventListener('wheel', e => {
+  if (Math.abs(e.deltaX) <= Math.abs(e.deltaY)) { wheelAcc = 0; return; }   // vertical scroll → leave it
+  const bubble = e.target.closest('.msg[data-id]');
+  if (!bubble) return;
+  e.preventDefault();
+  if (Date.now() < wheelCooldown) return;
+  if (wheelBubble !== bubble) { wheelBubble = bubble; wheelAcc = 0; }
+  wheelAcc += e.deltaX;
+  if (Math.abs(wheelAcc) > 60) { wheelAcc = 0; wheelCooldown = Date.now() + 700; openMsgActions(bubble); }
+}, { passive: false });
+
+// One reaction per person per message: same emoji again removes it, a different one replaces it.
+async function toggleReaction(msgId, emoji) {
+  const mine = (reactionsByMsg[msgId] || []).find(r => r.pubkey === myPubB64);
+  if (mine && mine.emoji === emoji) {
+    await client.from('reactions').delete().eq('message_id', msgId).eq('pubkey', myPubB64);
+  } else {
+    const { error } = await client.from('reactions').upsert({ message_id: msgId, pubkey: myPubB64, emoji }, { onConflict: 'message_id,pubkey' });
+    if (error) { dbg('Reaktion fehlgeschlagen (reactions-Tabelle/Policy da?): ' + error.message); return; }
+  }
+  await refreshReactionsFor(msgId);   // realtime also refreshes for everyone
+}
+// Re-fetch + redraw the reactions of a single message.
+async function refreshReactionsFor(msgId) {
+  const { data } = await client.from('reactions').select('pubkey,emoji').eq('message_id', msgId);
+  reactionsByMsg[msgId] = data || [];
+  renderReactions(msgId);
+}
+// Bulk-load reactions for every message currently on screen (called after loadMessages).
+async function loadReactions() {
+  const ids = [...messagesEl.querySelectorAll('.msg[data-id]')].map(el => el.dataset.id);
+  reactionsByMsg = {};
+  if (!ids.length) return;
+  const { data, error } = await client.from('reactions').select('message_id,pubkey,emoji').in('message_id', ids);
+  if (error) { dbg('Reaktionen laden fehlgeschlagen: ' + error.message); return; }
+  for (const r of (data || [])) (reactionsByMsg[r.message_id] = reactionsByMsg[r.message_id] || []).push({ pubkey: r.pubkey, emoji: r.emoji });
+  for (const id of ids) renderReactions(id);
+  messagesEl.scrollTop = messagesEl.scrollHeight;   // chips added height after the initial scroll → re-pin to bottom
+}
+// Draw the chip row (emoji + count, own highlighted) under one bubble.
+function renderReactions(msgId) {
+  const bubble = messagesEl.querySelector(`[data-id="${msgId}"]`);
+  if (!bubble) return;
+  let box = bubble.querySelector('.reacts');
+  if (!box) { box = document.createElement('div'); box.className = 'reacts'; bubble.appendChild(box); }
+  const list = reactionsByMsg[msgId] || [];
+  bubble.classList.toggle('has-reacts', list.length > 0);   // reserve bottom space (no CSS :has() → Safari-safe)
+  const counts = {}; let mineEmoji = null;
+  for (const r of list) { counts[r.emoji] = (counts[r.emoji] || 0) + 1; if (r.pubkey === myPubB64) mineEmoji = r.emoji; }
+  box.innerHTML = Object.entries(counts).map(([emoji, n]) =>
+    `<span class="react-chip${emoji === mineEmoji ? ' mine' : ''}" data-emoji="${escapeHtml(emoji)}">${emojiImg(escapeHtml(emoji))}${n > 1 ? ' ' + n : ''}</span>`
+  ).join('');
+}
 
 msgInput.onkeydown = e => {
   if (!cmdBox.classList.contains('hidden') && cmdMatches.length) {

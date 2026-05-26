@@ -680,7 +680,7 @@
             else if (e.key === '0')          debugDayOffset = 0;
             else if (e.key === 's' || e.key === 'S') { skyTarget = skyTarget ? 0 : 1; e.preventDefault(); return; }  // planetarium toggle
             else if (e.key === 'n' || e.key === 'N') { starLangDE = !starLangDE; e.preventDefault(); return; }       // labels: German ↔ Latin
-            else if (e.key === 'p' || e.key === 'P') { toggleLapse(); e.preventDefault(); return; }                  // time-lapse play/pause
+            else if (e.key === ' ') { toggleLapse(); e.preventDefault(); return; }                                   // time-lapse play/pause (Space)
             else return;
             e.preventDefault();
             try { DebugWindow.log('[debug] Datum-Offset ' + debugDayOffset.toFixed(3) + ' d → ' + getDisplayTime().toLocaleString('de-DE')); } catch (_) {}
@@ -2060,6 +2060,29 @@
         }
 
         // Draw the Moon at (x,y) radius r with its phase: dark disc + lit lune; the bright limb faces `brightAngle`.
+        // Real Moon texture (moon.png) with the phase: dim full disc (earthshine) + bright texture clipped to the lit lune.
+        function drawMoonImg(c, x, y, r, k, brightAngle, alpha) {
+            if (!moonReady) { drawMoonPhase(c, x, y, r, k, brightAngle, alpha); return; }   // fallback until the image loads
+            c.save();
+            c.translate(x, y);
+            c.rotate(brightAngle);                                   // lit limb → +x (toward the Sun)
+            c.save();                                                // earthshine: dim full disc
+            c.beginPath(); c.arc(0, 0, r, 0, Math.PI * 2); c.clip();
+            c.globalAlpha = alpha * 0.15;
+            c.drawImage(moonImg, -r, -r, 2 * r, 2 * r);
+            c.restore();
+            c.save();                                                // lit lune: full-bright texture
+            const b = r * (1 - 2 * k);
+            c.beginPath();
+            c.arc(0, 0, r, -Math.PI / 2, Math.PI / 2, false);
+            c.ellipse(0, 0, Math.abs(b), r, 0, Math.PI / 2, -Math.PI / 2, b > 0);
+            c.closePath(); c.clip();
+            c.globalAlpha = alpha;
+            c.drawImage(moonImg, -r, -r, 2 * r, 2 * r);
+            c.restore();
+            c.restore();
+        }
+
         function drawMoonPhase(c, x, y, r, k, brightAngle, alpha) {
             c.save();
             c.globalAlpha = alpha;
@@ -2294,8 +2317,10 @@
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
                 const _nm = (starLangDE && typeof CONSTELLATION_NAMES_DE !== 'undefined') ? CONSTELLATION_NAMES_DE : CONSTELLATION_NAMES;
-                const labels = [];
+                const labels = [], _seen = {};
                 for (const con of CONSTELLATION_LINES) {
+                    if (_seen[con.id]) continue;             // dedupe (Serpens "Ser" appears twice → count/label once)
+                    _seen[con.id] = 1;
                     const c = CON_CENTROIDS[con.id];
                     if (!c) continue;
                     const p = proj(c[0], c[1]);              // fixed centroid → smooth, no jump
@@ -2361,10 +2386,10 @@
                     const _f = horizonFade(_mp[0], _mp[1]);
                     let _ba = -Math.PI / 2;     // bright limb faces the Sun's on-screen direction
                     if (typeof sunPosition === 'function') { const _s2 = sunPosition(getDisplayTime()), _s2p = proj(_s2.ra, _s2.dec); _ba = Math.atan2(_s2p[1] - _mp[1], _s2p[0] - _mp[0]); }
-                    drawMoonPhase(ctx, _mp[0], _mp[1], 7, _mo.illum, _ba, a * _f);
-                    ctx.fillStyle = `rgba(220, 230, 245, ${a * _f})`;
+                    drawMoonImg(ctx, _mp[0], _mp[1], 9, _mo.illum, _ba, a * _f);
+                    ctx.fillStyle = `rgba(245, 194, 66, ${a * _f})`;   // λ orange like Sun/planets
                     ctx.font = '600 10px Orbitron'; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
-                    ctx.fillText('Mond', _mp[0], _mp[1] + 10);
+                    ctx.fillText('Mond', _mp[0], _mp[1] + 12);
                 }
             }
             // Shooting stars — occasional fading streaks (spawn only in planetarium; existing ones finish either way).
