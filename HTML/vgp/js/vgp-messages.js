@@ -273,6 +273,15 @@ function emojiOnlyCount(s) {
   return m ? m.length : 0;
 }
 
+// Light WhatsApp-style formatting on an ALREADY HTML-ESCAPED string: *bold* _italic_ ~strike~.
+function formatText(s) {
+  return s
+    .replace(/\*(?=\S)([^*\n]*?\S)\*/g, '<b>$1</b>')
+    .replace(/_(?=\S)([^_\n]*?\S)_/g, '<i>$1</i>')
+    .replace(/~(?=\S)([^~\n]*?\S)~/g, '<s>$1</s>')
+    .replace(/=(?=\S)([^=\n]*?\S)=/g, '<s>$1</s>');   // easy DE alternative to ~ for strikethrough
+}
+
 async function renderMsg(msg) {
   // Skip if this message id is already on screen (realtime INSERT + loadMessages can race)
   if (msg.id != null && messagesEl.querySelector(`[data-id="${msg.id}"]`)) return;
@@ -331,7 +340,7 @@ async function renderMsg(msg) {
     const qt = orig ? (orig.dataset.raw || '').slice(0, 90) : '…';
     quote = `<div class="quote" data-to="${msg.reply_to}"><span class="q-au">${escapeHtml(qa)}</span>${emojiImg(escapeHtml(qt))}</div>`;
   }
-  div.innerHTML = `${quote}${sender}${badge}<span class="text">${emojiImg(escapeHtml(content))}</span><span class="time">${timeStr}${ticks}</span>`;
+  div.innerHTML = `${quote}${sender}${badge}<span class="text">${emojiImg(formatText(escapeHtml(content)))}</span><span class="time">${timeStr}${ticks}</span>`;
   // Actions trigger (⋯ on hover; touch uses long-press) → reactions + (own) delete; plus a reactions container.
   if (msg.id != null) {
     const act = document.createElement('button');
