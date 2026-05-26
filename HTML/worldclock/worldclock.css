@@ -226,20 +226,56 @@ html body.clock-only-mode:not(:has(#side-panel)) {
 #mini-stack.popup .mini-btn.two-line .opt.is-active {
     color: rgba(0, 210, 255, 0.95);     /* active: cyan */
 }
-/* HEUTE (date reset) in λ orange to set it apart from the cyan sky toggles */
+/* HEUTE: contextual button (not a binary toggle), so both lines share one colour.
+   today     → cyan, shows "HEUTE" + the current date (informational)
+   not today → orange .action, shows "ZURÜCK ZU / HEUTE" (tap resets to today) */
 #mini-stack.popup #wc-mb-today {
+    color: rgba(0, 210, 255, 0.95);
+    border-color: rgba(0, 210, 255, 0.8);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5), 0 0 10px rgba(0, 210, 255, 0.25);
+}
+#mini-stack.popup #wc-mb-today.two-line .opt { color: rgba(0, 210, 255, 0.95); }
+#mini-stack.popup #wc-mb-today:hover { background: rgba(0, 210, 255, 0.1); }
+#mini-stack.popup #wc-mb-today.action {
     color: rgb(245, 194, 66);
     border-color: rgb(245, 194, 66);
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5), 0 0 10px rgba(245, 194, 66, 0.3);
 }
-#mini-stack.popup #wc-mb-today:hover { background: rgba(245, 194, 66, 0.12); }
-/* HEUTE greyed out + inert while the clock already shows today (nothing to reset) */
-#mini-stack.popup #wc-mb-today:disabled {
-    color: rgba(160, 170, 185, 0.45);
-    border-color: rgba(160, 170, 185, 0.3);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
-    cursor: default;
-    pointer-events: none;
+#mini-stack.popup #wc-mb-today.action.two-line .opt { color: rgb(245, 194, 66); }
+#mini-stack.popup #wc-mb-today.action:hover { background: rgba(245, 194, 66, 0.12); }
+/* Left-edge hamburger trigger (vertically centred): no frame, dezent; stays three bars (no X).
+   When the menu is open the bars turn full cyan with a soft glow. */
+#wc-menu-btn {
+    position: fixed;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 46px;
+    height: 46px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    padding: 0;
+    border: none;
+    background: none;
+    box-shadow: none;
+    cursor: pointer;
+    z-index: 9500;
+}
+#wc-menu-btn span {
+    display: block;
+    width: 24px;
+    height: 2px;
+    border-radius: 2px;
+    background: rgba(0, 210, 255, 0.5);     /* dezent */
+    transition: background 0.15s, box-shadow 0.15s;
+}
+#wc-menu-btn:hover span { background: rgba(0, 210, 255, 0.7); }
+#wc-menu-btn.open span {
+    background: rgba(0, 210, 255, 1);       /* selected: full cyan */
+    box-shadow: 0 0 6px rgba(0, 210, 255, 0.6);
 }
 /* --- Hide the shared mini-rail entirely (always) and reclaim its grid column. --- */
 /* Override stays lab-local: the central layout files are untouched. */
