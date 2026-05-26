@@ -222,6 +222,17 @@ async function checkAccountAlive() {
 // Fallback if identities isn't in the realtime publication: refresh + alive-check on focus
 window.addEventListener('focus', () => { if (chatReady) { loadContacts(); checkAccountAlive(); } });
 
+// Count emoji if the message is emoji-only (no other text); 0 otherwise. Used for "jumbo" rendering.
+function emojiOnlyCount(s) {
+  const t = (s || '').trim();
+  if (!t) return 0;
+  // strip every emoji component (pictographic, skin-tone, ZWJ, VS16, keycap) + whitespace
+  const rest = t.replace(/[\p{Extended_Pictographic}\p{Emoji_Modifier}\p{Emoji_Component}\u200D\uFE0F\u20E3\s]/gu, '');
+  if (rest !== '') return 0;                       // has real text → not emoji-only
+  const m = t.match(/\p{Extended_Pictographic}/gu);
+  return m ? m.length : 0;
+}
+
 async function renderMsg(msg) {
   // Skip if this message id is already on screen (realtime INSERT + loadMessages can race)
   if (msg.id != null && messagesEl.querySelector(`[data-id="${msg.id}"]`)) return;
@@ -240,6 +251,8 @@ async function renderMsg(msg) {
   const rawContent = msg.content && msg.content.startsWith('ENC:') ? await decryptText(msg.content, msgKey) : (msg.content || '');
   const decryptFailed = rawContent === '[falscher Schlüssel]';
   const content = decryptFailed ? '🔒' : rawContent;
+  // Emoji-only message (1–3) → render big, no bubble (WhatsApp/Signal style)
+  if (!decryptFailed) { const ec = emojiOnlyCount(content); if (ec >= 1 && ec <= 3) div.classList.add('jumbo'); }
   // Anti-impersonation: the signature is bound to recipient (1:1) or room (group). For a 1:1 the
   // signer must also be the expected peer/me; in the room any valid member key is fine (the displayed
   // sender name is resolved from the pubkey → forging someone else's name is not possible).
@@ -317,31 +330,54 @@ async function renameAccount(newRaw) {
 // COMMANDS — slash-command registry + autocomplete box
 // ===========================================================================
 // --- Slash-command registry — single source of truth for autocomplete + execution ---
+// Two command kinds share one registry + autocomplete:
+//   • action commands  → have run(): execute locally, send nothing
+//   • phrase commands   → have text: send that text as a normal (encrypted) message
+// hidden:true → still works when fully typed, but kept out of the autocomplete list.
 const CMD_LIST = [
-  { cmd: '/help',    desc: 'Befehlsübersicht anzeigen',        run: () => document.getElementById('help-panel').classList.remove('hidden') },
-  { cmd: '/stats',   desc: 'Belegten Speicher anzeigen',        run: () => showStats() },
-  { cmd: '/rename',  desc: 'Namen ändern (Chats bleiben)',       run: () => { const n = prompt('Neuer Name (Chats & Identität bleiben erhalten):', myNameEl.value || ''); if (n) renameAccount(n); } },
-  { cmd: '/logout',  desc: 'App sperren (Konto-Passwort nötig)', run: () => { sessionStorage.removeItem(SESSION_PWD_KEY); location.reload(); } }
-  // „Konto löschen" liegt jetzt im ⋮-Menü oben links (nicht mehr als Tippbefehl).
+  // Bare "/" alone is the quickest shortcut: sends "Ich bin unterwegs".
+  { cmd: '/',        desc: 'Ich bin unterwegs',                 text: 'Ich bin unterwegs', hidden: true },
+  { cmd: '/stats',   desc: 'Belegten Speicher anzeigen',        run: () => showStats(), hidden: true },
+  { cmd: '/rename',  desc: 'Namen ändern (Chats bleiben)',       run: () => { const n = prompt('Neuer Name (Chats & Identität bleiben erhalten):', myNameEl.value || ''); if (n) renameAccount(n); }, hidden: true },
+  { cmd: '/logout',  desc: 'App sperren (Konto-Passwort nötig)', run: () => { sessionStorage.removeItem(SESSION_PWD_KEY); location.reload(); }, hidden: true },
+  // „Konto löschen" liegt im ⋮-Menü oben links (nicht mehr als Tippbefehl).
+  // --- Phrase commands: type the command, hit Enter, and the text is sent ---
+  { cmd: '/hi',        desc: 'Hi, wie geht’s Dir?',            text: 'Hi, wie geht’s Dir?' },
+  { cmd: '/gm',        desc: 'Guten Morgen! ☀️',          text: 'Guten Morgen! ☀️' },
+  { cmd: '/gn',        desc: 'Schlaf gut! 🌙',            text: 'Schlaf gut! 🌙' },
+  { cmd: '/bb',        desc: 'Bis später! 👋',       text: 'Bis später! 👋' },
+  { cmd: '/lieb',      desc: 'Hab dich lieb ❤️',          text: 'Hab dich lieb ❤️' },
+  { cmd: '/danke',     desc: 'Vielen Dank! 🙏',          text: 'Vielen Dank! 🙏' },
+  { cmd: '/ok',        desc: 'Alles klar 👍',            text: 'Alles klar 👍' },
+  { cmd: '/komme',     desc: 'Bin gleich da!',                  text: 'Bin gleich da!' },
+  { cmd: '/spät',      desc: 'Wird heute später, nicht warten', text: 'Wird heute später, nicht warten' },
+  { cmd: '/essen',     desc: 'Essen ist fertig! 🍽️',           text: 'Essen ist fertig! 🍽️' },
+  { cmd: '/ruf',       desc: 'Ruf mich bitte mal an 📞',        text: 'Ruf mich bitte mal an 📞' },
+  { cmd: '/home',      desc: 'Bin zu Hause 🏠',                 text: 'Bin zu Hause 🏠' },
+  { cmd: '/einkauf',   desc: 'Soll ich was mitbringen? 🛒',     text: 'Soll ich was mitbringen? 🛒' },
+  { cmd: '/ja',        desc: 'Ja 👍',                           text: 'Ja 👍' },
+  { cmd: '/nein',      desc: 'Nein',                            text: 'Nein' },
+  { cmd: '/sorry',     desc: 'Sorry! 🙈',                       text: 'Sorry! 🙈' }
 ];
 const cmdBox = document.getElementById('cmd-box');
-let cmdMatches = [], cmdActive = -1;
+let cmdMatches = [], cmdActive = -1, cmdNavigated = false;
 
 function refreshCmdBox() {
   const v = msgInput.value;
   if (!v.startsWith('/')) return hideCmdBox();
-  cmdMatches = CMD_LIST.filter(c => c.cmd.startsWith(v.toLowerCase()));
+  cmdMatches = CMD_LIST.filter(c => !c.hidden && c.cmd.startsWith(v.toLowerCase()));
   if (!cmdMatches.length) return hideCmdBox();
-  cmdActive = 0;
+  cmdActive = 0; cmdNavigated = false;   // fresh list → no explicit pick yet
   cmdBox.innerHTML = cmdMatches.map((c, i) =>
     `<div class="cmd-item${i === 0 ? ' active' : ''}" role="option" data-i="${i}"><code>${c.cmd}</code><span>${escapeHtml(c.desc)}</span></div>`
   ).join('');
   cmdBox.classList.remove('hidden');
 }
-function hideCmdBox() { cmdBox.classList.add('hidden'); cmdMatches = []; cmdActive = -1; }
+function hideCmdBox() { cmdBox.classList.add('hidden'); cmdMatches = []; cmdActive = -1; cmdNavigated = false; }
 function markCmdActive() {
   [...cmdBox.children].forEach((el, i) => el.classList.toggle('active', i === cmdActive));
 }
+// Tab only completes the field (lets you edit before sending)
 function applyCmd(i) {
   if (i < 0 || i >= cmdMatches.length) return;
   msgInput.value = cmdMatches[i].cmd;
@@ -349,26 +385,40 @@ function applyCmd(i) {
   msgInput.focus();
   updateSendBtn();
 }
+// Click/touch or Arrow+Enter → fill the command and send it immediately
+function sendCmd(i) {
+  if (i < 0 || i >= cmdMatches.length) return;
+  msgInput.value = cmdMatches[i].cmd;
+  hideCmdBox();
+  sendMsg();
+}
 cmdBox.addEventListener('mousedown', e => {
-  // mousedown (not click) so the input doesn't lose focus before we apply
+  // mousedown (not click) so the input doesn't lose focus before we act
   const item = e.target.closest('.cmd-item');
-  if (item) { e.preventDefault(); applyCmd(+item.dataset.i); }
+  if (item) { e.preventDefault(); sendCmd(+item.dataset.i); }
 });
+// Quick way into the command list from an empty field: type "/" + open the popup
+function openCmd() { msgInput.value = '/'; msgInput.focus(); refreshCmdBox(); updateSendBtn(); }
+// Double-click in the (empty) input also opens the command list
+msgInput.addEventListener('dblclick', () => { if (!msgInput.value.trim()) openCmd(); });
 
 msgInput.onkeydown = e => {
   if (!cmdBox.classList.contains('hidden') && cmdMatches.length) {
-    if (e.key === 'ArrowUp') { e.preventDefault(); cmdActive = (cmdActive - 1 + cmdMatches.length) % cmdMatches.length; markCmdActive(); return; }
-    if (e.key === 'ArrowDown') { e.preventDefault(); cmdActive = (cmdActive + 1) % cmdMatches.length; markCmdActive(); return; }
+    if (e.key === 'ArrowUp') { e.preventDefault(); cmdActive = (cmdActive - 1 + cmdMatches.length) % cmdMatches.length; cmdNavigated = true; markCmdActive(); return; }
+    if (e.key === 'ArrowDown') { e.preventDefault(); cmdActive = (cmdActive + 1) % cmdMatches.length; cmdNavigated = true; markCmdActive(); return; }
     if (e.key === 'Tab') { e.preventDefault(); applyCmd(cmdActive); return; }
     if (e.key === 'Escape') { e.preventDefault(); hideCmdBox(); return; }
     if (e.key === 'Enter') {
       e.preventDefault();
-      // If the field already equals the active command, run it; otherwise complete it first
-      if (msgInput.value.toLowerCase() === cmdMatches[cmdActive].cmd) { hideCmdBox(); sendMsg(); }
-      else applyCmd(cmdActive);
+      // Bare "/" with no arrow-pick → its own shortcut: send "Ich bin unterwegs" (the "/" alias).
+      if (msgInput.value.trim() === '/' && !cmdNavigated) { hideCmdBox(); sendMsg(); return; }
+      // Otherwise send the highlighted match directly.
+      sendCmd(cmdActive);
       return;
     }
   }
+  // Tab in an empty field → jump straight into the command list (instead of moving focus away)
+  if (e.key === 'Tab' && !msgInput.value.trim()) { e.preventDefault(); openCmd(); return; }
   if (e.key === 'Enter') { e.preventDefault(); sendMsg(); }
 };
 
@@ -379,17 +429,37 @@ msgInput.addEventListener('input', () => { updateSendBtn(); refreshCmdBox(); sen
 msgInput.addEventListener('blur', () => setTimeout(hideCmdBox, 120));
 sendBtn.onclick = () => sendMsg();
 
+// Text emoticons → emoji, applied on send so the stored message holds real emoji unicode.
+const EMOTICONS = {
+  ':-)':'🙂', ':)':'🙂', ':-D':'😃', ':D':'😃', ';-)':'😉', ';)':'😉',
+  ':-(':'🙁', ':(':'🙁', ':-P':'😛', ':P':'😛', ':-p':'😛', ':p':'😛',
+  ':-O':'😮', ':O':'😮', ':-o':'😮', ":'(":'😢', ':-*':'😘', ':*':'😘',
+  'xD':'😆', 'XD':'😆', ':-/':'😕', ':/':'😕', 'B-)':'😎', '8-)':'😎',
+  ':-|':'😐', ':|':'😐', '</3':'💔', '<3':'❤️'
+};
+// Match a known emoticon only when it stands free (string start/space before, space/end after) → URLs etc. stay intact.
+const EMOTICON_RE = new RegExp(
+  '(^|\\s)(' + Object.keys(EMOTICONS)
+    .sort((a, b) => b.length - a.length)                       // longest first: :-) before :)
+    .map(k => k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|') +
+  ')(?=\\s|$)', 'g');
+function emoticonsToEmoji(s) { return s.replace(EMOTICON_RE, (m, pre, e) => pre + EMOTICONS[e]); }
+
 async function sendMsg() {
   hideCmdBox();
-  const content = msgInput.value.trim();
+  let content = msgInput.value.trim();
   if (!content) return;
   // Dispatch slash commands — no name required
   const cmd = CMD_LIST.find(c => c.cmd === content.toLowerCase());
   if (cmd) {
-    msgInput.value = ''; updateSendBtn();
-    cmd.run();
-    return;
+    if (cmd.run) {                       // action command → run locally, send nothing
+      msgInput.value = ''; updateSendBtn();
+      cmd.run();
+      return;
+    }
+    content = cmd.text;                  // phrase command → send the canned text below
   }
+  content = emoticonsToEmoji(content);   // :-) → 🙂 etc. (commands already carry real emoji)
   // Group room → encrypt once with the shared roomKey, one row addressed to the group (room_id).
   if (activeRoom) {
     const encrypted = await encryptText(content, roomKey);
