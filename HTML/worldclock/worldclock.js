@@ -35,6 +35,8 @@
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
         const container = document.getElementById('canvas-container');
+        const trailCanvas = document.createElement('canvas');   // offscreen layer for star trails (fades instead of clearing)
+        const trailCtx = trailCanvas.getContext('2d');
 
         function resizeCanvasToContainer() {
             const dpr = window.devicePixelRatio || 1;
@@ -45,6 +47,10 @@
             canvas.height = Math.floor(h * dpr);
             ctx.setTransform(1, 0, 0, 1, 0, 0);
             ctx.scale(dpr, dpr);
+            trailCanvas.width = canvas.width;            // keep the star-trail layer pixel-aligned with the main canvas
+            trailCanvas.height = canvas.height;
+            trailCtx.setTransform(1, 0, 0, 1, 0, 0);
+            trailCtx.scale(dpr, dpr);
         }
 
         // --- WORLD CLOCK LOGIC ---
@@ -496,6 +502,47 @@
         let skyZoom = 1;  // planetarium zoom factor (mouse wheel / two-finger pinch); >1 = zoomed in
         let skyInfoClosed = false;  // user dismissed the planetarium info box (re-shown when the planetarium is re-opened)
         let _prevSkyTarget = 0;     // edge-detect planetarium open to reset skyInfoClosed
+        let hoveredStar = null;     // catalog star currently under the pointer (for the hover highlight ring)
+        let visStarCount = 0, visConCount = 0;   // currently-visible counts (stars above horizon · constellations on screen)
+        let STAR_FIELD = null;      // full colour star catalog (loaded async from starcatalog.json); null → figure-vertex fallback
+        (function loadStarCatalog() {
+            fetch('starcatalog.json').then(r => r.ok ? r.json() : Promise.reject(r.status)).then(data => {
+                // B-V colour index → approximate star RGB (blue → white → yellow → orange → red).
+                const anc = [[-0.4, 155, 176, 255], [0.0, 200, 213, 255], [0.3, 248, 247, 255], [0.6, 255, 244, 232], [1.0, 255, 213, 160], [1.5, 255, 182, 132], [2.0, 255, 160, 120]];
+                const bvToRgb = (bv) => {
+                    if (bv <= anc[0][0]) return [anc[0][1], anc[0][2], anc[0][3]];
+                    for (let i = 1; i < anc.length; i++) {
+                        if (bv <= anc[i][0]) {
+                            const a0 = anc[i - 1], b0 = anc[i], t = (bv - a0[0]) / (b0[0] - a0[0]);
+                            return [a0[1] + (b0[1] - a0[1]) * t, a0[2] + (b0[2] - a0[2]) * t, a0[3] + (b0[3] - a0[3]) * t];
+                        }
+                    }
+                    const L = anc[anc.length - 1]; return [L[1], L[2], L[3]];
+                };
+                const out = [];
+                for (const f of (data.features || [])) {
+                    const c = f.geometry && f.geometry.coordinates;
+                    if (!c) continue;
+                    const p = f.properties || {};
+                    const mag = (typeof p.mag === 'number') ? p.mag : parseFloat(p.mag);
+                    if (!isFinite(mag)) continue;
+                    const bv = parseFloat(p.bv);
+                    const rgb = bvToRgb(isFinite(bv) ? bv : 0.6);
+                    out.push({
+                        id: f.id, ra: c[0], dec: c[1], mag: mag, bv: (isFinite(bv) ? bv : 0.6),
+                        r: Math.round(rgb[0]), g: Math.round(rgb[1]), b: Math.round(rgb[2]),
+                        size: Math.max(0.5, 2.6 - 0.34 * mag),   // brighter (lower mag) → bigger
+                        af: Math.max(0.35, 1 - mag * 0.10)        // brighter → more opaque
+                    });
+                }
+                STAR_FIELD = out;
+                try { DebugWindow.log('[stars] catalog: ' + out.length + ' stars'); } catch (_) {}
+            }).catch(err => { try { DebugWindow.log('[stars] catalog load failed: ' + err); } catch (_) {} });
+        })();
+        // Optional star-name table (HIP → {name, bayer, desig, c}) for the click tooltip.
+        fetch('starnames.json').then(r => r.ok ? r.json() : Promise.reject(r.status))
+            .then(d => { window.STAR_NAMES = d; try { DebugWindow.log('[stars] names loaded'); } catch (_) {} })
+            .catch(() => {});
         let autoRotation = 0;
         let autoRotationEnabled = false;
         let isMouseDown = false;
@@ -720,7 +767,7 @@
             }
 
             // Flag/neighbor city click → rotate globe
-            if (flagHitboxes.length > 0) {
+            if (!skyTarget && flagHitboxes.length > 0) {
                 const clickedBox = flagHitboxes.find(b =>
                     b.absX != null &&
                     mxCanvas >= b.absX && mxCanvas <= b.absX + b.w &&
@@ -771,7 +818,8 @@
                 }
             }
 
-            // Hit test for cities - rotate globe to city
+            // Hit test for cities — disabled in planetarium (only sky rotation/zoom there)
+            if (!skyTarget) {
             let hit = false;
             const size = Math.min(rect.width, rect.height) * 0.8;
             const r = size / 2;
@@ -817,6 +865,7 @@
                 }
                 hideCityInfo();
             }
+            }  // end city hit-test (skipped in planetarium)
 
             isMouseDown = true;
             isReturning = false;
@@ -851,6 +900,8 @@
                     lastMouseAngle = currentAngle;
                 }
                 hoveredCity = null;
+            } else if (skyTarget) {
+                hoveredCity = null;        // no city hover in planetarium
             } else {
                 // Hover hit-test
                 const dist = Math.sqrt(mx*mx + my*my);
@@ -946,7 +997,7 @@
             }
 
             // Flag/neighbor city hit test
-            if (flagHitboxes.length > 0) {
+            if (!skyTarget && flagHitboxes.length > 0) {
                 const clickedBox = flagHitboxes.find(b =>
                     b.absX != null &&
                     mxCanvas >= b.absX && mxCanvas <= b.absX + b.w &&
@@ -1063,6 +1114,60 @@
                 e.preventDefault();
             }
         }, { passive: false });
+
+        // --- Click/tap a star → identify it (planetarium only). Screen positions are cached during render (s._x/_y/_vis). ---
+        function bvSpectral(bv) {
+            if (bv < -0.05) return 'blau (B)';
+            if (bv < 0.20)  return 'blau-weiß (A)';
+            if (bv < 0.45)  return 'weiß (F)';
+            if (bv < 0.75)  return 'gelb (G)';
+            if (bv < 1.35)  return 'orange (K)';
+            return 'rot (M)';
+        }
+        function showStarInfo(star, clientX, clientY) {
+            hoveredStar = star;   // drives the on-canvas highlight ring
+            const box = document.getElementById('star-info');
+            if (!box) return;
+            if (!star) { box.style.display = 'none'; return; }
+            const nEl = document.getElementById('star-info-name');
+            const sEl = document.getElementById('star-info-sub');
+            const info = window.STAR_NAMES && window.STAR_NAMES[star.id];
+            let label = 'HIP ' + star.id, conName = '';
+            if (info) {
+                if (info.name) label = info.name;                                  // proper name (e.g. Wega)
+                else if (info.desig) label = info.desig + (info.c ? ' ' + info.c : '');  // else Bayer/Flamsteed (e.g. τ Phe)
+                if (info.c) conName = (typeof CONSTELLATION_NAMES_DE !== 'undefined' && CONSTELLATION_NAMES_DE[info.c]) || info.c;
+            }
+            if (nEl) nEl.textContent = label;
+            if (sEl) sEl.textContent = 'Mag ' + star.mag.toFixed(2) + ' · ' + bvSpectral(star.bv) + (conName ? ' · ' + conName : '');
+            box.style.left = Math.min(window.innerWidth - 170, clientX + 12) + 'px';
+            box.style.top = Math.max(8, clientY - 8) + 'px';
+            box.style.display = 'block';
+        }
+        function starAt(clientX, clientY) {       // nearest visible catalog star within ~16 px, else null
+            if (!STAR_FIELD) return null;
+            const rect = canvas.getBoundingClientRect();
+            const px = clientX - rect.left, py = clientY - rect.top;
+            let best = null, bd = 16 * 16;
+            for (const s of STAR_FIELD) {
+                if (!s._vis) continue;
+                const dx = s._x - px, dy = s._y - py, d = dx * dx + dy * dy;
+                if (d < bd) { bd = d; best = s; }
+            }
+            return best;
+        }
+        let _spDown = null;   // pointer-down position; cleared once it turns into a drag
+        canvas.addEventListener('pointerdown', (e) => { _spDown = { x: e.clientX, y: e.clientY }; });
+        canvas.addEventListener('pointermove', (e) => {
+            if (_spDown && (Math.abs(e.clientX - _spDown.x) > 5 || Math.abs(e.clientY - _spDown.y) > 5)) _spDown = null;
+            if (e.buttons === 0 && skyTarget) showStarInfo(starAt(e.clientX, e.clientY), e.clientX, e.clientY);  // mouse hover → live tooltip
+        });
+        canvas.addEventListener('pointerup', (e) => {
+            if (!_spDown) return;                 // it was a drag (rotation), not a click/tap
+            _spDown = null;
+            if (skyTarget) showStarInfo(starAt(e.clientX, e.clientY), e.clientX, e.clientY);
+        });
+        canvas.addEventListener('pointerleave', () => { showStarInfo(null); });
 
         // --- Render helpers extracted from drawFrame (intra-file; read/write top-level state directly) ---
         function drawNumbersRing(r) {
@@ -1967,15 +2072,63 @@
                 }
             }
             ctx.lineWidth = 1;
-            for (const con of CONSTELLATION_LINES) {                 // figure stars (path vertices; hovered one bright white)
-                ctx.fillStyle = (con.id === hoverId) ? `rgba(255, 255, 255, ${Math.max(a, 0.95)})` : `rgba(235, 242, 255, ${a})`;
-                for (const path of con.paths) {
-                    for (let i = 0; i < path.length; i += 2) {
-                        const p = proj(path[i], path[i + 1]);
-                        if (!p[2]) continue;
-                        ctx.beginPath(); ctx.arc(p[0], p[1], 1.3, 0, Math.PI * 2); ctx.fill();
+            // Figure stars (path vertices) → offscreen trail layer that fades toward transparent instead of
+            // clearing → long-exposure star trails. Slow fade while turning (trails build up), fast when idle.
+            const _moving = isMouseDown || isReturning;
+            const _trailFade = _moving ? 0.02 : 0.08;
+            trailCtx.save();
+            trailCtx.globalCompositeOperation = 'destination-out';   // erase a bit of alpha everywhere → existing trails fade out
+            trailCtx.fillStyle = `rgba(0, 0, 0, ${_trailFade})`;
+            trailCtx.fillRect(0, 0, w, h);
+            trailCtx.globalCompositeOperation = 'source-over';
+            if (STAR_FIELD) {                                        // full catalog: real colours (B-V) + size by magnitude
+                let _vs = 0;
+                for (const s of STAR_FIELD) {
+                    const p = proj(s.ra, s.dec);
+                    s._x = p[0]; s._y = p[1]; s._vis = p[2];   // cache screen pos for click hit-testing
+                    if (!p[2]) continue;
+                    _vs++;
+                    trailCtx.fillStyle = `rgba(${s.r}, ${s.g}, ${s.b}, ${a * s.af})`;
+                    trailCtx.beginPath(); trailCtx.arc(p[0], p[1], s.size, 0, Math.PI * 2); trailCtx.fill();
+                }
+                visStarCount = _vs;
+            } else {                                                 // fallback until the catalog loads: plain figure-vertex dots
+                trailCtx.fillStyle = `rgba(235, 242, 255, ${a})`;
+                for (const con of CONSTELLATION_LINES) {
+                    for (const path of con.paths) {
+                        for (let i = 0; i < path.length; i += 2) {
+                            const p = proj(path[i], path[i + 1]);
+                            if (!p[2]) continue;
+                            trailCtx.beginPath(); trailCtx.arc(p[0], p[1], 0.9, 0, Math.PI * 2); trailCtx.fill();
+                        }
                     }
                 }
+            }
+            // Hover highlight: the hovered constellation's figure stars in bright white
+            if (hoverId) {
+                const _hc = CONSTELLATION_LINES.find(c => c.id === hoverId);
+                if (_hc) {
+                    trailCtx.fillStyle = `rgba(255, 255, 255, ${Math.max(a, 0.95)})`;
+                    for (const path of _hc.paths) {
+                        for (let i = 0; i < path.length; i += 2) {
+                            const p = proj(path[i], path[i + 1]);
+                            if (!p[2]) continue;
+                            trailCtx.beginPath(); trailCtx.arc(p[0], p[1], 1.5, 0, Math.PI * 2); trailCtx.fill();
+                        }
+                    }
+                }
+            }
+            trailCtx.restore();
+            ctx.drawImage(trailCanvas, 0, 0, w, h);                  // composite the trailed stars onto the sky (above the lines)
+            // Highlight the hovered/selected star (the one the tooltip describes) with a crisp cyan ring.
+            if (skyTarget && hoveredStar && hoveredStar._vis) {
+                ctx.save();
+                ctx.strokeStyle = 'rgba(0, 210, 255, 0.95)';
+                ctx.lineWidth = 1.3;
+                ctx.beginPath();
+                ctx.arc(hoveredStar._x, hoveredStar._y, Math.max(4.5, (hoveredStar.size || 1) + 3.5), 0, Math.PI * 2);
+                ctx.stroke();
+                ctx.restore();
             }
             // Pulsating Polaris (north celestial pole star). In dome mode its altitude = observer latitude,
             // so south of the equator proj() reports it below the horizon and it's skipped automatically.
@@ -2017,6 +2170,7 @@
                     }
                     if (n) labels.push({ t: _nm[con.id] || con.id, x: sx / n, y: sy / n, hot: con.id === hoverId });
                 }
+                visConCount = labels.length;
                 // (1) 50% dark-blue backdrop boxes behind the labels, no border
                 const padX = 6, boxH = 19;
                 ctx.fillStyle = `rgba(8, 20, 42, ${0.5 * a})`;
@@ -2124,6 +2278,11 @@
             // Planetarium top-center info box: selected city + its local date & time.
             if (skyTarget && !_prevSkyTarget) skyInfoClosed = false;   // reopening the planetarium re-shows it
             _prevSkyTarget = skyTarget;
+            const _scEl = document.getElementById('sky-count');
+            if (_scEl) {
+                if (skyTarget) { _scEl.textContent = visStarCount + ' Sterne · ' + visConCount + ' Sternbilder'; _scEl.style.display = 'block'; }
+                else _scEl.style.display = 'none';
+            }
             const _sib = document.getElementById('sky-info');
             if (_sib) {
                 if (skyTarget && targetCity && !skyInfoClosed) {
@@ -2143,6 +2302,8 @@
                     }
                 } else {
                     _sib.style.display = 'none';
+                    const _stib = document.getElementById('star-info');
+                    if (_stib) _stib.style.display = 'none';
                 }
             }
 
