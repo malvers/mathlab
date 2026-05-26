@@ -315,6 +315,13 @@ async function renderMsg(msg) {
   // Read receipts are per-pair → ticks only in 1:1, not in the group room.
   const ticks = (!isRoom && isSelf) ? (s => ` <span class="ticks ${s}">${tickGlyph(s)}</span>`)(tickState(msg.created_at)) : '';
   div.innerHTML = `${sender}${badge}<span class="text">${emojiImg(escapeHtml(content))}</span><span class="time">${timeStr}${ticks}</span>`;
+  // Own messages get a delete affordance (✕ on hover; touch uses long-press, see below)
+  if (isSelf && msg.id != null) {
+    const del = document.createElement('button');
+    del.className = 'del-btn'; del.title = 'Für alle löschen'; del.setAttribute('aria-label', 'Nachricht löschen'); del.textContent = '✕';
+    del.onclick = e => { e.stopPropagation(); deleteMessage(msg.id); };
+    div.appendChild(del);
+  }
   messagesEl.appendChild(div);
 }
 
@@ -527,6 +534,27 @@ async function saveEdit(content) {
   applyEdit(id, content);
   cancelEdit();
 }
+// Delete a message for everyone (confirm → DELETE row; recipients drop it via the realtime DELETE handler).
+async function deleteMessage(id) {
+  if (id == null) return;
+  if (!(await uiConfirm('Diese Nachricht für alle löschen?', { okText: 'Löschen', danger: true }))) return;
+  const { error } = await client.from('messages').delete().eq('id', id);
+  if (error) { dbg('Löschen fehlgeschlagen (DELETE-Policy in Supabase vorhanden?): ' + error.message); return; }
+  const el = messagesEl.querySelector(`[data-id="${id}"]`);
+  if (el) el.remove();
+  dbg('Nachricht gelöscht (id ' + id + ')');
+}
+// Touch: long-press on an own bubble → delete (desktop uses the hover ✕ button)
+let lpTimer = null;
+messagesEl.addEventListener('touchstart', e => {
+  const bubble = e.target.closest('.msg.self');
+  if (!bubble || bubble.dataset.id == null) return;
+  lpTimer = setTimeout(() => deleteMessage(bubble.dataset.id), 550);
+}, { passive: true });
+const clearLP = () => { clearTimeout(lpTimer); lpTimer = null; };
+messagesEl.addEventListener('touchend', clearLP);
+messagesEl.addEventListener('touchmove', clearLP);
+messagesEl.addEventListener('touchcancel', clearLP);
 
 msgInput.onkeydown = e => {
   if (!cmdBox.classList.contains('hidden') && cmdMatches.length) {
