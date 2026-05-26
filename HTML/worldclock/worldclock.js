@@ -492,6 +492,11 @@
 
         let manualOffset = 0; // in minutes
         let debugDayOffset = 0; // DEBUG: step the displayed date (Arrow keys) to watch the Moon, in days
+        let lapseActive = false; // time-lapse (play): advances the displayed date each frame
+        let lapseRate = 0.5;     // sky-hours advanced per real second while playing
+        let _lapseLast = 0;      // performance.now() of the previous frame (for dt)
+        let meteors = [];        // active shooting stars
+        function toggleLapse() { lapseActive = !lapseActive; }
         let skyT = 0;           // planetarium mode 0…1 (0 = clock + dim stars, 1 = clock hidden + full stars); toggled by 's'
         let skyTarget = 0;      // animation target for skyT (0/1), toggled by the 's' key
         let skyLon = (localCity && (localCity.globeLon ?? localCity.lon)) || 0;  // eases toward the selected city; starts on the local-timezone city (Dresden)
@@ -504,6 +509,25 @@
         let _prevSkyTarget = 0;     // edge-detect planetarium open to reset skyInfoClosed
         let hoveredStar = null;     // catalog star currently under the pointer (for the hover highlight ring)
         let visStarCount = 0, visConCount = 0;   // currently-visible counts (stars above horizon · constellations on screen)
+        // Fixed centroid (RA/Dec) per constellation — a stable label anchor that pans smoothly (no jump as
+        // individual stars cross the horizon). Averaged as 3D unit vectors so RA wraparound is handled.
+        const CON_CENTROIDS = (() => {
+            const m = {};
+            if (typeof CONSTELLATION_LINES !== 'undefined') {
+                const D = Math.PI / 180;
+                for (const con of CONSTELLATION_LINES) {
+                    let x = 0, y = 0, z = 0, n = 0;
+                    for (const path of con.paths) {
+                        for (let i = 0; i < path.length; i += 2) {
+                            const ra = path[i] * D, dec = path[i + 1] * D;
+                            x += Math.cos(dec) * Math.cos(ra); y += Math.cos(dec) * Math.sin(ra); z += Math.sin(dec); n++;
+                        }
+                    }
+                    if (n) m[con.id] = [(Math.atan2(y, x) * 180 / Math.PI + 360) % 360, Math.atan2(z, Math.hypot(x, y)) * 180 / Math.PI];
+                }
+            }
+            return m;
+        })();
         // Ecliptic sample points (RA/Dec, deg) — the Sun/Moon/planet highway; projected each frame as a faint arc.
         const ECLIPTIC_PTS = (() => {
             const ecl = 23.4393 * Math.PI / 180, pts = [];
@@ -552,6 +576,45 @@
         fetch('starnames.json').then(r => r.ok ? r.json() : Promise.reject(r.status))
             .then(d => { window.STAR_NAMES = d; try { DebugWindow.log('[stars] names loaded'); } catch (_) {} })
             .catch(() => {});
+        // Milky Way (mw.json): sampled into a faint POINT cloud once at load — points project individually,
+        // so there's no polygon filling/folding across the projection (which flickered). 5 nested levels → denser core.
+        let MW_POINTS = null;
+        fetch('mw.json').then(r => r.ok ? r.json() : Promise.reject(r.status)).then(d => {
+            const fs = (d.features || []).slice().sort((p, q) => String(p.id).localeCompare(String(q.id)));   // ol1 … ol5
+            const inRing = (x, y, r) => {                              // ray-casting point-in-ring
+                let inside = false;
+                for (let i = 0, j = r.length - 1; i < r.length; j = i++) {
+                    const xi = r[i][0], yi = r[i][1], xj = r[j][0], yj = r[j][1];
+                    if (((yi > y) !== (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi)) inside = !inside;
+                }
+                return inside;
+            };
+            const inPoly = (x, y, poly) => {                          // outer ring minus holes
+                if (!inRing(x, y, poly[0])) return false;
+                for (let h = 1; h < poly.length; h++) if (inRing(x, y, poly[h])) return false;
+                return true;
+            };
+            const perLevel = 1200, pts = [];
+            fs.forEach((f, li) => {
+                const alpha = 0.22 + li * 0.05;                       // inner levels a touch brighter per point
+                const polys = f.geometry.coordinates.map(poly => {
+                    const r = poly[0]; let a0 = Infinity, a1 = -Infinity, b0 = Infinity, b1 = -Infinity;
+                    for (const [x, y] of r) { if (x < a0) a0 = x; if (x > a1) a1 = x; if (y < b0) b0 = y; if (y > b1) b1 = y; }
+                    return { poly, a0, a1, b0, b1, area: (a1 - a0) * (b1 - b0) };
+                });
+                const tot = polys.reduce((s, p) => s + p.area, 0) || 1;
+                for (const P of polys) {
+                    let want = Math.round(perLevel * P.area / tot), got = 0, tries = 0;
+                    while (got < want && tries < want * 40) {
+                        tries++;
+                        const x = P.a0 + Math.random() * (P.a1 - P.a0), y = P.b0 + Math.random() * (P.b1 - P.b0);
+                        if (inPoly(x, y, P.poly)) { pts.push([x, y, alpha]); got++; }
+                    }
+                }
+            });
+            MW_POINTS = pts;
+            try { DebugWindow.log('[stars] milky way points: ' + pts.length); } catch (_) {}
+        }).catch(() => {});
         let autoRotation = 0;
         let autoRotationEnabled = false;
         let isMouseDown = false;
@@ -636,6 +699,7 @@
             else if (e.key === '0')          debugDayOffset = 0;
             else if (e.key === 's' || e.key === 'S') { skyTarget = skyTarget ? 0 : 1; e.preventDefault(); return; }  // planetarium toggle
             else if (e.key === 'n' || e.key === 'N') { starLangDE = !starLangDE; e.preventDefault(); return; }       // labels: German ↔ Latin
+            else if (e.key === 'p' || e.key === 'P') { toggleLapse(); e.preventDefault(); return; }                  // time-lapse play/pause
             else return;
             e.preventDefault();
             try { DebugWindow.log('[debug] Datum-Offset ' + debugDayOffset.toFixed(3) + ' d → ' + getDisplayTime().toLocaleString('de-DE')); } catch (_) {}
@@ -1177,6 +1241,7 @@
             if (skyTarget) showStarInfo(starAt(e.clientX, e.clientY), e.clientX, e.clientY);
         });
         canvas.addEventListener('pointerleave', () => { showStarInfo(null); });
+        document.getElementById('sky-play')?.addEventListener('click', () => toggleLapse());
 
         // --- Render helpers extracted from drawFrame (intra-file; read/write top-level state directly) ---
         function drawNumbersRing(r) {
@@ -2080,6 +2145,16 @@
             }
             const HL = `rgba(176, 36, 24, ${Math.max(a, 0.9)})`;     // Υ red highlight (project palette)
 
+            // Milky Way band — faint filled glow, drawn first (backmost), clipped to the horizon; levels stack into a core gradient.
+            if (MW_POINTS) {                                         // Milky Way as a faint point haze (no fills → no fold flicker)
+                for (const m of MW_POINTS) {
+                    const p = proj(m[0], m[1]);
+                    if (!p[2]) continue;
+                    ctx.fillStyle = `rgba(185, 205, 240, ${m[2] * a})`;
+                    ctx.beginPath(); ctx.arc(p[0], p[1], 0.7, 0, Math.PI * 2); ctx.fill();
+                }
+            }
+
             if (dome) {                                              // horizon circle (the "HORIZONT" label is drawn last → always on top)
                 ctx.strokeStyle = `rgba(120, 160, 220, ${a * 0.45})`;
                 ctx.beginPath(); ctx.arc(cx, cy, Rdome, 0, Math.PI * 2); ctx.stroke();
@@ -2101,7 +2176,7 @@
             // Figure stars (path vertices) → offscreen trail layer that fades toward transparent instead of
             // clearing → long-exposure star trails. Slow fade while turning (trails build up), fast when idle.
             const _moving = isMouseDown || isReturning;
-            const _trailFade = _moving ? 0.02 : 0.08;
+            const _trailFade = lapseActive ? 1 : (_moving ? 0.02 : 0.08);   // play = full clear each frame (no trails); drag = long trails
             trailCtx.save();
             trailCtx.globalCompositeOperation = 'destination-out';   // erase a bit of alpha everywhere → existing trails fade out
             trailCtx.fillStyle = `rgba(0, 0, 0, ${_trailFade})`;
@@ -2217,14 +2292,10 @@
                 const _nm = (starLangDE && typeof CONSTELLATION_NAMES_DE !== 'undefined') ? CONSTELLATION_NAMES_DE : CONSTELLATION_NAMES;
                 const labels = [];
                 for (const con of CONSTELLATION_LINES) {
-                    let sx = 0, sy = 0, n = 0;
-                    for (const path of con.paths) {
-                        for (let i = 0; i < path.length; i += 2) {
-                            const p = proj(path[i], path[i + 1]);
-                            if (p[2]) { sx += p[0]; sy += p[1]; n++; }
-                        }
-                    }
-                    if (n) labels.push({ t: _nm[con.id] || con.id, x: sx / n, y: sy / n, hot: con.id === hoverId });
+                    const c = CON_CENTROIDS[con.id];
+                    if (!c) continue;
+                    const p = proj(c[0], c[1]);              // fixed centroid → smooth, no jump
+                    if (p[2]) labels.push({ t: _nm[con.id] || con.id, x: p[0], y: p[1], hot: con.id === hoverId });
                 }
                 visConCount = labels.length;
                 // (1) 50% dark-blue backdrop boxes behind the labels, no border
@@ -2287,6 +2358,24 @@
                     ctx.fillText('Mond', _mp[0], _mp[1] + 10);
                 }
             }
+            // Shooting stars — occasional fading streaks (spawn only in planetarium; existing ones finish either way).
+            if (skyTarget && Math.random() < 0.004) {
+                const ex = cx + (Math.random() - 0.5) * Rdome * 1.3, ey = cy + (Math.random() - 0.5) * Rdome * 1.3;
+                const ang = Math.random() * Math.PI * 2, spd = 6 + Math.random() * 5;
+                meteors.push({ x: ex, y: ey, vx: Math.cos(ang) * spd, vy: Math.sin(ang) * spd, life: 0, max: 22 + Math.random() * 20 });
+            }
+            for (let i = meteors.length - 1; i >= 0; i--) {
+                const m = meteors[i];
+                m.x += m.vx; m.y += m.vy; m.life++;
+                if (m.life > m.max) { meteors.splice(i, 1); continue; }
+                const t = m.life / m.max, al = (t < 0.2 ? t / 0.2 : 1 - (t - 0.2) / 0.8) * a;
+                const tx = m.x - m.vx * 4, ty = m.y - m.vy * 4;
+                const g = ctx.createLinearGradient(m.x, m.y, tx, ty);
+                g.addColorStop(0, `rgba(255, 255, 255, ${al})`);
+                g.addColorStop(1, 'rgba(255, 255, 255, 0)');
+                ctx.strokeStyle = g; ctx.lineWidth = 1.6; ctx.lineCap = 'round';
+                ctx.beginPath(); ctx.moveTo(m.x, m.y); ctx.lineTo(tx, ty); ctx.stroke();
+            }
             // "HORIZONT" curved along the bottom of the horizon — drawn last so it always sits on top.
             if (dome) {
                 ctx.fillStyle = `rgba(255, 255, 255, ${a * 0.7})`;
@@ -2342,6 +2431,11 @@
 
             if (!mapLoaded) return;
 
+            // Time-lapse: advance the displayed date while playing (drives sky rotation, planets, moon phase, twilight).
+            const _lnow = (typeof performance !== 'undefined' ? performance.now() : Date.now());
+            if (lapseActive && skyTarget && _lapseLast) debugDayOffset += (lapseRate / 24) * ((_lnow - _lapseLast) / 1000);
+            _lapseLast = _lnow;
+
             // Smooth Return Logic
             if (isReturning && !isMouseDown) {
                 if (Math.abs(manualOffset) < 0.1) {
@@ -2385,6 +2479,11 @@
             if (_scEl) {
                 if (skyTarget) { _scEl.textContent = visStarCount + ' Sterne · ' + visConCount + ' Sternbilder'; _scEl.style.display = 'block'; }
                 else _scEl.style.display = 'none';
+            }
+            const _splEl = document.getElementById('sky-play');
+            if (_splEl) {
+                _splEl.textContent = lapseActive ? '⏸' : '▶';   // visibility follows its parent sky-info box
+                if (!skyTarget) lapseActive = false;
             }
             const _sib = document.getElementById('sky-info');
             if (_sib) {

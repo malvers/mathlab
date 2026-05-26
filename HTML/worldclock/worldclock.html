@@ -14,8 +14,12 @@
     <link rel="stylesheet" href="../js/cyber-lab-overrides.css">
     <link rel="stylesheet" href="../js/branding.styles.extracted.css">
     <link rel="stylesheet" href="../js/lab-shell-minimal.css">
-    <!-- Debug window: auto-disabled on docalvers.de; use ?debug=force to enable on production -->
-    <script src="../js/debug-window.js"></script>
+    <!-- Debug window: only loaded with ?debug=1 (all DebugWindow.* calls are guarded, so it's safe to skip) -->
+    <script>
+        if (new URLSearchParams(location.search).get('debug') === '1') {
+            document.write('<scr' + 'ipt src="../js/debug-window.js"><\/scr' + 'ipt>');
+        }
+    </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js"></script>
     <script src="https://unpkg.com/three@0.149.0/build/three.min.js"></script>
     <script src="https://unpkg.com/three-globe@2.27.0/dist/three-globe.min.js"></script>
@@ -196,6 +200,7 @@
         <div id="sky-info-city"></div>
         <div id="sky-info-date"></div>
         <div id="sky-info-time"></div>
+        <button id="sky-play" type="button" aria-label="Zeitraffer">▶</button>
     </div>
 
     <!-- Planetarium: live tally of currently-visible stars · constellations (bottom-left) -->
