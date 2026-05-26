@@ -104,6 +104,7 @@ function subscribeMessages() {
   subscription = client
     .channel('messages')
     .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, async payload => {
+     try {
       const m = payload.new;
       // Group-room message (addressed to my group) → render if the room is open, else bump its badge.
       if (m.room_id) {
@@ -136,12 +137,14 @@ function subscribeMessages() {
         publishDelivered(m.pubkey);
       }
       renderContacts(searchVal()); // refresh time + badge live
+     } catch (e) { dbg('Realtime-INSERT-Fehler (ignoriert, Kanal bleibt aktiv): ' + (e && e.message || e)); }
     })
     .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'messages' }, () => {
       if (activePeer || activeRoom) loadMessages();
     })
     // A message was edited (UPDATE) → if its bubble is on screen, replace the text in place.
     .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'messages' }, async payload => {
+     try {
       const m = payload.new;
       const el = messagesEl.querySelector(`[data-id="${m.id}"]`);
       if (!el) return;                                   // not in the open conversation
@@ -150,6 +153,7 @@ function subscribeMessages() {
       if (raw === '[falscher Schlüssel]') return;
       const mk = raw.match(/^(\u2063+)/); if (mk) raw = raw.slice(mk[1].length);
       applyEdit(m.id, raw);
+     } catch (e) { dbg('Realtime-UPDATE-Fehler (ignoriert): ' + (e && e.message || e)); }
     })
     // A receipt changed → if it's the open peer acknowledging MY messages, recolor the ticks live
     .on('postgres_changes', { event: '*', schema: 'public', table: 'receipts' }, payload => {
@@ -177,8 +181,24 @@ function subscribeMessages() {
         : (activePeer && payload.to === myPubB64 && payload.from === activePeer.pubkey);
       if (forOpen) showTyping();
     })
-    .subscribe(status => {
-      dbg('Realtime-Status: ' + JSON.stringify(status));
+    .subscribe((status, err) => {
+      dbg('Realtime-Status: ' + status + (err ? ' / ' + (err.message || err) : ''));
+      if (status === 'SUBSCRIBED') {
+        if (realtimeWasErrored) {                       // came back after a drop → resync missed messages
+          realtimeWasErrored = false;
+          dbg('Realtime wieder verbunden — synchronisiere…');
+          if (activePeer || activeRoom) loadMessages();
+        }
+        reconnectDelay = 2000;                          // reset backoff
+        clearTimeout(reconnectTimer); reconnectTimer = null;
+      } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+        realtimeWasErrored = true;
+        if (!reconnectTimer) {                          // schedule ONE reconnect with exponential backoff
+          dbg('Realtime-Kanal weg (' + status + ') — neuer Versuch in ' + (reconnectDelay / 1000) + 's');
+          reconnectTimer = setTimeout(() => { reconnectTimer = null; subscribeMessages(); }, reconnectDelay);
+          reconnectDelay = Math.min(reconnectDelay * 2, 30000);
+        }
+      }
     });
 }
 
@@ -266,7 +286,7 @@ async function renderMsg(msg) {
   let jumboScale = 0;
   if (!decryptFailed) {
     const mk = content.match(/^(\u2063+)/);
-    if (mk) { jumboScale = Math.min(10, mk[1].length); content = content.slice(mk[1].length); }
+    if (mk) { jumboScale = Math.min(5, mk[1].length); content = content.slice(mk[1].length); }
   }
   if (isSelf && !decryptFailed) div.dataset.raw = content;   // plain text for ArrowUp "edit last message"
   // Emoji-only message (1–3) → render big, no bubble (WhatsApp/Signal style)
@@ -581,7 +601,7 @@ async function sendMsg() {
   // "/N <emoji>" (N=2–5) → send that emoji N× big. Strip the prefix before emoticon conversion
   // (so /3:-) works), then prepend N invisible markers so the size travels E2E (old clients: invisible).
   let jumboScale = 0;
-  const sm = content.match(/^\/([2-9]|10)\s*(.+)$/s);
+  const sm = content.match(/^\/([2-5])\s*(.+)$/s);
   if (sm) { jumboScale = +sm[1]; content = sm[2].trim(); }
   content = emoticonsToEmoji(content);   // :-) → 🙂 etc. (commands already carry real emoji)
   if (jumboScale) { const n = emojiOnlyCount(content); if (n >= 1 && n <= 3) content = JUMBO_MARK.repeat(jumboScale) + content; }
@@ -590,11 +610,11 @@ async function sendMsg() {
     const encrypted = await encryptText(content, roomKey);
     const sig = await signText(encrypted + '|' + myGroupId); // signature bound to the room
     dbg(`Sende (Gruppen-Chat, verschlüsselt + signiert) an „${activeGroupLabel()}"`);
-    const { error } = await client.from('messages').insert({ content: encrypted, room_id: myGroupId, recipient_pubkey: null, pubkey: myPubB64, sig });
+    const { data, error } = await client.from('messages').insert({ content: encrypted, room_id: myGroupId, recipient_pubkey: null, pubkey: myPubB64, sig }).select().single();
     if (error) { dbg('Sendefehler (Gruppen-Chat): ' + error.message); return; }
     dbg('Gruppen-Chat-Nachricht gesendet');
     msgInput.value = ''; updateSendBtn();
-    setTimeout(loadMessages, 300);
+    if (data) { try { await renderMsg(data); } catch (e) { dbg('Render-Fehler (ignoriert): ' + (e && e.message || e)); } messagesEl.scrollTop = messagesEl.scrollHeight; } // show own msg instantly; realtime echo is deduped by id
     return;
   }
   // Real message → 1:1 to the selected contact, encrypted with the ECDH-derived shared key
@@ -605,10 +625,10 @@ async function sendMsg() {
   // Sign the ciphertext bound to the recipient's identity → receiver verifies it's really from us
   const sig = await signText(encrypted + '|' + activePeer.pubkey);
   dbg(`Sende (1:1, verschlüsselt + signiert) an ${activePeer.name}`);
-  const { error } = await client.from('messages').insert({ content: encrypted, recipient_pubkey: activePeer.pubkey, pubkey: myPubB64, sig });
+  const { data, error } = await client.from('messages').insert({ content: encrypted, recipient_pubkey: activePeer.pubkey, pubkey: myPubB64, sig }).select().single();
   if (error) { dbg('Sendefehler: ' + error.message); return; }
   dbg('Nachricht gesendet');
   msgInput.value = ''; updateSendBtn();
-  setTimeout(loadMessages, 300);
+  if (data) { try { await renderMsg(data); } catch (e) { dbg('Render-Fehler (ignoriert): ' + (e && e.message || e)); } messagesEl.scrollTop = messagesEl.scrollHeight; } // show own msg instantly; realtime echo is deduped by id
 }
 

@@ -27,6 +27,8 @@ function dbg(msg) {
 
 let client = null;
 let subscription = null;
+// Realtime auto-reconnect state (persists across re-subscribes)
+let reconnectTimer = null, reconnectDelay = 2000, realtimeWasErrored = false;
 
 // Single Supabase client + anonymous sign-in → a device-bound identity (auth.uid()) without e-mail.
 // Failsafe: if Anonymous sign-ins aren't enabled in Supabase yet, the app keeps working (old RLS).
