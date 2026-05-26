@@ -213,6 +213,10 @@ img.joypixels{display:inline-block;height:1.43em;width:1.43em;vertical-align:-0.
 .msg .ticks{margin-left:3px;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:rgba(var(--vgp-text-rgb),.55);letter-spacing:-3px}
 .msg .ticks.read{color:var(--vgp-accent)}
 .msg .edited{opacity:.6;font-size:.82em}  /* "✎" mark on an edited message */
+/* Delete affordance on own messages (✕, hover on desktop; long-press on touch) */
+.msg .del-btn{position:absolute;top:-8px;right:-8px;width:20px;height:20px;border-radius:50%;border:none;background:var(--vgp-red);color:var(--vgp-white);font-size:11px;line-height:20px;padding:0;cursor:pointer;opacity:0;transition:opacity .12s;z-index:6}
+.msg.self:hover .del-btn{opacity:1}
+@media (hover:none){.msg .del-btn{display:none}}  /* touch devices use long-press, not the tiny ✕ */
 /* Edit-last-message banner above the input + a subtle accent ring on the field while editing */
 #edit-hint{position:absolute;left:64px;right:60px;bottom:calc(100% - 4px);background:var(--vgp-chat);border:1px solid rgba(var(--vgp-accent-rgb),.25);border-radius:10px;padding:8px 14px;font-size:13px;color:var(--vgp-text-dim);z-index:30;box-shadow:0 -6px 24px rgba(var(--vgp-shadow),.45)}
 #edit-hint.hidden{display:none}
@@ -517,13 +521,13 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
   <button id="stats-close">SCHLIESSEN</button>
 </div>
 
-<script src="js/vgp-setup.js?v=20260524-52"></script>
-<script src="js/vgp-auth.js?v=20260524-52"></script>
-<script src="js/vgp-crypto.js?v=20260524-52"></script>
-<script src="js/vgp-backup-core.js?v=20260524-52"></script>
-<script src="js/vgp-contacts.js?v=20260524-52"></script>
-<script src="js/vgp-messages.js?v=20260524-52"></script>
-<script src="js/vgp-push.js?v=20260524-52"></script>
+<script src="js/vgp-setup.js?v=20260524-53"></script>
+<script src="js/vgp-auth.js?v=20260524-53"></script>
+<script src="js/vgp-crypto.js?v=20260524-53"></script>
+<script src="js/vgp-backup-core.js?v=20260524-53"></script>
+<script src="js/vgp-contacts.js?v=20260524-53"></script>
+<script src="js/vgp-messages.js?v=20260524-53"></script>
+<script src="js/vgp-push.js?v=20260524-53"></script>
 <script>
 // Local-vs-live indicator: mark the page red ONLY when served locally. No red = you're on the live site.
 (function () {

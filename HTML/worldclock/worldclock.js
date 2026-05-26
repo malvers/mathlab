@@ -531,7 +531,7 @@
         // Ecliptic sample points (RA/Dec, deg) — the Sun/Moon/planet highway; projected each frame as a faint arc.
         const ECLIPTIC_PTS = (() => {
             const ecl = 23.4393 * Math.PI / 180, pts = [];
-            for (let L = 0; L <= 360; L += 5) {
+            for (let L = 0; L <= 360; L += 3) {
                 const lr = L * Math.PI / 180, x = Math.cos(lr), y = Math.sin(lr) * Math.cos(ecl), z = Math.sin(lr) * Math.sin(ecl);
                 pts.push([((Math.atan2(y, x) * 180 / Math.PI) + 360) % 360, Math.atan2(z, Math.hypot(x, y)) * 180 / Math.PI]);
             }
@@ -2226,9 +2226,9 @@
             }
             // Ecliptic — the Sun/Moon/planet highway; faint dashed arc, broken at the horizon.
             ctx.save();
-            ctx.setLineDash([3, 4]);
-            ctx.strokeStyle = `rgba(245, 194, 66, ${a * 0.22})`;
-            ctx.lineWidth = 1;
+            ctx.setLineDash([4, 4]);
+            ctx.strokeStyle = `rgba(245, 194, 66, ${a * 0.5})`;
+            ctx.lineWidth = 1.4;
             let _ePrev = null;
             for (const _ep of ECLIPTIC_PTS) {
                 const q = proj(_ep[0], _ep[1]);
@@ -2385,7 +2385,7 @@
                 ctx.font = '9px Orbitron';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
-                const _hz = (starLangDE ? 'HORIZONT' : 'HORIZON'), _hls = 3, _hr = Rdome - 9;  // DE/Latin; baseline just inside the line
+                const _hz = (starLangDE ? 'HORIZONT' : 'HORIZON'), _hls = 3, _hr = Rdome + 12;  // DE/Latin; baseline just outside the line
                 const _hw = [..._hz].map(c => ctx.measureText(c).width);
                 const _harc = _hw.reduce((s, w) => s + w, 0) + _hls * (_hz.length - 1);
                 let _phi = Math.PI / 2 + (_harc / 2) / _hr;          // start at the left, walk right (decreasing φ; bottom = π/2, y down)
