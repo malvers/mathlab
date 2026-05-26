@@ -512,6 +512,7 @@
         let skyInfoClosed = false;  // user dismissed the planetarium info box (re-shown when the planetarium is re-opened)
         let _prevSkyTarget = 0;     // edge-detect planetarium open to reset skyInfoClosed
         let hoveredStar = null;     // catalog star currently under the pointer (for the hover highlight ring)
+        let hoveredZodiac = null;   // zodiac sign under the pointer (priority over stars/constellations)
         let visStarCount = 0, visConCount = 0;   // currently-visible counts (stars above horizon · constellations on screen)
         // Fixed centroid (RA/Dec) per constellation — a stable label anchor that pans smoothly (no jump as
         // individual stars cross the horizon). Averaged as 3D unit vectors so RA wraparound is handled.
@@ -544,9 +545,10 @@
         // Zodiac signs: symbol (♈…♓) at the centre of each 30° ecliptic segment (RA/Dec on the ecliptic).
         const ZODIAC = (() => {
             const ecl = 23.4393 * Math.PI / 180, out = [];
+            const nm = ['Widder', 'Stier', 'Zwillinge', 'Krebs', 'Löwe', 'Jungfrau', 'Waage', 'Skorpion', 'Schütze', 'Steinbock', 'Wassermann', 'Fische'];
             for (let i = 0; i < 12; i++) {
                 const L = (i * 30 + 15) * Math.PI / 180, x = Math.cos(L), y = Math.sin(L) * Math.cos(ecl), z = Math.sin(L) * Math.sin(ecl);
-                out.push({ sym: String.fromCodePoint(0x2648 + i), ra: ((Math.atan2(y, x) * 180 / Math.PI) + 360) % 360, dec: Math.atan2(z, Math.hypot(x, y)) * 180 / Math.PI });
+                out.push({ sym: String.fromCodePoint(0x2648 + i), name: nm[i], ra: ((Math.atan2(y, x) * 180 / Math.PI) + 360) % 360, dec: Math.atan2(z, Math.hypot(x, y)) * 180 / Math.PI });
             }
             return out;
         })();
@@ -1199,13 +1201,21 @@
             if (bv < 1.35)  return 'orange (K)';
             return 'rot (M)';
         }
-        function showStarInfo(star, clientX, clientY) {
-            hoveredStar = star;   // drives the on-canvas highlight ring
+        function showInfoBox(name, sub, clientX, clientY) {   // shared tooltip renderer (stars + zodiac)
             const box = document.getElementById('star-info');
             if (!box) return;
-            if (!star) { box.style.display = 'none'; return; }
+            if (!name) { box.style.display = 'none'; return; }
             const nEl = document.getElementById('star-info-name');
             const sEl = document.getElementById('star-info-sub');
+            if (nEl) nEl.textContent = name;
+            if (sEl) sEl.textContent = sub || '';
+            box.style.left = Math.min(window.innerWidth - 170, clientX + 12) + 'px';
+            box.style.top = Math.max(8, clientY - 8) + 'px';
+            box.style.display = 'block';
+        }
+        function showStarInfo(star, clientX, clientY) {
+            hoveredStar = star;   // drives the on-canvas highlight ring
+            if (!star) { showInfoBox(null); return; }
             const info = window.STAR_NAMES && window.STAR_NAMES[star.id];
             let label = 'HIP ' + star.id, conName = '';
             if (info) {
@@ -1213,11 +1223,7 @@
                 else if (info.desig) label = info.desig + (info.c ? ' ' + info.c : '');  // else Bayer/Flamsteed (e.g. τ Phe)
                 if (info.c) conName = (typeof CONSTELLATION_NAMES_DE !== 'undefined' && CONSTELLATION_NAMES_DE[info.c]) || info.c;
             }
-            if (nEl) nEl.textContent = label;
-            if (sEl) sEl.textContent = 'Mag ' + star.mag.toFixed(2) + ' · ' + bvSpectral(star.bv) + (conName ? ' · ' + conName : '');
-            box.style.left = Math.min(window.innerWidth - 170, clientX + 12) + 'px';
-            box.style.top = Math.max(8, clientY - 8) + 'px';
-            box.style.display = 'block';
+            showInfoBox(label, 'Mag ' + star.mag.toFixed(2) + ' · ' + bvSpectral(star.bv) + (conName ? ' · ' + conName : ''), clientX, clientY);
         }
         function starAt(clientX, clientY) {       // nearest visible catalog star within ~16 px, else null
             if (!STAR_FIELD) return null;
@@ -1231,18 +1237,40 @@
             }
             return best;
         }
+        function zodiacAt(clientX, clientY) {     // nearest visible zodiac glyph within ~15 px, else null
+            const rect = canvas.getBoundingClientRect();
+            const px = clientX - rect.left, py = clientY - rect.top;
+            let best = null, bd = 15 * 15;
+            for (const z of ZODIAC) {
+                if (!z._vis) continue;
+                const dx = z._x - px, dy = z._y - py, d = dx * dx + dy * dy;
+                if (d < bd) { bd = d; best = z; }
+            }
+            return best;
+        }
+        function hoverPick(clientX, clientY) {    // zodiac has priority over stars/constellations
+            const zod = zodiacAt(clientX, clientY);
+            if (zod) {
+                hoveredZodiac = zod;
+                hoveredStar = null;
+                showInfoBox(zod.sym + ' ' + zod.name, 'Tierkreiszeichen', clientX, clientY);
+            } else {
+                hoveredZodiac = null;
+                showStarInfo(starAt(clientX, clientY), clientX, clientY);
+            }
+        }
         let _spDown = null;   // pointer-down position; cleared once it turns into a drag
         canvas.addEventListener('pointerdown', (e) => { _spDown = { x: e.clientX, y: e.clientY }; });
         canvas.addEventListener('pointermove', (e) => {
             if (_spDown && (Math.abs(e.clientX - _spDown.x) > 5 || Math.abs(e.clientY - _spDown.y) > 5)) _spDown = null;
-            if (e.buttons === 0 && skyTarget) showStarInfo(starAt(e.clientX, e.clientY), e.clientX, e.clientY);  // mouse hover → live tooltip
+            if (e.buttons === 0 && skyTarget) hoverPick(e.clientX, e.clientY);  // mouse hover → live tooltip
         });
         canvas.addEventListener('pointerup', (e) => {
             if (!_spDown) return;                 // it was a drag (rotation), not a click/tap
             _spDown = null;
-            if (skyTarget) showStarInfo(starAt(e.clientX, e.clientY), e.clientX, e.clientY);
+            if (skyTarget) hoverPick(e.clientX, e.clientY);
         });
-        canvas.addEventListener('pointerleave', () => { showStarInfo(null); });
+        canvas.addEventListener('pointerleave', () => { showStarInfo(null); hoveredZodiac = null; });
         document.getElementById('sky-play')?.addEventListener('click', () => toggleLapse());
 
         // --- Render helpers extracted from drawFrame (intra-file; read/write top-level state directly) ---
@@ -2151,7 +2179,7 @@
 
             // Which constellation is under the pointer? (planetarium mode only) → highlight it red.
             let hoverId = null;
-            if (skyTarget && starHover.on) {
+            if (skyTarget && starHover.on && !hoveredZodiac) {
                 let best = Infinity;
                 for (const con of CONSTELLATION_LINES) {
                     for (const path of con.paths) {
@@ -2299,6 +2327,7 @@
             ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
             for (const z of ZODIAC) {
                 const q = proj(z.ra, z.dec);
+                z._x = q[0]; z._y = q[1]; z._vis = q[2];   // cache for hover hit-testing
                 if (q[2]) ctx.fillText(z.sym, q[0], q[1]);
             }
             ctx.restore();
