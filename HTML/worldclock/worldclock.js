@@ -607,13 +607,21 @@
             const bDir   = document.getElementById('wc-mb-dir');
             const bToday = document.getElementById('wc-mb-today');
 
+            // Two-line buttons: light the active option (cyan), dim the other. First span = "on" state.
+            function setActive(btn, firstActive) {
+                if (!btn) return;
+                const opts = btn.querySelectorAll('.opt');
+                if (opts.length < 2) return;
+                opts[0].classList.toggle('is-active', !!firstActive);
+                opts[1].classList.toggle('is-active', !firstActive);
+            }
             function refreshLabels() {
-                if (bSky)   bSky.textContent   = skyTarget       ? 'UHR'     : 'STERNE';   // on/off → next action
-                if (bView)  bView.textContent  = skyView         ? 'STADTHIMMEL' : 'POL-RAD';   // current projection
-                if (bLang)  bLang.textContent  = starLangDE      ? 'DEUTSCH' : 'LATEIN';   // current label language
-                if (bGlobe) bGlobe.textContent = window.useGlobe ? 'UHR'     : 'GLOBUS';   // 3D globe ↔ clock
-                if (bDir)   bDir.textContent   = CW              ? 'SÜD-VIEW'    : 'NORD-VIEW';  // CW = south sky, CCW = north sky
-                if (bToday) bToday.disabled    = (debugDayOffset === 0);  // grey out when the clock already shows today
+                setActive(bSky,   !!skyTarget);        // STERNE (on) ↔ UHR
+                setActive(bView,  !!skyView);          // STADTHIMMEL (dome) ↔ POL-RAD
+                setActive(bLang,  !!starLangDE);       // DEUTSCH ↔ LATEIN
+                setActive(bGlobe, !!window.useGlobe);  // GLOBUS ↔ UHR
+                setActive(bDir,   !!CW);               // SÜD-VIEW (CW) ↔ NORD-VIEW (CCW)
+                if (bToday) bToday.disabled = (debugDayOffset === 0);  // grey out when the clock already shows today
             }
 
             function clearPositions() {
