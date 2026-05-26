@@ -71,8 +71,12 @@
 
         // Round Moon disc (pre-rendered, public-domain NASA texture) — shown in a box under the city list
         const moonImg = new Image();
-        let moonReady = false;
-        moonImg.onload = () => { moonReady = true; };
+        let moonReady = false, moonSmall = null;
+        moonImg.onload = () => {
+            moonReady = true;
+            moonSmall = document.createElement('canvas'); moonSmall.width = 96; moonSmall.height = 96;
+            moonSmall.getContext('2d').drawImage(moonImg, 0, 0, 96, 96);   // pre-scaled once → cheap per-frame drawImage
+        };
         moonImg.src = '../resources/moon.png';
 
         // Pole label ("NORDPOL"/"SÜDPOL") + small red dot, drawn at the centre (= the pole) in screen space.
@@ -2078,7 +2082,7 @@
             c.save();                                                // earthshine: dim full disc
             c.beginPath(); c.arc(0, 0, r, 0, Math.PI * 2); c.clip();
             c.globalAlpha = alpha * 0.15;
-            c.drawImage(moonImg, -r, -r, 2 * r, 2 * r);
+            c.drawImage(moonSmall || moonImg, -r, -r, 2 * r, 2 * r);
             c.restore();
             c.save();                                                // lit lune: full-bright texture
             const b = r * (1 - 2 * k);
@@ -2087,7 +2091,7 @@
             c.ellipse(0, 0, Math.abs(b), r, 0, Math.PI / 2, -Math.PI / 2, b > 0);
             c.closePath(); c.clip();
             c.globalAlpha = alpha;
-            c.drawImage(moonImg, -r, -r, 2 * r, 2 * r);
+            c.drawImage(moonSmall || moonImg, -r, -r, 2 * r, 2 * r);
             c.restore();
             c.restore();
         }
@@ -2184,17 +2188,36 @@
                 ctx.strokeStyle = `rgba(120, 160, 220, ${a * 0.45})`;
                 ctx.beginPath(); ctx.arc(cx, cy, Rdome, 0, Math.PI * 2); ctx.stroke();
             }
-            for (const con of CONSTELLATION_LINES) {                 // constellation lines (hovered one in red; break at horizon in dome mode)
-                const hot = con.id === hoverId;
-                ctx.strokeStyle = hot ? HL : `rgba(120, 160, 220, ${a * 0.5})`;
-                ctx.lineWidth = hot ? 1.8 : 1;
+            // Constellation lines — batched into ONE path per colour (one stroke instead of thousands) → much cheaper.
+            ctx.strokeStyle = `rgba(120, 160, 220, ${a * 0.5})`;
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            for (const con of CONSTELLATION_LINES) {
+                if (con.id === hoverId) continue;                    // hovered one drawn separately (red, thicker)
                 for (const path of con.paths) {
                     let prev = null;
                     for (let i = 0; i < path.length; i += 2) {
                         const p = proj(path[i], path[i + 1]);
-                        if (prev && prev[2] && p[2]) { ctx.beginPath(); ctx.moveTo(prev[0], prev[1]); ctx.lineTo(p[0], p[1]); ctx.stroke(); }
+                        if (prev && prev[2] && p[2]) { ctx.moveTo(prev[0], prev[1]); ctx.lineTo(p[0], p[1]); }
                         prev = p;
                     }
+                }
+            }
+            ctx.stroke();
+            if (hoverId) {                                           // hovered constellation in red, one stroke
+                const _hcon = CONSTELLATION_LINES.find(c => c.id === hoverId);
+                if (_hcon) {
+                    ctx.strokeStyle = HL; ctx.lineWidth = 1.8;
+                    ctx.beginPath();
+                    for (const path of _hcon.paths) {
+                        let prev = null;
+                        for (let i = 0; i < path.length; i += 2) {
+                            const p = proj(path[i], path[i + 1]);
+                            if (prev && prev[2] && p[2]) { ctx.moveTo(prev[0], prev[1]); ctx.lineTo(p[0], p[1]); }
+                            prev = p;
+                        }
+                    }
+                    ctx.stroke();
                 }
             }
             ctx.lineWidth = 1;
