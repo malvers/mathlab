@@ -124,7 +124,9 @@ async function loadContacts() {
 }
 // The pinned group-room row ("# Familie") at the very top of the sidebar — opens the shared room.
 // Group-of-people logo for the shared group room (inherits .room-av color via currentColor)
-const GROUP_ICON = '<svg viewBox="0 0 24 24" fill="currentColor" style="width:64%;height:64%" aria-hidden="true"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>';
+const GROUP_ICON = emojiImg('👫');  // "an alle" room avatar (mixed pair) — rendered per current emoji mode
+// Previous SVG people icon (kept as fallback — restore this line to revert):
+// const GROUP_ICON = '<svg viewBox="0 0 24 24" fill="currentColor" style="width:64%;height:64%" aria-hidden="true"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>';
 // One contact/member row (1:1). `active` highlights the open conversation.
 function memberRow(c, active) {
   const div = document.createElement('div');
@@ -194,7 +196,7 @@ function renderContacts(filter) {
     const roomDiv = document.createElement('div');
     roomDiv.className = 'contact room' + (isActive && activeRoom ? ' active' : '');
     const rt = g.roomLastTime ? fmtContactTime(g.roomLastTime) : '';
-    roomDiv.innerHTML = `<span class="av room-av">${GROUP_ICON}</span><span class="nm">an alle</span>` +
+    roomDiv.innerHTML = `<span class="av emo">${GROUP_ICON}</span><span class="nm">an alle</span>` +
                         `<div class="c-meta">` +
                           (rt ? `<span class="c-time${g.roomUnread ? ' unread' : ''}">${escapeHtml(rt)}</span>` : '') +
                           (g.roomUnread ? `<span class="c-badge">${g.roomUnread > 99 ? '99+' : g.roomUnread}</span>` : '') +
@@ -227,7 +229,7 @@ function selectRoom() {
   const gd = groupsData.find(x => x.pwd === activeGroupPwd); if (gd) gd.roomUnread = 0; // clear badge now
   document.getElementById('chat-watermark').classList.add('hidden');
   const peerAv = document.getElementById('chat-peer-av');
-  peerAv.className = 'room-av'; peerAv.style.backgroundImage = ''; peerAv.innerHTML = GROUP_ICON;
+  peerAv.className = 'emo'; peerAv.style.backgroundImage = ''; peerAv.innerHTML = GROUP_ICON;
   document.getElementById('chat-peer').textContent = activeGroupLabel();
   const appEl = document.getElementById('app'); appEl.classList.add('chat-open'); appEl.classList.add('room-mode'); // broadcasting → red compose field
   msgInput.disabled = false;

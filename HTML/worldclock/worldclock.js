@@ -504,6 +504,15 @@
         let _prevSkyTarget = 0;     // edge-detect planetarium open to reset skyInfoClosed
         let hoveredStar = null;     // catalog star currently under the pointer (for the hover highlight ring)
         let visStarCount = 0, visConCount = 0;   // currently-visible counts (stars above horizon · constellations on screen)
+        // Ecliptic sample points (RA/Dec, deg) — the Sun/Moon/planet highway; projected each frame as a faint arc.
+        const ECLIPTIC_PTS = (() => {
+            const ecl = 23.4393 * Math.PI / 180, pts = [];
+            for (let L = 0; L <= 360; L += 5) {
+                const lr = L * Math.PI / 180, x = Math.cos(lr), y = Math.sin(lr) * Math.cos(ecl), z = Math.sin(lr) * Math.sin(ecl);
+                pts.push([((Math.atan2(y, x) * 180 / Math.PI) + 360) % 360, Math.atan2(z, Math.hypot(x, y)) * 180 / Math.PI]);
+            }
+            return pts;
+        })();
         let STAR_FIELD = null;      // full colour star catalog (loaded async from starcatalog.json); null → figure-vertex fallback
         (function loadStarCatalog() {
             fetch('starcatalog.json').then(r => r.ok ? r.json() : Promise.reject(r.status)).then(data => {
@@ -1996,6 +2005,23 @@
             return Math.hypot(px - (ax + t * dx), py - (ay + t * dy));
         }
 
+        // Draw the Moon at (x,y) radius r with its phase: dark disc + lit lune; the bright limb faces `brightAngle`.
+        function drawMoonPhase(c, x, y, r, k, brightAngle, alpha) {
+            c.save();
+            c.globalAlpha = alpha;
+            c.translate(x, y);
+            c.rotate(brightAngle);                                   // after this the bright limb is on the +x side
+            c.fillStyle = 'rgba(90, 100, 120, 0.55)';                // dark disc (earthshine)
+            c.beginPath(); c.arc(0, 0, r, 0, Math.PI * 2); c.fill();
+            c.fillStyle = 'rgba(238, 240, 248, 0.98)';               // lit lune
+            const b = r * (1 - 2 * k);                               // terminator semi-minor (signed): k=0→r, 0.5→0, 1→−r
+            c.beginPath();
+            c.arc(0, 0, r, -Math.PI / 2, Math.PI / 2, false);        // bright limb (right semicircle)
+            c.ellipse(0, 0, Math.abs(b), r, 0, Math.PI / 2, -Math.PI / 2, b > 0);  // terminator
+            c.closePath(); c.fill();
+            c.restore();
+        }
+
         function drawStarfield(w, h, cx, cy) {
             if (typeof CONSTELLATION_LINES === 'undefined' || typeof siderealTimeDeg !== 'function') return;
             if (window.useGlobe) return;                             // globe mode: canvas sits over the 3D globe → skip for now
@@ -2130,6 +2156,36 @@
                 ctx.stroke();
                 ctx.restore();
             }
+            // Ecliptic — the Sun/Moon/planet highway; faint dashed arc, broken at the horizon.
+            ctx.save();
+            ctx.setLineDash([3, 4]);
+            ctx.strokeStyle = `rgba(245, 194, 66, ${a * 0.22})`;
+            ctx.lineWidth = 1;
+            let _ePrev = null;
+            for (const _ep of ECLIPTIC_PTS) {
+                const q = proj(_ep[0], _ep[1]);
+                if (_ePrev && _ePrev[2] && q[2]) { ctx.beginPath(); ctx.moveTo(_ePrev[0], _ePrev[1]); ctx.lineTo(q[0], q[1]); ctx.stroke(); }
+                _ePrev = q;
+            }
+            ctx.restore();
+            // Twilight glow at the Sun's position, fading from horizon into night (subtle — keeps the stars visible).
+            if (dome && typeof sunPosition === 'function') {
+                const _sun = sunPosition(getDisplayTime());
+                const _H = (lst - _sun.ra) * D2R, _dd = _sun.dec * D2R, _la = skyLat * D2R;
+                const _alt = Math.asin(Math.max(-1, Math.min(1, Math.sin(_la) * Math.sin(_dd) + Math.cos(_la) * Math.cos(_dd) * Math.cos(_H)))) * (180 / Math.PI);
+                const _tw = Math.max(0, Math.min(1, (_alt + 16) / 22));   // 0 at −16° (night) → 1 by +6°
+                if (_tw > 0.01) {
+                    const _sp = proj(_sun.ra, _sun.dec);
+                    const g = ctx.createRadialGradient(_sp[0], _sp[1], 0, _sp[0], _sp[1], Rdome);
+                    g.addColorStop(0, `rgba(255, 170, 90, ${0.22 * _tw * a})`);
+                    g.addColorStop(0.45, `rgba(120, 135, 210, ${0.10 * _tw * a})`);
+                    g.addColorStop(1, 'rgba(0,0,0,0)');
+                    ctx.save();
+                    ctx.beginPath(); ctx.arc(cx, cy, Rdome, 0, Math.PI * 2); ctx.clip();
+                    ctx.fillStyle = g; ctx.fillRect(cx - Rdome, cy - Rdome, Rdome * 2, Rdome * 2);
+                    ctx.restore();
+                }
+            }
             // Pulsating Polaris (north celestial pole star). In dome mode its altitude = observer latitude,
             // so south of the equator proj() reports it below the horizon and it's skipped automatically.
             {
@@ -2182,6 +2238,53 @@
                 for (const L of labels) {
                     ctx.fillStyle = L.hot ? `rgba(0, 210, 255, ${Math.max(nameA, 0.95)})` : `rgba(150, 185, 235, ${nameA})`;
                     ctx.fillText(L.t, L.x, L.y);
+                }
+            }
+            // Planets (Schlyter ephemeris): bright coloured markers + names; they sit on the ecliptic and drift over days.
+            if (typeof planetPositions === 'function') {
+                const _pls = planetPositions(getDisplayTime());
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'top';
+                ctx.font = '600 10px Orbitron';
+                for (const _pl of _pls) {
+                    const _pp = proj(_pl.ra, _pl.dec);
+                    if (!_pp[2]) continue;
+                    ctx.save();
+                    ctx.shadowColor = _pl.color;
+                    ctx.shadowBlur = 8;
+                    ctx.globalAlpha = a;
+                    ctx.fillStyle = _pl.color;
+                    ctx.beginPath(); ctx.arc(_pp[0], _pp[1], 2.8, 0, Math.PI * 2); ctx.fill();
+                    ctx.restore();
+                    ctx.fillStyle = `rgba(245, 194, 66, ${a})`;   // λ orange (CLAUDE.md palette)
+                    ctx.fillText(_pl.name, _pp[0], _pp[1] + 5);
+                }
+            }
+            // Sun + Moon — bright bodies on the ecliptic (drawn near the planets).
+            if (typeof sunPosition === 'function') {
+                const _su = sunPosition(getDisplayTime());
+                const _sp = proj(_su.ra, _su.dec);
+                if (_sp[2]) {
+                    ctx.save();
+                    ctx.shadowColor = 'rgba(255, 210, 90, 0.9)'; ctx.shadowBlur = 16; ctx.globalAlpha = a;
+                    ctx.fillStyle = 'rgba(255, 224, 120, 1)';
+                    ctx.beginPath(); ctx.arc(_sp[0], _sp[1], 6, 0, Math.PI * 2); ctx.fill();
+                    ctx.restore();
+                    ctx.fillStyle = `rgba(245, 194, 66, ${a})`;
+                    ctx.font = '600 10px Orbitron'; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+                    ctx.fillText('Sonne', _sp[0], _sp[1] + 9);
+                }
+            }
+            if (typeof moonPosition === 'function') {
+                const _mo = moonPosition(getDisplayTime());
+                const _mp = proj(_mo.ra, _mo.dec);
+                if (_mp[2]) {
+                    let _ba = -Math.PI / 2;     // bright limb faces the Sun's on-screen direction
+                    if (typeof sunPosition === 'function') { const _s2 = sunPosition(getDisplayTime()), _s2p = proj(_s2.ra, _s2.dec); _ba = Math.atan2(_s2p[1] - _mp[1], _s2p[0] - _mp[0]); }
+                    drawMoonPhase(ctx, _mp[0], _mp[1], 7, _mo.illum, _ba, a);
+                    ctx.fillStyle = `rgba(220, 230, 245, ${a})`;
+                    ctx.font = '600 10px Orbitron'; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+                    ctx.fillText('Mond', _mp[0], _mp[1] + 10);
                 }
             }
             // "HORIZONT" curved along the bottom of the horizon — drawn last so it always sits on top.
