@@ -492,6 +492,7 @@
         let skyLat = 0;         // animated sky latitude (deg) — for the city-dome (alt-az) view
         let skyView = 1;        // 0 = pol-wheel (pole-centred), 1 = city dome (alt-az horizon); toggled by 'v'. Default: dome.
         let starLangDE = true;  // constellation labels: true = German, false = Latin (toggled by 'n')
+        let starHover = { x: 0, y: 0, on: false };  // pointer pos (canvas px) for the constellation hover-highlight (planetarium mode)
         let autoRotation = 0;
         let autoRotationEnabled = false;
         let isMouseDown = false;
@@ -632,7 +633,7 @@
 
             // Half-circle anchored at the left-edge hamburger: items fan out to the right (−90°…+90°).
             function open() {
-                const H = 260, cxC = 66, rx = 140, ry = 180;  // wide vertical spread so the 120×44 buttons never overlap; cxC clears the left edge
+                const H = 260, cxC = 56, rx = 164, ry = 70;   // flat wide ellipse (rx > ry): tight in y, no overlap with the 108×44 buttons
                 stack.style.left = '8px';
                 stack.style.top  = (window.innerHeight / 2 - H / 2) + 'px';
                 refreshLabels();
@@ -1028,6 +1029,18 @@
             isMouseDown = false;
             isReturning = true;
         }, false);
+
+        // --- Constellation hover: track the pointer in canvas px so drawStarfield can highlight what's under it ---
+        function setStarHover(clientX, clientY) {
+            const rect = canvas.getBoundingClientRect();
+            starHover.x = clientX - rect.left;
+            starHover.y = clientY - rect.top;
+            starHover.on = true;
+        }
+        canvas.addEventListener('mousemove', (e) => setStarHover(e.clientX, e.clientY));
+        canvas.addEventListener('mouseleave', () => { starHover.on = false; });
+        canvas.addEventListener('touchstart', (e) => { if (e.touches.length) setStarHover(e.touches[0].clientX, e.touches[0].clientY); }, { passive: true });
+        canvas.addEventListener('touchmove',  (e) => { if (e.touches.length) setStarHover(e.touches[0].clientX, e.touches[0].clientY); }, { passive: true });
 
         // --- Render helpers extracted from drawFrame (intra-file; read/write top-level state directly) ---
         function drawNumbersRing(r) {
@@ -1847,6 +1860,15 @@
         // Celestial backdrop. Two projections (toggle with 'v'):
         //   skyView 0 = pol-wheel  — celestial pole at centre, radius ∝ colatitude (matches the polar clock).
         //   skyView 1 = city dome  — zenith at centre, horizon circle; the REAL sky from the selected city (lat-correct, alt-az).
+        // Distance from point (px,py) to segment (ax,ay)-(bx,by) — for constellation hover hit-testing.
+        function segDist(px, py, ax, ay, bx, by) {
+            const dx = bx - ax, dy = by - ay;
+            const l2 = dx * dx + dy * dy;
+            let t = l2 ? ((px - ax) * dx + (py - ay) * dy) / l2 : 0;
+            t = t < 0 ? 0 : (t > 1 ? 1 : t);
+            return Math.hypot(px - (ax + t * dx), py - (ay + t * dy));
+        }
+
         function drawStarfield(w, h, cx, cy) {
             if (typeof CONSTELLATION_LINES === 'undefined' || typeof siderealTimeDeg !== 'function') return;
             if (window.useGlobe) return;                             // globe mode: canvas sits over the 3D globe → skip for now
@@ -1883,12 +1905,36 @@
             ctx.globalAlpha = 1;                                     // stars unaffected by the clock fade
             ctx.lineJoin = "round";
             ctx.lineWidth = 1;
+
+            // Which constellation is under the pointer? (planetarium mode only) → highlight it red.
+            let hoverId = null;
+            if (skyTarget && starHover.on) {
+                let best = Infinity;
+                for (const con of CONSTELLATION_LINES) {
+                    for (const path of con.paths) {
+                        let prev = null;
+                        for (let i = 0; i < path.length; i += 2) {
+                            const p = proj(path[i], path[i + 1]);
+                            if (prev && prev[2] && p[2]) {
+                                const d = segDist(starHover.x, starHover.y, prev[0], prev[1], p[0], p[1]);
+                                if (d < best) { best = d; hoverId = con.id; }
+                            }
+                            prev = p;
+                        }
+                    }
+                }
+                if (best > 22) hoverId = null;                       // only when the pointer is actually near a figure
+            }
+            const HL = `rgba(176, 36, 24, ${Math.max(a, 0.9)})`;     // Υ red highlight (project palette)
+
             if (dome) {                                              // horizon circle
                 ctx.strokeStyle = `rgba(120, 160, 220, ${a * 0.45})`;
                 ctx.beginPath(); ctx.arc(cx, cy, Rdome, 0, Math.PI * 2); ctx.stroke();
             }
-            ctx.strokeStyle = `rgba(120, 160, 220, ${a * 0.5})`;     // constellation lines (break at the horizon in dome mode)
-            for (const con of CONSTELLATION_LINES) {
+            for (const con of CONSTELLATION_LINES) {                 // constellation lines (hovered one in red; break at horizon in dome mode)
+                const hot = con.id === hoverId;
+                ctx.strokeStyle = hot ? HL : `rgba(120, 160, 220, ${a * 0.5})`;
+                ctx.lineWidth = hot ? 1.8 : 1;
                 for (const path of con.paths) {
                     let prev = null;
                     for (let i = 0; i < path.length; i += 2) {
@@ -1898,8 +1944,9 @@
                     }
                 }
             }
-            ctx.fillStyle = `rgba(235, 242, 255, ${a})`;             // figure stars (path vertices)
-            for (const con of CONSTELLATION_LINES) {
+            ctx.lineWidth = 1;
+            for (const con of CONSTELLATION_LINES) {                 // figure stars (path vertices; hovered one in red)
+                ctx.fillStyle = (con.id === hoverId) ? HL : `rgba(235, 242, 255, ${a})`;
                 for (const path of con.paths) {
                     for (let i = 0; i < path.length; i += 2) {
                         const p = proj(path[i], path[i + 1]);
@@ -1908,11 +1955,10 @@
                     }
                 }
             }
-            // Constellation names at each (visible) constellation's centroid — fade in with sky mode (clean backdrop otherwise).
-            const nameA = a * 0.85;   // always on; brightness tracks the stars (dim behind clock, bright in sky mode)
+            // Constellation names at each (visible) constellation's centroid — always on, +36% size, hovered one red.
+            const nameA = a * 0.85;   // brightness tracks the stars (dim behind clock, bright in sky mode)
             if (nameA > 0.02 && typeof CONSTELLATION_NAMES !== 'undefined') {
-                ctx.fillStyle = `rgba(150, 185, 235, ${nameA})`;
-                ctx.font = '9px Orbitron';
+                ctx.font = '12.24px Orbitron';                       // 9px + 36%
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
                 const _nm = (starLangDE && typeof CONSTELLATION_NAMES_DE !== 'undefined') ? CONSTELLATION_NAMES_DE : CONSTELLATION_NAMES;
@@ -1924,7 +1970,10 @@
                             if (p[2]) { sx += p[0]; sy += p[1]; n++; }
                         }
                     }
-                    if (n) ctx.fillText(_nm[con.id] || con.id, sx / n, sy / n);
+                    if (n) {
+                        ctx.fillStyle = (con.id === hoverId) ? HL : `rgba(150, 185, 235, ${nameA})`;
+                        ctx.fillText(_nm[con.id] || con.id, sx / n, sy / n);
+                    }
                 }
             }
             ctx.restore();
