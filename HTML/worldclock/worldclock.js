@@ -493,7 +493,7 @@
         let manualOffset = 0; // in minutes
         let debugDayOffset = 0; // DEBUG: step the displayed date (Arrow keys) to watch the Moon, in days
         let lapseActive = false; // time-lapse (play): advances the displayed date each frame
-        let lapseRate = 0.5;     // sky-hours advanced per real second while playing
+        let lapseRate = 0.25;    // sky-hours advanced per real second while playing
         let _lapseLast = 0;      // performance.now() of the previous frame (for dt)
         let meteors = [];        // active shooting stars
         function toggleLapse() { lapseActive = !lapseActive; }
@@ -576,44 +576,25 @@
         fetch('starnames.json').then(r => r.ok ? r.json() : Promise.reject(r.status))
             .then(d => { window.STAR_NAMES = d; try { DebugWindow.log('[stars] names loaded'); } catch (_) {} })
             .catch(() => {});
-        // Milky Way (mw.json): sampled into a faint POINT cloud once at load — points project individually,
-        // so there's no polygon filling/folding across the projection (which flickered). 5 nested levels → denser core.
-        let MW_POINTS = null;
+        // Milky Way (mw.json): contour vertices jittered into a haze, grouped by brightness level so each
+        // level draws in ONE batched fill (no per-point fill/shadow → smooth). Points project individually → wrap-safe.
+        let MW_LEVELS = null, mwCount = 0;
         fetch('mw.json').then(r => r.ok ? r.json() : Promise.reject(r.status)).then(d => {
             const fs = (d.features || []).slice().sort((p, q) => String(p.id).localeCompare(String(q.id)));   // ol1 … ol5
-            const inRing = (x, y, r) => {                              // ray-casting point-in-ring
-                let inside = false;
-                for (let i = 0, j = r.length - 1; i < r.length; j = i++) {
-                    const xi = r[i][0], yi = r[i][1], xj = r[j][0], yj = r[j][1];
-                    if (((yi > y) !== (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi)) inside = !inside;
-                }
-                return inside;
-            };
-            const inPoly = (x, y, poly) => {                          // outer ring minus holes
-                if (!inRing(x, y, poly[0])) return false;
-                for (let h = 1; h < poly.length; h++) if (inRing(x, y, poly[h])) return false;
-                return true;
-            };
-            const perLevel = 1200, pts = [];
+            const al = [0.20, 0.25, 0.30, 0.35, 0.40];   // per-level brightness
+            const levels = [];
             fs.forEach((f, li) => {
-                const alpha = 0.22 + li * 0.05;                       // inner levels a touch brighter per point
-                const polys = f.geometry.coordinates.map(poly => {
-                    const r = poly[0]; let a0 = Infinity, a1 = -Infinity, b0 = Infinity, b1 = -Infinity;
-                    for (const [x, y] of r) { if (x < a0) a0 = x; if (x > a1) a1 = x; if (y < b0) b0 = y; if (y > b1) b1 = y; }
-                    return { poly, a0, a1, b0, b1, area: (a1 - a0) * (b1 - b0) };
-                });
-                const tot = polys.reduce((s, p) => s + p.area, 0) || 1;
-                for (const P of polys) {
-                    let want = Math.round(perLevel * P.area / tot), got = 0, tries = 0;
-                    while (got < want && tries < want * 40) {
-                        tries++;
-                        const x = P.a0 + Math.random() * (P.a1 - P.a0), y = P.b0 + Math.random() * (P.b1 - P.b0);
-                        if (inPoly(x, y, P.poly)) { pts.push([x, y, alpha]); got++; }
-                    }
+                const verts = [];                                     // collect every coordinate pair, whatever the nesting depth
+                (function rec(node) { if (typeof node[0] === 'number') verts.push(node); else for (const c of node) rec(c); })(f.geometry.coordinates);
+                const pts = [];
+                for (let i = 0; i < verts.length; i += 2) {          // jitter each contour vertex into a random haze
+                    pts.push([verts[i][0] + (Math.random() - 0.5) * 4, verts[i][1] + (Math.random() - 0.5) * 4]);
                 }
+                levels.push({ alpha: al[Math.min(li, al.length - 1)], pts });
             });
-            MW_POINTS = pts;
-            try { DebugWindow.log('[stars] milky way points: ' + pts.length); } catch (_) {}
+            MW_LEVELS = levels;
+            mwCount = levels.reduce((s, l) => s + l.pts.length, 0);
+            try { DebugWindow.log('[stars] milky way levels: ' + levels.length + ', points: ' + mwCount); } catch (_) {}
         }).catch(() => {});
         let autoRotation = 0;
         let autoRotationEnabled = false;
@@ -1189,6 +1170,14 @@
         }, { passive: false });
 
         // --- Click/tap a star → identify it (planetarium only). Screen positions are cached during render (s._x/_y/_vis). ---
+        // Render a number as fixed-width digit boxes (Orbitron isn't tabular → plain text jitters). Rebuilds only on change.
+        function setSkyDigits(el, n) {
+            if (!el) return;
+            const s = String(n);
+            if (el._v === s) return;
+            el._v = s;
+            el.innerHTML = s.replace(/./g, c => '<span class="scd">' + c + '</span>');
+        }
         function bvSpectral(bv) {
             if (bv < -0.05) return 'blau (B)';
             if (bv < 0.20)  return 'blau-weiß (A)';
@@ -2146,12 +2135,16 @@
             const HL = `rgba(176, 36, 24, ${Math.max(a, 0.9)})`;     // Υ red highlight (project palette)
 
             // Milky Way band — faint filled glow, drawn first (backmost), clipped to the horizon; levels stack into a core gradient.
-            if (MW_POINTS) {                                         // Milky Way as a faint point haze (no fills → no fold flicker)
-                for (const m of MW_POINTS) {
-                    const p = proj(m[0], m[1]);
-                    if (!p[2]) continue;
-                    ctx.fillStyle = `rgba(185, 205, 240, ${m[2] * a})`;
-                    ctx.beginPath(); ctx.arc(p[0], p[1], 0.7, 0, Math.PI * 2); ctx.fill();
+            if (MW_LEVELS) {                                         // Milky Way haze — one batched fill per level (cheap, smooth)
+                for (const lvl of MW_LEVELS) {
+                    ctx.fillStyle = `rgba(185, 205, 240, ${lvl.alpha * a})`;
+                    ctx.beginPath();
+                    for (const p of lvl.pts) {
+                        const q = proj(p[0], p[1]);
+                        if (!q[2]) continue;
+                        ctx.rect(q[0] - 0.6, q[1] - 0.6, 1.3, 1.3);   // tiny square — batches far better than per-point arc
+                    }
+                    ctx.fill();
                 }
             }
 
@@ -2258,6 +2251,16 @@
                     ctx.save();
                     ctx.beginPath(); ctx.arc(cx, cy, Rdome, 0, Math.PI * 2); ctx.clip();
                     ctx.fillStyle = g; ctx.fillRect(cx - Rdome, cy - Rdome, Rdome * 2, Rdome * 2);
+                    ctx.restore();
+                }
+                // Global day/night tint from the Sun's altitude: day → blue brighten, deep night → slight darken.
+                const _day = Math.max(0, Math.min(1, (_alt + 6) / 16));      // 0 below −6°, full by +10°
+                const _night = Math.max(0, Math.min(1, (-10 - _alt) / 8));   // deepens below −10°
+                if (_day > 0.01 || _night > 0.01) {
+                    ctx.save();
+                    ctx.beginPath(); ctx.arc(cx, cy, Rdome, 0, Math.PI * 2); ctx.clip();
+                    if (_day > 0.01)   { ctx.fillStyle = `rgba(120, 150, 210, ${0.18 * _day * a})`; ctx.fillRect(cx - Rdome, cy - Rdome, Rdome * 2, Rdome * 2); }
+                    if (_night > 0.01) { ctx.fillStyle = `rgba(2, 6, 18, ${0.14 * _night * a})`;     ctx.fillRect(cx - Rdome, cy - Rdome, Rdome * 2, Rdome * 2); }
                     ctx.restore();
                 }
             }
@@ -2477,8 +2480,12 @@
             _prevSkyTarget = skyTarget;
             const _scEl = document.getElementById('sky-count');
             if (_scEl) {
-                if (skyTarget) { _scEl.textContent = visStarCount + ' Sterne · ' + visConCount + ' Sternbilder'; _scEl.style.display = 'block'; }
-                else _scEl.style.display = 'none';
+                if (skyTarget) {
+                    setSkyDigits(document.getElementById('sc-stars'), visStarCount);
+                    setSkyDigits(document.getElementById('sc-cons'), visConCount);
+                    setSkyDigits(document.getElementById('sc-mw'), mwCount);
+                    _scEl.style.display = 'block';
+                } else _scEl.style.display = 'none';
             }
             const _splEl = document.getElementById('sky-play');
             if (_splEl) {
