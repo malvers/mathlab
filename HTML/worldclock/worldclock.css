@@ -286,7 +286,7 @@ body.cyber-shell-grid { grid-template-columns: 0 minmax(0, 1fr) !important; }
 /* before that wrap runs: cyber-layout.css 3-col grid (main = col 3) */
 body:not(.cyber-shell-grid):has(#side-panel) { grid-template-columns: 0 0 minmax(0, 1fr) !important; }
 
-/* --- Planetarium top-center info box (city + local date/time), dark-blue 50%, no border --- */
+/* --- Planetarium top-center info box (city + local date + digit clock), dark-blue 55%, no border --- */
 #sky-info {
     position: fixed;
     top: 14px;
@@ -294,38 +294,28 @@ body:not(.cyber-shell-grid):has(#side-panel) { grid-template-columns: 0 0 minmax
     transform: translateX(-50%);
     display: none;
     z-index: 9550;
-    padding: 8px 36px 8px 18px;        /* extra room on the right for the ✕ */
-    border-radius: 12px;
+    padding: 10px 24px 12px;
+    border-radius: 14px;
     background: rgba(8, 20, 42, 0.55);
     text-align: center;
     font-family: 'Orbitron', sans-serif;
-    pointer-events: auto;
+    pointer-events: none;
 }
 #sky-info-city {
-    font-size: 0.95rem;
+    font-size: 1rem;
     font-weight: 700;
-    letter-spacing: 0.12em;
+    letter-spacing: 0.14em;
     color: rgba(0, 210, 255, 0.95);
 }
-#sky-info-when {
-    margin-top: 3px;
-    font-size: 0.78rem;
-    letter-spacing: 0.1em;
-    color: rgba(150, 185, 235, 0.95);
+#sky-info-date {
+    margin-top: 4px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    color: rgba(210, 225, 240, 0.85);
 }
-#sky-info-x {
-    position: absolute;
-    top: 4px;
-    right: 6px;
-    width: 22px;
-    height: 22px;
-    padding: 0;
-    border: none;
-    background: none;
-    cursor: pointer;
-    font-family: 'Orbitron', sans-serif;
-    font-size: 0.8rem;
-    line-height: 1;
-    color: rgba(0, 210, 255, 0.65);
+#sky-info-time {
+    margin-top: 6px;
+    display: flex;
+    justify-content: center;     /* centre the CyberClock widget */
 }
-#sky-info-x:hover { color: rgba(0, 210, 255, 1); }
