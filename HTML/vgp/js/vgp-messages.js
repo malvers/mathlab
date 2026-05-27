@@ -319,6 +319,7 @@ async function renderMsg(msg) {
   }
   if (!decryptFailed) div.dataset.raw = imgDesc ? '📷 Bild' : voiceDesc ? ('🎤 ' + (voiceDesc.t || 'Sprachnachricht')) : content;   // plain text (ArrowUp edit + reply quotes)
   div.dataset.kind = imgDesc ? 'img' : voiceDesc ? 'voice' : 'text';   // only 'text' is editable
+  if (voiceDesc && voiceDesc.t) div.dataset.tx = voiceDesc.t;          // transcript → copyable
   // Emoji-only message (1–3) → render big, no bubble (WhatsApp/Signal style)
   if (!decryptFailed) {
     const ec = emojiOnlyCount(content);
@@ -601,6 +602,7 @@ async function deleteMessage(id) {
 const msgActions = document.getElementById('msg-actions');
 const maDel = document.getElementById('ma-del');
 const maEdit = document.getElementById('ma-edit');
+const maCopy = document.getElementById('ma-copy');
 let actionTargetId = null;
 let reactionsByMsg = {};   // { message_id: [{pubkey, emoji}] }
 
@@ -611,6 +613,7 @@ function openMsgActions(bubble) {
   const own = bubble.classList.contains('self');
   maDel.classList.toggle('hidden', !own);
   if (maEdit) maEdit.classList.toggle('hidden', !(own && bubble.dataset.kind === 'text'));   // can't edit images/voice
+  if (maCopy) maCopy.classList.toggle('hidden', !(bubble.dataset.kind === 'text' || bubble.dataset.tx));   // text, or a voice transcript
   msgActions.classList.remove('hidden');                    // show first so we can measure
   const r = bubble.getBoundingClientRect();
   const aw = msgActions.offsetWidth, ah = msgActions.offsetHeight;
@@ -651,6 +654,11 @@ if (maEdit) maEdit.onclick = () => {
   const b = messagesEl.querySelector(`[data-id="${actionTargetId}"]`);
   closeMsgActions();
   if (b) startEdit(b);
+};
+if (maCopy) maCopy.onclick = () => {
+  const b = messagesEl.querySelector(`[data-id="${actionTargetId}"]`);
+  closeMsgActions();
+  if (b && navigator.clipboard) navigator.clipboard.writeText(b.dataset.kind === 'voice' ? (b.dataset.tx || '') : (b.dataset.raw || '')).catch(() => {});
 };
 // Right-click on a message → our popover instead of the browser's native context menu
 messagesEl.addEventListener('contextmenu', e => {
