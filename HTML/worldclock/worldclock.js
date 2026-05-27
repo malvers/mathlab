@@ -2793,6 +2793,7 @@
             // Planetarium top-center info box: selected city + its local date & time.
             if (skyTarget && !_prevSkyTarget) skyInfoClosed = false;   // reopening the planetarium re-shows it
             _prevSkyTarget = skyTarget;
+            document.body.classList.toggle('planetarium-on', !!skyTarget);   // hides search box + personalize link via CSS
             const _scEl = document.getElementById('sky-count');
             if (_scEl) {
                 if (skyTarget) {
@@ -2805,6 +2806,7 @@
             const _splEl = document.getElementById('sky-play');
             if (_splEl) {
                 _splEl.textContent = lapseActive ? '⏸' : '▶';
+                _splEl.classList.toggle('playing', lapseActive);   // running (pause icon) → orange
                 _splEl.style.display = (skyTarget && targetCity && !skyInfoClosed) ? 'flex' : 'none';   // only in the planetarium
                 if (!skyTarget) lapseActive = false;
             }
