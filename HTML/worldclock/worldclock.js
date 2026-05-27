@@ -69,15 +69,7 @@
         southMapImg.onload = () => { southMapReady = true; };
         southMapImg.src = '../resources/worldmap_polar_south.png';
 
-        // Round Moon disc (pre-rendered, public-domain NASA texture) — shown in a box under the city list
-        const moonImg = new Image();
-        let moonReady = false, moonSmall = null;
-        moonImg.onload = () => {
-            moonReady = true;
-            moonSmall = document.createElement('canvas'); moonSmall.width = 96; moonSmall.height = 96;
-            moonSmall.getContext('2d').drawImage(moonImg, 0, 0, 96, 96);   // pre-scaled once → cheap per-frame drawImage
-        };
-        moonImg.src = '../resources/moon.png';
+        // Moon texture loader + drawMoon/drawMoonImg/drawMoonPhase → moved to worldclock-moon.js (Phase 2 refactor).
 
         // Pole label ("NORDPOL"/"SÜDPOL") + small red dot, drawn at the centre (= the pole) in screen space.
         function drawPoleMarker(w, h, r) {
@@ -564,181 +556,8 @@
             try { DebugWindow.log('[debug] Datum-Offset ' + debugDayOffset.toFixed(3) + ' d → ' + getDisplayTime().toLocaleString('de-DE')); } catch (_) {}
         });
 
-        // --- Touch control menu: a left-edge hamburger opens a right-facing half-circle of buttons. ---
-        // Standalone (no imports); same scope as the state lets above, so the buttons read/write
-        // skyTarget / starLangDE / useGlobe / CW / debugDayOffset directly. (skyView is fixed at 1 =
-        // Stadthimmel/dome — the astronomically correct local sky — so there is no projection toggle.)
-        (function () {
-            const stack = document.getElementById('mini-stack');
-            if (!stack) return;
-            const hamb   = document.getElementById('wc-menu-btn');
-            const bSky   = document.getElementById('wc-mb-sky');
-            const bLang  = document.getElementById('wc-mb-lang');
-            const bGlobe = document.getElementById('wc-mb-globe');
-            const bDir   = document.getElementById('wc-mb-dir');
-            const bToday = document.getElementById('wc-mb-today');
-            const bMoon  = document.getElementById('wc-mb-moon');   // planetarium-only on/off toggles
-            const bNeb   = document.getElementById('wc-mb-nebula');
-
-            // Two-line buttons: light the active option (cyan), dim the other. First span = "on" state.
-            function setActive(btn, firstActive) {
-                if (!btn) return;
-                const opts = btn.querySelectorAll('.opt');
-                if (opts.length < 2) return;
-                opts[0].classList.toggle('is-active', !!firstActive);
-                opts[1].classList.toggle('is-active', !firstActive);
-            }
-            function refreshLabels() {
-                setActive(bSky,   !!skyTarget);        // PLANETARIUM (on) ↔ UHR
-                setActive(bLang,  !!starLangDE);       // DEUTSCH ↔ LATEIN
-                setActive(bGlobe, !!window.useGlobe);  // GLOBUS ↔ UHR
-                setActive(bDir,   !!CW);               // SÜD-VIEW (CW) ↔ NORD-VIEW (CCW)
-                if (bMoon) bMoon.classList.toggle('off', !showMoon);     // single-line toggles: off = dimmed
-                if (bNeb)  bNeb.classList.toggle('off', !showDeepsky);
-                if (bToday) {
-                    const to = bToday.querySelectorAll('.opt');
-                    if (to.length >= 2) {
-                        if (debugDayOffset === 0) {           // already on today → show the date, active (cyan)
-                            const d = getDisplayTime();
-                            to[0].textContent = 'HEUTE';
-                            to[1].textContent = String(d.getDate()).padStart(2, '0') + '.' +
-                                                String(d.getMonth() + 1).padStart(2, '0') + '.' + d.getFullYear();
-                            bToday.classList.remove('action');
-                        } else {                              // stepped away → offer the reset (orange action)
-                            to[0].textContent = 'ZURÜCK ZU';
-                            to[1].textContent = 'HEUTE';
-                            bToday.classList.add('action');
-                        }
-                    }
-                }
-            }
-
-            function clearPositions() {
-                stack.querySelectorAll('.mini-btn').forEach(b => { b.style.left = ''; b.style.top = ''; });
-            }
-
-            // Half-circle anchored at the left-edge hamburger: items fan out to the right (−90°…+90°).
-            function open() {
-                const H = 260, cxC = 56, bulge = 106, rowGap = 50;  // even vertical gaps + a gentle sin bulge to the right (rowGap > button height ⇒ never overlaps); ends (top/bottom) sit at cxC, only the bulged middle three move with `bulge`
-                stack.style.left = '8px';
-                stack.style.top  = (window.innerHeight / 2 - H / 2) + 'px';
-                refreshLabels();
-                stack.classList.add('popup');
-                if (hamb) hamb.classList.add('open');
-                // Mode-specific buttons: GLOBUS + SÜD/NORD only in clock mode; MOND + NEBEL only in the planetarium.
-                if (bGlobe) bGlobe.style.display = skyTarget ? 'none' : '';
-                if (bDir)   bDir.style.display   = skyTarget ? 'none' : '';
-                if (bMoon)  bMoon.style.display  = skyTarget ? '' : 'none';
-                if (bNeb)   bNeb.style.display   = skyTarget ? '' : 'none';
-                const btns = Array.from(stack.querySelectorAll('.mini-btn')).filter(b => b.style.display !== 'none');
-                const n = btns.length;
-                btns.forEach((b, i) => {
-                    const t = n > 1 ? i / (n - 1) : 0.5;                          // 0 (top) … 1 (bottom)
-                    b.style.left = (cxC + Math.sin(t * Math.PI) * bulge) + 'px';  // ends flush left, middle bulges right
-                    b.style.top  = (H / 2 + (i - (n - 1) / 2) * rowGap) + 'px';   // equal vertical gaps
-                });
-            }
-            function close() {
-                stack.classList.remove('popup');
-                if (hamb) hamb.classList.remove('open');
-                clearPositions();
-            }
-            function toggle() { stack.classList.contains('popup') ? close() : open(); }
-
-            // primary trigger: the hamburger (tap)
-            if (hamb) hamb.addEventListener('click', () => toggle());
-
-            // alternates: right-click (desktop) + long-press (touch) open the same left-anchored menu
-            window.addEventListener('contextmenu', e => { e.preventDefault(); open(); });
-            let lpTimer = null, lpX = 0, lpY = 0;
-            document.addEventListener('touchstart', e => {
-                if (e.target.closest('button, input, label')) return;
-                if (stack.classList.contains('popup')) return;
-                const t = e.touches[0]; lpX = t.clientX; lpY = t.clientY;
-                clearTimeout(lpTimer);
-                lpTimer = setTimeout(() => { open(); lpTimer = null; }, 550);
-            }, { passive: true });
-            document.addEventListener('touchmove', e => {
-                const t = e.touches[0];
-                if (Math.abs(t.clientX - lpX) > 8 || Math.abs(t.clientY - lpY) > 8) { clearTimeout(lpTimer); lpTimer = null; }
-            }, { passive: true });
-            document.addEventListener('touchend',    () => { clearTimeout(lpTimer); lpTimer = null; });
-            document.addEventListener('touchcancel', () => { clearTimeout(lpTimer); lpTimer = null; });
-
-            // close on button tap inside (after the action) or on a click/tap outside (but not on the hamburger)
-            stack.addEventListener('click', e => { if (e.target.tagName === 'BUTTON') close(); });
-            document.addEventListener('mousedown', e => {
-                if (!stack.classList.contains('popup')) return;
-                if (stack.contains(e.target)) return;
-                if (hamb && hamb.contains(e.target)) return;   // the hamburger toggles itself
-                close();
-            });
-
-            // actions — mirror the keyboard handlers exactly
-            if (bSky)   bSky.addEventListener('click',   () => { skyTarget = skyTarget ? 0 : 1; refreshLabels(); });
-            if (bLang)  bLang.addEventListener('click',  () => { starLangDE = !starLangDE;       refreshLabels(); });
-            if (bGlobe) bGlobe.addEventListener('click', () => { window.toggleGlobe();            refreshLabels(); });
-            if (bDir)   bDir.addEventListener('click',   () => { setDirection(!CW);               refreshLabels(); });
-            if (bToday) bToday.addEventListener('click', () => { debugDayOffset = 0; });
-            // on/off toggles: flip + restyle, keep the menu open (stopPropagation prevents the close-on-tap)
-            if (bMoon) bMoon.addEventListener('click', (e) => { e.stopPropagation(); showMoon = !showMoon; refreshLabels(); });
-            if (bNeb)  bNeb.addEventListener('click',  (e) => { e.stopPropagation(); showDeepsky = !showDeepsky; refreshLabels(); });
-        })();
-
-        // --- Right-edge mirror menu: on/off toggles for the sky overlays (left-facing half-circle). ---
-        (function () {
-            const stack = document.getElementById('mini-stack-r');
-            if (!stack) return;
-            const hamb = document.getElementById('wc-menu-btn-r');
-            const map = [
-                ['wc-tg-conlines', () => showConstLines, v => { showConstLines = v; }],
-                ['wc-tg-connames', () => showConstNames, v => { showConstNames = v; }],
-                ['wc-tg-ecliptic', () => showEcliptic,   v => { showEcliptic   = v; }],
-                ['wc-tg-planets',  () => showPlanets,    v => { showPlanets    = v; }],
-                ['wc-tg-zodiac',   () => showZodiac,     v => { showZodiac     = v; }],
-            ];
-            function refreshToggles() {
-                for (const [id, get] of map) {
-                    const b = document.getElementById(id);
-                    if (b) b.classList.toggle('off', !get());   // off = dimmed grey, on = cyan
-                }
-            }
-            // Half-circle anchored at the right edge: items fan out to the LEFT (mirror of the left menu).
-            function open() {
-                const H = 260, cxC = 56, bulge = 106, rowGap = 50, W = 320;
-                stack.style.left = (window.innerWidth - 8 - W) + 'px';
-                stack.style.top  = (window.innerHeight / 2 - H / 2) + 'px';
-                refreshToggles();
-                stack.classList.add('popup');
-                if (hamb) hamb.classList.add('open');
-                const btns = Array.from(stack.querySelectorAll('.mini-btn'));
-                const n = btns.length;
-                btns.forEach((b, i) => {
-                    const t = n > 1 ? i / (n - 1) : 0.5;
-                    b.style.left = (W - cxC - Math.sin(t * Math.PI) * bulge) + 'px';  // ends flush right, middle bulges left
-                    b.style.top  = (H / 2 + (i - (n - 1) / 2) * rowGap) + 'px';
-                });
-            }
-            function close() {
-                stack.classList.remove('popup');
-                if (hamb) hamb.classList.remove('open');
-                stack.querySelectorAll('.mini-btn').forEach(b => { b.style.left = ''; b.style.top = ''; });
-            }
-            function toggle() { stack.classList.contains('popup') ? close() : open(); }
-            if (hamb) hamb.addEventListener('click', () => toggle());
-            // each toggle flips its layer and stays open (so several can be flipped in a row)
-            for (const [id, get, set] of map) {
-                const b = document.getElementById(id);
-                if (b) b.addEventListener('click', (e) => { e.stopPropagation(); set(!get()); refreshToggles(); });
-            }
-            // close on a click/tap outside (but not on its hamburger)
-            document.addEventListener('mousedown', e => {
-                if (!stack.classList.contains('popup')) return;
-                if (stack.contains(e.target)) return;
-                if (hamb && hamb.contains(e.target)) return;
-                close();
-            });
-        })();
+        // --- Touch control menus (left = mode/date, right = sky-layer toggles) → moved to worldclock-menus.js
+        //     (Phase 3 refactor). Loaded after worldclock.js so they can read/write its state at IIFE time.
 
         function getMouseAngle(e) {
             const rect = canvas.getBoundingClientRect();
@@ -1352,57 +1171,7 @@
             ctx.restore();
         }
 
-        function drawMoon(mmx, mmy, mW, mH) {
-            ctx.fillStyle = "rgba(0, 10, 30, 0.98)";
-            ctx.strokeStyle = "rgba(0, 210, 255, 0.4)";
-            ctx.lineWidth = 1;
-            ctx.beginPath();
-            ctx.roundRect(mmx, mmy, mW, mH, 5);
-            ctx.fill();
-            ctx.stroke();
-            if (moonReady) {
-                const moonSize = Math.min(mW, mH) - 30;
-                const mcx = 0, mcy = mmy + mH / 2, mR = moonSize / 2;
-                // Follow the displayed (scrubbable) time, not just real-time — so dragging the city ring
-                // rocks the Moon smoothly through its daily parallactic swing; springs back to "now" on release.
-                const t = getDisplayTime();
-                // Bright-limb orientation for the selected city (continuous, lat/lon/time based).
-                const mLat = (targetCity.globeLat ?? targetCity.lat) ?? 0;
-                const mLon = (targetCity.globeLon ?? targetCity.lon) ?? 0;
-                const rot = moonBrightLimbRotation(t, mLat, mLon);
-                // Phase is global (same instant everywhere); only the orientation depends on location.
-                const synodic = 29.530588853;
-                const knownNew = Date.UTC(2000, 0, 6, 18, 14) / 86400000;  // reference new moon (days)
-                const phase = (((t.getTime() / 86400000 - knownNew) / synodic) % 1 + 1) % 1;
-                const a = Math.cos(phase * 2 * Math.PI) * mR;              // signed terminator x-extent
-                ctx.save();
-                // Draw everything in a canonical "bright limb on the right" frame, then rotate it into place.
-                ctx.translate(mcx, mcy); ctx.rotate(rot); ctx.translate(-mcx, -mcy);
-                // Soft warm glow behind the Moon (before the circle-clip, so the halo can reach past the disc).
-                const _glow = ctx.createRadialGradient(mcx, mcy, mR * 0.85, mcx, mcy, mR * 1.25);
-                _glow.addColorStop(0, 'rgba(255, 233, 170, 0.22)');
-                _glow.addColorStop(1, 'rgba(255, 233, 170, 0)');
-                ctx.fillStyle = _glow;
-                ctx.fillRect(mcx - mR * 1.25, mcy - mR * 1.25, mR * 2.5, mR * 2.5);
-                ctx.drawImage(moonImg, mcx - mR, mcy - mR, moonSize, moonSize);
-                ctx.beginPath(); ctx.arc(mcx, mcy, mR, 0, Math.PI * 2); ctx.clip();
-                // Warm the Moon a touch yellow (multiply keeps the shaded areas dark).
-                ctx.globalCompositeOperation = 'multiply';
-                ctx.fillStyle = 'rgb(255, 236, 170)';
-                ctx.fillRect(mcx - mR, mcy - mR, moonSize, moonSize);
-                ctx.globalCompositeOperation = 'source-over';
-                // Solid cover, soft terminator via blur. The outer boundary is pushed well past the clip (mR*1.6),
-                // so the blurred limb edge gets clipped away → only the terminator (inner edge) is soft; limb stays crisp.
-                ctx.fillStyle = "rgba(2, 4, 14, 0.92)";
-                ctx.filter = 'blur(' + (mR * 0.16) + 'px)';
-                ctx.beginPath();
-                ctx.arc(mcx, mcy, mR * 1.6, -Math.PI / 2, Math.PI / 2, true);   // outer boundary beyond the clip circle
-                ctx.ellipse(mcx, mcy, Math.abs(a), mR, 0, Math.PI / 2, -Math.PI / 2, a > 0); // terminator → blurs soft
-                ctx.fill();
-                ctx.filter = 'none';
-                ctx.restore();
-            }
-        }
+        // drawMoon → worldclock-moon.js (Phase 2 refactor).
 
         // Legend (top-left) + search/link overlay + globe & direction mode icons.
         // Input: r. Writes globeIconHitbox / dirIconHitbox (top-level).
@@ -2060,43 +1829,7 @@
 
         // Draw the Moon at (x,y) radius r with its phase: dark disc + lit lune; the bright limb faces `brightAngle`.
         // Real Moon texture (moon.png) with the phase: dim full disc (earthshine) + bright texture clipped to the lit lune.
-        function drawMoonImg(c, x, y, r, k, brightAngle, alpha) {
-            if (!moonReady) { drawMoonPhase(c, x, y, r, k, brightAngle, alpha); return; }   // fallback until the image loads
-            c.save();
-            c.translate(x, y);
-            c.rotate(brightAngle);                                   // lit limb → +x (toward the Sun)
-            c.save();                                                // earthshine: dim full disc
-            c.beginPath(); c.arc(0, 0, r, 0, Math.PI * 2); c.clip();
-            c.globalAlpha = alpha * 0.15;
-            c.drawImage(moonSmall || moonImg, -r, -r, 2 * r, 2 * r);
-            c.restore();
-            c.save();                                                // lit lune: full-bright texture
-            const b = r * (1 - 2 * k);
-            c.beginPath();
-            c.arc(0, 0, r, -Math.PI / 2, Math.PI / 2, false);
-            c.ellipse(0, 0, Math.abs(b), r, 0, Math.PI / 2, -Math.PI / 2, b > 0);
-            c.closePath(); c.clip();
-            c.globalAlpha = alpha;
-            c.drawImage(moonSmall || moonImg, -r, -r, 2 * r, 2 * r);
-            c.restore();
-            c.restore();
-        }
-
-        function drawMoonPhase(c, x, y, r, k, brightAngle, alpha) {
-            c.save();
-            c.globalAlpha = alpha;
-            c.translate(x, y);
-            c.rotate(brightAngle);                                   // after this the bright limb is on the +x side
-            c.fillStyle = 'rgba(90, 100, 120, 0.55)';                // dark disc (earthshine)
-            c.beginPath(); c.arc(0, 0, r, 0, Math.PI * 2); c.fill();
-            c.fillStyle = 'rgba(238, 240, 248, 0.98)';               // lit lune
-            const b = r * (1 - 2 * k);                               // terminator semi-minor (signed): k=0→r, 0.5→0, 1→−r
-            c.beginPath();
-            c.arc(0, 0, r, -Math.PI / 2, Math.PI / 2, false);        // bright limb (right semicircle)
-            c.ellipse(0, 0, Math.abs(b), r, 0, Math.PI / 2, -Math.PI / 2, b > 0);  // terminator
-            c.closePath(); c.fill();
-            c.restore();
-        }
+        // drawMoonImg + drawMoonPhase → worldclock-moon.js (Phase 2 refactor).
 
         function drawStarfield(w, h, cx, cy) {
             if (typeof CONSTELLATION_LINES === 'undefined' || typeof siderealTimeDeg !== 'function') return;
@@ -2181,21 +1914,24 @@
                 if (!q[2]) continue;
                 _dsVis++;
                 const rad = d.rad * 1.5 * skyZoom;
+                // Fade in/out over the last ~6 % toward the horizon (no popping as it rises/sets).
+                const _hf = dome ? Math.max(0, Math.min(1, (Rdome - Math.hypot(q[0] - cx, q[1] - cy)) / (Rdome * 0.06))) : 1;
+                const dc = _dsCore * _hf;
                 ctx.save();
                 ctx.globalCompositeOperation = 'lighter';            // additive → photo/glow shines out; black photo background adds nothing
                 if (dsoPhotos && d._masked) {                        // real photo, pre-masked to a soft round vignette
                     const R = d.rad * 2.4 * skyZoom;
-                    ctx.globalAlpha = 0.5 + 0.5 * skyT;              // dim behind the clock, full in the planetarium
+                    ctx.globalAlpha = (0.5 + 0.5 * skyT) * _hf;      // dim behind the clock, full in the planetarium
                     ctx.drawImage(d._masked, q[0] - R, q[1] - R, 2 * R, 2 * R);
                 } else {                                             // stylised fallback: two stacked additive halos
                     const g = ctx.createRadialGradient(q[0], q[1], 0, q[0], q[1], rad);
-                    g.addColorStop(0, `rgba(${d.r}, ${d.g}, ${d.b}, ${_dsCore})`);
-                    g.addColorStop(0.5, `rgba(${d.r}, ${d.g}, ${d.b}, ${_dsCore * 0.45})`);
+                    g.addColorStop(0, `rgba(${d.r}, ${d.g}, ${d.b}, ${dc})`);
+                    g.addColorStop(0.5, `rgba(${d.r}, ${d.g}, ${d.b}, ${dc * 0.45})`);
                     g.addColorStop(1, `rgba(${d.r}, ${d.g}, ${d.b}, 0)`);
                     ctx.fillStyle = g;
                     ctx.beginPath(); ctx.arc(q[0], q[1], rad, 0, Math.PI * 2); ctx.fill();
                     const g2 = ctx.createRadialGradient(q[0], q[1], 0, q[0], q[1], rad * 0.45);
-                    g2.addColorStop(0, `rgba(${d.r}, ${d.g}, ${d.b}, ${_dsCore})`);
+                    g2.addColorStop(0, `rgba(${d.r}, ${d.g}, ${d.b}, ${dc})`);
                     g2.addColorStop(1, `rgba(${d.r}, ${d.g}, ${d.b}, 0)`);
                     ctx.fillStyle = g2;
                     ctx.beginPath(); ctx.arc(q[0], q[1], rad * 0.45, 0, Math.PI * 2); ctx.fill();
@@ -2276,7 +2012,8 @@
                     const amp = 0.3 + 0.5 * rf;                                       // 0.3 high up … 0.8 at the horizon
                     const fl = 0.6 * Math.sin(_tnow * 1.8 + s.tw) + 0.4 * Math.sin(_tnow * 2.9 + s.tw * 1.7);
                     const bf = 1 - amp * (0.5 - 0.5 * fl);                            // dips brightness in [1-amp, 1]
-                    trailCtx.fillStyle = `rgba(${s.r}, ${s.g}, ${s.b}, ${a * s.af * bf})`;
+                    const hf = dome ? Math.max(0, Math.min(1, (1 - rf) / 0.06)) : 1;  // fade in/out at the horizon (no popping)
+                    trailCtx.fillStyle = `rgba(${s.r}, ${s.g}, ${s.b}, ${a * s.af * bf * hf})`;
                     trailCtx.beginPath(); trailCtx.arc(p[0], p[1], s.size * (0.85 + 0.3 * bf), 0, Math.PI * 2); trailCtx.fill();
                 }
                 visStarCount = _vs;
@@ -2346,13 +2083,16 @@
             // Zodiac signs along the ecliptic (symbol at each 30° sign centre).
             if (showZodiac) {
                 ctx.save();
-                ctx.fillStyle = `rgba(245, 210, 130, ${a * 0.7})`;
                 ctx.font = '16px sans-serif';   // astrological glyphs (Orbitron lacks them)
                 ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
                 for (const z of ZODIAC) {
                     const q = proj(z.ra, z.dec);
                     z._x = q[0]; z._y = q[1]; z._vis = q[2];   // cache for hover hit-testing
-                    if (q[2]) ctx.fillText(z.sym, q[0], q[1]);
+                    if (!q[2]) continue;
+                    // Fade in/out over the last ~6 % toward the horizon (no popping as a sign rises/sets).
+                    const _zf = dome ? Math.max(0, Math.min(1, (Rdome - Math.hypot(q[0] - cx, q[1] - cy)) / (Rdome * 0.06))) : 1;
+                    ctx.fillStyle = `rgba(245, 210, 130, ${a * 0.7 * _zf})`;
+                    ctx.fillText(z.sym, q[0], q[1]);
                 }
                 ctx.restore();
             } else {
@@ -2422,19 +2162,24 @@
                     const c = CON_CENTROIDS[con.id];
                     if (!c) continue;
                     const p = proj(c[0], c[1]);              // fixed centroid → smooth, no jump
-                    if (p[2]) labels.push({ t: _nm[con.id] || con.id, x: p[0], y: p[1], hot: con.id === hoverId });
+                    if (!p[2]) continue;
+                    // Fade in/out over the last ~6 % toward the horizon (no popping as a constellation rises/sets).
+                    const f = dome ? Math.max(0, Math.min(1, (Rdome - Math.hypot(p[0] - cx, p[1] - cy)) / (Rdome * 0.06))) : 1;
+                    labels.push({ t: _nm[con.id] || con.id, x: p[0], y: p[1], hot: con.id === hoverId, f });
                 }
                 visConCount = labels.length;
-                // (1) 50% dark-blue backdrop boxes behind the labels, no border
+                // (1) 50% dark-blue backdrop boxes behind the labels, no border (alpha follows the horizon fade)
                 const padX = 6, boxH = 19;
-                ctx.fillStyle = `rgba(8, 20, 42, ${0.5 * a})`;
                 for (const L of labels) {
                     const bw = ctx.measureText(L.t).width + padX * 2;
-                    ctx.fillRect(L.x - bw / 2, L.y - boxH / 2, bw, boxH);
+                    ctx.fillStyle = `rgba(8, 20, 42, ${0.5 * a * L.f})`;
+                    ctx.beginPath();
+                    ctx.roundRect(L.x - bw / 2, L.y - boxH / 2, bw, boxH, 5);   // slightly rounded, borderless
+                    ctx.fill();
                 }
                 // (2) the labels themselves, hovered one red
                 for (const L of labels) {
-                    ctx.fillStyle = L.hot ? `rgba(0, 210, 255, ${Math.max(nameA, 0.95)})` : `rgba(150, 185, 235, ${nameA})`;
+                    ctx.fillStyle = L.hot ? `rgba(0, 210, 255, ${Math.max(nameA, 0.95) * L.f})` : `rgba(150, 185, 235, ${nameA * L.f})`;
                     ctx.fillText(L.t, L.x, L.y);
                 }
             }

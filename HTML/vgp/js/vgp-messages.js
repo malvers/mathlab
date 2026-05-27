@@ -318,6 +318,7 @@ async function renderMsg(msg) {
     try { const d = JSON.parse(content.slice(VOICE_PREFIX.length)); if (d && d.a) voiceDesc = d; } catch (_) {}
   }
   if (!decryptFailed) div.dataset.raw = imgDesc ? '📷 Bild' : voiceDesc ? ('🎤 ' + (voiceDesc.t || 'Sprachnachricht')) : content;   // plain text (ArrowUp edit + reply quotes)
+  div.dataset.kind = imgDesc ? 'img' : voiceDesc ? 'voice' : 'text';   // only 'text' is editable
   // Emoji-only message (1–3) → render big, no bubble (WhatsApp/Signal style)
   if (!decryptFailed) {
     const ec = emojiOnlyCount(content);
@@ -599,14 +600,17 @@ async function deleteMessage(id) {
 // ===========================================================================
 const msgActions = document.getElementById('msg-actions');
 const maDel = document.getElementById('ma-del');
+const maEdit = document.getElementById('ma-edit');
 let actionTargetId = null;
 let reactionsByMsg = {};   // { message_id: [{pubkey, emoji}] }
 
-// Open the actions popover near a bubble (reactions for all; delete only for own).
+// Open the actions popover near a bubble (reactions for all; delete for own; edit only for own TEXT).
 function openMsgActions(bubble) {
   if (!bubble || bubble.dataset.id == null) return;
   actionTargetId = bubble.dataset.id;
-  maDel.classList.toggle('hidden', !bubble.classList.contains('self'));
+  const own = bubble.classList.contains('self');
+  maDel.classList.toggle('hidden', !own);
+  if (maEdit) maEdit.classList.toggle('hidden', !(own && bubble.dataset.kind === 'text'));   // can't edit images/voice
   msgActions.classList.remove('hidden');                    // show first so we can measure
   const r = bubble.getBoundingClientRect();
   const aw = msgActions.offsetWidth, ah = msgActions.offsetHeight;
@@ -643,6 +647,16 @@ document.getElementById('ma-reply').onclick = () => {
   closeMsgActions();
   if (b) startReply(b);
 };
+if (maEdit) maEdit.onclick = () => {
+  const b = messagesEl.querySelector(`[data-id="${actionTargetId}"]`);
+  closeMsgActions();
+  if (b) startEdit(b);
+};
+// Right-click on a message → our popover instead of the browser's native context menu
+messagesEl.addEventListener('contextmenu', e => {
+  const b = e.target.closest('.msg[data-id]');
+  if (b) { e.preventDefault(); openMsgActions(b); }
+});
 // Tap a quote → scroll to the original + flash it
 messagesEl.addEventListener('click', e => {
   const q = e.target.closest('.quote');
@@ -757,7 +771,7 @@ msgInput.onkeydown = e => {
   if (e.key === 'Tab' && !msgInput.value.trim()) { e.preventDefault(); openCmd(); return; }
   // ArrowUp in an empty field → load my last message for editing (only the last one)
   if (e.key === 'ArrowUp' && !msgInput.value && editingId == null) {
-    const last = [...messagesEl.querySelectorAll('.msg.self[data-id]')].pop();
+    const last = [...messagesEl.querySelectorAll('.msg.self[data-id]')].filter(el => el.dataset.kind === 'text').pop();
     if (last && last.dataset.raw != null) { e.preventDefault(); startEdit(last); return; }
   }
   // Esc cancels an in-progress edit
@@ -808,7 +822,7 @@ if (attachBtn && imgInput) {
     const file = imgInput.files && imgInput.files[0];
     imgInput.value = '';                   // reset so the same file can be picked again
     if (!file || !file.type.startsWith('image/')) return;
-    if (!activeRoom && !activePeer) { alert('Wähle zuerst einen Kontakt.'); return; }
+    if (!activeRoom && !activePeer) { await uiConfirm('Wähle zuerst einen Kontakt links aus 👈', { alert: true }); return; }
     try { await sendImage(file); } catch (e) { dbg('Bild senden fehlgeschlagen: ' + (e && e.message || e)); }
   };
 }
@@ -846,7 +860,10 @@ async function sendImage(file) {
 // sender's one-shot scroll undershooting media that lays out/loads after the initial scroll).
 function pinIfLast(div) {
   if (div !== messagesEl.lastElementChild) return;
-  if (div.offsetTop + div.offsetHeight > messagesEl.scrollTop + messagesEl.clientHeight - 4) messagesEl.scrollTop = messagesEl.scrollHeight;
+  if (div.offsetTop + div.offsetHeight > messagesEl.scrollTop + messagesEl.clientHeight - 4) {
+    cancelAnimationFrame(glideRAF);   // stop a running slow-glide, otherwise it overrides the pin
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+  }
 }
 function placeImg(wrap, url, div) {
   wrap.innerHTML = `<img class="msg-img" src="${url}" alt="Bild">`;
@@ -897,7 +914,7 @@ function updateRecText() { if (recTextEl) { recTextEl.textContent = (recFinal + 
 
 function fmtDur(s) { const m = Math.floor(s / 60); return m + ':' + String(s % 60).padStart(2, '0'); }
 async function startRec() {
-  if (!activeRoom && !activePeer) { alert('Wähle zuerst einen Kontakt.'); return; }
+  if (!activeRoom && !activePeer) { await uiConfirm('Wähle zuerst einen Kontakt links aus 👈', { alert: true }); return; }
   try { recStream = await navigator.mediaDevices.getUserMedia({ audio: true }); }
   catch (e) { alert('Mikrofon-Zugriff verweigert.'); return; }
   recCancelled = false; recChunks = [];
@@ -1053,7 +1070,7 @@ async function deliverMessage(content) {
     if (data) { try { await renderMsg(data); } catch (e) { dbg('Render-Fehler (ignoriert): ' + (e && e.message || e)); } messagesEl.scrollTop = messagesEl.scrollHeight; }
     return true;
   }
-  if (!activePeer) { alert('Wähle zuerst einen Kontakt.'); return false; }
+  if (!activePeer) { await uiConfirm('Wähle zuerst einen Kontakt links aus 👈', { alert: true }); return false; }
   const chatKey = await deriveChatKey(activePeer.ecdh_pubkey);
   if (!chatKey) { dbg('Kein Chat-Schlüssel (ECDH) — Kontakt ohne ecdh_pubkey?'); return false; }
   const encrypted = await encryptText(content, chatKey);
