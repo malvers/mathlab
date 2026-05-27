@@ -317,7 +317,7 @@ async function renderMsg(msg) {
   } else if (!decryptFailed && content.startsWith(VOICE_PREFIX)) {
     try { const d = JSON.parse(content.slice(VOICE_PREFIX.length)); if (d && d.a) voiceDesc = d; } catch (_) {}
   }
-  if (!decryptFailed) div.dataset.raw = imgDesc ? '📷 Bild' : voiceDesc ? '🎤 Sprachnachricht' : content;   // plain text (ArrowUp edit + reply quotes)
+  if (!decryptFailed) div.dataset.raw = imgDesc ? '📷 Bild' : voiceDesc ? ('🎤 ' + (voiceDesc.t || 'Sprachnachricht')) : content;   // plain text (ArrowUp edit + reply quotes)
   // Emoji-only message (1–3) → render big, no bubble (WhatsApp/Signal style)
   if (!decryptFailed) {
     const ec = emojiOnlyCount(content);
@@ -354,7 +354,8 @@ async function renderMsg(msg) {
   const body = imgDesc
     ? `<div class="img-wrap" data-p="${escapeHtml(imgDesc.p)}" style="aspect-ratio:${(imgDesc.w || 4)}/${(imgDesc.h || 3)}"><span class="img-spin">📷</span></div>`
     : voiceDesc
-    ? `<div class="voice-wrap" data-p="${escapeHtml(voiceDesc.a)}"><span class="img-spin">🎤</span> ${fmtDur(voiceDesc.d || 0)}</div>`
+    ? `<div class="voice-wrap" data-p="${escapeHtml(voiceDesc.a)}" data-d="${voiceDesc.d || 0}"><span class="img-spin">🎤</span> ${fmtDur(voiceDesc.d || 0)}</div>`
+      + (voiceDesc.t ? `<div class="voice-tx">${emojiImg(formatText(escapeHtml(voiceDesc.t)))}</div>` : '')
     : `<span class="text">${emojiImg(formatText(escapeHtml(content)))}</span>`;
   div.innerHTML = `${quote}${sender}${badge}${body}<span class="time">${timeStr}${ticks}</span>`;
   // Actions trigger (⋯ on hover; touch uses long-press) → reactions + (own) delete; plus a reactions container.
@@ -841,16 +842,16 @@ async function sendImage(file) {
   if (error) { dbg('Upload fehlgeschlagen (Bucket „media" + Policy vorhanden?): ' + error.message); alert('Bild-Upload fehlgeschlagen.'); return; }
   await deliverMessage(IMG_PREFIX + JSON.stringify({ p: path, w, h }));
 }
-// Put the decoded image into a wrap; once it has laid out, re-pin to bottom if this is the last
-// message and it's cut off (fixes the sender's one-shot scroll undershooting the async image height).
+// Re-pin to bottom if this is the last message and its bottom is below the fold (fixes the
+// sender's one-shot scroll undershooting media that lays out/loads after the initial scroll).
+function pinIfLast(div) {
+  if (div !== messagesEl.lastElementChild) return;
+  if (div.offsetTop + div.offsetHeight > messagesEl.scrollTop + messagesEl.clientHeight - 4) messagesEl.scrollTop = messagesEl.scrollHeight;
+}
 function placeImg(wrap, url, div) {
   wrap.innerHTML = `<img class="msg-img" src="${url}" alt="Bild">`;
   const im = wrap.querySelector('img');
-  const pin = () => {
-    if (div !== messagesEl.lastElementChild) return;
-    if (div.offsetTop + div.offsetHeight > messagesEl.scrollTop + messagesEl.clientHeight - 4) messagesEl.scrollTop = messagesEl.scrollHeight;
-  };
-  if (im.complete) pin(); else im.addEventListener('load', pin, { once: true });
+  if (im.complete) pinIfLast(div); else im.addEventListener('load', () => pinIfLast(div), { once: true });
 }
 // Download the ciphertext, decrypt with the message's key, show the image (cached by path).
 async function loadImage(div, key) {
@@ -881,8 +882,18 @@ if (lightbox) lightbox.addEventListener('click', () => lightbox.classList.add('h
 // ===========================================================================
 const VOICE_PREFIX = 'vgpvoi';
 let mediaRec = null, recChunks = [], recStream = null, recStart = 0, recTimer = null, recCancelled = false;
-const recBar = document.getElementById('rec-bar');
+let recognition = null, recFinal = '', recInterim = '';   // live speech-to-text (Web Speech API)
 const recTimeEl = document.getElementById('rec-time');
+const recTextEl = document.getElementById('rec-text');
+const inputRow = document.getElementById('input-row');
+function makeRecognition() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) return null;
+  const r = new SR();
+  r.lang = 'de-DE'; r.continuous = true; r.interimResults = true;
+  return r;
+}
+function updateRecText() { if (recTextEl) { recTextEl.textContent = (recFinal + recInterim).trim(); recTextEl.scrollLeft = recTextEl.scrollWidth; } }   // follow the newest words
 
 function fmtDur(s) { const m = Math.floor(s / 60); return m + ':' + String(s % 60).padStart(2, '0'); }
 async function startRec() {
@@ -897,16 +908,36 @@ async function startRec() {
     if (!recCancelled) { try { await finishRecording(); } catch (e) { dbg('Voice fehlgeschlagen: ' + (e && e.message || e)); alert('Sprachnachricht fehlgeschlagen.'); } }
   };
   mediaRec.start();
+  // Live transcription (best-effort; ignore if unsupported/denied → voice-only fallback)
+  recFinal = ''; recInterim = ''; updateRecText();
+  recognition = makeRecognition();
+  if (recognition) {
+    recognition.onresult = e => {
+      let interim = '';
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        const r = e.results[i];
+        if (r.isFinal) recFinal += r[0].transcript; else interim += r[0].transcript;
+      }
+      recInterim = interim; updateRecText();
+    };
+    recognition.onerror = () => {};   // no-speech / network etc. → just no transcript
+    try { recognition.start(); } catch (_) {}
+  }
   recStart = Date.now();
   micBtn.classList.add('recording');
-  if (recBar) recBar.classList.remove('hidden');
+  if (inputRow) inputRow.classList.add('recording');   // the input line itself turns into the recorder (WhatsApp-style)
   recTimer = setInterval(() => { if (recTimeEl) recTimeEl.textContent = fmtDur(Math.round((Date.now() - recStart) / 1000)); }, 250);
 }
-function endRecUI() { micBtn.classList.remove('recording'); clearInterval(recTimer); if (recBar) recBar.classList.add('hidden'); }
+function endRecUI() {
+  micBtn.classList.remove('recording'); clearInterval(recTimer);
+  if (recognition) { try { recognition.stop(); } catch (_) {} }
+  if (inputRow) inputRow.classList.remove('recording');
+  if (recTextEl) recTextEl.textContent = '';
+}
 function stopAndSend() { recCancelled = false; if (mediaRec && mediaRec.state === 'recording') mediaRec.stop(); endRecUI(); }
 function cancelRec() { recCancelled = true; if (mediaRec && mediaRec.state === 'recording') mediaRec.stop(); else if (recStream) recStream.getTracks().forEach(t => t.stop()); endRecUI(); }
 if (micBtn) micBtn.onclick = () => { (mediaRec && mediaRec.state === 'recording') ? stopAndSend() : startRec(); };
-if (recBar) document.getElementById('rec-cancel').onclick = cancelRec;
+{ const rc = document.getElementById('rec-cancel'); if (rc) rc.onclick = cancelRec; }
 
 // 16-bit PCM mono WAV from a Float32 buffer
 function encodeWav(f32, rate) {
@@ -929,6 +960,7 @@ function toMono(ab, targetRate) {
   return { data: out, rate: targetRate };
 }
 async function finishRecording() {
+  const transcript = (recFinal + ' ' + recInterim).trim();   // captured before the recognizer fully stops
   const dur = Math.round((Date.now() - recStart) / 1000);
   const blob = new Blob(recChunks, { type: mediaRec.mimeType || 'audio/webm' });
   if (!blob.size || dur < 1) return;                          // too short → ignore (accidental tap)
@@ -942,22 +974,42 @@ async function finishRecording() {
   const path = crypto.randomUUID() + '.bin';
   const { error } = await client.storage.from('media').upload(path, enc, { contentType: 'application/octet-stream' });
   if (error) { dbg('Voice-Upload fehlgeschlagen: ' + error.message); alert('Sprachnachricht-Upload fehlgeschlagen.'); return; }
-  await deliverMessage(VOICE_PREFIX + JSON.stringify({ a: path, d: dur }));
+  const desc = { a: path, d: dur }; if (transcript) desc.t = transcript;
+  await deliverMessage(VOICE_PREFIX + JSON.stringify(desc));
 }
 // Download + decrypt a voice clip into a <audio> player.
+// Custom audio player (consistent across browsers): play/pause + progress bar + time.
+function renderVoice(wrap, url, dur) {
+  wrap.innerHTML =
+    '<button class="v-play" aria-label="Abspielen">▶</button>' +
+    '<div class="v-bar"><div class="v-prog"></div></div>' +
+    '<span class="v-time">' + fmtDur(dur || 0) + '</span>' +
+    '<audio src="' + url + '" preload="metadata"></audio>';
+  const audio = wrap.querySelector('audio'), play = wrap.querySelector('.v-play');
+  const prog = wrap.querySelector('.v-prog'), bar = wrap.querySelector('.v-bar'), time = wrap.querySelector('.v-time');
+  const total = () => audio.duration && isFinite(audio.duration) ? audio.duration : (dur || 0);
+  play.onclick = () => { audio.paused ? audio.play() : audio.pause(); };
+  audio.onplay = () => { play.textContent = '⏸'; };
+  audio.onpause = () => { play.textContent = '▶'; };
+  audio.onended = () => { play.textContent = '▶'; prog.style.width = '0%'; time.textContent = fmtDur(dur || 0); };
+  audio.ontimeupdate = () => {
+    const t = total(); prog.style.width = (t ? Math.min(100, audio.currentTime / t * 100) : 0) + '%';
+    time.textContent = fmtDur(Math.round(audio.currentTime || 0));
+  };
+  bar.onclick = e => { const r = bar.getBoundingClientRect(); audio.currentTime = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)) * total(); };
+}
 async function loadVoice(div, key) {
   const wrap = div.querySelector('.voice-wrap');
   if (!wrap) return;
-  const path = wrap.dataset.p;
+  const path = wrap.dataset.p, dur = +wrap.dataset.d || 0;
   if (!path) return;
-  const render = url => { wrap.innerHTML = `<audio controls preload="metadata" src="${url}"></audio>`; };
-  if (imgCache[path]) { render(imgCache[path]); return; }
+  if (imgCache[path]) { renderVoice(wrap, imgCache[path], dur); pinIfLast(div); return; }
   try {
     const { data, error } = await client.storage.from('media').download(path);
     if (error || !data) { wrap.innerHTML = '<span class="img-err">⚠️</span>'; return; }
     const plain = await decryptBytes(new Uint8Array(await data.arrayBuffer()), key);
     const url = URL.createObjectURL(new Blob([plain], { type: 'audio/wav' }));
-    imgCache[path] = url; render(url);
+    imgCache[path] = url; renderVoice(wrap, url, dur); pinIfLast(div);
   } catch (e) { wrap.innerHTML = '<span class="img-err">⚠️</span>'; dbg('Voice laden/entschlüsseln fehlgeschlagen: ' + (e && e.message || e)); }
 }
 
