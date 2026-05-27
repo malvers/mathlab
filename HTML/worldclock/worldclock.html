@@ -197,9 +197,11 @@
 
     <!-- Planetarium: top-center info box — selected city + its local date & time -->
     <div id="sky-info">
-        <div id="sky-info-city"></div>
-        <div id="sky-info-date"></div>
-        <div id="sky-info-time"></div>
+        <div id="sky-info-line">
+            <div id="sky-info-date"></div>
+            <div id="sky-info-city"></div>
+            <div id="sky-info-time"></div>
+        </div>
         <button id="sky-play" type="button" aria-label="Zeitraffer">▶</button>
     </div>
 
@@ -229,6 +231,20 @@
     <script src="../js/cyber-clock.js"></script>
     <script src="worldclock.js"></script>
     <script src="../js/cyber-recorder-key.js"></script>
+    <script>
+    // Local-vs-live indicator (top right): red badge + ring ONLY when served locally. No red = you are on the LIVE site.
+    (function () {
+        const h = location.hostname;
+        const local = h === '' || h === 'localhost' || h === '127.0.0.1' || h.endsWith('.local')
+                   || /^(192\.168\.|10\.|172\.(1[6-9]|2\d|3[01])\.)/.test(h) || location.protocol === 'file:';
+        if (!local) return;
+        document.documentElement.classList.add('env-local');
+        const b = document.createElement('div');
+        b.className = 'env-badge';
+        b.textContent = 'LOKAL';
+        document.body.appendChild(b);
+    })();
+    </script>
 </body>
 </html>
 
