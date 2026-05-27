@@ -378,7 +378,7 @@ async function renderMsg(msg) {
 // Etappe 4: permanently delete the account — server rows (own messages, receipts, identity, backup)
 // + everything local + sign out. Irreversible → three confirmations.
 async function deleteAccount() {
-  if (!myPubB64) { alert('Erst anmelden.'); return; }
+  if (!myPubB64) { await uiConfirm('Erst anmelden.', { alert: true }); return; }
   if (!await uiConfirm('Konto WIRKLICH löschen?\n\nDeine gesendeten Nachrichten, deine Identität (Name + Schlüssel) und dein Server-Backup werden entfernt.', { okText: 'LÖSCHEN', danger: true })) return;
   if (!await uiConfirm('Bist du ganz sicher?\n\nDas lässt sich NICHT rückgängig machen — auch dein Recovery-Code wird ungültig.', { okText: 'LÖSCHEN', danger: true })) return;
   if (!await uiConfirm('Letzte Warnung — Konto endgültig löschen?', { okText: 'LÖSCHEN', danger: true })) return;
@@ -401,21 +401,21 @@ async function deleteAccount() {
 async function renameAccount(newRaw) {
   const newName = (newRaw || '').trim().toLowerCase();
   if (!newName) return;
-  if (!myPubB64 || !hmacKey) { alert('Bitte zuerst anmelden.'); return; }
-  if (newName.length > 30) { alert('Name zu lang (max. 30 Zeichen).'); return; }
+  if (!myPubB64 || !hmacKey) { await uiConfirm('Bitte zuerst anmelden.', { alert: true }); return; }
+  if (newName.length > 30) { await uiConfirm('Name zu lang (max. 30 Zeichen).', { alert: true }); return; }
   const oldName = (myNameEl.value || '').trim().toLowerCase();
   if (newName === oldName) return;
   const oldId = await nameId(oldName), newId = await nameId(newName);
   // Is the new name free (owned by nobody else)?
   const { data: ex, error: exErr } = await client.from('identities').select('pubkey').eq('name_id', newId).limit(1);
-  if (exErr) { alert('Prüfung fehlgeschlagen: ' + exErr.message); return; }
-  if (ex && ex.length && ex[0].pubkey !== myPubB64) { alert('Der Name „' + newName + '" ist bereits vergeben.'); return; }
+  if (exErr) { await uiConfirm('Prüfung fehlgeschlagen: ' + exErr.message, { alert: true }); return; }
+  if (ex && ex.length && ex[0].pubkey !== myPubB64) { await uiConfirm('Der Name „' + newName + '" ist bereits vergeben.', { alert: true }); return; }
   // Move the server backup to the new key (enc/wraps untouched → recovery code stays valid)
   const { error: vErr } = await client.from('vaults').update({ name_id: newId }).eq('name_id', oldId);
-  if (vErr) { alert('Umbenennen fehlgeschlagen (Backup): ' + vErr.message); return; }
+  if (vErr) { await uiConfirm('Umbenennen fehlgeschlagen (Backup): ' + vErr.message, { alert: true }); return; }
   // Update the directory entry: new name_id + new encrypted display name
   const { error: iErr } = await client.from('identities').update({ name_id: newId, name: await encDir(newName) }).eq('pubkey', myPubB64);
-  if (iErr) { alert('Umbenennen fehlgeschlagen: ' + iErr.message); return; }
+  if (iErr) { await uiConfirm('Umbenennen fehlgeschlagen: ' + iErr.message, { alert: true }); return; }
   // Local vault keeps the name in clear in its wrapper → update it directly (no re-encryption needed)
   try { const v = JSON.parse(localStorage.getItem(VAULT_KEY)); if (v) { v.name = newName; localStorage.setItem(VAULT_KEY, JSON.stringify(v)); } } catch (_) {}
   localStorage.setItem(NAME_KEY, newName);
@@ -861,7 +861,7 @@ async function sendImage(file) {
   const enc = await encryptBytes(bytes, key);                 // iv ++ ciphertext (E2E — storage sees only this)
   const path = crypto.randomUUID() + '.bin';
   const { error } = await client.storage.from('media').upload(path, enc, { contentType: 'application/octet-stream' });
-  if (error) { dbg('Upload fehlgeschlagen (Bucket „media" + Policy vorhanden?): ' + error.message); alert('Bild-Upload fehlgeschlagen.'); return; }
+  if (error) { dbg('Upload fehlgeschlagen (Bucket „media" + Policy vorhanden?): ' + error.message); await uiConfirm('Bild-Upload fehlgeschlagen.', { alert: true }); return; }
   await deliverMessage(IMG_PREFIX + JSON.stringify({ p: path, w, h }));
 }
 // Re-pin to bottom if this is the last message and its bottom is below the fold (fixes the
@@ -924,13 +924,13 @@ function fmtDur(s) { const m = Math.floor(s / 60); return m + ':' + String(s % 6
 async function startRec() {
   if (!activeRoom && !activePeer) { await uiConfirm('Wähle zuerst einen Kontakt links aus 👈', { alert: true }); return; }
   try { recStream = await navigator.mediaDevices.getUserMedia({ audio: true }); }
-  catch (e) { alert('Mikrofon-Zugriff verweigert.'); return; }
+  catch (e) { await uiConfirm('Mikrofon-Zugriff verweigert.', { alert: true }); return; }
   recCancelled = false; recChunks = [];
   mediaRec = new MediaRecorder(recStream);
   mediaRec.ondataavailable = e => { if (e.data && e.data.size) recChunks.push(e.data); };
   mediaRec.onstop = async () => {
     recStream.getTracks().forEach(t => t.stop());
-    if (!recCancelled) { try { await finishRecording(); } catch (e) { dbg('Voice fehlgeschlagen: ' + (e && e.message || e)); alert('Sprachnachricht fehlgeschlagen.'); } }
+    if (!recCancelled) { try { await finishRecording(); } catch (e) { dbg('Voice fehlgeschlagen: ' + (e && e.message || e)); await uiConfirm('Sprachnachricht fehlgeschlagen.', { alert: true }); } }
   };
   mediaRec.start();
   // Live transcription (best-effort; ignore if unsupported/denied → voice-only fallback)
@@ -998,7 +998,7 @@ async function finishRecording() {
   const enc = await encryptBytes(wav, key);
   const path = crypto.randomUUID() + '.bin';
   const { error } = await client.storage.from('media').upload(path, enc, { contentType: 'application/octet-stream' });
-  if (error) { dbg('Voice-Upload fehlgeschlagen: ' + error.message); alert('Sprachnachricht-Upload fehlgeschlagen.'); return; }
+  if (error) { dbg('Voice-Upload fehlgeschlagen: ' + error.message); await uiConfirm('Sprachnachricht-Upload fehlgeschlagen.', { alert: true }); return; }
   const desc = { a: path, d: dur }; if (transcript) desc.t = transcript;
   await deliverMessage(VOICE_PREFIX + JSON.stringify(desc));
 }

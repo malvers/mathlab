@@ -357,7 +357,7 @@ async function nameId(name) {
 }
 // Returns true if the name is now ours (freshly claimed or already owned via our signing key)
 async function claimName(name) {
-  if (!hmacKey) { alert('Erst Passwort eingeben!'); return false; }
+  if (!hmacKey) { await uiConfirm('Erst Passwort eingeben!', { alert: true }); return false; }
   await ensureClient();
   const id = await nameId(name);
   // A name is bound to a public key. Ours if the stored pubkey matches this device's key.
@@ -366,7 +366,7 @@ async function claimName(name) {
   if (data && data.length) {
     if (data[0].pubkey === myPubB64) { dbg('Name gehört dir: ' + name); return true; }
     dbg('Name vergeben: ' + name);
-    alert('Der Name „' + name + '" ist bereits vergeben — bitte einen anderen wählen.');
+    await uiConfirm('Der Name „' + name + '" ist bereits vergeben — bitte einen anderen wählen.', { alert: true });
     return false;
   }
   // Store signing key + ECDH key + clear-text name (name & ecdh_pubkey power 1:1 chats / contact list)
@@ -379,7 +379,7 @@ async function claimName(name) {
   }
   if (insErr) {
     dbg('Claim fehlgeschlagen: ' + insErr.message);
-    alert('Der Name „' + name + '" ist bereits vergeben — bitte einen anderen wählen.');
+    await uiConfirm('Der Name „' + name + '" ist bereits vergeben — bitte einen anderen wählen.', { alert: true });
     return false;
   }
   dbg('Name beansprucht (Schlüssel + ECDH gebunden): ' + name);

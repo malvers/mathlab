@@ -217,7 +217,7 @@ img.joypixels{display:inline-block;height:1.43em;width:1.43em;vertical-align:-0.
 .msg .act-btn{position:absolute;top:-9px;right:-9px;width:22px;height:22px;border-radius:50%;border:1px solid rgba(var(--vgp-accent-rgb),.3);background:var(--vgp-panel);color:var(--vgp-text-dim);font-size:13px;line-height:20px;padding:0;cursor:pointer;opacity:0;transition:opacity .12s;z-index:6}
 .msg.self .act-btn{right:auto;left:-9px}
 .msg:hover .act-btn{opacity:1}
-@media (hover:none){.msg .act-btn{display:none}}  /* touch uses long-press */
+@media (pointer:coarse){.msg .act-btn{display:none}}  /* real touch uses long-press; Mac keeps ⋯ on hover */
 /* Reaction chips straddling the bubble's bottom edge (WhatsApp/Signal style) */
 .msg .reacts{position:absolute;bottom:-13px;display:flex;gap:2px;z-index:4;margin:0}
 .msg.self .reacts{right:8px}
@@ -277,6 +277,11 @@ img.joypixels{display:inline-block;height:1.43em;width:1.43em;vertical-align:-0.
 #msg-actions > button#ma-del{color:var(--vgp-red)}
 #msg-actions > button#ma-del:hover{background:rgba(var(--vgp-red-rgb),.15)}
 #msg-actions > button.hidden{display:none}
+/* Real touch (finger = coarse pointer): comfortable ~44px tap targets; Mac trackpad/mouse stays compact above */
+@media (pointer:coarse){
+  #msg-actions .react-row button{height:44px;line-height:44px}
+  #msg-actions > button{padding:10px 0}
+}
 /* Edit-last-message banner above the input + a subtle accent ring on the field while editing */
 #edit-hint{position:absolute;left:64px;right:60px;bottom:calc(100% - 4px);background:var(--vgp-chat);border:1px solid rgba(var(--vgp-accent-rgb),.25);border-radius:10px;padding:8px 14px;font-size:13px;color:var(--vgp-text-dim);z-index:30;box-shadow:0 -6px 24px rgba(var(--vgp-shadow),.45)}
 #edit-hint.hidden{display:none}
@@ -602,13 +607,13 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
   <button id="stats-close">SCHLIESSEN</button>
 </div>
 
-<script src="js/vgp-setup.js?v=20260524-97"></script>
-<script src="js/vgp-auth.js?v=20260524-97"></script>
-<script src="js/vgp-crypto.js?v=20260524-97"></script>
-<script src="js/vgp-backup-core.js?v=20260524-97"></script>
-<script src="js/vgp-contacts.js?v=20260524-97"></script>
-<script src="js/vgp-messages.js?v=20260524-97"></script>
-<script src="js/vgp-push.js?v=20260524-97"></script>
+<script src="js/vgp-setup.js?v=20260524-100"></script>
+<script src="js/vgp-auth.js?v=20260524-100"></script>
+<script src="js/vgp-crypto.js?v=20260524-100"></script>
+<script src="js/vgp-backup-core.js?v=20260524-100"></script>
+<script src="js/vgp-contacts.js?v=20260524-100"></script>
+<script src="js/vgp-messages.js?v=20260524-100"></script>
+<script src="js/vgp-push.js?v=20260524-100"></script>
 <script>
 // Local-vs-live indicator: mark the page red ONLY when served locally. No red = you're on the live site.
 (function () {

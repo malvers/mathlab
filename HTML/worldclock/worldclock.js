@@ -96,6 +96,13 @@
         }
 
         const PROJ_PERSP_KEY = 'worldclock-projpersp';   // persisted dome perspective blend (0…1)
+        const SKY_TOGGLES_KEY = 'worldclock-sky-toggles';   // persisted on/off state of all sky-layer toggles
+        function loadSkyToggle(name, dflt) {
+            try { const s = JSON.parse(localStorage.getItem(SKY_TOGGLES_KEY)); return (s && name in s) ? !!s[name] : dflt; } catch (_) { return dflt; }
+        }
+        function saveSkyToggle(name, val) {
+            try { const s = JSON.parse(localStorage.getItem(SKY_TOGGLES_KEY)) || {}; s[name] = !!val; localStorage.setItem(SKY_TOGGLES_KEY, JSON.stringify(s)); } catch (_) {}
+        }
         // Globe vs clock mode — precedence: URL ?globe= (wins) > localStorage > default (clock).
         const GLOBE_KEY = 'worldclock-globe';
         window.useGlobe = (function () {
@@ -185,14 +192,15 @@
         let hoveredZodiac = null;   // zodiac sign under the pointer (priority over stars/constellations)
         let hoveredDeepsky = null;  // deep-sky object under the pointer (Messier nebulae/clusters/galaxies)
         let _dsLastLog = -1;        // last logged deep-sky-above-horizon count (avoids spamming the DEBUG window)
-        // Right-menu layer toggles (all on by default) — show/hide individual sky overlays.
-        let showConstLines = true;  // constellation lines/figures
-        let showConstNames = true;  // constellation name labels
-        let showEcliptic   = true;  // ecliptic line
-        let showPlanets    = true;  // planet markers + names
-        let showZodiac     = true;  // zodiac symbols
-        let showMoon       = true;  // the Moon (texture + phase)
-        let showDeepsky    = true;  // deep-sky objects (nebulae/clusters/galaxies)
+        // Sky-layer toggles — default on, but each restored from localStorage (persisted on every change).
+        let showConstLines = loadSkyToggle('conLines', true);  // constellation lines/figures
+        let showConstNames = loadSkyToggle('conNames', true);  // constellation name labels
+        let showEcliptic   = loadSkyToggle('ecliptic', true);  // ecliptic line
+        let showPlanets    = loadSkyToggle('planets', true);   // planet markers + names
+        let showZodiac     = loadSkyToggle('zodiac', true);    // zodiac symbols
+        let showMoon       = loadSkyToggle('moon', true);      // the Moon (texture + phase)
+        let showDeepsky    = loadSkyToggle('deepsky', true);   // deep-sky objects (nebulae/clusters/galaxies)
+        let showSats       = loadSkyToggle('sats', true);      // satellites (ISS, Tiangong, Hubble) via SGP4
         let visStarCount = 0, visConCount = 0;   // currently-visible counts (stars above horizon · constellations on screen)
         // --- Sky data + loaders (centroids, ecliptic, zodiac, deep-sky, star catalog, Milky Way) → worldclock-sky.js (Phase 4).
         let autoRotation = 0;
@@ -276,12 +284,12 @@
             else if (e.key === 'ArrowLeft')  debugDayOffset -= 1;
             else if (e.key === 'ArrowUp')    debugDayOffset += 1 / 24;
             else if (e.key === 'ArrowDown')  debugDayOffset -= 1 / 24;
-            else if (e.key === '0')          debugDayOffset = 0;
+            else if (e.key === '0')        { debugDayOffset = 0; lapseActive = false; }   // back to NOW + stop the time-lapse
             else if (e.key === 's' || e.key === 'S') { skyTarget = skyTarget ? 0 : 1; e.preventDefault(); return; }  // planetarium toggle
             else if (e.key === 'n' || e.key === 'N') { starLangDE = !starLangDE; e.preventDefault(); return; }       // labels: German ↔ Latin
             else if (e.key === ' ') { toggleLapse(); e.preventDefault(); return; }                                   // time-lapse play/pause (Space)
             else if (e.key === 'Escape') { skyZoom = 1; skyPanX = 0; skyPanY = 0; e.preventDefault(); return; }      // reset zoom + pan
-            else if (e.key === 'b' || e.key === 'B') { dsoPhotos = !dsoPhotos; try { DebugWindow.log('[deepsky] Fotos ' + (dsoPhotos ? 'an' : 'aus')); } catch (_) {} e.preventDefault(); return; }  // deep-sky photos ↔ stylised glow
+            else if (e.key === 'b' || e.key === 'B') { dsoPhotos = !dsoPhotos; saveSkyToggle('photos', dsoPhotos); try { DebugWindow.log('[deepsky] Fotos ' + (dsoPhotos ? 'an' : 'aus')); } catch (_) {} e.preventDefault(); return; }  // deep-sky photos ↔ stylised glow
             else if (e.key === ',' || e.key === '.') {
                 projPersp = e.key === ',' ? Math.max(0, projPersp - 0.1) : Math.min(1, projPersp + 0.1);
                 try { localStorage.setItem(PROJ_PERSP_KEY, projPersp); } catch (_) {}

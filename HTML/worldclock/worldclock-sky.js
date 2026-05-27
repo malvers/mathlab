@@ -60,7 +60,7 @@
             { id: 'M104',ra: 189.99, dec: -11.62, name: 'Sombrero-Galaxie', type: 'Galaxie',              rad: 8,  r: 205, g: 213, b: 238, img: 'M104_ngc4594_sombrero_galaxy_hi-res.jpg' },
             { id: 'h+χ', ra: 34.70,  dec: 57.10,  name: 'Doppelhaufen Perseus', type: 'Offener Sternhaufen', rad: 11, r: 175, g: 205, b: 255 }
         ];
-        let dsoPhotos = true;   // true = real photos (additive, soft-masked); false = stylised glow only. Toggle: key 'b'
+        let dsoPhotos = loadSkyToggle('photos', true);   // real photos (additive) vs stylised glow; key 'b'. Persisted.
         // Load each photo once, pre-mask it to a soft round vignette (so no hard rectangle edge), store on the entry.
         function loadNebulaImages() {
             const _withImg = DEEPSKY.filter(d => d.img).length;
@@ -718,6 +718,52 @@
                     ctx.fillStyle = `rgba(245, 194, 66, ${a * _f})`;   // λ orange like Sun/planets
                     ctx.font = '600 10px Orbitron'; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
                     ctx.fillText('Mond', _mp[0], _mp[1] + 12);
+                }
+            }
+            // Satellites (ISS, Tiangong, Hubble): SGP4 via satellite.js → alt/az for the dome's location, plotted
+            // with a short past-arc trail. Only above the horizon. Streaks fast under time-lapse, crawls in real time.
+            if (showSats && dome && typeof satellite !== 'undefined' && typeof SAT_TLE !== 'undefined') {
+                // Follow the displayed (lapse/scrub) time so ▶ fast-forward brings overhead passes within seconds.
+                // A frame-persistent fading tail makes even a fast pass read as a clear glowing arc (no 20 ms flash).
+                const _sd = getDisplayTime();
+                const _obs = { longitude: skyLon * D2R, latitude: skyLat * D2R, height: 0.1 };  // observer = the dome's eased location
+                const projAA = (altDeg, azDeg) => {                                  // alt/az → screen (matches the star proj + perspective)
+                    const altR = altDeg * D2R, azR = azDeg * D2R;
+                    const _re = (Math.PI / 2 - altR) / (Math.PI / 2), _ro = Math.cos(altR);
+                    const rr = (_re * (1 - projPersp) + _ro * projPersp) * Rdome;
+                    return [cx - rr * Math.sin(azR), cy - rr * Math.cos(azR)];
+                };
+                for (const sat of SAT_TLE) {
+                    const _rec = sat._rec || (sat._rec = satellite.twoline2satrec(sat.l1, sat.l2));
+                    let head = null;
+                    let pv; try { pv = satellite.propagate(_rec, _sd); } catch (_) { pv = null; }
+                    if (pv && pv.position) {
+                        const la = satellite.ecfToLookAngles(_obs, satellite.eciToEcf(pv.position, satellite.gstime(_sd)));
+                        if (la.elevation > 0) head = projAA(la.elevation * 180 / Math.PI, la.azimuth * 180 / Math.PI);
+                    }
+                    const _up = !!head;                                              // log rise/set transitions
+                    if (sat._up !== undefined && _up !== sat._up) { try { DebugWindow.log('[sat] ' + sat.name + (_up ? ' ↑ über Horizont' : ' ↓ untergegangen')); } catch (_) {} }
+                    sat._up = _up;
+                    // Frame-persistent tail: keep the last ~28 screen positions (null = gap when below horizon) → lingering streak.
+                    if (!sat._tail) sat._tail = [];
+                    sat._tail.push(head);
+                    if (sat._tail.length > 28) sat._tail.shift();
+                    ctx.save();
+                    ctx.strokeStyle = sat.color; ctx.lineWidth = 1.6; ctx.lineCap = 'round';
+                    for (let i = 1; i < sat._tail.length; i++) {                      // fade old → new
+                        const p0 = sat._tail[i - 1], p1 = sat._tail[i];
+                        if (!p0 || !p1) continue;
+                        ctx.globalAlpha = a * 0.9 * (i / sat._tail.length);
+                        ctx.beginPath(); ctx.moveTo(p0[0], p0[1]); ctx.lineTo(p1[0], p1[1]); ctx.stroke();
+                    }
+                    if (head) {
+                        ctx.globalAlpha = a; ctx.fillStyle = sat.color;              // head dot
+                        ctx.beginPath(); ctx.arc(head[0], head[1], 2.8, 0, Math.PI * 2); ctx.fill();
+                        ctx.fillStyle = `rgba(255, 255, 255, ${a * 0.95})`;          // label
+                        ctx.font = '600 10px Orbitron'; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+                        ctx.fillText(sat.name, head[0], head[1] + 5);
+                    }
+                    ctx.restore();
                 }
             }
             // Shooting stars — occasional fading streaks (spawn only in planetarium; existing ones finish either way).
