@@ -433,9 +433,75 @@ body:not(.cyber-shell-grid):has(#side-panel) { grid-template-columns: 0 0 minmax
     letter-spacing: 0.08em;
     color: rgba(210, 225, 240, 0.85);
 }
-#sky-info-time { letter-spacing: normal; }   /* the fixed slots handle spacing themselves */
-#sky-info-time .tdig { display: inline-block; width: 0.92em; text-align: center; }   /* equal-width digits → no jitter (stretched x) */
-#sky-info-time .tcol { display: inline-block; width: 0.42em; text-align: center; }   /* the ':' keeps its own breathing room */
+/* The time uses the central CyberClock widget (cyber-clock.js/.css). These overrides match the info-line look:
+   slim 600 weight, wider equal-width digit slots, and colons in the same colour as the digits (not cyan). */
+#sky-info-time.cyber-clock { --cc-size: 0.82rem; --cc-digit: rgba(210, 225, 240, 0.85); --cc-colon: rgba(210, 225, 240, 0.85); --cc-dw: 0.92em; letter-spacing: normal; }
+#sky-info-time.cyber-clock .cc-d,
+#sky-info-time.cyber-clock .cc-sep { font-weight: 600; }
+/* Caption under the box — fades in only while the sat-pass slow-motion is engaged (lapse + a satellite up). */
+#sky-info-slomo {
+    margin-top: 4px;
+    font-size: 0.82rem;
+    font-weight: 400;
+    letter-spacing: 0.2em;
+    text-transform: lowercase;
+    color: rgba(140, 200, 70, 0.85);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    pointer-events: none;
+}
+#sky-info-slomo.is-on { opacity: 1; }
+
+/* Satellite table — DOM overlay HUD (top-left of the planetarium). The "sichtbar" countdown per row
+   is rendered by the central CyberClock (cyber-clock.js/.css); states colour the cells via [data-st]. */
+#sat-table {
+    position: absolute;
+    top: 14px;
+    left: 16px;
+    z-index: 9550;
+    display: none;
+    pointer-events: none;
+    font-family: 'Orbitron', sans-serif;
+}
+#sat-table .st-grid {
+    display: grid;
+    grid-template-columns: auto 3.4em auto;     /* Höhe column fixed → it never shifts (and so the time column stays put) */
+    column-gap: 21px;
+    row-gap: 6px;
+    align-items: baseline;
+}
+#sat-table .st-h {                              /* header row — left-aligned, uppercase, brighter */
+    font-size: 0.74rem;
+    font-weight: 600;
+    text-align: left;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: rgba(170, 230, 255, 0.95);
+}
+#sat-table .st-name,
+#sat-table .st-alt,
+#sat-table .st-word {                           /* "nie" / "sichtbar" share the value size */
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+#sat-table .st-alt,
+#sat-table .st-h:nth-child(2) { text-align: right; }   /* HÖHE header + values right-aligned (so the "°" stays anchored) */
+#sat-table .st-alt .st-c {                      /* each glyph in an equal-width slot → digits never jitter (Orbitron isn't monospaced) */
+    display: inline-block;
+    width: 0.64em;
+    text-align: center;
+}
+/* state colours: up = green, below-horizon-but-coming-up = orange (whole row), no data / never = dim */
+#sat-table [data-st="up"]     { color: rgba(140, 200, 70, 0.95); }
+#sat-table [data-st="down"]   { color: rgb(245, 194, 66); }       /* λ orange — below horizon, counting up */
+#sat-table [data-st="rise"]   { color: rgb(245, 194, 66); }       /* same orange for the countdown → whole row orange */
+#sat-table [data-st="nodata"] { color: rgba(150, 165, 185, 0.5); }
+/* the central clock in the time column: slim 600 weight, sized like the old 11px canvas text, coloured by state */
+#sat-table .st-clock.cyber-clock { --cc-size: 0.8rem; --cc-dw: 0.66em; }
+#sat-table .st-clock[data-st="up"]   { --cc-digit: rgba(140, 200, 70, 0.95); --cc-colon: rgba(140, 200, 70, 0.95); }
+#sat-table .st-clock[data-st="rise"] { --cc-digit: rgb(245, 194, 66); --cc-colon: rgb(245, 194, 66); }
+#sat-table .st-clock .cc-d,
+#sat-table .st-clock .cc-sep { font-weight: 600; }
 
 /* In the planetarium, hide the search box and the "Personalisieren" link (decluttered sky view). */
 body.planetarium-on #wc-search,

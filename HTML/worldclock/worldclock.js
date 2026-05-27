@@ -170,8 +170,14 @@
         let manualOffset = 0; // in minutes
         let debugDayOffset = 0; // DEBUG: step the displayed date (Arrow keys) to watch the Moon, in days
         let lapseActive = false; // time-lapse (play): advances the displayed date each frame
-        let lapseRate = 0.25;    // sky-hours advanced per real second while playing
+        let lapseRate = 1000 / 3600;    // sky-hours advanced per real second while playing → 1000× real time
         let _lapseLast = 0;      // performance.now() of the previous frame (for dt)
+        // Sat-pass slow-motion: during time-lapse, ease the rate way down while a tracked satellite is above the horizon
+        // so the pass is watchable; full lapseRate resumes (catches up) in the dead time between passes.
+        const SAT_SLOMO = 30 / 3600;  // sky-hours/s while a satellite is up → 30× real time (a 6-min pass takes ~12 s to watch)
+        let satPassActive = false;    // set each frame by drawStarfield: any tracked satellite above the horizon
+        let satPassNames = '';        // names of the satellite(s) currently driving the slow-motion (for the caption)
+        let lapseRateEff = 1000 / 3600; // eased effective lapse rate (smooth slow-down / speed-up)
         let meteors = [];        // active shooting stars
         let _trailFadeEased = 1; // eased trail-clear strength: low while dragging (long trails), ramps back to full clear on release
         function toggleLapse() { lapseActive = !lapseActive; }
@@ -201,9 +207,8 @@
         let showMoon       = loadSkyToggle('moon', true);      // the Moon (texture + phase)
         let showDeepsky    = loadSkyToggle('deepsky', true);   // deep-sky objects (nebulae/clusters/galaxies)
         let showSats       = loadSkyToggle('sats', true);      // satellites (ISS, Tiangong, Hubble) via SGP4
-        // Satellites run on their OWN per-object clock: slow GLIDE while above the horizon, fast SKIP while below it,
-        // so you get back-to-back watchable passes (no hours of waiting, no flash). Decoupled from stop/star-lapse.
-        const SAT_SLOW = 25, SAT_FAST = 900;
+        // Satellites run on the SAME displayed time as the rest of the sky (getDisplayTime) — real time, no acceleration.
+        // So they cross the dome only during their actual passes; use the time-lapse (play) to fast-forward everything together.
         let visStarCount = 0, visConCount = 0;   // currently-visible counts (stars above horizon · constellations on screen)
         // --- Sky data + loaders (centroids, ecliptic, zodiac, deep-sky, star catalog, Milky Way) → worldclock-sky.js (Phase 4).
         let autoRotation = 0;
@@ -1457,7 +1462,11 @@
 
             // Time-lapse: advance the displayed date while playing (drives sky rotation, planets, moon phase, twilight).
             const _lnow = (typeof performance !== 'undefined' ? performance.now() : Date.now());
-            if (lapseActive && skyTarget && _lapseLast) debugDayOffset += (lapseRate / 24) * ((_lnow - _lapseLast) / 1000);
+            if (lapseActive && skyTarget && _lapseLast) {
+                const _target = satPassActive ? Math.min(lapseRate, SAT_SLOMO) : lapseRate;  // slow while a sat is up
+                lapseRateEff += (_target - lapseRateEff) * 0.15;                              // ease the slow-down / speed-up
+                debugDayOffset += (lapseRateEff / 24) * ((_lnow - _lapseLast) / 1000);
+            }
             _lapseLast = _lnow;
 
             // Smooth Return Logic
@@ -1531,11 +1540,20 @@
                     const _tEl = document.getElementById('sky-info-time');
                     if (_tEl) {
                         const _tm = time.toLocaleTimeString('de-DE', { timeZone: targetCity.tz, hour: '2-digit', minute: '2-digit', second: '2-digit' });
-                        if (_tEl.dataset.t !== _tm) {                 // rebuild only when the value changes
+                        if (!_tEl._ccDigits && window.CyberClock) CyberClock.mount(_tEl, { seconds: true });   // central fixed-box clock (cyber-clock.js)
+                        if (_tEl.dataset.t !== _tm) {                 // update only when the value changes
                             _tEl.dataset.t = _tm;
-                            let _h = '';                             // fixed-width slots (digits + colon) → no jitter, colons stay visible
-                            for (const ch of _tm) _h += /\d/.test(ch) ? '<span class="tdig">' + ch + '</span>' : '<span class="tcol">' + ch + '</span>';
-                            _tEl.innerHTML = _h;
+                            if (_tEl._ccDigits) CyberClock.set(_tEl, _tm); else _tEl.textContent = _tm;
+                        }
+                    }
+                    const _slo = document.getElementById('sky-info-slomo');   // caption: lapse speed; switches to slow-motion text during a flyby
+                    if (_slo) {
+                        _slo.classList.toggle('is-on', lapseActive);
+                        if (lapseActive) {
+                            const _t = satPassActive
+                                ? 'running ' + Math.round(SAT_SLOMO * 3600) + ' x real time for flyby' + (satPassNames ? ' — ' + satPassNames : '')
+                                : 'running ' + Math.round(lapseRate * 3600) + ' x real time';
+                            if (_slo.textContent !== _t) _slo.textContent = _t;
                         }
                     }
                 } else {
