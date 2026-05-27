@@ -723,9 +723,7 @@
             // Satellites (ISS, Tiangong, Hubble): SGP4 via satellite.js → alt/az for the dome's location, plotted
             // with a short past-arc trail. Only above the horizon. Streaks fast under time-lapse, crawls in real time.
             if (showSats && dome && typeof satellite !== 'undefined' && typeof SAT_TLE !== 'undefined') {
-                // Follow the displayed (lapse/scrub) time so ▶ fast-forward brings overhead passes within seconds.
-                // A frame-persistent fading tail makes even a fast pass read as a clear glowing arc (no 20 ms flash).
-                const _sd = getDisplayTime();
+                const _rn = (typeof performance !== 'undefined' ? performance.now() : Date.now());
                 const _obs = { longitude: skyLon * D2R, latitude: skyLat * D2R, height: 0.1 };  // observer = the dome's eased location
                 const projAA = (altDeg, azDeg) => {                                  // alt/az → screen (matches the star proj + perspective)
                     const altR = altDeg * D2R, azR = azDeg * D2R;
@@ -733,14 +731,21 @@
                     const rr = (_re * (1 - projPersp) + _ro * projPersp) * Rdome;
                     return [cx - rr * Math.sin(azR), cy - rr * Math.cos(azR)];
                 };
+                const _satStatus = [];                                               // elevation HUD (transparency: shows even when below horizon)
                 for (const sat of SAT_TLE) {
                     const _rec = sat._rec || (sat._rec = satellite.twoline2satrec(sat.l1, sat.l2));
-                    let head = null;
-                    let pv; try { pv = satellite.propagate(_rec, _sd); } catch (_) { pv = null; }
+                    if (!sat._t) { sat._t = Date.now(); sat._lastPerf = _rn; }         // own clock, starts at now
+                    let head = null, _alt = null;
+                    let pv; try { pv = satellite.propagate(_rec, new Date(sat._t)); } catch (_) { pv = null; }
                     if (pv && pv.position) {
-                        const la = satellite.ecfToLookAngles(_obs, satellite.eciToEcf(pv.position, satellite.gstime(_sd)));
-                        if (la.elevation > 0) head = projAA(la.elevation * 180 / Math.PI, la.azimuth * 180 / Math.PI);
+                        const la = satellite.ecfToLookAngles(_obs, satellite.eciToEcf(pv.position, satellite.gstime(new Date(sat._t))));
+                        _alt = la.elevation * 180 / Math.PI;
+                        if (la.elevation > 0) head = projAA(_alt, la.azimuth * 180 / Math.PI);
                     }
+                    // advance this satellite's clock: glide while up (or about to rise), fast-skip the dead time below
+                    const _dtMs = sat._lastPerf ? (_rn - sat._lastPerf) : 0; sat._lastPerf = _rn;
+                    sat._t += _dtMs * ((_alt != null && _alt > -2) ? SAT_SLOW : SAT_FAST);
+                    _satStatus.push({ name: sat.name, alt: _alt, color: sat.color });
                     const _up = !!head;                                              // log rise/set transitions
                     if (sat._up !== undefined && _up !== sat._up) { try { DebugWindow.log('[sat] ' + sat.name + (_up ? ' ↑ über Horizont' : ' ↓ untergegangen')); } catch (_) {} }
                     sat._up = _up;
@@ -765,6 +770,20 @@
                     }
                     ctx.restore();
                 }
+                // Elevation HUD (top-left): proves what's up. Green = above horizon, dim = below.
+                ctx.save();
+                ctx.font = '600 11px Orbitron'; ctx.textAlign = 'left'; ctx.textBaseline = 'top';
+                ctx.fillStyle = 'rgba(0, 210, 255, 0.85)';   // observer actually used (proves city selection reaches the dome)
+                ctx.fillText('Obs ' + skyLat.toFixed(1) + '°  ' + skyLon.toFixed(1) + '°', 14, 14);
+                _satStatus.forEach((s, i) => {
+                    const up = s.alt != null && s.alt > 0;
+                    ctx.fillStyle = s.alt == null ? 'rgba(150, 165, 185, 0.5)'
+                                  : up ? 'rgba(140, 200, 70, 0.95)'    // above horizon → green
+                                       : 'rgba(220, 70, 55, 0.9)';     // below horizon → red
+                    const txt = s.name + '  ' + (s.alt == null ? '—' : (s.alt >= 0 ? '+' : '') + s.alt.toFixed(0) + '°') + (up ? '  ●' : '');
+                    ctx.fillText(txt, 14, 32 + i * 16);
+                });
+                ctx.restore();
             }
             // Shooting stars — occasional fading streaks (spawn only in planetarium; existing ones finish either way).
             if (skyTarget && Math.random() < 0.004) {

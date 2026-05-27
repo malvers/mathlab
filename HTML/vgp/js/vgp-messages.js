@@ -588,10 +588,14 @@ async function saveEdit(content) {
 async function deleteMessage(id) {
   if (id == null) return;
   if (!(await uiConfirm('Diese Nachricht für alle löschen?', { okText: 'Löschen', danger: true }))) return;
+  const el = messagesEl.querySelector(`[data-id="${id}"]`);
+  // Grab the media blob's storage path (if any) BEFORE the row is gone → delete it too (no orphans in the bucket).
+  const media = el && el.querySelector('.img-wrap, .voice-wrap');
+  const mediaPath = media && media.dataset.p;
   const { error } = await client.from('messages').delete().eq('id', id);
   if (error) { dbg('Löschen fehlgeschlagen (DELETE-Policy in Supabase vorhanden?): ' + error.message); return; }
   try { await client.from('reactions').delete().eq('message_id', id); } catch (_) {}   // best-effort cleanup
-  const el = messagesEl.querySelector(`[data-id="${id}"]`);
+  if (mediaPath) { try { await client.storage.from('media').remove([mediaPath]); dbg('Medien-Blob entfernt: ' + mediaPath); } catch (e) { dbg('Medien-Blob bleibt liegen: ' + (e && e.message || e)); } }
   if (el) el.remove();
   dbg('Nachricht gelöscht (id ' + id + ')');
 }
