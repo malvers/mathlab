@@ -330,7 +330,12 @@
                     const alt = Math.asin(Math.max(-1, Math.min(1, sinAlt)));
                     const azN = Math.atan2(-Math.cos(d) * Math.sin(H),
                                            Math.sin(d) * Math.cos(lat) - Math.cos(d) * Math.sin(lat) * Math.cos(H)); // 0=N, +=E
-                    const rr = (Math.PI / 2 - alt) / (Math.PI / 2) * Rdome;  // zenith→0, horizon→Rdome
+                    // Radial mapping, blended by projPersp: 0 = azimuthal-equidistant (fisheye, linear in altitude),
+                    // 1 = orthographic (cos → real perspective foreshortening; great circles read as ellipses).
+                    // Both keep zenith→0 and horizon→1, so the horizon ring stays at Rdome for either look.
+                    const _re = (Math.PI / 2 - alt) / (Math.PI / 2);     // equidistant fraction
+                    const _ro = Math.cos(alt);                           // orthographic fraction
+                    const rr = (_re * (1 - projPersp) + _ro * projPersp) * Rdome;
                     return [cx - rr * Math.sin(azN), cy - rr * Math.cos(azN), alt > 0];  // N up, E left (sign tunable)
                 };
             } else {
