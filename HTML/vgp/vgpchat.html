@@ -245,6 +245,16 @@ img.joypixels{display:inline-block;height:1.43em;width:1.43em;vertical-align:-0.
 #lightbox{position:fixed;inset:0;background:rgba(var(--vgp-ink-rgb),.92);display:flex;align-items:center;justify-content:center;z-index:200;padding:24px;cursor:zoom-out}
 #lightbox.hidden{display:none}
 #lightbox img{max-width:100%;max-height:100%;border-radius:8px}
+/* Voice messages: mic button, recording bar, in-bubble player */
+#mic-btn{flex:0 0 auto;margin-left:auto;display:flex;align-items:center;justify-content:center;width:40px;height:40px;border:none;border-radius:50%;background:transparent;font-size:22px;cursor:pointer;padding:0}
+#mic-btn.recording{background:var(--vgp-red);animation:vgpPulse 1.2s ease-in-out infinite}
+@keyframes vgpPulse{0%,100%{opacity:1}50%{opacity:.5}}
+#rec-bar{position:absolute;left:64px;right:60px;bottom:calc(100% - 4px);display:flex;align-items:center;gap:8px;background:var(--vgp-chat);border:1px solid rgba(var(--vgp-red-rgb),.4);border-radius:10px;padding:7px 10px;font-size:13px;color:var(--vgp-text-dim);z-index:30;box-shadow:0 -6px 24px rgba(var(--vgp-shadow),.45)}
+#rec-bar.hidden{display:none}
+#rec-bar .rec-dot{color:var(--vgp-red);animation:vgpPulse 1.2s ease-in-out infinite}
+#rec-cancel{margin-left:auto;border:none;background:transparent;color:var(--vgp-text-dim);font-size:14px;cursor:pointer;padding:2px 4px}
+.msg .voice-wrap{display:flex;align-items:center;gap:6px;min-width:200px;color:var(--vgp-text-dim);font-size:13px}
+.msg .voice-wrap audio{width:230px;height:36px}
 /* Message-actions popover */
 #msg-actions{position:fixed;z-index:80;background:var(--vgp-panel);border:1px solid rgba(var(--vgp-accent-rgb),.3);border-radius:14px;padding:6px;display:flex;flex-direction:column;gap:6px;box-shadow:0 8px 26px rgba(var(--vgp-shadow),.55)}
 #msg-actions.hidden{display:none}
@@ -449,6 +459,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
       <div id="cmd-box" class="hidden" role="listbox" aria-label="Befehle"></div>
       <div id="edit-hint" class="hidden">✎ Nachricht bearbeiten — Enter speichert · Esc bricht ab</div>
       <div id="reply-bar" class="hidden"><span id="reply-text"></span><button type="button" id="reply-cancel" aria-label="Antwort abbrechen">✕</button></div>
+      <div id="rec-bar" class="hidden"><span class="rec-dot">●</span> Aufnahme <span id="rec-time">0:00</span> — Mic tippen zum Senden<button type="button" id="rec-cancel" aria-label="Aufnahme abbrechen">✕</button></div>
       <input type="file" id="img-input" accept="image/*" hidden>
       <button id="attach-btn" type="button" aria-label="Bild senden" title="Bild senden">📎</button>
       <button id="msg-emoji" type="button" aria-label="Emoji wählen" title="Emoji"><span style="pointer-events:none">🙂</span></button>
@@ -460,6 +471,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
           <polygon points="3 3 22 12 3 21 8 12"></polygon>
         </svg>
       </button>
+      <button id="mic-btn" type="button" aria-label="Sprachnachricht aufnehmen" title="Sprachnachricht">🎤</button>
     </div>
   </section>
   <div id="lightbox" class="hidden"><img src="" alt="Bild"></div>
@@ -576,13 +588,13 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
   <button id="stats-close">SCHLIESSEN</button>
 </div>
 
-<script src="js/vgp-setup.js?v=20260524-73"></script>
-<script src="js/vgp-auth.js?v=20260524-73"></script>
-<script src="js/vgp-crypto.js?v=20260524-73"></script>
-<script src="js/vgp-backup-core.js?v=20260524-73"></script>
-<script src="js/vgp-contacts.js?v=20260524-73"></script>
-<script src="js/vgp-messages.js?v=20260524-73"></script>
-<script src="js/vgp-push.js?v=20260524-73"></script>
+<script src="js/vgp-setup.js?v=20260524-74"></script>
+<script src="js/vgp-auth.js?v=20260524-74"></script>
+<script src="js/vgp-crypto.js?v=20260524-74"></script>
+<script src="js/vgp-backup-core.js?v=20260524-74"></script>
+<script src="js/vgp-contacts.js?v=20260524-74"></script>
+<script src="js/vgp-messages.js?v=20260524-74"></script>
+<script src="js/vgp-push.js?v=20260524-74"></script>
 <script>
 // Local-vs-live indicator: mark the page red ONLY when served locally. No red = you're on the live site.
 (function () {

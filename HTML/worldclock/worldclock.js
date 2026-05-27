@@ -500,6 +500,7 @@
         let lapseRate = 0.25;    // sky-hours advanced per real second while playing
         let _lapseLast = 0;      // performance.now() of the previous frame (for dt)
         let meteors = [];        // active shooting stars
+        let _trailFadeEased = 1; // eased trail-clear strength: low while dragging (long trails), ramps back to full clear on release
         function toggleLapse() { lapseActive = !lapseActive; }
         let skyT = 0;           // planetarium mode 0…1 (0 = clock + dim stars, 1 = clock hidden + full stars); toggled by 's'
         let skyTarget = 0;      // animation target for skyT (0/1), toggled by the 's' key
@@ -2433,7 +2434,11 @@
             // Figure stars (path vertices) → offscreen trail layer that fades toward transparent instead of
             // clearing → long-exposure star trails. Slow fade while turning (trails build up), fast when idle.
             const _moving = isMouseDown || isReturning;
-            const _trailFade = _moving ? 0.02 : 1;   // drag = long trails; otherwise full clear each frame (crisp twinkle, no smearing)
+            // Drag → low fade (long trails). Release → ease the fade back up to 1 so trails dissolve softly instead of
+            // vanishing in one frame; once settled at ~1 it is a full clear again (crisp twinkle, no smearing).
+            const _fadeTarget = _moving ? 0.02 : 1;
+            _trailFadeEased += (_fadeTarget - _trailFadeEased) * (_moving ? 0.4 : 0.06);
+            const _trailFade = _trailFadeEased;
             trailCtx.save();
             trailCtx.globalCompositeOperation = 'destination-out';   // erase a bit of alpha everywhere → existing trails fade out
             trailCtx.fillStyle = `rgba(0, 0, 0, ${_trailFade})`;
@@ -2668,10 +2673,13 @@
             }
             // Shooting stars — occasional fading streaks (spawn only in planetarium; existing ones finish either way).
             if (skyTarget && Math.random() < 0.004) {
-                const ex = cx + (Math.random() - 0.5) * Rdome * 1.3, ey = cy + (Math.random() - 0.5) * Rdome * 1.3;
+                const _r = Rdome * 0.9 * Math.sqrt(Math.random()), _th = Math.random() * Math.PI * 2;   // uniformly inside the dome
+                const ex = cx + _r * Math.cos(_th), ey = cy + _r * Math.sin(_th);
                 const ang = Math.random() * Math.PI * 2, spd = 6 + Math.random() * 5;
                 meteors.push({ x: ex, y: ey, vx: Math.cos(ang) * spd, vy: Math.sin(ang) * spd, life: 0, max: 22 + Math.random() * 20 });
             }
+            ctx.save();
+            if (dome) { ctx.beginPath(); ctx.arc(cx, cy, Rdome, 0, Math.PI * 2); ctx.clip(); }   // keep streaks inside the horizon
             for (let i = meteors.length - 1; i >= 0; i--) {
                 const m = meteors[i];
                 m.x += m.vx; m.y += m.vy; m.life++;
@@ -2684,6 +2692,7 @@
                 ctx.strokeStyle = g; ctx.lineWidth = 1.6; ctx.lineCap = 'round';
                 ctx.beginPath(); ctx.moveTo(m.x, m.y); ctx.lineTo(tx, ty); ctx.stroke();
             }
+            ctx.restore();
             // "HORIZONT" curved along the bottom of the horizon — drawn last so it always sits on top.
             if (dome) {
                 ctx.fillStyle = `rgba(255, 255, 255, ${a * 0.7})`;
