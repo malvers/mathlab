@@ -307,6 +307,78 @@
             return Math.hypot(px - (ax + t * dx), py - (ay + t * dy));
         }
 
+        // Satellite table as a DOM overlay (top-left HUD), reusing the central CyberClock for each countdown.
+        // Built lazily once into #canvas-container (one row per satellite), then updated each frame. show=false hides it.
+        function updateSatTable(rows, dispMs, show) {
+            let el = document.getElementById('sat-table');
+            if (!show) { if (el && el.style.display !== 'none') el.style.display = 'none'; return; }
+            if (!el) {
+                el = document.createElement('div');
+                el.id = 'sat-table';
+                el.setAttribute('aria-hidden', 'true');
+                const grid = document.createElement('div');
+                grid.className = 'st-grid';
+                ['Satellit', 'Höhe', 'sichtbar'].forEach(t => {
+                    const h = document.createElement('div'); h.className = 'st-h'; h.textContent = t; grid.appendChild(h);
+                });
+                el.appendChild(grid);
+                el._grid = grid; el._rows = [];
+                (document.getElementById('canvas-container') || document.body).appendChild(el);
+            }
+            el.style.display = 'block';
+            while (el._rows.length < rows.length) {                               // one row (name · alt · time) per satellite, created once
+                const name = document.createElement('div'); name.className = 'st-name';
+                const alt  = document.createElement('div'); alt.className  = 'st-alt';
+                const time = document.createElement('div'); time.className = 'st-time';
+                const clock = document.createElement('span'); clock.className = 'st-clock';   // the central CyberClock lives here
+                const word  = document.createElement('span'); word.className  = 'st-word';    // shown instead for "nie" / "sichtbar"
+                time.appendChild(clock); time.appendChild(word);
+                if (window.CyberClock) CyberClock.mount(clock, { days: true });   // DD:HH:MM:SS (next pass can be days away)
+                el._grid.appendChild(name); el._grid.appendChild(alt); el._grid.appendChild(time);
+                el._rows.push({ name, alt, time, clock, word });
+            }
+            const pad2 = (n) => (n < 10 ? '0' : '') + n;
+            const fmtHMS = (ms) => {                                              // instant → dd:hh:mm:ss countdown from the displayed time
+                let s = Math.max(0, Math.round((ms - dispMs) / 1000));
+                const d = Math.floor(s / 86400); s -= d * 86400;
+                const h = Math.floor(s / 3600); s -= h * 3600;
+                const m = Math.floor(s / 60); s -= m * 60;
+                return pad2(d) + ':' + pad2(h) + ':' + pad2(m) + ':' + pad2(s);
+            };
+            const fmtDate = (ms) => new Date(ms).toLocaleDateString('de-DE', { day: 'numeric', month: 'short' });
+            const setTxt = (n, t) => { if (n.textContent !== t) n.textContent = t; };
+            rows.forEach((s, i) => {
+                const r = el._rows[i];
+                const st = s.alt == null ? 'nodata' : (s.alt > 0 ? 'up' : 'down');
+                setTxt(r.name, s.name);
+                // Elevation in fixed-width per-char slots (Orbitron digits aren't equal width) + padded to sign + 2 digits → no jitter.
+                const altStr = s.alt == null ? '—'
+                    : (s.alt < 0 ? '-' : '+') + pad2(Math.abs(Math.round(s.alt))) + '°';
+                if (r.alt.dataset.v !== altStr) {
+                    r.alt.dataset.v = altStr;
+                    let _h = ''; for (const ch of altStr) _h += '<span class="st-c">' + ch + '</span>';
+                    r.alt.innerHTML = _h;
+                }
+                if (r.name.dataset.st !== st) { r.name.dataset.st = st; r.alt.dataset.st = st; }
+                let txt, tst, isClock = false;                                    // visible column: a live countdown (clock) or a word/date
+                if (s.alt != null && s.alt > 0) { txt = s.set == null ? 'sichtbar' : fmtHMS(s.set); tst = 'up'; isClock = s.set != null; }
+                else if (s.rise != null) { txt = fmtHMS(s.rise); tst = 'rise'; isClock = true; }   // next pass within a week → ticking countdown
+                else if (s.never) { txt = 'nie'; tst = 'nodata'; }                                  // can never clear the horizon from here
+                else if (s.far != null) { txt = fmtDate(s.far) + (s.maxEl != null ? ' · max ' + Math.round(s.maxEl) + '°' : ''); tst = 'rise'; }  // rare pass → date
+                else { txt = 'max ' + Math.max(0, Math.round(s.maxEl || 0)) + '°'; tst = 'nodata'; }   // horizon-grazer → best-case elevation (≈0°)
+                if (isClock) {                                                    // dd:hh:mm:ss → central clock
+                    if (r.word.style.display !== 'none') r.word.style.display = 'none';
+                    if (r.clock.style.display === 'none') r.clock.style.display = '';
+                    if (window.CyberClock) CyberClock.set(r.clock, txt); else setTxt(r.clock, txt);
+                } else {                                                          // "nie" / "sichtbar" → plain word
+                    if (r.clock.style.display !== 'none') r.clock.style.display = 'none';
+                    if (r.word.style.display === 'none') r.word.style.display = '';
+                    setTxt(r.word, txt);
+                }
+                if (r.time.dataset.st !== tst) { r.time.dataset.st = tst; r.clock.dataset.st = tst; r.word.dataset.st = tst; }
+            });
+        }
+
         // Draw the Moon at (x,y) radius r with its phase: dark disc + lit lune; the bright limb faces `brightAngle`.
         // Real Moon texture (moon.png) with the phase: dim full disc (earthshine) + bright texture clipped to the lit lune.
         // drawMoonImg + drawMoonPhase → worldclock-moon.js (Phase 2 refactor).
@@ -723,7 +795,6 @@
             // Satellites (ISS, Tiangong, Hubble): SGP4 via satellite.js → alt/az for the dome's location, plotted
             // with a short past-arc trail. Only above the horizon. Streaks fast under time-lapse, crawls in real time.
             if (showSats && dome && typeof satellite !== 'undefined' && typeof SAT_TLE !== 'undefined') {
-                const _rn = (typeof performance !== 'undefined' ? performance.now() : Date.now());
                 const _obs = { longitude: skyLon * D2R, latitude: skyLat * D2R, height: 0.1 };  // observer = the dome's eased location
                 const projAA = (altDeg, azDeg) => {                                  // alt/az → screen (matches the star proj + perspective)
                     const altR = altDeg * D2R, azR = azDeg * D2R;
@@ -731,59 +802,133 @@
                     const rr = (_re * (1 - projPersp) + _ro * projPersp) * Rdome;
                     return [cx - rr * Math.sin(azR), cy - rr * Math.cos(azR)];
                 };
-                const _satStatus = [];                                               // elevation HUD (transparency: shows even when below horizon)
+                const _satStatus = [];                                               // table rows: name · real elevation · next pass (all at the displayed time)
+                // Real elevation (deg) of a satellite at a given wall-clock instant, for the observer. null if no fix.
+                const elevAtMs = (rec, obs, ms) => {
+                    let pv; try { pv = satellite.propagate(rec, new Date(ms)); } catch (_) { return null; }
+                    if (!pv || !pv.position) return null;
+                    const la = satellite.ecfToLookAngles(obs, satellite.eciToEcf(pv.position, satellite.gstime(new Date(ms))));
+                    return la.elevation * 180 / Math.PI;
+                };
+                // Next real-time rise (wall clock): coarse 1-min sweep to bracket the horizon crossing, then bisect to ~5 s.
+                const nextRiseMs = (rec, obs, fromMs, horizon) => {
+                    const STEP = 60000, HORIZON = horizon || 7 * 24 * 3600 * 1000, FINE = 5000;  // default a week; caller may search further for rare passes
+                    let prev = fromMs;                                                // assumed below horizon (caller only calls when down)
+                    for (let dt = STEP; dt <= HORIZON; dt += STEP) {
+                        const t = fromMs + dt, e = elevAtMs(rec, obs, t);
+                        if (e != null && e > 0) {                                     // crossing is between prev (below) and t (above)
+                            let lo = prev, hi = t;
+                            while (hi - lo > FINE) {
+                                const mid = (lo + hi) / 2, em = elevAtMs(rec, obs, mid);
+                                if (em != null && em > 0) hi = mid; else lo = mid;
+                            }
+                            return hi;
+                        }
+                        prev = t;
+                    }
+                    return null;                                                      // no pass within the look-ahead window
+                };
+                // Next set (wall clock): how long the current pass lasts — sweep until the sat drops back below the horizon, bisect to ~5 s.
+                const nextSetMs = (rec, obs, fromMs) => {
+                    const STEP = 60000, HORIZON = 3 * 3600 * 1000, FINE = 5000;       // a pass is minutes; 3 h covers even high passes
+                    let prev = fromMs;                                                // assumed above horizon (caller only calls when up)
+                    for (let dt = STEP; dt <= HORIZON; dt += STEP) {
+                        const t = fromMs + dt, e = elevAtMs(rec, obs, t);
+                        if (e == null) continue;
+                        if (e <= 0) {                                                 // crossing is between prev (above) and t (below)
+                            let lo = prev, hi = t;
+                            while (hi - lo > FINE) {
+                                const mid = (lo + hi) / 2, em = elevAtMs(rec, obs, mid);
+                                if (em != null && em <= 0) hi = mid; else lo = mid;
+                            }
+                            return hi;
+                        }
+                        prev = t;
+                    }
+                    return null;
+                };
+                // Best-case (geometric, time-independent) max elevation from the observer's latitude. <0 ⇒ this sat can NEVER
+                // clear the horizon from here (true "nie"); a small positive value ⇒ only horizon-grazing passes.
+                const maxElevDeg = (rec, latDeg) => {
+                    const Re = 6371, MU = 398600.4418;
+                    // satrec.a = Brouwer mean semi-major axis in earth radii (J2-corrected by sgp4init) → much better than raw Kepler.
+                    const aKm = (rec.a && rec.a > 0) ? rec.a * 6378.135
+                                                     : Math.pow(MU / Math.pow(rec.no / 60, 2), 1 / 3);
+                    let inc = rec.inclo * 180 / Math.PI; inc = Math.min(inc, 180 - inc);   // effective max sub-point latitude
+                    const minD = Math.max(0, Math.abs(latDeg) - inc);               // closest the sub-point ever gets to the observer
+                    if (minD <= 0) return 90;                                        // can pass (near) overhead
+                    const D = minD * Math.PI / 180, ratio = Re / aKm;
+                    return Math.atan2(Math.cos(D) - ratio, Math.sin(D)) * 180 / Math.PI;
+                };
+                const _dispMs = getDisplayTime().getTime();                          // shared planetarium time: real now, or shifted by the user (arrows / play)
+                let _upNames = [];                                                   // tracked sats above (or just below) the horizon → drive lapse slow-motion + caption
                 for (const sat of SAT_TLE) {
                     const _rec = sat._rec || (sat._rec = satellite.twoline2satrec(sat.l1, sat.l2));
-                    if (!sat._t) { sat._t = Date.now(); sat._lastPerf = _rn; }         // own clock, starts at now
-                    let head = null, _alt = null;
-                    let pv; try { pv = satellite.propagate(_rec, new Date(sat._t)); } catch (_) { pv = null; }
+                    let head = null, _alt = null;                                     // position + elevation at the displayed time (real time, no acceleration)
+                    let pv; try { pv = satellite.propagate(_rec, new Date(_dispMs)); } catch (_) { pv = null; }
                     if (pv && pv.position) {
-                        const la = satellite.ecfToLookAngles(_obs, satellite.eciToEcf(pv.position, satellite.gstime(new Date(sat._t))));
+                        const la = satellite.ecfToLookAngles(_obs, satellite.eciToEcf(pv.position, satellite.gstime(new Date(_dispMs))));
                         _alt = la.elevation * 180 / Math.PI;
-                        if (la.elevation > 0) head = projAA(_alt, la.azimuth * 180 / Math.PI);
+                        if (_alt > 0) head = projAA(_alt, la.azimuth * 180 / Math.PI);
                     }
-                    // advance this satellite's clock: glide while up (or about to rise), fast-skip the dead time below
-                    const _dtMs = sat._lastPerf ? (_rn - sat._lastPerf) : 0; sat._lastPerf = _rn;
-                    sat._t += _dtMs * ((_alt != null && _alt > -2) ? SAT_SLOW : SAT_FAST);
-                    _satStatus.push({ name: sat.name, alt: _alt, color: sat.color });
+                    // Rise/set (expensive) → cache the ABSOLUTE event time so the countdown ticks smoothly. Recompute only when
+                    // the observer moved, up-state flipped, never computed, or the cached event has already passed.
+                    const _isUp = _alt != null && _alt > 0;
+                    if (_alt != null && _alt > -2) _upNames.push(sat.name);          // up (or about to rise) → slow the time-lapse
+                    const _obsKey = skyLat.toFixed(2) + ',' + skyLon.toFixed(2);
+                    const _passed = _isUp ? (sat._setT != null && _dispMs >= sat._setT)
+                                          : (sat._riseT != null && _dispMs >= sat._riseT);
+                    if (sat._evObsKey !== _obsKey || sat._evCalc == null || sat._wasUp !== _isUp || _passed) {
+                        sat._setT  = _isUp ? nextSetMs(_rec, _obs, _dispMs)  : null;  // up → when it drops below the horizon
+                        sat._riseT = _isUp ? _dispMs : nextRiseMs(_rec, _obs, _dispMs); // down → next pass within a week (null = none)
+                        sat._never = false; sat._farT = null; sat._maxEl = null;
+                        if (!_isUp && sat._riseT == null) {                          // no pass in a week → why? (geometry tells us)
+                            const _me = maxElevDeg(_rec, skyLat);
+                            sat._maxEl = _me;
+                            if (_me < -2) sat._never = true;                         // clearly below the horizon for good → true "nie"
+                            else if (_me >= 2) sat._farT = nextRiseMs(_rec, _obs, _dispMs, 30 * 24 * 3600 * 1000);  // rare but real → find the date
+                            // −2°…+2° is a horizon-grazer → shown as "max 0°" (see updateSatTable)
+                        }
+                        sat._evObsKey = _obsKey; sat._wasUp = _isUp; sat._evCalc = _dispMs;
+                    }
+                    _satStatus.push({ name: sat.name, alt: _alt, color: sat.color, rise: sat._riseT, set: sat._setT, never: sat._never, far: sat._farT, maxEl: sat._maxEl });
                     const _up = !!head;                                              // log rise/set transitions
                     if (sat._up !== undefined && _up !== sat._up) { try { DebugWindow.log('[sat] ' + sat.name + (_up ? ' ↑ über Horizont' : ' ↓ untergegangen')); } catch (_) {} }
                     sat._up = _up;
-                    // Frame-persistent tail: keep the last ~28 screen positions (null = gap when below horizon) → lingering streak.
-                    if (!sat._tail) sat._tail = [];
-                    sat._tail.push(head);
-                    if (sat._tail.length > 28) sat._tail.shift();
                     ctx.save();
-                    ctx.strokeStyle = sat.color; ctx.lineWidth = 1.6; ctx.lineCap = 'round';
-                    for (let i = 1; i < sat._tail.length; i++) {                      // fade old → new
-                        const p0 = sat._tail[i - 1], p1 = sat._tail[i];
-                        if (!p0 || !p1) continue;
-                        ctx.globalAlpha = a * 0.9 * (i / sat._tail.length);
-                        ctx.beginPath(); ctx.moveTo(p0[0], p0[1]); ctx.lineTo(p1[0], p1[1]); ctx.stroke();
-                    }
                     if (head) {
-                        ctx.globalAlpha = a; ctx.fillStyle = sat.color;              // head dot
-                        ctx.beginPath(); ctx.arc(head[0], head[1], 2.8, 0, Math.PI * 2); ctx.fill();
-                        ctx.fillStyle = `rgba(255, 255, 255, ${a * 0.95})`;          // label
+                        if (sat.img && !sat._img) {                                  // lazy-load the station photo once
+                            sat._img = new Image();
+                            sat._img.onload = () => { sat._imgReady = true; };
+                            sat._img.src = '../resources/sats/' + sat.img;
+                        }
+                        let _labelY = head[1] + 5;
+                        if (sat._imgReady) {                                         // real photo, additive (black space adds nothing → no box)
+                            const w = 88 * skyZoom, h = w * (sat._img.naturalHeight / sat._img.naturalWidth);
+                            ctx.globalCompositeOperation = 'lighter';
+                            ctx.globalAlpha = a;
+                            ctx.drawImage(sat._img, head[0] - w / 2, head[1] - h / 2, w, h);
+                            ctx.globalCompositeOperation = 'source-over';
+                            _labelY = head[1] + h / 2 + 2;
+                        } else {                                                     // dot fallback until the image loads
+                            ctx.globalAlpha = a; ctx.fillStyle = sat.color;
+                            ctx.beginPath(); ctx.arc(head[0], head[1], 2.8, 0, Math.PI * 2); ctx.fill();
+                        }
+                        ctx.globalAlpha = 1; ctx.fillStyle = `rgba(255, 255, 255, ${a * 0.95})`;   // label
                         ctx.font = '600 10px Orbitron'; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
-                        ctx.fillText(sat.name, head[0], head[1] + 5);
+                        ctx.fillText(sat.name, head[0], _labelY);
                     }
                     ctx.restore();
                 }
-                // Elevation HUD (top-left): proves what's up. Green = above horizon, dim = below.
-                ctx.save();
-                ctx.font = '600 11px Orbitron'; ctx.textAlign = 'left'; ctx.textBaseline = 'top';
-                ctx.fillStyle = 'rgba(0, 210, 255, 0.85)';   // observer actually used (proves city selection reaches the dome)
-                ctx.fillText('Obs ' + skyLat.toFixed(1) + '°  ' + skyLon.toFixed(1) + '°', 14, 14);
-                _satStatus.forEach((s, i) => {
-                    const up = s.alt != null && s.alt > 0;
-                    ctx.fillStyle = s.alt == null ? 'rgba(150, 165, 185, 0.5)'
-                                  : up ? 'rgba(140, 200, 70, 0.95)'    // above horizon → green
-                                       : 'rgba(220, 70, 55, 0.9)';     // below horizon → red
-                    const txt = s.name + '  ' + (s.alt == null ? '—' : (s.alt >= 0 ? '+' : '') + s.alt.toFixed(0) + '°') + (up ? '  ●' : '');
-                    ctx.fillText(txt, 14, 32 + i * 16);
-                });
-                ctx.restore();
+                // Satellite table → DOM overlay (top-left HUD) using the central CyberClock. Shown only while the
+                // planetarium is the active target (skyTarget); see updateSatTable.
+                satPassActive = _upNames.length > 0;                                 // drives the time-lapse slow-motion (read next frame)
+                satPassNames = _upNames.join(' | ');                                 // shown in the "slomo for flyby" caption
+                updateSatTable(_satStatus, _dispMs, skyTarget);
+            } else {
+                satPassActive = false;
+                satPassNames = '';
+                updateSatTable([], 0, false);   // satellites off / not in dome → hide the DOM table
             }
             // Shooting stars — occasional fading streaks (spawn only in planetarium; existing ones finish either way).
             if (skyTarget && Math.random() < 0.004) {

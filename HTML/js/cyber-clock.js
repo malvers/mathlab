@@ -11,7 +11,8 @@
         if (opts.size)       el.style.setProperty('--cc-size', opts.size);
         if (opts.digitColor) el.style.setProperty('--cc-digit', opts.digitColor);
         if (opts.colonColor) el.style.setProperty('--cc-colon', opts.colonColor);
-        const groups = (opts.seconds === false) ? 2 : 3;          // HH:MM or HH:MM:SS
+        // group count: HH:MM (2), HH:MM:SS (3, default), or DD:HH:MM:SS (4, opts.days)
+        const groups = opts.days ? 4 : (opts.seconds === false) ? 2 : 3;
         let html = '';
         for (let g = 0; g < groups; g++) {
             if (g > 0) html += '<span class="cc-sep">:</span>';
