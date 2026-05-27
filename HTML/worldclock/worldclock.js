@@ -201,6 +201,9 @@
         let showMoon       = loadSkyToggle('moon', true);      // the Moon (texture + phase)
         let showDeepsky    = loadSkyToggle('deepsky', true);   // deep-sky objects (nebulae/clusters/galaxies)
         let showSats       = loadSkyToggle('sats', true);      // satellites (ISS, Tiangong, Hubble) via SGP4
+        // Satellites run on their OWN per-object clock: slow GLIDE while above the horizon, fast SKIP while below it,
+        // so you get back-to-back watchable passes (no hours of waiting, no flash). Decoupled from stop/star-lapse.
+        const SAT_SLOW = 25, SAT_FAST = 900;
         let visStarCount = 0, visConCount = 0;   // currently-visible counts (stars above horizon · constellations on screen)
         // --- Sky data + loaders (centroids, ecliptic, zodiac, deep-sky, star catalog, Milky Way) → worldclock-sky.js (Phase 4).
         let autoRotation = 0;
