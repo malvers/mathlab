@@ -115,8 +115,9 @@ function subscribeMessages() {
         gd.roomLastTime = m.created_at;
         const openHere = activeRoom && gd.pwd === activeGroupPwd; // this room is the one on screen
         if (openHere) {
+          const near = messagesEl.scrollHeight - messagesEl.scrollTop - messagesEl.clientHeight <= 160;  // before the insert
           await renderMsg(m);
-          if (m.pubkey === myPubB64) messagesEl.scrollTop = messagesEl.scrollHeight; else glideToBottom(messagesEl);
+          if (m.pubkey === myPubB64) messagesEl.scrollTop = messagesEl.scrollHeight; else glideToBottom(messagesEl, near);
         } else if (m.pubkey !== myPubB64) {
           gd.roomUnread++;
         }
@@ -130,8 +131,9 @@ function subscribeMessages() {
       const peer = activePeer && activePeer.pubkey;
       if (peer && ((m.pubkey === myPubB64 && m.recipient_pubkey === peer) ||
                    (m.pubkey === peer      && m.recipient_pubkey === myPubB64))) {
+        const near = messagesEl.scrollHeight - messagesEl.scrollTop - messagesEl.clientHeight <= 160;  // before the insert
         await renderMsg(m);
-        if (m.pubkey === myPubB64) messagesEl.scrollTop = messagesEl.scrollHeight; else glideToBottom(messagesEl);
+        if (m.pubkey === myPubB64) messagesEl.scrollTop = messagesEl.scrollHeight; else glideToBottom(messagesEl, near);
         if (m.pubkey === peer) { markRead(peer); publishRead(peer); } // received in open chat → read
       } else if (m.recipient_pubkey === myPubB64) {
         // Message for me in a chat I don't have open → bump badge + confirm delivery to the sender
@@ -231,13 +233,15 @@ function sendTyping() {
   if (payload) subscription.send({ type: 'broadcast', event: 'typing', payload });
 }
 
-// Ultra-gentle auto-scroll: glide #messages to the bottom over GLIDE_MS instead of snapping —
+// Very gentle auto-scroll: glide #messages to the bottom over GLIDE_MS instead of snapping —
 // but only if the reader is already near the bottom (never yank them off older messages).
 let glideRAF = 0;
 const GLIDE_MS = 8000;
-function glideToBottom(el) {
+function glideToBottom(el, force) {
   if (!el) return;
-  if (el.scrollHeight - el.scrollTop - el.clientHeight > 160) return;   // reader scrolled up → leave them be
+  // Skip only if the reader scrolled up — but `force` (measured BEFORE a tall insert like an image) overrides,
+  // since a big new message can itself push the gap past 160px even though the reader was at the bottom.
+  if (!force && el.scrollHeight - el.scrollTop - el.clientHeight > 160) return;
   cancelAnimationFrame(glideRAF);
   const startTop = el.scrollTop, t0 = performance.now();
   const step = (now) => {
@@ -827,20 +831,31 @@ async function sendImage(file) {
   if (error) { dbg('Upload fehlgeschlagen (Bucket „media" + Policy vorhanden?): ' + error.message); alert('Bild-Upload fehlgeschlagen.'); return; }
   await deliverMessage(IMG_PREFIX + JSON.stringify({ p: path, w, h }));
 }
+// Put the decoded image into a wrap; once it has laid out, re-pin to bottom if this is the last
+// message and it's cut off (fixes the sender's one-shot scroll undershooting the async image height).
+function placeImg(wrap, url, div) {
+  wrap.innerHTML = `<img class="msg-img" src="${url}" alt="Bild">`;
+  const im = wrap.querySelector('img');
+  const pin = () => {
+    if (div !== messagesEl.lastElementChild) return;
+    if (div.offsetTop + div.offsetHeight > messagesEl.scrollTop + messagesEl.clientHeight - 4) messagesEl.scrollTop = messagesEl.scrollHeight;
+  };
+  if (im.complete) pin(); else im.addEventListener('load', pin, { once: true });
+}
 // Download the ciphertext, decrypt with the message's key, show the image (cached by path).
 async function loadImage(div, key) {
   const wrap = div.querySelector('.img-wrap');
   if (!wrap) return;
   const path = wrap.dataset.p;
   if (!path) return;
-  if (imgCache[path]) { wrap.innerHTML = `<img class="msg-img" src="${imgCache[path]}" alt="Bild">`; return; }
+  if (imgCache[path]) { placeImg(wrap, imgCache[path], div); return; }
   try {
     const { data, error } = await client.storage.from('media').download(path);
     if (error || !data) { wrap.innerHTML = '<span class="img-err">⚠️</span>'; return; }
     const plain = await decryptBytes(new Uint8Array(await data.arrayBuffer()), key);
     const url = URL.createObjectURL(new Blob([plain], { type: 'image/jpeg' }));
     imgCache[path] = url;
-    wrap.innerHTML = `<img class="msg-img" src="${url}" alt="Bild">`;
+    placeImg(wrap, url, div);
   } catch (e) { wrap.innerHTML = '<span class="img-err">⚠️</span>'; dbg('Bild laden/entschlüsseln fehlgeschlagen: ' + (e && e.message || e)); }
 }
 // Lightbox: tap an image → fullscreen
