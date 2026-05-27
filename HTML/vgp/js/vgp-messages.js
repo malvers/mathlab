@@ -310,12 +310,14 @@ async function renderMsg(msg) {
     const mk = content.match(/^(\u2063+)/);
     if (mk) { jumboScale = Math.min(5, mk[1].length); content = content.slice(mk[1].length); }
   }
-  // Image message? content = IMG_PREFIX + JSON descriptor {p,w,h}. Validate by parsing.
-  let imgDesc = null;
+  // Image/voice message? content = PREFIX + JSON descriptor. Validate by parsing.
+  let imgDesc = null, voiceDesc = null;
   if (!decryptFailed && content.startsWith(IMG_PREFIX)) {
     try { const d = JSON.parse(content.slice(IMG_PREFIX.length)); if (d && d.p) imgDesc = d; } catch (_) {}
+  } else if (!decryptFailed && content.startsWith(VOICE_PREFIX)) {
+    try { const d = JSON.parse(content.slice(VOICE_PREFIX.length)); if (d && d.a) voiceDesc = d; } catch (_) {}
   }
-  if (!decryptFailed) div.dataset.raw = imgDesc ? '📷 Bild' : content;   // plain text (for ArrowUp edit + reply quotes)
+  if (!decryptFailed) div.dataset.raw = imgDesc ? '📷 Bild' : voiceDesc ? '🎤 Sprachnachricht' : content;   // plain text (ArrowUp edit + reply quotes)
   // Emoji-only message (1–3) → render big, no bubble (WhatsApp/Signal style)
   if (!decryptFailed) {
     const ec = emojiOnlyCount(content);
@@ -351,6 +353,8 @@ async function renderMsg(msg) {
   }
   const body = imgDesc
     ? `<div class="img-wrap" data-p="${escapeHtml(imgDesc.p)}" style="aspect-ratio:${(imgDesc.w || 4)}/${(imgDesc.h || 3)}"><span class="img-spin">📷</span></div>`
+    : voiceDesc
+    ? `<div class="voice-wrap" data-p="${escapeHtml(voiceDesc.a)}"><span class="img-spin">🎤</span> ${fmtDur(voiceDesc.d || 0)}</div>`
     : `<span class="text">${emojiImg(formatText(escapeHtml(content)))}</span>`;
   div.innerHTML = `${quote}${sender}${badge}${body}<span class="time">${timeStr}${ticks}</span>`;
   // Actions trigger (⋯ on hover; touch uses long-press) → reactions + (own) delete; plus a reactions container.
@@ -364,7 +368,8 @@ async function renderMsg(msg) {
     div.appendChild(reacts);
   }
   messagesEl.appendChild(div);
-  if (imgDesc) loadImage(div, msgKey);   // lazily download + decrypt the picture
+  if (imgDesc) loadImage(div, msgKey);        // lazily download + decrypt the picture
+  else if (voiceDesc) loadVoice(div, msgKey); // … or the voice clip
 }
 
 // Etappe 4: permanently delete the account — server rows (own messages, receipts, identity, backup)
@@ -761,7 +766,12 @@ msgInput.onkeydown = e => {
 
 // Send button: visible only while the field has text
 const sendBtn = document.getElementById('send-btn');
-function updateSendBtn() { sendBtn.classList.toggle('visible', msgInput.value.trim().length > 0); }
+const micBtn = document.getElementById('mic-btn');
+function updateSendBtn() {
+  const hasText = msgInput.value.trim().length > 0;
+  sendBtn.classList.toggle('visible', hasText);
+  if (micBtn) micBtn.style.display = hasText ? 'none' : 'flex';   // mic when empty, send when typing (WhatsApp-style)
+}
 msgInput.addEventListener('input', () => { updateSendBtn(); refreshCmdBox(); sendTyping(); });
 msgInput.addEventListener('blur', () => setTimeout(hideCmdBox, 120));
 sendBtn.onclick = () => sendMsg();
@@ -865,6 +875,91 @@ messagesEl.addEventListener('click', e => {
   if (im && lightbox) { lightbox.querySelector('img').src = im.src; lightbox.classList.remove('hidden'); }
 });
 if (lightbox) lightbox.addEventListener('click', () => lightbox.classList.add('hidden'));
+
+// ===========================================================================
+// VOICE MESSAGES — record → decode → WAV (16 kHz mono) → encrypt → upload (same media bucket)
+// ===========================================================================
+const VOICE_PREFIX = 'vgpvoi';
+let mediaRec = null, recChunks = [], recStream = null, recStart = 0, recTimer = null, recCancelled = false;
+const recBar = document.getElementById('rec-bar');
+const recTimeEl = document.getElementById('rec-time');
+
+function fmtDur(s) { const m = Math.floor(s / 60); return m + ':' + String(s % 60).padStart(2, '0'); }
+async function startRec() {
+  if (!activeRoom && !activePeer) { alert('Wähle zuerst einen Kontakt.'); return; }
+  try { recStream = await navigator.mediaDevices.getUserMedia({ audio: true }); }
+  catch (e) { alert('Mikrofon-Zugriff verweigert.'); return; }
+  recCancelled = false; recChunks = [];
+  mediaRec = new MediaRecorder(recStream);
+  mediaRec.ondataavailable = e => { if (e.data && e.data.size) recChunks.push(e.data); };
+  mediaRec.onstop = async () => {
+    recStream.getTracks().forEach(t => t.stop());
+    if (!recCancelled) { try { await finishRecording(); } catch (e) { dbg('Voice fehlgeschlagen: ' + (e && e.message || e)); alert('Sprachnachricht fehlgeschlagen.'); } }
+  };
+  mediaRec.start();
+  recStart = Date.now();
+  micBtn.classList.add('recording');
+  if (recBar) recBar.classList.remove('hidden');
+  recTimer = setInterval(() => { if (recTimeEl) recTimeEl.textContent = fmtDur(Math.round((Date.now() - recStart) / 1000)); }, 250);
+}
+function endRecUI() { micBtn.classList.remove('recording'); clearInterval(recTimer); if (recBar) recBar.classList.add('hidden'); }
+function stopAndSend() { recCancelled = false; if (mediaRec && mediaRec.state === 'recording') mediaRec.stop(); endRecUI(); }
+function cancelRec() { recCancelled = true; if (mediaRec && mediaRec.state === 'recording') mediaRec.stop(); else if (recStream) recStream.getTracks().forEach(t => t.stop()); endRecUI(); }
+if (micBtn) micBtn.onclick = () => { (mediaRec && mediaRec.state === 'recording') ? stopAndSend() : startRec(); };
+if (recBar) document.getElementById('rec-cancel').onclick = cancelRec;
+
+// 16-bit PCM mono WAV from a Float32 buffer
+function encodeWav(f32, rate) {
+  const len = f32.length, buf = new ArrayBuffer(44 + len * 2), v = new DataView(buf);
+  const ws = (o, s) => { for (let i = 0; i < s.length; i++) v.setUint8(o + i, s.charCodeAt(i)); };
+  ws(0, 'RIFF'); v.setUint32(4, 36 + len * 2, true); ws(8, 'WAVE'); ws(12, 'fmt ');
+  v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
+  v.setUint32(24, rate, true); v.setUint32(28, rate * 2, true); v.setUint16(32, 2, true); v.setUint16(34, 16, true);
+  ws(36, 'data'); v.setUint32(40, len * 2, true);
+  let o = 44; for (let i = 0; i < len; i++) { const x = Math.max(-1, Math.min(1, f32[i])); v.setInt16(o, x < 0 ? x * 0x8000 : x * 0x7FFF, true); o += 2; }
+  return new Uint8Array(buf);
+}
+// Downmix to mono + linear-resample to targetRate
+function toMono(ab, targetRate) {
+  const chs = ab.numberOfChannels, n = ab.length, mono = new Float32Array(n);
+  for (let c = 0; c < chs; c++) { const d = ab.getChannelData(c); for (let i = 0; i < n; i++) mono[i] += d[i] / chs; }
+  if (ab.sampleRate === targetRate) return { data: mono, rate: targetRate };
+  const ratio = ab.sampleRate / targetRate, outN = Math.floor(n / ratio), out = new Float32Array(outN);
+  for (let i = 0; i < outN; i++) { const idx = i * ratio, i0 = Math.floor(idx), f = idx - i0; out[i] = (mono[i0] || 0) * (1 - f) + (mono[i0 + 1] || 0) * f; }
+  return { data: out, rate: targetRate };
+}
+async function finishRecording() {
+  const dur = Math.round((Date.now() - recStart) / 1000);
+  const blob = new Blob(recChunks, { type: mediaRec.mimeType || 'audio/webm' });
+  if (!blob.size || dur < 1) return;                          // too short → ignore (accidental tap)
+  const ctx = new (window.AudioContext || window.webkitAudioContext)();
+  const audioBuf = await ctx.decodeAudioData(await blob.arrayBuffer());   // decode native format LOCALLY
+  ctx.close();
+  const { data, rate } = toMono(audioBuf, 16000);
+  const wav = encodeWav(data, rate);
+  const key = await currentChatKey(); if (!key) return;
+  const enc = await encryptBytes(wav, key);
+  const path = crypto.randomUUID() + '.bin';
+  const { error } = await client.storage.from('media').upload(path, enc, { contentType: 'application/octet-stream' });
+  if (error) { dbg('Voice-Upload fehlgeschlagen: ' + error.message); alert('Sprachnachricht-Upload fehlgeschlagen.'); return; }
+  await deliverMessage(VOICE_PREFIX + JSON.stringify({ a: path, d: dur }));
+}
+// Download + decrypt a voice clip into a <audio> player.
+async function loadVoice(div, key) {
+  const wrap = div.querySelector('.voice-wrap');
+  if (!wrap) return;
+  const path = wrap.dataset.p;
+  if (!path) return;
+  const render = url => { wrap.innerHTML = `<audio controls preload="metadata" src="${url}"></audio>`; };
+  if (imgCache[path]) { render(imgCache[path]); return; }
+  try {
+    const { data, error } = await client.storage.from('media').download(path);
+    if (error || !data) { wrap.innerHTML = '<span class="img-err">⚠️</span>'; return; }
+    const plain = await decryptBytes(new Uint8Array(await data.arrayBuffer()), key);
+    const url = URL.createObjectURL(new Blob([plain], { type: 'audio/wav' }));
+    imgCache[path] = url; render(url);
+  } catch (e) { wrap.innerHTML = '<span class="img-err">⚠️</span>'; dbg('Voice laden/entschlüsseln fehlgeschlagen: ' + (e && e.message || e)); }
+}
 
 async function sendMsg() {
   hideCmdBox();
