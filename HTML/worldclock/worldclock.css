@@ -162,8 +162,8 @@ html body.clock-only-mode:not(:has(#side-panel)) {
     grid-template-columns: 0 0 minmax(0, 1fr) !important;
 }
 /* --- Radial touch control popup (right-click / long-press), ported from voicerecorder --- */
-#mini-stack { display: none; }
-#mini-stack.popup {
+.mini-stack { display: none; }
+.mini-stack.popup {
     display: block;
     position: fixed;
     z-index: 9600;
@@ -172,7 +172,7 @@ html body.clock-only-mode:not(:has(#side-panel)) {
     padding: 0;
     pointer-events: none; /* only the buttons are tappable */
 }
-#mini-stack.popup::before {
+.mini-stack.popup::before {
     content: '';
     position: absolute;
     left: 50%; top: 50%;
@@ -187,7 +187,7 @@ html body.clock-only-mode:not(:has(#side-panel)) {
     z-index: -1;
     filter: blur(6px);
 }
-#mini-stack.popup .mini-btn {
+.mini-stack.popup .mini-btn {
     position: absolute;
     pointer-events: auto;
     width: 108px;
@@ -205,10 +205,10 @@ html body.clock-only-mode:not(:has(#side-panel)) {
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5), 0 0 10px rgba(0, 210, 255, 0.25);
     transition: background 0.12s, transform 0.12s;
 }
-#mini-stack.popup .mini-btn:hover  { background: rgba(0, 210, 255, 0.1); }
-#mini-stack.popup .mini-btn:active { transform: translate(-50%, -50%) scale(0.95); }
+.mini-stack.popup .mini-btn:hover  { background: rgba(0, 210, 255, 0.1); }
+.mini-stack.popup .mini-btn:active { transform: translate(-50%, -50%) scale(0.95); }
 /* two-line toggle buttons: both states stacked, active one cyan, the other dimmed */
-#mini-stack.popup .mini-btn.two-line {
+.mini-stack.popup .mini-btn.two-line {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -217,32 +217,32 @@ html body.clock-only-mode:not(:has(#side-panel)) {
     line-height: 1.05;
     padding: 0;
 }
-#mini-stack.popup .mini-btn.two-line .opt {
+.mini-stack.popup .mini-btn.two-line .opt {
     display: block;
     white-space: nowrap;
     color: rgba(150, 165, 185, 0.5);    /* inactive: dim grey */
     transition: color 0.12s;
 }
-#mini-stack.popup .mini-btn.two-line .opt.is-active {
+.mini-stack.popup .mini-btn.two-line .opt.is-active {
     color: rgba(0, 210, 255, 0.95);     /* active: cyan */
 }
 /* HEUTE: contextual button (not a binary toggle), so both lines share one colour.
    today     → cyan, shows "HEUTE" + the current date (informational)
    not today → orange .action, shows "ZURÜCK ZU / HEUTE" (tap resets to today) */
-#mini-stack.popup #wc-mb-today {
+.mini-stack.popup #wc-mb-today {
     color: rgba(0, 210, 255, 0.95);
     border-color: rgba(0, 210, 255, 0.8);
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5), 0 0 10px rgba(0, 210, 255, 0.25);
 }
-#mini-stack.popup #wc-mb-today.two-line .opt { color: rgba(0, 210, 255, 0.95); }
-#mini-stack.popup #wc-mb-today:hover { background: rgba(0, 210, 255, 0.1); }
-#mini-stack.popup #wc-mb-today.action {
+.mini-stack.popup #wc-mb-today.two-line .opt { color: rgba(0, 210, 255, 0.95); }
+.mini-stack.popup #wc-mb-today:hover { background: rgba(0, 210, 255, 0.1); }
+.mini-stack.popup #wc-mb-today.action {
     color: rgb(245, 194, 66);
     border-color: rgb(245, 194, 66);
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5), 0 0 10px rgba(245, 194, 66, 0.3);
 }
-#mini-stack.popup #wc-mb-today.action.two-line .opt { color: rgb(245, 194, 66); }
-#mini-stack.popup #wc-mb-today.action:hover { background: rgba(245, 194, 66, 0.12); }
+.mini-stack.popup #wc-mb-today.action.two-line .opt { color: rgb(245, 194, 66); }
+.mini-stack.popup #wc-mb-today.action:hover { background: rgba(245, 194, 66, 0.12); }
 /* Left-edge hamburger trigger (vertically centred): no frame, dezent; stays three bars (no X).
    When the menu is open the bars turn full cyan with a soft glow. */
 #wc-menu-btn {
@@ -264,7 +264,7 @@ html body.clock-only-mode:not(:has(#side-panel)) {
     cursor: pointer;
     z-index: 9500;
 }
-#wc-menu-btn span {
+#wc-menu-btn span, #wc-menu-btn-r span {
     display: block;
     width: 24px;
     height: 2px;
@@ -272,10 +272,44 @@ html body.clock-only-mode:not(:has(#side-panel)) {
     background: rgba(0, 210, 255, 0.5);     /* dezent */
     transition: background 0.15s, box-shadow 0.15s;
 }
-#wc-menu-btn:hover span { background: rgba(0, 210, 255, 0.7); }
-#wc-menu-btn.open span {
+#wc-menu-btn:hover span, #wc-menu-btn-r:hover span { background: rgba(0, 210, 255, 0.7); }
+#wc-menu-btn.open span, #wc-menu-btn-r.open span {
     background: rgba(0, 210, 255, 1);       /* selected: full cyan */
     box-shadow: 0 0 6px rgba(0, 210, 255, 0.6);
+}
+/* Right-edge hamburger (mirror of the left): opens the layer toggles. */
+#wc-menu-btn-r {
+    position: fixed;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 46px;
+    height: 46px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    padding: 0;
+    border: none;
+    background: none;
+    box-shadow: none;
+    cursor: pointer;
+    z-index: 9500;
+}
+/* Single-line on/off toggle buttons (right menu): on = cyan (default mini-btn), off = dimmed. */
+.mini-stack.popup .mini-btn.toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    white-space: nowrap;
+    padding: 0 6px;
+}
+.mini-stack.popup .mini-btn.toggle.off {
+    color: rgba(150, 165, 185, 0.5);
+    border-color: rgba(150, 165, 185, 0.35);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
 }
 /* --- Hide the shared mini-rail entirely (always) and reclaim its grid column. --- */
 /* Override stays lab-local: the central layout files are untouched. */
@@ -356,7 +390,7 @@ body:not(.cyber-shell-grid):has(#side-panel) { grid-template-columns: 0 0 minmax
 /* --- Planetarium top-center info box (city + local date + digit clock), dark-blue 55%, no border --- */
 #sky-info {
     position: fixed;
-    top: 14px;
+    top: 38px;
     left: 50%;
     transform: translateX(-50%);
     display: none;
@@ -388,8 +422,8 @@ body:not(.cyber-shell-grid):has(#side-panel) { grid-template-columns: 0 0 minmax
     color: rgba(210, 225, 240, 0.85);
 }
 #sky-info-time { letter-spacing: normal; }   /* the fixed slots handle spacing themselves */
-#sky-info-time .tdig { display: inline-block; width: 0.78em; text-align: center; }   /* equal-width digits → no jitter */
-#sky-info-time .tcol { display: inline-block; width: 0.34em; text-align: center; }   /* the ':' keeps its own breathing room */
+#sky-info-time .tdig { display: inline-block; width: 0.92em; text-align: center; }   /* equal-width digits → no jitter (stretched x) */
+#sky-info-time .tcol { display: inline-block; width: 0.42em; text-align: center; }   /* the ':' keeps its own breathing room */
 
 /* LOCAL-environment marker — shown ONLY when served from localhost/LAN/file. No red ring = you are on the LIVE site. */
 .env-local body { box-shadow: inset 0 0 0 4px rgb(176, 36, 24); }   /* Υ red, purely visual — never intercepts clicks */
