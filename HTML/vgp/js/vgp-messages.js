@@ -306,7 +306,12 @@ async function renderMsg(msg) {
     const mk = content.match(/^(\u2063+)/);
     if (mk) { jumboScale = Math.min(5, mk[1].length); content = content.slice(mk[1].length); }
   }
-  if (!decryptFailed) div.dataset.raw = content;   // plain text (for ArrowUp edit + reply quotes)
+  // Image message? content = IMG_PREFIX + JSON descriptor {p,w,h}. Validate by parsing.
+  let imgDesc = null;
+  if (!decryptFailed && content.startsWith(IMG_PREFIX)) {
+    try { const d = JSON.parse(content.slice(IMG_PREFIX.length)); if (d && d.p) imgDesc = d; } catch (_) {}
+  }
+  if (!decryptFailed) div.dataset.raw = imgDesc ? '📷 Bild' : content;   // plain text (for ArrowUp edit + reply quotes)
   // Emoji-only message (1–3) → render big, no bubble (WhatsApp/Signal style)
   if (!decryptFailed) {
     const ec = emojiOnlyCount(content);
@@ -340,7 +345,10 @@ async function renderMsg(msg) {
     const qt = orig ? (orig.dataset.raw || '').slice(0, 90) : '…';
     quote = `<div class="quote" data-to="${msg.reply_to}"><span class="q-au">${escapeHtml(qa)}</span>${emojiImg(escapeHtml(qt))}</div>`;
   }
-  div.innerHTML = `${quote}${sender}${badge}<span class="text">${emojiImg(formatText(escapeHtml(content)))}</span><span class="time">${timeStr}${ticks}</span>`;
+  const body = imgDesc
+    ? `<div class="img-wrap" data-p="${escapeHtml(imgDesc.p)}" style="aspect-ratio:${(imgDesc.w || 4)}/${(imgDesc.h || 3)}"><span class="img-spin">📷</span></div>`
+    : `<span class="text">${emojiImg(formatText(escapeHtml(content)))}</span>`;
+  div.innerHTML = `${quote}${sender}${badge}${body}<span class="time">${timeStr}${ticks}</span>`;
   // Actions trigger (⋯ on hover; touch uses long-press) → reactions + (own) delete; plus a reactions container.
   if (msg.id != null) {
     const act = document.createElement('button');
@@ -352,6 +360,7 @@ async function renderMsg(msg) {
     div.appendChild(reacts);
   }
   messagesEl.appendChild(div);
+  if (imgDesc) loadImage(div, msgKey);   // lazily download + decrypt the picture
 }
 
 // Etappe 4: permanently delete the account — server rows (own messages, receipts, identity, backup)
@@ -771,6 +780,77 @@ const EMOTICON_RE = new RegExp(
   ')(?=\\s|$)', 'g');
 function emoticonsToEmoji(s) { return s.replace(EMOTICON_RE, (m, pre, e) => pre + EMOTICONS[e]); }
 
+// ===========================================================================
+// IMAGES — compress → encrypt → upload (Supabase Storage) → message holds only a descriptor
+// ===========================================================================
+const IMG_PREFIX = 'vgpimg';   // sentinel inside the (encrypted) message content → "this is an image"
+const imgCache = {};                       // storage path → decrypted object URL (avoid re-download on re-render)
+const imgInput = document.getElementById('img-input');
+const attachBtn = document.getElementById('attach-btn');
+if (attachBtn && imgInput) {
+  attachBtn.onclick = () => imgInput.click();
+  imgInput.onchange = async () => {
+    const file = imgInput.files && imgInput.files[0];
+    imgInput.value = '';                   // reset so the same file can be picked again
+    if (!file || !file.type.startsWith('image/')) return;
+    if (!activeRoom && !activePeer) { alert('Wähle zuerst einen Kontakt.'); return; }
+    try { await sendImage(file); } catch (e) { dbg('Bild senden fehlgeschlagen: ' + (e && e.message || e)); }
+  };
+}
+async function currentChatKey() {
+  if (activeRoom) return roomKey;
+  if (activePeer) return await deriveChatKey(activePeer.ecdh_pubkey);
+  return null;
+}
+// Resize to max 1280px + JPEG ~0.7 → { bytes, w, h }
+function compressImage(file) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      const MAX = 1280; let w = img.naturalWidth, h = img.naturalHeight;
+      if (w > MAX || h > MAX) { const s = MAX / Math.max(w, h); w = Math.round(w * s); h = Math.round(h * s); }
+      const cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+      cv.getContext('2d').drawImage(img, 0, 0, w, h);
+      cv.toBlob(b => b ? b.arrayBuffer().then(ab => resolve({ bytes: new Uint8Array(ab), w, h })) : reject(new Error('toBlob')), 'image/jpeg', 0.7);
+    };
+    img.onerror = () => reject(new Error('Bild konnte nicht geladen werden'));
+    img.src = URL.createObjectURL(file);
+  });
+}
+async function sendImage(file) {
+  const key = await currentChatKey();
+  if (!key) return;
+  const { bytes, w, h } = await compressImage(file);
+  const enc = await encryptBytes(bytes, key);                 // iv ++ ciphertext (E2E — storage sees only this)
+  const path = crypto.randomUUID() + '.bin';
+  const { error } = await client.storage.from('media').upload(path, enc, { contentType: 'application/octet-stream' });
+  if (error) { dbg('Upload fehlgeschlagen (Bucket „media" + Policy vorhanden?): ' + error.message); alert('Bild-Upload fehlgeschlagen.'); return; }
+  await deliverMessage(IMG_PREFIX + JSON.stringify({ p: path, w, h }));
+}
+// Download the ciphertext, decrypt with the message's key, show the image (cached by path).
+async function loadImage(div, key) {
+  const wrap = div.querySelector('.img-wrap');
+  if (!wrap) return;
+  const path = wrap.dataset.p;
+  if (!path) return;
+  if (imgCache[path]) { wrap.innerHTML = `<img class="msg-img" src="${imgCache[path]}" alt="Bild">`; return; }
+  try {
+    const { data, error } = await client.storage.from('media').download(path);
+    if (error || !data) { wrap.innerHTML = '<span class="img-err">⚠️</span>'; return; }
+    const plain = await decryptBytes(new Uint8Array(await data.arrayBuffer()), key);
+    const url = URL.createObjectURL(new Blob([plain], { type: 'image/jpeg' }));
+    imgCache[path] = url;
+    wrap.innerHTML = `<img class="msg-img" src="${url}" alt="Bild">`;
+  } catch (e) { wrap.innerHTML = '<span class="img-err">⚠️</span>'; dbg('Bild laden/entschlüsseln fehlgeschlagen: ' + (e && e.message || e)); }
+}
+// Lightbox: tap an image → fullscreen
+const lightbox = document.getElementById('lightbox');
+messagesEl.addEventListener('click', e => {
+  const im = e.target.closest('.msg-img');
+  if (im && lightbox) { lightbox.querySelector('img').src = im.src; lightbox.classList.remove('hidden'); }
+});
+if (lightbox) lightbox.addEventListener('click', () => lightbox.classList.add('hidden'));
+
 async function sendMsg() {
   hideCmdBox();
   let content = msgInput.value.trim();
@@ -794,30 +874,32 @@ async function sendMsg() {
   if (sm) { jumboScale = +sm[1]; content = sm[2].trim(); }
   content = emoticonsToEmoji(content);   // :-) → 🙂 etc. (commands already carry real emoji)
   if (jumboScale) { const n = emojiOnlyCount(content); if (n >= 1 && n <= 3) content = JUMBO_MARK.repeat(jumboScale) + content; }
-  // Group room → encrypt once with the shared roomKey, one row addressed to the group (room_id).
+  const ok = await deliverMessage(content);   // shared encrypt+sign+insert+optimistic-render path (text & images)
+  if (ok) { msgInput.value = ''; updateSendBtn(); }
+}
+
+// Encrypt + sign + insert one message (room or 1:1), render it optimistically. Returns true on success.
+// `content` is the plaintext payload (normal text, or an image descriptor). Honors the current replyTo.
+async function deliverMessage(content) {
+  const rt = replyTo;
   if (activeRoom) {
     const encrypted = await encryptText(content, roomKey);
-    const sig = await signText(encrypted + '|' + myGroupId); // signature bound to the room
-    dbg(`Sende (Gruppen-Chat, verschlüsselt + signiert) an „${activeGroupLabel()}"`);
-    const { data, error } = await client.from('messages').insert({ content: encrypted, room_id: myGroupId, recipient_pubkey: null, pubkey: myPubB64, sig, reply_to: replyTo }).select().single();
-    if (error) { dbg('Sendefehler (Gruppen-Chat): ' + error.message); return; }
-    dbg('Gruppen-Chat-Nachricht gesendet');
-    msgInput.value = ''; updateSendBtn(); cancelReply();
-    if (data) { try { await renderMsg(data); } catch (e) { dbg('Render-Fehler (ignoriert): ' + (e && e.message || e)); } messagesEl.scrollTop = messagesEl.scrollHeight; } // show own msg instantly; realtime echo is deduped by id
-    return;
+    const sig = await signText(encrypted + '|' + myGroupId);
+    const { data, error } = await client.from('messages').insert({ content: encrypted, room_id: myGroupId, recipient_pubkey: null, pubkey: myPubB64, sig, reply_to: rt }).select().single();
+    if (error) { dbg('Sendefehler (Gruppen-Chat): ' + error.message); return false; }
+    dbg('Gruppen-Chat-Nachricht gesendet'); cancelReply();
+    if (data) { try { await renderMsg(data); } catch (e) { dbg('Render-Fehler (ignoriert): ' + (e && e.message || e)); } messagesEl.scrollTop = messagesEl.scrollHeight; }
+    return true;
   }
-  // Real message → 1:1 to the selected contact, encrypted with the ECDH-derived shared key
-  if (!activePeer) return alert('Wähle zuerst einen Kontakt.');
+  if (!activePeer) { alert('Wähle zuerst einen Kontakt.'); return false; }
   const chatKey = await deriveChatKey(activePeer.ecdh_pubkey);
-  if (!chatKey) { dbg('Kein Chat-Schlüssel (ECDH) — Kontakt ohne ecdh_pubkey?'); return; }
+  if (!chatKey) { dbg('Kein Chat-Schlüssel (ECDH) — Kontakt ohne ecdh_pubkey?'); return false; }
   const encrypted = await encryptText(content, chatKey);
-  // Sign the ciphertext bound to the recipient's identity → receiver verifies it's really from us
   const sig = await signText(encrypted + '|' + activePeer.pubkey);
-  dbg(`Sende (1:1, verschlüsselt + signiert) an ${activePeer.name}`);
-  const { data, error } = await client.from('messages').insert({ content: encrypted, recipient_pubkey: activePeer.pubkey, pubkey: myPubB64, sig, reply_to: replyTo }).select().single();
-  if (error) { dbg('Sendefehler: ' + error.message); return; }
-  dbg('Nachricht gesendet');
-  msgInput.value = ''; updateSendBtn(); cancelReply();
-  if (data) { try { await renderMsg(data); } catch (e) { dbg('Render-Fehler (ignoriert): ' + (e && e.message || e)); } messagesEl.scrollTop = messagesEl.scrollHeight; } // show own msg instantly; realtime echo is deduped by id
+  const { data, error } = await client.from('messages').insert({ content: encrypted, recipient_pubkey: activePeer.pubkey, pubkey: myPubB64, sig, reply_to: rt }).select().single();
+  if (error) { dbg('Sendefehler: ' + error.message); return false; }
+  dbg('Nachricht gesendet'); cancelReply();
+  if (data) { try { await renderMsg(data); } catch (e) { dbg('Render-Fehler (ignoriert): ' + (e && e.message || e)); } messagesEl.scrollTop = messagesEl.scrollHeight; }
+  return true;
 }
 

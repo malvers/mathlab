@@ -105,6 +105,18 @@ async function decryptText(cipherB64, key) {
   }
 }
 
+// Binary AES-GCM for media (images): output = iv(12) ++ ciphertext, as one Uint8Array (uploaded as-is).
+async function encryptBytes(bytes, key) {
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const ct = new Uint8Array(await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, bytes));
+  const out = new Uint8Array(12 + ct.length); out.set(iv); out.set(ct, 12);
+  return out;
+}
+async function decryptBytes(combined, key) {
+  const iv = combined.slice(0, 12), data = combined.slice(12);
+  return new Uint8Array(await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, data));
+}
+
 // ===========================================================================
 // IDENTITY — ECDSA/ECDH keys, sign & verify
 // ===========================================================================

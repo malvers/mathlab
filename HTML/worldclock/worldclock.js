@@ -516,6 +516,12 @@
         let hoveredZodiac = null;   // zodiac sign under the pointer (priority over stars/constellations)
         let hoveredDeepsky = null;  // deep-sky object under the pointer (Messier nebulae/clusters/galaxies)
         let _dsLastLog = -1;        // last logged deep-sky-above-horizon count (avoids spamming the DEBUG window)
+        // Right-menu layer toggles (all on by default) — show/hide individual sky overlays.
+        let showConstLines = true;  // constellation lines/figures
+        let showConstNames = true;  // constellation name labels
+        let showEcliptic   = true;  // ecliptic line
+        let showPlanets    = true;  // planet markers + names
+        let showZodiac     = true;  // zodiac symbols
         let visStarCount = 0, visConCount = 0;   // currently-visible counts (stars above horizon · constellations on screen)
         // Fixed centroid (RA/Dec) per constellation — a stable label anchor that pans smoothly (no jump as
         // individual stars cross the horizon). Averaged as 3D unit vectors so RA wraparound is handled.
@@ -858,6 +864,61 @@
             if (bGlobe) bGlobe.addEventListener('click', () => { window.toggleGlobe();            refreshLabels(); });
             if (bDir)   bDir.addEventListener('click',   () => { setDirection(!CW);               refreshLabels(); });
             if (bToday) bToday.addEventListener('click', () => { debugDayOffset = 0; });
+        })();
+
+        // --- Right-edge mirror menu: on/off toggles for the sky overlays (left-facing half-circle). ---
+        (function () {
+            const stack = document.getElementById('mini-stack-r');
+            if (!stack) return;
+            const hamb = document.getElementById('wc-menu-btn-r');
+            const map = [
+                ['wc-tg-conlines', () => showConstLines, v => { showConstLines = v; }],
+                ['wc-tg-connames', () => showConstNames, v => { showConstNames = v; }],
+                ['wc-tg-ecliptic', () => showEcliptic,   v => { showEcliptic   = v; }],
+                ['wc-tg-planets',  () => showPlanets,    v => { showPlanets    = v; }],
+                ['wc-tg-zodiac',   () => showZodiac,     v => { showZodiac     = v; }],
+            ];
+            function refreshToggles() {
+                for (const [id, get] of map) {
+                    const b = document.getElementById(id);
+                    if (b) b.classList.toggle('off', !get());   // off = dimmed grey, on = cyan
+                }
+            }
+            // Half-circle anchored at the right edge: items fan out to the LEFT (mirror of the left menu).
+            function open() {
+                const H = 260, cxC = 56, bulge = 106, rowGap = 50, W = 320;
+                stack.style.left = (window.innerWidth - 8 - W) + 'px';
+                stack.style.top  = (window.innerHeight / 2 - H / 2) + 'px';
+                refreshToggles();
+                stack.classList.add('popup');
+                if (hamb) hamb.classList.add('open');
+                const btns = Array.from(stack.querySelectorAll('.mini-btn'));
+                const n = btns.length;
+                btns.forEach((b, i) => {
+                    const t = n > 1 ? i / (n - 1) : 0.5;
+                    b.style.left = (W - cxC - Math.sin(t * Math.PI) * bulge) + 'px';  // ends flush right, middle bulges left
+                    b.style.top  = (H / 2 + (i - (n - 1) / 2) * rowGap) + 'px';
+                });
+            }
+            function close() {
+                stack.classList.remove('popup');
+                if (hamb) hamb.classList.remove('open');
+                stack.querySelectorAll('.mini-btn').forEach(b => { b.style.left = ''; b.style.top = ''; });
+            }
+            function toggle() { stack.classList.contains('popup') ? close() : open(); }
+            if (hamb) hamb.addEventListener('click', () => toggle());
+            // each toggle flips its layer and stays open (so several can be flipped in a row)
+            for (const [id, get, set] of map) {
+                const b = document.getElementById(id);
+                if (b) b.addEventListener('click', (e) => { e.stopPropagation(); set(!get()); refreshToggles(); });
+            }
+            // close on a click/tap outside (but not on its hamburger)
+            document.addEventListener('mousedown', e => {
+                if (!stack.classList.contains('popup')) return;
+                if (stack.contains(e.target)) return;
+                if (hamb && hamb.contains(e.target)) return;
+                close();
+            });
         })();
 
         function getMouseAngle(e) {
@@ -2335,27 +2396,13 @@
                 ctx.beginPath(); ctx.arc(cx, cy, Rdome, 0, Math.PI * 2); ctx.stroke();
             }
             // Constellation lines — batched into ONE path per colour (one stroke instead of thousands) → much cheaper.
-            ctx.strokeStyle = `rgba(120, 160, 220, ${a * 0.5})`;
-            ctx.lineWidth = 1;
-            ctx.beginPath();
-            for (const con of CONSTELLATION_LINES) {
-                if (con.id === hoverId) continue;                    // hovered one drawn separately (red, thicker)
-                for (const path of con.paths) {
-                    let prev = null;
-                    for (let i = 0; i < path.length; i += 2) {
-                        const p = proj(path[i], path[i + 1]);
-                        if (prev && prev[2] && p[2]) { ctx.moveTo(prev[0], prev[1]); ctx.lineTo(p[0], p[1]); }
-                        prev = p;
-                    }
-                }
-            }
-            ctx.stroke();
-            if (hoverId) {                                           // hovered constellation in red, one stroke
-                const _hcon = CONSTELLATION_LINES.find(c => c.id === hoverId);
-                if (_hcon) {
-                    ctx.strokeStyle = HL; ctx.lineWidth = 1.8;
-                    ctx.beginPath();
-                    for (const path of _hcon.paths) {
+            if (showConstLines) {
+                ctx.strokeStyle = `rgba(120, 160, 220, ${a * 0.5})`;
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                for (const con of CONSTELLATION_LINES) {
+                    if (con.id === hoverId) continue;                    // hovered one drawn separately (red, thicker)
+                    for (const path of con.paths) {
                         let prev = null;
                         for (let i = 0; i < path.length; i += 2) {
                             const p = proj(path[i], path[i + 1]);
@@ -2363,7 +2410,23 @@
                             prev = p;
                         }
                     }
-                    ctx.stroke();
+                }
+                ctx.stroke();
+                if (hoverId) {                                           // hovered constellation in red, one stroke
+                    const _hcon = CONSTELLATION_LINES.find(c => c.id === hoverId);
+                    if (_hcon) {
+                        ctx.strokeStyle = HL; ctx.lineWidth = 1.8;
+                        ctx.beginPath();
+                        for (const path of _hcon.paths) {
+                            let prev = null;
+                            for (let i = 0; i < path.length; i += 2) {
+                                const p = proj(path[i], path[i + 1]);
+                                if (prev && prev[2] && p[2]) { ctx.moveTo(prev[0], prev[1]); ctx.lineTo(p[0], p[1]); }
+                                prev = p;
+                            }
+                        }
+                        ctx.stroke();
+                    }
                 }
             }
             ctx.lineWidth = 1;
@@ -2442,29 +2505,35 @@
                 ctx.restore();
             }
             // Ecliptic — the Sun/Moon/planet highway; faint dashed arc, broken at the horizon.
-            ctx.save();
-            if (dome) { ctx.beginPath(); ctx.arc(cx, cy, Rdome, 0, Math.PI * 2); ctx.clip(); }   // so it reaches exactly to the horizon
-            ctx.setLineDash([4, 4]);
-            ctx.strokeStyle = `rgba(245, 194, 66, ${a * 0.5})`;
-            ctx.lineWidth = 1.4;
-            let _ePrev = null;
-            for (const _ep of ECLIPTIC_PTS) {
-                const q = proj(_ep[0], _ep[1]);
-                if (_ePrev && (_ePrev[2] || q[2])) { ctx.beginPath(); ctx.moveTo(_ePrev[0], _ePrev[1]); ctx.lineTo(q[0], q[1]); ctx.stroke(); }
-                _ePrev = q;
+            if (showEcliptic) {
+                ctx.save();
+                if (dome) { ctx.beginPath(); ctx.arc(cx, cy, Rdome, 0, Math.PI * 2); ctx.clip(); }   // so it reaches exactly to the horizon
+                ctx.setLineDash([4, 4]);
+                ctx.strokeStyle = `rgba(245, 194, 66, ${a * 0.5})`;
+                ctx.lineWidth = 1.4;
+                let _ePrev = null;
+                for (const _ep of ECLIPTIC_PTS) {
+                    const q = proj(_ep[0], _ep[1]);
+                    if (_ePrev && (_ePrev[2] || q[2])) { ctx.beginPath(); ctx.moveTo(_ePrev[0], _ePrev[1]); ctx.lineTo(q[0], q[1]); ctx.stroke(); }
+                    _ePrev = q;
+                }
+                ctx.restore();
             }
-            ctx.restore();
             // Zodiac signs along the ecliptic (symbol at each 30° sign centre).
-            ctx.save();
-            ctx.fillStyle = `rgba(245, 210, 130, ${a * 0.7})`;
-            ctx.font = '16px sans-serif';   // astrological glyphs (Orbitron lacks them)
-            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-            for (const z of ZODIAC) {
-                const q = proj(z.ra, z.dec);
-                z._x = q[0]; z._y = q[1]; z._vis = q[2];   // cache for hover hit-testing
-                if (q[2]) ctx.fillText(z.sym, q[0], q[1]);
+            if (showZodiac) {
+                ctx.save();
+                ctx.fillStyle = `rgba(245, 210, 130, ${a * 0.7})`;
+                ctx.font = '16px sans-serif';   // astrological glyphs (Orbitron lacks them)
+                ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                for (const z of ZODIAC) {
+                    const q = proj(z.ra, z.dec);
+                    z._x = q[0]; z._y = q[1]; z._vis = q[2];   // cache for hover hit-testing
+                    if (q[2]) ctx.fillText(z.sym, q[0], q[1]);
+                }
+                ctx.restore();
+            } else {
+                for (const z of ZODIAC) z._vis = false;        // hidden → not hoverable
             }
-            ctx.restore();
             // Twilight glow at the Sun's position, fading from horizon into night (subtle — keeps the stars visible).
             if (dome && typeof sunPosition === 'function') {
                 const _sun = sunPosition(getDisplayTime());
@@ -2517,7 +2586,7 @@
             }
             // Constellation names at each (visible) constellation's centroid — always on, +36% size, hovered one red.
             const nameA = a * 0.85;   // brightness tracks the stars (dim behind clock, bright in sky mode)
-            if (nameA > 0.02 && typeof CONSTELLATION_NAMES !== 'undefined') {
+            if (showConstNames && nameA > 0.02 && typeof CONSTELLATION_NAMES !== 'undefined') {
                 ctx.font = '12.24px Orbitron';                       // 9px + 36%
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
@@ -2548,7 +2617,7 @@
             // Horizon fade: bodies fade out over the last ~5° as they set (and in as they rise) instead of popping.
             const horizonFade = (px, py) => dome ? Math.max(0, Math.min(1, (Rdome - Math.hypot(px - cx, py - cy)) / (Rdome * 0.06))) : 1;
             // Planets (Schlyter ephemeris): bright coloured markers + names; they sit on the ecliptic and drift over days.
-            if (typeof planetPositions === 'function') {
+            if (showPlanets && typeof planetPositions === 'function') {
                 const _pls = planetPositions(getDisplayTime());
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'top';
