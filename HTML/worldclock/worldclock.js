@@ -1315,7 +1315,8 @@
             for (const d of DEEPSKY) {
                 if (!d._vis) continue;
                 const dx = d._x - px, dy = d._y - py, dd = dx * dx + dy * dy;
-                const hit = (d.rad * skyZoom + 6); // glow radius plus a small margin
+                const drawn = (dsoPhotos && d._masked ? d.rad * 2.4 : d.rad * 1.5) * skyZoom;  // match the rendered size
+                const hit = drawn + 6;             // plus a small margin so the edge is grabbable
                 if (dd < hit * hit && dd < bd) { bd = dd; best = d; }
             }
             return best;
@@ -2734,7 +2735,8 @@
             }
             const _splEl = document.getElementById('sky-play');
             if (_splEl) {
-                _splEl.textContent = lapseActive ? '⏸' : '▶';   // visibility follows its parent sky-info box
+                _splEl.textContent = lapseActive ? '⏸' : '▶';
+                _splEl.style.display = (skyTarget && targetCity && !skyInfoClosed) ? 'flex' : 'none';   // only in the planetarium
                 if (!skyTarget) lapseActive = false;
             }
             const _sib = document.getElementById('sky-info');
@@ -2754,8 +2756,8 @@
                         const _tm = time.toLocaleTimeString('de-DE', { timeZone: targetCity.tz, hour: '2-digit', minute: '2-digit', second: '2-digit' });
                         if (_tEl.dataset.t !== _tm) {                 // rebuild only when the value changes
                             _tEl.dataset.t = _tm;
-                            let _h = '';                             // fixed-width digit slots → Orbitron time never shifts the line
-                            for (const ch of _tm) _h += /\d/.test(ch) ? '<span class="tdig">' + ch + '</span>' : ch;
+                            let _h = '';                             // fixed-width slots (digits + colon) → no jitter, colons stay visible
+                            for (const ch of _tm) _h += /\d/.test(ch) ? '<span class="tdig">' + ch + '</span>' : '<span class="tcol">' + ch + '</span>';
                             _tEl.innerHTML = _h;
                         }
                     }

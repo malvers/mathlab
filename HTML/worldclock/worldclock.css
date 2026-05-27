@@ -290,7 +290,9 @@ body:not(.cyber-shell-grid):has(#side-panel) { grid-template-columns: 0 0 minmax
 #sky-play {
     position: fixed;
     top: 50%; left: 50%;
-    transform: translate(-50%, -50%);   /* dead centre of the window */
+    transform: translate(-50%, -50%);   /* dead centre of the window (direct body child → not trapped by #sky-info) */
+    display: none;                       /* shown by JS only in the planetarium */
+    align-items: center; justify-content: center;
     width: 48px;
     height: 48px;
     border-radius: 50%;
@@ -302,7 +304,7 @@ body:not(.cyber-shell-grid):has(#side-panel) { grid-template-columns: 0 0 minmax
     cursor: pointer;
     z-index: 9560;
     font-family: 'Orbitron', sans-serif;
-    pointer-events: auto;         /* sky-info itself is pointer-events:none */
+    pointer-events: auto;
 }
 #sky-play:hover { background: rgba(0, 210, 255, 0.15); }
 
@@ -385,7 +387,9 @@ body:not(.cyber-shell-grid):has(#side-panel) { grid-template-columns: 0 0 minmax
     letter-spacing: 0.08em;
     color: rgba(210, 225, 240, 0.85);
 }
-#sky-info-time .tdig { display: inline-block; width: 0.64em; text-align: center; }   /* equal-width digits → no jitter */
+#sky-info-time { letter-spacing: normal; }   /* the fixed slots handle spacing themselves */
+#sky-info-time .tdig { display: inline-block; width: 0.78em; text-align: center; }   /* equal-width digits → no jitter */
+#sky-info-time .tcol { display: inline-block; width: 0.34em; text-align: center; }   /* the ':' keeps its own breathing room */
 
 /* LOCAL-environment marker — shown ONLY when served from localhost/LAN/file. No red ring = you are on the LIVE site. */
 .env-local body { box-shadow: inset 0 0 0 4px rgb(176, 36, 24); }   /* Υ red, purely visual — never intercepts clicks */
