@@ -327,12 +327,12 @@ function collapseInactive() {
 // Join/create a group: add it to the vault, register the identity in it, refresh the server backup.
 async function joinGroup(groupPwd, label) {
   groupPwd = (groupPwd || '').trim();
-  if (groupPwd.length < 6) { alert('Gruppen-Passwort: mindestens 6 Zeichen.'); return; }
+  if (groupPwd.length < 6) { await uiConfirm('Gruppen-Passwort: mindestens 6 Zeichen.', { alert: true }); return; }
   if (myGroups.some(g => g.pwd === groupPwd)) { await switchGroup(groupPwd); return; }
   const accountPwd = sessionStorage.getItem(SESSION_PWD_KEY);
-  if (!accountPwd) { alert('Bitte einmal ab- und wieder anmelden, dann „Neue Gruppe".'); return; }
+  if (!accountPwd) { await uiConfirm('Bitte einmal ab- und wieder anmelden, dann „Neue Gruppe".', { alert: true }); return; }
   const v = await openVault(accountPwd);
-  if (!v || v === 'WRONG') { alert('Konto-Passwort nicht verfügbar.'); return; }
+  if (!v || v === 'WRONG') { await uiConfirm('Konto-Passwort nicht verfügbar.', { alert: true }); return; }
   const prevGroups = v.groups.slice(), prevActive = v.activeGroup;
   v.groups = [...v.groups, { pwd: groupPwd, label: (label || 'Gruppe').trim() }];
   v.activeGroup = groupPwd;

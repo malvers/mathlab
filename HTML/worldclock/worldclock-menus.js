@@ -44,8 +44,8 @@
                                         String(d.getMonth() + 1).padStart(2, '0') + '.' + d.getFullYear();
                     bToday.classList.remove('action');
                 } else {                              // stepped away → offer the reset (orange action)
-                    to[0].textContent = 'ZURÜCK ZU';
-                    to[1].textContent = 'HEUTE';
+                    to[0].textContent = 'ZURÜCK AUF';
+                    to[1].textContent = 'JETZT';
                     bToday.classList.add('action');
                 }
             }
@@ -118,7 +118,7 @@
     if (bLang)  bLang.addEventListener('click',  () => { starLangDE = !starLangDE;       refreshLabels(); });
     if (bGlobe) bGlobe.addEventListener('click', () => { window.toggleGlobe();            refreshLabels(); });
     if (bDir)   bDir.addEventListener('click',   () => { setDirection(!CW);               refreshLabels(); });
-    if (bToday) bToday.addEventListener('click', () => { debugDayOffset = 0; });
+    if (bToday) bToday.addEventListener('click', () => { debugDayOffset = 0; lapseActive = false; refreshLabels(); });   // back to NOW + stop the time-lapse
     // on/off toggles: flip + restyle, keep the menu open (stopPropagation prevents the close-on-tap)
     if (bMoon) bMoon.addEventListener('click', (e) => { e.stopPropagation(); showMoon = !showMoon; refreshLabels(); });
     if (bNeb)  bNeb.addEventListener('click',  (e) => { e.stopPropagation(); showDeepsky = !showDeepsky; refreshLabels(); });
@@ -130,11 +130,12 @@
     if (!stack) return;
     const hamb = document.getElementById('wc-menu-btn-r');
     const map = [
-        ['wc-tg-conlines', () => showConstLines, v => { showConstLines = v; }],
-        ['wc-tg-connames', () => showConstNames, v => { showConstNames = v; }],
-        ['wc-tg-ecliptic', () => showEcliptic,   v => { showEcliptic   = v; }],
-        ['wc-tg-planets',  () => showPlanets,    v => { showPlanets    = v; }],
-        ['wc-tg-zodiac',   () => showZodiac,     v => { showZodiac     = v; }],
+        ['wc-tg-conlines', () => showConstLines, v => { showConstLines = v; }, 'conLines'],
+        ['wc-tg-connames', () => showConstNames, v => { showConstNames = v; }, 'conNames'],
+        ['wc-tg-ecliptic', () => showEcliptic,   v => { showEcliptic   = v; }, 'ecliptic'],
+        ['wc-tg-planets',  () => showPlanets,    v => { showPlanets    = v; }, 'planets'],
+        ['wc-tg-zodiac',   () => showZodiac,     v => { showZodiac     = v; }, 'zodiac'],
+        ['wc-tg-sats',     () => showSats,       v => { showSats       = v; }, 'sats'],
     ];
     function refreshToggles() {
         for (const [id, get] of map) {
@@ -166,9 +167,9 @@
     function toggle() { stack.classList.contains('popup') ? close() : open(); }
     if (hamb) hamb.addEventListener('click', () => toggle());
     // each toggle flips its layer and stays open (so several can be flipped in a row)
-    for (const [id, get, set] of map) {
+    for (const [id, get, set, key] of map) {
         const b = document.getElementById(id);
-        if (b) b.addEventListener('click', (e) => { e.stopPropagation(); set(!get()); refreshToggles(); });
+        if (b) b.addEventListener('click', (e) => { e.stopPropagation(); set(!get()); saveSkyToggle(key, get()); refreshToggles(); });
     }
     // close on a click/tap outside (but not on its hamburger)
     document.addEventListener('mousedown', e => {
