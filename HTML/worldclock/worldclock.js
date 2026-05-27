@@ -509,10 +509,13 @@
         let starLangDE = true;  // constellation labels: true = German, false = Latin (toggled by 'n')
         let starHover = { x: 0, y: 0, on: false };  // pointer pos (canvas px) for the constellation hover-highlight (planetarium mode)
         let skyZoom = 1;  // planetarium zoom factor (mouse wheel / two-finger pinch); >1 = zoomed in
+        let skyPanX = 0, skyPanY = 0;  // dome centre offset (px) so zoom homes in on the cursor; ESC resets
         let skyInfoClosed = false;  // user dismissed the planetarium info box (re-shown when the planetarium is re-opened)
         let _prevSkyTarget = 0;     // edge-detect planetarium open to reset skyInfoClosed
         let hoveredStar = null;     // catalog star currently under the pointer (for the hover highlight ring)
         let hoveredZodiac = null;   // zodiac sign under the pointer (priority over stars/constellations)
+        let hoveredDeepsky = null;  // deep-sky object under the pointer (Messier nebulae/clusters/galaxies)
+        let _dsLastLog = -1;        // last logged deep-sky-above-horizon count (avoids spamming the DEBUG window)
         let visStarCount = 0, visConCount = 0;   // currently-visible counts (stars above horizon · constellations on screen)
         // Fixed centroid (RA/Dec) per constellation — a stable label anchor that pans smoothly (no jump as
         // individual stars cross the horizon). Averaged as 3D unit vectors so RA wraparound is handled.
@@ -552,6 +555,22 @@
             }
             return out;
         })();
+        // Bright deep-sky objects (Messier): RA/Dec in degrees, German name + type, base glow radius (px) and tint.
+        // type → colour: galaxy=soft white, emission=pink/red, open cluster=blue-white, globular=warm white, planetary=teal.
+        const DEEPSKY = [
+            { id: 'M31', ra: 10.68,  dec: 41.27,  name: 'Andromedanebel',   type: 'Galaxie',              rad: 17, r: 205, g: 213, b: 238 },
+            { id: 'M42', ra: 83.82,  dec: -5.39,  name: 'Orionnebel',       type: 'Emissionsnebel',       rad: 14, r: 255, g: 120, b: 140 },
+            { id: 'M45', ra: 56.75,  dec: 24.12,  name: 'Plejaden',         type: 'Offener Sternhaufen',  rad: 13, r: 175, g: 205, b: 255 },
+            { id: 'M44', ra: 130.05, dec: 19.67,  name: 'Praesepe',         type: 'Offener Sternhaufen',  rad: 12, r: 175, g: 205, b: 255 },
+            { id: 'M13', ra: 250.42, dec: 36.46,  name: 'Herkuleshaufen',   type: 'Kugelsternhaufen',     rad: 10, r: 255, g: 240, b: 210 },
+            { id: 'M8',  ra: 270.92, dec: -24.38, name: 'Lagunennebel',     type: 'Emissionsnebel',       rad: 12, r: 255, g: 130, b: 150 },
+            { id: 'M27', ra: 299.90, dec: 22.72,  name: 'Hantelnebel',      type: 'Planetarischer Nebel', rad: 8,  r: 120, g: 230, b: 210 },
+            { id: 'M57', ra: 283.40, dec: 33.03,  name: 'Ringnebel',        type: 'Planetarischer Nebel', rad: 7,  r: 120, g: 230, b: 210 },
+            { id: 'M51', ra: 202.47, dec: 47.20,  name: 'Whirlpool-Galaxie',type: 'Galaxie',              rad: 9,  r: 205, g: 213, b: 238 },
+            { id: 'M81', ra: 148.89, dec: 69.07,  name: 'Bodes Galaxie',    type: 'Galaxie',              rad: 9,  r: 205, g: 213, b: 238 },
+            { id: 'M104',ra: 189.99, dec: -11.62, name: 'Sombrero-Galaxie', type: 'Galaxie',              rad: 8,  r: 205, g: 213, b: 238 },
+            { id: 'h+χ', ra: 34.70,  dec: 57.10,  name: 'Doppelhaufen Perseus', type: 'Offener Sternhaufen', rad: 11, r: 175, g: 205, b: 255 }
+        ];
         let STAR_FIELD = null;      // full colour star catalog (loaded async from starcatalog.json); null → figure-vertex fallback
         (function loadStarCatalog() {
             fetch('starcatalog.json').then(r => r.ok ? r.json() : Promise.reject(r.status)).then(data => {
@@ -580,7 +599,8 @@
                         id: f.id, ra: c[0], dec: c[1], mag: mag, bv: (isFinite(bv) ? bv : 0.6),
                         r: Math.round(rgb[0]), g: Math.round(rgb[1]), b: Math.round(rgb[2]),
                         size: Math.max(0.5, 2.6 - 0.34 * mag),   // brighter (lower mag) → bigger
-                        af: Math.max(0.35, 1 - mag * 0.10)        // brighter → more opaque
+                        af: Math.max(0.35, 1 - mag * 0.10),       // brighter → more opaque
+                        tw: Math.random() * 6.283                 // random twinkle phase (so stars don't flicker in sync)
                     });
                 }
                 STAR_FIELD = out;
@@ -696,6 +716,7 @@
             else if (e.key === 's' || e.key === 'S') { skyTarget = skyTarget ? 0 : 1; e.preventDefault(); return; }  // planetarium toggle
             else if (e.key === 'n' || e.key === 'N') { starLangDE = !starLangDE; e.preventDefault(); return; }       // labels: German ↔ Latin
             else if (e.key === ' ') { toggleLapse(); e.preventDefault(); return; }                                   // time-lapse play/pause (Space)
+            else if (e.key === 'Escape') { skyZoom = 1; skyPanX = 0; skyPanY = 0; e.preventDefault(); return; }      // reset zoom + pan
             else return;
             e.preventDefault();
             try { DebugWindow.log('[debug] Datum-Offset ' + debugDayOffset.toFixed(3) + ' d → ' + getDisplayTime().toLocaleString('de-DE')); } catch (_) {}
@@ -1169,7 +1190,15 @@
         canvas.addEventListener('wheel', (e) => {
             if (!skyTarget) return;                                  // outside planetarium: leave the wheel alone
             e.preventDefault();
-            skyZoom = Math.max(0.4, Math.min(12, skyZoom * Math.exp(-e.deltaY * 0.0015)));  // scroll up = zoom in
+            const rect = canvas.getBoundingClientRect();
+            const C0x = rect.width / 2, C0y = rect.height / 2;       // unzoomed dome centre (canvas px)
+            const mx = e.clientX - rect.left, my = e.clientY - rect.top;
+            const z0 = skyZoom;
+            const z1 = Math.max(0.4, Math.min(12, z0 * Math.exp(-e.deltaY * 0.0015)));  // scroll up = zoom in
+            // Keep the sky point under the cursor fixed while zooming (zoom toward the pointer).
+            skyPanX = (mx - C0x) - (z1 / z0) * (mx - C0x - skyPanX);
+            skyPanY = (my - C0y) - (z1 / z0) * (my - C0y - skyPanY);
+            skyZoom = z1;
         }, { passive: false });
         let pinchDist0 = 0, pinchZoom0 = 1;
         const pinchSpan = (e) => Math.hypot(e.touches[0].clientX - e.touches[1].clientX,
@@ -1248,16 +1277,33 @@
             }
             return best;
         }
-        function hoverPick(clientX, clientY) {    // zodiac has priority over stars/constellations
+        function deepskyAt(clientX, clientY) {    // nearest visible deep-sky object (within its glow radius + a little)
+            const rect = canvas.getBoundingClientRect();
+            const px = clientX - rect.left, py = clientY - rect.top;
+            let best = null, bd = Infinity;
+            for (const d of DEEPSKY) {
+                if (!d._vis) continue;
+                const dx = d._x - px, dy = d._y - py, dd = dx * dx + dy * dy;
+                const hit = (d.rad * skyZoom + 6); // glow radius plus a small margin
+                if (dd < hit * hit && dd < bd) { bd = dd; best = d; }
+            }
+            return best;
+        }
+        function hoverPick(clientX, clientY) {    // priority: zodiac → deep-sky → star/constellation
             const zod = zodiacAt(clientX, clientY);
             if (zod) {
-                hoveredZodiac = zod;
-                hoveredStar = null;
+                hoveredZodiac = zod; hoveredDeepsky = null; hoveredStar = null;
                 showInfoBox(zod.sym + ' ' + zod.name, 'Tierkreiszeichen', clientX, clientY);
-            } else {
-                hoveredZodiac = null;
-                showStarInfo(starAt(clientX, clientY), clientX, clientY);
+                return;
             }
+            const ds = deepskyAt(clientX, clientY);
+            if (ds) {
+                hoveredDeepsky = ds; hoveredZodiac = null; hoveredStar = null;
+                showInfoBox(ds.id + ' · ' + ds.name, ds.type, clientX, clientY);
+                return;
+            }
+            hoveredZodiac = null; hoveredDeepsky = null;
+            showStarInfo(starAt(clientX, clientY), clientX, clientY);
         }
         let _spDown = null;   // pointer-down position; cleared once it turns into a drag
         canvas.addEventListener('pointerdown', (e) => { _spDown = { x: e.clientX, y: e.clientY }; });
@@ -1270,7 +1316,7 @@
             _spDown = null;
             if (skyTarget) hoverPick(e.clientX, e.clientY);
         });
-        canvas.addEventListener('pointerleave', () => { showStarInfo(null); hoveredZodiac = null; });
+        canvas.addEventListener('pointerleave', () => { showStarInfo(null); hoveredZodiac = null; hoveredDeepsky = null; });
         document.getElementById('sky-play')?.addEventListener('click', () => toggleLapse());
 
         // --- Render helpers extracted from drawFrame (intra-file; read/write top-level state directly) ---
@@ -2143,6 +2189,7 @@
         function drawStarfield(w, h, cx, cy) {
             if (typeof CONSTELLATION_LINES === 'undefined' || typeof siderealTimeDeg !== 'function') return;
             if (window.useGlobe) return;                             // globe mode: canvas sits over the 3D globe → skip for now
+            cx += skyPanX; cy += skyPanY;                            // shift the whole dome so zoom homes in on the cursor (ESC resets)
             const D2R = Math.PI / 180;
             const a = 0.35 + 0.65 * skyT;                            // dim behind the clock; full in sky mode
             const lst = siderealTimeDeg(getDisplayTime(), skyLon);   // skyLon eases toward the selected city → smooth pan
@@ -2212,6 +2259,35 @@
                 }
             }
 
+            // Deep-sky objects (Messier nebulae/clusters/galaxies) — soft radial glow, tinted by type; names in planetarium.
+            let _dsVis = 0;
+            const _dsCore = 0.7 + 0.3 * skyT;                        // clearly visible behind the clock, full in the planetarium
+            for (const d of DEEPSKY) {
+                const q = proj(d.ra, d.dec);
+                d._x = q[0]; d._y = q[1]; d._vis = q[2];             // cache for hover hit-testing
+                if (!q[2]) continue;
+                _dsVis++;
+                const rad = d.rad * 1.8 * skyZoom;
+                const g = ctx.createRadialGradient(q[0], q[1], 0, q[0], q[1], rad);
+                g.addColorStop(0, `rgba(${d.r}, ${d.g}, ${d.b}, ${_dsCore})`);
+                g.addColorStop(0.3, `rgba(${d.r}, ${d.g}, ${d.b}, ${_dsCore * 0.55})`);
+                g.addColorStop(1, `rgba(${d.r}, ${d.g}, ${d.b}, 0)`);
+                ctx.save();
+                ctx.globalCompositeOperation = 'lighter';            // additive → the glow shines out against the dark sky
+                ctx.fillStyle = g;
+                ctx.beginPath(); ctx.arc(q[0], q[1], rad, 0, Math.PI * 2); ctx.fill();
+                ctx.fillStyle = `rgba(${d.r}, ${d.g}, ${d.b}, ${_dsCore})`;   // crisp bright core so it reads as a distinct object
+                ctx.beginPath(); ctx.arc(q[0], q[1], 2, 0, Math.PI * 2); ctx.fill();
+                ctx.restore();
+                if (skyTarget) {                                     // tiny catalog label only in the planetarium
+                    ctx.fillStyle = `rgba(${d.r}, ${d.g}, ${d.b}, ${a * 0.9})`;
+                    ctx.font = '10px Orbitron, sans-serif';
+                    ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+                    ctx.fillText(d.id, q[0], q[1] + rad + 2);
+                }
+            }
+            if (_dsVis !== _dsLastLog) { _dsLastLog = _dsVis; try { DebugWindow.log('[deepsky] ' + _dsVis + '/' + DEEPSKY.length + ' über Horizont'); } catch (_) {} }
+
             if (dome) {                                              // horizon circle (the "HORIZONT" label is drawn last → always on top)
                 ctx.strokeStyle = `rgba(120, 160, 220, ${a * 0.45})`;
                 ctx.beginPath(); ctx.arc(cx, cy, Rdome, 0, Math.PI * 2); ctx.stroke();
@@ -2252,7 +2328,7 @@
             // Figure stars (path vertices) → offscreen trail layer that fades toward transparent instead of
             // clearing → long-exposure star trails. Slow fade while turning (trails build up), fast when idle.
             const _moving = isMouseDown || isReturning;
-            const _trailFade = lapseActive ? 1 : (_moving ? 0.02 : 0.08);   // play = full clear each frame (no trails); drag = long trails
+            const _trailFade = _moving ? 0.02 : 1;   // drag = long trails; otherwise full clear each frame (crisp twinkle, no smearing)
             trailCtx.save();
             trailCtx.globalCompositeOperation = 'destination-out';   // erase a bit of alpha everywhere → existing trails fade out
             trailCtx.fillStyle = `rgba(0, 0, 0, ${_trailFade})`;
@@ -2260,13 +2336,19 @@
             trailCtx.globalCompositeOperation = 'source-over';
             if (STAR_FIELD) {                                        // full catalog: real colours (B-V) + size by magnitude
                 let _vs = 0;
+                const _tnow = (typeof performance !== 'undefined' ? performance.now() : Date.now()) / 1000;
                 for (const s of STAR_FIELD) {
                     const p = proj(s.ra, s.dec);
                     s._x = p[0]; s._y = p[1]; s._vis = p[2];   // cache screen pos for click hit-testing
                     if (!p[2]) continue;
                     _vs++;
-                    trailCtx.fillStyle = `rgba(${s.r}, ${s.g}, ${s.b}, ${a * s.af})`;
-                    trailCtx.beginPath(); trailCtx.arc(p[0], p[1], s.size, 0, Math.PI * 2); trailCtx.fill();
+                    // Twinkle (atmospheric scintillation): present everywhere, stronger toward the horizon.
+                    const rf = dome ? Math.hypot(p[0] - cx, p[1] - cy) / Rdome : 0.4;   // 0 = zenith, 1 = horizon
+                    const amp = 0.3 + 0.5 * rf;                                       // 0.3 high up … 0.8 at the horizon
+                    const fl = 0.6 * Math.sin(_tnow * 1.8 + s.tw) + 0.4 * Math.sin(_tnow * 2.9 + s.tw * 1.7);
+                    const bf = 1 - amp * (0.5 - 0.5 * fl);                            // dips brightness in [1-amp, 1]
+                    trailCtx.fillStyle = `rgba(${s.r}, ${s.g}, ${s.b}, ${a * s.af * bf})`;
+                    trailCtx.beginPath(); trailCtx.arc(p[0], p[1], s.size * (0.85 + 0.3 * bf), 0, Math.PI * 2); trailCtx.fill();
                 }
                 visStarCount = _vs;
             } else {                                                 // fallback until the catalog loads: plain figure-vertex dots
@@ -2304,6 +2386,16 @@
                 ctx.lineWidth = 1.3;
                 ctx.beginPath();
                 ctx.arc(hoveredStar._x, hoveredStar._y, Math.max(4.5, (hoveredStar.size || 1) + 3.5), 0, Math.PI * 2);
+                ctx.stroke();
+                ctx.restore();
+            }
+            // Highlight the hovered deep-sky object with a cyan ring around its glow.
+            if (skyTarget && hoveredDeepsky && hoveredDeepsky._vis) {
+                ctx.save();
+                ctx.strokeStyle = 'rgba(0, 210, 255, 0.95)';
+                ctx.lineWidth = 1.3;
+                ctx.beginPath();
+                ctx.arc(hoveredDeepsky._x, hoveredDeepsky._y, hoveredDeepsky.rad * skyZoom + 3, 0, Math.PI * 2);
                 ctx.stroke();
                 ctx.restore();
             }
