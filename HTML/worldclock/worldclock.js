@@ -558,19 +558,47 @@
         // Bright deep-sky objects (Messier): RA/Dec in degrees, German name + type, base glow radius (px) and tint.
         // type → colour: galaxy=soft white, emission=pink/red, open cluster=blue-white, globular=warm white, planetary=teal.
         const DEEPSKY = [
-            { id: 'M31', ra: 10.68,  dec: 41.27,  name: 'Andromedanebel',   type: 'Galaxie',              rad: 17, r: 205, g: 213, b: 238 },
-            { id: 'M42', ra: 83.82,  dec: -5.39,  name: 'Orionnebel',       type: 'Emissionsnebel',       rad: 14, r: 255, g: 120, b: 140 },
-            { id: 'M45', ra: 56.75,  dec: 24.12,  name: 'Plejaden',         type: 'Offener Sternhaufen',  rad: 13, r: 175, g: 205, b: 255 },
+            { id: 'M31', ra: 10.68,  dec: 41.27,  name: 'Andromedanebel',   type: 'Galaxie',              rad: 17, r: 205, g: 213, b: 238, img: 'Andromeda_Galaxy_(with_h-alpha).jpg' },
+            { id: 'M42', ra: 83.82,  dec: -5.39,  name: 'Orionnebel',       type: 'Emissionsnebel',       rad: 14, r: 255, g: 120, b: 140, img: 'Orion_Nebula_-_Hubble_2006_mosaic_18000.jpg' },
+            { id: 'M45', ra: 56.75,  dec: 24.12,  name: 'Plejaden',         type: 'Offener Sternhaufen',  rad: 13, r: 175, g: 205, b: 255, img: 'Pleiades_large.jpg' },
             { id: 'M44', ra: 130.05, dec: 19.67,  name: 'Praesepe',         type: 'Offener Sternhaufen',  rad: 12, r: 175, g: 205, b: 255 },
             { id: 'M13', ra: 250.42, dec: 36.46,  name: 'Herkuleshaufen',   type: 'Kugelsternhaufen',     rad: 10, r: 255, g: 240, b: 210 },
-            { id: 'M8',  ra: 270.92, dec: -24.38, name: 'Lagunennebel',     type: 'Emissionsnebel',       rad: 12, r: 255, g: 130, b: 150 },
-            { id: 'M27', ra: 299.90, dec: 22.72,  name: 'Hantelnebel',      type: 'Planetarischer Nebel', rad: 8,  r: 120, g: 230, b: 210 },
-            { id: 'M57', ra: 283.40, dec: 33.03,  name: 'Ringnebel',        type: 'Planetarischer Nebel', rad: 7,  r: 120, g: 230, b: 210 },
-            { id: 'M51', ra: 202.47, dec: 47.20,  name: 'Whirlpool-Galaxie',type: 'Galaxie',              rad: 9,  r: 205, g: 213, b: 238 },
-            { id: 'M81', ra: 148.89, dec: 69.07,  name: 'Bodes Galaxie',    type: 'Galaxie',              rad: 9,  r: 205, g: 213, b: 238 },
-            { id: 'M104',ra: 189.99, dec: -11.62, name: 'Sombrero-Galaxie', type: 'Galaxie',              rad: 8,  r: 205, g: 213, b: 238 },
+            { id: 'M8',  ra: 270.92, dec: -24.38, name: 'Lagunennebel',     type: 'Emissionsnebel',       rad: 12, r: 255, g: 130, b: 150, img: 'Lagoon_Nebula_(ESO).jpg' },
+            { id: 'M27', ra: 299.90, dec: 22.72,  name: 'Hantelnebel',      type: 'Planetarischer Nebel', rad: 8,  r: 120, g: 230, b: 210, img: 'M27_-_Dumbbell_Nebula.jpg' },
+            { id: 'M57', ra: 283.40, dec: 33.03,  name: 'Ringnebel',        type: 'Planetarischer Nebel', rad: 7,  r: 120, g: 230, b: 210, img: 'M57_The_Ring_Nebula.JPG' },
+            { id: 'M51', ra: 202.47, dec: 47.20,  name: 'Whirlpool-Galaxie',type: 'Galaxie',              rad: 9,  r: 205, g: 213, b: 238, img: 'M51_Hubble_Remix.jpg' },
+            { id: 'M81', ra: 148.89, dec: 69.07,  name: 'Bodes Galaxie',    type: 'Galaxie',              rad: 9,  r: 205, g: 213, b: 238, img: 'M81.jpg' },
+            { id: 'M104',ra: 189.99, dec: -11.62, name: 'Sombrero-Galaxie', type: 'Galaxie',              rad: 8,  r: 205, g: 213, b: 238, img: 'M104_ngc4594_sombrero_galaxy_hi-res.jpg' },
             { id: 'h+χ', ra: 34.70,  dec: 57.10,  name: 'Doppelhaufen Perseus', type: 'Offener Sternhaufen', rad: 11, r: 175, g: 205, b: 255 }
         ];
+        let dsoPhotos = true;   // true = real photos (additive, soft-masked); false = stylised glow only. Toggle: key 'b'
+        // Load each photo once, pre-mask it to a soft round vignette (so no hard rectangle edge), store on the entry.
+        function loadNebulaImages() {
+            const _withImg = DEEPSKY.filter(d => d.img).length;
+            try { DebugWindow.log('[deepsky] starte Foto-Laden: ' + _withImg + ' Bilder'); } catch (_) {}
+            for (const d of DEEPSKY) {
+                if (!d.img) continue;
+                const im = new Image();
+                im.onload = () => {
+                    try {
+                        const S = 256, cv = document.createElement('canvas'); cv.width = S; cv.height = S;
+                        const cc = cv.getContext('2d');
+                        cc.drawImage(im, 0, 0, S, S);
+                        cc.globalCompositeOperation = 'destination-in';   // feather the edges into transparency → round nebula
+                        const g = cc.createRadialGradient(S / 2, S / 2, 0, S / 2, S / 2, S / 2);
+                        g.addColorStop(0, 'rgba(0,0,0,1)'); g.addColorStop(0.62, 'rgba(0,0,0,1)'); g.addColorStop(1, 'rgba(0,0,0,0)');
+                        cc.fillStyle = g; cc.fillRect(0, 0, S, S);
+                        d._masked = cv;
+                        try { DebugWindow.log('[deepsky] Foto geladen: ' + d.id); } catch (_) {}
+                    } catch (err) {
+                        try { DebugWindow.log('[deepsky] Maskier-Fehler ' + d.id + ': ' + err); } catch (_) {}
+                    }
+                };
+                im.onerror = () => { try { DebugWindow.log('[deepsky] Foto FEHLT: ' + d.id + ' → ' + im.src); } catch (_) {} };
+                im.src = '../resources/nebulas/' + d.img;            // HTML/ is the server root locally and live
+            }
+        }
+        setTimeout(loadNebulaImages, 0);   // defer so DebugWindow exists when we log
         let STAR_FIELD = null;      // full colour star catalog (loaded async from starcatalog.json); null → figure-vertex fallback
         (function loadStarCatalog() {
             fetch('starcatalog.json').then(r => r.ok ? r.json() : Promise.reject(r.status)).then(data => {
@@ -717,6 +745,7 @@
             else if (e.key === 'n' || e.key === 'N') { starLangDE = !starLangDE; e.preventDefault(); return; }       // labels: German ↔ Latin
             else if (e.key === ' ') { toggleLapse(); e.preventDefault(); return; }                                   // time-lapse play/pause (Space)
             else if (e.key === 'Escape') { skyZoom = 1; skyPanX = 0; skyPanY = 0; e.preventDefault(); return; }      // reset zoom + pan
+            else if (e.key === 'b' || e.key === 'B') { dsoPhotos = !dsoPhotos; try { DebugWindow.log('[deepsky] Fotos ' + (dsoPhotos ? 'an' : 'aus')); } catch (_) {} e.preventDefault(); return; }  // deep-sky photos ↔ stylised glow
             else return;
             e.preventDefault();
             try { DebugWindow.log('[debug] Datum-Offset ' + debugDayOffset.toFixed(3) + ' d → ' + getDisplayTime().toLocaleString('de-DE')); } catch (_) {}
@@ -1192,10 +1221,12 @@
             e.preventDefault();
             const rect = canvas.getBoundingClientRect();
             const C0x = rect.width / 2, C0y = rect.height / 2;       // unzoomed dome centre (canvas px)
-            const mx = e.clientX - rect.left, my = e.clientY - rect.top;
+            // Shift = zoom about the window centre; otherwise zoom toward the cursor.
+            const mx = e.shiftKey ? C0x : (e.clientX - rect.left);
+            const my = e.shiftKey ? C0y : (e.clientY - rect.top);
             const z0 = skyZoom;
             const z1 = Math.max(0.4, Math.min(12, z0 * Math.exp(-e.deltaY * 0.0015)));  // scroll up = zoom in
-            // Keep the sky point under the cursor fixed while zooming (zoom toward the pointer).
+            // Keep the chosen anchor (cursor or centre) fixed while zooming.
             skyPanX = (mx - C0x) - (z1 / z0) * (mx - C0x - skyPanX);
             skyPanY = (my - C0y) - (z1 / z0) * (my - C0y - skyPanY);
             skyZoom = z1;
@@ -2261,29 +2292,39 @@
 
             // Deep-sky objects (Messier nebulae/clusters/galaxies) — soft radial glow, tinted by type; names in planetarium.
             let _dsVis = 0;
-            const _dsCore = 0.7 + 0.3 * skyT;                        // clearly visible behind the clock, full in the planetarium
+            const _dsCore = 0.9;                                     // bright, additive — clearly visible in both modes
             for (const d of DEEPSKY) {
                 const q = proj(d.ra, d.dec);
                 d._x = q[0]; d._y = q[1]; d._vis = q[2];             // cache for hover hit-testing
                 if (!q[2]) continue;
                 _dsVis++;
-                const rad = d.rad * 1.8 * skyZoom;
-                const g = ctx.createRadialGradient(q[0], q[1], 0, q[0], q[1], rad);
-                g.addColorStop(0, `rgba(${d.r}, ${d.g}, ${d.b}, ${_dsCore})`);
-                g.addColorStop(0.3, `rgba(${d.r}, ${d.g}, ${d.b}, ${_dsCore * 0.55})`);
-                g.addColorStop(1, `rgba(${d.r}, ${d.g}, ${d.b}, 0)`);
+                const rad = d.rad * 1.5 * skyZoom;
                 ctx.save();
-                ctx.globalCompositeOperation = 'lighter';            // additive → the glow shines out against the dark sky
-                ctx.fillStyle = g;
-                ctx.beginPath(); ctx.arc(q[0], q[1], rad, 0, Math.PI * 2); ctx.fill();
-                ctx.fillStyle = `rgba(${d.r}, ${d.g}, ${d.b}, ${_dsCore})`;   // crisp bright core so it reads as a distinct object
-                ctx.beginPath(); ctx.arc(q[0], q[1], 2, 0, Math.PI * 2); ctx.fill();
+                ctx.globalCompositeOperation = 'lighter';            // additive → photo/glow shines out; black photo background adds nothing
+                if (dsoPhotos && d._masked) {                        // real photo, pre-masked to a soft round vignette
+                    const R = d.rad * 2.4 * skyZoom;
+                    ctx.globalAlpha = 0.5 + 0.5 * skyT;              // dim behind the clock, full in the planetarium
+                    ctx.drawImage(d._masked, q[0] - R, q[1] - R, 2 * R, 2 * R);
+                } else {                                             // stylised fallback: two stacked additive halos
+                    const g = ctx.createRadialGradient(q[0], q[1], 0, q[0], q[1], rad);
+                    g.addColorStop(0, `rgba(${d.r}, ${d.g}, ${d.b}, ${_dsCore})`);
+                    g.addColorStop(0.5, `rgba(${d.r}, ${d.g}, ${d.b}, ${_dsCore * 0.45})`);
+                    g.addColorStop(1, `rgba(${d.r}, ${d.g}, ${d.b}, 0)`);
+                    ctx.fillStyle = g;
+                    ctx.beginPath(); ctx.arc(q[0], q[1], rad, 0, Math.PI * 2); ctx.fill();
+                    const g2 = ctx.createRadialGradient(q[0], q[1], 0, q[0], q[1], rad * 0.45);
+                    g2.addColorStop(0, `rgba(${d.r}, ${d.g}, ${d.b}, ${_dsCore})`);
+                    g2.addColorStop(1, `rgba(${d.r}, ${d.g}, ${d.b}, 0)`);
+                    ctx.fillStyle = g2;
+                    ctx.beginPath(); ctx.arc(q[0], q[1], rad * 0.45, 0, Math.PI * 2); ctx.fill();
+                }
                 ctx.restore();
                 if (skyTarget) {                                     // tiny catalog label only in the planetarium
+                    const lblR = (dsoPhotos && d._masked) ? d.rad * 2.4 * skyZoom : rad;   // sit just below the drawn object
                     ctx.fillStyle = `rgba(${d.r}, ${d.g}, ${d.b}, ${a * 0.9})`;
                     ctx.font = '10px Orbitron, sans-serif';
                     ctx.textAlign = 'center'; ctx.textBaseline = 'top';
-                    ctx.fillText(d.id, q[0], q[1] + rad + 2);
+                    ctx.fillText(d.id, q[0], q[1] + lblR + 2);
                 }
             }
             if (_dsVis !== _dsLastLog) { _dsLastLog = _dsVis; try { DebugWindow.log('[deepsky] ' + _dsVis + '/' + DEEPSKY.length + ' über Horizont'); } catch (_) {} }
@@ -2593,14 +2634,15 @@
                     _phi -= (_hw[i] / 2 + _hls) / _hr;
                 }
                 // Cardinal directions (N top, O/east left, S bottom, W/west right — view looking up; frame is fixed).
-                const _cr = Rdome - 16;
+                // Placed OUTSIDE the horizon ring (like HORIZONT); S sits a bit further out so it clears the HORIZONT label.
+                const _co = Rdome + 14;          // just outside the ring (HORIZONT baseline is Rdome + 12)
                 ctx.fillStyle = `rgba(150, 190, 240, ${a * 0.85})`;
                 ctx.font = '700 14px Orbitron';
                 ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-                ctx.fillText('N', cx, cy - _cr);
-                ctx.fillText('S', cx, cy + _cr);
-                ctx.fillText('O', cx - _cr, cy);
-                ctx.fillText('W', cx + _cr, cy);
+                ctx.fillText('N', cx, cy - _co);
+                ctx.fillText('O', cx - _co, cy);
+                ctx.fillText('W', cx + _co, cy);
+                ctx.fillText('S', cx, cy + Rdome + 28);   // below the HORIZONT word
             }
             ctx.restore();
         }
@@ -2708,9 +2750,14 @@
                         _dEl.textContent = _wd + ' ' + _dm;
                     }
                     const _tEl = document.getElementById('sky-info-time');
-                    if (_tEl && window.CyberClock) {
-                        if (!_tEl.dataset.mounted) { CyberClock.mount(_tEl, { size: '1.05rem' }); _tEl.dataset.mounted = '1'; }
-                        CyberClock.set(_tEl, time.toLocaleTimeString('de-DE', { timeZone: targetCity.tz, hour: '2-digit', minute: '2-digit', second: '2-digit' }));
+                    if (_tEl) {
+                        const _tm = time.toLocaleTimeString('de-DE', { timeZone: targetCity.tz, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                        if (_tEl.dataset.t !== _tm) {                 // rebuild only when the value changes
+                            _tEl.dataset.t = _tm;
+                            let _h = '';                             // fixed-width digit slots → Orbitron time never shifts the line
+                            for (const ch of _tm) _h += /\d/.test(ch) ? '<span class="tdig">' + ch + '</span>' : ch;
+                            _tEl.innerHTML = _h;
+                        }
                     }
                 } else {
                     _sib.style.display = 'none';

@@ -288,17 +288,19 @@ body:not(.cyber-shell-grid):has(#side-panel) { grid-template-columns: 0 0 minmax
 
 /* --- Planetarium: time-lapse play/pause (bottom-right) --- */
 #sky-play {
-    display: block;
-    margin: 8px auto 0;           /* centred in the sky-info box, just under the clock */
-    width: 34px;
-    height: 34px;
+    position: fixed;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);   /* dead centre of the window */
+    width: 48px;
+    height: 48px;
     border-radius: 50%;
     border: 1px solid rgba(0, 210, 255, 0.6);
-    background: rgba(8, 20, 42, 0.7);
+    background: rgba(8, 20, 42, 0.55);
     color: rgba(0, 210, 255, 0.95);
-    font-size: 13px;
+    font-size: 18px;
     line-height: 1;
     cursor: pointer;
+    z-index: 9560;
     font-family: 'Orbitron', sans-serif;
     pointer-events: auto;         /* sky-info itself is pointer-events:none */
 }
@@ -364,21 +366,33 @@ body:not(.cyber-shell-grid):has(#side-panel) { grid-template-columns: 0 0 minmax
     font-family: 'Orbitron', sans-serif;
     pointer-events: none;
 }
+#sky-info-line {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 14px;                   /* date · DRESDEN · time on one line */
+}
 #sky-info-city {
-    font-size: 1rem;
+    font-size: 1.05rem;
     font-weight: 700;
     letter-spacing: 0.14em;
-    color: rgba(0, 210, 255, 0.95);
+    color: rgba(0, 210, 255, 0.95);   /* city stays the prominent cyan centrepiece */
 }
-#sky-info-date {
-    margin-top: 4px;
+#sky-info-date,
+#sky-info-time {
     font-size: 0.82rem;
     font-weight: 600;
     letter-spacing: 0.08em;
     color: rgba(210, 225, 240, 0.85);
 }
-#sky-info-time {
-    margin-top: 6px;
-    display: flex;
-    justify-content: center;     /* centre the CyberClock widget */
+#sky-info-time .tdig { display: inline-block; width: 0.64em; text-align: center; }   /* equal-width digits → no jitter */
+
+/* LOCAL-environment marker — shown ONLY when served from localhost/LAN/file. No red ring = you are on the LIVE site. */
+.env-local body { box-shadow: inset 0 0 0 4px rgb(176, 36, 24); }   /* Υ red, purely visual — never intercepts clicks */
+.env-local .env-badge {
+    position: fixed; top: 0; right: 0;
+    background: rgb(176, 36, 24); color: #fff;
+    font: 700 12px/1 'Orbitron', system-ui, sans-serif; letter-spacing: 2px;
+    padding: 6px 14px; border-radius: 0 0 0 8px;
+    z-index: 100000; pointer-events: none;
 }
