@@ -95,6 +95,7 @@
             ctx.restore();
         }
 
+        const PROJ_PERSP_KEY = 'worldclock-projpersp';   // persisted dome perspective blend (0…1)
         // Globe vs clock mode — precedence: URL ?globe= (wins) > localStorage > default (clock).
         const GLOBE_KEY = 'worldclock-globe';
         window.useGlobe = (function () {
@@ -176,6 +177,8 @@
         let starHover = { x: 0, y: 0, on: false };  // pointer pos (canvas px) for the constellation hover-highlight (planetarium mode)
         let skyZoom = 1;  // planetarium zoom factor (mouse wheel / two-finger pinch); >1 = zoomed in
         let skyPanX = 0, skyPanY = 0;  // dome centre offset (px) so zoom homes in on the cursor; ESC resets
+        // dome radial blend: 0 = fisheye (equidistant) … 1 = orthographic (real perspective). Keys , . — persisted.
+        let projPersp = (() => { try { const v = parseFloat(localStorage.getItem(PROJ_PERSP_KEY)); return isFinite(v) ? Math.max(0, Math.min(1, v)) : 1; } catch (_) { return 1; } })();
         let skyInfoClosed = false;  // user dismissed the planetarium info box (re-shown when the planetarium is re-opened)
         let _prevSkyTarget = 0;     // edge-detect planetarium open to reset skyInfoClosed
         let hoveredStar = null;     // catalog star currently under the pointer (for the hover highlight ring)
@@ -279,6 +282,12 @@
             else if (e.key === ' ') { toggleLapse(); e.preventDefault(); return; }                                   // time-lapse play/pause (Space)
             else if (e.key === 'Escape') { skyZoom = 1; skyPanX = 0; skyPanY = 0; e.preventDefault(); return; }      // reset zoom + pan
             else if (e.key === 'b' || e.key === 'B') { dsoPhotos = !dsoPhotos; try { DebugWindow.log('[deepsky] Fotos ' + (dsoPhotos ? 'an' : 'aus')); } catch (_) {} e.preventDefault(); return; }  // deep-sky photos ↔ stylised glow
+            else if (e.key === ',' || e.key === '.') {
+                projPersp = e.key === ',' ? Math.max(0, projPersp - 0.1) : Math.min(1, projPersp + 0.1);
+                try { localStorage.setItem(PROJ_PERSP_KEY, projPersp); } catch (_) {}
+                try { DebugWindow.log('[proj] Perspektive ' + projPersp.toFixed(2) + ' (0=Fischauge, 1=ortho)'); } catch (_) {}
+                e.preventDefault(); return;
+            }
             else return;
             e.preventDefault();
             try { DebugWindow.log('[debug] Datum-Offset ' + debugDayOffset.toFixed(3) + ' d → ' + getDisplayTime().toLocaleString('de-DE')); } catch (_) {}
