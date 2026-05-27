@@ -254,7 +254,7 @@ img.joypixels{display:inline-block;height:1.43em;width:1.43em;vertical-align:-0.
 #input-row.recording #rec-bar{display:flex}
 #input-row.recording #attach-btn,#input-row.recording #msg-emoji,#input-row.recording .msg-field-wrap{display:none}
 #rec-bar .rec-ring{flex:0 0 auto;width:11px;height:11px;border-radius:50%;background:var(--vgp-red);animation:vgpPulse 1.2s ease-in-out infinite}
-#rec-text{flex:1;min-width:0;overflow:hidden;white-space:nowrap;color:var(--vgp-text-dim);font-style:italic}  /* live transcript — auto-scrolls to the newest words */
+#rec-text{flex:1;min-width:0;overflow:hidden;white-space:nowrap;color:var(--vgp-text2);font-size:14.5px}  /* live transcript — standard text, auto-scrolls to the newest words */
 #rec-time{flex:0 0 auto;font-variant-numeric:tabular-nums}
 #rec-cancel{flex:0 0 auto;border:none;background:transparent;color:var(--vgp-text-dim);font-size:15px;cursor:pointer;padding:2px 4px}
 .msg .voice-wrap{display:flex;align-items:center;gap:9px;min-width:210px;color:var(--vgp-text-dim);font-size:12px}
@@ -274,6 +274,7 @@ img.joypixels{display:inline-block;height:1.43em;width:1.43em;vertical-align:-0.
 #msg-actions #ma-del{border:none;background:transparent;color:var(--vgp-red);font-family:inherit;font-size:13px;font-weight:500;padding:8px 10px;border-radius:8px;cursor:pointer;text-align:center}
 #msg-actions #ma-del:hover{background:rgba(var(--vgp-red-rgb),.15)}
 #msg-actions #ma-del.hidden{display:none}
+#msg-actions .react-row #ma-edit.hidden{display:none}
 /* Edit-last-message banner above the input + a subtle accent ring on the field while editing */
 #edit-hint{position:absolute;left:64px;right:60px;bottom:calc(100% - 4px);background:var(--vgp-chat);border:1px solid rgba(var(--vgp-accent-rgb),.25);border-radius:10px;padding:8px 14px;font-size:13px;color:var(--vgp-text-dim);z-index:30;box-shadow:0 -6px 24px rgba(var(--vgp-shadow),.45)}
 #edit-hint.hidden{display:none}
@@ -444,7 +445,9 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
         <button type="button" data-emoji="🙏">🙏</button>
         <button type="button" id="ma-reply" title="Antworten" aria-label="Antworten">↩️</button>
       </div>
-      <button type="button" id="ma-del" class="danger">Löschen</button>
+      <button type="button" id="ma-edit">✏️ Editieren</button>
+      <button type="button" id="ma-copy">📋 Kopieren</button>
+      <button type="button" id="ma-del" class="danger">🗑 Löschen</button>
     </div>
     <textarea id="contact-search" rows="1" placeholder="Suchen…" aria-label="Kontakte suchen" autocomplete="off"></textarea>
     <div id="contact-list"></div>
@@ -597,13 +600,13 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
   <button id="stats-close">SCHLIESSEN</button>
 </div>
 
-<script src="js/vgp-setup.js?v=20260524-82"></script>
-<script src="js/vgp-auth.js?v=20260524-82"></script>
-<script src="js/vgp-crypto.js?v=20260524-82"></script>
-<script src="js/vgp-backup-core.js?v=20260524-82"></script>
-<script src="js/vgp-contacts.js?v=20260524-82"></script>
-<script src="js/vgp-messages.js?v=20260524-82"></script>
-<script src="js/vgp-push.js?v=20260524-82"></script>
+<script src="js/vgp-setup.js?v=20260524-86"></script>
+<script src="js/vgp-auth.js?v=20260524-86"></script>
+<script src="js/vgp-crypto.js?v=20260524-86"></script>
+<script src="js/vgp-backup-core.js?v=20260524-86"></script>
+<script src="js/vgp-contacts.js?v=20260524-86"></script>
+<script src="js/vgp-messages.js?v=20260524-86"></script>
+<script src="js/vgp-push.js?v=20260524-86"></script>
 <script>
 // Local-vs-live indicator: mark the page red ONLY when served locally. No red = you're on the live site.
 (function () {
