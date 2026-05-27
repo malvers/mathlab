@@ -1495,7 +1495,7 @@
             const size = Math.min(w, h) * 0.8;
             const r = size / 2;
             const cx = w / 2;
-            const cy = h / 2 - 10;   // nudge the whole canvas (clock + planetarium) up 10px; DOM boxes stay edge-pinned
+            const cy = h / 2 - 15;   // nudge the whole canvas (clock + planetarium) up 15px; DOM boxes stay edge-pinned
 
             // Sicherheitsnetz: bei degenerierten Maßen Frame überspringen.
             if (!Number.isFinite(r) || r < 1) return;
