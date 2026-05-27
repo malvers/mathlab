@@ -296,7 +296,13 @@
             else if (e.key === 's' || e.key === 'S') { skyTarget = skyTarget ? 0 : 1; e.preventDefault(); return; }  // planetarium toggle
             else if (e.key === 'n' || e.key === 'N') { starLangDE = !starLangDE; e.preventDefault(); return; }       // labels: German ↔ Latin
             else if (e.key === ' ') { toggleLapse(); e.preventDefault(); return; }                                   // time-lapse play/pause (Space)
-            else if (e.key === 'Escape') { skyZoom = 1; skyPanX = 0; skyPanY = 0; e.preventDefault(); return; }      // reset zoom + pan
+            else if (e.key === 'Escape') {          // fit the whole horizon dome into the window (zoom + recentre); N/S direction (dirSign) untouched
+                const _r = canvas.getBoundingClientRect();
+                const _w = Math.max(80, _r.width || 0), _h = Math.max(80, _r.height || 0);
+                skyZoom = 0.88 * Math.min(_w, _h) / (1.24 * Math.max(_w, _h));   // Rdome = max(w,h)·0.62·zoom → inscribe the horizon circle + room for the N/S horizon marks
+                skyPanX = 0; skyPanY = 0;
+                e.preventDefault(); return;
+            }
             else if (e.key === 'b' || e.key === 'B') { dsoPhotos = !dsoPhotos; saveSkyToggle('photos', dsoPhotos); try { DebugWindow.log('[deepsky] Fotos ' + (dsoPhotos ? 'an' : 'aus')); } catch (_) {} e.preventDefault(); return; }  // deep-sky photos ↔ stylised glow
             else if (e.key === ',' || e.key === '.') {
                 projPersp = e.key === ',' ? Math.max(0, projPersp - 0.1) : Math.min(1, projPersp + 0.1);
@@ -1489,7 +1495,7 @@
             const size = Math.min(w, h) * 0.8;
             const r = size / 2;
             const cx = w / 2;
-            const cy = h / 2;
+            const cy = h / 2 - 10;   // nudge the whole canvas (clock + planetarium) up 10px; DOM boxes stay edge-pinned
 
             // Sicherheitsnetz: bei degenerierten Maßen Frame überspringen.
             if (!Number.isFinite(r) || r < 1) return;
