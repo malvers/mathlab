@@ -62,8 +62,8 @@
         .term .eq .katex,.term .eq-y .katex,.term .eq .katex *,.term .eq-y .katex *{color:#1f1f1f !important}
         /* Solved-for-y line: full opacity, full black in both active and inactive states. */
         .term .eq-y{color:#1f1f1f;white-space:nowrap}
-        /* LHS: always show "y" (.y-lhs); .nan-lhs is now unused. Inactive: tint the "y" red. */
-        .term .eq-y .nan-lhs{display:none}
+        /* LHS: \htmlClass{y-lhs}{y} wraps the "y" in every texY. Active → dark default;
+           inactive → tinted red so it reads as part of the NaN story. */
         .term:not(.active) .eq-y .y-lhs,
         .term:not(.active) .eq-y .y-lhs *{color:var(--bat-red) !important}
         /* .val line is redundant — eq-y already shows "y = ... = <value>" when active and
@@ -245,7 +245,7 @@
         <div id="ui-container">
             <div id="x-strip">
                 <div class="row">
-                    <label id="x-label"></label>
+                    <label id="x-label" for="x-slider"></label>
                     <span class="xval" id="x-readout"></span>
                 </div>
                 <input type="range" id="x-slider" min="-7" max="7" step="0.01" value="0">
@@ -404,6 +404,20 @@
             return { active:true, y };
         }
 
+        // Shared constants for the TERMS table + the render path.
+        // Y_EQ: shared "y =" LHS for every texY. \htmlClass{y-lhs}{y} so CSS can tint the y
+        //   red when the term is inactive; \kern{1pt} gives a tighter-than-default spacing
+        //   around "=" (KaTeX's automatic mrel-space is too wide with the htmlClass wrapper).
+        // X_RE: matches an isolated math-variable "x" — used by both substituteX (replace)
+        //   and hasX detection. No g-flag → reusable .test() without lastIndex state.
+        // KOPTS / KOPTS_PLAIN: every katex.render call uses the same options; KOPTS opts in
+        //   to \htmlClass (needed for our nan-sqrt / y-lhs / nan-suffix markers).
+        const Y_EQ = '\\htmlClass{y-lhs}{y}\\kern{1pt}=\\kern{1pt}';
+        const X_RE = /(?<![\\a-zA-Z])x(?![a-zA-Z])/;
+        const X_RE_G = /(?<![\\a-zA-Z])x(?![a-zA-Z])/g;
+        const KOPTS_PLAIN = { throwOnError:false, displayMode:false };
+        const KOPTS = { ...KOPTS_PLAIN, trust:(c)=>c.command==='\\htmlClass', strict:'ignore' };
+
         // LaTeX strings + meta for each term — order = visible bottom-up of the bat.
         // `texY` is the same factor solved for y (what we actually plot inside the domain).
         // \htmlClass{nan-sqrt}{...} marks ONLY the symbolic sign-indicator sqrts (the trick
@@ -412,22 +426,22 @@
         const TERMS = [
             { id:1, fn:term1, name:'Wings (upper ellipse)',
               tex: '\\left(\\tfrac{x}{7}\\right)^2\\htmlClass{nan-sqrt}{\\sqrt{\\tfrac{||x|-3|}{|x|-3}}} + \\left(\\tfrac{y}{3}\\right)^2\\htmlClass{nan-sqrt}{\\sqrt{\\tfrac{y+\\tfrac{3\\sqrt{33}}{7}}{|y|+\\tfrac{3\\sqrt{33}}{7}}}} - 1 = 0',
-              texY: '\\htmlClass{y-lhs}{y}\\htmlClass{nan-lhs}{\\mathrm{NaN}}\\kern{1pt}=\\kern{1pt}\\pm 3\\sqrt{1 - \\left(\\tfrac{x}{7}\\right)^2}\\htmlClass{nan-suffix}{\\cdot \\mathrm{NaN} \\cdot \\mathrm{NaN}}' },
+              texY: Y_EQ + '\\pm 3\\sqrt{1 - \\left(\\tfrac{x}{7}\\right)^2}\\htmlClass{nan-suffix}{\\cdot \\mathrm{NaN} \\cdot \\mathrm{NaN}}' },
             { id:2, fn:term2, name:'Head outline',
               tex: '\\left|\\tfrac{x}{2}\\right| - \\tfrac{3\\sqrt{33}-7}{112}x^2 - 3 + \\htmlClass{nan-sqrt}{\\sqrt{1-(||x|-2|-1)^2}} - y = 0',
-              texY: '\\htmlClass{y-lhs}{y}\\htmlClass{nan-lhs}{\\mathrm{NaN}}\\kern{1pt}=\\kern{1pt}\\left|\\tfrac{x}{2}\\right| - \\tfrac{3\\sqrt{33}-7}{112}x^2 - 3 + \\htmlClass{nan-sqrt}{\\sqrt{1-(||x|-2|-1)^2}}' },
+              texY: Y_EQ + '\\left|\\tfrac{x}{2}\\right| - \\tfrac{3\\sqrt{33}-7}{112}x^2 - 3 + \\htmlClass{nan-sqrt}{\\sqrt{1-(||x|-2|-1)^2}}' },
             { id:3, fn:term3, name:'Inner ears',
               tex: '9\\htmlClass{nan-sqrt}{\\sqrt{\\tfrac{(|x|-1)(|x|-0.75)}{(1-|x|)(|x|-0.75)}}} - 8|x| - y = 0',
-              texY: '\\htmlClass{y-lhs}{y}\\htmlClass{nan-lhs}{\\mathrm{NaN}}\\kern{1pt}=\\kern{1pt}9\\htmlClass{nan-suffix}{\\cdot \\mathrm{NaN}} - 8|x|' },
+              texY: Y_EQ + '9\\htmlClass{nan-suffix}{\\cdot \\mathrm{NaN}} - 8|x|' },
             { id:4, fn:term4, name:'Jaw lobes',
               tex: '3|x| + 0.75\\htmlClass{nan-sqrt}{\\sqrt{\\tfrac{(|x|-0.75)(|x|-0.5)}{(0.75-|x|)(|x|-0.5)}}} - y = 0',
-              texY: '\\htmlClass{y-lhs}{y}\\htmlClass{nan-lhs}{\\mathrm{NaN}}\\kern{1pt}=\\kern{1pt}3|x| + 0.75\\htmlClass{nan-suffix}{\\cdot \\mathrm{NaN}}' },
+              texY: Y_EQ + '3|x| + 0.75\\htmlClass{nan-suffix}{\\cdot \\mathrm{NaN}}' },
             { id:5, fn:term5, name:'Center chin',
               tex: '2.25\\htmlClass{nan-sqrt}{\\sqrt{\\tfrac{(x-0.5)(x+0.5)}{(0.5-x)(0.5+x)}}} - y = 0',
-              texY: '\\htmlClass{y-lhs}{y}\\htmlClass{nan-lhs}{\\mathrm{NaN}}\\kern{1pt}=\\kern{1pt}2.25\\htmlClass{nan-suffix}{\\cdot \\mathrm{NaN}}' },
+              texY: Y_EQ + '2.25\\htmlClass{nan-suffix}{\\cdot \\mathrm{NaN}}' },
             { id:6, fn:term6, name:'Wings (lower curve)',
               tex: '\\tfrac{6\\sqrt{10}}{7} + (1.5-0.5|x|)\\htmlClass{nan-sqrt}{\\sqrt{\\tfrac{||x|-1|}{|x|-1}}} - \\tfrac{6\\sqrt{10}}{14}\\sqrt{4-(|x|-1)^2} - y = 0',
-              texY: '\\htmlClass{y-lhs}{y}\\htmlClass{nan-lhs}{\\mathrm{NaN}}\\kern{1pt}=\\kern{1pt}\\tfrac{6\\sqrt{10}}{7} + (1.5 - 0.5|x|)\\htmlClass{nan-suffix}{\\cdot \\mathrm{NaN}} - \\tfrac{6\\sqrt{10}}{14}\\sqrt{4-(|x|-1)^2}' },
+              texY: Y_EQ + '\\tfrac{6\\sqrt{10}}{7} + (1.5 - 0.5|x|)\\htmlClass{nan-suffix}{\\cdot \\mathrm{NaN}} - \\tfrac{6\\sqrt{10}}{14}\\sqrt{4-(|x|-1)^2}' },
         ];
 
         // Whole equation = product of all six factors = 0. Build each factor as a separate
@@ -442,7 +456,7 @@
                     const sep = document.createElement('span');
                     sep.className = 'full-sep';
                     target.appendChild(sep);
-                    try { katex.render('\\cdot', sep, { throwOnError:false, displayMode:false }); }
+                    try { katex.render('\\cdot', sep, KOPTS_PLAIN); }
                     catch (_) { sep.textContent = ' · '; }
                 }
                 // Each factor lives in a vertical wrap: coloured lozenge on top, underbrace below.
@@ -454,7 +468,7 @@
                 box.id = 'ff-' + t.id;
                 wrap.appendChild(box);
                 const factorTex = '\\big(' + t.tex.replace(/\s*=\s*0\s*$/, '') + '\\big)';
-                try { katex.render(factorTex, box, { throwOnError:false, displayMode:false, trust:(c)=>c.command==='\\htmlClass', strict:'ignore' }); }
+                try { katex.render(factorTex, box, KOPTS); }
                 catch (_) { box.textContent = factorTex; }
                 const brace = document.createElement('span');
                 brace.className = 'full-brace';
@@ -464,7 +478,7 @@
             const eq = document.createElement('span');
             eq.className = 'full-eq-equals';
             target.appendChild(eq);
-            try { katex.render('= 0', eq, { throwOnError:false, displayMode:false }); }
+            try { katex.render('= 0', eq, KOPTS_PLAIN); }
             catch (_) { eq.textContent = ' = 0'; }
             // KaTeX downloads its own webfonts; widths only stabilise once those have loaded.
             // Refit + equalise heights once now, again on fonts.ready, again after short timeouts.
@@ -487,7 +501,7 @@
             const probe = document.createElement('span');
             probe.style.cssText = 'position:absolute;visibility:hidden;left:-9999px;top:0';
             host.appendChild(probe);
-            try { katex.render('\\underbrace{\\kern 100pt}_{}', probe, { throwOnError:false, displayMode:false }); }
+            try { katex.render('\\underbrace{\\kern 100pt}_{}', probe, KOPTS_PLAIN); }
             catch (_) {}
             const k = probe.querySelector('.katex');
             if (k) braceSlackPx = Math.max(0, k.offsetWidth - 100 * 4/3);   // 100pt = 133.33px
@@ -550,16 +564,16 @@
         function tex(target, src) {
             if (!target) return;
             if (window.katex) {
-                try { katex.render(src, target, { throwOnError:false, displayMode:false, trust:(c)=>c.command==='\\htmlClass', strict:'ignore' }); return; }
+                try { katex.render(src, target, KOPTS); return; }
                 catch (_) {}
             }
             target.textContent = src;
         }
         // Replace every isolated math-variable x in a LaTeX string with the numeric value.
-        // The lookarounds skip any "x" that's part of a command (\sqrt, \tfrac...) or an
-        // identifier. No parens around negatives — bare value, even for x^2.
+        // X_RE_G skips any "x" that's part of a command (\sqrt, \tfrac...) or an identifier.
+        // No parens around negatives — bare value, even for x^2.
         function substituteX(texStr, xval) {
-            return texStr.replace(/(?<![\\a-zA-Z])x(?![a-zA-Z])/g, xval.toFixed(2));
+            return texStr.replace(X_RE_G, xval.toFixed(2));
         }
         // For the inactive y-line: replace any \htmlClass{nan-sqrt}{...} block with \mathrm{NaN}
         // — if the sqrt is symbolically NaN, just write "NaN" there instead of the sqrt.
@@ -641,9 +655,9 @@
                 const eqEl  = div.querySelector('.eq');
                 const eqyEl = div.querySelector('.eq-y');
                 if (window.katex) {
-                    try { katex.render(t.tex,  eqEl,  { throwOnError:false, displayMode:false, trust:(c)=>c.command==='\\htmlClass', strict:'ignore' }); }
+                    try { katex.render(t.tex,  eqEl,  KOPTS); }
                     catch (_) { eqEl.textContent = t.tex; }
-                    try { katex.render(t.texY, eqyEl, { throwOnError:false, displayMode:false, trust:(c)=>c.command==='\\htmlClass', strict:'ignore' }); }
+                    try { katex.render(t.texY, eqyEl, KOPTS); }
                     catch (_) { eqyEl.textContent = t.texY; }
                 } else {
                     eqEl.textContent  = t.tex;
@@ -769,10 +783,9 @@
                 const eqEl  = document.getElementById('eq-'  + c.meta.id);
                 const eqyEl = document.getElementById('eqy-' + c.meta.id);
                 if (window.katex) {
-                    const renderOpts = { throwOnError:false, displayMode:false, trust:(ctx)=>ctx.command==='\\htmlClass', strict:'ignore' };
                     if (eqEl) {
                         const eqSrc = r.active ? substituteX(c.meta.tex, x) : c.meta.tex;
-                        try { katex.render(eqSrc, eqEl, renderOpts); } catch (_) {}
+                        try { katex.render(eqSrc, eqEl, KOPTS); } catch (_) {}
                     }
                     if (eqyEl) {
                         let src;
@@ -781,13 +794,13 @@
                             const lhs = substituteX(c.meta.texY, x);
                             // Skip the "= <value>" tail if texY has no x (constant RHS like T5
                             // "y = 2.25") — otherwise it'd read "y = 2.25 = 2.25".
-                            const hasX = /(?<![\\a-zA-Z])x(?![a-zA-Z])/.test(c.meta.texY);
+                            const hasX = X_RE.test(c.meta.texY);
                             src = hasX ? `${lhs} = ${sign}${r.y.toFixed(3)}` : lhs;
                         } else {
                             // Collapse symbolic NaN-sqrts to "NaN" text, mirror active tail.
                             src = nanifyNanSqrts(c.meta.texY) + ' = \\htmlClass{nan-rhs}{\\mathrm{NaN}}';
                         }
-                        try { katex.render(src, eqyEl, renderOpts); } catch (_) {}
+                        try { katex.render(src, eqyEl, KOPTS); } catch (_) {}
                     }
                 }
                 if (r.active) {
@@ -845,7 +858,7 @@
                         // scaleX clamp below catches any label overflow.
                         const tex = `\\underbrace{\\kern ${kernPt}pt}_{\\Large\\,${yLabel}\\,}`;
                         // trust+strict needed so \htmlClass passes through (for .nan-label).
-                        try { katex.render(tex, brace, { throwOnError:false, displayMode:false, trust:(ctx)=>ctx.command==='\\htmlClass', strict:'ignore' }); }
+                        try { katex.render(tex, brace, KOPTS); }
                         catch (_) { brace.textContent = yLabel; }
                         // KaTeX widens \underbrace to MAX(kern, label_width). Squish horizontally
                         // if the rendered brace exceeds the lozenge width.
