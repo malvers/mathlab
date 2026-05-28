@@ -42,16 +42,32 @@
            inside the box. Without it the .katex span wraps and scrollWidth would report the
            WRAPPED width — which is what we want to AVOID. With nowrap, the natural single-
            line width is exposed and the sidebar auto-fit can size correctly. */
-        .term .eq{color:var(--term-fg);white-space:nowrap}
-        /* KaTeX colors its tokens itself — force the state-dependent text color through */
-        .term .eq .katex,.term .eq-y .katex,.term .eq .katex *,.term .eq-y .katex *{color:var(--term-fg) !important}
-        /* Solved-for-y line: shown below the original factor; slightly dim to mark it as derived */
-        .term .eq-y{margin-top:5px;color:var(--term-fg);opacity:.92;white-space:nowrap;transition:opacity .15s}
-        /* Out-of-domain: solved-for-y line is mathematically not applicable, so dim it strongly
-           to avoid the false-implication contradiction with "nicht definiert" in .val. */
-        .term:not(.active) .eq-y{opacity:.25}
-        .term .val{display:block;margin-top:4px;color:var(--term-fg);opacity:.92}
-        .term .val .katex,.term .val .katex *{color:var(--term-fg) !important}
+        .term .eq{color:#1f1f1f;white-space:nowrap}
+        /* KaTeX colors its tokens itself — force the dark-gray text color through */
+        .term .eq .katex,.term .eq-y .katex,.term .eq .katex *,.term .eq-y .katex *{color:#1f1f1f !important}
+        /* Solved-for-y line: full opacity, full black in both active and inactive states. */
+        .term .eq-y{margin-top:5px;color:#1f1f1f;white-space:nowrap}
+        .term .val{display:block;margin-top:4px;color:#1f1f1f;opacity:.92}
+        .term .val .katex,.term .val .katex *{color:#1f1f1f !important}
+        /* Inactive: whole "nicht definiert (NaN)" line goes red. */
+        .term:not(.active) .val,
+        .term:not(.active) .val .katex,
+        .term:not(.active) .val .katex *{color:var(--bat-red) !important}
+        /* Out-of-domain: paint ONLY the NaN-producing sub-expressions red. The tex strings
+           wrap those specific sqrts with \htmlClass{nan-sqrt}{...}; constant sqrts (√10, √33)
+           stay dark. Children too — KaTeX nests deeply inside .nan-sqrt. */
+        .term:not(.active) .eq .nan-sqrt,
+        .term:not(.active) .eq .nan-sqrt *,
+        .term:not(.active) .eq-y .nan-sqrt,
+        .term:not(.active) .eq-y .nan-sqrt *{color:var(--bat-red) !important}
+        /* nan-suffix marks a "·NaN" inserted into texY where the indicator sqrt was
+           simplified away (T3/T4/T5/T6), and the "(NaN)" appended to "nicht definiert".
+           Hidden when active (only meaningful in inactive context), red when inactive. */
+        .term.active .eq-y .nan-suffix{display:none}
+        .term:not(.active) .eq-y .nan-suffix,
+        .term:not(.active) .eq-y .nan-suffix *,
+        .term:not(.active) .val .nan-suffix,
+        .term:not(.active) .val .nan-suffix *{color:var(--bat-red) !important}
         /* Slider strip at the top of the sidebar — all text rendered as KaTeX, so we keep
            only color/size on the host element and let KaTeX inherit them. */
         #x-strip{padding:14px 12px 6px;border-bottom:1px solid rgba(255,255,255,.08)}
@@ -89,9 +105,12 @@
            lozenge — the brace is positioned absolutely, so it has ZERO influence on width.
            This kills the feedback loop where an active brace would stretch the lozenge wider. */
         .full-factor-wrap{position:relative;display:inline-flex;flex-direction:column;align-items:stretch;margin:0 2px;padding-bottom:34px}
-        .full-factor{--factor-fg:#fff;display:inline-flex;align-items:center;padding:3px 8px;border-radius:7px;background:var(--bat-red);transition:background .15s,color .15s}
-        .full-factor.active{--factor-fg:#1f1f1f;background:var(--bat-green)}
-        .full-factor .katex,.full-factor .katex *{color:var(--factor-fg) !important}
+        .full-factor{display:inline-flex;align-items:center;padding:3px 8px;border-radius:7px;background:var(--bat-orange);transition:background .15s}
+        .full-factor.active{background:var(--bat-green)}
+        .full-factor .katex,.full-factor .katex *{color:#1f1f1f !important}
+        /* Out-of-domain: same .nan-sqrt rule for top-strip lozenges. */
+        .full-factor:not(.active) .nan-sqrt,
+        .full-factor:not(.active) .nan-sqrt *{color:var(--bat-red) !important}
         /* Brace area: absolutely positioned right under the lozenge (--lozenge-h set by JS),
            spanning its width via left/right. KaTeX renders \underbrace{\kern Wpt}_{label};
            with kern = lozenge width, the BRACE SYMBOL itself matches the lozenge exactly.
@@ -269,25 +288,28 @@
 
         // LaTeX strings + meta for each term — order = visible bottom-up of the bat.
         // `texY` is the same factor solved for y (what we actually plot inside the domain).
+        // \htmlClass{nan-sqrt}{...} marks ONLY the symbolic sign-indicator sqrts (the trick
+        // sqrt((x-a)(x-b)/((a-x)(b-x))). Regular sqrts that happen to be real for most x
+        // (\sqrt{10}, \sqrt{33}, half-circle sqrts) are NOT NaN-producers and stay plain.
         const TERMS = [
             { id:1, fn:term1, name:'Wings (upper ellipse)',
-              tex: '\\left(\\tfrac{x}{7}\\right)^2\\sqrt{\\tfrac{||x|-3|}{|x|-3}} + \\left(\\tfrac{y}{3}\\right)^2\\sqrt{\\tfrac{y+\\tfrac{3\\sqrt{33}}{7}}{|y|+\\tfrac{3\\sqrt{33}}{7}}} - 1 = 0',
-              texY: 'y = \\pm 3\\sqrt{1 - \\left(\\tfrac{x}{7}\\right)^2}' },
+              tex: '\\left(\\tfrac{x}{7}\\right)^2\\htmlClass{nan-sqrt}{\\sqrt{\\tfrac{||x|-3|}{|x|-3}}} + \\left(\\tfrac{y}{3}\\right)^2\\htmlClass{nan-sqrt}{\\sqrt{\\tfrac{y+\\tfrac{3\\sqrt{33}}{7}}{|y|+\\tfrac{3\\sqrt{33}}{7}}}} - 1 = 0',
+              texY: 'y = \\pm 3\\sqrt{1 - \\left(\\tfrac{x}{7}\\right)^2}\\htmlClass{nan-suffix}{\\cdot \\mathrm{NaN} \\cdot \\mathrm{NaN}}' },
             { id:2, fn:term2, name:'Head outline',
-              tex: '\\left|\\tfrac{x}{2}\\right| - \\tfrac{3\\sqrt{33}-7}{112}x^2 - 3 + \\sqrt{1-(||x|-2|-1)^2} - y = 0',
-              texY: 'y = \\left|\\tfrac{x}{2}\\right| - \\tfrac{3\\sqrt{33}-7}{112}x^2 - 3 + \\sqrt{1-(||x|-2|-1)^2}' },
+              tex: '\\left|\\tfrac{x}{2}\\right| - \\tfrac{3\\sqrt{33}-7}{112}x^2 - 3 + \\htmlClass{nan-sqrt}{\\sqrt{1-(||x|-2|-1)^2}} - y = 0',
+              texY: 'y = \\left|\\tfrac{x}{2}\\right| - \\tfrac{3\\sqrt{33}-7}{112}x^2 - 3 + \\htmlClass{nan-sqrt}{\\sqrt{1-(||x|-2|-1)^2}}' },
             { id:3, fn:term3, name:'Inner ears',
-              tex: '9\\sqrt{\\tfrac{(|x|-1)(|x|-0.75)}{(1-|x|)(|x|-0.75)}} - 8|x| - y = 0',
-              texY: 'y = 9 - 8|x|' },
+              tex: '9\\htmlClass{nan-sqrt}{\\sqrt{\\tfrac{(|x|-1)(|x|-0.75)}{(1-|x|)(|x|-0.75)}}} - 8|x| - y = 0',
+              texY: 'y = 9\\htmlClass{nan-suffix}{\\cdot \\mathrm{NaN}} - 8|x|' },
             { id:4, fn:term4, name:'Jaw lobes',
-              tex: '3|x| + 0.75\\sqrt{\\tfrac{(|x|-0.75)(|x|-0.5)}{(0.75-|x|)(|x|-0.5)}} - y = 0',
-              texY: 'y = 3|x| + 0.75' },
+              tex: '3|x| + 0.75\\htmlClass{nan-sqrt}{\\sqrt{\\tfrac{(|x|-0.75)(|x|-0.5)}{(0.75-|x|)(|x|-0.5)}}} - y = 0',
+              texY: 'y = 3|x| + 0.75\\htmlClass{nan-suffix}{\\cdot \\mathrm{NaN}}' },
             { id:5, fn:term5, name:'Center chin',
-              tex: '2.25\\sqrt{\\tfrac{(x-0.5)(x+0.5)}{(0.5-x)(0.5+x)}} - y = 0',
-              texY: 'y = 2.25' },
+              tex: '2.25\\htmlClass{nan-sqrt}{\\sqrt{\\tfrac{(x-0.5)(x+0.5)}{(0.5-x)(0.5+x)}}} - y = 0',
+              texY: 'y = 2.25\\htmlClass{nan-suffix}{\\cdot \\mathrm{NaN}}' },
             { id:6, fn:term6, name:'Wings (lower curve)',
-              tex: '\\tfrac{6\\sqrt{10}}{7} + (1.5-0.5|x|)\\sqrt{\\tfrac{||x|-1|}{|x|-1}} - \\tfrac{6\\sqrt{10}}{14}\\sqrt{4-(|x|-1)^2} - y = 0',
-              texY: 'y = \\tfrac{6\\sqrt{10}}{7} + (1.5 - 0.5|x|) - \\tfrac{6\\sqrt{10}}{14}\\sqrt{4-(|x|-1)^2}' },
+              tex: '\\tfrac{6\\sqrt{10}}{7} + (1.5-0.5|x|)\\htmlClass{nan-sqrt}{\\sqrt{\\tfrac{||x|-1|}{|x|-1}}} - \\tfrac{6\\sqrt{10}}{14}\\sqrt{4-(|x|-1)^2} - y = 0',
+              texY: 'y = \\tfrac{6\\sqrt{10}}{7} + (1.5 - 0.5|x|)\\htmlClass{nan-suffix}{\\cdot \\mathrm{NaN}} - \\tfrac{6\\sqrt{10}}{14}\\sqrt{4-(|x|-1)^2}' },
         ];
 
         // Whole equation = product of all six factors = 0. Build each factor as a separate
@@ -314,7 +336,7 @@
                 box.id = 'ff-' + t.id;
                 wrap.appendChild(box);
                 const factorTex = '\\big(' + t.tex.replace(/\s*=\s*0\s*$/, '') + '\\big)';
-                try { katex.render(factorTex, box, { throwOnError:false, displayMode:false }); }
+                try { katex.render(factorTex, box, { throwOnError:false, displayMode:false, trust:(c)=>c.command==='\\htmlClass', strict:'ignore' }); }
                 catch (_) { box.textContent = factorTex; }
                 const brace = document.createElement('span');
                 brace.className = 'full-brace';
@@ -410,7 +432,7 @@
         function tex(target, src) {
             if (!target) return;
             if (window.katex) {
-                try { katex.render(src, target, { throwOnError:false, displayMode:false }); return; }
+                try { katex.render(src, target, { throwOnError:false, displayMode:false, trust:(c)=>c.command==='\\htmlClass', strict:'ignore' }); return; }
                 catch (_) {}
             }
             target.textContent = src;
@@ -430,9 +452,9 @@
                 const eqEl  = div.querySelector('.eq');
                 const eqyEl = div.querySelector('.eq-y');
                 if (window.katex) {
-                    try { katex.render(t.tex,  eqEl,  { throwOnError:false, displayMode:false }); }
+                    try { katex.render(t.tex,  eqEl,  { throwOnError:false, displayMode:false, trust:(c)=>c.command==='\\htmlClass', strict:'ignore' }); }
                     catch (_) { eqEl.textContent = t.tex; }
-                    try { katex.render(t.texY, eqyEl, { throwOnError:false, displayMode:false }); }
+                    try { katex.render(t.texY, eqyEl, { throwOnError:false, displayMode:false, trust:(c)=>c.command==='\\htmlClass', strict:'ignore' }); }
                     catch (_) { eqyEl.textContent = t.texY; }
                 } else {
                     eqEl.textContent  = t.tex;
@@ -523,8 +545,9 @@
             }
             const yTopAll = allYs.length ? Math.max(...allYs) : null;
             const yBotAll = allYs.length ? Math.min(...allYs) : null;
-            const RED  = '#b02418';   // palette Υ
-            const BLUE = '#50a0ff';   // brighter than pure blue for legibility on dark bg
+            const RED   = '#b02418';   // palette Υ — top endpoint when there IS a vertical pair
+            const BLUE  = '#50a0ff';   // brighter than pure blue for legibility on dark bg
+            const GREEN = '#799e31';   // palette φ — used when only one active point (no pair)
             for (const c of cells) {
                 const r = c.meta.fn(x);
                 c.root.classList.toggle('active', !!r.active);
@@ -533,7 +556,7 @@
                     const sign = r.note === '±' ? '\\pm ' : '';
                     tex(c.val, `\\text{bei } x = ${x.toFixed(2)} \\;\\to\\; y = \\mathbf{${sign}${yStr}}`);
                 } else {
-                    tex(c.val, '\\text{nicht definiert}');
+                    tex(c.val, '\\text{nicht definiert } \\htmlClass{nan-suffix}{(\\mathrm{NaN})}');
                 }
                 // Mirror the active/inactive colour on the top-strip factor lozenge.
                 const ff = document.getElementById('ff-' + c.meta.id);
@@ -553,27 +576,28 @@
                         // \textstyle restores normal math spacing (subscripts use scriptscriptstyle
                         // which would squeeze "y = -3" tight); \; adds visible "Luft" around the =.
                         let yLabel;
-                        if (r.note === '±' && c.meta.id === 1 && r.yLow !== null) {
-                            // T1 with both branches active: two stacked rows, top red, bottom blue,
-                            // so each row matches its dot on the canvas.
-                            // \hphantom{-} reserves the width of a minus sign in the positive
-                            // row so both rows are identical width; \substack centers each row,
-                            // so identical width = "=" and digits line up vertically.
-                            const top = `\\textcolor{${RED}}{\\textstyle y \\; = \\; \\hphantom{-}${yStr}}`;
-                            const bot = `\\textcolor{${BLUE}}{\\textstyle y \\; = \\; -${yStr}}`;
+                        // Top endpoint colour = green, bottom = blue, in-between = default cyan.
+                        // Matches the canvas dot colours so brace and dot read as a pair.
+                        const yUpVal = r.y;
+                        const yLowVal = (c.meta.id === 1 && r.yLow !== null) ? r.yLow : null;
+                        const toneFor = (v) => (v === yTopAll) ? GREEN
+                                         : (v === yBotAll && yTopAll !== yBotAll) ? BLUE
+                                         : null;
+                        const wrap = (v, core) => {
+                            const t = toneFor(v);
+                            return t ? `\\textcolor{${t}}{${core}}` : core;
+                        };
+                        if (r.note === '±' && c.meta.id === 1 && yLowVal !== null) {
+                            // T1 with both branches: two stacked rows. Top row → yUp colour,
+                            // bottom row → yLow colour. \hphantom{-} aligns digits vertically.
+                            const top = wrap(yUpVal,  `\\textstyle y \\; = \\; \\hphantom{-}${yStr}`);
+                            const bot = wrap(yLowVal, `\\textstyle y \\; = \\; -${yStr}`);
                             yLabel = `\\substack{${top} \\\\ ${bot}}`;
                         } else {
                             const core = (r.note === '±')
                                 ? `\\textstyle y \\; = \\; \\pm ${yStr}`
                                 : `\\textstyle y \\; = \\; ${yStr}`;
-                            // Tint the whole \underbrace (label + brace stroke) red/blue when this
-                            // y is the global top/bot; otherwise keep the default cyan.
-                            // Match the canvas dot logic: top takes precedence so a lone
-                            // active point (yTop === yBot) renders red, not blue.
-                            const tone = (r.y === yTopAll) ? RED
-                                       : (r.y === yBotAll && yTopAll !== yBotAll) ? BLUE
-                                       : null;
-                            yLabel = tone ? `\\textcolor{${tone}}{${core}}` : core;
+                            yLabel = wrap(yUpVal, core);
                         }
                         const tex = `\\underbrace{\\kern ${kernPt}pt}_{\\,${yLabel}\\,}`;
                         try { katex.render(tex, brace, { throwOnError:false, displayMode:false }); }
@@ -786,7 +810,10 @@
                     const isTop = (yy === yTop);
                     const isBot = (yy === yBot && yTop !== yBot);
                     const radius = (isTop || isBot) ? 7.5 : 5;
-                    const fill   = isTop ? 'rgb(176,36,24)' : isBot ? 'rgb(80,160,255)' : 'rgba(245,194,66,1)';
+                    // Top → palette green, bottom → blue. Lone active point falls under isTop → green.
+                    const fill   = isTop ? 'rgb(121,158,49)'
+                                 : isBot ? 'rgb(80,160,255)'
+                                 :         'rgba(245,194,66,1)';
                     ctx.fillStyle = fill;
                     ctx.beginPath(); ctx.arc(X(cur), Y(yy), radius, 0, 2*Math.PI); ctx.fill();
                     ctx.strokeStyle = '#1a1a1a'; ctx.lineWidth = 1.5; ctx.stroke();
