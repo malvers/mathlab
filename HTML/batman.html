@@ -89,11 +89,21 @@
         #sb-toggles{display:flex;gap:14px;padding:8px 12px;border-bottom:1px solid rgba(255,255,255,.08);font-family:'Outfit',sans-serif;font-size:13px;color:rgba(255,255,255,.75)}
         #sb-toggles .tg{display:inline-flex;align-items:center;gap:6px;cursor:pointer;user-select:none}
         #sb-toggles input[type=checkbox]{accent-color:var(--bat-orange);cursor:pointer}
-        /* tone-flat: orange/green colours OFF → everything goes neutral gray (180,180,180). */
+        /* tone-flat: orange/green colours OFF → boxes adopt the canvas dark-blue background
+           (so they read as "transparent over canvas") and the text turns cyan. ONLY in this
+           mode — normal mode keeps the dark text on orange/green palette. */
         body.tone-flat .term,
-        body.tone-flat .term.active{background:rgb(220,220,220) !important;border-color:rgb(220,220,220) !important}
+        body.tone-flat .term.active{background:rgb(8,20,42) !important;border:0.5px solid rgb(0,210,255) !important;color:rgb(0,210,255) !important}
+        body.tone-flat .term .eq,
+        body.tone-flat .term .eq-y,
+        body.tone-flat .term .eq .katex,
+        body.tone-flat .term .eq .katex *,
+        body.tone-flat .term .eq-y .katex,
+        body.tone-flat .term .eq-y .katex *{color:rgb(0,210,255) !important}
         body.tone-flat .full-factor,
-        body.tone-flat .full-factor.active{background:rgb(220,220,220) !important}
+        body.tone-flat .full-factor.active{background:rgb(8,20,42) !important}
+        body.tone-flat .full-factor .katex,
+        body.tone-flat .full-factor .katex *{color:rgb(0,210,255) !important}
         /* nan-mono: NaN red highlighting OFF → red NaN bits revert to default dark / cyan. */
         body.nan-mono .term:not(.active) .eq .nan-sqrt,
         body.nan-mono .term:not(.active) .eq .nan-sqrt *,
@@ -113,6 +123,24 @@
         /* Same red-off rule for the top-strip lozenge NaN-sqrts (inactive). */
         body.nan-mono .full-factor:not(.active) .nan-sqrt,
         body.nan-mono .full-factor:not(.active) .nan-sqrt *{color:#1f1f1f !important}
+        /* tone-flat: ALL red/dark-NaN highlighting goes cyan in this mode so everything blends.
+           Placed AFTER nan-mono so that on equal specificity, source-order makes tone-flat win
+           — otherwise nan-mono's #1f1f1f would override and the NaN bits become invisible on
+           the dark-blue tone-flat background. */
+        body.tone-flat .term:not(.active) .eq-y .y-lhs,
+        body.tone-flat .term:not(.active) .eq-y .y-lhs *,
+        body.tone-flat .term:not(.active) .eq .nan-sqrt,
+        body.tone-flat .term:not(.active) .eq .nan-sqrt *,
+        body.tone-flat .term:not(.active) .eq-y .nan-sqrt,
+        body.tone-flat .term:not(.active) .eq-y .nan-sqrt *,
+        body.tone-flat .term:not(.active) .eq-y .nan-suffix,
+        body.tone-flat .term:not(.active) .eq-y .nan-suffix *,
+        body.tone-flat .term:not(.active) .eq-y .nan-rhs,
+        body.tone-flat .term:not(.active) .eq-y .nan-rhs *,
+        body.tone-flat .full-factor:not(.active) .nan-sqrt,
+        body.tone-flat .full-factor:not(.active) .nan-sqrt *,
+        body.tone-flat .full-brace .nan-label,
+        body.tone-flat .full-brace .nan-label *{color:rgb(0,210,255) !important}
         /* hide-eq-y: 2nd-line "y = …" toggle OFF → drop the solved-for-y row entirely. */
         body.hide-eq-y .term .eq-y{display:none}
         /* hide-braces: drop the underbrace + y-value labels in the top equation strip,
@@ -120,11 +148,23 @@
         body.hide-braces .full-brace{display:none}
         body.hide-braces .full-factor-wrap{padding-bottom:0}
         /* eq-white: "Equation" toggle OFF → the top-strip equation lozenges go background-less
-           and the text turns white. Affects ONLY the top strip (#full-eq), NOT the SB term boxes. */
+           and the text turns CYAN (incl. the multiplication dot). Affects ONLY the top strip
+           (#full-eq), NOT the SB term boxes. */
         body.eq-white .full-factor,
         body.eq-white .full-factor.active{background:transparent !important}
         body.eq-white .full-factor .katex,
-        body.eq-white .full-factor .katex *{color:#fff !important}
+        body.eq-white .full-factor .katex *{color:rgb(0,210,255) !important}
+        body.eq-white .full-factor:not(.active) .nan-sqrt,
+        body.eq-white .full-factor:not(.active) .nan-sqrt *,
+        body.eq-white .full-factor.active .nan-sqrt,
+        body.eq-white .full-factor.active .nan-sqrt *{color:rgb(0,210,255) !important}
+        /* Multiplication dot and "= 0" tail also go cyan in eq-white state. */
+        body.eq-white .full-sep,
+        body.eq-white .full-sep .katex,
+        body.eq-white .full-sep .katex *,
+        body.eq-white .full-eq-equals,
+        body.eq-white .full-eq-equals .katex,
+        body.eq-white .full-eq-equals .katex *{color:rgb(0,210,255) !important}
         /* Slider strip at the top of the sidebar — all text rendered as KaTeX, so we keep
            only color/size on the host element and let KaTeX inherit them. */
         #x-strip{padding:14px 12px 6px;border-bottom:1px solid rgba(255,255,255,.08)}
@@ -183,8 +223,9 @@
         .full-eq-equals{color:#fff}
         .full-eq-equals .katex,.full-eq-equals .katex *{color:#fff !important}
         /* Multiplication dot between factors: bigger and cyan (matches the BM fill colour). */
-        .full-sep{color:rgb(0,210,255);font-size:2.4em}
-        .full-sep .katex,.full-sep .katex *{color:rgb(0,210,255) !important}
+        /* Multiplication dot between factors: always white (user request). */
+        .full-sep{color:#fff;font-size:2.4em}
+        .full-sep .katex,.full-sep .katex *{color:#fff !important}
     </style>
 </head>
 
@@ -216,7 +257,7 @@
                 <label class="tg"><input type="checkbox" id="tg-eqy" checked> <span>y = …</span></label>
                 <label class="tg"><input type="checkbox" id="tg-braces" checked> <span>Klammern</span></label>
                 <label class="tg"><input type="checkbox" id="tg-dash" checked> <span>dashed bar</span></label>
-                <label class="tg"><input type="checkbox" id="tg-eq" checked> <span>Equation</span></label>
+                <label class="tg"><input type="checkbox" id="tg-bm" checked> <span>BM</span></label>
             </div>
             <div id="term-list"></div>
         </div>
@@ -253,6 +294,8 @@
         function toggleSidebar() {
             const panel = document.getElementById('side-panel');
             panel.classList.toggle('collapsed');
+            // Persist sidebar visibility across reloads.
+            try { localStorage.setItem('batman.sidebar.collapsed', panel.classList.contains('collapsed') ? '1' : '0'); } catch (_) {}
             if (window.CyberLeftChrome && typeof CyberLeftChrome.publishResolvedScale === 'function') {
                 CyberLeftChrome.publishResolvedScale();
             }
@@ -264,6 +307,16 @@
                 }
             }, 400);
         }
+        // Restore persisted sidebar visibility synchronously, before chrome renders, so we
+        // don't briefly show an expanded sidebar that collapses a frame later (or vice versa).
+        try {
+            if (localStorage.getItem('batman.sidebar.collapsed') === '1') {
+                document.addEventListener('DOMContentLoaded', () => {
+                    const panel = document.getElementById('side-panel');
+                    if (panel) panel.classList.add('collapsed');
+                }, { once: true });
+            }
+        } catch (_) {}
 
         CyberBranding.init({
             useExternalStyles: true,
@@ -560,14 +613,25 @@
                 if (typeof redraw === 'function') redraw();
             });
         }
-        // Dashed x-marker on the canvas is drawn in JS, not CSS — flag read by draw().
+        // Canvas-drawn elements use JS flags (CSS can't reach them).
         let dashedBarOn = true;
+        let bmOn = true;
         bindToggle('tg-color',  'color',  on => document.body.classList.toggle('tone-flat', !on));
         bindToggle('tg-nan',    'nan',    on => document.body.classList.toggle('nan-mono', !on));
         bindToggle('tg-eqy',    'eqy',    on => document.body.classList.toggle('hide-eq-y', !on));
         bindToggle('tg-braces', 'braces', on => document.body.classList.toggle('hide-braces', !on));
         bindToggle('tg-dash',   'dash',   on => { dashedBarOn = on; }, () => draw());
         bindToggle('tg-eq',     'eq',     on => document.body.classList.toggle('eq-white', !on));
+        bindToggle('tg-bm',     'bm',     on => { bmOn = on; }, () => draw());
+        // Keyboard shortcut: "b" toggles the BM checkbox. Ignored while typing in a form field.
+        window.addEventListener('keydown', e => {
+            if (e.key !== 'b' && e.key !== 'B') return;
+            const t = e.target;
+            if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
+            if (e.ctrlKey || e.metaKey || e.altKey) return;
+            const cb = document.getElementById('tg-bm');
+            if (cb) cb.click();   // flips checkbox + fires change → persist + redraw
+        });
         function buildList() {
             for (const t of TERMS) {
                 const div = document.createElement('div');
@@ -833,6 +897,13 @@
             const cRect = container.getBoundingClientRect();
             const eqBottom = eqEl ? eqEl.getBoundingClientRect().bottom - cRect.top : h * 0.10;
             const desired = Math.max(eqBottom + 16, h * 0.10);   // 16px breathing room below the strip
+            // On wide canvases the figure was getting cut off at the bottom because dh was sized
+            // for the full canvas height while the y-offset (desired) shifted it down → overflow.
+            // Clamp dh to "height below the equation strip minus a pad", then re-derive dw from
+            // aspect ratio. Net effect: BM becomes narrower (and shorter) on wide canvases, but
+            // always fits underneath the equation strip without bottom cut-off.
+            const availH = Math.max(80, h - desired - pad);
+            if (dh > availH) { dh = availH; dw = dh * aspect; }
             const ox = (w - dw) / 2, oy = Math.max(desired, (h - dh) / 2);
             const sx = dw / (2*WX), sy = dh / (WY_TOP - WY_BOT);
             layout = {
@@ -922,41 +993,41 @@
                 ctx.stroke();
             }
             // Bat silhouette as ONE closed path → transparent cyan fill + cyan outline.
-            // The boundary is traced clockwise: top (left→right) then bottom (right→left).
-            // Each piece comes from the term that's active in that sub-range; the curves all
-            // meet at the analytically correct join points, so closing the path is continuous.
-            const PERSEG = 220;
-            ctx.beginPath();
-            let started = false;
-            function seg(getY, x0, x1) {
-                for (let i = 0; i <= PERSEG; i++) {
-                    const x = x0 + (x1 - x0) * i / PERSEG;
-                    const y = getY(x);
-                    if (y === null || isNaN(y)) continue;
-                    if (!started) { ctx.moveTo(X(x), Y(y)); started = true; }
-                    else ctx.lineTo(X(x), Y(y));
+            // Skipped entirely when the BM toggle is off.
+            if (bmOn) {
+                const PERSEG = 220;
+                ctx.beginPath();
+                let started = false;
+                function seg(getY, x0, x1) {
+                    for (let i = 0; i <= PERSEG; i++) {
+                        const x = x0 + (x1 - x0) * i / PERSEG;
+                        const y = getY(x);
+                        if (y === null || isNaN(y)) continue;
+                        if (!started) { ctx.moveTo(X(x), Y(y)); started = true; }
+                        else ctx.lineTo(X(x), Y(y));
+                    }
                 }
+                // TOP boundary, left → right
+                seg(x => { const r = term1(x); return r.active ? r.y : null; },     -7,    -3   );
+                seg(x => { const r = term6(x); return r.active ? r.y : null; },     -3,    -1   );
+                seg(x => { const r = term3(x); return r.active ? r.y : null; },     -1,    -0.75);
+                seg(x => { const r = term4(x); return r.active ? r.y : null; },     -0.75, -0.5 );
+                seg(x => 2.25,                                                       -0.5,  0.5 );  // T5 flat chin
+                seg(x => { const r = term4(x); return r.active ? r.y : null; },      0.5,  0.75);
+                seg(x => { const r = term3(x); return r.active ? r.y : null; },      0.75, 1   );
+                seg(x => { const r = term6(x); return r.active ? r.y : null; },      1,    3   );
+                seg(x => { const r = term1(x); return r.active ? r.y : null; },      3,    7   );
+                // BOTTOM boundary, right → left
+                seg(x => { const r = term1(x); return (r.active && r.yLow !== null) ? r.yLow : null; }, 7, 4);
+                seg(x => { const r = term2(x); return r.active ? r.y : null; },                         4, -4);
+                seg(x => { const r = term1(x); return (r.active && r.yLow !== null) ? r.yLow : null; }, -4, -7);
+                ctx.closePath();
+                ctx.fillStyle = 'rgba(0,210,255,.18)';
+                ctx.fill();
+                ctx.strokeStyle = 'rgba(0,210,255,.95)';
+                ctx.lineWidth = 2;
+                ctx.stroke();
             }
-            // TOP boundary, left → right
-            seg(x => { const r = term1(x); return r.active ? r.y : null; },     -7,    -3   );
-            seg(x => { const r = term6(x); return r.active ? r.y : null; },     -3,    -1   );
-            seg(x => { const r = term3(x); return r.active ? r.y : null; },     -1,    -0.75);
-            seg(x => { const r = term4(x); return r.active ? r.y : null; },     -0.75, -0.5 );
-            seg(x => 2.25,                                                       -0.5,  0.5 );  // T5 flat chin
-            seg(x => { const r = term4(x); return r.active ? r.y : null; },      0.5,  0.75);
-            seg(x => { const r = term3(x); return r.active ? r.y : null; },      0.75, 1   );
-            seg(x => { const r = term6(x); return r.active ? r.y : null; },      1,    3   );
-            seg(x => { const r = term1(x); return r.active ? r.y : null; },      3,    7   );
-            // BOTTOM boundary, right → left
-            seg(x => { const r = term1(x); return (r.active && r.yLow !== null) ? r.yLow : null; }, 7, 4);
-            seg(x => { const r = term2(x); return r.active ? r.y : null; },                         4, -4);
-            seg(x => { const r = term1(x); return (r.active && r.yLow !== null) ? r.yLow : null; }, -4, -7);
-            ctx.closePath();
-            ctx.fillStyle = 'rgba(0,210,255,.18)';
-            ctx.fill();
-            ctx.strokeStyle = 'rgba(0,210,255,.95)';
-            ctx.lineWidth = 2;
-            ctx.stroke();
 
             // Collect every currently active y at this x (T1 may contribute two).
             const activeYs = [];
@@ -977,10 +1048,11 @@
             }
             // Dots on each currently active y for the slider x. The top and bottom of the
             // dashed marker line get bigger, palette-red / pure-blue end caps; intermediate
-            // hits keep the orange dot.
+            // hits keep the orange dot. ALSO toggled off when the dashed bar is off — dots
+            // and dashed bar belong together visually.
             const yTop = activeYs.length ? Math.max(...activeYs) : null;
             const yBot = activeYs.length ? Math.min(...activeYs) : null;
-            for (const t of TERMS) {
+            if (dashedBarOn) for (const t of TERMS) {
                 const r = t.fn(cur);
                 if (!r.active) continue;
                 const ys = (t.id === 1)
