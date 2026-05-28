@@ -36,10 +36,8 @@
         #term-list{display:flex;flex-direction:column;gap:8px;padding:8px 10px 14px}
         /* Background = full palette colors (CLAUDE.md): orange = out-of-domain, green = active.
            Text: dark gray for legibility on both warm backgrounds. */
-        .term{position:relative;border:1px solid var(--bat-orange);border-radius:10px;padding:10px 10px 10px 36px;background:var(--bat-orange);transition:background .15s,border-color .15s;font-size:20px;line-height:1.45;overflow:hidden;color:#1f1f1f}
+        .term{position:relative;border:1px solid var(--bat-orange);border-radius:10px;padding:10px 12px;background:var(--bat-orange);transition:background .15s,border-color .15s;font-size:21px;line-height:1.45;overflow:hidden;color:#1f1f1f}
         .term.active{border-color:var(--bat-green);background:var(--bat-green)}
-        .term .badge{position:absolute;left:8px;top:8px;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:#1f1f1f;background:#fff}
-        .term.active .badge{background:#fff;color:#1f1f1f}
         /* white-space:nowrap is essential: it stops KaTeX inline tokens from line-breaking
            inside the box. Without it the .katex span wraps and scrollWidth would report the
            WRAPPED width — which is what we want to AVOID. With nowrap, the natural single-
@@ -57,7 +55,7 @@
         #x-strip label{font-family:'Orbitron',sans-serif;letter-spacing:1px;color:var(--bat-orange);font-size:13px}
         #x-strip .xval{font-family:'Outfit',sans-serif;font-weight:600;color:#fff;font-size:18px;margin-left:auto}
         #x-strip input[type=range]{width:100%;accent-color:var(--bat-orange)}
-        #x-strip .bounds{display:flex;justify-content:space-between;font-size:11px;color:rgba(255,255,255,.45);font-family:'Outfit',sans-serif}
+        #x-strip .bounds{display:flex;justify-content:space-between;font-size:15px;color:rgba(255,255,255,.55);font-family:'Outfit',sans-serif;font-weight:600}
         /* Tighten KaTeX inside narrow boxes */
         .term .katex{font-size:1em}
         /* Full-equation strip above the figure: sits 10% down. Render at a readable
@@ -65,10 +63,36 @@
            the whole equation stays in ONE line no matter how narrow the window. */
         /* Hide the central cyber background grid (user prefers a plain backdrop here). */
         #canvas-container .cyber-grid{display:none}
-        #full-eq{position:absolute;top:7%;left:12px;right:12px;z-index:5;padding:8px 12px;background:transparent;overflow:hidden;color:#cfe4f7;font-size:14px;text-align:left}
-        #full-eq-tex{display:inline-block;transform-origin:top left;white-space:nowrap}
+        /* pointer-events:none so the equation strip never intercepts the canvas drag —
+           mouse goes through to the canvas, the cursor stays ew-resize everywhere.
+           overflow:visible so the lozenges + braces below them are NEVER clipped, even when
+           the transform scales the row up. Batman is shifted dynamically so it sits below this strip. */
+        #full-eq{position:absolute;top:7%;left:12px;right:12px;z-index:5;padding:8px 12px;background:transparent;overflow:visible;color:#cfe4f7;font-size:14px;text-align:left;pointer-events:none}
+        #canvas-container{cursor:ew-resize}
+        /* Wrap = column: lozenge on top, underbrace + y-value below (only when active).
+           inline-flex on the outer container keeps everything in one line; align-items:flex-start
+           so wraps sit at the top and the brace hangs freely below the lozenges. */
+        #full-eq-tex{display:inline-flex;align-items:flex-start;transform-origin:top left;white-space:nowrap;line-height:1.2}
         #full-eq .katex{font-size:1em;white-space:nowrap}
-        #full-eq .meta{display:block;margin-top:4px;font-family:'Outfit',sans-serif;font-size:11px;color:rgba(245,194,66,.85);letter-spacing:.4px;white-space:normal}
+        /* Wrap reserves vertical space (padding-bottom) for the brace so the lozenge layout
+           stays untouched even when the brace appears/disappears. Width is set purely by the
+           lozenge — the brace is positioned absolutely, so it has ZERO influence on width.
+           This kills the feedback loop where an active brace would stretch the lozenge wider. */
+        .full-factor-wrap{position:relative;display:inline-flex;flex-direction:column;align-items:stretch;margin:0 2px;padding-bottom:34px}
+        .full-factor{display:inline-flex;align-items:center;padding:3px 8px;border-radius:7px;background:var(--bat-orange);transition:background .15s}
+        .full-factor.active{background:var(--bat-green)}
+        .full-factor .katex,.full-factor .katex *{color:#1f1f1f !important}
+        /* Brace area: absolutely positioned below the lozenge, spanning its width via left/right.
+           Doesn't grow or shrink the wrap horizontally. Flex-centred so the KaTeX brace is
+           always centred under the lozenge even when it would otherwise overflow. */
+        .full-brace{position:absolute;left:0;right:0;bottom:0;padding-top:4px;color:#cfe4f7;overflow:visible;display:flex;justify-content:center;align-items:flex-start}
+        .full-brace .katex,.full-brace .katex *{color:#cfe4f7 !important}
+        /* The transform-origin is top-center so the JS scaleX-to-fit squishes around the centre. */
+        .full-brace .katex{transform-origin:top center}
+        /* Seps and "= 0" align to the top of #full-eq-tex (same as the wraps) and get an
+           explicit height matching the lozenges (set in JS), so their content's flex-centering
+           lines them up with the lozenges' vertical centre instead of the wrap's centre. */
+        .full-sep,.full-eq-equals{display:inline-flex;align-items:center;margin:0 4px;color:#cfe4f7;align-self:flex-start}
     </style>
 </head>
 
@@ -91,8 +115,8 @@
                     <label>x</label>
                     <span class="xval" id="x-readout">0.00</span>
                 </div>
-                <input type="range" id="x-slider" min="-6.5" max="6.5" step="0.01" value="0">
-                <div class="bounds"><span>−6.5</span><span>+6.5</span></div>
+                <input type="range" id="x-slider" min="-7" max="7" step="0.01" value="0">
+                <div class="bounds"><span>−7</span><span>+7</span></div>
             </div>
             <div id="term-list"></div>
         </div>
@@ -221,29 +245,84 @@
               tex: '\\left|\\tfrac{x}{2}\\right| - \\tfrac{3\\sqrt{33}-7}{112}x^2 - 3 + \\sqrt{1-(||x|-2|-1)^2} - y = 0',
               texY: 'y = \\left|\\tfrac{x}{2}\\right| - \\tfrac{3\\sqrt{33}-7}{112}x^2 - 3 + \\sqrt{1-(||x|-2|-1)^2}' },
             { id:3, fn:term3, name:'Inner ears',
-              tex: '9\\sqrt{\\tfrac{(|x|-1)(|x|-.75)}{(1-|x|)(|x|-.75)}} - 8|x| - y = 0',
+              tex: '9\\sqrt{\\tfrac{(|x|-1)(|x|-0.75)}{(1-|x|)(|x|-0.75)}} - 8|x| - y = 0',
               texY: 'y = 9 - 8|x|' },
             { id:4, fn:term4, name:'Jaw lobes',
-              tex: '3|x| + .75\\sqrt{\\tfrac{(|x|-.75)(|x|-.5)}{(.75-|x|)(|x|-.5)}} - y = 0',
+              tex: '3|x| + 0.75\\sqrt{\\tfrac{(|x|-0.75)(|x|-0.5)}{(0.75-|x|)(|x|-0.5)}} - y = 0',
               texY: 'y = 3|x| + 0.75' },
             { id:5, fn:term5, name:'Center chin',
-              tex: '2.25\\sqrt{\\tfrac{(x-.5)(x+.5)}{(.5-x)(.5+x)}} - y = 0',
+              tex: '2.25\\sqrt{\\tfrac{(x-0.5)(x+0.5)}{(0.5-x)(0.5+x)}} - y = 0',
               texY: 'y = 2.25' },
             { id:6, fn:term6, name:'Wings (lower curve)',
-              tex: '\\tfrac{6\\sqrt{10}}{7} + (1.5-.5|x|)\\sqrt{\\tfrac{||x|-1|}{|x|-1}} - \\tfrac{6\\sqrt{10}}{14}\\sqrt{4-(|x|-1)^2} - y = 0',
+              tex: '\\tfrac{6\\sqrt{10}}{7} + (1.5-0.5|x|)\\sqrt{\\tfrac{||x|-1|}{|x|-1}} - \\tfrac{6\\sqrt{10}}{14}\\sqrt{4-(|x|-1)^2} - y = 0',
               texY: 'y = \\tfrac{6\\sqrt{10}}{7} + (1.5 - 0.5|x|) - \\tfrac{6\\sqrt{10}}{14}\\sqrt{4-(|x|-1)^2}' },
         ];
 
-        // Whole equation = product of all six factors = 0. The factor TeX strings have a
-        // trailing "= 0" each (for the sidebar); strip that here and chain with \cdot.
+        // Whole equation = product of all six factors = 0. Build each factor as a separate
+        // inline lozenge so we can colour it (orange = out-of-domain, green = active) per x —
+        // mirrors the sidebar live as you slide.
         function renderFullEquation() {
             const target = document.getElementById('full-eq-tex');
             if (!target || !window.katex) return;
-            const factors = TERMS.map(t => '\\big(' + t.tex.replace(/\s*=\s*0\s*$/, '') + '\\big)');
-            const tex = factors.join(' \\cdot ') + ' = 0';
-            try { katex.render(tex, target, { throwOnError:false, displayMode:false }); }
-            catch (_) { target.textContent = tex; }
-            fitFullEquation();
+            target.innerHTML = '';
+            TERMS.forEach((t, i) => {
+                if (i > 0) {
+                    const sep = document.createElement('span');
+                    sep.className = 'full-sep';
+                    target.appendChild(sep);
+                    try { katex.render('\\cdot', sep, { throwOnError:false, displayMode:false }); }
+                    catch (_) { sep.textContent = ' · '; }
+                }
+                // Each factor lives in a vertical wrap: coloured lozenge on top, underbrace below.
+                const wrap = document.createElement('span');
+                wrap.className = 'full-factor-wrap';
+                target.appendChild(wrap);
+                const box = document.createElement('span');
+                box.className = 'full-factor';
+                box.id = 'ff-' + t.id;
+                wrap.appendChild(box);
+                const factorTex = '\\big(' + t.tex.replace(/\s*=\s*0\s*$/, '') + '\\big)';
+                try { katex.render(factorTex, box, { throwOnError:false, displayMode:false }); }
+                catch (_) { box.textContent = factorTex; }
+                const brace = document.createElement('span');
+                brace.className = 'full-brace';
+                brace.id = 'brace-' + t.id;
+                wrap.appendChild(brace);
+            });
+            const eq = document.createElement('span');
+            eq.className = 'full-eq-equals';
+            target.appendChild(eq);
+            try { katex.render('= 0', eq, { throwOnError:false, displayMode:false }); }
+            catch (_) { eq.textContent = ' = 0'; }
+            // KaTeX downloads its own webfonts; widths only stabilise once those have loaded.
+            // Refit + equalise heights once now, again on fonts.ready, again after short timeouts.
+            const reflow = () => { equalizeFactorHeights(); fitFullEquation(); };
+            reflow();
+            if (document.fonts && document.fonts.ready) {
+                document.fonts.ready.then(() => requestAnimationFrame(reflow));
+            }
+            setTimeout(reflow, 250);
+            setTimeout(reflow, 800);
+        }
+        // Make every top-strip lozenge as tall as the tallest one — measured pre-transform
+        // (offsetHeight is layout, not visual), so the equal sizing survives the scale.
+        // Also set the separator (·) and "= 0" heights to match, so they centre at the
+        // lozenge's vertical mid (instead of being pulled low by the wrap's brace-padding).
+        function equalizeFactorHeights() {
+            let max = 0;
+            for (const t of TERMS) {
+                const ff = document.getElementById('ff-' + t.id);
+                if (!ff) continue;
+                ff.style.minHeight = '';
+                if (ff.offsetHeight > max) max = ff.offsetHeight;
+            }
+            for (const t of TERMS) {
+                const ff = document.getElementById('ff-' + t.id);
+                if (ff) ff.style.minHeight = max + 'px';
+            }
+            document.querySelectorAll('#full-eq-tex .full-sep, #full-eq-tex .full-eq-equals').forEach(el => {
+                el.style.height = max + 'px';
+            });
         }
         // Scale the rendered TeX to fit the box width AND center it manually — text-align
         // doesn't center an inline-block that's wider than its container, so we compute the
@@ -275,7 +354,7 @@
             for (const t of TERMS) {
                 const div = document.createElement('div');
                 div.className = 'term';
-                div.innerHTML = `<div class="badge">${t.id}</div><div class="eq" id="eq-${t.id}"></div><div class="eq-y" id="eqy-${t.id}"></div><span class="val" id="val-${t.id}">—</span>`;
+                div.innerHTML = `<div class="eq" id="eq-${t.id}"></div><div class="eq-y" id="eqy-${t.id}"></div><span class="val" id="val-${t.id}">—</span>`;
                 listEl.appendChild(div);
                 const eqEl  = div.querySelector('.eq');
                 const eqyEl = div.querySelector('.eq-y');
@@ -309,10 +388,10 @@
                         maxW = Math.max(maxW, k.getBoundingClientRect().width);
                     });
                 }
-                // Box chrome: term padding-left 36 (badge column) + padding-right 10 = 46.
-                // #term-list padding (10+10) + #side-panel padding (10+10) = 40. Total = 86px.
-                // Add a small 4px safety pad so sub-pixel rounding never re-introduces wrap.
-                const target = Math.ceil(maxW + 86 + 4);
+                // Box chrome: term padding 12+12 = 24. #term-list padding (10+10) + #side-panel
+                // padding (10+10) = 40. Total = 64. + 4px safety against sub-pixel rounding.
+                const chrome = 64 + 4;
+                const target = Math.ceil(maxW + chrome);
                 // Cap at 80% of viewport — generous, but never eats the whole screen.
                 const cap = Math.max(420, Math.floor(window.innerWidth * 0.80));
                 const sidebarW = Math.min(target, cap);
@@ -321,9 +400,24 @@
                 // The shared left-chrome hard cap (`--cyber-left-cap` in cyber-lab-overrides.css)
                 // would clip our wider sidebar. Lift it locally to rail + sidebar + small buffer.
                 root.setProperty('--cyber-left-cap', (66 + sidebarW + 20) + 'px');
+                // If we hit the viewport cap, the formulas no longer fit at their natural width
+                // → shrink the term font-size so KaTeX scales down and the formulas stay visible
+                // (same idea as the top-strip transform-scale, but here via font-size since the
+                // boxes already have nowrap and we want them readable, not micro-scaled).
+                const baseFs = 21;
+                const availForFormulas = sidebarW - chrome;
+                const fitScale = Math.min(1, availForFormulas / Math.max(1, maxW));
+                const fs = Math.max(8, baseFs * fitScale);
+                for (const c of cells) c.root.style.fontSize = fs + 'px';
                 // Canvas needs to re-measure after the sidebar width changed.
-                requestAnimationFrame(() => { init(); fitFullEquation(); });
+                requestAnimationFrame(() => { init(); fitFullEquation(); equalizeBoxHeights(); });
             });
+        }
+        // After layout settles, make every term-box the same height as the tallest.
+        function equalizeBoxHeights() {
+            let max = 0;
+            for (const c of cells) { c.root.style.minHeight = ''; max = Math.max(max, c.root.offsetHeight); }
+            for (const c of cells) c.root.style.minHeight = max + 'px';
         }
 
         function updateList(x) {
@@ -336,7 +430,38 @@
                     const prefix = r.note === '±' ? '±' : '';
                     c.val.innerHTML = `bei x = ${x.toFixed(2)} → y = <span class="num">${prefix}${yStr}</span>`;
                 } else {
-                    c.val.innerHTML = 'außerhalb des Definitionsbereichs';
+                    c.val.innerHTML = 'nicht definiert';
+                }
+                // Mirror the active/inactive colour on the top-strip factor lozenge.
+                const ff = document.getElementById('ff-' + c.meta.id);
+                if (ff) ff.classList.toggle('active', !!r.active);
+                // Underbrace + y-value below the lozenge — only for active terms.
+                // Measure the INNER .katex (stable, never stretched) instead of the lozenge itself
+                // — otherwise the wrap's align-items:stretch makes the brace push the lozenge wider
+                // and the lozenge feedback-pushes the brace, growing every slider tick.
+                const brace = document.getElementById('brace-' + c.meta.id);
+                if (brace) {
+                    if (r.active && ff && window.katex) {
+                        const innerK = ff.querySelector('.katex');
+                        const innerW = innerK ? innerK.offsetWidth : (ff.offsetWidth - 16);
+                        const wPx = Math.max(1, innerW + 16);   // + lozenge padding (8px each side)
+                        const wPt = (wPx * 0.75).toFixed(1);     // px → pt (KaTeX wants pt, not px)
+                        const yStr = r.y.toFixed(3);
+                        const yLabel = (r.note === '±') ? `y = \\pm ${yStr}` : `y = ${yStr}`;
+                        const tex = `\\underbrace{\\kern ${wPt}pt}_{\\,${yLabel}\\,}`;
+                        try { katex.render(tex, brace, { throwOnError:false, displayMode:false }); }
+                        catch (_) { brace.textContent = yLabel; }
+                        // KaTeX adds typesetting slack around \underbrace, so the rendered span is
+                        // a few px wider than the kern. Squish horizontally to the lozenge width.
+                        const bk = brace.querySelector('.katex');
+                        if (bk) {
+                            bk.style.transform = '';
+                            const bw = bk.offsetWidth;
+                            if (bw > wPx && bw > 0) bk.style.transform = `scaleX(${wPx / bw})`;
+                        }
+                    } else {
+                        brace.innerHTML = '';
+                    }
                 }
             }
             draw();
@@ -367,9 +492,13 @@
             const aspect = (2*WX) / (WY_TOP - WY_BOT);
             let dw = w - 2*pad, dh = h - 2*pad;
             if (dw / dh > aspect) dw = dh * aspect; else dh = dw / aspect;
-            // Bias the figure 10% of the container height downward (makes room for the
-            // full-equation strip above it).
-            const ox = (w - dw) / 2, oy = (h - dh) / 2 + h * 0.10;
+            // Bias the figure down so it starts BELOW the full-equation strip (whose height
+            // depends on the rendered formulas + braces). Fallback to 10% if not yet rendered.
+            const eqEl = document.getElementById('full-eq');
+            const cRect = container.getBoundingClientRect();
+            const eqBottom = eqEl ? eqEl.getBoundingClientRect().bottom - cRect.top : h * 0.10;
+            const desired = Math.max(eqBottom + 16, h * 0.10);   // 16px breathing room below the strip
+            const ox = (w - dw) / 2, oy = Math.max(desired, (h - dh) / 2);
             const sx = dw / (2*WX), sy = dh / (WY_TOP - WY_BOT);
             layout = {
                 w, h, ox, oy, dw, dh, sx, sy,
@@ -457,25 +586,65 @@
                 }
                 ctx.stroke();
             }
-            // Build a getter per term/branch and draw.
-            ctx.strokeStyle = 'rgba(121,158,49,.92)'; ctx.lineWidth = 2;
-            const getTopY  = t => x => { const r = t.fn(x); return r.active ? r.y : null; };
-            const getLowY1 = x => { const r = term1(x); return (r.active && r.yLow !== null) ? r.yLow : null; };
-            for (const t of TERMS) drawCurve(getTopY(t));
-            drawCurve(getLowY1);
+            // Bat silhouette as ONE closed path → transparent cyan fill + cyan outline.
+            // The boundary is traced clockwise: top (left→right) then bottom (right→left).
+            // Each piece comes from the term that's active in that sub-range; the curves all
+            // meet at the analytically correct join points, so closing the path is continuous.
+            const PERSEG = 220;
+            ctx.beginPath();
+            let started = false;
+            function seg(getY, x0, x1) {
+                for (let i = 0; i <= PERSEG; i++) {
+                    const x = x0 + (x1 - x0) * i / PERSEG;
+                    const y = getY(x);
+                    if (y === null || isNaN(y)) continue;
+                    if (!started) { ctx.moveTo(X(x), Y(y)); started = true; }
+                    else ctx.lineTo(X(x), Y(y));
+                }
+            }
+            // TOP boundary, left → right
+            seg(x => { const r = term1(x); return r.active ? r.y : null; },     -7,    -3   );
+            seg(x => { const r = term6(x); return r.active ? r.y : null; },     -3,    -1   );
+            seg(x => { const r = term3(x); return r.active ? r.y : null; },     -1,    -0.75);
+            seg(x => { const r = term4(x); return r.active ? r.y : null; },     -0.75, -0.5 );
+            seg(x => 2.25,                                                       -0.5,  0.5 );  // T5 flat chin
+            seg(x => { const r = term4(x); return r.active ? r.y : null; },      0.5,  0.75);
+            seg(x => { const r = term3(x); return r.active ? r.y : null; },      0.75, 1   );
+            seg(x => { const r = term6(x); return r.active ? r.y : null; },      1,    3   );
+            seg(x => { const r = term1(x); return r.active ? r.y : null; },      3,    7   );
+            // BOTTOM boundary, right → left
+            seg(x => { const r = term1(x); return (r.active && r.yLow !== null) ? r.yLow : null; }, 7, 4);
+            seg(x => { const r = term2(x); return r.active ? r.y : null; },                         4, -4);
+            seg(x => { const r = term1(x); return (r.active && r.yLow !== null) ? r.yLow : null; }, -4, -7);
+            ctx.closePath();
+            ctx.fillStyle = 'rgba(0,210,255,.18)';
+            ctx.fill();
+            ctx.strokeStyle = 'rgba(0,210,255,.95)';
+            ctx.lineWidth = 2;
+            ctx.stroke();
 
-            // Vertical x-marker
-            ctx.strokeStyle = 'rgba(245,194,66,.9)'; ctx.lineWidth = 1.5;
-            ctx.setLineDash([4, 4]);
-            ctx.beginPath(); ctx.moveTo(X(cur), Y(WY_BOT)); ctx.lineTo(X(cur), Y(WY_TOP)); ctx.stroke();
-            ctx.setLineDash([]);
-
+            // Collect every currently active y at this x (T1 may contribute two).
+            const activeYs = [];
+            for (const t of TERMS) {
+                const r = t.fn(cur);
+                if (!r.active) continue;
+                activeYs.push(r.y);
+                if (t.id === 1 && r.yLow !== null) activeYs.push(r.yLow);
+            }
+            // Dashed x-marker — only BETWEEN the outermost active points, not over the full canvas.
+            if (activeYs.length >= 2) {
+                const yMin = Math.min(...activeYs), yMax = Math.max(...activeYs);
+                ctx.strokeStyle = 'rgba(245,194,66,.9)'; ctx.lineWidth = 1.5;
+                ctx.setLineDash([4, 4]);
+                ctx.beginPath(); ctx.moveTo(X(cur), Y(yMax)); ctx.lineTo(X(cur), Y(yMin)); ctx.stroke();
+                ctx.setLineDash([]);
+            }
             // Dots on each currently active y for the slider x
             for (const t of TERMS) {
                 const r = t.fn(cur);
                 if (!r.active) continue;
                 const ys = (t.id === 1)
-                    ? (r.yLow !== null ? [r.y, r.yLow] : [r.y])   // wing-tip flare only where the lower branch lives
+                    ? (r.yLow !== null ? [r.y, r.yLow] : [r.y])
                     : [r.y];
                 for (const yy of ys) {
                     ctx.fillStyle = 'rgba(245,194,66,1)';
@@ -493,6 +662,25 @@
         slider.addEventListener('input', () => updateList(parseFloat(slider.value)));
         window.addEventListener('resize', () => { init(); fitFullEquation(); });
 
+        // -------- Mouse/touch drag on the canvas → move the dashed x-marker live --------
+        let dragging = false;
+        function setXFromClientX(clientX) {
+            if (!layout) return;
+            const rect = canvas.getBoundingClientRect();
+            const px = clientX - rect.left;
+            const u  = (px - layout.ox) / layout.sx - WX;
+            const x  = Math.max(-7, Math.min(7, u));
+            slider.value = x;
+            updateList(x);
+        }
+        canvas.style.cursor = 'ew-resize';
+        canvas.addEventListener('mousedown', e => { dragging = true; setXFromClientX(e.clientX); e.preventDefault(); });
+        window.addEventListener('mousemove', e => { if (dragging) setXFromClientX(e.clientX); });
+        window.addEventListener('mouseup',   ()  => { dragging = false; });
+        canvas.addEventListener('touchstart', e => { dragging = true; setXFromClientX(e.touches[0].clientX); e.preventDefault(); }, { passive:false });
+        window.addEventListener('touchmove',  e => { if (dragging && e.touches[0]) { setXFromClientX(e.touches[0].clientX); e.preventDefault(); } }, { passive:false });
+        window.addEventListener('touchend',   ()  => { dragging = false; });
+
         // Build the list as soon as KaTeX is ready (it's loaded with `defer`).
         function whenReady(cb) {
             if (window.katex) return cb();
@@ -500,7 +688,18 @@
         }
         document.fonts.ready.then(() => {
             init();
-            whenReady(() => { renderFullEquation(); buildList(); fitSidebarToFormulas(); updateList(parseFloat(slider.value)); });
+            whenReady(() => {
+                renderFullEquation();
+                buildList();
+                fitSidebarToFormulas();
+                updateList(parseFloat(slider.value));
+                // KaTeX fonts may still be loading → re-fit when they're done and after short delays.
+                if (document.fonts && document.fonts.ready) {
+                    document.fonts.ready.then(() => requestAnimationFrame(fitSidebarToFormulas));
+                }
+                setTimeout(fitSidebarToFormulas, 300);
+                setTimeout(fitSidebarToFormulas, 900);
+            });
         });
     </script>
 </body>
