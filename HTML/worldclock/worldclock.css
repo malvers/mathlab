@@ -323,30 +323,38 @@ body:not(.cyber-shell-grid):has(#side-panel) { grid-template-columns: 0 0 minmax
 /* --- Planetarium: time-lapse play/pause (bottom-right) --- */
 #sky-play {
     position: fixed;
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);   /* dead centre of the window (direct body child → not trapped by #sky-info) */
+    top: calc(50% - 15px); left: 50%;   /* matches the canvas dome centre (cy = h/2 − 15) */
+    transform: translate(-50%, -50%);
     display: none;                       /* shown by JS only in the planetarium */
     align-items: center; justify-content: center;
     width: 48px;
     height: 48px;
     border-radius: 50%;
-    border: 1px solid rgba(0, 210, 255, 0.6);
-    background: rgba(8, 20, 42, 0.55);
-    color: rgba(0, 210, 255, 0.95);
-    font-size: 18px;
+    border: 1.5px solid rgba(0, 210, 255, 0.85);
+    background: rgba(8, 20, 42, 0.65);
+    color: rgba(0, 230, 255, 1);
+    font-size: 20px;
     line-height: 1;
     cursor: pointer;
     z-index: 9560;
     font-family: 'Orbitron', sans-serif;
     pointer-events: auto;
+    transition: opacity 0.45s ease;     /* smooth idle fade */
+    opacity: 1;
 }
-#sky-play:hover { background: rgba(0, 210, 255, 0.15); }
-#sky-play.playing {                       /* time-lapse running → orange pause button (λ) */
-    color: rgb(245, 194, 66);
-    border-color: rgba(245, 194, 66, 0.8);
-    box-shadow: 0 0 10px rgba(245, 194, 66, 0.35);
+#sky-play svg { width: 26px; height: 26px; fill: currentColor; display: block; }
+#sky-play .icon-pause { display: none; }
+#sky-play.playing .icon-play  { display: none; }
+#sky-play.playing .icon-pause { display: block; }
+#sky-play:hover { background: rgba(0, 210, 255, 0.18); }
+#sky-play.playing {                     /* time-lapse running → keep cyan, subtle cyan glow (icon already changes ▶→⏸) */
+    box-shadow: 0 0 10px rgba(0, 210, 255, 0.5);
+    background: rgba(0, 210, 255, 0.18);
 }
-#sky-play.playing:hover { background: rgba(245, 194, 66, 0.15); }
+#sky-play.is-hidden {                   /* auto-faded after 5 s of pointer idle — any move/touch wakes it */
+    opacity: 0;
+    pointer-events: none;
+}
 
 /* --- Planetarium: live count of visible stars · constellations (bottom-left) --- */
 #sky-count {

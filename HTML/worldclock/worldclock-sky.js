@@ -297,6 +297,23 @@
         });
         canvas.addEventListener('pointerleave', () => { showStarInfo(null); hoveredZodiac = null; hoveredDeepsky = null; });
         document.getElementById('sky-play')?.addEventListener('click', () => toggleLapse());
+        // Auto-fade the play/pause button after 5 s of pointer idle; any move / touch / click / key wakes it.
+        (function () {
+            const _btn = document.getElementById('sky-play');
+            if (!_btn) return;
+            let _t = null;
+            const _wake = () => {
+                _btn.classList.remove('is-hidden');
+                if (_t) clearTimeout(_t);
+                _t = setTimeout(() => _btn.classList.add('is-hidden'), 5000);
+            };
+            _wake();                                                // start the idle clock
+            document.addEventListener('pointermove', _wake, { passive: true });
+            document.addEventListener('pointerdown', _wake, { passive: true });
+            document.addEventListener('touchstart',  _wake, { passive: true });
+            document.addEventListener('keydown',     _wake, { passive: true });
+            _btn.addEventListener('click', _wake);                  // pairs with the toggleLapse() click above
+        })();
 
 // ===== segDist + drawStarfield =====
         function segDist(px, py, ax, ay, bx, by) {

@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DOC ALVERS MATHE-LABORE | Batman</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet">
+    <link rel="icon" type="image/png" href="resources/favicon.png">
+    <link rel="stylesheet" href="js/cyber-layout.css">
+    <link rel="stylesheet" href="js/buttons-ultra.css">
+    <link rel="stylesheet" href="js/cyber-lab-overrides.css">
+    <link rel="stylesheet" href="js/branding.styles.extracted.css">
+    <link rel="stylesheet" href="js/lab-shell-minimal.css">
+    <!-- KaTeX for rendering the six factor equations as real math -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.21/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.21/dist/katex.min.js"></script>
+    <style>
+        /* Central palette (CLAUDE.md): φ green = active, Υ red = out-of-domain */
+        :root{
+            --bat-green:  rgb(121,158, 49);
+            --bat-green-d:rgb( 86,118, 30);
+            --bat-red:    rgb(176, 36, 24);
+            --bat-red-d:  rgb(120, 22, 14);
+            --bat-orange: rgb(245,194, 66);
+            /* LOCAL override (not central): widen the sidebar enough for the long Batman
+               factors to fit on a single line. cyber-lab-overrides.css hard-caps the whole
+               left chrome at --cyber-left-cap (390px by default) — we must lift that cap
+               too, otherwise the sidebar variable is ignored. Final values are set by JS
+               from the widest rendered formula (T6); these are sensible boot-time guesses. */
+            --cyber-sidebar-w: 620px;
+            --cyber-left-cap:  720px;   /* rail 66 + sidebar + small buffer */
+        }
+        #term-list{display:flex;flex-direction:column;gap:8px;padding:8px 10px 14px}
+        /* Background = full palette colors (CLAUDE.md): orange = out-of-domain, green = active.
+           Text: dark gray for legibility on both warm backgrounds. */
+        .term{position:relative;border:1px solid var(--bat-orange);border-radius:10px;padding:10px 10px 10px 36px;background:var(--bat-orange);transition:background .15s,border-color .15s;font-size:20px;line-height:1.45;overflow:hidden;color:#1f1f1f}
+        .term.active{border-color:var(--bat-green);background:var(--bat-green)}
+        .term .badge{position:absolute;left:8px;top:8px;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:#1f1f1f;background:#fff}
+        .term.active .badge{background:#fff;color:#1f1f1f}
+        /* white-space:nowrap is essential: it stops KaTeX inline tokens from line-breaking
+           inside the box. Without it the .katex span wraps and scrollWidth would report the
+           WRAPPED width — which is what we want to AVOID. With nowrap, the natural single-
+           line width is exposed and the sidebar auto-fit can size correctly. */
+        .term .eq{color:#1f1f1f;white-space:nowrap}
+        /* KaTeX colors its tokens itself — force the dark-gray text color through */
+        .term .eq .katex,.term .eq-y .katex,.term .eq .katex *,.term .eq-y .katex *{color:#1f1f1f !important}
+        /* Solved-for-y line: shown below the original factor; slightly dim to mark it as derived */
+        .term .eq-y{margin-top:5px;color:#1f1f1f;opacity:.92;font-size:.95em;white-space:nowrap}
+        .term .val{display:block;margin-top:4px;font-family:'Outfit',sans-serif;font-size:15px;color:#1f1f1f;opacity:.92}
+        .term .val .num{font-weight:700}
+        /* Slider strip at the top of the sidebar */
+        #x-strip{padding:14px 12px 6px;border-bottom:1px solid rgba(255,255,255,.08)}
+        #x-strip .row{display:flex;align-items:baseline;gap:10px;margin-bottom:6px}
+        #x-strip label{font-family:'Orbitron',sans-serif;letter-spacing:1px;color:var(--bat-orange);font-size:13px}
+        #x-strip .xval{font-family:'Outfit',sans-serif;font-weight:600;color:#fff;font-size:18px;margin-left:auto}
+        #x-strip input[type=range]{width:100%;accent-color:var(--bat-orange)}
+        #x-strip .bounds{display:flex;justify-content:space-between;font-size:11px;color:rgba(255,255,255,.45);font-family:'Outfit',sans-serif}
+        /* Tighten KaTeX inside narrow boxes */
+        .term .katex{font-size:1em}
+        /* Full-equation strip above the figure: sits 10% down. Render at a readable
+           size, then JS scales (transform) it down to fit the available width — so
+           the whole equation stays in ONE line no matter how narrow the window. */
+        /* Hide the central cyber background grid (user prefers a plain backdrop here). */
+        #canvas-container .cyber-grid{display:none}
+        #full-eq{position:absolute;top:7%;left:12px;right:12px;z-index:5;padding:8px 12px;background:transparent;overflow:hidden;color:#cfe4f7;font-size:14px;text-align:left}
+        #full-eq-tex{display:inline-block;transform-origin:top left;white-space:nowrap}
+        #full-eq .katex{font-size:1em;white-space:nowrap}
+        #full-eq .meta{display:block;margin-top:4px;font-family:'Outfit',sans-serif;font-size:11px;color:rgba(245,194,66,.85);letter-spacing:.4px;white-space:normal}
+    </style>
+</head>
+
+<body>
+    <nav id="mini-rail">
+        <div class="nav-btn" onclick="toggleSidebar()" title="Toggle Menu">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </div>
+    </nav>
+
+    <aside id="side-panel">
+        <header id="sidebar-header"></header>
+        <div id="ui-container">
+            <div id="x-strip">
+                <div class="row">
+                    <label>x</label>
+                    <span class="xval" id="x-readout">0.00</span>
+                </div>
+                <input type="range" id="x-slider" min="-6.5" max="6.5" step="0.01" value="0">
+                <div class="bounds"><span>−6.5</span><span>+6.5</span></div>
+            </div>
+            <div id="term-list"></div>
+        </div>
+    </aside>
+
+    <main id="main-content">
+        <div id="canvas-container">
+            <div class="cyber-grid"></div>
+            <!-- The whole Batman equation = product of all six factors = 0, in one (wide) line. -->
+            <div id="full-eq">
+                <div id="full-eq-tex"></div>
+            </div>
+            <canvas id="canvas"></canvas>
+        </div>
+    </main>
+
+    <script src="js/cyber-left-chrome.js"></script>
+    <script src="js/branding/briefings.js"></script>
+    <script src="js/branding/overlays.js"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/i18n-de.js"></script>
+    <script src="js/i18n-en.js"></script>
+    <script src="js/i18n-es.js"></script>
+    <script src="js/i18n-fr.js"></script>
+    <script src="js/i18n-it.js"></script>
+    <script src="js/i18n-pt.js"></script>
+    <script src="js/i18n-sw.js"></script>
+    <script src="js/i18n-tr.js"></script>
+    <script src="js/i18n-nl.js"></script>
+    <script src="js/branding/nav.js"></script>
+    <script src="js/branding.js"></script>
+    <script src="js/ui.js"></script>
+    <script>
+        function toggleSidebar() {
+            const panel = document.getElementById('side-panel');
+            panel.classList.toggle('collapsed');
+            if (window.CyberLeftChrome && typeof CyberLeftChrome.publishResolvedScale === 'function') {
+                CyberLeftChrome.publishResolvedScale();
+            }
+            setTimeout(() => {
+                window.dispatchEvent(new Event('resize'));
+                if (typeof init === 'function') init();
+                if (window.CyberLeftChrome && typeof CyberLeftChrome.publishResolvedScale === 'function') {
+                    CyberLeftChrome.publishResolvedScale();
+                }
+            }, 400);
+        }
+
+        CyberBranding.init({
+            useExternalStyles: true,
+            title: 'Batman',
+            subtitle: 'Equation',
+        });
+        CyberUI.init();
+
+        if (window.CyberLeftChrome && typeof CyberLeftChrome.configure === 'function') {
+            CyberLeftChrome.configure({ viewportOnlyZoom: true });
+        }
+
+        // ===================================================================
+        // The six factors of the Batman equation (J. Matthew Register form).
+        // Each factor has a sqrt-trick whose argument is only ≥ 0 inside a
+        // narrow x-window — that window IS the domain where the factor draws
+        // a piece of the bat. Outside the window: "flies out" (rot).
+        // ===================================================================
+        const SQRT33 = Math.sqrt(33);
+        const SQRT10 = Math.sqrt(10);
+
+        // T1 — wings (ellipse). Domain in x: 3 < |x| ≤ 7. The original y-sqrt
+        // also requires y > -3√33/7 ≈ -2.46, so the LOWER branch is only valid
+        // for |x| > 4 (the wing-tip flare). In 3<|x|<4 only the upper branch lives.
+        const Y_LOW_BOUND = -3 * SQRT33 / 7;     // ≈ -2.4595
+        function term1(x) {
+            const ax = Math.abs(x);
+            if (!(ax > 3 && ax <= 7)) return { active:false };
+            const r = 1 - (x/7)*(x/7);
+            if (r < 0) return { active:false };
+            const yUp = 3*Math.sqrt(r);
+            const yLow = -yUp;
+            const lowOk = yLow > Y_LOW_BOUND;     // y-domain filter from the original sqrt
+            return { active:true, y: yUp, yLow: lowOk ? yLow : null, note:'±' };
+        }
+        // T2 — head outline. Domain: |x| ≤ 4 (inner sqrt non-negative).
+        function term2(x) {
+            const ax = Math.abs(x);
+            if (ax > 4) return { active:false };
+            const inner = 1 - Math.pow(Math.abs(ax - 2) - 1, 2);
+            if (inner < 0) return { active:false };
+            const y = Math.abs(x/2) - ((3*SQRT33 - 7)/112)*x*x - 3 + Math.sqrt(inner);
+            return { active:true, y };
+        }
+        // T3 — inner ears. Domain: 0.75 < |x| < 1.
+        function term3(x) {
+            const ax = Math.abs(x);
+            if (!(ax > 0.75 && ax < 1)) return { active:false };
+            return { active:true, y: 9 - 8*ax };
+        }
+        // T4 — jaw lobes (small bumps below the ears). Domain: 0.5 < |x| < 0.75.
+        function term4(x) {
+            const ax = Math.abs(x);
+            if (!(ax > 0.5 && ax < 0.75)) return { active:false };
+            return { active:true, y: 3*ax + 0.75 };
+        }
+        // T5 — center cheek (flat top of the chin). Domain: |x| < 0.5.
+        function term5(x) {
+            if (!(Math.abs(x) < 0.5)) return { active:false };
+            return { active:true, y: 2.25 };
+        }
+        // T6 — wing lower curve. Domain: 1 < |x| ≤ 3.
+        function term6(x) {
+            const ax = Math.abs(x);
+            if (!(ax > 1 && ax <= 3)) return { active:false };
+            const inner = 4 - (ax - 1)*(ax - 1);
+            if (inner < 0) return { active:false };
+            const y = (6*SQRT10)/7 + (1.5 - 0.5*ax) - (6*SQRT10)/14 * Math.sqrt(inner);
+            return { active:true, y };
+        }
+
+        // LaTeX strings + meta for each term — order = visible bottom-up of the bat.
+        // `texY` is the same factor solved for y (what we actually plot inside the domain).
+        const TERMS = [
+            { id:1, fn:term1, name:'Wings (upper ellipse)',
+              tex: '\\left(\\tfrac{x}{7}\\right)^2\\sqrt{\\tfrac{||x|-3|}{|x|-3}} + \\left(\\tfrac{y}{3}\\right)^2\\sqrt{\\tfrac{y+\\tfrac{3\\sqrt{33}}{7}}{|y|+\\tfrac{3\\sqrt{33}}{7}}} - 1 = 0',
+              texY: 'y = \\pm 3\\sqrt{1 - \\left(\\tfrac{x}{7}\\right)^2}' },
+            { id:2, fn:term2, name:'Head outline',
+              tex: '\\left|\\tfrac{x}{2}\\right| - \\tfrac{3\\sqrt{33}-7}{112}x^2 - 3 + \\sqrt{1-(||x|-2|-1)^2} - y = 0',
+              texY: 'y = \\left|\\tfrac{x}{2}\\right| - \\tfrac{3\\sqrt{33}-7}{112}x^2 - 3 + \\sqrt{1-(||x|-2|-1)^2}' },
+            { id:3, fn:term3, name:'Inner ears',
+              tex: '9\\sqrt{\\tfrac{(|x|-1)(|x|-.75)}{(1-|x|)(|x|-.75)}} - 8|x| - y = 0',
+              texY: 'y = 9 - 8|x|' },
+            { id:4, fn:term4, name:'Jaw lobes',
+              tex: '3|x| + .75\\sqrt{\\tfrac{(|x|-.75)(|x|-.5)}{(.75-|x|)(|x|-.5)}} - y = 0',
+              texY: 'y = 3|x| + 0.75' },
+            { id:5, fn:term5, name:'Center chin',
+              tex: '2.25\\sqrt{\\tfrac{(x-.5)(x+.5)}{(.5-x)(.5+x)}} - y = 0',
+              texY: 'y = 2.25' },
+            { id:6, fn:term6, name:'Wings (lower curve)',
+              tex: '\\tfrac{6\\sqrt{10}}{7} + (1.5-.5|x|)\\sqrt{\\tfrac{||x|-1|}{|x|-1}} - \\tfrac{6\\sqrt{10}}{14}\\sqrt{4-(|x|-1)^2} - y = 0',
+              texY: 'y = \\tfrac{6\\sqrt{10}}{7} + (1.5 - 0.5|x|) - \\tfrac{6\\sqrt{10}}{14}\\sqrt{4-(|x|-1)^2}' },
+        ];
+
+        // Whole equation = product of all six factors = 0. The factor TeX strings have a
+        // trailing "= 0" each (for the sidebar); strip that here and chain with \cdot.
+        function renderFullEquation() {
+            const target = document.getElementById('full-eq-tex');
+            if (!target || !window.katex) return;
+            const factors = TERMS.map(t => '\\big(' + t.tex.replace(/\s*=\s*0\s*$/, '') + '\\big)');
+            const tex = factors.join(' \\cdot ') + ' = 0';
+            try { katex.render(tex, target, { throwOnError:false, displayMode:false }); }
+            catch (_) { target.textContent = tex; }
+            fitFullEquation();
+        }
+        // Scale the rendered TeX to fit the box width AND center it manually — text-align
+        // doesn't center an inline-block that's wider than its container, so we compute the
+        // left margin ourselves from (avail - scaledWidth)/2. Re-run on resize.
+        function fitFullEquation() {
+            const box = document.getElementById('full-eq');
+            const tex = document.getElementById('full-eq-tex');
+            if (!box || !tex) return;
+            tex.style.transform = 'none';
+            tex.style.height = '';
+            tex.style.marginLeft = '';
+            const cs = getComputedStyle(box);
+            const avail = box.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+            const natural = tex.scrollWidth;
+            if (natural <= 0 || avail <= 0) return;
+            const k = avail / natural;   // grow when there's space, shrink when there isn't
+            const scaledW = natural * k;
+            tex.style.transform = `scale(${k})`;
+            tex.style.marginLeft = ((avail - scaledW) / 2) + 'px';   // center the scaled box
+            tex.style.height = (tex.scrollHeight * k) + 'px';        // reclaim layout space the transform leaves
+        }
+
+        // Build the sidebar entries once, then update color/value on slider change.
+        const listEl = document.getElementById('term-list');
+        const slider = document.getElementById('x-slider');
+        const xReadout = document.getElementById('x-readout');
+        const cells = [];
+        function buildList() {
+            for (const t of TERMS) {
+                const div = document.createElement('div');
+                div.className = 'term';
+                div.innerHTML = `<div class="badge">${t.id}</div><div class="eq" id="eq-${t.id}"></div><div class="eq-y" id="eqy-${t.id}"></div><span class="val" id="val-${t.id}">—</span>`;
+                listEl.appendChild(div);
+                const eqEl  = div.querySelector('.eq');
+                const eqyEl = div.querySelector('.eq-y');
+                if (window.katex) {
+                    try { katex.render(t.tex,  eqEl,  { throwOnError:false, displayMode:false }); }
+                    catch (_) { eqEl.textContent = t.tex; }
+                    try { katex.render(t.texY, eqyEl, { throwOnError:false, displayMode:false }); }
+                    catch (_) { eqyEl.textContent = t.texY; }
+                } else {
+                    eqEl.textContent  = t.tex;
+                    eqyEl.textContent = t.texY;
+                }
+                cells.push({ root:div, val:div.querySelector('.val'), meta:t });
+            }
+        }
+
+        // Measure the widest rendered formula (.eq + .eq-y across all 6 terms) and size
+        // the sidebar so every box fits in one line. Local override only — no shared CSS touched.
+        function fitSidebarToFormulas() {
+            // Wait one frame so KaTeX has finished its layout pass before we read widths.
+            requestAnimationFrame(() => {
+                let maxW = 0;
+                // With .eq/.eq-y forced to white-space:nowrap their natural single-line
+                // width is exposed via scrollWidth. We also probe the inner .katex span
+                // for a tighter direct measurement.
+                for (const c of cells) {
+                    c.root.querySelectorAll('.eq, .eq-y').forEach(el => {
+                        maxW = Math.max(maxW, el.scrollWidth);
+                    });
+                    c.root.querySelectorAll('.eq > .katex, .eq-y > .katex').forEach(k => {
+                        maxW = Math.max(maxW, k.getBoundingClientRect().width);
+                    });
+                }
+                // Box chrome: term padding-left 36 (badge column) + padding-right 10 = 46.
+                // #term-list padding (10+10) + #side-panel padding (10+10) = 40. Total = 86px.
+                // Add a small 4px safety pad so sub-pixel rounding never re-introduces wrap.
+                const target = Math.ceil(maxW + 86 + 4);
+                // Cap at 80% of viewport — generous, but never eats the whole screen.
+                const cap = Math.max(420, Math.floor(window.innerWidth * 0.80));
+                const sidebarW = Math.min(target, cap);
+                const root = document.documentElement.style;
+                root.setProperty('--cyber-sidebar-w', sidebarW + 'px');
+                // The shared left-chrome hard cap (`--cyber-left-cap` in cyber-lab-overrides.css)
+                // would clip our wider sidebar. Lift it locally to rail + sidebar + small buffer.
+                root.setProperty('--cyber-left-cap', (66 + sidebarW + 20) + 'px');
+                // Canvas needs to re-measure after the sidebar width changed.
+                requestAnimationFrame(() => { init(); fitFullEquation(); });
+            });
+        }
+
+        function updateList(x) {
+            xReadout.textContent = x.toFixed(2);
+            for (const c of cells) {
+                const r = c.meta.fn(x);
+                c.root.classList.toggle('active', !!r.active);
+                if (r.active) {
+                    const yStr = r.y.toFixed(3);
+                    const prefix = r.note === '±' ? '±' : '';
+                    c.val.innerHTML = `bei x = ${x.toFixed(2)} → y = <span class="num">${prefix}${yStr}</span>`;
+                } else {
+                    c.val.innerHTML = 'außerhalb des Definitionsbereichs';
+                }
+            }
+            draw();
+        }
+
+        // ===================================================================
+        // Canvas — plot the bat silhouette, vertical x-marker, dots on active y.
+        // ===================================================================
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const container = document.getElementById('canvas-container');
+
+        // World extent: a bit beyond the curve so it doesn't touch edges.
+        const WX = 7.6, WY_TOP = 3.4, WY_BOT = -3.4;
+        let layout = null;   // pixel mapping computed in resize
+
+        function resizeCanvasToContainer() {
+            const dpr = window.devicePixelRatio || 1;
+            const rect = container.getBoundingClientRect();
+            const w = Math.max(1, rect.width);
+            const h = Math.max(1, rect.height);
+            canvas.width = Math.floor(w * dpr);
+            canvas.height = Math.floor(h * dpr);
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.scale(dpr, dpr);
+            // square-ish drawing area centered in the canvas
+            const pad = 24;
+            const aspect = (2*WX) / (WY_TOP - WY_BOT);
+            let dw = w - 2*pad, dh = h - 2*pad;
+            if (dw / dh > aspect) dw = dh * aspect; else dh = dw / aspect;
+            // Bias the figure 10% of the container height downward (makes room for the
+            // full-equation strip above it).
+            const ox = (w - dw) / 2, oy = (h - dh) / 2 + h * 0.10;
+            const sx = dw / (2*WX), sy = dh / (WY_TOP - WY_BOT);
+            layout = {
+                w, h, ox, oy, dw, dh, sx, sy,
+                X: u => ox + (u + WX) * sx,
+                Y: v => oy + (WY_TOP - v) * sy,
+            };
+        }
+
+        function draw() {
+            if (!layout) return;
+            const { w, h, X, Y } = layout;
+            ctx.clearRect(0, 0, w, h);
+
+            // Axes — drawn across the FULL canvas (not just the figure's drawable box).
+            ctx.strokeStyle = 'rgba(255,255,255,.18)'; ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.moveTo(0, Y(0)); ctx.lineTo(w, Y(0)); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(X(0), 0); ctx.lineTo(X(0), h); ctx.stroke();
+            // Ticks every 0.5, labels at integers; extend across the FULL canvas (not just the figure box).
+            const { sx, sy, ox, oy, dw, dh } = layout;
+            const xLeft  = (0 - ox) / sx - WX;             // world-x at canvas left edge
+            const xRight = (w - ox) / sx - WX;             // world-x at canvas right edge
+            const yTopW    = WY_TOP - (0 - oy) / sy;       // world-y at canvas top edge
+            const yBotW    = WY_TOP - (h - oy) / sy;       // world-y at canvas bottom edge
+            ctx.fillStyle = 'rgba(255,255,255,.4)'; ctx.font = '11px Outfit,sans-serif';
+            // X-axis ticks
+            ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+            const xStart = Math.ceil(xLeft * 2) / 2, xEnd = Math.floor(xRight * 2) / 2;
+            for (let t = xStart; t <= xEnd + 1e-9; t += 0.5) {
+                if (Math.abs(t) < 1e-9) continue;
+                const isMajor = Math.abs(t - Math.round(t)) < 1e-9;
+                const len = isMajor ? 5 : 3;
+                ctx.beginPath(); ctx.moveTo(X(t), Y(0) - len); ctx.lineTo(X(t), Y(0) + len); ctx.stroke();
+                if (isMajor) ctx.fillText(t.toString(), X(t), Y(0) + 6);
+            }
+            // Y-axis ticks
+            ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+            const yStart = Math.ceil(yBotW * 2) / 2, yEnd = Math.floor(yTopW * 2) / 2;
+            for (let t = yStart; t <= yEnd + 1e-9; t += 0.5) {
+                if (Math.abs(t) < 1e-9) continue;
+                const isMajor = Math.abs(t - Math.round(t)) < 1e-9;
+                const len = isMajor ? 5 : 3;
+                ctx.beginPath(); ctx.moveTo(X(0) - len, Y(t)); ctx.lineTo(X(0) + len, Y(t)); ctx.stroke();
+                if (isMajor) ctx.fillText(t.toString(), X(0) - 7, Y(t));
+            }
+
+            // Sample each branch and close the gaps at domain boundaries by bisecting
+            // (where active→inactive flips) so adjacent pieces meet at the same point.
+            const N = 1500;
+            const cur = parseFloat(slider.value);
+            // getY: x → y if active in this branch, else null.
+            function bisectEdge(getY, xA, xB) {
+                // Exactly one of getY(xA)/getY(xB) is null; tighten until they're ~1e-6 apart.
+                let a = xA, b = xB;
+                for (let k = 0; k < 30; k++) {
+                    const m = (a + b) / 2;
+                    if ((getY(m) === null) === (getY(a) === null)) a = m; else b = m;
+                }
+                return (getY(a) !== null) ? a : b;
+            }
+            function drawCurve(getY) {
+                ctx.beginPath();
+                let prevX = null, prevY = null;
+                for (let i = 0; i <= N; i++) {
+                    const xx = -WX + (2*WX) * (i / N);
+                    const yy = getY(xx);
+                    if (yy !== null) {
+                        if (prevY === null && prevX !== null) {
+                            // entering domain → bisect for the exact entry point
+                            const xb = bisectEdge(getY, prevX, xx);
+                            const yb = getY(xb);
+                            if (yb !== null) { ctx.moveTo(X(xb), Y(yb)); ctx.lineTo(X(xx), Y(yy)); }
+                            else ctx.moveTo(X(xx), Y(yy));
+                        } else if (prevY === null) {
+                            ctx.moveTo(X(xx), Y(yy));
+                        } else {
+                            ctx.lineTo(X(xx), Y(yy));
+                        }
+                    } else if (prevY !== null) {
+                        // leaving domain → bisect for the exact exit point
+                        const xb = bisectEdge(getY, xx, prevX);
+                        const yb = getY(xb);
+                        if (yb !== null) ctx.lineTo(X(xb), Y(yb));
+                    }
+                    prevX = xx; prevY = yy;
+                }
+                ctx.stroke();
+            }
+            // Build a getter per term/branch and draw.
+            ctx.strokeStyle = 'rgba(121,158,49,.92)'; ctx.lineWidth = 2;
+            const getTopY  = t => x => { const r = t.fn(x); return r.active ? r.y : null; };
+            const getLowY1 = x => { const r = term1(x); return (r.active && r.yLow !== null) ? r.yLow : null; };
+            for (const t of TERMS) drawCurve(getTopY(t));
+            drawCurve(getLowY1);
+
+            // Vertical x-marker
+            ctx.strokeStyle = 'rgba(245,194,66,.9)'; ctx.lineWidth = 1.5;
+            ctx.setLineDash([4, 4]);
+            ctx.beginPath(); ctx.moveTo(X(cur), Y(WY_BOT)); ctx.lineTo(X(cur), Y(WY_TOP)); ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Dots on each currently active y for the slider x
+            for (const t of TERMS) {
+                const r = t.fn(cur);
+                if (!r.active) continue;
+                const ys = (t.id === 1)
+                    ? (r.yLow !== null ? [r.y, r.yLow] : [r.y])   // wing-tip flare only where the lower branch lives
+                    : [r.y];
+                for (const yy of ys) {
+                    ctx.fillStyle = 'rgba(245,194,66,1)';
+                    ctx.beginPath(); ctx.arc(X(cur), Y(yy), 5, 0, 2*Math.PI); ctx.fill();
+                    ctx.strokeStyle = '#1a1a1a'; ctx.lineWidth = 1.5; ctx.stroke();
+                }
+            }
+        }
+
+        function init() {
+            resizeCanvasToContainer();
+            draw();
+        }
+
+        slider.addEventListener('input', () => updateList(parseFloat(slider.value)));
+        window.addEventListener('resize', () => { init(); fitFullEquation(); });
+
+        // Build the list as soon as KaTeX is ready (it's loaded with `defer`).
+        function whenReady(cb) {
+            if (window.katex) return cb();
+            const t = setInterval(() => { if (window.katex) { clearInterval(t); cb(); } }, 30);
+        }
+        document.fonts.ready.then(() => {
+            init();
+            whenReady(() => { renderFullEquation(); buildList(); fitSidebarToFormulas(); updateList(parseFloat(slider.value)); });
+        });
+    </script>
+</body>
+
+</html>
