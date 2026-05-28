@@ -49,6 +49,14 @@ create policy "vgp reactions insert" on public.reactions for insert to authentic
 create policy "vgp reactions update" on public.reactions for update to authenticated using (true) with check (true);
 create policy "vgp reactions delete" on public.reactions for delete to authenticated using (true);
 
+-- --- Data-API grants (explicit, future-proof) -----------------------------
+-- Supabase used to auto-grant public-schema tables to the API roles. From
+-- 2026-10-30 newly created tables in existing projects no longer get the
+-- automatic grant → we set them explicitly so this script keeps working on a
+-- fresh project after that date. Idempotent: re-running is a no-op.
+grant select, insert, update, delete on public.reactions to anon, authenticated;
+grant usage, select on all sequences in schema public to anon, authenticated;
+
 -- --- Realtime: live INSERT/UPDATE/DELETE for messages + reactions ---------
 -- replica identity full → UPDATE/DELETE events carry enough to update the UI
 alter table public.messages  replica identity full;

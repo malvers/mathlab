@@ -1526,8 +1526,7 @@
             }
             const _splEl = document.getElementById('sky-play');
             if (_splEl) {
-                _splEl.textContent = lapseActive ? '⏸' : '▶';
-                _splEl.classList.toggle('playing', lapseActive);   // running (pause icon) → orange
+                _splEl.classList.toggle('playing', lapseActive);   // CSS swaps the SVG icons (▶ → ⏸) by class
                 _splEl.style.display = (skyTarget && targetCity && !skyInfoClosed) ? 'flex' : 'none';   // only in the planetarium
                 if (!skyTarget) lapseActive = false;
             }
