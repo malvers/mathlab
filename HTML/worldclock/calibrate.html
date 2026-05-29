@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>Plate Calibrator — anchors picker</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; }
+body { margin: 0; background: #0a1428; color: #e6edf3; font-family: 'Outfit', sans-serif; }
+header { padding: 12px 18px; background: rgba(8, 20, 42, 0.8); border-bottom: 1px solid rgba(0, 210, 255, 0.25); display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+header h1 { margin: 0; font: 700 1rem 'Orbitron', sans-serif; color: #00d2ff; letter-spacing: 0.06em; }
+header .hint { font-size: 0.78rem; color: rgba(230, 237, 243, 0.6); }
+header input[type=file] { color: #e6edf3; }
+header button { background: rgba(0, 210, 255, 0.12); color: #00d2ff; border: 1px solid rgba(0, 210, 255, 0.5); border-radius: 6px; padding: 6px 14px; font: 600 0.82rem 'Orbitron', sans-serif; cursor: pointer; }
+header button:hover { background: rgba(0, 210, 255, 0.22); }
+header select { background: rgba(8, 20, 42, 0.6); color: #00d2ff; border: 1px solid rgba(0, 210, 255, 0.5); border-radius: 6px; padding: 6px 10px; font: 600 0.82rem 'Outfit', sans-serif; cursor: pointer; max-width: 360px; }
+header select:hover { background: rgba(0, 210, 255, 0.1); }
+#layout { display: flex; min-height: calc(100vh - 56px); }
+#canvas-wrap { flex: 1; position: relative; overflow: auto; padding: 14px; }
+#canvas { display: block; cursor: crosshair; max-width: 100%; height: auto; }
+#popup { position: absolute; background: rgba(8, 20, 42, 0.96); border: 1px solid rgba(0, 210, 255, 0.55); border-radius: 8px; padding: 10px 12px; box-shadow: 0 6px 24px rgba(0, 0, 0, 0.7); z-index: 10; display: none; }
+#popup label { display: flex; align-items: center; gap: 10px; font-size: 0.85rem; margin-bottom: 8px; }
+#popup label > span { display: inline-block; width: 36px; text-align: right; color: rgba(230, 237, 243, 0.65); }
+#popup input { width: 130px; padding: 4px 8px; background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(0, 210, 255, 0.4); color: #e6edf3; font: 600 0.9rem 'Outfit', sans-serif; border-radius: 4px; }
+#popup .btns { margin-top: 8px; display: flex; gap: 6px; }
+#popup button { padding: 4px 10px; font: 600 0.78rem 'Orbitron', sans-serif; border-radius: 4px; cursor: pointer; border: 1px solid rgba(0, 210, 255, 0.5); background: rgba(0, 210, 255, 0.15); color: #00d2ff; }
+#popup button.secondary { border-color: rgba(230, 237, 243, 0.3); background: transparent; color: rgba(230, 237, 243, 0.7); }
+#side { width: 360px; background: rgba(8, 20, 42, 0.6); border-left: 1px solid rgba(0, 210, 255, 0.2); padding: 14px; overflow-y: auto; }
+#side h3 { margin: 0 0 10px; font: 700 0.9rem 'Orbitron', sans-serif; color: #00d2ff; letter-spacing: 0.06em; }
+#meta { font-size: 0.78rem; color: rgba(230, 237, 243, 0.65); margin-bottom: 14px; line-height: 1.5; }
+#meta span { color: #ffd27a; }
+#list { list-style: none; padding: 0; margin: 0; }
+#list li { display: flex; justify-content: space-between; align-items: center; padding: 6px 8px; margin-bottom: 4px; background: rgba(0, 0, 0, 0.25); border: 1px solid rgba(0, 210, 255, 0.15); border-radius: 4px; font: 600 0.78rem 'Outfit', sans-serif; }
+#list .vals { color: #00d2ff; }
+#list .px { color: rgba(230, 237, 243, 0.55); font-size: 0.7rem; margin-left: 6px; }
+#list .del { cursor: pointer; color: rgba(220, 70, 55, 0.8); font-weight: 700; padding: 0 4px; background: none; border: none; font-size: 1.1rem; }
+#list .del:hover { color: rgb(220, 70, 55); }
+#tip { font-size: 0.72rem; color: rgba(230, 237, 243, 0.5); margin-top: 16px; line-height: 1.5; border-top: 1px dashed rgba(0, 210, 255, 0.15); padding-top: 12px; }
+</style>
+</head>
+<body>
+<header>
+    <h1>PLATE CALIBRATOR</h1>
+    <select id="plateSelect" title="Plate aus lokaler Bibliothek (resources/constellations/) laden">
+        <option value="">— Jamieson-Plate auswählen —</option>
+        <option value="1">Plate 1 — Nordhimmel-Übersicht</option>
+        <option value="2">Plate 2 — Cassiopeia · Cepheus · Draco · UMi</option>
+        <option value="3">Plate 3 — Perseus · Andromeda · Triangulum</option>
+        <option value="4">Plate 4 — Auriga</option>
+        <option value="5">Plate 5 — Lynx · Leo Minor</option>
+        <option value="6">Plate 6 — Ursa Major</option>
+        <option value="7">Plate 7 — Boötes · Canes Venatici</option>
+        <option value="8">Plate 8 — Hercules · Lyra · Corona Borealis</option>
+        <option value="9">Plate 9 — Ophiuchus · Serpens</option>
+        <option value="10">Plate 10 — Aquila · Sagitta · Delphinus · Vulpecula</option>
+        <option value="11">Plate 11 — Cygnus · Lacerta</option>
+        <option value="12">Plate 12 — Pegasus · Equuleus</option>
+        <option value="13">Plate 13 — Aries</option>
+        <option value="14">Plate 14 — Taurus</option>
+        <option value="15">Plate 15 — Gemini · CMi</option>
+        <option value="16">Plate 16 — Cancer</option>
+        <option value="17">Plate 17 — Leo</option>
+        <option value="18">Plate 18 — Virgo</option>
+        <option value="19">Plate 19 — Libra · Scorpius</option>
+        <option value="20">Plate 20 — Sagittarius</option>
+        <option value="21">Plate 21 — Capricornus</option>
+        <option value="22">Plate 22 — Aquarius · Piscis Austrinus</option>
+        <option value="23">Plate 23 — Pisces · Cetus</option>
+        <option value="24">Plate 24 — Orion · Lepus</option>
+        <option value="25">Plate 25 — Canis Major · Monoceros · CMi</option>
+        <option value="26">Plate 26 — Hydra · Crater · Corvus · Sextans</option>
+        <option value="27">Plate 27 — Argo Navis (Carina · Puppis · Vela)</option>
+        <option value="28">Plate 28 — Centaurus · Lupus</option>
+        <option value="29">Plate 29 — südliche Konstellationen</option>
+        <option value="30">Plate 30 — Südhimmel-Übersicht</option>
+    </select>
+    <input type="file" id="file" accept="image/*" title="Eigene Plate per File-Picker laden">
+    <span class="hint">→ klick auf die Plate, gib RA und Dec der Stelle ein</span>
+    <button id="export">EXPORT anchors[] (Clipboard)</button>
+    <button id="clear" class="secondary">Reset</button>
+</header>
+<div id="layout">
+    <div id="canvas-wrap">
+        <canvas id="canvas"></canvas>
+        <div id="popup">
+            <label><span>RA</span><input id="ra" type="text" placeholder="0…360"></label>
+            <label><span>Dec</span><input id="dec" type="text" placeholder="-90…+90"></label>
+            <div class="btns">
+                <button id="add">OK</button>
+                <button id="cancel" class="secondary">Abbrechen</button>
+            </div>
+        </div>
+    </div>
+    <aside id="side">
+        <h3>Anchors</h3>
+        <div id="meta">Bild: <span id="imgInfo">—</span><br>Anzahl: <span id="count">0</span></div>
+        <ul id="list"></ul>
+        <div id="tip">
+            <b>Workflow:</b><br>
+            • Plate laden (oben links).<br>
+            • Auf einen Punkt mit bekannter Position klicken (Innenrahmen-Ecke, Gitter-Schnittpunkt, beschrifteter Stern).<br>
+            • RA und Dec eingeben — beides in Grad (z. B. 165.5 / +61.75). Für RA in Stunden × 15 rechnen.<br>
+            • Anchors sammeln (4 Ecken minimum, mehr = besser).<br>
+            • Export → das fertige JS-Array landet in der Zwischenablage, fertig zum Paste in <code>CONSTELLATION_ART</code>.
+        </div>
+    </aside>
+</div>
+<script>
+(function () {
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const popup = document.getElementById('popup');
+    const raIn = document.getElementById('ra');
+    const decIn = document.getElementById('dec');
+    const list = document.getElementById('list');
+    const countEl = document.getElementById('count');
+    const imgInfo = document.getElementById('imgInfo');
+    let img = null;
+    let pending = null;   // { x, y } in image pixel coords (the most recent click)
+    let mouse = null;     // { x, y } in image pixel coords (live cursor → crosshair)
+    let shiftDown = false;// Shift held → show magnifier loupe near the cursor
+    let currentLabel = '';// label of the currently-loaded plate ("Plate 6 — Ursa Major" / file name) → shown in the export comment
+    const anchors = [];   // { ra, dec, x, y } in image pixel coords
+
+    // --- Image loading ---
+    function loadImage(url, label) {
+        if (anchors.length && !confirm('Aktuelle ' + anchors.length + ' Anker löschen und neue Plate laden?')) return false;
+        anchors.length = 0; pending = null; popup.style.display = 'none'; refreshList();
+        currentLabel = label || '';
+        const i = new Image();
+        i.onload  = () => { img = i; imgInfo.textContent = (label || '') + ' · ' + i.naturalWidth + ' × ' + i.naturalHeight + ' px'; redraw(); };
+        i.onerror = () => { alert('Plate konnte nicht geladen werden: ' + url); };
+        i.src = url;
+        return true;
+    }
+    document.getElementById('file').addEventListener('change', e => {
+        const f = e.target.files[0];
+        if (!f) return;
+        if (!loadImage(URL.createObjectURL(f), f.name)) e.target.value = '';
+    });
+    document.getElementById('plateSelect').addEventListener('change', e => {
+        const n = e.target.value;
+        if (!n) return;
+        const url = '../resources/constellations/Alexander_Jamieson_Celestial_Atlas-Plate_' + n + '.jpg';
+        const label = e.target.options[e.target.selectedIndex].text;       // "Plate 6 — Ursa Major" → goes into the export comment
+        if (!loadImage(url, label)) e.target.value = '';
+    });
+
+    // --- Canvas resize + click-to-imagespace ---
+    function fitCanvas() {
+        if (!img) return;
+        // Fit canvas to viewport width while preserving aspect; allow vertical scroll
+        const maxW = document.getElementById('canvas-wrap').clientWidth - 28;
+        const scale = Math.min(1, maxW / img.naturalWidth);
+        canvas.width = Math.round(img.naturalWidth * scale);
+        canvas.height = Math.round(img.naturalHeight * scale);
+        canvas._scale = scale;
+    }
+    function redraw() {
+        fitCanvas();
+        if (!img) return;
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        // Anchor markers
+        anchors.forEach((a, i) => drawMarker(a.x * canvas._scale, a.y * canvas._scale, i + 1));
+        if (pending) drawMarker(pending.x * canvas._scale, pending.y * canvas._scale, '?', true);
+        // Live crosshair following the cursor (canvas-wide thin lines + tiny centre cross + coord readout) — suppressed when the loupe is shown.
+        if (mouse && !shiftDown) {
+            const mx = mouse.x * canvas._scale, my = mouse.y * canvas._scale;
+            ctx.save();
+            // White shadow line behind for contrast on dark areas, then the red line on top → readable on any background.
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.9)';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(0, my + 0.5); ctx.lineTo(canvas.width, my + 0.5);
+            ctx.moveTo(mx + 0.5, 0); ctx.lineTo(mx + 0.5, canvas.height);
+            ctx.stroke();
+            ctx.strokeStyle = 'rgb(220, 30, 30)';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(0, my + 0.5); ctx.lineTo(canvas.width, my + 0.5);
+            ctx.moveTo(mx + 0.5, 0); ctx.lineTo(mx + 0.5, canvas.height);
+            ctx.stroke();
+            // tiny gap-centred precise cross (centre dot for sub-pixel aim)
+            ctx.strokeStyle = 'rgb(220, 30, 30)';
+            ctx.lineWidth = 2.5;
+            ctx.beginPath();
+            ctx.moveTo(mx - 12, my); ctx.lineTo(mx - 3, my);
+            ctx.moveTo(mx + 3, my); ctx.lineTo(mx + 12, my);
+            ctx.moveTo(mx, my - 12); ctx.lineTo(mx, my - 3);
+            ctx.moveTo(mx, my + 3); ctx.lineTo(mx, my + 12);
+            ctx.stroke();
+            ctx.fillStyle = 'rgb(220, 30, 30)';
+            ctx.beginPath(); ctx.arc(mx, my, 1.5, 0, Math.PI * 2); ctx.fill();
+            // pixel coord readout
+            const txt = Math.round(mouse.x) + ', ' + Math.round(mouse.y);
+            ctx.font = '700 12px Orbitron, sans-serif';
+            const tw = ctx.measureText(txt).width;
+            const lx = mx + 16, ly = my + 14;
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.85)';
+            ctx.fillRect(lx - 4, ly - 13, tw + 10, 20);
+            ctx.fillStyle = 'rgb(255, 100, 100)';
+            ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+            ctx.fillText(txt, lx + 1, ly - 3);
+            ctx.restore();
+        }
+        // Magnifier loupe (Shift held): circular magnified view centred ON the mouse cursor itself. No inner crosshair.
+        if (shiftDown && mouse) {
+            const zoom = 6, loupeR = 110;
+            const lx = mouse.x * canvas._scale, ly = mouse.y * canvas._scale;       // loupe centre = cursor position
+            const srcSize = (loupeR * 2) / zoom / canvas._scale;                     // source area in natural image pixels
+            const srcX = mouse.x - srcSize / 2, srcY = mouse.y - srcSize / 2;
+            ctx.save();
+            ctx.beginPath(); ctx.arc(lx, ly, loupeR, 0, Math.PI * 2); ctx.clip();
+            ctx.fillStyle = '#000';                                                  // backdrop for source areas off the image
+            ctx.fillRect(lx - loupeR, ly - loupeR, loupeR * 2, loupeR * 2);
+            ctx.imageSmoothingEnabled = false;                                       // crisp pixels at high zoom
+            ctx.drawImage(img, srcX, srcY, srcSize, srcSize, lx - loupeR, ly - loupeR, loupeR * 2, loupeR * 2);
+            ctx.imageSmoothingEnabled = true;
+            ctx.restore();
+            // Loupe ring border only — no inner crosshair, no centre dot.
+            ctx.save();
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.95)'; ctx.lineWidth = 4;
+            ctx.beginPath(); ctx.arc(lx, ly, loupeR, 0, Math.PI * 2); ctx.stroke();
+            ctx.strokeStyle = 'rgb(220, 30, 30)'; ctx.lineWidth = 1.8;
+            ctx.beginPath(); ctx.arc(lx, ly, loupeR, 0, Math.PI * 2); ctx.stroke();
+            ctx.restore();
+        }
+    }
+    function drawMarker(x, y, label, pending) {
+        ctx.save();
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = pending ? 'rgba(255, 220, 80, 1)' : 'rgba(0, 230, 255, 1)';
+        ctx.fillStyle   = pending ? 'rgba(255, 220, 80, 1)' : 'rgba(0, 230, 255, 1)';
+        ctx.beginPath(); ctx.arc(x, y, 8, 0, Math.PI * 2); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(x - 14, y); ctx.lineTo(x + 14, y); ctx.moveTo(x, y - 14); ctx.lineTo(x, y + 14); ctx.stroke();
+        ctx.fillStyle = pending ? 'rgba(0, 0, 0, 0.7)' : 'rgba(0, 0, 0, 0.7)';
+        ctx.fillRect(x + 10, y - 14, label.toString().length * 9 + 8, 18);
+        ctx.fillStyle = pending ? 'rgba(255, 220, 80, 1)' : 'rgba(0, 230, 255, 1)';
+        ctx.font = '700 12px Orbitron, sans-serif';
+        ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+        ctx.fillText(label, x + 14, y - 5);
+        ctx.restore();
+    }
+
+    canvas.addEventListener('mousemove', e => {
+        if (!img) return;
+        const r = canvas.getBoundingClientRect();
+        mouse = { x: (e.clientX - r.left) / canvas._scale, y: (e.clientY - r.top) / canvas._scale };
+        redraw();
+    });
+    canvas.addEventListener('mouseleave', () => { mouse = null; redraw(); });
+
+    // --- Prediction: from existing anchors, suggest RA/Dec for the next click ---
+    // Solve a 3x3 linear system Ax = b (Cramer). Returns null if singular.
+    function solve3(A, b) {
+        const D = A[0][0] * (A[1][1] * A[2][2] - A[1][2] * A[2][1])
+                - A[0][1] * (A[1][0] * A[2][2] - A[1][2] * A[2][0])
+                + A[0][2] * (A[1][0] * A[2][1] - A[1][1] * A[2][0]);
+        if (Math.abs(D) < 1e-9) return null;
+        const inv = 1 / D;
+        const D0 = b[0] * (A[1][1] * A[2][2] - A[1][2] * A[2][1])
+                 - A[0][1] * (b[1] * A[2][2] - A[1][2] * b[2])
+                 + A[0][2] * (b[1] * A[2][1] - A[1][1] * b[2]);
+        const D1 = A[0][0] * (b[1] * A[2][2] - A[1][2] * b[2])
+                 - b[0] * (A[1][0] * A[2][2] - A[1][2] * A[2][0])
+                 + A[0][2] * (A[1][0] * b[2] - b[1] * A[2][0]);
+        const D2 = A[0][0] * (A[1][1] * b[2] - b[1] * A[2][1])
+                 - A[0][1] * (A[1][0] * b[2] - b[1] * A[2][0])
+                 + b[0] * (A[1][0] * A[2][1] - A[1][1] * A[2][0]);
+        return [D0 * inv, D1 * inv, D2 * inv];
+    }
+    // Least-squares affine fit: v(x, y) = a*x + b*y + c over all anchors. Needs n ≥ 3.
+    function lsqAffine(field) {
+        let sxx = 0, sxy = 0, sx = 0, syy = 0, sy = 0, svx = 0, svy = 0, sv = 0;
+        for (const a of anchors) {
+            sxx += a.x * a.x; sxy += a.x * a.y; sx += a.x;
+            syy += a.y * a.y; sy += a.y;
+            svx += a[field] * a.x; svy += a[field] * a.y; sv += a[field];
+        }
+        const n = anchors.length;
+        return solve3([[sxx, sxy, sx], [sxy, syy, sy], [sx, sy, n]], [svx, svy, sv]);
+    }
+    function predict(px, py) {
+        if (anchors.length < 2) return null;
+        if (anchors.length === 2) {                           // axis-aligned assumption: RA varies with x, Dec with y
+            const [a1, a2] = anchors;
+            if (Math.abs(a2.x - a1.x) < 1 || Math.abs(a2.y - a1.y) < 1) return null;
+            const bx = (a2.ra - a1.ra) / (a2.x - a1.x);
+            const by = (a2.dec - a1.dec) / (a2.y - a1.y);
+            return { ra: a1.ra + bx * (px - a1.x), dec: a1.dec + by * (py - a1.y), mode: 'axis' };
+        }
+        const raC  = lsqAffine('ra');                          // 3+ anchors → least-squares affine (= exact affine for n=3)
+        const decC = lsqAffine('dec');
+        if (!raC || !decC) return null;
+        return { ra: raC[0] * px + raC[1] * py + raC[2], dec: decC[0] * px + decC[1] * py + decC[2], mode: anchors.length === 3 ? 'affine' : 'lsq' };
+    }
+
+    canvas.addEventListener('click', e => {
+        if (!img) return;
+        const r = canvas.getBoundingClientRect();
+        const cx = e.clientX - r.left;
+        const cy = e.clientY - r.top;
+        pending = { x: cx / canvas._scale, y: cy / canvas._scale };
+        // Show popup near the click
+        popup.style.display = 'block';
+        const px = Math.min(r.width - 200, cx + 16);
+        const py = Math.min(r.height - 140, cy + 10);
+        popup.style.left = (px + 14) + 'px';   // 14 = #canvas-wrap padding
+        popup.style.top  = (py + 14) + 'px';
+        // Pre-fill from existing anchors if we can predict
+        const p = predict(pending.x, pending.y);
+        if (p) {
+            raIn.value  = p.ra.toFixed(2);
+            decIn.value = p.dec.toFixed(2);
+            raIn.dataset.mode = p.mode;
+            raIn.select();                                     // selected → Enter accepts, typing overrides
+        } else {
+            raIn.value = ''; decIn.value = '';
+            raIn.dataset.mode = '';
+            raIn.focus();
+        }
+        redraw();
+    });
+
+    document.getElementById('add').addEventListener('click', () => {
+        if (!pending) return;
+        const ra  = parseFloat(raIn.value.replace(',', '.'));
+        const dec = parseFloat(decIn.value.replace(',', '.'));
+        if (!isFinite(ra) || !isFinite(dec)) { alert('RA und Dec bitte als Zahl eingeben.'); return; }
+        anchors.push({ ra, dec, x: pending.x, y: pending.y });
+        pending = null;
+        popup.style.display = 'none';
+        refreshList();
+        redraw();
+    });
+    document.getElementById('cancel').addEventListener('click', () => { pending = null; popup.style.display = 'none'; redraw(); });
+    [raIn, decIn].forEach(el => el.addEventListener('keydown', e => {
+        if (e.key === 'Enter') document.getElementById('add').click();
+        if (e.key === 'Escape') document.getElementById('cancel').click();
+    }));
+
+    function refreshList() {
+        list.innerHTML = '';
+        countEl.textContent = anchors.length;
+        anchors.forEach((a, i) => {
+            const li = document.createElement('li');
+            li.innerHTML = '<span><b>' + (i + 1) + '</b> <span class="vals">RA ' + a.ra.toFixed(2) + '°, Dec ' + a.dec.toFixed(2) + '°</span><span class="px">px (' + Math.round(a.x) + ', ' + Math.round(a.y) + ')</span></span>';
+            const del = document.createElement('button');
+            del.className = 'del'; del.textContent = '×'; del.title = 'Anchor löschen';
+            del.onclick = () => { anchors.splice(i, 1); refreshList(); redraw(); };
+            li.appendChild(del);
+            list.appendChild(li);
+        });
+    }
+
+    document.getElementById('export').addEventListener('click', () => {
+        if (!img || anchors.length === 0) { alert('Erst eine Plate laden und Anchors setzen.'); return; }
+        const W = img.naturalWidth, H = img.naturalHeight;
+        const lines = anchors.map(a =>
+            '    [' + a.ra.toFixed(4) + ', ' + a.dec.toFixed(4) + ', ' + (a.x / W).toFixed(4) + ', ' + (a.y / H).toFixed(4) + ']'
+        );
+        const header = currentLabel ? '// ' + currentLabel + '\n' : '';
+        const text = header + 'anchors: [\n' + lines.join(',\n') + '\n]';
+        navigator.clipboard.writeText(text).then(
+            () => alert('In Zwischenablage kopiert (' + anchors.length + ' Anker).'),
+            () => { prompt('Kopiere manuell:', text); }
+        );
+    });
+
+    document.getElementById('clear').addEventListener('click', () => {
+        if (!anchors.length) return;
+        if (!confirm('Alle ' + anchors.length + ' Anker löschen?')) return;
+        anchors.length = 0; pending = null; popup.style.display = 'none'; refreshList(); redraw();
+    });
+
+    window.addEventListener('resize', redraw);
+    // Shift held anywhere → activate the loupe (redraw only on state change to avoid keydown-repeat spam)
+    window.addEventListener('keydown', e => { if (e.key === 'Shift' && !shiftDown) { shiftDown = true; redraw(); } });
+    window.addEventListener('keyup',   e => { if (e.key === 'Shift' &&  shiftDown) { shiftDown = false; redraw(); } });
+})();
+</script>
+</body>
+</html>

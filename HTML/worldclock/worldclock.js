@@ -168,10 +168,18 @@
         if (localCity) localCity.highlight = true;
 
         let manualOffset = 0; // in minutes
-        let debugDayOffset = 0; // DEBUG: step the displayed date (Arrow keys) to watch the Moon, in days
+        const DAY_OFFSET_KEY = 'wc.dayOffset';
+        let debugDayOffset = (() => {                                                   // DEBUG: step the displayed date (Arrow keys), in days; persisted across reloads
+            try { const v = parseFloat(localStorage.getItem(DAY_OFFSET_KEY)); return isFinite(v) ? v : 0; } catch (_) { return 0; }
+        })();
         let lapseActive = false; // time-lapse (play): advances the displayed date each frame
         let lapseRate = 1000 / 3600;    // sky-hours advanced per real second while playing → 1000× real time
         let _lapseLast = 0;      // performance.now() of the previous frame (for dt)
+        // Planetarium crosshair: track Shift state so the drawFrame can switch to a bigger FK + coordinate readout.
+        window.addEventListener('keydown', (e) => { if (e.key === 'Shift' && !fkShift) fkShift = true; });
+        window.addEventListener('keyup',   (e) => { if (e.key === 'Shift' &&  fkShift) fkShift = false; });
+        canvas.addEventListener('mouseleave', () => { fkMouse = null; });
+
         // Sat-pass slow-motion: during time-lapse, ease the rate way down while a tracked satellite is above the horizon
         // so the pass is watchable; full lapseRate resumes (catches up) in the dead time between passes.
         const SAT_SLOMO = 30 / 3600;  // sky-hours/s while a satellite is up → 30× real time (a 6-min pass takes ~12 s to watch)
@@ -190,6 +198,9 @@
         let starHover = { x: 0, y: 0, on: false };  // pointer pos (canvas px) for the constellation hover-highlight (planetarium mode)
         let skyZoom = 1;  // planetarium zoom factor (mouse wheel / two-finger pinch); >1 = zoomed in
         let skyPanX = 0, skyPanY = 0;  // dome centre offset (px) so zoom homes in on the cursor; ESC resets
+        // Mouse-tracking crosshair for visual calibration (planetarium only). null when the pointer is outside the canvas.
+        let fkMouse = null;            // { x, y } in canvas CSS px
+        let fkShift = false;           // Shift held → bigger crosshair + coord readout
         // dome radial blend: 0 = fisheye (equidistant) … 1 = orthographic (real perspective). Keys , . — persisted.
         let projPersp = (() => { try { const v = parseFloat(localStorage.getItem(PROJ_PERSP_KEY)); return isFinite(v) ? Math.max(0, Math.min(1, v)) : 1; } catch (_) { return 1; } })();
         let skyInfoClosed = false;  // user dismissed the planetarium info box (re-shown when the planetarium is re-opened)
@@ -200,13 +211,24 @@
         let _dsLastLog = -1;        // last logged deep-sky-above-horizon count (avoids spamming the DEBUG window)
         // Sky-layer toggles — default on, but each restored from localStorage (persisted on every change).
         let showConstLines = loadSkyToggle('conLines', true);  // constellation lines/figures
-        let showConstNames = loadSkyToggle('conNames', true);  // constellation name labels
+        let showConstNames = showConstLines;                   // coupled with showConstLines (one menu toggle controls both); ignore any saved separate value
         let showEcliptic   = loadSkyToggle('ecliptic', true);  // ecliptic line
         let showPlanets    = loadSkyToggle('planets', true);   // planet markers + names
         let showZodiac     = loadSkyToggle('zodiac', true);    // zodiac symbols
         let showMoon       = loadSkyToggle('moon', true);      // the Moon (texture + phase)
         let showDeepsky    = loadSkyToggle('deepsky', true);   // deep-sky objects (nebulae/clusters/galaxies)
         let showSats       = loadSkyToggle('sats', true);      // satellites (ISS, Tiangong, Hubble) via SGP4
+        let showArt        = loadSkyToggle('art', true);       // mythology figures (Stellarium-style 3-star affine overlay) — on by default; key 'm' to toggle
+        let selectedArtId = null;                                // ID of the constellation whose plate is currently shown (set by clicking its name label)
+        let showArtAnchors = loadSkyToggle('artAnchors', true);  // red anchor markers (rings + crosshair + dashed polygon) — key 'a' toggles
+        let artHoverQuad  = null;                                // screen-space outer corners of the rendered plate → used to suppress star/constellation hover while pointer is over it
+        let conLabelHits  = [];                                  // populated each frame by drawStarfield: [{ id, x, y, w, h }] for click hit-testing on constellation names
+        let conLabelsCache = null;                               // labels[] saved at first render so they can be redrawn ON TOP of the art plate
+        let hoveredLabelId = null;                               // ID of the constellation whose name label the pointer is currently over → live preview of its plate
+        const ART_ALPHA_KEY = 'wc.artAlpha3';                    // bumped again to force-reset to 0.35 (fades up to 1.0 on plate-hover)
+        let artAlpha = (() => {                                  // 0..1 baseline opacity of the constellation-art plate; Cmd+↑/↓ in steps of 0.05; persisted
+            try { const v = parseFloat(localStorage.getItem(ART_ALPHA_KEY)); return isFinite(v) ? Math.max(0, Math.min(1, v)) : 0.35; } catch (_) { return 0.35; }
+        })();
         // Satellites run on the SAME displayed time as the rest of the sky (getDisplayTime) — real time, no acceleration.
         // So they cross the dome only during their actual passes; use the time-lapse (play) to fast-forward everything together.
         let visStarCount = 0, visConCount = 0;   // currently-visible counts (stars above horizon · constellations on screen)
@@ -288,6 +310,13 @@
         document.addEventListener('keydown', (e) => {
             const t = e.target;
             if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
+            // Cmd (or Ctrl) + ↑/↓ → tweak the constellation-art opacity in steps of 0.05 (persisted); plain ↑/↓ still steps the date by 1 hour
+            if ((e.metaKey || e.ctrlKey) && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) {
+                artAlpha = Math.max(0, Math.min(1, artAlpha + (e.key === 'ArrowUp' ? 0.05 : -0.05)));
+                try { localStorage.setItem(ART_ALPHA_KEY, artAlpha); } catch (_) {}
+                try { DebugWindow.log('[art] Transparenz ' + artAlpha.toFixed(2)); } catch (_) {}
+                e.preventDefault(); return;
+            }
             if (e.key === 'ArrowRight')      debugDayOffset += 1;
             else if (e.key === 'ArrowLeft')  debugDayOffset -= 1;
             else if (e.key === 'ArrowUp')    debugDayOffset += 1 / 24;
@@ -304,6 +333,8 @@
                 e.preventDefault(); return;
             }
             else if (e.key === 'b' || e.key === 'B') { dsoPhotos = !dsoPhotos; saveSkyToggle('photos', dsoPhotos); try { DebugWindow.log('[deepsky] Fotos ' + (dsoPhotos ? 'an' : 'aus')); } catch (_) {} e.preventDefault(); return; }  // deep-sky photos ↔ stylised glow
+            else if (e.key === 'm' || e.key === 'M') { showArt = !showArt; saveSkyToggle('art', showArt); try { DebugWindow.log('[art] Mythen-Figuren ' + (showArt ? 'an' : 'aus')); } catch (_) {} e.preventDefault(); return; }   // constellation art on/off
+            else if (e.key === 'a' || e.key === 'A') { showArtAnchors = !showArtAnchors; saveSkyToggle('artAnchors', showArtAnchors); try { DebugWindow.log('[art] Anker ' + (showArtAnchors ? 'an' : 'aus')); } catch (_) {} e.preventDefault(); return; }   // anchor markers on/off
             else if (e.key === ',' || e.key === '.') {
                 projPersp = e.key === ',' ? Math.max(0, projPersp - 0.1) : Math.min(1, projPersp + 0.1);
                 try { localStorage.setItem(PROJ_PERSP_KEY, projPersp); } catch (_) {}
@@ -312,6 +343,7 @@
             }
             else return;
             e.preventDefault();
+            try { localStorage.setItem(DAY_OFFSET_KEY, debugDayOffset); } catch (_) {}   // persist so the chosen date survives reloads
             try { DebugWindow.log('[debug] Datum-Offset ' + debugDayOffset.toFixed(3) + ' d → ' + getDisplayTime().toLocaleString('de-DE')); } catch (_) {}
         });
 
@@ -461,6 +493,10 @@
             window.lastMouseX = e.clientX;
             window.lastMouseY = e.clientY;
             const rect = canvas.getBoundingClientRect();
+            // Update planetarium crosshair pos (canvas CSS px from top-left)
+            const _fkx = e.clientX - rect.left, _fky = e.clientY - rect.top;
+            fkMouse = (_fkx >= 0 && _fky >= 0 && _fkx <= rect.width && _fky <= rect.height) ? { x: _fkx, y: _fky } : null;
+            fkShift = e.shiftKey;                                                       // read the modifier straight from the event → no chance of getting stuck
             const mx = e.clientX - (rect.left + rect.width / 2);
             const my = e.clientY - (rect.top + rect.height / 2);
             // Existing hover logic continues as before
@@ -1681,6 +1717,70 @@
 
             // 7. Central selection panel (time box + neighbor list + moon + hover tooltip)
             if (displayAlpha > 0 && targetCity) drawSelectionPanel(r, cx, cy, mapRotation, time);
+
+            // 8. Mouse overlay (planetarium only): Shift held → magnifier loupe centred on the cursor (no FK underneath);
+            //    otherwise → thin crosshair at the cursor for visual calibration.
+            if (fkMouse && skyTarget) {
+                const lx = fkMouse.x, ly = fkMouse.y;
+                if (fkShift) {                                                       // — LOUPE centred on the cursor (no FK at all, neither lines nor centre cross) —
+                    const dpr = window.devicePixelRatio || 1;
+                    const zoom = 5, loupeR = 110;
+                    const srcSize = (loupeR * 2) / zoom;                              // CSS px diameter of the area being magnified
+                    // Precise integer-pixel source rect centred on the cursor (avoid sub-pixel drift in getImageData).
+                    const cxPx = Math.round(lx * dpr), cyPx = Math.round(ly * dpr);
+                    const half = Math.round(srcSize / 2 * dpr);
+                    const sx0 = cxPx - half, sy0 = cyPx - half;
+                    const sw = half * 2, sh = half * 2;
+                    // Capture (clamp the read inside the canvas; pad the offscreen so the cursor stays geometrically at its centre).
+                    const _off = document.createElement('canvas');
+                    _off.width = sw; _off.height = sh;
+                    const _octx = _off.getContext('2d');
+                    _octx.fillStyle = '#000'; _octx.fillRect(0, 0, sw, sh);
+                    const rx = Math.max(0, sx0), ry = Math.max(0, sy0);
+                    const rw = Math.min(canvas.width  - rx, sw - (rx - sx0));
+                    const rh = Math.min(canvas.height - ry, sh - (ry - sy0));
+                    if (rw > 0 && rh > 0) {
+                        try {
+                            const imgData = ctx.getImageData(rx, ry, rw, rh);
+                            _octx.putImageData(imgData, rx - sx0, ry - sy0);
+                        } catch (_) { /* CORS or read failure — black backdrop only */ }
+                    }
+                    ctx.save();
+                    ctx.beginPath(); ctx.arc(lx, ly, loupeR, 0, Math.PI * 2); ctx.clip();
+                    ctx.imageSmoothingEnabled = false;                                // crisp pixels at high zoom
+                    ctx.drawImage(_off, lx - loupeR, ly - loupeR, loupeR * 2, loupeR * 2);
+                    ctx.imageSmoothingEnabled = true;
+                    ctx.restore();
+                    // Loupe ring border (white + red) — no centre cross, no inner FK
+                    ctx.save();
+                    ctx.strokeStyle = 'rgba(255, 255, 255, 0.95)'; ctx.lineWidth = 4;
+                    ctx.beginPath(); ctx.arc(lx, ly, loupeR, 0, Math.PI * 2); ctx.stroke();
+                    ctx.strokeStyle = 'rgb(220, 30, 30)'; ctx.lineWidth = 1.8;
+                    ctx.beginPath(); ctx.arc(lx, ly, loupeR, 0, Math.PI * 2); ctx.stroke();
+                    ctx.restore();
+                } else {                                                              // — thin FK through the cursor —
+                    ctx.save();
+                    ctx.strokeStyle = 'rgba(255, 255, 255, 0.55)'; ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.moveTo(0, ly + 0.5); ctx.lineTo(canvas.width, ly + 0.5);
+                    ctx.moveTo(lx + 0.5, 0); ctx.lineTo(lx + 0.5, canvas.height);
+                    ctx.stroke();
+                    ctx.strokeStyle = 'rgb(220, 30, 30)'; ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.moveTo(0, ly + 0.5); ctx.lineTo(canvas.width, ly + 0.5);
+                    ctx.moveTo(lx + 0.5, 0); ctx.lineTo(lx + 0.5, canvas.height);
+                    ctx.stroke();
+                    ctx.strokeStyle = 'rgb(220, 30, 30)'; ctx.lineWidth = 1.5;
+                    ctx.beginPath();
+                    ctx.moveTo(lx - 10, ly); ctx.lineTo(lx - 3, ly);
+                    ctx.moveTo(lx + 3, ly); ctx.lineTo(lx + 10, ly);
+                    ctx.moveTo(lx, ly - 10); ctx.lineTo(lx, ly - 3);
+                    ctx.moveTo(lx, ly + 3); ctx.lineTo(lx, ly + 10);
+                    ctx.stroke();
+                    ctx.fillStyle = 'rgb(220, 30, 30)'; ctx.beginPath(); ctx.arc(lx, ly, 1.5, 0, Math.PI * 2); ctx.fill();
+                    ctx.restore();
+                }
+            }
         }
 
         function setupUI() {

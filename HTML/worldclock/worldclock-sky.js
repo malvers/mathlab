@@ -151,6 +151,17 @@
 
 // ===== Sky interaction (hover, zoom, tooltips) =====
         // --- Constellation hover: track the pointer in canvas px so drawStarfield can highlight what's under it ---
+        // Point-in-quad (ray-casting) — used to detect when the pointer is over the currently-rendered constellation plate.
+        function _ptInArtQuad(px, py) {
+            if (!artHoverQuad || artHoverQuad.length !== 4) return false;
+            let inside = false;
+            for (let i = 0, j = 3; i < 4; j = i++) {
+                const xi = artHoverQuad[i][0], yi = artHoverQuad[i][1];
+                const xj = artHoverQuad[j][0], yj = artHoverQuad[j][1];
+                if (((yi > py) !== (yj > py)) && (px < (xj - xi) * (py - yi) / (yj - yi) + xi)) inside = !inside;
+            }
+            return inside;
+        }
         function setStarHover(clientX, clientY) {
             const rect = canvas.getBoundingClientRect();
             starHover.x = clientX - rect.left;
@@ -158,6 +169,18 @@
             starHover.on = true;
         }
         canvas.addEventListener('mousemove', (e) => setStarHover(e.clientX, e.clientY));
+        // Track which constellation name label the pointer is currently over (used for cyan-highlight + live plate preview).
+        canvas.addEventListener('mousemove', (e) => {
+            if (!conLabelHits || !conLabelHits.length) { hoveredLabelId = null; return; }
+            const _r = canvas.getBoundingClientRect();
+            const _x = e.clientX - _r.left, _y = e.clientY - _r.top;
+            let _found = null;
+            for (const h of conLabelHits) {
+                if (_x >= h.x && _x <= h.x + h.w && _y >= h.y && _y <= h.y + h.h) { _found = h.id; break; }
+            }
+            hoveredLabelId = _found;
+        });
+        canvas.addEventListener('mouseleave', () => { hoveredLabelId = null; });
         canvas.addEventListener('mouseleave', () => { starHover.on = false; });
         canvas.addEventListener('touchstart', (e) => { if (e.touches.length) setStarHover(e.touches[0].clientX, e.touches[0].clientY); }, { passive: true });
         canvas.addEventListener('touchmove',  (e) => { if (e.touches.length === 1) setStarHover(e.touches[0].clientX, e.touches[0].clientY); }, { passive: true });
@@ -269,6 +292,13 @@
             return best;
         }
         function hoverPick(clientX, clientY) {    // priority: zodiac → deep-sky → star/constellation
+            // Suppress all hover info if the pointer is over the currently-rendered constellation plate.
+            const _rect = canvas.getBoundingClientRect();
+            if (_ptInArtQuad(clientX - _rect.left, clientY - _rect.top)) {
+                hoveredZodiac = null; hoveredDeepsky = null; hoveredStar = null;
+                showInfoBox(null);
+                return;
+            }
             const zod = zodiacAt(clientX, clientY);
             if (zod) {
                 hoveredZodiac = zod; hoveredDeepsky = null; hoveredStar = null;
@@ -293,7 +323,20 @@
         canvas.addEventListener('pointerup', (e) => {
             if (!_spDown) return;                 // it was a drag (rotation), not a click/tap
             _spDown = null;
-            if (skyTarget) hoverPick(e.clientX, e.clientY);
+            if (!skyTarget) return;
+            // Constellation-name click: if Celestials (showArt) is on, clicking a label selects/deselects that constellation's plate.
+            if (showArt && conLabelHits && conLabelHits.length) {
+                const _r = canvas.getBoundingClientRect();
+                const _cx2 = e.clientX - _r.left, _cy2 = e.clientY - _r.top;
+                for (const h of conLabelHits) {
+                    if (_cx2 >= h.x && _cx2 <= h.x + h.w && _cy2 >= h.y && _cy2 <= h.y + h.h) {
+                        selectedArtId = (selectedArtId === h.id) ? null : h.id;
+                        try { DebugWindow.log('[art] selected ' + (selectedArtId || '–')); } catch (_) {}
+                        return;
+                    }
+                }
+            }
+            hoverPick(e.clientX, e.clientY);
         });
         canvas.addEventListener('pointerleave', () => { showStarInfo(null); hoveredZodiac = null; hoveredDeepsky = null; });
         document.getElementById('sky-play')?.addEventListener('click', () => toggleLapse());
@@ -739,21 +782,26 @@
                     if (!p[2]) continue;
                     // Fade in/out over the last ~6 % toward the horizon (no popping as a constellation rises/sets).
                     const f = dome ? Math.max(0, Math.min(1, (Rdome - Math.hypot(p[0] - cx, p[1] - cy)) / (Rdome * 0.06))) : 1;
-                    labels.push({ t: _nm[con.id] || con.id, x: p[0], y: p[1], hot: con.id === hoverId, f });
+                    labels.push({ id: con.id, t: _nm[con.id] || con.id, x: p[0], y: p[1], hot: con.id === hoverId, f });
                 }
                 visConCount = labels.length;
-                // (1) 50% dark-blue backdrop boxes behind the labels, no border (alpha follows the horizon fade)
+                conLabelsCache = { labels, nameA, a, padX: 6, boxH: 19 };             // cached → redrawn ON TOP of the constellation-art plate (see after the art block)
+                // (1) 50% dark-blue backdrop boxes behind the labels + populate click hit-boxes for the constellation-art selection feature
                 const padX = 6, boxH = 19;
+                conLabelHits = [];
                 for (const L of labels) {
                     const bw = ctx.measureText(L.t).width + padX * 2;
                     ctx.fillStyle = `rgba(8, 20, 42, ${0.5 * a * L.f})`;
                     ctx.beginPath();
                     ctx.roundRect(L.x - bw / 2, L.y - boxH / 2, bw, boxH, 5);   // slightly rounded, borderless
                     ctx.fill();
+                    conLabelHits.push({ id: L.id, x: L.x - bw / 2, y: L.y - boxH / 2, w: bw, h: boxH });
                 }
-                // (2) the labels themselves, hovered one red
+                // (2) the labels themselves — selected (pinned) = red, hovered (line OR label) = cyan, normal = pale blue
                 for (const L of labels) {
-                    ctx.fillStyle = L.hot ? `rgba(0, 210, 255, ${Math.max(nameA, 0.95) * L.f})` : `rgba(150, 185, 235, ${nameA * L.f})`;
+                    if (L.id === selectedArtId)                       ctx.fillStyle = `rgba(255, 80, 80, ${Math.max(nameA, 0.95) * L.f})`;
+                    else if (L.hot || L.id === hoveredLabelId)        ctx.fillStyle = `rgba(0, 210, 255, ${Math.max(nameA, 0.95) * L.f})`;
+                    else                                              ctx.fillStyle = `rgba(150, 185, 235, ${nameA * L.f})`;
                     ctx.fillText(L.t, L.x, L.y);
                 }
             }
@@ -807,6 +855,234 @@
                     ctx.fillStyle = `rgba(245, 194, 66, ${a * _f})`;   // λ orange like Sun/planets
                     ctx.font = '600 10px Orbitron'; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
                     ctx.fillText('Mond', _mp[0], _mp[1] + 12);
+                }
+            }
+            // Constellation overlay (Jamieson-style plate) — multi-anchor piecewise-affine warp via Delaunay triangulation.
+            // Each entry's anchors map texture pixels (tx*W, ty*H) onto live sky positions (proj(ra, dec)); triangles tile
+            // the texture, each warped independently → flat plates fold cleanly onto the curved dome. Engraving lines are
+            // inverted to white and added ('lighter' blend) so the cream paper disappears and only the ink glows. Toggle 'm'.
+            artHoverQuad = null;                                                  // reset each frame; set below if a plate is rendered
+            if (showArt && selectedArtId && typeof CONSTELLATION_ART !== 'undefined') {  // only show a plate when the user has clicked a constellation name (selectedArtId set)
+                const _solveAff = (p1, p2, p3, q1, q2, q3) => {                       // (p_i → q_i) affine: q = M·p + t
+                    const x1 = p1[0], y1 = p1[1], x2 = p2[0], y2 = p2[1], x3 = p3[0], y3 = p3[1];
+                    const det = (x2 - x1) * (y3 - y1) - (y2 - y1) * (x3 - x1);
+                    if (Math.abs(det) < 1e-6) return null;
+                    const inv = 1 / det;
+                    const u1 = q1[0], u2 = q2[0], u3 = q3[0], v1 = q1[1], v2 = q2[1], v3 = q3[1];
+                    const a = ((u2 - u1) * (y3 - y1) - (u3 - u1) * (y2 - y1)) * inv;
+                    const b = ((u3 - u1) * (x2 - x1) - (u2 - u1) * (x3 - x1)) * inv;
+                    const c = u1 - a * x1 - b * y1;
+                    const d = ((v2 - v1) * (y3 - y1) - (v3 - v1) * (y2 - y1)) * inv;
+                    const e = ((v3 - v1) * (x2 - x1) - (v2 - v1) * (x3 - x1)) * inv;
+                    const f = v1 - d * x1 - e * y1;
+                    return { a, b, c, d, e, f };
+                };
+                // Delaunay (Bowyer-Watson): for N anchor points returns triangle index triples [i, j, k] tiling the convex hull.
+                // For N=3 trivially returns the single triangle; for N=4 returns the better of the two diagonal splits; scales to N.
+                const _delaunay = (pts) => {
+                    const n = pts.length;
+                    if (n < 3) return [];
+                    if (n === 3) return [[0, 1, 2]];
+                    let minX = pts[0][0], minY = pts[0][1], maxX = minX, maxY = minY;
+                    for (const p of pts) {
+                        if (p[0] < minX) minX = p[0]; if (p[1] < minY) minY = p[1];
+                        if (p[0] > maxX) maxX = p[0]; if (p[1] > maxY) maxY = p[1];
+                    }
+                    const dM = Math.max(maxX - minX, maxY - minY) * 20 + 1;
+                    const _cx = (minX + maxX) / 2, _cy = (minY + maxY) / 2;
+                    const all = pts.concat([[_cx - dM, _cy - 1], [_cx, _cy + dM], [_cx + dM, _cy - 1]]);
+                    let tris = [[n, n + 1, n + 2]];
+                    const inCirc = (A, B, C, P) => {
+                        const ax = A[0] - P[0], ay = A[1] - P[1];
+                        const bx = B[0] - P[0], by = B[1] - P[1];
+                        const cx2 = C[0] - P[0], cy2 = C[1] - P[1];
+                        const a2 = ax * ax + ay * ay, b2 = bx * bx + by * by, c2 = cx2 * cx2 + cy2 * cy2;
+                        const dT = ax * (by * c2 - cy2 * b2) - ay * (bx * c2 - cx2 * b2) + a2 * (bx * cy2 - by * cx2);
+                        const o = (B[0] - A[0]) * (C[1] - A[1]) - (B[1] - A[1]) * (C[0] - A[0]);
+                        return o > 0 ? dT > 0 : dT < 0;
+                    };
+                    for (let i = 0; i < n; i++) {
+                        const P = pts[i];
+                        const bad = [];
+                        for (let ti = 0; ti < tris.length; ti++) {
+                            if (inCirc(all[tris[ti][0]], all[tris[ti][1]], all[tris[ti][2]], P)) bad.push(ti);
+                        }
+                        const edges = [];
+                        for (const ti of bad) {
+                            const tr = tris[ti];
+                            edges.push([tr[0], tr[1]], [tr[1], tr[2]], [tr[2], tr[0]]);
+                        }
+                        const bnd = [];                                                // hole boundary = edges appearing exactly once
+                        for (let ei = 0; ei < edges.length; ei++) {
+                            let dup = false;
+                            for (let ej = 0; ej < edges.length; ej++) {
+                                if (ei !== ej && edges[ei][0] === edges[ej][1] && edges[ei][1] === edges[ej][0]) { dup = true; break; }
+                            }
+                            if (!dup) bnd.push(edges[ei]);
+                        }
+                        for (let bi = bad.length - 1; bi >= 0; bi--) tris.splice(bad[bi], 1);
+                        for (const ed of bnd) tris.push([ed[0], ed[1], i]);
+                    }
+                    return tris.filter(t => t[0] < n && t[1] < n && t[2] < n);
+                };
+                for (const art of CONSTELLATION_ART) {
+                    if (art.id !== selectedArtId) continue;                           // render only the constellation the user clicked
+                    if (art.img && !art._img) {                                       // lazy-load the texture once
+                        art._img = new Image();
+                        art._img.onload = () => { art._imgReady = true; };
+                        art._img.src = '../resources/constellations/' + art.img;
+                    }
+                    const s = art.anchors.map(an => proj(an[0], an[1]));              // anchors → live screen positions
+                    if (!s.every(p => p && isFinite(p[0]) && isFinite(p[1]))) continue;
+                    if (art._imgReady && art._img.naturalWidth) {                     // texture ready → warp it triangle-by-triangle
+                        const W = art._img.naturalWidth, H = art._img.naturalHeight;
+                        const n = art.anchors.length;
+                        // Cache (per art): LSQ-fit a linear pixel → (RA, Dec) from the calibrated anchors, build a mesh grid over the
+                        // WHOLE texture, and pre-compute each grid point's (RA, Dec). Each frame we re-project the grid via proj() so
+                        // the dome's curvature is captured by many small triangles instead of squished into 4 flat ones.
+                        if (!art._meshReady) {
+                            const t = art.anchors.map(an => [an[2] * W, an[3] * H]);
+                            const _lsq = (vals) => {
+                                let sxx = 0, sxy = 0, sx = 0, syy = 0, sy = 0;
+                                let svx = 0, svy = 0, sv = 0;
+                                for (let i = 0; i < n; i++) {
+                                    const x = t[i][0], y = t[i][1], v = vals[i];
+                                    sxx += x * x; sxy += x * y; sx += x;
+                                    syy += y * y; sy += y;
+                                    svx += v * x; svy += v * y; sv += v;
+                                }
+                                const det = sxx * (syy * n - sy * sy) - sxy * (sxy * n - sy * sx) + sx * (sxy * sy - syy * sx);
+                                if (Math.abs(det) < 1e-9) return null;
+                                const inv = 1 / det;
+                                const a = (svx * (syy * n - sy * sy) - sxy * (svy * n - sy * sv) + sx * (svy * sy - syy * sv)) * inv;
+                                const b = (sxx * (svy * n - sy * sv) - svx * (sxy * n - sy * sx) + sx * (sxy * sv - svy * sx)) * inv;
+                                const c = (sxx * (syy * sv - svy * sy) - sxy * (sxy * sv - svy * sx) + svx * (sxy * sy - syy * sx)) * inv;
+                                return [a, b, c];
+                            };
+                            const raA  = _lsq(art.anchors.map(an => an[0]));
+                            const decA = _lsq(art.anchors.map(an => an[1]));
+                            if (!raA || !decA || n < 3) {
+                                art._meshReady = 'fail';
+                            } else {
+                                const GRID_N = 14;                                    // 14×14 cells → 15×15 = 225 grid points → 392 triangles → smooth curved edges
+                                const cellW = W / GRID_N, cellH = H / GRID_N;
+                                art._meshTx  = [];                                    // texture-pixel positions of grid points
+                                art._meshRA  = [];                                    // extrapolated RA per grid point
+                                art._meshDec = [];                                    // extrapolated Dec
+                                for (let j = 0; j <= GRID_N; j++) {
+                                    for (let i = 0; i <= GRID_N; i++) {
+                                        const px = i * cellW, py = j * cellH;
+                                        art._meshTx.push([px, py]);
+                                        art._meshRA.push (raA[0]  * px + raA[1]  * py + raA[2]);
+                                        art._meshDec.push(decA[0] * px + decA[1] * py + decA[2]);
+                                    }
+                                }
+                                art._meshTris = [];                                   // 2 triangles per cell
+                                const _idx = (i, j) => j * (GRID_N + 1) + i;
+                                for (let j = 0; j < GRID_N; j++) {
+                                    for (let i = 0; i < GRID_N; i++) {
+                                        const tl = _idx(i, j),     tr = _idx(i + 1, j);
+                                        const bl = _idx(i, j + 1), br = _idx(i + 1, j + 1);
+                                        art._meshTris.push([tl, tr, br]);
+                                        art._meshTris.push([tl, br, bl]);
+                                    }
+                                }
+                                art._meshReady = true;
+                            }
+                        }
+                        if (art._meshReady === true) {
+                            // Per frame: project all grid points to screen — dome curvature handled by proj() at each individual point.
+                            const _sk = new Array(art._meshTx.length);
+                            for (let i = 0; i < art._meshTx.length; i++) _sk[i] = proj(art._meshRA[i], art._meshDec[i]);
+                            // Hover-detect: is the mouse inside the plate's 4-corner outer quad? → ease alpha toward 1.0 while hovering, back to artAlpha otherwise.
+                            const _gN = Math.round(Math.sqrt(art._meshTx.length)) - 1;
+                            const _quad = [_sk[0], _sk[_gN], _sk[_sk.length - 1], _sk[_gN * (_gN + 1)]];   // TL, TR, BR, BL
+                            artHoverQuad = _quad;                                     // expose to the hover-suppression check (used by setStarHover/hoverPick)
+                            let _hover = false;
+                            if (typeof fkMouse !== 'undefined' && fkMouse && _quad.every(p => p)) {
+                                const px = fkMouse.x, py = fkMouse.y;
+                                for (let i = 0, j = 3; i < 4; j = i++) {
+                                    const xi = _quad[i][0], yi = _quad[i][1];
+                                    const xj = _quad[j][0], yj = _quad[j][1];
+                                    if (((yi > py) !== (yj > py)) && (px < (xj - xi) * (py - yi) / (yj - yi) + xi)) _hover = !_hover;
+                                }
+                            }
+                            const _target = _hover ? 1 : artAlpha;
+                            if (art._alphaEff == null) art._alphaEff = artAlpha;
+                            art._alphaEff += (_target - art._alphaEff) * 0.15;        // smooth ~10-frame fade
+                            const _dpr = window.devicePixelRatio || 1;
+                            for (const tri of art._meshTris) {
+                                const tp0 = art._meshTx[tri[0]], tp1 = art._meshTx[tri[1]], tp2 = art._meshTx[tri[2]];
+                                const sp0 = _sk[tri[0]], sp1 = _sk[tri[1]], sp2 = _sk[tri[2]];
+                                if (!sp0 || !sp1 || !sp2) continue;
+                                const m = _solveAff(tp0, tp1, tp2, sp0, sp1, sp2);
+                                if (!m) continue;
+                                ctx.save();
+                                ctx.setTransform(m.a * _dpr, m.d * _dpr, m.b * _dpr, m.e * _dpr, m.c * _dpr, m.f * _dpr);
+                                ctx.beginPath();
+                                ctx.moveTo(tp0[0], tp0[1]); ctx.lineTo(tp1[0], tp1[1]); ctx.lineTo(tp2[0], tp2[1]); ctx.closePath();
+                                ctx.clip();
+                                ctx.globalAlpha = a * art._alphaEff;                  // baseline artAlpha (Cmd+↑/↓), fades to 1.0 on hover
+                                ctx.drawImage(art._img, 0, 0);
+                                ctx.restore();
+                            }
+                        }
+                    } else {                                                          // no image yet → dashed polygon outlining the anchor hull
+                        ctx.save();
+                        ctx.globalAlpha = a * 0.5;
+                        ctx.strokeStyle = 'rgba(170, 230, 255, 0.7)';
+                        ctx.lineWidth = 1; ctx.setLineDash([4, 3]);
+                        ctx.beginPath();
+                        ctx.moveTo(s[0][0], s[0][1]);
+                        for (let i = 1; i < s.length; i++) ctx.lineTo(s[i][0], s[i][1]);
+                        ctx.closePath(); ctx.stroke();
+                        ctx.setLineDash([]);
+                        let _ccx = 0, _ccy = 0;
+                        for (const p of s) { _ccx += p[0]; _ccy += p[1]; }
+                        _ccx /= s.length; _ccy /= s.length;
+                        ctx.fillStyle = 'rgba(170, 230, 255, 0.85)';
+                        ctx.font = '600 10px Orbitron'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                        ctx.fillText(art.id, _ccx, _ccy);
+                        ctx.restore();
+                    }
+                    // Debug overlay: red polygon connecting all anchors + ring/crosshair/label at each anchor's sky position. Toggle with 'a'.
+                    if (!showArtAnchors) continue;
+                    ctx.save();
+                    ctx.globalAlpha = 1;
+                    ctx.strokeStyle = 'rgba(220, 30, 30, 0.55)';
+                    ctx.lineWidth = 1.5; ctx.setLineDash([6, 4]);
+                    ctx.beginPath();
+                    ctx.moveTo(s[0][0], s[0][1]);
+                    for (let i = 1; i < s.length; i++) ctx.lineTo(s[i][0], s[i][1]);
+                    ctx.closePath(); ctx.stroke();
+                    ctx.setLineDash([]);
+                    ctx.strokeStyle = 'rgb(255, 80, 80)';
+                    ctx.fillStyle = 'rgb(255, 80, 80)';
+                    ctx.lineWidth = 2;
+                    ctx.font = '700 11px Orbitron'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+                    for (let i = 0; i < s.length; i++) {
+                        const x = s[i][0], y = s[i][1];
+                        ctx.beginPath(); ctx.arc(x, y, 8, 0, Math.PI * 2); ctx.stroke();
+                        ctx.beginPath();
+                        ctx.moveTo(x - 12, y); ctx.lineTo(x + 12, y);
+                        ctx.moveTo(x, y - 12); ctx.lineTo(x, y + 12);
+                        ctx.stroke();
+                        ctx.fillText(art.id + '·' + i, x + 14, y);
+                    }
+                    ctx.restore();
+                }
+            }
+            // Re-render ONLY the selected (pinned) constellation's name ON TOP of the plate so it stays readable as the red anchor label.
+            if (selectedArtId && conLabelsCache && conLabelsCache.labels) {
+                const { labels: _Ls, nameA: _nA, a: _a, padX: _pX, boxH: _bH } = conLabelsCache;
+                const _sel = _Ls.find(L => L.id === selectedArtId);
+                if (_sel) {
+                    ctx.font = '12.24px Orbitron'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                    const bw = ctx.measureText(_sel.t).width + _pX * 2;
+                    ctx.fillStyle = `rgba(8, 20, 42, ${0.85 * _a * _sel.f})`;         // strong backdrop so it overrides the plate underneath
+                    ctx.beginPath(); ctx.roundRect(_sel.x - bw / 2, _sel.y - _bH / 2, bw, _bH, 5); ctx.fill();
+                    ctx.fillStyle = `rgba(255, 80, 80, ${Math.max(_nA, 0.95) * _sel.f})`;
+                    ctx.fillText(_sel.t, _sel.x, _sel.y);
                 }
             }
             // Satellites (ISS, Tiangong, Hubble): SGP4 via satellite.js → alt/az for the dome's location, plotted

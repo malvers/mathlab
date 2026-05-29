@@ -130,8 +130,8 @@
     if (!stack) return;
     const hamb = document.getElementById('wc-menu-btn-r');
     const map = [
-        ['wc-tg-conlines', () => showConstLines, v => { showConstLines = v; }, 'conLines'],
-        ['wc-tg-connames', () => showConstNames, v => { showConstNames = v; }, 'conNames'],
+        ['wc-tg-conlines', () => showConstLines, v => { showConstLines = v; showConstNames = v; saveSkyToggle('conNames', v); }, 'conLines'],   // names follow lines (one toggle for both)
+        ['wc-tg-art',      () => showArt,        v => { showArt        = v; }, 'art'],
         ['wc-tg-ecliptic', () => showEcliptic,   v => { showEcliptic   = v; }, 'ecliptic'],
         ['wc-tg-planets',  () => showPlanets,    v => { showPlanets    = v; }, 'planets'],
         ['wc-tg-zodiac',   () => showZodiac,     v => { showZodiac     = v; }, 'zodiac'],

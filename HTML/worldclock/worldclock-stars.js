@@ -95,3 +95,22 @@ const CONSTELLATION_LINES = [
 // IAU constellation names (Latin), keyed by 3-letter abbreviation.
 const CONSTELLATION_NAMES = {"And":"Andromeda","Ant":"Antlia","Aps":"Apus","Aqr":"Aquarius","Aql":"Aquila","Ara":"Ara","Ari":"Aries","Aur":"Auriga","Boo":"Boötes","Cae":"Caelum","Cam":"Camelopardalis","Cnc":"Cancer","CVn":"Canes Venatici","CMa":"Canis Major","CMi":"Canis Minor","Cap":"Capricornus","Car":"Carina","Cas":"Cassiopeia","Cen":"Centaurus","Cep":"Cepheus","Cet":"Cetus","Cha":"Chamaeleon","Cir":"Circinus","Col":"Columba","Com":"Coma Berenices","CrA":"Corona Australis","CrB":"Corona Borealis","Crv":"Corvus","Crt":"Crater","Cru":"Crux","Cyg":"Cygnus","Del":"Delphinus","Dor":"Dorado","Dra":"Draco","Equ":"Equuleus","Eri":"Eridanus","For":"Fornax","Gem":"Gemini","Gru":"Grus","Her":"Hercules","Hor":"Horologium","Hya":"Hydra","Hyi":"Hydrus","Ind":"Indus","Lac":"Lacerta","Leo":"Leo","LMi":"Leo Minor","Lep":"Lepus","Lib":"Libra","Lup":"Lupus","Lyn":"Lynx","Lyr":"Lyra","Men":"Mensa","Mic":"Microscopium","Mon":"Monoceros","Mus":"Musca","Nor":"Norma","Oct":"Octans","Oph":"Ophiuchus","Ori":"Orion","Pav":"Pavo","Peg":"Pegasus","Per":"Perseus","Phe":"Phoenix","Pic":"Pictor","Psc":"Pisces","PsA":"Piscis Austrinus","Pup":"Puppis","Pyx":"Pyxis","Ret":"Reticulum","Sge":"Sagitta","Sgr":"Sagittarius","Sco":"Scorpius","Scl":"Sculptor","Sct":"Scutum","Ser":"Serpens","Sex":"Sextans","Tau":"Taurus","Tel":"Telescopium","Tri":"Triangulum","TrA":"Triangulum Australe","Tuc":"Tucana","UMa":"Ursa Major","UMi":"Ursa Minor","Vel":"Vela","Vir":"Virgo","Vol":"Volans","Vul":"Vulpecula"};   // Latin (IAU)
 const CONSTELLATION_NAMES_DE = {"And":"Andromeda","Ant":"Luftpumpe","Aps":"Paradiesvogel","Aqr":"Wassermann","Aql":"Adler","Ara":"Altar","Ari":"Widder","Aur":"Fuhrmann","Boo":"Bärenhüter","Cae":"Grabstichel","Cam":"Giraffe","Cnc":"Krebs","CVn":"Jagdhunde","CMa":"Großer Hund","CMi":"Kleiner Hund","Cap":"Steinbock","Car":"Kiel","Cas":"Kassiopeia","Cen":"Zentaur","Cep":"Kepheus","Cet":"Walfisch","Cha":"Chamäleon","Cir":"Zirkel","Col":"Taube","Com":"Haar der Berenike","CrA":"Südliche Krone","CrB":"Nördliche Krone","Crv":"Rabe","Crt":"Becher","Cru":"Kreuz des Südens","Cyg":"Schwan","Del":"Delfin","Dor":"Schwertfisch","Dra":"Drache","Equ":"Füllen","Eri":"Eridanus","For":"Ofen","Gem":"Zwillinge","Gru":"Kranich","Her":"Herkules","Hor":"Pendeluhr","Hya":"Wasserschlange","Hyi":"Kleine Wasserschlange","Ind":"Indianer","Lac":"Eidechse","Leo":"Löwe","LMi":"Kleiner Löwe","Lep":"Hase","Lib":"Waage","Lup":"Wolf","Lyn":"Luchs","Lyr":"Leier","Men":"Tafelberg","Mic":"Mikroskop","Mon":"Einhorn","Mus":"Fliege","Nor":"Winkelmaß","Oct":"Oktant","Oph":"Schlangenträger","Ori":"Orion","Pav":"Pfau","Peg":"Pegasus","Per":"Perseus","Phe":"Phönix","Pic":"Maler","Psc":"Fische","PsA":"Südlicher Fisch","Pup":"Achterdeck","Pyx":"Schiffskompass","Ret":"Netz","Sge":"Pfeil","Sgr":"Schütze","Sco":"Skorpion","Scl":"Bildhauer","Sct":"Schild","Ser":"Schlange","Sex":"Sextant","Tau":"Stier","Tel":"Teleskop","Tri":"Dreieck","TrA":"Südliches Dreieck","Tuc":"Tukan","UMa":"Großer Bär","UMi":"Kleiner Bär","Vel":"Segel","Vir":"Jungfrau","Vol":"Fliegender Fisch","Vul":"Füchschen"};   // German
+
+// Constellation mythology figures (Stellarium-style 3-star affine anchoring). Each entry:
+//   id      : IAU 3-letter code (matches CONSTELLATION_LINES)
+//   img     : transparent PNG under HTML/resources/constellations/ — dark line-art on alpha; the renderer inverts to white.
+//   anchors : exactly three [RA°(J2000), Dec°(J2000), tx, ty]. tx/ty are normalised positions (0..1) of that star
+//             on the texture; the renderer solves the affine map (tx*W, ty*H) → screen(ra, dec) each frame.
+// Texture coords are first-guess placeholders — recalibrate once the freigestellte plate exists (tweak tx/ty).
+const CONSTELLATION_ART = [
+    {
+        id: 'UMa', img: 'Alexander_Jamieson_Celestial_Atlas-Plate_6.jpg',
+        anchors: [
+            // 4 plate-frame corners (RA, Dec, tx, ty) — calibrated via calibrate.html. Order: clockwise (BR → BL → TL → TR).
+            [130.0000, 40.0000, 0.8586, 0.6849],   // BR
+            [190.1700, 34.8500, 0.1257, 0.7748],   // BL
+            [190.0000, 70.0000, 0.1277, 0.1610],   // TL
+            [129.8300, 70.0500, 0.8607, 0.1602]    // TR
+        ]
+    }
+];
