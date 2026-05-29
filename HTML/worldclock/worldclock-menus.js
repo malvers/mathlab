@@ -179,3 +179,119 @@
         close();
     });
 })();
+
+// --- Constellation search (top-right): filters German + Latin names; on pick rotates the sky so the chosen
+// constellation culminates (RA on local meridian) and selects it for the celestial-art plate. Shown only in
+// planetarium mode; hidden in clock mode (driven by skyTarget — see refreshVisibility()).
+(function () {
+    const root = document.getElementById('sky-search');
+    const inp  = document.getElementById('sky-search-input');
+    const list = document.getElementById('sky-search-list');
+    if (!root || !inp || !list) return;
+
+    // Build the search index once: [{ id, latin, german, ra, dec }, …]
+    let _index = null;
+    function buildIndex() {
+        if (_index) return _index;
+        _index = [];
+        if (typeof CONSTELLATION_NAMES === 'undefined' || typeof CON_CENTROIDS === 'undefined') return _index;
+        const de = (typeof CONSTELLATION_NAMES_DE !== 'undefined') ? CONSTELLATION_NAMES_DE : {};
+        for (const id in CONSTELLATION_NAMES) {
+            const c = CON_CENTROIDS[id];
+            if (!c) continue;
+            _index.push({ id, latin: CONSTELLATION_NAMES[id], german: de[id] || '', ra: c[0], dec: c[1] });
+        }
+        _index.sort((a, b) => (a.german || a.latin).localeCompare(b.german || b.latin, 'de'));
+        return _index;
+    }
+
+    let _sel = 0;   // keyboard-highlighted result index
+    function render(q) {
+        const idx = buildIndex();
+        const qn = q.trim().toLowerCase();
+        const hits = qn ? idx.filter(x => x.latin.toLowerCase().includes(qn) || x.german.toLowerCase().includes(qn) || x.id.toLowerCase().includes(qn))
+                        : idx;
+        list.innerHTML = '';
+        if (!hits.length) { list.classList.remove('is-on'); return; }
+        const cap = hits.slice(0, 60);                                   // cap to keep the dropdown short
+        for (let i = 0; i < cap.length; i++) {
+            const h = cap[i];
+            const li = document.createElement('li');
+            li.dataset.id = h.id;
+            const primary = starLangDE ? (h.german || h.latin) : h.latin;
+            const secondary = starLangDE ? h.latin : (h.german || h.id);
+            li.innerHTML = primary + ' <span class="sub">' + secondary + '</span>';
+            if (i === _sel) li.classList.add('is-sel');
+            list.appendChild(li);
+        }
+        list.classList.add('is-on');
+    }
+
+    // Rotate the sky so the chosen constellation crosses the local meridian (its highest point at the
+    // current observer). LST advances at ≈15°/hour; shifting debugDayOffset by Δh/24 days reaches it.
+    function rotateToRA(targetRA) {
+        if (typeof siderealTimeDeg !== 'function') return;
+        const lst = siderealTimeDeg(getDisplayTime(), skyLon);
+        let d = targetRA - lst;                                          // signed shortest path in degrees
+        d = ((d + 540) % 360) - 180;                                     // wrap to (−180, +180]
+        debugDayOffset += (d / 15.0411) / 24;                            // sidereal rate: 15.04°/h
+        lapseActive = false;                                             // stop the time-lapse so it stays put
+        try { localStorage.setItem('wc.dayOffset', debugDayOffset); } catch (_) {}
+        try { DebugWindow.log('[search] Δ ' + d.toFixed(1) + '° → Offset ' + debugDayOffset.toFixed(3) + ' d'); } catch (_) {}
+    }
+    function pick(id) {
+        const item = buildIndex().find(x => x.id === id);
+        if (!item) return;
+        rotateToRA(item.ra);
+        // Move the observer to the constellation's declination so it passes through (or near) the zenith at culmination.
+        // Without this, southern constellations like Pavo (Dec −65°) stay below the horizon from northern cities and the
+        // "search" appears to do nothing. Cities are normally smoothed via the render-loop easing toward targetCity.lat/lon,
+        // so we synthesise a one-off pseudo-city — its NAME is the picked constellation's local label, which the HUD shows.
+        const _name = (starLangDE && typeof CONSTELLATION_NAMES_DE !== 'undefined' && CONSTELLATION_NAMES_DE[id])
+                      ? CONSTELLATION_NAMES_DE[id]
+                      : (typeof CONSTELLATION_NAMES !== 'undefined' ? (CONSTELLATION_NAMES[id] || id) : id);
+        const _lat = Math.max(-89, Math.min(89, item.dec));              // clamp away from the poles (avoids tan(±90°))
+        const _lon = (typeof skyLon === 'number') ? skyLon : 0;          // keep current longitude (time-shift already handles RA)
+        targetCity = { name: _name.toUpperCase(), lat: _lat, lon: _lon, globeLat: _lat, globeLon: _lon };
+        selectedArtId = id;                                              // shows the plate (if calibrated) and the red label/lines
+        try { DebugWindow.log('[search] ' + id + ' → Beobachter lat=' + _lat.toFixed(1) + '°'); } catch (_) {}
+        inp.value = '';
+        list.classList.remove('is-on');
+        inp.blur();
+    }
+
+    inp.addEventListener('focus', () => { _sel = 0; render(inp.value); });
+    inp.addEventListener('input', () => { _sel = 0; render(inp.value); });
+    inp.addEventListener('keydown', (e) => {
+        const items = list.querySelectorAll('li');
+        if (e.key === 'ArrowDown') { e.preventDefault(); if (!items.length) return; _sel = Math.min(items.length - 1, _sel + 1); render(inp.value); }
+        else if (e.key === 'ArrowUp') { e.preventDefault(); if (!items.length) return; _sel = Math.max(0, _sel - 1); render(inp.value); }
+        else if (e.key === 'Enter') { e.preventDefault(); const li = items[_sel]; if (li) pick(li.dataset.id); }
+        else if (e.key === 'Escape') { e.preventDefault(); inp.value = ''; list.classList.remove('is-on'); inp.blur(); }
+    });
+    list.addEventListener('mousedown', (e) => {                          // mousedown (not click) → fires before blur closes the list
+        const li = e.target.closest('li');
+        if (li) { e.preventDefault(); pick(li.dataset.id); }
+    });
+    document.addEventListener('mousedown', (e) => {                      // click outside → close dropdown (keep input value)
+        if (root.contains(e.target)) return;
+        list.classList.remove('is-on');
+    });
+    // Global hotkey: "f" focuses the search (ignored while typing in another input).
+    document.addEventListener('keydown', (e) => {
+        if (e.key !== 'f' && e.key !== 'F') return;
+        const t = e.target;
+        if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
+        if (!skyTarget) return;
+        e.preventDefault();
+        inp.focus();
+        inp.select();
+    });
+
+    // Visibility tracks planetarium mode (skyTarget). Poll cheaply — there is no central event for it.
+    function refreshVisibility() {
+        root.classList.toggle('is-on', !!skyTarget);
+    }
+    refreshVisibility();
+    setInterval(refreshVisibility, 400);
+})();

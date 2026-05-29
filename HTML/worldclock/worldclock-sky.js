@@ -152,12 +152,18 @@
 // ===== Sky interaction (hover, zoom, tooltips) =====
         // --- Constellation hover: track the pointer in canvas px so drawStarfield can highlight what's under it ---
         // Point-in-quad (ray-casting) — used to detect when the pointer is over the currently-rendered constellation plate.
+        // Point-in-polygon (ray-casting) — `artHoverQuad` is the full mesh-boundary polygon (52 pts for GRID_N=14),
+        // not just 4 corners, so the curved sides of the bilinear plate are captured correctly. Nulls (boundary
+        // grid points whose proj() returned a below-horizon position) are filtered out — leaves small gaps in
+        // the polygon but the bulk of the visible plate remains well-defined.
         function _ptInArtQuad(px, py) {
-            if (!artHoverQuad || artHoverQuad.length !== 4) return false;
+            if (!artHoverQuad) return false;
+            const pts = artHoverQuad.filter(p => p);
+            if (pts.length < 3) return false;
             let inside = false;
-            for (let i = 0, j = 3; i < 4; j = i++) {
-                const xi = artHoverQuad[i][0], yi = artHoverQuad[i][1];
-                const xj = artHoverQuad[j][0], yj = artHoverQuad[j][1];
+            for (let i = 0, j = pts.length - 1; i < pts.length; j = i++) {
+                const xi = pts[i][0], yi = pts[i][1];
+                const xj = pts[j][0], yj = pts[j][1];
                 if (((yi > py) !== (yj > py)) && (px < (xj - xi) * (py - yi) / (yj - yi) + xi)) inside = !inside;
             }
             return inside;
@@ -166,12 +172,14 @@
             const rect = canvas.getBoundingClientRect();
             starHover.x = clientX - rect.left;
             starHover.y = clientY - rect.top;
-            starHover.on = true;
+            // Celestials (showArt) on → ALL hover effects off (no red lines, no white figure stars).
+            // The constellation labels themselves stay visible; only their hover treatment is suppressed.
+            starHover.on = !showArt;
         }
         canvas.addEventListener('mousemove', (e) => setStarHover(e.clientX, e.clientY));
-        // Track which constellation name label the pointer is currently over (used for cyan-highlight + live plate preview).
+        // Track which constellation name label the pointer is currently over (cyan highlight) — also off in Celestials mode.
         canvas.addEventListener('mousemove', (e) => {
-            if (!conLabelHits || !conLabelHits.length) { hoveredLabelId = null; return; }
+            if (showArt || !conLabelHits || !conLabelHits.length) { hoveredLabelId = null; return; }
             const _r = canvas.getBoundingClientRect();
             const _x = e.clientX - _r.left, _y = e.clientY - _r.top;
             let _found = null;
@@ -292,9 +300,9 @@
             return best;
         }
         function hoverPick(clientX, clientY) {    // priority: zodiac → deep-sky → star/constellation
-            // Suppress all hover info if the pointer is over the currently-rendered constellation plate.
-            const _rect = canvas.getBoundingClientRect();
-            if (_ptInArtQuad(clientX - _rect.left, clientY - _rect.top)) {
+            // Celestials (showArt) on → no tooltips at all. Constellation labels remain interactive for clicks
+            // (the click handler in `pointerup` doesn't depend on hover state), but no info-box pops up.
+            if (showArt) {
                 hoveredZodiac = null; hoveredDeepsky = null; hoveredStar = null;
                 showInfoBox(null);
                 return;
@@ -574,7 +582,7 @@
                 ctx.lineWidth = 1;
                 ctx.beginPath();
                 for (const con of CONSTELLATION_LINES) {
-                    if (con.id === hoverId) continue;                    // hovered one drawn separately (red, thicker)
+                    if (con.id === hoverId || con.id === selectedArtId) continue;   // hovered/selected drawn separately (red, thicker)
                     for (const path of con.paths) {
                         let prev = null;
                         for (let i = 0; i < path.length; i += 2) {
@@ -585,11 +593,16 @@
                     }
                 }
                 ctx.stroke();
-                if (hoverId) {                                           // hovered constellation in red, one stroke
-                    const _hcon = CONSTELLATION_LINES.find(c => c.id === hoverId);
-                    if (_hcon) {
-                        ctx.strokeStyle = HL; ctx.lineWidth = 1.8;
-                        ctx.beginPath();
+                // Selected (pinned) + hovered constellation — both stroked in Υ red, one batched path.
+                const _redIds = [];
+                if (selectedArtId) _redIds.push(selectedArtId);
+                if (hoverId && hoverId !== selectedArtId) _redIds.push(hoverId);
+                if (_redIds.length) {
+                    ctx.strokeStyle = HL; ctx.lineWidth = 1.8;
+                    ctx.beginPath();
+                    for (const _rid of _redIds) {
+                        const _hcon = CONSTELLATION_LINES.find(c => c.id === _rid);
+                        if (!_hcon) continue;
                         for (const path of _hcon.paths) {
                             let prev = null;
                             for (let i = 0; i < path.length; i += 2) {
@@ -598,8 +611,8 @@
                                 prev = p;
                             }
                         }
-                        ctx.stroke();
                     }
+                    ctx.stroke();
                 }
             }
             ctx.lineWidth = 1;
@@ -941,40 +954,115 @@
                         // WHOLE texture, and pre-compute each grid point's (RA, Dec). Each frame we re-project the grid via proj() so
                         // the dome's curvature is captured by many small triangles instead of squished into 4 flat ones.
                         if (!art._meshReady) {
-                            const t = art.anchors.map(an => [an[2] * W, an[3] * H]);
-                            const _lsq = (vals) => {
-                                let sxx = 0, sxy = 0, sx = 0, syy = 0, sy = 0;
-                                let svx = 0, svy = 0, sv = 0;
-                                for (let i = 0; i < n; i++) {
-                                    const x = t[i][0], y = t[i][1], v = vals[i];
-                                    sxx += x * x; sxy += x * y; sx += x;
-                                    syy += y * y; sy += y;
-                                    svx += v * x; svy += v * y; sv += v;
+                            // THIN-PLATE-SPLINE fit pixel → (RA, Dec). TPS interpolates EXACTLY through every
+                            // anchor and curves smoothly between them — required because the prior bilinear LSQ
+                            // had ~65 px mean residual on the Jamieson conic projection (4 parameters can't capture
+                            // the radial conic taper). Basis: f(x, y) = a₀ + a₁·x + a₂·y + Σ wᵢ · φ(‖p − pᵢ‖²),
+                            // φ(r²) = r² log(r²). One Gauss-Jordan pass handles both u→RA and u→Dec via the same
+                            // (N+3)×(N+3) matrix with two RHS columns. Anchors with identical (tx, ty) but different
+                            // (RA, Dec) — e.g. duplicate calibration clicks — are merged by averaging.
+                            const groups = new Map();
+                            for (const an of art.anchors) {
+                                const key = an[2].toFixed(4) + '_' + an[3].toFixed(4);
+                                if (!groups.has(key)) groups.set(key, { tx: an[2] * W, ty: an[3] * H, ras: [], decs: [] });
+                                const g = groups.get(key);
+                                g.ras.push(an[0]); g.decs.push(an[1]);
+                            }
+                            const ctrl = [];
+                            for (const g of groups.values()) {
+                                ctrl.push({
+                                    tx: g.tx, ty: g.ty,
+                                    ra:  g.ras.reduce((s, x) => s + x, 0) / g.ras.length,
+                                    dec: g.decs.reduce((s, x) => s + x, 0) / g.decs.length
+                                });
+                            }
+                            const Nc = ctrl.length;
+                            let raCoef = null, decCoef = null, tpsPts = null;
+                            if (Nc >= 4) {
+                                const D = Nc + 3;
+                                const A = new Array(D);
+                                for (let i = 0; i < D; i++) A[i] = new Array(D).fill(0);
+                                const rRa = new Array(D).fill(0), rDec = new Array(D).fill(0);
+                                const _phi = r2 => r2 < 1e-12 ? 0 : r2 * Math.log(r2);
+                                for (let i = 0; i < Nc; i++) {
+                                    for (let j = 0; j < Nc; j++) {
+                                        const dx = ctrl[i].tx - ctrl[j].tx, dy = ctrl[i].ty - ctrl[j].ty;
+                                        A[i][j] = _phi(dx * dx + dy * dy);
+                                    }
+                                    A[i][Nc] = 1; A[i][Nc + 1] = ctrl[i].tx; A[i][Nc + 2] = ctrl[i].ty;
+                                    A[Nc][i] = 1; A[Nc + 1][i] = ctrl[i].tx; A[Nc + 2][i] = ctrl[i].ty;
+                                    rRa[i] = ctrl[i].ra; rDec[i] = ctrl[i].dec;
                                 }
-                                const det = sxx * (syy * n - sy * sy) - sxy * (sxy * n - sy * sx) + sx * (sxy * sy - syy * sx);
-                                if (Math.abs(det) < 1e-9) return null;
-                                const inv = 1 / det;
-                                const a = (svx * (syy * n - sy * sy) - sxy * (svy * n - sy * sv) + sx * (svy * sy - syy * sv)) * inv;
-                                const b = (sxx * (svy * n - sy * sv) - svx * (sxy * n - sy * sx) + sx * (sxy * sv - svy * sx)) * inv;
-                                const c = (sxx * (syy * sv - svy * sy) - sxy * (sxy * sv - svy * sx) + svx * (sxy * sy - syy * sx)) * inv;
-                                return [a, b, c];
-                            };
-                            const raA  = _lsq(art.anchors.map(an => an[0]));
-                            const decA = _lsq(art.anchors.map(an => an[1]));
-                            if (!raA || !decA || n < 3) {
+                                // Gauss-Jordan, partial pivoting, single pass solving both RHS columns simultaneously.
+                                let ok = true;
+                                for (let i = 0; i < D && ok; i++) {
+                                    let piv = i, pa = Math.abs(A[i][i]);
+                                    for (let k = i + 1; k < D; k++) {
+                                        const v = Math.abs(A[k][i]);
+                                        if (v > pa) { pa = v; piv = k; }
+                                    }
+                                    if (pa < 1e-10) { ok = false; break; }
+                                    if (piv !== i) {
+                                        const t = A[i]; A[i] = A[piv]; A[piv] = t;
+                                        const tr = rRa[i]; rRa[i] = rRa[piv]; rRa[piv] = tr;
+                                        const td = rDec[i]; rDec[i] = rDec[piv]; rDec[piv] = td;
+                                    }
+                                    const p = A[i][i];
+                                    for (let j = i; j < D; j++) A[i][j] /= p;
+                                    rRa[i] /= p; rDec[i] /= p;
+                                    for (let k = 0; k < D; k++) {
+                                        if (k === i) continue;
+                                        const f = A[k][i]; if (!f) continue;
+                                        for (let j = i; j < D; j++) A[k][j] -= f * A[i][j];
+                                        rRa[k] -= f * rRa[i]; rDec[k] -= f * rDec[i];
+                                    }
+                                }
+                                if (ok) {
+                                    raCoef  = { w: rRa.slice(0, Nc),  a: rRa.slice(Nc)  };
+                                    decCoef = { w: rDec.slice(0, Nc), a: rDec.slice(Nc) };
+                                    tpsPts = ctrl;
+                                }
+                            }
+                            if (!raCoef || !decCoef) {
                                 art._meshReady = 'fail';
                             } else {
                                 const GRID_N = 14;                                    // 14×14 cells → 15×15 = 225 grid points → 392 triangles → smooth curved edges
-                                const cellW = W / GRID_N, cellH = H / GRID_N;
+                                // Mesh covers the anchor bounding box (in texture pixels) PLUS a 20 % margin on each side,
+                                // clamped to the texture rectangle. The margin lets the ornamental atlas frame (outer RA scale,
+                                // chart border) render too. TPS extrapolation outside the anchor hull is unbounded — keep
+                                // the margin modest (20 %) so it stays well-behaved.
+                                let _uMin = Infinity, _uMax = -Infinity, _vMin = Infinity, _vMax = -Infinity;
+                                for (const an of art.anchors) {
+                                    if (an[2] < _uMin) _uMin = an[2]; if (an[2] > _uMax) _uMax = an[2];
+                                    if (an[3] < _vMin) _vMin = an[3]; if (an[3] > _vMax) _vMax = an[3];
+                                }
+                                const _MARGIN = 0.20;
+                                const _uMar = (_uMax - _uMin) * _MARGIN, _vMar = (_vMax - _vMin) * _MARGIN;
+                                _uMin = Math.max(0, _uMin - _uMar); _uMax = Math.min(1, _uMax + _uMar);
+                                _vMin = Math.max(0, _vMin - _vMar); _vMax = Math.min(1, _vMax + _vMar);
+                                const pxMin = _uMin * W, pxMax = _uMax * W;
+                                const pyMin = _vMin * H, pyMax = _vMax * H;
+                                const cellW = (pxMax - pxMin) / GRID_N, cellH = (pyMax - pyMin) / GRID_N;
+                                // Cached TPS evaluator — closures over the solved coefficients + control points.
+                                const _evalTPS = (px, py, coef) => {
+                                    let z = coef.a[0] + coef.a[1] * px + coef.a[2] * py;
+                                    for (let i = 0; i < tpsPts.length; i++) {
+                                        const dx = px - tpsPts[i].tx, dy = py - tpsPts[i].ty;
+                                        const r2 = dx * dx + dy * dy;
+                                        if (r2 < 1e-12) continue;
+                                        z += coef.w[i] * r2 * Math.log(r2);
+                                    }
+                                    return z;
+                                };
                                 art._meshTx  = [];                                    // texture-pixel positions of grid points
-                                art._meshRA  = [];                                    // extrapolated RA per grid point
-                                art._meshDec = [];                                    // extrapolated Dec
+                                art._meshRA  = [];                                    // TPS-interpolated RA per grid point (exact at anchors)
+                                art._meshDec = [];                                    // TPS-interpolated Dec
                                 for (let j = 0; j <= GRID_N; j++) {
                                     for (let i = 0; i <= GRID_N; i++) {
-                                        const px = i * cellW, py = j * cellH;
+                                        const px = pxMin + i * cellW, py = pyMin + j * cellH;
                                         art._meshTx.push([px, py]);
-                                        art._meshRA.push (raA[0]  * px + raA[1]  * py + raA[2]);
-                                        art._meshDec.push(decA[0] * px + decA[1] * py + decA[2]);
+                                        art._meshRA.push (_evalTPS(px, py, raCoef));
+                                        art._meshDec.push(_evalTPS(px, py, decCoef));
                                     }
                                 }
                                 art._meshTris = [];                                   // 2 triangles per cell
