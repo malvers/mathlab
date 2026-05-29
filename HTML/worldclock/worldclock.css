@@ -323,12 +323,12 @@ body:not(.cyber-shell-grid):has(#side-panel) { grid-template-columns: 0 0 minmax
 /* --- Planetarium: time-lapse play/pause (bottom-right) --- */
 #sky-play {
     position: fixed;
-    top: calc(50% - 15px); left: 50%;   /* matches the canvas dome centre (cy = h/2 − 15) */
-    transform: translate(-50%, -50%);
+    top: 50%; left: 64px;                /* sits right of the left-edge hamburger (14 + 46 + 4 gap), vertically centred */
+    transform: translateY(-50%);
     display: none;                       /* shown by JS only in the planetarium */
     align-items: center; justify-content: center;
-    width: 48px;
-    height: 48px;
+    width: 44px;                         /* same height as the mini-btn menu buttons */
+    height: 44px;
     border-radius: 50%;
     border: 1.5px solid rgba(0, 210, 255, 0.85);
     background: rgba(8, 20, 42, 0.65);
@@ -342,7 +342,7 @@ body:not(.cyber-shell-grid):has(#side-panel) { grid-template-columns: 0 0 minmax
     transition: opacity 0.45s ease;     /* smooth idle fade */
     opacity: 1;
 }
-#sky-play svg { width: 26px; height: 26px; fill: currentColor; display: block; }
+#sky-play svg { width: 22px; height: 22px; fill: currentColor; display: block; }
 #sky-play .icon-pause { display: none; }
 #sky-play.playing .icon-play  { display: none; }
 #sky-play.playing .icon-pause { display: block; }
@@ -459,6 +459,59 @@ body:not(.cyber-shell-grid):has(#side-panel) { grid-template-columns: 0 0 minmax
     pointer-events: none;
 }
 #sky-info-slomo.is-on { opacity: 1; }
+
+/* --- Planetarium constellation search: sits left of the right-edge hamburger, vertically centred to it.
+   Hidden when the right menu is open (so the half-circle never overlaps the input). --- */
+#sky-search {
+    position: fixed;
+    top: 50%;
+    right: 74px;                                /* 14 (hamb right) + 46 (hamb w) + 14 gap */
+    transform: translateY(-50%);
+    z-index: 9555;
+    display: none;
+    width: 220px;
+    font-family: 'Orbitron', sans-serif;
+}
+#sky-search.is-on { display: block; }
+/* Hide while the right hamburger menu (mini-stack-r) is open — its half-circle would otherwise overlap. */
+body:has(#mini-stack-r.popup) #sky-search { display: none; }
+#sky-search-input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 7px 10px;
+    background: rgba(8, 20, 42, 0.7);
+    border: 1px solid rgba(0, 210, 255, 0.35);
+    border-radius: 8px;
+    color: rgba(220, 235, 250, 0.95);
+    font-family: inherit;
+    font-size: 0.78rem;
+    letter-spacing: 0.06em;
+    outline: none;
+}
+#sky-search-input::placeholder { color: rgba(150, 185, 235, 0.55); }
+#sky-search-input:focus { border-color: rgba(0, 210, 255, 0.75); }
+#sky-search-list {
+    list-style: none;
+    margin: 4px 0 0;
+    padding: 4px 0;
+    max-height: 260px;
+    overflow-y: auto;
+    background: rgba(8, 20, 42, 0.85);
+    border: 1px solid rgba(0, 210, 255, 0.25);
+    border-radius: 8px;
+    display: none;
+}
+#sky-search-list.is-on { display: block; }
+#sky-search-list li {
+    padding: 5px 12px;
+    color: rgba(210, 225, 240, 0.85);
+    font-size: 0.74rem;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+}
+#sky-search-list li:hover,
+#sky-search-list li.is-sel { background: rgba(0, 210, 255, 0.14); color: rgba(0, 210, 255, 0.95); }
+#sky-search-list li .sub { color: rgba(150, 185, 235, 0.55); font-size: 0.66rem; margin-left: 6px; }
 
 /* Satellite table — DOM overlay HUD (top-left of the planetarium). The "sichtbar" countdown per row
    is rendered by the central CyberClock (cyber-clock.js/.css); states colour the cells via [data-st]. */

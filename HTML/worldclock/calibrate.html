@@ -20,7 +20,7 @@ header select:hover { background: rgba(0, 210, 255, 0.1); }
 #canvas { display: block; cursor: crosshair; max-width: 100%; height: auto; }
 #popup { position: absolute; background: rgba(8, 20, 42, 0.96); border: 1px solid rgba(0, 210, 255, 0.55); border-radius: 8px; padding: 10px 12px; box-shadow: 0 6px 24px rgba(0, 0, 0, 0.7); z-index: 10; display: none; }
 #popup label { display: flex; align-items: center; gap: 10px; font-size: 0.85rem; margin-bottom: 8px; }
-#popup label > span { display: inline-block; width: 36px; text-align: right; color: rgba(230, 237, 243, 0.65); }
+#popup label > span { display: inline-block; width: 72px; text-align: right; color: rgba(230, 237, 243, 0.65); }
 #popup input { width: 130px; padding: 4px 8px; background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(0, 210, 255, 0.4); color: #e6edf3; font: 600 0.9rem 'Outfit', sans-serif; border-radius: 4px; }
 #popup .btns { margin-top: 8px; display: flex; gap: 6px; }
 #popup button { padding: 4px 10px; font: 600 0.78rem 'Orbitron', sans-serif; border-radius: 4px; cursor: pointer; border: 1px solid rgba(0, 210, 255, 0.5); background: rgba(0, 210, 255, 0.15); color: #00d2ff; }
@@ -76,6 +76,10 @@ header select:hover { background: rgba(0, 210, 255, 0.1); }
     </select>
     <input type="file" id="file" accept="image/*" title="Eigene Plate per File-Picker laden">
     <span class="hint">→ klick auf die Plate, gib RA und Dec der Stelle ein</span>
+    <label class="hint" style="display:inline-flex; align-items:center; gap:6px; cursor:pointer;">
+        <input type="checkbox" id="showCat" checked> Katalog-Sterne (ab 4 Ankern)
+    </label>
+    <button id="importBtn" class="secondary" title="Anker aus CONSTELLATION_ART (worldclock-stars.js) für die geladene Plate übernehmen">IMPORT</button>
     <button id="export">EXPORT anchors[] (Clipboard)</button>
     <button id="clear" class="secondary">Reset</button>
 </header>
@@ -83,8 +87,8 @@ header select:hover { background: rgba(0, 210, 255, 0.1); }
     <div id="canvas-wrap">
         <canvas id="canvas"></canvas>
         <div id="popup">
-            <label><span>RA</span><input id="ra" type="text" placeholder="0…360"></label>
-            <label><span>Dec</span><input id="dec" type="text" placeholder="-90…+90"></label>
+            <label><span>RA</span><input id="ra" type="text" placeholder="XI · 165 · 165.5 …"></label>
+            <label><span>Dec</span><input id="dec" type="text" placeholder="-90 … +90"></label>
             <div class="btns">
                 <button id="add">OK</button>
                 <button id="cancel" class="secondary">Abbrechen</button>
@@ -119,8 +123,243 @@ header select:hover { background: rgba(0, 210, 255, 0.1); }
     let pending = null;   // { x, y } in image pixel coords (the most recent click)
     let mouse = null;     // { x, y } in image pixel coords (live cursor → crosshair)
     let shiftDown = false;// Shift held → show magnifier loupe near the cursor
+    // localStorage-persisted UI state — restored on load below.
+    const LS_PLATE = 'cal.plate', LS_CROSS = 'cal.crosshair', LS_VIS = 'cal.visStars';
+    const LS_ANCH = n => 'cal.anchors.' + n;                                 // per-plate anchor store (preserves snapLabel across reloads)
+    function saveAnchors() {
+        if (!currentPlate) return;
+        try { localStorage.setItem(LS_ANCH(currentPlate), JSON.stringify(anchors)); } catch (_) {}
+    }
+    function loadAnchors(plate) {
+        try { const v = localStorage.getItem(LS_ANCH(plate)); return v ? JSON.parse(v) : null; } catch (_) { return null; }
+    }
+    let showCrosshair = (() => { try { const v = localStorage.getItem(LS_CROSS); return v == null ? true : v === '1'; } catch (_) { return true; } })();
+    let showNonFigStars = (() => { try { const v = localStorage.getItem(LS_VIS); return v === '1'; } catch (_) { return false; } })();   // default OFF — start with only SB-relevant orange figure stars; 'v' toggles the red rings
     let currentLabel = '';// label of the currently-loaded plate ("Plate 6 — Ursa Major" / file name) → shown in the export comment
+    let currentPlate = '';// plate number as string ("11", …) — drives the catalog overlay's constellation filter
     const anchors = [];   // { ra, dec, x, y } in image pixel coords
+
+    // --- Catalog overlay (visual verification): predict where each catalogued bright star of the plate's
+    // constellations SHOULD land, using the user's current anchors + a forward bilinear fit. The marker on the
+    // image is the "ground truth"; the drawn star on the Jamieson plate should be right under it when the
+    // calibration is good. Mismatches show you where to add or correct anchors.
+    let STAR_CAT = null;     // { [hip]: { ra, dec, mag } }
+    let STAR_NAMES = null;   // { [hip]: { bayer, flam, c, name } }
+    const PLATE_CONS = {     // plate number → constellation IDs known to live on that plate
+        '1':  [],   // northern overview — too many; skip
+        '2':  ['Cas', 'Cep', 'Dra', 'UMi'],
+        '3':  ['Per', 'And', 'Tri'],
+        '4':  ['Aur'],
+        '5':  ['Lyn', 'LMi'],
+        '6':  ['UMa'],
+        '7':  ['Boo', 'CVn'],
+        '8':  ['Her', 'Lyr', 'CrB'],
+        '9':  ['Oph', 'Ser'],
+        '10': ['Aql', 'Sge', 'Del', 'Vul'],
+        '11': ['Cyg', 'Lac'],
+        '12': ['Peg', 'Equ'],
+        '13': ['Ari'],
+        '14': ['Tau'],
+        '15': ['Gem', 'CMi'],
+        '16': ['Cnc'],
+        '17': ['Leo'],
+        '18': ['Vir'],
+        '19': ['Lib', 'Sco'],
+        '20': ['Sgr'],
+        '21': ['Cap'],
+        '22': ['Aqr', 'PsA'],
+        '23': ['Psc', 'Cet'],
+        '24': ['Ori', 'Lep'],
+        '25': ['CMa', 'Mon', 'CMi'],
+        '26': ['Hya', 'Crt', 'Crv', 'Sex'],
+        '27': ['Car', 'Pup', 'Vel'],
+        '28': ['Cen', 'Lup'],
+        '29': [],
+        '30': []
+    };
+    // Load both catalogs in parallel; redraw once they're in so existing anchors paint markers immediately.
+    Promise.all([
+        fetch('starcatalog.json').then(r => r.json()),
+        fetch('starnames.json').then(r => r.json())
+    ]).then(([cat, names]) => {
+        STAR_CAT = {};
+        for (const f of cat.features) {
+            const [ra, dec] = f.geometry.coordinates;
+            STAR_CAT[String(f.id)] = { ra: ra < 0 ? ra + 360 : ra, dec, mag: f.properties.mag };   // catalog stores RA in (−180, 180]; normalise to [0, 360)
+        }
+        STAR_NAMES = names;
+        annotateAnchorsFromCatalog();                                          // catalog now in → retag any anchors already restored before this point
+        refreshList(); redraw();
+    }).catch(err => { console.warn('Catalog load failed:', err); });
+
+    // Forward THIN-PLATE-SPLINE fit (RA, Dec) → (u, v). TPS interpolates EXACTLY through every anchor point
+    // and curves smoothly between them — required because the bilinear fit had ~65 px mean residual on the
+    // Jamieson conic projection (4 parameters can't capture the radial conic taper). TPS basis:
+    //     f(p) = a₀ + a₁·RA + a₂·Dec + Σ wᵢ · φ(‖p − pᵢ‖²),   φ(r²) = r² log(r²)
+    // Solved with N+3 unknowns where N = unique anchor count. Both u and v share the SAME matrix (one
+    // Gauss-Jordan pass with two RHS columns) so cost is O((N+3)³) once per fit, not 2×.
+    function fitForward() {
+        if (!img || !anchors.length) return null;
+        const W = img.naturalWidth, H = img.naturalHeight;
+        // Merge near-duplicate anchors (same RA/Dec from repeat-clicks on the same star) by averaging u/v —
+        // TPS is singular on exact duplicates, and averaging is the right behaviour for inconsistent clicks.
+        const groups = new Map();
+        for (const a of anchors) {
+            const key = a.ra.toFixed(3) + '_' + a.dec.toFixed(3);
+            if (!groups.has(key)) groups.set(key, { ra: a.ra, dec: a.dec, us: [], vs: [] });
+            const g = groups.get(key);
+            g.us.push(a.x / W); g.vs.push(a.y / H);
+        }
+        const pts = [];
+        for (const g of groups.values()) {
+            pts.push({
+                ra: g.ra, dec: g.dec,
+                u: g.us.reduce((s, x) => s + x, 0) / g.us.length,
+                v: g.vs.reduce((s, x) => s + x, 0) / g.vs.length
+            });
+        }
+        const N = pts.length;
+        if (N < 4) return null;
+        const D = N + 3;
+        const A = Array.from({ length: D }, () => new Array(D).fill(0));
+        const ru = new Array(D).fill(0), rv = new Array(D).fill(0);
+        const phi = r2 => r2 < 1e-12 ? 0 : r2 * Math.log(r2);
+        for (let i = 0; i < N; i++) {
+            for (let j = 0; j < N; j++) {
+                const dx = pts[i].ra - pts[j].ra, dy = pts[i].dec - pts[j].dec;
+                A[i][j] = phi(dx * dx + dy * dy);
+            }
+            A[i][N] = 1; A[i][N+1] = pts[i].ra; A[i][N+2] = pts[i].dec;
+            A[N][i] = 1; A[N+1][i] = pts[i].ra; A[N+2][i] = pts[i].dec;
+            ru[i] = pts[i].u; rv[i] = pts[i].v;
+        }
+        // Gauss-Jordan with partial pivoting, single pass, both RHS columns updated together.
+        for (let i = 0; i < D; i++) {
+            let piv = i, pa = Math.abs(A[i][i]);
+            for (let k = i + 1; k < D; k++) { const a = Math.abs(A[k][i]); if (a > pa) { pa = a; piv = k; } }
+            if (pa < 1e-10) return null;
+            if (piv !== i) {
+                const t = A[i]; A[i] = A[piv]; A[piv] = t;
+                const tu = ru[i]; ru[i] = ru[piv]; ru[piv] = tu;
+                const tv = rv[i]; rv[i] = rv[piv]; rv[piv] = tv;
+            }
+            const p = A[i][i];
+            for (let j = i; j < D; j++) A[i][j] /= p;
+            ru[i] /= p; rv[i] /= p;
+            for (let k = 0; k < D; k++) {
+                if (k === i) continue;
+                const f = A[k][i]; if (!f) continue;
+                for (let j = i; j < D; j++) A[k][j] -= f * A[i][j];
+                ru[k] -= f * ru[i]; rv[k] -= f * rv[i];
+            }
+        }
+        return { pts, w_u: ru.slice(0, N), a_u: ru.slice(N), w_v: rv.slice(0, N), a_v: rv.slice(N), W, H };
+    }
+    // Evaluate TPS at (ra, dec) for either 'u' or 'v'. Linear-time in N anchors per call.
+    function tpsEval(fit, ra, dec, which) {
+        const a = (which === 'u') ? fit.a_u : fit.a_v;
+        const w = (which === 'u') ? fit.w_u : fit.w_v;
+        let z = a[0] + a[1] * ra + a[2] * dec;
+        const pts = fit.pts;
+        for (let i = 0; i < pts.length; i++) {
+            const dx = ra - pts[i].ra, dy = dec - pts[i].dec;
+            const r2 = dx * dx + dy * dy;
+            if (r2 < 1e-12) continue;
+            z += w[i] * r2 * Math.log(r2);
+        }
+        return z;
+    }
+    // Project a sky position through the current TPS forward fit. Returns [pixel_x, pixel_y].
+    function projectSky(fit, ra, dec, bumpHigh) {
+        if (bumpHigh && ra < 100) ra += 360;
+        return [tpsEval(fit, ra, dec, 'u') * fit.W, tpsEval(fit, ra, dec, 'v') * fit.H];
+    }
+    // Project the FIGURE-LINE vertices of the active plate's constellations. These are the stars that actually
+    // form the constellation's drawn pattern (Cassiopeia's W, the Big Dipper's spoon, Lacerta's zig-zag, …) —
+    // i.e. the "real" SB stars in the user's words. Returns deduplicated [{ ra, dec, x, y }].
+    function predictedFigureStars() {
+        if (!CONSTELLATION_LINES) return [];
+        const cons = PLATE_CONS[currentPlate] || [];
+        if (!cons.length) return [];
+        const fit = fitForward();
+        if (!fit) return [];
+        const maxRA = anchors.reduce((m, a) => Math.max(m, a.ra), -Infinity);
+        const bumpHigh = maxRA > 360;
+        // Build a same-constellation catalog index → fastest closest-match per vertex.
+        const conIdx = [];
+        if (STAR_CAT && STAR_NAMES) {
+            for (const hip in STAR_NAMES) {
+                const info = STAR_NAMES[hip];
+                if (!cons.includes(info.c)) continue;
+                const b = (info.bayer || '').trim();
+                const fl = (info.flam || '').trim();
+                if (!b && !fl) continue;
+                const p = STAR_CAT[hip]; if (!p) continue;
+                conIdx.push({ hip, label: b || fl, ra: p.ra, dec: p.dec });
+            }
+        }
+        const matchHips = new Set();                                          // hips claimed by a figure vertex → drawCatStar skips them (no double marker)
+        const out = [];
+        const seen = new Set();                                               // dedupe shared vertices between paths
+        for (const con of CONSTELLATION_LINES) {
+            if (!cons.includes(con.id)) continue;
+            for (const path of con.paths) {
+                for (let i = 0; i < path.length; i += 2) {
+                    let ra = path[i], dec = path[i + 1];
+                    if (ra < 0) ra += 360;
+                    const key = ra.toFixed(2) + '_' + dec.toFixed(2);
+                    if (seen.has(key)) continue;
+                    seen.add(key);
+                    const [x, y] = projectSky(fit, ra, dec, bumpHigh);
+                    if (x < -50 || x > fit.W + 50 || y < -50 || y > fit.H + 50) continue;
+                    // Find the catalogued star closest to this figure vertex (within ~0.5°) → reveal its Bayer/Flamsteed identity.
+                    let best = null, bestD2 = 0.25;                            // 0.5° squared
+                    for (const c of conIdx) {
+                        const dRA = (ra - c.ra) * Math.cos(dec * Math.PI / 180);
+                        const dDec = dec - c.dec;
+                        const d2 = dRA*dRA + dDec*dDec;
+                        if (d2 < bestD2) { bestD2 = d2; best = c; }
+                    }
+                    const label = best ? best.label : '';
+                    if (best) matchHips.add(best.hip);
+                    out.push({ ra, dec, x, y, label });
+                }
+            }
+        }
+        // Stash so predictedCatalog() can skip already-shown stars (avoids a second iteration).
+        predictedFigureStars._claimed = matchHips;
+        return out;
+    }
+    // Compute catalog-star predictions for the active plate. Honours RA-wrap: if anchors used >360 values
+    // (e.g. the [10, 60] anchor bumped to [370, 60]), catalog stars at low RA get the same +360° bump.
+    function predictedCatalog() {
+        if (!STAR_CAT || !STAR_NAMES) return [];
+        const cons = PLATE_CONS[currentPlate] || [];
+        if (!cons.length) return [];
+        const fit = fitForward();
+        if (!fit) return [];
+        const maxRA = anchors.reduce((m, a) => Math.max(m, a.ra), -Infinity);   // detect bump convention
+        const bumpHigh = maxRA > 360;
+        const claimed = predictedFigureStars._claimed || new Set();             // figure stars already drawn as orange dots → don't draw a red ring on top
+        const out = [];
+        for (const hip in STAR_NAMES) {
+            if (claimed.has(hip)) continue;
+            const info = STAR_NAMES[hip];
+            if (!cons.includes(info.c)) continue;
+            const b = (info.bayer || '').trim();
+            const fl = (info.flam || '').trim();
+            if (!b && !fl) continue;                                            // only stars with a recognisable designation
+            const p = STAR_CAT[hip]; if (!p) continue;
+            let ra = p.ra;
+            if (bumpHigh && ra < 100) ra += 360;
+            const u = tpsEval(fit, ra, p.dec, 'u');
+            const v = tpsEval(fit, ra, p.dec, 'v');
+            if (u < -0.05 || u > 1.05 || v < -0.05 || v > 1.05) continue;        // skip far-off-plate predictions
+            const label = b ? b : fl;
+            out.push({ hip, label, mag: p.mag, x: u * fit.W, y: v * fit.H });
+        }
+        return out;
+    }
 
     // --- Image loading ---
     function loadImage(url, label) {
@@ -128,7 +367,12 @@ header select:hover { background: rgba(0, 210, 255, 0.1); }
         anchors.length = 0; pending = null; popup.style.display = 'none'; refreshList();
         currentLabel = label || '';
         const i = new Image();
-        i.onload  = () => { img = i; imgInfo.textContent = (label || '') + ' · ' + i.naturalWidth + ' × ' + i.naturalHeight + ' px'; redraw(); };
+        i.onload  = () => {
+            img = i;
+            imgInfo.textContent = (label || '') + ' · ' + i.naturalWidth + ' × ' + i.naturalHeight + ' px';
+            maybeAutoImport();                                                 // image ready → try auto-import (no-op if art not parsed yet)
+            redraw();
+        };
         i.onerror = () => { alert('Plate konnte nicht geladen werden: ' + url); };
         i.src = url;
         return true;
@@ -138,12 +382,119 @@ header select:hover { background: rgba(0, 210, 255, 0.1); }
         if (!f) return;
         if (!loadImage(URL.createObjectURL(f), f.name)) e.target.value = '';
     });
-    document.getElementById('plateSelect').addEventListener('change', e => {
-        const n = e.target.value;
+    // Load a plate from the dropdown selection — used by the change handler and the persisted-restore.
+    function selectPlate(n, ask) {
         if (!n) return;
+        const sel = document.getElementById('plateSelect');
+        sel.value = n;
         const url = '../resources/constellations/Alexander_Jamieson_Celestial_Atlas-Plate_' + n + '.jpg';
-        const label = e.target.options[e.target.selectedIndex].text;       // "Plate 6 — Ursa Major" → goes into the export comment
-        if (!loadImage(url, label)) e.target.value = '';
+        const label = sel.options[sel.selectedIndex].text;                 // "Plate 6 — Ursa Major" → export comment
+        // Auto-import: pull the production calibration for this plate as soon as the image is in. Without `ask`
+        // (the restore path) we don't prompt to overwrite; with `ask` (the change handler) we do, in loadImage.
+        const ok = loadImage(url, label);
+        if (!ok) { sel.value = ''; return; }
+        currentPlate = n;
+        try { localStorage.setItem(LS_PLATE, n); } catch (_) {}
+        // The image loads async; importAnchorsForCurrentPlate() will fire once the catalog parse is done too.
+        autoImportAfterReady = true;
+    }
+    let autoImportAfterReady = false;                                       // set when the user picks a plate; cleared after the import fires
+    document.getElementById('plateSelect').addEventListener('change', e => selectPlate(e.target.value, true));
+    document.getElementById('showCat').addEventListener('change', () => redraw());
+
+    // --- Import anchors from CONSTELLATION_ART (worldclock-stars.js) — pulls the production calibration
+    // for the loaded plate so you can verify the catalog overlay against it without re-clicking.
+    let CONSTELLATION_ART = null;
+    let CONSTELLATION_LINES = null;   // figure-line vertices per constellation → these are the REAL SB stars (drawn orange)
+    fetch('worldclock-stars.js').then(r => r.text()).then(src => {
+        // Plate 2 references two helper consts (_PLATE2_IMG / _PLATE2_ANCHORS) that the bare eval can't see —
+        // pull them out of the source first and prepend their definitions so the array literal evaluates.
+        const helpers = [];
+        for (const name of ['_PLATE2_IMG', '_PLATE2_ANCHORS']) {
+            const hm = src.match(new RegExp('const\\s+' + name + '\\s*=\\s*([\\s\\S]*?);\\s*\\n'));
+            if (hm) helpers.push('var ' + name + ' = ' + hm[1] + ';');
+        }
+        const artM = src.match(/const\s+CONSTELLATION_ART\s*=\s*(\[[\s\S]*?\n\];)/);
+        if (artM) {
+            try { CONSTELLATION_ART = (new Function(helpers.join('\n') + '\nreturn (' + artM[1].replace(/;$/, '') + ');'))(); }
+            catch (e) { console.warn('CONSTELLATION_ART parse failed:', e); }
+        }
+        const linesM = src.match(/const\s+CONSTELLATION_LINES\s*=\s*(\[[\s\S]*?\n\];)/);
+        if (linesM) {
+            try { CONSTELLATION_LINES = (new Function('return (' + linesM[1].replace(/;$/, '') + ');'))(); }
+            catch (e) { console.warn('CONSTELLATION_LINES parse failed:', e); }
+        }
+        maybeAutoImport();                                                       // CONSTELLATION_ART now ready → try auto-import (no-op if image not loaded yet)
+        redraw();
+    }).catch(e => console.warn('Import fetch failed:', e));
+    // Restore the last-selected plate from localStorage so the calibrator opens where the user left off.
+    try {
+        const savedPlate = localStorage.getItem(LS_PLATE);
+        if (savedPlate) selectPlate(savedPlate, false);
+    } catch (_) {}
+    // Import the production calibration for the active plate. `silent` skips both alerts and the overwrite-prompt
+    // (used by the auto-import after restore/selection); the button always passes silent=false.
+    function importAnchorsForCurrentPlate(silent) {
+        if (!img || !CONSTELLATION_ART) return false;
+        const cons = PLATE_CONS[currentPlate] || [];
+        const hit = CONSTELLATION_ART.find(art => cons.includes(art.id));
+        if (!hit) { if (!silent) alert('Keine bestehende Kalibrierung für diese Plate gefunden.'); return false; }
+        if (!silent && anchors.length && !confirm('Bestehende ' + anchors.length + ' Anker überschreiben?')) return false;
+        anchors.length = 0;
+        const W = img.naturalWidth, H = img.naturalHeight;
+        for (const a of hit.anchors) anchors.push({ ra: a[0], dec: a[1], x: a[2] * W, y: a[3] * H });
+        annotateAnchorsFromCatalog();                                          // auto-tag imported anchors whose RA/Dec match a catalog star → orange
+        refreshList(); redraw();
+        return true;
+    }
+    function maybeAutoImport() {
+        if (!autoImportAfterReady) return;
+        if (!img) return;
+        // First priority: restore persisted anchors for this plate (preserves snapLabel & user edits across reloads).
+        const saved = loadAnchors(currentPlate);
+        if (saved && saved.length) {
+            autoImportAfterReady = false;
+            anchors.length = 0;
+            for (const a of saved) anchors.push(a);
+            annotateAnchorsFromCatalog();
+            refreshList(); redraw();
+            return;
+        }
+        // No saved data → fall back to CONSTELLATION_ART (production calibration), once ART is parsed.
+        if (!CONSTELLATION_ART) return;
+        autoImportAfterReady = false;
+        importAnchorsForCurrentPlate(true);
+    }
+    // Reverse-lookup any anchor whose (RA, Dec) matches a catalogued named star within ~0.2° → set snapLabel,
+    // so it renders as orange. Works for fresh snaps, restored snaps, AND grid anchors that happen to coincide
+    // with a catalog star (so e.g. an old "Deneb" anchor typed by hand still gets its α label). Idempotent.
+    function annotateAnchorsFromCatalog() {
+        if (!STAR_CAT || !STAR_NAMES || !anchors.length) return;
+        const cons = PLATE_CONS[currentPlate] || [];
+        if (!cons.length) return;
+        for (const a of anchors) {
+            if (a.snapLabel) continue;                                       // user-provided label takes precedence
+            let raCheck = a.ra; if (raCheck > 360) raCheck -= 360;
+            let best = null, bestD2 = 0.04;                                  // 0.2° squared
+            for (const hip in STAR_NAMES) {
+                const info = STAR_NAMES[hip];
+                if (!cons.includes(info.c)) continue;
+                const b = (info.bayer || '').trim();
+                const fl = (info.flam || '').trim();
+                if (!b && !fl) continue;
+                const p = STAR_CAT[hip]; if (!p) continue;
+                const dRA = (raCheck - p.ra) * Math.cos(a.dec * Math.PI / 180);
+                const dDec = a.dec - p.dec;
+                const d2 = dRA*dRA + dDec*dDec;
+                if (d2 < bestD2) { bestD2 = d2; best = b || fl; }
+            }
+            if (best) a.snapLabel = best;
+        }
+    }
+    document.getElementById('importBtn').addEventListener('click', () => {
+        if (!img) { alert('Erst eine Plate laden.'); return; }
+        if (!CONSTELLATION_ART) { alert('Anker-Daten noch nicht geladen.'); return; }
+        if (!importAnchorsForCurrentPlate(false)) return;
     });
 
     // --- Canvas resize + click-to-imagespace ---
@@ -160,11 +511,53 @@ header select:hover { background: rgba(0, 210, 255, 0.1); }
         fitCanvas();
         if (!img) return;
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        // Catalog-star predictions — drawn BEFORE anchor markers so a hand-set anchor sits on top of a prediction at the same spot.
+        // Order: (1) orange filled = figure-line vertices ("real" SB stars), (2) red rings = additional catalogued bright stars.
+        if (document.getElementById('showCat').checked) {
+            const figs = predictedFigureStars();                                 // populates predictedFigureStars._claimed → predictedCatalog skips dupes
+            for (const p of figs) drawFigStar(p.x * canvas._scale, p.y * canvas._scale, p.label);
+            if (showNonFigStars) {                                                // 'v' toggle — extra catalogued bright stars not in the figure (red rings)
+                for (const p of predictedCatalog()) drawCatStar(p.x * canvas._scale, p.y * canvas._scale, p.label, p.mag);
+            }
+        }
+        // Armed marker (marker-first workflow): pulsing yellow halo on the selected catalog marker.
+        // Until the user places its anchor by clicking on the plate (or hits Escape), this stays armed.
+        if (armedMarker) {
+            const ax = armedMarker.markerX * canvas._scale, ay = armedMarker.markerY * canvas._scale;
+            const t = (performance.now() % 1200) / 1200;                       // pulse phase
+            const haloR = 14 + 6 * Math.sin(t * Math.PI * 2);
+            ctx.save();
+            ctx.strokeStyle = 'rgba(255, 220, 80, 0.95)'; ctx.lineWidth = 3;
+            ctx.beginPath(); ctx.arc(ax, ay, haloR, 0, Math.PI * 2); ctx.stroke();
+            ctx.restore();
+            requestAnimationFrame(redraw);                                     // keep the pulse animating while armed
+        }
+        // Snap feedback (drawn under the new anchor marker so the cyan ring stays on top).
+        if (snapFlash) {
+            const sx = snapFlash.clickX * canvas._scale, sy = snapFlash.clickY * canvas._scale;
+            const mx = snapFlash.markerX * canvas._scale, my = snapFlash.markerY * canvas._scale;
+            ctx.save();
+            ctx.strokeStyle = 'rgba(255, 220, 80, 0.95)';                    // pending-yellow (matches the "?" marker palette)
+            ctx.setLineDash([6, 4]); ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.moveTo(mx, my); ctx.lineTo(sx, sy); ctx.stroke();
+            // Large flash label near the click → confirms the catalogue identity that was attached
+            if (snapFlash.label) {
+                ctx.setLineDash([]);
+                ctx.font = '700 22px Arial, sans-serif';
+                const tw = ctx.measureText('= ' + snapFlash.label).width;
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.85)';
+                ctx.fillRect(sx + 16, sy - 18, tw + 14, 30);
+                ctx.fillStyle = 'rgb(255, 220, 80)';
+                ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+                ctx.fillText('= ' + snapFlash.label, sx + 23, sy - 2);
+            }
+            ctx.restore();
+        }
         // Anchor markers
-        anchors.forEach((a, i) => drawMarker(a.x * canvas._scale, a.y * canvas._scale, i + 1));
+        anchors.forEach((a, i) => drawMarker(a.x * canvas._scale, a.y * canvas._scale, i + 1, false, !!a.snapLabel));
         if (pending) drawMarker(pending.x * canvas._scale, pending.y * canvas._scale, '?', true);
-        // Live crosshair following the cursor (canvas-wide thin lines + tiny centre cross + coord readout) — suppressed when the loupe is shown.
-        if (mouse && !shiftDown) {
+        // Live crosshair following the cursor (canvas-wide thin lines + tiny centre cross + coord readout) — suppressed when the loupe is shown or 'c' toggled it off.
+        if (mouse && !shiftDown && showCrosshair) {
             const mx = mouse.x * canvas._scale, my = mouse.y * canvas._scale;
             ctx.save();
             // White shadow line behind for contrast on dark areas, then the red line on top → readable on any background.
@@ -191,16 +584,6 @@ header select:hover { background: rgba(0, 210, 255, 0.1); }
             ctx.stroke();
             ctx.fillStyle = 'rgb(220, 30, 30)';
             ctx.beginPath(); ctx.arc(mx, my, 1.5, 0, Math.PI * 2); ctx.fill();
-            // pixel coord readout
-            const txt = Math.round(mouse.x) + ', ' + Math.round(mouse.y);
-            ctx.font = '700 12px Orbitron, sans-serif';
-            const tw = ctx.measureText(txt).width;
-            const lx = mx + 16, ly = my + 14;
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.85)';
-            ctx.fillRect(lx - 4, ly - 13, tw + 10, 20);
-            ctx.fillStyle = 'rgb(255, 100, 100)';
-            ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
-            ctx.fillText(txt, lx + 1, ly - 3);
             ctx.restore();
         }
         // Magnifier loupe (Shift held): circular magnified view centred ON the mouse cursor itself. No inner crosshair.
@@ -226,17 +609,60 @@ header select:hover { background: rgba(0, 210, 255, 0.1); }
             ctx.restore();
         }
     }
-    function drawMarker(x, y, label, pending) {
+    // Figure-star marker (orange filled): these are the SB-defining vertices from CONSTELLATION_LINES,
+    // i.e. the stars that draw the constellation's actual pattern. Used to distinguish the few "real" SB
+    // stars from the many additional catalogued bright stars (red rings, drawCatStar below).
+    function drawFigStar(x, y, label) {
+        ctx.save();
+        ctx.fillStyle = 'rgb(245, 144, 16)';                                 // λ orange (CLAUDE.md palette), saturated
+        ctx.strokeStyle = 'rgba(0, 0, 0, 0.85)';
+        ctx.lineWidth = 1.2;
+        ctx.beginPath(); ctx.arc(x, y, 6, 0, Math.PI * 2);
+        ctx.fill(); ctx.stroke();
+        if (label) {
+            // Black halo box behind the label so the orange letter pops on any backdrop (cream paper or constellation drawing).
+            ctx.font = '700 16px Arial, sans-serif';
+            const tw = ctx.measureText(label).width;
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.85)';
+            ctx.fillRect(x + 8, y - 12, tw + 8, 22);
+            ctx.fillStyle = 'rgb(245, 144, 16)';
+            ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+            ctx.fillText(label, x + 12, y);
+        }
+        ctx.restore();
+    }
+    // Catalog-star marker (verification overlay): green ring sized by magnitude (brighter = bigger),
+    // with the Bayer letter / Flamsteed number as a small caption. Borderless, semi-transparent so the
+    // drawn star on the Jamieson plate stays readable underneath.
+    function drawCatStar(x, y, label, mag) {
+        const r = Math.max(4, 11 - (mag || 5) * 1.2);
+        ctx.save();
+        ctx.strokeStyle = 'rgb(176, 36, 24)';                                // Υ dark red (CLAUDE.md palette) — pops on cream Jamieson background
+        ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.stroke();
+        ctx.fillStyle = 'rgb(176, 36, 24)';
+        ctx.font = '700 15px Arial, sans-serif';                             // debug overlay: Arial, not Orbitron (per Doc's rule)
+        ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+        ctx.fillText(label, x + r + 4, y);
+        ctx.restore();
+    }
+    // drawMarker — anchor marker on the canvas.
+    //   pending  → unfilled yellow ring (live click target before RA/Dec is committed)
+    //   snapped  → orange (λ palette) ring + orange number  ← came from a catalog-snap click, so it carries
+    //              high-precision RA/Dec from the catalogue rather than a typed value
+    //   default  → cyan ring + cyan number (hand-typed RA/Dec)
+    function drawMarker(x, y, label, pending, snapped) {
+        const col = pending ? 'rgba(255, 220, 80, 1)' : (snapped ? 'rgb(245, 144, 16)' : 'rgba(0, 230, 255, 1)');
         ctx.save();
         ctx.lineWidth = 2;
-        ctx.strokeStyle = pending ? 'rgba(255, 220, 80, 1)' : 'rgba(0, 230, 255, 1)';
-        ctx.fillStyle   = pending ? 'rgba(255, 220, 80, 1)' : 'rgba(0, 230, 255, 1)';
+        ctx.strokeStyle = col;
+        ctx.fillStyle   = col;
         ctx.beginPath(); ctx.arc(x, y, 8, 0, Math.PI * 2); ctx.stroke();
         ctx.beginPath(); ctx.moveTo(x - 14, y); ctx.lineTo(x + 14, y); ctx.moveTo(x, y - 14); ctx.lineTo(x, y + 14); ctx.stroke();
-        ctx.fillStyle = pending ? 'rgba(0, 0, 0, 0.7)' : 'rgba(0, 0, 0, 0.7)';
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
         ctx.fillRect(x + 10, y - 14, label.toString().length * 9 + 8, 18);
-        ctx.fillStyle = pending ? 'rgba(255, 220, 80, 1)' : 'rgba(0, 230, 255, 1)';
-        ctx.font = '700 12px Orbitron, sans-serif';
+        ctx.fillStyle = col;
+        ctx.font = '700 12px Arial, sans-serif';                             // debug overlay: Arial, not Orbitron (per Doc's rule)
         ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
         ctx.fillText(label, x + 14, y - 5);
         ctx.restore();
@@ -281,33 +707,102 @@ header select:hover { background: rgba(0, 210, 255, 0.1); }
         return solve3([[sxx, sxy, sx], [sxy, syy, sy], [sx, sy, n]], [svx, svy, sv]);
     }
     function predict(px, py) {
-        if (anchors.length < 2) return null;
-        if (anchors.length === 2) {                           // axis-aligned assumption: RA varies with x, Dec with y
-            const [a1, a2] = anchors;
-            if (Math.abs(a2.x - a1.x) < 1 || Math.abs(a2.y - a1.y) < 1) return null;
-            const bx = (a2.ra - a1.ra) / (a2.x - a1.x);
-            const by = (a2.dec - a1.dec) / (a2.y - a1.y);
-            return { ra: a1.ra + bx * (px - a1.x), dec: a1.dec + by * (py - a1.y), mode: 'axis' };
-        }
-        const raC  = lsqAffine('ra');                          // 3+ anchors → least-squares affine (= exact affine for n=3)
-        const decC = lsqAffine('dec');
-        if (!raC || !decC) return null;
-        return { ra: raC[0] * px + raC[1] * py + raC[2], dec: decC[0] * px + decC[1] * py + decC[2], mode: anchors.length === 3 ? 'affine' : 'lsq' };
+        if (anchors.length !== 2) return null;                // only the 2-anchor axis-aligned prediction is reliable; 3+ LSQ-affine breaks on polar plates
+        const [a1, a2] = anchors;
+        if (Math.abs(a2.x - a1.x) < 1 || Math.abs(a2.y - a1.y) < 1) return null;
+        const bx = (a2.ra - a1.ra) / (a2.x - a1.x);
+        const by = (a2.dec - a1.dec) / (a2.y - a1.y);
+        return { ra: a1.ra + bx * (px - a1.x), dec: a1.dec + by * (py - a1.y), mode: 'axis' };
     }
 
+    // Snap-to-prediction: click anywhere on the plate → if any catalog-predicted marker exists, snap to the
+    // CLOSEST one (no max distance). The anchor is added at the CLICKED pixel position with that marker's
+    // catalogue RA/Dec. Idea: in calibration mode you always click a star you mean to anchor; the closest
+    // orange dot tells us its identity. Re-fit moves all other markers closer to their real positions.
+    // Marker hit-test: returns the catalog marker (figure star or red ring) directly under the click,
+    // within `radius` image px. Used by the marker-first workflow to arm a specific catalog identity.
+    function findMarkerAt(px, py, radius) {
+        const figs = predictedFigureStars(), cats = showNonFigStars ? predictedCatalog() : [];
+        let best = null, bd2 = radius * radius;
+        for (const f of figs) {
+            const dx = f.x - px, dy = f.y - py, d2 = dx*dx + dy*dy;
+            if (d2 < bd2) { bd2 = d2; best = { ra: f.ra, dec: f.dec, label: f.label || '?', markerX: f.x, markerY: f.y }; }
+        }
+        for (const c of cats) {
+            const dx = c.x - px, dy = c.y - py, d2 = dx*dx + dy*dy;
+            if (d2 < bd2) { bd2 = d2; best = { ra: c.ra, dec: c.dec, label: c.label, markerX: c.x, markerY: c.y }; }
+        }
+        return best;
+    }
+    function findNearestPredicted(px, py) {
+        const figs = predictedFigureStars(), cats = showNonFigStars ? predictedCatalog() : [];
+        if (!figs.length && !cats.length) return null;                       // no orange markers yet → fall through to manual popup
+        let best = null, bd2 = Infinity, bx = 0, by = 0;
+        for (const f of figs) {
+            const dx = f.x - px, dy = f.y - py, d2 = dx*dx + dy*dy;
+            if (d2 < bd2) { bd2 = d2; best = { ra: f.ra, dec: f.dec, label: f.label || '?' }; bx = f.x; by = f.y; }
+        }
+        for (const c of cats) {
+            const dx = c.x - px, dy = c.y - py, d2 = dx*dx + dy*dy;
+            if (d2 < bd2) { bd2 = d2; best = { ra: c.ra, dec: c.dec, label: c.label }; bx = c.x; by = c.y; }
+        }
+        if (best) { best.markerX = bx; best.markerY = by; best.dist = Math.sqrt(bd2); }
+        return best;
+    }
+    // Last snap visual feedback — a connecting line from the click to the snapped-to marker + the label,
+    // drawn for ~0.9s after a snap. Lets you see WHICH catalog star the click was attributed to.
+    let snapFlash = null;       // { clickX, clickY, markerX, markerY, label, until }
+    // Marker-first mode: click an orange marker once → it goes into "armed" state (highlighted halo).
+    // Next click anywhere on the plate places the anchor at that pixel with the armed marker's catalog RA/Dec.
+    // Cancel by hitting Escape or clicking the same marker again.
+    let armedMarker = null;     // { ra, dec, label, markerX, markerY }
+    function tickFlash() {
+        if (!snapFlash) return;
+        if (performance.now() > snapFlash.until) { snapFlash = null; redraw(); return; }
+        requestAnimationFrame(tickFlash);
+    }
     canvas.addEventListener('click', e => {
         if (!img) return;
         const r = canvas.getBoundingClientRect();
         const cx = e.clientX - r.left;
         const cy = e.clientY - r.top;
         pending = { x: cx / canvas._scale, y: cy / canvas._scale };
-        // Show popup near the click
+        // Marker-first workflow: a click directly on an orange/red marker (within ~14 image-px) arms (or disarms) it.
+        // The NEXT click on the plate places the anchor at that pixel with the armed marker's catalog RA/Dec.
+        const onMarker = findMarkerAt(pending.x, pending.y, 14);
+        if (onMarker) {
+            if (armedMarker && armedMarker.label === onMarker.label) armedMarker = null;   // click same marker again → disarm
+            else armedMarker = onMarker;
+            pending = null;
+            redraw();
+            return;
+        }
+        if (armedMarker) {
+            // We have a chosen catalog identity → place the anchor at THIS click, using the armed marker's RA/Dec.
+            anchors.push({ ra: armedMarker.ra, dec: armedMarker.dec, x: pending.x, y: pending.y, snapLabel: armedMarker.label });
+            snapFlash = { clickX: pending.x, clickY: pending.y, markerX: armedMarker.markerX, markerY: armedMarker.markerY, label: armedMarker.label, until: performance.now() + 900 };
+            requestAnimationFrame(tickFlash);
+            armedMarker = null;                                                  // single-shot — next click goes through the normal flow
+            pending = null;
+            refreshList(); redraw();
+            return;
+        }
+        // Fallback: nearest-marker snap (no marker armed → closest one wins, no max distance).
+        const snap = findNearestPredicted(pending.x, pending.y);
+        if (snap) {
+            anchors.push({ ra: snap.ra, dec: snap.dec, x: pending.x, y: pending.y, snapLabel: snap.label });
+            snapFlash = { clickX: pending.x, clickY: pending.y, markerX: snap.markerX, markerY: snap.markerY, label: snap.label, until: performance.now() + 900 };
+            requestAnimationFrame(tickFlash);
+            pending = null;
+            refreshList(); redraw();
+            return;
+        }
+        // No snap → traditional popup with the 2-anchor axis prediction (if any).
         popup.style.display = 'block';
         const px = Math.min(r.width - 200, cx + 16);
         const py = Math.min(r.height - 140, cy + 10);
         popup.style.left = (px + 14) + 'px';   // 14 = #canvas-wrap padding
         popup.style.top  = (py + 14) + 'px';
-        // Pre-fill from existing anchors if we can predict
         const p = predict(pending.x, pending.y);
         if (p) {
             raIn.value  = p.ra.toFixed(2);
@@ -322,11 +817,26 @@ header select:hover { background: rgba(0, 210, 255, 0.1); }
         redraw();
     });
 
+    // RA parser: accepts decimal degrees ("165"), decimal hours (… not auto, ambiguous), OR Roman-numeral hours ("XI" → 165°).
+    function parseRA(s) {
+        if (!s) return NaN;
+        const t = s.trim().toUpperCase();
+        if (/^[IVXL]+$/.test(t)) {
+            const R = { I: 1, V: 5, X: 10, L: 50 };
+            let val = 0;
+            for (let i = 0; i < t.length; i++) {
+                const cur = R[t[i]], next = R[t[i + 1]];
+                val += (next > cur) ? -cur : cur;
+            }
+            return val * 15;                                                       // hours → degrees
+        }
+        return parseFloat(t.replace(',', '.'));
+    }
     document.getElementById('add').addEventListener('click', () => {
         if (!pending) return;
-        const ra  = parseFloat(raIn.value.replace(',', '.'));
+        const ra  = parseRA(raIn.value);
         const dec = parseFloat(decIn.value.replace(',', '.'));
-        if (!isFinite(ra) || !isFinite(dec)) { alert('RA und Dec bitte als Zahl eingeben.'); return; }
+        if (!isFinite(ra) || !isFinite(dec)) { alert('RA und Dec bitte als Zahl (Grad) oder römische Stunde (XI…) eingeben.'); return; }
         anchors.push({ ra, dec, x: pending.x, y: pending.y });
         pending = null;
         popup.style.display = 'none';
@@ -340,11 +850,13 @@ header select:hover { background: rgba(0, 210, 255, 0.1); }
     }));
 
     function refreshList() {
+        saveAnchors();                                                       // persist any anchor change (push, splice, clear, import) per plate
         list.innerHTML = '';
         countEl.textContent = anchors.length;
         anchors.forEach((a, i) => {
             const li = document.createElement('li');
-            li.innerHTML = '<span><b>' + (i + 1) + '</b> <span class="vals">RA ' + a.ra.toFixed(2) + '°, Dec ' + a.dec.toFixed(2) + '°</span><span class="px">px (' + Math.round(a.x) + ', ' + Math.round(a.y) + ')</span></span>';
+            const tag = a.snapLabel ? ' <span style="color: rgb(245, 144, 16); font-weight: 700;">' + a.snapLabel + '</span>' : '';
+            li.innerHTML = '<span><b>' + (i + 1) + '</b>' + tag + ' <span class="vals">RA ' + a.ra.toFixed(2) + '°, Dec ' + a.dec.toFixed(2) + '°</span><span class="px">px (' + Math.round(a.x) + ', ' + Math.round(a.y) + ')</span></span>';
             const del = document.createElement('button');
             del.className = 'del'; del.textContent = '×'; del.title = 'Anchor löschen';
             del.onclick = () => { anchors.splice(i, 1); refreshList(); redraw(); };
@@ -375,7 +887,24 @@ header select:hover { background: rgba(0, 210, 255, 0.1); }
 
     window.addEventListener('resize', redraw);
     // Shift held anywhere → activate the loupe (redraw only on state change to avoid keydown-repeat spam)
-    window.addEventListener('keydown', e => { if (e.key === 'Shift' && !shiftDown) { shiftDown = true; redraw(); } });
+    window.addEventListener('keydown', e => {
+        if (e.key === 'Escape' && armedMarker) { armedMarker = null; redraw(); return; }   // disarm the marker-first selection
+        if (e.key === 'Shift' && !shiftDown) { shiftDown = true; redraw(); }
+        else if ((e.key === 'c' || e.key === 'C') && !e.metaKey && !e.ctrlKey && !e.altKey) {
+            const t = e.target;
+            if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA')) return;   // don't swallow typing in the RA/Dec fields
+            showCrosshair = !showCrosshair;
+            try { localStorage.setItem(LS_CROSS, showCrosshair ? '1' : '0'); } catch (_) {}
+            redraw();
+        }
+        else if ((e.key === 'v' || e.key === 'V') && !e.metaKey && !e.ctrlKey && !e.altKey) {
+            const t = e.target;
+            if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA')) return;
+            showNonFigStars = !showNonFigStars;                                       // toggle the extra non-figure red rings
+            try { localStorage.setItem(LS_VIS, showNonFigStars ? '1' : '0'); } catch (_) {}
+            redraw();
+        }
+    });
     window.addEventListener('keyup',   e => { if (e.key === 'Shift' &&  shiftDown) { shiftDown = false; redraw(); } });
 })();
 </script>
