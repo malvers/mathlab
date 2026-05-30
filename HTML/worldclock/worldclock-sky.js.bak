@@ -172,17 +172,16 @@
             const rect = canvas.getBoundingClientRect();
             starHover.x = clientX - rect.left;
             starHover.y = clientY - rect.top;
-            // Over the plate rectangle → suppress red-line + white-star hover so the plate stays readable;
-            // outside it, normal star/constellation hovering works.
-            starHover.on = !_ptInArtQuad(starHover.x, starHover.y);
+            // Celestials (showArt) on → ALL hover effects off (no red lines, no white figure stars).
+            // The constellation labels themselves stay visible; only their hover treatment is suppressed.
+            starHover.on = !showArt;
         }
         canvas.addEventListener('mousemove', (e) => setStarHover(e.clientX, e.clientY));
-        // Track which constellation name label the pointer is currently over (cyan highlight) — off when over the plate.
+        // Track which constellation name label the pointer is currently over (cyan highlight) — also off in Celestials mode.
         canvas.addEventListener('mousemove', (e) => {
-            if (!conLabelHits || !conLabelHits.length) { hoveredLabelId = null; return; }
+            if (showArt || !conLabelHits || !conLabelHits.length) { hoveredLabelId = null; return; }
             const _r = canvas.getBoundingClientRect();
             const _x = e.clientX - _r.left, _y = e.clientY - _r.top;
-            if (_ptInArtQuad(_x, _y)) { hoveredLabelId = null; return; }
             let _found = null;
             for (const h of conLabelHits) {
                 if (_x >= h.x && _x <= h.x + h.w && _y >= h.y && _y <= h.y + h.h) { _found = h.id; break; }
@@ -301,9 +300,9 @@
             return best;
         }
         function hoverPick(clientX, clientY) {    // priority: zodiac → deep-sky → star/constellation
-            // Over the plate rectangle → no tooltips (the plate is the focus). Outside it, normal hover-picking.
-            const _rect = canvas.getBoundingClientRect();
-            if (_ptInArtQuad(clientX - _rect.left, clientY - _rect.top)) {
+            // Celestials (showArt) on → no tooltips at all. Constellation labels remain interactive for clicks
+            // (the click handler in `pointerup` doesn't depend on hover state), but no info-box pops up.
+            if (showArt) {
                 hoveredZodiac = null; hoveredDeepsky = null; hoveredStar = null;
                 showInfoBox(null);
                 return;
@@ -927,6 +926,223 @@
                     ctx.strokeStyle = `rgba(0, 210, 255, ${0.45 * a * art._alphaEff})`;
                     ctx.lineWidth = 1.5;
                     ctx.strokeRect(_rx + 0.5, _ry + 0.5, _targetW - 1, _targetH - 1);
+                    ctx.restore();
+                }
+            }
+            // (Legacy debug-anchor overlay, mesh wrap pipeline removed — plates are shown as plain rectangles now.)
+            if (false) {                                                              // dead branch kept to preserve the brace structure of the surrounding block
+                const _solveAff = null, _delaunay = null;
+                for (const art of CONSTELLATION_ART || []) {
+                    if (art.id !== selectedArtId) continue;
+                    const W = 1, H = 1;
+                    const n = 0;
+                        // Cache (per art): LSQ-fit a linear pixel → (RA, Dec) from the calibrated anchors, build a mesh grid over the
+                        // WHOLE texture, and pre-compute each grid point's (RA, Dec). Each frame we re-project the grid via proj() so
+                        // the dome's curvature is captured by many small triangles instead of squished into 4 flat ones.
+                        if (!art._meshReady) {
+                            // THIN-PLATE-SPLINE fit pixel → (RA, Dec). TPS interpolates EXACTLY through every
+                            // anchor and curves smoothly between them — required because the prior bilinear LSQ
+                            // had ~65 px mean residual on the Jamieson conic projection (4 parameters can't capture
+                            // the radial conic taper). Basis: f(x, y) = a₀ + a₁·x + a₂·y + Σ wᵢ · φ(‖p − pᵢ‖²),
+                            // φ(r²) = r² log(r²). One Gauss-Jordan pass handles both u→RA and u→Dec via the same
+                            // (N+3)×(N+3) matrix with two RHS columns. Anchors with identical (tx, ty) but different
+                            // (RA, Dec) — e.g. duplicate calibration clicks — are merged by averaging.
+                            const groups = new Map();
+                            for (const an of art.anchors) {
+                                const key = an[2].toFixed(4) + '_' + an[3].toFixed(4);
+                                if (!groups.has(key)) groups.set(key, { tx: an[2] * W, ty: an[3] * H, ras: [], decs: [] });
+                                const g = groups.get(key);
+                                g.ras.push(an[0]); g.decs.push(an[1]);
+                            }
+                            const ctrl = [];
+                            for (const g of groups.values()) {
+                                ctrl.push({
+                                    tx: g.tx, ty: g.ty,
+                                    ra:  g.ras.reduce((s, x) => s + x, 0) / g.ras.length,
+                                    dec: g.decs.reduce((s, x) => s + x, 0) / g.decs.length
+                                });
+                            }
+                            const Nc = ctrl.length;
+                            let raCoef = null, decCoef = null, tpsPts = null;
+                            if (Nc >= 4) {
+                                const D = Nc + 3;
+                                const A = new Array(D);
+                                for (let i = 0; i < D; i++) A[i] = new Array(D).fill(0);
+                                const rRa = new Array(D).fill(0), rDec = new Array(D).fill(0);
+                                const _phi = r2 => r2 < 1e-12 ? 0 : r2 * Math.log(r2);
+                                for (let i = 0; i < Nc; i++) {
+                                    for (let j = 0; j < Nc; j++) {
+                                        const dx = ctrl[i].tx - ctrl[j].tx, dy = ctrl[i].ty - ctrl[j].ty;
+                                        A[i][j] = _phi(dx * dx + dy * dy);
+                                    }
+                                    A[i][Nc] = 1; A[i][Nc + 1] = ctrl[i].tx; A[i][Nc + 2] = ctrl[i].ty;
+                                    A[Nc][i] = 1; A[Nc + 1][i] = ctrl[i].tx; A[Nc + 2][i] = ctrl[i].ty;
+                                    rRa[i] = ctrl[i].ra; rDec[i] = ctrl[i].dec;
+                                }
+                                // Gauss-Jordan, partial pivoting, single pass solving both RHS columns simultaneously.
+                                let ok = true;
+                                for (let i = 0; i < D && ok; i++) {
+                                    let piv = i, pa = Math.abs(A[i][i]);
+                                    for (let k = i + 1; k < D; k++) {
+                                        const v = Math.abs(A[k][i]);
+                                        if (v > pa) { pa = v; piv = k; }
+                                    }
+                                    if (pa < 1e-10) { ok = false; break; }
+                                    if (piv !== i) {
+                                        const t = A[i]; A[i] = A[piv]; A[piv] = t;
+                                        const tr = rRa[i]; rRa[i] = rRa[piv]; rRa[piv] = tr;
+                                        const td = rDec[i]; rDec[i] = rDec[piv]; rDec[piv] = td;
+                                    }
+                                    const p = A[i][i];
+                                    for (let j = i; j < D; j++) A[i][j] /= p;
+                                    rRa[i] /= p; rDec[i] /= p;
+                                    for (let k = 0; k < D; k++) {
+                                        if (k === i) continue;
+                                        const f = A[k][i]; if (!f) continue;
+                                        for (let j = i; j < D; j++) A[k][j] -= f * A[i][j];
+                                        rRa[k] -= f * rRa[i]; rDec[k] -= f * rDec[i];
+                                    }
+                                }
+                                if (ok) {
+                                    raCoef  = { w: rRa.slice(0, Nc),  a: rRa.slice(Nc)  };
+                                    decCoef = { w: rDec.slice(0, Nc), a: rDec.slice(Nc) };
+                                    tpsPts = ctrl;
+                                }
+                            }
+                            if (!raCoef || !decCoef) {
+                                art._meshReady = 'fail';
+                            } else {
+                                const GRID_N = 14;                                    // 14×14 cells → 15×15 = 225 grid points → 392 triangles → smooth curved edges
+                                // Mesh covers the anchor bounding box (in texture pixels) PLUS a 20 % margin on each side,
+                                // clamped to the texture rectangle. The margin lets the ornamental atlas frame (outer RA scale,
+                                // chart border) render too. TPS extrapolation outside the anchor hull is unbounded — keep
+                                // the margin modest (20 %) so it stays well-behaved.
+                                let _uMin = Infinity, _uMax = -Infinity, _vMin = Infinity, _vMax = -Infinity;
+                                for (const an of art.anchors) {
+                                    if (an[2] < _uMin) _uMin = an[2]; if (an[2] > _uMax) _uMax = an[2];
+                                    if (an[3] < _vMin) _vMin = an[3]; if (an[3] > _vMax) _vMax = an[3];
+                                }
+                                const _MARGIN = 0.20;
+                                const _uMar = (_uMax - _uMin) * _MARGIN, _vMar = (_vMax - _vMin) * _MARGIN;
+                                _uMin = Math.max(0, _uMin - _uMar); _uMax = Math.min(1, _uMax + _uMar);
+                                _vMin = Math.max(0, _vMin - _vMar); _vMax = Math.min(1, _vMax + _vMar);
+                                const pxMin = _uMin * W, pxMax = _uMax * W;
+                                const pyMin = _vMin * H, pyMax = _vMax * H;
+                                const cellW = (pxMax - pxMin) / GRID_N, cellH = (pyMax - pyMin) / GRID_N;
+                                // Cached TPS evaluator — closures over the solved coefficients + control points.
+                                const _evalTPS = (px, py, coef) => {
+                                    let z = coef.a[0] + coef.a[1] * px + coef.a[2] * py;
+                                    for (let i = 0; i < tpsPts.length; i++) {
+                                        const dx = px - tpsPts[i].tx, dy = py - tpsPts[i].ty;
+                                        const r2 = dx * dx + dy * dy;
+                                        if (r2 < 1e-12) continue;
+                                        z += coef.w[i] * r2 * Math.log(r2);
+                                    }
+                                    return z;
+                                };
+                                art._meshTx  = [];                                    // texture-pixel positions of grid points
+                                art._meshRA  = [];                                    // TPS-interpolated RA per grid point (exact at anchors)
+                                art._meshDec = [];                                    // TPS-interpolated Dec
+                                for (let j = 0; j <= GRID_N; j++) {
+                                    for (let i = 0; i <= GRID_N; i++) {
+                                        const px = pxMin + i * cellW, py = pyMin + j * cellH;
+                                        art._meshTx.push([px, py]);
+                                        art._meshRA.push (_evalTPS(px, py, raCoef));
+                                        art._meshDec.push(_evalTPS(px, py, decCoef));
+                                    }
+                                }
+                                art._meshTris = [];                                   // 2 triangles per cell
+                                const _idx = (i, j) => j * (GRID_N + 1) + i;
+                                for (let j = 0; j < GRID_N; j++) {
+                                    for (let i = 0; i < GRID_N; i++) {
+                                        const tl = _idx(i, j),     tr = _idx(i + 1, j);
+                                        const bl = _idx(i, j + 1), br = _idx(i + 1, j + 1);
+                                        art._meshTris.push([tl, tr, br]);
+                                        art._meshTris.push([tl, br, bl]);
+                                    }
+                                }
+                                art._meshReady = true;
+                            }
+                        }
+                        if (art._meshReady === true) {
+                            // Per frame: project all grid points to screen — dome curvature handled by proj() at each individual point.
+                            const _sk = new Array(art._meshTx.length);
+                            for (let i = 0; i < art._meshTx.length; i++) _sk[i] = proj(art._meshRA[i], art._meshDec[i]);
+                            // Hover-detect: is the mouse inside the plate's 4-corner outer quad? → ease alpha toward 1.0 while hovering, back to artAlpha otherwise.
+                            const _gN = Math.round(Math.sqrt(art._meshTx.length)) - 1;
+                            const _quad = [_sk[0], _sk[_gN], _sk[_sk.length - 1], _sk[_gN * (_gN + 1)]];   // TL, TR, BR, BL
+                            artHoverQuad = _quad;                                     // expose to the hover-suppression check (used by setStarHover/hoverPick)
+                            let _hover = false;
+                            if (typeof fkMouse !== 'undefined' && fkMouse && _quad.every(p => p)) {
+                                const px = fkMouse.x, py = fkMouse.y;
+                                for (let i = 0, j = 3; i < 4; j = i++) {
+                                    const xi = _quad[i][0], yi = _quad[i][1];
+                                    const xj = _quad[j][0], yj = _quad[j][1];
+                                    if (((yi > py) !== (yj > py)) && (px < (xj - xi) * (py - yi) / (yj - yi) + xi)) _hover = !_hover;
+                                }
+                            }
+                            const _target = _hover ? 1 : artAlpha;
+                            if (art._alphaEff == null) art._alphaEff = artAlpha;
+                            art._alphaEff += (_target - art._alphaEff) * 0.15;        // smooth ~10-frame fade
+                            const _dpr = window.devicePixelRatio || 1;
+                            for (const tri of art._meshTris) {
+                                const tp0 = art._meshTx[tri[0]], tp1 = art._meshTx[tri[1]], tp2 = art._meshTx[tri[2]];
+                                const sp0 = _sk[tri[0]], sp1 = _sk[tri[1]], sp2 = _sk[tri[2]];
+                                if (!sp0 || !sp1 || !sp2) continue;
+                                const m = _solveAff(tp0, tp1, tp2, sp0, sp1, sp2);
+                                if (!m) continue;
+                                ctx.save();
+                                ctx.setTransform(m.a * _dpr, m.d * _dpr, m.b * _dpr, m.e * _dpr, m.c * _dpr, m.f * _dpr);
+                                ctx.beginPath();
+                                ctx.moveTo(tp0[0], tp0[1]); ctx.lineTo(tp1[0], tp1[1]); ctx.lineTo(tp2[0], tp2[1]); ctx.closePath();
+                                ctx.clip();
+                                ctx.globalAlpha = a * art._alphaEff;                  // baseline artAlpha (Cmd+↑/↓), fades to 1.0 on hover
+                                ctx.drawImage(art._img, 0, 0);
+                                ctx.restore();
+                            }
+                        }
+                    } else {                                                          // no image yet → dashed polygon outlining the anchor hull
+                        ctx.save();
+                        ctx.globalAlpha = a * 0.5;
+                        ctx.strokeStyle = 'rgba(170, 230, 255, 0.7)';
+                        ctx.lineWidth = 1; ctx.setLineDash([4, 3]);
+                        ctx.beginPath();
+                        ctx.moveTo(s[0][0], s[0][1]);
+                        for (let i = 1; i < s.length; i++) ctx.lineTo(s[i][0], s[i][1]);
+                        ctx.closePath(); ctx.stroke();
+                        ctx.setLineDash([]);
+                        let _ccx = 0, _ccy = 0;
+                        for (const p of s) { _ccx += p[0]; _ccy += p[1]; }
+                        _ccx /= s.length; _ccy /= s.length;
+                        ctx.fillStyle = 'rgba(170, 230, 255, 0.85)';
+                        ctx.font = '600 10px Orbitron'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                        ctx.fillText(art.id, _ccx, _ccy);
+                        ctx.restore();
+                    }
+                    // Debug overlay: red polygon connecting all anchors + ring/crosshair/label at each anchor's sky position. Toggle with 'a'.
+                    if (!showArtAnchors) continue;
+                    ctx.save();
+                    ctx.globalAlpha = 1;
+                    ctx.strokeStyle = 'rgba(220, 30, 30, 0.55)';
+                    ctx.lineWidth = 1.5; ctx.setLineDash([6, 4]);
+                    ctx.beginPath();
+                    ctx.moveTo(s[0][0], s[0][1]);
+                    for (let i = 1; i < s.length; i++) ctx.lineTo(s[i][0], s[i][1]);
+                    ctx.closePath(); ctx.stroke();
+                    ctx.setLineDash([]);
+                    ctx.strokeStyle = 'rgb(255, 80, 80)';
+                    ctx.fillStyle = 'rgb(255, 80, 80)';
+                    ctx.lineWidth = 2;
+                    ctx.font = '700 11px Orbitron'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+                    for (let i = 0; i < s.length; i++) {
+                        const x = s[i][0], y = s[i][1];
+                        ctx.beginPath(); ctx.arc(x, y, 8, 0, Math.PI * 2); ctx.stroke();
+                        ctx.beginPath();
+                        ctx.moveTo(x - 12, y); ctx.lineTo(x + 12, y);
+                        ctx.moveTo(x, y - 12); ctx.lineTo(x, y + 12);
+                        ctx.stroke();
+                        ctx.fillText(art.id + '·' + i, x + 14, y);
+                    }
                     ctx.restore();
                 }
             }
