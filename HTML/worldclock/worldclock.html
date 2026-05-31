@@ -128,15 +128,23 @@
 
     <!-- CITY INFO BOX (globe mode, left side) -->
     <div id="city-info-box" style="position: fixed; left: 0; top: 50%; transform: translateY(-50%); width: clamp(240px, 30vmin, 440px); max-height: 80vh; background: rgba(0, 6, 22, 0.92); border: 1px solid rgba(0, 210, 255, 0.4); border-radius: 1vmin; z-index: 9999; display: none; flex-direction: column; font-family: 'Outfit', sans-serif; color: #e6edf3; overflow: hidden; box-shadow: 0 1vmin 4vmin rgba(0,0,0,0.6);">
-        <div id="city-info-img-wrap" style="width: 100%; background: #000; overflow: hidden; display: none;">
+        <div id="city-info-img-wrap" style="width: 100%; background: #000; overflow: hidden; display: none; position: relative;">
             <img id="city-info-img" src="" alt="" style="width: 100%; height: auto; display: block;">
+            <!-- Live weather overlay (top of the city image): icon + temperature + wind -->
+            <div id="city-info-weather" aria-hidden="true">
+                <img id="ciw-icon" alt="">
+                <div class="ciw-readout">
+                    <div id="ciw-temp"></div>
+                    <div id="ciw-wind"><span id="ciw-wind-arrow">↑</span><span id="ciw-wind-val"></span></div>
+                </div>
+            </div>
         </div>
         <a id="city-info-source" target="_blank" rel="noopener" style="display: none; padding: 0.3vmin 1.2vmin; font-size: clamp(0.6rem, 0.85vmin, 0.8rem); color: rgba(0, 210, 255, 0.7); text-decoration: none; font-family: 'Outfit', sans-serif; border-bottom: 1px solid rgba(0, 210, 255, 0.15);">Quelle: Wikipedia →</a>
         <div style="padding: 1vmin 1.2vmin;">
             <div id="city-info-title" style="font-family: 'Orbitron', sans-serif; font-weight: 700; color: #00d2ff; font-size: clamp(0.8rem, 1.3vmin, 1.1rem); margin-bottom: 0.4vmin; letter-spacing: 1px;"></div>
             <div id="city-info-pop" style="font-family: 'Orbitron', sans-serif; font-weight: 400; color: #ffaa00; font-size: clamp(0.65rem, 1vmin, 0.85rem); margin-bottom: 0.6vmin; letter-spacing: 1px; display: none;"></div>
             <div id="city-info-loading" style="font-size: clamp(0.7rem, 1vmin, 0.9rem); color: rgba(0, 210, 255, 0.6); font-style: italic; display: none;">Lade Info…</div>
-            <div id="city-info-extract" style="font-size: clamp(0.72rem, 1.05vmin, 0.95rem); line-height: 1.45; color: rgba(230, 237, 243, 0.85); max-height: 45vh; overflow-y: auto;"></div>
+            <div id="city-info-extract" style="font-family: 'Raleway', sans-serif; font-size: clamp(0.72rem, 1.05vmin, 0.95rem); line-height: 1.45; color: rgba(230, 237, 243, 0.85); max-height: 45vh; overflow-y: auto;"></div>
         </div>
     </div>
 

@@ -59,6 +59,62 @@ function fetchWikidataPopulation(qid) {
         .catch(() => null);
 }
 
+// Normalise the Wikipedia summary to roughly Dresden's length (~188 chars): keep short intros as-is,
+// trim longer ones to the last full sentence near the target, else cut on a word boundary with "…".
+function trimToDresdenLength(text) {
+    const TARGET = 190;
+    const t = (text || '').trim();
+    if (t.length <= TARGET + 30) return t;                 // already Dresden-ish or shorter → leave it
+    const slice = t.slice(0, TARGET + 40);
+    const lastDot = Math.max(slice.lastIndexOf('. '), slice.lastIndexOf('! '), slice.lastIndexOf('? '));
+    if (lastDot >= TARGET - 60) return t.slice(0, lastDot + 1);   // end on a full sentence
+    let cut = t.slice(0, TARGET);
+    const sp = cut.lastIndexOf(' ');
+    if (sp > 0) cut = cut.slice(0, sp);
+    return cut.replace(/[.,;:\s]+$/, '') + ' …';
+}
+
+// --- Live weather overlay (Open-Meteo, no API key) ---
+const WX_ICON_BASE = 'https://cdn.jsdelivr.net/gh/basmilius/weather-icons@dev/production/fill/svg/';
+
+// WMO weather code → Meteocons icon name (day/night aware). Only verified icon names are returned.
+function weatherIconName(code, isDay) {
+    const d = isDay ? 'day' : 'night';
+    if (code <= 1) return 'clear-' + d;
+    if (code === 2) return 'partly-cloudy-' + d;
+    if (code === 3) return 'overcast-' + d;
+    if (code === 45 || code === 48) return 'fog-' + d;
+    if (code >= 51 && code <= 57) return 'drizzle';
+    if (code >= 61 && code <= 67) return 'rain';
+    if (code >= 71 && code <= 77) return 'snow';
+    if (code >= 80 && code <= 82) return 'partly-cloudy-' + d + '-rain';
+    if (code === 85 || code === 86) return 'snow';
+    if (code >= 95) return 'thunderstorms-rain';
+    return 'overcast-' + d;
+}
+
+function fetchCityWeather(lat, lon, token) {
+    const box = document.getElementById('city-info-weather');
+    if (!box) return;
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}`
+              + `&current=temperature_2m,wind_speed_10m,wind_direction_10m,weather_code,is_day`;
+    fetch(url)
+        .then(r => r.ok ? r.json() : Promise.reject(r.status))
+        .then(d => {
+            if (token !== cityInfoFetchToken) return;                  // stale (city changed meanwhile)
+            const c = d && d.current;
+            if (!c || typeof c.temperature_2m !== 'number') return;
+            document.getElementById('ciw-icon').src = WX_ICON_BASE + weatherIconName(c.weather_code, c.is_day === 1) + '.svg';
+            document.getElementById('ciw-temp').textContent = Math.round(c.temperature_2m) + '°';
+            document.getElementById('ciw-wind-val').textContent = Math.round(c.wind_speed_10m) + ' km/h';
+            // meteorological direction = where the wind comes FROM; the arrow points where it flows TO
+            const arrow = document.getElementById('ciw-wind-arrow');
+            if (arrow) arrow.style.transform = 'rotate(' + (((c.wind_direction_10m || 0) + 180) % 360) + 'deg)';
+            box.classList.add('is-on');
+        })
+        .catch(() => { /* weather unavailable → overlay stays hidden */ });
+}
+
 function showCityInfo(cityName) {
     if (!window.useGlobe) { hideCityInfo(); return; }
     const cleanName = cityName.replace(/\n/g, ' ').trim();
@@ -87,6 +143,8 @@ function showCityInfo(cityName) {
     popEl.style.display = 'none';
     loadingEl.style.display = 'block';
     imgWrap.style.display = 'none';
+    const weatherBox = document.getElementById('city-info-weather');
+    if (weatherBox) weatherBox.classList.remove('is-on');   // hide last city's weather until the new one loads
     const sourceElInit = document.getElementById('city-info-source');
     if (sourceElInit) sourceElInit.style.display = 'none';
 
@@ -108,7 +166,7 @@ function showCityInfo(cityName) {
             return;
         }
         if (primary.title) titleEl.textContent = primary.title.toUpperCase();
-        extractEl.textContent = primary.extract || 'Keine Beschreibung verfügbar.';
+        extractEl.textContent = primary.extract ? trimToDresdenLength(primary.extract) : 'Keine Beschreibung verfügbar.';
 
         // Prefer EN image (often skyline/landmark), fallback to DE
         let imgSrc = null;
@@ -120,6 +178,11 @@ function showCityInfo(cityName) {
         if (imgSrc) {
             imgEl.src = imgSrc;
             imgWrap.style.display = 'block';
+            // Live weather sits on top of the image → only fetch it when there is an image + coordinates.
+            const coords = (de && de.coordinates) || (en && en.coordinates) || primary.coordinates;
+            if (coords && typeof coords.lat === 'number' && typeof coords.lon === 'number') {
+                fetchCityWeather(coords.lat, coords.lon, token);
+            }
             const pageUrl = de?.content_urls?.desktop?.page || en?.content_urls?.desktop?.page;
             if (sourceEl && pageUrl) {
                 sourceEl.href = pageUrl;
@@ -188,6 +251,14 @@ function updateCityInfoBoxPosition() {
     }
     if (loadingEl) loadingEl.style.fontSize = extractSize + 'px';
     if (imgWrap) imgWrap.style.height = imgHeight + 'px';
+
+    // Weather overlay scales with the image height so it stays proportional in small/large boxes.
+    const weatherEl = document.getElementById('city-info-weather');
+    if (weatherEl) {
+        weatherEl.style.setProperty('--ciw-icon', clamp(34, imgHeight * 0.34, 60) + 'px');
+        weatherEl.style.setProperty('--ciw-temp', clamp(15, imgHeight * 0.17, 28) + 'px');
+        weatherEl.style.setProperty('--ciw-wind', clamp(9, imgHeight * 0.072, 13) + 'px');
+    }
 
     // Position der "18" auf dem Stundenring (links, bei 9-Uhr-Position)
     // angle für i=18: (12-18)*(2PI/24) - PI/2 = -PI  →  cos = -1

@@ -220,7 +220,9 @@
             li.dataset.id = h.id;
             const primary = starLangDE ? (h.german || h.latin) : h.latin;
             const secondary = starLangDE ? h.latin : (h.german || h.id);
-            li.innerHTML = primary + ' <span class="sub">' + secondary + '</span>';
+            li.innerHTML = '<span class="main">' + primary + '</span>'
+                         + '<span class="dots"></span>'
+                         + '<span class="sub">' + secondary + '</span>';
             if (i === _sel) li.classList.add('is-sel');
             list.appendChild(li);
         }
@@ -255,12 +257,12 @@
         targetCity = { name: _name.toUpperCase(), lat: _lat, lon: _lon, globeLat: _lat, globeLon: _lon };
         selectedArtId = id;                                              // shows the plate (if calibrated) and the red label/lines
         try { DebugWindow.log('[search] ' + id + ' → Beobachter lat=' + _lat.toFixed(1) + '°'); } catch (_) {}
-        inp.value = '';
+        inp.value = _name;                                               // keep the chosen name visible in the search field
         list.classList.remove('is-on');
         inp.blur();
     }
 
-    inp.addEventListener('focus', () => { _sel = 0; render(inp.value); });
+    inp.addEventListener('focus', () => { _sel = 0; inp.select(); render(inp.value); });   // select any prior name so typing replaces it
     inp.addEventListener('input', () => { _sel = 0; render(inp.value); });
     inp.addEventListener('keydown', (e) => {
         const items = list.querySelectorAll('li');
@@ -288,10 +290,23 @@
         inp.select();
     });
 
-    // Visibility tracks planetarium mode (skyTarget). Poll cheaply — there is no central event for it.
+    // Visibility tracks planetarium mode (skyTarget). Same poll also mirrors selectedArtId into the input
+    // so a constellation picked by clicking its label on the dome shows up in the search field too.
+    let _lastSel = null;
     function refreshVisibility() {
         root.classList.toggle('is-on', !!skyTarget);
+        if (selectedArtId !== _lastSel) {
+            _lastSel = selectedArtId;
+            if (document.activeElement !== inp) {                            // don't overwrite a search the user is currently typing
+                if (selectedArtId) {
+                    const _it = buildIndex().find(x => x.id === selectedArtId);
+                    if (_it) inp.value = starLangDE ? (_it.german || _it.latin) : _it.latin;
+                } else {
+                    inp.value = '';
+                }
+            }
+        }
     }
     refreshVisibility();
-    setInterval(refreshVisibility, 400);
+    setInterval(refreshVisibility, 250);
 })();
