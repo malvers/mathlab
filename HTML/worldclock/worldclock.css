@@ -136,7 +136,9 @@ body.school-ibb #opening-hours {
     z-index: 0;
     pointer-events: none;
 }
-body.use-globe #globe-stage { display: block; filter: brightness(0.8); }
+/* Match the canvas dial/planetarium nudge (cy = h/2 - 15 in worldclock.js) so the sphere
+   stays concentric with the city ring instead of sitting 15px low. */
+body.use-globe #globe-stage { display: block; filter: brightness(0.8); transform: translateY(-15px); }
 body.use-globe #canvas { position: relative; z-index: 1; background: transparent; }
 /* --- DEBUG: Clock-only cover (fades in 2s after load) --- */
 :root { --fade-out-ms: 3000ms; --fade-in-ms: 250ms; }
@@ -500,18 +502,55 @@ body:has(#mini-stack-r.popup) #sky-search { display: none; }
     border: 1px solid rgba(0, 210, 255, 0.25);
     border-radius: 8px;
     display: none;
+    /* Firefox scrollbar — matches the index page (muted thumb, lighter track). */
+    scrollbar-width: thin;
+    scrollbar-color: rgba(72, 88, 112, 0.95) rgba(38, 46, 64, 0.88);
 }
+/* WebKit (Chromium / Safari / Edge) scrollbar — also matches the index page. */
+#sky-search-list::-webkit-scrollbar { width: 11px; height: 11px; }
+#sky-search-list::-webkit-scrollbar-track {
+    background: rgba(40, 48, 68, 0.72);
+    border-radius: 999px;
+    margin: 6px 0;
+}
+#sky-search-list::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, rgba(78, 92, 118, 0.95) 0%, rgba(52, 64, 86, 0.92) 100%);
+    border-radius: 999px;
+    border: 2px solid rgba(34, 42, 58, 0.85);
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.35);
+}
+#sky-search-list::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, rgba(92, 108, 134, 0.98) 0%, rgba(68, 82, 108, 0.95) 100%);
+    box-shadow: 0 0 10px rgba(100, 118, 145, 0.22);
+}
+#sky-search-list::-webkit-scrollbar-corner { background: transparent; }
 #sky-search-list.is-on { display: block; }
+/* Book-index look: name left, secondary right, dotted leader fills the gap between them. */
 #sky-search-list li {
-    padding: 5px 12px;
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    padding: 6px 14px;
     color: rgba(210, 225, 240, 0.85);
-    font-size: 0.74rem;
+    font-size: 0.78rem;
     letter-spacing: 0.04em;
     cursor: pointer;
 }
 #sky-search-list li:hover,
 #sky-search-list li.is-sel { background: rgba(0, 210, 255, 0.14); color: rgba(0, 210, 255, 0.95); }
-#sky-search-list li .sub { color: rgba(150, 185, 235, 0.55); font-size: 0.66rem; margin-left: 6px; }
+#sky-search-list li .main { flex: 0 0 auto; }
+#sky-search-list li .dots {
+    flex: 1 1 auto;
+    min-width: 16px;
+    border-bottom: 1px dotted rgba(150, 185, 235, 0.28);
+    transform: translateY(-3px);                 /* lift the dots so they sit on the typographic baseline */
+}
+#sky-search-list li .sub {
+    flex: 0 0 auto;
+    color: rgba(150, 185, 235, 0.65);
+    font-size: 0.68rem;
+    letter-spacing: 0.06em;
+}
 
 /* Satellite table — DOM overlay HUD (top-left of the planetarium). The "sichtbar" countdown per row
    is rendered by the central CyberClock (cyber-clock.js/.css); states colour the cells via [data-st]. */
@@ -563,6 +602,59 @@ body:has(#mini-stack-r.popup) #sky-search { display: none; }
 #sat-table .st-clock[data-st="rise"] { --cc-digit: rgb(245, 194, 66); --cc-colon: rgb(245, 194, 66); }
 #sat-table .st-clock .cc-d,
 #sat-table .st-clock .cc-sep { font-weight: 600; }
+
+/* The two edge hamburgers are planetarium-only: in clock mode the canvas toolbar (globe / direction /
+   Orion) covers the clock controls, and the Orion icon is the way into the planetarium. */
+body:not(.planetarium-on) #wc-menu-btn,
+body:not(.planetarium-on) #wc-menu-btn-r { display: none; }
+
+/* Live-weather overlay on the city image (globe-mode info box): icon + temperature + wind.
+   Sky-tinted gradient fades the image into the readout so the text stays legible over any photo. */
+#city-info-weather {
+    --ciw-icon: 54px;
+    --ciw-temp: 1.5rem;
+    --ciw-wind: 0.72rem;
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 10px 14px;
+    background: linear-gradient(180deg, rgba(8, 20, 42, 0.82) 0%, rgba(8, 20, 42, 0.42) 58%, rgba(8, 20, 42, 0) 100%);
+    pointer-events: none;
+    font-family: 'Orbitron', sans-serif;
+    color: #eaf4ff;
+}
+#city-info-weather:not(.is-on) { display: none; }
+#ciw-icon {
+    width: var(--ciw-icon);
+    height: var(--ciw-icon);
+    flex: 0 0 auto;
+    filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.55));
+}
+.ciw-readout { display: flex; flex-direction: column; line-height: 1.05; }
+#ciw-temp {
+    font-size: var(--ciw-temp);
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.75);
+}
+#ciw-wind {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 2px;
+    font-size: var(--ciw-wind);
+    font-weight: 400;
+    color: rgba(220, 235, 255, 0.88);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.75);
+}
+#ciw-wind-arrow {
+    display: inline-block;
+    font-size: 1.05em;
+    color: #00d2ff;
+    transition: transform 0.3s ease;
+}
 
 /* In the planetarium, hide the search box and the "Personalisieren" link (decluttered sky view). */
 body.planetarium-on #wc-search,

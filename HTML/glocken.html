@@ -1,0 +1,1662 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Die Glocken von Bagdad — Alvers Quest</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Raleway:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: rgb(8, 20, 42);
+    --bg-light: rgb(14, 36, 78);
+    --bg-deep: rgb(2, 9, 25);
+    --orange: rgb(245, 194, 66);
+    --red: rgb(176, 36, 24);
+    --green: rgb(121, 158, 49);
+    --ink: #f4f4f4;
+    --muted: rgba(244, 244, 244, 0.62);
+    --line: rgba(244, 244, 244, 0.12);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Raleway', system-ui, -apple-system, sans-serif;
+    font-weight: 400;
+    -webkit-font-smoothing: antialiased;
+    overscroll-behavior: none;
+    touch-action: manipulation;
+  }
+
+  body {
+    display: flex;
+    flex-direction: column;
+    max-width: 480px;
+    margin: 0 auto;
+    padding: calc(18px + 4vh) 18px 22px;
+    min-height: 100vh;
+    min-height: 100dvh;
+    gap: 14px;
+  }
+
+  /* ===== Intro ===== */
+  .intro {
+    position: fixed;
+    inset: 0;
+    z-index: 10;
+    overflow: hidden;
+    background: linear-gradient(to bottom, #03102a 0%, #0a1d3f 55%, #142855 100%);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: opacity 0.7s ease;
+  }
+  .intro.gone { opacity: 0; pointer-events: none; }
+
+  .stars {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+  .star {
+    position: absolute;
+    width: 2px;
+    height: 2px;
+    background: #fff;
+    border-radius: 50%;
+    opacity: 0;
+    animation: twinkle 3s ease-in-out infinite;
+  }
+  @keyframes twinkle {
+    0%, 100% { opacity: 0.1; transform: scale(0.8); }
+    50%      { opacity: 0.95; transform: scale(1.2); }
+  }
+
+  .moon {
+    position: absolute;
+    top: 8vh;
+    right: 12vw;
+    width: 64px;
+    height: 64px;
+    opacity: 0;
+    animation: fadeIn 1.4s 0.9s ease forwards;
+  }
+
+  .skyline {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 42vh;
+    max-height: 320px;
+    z-index: 1;
+    opacity: 0;
+    transform: translateY(40px);
+    animation: rise 1.6s 1.7s cubic-bezier(0.2, 0.7, 0.3, 1) forwards;
+  }
+  @keyframes rise {
+    to { opacity: 1; transform: none; }
+  }
+
+  .door-aura {
+    animation: doorAura 4.2s ease-in-out infinite;
+    transform-origin: center;
+  }
+  @keyframes doorAura {
+    0%   { opacity: 0.35; }
+    23%  { opacity: 0.58; }
+    41%  { opacity: 0.42; }
+    58%  { opacity: 0.68; }
+    77%  { opacity: 0.48; }
+    100% { opacity: 0.38; }
+  }
+  .door-light {
+    animation: doorPulse 2.6s ease-in-out infinite;
+  }
+  @keyframes doorPulse {
+    0%   { opacity: 0.82; }
+    34%  { opacity: 1;    }
+    62%  { opacity: 0.88; }
+    100% { opacity: 0.85; }
+  }
+
+  .intro-text {
+    position: absolute;
+    top: 16vh;
+    left: 0;
+    right: 0;
+    text-align: center;
+    padding: 0 24px;
+    z-index: 5;
+  }
+  .intro-title {
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 700;
+    font-size: clamp(22px, 7vw, 32px);
+    color: var(--orange);
+    margin: 0 0 12px;
+    letter-spacing: 0.02em;
+    opacity: 0;
+    animation: fadeIn 1.4s 3.1s ease forwards;
+    text-shadow: 0 0 24px rgba(245, 194, 66, 0.25);
+  }
+  .intro-date {
+    font-family: 'Raleway', sans-serif;
+    font-weight: 400;
+    font-size: clamp(15px, 4.2vw, 18px);
+    color: var(--ink);
+    letter-spacing: 0.04em;
+    opacity: 0;
+    animation: fadeIn 1.2s 4.0s ease forwards;
+  }
+  .end-overlay {
+    position: absolute;
+    top: 30vh;
+    left: 0; right: 0;
+    bottom: 6vh;
+    padding: 0 28px;
+    z-index: 7;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: 14px;
+    text-align: center;
+    overflow-y: auto;
+  }
+  .end-overlay.hidden { display: none !important; }
+  .end-overlay p {
+    font-family: 'Raleway', sans-serif;
+    font-weight: 300;
+    font-size: clamp(14px, 4vw, 17px);
+    color: var(--ink);
+    line-height: 1.55;
+    margin: 0;
+    text-shadow: 0 2px 14px rgba(0, 0, 0, 0.6);
+  }
+  .end-overlay p:nth-last-child(-n+2) {
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 700;
+    color: var(--orange);
+    letter-spacing: 0.06em;
+    text-shadow: 0 0 18px rgba(245, 194, 66, 0.45);
+  }
+  .end-overlay p:nth-last-child(2) {
+    font-size: clamp(13px, 3.8vw, 17px);
+    margin-top: 22px;
+  }
+  .end-overlay p:last-child {
+    font-size: clamp(20px, 6vw, 28px);
+    margin-top: 4px;
+  }
+  .end-overlay .prize {
+    margin: 12px auto 0;
+    padding: 10px 18px;
+    border: 1.5px solid var(--orange);
+    border-radius: 999px;
+    color: var(--orange);
+    font-family: 'Orbitron', sans-serif;
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  .intro-tap {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 11px 22px;
+    border: 1px solid rgba(245, 194, 66, 0.45);
+    border-radius: 999px;
+    background: rgba(14, 36, 78, 0.55);
+    backdrop-filter: blur(4px);
+    font-family: 'Orbitron', sans-serif;
+    font-size: 11px;
+    color: var(--orange);
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+  }
+  .intro-tap.start { animation: tapIn 1s 5.0s ease forwards, tapPulse 2.4s 6.0s ease-in-out infinite; }
+  .intro-tap.shown { animation: tapIn 0.8s ease forwards, tapPulse 2.4s 0.8s ease-in-out infinite; }
+  @keyframes tapIn  { from { opacity: 0; } to { opacity: 0.7; } }
+  @keyframes tapPulse { 0%, 100% { opacity: 0.35; } 50% { opacity: 0.95; } }
+
+  .intro-title.faded, .intro-date.faded {
+    animation: titleOut 0.8s ease forwards !important;
+  }
+  @keyframes titleOut { to { opacity: 0; transform: translateY(-6px); } }
+
+  .narration {
+    position: absolute;
+    top: 38vh;
+    transform: translateY(-50%);
+    left: 0; right: 0;
+    min-height: 22vh;
+    padding: 0 28px;
+    pointer-events: none;
+    z-index: 6;
+  }
+  .narration.hidden { display: none; }
+  .n-para {
+    position: absolute;
+    left: 28px; right: 28px;
+    top: 0;
+    margin: 0;
+    font-family: 'Raleway', sans-serif;
+    font-weight: 300;
+    font-size: clamp(16px, 4.6vw, 19px);
+    color: var(--ink);
+    line-height: 1.55;
+    text-align: center;
+    text-shadow: 0 2px 18px rgba(0, 0, 0, 0.55);
+    opacity: 0;
+    transform: translateY(12px);
+    transition: opacity 0.9s ease, transform 0.9s ease;
+  }
+  .n-para.show { opacity: 0.95; transform: none; }
+  .n-para.done { opacity: 0; transform: translateY(-14px); }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+  /* ===== Quest UI ===== */
+  header {
+    text-align: center;
+    padding: 4px 0 2px;
+  }
+  h1 {
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 700;
+    font-size: clamp(20px, 5.5vw, 26px);
+    margin: 0;
+    color: var(--orange);
+    letter-spacing: 0.02em;
+  }
+  .subtitle {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 6px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+  .round-pill {
+    display: inline-block;
+    margin-top: 8px;
+    padding: 4px 12px;
+    border-radius: 999px;
+    background: var(--bg-light);
+    color: var(--muted);
+    font-family: 'Orbitron', sans-serif;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+
+  .bubble {
+    background: var(--bg-light);
+    border-radius: 14px;
+    padding: 16px 18px;
+    font-size: 16px;
+    line-height: 1.55;
+    min-height: 100px;
+    transition: opacity 0.25s ease;
+    border-left: 3px solid var(--orange);
+  }
+
+  .bell-row {
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    gap: 40px;
+    padding: 4px 0 6px;
+  }
+  .bell {
+    width: 86px; height: 96px;
+    cursor: pointer;
+    display: flex; align-items: flex-start; justify-content: center;
+    color: var(--orange);
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    transition: filter 0.2s ease;
+  }
+  .bell.big { width: 116px; height: 128px; color: var(--red); transform: translateY(10px); }
+  .bell-svg {
+    width: 100%; height: 100%;
+    transform-origin: 50% 8%;
+    animation: sway 5.4s ease-in-out infinite;
+    overflow: visible;
+  }
+  .bell.big .bell-svg { animation: sway 6.2s -1.4s ease-in-out infinite; }
+  .bell.active { filter: drop-shadow(0 0 14px currentColor); }
+  .bell.active .bell-svg { animation: ring 0.6s ease-in-out; }
+  @keyframes sway {
+    0%, 100% { transform: rotate(-1.6deg); }
+    50%      { transform: rotate(1.6deg); }
+  }
+  @keyframes ring {
+    0%   { transform: rotate(0deg); }
+    16%  { transform: rotate(-16deg); }
+    34%  { transform: rotate(12deg); }
+    52%  { transform: rotate(-8deg); }
+    72%  { transform: rotate(5deg); }
+    100% { transform: rotate(0deg); }
+  }
+  .bell-digit {
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 700;
+    font-size: 7px;
+    fill: currentColor;
+    stroke: none;
+  }
+
+  .timeline-wrap { background: var(--bg-light); border-radius: 12px; padding: 14px 14px 14px; }
+  .timeline-label {
+    font-size: 10px; text-transform: uppercase; letter-spacing: 0.18em;
+    color: var(--muted); margin-bottom: 18px; text-align: center;
+  }
+  .timeline { position: relative; height: 70px; background: var(--bg); border-radius: 8px; overflow: visible; }
+  .time-axis {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: rgba(244, 244, 244, 0.22);
+    transform: translateY(-0.5px);
+    pointer-events: none;
+    z-index: 0;
+  }
+  .sec-mark {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: rgba(244, 244, 244, 0.10);
+    pointer-events: none;
+    z-index: 0;
+  }
+  .tick { position: absolute; top: 0; bottom: 0; width: 1px; background: var(--line); }
+  .tick.major { background: rgba(244, 244, 244, 0.25); }
+  .axis-labels {
+    position: relative;
+    height: 20px;
+    margin-top: 14px;
+  }
+  .tick-num {
+    position: absolute; top: 0;
+    font-family: Arial, sans-serif;
+    font-size: 13px;
+    color: var(--ink);
+    transform: translateX(-50%);
+    pointer-events: none;
+    white-space: nowrap;
+  }
+  .tick-num.color-small { color: var(--orange); font-weight: 700; }
+  .tick-num.color-big   { color: var(--red);    font-weight: 700; }
+  .tick-num.color-meet  { color: var(--green);  font-weight: 700; }
+  .strike { position: absolute; width: 4px; border-radius: 2px; transition: box-shadow 0.3s, transform 0.3s, width 0.3s; z-index: 2; }
+  .strike.small { top: 8px; height: 22px; background: var(--orange); }
+  .strike.big   { bottom: 8px; height: 26px; background: var(--red); }
+  .strike.meet  { box-shadow: 0 0 14px currentColor; width: 6px; border-radius: 3px; }
+  .slot-fill {
+    position: absolute;
+    width: 0; height: 0;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.55s ease;
+    transform: translateX(-50%);
+    z-index: 2;
+  }
+  .slot-fill.show { opacity: 1; }
+  .slot-fill.small {
+    top: -8px;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 8px solid var(--orange);
+  }
+  .slot-fill.big {
+    bottom: -8px;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-bottom: 8px solid var(--red);
+  }
+  .cursor { position: absolute; top: 0; bottom: 0; width: 2px; background: rgba(244,244,244,0.4); pointer-events: none; }
+  .meeting-row { position: relative; height: 38px; margin-top: 6px; }
+  .meeting-label {
+    position: absolute; top: 0;
+    display: flex; flex-direction: column; align-items: center;
+    transform: translateX(-50%);
+    opacity: 0; transition: opacity 0.5s ease;
+    pointer-events: none;
+  }
+  .meeting-label.show { opacity: 1; }
+  .meeting-label .arrow {
+    font-size: 12px; color: var(--green); line-height: 1; margin-bottom: 1px;
+  }
+  .meeting-label .num {
+    font-family: 'Orbitron', sans-serif; font-weight: 700;
+    font-size: 22px; color: var(--green);
+    text-shadow: 0 0 18px rgba(121, 158, 49, 0.55);
+    line-height: 1; letter-spacing: 0.04em;
+  }
+
+  .math-box {
+    background: var(--bg-light); border-radius: 12px; padding: 18px 14px;
+    text-align: center; font-family: 'Orbitron', sans-serif;
+    color: var(--orange); font-size: clamp(18px, 5vw, 22px);
+  }
+  .frac { display: inline-flex; flex-direction: column; align-items: center; vertical-align: middle; margin: 0 5px; line-height: 1; color: var(--ink); }
+  .frac .num { border-bottom: 2px solid var(--ink); padding: 0 7px 3px; }
+  .frac .den { padding: 3px 7px 0; }
+  .frac .num.color-small, .frac .den.color-small { color: var(--orange); }
+  .frac .num.color-big,   .frac .den.color-big   { color: var(--red); }
+  .frac .num.color-meet,  .frac .den.color-meet  { color: var(--green); }
+  .math-box .op { margin: 0 4px; color: var(--ink); }
+
+  .controls { display: flex; justify-content: center; margin-top: auto; padding-top: 6px; }
+  .btn {
+    background: var(--orange); color: var(--bg); border: none; border-radius: 999px;
+    padding: 14px 30px; font-family: 'Orbitron', sans-serif; font-weight: 700;
+    font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer;
+    -webkit-tap-highlight-color: transparent; transition: transform 0.1s, opacity 0.15s;
+  }
+  .btn:active { transform: scale(0.97); }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .end { text-align: center; padding: 16px 8px; }
+  .end h2 {
+    font-family: 'Orbitron', sans-serif; font-size: 18px;
+    color: var(--orange); margin: 0 0 14px; letter-spacing: 0.04em;
+  }
+  .end p { font-size: 15px; line-height: 1.55; margin: 10px 0; color: var(--ink); }
+  .end .quiet { font-size: 13px; color: var(--muted); margin-top: 22px; }
+  .prize {
+    display: inline-block; margin-top: 18px; padding: 10px 18px;
+    border: 1.5px solid var(--orange); border-radius: 999px;
+    color: var(--orange); font-family: 'Orbitron', sans-serif;
+    font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase;
+  }
+
+  .corner-btn {
+    position: fixed;
+    top: 14px;
+    z-index: 20;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: rgba(14, 36, 78, 0.85);
+    backdrop-filter: blur(6px);
+    border: 1px solid rgba(244, 244, 244, 0.18);
+    color: var(--ink);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform 0.1s, opacity 0.2s, color 0.2s;
+  }
+  .corner-btn:active { transform: scale(0.93); }
+  .mute-btn { right: 14px; }
+  .settings-btn { right: 62px; opacity: 0.7; }
+  .settings-btn.has-key { color: var(--green); opacity: 1; }
+  .mute-btn.muted { color: var(--muted); }
+
+  .hidden { display: none !important; }
+  .fade-in { animation: bubbleIn 0.45s ease forwards; }
+  @keyframes bubbleIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: none; }
+  }
+</style>
+</head>
+<body>
+
+<button id="settings-btn" class="corner-btn settings-btn" aria-label="Stimme-Einstellung" title="Google-TTS-Key">
+  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+    <circle cx="12" cy="12" r="2.8"/>
+    <path d="M12 2.5v3M12 18.5v3M4.2 7l2.6 1.5M17.2 15.5l2.6 1.5M2.5 12h3M18.5 12h3M4.2 17l2.6-1.5M17.2 8.5l2.6-1.5"/>
+  </svg>
+</button>
+
+<button id="mute-btn" class="corner-btn mute-btn" aria-label="Stimme an/aus" title="Stimme an/aus">
+  <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+    <path id="mute-speaker" d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/>
+    <g id="mute-waves">
+      <path d="M16 8.5c1.6 1.6 1.6 5.4 0 7" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+      <path d="M18.5 6c3 3 3 9 0 12" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+    </g>
+    <g id="mute-cross" class="hidden">
+      <line x1="15" y1="9" x2="21" y2="15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+      <line x1="21" y1="9" x2="15" y2="15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+    </g>
+  </svg>
+</button>
+
+<!-- ===== Intro Overlay ===== -->
+<div id="intro" class="intro">
+  <div class="stars" id="stars"></div>
+
+  <svg class="moon" viewBox="0 0 80 80" aria-hidden="true">
+    <circle cx="40" cy="40" r="28" fill="#f5c242" opacity="0.92"/>
+    <circle cx="52" cy="36" r="24" fill="#03102a"/>
+  </svg>
+
+  <svg class="skyline" viewBox="0 0 400 220" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+    <defs>
+      <radialGradient id="doorGlow" cx="50%" cy="55%" r="55%">
+        <stop offset="0%"  stop-color="rgba(245,194,66,0.55)"/>
+        <stop offset="50%" stop-color="rgba(245,194,66,0.14)"/>
+        <stop offset="100%" stop-color="rgba(245,194,66,0)"/>
+      </radialGradient>
+    </defs>
+    <!-- left palm: detailed silhouette -->
+    <g transform="translate(58, 220) scale(0.34) translate(-200, -360)" fill="#020919">
+      <!-- trunk -->
+      <path d="M 185 360 L 215 360 Q 210 310 206 260 Q 202 210 205 160 L 195 160 Q 192 210 192 260 Q 190 310 185 360 Z"/>
+      <!-- coconuts -->
+      <circle cx="188" cy="158" r="10"/>
+      <circle cx="196" cy="164" r="11"/>
+      <circle cx="206" cy="156" r="9"/>
+      <!-- fronds -->
+      <path d="M 197 160 C 180 130 130 100 80 120 C 110 140 150 160 197 160 Z"/>
+      <path d="M 197 160 C 160 150 100 140 60 180 C 95 185 145 175 197 160 Z"/>
+      <path d="M 200 160 C 200 110 170 60 200 30 C 215 60 210 110 200 160 Z"/>
+      <path d="M 203 160 C 220 130 270 100 320 120 C 290 140 250 160 203 160 Z"/>
+      <path d="M 203 160 C 240 150 300 140 340 180 C 305 185 255 175 203 160 Z"/>
+      <path d="M 196 162 C 150 170 110 190 85 240 C 110 220 160 190 196 162 Z"/>
+      <path d="M 204 162 C 250 170 290 190 315 240 C 290 220 240 190 204 162 Z"/>
+    </g>
+
+    <!-- left minaret -->
+    <g transform="translate(118,220)" fill="#020919">
+      <rect x="-5" y="-150" width="10" height="150"/>
+      <rect x="-9" y="-160" width="18" height="12"/>
+      <ellipse cx="0" cy="-168" rx="7" ry="9"/>
+      <line x1="0" y1="-178" x2="0" y2="-190" stroke="#020919" stroke-width="2"/>
+      <path d="M-3,-190 a3,3 0 1,0 6,0 z"/>
+      <!-- balcony rail dots -->
+      <rect x="-9" y="-148" width="2" height="3"/>
+      <rect x="-3" y="-148" width="2" height="3"/>
+      <rect x="3" y="-148" width="2" height="3"/>
+      <rect x="7" y="-148" width="2" height="3"/>
+    </g>
+
+    <!-- main dome (House of Wisdom) -->
+    <g transform="translate(200,220)">
+      <rect x="-58" y="-88" width="116" height="88" fill="#020919"/>
+      <path d="M-66,-88 Q0,-160 66,-88 Z" fill="#020919"/>
+      <!-- door light aura (spills onto the dome silhouette) -->
+      <ellipse class="door-aura" cx="0" cy="-14" rx="44" ry="42" fill="url(#doorGlow)"/>
+      <!-- the arched door, lit and pulsing -->
+      <path class="door-light" d="M-9,0 V-24 Q-9,-34 0,-34 Q9,-34 9,-24 V0 Z" fill="#f5c242"/>
+      <!-- lit windows -->
+      <rect x="-36" y="-50" width="5" height="10" fill="#f5c242" opacity="0.55"/>
+      <rect x="-20" y="-50" width="5" height="10" fill="#f5c242" opacity="0.4"/>
+      <rect x="-4" y="-50" width="5" height="10" fill="#f5c242" opacity="0.5"/>
+      <rect x="12" y="-50" width="5" height="10" fill="#f5c242" opacity="0.65"/>
+      <rect x="28" y="-50" width="5" height="10" fill="#f5c242" opacity="0.45"/>
+    </g>
+
+    <!-- small dome left of main (between BG and main dome — silhouette but ambient-lit) -->
+    <g transform="translate(150,220)" fill="#0c1d36">
+      <rect x="-22" y="-46" width="44" height="46"/>
+      <path d="M-26,-46 Q0,-78 26,-46 Z"/>
+    </g>
+
+    <!-- right minaret -->
+    <g transform="translate(298,220)" fill="#020919">
+      <rect x="-4.5" y="-135" width="9" height="135"/>
+      <rect x="-8" y="-146" width="16" height="11"/>
+      <ellipse cx="0" cy="-153" rx="6.5" ry="8.5"/>
+      <line x1="0" y1="-162" x2="0" y2="-172" stroke="#020919" stroke-width="2"/>
+      <path d="M-2.5,-172 a2.5,2.5 0 1,0 5,0 z"/>
+    </g>
+
+    <!-- right palm: mirrored, taller, different frond pattern -->
+    <g transform="translate(345, 220) scale(-0.40, 0.40) translate(-200, -360)" fill="#020919">
+      <path d="M 185 360 L 215 360 Q 210 310 206 260 Q 202 210 205 160 L 195 160 Q 192 210 192 260 Q 190 310 185 360 Z"/>
+      <circle cx="188" cy="158" r="9"/>
+      <circle cx="198" cy="166" r="11"/>
+      <circle cx="208" cy="155" r="10"/>
+      <!-- different fronds: asymmetric, more upward sweep on one side -->
+      <path d="M 197 160 C 175 125 115 88 60 100 C 100 132 150 158 197 160 Z"/>
+      <path d="M 197 160 C 150 148 90 138 50 175 C 88 188 140 178 197 160 Z"/>
+      <path d="M 200 160 C 196 100 162 50 195 15 C 222 45 218 102 200 160 Z"/>
+      <path d="M 203 160 C 225 135 270 102 318 115 C 290 138 248 156 203 160 Z"/>
+      <path d="M 203 160 C 245 152 305 144 345 188 C 305 193 252 178 203 160 Z"/>
+      <path d="M 196 162 C 145 175 105 200 75 250 C 105 225 158 195 196 162 Z"/>
+      <path d="M 204 162 C 258 175 300 200 325 250 C 295 222 247 195 204 162 Z"/>
+    </g>
+
+    <!-- ground -->
+    <rect x="0" y="218" width="400" height="20" fill="#020919"/>
+  </svg>
+
+
+  <div class="intro-text">
+    <h1 class="intro-title" id="intro-title">Die Glocken von Bagdad</h1>
+    <div class="intro-date" id="intro-date">Bagdad · vor fast 1200 Jahren</div>
+  </div>
+
+  <div class="narration hidden" id="narration">
+    <p class="n-para" id="n1"></p>
+    <p class="n-para" id="n2"></p>
+    <p class="n-para" id="n3"></p>
+  </div>
+
+  <div class="intro-tap start" id="intro-tap-1">Tippen, um die Geschichte zu hören</div>
+  <div class="intro-tap" id="intro-tap-2">Tippen, um zu beginnen</div>
+
+  <div class="end-overlay hidden" id="end-overlay"></div>
+</div>
+
+<!-- ===== Quest UI (under the intro overlay) ===== -->
+<header>
+  <h1>Die Glocken von Bagdad</h1>
+  <div class="round-pill" id="round-pill">Runde 1 von 3</div>
+</header>
+
+<div id="bubble" class="bubble"></div>
+
+<div id="bells" class="bell-row">
+  <div class="bell" id="bell-small" data-period="3">
+    <svg class="bell-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M10 5a2 2 0 1 1 4 0a7 7 0 0 1 4 6v3a4 4 0 0 0 2 3h-16a4 4 0 0 0 2 -3v-3a7 7 0 0 1 4 -6"/>
+      <path d="M9 17v1a3 3 0 0 0 6 0v-1"/>
+      <text x="12" y="14" text-anchor="middle" class="bell-digit">3</text>
+    </svg>
+  </div>
+  <div class="bell big" id="bell-big" data-period="4">
+    <svg class="bell-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M10 5a2 2 0 1 1 4 0a7 7 0 0 1 4 6v3a4 4 0 0 0 2 3h-16a4 4 0 0 0 2 -3v-3a7 7 0 0 1 4 -6"/>
+      <path d="M9 17v1a3 3 0 0 0 6 0v-1"/>
+      <text x="12" y="14" text-anchor="middle" class="bell-digit">4</text>
+    </svg>
+  </div>
+</div>
+
+<div id="timeline-wrap" class="timeline-wrap hidden">
+  <div class="timeline-label" id="timeline-label">Zeitleiste</div>
+  <div class="timeline" id="timeline">
+    <div class="time-axis"></div>
+    <div class="cursor" id="cursor"></div>
+  </div>
+  <div class="axis-labels" id="axis-labels"></div>
+  <div class="meeting-row">
+    <div class="meeting-label" id="meeting-label">
+      <div class="arrow">↑</div>
+      <div class="num">12</div>
+    </div>
+  </div>
+</div>
+
+<div id="math-area" class="hidden"></div>
+
+<div id="end-area" class="hidden"></div>
+
+<div class="controls" id="controls">
+  <button id="next-btn" class="btn">Lass sie läuten</button>
+</div>
+
+<script>
+(() => {
+  // ====================================================================
+  // LOCAL DEV ONLY — Google Cloud TTS API key bake-in.
+  // REMOVE THIS BLOCK BEFORE `git push` (repo is public).
+  // The key gets copied into localStorage on first load; after that, you
+  // can delete these 5 lines and the voice still works in your browser.
+  // ====================================================================
+  const __DEV_GTTS_KEY = 'AIzaSyC12C7FjeQmk7ShpjDskIQhgPu4AuOwL8o';
+  if (__DEV_GTTS_KEY && localStorage.getItem('gctt_api_key') !== __DEV_GTTS_KEY) {
+    localStorage.setItem('gctt_api_key', __DEV_GTTS_KEY);
+  }
+  // ====================================================================
+
+  // ===== Stars =====
+  const starsEl = document.getElementById('stars');
+  for (let i = 0; i < 90; i++) {
+    const s = document.createElement('div');
+    s.className = 'star';
+    s.style.left = (Math.random() * 100) + '%';
+    s.style.top  = (Math.random() * 58) + '%';
+    const size = 1 + Math.random() * 2;
+    s.style.width = size + 'px';
+    s.style.height = size + 'px';
+    s.style.animationDelay = (Math.random() * 2.5) + 's';
+    s.style.animationDuration = (2 + Math.random() * 2.5) + 's';
+    starsEl.appendChild(s);
+  }
+
+  // ===== Voice (Google Cloud TTS with browser fallback) =====
+  let voiceEnabled = localStorage.getItem('gctt_muted') !== '1';
+  let chosenVoice = null;
+  let currentAudio = null;
+
+  function pickBrowserVoice() {
+    if (!('speechSynthesis' in window)) return;
+    const voices = speechSynthesis.getVoices();
+    if (!voices.length) return;
+    const male = voices.find(v => /^de(-DE)?/i.test(v.lang) &&
+      /Markus|Yannick|Stefan|Hans|Daniel|Eddy|Reed/i.test(v.name));
+    const anyDE = voices.find(v => /^de(-DE)?/i.test(v.lang));
+    chosenVoice = male || anyDE || voices[0];
+  }
+  if ('speechSynthesis' in window) {
+    pickBrowserVoice();
+    speechSynthesis.onvoiceschanged = pickBrowserVoice;
+  }
+
+  function hashStr(s) {
+    let h = 5381;
+    for (let i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) | 0;
+    return (h >>> 0).toString(36);
+  }
+
+  function gKey()   { return localStorage.getItem('gctt_api_key'); }
+  function gVoice() { return localStorage.getItem('gctt_voice') || 'de-DE-Neural2-B'; }
+
+  // Wrap all standalone integers in <say-as interpret-as="cardinal"> so TTS
+  // doesn't read "6" at sentence end as "der Sechste" / a date.
+  function toSSML(text) {
+    let s = text
+      // math operators (only between digits!) → spoken words
+      .replace(/(\d)\s*[·×]\s*(\d)/g, '$1 mal $2')
+      .replace(/(\d)\s*\*\s*(\d)/g, '$1 mal $2')
+      .replace(/(\d)\s*\+\s*(\d)/g, '$1 plus $2')
+      .replace(/(\d)\s*=\s*(\d)/g, '$1 ist gleich $2')
+      // XML escape
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&apos;');
+    // emphasis: *word* → <emphasis>
+    s = s.replace(/\*([^*]+)\*/g, '<emphasis level="strong">$1</emphasis>');
+    // standalone integers → cardinal say-as
+    s = s.replace(/\b(\d+)\b/g, '<say-as interpret-as="cardinal">$1</say-as>');
+    return '<speak>' + s + '</speak>';
+  }
+
+  // Strip emphasis markers from display (voice gets SSML emphasis instead)
+  function stripMarkers(text) {
+    return text.replace(/\*([^*]+)\*/g, '$1');
+  }
+
+  async function googleTTS(text) {
+    const key = gKey();
+    if (!key || !text) return null;
+    const voice = gVoice();
+    const ssml = toSSML(text);
+    const cacheKey = 'gctt_audio_v2_' + voice + '_' + hashStr(ssml);
+    const cached = localStorage.getItem(cacheKey);
+    if (cached) return cached;
+    try {
+      const res = await fetch(
+        'https://texttospeech.googleapis.com/v1/text:synthesize?key=' + encodeURIComponent(key),
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            input: { ssml },
+            voice: { languageCode: 'de-DE', name: voice },
+            audioConfig: { audioEncoding: 'MP3', speakingRate: 0.95, pitch: -1.5 }
+          })
+        }
+      );
+      if (!res.ok) {
+        console.warn('Google TTS error', res.status, await res.text());
+        return null;
+      }
+      const data = await res.json();
+      const b64 = data.audioContent;
+      try { localStorage.setItem(cacheKey, b64); } catch (e) { /* quota */ }
+      return b64;
+    } catch (e) {
+      console.warn('Google TTS fetch failed', e);
+      return null;
+    }
+  }
+
+  function stopAllSpeech() {
+    if (currentAudio) {
+      try { currentAudio.pause(); } catch (e) {}
+      currentAudio = null;
+    }
+    if ('speechSynthesis' in window) speechSynthesis.cancel();
+  }
+
+  // speak() returns a Promise that resolves when the spoken audio ENDS.
+  async function speak(text) {
+    if (!voiceEnabled || !text) return;
+    stopAllSpeech();
+    const b64 = await googleTTS(text);
+    if (!voiceEnabled) return;
+    return new Promise((resolve) => {
+      let done = false;
+      const finish = () => { if (!done) { done = true; resolve(); } };
+      if (b64) {
+        try {
+          currentAudio = new Audio('data:audio/mp3;base64,' + b64);
+          currentAudio.addEventListener('ended', finish);
+          currentAudio.addEventListener('error', finish);
+          currentAudio.play().catch(finish);
+        } catch (e) {
+          browserSpeakWithEnd(text, finish);
+        }
+      } else {
+        browserSpeakWithEnd(text, finish);
+      }
+    });
+  }
+  function browserSpeakWithEnd(text, done) {
+    if (!('speechSynthesis' in window)) { done(); return; }
+    try {
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = 'de-DE';
+      u.rate = 0.94;
+      u.pitch = 0.88;
+      if (chosenVoice) u.voice = chosenVoice;
+      u.onend = done;
+      u.onerror = done;
+      speechSynthesis.speak(u);
+    } catch (e) { done(); }
+  }
+
+  // Console helpers
+  window.setGoogleKey = (k) => {
+    if (!k) { localStorage.removeItem('gctt_api_key'); console.log('Key entfernt'); }
+    else    { localStorage.setItem('gctt_api_key', k); console.log('Key gespeichert'); }
+    refreshSettingsBtnState();
+  };
+  window.setGoogleVoice = (v) => {
+    localStorage.setItem('gctt_voice', v);
+    console.log('Voice:', v);
+  };
+  window.clearGoogleAudioCache = () => {
+    const keys = Object.keys(localStorage).filter(k => k.startsWith('gctt_audio_'));
+    keys.forEach(k => localStorage.removeItem(k));
+    console.log('Cache geleert,', keys.length, 'Einträge entfernt');
+  };
+  // Clear v1 cache automatically on first load with SSML version
+  (function() {
+    if (!localStorage.getItem('gctt_ssml_migrated')) {
+      Object.keys(localStorage).filter(k => k.startsWith('gctt_audio_') && !k.startsWith('gctt_audio_v2_'))
+        .forEach(k => localStorage.removeItem(k));
+      localStorage.setItem('gctt_ssml_migrated', '1');
+    }
+  })();
+  function refreshSettingsBtnState() {
+    const btn = document.getElementById('settings-btn');
+    btn && btn.classList.toggle('has-key', !!gKey());
+  }
+
+  // ===== Audio =====
+  let ctx = null;
+  function audio() {
+    if (!ctx) {
+      ctx = new (window.AudioContext || window.webkitAudioContext)();
+      preloadBells();
+    }
+    if (ctx.state === 'suspended') ctx.resume();
+    return ctx;
+  }
+
+  // ===== Bell samples =====
+  const BELL_PATHS = {
+    small: 'resources/bells/wingsoarstudio-anvil-bell-2-wav-485668.mp3',
+    big:   'resources/bells/koiroylers-clear-bell-notification-sound-351709.mp3',
+  };
+  const bellBuffers = { small: null, big: null };
+  const bellOnsets  = { small: 0,    big: 0 };
+
+  // Find the first sample where the waveform exceeds the threshold —
+  // skip leading silence so both bells' audible attacks align.
+  function detectOnset(buffer, threshold = 0.04) {
+    const ch = buffer.getChannelData(0);
+    const sr = buffer.sampleRate;
+    for (let i = 0; i < ch.length; i++) {
+      if (Math.abs(ch[i]) > threshold) return Math.max(0, i / sr - 0.003); // ~3 ms lead-in
+    }
+    return 0;
+  }
+
+  async function loadBell(kind) {
+    if (bellBuffers[kind] || !ctx) return;
+    try {
+      const res = await fetch(BELL_PATHS[kind]);
+      if (!res.ok) throw new Error('fetch ' + res.status);
+      const arr = await res.arrayBuffer();
+      bellBuffers[kind] = await ctx.decodeAudioData(arr);
+      bellOnsets[kind]  = detectOnset(bellBuffers[kind]);
+      console.log('bell', kind, 'onset', (bellOnsets[kind] * 1000).toFixed(1), 'ms');
+    } catch (e) {
+      console.warn('bell load failed:', kind, e);
+    }
+  }
+  function preloadBells() {
+    loadBell('small');
+    loadBell('big');
+  }
+
+  function playSample(kind, when) {
+    const buf = bellBuffers[kind];
+    if (!buf || !ctx) return false;
+    const src = ctx.createBufferSource();
+    src.buffer = buf;
+    src.playbackRate.value = 1 + (Math.random() - 0.5) * 0.04; // ±2% jitter
+    const g = ctx.createGain();
+    g.gain.value = 0.75;
+    src.connect(g).connect(ctx.destination);
+    src.start(when || 0, bellOnsets[kind] || 0);
+    return true;
+  }
+  // Richer bell synthesis — inharmonic partials (hum/prime/tierce/quint/nominal),
+  // sharp strike transient, long resonant tail. Closer to a real church bell.
+  function bellTone(freq, dur = 1.6) {
+    const c = audio();
+    const t0 = c.currentTime;
+
+    const master = c.createGain();
+    master.gain.value = 0.34;
+    master.connect(c.destination);
+
+    // Slight overall band shape so the tone sits in the warm range
+    const tone = c.createBiquadFilter();
+    tone.type = 'lowpass';
+    tone.frequency.value = freq * 8;
+    tone.Q.value = 0.7;
+    tone.connect(master);
+
+    // Real church-bell partial ratios (Hemony)
+    const partials = [
+      { mult: 0.5,  g: 0.34, d: dur * 1.00 }, // hum (octave below)
+      { mult: 1.00, g: 0.42, d: dur * 0.90 }, // prime / strike tone
+      { mult: 1.19, g: 0.26, d: dur * 0.75 }, // tierce (minor third)
+      { mult: 1.50, g: 0.22, d: dur * 0.60 }, // quint (perfect fifth)
+      { mult: 2.00, g: 0.34, d: dur * 0.80 }, // nominal (octave)
+      { mult: 2.52, g: 0.16, d: dur * 0.42 },
+      { mult: 3.00, g: 0.11, d: dur * 0.35 },
+    ];
+    partials.forEach(p => {
+      const o = c.createOscillator();
+      const g = c.createGain();
+      o.type = 'sine';
+      o.frequency.value = freq * p.mult;
+      g.gain.setValueAtTime(0, t0);
+      g.gain.linearRampToValueAtTime(p.g, t0 + 0.004);
+      g.gain.exponentialRampToValueAtTime(0.0001, t0 + p.d);
+      o.connect(g).connect(tone);
+      o.start(t0);
+      o.stop(t0 + p.d + 0.05);
+    });
+
+    // Sharp metallic strike transient — band-passed triangle, ~50 ms
+    const click = c.createOscillator();
+    const cf = c.createBiquadFilter();
+    const cg = c.createGain();
+    click.type = 'triangle';
+    click.frequency.value = freq * 5.4;
+    cf.type = 'bandpass';
+    cf.frequency.value = freq * 6;
+    cf.Q.value = 2.5;
+    cg.gain.setValueAtTime(0.32, t0);
+    cg.gain.exponentialRampToValueAtTime(0.001, t0 + 0.06);
+    click.connect(cf).connect(cg).connect(master);
+    click.start(t0);
+    click.stop(t0 + 0.08);
+  }
+
+  // ===== DOM =====
+  const bubble    = document.getElementById('bubble');
+  const nextBtn   = document.getElementById('next-btn');
+  const tlWrap    = document.getElementById('timeline-wrap');
+  const tl        = document.getElementById('timeline');
+  const cursor    = document.getElementById('cursor');
+  const meetLabel = document.getElementById('meeting-label');
+  const mathArea  = document.getElementById('math-area');
+  const endArea   = document.getElementById('end-area');
+  const bellsRow  = document.getElementById('bells');
+  const tlLabel   = document.getElementById('timeline-label');
+  const bellSmall = document.getElementById('bell-small');
+  const bellBig   = document.getElementById('bell-big');
+  const roundPill = document.getElementById('round-pill');
+  const intro     = document.getElementById('intro');
+
+  // ===== Helpers =====
+  const gcd = (a, b) => b ? gcd(b, a % b) : a;
+  const lcm = (a, b) => a * b / gcd(a, b);
+
+  function flashBell(el) {
+    el.classList.add('active');
+    setTimeout(() => el.classList.remove('active'), 180);
+  }
+  function ringBell(kind, when) {
+    const el = (kind === 'small') ? bellSmall : bellBig;
+    flashBell(el);
+    if (!voiceEnabled) return; // speaker off → bell flashes but stays silent
+    if (!playSample(kind, when)) {
+      const period = (kind === 'small') ? state.small : state.big;
+      bellTone(freqFor(period), kind === 'small' ? 0.6 : 0.75);
+    }
+  }
+  bellSmall.addEventListener('click', () => { audio(); ringBell('small'); });
+  bellBig.addEventListener('click',   () => { audio(); ringBell('big'); });
+
+  function freqFor(period) {
+    const base = 220;
+    return Math.round(base * Math.pow(2, (6 - period) / 6));
+  }
+
+  // Returns a Promise that resolves when the spoken text ENDS.
+  // `speechText` is optional — used for TTS when display text contains things TTS reads weirdly (e.g. "1/3" → "der dritte").
+  function setBubble(text, speechText) {
+    bubble.style.opacity = '0';
+    return new Promise((resolve) => {
+      setTimeout(async () => {
+        bubble.textContent = stripMarkers(text);
+        bubble.style.opacity = '1';
+        await speak(speechText || text);
+        resolve();
+      }, 140);
+    });
+  }
+
+  // ===== State =====
+  const state = { small: 3, big: 4, L: 12, tEnd: 15 };
+
+  function setRound(s, b, label) {
+    state.small = s;
+    state.big = b;
+    state.L = lcm(s, b);
+    state.tEnd = Math.ceil(state.L * 1.4);
+    bellSmall.querySelector('.bell-digit').textContent = s;
+    bellBig.querySelector('.bell-digit').textContent = b;
+    roundPill.textContent = label;
+  }
+
+  function clearTimeline() {
+    tl.querySelectorAll('.strike, .tick, .slot-fill, .sec-mark').forEach(n => n.remove());
+    const axisLabels = document.getElementById('axis-labels');
+    if (axisLabels) axisLabels.querySelectorAll('.tick-num').forEach(n => n.remove());
+    cursor.style.left = '0px';
+    meetLabel.classList.remove('show');
+  }
+
+  function drawTimeAxis() {
+    tl.querySelectorAll('.sec-mark').forEach(el => el.remove());
+    const axisLabels = document.getElementById('axis-labels');
+    axisLabels.querySelectorAll('.tick-num').forEach(el => el.remove());
+    const w = tlWidth();
+    for (let s = 0; s <= state.tEnd; s++) {
+      const x = (s / state.tEnd) * w;
+      if (s > 0 && s < state.tEnd) {
+        const m = document.createElement('div');
+        m.className = 'sec-mark';
+        m.dataset.sec = s;
+        m.style.left = x + 'px';
+        tl.appendChild(m);
+      }
+      const lab = document.createElement('div');
+      lab.className = 'tick-num';
+      lab.dataset.tickIdx = s;
+      lab.dataset.tickTotal = state.tEnd;
+      lab.style.left = x + 'px';
+      if (s === 0)              lab.style.transform = 'translateX(0)';
+      else if (s === state.tEnd) lab.style.transform = 'translateX(-100%)';
+      lab.textContent = String(s);
+      axisLabels.appendChild(lab);
+    }
+  }
+
+  function drawAllStrikes() {
+    for (let t = state.small; t <= state.L; t += state.small) placeStrike(t, 'small');
+    for (let t = state.big;   t <= state.L; t += state.big)   placeStrike(t, 'big');
+  }
+
+  function showSlots(period, kind, instant) {
+    const w = tlWidth();
+    for (let t = period; t <= state.L; t += period) {
+      const tri = document.createElement('div');
+      tri.className = 'slot-fill ' + kind;
+      tri.dataset.slotEnd = t;
+      tri.style.left = ((t / state.tEnd) * w) + 'px';
+      tl.appendChild(tri);
+      if (instant) tri.classList.add('show');
+      else setTimeout(() => tri.classList.add('show'), 80);
+    }
+  }
+
+  function tlWidth() { return tl.clientWidth; }
+
+  function placeStrike(time, kind) {
+    const el = document.createElement('div');
+    el.className = 'strike ' + kind;
+    el.dataset.time = time;
+    el.style.left = ((time / state.tEnd) * tlWidth() - 2) + 'px';
+    tl.appendChild(el);
+    // Color the axis label that matches this strike's position
+    const axisLabels = document.getElementById('axis-labels');
+    if (axisLabels) {
+      const lab = axisLabels.querySelector('.tick-num[data-tick-idx="' + time + '"]');
+      if (lab) {
+        if (time === state.L) {
+          lab.classList.remove('color-small', 'color-big');
+          lab.classList.add('color-meet');
+        } else {
+          lab.classList.add(kind === 'small' ? 'color-small' : 'color-big');
+        }
+      }
+    }
+    return el;
+  }
+
+  function runTimeline(done) {
+    clearTimeline();
+    drawTimeAxis();
+    let smallNext = state.small;
+    let bigNext = state.big;
+    const animMs = 4200;
+    const t0 = performance.now();
+
+    function frame(now) {
+      const k = Math.min(1, (now - t0) / animMs);
+      const t = k * state.tEnd;
+      cursor.style.left = (k * tlWidth()) + 'px';
+
+      // Shared audio time for this frame — strikes that fire together (at the meeting)
+      // get scheduled with the exact same `when`, so WebAudio plays them sample-aligned.
+      const audioWhen = ctx ? ctx.currentTime : 0;
+
+      while (smallNext <= t && smallNext <= state.tEnd) {
+        placeStrike(smallNext, 'small');
+        ringBell('small', audioWhen);
+        smallNext += state.small;
+      }
+      while (bigNext <= t && bigNext <= state.tEnd) {
+        placeStrike(bigNext, 'big');
+        ringBell('big', audioWhen);
+        bigNext += state.big;
+      }
+
+      if (k < 1) requestAnimationFrame(frame);
+      else done && done();
+    }
+    requestAnimationFrame(frame);
+  }
+
+  function highlightMeeting() {
+    tl.querySelectorAll('.strike').forEach(el => {
+      if (parseFloat(el.dataset.time) === state.L) el.classList.add('meet');
+    });
+    const w = tlWidth();
+    meetLabel.style.left = ((state.L / state.tEnd) * w) + 'px';
+    meetLabel.querySelector('.num').textContent = state.L;
+    meetLabel.classList.add('show');
+  }
+
+  function divideIntoN(n) {
+    tl.querySelectorAll('.tick').forEach(el => el.remove());
+    const w = tlWidth();
+    const lcmX = (state.L / state.tEnd) * w;
+    for (let i = 1; i < n; i++) {
+      const x = (i / n) * lcmX;
+      const t = document.createElement('div');
+      t.className = 'tick';
+      t.dataset.tickIdx = i;
+      t.dataset.tickTotal = n;
+      t.style.left = x + 'px';
+      tl.appendChild(t);
+    }
+  }
+
+  function relayout() {
+    const w = tlWidth();
+    tl.querySelectorAll('.strike').forEach(el => {
+      const t = parseFloat(el.dataset.time);
+      el.style.left = ((t / state.tEnd) * w - 2) + 'px';
+    });
+    const lcmX = (state.L / state.tEnd) * w;
+    tl.querySelectorAll('.slot-fill').forEach(el => {
+      const t = parseFloat(el.dataset.slotEnd);
+      el.style.left = ((t / state.tEnd) * w) + 'px';
+    });
+    tl.querySelectorAll('.tick').forEach(el => {
+      const i = parseInt(el.dataset.tickIdx, 10);
+      const n = parseInt(el.dataset.tickTotal, 10);
+      if (!isNaN(i) && !isNaN(n)) {
+        el.style.left = ((i / n) * lcmX) + 'px';
+      }
+    });
+    const axisLabels = document.getElementById('axis-labels');
+    if (axisLabels) axisLabels.querySelectorAll('.tick-num').forEach(el => {
+      const i = parseInt(el.dataset.tickIdx, 10);
+      const n = parseInt(el.dataset.tickTotal, 10);
+      if (!isNaN(i) && !isNaN(n)) {
+        el.style.left = ((i / n) * lcmX) + 'px';
+      }
+    });
+    tl.querySelectorAll('.sec-mark').forEach(el => {
+      const s = parseFloat(el.dataset.sec);
+      el.style.left = ((s / state.tEnd) * w) + 'px';
+    });
+    if (meetLabel.classList.contains('show')) {
+      meetLabel.style.left = ((state.L / state.tEnd) * w) + 'px';
+    }
+  }
+  window.addEventListener('resize', relayout);
+
+  function showMath() {
+    mathArea.classList.remove('hidden');
+    mathArea.innerHTML = `
+      <div class="math-box fade-in">
+        <span class="frac"><span class="num">1</span><span class="den color-small">3</span></span>
+        <span class="op">+</span>
+        <span class="frac"><span class="num">1</span><span class="den color-big">4</span></span>
+        <span class="op">=</span>
+        <span class="frac"><span class="num color-big">4</span><span class="den color-meet">12</span></span>
+        <span class="op">+</span>
+        <span class="frac"><span class="num color-small">3</span><span class="den color-meet">12</span></span>
+        <span class="op">=</span>
+        <span class="frac"><span class="num">7</span><span class="den color-meet">12</span></span>
+      </div>`;
+  }
+
+  async function showEnd(instant) {
+    // Hide quest UI
+    bubble.classList.add('hidden');
+    bellsRow.classList.add('hidden');
+    tlWrap.classList.add('hidden');
+    mathArea.classList.add('hidden');
+    document.getElementById('controls').classList.add('hidden');
+    roundPill.classList.add('hidden');
+    const questHeader = document.querySelector('body > header');
+    if (questHeader) questHeader.style.display = 'none';
+
+    // Re-show intro backdrop (stars, moon, skyline, flickering door)
+    intro.style.display = '';
+    intro.classList.remove('gone');
+
+    // Keep the title visible for the end too; hide everything else intro-specific
+    if (introTitle) introTitle.style.display = '';
+    if (introDate)  introDate.style.display  = 'none';
+    if (tap1)       tap1.style.display       = 'none';
+    if (tap2)       tap2.style.display       = 'none';
+    if (narrationBox) narrationBox.classList.add('hidden');
+
+    // Populate and reveal end overlay
+    const endOv = document.getElementById('end-overlay');
+    endOv.innerHTML = END_PARAGRAPHS.map(p => `<p>${stripMarkers(p)}</p>`).join('');
+    endOv.classList.remove('hidden');
+
+    if (instant) return;
+    // Speak each paragraph in sequence
+    for (let i = 0; i < END_PARAGRAPHS.length; i++) {
+      await speak(END_PARAGRAPHS[i]);
+      if (i < END_PARAGRAPHS.length - 1) await wait(500);
+    }
+  }
+
+  // ===== Scene flow =====
+  const scenes = [
+    // 0 — Bells appear, kid can try them
+    {
+      bubble: "Da hängen sie — vor dir. Tipp die Glocken an, hör sie. Dann lass sie läuten.",
+      btn: "Lass sie läuten",
+      onEnter: () => setRound(3, 4, "Runde 1 von 3"),
+    },
+    // 1 — Run round 1
+    {
+      bubble: "Wann läuten beide gleichzeitig? Pass auf die Zeitleiste auf.",
+      skipAutoBtn: true,
+      onEnter: async (speakingDone, instant) => {
+        tlWrap.classList.remove('hidden');
+        tlLabel.textContent = "Runde 1 · 3 und 4";
+        if (instant) { clearTimeline(); drawTimeAxis(); drawAllStrikes(); return; }
+        nextBtn.disabled = true;
+        nextBtn.textContent = "…";
+        await speakingDone;
+        await wait(350);
+        runTimeline(() => {
+          nextBtn.disabled = false;
+          nextBtn.textContent = "Hast du's gesehen?";
+        });
+      },
+    },
+    // 2 — Aha 1
+    {
+      bubble: "Sie treffen sich bei der 12! Dieser Takt, die Zahl 12, ist beiden gemein!",
+      btn: "Andere Glocken!",
+      onEnter: () => highlightMeeting(),
+    },
+    // 3 — Round 2 run
+    {
+      bubble: "Neue Rhythmen: 2 und 3 Sekunden. Was glaubst du, wann treffen sie sich diesmal?",
+      skipAutoBtn: true,
+      onEnter: async (speakingDone, instant) => {
+        setRound(2, 3, "Runde 2 von 3");
+        tlLabel.textContent = "Runde 2 · 2 und 3";
+        if (instant) { clearTimeline(); drawTimeAxis(); drawAllStrikes(); return; }
+        nextBtn.disabled = true;
+        nextBtn.textContent = "…";
+        await speakingDone;
+        await wait(350);
+        runTimeline(() => {
+          nextBtn.disabled = false;
+          nextBtn.textContent = "Was war die Zahl?";
+        });
+      },
+    },
+    // 4 — Aha 2
+    {
+      bubble: "Bei 6. Das ist 2 mal 3. Eine Runde noch, jetzt wird's spannend.",
+      btn: "Letzte Runde",
+      onEnter: () => highlightMeeting(),
+    },
+    // 5 — Round 3 run (twist)
+    {
+      bubble: "4 und 6 Sekunden. 4 mal 6 wäre 24. Aber pass mal auf, was wirklich passiert.",
+      skipAutoBtn: true,
+      onEnter: async (speakingDone, instant) => {
+        setRound(4, 6, "Runde 3 von 3");
+        tlLabel.textContent = "Runde 3 · 4 und 6";
+        if (instant) { clearTimeline(); drawTimeAxis(); drawAllStrikes(); return; }
+        nextBtn.disabled = true;
+        nextBtn.textContent = "…";
+        await speakingDone;
+        await wait(350);
+        runTimeline(() => {
+          nextBtn.disabled = false;
+          nextBtn.textContent = "Wann war's?";
+        });
+      },
+    },
+    // 6 — Aha 3: observation
+    {
+      bubble: "12 — nicht 24! Beide Zahlen passen in die 12: dreimal 4 ist 12, zweimal 6 ist 12.",
+      btn: "Geht's noch kleiner?",
+      onEnter: () => highlightMeeting(),
+    },
+    // 7 — Probe: smaller numbers?
+    {
+      bubble: "Gibt's eine kleinere Zahl in die beide reinpassen? 6? — die 4 passt nicht. 8? — die 6 passt nicht. 10? — auch nicht.",
+      btn: "Also ist die 12 …",
+    },
+    // 8 — Name reveal: kgV
+    {
+      bubble: "Die 12 ist die kleinste Zahl in die beide reinpassen. Genau deshalb heißt sie das kleinste gemeinsame Vielfache. Kurz: kgV.",
+      btn: "Mal Produkt, mal weniger?",
+    },
+    // 9 — Observation: product vs less
+    {
+      bubble: "Manchmal ist das kgV einfach das Produkt — 3·4 = 12, 2·3 = 6. Manchmal weniger — 4·6 wäre 24, aber 12 ist kleiner als 24. So rechnet man lieber mit 12, weil dann die Zahlen beim Rechnen kleiner bleiben!",
+      btn: "Was hat das mit Brüchen zu tun?",
+    },
+    // 10 — Bridge: back to 3,4, divide into 12
+    {
+      bubble: "Zurück zu unseren ersten Glocken — 3 und 4. Das kgV ist 12. Wir teilen die Zeit bis 12 in 12 gleich große Stücke.",
+      btn: "Was sagt das über die kleine?",
+      onEnter: () => {
+        setRound(3, 4, "Brücke");
+        tlLabel.textContent = "Zeit bis 12 — in 12 Stücke";
+        clearTimeline();
+        drawTimeAxis();
+        divideIntoN(12);
+        drawAllStrikes();
+        highlightMeeting();
+      },
+    },
+    // 11 — Yellow slots: small bell every 3rd
+    {
+      bubble: "Schau auf die kleine Glocke. Sie schlägt jedes dritte Stück — bei 3, 6, 9 und 12. Also: eins von drei Stücken ist gelb. Das ist ein Drittel — oder 1/3.",
+      speech: "Schau auf die kleine Glocke. Sie schlägt jedes dritte Stück — bei 3, 6, 9 und 12. Also: eins von drei Stücken ist gelb. Das ist ein Drittel.",
+      btn: "Und die große?",
+      onEnter: (speakingDone, instant) => showSlots(state.small, 'small', instant),
+    },
+    // 12 — Red slots: big bell every 4th
+    {
+      bubble: "Die große schlägt jedes vierte Stück — bei 4, 8 und 12. Eins von vier Stücken ist rot. Das ist ein Viertel — oder 1/4.",
+      speech: "Die große schlägt jedes vierte Stück — bei 4, 8 und 12. Eins von vier Stücken ist rot. Das ist ein Viertel.",
+      btn: "Wieviele zusammen?",
+      onEnter: (speakingDone, instant) => showSlots(state.big, 'big', instant),
+    },
+    // 13 — Count
+    {
+      bubble: "Zähl die gelben Stücke: vier. Die roten: drei. Zusammen sieben — von zwölf Stücken.",
+      btn: "Sieh die Gleichung",
+    },
+    // 14 — Math reveal
+    {
+      bubble: "Genau diese sieben von zwölf hast du gerade gezählt. Das ist die Summe von einem Drittel und einem Viertel — oder von vier Zwölfteln und drei Zwölfteln — ergibt 4 + 3 = 7, also 7 Zwölftel — 7/12.",
+      speech: "Genau diese sieben von zwölf hast du gerade gezählt. Das ist die Summe von einem Drittel und einem Viertel — oder von vier Zwölfteln und drei Zwölfteln — ergibt vier plus drei ist gleich sieben, also sieben Zwölftel.",
+      btn: "Punchline",
+      onEnter: () => showMath(),
+    },
+    // 15 — Punchline
+    {
+      bubble: "Genau so funktioniert Brüche addieren oder subtrahieren! Man sucht das kgV und rechnet. Wie man es sucht, hast du gesehen!",
+      btn: "Quest beenden",
+    },
+    // 16 — End
+    {
+      skipAutoBtn: true,
+      onEnter: (speakingDone, instant) => showEnd(instant),
+    },
+  ];
+
+  let sceneIdx = -1;
+  function advance(instant = false) {
+    audio();
+    sceneIdx++;
+    const s = scenes[sceneIdx];
+    if (!s) return;
+    nextBtn.disabled = false; // always re-enable when entering a new scene
+    if (s.btn && !s.skipAutoBtn) nextBtn.textContent = s.btn;
+    if (instant) {
+      stopAllSpeech();
+      if (s.bubble) {
+        bubble.style.opacity = '1';
+        bubble.textContent = s.bubble;
+      }
+      if (s.onEnter) s.onEnter(Promise.resolve(), true);
+    } else {
+      const speakingDone = s.bubble ? setBubble(s.bubble, s.speech) : Promise.resolve();
+      if (s.onEnter) s.onEnter(speakingDone, false);
+    }
+  }
+
+  function hardReset() {
+    stopAllSpeech();
+    clearTimeline();
+    tlWrap.classList.add('hidden');
+    mathArea.classList.add('hidden');
+    mathArea.innerHTML = '';
+    endArea.classList.add('hidden');
+    endArea.innerHTML = '';
+    // Restore anything showEnd may have hidden / re-shown
+    const questHeader = document.querySelector('body > header');
+    if (questHeader) questHeader.style.display = '';
+    intro.style.display = 'none';
+    intro.classList.add('gone');
+    const endOv = document.getElementById('end-overlay');
+    if (endOv) endOv.classList.add('hidden');
+    document.getElementById('controls').classList.remove('hidden');
+    roundPill.classList.remove('hidden');
+    bubble.classList.remove('hidden');
+    bellsRow.classList.remove('hidden');
+    bubble.textContent = '';
+    nextBtn.disabled = false;
+    sceneIdx = -1;
+  }
+
+  function goBack() {
+    if (sceneIdx <= 0) return;
+    const target = sceneIdx - 1;
+    hardReset();
+    for (let i = 0; i <= target; i++) advance(true);
+  }
+
+  nextBtn.addEventListener('click', () => advance(false));
+
+  // Arrow keys: → forward, ← back — works in every phase
+  document.addEventListener('keydown', (e) => {
+    if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return;
+    if (e.key === 'ArrowRight') {
+      e.preventDefault();
+      if      (introPhase === 'atmosphere') startNarration();
+      else if (introPhase === 'narrating')  skipNarration();
+      else if (introPhase === 'ready')      dismissIntro();
+      else if (introPhase === 'gone')       advance(false);
+    } else if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      if (introPhase === 'gone') goBack();
+    } else if (e.key === 'b' || e.key === 'B') {
+      e.preventDefault();
+      audio();
+      const when = ctx ? ctx.currentTime : 0;
+      ringBell('small', when);
+      ringBell('big', when);
+    }
+  });
+
+  // ===== Mute toggle =====
+  const muteBtn = document.getElementById('mute-btn');
+  const muteWaves = document.getElementById('mute-waves');
+  const muteCross = document.getElementById('mute-cross');
+  function applyMuteUI() {
+    muteBtn.classList.toggle('muted', !voiceEnabled);
+    muteWaves.classList.toggle('hidden', !voiceEnabled);
+    muteCross.classList.toggle('hidden', voiceEnabled);
+  }
+  applyMuteUI();
+  muteBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    voiceEnabled = !voiceEnabled;
+    localStorage.setItem('gctt_muted', voiceEnabled ? '0' : '1');
+    applyMuteUI();
+    if (!voiceEnabled) stopAllSpeech();
+  });
+
+  // ===== Settings (Google TTS key) =====
+  const settingsBtn = document.getElementById('settings-btn');
+  refreshSettingsBtnState();
+  settingsBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const current = gKey() || '';
+    const masked = current ? current.slice(0, 6) + '…' + current.slice(-4) : '';
+    const input = prompt(
+      'Google Cloud TTS API-Key\n' +
+      (current ? '(aktuell: ' + masked + ')\n' : '') +
+      'Leer lassen zum Entfernen.',
+      current
+    );
+    if (input === null) return;
+    const k = input.trim();
+    if (k) {
+      localStorage.setItem('gctt_api_key', k);
+      refreshSettingsBtnState();
+    } else {
+      localStorage.removeItem('gctt_api_key');
+      refreshSettingsBtnState();
+    }
+  });
+
+  // ===== Intro phase machine: atmosphere → narrating → ready → gone =====
+  let introPhase = 'atmosphere';
+  const introTitle = document.getElementById('intro-title');
+  const introDate  = document.getElementById('intro-date');
+  const tap1 = document.getElementById('intro-tap-1');
+  const tap2 = document.getElementById('intro-tap-2');
+  const narrationBox = document.getElementById('narration');
+  const NARRATION = [
+    "Es war einmal in Bagdad. Vor fast 1200 Jahren. Dort lebte ein Mann — klug, weise, geduldig — dem die Mathematik mehr bedeutete als alles andere.",
+    "Eine Frage ließ ihn nicht los, und sie lässt bis heute niemanden los: Gehört die Mathematik zum Universum? Oder haben die Menschen sie erfunden?",
+    "Eines Nachts, als die Stadt schon schlief, hörte er etwas. Zwei Glocken. Jede in ihrem eigenen Takt."
+  ];
+  const END_PARAGRAPHS = [
+    "Al-Khwārizmī hat das alles im Jahr 832 entdeckt. Er hat gesehen und verstanden, dass Rhythmen etwas mit Zahlen und sogar mit Bruchrechnung zu tun haben. Die Mathematik und die Wirklichkeit gehen Hand in Hand. Die Mathematik beschreibt unsere Welt, unser Universum *sensationell* gut.",
+    "Aber ist sie nun erfunden oder gehört sie zum Universum? Das konnte bis heute noch niemand wirklich schlüssig beweisen. Willst Du die Erste sein, die das beweist? Du kannst das!",
+    "DENK DAS UNMÖGLICHE!",
+    "THINK THE IMPOSSIBLE!"
+  ];
+  // Populate the <p> elements from the single source of truth above
+  ['n1','n2','n3'].forEach((id, i) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = NARRATION[i];
+  });
+
+  async function startNarration() {
+    introPhase = 'narrating';
+    audio();
+    // iOS Safari: prime speechSynthesis with a silent utterance inside the user gesture
+    if ('speechSynthesis' in window) {
+      try {
+        const prime = new SpeechSynthesisUtterance(' ');
+        prime.volume = 0;
+        speechSynthesis.speak(prime);
+      } catch (e) {}
+    }
+    tap1.classList.remove('start');
+    tap1.style.animation = 'none';
+    tap1.style.opacity = '0';
+    introDate.classList.add('faded');
+    narrationBox.classList.remove('hidden');
+
+    const paras = ['n1','n2','n3'].map(id => document.getElementById(id));
+    for (let i = 0; i < NARRATION.length; i++) {
+      if (introPhase !== 'narrating') break;
+      paras[i].classList.add('show');
+      await speak(NARRATION[i]);
+      if (introPhase !== 'narrating') break;
+      if (i < NARRATION.length - 1) {
+        paras[i].classList.remove('show');
+        paras[i].classList.add('done');
+        await wait(550);
+      } else {
+        await wait(450);
+      }
+    }
+    introPhase = 'ready';
+    tap2.classList.add('shown');
+  }
+
+  function wait(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+  function skipNarration() {
+    introPhase = 'ready';
+    stopAllSpeech();
+    const ids = ['n1','n2','n3'];
+    ids.forEach((id, i) => {
+      const el = document.getElementById(id);
+      if (i < ids.length - 1) { el.classList.remove('show'); el.classList.add('done'); }
+      else { el.classList.add('show'); }
+    });
+    tap2.classList.add('shown');
+  }
+
+  function dismissIntro() {
+    if (introPhase === 'gone') return;
+    introPhase = 'gone';
+    stopAllSpeech();
+    intro.classList.add('gone');
+    setTimeout(() => {
+      intro.style.display = 'none';
+      advance(); // launch scenes[0]
+    }, 650);
+  }
+
+  intro.addEventListener('click', (e) => {
+    if (e.target.closest('.corner-btn')) return;
+    if (introPhase === 'atmosphere') startNarration();
+    else if (introPhase === 'narrating') skipNarration();
+    else if (introPhase === 'ready') dismissIntro();
+  });
+})();
+</script>
+</body>
+</html>

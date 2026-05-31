@@ -136,6 +136,7 @@
         let globeInstance = null;
         let globeIconHitbox = null;
         let dirIconHitbox = null;   // direction-toggle icon, drawn right of the globe icon
+        let orionIconHitbox = null; // Orion-constellation icon, drawn right of the direction icon → toggles the planetarium
 
         // --- Globe marker/init/reset/toggle → worldclock-globe.js (Phase 5).
 
@@ -426,6 +427,15 @@
                     return;
                 }
             }
+            // Orion icon hit test → toggle the planetarium
+            if (orionIconHitbox) {
+                const dx = mxCanvas - orionIconHitbox.cx;
+                const dy = myCanvas - orionIconHitbox.cy;
+                if (Math.sqrt(dx*dx + dy*dy) <= orionIconHitbox.r) {
+                    skyTarget = skyTarget ? 0 : 1;
+                    return;
+                }
+            }
 
             // Hit test for cities — disabled in planetarium (only sky rotation/zoom there)
             if (!skyTarget) {
@@ -567,7 +577,13 @@
                     const ddy = myCanvas - dirIconHitbox.cy;
                     overDirIcon = Math.sqrt(ddx*ddx + ddy*ddy) <= dirIconHitbox.r;
                 }
-                const onHittable = !!(found || foundFlagIdx !== null || overImprint || overGlobeIcon || overDirIcon);
+                let overOrionIcon = false;
+                if (orionIconHitbox) {
+                    const ddx = mxCanvas - orionIconHitbox.cx;
+                    const ddy = myCanvas - orionIconHitbox.cy;
+                    overOrionIcon = Math.sqrt(ddx*ddx + ddy*ddy) <= orionIconHitbox.r;
+                }
+                const onHittable = !!(found || foundFlagIdx !== null || overImprint || overGlobeIcon || overDirIcon || overOrionIcon);
                 canvas.style.cursor = onHittable ? 'pointer' : 'default';
                 // In globe mode, only capture pointer events when over a hittable element
                 // so TrackballControls receives events for empty-area drags
@@ -647,6 +663,16 @@
                 const dy = myCanvas - dirIconHitbox.cy;
                 if (Math.sqrt(dx*dx + dy*dy) <= dirIconHitbox.r) {
                     setDirection(!CW);
+                    e.preventDefault();
+                    return;
+                }
+            }
+            // Orion icon hit test → toggle the planetarium
+            if (orionIconHitbox) {
+                const dx = mxCanvas - orionIconHitbox.cx;
+                const dy = myCanvas - orionIconHitbox.cy;
+                if (Math.sqrt(dx*dx + dy*dy) <= orionIconHitbox.r) {
+                    skyTarget = skyTarget ? 0 : 1;
                     e.preventDefault();
                     return;
                 }
@@ -1092,6 +1118,55 @@
                 ctx.restore();
             }
             dirIconHitbox = { cx: dirCx, cy: dirCy, r: iconR * 1.4 };
+
+            // --- Orion-constellation icon: stars + asterism lines, right of the direction icon → toggles the planetarium ---
+            // Normalised star positions (x right, y down), centred on (0,0); scaled by `oR` below.
+            const orionCx = dirCx + iconR * 3.1;
+            const orionCy = iconCy;
+            if ((window.__clockOnlyAlpha ?? 1) > 0.001) {
+                // Betelgeuse / Bellatrix = shoulders, three belt stars, Saiph / Rigel = feet.
+                const STARS = {
+                    bet: [-0.55, -0.72], bel: [0.50, -0.82],   // shoulders (top)
+                    bL:  [-0.20,  0.10], bM: [0.00,  0.02], bR: [0.20, -0.06],   // belt (diagonal)
+                    sai: [-0.45,  0.88], rig: [0.55,  0.82],   // feet (bottom)
+                };
+                const LINES = [
+                    ['bet', 'bel'],                            // shoulders
+                    ['bet', 'bL'], ['bel', 'bR'],             // shoulders → belt
+                    ['bL', 'bM'], ['bM', 'bR'],               // the belt
+                    ['bL', 'sai'], ['bR', 'rig'],             // belt → feet
+                    ['sai', 'rig'],                            // feet
+                ];
+                const oR = iconR * 1.05;
+                const on = !!skyTarget;
+                const col = on ? '#00d2ff' : '#888888';
+                ctx.save();
+                ctx.globalAlpha *= (window.__clockOnlyAlpha ?? 1);
+                ctx.translate(orionCx, orionCy);
+                ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+                // asterism lines (dim)
+                ctx.strokeStyle = col;
+                ctx.globalAlpha *= 0.55;
+                ctx.lineWidth = Math.max(0.6, iconR * 0.05);
+                ctx.beginPath();
+                for (const [a, b] of LINES) {
+                    ctx.moveTo(STARS[a][0] * oR, STARS[a][1] * oR);
+                    ctx.lineTo(STARS[b][0] * oR, STARS[b][1] * oR);
+                }
+                ctx.stroke();
+                ctx.globalAlpha /= 0.55;
+                // stars (bright dots; Betelgeuse + Rigel a touch larger)
+                ctx.fillStyle = col;
+                for (const k in STARS) {
+                    const big = (k === 'bet' || k === 'rig');
+                    const sr = iconR * (big ? 0.16 : 0.10);
+                    ctx.beginPath();
+                    ctx.arc(STARS[k][0] * oR, STARS[k][1] * oR, sr, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                ctx.restore();
+            }
+            orionIconHitbox = { cx: orionCx, cy: orionCy, r: iconR * 1.4 };
 
             ctx.restore();
         }
@@ -1718,68 +1793,45 @@
             // 7. Central selection panel (time box + neighbor list + moon + hover tooltip)
             if (displayAlpha > 0 && targetCity) drawSelectionPanel(r, cx, cy, mapRotation, time);
 
-            // 8. Mouse overlay (planetarium only): Shift held → magnifier loupe centred on the cursor (no FK underneath);
-            //    otherwise → thin crosshair at the cursor for visual calibration.
-            if (fkMouse && skyTarget) {
+            // 8. Mouse overlay (planetarium only): Shift held → magnifier loupe centred on the cursor.
+            //    No crosshair otherwise — it was a calibration helper that crept in unbidden.
+            if (fkMouse && skyTarget && fkShift) {
                 const lx = fkMouse.x, ly = fkMouse.y;
-                if (fkShift) {                                                       // — LOUPE centred on the cursor (no FK at all, neither lines nor centre cross) —
-                    const dpr = window.devicePixelRatio || 1;
-                    const zoom = 5, loupeR = 110;
-                    const srcSize = (loupeR * 2) / zoom;                              // CSS px diameter of the area being magnified
-                    // Precise integer-pixel source rect centred on the cursor (avoid sub-pixel drift in getImageData).
-                    const cxPx = Math.round(lx * dpr), cyPx = Math.round(ly * dpr);
-                    const half = Math.round(srcSize / 2 * dpr);
-                    const sx0 = cxPx - half, sy0 = cyPx - half;
-                    const sw = half * 2, sh = half * 2;
-                    // Capture (clamp the read inside the canvas; pad the offscreen so the cursor stays geometrically at its centre).
-                    const _off = document.createElement('canvas');
-                    _off.width = sw; _off.height = sh;
-                    const _octx = _off.getContext('2d');
-                    _octx.fillStyle = '#000'; _octx.fillRect(0, 0, sw, sh);
-                    const rx = Math.max(0, sx0), ry = Math.max(0, sy0);
-                    const rw = Math.min(canvas.width  - rx, sw - (rx - sx0));
-                    const rh = Math.min(canvas.height - ry, sh - (ry - sy0));
-                    if (rw > 0 && rh > 0) {
-                        try {
-                            const imgData = ctx.getImageData(rx, ry, rw, rh);
-                            _octx.putImageData(imgData, rx - sx0, ry - sy0);
-                        } catch (_) { /* CORS or read failure — black backdrop only */ }
-                    }
-                    ctx.save();
-                    ctx.beginPath(); ctx.arc(lx, ly, loupeR, 0, Math.PI * 2); ctx.clip();
-                    ctx.imageSmoothingEnabled = false;                                // crisp pixels at high zoom
-                    ctx.drawImage(_off, lx - loupeR, ly - loupeR, loupeR * 2, loupeR * 2);
-                    ctx.imageSmoothingEnabled = true;
-                    ctx.restore();
-                    // Loupe ring border (white + red) — no centre cross, no inner FK
-                    ctx.save();
-                    ctx.strokeStyle = 'rgba(255, 255, 255, 0.95)'; ctx.lineWidth = 4;
-                    ctx.beginPath(); ctx.arc(lx, ly, loupeR, 0, Math.PI * 2); ctx.stroke();
-                    ctx.strokeStyle = 'rgb(220, 30, 30)'; ctx.lineWidth = 1.8;
-                    ctx.beginPath(); ctx.arc(lx, ly, loupeR, 0, Math.PI * 2); ctx.stroke();
-                    ctx.restore();
-                } else {                                                              // — thin FK through the cursor —
-                    ctx.save();
-                    ctx.strokeStyle = 'rgba(255, 255, 255, 0.55)'; ctx.lineWidth = 2;
-                    ctx.beginPath();
-                    ctx.moveTo(0, ly + 0.5); ctx.lineTo(canvas.width, ly + 0.5);
-                    ctx.moveTo(lx + 0.5, 0); ctx.lineTo(lx + 0.5, canvas.height);
-                    ctx.stroke();
-                    ctx.strokeStyle = 'rgb(220, 30, 30)'; ctx.lineWidth = 1;
-                    ctx.beginPath();
-                    ctx.moveTo(0, ly + 0.5); ctx.lineTo(canvas.width, ly + 0.5);
-                    ctx.moveTo(lx + 0.5, 0); ctx.lineTo(lx + 0.5, canvas.height);
-                    ctx.stroke();
-                    ctx.strokeStyle = 'rgb(220, 30, 30)'; ctx.lineWidth = 1.5;
-                    ctx.beginPath();
-                    ctx.moveTo(lx - 10, ly); ctx.lineTo(lx - 3, ly);
-                    ctx.moveTo(lx + 3, ly); ctx.lineTo(lx + 10, ly);
-                    ctx.moveTo(lx, ly - 10); ctx.lineTo(lx, ly - 3);
-                    ctx.moveTo(lx, ly + 3); ctx.lineTo(lx, ly + 10);
-                    ctx.stroke();
-                    ctx.fillStyle = 'rgb(220, 30, 30)'; ctx.beginPath(); ctx.arc(lx, ly, 1.5, 0, Math.PI * 2); ctx.fill();
-                    ctx.restore();
+                const dpr = window.devicePixelRatio || 1;
+                const zoom = 5, loupeR = 110;
+                const srcSize = (loupeR * 2) / zoom;                              // CSS px diameter of the area being magnified
+                // Precise integer-pixel source rect centred on the cursor (avoid sub-pixel drift in getImageData).
+                const cxPx = Math.round(lx * dpr), cyPx = Math.round(ly * dpr);
+                const half = Math.round(srcSize / 2 * dpr);
+                const sx0 = cxPx - half, sy0 = cyPx - half;
+                const sw = half * 2, sh = half * 2;
+                // Capture (clamp the read inside the canvas; pad the offscreen so the cursor stays geometrically at its centre).
+                const _off = document.createElement('canvas');
+                _off.width = sw; _off.height = sh;
+                const _octx = _off.getContext('2d');
+                _octx.fillStyle = '#000'; _octx.fillRect(0, 0, sw, sh);
+                const rx = Math.max(0, sx0), ry = Math.max(0, sy0);
+                const rw = Math.min(canvas.width  - rx, sw - (rx - sx0));
+                const rh = Math.min(canvas.height - ry, sh - (ry - sy0));
+                if (rw > 0 && rh > 0) {
+                    try {
+                        const imgData = ctx.getImageData(rx, ry, rw, rh);
+                        _octx.putImageData(imgData, rx - sx0, ry - sy0);
+                    } catch (_) { /* CORS or read failure — black backdrop only */ }
                 }
+                ctx.save();
+                ctx.beginPath(); ctx.arc(lx, ly, loupeR, 0, Math.PI * 2); ctx.clip();
+                ctx.imageSmoothingEnabled = false;                                // crisp pixels at high zoom
+                ctx.drawImage(_off, lx - loupeR, ly - loupeR, loupeR * 2, loupeR * 2);
+                ctx.imageSmoothingEnabled = true;
+                ctx.restore();
+                // Loupe ring border (white + red)
+                ctx.save();
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.95)'; ctx.lineWidth = 4;
+                ctx.beginPath(); ctx.arc(lx, ly, loupeR, 0, Math.PI * 2); ctx.stroke();
+                ctx.strokeStyle = 'rgb(220, 30, 30)'; ctx.lineWidth = 1.8;
+                ctx.beginPath(); ctx.arc(lx, ly, loupeR, 0, Math.PI * 2); ctx.stroke();
+                ctx.restore();
             }
         }
 
