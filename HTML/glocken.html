@@ -313,11 +313,11 @@
     display: flex;
     justify-content: center;
     align-items: flex-end;
-    gap: 40px;
-    padding: 4px 0 6px;
+    gap: 36px;
+    padding: 0;
   }
   .bell {
-    width: 86px; height: 96px;
+    width: 86px; height: 76px;
     cursor: pointer;
     display: flex; align-items: flex-start; justify-content: center;
     color: var(--orange);
@@ -325,7 +325,7 @@
     user-select: none;
     transition: filter 0.2s ease;
   }
-  .bell.big { width: 116px; height: 128px; color: var(--red); transform: translateY(10px); }
+  .bell.big { width: 110px; height: 96px; color: var(--red); transform: translateY(7px); }
   .bell-svg {
     width: 100%; height: 100%;
     transform-origin: 50% 8%;
@@ -483,6 +483,20 @@
     font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase;
   }
 
+  .scene-progress {
+    position: fixed;
+    top: 18px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 20;
+    font-family: Arial, sans-serif;
+    font-size: 11px;
+    color: rgba(244, 244, 244, 0.45);
+    pointer-events: none;
+    letter-spacing: 0.05em;
+  }
+  .scene-progress.hidden { display: none; }
+
   .corner-btn {
     position: fixed;
     top: 14px;
@@ -505,6 +519,7 @@
   .mute-btn { right: 14px; }
   .settings-btn { right: 62px; opacity: 0.7; }
   .settings-btn.has-key { color: var(--green); opacity: 1; }
+  .fullscreen-btn { right: 62px; }
   .mute-btn.muted { color: var(--muted); }
 
   .hidden { display: none !important; }
@@ -517,10 +532,14 @@
 </head>
 <body>
 
-<button id="settings-btn" class="corner-btn settings-btn" aria-label="Stimme-Einstellung" title="Google-TTS-Key">
-  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-    <circle cx="12" cy="12" r="2.8"/>
-    <path d="M12 2.5v3M12 18.5v3M4.2 7l2.6 1.5M17.2 15.5l2.6 1.5M2.5 12h3M18.5 12h3M4.2 17l2.6-1.5M17.2 8.5l2.6-1.5"/>
+<div id="scene-progress" class="scene-progress hidden"></div>
+
+<button id="fullscreen-btn" class="corner-btn fullscreen-btn" aria-label="Vollbild" title="Vollbild">
+  <svg id="fs-icon-enter" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M3 9V5a2 2 0 0 1 2-2h4M21 9V5a2 2 0 0 0-2-2h-4M3 15v4a2 2 0 0 0 2 2h4M21 15v4a2 2 0 0 1-2 2h-4"/>
+  </svg>
+  <svg id="fs-icon-exit" class="hidden" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M9 3v4a2 2 0 0 1-2 2H3M21 9h-4a2 2 0 0 1-2-2V3M15 21v-4a2 2 0 0 1 2-2h4M3 15h4a2 2 0 0 1 2 2v4"/>
   </svg>
 </button>
 
@@ -641,7 +660,7 @@
 
   <div class="intro-text">
     <h1 class="intro-title" id="intro-title">Die Glocken von Bagdad</h1>
-    <div class="intro-date" id="intro-date">Bagdad · vor fast 1200 Jahren</div>
+    <div class="intro-date" id="intro-date">Bagdad · vor fast 1200 Jahren<br>Eine wahre Geschichte?</div>
   </div>
 
   <div class="narration hidden" id="narration">
@@ -709,11 +728,13 @@
   // ====================================================================
   // LOCAL DEV ONLY — Google Cloud TTS API key bake-in.
   // REMOVE THIS BLOCK BEFORE `git push` (repo is public).
-  // The key gets copied into localStorage on first load; after that, you
-  // can delete these 5 lines and the voice still works in your browser.
+  // First load: seeds plain key → vault migration encrypts it on init.
+  // Subsequent loads: skipped if an encrypted key already exists.
   // ====================================================================
   const __DEV_GTTS_KEY = 'AIzaSyC12C7FjeQmk7ShpjDskIQhgPu4AuOwL8o';
-  if (__DEV_GTTS_KEY && localStorage.getItem('gctt_api_key') !== __DEV_GTTS_KEY) {
+  if (__DEV_GTTS_KEY
+      && !localStorage.getItem('gctt_api_key')
+      && !localStorage.getItem('gctt_api_key_enc')) {
     localStorage.setItem('gctt_api_key', __DEV_GTTS_KEY);
   }
   // ====================================================================
@@ -758,13 +779,104 @@
     return (h >>> 0).toString(36);
   }
 
-  function gKey()   { return localStorage.getItem('gctt_api_key'); }
+  // ===== Encrypted API-key vault (Web Crypto + IndexedDB) =====
+  const VAULT_DB         = 'gctt-vault';
+  const VAULT_STORE      = 'keys';
+  const VAULT_WRAP_NAME  = 'wrap-key';
+  const VAULT_CIPHER_LS  = 'gctt_api_key_enc';
+  let   wrapKey          = null;
+  let   cachedApiKey     = null;
+
+  function openVaultDB() {
+    return new Promise((resolve, reject) => {
+      const req = indexedDB.open(VAULT_DB, 1);
+      req.onupgradeneeded = () => req.result.createObjectStore(VAULT_STORE);
+      req.onsuccess = () => resolve(req.result);
+      req.onerror   = () => reject(req.error);
+    });
+  }
+  async function loadOrCreateWrapKey() {
+    if (wrapKey) return wrapKey;
+    const db = await openVaultDB();
+    const existing = await new Promise((res, rej) => {
+      const r = db.transaction(VAULT_STORE, 'readonly').objectStore(VAULT_STORE).get(VAULT_WRAP_NAME);
+      r.onsuccess = () => res(r.result);
+      r.onerror   = () => rej(r.error);
+    });
+    if (existing) { wrapKey = existing; return wrapKey; }
+    wrapKey = await crypto.subtle.generateKey(
+      { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']
+    );
+    await new Promise((res, rej) => {
+      const tx = db.transaction(VAULT_STORE, 'readwrite');
+      tx.objectStore(VAULT_STORE).put(wrapKey, VAULT_WRAP_NAME);
+      tx.oncomplete = res;
+      tx.onerror    = () => rej(tx.error);
+    });
+    return wrapKey;
+  }
+  async function vaultEncrypt(plain) {
+    const k  = await loadOrCreateWrapKey();
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const ct = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, k, new TextEncoder().encode(plain));
+    const buf = new Uint8Array(iv.length + ct.byteLength);
+    buf.set(iv, 0); buf.set(new Uint8Array(ct), iv.length);
+    return btoa(String.fromCharCode(...buf));
+  }
+  async function vaultDecrypt(b64) {
+    const k = await loadOrCreateWrapKey();
+    const buf = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
+    const iv = buf.slice(0, 12), ct = buf.slice(12);
+    const dec = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, k, ct);
+    return new TextDecoder().decode(dec);
+  }
+
+  async function initApiKeyVault() {
+    // Migrate any plain key (older versions or the DEV-seed) into the vault
+    const plain = localStorage.getItem('gctt_api_key');
+    if (plain) {
+      try {
+        const ct = await vaultEncrypt(plain);
+        localStorage.setItem(VAULT_CIPHER_LS, ct);
+        localStorage.removeItem('gctt_api_key');
+        cachedApiKey = plain;
+      } catch (e) { console.warn('vault migrate failed', e); }
+    }
+    // Load any existing ciphertext
+    const ct = localStorage.getItem(VAULT_CIPHER_LS);
+    if (ct && !cachedApiKey) {
+      try { cachedApiKey = await vaultDecrypt(ct); }
+      catch (e) { console.warn('vault decrypt failed', e); cachedApiKey = null; }
+    }
+    refreshSettingsBtnState();
+  }
+  async function saveApiKey(plain) {
+    if (!plain) {
+      cachedApiKey = null;
+      localStorage.removeItem(VAULT_CIPHER_LS);
+      refreshSettingsBtnState();
+      return;
+    }
+    try {
+      const ct = await vaultEncrypt(plain);
+      localStorage.setItem(VAULT_CIPHER_LS, ct);
+      cachedApiKey = plain;
+    } catch (e) { console.warn('vault encrypt failed', e); }
+    refreshSettingsBtnState();
+  }
+
+  function gKey()   { return cachedApiKey; }
   function gVoice() { return localStorage.getItem('gctt_voice') || 'de-DE-Neural2-B'; }
+
+  initApiKeyVault();
 
   // Wrap all standalone integers in <say-as interpret-as="cardinal"> so TTS
   // doesn't read "6" at sentence end as "der Sechste" / a date.
   function toSSML(text) {
-    let s = text
+    let s = text;
+    // pre-tokenize pause markers so they survive XML escape:  [break:1s] / [break:0.5s]
+    s = s.replace(/\[break:(\d+(?:\.\d+)?)s?\]/gi, (_, t) => ` BREAK${t}`);
+    s = s
       // math operators (only between digits!) → spoken words
       .replace(/(\d)\s*[·×]\s*(\d)/g, '$1 mal $2')
       .replace(/(\d)\s*\*\s*(\d)/g, '$1 mal $2')
@@ -776,6 +888,8 @@
       .replace(/>/g, '&gt;')
       .replace(/"/g, '&quot;')
       .replace(/'/g, '&apos;');
+    // restore break markers as SSML tags (after escape)
+    s = s.replace(/ BREAK([\d.]+)/g, '<break time="$1s"/>');
     // emphasis: *word* → <emphasis>
     s = s.replace(/\*([^*]+)\*/g, '<emphasis level="strong">$1</emphasis>');
     // standalone integers → cardinal say-as
@@ -869,10 +983,9 @@
   }
 
   // Console helpers
-  window.setGoogleKey = (k) => {
-    if (!k) { localStorage.removeItem('gctt_api_key'); console.log('Key entfernt'); }
-    else    { localStorage.setItem('gctt_api_key', k); console.log('Key gespeichert'); }
-    refreshSettingsBtnState();
+  window.setGoogleKey = async (k) => {
+    await saveApiKey(k || '');
+    console.log(k ? 'Key gespeichert (verschlüsselt)' : 'Key entfernt');
   };
   window.setGoogleVoice = (v) => {
     localStorage.setItem('gctt_voice', v);
@@ -1093,22 +1206,18 @@
     const axisLabels = document.getElementById('axis-labels');
     axisLabels.querySelectorAll('.tick-num').forEach(el => el.remove());
     const w = tlWidth();
-    for (let s = 0; s <= state.tEnd; s++) {
+    for (let s = 1; s < state.tEnd; s++) {
       const x = (s / state.tEnd) * w;
-      if (s > 0 && s < state.tEnd) {
-        const m = document.createElement('div');
-        m.className = 'sec-mark';
-        m.dataset.sec = s;
-        m.style.left = x + 'px';
-        tl.appendChild(m);
-      }
+      const m = document.createElement('div');
+      m.className = 'sec-mark';
+      m.dataset.sec = s;
+      m.style.left = x + 'px';
+      tl.appendChild(m);
       const lab = document.createElement('div');
       lab.className = 'tick-num';
       lab.dataset.tickIdx = s;
       lab.dataset.tickTotal = state.tEnd;
       lab.style.left = x + 'px';
-      if (s === 0)              lab.style.transform = 'translateX(0)';
-      else if (s === state.tEnd) lab.style.transform = 'translateX(-100%)';
       lab.textContent = String(s);
       axisLabels.appendChild(lab);
     }
@@ -1336,7 +1445,7 @@
     },
     // 3 — Round 2 run
     {
-      bubble: "Neue Rhythmen: 2 und 3 Sekunden. Was glaubst du, wann treffen sie sich diesmal?",
+      bubble: "Probieren wir andere Rhythmen: 2 und 3 Sekunden. Was glaubst du, wann treffen sie sich diesmal?",
       skipAutoBtn: true,
       onEnter: async (speakingDone, instant) => {
         setRound(2, 3, "Runde 2 von 3");
@@ -1361,6 +1470,7 @@
     // 5 — Round 3 run (twist)
     {
       bubble: "4 und 6 Sekunden. 4 mal 6 wäre 24. Aber pass mal auf, was wirklich passiert.",
+      speech: "Vier und sechs Sekunden. Vier mal sechs wäre vierundzwanzig. Aber pass mal auf, was wirklich passiert.",
       skipAutoBtn: true,
       onEnter: async (speakingDone, instant) => {
         setRound(4, 6, "Runde 3 von 3");
@@ -1400,7 +1510,7 @@
     // 10 — Bridge: back to 3,4, divide into 12
     {
       bubble: "Zurück zu unseren ersten Glocken — 3 und 4. Das kgV ist 12. Wir teilen die Zeit bis 12 in 12 gleich große Stücke.",
-      btn: "Was sagt das über die kleine?",
+      btn: "Was sagt das über die kleine Glocke?",
       onEnter: () => {
         setRound(3, 4, "Brücke");
         tlLabel.textContent = "Zeit bis 12 — in 12 Stücke";
@@ -1414,20 +1524,21 @@
     // 11 — Yellow slots: small bell every 3rd
     {
       bubble: "Schau auf die kleine Glocke. Sie schlägt jedes dritte Stück — bei 3, 6, 9 und 12. Also: eins von drei Stücken ist gelb. Das ist ein Drittel — oder 1/3.",
-      speech: "Schau auf die kleine Glocke. Sie schlägt jedes dritte Stück — bei 3, 6, 9 und 12. Also: eins von drei Stücken ist gelb. Das ist ein Drittel.",
+      speech: "Schau auf die kleine Glocke. Sie schlägt jedes dritte Stück — bei drei, sechs, neun und zwölf. Also: eins von drei Stücken ist gelb. Das ist ein Drittel.",
       btn: "Und die große?",
       onEnter: (speakingDone, instant) => showSlots(state.small, 'small', instant),
     },
     // 12 — Red slots: big bell every 4th
     {
       bubble: "Die große schlägt jedes vierte Stück — bei 4, 8 und 12. Eins von vier Stücken ist rot. Das ist ein Viertel — oder 1/4.",
-      speech: "Die große schlägt jedes vierte Stück — bei 4, 8 und 12. Eins von vier Stücken ist rot. Das ist ein Viertel.",
+      speech: "Die große schlägt jedes vierte Stück — bei vier, acht und zwölf. Eins von vier Stücken ist rot. Das ist ein Viertel.",
       btn: "Wieviele zusammen?",
       onEnter: (speakingDone, instant) => showSlots(state.big, 'big', instant),
     },
     // 13 — Count
     {
       bubble: "Zähl die gelben Stücke: vier. Die roten: drei. Zusammen sieben — von zwölf Stücken.",
+      speech: "Zähl die gelben Stücke: [break:2s] vier. Die roten: [break:2s] drei. Zusammen sieben — von zwölf Stücken.",
       btn: "Sieh die Gleichung",
     },
     // 14 — Math reveal
@@ -1439,7 +1550,7 @@
     },
     // 15 — Punchline
     {
-      bubble: "Genau so funktioniert Brüche addieren oder subtrahieren! Man sucht das kgV und rechnet. Wie man es sucht, hast du gesehen!",
+      bubble: "Genau so funktioniert Brüche addieren oder subtrahieren! Man sucht das kgV und rechnet. Wie man es sucht, hast du gesehen: Man sucht den gemeinsamen Takt!",
       btn: "Quest beenden",
     },
     // 16 — End
@@ -1449,6 +1560,18 @@
     },
   ];
 
+  const sceneProgressEl = document.getElementById('scene-progress');
+  function updateProgress() {
+    if (!sceneProgressEl) return;
+    const total = scenes.length - 1; // exclude end scene
+    if (sceneIdx < 0 || sceneIdx >= total) {
+      sceneProgressEl.classList.add('hidden');
+    } else {
+      sceneProgressEl.textContent = (sceneIdx + 1) + '/' + total;
+      sceneProgressEl.classList.remove('hidden');
+    }
+  }
+
   let sceneIdx = -1;
   function advance(instant = false) {
     audio();
@@ -1457,6 +1580,7 @@
     if (!s) return;
     nextBtn.disabled = false; // always re-enable when entering a new scene
     if (s.btn && !s.skipAutoBtn) nextBtn.textContent = s.btn;
+    updateProgress();
     if (instant) {
       stopAllSpeech();
       if (s.bubble) {
@@ -1492,6 +1616,7 @@
     bubble.textContent = '';
     nextBtn.disabled = false;
     sceneIdx = -1;
+    updateProgress();
   }
 
   function goBack() {
@@ -1542,29 +1667,34 @@
     if (!voiceEnabled) stopAllSpeech();
   });
 
-  // ===== Settings (Google TTS key) =====
-  const settingsBtn = document.getElementById('settings-btn');
-  refreshSettingsBtnState();
-  settingsBtn.addEventListener('click', (e) => {
+  // ===== Fullscreen toggle =====
+  const fsBtn   = document.getElementById('fullscreen-btn');
+  const fsEnter = document.getElementById('fs-icon-enter');
+  const fsExit  = document.getElementById('fs-icon-exit');
+  function inFullscreen() {
+    return !!(document.fullscreenElement || document.webkitFullscreenElement);
+  }
+  function updateFSIcon() {
+    const fs = inFullscreen();
+    fsEnter.classList.toggle('hidden', fs);
+    fsExit.classList.toggle('hidden', !fs);
+  }
+  fsBtn.addEventListener('click', (e) => {
     e.stopPropagation();
-    const current = gKey() || '';
-    const masked = current ? current.slice(0, 6) + '…' + current.slice(-4) : '';
-    const input = prompt(
-      'Google Cloud TTS API-Key\n' +
-      (current ? '(aktuell: ' + masked + ')\n' : '') +
-      'Leer lassen zum Entfernen.',
-      current
-    );
-    if (input === null) return;
-    const k = input.trim();
-    if (k) {
-      localStorage.setItem('gctt_api_key', k);
-      refreshSettingsBtnState();
+    if (inFullscreen()) {
+      const fn = document.exitFullscreen || document.webkitExitFullscreen;
+      if (fn) fn.call(document);
     } else {
-      localStorage.removeItem('gctt_api_key');
-      refreshSettingsBtnState();
+      const el = document.documentElement;
+      const fn = el.requestFullscreen || el.webkitRequestFullscreen;
+      if (fn) fn.call(el);
     }
   });
+  document.addEventListener('fullscreenchange', updateFSIcon);
+  document.addEventListener('webkitfullscreenchange', updateFSIcon);
+  updateFSIcon();
+
+  // Settings button removed — use `setGoogleKey('...')` from the DevTools console to set/clear the key.
 
   // ===== Intro phase machine: atmosphere → narrating → ready → gone =====
   let introPhase = 'atmosphere';
