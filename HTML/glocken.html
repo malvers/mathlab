@@ -6,7 +6,7 @@
 <title>Die Glocken von Bagdad — Alvers Quest</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Raleway:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;600;700&family=Raleway:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
     --bg: rgb(8, 20, 42);
@@ -515,15 +515,14 @@
 
   .corner-btn {
     position: fixed;
-    top: 14px;
+    top: 16px;
     z-index: 20;
-    width: 38px;
-    height: 38px;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
-    background: rgba(14, 36, 78, 0.85);
-    backdrop-filter: blur(6px);
-    border: 1px solid rgba(244, 244, 244, 0.18);
-    color: var(--ink);
+    background: transparent;
+    border: 1px solid rgba(244, 244, 244, 0.25);
+    color: var(--muted);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -531,6 +530,9 @@
     -webkit-tap-highlight-color: transparent;
     transition: transform 0.1s, opacity 0.2s, color 0.2s;
   }
+  .corner-btn:hover { color: var(--ink); border-color: rgba(244, 244, 244, 0.5); }
+  .corner-btn:focus,
+  .corner-btn:focus-visible { outline: none; box-shadow: none; }
   .corner-btn:active { transform: scale(0.93); }
   .mute-btn { right: 14px; }
   .settings-btn { right: 62px; opacity: 0.7; }
@@ -566,6 +568,7 @@
 
   /* ===== Tutor overlay ===== */
   .tutor-overlay {
+    --tutor-w: min(460px, 92vw);   /* shared column width: heading = bubble = timeline */
     position: fixed;
     inset: 0;
     z-index: 15;
@@ -592,11 +595,49 @@
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
   }
+  /* Corner pills — AI provider + voice toggles, side by side, top-left */
+  .tutor-corner-toggles {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .tutor-corner-pill {
+    background: transparent;
+    border: 1px solid rgba(244, 244, 244, 0.25);
+    color: var(--muted);
+    height: 36px;
+    padding: 0 14px;
+    border-radius: 999px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    cursor: pointer;
+    white-space: nowrap;
+    outline: none;
+    -webkit-tap-highlight-color: transparent;
+    transition: color 0.2s, border-color 0.2s;
+  }
+  .tutor-corner-pill:hover { color: var(--ink); border-color: rgba(244, 244, 244, 0.5); }
+  /* No focus glow/ring when selected */
+  .tutor-corner-pill:focus,
+  .tutor-corner-pill:focus-visible { outline: none; box-shadow: none; }
+  /* Names follow the pill color (grey, white on hover) — no orange accent */
+  .tutor-corner-pill .ai-name,
+  .tutor-corner-pill .voice-name { color: inherit; }
+  /* Keep the historical name in its original spelling — no all-caps */
+  .tutor-corner-pill .voice-name { text-transform: none; letter-spacing: 0.02em; }
   .tutor-heading {
     text-align: center;
     display: flex;
     flex-direction: column;
     gap: 6px;
+    width: var(--tutor-w);
   }
   .tutor-title {
     font-family: 'Orbitron', sans-serif;
@@ -610,7 +651,7 @@
   .tutor-subtitle {
     font-family: 'Orbitron', sans-serif;
     font-weight: 400;
-    font-size: clamp(11px, 3vw, 18px);
+    font-size: clamp(10px, 2.4vw, 15px);
     color: var(--green);
     letter-spacing: 0.04em;
   }
@@ -620,6 +661,17 @@
     color: var(--muted);
     letter-spacing: 0.18em;
     text-transform: uppercase;
+    transition: color 0.3s ease;
+  }
+  /* Level-cleared: brief golden pulse on the rank label */
+  .tutor-level.rank-up {
+    color: var(--orange);
+    animation: rankPulse 1.4s ease;
+  }
+  @keyframes rankPulse {
+    0%   { transform: scale(1);    text-shadow: none; }
+    30%  { transform: scale(1.28); text-shadow: 0 0 20px rgba(245, 194, 66, 0.6); }
+    100% { transform: scale(1);    text-shadow: none; }
   }
   .tutor-bubble {
     background: var(--bg-light);
@@ -629,8 +681,7 @@
     font-size: 16px;
     line-height: 1.55;
     color: var(--ink);
-    max-width: 420px;
-    width: 100%;
+    width: var(--tutor-w);
     min-height: 90px;
     box-sizing: border-box;
     text-align: left;
@@ -658,6 +709,9 @@
     gap: 12px;
     align-items: center;
   }
+  /* Timeline replay inside the tutor (shown after a correct answer) needs an explicit
+     width — in the centered flex column a bare div would otherwise collapse. */
+  #tutor-overlay #timeline-wrap { width: var(--tutor-w); }
   .tutor-input {
     font-family: 'Orbitron', sans-serif;
     font-weight: 700;
@@ -973,6 +1027,10 @@
 
 <!-- ===== Tutor overlay (after extro) ===== -->
 <div class="tutor-overlay hidden" id="tutor-overlay">
+  <div class="tutor-corner-toggles">
+    <button class="tutor-corner-pill tutor-ai-toggle" id="tutor-ai-toggle" title="Tutor-KI umschalten">KI · <span class="ai-name" id="tutor-ai-name">Gemini</span></button>
+    <button class="tutor-corner-pill tutor-voice-toggle" id="tutor-voice-toggle" title="Stimme umschalten"><span class="voice-name" id="tutor-voice-name">Herr al-Khwārizmī</span></button>
+  </div>
   <button class="tutor-exit" id="tutor-exit" aria-label="Beenden" title="Beenden">✕</button>
   <div class="tutor-heading">
     <h2 class="tutor-title">Suche den gemeinsamen Takt</h2>
@@ -1156,6 +1214,33 @@
 
   initApiKeyVault();
 
+  // ===== Gemini key — separate vault slot (the Gemini-scoped key differs from the TTS key) =====
+  const VAULT_GEMINI_LS = 'gemini_api_key_enc';
+  let cachedGeminiKey = null;
+  async function initGeminiVault() {
+    const ct = localStorage.getItem(VAULT_GEMINI_LS);
+    if (ct) {
+      try { cachedGeminiKey = await vaultDecrypt(ct); }
+      catch (e) { console.warn('gemini vault decrypt failed', e); cachedGeminiKey = null; }
+    }
+  }
+  async function saveGeminiKey(plain) {
+    if (!plain) { cachedGeminiKey = null; localStorage.removeItem(VAULT_GEMINI_LS); return; }
+    try {
+      const ct = await vaultEncrypt(plain);
+      localStorage.setItem(VAULT_GEMINI_LS, ct);
+      cachedGeminiKey = plain;
+    } catch (e) { console.warn('gemini vault encrypt failed', e); }
+  }
+  function gemKey() { return cachedGeminiKey; }
+  initGeminiVault();
+
+  // Console helper — set/clear the Gemini key (stored encrypted, never in source)
+  window.setGeminiKey = async (k) => {
+    await saveGeminiKey(k || '');
+    console.log(k ? 'Gemini-Key gespeichert (verschlüsselt)' : 'Gemini-Key entfernt');
+  };
+
   // ===== DeepSeek auth — same scheme as labai.html =====
   // The AES-encrypted DeepSeek API key. Same blob as labai.html — unlocked with the
   // same password. localStorage.dev_access (set by labai login) auto-unlocks here.
@@ -1225,6 +1310,51 @@
   };
 
   // ===== DeepSeek chat =====
+  // ===== Gemini chat (reuses the Google Cloud key from the vault) =====
+  async function geminiJSON(systemPrompt, userPayload) {
+    const key = gemKey();
+    if (!key) { dbg('[Gemini] geminiJSON: no Gemini key (run setGeminiKey in console)'); return null; }
+    try {
+      const model = localStorage.getItem('gemini_model') || 'gemini-2.5-flash';
+      dbg('[Gemini] request model=' + model);
+      const url = 'https://generativelanguage.googleapis.com/v1beta/models/' + model + ':generateContent?key=' + encodeURIComponent(key);
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          systemInstruction: { parts: [{ text: systemPrompt }] },
+          contents: [{ role: 'user', parts: [{ text: JSON.stringify(userPayload) }] }],
+          generationConfig: {
+            responseMimeType: 'application/json',
+            temperature: 0.8,
+            maxOutputTokens: 400
+          }
+        })
+      });
+      if (!res.ok) {
+        const body = await res.text();
+        dbg('[Gemini] error ' + res.status + ': ' + body.slice(0, 300));
+        return null;
+      }
+      const data = await res.json();
+      const content = data.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (!content) { dbg('[Gemini] empty content'); return null; }
+      try {
+        const parsed = JSON.parse(content);
+        dbg('[Gemini] ok: ' + (parsed.feedback || '').slice(0, 60));
+        return parsed;
+      } catch (e) {
+        const m = content.match(/\{[\s\S]*\}/);
+        if (m) { try { return JSON.parse(m[0]); } catch (e2) {} }
+        dbg('[Gemini] JSON parse failed: ' + content.slice(0, 120));
+        return null;
+      }
+    } catch (e) {
+      dbg('[Gemini] fetch failed: ' + (e?.message || e));
+      return null;
+    }
+  }
+
   async function deepseekJSON(systemPrompt, userPayload) {
     const key = dsKey();
     if (!key) { dbg('[DS] deepseekJSON: no key, returning null'); return null; }
@@ -1286,7 +1416,8 @@ Du bekommst pro Schritt einen JSON-Kontext und antwortest AUSSCHLIESSLICH mit g�
 }
 
 Regeln:
-- Bei korrekter Antwort beim 1. Versuch: feedback feiernd, celebrate=true, difficulty_change="harder".
+- Bei korrekter Antwort beim 1. Versuch: feedback *begeistert* und feiernd, celebrate=true, difficulty_change="harder".
+- BEGEISTERUNG & VIELFALT: Starte fast immer mit einem coolen, mitreißenden Ausruf — variiere ihn STARK und wiederhole dich nie ("Bingo!", "Ausgezeichnet!", "Krass!", "Volltreffer!", "Wahnsinn!", "Glasklar!", "Boom!", "Wunderbar!", "Stark!", …). Sei energiegeladen wie ein begeisterter Trainer, nicht steif. Manchmal auch mal ganz ohne Ausruf, damit es echt bleibt.
 - Bei korrekter Antwort nach mehreren Versuchen: feedback ermutigend, celebrate=false, difficulty_change="same".
 - Bei falscher Antwort: behutsam, einen klitzekleinen Hinweis (z.B. "passt 8 wirklich? Schau ob 4 da reingeht"), celebrate=false, difficulty_change="same".
 - Bei mehrfach falsch (≥3 Versuche): wärmer, leichter machen, difficulty_change="easier".
@@ -1303,47 +1434,78 @@ Regeln:
     3: [[4,6],[6,8],[6,9],[8,12],[9,12],[10,12],[6,10],[8,10]], // echtes kgV-Rätsel
   };
 
-  function generateProblem(difficulty) {
+  // ===== Level as a worked-through set: shuffle the pool, present each pair once, no repeats =====
+  // Fisher–Yates shuffle on a copy.
+  function shuffled(arr) {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      const t = a[i]; a[i] = a[j]; a[j] = t;
+    }
+    return a;
+  }
+
+  // Load a fresh shuffled bag for the given level.
+  function loadLevelBag(difficulty) {
     const lvl = Math.max(1, Math.min(3, difficulty | 0));
-    const pool = PROBLEM_POOLS[lvl];
-    // Avoid immediate repeat
-    let attempts = 0;
-    let pair;
-    do {
-      pair = pool[Math.floor(Math.random() * pool.length)];
-      attempts++;
-    } while (tutorState.lastProblem &&
-             pair[0] === tutorState.lastProblem.a &&
-             pair[1] === tutorState.lastProblem.b &&
-             attempts < 6);
-    return { a: pair[0], b: pair[1], answer: lcmN(pair[0], pair[1]), difficulty: lvl };
+    tutorState.difficulty = lvl;
+    tutorState.bag = shuffled(PROBLEM_POOLS[lvl]);
+  }
+
+  // Pop the next problem from the current bag (each pair appears once per level).
+  function nextProblemFromBag() {
+    const pair = tutorState.bag.shift();
+    const lvl = tutorState.difficulty;
+    let a = pair[0], b = pair[1];
+    // Level 1 (a teilt b → kgV = b): randomly put the small number second so the answer
+    // isn't predictably "the bigger/second number". The kgV is order-independent.
+    if (lvl === 1 && Math.random() < 0.5) { const t = a; a = b; b = t; }
+    return { a, b, answer: lcmN(a, b), difficulty: lvl };
   }
 
   const tutorState = {
     difficulty: 1,
     currentProblem: null,
-    lastProblem: null,
+    bag: [],              // remaining problems in the current level (shuffled, each popped once)
     attempts: 0,
     history: [],
+    masteredTop: false,   // fire the level-3 mastery praise only once
   };
+
+  // Central pool of cool exclamations for correct answers (offline path).
+  // Source of truth — also documented in HTML/glocken-tutor-lob.md.
+  const COOL_EXCLAIMS = [
+    "Genau!", "Stark!", "Wunderbar!", "Ausgezeichnet!", "Bingo!", "Crazy!",
+    "Das ist krass!", "Krass!", "Bravo!", "Glasklar!", "Volltreffer!", "Perfekt!",
+    "Sauber!", "Das sitzt!", "Meisterhaft!", "Brillant!", "Punktgenau!", "Klasse!",
+    "Goldrichtig!", "Treffer!", "Da ist es!", "Mächtig gut!", "Wie eine Glocke!",
+    "Boom!", "Yes!", "Stimmt haargenau!", "Saubere Arbeit!", "Stark gerechnet!"
+  ];
 
   function offlineFeedback(correct, attempts, a, b, kgv) {
     const pick = arr => arr[Math.floor(Math.random() * arr.length)];
     if (correct && attempts === 1) {
-      return { feedback: pick([
-        "Genau! [break:0.5s] Du hast das *im Takt* gefunden.",
-        "Stark! Die [break:0.3s] " + kgv + " ist genau richtig.",
-        "Wunderbar! [break:0.5s] *Genau* so.",
-        "Beim ersten Anlauf! [break:0.5s] Das war *sauber* gerechnet."
-      ]), celebrate: true, difficulty_change: 'harder' };
+      const body = pick([
+        "Du hast das *im Takt* gefunden.",
+        "Die *" + kgv + "* ist genau richtig.",
+        "*Genau* so.",
+        "Beim ersten Anlauf — *sauber* gerechnet.",
+        "Du hast den gemeinsamen Takt sofort gehört.",
+        "Glatt durchgerechnet."
+      ]);
+      return { feedback: pick(COOL_EXCLAIMS) + " [break:0.4s] " + body,
+               celebrate: true, difficulty_change: 'harder' };
     }
     if (correct) {
-      return { feedback: pick([
-        "Richtig! [break:0.5s] Da steckte etwas Knobelei drin.",
-        "Genau! [break:0.5s] Manchmal braucht es ein paar Anläufe.",
-        "Du hast den Takt gefunden! [break:0.5s] Schön ruhig gerechnet.",
-        "Stimmt! [break:0.5s] Mehr Arbeit als sonst — aber *sitzt*."
-      ]), celebrate: false, difficulty_change: 'same' };
+      const body = pick([
+        "Da steckte etwas Knobelei drin.",
+        "Manchmal braucht es ein paar Anläufe.",
+        "Schön ruhig gerechnet.",
+        "Mehr Arbeit als sonst — aber *sitzt*.",
+        "Drangeblieben und gekriegt."
+      ]);
+      return { feedback: pick(COOL_EXCLAIMS) + " [break:0.4s] " + body,
+               celebrate: false, difficulty_change: 'same' };
     }
     if (attempts < 3) {
       return { feedback: pick([
@@ -1353,15 +1515,70 @@ Regeln:
       ]), celebrate: false, difficulty_change: 'same' };
     }
     return { feedback: pick([
-      "Lass uns ein leichteres Paar nehmen. [break:0.5s] Die nächsten Glocken sind freundlicher.",
-      "Wir wechseln das Paar. [break:0.5s] Frischer Versuch mit leichteren Zahlen."
-    ]), celebrate: false, difficulty_change: 'easier' };
+      "Noch nicht — bleib dran. [break:0.5s] Geh die *" + b + "* in Schritten durch: " + b + ", " + (b*2) + ", " + (b*3) + " … und schau, welche davon sich auch in *" + a + "*er-Schritten treffen lässt.",
+      "Fast. [break:0.5s] Nimm die größere Zahl Schritt für Schritt — passt die *" + a + "* an einer dieser Stellen auch genau hinein?"
+    ]), celebrate: false, difficulty_change: 'same' };
+  }
+
+  // ===== Level milestones: rank + praise + bell fanfare when a level is cleared =====
+  const TUTOR_RANKS = { 1: 'Lehrling', 2: 'Rechner', 3: 'Meister von Bagdad' };
+  // Spoken when the child CLEARS a level (advances past it, or masters level 3).
+  // Process praise (names the strategy), not ability praise — and elevates into the craft.
+  const LEVEL_PRAISE = {
+    1: "Du hast etwas Feines gesehen: [break:0.4s] wenn die kleinere Zahl schon *in* der größeren steckt, ist die größere bereits das kgV. [break:0.5s] Das erkennen viele Erwachsene nicht so schnell wie du gerade. [break:0.4s] Auf zu schwereren Glocken.",
+    2: "Stark. [break:0.4s] Diese beiden hatten *keinen* gemeinsamen Teiler — also musstest du sie multiplizieren, um den Takt zu finden. [break:0.5s] Du hast es ohne Umweg gerechnet. [break:0.4s] So arbeiten Zahlentheoretiker.",
+    3: "Das war die Königsklasse: [break:0.4s] gemeinsame Teiler herauskürzen und trotzdem das *kleinste* Vielfache treffen. [break:0.5s] Genau diese Idee brauchst du später beim Brüche-Addieren — [break:0.4s] du beherrschst sie jetzt schon. [break:0.5s] Meister.",
+  };
+
+  // Triumphant fanfare via the central bell engine: a rising C-major run that
+  // resolves into a held triad ("ta-daa"). Returns the total duration in ms.
+  function celebrateChord() {
+    if (!voiceEnabled) return 0;          // speaker off → silent; the visual pulse still runs
+    const C5 = 523.25, E5 = 659.25, G5 = 783.99, C6 = 1046.50;
+    const run = [C5, E5, G5];             // ascending run
+    const step = 150;
+    run.forEach((f, i) => setTimeout(() => bellTone(f, 0.8), i * step));
+    // Resolution: full triad struck together, held long
+    const chordAt = run.length * step;    // = 450 ms
+    const chordDur = 1.8;
+    [C5, E5, G5, C6].forEach(f => setTimeout(() => bellTone(f, chordDur), chordAt));
+    return chordAt + chordDur * 1000;     // ≈ 2250 ms
+  }
+
+  // Fired once a level is cleared: fanfare → (wait it out) → rank pulse + spoken praise.
+  async function celebrateLevel(clearedLevel, newDifficulty, repeatTop) {
+    const fanfareMs = celebrateChord();
+    tutorLevelEl.textContent = 'Level ' + newDifficulty + ' · ' + (TUTOR_RANKS[newDifficulty] || TUTOR_RANKS[3]);
+    tutorLevelEl.classList.add('rank-up');
+    // Let the fanfare ring out before Khwārizmī speaks (don't talk over it).
+    if (fanfareMs) await new Promise(r => setTimeout(r, fanfareMs + 150));
+    const praise = repeatTop
+      ? "Wieder das ganze Set gemeistert. [break:0.4s] Du hältst dein Niveau, *Meister*."
+      : LEVEL_PRAISE[clearedLevel];
+    await setTutorBubble(praise);
+    tutorLevelEl.classList.remove('rank-up');
+  }
+
+  // ===== Tutor AI provider (switchable: Gemini ↔ DeepSeek; choice persists) =====
+  const AI_PROVIDERS = {
+    gemini: { label: 'Gemini',   call: geminiJSON },
+    ds:     { label: 'DeepSeek', call: deepseekJSON },
+  };
+  function aiProvider() {
+    const p = localStorage.getItem('tutor_ai_provider');
+    return AI_PROVIDERS[p] ? p : 'gemini';   // default Gemini
+  }
+  function setAiProvider(p) {
+    if (!AI_PROVIDERS[p]) return;
+    localStorage.setItem('tutor_ai_provider', p);
+    refreshAiToggle();
   }
 
   async function askKhwarizmi(payload) {
-    const result = await deepseekJSON(KHWARIZMI_SYSTEM, payload);
+    const provider = AI_PROVIDERS[aiProvider()];
+    const result = await provider.call(KHWARIZMI_SYSTEM, payload);
     if (result && typeof result.feedback === 'string') return result;
-    // Fallback offline
+    // Fallback offline (also covers: provider has no key / API disabled / network error)
     return offlineFeedback(payload.correct, payload.attempts, payload.a, payload.b, payload.correct_answer);
   }
 
@@ -1374,9 +1591,27 @@ Regeln:
   const tutorInput   = document.getElementById('tutor-input');
   const tutorSubmit  = document.getElementById('tutor-submit');
   const tutorExit    = document.getElementById('tutor-exit');
+  const tutorAiToggle = document.getElementById('tutor-ai-toggle');
+  const tutorAiName   = document.getElementById('tutor-ai-name');
+  const tutorVoiceToggle = document.getElementById('tutor-voice-toggle');
+  const tutorVoiceName   = document.getElementById('tutor-voice-name');
+  let lastTutorSpeech = '';   // last text spoken — re-spoken when the voice is switched
+
+  function refreshAiToggle() {
+    if (tutorAiName) tutorAiName.textContent = AI_PROVIDERS[aiProvider()].label;
+  }
+
+  // Voice toggle: two German Google voices, choice persists in gctt_voice
+  const VOICE_MALE   = 'de-DE-Neural2-B';   // Khwārizmī default
+  const VOICE_FEMALE = 'de-DE-Neural2-F';
+  function voiceIsFemale() { return gVoice() === VOICE_FEMALE; }
+  function refreshVoiceToggle() {
+    if (tutorVoiceName) tutorVoiceName.textContent = voiceIsFemale() ? 'Frau al-Khwārizmī' : 'Herr al-Khwārizmī';
+  }
 
   function setTutorBubble(text) {
     // No setTimeout — keep speak() inside the user-gesture transient activation window
+    lastTutorSpeech = text;
     tutorBubble.style.opacity = '0';
     tutorBubble.textContent = stripMarkers(text);
     requestAnimationFrame(() => { tutorBubble.style.opacity = '1'; });
@@ -1385,11 +1620,15 @@ Regeln:
   }
 
   function showProblem(p) {
+    hideTutorTimeline();
     tutorState.currentProblem = p;
     tutorState.attempts = 0;
     tutorAEl.textContent = p.a;
     tutorBEl.textContent = p.b;
-    tutorLevelEl.textContent = 'Übung · Level ' + p.difficulty;
+    // Colour follows magnitude, not position: the bigger number is always red, the smaller orange.
+    tutorAEl.style.color = (p.a > p.b) ? 'var(--red)' : 'var(--orange)';
+    tutorBEl.style.color = (p.b > p.a) ? 'var(--red)' : 'var(--orange)';
+    tutorLevelEl.textContent = 'Level ' + p.difficulty + ' · ' + (TUTOR_RANKS[p.difficulty] || TUTOR_RANKS[1]);
     tutorInput.value = '';
     tutorInput.style.opacity = '1';
     tutorInput.classList.remove('shake', 'celebrate');
@@ -1416,15 +1655,17 @@ Regeln:
     tutorReturnTo = from || 'end';
     document.getElementById('end-overlay').classList.add('hidden');
     tutorOverlay.classList.remove('hidden');
-    tutorState.difficulty = 1;
     tutorState.history = [];
-    const p = generateProblem(tutorState.difficulty);
+    tutorState.masteredTop = false;
+    loadLevelBag(1);                   // sets difficulty = 1 and fills the shuffled bag
+    const p = nextProblemFromBag();
     showProblem(p);
     setTutorBubble("Lass uns *üben*! [break:0.5s] Wann passen die *" + p.a + "* und die *" + p.b + "* zusammen in einen Takt?");
   }
 
   function exitTutor() {
     stopAllAudio();
+    hideTutorTimeline();
     tutorOverlay.classList.add('hidden');
     if (tutorReturnTo === 'end') {
       document.getElementById('end-overlay').classList.remove('hidden');
@@ -1432,7 +1673,77 @@ Regeln:
     // For 'intro' return target: intro overlay is still visible underneath, no action needed
   }
 
+  // ===== Tutor: replay the story timeline for the just-solved pair =====
+  // Reuses the existing engine (setRound / runTimeline / highlightMeeting). The single
+  // #timeline-wrap node is moved between the equation and the button row on first use.
+  let _tlScrollRAF = 0;
+  function mountTimelineInTutor() {
+    const wrap = document.getElementById('timeline-wrap');
+    const row  = tutorOverlay.querySelector('.tutor-input-row');
+    if (wrap && row && wrap.nextElementSibling !== row) {
+      row.parentNode.insertBefore(wrap, row);   // sits between .tutor-problem and the buttons
+    }
+    return wrap;
+  }
+  // Size the timeline so 17 units fill the box; beyond that it overflows and scrolls.
+  function sizeTutorTimeline(wrap) {
+    const inner = Math.max(120, wrap.clientWidth - 28);   // minus 14px padding each side
+    const contentW = Math.round(state.tEnd * (inner / 17));
+    const els = [document.getElementById('timeline'),
+                 document.getElementById('axis-labels'),
+                 wrap.querySelector('.meeting-row')];
+    if (contentW > inner) {                               // > 17 units → fixed spacing, scrolls
+      els.forEach(el => { if (el) el.style.width = contentW + 'px'; });
+      wrap.style.overflow = 'hidden';                     // both axes: no bars — we scroll x via JS
+      return true;
+    }
+    els.forEach(el => { if (el) el.style.width = ''; });  // fits → fill the box, no scroll
+    wrap.style.overflow = 'hidden';
+    return false;
+  }
+  // During playback keep the cursor (and the meeting point) in view by scrolling left.
+  function followCursor(wrap) {
+    cancelAnimationFrame(_tlScrollRAF);
+    const step = () => {
+      const cx = parseFloat(cursor.style.left) || 0;
+      wrap.scrollLeft = Math.max(0, cx - wrap.clientWidth * 0.55);
+      _tlScrollRAF = requestAnimationFrame(step);
+    };
+    _tlScrollRAF = requestAnimationFrame(step);
+  }
+  function hideTutorTimeline() {
+    cancelAnimationFrame(_tlScrollRAF);
+    const wrap = document.getElementById('timeline-wrap');
+    if (wrap) { wrap.classList.add('hidden'); wrap.style.overflow = 'hidden'; wrap.scrollLeft = 0; }
+  }
+  function playTutorTimeline(a, b) {
+    return new Promise((resolve) => {
+      const wrap = mountTimelineInTutor();
+      if (!wrap) { resolve(); return; }
+      // Pass ordered (small, big) so the bigger number is always the red "big" rhythm,
+      // regardless of how the equation displays them.
+      setRound(Math.min(a, b), Math.max(a, b), 'kgV von ' + a + ' und ' + b);
+      state.tEnd = state.L + 1;        // end the axis right after the kgV → meeting sits at the right edge
+      wrap.classList.remove('hidden');
+      wrap.scrollLeft = 0;
+      const scrolls = sizeTutorTimeline(wrap);
+      if (scrolls) followCursor(wrap);
+      const durationMs = Math.min(9000, Math.max(6000, state.tEnd * 320));   // slower than the story's 4.2s
+      runTimeline(() => {
+        highlightMeeting();
+        cancelAnimationFrame(_tlScrollRAF);
+        if (scrolls) {
+          const meetX = (state.L / state.tEnd) * document.getElementById('timeline').clientWidth;
+          wrap.scrollTo({ left: Math.max(0, meetX - wrap.clientWidth * 0.5), behavior: 'smooth' });
+        }
+        setTimeout(resolve, 3800);   // linger on the meeting point before the next problem
+      }, durationMs);
+    });
+  }
+
+  let _tutorAdvancing = false;   // true while a correct answer's timeline plays → block re-entry
   async function submitTutorAnswer() {
+    if (_tutorAdvancing) return;
     const raw = tutorInput.value.trim();
     if (!raw) { tutorInput.focus(); return; }
     const guess = parseInt(raw, 10);
@@ -1470,27 +1781,27 @@ Regeln:
     setTutorBubble(reaction.feedback);
 
     if (correct) {
-      // Next problem after a short pause
-      tutorState.lastProblem = { a: p.a, b: p.b };
+      // The current pair was popped from the bag when shown → it won't repeat this level.
       tutorState.history.push({ a: p.a, b: p.b, attempts: tutorState.attempts });
-      let nextDiff = tutorState.difficulty;
-      if (reaction.difficulty_change === 'harder') nextDiff = Math.min(3, nextDiff + 1);
-      if (reaction.difficulty_change === 'easier') nextDiff = Math.max(1, nextDiff - 1);
-      tutorState.difficulty = nextDiff;
-      setTimeout(() => {
-        const next = generateProblem(nextDiff);
-        showProblem(next);
-      }, 2400);
-    } else if (reaction.difficulty_change === 'easier') {
-      // Drop a level and give a fresh problem
-      tutorState.difficulty = Math.max(1, tutorState.difficulty - 1);
-      tutorState.lastProblem = { a: p.a, b: p.b };
-      setTimeout(() => {
-        const next = generateProblem(tutorState.difficulty);
-        showProblem(next);
-      }, 2400);
+      _tutorAdvancing = true;
+      tutorSubmit.disabled = true;
+      // Replay the timeline for this pair, THEN move on.
+      await playTutorTimeline(p.a, p.b);
+      // Bag empty → the whole level set is worked through → celebrate + advance.
+      if (tutorState.bag.length === 0) {
+        const clearedLevel = tutorState.difficulty;
+        const newDifficulty = Math.min(3, clearedLevel + 1);
+        const repeatTop = clearedLevel === 3 && tutorState.masteredTop;
+        if (clearedLevel === 3) tutorState.masteredTop = true;
+        await celebrateLevel(clearedLevel, newDifficulty, repeatTop);
+        loadLevelBag(newDifficulty);   // next level — or reshuffle level 3 to keep practicing
+      }
+      const next = nextProblemFromBag();
+      showProblem(next);
+      tutorSubmit.disabled = false;
+      _tutorAdvancing = false;
     } else {
-      // Wrong, same problem — fade the wrong value out, clear, fade back in
+      // Wrong → keep the SAME problem (it stays out of the bag until solved); retry with a hint
       tutorInput.style.transition = 'opacity 0.35s ease';
       tutorInput.style.opacity = '0';
       setTimeout(() => {
@@ -1506,6 +1817,23 @@ Regeln:
     if (e.key === 'Enter') { e.preventDefault(); submitTutorAnswer(); }
   });
   tutorExit.addEventListener('click', exitTutor);
+  if (tutorAiToggle) {
+    tutorAiToggle.addEventListener('click', () => {
+      setAiProvider(aiProvider() === 'gemini' ? 'ds' : 'gemini');
+      dbg('[tutor] AI provider → ' + aiProvider());
+    });
+  }
+  refreshAiToggle();   // sync label with stored choice on load
+
+  if (tutorVoiceToggle) {
+    tutorVoiceToggle.addEventListener('click', () => {
+      localStorage.setItem('gctt_voice', voiceIsFemale() ? VOICE_MALE : VOICE_FEMALE);
+      refreshVoiceToggle();
+      dbg('[tutor] voice → ' + gVoice());
+      if (lastTutorSpeech) speak(lastTutorSpeech);   // preview the new voice right away
+    });
+  }
+  refreshVoiceToggle();   // sync ♂/♀ label on load
 
   // Robust HTMLAudio unlock — must run synchronously inside a user-gesture click handler
   function unlockHtmlAudio() {
@@ -1970,12 +2298,12 @@ Regeln:
     return el;
   }
 
-  function runTimeline(done) {
+  function runTimeline(done, durationMs) {
     clearTimeline();
     drawTimeAxis();
     let smallNext = state.small;
     let bigNext = state.big;
-    const animMs = 4200;
+    const animMs = durationMs || 4200;
     const t0 = performance.now();
 
     function frame(now) {
