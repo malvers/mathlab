@@ -23,6 +23,7 @@ A few ground rules:
 15. Programming always in English!
 16. We work always responsive!
 17. Never say or write "ULTRA"!
+18. **NIEMALS ein Passwort, API-Key, Token oder sonstiges Secret im Quellcode** — auch nicht in Kommentaren, Default-Werten, Beispielen oder als „DEV-Bake-in". Dieses Repo ist public; git-history vergisst nichts. Verschlüsselte Blobs ohne das zugehörige Passwort/Key sind OK; Passwort + Ciphertext zusammen NICHT. Bei Verstoß: SOFORT laut warnen und Rotation vorschlagen, nicht nur Kommentar entfernen.
 
 ## Bevorzugte Farbpalette
 
