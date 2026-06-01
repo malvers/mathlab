@@ -156,15 +156,15 @@
   }
   .end-overlay {
     position: absolute;
-    top: 30vh;
+    top: 26vh;
     left: 0; right: 0;
     bottom: 6vh;
-    padding: 0 28px;
-    z-index: 7;
+    padding: 0 24px;
+    z-index: 10;
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
-    gap: 14px;
+    gap: 10px;
     text-align: center;
     overflow-y: auto;
   }
@@ -172,11 +172,11 @@
   .end-overlay p {
     font-family: 'Raleway', sans-serif;
     font-weight: 300;
-    font-size: clamp(14px, 4vw, 17px);
+    font-size: clamp(13px, 3.5vw, 16px);
     color: var(--ink);
-    line-height: 1.55;
+    line-height: 1.5;
     margin: 0;
-    text-shadow: 0 2px 14px rgba(0, 0, 0, 0.6);
+    text-shadow: 0 2px 14px rgba(0, 0, 0, 0.85);
   }
   .end-overlay p:nth-last-child(-n+2) {
     font-family: 'Orbitron', sans-serif;
@@ -186,11 +186,11 @@
     text-shadow: 0 0 18px rgba(245, 194, 66, 0.45);
   }
   .end-overlay p:nth-last-child(2) {
-    font-size: clamp(13px, 3.8vw, 17px);
-    margin-top: 22px;
+    font-size: clamp(12px, 3.4vw, 15px);
+    margin-top: 16px;
   }
   .end-overlay p:last-child {
-    font-size: clamp(20px, 6vw, 28px);
+    font-size: clamp(18px, 5.2vw, 24px);
     margin-top: 4px;
   }
   .end-overlay .prize {
@@ -459,7 +459,22 @@
   .frac .num.color-meet,  .frac .den.color-meet  { color: var(--green); }
   .math-box .op { margin: 0 4px; color: var(--ink); }
 
-  .controls { display: flex; justify-content: center; margin-top: auto; padding-top: 6px; }
+  .controls { display: flex; justify-content: center; align-items: center; gap: 14px; margin-top: auto; padding-top: 6px; }
+  .nav-btn {
+    background: transparent;
+    border: none;
+    color: var(--orange);
+    font-size: 20px;
+    padding: 8px 14px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    opacity: 0.5;
+    line-height: 1;
+    transition: opacity 0.15s, transform 0.1s;
+  }
+  .nav-btn:hover { opacity: 1; }
+  .nav-btn:active { transform: scale(0.92); }
+  .nav-btn:disabled { opacity: 0.15; cursor: default; }
   .btn {
     background: var(--orange); color: var(--bg); border: none; border-radius: 999px;
     padding: 14px 30px; font-family: 'Orbitron', sans-serif; font-weight: 700;
@@ -522,6 +537,32 @@
   .fullscreen-btn { right: 62px; }
   .mute-btn.muted { color: var(--muted); }
 
+  /* ===== Phone-tighter (Pixel etc.) ===== */
+  @media (max-width: 480px) {
+    body {
+      padding: calc(10px + 2vh) 14px 14px;
+      gap: 10px;
+    }
+    h1 { font-size: clamp(18px, 5vw, 22px); }
+    .round-pill { margin-top: 4px; }
+    .bubble { padding: 12px 14px; font-size: 15px; min-height: 70px; }
+    .bell-row { gap: 28px; padding: 0; }
+    .bell { width: 68px; height: 62px; }
+    .bell.big { width: 90px; height: 78px; transform: translateY(6px); }
+    .timeline-wrap { padding: 10px 10px 12px; }
+    .timeline-label { font-size: 9px; margin-bottom: 12px; }
+    .timeline { height: 58px; }
+    .axis-labels { height: 18px; margin-top: 10px; }
+    .tick-num { font-size: 11px; letter-spacing: -0.5px; }
+    .tick-num.color-small, .tick-num.color-big, .tick-num.color-meet { font-size: 11px; }
+    .meeting-row { height: 32px; }
+    .meeting-label .num { font-size: 18px; }
+    .math-box { padding: 14px 10px; font-size: clamp(16px, 4.5vw, 20px); }
+    .controls { padding-top: 4px; }
+    .btn { padding: 12px 22px; font-size: 12px; }
+    .nav-btn { font-size: 18px; padding: 6px 10px; }
+  }
+
   .hidden { display: none !important; }
   .fade-in { animation: bubbleIn 0.45s ease forwards; }
   @keyframes bubbleIn {
@@ -566,7 +607,7 @@
     <circle cx="52" cy="36" r="24" fill="#03102a"/>
   </svg>
 
-  <svg class="skyline" viewBox="0 0 400 220" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+  <svg class="skyline" viewBox="0 0 400 220" preserveAspectRatio="xMidYMax meet" aria-hidden="true">
     <defs>
       <radialGradient id="doorGlow" cx="50%" cy="55%" r="55%">
         <stop offset="0%"  stop-color="rgba(245,194,66,0.55)"/>
@@ -606,20 +647,31 @@
       <rect x="7" y="-148" width="2" height="3"/>
     </g>
 
-    <!-- main dome (House of Wisdom) -->
+    <!-- main mosque (House of Wisdom) — onion dome with finial -->
     <g transform="translate(200,220)">
+      <!-- rectangular base -->
       <rect x="-58" y="-88" width="116" height="88" fill="#020919"/>
-      <path d="M-66,-88 Q0,-160 66,-88 Z" fill="#020919"/>
-      <!-- door light aura (spills onto the dome silhouette) -->
+      <!-- onion dome: pointed peak, slight bulge -->
+      <path d="M-60,-88
+               C-66,-108 -66,-128 -42,-136
+               C-46,-150 -25,-160 0,-162
+               C25,-160 46,-150 42,-136
+               C66,-128 66,-108 60,-88 Z" fill="#020919"/>
+      <!-- finial (slim spire + ball on top) -->
+      <line x1="0" y1="-162" x2="0" y2="-178" stroke="#020919" stroke-width="2.5" stroke-linecap="round"/>
+      <circle cx="0" cy="-181" r="3" fill="#020919"/>
+      <!-- decorative cornice between base and dome -->
+      <rect x="-60" y="-91" width="120" height="4" fill="#020919"/>
+      <!-- door light aura -->
       <ellipse class="door-aura" cx="0" cy="-14" rx="44" ry="42" fill="url(#doorGlow)"/>
-      <!-- the arched door, lit and pulsing -->
-      <path class="door-light" d="M-9,0 V-24 Q-9,-34 0,-34 Q9,-34 9,-24 V0 Z" fill="#f5c242"/>
-      <!-- lit windows -->
-      <rect x="-36" y="-50" width="5" height="10" fill="#f5c242" opacity="0.55"/>
-      <rect x="-20" y="-50" width="5" height="10" fill="#f5c242" opacity="0.4"/>
-      <rect x="-4" y="-50" width="5" height="10" fill="#f5c242" opacity="0.5"/>
-      <rect x="12" y="-50" width="5" height="10" fill="#f5c242" opacity="0.65"/>
-      <rect x="28" y="-50" width="5" height="10" fill="#f5c242" opacity="0.45"/>
+      <!-- arched door, lit and pulsing -->
+      <path class="door-light" d="M-10,0 V-26 Q-10,-38 0,-38 Q10,-38 10,-26 V0 Z" fill="#f5c242"/>
+      <!-- arched lit windows in a row -->
+      <path d="M-40,-52 Q-40,-62 -34,-62 Q-28,-62 -28,-52 Z" fill="#f5c242" opacity="0.6"/>
+      <path d="M-22,-52 Q-22,-62 -16,-62 Q-10,-62 -10,-52 Z" fill="#f5c242" opacity="0.45"/>
+      <path d="M-4,-52 Q-4,-62 2,-62 Q8,-62 8,-52 Z" fill="#f5c242" opacity="0.55"/>
+      <path d="M14,-52 Q14,-62 20,-62 Q26,-62 26,-52 Z" fill="#f5c242" opacity="0.7"/>
+      <path d="M32,-52 Q32,-62 38,-62 Q44,-62 44,-52 Z" fill="#f5c242" opacity="0.4"/>
     </g>
 
     <!-- small dome left of main (between BG and main dome — silhouette but ambient-lit) -->
@@ -720,7 +772,9 @@
 <div id="end-area" class="hidden"></div>
 
 <div class="controls" id="controls">
+  <button id="prev-btn" class="nav-btn" aria-label="Zurück" title="Zurück">◀</button>
   <button id="next-btn" class="btn">Lass sie läuten</button>
+  <button id="forward-btn" class="nav-btn" aria-label="Vor" title="Vor">▶</button>
 </div>
 
 <script>
@@ -1027,6 +1081,7 @@
   };
   const bellBuffers = { small: null, big: null };
   const bellOnsets  = { small: 0,    big: 0 };
+  const activeBellSources = []; // tracked for stop-all
 
   // Find the first sample where the waveform exceeds the threshold —
   // skip leading silence so both bells' audible attacks align.
@@ -1067,7 +1122,28 @@
     g.gain.value = 0.75;
     src.connect(g).connect(ctx.destination);
     src.start(when || 0, bellOnsets[kind] || 0);
+    const entry = { src, g };
+    activeBellSources.push(entry);
+    src.onended = () => {
+      const i = activeBellSources.indexOf(entry);
+      if (i >= 0) activeBellSources.splice(i, 1);
+    };
     return true;
+  }
+  function stopBells() {
+    while (activeBellSources.length) {
+      const { src, g } = activeBellSources.pop();
+      try {
+        g.gain.cancelScheduledValues(ctx.currentTime);
+        g.gain.setValueAtTime(g.gain.value, ctx.currentTime);
+        g.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.04);
+        src.stop(ctx.currentTime + 0.05);
+      } catch (e) {}
+    }
+  }
+  function stopAllAudio() {
+    stopBells();
+    stopAllSpeech();
   }
   // Richer bell synthesis — inharmonic partials (hum/prime/tierce/quint/nominal),
   // sharp strike transient, long resonant tail. Closer to a real church bell.
@@ -1488,7 +1564,7 @@
     },
     // 6 — Aha 3: observation
     {
-      bubble: "12 — nicht 24! Beide Zahlen passen in die 12: dreimal 4 ist 12, zweimal 6 ist 12.",
+      bubble: "12 — nicht 24! Beide Zahlen passen auch schon in die 12! Dreimal 4 ist 12, zweimal 6 ist 12.",
       btn: "Geht's noch kleiner?",
       onEnter: () => highlightMeeting(),
     },
@@ -1513,6 +1589,7 @@
       btn: "Was sagt das über die kleine Glocke?",
       onEnter: () => {
         setRound(3, 4, "Brücke");
+        state.tEnd = state.L + 1; // limit timeline to kgV (with 1-slot tail) — keine 13–17 mehr
         tlLabel.textContent = "Zeit bis 12 — in 12 Stücke";
         clearTimeline();
         drawTimeAxis();
@@ -1575,6 +1652,7 @@
   let sceneIdx = -1;
   function advance(instant = false) {
     audio();
+    stopAllAudio();
     sceneIdx++;
     const s = scenes[sceneIdx];
     if (!s) return;
@@ -1595,7 +1673,7 @@
   }
 
   function hardReset() {
-    stopAllSpeech();
+    stopAllAudio();
     clearTimeline();
     tlWrap.classList.add('hidden');
     mathArea.classList.add('hidden');
@@ -1627,6 +1705,8 @@
   }
 
   nextBtn.addEventListener('click', () => advance(false));
+  document.getElementById('prev-btn').addEventListener('click', goBack);
+  document.getElementById('forward-btn').addEventListener('click', () => advance(false));
 
   // Arrow keys: → forward, ← back — works in every phase
   document.addEventListener('keydown', (e) => {
