@@ -564,6 +564,202 @@
     .nav-btn { font-size: 18px; padding: 6px 10px; }
   }
 
+  /* ===== Tutor overlay ===== */
+  .tutor-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 15;
+    background: radial-gradient(ellipse at center, rgba(10, 29, 63, 0.92) 0%, rgba(3, 16, 42, 0.97) 70%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: clamp(48px, 12vh, 130px) 24px 80px;
+    gap: 20px;
+    animation: fadeIn 0.4s ease forwards;
+  }
+  .tutor-overlay.hidden { display: none !important; }
+  .tutor-exit {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: transparent;
+    border: 1px solid rgba(244, 244, 244, 0.25);
+    color: var(--ink);
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    font-size: 16px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .tutor-heading {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .tutor-title {
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 700;
+    font-size: clamp(17px, 5vw, 34px);
+    color: var(--orange);
+    margin: 0;
+    letter-spacing: 0.02em;
+    text-shadow: 0 0 24px rgba(245, 194, 66, 0.25);
+  }
+  .tutor-subtitle {
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 400;
+    font-size: clamp(11px, 3vw, 18px);
+    color: var(--green);
+    letter-spacing: 0.04em;
+  }
+  .tutor-level {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+  .tutor-bubble {
+    background: var(--bg-light);
+    border-left: 3px solid var(--orange);
+    border-radius: 14px;
+    padding: 16px 20px;
+    font-size: 16px;
+    line-height: 1.55;
+    color: var(--ink);
+    max-width: 420px;
+    width: 100%;
+    min-height: 90px;
+    box-sizing: border-box;
+    text-align: left;
+    transition: opacity 0.25s ease;
+  }
+  .tutor-problem {
+    display: flex;
+    gap: 10px;
+    align-items: baseline;
+    flex-wrap: wrap;
+    justify-content: center;
+    font-family: 'Orbitron', sans-serif;
+    font-size: clamp(22px, 6.5vw, 30px);
+    color: var(--ink);
+    font-weight: 700;
+  }
+  .tutor-kgv { font-family: 'Orbitron', sans-serif; color: var(--green); }
+  .tutor-a { color: var(--orange); }
+  .tutor-b { color: var(--red); }
+  .tutor-eq { color: var(--ink); }
+  .tutor-answer { color: var(--green); transition: color 0.4s, transform 0.4s; }
+  .tutor-answer.correct { color: var(--green); transform: scale(1.15); }
+  .tutor-input-row {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+  .tutor-input {
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 700;
+    font-size: 24px;
+    text-align: center;
+    width: 160px;
+    height: 56px;
+    padding: 0;
+    border: 2px solid var(--muted);
+    border-radius: 999px;
+    background: var(--bg);
+    color: var(--orange);
+    caret-color: var(--green);
+    -webkit-appearance: none;
+    appearance: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .tutor-input:focus {
+    outline: none;
+    border-color: var(--green);
+    box-shadow: none;
+  }
+  .tutor-input::placeholder { color: var(--green); opacity: 1; }
+  .tutor-input:focus::placeholder { color: transparent; }
+  .tutor-input::-webkit-outer-spin-button,
+  .tutor-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  .tutor-submit {
+    width: 160px;
+    height: 56px;
+    padding: 0;
+    font-size: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .tutor-input.shake {
+    animation: shake 0.4s ease-in-out;
+    border-color: var(--red);
+    color: var(--red);
+  }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-6px); }
+    40% { transform: translateX(6px); }
+    60% { transform: translateX(-4px); }
+    80% { transform: translateX(4px); }
+  }
+  .tutor-input.celebrate {
+    border-color: var(--green);
+    color: var(--green);
+    animation: celebrate 0.5s ease;
+  }
+  @keyframes celebrate {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+  }
+
+  /* Intro corner "üben" button — direct jump to tutor */
+  .intro-practice-btn {
+    position: absolute;
+    bottom: 24px;
+    right: 22px;
+    z-index: 11;
+    background: rgba(8, 20, 42, 0.55);
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(121, 158, 49, 0.55);
+    color: var(--green);
+    padding: 8px 14px;
+    border-radius: 999px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform 0.1s, background 0.15s;
+  }
+  .intro-practice-btn:hover { background: var(--green); color: var(--bg); }
+  .intro-practice-btn:active { transform: scale(0.95); }
+
+  /* End-screen "üben" button */
+  .end-practice-btn {
+    margin-top: 22px;
+    align-self: center;
+    padding: 12px 24px;
+    background: transparent;
+    border: 2px solid var(--green);
+    color: var(--green);
+    border-radius: 999px;
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform 0.1s, background 0.15s, color 0.15s;
+  }
+  .end-practice-btn:hover { background: var(--green); color: var(--bg); }
+  .end-practice-btn:active { transform: scale(0.97); }
+
   .hidden { display: none !important; }
   .fade-in { animation: bubbleIn 0.45s ease forwards; }
   @keyframes bubbleIn {
@@ -721,6 +917,8 @@
   <div class="intro-tap" id="intro-tap-2">Tippen, um zu beginnen</div>
 
   <div class="end-overlay hidden" id="end-overlay"></div>
+
+  <button class="intro-practice-btn" id="intro-practice-btn" title="Direkt mit Khwārizmī üben">Gleich zum Üben</button>
 </div>
 
 <!-- ===== Quest UI (under the intro overlay) ===== -->
@@ -773,8 +971,46 @@
   <button id="forward-btn" class="nav-btn" aria-label="Vor" title="Vor">▶</button>
 </div>
 
+<!-- ===== Tutor overlay (after extro) ===== -->
+<div class="tutor-overlay hidden" id="tutor-overlay">
+  <button class="tutor-exit" id="tutor-exit" aria-label="Beenden" title="Beenden">✕</button>
+  <div class="tutor-heading">
+    <h2 class="tutor-title">Suche den gemeinsamen Takt</h2>
+    <div class="tutor-subtitle">Suche das kleinste gemeinsame Vielfache, das kgV</div>
+  </div>
+  <div class="tutor-level" id="tutor-level">Übung · Level 1</div>
+  <div class="tutor-bubble" id="tutor-bubble"></div>
+  <div class="tutor-problem">
+    <span class="tutor-kgv">kgV</span>
+    <span>von</span>
+    <span class="tutor-a" id="tutor-a">2</span>
+    <span>und</span>
+    <span class="tutor-b" id="tutor-b">4</span>
+    <span class="tutor-eq">=</span>
+    <span class="tutor-answer" id="tutor-answer">?</span>
+  </div>
+  <div class="tutor-input-row">
+    <input type="number" inputmode="numeric" pattern="[0-9]*" class="tutor-input" id="tutor-input" min="1" max="999" placeholder="?" autocomplete="off" aria-label="Antwort eingeben">
+    <button class="btn tutor-submit" id="tutor-submit">Prüfen</button>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+<script src="js/debug-window.js"></script>
 <script>
 (() => {
+  // Boot DebugWindow (collapsed by default — click pill bottom-right to open)
+  if (window.DebugWindow && typeof DebugWindow.init === 'function') DebugWindow.init();
+  function dbg(...args) {
+    const msg = args.map(a => typeof a === 'string' ? a : JSON.stringify(a)).join(' ');
+    if (typeof DebugWindow !== 'undefined' && typeof DebugWindow.log === 'function') {
+      DebugWindow.log(msg);
+    } else {
+      console.log(msg);
+    }
+  }
+  window.dbg = dbg;
+
   // ====================================================================
   // LOCAL DEV ONLY — Google Cloud TTS API key bake-in.
   // REMOVE THIS BLOCK BEFORE `git push` (repo is public).
@@ -920,12 +1156,391 @@
 
   initApiKeyVault();
 
+  // ===== DeepSeek auth — same scheme as labai.html =====
+  // The AES-encrypted DeepSeek API key. Same blob as labai.html — unlocked with the
+  // same password. localStorage.dev_access (set by labai login) auto-unlocks here.
+  const DS_ENCRYPTED_KEY = "U2FsdGVkX18xMjM0NTY3OF0Uf+jzF9gByhGWIdT4T2fU3spB2Qdhpje6i/EbkuiEknQzonQJGrEVmzraOCZTng==";
+  let cachedDsKey = null;
+
+  function dsAesDecrypt(encryptedText, pwd) {
+    try {
+      if (!window.CryptoJS) return "";
+      const bytes = CryptoJS.AES.decrypt(encryptedText, pwd);
+      return bytes.toString(CryptoJS.enc.Utf8);
+    } catch (e) { return ""; }
+  }
+  function tryUnlockDsKey() {
+    const pwd = localStorage.getItem('dev_access');
+    if (!pwd) { dbg('[DS] no dev_access stored yet'); return false; }
+    const plain = dsAesDecrypt(DS_ENCRYPTED_KEY, pwd);
+    if (plain && plain.startsWith('sk-')) {
+      cachedDsKey = plain;
+      dbg('[DS] key unlocked from stored password');
+      return true;
+    }
+    dbg('[DS] stored password could not decrypt key — clearing');
+    localStorage.removeItem('dev_access');
+    return false;
+  }
+  // Interactive unlock — prompts for password, saves on success.
+  // Called from startTutor when no key is cached yet.
+  function tryUnlockDsKeyInteractive() {
+    if (cachedDsKey) return true;
+    if (!window.CryptoJS) { dbg('[DS] CryptoJS not ready yet'); return false; }
+    if (tryUnlockDsKey()) return true; // try stored first
+    const pwd = window.prompt('Passwort für Khwārizmī (DeepSeek-Tutor):');
+    if (!pwd) { dbg('[DS] user cancelled password prompt'); return false; }
+    const plain = dsAesDecrypt(DS_ENCRYPTED_KEY, pwd);
+    if (plain && plain.startsWith('sk-')) {
+      localStorage.setItem('dev_access', pwd);
+      cachedDsKey = plain;
+      dbg('[DS] key unlocked via prompt — saved for future sessions');
+      return true;
+    }
+    dbg('[DS] prompt password failed to decrypt key');
+    alert('Passwort hat nicht gepasst.');
+    return false;
+  }
+  // Wait for CryptoJS (loaded from CDN) before first unlock attempt
+  if (window.CryptoJS) tryUnlockDsKey();
+  else {
+    let tries = 0;
+    const wait = setInterval(() => {
+      if (window.CryptoJS || ++tries > 50) {
+        clearInterval(wait);
+        if (window.CryptoJS) tryUnlockDsKey();
+        else dbg('[DS] CryptoJS failed to load');
+      }
+    }, 100);
+  }
+  function dsKey() {
+    if (!cachedDsKey && window.CryptoJS) tryUnlockDsKey();
+    return cachedDsKey;
+  }
+
+  // Manual override (DevTools console): setDeepSeekKey('sk-...')
+  window.setDeepSeekKey = (k) => {
+    cachedDsKey = (k && k.startsWith('sk-')) ? k : null;
+    dbg('[DS] manual key ' + (cachedDsKey ? 'set' : 'cleared'));
+  };
+
+  // ===== DeepSeek chat =====
+  async function deepseekJSON(systemPrompt, userPayload) {
+    const key = dsKey();
+    if (!key) { dbg('[DS] deepseekJSON: no key, returning null'); return null; }
+    try {
+      const model = localStorage.getItem('ai_model') || 'deepseek-v4-flash';
+      dbg('[DS] request model=' + model);
+      const res = await fetch('https://api.deepseek.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + key
+        },
+        body: JSON.stringify({
+          model: model,
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: JSON.stringify(userPayload) }
+          ],
+          response_format: { type: 'json_object' },
+          temperature: 0.8,
+          max_tokens: 400
+        })
+      });
+      if (!res.ok) {
+        const body = await res.text();
+        dbg('[DS] error ' + res.status + ': ' + body.slice(0, 300));
+        return null;
+      }
+      const data = await res.json();
+      const content = data.choices?.[0]?.message?.content;
+      if (!content) { dbg('[DS] empty content'); return null; }
+      try {
+        const parsed = JSON.parse(content);
+        dbg('[DS] ok: ' + (parsed.feedback || '').slice(0, 60));
+        return parsed;
+      } catch (e) {
+        // Fuzzy extract first {...} block
+        const m = content.match(/\{[\s\S]*\}/);
+        if (m) {
+          try { return JSON.parse(m[0]); } catch (e2) {}
+        }
+        dbg('[DS] JSON parse failed: ' + content.slice(0, 120));
+        return null;
+      }
+    } catch (e) {
+      dbg('[DS] fetch failed: ' + (e?.message || e));
+      return null;
+    }
+  }
+
+  // ===== Tutor: persona, problem generator, math =====
+  const KHWARIZMI_SYSTEM = `Du bist Al-Khwārizmī, ein weiser, ruhiger Mathematiker aus Bagdad im 9. Jahrhundert. Du übst mit einem Kind in Klasse 5–6 das Finden des kleinsten gemeinsamen Vielfachen (kgV). Deine Sprache ist warm, kindgerecht und ermutigend. Du verrätst NIEMALS die Antwort direkt — bei falscher Antwort gibst du einen behutsamen Hinweis.
+
+Du bekommst pro Schritt einen JSON-Kontext und antwortest AUSSCHLIESSLICH mit gültigem JSON nach diesem Schema:
+{
+  "feedback": "1–2 kurze Sätze Deutsch, kindgerecht. Du darfst *Wort* für Betonung und [break:0.5s] für Pausen nutzen — sparsam.",
+  "celebrate": true | false,
+  "difficulty_change": "easier" | "same" | "harder"
+}
+
+Regeln:
+- Bei korrekter Antwort beim 1. Versuch: feedback feiernd, celebrate=true, difficulty_change="harder".
+- Bei korrekter Antwort nach mehreren Versuchen: feedback ermutigend, celebrate=false, difficulty_change="same".
+- Bei falscher Antwort: behutsam, einen klitzekleinen Hinweis (z.B. "passt 8 wirklich? Schau ob 4 da reingeht"), celebrate=false, difficulty_change="same".
+- Bei mehrfach falsch (≥3 Versuche): wärmer, leichter machen, difficulty_change="easier".
+- Sprich das Kind als "du" an. Niemals "Sie".
+- Erwähne *keine* anderen Mathebegriffe (kein "Vielfaches", kein "Faktor") — nutze "passt rein", "teilt sich auf", "Takt", "Stück".`;
+
+  function gcdN(a, b) { return b ? gcdN(b, a % b) : a; }
+  function lcmN(a, b) { return a * b / gcdN(a, b); }
+
+  // Problem pools by difficulty
+  const PROBLEM_POOLS = {
+    1: [[2,4],[2,6],[3,6],[3,9],[4,8],[2,8],[4,12]],            // a teilt b
+    2: [[2,3],[2,5],[3,4],[3,5],[3,7],[4,5],[4,7],[5,6],[5,7]], // teilerfremd
+    3: [[4,6],[6,8],[6,9],[8,12],[9,12],[10,12],[6,10],[8,10]], // echtes kgV-Rätsel
+  };
+
+  function generateProblem(difficulty) {
+    const lvl = Math.max(1, Math.min(3, difficulty | 0));
+    const pool = PROBLEM_POOLS[lvl];
+    // Avoid immediate repeat
+    let attempts = 0;
+    let pair;
+    do {
+      pair = pool[Math.floor(Math.random() * pool.length)];
+      attempts++;
+    } while (tutorState.lastProblem &&
+             pair[0] === tutorState.lastProblem.a &&
+             pair[1] === tutorState.lastProblem.b &&
+             attempts < 6);
+    return { a: pair[0], b: pair[1], answer: lcmN(pair[0], pair[1]), difficulty: lvl };
+  }
+
+  const tutorState = {
+    difficulty: 1,
+    currentProblem: null,
+    lastProblem: null,
+    attempts: 0,
+    history: [],
+  };
+
+  function offlineFeedback(correct, attempts, a, b, kgv) {
+    const pick = arr => arr[Math.floor(Math.random() * arr.length)];
+    if (correct && attempts === 1) {
+      return { feedback: pick([
+        "Genau! [break:0.5s] Du hast das *im Takt* gefunden.",
+        "Stark! Die [break:0.3s] " + kgv + " ist genau richtig.",
+        "Wunderbar! [break:0.5s] *Genau* so.",
+        "Beim ersten Anlauf! [break:0.5s] Das war *sauber* gerechnet."
+      ]), celebrate: true, difficulty_change: 'harder' };
+    }
+    if (correct) {
+      return { feedback: pick([
+        "Richtig! [break:0.5s] Da steckte etwas Knobelei drin.",
+        "Genau! [break:0.5s] Manchmal braucht es ein paar Anläufe.",
+        "Du hast den Takt gefunden! [break:0.5s] Schön ruhig gerechnet.",
+        "Stimmt! [break:0.5s] Mehr Arbeit als sonst — aber *sitzt*."
+      ]), celebrate: false, difficulty_change: 'same' };
+    }
+    if (attempts < 3) {
+      return { feedback: pick([
+        "Leider noch nicht. [break:0.5s] Schau, ob *beide* Zahlen in deine Zahl reingehen.",
+        "Leider knapp daneben. [break:0.5s] Geht die *" + a + "* in deine Zahl rein? Und die *" + b + "*?",
+        "Leider noch nicht — versuch's nochmal. [break:0.5s] Beide müssen *auf*gehen."
+      ]), celebrate: false, difficulty_change: 'same' };
+    }
+    return { feedback: pick([
+      "Lass uns ein leichteres Paar nehmen. [break:0.5s] Die nächsten Glocken sind freundlicher.",
+      "Wir wechseln das Paar. [break:0.5s] Frischer Versuch mit leichteren Zahlen."
+    ]), celebrate: false, difficulty_change: 'easier' };
+  }
+
+  async function askKhwarizmi(payload) {
+    const result = await deepseekJSON(KHWARIZMI_SYSTEM, payload);
+    if (result && typeof result.feedback === 'string') return result;
+    // Fallback offline
+    return offlineFeedback(payload.correct, payload.attempts, payload.a, payload.b, payload.correct_answer);
+  }
+
+  // ===== Tutor flow =====
+  const tutorOverlay = document.getElementById('tutor-overlay');
+  const tutorBubble  = document.getElementById('tutor-bubble');
+  const tutorLevelEl = document.getElementById('tutor-level');
+  const tutorAEl     = document.getElementById('tutor-a');
+  const tutorBEl     = document.getElementById('tutor-b');
+  const tutorInput   = document.getElementById('tutor-input');
+  const tutorSubmit  = document.getElementById('tutor-submit');
+  const tutorExit    = document.getElementById('tutor-exit');
+
+  function setTutorBubble(text) {
+    // No setTimeout — keep speak() inside the user-gesture transient activation window
+    tutorBubble.style.opacity = '0';
+    tutorBubble.textContent = stripMarkers(text);
+    requestAnimationFrame(() => { tutorBubble.style.opacity = '1'; });
+    dbg('[tutor] setTutorBubble → speak', { voiceEnabled, hasKey: !!gKey(), len: text.length });
+    return speak(text);
+  }
+
+  function showProblem(p) {
+    tutorState.currentProblem = p;
+    tutorState.attempts = 0;
+    tutorAEl.textContent = p.a;
+    tutorBEl.textContent = p.b;
+    tutorLevelEl.textContent = 'Übung · Level ' + p.difficulty;
+    tutorInput.value = '';
+    tutorInput.style.opacity = '1';
+    tutorInput.classList.remove('shake', 'celebrate');
+    const ansEl = document.getElementById('tutor-answer');
+    if (ansEl) { ansEl.textContent = '?'; ansEl.classList.remove('correct'); }
+    setTimeout(() => tutorInput.focus(), 200);
+  }
+
+  let tutorReturnTo = 'end';
+  async function startTutor(from) {
+    dbg('[tutor] startTutor', { from, voiceEnabled, hasKey: !!gKey(), ctxState: ctx?.state });
+    stopAllAudio();
+    audio();
+    // Ask for DS password once (saved to localStorage; future sessions auto-unlock)
+    if (!cachedDsKey) tryUnlockDsKeyInteractive();
+    dbg('[tutor] after audio()', { ctxState: ctx?.state, dsReady: !!cachedDsKey });
+    if ('speechSynthesis' in window) {
+      try {
+        const prime = new SpeechSynthesisUtterance(' ');
+        prime.volume = 0;
+        speechSynthesis.speak(prime);
+      } catch (e) {}
+    }
+    tutorReturnTo = from || 'end';
+    document.getElementById('end-overlay').classList.add('hidden');
+    tutorOverlay.classList.remove('hidden');
+    tutorState.difficulty = 1;
+    tutorState.history = [];
+    const p = generateProblem(tutorState.difficulty);
+    showProblem(p);
+    setTutorBubble("Lass uns *üben*! [break:0.5s] Wann passen die *" + p.a + "* und die *" + p.b + "* zusammen in einen Takt?");
+  }
+
+  function exitTutor() {
+    stopAllAudio();
+    tutorOverlay.classList.add('hidden');
+    if (tutorReturnTo === 'end') {
+      document.getElementById('end-overlay').classList.remove('hidden');
+    }
+    // For 'intro' return target: intro overlay is still visible underneath, no action needed
+  }
+
+  async function submitTutorAnswer() {
+    const raw = tutorInput.value.trim();
+    if (!raw) { tutorInput.focus(); return; }
+    const guess = parseInt(raw, 10);
+    if (Number.isNaN(guess) || guess < 1) {
+      tutorInput.classList.add('shake');
+      setTimeout(() => tutorInput.classList.remove('shake'), 500);
+      return;
+    }
+    const p = tutorState.currentProblem;
+    tutorState.attempts++;
+    const correct = guess === p.answer;
+
+    if (correct) {
+      tutorInput.classList.add('celebrate');
+      const ansEl = document.getElementById('tutor-answer');
+      if (ansEl) { ansEl.textContent = p.answer; ansEl.classList.add('correct'); }
+    } else {
+      tutorInput.classList.add('shake');
+      setTimeout(() => tutorInput.classList.remove('shake'), 500);
+    }
+
+    // Ask Khwārizmī for feedback + difficulty signal
+    tutorSubmit.disabled = true;
+    const reaction = await askKhwarizmi({
+      a: p.a,
+      b: p.b,
+      correct_answer: p.answer,
+      user_answer: guess,
+      attempts: tutorState.attempts,
+      difficulty: tutorState.difficulty,
+      correct: correct,
+    });
+    tutorSubmit.disabled = false;
+
+    setTutorBubble(reaction.feedback);
+
+    if (correct) {
+      // Next problem after a short pause
+      tutorState.lastProblem = { a: p.a, b: p.b };
+      tutorState.history.push({ a: p.a, b: p.b, attempts: tutorState.attempts });
+      let nextDiff = tutorState.difficulty;
+      if (reaction.difficulty_change === 'harder') nextDiff = Math.min(3, nextDiff + 1);
+      if (reaction.difficulty_change === 'easier') nextDiff = Math.max(1, nextDiff - 1);
+      tutorState.difficulty = nextDiff;
+      setTimeout(() => {
+        const next = generateProblem(nextDiff);
+        showProblem(next);
+      }, 2400);
+    } else if (reaction.difficulty_change === 'easier') {
+      // Drop a level and give a fresh problem
+      tutorState.difficulty = Math.max(1, tutorState.difficulty - 1);
+      tutorState.lastProblem = { a: p.a, b: p.b };
+      setTimeout(() => {
+        const next = generateProblem(tutorState.difficulty);
+        showProblem(next);
+      }, 2400);
+    } else {
+      // Wrong, same problem — fade the wrong value out, clear, fade back in
+      tutorInput.style.transition = 'opacity 0.35s ease';
+      tutorInput.style.opacity = '0';
+      setTimeout(() => {
+        tutorInput.value = '';
+        tutorInput.style.opacity = '1';
+        tutorInput.focus();
+      }, 360);
+    }
+  }
+
+  tutorSubmit.addEventListener('click', submitTutorAnswer);
+  tutorInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); submitTutorAnswer(); }
+  });
+  tutorExit.addEventListener('click', exitTutor);
+
+  // Robust HTMLAudio unlock — must run synchronously inside a user-gesture click handler
+  function unlockHtmlAudio() {
+    try {
+      const a = new Audio();
+      // Tiny silent MP3 (28 bytes)
+      a.src = 'data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4LjQ1LjEwMAAAAAAAAAAAAAAA//tQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';
+      a.volume = 0;
+      a.play().catch(() => { /* ignored — best-effort */ });
+    } catch (e) {}
+  }
+
+  // Intro corner button — direct jump to tutor
+  const introPracticeBtn = document.getElementById('intro-practice-btn');
+  dbg('[init] introPracticeBtn found=' + !!introPracticeBtn);
+  if (introPracticeBtn) {
+    introPracticeBtn.addEventListener('click', (e) => {
+      dbg('[click] intro practice button — START');
+      e.stopPropagation();
+      unlockHtmlAudio();
+      try {
+        startTutor('intro');
+        dbg('[click] startTutor returned (no throw)');
+      } catch (err) {
+        dbg('[click] startTutor THREW: ' + (err?.message || err));
+      }
+    });
+  }
+
   // Wrap all standalone integers in <say-as interpret-as="cardinal"> so TTS
   // doesn't read "6" at sentence end as "der Sechste" / a date.
   function toSSML(text) {
     let s = text;
     // pre-tokenize pause markers so they survive XML escape:  [break:1s] / [break:0.5s]
-    s = s.replace(/\[break:(\d+(?:\.\d+)?)s?\]/gi, (_, t) => ` BREAK${t}`);
+    s = s.replace(/\[break:(\d+(?:\.\d+)?)s?\]/gi, (_, t) => `\u0000BREAK${t}\u0001`);
     s = s
       // math operators (only between digits!) → spoken words
       .replace(/(\d)\s*[·×]\s*(\d)/g, '$1 mal $2')
@@ -939,22 +1554,26 @@
       .replace(/"/g, '&quot;')
       .replace(/'/g, '&apos;');
     // restore break markers as SSML tags (after escape)
-    s = s.replace(/ BREAK([\d.]+)/g, '<break time="$1s"/>');
+    s = s.replace(/\u0000BREAK([\d.]+)\u0001/g, '<break time="$1s"/>');
     // emphasis: *word* → <emphasis>
     s = s.replace(/\*([^*]+)\*/g, '<emphasis level="strong">$1</emphasis>');
-    // standalone integers → cardinal say-as
-    s = s.replace(/\b(\d+)\b/g, '<say-as interpret-as="cardinal">$1</say-as>');
+    // standalone integers → cardinal say-as. Negative-lookahead skips digits
+    // already inside a tag (e.g. the "0" in <break time="0.5s"/>).
+    s = s.replace(/\b(\d+)\b(?![^<]*>)/g, '<say-as interpret-as="cardinal">$1</say-as>');
     return '<speak>' + s + '</speak>';
   }
 
-  // Strip emphasis markers from display (voice gets SSML emphasis instead)
+  // Strip emphasis + pause markers from display (voice gets SSML versions instead)
   function stripMarkers(text) {
-    return text.replace(/\*([^*]+)\*/g, '$1');
+    return text
+      .replace(/\*([^*]+)\*/g, '$1')                      // *word* → word
+      .replace(/\s*\[break:\d+(?:\.\d+)?s?\]\s*/gi, ' '); // [break:1s] → space
   }
 
   async function googleTTS(text) {
     const key = gKey();
-    if (!key || !text) return null;
+    dbg('[TTS] googleTTS called', { hasKey: !!key, textLen: text?.length });
+    if (!key || !text) { dbg('[TTS] googleTTS bailing: no key or no text'); return null; }
     const voice = gVoice();
     const ssml = toSSML(text);
     const cacheKey = 'gctt_audio_v2_' + voice + '_' + hashStr(ssml);
@@ -974,7 +1593,8 @@
         }
       );
       if (!res.ok) {
-        console.warn('Google TTS error', res.status, await res.text());
+        const body = await res.text();
+        dbg('[TTS] Google error ' + res.status + ': ' + body.slice(0, 400));
         return null;
       }
       const data = await res.json();
@@ -997,39 +1617,52 @@
 
   // speak() returns a Promise that resolves when the spoken audio ENDS.
   async function speak(text) {
-    if (!voiceEnabled || !text) return;
+    dbg('[speak] called', { voiceEnabled, hasText: !!text, textPreview: text?.slice(0, 40) });
+    if (!voiceEnabled || !text) { dbg('[speak] bailing: voiceEnabled=' + voiceEnabled); return; }
     stopAllSpeech();
     const b64 = await googleTTS(text);
-    if (!voiceEnabled) return;
+    dbg('[speak] googleTTS returned', { gotB64: !!b64, b64Len: b64?.length });
+    if (!voiceEnabled) { dbg('[speak] bailing after googleTTS: voiceEnabled false'); return; }
     return new Promise((resolve) => {
       let done = false;
-      const finish = () => { if (!done) { done = true; resolve(); } };
+      const finish = (why) => { if (!done) { done = true; dbg('[speak] finish', why); resolve(); } };
       if (b64) {
         try {
           currentAudio = new Audio('data:audio/mp3;base64,' + b64);
-          currentAudio.addEventListener('ended', finish);
-          currentAudio.addEventListener('error', finish);
-          currentAudio.play().catch(finish);
+          currentAudio.addEventListener('ended', () => finish('ended'));
+          currentAudio.addEventListener('error', (e) => { dbg('[speak] Audio error', String(e?.message || e)); finish('error'); });
+          const p = currentAudio.play();
+          dbg('[speak] play() called, hasPromise=' + !!(p && p.catch));
+          if (p && typeof p.catch === 'function') {
+            p.catch(err => { dbg('[speak] play() promise rejected', err.name + ': ' + err.message); finish('rejected'); });
+          }
         } catch (e) {
-          browserSpeakWithEnd(text, finish);
+          dbg('[speak] Audio constructor threw', String(e?.message || e));
+          browserSpeakWithEnd(text, () => finish('browser-after-throw'));
         }
       } else {
-        browserSpeakWithEnd(text, finish);
+        dbg('[speak] no b64, falling back to browser TTS');
+        browserSpeakWithEnd(text, () => finish('browser-fallback'));
       }
     });
   }
   function browserSpeakWithEnd(text, done) {
-    if (!('speechSynthesis' in window)) { done(); return; }
+    // Browser SS can't parse SSML / our markers — feed it the clean display text.
+    const clean = stripMarkers(text);
+    dbg('[browserSpeak] called', { hasSynth: 'speechSynthesis' in window, chosenVoice: chosenVoice?.name, text: clean?.slice(0, 40) });
+    if (!('speechSynthesis' in window)) { dbg('[browserSpeak] no speechSynthesis'); done(); return; }
     try {
-      const u = new SpeechSynthesisUtterance(text);
+      const u = new SpeechSynthesisUtterance(clean);
       u.lang = 'de-DE';
       u.rate = 0.94;
       u.pitch = 0.88;
       if (chosenVoice) u.voice = chosenVoice;
-      u.onend = done;
-      u.onerror = done;
+      u.onstart = () => dbg('[browserSpeak] start');
+      u.onend = () => { dbg('[browserSpeak] end'); done(); };
+      u.onerror = (e) => { dbg('[browserSpeak] error ' + (e?.error || '')); done(); };
       speechSynthesis.speak(u);
-    } catch (e) { done(); }
+      dbg('[browserSpeak] speak() queued, pending=' + speechSynthesis.pending + ' speaking=' + speechSynthesis.speaking);
+    } catch (e) { dbg('[browserSpeak] threw', String(e?.message || e)); done(); }
   }
 
   // Console helpers
@@ -1472,13 +2105,21 @@
 
     // Populate and reveal end overlay
     const endOv = document.getElementById('end-overlay');
-    endOv.innerHTML = END_PARAGRAPHS.map(p => `<p>${stripMarkers(p)}</p>`).join('');
+    endOv.innerHTML = END_PARAGRAPHS.map(p => `<p>${stripMarkers(p)}</p>`).join('') +
+      '<button class="end-practice-btn" id="end-practice-btn">Mit Khwārizmī üben</button>';
+    const practiceBtn = document.getElementById('end-practice-btn');
+    if (practiceBtn) practiceBtn.addEventListener('click', () => {
+      unlockHtmlAudio();
+      startTutor('end');
+    });
     endOv.classList.remove('hidden');
 
     if (instant) return;
-    // Speak each paragraph in sequence
+    // Speak each paragraph in sequence — break if the user exited the end-screen (e.g. opened tutor)
     for (let i = 0; i < END_PARAGRAPHS.length; i++) {
+      if (endOv.classList.contains('hidden')) break;
       await speak(END_PARAGRAPHS[i]);
+      if (endOv.classList.contains('hidden')) break;
       if (i < END_PARAGRAPHS.length - 1) await wait(500);
     }
   }
@@ -1704,9 +2345,49 @@
   document.getElementById('prev-btn').addEventListener('click', goBack);
   document.getElementById('forward-btn').addEventListener('click', () => advance(false));
 
+  // Test tone — pure WebAudio, bypasses HTMLAudio / Google TTS
+  function playTestTone() {
+    const c = audio();
+    if (!c) { dbg('[testTone] NO ctx'); return; }
+    dbg('[testTone] ctx.state=' + c.state);
+    if (c.state === 'suspended') c.resume().then(() => dbg('[testTone] resume() resolved'));
+    const osc = c.createOscillator();
+    const g = c.createGain();
+    osc.type = 'sine';
+    osc.frequency.value = 660;
+    g.gain.setValueAtTime(0.0001, c.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.35, c.currentTime + 0.01);
+    g.gain.exponentialRampToValueAtTime(0.0001, c.currentTime + 0.5);
+    osc.connect(g).connect(c.destination);
+    osc.start();
+    osc.stop(c.currentTime + 0.55);
+    dbg('[testTone] osc.start() called');
+  }
+  // Space → test sound. Reads bubble text aloud via speak(). Falls back to a tone.
+  document.addEventListener('keydown', (e) => {
+    if (e.code === 'Space' || e.key === ' ') {
+      // Avoid double-trigger from input (still allow space char to flow)
+      const target = e.target;
+      const inInput = target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA');
+      dbg('[space] pressed target=' + (target?.tagName || '?'));
+      // Pick text: tutor bubble if visible, else quest bubble, else fallback
+      const tutorVisible = tutorOverlay && !tutorOverlay.classList.contains('hidden');
+      let text = '';
+      if (tutorVisible) text = tutorBubble?.textContent?.trim();
+      if (!text) text = bubble?.textContent?.trim();
+      if (!text) text = 'Eins, zwei, drei.';
+      dbg('[space] will speak: ' + text.slice(0, 60));
+      // Don't preventDefault — let input get the space char too
+      playTestTone(); // diagnostic tone in parallel
+      speak(text);
+    }
+  });
+
   // Arrow keys: → forward, ← back — works in every phase
   document.addEventListener('keydown', (e) => {
     if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return;
+    // Disable quest-nav shortcuts while tutor overlay is active
+    if (!tutorOverlay.classList.contains('hidden')) return;
     if (e.key === 'ArrowRight') {
       e.preventDefault();
       if      (introPhase === 'atmosphere') startNarration();
