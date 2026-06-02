@@ -1528,7 +1528,7 @@ Regeln:
       const i = parseInt(el.dataset.tickIdx, 10);
       const n = parseInt(el.dataset.tickTotal, 10);
       if (!isNaN(i) && !isNaN(n)) {
-        el.style.left = ((i / n) * lcmX) + 'px';
+        el.style.left = ((i / n) * w) + 'px';   // full-axis position (matches drawTimeAxis), NOT lcmX
       }
       el.style.fontSize = fpx + 'px';
     });
