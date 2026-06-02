@@ -377,6 +377,29 @@ Regeln:
     3: [[4,6],[6,8],[6,9],[8,12],[9,12],[10,12],[6,10],[8,10]], // echtes kgV-Rätsel
   };
 
+  // Fraction add/subtract pools (unit fractions 1/a ± 1/b). Pairs get ordered a<b on use.
+  const ADD_POOLS = {
+    1: [[2,4],[3,6],[2,6],[2,8],[4,8],[3,9],[2,10]],            // a teilt b → denom = b
+    2: [[2,3],[2,5],[3,4],[3,5],[4,5],[2,7],[3,7]],             // teilerfremd → denom = a·b
+    3: [[4,6],[6,8],[6,9],[8,12],[9,12],[10,12],[6,10]],        // echtes kgV
+  };
+  const SUB_POOLS = {
+    1: [[2,4],[3,6],[2,6],[2,8],[4,8],[3,9]],
+    2: [[2,3],[2,5],[3,4],[3,5],[4,5],[2,7]],
+    3: [[4,6],[6,8],[6,9],[8,12],[9,12],[10,12]],
+  };
+
+  // Tutor modes: kgV (find the lcm) · add · sub (numerator over the kgV denominator)
+  let tutorMode = (() => {
+    const m = localStorage.getItem('tutor_mode');
+    return (m === 'add' || m === 'sub' || m === 'kgv') ? m : 'kgv';
+  })();
+  const MODES = {
+    kgv: { label: 'kgV',   title: 'Suche den gemeinsamen Takt',  subtitle: 'Suche das kleinste gemeinsame Vielfache, das kgV', pools: PROBLEM_POOLS },
+    add: { label: 'Plus',  title: 'Addiere die Brüche',          subtitle: 'Zähl die Stücke über dem gemeinsamen Takt',        pools: ADD_POOLS },
+    sub: { label: 'Minus', title: 'Subtrahiere die Brüche',      subtitle: 'Wie viele Stücke bleiben über dem Takt?',          pools: SUB_POOLS },
+  };
+
   // ===== Level as a worked-through set: shuffle the pool, present each pair once, no repeats =====
   // Fisher–Yates shuffle on a copy.
   function shuffled(arr) {
@@ -388,22 +411,29 @@ Regeln:
     return a;
   }
 
-  // Load a fresh shuffled bag for the given level.
+  // Load a fresh shuffled bag for the given level (from the current mode's pools).
   function loadLevelBag(difficulty) {
     const lvl = Math.max(1, Math.min(3, difficulty | 0));
     tutorState.difficulty = lvl;
-    tutorState.bag = shuffled(PROBLEM_POOLS[lvl]);
+    tutorState.bag = shuffled(MODES[tutorMode].pools[lvl]);
   }
 
   // Pop the next problem from the current bag (each pair appears once per level).
   function nextProblemFromBag() {
     const pair = tutorState.bag.shift();
     const lvl = tutorState.difficulty;
-    let a = pair[0], b = pair[1];
-    // Level 1 (a teilt b → kgV = b): randomly put the small number second so the answer
-    // isn't predictably "the bigger/second number". The kgV is order-independent.
-    if (lvl === 1 && Math.random() < 0.5) { const t = a; a = b; b = t; }
-    return { a, b, answer: lcmN(a, b), difficulty: lvl };
+    if (tutorMode === 'kgv') {
+      let a = pair[0], b = pair[1];
+      // Level 1 (a teilt b → kgV = b): randomly put the small number second so the answer
+      // isn't predictably "the bigger/second number". The kgV is order-independent.
+      if (lvl === 1 && Math.random() < 0.5) { const t = a; a = b; b = t; }
+      return { mode: 'kgv', a, b, answer: lcmN(a, b), difficulty: lvl };
+    }
+    // add/sub: order a<b so 1/a > 1/b (subtraction stays positive), denom = kgV
+    const a = Math.min(pair[0], pair[1]), b = Math.max(pair[0], pair[1]);
+    const L = lcmN(a, b), na = L / a, nb = L / b;
+    const answer = tutorMode === 'add' ? (na + nb) : (na - nb);  // numerator over L
+    return { mode: tutorMode, a, b, den: L, answer, difficulty: lvl };
   }
 
   const tutorState = {
@@ -425,8 +455,14 @@ Regeln:
     "Boom!", "Yes!", "Stimmt haargenau!", "Saubere Arbeit!", "Stark gerechnet!"
   ];
 
-  function offlineFeedback(correct, attempts, a, b, kgv) {
+  // Fact-aware offline feedback. Takes the same payload as the AI (with verified
+  // divisibility facts), so its hints are always mathematically correct.
+  function offlineFeedback(payload) {
+    const a = payload.a, b = payload.b, kgv = payload.correct_answer;
+    const attempts = payload.attempts, correct = payload.correct;
+    const aFits = payload.a_passt, bFits = payload.b_passt, bothFit = payload.beide_passen;
     const pick = arr => arr[Math.floor(Math.random() * arr.length)];
+
     if (correct && attempts === 1) {
       const body = pick([
         "Du hast das *im Takt* gefunden.",
@@ -450,17 +486,58 @@ Regeln:
       return { feedback: pick(COOL_EXCLAIMS) + " [break:0.4s] " + body,
                celebrate: false, difficulty_change: 'same' };
     }
-    if (attempts < 3) {
+    // ---- wrong answer: hints based on the verified facts ----
+    if (bothFit) {   // a common multiple — just not the smallest
       return { feedback: pick([
-        "Leider noch nicht. [break:0.5s] Schau, ob *beide* Zahlen in deine Zahl reingehen.",
-        "Leider knapp daneben. [break:0.5s] Geht die *" + a + "* in deine Zahl rein? Und die *" + b + "*?",
-        "Leider noch nicht — versuch's nochmal. [break:0.5s] Beide müssen *auf*gehen."
+        "Fast! [break:0.4s] In deine Zahl passen *beide* schon rein — aber es geht noch *kleiner*. Such die *kleinste*, die beide mögen.",
+        "Gut gedacht — *beide* passen rein! [break:0.4s] Aber es gibt eine *kleinere*, die auch beide mag. Welche?"
       ]), celebrate: false, difficulty_change: 'same' };
     }
-    return { feedback: pick([
-      "Noch nicht — bleib dran. [break:0.5s] Geh die *" + b + "* in Schritten durch: " + b + ", " + (b*2) + ", " + (b*3) + " … und schau, welche davon sich auch in *" + a + "*er-Schritten treffen lässt.",
-      "Fast. [break:0.5s] Nimm die größere Zahl Schritt für Schritt — passt die *" + a + "* an einer dieser Stellen auch genau hinein?"
+    if (aFits || bFits) {   // exactly one fits → name the one that doesn't
+      const missing = aFits ? b : a;
+      return { feedback: pick([
+        "Leider noch nicht. [break:0.4s] Die *" + missing + "* geht noch nicht *auf* in deiner Zahl.",
+        "Knapp! [break:0.4s] Prüf die *" + missing + "* — die passt noch nicht genau hinein."
+      ]), celebrate: false, difficulty_change: 'same' };
+    }
+    if (attempts >= 3) {   // neither fits, struggling → concrete strategy
+      return { feedback: pick([
+        "Noch nicht — bleib dran. [break:0.5s] Geh die *" + b + "* in Schritten durch: " + b + ", " + (b*2) + ", " + (b*3) + " … und schau, welche davon sich auch in *" + a + "*er-Schritten treffen lässt.",
+        "Fast. [break:0.5s] Nimm die größere Zahl Schritt für Schritt — passt die *" + a + "* an einer dieser Stellen auch genau hinein?"
+      ]), celebrate: false, difficulty_change: 'same' };
+    }
+    return { feedback: pick([   // neither fits, early tries
+      "Leider noch nicht. [break:0.4s] In deine Zahl muss *jede* der beiden ganz hineinpassen — noch passt keine.",
+      "Leider daneben. [break:0.4s] Geht die *" + a + "* rein? Und die *" + b + "*? Noch passt keine ganz."
     ]), celebrate: false, difficulty_change: 'same' };
+  }
+
+  // Local, math-correct feedback for the add/subtract modes (na, nb = pieces over the kgV).
+  function fractionFeedback(p, guess, correct, attempts) {
+    const pick = arr => arr[Math.floor(Math.random() * arr.length)];
+    const na = p.den / p.a, nb = p.den / p.b;
+    const verb = p.mode === 'add' ? 'zusammenzählen' : 'abziehen';
+    const opWord = p.mode === 'add' ? 'plus' : 'minus';
+    if (correct && attempts === 1) {
+      return { feedback: pick(COOL_EXCLAIMS) + " [break:0.4s] " + pick([
+        "Genau über dem Takt *" + p.den + "* gerechnet.",
+        "Die Stücke sauber " + (p.mode === 'add' ? 'zusammengezählt' : 'abgezogen') + ".",
+        "*Genau* so."
+      ]) };
+    }
+    if (correct) {
+      return { feedback: pick(COOL_EXCLAIMS) + " [break:0.4s] " + pick([
+        "Hat etwas gedauert — aber *sitzt*.",
+        "Drangeblieben und gekriegt."
+      ]) };
+    }
+    if (attempts < 3) {
+      return { feedback: pick([
+        "Leider noch nicht. [break:0.4s] Bring beide auf den Takt *" + p.den + "*: der erste Bruch sind *" + na + "* Stücke, der zweite *" + nb + "*. Dann " + verb + ".",
+        (guess > p.answer ? "Etwas *zu viel*. " : "Etwas *zu wenig*. ") + "[break:0.3s] Zähl die Stücke nochmal: *" + na + "* " + opWord + " *" + nb + "*."
+      ]) };
+    }
+    return { feedback: "Schau: *" + na + "* " + opWord + " *" + nb + "* Stücke — über dem Takt *" + p.den + "*. [break:0.3s] Wie viele sind das?" };
   }
 
   // ===== Level milestones: rank + praise + bell fanfare when a level is cleared =====
@@ -495,9 +572,16 @@ Regeln:
     tutorLevelEl.classList.add('rank-up');
     // Let the fanfare ring out before Khwārizmī speaks (don't talk over it).
     if (fanfareMs) await new Promise(r => setTimeout(r, fanfareMs + 150));
-    const praise = repeatTop
-      ? "Wieder das ganze Set gemeistert. [break:0.4s] Du hältst dein Niveau, *Meister*."
-      : LEVEL_PRAISE[clearedLevel];
+    let praise;
+    if (repeatTop) {
+      praise = "Wieder das ganze Set gemeistert. [break:0.4s] Du hältst dein Niveau, *Meister*.";
+    } else if (tutorMode === 'kgv') {
+      praise = LEVEL_PRAISE[clearedLevel];
+    } else {
+      // generic praise for the add/subtract sets
+      const what = tutorMode === 'add' ? 'addiert' : 'subtrahiert';
+      praise = "Ein ganzes Set sauber " + what + "! [break:0.4s] Du findest den gemeinsamen Takt und rechnest *darüber* — genau so geht's.";
+    }
     await setTutorBubble(praise);
     tutorLevelEl.classList.remove('rank-up');
   }
@@ -522,7 +606,7 @@ Regeln:
     const result = await provider.call(KHWARIZMI_SYSTEM, payload);
     if (result && typeof result.feedback === 'string') return result;
     // Fallback offline (also covers: provider has no key / API disabled / network error)
-    return offlineFeedback(payload.correct, payload.attempts, payload.a, payload.b, payload.correct_answer);
+    return offlineFeedback(payload);
   }
 
   // ===== Tutor flow =====
@@ -569,26 +653,56 @@ Regeln:
     return speak(text);
   }
 
-  // The question for a pair — always describes the CURRENT problem.
+  // The spoken/displayed question for the current problem (mode-aware).
   function problemPrompt(p) {
+    if (p.mode === 'add')
+      return "Addiere die beiden Brüche. [break:0.3s] Welche Zahl kommt oben über die *" + p.den + "*?";
+    if (p.mode === 'sub')
+      return "Zieh ab. [break:0.3s] Welche Zahl bleibt oben über der *" + p.den + "*?";
     return "Was ist der gemeinsame Takt von *" + p.a + "* und *" + p.b + "*?";
+  }
+
+  // Render the problem expression into #tutor-problem: a kgV question, or a fraction sum/difference.
+  function renderProblem(p) {
+    const el = document.getElementById('tutor-problem');
+    if (!el) return;
+    if (p.mode === 'add' || p.mode === 'sub') {
+      const op = p.mode === 'add' ? '+' : '−';
+      el.innerHTML =
+        '<span class="frac"><span class="num">1</span><span class="den color-small">' + p.a + '</span></span>' +
+        '<span class="op">' + op + '</span>' +
+        '<span class="frac"><span class="num">1</span><span class="den color-big">' + p.b + '</span></span>' +
+        '<span class="tutor-eq">=</span>' +
+        '<span class="frac"><span class="num tutor-answer" id="tutor-answer">?</span><span class="den color-meet">' + p.den + '</span></span>';
+    } else {
+      // colour follows magnitude: smaller orange, bigger red
+      const colA = p.a < p.b ? 'var(--orange)' : 'var(--red)';
+      const colB = p.b < p.a ? 'var(--orange)' : 'var(--red)';
+      el.innerHTML =
+        '<span class="tutor-kgv">kgV</span>' +
+        '<span>von</span>' +
+        '<span class="tutor-a" style="color:' + colA + '">' + p.a + '</span>' +
+        '<span>und</span>' +
+        '<span class="tutor-b" style="color:' + colB + '">' + p.b + '</span>' +
+        '<span class="tutor-eq">=</span>' +
+        '<span class="tutor-answer" id="tutor-answer">?</span>';
+    }
   }
 
   function showProblem(p, intro) {
     hideTutorTimeline();
     tutorState.currentProblem = p;
     tutorState.attempts = 0;
-    tutorAEl.textContent = p.a;
-    tutorBEl.textContent = p.b;
-    // Colour follows magnitude, not position: the bigger number is always red, the smaller orange.
-    tutorAEl.style.color = (p.a > p.b) ? 'var(--red)' : 'var(--orange)';
-    tutorBEl.style.color = (p.b > p.a) ? 'var(--red)' : 'var(--orange)';
+    renderProblem(p);
+    const meta = MODES[p.mode] || MODES.kgv;
+    const titleEl = document.querySelector('.tutor-title');
+    const subEl   = document.querySelector('.tutor-subtitle');
+    if (titleEl) titleEl.textContent = meta.title;
+    if (subEl)   subEl.textContent   = meta.subtitle;
     tutorLevelEl.textContent = 'Level ' + p.difficulty + ' · ' + (TUTOR_RANKS[p.difficulty] || TUTOR_RANKS[1]);
     tutorInput.value = '';
     tutorInput.style.opacity = '1';
     tutorInput.classList.remove('shake', 'celebrate');
-    const ansEl = document.getElementById('tutor-answer');
-    if (ansEl) { ansEl.textContent = '?'; ansEl.classList.remove('correct'); }
     // Always describe the new problem in the bubble (with an optional intro for the very first)
     setTutorBubble((intro ? intro + " [break:0.5s] " : "") + problemPrompt(p));
     setTimeout(() => tutorInput.focus(), 200);
@@ -616,6 +730,7 @@ Regeln:
     tutorState.history = [];
     tutorState.masteredTop = false;
     loadLevelBag(1);                   // sets difficulty = 1 and fills the shuffled bag
+    refreshModeUI();                   // highlight the active mode pill
     const p = nextProblemFromBag();
     showProblem(p, "Lass uns *üben*!");
   }
@@ -714,9 +829,6 @@ Regeln:
     const p = tutorState.currentProblem;
     tutorState.attempts++;
     const correct = guess === p.answer;
-    // Locally verified facts — the AI must NOT do its own arithmetic (it gets these wrong)
-    const aFits = guess % p.a === 0;
-    const bFits = guess % p.b === 0;
 
     if (correct) {
       tutorInput.classList.add('celebrate');
@@ -727,24 +839,32 @@ Regeln:
       setTimeout(() => tutorInput.classList.remove('shake'), 500);
     }
 
-    // Ask Khwārizmī for feedback + difficulty signal
+    // Feedback: fraction modes use local (math-correct) feedback; kgV uses Khwārizmī (AI + offline)
     tutorSubmit.disabled = true;
-    const reaction = await askKhwarizmi({
-      a: p.a,
-      b: p.b,
-      correct_answer: p.answer,
-      user_answer: guess,
-      attempts: tutorState.attempts,
-      difficulty: tutorState.difficulty,
-      correct: correct,
-      // Verified facts (do not recompute):
-      a_passt: aFits,                 // does a divide the guess?
-      b_passt: bFits,                 // does b divide the guess?
-      beide_passen: aFits && bFits,   // is the guess a common multiple at all?
-      ist_kgv: correct,
-      antwort_zu_gross: guess > p.answer,
-      antwort_zu_klein: guess < p.answer,
-    });
+    let reaction;
+    if (p.mode === 'add' || p.mode === 'sub') {
+      reaction = fractionFeedback(p, guess, correct, tutorState.attempts);
+    } else {
+      // Locally verified facts — the AI must NOT do its own arithmetic (it gets these wrong)
+      const aFits = guess % p.a === 0;
+      const bFits = guess % p.b === 0;
+      reaction = await askKhwarizmi({
+        a: p.a,
+        b: p.b,
+        correct_answer: p.answer,
+        user_answer: guess,
+        attempts: tutorState.attempts,
+        difficulty: tutorState.difficulty,
+        correct: correct,
+        // Verified facts (do not recompute):
+        a_passt: aFits,                 // does a divide the guess?
+        b_passt: bFits,                 // does b divide the guess?
+        beide_passen: aFits && bFits,   // is the guess a common multiple at all?
+        ist_kgv: correct,
+        antwort_zu_gross: guess > p.answer,
+        antwort_zu_klein: guess < p.answer,
+      });
+    }
     tutorSubmit.disabled = false;
 
     setTutorBubble(reaction.feedback);
@@ -788,8 +908,13 @@ Regeln:
 
   // Hint: a strategy tip for the current problem — never reveals the answer
   function hintForProblem(p) {
-    const lo = Math.min(p.a, p.b), hi = Math.max(p.a, p.b);
     const pick = arr => arr[Math.floor(Math.random() * arr.length)];
+    if (p.mode === 'add' || p.mode === 'sub') {
+      const na = p.den / p.a, nb = p.den / p.b;
+      const verb = p.mode === 'add' ? 'zähl sie zusammen' : 'zieh sie ab';
+      return "Tipp: [break:0.3s] Bring beide auf den Takt *" + p.den + "*. Der erste Bruch sind *" + na + "* Stücke, der zweite *" + nb + "* — dann " + verb + ".";
+    }
+    const lo = Math.min(p.a, p.b), hi = Math.max(p.a, p.b);
     return pick([
       "Tipp: [break:0.3s] Zähl die Vielfachen der *" + hi + "* — " + hi + ", " + (hi * 2) + ", " + (hi * 3) + " … [break:0.3s] welche davon lässt sich auch durch *" + lo + "* teilen?",
       "Tipp: [break:0.3s] Geh in *" + hi + "*er-Schritten und prüf jedes Mal: passt die *" + lo + "* auch genau hinein? Die erste, die klappt, ist das kgV.",
@@ -805,6 +930,27 @@ Regeln:
       tutorInput.focus();
     });
   }
+
+  // ===== Mode selector (kgV / Plus / Minus) =====
+  function refreshModeUI() {
+    document.querySelectorAll('.tutor-mode').forEach(b => {
+      b.classList.toggle('active', b.dataset.mode === tutorMode);
+    });
+  }
+  function setTutorMode(m, intro) {
+    if (!MODES[m]) return;
+    if (_tutorAdvancing) return;
+    tutorMode = m;
+    try { localStorage.setItem('tutor_mode', m); } catch (e) {}
+    tutorState.history = [];
+    tutorState.masteredTop = false;
+    loadLevelBag(1);
+    refreshModeUI();
+    showProblem(nextProblemFromBag(), intro);
+  }
+  document.querySelectorAll('.tutor-mode').forEach(b => {
+    b.addEventListener('click', () => setTutorMode(b.dataset.mode));
+  });
 
   tutorExit.addEventListener('click', exitTutor);
   if (tutorAiToggle) {
@@ -1226,11 +1372,19 @@ Regeln:
     meetLabel.classList.remove('show');
   }
 
+  // Axis-label font scales with the per-tick spacing so two-digit numbers always fit
+  // (responsive: many ticks on a narrow track → smaller font, clamped for readability).
+  function tickFontPx() {
+    const spacing = tlWidth() / Math.max(1, state.tEnd);
+    return Math.max(8, Math.min(13, spacing * 0.62));
+  }
+
   function drawTimeAxis() {
     tl.querySelectorAll('.sec-mark').forEach(el => el.remove());
     const axisLabels = document.getElementById('axis-labels');
     axisLabels.querySelectorAll('.tick-num').forEach(el => el.remove());
     const w = tlWidth();
+    const fpx = tickFontPx();
     for (let s = 1; s < state.tEnd; s++) {
       const x = (s / state.tEnd) * w;
       const m = document.createElement('div');
@@ -1243,6 +1397,7 @@ Regeln:
       lab.dataset.tickIdx = s;
       lab.dataset.tickTotal = state.tEnd;
       lab.style.left = x + 'px';
+      lab.style.fontSize = fpx + 'px';
       lab.textContent = String(s);
       axisLabels.appendChild(lab);
     }
@@ -1368,12 +1523,14 @@ Regeln:
       }
     });
     const axisLabels = document.getElementById('axis-labels');
+    const fpx = tickFontPx();
     if (axisLabels) axisLabels.querySelectorAll('.tick-num').forEach(el => {
       const i = parseInt(el.dataset.tickIdx, 10);
       const n = parseInt(el.dataset.tickTotal, 10);
       if (!isNaN(i) && !isNaN(n)) {
         el.style.left = ((i / n) * lcmX) + 'px';
       }
+      el.style.fontSize = fpx + 'px';
     });
     tl.querySelectorAll('.sec-mark').forEach(el => {
       const s = parseFloat(el.dataset.sec);
