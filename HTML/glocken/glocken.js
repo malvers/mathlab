@@ -1,1061 +1,3 @@
-<!DOCTYPE html>
-<html lang="de">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Die Glocken von Bagdad — Alvers Quest</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;600;700&family=Raleway:wght@300;400;500;600&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --bg: rgb(8, 20, 42);
-    --bg-light: rgb(14, 36, 78);
-    --bg-deep: rgb(2, 9, 25);
-    --orange: rgb(245, 194, 66);
-    --red: rgb(176, 36, 24);
-    --green: rgb(121, 158, 49);
-    --ink: #f4f4f4;
-    --muted: rgba(244, 244, 244, 0.62);
-    --line: rgba(244, 244, 244, 0.12);
-  }
-
-  *, *::before, *::after { box-sizing: border-box; }
-
-  html, body {
-    margin: 0;
-    padding: 0;
-    background: var(--bg);
-    color: var(--ink);
-    font-family: 'Raleway', system-ui, -apple-system, sans-serif;
-    font-weight: 400;
-    -webkit-font-smoothing: antialiased;
-    overscroll-behavior: none;
-    touch-action: manipulation;
-  }
-
-  body {
-    display: flex;
-    flex-direction: column;
-    max-width: 480px;
-    margin: 0 auto;
-    padding: calc(18px + 4vh) 18px 22px;
-    min-height: 100vh;
-    min-height: 100dvh;
-    gap: 14px;
-  }
-
-  /* ===== Intro ===== */
-  .intro {
-    position: fixed;
-    inset: 0;
-    z-index: 10;
-    overflow: hidden;
-    background: linear-gradient(to bottom, #03102a 0%, #0a1d3f 55%, #142855 100%);
-    cursor: pointer;
-    -webkit-tap-highlight-color: transparent;
-    transition: opacity 0.7s ease;
-  }
-  .intro.gone { opacity: 0; pointer-events: none; }
-
-  .stars {
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-  }
-  .star {
-    position: absolute;
-    width: 2px;
-    height: 2px;
-    background: #fff;
-    border-radius: 50%;
-    opacity: 0;
-    animation: twinkle 3s ease-in-out infinite;
-  }
-  @keyframes twinkle {
-    0%, 100% { opacity: 0.1; transform: scale(0.8); }
-    50%      { opacity: 0.95; transform: scale(1.2); }
-  }
-
-  .moon {
-    position: absolute;
-    top: 8vh;
-    right: 12vw;
-    width: 64px;
-    height: 64px;
-    opacity: 0;
-    animation: fadeIn 1.4s 0.9s ease forwards;
-  }
-
-  .skyline {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 42vh;
-    max-height: 320px;
-    z-index: 1;
-    opacity: 0;
-    transform: translateY(40px);
-    animation: rise 1.6s 1.7s cubic-bezier(0.2, 0.7, 0.3, 1) forwards;
-  }
-  @keyframes rise {
-    to { opacity: 1; transform: none; }
-  }
-
-  .door-aura {
-    animation: doorAura 4.2s ease-in-out infinite;
-    transform-origin: center;
-    filter: blur(5px);
-  }
-  @keyframes doorAura {
-    0%   { opacity: 0.35; }
-    23%  { opacity: 0.58; }
-    41%  { opacity: 0.42; }
-    58%  { opacity: 0.68; }
-    77%  { opacity: 0.48; }
-    100% { opacity: 0.38; }
-  }
-  .door-light {
-    animation: doorPulse 2.6s ease-in-out infinite;
-  }
-  @keyframes doorPulse {
-    0%   { opacity: 0.82; }
-    34%  { opacity: 1;    }
-    62%  { opacity: 0.88; }
-    100% { opacity: 0.85; }
-  }
-
-  .intro-text {
-    position: absolute;
-    top: 16vh;
-    left: 0;
-    right: 0;
-    text-align: center;
-    padding: 0 24px;
-    z-index: 5;
-  }
-  .intro-title {
-    font-family: 'Orbitron', sans-serif;
-    font-weight: 700;
-    font-size: clamp(22px, 7vw, 32px);
-    color: var(--orange);
-    margin: 0 0 12px;
-    letter-spacing: 0.02em;
-    opacity: 0;
-    animation: fadeIn 1.4s 3.1s ease forwards;
-    text-shadow: 0 0 24px rgba(245, 194, 66, 0.25);
-  }
-  .intro-date {
-    font-family: 'Raleway', sans-serif;
-    font-weight: 400;
-    font-size: clamp(15px, 4.2vw, 18px);
-    color: var(--ink);
-    letter-spacing: 0.04em;
-    opacity: 0;
-    animation: fadeIn 1.2s 4.0s ease forwards;
-  }
-  .end-overlay {
-    position: absolute;
-    top: 26vh;
-    left: 0; right: 0;
-    bottom: 6vh;
-    padding: 0 24px;
-    z-index: 10;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    gap: 10px;
-    text-align: center;
-    overflow: hidden;
-  }
-  .end-overlay.hidden { display: none !important; }
-  .end-overlay p {
-    font-family: 'Raleway', sans-serif;
-    font-weight: 300;
-    font-size: clamp(13px, 3.5vw, 16px);
-    color: var(--ink);
-    line-height: 1.5;
-    margin: 0;
-    text-shadow: 0 2px 14px rgba(0, 0, 0, 0.85);
-  }
-  .end-overlay p:nth-last-child(-n+2) {
-    font-family: 'Orbitron', sans-serif;
-    font-weight: 700;
-    color: var(--orange);
-    letter-spacing: 0.06em;
-    text-shadow: 0 0 18px rgba(245, 194, 66, 0.45);
-  }
-  .end-overlay p:nth-last-child(2) {
-    font-size: clamp(12px, 3.4vw, 15px);
-    margin-top: 16px;
-  }
-  .end-overlay p:last-child {
-    font-size: clamp(18px, 5.2vw, 24px);
-    margin-top: 4px;
-  }
-  .end-overlay .prize {
-    margin: 12px auto 0;
-    padding: 10px 18px;
-    border: 1.5px solid var(--orange);
-    border-radius: 999px;
-    color: var(--orange);
-    font-family: 'Orbitron', sans-serif;
-    font-size: 12px;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-  }
-
-  .intro-tap {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    padding: 11px 22px;
-    border: 1px solid rgba(245, 194, 66, 0.45);
-    border-radius: 999px;
-    background: rgba(14, 36, 78, 0.55);
-    backdrop-filter: blur(4px);
-    font-family: 'Orbitron', sans-serif;
-    font-size: 11px;
-    color: var(--orange);
-    letter-spacing: 0.22em;
-    text-transform: uppercase;
-    white-space: nowrap;
-    opacity: 0;
-    pointer-events: none;
-  }
-  .intro-tap.start { animation: tapIn 1s 5.0s ease forwards, tapPulse 2.4s 6.0s ease-in-out infinite; }
-  .intro-tap.shown { animation: tapIn 0.8s ease forwards, tapPulse 2.4s 0.8s ease-in-out infinite; }
-  @keyframes tapIn  { from { opacity: 0; } to { opacity: 0.7; } }
-  @keyframes tapPulse { 0%, 100% { opacity: 0.35; } 50% { opacity: 0.95; } }
-
-  .intro-title.faded, .intro-date.faded {
-    animation: titleOut 0.8s ease forwards !important;
-  }
-  @keyframes titleOut { to { opacity: 0; transform: translateY(-6px); } }
-
-  .narration {
-    position: absolute;
-    top: 38vh;
-    transform: translateY(-50%);
-    left: 0; right: 0;
-    min-height: 22vh;
-    padding: 0 28px;
-    pointer-events: none;
-    z-index: 6;
-  }
-  .narration.hidden { display: none; }
-  .n-para {
-    position: absolute;
-    left: 28px; right: 28px;
-    top: 0;
-    margin: 0;
-    font-family: 'Raleway', sans-serif;
-    font-weight: 300;
-    font-size: clamp(16px, 4.6vw, 19px);
-    color: var(--ink);
-    line-height: 1.55;
-    text-align: center;
-    text-shadow: 0 2px 18px rgba(0, 0, 0, 0.55);
-    opacity: 0;
-    transform: translateY(12px);
-    transition: opacity 0.9s ease, transform 0.9s ease;
-  }
-  .n-para.show { opacity: 0.95; transform: none; }
-  .n-para.done { opacity: 0; transform: translateY(-14px); }
-  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-  /* ===== Quest UI ===== */
-  header {
-    text-align: center;
-    padding: 4px 0 2px;
-  }
-  h1 {
-    font-family: 'Orbitron', sans-serif;
-    font-weight: 700;
-    font-size: clamp(20px, 5.5vw, 26px);
-    margin: 0;
-    color: var(--orange);
-    letter-spacing: 0.02em;
-  }
-  .subtitle {
-    font-size: 11px;
-    color: var(--muted);
-    margin-top: 6px;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-  }
-  .round-pill {
-    display: inline-block;
-    margin-top: 8px;
-    padding: 4px 12px;
-    border-radius: 999px;
-    background: var(--bg-light);
-    color: var(--muted);
-    font-family: 'Orbitron', sans-serif;
-    font-size: 10px;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-  }
-
-  .bubble {
-    background: var(--bg-light);
-    border-radius: 14px;
-    padding: 16px 18px;
-    font-size: 16px;
-    line-height: 1.55;
-    min-height: 100px;
-    transition: opacity 0.25s ease;
-    border-left: 3px solid var(--orange);
-  }
-
-  .bell-row {
-    display: flex;
-    justify-content: center;
-    align-items: flex-end;
-    gap: 36px;
-    padding: 0;
-  }
-  .bell {
-    width: 86px; height: 76px;
-    cursor: pointer;
-    display: flex; align-items: flex-start; justify-content: center;
-    color: var(--orange);
-    -webkit-tap-highlight-color: transparent;
-    user-select: none;
-    transition: filter 0.2s ease;
-  }
-  .bell.big { width: 110px; height: 96px; color: var(--red); transform: translateY(7px); }
-  .bell-svg {
-    width: 100%; height: 100%;
-    transform-origin: 50% 8%;
-    animation: sway 5.4s ease-in-out infinite;
-    overflow: visible;
-  }
-  .bell.big .bell-svg { animation: sway 6.2s -1.4s ease-in-out infinite; }
-  .bell.active { filter: drop-shadow(0 0 14px currentColor); }
-  .bell.active .bell-svg { animation: ring 0.6s ease-in-out; }
-  @keyframes sway {
-    0%, 100% { transform: rotate(-1.6deg); }
-    50%      { transform: rotate(1.6deg); }
-  }
-  @keyframes ring {
-    0%   { transform: rotate(0deg); }
-    16%  { transform: rotate(-16deg); }
-    34%  { transform: rotate(12deg); }
-    52%  { transform: rotate(-8deg); }
-    72%  { transform: rotate(5deg); }
-    100% { transform: rotate(0deg); }
-  }
-  .bell-digit {
-    font-family: 'Orbitron', sans-serif;
-    font-weight: 700;
-    font-size: 7px;
-    fill: currentColor;
-    stroke: none;
-  }
-
-  .timeline-wrap { background: var(--bg-light); border-radius: 12px; padding: 14px 14px 14px; }
-  .timeline-label {
-    font-size: 10px; text-transform: uppercase; letter-spacing: 0.18em;
-    color: var(--muted); margin-bottom: 18px; text-align: center;
-  }
-  .timeline { position: relative; height: 70px; background: var(--bg); border-radius: 8px; overflow: visible; }
-  .time-axis {
-    position: absolute;
-    top: 50%;
-    left: 0;
-    right: 0;
-    height: 1px;
-    background: rgba(244, 244, 244, 0.22);
-    transform: translateY(-0.5px);
-    pointer-events: none;
-    z-index: 0;
-  }
-  .sec-mark {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    width: 1px;
-    background: rgba(244, 244, 244, 0.10);
-    pointer-events: none;
-    z-index: 0;
-  }
-  .tick { position: absolute; top: 0; bottom: 0; width: 1px; background: var(--line); }
-  .tick.major { background: rgba(244, 244, 244, 0.25); }
-  .axis-labels {
-    position: relative;
-    height: 20px;
-    margin-top: 14px;
-  }
-  .tick-num {
-    position: absolute; top: 0;
-    font-family: Arial, sans-serif;
-    font-size: 13px;
-    color: var(--ink);
-    transform: translateX(-50%);
-    pointer-events: none;
-    white-space: nowrap;
-  }
-  .tick-num.color-small { color: var(--orange); font-weight: 700; }
-  .tick-num.color-big   { color: var(--red);    font-weight: 700; }
-  .tick-num.color-meet  { color: var(--green);  font-weight: 700; }
-  .strike { position: absolute; width: 4px; border-radius: 2px; transition: box-shadow 0.3s, transform 0.3s, width 0.3s; z-index: 2; }
-  .strike.small { top: 8px; height: 22px; background: var(--orange); }
-  .strike.big   { bottom: 8px; height: 26px; background: var(--red); }
-  .strike.meet  { box-shadow: 0 0 14px currentColor; width: 6px; border-radius: 3px; }
-  .slot-fill {
-    position: absolute;
-    width: 0; height: 0;
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity 0.55s ease;
-    transform: translateX(-50%);
-    z-index: 2;
-  }
-  .slot-fill.show { opacity: 1; }
-  .slot-fill.small {
-    top: -8px;
-    border-left: 5px solid transparent;
-    border-right: 5px solid transparent;
-    border-top: 8px solid var(--orange);
-  }
-  .slot-fill.big {
-    bottom: -8px;
-    border-left: 5px solid transparent;
-    border-right: 5px solid transparent;
-    border-bottom: 8px solid var(--red);
-  }
-  .cursor { position: absolute; top: 0; bottom: 0; width: 2px; background: rgba(244,244,244,0.4); pointer-events: none; }
-  .meeting-row { position: relative; height: 38px; margin-top: 6px; }
-  .meeting-label {
-    position: absolute; top: 0;
-    display: flex; flex-direction: column; align-items: center;
-    transform: translateX(-50%);
-    opacity: 0; transition: opacity 0.5s ease;
-    pointer-events: none;
-  }
-  .meeting-label.show { opacity: 1; }
-  .meeting-label .arrow {
-    font-size: 12px; color: var(--green); line-height: 1; margin-bottom: 1px;
-  }
-  .meeting-label .num {
-    font-family: 'Orbitron', sans-serif; font-weight: 700;
-    font-size: 22px; color: var(--green);
-    text-shadow: 0 0 18px rgba(121, 158, 49, 0.55);
-    line-height: 1; letter-spacing: 0.04em;
-  }
-
-  .math-box {
-    background: var(--bg-light); border-radius: 12px; padding: 18px 14px;
-    text-align: center; font-family: 'Orbitron', sans-serif;
-    color: var(--orange); font-size: clamp(18px, 5vw, 22px);
-  }
-  .frac { display: inline-flex; flex-direction: column; align-items: center; vertical-align: middle; margin: 0 5px; line-height: 1; color: var(--ink); }
-  .frac .num { border-bottom: 2px solid var(--ink); padding: 0 7px 3px; }
-  .frac .den { padding: 3px 7px 0; }
-  .frac .num.color-small, .frac .den.color-small { color: var(--orange); }
-  .frac .num.color-big,   .frac .den.color-big   { color: var(--red); }
-  .frac .num.color-meet,  .frac .den.color-meet  { color: var(--green); }
-  .math-box .op { margin: 0 4px; color: var(--ink); }
-
-  .controls { display: flex; justify-content: center; align-items: center; gap: 14px; margin-top: auto; padding-top: 6px; }
-  .nav-btn {
-    background: transparent;
-    border: none;
-    color: var(--orange);
-    font-size: 20px;
-    padding: 8px 14px;
-    cursor: pointer;
-    -webkit-tap-highlight-color: transparent;
-    opacity: 0.5;
-    line-height: 1;
-    transition: opacity 0.15s, transform 0.1s;
-  }
-  .nav-btn:hover { opacity: 1; }
-  .nav-btn:active { transform: scale(0.92); }
-  .nav-btn:disabled { opacity: 0.15; cursor: default; }
-  .btn {
-    background: var(--orange); color: var(--bg); border: none; border-radius: 999px;
-    padding: 14px 30px; font-family: 'Orbitron', sans-serif; font-weight: 700;
-    font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer;
-    -webkit-tap-highlight-color: transparent; transition: transform 0.1s, opacity 0.15s;
-  }
-  .btn:active { transform: scale(0.97); }
-  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
-
-  .end { text-align: center; padding: 16px 8px; }
-  .end h2 {
-    font-family: 'Orbitron', sans-serif; font-size: 18px;
-    color: var(--orange); margin: 0 0 14px; letter-spacing: 0.04em;
-  }
-  .end p { font-size: 15px; line-height: 1.55; margin: 10px 0; color: var(--ink); }
-  .end .quiet { font-size: 13px; color: var(--muted); margin-top: 22px; }
-  .prize {
-    display: inline-block; margin-top: 18px; padding: 10px 18px;
-    border: 1.5px solid var(--orange); border-radius: 999px;
-    color: var(--orange); font-family: 'Orbitron', sans-serif;
-    font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase;
-  }
-
-  .scene-progress {
-    position: fixed;
-    top: 18px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 20;
-    font-family: Arial, sans-serif;
-    font-size: 11px;
-    color: rgba(244, 244, 244, 0.45);
-    pointer-events: none;
-    letter-spacing: 0.05em;
-  }
-  .scene-progress.hidden { display: none; }
-
-  .corner-btn {
-    position: fixed;
-    top: 16px;
-    z-index: 20;
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    background: transparent;
-    border: 1px solid rgba(244, 244, 244, 0.25);
-    color: var(--muted);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    -webkit-tap-highlight-color: transparent;
-    transition: transform 0.1s, opacity 0.2s, color 0.2s;
-  }
-  .corner-btn:hover { color: var(--ink); border-color: rgba(244, 244, 244, 0.5); }
-  .corner-btn:focus,
-  .corner-btn:focus-visible { outline: none; box-shadow: none; }
-  .corner-btn:active { transform: scale(0.93); }
-  .mute-btn { right: 14px; }
-  .settings-btn { right: 62px; opacity: 0.7; }
-  .settings-btn.has-key { color: var(--green); opacity: 1; }
-  .fullscreen-btn { right: 62px; }
-  .mute-btn.muted { color: var(--muted); }
-
-  /* ===== Phone-tighter (Pixel etc.) ===== */
-  @media (max-width: 480px) {
-    body {
-      padding: calc(10px + 2vh) 14px 14px;
-      gap: 10px;
-    }
-    h1 { font-size: clamp(18px, 5vw, 22px); }
-    .round-pill { margin-top: 4px; }
-    .bubble { padding: 12px 14px; font-size: 15px; min-height: 70px; }
-    .bell-row { gap: 28px; padding: 0; }
-    .bell { width: 68px; height: 62px; }
-    .bell.big { width: 90px; height: 78px; transform: translateY(6px); }
-    .timeline-wrap { padding: 10px 10px 12px; }
-    .timeline-label { font-size: 9px; margin-bottom: 12px; }
-    .timeline { height: 58px; }
-    .axis-labels { height: 18px; margin-top: 10px; }
-    .tick-num { font-size: 11px; letter-spacing: -0.5px; }
-    .tick-num.color-small, .tick-num.color-big, .tick-num.color-meet { font-size: 11px; }
-    .meeting-row { height: 32px; }
-    .meeting-label .num { font-size: 18px; }
-    .math-box { padding: 14px 10px; font-size: clamp(16px, 4.5vw, 20px); }
-    .controls { padding-top: 4px; }
-    .btn { padding: 12px 22px; font-size: 12px; }
-    .nav-btn { font-size: 18px; padding: 6px 10px; }
-  }
-
-  /* ===== Tutor overlay ===== */
-  .tutor-overlay {
-    --tutor-w: min(460px, 92vw);   /* shared column width: heading = bubble = timeline */
-    position: fixed;
-    inset: 0;
-    z-index: 15;
-    background: radial-gradient(ellipse at center, rgba(10, 29, 63, 0.92) 0%, rgba(3, 16, 42, 0.97) 70%);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-start;
-    padding: clamp(48px, 12vh, 130px) 24px 80px;
-    gap: 20px;
-    animation: fadeIn 0.4s ease forwards;
-  }
-  .tutor-overlay.hidden { display: none !important; }
-  .tutor-exit {
-    position: absolute;
-    top: 16px;
-    right: 16px;
-    background: transparent;
-    border: 1px solid rgba(244, 244, 244, 0.25);
-    color: var(--ink);
-    width: 36px; height: 36px;
-    border-radius: 50%;
-    font-size: 16px;
-    cursor: pointer;
-    -webkit-tap-highlight-color: transparent;
-  }
-  /* Corner pills — AI provider + voice toggles, side by side, top-left */
-  .tutor-corner-toggles {
-    position: absolute;
-    top: 16px;
-    left: 16px;
-    display: flex;
-    gap: 8px;
-    align-items: center;
-    flex-wrap: wrap;
-  }
-  .tutor-corner-pill {
-    background: transparent;
-    border: 1px solid rgba(244, 244, 244, 0.25);
-    color: var(--muted);
-    height: 36px;
-    padding: 0 14px;
-    border-radius: 999px;
-    font-family: 'Orbitron', sans-serif;
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    cursor: pointer;
-    white-space: nowrap;
-    outline: none;
-    -webkit-tap-highlight-color: transparent;
-    transition: color 0.2s, border-color 0.2s;
-  }
-  .tutor-corner-pill:hover { color: var(--ink); border-color: rgba(244, 244, 244, 0.5); }
-  /* No focus glow/ring when selected */
-  .tutor-corner-pill:focus,
-  .tutor-corner-pill:focus-visible { outline: none; box-shadow: none; }
-  /* Names follow the pill color (grey, white on hover) — no orange accent */
-  .tutor-corner-pill .ai-name,
-  .tutor-corner-pill .voice-name { color: inherit; }
-  /* Keep the historical name in its original spelling — no all-caps */
-  .tutor-corner-pill .voice-name { text-transform: none; letter-spacing: 0.02em; }
-  .tutor-heading {
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    width: var(--tutor-w);
-  }
-  .tutor-title {
-    font-family: 'Orbitron', sans-serif;
-    font-weight: 700;
-    font-size: clamp(17px, 5vw, 34px);
-    color: var(--orange);
-    margin: 0;
-    letter-spacing: 0.02em;
-    text-shadow: 0 0 24px rgba(245, 194, 66, 0.25);
-  }
-  .tutor-subtitle {
-    font-family: 'Orbitron', sans-serif;
-    font-weight: 400;
-    font-size: clamp(10px, 2.4vw, 15px);
-    color: var(--green);
-    letter-spacing: 0.04em;
-  }
-  .tutor-level {
-    font-family: 'Orbitron', sans-serif;
-    font-size: 11px;
-    color: var(--muted);
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    transition: color 0.3s ease;
-  }
-  /* Level-cleared: brief golden pulse on the rank label */
-  .tutor-level.rank-up {
-    color: var(--orange);
-    animation: rankPulse 1.4s ease;
-  }
-  @keyframes rankPulse {
-    0%   { transform: scale(1);    text-shadow: none; }
-    30%  { transform: scale(1.28); text-shadow: 0 0 20px rgba(245, 194, 66, 0.6); }
-    100% { transform: scale(1);    text-shadow: none; }
-  }
-  .tutor-bubble {
-    background: var(--bg-light);
-    border-left: 3px solid var(--orange);
-    border-radius: 14px;
-    padding: 16px 20px;
-    font-size: 16px;
-    line-height: 1.55;
-    color: var(--ink);
-    width: var(--tutor-w);
-    min-height: 90px;
-    box-sizing: border-box;
-    text-align: left;
-    transition: opacity 0.25s ease;
-  }
-  .tutor-problem {
-    display: flex;
-    gap: 10px;
-    align-items: baseline;
-    flex-wrap: wrap;
-    justify-content: center;
-    font-family: 'Orbitron', sans-serif;
-    font-size: clamp(22px, 6.5vw, 30px);
-    color: var(--ink);
-    font-weight: 700;
-  }
-  .tutor-kgv { font-family: 'Orbitron', sans-serif; color: var(--green); }
-  .tutor-a { color: var(--orange); }
-  .tutor-b { color: var(--red); }
-  .tutor-eq { color: var(--ink); }
-  .tutor-answer { color: var(--green); transition: color 0.4s, transform 0.4s; }
-  .tutor-answer.correct { color: var(--green); transform: scale(1.15); }
-  .tutor-input-row {
-    display: flex;
-    gap: 12px;
-    align-items: center;
-  }
-  /* Timeline replay inside the tutor (shown after a correct answer) needs an explicit
-     width — in the centered flex column a bare div would otherwise collapse. */
-  #tutor-overlay #timeline-wrap { width: var(--tutor-w); }
-  .tutor-input {
-    font-family: 'Orbitron', sans-serif;
-    font-weight: 700;
-    font-size: 24px;
-    text-align: center;
-    width: 160px;
-    height: 56px;
-    padding: 0;
-    border: 2px solid var(--muted);
-    border-radius: 999px;
-    background: var(--bg);
-    color: var(--orange);
-    caret-color: var(--green);
-    -webkit-appearance: none;
-    appearance: none;
-    transition: border-color 0.2s, box-shadow 0.2s;
-  }
-  .tutor-input:focus {
-    outline: none;
-    border-color: var(--green);
-    box-shadow: none;
-  }
-  .tutor-input::placeholder { color: var(--green); opacity: 1; }
-  .tutor-input:focus::placeholder { color: transparent; }
-  .tutor-input::-webkit-outer-spin-button,
-  .tutor-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-  .tutor-submit {
-    width: 160px;
-    height: 56px;
-    padding: 0;
-    font-size: 14px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .tutor-input.shake {
-    animation: shake 0.4s ease-in-out;
-    border-color: var(--red);
-    color: var(--red);
-  }
-  @keyframes shake {
-    0%, 100% { transform: translateX(0); }
-    20% { transform: translateX(-6px); }
-    40% { transform: translateX(6px); }
-    60% { transform: translateX(-4px); }
-    80% { transform: translateX(4px); }
-  }
-  .tutor-input.celebrate {
-    border-color: var(--green);
-    color: var(--green);
-    animation: celebrate 0.5s ease;
-  }
-  @keyframes celebrate {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.1); }
-  }
-
-  /* Intro corner "üben" button — direct jump to tutor */
-  .intro-practice-btn {
-    position: absolute;
-    bottom: 24px;
-    right: 22px;
-    z-index: 11;
-    background: rgba(8, 20, 42, 0.55);
-    backdrop-filter: blur(4px);
-    border: 1px solid rgba(121, 158, 49, 0.55);
-    color: var(--green);
-    padding: 8px 14px;
-    border-radius: 999px;
-    font-family: 'Orbitron', sans-serif;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    cursor: pointer;
-    -webkit-tap-highlight-color: transparent;
-    transition: transform 0.1s, background 0.15s;
-  }
-  .intro-practice-btn:hover { background: var(--green); color: var(--bg); }
-  .intro-practice-btn:active { transform: scale(0.95); }
-
-  /* End-screen "üben" button */
-  .end-practice-btn {
-    margin-top: 22px;
-    align-self: center;
-    padding: 12px 24px;
-    background: transparent;
-    border: 2px solid var(--green);
-    color: var(--green);
-    border-radius: 999px;
-    font-family: 'Orbitron', sans-serif;
-    font-weight: 700;
-    font-size: 13px;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    cursor: pointer;
-    -webkit-tap-highlight-color: transparent;
-    transition: transform 0.1s, background 0.15s, color 0.15s;
-  }
-  .end-practice-btn:hover { background: var(--green); color: var(--bg); }
-  .end-practice-btn:active { transform: scale(0.97); }
-
-  .hidden { display: none !important; }
-  .fade-in { animation: bubbleIn 0.45s ease forwards; }
-  @keyframes bubbleIn {
-    from { opacity: 0; transform: translateY(8px); }
-    to   { opacity: 1; transform: none; }
-  }
-</style>
-</head>
-<body>
-
-<div id="scene-progress" class="scene-progress hidden"></div>
-
-<button id="fullscreen-btn" class="corner-btn fullscreen-btn" aria-label="Vollbild" title="Vollbild">
-  <svg id="fs-icon-enter" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-    <path d="M3 9V5a2 2 0 0 1 2-2h4M21 9V5a2 2 0 0 0-2-2h-4M3 15v4a2 2 0 0 0 2 2h4M21 15v4a2 2 0 0 1-2 2h-4"/>
-  </svg>
-  <svg id="fs-icon-exit" class="hidden" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-    <path d="M9 3v4a2 2 0 0 1-2 2H3M21 9h-4a2 2 0 0 1-2-2V3M15 21v-4a2 2 0 0 1 2-2h4M3 15h4a2 2 0 0 1 2 2v4"/>
-  </svg>
-</button>
-
-<button id="mute-btn" class="corner-btn mute-btn" aria-label="Stimme an/aus" title="Stimme an/aus">
-  <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
-    <path id="mute-speaker" d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/>
-    <g id="mute-waves">
-      <path d="M16 8.5c1.6 1.6 1.6 5.4 0 7" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round"/>
-      <path d="M18.5 6c3 3 3 9 0 12" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round"/>
-    </g>
-    <g id="mute-cross" class="hidden">
-      <line x1="15" y1="9" x2="21" y2="15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-      <line x1="21" y1="9" x2="15" y2="15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-    </g>
-  </svg>
-</button>
-
-<!-- ===== Intro Overlay ===== -->
-<div id="intro" class="intro">
-  <div class="stars" id="stars"></div>
-
-  <svg class="moon" viewBox="0 0 80 80" aria-hidden="true">
-    <circle cx="40" cy="40" r="28" fill="#f5c242" opacity="0.92"/>
-    <circle cx="52" cy="36" r="24" fill="#03102a"/>
-  </svg>
-
-  <svg class="skyline" viewBox="0 0 400 220" preserveAspectRatio="xMidYMax meet" aria-hidden="true">
-    <defs>
-      <radialGradient id="doorGlow" cx="50%" cy="55%" r="55%">
-        <stop offset="0%"  stop-color="rgba(245,194,66,0.55)"/>
-        <stop offset="50%" stop-color="rgba(245,194,66,0.14)"/>
-        <stop offset="100%" stop-color="rgba(245,194,66,0)"/>
-      </radialGradient>
-    </defs>
-    <!-- left palm: detailed silhouette -->
-    <g transform="translate(58, 220) scale(0.34) translate(-200, -360)" fill="#020919">
-      <!-- trunk -->
-      <path d="M 185 360 L 215 360 Q 210 310 206 260 Q 202 210 205 160 L 195 160 Q 192 210 192 260 Q 190 310 185 360 Z"/>
-      <!-- coconuts -->
-      <circle cx="188" cy="158" r="10"/>
-      <circle cx="196" cy="164" r="11"/>
-      <circle cx="206" cy="156" r="9"/>
-      <!-- fronds -->
-      <path d="M 197 160 C 180 130 130 100 80 120 C 110 140 150 160 197 160 Z"/>
-      <path d="M 197 160 C 160 150 100 140 60 180 C 95 185 145 175 197 160 Z"/>
-      <path d="M 200 160 C 200 110 170 60 200 30 C 215 60 210 110 200 160 Z"/>
-      <path d="M 203 160 C 220 130 270 100 320 120 C 290 140 250 160 203 160 Z"/>
-      <path d="M 203 160 C 240 150 300 140 340 180 C 305 185 255 175 203 160 Z"/>
-      <path d="M 196 162 C 150 170 110 190 85 240 C 110 220 160 190 196 162 Z"/>
-      <path d="M 204 162 C 250 170 290 190 315 240 C 290 220 240 190 204 162 Z"/>
-    </g>
-
-    <!-- left minaret -->
-    <g transform="translate(118,220)" fill="#020919">
-      <rect x="-5" y="-150" width="10" height="150"/>
-      <rect x="-9" y="-160" width="18" height="12"/>
-      <ellipse cx="0" cy="-168" rx="7" ry="9"/>
-      <line x1="0" y1="-178" x2="0" y2="-190" stroke="#020919" stroke-width="2"/>
-      <path d="M-3,-190 a3,3 0 1,0 6,0 z"/>
-      <!-- balcony rail dots -->
-      <rect x="-9" y="-148" width="2" height="3"/>
-      <rect x="-3" y="-148" width="2" height="3"/>
-      <rect x="3" y="-148" width="2" height="3"/>
-      <rect x="7" y="-148" width="2" height="3"/>
-    </g>
-
-    <!-- main mosque (House of Wisdom) — onion dome with finial -->
-    <g transform="translate(200,220)">
-      <!-- rectangular base -->
-      <rect x="-58" y="-88" width="116" height="88" fill="#020919"/>
-      <!-- onion dome: pointed peak, slight bulge -->
-      <path d="M-60,-88
-               C-66,-108 -66,-128 -42,-136
-               C-46,-150 -25,-160 0,-162
-               C25,-160 46,-150 42,-136
-               C66,-128 66,-108 60,-88 Z" fill="#020919"/>
-      <!-- finial (slim spire + ball on top) -->
-      <line x1="0" y1="-162" x2="0" y2="-178" stroke="#020919" stroke-width="2.5" stroke-linecap="round"/>
-      <circle cx="0" cy="-181" r="3" fill="#020919"/>
-      <!-- decorative cornice between base and dome -->
-      <rect x="-60" y="-91" width="120" height="4" fill="#020919"/>
-      <!-- door light aura -->
-      <ellipse class="door-aura" cx="0" cy="-14" rx="44" ry="42" fill="url(#doorGlow)"/>
-      <!-- arched door, lit and pulsing -->
-      <path class="door-light" d="M-10,0 V-26 Q-10,-38 0,-38 Q10,-38 10,-26 V0 Z" fill="#f5c242"/>
-      <!-- arched lit windows in a row -->
-      <path d="M-40,-52 Q-40,-62 -34,-62 Q-28,-62 -28,-52 Z" fill="#f5c242" opacity="0.6"/>
-      <path d="M-22,-52 Q-22,-62 -16,-62 Q-10,-62 -10,-52 Z" fill="#f5c242" opacity="0.45"/>
-      <path d="M-4,-52 Q-4,-62 2,-62 Q8,-62 8,-52 Z" fill="#f5c242" opacity="0.55"/>
-      <path d="M14,-52 Q14,-62 20,-62 Q26,-62 26,-52 Z" fill="#f5c242" opacity="0.7"/>
-      <path d="M32,-52 Q32,-62 38,-62 Q44,-62 44,-52 Z" fill="#f5c242" opacity="0.4"/>
-    </g>
-
-
-    <!-- right minaret -->
-    <g transform="translate(298,220)" fill="#020919">
-      <rect x="-4.5" y="-135" width="9" height="135"/>
-      <rect x="-8" y="-146" width="16" height="11"/>
-      <ellipse cx="0" cy="-153" rx="6.5" ry="8.5"/>
-      <line x1="0" y1="-162" x2="0" y2="-172" stroke="#020919" stroke-width="2"/>
-      <path d="M-2.5,-172 a2.5,2.5 0 1,0 5,0 z"/>
-    </g>
-
-    <!-- right palm: mirrored, taller, different frond pattern -->
-    <g transform="translate(345, 220) scale(-0.40, 0.40) translate(-200, -360)" fill="#020919">
-      <path d="M 185 360 L 215 360 Q 210 310 206 260 Q 202 210 205 160 L 195 160 Q 192 210 192 260 Q 190 310 185 360 Z"/>
-      <circle cx="188" cy="158" r="9"/>
-      <circle cx="198" cy="166" r="11"/>
-      <circle cx="208" cy="155" r="10"/>
-      <!-- different fronds: asymmetric, more upward sweep on one side -->
-      <path d="M 197 160 C 175 125 115 88 60 100 C 100 132 150 158 197 160 Z"/>
-      <path d="M 197 160 C 150 148 90 138 50 175 C 88 188 140 178 197 160 Z"/>
-      <path d="M 200 160 C 196 100 162 50 195 15 C 222 45 218 102 200 160 Z"/>
-      <path d="M 203 160 C 225 135 270 102 318 115 C 290 138 248 156 203 160 Z"/>
-      <path d="M 203 160 C 245 152 305 144 345 188 C 305 193 252 178 203 160 Z"/>
-      <path d="M 196 162 C 145 175 105 200 75 250 C 105 225 158 195 196 162 Z"/>
-      <path d="M 204 162 C 258 175 300 200 325 250 C 295 222 247 195 204 162 Z"/>
-    </g>
-
-    <!-- ground -->
-    <rect x="0" y="218" width="400" height="20" fill="#020919"/>
-  </svg>
-
-
-  <div class="intro-text">
-    <h1 class="intro-title" id="intro-title">Die Glocken von Bagdad</h1>
-    <div class="intro-date" id="intro-date">Bagdad · vor fast 1200 Jahren<br>Eine wahre Geschichte?</div>
-  </div>
-
-  <div class="narration hidden" id="narration">
-    <p class="n-para" id="n1"></p>
-    <p class="n-para" id="n2"></p>
-    <p class="n-para" id="n3"></p>
-  </div>
-
-  <div class="intro-tap start" id="intro-tap-1">Tippen, um die Geschichte zu hören</div>
-  <div class="intro-tap" id="intro-tap-2">Tippen, um zu beginnen</div>
-
-  <div class="end-overlay hidden" id="end-overlay"></div>
-
-  <button class="intro-practice-btn" id="intro-practice-btn" title="Direkt mit Khwārizmī üben">Gleich zum Üben</button>
-</div>
-
-<!-- ===== Quest UI (under the intro overlay) ===== -->
-<header>
-  <h1>Die Glocken von Bagdad</h1>
-  <div class="round-pill" id="round-pill">Runde 1 von 3</div>
-</header>
-
-<div id="bubble" class="bubble"></div>
-
-<div id="bells" class="bell-row">
-  <div class="bell" id="bell-small" data-period="3">
-    <svg class="bell-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-      <path d="M10 5a2 2 0 1 1 4 0a7 7 0 0 1 4 6v3a4 4 0 0 0 2 3h-16a4 4 0 0 0 2 -3v-3a7 7 0 0 1 4 -6"/>
-      <path d="M9 17v1a3 3 0 0 0 6 0v-1"/>
-      <text x="12" y="14" text-anchor="middle" class="bell-digit">3</text>
-    </svg>
-  </div>
-  <div class="bell big" id="bell-big" data-period="4">
-    <svg class="bell-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-      <path d="M10 5a2 2 0 1 1 4 0a7 7 0 0 1 4 6v3a4 4 0 0 0 2 3h-16a4 4 0 0 0 2 -3v-3a7 7 0 0 1 4 -6"/>
-      <path d="M9 17v1a3 3 0 0 0 6 0v-1"/>
-      <text x="12" y="14" text-anchor="middle" class="bell-digit">4</text>
-    </svg>
-  </div>
-</div>
-
-<div id="timeline-wrap" class="timeline-wrap hidden">
-  <div class="timeline-label" id="timeline-label">Zeitleiste</div>
-  <div class="timeline" id="timeline">
-    <div class="time-axis"></div>
-    <div class="cursor" id="cursor"></div>
-  </div>
-  <div class="axis-labels" id="axis-labels"></div>
-  <div class="meeting-row">
-    <div class="meeting-label" id="meeting-label">
-      <div class="arrow">↑</div>
-      <div class="num">12</div>
-    </div>
-  </div>
-</div>
-
-<div id="math-area" class="hidden"></div>
-
-<div id="end-area" class="hidden"></div>
-
-<div class="controls" id="controls">
-  <button id="prev-btn" class="nav-btn" aria-label="Zurück" title="Zurück">◀</button>
-  <button id="next-btn" class="btn">Lass sie läuten</button>
-  <button id="forward-btn" class="nav-btn" aria-label="Vor" title="Vor">▶</button>
-</div>
-
-<!-- ===== Tutor overlay (after extro) ===== -->
-<div class="tutor-overlay hidden" id="tutor-overlay">
-  <div class="tutor-corner-toggles">
-    <button class="tutor-corner-pill tutor-ai-toggle" id="tutor-ai-toggle" title="Tutor-KI umschalten">KI · <span class="ai-name" id="tutor-ai-name">Gemini</span></button>
-    <button class="tutor-corner-pill tutor-voice-toggle" id="tutor-voice-toggle" title="Stimme umschalten"><span class="voice-name" id="tutor-voice-name">Herr al-Khwārizmī</span></button>
-  </div>
-  <button class="tutor-exit" id="tutor-exit" aria-label="Beenden" title="Beenden">✕</button>
-  <div class="tutor-heading">
-    <h2 class="tutor-title">Suche den gemeinsamen Takt</h2>
-    <div class="tutor-subtitle">Suche das kleinste gemeinsame Vielfache, das kgV</div>
-  </div>
-  <div class="tutor-level" id="tutor-level">Übung · Level 1</div>
-  <div class="tutor-bubble" id="tutor-bubble"></div>
-  <div class="tutor-problem">
-    <span class="tutor-kgv">kgV</span>
-    <span>von</span>
-    <span class="tutor-a" id="tutor-a">2</span>
-    <span>und</span>
-    <span class="tutor-b" id="tutor-b">4</span>
-    <span class="tutor-eq">=</span>
-    <span class="tutor-answer" id="tutor-answer">?</span>
-  </div>
-  <div class="tutor-input-row">
-    <input type="number" inputmode="numeric" pattern="[0-9]*" class="tutor-input" id="tutor-input" min="1" max="999" placeholder="?" autocomplete="off" aria-label="Antwort eingeben">
-    <button class="btn tutor-submit" id="tutor-submit">Prüfen</button>
-  </div>
-</div>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
-<script src="js/debug-window.js"></script>
-<script>
 (() => {
   // Boot DebugWindow (collapsed by default — click pill bottom-right to open)
   if (window.DebugWindow && typeof DebugWindow.init === 'function') DebugWindow.init();
@@ -1416,6 +358,7 @@ Du bekommst pro Schritt einen JSON-Kontext und antwortest AUSSCHLIESSLICH mit g�
 }
 
 Regeln:
+- MATHE-FAKTEN — RECHNE NIEMALS SELBST: Du bekommst geprüfte Wahrheitswerte: a_passt, b_passt, beide_passen, ist_kgv, antwort_zu_gross, antwort_zu_klein. Stütze JEDE Aussage NUR auf diese Werte. Behaupte NIEMALS, dass beide Zahlen "reinpassen", wenn beide_passen=false. Wenn nur a_passt (b_passt=false): sag, dass die andere Zahl noch NICHT hineingeht — und umgekehrt. Wenn beide_passen=true, aber ist_kgv=false: lobe, dass beide reinpassen, und frage nach einer KLEINEREN Zahl. Verrate nie die Lösung.
 - Bei korrekter Antwort beim 1. Versuch: feedback *begeistert* und feiernd, celebrate=true, difficulty_change="harder".
 - BEGEISTERUNG & VIELFALT: Starte fast immer mit einem coolen, mitreißenden Ausruf — variiere ihn STARK und wiederhole dich nie ("Bingo!", "Ausgezeichnet!", "Krass!", "Volltreffer!", "Wahnsinn!", "Glasklar!", "Boom!", "Wunderbar!", "Stark!", …). Sei energiegeladen wie ein begeisterter Trainer, nicht steif. Manchmal auch mal ganz ohne Ausruf, damit es echt bleibt.
 - Bei korrekter Antwort nach mehreren Versuchen: feedback ermutigend, celebrate=false, difficulty_change="same".
@@ -1590,12 +533,19 @@ Regeln:
   const tutorBEl     = document.getElementById('tutor-b');
   const tutorInput   = document.getElementById('tutor-input');
   const tutorSubmit  = document.getElementById('tutor-submit');
+  const tutorHint    = document.getElementById('tutor-hint');
   const tutorExit    = document.getElementById('tutor-exit');
   const tutorAiToggle = document.getElementById('tutor-ai-toggle');
   const tutorAiName   = document.getElementById('tutor-ai-name');
   const tutorVoiceToggle = document.getElementById('tutor-voice-toggle');
   const tutorVoiceName   = document.getElementById('tutor-voice-name');
+  const cornerToggles    = document.querySelector('.tutor-corner-toggles');
   let lastTutorSpeech = '';   // last text spoken — re-spoken when the voice is switched
+
+  // Voice + AI pills are shown ONLY on the start (intro) screen.
+  function showCornerToggles(visible) {
+    if (cornerToggles) cornerToggles.classList.toggle('hidden', !visible);
+  }
 
   function refreshAiToggle() {
     if (tutorAiName) tutorAiName.textContent = AI_PROVIDERS[aiProvider()].label;
@@ -1619,7 +569,12 @@ Regeln:
     return speak(text);
   }
 
-  function showProblem(p) {
+  // The question for a pair — always describes the CURRENT problem.
+  function problemPrompt(p) {
+    return "Was ist der gemeinsame Takt von *" + p.a + "* und *" + p.b + "*?";
+  }
+
+  function showProblem(p, intro) {
     hideTutorTimeline();
     tutorState.currentProblem = p;
     tutorState.attempts = 0;
@@ -1634,6 +589,8 @@ Regeln:
     tutorInput.classList.remove('shake', 'celebrate');
     const ansEl = document.getElementById('tutor-answer');
     if (ansEl) { ansEl.textContent = '?'; ansEl.classList.remove('correct'); }
+    // Always describe the new problem in the bubble (with an optional intro for the very first)
+    setTutorBubble((intro ? intro + " [break:0.5s] " : "") + problemPrompt(p));
     setTimeout(() => tutorInput.focus(), 200);
   }
 
@@ -1653,14 +610,14 @@ Regeln:
       } catch (e) {}
     }
     tutorReturnTo = from || 'end';
+    showCornerToggles(false);   // tutor is not the start screen → hide the pills
     document.getElementById('end-overlay').classList.add('hidden');
     tutorOverlay.classList.remove('hidden');
     tutorState.history = [];
     tutorState.masteredTop = false;
     loadLevelBag(1);                   // sets difficulty = 1 and fills the shuffled bag
     const p = nextProblemFromBag();
-    showProblem(p);
-    setTutorBubble("Lass uns *üben*! [break:0.5s] Wann passen die *" + p.a + "* und die *" + p.b + "* zusammen in einen Takt?");
+    showProblem(p, "Lass uns *üben*!");
   }
 
   function exitTutor() {
@@ -1669,8 +626,10 @@ Regeln:
     tutorOverlay.classList.add('hidden');
     if (tutorReturnTo === 'end') {
       document.getElementById('end-overlay').classList.remove('hidden');
+    } else {
+      // Returning to the still-visible intro (start screen) → bring the pills back
+      showCornerToggles(true);
     }
-    // For 'intro' return target: intro overlay is still visible underneath, no action needed
   }
 
   // ===== Tutor: replay the story timeline for the just-solved pair =====
@@ -1755,6 +714,9 @@ Regeln:
     const p = tutorState.currentProblem;
     tutorState.attempts++;
     const correct = guess === p.answer;
+    // Locally verified facts — the AI must NOT do its own arithmetic (it gets these wrong)
+    const aFits = guess % p.a === 0;
+    const bFits = guess % p.b === 0;
 
     if (correct) {
       tutorInput.classList.add('celebrate');
@@ -1775,6 +737,13 @@ Regeln:
       attempts: tutorState.attempts,
       difficulty: tutorState.difficulty,
       correct: correct,
+      // Verified facts (do not recompute):
+      a_passt: aFits,                 // does a divide the guess?
+      b_passt: bFits,                 // does b divide the guess?
+      beide_passen: aFits && bFits,   // is the guess a common multiple at all?
+      ist_kgv: correct,
+      antwort_zu_gross: guess > p.answer,
+      antwort_zu_klein: guess < p.answer,
     });
     tutorSubmit.disabled = false;
 
@@ -1816,6 +785,27 @@ Regeln:
   tutorInput.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') { e.preventDefault(); submitTutorAnswer(); }
   });
+
+  // Hint: a strategy tip for the current problem — never reveals the answer
+  function hintForProblem(p) {
+    const lo = Math.min(p.a, p.b), hi = Math.max(p.a, p.b);
+    const pick = arr => arr[Math.floor(Math.random() * arr.length)];
+    return pick([
+      "Tipp: [break:0.3s] Zähl die Vielfachen der *" + hi + "* — " + hi + ", " + (hi * 2) + ", " + (hi * 3) + " … [break:0.3s] welche davon lässt sich auch durch *" + lo + "* teilen?",
+      "Tipp: [break:0.3s] Geh in *" + hi + "*er-Schritten und prüf jedes Mal: passt die *" + lo + "* auch genau hinein? Die erste, die klappt, ist das kgV.",
+      "Tipp: [break:0.3s] Such die kleinste Zahl, in die *beide* — die *" + lo + "* und die *" + hi + "* — ganz ohne Rest hineinpassen."
+    ]);
+  }
+  if (tutorHint) {
+    tutorHint.addEventListener('click', () => {
+      if (_tutorAdvancing) return;
+      const p = tutorState.currentProblem;
+      if (!p) return;
+      setTutorBubble(hintForProblem(p));
+      tutorInput.focus();
+    });
+  }
+
   tutorExit.addEventListener('click', exitTutor);
   if (tutorAiToggle) {
     tutorAiToggle.addEventListener('click', () => {
@@ -1867,6 +857,8 @@ Regeln:
   // doesn't read "6" at sentence end as "der Sechste" / a date.
   function toSSML(text) {
     let s = text;
+    // drop thinking-interjections Google TTS mangles ("Hmm", "Uhm", "Ähm" …) from the spoken text
+    s = s.replace(/\b(?:[Hh]m+|[UuÄäÖöMm]h+m*)\b\s*[,.…]?\s*/g, '');
     // pre-tokenize pause markers so they survive XML escape:  [break:1s] / [break:0.5s]
     s = s.replace(/\[break:(\d+(?:\.\d+)?)s?\]/gi, (_, t) => `\u0000BREAK${t}\u0001`);
     s = s
@@ -2033,8 +1025,8 @@ Regeln:
 
   // ===== Bell samples =====
   const BELL_PATHS = {
-    small: 'resources/bells/wingsoarstudio-anvil-bell-2-wav-485668.mp3',
-    big:   'resources/bells/koiroylers-clear-bell-notification-sound-351709.mp3',
+    small: '../resources/bells/wingsoarstudio-anvil-bell-2-wav-485668.mp3',
+    big:   '../resources/bells/koiroylers-clear-bell-notification-sound-351709.mp3',
   };
   const bellBuffers = { small: null, big: null };
   const bellOnsets  = { small: 0,    big: 0 };
@@ -2393,20 +1385,46 @@ Regeln:
   }
   window.addEventListener('resize', relayout);
 
-  function showMath() {
+  // 1/a + 1/b = (L/a)/L + (L/b)/L = sum/L, with L = kgV. Defaults to the current round.
+  function showMath(a, b) {
+    a = a || state.small; b = b || state.big;
+    const L = lcm(a, b);
+    const na = L / a, nb = L / b, sum = na + nb;
     mathArea.classList.remove('hidden');
     mathArea.innerHTML = `
       <div class="math-box fade-in">
-        <span class="frac"><span class="num">1</span><span class="den color-small">3</span></span>
+        <span class="frac"><span class="num">1</span><span class="den color-small">${a}</span></span>
         <span class="op">+</span>
-        <span class="frac"><span class="num">1</span><span class="den color-big">4</span></span>
+        <span class="frac"><span class="num">1</span><span class="den color-big">${b}</span></span>
         <span class="op">=</span>
-        <span class="frac"><span class="num color-big">4</span><span class="den color-meet">12</span></span>
+        <span class="frac"><span class="num color-small">${na}</span><span class="den color-meet">${L}</span></span>
         <span class="op">+</span>
-        <span class="frac"><span class="num color-small">3</span><span class="den color-meet">12</span></span>
+        <span class="frac"><span class="num color-big">${nb}</span><span class="den color-meet">${L}</span></span>
         <span class="op">=</span>
-        <span class="frac"><span class="num">7</span><span class="den color-meet">12</span></span>
+        <span class="frac"><span class="num">${sum}</span><span class="den color-meet">${L}</span></span>
       </div>`;
+  }
+
+  // Summary: the three examples in full form (1/a + 1/b = na/L + nb/L = sum/L).
+  function showSummary() {
+    tlWrap.classList.add('hidden');     // no timeline on the summary screen
+    bellsRow.classList.add('hidden');   // and no bells either — just the rule + equations
+    const row = (a, b) => {
+      const L = lcm(a, b), na = L / a, nb = L / b, sum = na + nb;
+      return `<div class="math-box fade-in" style="margin:6px 0;">
+        <span class="frac"><span class="num">1</span><span class="den color-small">${a}</span></span>
+        <span class="op">+</span>
+        <span class="frac"><span class="num">1</span><span class="den color-big">${b}</span></span>
+        <span class="op">=</span>
+        <span class="frac"><span class="num color-small">${na}</span><span class="den color-meet">${L}</span></span>
+        <span class="op">+</span>
+        <span class="frac"><span class="num color-big">${nb}</span><span class="den color-meet">${L}</span></span>
+        <span class="op">=</span>
+        <span class="frac"><span class="num">${sum}</span><span class="den color-meet">${L}</span></span>
+      </div>`;
+    };
+    mathArea.classList.remove('hidden');
+    mathArea.innerHTML = row(3, 4) + row(2, 3) + row(2, 4);
   }
 
   async function showEnd(instant) {
@@ -2429,6 +1447,7 @@ Regeln:
     if (introDate)  introDate.style.display  = 'none';
     if (tap1)       tap1.style.display       = 'none';
     if (tap2)       tap2.style.display       = 'none';
+    if (introPracticeBtn) introPracticeBtn.style.display = 'none';   // end screen has its own practice button
     if (narrationBox) narrationBox.classList.add('hidden');
 
     // Populate and reveal end overlay
@@ -2587,15 +1606,86 @@ Regeln:
     {
       bubble: "Genau diese sieben von zwölf hast du gerade gezählt. Das ist die Summe von einem Drittel und einem Viertel — oder von vier Zwölfteln und drei Zwölfteln — ergibt 4 + 3 = 7, also 7 Zwölftel — 7/12.",
       speech: "Genau diese sieben von zwölf hast du gerade gezählt. Das ist die Summe von einem Drittel und einem Viertel — oder von vier Zwölfteln und drei Zwölfteln — ergibt vier plus drei ist gleich sieben, also sieben Zwölftel.",
-      btn: "Punchline",
+      btn: "Noch ein Beispiel",
       onEnter: () => showMath(),
     },
-    // 15 — Punchline
+
+    // ===== Example 2: 2 & 3 → 5/6 (fully shown again, same structure) =====
     {
-      bubble: "Genau so funktioniert Brüche addieren oder subtrahieren! Man sucht das kgV und rechnet. Wie man es sucht, hast du gesehen: Man sucht den gemeinsamen Takt!",
-      btn: "Quest beenden",
+      bubble: "Nochmal — neue Glocken: 2 und 3. Das kgV ist 6. Wir teilen die Zeit bis 6 in 6 gleiche Stücke.",
+      speech: "Nochmal — neue Glocken: zwei und drei. Das kgV ist sechs. Wir teilen die Zeit bis sechs in sechs gleiche Stücke.",
+      btn: "Die kleine Glocke?",
+      onEnter: () => {
+        mathArea.classList.add('hidden');   // clear the previous example's equation
+        mathArea.innerHTML = '';
+        setRound(2, 3, "Beispiel 2");
+        state.tEnd = state.L + 1;
+        tlLabel.textContent = "Zeit bis 6 — in 6 Stücke";
+        clearTimeline();
+        drawTimeAxis();
+        divideIntoN(6);
+        drawAllStrikes();
+        highlightMeeting();
+      },
     },
-    // 16 — End
+    {
+      bubble: "Die kleine schlägt jedes zweite Stück — bei 2, 4 und 6. Drei von sechs sind gelb. Das sind drei Sechstel — oder gekürzt ein Halb, also 1/2.",
+      speech: "Die kleine schlägt jedes zweite Stück — bei zwei, vier und sechs. Drei von sechs sind gelb. Das sind drei Sechstel — oder gekürzt ein Halb.",
+      btn: "Und die große?",
+      onEnter: (d, instant) => showSlots(state.small, 'small', instant),
+    },
+    {
+      bubble: "Die große schlägt jedes dritte Stück — bei 3 und 6. Zwei von sechs sind rot. Das sind zwei Sechstel — oder gekürzt ein Drittel, also 1/3.",
+      speech: "Die große schlägt jedes dritte Stück — bei drei und sechs. Zwei von sechs sind rot. Das sind zwei Sechstel — oder gekürzt ein Drittel.",
+      btn: "Zusammen?",
+      onEnter: (d, instant) => showSlots(state.big, 'big', instant),
+    },
+    {
+      bubble: "Drei gelbe, zwei rote — zusammen fünf von sechs. Also: 1/2 + 1/3 = 3/6 + 2/6 = 5/6.",
+      speech: "Drei gelbe, [break:1s] zwei rote — zusammen fünf von sechs. Also: ein Halb plus ein Drittel ist drei Sechstel plus zwei Sechstel — ergibt fünf Sechstel.",
+      btn: "Jetzt du!",
+      onEnter: () => showMath(2, 3),
+    },
+
+    // ===== Example 3: 2 & 4 → 3/4 (interactive — the child counts) =====
+    {
+      bubble: "Jetzt zähl du! Neue Glocken: 2 und 4. Das kgV ist 4 — also haben wir vier Stücke. Gelb schlägt bei 2 und 4, rot bei 4. Wieviele Schläge haben wir insgesamt?",
+      speech: "Jetzt zähl du! Neue Glocken: zwei und vier. Das k g V ist vier — also haben wir vier Stücke. Gelb schlägt bei zwei und vier, rot bei vier. Wie viele Schläge haben wir insgesamt?",
+      ask: {
+        options: [2, 3, 4],
+        answer: 3,
+        hintWrong: "Zähl die Schläge in Ruhe: zwei gelbe und einer rot — zusammen?",
+      },
+      onEnter: (d, instant) => {
+        mathArea.classList.add('hidden');   // clear the previous example's equation
+        mathArea.innerHTML = '';
+        setRound(2, 4, "Beispiel 3");
+        state.tEnd = state.L + 1;
+        tlLabel.textContent = "Zeit bis 4 — in 4 Stücke";
+        clearTimeline();
+        drawTimeAxis();
+        divideIntoN(4);
+        drawAllStrikes();
+        highlightMeeting();
+        showSlots(state.small, 'small', instant);
+        showSlots(state.big, 'big', instant);
+      },
+    },
+    {
+      bubble: "Genau — drei von vier! Also: 1/2 + 1/4 = 2/4 + 1/4 = 3/4.",
+      speech: "Genau — drei von vier! Also: ein Halb plus ein Viertel ist zwei Viertel plus ein Viertel — ergibt drei Viertel.",
+      btn: "Zusammengefasst",
+      onEnter: () => showMath(2, 4),
+    },
+
+    // ===== Summary: the rule + all three results =====
+    {
+      bubble: "Du gehst immer gleich vor: Gelbe zählen, rote zählen, addieren — das ist der Zähler, das kgV der Nenner. So addierst oder subtrahierst Du immer Brüche!",
+      speech: "Du gehst immer gleich vor: Gelbe zählen, rote zählen, addieren — das ist der Zähler oben, das k g V der Nenner unten. So addierst oder subtrahierst du immer Brüche!",
+      btn: "Quest beenden",
+      onEnter: () => showSummary(),
+    },
+    // End
     {
       skipAutoBtn: true,
       onEnter: (speakingDone, instant) => showEnd(instant),
@@ -2614,6 +1704,42 @@ Regeln:
     }
   }
 
+  // ===== Tap-to-answer bar (interactive story scenes) =====
+  const answerBar = document.getElementById('answer-bar');
+  const fwdBtn    = document.getElementById('forward-btn');
+
+  function hideAnswerBar() {
+    if (!answerBar) return;
+    answerBar.classList.add('hidden');
+    answerBar.innerHTML = '';
+  }
+  function showAnswerBar(scene) {
+    if (!answerBar || !scene.ask) return;
+    const { options, answer, hintWrong } = scene.ask;
+    answerBar.innerHTML = '';
+    options.forEach(val => {
+      const b = document.createElement('button');
+      b.className = 'answer-opt';
+      b.textContent = val;
+      b.addEventListener('click', () => {
+        if (b.disabled) return;
+        if (val === answer) {
+          b.classList.add('correct');
+          answerBar.querySelectorAll('.answer-opt').forEach(o => o.disabled = true);
+          // brief beat on the green answer, then advance to the reveal scene
+          setTimeout(() => { hideAnswerBar(); advance(false); }, 750);
+        } else {
+          b.classList.remove('wrong'); void b.offsetWidth;  // restart the shake
+          b.classList.add('wrong');
+          setTimeout(() => b.classList.remove('wrong'), 500);
+          if (hintWrong) { stopAllSpeech(); speak(hintWrong); }
+        }
+      });
+      answerBar.appendChild(b);
+    });
+    answerBar.classList.remove('hidden');
+  }
+
   let sceneIdx = -1;
   function advance(instant = false) {
     audio();
@@ -2621,7 +1747,14 @@ Regeln:
     sceneIdx++;
     const s = scenes[sceneIdx];
     if (!s) return;
+    // Persist current scene so a reload resumes here (cleared once the end is reached)
+    try {
+      if (sceneIdx >= scenes.length - 1) localStorage.removeItem('glocken_scene');
+      else localStorage.setItem('glocken_scene', String(sceneIdx));
+    } catch (e) {}
+    hideAnswerBar();
     nextBtn.disabled = false; // always re-enable when entering a new scene
+    if (fwdBtn) fwdBtn.disabled = false;
     if (s.btn && !s.skipAutoBtn) nextBtn.textContent = s.btn;
     updateProgress();
     if (instant) {
@@ -2635,10 +1768,17 @@ Regeln:
       const speakingDone = s.bubble ? setBubble(s.bubble, s.speech) : Promise.resolve();
       if (s.onEnter) s.onEnter(speakingDone, false);
     }
+    // Interactive scene: show the tap bar and block skipping until answered
+    if (s.ask) {
+      showAnswerBar(s);
+      nextBtn.disabled = true;
+      if (fwdBtn) fwdBtn.disabled = true;
+    }
   }
 
   function hardReset() {
     stopAllAudio();
+    hideAnswerBar();
     clearTimeline();
     tlWrap.classList.add('hidden');
     mathArea.classList.add('hidden');
@@ -2858,6 +1998,7 @@ Regeln:
     if (introPhase === 'gone') return;
     introPhase = 'gone';
     stopAllSpeech();
+    showCornerToggles(false);   // leaving the start screen → hide the pills
     intro.classList.add('gone');
     setTimeout(() => {
       intro.style.display = 'none';
@@ -2871,7 +2012,17 @@ Regeln:
     else if (introPhase === 'narrating') skipNarration();
     else if (introPhase === 'ready') dismissIntro();
   });
+
+  // Resume at the last visited scene on reload (skip the intro). Cleared at the end,
+  // so finishing the quest shows the intro fresh next time.
+  try {
+    const saved = parseInt(localStorage.getItem('glocken_scene'), 10);
+    if (!isNaN(saved) && saved >= 0 && saved < scenes.length) {
+      introPhase = 'gone';
+      intro.classList.add('gone');
+      intro.style.display = 'none';
+      showCornerToggles(false);
+      for (let i = 0; i <= saved; i++) advance(true);
+    }
+  } catch (e) {}
 })();
-</script>
-</body>
-</html>
