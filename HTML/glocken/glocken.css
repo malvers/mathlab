@@ -392,8 +392,10 @@
   .tick-num.color-big   { color: var(--red);    font-weight: 700; }
   .tick-num.color-meet  { color: var(--green);  font-weight: 700; }
   .strike { position: absolute; width: 4px; border-radius: 2px; transition: box-shadow 0.3s, transform 0.3s, width 0.3s; z-index: 2; }
-  .strike.small { top: 8px; height: 22px; background: var(--orange); }
-  .strike.big   { bottom: 8px; height: 26px; background: var(--red); }
+  /* Heights are relative to the track so strikes always stay in their half (gap in the middle),
+     regardless of timeline height — no overflow on shorter mobile tracks. */
+  .strike.small { top: 8px;    height: calc(50% - 10px); background: var(--orange); }
+  .strike.big   { bottom: 8px; height: calc(50% - 10px); background: var(--red); }
   .strike.meet  { box-shadow: 0 0 14px currentColor; width: 6px; border-radius: 3px; }
   .slot-fill {
     position: absolute;
@@ -669,6 +671,33 @@
     color: var(--green);
     letter-spacing: 0.04em;
   }
+  /* Mode selector — kgV / Plus / Minus (segmented pills) */
+  .tutor-modes {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .tutor-mode {
+    background: transparent;
+    border: 1px solid rgba(244, 244, 244, 0.25);
+    color: var(--muted);
+    border-radius: 999px;
+    padding: 7px 16px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    outline: none;
+    -webkit-tap-highlight-color: transparent;
+    transition: color 0.2s, border-color 0.2s, background 0.2s;
+  }
+  .tutor-mode:hover { color: var(--ink); border-color: rgba(244, 244, 244, 0.5); }
+  .tutor-mode.active { color: var(--bg); background: var(--orange); border-color: var(--orange); }
+  .tutor-mode:focus, .tutor-mode:focus-visible { outline: none; box-shadow: none; }
+
   .tutor-level {
     font-family: 'Orbitron', sans-serif;
     font-size: 11px;
