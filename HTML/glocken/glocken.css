@@ -577,6 +577,9 @@
     .controls { padding-top: 4px; }
     .btn { padding: 12px 22px; font-size: 12px; }
     .nav-btn { font-size: 18px; padding: 6px 10px; }
+    /* Tutor: tighter side padding so the input row + fraction display get more room */
+    .tutor-overlay { padding: clamp(40px, 9vh, 90px) 14px 64px; gap: 16px; }
+    .tutor-input { font-size: 22px; }
   }
 
   /* ===== Tutor overlay ===== */
@@ -751,6 +754,8 @@
     display: flex;
     gap: 12px;
     align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;           /* on very narrow screens the button drops below the input */
   }
   /* Timeline replay inside the tutor (shown after a correct answer) needs an explicit
      width — in the centered flex column a bare div would otherwise collapse. */
@@ -760,7 +765,7 @@
     font-weight: 700;
     font-size: 24px;
     text-align: center;
-    width: 160px;
+    width: min(160px, 42vw);
     height: 56px;
     padding: 0;
     border: 2px solid var(--muted);
@@ -782,7 +787,7 @@
   .tutor-input::-webkit-outer-spin-button,
   .tutor-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
   .tutor-submit {
-    width: 160px;
+    width: min(160px, 38vw);
     height: 56px;
     padding: 0;
     font-size: 14px;
