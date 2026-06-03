@@ -349,7 +349,7 @@
   .timeline-wrap { background: var(--bg-light); border-radius: 12px; padding: 14px 14px 14px; }
   .timeline-label {
     font-size: 10px; text-transform: uppercase; letter-spacing: 0.18em;
-    color: var(--muted); margin-bottom: 18px; text-align: center;
+    color: var(--muted); margin-bottom: 22px; text-align: center;
   }
   .timeline { position: relative; height: 70px; background: var(--bg); border-radius: 8px; overflow: visible; }
   .time-axis {
@@ -377,7 +377,7 @@
   .axis-labels {
     position: relative;
     height: 20px;
-    margin-top: 14px;
+    margin-top: 30px;   /* room for the red (big-bell) counts sitting below the timeline */
   }
   .tick-num {
     position: absolute; top: 0;
@@ -397,6 +397,19 @@
   .strike.small { top: 8px;    height: calc(50% - 10px); background: var(--orange); }
   .strike.big   { bottom: 8px; height: calc(50% - 10px); background: var(--red); }
   .strike.meet  { box-shadow: 0 0 14px currentColor; width: 6px; border-radius: 3px; }
+  /* Per-bell strike counter: small counts above (orange), big counts below (red) */
+  .strike-count {
+    position: absolute;
+    transform: translateX(-50%);
+    font-family: Arial, sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1;
+    pointer-events: none;
+    z-index: 3;
+  }
+  .strike-count.small { top: -14px;    color: var(--orange); }  /* above the timeline */
+  .strike-count.big   { bottom: -15px; color: rgb(255, 0, 0); }  /* below the timeline (pure red — brighter on dark) */
   .slot-fill {
     position: absolute;
     width: 0; height: 0;
@@ -419,7 +432,7 @@
     border-right: 5px solid transparent;
     border-bottom: 8px solid var(--red);
   }
-  .cursor { position: absolute; top: 0; bottom: 0; width: 2px; background: rgba(244,244,244,0.4); pointer-events: none; }
+  .cursor { position: absolute; top: 0; bottom: 0; width: 2px; background: rgba(244,244,244,0.4); pointer-events: none; transition: opacity 0.3s ease; }
   .meeting-row { position: relative; height: 38px; margin-top: 6px; }
   .meeting-label {
     position: absolute; top: 0;
@@ -552,6 +565,9 @@
   .settings-btn.has-key { color: var(--green); opacity: 1; }
   .fullscreen-btn { right: 62px; }
   .mute-btn.muted { color: var(--muted); }
+  /* In the tutor the close-✕ takes the rightmost slot → shift mute/fullscreen left */
+  body.tutor-open .mute-btn { right: 62px; }
+  body.tutor-open .fullscreen-btn { right: 110px; }
 
   /* ===== Phone-tighter (Pixel etc.) ===== */
   @media (max-width: 480px) {
@@ -566,9 +582,9 @@
     .bell { width: 68px; height: 62px; }
     .bell.big { width: 90px; height: 78px; transform: translateY(6px); }
     .timeline-wrap { padding: 10px 10px 12px; }
-    .timeline-label { font-size: 9px; margin-bottom: 12px; }
+    .timeline-label { font-size: 9px; margin-bottom: 18px; }
     .timeline { height: 58px; }
-    .axis-labels { height: 18px; margin-top: 10px; }
+    .axis-labels { height: 18px; margin-top: 26px; }
     .tick-num { font-size: 11px; letter-spacing: -0.5px; }
     .tick-num.color-small, .tick-num.color-big, .tick-num.color-meet { font-size: 11px; }
     .meeting-row { height: 32px; }
@@ -577,8 +593,8 @@
     .controls { padding-top: 4px; }
     .btn { padding: 12px 22px; font-size: 12px; }
     .nav-btn { font-size: 18px; padding: 6px 10px; }
-    /* Tutor: tighter side padding so the input row + fraction display get more room */
-    .tutor-overlay { padding: clamp(40px, 9vh, 90px) 14px 64px; gap: 16px; }
+    /* Tutor: moderate top + tight side padding so the replay timeline still fits */
+    .tutor-overlay { padding: clamp(20px, 5vh, 56px) 14px 36px; gap: 12px; }
     .tutor-input { font-size: 22px; }
   }
 
@@ -588,20 +604,24 @@
     position: fixed;
     inset: 0;
     z-index: 15;
-    background: radial-gradient(ellipse at center, rgba(10, 29, 63, 0.92) 0%, rgba(3, 16, 42, 0.97) 70%);
+    background: radial-gradient(ellipse at center, rgb(10, 29, 63) 0%, rgb(3, 16, 42) 70%);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: flex-start;
-    padding: clamp(48px, 12vh, 130px) 24px 80px;
-    gap: 20px;
+    overflow-y: auto;                 /* short/landscape screens: scroll instead of clipping */
+    -webkit-overflow-scrolling: touch;
+    /* Moderate top padding: content sits a bit lower, replay timeline still fits */
+    padding: clamp(28px, 7vh, 80px) 24px 40px;
+    gap: 14px;
     animation: fadeIn 0.4s ease forwards;
   }
   .tutor-overlay.hidden { display: none !important; }
   .tutor-exit {
     position: absolute;
     top: 16px;
-    right: 16px;
+    right: 14px;                /* top-right, rightmost — mute/fullscreen shift left in the tutor */
+    z-index: 21;                /* above the global corner buttons */
     background: transparent;
     border: 1px solid rgba(244, 244, 244, 0.25);
     color: var(--ink);
@@ -814,6 +834,59 @@
   .tutor-hint:hover { color: var(--ink); border-color: var(--orange); }
   .tutor-hint:active { transform: scale(0.96); }
   .tutor-hint:focus, .tutor-hint:focus-visible { outline: none; box-shadow: none; }
+
+  /* Completion screen (after Level 3 / Experte) */
+  .tutor-complete {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    width: var(--tutor-w);
+    text-align: center;
+    animation: fadeIn 0.4s ease;
+  }
+  .tutor-complete.hidden { display: none; }
+  .tutor-complete .tc-title {
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 700;
+    font-size: clamp(20px, 6vw, 30px);
+    color: var(--orange);
+    text-shadow: 0 0 22px rgba(245, 194, 66, 0.3);
+  }
+  .tutor-complete .tc-sub {
+    font-family: 'Raleway', sans-serif;
+    font-size: clamp(13px, 3.6vw, 16px);
+    color: var(--muted);
+  }
+  .tutor-complete .tc-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+    max-width: 320px;
+    margin-top: 6px;
+  }
+  .tc-btn {
+    height: 50px;
+    border-radius: 999px;
+    border: 1px solid rgba(244, 244, 244, 0.3);
+    background: transparent;
+    color: var(--ink);
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    cursor: pointer;
+    outline: none;
+    -webkit-tap-highlight-color: transparent;
+    transition: color 0.2s, border-color 0.2s, background 0.2s, transform 0.1s;
+  }
+  .tc-btn:hover { border-color: var(--orange); color: var(--orange); }
+  .tc-btn:active { transform: scale(0.97); }
+  .tc-btn:focus, .tc-btn:focus-visible { outline: none; box-shadow: none; }
+  .tc-btn.tc-expert { background: var(--orange); color: var(--bg); border-color: var(--orange); }
+  .tc-btn.tc-ghost { color: var(--muted); }
   .tutor-input.shake {
     animation: shake 0.4s ease-in-out;
     border-color: var(--red);
