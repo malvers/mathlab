@@ -375,6 +375,7 @@ Regeln:
     1: [[2,4],[2,6],[3,6],[3,9],[4,8],[2,8],[4,12]],            // a teilt b
     2: [[2,3],[2,5],[3,4],[3,5],[3,7],[4,5],[4,7],[5,6],[5,7]], // teilerfremd
     3: [[4,6],[6,8],[6,9],[8,12],[9,12],[10,12],[6,10],[8,10]], // echtes kgV-Rätsel
+    4: [[11,3],[11,4],[11,6],[7,8],[7,9],[8,9],[12,18],[14,21],[15,20],[9,15]], // Experte (freiwillig)
   };
 
   // Fraction add/subtract pools (unit fractions 1/a ± 1/b). Pairs get ordered a<b on use.
@@ -412,10 +413,14 @@ Regeln:
   }
 
   // Load a fresh shuffled bag for the given level (from the current mode's pools).
+  // Levels 1–3 exist for every mode; level 4 (Experte) only for kgV.
   function loadLevelBag(difficulty) {
-    const lvl = Math.max(1, Math.min(3, difficulty | 0));
+    const pools = MODES[tutorMode].pools;
+    let lvl = Math.max(1, Math.min(4, difficulty | 0));
+    if (!pools[lvl]) lvl = 3;
     tutorState.difficulty = lvl;
-    tutorState.bag = shuffled(MODES[tutorMode].pools[lvl]);
+    tutorState.bag = shuffled(pools[lvl]);
+    tutorState.levelTotal = pools[lvl].length;   // for the "k/N" progress in the label
   }
 
   // Pop the next problem from the current bag (each pair appears once per level).
@@ -541,13 +546,14 @@ Regeln:
   }
 
   // ===== Level milestones: rank + praise + bell fanfare when a level is cleared =====
-  const TUTOR_RANKS = { 1: 'Lehrling', 2: 'Rechner', 3: 'Meister von Bagdad' };
+  const TUTOR_RANKS = { 1: 'Lehrling', 2: 'Rechner', 3: 'Meister von Bagdad', 4: 'Experte' };
   // Spoken when the child CLEARS a level (advances past it, or masters level 3).
   // Process praise (names the strategy), not ability praise — and elevates into the craft.
   const LEVEL_PRAISE = {
     1: "Du hast etwas Feines gesehen: [break:0.4s] wenn die kleinere Zahl schon *in* der größeren steckt, ist die größere bereits das kgV. [break:0.5s] Das erkennen viele Erwachsene nicht so schnell wie du gerade. [break:0.4s] Auf zu schwereren Glocken.",
     2: "Stark. [break:0.4s] Diese beiden hatten *keinen* gemeinsamen Teiler — also musstest du sie multiplizieren, um den Takt zu finden. [break:0.5s] Du hast es ohne Umweg gerechnet. [break:0.4s] So arbeiten Zahlentheoretiker.",
     3: "Das war die Königsklasse: [break:0.4s] gemeinsame Teiler herauskürzen und trotzdem das *kleinste* Vielfache treffen. [break:0.5s] Genau diese Idee brauchst du später beim Brüche-Addieren — [break:0.4s] du beherrschst sie jetzt schon. [break:0.5s] Meister.",
+    4: "Die Experten-Glocken — geknackt. [break:0.4s] Das waren kgVs, die man nicht *sieht*, sondern *erarbeiten* muss: große Primzahlen und versteckte gemeinsame Teiler. [break:0.5s] Hut ab, *Experte*.",
   };
 
   // Triumphant fanfare via the central bell engine: a rising C-major run that
@@ -691,6 +697,8 @@ Regeln:
 
   function showProblem(p, intro) {
     hideTutorTimeline();
+    tutorState.pendingNext = null;     // clear any "Weiter" state
+    if (tutorSubmit) tutorSubmit.textContent = 'Prüfen';
     tutorState.currentProblem = p;
     tutorState.attempts = 0;
     renderProblem(p);
@@ -699,7 +707,10 @@ Regeln:
     const subEl   = document.querySelector('.tutor-subtitle');
     if (titleEl) titleEl.textContent = meta.title;
     if (subEl)   subEl.textContent   = meta.subtitle;
-    tutorLevelEl.textContent = 'Level ' + p.difficulty + ' · ' + (TUTOR_RANKS[p.difficulty] || TUTOR_RANKS[1]);
+    const total = tutorState.levelTotal || 0;
+    const nr = total ? (total - tutorState.bag.length) : 0;   // current problem number within the level
+    tutorLevelEl.textContent = 'Level ' + p.difficulty + ' · ' + (TUTOR_RANKS[p.difficulty] || TUTOR_RANKS[1])
+      + (total ? ' · ' + nr + '/' + total : '');
     tutorInput.value = '';
     tutorInput.style.opacity = '1';
     tutorInput.classList.remove('shake', 'celebrate');
@@ -727,6 +738,8 @@ Regeln:
     showCornerToggles(false);   // tutor is not the start screen → hide the pills
     document.getElementById('end-overlay').classList.add('hidden');
     tutorOverlay.classList.remove('hidden');
+    document.body.classList.add('tutor-open');
+    hideTutorComplete();               // clear any leftover completion panel
     tutorState.history = [];
     tutorState.masteredTop = false;
     loadLevelBag(1);                   // sets difficulty = 1 and fills the shuffled bag
@@ -739,6 +752,7 @@ Regeln:
     stopAllAudio();
     hideTutorTimeline();
     tutorOverlay.classList.add('hidden');
+    document.body.classList.remove('tutor-open');
     if (tutorReturnTo === 'end') {
       document.getElementById('end-overlay').classList.remove('hidden');
     } else {
@@ -805,12 +819,13 @@ Regeln:
       const durationMs = Math.min(9000, Math.max(6000, state.tEnd * 320));   // slower than the story's 4.2s
       runTimeline(() => {
         highlightMeeting();
+        cursor.style.opacity = '0';   // hide the runner at the end (the meeting is marked)
         cancelAnimationFrame(_tlScrollRAF);
         if (scrolls) {
           const meetX = (state.L / state.tEnd) * document.getElementById('timeline').clientWidth;
           wrap.scrollTo({ left: Math.max(0, meetX - wrap.clientWidth * 0.5), behavior: 'smooth' });
         }
-        setTimeout(resolve, 3800);   // linger on the meeting point before the next problem
+        setTimeout(resolve, 1000);   // brief settle on the meeting point, then wait for "Weiter"
       }, durationMs);
     });
   }
@@ -818,6 +833,11 @@ Regeln:
   let _tutorAdvancing = false;   // true while a correct answer's timeline plays → block re-entry
   async function submitTutorAnswer() {
     if (_tutorAdvancing) return;
+    // "Weiter" state: a correct answer is on screen with the timeline standing → advance now.
+    if (tutorState.pendingNext) {
+      showProblem(tutorState.pendingNext);   // showProblem resets pendingNext + button text
+      return;
+    }
     const raw = tutorInput.value.trim();
     if (!raw) { tutorInput.focus(); return; }
     const guess = parseInt(raw, 10);
@@ -876,17 +896,23 @@ Regeln:
       tutorSubmit.disabled = true;
       // Replay the timeline for this pair, THEN move on.
       await playTutorTimeline(p.a, p.b);
-      // Bag empty → the whole level set is worked through → celebrate + advance.
+      // Bag empty → the whole level set is worked through.
       if (tutorState.bag.length === 0) {
         const clearedLevel = tutorState.difficulty;
-        const newDifficulty = Math.min(3, clearedLevel + 1);
-        const repeatTop = clearedLevel === 3 && tutorState.masteredTop;
-        if (clearedLevel === 3) tutorState.masteredTop = true;
-        await celebrateLevel(clearedLevel, newDifficulty, repeatTop);
-        loadLevelBag(newDifficulty);   // next level — or reshuffle level 3 to keep practicing
+        if (clearedLevel >= 3) {
+          // Level 3 (or Experte/4) finished → fanfare + completion screen, NO endless reshuffle.
+          await celebrateLevel(clearedLevel, clearedLevel, false);
+          showTutorComplete(clearedLevel);
+          tutorSubmit.disabled = false;
+          _tutorAdvancing = false;
+          return;
+        }
+        await celebrateLevel(clearedLevel, clearedLevel + 1, false);
+        loadLevelBag(clearedLevel + 1);
       }
-      const next = nextProblemFromBag();
-      showProblem(next);
+      // Don't auto-advance — leave the timeline standing; the next problem waits for "Weiter".
+      tutorState.pendingNext = nextProblemFromBag();
+      tutorSubmit.textContent = 'Weiter';
       tutorSubmit.disabled = false;
       _tutorAdvancing = false;
     } else {
@@ -940,19 +966,97 @@ Regeln:
   function setTutorMode(m, intro) {
     if (!MODES[m]) return;
     if (_tutorAdvancing) return;
-    tutorMode = m;
-    try { localStorage.setItem('tutor_mode', m); } catch (e) {}
-    tutorState.history = [];
-    tutorState.masteredTop = false;
-    loadLevelBag(1);
-    refreshModeUI();
-    showProblem(nextProblemFromBag(), intro);
+    hideTutorComplete();
+    startLevel(m, 1, intro);
   }
   document.querySelectorAll('.tutor-mode').forEach(b => {
     b.addEventListener('click', () => setTutorMode(b.dataset.mode));
   });
 
-  tutorExit.addEventListener('click', exitTutor);
+  // Start a specific mode + level (used by mode switch and the completion screen's "Experte").
+  function startLevel(mode, level, intro) {
+    tutorMode = mode;
+    try { localStorage.setItem('tutor_mode', mode); } catch (e) {}
+    tutorState.history = [];
+    tutorState.masteredTop = false;
+    loadLevelBag(level);
+    refreshModeUI();
+    showProblem(nextProblemFromBag(), intro);
+  }
+
+  // ===== Debug: jump straight to any mode + level =====
+  // Console:  gotoLevel('kgv', 3)   ·   URL:  glocken.html#kgv3  (kgv|add|sub, level 1–4)
+  function gotoLevel(mode, level) {
+    mode = MODES[mode] ? mode : 'kgv';
+    level = Math.max(1, Math.min(4, parseInt(level, 10) || 1));
+    if (tutorOverlay.classList.contains('hidden')) {
+      stopAllAudio(); audio();
+      const endOv = document.getElementById('end-overlay');
+      if (endOv) endOv.classList.add('hidden');
+      if (intro) { intro.style.display = 'none'; intro.classList.add('gone'); }
+      introPhase = 'gone';
+      showCornerToggles(false);
+      tutorReturnTo = 'end';
+      tutorOverlay.classList.remove('hidden');
+    document.body.classList.add('tutor-open');
+    }
+    hideTutorComplete();
+    startLevel(mode, level);
+    dbg('[debug] gotoLevel ' + mode + ' · L' + level);
+  }
+  window.gotoLevel = gotoLevel;
+  // React live to hash edits (#kgv3 etc.) — no reload needed
+  window.addEventListener('hashchange', () => {
+    const m = (location.hash || '').match(/^#(kgv|add|sub)([1-4])$/);
+    if (m) gotoLevel(m[1], parseInt(m[2], 10));
+  });
+
+  // ===== Completion screen (shown after Level 3 / Experte instead of endless reshuffle) =====
+  function setProblemUIVisible(v) {
+    const prob = document.getElementById('tutor-problem');
+    const row  = tutorOverlay.querySelector('.tutor-input-row');
+    if (prob) prob.style.display = v ? '' : 'none';
+    if (row)  row.style.display  = v ? '' : 'none';
+    if (tutorHint) tutorHint.style.display = v ? '' : 'none';
+    if (tutorBubble) tutorBubble.style.display = v ? '' : 'none';   // hide the question bubble on the completion screen
+  }
+  function hideTutorComplete() {
+    const panel = document.getElementById('tutor-complete');
+    if (panel) { panel.classList.add('hidden'); panel.innerHTML = ''; }
+    setProblemUIVisible(true);
+  }
+  function showTutorComplete(clearedLevel, manual) {
+    hideTutorTimeline();
+    setProblemUIVisible(false);
+    const expert = clearedLevel >= 4;
+    const panel = document.getElementById('tutor-complete');
+    if (!panel) return;
+    let btns = '';
+    if (tutorMode === 'kgv' && !expert) {
+      btns += '<button class="tc-btn tc-expert" data-act="expert">Experte 🔥</button>';
+    }
+    ['kgv', 'add', 'sub'].forEach(m => {
+      btns += '<button class="tc-btn" data-act="mode:' + m + '">' + MODES[m].label + '</button>';
+    });
+    btns += '<button class="tc-btn tc-ghost" data-act="exit">Fertig</button>';
+    const title = manual ? 'Level beendet' : (expert ? 'Experte gemeistert! 🔥' : 'Geschafft! 🔔');
+    const sub   = manual ? 'Weiter üben oder fertig?'
+                         : (expert ? 'Du hast die harten kgVs geknackt.' : 'Alle drei Level durch — weiter üben?');
+    panel.innerHTML =
+      '<div class="tc-title">' + title + '</div>' +
+      '<div class="tc-sub">' + sub + '</div>' +
+      '<div class="tc-buttons">' + btns + '</div>';
+    panel.classList.remove('hidden');
+    panel.querySelectorAll('.tc-btn').forEach(b => b.addEventListener('click', () => {
+      const act = b.dataset.act;
+      hideTutorComplete();
+      if (act === 'expert') startLevel('kgv', 4);
+      else if (act === 'exit') exitTutor();
+      else if (act.indexOf('mode:') === 0) setTutorMode(act.slice(5));
+    }));
+  }
+
+  tutorExit.addEventListener('click', () => showTutorComplete(tutorState.difficulty, true));
   if (tutorAiToggle) {
     tutorAiToggle.addEventListener('click', () => {
       setAiProvider(aiProvider() === 'gemini' ? 'ds' : 'gemini');
@@ -1365,10 +1469,11 @@ Regeln:
   }
 
   function clearTimeline() {
-    tl.querySelectorAll('.strike, .tick, .slot-fill, .sec-mark').forEach(n => n.remove());
+    tl.querySelectorAll('.strike, .strike-count, .tick, .slot-fill, .sec-mark').forEach(n => n.remove());
     const axisLabels = document.getElementById('axis-labels');
     if (axisLabels) axisLabels.querySelectorAll('.tick-num').forEach(n => n.remove());
     cursor.style.left = '0px';
+    cursor.style.opacity = '1';   // runner visible for a fresh run
     meetLabel.classList.remove('show');
   }
 
@@ -1429,6 +1534,14 @@ Regeln:
     el.dataset.time = time;
     el.style.left = ((time / state.tEnd) * tlWidth() - 2) + 'px';
     tl.appendChild(el);
+    // Running count of this bell's strikes: 1,2,3… (small, above) · 1,2… (big, below)
+    const period = (kind === 'small') ? state.small : state.big;
+    const num = document.createElement('div');
+    num.className = 'strike-count ' + kind;
+    num.dataset.time = time;
+    num.style.left = ((time / state.tEnd) * tlWidth()) + 'px';
+    num.textContent = Math.round(time / period);
+    tl.appendChild(num);
     // Color the axis label that matches this strike's position
     const axisLabels = document.getElementById('axis-labels');
     if (axisLabels) {
@@ -1509,6 +1622,10 @@ Regeln:
     tl.querySelectorAll('.strike').forEach(el => {
       const t = parseFloat(el.dataset.time);
       el.style.left = ((t / state.tEnd) * w - 2) + 'px';
+    });
+    tl.querySelectorAll('.strike-count').forEach(el => {
+      const t = parseFloat(el.dataset.time);
+      el.style.left = ((t / state.tEnd) * w) + 'px';
     });
     const lcmX = (state.L / state.tEnd) * w;
     tl.querySelectorAll('.slot-fill').forEach(el => {
@@ -2170,16 +2287,22 @@ Regeln:
     else if (introPhase === 'ready') dismissIntro();
   });
 
-  // Resume at the last visited scene on reload (skip the intro). Cleared at the end,
-  // so finishing the quest shows the intro fresh next time.
-  try {
-    const saved = parseInt(localStorage.getItem('glocken_scene'), 10);
-    if (!isNaN(saved) && saved >= 0 && saved < scenes.length) {
-      introPhase = 'gone';
-      intro.classList.add('gone');
-      intro.style.display = 'none';
-      showCornerToggles(false);
-      for (let i = 0; i <= saved; i++) advance(true);
-    }
-  } catch (e) {}
+  // Debug: URL hash like #kgv3 / #add2 / #sub1 / #kgv4 jumps straight into that tutor level.
+  const hashJump = (location.hash || '').match(/^#(kgv|add|sub)([1-4])$/);
+  if (hashJump) {
+    gotoLevel(hashJump[1], parseInt(hashJump[2], 10));
+  } else {
+    // Resume at the last visited scene on reload (skip the intro). Cleared at the end,
+    // so finishing the quest shows the intro fresh next time.
+    try {
+      const saved = parseInt(localStorage.getItem('glocken_scene'), 10);
+      if (!isNaN(saved) && saved >= 0 && saved < scenes.length) {
+        introPhase = 'gone';
+        intro.classList.add('gone');
+        intro.style.display = 'none';
+        showCornerToggles(false);
+        for (let i = 0; i <= saved; i++) advance(true);
+      }
+    } catch (e) {}
+  }
 })();

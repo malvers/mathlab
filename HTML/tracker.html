@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DOC ALVERS MATHE-LABORE | GPS Tracker</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="resources/favicon.png">
+    <!-- Leaflet (map library) -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+    <!-- Reusable fixed-slot clock (shared component) — keeps the timer from jittering -->
+    <link rel="stylesheet" href="js/cyber-clock.css">
+    <style>
+        /* ---- Standalone full-screen shell (same pattern as glocken — no cyber grid,
+                so there is no left margin / blue rand bleeding through) ---- */
+        :root {
+            --bg: rgb(8, 20, 42);
+            --bg-light: rgb(14, 36, 78);
+            --orange: rgb(245, 194, 66);
+            --red: rgb(176, 36, 24);
+            --green: rgb(121, 158, 49);
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg);
+            color: #fff;
+            font-family: 'Orbitron', sans-serif;
+            overflow: hidden;
+            overscroll-behavior: none;
+            touch-action: manipulation;
+        }
+
+        /* ---- Map fills the whole viewport ---- */
+        #map {
+            position: fixed;
+            inset: 0;
+            z-index: 1;
+        }
+
+        .leaflet-container {
+            background: var(--bg-light);
+        }
+
+        /* Red position dot — hidden during the move, fades in once we are on the position */
+        path.pos-marker {
+            opacity: 0;
+            transition: opacity 0.6s ease;
+        }
+
+        path.pos-marker.pos-shown {
+            opacity: 1;
+        }
+
+        /* ---- Top HUD: timer + stats ---- */
+        #hud-top {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 500;
+            padding: 14px 16px 30px;
+            padding-top: max(14px, env(safe-area-inset-top));
+            background: linear-gradient(180deg,
+                    rgba(8, 20, 42, 0.95) 0%,
+                    rgba(8, 20, 42, 0.92) 62%,
+                    rgba(8, 20, 42, 0.72) 86%,
+                    rgba(8, 20, 42, 0) 100%);
+            text-align: center;
+            pointer-events: none;
+            /* let map drags pass through empty areas */
+        }
+
+        #gps-chip {
+            position: absolute;
+            top: max(12px, env(safe-area-inset-top));
+            left: 14px;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            font-size: 0.7rem;
+            letter-spacing: 2px;
+            color: rgba(255, 255, 255, 0.85);
+        }
+
+        #gps-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 0 8px currentColor;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        #gps-label {
+            transition: color 0.3s ease;
+        }
+
+        /* Timer is rendered by CyberClock (fixed-width digit slots). Size it here; the
+           component reads --cc-size for its slot/digit sizing. */
+        #hud-time {
+            --cc-size: clamp(2.2rem, 12vw, 3.6rem);
+            justify-content: center;
+            margin-top: clamp(22px, 6vw, 32px);
+            /* clear the POSITION chip above */
+        }
+
+        #hud-time-label {
+            font-size: 0.6rem;
+            letter-spacing: 4px;
+            color: rgba(255, 255, 255, 0.5);
+            margin-top: 4px;
+        }
+
+        #hud-stats {
+            display: flex;
+            justify-content: center;
+            gap: clamp(18px, 9vw, 56px);
+            margin-top: 14px;
+        }
+
+        .hud-stat {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .hud-val {
+            font-size: clamp(1.2rem, 6vw, 1.9rem);
+            font-weight: 700;
+            line-height: 1;
+            color: var(--orange);
+            font-variant-numeric: tabular-nums;
+            font-feature-settings: 'tnum' 1;
+        }
+
+        .hud-lbl {
+            font-size: 0.55rem;
+            letter-spacing: 2px;
+            color: rgba(255, 255, 255, 0.5);
+            margin-top: 6px;
+        }
+
+        #trk-status {
+            margin-top: 12px;
+            font-family: system-ui, -apple-system, sans-serif;
+            font-size: 0.72rem;
+            letter-spacing: 0.5px;
+            color: rgba(255, 255, 255, 0.7);
+            min-height: 1em;
+        }
+
+        /* ---- Big round START / STOP ---- */
+        #trk-toggle {
+            position: fixed;
+            bottom: max(26px, env(safe-area-inset-bottom));
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 500;
+            width: clamp(96px, 30vw, 132px);
+            height: clamp(96px, 30vw, 132px);
+            border-radius: 50%;
+            border: 3px solid rgba(255, 255, 255, 0.85);
+            background: var(--green);
+            color: #fff;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            font-size: clamp(1.1rem, 5vw, 1.5rem);
+            letter-spacing: 2px;
+            cursor: pointer;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+            transition: background 0.2s ease, transform 0.1s ease;
+        }
+
+        #trk-toggle:active {
+            transform: translateX(-50%) scale(0.96);
+        }
+
+        /* ---- Small tool buttons (bottom-left) ---- */
+        #hud-tools {
+            position: fixed;
+            left: 14px;
+            bottom: max(26px, env(safe-area-inset-bottom));
+            z-index: 500;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .hud-tool {
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            background: rgba(8, 20, 42, 0.82);
+            color: #fff;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(8px);
+            transition: transform 0.1s ease, border-color 0.2s ease, color 0.2s ease;
+        }
+
+        .hud-tool svg {
+            width: 22px;
+            height: 22px;
+        }
+
+        .hud-tool:hover {
+            border-color: rgba(255, 255, 255, 0.6);
+        }
+
+        .hud-tool:active {
+            transform: scale(0.94);
+        }
+
+        /* Clear button hints at its destructive action */
+        #trk-clear:hover {
+            color: var(--red);
+            border-color: var(--red);
+        }
+    </style>
+</head>
+
+<body>
+    <div id="map"></div>
+
+    <!-- Top HUD -->
+    <div id="hud-top">
+        <div id="gps-chip"><span id="gps-dot"></span><span id="gps-label">POSITION</span></div>
+        <div id="hud-time"></div>
+        <div id="hud-time-label">DAUER</div>
+        <div id="hud-stats">
+            <div class="hud-stat"><span class="hud-val" id="trk-dist">0.00</span><span class="hud-lbl">KM</span></div>
+            <div class="hud-stat"><span class="hud-val" id="trk-speed">0.0</span><span class="hud-lbl">TEMPO KM/H</span></div>
+            <div class="hud-stat"><span class="hud-val" id="trk-acc">–</span><span class="hud-lbl">GENAU. M</span></div>
+        </div>
+        <div id="trk-status">Bereit. Tippe START.</div>
+    </div>
+
+    <!-- Tool buttons -->
+    <div id="hud-tools">
+        <button id="trk-center" class="hud-tool" title="Zentrieren" aria-label="Zentrieren">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round">
+                <circle cx="12" cy="12" r="3"></circle>
+                <line x1="12" y1="2" x2="12" y2="5"></line>
+                <line x1="12" y1="19" x2="12" y2="22"></line>
+                <line x1="2" y1="12" x2="5" y2="12"></line>
+                <line x1="19" y1="12" x2="22" y2="12"></line>
+            </svg>
+        </button>
+        <button id="trk-export" class="hud-tool" title="Export GPX" aria-label="Export GPX">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+        </button>
+        <button id="trk-clear" class="hud-tool" title="Track löschen" aria-label="Track löschen">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round">
+                <polyline points="3 6 5 6 21 6"></polyline>
+                <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
+                <line x1="10" y1="11" x2="10" y2="17"></line>
+                <line x1="14" y1="11" x2="14" y2="17"></line>
+                <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path>
+            </svg>
+        </button>
+    </div>
+
+    <!-- Big start/stop -->
+    <button id="trk-toggle">START</button>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="js/cyber-clock.js"></script>
+    <script>
+        // ---------------------------------------------------------------
+        // Brand palette (see CLAUDE.md)
+        // ---------------------------------------------------------------
+        const COL_ORANGE = 'rgb(245, 194, 66)';   // track line
+        const COL_RED = 'rgb(176, 36, 24)';       // stop / recording
+        const COL_GREEN = 'rgb(121, 158, 49)';    // start / idle
+
+        // ---------------------------------------------------------------
+        // Map setup
+        // ---------------------------------------------------------------
+        const map = L.map('map', { zoomControl: false, attributionControl: true })
+            .setView([51.1657, 10.4515], 6); // centre of Germany as a neutral start
+        L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; OpenStreetMap contributors',
+        }).addTo(map);
+
+        const trackLine = L.polyline([], { color: COL_ORANGE, weight: 5, opacity: 0.9 }).addTo(map);
+        let posMarker = null;
+
+        // ---------------------------------------------------------------
+        // Tracking state
+        // ---------------------------------------------------------------
+        let watchId = null;
+        let acquireWatch = null;   // temporary watch used while acquiring a good initial fix
+        let tracking = false;
+        let track = [];            // array of [lat, lng]
+        let times = [];            // ISO timestamp per recorded point (index-aligned)
+        let totalDist = 0;         // metres
+        let startTime = null;      // ms
+        let timerId = null;
+        let lastFix = null;        // { lat, lng, t }
+
+        const MIN_MOVE_M = 4;      // ignore jitter below this distance
+        const MAX_ACC_M = 50;      // ignore fixes worse than this accuracy
+
+        const $ = id => document.getElementById(id);
+        const elToggle = $('trk-toggle');
+        const elDist = $('trk-dist');
+        const elTime = $('hud-time');
+        const elSpeed = $('trk-speed');
+        const elAcc = $('trk-acc');
+        const elStatus = $('trk-status');
+        const elGps = $('gps-dot');
+        const elGpsLabel = $('gps-label');
+
+        // Mount the shared fixed-slot clock so the ticking timer never jitters.
+        // Size comes from the #hud-time --cc-size rule; colours are set here.
+        CyberClock.mount(elTime, {
+            digitColor: '#fff',
+            colonColor: 'rgba(255, 255, 255, 0.55)',
+            seconds: true,
+        });
+        CyberClock.set(elTime, '00:00:00');
+
+        function setStatus(msg) { elStatus.textContent = msg; }
+
+        function setGpsState(hasFix) {
+            // Green once a position is available, dimmed grey while none ("grün wenn da")
+            const c = hasFix ? COL_GREEN : 'rgba(255, 255, 255, 0.3)';
+            elGps.style.background = c;
+            elGps.style.color = c; // drives the dot glow (box-shadow uses currentColor)
+            elGpsLabel.style.color = hasFix ? COL_GREEN : 'rgba(255, 255, 255, 0.55)';
+        }
+        setGpsState(false);
+
+        // Fade the red position dot in (it starts hidden via CSS)
+        function showDot() {
+            const el = posMarker && posMarker.getElement && posMarker.getElement();
+            if (el) el.classList.add('pos-shown');
+        }
+
+        // ---------------------------------------------------------------
+        // Geometry helpers
+        // ---------------------------------------------------------------
+        function haversine(a, b) {
+            const R = 6371000; // metres
+            const toRad = d => d * Math.PI / 180;
+            const dLat = toRad(b[0] - a[0]);
+            const dLon = toRad(b[1] - a[1]);
+            const lat1 = toRad(a[0]);
+            const lat2 = toRad(b[0]);
+            const x = Math.sin(dLat / 2) ** 2 +
+                Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLon / 2) ** 2;
+            return 2 * R * Math.asin(Math.sqrt(x));
+        }
+
+        function fmtDuration(ms) {
+            const s = Math.floor(ms / 1000);
+            const hh = Math.floor(s / 3600);
+            const mm = Math.floor((s % 3600) / 60);
+            const ss = s % 60;
+            const pad = n => String(n).padStart(2, '0');
+            return `${pad(hh)}:${pad(mm)}:${pad(ss)}`;
+        }
+
+        function updateDuration() {
+            if (startTime) CyberClock.set(elTime, fmtDuration(Date.now() - startTime));
+        }
+
+        // ---------------------------------------------------------------
+        // Position handling
+        // ---------------------------------------------------------------
+        // Draw / move the current-position marker, accuracy circle and HUD readout.
+        // Shared by live tracking and the one-shot "centre" locate.
+        function renderPosition(here, accuracy) {
+            // Fixed-pixel dot via circleMarker — keeps its size at every zoom level.
+            // (An L.circle would use metres and balloon when zooming in.)
+            if (!posMarker) {
+                posMarker = L.circleMarker(here, {
+                    radius: 7, color: '#fff', weight: 2,
+                    fillColor: COL_RED, fillOpacity: 1,
+                    className: 'pos-marker',
+                }).addTo(map);
+            } else {
+                posMarker.setLatLng(here);
+            }
+
+            elAcc.textContent = accuracy != null ? Math.round(accuracy) : '–';
+            setGpsState(true);
+        }
+
+        function onPosition(pos) {
+            const { latitude, longitude, accuracy, speed } = pos.coords;
+            const now = pos.timestamp || Date.now();
+            const here = [latitude, longitude];
+
+            const firstFix = !posMarker;
+            renderPosition(here, accuracy);
+            showDot();
+            if (firstFix) map.setView(here, 17); // snap to the very first fix
+
+            // Reject noisy fixes for the recorded track
+            if (accuracy != null && accuracy > MAX_ACC_M) {
+                setStatus(`Warte auf besseres Signal … (±${Math.round(accuracy)} m)`);
+                return;
+            }
+
+            // Add to track only if we actually moved
+            const stamp = new Date(now).toISOString();
+            if (track.length === 0) {
+                track.push(here);
+                times.push(stamp);
+                trackLine.addLatLng(here);
+            } else {
+                const step = haversine(track[track.length - 1], here);
+                if (step >= MIN_MOVE_M) {
+                    totalDist += step;
+                    track.push(here);
+                    times.push(stamp);
+                    trackLine.addLatLng(here);
+                }
+            }
+            elDist.textContent = (totalDist / 1000).toFixed(2);
+
+            // Speed: prefer device value (m/s), else derive from last fix
+            let kmh = null;
+            if (speed != null && speed >= 0) {
+                kmh = speed * 3.6;
+            } else if (lastFix) {
+                const dt = (now - lastFix.t) / 1000;
+                if (dt > 0) kmh = (haversine([lastFix.lat, lastFix.lng], here) / dt) * 3.6;
+            }
+            if (kmh != null) elSpeed.textContent = kmh.toFixed(1);
+
+            lastFix = { lat: latitude, lng: longitude, t: now };
+
+            map.panTo(here, { animate: true });
+            if (tracking) setStatus(`Aufzeichnung läuft … ${track.length} Punkte`);
+        }
+
+        function onError(err) {
+            const messages = {
+                1: 'Standortzugriff verweigert. Bitte in den Einstellungen erlauben.',
+                2: 'Position nicht verfügbar (kein GPS-Signal).',
+                3: 'Zeitüberschreitung beim Standort.',
+            };
+            setStatus(messages[err.code] || ('Fehler: ' + err.message));
+        }
+
+        // ---------------------------------------------------------------
+        // Start / Stop
+        // ---------------------------------------------------------------
+        function startTracking() {
+            if (!('geolocation' in navigator)) {
+                setStatus('Dieser Browser unterstützt keine Standortbestimmung.');
+                return;
+            }
+            if (!window.isSecureContext) {
+                setStatus('GPS braucht HTTPS oder localhost. Über file:// gibt es keine Position.');
+                return;
+            }
+            // stop the acquire watch — the tracking watch takes over now
+            if (acquireWatch != null) { navigator.geolocation.clearWatch(acquireWatch); acquireWatch = null; }
+            tracking = true;
+            startTime = Date.now();
+            timerId = setInterval(updateDuration, 1000);
+            watchId = navigator.geolocation.watchPosition(onPosition, onError, {
+                enableHighAccuracy: true,
+                maximumAge: 0,
+                timeout: 10000,
+            });
+            elToggle.textContent = 'STOP';
+            elToggle.style.background = COL_RED;
+            setStatus('Suche GPS-Signal …');
+        }
+
+        function stopTracking() {
+            tracking = false;
+            if (watchId != null) navigator.geolocation.clearWatch(watchId);
+            watchId = null;
+            if (timerId) clearInterval(timerId);
+            timerId = null;
+            elToggle.textContent = 'START';
+            elToggle.style.background = COL_GREEN;
+            setStatus(track.length ? `Gestoppt. ${(totalDist / 1000).toFixed(2)} km, ${track.length} Punkte.` : 'Gestoppt.');
+        }
+
+        elToggle.addEventListener('click', () => tracking ? stopTracking() : startTracking());
+
+        // ---------------------------------------------------------------
+        // Acquire a position: snap there at once, then keep refining until the
+        // accuracy is good (or a timeout hits) — only then reveal the red dot.
+        // ---------------------------------------------------------------
+        function goToCurrentPosition(opts) {
+            opts = opts || {};
+            if (!('geolocation' in navigator)) {
+                setStatus('Dieser Browser unterstützt keine Standortbestimmung.');
+                return;
+            }
+            if (!window.isSecureContext) {
+                setStatus('GPS braucht HTTPS oder localhost. Über file:// gibt es keine Position.');
+                return;
+            }
+            if (acquireWatch != null) navigator.geolocation.clearWatch(acquireWatch);
+
+            const GOOD_ACC = 15;       // metres: a great fix → settle at once
+            const STABLE_MS = 3000;    // ms: accuracy stopped improving this long → settle at best
+            const MAX_WAIT = 15000;    // ms: reveal anyway after this long
+            const startedAt = Date.now();
+            let best = null;
+            let lastImproved = startedAt;
+            let centred = false;
+
+            setStatus('Warte auf bessere Positionsdaten …');
+
+            function reveal() {
+                if (acquireWatch != null) { navigator.geolocation.clearWatch(acquireWatch); acquireWatch = null; }
+                if (!best) return;
+                showDot();
+                setStatus(`Position gefunden (±${Math.round(best.accuracy)} m).`);
+            }
+
+            acquireWatch = navigator.geolocation.watchPosition(
+                pos => {
+                    const here = [pos.coords.latitude, pos.coords.longitude];
+                    const acc = pos.coords.accuracy != null ? pos.coords.accuracy : Infinity;
+                    const now = Date.now();
+                    // count it as progress only if accuracy drops meaningfully (ignore jitter)
+                    if (!best || acc < best.accuracy - 0.5) { best = { here, accuracy: acc }; lastImproved = now; }
+
+                    renderPosition(best.here, best.accuracy); // moves the still-hidden dot + accuracy readout
+
+                    if (!centred) {
+                        centred = true; // go to the position immediately on the first fix
+                        if (opts.initial) map.setView(best.here, 16);
+                        else map.flyTo(best.here, Math.max(map.getZoom(), 16), { duration: 1.2 });
+                    } else {
+                        map.panTo(best.here, { animate: true });
+                    }
+
+                    // settle once it is great, once it stops improving, or after the hard cap
+                    const settle = best.accuracy <= GOOD_ACC
+                        || (now - lastImproved) >= STABLE_MS
+                        || (now - startedAt) > MAX_WAIT;
+                    if (settle) reveal();
+                    else setStatus(`Warte auf bessere Positionsdaten … (±${Math.round(best.accuracy)} m)`);
+                },
+                onError,
+                { enableHighAccuracy: true, maximumAge: 0, timeout: 12000 }
+            );
+
+            // safety net: reveal the best fix even if updates stop coming
+            setTimeout(() => { if (acquireWatch != null) reveal(); }, MAX_WAIT + 500);
+        }
+
+        $('trk-center').addEventListener('click', () => {
+            // Already have a position → glide there smoothly
+            if (posMarker) {
+                map.flyTo(posMarker.getLatLng(), Math.max(map.getZoom(), 16), { duration: 1.2 });
+                showDot();
+                return;
+            }
+            goToCurrentPosition({ initial: false });
+        });
+
+        $('trk-clear').addEventListener('click', () => {
+            // Guard against losing a recording by accident
+            if (track.length && !confirm('Aktuellen Track wirklich löschen?')) return;
+            track = [];
+            times = [];
+            totalDist = 0;
+            lastFix = null;
+            trackLine.setLatLngs([]);
+            elDist.textContent = '0.00';
+            elSpeed.textContent = '0.0';
+            if (!tracking) { CyberClock.set(elTime, '00:00:00'); startTime = null; }
+            setStatus('Track gelöscht.');
+        });
+
+        // ---------------------------------------------------------------
+        // Export as GPX (the standard GPS exchange format)
+        // ---------------------------------------------------------------
+        function buildGpx() {
+            const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            const name = 'Doc Alvers Tracker ' + (times[0] || '');
+            const pts = track.map((p, i) =>
+                `      <trkpt lat="${p[0].toFixed(7)}" lon="${p[1].toFixed(7)}">` +
+                (times[i] ? `<time>${times[i]}</time>` : '') +
+                `</trkpt>`
+            ).join('\n');
+            return `<?xml version="1.0" encoding="UTF-8"?>
+<gpx version="1.1" creator="Doc Alvers Mathe-Labor" xmlns="http://www.topografix.com/GPX/1/1">
+  <trk>
+    <name>${esc(name)}</name>
+    <trkseg>
+${pts}
+    </trkseg>
+  </trk>
+</gpx>`;
+        }
+
+        $('trk-export').addEventListener('click', () => {
+            if (track.length < 2) {
+                setStatus('Noch kein Track zum Exportieren (mind. 2 Punkte nötig).');
+                return;
+            }
+            const blob = new Blob([buildGpx()], { type: 'application/gpx+xml' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `track-${new Date().toISOString().replace(/[:.]/g, '-')}.gpx`;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            URL.revokeObjectURL(url);
+            setStatus(`GPX exportiert: ${track.length} Punkte, ${(totalDist / 1000).toFixed(2)} km.`);
+        });
+
+        // ---------------------------------------------------------------
+        // Keep Leaflet sized correctly
+        // ---------------------------------------------------------------
+        function init() {
+            map.invalidateSize();
+        }
+        window.addEventListener('resize', init);
+        document.fonts.ready.then(init);
+        setTimeout(init, 300);
+
+        // On load: jump straight to the current position (no need to press centre),
+        // then wait for better data before revealing the red dot.
+        goToCurrentPosition({ initial: true });
+    </script>
+</body>
+
+</html>
