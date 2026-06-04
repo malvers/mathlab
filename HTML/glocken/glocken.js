@@ -1009,6 +1009,7 @@ Regeln:
   window.gotoLevel = gotoLevel;
   // React live to hash edits (#kgv3 etc.) — no reload needed
   window.addEventListener('hashchange', () => {
+    if (/^#(start|intro|reset)$/.test(location.hash || '')) { location.reload(); return; }
     const m = (location.hash || '').match(/^#(kgv|add|sub)([1-4])$/);
     if (m) gotoLevel(m[1], parseInt(m[2], 10));
   });
@@ -1066,7 +1067,7 @@ Regeln:
       q: "Was heißt eigentlich *kgV*?",
       options: ["das kleinste gemeinsame Vielfache", "kein großer Vogel", "kleiner gelber Flieger", "Karl grillt Vanillekipferl"],
       answer: 0,
-      win: "Genau! [break:0.3s] Obwohl … „kein großer Vogel" wäre auch ziemlich gut.",
+      win: "Genau! [break:0.3s] Obwohl — ein *großer Vogel* wäre auch ziemlich lustig.",
       nope: "Haha! [break:0.3s] Schön wär's — aber nö."
     },
     {
@@ -1604,7 +1605,11 @@ Regeln:
     }
   }
 
+  // Strike-count numbers (1,2,3 above / 1,2 below): ON for the animated runTimeline
+  // (story rounds + tutor replay), OFF for the static "Stücke" scenes (drawAllStrikes).
+  let showStrikeNums = true;
   function drawAllStrikes() {
+    showStrikeNums = false;   // pieces/triangles scenes: no per-strike numbers
     for (let t = state.small; t <= state.L; t += state.small) placeStrike(t, 'small');
     for (let t = state.big;   t <= state.L; t += state.big)   placeStrike(t, 'big');
   }
@@ -1631,13 +1636,15 @@ Regeln:
     el.style.left = ((time / state.tEnd) * tlWidth() - 2) + 'px';
     tl.appendChild(el);
     // Running count of this bell's strikes: 1,2,3… (small, above) · 1,2… (big, below)
-    const period = (kind === 'small') ? state.small : state.big;
-    const num = document.createElement('div');
-    num.className = 'strike-count ' + kind;
-    num.dataset.time = time;
-    num.style.left = ((time / state.tEnd) * tlWidth()) + 'px';
-    num.textContent = Math.round(time / period);
-    tl.appendChild(num);
+    if (showStrikeNums) {
+      const period = (kind === 'small') ? state.small : state.big;
+      const num = document.createElement('div');
+      num.className = 'strike-count ' + kind;
+      num.dataset.time = time;
+      num.style.left = ((time / state.tEnd) * tlWidth()) + 'px';
+      num.textContent = Math.round(time / period);
+      tl.appendChild(num);
+    }
     // Color the axis label that matches this strike's position
     const axisLabels = document.getElementById('axis-labels');
     if (axisLabels) {
@@ -1655,6 +1662,7 @@ Regeln:
   }
 
   function runTimeline(done, durationMs) {
+    showStrikeNums = true;   // animated runs (story rounds + tutor replay) show the counts
     clearTimeline();
     drawTimeAxis();
     let smallNext = state.small;
@@ -2299,7 +2307,7 @@ Regeln:
   const tap2 = document.getElementById('intro-tap-2');
   const narrationBox = document.getElementById('narration');
   const NARRATION = [
-    "Es war einmal in Bagdad. Vor fast 1200 Jahren. Dort lebte ein Mann — klug, weise, geduldig — dem die Mathematik mehr bedeutete als alles andere.",
+    "Es war einmal in Bagdad. Vor fast 1200 Jahren. Dort lebte ein Mann — klug, weise, wissbegierig — dem die Mathematik mehr bedeutete als alles andere.",
     "Eine Frage ließ ihn nicht los, und sie lässt bis heute niemanden los: Gehört die Mathematik zum Universum? Oder haben die Menschen sie erfunden?",
     "Eines Nachts, als die Stadt schon schlief, hörte er etwas. Zwei Glocken. Jede in ihrem eigenen Takt."
   ];
@@ -2383,9 +2391,14 @@ Regeln:
     else if (introPhase === 'ready') dismissIntro();
   });
 
+  // #start / #intro → back to the very beginning (clear the saved scene, show the intro).
+  const hashStart = /^#(start|intro|reset)$/.test(location.hash || '');
   // Debug: URL hash like #kgv3 / #add2 / #sub1 / #kgv4 jumps straight into that tutor level.
   const hashJump = (location.hash || '').match(/^#(kgv|add|sub)([1-4])$/);
-  if (hashJump) {
+  if (hashStart) {
+    try { localStorage.removeItem('glocken_scene'); } catch (e) {}
+    // fall through: no resume, no jump → the normal intro plays from the top
+  } else if (hashJump) {
     gotoLevel(hashJump[1], parseInt(hashJump[2], 10));
   } else {
     // Resume at the last visited scene on reload (skip the intro). Cleared at the end,
@@ -2401,4 +2414,11 @@ Regeln:
       }
     } catch (e) {}
   }
+
+  // Console/debug helper: jump to the very beginning from anywhere.
+  window.gotoStart = () => {
+    try { localStorage.removeItem('glocken_scene'); } catch (e) {}
+    location.hash = 'start';
+    location.reload();
+  };
 })();
