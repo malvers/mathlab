@@ -88,15 +88,23 @@
         }
 
         #gps-chip {
-            position: absolute;
-            top: max(12px, env(safe-area-inset-top));
-            left: 14px;
             display: flex;
+            justify-content: center;
             align-items: center;
-            gap: 7px;
-            font-size: 0.7rem;
+            gap: 8px;
+            font-size: 0.72rem;
             letter-spacing: 2px;
             color: rgba(255, 255, 255, 0.85);
+        }
+
+        #gps-src {
+            color: rgba(255, 255, 255, 0.85);
+        }
+
+        #gps-acc {
+            color: rgba(255, 255, 255, 0.6);
+            letter-spacing: 1px;
+            font-variant-numeric: tabular-nums;
         }
 
         #gps-dot {
@@ -117,21 +125,14 @@
         #hud-time {
             --cc-size: clamp(2.2rem, 12vw, 3.6rem);
             justify-content: center;
-            margin-top: clamp(22px, 6vw, 32px);
-            /* clear the POSITION chip above */
+            margin-top: clamp(6px, 2vw, 12px);
+            /* small gap below the POSITION chip */
             pointer-events: auto;
             /* re-enable taps — the parent HUD is pointer-events:none */
             cursor: pointer;
             -webkit-user-select: none;
             user-select: none;
             -webkit-tap-highlight-color: transparent;
-        }
-
-        #hud-time-label {
-            font-size: 0.6rem;
-            letter-spacing: 4px;
-            color: rgba(255, 255, 255, 0.5);
-            margin-top: 4px;
         }
 
         #hud-stats {
@@ -161,15 +162,6 @@
             letter-spacing: 2px;
             color: rgba(255, 255, 255, 0.5);
             margin-top: 6px;
-        }
-
-        #trk-status {
-            margin-top: 12px;
-            font-family: system-ui, -apple-system, sans-serif;
-            font-size: 0.72rem;
-            letter-spacing: 0.5px;
-            color: rgba(255, 255, 255, 0.7);
-            min-height: 1em;
         }
 
         /* ---- Big round START / STOP ---- */
@@ -250,15 +242,12 @@
 
     <!-- Top HUD -->
     <div id="hud-top">
-        <div id="gps-chip"><span id="gps-dot"></span><span id="gps-label">POSITION</span></div>
+        <div id="gps-chip"><span id="gps-dot"></span><span id="gps-label">POSITION</span><span id="gps-src"></span><span id="gps-acc">±– m</span></div>
         <div id="hud-time"></div>
-        <div id="hud-time-label">DAUER</div>
         <div id="hud-stats">
             <div class="hud-stat"><span class="hud-val" id="trk-dist">0.00</span><span class="hud-lbl">KM</span></div>
-            <div class="hud-stat"><span class="hud-val" id="trk-speed">0.0</span><span class="hud-lbl">TEMPO KM/H</span></div>
-            <div class="hud-stat"><span class="hud-val" id="trk-acc">–</span><span class="hud-lbl">GENAU. M</span></div>
+            <div class="hud-stat"><span class="hud-val" id="trk-speed">0.0</span><span class="hud-lbl">KM/H</span></div>
         </div>
-        <div id="trk-status">Bereit. Tippe START.</div>
     </div>
 
     <!-- Tool buttons -->
@@ -313,7 +302,8 @@
         const map = L.map('map', {
             zoomControl: false,
             attributionControl: true,
-            touchZoom: true,   // pinch-zoom with two fingers
+            touchZoom: true,          // pinch-zoom with two fingers
+            doubleClickZoom: false,   // so a double-tap never zooms the map (clock owns double-tap → fullscreen)
             tap: true,
         }).setView([51.1657, 10.4515], 6); // centre of Germany as a neutral start
         L.control.zoom({ position: 'bottomright' }).addTo(map);
@@ -347,7 +337,8 @@
         const elDist = $('trk-dist');
         const elTime = $('hud-time');
         const elSpeed = $('trk-speed');
-        const elAcc = $('trk-acc');
+        const elAcc = $('gps-acc');
+        const elSrc = $('gps-src');
         const elStatus = $('trk-status');
         const elGps = $('gps-dot');
         const elGpsLabel = $('gps-label');
@@ -361,7 +352,7 @@
         });
         CyberClock.set(elTime, '00:00:00');
 
-        function setStatus(msg) { elStatus.textContent = msg; }
+        function setStatus(msg) { if (elStatus) elStatus.textContent = msg; } // status line removed — guard-safe no-op
 
         function setGpsState(hasFix) {
             // Green once a position is available, dimmed grey while none ("grün wenn da")
@@ -424,8 +415,18 @@
                 posMarker.setLatLng(here);
             }
 
-            elAcc.textContent = accuracy != null ? Math.round(accuracy) : '–';
+            elAcc.textContent = accuracy != null ? '±' + Math.round(accuracy) + ' m' : '±– m';
+            elSrc.textContent = sourceLabel(accuracy);
             setGpsState(true);
+        }
+
+        // The web Geolocation API hides the fix source — infer it from accuracy (heuristic).
+        // The real provider (gps/network/fused) is only available in the native app.
+        function sourceLabel(acc) {
+            if (acc == null) return '';
+            if (acc <= 15) return 'GPS';     // only GNSS is this precise
+            if (acc <= 150) return 'WLAN';
+            return 'FUNK';                    // cell tower / IP
         }
 
         function onPosition(pos) {
@@ -719,7 +720,8 @@ ${pts}
         }
 
         let lastTapTime = 0;
-        elTime.addEventListener('click', () => {
+        elTime.addEventListener('click', (e) => {
+            e.stopPropagation(); // don't let the tap leak to the map underneath
             const now = Date.now();
             if (now - lastTapTime < 350) { toggleFullscreen(); lastTapTime = 0; } // second tap
             else lastTapTime = now;

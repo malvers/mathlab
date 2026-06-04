@@ -429,9 +429,8 @@ Regeln:
     const lvl = tutorState.difficulty;
     if (tutorMode === 'kgv') {
       let a = pair[0], b = pair[1];
-      // Level 1 (a teilt b → kgV = b): randomly put the small number second so the answer
-      // isn't predictably "the bigger/second number". The kgV is order-independent.
-      if (lvl === 1 && Math.random() < 0.5) { const t = a; a = b; b = t; }
+      // Randomly swap the order so the pair isn't always "small, big". kgV is order-independent.
+      if (Math.random() < 0.5) { const t = a; a = b; b = t; }
       return { mode: 'kgv', a, b, answer: lcmN(a, b), difficulty: lvl };
     }
     // add/sub: order a<b so 1/a > 1/b (subtraction stays positive), denom = kgV
@@ -681,9 +680,10 @@ Regeln:
         '<span class="tutor-eq">=</span>' +
         '<span class="frac"><span class="num tutor-answer" id="tutor-answer">?</span><span class="den color-meet">' + p.den + '</span></span>';
     } else {
-      // colour follows magnitude: smaller orange, bigger red
-      const colA = p.a < p.b ? 'var(--orange)' : 'var(--red)';
-      const colB = p.b < p.a ? 'var(--orange)' : 'var(--red)';
+      // colour follows magnitude (smaller orange, bigger red) — but neutral from Level 3 up
+      const neutral = p.difficulty >= 3;
+      const colA = neutral ? 'var(--ink)' : (p.a < p.b ? 'var(--orange)' : 'var(--red)');
+      const colB = neutral ? 'var(--ink)' : (p.b < p.a ? 'var(--orange)' : 'var(--red)');
       el.innerHTML =
         '<span class="tutor-kgv">kgV</span>' +
         '<span>von</span>' +
@@ -698,6 +698,7 @@ Regeln:
   function showProblem(p, intro) {
     hideTutorTimeline();
     hideFunQuiz();                     // a real problem is showing → no quiz panel
+    hideTrophy();                      // … and no trophy (restores the equation/input)
     tutorState.pendingNext = null;     // clear any "Weiter" state
     if (tutorSubmit) tutorSubmit.textContent = 'Prüfen';
     tutorState.currentProblem = p;
@@ -741,6 +742,7 @@ Regeln:
     tutorOverlay.classList.remove('hidden');
     document.body.classList.add('tutor-open');
     hideTutorComplete();               // clear any leftover completion panel
+    document.getElementById('tutor-trophy')?.classList.add('hidden');
     tutorState.history = [];
     tutorState.masteredTop = false;
     loadLevelBag(1);                   // sets difficulty = 1 and fills the shuffled bag
@@ -912,7 +914,8 @@ Regeln:
         await celebrateLevel(clearedLevel, clearedLevel + 1, false);
         loadLevelBag(clearedLevel + 1);
       }
-      // Don't auto-advance — leave the timeline standing; the next problem waits for "Weiter".
+      // Reward: timeline + equation away, golden trophy instead. Next problem waits for "Weiter".
+      showTrophy();
       tutorState.pendingNext = nextProblemFromBag();
       tutorSubmit.textContent = 'Weiter';
       tutorSubmit.disabled = false;
@@ -1032,6 +1035,7 @@ Regeln:
     hideTutorTimeline();
     hideFunQuiz();
     setProblemUIVisible(false);
+    document.getElementById('tutor-trophy')?.classList.add('hidden');
     if (tutorBubble) tutorBubble.style.display = 'none';   // no leftover question on the completion screen
     const expert = clearedLevel >= 4;
     const panel = document.getElementById('tutor-complete');
@@ -1117,6 +1121,29 @@ Regeln:
   function hideFunQuiz() {
     const panel = document.getElementById('tutor-quiz');
     if (panel) { panel.classList.add('hidden'); panel.innerHTML = ''; }
+  }
+
+  // Reward trophy: shown after a correct answer in place of the kgV equation + timeline.
+  function showTrophy() {
+    hideTutorTimeline();
+    const prob = document.getElementById('tutor-problem');
+    if (prob) prob.style.display = 'none';
+    if (tutorInput) tutorInput.style.display = 'none';
+    if (tutorHint) tutorHint.style.display = 'none';
+    const t = document.getElementById('tutor-trophy');
+    if (t) {
+      t.classList.remove('hidden');
+      const svg = t.querySelector('.trophy-svg');     // restart the pop animation
+      if (svg) { svg.style.animation = 'none'; void svg.offsetWidth; svg.style.animation = ''; }
+    }
+  }
+  function hideTrophy() {
+    const t = document.getElementById('tutor-trophy');
+    if (t) t.classList.add('hidden');
+    const prob = document.getElementById('tutor-problem');
+    if (prob) prob.style.display = '';
+    if (tutorInput) tutorInput.style.display = '';
+    if (tutorHint) tutorHint.style.display = '';
   }
   // One silly question as a warm-up; calls onDone() once answered correctly.
   function showFunQuiz(onDone) {
