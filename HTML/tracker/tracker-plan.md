@@ -24,6 +24,11 @@
   (APK NICHT neu gebaut — Doc testet die installierte Version; Zoom-Fix kommt beim nächsten Build.)
 
 ## Offen
+- **Pro Punkt: Höhe + Velocity speichern** — aktuell nur `[lat, lng, t]`. Erweitern auf
+  `[lat, lng, t, alt, speed]` (Geolocation: `coords.altitude` in m, `coords.speed` in m/s;
+  nativ liefert das BackgroundGeolocation-Plugin beides auch). Ermöglicht später Höhenprofil
+  + Geschwindigkeitsverlauf eines Tracks. Schema-Änderung in `track`/`times` → `onPosition`,
+  `plotTrack`, `saveTrack`/`buildGpx` (GPX `<ele>` pro `<trkpt>`) anfassen.
 - **Bewegungs-Gate** (Accelerometer/DeviceMotion gegen Phantom-Tempo im Stand) — bewusst NICHT blind
   gebaut, braucht Geräte-Test. Nächster Schritt mit Doc.
 - **Tracking-Notification farbig** (Akzentfarbe/Icon im Benachrichtigungs-Panel) — Doc hatte gefragt;

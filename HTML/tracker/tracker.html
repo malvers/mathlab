@@ -26,7 +26,7 @@
             /* Bottom offset for the fixed controls: safe-area added ON TOP of a solid base,
                so on Android (where safe-area-inset-bottom is usually 0) the START button still
                clears the Leaflet attribution instead of sitting right on top of it. */
-            --btm: calc(env(safe-area-inset-bottom, 0px) + clamp(40px, 8vw, 54px));
+            --btm: calc(env(safe-area-inset-bottom, 0px) + clamp(48px, 9vw, 62px));
         }
 
         *,
@@ -80,7 +80,8 @@
             right: 0;
             z-index: 500;
             padding: 14px 16px 30px;
-            padding-top: max(14px, env(safe-area-inset-top));
+            /* extra top room so the centred camera button doesn't overlap the POSITION line */
+            padding-top: calc(max(14px, env(safe-area-inset-top)) + 48px);
             background: linear-gradient(180deg,
                     rgba(8, 20, 42, 0.95) 0%,
                     rgba(8, 20, 42, 0.92) 62%,
@@ -243,6 +244,121 @@
         #recenter-fab svg {
             width: 16px;
             height: 16px;
+        }
+
+        /* ---- Camera button (top-center) → Foto-Spur ---- */
+        #cam-fab {
+            position: fixed;
+            top: max(12px, env(safe-area-inset-top));
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 600;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            border: 1px solid rgba(245, 194, 66, 0.75);
+            background: rgba(8, 20, 42, 0.85);
+            color: var(--orange);
+            /* hidden until the first START — then it stays visible like the HUD */
+            display: none;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(8px);
+            cursor: pointer;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+            transition: transform 0.1s ease, border-color 0.2s ease;
+        }
+
+        #cam-fab.shown {
+            display: inline-flex;
+        }
+
+        #cam-fab:hover {
+            border-color: var(--orange);
+        }
+
+        #cam-fab:active {
+            transform: translateX(-50%) scale(0.94);
+        }
+
+        #cam-fab svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        /* ---- Photo waypoint pins (Foto-Spur) ---- */
+        .wp-pin {
+            background: none;
+            border: none;
+        }
+
+        .wp-dot {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--orange);
+            color: rgb(8, 20, 42);
+            border: 2px solid #fff;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+        }
+
+        .wp-dot svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* pulse while Gemini is still identifying the photo */
+        .wp-dot.pending {
+            animation: wpPulse 1s ease-in-out infinite;
+        }
+
+        @keyframes wpPulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.35;
+            }
+        }
+
+        /* ---- Photo popup (the knowledge card) ---- */
+        .wp-popup .leaflet-popup-content-wrapper {
+            background: rgba(8, 20, 42, 0.97);
+            color: #fff;
+            border: 1px solid rgba(245, 194, 66, 0.5);
+            border-radius: 12px;
+        }
+
+        .wp-popup .leaflet-popup-tip {
+            background: rgba(8, 20, 42, 0.97);
+        }
+
+        .wp-pop img {
+            width: 100%;
+            border-radius: 8px;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .wp-pop-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.78rem;
+            color: var(--orange);
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+
+        .wp-pop-text {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 0.82rem;
+            line-height: 1.4;
+            color: #fff;
         }
 
         /* ---- Small tool buttons (bottom-left) ---- */
@@ -709,6 +825,16 @@
         ZENTRIEREN
     </button>
 
+    <!-- Camera (top-center) → Foto-Spur: snap → pin on the track + Gemini explains it -->
+    <button id="cam-fab" aria-label="Foto aufnehmen" title="Foto aufnehmen">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round">
+            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+            <circle cx="12" cy="13" r="4"></circle>
+        </svg>
+    </button>
+    <input id="cam-input" type="file" accept="image/*" capture="environment" style="display:none">
+
     <!-- Left-edge menu hamburger (vertically centred) → opens the radial popup -->
     <button id="menu-fab" aria-label="Menü" title="Menü"><span></span><span></span><span></span></button>
 
@@ -775,6 +901,7 @@
             tap: true,
         }).setView([51.1657, 10.4515], 6); // centre of Germany as a neutral start
         L.control.zoom({ position: 'bottomright' }).addTo(map);
+        map.attributionControl.setPrefix(false); // drop the "Leaflet" prefix → shorter bar, stays out from under START
 
         // The map auto-follows new fixes until you take over (drag) — ZENTRIEREN re-enables it.
         // The position dot is hidden during zoom animations so it doesn't jump, then fades back.
@@ -814,6 +941,8 @@
         let startTime = null;      // ms
         let timerId = null;
         let lastFix = null;        // { lat, lng, t }
+        let waypoints = [];        // Foto-Spur: [{lat, lng, t, img, title, text, _marker}]
+        let wpMarkers = [];        // their Leaflet markers (kept for clearing)
 
         const MIN_MOVE_M = 4;      // ignore jitter below this distance
         const MAX_ACC_M = 50;      // ignore fixes worse than this accuracy
@@ -1056,6 +1185,7 @@
             elToggle.textContent = 'STOP';
             elToggle.style.background = COL_RED;
             $('hud-top').classList.add('shown'); // reveal the header (fades down) on first start
+            $('cam-fab').classList.add('shown'); // and the camera (Foto-Spur)
             setStatus('Suche GPS-Signal …');
         }
 
@@ -1157,6 +1287,7 @@
             totalDist = 0;
             lastFix = null;
             trackLine.setLatLngs([]);
+            clearWaypoints();
             elDist.textContent = '0.00';
             elSpeed.textContent = '0.0';
             if (!tracking) { CyberClock.set(elTime, '00:00:00'); startTime = null; }
@@ -1174,8 +1305,17 @@
                 (times[i] ? `<time>${times[i]}</time>` : '') +
                 `</trkpt>`
             ).join('\n');
+            // Photo waypoints → standard <wpt> (must precede <trk> per the GPX schema)
+            const wpts = waypoints.map(w =>
+                `  <wpt lat="${w.lat.toFixed(7)}" lon="${w.lng.toFixed(7)}">` +
+                (w.t ? `<time>${w.t}</time>` : '') +
+                `<name>${esc(w.title || 'Foto')}</name>` +
+                (w.text ? `<desc>${esc(w.text)}</desc>` : '') +
+                `</wpt>`
+            ).join('\n');
             return `<?xml version="1.0" encoding="UTF-8"?>
 <gpx version="1.1" creator="Doc Alvers Mathe-Labor" xmlns="http://www.topografix.com/GPX/1/1">
+${wpts}
   <trk>
     <name>${esc(name)}</name>
     <trkseg>
@@ -1289,7 +1429,7 @@ ${pts}
             const have = session && session.user ? (session.user.email || null) : null;
             const want = (await syncCreds(code)).email;
             if (have === want) return -1; // already on this account
-            const rows = (await sb.from('tracks').select('name, distance_m, points')).data || [];
+            const rows = (await sb.from('tracks').select('name, distance_m, points, waypoints')).data || [];
             await signInWithCode(code);           // create / sign into the account FIRST (throws on failure)
             localStorage.setItem(SYNC_KEY, code);  // persist the code ONLY after a successful login
             let n = 0;
@@ -1298,7 +1438,7 @@ ${pts}
                 const add = rows.filter(r => !known.has(r.name));
                 if (add.length) {
                     const { error } = await sb.from('tracks')
-                        .insert(add.map(r => ({ name: r.name, distance_m: r.distance_m, points: r.points })));
+                        .insert(add.map(r => ({ name: r.name, distance_m: r.distance_m, points: r.points, waypoints: r.waypoints })));
                     if (error) throw error;
                     n = add.length;
                 }
@@ -1309,10 +1449,13 @@ ${pts}
         async function saveTrack(name) {
             const c = await ensureSb();
             const pts = track.map((p, i) => [p[0], p[1], times[i] || null]);
+            // strip the live Leaflet marker reference before persisting
+            const wps = waypoints.map(w => ({ lat: w.lat, lng: w.lng, t: w.t, img: w.img, title: w.title, text: w.text }));
             const { error } = await c.from('tracks').insert({
                 name: name,
                 distance_m: Math.round(totalDist),
                 points: pts,
+                waypoints: wps,
             });
             if (error) throw error;
         }
@@ -1326,11 +1469,11 @@ ${pts}
             return data || [];
         }
 
-        async function fetchTrackPoints(id) {
+        async function fetchTrack(id) {
             const c = await ensureSb();
-            const { data, error } = await c.from('tracks').select('points').eq('id', id).single();
+            const { data, error } = await c.from('tracks').select('points, waypoints').eq('id', id).single();
             if (error) throw error;
-            return data.points || [];
+            return { points: data.points || [], waypoints: data.waypoints || [] };
         }
 
         async function removeTrack(id) {
@@ -1339,14 +1482,16 @@ ${pts}
             if (error) throw error;
         }
 
-        // Plot a loaded track onto the map (replaces the current line)
-        function plotTrack(points) {
+        // Plot a loaded track onto the map (replaces the current line + photo pins)
+        function plotTrack(points, wps) {
             const latlngs = points.map(p => [p[0], p[1]]);
             track = latlngs.map(ll => [ll[0], ll[1]]);
             times = points.map(p => p[2] || null);
             totalDist = 0;
             for (let i = 1; i < latlngs.length; i++) totalDist += haversine(latlngs[i - 1], latlngs[i]);
             trackLine.setLatLngs(latlngs);
+            clearWaypoints();
+            (wps || []).forEach(w => addWaypoint({ lat: w.lat, lng: w.lng, t: w.t, img: w.img, title: w.title, text: w.text }));
             elDist.textContent = (totalDist / 1000).toFixed(2);
             elSpeed.textContent = '0.0';
             if (latlngs.length) map.fitBounds(trackLine.getBounds(), { padding: [40, 40] });
@@ -1361,6 +1506,156 @@ ${pts}
             if (toastTimer) clearTimeout(toastTimer);
             toastTimer = setTimeout(() => t.classList.remove('show'), 2400);
         }
+
+        // ===============================================================
+        // Foto-Spur: snap a photo, nail it to the track at the current
+        // position, and let Gemini (via the identify Edge Function) name
+        // and explain what it is. The Gemini key lives server-side only.
+        // ===============================================================
+        const IDENTIFY_URL = SUPABASE_URL + '/functions/v1/identify';
+        const CAM_PIN_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="rgb(8,20,42)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>';
+        const PENDING_TITLE = 'Wird erkannt …';
+
+        function currentLatLng() {
+            if (lastFix) return [lastFix.lat, lastFix.lng];
+            if (posMarker) { const p = posMarker.getLatLng(); return [p.lat, p.lng]; }
+            return null;
+        }
+
+        // Read an image File, scale its longest side down to `max` px, return a JPEG data URL.
+        function downscaleToJpeg(file, max, quality) {
+            return new Promise((resolve, reject) => {
+                const fr = new FileReader();
+                fr.onerror = () => reject(new Error('Datei nicht lesbar'));
+                fr.onload = () => {
+                    const im = new Image();
+                    im.onerror = () => reject(new Error('Bild nicht dekodierbar'));
+                    im.onload = () => {
+                        let w = im.naturalWidth, h = im.naturalHeight;
+                        if (w >= h && w > max) { h = Math.round(h * max / w); w = max; }
+                        else if (h > w && h > max) { w = Math.round(w * max / h); h = max; }
+                        const cv = document.createElement('canvas');
+                        cv.width = w; cv.height = h;
+                        cv.getContext('2d').drawImage(im, 0, 0, w, h);
+                        resolve(cv.toDataURL('image/jpeg', quality));
+                    };
+                    im.src = fr.result;
+                };
+                fr.readAsDataURL(file);
+            });
+        }
+
+        // Ask the identify Edge Function (which holds the Gemini key) what the photo shows.
+        async function identifyPhoto(dataUrl) {
+            const base64 = dataUrl.slice(dataUrl.indexOf(',') + 1);
+            let token = SUPABASE_KEY;
+            try {
+                const { data: { session } } = await (await ensureSb()).auth.getSession();
+                if (session && session.access_token) token = session.access_token;
+            } catch (e) { /* fall back to the publishable key */ }
+            const res = await fetch(IDENTIFY_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + token },
+                body: JSON.stringify({ image: base64, mime: 'image/jpeg' }),
+            });
+            const j = await res.json().catch(() => ({}));
+            if (!res.ok) throw new Error(j.error || ('KI ' + res.status));
+            return { title: j.title || 'Unbekannt', text: j.text || '' };
+        }
+
+        // ---- waypoint markers ----
+        function wpIcon(wp) {
+            const pending = (wp.title === PENDING_TITLE) ? ' pending' : '';
+            return L.divIcon({
+                className: 'wp-pin',
+                html: '<div class="wp-dot' + pending + '">' + CAM_PIN_SVG + '</div>',
+                iconSize: [30, 30], iconAnchor: [15, 30], popupAnchor: [0, -30],
+            });
+        }
+        function wpPopupHtml(wp) {
+            const esc = s => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            return '<div class="wp-pop"><img src="' + wp.img + '" alt="">' +
+                '<div class="wp-pop-title">' + esc(wp.title) + '</div>' +
+                (wp.text ? '<div class="wp-pop-text">' + esc(wp.text) + '</div>' : '') + '</div>';
+        }
+        function addWaypoint(wp) {
+            waypoints.push(wp);
+            const m = L.marker([wp.lat, wp.lng], { icon: wpIcon(wp) }).addTo(map);
+            m.bindPopup(wpPopupHtml(wp), { maxWidth: 260, className: 'wp-popup' });
+            wp._marker = m;
+            wpMarkers.push(m);
+            return wp;
+        }
+        function refreshWaypoint(wp) {
+            if (!wp._marker) return;
+            wp._marker.setIcon(wpIcon(wp));
+            wp._marker.setPopupContent(wpPopupHtml(wp));
+        }
+        function clearWaypoints() {
+            wpMarkers.forEach(m => map.removeLayer(m));
+            wpMarkers = [];
+            waypoints = [];
+        }
+
+        // ---- camera button → capture → pin → identify ----
+        // Native (Capacitor) uses the @capacitor/camera plugin for a reliable capture;
+        // the browser falls back to the hidden <input capture> picker. Same single source —
+        // window.Capacitor is undefined on the web, so the native path is simply skipped.
+        const camInput = $('cam-input');
+        const NativeCam = (window.Capacitor && Capacitor.Plugins && Capacitor.Plugins.Camera) || null;
+        const useNativeCam = !!(NativeCam && Capacitor.isNativePlatform && Capacitor.isNativePlatform());
+
+        // Return a JPEG data URL (already ~1024 px wide), or null if the user cancelled.
+        async function capturePhoto() {
+            if (useNativeCam) {
+                const photo = await NativeCam.getPhoto({
+                    resultType: 'dataUrl', source: 'CAMERA',
+                    quality: 70, width: 1024, correctOrientation: true, saveToGallery: false,
+                });
+                return (photo && photo.dataUrl) ? photo.dataUrl : null;
+            }
+            // web: trigger the hidden file input and resolve once a file is picked
+            return new Promise((resolve) => {
+                const onChange = async () => {
+                    camInput.removeEventListener('change', onChange);
+                    const file = camInput.files && camInput.files[0];
+                    if (!file) return resolve(null);
+                    try { resolve(await downscaleToJpeg(file, 1024, 0.7)); }
+                    catch (e) { toast('Foto konnte nicht gelesen werden.'); resolve(null); }
+                };
+                camInput.value = '';
+                camInput.addEventListener('change', onChange);
+                camInput.click();
+            });
+        }
+
+        // Drop the pin at `ll`, then let Gemini name + explain the photo.
+        async function addPhotoAt(img, ll) {
+            toast('Foto wird verarbeitet …');
+            const wp = addWaypoint({ lat: ll[0], lng: ll[1], t: new Date().toISOString(), img, title: PENDING_TITLE, text: '' });
+            wp._marker.openPopup();
+            try {
+                const r = await identifyPhoto(img);
+                wp.title = r.title; wp.text = r.text;
+                toast(wp.title);
+            } catch (e) {
+                wp.title = 'Erkennung fehlgeschlagen';
+                wp.text = (e.message || '') + ' — Foto bleibt am Track.';
+                toast('KI-Erkennung fehlgeschlagen.');
+            }
+            refreshWaypoint(wp);
+        }
+
+        $('cam-fab').addEventListener('click', async () => {
+            if (!currentLatLng()) { toast('Noch keine Position — kurz auf GPS warten.'); return; }
+            let img;
+            try { img = await capturePhoto(); }
+            catch (e) { toast('Kamera nicht verfügbar: ' + (e.message || e)); return; }
+            if (!img) return; // cancelled
+            const ll = currentLatLng();
+            if (!ll) { toast('Position verloren — nochmal versuchen.'); return; }
+            await addPhotoAt(img, ll);
+        });
 
         // ===============================================================
         // Radial action popup (long-press / right-click) — style from worldclock
@@ -1423,7 +1718,7 @@ ${pts}
         // ---- Popup actions ----
         $('mb-save').addEventListener('click', async () => {
             closePopup();
-            if (track.length < 1) { toast('Noch kein Punkt — erst START drücken.'); return; }
+            if (track.length < 1 && waypoints.length < 1) { toast('Noch kein Punkt — erst START drücken.'); return; }
             const def = 'Track ' + new Date().toLocaleString('de-DE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
             const name = prompt('Track-Name:', def);
             if (name == null) return;
@@ -1510,7 +1805,7 @@ ${pts}
                 main.appendChild(nm); main.appendChild(mt);
                 main.addEventListener('click', async () => {
                     toast('Lade Track …');
-                    try { const pts = await fetchTrackPoints(r.id); plotTrack(pts); hidePanels(); toast(r.name + ' geladen.'); }
+                    try { const t = await fetchTrack(r.id); plotTrack(t.points, t.waypoints); hidePanels(); toast(r.name + ' geladen.'); }
                     catch (e) { toast('Track laden fehlgeschlagen.'); }
                 });
                 const del = document.createElement('button');
