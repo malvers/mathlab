@@ -54,6 +54,8 @@
 
         .leaflet-container {
             background: var(--bg-light);
+            /* let Leaflet fully own touch gestures (pinch-zoom / pan) even with user-scalable=no */
+            touch-action: none;
         }
 
         /* Red position dot — hidden during the move, fades in once we are on the position */
@@ -117,6 +119,12 @@
             justify-content: center;
             margin-top: clamp(22px, 6vw, 32px);
             /* clear the POSITION chip above */
+            pointer-events: auto;
+            /* re-enable taps — the parent HUD is pointer-events:none */
+            cursor: pointer;
+            -webkit-user-select: none;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
         }
 
         #hud-time-label {
@@ -302,8 +310,12 @@
         // ---------------------------------------------------------------
         // Map setup
         // ---------------------------------------------------------------
-        const map = L.map('map', { zoomControl: false, attributionControl: true })
-            .setView([51.1657, 10.4515], 6); // centre of Germany as a neutral start
+        const map = L.map('map', {
+            zoomControl: false,
+            attributionControl: true,
+            touchZoom: true,   // pinch-zoom with two fingers
+            tap: true,
+        }).setView([51.1657, 10.4515], 6); // centre of Germany as a neutral start
         L.control.zoom({ position: 'bottomright' }).addTo(map);
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -475,6 +487,57 @@
         }
 
         // ---------------------------------------------------------------
+        // Geolocation source — prefer the native background plugin (Capacitor)
+        // so recording continues with the screen off; fall back to the browser
+        // API on the web. In a plain browser window.Capacitor is undefined, so
+        // this whole block is a no-op and the web behaviour is unchanged.
+        // ---------------------------------------------------------------
+        const BgGeo = (window.Capacitor && Capacitor.Plugins && Capacitor.Plugins.BackgroundGeolocation) || null;
+        const useNativeGeo = !!(BgGeo && Capacitor.isNativePlatform && Capacitor.isNativePlatform());
+
+        function startGeoWatch(onPos, onErr) {
+            if (useNativeGeo) {
+                // addWatcher returns a Promise<string> (the watcher id)
+                return BgGeo.addWatcher(
+                    {
+                        backgroundTitle: 'Doc Alvers Tracker',
+                        backgroundMessage: 'Aufzeichnung läuft …',
+                        requestPermissions: true,
+                        stale: false,
+                        distanceFilter: 0,
+                    },
+                    (location, error) => {
+                        if (error) {
+                            onErr({ code: error.code === 'NOT_AUTHORIZED' ? 1 : 2, message: error.message || '' });
+                            return;
+                        }
+                        // adapt the plugin's location shape to the W3C Geolocation shape
+                        onPos({
+                            coords: {
+                                latitude: location.latitude,
+                                longitude: location.longitude,
+                                accuracy: location.accuracy,
+                                speed: location.speed,
+                            },
+                            timestamp: location.time || Date.now(),
+                        });
+                    }
+                );
+            }
+            return navigator.geolocation.watchPosition(onPos, onErr, {
+                enableHighAccuracy: true,
+                maximumAge: 0,
+                timeout: 10000,
+            });
+        }
+
+        function stopGeoWatch(id) {
+            if (id == null) return;
+            if (useNativeGeo) Promise.resolve(id).then(realId => BgGeo.removeWatcher({ id: realId }));
+            else navigator.geolocation.clearWatch(id);
+        }
+
+        // ---------------------------------------------------------------
         // Start / Stop
         // ---------------------------------------------------------------
         function startTracking() {
@@ -491,11 +554,7 @@
             tracking = true;
             startTime = Date.now();
             timerId = setInterval(updateDuration, 1000);
-            watchId = navigator.geolocation.watchPosition(onPosition, onError, {
-                enableHighAccuracy: true,
-                maximumAge: 0,
-                timeout: 10000,
-            });
+            watchId = startGeoWatch(onPosition, onError); // native background plugin if available, else web
             elToggle.textContent = 'STOP';
             elToggle.style.background = COL_RED;
             setStatus('Suche GPS-Signal …');
@@ -503,7 +562,7 @@
 
         function stopTracking() {
             tracking = false;
-            if (watchId != null) navigator.geolocation.clearWatch(watchId);
+            stopGeoWatch(watchId);
             watchId = null;
             if (timerId) clearInterval(timerId);
             timerId = null;
@@ -642,6 +701,33 @@ ${pts}
             URL.revokeObjectURL(url);
             setStatus(`GPX exportiert: ${track.length} Punkte, ${(totalDist / 1000).toFixed(2)} km.`);
         });
+
+        // ---------------------------------------------------------------
+        // Double-tap the clock → toggle fullscreen
+        // ---------------------------------------------------------------
+        function toggleFullscreen() {
+            const d = document;
+            const inFs = d.fullscreenElement || d.webkitFullscreenElement;
+            if (!inFs) {
+                const el = d.documentElement;
+                const req = el.requestFullscreen || el.webkitRequestFullscreen;
+                if (req) req.call(el);
+            } else {
+                const exit = d.exitFullscreen || d.webkitExitFullscreen;
+                if (exit) exit.call(d);
+            }
+        }
+
+        let lastTapTime = 0;
+        elTime.addEventListener('click', () => {
+            const now = Date.now();
+            if (now - lastTapTime < 350) { toggleFullscreen(); lastTapTime = 0; } // second tap
+            else lastTapTime = now;
+        });
+
+        // Re-fit the map after the viewport changes size on enter/leave fullscreen
+        document.addEventListener('fullscreenchange', () => setTimeout(init, 120));
+        document.addEventListener('webkitfullscreenchange', () => setTimeout(init, 120));
 
         // ---------------------------------------------------------------
         // Keep Leaflet sized correctly
