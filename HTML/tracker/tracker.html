@@ -1,0 +1,1577 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DOC ALVERS MATHE-LABORE | GPS Tracker</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="../resources/favicon.png">
+    <!-- Leaflet (map library) -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+    <!-- Reusable fixed-slot clock (shared component) — keeps the timer from jittering -->
+    <link rel="stylesheet" href="../js/cyber-clock.css">
+    <style>
+        /* ---- Standalone full-screen shell (same pattern as glocken — no cyber grid,
+                so there is no left margin / blue rand bleeding through) ---- */
+        :root {
+            --bg: rgb(8, 20, 42);
+            --bg-light: rgb(14, 36, 78);
+            --orange: rgb(245, 194, 66);
+            --red: rgb(176, 36, 24);
+            --green: rgb(121, 158, 49);
+            /* Bottom offset for the fixed controls: safe-area added ON TOP of a solid base,
+               so on Android (where safe-area-inset-bottom is usually 0) the START button still
+               clears the Leaflet attribution instead of sitting right on top of it. */
+            --btm: calc(env(safe-area-inset-bottom, 0px) + clamp(40px, 8vw, 54px));
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg);
+            color: #fff;
+            font-family: 'Orbitron', sans-serif;
+            overflow: hidden;
+            overscroll-behavior: none;
+            touch-action: manipulation;
+        }
+
+        /* ---- Map fills the whole viewport ---- */
+        #map {
+            position: fixed;
+            inset: 0;
+            z-index: 1;
+        }
+
+        .leaflet-container {
+            background: var(--bg-light);
+            /* let Leaflet fully own touch gestures (pinch-zoom / pan) even with user-scalable=no */
+            touch-action: none;
+        }
+
+        /* Red position dot — hidden during the move, fades in once we are on the position */
+        path.pos-marker {
+            opacity: 0;
+            transition: opacity 0.6s ease;
+        }
+
+        path.pos-marker.pos-shown {
+            opacity: 1;
+        }
+
+        /* ---- Top HUD: timer + stats ---- */
+        #hud-top {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 500;
+            padding: 14px 16px 30px;
+            padding-top: max(14px, env(safe-area-inset-top));
+            background: linear-gradient(180deg,
+                    rgba(8, 20, 42, 0.95) 0%,
+                    rgba(8, 20, 42, 0.92) 62%,
+                    rgba(8, 20, 42, 0.72) 86%,
+                    rgba(8, 20, 42, 0) 100%);
+            text-align: center;
+            pointer-events: none;
+            /* let map drags pass through empty areas */
+            opacity: 0;
+            transform: translateY(-18px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+
+        /* Header is hidden until the first START, then fades down into view */
+        #hud-top.shown {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        #gps-chip {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.72rem;
+            letter-spacing: 2px;
+            color: rgba(255, 255, 255, 0.85);
+        }
+
+        #gps-src {
+            color: rgba(255, 255, 255, 0.85);
+        }
+
+        #gps-acc {
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: rgba(255, 255, 255, 0.6);
+            letter-spacing: 1px;
+            font-variant-numeric: tabular-nums;
+        }
+
+        #gps-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 0 8px currentColor;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        #gps-label {
+            transition: color 0.3s ease;
+        }
+
+        /* Timer is rendered by CyberClock (fixed-width digit slots). Size it here; the
+           component reads --cc-size for its slot/digit sizing. */
+        #hud-time {
+            --cc-size: clamp(1.7rem, 8.5vw, 3.6rem);
+            --cc-dw: 1em;
+            /* wider digit slots so the digits don't look squished horizontally */
+            gap: 3px;
+            justify-content: center;
+            margin-top: clamp(6px, 2vw, 12px);
+            /* small gap below the POSITION chip */
+            pointer-events: auto;
+            /* re-enable taps — the parent HUD is pointer-events:none */
+            cursor: pointer;
+            -webkit-user-select: none;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        #hud-stats {
+            display: flex;
+            justify-content: center;
+            gap: clamp(18px, 9vw, 56px);
+            margin-top: 14px;
+        }
+
+        .hud-stat {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .hud-val {
+            font-size: clamp(1.2rem, 6vw, 1.9rem);
+            font-weight: 700;
+            line-height: 1;
+            color: var(--orange);
+            font-variant-numeric: tabular-nums;
+            font-feature-settings: 'tnum' 1;
+        }
+
+        .hud-lbl {
+            font-size: 0.55rem;
+            letter-spacing: 2px;
+            color: rgba(255, 255, 255, 0.5);
+            margin-top: 6px;
+        }
+
+        /* ---- Big round START / STOP ---- */
+        #trk-toggle {
+            position: fixed;
+            bottom: var(--btm);
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 500;
+            width: clamp(96px, 30vw, 132px);
+            height: clamp(96px, 30vw, 132px);
+            border-radius: 50%;
+            border: 3px solid rgba(255, 255, 255, 0.85);
+            background: var(--green);
+            color: #fff;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            font-size: clamp(1.1rem, 5vw, 1.5rem);
+            letter-spacing: 2px;
+            cursor: pointer;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+            transition: background 0.2s ease, transform 0.1s ease;
+        }
+
+        #trk-toggle:active {
+            transform: translateX(-50%) scale(0.96);
+        }
+
+        /* Recenter button — shown above STOP when the map stops following you */
+        #recenter-fab {
+            position: fixed;
+            left: 50%;
+            bottom: calc(var(--btm) + clamp(96px, 30vw, 132px) + 14px);
+            transform: translateX(-50%) translateY(8px);
+            z-index: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 18px;
+            border: 1px solid rgba(245, 194, 66, 0.7);
+            border-radius: 999px;
+            background: rgba(8, 20, 42, 0.92);
+            backdrop-filter: blur(8px);
+            color: var(--orange);
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.7rem;
+            letter-spacing: 1.5px;
+            cursor: pointer;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s ease, transform 0.25s ease;
+        }
+
+        #recenter-fab.show {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        #recenter-fab svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* ---- Small tool buttons (bottom-left) ---- */
+        #hud-tools {
+            position: fixed;
+            left: 14px;
+            bottom: var(--btm);
+            z-index: 500;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .hud-tool {
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            background: rgba(8, 20, 42, 0.82);
+            color: #fff;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(8px);
+            transition: transform 0.1s ease, border-color 0.2s ease, color 0.2s ease;
+        }
+
+        .hud-tool svg {
+            width: 22px;
+            height: 22px;
+        }
+
+        .hud-tool:hover {
+            border-color: rgba(255, 255, 255, 0.6);
+        }
+
+        .hud-tool:active {
+            transform: scale(0.94);
+        }
+
+        /* Clear button hints at its destructive action */
+        #trk-clear:hover {
+            color: var(--red);
+            border-color: var(--red);
+        }
+
+        /* ---- Left-edge hamburger (vertically centred) → opens the radial popup ---- */
+        #menu-fab {
+            position: fixed;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 500;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 5px;
+            padding: 0 12px;
+            background: rgba(8, 20, 42, 0.82);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            border-radius: 50%;
+            backdrop-filter: blur(8px);
+            cursor: pointer;
+        }
+
+        #menu-fab span {
+            display: block;
+            height: 2px;
+            border-radius: 2px;
+            background: rgba(255, 255, 255, 0.9);
+            transition: background 0.2s ease;
+        }
+
+        #menu-fab:active {
+            transform: translateY(-50%) scale(0.94);
+        }
+
+        #menu-fab:hover span {
+            background: var(--orange);
+        }
+
+        /* ---- Radial action popup (long-press / right-click) — style from worldclock, orange accent ---- */
+        #mini-stack {
+            display: none;
+        }
+
+        #mini-stack.popup {
+            display: block;
+            position: fixed;
+            z-index: 960;
+            width: 0;
+            height: 0;
+            pointer-events: none;
+            /* anchored at the hamburger by JS; only the buttons are tappable */
+        }
+
+        #mini-stack.popup::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            width: 520px;
+            height: 380px;
+            transform: translate(-50%, -50%);
+            background: radial-gradient(ellipse at center,
+                    rgba(245, 194, 66, 0.18) 0%,
+                    rgba(245, 194, 66, 0.09) 28%,
+                    rgba(245, 194, 66, 0.035) 55%,
+                    rgba(245, 194, 66, 0) 75%);
+            filter: blur(6px);
+            z-index: -1;
+        }
+
+        #mini-stack.popup .mini-btn {
+            position: absolute;
+            pointer-events: auto;
+            width: 130px;
+            height: 46px;
+            padding: 0 10px;
+            white-space: nowrap;
+            transform: translate(-50%, -50%);
+            border-radius: 12px;
+            cursor: pointer;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.64rem;
+            letter-spacing: 0.12em;
+            color: var(--orange);
+            background: rgba(8, 18, 38, 0.96);
+            border: 1px solid rgba(245, 194, 66, 0.8);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5), 0 0 10px rgba(245, 194, 66, 0.25);
+            transition: background 0.12s, transform 0.12s;
+        }
+
+        #mini-stack.popup .mini-btn:hover {
+            background: rgba(245, 194, 66, 0.12);
+        }
+
+        #mini-stack.popup .mini-btn:active {
+            transform: translate(-50%, -50%) scale(0.95);
+        }
+
+        /* ---- Centered overlay panels (track list + info) ---- */
+        #ov-backdrop {
+            position: fixed;
+            inset: 0;
+            z-index: 970;
+            background: rgba(2, 9, 25, 0.6);
+            backdrop-filter: blur(2px);
+            display: none;
+        }
+
+        #ov-backdrop.open {
+            display: block;
+        }
+
+        .ov-panel {
+            position: fixed;
+            z-index: 971;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%) scale(0.96);
+            opacity: 0;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            width: min(92vw, 420px);
+            max-height: 80vh;
+            padding: 16px;
+            background: rgba(8, 20, 42, 0.95);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.55);
+            font-family: 'Orbitron', sans-serif;
+            color: #fff;
+            transition: opacity 0.18s ease, transform 0.18s ease;
+        }
+
+        .ov-panel.open {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .ov-title {
+            font-size: 0.8rem;
+            letter-spacing: 2px;
+            color: var(--orange);
+            margin-bottom: 12px;
+        }
+
+        .ov-action {
+            margin-bottom: 12px;
+            padding: 13px;
+            border: 1px solid rgba(245, 194, 66, 0.7);
+            border-radius: 10px;
+            background: rgba(245, 194, 66, 0.12);
+            color: var(--orange);
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.74rem;
+            letter-spacing: 1px;
+            cursor: pointer;
+        }
+
+        .ov-action:hover {
+            background: rgba(245, 194, 66, 0.2);
+        }
+
+        /* Slim dark scrollbar — index.html look, applied the cross-browser-safe way:
+           ::-webkit-scrollbar for Chrome/Safari, scrollbar-width only for Firefox in
+           @supports (never both on the same element — Safari would drop the webkit rules). */
+        .ov-body {
+            overflow-y: auto;
+        }
+
+        .ov-body::-webkit-scrollbar {
+            width: 11px;
+            height: 11px;
+        }
+
+        .ov-body::-webkit-scrollbar-track {
+            background: rgba(40, 48, 68, 0.72);
+            border-radius: 999px;
+            margin: 6px 0;
+        }
+
+        .ov-body::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg,
+                    rgba(78, 92, 118, 0.95) 0%,
+                    rgba(52, 64, 86, 0.92) 100%);
+            border-radius: 999px;
+            border: 2px solid rgba(34, 42, 58, 0.85);
+            box-shadow: 0 0 8px rgba(0, 0, 0, 0.35);
+        }
+
+        .ov-body::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg,
+                    rgba(92, 108, 134, 0.98) 0%,
+                    rgba(68, 82, 108, 0.95) 100%);
+            box-shadow: 0 0 10px rgba(100, 118, 145, 0.22);
+        }
+
+        @supports (-moz-appearance: none) {
+            .ov-body {
+                scrollbar-width: thin;
+                scrollbar-color: rgba(72, 88, 112, 0.95) transparent;
+            }
+        }
+
+        .ov-close {
+            margin-top: 14px;
+            padding: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            background: transparent;
+            color: #fff;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.72rem;
+            letter-spacing: 1px;
+            cursor: pointer;
+        }
+
+        .ov-close:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        /* ---- Sync-Code panel ---- */
+        #sync-status {
+            font-family: system-ui, -apple-system, sans-serif;
+            font-size: 0.85rem;
+            color: #fff;
+            margin: 0 0 8px;
+            word-break: break-all;
+            white-space: pre-line;
+        }
+
+        .sync-hint {
+            font-family: system-ui, -apple-system, sans-serif;
+            font-size: 0.78rem;
+            color: rgba(255, 255, 255, 0.55);
+            line-height: 1.45;
+            margin: 0 0 16px;
+        }
+
+        .sync-field {
+            width: 100%;
+            padding: 12px 14px;
+            margin-bottom: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.04);
+            color: #fff;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+        }
+
+        .sync-field:focus {
+            outline: none;
+            border-color: rgba(245, 194, 66, 0.6);
+        }
+
+        .sync-btn {
+            display: block;
+            width: 100%;
+            padding: 13px;
+            margin-bottom: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            border-radius: 10px;
+            background: transparent;
+            color: #fff;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.72rem;
+            letter-spacing: 1px;
+            cursor: pointer;
+        }
+
+        .sync-btn:hover {
+            background: rgba(255, 255, 255, 0.06);
+        }
+
+        .sync-btn.primary {
+            background: rgba(245, 194, 66, 0.14);
+            border-color: rgba(245, 194, 66, 0.6);
+            color: var(--orange);
+        }
+
+        .sync-btn.primary:hover {
+            background: rgba(245, 194, 66, 0.22);
+        }
+
+        /* track list rows */
+        .tl-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 10px;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+        .tl-row:hover {
+            background: rgba(255, 255, 255, 0.06);
+        }
+
+        .tl-main {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .tl-name {
+            font-size: 0.78rem;
+        }
+
+        .tl-meta {
+            font-family: system-ui, sans-serif;
+            font-size: 0.66rem;
+            color: rgba(255, 255, 255, 0.5);
+            margin-top: 3px;
+        }
+
+        .tl-del {
+            flex: none;
+            width: 34px;
+            height: 34px;
+            border: none;
+            border-radius: 8px;
+            background: transparent;
+            color: rgba(255, 255, 255, 0.5);
+            cursor: pointer;
+            font-size: 1.1rem;
+        }
+
+        .tl-del:hover {
+            background: rgba(176, 36, 24, 0.18);
+            color: var(--red);
+        }
+
+        .tl-empty {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.74rem;
+            padding: 8px 0;
+        }
+
+        /* GNSS info text */
+        #info-body {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 0.82rem;
+            line-height: 1.5;
+            color: #fff;
+        }
+
+        #info-body h4 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.74rem;
+            color: var(--orange);
+            margin: 14px 0 4px;
+        }
+
+        #info-body p {
+            margin: 0 0 8px;
+        }
+
+        #info-body .flag {
+            font-size: 0.72rem;
+            color: rgba(255, 255, 255, 0.55);
+        }
+
+        /* toast */
+        #toast {
+            position: fixed;
+            left: 50%;
+            bottom: max(170px, calc(env(safe-area-inset-bottom) + 150px));
+            transform: translateX(-50%) translateY(8px);
+            z-index: 980;
+            background: rgba(8, 20, 42, 0.96);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+            padding: 10px 16px;
+            font-family: system-ui, sans-serif;
+            font-size: 0.8rem;
+            color: #fff;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s ease, transform 0.25s ease;
+        }
+
+        #toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+    </style>
+</head>
+
+<body>
+    <div id="map"></div>
+
+    <!-- Top HUD -->
+    <div id="hud-top">
+        <div id="gps-chip"><span id="gps-dot"></span><span id="gps-label">POSITION</span><span id="gps-src"></span><span id="gps-acc">±– m</span></div>
+        <div id="hud-time"></div>
+        <div id="hud-stats">
+            <div class="hud-stat"><span class="hud-val" id="trk-dist">0.00</span><span class="hud-lbl">KM</span></div>
+            <div class="hud-stat"><span class="hud-val" id="trk-speed">0.0</span><span class="hud-lbl">KM/H</span></div>
+        </div>
+    </div>
+
+    <!-- Big start/stop -->
+    <button id="trk-toggle">START</button>
+
+    <!-- Recenter button — appears centred above STOP when the map is no longer following -->
+    <button id="recenter-fab" aria-label="Zentrieren">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"></circle>
+            <line x1="12" y1="2" x2="12" y2="5"></line>
+            <line x1="12" y1="19" x2="12" y2="22"></line>
+            <line x1="2" y1="12" x2="5" y2="12"></line>
+            <line x1="19" y1="12" x2="22" y2="12"></line>
+        </svg>
+        ZENTRIEREN
+    </button>
+
+    <!-- Left-edge menu hamburger (vertically centred) → opens the radial popup -->
+    <button id="menu-fab" aria-label="Menü" title="Menü"><span></span><span></span><span></span></button>
+
+    <!-- Radial action popup (long-press / right-click) — style ported from worldclock -->
+    <div id="mini-stack">
+        <button class="mini-btn" id="mb-save">SPEICHERN</button>
+        <button class="mini-btn" id="mb-load">LADEN</button>
+        <button class="mini-btn" id="mb-sync">SYNC</button>
+        <button class="mini-btn" id="mb-center">ZENTRIEREN</button>
+        <button class="mini-btn" id="mb-info">INFO</button>
+    </div>
+
+    <!-- Centered overlay panels (track list + GNSS info) -->
+    <div id="ov-backdrop"></div>
+    <div id="track-list" class="ov-panel">
+        <div class="ov-title">Gespeicherte Tracks</div>
+        <div id="track-list-items" class="ov-body"></div>
+        <button class="ov-close" id="list-close">Schließen</button>
+    </div>
+    <div id="info-panel" class="ov-panel">
+        <div class="ov-title">Wir nutzen alle Quellen</div>
+        <div class="ov-body" id="info-body"></div>
+        <button class="ov-close" id="info-close">Schließen</button>
+    </div>
+    <div id="sync-panel" class="ov-panel">
+        <div class="ov-title">Sync-Code</div>
+        <div class="ov-body">
+            <p id="sync-status"></p>
+            <p class="sync-hint">Gleicher Code auf mehreren Geräten = dieselben Tracks. Ohne Code bleiben sie
+                privat auf diesem Gerät.</p>
+            <input id="sync-input" class="sync-field" placeholder="Code eingeben" aria-label="Sync-Code"
+                autocomplete="off" autocapitalize="off" spellcheck="false">
+            <button class="sync-btn primary" id="sync-connect">Verbinden</button>
+            <button class="sync-btn" id="sync-gen">Code erzeugen</button>
+            <button class="sync-btn" id="sync-copy">Code kopieren</button>
+            <button class="sync-btn" id="sync-clear">Trennen (lokal &amp; privat)</button>
+        </div>
+        <button class="ov-close" id="sync-close">Schließen</button>
+    </div>
+
+    <!-- Transient toast (replaces the removed status line for action feedback) -->
+    <div id="toast"></div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="../js/cyber-clock.js"></script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script>
+        // ---------------------------------------------------------------
+        // Brand palette (see CLAUDE.md)
+        // ---------------------------------------------------------------
+        const COL_ORANGE = 'rgb(245, 194, 66)';   // track line
+        const COL_RED = 'rgb(176, 36, 24)';       // stop / recording
+        const COL_GREEN = 'rgb(121, 158, 49)';    // start / idle
+
+        // ---------------------------------------------------------------
+        // Map setup
+        // ---------------------------------------------------------------
+        const map = L.map('map', {
+            zoomControl: false,
+            attributionControl: true,
+            touchZoom: true,          // pinch-zoom with two fingers
+            doubleClickZoom: false,   // so a double-tap never zooms the map (clock owns double-tap → fullscreen)
+            tap: true,
+        }).setView([51.1657, 10.4515], 6); // centre of Germany as a neutral start
+        L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+        // The map auto-follows new fixes until you take over (drag) — ZENTRIEREN re-enables it.
+        // The position dot is hidden during zoom animations so it doesn't jump, then fades back.
+        let following = true;
+        function refreshRecenter() {
+            const btn = $('recenter-fab');
+            if (btn) btn.classList.toggle('show', !following && !!posMarker);
+        }
+        function setFollowing(v) { following = v; refreshRecenter(); }
+        map.on('dragstart', () => setFollowing(false));
+        map.on('zoomstart', () => {
+            const el = posMarker && posMarker.getElement && posMarker.getElement();
+            if (el) { el.style.transition = 'none'; el.style.opacity = '0'; }
+        });
+        map.on('zoomend', () => {
+            const el = posMarker && posMarker.getElement && posMarker.getElement();
+            if (el) { el.style.transition = ''; el.style.opacity = ''; }
+        });
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; OpenStreetMap contributors',
+        }).addTo(map);
+
+        const trackLine = L.polyline([], { color: COL_ORANGE, weight: 5, opacity: 0.9 }).addTo(map);
+        let posMarker = null;
+
+        // ---------------------------------------------------------------
+        // Tracking state
+        // ---------------------------------------------------------------
+        let watchId = null;
+        let acquireWatch = null;   // temporary watch used while acquiring a good initial fix
+        let tracking = false;
+        let track = [];            // array of [lat, lng]
+        let times = [];            // ISO timestamp per recorded point (index-aligned)
+        let totalDist = 0;         // metres
+        let startTime = null;      // ms
+        let timerId = null;
+        let lastFix = null;        // { lat, lng, t }
+
+        const MIN_MOVE_M = 4;      // ignore jitter below this distance
+        const MAX_ACC_M = 50;      // ignore fixes worse than this accuracy
+
+        const $ = id => document.getElementById(id);
+        const elToggle = $('trk-toggle');
+        const elDist = $('trk-dist');
+        const elTime = $('hud-time');
+        const elSpeed = $('trk-speed');
+        const elAcc = $('gps-acc');
+        const elSrc = $('gps-src');
+        const elStatus = $('trk-status');
+        const elGps = $('gps-dot');
+        const elGpsLabel = $('gps-label');
+
+        // Mount the shared fixed-slot clock so the ticking timer never jitters.
+        // Size comes from the #hud-time --cc-size rule; colours are set here.
+        CyberClock.mount(elTime, {
+            digitColor: '#fff',
+            colonColor: 'rgba(255, 255, 255, 0.55)',
+            seconds: true,
+        });
+        CyberClock.set(elTime, '00:00:00');
+
+        function setStatus(msg) { if (elStatus) elStatus.textContent = msg; } // status line removed — guard-safe no-op
+
+        function setGpsState(hasFix) {
+            // Green once a position is available, dimmed grey while none ("grün wenn da")
+            const c = hasFix ? COL_GREEN : 'rgba(255, 255, 255, 0.3)';
+            elGps.style.background = c;
+            elGps.style.color = c; // drives the dot glow (box-shadow uses currentColor)
+            elGpsLabel.style.color = hasFix ? COL_GREEN : 'rgba(255, 255, 255, 0.55)';
+        }
+        setGpsState(false);
+
+        // Colour the accuracy number by quality: green < 10 m, orange 10–50 m, red worse.
+        // (50 m is also the cutoff above which a fix is too noisy to record into the track.)
+        function accColor(acc) {
+            if (acc == null) return 'rgba(255, 255, 255, 0.6)';
+            if (acc < 10) return COL_GREEN;
+            if (acc <= 50) return COL_ORANGE;
+            return COL_RED;
+        }
+
+        // Fade the red position dot in (it starts hidden via CSS)
+        function showDot() {
+            const el = posMarker && posMarker.getElement && posMarker.getElement();
+            if (el) el.classList.add('pos-shown');
+        }
+
+        // ---------------------------------------------------------------
+        // Geometry helpers
+        // ---------------------------------------------------------------
+        function haversine(a, b) {
+            const R = 6371000; // metres
+            const toRad = d => d * Math.PI / 180;
+            const dLat = toRad(b[0] - a[0]);
+            const dLon = toRad(b[1] - a[1]);
+            const lat1 = toRad(a[0]);
+            const lat2 = toRad(b[0]);
+            const x = Math.sin(dLat / 2) ** 2 +
+                Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLon / 2) ** 2;
+            return 2 * R * Math.asin(Math.sqrt(x));
+        }
+
+        function fmtDuration(ms) {
+            const s = Math.floor(ms / 1000);
+            const hh = Math.floor(s / 3600);
+            const mm = Math.floor((s % 3600) / 60);
+            const ss = s % 60;
+            const pad = n => String(n).padStart(2, '0');
+            return `${pad(hh)}:${pad(mm)}:${pad(ss)}`;
+        }
+
+        function updateDuration() {
+            if (startTime) CyberClock.set(elTime, fmtDuration(Date.now() - startTime));
+        }
+
+        // ---------------------------------------------------------------
+        // Position handling
+        // ---------------------------------------------------------------
+        // Draw / move the current-position marker, accuracy circle and HUD readout.
+        // Shared by live tracking and the one-shot "centre" locate.
+        function renderPosition(here, accuracy) {
+            // Fixed-pixel dot via circleMarker — keeps its size at every zoom level.
+            // (An L.circle would use metres and balloon when zooming in.)
+            if (!posMarker) {
+                posMarker = L.circleMarker(here, {
+                    radius: 7, color: '#fff', weight: 2,
+                    fillColor: COL_RED, fillOpacity: 1,
+                    className: 'pos-marker',
+                }).addTo(map);
+            } else {
+                posMarker.setLatLng(here);
+            }
+
+            elAcc.textContent = accuracy != null ? '±' + Math.round(accuracy) + ' m' : '±– m';
+            elAcc.style.color = accColor(accuracy);
+            elSrc.textContent = sourceLabel(accuracy);
+            setGpsState(true);
+        }
+
+        // The web Geolocation API hides the fix source — infer it from accuracy (heuristic).
+        // The real provider (gps/network/fused) is only available in the native app.
+        function sourceLabel(acc) {
+            if (acc == null) return '';
+            if (acc <= 15) return 'GPS';     // only GNSS is this precise
+            if (acc <= 150) return 'WLAN';
+            return 'FUNK';                    // cell tower / IP
+        }
+
+        function onPosition(pos) {
+            const { latitude, longitude, accuracy, speed } = pos.coords;
+            const now = pos.timestamp || Date.now();
+            const here = [latitude, longitude];
+
+            const firstFix = !posMarker;
+            renderPosition(here, accuracy);
+            showDot();
+            if (firstFix) map.setView(here, 17); // snap to the very first fix
+
+            // Reject noisy fixes for the recorded track
+            if (accuracy != null && accuracy > MAX_ACC_M) {
+                setStatus(`Warte auf besseres Signal … (±${Math.round(accuracy)} m)`);
+                return;
+            }
+
+            // Add to track only if we actually moved
+            const stamp = new Date(now).toISOString();
+            if (track.length === 0) {
+                track.push(here);
+                times.push(stamp);
+                trackLine.addLatLng(here);
+            } else {
+                const step = haversine(track[track.length - 1], here);
+                if (step >= MIN_MOVE_M) {
+                    totalDist += step;
+                    track.push(here);
+                    times.push(stamp);
+                    trackLine.addLatLng(here);
+                }
+            }
+            elDist.textContent = (totalDist / 1000).toFixed(2);
+
+            // Speed: prefer device value (m/s), else derive from last fix
+            let kmh = null;
+            if (speed != null && speed >= 0) {
+                kmh = speed * 3.6;
+            } else if (lastFix) {
+                const dt = (now - lastFix.t) / 1000;
+                if (dt > 0) kmh = (haversine([lastFix.lat, lastFix.lng], here) / dt) * 3.6;
+            }
+            if (kmh != null) elSpeed.textContent = kmh.toFixed(1);
+
+            lastFix = { lat: latitude, lng: longitude, t: now };
+
+            if (following) map.panTo(here, { animate: true });
+            refreshRecenter(); // show/hide the recenter button as needed
+            if (tracking) setStatus(`Aufzeichnung läuft … ${track.length} Punkte`);
+        }
+
+        function onError(err) {
+            const messages = {
+                1: 'Standortzugriff verweigert. Bitte in den Einstellungen erlauben.',
+                2: 'Position nicht verfügbar (kein GPS-Signal).',
+                3: 'Zeitüberschreitung beim Standort.',
+            };
+            setStatus(messages[err.code] || ('Fehler: ' + err.message));
+        }
+
+        // ---------------------------------------------------------------
+        // Geolocation source — prefer the native background plugin (Capacitor)
+        // so recording continues with the screen off; fall back to the browser
+        // API on the web. In a plain browser window.Capacitor is undefined, so
+        // this whole block is a no-op and the web behaviour is unchanged.
+        // ---------------------------------------------------------------
+        const BgGeo = (window.Capacitor && Capacitor.Plugins && Capacitor.Plugins.BackgroundGeolocation) || null;
+        const useNativeGeo = !!(BgGeo && Capacitor.isNativePlatform && Capacitor.isNativePlatform());
+
+        function startGeoWatch(onPos, onErr) {
+            if (useNativeGeo) {
+                // addWatcher returns a Promise<string> (the watcher id)
+                return BgGeo.addWatcher(
+                    {
+                        backgroundTitle: 'Doc Alvers Tracker',
+                        backgroundMessage: 'Aufzeichnung läuft …',
+                        requestPermissions: true,
+                        stale: false,
+                        distanceFilter: 0,
+                    },
+                    (location, error) => {
+                        if (error) {
+                            onErr({ code: error.code === 'NOT_AUTHORIZED' ? 1 : 2, message: error.message || '' });
+                            return;
+                        }
+                        // adapt the plugin's location shape to the W3C Geolocation shape
+                        onPos({
+                            coords: {
+                                latitude: location.latitude,
+                                longitude: location.longitude,
+                                accuracy: location.accuracy,
+                                speed: location.speed,
+                            },
+                            timestamp: location.time || Date.now(),
+                        });
+                    }
+                );
+            }
+            return navigator.geolocation.watchPosition(onPos, onErr, {
+                enableHighAccuracy: true,
+                maximumAge: 0,
+                timeout: 10000,
+            });
+        }
+
+        function stopGeoWatch(id) {
+            if (id == null) return;
+            if (useNativeGeo) Promise.resolve(id).then(realId => BgGeo.removeWatcher({ id: realId }));
+            else navigator.geolocation.clearWatch(id);
+        }
+
+        // ---------------------------------------------------------------
+        // Start / Stop
+        // ---------------------------------------------------------------
+        function startTracking() {
+            if (!('geolocation' in navigator)) {
+                setStatus('Dieser Browser unterstützt keine Standortbestimmung.');
+                return;
+            }
+            if (!window.isSecureContext) {
+                setStatus('GPS braucht HTTPS oder localhost. Über file:// gibt es keine Position.');
+                return;
+            }
+            // stop the acquire watch — the tracking watch takes over now
+            if (acquireWatch != null) { navigator.geolocation.clearWatch(acquireWatch); acquireWatch = null; }
+            tracking = true;
+            startTime = Date.now();
+            timerId = setInterval(updateDuration, 1000);
+            watchId = startGeoWatch(onPosition, onError); // native background plugin if available, else web
+            elToggle.textContent = 'STOP';
+            elToggle.style.background = COL_RED;
+            $('hud-top').classList.add('shown'); // reveal the header (fades down) on first start
+            setStatus('Suche GPS-Signal …');
+        }
+
+        function stopTracking() {
+            tracking = false;
+            stopGeoWatch(watchId);
+            watchId = null;
+            if (timerId) clearInterval(timerId);
+            timerId = null;
+            elToggle.textContent = 'START';
+            elToggle.style.background = COL_GREEN;
+            setStatus(track.length ? `Gestoppt. ${(totalDist / 1000).toFixed(2)} km, ${track.length} Punkte.` : 'Gestoppt.');
+        }
+
+        elToggle.addEventListener('click', () => tracking ? stopTracking() : startTracking());
+
+        // ---------------------------------------------------------------
+        // Acquire a position: snap there at once, then keep refining until the
+        // accuracy is good (or a timeout hits) — only then reveal the red dot.
+        // ---------------------------------------------------------------
+        function goToCurrentPosition(opts) {
+            opts = opts || {};
+            if (!('geolocation' in navigator)) {
+                setStatus('Dieser Browser unterstützt keine Standortbestimmung.');
+                return;
+            }
+            if (!window.isSecureContext) {
+                setStatus('GPS braucht HTTPS oder localhost. Über file:// gibt es keine Position.');
+                return;
+            }
+            if (acquireWatch != null) navigator.geolocation.clearWatch(acquireWatch);
+
+            const GOOD_ACC = 15;       // metres: a great fix → settle at once
+            const STABLE_MS = 3000;    // ms: accuracy stopped improving this long → settle at best
+            const MAX_WAIT = 15000;    // ms: reveal anyway after this long
+            const startedAt = Date.now();
+            let best = null;
+            let lastImproved = startedAt;
+            let centred = false;
+
+            setStatus('Warte auf bessere Positionsdaten …');
+
+            function reveal() {
+                if (acquireWatch != null) { navigator.geolocation.clearWatch(acquireWatch); acquireWatch = null; }
+                if (!best) return;
+                showDot();
+                setStatus(`Position gefunden (±${Math.round(best.accuracy)} m).`);
+            }
+
+            acquireWatch = navigator.geolocation.watchPosition(
+                pos => {
+                    const here = [pos.coords.latitude, pos.coords.longitude];
+                    const acc = pos.coords.accuracy != null ? pos.coords.accuracy : Infinity;
+                    const now = Date.now();
+                    // count it as progress only if accuracy drops meaningfully (ignore jitter)
+                    if (!best || acc < best.accuracy - 0.5) { best = { here, accuracy: acc }; lastImproved = now; }
+
+                    renderPosition(best.here, best.accuracy); // moves the still-hidden dot + accuracy readout
+
+                    if (!centred) {
+                        centred = true; // go to the position immediately on the first fix
+                        if (opts.initial) map.setView(best.here, 16);
+                        else map.flyTo(best.here, Math.max(map.getZoom(), 16), { duration: 1.2 });
+                    } else {
+                        map.panTo(best.here, { animate: true });
+                    }
+
+                    // settle once it is great, once it stops improving, or after the hard cap
+                    const settle = best.accuracy <= GOOD_ACC
+                        || (now - lastImproved) >= STABLE_MS
+                        || (now - startedAt) > MAX_WAIT;
+                    if (settle) reveal();
+                    else setStatus(`Warte auf bessere Positionsdaten … (±${Math.round(best.accuracy)} m)`);
+                },
+                onError,
+                { enableHighAccuracy: true, maximumAge: 0, timeout: 12000 }
+            );
+
+            // safety net: reveal the best fix even if updates stop coming
+            setTimeout(() => { if (acquireWatch != null) reveal(); }, MAX_WAIT + 500);
+        }
+
+        function centerOnPosition() {
+            setFollowing(true); // re-enable auto-follow (and hide the recenter button)
+            // Already have a position → glide there smoothly
+            if (posMarker) {
+                map.flyTo(posMarker.getLatLng(), Math.max(map.getZoom(), 16), { duration: 1.2 });
+                showDot();
+                return;
+            }
+            goToCurrentPosition({ initial: false });
+        }
+
+        function clearTrack() {
+            // Guard against losing a recording by accident
+            if (track.length && !confirm('Aktuellen Track wirklich löschen?')) return;
+            track = [];
+            times = [];
+            totalDist = 0;
+            lastFix = null;
+            trackLine.setLatLngs([]);
+            elDist.textContent = '0.00';
+            elSpeed.textContent = '0.0';
+            if (!tracking) { CyberClock.set(elTime, '00:00:00'); startTime = null; }
+            toast('Track gelöscht.');
+        }
+
+        // ---------------------------------------------------------------
+        // Export as GPX (the standard GPS exchange format)
+        // ---------------------------------------------------------------
+        function buildGpx() {
+            const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            const name = 'Doc Alvers Tracker ' + (times[0] || '');
+            const pts = track.map((p, i) =>
+                `      <trkpt lat="${p[0].toFixed(7)}" lon="${p[1].toFixed(7)}">` +
+                (times[i] ? `<time>${times[i]}</time>` : '') +
+                `</trkpt>`
+            ).join('\n');
+            return `<?xml version="1.0" encoding="UTF-8"?>
+<gpx version="1.1" creator="Doc Alvers Mathe-Labor" xmlns="http://www.topografix.com/GPX/1/1">
+  <trk>
+    <name>${esc(name)}</name>
+    <trkseg>
+${pts}
+    </trkseg>
+  </trk>
+</gpx>`;
+        }
+
+        function exportGpx() {
+            if (track.length < 2) { toast('Kein Track zum Exportieren.'); return; }
+            const blob = new Blob([buildGpx()], { type: 'application/gpx+xml' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `track-${new Date().toISOString().replace(/[:.]/g, '-')}.gpx`;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            URL.revokeObjectURL(url);
+            toast('GPX exportiert (' + track.length + ' Punkte).');
+        }
+
+        // ---------------------------------------------------------------
+        // Double-tap the clock → toggle fullscreen
+        // ---------------------------------------------------------------
+        function toggleFullscreen() {
+            const d = document;
+            const inFs = d.fullscreenElement || d.webkitFullscreenElement;
+            if (!inFs) {
+                const el = d.documentElement;
+                const req = el.requestFullscreen || el.webkitRequestFullscreen;
+                if (req) req.call(el);
+            } else {
+                const exit = d.exitFullscreen || d.webkitExitFullscreen;
+                if (exit) exit.call(d);
+            }
+        }
+
+        let lastTapTime = 0;
+        elTime.addEventListener('click', (e) => {
+            e.stopPropagation(); // don't let the tap leak to the map underneath
+            const now = Date.now();
+            if (now - lastTapTime < 350) { toggleFullscreen(); lastTapTime = 0; } // second tap
+            else lastTapTime = now;
+        });
+
+        // Re-fit the map after the viewport changes size on enter/leave fullscreen
+        document.addEventListener('fullscreenchange', () => setTimeout(init, 120));
+        document.addEventListener('webkitfullscreenchange', () => setTimeout(init, 120));
+
+        // ===============================================================
+        // Supabase — same project as VGP. The publishable key is public by
+        // design; Row-Level-Security keeps each device's tracks private to
+        // its anonymous auth.uid().
+        // ===============================================================
+        const SUPABASE_URL = 'https://fyfhxzyymmurlaenmzse.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_ubQDiMD-X3N0vZvPVi229Q_-5Zootfk';
+        let sb = null;
+
+        // --- Sync-Code: a shared passphrase maps to ONE deterministic account, so several
+        //     devices with the same code share their tracks. No code → anonymous (private). ---
+        const SYNC_KEY = 'tracker.syncCode';
+        function getSyncCode() { return localStorage.getItem(SYNC_KEY) || ''; }
+
+        async function sha256hex(s) {
+            const b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s));
+            return Array.from(new Uint8Array(b)).map(x => x.toString(16).padStart(2, '0')).join('');
+        }
+        async function syncCreds(code) {
+            const h = await sha256hex(code);
+            // docalvers.de has valid MX → Supabase accepts the address (no mail is sent while
+            // "Confirm email" is off). Local part is derived from the code.
+            return { email: 't-' + h.slice(0, 32) + '@docalvers.de', password: 'p-' + code };
+        }
+        async function signInWithCode(code) {
+            const { email, password } = await syncCreds(code);
+            const first = await sb.auth.signInWithPassword({ email, password });
+            if (first.error) {
+                await sb.auth.signUp({ email, password }); // first device with this code → create it
+                const re = await sb.auth.signInWithPassword({ email, password });
+                if (re.error) throw new Error('Sync-Login fehlgeschlagen — „Confirm email" im Dashboard aus? (' + re.error.message + ')');
+            }
+        }
+
+        async function ensureSb() {
+            if (!window.supabase) throw new Error('Supabase-Lib nicht geladen');
+            if (!sb) sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+            const code = getSyncCode();
+            const want = code ? (await syncCreds(code)).email : null; // null = anonymous identity
+            const { data: { session } } = await sb.auth.getSession();
+            const have = session && session.user ? (session.user.email || null) : undefined; // undefined = no session
+            if (session && have === want) return sb; // already the right identity
+            if (session) await sb.auth.signOut().catch(() => { });
+            if (code) await signInWithCode(code);
+            else {
+                const { error } = await sb.auth.signInAnonymously();
+                if (error) throw new Error('Anon-Login aus? ' + error.message);
+            }
+            return sb;
+        }
+
+        async function clearSyncCode() { localStorage.removeItem(SYNC_KEY); await ensureSb(); }
+
+        // Connect to a code's shared account AND carry the current device's tracks over.
+        // Crucial: read the current tracks BEFORE switching (switching signs the old session
+        // out). Dedupe by name so re-connecting doesn't duplicate.
+        async function connectSync(code) {
+            await ensureSb();
+            const { data: { session } } = await sb.auth.getSession();
+            const have = session && session.user ? (session.user.email || null) : null;
+            const want = (await syncCreds(code)).email;
+            if (have === want) return -1; // already on this account
+            const rows = (await sb.from('tracks').select('name, distance_m, points')).data || [];
+            await signInWithCode(code);           // create / sign into the account FIRST (throws on failure)
+            localStorage.setItem(SYNC_KEY, code);  // persist the code ONLY after a successful login
+            let n = 0;
+            if (rows.length) {
+                const known = new Set(((await sb.from('tracks').select('name')).data || []).map(r => r.name));
+                const add = rows.filter(r => !known.has(r.name));
+                if (add.length) {
+                    const { error } = await sb.from('tracks')
+                        .insert(add.map(r => ({ name: r.name, distance_m: r.distance_m, points: r.points })));
+                    if (error) throw error;
+                    n = add.length;
+                }
+            }
+            return n;
+        }
+
+        async function saveTrack(name) {
+            const c = await ensureSb();
+            const pts = track.map((p, i) => [p[0], p[1], times[i] || null]);
+            const { error } = await c.from('tracks').insert({
+                name: name,
+                distance_m: Math.round(totalDist),
+                points: pts,
+            });
+            if (error) throw error;
+        }
+
+        async function listTracks() {
+            const c = await ensureSb();
+            const { data, error } = await c.from('tracks')
+                .select('id, name, created_at, distance_m')
+                .order('created_at', { ascending: false });
+            if (error) throw error;
+            return data || [];
+        }
+
+        async function fetchTrackPoints(id) {
+            const c = await ensureSb();
+            const { data, error } = await c.from('tracks').select('points').eq('id', id).single();
+            if (error) throw error;
+            return data.points || [];
+        }
+
+        async function removeTrack(id) {
+            const c = await ensureSb();
+            const { error } = await c.from('tracks').delete().eq('id', id);
+            if (error) throw error;
+        }
+
+        // Plot a loaded track onto the map (replaces the current line)
+        function plotTrack(points) {
+            const latlngs = points.map(p => [p[0], p[1]]);
+            track = latlngs.map(ll => [ll[0], ll[1]]);
+            times = points.map(p => p[2] || null);
+            totalDist = 0;
+            for (let i = 1; i < latlngs.length; i++) totalDist += haversine(latlngs[i - 1], latlngs[i]);
+            trackLine.setLatLngs(latlngs);
+            elDist.textContent = (totalDist / 1000).toFixed(2);
+            elSpeed.textContent = '0.0';
+            if (latlngs.length) map.fitBounds(trackLine.getBounds(), { padding: [40, 40] });
+        }
+
+        // ---- Transient toast (the persistent status line was removed) ----
+        let toastTimer = null;
+        function toast(msg) {
+            const t = $('toast');
+            t.textContent = msg;
+            t.classList.add('show');
+            if (toastTimer) clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => t.classList.remove('show'), 2400);
+        }
+
+        // ===============================================================
+        // Radial action popup (long-press / right-click) — style from worldclock
+        // ===============================================================
+        const miniStack = $('mini-stack');
+
+        function openPopup() {
+            // Anchor the menu at the hamburger and fan the buttons out in a right-facing
+            // half-circle around it (worldclock style) — not a centred ring.
+            const r = $('menu-fab').getBoundingClientRect();
+            const cx = r.left + r.width / 2;
+            const cy = r.top + r.height / 2;
+            miniStack.style.left = cx + 'px';
+            miniStack.style.top = cy + 'px';
+            miniStack.classList.add('popup');
+            const btns = Array.from(miniStack.querySelectorAll('.mini-btn'));
+            const n = btns.length;
+            const radius = 152;
+            btns.forEach((b, i) => {
+                const t = n === 1 ? 0.5 : i / (n - 1);
+                const ang = (-72 + t * 144) * Math.PI / 180; // top → bottom, all on the right
+                b.style.left = (Math.cos(ang) * radius) + 'px';
+                b.style.top = (Math.sin(ang) * radius) + 'px';
+            });
+        }
+        function closePopup() { miniStack.classList.remove('popup'); }
+
+        window.addEventListener('contextmenu', (e) => { e.preventDefault(); openPopup(); });
+
+        let lpTimer = null, lpX = 0, lpY = 0;
+        document.addEventListener('touchstart', (e) => {
+            if (e.target.closest('button')) return;
+            if (miniStack.classList.contains('popup')) return;
+            const t = e.touches[0];
+            lpX = t.clientX; lpY = t.clientY;
+            clearTimeout(lpTimer);
+            lpTimer = setTimeout(() => { openPopup(); lpTimer = null; }, 550);
+        }, { passive: true });
+        document.addEventListener('touchmove', (e) => {
+            const t = e.touches[0];
+            if (Math.abs(t.clientX - lpX) > 10 || Math.abs(t.clientY - lpY) > 10) { clearTimeout(lpTimer); lpTimer = null; }
+        }, { passive: true });
+        document.addEventListener('touchend', () => { clearTimeout(lpTimer); lpTimer = null; });
+        document.addEventListener('touchcancel', () => { clearTimeout(lpTimer); lpTimer = null; });
+        document.addEventListener('mousedown', (e) => {
+            if (miniStack.classList.contains('popup') && !miniStack.contains(e.target)) closePopup();
+        });
+
+        // ---- Overlay panels (track list + info) ----
+        const ovBackdrop = $('ov-backdrop');
+        function showPanel(id) { ovBackdrop.classList.add('open'); $(id).classList.add('open'); }
+        function hidePanels() {
+            ovBackdrop.classList.remove('open');
+            document.querySelectorAll('.ov-panel').forEach(p => p.classList.remove('open'));
+        }
+        ovBackdrop.addEventListener('click', hidePanels);
+        $('list-close').addEventListener('click', hidePanels);
+        $('info-close').addEventListener('click', hidePanels);
+
+        // ---- Popup actions ----
+        $('mb-save').addEventListener('click', async () => {
+            closePopup();
+            if (track.length < 1) { toast('Noch kein Punkt — erst START drücken.'); return; }
+            const def = 'Track ' + new Date().toLocaleString('de-DE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+            const name = prompt('Track-Name:', def);
+            if (name == null) return;
+            toast('Speichere …');
+            try { await saveTrack(name.trim() || def); toast('Track gespeichert.'); }
+            catch (e) { toast('Speichern fehlgeschlagen: ' + (e.message || e)); }
+        });
+
+        $('mb-load').addEventListener('click', async () => {
+            closePopup();
+            toast('Lade Liste …');
+            let rows;
+            try { rows = await listTracks(); }
+            catch (e) { toast('Laden fehlgeschlagen: ' + (e.message || e)); return; }
+            renderTrackList(rows);
+            showPanel('track-list');
+        });
+
+        $('mb-center').addEventListener('click', () => { closePopup(); centerOnPosition(); });
+        $('mb-info').addEventListener('click', () => { closePopup(); $('info-body').innerHTML = GNSS_INFO; showPanel('info-panel'); });
+        $('menu-fab').addEventListener('click', () => openPopup());
+        $('recenter-fab').addEventListener('click', () => centerOnPosition());
+
+        // ---- Sync-Code ----
+        function genCode() {
+            const cs = 'abcdefghjkmnpqrstuvwxyz23456789'; // no ambiguous chars
+            const a = new Uint8Array(12);
+            crypto.getRandomValues(a);
+            let s = '';
+            for (let i = 0; i < 12; i++) { if (i && i % 4 === 0) s += '-'; s += cs[a[i] % cs.length]; }
+            return s;
+        }
+        async function updateSyncStatus() {
+            const code = getSyncCode();
+            const base = code ? ('Synchronisiert · Code: ' + code) : 'Lokal & privat — nicht synchronisiert.';
+            if (code) $('sync-input').value = code;
+            $('sync-status').textContent = base;
+            // show the real signed-in account id → must be identical on all synced devices
+            try {
+                const c = await ensureSb();
+                const { data: { session } } = await c.auth.getSession();
+                const uid = session && session.user ? session.user.id : null;
+                if (uid) $('sync-status').textContent = base + '\nKonto-ID ' + uid.slice(0, 8) + ' (auf allen Geräten gleich)';
+            } catch (e) { /* keep base line */ }
+        }
+        $('mb-sync').addEventListener('click', () => { closePopup(); updateSyncStatus(); showPanel('sync-panel'); });
+        $('sync-gen').addEventListener('click', () => { $('sync-input').value = genCode(); });
+        $('sync-copy').addEventListener('click', async () => {
+            const code = (getSyncCode() || $('sync-input').value.trim()); // active code first!
+            if (!code) { toast('Kein Code zum Kopieren.'); return; }
+            try { await navigator.clipboard.writeText(code); toast('Code kopiert.'); }
+            catch (e) { toast('Kopieren ging nicht.'); }
+        });
+        $('sync-close').addEventListener('click', hidePanels);
+        $('sync-connect').addEventListener('click', async () => {
+            const code = $('sync-input').value.trim();
+            if (code.length < 4) { toast('Code zu kurz (min. 4 Zeichen).'); return; }
+            toast('Verbinde …');
+            try {
+                const n = await connectSync(code);
+                updateSyncStatus();
+                toast(n > 0 ? ('Verbunden — ' + n + ' Track(s) übernommen.') : 'Verbunden.');
+            } catch (e) { toast('Sync fehlgeschlagen: ' + (e.message || e)); }
+        });
+        $('sync-clear').addEventListener('click', async () => {
+            toast('Trenne …');
+            try { await clearSyncCode(); $('sync-input').value = ''; updateSyncStatus(); toast('Lokal & privat.'); }
+            catch (e) { toast('Fehlgeschlagen: ' + (e.message || e)); }
+        });
+
+        function renderTrackList(rows) {
+            const box = $('track-list-items');
+            box.innerHTML = '';
+            if (!rows.length) { box.innerHTML = '<div class="tl-empty">Noch keine gespeicherten Tracks.</div>'; return; }
+            rows.forEach((r) => {
+                const row = document.createElement('div');
+                row.className = 'tl-row';
+                const km = r.distance_m != null ? (r.distance_m / 1000).toFixed(2) + ' km' : '–';
+                const when = new Date(r.created_at).toLocaleString('de-DE', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' });
+                const main = document.createElement('div');
+                main.className = 'tl-main';
+                const nm = document.createElement('div'); nm.className = 'tl-name'; nm.textContent = r.name;
+                const mt = document.createElement('div'); mt.className = 'tl-meta'; mt.textContent = when + ' · ' + km;
+                main.appendChild(nm); main.appendChild(mt);
+                main.addEventListener('click', async () => {
+                    toast('Lade Track …');
+                    try { const pts = await fetchTrackPoints(r.id); plotTrack(pts); hidePanels(); toast(r.name + ' geladen.'); }
+                    catch (e) { toast('Track laden fehlgeschlagen.'); }
+                });
+                const del = document.createElement('button');
+                del.className = 'tl-del'; del.textContent = '×'; del.title = 'Löschen';
+                del.addEventListener('click', async (ev) => {
+                    ev.stopPropagation();
+                    if (!confirm('Track löschen?')) return;
+                    try { await removeTrack(r.id); row.remove(); toast('Gelöscht.'); }
+                    catch (e) { toast('Löschen fehlgeschlagen.'); }
+                });
+                row.appendChild(main); row.appendChild(del);
+                box.appendChild(row);
+            });
+        }
+
+        const GNSS_INFO =
+            '<p>Dein Gerät bestimmt seine Position aus <b>mehreren Quellen gleichzeitig</b> und nimmt jeweils ' +
+            'die beste — je nachdem, was gerade verfügbar und am genauesten ist.</p>' +
+            '<h4>Satelliten · GNSS</h4>' +
+            '<p>Globale Navigations-Satelliten-Systeme: Dein Gerät empfängt Signale mehrerer Satelliten und ' +
+            'berechnet aus deren Laufzeiten die Position. Am genauesten (Meter), braucht aber freie Sicht zum ' +
+            'Himmel. Mehrere Systeme zusammen (Multi-GNSS) → schneller und genauer:</p>' +
+            '<h4>GPS · USA</h4>' +
+            '<p>„Global Positioning System", betrieben von der <b>US Space Force</b>. Das älteste und ' +
+            'bekannteste System, rund 31 Satelliten, seit 1978.</p>' +
+            '<h4>GLONASS · Russland</h4>' +
+            '<p>Russisches Gegenstück, betrieben von Roskosmos.</p>' +
+            '<h4>Galileo · Europa</h4>' +
+            '<p>Ziviles System der <b>EU/ESA</b> — sehr genau, kein Militär dahinter.</p>' +
+            '<h4>BeiDou · China</h4>' +
+            '<p>Chinesisches System, seit 2020 global.</p>' +
+            '<h4>QZSS · Japan &amp; NavIC · Indien</h4>' +
+            '<p>Regionale Systeme, die GPS über Asien bzw. Indien ergänzen.</p>' +
+            '<h4>WLAN</h4>' +
+            '<p>Ohne GPS (z. B. am Laptop) schätzt das Gerät die Position aus den umliegenden WLAN-Routern: ' +
+            'deren Kennungen werden in einer Datenbank (Apple/Google) nachgeschlagen, die weiß, wo sie stehen. ' +
+            'Klappt auch drinnen, Genauigkeit etwa 20–50 m.</p>' +
+            '<h4>Funkzelle</h4>' +
+            '<p>Aus den Mobilfunk-Masten in Reichweite — grob (hunderte Meter bis Kilometer), dafür fast ' +
+            'überall verfügbar.</p>' +
+            '<h4>IP-Adresse</h4>' +
+            '<p>Die gröbste Notlösung: ungefähr der Standort deines Internet-Anbieters. Kann zig Kilometer ' +
+            'danebenliegen.</p>' +
+            '<h4>Wer trägt bei?</h4>' +
+            '<p>Welche Quelle gerade zu Deiner Positionsbestimmung beiträgt (und welche Satelliten), kann nur ' +
+            'die native App zeigen (Android GnssStatus) — im Browser gibt die Standort-API das nicht her.</p>';
+
+        // ---------------------------------------------------------------
+        // Keep Leaflet sized correctly
+        // ---------------------------------------------------------------
+        function init() {
+            map.invalidateSize();
+        }
+        window.addEventListener('resize', init);
+        document.fonts.ready.then(init);
+        setTimeout(init, 300);
+
+        // On load: jump straight to the current position (no need to press centre),
+        // then wait for better data before revealing the red dot.
+        goToCurrentPosition({ initial: true });
+    </script>
+</body>
+
+</html>

@@ -12,7 +12,24 @@
   SPEICHERN · LADEN · VOLLBILD · INFO; + Lade-Liste-Panel + GNSS-Info-Panel.
 - (www im Wrapper neu gesynct.)
 
+## ✅ Erledigt (2026-06-04, autonome Session während Doc unterwegs)
+- **Zoom/Folgen**: Karte folgt neuen Fixes nur bis der User selbst draggt (`following`-Flag);
+  ZENTRIEREN aktiviert Folgen wieder. Roter Punkt wird bei `zoomstart` ausgeblendet, bei `zoomend`
+  wieder eingeblendet → „ordentlich zoomen".
+- **Menü final**: Halbkreis-Bogen um den Hamburger (worldclock-Stil), 5 gleich breite Buttons:
+  SPEICHERN · LADEN · ZENTRIEREN · VOLLBILD · INFO. Export/Löschen raus (Löschen in der Liste).
+- **Struktur**: alles nach `HTML/tracker/` (tracker.html, index.html=Landing, icon.svg, tracker-plan.md);
+  `HTML/tracker.html` ist jetzt ein **Redirect** → `tracker/tracker.html`. Landing Page mit KISS + USPs.
+- **Wrapper**: sync-web.sh zieht jetzt aus `HTML/tracker/tracker.html` und schreibt `../` → root um.
+  (APK NICHT neu gebaut — Doc testet die installierte Version; Zoom-Fix kommt beim nächsten Build.)
+
 ## Offen
+- **Bewegungs-Gate** (Accelerometer/DeviceMotion gegen Phantom-Tempo im Stand) — bewusst NICHT blind
+  gebaut, braucht Geräte-Test. Nächster Schritt mit Doc.
+- **Tracking-Notification farbig** (Akzentfarbe/Icon im Benachrichtigungs-Panel) — Doc hatte gefragt;
+  nativer Eingriff, offen.
+- Native App: Background-Test (START → sperren → laufen) durch Doc; ggf. Notification-Farbe.
+
 ## UI-Umbau (HUD verschlanken)
 1. **POSITION** oben **zentriert**, dahinter die **Genauigkeit** (±X m). Den separaten
    GENAU-Wert unten rechts **entfernen**.
