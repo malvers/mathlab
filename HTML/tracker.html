@@ -234,6 +234,236 @@
             color: var(--red);
             border-color: var(--red);
         }
+
+        /* ---- Radial action popup (long-press / right-click) — style from worldclock, orange accent ---- */
+        #mini-stack {
+            display: none;
+        }
+
+        #mini-stack.popup {
+            display: block;
+            position: fixed;
+            z-index: 960;
+            width: 320px;
+            height: 260px;
+            pointer-events: none;
+            /* only the buttons are tappable */
+        }
+
+        #mini-stack.popup::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            width: 520px;
+            height: 380px;
+            transform: translate(-50%, -50%);
+            background: radial-gradient(ellipse at center,
+                    rgba(245, 194, 66, 0.18) 0%,
+                    rgba(245, 194, 66, 0.09) 28%,
+                    rgba(245, 194, 66, 0.035) 55%,
+                    rgba(245, 194, 66, 0) 75%);
+            filter: blur(6px);
+            z-index: -1;
+        }
+
+        #mini-stack.popup .mini-btn {
+            position: absolute;
+            pointer-events: auto;
+            width: 112px;
+            height: 46px;
+            transform: translate(-50%, -50%);
+            border-radius: 12px;
+            cursor: pointer;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.64rem;
+            letter-spacing: 0.12em;
+            color: var(--orange);
+            background: rgba(8, 18, 38, 0.96);
+            border: 1px solid rgba(245, 194, 66, 0.8);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5), 0 0 10px rgba(245, 194, 66, 0.25);
+            transition: background 0.12s, transform 0.12s;
+        }
+
+        #mini-stack.popup .mini-btn:hover {
+            background: rgba(245, 194, 66, 0.12);
+        }
+
+        #mini-stack.popup .mini-btn:active {
+            transform: translate(-50%, -50%) scale(0.95);
+        }
+
+        /* ---- Centered overlay panels (track list + info) ---- */
+        #ov-backdrop {
+            position: fixed;
+            inset: 0;
+            z-index: 970;
+            background: rgba(2, 9, 25, 0.6);
+            backdrop-filter: blur(2px);
+            display: none;
+        }
+
+        #ov-backdrop.open {
+            display: block;
+        }
+
+        .ov-panel {
+            position: fixed;
+            z-index: 971;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%) scale(0.96);
+            opacity: 0;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            width: min(92vw, 420px);
+            max-height: 80vh;
+            padding: 16px;
+            background: rgba(8, 20, 42, 0.95);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.55);
+            font-family: 'Orbitron', sans-serif;
+            color: #fff;
+            transition: opacity 0.18s ease, transform 0.18s ease;
+        }
+
+        .ov-panel.open {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .ov-title {
+            font-size: 0.8rem;
+            letter-spacing: 2px;
+            color: var(--orange);
+            margin-bottom: 12px;
+        }
+
+        .ov-body {
+            overflow-y: auto;
+        }
+
+        .ov-close {
+            margin-top: 14px;
+            padding: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            background: transparent;
+            color: #fff;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.72rem;
+            letter-spacing: 1px;
+            cursor: pointer;
+        }
+
+        .ov-close:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        /* track list rows */
+        .tl-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 10px;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+        .tl-row:hover {
+            background: rgba(255, 255, 255, 0.06);
+        }
+
+        .tl-main {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .tl-name {
+            font-size: 0.78rem;
+        }
+
+        .tl-meta {
+            font-family: system-ui, sans-serif;
+            font-size: 0.66rem;
+            color: rgba(255, 255, 255, 0.5);
+            margin-top: 3px;
+        }
+
+        .tl-del {
+            flex: none;
+            width: 34px;
+            height: 34px;
+            border: none;
+            border-radius: 8px;
+            background: transparent;
+            color: rgba(255, 255, 255, 0.5);
+            cursor: pointer;
+            font-size: 1.1rem;
+        }
+
+        .tl-del:hover {
+            background: rgba(176, 36, 24, 0.18);
+            color: var(--red);
+        }
+
+        .tl-empty {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.74rem;
+            padding: 8px 0;
+        }
+
+        /* GNSS info text */
+        #info-body {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 0.82rem;
+            line-height: 1.5;
+            color: #fff;
+        }
+
+        #info-body h4 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.74rem;
+            color: var(--orange);
+            margin: 14px 0 4px;
+        }
+
+        #info-body p {
+            margin: 0 0 8px;
+        }
+
+        #info-body .flag {
+            font-size: 0.72rem;
+            color: rgba(255, 255, 255, 0.55);
+        }
+
+        /* toast */
+        #toast {
+            position: fixed;
+            left: 50%;
+            bottom: max(170px, calc(env(safe-area-inset-bottom) + 150px));
+            transform: translateX(-50%) translateY(8px);
+            z-index: 980;
+            background: rgba(8, 20, 42, 0.96);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+            padding: 10px 16px;
+            font-family: system-ui, sans-serif;
+            font-size: 0.8rem;
+            color: #fff;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s ease, transform 0.25s ease;
+        }
+
+        #toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
     </style>
 </head>
 
@@ -285,9 +515,34 @@
     <!-- Big start/stop -->
     <button id="trk-toggle">START</button>
 
+    <!-- Radial action popup (long-press / right-click) — style ported from worldclock -->
+    <div id="mini-stack">
+        <button class="mini-btn" id="mb-save">SPEICHERN</button>
+        <button class="mini-btn" id="mb-load">LADEN</button>
+        <button class="mini-btn" id="mb-fs">VOLLBILD</button>
+        <button class="mini-btn" id="mb-info">INFO</button>
+    </div>
+
+    <!-- Centered overlay panels (track list + GNSS info) -->
+    <div id="ov-backdrop"></div>
+    <div id="track-list" class="ov-panel">
+        <div class="ov-title">Gespeicherte Tracks</div>
+        <div id="track-list-items" class="ov-body"></div>
+        <button class="ov-close" id="list-close">Schließen</button>
+    </div>
+    <div id="info-panel" class="ov-panel">
+        <div class="ov-title">Satelliten-Systeme · GNSS</div>
+        <div class="ov-body" id="info-body"></div>
+        <button class="ov-close" id="info-close">Schließen</button>
+    </div>
+
+    <!-- Transient toast (replaces the removed status line for action feedback) -->
+    <div id="toast"></div>
+
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
         integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <script src="js/cyber-clock.js"></script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <script>
         // ---------------------------------------------------------------
         // Brand palette (see CLAUDE.md)
@@ -730,6 +985,212 @@ ${pts}
         // Re-fit the map after the viewport changes size on enter/leave fullscreen
         document.addEventListener('fullscreenchange', () => setTimeout(init, 120));
         document.addEventListener('webkitfullscreenchange', () => setTimeout(init, 120));
+
+        // ===============================================================
+        // Supabase — same project as VGP. The publishable key is public by
+        // design; Row-Level-Security keeps each device's tracks private to
+        // its anonymous auth.uid().
+        // ===============================================================
+        const SUPABASE_URL = 'https://fyfhxzyymmurlaenmzse.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_ubQDiMD-X3N0vZvPVi229Q_-5Zootfk';
+        let sb = null;
+
+        async function ensureSb() {
+            if (!window.supabase) throw new Error('Supabase-Lib nicht geladen');
+            if (!sb) sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+            const { data: { session } } = await sb.auth.getSession();
+            if (!session) {
+                const { error } = await sb.auth.signInAnonymously();
+                if (error) throw new Error('Anon-Login aus? ' + error.message);
+            }
+            return sb;
+        }
+
+        async function saveTrack(name) {
+            const c = await ensureSb();
+            const pts = track.map((p, i) => [p[0], p[1], times[i] || null]);
+            const { error } = await c.from('tracks').insert({
+                name: name,
+                distance_m: Math.round(totalDist),
+                points: pts,
+            });
+            if (error) throw error;
+        }
+
+        async function listTracks() {
+            const c = await ensureSb();
+            const { data, error } = await c.from('tracks')
+                .select('id, name, created_at, distance_m')
+                .order('created_at', { ascending: false });
+            if (error) throw error;
+            return data || [];
+        }
+
+        async function fetchTrackPoints(id) {
+            const c = await ensureSb();
+            const { data, error } = await c.from('tracks').select('points').eq('id', id).single();
+            if (error) throw error;
+            return data.points || [];
+        }
+
+        async function removeTrack(id) {
+            const c = await ensureSb();
+            const { error } = await c.from('tracks').delete().eq('id', id);
+            if (error) throw error;
+        }
+
+        // Plot a loaded track onto the map (replaces the current line)
+        function plotTrack(points) {
+            const latlngs = points.map(p => [p[0], p[1]]);
+            track = latlngs.map(ll => [ll[0], ll[1]]);
+            times = points.map(p => p[2] || null);
+            totalDist = 0;
+            for (let i = 1; i < latlngs.length; i++) totalDist += haversine(latlngs[i - 1], latlngs[i]);
+            trackLine.setLatLngs(latlngs);
+            elDist.textContent = (totalDist / 1000).toFixed(2);
+            elSpeed.textContent = '0.0';
+            if (latlngs.length) map.fitBounds(trackLine.getBounds(), { padding: [40, 40] });
+        }
+
+        // ---- Transient toast (the persistent status line was removed) ----
+        let toastTimer = null;
+        function toast(msg) {
+            const t = $('toast');
+            t.textContent = msg;
+            t.classList.add('show');
+            if (toastTimer) clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => t.classList.remove('show'), 2400);
+        }
+
+        // ===============================================================
+        // Radial action popup (long-press / right-click) — style from worldclock
+        // ===============================================================
+        const miniStack = $('mini-stack');
+
+        function openPopup(clientX, clientY) {
+            const W = 320, H = 260, rx = 104, ry = 92;
+            const x = Math.max(8, Math.min(clientX - W / 2, window.innerWidth - W - 8));
+            const y = Math.max(8, Math.min(clientY - H / 2, window.innerHeight - H - 8));
+            miniStack.style.left = x + 'px';
+            miniStack.style.top = y + 'px';
+            miniStack.classList.add('popup');
+            const btns = Array.from(miniStack.querySelectorAll('.mini-btn'));
+            const n = btns.length;
+            btns.forEach((b, i) => {
+                const a = (i / n) * 2 * Math.PI - Math.PI / 2;
+                b.style.left = (W / 2 + Math.cos(a) * rx) + 'px';
+                b.style.top = (H / 2 + Math.sin(a) * ry) + 'px';
+            });
+        }
+        function closePopup() { miniStack.classList.remove('popup'); }
+
+        window.addEventListener('contextmenu', (e) => { e.preventDefault(); openPopup(e.clientX, e.clientY); });
+
+        let lpTimer = null, lpX = 0, lpY = 0;
+        document.addEventListener('touchstart', (e) => {
+            if (e.target.closest('button')) return;
+            if (miniStack.classList.contains('popup')) return;
+            const t = e.touches[0];
+            lpX = t.clientX; lpY = t.clientY;
+            clearTimeout(lpTimer);
+            lpTimer = setTimeout(() => { openPopup(lpX, lpY); lpTimer = null; }, 550);
+        }, { passive: true });
+        document.addEventListener('touchmove', (e) => {
+            const t = e.touches[0];
+            if (Math.abs(t.clientX - lpX) > 10 || Math.abs(t.clientY - lpY) > 10) { clearTimeout(lpTimer); lpTimer = null; }
+        }, { passive: true });
+        document.addEventListener('touchend', () => { clearTimeout(lpTimer); lpTimer = null; });
+        document.addEventListener('touchcancel', () => { clearTimeout(lpTimer); lpTimer = null; });
+        document.addEventListener('mousedown', (e) => {
+            if (miniStack.classList.contains('popup') && !miniStack.contains(e.target)) closePopup();
+        });
+
+        // ---- Overlay panels (track list + info) ----
+        const ovBackdrop = $('ov-backdrop');
+        function showPanel(id) { ovBackdrop.classList.add('open'); $(id).classList.add('open'); }
+        function hidePanels() {
+            ovBackdrop.classList.remove('open');
+            document.querySelectorAll('.ov-panel').forEach(p => p.classList.remove('open'));
+        }
+        ovBackdrop.addEventListener('click', hidePanels);
+        $('list-close').addEventListener('click', hidePanels);
+        $('info-close').addEventListener('click', hidePanels);
+
+        // ---- Popup actions ----
+        $('mb-save').addEventListener('click', async () => {
+            closePopup();
+            if (track.length < 2) { toast('Kein Track zum Speichern.'); return; }
+            const def = 'Track ' + new Date().toLocaleString('de-DE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+            const name = prompt('Track-Name:', def);
+            if (name == null) return;
+            toast('Speichere …');
+            try { await saveTrack(name.trim() || def); toast('Track gespeichert.'); }
+            catch (e) { toast('Speichern fehlgeschlagen: ' + (e.message || e)); }
+        });
+
+        $('mb-load').addEventListener('click', async () => {
+            closePopup();
+            toast('Lade Liste …');
+            let rows;
+            try { rows = await listTracks(); }
+            catch (e) { toast('Laden fehlgeschlagen: ' + (e.message || e)); return; }
+            renderTrackList(rows);
+            showPanel('track-list');
+        });
+
+        $('mb-fs').addEventListener('click', () => { closePopup(); toggleFullscreen(); });
+        $('mb-info').addEventListener('click', () => { closePopup(); $('info-body').innerHTML = GNSS_INFO; showPanel('info-panel'); });
+
+        function renderTrackList(rows) {
+            const box = $('track-list-items');
+            box.innerHTML = '';
+            if (!rows.length) { box.innerHTML = '<div class="tl-empty">Noch keine gespeicherten Tracks.</div>'; return; }
+            rows.forEach((r) => {
+                const row = document.createElement('div');
+                row.className = 'tl-row';
+                const km = r.distance_m != null ? (r.distance_m / 1000).toFixed(2) + ' km' : '–';
+                const when = new Date(r.created_at).toLocaleString('de-DE', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' });
+                const main = document.createElement('div');
+                main.className = 'tl-main';
+                const nm = document.createElement('div'); nm.className = 'tl-name'; nm.textContent = r.name;
+                const mt = document.createElement('div'); mt.className = 'tl-meta'; mt.textContent = when + ' · ' + km;
+                main.appendChild(nm); main.appendChild(mt);
+                main.addEventListener('click', async () => {
+                    toast('Lade Track …');
+                    try { const pts = await fetchTrackPoints(r.id); plotTrack(pts); hidePanels(); toast(r.name + ' geladen.'); }
+                    catch (e) { toast('Track laden fehlgeschlagen.'); }
+                });
+                const del = document.createElement('button');
+                del.className = 'tl-del'; del.textContent = '×'; del.title = 'Löschen';
+                del.addEventListener('click', async (ev) => {
+                    ev.stopPropagation();
+                    if (!confirm('Track löschen?')) return;
+                    try { await removeTrack(r.id); row.remove(); toast('Gelöscht.'); }
+                    catch (e) { toast('Löschen fehlgeschlagen.'); }
+                });
+                row.appendChild(main); row.appendChild(del);
+                box.appendChild(row);
+            });
+        }
+
+        const GNSS_INFO =
+            '<p>GNSS = <b>Globale Navigations-Satelliten-Systeme</b>. Dein Gerät empfängt Signale mehrerer ' +
+            'Satelliten und berechnet aus deren Laufzeiten seine Position. Meist laufen mehrere Systeme ' +
+            'gleichzeitig (Multi-GNSS) → schneller und genauer.</p>' +
+            '<h4>GPS · USA</h4>' +
+            '<p>„Global Positioning System", betrieben von der <b>US Space Force</b>. Das älteste und ' +
+            'bekannteste System, rund 31 Satelliten. <span class="flag">seit 1978</span></p>' +
+            '<h4>GLONASS · Russland</h4>' +
+            '<p>Russisches Gegenstück, betrieben von Roskosmos.</p>' +
+            '<h4>Galileo · Europa</h4>' +
+            '<p>Ziviles System der <b>EU/ESA</b> — sehr genau, kein Militär dahinter.</p>' +
+            '<h4>BeiDou · China</h4>' +
+            '<p>Chinesisches System, seit 2020 global.</p>' +
+            '<h4>QZSS · Japan &amp; NavIC · Indien</h4>' +
+            '<p>Regionale Systeme, die GPS über Asien bzw. Indien ergänzen.</p>' +
+            '<h4>Wer trägt bei?</h4>' +
+            '<p>Welche Satelliten gerade zu Deiner Positionsbestimmung beitragen, kann nur die native App ' +
+            'zeigen (Android GnssStatus) — im Browser gibt die Standort-API das nicht her.</p>';
 
         // ---------------------------------------------------------------
         // Keep Leaflet sized correctly
