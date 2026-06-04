@@ -913,9 +913,9 @@ Regeln:
         }
         await celebrateLevel(clearedLevel, clearedLevel + 1, false);
         loadLevelBag(clearedLevel + 1);
+        showTrophy();   // LEVEL finished → reward trophy (timeline + equation away)
       }
-      // Reward: timeline + equation away, golden trophy instead. Next problem waits for "Weiter".
-      showTrophy();
+      // Regular correct: leave the timeline standing. Level-finish: trophy. Both wait for "Weiter".
       tutorState.pendingNext = nextProblemFromBag();
       tutorSubmit.textContent = 'Weiter';
       tutorSubmit.disabled = false;

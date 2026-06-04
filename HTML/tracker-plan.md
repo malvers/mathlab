@@ -5,6 +5,11 @@
 - #2: Wort „DAUER" weg, Uhr `0:00:00` bleibt.
 - #3: Wort „TEMPO" weg, Geschwindigkeitswert bleibt (Label „KM/H").
 - #6: Map-`doubleClickZoom` aus + Tap auf Uhr gekapselt → Doppel-Tap stört die Karte nicht mehr.
+- Quellen-Label (geschätzt aus Accuracy): GPS/WLAN/FUNK im POSITION-Chip.
+- Status-Zeile entfernt → stattdessen transienter Toast für Aktions-Feedback.
+- #4 Supabase: Client + Anon-Auth + Tabelle `tracks` (RLS) → Speichern/Laden/Löschen.
+- #5 Kontextmenü: radiales Popup (worldclock-Stil, Orange) per Long-Press/Rechtsklick →
+  SPEICHERN · LADEN · VOLLBILD · INFO; + Lade-Liste-Panel + GNSS-Info-Panel.
 - (www im Wrapper neu gesynct.)
 
 ## Offen
