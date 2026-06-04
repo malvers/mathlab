@@ -697,6 +697,7 @@ Regeln:
 
   function showProblem(p, intro) {
     hideTutorTimeline();
+    hideFunQuiz();                     // a real problem is showing → no quiz panel
     tutorState.pendingNext = null;     // clear any "Weiter" state
     if (tutorSubmit) tutorSubmit.textContent = 'Prüfen';
     tutorState.currentProblem = p;
@@ -745,7 +746,8 @@ Regeln:
     loadLevelBag(1);                   // sets difficulty = 1 and fills the shuffled bag
     refreshModeUI();                   // highlight the active mode pill
     const p = nextProblemFromBag();
-    showProblem(p, "Lass uns *üben*!");
+    // Warm-up giggle: one silly multiple-choice question, then into the real practice.
+    showFunQuiz(() => showProblem(p, "Lass uns *üben*!"));
   }
 
   function exitTutor() {
@@ -1018,16 +1020,18 @@ Regeln:
     if (prob) prob.style.display = v ? '' : 'none';
     if (row)  row.style.display  = v ? '' : 'none';
     if (tutorHint) tutorHint.style.display = v ? '' : 'none';
-    if (tutorBubble) tutorBubble.style.display = v ? '' : 'none';   // hide the question bubble on the completion screen
   }
   function hideTutorComplete() {
     const panel = document.getElementById('tutor-complete');
     if (panel) { panel.classList.add('hidden'); panel.innerHTML = ''; }
     setProblemUIVisible(true);
+    if (tutorBubble) tutorBubble.style.display = '';
   }
   function showTutorComplete(clearedLevel, manual) {
     hideTutorTimeline();
+    hideFunQuiz();
     setProblemUIVisible(false);
+    if (tutorBubble) tutorBubble.style.display = 'none';   // no leftover question on the completion screen
     const expert = clearedLevel >= 4;
     const panel = document.getElementById('tutor-complete');
     if (!panel) return;
@@ -1054,6 +1058,98 @@ Regeln:
       else if (act === 'exit') exitTutor();
       else if (act.indexOf('mode:') === 0) setTutorMode(act.slice(5));
     }));
+  }
+
+  // ===== Spaß-Quiz (warm-up): silly multiple-choice questions to make kids giggle =====
+  const FUN_QUIZ = [
+    {
+      q: "Was heißt eigentlich *kgV*?",
+      options: ["das kleinste gemeinsame Vielfache", "kein großer Vogel", "kleiner gelber Flieger", "Karl grillt Vanillekipferl"],
+      answer: 0,
+      win: "Genau! [break:0.3s] Obwohl … „kein großer Vogel" wäre auch ziemlich gut.",
+      nope: "Haha! [break:0.3s] Schön wär's — aber nö."
+    },
+    {
+      q: "Wofür steht das *V* im kgV?",
+      options: ["Vielfaches", "Vampir", "Vanillepudding", "Vogelscheuche"],
+      answer: 0,
+      win: "Richtig — *Vielfaches*! [break:0.3s] Kein Vampir weit und breit.",
+      nope: "Hihi, nein! [break:0.3s] Aber nett geraten."
+    },
+    {
+      q: "Was ist das kgV von *2* und *3*?",
+      options: ["6", "23", "ein Käsebrot", "5"],
+      answer: 0,
+      win: "Sechs! [break:0.3s] Das Käsebrot war eine fiese Falle.",
+      nope: "Nope! [break:0.3s] Zähl nochmal — und nicht das Käsebrot nehmen."
+    },
+    {
+      q: "Wie heißt unser Mathe-Held aus Bagdad?",
+      options: ["al-Khwārizmī", "Käpt'n Glockenhose", "Sir Zahlissimo", "Bruchpilot Bruno"],
+      answer: 0,
+      win: "al-Khwārizmī! [break:0.3s] Von seinem Namen kommt das Wort *Algorithmus*.",
+      nope: "Haha, leider nein — auch wenn Bruchpilot Bruno cool klingt."
+    },
+    {
+      q: "Wann läuten zwei Glocken *gemeinsam*?",
+      options: ["beim gemeinsamen Vielfachen", "wenn der Wecker klingelt", "wenn der Hund bellt", "nie, Glocken sind schüchtern"],
+      answer: 0,
+      win: "Genau! [break:0.3s] Schüchterne Glocken wären aber irgendwie süß.",
+      nope: "Nö! [break:0.3s] Aber das mit den schüchternen Glocken merk ich mir."
+    },
+    {
+      q: "Wie viele Beine hat ein Dreieck?",
+      options: ["keine — es ist eine Form!", "drei", "dreieinhalb", "kommt auf die Laune an"],
+      answer: 0,
+      win: "Richtig — *keine*! [break:0.3s] Dreiecke können nämlich nicht weglaufen.",
+      nope: "Hihi — ein Dreieck hat gar keine Beine!"
+    },
+    {
+      q: "Was tust du, um das kgV zu finden?",
+      options: ["zählen, bis beide Takte zusammenpassen", "ganz fest die Augen zudrücken", "die Glocken bestechen", "einen Pudding fragen"],
+      answer: 0,
+      win: "Genau! [break:0.3s] Pudding kann nämlich überhaupt nicht rechnen.",
+      nope: "Hihi, nein! [break:0.3s] Der Pudding hilft dir da nicht."
+    }
+  ];
+
+  function hideFunQuiz() {
+    const panel = document.getElementById('tutor-quiz');
+    if (panel) { panel.classList.add('hidden'); panel.innerHTML = ''; }
+  }
+  // One silly question as a warm-up; calls onDone() once answered correctly.
+  function showFunQuiz(onDone) {
+    const panel = document.getElementById('tutor-quiz');
+    if (!panel) { onDone(); return; }
+    setProblemUIVisible(false);   // hide problem/input/hint; the bubble carries the question + reactions
+    hideTutorTimeline();
+    const item = FUN_QUIZ[Math.floor(Math.random() * FUN_QUIZ.length)];
+    const opts = shuffled(item.options.map((text, i) => ({ text, correct: i === item.answer })));
+    panel.innerHTML = opts.map((o, i) =>
+      '<button class="tc-btn tq-opt" data-i="' + i + '">' + o.text + '</button>').join('');
+    panel.classList.remove('hidden');
+    setTutorBubble(item.q);   // question shown in the bubble + spoken
+    panel.querySelectorAll('.tq-opt').forEach((b, i) => {
+      b.addEventListener('click', () => {
+        if (b.disabled) return;
+        if (opts[i].correct) {
+          b.classList.add('tq-correct');
+          panel.querySelectorAll('.tq-opt').forEach(x => x.disabled = true);
+          setTutorBubble(item.win);
+          setTimeout(() => {
+            panel.classList.add('hidden');
+            panel.innerHTML = '';
+            setProblemUIVisible(true);
+            onDone();
+          }, 1700);
+        } else {
+          b.classList.remove('tq-wrong'); void b.offsetWidth;
+          b.classList.add('tq-wrong');
+          setTimeout(() => b.classList.remove('tq-wrong'), 500);
+          setTutorBubble(item.nope);
+        }
+      });
+    });
   }
 
   tutorExit.addEventListener('click', () => showTutorComplete(tutorState.difficulty, true));
