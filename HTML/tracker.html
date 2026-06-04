@@ -85,6 +85,15 @@
             text-align: center;
             pointer-events: none;
             /* let map drags pass through empty areas */
+            opacity: 0;
+            transform: translateY(-18px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+
+        /* Header is hidden until the first START, then fades down into view */
+        #hud-top.shown {
+            opacity: 1;
+            transform: translateY(0);
         }
 
         #gps-chip {
@@ -343,8 +352,45 @@
             margin-bottom: 12px;
         }
 
+        /* Slim dark scrollbar — index.html look, applied the cross-browser-safe way:
+           ::-webkit-scrollbar for Chrome/Safari, scrollbar-width only for Firefox in
+           @supports (never both on the same element — Safari would drop the webkit rules). */
         .ov-body {
             overflow-y: auto;
+        }
+
+        .ov-body::-webkit-scrollbar {
+            width: 11px;
+            height: 11px;
+        }
+
+        .ov-body::-webkit-scrollbar-track {
+            background: rgba(40, 48, 68, 0.72);
+            border-radius: 999px;
+            margin: 6px 0;
+        }
+
+        .ov-body::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg,
+                    rgba(78, 92, 118, 0.95) 0%,
+                    rgba(52, 64, 86, 0.92) 100%);
+            border-radius: 999px;
+            border: 2px solid rgba(34, 42, 58, 0.85);
+            box-shadow: 0 0 8px rgba(0, 0, 0, 0.35);
+        }
+
+        .ov-body::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg,
+                    rgba(92, 108, 134, 0.98) 0%,
+                    rgba(68, 82, 108, 0.95) 100%);
+            box-shadow: 0 0 10px rgba(100, 118, 145, 0.22);
+        }
+
+        @supports (-moz-appearance: none) {
+            .ov-body {
+                scrollbar-width: thin;
+                scrollbar-color: rgba(72, 88, 112, 0.95) transparent;
+            }
         }
 
         .ov-close {
@@ -531,7 +577,7 @@
         <button class="ov-close" id="list-close">Schließen</button>
     </div>
     <div id="info-panel" class="ov-panel">
-        <div class="ov-title">Satelliten-Systeme · GNSS</div>
+        <div class="ov-title">Wir nutzen alle Quellen</div>
         <div class="ov-body" id="info-body"></div>
         <button class="ov-close" id="info-close">Schließen</button>
     </div>
@@ -813,6 +859,7 @@
             watchId = startGeoWatch(onPosition, onError); // native background plugin if available, else web
             elToggle.textContent = 'STOP';
             elToggle.style.background = COL_RED;
+            $('hud-top').classList.add('shown'); // reveal the header (fades down) on first start
             setStatus('Suche GPS-Signal …');
         }
 
@@ -1174,12 +1221,15 @@ ${pts}
         }
 
         const GNSS_INFO =
-            '<p>GNSS = <b>Globale Navigations-Satelliten-Systeme</b>. Dein Gerät empfängt Signale mehrerer ' +
-            'Satelliten und berechnet aus deren Laufzeiten seine Position. Meist laufen mehrere Systeme ' +
-            'gleichzeitig (Multi-GNSS) → schneller und genauer.</p>' +
+            '<p>Dein Gerät bestimmt seine Position aus <b>mehreren Quellen gleichzeitig</b> und nimmt jeweils ' +
+            'die beste — je nachdem, was gerade verfügbar und am genauesten ist.</p>' +
+            '<h4>Satelliten · GNSS</h4>' +
+            '<p>Globale Navigations-Satelliten-Systeme: Dein Gerät empfängt Signale mehrerer Satelliten und ' +
+            'berechnet aus deren Laufzeiten die Position. Am genauesten (Meter), braucht aber freie Sicht zum ' +
+            'Himmel. Mehrere Systeme zusammen (Multi-GNSS) → schneller und genauer:</p>' +
             '<h4>GPS · USA</h4>' +
             '<p>„Global Positioning System", betrieben von der <b>US Space Force</b>. Das älteste und ' +
-            'bekannteste System, rund 31 Satelliten. <span class="flag">seit 1978</span></p>' +
+            'bekannteste System, rund 31 Satelliten, seit 1978.</p>' +
             '<h4>GLONASS · Russland</h4>' +
             '<p>Russisches Gegenstück, betrieben von Roskosmos.</p>' +
             '<h4>Galileo · Europa</h4>' +
@@ -1188,9 +1238,19 @@ ${pts}
             '<p>Chinesisches System, seit 2020 global.</p>' +
             '<h4>QZSS · Japan &amp; NavIC · Indien</h4>' +
             '<p>Regionale Systeme, die GPS über Asien bzw. Indien ergänzen.</p>' +
+            '<h4>WLAN</h4>' +
+            '<p>Ohne GPS (z. B. am Laptop) schätzt das Gerät die Position aus den umliegenden WLAN-Routern: ' +
+            'deren Kennungen werden in einer Datenbank (Apple/Google) nachgeschlagen, die weiß, wo sie stehen. ' +
+            'Klappt auch drinnen, Genauigkeit etwa 20–50 m.</p>' +
+            '<h4>Funkzelle</h4>' +
+            '<p>Aus den Mobilfunk-Masten in Reichweite — grob (hunderte Meter bis Kilometer), dafür fast ' +
+            'überall verfügbar.</p>' +
+            '<h4>IP-Adresse</h4>' +
+            '<p>Die gröbste Notlösung: ungefähr der Standort deines Internet-Anbieters. Kann zig Kilometer ' +
+            'danebenliegen.</p>' +
             '<h4>Wer trägt bei?</h4>' +
-            '<p>Welche Satelliten gerade zu Deiner Positionsbestimmung beitragen, kann nur die native App ' +
-            'zeigen (Android GnssStatus) — im Browser gibt die Standort-API das nicht her.</p>';
+            '<p>Welche Quelle gerade zu Deiner Positionsbestimmung beiträgt (und welche Satelliten), kann nur ' +
+            'die native App zeigen (Android GnssStatus) — im Browser gibt die Standort-API das nicht her.</p>';
 
         // ---------------------------------------------------------------
         // Keep Leaflet sized correctly
