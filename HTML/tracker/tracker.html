@@ -1256,9 +1256,10 @@
         }).addTo(map);
 
         // Track coloured by speed (green slow → orange → red fast) via Leaflet.hotline, but the
-        // line is BROKEN at gaps: a stretch where recording paused (movement gate "still", accuracy
-        // > 50 m, or no fix from the OS) leaves a big time gap → instead of a speed line, that
-        // segment is drawn as a white/red dashed "no data here" marker (no speed colour under it).
+        // line is BROKEN only at a REAL signal loss: a stretch where the OS delivered no fixes at
+        // all (true GPS dropout) is drawn as a white/red dashed "no data here" marker. A mere
+        // recording pause (movement gate "still", accuracy > 50 m, slow fix rate) is NOT a dropout —
+        // fixes kept arriving — so it stays a normal coloured line, no dashes.
         const usesHotline = !!L.hotline;
         // ABSOLUTE colour scale (comparable across tracks). Walking (0–5 km/h) gets the lower HALF
         // of the scale as its own rich green sub-ramp; 5 km/h → MAX_KMH fills the upper half.
@@ -1288,9 +1289,17 @@
         const trackLayer = L.layerGroup().addTo(map);
 
         function isGap(i) {
-            return times[i] && times[i - 1]
-                && ((Date.parse(times[i]) - Date.parse(times[i - 1])) / 1000 > GAP_SEC)
-                && (haversine(track[i - 1], track[i]) > GAP_M);
+            if (!times[i] || !times[i - 1]) return false;
+            // gaps[i] === true : OS genuinely delivered no fixes across this interval (real dropout)
+            // gaps[i] === false: signal was present, recording merely paused → no barber-pole
+            // gaps[i] == null  : older track saved without the flag → fall back to the time heuristic.
+            // The distance guard keeps a dropout while essentially stationary from drawing a
+            // meaningless dash between two near-identical points.
+            if (gaps[i] != null) {
+                return gaps[i] && haversine(track[i - 1], track[i]) > GAP_M;
+            }
+            const dt = (Date.parse(times[i]) - Date.parse(times[i - 1])) / 1000;
+            return dt > GAP_SEC && haversine(track[i - 1], track[i]) > GAP_M;
         }
         // Draw one continuous run, coloured by its travel mode (white → mode-colour by speed).
         function drawRun(idxs, activity) {
@@ -1343,6 +1352,9 @@
         let alts = [];             // altitude in m per point (fused GPS+baro; null if unknown)
         let speeds = [];           // speed in km/h per point (index-aligned)
         let activities = [];       // travel mode per point: walking/running/on_bicycle/in_vehicle/still
+        let gaps = [];             // bool per point: true = a real GPS dropout precedes this point
+        let lastRecvT = 0;         // wall-clock (ms) of the last fix RECEIVED from the OS (any quality)
+        let maxFixGap = 0;         // longest no-fix stretch (s) since the last recorded point
         let totalDist = 0;         // metres
         let startTime = null;      // ms
         let timerId = null;
@@ -1491,6 +1503,15 @@
             const now = pos.timestamp || Date.now();
             const here = [latitude, longitude];
 
+            // Track continuity of RECEIVED fixes, independent of whether they get recorded. A true
+            // signal loss = the OS stops calling us; maxFixGap is the longest no-fix stretch since
+            // the last recorded point. This runs BEFORE the accuracy filter below so a rejected (but
+            // received) fix still counts as "signal present" — telling a real dropout apart from a
+            // mere recording pause (motion gate / low accuracy / min-step).
+            const recvDt = lastRecvT ? (now - lastRecvT) / 1000 : 0;
+            if (recvDt > maxFixGap) maxFixGap = recvDt;
+            lastRecvT = now;
+
             // Movement gate: does the accelerometer confirm we actually move? If the sensor
             // says "still", GPS jitter is suppressed (no points, speed 0, dot + map held).
             const still = motionReady && motionStill;
@@ -1533,12 +1554,14 @@
             const spdVal = Math.round(shownSpeed * 10) / 10;
             const actVal = effectiveActivity();
             if (track.length === 0) {
-                track.push(here); times.push(stamp); alts.push(altVal); speeds.push(spdVal); activities.push(actVal); redrawTrack();
+                track.push(here); times.push(stamp); alts.push(altVal); speeds.push(spdVal); activities.push(actVal);
+                gaps.push(false); maxFixGap = 0; redrawTrack();
             } else if (!still) {
                 const step = haversine(track[track.length - 1], here);
                 if (step >= minStep) {
                     totalDist += step;
-                    track.push(here); times.push(stamp); alts.push(altVal); speeds.push(spdVal); activities.push(actVal); redrawTrack();
+                    track.push(here); times.push(stamp); alts.push(altVal); speeds.push(spdVal); activities.push(actVal);
+                    gaps.push(maxFixGap > GAP_SEC); maxFixGap = 0; redrawTrack();
                 }
             }
             elDist.textContent = (totalDist / 1000).toFixed(2);
@@ -1724,6 +1747,8 @@
         // Shared startup of the live watch + sensors (does NOT touch startTime → caller sets it).
         function startWatch() {
             if (acquireWatch != null) { navigator.geolocation.clearWatch(acquireWatch); acquireWatch = null; }
+            // Reset fix-continuity so a pause/resume (watch was off) is never mistaken for a dropout.
+            lastRecvT = 0; maxFixGap = 0;
             tracking = true;
             timerId = setInterval(updateDuration, 1000);
             watchId = startGeoWatch(onPosition, onError); // native background plugin if available, else web
@@ -1869,8 +1894,10 @@
             alts = [];
             speeds = [];
             activities = [];
+            gaps = [];
             totalDist = 0;
             lastFix = null;
+            lastRecvT = 0; maxFixGap = 0;
             trackLayer.clearLayers();
             clearWaypoints();
             elDist.textContent = '0.00';
@@ -2035,8 +2062,8 @@ ${pts}
 
         async function saveTrack(name) {
             const c = await ensureSb();
-            // [lat, lng, time, altitude(m), speed(km/h)] — alt/speed null when unknown
-            const pts = track.map((p, i) => [p[0], p[1], times[i] || null, alts[i] != null ? alts[i] : null, speeds[i] != null ? speeds[i] : null, activities[i] || null]);
+            // [lat, lng, time, altitude(m), speed(km/h), activity, gapBefore] — alt/speed null when unknown
+            const pts = track.map((p, i) => [p[0], p[1], times[i] || null, alts[i] != null ? alts[i] : null, speeds[i] != null ? speeds[i] : null, activities[i] || null, gaps[i] ? 1 : 0]);
             // strip the live Leaflet marker reference before persisting
             const wps = waypoints.map(w => ({ lat: w.lat, lng: w.lng, t: w.t, img: w.img, title: w.title, text: w.text }));
             const { error } = await c.from('tracks').insert({
@@ -2082,6 +2109,7 @@ ${pts}
             alts = points.map(p => (p[3] != null ? p[3] : null));   // older tracks have no p[3] → null
             speeds = points.map(p => (p[4] != null ? p[4] : null));
             activities = points.map(p => (p[5] != null ? p[5] : null)); // travel mode (older tracks → null)
+            gaps = points.map(p => (p.length > 6 ? !!p[6] : null));      // dropout flag (older tracks → null → time heuristic)
             totalDist = 0;
             for (let i = 1; i < latlngs.length; i++) totalDist += haversine(latlngs[i - 1], latlngs[i]);
             redrawTrack(); // speed-coloured
