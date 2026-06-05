@@ -351,14 +351,14 @@
 
         /* ---- Photo popup (the knowledge card) ---- */
         .wp-popup .leaflet-popup-content-wrapper {
-            background: rgba(8, 20, 42, 0.97);
+            background: rgb(8, 20, 42);
             color: #fff;
             border: 1px solid rgba(245, 194, 66, 0.5);
             border-radius: 12px;
         }
 
         .wp-popup .leaflet-popup-tip {
-            background: rgba(8, 20, 42, 0.97);
+            background: rgb(8, 20, 42);
         }
 
         .wp-pop img {
@@ -397,8 +397,8 @@
             align-items: center;
             justify-content: center;
             padding: max(10px, env(safe-area-inset-top)) 10px 16px;
-            background: rgba(8, 20, 42, 0.97);
-            backdrop-filter: blur(6px);
+            background: rgb(8, 20, 42);
+            /* fully opaque — at 0.97 the map bled through unevenly behind the photo */
         }
 
         #photo-lightbox.open {
@@ -421,6 +421,11 @@
             border-radius: 12px;
             display: block;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+            /* kill the native long-press behaviour on the photo (callout / save-image / drag) */
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+            -webkit-user-drag: none;
         }
 
         #lightbox-title {
@@ -1193,44 +1198,59 @@
             attribution: '&copy; OpenStreetMap contributors',
         }).addTo(map);
 
-        // Track line coloured by speed (green = slow → orange → red = fast, brand palette) via
-        // Leaflet.hotline. If the plugin failed to load, fall back to a plain orange polyline.
+        // Track coloured by speed (green slow → orange → red fast) via Leaflet.hotline, but the
+        // line is BROKEN at gaps: a stretch where recording paused (movement gate "still", accuracy
+        // > 50 m, or no fix from the OS) leaves a big time gap → instead of a speed line, that
+        // segment is drawn as a white/red dashed "no data here" marker (no speed colour under it).
         const usesHotline = !!L.hotline;
-        const SPEED_PALETTE = { 0.0: 'rgb(121,158,49)', 0.5: 'rgb(245,194,66)', 1.0: 'rgb(176,36,24)' };
-        const trackLine = usesHotline
-            ? L.hotline([], { weight: 5, outlineWidth: 1, outlineColor: 'rgba(8,20,42,0.6)', palette: SPEED_PALETTE, min: 0, max: 10 }).addTo(map)
-            : L.polyline([], { color: COL_ORANGE, weight: 5, opacity: 0.9 }).addTo(map);
-
-        // Stretches where recording paused (movement gate said "still", accuracy > 50 m, or no
-        // fix from the OS) leave a big time gap → the straight connecting line is only a guess.
-        // Overlay those segments white & dashed so they read as "no data here", not a real path.
+        // ABSOLUTE colour scale (comparable across tracks). Walking (0–5 km/h) gets the lower HALF
+        // of the scale as its own rich green sub-ramp; 5 km/h → MAX_KMH fills the upper half.
+        const MAX_KMH = 40;
+        function speedToScale(kmh) {
+            if (kmh <= 5) return (kmh / 5) * 0.5;                       // 0–5 km/h  → 0.0–0.5 (walking)
+            return 0.5 + Math.min((kmh - 5) / (MAX_KMH - 5), 1) * 0.5;  // 5–40 km/h → 0.5–1.0
+        }
+        const SPEED_PALETTE = {
+            0.00: 'rgb(40,90,30)',    //  0 km/h   deep green
+            0.25: 'rgb(121,158,49)',  //  2.5      brand green (φ)
+            0.50: 'rgb(180,200,70)',  //  5 km/h   light lime — top of the walking sub-scale
+            0.70: 'rgb(245,194,66)',  // ~15       orange (λ)
+            1.00: 'rgb(176,36,24)',   // 40+       red (Υ)
+        };
         const GAP_SEC = 20;   // s between two consecutive recorded points
         const GAP_M = 30;     // m — only when there's a real jump too (not a standing-still pause)
-        const gapLayer = L.layerGroup().addTo(map);
+        const trackLayer = L.layerGroup().addTo(map);
 
-        // Rebuild the line from track + per-point speed; rescale the colour range to the track.
+        function isGap(i) {
+            return times[i] && times[i - 1]
+                && ((Date.parse(times[i]) - Date.parse(times[i - 1])) / 1000 > GAP_SEC)
+                && (haversine(track[i - 1], track[i]) > GAP_M);
+        }
+        function drawRun(idxs) {
+            if (idxs.length < 2) return; // a lone point has no segment to draw
+            if (usesHotline) {
+                const data = idxs.map(i => [track[i][0], track[i][1], speedToScale(speeds[i] != null ? speeds[i] : 0)]);
+                L.hotline(data, { weight: 5, outlineWidth: 1, outlineColor: 'rgba(8,20,42,0.6)', palette: SPEED_PALETTE, min: 0, max: 1 }).addTo(trackLayer);
+            } else {
+                L.polyline(idxs.map(i => track[i]), { color: COL_ORANGE, weight: 5, opacity: 0.9 }).addTo(trackLayer);
+            }
+        }
+        // White/red barber-pole over a gap (two offset dashed lines), no speed colour beneath.
+        function drawGap(a, b) {
+            const seg = [track[a], track[b]];
+            L.polyline(seg, { color: '#ffffff', weight: 4, dashArray: '10 10', interactive: false }).addTo(trackLayer);
+            L.polyline(seg, { color: 'rgb(176,36,24)', weight: 4, dashArray: '10 10', dashOffset: '10', interactive: false }).addTo(trackLayer);
+        }
+        // Rebuild: continuous runs (speed-coloured) separated by dashed white/red gaps.
         function redrawTrack() {
-            const data = track.map((p, i) => [p[0], p[1], speeds[i] != null ? speeds[i] : 0]);
-            trackLine.setLatLngs(data);
-            if (usesHotline && data.length) {
-                let lo = Infinity, hi = -Infinity;
-                for (const d of data) { if (d[2] < lo) lo = d[2]; if (d[2] > hi) hi = d[2]; }
-                trackLine.options.min = lo;
-                trackLine.options.max = Math.max(hi, lo + 1); // avoid a zero-width range
-                trackLine.redraw();
-            }
-            // Mark not-recorded stretches: a big TIME gap (plus a real distance jump) → white dashed.
-            gapLayer.clearLayers();
+            trackLayer.clearLayers();
+            if (!track.length) return;
+            let run = [0];
             for (let i = 1; i < track.length; i++) {
-                if (!times[i] || !times[i - 1]) continue; // need timestamps to tell a pause apart
-                const dt = (Date.parse(times[i]) - Date.parse(times[i - 1])) / 1000; // s
-                const dd = haversine(track[i - 1], track[i]);                          // m
-                if (dt > GAP_SEC && dd > GAP_M) {
-                    L.polyline([track[i - 1], track[i]], {
-                        color: '#ffffff', weight: 3, opacity: 0.9, dashArray: '6 8', interactive: false,
-                    }).addTo(gapLayer);
-                }
+                if (isGap(i)) { drawRun(run); drawGap(i - 1, i); run = [i]; }
+                else run.push(i);
             }
+            drawRun(run);
         }
         let posMarker = null;
 
@@ -1258,8 +1278,11 @@
 
         // --- Movement gate (accelerometer) + adaptive jitter filtering ---
         const ACC_STEP_FACTOR = 0.7;   // adaptive min step = accuracy * this (never below MIN_MOVE_M)
-        const MOTION_STILL = 0.14;     // m/s²: dynamic-accel energy below this → "still"
-        const MOTION_MOVE = 0.35;      // m/s²: above this → "moving" (hysteresis between the two)
+        // Gate is a SAFETY NET only for "phone lying around" (sensor barely reacts). Any carrying
+        // — even calm walking / a smooth ride / a steady hand — has enough micro-motion to count as
+        // moving, so it keeps recording. Thresholds sit just above the accelerometer noise floor.
+        const MOTION_STILL = 0.04;     // m/s²: dynamic-accel energy below this → "still" (basically motionless)
+        const MOTION_MOVE = 0.10;      // m/s²: above this → "moving" (hysteresis between the two)
         let motionReady = false;       // a real accelerometer is delivering data
         let motionStill = true;        // current gate verdict
         let motionEnergy = 0;          // smoothed |dynamic acceleration|
@@ -1726,7 +1749,7 @@
             speeds = [];
             totalDist = 0;
             lastFix = null;
-            trackLine.setLatLngs([]);
+            trackLayer.clearLayers();
             clearWaypoints();
             elDist.textContent = '0.00';
             elSpeed.textContent = '0.0';
@@ -1927,6 +1950,10 @@ ${pts}
 
         // Plot a loaded track onto the map (replaces the current line + photo pins)
         function plotTrack(points, wps) {
+            // Loading a track must NOT get yanked back to the live position: stop the initial
+            // position-acquire watch and turn off auto-follow so the track stays in view.
+            if (acquireWatch != null) { navigator.geolocation.clearWatch(acquireWatch); acquireWatch = null; }
+            setFollowing(false);
             const latlngs = points.map(p => [p[0], p[1]]);
             track = latlngs.map(ll => [ll[0], ll[1]]);
             times = points.map(p => p[2] || null);
@@ -1943,7 +1970,7 @@ ${pts}
             const lastAlt = alts.slice().reverse().find(a => a != null);
             fusedAlt = (lastAlt != null) ? lastAlt : null;
             renderAltitude();
-            if (latlngs.length) map.fitBounds(trackLine.getBounds(), { padding: [40, 40] });
+            if (latlngs.length) map.fitBounds(L.latLngBounds(latlngs), { padding: [40, 40] });
         }
 
         // ---- Transient toast (the persistent status line was removed) ----
@@ -2254,7 +2281,12 @@ ${pts}
         }
         function closePopup() { miniStack.classList.remove('popup'); }
 
-        window.addEventListener('contextmenu', (e) => { e.preventDefault(); openPopup(); });
+        window.addEventListener('contextmenu', (e) => {
+            e.preventDefault(); // always suppress the native menu (e.g. Android "save image" on a long-press)
+            // long-press on a photo pin, inside the lightbox, or while a fan is open → do nothing
+            if (e.target.closest('.wp-pin') || e.target.closest('#photo-lightbox') || fannedCluster) return;
+            openPopup();
+        });
 
         let lpTimer = null, lpX = 0, lpY = 0;
         document.addEventListener('touchstart', (e) => {
