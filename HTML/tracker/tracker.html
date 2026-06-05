@@ -163,9 +163,11 @@
            component reads --cc-size for its slot/digit sizing. */
         #hud-time {
             --cc-size: clamp(1.7rem, 8.5vw, 3.6rem);
-            /* digit slot width — snug, so the time isn't stretched apart on wide screens
-               (1em was too airy at the big clamp size; shared default is 0.78em) */
-            --cc-dw: 0.82em;
+            /* digit slot width, computed from the font: Orbitron-900's widest digit (0/8)
+               advances 0.834em (canvas measureText on device). The slot MUST exceed that or
+               wide digits clip → "gequetscht". 0.86em = 0.834 + ~0.026 snug padding.
+               (0.78/0.82em were below 0.834 → squished; 1em was too airy.) */
+            --cc-dw: 0.86em;
             gap: 2px;
             justify-content: center;
             pointer-events: auto;
@@ -184,10 +186,11 @@
         }
 
         #mode-icon {
-            /* travel-mode figure, inline to the LEFT of the KM/H value, sized to be about
-               as tall as the value + label lines together */
-            font-size: clamp(2rem, 8vw, 2.9rem);
+            /* travel-mode figure, inline to the RIGHT of the KM/H value, mirrored, ~as tall
+               as the value + label lines together (16% smaller than before) */
+            font-size: clamp(1.67rem, 6.57vw, 2.4rem);
             line-height: 1;
+            transform: scaleX(-1);
         }
 
         #hud-stats {
@@ -1076,7 +1079,7 @@
         </div>
         <div id="hud-stats">
             <div class="hud-stat"><span class="hud-val" id="trk-dist">0.00</span><span class="hud-lbl">KM</span></div>
-            <div class="hud-stat speed-stat"><span id="mode-icon" aria-hidden="true">📍</span><div class="speed-col"><span class="hud-val" id="trk-speed">0.0</span><span class="hud-lbl">KM/H</span></div></div>
+            <div class="hud-stat speed-stat"><div class="speed-col"><span class="hud-val" id="trk-speed">0.0</span><span class="hud-lbl">KM/H</span></div><span id="mode-icon" aria-hidden="true">📍</span></div>
             <div class="hud-stat"><span class="hud-val" id="trk-alt">–</span><span class="hud-lbl">HÖHE m</span></div>
         </div>
     </div>
@@ -1699,11 +1702,11 @@
             if (s === 'idle') {
                 tg.textContent = 'START'; tg.style.background = COL_GREEN; fin.style.display = 'none';
             } else if (s === 'recording') {
-                tg.textContent = 'STOP'; tg.style.background = COL_RED; fin.style.display = 'none';
+                tg.textContent = 'PAUSE'; tg.style.background = COL_RED; fin.style.display = 'none';
             } else { // paused → continue or save
                 tg.textContent = 'CONTINUE'; tg.style.background = COL_GREEN; tg.style.color = '#fff';
                 fin.textContent = 'SPEICHERN'; fin.style.background = 'rgb(245, 194, 66)'; fin.style.color = '#14110a';
-                fin.style.display = '';
+                fin.style.display = 'inline-flex';
             }
         }
 
