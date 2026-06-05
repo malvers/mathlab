@@ -1130,7 +1130,7 @@
     <div id="photo-lightbox">
         <button id="lightbox-close" aria-label="Schließen">&times;</button>
         <div class="lb-inner ov-body">
-            <img id="lightbox-img" alt="">
+            <img id="lightbox-img" alt="" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==">
             <div id="lightbox-title"></div>
             <div id="lightbox-text"></div>
         </div>
@@ -1188,7 +1188,8 @@
         });
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19,
+            maxNativeZoom: 19, // OSM tiles stop at z19 …
+            maxZoom: 21,       // … Leaflet upscales beyond (blurry) so close photo pins can separate
             attribution: '&copy; OpenStreetMap contributors',
         }).addTo(map);
 
@@ -2028,11 +2029,67 @@ ${pts}
         $('lightbox-close').addEventListener('click', closePhotoLightbox);
         $('photo-lightbox').addEventListener('click', (e) => { if (e.target.id === 'photo-lightbox') closePhotoLightbox(); });
         document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && $('photo-lightbox').classList.contains('open')) closePhotoLightbox(); });
+        // ---- Photo-pin fan-out (spiderfy): pins at the (nearly) same spot fan out on
+        //      hover (desktop) / tap (touch) so each photo is reachable — even at 100% overlap. ----
+        const FAN_DETECT_PX = 26;   // pins within this screen distance count as "stacked"
+        let fannedCluster = null;   // { markers, originals, lines, center, radius }
+
+        function pinClusterAround(marker) {
+            const p0 = map.latLngToLayerPoint(marker.getLatLng());
+            return wpMarkers.filter(m => map.latLngToLayerPoint(m.getLatLng()).distanceTo(p0) <= FAN_DETECT_PX);
+        }
+        function fanOut(markers) {
+            collapseFan();
+            const n = markers.length;
+            if (n < 2) return;
+            const centerLatLng = markers[0].getLatLng();
+            const c = map.latLngToLayerPoint(centerLatLng);
+            const R = Math.max(48, n * 5.4); // keep ~34 px spacing around the ring
+            const originals = markers.map(m => m.getLatLng());
+            const lines = [];
+            markers.forEach((m, i) => {
+                const ang = (i / n) * 2 * Math.PI - Math.PI / 2; // start at the top
+                const ll = map.layerPointToLatLng(L.point(c.x + Math.cos(ang) * R, c.y + Math.sin(ang) * R));
+                lines.push(L.polyline([centerLatLng, ll], { weight: 1.5, color: COL_ORANGE, opacity: 0.55, interactive: false }).addTo(map));
+                m.setLatLng(ll);
+                m.setZIndexOffset(1000);
+            });
+            fannedCluster = { markers, originals, lines, center: centerLatLng, radius: R };
+        }
+        function collapseFan() {
+            if (!fannedCluster) return;
+            fannedCluster.markers.forEach((m, i) => { m.setLatLng(fannedCluster.originals[i]); m.setZIndexOffset(0); });
+            fannedCluster.lines.forEach(l => map.removeLayer(l));
+            fannedCluster = null;
+        }
+        function onPinClick(marker) {
+            // a fanned pin → open it; a stacked pin → fan it; a lone pin → open it
+            if (fannedCluster && fannedCluster.markers.indexOf(marker) !== -1) {
+                const wp = marker._wp; collapseFan(); openPhotoLightbox(wp); return;
+            }
+            const cluster = pinClusterAround(marker);
+            if (cluster.length > 1) fanOut(cluster);
+            else openPhotoLightbox(marker._wp);
+        }
+        function onPinHover(marker) { // desktop hover → fan a stack open
+            if (fannedCluster) return;
+            const cluster = pinClusterAround(marker);
+            if (cluster.length > 1) fanOut(cluster);
+        }
+        // collapse when the cursor leaves the fanned area, on a map tap, or on zoom
+        map.on('mousemove', (e) => {
+            if (!fannedCluster) return;
+            if (e.layerPoint.distanceTo(map.latLngToLayerPoint(fannedCluster.center)) > fannedCluster.radius + 44) collapseFan();
+        });
+        map.on('click', collapseFan);
+        map.on('zoomstart', collapseFan);
+
         function addWaypoint(wp) {
             waypoints.push(wp);
             const m = L.marker([wp.lat, wp.lng], { icon: wpIcon(wp) }).addTo(map);
-            // Tap the pin → straight to the full-screen photo + description (no Leaflet popup).
-            m.on('click', () => openPhotoLightbox(wp));
+            m._wp = wp;
+            m.on('click', () => onPinClick(m));     // tap (touch) / click (desktop)
+            m.on('mouseover', () => onPinHover(m));  // hover (desktop) → fan a stack
             wp._marker = m;
             wpMarkers.push(m);
             return wp;
@@ -2042,6 +2099,7 @@ ${pts}
             wp._marker.setIcon(wpIcon(wp)); // pending → done; the lightbox reads wp.title/text live
         }
         function clearWaypoints() {
+            collapseFan();
             wpMarkers.forEach(m => map.removeLayer(m));
             wpMarkers = [];
             waypoints = [];
