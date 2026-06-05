@@ -1374,6 +1374,8 @@
         // moving, so it keeps recording. Thresholds sit just above the accelerometer noise floor.
         const MOTION_STILL = 0.04;     // m/s²: dynamic-accel energy below this → "still" (basically motionless)
         const MOTION_MOVE = 0.10;      // m/s²: above this → "moving" (hysteresis between the two)
+        const SPEED_MOVE_KMH = 4;      // km/h: GPS speed above this overrides the gate → always "moving"
+                                       // (a vehicle at steady cruise produces almost no dynamic accel)
         let motionReady = false;       // a real accelerometer is delivering data
         let motionStill = true;        // current gate verdict
         let motionEnergy = 0;          // smoothed |dynamic acceleration|
@@ -1514,7 +1516,14 @@
 
             // Movement gate: does the accelerometer confirm we actually move? If the sensor
             // says "still", GPS jitter is suppressed (no points, speed 0, dot + map held).
-            const still = motionReady && motionStill;
+            // BUT a vehicle at steady cruise has almost no dynamic acceleration, so the sensor
+            // can wrongly read "still" mid-drive. The gate's only job is to kill GPS jitter while
+            // genuinely stopped (where GPS speed ≈ 0), so let a clear GPS speed override it: above
+            // SPEED_MOVE_KMH (with usable accuracy) we trust GPS and keep recording. Then it only
+            // suppresses true standstill — a red light, not the open road.
+            const gpsKmh = (speed != null && speed >= 0) ? speed * 3.6 : null;
+            const gpsMoving = gpsKmh != null && gpsKmh > SPEED_MOVE_KMH && (accuracy == null || accuracy <= MAX_ACC_M);
+            const still = motionReady && motionStill && !gpsMoving;
 
             const firstFix = !posMarker;
             renderPosition(here, accuracy, still && !firstFix);
