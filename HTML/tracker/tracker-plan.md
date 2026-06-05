@@ -23,14 +23,26 @@
 - **Wrapper**: sync-web.sh zieht jetzt aus `HTML/tracker/tracker.html` und schreibt `../` → root um.
   (APK NICHT neu gebaut — Doc testet die installierte Version; Zoom-Fix kommt beim nächsten Build.)
 
+## ✅ Erledigt (2026-06-05)
+- **Track nach Speed eingefärbt** — Leaflet.hotline (CDN), Gradient grün→orange→rot (Marken),
+  Farbskala auto-normiert pro Track (`redrawTrack()` setzt min/max). Live + bei geladenen Tracks.
+  Fallback auf orange Polyline, falls Lib fehlt. Offen/optional: absolute Schwellen statt relativ;
+  Umschalter Speed↔Höhe-Färbung.
+
 ## Offen
-- **Pro Punkt: Höhe + Velocity speichern** — aktuell nur `[lat, lng, t]`. Erweitern auf
-  `[lat, lng, t, alt, speed]` (Geolocation: `coords.altitude` in m, `coords.speed` in m/s;
-  nativ liefert das BackgroundGeolocation-Plugin beides auch). Ermöglicht später Höhenprofil
-  + Geschwindigkeitsverlauf eines Tracks. Schema-Änderung in `track`/`times` → `onPosition`,
-  `plotTrack`, `saveTrack`/`buildGpx` (GPX `<ele>` pro `<trkpt>`) anfassen.
-- **Bewegungs-Gate** (Accelerometer/DeviceMotion gegen Phantom-Tempo im Stand) — bewusst NICHT blind
-  gebaut, braucht Geräte-Test. Nächster Schritt mit Doc.
+- **Debug-Readout `#motion-dbg` entfernen** (unten links, „STILL · e=… · step≥…") — bewusst noch
+  drin gelassen (Doc, 2026-06-05), **raus auf Zuruf**.
+- ✅ **Höhe + Velocity pro Punkt FERTIG (2026-06-05)** — Punkte jetzt `[lat,lng,t,alt,speed]`
+  (alts/speeds parallel zu times). **Höhe = GPS+Barometer fusioniert** (eigenes natives Plugin
+  `Baro`, ICP20100 im Pixel 8a verifiziert): Baro = präzises relatives Profil, GPS = langsame
+  absolute Referenz (altOffset-EMA). Browser → nur GPS-Höhe. **HÖHE-Kachel** im HUD (3. Stat),
+  GPX `<ele>` pro `<trkpt>`. Ermöglicht später Höhenprofil + Geschwindigkeitsverlauf.
+- ✅ **Bewegungs-Gate FERTIG (2026-06-05, „arbeitet perfekt!")** — DeviceMotion (Beschleunigung):
+  dynamische Accel-Energie (EMA, Schwerkraft per Low-Pass raus) → still/bewegt mit Hysterese
+  (MOTION_STILL 0.14 / MOTION_MOVE 0.35 m/s²). Still → KM/H 0, keine Punkte, Punkt+Karte
+  festgehalten. Adaptiver Mindestschritt = max(4 m, accuracy×0.7). Speed leicht geglättet.
+  Enable in startTracking (iOS-Permission via START-Geste), disable in stopTracking. Kleiner
+  Debug-Readout #motion-dbg (Arial, unten links) zum Schwellen-Justieren — **noch drin, kann raus**.
 - **Tracking-Notification farbig** (Akzentfarbe/Icon im Benachrichtigungs-Panel) — Doc hatte gefragt;
   nativer Eingriff, offen.
 - Native App: Background-Test (START → sperren → laufen) durch Doc; ggf. Notification-Farbe.
