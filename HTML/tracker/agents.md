@@ -53,7 +53,9 @@ cd android && ./gradlew assembleDebug        # → app/build/outputs/apk/debug/a
 adb install -r app/build/outputs/apk/debug/app-debug.apk
 cp app/build/outputs/apk/debug/app-debug.apk ../../HTML/tracker/doc-alvers-tracker.apk   # Download aktualisieren
 ```
-Toolchain (Doc's Mac, getestet): Java (Zulu 24), Android SDK `~/Library/Android/sdk`, `minSdkVersion 22`. Headless `./gradlew assembleDebug` läuft sauber. APK ist **Debug-signiert** → kein In-place-Update auf einen Release-Build (erst deinstallieren). `adb` findet das Pixel per USB-Debugging.
+Toolchain (Doc's Mac): Android SDK `~/Library/Android/sdk`, `minSdkVersion 22`. APK ist **Debug-signiert** → kein In-place-Update auf einen Release-Build (erst deinstallieren). `adb` findet das Pixel per USB-Debugging.
+
+⚠️ **JDK-Falle:** Gradle 8.2.1 läuft NICHT auf der System-JDK 24 — sobald ein `build.gradle` neu kompiliert werden muss, bricht es mit „Unsupported class file major version 68" ab (vorher liefen Builds nur aus dem Script-Cache). Fix ist **persistent** gesetzt in `android/gradle.properties`: `org.gradle.java.home=/Applications/Android Studio.app/Contents/jbr/Contents/Home` (JBR 21). Da `tracker-app/` git-ignored ist, ist der absolute Pfad da unkritisch. Falls Builds wieder mit „major version …" sterben: diese Zeile prüfen.
 
 Einmaliges Setup (falls Projekt neu aufgesetzt wird): Node via **nvm** (Homebrew-Node v13 auf dem Mac war kaputt) → `nvm install --lts`; dann `cd tracker-app && npm install && npx cap add android`. Capacitor ist auf **6.x** gepinnt (Plugin-Kompatibilität — vor Bump auf 7 prüfen). **iOS** ist nicht eingerichtet (bräuchte `cap add ios` + Xcode).
 
