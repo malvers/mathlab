@@ -80,8 +80,8 @@
             right: 0;
             z-index: 500;
             padding: 14px 16px 30px;
-            /* extra top room so the centred camera button doesn't overlap the POSITION line */
-            padding-top: calc(max(14px, env(safe-area-inset-top)) + 48px);
+            /* clear the status bar / notch — no more extra room needed (camera moved to the right) */
+            padding-top: max(14px, env(safe-area-inset-top));
             background: linear-gradient(180deg,
                     rgba(8, 20, 42, 0.95) 0%,
                     rgba(8, 20, 42, 0.92) 62%,
@@ -102,6 +102,7 @@
         }
 
         #gps-chip {
+            position: relative;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -112,10 +113,32 @@
         }
 
         #gps-src {
+            flex: 1 1 auto;
+            min-width: 0;
+            font-size: 0.72rem;
+            letter-spacing: 0.5px;
+            text-align: center;
             color: rgba(255, 255, 255, 0.85);
         }
 
+        /* Satellite constellations: always show the full set in grey, the contributing
+           ones in green (fixed set + fixed order → no flicker/reflow). */
+        #gps-src .sat {
+            color: rgba(255, 255, 255, 0.4);
+            transition: color 0.3s ease;
+        }
+
+        #gps-src .sat.on {
+            color: var(--green);
+        }
+
+        #gps-src .sat-sep {
+            color: rgba(255, 255, 255, 0.22);
+        }
+
         #gps-acc {
+            flex: 0 0 auto;
+            white-space: nowrap;
             font-size: 0.72rem;
             font-weight: 700;
             color: rgba(255, 255, 255, 0.6);
@@ -168,7 +191,7 @@
         }
 
         .hud-val {
-            font-size: clamp(1.2rem, 6vw, 1.9rem);
+            font-size: clamp(1rem, 4.5vw, 1.4rem);
             font-weight: 700;
             line-height: 1;
             color: var(--orange);
@@ -249,24 +272,23 @@
         /* ---- Camera button (top-center) → Foto-Spur ---- */
         #cam-fab {
             position: fixed;
-            top: max(12px, env(safe-area-inset-top));
-            left: 50%;
-            transform: translateX(-50%);
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
             z-index: 600;
-            width: 48px;
-            height: 48px;
+            width: 44px;
+            height: 44px;
             border-radius: 50%;
-            border: 1px solid rgba(245, 194, 66, 0.75);
-            background: rgba(8, 20, 42, 0.85);
-            color: var(--orange);
-            /* hidden until the first START — then it stays visible like the HUD */
-            display: none;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            background: rgba(8, 20, 42, 0.82);
+            color: rgba(255, 255, 255, 0.9);
+            /* always visible: while tracking → pin on the track; idle → one-point photo track */
+            display: inline-flex;
             align-items: center;
             justify-content: center;
             backdrop-filter: blur(8px);
             cursor: pointer;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
-            transition: transform 0.1s ease, border-color 0.2s ease;
+            transition: transform 0.1s ease, color 0.2s ease;
         }
 
         #cam-fab.shown {
@@ -274,11 +296,11 @@
         }
 
         #cam-fab:hover {
-            border-color: var(--orange);
+            color: var(--orange);
         }
 
         #cam-fab:active {
-            transform: translateX(-50%) scale(0.94);
+            transform: translateY(-50%) scale(0.94);
         }
 
         #cam-fab svg {
@@ -344,6 +366,8 @@
             border-radius: 8px;
             display: block;
             margin-bottom: 8px;
+            cursor: pointer;
+            /* tap → full-screen lightbox */
         }
 
         .wp-pop-title {
@@ -359,6 +383,84 @@
             font-size: 0.82rem;
             line-height: 1.4;
             color: #fff;
+        }
+
+        /* ---- Photo lightbox: tap a photo card → show it over everything ---- */
+        #photo-lightbox {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 99999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: max(10px, env(safe-area-inset-top)) 10px 16px;
+            background: rgba(8, 20, 42, 0.97);
+            backdrop-filter: blur(6px);
+        }
+
+        #photo-lightbox.open {
+            display: flex !important;
+        }
+
+        .lb-inner {
+            width: min(98vw, 1200px);
+            max-height: 96vh;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        #lightbox-img {
+            width: 100%;
+            max-height: 82vh;
+            /* fill the screen but keep the whole photo visible (no crop) */
+            object-fit: contain;
+            border-radius: 12px;
+            display: block;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+        }
+
+        #lightbox-title {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--orange);
+            font-size: 1rem;
+            letter-spacing: 0.5px;
+            margin: 16px 0 6px;
+        }
+
+        #lightbox-text {
+            font-family: Arial, Helvetica, sans-serif;
+            color: #fff;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        #lightbox-close {
+            position: fixed;
+            top: max(14px, env(safe-area-inset-top));
+            right: 16px;
+            z-index: 100000;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            background: rgba(8, 20, 42, 0.92);
+            color: #fff;
+            font-size: 1.7rem;
+            line-height: 1;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(8px);
+        }
+
+        #lightbox-close:hover {
+            border-color: var(--orange);
+            color: var(--orange);
         }
 
         /* ---- Small tool buttons (bottom-left) ---- */
@@ -551,6 +653,8 @@
             letter-spacing: 2px;
             color: var(--orange);
             margin-bottom: 12px;
+            padding-right: 40px;
+            /* leave room for the top-right X */
         }
 
         .ov-action {
@@ -612,15 +716,22 @@
         }
 
         .ov-close {
-            margin-top: 14px;
-            padding: 12px;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 34px;
+            height: 34px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
             border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 10px;
+            border-radius: 9px;
             background: transparent;
             color: #fff;
-            font-family: 'Orbitron', sans-serif;
-            font-size: 0.72rem;
-            letter-spacing: 1px;
+            font-family: system-ui, -apple-system, sans-serif;
+            font-size: 1.4rem;
+            line-height: 1;
             cursor: pointer;
         }
 
@@ -654,8 +765,9 @@
             border-radius: 10px;
             background: rgba(255, 255, 255, 0.04);
             color: #fff;
-            font-family: 'Orbitron', sans-serif;
-            font-size: 0.9rem;
+            /* Arial too — entering a code needs readable characters */
+            font-family: Arial, system-ui, sans-serif;
+            font-size: 1rem;
             letter-spacing: 1px;
         }
 
@@ -691,6 +803,104 @@
 
         .sync-btn.primary:hover {
             background: rgba(245, 194, 66, 0.22);
+        }
+
+        /* ---- Simplified sync panel: state-driven ---- */
+        .sync-lead {
+            font-family: system-ui, -apple-system, sans-serif;
+            font-size: 0.82rem;
+            color: rgba(255, 255, 255, 0.6);
+            line-height: 1.45;
+            margin: 0 0 16px;
+        }
+
+        /* The active code shown big — tapping it copies to the clipboard */
+        .sync-code {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            width: 100%;
+            padding: 16px 14px;
+            margin-bottom: 14px;
+            border: 1px solid rgba(245, 194, 66, 0.5);
+            border-radius: 12px;
+            background: rgba(245, 194, 66, 0.1);
+            cursor: pointer;
+        }
+
+        .sync-code:hover {
+            background: rgba(245, 194, 66, 0.16);
+        }
+
+        .sync-code:active {
+            transform: scale(0.99);
+        }
+
+        #sync-code-val {
+            /* Arial (not Orbitron) — a sync code must be easy to read/type */
+            font-family: Arial, system-ui, sans-serif;
+            font-size: 1.25rem;
+            letter-spacing: 1px;
+            color: var(--orange);
+            word-break: break-all;
+        }
+
+        .sync-code-tip {
+            font-family: system-ui, -apple-system, sans-serif;
+            font-size: 0.68rem;
+            letter-spacing: 1px;
+            color: rgba(255, 255, 255, 0.45);
+        }
+
+        /* Quiet secondary action (Trennen / oder Code eingeben) */
+        .sync-link {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            border: none;
+            background: transparent;
+            color: rgba(255, 255, 255, 0.55);
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.68rem;
+            letter-spacing: 1px;
+            cursor: pointer;
+            text-decoration: underline;
+            text-underline-offset: 3px;
+        }
+
+        .sync-link:hover {
+            color: rgba(255, 255, 255, 0.85);
+        }
+
+        /* Disconnect confirmation */
+        .sync-warn {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.95rem;
+            color: #fff;
+            margin: 0 0 10px;
+        }
+
+        .sync-warn-body {
+            font-family: system-ui, -apple-system, sans-serif;
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.5;
+            margin: 0 0 14px;
+        }
+
+        .sync-warn-body b {
+            color: var(--orange);
+        }
+
+        .sync-btn.danger {
+            background: rgba(176, 36, 24, 0.85);
+            border-color: rgba(176, 36, 24, 0.95);
+            color: #fff;
+        }
+
+        .sync-btn.danger:hover {
+            background: rgba(176, 36, 24, 1);
         }
 
         /* track list rows */
@@ -793,6 +1003,22 @@
             opacity: 1;
             transform: translateX(-50%) translateY(0);
         }
+
+        /* Movement-gate tuning readout (debug → Arial). Remove once thresholds are dialed in. */
+        #motion-dbg {
+            position: fixed;
+            left: 8px;
+            bottom: calc(env(safe-area-inset-bottom, 0px) + 6px);
+            z-index: 950;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 10px;
+            letter-spacing: 0.3px;
+            color: rgba(255, 255, 255, 0.65);
+            background: rgba(8, 20, 42, 0.55);
+            padding: 2px 6px;
+            border-radius: 6px;
+            pointer-events: none;
+        }
     </style>
 </head>
 
@@ -801,11 +1027,12 @@
 
     <!-- Top HUD -->
     <div id="hud-top">
-        <div id="gps-chip"><span id="gps-dot"></span><span id="gps-label">POSITION</span><span id="gps-src"></span><span id="gps-acc">±– m</span></div>
+        <div id="gps-chip"><span id="gps-src"></span><span id="gps-acc">±– m</span></div>
         <div id="hud-time"></div>
         <div id="hud-stats">
             <div class="hud-stat"><span class="hud-val" id="trk-dist">0.00</span><span class="hud-lbl">KM</span></div>
             <div class="hud-stat"><span class="hud-val" id="trk-speed">0.0</span><span class="hud-lbl">KM/H</span></div>
+            <div class="hud-stat"><span class="hud-val" id="trk-alt">–</span><span class="hud-lbl">HÖHE m</span></div>
         </div>
     </div>
 
@@ -852,34 +1079,73 @@
     <div id="track-list" class="ov-panel">
         <div class="ov-title">Gespeicherte Tracks</div>
         <div id="track-list-items" class="ov-body"></div>
-        <button class="ov-close" id="list-close">Schließen</button>
+        <button class="ov-close" id="list-close" aria-label="Schließen">&times;</button>
     </div>
     <div id="info-panel" class="ov-panel">
         <div class="ov-title">Wir nutzen alle Quellen</div>
         <div class="ov-body" id="info-body"></div>
-        <button class="ov-close" id="info-close">Schließen</button>
+        <button class="ov-close" id="info-close" aria-label="Schließen">&times;</button>
     </div>
     <div id="sync-panel" class="ov-panel">
-        <div class="ov-title">Sync-Code</div>
+        <div class="ov-title">Code zur Synchronisation mit anderen Geräten</div>
         <div class="ov-body">
-            <p id="sync-status"></p>
-            <p class="sync-hint">Gleicher Code auf mehreren Geräten = dieselben Tracks. Ohne Code bleiben sie
-                privat auf diesem Gerät.</p>
-            <input id="sync-input" class="sync-field" placeholder="Code eingeben" aria-label="Sync-Code"
-                autocomplete="off" autocapitalize="off" spellcheck="false">
-            <button class="sync-btn primary" id="sync-connect">Verbinden</button>
-            <button class="sync-btn" id="sync-gen">Code erzeugen</button>
-            <button class="sync-btn" id="sync-copy">Code kopieren</button>
-            <button class="sync-btn" id="sync-clear">Trennen (lokal &amp; privat)</button>
+            <!-- State A — connected: just the code (tap to copy) + a quiet Trennen -->
+            <div id="sync-connected" hidden>
+                <button id="sync-code" class="sync-code" type="button" aria-label="Code antippen zum Kopieren">
+                    <span id="sync-code-val">—</span>
+                    <span class="sync-code-tip">Antippen = kopieren</span>
+                </button>
+                <button class="sync-link" id="sync-clear" type="button">Trennen</button>
+            </div>
+
+            <!-- State B — not connected: one primary action, code-entry on demand -->
+            <div id="sync-disconnected" hidden>
+                <p class="sync-lead">Tracks auf mehreren Geräten? Code erzeugen — oder einen vorhandenen eingeben.</p>
+                <button class="sync-btn primary" id="sync-gen" type="button">Code erzeugen</button>
+                <button class="sync-link" id="sync-enter-toggle" type="button">oder Code eingeben</button>
+                <div id="sync-enter" hidden>
+                    <input id="sync-input" class="sync-field" placeholder="Code eingeben" aria-label="Sync-Code"
+                        autocomplete="off" autocapitalize="off" spellcheck="false">
+                    <button class="sync-btn primary" id="sync-connect" type="button">Verbinden</button>
+                </div>
+            </div>
+
+            <!-- State C — confirm before disconnecting (must be crystal-clear to a non-techie) -->
+            <div id="sync-confirm" hidden>
+                <p class="sync-warn">Wirklich trennen?</p>
+                <p class="sync-warn-body">Deine Tracks bleiben <b>nur über diesen Code</b> erreichbar. Notiere oder
+                    kopiere ihn — ohne ihn kommst du auf diesem Gerät <b>nicht mehr</b> an deine Tracks:</p>
+                <button id="sync-code-confirm" class="sync-code" type="button" aria-label="Code antippen zum Kopieren">
+                    <span id="sync-code-confirm-val">—</span>
+                    <span class="sync-code-tip">Antippen = kopieren</span>
+                </button>
+                <button class="sync-btn danger" id="sync-clear-confirm" type="button">Ja, trennen</button>
+                <button class="sync-link" id="sync-clear-cancel" type="button">Abbrechen</button>
+            </div>
         </div>
-        <button class="ov-close" id="sync-close">Schließen</button>
+        <button class="ov-close" id="sync-close" aria-label="Schließen">&times;</button>
+    </div>
+
+    <!-- Photo lightbox — tap a photo card to show it over everything -->
+    <div id="photo-lightbox">
+        <button id="lightbox-close" aria-label="Schließen">&times;</button>
+        <div class="lb-inner ov-body">
+            <img id="lightbox-img" alt="">
+            <div id="lightbox-title"></div>
+            <div id="lightbox-text"></div>
+        </div>
     </div>
 
     <!-- Transient toast (replaces the removed status line for action feedback) -->
     <div id="toast"></div>
 
+    <!-- Movement-gate tuning readout (debug) -->
+    <div id="motion-dbg"></div>
+
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
         integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <!-- Leaflet.hotline — draws the track as a speed-coloured gradient -->
+    <script src="https://unpkg.com/leaflet-hotline@0.4.0/dist/leaflet.hotline.js"></script>
     <script src="../js/cyber-clock.js"></script>
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <script>
@@ -926,7 +1192,26 @@
             attribution: '&copy; OpenStreetMap contributors',
         }).addTo(map);
 
-        const trackLine = L.polyline([], { color: COL_ORANGE, weight: 5, opacity: 0.9 }).addTo(map);
+        // Track line coloured by speed (green = slow → orange → red = fast, brand palette) via
+        // Leaflet.hotline. If the plugin failed to load, fall back to a plain orange polyline.
+        const usesHotline = !!L.hotline;
+        const SPEED_PALETTE = { 0.0: 'rgb(121,158,49)', 0.5: 'rgb(245,194,66)', 1.0: 'rgb(176,36,24)' };
+        const trackLine = usesHotline
+            ? L.hotline([], { weight: 5, outlineWidth: 1, outlineColor: 'rgba(8,20,42,0.6)', palette: SPEED_PALETTE, min: 0, max: 10 }).addTo(map)
+            : L.polyline([], { color: COL_ORANGE, weight: 5, opacity: 0.9 }).addTo(map);
+
+        // Rebuild the line from track + per-point speed; rescale the colour range to the track.
+        function redrawTrack() {
+            const data = track.map((p, i) => [p[0], p[1], speeds[i] != null ? speeds[i] : 0]);
+            trackLine.setLatLngs(data);
+            if (usesHotline && data.length) {
+                let lo = Infinity, hi = -Infinity;
+                for (const d of data) { if (d[2] < lo) lo = d[2]; if (d[2] > hi) hi = d[2]; }
+                trackLine.options.min = lo;
+                trackLine.options.max = Math.max(hi, lo + 1); // avoid a zero-width range
+                trackLine.redraw();
+            }
+        }
         let posMarker = null;
 
         // ---------------------------------------------------------------
@@ -937,21 +1222,43 @@
         let tracking = false;
         let track = [];            // array of [lat, lng]
         let times = [];            // ISO timestamp per recorded point (index-aligned)
+        let alts = [];             // altitude in m per point (fused GPS+baro; null if unknown)
+        let speeds = [];           // speed in km/h per point (index-aligned)
         let totalDist = 0;         // metres
         let startTime = null;      // ms
         let timerId = null;
         let lastFix = null;        // { lat, lng, t }
         let waypoints = [];        // Foto-Spur: [{lat, lng, t, img, title, text, _marker}]
         let wpMarkers = [];        // their Leaflet markers (kept for clearing)
+        let gnssActive = false;    // true once the native GnssStatus listener delivers data
+        let gnssLatest = null;     // last native GNSS summary {used, inView, usedByConstellation, ...}
 
         const MIN_MOVE_M = 4;      // ignore jitter below this distance
         const MAX_ACC_M = 50;      // ignore fixes worse than this accuracy
+
+        // --- Movement gate (accelerometer) + adaptive jitter filtering ---
+        const ACC_STEP_FACTOR = 0.7;   // adaptive min step = accuracy * this (never below MIN_MOVE_M)
+        const MOTION_STILL = 0.14;     // m/s²: dynamic-accel energy below this → "still"
+        const MOTION_MOVE = 0.35;      // m/s²: above this → "moving" (hysteresis between the two)
+        let motionReady = false;       // a real accelerometer is delivering data
+        let motionStill = true;        // current gate verdict
+        let motionEnergy = 0;          // smoothed |dynamic acceleration|
+        let shownSpeed = 0;            // smoothed km/h for a flicker-free readout
+        const _grav = { x: 0, y: 0, z: 0 };
+
+        // --- Altitude: fuse the (precise but uncalibrated) barometer with the (absolute but
+        //     noisy) GPS height. baro gives the smooth profile, GPS anchors it slowly. ---
+        let baroReady = false;     // native pressure sensor delivering data
+        let baroAlt = null;        // barometric altitude (m, uncalibrated absolute)
+        let altOffset = null;      // slow EMA of (gpsAlt − baroAlt) → calibrates the baro to GPS
+        let fusedAlt = null;       // current best altitude (m) shown + stored
 
         const $ = id => document.getElementById(id);
         const elToggle = $('trk-toggle');
         const elDist = $('trk-dist');
         const elTime = $('hud-time');
         const elSpeed = $('trk-speed');
+        const elAlt = $('trk-alt');
         const elAcc = $('gps-acc');
         const elSrc = $('gps-src');
         const elStatus = $('trk-status');
@@ -970,11 +1277,12 @@
         function setStatus(msg) { if (elStatus) elStatus.textContent = msg; } // status line removed — guard-safe no-op
 
         function setGpsState(hasFix) {
-            // Green once a position is available, dimmed grey while none ("grün wenn da")
+            // dot + POSITION label were removed → guard-safe no-op (kept so callers don't break)
+            if (!elGps) return;
             const c = hasFix ? COL_GREEN : 'rgba(255, 255, 255, 0.3)';
             elGps.style.background = c;
             elGps.style.color = c; // drives the dot glow (box-shadow uses currentColor)
-            elGpsLabel.style.color = hasFix ? COL_GREEN : 'rgba(255, 255, 255, 0.55)';
+            if (elGpsLabel) elGpsLabel.style.color = hasFix ? COL_GREEN : 'rgba(255, 255, 255, 0.55)';
         }
         setGpsState(false);
 
@@ -1026,7 +1334,7 @@
         // ---------------------------------------------------------------
         // Draw / move the current-position marker, accuracy circle and HUD readout.
         // Shared by live tracking and the one-shot "centre" locate.
-        function renderPosition(here, accuracy) {
+        function renderPosition(here, accuracy, holdPos) {
             // Fixed-pixel dot via circleMarker — keeps its size at every zoom level.
             // (An L.circle would use metres and balloon when zooming in.)
             if (!posMarker) {
@@ -1035,13 +1343,15 @@
                     fillColor: COL_RED, fillOpacity: 1,
                     className: 'pos-marker',
                 }).addTo(map);
-            } else {
-                posMarker.setLatLng(here);
+            } else if (!holdPos) {
+                posMarker.setLatLng(here); // hold the dot steady when the gate says we're standing still
             }
 
             elAcc.textContent = accuracy != null ? '±' + Math.round(accuracy) + ' m' : '±– m';
             elAcc.style.color = accColor(accuracy);
-            elSrc.textContent = sourceLabel(accuracy);
+            // Native app: the real GnssStatus listener owns the source label. Only the web
+            // falls back to the accuracy heuristic here.
+            if (!gnssActive) elSrc.textContent = sourceLabel(accuracy);
             setGpsState(true);
         }
 
@@ -1059,48 +1369,61 @@
             const now = pos.timestamp || Date.now();
             const here = [latitude, longitude];
 
+            // Movement gate: does the accelerometer confirm we actually move? If the sensor
+            // says "still", GPS jitter is suppressed (no points, speed 0, dot + map held).
+            const still = motionReady && motionStill;
+
             const firstFix = !posMarker;
-            renderPosition(here, accuracy);
+            renderPosition(here, accuracy, still && !firstFix);
             showDot();
             if (firstFix) map.setView(here, 17); // snap to the very first fix
 
             // Reject noisy fixes for the recorded track
             if (accuracy != null && accuracy > MAX_ACC_M) {
                 setStatus(`Warte auf besseres Signal … (±${Math.round(accuracy)} m)`);
+                updateMotionDbg(accuracy, MIN_MOVE_M, still);
                 return;
             }
 
-            // Add to track only if we actually moved
+            // Altitude: fuse the precise barometer profile with the absolute GPS reference.
+            updateAltitude(pos.coords.altitude != null ? pos.coords.altitude : null);
+
+            // Speed: 0 when the gate says we're standing still; otherwise GPS value (or derived),
+            // lightly smoothed so the readout doesn't flicker.
+            let kmh = 0;
+            if (!still) {
+                if (speed != null && speed >= 0) kmh = speed * 3.6;
+                else if (lastFix) {
+                    const dt = (now - lastFix.t) / 1000;
+                    if (dt > 0) kmh = (haversine([lastFix.lat, lastFix.lng], here) / dt) * 3.6;
+                }
+            }
+            shownSpeed = still ? 0 : (0.6 * shownSpeed + 0.4 * kmh);
+            elSpeed.textContent = shownSpeed.toFixed(1);
+
+            // Adaptive minimum step: within the GPS error circle everything is noise, so require
+            // a move bigger than a fraction of the accuracy — never below MIN_MOVE_M. Each recorded
+            // point carries its altitude (m) + speed (km/h) for the later elevation/speed profile.
+            const minStep = Math.max(MIN_MOVE_M, (accuracy || 0) * ACC_STEP_FACTOR);
             const stamp = new Date(now).toISOString();
+            const altVal = fusedAlt != null ? Math.round(fusedAlt * 10) / 10 : null;
+            const spdVal = Math.round(shownSpeed * 10) / 10;
             if (track.length === 0) {
-                track.push(here);
-                times.push(stamp);
-                trackLine.addLatLng(here);
-            } else {
+                track.push(here); times.push(stamp); alts.push(altVal); speeds.push(spdVal); redrawTrack();
+            } else if (!still) {
                 const step = haversine(track[track.length - 1], here);
-                if (step >= MIN_MOVE_M) {
+                if (step >= minStep) {
                     totalDist += step;
-                    track.push(here);
-                    times.push(stamp);
-                    trackLine.addLatLng(here);
+                    track.push(here); times.push(stamp); alts.push(altVal); speeds.push(spdVal); redrawTrack();
                 }
             }
             elDist.textContent = (totalDist / 1000).toFixed(2);
 
-            // Speed: prefer device value (m/s), else derive from last fix
-            let kmh = null;
-            if (speed != null && speed >= 0) {
-                kmh = speed * 3.6;
-            } else if (lastFix) {
-                const dt = (now - lastFix.t) / 1000;
-                if (dt > 0) kmh = (haversine([lastFix.lat, lastFix.lng], here) / dt) * 3.6;
-            }
-            if (kmh != null) elSpeed.textContent = kmh.toFixed(1);
-
             lastFix = { lat: latitude, lng: longitude, t: now };
 
-            if (following) map.panTo(here, { animate: true });
+            if (following && !still) map.panTo(here, { animate: true }); // don't drift the map when still
             refreshRecenter(); // show/hide the recenter button as needed
+            updateMotionDbg(accuracy, minStep, still);
             if (tracking) setStatus(`Aufzeichnung läuft … ${track.length} Punkte`);
         }
 
@@ -1145,6 +1468,7 @@
                                 longitude: location.longitude,
                                 accuracy: location.accuracy,
                                 speed: location.speed,
+                                altitude: location.altitude,
                             },
                             timestamp: location.time || Date.now(),
                         });
@@ -1167,6 +1491,95 @@
         // ---------------------------------------------------------------
         // Start / Stop
         // ---------------------------------------------------------------
+        // ---------------------------------------------------------------
+        // Movement gate — the accelerometer (DeviceMotion) tells "standing
+        // still" from "moving", so GPS jitter can't fake phantom motion.
+        // Works on web + native while the screen is on. No sensor (desktop)
+        // → motionReady stays false and the gate is simply inactive.
+        // ---------------------------------------------------------------
+        function onDeviceMotion(e) {
+            let ax, ay, az;
+            const acc = e.acceleration;
+            if (acc && acc.x != null) {            // gravity already removed
+                ax = acc.x; ay = acc.y; az = acc.z;
+            } else {
+                const g = e.accelerationIncludingGravity;
+                if (!g || g.x == null) return;
+                _grav.x = 0.8 * _grav.x + 0.2 * g.x; // low-pass ≈ gravity, subtract for the dynamic part
+                _grav.y = 0.8 * _grav.y + 0.2 * g.y;
+                _grav.z = 0.8 * _grav.z + 0.2 * g.z;
+                ax = g.x - _grav.x; ay = g.y - _grav.y; az = g.z - _grav.z;
+            }
+            const mag = Math.sqrt(ax * ax + ay * ay + az * az);
+            motionEnergy = 0.8 * motionEnergy + 0.2 * mag;
+            motionReady = true;
+            if (motionStill && motionEnergy > MOTION_MOVE) motionStill = false;
+            else if (!motionStill && motionEnergy < MOTION_STILL) motionStill = true;
+        }
+        function enableMotion() {
+            if (typeof DeviceMotionEvent === 'undefined') return;
+            // iOS 13+ needs an explicit permission, triggered here from the START gesture
+            if (typeof DeviceMotionEvent.requestPermission === 'function') {
+                DeviceMotionEvent.requestPermission()
+                    .then(s => { if (s === 'granted') window.addEventListener('devicemotion', onDeviceMotion); })
+                    .catch(() => { });
+            } else {
+                window.addEventListener('devicemotion', onDeviceMotion);
+            }
+        }
+        function disableMotion() {
+            window.removeEventListener('devicemotion', onDeviceMotion);
+            motionReady = false; motionStill = true; motionEnergy = 0;
+        }
+        // Tiny tuning readout (Arial per debug convention) — remove once thresholds are dialed in.
+        function updateMotionDbg(acc, minStep, still) {
+            const el = $('motion-dbg');
+            if (!el) return;
+            const accTxt = acc != null ? Math.round(acc) : '–';
+            el.textContent = motionReady
+                ? (still ? 'STILL' : 'MOVE') + ' · e=' + motionEnergy.toFixed(2) + ' · ±' + accTxt + 'm · step≥' + minStep.toFixed(1) + 'm'
+                : 'kein Sensor · ±' + accTxt + 'm · step≥' + minStep.toFixed(1) + 'm';
+        }
+
+        // ---------------------------------------------------------------
+        // Altitude — barometer (native Baro plugin) fused with GPS height.
+        // Browser / no barometer → GPS altitude only (rougher). The barometer
+        // gives the smooth relative profile; GPS slowly calibrates the absolute.
+        // ---------------------------------------------------------------
+        function renderAltitude() {
+            if (elAlt) elAlt.textContent = (fusedAlt != null) ? Math.round(fusedAlt) : '–';
+        }
+        function updateAltitude(gpsAlt) {
+            if (baroReady && baroAlt != null) {
+                if (gpsAlt != null) {
+                    const diff = gpsAlt - baroAlt;
+                    altOffset = (altOffset == null) ? diff : (0.95 * altOffset + 0.05 * diff);
+                }
+                fusedAlt = (altOffset != null) ? baroAlt + altOffset : baroAlt;
+            } else {
+                fusedAlt = gpsAlt; // no barometer → raw GPS height (may be null)
+            }
+            renderAltitude();
+        }
+
+        const Baro = (window.Capacitor && Capacitor.Plugins && Capacitor.Plugins.Baro) || null;
+        let baroListenerAdded = false;
+        function startBaro() {
+            if (!Baro) return; // web / no plugin → GPS-only altitude
+            if (!baroListenerAdded) {
+                Baro.addListener('baro', (d) => {
+                    if (!d || d.altitude == null) return;
+                    baroReady = true;
+                    baroAlt = d.altitude;
+                    fusedAlt = (altOffset != null) ? baroAlt + altOffset : baroAlt;
+                    renderAltitude();
+                });
+                baroListenerAdded = true;
+            }
+            Baro.start().catch(() => { }); // resolves {available:false} on phones without a barometer
+        }
+        function stopBaro() { if (Baro) Baro.stop().catch(() => { }); }
+
         function startTracking() {
             if (!('geolocation' in navigator)) {
                 setStatus('Dieser Browser unterstützt keine Standortbestimmung.');
@@ -1186,6 +1599,9 @@
             elToggle.style.background = COL_RED;
             $('hud-top').classList.add('shown'); // reveal the header (fades down) on first start
             $('cam-fab').classList.add('shown'); // and the camera (Foto-Spur)
+            startGnss(); // native: now that location is on, read the real GnssStatus
+            enableMotion(); // accelerometer movement gate against GPS jitter
+            startBaro();    // native barometer → precise altitude (fused with GPS)
             setStatus('Suche GPS-Signal …');
         }
 
@@ -1193,6 +1609,8 @@
             tracking = false;
             stopGeoWatch(watchId);
             watchId = null;
+            disableMotion(); // stop listening to the accelerometer
+            stopBaro();      // stop the barometer
             if (timerId) clearInterval(timerId);
             timerId = null;
             elToggle.textContent = 'START';
@@ -1284,12 +1702,15 @@
             if (track.length && !confirm('Aktuellen Track wirklich löschen?')) return;
             track = [];
             times = [];
+            alts = [];
+            speeds = [];
             totalDist = 0;
             lastFix = null;
             trackLine.setLatLngs([]);
             clearWaypoints();
             elDist.textContent = '0.00';
             elSpeed.textContent = '0.0';
+            if (elAlt) elAlt.textContent = '–';
             if (!tracking) { CyberClock.set(elTime, '00:00:00'); startTime = null; }
             toast('Track gelöscht.');
         }
@@ -1302,6 +1723,7 @@
             const name = 'Doc Alvers Tracker ' + (times[0] || '');
             const pts = track.map((p, i) =>
                 `      <trkpt lat="${p[0].toFixed(7)}" lon="${p[1].toFixed(7)}">` +
+                (alts[i] != null ? `<ele>${alts[i].toFixed(1)}</ele>` : '') +
                 (times[i] ? `<time>${times[i]}</time>` : '') +
                 `</trkpt>`
             ).join('\n');
@@ -1448,7 +1870,8 @@ ${pts}
 
         async function saveTrack(name) {
             const c = await ensureSb();
-            const pts = track.map((p, i) => [p[0], p[1], times[i] || null]);
+            // [lat, lng, time, altitude(m), speed(km/h)] — alt/speed null when unknown
+            const pts = track.map((p, i) => [p[0], p[1], times[i] || null, alts[i] != null ? alts[i] : null, speeds[i] != null ? speeds[i] : null]);
             // strip the live Leaflet marker reference before persisting
             const wps = waypoints.map(w => ({ lat: w.lat, lng: w.lng, t: w.t, img: w.img, title: w.title, text: w.text }));
             const { error } = await c.from('tracks').insert({
@@ -1487,13 +1910,19 @@ ${pts}
             const latlngs = points.map(p => [p[0], p[1]]);
             track = latlngs.map(ll => [ll[0], ll[1]]);
             times = points.map(p => p[2] || null);
+            alts = points.map(p => (p[3] != null ? p[3] : null));   // older tracks have no p[3] → null
+            speeds = points.map(p => (p[4] != null ? p[4] : null));
             totalDist = 0;
             for (let i = 1; i < latlngs.length; i++) totalDist += haversine(latlngs[i - 1], latlngs[i]);
-            trackLine.setLatLngs(latlngs);
+            redrawTrack(); // speed-coloured
             clearWaypoints();
             (wps || []).forEach(w => addWaypoint({ lat: w.lat, lng: w.lng, t: w.t, img: w.img, title: w.title, text: w.text }));
             elDist.textContent = (totalDist / 1000).toFixed(2);
             elSpeed.textContent = '0.0';
+            // show the loaded track's last known altitude (if any)
+            const lastAlt = alts.slice().reverse().find(a => a != null);
+            fusedAlt = (lastAlt != null) ? lastAlt : null;
+            renderAltitude();
             if (latlngs.length) map.fitBounds(trackLine.getBounds(), { padding: [40, 40] });
         }
 
@@ -1522,25 +1951,29 @@ ${pts}
             return null;
         }
 
-        // Read an image File, scale its longest side down to `max` px, return a JPEG data URL.
+        // Scale an image source (data URL / object URL) longest-side down to `max` px → JPEG data URL.
+        function downscaleSrcToJpeg(src, max, quality) {
+            return new Promise((resolve, reject) => {
+                const im = new Image();
+                im.onerror = () => reject(new Error('Bild nicht dekodierbar'));
+                im.onload = () => {
+                    let w = im.naturalWidth, h = im.naturalHeight;
+                    if (w >= h && w > max) { h = Math.round(h * max / w); w = max; }
+                    else if (h > w && h > max) { w = Math.round(w * max / h); h = max; }
+                    const cv = document.createElement('canvas');
+                    cv.width = w; cv.height = h;
+                    cv.getContext('2d').drawImage(im, 0, 0, w, h);
+                    resolve(cv.toDataURL('image/jpeg', quality));
+                };
+                im.src = src;
+            });
+        }
+        // Same, but from a File (web file-input path).
         function downscaleToJpeg(file, max, quality) {
             return new Promise((resolve, reject) => {
                 const fr = new FileReader();
                 fr.onerror = () => reject(new Error('Datei nicht lesbar'));
-                fr.onload = () => {
-                    const im = new Image();
-                    im.onerror = () => reject(new Error('Bild nicht dekodierbar'));
-                    im.onload = () => {
-                        let w = im.naturalWidth, h = im.naturalHeight;
-                        if (w >= h && w > max) { h = Math.round(h * max / w); w = max; }
-                        else if (h > w && h > max) { w = Math.round(w * max / h); h = max; }
-                        const cv = document.createElement('canvas');
-                        cv.width = w; cv.height = h;
-                        cv.getContext('2d').drawImage(im, 0, 0, w, h);
-                        resolve(cv.toDataURL('image/jpeg', quality));
-                    };
-                    im.src = fr.result;
-                };
+                fr.onload = () => downscaleSrcToJpeg(fr.result, max, quality).then(resolve, reject);
                 fr.readAsDataURL(file);
             });
         }
@@ -1574,22 +2007,39 @@ ${pts}
         }
         function wpPopupHtml(wp) {
             const esc = s => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-            return '<div class="wp-pop"><img src="' + wp.img + '" alt="">' +
+            const i = waypoints.indexOf(wp); // → lightbox uses this to find the waypoint on tap
+            return '<div class="wp-pop"><img class="wp-pop-img" data-i="' + i + '" src="' + wp.img + '" alt="">' +
                 '<div class="wp-pop-title">' + esc(wp.title) + '</div>' +
                 (wp.text ? '<div class="wp-pop-text">' + esc(wp.text) + '</div>' : '') + '</div>';
         }
+
+        // ---- Photo lightbox: tap a popup photo → show it full-screen over everything ----
+        function openPhotoLightbox(wp) {
+            if (!wp) return;
+            $('lightbox-img').src = wp.img;
+            $('lightbox-title').textContent = wp.title || '';
+            $('lightbox-text').textContent = wp.text || '';
+            $('photo-lightbox').classList.add('open');
+        }
+        function closePhotoLightbox() {
+            $('photo-lightbox').classList.remove('open');
+            $('lightbox-img').removeAttribute('src');
+        }
+        $('lightbox-close').addEventListener('click', closePhotoLightbox);
+        $('photo-lightbox').addEventListener('click', (e) => { if (e.target.id === 'photo-lightbox') closePhotoLightbox(); });
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && $('photo-lightbox').classList.contains('open')) closePhotoLightbox(); });
         function addWaypoint(wp) {
             waypoints.push(wp);
             const m = L.marker([wp.lat, wp.lng], { icon: wpIcon(wp) }).addTo(map);
-            m.bindPopup(wpPopupHtml(wp), { maxWidth: 260, className: 'wp-popup' });
+            // Tap the pin → straight to the full-screen photo + description (no Leaflet popup).
+            m.on('click', () => openPhotoLightbox(wp));
             wp._marker = m;
             wpMarkers.push(m);
             return wp;
         }
         function refreshWaypoint(wp) {
             if (!wp._marker) return;
-            wp._marker.setIcon(wpIcon(wp));
-            wp._marker.setPopupContent(wpPopupHtml(wp));
+            wp._marker.setIcon(wpIcon(wp)); // pending → done; the lightbox reads wp.title/text live
         }
         function clearWaypoints() {
             wpMarkers.forEach(m => map.removeLayer(m));
@@ -1608,11 +2058,14 @@ ${pts}
         // Return a JPEG data URL (already ~1024 px wide), or null if the user cancelled.
         async function capturePhoto() {
             if (useNativeCam) {
+                // Capture at full resolution and ALSO save the original to the Photos gallery;
+                // then return a downscaled (~1024 px) copy for the track/Supabase waypoint.
                 const photo = await NativeCam.getPhoto({
                     resultType: 'dataUrl', source: 'CAMERA',
-                    quality: 70, width: 1024, correctOrientation: true, saveToGallery: false,
+                    quality: 90, correctOrientation: true, saveToGallery: true,
                 });
-                return (photo && photo.dataUrl) ? photo.dataUrl : null;
+                if (!(photo && photo.dataUrl)) return null;
+                return await downscaleSrcToJpeg(photo.dataUrl, 1024, 0.7);
             }
             // web: trigger the hidden file input and resolve once a file is picked
             return new Promise((resolve) => {
@@ -1633,7 +2086,6 @@ ${pts}
         async function addPhotoAt(img, ll) {
             toast('Foto wird verarbeitet …');
             const wp = addWaypoint({ lat: ll[0], lng: ll[1], t: new Date().toISOString(), img, title: PENDING_TITLE, text: '' });
-            wp._marker.openPopup();
             try {
                 const r = await identifyPhoto(img);
                 wp.title = r.title; wp.text = r.text;
@@ -1646,6 +2098,37 @@ ${pts}
             refreshWaypoint(wp);
         }
 
+        // New "one-point track" mode: a geotagged photo taken WITHOUT an active recording.
+        // Saved as its own track (1 point + 1 photo waypoint) so it shows up in the list.
+        async function saveOnePointTrack(name, ll, wp) {
+            const c = await ensureSb();
+            const { error } = await c.from('tracks').insert({
+                name: name,
+                distance_m: 0,
+                points: [[ll[0], ll[1], wp.t, null, null]],
+                waypoints: [{ lat: wp.lat, lng: wp.lng, t: wp.t, img: wp.img, title: wp.title, text: wp.text }],
+            });
+            if (error) throw error;
+        }
+        async function addPhotoPoint(img, ll) {
+            toast('Foto wird verarbeitet …');
+            const wp = addWaypoint({ lat: ll[0], lng: ll[1], t: new Date().toISOString(), img, title: PENDING_TITLE, text: '' });
+            try {
+                const r = await identifyPhoto(img);
+                wp.title = r.title; wp.text = r.text;
+            } catch (e) {
+                wp.title = 'Erkennung fehlgeschlagen';
+                wp.text = (e.message || '') + ' — Foto bleibt gespeichert.';
+            }
+            refreshWaypoint(wp);
+            const valid = wp.title && wp.title !== PENDING_TITLE && wp.title !== 'Erkennung fehlgeschlagen';
+            const name = valid ? wp.title : ('Foto ' + new Date().toLocaleString('de-DE'));
+            try { await saveOnePointTrack(name, ll, wp); toast('Gespeichert: ' + name); }
+            catch (e) { toast('Speichern fehlgeschlagen: ' + (e.message || e)); }
+            // isolate from any later live-tracking session (the map pin stays visible)
+            waypoints = waypoints.filter(x => x !== wp);
+        }
+
         $('cam-fab').addEventListener('click', async () => {
             if (!currentLatLng()) { toast('Noch keine Position — kurz auf GPS warten.'); return; }
             let img;
@@ -1654,7 +2137,8 @@ ${pts}
             if (!img) return; // cancelled
             const ll = currentLatLng();
             if (!ll) { toast('Position verloren — nochmal versuchen.'); return; }
-            await addPhotoAt(img, ll);
+            if (tracking) await addPhotoAt(img, ll);   // pin on the active track
+            else await addPhotoPoint(img, ll);          // idle → standalone one-point track
         });
 
         // ===============================================================
@@ -1689,6 +2173,7 @@ ${pts}
         document.addEventListener('touchstart', (e) => {
             if (e.target.closest('button')) return;
             if (miniStack.classList.contains('popup')) return;
+            if ($('photo-lightbox').classList.contains('open')) return; // lightbox owns the screen
             const t = e.touches[0];
             lpX = t.clientX; lpY = t.clientY;
             clearTimeout(lpTimer);
@@ -1738,7 +2223,7 @@ ${pts}
         });
 
         $('mb-center').addEventListener('click', () => { closePopup(); centerOnPosition(); });
-        $('mb-info').addEventListener('click', () => { closePopup(); $('info-body').innerHTML = GNSS_INFO; showPanel('info-panel'); });
+        $('mb-info').addEventListener('click', () => { closePopup(); $('info-body').innerHTML = (gnssActive ? gnssLiveHtml() : '') + GNSS_INFO; showPanel('info-panel'); });
         $('menu-fab').addEventListener('click', () => openPopup());
         $('recenter-fab').addEventListener('click', () => centerOnPosition());
 
@@ -1751,26 +2236,43 @@ ${pts}
             for (let i = 0; i < 12; i++) { if (i && i % 4 === 0) s += '-'; s += cs[a[i] % cs.length]; }
             return s;
         }
-        async function updateSyncStatus() {
+        // Render the panel for the current state: connected → show the code; else → the entry actions.
+        function updateSyncStatus() {
             const code = getSyncCode();
-            const base = code ? ('Synchronisiert · Code: ' + code) : 'Lokal & privat — nicht synchronisiert.';
-            if (code) $('sync-input').value = code;
-            $('sync-status').textContent = base;
-            // show the real signed-in account id → must be identical on all synced devices
-            try {
-                const c = await ensureSb();
-                const { data: { session } } = await c.auth.getSession();
-                const uid = session && session.user ? session.user.id : null;
-                if (uid) $('sync-status').textContent = base + '\nKonto-ID ' + uid.slice(0, 8) + ' (auf allen Geräten gleich)';
-            } catch (e) { /* keep base line */ }
+            const connected = !!code;
+            $('sync-connected').hidden = !connected;
+            $('sync-disconnected').hidden = connected;
+            $('sync-confirm').hidden = true;   // always reset the disconnect confirmation
+            if (connected) {
+                $('sync-code-val').textContent = code;
+            } else {
+                $('sync-enter').hidden = true;   // collapse the code-entry section again
+                $('sync-input').value = '';
+            }
         }
         $('mb-sync').addEventListener('click', () => { closePopup(); updateSyncStatus(); showPanel('sync-panel'); });
-        $('sync-gen').addEventListener('click', () => { $('sync-input').value = genCode(); });
-        $('sync-copy').addEventListener('click', async () => {
-            const code = (getSyncCode() || $('sync-input').value.trim()); // active code first!
-            if (!code) { toast('Kein Code zum Kopieren.'); return; }
+        // "Code erzeugen" generates AND connects this device in one step
+        $('sync-gen').addEventListener('click', async () => {
+            toast('Verbinde …');
+            try {
+                await connectSync(genCode());
+                updateSyncStatus();
+                toast('Code erzeugt & verbunden.');
+            } catch (e) { toast('Fehlgeschlagen: ' + (e.message || e)); }
+        });
+        // Tap the big code (in either the connected view or the disconnect confirmation) → copy
+        async function copyActiveCode() {
+            const code = getSyncCode();
+            if (!code) return;
             try { await navigator.clipboard.writeText(code); toast('Code kopiert.'); }
             catch (e) { toast('Kopieren ging nicht.'); }
+        }
+        $('sync-code').addEventListener('click', copyActiveCode);
+        $('sync-code-confirm').addEventListener('click', copyActiveCode);
+        // Reveal the code-entry field only on demand
+        $('sync-enter-toggle').addEventListener('click', () => {
+            $('sync-enter').hidden = false;
+            $('sync-input').focus();
         });
         $('sync-close').addEventListener('click', hidePanels);
         $('sync-connect').addEventListener('click', async () => {
@@ -1783,9 +2285,17 @@ ${pts}
                 toast(n > 0 ? ('Verbunden — ' + n + ' Track(s) übernommen.') : 'Verbunden.');
             } catch (e) { toast('Sync fehlgeschlagen: ' + (e.message || e)); }
         });
-        $('sync-clear').addEventListener('click', async () => {
+        // "Trennen" no longer disconnects directly → it opens the confirmation first
+        $('sync-clear').addEventListener('click', () => {
+            $('sync-code-confirm-val').textContent = getSyncCode();
+            $('sync-connected').hidden = true;
+            $('sync-confirm').hidden = false;
+        });
+        $('sync-clear-cancel').addEventListener('click', () => updateSyncStatus());
+        // Only THIS actually disconnects
+        $('sync-clear-confirm').addEventListener('click', async () => {
             toast('Trenne …');
-            try { await clearSyncCode(); $('sync-input').value = ''; updateSyncStatus(); toast('Lokal & privat.'); }
+            try { await clearSyncCode(); updateSyncStatus(); toast('Getrennt — dieses Gerät ist jetzt leer.'); }
             catch (e) { toast('Fehlgeschlagen: ' + (e.message || e)); }
         });
 
@@ -1835,7 +2345,7 @@ ${pts}
             '<p>Russisches Gegenstück, betrieben von Roskosmos.</p>' +
             '<h4>Galileo · Europa</h4>' +
             '<p>Ziviles System der <b>EU/ESA</b> — sehr genau, kein Militär dahinter.</p>' +
-            '<h4>BeiDou · China</h4>' +
+            '<h4>Baidu · China</h4>' +
             '<p>Chinesisches System, seit 2020 global.</p>' +
             '<h4>QZSS · Japan &amp; NavIC · Indien</h4>' +
             '<p>Regionale Systeme, die GPS über Asien bzw. Indien ergänzen.</p>' +
@@ -1862,6 +2372,49 @@ ${pts}
         window.addEventListener('resize', init);
         document.fonts.ready.then(init);
         setTimeout(init, 300);
+
+        // ---------------------------------------------------------------
+        // Native GNSS status — the REAL constellations feeding the fix
+        // (Android GnssStatus via our GnssInfo plugin). On the web GnssInfo
+        // is null → this stays inert and the accuracy heuristic is used.
+        // ---------------------------------------------------------------
+        const GnssInfo = (window.Capacitor && Capacitor.Plugins && Capacitor.Plugins.GnssInfo) || null;
+        const CON_NAMES = { GAL: 'Galileo', GPS: 'GPS', GLO: 'GLONASS', BDS: 'Baidu', QZS: 'QZSS', NAV: 'NavIC', SBAS: 'SBAS', '?': 'unbekannt' };
+        let gnssListenerAdded = false;
+
+        function conSortedByCount(obj) {
+            const keys = Object.keys(obj || {});
+            keys.sort((a, b) => obj[b] - obj[a]); // most-used first (in DE that's often Galileo)
+            return keys;
+        }
+        // Always show this fixed set in fixed order (grey); the contributing ones turn green.
+        // Fixed = stable: nothing reorders/appears/disappears → calm HUD (no flicker).
+        const GNSS_ALL = ['GPS', 'GLO', 'GAL', 'BDS'];
+        function renderGnssChip(d) {
+            const used = (d && d.usedByConstellation) || {};
+            elSrc.innerHTML = GNSS_ALL
+                .map(c => '<span class="sat' + ((used[c] || 0) > 0 ? ' on' : '') + '">' + CON_NAMES[c] + '</span>')
+                .join('<span class="sat-sep"> · </span>');
+        }
+        function gnssLiveHtml() {
+            const d = gnssLatest; if (!d) return '';
+            const used = d.usedByConstellation || {}, view = d.viewByConstellation || {};
+            const rows = conSortedByCount(view).map(c =>
+                '<p><b>' + (CON_NAMES[c] || c) + '</b>: ' + (used[c] || 0) + ' genutzt · ' + (view[c] || 0) + ' sichtbar</p>'
+            ).join('');
+            return '<h4>Wer trägt gerade bei? (live)</h4>' +
+                '<p>' + (d.used || 0) + ' Satelliten in Nutzung, ' + (d.inView || 0) + ' sichtbar:</p>' + rows +
+                '<hr style="border:none;border-top:1px solid rgba(255,255,255,0.12);margin:12px 0">';
+        }
+        function startGnss() {
+            if (!GnssInfo) return; // web → no native GnssStatus
+            if (!gnssListenerAdded) {
+                GnssInfo.addListener('gnss', (d) => { gnssLatest = d; gnssActive = true; renderGnssChip(d); });
+                gnssListenerAdded = true;
+            }
+            GnssInfo.start().catch(() => { }); // may reject until location permission is granted; retried on START
+        }
+        startGnss(); // best effort at load; also called from startTracking once permission is sure
 
         // On load: jump straight to the current position (no need to press centre),
         // then wait for better data before revealing the red dot.
