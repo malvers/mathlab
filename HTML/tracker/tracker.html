@@ -1201,6 +1201,13 @@
             ? L.hotline([], { weight: 5, outlineWidth: 1, outlineColor: 'rgba(8,20,42,0.6)', palette: SPEED_PALETTE, min: 0, max: 10 }).addTo(map)
             : L.polyline([], { color: COL_ORANGE, weight: 5, opacity: 0.9 }).addTo(map);
 
+        // Stretches where recording paused (movement gate said "still", accuracy > 50 m, or no
+        // fix from the OS) leave a big time gap → the straight connecting line is only a guess.
+        // Overlay those segments white & dashed so they read as "no data here", not a real path.
+        const GAP_SEC = 20;   // s between two consecutive recorded points
+        const GAP_M = 30;     // m — only when there's a real jump too (not a standing-still pause)
+        const gapLayer = L.layerGroup().addTo(map);
+
         // Rebuild the line from track + per-point speed; rescale the colour range to the track.
         function redrawTrack() {
             const data = track.map((p, i) => [p[0], p[1], speeds[i] != null ? speeds[i] : 0]);
@@ -1211,6 +1218,18 @@
                 trackLine.options.min = lo;
                 trackLine.options.max = Math.max(hi, lo + 1); // avoid a zero-width range
                 trackLine.redraw();
+            }
+            // Mark not-recorded stretches: a big TIME gap (plus a real distance jump) → white dashed.
+            gapLayer.clearLayers();
+            for (let i = 1; i < track.length; i++) {
+                if (!times[i] || !times[i - 1]) continue; // need timestamps to tell a pause apart
+                const dt = (Date.parse(times[i]) - Date.parse(times[i - 1])) / 1000; // s
+                const dd = haversine(track[i - 1], track[i]);                          // m
+                if (dt > GAP_SEC && dd > GAP_M) {
+                    L.polyline([track[i - 1], track[i]], {
+                        color: '#ffffff', weight: 3, opacity: 0.9, dashArray: '6 8', interactive: false,
+                    }).addTo(gapLayer);
+                }
             }
         }
         let posMarker = null;
@@ -2050,16 +2069,26 @@ ${pts}
             markers.forEach((m, i) => {
                 const ang = (i / n) * 2 * Math.PI - Math.PI / 2; // start at the top
                 const ll = map.layerPointToLatLng(L.point(c.x + Math.cos(ang) * R, c.y + Math.sin(ang) * R));
-                lines.push(L.polyline([centerLatLng, ll], { weight: 1.5, color: COL_ORANGE, opacity: 0.55, interactive: false }).addTo(map));
+                lines.push(L.polyline([centerLatLng, ll], { weight: 1.5, color: COL_ORANGE, opacity: 0.45, interactive: false }).addTo(map));
                 m.setLatLng(ll);
                 m.setZIndexOffset(1000);
             });
-            fannedCluster = { markers, originals, lines, center: centerLatLng, radius: R };
+            // dashed box that groups the fanned-out photos (these belong to one spot)
+            const pad = R + 26;
+            const box = L.rectangle(
+                L.latLngBounds(
+                    map.layerPointToLatLng(L.point(c.x - pad, c.y - pad)),
+                    map.layerPointToLatLng(L.point(c.x + pad, c.y + pad))
+                ),
+                { color: COL_ORANGE, weight: 1.5, dashArray: '6 6', fill: false, opacity: 0.7, interactive: false }
+            ).addTo(map);
+            fannedCluster = { markers, originals, lines, box, center: centerLatLng, radius: R };
         }
         function collapseFan() {
             if (!fannedCluster) return;
             fannedCluster.markers.forEach((m, i) => { m.setLatLng(fannedCluster.originals[i]); m.setZIndexOffset(0); });
             fannedCluster.lines.forEach(l => map.removeLayer(l));
+            if (fannedCluster.box) map.removeLayer(fannedCluster.box);
             fannedCluster = null;
         }
         function onPinClick(marker) {
@@ -2230,6 +2259,8 @@ ${pts}
         let lpTimer = null, lpX = 0, lpY = 0;
         document.addEventListener('touchstart', (e) => {
             if (e.target.closest('button')) return;
+            if (e.target.closest('.wp-pin')) return; // photo pins own their tap (fan/open) — no radial menu
+            if (fannedCluster) return;               // a photo fan is open → no radial menu
             if (miniStack.classList.contains('popup')) return;
             if ($('photo-lightbox').classList.contains('open')) return; // lightbox owns the screen
             const t = e.touches[0];
