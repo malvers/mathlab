@@ -167,14 +167,29 @@
             /* wider digit slots so the digits don't look squished horizontally */
             gap: 3px;
             justify-content: center;
-            margin-top: clamp(6px, 2vw, 12px);
-            /* small gap below the POSITION chip */
             pointer-events: auto;
             /* re-enable taps — the parent HUD is pointer-events:none */
             cursor: pointer;
             -webkit-user-select: none;
             user-select: none;
             -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Wrapper so the travel-mode icon hangs to the LEFT of the (still centred) clock. */
+        #hud-time-wrap {
+            position: relative;
+            display: inline-block;
+            margin-top: clamp(6px, 2vw, 12px);
+        }
+
+        #mode-icon {
+            position: absolute;
+            right: 100%;
+            top: 50%;
+            transform: translateY(-50%);
+            margin-right: 12px;
+            font-size: clamp(1.3rem, 5.5vw, 1.9rem);
+            line-height: 1;
         }
 
         #hud-stats {
@@ -1033,7 +1048,9 @@
     <!-- Top HUD -->
     <div id="hud-top">
         <div id="gps-chip"><span id="gps-src"></span><span id="gps-acc">±– m</span></div>
-        <div id="hud-time"></div>
+        <div id="hud-time-wrap"><span id="mode-icon" aria-hidden="true">📍</span>
+            <div id="hud-time"></div>
+        </div>
         <div id="hud-stats">
             <div class="hud-stat"><span class="hud-val" id="trk-dist">0.00</span><span class="hud-lbl">KM</span></div>
             <div class="hud-stat"><span class="hud-val" id="trk-speed">0.0</span><span class="hud-lbl">KM/H</span></div>
@@ -1217,6 +1234,15 @@
             0.70: 'rgb(245,194,66)',  // ~15       orange (λ)
             1.00: 'rgb(176,36,24)',   // 40+       red (Υ)
         };
+        // Per-mode colour: each travel mode goes white (slow) → its colour (fast), with a sensible
+        // km/h span. 'unknown' (web / before first detection) falls back to the absolute speed scale.
+        const MODE_COLORS = {
+            walking:    { max: 6,  palette: { 0: '#ffffff', 1: 'rgb(121,158,49)' } },                        // white → green
+            running:    { max: 14, palette: { 0: '#ffffff', 1: 'rgb(60,180,120)' } },                        // white → teal-green
+            on_bicycle: { max: 30, palette: { 0: '#ffffff', 1: 'rgb(60,130,210)' } },                        // white → blue
+            in_vehicle: { max: 80, palette: { 0: '#ffffff', 0.5: 'rgb(245,194,66)', 1: 'rgb(176,36,24)' } }, // white → orange → red
+            still:      { max: 1,  palette: { 0: 'rgb(150,165,190)', 1: 'rgb(150,165,190)' } },              // flat grey
+        };
         const GAP_SEC = 20;   // s between two consecutive recorded points
         const GAP_M = 30;     // m — only when there's a real jump too (not a standing-still pause)
         const trackLayer = L.layerGroup().addTo(map);
@@ -1226,11 +1252,18 @@
                 && ((Date.parse(times[i]) - Date.parse(times[i - 1])) / 1000 > GAP_SEC)
                 && (haversine(track[i - 1], track[i]) > GAP_M);
         }
-        function drawRun(idxs) {
+        // Draw one continuous run, coloured by its travel mode (white → mode-colour by speed).
+        function drawRun(idxs, activity) {
             if (idxs.length < 2) return; // a lone point has no segment to draw
+            const mode = MODE_COLORS[activity];
             if (usesHotline) {
-                const data = idxs.map(i => [track[i][0], track[i][1], speedToScale(speeds[i] != null ? speeds[i] : 0)]);
-                L.hotline(data, { weight: 5, outlineWidth: 1, outlineColor: 'rgba(8,20,42,0.6)', palette: SPEED_PALETTE, min: 0, max: 1 }).addTo(trackLayer);
+                const pal = mode ? mode.palette : SPEED_PALETTE;
+                const data = idxs.map(i => {
+                    const kmh = speeds[i] != null ? speeds[i] : 0;
+                    const v = mode ? Math.min(kmh / mode.max, 1) : speedToScale(kmh);
+                    return [track[i][0], track[i][1], v];
+                });
+                L.hotline(data, { weight: 5, outlineWidth: 1, outlineColor: 'rgba(8,20,42,0.6)', palette: pal, min: 0, max: 1 }).addTo(trackLayer);
             } else {
                 L.polyline(idxs.map(i => track[i]), { color: COL_ORANGE, weight: 5, opacity: 0.9 }).addTo(trackLayer);
             }
@@ -1241,16 +1274,19 @@
             L.polyline(seg, { color: '#ffffff', weight: 4, dashArray: '10 10', interactive: false }).addTo(trackLayer);
             L.polyline(seg, { color: 'rgb(176,36,24)', weight: 4, dashArray: '10 10', dashOffset: '10', interactive: false }).addTo(trackLayer);
         }
-        // Rebuild: continuous runs (speed-coloured) separated by dashed white/red gaps.
+        // Rebuild: split into runs at gaps AND at mode changes; each run coloured by its mode.
         function redrawTrack() {
             trackLayer.clearLayers();
             if (!track.length) return;
             let run = [0];
+            let runAct = activities[0] || 'unknown';
             for (let i = 1; i < track.length; i++) {
-                if (isGap(i)) { drawRun(run); drawGap(i - 1, i); run = [i]; }
+                const act = activities[i] || 'unknown';
+                if (isGap(i)) { drawRun(run, runAct); drawGap(i - 1, i); run = [i]; runAct = act; }
+                else if (act !== runAct) { drawRun(run, runAct); run = [i - 1, i]; runAct = act; } // overlap point → continuous
                 else run.push(i);
             }
-            drawRun(run);
+            drawRun(run, runAct);
         }
         let posMarker = null;
 
@@ -1264,6 +1300,7 @@
         let times = [];            // ISO timestamp per recorded point (index-aligned)
         let alts = [];             // altitude in m per point (fused GPS+baro; null if unknown)
         let speeds = [];           // speed in km/h per point (index-aligned)
+        let activities = [];       // travel mode per point: walking/running/on_bicycle/in_vehicle/still
         let totalDist = 0;         // metres
         let startTime = null;      // ms
         let timerId = null;
@@ -1443,6 +1480,7 @@
             }
             shownSpeed = still ? 0 : (0.6 * shownSpeed + 0.4 * kmh);
             elSpeed.textContent = shownSpeed.toFixed(1);
+            updateModeIcon(); // keep the mode glyph (left of the clock) current
 
             // Adaptive minimum step: within the GPS error circle everything is noise, so require
             // a move bigger than a fraction of the accuracy — never below MIN_MOVE_M. Each recorded
@@ -1451,13 +1489,14 @@
             const stamp = new Date(now).toISOString();
             const altVal = fusedAlt != null ? Math.round(fusedAlt * 10) / 10 : null;
             const spdVal = Math.round(shownSpeed * 10) / 10;
+            const actVal = effectiveActivity();
             if (track.length === 0) {
-                track.push(here); times.push(stamp); alts.push(altVal); speeds.push(spdVal); redrawTrack();
+                track.push(here); times.push(stamp); alts.push(altVal); speeds.push(spdVal); activities.push(actVal); redrawTrack();
             } else if (!still) {
                 const step = haversine(track[track.length - 1], here);
                 if (step >= minStep) {
                     totalDist += step;
-                    track.push(here); times.push(stamp); alts.push(altVal); speeds.push(spdVal); redrawTrack();
+                    track.push(here); times.push(stamp); alts.push(altVal); speeds.push(spdVal); activities.push(actVal); redrawTrack();
                 }
             }
             elDist.textContent = (totalDist / 1000).toFixed(2);
@@ -1643,6 +1682,7 @@
             $('hud-top').classList.add('shown'); // reveal the header (fades down) on first start
             $('cam-fab').classList.add('shown'); // and the camera (Foto-Spur)
             startGnss(); // native: now that location is on, read the real GnssStatus
+            startActivity(); // native travel-mode detection (walk/run/bike/vehicle)
             enableMotion(); // accelerometer movement gate against GPS jitter
             startBaro();    // native barometer → precise altitude (fused with GPS)
             setStatus('Suche GPS-Signal …');
@@ -1652,6 +1692,7 @@
             tracking = false;
             stopGeoWatch(watchId);
             watchId = null;
+            stopActivity();  // stop native travel-mode detection
             disableMotion(); // stop listening to the accelerometer
             stopBaro();      // stop the barometer
             if (timerId) clearInterval(timerId);
@@ -1747,6 +1788,7 @@
             times = [];
             alts = [];
             speeds = [];
+            activities = [];
             totalDist = 0;
             lastFix = null;
             trackLayer.clearLayers();
@@ -1914,7 +1956,7 @@ ${pts}
         async function saveTrack(name) {
             const c = await ensureSb();
             // [lat, lng, time, altitude(m), speed(km/h)] — alt/speed null when unknown
-            const pts = track.map((p, i) => [p[0], p[1], times[i] || null, alts[i] != null ? alts[i] : null, speeds[i] != null ? speeds[i] : null]);
+            const pts = track.map((p, i) => [p[0], p[1], times[i] || null, alts[i] != null ? alts[i] : null, speeds[i] != null ? speeds[i] : null, activities[i] || null]);
             // strip the live Leaflet marker reference before persisting
             const wps = waypoints.map(w => ({ lat: w.lat, lng: w.lng, t: w.t, img: w.img, title: w.title, text: w.text }));
             const { error } = await c.from('tracks').insert({
@@ -1959,6 +2001,7 @@ ${pts}
             times = points.map(p => p[2] || null);
             alts = points.map(p => (p[3] != null ? p[3] : null));   // older tracks have no p[3] → null
             speeds = points.map(p => (p[4] != null ? p[4] : null));
+            activities = points.map(p => (p[5] != null ? p[5] : null)); // travel mode (older tracks → null)
             totalDist = 0;
             for (let i = 1; i < latlngs.length; i++) totalDist += haversine(latlngs[i - 1], latlngs[i]);
             redrawTrack(); // speed-coloured
@@ -2536,6 +2579,45 @@ ${pts}
             GnssInfo.start().catch(() => { }); // may reject until location permission is granted; retried on START
         }
         startGnss(); // best effort at load; also called from startTracking once permission is sure
+
+        // ---------------------------------------------------------------
+        // Travel mode (walk / run / bike / vehicle) — native Activity Recognition,
+        // with a speed heuristic fallback on the web / before the first detection.
+        // ---------------------------------------------------------------
+        const ActRec = (window.Capacitor && Capacitor.Plugins && Capacitor.Plugins.ActivityRecognition) || null;
+        let currentActivity = 'unknown';
+        let actListenerAdded = false;
+        const MODE_ICON = { walking: '🚶', running: '🏃', on_bicycle: '🚴', in_vehicle: '🚗', still: '🧍', unknown: '📍' };
+
+        function heuristicActivity(kmh) {
+            if (kmh < 1.5) return 'still';
+            if (kmh < 7) return 'walking';
+            if (kmh < 14) return 'running';
+            if (kmh < 32) return 'on_bicycle';
+            return 'in_vehicle';
+        }
+        // Native detection wins once it has spoken; otherwise fall back to speed.
+        function effectiveActivity() {
+            return (ActRec && currentActivity !== 'unknown') ? currentActivity : heuristicActivity(shownSpeed);
+        }
+        function updateModeIcon() {
+            const el = $('mode-icon');
+            if (el) el.textContent = MODE_ICON[effectiveActivity()] || '📍';
+        }
+        async function startActivity() {
+            if (!ActRec) return; // web → heuristic only
+            try {
+                const p = await ActRec.requestPermission();
+                if (!p || !p.granted) return;
+                if (!actListenerAdded) {
+                    ActRec.addListener('activity', (d) => { currentActivity = d.type || 'unknown'; updateModeIcon(); });
+                    actListenerAdded = true;
+                }
+                await ActRec.start();
+            } catch (e) { /* heuristic fallback stays active */ }
+        }
+        async function stopActivity() { if (ActRec) { try { await ActRec.stop(); } catch (e) { } } }
+        updateModeIcon();
 
         // On load: jump straight to the current position (no need to press centre),
         // then wait for better data before revealing the red dot.
