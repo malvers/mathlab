@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Doc Alvers Tracker — geteilter Track</title>
+    <link rel="icon" type="image/svg+xml" href="icon.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+    <style>
+        :root {
+            --bg: rgb(8, 20, 42);
+            --bg-light: rgb(14, 36, 78);
+            --orange: rgb(245, 194, 66);
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            margin: 0;
+            height: 100%;
+            background: var(--bg);
+            color: #fff;
+            font-family: 'Orbitron', sans-serif;
+            overflow: hidden;
+        }
+
+        #map {
+            position: fixed;
+            inset: 0;
+            z-index: 1;
+        }
+
+        .leaflet-container {
+            background: var(--bg-light);
+        }
+
+        /* ---- Top header: track name + stats ---- */
+        #hdr {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 500;
+            padding: 14px 16px 26px;
+            padding-top: max(14px, env(safe-area-inset-top));
+            background: linear-gradient(180deg, rgba(8, 20, 42, 0.95) 0%, rgba(8, 20, 42, 0.85) 60%, rgba(8, 20, 42, 0) 100%);
+            text-align: center;
+            pointer-events: none;
+        }
+
+        #hdr h1 {
+            margin: 0;
+            font-size: clamp(1rem, 4.5vw, 1.4rem);
+            font-weight: 900;
+            letter-spacing: 1px;
+            color: var(--orange);
+        }
+
+        #hdr .stats {
+            margin-top: 6px;
+            font-size: 0.72rem;
+            letter-spacing: 2px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        /* ---- Footer link back to the app ---- */
+        #foot {
+            position: fixed;
+            bottom: max(8px, env(safe-area-inset-bottom));
+            left: 0;
+            right: 0;
+            z-index: 500;
+            text-align: center;
+            font-size: 0.68rem;
+            letter-spacing: 1px;
+            pointer-events: none;
+        }
+
+        #foot a {
+            color: var(--orange);
+            text-decoration: none;
+            pointer-events: auto;
+        }
+
+        /* ---- Loading / error overlay ---- */
+        #msg {
+            position: fixed;
+            inset: 0;
+            z-index: 900;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            text-align: center;
+            background: var(--bg);
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        #msg.hidden {
+            display: none;
+        }
+
+        /* ---- Photo waypoint pins ---- */
+        .wp-pin {
+            background: none;
+            border: none;
+        }
+
+        .wp-dot {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--orange);
+            color: rgb(8, 20, 42);
+            border: 2px solid #fff;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+        }
+
+        .wp-dot svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .wp-popup .leaflet-popup-content-wrapper {
+            background: rgb(8, 20, 42);
+            color: #fff;
+            border: 1px solid rgba(245, 194, 66, 0.5);
+            border-radius: 12px;
+        }
+
+        .wp-popup .leaflet-popup-tip {
+            background: rgb(8, 20, 42);
+        }
+
+        .wp-pop img {
+            width: 100%;
+            border-radius: 8px;
+            display: block;
+            margin-bottom: 8px;
+            cursor: pointer;
+        }
+
+        .wp-pop-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.78rem;
+            color: var(--orange);
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+
+        .wp-pop-text {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 0.82rem;
+            line-height: 1.4;
+            color: #fff;
+        }
+
+        /* ---- Photo lightbox ---- */
+        #photo-lightbox {
+            position: fixed;
+            inset: 0;
+            z-index: 99999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: max(10px, env(safe-area-inset-top)) 10px 16px;
+            background: rgb(8, 20, 42);
+        }
+
+        #photo-lightbox.open {
+            display: flex;
+        }
+
+        .lb-inner {
+            width: min(98vw, 1200px);
+            max-height: 96vh;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        #lightbox-img {
+            width: 100%;
+            max-height: 82vh;
+            object-fit: contain;
+            border-radius: 12px;
+            display: block;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+        }
+
+        #lightbox-title {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--orange);
+            font-size: 1rem;
+            letter-spacing: 0.5px;
+            margin: 16px 0 6px;
+        }
+
+        #lightbox-text {
+            font-family: Arial, Helvetica, sans-serif;
+            color: #fff;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        #lightbox-close {
+            position: fixed;
+            top: max(10px, env(safe-area-inset-top));
+            right: 12px;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            border-radius: 10px;
+            background: rgba(8, 20, 42, 0.85);
+            color: #fff;
+            font-size: 1.6rem;
+            cursor: pointer;
+            z-index: 100000;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="map"></div>
+    <header id="hdr">
+        <h1 id="trk-name">Track</h1>
+        <div class="stats" id="trk-stats"></div>
+    </header>
+    <div id="foot"><a href="index.html">Aufgezeichnet mit Doc Alvers Tracker →</a></div>
+
+    <div id="msg">Lade geteilten Track …</div>
+
+    <!-- Photo lightbox -->
+    <div id="photo-lightbox">
+        <button id="lightbox-close" aria-label="Schließen">&times;</button>
+        <div class="lb-inner">
+            <img id="lightbox-img" alt="" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==">
+            <div id="lightbox-title"></div>
+            <div id="lightbox-text"></div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="https://unpkg.com/leaflet-hotline@0.4.0/dist/leaflet.hotline.min.js"></script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script>
+        const $ = id => document.getElementById(id);
+        const SUPABASE_URL = 'https://fyfhxzyymmurlaenmzse.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_ubQDiMD-X3N0vZvPVi229Q_-5Zootfk';
+        const COL_ORANGE = 'rgb(245, 194, 66)';
+
+        function haversine(a, b) {
+            const R = 6371000, rad = x => x * Math.PI / 180;
+            const dLat = rad(b[0] - a[0]), dLng = rad(b[1] - a[1]);
+            const s = Math.sin(dLat / 2) ** 2 + Math.cos(rad(a[0])) * Math.cos(rad(b[0])) * Math.sin(dLng / 2) ** 2;
+            return 2 * R * Math.asin(Math.sqrt(s));
+        }
+
+        const map = L.map('map', { zoomControl: true, attributionControl: true })
+            .setView([51.1657, 10.4515], 6);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxNativeZoom: 19, maxZoom: 21, attribution: '&copy; OpenStreetMap contributors',
+        }).addTo(map);
+        map.attributionControl.setPrefix(false);
+
+        // ---- track data (filled from the shared row) ----
+        let track = [], times = [], speeds = [], activities = [], waypoints = [], wpMarkers = [];
+
+        // ---- speed/mode colouring — identical scheme to the recorder ----
+        const usesHotline = !!L.hotline;
+        const MAX_KMH = 40;
+        function speedToScale(kmh) {
+            if (kmh <= 5) return (kmh / 5) * 0.5;
+            return 0.5 + Math.min((kmh - 5) / (MAX_KMH - 5), 1) * 0.5;
+        }
+        const SPEED_PALETTE = { 0.00: 'rgb(40,90,30)', 0.25: 'rgb(121,158,49)', 0.50: 'rgb(180,200,70)', 0.70: 'rgb(245,194,66)', 1.00: 'rgb(176,36,24)' };
+        const MODE_COLORS = {
+            walking:    { max: 6,  palette: { 0: '#ffffff', 1: 'rgb(121,158,49)' } },
+            running:    { max: 14, palette: { 0: '#ffffff', 1: 'rgb(60,180,120)' } },
+            on_bicycle: { max: 30, palette: { 0: '#ffffff', 1: 'rgb(60,130,210)' } },
+            in_vehicle: { max: 80, palette: { 0: '#ffffff', 0.5: 'rgb(245,194,66)', 1: 'rgb(176,36,24)' } },
+            still:      { max: 1,  palette: { 0: 'rgb(150,165,190)', 1: 'rgb(150,165,190)' } },
+        };
+        const GAP_SEC = 20, GAP_M = 30;
+        const trackLayer = L.layerGroup().addTo(map);
+
+        function isGap(i) {
+            return times[i] && times[i - 1]
+                && ((Date.parse(times[i]) - Date.parse(times[i - 1])) / 1000 > GAP_SEC)
+                && (haversine(track[i - 1], track[i]) > GAP_M);
+        }
+        function drawRun(idxs, activity) {
+            if (idxs.length < 2) return;
+            const mode = MODE_COLORS[activity];
+            if (usesHotline) {
+                const pal = mode ? mode.palette : SPEED_PALETTE;
+                const data = idxs.map(i => {
+                    const kmh = speeds[i] != null ? speeds[i] : 0;
+                    const v = mode ? Math.min(kmh / mode.max, 1) : speedToScale(kmh);
+                    return [track[i][0], track[i][1], v];
+                });
+                L.hotline(data, { weight: 5, outlineWidth: 1, outlineColor: 'rgba(8,20,42,0.6)', palette: pal, min: 0, max: 1 }).addTo(trackLayer);
+            } else {
+                L.polyline(idxs.map(i => track[i]), { color: COL_ORANGE, weight: 5, opacity: 0.9 }).addTo(trackLayer);
+            }
+        }
+        function drawGap(a, b) {
+            const seg = [track[a], track[b]];
+            L.polyline(seg, { color: '#ffffff', weight: 4, dashArray: '10 10', interactive: false }).addTo(trackLayer);
+            L.polyline(seg, { color: 'rgb(176,36,24)', weight: 4, dashArray: '10 10', dashOffset: '10', interactive: false }).addTo(trackLayer);
+        }
+        function redrawTrack() {
+            trackLayer.clearLayers();
+            if (!track.length) return;
+            let run = [0], runAct = activities[0] || 'unknown';
+            for (let i = 1; i < track.length; i++) {
+                const act = activities[i] || 'unknown';
+                if (isGap(i)) { drawRun(run, runAct); drawGap(i - 1, i); run = [i]; runAct = act; }
+                else if (act !== runAct) { drawRun(run, runAct); run = [i - 1, i]; runAct = act; }
+                else run.push(i);
+            }
+            drawRun(run, runAct);
+        }
+
+        // ---- photo pins + lightbox ----
+        const CAM_PIN_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="rgb(8,20,42)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>';
+        const esc = s => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+        function addWaypoint(wp) {
+            waypoints.push(wp);
+            const icon = L.divIcon({ className: 'wp-pin', html: '<div class="wp-dot">' + CAM_PIN_SVG + '</div>', iconSize: [30, 30], iconAnchor: [15, 30], popupAnchor: [0, -30] });
+            const m = L.marker([wp.lat, wp.lng], { icon }).addTo(map);
+            const html = '<div class="wp-pop"><img class="wp-pop-img" src="' + wp.img + '" alt="">' +
+                '<div class="wp-pop-title">' + esc(wp.title) + '</div>' +
+                (wp.text ? '<div class="wp-pop-text">' + esc(wp.text) + '</div>' : '') + '</div>';
+            m.bindPopup(html, { className: 'wp-popup', maxWidth: 260 });
+            m.on('popupopen', (e) => {
+                const img = e.popup.getElement().querySelector('.wp-pop-img');
+                if (img) img.addEventListener('click', () => openLightbox(wp));
+            });
+            wpMarkers.push(m);
+        }
+        function openLightbox(wp) {
+            $('lightbox-img').src = wp.img;
+            $('lightbox-title').textContent = wp.title || '';
+            $('lightbox-text').textContent = wp.text || '';
+            $('photo-lightbox').classList.add('open');
+        }
+        function closeLightbox() {
+            $('photo-lightbox').classList.remove('open');
+            $('lightbox-img').removeAttribute('src');
+        }
+        $('lightbox-close').addEventListener('click', closeLightbox);
+        $('photo-lightbox').addEventListener('click', (e) => { if (e.target.id === 'photo-lightbox') closeLightbox(); });
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeLightbox(); });
+
+        function fmtDuration(ms) {
+            const s = Math.max(0, Math.round(ms / 1000));
+            const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60);
+            return h > 0 ? (h + ' h ' + m + ' min') : (m + ' min');
+        }
+
+        // ---- load the shared track by token ----
+        async function load() {
+            const token = new URLSearchParams(location.search).get('s');
+            if (!token) { $('msg').textContent = 'Kein Track-Token im Link.'; return; }
+            let row;
+            try {
+                const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+                const { data, error } = await sb.rpc('get_shared_track', { p_token: token });
+                if (error) throw error;
+                row = data;
+            } catch (e) {
+                $('msg').textContent = 'Konnte den Track nicht laden: ' + (e.message || e);
+                return;
+            }
+            if (!row) { $('msg').textContent = 'Track nicht gefunden — der Link ist ungültig oder wurde widerrufen.'; return; }
+
+            const points = row.points || [], wps = row.waypoints || [];
+            track = points.map(p => [p[0], p[1]]);
+            times = points.map(p => p[2] || null);
+            speeds = points.map(p => (p[4] != null ? p[4] : null));
+            activities = points.map(p => (p[5] != null ? p[5] : null));
+            redrawTrack();
+            wps.forEach(w => addWaypoint(w));
+
+            $('trk-name').textContent = row.name || 'Track';
+            const km = (row.distance_m != null ? row.distance_m / 1000 : 0).toFixed(2);
+            let dur = '';
+            const t0 = times.find(Boolean), t1 = [...times].reverse().find(Boolean);
+            if (t0 && t1) dur = ' · ' + fmtDuration(Date.parse(t1) - Date.parse(t0));
+            const fotos = wps.length ? ' · ' + wps.length + ' Foto' + (wps.length > 1 ? 's' : '') : '';
+            $('trk-stats').textContent = km + ' km' + dur + fotos;
+
+            if (track.length) map.fitBounds(L.latLngBounds(track), { padding: [50, 50] });
+            else if (wps.length) map.setView([wps[0].lat, wps[0].lng], 15);
+            $('msg').classList.add('hidden');
+        }
+        load();
+    </script>
+</body>
+
+</html>

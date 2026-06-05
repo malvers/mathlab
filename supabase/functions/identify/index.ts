@@ -52,14 +52,44 @@ Deno.serve(async (req) => {
     };
 
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${key}`;
-    const r = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-    });
-    if (!r.ok) {
-      const detail = (await r.text()).slice(0, 300);
-      return json({ error: 'Gemini ' + r.status, detail }, 502);
+
+    // Gemini occasionally answers with a transient 503 ("model overloaded"),
+    // 429 or 5xx that clears within a second or two. Retry those with
+    // exponential backoff instead of failing the whole identification.
+    // Hard errors (e.g. 400 bad image) are returned right away — retrying
+    // them would only waste time.
+    const TRANSIENT = new Set([429, 500, 502, 503, 504]);
+    const MAX_TRIES = 4;
+    const sleep = (ms: number) => new Promise((res) => setTimeout(res, ms));
+
+    let r: Response | undefined;
+    let lastStatus = 0;
+    let lastDetail = '';
+    for (let attempt = 1; attempt <= MAX_TRIES; attempt++) {
+      try {
+        r = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        });
+      } catch (e) {
+        // network-level failure → treat like a transient error and retry
+        r = undefined;
+        lastStatus = 0;
+        lastDetail = String((e && (e as Error).message) || e);
+      }
+      if (r) {
+        if (r.ok) break; // success
+        lastStatus = r.status;
+        lastDetail = (await r.text()).slice(0, 300);
+        if (!TRANSIENT.has(r.status)) break; // hard error → no retry
+      }
+      if (attempt === MAX_TRIES) break;
+      await sleep(600 * 2 ** (attempt - 1)); // 0.6s, 1.2s, 2.4s
+    }
+
+    if (!r || !r.ok) {
+      return json({ error: 'Gemini ' + (lastStatus || 'net'), detail: lastDetail, tries: MAX_TRIES }, 502);
     }
 
     const data = await r.json();
