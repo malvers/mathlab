@@ -184,12 +184,9 @@
         }
 
         #mode-icon {
-            position: absolute;
-            right: 100%;
-            top: 50%;
-            transform: translateY(-50%);
-            margin-right: 12px;
-            font-size: clamp(1.3rem, 5.5vw, 1.9rem);
+            /* travel-mode figure, inline to the LEFT of the KM/H value, sized to be about
+               as tall as the value + label lines together */
+            font-size: clamp(2rem, 8vw, 2.9rem);
             line-height: 1;
         }
 
@@ -201,6 +198,19 @@
         }
 
         .hud-stat {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* the KM/H stat carries the travel-mode figure to its left, both lines tall */
+        .speed-stat {
+            flex-direction: row;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .speed-col {
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -223,12 +233,19 @@
         }
 
         /* ---- Big round START / STOP ---- */
-        #trk-toggle {
+        #trk-controls {
             position: fixed;
             bottom: var(--btm);
             left: 50%;
             transform: translateX(-50%);
             z-index: 500;
+            display: flex;
+            align-items: center;
+            gap: clamp(14px, 5vw, 28px);
+        }
+
+        #trk-toggle,
+        #trk-finish {
             width: clamp(96px, 30vw, 132px);
             height: clamp(96px, 30vw, 132px);
             border-radius: 50%;
@@ -237,15 +254,20 @@
             color: #fff;
             font-family: 'Orbitron', sans-serif;
             font-weight: 700;
-            font-size: clamp(1.1rem, 5vw, 1.5rem);
-            letter-spacing: 2px;
+            font-size: clamp(0.82rem, 3.4vw, 1.15rem);
+            letter-spacing: 1px;
             cursor: pointer;
             box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
             transition: background 0.2s ease, transform 0.1s ease;
         }
 
-        #trk-toggle:active {
-            transform: translateX(-50%) scale(0.96);
+        #trk-finish {
+            display: none;
+        }
+
+        #trk-toggle:active,
+        #trk-finish:active {
+            transform: scale(0.96);
         }
 
         /* Recenter button — shown above STOP when the map stops following you */
@@ -1049,18 +1071,21 @@
     <!-- Top HUD -->
     <div id="hud-top">
         <div id="gps-chip"><span id="gps-src"></span><span id="gps-acc">±– m</span></div>
-        <div id="hud-time-wrap"><span id="mode-icon" aria-hidden="true">📍</span>
+        <div id="hud-time-wrap">
             <div id="hud-time"></div>
         </div>
         <div id="hud-stats">
             <div class="hud-stat"><span class="hud-val" id="trk-dist">0.00</span><span class="hud-lbl">KM</span></div>
-            <div class="hud-stat"><span class="hud-val" id="trk-speed">0.0</span><span class="hud-lbl">KM/H</span></div>
+            <div class="hud-stat speed-stat"><span id="mode-icon" aria-hidden="true">📍</span><div class="speed-col"><span class="hud-val" id="trk-speed">0.0</span><span class="hud-lbl">KM/H</span></div></div>
             <div class="hud-stat"><span class="hud-val" id="trk-alt">–</span><span class="hud-lbl">HÖHE m</span></div>
         </div>
     </div>
 
-    <!-- Big start/stop -->
-    <button id="trk-toggle">START</button>
+    <!-- Bottom controls: one round button (START/STOP), two side by side when paused (CONTINUE | STOP) -->
+    <div id="trk-controls">
+        <button id="trk-toggle">START</button>
+        <button id="trk-finish">STOP</button>
+    </div>
 
     <!-- Recenter button — appears centred above STOP when the map is no longer following -->
     <button id="recenter-fab" aria-label="Zentrieren">
@@ -1296,7 +1321,9 @@
         // ---------------------------------------------------------------
         let watchId = null;
         let acquireWatch = null;   // temporary watch used while acquiring a good initial fix
-        let tracking = false;
+        let tracking = false;      // true only while actively recording
+        let trkState = 'idle';     // 'idle' | 'recording' | 'paused'
+        let pauseStart = 0;        // ms — when the current pause began (to not count it as track time)
         let track = [];            // array of [lat, lng]
         let times = [];            // ISO timestamp per recorded point (index-aligned)
         let alts = [];             // altitude in m per point (fused GPS+baro; null if unknown)
@@ -1663,47 +1690,85 @@
         }
         function stopBaro() { if (Baro) Baro.stop().catch(() => { }); }
 
-        function startTracking() {
-            if (!('geolocation' in navigator)) {
-                setStatus('Dieser Browser unterstützt keine Standortbestimmung.');
-                return;
+        // ---- Track lifecycle: idle → recording → paused → (finish) idle ----
+        // Buttons: idle [START] · recording [STOP=pause] · paused [CONTINUE | STOP=finish+save].
+        function setTrkState(s) {
+            trkState = s;
+            tracking = (s === 'recording');
+            const tg = $('trk-toggle'), fin = $('trk-finish');
+            if (s === 'idle') {
+                tg.textContent = 'START'; tg.style.background = COL_GREEN; fin.style.display = 'none';
+            } else if (s === 'recording') {
+                tg.textContent = 'STOP'; tg.style.background = COL_RED; fin.style.display = 'none';
+            } else { // paused → continue or save
+                tg.textContent = 'CONTINUE'; tg.style.background = COL_GREEN; tg.style.color = '#fff';
+                fin.textContent = 'SPEICHERN'; fin.style.background = 'rgb(245, 194, 66)'; fin.style.color = '#14110a';
+                fin.style.display = '';
             }
-            if (!window.isSecureContext) {
-                setStatus('GPS braucht HTTPS oder localhost. Über file:// gibt es keine Position.');
-                return;
-            }
-            // stop the acquire watch — the tracking watch takes over now
+        }
+
+        // Shared startup of the live watch + sensors (does NOT touch startTime → caller sets it).
+        function startWatch() {
             if (acquireWatch != null) { navigator.geolocation.clearWatch(acquireWatch); acquireWatch = null; }
             tracking = true;
-            startTime = Date.now();
             timerId = setInterval(updateDuration, 1000);
             watchId = startGeoWatch(onPosition, onError); // native background plugin if available, else web
-            elToggle.textContent = 'STOP';
-            elToggle.style.background = COL_RED;
-            $('hud-top').classList.add('shown'); // reveal the header (fades down) on first start
-            $('cam-fab').classList.add('shown'); // and the camera (Foto-Spur)
-            startGnss(); // native: now that location is on, read the real GnssStatus
-            startActivity(); // native travel-mode detection (walk/run/bike/vehicle)
-            enableMotion(); // accelerometer movement gate against GPS jitter
-            startBaro();    // native barometer → precise altitude (fused with GPS)
+            startGnss();     // native: real GnssStatus
+            startActivity(); // native travel-mode detection
+            enableMotion();  // accelerometer movement gate
+            startBaro();     // native barometer → altitude
+        }
+
+        // START (idle): a brand-new track. The previous (finished+saved) one is cleared from view.
+        function beginTracking() {
+            if (!('geolocation' in navigator)) { setStatus('Dieser Browser unterstützt keine Standortbestimmung.'); return; }
+            if (!window.isSecureContext) { setStatus('GPS braucht HTTPS oder localhost. Über file:// gibt es keine Position.'); return; }
+            clearTrack(true); // silent — the old track was already saved on FINISH
+            startTime = Date.now();
+            startWatch();
+            $('hud-top').classList.add('shown'); // reveal the header on first start
+            setTrkState('recording');
             setStatus('Suche GPS-Signal …');
         }
 
-        function stopTracking() {
-            tracking = false;
-            stopGeoWatch(watchId);
-            watchId = null;
-            stopActivity();  // stop native travel-mode detection
-            disableMotion(); // stop listening to the accelerometer
-            stopBaro();      // stop the barometer
-            if (timerId) clearInterval(timerId);
-            timerId = null;
-            elToggle.textContent = 'START';
-            elToggle.style.background = COL_GREEN;
-            setStatus(track.length ? `Gestoppt. ${(totalDist / 1000).toFixed(2)} km, ${track.length} Punkte.` : 'Gestoppt.');
+        // STOP while recording → pause (keep all data, freeze the timer).
+        function pauseTracking() {
+            pauseStart = Date.now();
+            stopGeoWatch(watchId); watchId = null;
+            stopActivity(); disableMotion(); stopBaro();
+            if (timerId) clearInterval(timerId); timerId = null;
+            setTrkState('paused');
+            setStatus(track.length ? `Pausiert · ${(totalDist / 1000).toFixed(2)} km` : 'Pausiert.');
         }
 
-        elToggle.addEventListener('click', () => tracking ? stopTracking() : startTracking());
+        // CONTINUE → resume the same track (don't count the pause as elapsed track time).
+        function resumeTracking() {
+            startTime += (Date.now() - pauseStart);
+            startWatch();
+            setTrkState('recording');
+            setStatus('Aufzeichnung läuft …');
+        }
+
+        // STOP while paused → finish: auto-save the track, back to idle. Track stays drawn.
+        async function finishTracking() {
+            setTrkState('idle');
+            if (track.length >= 1) {
+                const name = 'Track ' + new Date().toLocaleString('de-DE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+                toast('Speichere …');
+                try { await saveTrack(name); toast('Gespeichert: ' + name); }
+                catch (e) { toast('Speichern fehlgeschlagen: ' + (e.message || e)); }
+            } else {
+                setStatus('Beendet.');
+            }
+        }
+
+        $('trk-toggle').addEventListener('click', () => {
+            if (trkState === 'idle') beginTracking();
+            else if (trkState === 'recording') pauseTracking();
+            else resumeTracking(); // paused
+        });
+        $('trk-finish').addEventListener('click', () => { if (trkState === 'paused') finishTracking(); });
+        setTrkState('idle');
 
         // ---------------------------------------------------------------
         // Acquire a position: snap there at once, then keep refining until the
@@ -1782,9 +1847,9 @@
             goToCurrentPosition({ initial: false });
         }
 
-        function clearTrack() {
-            // Guard against losing a recording by accident
-            if (track.length && !confirm('Aktuellen Track wirklich löschen?')) return;
+        function clearTrack(silent) {
+            // Guard against losing a recording by accident (silent skips the confirm)
+            if (!silent && track.length && !confirm('Aktuellen Track wirklich löschen?')) return;
             track = [];
             times = [];
             alts = [];
