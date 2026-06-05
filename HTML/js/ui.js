@@ -302,7 +302,7 @@ class CyberUI {
                 <h3 style="color: #ffd700; text-shadow: 0 0 10px rgba(255, 215, 0, 0.4);">Cyber-Kaffee Spendieren</h3>
                 <p>Dir gefallen die interaktiven Labore und du möchtest die Weiterentwicklung des Cyber-Labors unterstützen? Ich freue mich über jeden virtuellen Kaffee, der mich nachts beim Coden wachhält! ☕️🚀</p>
                 
-                <a href="https://www.paypal.com/donate/?business=michael.r.alvers@gmail.com&no_recurring=1&currency_code=EUR" 
+                <a href="https://www.paypal.com/donate/?business=info@docalvers.de&no_recurring=1&currency_code=EUR" 
                    target="_blank" 
                    style="display: flex; align-items: center; justify-content: center; gap: 10px; background: rgba(255, 215, 0, 0.1); border: 1px solid #ffd700; color: #ffd700; padding: 15px; border-radius: 8px; text-decoration: none; font-family: 'Orbitron', sans-serif; font-size: 1rem; margin: 25px 0 15px 0; transition: all 0.3s ease; box-shadow: 0 0 15px rgba(255, 215, 0, 0.2);"
                    onmouseover="this.style.background='rgba(255, 215, 0, 0.2)'; this.style.boxShadow='0 0 25px rgba(255, 215, 0, 0.4)';"
