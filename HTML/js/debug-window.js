@@ -19,8 +19,10 @@ const DebugWindow = (() => {
 
     function init() {
         if (debugEl) return;
-        // Skip debug window on production unless ?debug=force is set
-        if (isProduction() && !new URLSearchParams(window.location.search).has('debug')) {
+        // Skip debug window on production unless ?debug is set — BUT always allow it inside the
+        // native Capacitor app (it loads the live docalvers.de URL, yet is our test build).
+        const isNativeApp = !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
+        if (isProduction() && !isNativeApp && !new URLSearchParams(window.location.search).has('debug')) {
             return;
         }
 

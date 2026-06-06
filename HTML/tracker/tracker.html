@@ -1353,6 +1353,7 @@
     <script src="../js/rain-radar.js"></script>
     <script src="../js/cyber-clock.js"></script>
     <script src="../js/debug-window.js"></script>
+    <script src="../js/photo-fullscreen.js"></script>
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <script>
         // ---------------------------------------------------------------
@@ -2322,6 +2323,9 @@ ${pts}
             // arrows only make sense with more than one photo
             $('lightbox-nav').style.display = (waypoints.length > 1 && lightboxIndex >= 0) ? 'flex' : 'none';
             $('photo-lightbox').classList.add('open');
+            // Native Android: switch the lightbox to true immersive fullscreen (hides
+            // status + nav bars). No-op on the web — see js/photo-fullscreen.js.
+            if (window.PhotoFullscreen) PhotoFullscreen.enter($('photo-lightbox'));
         }
         // Step through the track's photos, wrapping around (loop) at both ends.
         function lightboxStep(d) {
@@ -2331,6 +2335,7 @@ ${pts}
         }
         function closePhotoLightbox() {
             $('photo-lightbox').classList.remove('open');
+            if (window.PhotoFullscreen) PhotoFullscreen.exit(); // leave Android immersive fullscreen
             $('lightbox-img').removeAttribute('src');
             lightboxIndex = -1;
         }

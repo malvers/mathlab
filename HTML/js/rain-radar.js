@@ -75,6 +75,13 @@
             pane: PANE_NAME,
             opacity: TILE_OPACITY,
             tileSize: 256,
+            // RainViewer radar tiles only exist up to z7 (measured — z8+ returns a
+            // "Zoom Level Not Supported" placeholder). Cap the native zoom there and let
+            // Leaflet upscale, so the (coarse ~1 km) radar stays visible at every zoom
+            // instead of breaking. It turns blocky when zoomed in close — that's the
+            // radar's real resolution, not a bug.
+            maxNativeZoom: 7,
+            maxZoom: 21,
             attribution: ATTRIBUTION,
             zIndex: 1,
         });
