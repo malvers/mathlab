@@ -54,7 +54,10 @@ async function plantnetIdentify(
   image: string,
   mime: string,
   key: string,
-): Promise<{ ok: true; score: number; sci: string; common: string } | { ok: false; reason: string }> {
+): Promise<
+  | { ok: true; score: number; sci: string; common: string; remaining?: number }
+  | { ok: false; reason: string; remaining?: number }
+> {
   const bin = Uint8Array.from(atob(image), (c) => c.charCodeAt(0));
   const fd = new FormData();
   fd.append('images', new Blob([bin], { type: mime || 'image/jpeg' }), 'photo.jpg');
@@ -63,13 +66,18 @@ async function plantnetIdentify(
   const r = await fetch(url, { method: 'POST', body: fd });
   if (!r.ok) return { ok: false, reason: 'http' + r.status }; // 404 ≈ not a plant / no match
   const d = await r.json();
+  // Pl@ntNet reports how much of today's quota is left in every response body.
+  const remaining = typeof d?.remainingIdentificationRequests === 'number'
+    ? d.remainingIdentificationRequests
+    : undefined;
   const top = d?.results?.[0];
-  if (!top) return { ok: false, reason: 'empty' };
+  if (!top) return { ok: false, reason: 'empty', remaining };
   return {
     ok: true,
     score: top.score ?? 0,
     sci: top.species?.scientificNameWithoutAuthor || '',
     common: (top.species?.commonNames && top.species.commonNames[0]) || '',
+    remaining,
   };
 }
 
@@ -87,9 +95,11 @@ Deno.serve(async (req) => {
     const plantKey = Deno.env.get('PLANTNET_API_KEY');
     let plant: { sci: string; common: string; score: number } | null = null;
     let pnDiag: unknown = 'off';
+    let pnRemaining: number | undefined; // Pl@ntNet daily quota left (free tier = 500/day)
     if (plantKey) {
       try {
         const pn = await plantnetIdentify(image, mime, plantKey);
+        if (pn.remaining !== undefined) pnRemaining = pn.remaining;
         if (pn.ok && pn.score >= PLANTNET_MIN_SCORE) {
           plant = { sci: pn.sci, common: pn.common, score: pn.score };
           pnDiag = { score: +pn.score.toFixed(3), sci: pn.sci };
@@ -191,7 +201,7 @@ Deno.serve(async (req) => {
     // inline so it survives the esc()'d <div>/GPX rendering on the client.
     const source = plant ? 'Pl@ntNet' : 'Google Gemini';
     text = (text ? text.trimEnd() + ' ' : '') + '(Quelle: ' + source + ')';
-    return json({ title, text, source, _diag: diag });
+    return json({ title, text, source, pnRemaining, _diag: diag });
   } catch (e) {
     return json({ error: String((e && (e as Error).message) || e) }, 500);
   }

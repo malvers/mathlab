@@ -43,6 +43,7 @@
     // --- RainViewer (global fallback). ---
     const RV_API = 'https://api.rainviewer.com/public/weather-maps.json';
     const RV_ATTR = '<a href="https://www.rainviewer.com/" target="_blank" rel="noopener">RainViewer</a>';
+    const RV_MAX_NATIVE = 7;   // RainViewer has native tiles only to z7 (measured) → upscale above
 
     let map = null;
     let on = false;
@@ -54,7 +55,9 @@
 
     // slider UI
     let ui = null, slider = null, lbl = null, playBtn = null, playTimer = null;
-    let baseLayer = null;   // RainViewer "fill" under DWD so the whole view is covered, not just DE
+    let baseLayer = null;   // (legacy) separate RainViewer base — no longer used; RV is now
+                            // composited INTO each DWD tile so nothing bleeds inside the coverage
+    let rvHost = null, rvPath = null;   // current RainViewer frame, read by the composite tiles
 
     function dbg(m) {
         if (typeof DebugWindow !== 'undefined' && DebugWindow && DebugWindow.log) DebugWindow.log(m);
@@ -81,53 +84,74 @@
         return new Date(ms).toISOString().replace(/\.\d{3}Z$/, 'Z');
     }
 
-    // ---- client-side pixel filter for the DWD tiles -------------------------------
-    // DWD's WMS style bakes TWO non-precipitation things into every radar tile:
-    //   • a GREY no-data mask outside the radar range — measured RGB ≈126–141 (achromatic,
-    //     alpha ~80); it veils the whole map outside coverage.
-    //   • a MAGENTA coverage-boundary line ("Reichweitengrenze") — measured SYMMETRIC
-    //     magenta peaking at FF00FF (R≈B, very low G).
-    // We set both to full transparency on a canvas so ONLY the real rain stays and the OSM
-    // base shows through everywhere else.
-    //
-    // CRUCIAL: the DWD colour ramp ALSO uses magenta/violet for EXTREME precipitation
-    // (legend: …→red(240,0,0)→(192,0,144)→(96,0,192)→blue). Those MUST stay. They are
-    // ASYMMETRIC (R−B≈48 / B−R≈96); the boundary line is SYMMETRIC (|R−B| small). So the
-    // |R−B| ≤ 36 test strips the line while KEEPING the heaviest-rain cells. Every threshold
-    // here was measured from real tiles + GetLegendGraphic — not guessed.
+    // ---- composite: DWD INSIDE its coverage, RainViewer OUTSIDE -------------------
+    // DWD bakes a GREY no-data mask (achromatic, measured RGB ≈126–141, α~80) and a MAGENTA
+    // coverage-boundary line (symmetric R≈B, peak FF00FF) into every tile. The grey mask marks
+    // exactly the area OUTSIDE the radar's reach — i.e. it IS the "formerly magenta line".
+    // We use it as the precise, irregular clip between the two sources:
+    //   • DWD grey no-data  → OUTSIDE coverage → take the RainViewer (EU) pixel
+    //   • DWD magenta line  → faint neutral grey (a quiet boundary hint)
+    //   • DWD rain          → keep the DWD pixel (incl. ASYMMETRIC extreme magenta/violet)
+    //   • DWD transparent   → INSIDE coverage, no rain → stays clear (basemap shows, NO EU)
+    // ⇒ inside the line: never any RainViewer; outside it: only RainViewer. All colour
+    //   thresholds MEASURED from real tiles + GetLegendGraphic — not guessed.
     const BOUNDARY_GREY = 128;        // recolour the boundary line to a neutral mid-grey…
-    const BOUNDARY_ALPHA_SCALE = 1.0; // …keeping its full alpha for now (DEBUG: find the line, then dial down)
-    function filterDwdPixels(d) {
+    const BOUNDARY_ALPHA_SCALE = 1.0; // …keeping its full alpha for now (tune later)
+    function compositeDwdRv(d, rv) {
         for (let i = 0; i < d.length; i += 4) {
-            if (d[i + 3] === 0) continue;                       // already transparent
+            const a = d[i + 3];
+            if (a === 0) continue;                       // inside coverage, no rain → keep clear (NO EU)
             const r = d[i], g = d[i + 1], b = d[i + 2];
             const mx = r > g ? (r > b ? r : b) : (g > b ? g : b);
             const mn = r < g ? (r < b ? r : b) : (g < b ? g : b);
-            // 1) grey no-data mask → transparent (achromatic mid-grey; precip is always saturated)
+            // grey no-data → OUTSIDE coverage → RainViewer pixel (or clear if RV is missing)
             if (mx - mn < 30) {
                 const avg = (r + g + b) / 3;
-                if (avg >= 85 && avg <= 170) { d[i + 3] = 0; continue; }
+                if (avg >= 85 && avg <= 170) {
+                    if (rv) { d[i] = rv[i]; d[i + 1] = rv[i + 1]; d[i + 2] = rv[i + 2]; d[i + 3] = rv[i + 3]; }
+                    else d[i + 3] = 0;
+                    continue;
+                }
             }
-            // 2) magenta boundary line → faint neutral grey (symmetric R≈B, low G) so it stays
-            //    as a quiet orientation hint. Extreme-precip magenta/violet are asymmetric
-            //    (|R−B|>36) → untouched.
+            // magenta boundary line → faint grey hint (symmetric R≈B; extreme precip is asymmetric → kept)
             if (r > 140 && b > 120 && g < r - 35 && g < b - 25 && (r > b ? r - b : b - r) <= 36) {
                 d[i] = d[i + 1] = d[i + 2] = BOUNDARY_GREY;
-                d[i + 3] = Math.round(d[i + 3] * BOUNDARY_ALPHA_SCALE);
+                d[i + 3] = Math.round(a * BOUNDARY_ALPHA_SCALE);
             }
+            // else: DWD rain → unchanged
         }
     }
 
-    // A DWD WMS layer that pushes every tile through filterDwdPixels() on a canvas before it
-    // is shown. Built lazily so Leaflet (L) is guaranteed loaded. CORS on maps.dwd.de is
-    // 'Access-Control-Allow-Origin: *' (measured) → the crossOrigin canvas read is allowed.
+    // RainViewer tile URL for the SAME web-mercator tile (standard z/x/y, like Leaflet/OSM).
+    // RainViewer is native only to z7 → above that, request the z7 PARENT (the right sub-rect is
+    // upscaled in drawRvForCoords, mirroring Leaflet's own maxNativeZoom behaviour).
+    function rvTileUrl(coords) {
+        if (!rvHost || !rvPath) return null;
+        let tz = coords.z, tx = coords.x, ty = coords.y;
+        if (tz > RV_MAX_NATIVE) { const s = tz - RV_MAX_NATIVE; tz = RV_MAX_NATIVE; tx = tx >> s; ty = ty >> s; }
+        return rvHost + rvPath + '/256/' + tz + '/' + tx + '/' + ty + '/2/1_1.png';
+    }
+    // Draw the RainViewer image into a 256² context; for z>7 scale up the matching sub-rect.
+    function drawRvForCoords(rcx, rvImg, coords, size) {
+        if (coords.z <= RV_MAX_NATIVE) { rcx.drawImage(rvImg, 0, 0, size.x, size.y); return; }
+        const s = coords.z - RV_MAX_NATIVE, scale = 1 << s, sub = 256 / scale;
+        const px = coords.x >> s, py = coords.y >> s;
+        const sx = (coords.x - px * scale) * sub, sy = (coords.y - py * scale) * sub;
+        rcx.imageSmoothingEnabled = true;
+        rcx.drawImage(rvImg, sx, sy, sub, sub, 0, 0, size.x, size.y);
+    }
+
+    // A DWD WMS layer whose tiles are composited with RainViewer on a canvas (compositeDwdRv).
+    // Built lazily so Leaflet (L) is loaded. CORS on BOTH maps.dwd.de and RainViewer is '*'
+    // (measured) → the crossOrigin canvas reads are allowed. Each tile waits for both source
+    // images, then composites; the slow part is always the DWD WMS (~3 s), RainViewer is fast
+    // and browser-cached across frames (same URL), so it adds ~nothing.
     //
-    // GOTCHA (measured): Leaflet's _abortLoading() prunes every tile of a zoom level being
-    // left whose `tile.complete` is not truthy. A real <img> reports complete===true once
-    // loaded, so it is retained as parent coverage during a zoom; a <canvas> has NO `complete`
-    // property → Leaflet treats every loaded canvas tile as "still loading" and removes it the
-    // instant you zoom → the whole DWD layer blanks out. Fix: stamp `complete = true` on the
-    // canvas once it is ready, so it survives _abortLoading just like an <img> would.
+    // GOTCHA (measured): Leaflet's _abortLoading() prunes every tile of a zoom level being left
+    // whose `tile.complete` is not truthy. A real <img> reports complete===true once loaded, so
+    // it is retained as parent coverage during a zoom; a <canvas> has NO `complete` property →
+    // Leaflet drops every loaded canvas tile the instant you zoom → the DWD layer blanks out.
+    // Fix: stamp `complete = true` once the tile is ready, so it survives _abortLoading.
     let FilteredDwdWMS = null;
     function ensureFilteredClass() {
         if (FilteredDwdWMS || typeof L === 'undefined') return FilteredDwdWMS;
@@ -138,23 +162,37 @@
                 tile.width = size.x;
                 tile.height = size.y;
                 const ctx = tile.getContext('2d', { willReadFrequently: true });
-                const img = new Image();
-                img.crossOrigin = 'anonymous';
-                img.onload = function () {
+                const dwdImg = new Image(); dwdImg.crossOrigin = 'anonymous';
+                const rvImg = new Image(); rvImg.crossOrigin = 'anonymous';
+                let dwdState = 0, rvState = 0;   // 0 pending · 1 ok · -1 failed
+                function finish() {
+                    if (dwdState === 0 || rvState === 0) return;   // wait for BOTH sources
                     try {
-                        ctx.drawImage(img, 0, 0, size.x, size.y);
+                        let rvData = null;
+                        if (rvState === 1) {
+                            const rc = document.createElement('canvas'); rc.width = size.x; rc.height = size.y;
+                            const rcx = rc.getContext('2d', { willReadFrequently: true });
+                            drawRvForCoords(rcx, rvImg, coords, size);
+                            rvData = rcx.getImageData(0, 0, size.x, size.y).data;
+                        }
+                        if (dwdState === 1) ctx.drawImage(dwdImg, 0, 0, size.x, size.y);
                         const id = ctx.getImageData(0, 0, size.x, size.y);
-                        filterDwdPixels(id.data);
+                        compositeDwdRv(id.data, rvData);
                         ctx.putImageData(id, 0, 0);
                     } catch (e) {
-                        // tainted canvas / decode issue → fall back to the unfiltered tile
-                        try { ctx.clearRect(0, 0, size.x, size.y); ctx.drawImage(img, 0, 0, size.x, size.y); } catch (_) {}
+                        // tainted/decoding → fall back to the raw DWD tile (if any)
+                        try { ctx.clearRect(0, 0, size.x, size.y); if (dwdState === 1) ctx.drawImage(dwdImg, 0, 0, size.x, size.y); } catch (_) {}
                     }
                     tile.complete = true;   // make Leaflet's _abortLoading keep it across zooms
                     done(null, tile);
-                };
-                img.onerror = function (e) { tile.complete = true; done(e, tile); };
-                img.src = this.getTileUrl(coords);
+                }
+                dwdImg.onload = function () { dwdState = 1; finish(); };
+                dwdImg.onerror = function () { dwdState = -1; finish(); };
+                rvImg.onload = function () { rvState = 1; finish(); };
+                rvImg.onerror = function () { rvState = -1; finish(); };
+                dwdImg.src = this.getTileUrl(coords);
+                const ru = rvTileUrl(coords);
+                if (ru) { rvImg.src = ru; } else { rvState = -1; finish(); }
                 return tile;
             }
         });
@@ -194,15 +232,14 @@
         });
     }
 
-    // Latest observed RainViewer frame as a single layer — the global base under the DWD
-    // overlay so areas outside DWD's German coverage are still filled (NL, FR, …).
-    async function rvCurrentLayer() {
+    // Fetch the current RainViewer frame (host + latest observed path) into rvHost/rvPath, which
+    // the DE composite tiles read to fill their outside-coverage (EU) pixels.
+    async function fetchRvInfo() {
         const res = await fetch(RV_API, { cache: 'no-store' });
         if (!res.ok) throw new Error('HTTP ' + res.status);
         const data = await res.json();
         const past = (data.radar && data.radar.past) || [];
-        if (!past.length) return null;
-        return rvLayer(data.host, past[past.length - 1]);
+        if (data.host && past.length) { rvHost = data.host; rvPath = past[past.length - 1].path; }
     }
 
     // Build the frame list for `which`. Returns true if a timeline was built.
@@ -359,11 +396,13 @@
         catch (e) { dbg('RainRadar: Frame-Aufbau fehlgeschlagen (' + (e && e.message ? e.message : e) + ')'); }
         if (!on) return;
         provider = which;
-        // DWD only covers Germany → lay a RainViewer base underneath so the rest of the view
-        // (NL, FR, …) stays filled. The slider/+2 h forecast drives the DWD layer on top.
-        if (which === 'dwd' && !baseLayer) {
-            try { const b = await rvCurrentLayer(); if (b && on) { baseLayer = b; baseLayer.addTo(map); } }
-            catch (e) { dbg('RainRadar: RainViewer-Basis fehlgeschlagen (' + (e && e.message ? e.message : e) + ')'); }
+        // For the DE composite each DWD tile fills its OUTSIDE-coverage pixels with the current
+        // RainViewer frame → fetch host+path once (the tiles read rvHost/rvPath). No separate
+        // base layer, so nothing bleeds inside the coverage.
+        if (which === 'dwd') {
+            try { await fetchRvInfo(); }
+            catch (e) { dbg('RainRadar: RainViewer-Info fehlgeschlagen (' + (e && e.message ? e.message : e) + ')'); }
+            if (!on) return;
         }
         if (ok && frames.length) {
             buildUI();
