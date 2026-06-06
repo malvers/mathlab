@@ -1293,6 +1293,7 @@
         integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <!-- Leaflet.hotline — draws the track as a speed-coloured gradient -->
     <script src="https://unpkg.com/leaflet-hotline@0.4.0/dist/leaflet.hotline.js"></script>
+    <script src="../js/track-render.js"></script>
     <script src="../js/cyber-clock.js"></script>
     <script src="../js/debug-window.js"></script>
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
@@ -1349,70 +1350,12 @@
         // ABSOLUTE colour scale (comparable across tracks). Walking (0–5 km/h) gets the lower HALF
         // of the scale as its own rich green sub-ramp; 5 km/h → MAX_KMH fills the upper half.
         const MAX_KMH = 40;
-        function speedToScale(kmh) {
-            if (kmh <= 5) return (kmh / 5) * 0.5;                       // 0–5 km/h  → 0.0–0.5 (walking)
-            return 0.5 + Math.min((kmh - 5) / (MAX_KMH - 5), 1) * 0.5;  // 5–40 km/h → 0.5–1.0
-        }
-        const SPEED_PALETTE = {
-            0.00: 'rgb(40,90,30)',    //  0 km/h   deep green
-            0.25: 'rgb(121,158,49)',  //  2.5      brand green (φ)
-            0.50: 'rgb(180,200,70)',  //  5 km/h   light lime — top of the walking sub-scale
-            0.70: 'rgb(245,194,66)',  // ~15       orange (λ)
-            1.00: 'rgb(176,36,24)',   // 40+       red (Υ)
-        };
-        // Per-mode colour: each travel mode goes white (slow) → its colour (fast), with a sensible
-        // km/h span. 'unknown' (web / before first detection) falls back to the absolute speed scale.
-        const MODE_COLORS = {
-            walking:    { max: 6,  palette: { 0: '#ffffff', 1: 'rgb(121,158,49)' } },                        // white → green
-            running:    { max: 14, palette: { 0: '#ffffff', 1: 'rgb(60,180,120)' } },                        // white → teal-green
-            on_bicycle: { max: 30, palette: { 0: '#ffffff', 1: 'rgb(60,130,210)' } },                        // white → blue
-            in_vehicle: { max: 80, palette: { 0: '#ffffff', 0.5: 'rgb(245,194,66)', 1: 'rgb(176,36,24)' } }, // white → orange → red
-            still:      { max: 1,  palette: { 0: 'rgb(150,165,190)', 1: 'rgb(150,165,190)' } },              // flat grey
-        };
-        const GAP_SEC = 20;   // s between two consecutive recorded points
-        const GAP_M = 30;     // m — only when there's a real jump too (not a standing-still pause)
+        // Track-Renderer (Farbskalen, Gap-Logik, Run-Splitting) lebt zentral in ../js/track-render.js
+        // — single source of truth, geteilt mit view.html. Hier nur der seiteneigene Layer + ein
+        // dünner Wrapper, der den lokalen State (track/times/speeds/activities) reinreicht.
         const trackLayer = L.layerGroup().addTo(map);
-
-        function isGap(i) {
-            return times[i] && times[i - 1]
-                && ((Date.parse(times[i]) - Date.parse(times[i - 1])) / 1000 > GAP_SEC)
-                && (haversine(track[i - 1], track[i]) > GAP_M);
-        }
-        // Draw one continuous run, coloured by its travel mode (white → mode-colour by speed).
-        function drawRun(idxs, activity) {
-            if (idxs.length < 2) return; // a lone point has no segment to draw
-            const mode = MODE_COLORS[activity];
-            if (usesHotline) {
-                const pal = mode ? mode.palette : SPEED_PALETTE;
-                const data = idxs.map(i => {
-                    const kmh = speeds[i] != null ? speeds[i] : 0;
-                    const v = mode ? Math.min(kmh / mode.max, 1) : speedToScale(kmh);
-                    return [track[i][0], track[i][1], v];
-                });
-                L.hotline(data, { weight: 5, outlineWidth: 1, outlineColor: 'rgba(8,20,42,0.6)', palette: pal, min: 0, max: 1 }).addTo(trackLayer);
-            } else {
-                L.polyline(idxs.map(i => track[i]), { color: COL_ORANGE, weight: 5, opacity: 0.9 }).addTo(trackLayer);
-            }
-        }
-        // White/red barber-pole over a gap (two offset dashed lines), no speed colour beneath.
-        function drawGap(a, b) {
-            const seg = [track[a], track[b]];
-            L.polyline(seg, { color: '#ffffff', weight: 4, dashArray: '10 10', interactive: false }).addTo(trackLayer);
-            L.polyline(seg, { color: 'rgb(176,36,24)', weight: 4, dashArray: '10 10', dashOffset: '10', interactive: false }).addTo(trackLayer);
-        }
-        // Rebuild: split into runs at gaps AND at mode changes; each run coloured by its mode.
         function redrawTrack() {
-            trackLayer.clearLayers();
-            if (!track.length) return;
-            let run = [0];
-            let runAct = activities[0] || 'unknown';
-            for (let i = 1; i < track.length; i++) {
-                const act = activities[i] || 'unknown';
-                if (isGap(i)) { drawRun(run, runAct); drawGap(i - 1, i); run = [i]; runAct = act; }
-                else if (act !== runAct) { drawRun(run, runAct); run = [i - 1, i]; runAct = act; } // overlap point → continuous
-                else run.push(i);
-            }
-            drawRun(run, runAct);
+            TrackRender.redraw({ track, times, speeds, activities, layer: trackLayer, usesHotline });
         }
         let posMarker = null;
 

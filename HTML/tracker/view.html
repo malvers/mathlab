@@ -260,6 +260,7 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
         integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <script src="https://unpkg.com/leaflet-hotline@0.4.0/dist/leaflet.hotline.min.js"></script>
+    <script src="../js/track-render.js"></script>
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <script>
         const $ = id => document.getElementById(id);
@@ -287,57 +288,11 @@
         // ---- speed/mode colouring — identical scheme to the recorder ----
         const usesHotline = !!L.hotline;
         const MAX_KMH = 40;
-        function speedToScale(kmh) {
-            if (kmh <= 5) return (kmh / 5) * 0.5;
-            return 0.5 + Math.min((kmh - 5) / (MAX_KMH - 5), 1) * 0.5;
-        }
-        const SPEED_PALETTE = { 0.00: 'rgb(40,90,30)', 0.25: 'rgb(121,158,49)', 0.50: 'rgb(180,200,70)', 0.70: 'rgb(245,194,66)', 1.00: 'rgb(176,36,24)' };
-        const MODE_COLORS = {
-            walking:    { max: 6,  palette: { 0: '#ffffff', 1: 'rgb(121,158,49)' } },
-            running:    { max: 14, palette: { 0: '#ffffff', 1: 'rgb(60,180,120)' } },
-            on_bicycle: { max: 30, palette: { 0: '#ffffff', 1: 'rgb(60,130,210)' } },
-            in_vehicle: { max: 80, palette: { 0: '#ffffff', 0.5: 'rgb(245,194,66)', 1: 'rgb(176,36,24)' } },
-            still:      { max: 1,  palette: { 0: 'rgb(150,165,190)', 1: 'rgb(150,165,190)' } },
-        };
-        const GAP_SEC = 20, GAP_M = 30;
+        // Renderer (Farbskalen / Gap-Logik / Run-Splitting) lebt zentral in ../js/track-render.js
+        // — single source of truth, geteilt mit tracker.html. Hier nur Layer + dünner Wrapper.
         const trackLayer = L.layerGroup().addTo(map);
-
-        function isGap(i) {
-            return times[i] && times[i - 1]
-                && ((Date.parse(times[i]) - Date.parse(times[i - 1])) / 1000 > GAP_SEC)
-                && (haversine(track[i - 1], track[i]) > GAP_M);
-        }
-        function drawRun(idxs, activity) {
-            if (idxs.length < 2) return;
-            const mode = MODE_COLORS[activity];
-            if (usesHotline) {
-                const pal = mode ? mode.palette : SPEED_PALETTE;
-                const data = idxs.map(i => {
-                    const kmh = speeds[i] != null ? speeds[i] : 0;
-                    const v = mode ? Math.min(kmh / mode.max, 1) : speedToScale(kmh);
-                    return [track[i][0], track[i][1], v];
-                });
-                L.hotline(data, { weight: 5, outlineWidth: 1, outlineColor: 'rgba(8,20,42,0.6)', palette: pal, min: 0, max: 1 }).addTo(trackLayer);
-            } else {
-                L.polyline(idxs.map(i => track[i]), { color: COL_ORANGE, weight: 5, opacity: 0.9 }).addTo(trackLayer);
-            }
-        }
-        function drawGap(a, b) {
-            const seg = [track[a], track[b]];
-            L.polyline(seg, { color: '#ffffff', weight: 4, dashArray: '10 10', interactive: false }).addTo(trackLayer);
-            L.polyline(seg, { color: 'rgb(176,36,24)', weight: 4, dashArray: '10 10', dashOffset: '10', interactive: false }).addTo(trackLayer);
-        }
         function redrawTrack() {
-            trackLayer.clearLayers();
-            if (!track.length) return;
-            let run = [0], runAct = activities[0] || 'unknown';
-            for (let i = 1; i < track.length; i++) {
-                const act = activities[i] || 'unknown';
-                if (isGap(i)) { drawRun(run, runAct); drawGap(i - 1, i); run = [i]; runAct = act; }
-                else if (act !== runAct) { drawRun(run, runAct); run = [i - 1, i]; runAct = act; }
-                else run.push(i);
-            }
-            drawRun(run, runAct);
+            TrackRender.redraw({ track, times, speeds, activities, layer: trackLayer, usesHotline });
         }
 
         // ---- photo pins + lightbox ----
