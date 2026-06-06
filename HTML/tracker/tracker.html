@@ -964,7 +964,7 @@
             font-family: system-ui, -apple-system, sans-serif;
             font-size: 0.82rem;
             color: rgba(255, 255, 255, 0.82);
-            padding: 5px 0;
+            padding: 11px 0;
             border-top: 1px solid rgba(255, 255, 255, 0.07);
         }
 
@@ -1257,12 +1257,11 @@
 
     <!-- Radial action popup (long-press / right-click) — style ported from worldclock -->
     <div id="mini-stack">
-        <button class="mini-btn" id="mb-reburn">BILDER ANALYSIEREN</button>
         <button class="mini-btn" id="mb-load">LADEN</button>
-        <button class="mini-btn" id="mb-share">TEILEN</button>
-        <button class="mini-btn" id="mb-settings">EINSTELLUNGEN</button>
+        <button class="mini-btn" id="mb-fit">FIT TRACK</button>
+        <button class="mini-btn" id="mb-sharetrack">SHARE TRACK</button>
         <button class="mini-btn" id="mb-rain">REGEN</button>
-        <button class="mini-btn" id="mb-info">INFO</button>
+        <button class="mini-btn" id="mb-settings">EINSTELLUNGEN</button>
     </div>
 
     <!-- Centered overlay panels (track list + GNSS info) -->
@@ -1327,6 +1326,20 @@
             <div class="set-row"><span>Tempo-Limit</span><span>~1000 Anfragen / Min</span></div>
             <div class="set-row"><span>Drosselung</span><span>0,3 s zwischen Fotos</span></div>
             <a class="sync-link" href="https://ai.dev/rate-limit" target="_blank" rel="noopener">Nutzung &amp; Limits live ansehen ↗</a>
+          </div><!-- /set-card -->
+
+          <!-- Card: Foto-Spur — re-run the AI analysis on still-unrecognised photos -->
+          <div class="set-card">
+            <div class="set-card-title">Foto-Spur</div>
+            <p class="set-card-sub">Noch nicht erkannte Fotos erneut per KI analysieren.</p>
+            <button class="sync-btn primary" id="set-reburn" type="button">Bilder analysieren</button>
+          </div><!-- /set-card -->
+
+          <!-- Card: Info — GNSS sources / „Wir nutzen alle Quellen" (opens the info panel) -->
+          <div class="set-card">
+            <div class="set-card-title">Info</div>
+            <p class="set-card-sub">Welche Satelliten-Systeme &amp; Quellen die App nutzt.</p>
+            <button class="sync-btn primary" id="set-info" type="button">Info anzeigen</button>
           </div><!-- /set-card -->
         </div>
         <button class="ov-close" id="settings-close" aria-label="Schließen">&times;</button>
@@ -2663,9 +2676,11 @@ ${pts}
         $('info-close').addEventListener('click', hidePanels);
 
         // ---- Popup actions ----
-        $('mb-reburn').addEventListener('click', async () => {
+        // FIT TRACK — zoom/pan the map so the whole current track fits the screen.
+        $('mb-fit').addEventListener('click', () => {
             closePopup();
-            await reburnTrack();
+            if (!track || !track.length) { toast('Kein Track zum Einpassen.'); return; }
+            map.fitBounds(L.latLngBounds(track), { padding: [40, 40] });
         });
 
         $('mb-load').addEventListener('click', async () => {
@@ -2678,7 +2693,14 @@ ${pts}
             showPanel('track-list');
         });
 
-        $('mb-info').addEventListener('click', () => { closePopup(); $('info-body').innerHTML = (gnssActive ? gnssLiveHtml() : '') + GNSS_INFO; showPanel('info-panel'); });
+        // SHARE TRACK (popup) — share the current track (same action as TEILEN)
+        $('mb-sharetrack').addEventListener('click', () => {
+            closePopup();
+            if (!currentTrackId) { toast('Erst einen Track laden oder speichern.'); return; }
+            shareTrack(currentTrackId, currentTrackName);
+        });
+        // Info card (settings) → open the GNSS-sources info panel
+        $('set-info').addEventListener('click', () => { $('info-body').innerHTML = (gnssActive ? gnssLiveHtml() : '') + GNSS_INFO; showPanel('info-panel'); });
         // REGEN toggles the optional rain-radar overlay; reflect on/off on the button (.active).
         $('mb-rain').addEventListener('click', (e) => {
             const isOn = RainRadar.toggle();
@@ -2713,11 +2735,8 @@ ${pts}
             }
         }
         $('mb-settings').addEventListener('click', () => { closePopup(); updateSyncStatus(); showPanel('settings-panel'); });
-        $('mb-share').addEventListener('click', () => {
-            closePopup();
-            if (!currentTrackId) { toast('Erst einen Track laden oder speichern.'); return; }
-            shareTrack(currentTrackId, currentTrackName);
-        });
+        // Foto-Spur card → re-run the AI analysis on still-unrecognised photos
+        $('set-reburn').addEventListener('click', async () => { await reburnTrack(); });
         // "Code erzeugen" generates AND connects this device in one step
         $('sync-gen').addEventListener('click', async () => {
             toast('Verbinde …');

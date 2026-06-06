@@ -47,6 +47,7 @@
 
     // slider UI
     let ui = null, slider = null, lbl = null, playBtn = null, playTimer = null;
+    let vignette = null;    // soft screen-edge darkening while the radar is on (focus the middle)
 
     function dbg(m) {
         if (typeof DebugWindow !== 'undefined' && DebugWindow && DebugWindow.log) DebugWindow.log(m);
@@ -70,6 +71,8 @@
             transparent: true,
             version: '1.3.0',
             time: isoMin(ms),       // forwarded as a WMS query param (not a Leaflet option)
+            interpolations: 'bilinear', // GeoServer renders the 1 km grid smoothed → soft gradients
+                                        // instead of blocky cells (measured: WetterOnline-like look)
             pane: PANE_NAME,
             opacity: OPACITY,
             attribution: DWD_ATTR,
@@ -189,6 +192,25 @@
         if (ui && ui.parentNode) ui.parentNode.removeChild(ui);
         ui = slider = lbl = playBtn = null;
     }
+
+    // Soft vignette over the map: bright in the middle, darkening towards the edges. It de-
+    // emphasises the busy periphery — including DWD's magenta coverage boundary, which is baked
+    // into the radar tiles and can't be thinned from here. Sits above the map (z 1), below the
+    // HUD (z ≥ 500). Dark blue per house style (never pure black).
+    function addVignette() {
+        removeVignette();
+        vignette = document.createElement('div');
+        vignette.id = 'rain-vignette';
+        vignette.style.cssText = 'position:fixed; inset:0; pointer-events:none; z-index:300;'
+            + 'background:radial-gradient(ellipse 80% 80% at 50% 44%, rgba(8,20,42,0) 48%,'
+            + ' rgba(8,20,42,0.28) 76%, rgba(8,20,42,0.62) 100%);';
+        document.body.appendChild(vignette);
+    }
+    function removeVignette() {
+        if (vignette && vignette.parentNode) vignette.parentNode.removeChild(vignette);
+        vignette = null;
+    }
+
     function togglePlay() { if (playTimer) pause(); else play(); }
     function play() {
         if (playTimer || frames.length < 2) return;
@@ -213,6 +235,7 @@
         catch (e) { dbg('RainRadar: Frame-Aufbau fehlgeschlagen (' + (e && e.message ? e.message : e) + ')'); }
         if (!on) return;
         provider = which;
+        addVignette();
         if (ok && frames.length) {
             buildUI();
             showIndex(nowIdx);
@@ -263,6 +286,7 @@
         if (on) {
             on = false;
             removeUI();
+            removeVignette();
             if (layer) { map.removeLayer(layer); layer = null; }
             frames = [];
             provider = null;
