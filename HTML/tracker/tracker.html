@@ -152,14 +152,14 @@
             <div class="set-card-title">Statistik</div>
             <p class="set-card-sub">Pl@ntNet bestimmt Pflanzen mit höchster Präzision. Google Gemini liefert die Beschreibung — nicht nur für Pflanzen, sondern auch für Kunstwerke, Gebäude usw.</p>
             <div class="set-row"><span>Analysiert</span><span id="use-photos">…</span></div>
-            <div class="set-row"><span style="color:rgb(176,36,24)">Kosten für Tracker</span><span id="use-cost" style="color:rgb(176,36,24)">…</span></div>
+            <div class="set-row"><span style="color:rgb(176,36,24)">Kosten für den Betreiber<br><small style="opacity:.85">nicht für den Nutzer!</small></span><span id="use-cost" style="color:rgb(176,36,24)">…</span></div>
             <a class="sync-link" href="https://aistudio.google.com/rate-limit" target="_blank" rel="noopener">Nutzung &amp; Limits live ansehen ↗</a>
           </div><!-- /set-card -->
 
           <!-- Card: Nicht analysierte Fotos — re-run the AI analysis on still-unrecognised photos -->
           <div class="set-card">
             <div class="set-card-title">Nicht analysierte Fotos</div>
-            <p class="set-card-sub">Noch nicht erkannte Fotos erneut per KI analysieren.</p>
+            <p class="set-card-sub">Noch nicht erkannte Fotos durch z.B. fehlende Internetverbindung können hier nachträglich analysiert werden.</p>
             <button class="sync-btn primary" id="set-reburn" type="button">Bilder analysieren</button>
           </div><!-- /set-card -->
 
@@ -1514,6 +1514,15 @@ ${pts}
         function wpNeedsId(wp) {
             return !wp.title || wp.title === PENDING_TITLE || wp.title === FAIL_TITLE;
         }
+        // Grey out "Bilder analysieren" when there is nothing left to (re-)identify.
+        function updateReburnButton() {
+            const btn = $('set-reburn');
+            if (!btn) return;
+            const none = waypoints.filter(wpNeedsId).length === 0;
+            btn.disabled = none;
+            btn.style.opacity = none ? '0.4' : '';
+            btn.style.cursor = none ? 'default' : '';
+        }
         async function persistReburn() {
             // A loaded/saved track has a DB row to update; a live recording is persisted by
             // the auto-save on STOP. Returns true if a row was actually written
@@ -1637,7 +1646,14 @@ ${pts}
 
         // ---- Overlay panels (track list + info) ----
         const ovBackdrop = $('ov-backdrop');
-        function showPanel(id) { ovBackdrop.classList.add('open'); $(id).classList.add('open'); }
+        function showPanel(id) {
+            // One overlay at a time: close any open panel FIRST. Otherwise a panel opened
+            // from inside another (e.g. "Info anzeigen" within Einstellungen) lands behind
+            // it in the DOM stacking order and looks like nothing happened.
+            document.querySelectorAll('.ov-panel.open').forEach(p => p.classList.remove('open'));
+            ovBackdrop.classList.add('open');
+            $(id).classList.add('open');
+        }
         function hidePanels() {
             ovBackdrop.classList.remove('open');
             document.querySelectorAll('.ov-panel').forEach(p => p.classList.remove('open'));
@@ -1706,9 +1722,9 @@ ${pts}
                 $('sync-input').value = '';
             }
         }
-        $('mb-settings').addEventListener('click', () => { closePopup(); updateSyncStatus(); loadUsage(); showPanel('settings-panel'); });
+        $('mb-settings').addEventListener('click', () => { closePopup(); updateSyncStatus(); loadUsage(); updateReburnButton(); showPanel('settings-panel'); });
         // Foto-Spur card → re-run the AI analysis on still-unrecognised photos
-        $('set-reburn').addEventListener('click', async () => { await reburnTrack(); });
+        $('set-reburn').addEventListener('click', async () => { await reburnTrack(); updateReburnButton(); });
         // "Code erzeugen" generates AND connects this device in one step
         $('sync-gen').addEventListener('click', async () => {
             toast('Verbinde …');
