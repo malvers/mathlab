@@ -47,6 +47,7 @@
 
     // slider UI
     let ui = null, slider = null, lbl = null, playBtn = null, playTimer = null;
+    let baseLayer = null;   // RainViewer "fill" under DWD so the whole view is covered, not just DE
 
     function dbg(m) {
         if (typeof DebugWindow !== 'undefined' && DebugWindow && DebugWindow.log) DebugWindow.log(m);
@@ -54,12 +55,19 @@
     function inGermany(ll) {
         return !!ll && ll.lat >= GERMANY.s && ll.lat <= GERMANY.n && ll.lng >= GERMANY.w && ll.lng <= GERMANY.e;
     }
-    // Doc prefers RainViewer's colours + full European coverage everywhere (no magenta DWD
-    // coverage rim, no out-of-range greying — both come from DWD's WMS style). Flip to true
-    // to bring the sharp DWD 1 km (+2 h forecast) back over Germany.
-    const USE_DWD_IN_DE = false;
+    // In Germany: sharp DWD 1 km (+2 h forecast) on TOP, with a RainViewer base underneath so the
+    // rest of the view (NL, FR, …) is filled too. Elsewhere: RainViewer only. Set false → RV only.
+    const USE_DWD_IN_DE = true;
+    // DWD (sharp DE) kicks in as soon as Germany overlaps the VIEW at all — not just when the
+    // map is centred there — so partial-DE views still get the sharp 1 km over the German part.
+    function germanyInView() {
+        if (!map) return false;
+        const b = map.getBounds();
+        return b.getSouth() < GERMANY.n && b.getNorth() > GERMANY.s
+            && b.getWest() < GERMANY.e && b.getEast() > GERMANY.w;
+    }
     function pickProvider() {
-        return (USE_DWD_IN_DE && inGermany(map.getCenter())) ? 'dwd' : 'rv';
+        return (USE_DWD_IN_DE && germanyInView()) ? 'dwd' : 'rv';
     }
     // ISO without milliseconds (what WMS time dimensions expect): 2026-06-06T08:35:00Z
     function isoMin(ms) {
@@ -80,6 +88,7 @@
             opacity: OPACITY,
             attribution: DWD_ATTR,
             maxZoom: 21,            // WMS renders every zoom on demand → crisp at any level
+            zIndex: 5,              // sits ABOVE the RainViewer base (zIndex 1)
         });
     }
     function rvLayer(host, frame) {
@@ -93,6 +102,17 @@
             maxZoom: 21,
             zIndex: 1,
         });
+    }
+
+    // Latest observed RainViewer frame as a single layer — the global base under the DWD
+    // overlay so areas outside DWD's German coverage are still filled (NL, FR, …).
+    async function rvCurrentLayer() {
+        const res = await fetch(RV_API, { cache: 'no-store' });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+        const past = (data.radar && data.radar.past) || [];
+        if (!past.length) return null;
+        return rvLayer(data.host, past[past.length - 1]);
     }
 
     // Build the frame list for `which`. Returns true if a timeline was built.
@@ -230,6 +250,12 @@
         catch (e) { dbg('RainRadar: Frame-Aufbau fehlgeschlagen (' + (e && e.message ? e.message : e) + ')'); }
         if (!on) return;
         provider = which;
+        // DWD only covers Germany → lay a RainViewer base underneath so the rest of the view
+        // (NL, FR, …) stays filled. The slider/+2 h forecast drives the DWD layer on top.
+        if (which === 'dwd' && !baseLayer) {
+            try { const b = await rvCurrentLayer(); if (b && on) { baseLayer = b; baseLayer.addTo(map); } }
+            catch (e) { dbg('RainRadar: RainViewer-Basis fehlgeschlagen (' + (e && e.message ? e.message : e) + ')'); }
+        }
         if (ok && frames.length) {
             buildUI();
             showIndex(nowIdx);
@@ -258,6 +284,7 @@
         if (!on || !map) return;
         if (pickProvider() !== provider) {
             if (layer) { map.removeLayer(layer); layer = null; }
+            if (baseLayer) { map.removeLayer(baseLayer); baseLayer = null; }
             removeUI();
             start();
         }
@@ -281,6 +308,7 @@
             on = false;
             removeUI();
             if (layer) { map.removeLayer(layer); layer = null; }
+            if (baseLayer) { map.removeLayer(baseLayer); baseLayer = null; }
             frames = [];
             provider = null;
             dbg('RainRadar: aus');
