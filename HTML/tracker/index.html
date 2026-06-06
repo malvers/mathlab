@@ -192,6 +192,95 @@
             font-size: 0.8rem;
             color: var(--muted);
         }
+
+        /* ---- Info dialog (shown when the user picks the browser version) ---- */
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            background: rgba(5, 13, 30, 0.72);
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-backdrop[hidden] {
+            display: none;
+        }
+
+        .modal {
+            position: relative;
+            width: 100%;
+            max-width: 460px;
+            background: linear-gradient(180deg, rgba(14, 36, 78, 0.96), rgba(8, 20, 42, 0.98));
+            border: 1px solid rgba(var(--orange-rgb), 0.35);
+            border-radius: 20px;
+            box-shadow: 0 24px 70px rgba(0, 0, 0, 0.55);
+            padding: clamp(26px, 5vw, 36px);
+            text-align: left;
+        }
+
+        .modal h3 {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            font-size: clamp(1.1rem, 4vw, 1.35rem);
+            letter-spacing: 1px;
+            color: var(--orange);
+            margin-bottom: 14px;
+        }
+
+        .modal p {
+            color: var(--ink);
+            font-size: 0.96rem;
+            line-height: 1.6;
+            margin-bottom: 14px;
+        }
+
+        .modal p b {
+            color: #fff;
+            font-weight: 600;
+        }
+
+        .wm-link {
+            color: var(--orange);
+            font-weight: 600;
+            text-decoration: none;
+            border-bottom: 1px solid rgba(var(--orange-rgb), 0.5);
+        }
+
+        .wm-link:hover {
+            color: #fff;
+        }
+
+        .wm-vibe {
+            color: var(--muted);
+        }
+
+        .modal .btn {
+            margin-top: 6px;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 12px;
+            right: 14px;
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            border: 1px solid var(--line);
+            background: transparent;
+            color: var(--ink);
+            font-size: 1.6rem;
+            line-height: 1;
+            cursor: pointer;
+        }
+
+        .modal-close:hover {
+            color: var(--orange);
+            border-color: rgba(var(--orange-rgb), 0.5);
+        }
     </style>
 </head>
 
@@ -216,7 +305,7 @@
             </svg>
             <h2>Im Browser</h2>
             <p class="line">Öffnen. Starten. Laufen.</p>
-            <a class="btn" href="tracker.html">ÖFFNEN</a>
+            <a class="btn" href="tracker.html" id="web-open">ÖFFNEN</a>
         </div>
 
         <!-- Tile 2 — download the Android APK -->
@@ -233,6 +322,32 @@
             <a class="btn" href="doc-alvers-tracker.apk" download="doc-alvers-tracker.apk">INSTALLIEREN</a>
         </div>
     </div>
+
+    <!-- Info dialog shown when the user picks the browser version -->
+    <div id="web-modal" class="modal-backdrop" hidden>
+        <div class="modal" role="dialog" aria-modal="true" aria-labelledby="wm-title">
+            <button class="modal-close" id="wm-close" aria-label="Schließen">&times;</button>
+            <h3 id="wm-title">Ohne App tracken</h3>
+            <p>Dieser Tracker läuft <b>ohne App</b> — praktisch, aber mit einem Haken: Du musst die Website
+                <b>offen halten</b>. Verlässt du die Seite, <b>pausiert die Aufzeichnung</b>.</p>
+            <p>Willst du <b>immer</b> tracken — auch wenn die App nicht sichtbar ist — nimm die
+                <a class="wm-link" href="doc-alvers-tracker.apk" download="doc-alvers-tracker.apk">App&nbsp;↗</a>.
+                Auch dort: kein Login, keine Werbung, keine Beobachtung durch uns.</p>
+            <p class="wm-vibe">Wie das geht? Doc Alvers hat einfach Spaß am Vibe Coding 😊</p>
+            <a class="btn" href="tracker.html" id="wm-go">Web-Version starten →</a>
+        </div>
+    </div>
+
+    <script>
+        // The browser version pauses when its tab loses focus — warn first, then let the user proceed.
+        const webModal = document.getElementById('web-modal');
+        const showModal = () => { webModal.hidden = false; };
+        const hideModal = () => { webModal.hidden = true; };
+        document.getElementById('web-open').addEventListener('click', (e) => { e.preventDefault(); showModal(); });
+        document.getElementById('wm-close').addEventListener('click', hideModal);
+        webModal.addEventListener('click', (e) => { if (e.target === webModal) hideModal(); }); // backdrop tap
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !webModal.hidden) hideModal(); });
+    </script>
 </body>
 
 </html>

@@ -719,6 +719,12 @@
             transform: translate(-50%, -50%) scale(0.95);
         }
 
+        /* REGEN toggle in its ON state → highlight in brand green so it's visibly active */
+        #mini-stack.popup .mini-btn.active {
+            color: var(--green);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5), inset 0 0 0 1.5px rgba(121, 158, 49, 0.85);
+        }
+
         /* ---- Centered overlay panels (track list + info) ---- */
         #ov-backdrop {
             position: fixed;
@@ -1248,6 +1254,7 @@
         <button class="mini-btn" id="mb-load">LADEN</button>
         <button class="mini-btn" id="mb-share">TEILEN</button>
         <button class="mini-btn" id="mb-settings">EINSTELLUNGEN</button>
+        <button class="mini-btn" id="mb-rain">REGEN</button>
         <button class="mini-btn" id="mb-info">INFO</button>
     </div>
 
@@ -1343,6 +1350,7 @@
     <!-- Leaflet.hotline — draws the track as a speed-coloured gradient -->
     <script src="https://unpkg.com/leaflet-hotline@0.4.0/dist/leaflet.hotline.js"></script>
     <script src="../js/track-render.js"></script>
+    <script src="../js/rain-radar.js"></script>
     <script src="../js/cyber-clock.js"></script>
     <script src="../js/debug-window.js"></script>
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
@@ -1366,6 +1374,10 @@
         }).setView([51.1657, 10.4515], 6); // centre of Germany as a neutral start
         L.control.zoom({ position: 'bottomright' }).addTo(map);
         map.attributionControl.setPrefix(false); // drop the "Leaflet" prefix → shorter bar, stays out from under START
+
+        // Optional rain-radar overlay (off by default; toggled via the REGEN radial button).
+        // Lives in ../js/rain-radar.js — its dedicated pane sits below the track + photo pins.
+        if (typeof RainRadar !== 'undefined') RainRadar.init(map);
 
         // The map auto-follows new fixes until you take over (drag) — ZENTRIEREN re-enables it.
         // The position dot is hidden during zoom animations so it doesn't jump, then fades back.
@@ -2655,6 +2667,13 @@ ${pts}
         });
 
         $('mb-info').addEventListener('click', () => { closePopup(); $('info-body').innerHTML = (gnssActive ? gnssLiveHtml() : '') + GNSS_INFO; showPanel('info-panel'); });
+        // REGEN toggles the optional rain-radar overlay; reflect on/off on the button (.active).
+        $('mb-rain').addEventListener('click', (e) => {
+            const isOn = RainRadar.toggle();
+            e.currentTarget.classList.toggle('active', isOn);
+            toast(isOn ? 'Regenradar an' : 'Regenradar aus');
+            closePopup();
+        });
         $('menu-fab').addEventListener('click', () => openPopup());
         $('recenter-fab').addEventListener('click', () => centerOnPosition());
 
