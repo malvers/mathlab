@@ -21,6 +21,20 @@
         document.write('<link rel="stylesheet" href="../js/cyber-clock.css' + window.__ASSET_V + '">');
         document.write('<link rel="stylesheet" href="tracker.css' + window.__ASSET_V + '">');
     </script>
+    <!-- Register the tracker service worker (network-first) so a fresh deploy is picked
+         up on the next load instead of waiting out GitHub Pages' max-age=600. Scope is
+         limited to /tracker/ (sw.js lives here) → it can't affect the other apps.
+         updateViaCache:'none' keeps the SW script itself from getting stuck behind that
+         same 10-min cache. -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function () {
+                navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' })
+                    .then(function (r) { if (window.DebugWindow) DebugWindow.log('SW aktiv (scope ' + r.scope + ')'); })
+                    .catch(function (e) { if (window.DebugWindow) DebugWindow.log('SW Fehler: ' + e); });
+            });
+        }
+    </script>
 </head>
 
 <body>
@@ -45,7 +59,7 @@
         <button id="trk-finish">STOP</button>
     </div>
 
-    <!-- Recenter button — appears centred above STOP when the map is no longer following -->
+    <!-- Recenter button — appears centred above STOP when the position is no longer in view -->
     <button id="recenter-fab" aria-label="Zentrieren">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
             stroke-linejoin="round">
@@ -251,10 +265,16 @@
         let following = !viewRestored; // a restored viewport stays put (don't auto-follow GPS away from it)
         function refreshRecenter() {
             const btn = $('recenter-fab');
-            if (btn) btn.classList.toggle('show', !following && !!posMarker);
+            if (!btn) return;
+            const pos = posMarker && posMarker.getLatLng && posMarker.getLatLng();
+            // Show the recenter button whenever the position isn't (comfortably) in view — i.e. the
+            // map is no longer AROUND the POS. The slight inset means a dot drifting to the edge counts.
+            const around = pos && map.getBounds().pad(-0.15).contains(pos);
+            btn.classList.toggle('show', !!pos && !around);
         }
         function setFollowing(v) { following = v; refreshRecenter(); }
         map.on('dragstart', () => setFollowing(false));
+        map.on('moveend zoomend', refreshRecenter); // view moved → POS may have left/entered the view
         map.on('zoomstart', () => {
             const el = posMarker && posMarker.getElement && posMarker.getElement();
             if (el) { el.style.transition = 'none'; el.style.opacity = '0'; }
