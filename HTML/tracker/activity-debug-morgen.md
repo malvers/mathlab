@@ -3,7 +3,7 @@
 Stand 2026-06-05. Frage: Reisemodus-Icon (laufen/fahren) wirkt nur speed-basiert.
 
 ## Was schon drin ist
-- Activity-Diagnose über zentrale `DebugWindow.log()` — in `tracker.html`, Funktion `startActivity()` (~Zeile 2831).
+- Activity-Diagnose über zentrale `DebugWindow.log()` — in `tracker.html`, Funktion `startActivity()` (~Zeile 2886).
 - **Kein APK-Neubau nötig**: `tracker.html` lädt live (Plan A, docalvers.de).
 
 ## Morgen: Test
@@ -31,7 +31,7 @@ Drei mögliche Befunde:
 - Dependency `play-services-location:21.3.0` vorhanden (build.gradle)
 - Permission `ACTIVITY_RECOGNITION` im Manifest
 - Plugin registriert (MainActivity.java:12)
-- JS ruft `startActivity()` beim Tracking-Start (tracker.html:1793)
+- JS ruft `startActivity()` beim Tracking-Start (tracker.html:1805)
 - Permission wurde am Gerät erteilt (Doc bestätigt) → Grund „nie gefragt" fällt raus.
 
 ## Nebenbei: Outdoor-Zugang steht
