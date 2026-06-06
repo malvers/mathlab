@@ -114,6 +114,13 @@
     // A DWD WMS layer that pushes every tile through filterDwdPixels() on a canvas before it
     // is shown. Built lazily so Leaflet (L) is guaranteed loaded. CORS on maps.dwd.de is
     // 'Access-Control-Allow-Origin: *' (measured) → the crossOrigin canvas read is allowed.
+    //
+    // GOTCHA (measured): Leaflet's _abortLoading() prunes every tile of a zoom level being
+    // left whose `tile.complete` is not truthy. A real <img> reports complete===true once
+    // loaded, so it is retained as parent coverage during a zoom; a <canvas> has NO `complete`
+    // property → Leaflet treats every loaded canvas tile as "still loading" and removes it the
+    // instant you zoom → the whole DWD layer blanks out. Fix: stamp `complete = true` on the
+    // canvas once it is ready, so it survives _abortLoading just like an <img> would.
     let FilteredDwdWMS = null;
     function ensureFilteredClass() {
         if (FilteredDwdWMS || typeof L === 'undefined') return FilteredDwdWMS;
@@ -136,9 +143,10 @@
                         // tainted canvas / decode issue → fall back to the unfiltered tile
                         try { ctx.clearRect(0, 0, size.x, size.y); ctx.drawImage(img, 0, 0, size.x, size.y); } catch (_) {}
                     }
+                    tile.complete = true;   // make Leaflet's _abortLoading keep it across zooms
                     done(null, tile);
                 };
-                img.onerror = function (e) { done(e, tile); };
+                img.onerror = function (e) { tile.complete = true; done(e, tile); };
                 img.src = this.getTileUrl(coords);
                 return tile;
             }
