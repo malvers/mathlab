@@ -147,20 +147,18 @@
             </div>
           </div><!-- /set-card -->
 
-          <!-- Card: Kosten & Limits (hybrid: Pl@ntNet identifies the plant, Gemini explains it) -->
+          <!-- Card: Statistik — actual consumption (estimate from the stored photos) -->
           <div class="set-card">
-            <div class="set-card-title">Kosten &amp; Limits</div>
-            <p class="set-card-sub">Pl@ntNet bestimmt die Pflanze (Free Tier), Gemini 2.5 Flash schreibt die Erklärung (Paid Tier).</p>
-            <div class="set-row"><span>Kosten</span><span>~0,05 ct / Foto</span></div>
-            <div class="set-row"><span>Tages-Limit</span><span>500 Fotos / Tag (Pl@ntNet)</span></div>
-            <div class="set-row"><span>Tempo-Limit</span><span>~1000 Anfragen / Min (Gemini)</span></div>
-            <div class="set-row"><span>Drosselung</span><span>0,3 s zwischen Fotos</span></div>
+            <div class="set-card-title">Statistik</div>
+            <p class="set-card-sub">Pl@ntNet bestimmt Pflanzen mit höchster Präzision. Google Gemini liefert die Beschreibung — nicht nur für Pflanzen, sondern auch für Kunstwerke, Gebäude usw.</p>
+            <div class="set-row"><span>Analysiert</span><span id="use-photos">…</span></div>
+            <div class="set-row"><span style="color:rgb(176,36,24)">Kosten für Tracker</span><span id="use-cost" style="color:rgb(176,36,24)">…</span></div>
             <a class="sync-link" href="https://aistudio.google.com/rate-limit" target="_blank" rel="noopener">Nutzung &amp; Limits live ansehen ↗</a>
           </div><!-- /set-card -->
 
-          <!-- Card: Foto-Spur — re-run the AI analysis on still-unrecognised photos -->
+          <!-- Card: Nicht analysierte Fotos — re-run the AI analysis on still-unrecognised photos -->
           <div class="set-card">
-            <div class="set-card-title">Foto-Spur</div>
+            <div class="set-card-title">Nicht analysierte Fotos</div>
             <p class="set-card-sub">Noch nicht erkannte Fotos erneut per KI analysieren.</p>
             <button class="sync-btn primary" id="set-reburn" type="button">Bilder analysieren</button>
           </div><!-- /set-card -->
@@ -513,7 +511,10 @@
                     track.push(here); times.push(stamp); alts.push(altVal); speeds.push(spdVal); activities.push(actVal); redrawTrack();
                 }
             }
-            if (track.length !== ptsBefore && typeof TrackBuffer !== 'undefined') TrackBuffer.save(bufferSnapshot());
+            if (track.length !== ptsBefore) {
+                if (typeof TrackBuffer !== 'undefined') TrackBuffer.save(bufferSnapshot());
+                scheduleSync(); // Stage 2: push to the cloud on the fly
+            }
             elDist.textContent = (totalDist / 1000).toFixed(2);
 
             lastFix = { lat: latitude, lng: longitude, t: now };
@@ -711,7 +712,7 @@
             if (!('geolocation' in navigator)) { setStatus('Dieser Browser unterstützt keine Standortbestimmung.'); return; }
             if (!window.isSecureContext) { setStatus('GPS braucht HTTPS oder localhost. Über file:// gibt es keine Position.'); return; }
             clearTrack(true); // silent — the old track was already saved on FINISH
-            currentTrackId = null; currentTrackName = ''; // fresh live track: no saved row yet (set on FINISH)
+            currentTrackId = null; currentTrackName = autoTrackName(); // fresh live track; name from start (autosync + finish reuse it)
             startTime = Date.now();
             startWatch();
             $('hud-top').classList.add('shown'); // reveal the header on first start
@@ -727,6 +728,7 @@
             if (timerId) clearInterval(timerId); timerId = null;
             setTrkState('paused');
             if (typeof TrackBuffer !== 'undefined') TrackBuffer.saveNow(bufferSnapshot());
+            doSync(); // Stage 2: flush to the cloud on pause
             setStatus(track.length ? `Pausiert · ${(totalDist / 1000).toFixed(2)} km` : 'Pausiert.');
         }
 
@@ -742,9 +744,9 @@
         async function finishTracking() {
             setTrkState('idle');
             if (track.length >= 1) {
-                const name = 'Track ' + new Date().toLocaleString('de-DE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+                const name = currentTrackName || autoTrackName();
                 toast('Speichere …');
-                try { currentTrackId = await saveTrack(name); currentTrackName = name; if (typeof TrackBuffer !== 'undefined') await TrackBuffer.clear(); toast('Gespeichert: ' + name); }
+                try { currentTrackId = await saveTrack(name, 'done'); currentTrackName = name; if (typeof TrackBuffer !== 'undefined') await TrackBuffer.clear(); toast('Gespeichert: ' + name); }
                 catch (e) { toast('Speichern fehlgeschlagen (lokal gesichert): ' + (e.message || e)); }
             } else {
                 setStatus('Beendet.');
@@ -763,7 +765,7 @@
         //      the fly so a close/kill/crash — or a failed offline save — never loses it. ----
         function bufferSnapshot() {
             return {
-                v: 1, savedAt: Date.now(), startTime: startTime, totalDist: totalDist,
+                v: 1, savedAt: Date.now(), currentTrackId: currentTrackId, name: currentTrackName, startTime: startTime, totalDist: totalDist,
                 track: track, times: times, alts: alts, speeds: speeds, activities: activities,
                 waypoints: waypoints.map(w => ({ lat: w.lat, lng: w.lng, t: w.t, img: w.img, title: w.title, text: w.text })),
             };
@@ -772,6 +774,7 @@
             if (trkState !== 'idle' || !buf || !Array.isArray(buf.track) || !buf.track.length) return;
             track = buf.track; times = buf.times || []; alts = buf.alts || [];
             speeds = buf.speeds || []; activities = buf.activities || []; totalDist = buf.totalDist || 0;
+            currentTrackId = buf.currentTrackId || null; currentTrackName = buf.name || ''; // re-save UPDATES the same cloud row (no duplicate)
             (buf.waypoints || []).forEach(w => addWaypoint({ lat: w.lat, lng: w.lng, t: w.t, img: w.img, title: w.title, text: w.text }));
             redrawTrack();
             // show the recorded duration; arm pauseStart so CONTINUE doesn't count the closed gap
@@ -788,6 +791,26 @@
         }
         if (typeof TrackBuffer !== 'undefined') {
             TrackBuffer.load().then(buf => { if (buf) restoreBufferedTrack(buf); });
+        }
+
+        // ---- Stage 2: cloud autosync on the fly — upsert the row every SYNC_MS while recording.
+        //      Offline ticks just fail and retry; the local buffer (Stage 1) stays the safety net. ----
+        function autoTrackName() {
+            return 'Track ' + new Date().toLocaleString('de-DE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+        }
+        let syncInflight = false, lastSync = 0, syncTimer = null;
+        const SYNC_MS = 20000; // cloud update cadence while recording (battery/data friendly)
+        async function doSync() {
+            syncTimer = null;
+            if (syncInflight || trkState === 'idle' || !track.length) return;
+            syncInflight = true; lastSync = Date.now();
+            try { await saveTrack(currentTrackName || autoTrackName(), 'recording'); }
+            catch (e) { if (window.DebugWindow) DebugWindow.log('Sync: ' + (e.message || e)); } // offline → retry next tick
+            syncInflight = false;
+        }
+        function scheduleSync() {
+            if (syncTimer || syncInflight) return;
+            syncTimer = setTimeout(doSync, Math.max(0, SYNC_MS - (Date.now() - lastSync)));
         }
 
         // ---------------------------------------------------------------
@@ -976,6 +999,8 @@ ${pts}
         const SYNC_KEY = 'tracker.syncCode';
         function getSyncCode() { return localStorage.getItem(SYNC_KEY) || ''; }
 
+        const EUR_PER_PHOTO = 0.0005; // ~0,05 ct per Gemini identification (Pl@ntNet is free)
+
         async function sha256hex(s) {
             const b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s));
             return Array.from(new Uint8Array(b)).map(x => x.toString(16).padStart(2, '0')).join('');
@@ -1041,27 +1066,39 @@ ${pts}
             return n;
         }
 
-        async function saveTrack(name) {
+        // Save the current in-memory track. If a row already exists for this recording
+        // (currentTrackId — set by the live autosync), UPDATE it instead of inserting a duplicate.
+        // `status` ('recording' | 'done') hides in-progress tracks from the list; if that column
+        // isn't migrated yet, we transparently retry without it (no regression to the old behaviour).
+        async function saveTrack(name, status) {
             const c = await ensureSb();
-            // [lat, lng, time, altitude(m), speed(km/h)] — alt/speed null when unknown
+            // [lat, lng, time, altitude(m), speed(km/h), activity] — alt/speed null when unknown
             const pts = track.map((p, i) => [p[0], p[1], times[i] || null, alts[i] != null ? alts[i] : null, speeds[i] != null ? speeds[i] : null, activities[i] || null]);
             // strip the live Leaflet marker reference before persisting
             const wps = waypoints.map(w => ({ lat: w.lat, lng: w.lng, t: w.t, img: w.img, title: w.title, text: w.text }));
-            const { data, error } = await c.from('tracks').insert({
-                name: name,
-                distance_m: Math.round(totalDist),
-                points: pts,
-                waypoints: wps,
-            }).select('id').single();
+            const row = { name: name, distance_m: Math.round(totalDist), points: pts, waypoints: wps, status: status || 'done' };
+            const missingCol = e => e && /status/i.test(e.message || ''); // 'status' column not migrated yet
+            if (currentTrackId) {                                          // UPDATE the existing (live-synced) row
+                let { error } = await c.from('tracks').update(row).eq('id', currentTrackId);
+                if (missingCol(error)) { const { status: _s, ...bare } = row; ({ error } = await c.from('tracks').update(bare).eq('id', currentTrackId)); }
+                if (error) throw error;
+                return currentTrackId;
+            }
+            let { data, error } = await c.from('tracks').insert(row).select('id').single();
+            if (missingCol(error)) { const { status: _s, ...bare } = row; ({ data, error } = await c.from('tracks').insert(bare).select('id').single()); }
             if (error) throw error;
-            return data ? data.id : null;
+            currentTrackId = data ? data.id : null;
+            return currentTrackId;
         }
 
         async function listTracks() {
             const c = await ensureSb();
-            const { data, error } = await c.from('tracks')
-                .select('id, name, created_at, distance_m')
-                .order('created_at', { ascending: false });
+            // hide in-progress ('recording') tracks; tolerate the 'status' column not existing yet
+            const cols = 'id, name, created_at, distance_m';
+            let { data, error } = await c.from('tracks').select(cols).eq('status', 'done').order('created_at', { ascending: false });
+            if (error && /status/i.test(error.message || '')) {
+                ({ data, error } = await c.from('tracks').select(cols).order('created_at', { ascending: false }));
+            }
             if (error) throw error;
             return data || [];
         }
@@ -1209,6 +1246,27 @@ ${pts}
             if (!res.ok) { DebugWindow.log('identify ✗ ' + dt + 's HTTP' + res.status + ' ' + (j.error || '') + d); throw new Error(j.error || ('KI ' + res.status)); }
             DebugWindow.log('identify ✓ ' + dt + 's „' + (j.title || '') + '"' + d);
             return { title: j.title || 'Unbekannt', text: j.text || '' };
+        }
+
+        // ---- "Statistik" card: actual consumption (estimate) -----------------------
+        // photo_usage() is a tiny DB function (SECURITY INVOKER → RLS-scoped to this
+        // sync account) returning Σ photo-waypoints, WITHOUT pulling the image blobs.
+        async function loadUsage() {
+            const photoEl = $('use-photos'), costEl = $('use-cost');
+            if (!photoEl) return;
+            photoEl.textContent = '…'; costEl.textContent = '…';
+            try {
+                const c = await ensureSb();
+                const { data, error } = await c.rpc('photo_usage');
+                if (error) throw error;
+                const row = Array.isArray(data) ? data[0] : data;
+                const n = Number((row && row.photos) || 0);
+                photoEl.textContent = n + (n === 1 ? ' Foto' : ' Fotos');
+                costEl.textContent = '~' + (n * EUR_PER_PHOTO).toLocaleString('de-DE', { style: 'currency', currency: 'EUR' });
+            } catch (e) {
+                photoEl.textContent = '–'; costEl.textContent = '–';
+                if (window.DebugWindow) DebugWindow.log('Verbrauch: ' + (e && (e.message || e)));
+            }
         }
 
         // ---- waypoint markers ----
@@ -1648,7 +1706,7 @@ ${pts}
                 $('sync-input').value = '';
             }
         }
-        $('mb-settings').addEventListener('click', () => { closePopup(); updateSyncStatus(); showPanel('settings-panel'); });
+        $('mb-settings').addEventListener('click', () => { closePopup(); updateSyncStatus(); loadUsage(); showPanel('settings-panel'); });
         // Foto-Spur card → re-run the AI analysis on still-unrecognised photos
         $('set-reburn').addEventListener('click', async () => { await reburnTrack(); });
         // "Code erzeugen" generates AND connects this device in one step
