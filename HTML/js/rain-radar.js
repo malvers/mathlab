@@ -47,7 +47,6 @@
 
     // slider UI
     let ui = null, slider = null, lbl = null, playBtn = null, playTimer = null;
-    let vignette = null;    // soft screen-edge darkening while the radar is on (focus the middle)
 
     function dbg(m) {
         if (typeof DebugWindow !== 'undefined' && DebugWindow && DebugWindow.log) DebugWindow.log(m);
@@ -55,8 +54,12 @@
     function inGermany(ll) {
         return !!ll && ll.lat >= GERMANY.s && ll.lat <= GERMANY.n && ll.lng >= GERMANY.w && ll.lng <= GERMANY.e;
     }
+    // Doc prefers RainViewer's colours + full European coverage everywhere (no magenta DWD
+    // coverage rim, no out-of-range greying — both come from DWD's WMS style). Flip to true
+    // to bring the sharp DWD 1 km (+2 h forecast) back over Germany.
+    const USE_DWD_IN_DE = false;
     function pickProvider() {
-        return inGermany(map.getCenter()) ? 'dwd' : 'rv';
+        return (USE_DWD_IN_DE && inGermany(map.getCenter())) ? 'dwd' : 'rv';
     }
     // ISO without milliseconds (what WMS time dimensions expect): 2026-06-06T08:35:00Z
     function isoMin(ms) {
@@ -129,7 +132,7 @@
         if (Math.abs(dmin) < 3) rel = 'jetzt';
         else if (dmin > 0) rel = '+' + dmin + ' min';
         else rel = dmin + ' min';
-        return hh + ':' + mm + '  (' + rel + ')';
+        return hh + ':' + mm;
     }
 
     // Show frame i, swapping out the previous layer once the new one has painted.
@@ -154,11 +157,13 @@
     // ---- slider UI (self-contained, created only while the overlay is on) ----
     function buildUI() {
         removeUI();
+        // Idle = light/neutral; active = orange. Applies to the slider, PLAY and the time label.
+        const SLIDER_IDLE = 'rgba(255,255,255,0.45)', SLIDER_ACTIVE = '#f5c242';
         ui = document.createElement('div');
         ui.id = 'rain-slider';
-        ui.style.cssText = 'position:fixed; left:50%; bottom:96px; transform:translateX(-50%);'
+        ui.style.cssText = 'position:fixed; left:50%; top:20px; transform:translateX(-50%);'
             + 'display:flex; align-items:center; gap:10px; padding:8px 12px; max-width:92vw; box-sizing:border-box;'
-            + 'background:rgba(8,20,42,0.92); border:1px solid rgba(245,194,66,0.6); border-radius:12px;'
+            + 'background:rgba(8,20,42,0.92); border:none; border-radius:12px;'
             + 'box-shadow:0 4px 16px rgba(0,0,0,0.5); z-index:1200; font-family:\'Orbitron\',sans-serif; color:#f5c242;';
 
         playBtn = document.createElement('button');
@@ -166,7 +171,7 @@
         playBtn.textContent = '▶';
         playBtn.title = 'Abspielen';
         playBtn.style.cssText = 'flex:0 0 auto; width:32px; height:28px; border-radius:8px; cursor:pointer;'
-            + 'background:transparent; border:1px solid rgba(245,194,66,0.7); color:#f5c242; font-size:13px;';
+            + 'background:transparent; border:none; color:' + SLIDER_IDLE + '; font-size:13px;';
         playBtn.onclick = togglePlay;
 
         slider = document.createElement('input');
@@ -175,11 +180,20 @@
         slider.max = String(Math.max(0, frames.length - 1));
         slider.step = '1';
         slider.value = String(nowIdx);
-        slider.style.cssText = 'flex:1 1 180px; min-width:130px; accent-color:#f5c242; cursor:pointer;';
+        // Slider, PLAY and the time label stay light/neutral when idle; turn orange only while
+        // the user is dragging/selecting the timeline.
+        slider.style.cssText = 'flex:1 1 180px; min-width:130px; accent-color:' + SLIDER_IDLE + '; cursor:pointer;';
+        const sliderActive = () => { slider.style.accentColor = SLIDER_ACTIVE; playBtn.style.color = SLIDER_ACTIVE; if (lbl) lbl.style.color = SLIDER_ACTIVE; };
+        const sliderIdle = () => { slider.style.accentColor = SLIDER_IDLE; playBtn.style.color = SLIDER_IDLE; if (lbl) lbl.style.color = SLIDER_IDLE; };
+        slider.addEventListener('pointerdown', sliderActive);
+        slider.addEventListener('focus', sliderActive);
+        slider.addEventListener('pointerup', sliderIdle);
+        slider.addEventListener('pointercancel', sliderIdle);
+        slider.addEventListener('blur', sliderIdle);
         slider.oninput = function () { pause(); showIndex(parseInt(slider.value, 10)); };
 
         lbl = document.createElement('span');
-        lbl.style.cssText = 'flex:0 0 auto; font-size:0.68rem; letter-spacing:0.04em; min-width:98px; text-align:right; white-space:nowrap;';
+        lbl.style.cssText = 'flex:0 0 auto; font-size:0.68rem; letter-spacing:0.04em; min-width:98px; text-align:right; white-space:nowrap; color:' + SLIDER_IDLE + ';';
 
         ui.appendChild(playBtn);
         ui.appendChild(slider);
@@ -192,25 +206,6 @@
         if (ui && ui.parentNode) ui.parentNode.removeChild(ui);
         ui = slider = lbl = playBtn = null;
     }
-
-    // Soft vignette over the map: bright in the middle, darkening towards the edges. It de-
-    // emphasises the busy periphery — including DWD's magenta coverage boundary, which is baked
-    // into the radar tiles and can't be thinned from here. Sits above the map (z 1), below the
-    // HUD (z ≥ 500). Dark blue per house style (never pure black).
-    function addVignette() {
-        removeVignette();
-        vignette = document.createElement('div');
-        vignette.id = 'rain-vignette';
-        vignette.style.cssText = 'position:fixed; inset:0; pointer-events:none; z-index:300;'
-            + 'background:radial-gradient(ellipse 80% 80% at 50% 44%, rgba(8,20,42,0) 48%,'
-            + ' rgba(8,20,42,0.28) 76%, rgba(8,20,42,0.62) 100%);';
-        document.body.appendChild(vignette);
-    }
-    function removeVignette() {
-        if (vignette && vignette.parentNode) vignette.parentNode.removeChild(vignette);
-        vignette = null;
-    }
-
     function togglePlay() { if (playTimer) pause(); else play(); }
     function play() {
         if (playTimer || frames.length < 2) return;
@@ -235,7 +230,6 @@
         catch (e) { dbg('RainRadar: Frame-Aufbau fehlgeschlagen (' + (e && e.message ? e.message : e) + ')'); }
         if (!on) return;
         provider = which;
-        addVignette();
         if (ok && frames.length) {
             buildUI();
             showIndex(nowIdx);
@@ -286,7 +280,6 @@
         if (on) {
             on = false;
             removeUI();
-            removeVignette();
             if (layer) { map.removeLayer(layer); layer = null; }
             frames = [];
             provider = null;
