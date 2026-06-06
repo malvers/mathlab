@@ -206,6 +206,24 @@
         L.control.zoom({ position: 'bottomright' }).addTo(map);
         map.attributionControl.setPrefix(false); // drop the "Leaflet" prefix → shorter bar, stays out from under START
 
+        // Persist the map viewport (pan + zoom) across reloads: a hard-reload reopens where you
+        // last were instead of snapping back. A restored view WINS over the start-up GPS snap
+        // (see `viewRestored` in the acquire watch); GPS auto-follow while tracking still takes over.
+        const VIEW_KEY = 'tracker.mapView';
+        let viewRestored = false;
+        try {
+            const sv = JSON.parse(localStorage.getItem(VIEW_KEY) || 'null');
+            if (sv && isFinite(sv.lat) && isFinite(sv.lng) && isFinite(sv.z)) {
+                map.setView([sv.lat, sv.lng], sv.z);
+                viewRestored = true;
+            }
+        } catch (e) { /* corrupt entry → ignore, keep the default view */ }
+        const saveView = () => {
+            const c = map.getCenter();
+            try { localStorage.setItem(VIEW_KEY, JSON.stringify({ lat: c.lat, lng: c.lng, z: map.getZoom() })); } catch (e) {}
+        };
+        map.on('moveend zoomend', saveView);
+
         // Optional rain-radar overlay (toggled via the REGEN radial button; state persisted).
         // Lives in ../js/rain-radar.js — its dedicated pane sits below the track + photo pins.
         const RAIN_KEY = 'tracker.rainOn';
@@ -220,7 +238,7 @@
 
         // The map auto-follows new fixes until you take over (drag) — ZENTRIEREN re-enables it.
         // The position dot is hidden during zoom animations so it doesn't jump, then fades back.
-        let following = true;
+        let following = !viewRestored; // a restored viewport stays put (don't auto-follow GPS away from it)
         function refreshRecenter() {
             const btn = $('recenter-fab');
             if (btn) btn.classList.toggle('show', !following && !!posMarker);
@@ -751,10 +769,11 @@
                     renderPosition(best.here, best.accuracy); // moves the still-hidden dot + accuracy readout
 
                     if (!centred) {
-                        centred = true; // go to the position immediately on the first fix
-                        if (opts.initial) map.setView(best.here, 16);
+                        centred = true; // go to the position immediately on the first fix …
+                        // … but NOT on start-up if we restored a saved viewport (keep where the user was).
+                        if (opts.initial) { if (!viewRestored) map.setView(best.here, 16); }
                         else map.flyTo(best.here, Math.max(map.getZoom(), 16), { duration: 1.2 });
-                    } else {
+                    } else if (!(opts.initial && viewRestored)) {
                         map.panTo(best.here, { animate: true });
                     }
 

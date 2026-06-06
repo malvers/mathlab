@@ -1,15 +1,23 @@
-// Tracker — "identify" Edge Function.
-// The Foto-Spur sends a photo (base64 JPEG); we ask Gemini what the main subject is
-// and return a short German explanation: { title, text }. The Gemini key lives ONLY
-// here as an env secret — never in the public web client / repo.
+// Tracker — "identify" Edge Function (Foto-Spur).
+// Hybrid recognition: a SPECIALIST identifies the species, Gemini writes the explanation.
+//   1. If PLANTNET_API_KEY is set, the photo first goes to the Pl@ntNet botanical API.
+//      Pl@ntNet returns the most likely plant species + a confidence score, and REJECTS
+//      non-plant photos (buildings, animals, rocks) on its own.
+//   2. • Confident plant  → Gemini is told the species and only writes the German blurb.
+//      • No plant / low score / Pl@ntNet off → Gemini identifies the subject itself (as before).
+// Returns { title, text } (+ _diag). All keys live ONLY here as env secrets — never in the
+// public web client / repo.
 //
-// Secret to set (dashboard → Edge Functions → Secrets):
-//   GEMINI_API_KEY – your Google AI Studio key (https://aistudio.google.com/apikey)
+// Secrets to set (dashboard → Edge Functions → Secrets):
+//   GEMINI_API_KEY   – Google AI Studio key (https://aistudio.google.com/apikey)   [required]
+//   PLANTNET_API_KEY – Pl@ntNet API key   (https://my.plantnet.org/)               [optional]
 //
-// Deploy (no JWT needed — it only calls Gemini, touches no user data):
+// Deploy (no JWT needed — it only calls external APIs, touches no user data):
 //   supabase functions deploy identify --no-verify-jwt
 
 const MODEL = 'gemini-2.5-flash';
+const PLANTNET_URL = 'https://my-api.plantnet.org/v2/identify/all';
+const PLANTNET_MIN_SCORE = 0.30; // below this, treat the plant guess as too weak → let Gemini decide
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -17,18 +25,52 @@ const CORS = {
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 
-const PROMPT = `Du bist ein kundiger Wander- und Stadtführer.
+// Gemini identifies the subject itself (used for non-plants or when Pl@ntNet is off/unsure).
+const PROMPT_GENERIC = `Du bist ein kundiger Wander- und Stadtführer.
 Erkenne das HAUPTMOTIV auf dem Foto (Pflanze, Baum, Tier, Pilz, Gebäude, Denkmal, Gestein …).
 Antworte AUSSCHLIESSLICH als JSON: {"title": "...", "text": "..."}.
 - title: kurzer Name auf Deutsch, wenn sinnvoll mit Fach-/Artname in Klammern, max. ~6 Wörter.
 - text: 1–2 Sätze Wissenswertes auf Deutsch, sachlich, ohne Floskeln.
 Wenn du es nicht sicher erkennst: title "Unklar", text mit deiner besten Vermutung.`;
 
+// Gemini only EXPLAINS a species that Pl@ntNet has already determined botanically.
+function promptForPlant(sci: string, common: string): string {
+  return `Das Foto zeigt diese Pflanze (botanisch bestimmt): ${sci}${common ? ` — deutscher Name: ${common}` : ''}.
+Antworte AUSSCHLIESSLICH als JSON: {"title": "...", "text": "..."}.
+- title: deutscher Name mit wissenschaftlichem Artnamen in Klammern, max. ~6 Wörter.
+- text: 1–2 Sätze Wissenswertes auf Deutsch, sachlich, ohne Floskeln.`;
+}
+
 function json(obj: unknown, status = 200): Response {
   return new Response(JSON.stringify(obj), {
     status,
     headers: { ...CORS, 'Content-Type': 'application/json' },
   });
+}
+
+// Ask Pl@ntNet for the most likely species. Returns the top result, or a reason it didn't apply.
+// Pl@ntNet rejects non-plant photos itself (HTTP 404) → that's the natural "not a plant" signal.
+async function plantnetIdentify(
+  image: string,
+  mime: string,
+  key: string,
+): Promise<{ ok: true; score: number; sci: string; common: string } | { ok: false; reason: string }> {
+  const bin = Uint8Array.from(atob(image), (c) => c.charCodeAt(0));
+  const fd = new FormData();
+  fd.append('images', new Blob([bin], { type: mime || 'image/jpeg' }), 'photo.jpg');
+  fd.append('organs', 'auto');
+  const url = `${PLANTNET_URL}?api-key=${key}&lang=de&nb-results=5`;
+  const r = await fetch(url, { method: 'POST', body: fd });
+  if (!r.ok) return { ok: false, reason: 'http' + r.status }; // 404 ≈ not a plant / no match
+  const d = await r.json();
+  const top = d?.results?.[0];
+  if (!top) return { ok: false, reason: 'empty' };
+  return {
+    ok: true,
+    score: top.score ?? 0,
+    sci: top.species?.scientificNameWithoutAuthor || '',
+    common: (top.species?.commonNames && top.species.commonNames[0]) || '',
+  };
 }
 
 Deno.serve(async (req) => {
@@ -41,11 +83,31 @@ Deno.serve(async (req) => {
     const { image, mime } = await req.json().catch(() => ({}));
     if (!image) return json({ error: 'kein Bild übergeben' }, 400);
 
+    // ---- Step 1: specialist plant identification (optional, only if a key is configured) ----
+    const plantKey = Deno.env.get('PLANTNET_API_KEY');
+    let plant: { sci: string; common: string; score: number } | null = null;
+    let pnDiag: unknown = 'off';
+    if (plantKey) {
+      try {
+        const pn = await plantnetIdentify(image, mime, plantKey);
+        if (pn.ok && pn.score >= PLANTNET_MIN_SCORE) {
+          plant = { sci: pn.sci, common: pn.common, score: pn.score };
+          pnDiag = { score: +pn.score.toFixed(3), sci: pn.sci };
+        } else {
+          pnDiag = pn.ok ? { low: +pn.score.toFixed(3) } : { reject: pn.reason };
+        }
+      } catch (e) {
+        pnDiag = { err: String((e && (e as Error).message) || e) };
+      }
+    }
+
+    // ---- Step 2: Gemini — explain the known plant, or identify the subject itself ----
+    const promptText = plant ? promptForPlant(plant.sci, plant.common) : PROMPT_GENERIC;
     const body = {
       contents: [{
         parts: [
           { inline_data: { mime_type: mime || 'image/jpeg', data: image } },
-          { text: PROMPT },
+          { text: promptText },
         ],
       }],
       generationConfig: { temperature: 0.4, responseMimeType: 'application/json' },
@@ -106,7 +168,7 @@ Deno.serve(async (req) => {
       waitedMs += waitMs;
       await sleep(waitMs);
     }
-    const diag = { tries: triesUsed, waitedMs, statuses };
+    const diag = { tries: triesUsed, waitedMs, statuses, plantnet: pnDiag };
 
     if (!r || !r.ok) {
       return json({ error: 'Gemini ' + (lastStatus || 'net'), detail: lastDetail, _diag: diag }, 502);
