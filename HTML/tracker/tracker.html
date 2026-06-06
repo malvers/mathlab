@@ -382,6 +382,15 @@
             animation: wpPulse 1s ease-in-out infinite;
         }
 
+        /* AI recognised → green (φ); recognition failed → red (Υ) */
+        .wp-dot.done {
+            background: rgb(121, 158, 49);
+        }
+
+        .wp-dot.failed {
+            background: rgb(176, 36, 24);
+        }
+
         @keyframes wpPulse {
 
             0%,
@@ -630,9 +639,9 @@
         #mini-stack.popup .mini-btn {
             position: absolute;
             pointer-events: auto;
-            width: 130px;
+            width: 168px;
             height: 46px;
-            padding: 0 10px;
+            padding: 0 12px;
             white-space: nowrap;
             transform: translate(-50%, -50%);
             border-radius: 12px;
@@ -641,14 +650,24 @@
             font-size: 0.64rem;
             letter-spacing: 0.12em;
             color: var(--orange);
-            background: rgba(8, 18, 38, 0.96);
-            border: 1px solid rgba(245, 194, 66, 0.8);
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5), 0 0 10px rgba(245, 194, 66, 0.25);
+            background: rgb(8, 20, 42);
+            border: none;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
             transition: background 0.12s, transform 0.12s;
+        }
+        /* long label → wrap to two centred lines so it fits the fixed-width button */
+        #mini-stack.popup #mb-reburn {
+            white-space: normal;
+            line-height: 1.12;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
         }
 
         #mini-stack.popup .mini-btn:hover {
-            background: rgba(245, 194, 66, 0.12);
+            background: rgb(40, 74, 134);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5), inset 0 0 0 1.5px rgba(245, 194, 66, 0.55);
         }
 
         #mini-stack.popup .mini-btn:active {
@@ -775,12 +794,12 @@
             align-items: center;
             justify-content: center;
             padding: 0;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: none;
             border-radius: 9px;
             background: transparent;
             color: #fff;
             font-family: system-ui, -apple-system, sans-serif;
-            font-size: 1.4rem;
+            font-size: 1.6rem;
             line-height: 1;
             cursor: pointer;
         }
@@ -856,6 +875,45 @@
         }
 
         /* ---- Simplified sync panel: state-driven ---- */
+        /* Settings dialog cards (Sync is the first one) */
+        .set-card {
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 14px;
+            padding: 16px 16px 18px;
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .set-card-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.8rem;
+            letter-spacing: 1.5px;
+            color: var(--orange);
+            margin-bottom: 4px;
+        }
+
+        .set-card-sub {
+            font-family: system-ui, -apple-system, sans-serif;
+            font-size: 0.78rem;
+            color: rgba(255, 255, 255, 0.55);
+            line-height: 1.45;
+            margin: 0 0 14px;
+        }
+
+        .set-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            font-family: system-ui, -apple-system, sans-serif;
+            font-size: 0.82rem;
+            color: rgba(255, 255, 255, 0.82);
+            padding: 5px 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.07);
+        }
+
+        .set-row span:first-child {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
         .sync-lead {
             font-family: system-ui, -apple-system, sans-serif;
             font-size: 0.82rem;
@@ -1141,10 +1199,10 @@
 
     <!-- Radial action popup (long-press / right-click) — style ported from worldclock -->
     <div id="mini-stack">
-        <button class="mini-btn" id="mb-save">SPEICHERN</button>
+        <button class="mini-btn" id="mb-reburn">BILDER ANALYSIEREN</button>
         <button class="mini-btn" id="mb-load">LADEN</button>
-        <button class="mini-btn" id="mb-sync">SYNC</button>
-        <button class="mini-btn" id="mb-center">ZENTRIEREN</button>
+        <button class="mini-btn" id="mb-share">TEILEN</button>
+        <button class="mini-btn" id="mb-settings">EINSTELLUNGEN</button>
         <button class="mini-btn" id="mb-info">INFO</button>
     </div>
 
@@ -1160,9 +1218,13 @@
         <div class="ov-body" id="info-body"></div>
         <button class="ov-close" id="info-close" aria-label="Schließen">&times;</button>
     </div>
-    <div id="sync-panel" class="ov-panel">
-        <div class="ov-title">Code zur Synchronisation mit anderen Geräten</div>
+    <div id="settings-panel" class="ov-panel">
+        <div class="ov-title">Einstellungen</div>
         <div class="ov-body">
+          <!-- Card: Synchronisation (heute die einzige Einstellungs-Karte) -->
+          <div class="set-card">
+            <div class="set-card-title">Synchronisation</div>
+            <p class="set-card-sub">Gleicher Code auf mehreren Geräten = dieselben Tracks.</p>
             <!-- State A — connected: just the code (tap to copy) + a quiet Trennen -->
             <div id="sync-connected" hidden>
                 <button id="sync-code" class="sync-code" type="button" aria-label="Code antippen zum Kopieren">
@@ -1196,8 +1258,19 @@
                 <button class="sync-btn danger" id="sync-clear-confirm" type="button">Ja, trennen</button>
                 <button class="sync-link" id="sync-clear-cancel" type="button">Abbrechen</button>
             </div>
+          </div><!-- /set-card -->
+
+          <!-- Card: Kosten & Limits (Gemini photo recognition) -->
+          <div class="set-card">
+            <div class="set-card-title">Kosten &amp; Limits</div>
+            <p class="set-card-sub">Die Foto-Erkennung läuft über Gemini 2.5 Flash (Paid Tier).</p>
+            <div class="set-row"><span>Kosten</span><span>~0,04 ct / Foto</span></div>
+            <div class="set-row"><span>Tempo-Limit</span><span>~1000 Anfragen / Min</span></div>
+            <div class="set-row"><span>Drosselung</span><span>0,3 s zwischen Fotos</span></div>
+            <a class="sync-link" href="https://ai.dev/rate-limit" target="_blank" rel="noopener">Nutzung &amp; Limits live ansehen ↗</a>
+          </div><!-- /set-card -->
         </div>
-        <button class="ov-close" id="sync-close" aria-label="Schließen">&times;</button>
+        <button class="ov-close" id="settings-close" aria-label="Schließen">&times;</button>
     </div>
 
     <!-- Photo lightbox — tap a photo card to show it over everything -->
@@ -1221,6 +1294,7 @@
     <!-- Leaflet.hotline — draws the track as a speed-coloured gradient -->
     <script src="https://unpkg.com/leaflet-hotline@0.4.0/dist/leaflet.hotline.js"></script>
     <script src="../js/cyber-clock.js"></script>
+    <script src="../js/debug-window.js"></script>
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <script>
         // ---------------------------------------------------------------
@@ -1355,6 +1429,8 @@
         let alts = [];             // altitude in m per point (fused GPS+baro; null if unknown)
         let speeds = [];           // speed in km/h per point (index-aligned)
         let activities = [];       // travel mode per point: walking/running/on_bicycle/in_vehicle/still
+        let currentTrackId = null; // DB id of the loaded/just-saved track (for the menu "TEILEN")
+        let currentTrackName = '';
         let totalDist = 0;         // metres
         let startTime = null;      // ms
         let timerId = null;
@@ -1750,6 +1826,7 @@
             if (!('geolocation' in navigator)) { setStatus('Dieser Browser unterstützt keine Standortbestimmung.'); return; }
             if (!window.isSecureContext) { setStatus('GPS braucht HTTPS oder localhost. Über file:// gibt es keine Position.'); return; }
             clearTrack(true); // silent — the old track was already saved on FINISH
+            currentTrackId = null; currentTrackName = ''; // fresh live track: no saved row yet (set on FINISH)
             startTime = Date.now();
             startWatch();
             $('hud-top').classList.add('shown'); // reveal the header on first start
@@ -1781,7 +1858,7 @@
             if (track.length >= 1) {
                 const name = 'Track ' + new Date().toLocaleString('de-DE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
                 toast('Speichere …');
-                try { await saveTrack(name); toast('Gespeichert: ' + name); }
+                try { currentTrackId = await saveTrack(name); currentTrackName = name; toast('Gespeichert: ' + name); }
                 catch (e) { toast('Speichern fehlgeschlagen: ' + (e.message || e)); }
             } else {
                 setStatus('Beendet.');
@@ -2051,13 +2128,14 @@ ${pts}
             const pts = track.map((p, i) => [p[0], p[1], times[i] || null, alts[i] != null ? alts[i] : null, speeds[i] != null ? speeds[i] : null, activities[i] || null]);
             // strip the live Leaflet marker reference before persisting
             const wps = waypoints.map(w => ({ lat: w.lat, lng: w.lng, t: w.t, img: w.img, title: w.title, text: w.text }));
-            const { error } = await c.from('tracks').insert({
+            const { data, error } = await c.from('tracks').insert({
                 name: name,
                 distance_m: Math.round(totalDist),
                 points: pts,
                 waypoints: wps,
-            });
+            }).select('id').single();
             if (error) throw error;
+            return data ? data.id : null;
         }
 
         async function listTracks() {
@@ -2144,8 +2222,9 @@ ${pts}
         // and explain what it is. The Gemini key lives server-side only.
         // ===============================================================
         const IDENTIFY_URL = SUPABASE_URL + '/functions/v1/identify';
-        const CAM_PIN_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="rgb(8,20,42)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>';
+        const CAM_PIN_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>';
         const PENDING_TITLE = 'Wird erkannt …';
+        const FAIL_TITLE = 'Erkennung fehlgeschlagen'; // photo kept, AI failed → "nachbrennen" target
 
         function currentLatLng() {
             if (lastFix) return [lastFix.lat, lastFix.lng];
@@ -2188,22 +2267,31 @@ ${pts}
                 const { data: { session } } = await (await ensureSb()).auth.getSession();
                 if (session && session.access_token) token = session.access_token;
             } catch (e) { /* fall back to the publishable key */ }
+            const kb = Math.round(base64.length * 3 / 4 / 1024);
+            const t0 = Date.now();
+            DebugWindow.log('identify → ' + kb + ' KB gesendet …');
             const res = await fetch(IDENTIFY_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + token },
                 body: JSON.stringify({ image: base64, mime: 'image/jpeg' }),
             });
             const j = await res.json().catch(() => ({}));
-            if (!res.ok) throw new Error(j.error || ('KI ' + res.status));
+            const dt = ((Date.now() - t0) / 1000).toFixed(1);
+            const d = j._diag ? (' | tries=' + j._diag.tries + ' wait=' + j._diag.waitedMs + 'ms [' + (j._diag.statuses || []).join(',') + ']') : '';
+            if (!res.ok) { DebugWindow.log('identify ✗ ' + dt + 's HTTP' + res.status + ' ' + (j.error || '') + d); throw new Error(j.error || ('KI ' + res.status)); }
+            DebugWindow.log('identify ✓ ' + dt + 's „' + (j.title || '') + '"' + d);
             return { title: j.title || 'Unbekannt', text: j.text || '' };
         }
 
         // ---- waypoint markers ----
         function wpIcon(wp) {
-            const pending = (wp.title === PENDING_TITLE) ? ' pending' : '';
+            // green = AI recognised, orange pulse = identifying, red = failed (→ BILDER ANALYSIEREN)
+            let state = ' done';
+            if (wp.title === PENDING_TITLE) state = ' pending';
+            else if (!wp.title || wp.title === FAIL_TITLE) state = ' failed';
             return L.divIcon({
                 className: 'wp-pin',
-                html: '<div class="wp-dot' + pending + '">' + CAM_PIN_SVG + '</div>',
+                html: '<div class="wp-dot' + state + '">' + CAM_PIN_SVG + '</div>',
                 iconSize: [30, 30], iconAnchor: [15, 30], popupAnchor: [0, -30],
             });
         }
@@ -2360,7 +2448,7 @@ ${pts}
                 wp.title = r.title; wp.text = r.text;
                 toast(wp.title);
             } catch (e) {
-                wp.title = 'Erkennung fehlgeschlagen';
+                wp.title = FAIL_TITLE;
                 wp.text = (e.message || '') + ' — Foto bleibt am Track.';
                 toast('KI-Erkennung fehlgeschlagen.');
             }
@@ -2386,16 +2474,73 @@ ${pts}
                 const r = await identifyPhoto(img);
                 wp.title = r.title; wp.text = r.text;
             } catch (e) {
-                wp.title = 'Erkennung fehlgeschlagen';
+                wp.title = FAIL_TITLE;
                 wp.text = (e.message || '') + ' — Foto bleibt gespeichert.';
             }
             refreshWaypoint(wp);
-            const valid = wp.title && wp.title !== PENDING_TITLE && wp.title !== 'Erkennung fehlgeschlagen';
+            const valid = wp.title && wp.title !== PENDING_TITLE && wp.title !== FAIL_TITLE;
             const name = valid ? wp.title : ('Foto ' + new Date().toLocaleString('de-DE'));
             try { await saveOnePointTrack(name, ll, wp); toast('Gespeichert: ' + name); }
             catch (e) { toast('Speichern fehlgeschlagen: ' + (e.message || e)); }
             // isolate from any later live-tracking session (the map pin stays visible)
             waypoints = waypoints.filter(x => x !== wp);
+        }
+
+        // ---- "Nachbrennen": re-run the AI identification for photos whose recognition
+        //      failed or never finished. The image is always kept on the waypoint, so we
+        //      just re-send it — now via the retry-enabled Edge Function. ----
+        function wpNeedsId(wp) {
+            return !wp.title || wp.title === PENDING_TITLE || wp.title === FAIL_TITLE;
+        }
+        async function persistReburn() {
+            // A loaded/saved track has a DB row to update; a live recording is persisted by
+            // the auto-save on STOP. Returns true if a row was actually written
+            // (0 rows ⇒ the UPDATE RLS policy on `tracks` is still missing).
+            if (currentTrackId == null) return false;
+            const c = await ensureSb();
+            const wps = waypoints.map(w => ({ lat: w.lat, lng: w.lng, t: w.t, img: w.img, title: w.title, text: w.text }));
+            const { data, error } = await c.from('tracks').update({ waypoints: wps }).eq('id', currentTrackId).select('id');
+            if (error) throw error;
+            return !!(data && data.length);
+        }
+        async function reburnTrack() {
+            const todo = waypoints.filter(wpNeedsId);
+            if (!todo.length) { toast('Nichts zu analysieren — alle Fotos sind erkannt.'); return; }
+            DebugWindow.log('▶ ANALYSIEREN: ' + todo.length + ' offene Fotos (currentTrackId=' + currentTrackId + ')');
+            // Light pacing only — paid tier allows ~1000/min, so this is no longer a quota
+            // guard. The Edge Function still backstops with Gemini's "retry in Xs" hint.
+            const RPM_GAP_MS = 300;
+            let done = 0, ok = 0;
+            for (let idx = 0; idx < todo.length; idx++) {
+                const wp = todo[idx];
+                done++;
+                toast('Analysiere … ' + done + '/' + todo.length);
+                wp.title = PENDING_TITLE; wp.text = ''; refreshWaypoint(wp);
+                try {
+                    const r = await identifyPhoto(wp.img);
+                    wp.title = r.title; wp.text = r.text; ok++;
+                } catch (e) {
+                    wp.title = FAIL_TITLE; wp.text = (e.message || '') + ' — Foto bleibt am Track.';
+                    // 429 = Gemini-Kontingent erschöpft → der Rest würde genauso scheitern.
+                    // Batch abbrechen statt minutenlang gegen die Wand zu laufen.
+                    if (/\b429\b/.test(e.message || '')) {
+                        refreshWaypoint(wp);
+                        DebugWindow.log('⛔ 429 (Quota erschöpft) — Batch abgebrochen bei ' + done + '/' + todo.length);
+                        toast('Gemini-Limit erreicht — Rest abgebrochen, später nochmal.');
+                        break;
+                    }
+                }
+                refreshWaypoint(wp);
+                if (idx < todo.length - 1) await new Promise(res => setTimeout(res, RPM_GAP_MS));
+            }
+            let persisted = false;
+            try { persisted = await persistReburn(); }
+            catch (e) { toast('Zurückschreiben fehlgeschlagen: ' + (e.message || e)); }
+            if (currentTrackId != null && !persisted) {
+                toast(ok + '/' + todo.length + ' erkannt — aber NICHT gespeichert (UPDATE-Policy fehlt).');
+            } else {
+                toast(ok + '/' + todo.length + ' analysiert' + (currentTrackId != null ? ' & gespeichert.' : '.'));
+            }
         }
 
         $('cam-fab').addEventListener('click', async () => {
@@ -2416,22 +2561,25 @@ ${pts}
         const miniStack = $('mini-stack');
 
         function openPopup() {
-            // Anchor the menu at the hamburger and fan the buttons out in a right-facing
-            // half-circle around it (worldclock style) — not a centred ring.
+            // Radial "Kreis": button centres lie on a true circle (x² + y² = R²) and fan to the
+            // RIGHT, rows evenly spaced in y (→ even gaps). The whole fan is then shifted LEFT by dx
+            // so the top & bottom buttons are LEFT-ALIGNED with the hamburger; the middle bulges past
+            // it. R is chosen so the bulge clears the HH's right edge (no overlap).
             const r = $('menu-fab').getBoundingClientRect();
-            const cx = r.left + r.width / 2;
-            const cy = r.top + r.height / 2;
-            miniStack.style.left = cx + 'px';
-            miniStack.style.top = cy + 'px';
+            miniStack.style.left = (r.left + r.width / 2) + 'px';   // origin = HH centre
+            miniStack.style.top = (r.top + r.height / 2) + 'px';
             miniStack.classList.add('popup');
             const btns = Array.from(miniStack.querySelectorAll('.mini-btn'));
-            const n = btns.length;
-            const radius = 152;
+            const n = btns.length, bh = 46, gap = 10, step = bh + gap, bw = 168;
+            const halfH = (n - 1) * step / 2;                 // centre-to-centre half-height of the fan
+            const R = halfH + 44;                             // circle radius (arc curvature)
+            const xMin = Math.sqrt(R * R - halfH * halfH);    // smallest circle-x (top & bottom rows)
+            const dx = bw / 2 - r.width / 2 - xMin;           // shift: top/bottom left edge → HH left edge
             btns.forEach((b, i) => {
-                const t = n === 1 ? 0.5 : i / (n - 1);
-                const ang = (-72 + t * 144) * Math.PI / 180; // top → bottom, all on the right
-                b.style.left = (Math.cos(ang) * radius) + 'px';
-                b.style.top = (Math.sin(ang) * radius) + 'px';
+                const y = i * step - halfH;                   // evenly spaced rows, centred on the HH
+                const x = Math.sqrt(R * R - y * y) + dx;      // centre on the circle, then shifted left
+                b.style.left = x + 'px';
+                b.style.top = y + 'px';
             });
         }
         function closePopup() { miniStack.classList.remove('popup'); }
@@ -2477,15 +2625,9 @@ ${pts}
         $('info-close').addEventListener('click', hidePanels);
 
         // ---- Popup actions ----
-        $('mb-save').addEventListener('click', async () => {
+        $('mb-reburn').addEventListener('click', async () => {
             closePopup();
-            if (track.length < 1 && waypoints.length < 1) { toast('Noch kein Punkt — erst START drücken.'); return; }
-            const def = 'Track ' + new Date().toLocaleString('de-DE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
-            const name = prompt('Track-Name:', def);
-            if (name == null) return;
-            toast('Speichere …');
-            try { await saveTrack(name.trim() || def); toast('Track gespeichert.'); }
-            catch (e) { toast('Speichern fehlgeschlagen: ' + (e.message || e)); }
+            await reburnTrack();
         });
 
         $('mb-load').addEventListener('click', async () => {
@@ -2498,7 +2640,6 @@ ${pts}
             showPanel('track-list');
         });
 
-        $('mb-center').addEventListener('click', () => { closePopup(); centerOnPosition(); });
         $('mb-info').addEventListener('click', () => { closePopup(); $('info-body').innerHTML = (gnssActive ? gnssLiveHtml() : '') + GNSS_INFO; showPanel('info-panel'); });
         $('menu-fab').addEventListener('click', () => openPopup());
         $('recenter-fab').addEventListener('click', () => centerOnPosition());
@@ -2526,7 +2667,12 @@ ${pts}
                 $('sync-input').value = '';
             }
         }
-        $('mb-sync').addEventListener('click', () => { closePopup(); updateSyncStatus(); showPanel('sync-panel'); });
+        $('mb-settings').addEventListener('click', () => { closePopup(); updateSyncStatus(); showPanel('settings-panel'); });
+        $('mb-share').addEventListener('click', () => {
+            closePopup();
+            if (!currentTrackId) { toast('Erst einen Track laden oder speichern.'); return; }
+            shareTrack(currentTrackId, currentTrackName);
+        });
         // "Code erzeugen" generates AND connects this device in one step
         $('sync-gen').addEventListener('click', async () => {
             toast('Verbinde …');
@@ -2550,7 +2696,7 @@ ${pts}
             $('sync-enter').hidden = false;
             $('sync-input').focus();
         });
-        $('sync-close').addEventListener('click', hidePanels);
+        $('settings-close').addEventListener('click', hidePanels);
         $('sync-connect').addEventListener('click', async () => {
             const code = $('sync-input').value.trim();
             if (code.length < 4) { toast('Code zu kurz (min. 4 Zeichen).'); return; }
@@ -2591,7 +2737,7 @@ ${pts}
                 main.appendChild(nm); main.appendChild(mt);
                 main.addEventListener('click', async () => {
                     toast('Lade Track …');
-                    try { const t = await fetchTrack(r.id); plotTrack(t.points, t.waypoints); hidePanels(); toast(r.name + ' geladen.'); }
+                    try { const t = await fetchTrack(r.id); plotTrack(t.points, t.waypoints); currentTrackId = r.id; currentTrackName = r.name; hidePanels(); toast(r.name + ' geladen.'); }
                     catch (e) { toast('Track laden fehlgeschlagen.'); }
                 });
                 const sh = document.createElement('button');
@@ -2721,16 +2867,22 @@ ${pts}
             if (el) el.textContent = MODE_ICON[effectiveActivity()] || '📍';
         }
         async function startActivity() {
-            if (!ActRec) return; // web → heuristic only
+            if (!ActRec) { DebugWindow.log('🚶 ActRec: kein natives Plugin (web) → Speed-Heuristik'); return; } // web → heuristic only
             try {
                 const p = await ActRec.requestPermission();
+                DebugWindow.log('🚶 ActRec.requestPermission → granted=' + (p && p.granted));
                 if (!p || !p.granted) return;
                 if (!actListenerAdded) {
-                    ActRec.addListener('activity', (d) => { currentActivity = d.type || 'unknown'; updateModeIcon(); });
+                    ActRec.addListener('activity', (d) => {
+                        DebugWindow.log('🚶 ActRec event: type=' + (d && d.type) + ' conf=' + (d && d.confidence));
+                        currentActivity = d.type || 'unknown';
+                        updateModeIcon();
+                    });
                     actListenerAdded = true;
                 }
                 await ActRec.start();
-            } catch (e) { /* heuristic fallback stays active */ }
+                DebugWindow.log('🚶 ActRec.start ✓ — warte auf Events …');
+            } catch (e) { DebugWindow.log('🚶 ActRec FEHLER: ' + (e && (e.message || e))); /* heuristic fallback stays active */ }
         }
         async function stopActivity() { if (ActRec) { try { await ActRec.stop(); } catch (e) { } } }
         updateModeIcon();

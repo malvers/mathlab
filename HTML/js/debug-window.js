@@ -280,6 +280,11 @@ const DebugWindow = (() => {
 
         // Expose handles for toggle()
         debugEl._resizeHandles = resizeHandles;
+
+        // Never leave the panel off-screen (restored/old position, smaller viewport, rotate).
+        clampIntoView();
+        window.addEventListener('resize', clampIntoView);
+        window.addEventListener('orientationchange', clampIntoView);
     }
 
     function makeResizable(handle, element, dir) {
@@ -465,6 +470,26 @@ const DebugWindow = (() => {
         } catch (_) {}
     }
 
+    // Keep the window on-screen. A position restored from localStorage (saved on a bigger
+    // monitor, or dragged past the edge) can land fully outside the viewport → invisible.
+    // Clamp left/top so the whole box stays within a small margin. No-op when already in
+    // view, so the default bottom-right anchoring is preserved.
+    function clampIntoView() {
+        if (!debugEl) return;
+        const rect = debugEl.getBoundingClientRect();
+        const margin = 8;
+        const maxLeft = Math.max(margin, window.innerWidth - rect.width - margin);
+        const maxTop = Math.max(margin, window.innerHeight - rect.height - margin);
+        const newLeft = Math.min(Math.max(rect.left, margin), maxLeft);
+        const newTop = Math.min(Math.max(rect.top, margin), maxTop);
+        if (Math.abs(newLeft - rect.left) > 0.5 || Math.abs(newTop - rect.top) > 0.5) {
+            debugEl.style.left = newLeft + 'px';
+            debugEl.style.top = newTop + 'px';
+            debugEl.style.right = 'auto';
+            debugEl.style.bottom = 'auto';
+        }
+    }
+
     function log(msg) {
         if (!debugEl) init();
         const timestamp = new Date().toLocaleTimeString('de-DE', { hour12: false });
@@ -584,11 +609,13 @@ const DebugWindow = (() => {
 
         try { localStorage.setItem('debug-window-collapsed', collapsed ? '1' : '0'); } catch (_) {}
         saveState();
+        clampIntoView();
     }
 
     function show() {
         if (!debugEl) init();
         debugEl.style.display = 'flex';
+        clampIntoView();
     }
 
     function hide() {
