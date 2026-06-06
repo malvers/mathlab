@@ -1130,7 +1130,16 @@ ${pts}
             });
             const j = await res.json().catch(() => ({}));
             const dt = ((Date.now() - t0) / 1000).toFixed(1);
-            const d = j._diag ? (' | tries=' + j._diag.tries + ' wait=' + j._diag.waitedMs + 'ms [' + (j._diag.statuses || []).join(',') + ']') : '';
+            // Surface the Pl@ntNet outcome so we can SEE whether the botanical
+            // specialist made the call (pn=score sci) or Gemini fell back.
+            const pn = j._diag && j._diag.plantnet;
+            const pnStr = pn && pn !== 'off'
+                ? ' | pn=' + (pn.sci ? pn.score + ' ' + pn.sci
+                             : pn.low != null ? 'low ' + pn.low
+                             : pn.reject ? 'reject ' + pn.reject
+                             : pn.err ? 'err' : JSON.stringify(pn))
+                : '';
+            const d = j._diag ? (pnStr + ' | tries=' + j._diag.tries + ' wait=' + j._diag.waitedMs + 'ms [' + (j._diag.statuses || []).join(',') + ']') : '';
             if (!res.ok) { DebugWindow.log('identify ✗ ' + dt + 's HTTP' + res.status + ' ' + (j.error || '') + d); throw new Error(j.error || ('KI ' + res.status)); }
             DebugWindow.log('identify ✓ ' + dt + 's „' + (j.title || '') + '"' + d);
             return { title: j.title || 'Unbekannt', text: j.text || '' };
