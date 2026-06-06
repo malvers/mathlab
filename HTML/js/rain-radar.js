@@ -182,7 +182,7 @@
         ui = document.createElement('div');
         ui.id = 'rain-slider';
         ui.style.cssText = 'position:fixed; left:50%; top:20px; transform:translateX(-50%);'
-            + 'display:flex; align-items:center; gap:10px; padding:8px 12px; max-width:92vw; box-sizing:border-box;'
+            + 'display:flex; flex-direction:column; align-items:stretch; gap:6px; padding:8px 12px; max-width:92vw; box-sizing:border-box;'
             + 'background:rgba(8,20,42,0.92); border:none; border-radius:12px;'
             + 'box-shadow:0 4px 16px rgba(0,0,0,0.5); z-index:1200; font-family:\'Orbitron\',sans-serif; color:#f5c242;';
 
@@ -215,9 +215,28 @@
         lbl = document.createElement('span');
         lbl.style.cssText = 'flex:0 0 auto; font-size:0.68rem; letter-spacing:0.04em; min-width:98px; text-align:right; white-space:nowrap; color:' + SLIDER_IDLE + ';';
 
-        ui.appendChild(playBtn);
-        ui.appendChild(slider);
-        ui.appendChild(lbl);
+        // Controls stay on one row; a build-time readout sits UNDER them so Doc can see
+        // at a glance whether the freshly-pushed version has reached the device yet.
+        const row = document.createElement('div');
+        row.style.cssText = 'display:flex; align-items:center; gap:10px;';
+        row.appendChild(playBtn);
+        row.appendChild(slider);
+        row.appendChild(lbl);
+
+        // document.lastModified = the served HTML's Last-Modified header → the real build/
+        // deploy time. It updates by itself once the new file clears the Pages cache.
+        const build = document.createElement('div');
+        build.style.cssText = 'font-size:0.56rem; letter-spacing:0.05em; text-align:center;'
+            + ' white-space:nowrap; color:rgba(255,255,255,0.6);';
+        const lm = new Date(document.lastModified);
+        const pad = (n) => String(n).padStart(2, '0');
+        build.textContent = isNaN(lm.getTime())
+            ? 'BUILD ' + (document.lastModified || '?')
+            : 'BUILD ' + pad(lm.getDate()) + '.' + pad(lm.getMonth() + 1) + '. '
+              + pad(lm.getHours()) + ':' + pad(lm.getMinutes()) + ':' + pad(lm.getSeconds());
+
+        ui.appendChild(row);
+        ui.appendChild(build);
         document.body.appendChild(ui);
         lbl.textContent = frameLabel(nowIdx);
     }
