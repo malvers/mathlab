@@ -1,0 +1,1190 @@
+/* Doc Alvers Tracker — styles, extracted from tracker.html (was an inline <style> block). */
+/* ---- Standalone full-screen shell (same pattern as glocken — no cyber grid,
+        so there is no left margin / blue rand bleeding through) ---- */
+:root {
+    --bg: rgb(8, 20, 42);
+    --bg-light: rgb(14, 36, 78);
+    --orange: rgb(245, 194, 66);
+    --red: rgb(176, 36, 24);
+    --green: rgb(121, 158, 49);
+    /* Bottom offset for the fixed controls: safe-area added ON TOP of a solid base,
+       so on Android (where safe-area-inset-bottom is usually 0) the START button still
+       clears the Leaflet attribution instead of sitting right on top of it. */
+    --btm: calc(env(safe-area-inset-bottom, 0px) + clamp(48px, 9vw, 62px));
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--bg);
+    color: #fff;
+    font-family: 'Orbitron', sans-serif;
+    overflow: hidden;
+    overscroll-behavior: none;
+    touch-action: manipulation;
+}
+
+/* ---- Map fills the whole viewport ---- */
+#map {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+}
+
+.leaflet-container {
+    background: var(--bg-light);
+    /* let Leaflet fully own touch gestures (pinch-zoom / pan) even with user-scalable=no */
+    touch-action: none;
+}
+
+/* Red position dot — hidden during the move, fades in once we are on the position */
+path.pos-marker {
+    opacity: 0;
+    transition: opacity 0.6s ease;
+}
+
+path.pos-marker.pos-shown {
+    opacity: 1;
+}
+
+/* ---- Top HUD: timer + stats ---- */
+#hud-top {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 500;
+    padding: 14px 16px 30px;
+    /* clear the status bar / notch — no more extra room needed (camera moved to the right) */
+    padding-top: max(14px, env(safe-area-inset-top));
+    background: linear-gradient(180deg,
+            rgba(8, 20, 42, 0.95) 0%,
+            rgba(8, 20, 42, 0.92) 62%,
+            rgba(8, 20, 42, 0.72) 86%,
+            rgba(8, 20, 42, 0) 100%);
+    text-align: center;
+    pointer-events: none;
+    /* let map drags pass through empty areas */
+    opacity: 0;
+    transform: translateY(-18px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+/* Header is hidden until the first START, then fades down into view */
+#hud-top.shown {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+#gps-chip {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.72rem;
+    letter-spacing: 2px;
+    color: rgba(255, 255, 255, 0.85);
+}
+
+#gps-src {
+    flex: 1 1 auto;
+    min-width: 0;
+    font-size: 0.72rem;
+    letter-spacing: 0.5px;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.85);
+}
+
+/* Satellite constellations: always show the full set in grey, the contributing
+   ones in green (fixed set + fixed order → no flicker/reflow). */
+#gps-src .sat {
+    color: rgba(255, 255, 255, 0.4);
+    transition: color 0.3s ease;
+}
+
+#gps-src .sat.on {
+    color: var(--green);
+}
+
+#gps-src .sat-sep {
+    color: rgba(255, 255, 255, 0.22);
+}
+
+/* count of visible satellites behind each constellation (inherits grey/green) */
+#gps-src .sat-n {
+    font-size: 0.82em;
+    font-weight: 700;
+    opacity: 0.9;
+}
+
+#gps-acc {
+    flex: 0 0 auto;
+    white-space: nowrap;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.6);
+    letter-spacing: 1px;
+    font-variant-numeric: tabular-nums;
+}
+
+#gps-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    box-shadow: 0 0 8px currentColor;
+    transition: background 0.3s ease, color 0.3s ease;
+}
+
+#gps-label {
+    transition: color 0.3s ease;
+}
+
+/* Timer is rendered by CyberClock (fixed-width digit slots). Size it here; the
+   component reads --cc-size for its slot/digit sizing. */
+#hud-time {
+    --cc-size: clamp(1.7rem, 8.5vw, 3.6rem);
+    /* digit slot width, computed from the font: Orbitron-900's widest digit (0/8)
+       advances 0.834em (canvas measureText on device). The slot MUST exceed that or
+       wide digits clip → "gequetscht". 0.86em = 0.834 + ~0.026 snug padding.
+       (0.78/0.82em were below 0.834 → squished; 1em was too airy.) */
+    --cc-dw: 0.86em;
+    gap: 2px;
+    justify-content: center;
+    pointer-events: auto;
+    /* re-enable taps — the parent HUD is pointer-events:none */
+    cursor: pointer;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* Wrapper so the travel-mode icon hangs to the LEFT of the (still centred) clock. */
+#hud-time-wrap {
+    position: relative;
+    display: inline-block;
+    margin-top: clamp(6px, 2vw, 12px);
+}
+
+#mode-icon {
+    /* travel-mode figure, inline to the RIGHT of the KM/H value, mirrored, ~as tall
+       as the value + label lines together (16% smaller than before) */
+    font-size: clamp(1.67rem, 6.57vw, 2.4rem);
+    line-height: 1;
+    transform: scaleX(-1);
+}
+
+#hud-stats {
+    display: flex;
+    justify-content: center;
+    gap: clamp(18px, 9vw, 56px);
+    margin-top: 14px;
+}
+
+.hud-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* the KM/H stat carries the travel-mode figure to its left, both lines tall */
+.speed-stat {
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+}
+
+.speed-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.hud-val {
+    font-size: clamp(1rem, 4.5vw, 1.4rem);
+    font-weight: 700;
+    line-height: 1;
+    color: var(--orange);
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum' 1;
+}
+
+.hud-lbl {
+    font-size: 0.55rem;
+    letter-spacing: 2px;
+    color: rgba(255, 255, 255, 0.5);
+    margin-top: 6px;
+}
+
+/* ---- Big round START / STOP ---- */
+#trk-controls {
+    position: fixed;
+    bottom: var(--btm);
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 500;
+    display: flex;
+    align-items: center;
+    gap: clamp(14px, 5vw, 28px);
+}
+
+#trk-toggle,
+#trk-finish {
+    width: clamp(96px, 30vw, 132px);
+    height: clamp(96px, 30vw, 132px);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    border-radius: 50%;
+    border: 3px solid rgba(255, 255, 255, 0.85);
+    background: var(--green);
+    color: #fff;
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 700;
+    font-size: clamp(0.7rem, 2.6vw, 0.95rem);
+    letter-spacing: 1px;
+    cursor: pointer;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+    transition: background 0.2s ease, transform 0.1s ease;
+}
+
+#trk-finish {
+    display: none;
+}
+
+#trk-toggle:active,
+#trk-finish:active {
+    transform: scale(0.96);
+}
+
+/* Recenter button — shown above STOP when the map stops following you */
+#recenter-fab {
+    position: fixed;
+    left: 50%;
+    bottom: calc(var(--btm) + clamp(96px, 30vw, 132px) + 14px);
+    transform: translateX(-50%) translateY(8px);
+    z-index: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    border: 1px solid rgba(245, 194, 66, 0.7);
+    border-radius: 999px;
+    background: rgba(8, 20, 42, 0.92);
+    backdrop-filter: blur(8px);
+    color: var(--orange);
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.7rem;
+    letter-spacing: 1.5px;
+    cursor: pointer;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+#recenter-fab.show {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateX(-50%) translateY(0);
+}
+
+#recenter-fab svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* ---- Camera button (top-center) → Foto-Spur ---- */
+#cam-fab {
+    position: fixed;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 600;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    background: rgba(8, 20, 42, 0.82);
+    color: rgba(255, 255, 255, 0.9);
+    /* always visible: while tracking → pin on the track; idle → one-point photo track */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(8px);
+    cursor: pointer;
+    transition: transform 0.1s ease, color 0.2s ease;
+}
+
+#cam-fab.shown {
+    display: inline-flex;
+}
+
+#cam-fab:hover {
+    color: var(--orange);
+}
+
+#cam-fab:active {
+    transform: translateY(-50%) scale(0.94);
+}
+
+#cam-fab svg {
+    width: 24px;
+    height: 24px;
+}
+
+/* ---- Photo waypoint pins (Foto-Spur) ---- */
+.wp-pin {
+    background: none;
+    border: none;
+}
+
+.wp-dot {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--orange);
+    color: rgb(8, 20, 42);
+    border: 2px solid #fff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+.wp-dot svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* pulse while Gemini is still identifying the photo */
+.wp-dot.pending {
+    animation: wpPulse 1s ease-in-out infinite;
+}
+
+/* AI recognised → green (φ); recognition failed → red (Υ) */
+.wp-dot.done {
+    background: rgb(121, 158, 49);
+}
+
+.wp-dot.failed {
+    background: rgb(176, 36, 24);
+}
+
+@keyframes wpPulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.35;
+    }
+}
+
+/* ---- Photo popup (the knowledge card) ---- */
+.wp-popup .leaflet-popup-content-wrapper {
+    background: rgb(8, 20, 42);
+    color: #fff;
+    border: 1px solid rgba(245, 194, 66, 0.5);
+    border-radius: 12px;
+}
+
+.wp-popup .leaflet-popup-tip {
+    background: rgb(8, 20, 42);
+}
+
+.wp-pop img {
+    width: 100%;
+    border-radius: 8px;
+    display: block;
+    margin-bottom: 8px;
+    cursor: pointer;
+    /* tap → full-screen lightbox */
+}
+
+.wp-pop-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.78rem;
+    color: var(--orange);
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+}
+
+.wp-pop-text {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 0.82rem;
+    line-height: 1.4;
+    color: #fff;
+}
+
+/* ---- Photo lightbox: tap a photo card → show it over everything ---- */
+#photo-lightbox {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 99999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: max(10px, env(safe-area-inset-top)) 10px 16px;
+    background: rgb(8, 20, 42);
+    /* fully opaque — at 0.97 the map bled through unevenly behind the photo */
+}
+
+#photo-lightbox.open {
+    display: flex !important;
+}
+
+.lb-inner {
+    width: min(98vw, 1200px);
+    max-height: 96vh;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+}
+
+#lightbox-img {
+    width: 100%;
+    max-height: 82vh;
+    /* fill the screen but keep the whole photo visible (no crop) */
+    object-fit: contain;
+    border-radius: 12px;
+    display: block;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+    /* kill the native long-press behaviour on the photo (callout / save-image / drag) */
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-user-drag: none;
+}
+
+#lightbox-title {
+    font-family: 'Orbitron', sans-serif;
+    color: var(--orange);
+    font-size: 1rem;
+    letter-spacing: 0.5px;
+    margin: 16px 0 6px;
+}
+
+#lightbox-text {
+    font-family: Arial, Helvetica, sans-serif;
+    color: #fff;
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+#lightbox-close {
+    position: fixed;
+    top: max(14px, env(safe-area-inset-top));
+    right: 16px;
+    z-index: 100000;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    background: rgba(8, 20, 42, 0.92);
+    color: #fff;
+    font-size: 1.7rem;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(8px);
+}
+
+#lightbox-close:hover {
+    border-color: var(--orange);
+    color: var(--orange);
+}
+
+/* Lightbox photo nav (prev/next) — over the photo's left & right edges, vertically centred */
+#lightbox-nav {
+    display: none;   /* JS shows it only when the track has more than one photo */
+}
+
+.lb-arrow {
+    position: fixed;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 100000;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    background: rgba(8, 20, 42, 0.6);
+    color: #fff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(6px);
+}
+
+#lb-prev {
+    left: max(12px, env(safe-area-inset-left));
+}
+
+#lb-next {
+    right: max(12px, env(safe-area-inset-right));
+}
+
+.lb-arrow svg {
+    width: 28px;
+    height: 28px;
+}
+
+.lb-arrow:hover {
+    border-color: var(--orange);
+    color: var(--orange);
+}
+
+.lb-arrow:active {
+    transform: translateY(-50%) scale(0.94);
+}
+
+/* ---- Small tool buttons (bottom-left) ---- */
+#hud-tools {
+    position: fixed;
+    left: 14px;
+    bottom: var(--btm);
+    z-index: 500;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.hud-tool {
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    background: rgba(8, 20, 42, 0.82);
+    color: #fff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(8px);
+    transition: transform 0.1s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.hud-tool svg {
+    width: 22px;
+    height: 22px;
+}
+
+.hud-tool:hover {
+    border-color: rgba(255, 255, 255, 0.6);
+}
+
+.hud-tool:active {
+    transform: scale(0.94);
+}
+
+/* Clear button hints at its destructive action */
+#trk-clear:hover {
+    color: var(--red);
+    border-color: var(--red);
+}
+
+/* ---- Left-edge hamburger (vertically centred) → opens the radial popup ---- */
+#menu-fab {
+    position: fixed;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 500;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
+    padding: 0 12px;
+    background: rgba(8, 20, 42, 0.82);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 50%;
+    backdrop-filter: blur(8px);
+    cursor: pointer;
+}
+
+#menu-fab span {
+    display: block;
+    height: 2px;
+    border-radius: 2px;
+    background: rgba(255, 255, 255, 0.9);
+    transition: background 0.2s ease;
+}
+
+#menu-fab:active {
+    transform: translateY(-50%) scale(0.94);
+}
+
+#menu-fab:hover span {
+    background: var(--orange);
+}
+
+/* ---- Radial action popup (long-press / right-click) — style from worldclock, orange accent ---- */
+#mini-stack {
+    display: none;
+}
+
+#mini-stack.popup {
+    display: block;
+    position: fixed;
+    z-index: 960;
+    width: 0;
+    height: 0;
+    pointer-events: none;
+    /* anchored at the hamburger by JS; only the buttons are tappable */
+}
+
+#mini-stack.popup::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 520px;
+    height: 380px;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(ellipse at center,
+            rgba(245, 194, 66, 0.18) 0%,
+            rgba(245, 194, 66, 0.09) 28%,
+            rgba(245, 194, 66, 0.035) 55%,
+            rgba(245, 194, 66, 0) 75%);
+    filter: blur(6px);
+    z-index: -1;
+}
+
+#mini-stack.popup .mini-btn {
+    position: absolute;
+    pointer-events: auto;
+    width: 168px;
+    height: 46px;
+    padding: 0 12px;
+    white-space: nowrap;
+    transform: translate(-50%, -50%);
+    border-radius: 12px;
+    cursor: pointer;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.64rem;
+    letter-spacing: 0.12em;
+    color: var(--orange);
+    background: rgb(8, 20, 42);
+    border: none;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+    transition: background 0.12s, transform 0.12s;
+}
+/* long label → wrap to two centred lines so it fits the fixed-width button */
+#mini-stack.popup #mb-reburn {
+    white-space: normal;
+    line-height: 1.12;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+#mini-stack.popup .mini-btn:hover {
+    background: rgb(40, 74, 134);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5), inset 0 0 0 1.5px rgba(245, 194, 66, 0.55);
+}
+
+#mini-stack.popup .mini-btn:active {
+    transform: translate(-50%, -50%) scale(0.95);
+}
+
+/* REGEN toggle in its ON state → highlight in brand green so it's visibly active */
+#mini-stack.popup .mini-btn.active {
+    color: var(--green);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5), inset 0 0 0 1.5px rgba(121, 158, 49, 0.85);
+}
+
+/* ---- Centered overlay panels (track list + info) ---- */
+#ov-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 970;
+    background: rgba(2, 9, 25, 0.6);
+    backdrop-filter: blur(2px);
+    display: none;
+}
+
+#ov-backdrop.open {
+    display: block;
+}
+
+.ov-panel {
+    position: fixed;
+    z-index: 971;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%) scale(0.96);
+    opacity: 0;
+    pointer-events: none;
+    display: flex;
+    flex-direction: column;
+    width: min(92vw, 420px);
+    max-height: 80vh;
+    padding: 16px;
+    background: rgba(8, 20, 42, 0.95);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.55);
+    font-family: 'Orbitron', sans-serif;
+    color: #fff;
+    transition: opacity 0.18s ease, transform 0.18s ease;
+}
+
+.ov-panel.open {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translate(-50%, -50%) scale(1);
+}
+
+.ov-title {
+    font-size: 0.8rem;
+    letter-spacing: 2px;
+    color: var(--orange);
+    margin-bottom: 12px;
+    padding-right: 40px;
+    /* leave room for the top-right X */
+}
+
+.ov-action {
+    margin-bottom: 12px;
+    padding: 13px;
+    border: 1px solid rgba(245, 194, 66, 0.7);
+    border-radius: 10px;
+    background: rgba(245, 194, 66, 0.12);
+    color: var(--orange);
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.74rem;
+    letter-spacing: 1px;
+    cursor: pointer;
+}
+
+.ov-action:hover {
+    background: rgba(245, 194, 66, 0.2);
+}
+
+/* Slim dark scrollbar — index.html look, applied the cross-browser-safe way:
+   ::-webkit-scrollbar for Chrome/Safari, scrollbar-width only for Firefox in
+   @supports (never both on the same element — Safari would drop the webkit rules). */
+.ov-body {
+    overflow-y: auto;
+}
+
+.ov-body::-webkit-scrollbar {
+    width: 11px;
+    height: 11px;
+}
+
+.ov-body::-webkit-scrollbar-track {
+    background: rgba(40, 48, 68, 0.72);
+    border-radius: 999px;
+    margin: 6px 0;
+}
+
+.ov-body::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg,
+            rgba(78, 92, 118, 0.95) 0%,
+            rgba(52, 64, 86, 0.92) 100%);
+    border-radius: 999px;
+    border: 2px solid rgba(34, 42, 58, 0.85);
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.35);
+}
+
+.ov-body::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg,
+            rgba(92, 108, 134, 0.98) 0%,
+            rgba(68, 82, 108, 0.95) 100%);
+    box-shadow: 0 0 10px rgba(100, 118, 145, 0.22);
+}
+
+@supports (-moz-appearance: none) {
+    .ov-body {
+        scrollbar-width: thin;
+        scrollbar-color: rgba(72, 88, 112, 0.95) transparent;
+    }
+}
+
+.ov-close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 34px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: none;
+    border-radius: 9px;
+    background: transparent;
+    color: #fff;
+    font-family: system-ui, -apple-system, sans-serif;
+    font-size: 1.6rem;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.ov-close:hover {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+/* ---- Sync-Code panel ---- */
+#sync-status {
+    font-family: system-ui, -apple-system, sans-serif;
+    font-size: 0.85rem;
+    color: #fff;
+    margin: 0 0 8px;
+    word-break: break-all;
+    white-space: pre-line;
+}
+
+.sync-hint {
+    font-family: system-ui, -apple-system, sans-serif;
+    font-size: 0.78rem;
+    color: rgba(255, 255, 255, 0.55);
+    line-height: 1.45;
+    margin: 0 0 16px;
+}
+
+.sync-field {
+    width: 100%;
+    padding: 12px 14px;
+    margin-bottom: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.04);
+    color: #fff;
+    /* Arial too — entering a code needs readable characters */
+    font-family: Arial, system-ui, sans-serif;
+    font-size: 1rem;
+    letter-spacing: 1px;
+}
+
+.sync-field:focus {
+    outline: none;
+    border-color: rgba(245, 194, 66, 0.6);
+}
+
+.sync-btn {
+    display: block;
+    width: 100%;
+    padding: 13px;
+    margin-bottom: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 10px;
+    background: transparent;
+    color: #fff;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.72rem;
+    letter-spacing: 1px;
+    cursor: pointer;
+}
+
+.sync-btn:hover {
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.sync-btn.primary {
+    background: rgba(245, 194, 66, 0.14);
+    border-color: rgba(245, 194, 66, 0.6);
+    color: var(--orange);
+}
+
+.sync-btn.primary:hover {
+    background: rgba(245, 194, 66, 0.22);
+}
+
+/* ---- Simplified sync panel: state-driven ---- */
+/* Settings dialog cards (Sync is the first one) */
+.set-card {
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 14px;
+    padding: 16px 16px 18px;
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.set-card-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.8rem;
+    letter-spacing: 1.5px;
+    color: var(--orange);
+    margin-bottom: 4px;
+}
+
+.set-card-sub {
+    font-family: system-ui, -apple-system, sans-serif;
+    font-size: 0.78rem;
+    color: rgba(255, 255, 255, 0.55);
+    line-height: 1.45;
+    margin: 0 0 14px;
+}
+
+.set-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    font-family: system-ui, -apple-system, sans-serif;
+    font-size: 0.82rem;
+    color: rgba(255, 255, 255, 0.82);
+    padding: 11px 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.set-row span:first-child {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.sync-lead {
+    font-family: system-ui, -apple-system, sans-serif;
+    font-size: 0.82rem;
+    color: rgba(255, 255, 255, 0.6);
+    line-height: 1.45;
+    margin: 0 0 16px;
+}
+
+/* The active code shown big — tapping it copies to the clipboard */
+.sync-code {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    width: 100%;
+    padding: 16px 14px;
+    margin-bottom: 14px;
+    border: 1px solid rgba(245, 194, 66, 0.5);
+    border-radius: 12px;
+    background: rgba(245, 194, 66, 0.1);
+    cursor: pointer;
+}
+
+.sync-code:hover {
+    background: rgba(245, 194, 66, 0.16);
+}
+
+.sync-code:active {
+    transform: scale(0.99);
+}
+
+#sync-code-val {
+    /* Arial (not Orbitron) — a sync code must be easy to read/type */
+    font-family: Arial, system-ui, sans-serif;
+    font-size: 1.25rem;
+    letter-spacing: 1px;
+    color: var(--orange);
+    word-break: break-all;
+}
+
+.sync-code-tip {
+    font-family: system-ui, -apple-system, sans-serif;
+    font-size: 0.68rem;
+    letter-spacing: 1px;
+    color: rgba(255, 255, 255, 0.45);
+}
+
+/* Quiet secondary action (Trennen / oder Code eingeben) */
+.sync-link {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    border: none;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.55);
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.68rem;
+    letter-spacing: 1px;
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.sync-link:hover {
+    color: rgba(255, 255, 255, 0.85);
+}
+
+/* Disconnect confirmation */
+.sync-warn {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.95rem;
+    color: #fff;
+    margin: 0 0 10px;
+}
+
+.sync-warn-body {
+    font-family: system-ui, -apple-system, sans-serif;
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.7);
+    line-height: 1.5;
+    margin: 0 0 14px;
+}
+
+.sync-warn-body b {
+    color: var(--orange);
+}
+
+.sync-btn.danger {
+    background: rgba(176, 36, 24, 0.85);
+    border-color: rgba(176, 36, 24, 0.95);
+    color: #fff;
+}
+
+.sync-btn.danger:hover {
+    background: rgba(176, 36, 24, 1);
+}
+
+/* track list rows */
+.tl-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 10px;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+.tl-row:hover {
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.tl-main {
+    flex: 1;
+    min-width: 0;
+}
+
+.tl-name {
+    font-size: 0.78rem;
+}
+
+.tl-meta {
+    font-family: system-ui, sans-serif;
+    font-size: 0.66rem;
+    color: rgba(255, 255, 255, 0.5);
+    margin-top: 3px;
+}
+
+.tl-del {
+    flex: none;
+    width: 34px;
+    height: 34px;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.5);
+    cursor: pointer;
+    font-size: 1.1rem;
+}
+
+.tl-del:hover {
+    background: rgba(176, 36, 24, 0.18);
+    color: var(--red);
+}
+
+.tl-share {
+    flex: none;
+    width: 34px;
+    height: 34px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.5);
+    cursor: pointer;
+}
+
+.tl-share:hover {
+    background: rgba(245, 194, 66, 0.18);
+    color: var(--orange);
+}
+
+.tl-empty {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.74rem;
+    padding: 8px 0;
+}
+
+/* GNSS info text */
+#info-body {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 0.82rem;
+    line-height: 1.5;
+    color: #fff;
+}
+
+#info-body h4 {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.74rem;
+    color: var(--orange);
+    margin: 14px 0 4px;
+}
+
+#info-body p {
+    margin: 0 0 8px;
+}
+
+#info-body .flag {
+    font-size: 0.72rem;
+    color: rgba(255, 255, 255, 0.55);
+}
+
+/* toast */
+#toast {
+    position: fixed;
+    left: 50%;
+    bottom: max(170px, calc(env(safe-area-inset-bottom) + 150px));
+    transform: translateX(-50%) translateY(8px);
+    z-index: 980;
+    background: rgba(8, 20, 42, 0.96);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 10px;
+    padding: 10px 16px;
+    font-family: system-ui, sans-serif;
+    font-size: 0.8rem;
+    color: #fff;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+#toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+/* Movement-gate tuning readout (debug → Arial). Remove once thresholds are dialed in. */
+#motion-dbg {
+    position: fixed;
+    left: 8px;
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 6px);
+    z-index: 950;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 10px;
+    letter-spacing: 0.3px;
+    color: rgba(255, 255, 255, 0.65);
+    background: rgba(8, 20, 42, 0.55);
+    padding: 2px 6px;
+    border-radius: 6px;
+    pointer-events: none;
+}
