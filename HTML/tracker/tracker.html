@@ -1396,9 +1396,17 @@
         L.control.zoom({ position: 'bottomright' }).addTo(map);
         map.attributionControl.setPrefix(false); // drop the "Leaflet" prefix → shorter bar, stays out from under START
 
-        // Optional rain-radar overlay (off by default; toggled via the REGEN radial button).
+        // Optional rain-radar overlay (toggled via the REGEN radial button; state persisted).
         // Lives in ../js/rain-radar.js — its dedicated pane sits below the track + photo pins.
-        if (typeof RainRadar !== 'undefined') RainRadar.init(map);
+        const RAIN_KEY = 'tracker.rainOn';
+        if (typeof RainRadar !== 'undefined') {
+            RainRadar.init(map);
+            // Restore the persisted REGEN choice: if it was on last time, turn it back on.
+            if (localStorage.getItem(RAIN_KEY) === '1' && !RainRadar.isOn()) {
+                RainRadar.toggle();
+                const rb = document.getElementById('mb-rain'); if (rb) rb.classList.add('active');
+            }
+        }
 
         // The map auto-follows new fixes until you take over (drag) — ZENTRIEREN re-enables it.
         // The position dot is hidden during zoom animations so it doesn't jump, then fades back.
@@ -2705,6 +2713,7 @@ ${pts}
         $('mb-rain').addEventListener('click', (e) => {
             const isOn = RainRadar.toggle();
             e.currentTarget.classList.toggle('active', isOn);
+            localStorage.setItem(RAIN_KEY, isOn ? '1' : '0'); // persist REGEN across restarts
             toast(isOn ? 'Regenradar an' : 'Regenradar aus');
             closePopup();
         });
