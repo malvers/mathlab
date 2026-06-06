@@ -186,7 +186,12 @@ Deno.serve(async (req) => {
       // model didn't return clean JSON → fall back to raw text
       text = txt.slice(0, 300);
     }
-    return json({ title, text, _diag: diag });
+    // Credit the engine that actually identified the subject: Pl@ntNet (the botanical
+    // specialist) on the plant path, otherwise Gemini recognised it itself. Appended
+    // inline so it survives the esc()'d <div>/GPX rendering on the client.
+    const source = plant ? 'Pl@ntNet' : 'Google Gemini';
+    text = (text ? text.trimEnd() + ' ' : '') + '(Quelle: ' + source + ')';
+    return json({ title, text, source, _diag: diag });
   } catch (e) {
     return json({ error: String((e && (e as Error).message) || e) }, 500);
   }
