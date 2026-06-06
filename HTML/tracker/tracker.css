@@ -99,8 +99,9 @@ path.pos-marker.pos-shown {
 #gps-src {
     flex: 1 1 auto;
     min-width: 0;
-    font-size: 0.72rem;
-    letter-spacing: 0.5px;
+    /* keep the four constellations on ONE line on a phone: tighter spacing + a touch smaller */
+    font-size: clamp(0.58rem, 2.7vw, 0.72rem);
+    letter-spacing: 0;
     text-align: center;
     color: rgba(255, 255, 255, 0.85);
 }
@@ -178,10 +179,12 @@ path.pos-marker.pos-shown {
 
 #mode-icon {
     /* travel-mode figure, inline to the RIGHT of the KM/H value, mirrored, ~as tall
-       as the value + label lines together (16% smaller than before) */
+       as the value + label lines together. Noto colour-emoji sit high in their line box,
+       so a small em-based downward nudge optically centres the figure over BOTH lines
+       (value + KM/H label). Tunable: raise the 0.18em to drop it further. */
     font-size: clamp(1.67rem, 6.57vw, 2.4rem);
     line-height: 1;
-    transform: scaleX(-1);
+    transform: translateY(0.18em) scaleX(-1);
 }
 
 #hud-stats {

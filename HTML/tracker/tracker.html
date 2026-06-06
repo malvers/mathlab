@@ -147,14 +147,15 @@
             </div>
           </div><!-- /set-card -->
 
-          <!-- Card: Kosten & Limits (Gemini photo recognition) -->
+          <!-- Card: Kosten & Limits (hybrid: Pl@ntNet identifies the plant, Gemini explains it) -->
           <div class="set-card">
             <div class="set-card-title">Kosten &amp; Limits</div>
-            <p class="set-card-sub">Die Foto-Erkennung läuft über Gemini 2.5 Flash (Paid Tier).</p>
-            <div class="set-row"><span>Kosten</span><span>~0,04 ct / Foto</span></div>
-            <div class="set-row"><span>Tempo-Limit</span><span>~1000 Anfragen / Min</span></div>
+            <p class="set-card-sub">Pl@ntNet bestimmt die Pflanze (Free Tier), Gemini 2.5 Flash schreibt die Erklärung (Paid Tier).</p>
+            <div class="set-row"><span>Kosten</span><span>~0,05 ct / Foto</span></div>
+            <div class="set-row"><span>Tages-Limit</span><span>500 Fotos / Tag (Pl@ntNet)</span></div>
+            <div class="set-row"><span>Tempo-Limit</span><span>~1000 Anfragen / Min (Gemini)</span></div>
             <div class="set-row"><span>Drosselung</span><span>0,3 s zwischen Fotos</span></div>
-            <a class="sync-link" href="https://ai.dev/rate-limit" target="_blank" rel="noopener">Nutzung &amp; Limits live ansehen ↗</a>
+            <a class="sync-link" href="https://aistudio.google.com/rate-limit" target="_blank" rel="noopener">Nutzung &amp; Limits live ansehen ↗</a>
           </div><!-- /set-card -->
 
           <!-- Card: Foto-Spur — re-run the AI analysis on still-unrecognised photos -->
@@ -204,7 +205,7 @@
         // so the main init below still finds RainRadar/DebugWindow/PhotoFullscreen ready.
         (function () {
             var v = window.__ASSET_V || '';
-            var js = ['../js/track-render.js', '../js/rain-radar.js', '../js/cyber-clock.js', '../js/debug-window.js', '../js/photo-fullscreen.js'];
+            var js = ['../js/track-render.js', '../js/track-buffer.js', '../js/rain-radar.js', '../js/cyber-clock.js', '../js/debug-window.js', '../js/photo-fullscreen.js'];
             for (var i = 0; i < js.length; i++) document.write('<script src="' + js[i] + v + '"><\/script>');
         })();
     </script>
@@ -502,6 +503,7 @@
             const altVal = fusedAlt != null ? Math.round(fusedAlt * 10) / 10 : null;
             const spdVal = Math.round(shownSpeed * 10) / 10;
             const actVal = effectiveActivity();
+            const ptsBefore = track.length;
             if (track.length === 0) {
                 track.push(here); times.push(stamp); alts.push(altVal); speeds.push(spdVal); activities.push(actVal); redrawTrack();
             } else if (!still) {
@@ -511,6 +513,7 @@
                     track.push(here); times.push(stamp); alts.push(altVal); speeds.push(spdVal); activities.push(actVal); redrawTrack();
                 }
             }
+            if (track.length !== ptsBefore && typeof TrackBuffer !== 'undefined') TrackBuffer.save(bufferSnapshot());
             elDist.textContent = (totalDist / 1000).toFixed(2);
 
             lastFix = { lat: latitude, lng: longitude, t: now };
@@ -723,6 +726,7 @@
             stopActivity(); disableMotion(); stopBaro();
             if (timerId) clearInterval(timerId); timerId = null;
             setTrkState('paused');
+            if (typeof TrackBuffer !== 'undefined') TrackBuffer.saveNow(bufferSnapshot());
             setStatus(track.length ? `Pausiert · ${(totalDist / 1000).toFixed(2)} km` : 'Pausiert.');
         }
 
@@ -740,8 +744,8 @@
             if (track.length >= 1) {
                 const name = 'Track ' + new Date().toLocaleString('de-DE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
                 toast('Speichere …');
-                try { currentTrackId = await saveTrack(name); currentTrackName = name; toast('Gespeichert: ' + name); }
-                catch (e) { toast('Speichern fehlgeschlagen: ' + (e.message || e)); }
+                try { currentTrackId = await saveTrack(name); currentTrackName = name; if (typeof TrackBuffer !== 'undefined') await TrackBuffer.clear(); toast('Gespeichert: ' + name); }
+                catch (e) { toast('Speichern fehlgeschlagen (lokal gesichert): ' + (e.message || e)); }
             } else {
                 setStatus('Beendet.');
             }
@@ -754,6 +758,37 @@
         });
         $('trk-finish').addEventListener('click', () => { if (trkState === 'paused') finishTracking(); });
         setTrkState('idle');
+
+        // ---- Crash-proof live buffer (../js/track-buffer.js): persist the in-progress track on
+        //      the fly so a close/kill/crash — or a failed offline save — never loses it. ----
+        function bufferSnapshot() {
+            return {
+                v: 1, savedAt: Date.now(), startTime: startTime, totalDist: totalDist,
+                track: track, times: times, alts: alts, speeds: speeds, activities: activities,
+                waypoints: waypoints.map(w => ({ lat: w.lat, lng: w.lng, t: w.t, img: w.img, title: w.title, text: w.text })),
+            };
+        }
+        function restoreBufferedTrack(buf) {
+            if (trkState !== 'idle' || !buf || !Array.isArray(buf.track) || !buf.track.length) return;
+            track = buf.track; times = buf.times || []; alts = buf.alts || [];
+            speeds = buf.speeds || []; activities = buf.activities || []; totalDist = buf.totalDist || 0;
+            (buf.waypoints || []).forEach(w => addWaypoint({ lat: w.lat, lng: w.lng, t: w.t, img: w.img, title: w.title, text: w.text }));
+            redrawTrack();
+            // show the recorded duration; arm pauseStart so CONTINUE doesn't count the closed gap
+            const span = (times.length > 1) ? (Date.parse(times[times.length - 1]) - Date.parse(times[0])) : 0;
+            startTime = Date.now() - (isFinite(span) && span > 0 ? span : 0);
+            pauseStart = Date.now();
+            updateDuration();
+            elDist.textContent = (totalDist / 1000).toFixed(2);
+            $('hud-top').classList.add('shown');
+            setTrkState('paused'); // → CONTINUE | SPEICHERN
+            try { if (track.length) map.fitBounds(L.latLngBounds(track), { padding: [40, 40] }); } catch (e) { }
+            TrackBuffer.saveNow(bufferSnapshot()); // keep it persisted across the restore
+            toast('Ungesicherter Track wiederhergestellt: ' + track.length + ' Punkte. SPEICHERN nicht vergessen.');
+        }
+        if (typeof TrackBuffer !== 'undefined') {
+            TrackBuffer.load().then(buf => { if (buf) restoreBufferedTrack(buf); });
+        }
 
         // ---------------------------------------------------------------
         // Acquire a position: snap there at once, then keep refining until the
@@ -836,6 +871,7 @@
         function clearTrack(silent) {
             // Guard against losing a recording by accident (silent skips the confirm)
             if (!silent && track.length && !confirm('Aktuellen Track wirklich löschen?')) return;
+            if (typeof TrackBuffer !== 'undefined') TrackBuffer.clear();
             track = [];
             times = [];
             alts = [];
@@ -1370,6 +1406,7 @@ ${pts}
         async function addPhotoAt(img, ll) {
             toast('Foto wird verarbeitet …');
             const wp = addWaypoint({ lat: ll[0], lng: ll[1], t: new Date().toISOString(), img, title: PENDING_TITLE, text: '' });
+            if (typeof TrackBuffer !== 'undefined') TrackBuffer.saveNow(bufferSnapshot()); // secure the new photo at once
             try {
                 const r = await identifyPhoto(img);
                 wp.title = r.title; wp.text = r.text;

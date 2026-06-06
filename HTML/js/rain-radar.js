@@ -31,7 +31,14 @@
     const DWD_ATTR = '<a href="https://www.dwd.de/" target="_blank" rel="noopener">DWD</a>';
     const GERMANY = { s: 47.0, n: 55.5, w: 5.5, e: 15.5 }; // DWD coverage ≈ Germany + margin
     const FC_MIN = -15;   // slider start, minutes relative to now (a little past so "now" has data)
-    const FC_MAX = 120;   // slider end → +2 h forecast
+    // The RV product's time extent ends at (latest_analysis + 120 min). The analysis lags "now"
+    // by ~1 radar block (5 min), sometimes 2 → the available end is t0+115, occasionally t0+110
+    // (MEASURED). Requesting beyond it returns a ServiceException (text/xml), not a PNG, so the
+    // tile fails to load → DE blanks out on that frame (the "DE missing during play" bug). Cap at
+    // +110 to stay safely inside the window across normal analysis latency. (Exact alternative:
+    // read the layer's time-Dimension end from GetCapabilities — deferred; not worth an 850 KB
+    // fetch on every enable.)
+    const FC_MAX = 110;   // slider end → ~+1h50 forecast (was 120; trimmed to the real RV horizon)
 
     // --- RainViewer (global fallback). ---
     const RV_API = 'https://api.rainviewer.com/public/weather-maps.json';
@@ -88,7 +95,7 @@
     // ASYMMETRIC (R−B≈48 / B−R≈96); the boundary line is SYMMETRIC (|R−B| small). So the
     // |R−B| ≤ 36 test strips the line while KEEPING the heaviest-rain cells. Every threshold
     // here was measured from real tiles + GetLegendGraphic — not guessed.
-    const BOUNDARY_GREY = 205;        // recolour the boundary line to a light neutral grey…
+    const BOUNDARY_GREY = 128;        // recolour the boundary line to a neutral mid-grey…
     const BOUNDARY_ALPHA_SCALE = 1.0; // …keeping its full alpha for now (DEBUG: find the line, then dial down)
     function filterDwdPixels(d) {
         for (let i = 0; i < d.length; i += 4) {
