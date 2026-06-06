@@ -136,6 +136,13 @@
             color: rgba(255, 255, 255, 0.22);
         }
 
+        /* count of visible satellites behind each constellation (inherits grey/green) */
+        #gps-src .sat-n {
+            font-size: 0.82em;
+            font-weight: 700;
+            opacity: 0.9;
+        }
+
         #gps-acc {
             flex: 0 0 auto;
             white-space: nowrap;
@@ -2856,8 +2863,9 @@ ${pts}
         const GNSS_ALL = ['GPS', 'GLO', 'GAL', 'BDS'];
         function renderGnssChip(d) {
             const used = (d && d.usedByConstellation) || {};
+            const view = (d && d.viewByConstellation) || {}; // visible sats per constellation
             elSrc.innerHTML = GNSS_ALL
-                .map(c => '<span class="sat' + ((used[c] || 0) > 0 ? ' on' : '') + '">' + CON_NAMES[c] + '</span>')
+                .map(c => '<span class="sat' + ((used[c] || 0) > 0 ? ' on' : '') + '">' + CON_NAMES[c] + ' <span class="sat-n">' + (view[c] || 0) + '</span></span>')
                 .join('<span class="sat-sep"> · </span>');
         }
         function gnssLiveHtml() {
