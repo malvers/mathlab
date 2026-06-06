@@ -13,8 +13,14 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
         integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
     <!-- Reusable fixed-slot clock (shared component) — keeps the timer from jittering -->
-    <link rel="stylesheet" href="../js/cyber-clock.css">
-    <link rel="stylesheet" href="tracker.css">
+    <!-- Cache-bust local CSS/JS by the page's deploy time (document.lastModified) so a
+         refreshed HTML always pulls matching-fresh assets, never a stale WebView-cached
+         copy. External CDN libs are already versioned → left untouched. -->
+    <script>
+        window.__ASSET_V = '?v=' + encodeURIComponent(document.lastModified);
+        document.write('<link rel="stylesheet" href="../js/cyber-clock.css' + window.__ASSET_V + '">');
+        document.write('<link rel="stylesheet" href="tracker.css' + window.__ASSET_V + '">');
+    </script>
 </head>
 
 <body>
@@ -179,11 +185,16 @@
         integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <!-- Leaflet.hotline — draws the track as a speed-coloured gradient -->
     <script src="https://unpkg.com/leaflet-hotline@0.4.0/dist/leaflet.hotline.js"></script>
-    <script src="../js/track-render.js"></script>
-    <script src="../js/rain-radar.js"></script>
-    <script src="../js/cyber-clock.js"></script>
-    <script src="../js/debug-window.js"></script>
-    <script src="../js/photo-fullscreen.js"></script>
+    <script>
+        // Local app scripts, cache-busted via the shared asset version set in <head>.
+        // document.write keeps them synchronous + in-order (like the static tags were),
+        // so the main init below still finds RainRadar/DebugWindow/PhotoFullscreen ready.
+        (function () {
+            var v = window.__ASSET_V || '';
+            var js = ['../js/track-render.js', '../js/rain-radar.js', '../js/cyber-clock.js', '../js/debug-window.js', '../js/photo-fullscreen.js'];
+            for (var i = 0; i < js.length; i++) document.write('<script src="' + js[i] + v + '"><\/script>');
+        })();
+    </script>
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <script>
         // ---------------------------------------------------------------
