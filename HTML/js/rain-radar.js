@@ -1,112 +1,139 @@
 // Optional rain-radar overlay ("Regenradar") for the Doc Alvers Tracker.
-// Pulls free public radar tiles from RainViewer (https://www.rainviewer.com/api.html) —
-// NO API key required. The overlay is OFF by default and is purely opt-in via toggle().
+// Two free, NO-key sources, auto-picked by the map's position:
+//   • Germany  → DWD 1×1 km radar (WMS) — sharp at any zoom; transparent where it's dry
+//   • elsewhere → RainViewer global mosaic — coarse (native max zoom 7, then upscaled)
+// The overlay is OFF by default and purely opt-in via toggle().
 //
-// Layer ordering: the radar tiles live in a DEDICATED Leaflet pane ('rain-radar') whose
-// zIndex (250) sits ABOVE the OSM base tilePane (200) but BELOW the track polyline
-// (overlayPane, 400) and the photo pins (markerPane, 600). So the radar never covers the
-// GPS track or the photo markers — it only tints the basemap underneath them.
+// Layer ordering: the radar lives in a DEDICATED Leaflet pane ('rain-radar') whose zIndex
+// (250) sits ABOVE the OSM base tilePane (200) but BELOW the track polyline (overlayPane,
+// 400) and the photo pins (markerPane, 600) — so it tints the basemap, never the track.
 //
-// Exposes a single global object, window.RainRadar, with:
-//   init(map)  — store the map reference, create the pane (nothing visible yet)
-//   toggle()   — add/remove the radar overlay; returns the new on/off state
-//   isOn()     — boolean, whether the overlay is currently shown
+// Exposes one global, window.RainRadar:
+//   init(map)  — store the map, create the pane, watch for border crossings
+//   toggle()   — add/remove the overlay; returns the new on/off state
+//   isOn()     — boolean
 
 (function (global) {
     'use strict';
 
-    const API_URL = 'https://api.rainviewer.com/public/weather-maps.json';
     const PANE_NAME = 'rain-radar';
-    const PANE_Z_INDEX = 250;     // between OSM tilePane (200) and track overlayPane (400)
-    const TILE_OPACITY = 0.6;     // semi-transparent so the basemap stays readable
-    const REFRESH_MS = 5 * 60 * 1000; // re-fetch the frame list every ~5 minutes
-    const ATTRIBUTION = '<a href="https://www.rainviewer.com/" target="_blank" rel="noopener">RainViewer</a>';
+    const PANE_Z_INDEX = 250;          // between OSM tilePane (200) and track overlayPane (400)
+    const TILE_OPACITY = 0.6;
+    const REFRESH_MS = 5 * 60 * 1000;  // both sources update ~every 5 min
+
+    // --- RainViewer (global fallback) ---
+    const RV_API = 'https://api.rainviewer.com/public/weather-maps.json';
+    const RV_ATTR = '<a href="https://www.rainviewer.com/" target="_blank" rel="noopener">RainViewer</a>';
+
+    // --- DWD (Germany, 1 km, free, no key) ---
+    const DWD_WMS = 'https://maps.dwd.de/geoserver/dwd/wms';
+    const DWD_LAYER = 'dwd:Niederschlagsradar'; // measured: dry areas render transparent (alpha 0)
+    const DWD_ATTR = '<a href="https://www.dwd.de/" target="_blank" rel="noopener">DWD</a>';
+    // DWD national radar coverage (≈ Germany + a margin). Inside → use DWD, else RainViewer.
+    const GERMANY = { s: 47.0, n: 55.5, w: 5.5, e: 15.5 };
 
     let map = null;
     let on = false;
-    let layer = null;          // the current L.tileLayer (one observed radar frame)
-    let refreshTimer = null;   // setInterval handle while the overlay is on
-    let lastFrameTime = null;  // unix-ts of the frame currently shown (avoid needless re-adds)
+    let layer = null;        // the overlay layer currently on the map
+    let provider = null;     // 'dwd' | 'rainviewer' — which source is showing
 
-    // Route log lines into the central debug window when it is present; otherwise no-op.
+    let refreshTimer = null;
+
+    // Route log lines into the central debug window when present; otherwise no-op.
     function dbg(msg) {
-        if (typeof DebugWindow !== 'undefined' && DebugWindow && DebugWindow.log) {
-            DebugWindow.log(msg);
-        }
+        if (typeof DebugWindow !== 'undefined' && DebugWindow && DebugWindow.log) DebugWindow.log(msg);
     }
 
-    // Build the Leaflet tile-URL template for one RainViewer radar frame.
-    //   host  e.g. "https://tilecache.rainviewer.com"
-    //   path  e.g. "/v2/radar/1700000000"
-    // 256   = tile size
-    // 2     = colour scheme "universal blue"
-    // 1_1   = smoothed (1) + show-snow (1)
-    function frameUrl(host, frame) {
-        return `${host}${frame.path}/256/{z}/{x}/{y}/2/1_1.png`;
+    function inGermany(ll) {
+        return !!ll && ll.lat >= GERMANY.s && ll.lat <= GERMANY.n && ll.lng >= GERMANY.w && ll.lng <= GERMANY.e;
+    }
+    // Which source fits the current map centre?
+    function pickProvider() {
+        return inGermany(map.getCenter()) ? 'dwd' : 'rainviewer';
     }
 
-    // Fetch the radar manifest and return { host, frame } for the most recent OBSERVED
-    // (past) frame, or null on any failure. Nowcast frames are intentionally ignored —
-    // we only show what has actually been measured.
-    async function fetchLatestFrame() {
-        const res = await fetch(API_URL, { cache: 'no-store' });
+    // --- DWD: WMS layer of the latest radar frame. A changing extra param busts the tile
+    //     cache so a long-open overlay still refreshes to the newest 5-min frame. ---
+    function makeDwdLayer() {
+        return L.tileLayer.wms(DWD_WMS, {
+            layers: DWD_LAYER,
+            format: 'image/png',
+            transparent: true,
+            version: '1.3.0',
+            pane: PANE_NAME,
+            opacity: TILE_OPACITY,
+            attribution: DWD_ATTR,
+            maxZoom: 21,            // upscale the 1 km grid when zoomed in close
+            cacheBust: Date.now(),  // not a Leaflet option → forwarded as a WMS query param
+        });
+    }
+
+    // --- RainViewer: tile layer of the most recent OBSERVED frame (nowcast ignored). ---
+    function rvUrl(host, frame) {
+        // 256 = tile size · 2 = colour scheme "universal blue" · 1_1 = smoothed + show-snow
+        return host + frame.path + '/256/{z}/{x}/{y}/2/1_1.png';
+    }
+    async function makeRainViewerLayer() {
+        const res = await fetch(RV_API, { cache: 'no-store' });
         if (!res.ok) throw new Error('HTTP ' + res.status);
         const data = await res.json();
         const past = data && data.radar && data.radar.past;
         if (!Array.isArray(past) || past.length === 0) return null;
-        return { host: data.host, frame: past[past.length - 1], count: past.length };
+        const frame = past[past.length - 1];
+        return L.tileLayer(rvUrl(data.host, frame), {
+            pane: PANE_NAME,
+            opacity: TILE_OPACITY,
+            tileSize: 256,
+            attribution: RV_ATTR,
+            // RainViewer radar only exists up to z7 (measured — z8+ returns a placeholder).
+            maxNativeZoom: 7,
+            maxZoom: 21,
+            zIndex: 1,
+        });
     }
 
-    // Swap the displayed frame to the newest observed one. Adds a fresh tile layer first,
-    // then removes the old one (so there's no visible blank flash between the two).
-    async function refreshFrame() {
+    // Build the overlay for `which`, add it, then drop the previous one (no blank flash).
+    async function show(which) {
         if (!on || !map) return;
-        let info;
+        let next;
         try {
-            info = await fetchLatestFrame();
+            next = which === 'dwd' ? makeDwdLayer() : await makeRainViewerLayer();
         } catch (e) {
             dbg('RainRadar: Abruf fehlgeschlagen (' + (e && e.message ? e.message : e) + ')');
             return;
         }
-        if (!info) { dbg('RainRadar: keine Frames'); return; }
-        if (info.frame.time === lastFrameTime && layer) return; // already showing the newest
-
-        const next = L.tileLayer(frameUrl(info.host, info.frame), {
-            pane: PANE_NAME,
-            opacity: TILE_OPACITY,
-            tileSize: 256,
-            // RainViewer radar tiles only exist up to z7 (measured — z8+ returns a
-            // "Zoom Level Not Supported" placeholder). Cap the native zoom there and let
-            // Leaflet upscale, so the (coarse ~1 km) radar stays visible at every zoom
-            // instead of breaking. It turns blocky when zoomed in close — that's the
-            // radar's real resolution, not a bug.
-            maxNativeZoom: 7,
-            maxZoom: 21,
-            attribution: ATTRIBUTION,
-            zIndex: 1,
-        });
+        if (!next) { dbg('RainRadar: keine Daten'); return; }
+        if (!on) return; // toggled off while awaiting
         next.addTo(map);
         const prev = layer;
         layer = next;
-        lastFrameTime = info.frame.time;
+        provider = which;
         if (prev) {
-            // Drop the previous frame once the new one has had a moment to paint.
             next.once('load', () => { if (prev !== layer) map.removeLayer(prev); });
-            // Safety net in case 'load' never fires (e.g. fully cached / no tiles in view).
             setTimeout(() => { if (prev !== layer && map.hasLayer(prev)) map.removeLayer(prev); }, 2000);
         }
-        dbg('RainRadar: an (' + info.count + ' Frames)');
+        dbg('RainRadar: an (' + (which === 'dwd' ? 'DWD 1 km' : 'RainViewer') + ')');
+    }
+
+    // Periodic refresh: re-pick the source (you may have moved) and pull the newest frame.
+    function refresh() {
+        if (on && map) show(pickProvider());
+    }
+
+    // While on, swap the source when the map is panned across the DE border.
+    function onMoveEnd() {
+        if (on && map && pickProvider() !== provider) show(pickProvider());
     }
 
     function init(theMap) {
         map = theMap;
-        // Dedicated pane so the overlay always renders below the track and pins.
         if (!map.getPane(PANE_NAME)) {
             map.createPane(PANE_NAME);
             map.getPane(PANE_NAME).style.zIndex = PANE_Z_INDEX;
             // Radar tiles must not swallow taps meant for the map/markers underneath.
             map.getPane(PANE_NAME).style.pointerEvents = 'none';
         }
+        map.on('moveend', onMoveEnd);
     }
 
     function isOn() { return on; }
@@ -118,12 +145,12 @@
             on = false;
             if (refreshTimer) { clearInterval(refreshTimer); refreshTimer = null; }
             if (layer) { map.removeLayer(layer); layer = null; }
-            lastFrameTime = null;
+            provider = null;
             dbg('RainRadar: aus');
         } else {
             on = true;
-            refreshFrame();                                    // load the first frame now
-            refreshTimer = setInterval(refreshFrame, REFRESH_MS); // and keep it fresh
+            show(pickProvider());                          // load now…
+            refreshTimer = setInterval(refresh, REFRESH_MS); // …and keep it fresh
         }
         return on;
     }
