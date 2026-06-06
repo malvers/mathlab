@@ -22,7 +22,7 @@
 
     const PANE_NAME = 'rain-radar';
     const PANE_Z_INDEX = 250;
-    const OPACITY = 0.6;
+    const OPACITY = 1;   // full opacity — Doc likes the punchy look ("sieht irre aus")
     const MS5 = 5 * 60 * 1000;
 
     // --- DWD (Germany, 1 km, no key). RV = nowcast/forecast product (+0…+2 h). ---
@@ -74,9 +74,81 @@
         return new Date(ms).toISOString().replace(/\.\d{3}Z$/, 'Z');
     }
 
+    // ---- client-side pixel filter for the DWD tiles -------------------------------
+    // DWD's WMS style bakes TWO non-precipitation things into every radar tile:
+    //   • a GREY no-data mask outside the radar range — measured RGB ≈126–141 (achromatic,
+    //     alpha ~80); it veils the whole map outside coverage.
+    //   • a MAGENTA coverage-boundary line ("Reichweitengrenze") — measured SYMMETRIC
+    //     magenta peaking at FF00FF (R≈B, very low G).
+    // We set both to full transparency on a canvas so ONLY the real rain stays and the OSM
+    // base shows through everywhere else.
+    //
+    // CRUCIAL: the DWD colour ramp ALSO uses magenta/violet for EXTREME precipitation
+    // (legend: …→red(240,0,0)→(192,0,144)→(96,0,192)→blue). Those MUST stay. They are
+    // ASYMMETRIC (R−B≈48 / B−R≈96); the boundary line is SYMMETRIC (|R−B| small). So the
+    // |R−B| ≤ 36 test strips the line while KEEPING the heaviest-rain cells. Every threshold
+    // here was measured from real tiles + GetLegendGraphic — not guessed.
+    const BOUNDARY_GREY = 205;        // recolour the boundary line to a light neutral grey…
+    const BOUNDARY_ALPHA_SCALE = 1.0; // …keeping its full alpha for now (DEBUG: find the line, then dial down)
+    function filterDwdPixels(d) {
+        for (let i = 0; i < d.length; i += 4) {
+            if (d[i + 3] === 0) continue;                       // already transparent
+            const r = d[i], g = d[i + 1], b = d[i + 2];
+            const mx = r > g ? (r > b ? r : b) : (g > b ? g : b);
+            const mn = r < g ? (r < b ? r : b) : (g < b ? g : b);
+            // 1) grey no-data mask → transparent (achromatic mid-grey; precip is always saturated)
+            if (mx - mn < 30) {
+                const avg = (r + g + b) / 3;
+                if (avg >= 85 && avg <= 170) { d[i + 3] = 0; continue; }
+            }
+            // 2) magenta boundary line → faint neutral grey (symmetric R≈B, low G) so it stays
+            //    as a quiet orientation hint. Extreme-precip magenta/violet are asymmetric
+            //    (|R−B|>36) → untouched.
+            if (r > 140 && b > 120 && g < r - 35 && g < b - 25 && (r > b ? r - b : b - r) <= 36) {
+                d[i] = d[i + 1] = d[i + 2] = BOUNDARY_GREY;
+                d[i + 3] = Math.round(d[i + 3] * BOUNDARY_ALPHA_SCALE);
+            }
+        }
+    }
+
+    // A DWD WMS layer that pushes every tile through filterDwdPixels() on a canvas before it
+    // is shown. Built lazily so Leaflet (L) is guaranteed loaded. CORS on maps.dwd.de is
+    // 'Access-Control-Allow-Origin: *' (measured) → the crossOrigin canvas read is allowed.
+    let FilteredDwdWMS = null;
+    function ensureFilteredClass() {
+        if (FilteredDwdWMS || typeof L === 'undefined') return FilteredDwdWMS;
+        FilteredDwdWMS = L.TileLayer.WMS.extend({
+            createTile: function (coords, done) {
+                const tile = document.createElement('canvas');
+                const size = this.getTileSize();
+                tile.width = size.x;
+                tile.height = size.y;
+                const ctx = tile.getContext('2d', { willReadFrequently: true });
+                const img = new Image();
+                img.crossOrigin = 'anonymous';
+                img.onload = function () {
+                    try {
+                        ctx.drawImage(img, 0, 0, size.x, size.y);
+                        const id = ctx.getImageData(0, 0, size.x, size.y);
+                        filterDwdPixels(id.data);
+                        ctx.putImageData(id, 0, 0);
+                    } catch (e) {
+                        // tainted canvas / decode issue → fall back to the unfiltered tile
+                        try { ctx.clearRect(0, 0, size.x, size.y); ctx.drawImage(img, 0, 0, size.x, size.y); } catch (_) {}
+                    }
+                    done(null, tile);
+                };
+                img.onerror = function (e) { done(e, tile); };
+                img.src = this.getTileUrl(coords);
+                return tile;
+            }
+        });
+        return FilteredDwdWMS;
+    }
+
     // ---- per-frame layer factories ----
     function dwdLayer(ms) {
-        return L.tileLayer.wms(DWD_WMS, {
+        const opts = {
             layers: DWD_RV_LAYER,
             format: 'image/png',
             transparent: true,
@@ -89,7 +161,10 @@
             attribution: DWD_ATTR,
             maxZoom: 21,            // WMS renders every zoom on demand → crisp at any level
             zIndex: 5,              // sits ABOVE the RainViewer base (zIndex 1)
-        });
+            crossOrigin: 'anonymous',
+        };
+        const Cls = ensureFilteredClass();
+        return Cls ? new Cls(DWD_WMS, opts) : L.tileLayer.wms(DWD_WMS, opts);
     }
     function rvLayer(host, frame) {
         // 256 = tile size · 2 = colour scheme "universal blue" · 1_1 = smoothed + show-snow
