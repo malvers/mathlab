@@ -58,6 +58,7 @@
     let baseLayer = null;   // (legacy) separate RainViewer base — no longer used; RV is now
                             // composited INTO each DWD tile so nothing bleeds inside the coverage
     let rvHost = null, rvPath = null;   // current RainViewer frame, read by the composite tiles
+    let cov = null, covLoading = null;  // one-time DE-coverage mask (see ensureCoverageMask)
 
     function dbg(m) {
         if (typeof DebugWindow !== 'undefined' && DebugWindow && DebugWindow.log) DebugWindow.log(m);
@@ -84,6 +85,16 @@
         return new Date(ms).toISOString().replace(/\.\d{3}Z$/, 'Z');
     }
 
+    // Web-Mercator (EPSG:3857) helpers for the one-time coverage mask + per-tile bounds.
+    const MERC_R = 6378137.0, MERC_MAX = 20037508.342789244;
+    function mercX(lon) { return MERC_R * lon * Math.PI / 180; }
+    function mercY(lat) { return MERC_R * Math.log(Math.tan(Math.PI / 4 + lat * Math.PI / 360)); }
+    function tileMercBounds(coords) {
+        const span = 2 * MERC_MAX / Math.pow(2, coords.z);
+        const minX = -MERC_MAX + coords.x * span, maxY = MERC_MAX - coords.y * span;
+        return { minX: minX, maxX: minX + span, maxY: maxY, minY: maxY - span };
+    }
+
     // ---- composite: DWD INSIDE its coverage, RainViewer OUTSIDE -------------------
     // DWD bakes a GREY no-data mask (achromatic, measured RGB ≈126–141, α~80) and a MAGENTA
     // coverage-boundary line (symmetric R≈B, peak FF00FF) into every tile. The grey mask marks
@@ -92,33 +103,63 @@
     //   • DWD grey no-data  → OUTSIDE coverage → take the RainViewer (EU) pixel
     //   • DWD magenta line  → faint neutral grey (a quiet boundary hint)
     //   • DWD rain          → keep the DWD pixel (incl. ASYMMETRIC extreme magenta/violet)
-    //   • DWD transparent   → INSIDE coverage, no rain → stays clear (basemap shows, NO EU)
-    // ⇒ inside the line: never any RainViewer; outside it: only RainViewer. All colour
-    //   thresholds MEASURED from real tiles + GetLegendGraphic — not guessed.
+    //   • DWD transparent   → AMBIGUOUS: "inside coverage, no rain" vs "beyond the data grid" look
+    //     identical → resolved via the one-time coverage mask `cov` (ensureCoverageMask):
+    //        beyond-grid → RainViewer (EU)   ·   enclosed coverage → clear (basemap, NO EU)
+    // ⇒ EU is painted EVERYWHERE except inside the German radar coverage; inside it, never EU.
+    //   All colour thresholds MEASURED from real tiles + GetLegendGraphic — not guessed.
     const BOUNDARY_GREY = 128;        // recolour the boundary line to a neutral mid-grey…
     const BOUNDARY_ALPHA_SCALE = 1.0; // …keeping its full alpha for now (tune later)
-    function compositeDwdRv(d, rv) {
-        for (let i = 0; i < d.length; i += 4) {
-            const a = d[i + 3];
-            if (a === 0) continue;                       // inside coverage, no rain → keep clear (NO EU)
-            const r = d[i], g = d[i + 1], b = d[i + 2];
-            const mx = r > g ? (r > b ? r : b) : (g > b ? g : b);
-            const mn = r < g ? (r < b ? r : b) : (g < b ? g : b);
-            // grey no-data → OUTSIDE coverage → RainViewer pixel (or clear if RV is missing)
-            if (mx - mn < 30) {
-                const avg = (r + g + b) / 3;
-                if (avg >= 85 && avg <= 170) {
-                    if (rv) { d[i] = rv[i]; d[i + 1] = rv[i + 1]; d[i + 2] = rv[i + 2]; d[i + 3] = rv[i + 3]; }
-                    else d[i + 3] = 0;
+    // `tb` = this tile's web-mercator bounds → used to look each pixel up in the coverage mask.
+    function compositeDwdRv(d, rv, tb) {
+        const haveCov = !!(cov && tb && rv);
+        let cMinX, cMaxY, cInvW, cInvH, cw, ch, cdata, txSpan, tySpan;
+        if (haveCov) {
+            cdata = cov.data; cw = cov.w; ch = cov.h;
+            cMinX = cov.minX; cMaxY = cov.maxY;
+            cInvW = cov.w / (cov.maxX - cov.minX);
+            cInvH = cov.h / (cov.maxY - cov.minY);
+            txSpan = tb.maxX - tb.minX; tySpan = tb.maxY - tb.minY;
+        }
+        for (let yy = 0; yy < 256; yy++) {
+            let covRow = 0;
+            if (haveCov) {
+                const my = tb.maxY - (yy + 0.5) / 256 * tySpan;
+                covRow = ((cMaxY - my) * cInvH) | 0;
+                if (covRow < 0) covRow = 0; else if (covRow >= ch) covRow = ch - 1;
+            }
+            for (let xx = 0; xx < 256; xx++) {
+                const i = (yy * 256 + xx) * 4;
+                const a = d[i + 3];
+                if (a === 0) {
+                    // transparent: BEYOND the grid → EU; ENCLOSED coverage (DE, no rain) → clear
+                    if (haveCov) {
+                        const mx = tb.minX + (xx + 0.5) / 256 * txSpan;
+                        let covCol = ((mx - cMinX) * cInvW) | 0;
+                        if (covCol < 0) covCol = 0; else if (covCol >= cw) covCol = cw - 1;
+                        if (cdata[covRow * cw + covCol]) { d[i] = rv[i]; d[i + 1] = rv[i + 1]; d[i + 2] = rv[i + 2]; d[i + 3] = rv[i + 3]; }
+                    }
                     continue;
                 }
+                const r = d[i], g = d[i + 1], b = d[i + 2];
+                const mxc = r > g ? (r > b ? r : b) : (g > b ? g : b);
+                const mnc = r < g ? (r < b ? r : b) : (g < b ? g : b);
+                // grey no-data → OUTSIDE coverage → RainViewer (or clear if RV missing)
+                if (mxc - mnc < 30) {
+                    const avg = (r + g + b) / 3;
+                    if (avg >= 85 && avg <= 170) {
+                        if (rv) { d[i] = rv[i]; d[i + 1] = rv[i + 1]; d[i + 2] = rv[i + 2]; d[i + 3] = rv[i + 3]; }
+                        else d[i + 3] = 0;
+                        continue;
+                    }
+                }
+                // magenta boundary line → faint grey hint (symmetric R≈B; extreme precip asymmetric → kept)
+                if (r > 140 && b > 120 && g < r - 35 && g < b - 25 && (r > b ? r - b : b - r) <= 36) {
+                    d[i] = d[i + 1] = d[i + 2] = BOUNDARY_GREY;
+                    d[i + 3] = Math.round(a * BOUNDARY_ALPHA_SCALE);
+                }
+                // else: DWD rain → unchanged
             }
-            // magenta boundary line → faint grey hint (symmetric R≈B; extreme precip is asymmetric → kept)
-            if (r > 140 && b > 120 && g < r - 35 && g < b - 25 && (r > b ? r - b : b - r) <= 36) {
-                d[i] = d[i + 1] = d[i + 2] = BOUNDARY_GREY;
-                d[i + 3] = Math.round(a * BOUNDARY_ALPHA_SCALE);
-            }
-            // else: DWD rain → unchanged
         }
     }
 
@@ -177,7 +218,7 @@
                         }
                         if (dwdState === 1) ctx.drawImage(dwdImg, 0, 0, size.x, size.y);
                         const id = ctx.getImageData(0, 0, size.x, size.y);
-                        compositeDwdRv(id.data, rvData);
+                        compositeDwdRv(id.data, rvData, tileMercBounds(coords));
                         ctx.putImageData(id, 0, 0);
                     } catch (e) {
                         // tainted/decoding → fall back to the raw DWD tile (if any)
@@ -240,6 +281,57 @@
         const data = await res.json();
         const past = (data.radar && data.radar.past) || [];
         if (data.host && past.length) { rvHost = data.host; rvPath = past[past.length - 1].path; }
+    }
+
+    // ONE-TIME (per session): learn WHERE the German radar coverage is, so RainViewer can be
+    // painted EVERYWHERE EXCEPT inside it. DWD renders "inside coverage, no rain" and "beyond the
+    // data grid" as the SAME transparent pixel → indistinguishable per pixel. So we fetch one
+    // coarse DWD image of the whole region and flood-fill the transparent area inward from the
+    // border: the thick grey no-data ring blocks the fill, so ONLY the beyond-the-grid transparent
+    // gets marked (cov.data[i] = 1). The enclosed transparent (real coverage, no rain) stays 0 →
+    // clear. Verified on real data: the marked zone hugs the exact scalloped coverage outline. The
+    // coverage shape is time-invariant → cached for the whole session.
+    function ensureCoverageMask() {
+        if (cov) return Promise.resolve();
+        if (covLoading) return covLoading;
+        if (typeof L === 'undefined' || typeof document === 'undefined') return Promise.resolve();
+        const W = 512, H = 512;
+        const minX = mercX(-10), maxX = mercX(24), minY = mercY(42), maxY = mercY(57);
+        const url = DWD_WMS + '?service=WMS&version=1.3.0&request=GetMap&layers=' + encodeURIComponent(DWD_RV_LAYER)
+            + '&styles=&format=image/png&transparent=true&crs=EPSG:3857&width=' + W + '&height=' + H
+            + '&bbox=' + minX + ',' + minY + ',' + maxX + ',' + maxY;
+        covLoading = new Promise(function (resolve) {
+            const im = new Image();
+            im.crossOrigin = 'anonymous';
+            im.onload = function () {
+                try {
+                    const c = document.createElement('canvas'); c.width = W; c.height = H;
+                    const cx = c.getContext('2d', { willReadFrequently: true });
+                    cx.drawImage(im, 0, 0, W, H);
+                    const px = cx.getImageData(0, 0, W, H).data;
+                    const mask = new Uint8Array(W * H);   // 1 = beyond-grid (paint EU there)
+                    const stack = [];
+                    function consider(x, y) {
+                        if (x < 0 || y < 0 || x >= W || y >= H) return;
+                        const idx = y * W + x;
+                        if (mask[idx] || px[idx * 4 + 3] >= 40) return;   // visited or non-transparent → block
+                        mask[idx] = 1; stack.push(idx);
+                    }
+                    for (let x = 0; x < W; x++) { consider(x, 0); consider(x, H - 1); }
+                    for (let y = 0; y < H; y++) { consider(0, y); consider(W - 1, y); }
+                    while (stack.length) {
+                        const idx = stack.pop(), x = idx % W, y = (idx / W) | 0;
+                        consider(x - 1, y); consider(x + 1, y); consider(x, y - 1); consider(x, y + 1);
+                    }
+                    cov = { data: mask, w: W, h: H, minX: minX, minY: minY, maxX: maxX, maxY: maxY };
+                    dbg('RainRadar: Abdeckungs-Maske erstellt');
+                } catch (e) { dbg('RainRadar: Abdeckungs-Maske fehlgeschlagen ' + e); }
+                covLoading = null; resolve();
+            };
+            im.onerror = function () { dbg('RainRadar: Abdeckungs-Bild Ladefehler'); covLoading = null; resolve(); };
+            im.src = url;
+        });
+        return covLoading;
     }
 
     // Build the frame list for `which`. Returns true if a timeline was built.
@@ -397,11 +489,12 @@
         if (!on) return;
         provider = which;
         // For the DE composite each DWD tile fills its OUTSIDE-coverage pixels with the current
-        // RainViewer frame → fetch host+path once (the tiles read rvHost/rvPath). No separate
-        // base layer, so nothing bleeds inside the coverage.
+        // RainViewer frame → fetch host+path once, and the one-time coverage mask (so EU is
+        // painted everywhere EXCEPT inside the German radar coverage). The tiles read rvHost/
+        // rvPath/cov. No separate base layer, so nothing bleeds inside the coverage.
         if (which === 'dwd') {
-            try { await fetchRvInfo(); }
-            catch (e) { dbg('RainRadar: RainViewer-Info fehlgeschlagen (' + (e && e.message ? e.message : e) + ')'); }
+            try { await Promise.all([fetchRvInfo(), ensureCoverageMask()]); }
+            catch (e) { dbg('RainRadar: RainViewer/Maske fehlgeschlagen (' + (e && e.message ? e.message : e) + ')'); }
             if (!on) return;
         }
         if (ok && frames.length) {
