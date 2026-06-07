@@ -20,6 +20,7 @@
         window.__ASSET_V = '?v=' + encodeURIComponent(document.lastModified);
         document.write('<link rel="stylesheet" href="../js/cyber-clock.css' + window.__ASSET_V + '">');
         document.write('<link rel="stylesheet" href="tracker.css' + window.__ASSET_V + '">');
+        document.write('<link rel="stylesheet" href="../js/photo-layer.css' + window.__ASSET_V + '">');
     </script>
     <!-- Register the tracker service worker (network-first) so a fresh deploy is picked
          up on the next load instead of waiting out GitHub Pages' max-age=600. Scope is
@@ -190,6 +191,7 @@
     <!-- Photo lightbox — tap a photo card to show it over everything -->
     <div id="photo-lightbox">
         <button id="lightbox-close" aria-label="Schließen">&times;</button>
+        <div id="lightbox-count"></div>
         <div class="lb-inner ov-body">
             <img id="lightbox-img" alt="" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==">
             <div id="lightbox-title"></div>
@@ -1560,6 +1562,7 @@ ${pts}
             $('lightbox-img').src = wp.img;
             $('lightbox-title').textContent = wp.title || '';
             $('lightbox-text').textContent = wp.text || '';
+            $('lightbox-count').textContent = (i + 1) + '/' + waypoints.length;
         }
         function openPhotoLightbox(wp) {
             if (!wp) return;
@@ -1572,8 +1575,10 @@ ${pts}
                 $('lightbox-title').textContent = wp.title || '';
                 $('lightbox-text').textContent = wp.text || '';
             }
-            // arrows only make sense with more than one photo
-            $('lightbox-nav').style.display = (waypoints.length > 1 && lightboxIndex >= 0) ? 'flex' : 'none';
+            // arrows + counter only make sense with more than one photo
+            const multi = waypoints.length > 1 && lightboxIndex >= 0;
+            $('lightbox-nav').style.display = multi ? 'flex' : 'none';
+            $('lightbox-count').style.display = multi ? 'block' : 'none';
             $('photo-lightbox').classList.add('open');
             // Native Android: switch the lightbox to true immersive fullscreen (hides
             // status + nav bars). No-op on the web — see js/photo-fullscreen.js.

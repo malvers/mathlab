@@ -13,6 +13,8 @@
         integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
     <!-- shared fixed-slot number/clock widget — same component the recorder HUD uses -->
     <link rel="stylesheet" href="../js/cyber-clock.css">
+    <!-- shared photo pins (status colours) + lightbox — the SAME renderer the app uses -->
+    <link rel="stylesheet" href="../js/photo-layer.css">
     <style>
         :root {
             --bg: rgb(8, 20, 42);
@@ -157,129 +159,6 @@
             display: none;
         }
 
-        /* ---- Photo waypoint pins ---- */
-        .wp-pin {
-            background: none;
-            border: none;
-        }
-
-        .wp-dot {
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: var(--orange);
-            color: rgb(8, 20, 42);
-            border: 2px solid #fff;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
-        }
-
-        .wp-dot svg {
-            width: 16px;
-            height: 16px;
-        }
-
-        .wp-popup .leaflet-popup-content-wrapper {
-            background: rgb(8, 20, 42);
-            color: #fff;
-            border: 1px solid rgba(245, 194, 66, 0.5);
-            border-radius: 12px;
-        }
-
-        .wp-popup .leaflet-popup-tip {
-            background: rgb(8, 20, 42);
-        }
-
-        .wp-pop img {
-            width: 100%;
-            border-radius: 8px;
-            display: block;
-            margin-bottom: 8px;
-            cursor: pointer;
-        }
-
-        .wp-pop-title {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 0.78rem;
-            color: var(--orange);
-            letter-spacing: 0.5px;
-            margin-bottom: 4px;
-        }
-
-        .wp-pop-text {
-            font-family: Arial, Helvetica, sans-serif;
-            font-size: 0.82rem;
-            line-height: 1.4;
-            color: #fff;
-        }
-
-        /* ---- Photo lightbox ---- */
-        #photo-lightbox {
-            position: fixed;
-            inset: 0;
-            z-index: 99999;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            padding: max(10px, env(safe-area-inset-top)) 10px 16px;
-            background: rgb(8, 20, 42);
-        }
-
-        #photo-lightbox.open {
-            display: flex;
-        }
-
-        .lb-inner {
-            width: min(98vw, 1200px);
-            max-height: 96vh;
-            display: flex;
-            flex-direction: column;
-            overflow-y: auto;
-        }
-
-        #lightbox-img {
-            width: 100%;
-            max-height: 82vh;
-            object-fit: contain;
-            border-radius: 12px;
-            display: block;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
-        }
-
-        #lightbox-title {
-            font-family: 'Orbitron', sans-serif;
-            color: var(--orange);
-            font-size: 1rem;
-            letter-spacing: 0.5px;
-            margin: 16px 0 6px;
-        }
-
-        #lightbox-text {
-            font-family: Arial, Helvetica, sans-serif;
-            color: #fff;
-            font-size: 0.95rem;
-            line-height: 1.5;
-        }
-
-        #lightbox-close {
-            position: fixed;
-            top: max(10px, env(safe-area-inset-top));
-            right: 12px;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 1px solid rgba(255, 255, 255, 0.25);
-            border-radius: 10px;
-            background: rgba(8, 20, 42, 0.85);
-            color: #fff;
-            font-size: 1.6rem;
-            cursor: pointer;
-            z-index: 100000;
-        }
     </style>
 </head>
 
@@ -347,16 +226,13 @@
 
         function addWaypoint(wp) {
             waypoints.push(wp);
-            const icon = L.divIcon({ className: 'wp-pin', html: '<div class="wp-dot">' + CAM_PIN_SVG + '</div>', iconSize: [30, 30], iconAnchor: [15, 30], popupAnchor: [0, -30] });
+            // status colour like the recorder: recognised → green (.done), pending → pulse, failed/none → red
+            let state = ' done';
+            if (wp.title === 'Wird erkannt …') state = ' pending';
+            else if (!wp.title || wp.title === 'Erkennung fehlgeschlagen') state = ' failed';
+            const icon = L.divIcon({ className: 'wp-pin', html: '<div class="wp-dot' + state + '">' + CAM_PIN_SVG + '</div>', iconSize: [30, 30], iconAnchor: [15, 30], popupAnchor: [0, -30] });
             const m = L.marker([wp.lat, wp.lng], { icon }).addTo(map);
-            const html = '<div class="wp-pop"><img class="wp-pop-img" src="' + wp.img + '" alt="">' +
-                '<div class="wp-pop-title">' + esc(wp.title) + '</div>' +
-                (wp.text ? '<div class="wp-pop-text">' + esc(wp.text) + '</div>' : '') + '</div>';
-            m.bindPopup(html, { className: 'wp-popup', maxWidth: 260 });
-            m.on('popupopen', (e) => {
-                const img = e.popup.getElement().querySelector('.wp-pop-img');
-                if (img) img.addEventListener('click', () => openLightbox(wp));
-            });
+            m.on('click', () => openLightbox(wp)); // tap → straight to full-screen, like the app (no popup)
             wpMarkers.push(m);
         }
         function openLightbox(wp) {

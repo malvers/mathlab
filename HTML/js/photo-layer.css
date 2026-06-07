@@ -1,0 +1,238 @@
+/* Shared photo layer — waypoint pins (status colours: green=recognised, orange-pulse=identifying,
+   red=failed) + the photo lightbox. ONE source for BOTH the recorder (tracker.html) and the
+   read-only viewer (view.html), so photo pins & the lightbox render identically. Extracted
+   verbatim from tracker.css. */
+
+/* ---- Photo waypoint pins (Foto-Spur) ---- */
+.wp-pin {
+    background: none;
+    border: none;
+}
+
+.wp-dot {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--orange);
+    color: rgb(8, 20, 42);
+    border: 2px solid #fff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+.wp-dot svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* pulse while Gemini is still identifying the photo */
+.wp-dot.pending {
+    animation: wpPulse 1s ease-in-out infinite;
+}
+
+/* AI recognised → green (φ); recognition failed → red (Υ) */
+.wp-dot.done {
+    background: rgb(121, 158, 49);
+}
+
+.wp-dot.failed {
+    background: rgb(176, 36, 24);
+}
+
+@keyframes wpPulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.35;
+    }
+}
+
+/* ---- Photo popup (the knowledge card) ---- */
+.wp-popup .leaflet-popup-content-wrapper {
+    background: rgb(8, 20, 42);
+    color: #fff;
+    border: 1px solid rgba(245, 194, 66, 0.5);
+    border-radius: 12px;
+}
+
+.wp-popup .leaflet-popup-tip {
+    background: rgb(8, 20, 42);
+}
+
+.wp-pop img {
+    width: 100%;
+    border-radius: 8px;
+    display: block;
+    margin-bottom: 8px;
+    cursor: pointer;
+    /* tap → full-screen lightbox */
+}
+
+.wp-pop-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.78rem;
+    color: var(--orange);
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+}
+
+.wp-pop-text {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 0.82rem;
+    line-height: 1.4;
+    color: #fff;
+}
+
+/* ---- Photo lightbox: tap a photo card → show it over everything ---- */
+#photo-lightbox {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 99999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: max(10px, env(safe-area-inset-top)) 10px 16px;
+    background: rgb(8, 20, 42);
+    /* fully opaque — at 0.97 the map bled through unevenly behind the photo */
+}
+
+#photo-lightbox.open {
+    display: flex !important;
+}
+
+.lb-inner {
+    width: min(98vw, 1200px);
+    max-height: 96vh;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+}
+
+#lightbox-img {
+    width: 100%;
+    max-height: 82vh;
+    /* fill the screen but keep the whole photo visible (no crop) */
+    object-fit: contain;
+    border-radius: 12px;
+    display: block;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+    /* kill the native long-press behaviour on the photo (callout / save-image / drag) */
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-user-drag: none;
+}
+
+#lightbox-title {
+    font-family: 'Orbitron', sans-serif;
+    color: var(--orange);
+    font-size: 1rem;
+    letter-spacing: 0.5px;
+    margin: 16px 0 6px;
+}
+
+#lightbox-text {
+    font-family: Arial, Helvetica, sans-serif;
+    color: #fff;
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+#lightbox-close {
+    position: fixed;
+    top: max(14px, env(safe-area-inset-top));
+    right: 16px;
+    z-index: 100000;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    background: rgba(8, 20, 42, 0.92);
+    color: #fff;
+    font-size: 1.7rem;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(8px);
+}
+
+#lightbox-close:hover {
+    border-color: var(--orange);
+    color: var(--orange);
+}
+
+/* Photo counter pill (e.g. "5/12") — top-centre of the lightbox */
+#lightbox-count {
+    position: fixed;
+    top: max(16px, env(safe-area-inset-top));
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 100000;
+    display: none;
+    padding: 6px 14px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    background: rgba(8, 20, 42, 0.92);
+    color: #fff;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.72rem;
+    letter-spacing: 1px;
+    line-height: 1;
+    backdrop-filter: blur(8px);
+}
+
+/* Lightbox photo nav (prev/next) — over the photo's left & right edges, vertically centred */
+#lightbox-nav {
+    display: none;   /* JS shows it only when the track has more than one photo */
+}
+
+.lb-arrow {
+    position: fixed;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 100000;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    background: rgba(8, 20, 42, 0.6);
+    color: #fff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(6px);
+}
+
+#lb-prev {
+    left: max(12px, env(safe-area-inset-left));
+}
+
+#lb-next {
+    right: max(12px, env(safe-area-inset-right));
+}
+
+.lb-arrow svg {
+    width: 28px;
+    height: 28px;
+}
+
+.lb-arrow:hover {
+    border-color: var(--orange);
+    color: var(--orange);
+}
+
+.lb-arrow:active {
+    transform: translateY(-50%) scale(0.94);
+}
