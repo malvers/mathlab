@@ -168,6 +168,7 @@
         <h1 id="trk-name">Track</h1>
         <div id="hud-stats">
             <div class="hud-stat"><span id="v-dist"></span><span class="hud-lbl" id="v-dist-lbl">KM</span></div>
+            <div class="hud-stat"><span id="v-speed"></span><span class="hud-lbl">KM/H</span></div>
             <div class="hud-stat"><span id="v-dur"></span><span class="hud-lbl">DAUER</span></div>
             <div class="hud-stat" id="v-fotos-tile"><span id="v-fotos"></span><span class="hud-lbl">FOTOS</span></div>
         </div>
@@ -240,11 +241,13 @@
         function mountStatsOnce() {
             if (mountStatsOnce.done) return;
             mountStatsOnce.done = true;
+            CyberClock.mountNum($('v-speed'), { intSlots: 3, decimals: 1, size: STAT_SIZE, digitColor: STAT_COL });
             CyberClock.mount($('v-dur'), { size: STAT_SIZE, digitColor: '#fff', colonColor: 'rgba(255,255,255,0.55)', seconds: true });
             CyberClock.mountNum($('v-fotos'), { intSlots: 3, decimals: 0, size: STAT_SIZE, digitColor: STAT_COL });
         }
-        function setStats({ distM, durMs, fotos, showFotos = true }) {
+        function setStats({ distM, durMs, fotos, speedKmh, showFotos = true }) {
             mountStatsOnce();
+            CyberClock.setNum($('v-speed'), speedKmh != null ? speedKmh : 0);
             const meters = (distM != null && distM < 100);
             const want = meters ? 'm' : 'km';
             if ($('v-dist').dataset.unit !== want) {
@@ -261,9 +264,11 @@
         }
         function updateLiveStats() {
             const t0 = times.find(Boolean), t1 = [...times].reverse().find(Boolean);
+            const sp = [...speeds].reverse().find(s => s != null); // latest known speed (km/h)
             setStats({
                 distM: trackDistM(), durMs: (t0 && t1) ? (Date.parse(t1) - Date.parse(t0)) : 0,
                 fotos: waypoints.length, showFotos: waypoints.length > 0, // photos arrive live now (thumbnails)
+                speedKmh: sp != null ? sp : 0,
             });
         }
 
@@ -322,7 +327,11 @@
             ch.on('broadcast', { event: 'pos' }, ({ payload }) => onLivePos(payload));
             ch.on('broadcast', { event: 'photo' }, ({ payload }) => onLivePhoto(payload));
             ch.on('broadcast', { event: 'end' }, () => { const b = $('live-badge'); if (b) b.textContent = '■ beendet'; });
-            ch.subscribe();
+            // On (re)connect, ask the sender for the current state → a reload fills instantly
+            // instead of waiting for the next periodic trail (~15 s).
+            ch.subscribe((status) => {
+                if (status === 'SUBSCRIBED') ch.send({ type: 'broadcast', event: 'request', payload: {} });
+            });
         }
 
         // ---- load a SAVED shared track by token, then POLL so it stays LIVE ----------------
@@ -348,10 +357,13 @@
 
             $('trk-name').textContent = row.name || 'Track';
             const t0 = times.find(Boolean), t1 = [...times].reverse().find(Boolean);
+            const _dM = row.distance_m != null ? row.distance_m : trackDistM();
+            const _durMs = (t0 && t1) ? (Date.parse(t1) - Date.parse(t0)) : 0;
             setStats({
-                distM: row.distance_m != null ? row.distance_m : trackDistM(),
-                durMs: (t0 && t1) ? (Date.parse(t1) - Date.parse(t0)) : 0,
+                distM: _dM,
+                durMs: _durMs,
                 fotos: wps.length,
+                speedKmh: _durMs > 0 ? (_dM / 1000) / (_durMs / 3600000) : 0, // Ø-speed of the finished track
             });
 
             if (!_firstApplied) {
