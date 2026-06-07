@@ -322,6 +322,19 @@ path.pos-marker.pos-shown {
     height: 22px;
 }
 
+/* two states: crosshair (off-centre → re-centre on GPS) vs frame (centred → fit whole track) */
+#recenter-fab .ic-fit {
+    display: none;
+}
+
+#recenter-fab.fit .ic-recenter {
+    display: none;
+}
+
+#recenter-fab.fit .ic-fit {
+    display: inline-block;
+}
+
 /* ---- Camera button (top-center) → Foto-Spur ---- */
 #cam-fab {
     position: fixed;
@@ -1112,17 +1125,27 @@ path.pos-marker.pos-shown {
 .tl-main {
     flex: 1;
     min-width: 0;
+    /* name + meta on ONE line: name left (truncates), date · km right */
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
 }
 
 .tl-name {
     font-size: 0.78rem;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .tl-meta {
     font-family: system-ui, sans-serif;
     font-size: 0.66rem;
     color: rgba(255, 255, 255, 0.5);
-    margin-top: 3px;
+    flex: none;
+    white-space: nowrap;
 }
 
 .tl-del {

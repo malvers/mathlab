@@ -60,19 +60,28 @@
     <div id="trk-controls">
         <button id="trk-toggle">START</button>
         <button id="trk-finish">STOP</button>
-        <button id="trk-discard">VERWERFEN</button>
+        <button id="trk-discard">LÖSCHEN</button>
     </div>
 
 
     <!-- Recenter button — appears centred above STOP when the position is no longer in view -->
     <button id="recenter-fab" aria-label="Zentrieren">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+        <!-- crosshair: GPS dot is off-centre → tap to re-centre on the position -->
+        <svg class="ic-recenter" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
             stroke-linejoin="round">
             <circle cx="12" cy="12" r="3"></circle>
             <line x1="12" y1="2" x2="12" y2="5"></line>
             <line x1="12" y1="19" x2="12" y2="22"></line>
             <line x1="2" y1="12" x2="5" y2="12"></line>
             <line x1="19" y1="12" x2="22" y2="12"></line>
+        </svg>
+        <!-- frame: GPS is ~centred → tap to fit the whole track in view -->
+        <svg class="ic-fit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round">
+            <path d="M4 9V5a1 1 0 0 1 1-1h4"></path>
+            <path d="M20 9V5a1 1 0 0 0-1-1h-4"></path>
+            <path d="M4 15v4a1 1 0 0 0 1 1h4"></path>
+            <path d="M20 15v4a1 1 0 0 1-1 1h-4"></path>
         </svg>
     </button>
 
@@ -291,14 +300,20 @@
         // The map auto-follows new fixes until you take over (drag) — ZENTRIEREN re-enables it.
         // The position dot is hidden during zoom animations so it doesn't jump, then fades back.
         let following = !viewRestored; // a restored viewport stays put (don't auto-follow GPS away from it)
+        // ≈ 5 mm from the map centre (CSS px ≈ 1/96 in → 5 mm ≈ 19 px); within that the dot is "centred".
+        const CENTER_TOL_PX = 19;
         function refreshRecenter() {
             const btn = $('recenter-fab');
             if (!btn) return;
             const pos = posMarker && posMarker.getLatLng && posMarker.getLatLng();
-            // Show the recenter button whenever the position isn't (comfortably) in view — i.e. the
-            // map is no longer AROUND the POS. The slight inset means a dot drifting to the edge counts.
-            const around = pos && map.getBounds().pad(-0.15).contains(pos);
-            btn.classList.toggle('show', !!pos && !around);
+            if (!pos) { btn.classList.remove('show'); return; }
+            // Two states (button always visible once we have a fix): while auto-following — or the dot
+            // within ~5 mm of centre — show the "fit whole track" frame; once you've panned away and the
+            // dot sits >5 mm off centre, show the crosshair to re-centre on GPS.
+            const d = map.latLngToContainerPoint(pos).distanceTo(map.getSize().divideBy(2));
+            const centred = following || d <= CENTER_TOL_PX;
+            btn.classList.toggle('fit', centred); // no crosshair (centred) → show the fit-track icon
+            btn.classList.add('show');
         }
         function setFollowing(v) { following = v; refreshRecenter(); }
         map.on('dragstart', () => setFollowing(false));
@@ -796,7 +811,7 @@
                 tg.textContent = 'PAUSE'; tg.style.background = COL_RED; fin.style.display = 'none';
             } else { // paused → continue or save
                 tg.textContent = 'CONTINUE'; tg.style.background = COL_GREEN; tg.style.color = '#fff';
-                fin.textContent = 'SPEICHERN'; fin.style.background = 'rgb(245, 194, 66)'; fin.style.color = '#14110a';
+                fin.textContent = 'SPEICHERN'; fin.style.background = 'rgb(245, 194, 66)'; fin.style.color = '#fff';
                 fin.style.display = 'inline-flex';
             }
         }
@@ -1041,6 +1056,11 @@
                     liveChannel = c.channel('live:' + canon, { config: { broadcast: { self: false } } });
                     liveOn = true; updateLiveBadge();
                     livePhotos = []; // fresh live session
+                    // A (re)connecting viewer asks for the current state → re-send the whole trail,
+                    // the latest position and every photo at once, so a viewer reload fills instantly.
+                    liveChannel.on('broadcast', { event: 'request' }, () => {
+                        broadcastTrail(); broadcastLive(true); waypoints.forEach(addLivePhoto);
+                    });
                     liveChannel.subscribe((status) => {
                         if (status === 'SUBSCRIBED') {
                             broadcastTrail(); broadcastLive(true);
@@ -1161,7 +1181,7 @@
             setSpeed(0);
             setAlt(null);
             if (!tracking) { CyberClock.set(elTime, '00:00:00'); startTime = null; }
-            toast('Track gelöscht.');
+            if (!silent) toast('Track gelöscht.'); // silent clears (START / restore) shouldn't toast
         }
 
         // ---------------------------------------------------------------
@@ -1329,16 +1349,21 @@ ${pts}
             const pts = track.map((p, i) => [p[0], p[1], times[i] || null, alts[i] != null ? alts[i] : null, speeds[i] != null ? speeds[i] : null, activities[i] || null]);
             // strip the live Leaflet marker reference before persisting
             const wps = waypoints.map(w => ({ lat: w.lat, lng: w.lng, t: w.t, img: w.img, title: w.title, text: w.text }));
-            const row = { name: name, distance_m: Math.round(totalDist), points: pts, waypoints: wps, status: status || 'done' };
-            const missingCol = e => e && /status/i.test(e.message || ''); // 'status' column not migrated yet
+            // lightweight stats for the track list (so the list never has to load points/waypoints)
+            const durationS = (times.length >= 2 && times[0] && times[times.length - 1])
+                ? Math.max(0, Math.round((Date.parse(times[times.length - 1]) - Date.parse(times[0])) / 1000)) : 0;
+            const row = { name: name, distance_m: Math.round(totalDist), points: pts, waypoints: wps, status: status || 'done', duration_s: durationS, photo_count: waypoints.length };
+            // any optional column (status / duration_s / photo_count) not migrated yet → retry without them
+            const missingCol = e => e && /status|duration_s|photo_count/i.test(e.message || '');
+            const stripOpt = (o) => { const { status: _s, duration_s: _d, photo_count: _p, ...bare } = o; return bare; };
             if (currentTrackId) {                                          // UPDATE the existing (live-synced) row
                 let { error } = await c.from('tracks').update(row).eq('id', currentTrackId);
-                if (missingCol(error)) { const { status: _s, ...bare } = row; ({ error } = await c.from('tracks').update(bare).eq('id', currentTrackId)); }
+                if (missingCol(error)) { ({ error } = await c.from('tracks').update(stripOpt(row)).eq('id', currentTrackId)); }
                 if (error) throw error;
                 return currentTrackId;
             }
             let { data, error } = await c.from('tracks').insert(row).select('id').single();
-            if (missingCol(error)) { const { status: _s, ...bare } = row; ({ data, error } = await c.from('tracks').insert(bare).select('id').single()); }
+            if (missingCol(error)) { ({ data, error } = await c.from('tracks').insert(stripOpt(row)).select('id').single()); }
             if (error) throw error;
             currentTrackId = data ? data.id : null;
             return currentTrackId;
@@ -1347,9 +1372,15 @@ ${pts}
         async function listTracks() {
             const c = await ensureSb();
             // Show ALL saved tracks — never hide one by status (a tracker must not make tracks vanish).
-            const { data, error } = await c.from('tracks')
-                .select('id, name, created_at, distance_m')
+            // Prefer the lightweight stat columns (duration_s / photo_count); fall back if not migrated.
+            let { data, error } = await c.from('tracks')
+                .select('id, name, created_at, distance_m, duration_s, photo_count')
                 .order('created_at', { ascending: false });
+            if (error) {
+                ({ data, error } = await c.from('tracks')
+                    .select('id, name, created_at, distance_m')
+                    .order('created_at', { ascending: false }));
+            }
             if (error) throw error;
             return data || [];
         }
@@ -1953,7 +1984,14 @@ ${pts}
             closePopup();
         });
         $('menu-fab').addEventListener('click', () => openPopup());
-        $('recenter-fab').addEventListener('click', () => centerOnPosition());
+        $('recenter-fab').addEventListener('click', () => {
+            const btn = $('recenter-fab');
+            if (btn.classList.contains('fit')) {            // centred → zoom out to the whole track
+                if (track.length) { setFollowing(false); try { map.fitBounds(L.latLngBounds(track), { padding: [40, 40] }); } catch (e) { } }
+            } else {
+                centerOnPosition();                          // off-centre → re-centre on GPS
+            }
+        });
 
         // ---- Sync-Code ----
         function genCode() {
@@ -2029,6 +2067,7 @@ ${pts}
             catch (e) { toast('Fehlgeschlagen: ' + (e.message || e)); }
         });
 
+        function fmtDur(s) { const m = Math.round(s / 60); return m < 60 ? m + ' min' : Math.floor(m / 60) + ':' + String(m % 60).padStart(2, '0') + ' h'; }
         function renderTrackList(rows) {
             const box = $('track-list-items');
             box.innerHTML = '';
@@ -2036,12 +2075,16 @@ ${pts}
             rows.forEach((r) => {
                 const row = document.createElement('div');
                 row.className = 'tl-row';
-                const km = r.distance_m != null ? (r.distance_m / 1000).toFixed(2) + ' km' : '–';
-                const when = new Date(r.created_at).toLocaleString('de-DE', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' });
+                // sensible stats instead of the (redundant) date: km · duration · photos · Ø speed
+                const stats = [];
+                if (r.distance_m != null) stats.push((r.distance_m / 1000).toFixed(2) + ' km');
+                if (r.duration_s) stats.push(fmtDur(r.duration_s));
+                if (r.photo_count) stats.push(r.photo_count + ' 📷');
+                if (r.duration_s && r.distance_m) stats.push(((r.distance_m / 1000) / (r.duration_s / 3600)).toFixed(1) + ' km/h');
                 const main = document.createElement('div');
                 main.className = 'tl-main';
-                const nm = document.createElement('div'); nm.className = 'tl-name'; nm.textContent = r.name;
-                const mt = document.createElement('div'); mt.className = 'tl-meta'; mt.textContent = when + ' · ' + km;
+                const nm = document.createElement('div'); nm.className = 'tl-name'; nm.textContent = (r.name || '').replace(/^Track\s+/, ''); // drop the "Track " prefix in the list (stored name kept)
+                const mt = document.createElement('div'); mt.className = 'tl-meta'; mt.textContent = stats.join(' · ');
                 main.appendChild(nm); main.appendChild(mt);
                 main.addEventListener('click', async () => {
                     toast('Lade Track …');
