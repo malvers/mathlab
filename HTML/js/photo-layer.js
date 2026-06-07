@@ -33,6 +33,28 @@
     let idx = -1;    // index into list of the photo on display
     let wired = false;
 
+    // ---- manual fullscreen toggle (real OS fullscreen) ----
+    // The auto-immersive path (PhotoFullscreen) is native-Android-only and no-ops
+    // in a plain browser, so THIS button is what gives the read-only web viewer
+    // true OS fullscreen (browser chrome away). A button click is always a valid
+    // user gesture, so requestFullscreen is allowed where the auto path is blocked.
+    const ENTER_FS_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4H20V10M4 14V20H10"/></svg>';
+    const EXIT_FS_SVG  = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4V10H20M10 20V14H4"/></svg>';
+    function fsElement() { return document.fullscreenElement || document.webkitFullscreenElement || null; }
+    function refreshFsIcon() { const b = $('lightbox-fs'); if (b) b.innerHTML = fsElement() ? EXIT_FS_SVG : ENTER_FS_SVG; }
+    function exitFs() {
+        if (!fsElement()) return;
+        const ex = document.exitFullscreen || document.webkitExitFullscreen;
+        if (ex) { try { const r = ex.call(document); if (r && r.catch) r.catch(() => {}); } catch (_) {} }
+    }
+    function toggleFs() {
+        const lb = $('photo-lightbox');
+        if (!lb) return;
+        if (fsElement()) { exitFs(); return; }
+        const req = lb.requestFullscreen || lb.webkitRequestFullscreen;
+        if (req) { try { const r = req.call(lb); if (r && r.catch) r.catch(() => {}); } catch (_) {} }
+    }
+
     function showAt(i) {
         const wp = list[i];
         if (!wp) return;
@@ -53,6 +75,7 @@
         if (!lb) return;
         lb.classList.remove('open');
         if (global.PhotoFullscreen) global.PhotoFullscreen.exit(); // leave Android immersive fullscreen
+        exitFs(); // …and leave web OS-fullscreen if the toggle button put us there
         $('lightbox-img').removeAttribute('src');
         idx = -1; list = [];
     }
@@ -63,6 +86,7 @@
             const lb = document.createElement('div');
             lb.id = 'photo-lightbox';
             lb.innerHTML =
+                '<button id="lightbox-fs" aria-label="Vollbild umschalten" title="Vollbild"></button>' +
                 '<button id="lightbox-close" aria-label="Schließen">&times;</button>' +
                 '<div id="lightbox-count"></div>' +
                 '<div class="lb-inner"><img id="lightbox-img" alt="" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=="><div id="lightbox-title"></div><div id="lightbox-text"></div></div>' +
@@ -75,6 +99,10 @@
         if (wired) return;
         wired = true;
         $('lightbox-close').addEventListener('click', close);
+        $('lightbox-fs').addEventListener('click', toggleFs);
+        document.addEventListener('fullscreenchange', refreshFsIcon);
+        document.addEventListener('webkitfullscreenchange', refreshFsIcon);
+        refreshFsIcon();
         $('lb-prev').addEventListener('click', () => step(-1));
         $('lb-next').addEventListener('click', () => step(1));
         $('photo-lightbox').addEventListener('click', (e) => { if (e.target.id === 'photo-lightbox') close(); });

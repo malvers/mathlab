@@ -1349,21 +1349,16 @@ ${pts}
             const pts = track.map((p, i) => [p[0], p[1], times[i] || null, alts[i] != null ? alts[i] : null, speeds[i] != null ? speeds[i] : null, activities[i] || null]);
             // strip the live Leaflet marker reference before persisting
             const wps = waypoints.map(w => ({ lat: w.lat, lng: w.lng, t: w.t, img: w.img, title: w.title, text: w.text }));
-            // lightweight stats for the track list (so the list never has to load points/waypoints)
-            const durationS = (times.length >= 2 && times[0] && times[times.length - 1])
-                ? Math.max(0, Math.round((Date.parse(times[times.length - 1]) - Date.parse(times[0])) / 1000)) : 0;
-            const row = { name: name, distance_m: Math.round(totalDist), points: pts, waypoints: wps, status: status || 'done', duration_s: durationS, photo_count: waypoints.length };
-            // any optional column (status / duration_s / photo_count) not migrated yet → retry without them
-            const missingCol = e => e && /status|duration_s|photo_count/i.test(e.message || '');
-            const stripOpt = (o) => { const { status: _s, duration_s: _d, photo_count: _p, ...bare } = o; return bare; };
+            const row = { name: name, distance_m: Math.round(totalDist), points: pts, waypoints: wps, status: status || 'done' };
+            const missingCol = e => e && /status/i.test(e.message || ''); // 'status' column not migrated yet
             if (currentTrackId) {                                          // UPDATE the existing (live-synced) row
                 let { error } = await c.from('tracks').update(row).eq('id', currentTrackId);
-                if (missingCol(error)) { ({ error } = await c.from('tracks').update(stripOpt(row)).eq('id', currentTrackId)); }
+                if (missingCol(error)) { const { status: _s, ...bare } = row; ({ error } = await c.from('tracks').update(bare).eq('id', currentTrackId)); }
                 if (error) throw error;
                 return currentTrackId;
             }
             let { data, error } = await c.from('tracks').insert(row).select('id').single();
-            if (missingCol(error)) { ({ data, error } = await c.from('tracks').insert(stripOpt(row)).select('id').single()); }
+            if (missingCol(error)) { const { status: _s, ...bare } = row; ({ data, error } = await c.from('tracks').insert(bare).select('id').single()); }
             if (error) throw error;
             currentTrackId = data ? data.id : null;
             return currentTrackId;
@@ -1372,10 +1367,10 @@ ${pts}
         async function listTracks() {
             const c = await ensureSb();
             // Show ALL saved tracks — never hide one by status (a tracker must not make tracks vanish).
-            // Prefer the lightweight stat columns (duration_s / photo_count); fall back if not migrated.
-            let { data, error } = await c.from('tracks')
-                .select('id, name, created_at, distance_m, duration_s, photo_count')
-                .order('created_at', { ascending: false });
+            // list_tracks() RPC computes km · duration · photos server-side for EVERY track (old + new)
+            // from the existing points/waypoints — WITHOUT loading those heavy columns. Falls back to
+            // the basic select (km only) if the RPC isn't present yet.
+            let { data, error } = await c.rpc('list_tracks');
             if (error) {
                 ({ data, error } = await c.from('tracks')
                     .select('id, name, created_at, distance_m')
