@@ -55,6 +55,7 @@
 
     // slider UI
     let ui = null, slider = null, lbl = null, playBtn = null, playTimer = null;
+    let shifted = false;    // when the host's top HUD is up (tracking), drop the slider below it
     let baseLayer = null;   // (legacy) separate RainViewer base — no longer used; RV is now
                             // composited INTO each DWD tile so nothing bleeds inside the coverage
     let rvHost = null, rvPath = null;   // current RainViewer frame, read by the composite tiles
@@ -403,7 +404,8 @@
         ui.style.cssText = 'position:fixed; left:50%; top:20px; transform:translateX(-50%);'
             + 'display:flex; flex-direction:column; align-items:stretch; gap:6px; padding:8px 12px; max-width:92vw; box-sizing:border-box;'
             + 'background:rgba(8,20,42,0.92); border:none; border-radius:12px;'
-            + 'box-shadow:0 4px 16px rgba(0,0,0,0.5); z-index:1200; font-family:\'Orbitron\',sans-serif; color:#f5c242;';
+            + 'box-shadow:0 4px 16px rgba(0,0,0,0.5); z-index:1200; font-family:\'Orbitron\',sans-serif; color:#f5c242;'
+            + 'transition:top 0.35s ease;';
 
         playBtn = document.createElement('button');
         playBtn.type = 'button';
@@ -442,23 +444,25 @@
         row.appendChild(slider);
         row.appendChild(lbl);
 
-        // document.lastModified = the served HTML's Last-Modified header → the real build/
-        // deploy time. It updates by itself once the new file clears the Pages cache.
-        const build = document.createElement('div');
-        build.style.cssText = 'font-size:0.56rem; letter-spacing:0.05em; text-align:center;'
-            + ' white-space:nowrap; color:rgba(255,255,255,0.6);';
-        const lm = new Date(document.lastModified);
-        const pad = (n) => String(n).padStart(2, '0');
-        build.textContent = isNaN(lm.getTime())
-            ? 'BUILD ' + (document.lastModified || '?')
-            : 'BUILD ' + pad(lm.getDate()) + '.' + pad(lm.getMonth() + 1) + '. '
-              + pad(lm.getHours()) + ':' + pad(lm.getMinutes()) + ':' + pad(lm.getSeconds());
-
         ui.appendChild(row);
-        ui.appendChild(build);
         document.body.appendChild(ui);
+        applySliderTop();   // drop below the host HUD if tracking is already active
         lbl.textContent = frameLabel(nowIdx);
     }
+    // Position the slider: default top, or just below the host's top HUD while shifted (tracking).
+    // Uses #hud-top's offsetHeight (layout height — transform/opacity-independent) so it clears the
+    // header on any screen; falls back to a fixed drop if that element isn't present.
+    function applySliderTop() {
+        if (!ui) return;
+        let top = 20;
+        if (shifted) {
+            const h = (typeof document !== 'undefined') && document.getElementById('hud-top');
+            top = (h && h.offsetHeight) ? h.offsetHeight + 8 : 150;
+        }
+        ui.style.top = top + 'px';
+    }
+    // Host (e.g. the tracker) calls this when its top HUD appears/disappears.
+    function setShifted(v) { shifted = !!v; applySliderTop(); }
     function removeUI() {
         pause();
         if (ui && ui.parentNode) ui.parentNode.removeChild(ui);
@@ -560,5 +564,5 @@
         return on;
     }
 
-    global.RainRadar = { init, toggle, isOn };
+    global.RainRadar = { init, toggle, isOn, setShifted };
 })(window);

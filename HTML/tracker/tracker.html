@@ -47,17 +47,20 @@
             <div id="hud-time"></div>
         </div>
         <div id="hud-stats">
-            <div class="hud-stat"><span class="hud-val" id="trk-dist">0.00</span><span class="hud-lbl">KM</span></div>
-            <div class="hud-stat speed-stat"><div class="speed-col"><span class="hud-val" id="trk-speed">0.0</span><span class="hud-lbl">KM/H</span></div><span id="mode-icon" aria-hidden="true">📍</span></div>
-            <div class="hud-stat"><span class="hud-val" id="trk-alt">–</span><span class="hud-lbl">HÖHE m</span></div>
+            <div class="hud-stat"><span id="trk-dist"></span><span class="hud-lbl" id="trk-dist-lbl">KM</span></div>
+            <div class="hud-stat speed-stat"><div class="speed-col"><span id="trk-speed"></span><span class="hud-lbl" id="trk-speed-lbl">KM/H</span></div><span id="mode-icon" aria-hidden="true">📍</span></div>
+            <div class="hud-stat"><span id="trk-alt"></span><span class="hud-lbl" id="trk-alt-lbl">HÖHE m</span></div>
         </div>
     </div>
 
-    <!-- Bottom controls: one round button (START/STOP), two side by side when paused (CONTINUE | STOP) -->
+    <!-- Bottom controls: one round button (START/PAUSE), three side by side when paused
+         (CONTINUE | SPEICHERN | VERWERFEN) -->
     <div id="trk-controls">
         <button id="trk-toggle">START</button>
         <button id="trk-finish">STOP</button>
+        <button id="trk-discard">VERWERFEN</button>
     </div>
+
 
     <!-- Recenter button — appears centred above STOP when the position is no longer in view -->
     <button id="recenter-fab" aria-label="Zentrieren">
@@ -89,9 +92,13 @@
         <button class="mini-btn" id="mb-load">LADEN</button>
         <button class="mini-btn" id="mb-fit">FIT TRACK</button>
         <button class="mini-btn" id="mb-sharetrack">SHARE TRACK</button>
+        <button class="mini-btn" id="mb-live">LIVE</button>
         <button class="mini-btn" id="mb-rain">REGEN</button>
         <button class="mini-btn" id="mb-settings">EINSTELLUNGEN</button>
     </div>
+
+    <!-- Live-broadcast indicator (shown only while broadcasting your position) -->
+    <div id="live-badge">● LIVE</div>
 
     <!-- Centered overlay panels (track list + GNSS info) -->
     <div id="ov-backdrop"></div>
@@ -104,6 +111,15 @@
         <div class="ov-title">Wir nutzen alle Quellen</div>
         <div class="ov-body" id="info-body"></div>
         <button class="ov-close" id="info-close" aria-label="Schließen">&times;</button>
+    </div>
+    <div id="live-panel" class="ov-panel">
+        <div class="ov-title">Live senden</div>
+        <div class="ov-body">
+            <p class="live-hint">Vergib einen Namen. Wer ihn kennt, sieht dich live — sag ihn nur, wem du willst (öffentlich).</p>
+            <input id="live-name" class="live-url" type="text" placeholder="vsb" autocapitalize="off" autocomplete="off" spellcheck="false">
+            <button id="live-go" class="live-copy">LIVE senden</button>
+        </div>
+        <button class="ov-close" id="live-close" aria-label="Schließen">&times;</button>
     </div>
     <div id="settings-panel" class="ov-panel">
         <div class="ov-title">Einstellungen</div>
@@ -190,8 +206,8 @@
     <!-- Transient toast (replaces the removed status line for action feedback) -->
     <div id="toast"></div>
 
-    <!-- Movement-gate tuning readout (debug) -->
-    <div id="motion-dbg"></div>
+    <!-- Always-on debug readout (one box, readable): build/deploy stamp + movement-gate tuning -->
+    <div id="motion-dbg"><div id="dbg-build"></div><div id="dbg-motion"></div></div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
         integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
@@ -258,6 +274,19 @@
                 const rb = document.getElementById('mb-rain'); if (rb) rb.classList.add('active');
             }
         }
+
+        // Build/deploy stamp in the always-on debug box — document.lastModified = the served
+        // HTML's Last-Modified header → the real deploy time; tells at a glance if a push landed.
+        (function () {
+            const el = document.getElementById('dbg-build');
+            if (!el) return;
+            const lm = new Date(document.lastModified);
+            const p = (n) => String(n).padStart(2, '0');
+            el.textContent = isNaN(lm.getTime())
+                ? 'BUILD ' + (document.lastModified || '?')
+                : 'BUILD ' + p(lm.getDate()) + '.' + p(lm.getMonth() + 1) + '. '
+                  + p(lm.getHours()) + ':' + p(lm.getMinutes()) + ':' + p(lm.getSeconds());
+        })();
 
         // The map auto-follows new fixes until you take over (drag) — ZENTRIEREN re-enables it.
         // The position dot is hidden during zoom animations so it doesn't jump, then fades back.
@@ -329,9 +358,14 @@
         let wpMarkers = [];        // their Leaflet markers (kept for clearing)
         let gnssActive = false;    // true once the native GnssStatus listener delivers data
         let gnssLatest = null;     // last native GNSS summary {used, inView, usedByConstellation, ...}
+        let gpsReal = false;       // true only on a genuine GPS fix (native sats used, or acc ≤ GPS) —
+                                   // gates the travel-mode icon: in WLAN/cell the guessed mode is junk
 
         const MIN_MOVE_M = 4;      // ignore jitter below this distance
         const MAX_ACC_M = 50;      // ignore fixes worse than this accuracy
+        const MAX_JUMP_KMH = 300;  // a fix implying a faster GROUND speed than this = a GPS "teleport"
+                                   // — typically the coarse WLAN/cell first fix snapping to the real
+                                   // GPS position. Re-baseline on it, but drop its bogus speed + leg.
 
         // --- Movement gate (accelerometer) + adaptive jitter filtering ---
         const ACC_STEP_FACTOR = 0.7;   // adaptive min step = accuracy * this (never below MIN_MOVE_M)
@@ -373,6 +407,44 @@
             seconds: true,
         });
         CyberClock.set(elTime, '00:00:00');
+
+        // The three stats use the SAME fixed-slot widget so digits never jump as the value
+        // changes: right-aligned, no leading zeros (blank slots on the left), group stays
+        // centred. KM/H = 999.9 (1 dec), HÖHE = 9999 m (int).
+        const STAT_SIZE = 'clamp(1rem, 4.5vw, 1.4rem)';
+        const STAT_COL = 'var(--orange)';
+        CyberClock.mountNum(elSpeed, { intSlots: 3, decimals: 1, size: STAT_SIZE, digitColor: STAT_COL });
+        CyberClock.mountNum(elAlt, { intSlots: 4, decimals: 0, size: STAT_SIZE, digitColor: STAT_COL });
+        const elDistLbl = $('trk-dist-lbl'), elSpeedLbl = $('trk-speed-lbl'), elAltLbl = $('trk-alt-lbl');
+        // Centre each label under the VISIBLE digits (not the full right-aligned slot box). The
+        // number is right-aligned (blank slots on the left), so shift the label right by half the
+        // left-blank width — measured from the first non-empty slot → tracks the visible number.
+        function centerStatLabel(w, lbl) {
+            if (!w || !lbl || !w._ccDigits) return;
+            let first = null;
+            for (let i = 0; i < w._ccDigits.length; i++) { if (w._ccDigits[i].textContent !== '') { first = w._ccDigits[i]; break; } }
+            if (!first) { lbl.style.transform = ''; return; }
+            const shift = (first.getBoundingClientRect().left - w.getBoundingClientRect().left) / 2;
+            lbl.style.transform = shift > 0.5 ? 'translateX(' + shift.toFixed(1) + 'px)' : '';
+        }
+        // Distance is ADAPTIVE: < 100 m → whole metres (label "m"); ≥ 100 m → km with 2
+        // decimals (label "KM"). Re-mount only when the unit flips (rare) → no jitter within a unit.
+        function setDist(distM) {
+            const meters = (distM != null && distM < 100);
+            const want = meters ? 'm' : 'km';
+            if (elDist.dataset.unit !== want) {
+                CyberClock.mountNum(elDist, meters
+                    ? { intSlots: 3, decimals: 0, size: STAT_SIZE, digitColor: STAT_COL }
+                    : { intSlots: 3, decimals: 2, size: STAT_SIZE, digitColor: STAT_COL });
+                elDist.dataset.unit = want;
+                if (elDistLbl) elDistLbl.textContent = meters ? 'm' : 'KM';
+            }
+            CyberClock.setNum(elDist, distM == null ? null : (meters ? Math.round(distM) : distM / 1000));
+            centerStatLabel(elDist, elDistLbl);
+        }
+        function setSpeed(kmh) { CyberClock.setNum(elSpeed, kmh); centerStatLabel(elSpeed, elSpeedLbl); }
+        function setAlt(m) { CyberClock.setNum(elAlt, m); centerStatLabel(elAlt, elAltLbl); }
+        setDist(0); setSpeed(0); setAlt(null);
 
         function setStatus(msg) { if (elStatus) elStatus.textContent = msg; } // status line removed — guard-safe no-op
 
@@ -460,6 +532,12 @@
             const now = pos.timestamp || Date.now();
             const here = [latitude, longitude];
 
+            // Real GPS fix? Native sats in use, or an accuracy only GNSS reaches (≤15 m — the same
+            // threshold sourceLabel() calls 'GPS'). Gates the travel-mode icon: in WLAN/cell the
+            // speed (and thus the guessed mode) is unreliable → no icon at all.
+            gpsReal = (gnssLatest && gnssLatest.used > 0) || (accuracy != null && accuracy <= 15);
+            updateModeIcon(); // reflect the source immediately (also on rejected/teleport fixes)
+
             // Movement gate: does the accelerometer confirm we actually move? If the sensor
             // says "still", GPS jitter is suppressed (no points, speed 0, dot + map held).
             const still = motionReady && motionStill;
@@ -476,6 +554,22 @@
                 return;
             }
 
+            // Drop GPS "teleports": the first fix is often a coarse WLAN/cell guess; when the real
+            // GPS fix lands the position leaps km in seconds → an absurd speed (962 km/h!) and a
+            // bogus track leg. If a fix implies an impossible ground speed from the previous one,
+            // re-baseline on it but ignore the jump itself (no speed, no point, no distance).
+            if (lastFix) {
+                const jdt = (now - lastFix.t) / 1000;
+                const jumpKmh = jdt > 0 ? (haversine([lastFix.lat, lastFix.lng], here) / jdt) * 3.6 : Infinity;
+                if (jumpKmh > MAX_JUMP_KMH) {
+                    lastFix = { lat: latitude, lng: longitude, t: now }; // trust the new fix as the baseline
+                    shownSpeed = 0; setSpeed(0);
+                    if (following && !still) map.panTo(here, { animate: true });
+                    updateMotionDbg(accuracy, MIN_MOVE_M, still);
+                    return;
+                }
+            }
+
             // Altitude: fuse the precise barometer profile with the absolute GPS reference.
             updateAltitude(pos.coords.altitude != null ? pos.coords.altitude : null);
 
@@ -488,9 +582,10 @@
                     const dt = (now - lastFix.t) / 1000;
                     if (dt > 0) kmh = (haversine([lastFix.lat, lastFix.lng], here) / dt) * 3.6;
                 }
+                if (kmh > MAX_JUMP_KMH) kmh = 0; // a device-reported nonsense speed → ignore
             }
             shownSpeed = still ? 0 : (0.6 * shownSpeed + 0.4 * kmh);
-            elSpeed.textContent = shownSpeed.toFixed(1);
+            setSpeed(shownSpeed);
             updateModeIcon(); // keep the mode glyph (left of the clock) current
 
             // Adaptive minimum step: within the GPS error circle everything is noise, so require
@@ -514,8 +609,9 @@
             if (track.length !== ptsBefore) {
                 if (typeof TrackBuffer !== 'undefined') TrackBuffer.save(bufferSnapshot());
                 scheduleSync(); // Stage 2: push to the cloud on the fly
+                if (liveOn) broadcastLive(); // Stage 3: live position to viewers
             }
-            elDist.textContent = (totalDist / 1000).toFixed(2);
+            setDist(totalDist);
 
             lastFix = { lat: latitude, lng: longitude, t: now };
 
@@ -631,7 +727,7 @@
         }
         // Tiny tuning readout (Arial per debug convention) — remove once thresholds are dialed in.
         function updateMotionDbg(acc, minStep, still) {
-            const el = $('motion-dbg');
+            const el = $('dbg-motion');
             if (!el) return;
             const accTxt = acc != null ? Math.round(acc) : '–';
             el.textContent = motionReady
@@ -645,7 +741,7 @@
         // gives the smooth relative profile; GPS slowly calibrates the absolute.
         // ---------------------------------------------------------------
         function renderAltitude() {
-            if (elAlt) elAlt.textContent = (fusedAlt != null) ? Math.round(fusedAlt) : '–';
+            setAlt(fusedAlt);
         }
         function updateAltitude(gpsAlt) {
             if (baroReady && baroAlt != null) {
@@ -683,7 +779,8 @@
         function setTrkState(s) {
             trkState = s;
             tracking = (s === 'recording');
-            const tg = $('trk-toggle'), fin = $('trk-finish');
+            const tg = $('trk-toggle'), fin = $('trk-finish'), disc = $('trk-discard');
+            if (disc) disc.style.display = (s === 'paused') ? 'inline-flex' : 'none';
             if (s === 'idle') {
                 tg.textContent = 'START'; tg.style.background = COL_GREEN; fin.style.display = 'none';
             } else if (s === 'recording') {
@@ -716,6 +813,7 @@
             startTime = Date.now();
             startWatch();
             $('hud-top').classList.add('shown'); // reveal the header on first start
+            if (window.RainRadar && RainRadar.setShifted) RainRadar.setShifted(true); // drop the rain slider below the HUD
             setTrkState('recording');
             setStatus('Suche GPS-Signal …');
         }
@@ -743,6 +841,7 @@
         // STOP while paused → finish: auto-save the track, back to idle. Track stays drawn.
         async function finishTracking() {
             setTrkState('idle');
+            stopLive(true);
             if (track.length >= 1) {
                 const name = currentTrackName || autoTrackName();
                 toast('Speichere …');
@@ -758,8 +857,57 @@
             else if (trkState === 'recording') pauseTracking();
             else resumeTracking(); // paused
         });
+        // VERWERFEN → throw the paused track away WITHOUT saving: stop, delete the autosynced
+        // cloud row if one exists, wipe the crash buffer, reset the HUD, back to idle.
+        // Destructive → confirm first.
+        async function discardTracking() {
+            if (!(await uiConfirm('Track verwerfen? Das lässt sich nicht rückgängig machen.', { danger: true, okText: 'Verwerfen' }))) return;
+            setTrkState('idle');
+            stopLive(true);
+            const id = currentTrackId;
+            currentTrackId = null; currentTrackName = '';
+            await clearTrack(true);
+            setDist(0); setSpeed(0); setAlt(null);
+            try { if (typeof TrackBuffer !== 'undefined') await TrackBuffer.clear(); } catch (e) { }
+            if (id != null) { try { await removeTrack(id); } catch (e) { toast('Cloud-Löschen fehlgeschlagen: ' + (e.message || e)); } }
+            toast('Track verworfen.');
+        }
         $('trk-finish').addEventListener('click', () => { if (trkState === 'paused') finishTracking(); });
+        $('trk-discard').addEventListener('click', () => { if (trkState === 'paused') discardTracking(); });
         setTrkState('idle');
+
+        // Round-button labels: size the font by MEASURING the widest label (SPEICHERN/VERWERFEN…)
+        // so it always fits the smaller circle — computed, not guessed; uniform; re-fit on resize.
+        // Caps at the original font/diameter ratio so it never grows beyond design.
+        const CONTROL_LABELS = ['START', 'PAUSE', 'CONTINUE', 'SPEICHERN', 'VERWERFEN'];
+        function fitControlText() {
+            const btns = [$('trk-toggle'), $('trk-finish'), $('trk-discard')].filter(Boolean);
+            if (!btns.length) return;
+            const cs = getComputedStyle(btns[0]);
+            const dia = parseFloat(cs.width);
+            if (!dia) { const c = $('trk-controls'); if (c) c.classList.add('fitted'); return; }
+            const border = parseFloat(cs.borderLeftWidth) || 0;
+            const ls = parseFloat(cs.letterSpacing) || 0; // fixed px, size-independent
+            const avail = dia - 2 * border - 2 * (dia * 0.12); // text chord minus side margin
+            const ctx = fitControlText._ctx || (fitControlText._ctx = document.createElement('canvas').getContext('2d'));
+            const REF = 100;
+            ctx.font = '700 ' + REF + 'px ' + (cs.fontFamily || 'sans-serif');
+            let need = Infinity;
+            for (const lbl of CONTROL_LABELS) {
+                const glyph = ctx.measureText(lbl).width;          // at REF px (no letter-spacing)
+                const spacing = ls * Math.max(0, lbl.length - 1);  // px at final size
+                const fs = (avail - spacing) * REF / glyph;        // px that makes this label = avail
+                if (fs < need) need = fs;
+            }
+            const px = Math.max(7, Math.min(need, dia * 0.115) * 1.08); // cap = original ratio, +8% (Doc)
+            btns.forEach(b => { b.style.fontSize = px.toFixed(1) + 'px'; });
+            const ctrl = $('trk-controls'); if (ctrl) ctrl.classList.add('fitted'); // reveal — now sized, no flash
+        }
+        fitControlText();
+        window.addEventListener('resize', () => {
+            fitControlText();
+            centerStatLabel(elDist, elDistLbl); centerStatLabel(elSpeed, elSpeedLbl); centerStatLabel(elAlt, elAltLbl);
+        });
 
         // ---- Crash-proof live buffer (../js/track-buffer.js): persist the in-progress track on
         //      the fly so a close/kill/crash — or a failed offline save — never loses it. ----
@@ -782,8 +930,9 @@
             startTime = Date.now() - (isFinite(span) && span > 0 ? span : 0);
             pauseStart = Date.now();
             updateDuration();
-            elDist.textContent = (totalDist / 1000).toFixed(2);
+            setDist(totalDist);
             $('hud-top').classList.add('shown');
+            if (window.RainRadar && RainRadar.setShifted) RainRadar.setShifted(true);
             setTrkState('paused'); // → CONTINUE | SPEICHERN
             try { if (track.length) map.fitBounds(L.latLngBounds(track), { padding: [40, 40] }); } catch (e) { }
             TrackBuffer.saveNow(bufferSnapshot()); // keep it persisted across the restore
@@ -811,6 +960,72 @@
         function scheduleSync() {
             if (syncTimer || syncInflight) return;
             syncTimer = setTimeout(doSync, Math.max(0, SYNC_MS - (Date.now() - lastSync)));
+        }
+
+        // ---- Stage 3: live position broadcast over Supabase Realtime *Broadcast* (channel
+        //      'live:<token>'). No DB/publication change — Broadcast is ephemeral pub/sub; the
+        //      persisted trail still comes from the Stage 2 row, so a viewer gets history + live. ----
+        let liveOn = false, liveChannel = null, lastLiveMs = 0, liveTrailTimer = null;
+        let liveName = (localStorage.getItem('tracker.liveName') || 'vsb');
+        const LIVE_MS = 4000; // position broadcast cadence while live
+        function updateLiveBadge() {
+            const b = $('live-badge'); if (b) b.classList.toggle('on', liveOn);
+            const mb = $('mb-live'); if (mb) mb.classList.toggle('active', liveOn);
+        }
+        // 'pos' = latest fix (throttled); 'trail' = whole path (so late viewers see the history).
+        function broadcastLive(force) {
+            if (!liveOn || !liveChannel || !track.length) return;
+            const now = Date.now();
+            if (!force && now - lastLiveMs < LIVE_MS) return;
+            lastLiveMs = now;
+            const i = track.length - 1;
+            try {
+                liveChannel.send({
+                    type: 'broadcast', event: 'pos', payload: {
+                        lat: track[i][0], lng: track[i][1], t: times[i] || null,
+                        speed: speeds[i] != null ? speeds[i] : null, activity: activities[i] || null,
+                    },
+                });
+            } catch (e) { /* channel not joined yet → the next fix retries */ }
+        }
+        function broadcastTrail() {
+            if (!liveOn || !liveChannel || !track.length) return;
+            const pts = track.map((p, i) => [p[0], p[1], times[i] || null, speeds[i] != null ? speeds[i] : null, activities[i] || null]);
+            try { liveChannel.send({ type: 'broadcast', event: 'trail', payload: { pts: pts } }); } catch (e) { }
+        }
+        // LIVE: broadcast your position on a chosen PUBLIC channel name (default "vsb"). Anyone who
+        // knows the name and opens view.html?live=<name> (or types it) sees you move. No DB, no token.
+        function openLivePanel() {
+            const inp = $('live-name'); if (inp) inp.value = liveName;
+            showPanel('live-panel');
+            if (inp) { inp.focus(); inp.select(); }
+        }
+        function beginLive(name) {
+            const canon = (name || '').trim().toLowerCase() || 'vsb';
+            liveName = canon;
+            try { localStorage.setItem('tracker.liveName', canon); } catch (e) { }
+            if (!track.length) { toast('Erst aufzeichnen, dann LIVE.'); return; }
+            (async () => {
+                try {
+                    const c = await ensureSb();
+                    liveChannel = c.channel('live:' + canon, { config: { broadcast: { self: false } } });
+                    liveOn = true; updateLiveBadge();
+                    liveChannel.subscribe((status) => { if (status === 'SUBSCRIBED') { broadcastTrail(); broadcastLive(true); } });
+                    if (liveTrailTimer) clearInterval(liveTrailTimer);
+                    liveTrailTimer = setInterval(broadcastTrail, 15000); // refresh the path for late viewers
+                    toast("Live auf '" + canon + "' — Namen weitersagen.");
+                } catch (e) { toast('Live fehlgeschlagen: ' + (e.message || e)); liveOn = false; updateLiveBadge(); }
+            })();
+        }
+        function stopLive(silent) {
+            if (liveTrailTimer) { clearInterval(liveTrailTimer); liveTrailTimer = null; }
+            if (liveChannel) {
+                try { liveChannel.send({ type: 'broadcast', event: 'end', payload: {} }); } catch (e) { }
+                try { liveChannel.unsubscribe(); } catch (e) { }
+            }
+            liveChannel = null; liveOn = false;
+            updateLiveBadge();
+            if (!silent) toast('Live beendet.');
         }
 
         // ---------------------------------------------------------------
@@ -891,9 +1106,10 @@
             goToCurrentPosition({ initial: false });
         }
 
-        function clearTrack(silent) {
-            // Guard against losing a recording by accident (silent skips the confirm)
-            if (!silent && track.length && !confirm('Aktuellen Track wirklich löschen?')) return;
+        async function clearTrack(silent) {
+            // Guard against losing a recording by accident (silent skips the confirm). Note: the
+            // only caller passes silent=true → the await is never reached there, so it stays sync.
+            if (!silent && track.length && !(await uiConfirm('Aktuellen Track wirklich löschen?', { danger: true, okText: 'Löschen' }))) return;
             if (typeof TrackBuffer !== 'undefined') TrackBuffer.clear();
             track = [];
             times = [];
@@ -904,9 +1120,9 @@
             lastFix = null;
             trackLayer.clearLayers();
             clearWaypoints();
-            elDist.textContent = '0.00';
-            elSpeed.textContent = '0.0';
-            if (elAlt) elAlt.textContent = '–';
+            setDist(0);
+            setSpeed(0);
+            setAlt(null);
             if (!tracking) { CyberClock.set(elTime, '00:00:00'); startTime = null; }
             toast('Track gelöscht.');
         }
@@ -1153,8 +1369,8 @@ ${pts}
             redrawTrack(); // speed-coloured
             clearWaypoints();
             (wps || []).forEach(w => addWaypoint({ lat: w.lat, lng: w.lng, t: w.t, img: w.img, title: w.title, text: w.text }));
-            elDist.textContent = (totalDist / 1000).toFixed(2);
-            elSpeed.textContent = '0.0';
+            setDist(totalDist);
+            setSpeed(0);
             // show the loaded track's last known altitude (if any)
             const lastAlt = alts.slice().reverse().find(a => a != null);
             fusedAlt = (lastAlt != null) ? lastAlt : null;
@@ -1170,6 +1386,47 @@ ${pts}
             t.classList.add('show');
             if (toastTimer) clearTimeout(toastTimer);
             toastTimer = setTimeout(() => t.classList.remove('show'), 2400);
+        }
+
+        // Styled in-app confirm — replaces the ugly native confirm(). Returns Promise<boolean>.
+        // opts: { okText, cancelText, danger }  (danger → red OK button for destructive actions).
+        function uiConfirm(message, opts) {
+            opts = opts || {};
+            return new Promise((resolve) => {
+                const ov = document.createElement('div');
+                ov.className = 'ui-modal-ov';
+                ov.innerHTML =
+                    '<div class="ui-modal" role="dialog" aria-modal="true">' +
+                    '<div class="ui-modal-msg"></div>' +
+                    '<div class="ui-modal-btns">' +
+                    '<button type="button" class="ui-btn ui-btn-cancel"></button>' +
+                    '<button type="button" class="ui-btn ' + (opts.danger ? 'ui-btn-danger' : 'ui-btn-ok') + '"></button>' +
+                    '</div></div>';
+                ov.querySelector('.ui-modal-msg').textContent = message;
+                const cancel = ov.querySelector('.ui-btn-cancel');
+                const ok = ov.querySelector('.ui-btn:last-child');
+                cancel.textContent = opts.cancelText || 'Abbrechen';
+                ok.textContent = opts.okText || 'OK';
+                let done = false;
+                function close(v) {
+                    if (done) return;
+                    done = true;
+                    ov.classList.remove('shown');
+                    document.removeEventListener('keydown', onKey);
+                    setTimeout(() => ov.remove(), 200);
+                    resolve(v);
+                }
+                function onKey(e) {
+                    if (e.key === 'Escape') close(false);
+                    else if (e.key === 'Enter') close(true);
+                }
+                cancel.onclick = () => close(false);
+                ok.onclick = () => close(true);
+                ov.onclick = (e) => { if (e.target === ov) close(false); };
+                document.addEventListener('keydown', onKey);
+                document.body.appendChild(ov);
+                requestAnimationFrame(() => { ov.classList.add('shown'); ok.focus(); });
+            });
         }
 
         // ===============================================================
@@ -1661,6 +1918,12 @@ ${pts}
         ovBackdrop.addEventListener('click', hidePanels);
         $('list-close').addEventListener('click', hidePanels);
         $('info-close').addEventListener('click', hidePanels);
+        $('live-close').addEventListener('click', hidePanels);
+        $('live-go').addEventListener('click', () => {
+            const v = ($('live-name').value || '').trim() || 'vsb';
+            hidePanels();
+            beginLive(v);
+        });
 
         // ---- Popup actions ----
         // FIT TRACK — zoom/pan the map so the whole current track fits the screen.
@@ -1686,6 +1949,7 @@ ${pts}
             if (!currentTrackId) { toast('Erst einen Track laden oder speichern.'); return; }
             shareTrack(currentTrackId, currentTrackName);
         });
+        $('mb-live').addEventListener('click', () => { closePopup(); if (liveOn) stopLive(); else openLivePanel(); });
         // Info card (settings) → open the GNSS-sources info panel
         $('set-info').addEventListener('click', () => { $('info-body').innerHTML = (gnssActive ? gnssLiveHtml() : '') + GNSS_INFO; showPanel('info-panel'); });
         // REGEN toggles the optional rain-radar overlay; reflect on/off on the button (.active).
@@ -1800,7 +2064,7 @@ ${pts}
                 del.className = 'tl-del'; del.textContent = '×'; del.title = 'Löschen';
                 del.addEventListener('click', async (ev) => {
                     ev.stopPropagation();
-                    if (!confirm('Track löschen?')) return;
+                    if (!(await uiConfirm('Track löschen?', { danger: true, okText: 'Löschen' }))) return;
                     try { await removeTrack(r.id); row.remove(); toast('Gelöscht.'); }
                     catch (e) { toast('Löschen fehlgeschlagen.'); }
                 });
@@ -1917,7 +2181,42 @@ ${pts}
         }
         function updateModeIcon() {
             const el = $('mode-icon');
-            if (el) el.textContent = MODE_ICON[effectiveActivity()] || '📍';
+            if (!el) return;
+            // No real GPS (WLAN/cell)? The guessed travel mode is meaningless → hide the icon
+            // entirely (display:none removes its slot so the KM/H value re-centres).
+            if (!gpsReal) { el.style.display = 'none'; return; }
+            el.style.display = '';
+            const ic = MODE_ICON[effectiveActivity()] || '📍';
+            el.textContent = ic;
+            // Re-centre only when the glyph actually changes (measuring per tick is wasteful).
+            if (el.dataset.centered !== ic) { el.dataset.centered = ic; centerModeIcon(el); }
+        }
+        // MEASURED vertical centring (no eyeballing): we want the emoji's VISIBLE centre on
+        // its line-box centre — which align-items:center already centres over the speed-col,
+        // i.e. over BOTH HUD lines. Canvas measureText gives the metrics, all baseline-relative
+        // (down = +):
+        //   line-box centre → baseline = (fontDesc − fontAsc)/2     [line-height:1 box]
+        //   baseline → glyph visible centre = (actDesc − actAsc)/2
+        //   ⇒ glyph centre offset from box centre = (fontAsc − fontDesc)/2 + (actDesc − actAsc)/2
+        // Translate by its negative. Divided by font-size → expressed in em, so it scales with
+        // the clamp() size and survives resize/rotate. Falls back to the CSS nudge on old engines.
+        function centerModeIcon(el) {
+            try {
+                const cs = getComputedStyle(el);
+                const fpx = parseFloat(cs.fontSize) || 32;
+                const ctx = centerModeIcon._ctx || (centerModeIcon._ctx = document.createElement('canvas').getContext('2d'));
+                ctx.font = fpx + 'px ' + (cs.fontFamily || 'sans-serif');
+                ctx.textBaseline = 'alphabetic';
+                const m = ctx.measureText(el.textContent);
+                const fa = m.fontBoundingBoxAscent, fd = m.fontBoundingBoxDescent;
+                const aa = m.actualBoundingBoxAscent, ad = m.actualBoundingBoxDescent;
+                if ([fa, fd, aa, ad].some(v => typeof v !== 'number' || isNaN(v))) throw new Error('no TextMetrics');
+                const ratio = (((fa - fd) + (ad - aa)) / 2) / fpx; // glyph-centre offset, in em
+                el.style.transform = 'translateY(' + (-ratio).toFixed(4) + 'em) scaleX(-1)';
+                if (window.DebugWindow) DebugWindow.log('mode-icon ' + el.textContent + ' centred: ' + (-ratio).toFixed(3) + 'em');
+            } catch (e) {
+                el.style.transform = ''; // drop inline → CSS translateY fallback applies
+            }
         }
         async function startActivity() {
             if (!ActRec) { DebugWindow.log('🚶 ActRec: kein natives Plugin (web) → Speed-Heuristik'); return; } // web → heuristic only

@@ -121,8 +121,10 @@ path.pos-marker.pos-shown {
     color: rgba(255, 255, 255, 0.22);
 }
 
-/* count of visible satellites behind each constellation (inherits grey/green) */
+/* count of visible satellites behind each constellation (inherits grey/green).
+   Digits in Arial (not Orbitron) — cleaner numerals, no slashed zero. */
 #gps-src .sat-n {
+    font-family: Arial, Helvetica, sans-serif;
     font-size: 0.82em;
     font-weight: 700;
     opacity: 0.9;
@@ -178,13 +180,14 @@ path.pos-marker.pos-shown {
 }
 
 #mode-icon {
-    /* travel-mode figure, inline to the RIGHT of the KM/H value, mirrored, ~as tall
-       as the value + label lines together. Noto colour-emoji sit high in their line box,
-       so a small em-based downward nudge optically centres the figure over BOTH lines
-       (value + KM/H label). Tunable: raise the 0.18em to drop it further. */
+    /* travel-mode figure, inline to the RIGHT of the KM/H value, mirrored, ~as tall as the
+       value + label lines together. The exact vertical offset that centres the emoji's
+       VISIBLE box over both lines is MEASURED at runtime per glyph by centerModeIcon()
+       (canvas measureText, set as an inline translateY in em). This translateY here is only
+       the FALLBACK for engines without actual/fontBoundingBox TextMetrics. */
     font-size: clamp(1.67rem, 6.57vw, 2.4rem);
     line-height: 1;
-    transform: translateY(0.18em) scaleX(-1);
+    transform: translateY(0.22em) scaleX(-1);
 }
 
 #hud-stats {
@@ -242,9 +245,10 @@ path.pos-marker.pos-shown {
 }
 
 #trk-toggle,
-#trk-finish {
-    width: clamp(96px, 30vw, 132px);
-    height: clamp(96px, 30vw, 132px);
+#trk-finish,
+#trk-discard {
+    width: clamp(81px, 25.2vw, 111px);
+    height: clamp(81px, 25.2vw, 111px);
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -255,19 +259,31 @@ path.pos-marker.pos-shown {
     color: #fff;
     font-family: 'Orbitron', sans-serif;
     font-weight: 700;
-    font-size: clamp(0.7rem, 2.6vw, 0.95rem);
+    font-size: clamp(0.64rem, 2.35vw, 0.86rem); /* ~16% smaller +8%; JS fitControlText() overrides precisely */
     letter-spacing: 1px;
     cursor: pointer;
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
     transition: background 0.2s ease, transform 0.1s ease;
 }
 
-#trk-finish {
+/* Hide the labels until fitControlText() has measured & sized them, so they never flash at
+   the CSS size and then snap back. The circle (background) shows immediately. */
+#trk-controls:not(.fitted) button {
+    color: transparent !important;
+}
+
+#trk-finish,
+#trk-discard {
     display: none;
 }
 
+#trk-discard {
+    background: var(--red); /* discard = danger */
+}
+
 #trk-toggle:active,
-#trk-finish:active {
+#trk-finish:active,
+#trk-discard:active {
     transform: scale(0.96);
 }
 
@@ -275,7 +291,7 @@ path.pos-marker.pos-shown {
 #recenter-fab {
     position: fixed;
     left: 50%;
-    bottom: calc(var(--btm) + clamp(96px, 30vw, 132px) + 14px);
+    bottom: calc(var(--btm) + clamp(81px, 25.2vw, 111px) + 14px);
     transform: translateX(-50%) translateY(8px);
     z-index: 500;
     display: inline-flex;
@@ -1179,18 +1195,196 @@ path.pos-marker.pos-shown {
     transform: translateX(-50%) translateY(0);
 }
 
+/* ---- In-app confirm dialog (replaces the native confirm — Orbitron, dark blue) ---- */
+.ui-modal-ov {
+    position: fixed;
+    inset: 0;
+    z-index: 3000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: rgba(8, 20, 42, 0.55);
+    -webkit-backdrop-filter: blur(3px);
+    backdrop-filter: blur(3px);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.ui-modal-ov.shown {
+    opacity: 1;
+}
+
+.ui-modal {
+    width: 100%;
+    max-width: 360px;
+    padding: 24px 22px 18px;
+    background: var(--bg-light);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 16px;
+    box-shadow: 0 16px 50px rgba(0, 0, 0, 0.6);
+    color: #fff;
+    font-family: 'Orbitron', sans-serif;
+    transform: translateY(8px) scale(0.98);
+    transition: transform 0.2s ease;
+}
+
+.ui-modal-ov.shown .ui-modal {
+    transform: none;
+}
+
+.ui-modal-msg {
+    margin-bottom: 20px;
+    font-size: 1rem;
+    line-height: 1.35;
+    letter-spacing: 0.5px;
+    text-align: center;
+}
+
+.ui-modal-btns {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+}
+
+.ui-btn {
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 12px 16px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 700;
+    font-size: 0.82rem;
+    letter-spacing: 1px;
+    color: #fff;
+    transition: filter 0.15s ease, transform 0.1s ease;
+}
+
+.ui-btn:hover {
+    filter: brightness(1.12);
+}
+
+.ui-btn:active {
+    transform: translateY(1px);
+}
+
+.ui-btn-cancel {
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.ui-btn-ok {
+    background: var(--green);
+}
+
+.ui-btn-danger {
+    background: var(--red);
+}
+
 /* Movement-gate tuning readout (debug → Arial). Remove once thresholds are dialed in. */
 #motion-dbg {
     position: fixed;
-    left: 8px;
+    left: 50%;
+    transform: translateX(-50%);
     bottom: calc(env(safe-area-inset-bottom, 0px) + 6px);
     z-index: 950;
     font-family: Arial, Helvetica, sans-serif;
-    font-size: 10px;
+    font-size: 13px;
     letter-spacing: 0.3px;
+    white-space: nowrap;
+    text-align: center;
     color: rgba(255, 255, 255, 0.65);
-    background: rgba(8, 20, 42, 0.55);
-    padding: 2px 6px;
+    background: rgba(8, 20, 42, 0.72);
+    padding: 4px 12px;
     border-radius: 6px;
     pointer-events: none;
+}
+
+/* one centred line: build (dimmer) + live motion, with a separator only when motion has data */
+#dbg-build,
+#dbg-motion {
+    display: inline;
+}
+
+#dbg-build {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+#dbg-motion:empty {
+    display: none;
+}
+
+#dbg-motion:not(:empty)::before {
+    content: '  ·  ';
+    color: rgba(255, 255, 255, 0.35);
+}
+
+/* ---- Live-broadcast badge (Stage 3) — top-left, only while broadcasting ---- */
+#live-badge {
+    position: fixed;
+    top: max(8px, env(safe-area-inset-top));
+    left: 12px;
+    z-index: 600;
+    display: none;
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: rgba(176, 36, 24, 0.92);
+    color: #fff;
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 700;
+    font-size: 0.6rem;
+    letter-spacing: 1.5px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.45);
+    animation: live-pulse 1.4s ease-in-out infinite;
+}
+
+#live-badge.on {
+    display: block;
+}
+
+@keyframes live-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.45; }
+}
+
+/* ---- Live-share panel: link + copy button ---- */
+.live-hint {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: rgba(255, 255, 255, 0.85);
+    margin: 0 0 12px;
+}
+
+.live-url {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid rgba(245, 194, 66, 0.4);
+    background: rgba(8, 20, 42, 0.6);
+    color: #fff;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 0.82rem;
+    margin-bottom: 12px;
+}
+
+.live-copy {
+    display: block;
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 10px;
+    background: var(--orange);
+    color: #14110a;
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 700;
+    letter-spacing: 1px;
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+.live-copy:active {
+    transform: scale(0.97);
 }
