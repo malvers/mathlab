@@ -814,10 +814,13 @@
         }
 
         // START (idle): a brand-new track. The previous (finished+saved) one is cleared from view.
-        function beginTracking() {
+        async function beginTracking() {
             if (!('geolocation' in navigator)) { setStatus('Dieser Browser unterstützt keine Standortbestimmung.'); return; }
             if (!window.isSecureContext) { setStatus('GPS braucht HTTPS oder localhost. Über file:// gibt es keine Position.'); return; }
-            clearTrack(true); // silent — the old track was already saved on FINISH
+            // A track is on screen (loaded or just finished) → don't wipe the VIEW without asking.
+            // (It stays safe in the cloud / LADEN — START only clears the screen, it never deletes a row.)
+            if (track.length && !(await uiConfirm('Neuen Track starten? Der angezeigte Track verschwindet aus der Ansicht — gespeicherte Tracks bleiben in LADEN.', { okText: 'Neu starten' }))) return;
+            clearTrack(true); // silent — the displayed track was loaded/saved; START begins fresh
             currentTrackId = null; currentTrackName = autoTrackName(); // fresh live track; name from start (autosync + finish reuse it)
             startTime = Date.now();
             startWatch();
