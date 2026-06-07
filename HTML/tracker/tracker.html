@@ -564,7 +564,19 @@
             // suppresses true standstill — a red light, not the open road.
             const gpsKmh = (speed != null && speed >= 0) ? speed * 3.6 : null;
             const gpsMoving = gpsKmh != null && gpsKmh > SPEED_MOVE_KMH && (accuracy == null || accuracy <= MAX_ACC_M);
-            const still = motionReady && motionStill && !gpsMoving;
+            const sensorStill = motionReady && motionStill && !gpsMoving;
+            // POSITION deadband — ALWAYS on (sensor or not): a fix that stays within the GPS error
+            // circle of the shown dot is noise, not motion → hold. This catches the case where the
+            // accelerometer says "still" (e≈0) but the GPS speed-override (gpsMoving) wrongly fires on
+            // an indoor phantom speed, AND the no-sensor (desktop/WLAN) standstill drift. A real move
+            // (> band) still snaps through; sub-accuracy "movement" stays invisible (WLAN can't resolve it).
+            let posStill = false;
+            if (posMarker) {
+                const shown = posMarker.getLatLng();
+                const band = Math.max(MIN_MOVE_M, (accuracy || 0) * ACC_STEP_FACTOR);
+                posStill = haversine([shown.lat, shown.lng], here) <= band;
+            }
+            const still = sensorStill || posStill;
 
             const firstFix = !posMarker;
             renderPosition(here, accuracy, still && !firstFix);
@@ -753,10 +765,9 @@
         function updateMotionDbg(acc, minStep, still) {
             const el = $('dbg-motion');
             if (!el) return;
-            const accTxt = acc != null ? Math.round(acc) : '–';
             el.textContent = motionReady
-                ? (still ? 'STILL' : 'MOVE') + ' · e=' + motionEnergy.toFixed(2) + ' · ±' + accTxt + 'm · step≥' + minStep.toFixed(1) + 'm'
-                : 'kein Sensor · ±' + accTxt + 'm · step≥' + minStep.toFixed(1) + 'm';
+                ? (still ? 'STILL' : 'MOVE') + ' · e=' + motionEnergy.toFixed(2) + ' · step > ' + minStep.toFixed(1) + 'm'
+                : (still ? 'HALT·band' : 'frei') + ' · kein Sensor · step > ' + minStep.toFixed(1) + 'm';
         }
 
         // ---------------------------------------------------------------

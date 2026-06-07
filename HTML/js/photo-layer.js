@@ -124,6 +124,21 @@
             else if (e.key === 'ArrowLeft') step(-1);
             else if (e.key === 'ArrowRight') step(1);
         });
+        // Touch swipe — same as the arrows: swipe LEFT → next photo, swipe RIGHT → previous.
+        // Single finger, mostly-horizontal move past a threshold; pinch/vertical scroll ignored.
+        let sx = 0, sy = 0, swiping = false;
+        const lb = $('photo-lightbox');
+        lb.addEventListener('touchstart', (e) => {
+            if (e.touches.length !== 1) { swiping = false; return; }
+            sx = e.touches[0].clientX; sy = e.touches[0].clientY; swiping = true;
+        }, { passive: true });
+        lb.addEventListener('touchend', (e) => {
+            if (!swiping) return;
+            swiping = false;
+            const t = e.changedTouches[0];
+            const dx = t.clientX - sx, dy = t.clientY - sy;
+            if (Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy) * 1.5) step(dx < 0 ? 1 : -1);
+        }, { passive: true });
     }
 
     // Open a photo full-screen. `all` (optional) is the array to step through with the arrows.

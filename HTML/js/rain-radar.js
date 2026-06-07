@@ -445,7 +445,9 @@
         row.appendChild(lbl);
 
         ui.appendChild(row);
-        document.body.appendChild(ui);
+        // Doc 2026-06-07: rain slider commented out for now (overlap at the bottom edge). The radar
+        // overlay still works via REGEN (shows the current frame); re-enable by uncommenting this line.
+        // document.body.appendChild(ui);
         applySliderTop();   // drop below the host HUD if tracking is already active
         lbl.textContent = frameLabel(nowIdx);
     }
