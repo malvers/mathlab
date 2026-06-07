@@ -1433,3 +1433,18 @@ path.pos-marker.pos-shown {
 .live-copy:active {
     transform: scale(0.97);
 }
+
+/* ============================================================================
+   Doc 2026-06-07: ALL text → colour rgb(0,0,40) + 10% larger (global).
+   Revert = delete this whole block.
+   ⚠️ rgb(0,0,40) is near-black → text on the dark-blue surfaces is very low contrast.
+   Note: CyberClock numbers (timer + stat tiles) are drawn on a <canvas> via a JS digitColor,
+   so CSS colour does NOT reach them — they'd need a separate JS change.
+   ============================================================================ */
+html {
+    font-size: 110%;
+}
+
+*, *::before, *::after {
+    color: rgb(0, 0, 40) !important;
+}
