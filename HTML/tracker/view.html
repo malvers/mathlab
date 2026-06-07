@@ -336,7 +336,7 @@
         //      later re-send (with the AI title) just updates it. Remove+add the marker in one tick → no flicker.
         function onLivePhoto(p) {
             if (!p || p.lat == null || !p.img) return;
-            const wp = { lat: p.lat, lng: p.lng, t: p.t, img: p.img, title: p.title || '', text: '' };
+            const wp = { lat: p.lat, lng: p.lng, t: p.t, img: p.img, title: p.title || '', text: p.text || '' };
             const i = waypoints.findIndex(w => w.t === p.t);
             if (i >= 0) {
                 waypoints[i] = wp;
