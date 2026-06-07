@@ -219,7 +219,7 @@
         // so the main init below still finds RainRadar/DebugWindow/PhotoFullscreen ready.
         (function () {
             var v = window.__ASSET_V || '';
-            var js = ['../js/track-render.js', '../js/track-buffer.js', '../js/rain-radar.js', '../js/cyber-clock.js', '../js/debug-window.js', '../js/photo-fullscreen.js'];
+            var js = ['../js/track-render.js', '../js/track-buffer.js', '../js/rain-radar.js', '../js/cyber-clock.js', '../js/debug-window.js', '../js/photo-fullscreen.js', '../js/photo-layer.js'];
             for (var i = 0; i < js.length; i++) document.write('<script src="' + js[i] + v + '"><\/script>');
         })();
     </script>
@@ -1546,17 +1546,7 @@ ${pts}
         }
 
         // ---- waypoint markers ----
-        function wpIcon(wp) {
-            // green = AI recognised, orange pulse = identifying, red = failed (→ BILDER ANALYSIEREN)
-            let state = ' done';
-            if (wp.title === PENDING_TITLE) state = ' pending';
-            else if (!wp.title || wp.title === FAIL_TITLE) state = ' failed';
-            return L.divIcon({
-                className: 'wp-pin',
-                html: '<div class="wp-dot' + state + '">' + CAM_PIN_SVG + '</div>',
-                iconSize: [30, 30], iconAnchor: [15, 30], popupAnchor: [0, -30],
-            });
-        }
+        function wpIcon(wp) { return PhotoLayer.pinIcon(wp); } // shared pin renderer (../js/photo-layer.js)
         function wpPopupHtml(wp) {
             const esc = s => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
             const i = waypoints.indexOf(wp); // → lightbox uses this to find the waypoint on tap
@@ -1565,59 +1555,11 @@ ${pts}
                 (wp.text ? '<div class="wp-pop-text">' + esc(wp.text) + '</div>' : '') + '</div>';
         }
 
-        // ---- Photo lightbox: tap a popup photo → show it full-screen over everything ----
-        let lightboxIndex = -1;   // index into waypoints[] of the photo on display (-1 = standalone, no looping)
-        function showLightboxAt(i) {
-            const wp = waypoints[i];
-            if (!wp) return;
-            lightboxIndex = i;
-            $('lightbox-img').src = wp.img;
-            $('lightbox-title').textContent = wp.title || '';
-            $('lightbox-text').textContent = wp.text || '';
-            $('lightbox-count').textContent = (i + 1) + '/' + waypoints.length;
-        }
-        function openPhotoLightbox(wp) {
-            if (!wp) return;
-            const i = waypoints.indexOf(wp);
-            if (i >= 0) {
-                showLightboxAt(i);
-            } else { // photo not in the track list → show it alone, no looping
-                lightboxIndex = -1;
-                $('lightbox-img').src = wp.img;
-                $('lightbox-title').textContent = wp.title || '';
-                $('lightbox-text').textContent = wp.text || '';
-            }
-            // arrows + counter only make sense with more than one photo
-            const multi = waypoints.length > 1 && lightboxIndex >= 0;
-            $('lightbox-nav').style.display = multi ? 'flex' : 'none';
-            $('lightbox-count').style.display = multi ? 'block' : 'none';
-            $('photo-lightbox').classList.add('open');
-            // Native Android: switch the lightbox to true immersive fullscreen (hides
-            // status + nav bars). No-op on the web — see js/photo-fullscreen.js.
-            if (window.PhotoFullscreen) PhotoFullscreen.enter($('photo-lightbox'));
-        }
-        // Step through the track's photos, wrapping around (loop) at both ends.
-        function lightboxStep(d) {
-            const n = waypoints.length;
-            if (n < 2 || lightboxIndex < 0) return;
-            showLightboxAt((lightboxIndex + d + n) % n);
-        }
-        function closePhotoLightbox() {
-            $('photo-lightbox').classList.remove('open');
-            if (window.PhotoFullscreen) PhotoFullscreen.exit(); // leave Android immersive fullscreen
-            $('lightbox-img').removeAttribute('src');
-            lightboxIndex = -1;
-        }
-        $('lightbox-close').addEventListener('click', closePhotoLightbox);
-        $('lb-prev').addEventListener('click', () => lightboxStep(-1));
-        $('lb-next').addEventListener('click', () => lightboxStep(1));
-        $('photo-lightbox').addEventListener('click', (e) => { if (e.target.id === 'photo-lightbox') closePhotoLightbox(); });
-        document.addEventListener('keydown', (e) => {
-            if (!$('photo-lightbox').classList.contains('open')) return;
-            if (e.key === 'Escape') closePhotoLightbox();
-            else if (e.key === 'ArrowLeft') lightboxStep(-1);
-            else if (e.key === 'ArrowRight') lightboxStep(1);
-        });
+        // ---- Photo lightbox: shared with the viewer via ../js/photo-layer.js (pins + lightbox =
+        //      ONE renderer). PhotoLayer reuses the existing #photo-lightbox DOM + wires all
+        //      controls (close / prev-next / Esc / arrows / native immersive fullscreen). ----
+        PhotoLayer.mountLightbox();
+        function openPhotoLightbox(wp) { PhotoLayer.openLightbox(wp, waypoints); }
         // ---- Photo-pin fan-out (spiderfy): pins at the (nearly) same spot fan out on
         //      hover (desktop) / tap (touch) so each photo is reachable — even at 100% overlap. ----
         const FAN_DETECT_PX = 26;   // pins within this screen distance count as "stacked"
