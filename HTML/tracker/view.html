@@ -177,21 +177,14 @@
 
     <div id="msg">Lade geteilten Track …</div>
 
-    <!-- Photo lightbox -->
-    <div id="photo-lightbox">
-        <button id="lightbox-close" aria-label="Schließen">&times;</button>
-        <div class="lb-inner">
-            <img id="lightbox-img" alt="" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==">
-            <div id="lightbox-title"></div>
-            <div id="lightbox-text"></div>
-        </div>
-    </div>
+    <!-- Photo lightbox is injected by the shared PhotoLayer (../js/photo-layer.js). -->
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
         integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <script src="https://unpkg.com/leaflet-hotline@0.4.0/dist/leaflet.hotline.min.js"></script>
     <script src="../js/track-render.js"></script>
     <script src="../js/cyber-clock.js"></script>
+    <script src="../js/photo-layer.js"></script>
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <script>
         const $ = id => document.getElementById(id);
@@ -226,28 +219,11 @@
 
         function addWaypoint(wp) {
             waypoints.push(wp);
-            // status colour like the recorder: recognised → green (.done), pending → pulse, failed/none → red
-            let state = ' done';
-            if (wp.title === 'Wird erkannt …') state = ' pending';
-            else if (!wp.title || wp.title === 'Erkennung fehlgeschlagen') state = ' failed';
-            const icon = L.divIcon({ className: 'wp-pin', html: '<div class="wp-dot' + state + '">' + CAM_PIN_SVG + '</div>', iconSize: [30, 30], iconAnchor: [15, 30], popupAnchor: [0, -30] });
-            const m = L.marker([wp.lat, wp.lng], { icon }).addTo(map);
-            m.on('click', () => openLightbox(wp)); // tap → straight to full-screen, like the app (no popup)
+            const m = L.marker([wp.lat, wp.lng], { icon: PhotoLayer.pinIcon(wp) }).addTo(map);
+            m.on('click', () => PhotoLayer.openLightbox(wp, waypoints)); // tap → full-screen, counter + arrows
             wpMarkers.push(m);
         }
-        function openLightbox(wp) {
-            $('lightbox-img').src = wp.img;
-            $('lightbox-title').textContent = wp.title || '';
-            $('lightbox-text').textContent = wp.text || '';
-            $('photo-lightbox').classList.add('open');
-        }
-        function closeLightbox() {
-            $('photo-lightbox').classList.remove('open');
-            $('lightbox-img').removeAttribute('src');
-        }
-        $('lightbox-close').addEventListener('click', closeLightbox);
-        $('photo-lightbox').addEventListener('click', (e) => { if (e.target.id === 'photo-lightbox') closeLightbox(); });
-        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeLightbox(); });
+        PhotoLayer.mountLightbox(); // inject the shared lightbox + wire its controls (counter / arrows / esc)
 
         function fmtClock(ms) {
             const s = Math.max(0, Math.round(ms / 1000));
@@ -328,38 +304,57 @@
             ch.subscribe();
         }
 
-        // ---- load a SAVED shared track by token (static snapshot) ----
-        async function load(token) {
-            let row;
-            try {
-                const { data, error } = await sb.rpc('get_shared_track', { p_token: token });
-                if (error) throw error;
-                row = data;
-            } catch (e) {
-                $('msg').textContent = 'Konnte den Track nicht laden: ' + (e.message || e);
-                return;
-            }
-            if (!row) { $('msg').textContent = 'Track nicht gefunden — der Link ist ungültig oder wurde widerrufen.'; return; }
-
+        // ---- load a SAVED shared track by token, then POLL so it stays LIVE ----------------
+        // The recorder keeps upserting the SAME cloud row while recording (track grows, photos +
+        // their AI titles arrive). view.html used to fetch this ONCE → the shared view froze after
+        // the first tick: no new points, no photos, frozen clock. Now we re-fetch every POLL_MS and
+        // re-apply, so the token link updates live. fitBounds runs only on the FIRST apply, so the
+        // viewer's own pan/zoom is never yanked away.
+        const POLL_MS = 6000;
+        let _firstApplied = false;
+        function applyRow(row) {
             const points = row.points || [], wps = row.waypoints || [];
             track = points.map(p => [p[0], p[1]]);
             times = points.map(p => p[2] || null);
             speeds = points.map(p => (p[4] != null ? p[4] : null));
             activities = points.map(p => (p[5] != null ? p[5] : null));
             redrawTrack();
+            // Re-render the photo pins. Remove + re-add happens synchronously in one tick → no
+            // flicker, and it picks up NEW photos as well as ones whose AI title/text filled in
+            // after capture (the recorder pushes the photo twice: on snap, then once identified).
+            wpMarkers.forEach(m => map.removeLayer(m)); wpMarkers = []; waypoints = [];
             wps.forEach(w => addWaypoint(w));
 
             $('trk-name').textContent = row.name || 'Track';
             const t0 = times.find(Boolean), t1 = [...times].reverse().find(Boolean);
             setStats({
-                distM: row.distance_m != null ? row.distance_m : 0,
+                distM: row.distance_m != null ? row.distance_m : trackDistM(),
                 durMs: (t0 && t1) ? (Date.parse(t1) - Date.parse(t0)) : 0,
                 fotos: wps.length,
             });
 
-            if (track.length) map.fitBounds(L.latLngBounds(track), { padding: [50, 50] });
-            else if (wps.length) map.setView([wps[0].lat, wps[0].lng], 15);
-            $('msg').classList.add('hidden');
+            if (!_firstApplied) {
+                _firstApplied = true;
+                if (track.length) map.fitBounds(L.latLngBounds(track), { padding: [50, 50] });
+                else if (wps.length) map.setView([wps[0].lat, wps[0].lng], 15);
+                $('msg').classList.add('hidden');
+            }
+        }
+        async function fetchRow(token) {
+            const { data, error } = await sb.rpc('get_shared_track', { p_token: token });
+            if (error) throw error;
+            return data;
+        }
+        async function load(token) {
+            let row;
+            try { row = await fetchRow(token); }
+            catch (e) { $('msg').textContent = 'Konnte den Track nicht laden: ' + (e.message || e); return; }
+            if (!row) { $('msg').textContent = 'Track nicht gefunden — der Link ist ungültig oder wurde widerrufen.'; return; }
+            applyRow(row);
+            setInterval(async () => {                          // keep the shared view live
+                try { const r = await fetchRow(token); if (r) applyRow(r); }
+                catch (_) { /* transient network hiccup → just try again next tick */ }
+            }, POLL_MS);
         }
 
         // ---- ask for a live code when the page is opened bare (no ?live / ?s) ----
