@@ -11,6 +11,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
         integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+    <!-- shared fixed-slot number/clock widget — same component the recorder HUD uses -->
+    <link rel="stylesheet" href="../js/cyber-clock.css">
     <style>
         :root {
             --bg: rgb(8, 20, 42);
@@ -66,11 +68,24 @@
             color: var(--orange);
         }
 
-        #hdr .stats {
-            margin-top: 6px;
-            font-size: 0.72rem;
+        /* Stat tiles — the numbers use the SHARED CyberClock widget (cyber-clock.css),
+           same visual language as the recorder's HUD. */
+        #hud-stats {
+            display: flex;
+            justify-content: center;
+            gap: clamp(14px, 7vw, 44px);
+            margin-top: 10px;
+        }
+        .hud-stat {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .hud-lbl {
+            font-size: 0.55rem;
             letter-spacing: 2px;
-            color: rgba(255, 255, 255, 0.7);
+            color: rgba(255, 255, 255, 0.5);
+            margin-top: 6px;
         }
 
         /* Live-broadcast badge — hidden until real live positions arrive */
@@ -272,7 +287,11 @@
     <div id="map"></div>
     <header id="hdr">
         <h1 id="trk-name">Track</h1>
-        <div class="stats" id="trk-stats"></div>
+        <div id="hud-stats">
+            <div class="hud-stat"><span id="v-dist"></span><span class="hud-lbl" id="v-dist-lbl">KM</span></div>
+            <div class="hud-stat"><span id="v-dur"></span><span class="hud-lbl">DAUER</span></div>
+            <div class="hud-stat" id="v-fotos-tile"><span id="v-fotos"></span><span class="hud-lbl">FOTOS</span></div>
+        </div>
         <div id="live-badge">● LIVE</div>
     </header>
     <div id="foot"><a href="index.html">Aufgezeichnet mit Doc Alvers Tracker →</a></div>
@@ -293,6 +312,7 @@
         integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <script src="https://unpkg.com/leaflet-hotline@0.4.0/dist/leaflet.hotline.min.js"></script>
     <script src="../js/track-render.js"></script>
+    <script src="../js/cyber-clock.js"></script>
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <script>
         const $ = id => document.getElementById(id);
@@ -353,10 +373,43 @@
         $('photo-lightbox').addEventListener('click', (e) => { if (e.target.id === 'photo-lightbox') closeLightbox(); });
         document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeLightbox(); });
 
-        function fmtDuration(ms) {
+        function fmtClock(ms) {
             const s = Math.max(0, Math.round(ms / 1000));
-            const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60);
-            return h > 0 ? (h + ' h ' + m + ' min') : (m + ' min');
+            const p = n => String(n).padStart(2, '0');
+            return p(Math.floor(s / 3600)) + ':' + p(Math.floor((s % 3600) / 60)) + ':' + p(s % 60);
+        }
+        function trackDistM() { let d = 0; for (let i = 1; i < track.length; i++) d += TrackRender.haversine(track[i - 1], track[i]); return d; }
+
+        // Stats via the SHARED CyberClock widget → same look as the recorder's HUD; future widget
+        // changes (slot sizing, centring …) propagate here automatically. Distance is adaptive
+        // (< 100 m → metres, else km / 2 decimals), duration is the fixed-slot clock.
+        const STAT_SIZE = 'clamp(0.95rem, 4vw, 1.3rem)';
+        const STAT_COL = 'var(--orange)';
+        function mountStatsOnce() {
+            if (mountStatsOnce.done) return;
+            mountStatsOnce.done = true;
+            CyberClock.mount($('v-dur'), { size: STAT_SIZE, digitColor: '#fff', colonColor: 'rgba(255,255,255,0.55)', seconds: true });
+            CyberClock.mountNum($('v-fotos'), { intSlots: 3, decimals: 0, size: STAT_SIZE, digitColor: STAT_COL });
+        }
+        function setStats({ distM, durMs, fotos, showFotos = true }) {
+            mountStatsOnce();
+            const meters = (distM != null && distM < 100);
+            const want = meters ? 'm' : 'km';
+            if ($('v-dist').dataset.unit !== want) {
+                CyberClock.mountNum($('v-dist'), meters
+                    ? { intSlots: 3, decimals: 0, size: STAT_SIZE, digitColor: STAT_COL }
+                    : { intSlots: 3, decimals: 2, size: STAT_SIZE, digitColor: STAT_COL });
+                $('v-dist').dataset.unit = want;
+                $('v-dist-lbl').textContent = meters ? 'm' : 'KM';
+            }
+            CyberClock.setNum($('v-dist'), distM == null ? null : (meters ? Math.round(distM) : distM / 1000));
+            CyberClock.set($('v-dur'), fmtClock(durMs || 0));
+            $('v-fotos-tile').style.display = showFotos ? '' : 'none';
+            if (showFotos) CyberClock.setNum($('v-fotos'), fotos || 0);
+        }
+        function updateLiveStats() {
+            const t0 = times.find(Boolean), t1 = [...times].reverse().find(Boolean);
+            setStats({ distM: trackDistM(), durMs: (t0 && t1) ? (Date.parse(t1) - Date.parse(t0)) : 0, showFotos: false });
         }
 
         // ---- live position: subscribe to a broadcast channel; show movement live ----
@@ -372,6 +425,7 @@
             track.push([p.lat, p.lng]); times.push(p.t || null);
             speeds.push(p.speed != null ? p.speed : null); activities.push(p.activity != null ? p.activity : null);
             redrawTrack();
+            updateLiveStats();
             ensureLiveMarker(p.lat, p.lng);
             if (!liveFitDone) { map.setView([p.lat, p.lng], 15); liveFitDone = true; }
             else if (followLive) map.panTo([p.lat, p.lng], { animate: true });
@@ -385,6 +439,7 @@
             speeds = pts.map(p => (p[3] != null ? p[3] : null));
             activities = pts.map(p => (p[4] != null ? p[4] : null));
             redrawTrack();
+            updateLiveStats();
             const last = track[track.length - 1];
             ensureLiveMarker(last[0], last[1]);
             if (!liveFitDone && track.length > 1) { map.fitBounds(L.latLngBounds(track), { padding: [50, 50] }); liveFitDone = true; }
@@ -419,12 +474,12 @@
             wps.forEach(w => addWaypoint(w));
 
             $('trk-name').textContent = row.name || 'Track';
-            const km = (row.distance_m != null ? row.distance_m / 1000 : 0).toFixed(2);
-            let dur = '';
             const t0 = times.find(Boolean), t1 = [...times].reverse().find(Boolean);
-            if (t0 && t1) dur = ' · ' + fmtDuration(Date.parse(t1) - Date.parse(t0));
-            const fotos = wps.length ? ' · ' + wps.length + ' Foto' + (wps.length > 1 ? 's' : '') : '';
-            $('trk-stats').textContent = km + ' km' + dur + fotos;
+            setStats({
+                distM: row.distance_m != null ? row.distance_m : 0,
+                durMs: (t0 && t1) ? (Date.parse(t1) - Date.parse(t0)) : 0,
+                fotos: wps.length,
+            });
 
             if (track.length) map.fitBounds(L.latLngBounds(track), { padding: [50, 50] });
             else if (wps.length) map.setView([wps[0].lat, wps[0].lng], 15);
@@ -448,7 +503,7 @@
         const _liveName = _params.get('live'), _token = _params.get('s');
         if (_liveName) {
             $('trk-name').textContent = _liveName;
-            $('trk-stats').textContent = 'verbinde … warte auf Live-Signal';
+            setStats({ distM: 0, durMs: 0, showFotos: false }); // live broadcast carries no photos
             $('msg').classList.add('hidden');
             goLive(_liveName.trim().toLowerCase());
         } else if (_token) {

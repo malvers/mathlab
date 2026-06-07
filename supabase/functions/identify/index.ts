@@ -199,7 +199,7 @@ Deno.serve(async (req) => {
     // Credit the engine that actually identified the subject: Pl@ntNet (the botanical
     // specialist) on the plant path, otherwise Gemini recognised it itself. Appended
     // inline so it survives the esc()'d <div>/GPX rendering on the client.
-    const source = plant ? 'Pl@ntNet' : 'Google Gemini';
+    const source = plant ? 'Pl@ntNet (' + Math.round(plant.score * 100) + '%)' : 'Google Gemini';
     text = (text ? text.trimEnd() + ' ' : '') + '(Quelle: ' + source + ')';
     return json({ title, text, source, pnRemaining, _diag: diag });
   } catch (e) {
