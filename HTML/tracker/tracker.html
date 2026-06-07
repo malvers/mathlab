@@ -964,6 +964,7 @@
         async function doSync() {
             syncTimer = null;
             if (syncInflight || trkState === 'idle' || !track.length) return;
+            if (totalDist < 80 && track.length < 15) return; // skip trivial tracks → no empty cloud rows
             syncInflight = true; lastSync = Date.now();
             try { await saveTrack(currentTrackName || autoTrackName(), 'recording'); }
             catch (e) { if (window.DebugWindow) DebugWindow.log('Sync: ' + (e.message || e)); } // offline → retry next tick
@@ -1356,7 +1357,15 @@ ${pts}
             } catch (e) { /* user cancelled the share sheet → ignore */ }
         }
 
+        // ⚠️ DEBUG / DEV SAFETY MODE — TEMPORARY, not the final behaviour.
+        // While testing the tracker we keep cloud deletion OFF so NOTHING in Supabase can be lost
+        // (Doc's call after two data-loss scares on 2026-06-07). Before production this must be
+        // re-armed: set ALLOW_DELETE = true, or replace with a proper soft-delete / admin tool.
+        // Gates removeTrack() → covers BOTH the LADEN × and the DISCARD button; while false the
+        // × button isn't even rendered.
+        const ALLOW_DELETE = false; // ← DEBUG: set true to re-enable deletion
         async function removeTrack(id) {
+            if (!ALLOW_DELETE) return; // hard gate: no row is ever deleted while disabled
             const c = await ensureSb();
             const { error } = await c.from('tracks').delete().eq('id', id);
             if (error) throw error;
@@ -2075,15 +2084,18 @@ ${pts}
                 sh.className = 'tl-share'; sh.title = 'Teilen';
                 sh.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>';
                 sh.addEventListener('click', (ev) => { ev.stopPropagation(); shareTrack(r.id, r.name); });
-                const del = document.createElement('button');
-                del.className = 'tl-del'; del.textContent = '×'; del.title = 'Löschen';
-                del.addEventListener('click', async (ev) => {
-                    ev.stopPropagation();
-                    if (!(await uiConfirm('Track löschen?', { danger: true, okText: 'Löschen' }))) return;
-                    try { await removeTrack(r.id); row.remove(); toast('Gelöscht.'); }
-                    catch (e) { toast('Löschen fehlgeschlagen.'); }
-                });
-                row.appendChild(main); row.appendChild(sh); row.appendChild(del);
+                row.appendChild(main); row.appendChild(sh);
+                if (ALLOW_DELETE) { // cloud-delete disabled for now → no × button (see removeTrack)
+                    const del = document.createElement('button');
+                    del.className = 'tl-del'; del.textContent = '×'; del.title = 'Löschen';
+                    del.addEventListener('click', async (ev) => {
+                        ev.stopPropagation();
+                        if (!(await uiConfirm('Track löschen?', { danger: true, okText: 'Löschen' }))) return;
+                        try { await removeTrack(r.id); row.remove(); toast('Gelöscht.'); }
+                        catch (e) { toast('Löschen fehlgeschlagen.'); }
+                    });
+                    row.appendChild(del);
+                }
                 box.appendChild(row);
             });
         }
