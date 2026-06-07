@@ -26,12 +26,26 @@ const CORS = {
 };
 
 // Gemini identifies the subject itself (used for non-plants or when Pl@ntNet is off/unsure).
-const PROMPT_GENERIC = `Du bist ein kundiger Wander- und Stadtführer.
-Erkenne das HAUPTMOTIV auf dem Foto (Pflanze, Baum, Tier, Pilz, Gebäude, Denkmal, Gestein …).
+// Tuned to NAME the specific/iconic thing (designer, model, era) rather than describe its
+// surface ("chair with red cushion") — with a hedge so it won't invent false attributions.
+const PROMPT_GENERIC = `Du bist ein kundiger Experte für Natur, Architektur, Kunst und Design.
+Erkenne das HAUPTMOTIV auf dem Foto und BENENNE es so SPEZIFISCH wie möglich.
+Es kann sein: Pflanze, Baum, Tier, Pilz, Gestein — aber genauso ein Gebäude, Denkmal,
+Kunstwerk, ein Design-/Möbelstück, Fahrzeug oder bekanntes Produkt.
+
+WICHTIG — benennen, nicht beschreiben:
+- Ist das Objekt ein bekanntes/ikonisches Stück, nenne seinen EIGENNAMEN samt Schöpfer/
+  Designer und Epoche, soweit du sie kennst — NICHT bloß sein Aussehen.
+  Schlecht: "Stuhl mit rotem Sitzpolster". Gut: "Hill House Chair (Charles Rennie Mackintosh, 1903)".
+- Eine reine Oberflächen-Beschreibung (Farbe, Material, Form) ist nur erlaubt, wenn das
+  Objekt wirklich namenlos/alltäglich ist.
+- Bist du dir beim exakten Namen unsicher, nenne TYP + STIL/EPOCHE und kennzeichne die
+  Vermutung klar ("vermutlich …", "im Stil von …") — erfinde KEINE falsche, präzise Zuschreibung.
+
 Antworte AUSSCHLIESSLICH als JSON: {"title": "...", "text": "..."}.
-- title: kurzer Name auf Deutsch, wenn sinnvoll mit Fach-/Artname in Klammern, max. ~6 Wörter.
-- text: 1–2 Sätze Wissenswertes auf Deutsch, sachlich, ohne Floskeln.
-Wenn du es nicht sicher erkennst: title "Unklar", text mit deiner besten Vermutung.`;
+- title: spezifischer Name auf Deutsch, wenn sinnvoll mit Fach-/Designer-/Artname in Klammern, max. ~8 Wörter.
+- text: 1–2 Sätze Wissenswertes auf Deutsch (Bedeutung, Schöpfer, Epoche o. Ä.), sachlich, ohne Floskeln.
+Nur wenn du es wirklich nicht einordnen kannst: title "Unklar", text mit deiner besten Vermutung.`;
 
 // Gemini only EXPLAINS a species that Pl@ntNet has already determined botanically.
 function promptForPlant(sci: string, common: string): string {
@@ -94,25 +108,31 @@ Deno.serve(async (req) => {
     // ---- Step 1: specialist plant identification (optional, only if a key is configured) ----
     const plantKey = Deno.env.get('PLANTNET_API_KEY');
     let plant: { sci: string; common: string; score: number } | null = null;
+    let plantConfident = false; // score ≥ MIN → Pl@ntNet also gets the headline (else just shown)
     let pnDiag: unknown = 'off';
     let pnRemaining: number | undefined; // Pl@ntNet daily quota left (free tier = 500/day)
     if (plantKey) {
       try {
         const pn = await plantnetIdentify(image, mime, plantKey);
         if (pn.remaining !== undefined) pnRemaining = pn.remaining;
-        if (pn.ok && pn.score >= PLANTNET_MIN_SCORE) {
+        if (pn.ok && pn.sci) {
+          // ACCEPT any plant Pl@ntNet returns — even a weak score is worth showing as a second
+          // opinion (Doc: "immer beide"). MIN_SCORE only decides who writes the HEADLINE.
           plant = { sci: pn.sci, common: pn.common, score: pn.score };
-          pnDiag = { score: +pn.score.toFixed(3), sci: pn.sci };
+          plantConfident = pn.score >= PLANTNET_MIN_SCORE;
+          pnDiag = { score: +pn.score.toFixed(3), sci: pn.sci, conf: plantConfident };
         } else {
-          pnDiag = pn.ok ? { low: +pn.score.toFixed(3) } : { reject: pn.reason };
+          pnDiag = pn.ok ? { empty: true } : { reject: pn.reason };
         }
       } catch (e) {
         pnDiag = { err: String((e && (e as Error).message) || e) };
       }
     }
 
-    // ---- Step 2: Gemini — explain the known plant, or identify the subject itself ----
-    const promptText = plant ? promptForPlant(plant.sci, plant.common) : PROMPT_GENERIC;
+    // ---- Step 2: Gemini identifies the subject INDEPENDENTLY (never told Pl@ntNet's guess) ----
+    // On the plant path this yields a genuine SECOND opinion to compare against Pl@ntNet, instead
+    // of just a blurb echoing Pl@ntNet's answer. (promptForPlant is kept above but now unused.)
+    const promptText = PROMPT_GENERIC;
     const body = {
       contents: [{
         parts: [
@@ -186,21 +206,41 @@ Deno.serve(async (req) => {
 
     const data = await r.json();
     const txt = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
-    let title = 'Unbekannt';
-    let text = '';
+    // Gemini's OWN identification (independent of Pl@ntNet).
+    let gTitle = '';
+    let gText = '';
     try {
       const p = JSON.parse(txt);
-      title = p.title || title;
-      text = p.text || '';
+      gTitle = p.title || '';
+      gText = p.text || '';
     } catch {
-      // model didn't return clean JSON → fall back to raw text
-      text = txt.slice(0, 300);
+      gText = txt.slice(0, 300); // model didn't return clean JSON → keep raw text as the blurb
     }
-    // Credit the engine that actually identified the subject: Pl@ntNet (the botanical
-    // specialist) on the plant path, otherwise Gemini recognised it itself. Appended
-    // inline so it survives the esc()'d <div>/GPX rendering on the client.
-    const source = plant ? 'Pl@ntNet (' + Math.round(plant.score * 100) + '%)' : 'Google Gemini';
-    text = (text ? text.trimEnd() + ' ' : '') + '(Quelle: ' + source + ')';
+
+    let title: string;
+    let text: string;
+    let source: string;
+    if (plant) {
+      // PLANT → just show BOTH opinions side by side. NO agreement verdict — synonyms like
+      // Soehrensia/Echinopsis huascha can't be judged by a string match; Doc reads + decides.
+      const pct = Math.round(plant.score * 100);
+      const pnName = plant.common ? plant.sci + ' – ' + plant.common : plant.sci;
+      // Headline = the specialist's name when it's confident (≥ MIN); otherwise Gemini's, which is
+      // more trustworthy when Pl@ntNet is unsure (and Gemini can read a plant's label / sign).
+      const pnHead = plant.common ? plant.common + ' (' + plant.sci + ')' : plant.sci;
+      title = plantConfident ? (pnHead || gTitle) : (gTitle || pnHead);
+      // \t between label and value → the client aligns both values in a column (tab-size).
+      text = (gText ? gText.trimEnd() + '\n\n' : '') +
+        'PlantNet:\t' + pnName + ' (' + pct + ' %)\n' +
+        'Google Gemini:\t' + (gTitle || 'unklar');
+      source = 'both';
+    } else {
+      // Not a plant (Pl@ntNet rejected it) → Gemini only. NO "(Quelle: …)" stamp anymore — that
+      // parenthetical now marks an OLD recognition for the client's re-analyze logic.
+      title = gTitle || 'Unbekannt';
+      text = gText ? gText.trimEnd() : '';
+      source = 'Google Gemini';
+    }
     return json({ title, text, source, pnRemaining, _diag: diag });
   } catch (e) {
     return json({ error: String((e && (e as Error).message) || e) }, 500);

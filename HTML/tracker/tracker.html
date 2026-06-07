@@ -1693,12 +1693,17 @@ ${pts}
             m.on('click', () => onPinClick(m));     // tap (touch) / click (desktop)
             m.on('mouseover', () => onPinHover(m));  // hover (desktop) → fan a stack
             wp._marker = m;
+            if (wp.title === PENDING_TITLE) m.setZIndexOffset(2000); // see refreshWaypoint
             wpMarkers.push(m);
             return wp;
         }
         function refreshWaypoint(wp) {
             if (!wp._marker) return;
             wp._marker.setIcon(wpIcon(wp)); // pending → done; the lightbox reads wp.title/text live
+            // When pins stack (e.g. a dense botanical garden), the one currently being analyzed
+            // (orange/pending) pops ABOVE the others (high z) so you can see which is in work;
+            // once done it drops back to the base layer (0).
+            wp._marker.setZIndexOffset(wp.title === PENDING_TITLE ? 2000 : 0);
         }
         function clearWaypoints() {
             collapseFan();
@@ -1798,7 +1803,13 @@ ${pts}
         //      failed or never finished. The image is always kept on the waypoint, so we
         //      just re-send it — now via the retry-enabled Edge Function. ----
         function wpNeedsId(wp) {
-            return !wp.title || wp.title === PENDING_TITLE || wp.title === FAIL_TITLE;
+            if (!wp.title || wp.title === PENDING_TITLE || wp.title === FAIL_TITLE) return true;
+            // Re-run anything NOT in the current clean format. Stale markers from earlier
+            // generations: the "(Quelle: …)" stamp (oldest), the 🌿/✨ emoji pins, and the
+            // dropped agreement verdict (— stimmt zu / — andere Einschätzung). The current
+            // format ("PlantNet:" / "Google Gemini:" + value) carries none of these → done.
+            if (wp.text && /\(Quelle:|🌿|✨|— stimmt zu|— andere Einschätzung/.test(wp.text)) return true;
+            return false;
         }
         // Grey out "Fotos analysieren" when there is nothing left to (re-)identify.
         function updateReburnButton() {
