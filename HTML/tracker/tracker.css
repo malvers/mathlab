@@ -121,11 +121,11 @@ path.pos-marker.pos-shown {
     color: rgba(255, 255, 255, 0.22);
 }
 
-/* count of visible satellites behind each constellation (inherits grey/green).
-   Digits in Arial (not Orbitron) — cleaner numerals, no slashed zero. */
-#gps-src .sat-n {
+/* Numerals in Arial (not Orbitron) — cleaner, no slashed zero. Used for the satellite counts
+   AND the accuracy digits → digits look consistent across the whole GPS line. */
+.sat-n {
     font-family: Arial, Helvetica, sans-serif;
-    font-size: 1em; /* match the constellation letters (was 0.82em → looked smaller) */
+    font-size: 1em; /* match the surrounding Orbitron letters */
     font-weight: 700;
     opacity: 0.9;
 }
@@ -133,10 +133,10 @@ path.pos-marker.pos-shown {
 #gps-acc {
     flex: 0 0 auto;
     white-space: nowrap;
-    font-size: 0.72rem;
+    font-size: clamp(0.58rem, 2.7vw, 0.72rem); /* same size as the sats (#gps-src); digit → .sat-n (Arial) */
     font-weight: 700;
     color: rgba(255, 255, 255, 0.6);
-    letter-spacing: 1px;
+    letter-spacing: 0;
     font-variant-numeric: tabular-nums;
 }
 
@@ -207,7 +207,7 @@ path.pos-marker.pos-shown {
 .speed-stat {
     flex-direction: row;
     align-items: center;
-    gap: 8px;
+    gap: 16px; /* more breathing room between the KM/H value and the travel-mode icon */
 }
 
 .speed-col {

@@ -261,7 +261,10 @@
         }
         function updateLiveStats() {
             const t0 = times.find(Boolean), t1 = [...times].reverse().find(Boolean);
-            setStats({ distM: trackDistM(), durMs: (t0 && t1) ? (Date.parse(t1) - Date.parse(t0)) : 0, showFotos: false });
+            setStats({
+                distM: trackDistM(), durMs: (t0 && t1) ? (Date.parse(t1) - Date.parse(t0)) : 0,
+                fotos: waypoints.length, showFotos: waypoints.length > 0, // photos arrive live now (thumbnails)
+            });
         }
 
         // ---- live position: subscribe to a broadcast channel; show movement live ----
@@ -296,10 +299,28 @@
             ensureLiveMarker(last[0], last[1]);
             if (!liveFitDone && track.length > 1) { map.fitBounds(L.latLngBounds(track), { padding: [50, 50] }); liveFitDone = true; }
         }
+        // ---- live PHOTO: a small thumbnail pushed over the same channel. Add a pin (dedup by t); a
+        //      later re-send (with the AI title) just updates it. Remove+add the marker in one tick → no flicker.
+        function onLivePhoto(p) {
+            if (!p || p.lat == null || !p.img) return;
+            const wp = { lat: p.lat, lng: p.lng, t: p.t, img: p.img, title: p.title || '', text: '' };
+            const i = waypoints.findIndex(w => w.t === p.t);
+            if (i >= 0) {
+                waypoints[i] = wp;
+                if (wpMarkers[i]) map.removeLayer(wpMarkers[i]);
+                const m = L.marker([wp.lat, wp.lng], { icon: PhotoLayer.pinIcon(wp) }).addTo(map);
+                m.on('click', () => PhotoLayer.openLightbox(wp, waypoints));
+                wpMarkers[i] = m;
+            } else {
+                addWaypoint(wp);
+            }
+            updateLiveStats();
+        }
         function goLive(key) {
             const ch = sb.channel('live:' + key, { config: { broadcast: { self: false } } });
             ch.on('broadcast', { event: 'trail' }, ({ payload }) => onLiveTrail(payload && payload.pts));
             ch.on('broadcast', { event: 'pos' }, ({ payload }) => onLivePos(payload));
+            ch.on('broadcast', { event: 'photo' }, ({ payload }) => onLivePhoto(payload));
             ch.on('broadcast', { event: 'end' }, () => { const b = $('live-badge'); if (b) b.textContent = '■ beendet'; });
             ch.subscribe();
         }
@@ -374,7 +395,7 @@
         const _liveName = _params.get('live'), _token = _params.get('s');
         if (_liveName) {
             $('trk-name').textContent = _liveName;
-            setStats({ distM: 0, durMs: 0, showFotos: false }); // live broadcast carries no photos
+            setStats({ distM: 0, durMs: 0, showFotos: false }); // FOTO tile reveals once the first thumbnail lands
             $('msg').classList.add('hidden');
             goLive(_liveName.trim().toLowerCase());
         } else if (_token) {
