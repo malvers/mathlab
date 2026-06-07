@@ -43,7 +43,7 @@
 
     <!-- Top HUD -->
     <div id="hud-top">
-        <div id="gps-chip"><span id="gps-src"></span><span id="gps-acc">±– m</span></div>
+        <div id="gps-chip"><span id="gps-src"></span><span id="gps-acc">±<span class="sat-n">–</span> m</span></div>
         <div id="hud-time-wrap">
             <div id="live-badge">● LIVE</div>
             <div id="hud-time"></div>
@@ -115,7 +115,7 @@
         <div class="ov-title">Live senden</div>
         <div class="ov-body">
             <p class="live-hint">Vergib einen Namen. Wer ihn kennt, sieht dich live — sag ihn nur, wem du willst (öffentlich).</p>
-            <input id="live-name" class="live-url" type="text" placeholder="vsb" autocapitalize="off" autocomplete="off" spellcheck="false">
+            <input id="live-name" class="live-url" type="text" aria-label="Live-Name" placeholder="vsb" autocapitalize="off" autocomplete="off" spellcheck="false">
             <button id="live-go" class="live-copy">LIVE senden</button>
         </div>
         <button class="ov-close" id="live-close" aria-label="Schließen">&times;</button>
@@ -512,7 +512,7 @@
                 posMarker.setLatLng(here); // hold the dot steady when the gate says we're standing still
             }
 
-            elAcc.textContent = accuracy != null ? '±' + Math.round(accuracy) + ' m' : '±– m';
+            elAcc.innerHTML = accuracy != null ? '±<span class="sat-n">' + Math.round(accuracy) + '</span> m' : '±<span class="sat-n">–</span> m';
             elAcc.style.color = accColor(accuracy);
             // Native app: the real GnssStatus listener owns the source label. Only the web
             // falls back to the accuracy heuristic here.
@@ -1006,6 +1006,23 @@
             const pts = track.map((p, i) => [p[0], p[1], times[i] || null, speeds[i] != null ? speeds[i] : null, activities[i] || null]);
             try { liveChannel.send({ type: 'broadcast', event: 'trail', payload: { pts: pts } }); } catch (e) { }
         }
+        // ---- live PHOTOS over the SAME channel ('photo' event). We send the FULL stored image — the
+        //      same ~1024 px JPEG the share delivers (~130–400 KB). Realtime allows up to 1 MB per
+        //      broadcast message, so it fits comfortably; no thumbnail. livePhotos keeps the set so
+        //      late viewers are re-sent it (like the trail). dedup by t.
+        let livePhotos = [];
+        function broadcastPhoto(p) {
+            if (!liveOn || !liveChannel) return;
+            try { liveChannel.send({ type: 'broadcast', event: 'photo', payload: p }); } catch (e) { }
+        }
+        function broadcastPhotos() { livePhotos.forEach(broadcastPhoto); } // re-send all → late viewers catch up
+        function addLivePhoto(wp) {
+            if (!liveOn || !liveChannel || !wp || !wp.img) return;
+            const p = { lat: wp.lat, lng: wp.lng, t: wp.t, title: wp.title || '', img: wp.img };
+            const i = livePhotos.findIndex(x => x.t === wp.t);
+            if (i >= 0) livePhotos[i] = p; else livePhotos.push(p); // update on the AI-title re-send
+            broadcastPhoto(p);
+        }
         // LIVE: broadcast your position on a chosen PUBLIC channel name (default "vsb"). Anyone who
         // knows the name and opens view.html?live=<name> (or types it) sees you move. No DB, no token.
         function openLivePanel() {
@@ -1023,9 +1040,16 @@
                     const c = await ensureSb();
                     liveChannel = c.channel('live:' + canon, { config: { broadcast: { self: false } } });
                     liveOn = true; updateLiveBadge();
-                    liveChannel.subscribe((status) => { if (status === 'SUBSCRIBED') { broadcastTrail(); broadcastLive(true); } });
+                    livePhotos = []; // fresh live session
+                    liveChannel.subscribe((status) => {
+                        if (status === 'SUBSCRIBED') {
+                            broadcastTrail(); broadcastLive(true);
+                            waypoints.forEach(addLivePhoto); // push thumbnails of photos ALREADY on the track
+                        }
+                    });
                     if (liveTrailTimer) clearInterval(liveTrailTimer);
-                    liveTrailTimer = setInterval(broadcastTrail, 15000); // refresh the path for late viewers
+                    // refresh the path AND re-send the photo thumbnails so late viewers catch up
+                    liveTrailTimer = setInterval(() => { broadcastTrail(); broadcastPhotos(); }, 15000);
                     toast("Live auf '" + canon + "' — Namen weitersagen.");
                 } catch (e) { toast('Live fehlgeschlagen: ' + (e.message || e)); liveOn = false; updateLiveBadge(); }
             })();
@@ -1687,6 +1711,7 @@ ${pts}
             const wp = addWaypoint({ lat: ll[0], lng: ll[1], t: new Date().toISOString(), img, title: PENDING_TITLE, text: '' });
             if (typeof TrackBuffer !== 'undefined') TrackBuffer.saveNow(bufferSnapshot()); // secure the new photo at once
             doSync(); // push the photo to the cloud NOW — don't wait for the next GPS point (you stand still to shoot)
+            addLivePhoto(wp); // …and push a small thumbnail over the live channel right away
             try {
                 const r = await identifyPhoto(img);
                 wp.title = r.title; wp.text = r.text;
@@ -1698,6 +1723,7 @@ ${pts}
             }
             refreshWaypoint(wp);
             doSync(); // and again once the AI title/text is in, so the description propagates live
+            addLivePhoto(wp); // re-broadcast the thumbnail with the now-known title (dedup by t)
         }
 
         // New "one-point track" mode: a geotagged photo taken WITHOUT an active recording.
@@ -2106,7 +2132,7 @@ ${pts}
             const view = (d && d.viewByConstellation) || {}; // visible sats per constellation
             elSrc.innerHTML = GNSS_ALL
                 .map(c => '<span class="sat' + ((used[c] || 0) > 0 ? ' on' : '') + '">' + CON_NAMES[c] + ' <span class="sat-n">' + (view[c] || 0) + '</span></span>')
-                .join('<span class="sat-sep"> · </span>');
+                .join('<span class="sat-sep">&nbsp;&nbsp;</span>');
         }
         function gnssLiveHtml() {
             const d = gnssLatest; if (!d) return '';
