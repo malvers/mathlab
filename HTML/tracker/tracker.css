@@ -87,8 +87,10 @@ path.pos-marker.pos-shown {
 
 #gps-chip {
     position: relative;
-    display: flex;
-    justify-content: center;
+    /* 3 columns (1fr · auto · 1fr) → the source label sits in the centre column and is TRULY
+       centred on screen; the accuracy rides in the right column. Holds in WLAN and GPS mode. */
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
     align-items: center;
     gap: 8px;
     font-size: 0.72rem;
@@ -97,7 +99,7 @@ path.pos-marker.pos-shown {
 }
 
 #gps-src {
-    flex: 1 1 auto;
+    grid-column: 2;
     min-width: 0;
     /* keep the four constellations on ONE line on a phone: tighter spacing + a touch smaller */
     font-size: clamp(0.58rem, 2.7vw, 0.72rem);
@@ -131,13 +133,19 @@ path.pos-marker.pos-shown {
 }
 
 #gps-acc {
-    flex: 0 0 auto;
+    grid-column: 3;
+    justify-self: end;
     white-space: nowrap;
     font-size: clamp(0.58rem, 2.7vw, 0.72rem); /* same size as the sats (#gps-src); digit → .sat-n (Arial) */
-    font-weight: 700;
+    font-weight: 400; /* Doc: not bold — same weight/size as WLAN/GPS, just a quiet annotation */
     color: rgba(255, 255, 255, 0.6);
     letter-spacing: 0;
     font-variant-numeric: tabular-nums;
+}
+
+/* the accuracy digit shares .sat-n (Arial) with the sat counts, but here it must NOT be bold */
+#gps-acc .sat-n {
+    font-weight: 400;
 }
 
 #gps-dot {
@@ -254,7 +262,8 @@ path.pos-marker.pos-shown {
     justify-content: center;
     text-align: center;
     border-radius: 50%;
-    border: 3px solid rgba(255, 255, 255, 0.85);
+    border: 2px solid rgba(255, 255, 255, 0.85);
+    outline: none; /* no blue browser focus ring on the round control buttons */
     background: var(--green);
     color: #fff;
     font-family: 'Orbitron', sans-serif;
@@ -1435,16 +1444,15 @@ path.pos-marker.pos-shown {
 }
 
 /* ============================================================================
-   Doc 2026-06-07: ALL text → colour rgb(0,0,40) + 10% larger (global).
-   Revert = delete this whole block.
-   ⚠️ rgb(0,0,40) is near-black → text on the dark-blue surfaces is very low contrast.
-   Note: CyberClock numbers (timer + stat tiles) are drawn on a <canvas> via a JS digitColor,
-   so CSS colour does NOT reach them — they'd need a separate JS change.
+   Doc 2026-06-07: dark navy label ONLY on the round control buttons (START / PAUSE /
+   CONTINUE / SPEICHERN / LÖSCHEN). The earlier global "* { color: rgb(0,0,40) !important }"
+   darkened ALL text on the page — reverted, everything else is bright as before again.
+   !important keeps it dark even where setTrkState() sets an inline colour (CONTINUE/SPEICHERN).
    ============================================================================ */
 html {
     font-size: 110%;
 }
 
-*, *::before, *::after {
+#trk-controls button {
     color: rgb(0, 0, 40) !important;
 }

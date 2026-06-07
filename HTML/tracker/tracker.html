@@ -834,7 +834,7 @@
             if (!window.isSecureContext) { setStatus('GPS braucht HTTPS oder localhost. Über file:// gibt es keine Position.'); return; }
             // A track is on screen (loaded or just finished) → don't wipe the VIEW without asking.
             // (It stays safe in the cloud / LADEN — START only clears the screen, it never deletes a row.)
-            if (track.length && !(await uiConfirm('Neuen Track starten? Der angezeigte Track verschwindet aus der Ansicht — gespeicherte Tracks bleiben in LADEN.', { okText: 'Neu starten' }))) return;
+            if (track.length && !(await uiConfirm('Neuen Track starten? Der angezeigte Track verschwindet nur aus der Ansicht und bleibt gespeichert.', { okText: 'Neu starten' }))) return;
             clearTrack(true); // silent — the displayed track was loaded/saved; START begins fresh
             currentTrackId = null; currentTrackName = autoTrackName(); // fresh live track; name from start (autosync + finish reuse it)
             startTime = Date.now();
@@ -906,7 +906,7 @@
         // Round-button labels: size the font by MEASURING the widest label (SPEICHERN/VERWERFEN…)
         // so it always fits the smaller circle — computed, not guessed; uniform; re-fit on resize.
         // Caps at the original font/diameter ratio so it never grows beyond design.
-        const CONTROL_LABELS = ['START', 'PAUSE', 'CONTINUE', 'SPEICHERN', 'VERWERFEN'];
+        const CONTROL_LABELS = ['START', 'PAUSE', 'CONTINUE', 'SPEICHERN', 'LÖSCHEN'];
         function fitControlText() {
             const btns = [$('trk-toggle'), $('trk-finish'), $('trk-discard')].filter(Boolean);
             if (!btns.length) return;
@@ -926,7 +926,7 @@
                 const fs = (avail - spacing) * REF / glyph;        // px that makes this label = avail
                 if (fs < need) need = fs;
             }
-            const px = Math.max(7, Math.min(need, dia * 0.115) * 1.08); // cap = original ratio, +8% (Doc)
+            const px = Math.max(7, Math.min(need, dia * 0.115) * 1.134); // cap = original ratio, +13.4% (Doc: +8%, then +5% more)
             btns.forEach(b => { b.style.fontSize = px.toFixed(1) + 'px'; });
             const ctrl = $('trk-controls'); if (ctrl) ctrl.classList.add('fitted'); // reveal — now sized, no flash
         }

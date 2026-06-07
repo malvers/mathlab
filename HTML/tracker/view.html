@@ -128,6 +128,19 @@
             pointer-events: none;
         }
 
+        /* Deploy stamp — document.lastModified = served HTML's Last-Modified → tells
+           at a glance which build of the view actually loaded (GH-Pages caches ~10 min). */
+        #build-stamp {
+            position: fixed;
+            bottom: max(6px, env(safe-area-inset-bottom));
+            left: max(8px, env(safe-area-inset-left));
+            z-index: 500;
+            font-size: 0.6rem;
+            letter-spacing: 1px;
+            color: rgba(255, 255, 255, 0.5);
+            pointer-events: none;
+        }
+
         #foot a {
             display: inline-block;
             padding: 4px 12px;
@@ -175,6 +188,7 @@
         <div id="live-badge">● LIVE</div>
     </header>
     <div id="foot"><a href="index.html">Aufgezeichnet mit Doc Alvers Tracker →</a></div>
+    <div id="build-stamp"></div>
 
     <div id="msg">Lade geteilten Track …</div>
 
@@ -189,6 +203,20 @@
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <script>
         const $ = id => document.getElementById(id);
+
+        // Build/deploy stamp — document.lastModified = served HTML's Last-Modified header
+        // → the real deploy time; tells at a glance which build of the view loaded.
+        (function () {
+            const el = $('build-stamp');
+            if (!el) return;
+            const lm = new Date(document.lastModified);
+            const p = (n) => String(n).padStart(2, '0');
+            el.textContent = isNaN(lm.getTime())
+                ? 'BUILD ' + (document.lastModified || '?')
+                : 'BUILD ' + p(lm.getDate()) + '.' + p(lm.getMonth() + 1) + '. '
+                  + p(lm.getHours()) + ':' + p(lm.getMinutes()) + ':' + p(lm.getSeconds());
+        })();
+
         const SUPABASE_URL = 'https://fyfhxzyymmurlaenmzse.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_ubQDiMD-X3N0vZvPVi229Q_-5Zootfk';
         const COL_ORANGE = 'rgb(245, 194, 66)';

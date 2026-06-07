@@ -98,8 +98,20 @@
         }
         if (wired) return;
         wired = true;
+        // A host page may ship its OWN inline #photo-lightbox (the recorder does) that predates the
+        // fullscreen toggle and so lacks #lightbox-fs. Inject it so the wiring below never hits null.
+        if (!$('lightbox-fs')) {
+            const host = $('photo-lightbox');
+            if (host) {
+                const fb = document.createElement('button');
+                fb.id = 'lightbox-fs';
+                fb.setAttribute('aria-label', 'Vollbild umschalten');
+                fb.setAttribute('title', 'Vollbild');
+                host.insertBefore(fb, host.firstChild);
+            }
+        }
         $('lightbox-close').addEventListener('click', close);
-        $('lightbox-fs').addEventListener('click', toggleFs);
+        if ($('lightbox-fs')) $('lightbox-fs').addEventListener('click', toggleFs);
         document.addEventListener('fullscreenchange', refreshFsIcon);
         document.addEventListener('webkitfullscreenchange', refreshFsIcon);
         refreshFsIcon();
