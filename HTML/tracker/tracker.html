@@ -1033,7 +1033,7 @@
         function broadcastPhotos() { livePhotos.forEach(broadcastPhoto); } // re-send all → late viewers catch up
         function addLivePhoto(wp) {
             if (!liveOn || !liveChannel || !wp || !wp.img) return;
-            const p = { lat: wp.lat, lng: wp.lng, t: wp.t, title: wp.title || '', img: wp.img };
+            const p = { lat: wp.lat, lng: wp.lng, t: wp.t, title: wp.title || '', text: wp.text || '', img: wp.img };
             const i = livePhotos.findIndex(x => x.t === wp.t);
             if (i >= 0) livePhotos[i] = p; else livePhotos.push(p); // update on the AI-title re-send
             broadcastPhoto(p);
