@@ -44,6 +44,7 @@
     <div id="hud-top">
         <div id="gps-chip"><span id="gps-src"></span><span id="gps-acc">±– m</span></div>
         <div id="hud-time-wrap">
+            <div id="live-badge">● LIVE</div>
             <div id="hud-time"></div>
         </div>
         <div id="hud-stats">
@@ -96,9 +97,6 @@
         <button class="mini-btn" id="mb-rain">REGEN</button>
         <button class="mini-btn" id="mb-settings">EINSTELLUNGEN</button>
     </div>
-
-    <!-- Live-broadcast indicator (shown only while broadcasting your position) -->
-    <div id="live-badge">● LIVE</div>
 
     <!-- Centered overlay panels (track list + GNSS info) -->
     <div id="ov-backdrop"></div>
@@ -374,6 +372,8 @@
         // moving, so it keeps recording. Thresholds sit just above the accelerometer noise floor.
         const MOTION_STILL = 0.04;     // m/s²: dynamic-accel energy below this → "still" (basically motionless)
         const MOTION_MOVE = 0.10;      // m/s²: above this → "moving" (hysteresis between the two)
+        const SPEED_MOVE_KMH = 4;      // km/h: GPS speed above this overrides the gate → always "moving"
+                                       // (a vehicle at steady cruise produces almost no dynamic accel)
         let motionReady = false;       // a real accelerometer is delivering data
         let motionStill = true;        // current gate verdict
         let motionEnergy = 0;          // smoothed |dynamic acceleration|
@@ -540,7 +540,14 @@
 
             // Movement gate: does the accelerometer confirm we actually move? If the sensor
             // says "still", GPS jitter is suppressed (no points, speed 0, dot + map held).
-            const still = motionReady && motionStill;
+            // BUT a vehicle at steady cruise has almost no dynamic acceleration, so the sensor
+            // can wrongly read "still" mid-drive. The gate's only job is to kill GPS jitter while
+            // genuinely stopped (where GPS speed ≈ 0), so let a clear GPS speed override it: above
+            // SPEED_MOVE_KMH (with usable accuracy) we trust GPS and keep recording. Then it only
+            // suppresses true standstill — a red light, not the open road.
+            const gpsKmh = (speed != null && speed >= 0) ? speed * 3.6 : null;
+            const gpsMoving = gpsKmh != null && gpsKmh > SPEED_MOVE_KMH && (accuracy == null || accuracy <= MAX_ACC_M);
+            const still = motionReady && motionStill && !gpsMoving;
 
             const firstFix = !posMarker;
             renderPosition(here, accuracy, still && !firstFix);
@@ -1309,12 +1316,10 @@ ${pts}
 
         async function listTracks() {
             const c = await ensureSb();
-            // hide in-progress ('recording') tracks; tolerate the 'status' column not existing yet
-            const cols = 'id, name, created_at, distance_m';
-            let { data, error } = await c.from('tracks').select(cols).eq('status', 'done').order('created_at', { ascending: false });
-            if (error && /status/i.test(error.message || '')) {
-                ({ data, error } = await c.from('tracks').select(cols).order('created_at', { ascending: false }));
-            }
+            // Show ALL saved tracks — never hide one by status (a tracker must not make tracks vanish).
+            const { data, error } = await c.from('tracks')
+                .select('id, name, created_at, distance_m')
+                .order('created_at', { ascending: false });
             if (error) throw error;
             return data || [];
         }
@@ -1722,6 +1727,7 @@ ${pts}
             toast('Foto wird verarbeitet …');
             const wp = addWaypoint({ lat: ll[0], lng: ll[1], t: new Date().toISOString(), img, title: PENDING_TITLE, text: '' });
             if (typeof TrackBuffer !== 'undefined') TrackBuffer.saveNow(bufferSnapshot()); // secure the new photo at once
+            doSync(); // push the photo to the cloud NOW — don't wait for the next GPS point (you stand still to shoot)
             try {
                 const r = await identifyPhoto(img);
                 wp.title = r.title; wp.text = r.text;
@@ -1732,6 +1738,7 @@ ${pts}
                 toast('KI-Erkennung fehlgeschlagen.');
             }
             refreshWaypoint(wp);
+            doSync(); // and again once the AI title/text is in, so the description propagates live
         }
 
         // New "one-point track" mode: a geotagged photo taken WITHOUT an active recording.
