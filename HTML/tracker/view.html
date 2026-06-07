@@ -73,6 +73,31 @@
             color: rgba(255, 255, 255, 0.7);
         }
 
+        /* Live-broadcast badge — hidden until real live positions arrive */
+        #live-badge {
+            display: none;
+            margin: 8px auto 0;
+            width: fit-content;
+            padding: 3px 12px;
+            border-radius: 999px;
+            background: rgba(176, 36, 24, 0.92);
+            color: #fff;
+            font-weight: 700;
+            font-size: 0.62rem;
+            letter-spacing: 1.5px;
+            pointer-events: none;
+            animation: live-pulse 1.4s ease-in-out infinite;
+        }
+
+        #live-badge.on {
+            display: block;
+        }
+
+        @keyframes live-pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.45; }
+        }
+
         /* ---- Footer link back to the app ---- */
         #foot {
             position: fixed;
@@ -87,9 +112,15 @@
         }
 
         #foot a {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 999px;
+            background: rgba(8, 20, 42, 0.8);
             color: var(--orange);
             text-decoration: none;
             pointer-events: auto;
+            backdrop-filter: blur(4px);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
         }
 
         /* ---- Loading / error overlay ---- */
@@ -242,6 +273,7 @@
     <header id="hdr">
         <h1 id="trk-name">Track</h1>
         <div class="stats" id="trk-stats"></div>
+        <div id="live-badge">● LIVE</div>
     </header>
     <div id="foot"><a href="index.html">Aufgezeichnet mit Doc Alvers Tracker →</a></div>
 
@@ -267,6 +299,7 @@
         const SUPABASE_URL = 'https://fyfhxzyymmurlaenmzse.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_ubQDiMD-X3N0vZvPVi229Q_-5Zootfk';
         const COL_ORANGE = 'rgb(245, 194, 66)';
+        const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY); // shared: RPC load + live channel
 
         const map = L.map('map', { zoomControl: true, attributionControl: true })
             .setView([51.1657, 10.4515], 6);
@@ -326,13 +359,48 @@
             return h > 0 ? (h + ' h ' + m + ' min') : (m + ' min');
         }
 
-        // ---- load the shared track by token ----
-        async function load() {
-            const token = new URLSearchParams(location.search).get('s');
-            if (!token) { $('msg').textContent = 'Kein Track-Token im Link.'; return; }
+        // ---- live position: subscribe to a broadcast channel; show movement live ----
+        let liveMarker = null, followLive = true, liveFitDone = false;
+        map.on('dragstart', () => { followLive = false; });
+        function ensureLiveMarker(lat, lng) {
+            if (!liveMarker) liveMarker = L.circleMarker([lat, lng], { radius: 7, color: '#fff', weight: 2, fillColor: 'rgb(176,36,24)', fillOpacity: 1 }).addTo(map);
+            else liveMarker.setLatLng([lat, lng]);
+        }
+        function onLivePos(p) {
+            if (!p || p.lat == null) return;
+            const badge = $('live-badge'); if (badge) { badge.textContent = '● LIVE'; badge.classList.add('on'); }
+            track.push([p.lat, p.lng]); times.push(p.t || null);
+            speeds.push(p.speed != null ? p.speed : null); activities.push(p.activity != null ? p.activity : null);
+            redrawTrack();
+            ensureLiveMarker(p.lat, p.lng);
+            if (!liveFitDone) { map.setView([p.lat, p.lng], 15); liveFitDone = true; }
+            else if (followLive) map.panTo([p.lat, p.lng], { animate: true });
+        }
+        // Subscribe to a live channel by KEY (a chosen name like "vsb"). 'trail' carries the whole
+        // path so late joiners see history; 'pos' is each new fix; 'end' marks the session finished.
+        function onLiveTrail(pts) {
+            if (!Array.isArray(pts) || !pts.length) return;
+            track = pts.map(p => [p[0], p[1]]);
+            times = pts.map(p => p[2] || null);
+            speeds = pts.map(p => (p[3] != null ? p[3] : null));
+            activities = pts.map(p => (p[4] != null ? p[4] : null));
+            redrawTrack();
+            const last = track[track.length - 1];
+            ensureLiveMarker(last[0], last[1]);
+            if (!liveFitDone && track.length > 1) { map.fitBounds(L.latLngBounds(track), { padding: [50, 50] }); liveFitDone = true; }
+        }
+        function goLive(key) {
+            const ch = sb.channel('live:' + key, { config: { broadcast: { self: false } } });
+            ch.on('broadcast', { event: 'trail' }, ({ payload }) => onLiveTrail(payload && payload.pts));
+            ch.on('broadcast', { event: 'pos' }, ({ payload }) => onLivePos(payload));
+            ch.on('broadcast', { event: 'end' }, () => { const b = $('live-badge'); if (b) b.textContent = '■ beendet'; });
+            ch.subscribe();
+        }
+
+        // ---- load a SAVED shared track by token (static snapshot) ----
+        async function load(token) {
             let row;
             try {
-                const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
                 const { data, error } = await sb.rpc('get_shared_track', { p_token: token });
                 if (error) throw error;
                 row = data;
@@ -362,7 +430,32 @@
             else if (wps.length) map.setView([wps[0].lat, wps[0].lng], 15);
             $('msg').classList.add('hidden');
         }
-        load();
+
+        // ---- ask for a live code when the page is opened bare (no ?live / ?s) ----
+        function showLiveCodePrompt() {
+            $('msg').innerHTML = '<div style="text-align:center">'
+                + '<div style="margin-bottom:12px">Live-Code eingeben:</div>'
+                + '<input id="lc-input" placeholder="z. B. vsb" autocapitalize="off" autocomplete="off" '
+                + 'style="padding:10px 12px;border-radius:10px;border:1px solid rgba(245,194,66,0.5);background:rgba(8,20,42,0.6);color:#fff;font-size:1rem;text-align:center;width:11em">'
+                + '<button id="lc-go" style="margin-left:8px;padding:10px 16px;border:none;border-radius:10px;background:var(--orange);color:#14110a;font-weight:700;cursor:pointer">Anschauen</button></div>';
+            const go = () => { const v = ($('lc-input').value || '').trim(); if (v) location.search = '?live=' + encodeURIComponent(v); };
+            $('lc-go').addEventListener('click', go);
+            $('lc-input').addEventListener('keydown', e => { if (e.key === 'Enter') go(); });
+        }
+
+        // ---- entry: live frequency (?live=name), saved track (?s=token), or ask for a code ----
+        const _params = new URLSearchParams(location.search);
+        const _liveName = _params.get('live'), _token = _params.get('s');
+        if (_liveName) {
+            $('trk-name').textContent = _liveName;
+            $('trk-stats').textContent = 'verbinde … warte auf Live-Signal';
+            $('msg').classList.add('hidden');
+            goLive(_liveName.trim().toLowerCase());
+        } else if (_token) {
+            load(_token);
+        } else {
+            showLiveCodePrompt();
+        }
     </script>
 </body>
 

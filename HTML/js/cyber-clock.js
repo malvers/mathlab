@@ -28,5 +28,48 @@
         const digits = String(time).replace(/\D/g, '');
         for (let i = 0; i < boxes.length; i++) boxes[i].textContent = digits[i] || '0';
     }
-    window.CyberClock = { mount: mount, set: set };
+    // ---- Fixed-slot NUMBER variant (stats: KM/H, KM, HÖHE) — right-aligned, NO leading
+    //      zeros (blank slots on the left), so the value never jitters as digits change.
+    //      `intSlots` integer slots + an optional "." + `decimals` fractional slots. ----
+    function mountNum(el, opts) {
+        opts = opts || {};
+        el.classList.add('cyber-clock', 'cyber-num');
+        if (opts.size)       el.style.setProperty('--cc-size', opts.size);
+        if (opts.digitColor) el.style.setProperty('--cc-digit', opts.digitColor);
+        const intN = opts.intSlots || 3;
+        const decN = opts.decimals || 0;
+        let html = '';
+        for (let i = 0; i < intN; i++) html += '<span class="cc-d"></span>';
+        if (decN > 0) {
+            html += '<span class="cc-dot">.</span>';
+            for (let i = 0; i < decN; i++) html += '<span class="cc-d"></span>';
+        }
+        el.innerHTML = html;
+        el._ccDigits = el.querySelectorAll('.cc-d'); // intN + decN boxes, in order
+        el._ccIntN = intN;
+        el._ccDecN = decN;
+        return el;
+    }
+    function setNum(el, value) {
+        const boxes = el && el._ccDigits;
+        if (!boxes) return;
+        const intN = el._ccIntN, decN = el._ccDecN;
+        if (value == null || isNaN(value)) { for (let i = 0; i < boxes.length; i++) boxes[i].textContent = ''; return; }
+        const s = Number(value).toFixed(decN);
+        const dot = s.indexOf('.');
+        const intPart = dot < 0 ? s : s.slice(0, dot);
+        const decPart = dot < 0 ? '' : s.slice(dot + 1);
+        // integer slots → fill from the right; COLLAPSE the empty leading slots (display:none)
+        // so the VISIBLE number (and its label) centre in the tile — no reserved left padding,
+        // no leading zeros. Same digit count = same width → still no jitter; only a count change
+        // re-centres symmetrically.
+        for (let i = 0; i < intN; i++) {
+            const idx = intPart.length - intN + i;
+            if (idx >= 0) { boxes[i].textContent = intPart[idx]; boxes[i].style.display = ''; }
+            else { boxes[i].textContent = ''; boxes[i].style.display = 'none'; }
+        }
+        // fractional slots → left-aligned
+        for (let i = 0; i < decN; i++) boxes[intN + i].textContent = decPart[i] || '0';
+    }
+    window.CyberClock = { mount: mount, set: set, mountNum: mountNum, setNum: setNum };
 })();
