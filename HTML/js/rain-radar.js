@@ -123,10 +123,11 @@
         [204, 230, 1], [255, 255, 1], [255, 196, 1], [255, 137, 1], [255, 69, 1],
         [254, 0, 0], [229, 0, 76], [204, 0, 152], [102, 0, 203], [0, 0, 254]
     ];
-    const RV_STOPS = [ // RainViewer-style: pale cyan → blue → green → yellow → orange → red → white
-        [160, 235, 255], [100, 205, 255], [40, 150, 255], [0, 200, 160], [0, 200, 70],
-        [130, 215, 0], [225, 230, 0], [255, 200, 0], [255, 150, 0], [255, 95, 0],
-        [235, 0, 0], [200, 0, 40], [180, 0, 90], [200, 30, 200], [255, 255, 255]
+    const RV_STOPS = [ // RainViewer's REAL palette, MEASURED from its served tiles (storm sweep):
+        // light→moderate in blues up to deep blue, then a hard jump to warm for heavy, magenta/white extreme.
+        [136, 221, 238], [108, 209, 235], [54, 186, 229], [27, 174, 226], [0, 163, 224],
+        [0, 145, 202], [0, 112, 163], [0, 91, 142], [255, 224, 0], [255, 159, 0],
+        [255, 68, 0], [205, 13, 0], [143, 0, 0], [255, 129, 255], [255, 255, 255]
     ];
     function sampleRamp(stops, u) {
         const n = stops.length;
