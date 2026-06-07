@@ -111,6 +111,47 @@
     //   All colour thresholds MEASURED from real tiles + GetLegendGraphic — not guessed.
     const BOUNDARY_GREY = 128;        // recolour the boundary line to a neutral mid-grey…
     const BOUNDARY_ALPHA_SCALE = 1.0; // …keeping its full alpha for now (tune later)
+
+    // ---- DWD → RainViewer-style recolour (Doc: he prefers the RV palette over DWD's) -----------
+    // DWD renders 15 DISCRETE intensity bins (mm/h), each a fixed colour — MEASURED from the
+    // GetLegendGraphic, not guessed. We map each rain pixel onto that ordered colour curve to get a
+    // continuous intensity u∈[0,1], then sample an RV-like ramp at u. Continuous → the bilinear
+    // smoothness survives (no re-banding). Set RECOLOR_DWD=false to fall back to DWD's own colours.
+    const RECOLOR_DWD = true;
+    const DWD_STOPS = [ // light → heavy (0.1–0.2 … ≥150 mm/h)
+        [51, 255, 255], [26, 204, 154], [1, 153, 52], [77, 179, 27], [153, 204, 1],
+        [204, 230, 1], [255, 255, 1], [255, 196, 1], [255, 137, 1], [255, 69, 1],
+        [254, 0, 0], [229, 0, 76], [204, 0, 152], [102, 0, 203], [0, 0, 254]
+    ];
+    const RV_STOPS = [ // RainViewer-style: pale cyan → blue → green → yellow → orange → red → white
+        [160, 235, 255], [100, 205, 255], [40, 150, 255], [0, 200, 160], [0, 200, 70],
+        [130, 215, 0], [225, 230, 0], [255, 200, 0], [255, 150, 0], [255, 95, 0],
+        [235, 0, 0], [200, 0, 40], [180, 0, 90], [200, 30, 200], [255, 255, 255]
+    ];
+    function sampleRamp(stops, u) {
+        const n = stops.length;
+        if (u <= 0) return stops[0];
+        if (u >= 1) return stops[n - 1];
+        const f = u * (n - 1), i = f | 0, t = f - i, a = stops[i], c = stops[i + 1];
+        return [(a[0] + (c[0] - a[0]) * t) | 0, (a[1] + (c[1] - a[1]) * t) | 0, (a[2] + (c[2] - a[2]) * t) | 0];
+    }
+    function dwdToRv(r, g, b) {
+        // nearest point on the DWD stop polyline → global intensity parameter u∈[0,1]
+        let bestD = Infinity, bestU = 0;
+        const n = DWD_STOPS.length;
+        for (let i = 0; i < n - 1; i++) {
+            const a = DWD_STOPS[i], c = DWD_STOPS[i + 1];
+            const dx = c[0] - a[0], dy = c[1] - a[1], dz = c[2] - a[2];
+            const len2 = dx * dx + dy * dy + dz * dz || 1;
+            let t = ((r - a[0]) * dx + (g - a[1]) * dy + (b - a[2]) * dz) / len2;
+            if (t < 0) t = 0; else if (t > 1) t = 1;
+            const px = a[0] + dx * t, py = a[1] + dy * t, pz = a[2] + dz * t;
+            const D = (r - px) * (r - px) + (g - py) * (g - py) + (b - pz) * (b - pz);
+            if (D < bestD) { bestD = D; bestU = (i + t) / (n - 1); }
+        }
+        return sampleRamp(RV_STOPS, bestU);
+    }
+
     // `tb` = this tile's web-mercator bounds → used to look each pixel up in the coverage mask.
     function compositeDwdRv(d, rv, tb) {
         const haveCov = !!(cov && tb && rv);
@@ -158,8 +199,11 @@
                 if (r > 140 && b > 120 && g < r - 35 && g < b - 25 && (r > b ? r - b : b - r) <= 36) {
                     d[i] = d[i + 1] = d[i + 2] = BOUNDARY_GREY;
                     d[i + 3] = Math.round(a * BOUNDARY_ALPHA_SCALE);
+                } else if (RECOLOR_DWD) {
+                    // DWD rain → remap its DWD-palette colour onto the RainViewer-style ramp (alpha kept)
+                    const c = dwdToRv(r, g, b);
+                    d[i] = c[0]; d[i + 1] = c[1]; d[i + 2] = c[2];
                 }
-                // else: DWD rain → unchanged
             }
         }
     }
