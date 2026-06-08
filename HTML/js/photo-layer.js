@@ -40,6 +40,7 @@
     let list = [];   // the photos we can step through
     let idx = -1;    // index into list of the photo on display
     let wired = false;
+    let navTimer;    // 8 s idle timer that fades the prev/next arrows out
 
     // ---- manual fullscreen toggle (real OS fullscreen) ----
     // The auto-immersive path (PhotoFullscreen) is native-Android-only and no-ops
@@ -167,7 +168,20 @@
         exitFs(); // …and leave web OS-fullscreen if the toggle button put us there
         $('lightbox-img').removeAttribute('src');
         const au = $('lightbox-audio'); if (au) { try { au.pause(); } catch (_) {} au.removeAttribute('src'); }
+        clearTimeout(navTimer);
+        const nav = $('lightbox-nav'); if (nav) nav.classList.remove('faded');
         idx = -1; list = [];
+    }
+
+    // Auto-hide the prev/next arrows after 8 s idle; reveal them again on a TAP or mouse move
+    // (NOT on a swipe — a swipe already navigates). Only relevant when there's more than one photo.
+    function showNav() {
+        if (list.length < 2) return;
+        const nav = $('lightbox-nav');
+        if (!nav) return;
+        nav.classList.remove('faded');
+        clearTimeout(navTimer);
+        navTimer = setTimeout(() => nav.classList.add('faded'), 8000);
     }
 
     // Inject the lightbox DOM once (if the host page doesn't already have it) and wire the controls.
@@ -256,8 +270,11 @@
             swiping = false;
             const t = e.changedTouches[0];
             const dx = t.clientX - sx, dy = t.clientY - sy;
-            if (Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy) * 1.5) step(dx < 0 ? 1 : -1);
+            if (Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy) * 1.5) step(dx < 0 ? 1 : -1); // swipe → navigate
+            else showNav(); // a tap (not a swipe) → reveal the arrows + restart the fade timer
         }, { passive: true });
+        // Desktop: any mouse movement over the lightbox reveals the arrows + restarts the timer.
+        lb.addEventListener('mousemove', showNav);
     }
 
     // Open a photo full-screen. `all` (optional) is the array to step through with the arrows.
@@ -270,6 +287,7 @@
         else { list = [wp]; showAt(0); } // not in the list → show it alone, no looping
         const multi = list.length > 1;
         $('lightbox-nav').style.display = multi ? 'flex' : 'none';
+        if (multi) showNav(); // arrows visible now, then auto-fade after 8 s
         $('lightbox-count').style.display = multi ? 'block' : 'none';
         $('photo-lightbox').classList.add('open');
         if (global.PhotoFullscreen) global.PhotoFullscreen.enter($('photo-lightbox'));
