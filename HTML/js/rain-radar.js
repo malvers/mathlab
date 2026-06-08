@@ -69,7 +69,7 @@
     }
     // In Germany: sharp DWD 1 km (+2 h forecast) on TOP, with a RainViewer base underneath so the
     // rest of the view (NL, FR, …) is filled too. Elsewhere: RainViewer only. Set false → RV only.
-    const USE_DWD_IN_DE = true;
+    let dwdEnabled = true; // DEBUG: press 'd' to flip → RainViewer everywhere (incl. Germany)
     // DWD (sharp DE) kicks in as soon as Germany overlaps the VIEW at all — not just when the
     // map is centred there — so partial-DE views still get the sharp 1 km over the German part.
     function germanyInView() {
@@ -79,7 +79,7 @@
             && b.getWest() < GERMANY.e && b.getEast() > GERMANY.w;
     }
     function pickProvider() {
-        return (USE_DWD_IN_DE && germanyInView()) ? 'dwd' : 'rv';
+        return (dwdEnabled && germanyInView()) ? 'dwd' : 'rv';
     }
     // ISO without milliseconds (what WMS time dimensions expect): 2026-06-06T08:35:00Z
     function isoMin(ms) {
@@ -109,7 +109,7 @@
     //        beyond-grid → RainViewer (EU)   ·   enclosed coverage → clear (basemap, NO EU)
     // ⇒ EU is painted EVERYWHERE except inside the German radar coverage; inside it, never EU.
     //   All colour thresholds MEASURED from real tiles + GetLegendGraphic — not guessed.
-    const BOUNDARY_GREY = 128;        // recolour the boundary line to a neutral mid-grey…
+    const BOUNDARY_GREY = 255;        // recolour the boundary line to white (Doc)…
     const BOUNDARY_ALPHA_SCALE = 1.0; // …keeping its full alpha for now (tune later)
 
     // ---- DWD → RainViewer-style recolour (Doc: he prefers the RV palette over DWD's) -----------
@@ -123,11 +123,13 @@
         [204, 230, 1], [255, 255, 1], [255, 196, 1], [255, 137, 1], [255, 69, 1],
         [254, 0, 0], [229, 0, 76], [204, 0, 152], [102, 0, 203], [0, 0, 254]
     ];
-    const RV_STOPS = [ // RainViewer's REAL palette, MEASURED from its served tiles (storm sweep):
-        // light→moderate in blues up to deep blue, then a hard jump to warm for heavy, magenta/white extreme.
-        [136, 221, 238], [108, 209, 235], [54, 186, 229], [27, 174, 226], [0, 163, 224],
-        [0, 145, 202], [0, 112, 163], [0, 91, 142], [255, 224, 0], [255, 159, 0],
-        [255, 68, 0], [205, 13, 0], [143, 0, 0], [255, 129, 255], [255, 255, 255]
+    const RV_STOPS = [ // EXACT RainViewer "Universal Blue" (the scheme RV actually serves — identified
+        // 42/42 colour-match), from the official CSV (rainviewer.com/api/color-schemes). DWD mm/h →
+        // dBZ via Marshall-Palmer (dBZ = 23 + 16·log10 R) → that scheme's colour. tan(drizzle) → blue
+        // → yellow(≈5–7.5 mm/h) → orange → red → magenta(extreme).
+        [194, 180, 130], [222, 208, 151], [0, 163, 224], [0, 119, 170], [0, 91, 142],
+        [0, 78, 120], [255, 224, 0], [255, 197, 0], [255, 170, 0], [255, 129, 0],
+        [217, 27, 0], [168, 0, 0], [93, 0, 0], [255, 159, 255], [255, 119, 255]
     ];
     function sampleRamp(stops, u) {
         const n = stops.length;
@@ -582,6 +584,18 @@
         }
     }
 
+    // DEBUG (key 'd'): force DWD off → RainViewer everywhere, incl. Germany — to compare the two
+    // radar sources directly. Rebuilds the current frame with the flipped provider.
+    function toggleDwd() {
+        dwdEnabled = !dwdEnabled;
+        dbg('RainRadar: DWD ' + (dwdEnabled ? 'AN' : 'AUS — RV überall'));
+        if (!on || !map) return;
+        if (layer) { map.removeLayer(layer); layer = null; }
+        if (baseLayer) { map.removeLayer(baseLayer); baseLayer = null; }
+        removeUI();
+        start();
+    }
+
     function init(theMap) {
         map = theMap;
         if (!map.getPane(PANE_NAME)) {
@@ -590,6 +604,13 @@
             map.getPane(PANE_NAME).style.pointerEvents = 'none';
         }
         map.on('moveend', onMoveEnd);
+        document.addEventListener('keydown', function (e) {
+            if (e.key !== 'd' && e.key !== 'D') return;
+            const t = e.target;
+            if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
+            if (!on) return; // only while the radar overlay is on
+            toggleDwd();
+        });
     }
 
     function isOn() { return on; }

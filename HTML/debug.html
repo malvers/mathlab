@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="de">
+<!-- Rain-radar palette debug: DWD original bins vs the calibrated RV recolour, on a shared mm/h axis.
+     Standalone, no deps. Edit DWD_STOPS / RV_STOPS below to compare candidates. -->
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rain Radar — Palette Debug</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg: rgb(8, 20, 42); --bg2: rgb(14, 36, 78); --orange: rgb(245, 194, 66); }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0; padding: 24px; background: var(--bg); color: #fff;
+            font-family: 'Orbitron', sans-serif;
+        }
+        h1 { font-size: 1.1rem; color: var(--orange); letter-spacing: 1px; margin: 0 0 4px; }
+        .sub { font-size: 0.72rem; color: rgba(255,255,255,.55); margin: 0 0 22px; }
+        h2 { font-size: 0.8rem; letter-spacing: 1px; margin: 26px 0 8px; color: rgba(255,255,255,.85); }
+        .bar { height: 26px; border-radius: 6px; margin-bottom: 10px; border: 1px solid rgba(255,255,255,.12); }
+        .grid { display: grid; grid-template-columns: repeat(15, 1fr); gap: 2px; }
+        .cell { display: flex; flex-direction: column; align-items: center; }
+        .sw { width: 100%; height: 40px; border-radius: 4px; border: 1px solid rgba(255,255,255,.15); }
+        .mm { font-size: 0.52rem; color: rgba(255,255,255,.7); margin-bottom: 4px; text-align: center;
+              font-family: Arial, sans-serif; min-height: 22px; display: flex; align-items: center; }
+        .rgb { font-size: 0.78rem; color: rgba(255,255,255,.85); margin-top: 6px;
+               font-family: Arial, sans-serif; letter-spacing: 0; text-align: center; }
+        .row { background: var(--bg2); padding: 12px; border-radius: 10px; margin-bottom: 8px; }
+    </style>
+</head>
+
+<body>
+    <h1>Rain Radar — Palette Debug</h1>
+    <p class="sub">DWD-Originalbins (mm/h) ↔ kalibrierter RV-Recolor. Gleiche mm/h-Achse. Werte = exakt aus rain-radar.js.</p>
+    <div id="out"></div>
+
+    <script>
+        // ---- keep these in sync with rain-radar.js ----
+        const MMH = ['0.1–0.2', '0.2–0.4', '0.4–1', '1–2', '2–3', '3–5', '5–7.5', '7.5–10',
+            '10–15', '15–30', '30–45', '45–75', '75–100', '100–150', '≥150'];
+        const DWD_STOPS = [
+            [51, 255, 255], [26, 204, 154], [1, 153, 52], [77, 179, 27], [153, 204, 1],
+            [204, 230, 1], [255, 255, 1], [255, 196, 1], [255, 137, 1], [255, 69, 1],
+            [254, 0, 0], [229, 0, 76], [204, 0, 152], [102, 0, 203], [0, 0, 254]
+        ];
+        const RV_STOPS = [
+            [194, 180, 130], [222, 208, 151], [0, 163, 224], [0, 119, 170], [0, 91, 142],
+            [0, 78, 120], [255, 224, 0], [255, 197, 0], [255, 170, 0], [255, 129, 0],
+            [217, 27, 0], [168, 0, 0], [93, 0, 0], [255, 159, 255], [255, 119, 255]
+        ];
+
+        const hex = c => '#' + c.map(v => v.toString(16).padStart(2, '0')).join('');
+        const css = c => 'rgb(' + c.join(',') + ')';
+        const gradient = stops => 'linear-gradient(90deg,' +
+            stops.map((c, i) => css(c) + ' ' + (i / (stops.length - 1) * 100).toFixed(1) + '%').join(',') + ')';
+
+        function block(title, stops, labels) {
+            const cells = stops.map((c, i) =>
+                '<div class="cell">'
+                + '<div class="mm">' + labels[i] + '</div>'
+                + '<div class="sw" style="background:' + css(c) + '"></div>'
+                + '<div class="rgb">' + c.join(', ') + '</div>'
+                + '</div>').join('');
+            return '<h2>' + title + '</h2>'
+                + '<div class="bar" style="background:' + gradient(stops) + '"></div>'
+                + '<div class="row"><div class="grid">' + cells + '</div></div>';
+        }
+
+        document.getElementById('out').innerHTML =
+            block('DWD — Originalpalette · mm/h (gemessen aus der Legende)', DWD_STOPS, MMH)
+            + block('RV — Recolor · mm/h (RainViewer „Universal Blue", offizielle CSV)', RV_STOPS, MMH);
+    </script>
+</body>
+
+</html>

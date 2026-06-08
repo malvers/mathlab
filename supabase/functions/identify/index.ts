@@ -95,6 +95,64 @@ async function plantnetIdentify(
   };
 }
 
+// POWO (Kew, Plants of the World Online) — half-official API (no SLA), best-effort.
+// Resolves the ACCEPTED taxon for a binomial and returns its NATIVE range as WGSRPD
+// level-3 region names (e.g. ["Japan", "Korea"] for Acer palmatum) — the species' true
+// "Heimat" (natural origin), NOT where it was planted (that's `introduced`). Returns []
+// on any failure so the caller just omits the line. Two short hops, each aborted at ~2.5 s.
+// TDWG WGSRPD level-1 continent tokens (as they appear in POWO's locationTree) → German.
+// Asia's two halves both collapse to "Asien" (the dedup below merges them).
+const POWO_CONTINENTS: Record<string, string> = {
+  EUROPE: 'Europa', AFRICA: 'Afrika', ASIA_TEMPERATE: 'Asien', ASIA_TROPICAL: 'Asien',
+  AUSTRALASIA: 'Australasien', PACIFIC: 'Pazifik', NORTHERN_AMERICA: 'Nordamerika',
+  SOUTHERN_AMERICA: 'Südamerika', ANTARCTIC: 'Antarktis',
+};
+
+// POWO (Kew, Plants of the World Online) — half-official API (no SLA), best-effort.
+// Resolves the ACCEPTED taxon for a binomial and returns a short German "Heimat" string —
+// the species' NATIVE origin, NOT where it was planted (`introduced`). Few regions → the
+// region names ("Japan, Korea"); many → a continent roll-up ("Europa, Asien") from each
+// region's locationTree, so a Eurasian weed doesn't dump 33 fragments. Returns "" on any
+// failure so the caller just omits the line. Two short hops, each aborted at ~2.5 s.
+async function powoHeimat(sci: string): Promise<string> {
+  if (!sci) return '';
+  const BASE = 'https://powo.science.kew.org/api/2';
+  const H = { 'User-Agent': 'Mozilla/5.0', 'Accept': 'application/json' };
+  const signal = (ms: number) => {
+    const c = new AbortController();
+    setTimeout(() => c.abort(), ms);
+    return c.signal;
+  };
+  try {
+    const s = await fetch(`${BASE}/search?q=${encodeURIComponent(sci)}`, { headers: H, signal: signal(2500) });
+    if (!s.ok) return '';
+    const sd = await s.json();
+    const results = Array.isArray(sd?.results) ? sd.results : [];
+    // A binomial often matches a synonym first → prefer the ACCEPTED result.
+    const hit = results.find((r: { accepted?: boolean }) => r?.accepted) || results[0];
+    if (!hit?.fqId) return '';
+    const t = await fetch(`${BASE}/taxon/${hit.fqId}?fields=distribution`, { headers: H, signal: signal(2500) });
+    if (!t.ok) return '';
+    const td = await t.json();
+    const natives: { name?: string; locationTree?: string[] }[] =
+      Array.isArray(td?.distribution?.natives) ? td.distribution.natives : [];
+    const names = natives.map((n) => n?.name || '').filter((x: string) => x.length > 0);
+    if (!names.length) return '';
+    if (names.length <= 6) return names.join(', ');
+    // Widespread → roll up to continents via each region's locationTree.
+    const conts: string[] = [];
+    for (const n of natives) {
+      for (const tok of (Array.isArray(n?.locationTree) ? n.locationTree : [])) {
+        const de = POWO_CONTINENTS[tok];
+        if (de && !conts.includes(de)) conts.push(de);
+      }
+    }
+    return conts.length ? conts.join(', ') : names.slice(0, 6).join(', ') + ' +' + (names.length - 6);
+  } catch {
+    return ''; // POWO down / shape changed / timed out → best-effort: simply no Heimat line
+  }
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS });
 
@@ -128,6 +186,10 @@ Deno.serve(async (req) => {
         pnDiag = { err: String((e && (e as Error).message) || e) };
       }
     }
+
+    // Kick POWO off NOW (it only needs Pl@ntNet's name) so its two hops overlap the Gemini
+    // call below instead of adding latency after it. Awaited only when we build the plant answer.
+    const powoPromise: Promise<string> = plant?.sci ? powoHeimat(plant.sci) : Promise.resolve('');
 
     // ---- Step 2: Gemini identifies the subject INDEPENDENTLY (never told Pl@ntNet's guess) ----
     // On the plant path this yields a genuine SECOND opinion to compare against Pl@ntNet, instead
@@ -229,10 +291,13 @@ Deno.serve(async (req) => {
       // more trustworthy when Pl@ntNet is unsure (and Gemini can read a plant's label / sign).
       const pnHead = plant.common ? plant.common + ' (' + plant.sci + ')' : plant.sci;
       title = plantConfident ? (pnHead || gTitle) : (gTitle || pnHead);
-      // \t between label and value → the client aligns both values in a column (tab-size).
+      // "Label:\tValue" lines — the client's lightbox renders these as a 2-column facts table.
       text = (gText ? gText.trimEnd() + '\n\n' : '') +
         'PlantNet:\t' + pnName + ' (' + pct + ' %)\n' +
         'Google Gemini:\t' + (gTitle || 'unklar');
+      // POWO native range (best-effort) as a third row — the species' true "Heimat".
+      const heimat = await powoPromise;
+      if (heimat) text += '\nHeimat:\t' + heimat;
       source = 'both';
     } else {
       // Not a plant (Pl@ntNet rejected it) → Gemini only. NO "(Quelle: …)" stamp anymore — that
