@@ -70,3 +70,47 @@ Wenn `still` wahr ist, wird `shownSpeed` **hart auf 0** gesetzt (`:623`). Zwei Q
 `tracker.html:392` (`SPEED_MOVE_KMH`) · `:566-579` (Gate/`still`/`posStill`) · `:612-624`
 (Speed-Berechnung + EMA) · `:633` (gespeicherter Speed pro Punkt) · `:589,604,656`
 (`updateMotionDbg`-Hooks).
+
+---
+
+## ✅ Verifiziert am 2026-06-08 + Plan für morgen
+
+**Gegen den Live-Code geprüft** (die Zeilen oben waren verrutscht — aktuelle Stände):
+- `onPosition()` `:614` · Gate `still = sensorStill || posStill` `:646` · posStill-Band `:643-644`
+  (`band = max(MIN_MOVE_M, accuracy·ACC_STEP_FACTOR)`) · gpsMoving-Schwelle `:633` ·
+  Speed-Block + EMA `:679-691` · **Speed-Kill `shownSpeed = still ? 0 : …` `:690`** ·
+  gespeicherter `spdVal` `:700`.
+- Konstanten bestätigt (`:446-459`): `MIN_MOVE_M=4`, `MAX_ACC_M=50`, `MAX_JUMP_KMH=300`,
+  `ACC_STEP_FACTOR=0.7`, `SPEED_MOVE_KMH=4`.
+
+**Ursache, hart belegt (3 Mechanismen):**
+1. **Speed hängt am Aufzeichnungs-Gate** (`:690`). Das Gate soll nur Positions-Jitter im Stand
+   unterdrücken, nullt aber zusätzlich die Anzeige-Zahl — Konstruktionsfehler.
+2. **posStill-Band beim Gehen riesig:** ±20 m → 14 m, bei noch akzeptierten ±50 m → 35 m. Langsame
+   Schritte bleiben im Band → `still=true` → Speed 0 *und* kein Punkt, bis ein ganzes Band gelaufen
+   ist → „zeigt 0 / springt".
+3. **Sub-4-km/h überschreibt das Gate nicht** (`SPEED_MOVE_KMH=4`); Gehen ≈ 3–5 km/h.
+
+**Beschlossene Richtung — Speed-Anzeige vom Gate ENTKOPPELN:**
+- Bevorzugt rohen GPS-Doppler `coords.speed × 3.6` zeigen, **unabhängig vom `still`-Gate**
+  (Doppler misst Geschwindigkeit direkt, ist auch im Rausch-Band korrekt).
+- Nur wenn Doppler fehlt → geglätteter Distanz/Zeit-Fallback. Im Stand ist Doppler ≈ 0, die Zahl
+  fällt von selbst auf 0 → der harte Gate-Kill ist überflüssig. **Regressionsfrei:** fehlt Doppler,
+  bleibt es beim heutigen Verhalten.
+
+**ZUERST messen (Regel „nie raten"):** pro Fix ins **DEBUG-Fenster** loggen (`DebugWindow.log`,
+NICHT console): `coords.speed`, abgeleitetes kmh, `still`/`posStill`/`sensorStill`, accuracy, band,
+dt. 30 s gehen → die EINE offene Frage klären: **liefert Pixel 8a / Lenovo überhaupt `coords.speed`?**
+- Doppler **da** → Entkopplung reicht.
+- Doppler **null** → Fallback-Pfad fixen: posStill von der Speed-Logik lösen, `SPEED_MOVE_KMH` ~2,
+  EMA zeitbasiert (Gewicht aus `dt` statt pro Fix).
+
+**Noch zu entscheiden (separat vom Display-Fix):** posStill schluckt langsames Gehen auch aus dem
+AUFGEZEICHNETEN Track (grobe ~band-weite Sprünge), nicht nur aus der Anzeige. Display zuerst;
+Aufzeichnungs-Granularität getrennt — Risiko: Jitter im echten Stand wieder reinholen.
+
+**Reihenfolge morgen:**
+1. DEBUG-Logging pro Fix einbauen → 30 s gehen → ablesen.
+2. Je nach Doppler-Befund: Entkopplung (`:679-691`) ODER Fallback-Pfad fixen.
+3. `spdVal` (`:700`) erbt den neuen Wert → das gespeicherte Speed-Profil wird automatisch mit korrekt.
+4. Logging danach wieder raus (oder hinter ein Debug-Flag).

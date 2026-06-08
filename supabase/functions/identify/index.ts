@@ -153,6 +153,55 @@ async function powoHeimat(sci: string): Promise<string> {
   }
 }
 
+// Race a promise against a timeout so a slow Wikipedia/Overpass never holds up recognition.
+function withTimeout<T>(p: Promise<T>, ms: number): Promise<T> {
+  return Promise.race([p, new Promise<T>((_, rej) => setTimeout(() => rej(new Error('timeout')), ms))]);
+}
+
+// Build a short German LOCATION CONTEXT from two free, key-free, anonymous APIs so Gemini can name the
+// river/bridge/landmark instead of guessing blind from the pixels. Best-effort: any error/timeout is
+// dropped and recognition runs exactly as before. Only anonymous coordinates leave — never the photo.
+async function geoContext(lat: number, lng: number): Promise<string> {
+  // Wikipedia: the NOTABLE things nearby (Frauenkirche, Schloss Moritzburg, …), sorted by distance.
+  const wiki = (async (): Promise<string[]> => {
+    const u = `https://de.wikipedia.org/w/api.php?action=query&list=geosearch&gscoord=${lat}%7C${lng}&gsradius=600&gslimit=8&format=json`;
+    const r = await fetch(u, { headers: { 'User-Agent': 'DocAlversTracker/1.0 (geo-context)' } });
+    const d = await r.json();
+    return (d?.query?.geosearch || []).map((g: { title: string; dist: number }) => `${g.title} (${Math.round(g.dist)} m)`);
+  })();
+
+  // Overpass/OSM: the NAMED thing right under you — river / bridge / artwork / historic — which
+  // Wikipedia often has no own article for ("Elbe", a concrete bridge name).
+  const overpass = (async (): Promise<string[]> => {
+    const q = `[out:json][timeout:8];(way(around:160,${lat},${lng})[waterway=river][name];way(around:160,${lat},${lng})[bridge][name];node(around:160,${lat},${lng})[tourism=artwork][name];way(around:130,${lat},${lng})[historic][name];);out tags 14;`;
+    const r = await fetch('https://overpass-api.de/api/interpreter', {
+      method: 'POST',
+      headers: { 'User-Agent': 'DocAlversTracker/1.0 (geo-context)' },
+      body: 'data=' + encodeURIComponent(q),
+    });
+    const d = await r.json();
+    const seen = new Set<string>(); const out: string[] = [];
+    for (const e of (d?.elements || [])) {
+      const t = e.tags || {}; const n: string = t.name; if (!n || seen.has(n)) continue; seen.add(n);
+      const kind = t.waterway ? 'Fluss' : (t.bridge || t.man_made === 'bridge') ? 'Brücke'
+        : t.tourism === 'artwork' ? 'Kunstwerk' : t.historic ? 'historisch' : '';
+      out.push(kind ? `${n} (${kind})` : n);
+    }
+    return out;
+  })();
+
+  const [w, o] = await Promise.allSettled([withTimeout(wiki, 2500), withTimeout(overpass, 2500)]);
+  const wikiHits = w.status === 'fulfilled' ? w.value : [];
+  const osmHits = o.status === 'fulfilled' ? o.value : [];
+  if (!wikiHits.length && !osmHits.length) return '';
+
+  let ctx = `\n\nSTANDORT-KONTEXT (Foto aufgenommen bei ${lat.toFixed(4)}, ${lng.toFixed(4)}):`;
+  if (osmHits.length) ctx += `\nDirekt vor Ort (OpenStreetMap): ${osmHits.slice(0, 6).join('; ')}.`;
+  if (wikiHits.length) ctx += `\nBekanntes in der Nähe (Wikipedia): ${wikiHits.slice(0, 8).join('; ')}.`;
+  ctx += `\nBerücksichtige diesen Standort. Wenn das Hauptmotiv ein benannter Fluss, eine Brücke, ein Bauwerk, ein Denkmal oder ein Kunstwerk aus dieser Liste ist, benenne es KONKRET statt generisch. Erfinde aber nichts, was nicht zum Bild passt.`;
+  return ctx;
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS });
 
@@ -160,8 +209,14 @@ Deno.serve(async (req) => {
     const key = Deno.env.get('GEMINI_API_KEY');
     if (!key) return json({ error: 'GEMINI_API_KEY fehlt — als Edge-Function-Secret setzen.' }, 500);
 
-    const { image, mime } = await req.json().catch(() => ({}));
+    const { image, mime, lat, lng } = await req.json().catch(() => ({}));
     if (!image) return json({ error: 'kein Bild übergeben' }, 400);
+
+    // Kick off the location context NOW (best-effort) so it overlaps the Pl@ntNet + POWO hops below
+    // and adds no latency of its own. Resolves to '' when no coords or on any error/timeout.
+    const geoPromise: Promise<string> = (typeof lat === 'number' && typeof lng === 'number')
+      ? geoContext(lat, lng).catch(() => '')
+      : Promise.resolve('');
 
     // ---- Step 1: specialist plant identification (optional, only if a key is configured) ----
     const plantKey = Deno.env.get('PLANTNET_API_KEY');
@@ -194,7 +249,7 @@ Deno.serve(async (req) => {
     // ---- Step 2: Gemini identifies the subject INDEPENDENTLY (never told Pl@ntNet's guess) ----
     // On the plant path this yields a genuine SECOND opinion to compare against Pl@ntNet, instead
     // of just a blurb echoing Pl@ntNet's answer. (promptForPlant is kept above but now unused.)
-    const promptText = PROMPT_GENERIC;
+    const promptText = PROMPT_GENERIC + (await geoPromise);
     const body = {
       contents: [{
         parts: [

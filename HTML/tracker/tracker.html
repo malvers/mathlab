@@ -1620,7 +1620,7 @@ ${pts}
         }
 
         // Ask the identify Edge Function (which holds the Gemini key) what the photo shows.
-        async function identifyPhoto(dataUrl) {
+        async function identifyPhoto(dataUrl, lat, lng) {
             const base64 = dataUrl.slice(dataUrl.indexOf(',') + 1);
             let token = SUPABASE_KEY;
             try {
@@ -1633,7 +1633,9 @@ ${pts}
             const res = await fetch(IDENTIFY_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + token },
-                body: JSON.stringify({ image: base64, mime: 'image/jpeg' }),
+                body: JSON.stringify((lat != null && lng != null)
+                    ? { image: base64, mime: 'image/jpeg', lat: lat, lng: lng }   // give Gemini the location context
+                    : { image: base64, mime: 'image/jpeg' }),
             });
             const j = await res.json().catch(() => ({}));
             const dt = ((Date.now() - t0) / 1000).toFixed(1);
@@ -1827,7 +1829,7 @@ ${pts}
             doSync(); // push the photo to the cloud NOW — don't wait for the next GPS point (you stand still to shoot)
             addLivePhoto(wp); // …and push a small thumbnail over the live channel right away
             try {
-                const r = await identifyPhoto(img);
+                const r = await identifyPhoto(img, ll[0], ll[1]);
                 wp.title = r.title; wp.text = r.text;
                 toast(wp.title);
             } catch (e) {
@@ -1856,7 +1858,7 @@ ${pts}
             toast('Foto wird verarbeitet …');
             const wp = addWaypoint({ lat: ll[0], lng: ll[1], t: new Date().toISOString(), img, title: PENDING_TITLE, text: '' });
             try {
-                const r = await identifyPhoto(img);
+                const r = await identifyPhoto(img, ll[0], ll[1]);
                 wp.title = r.title; wp.text = r.text;
             } catch (e) {
                 wp.title = FAIL_TITLE;
@@ -1917,7 +1919,7 @@ ${pts}
                 toast('Analysiere … ' + done + '/' + todo.length);
                 wp.title = PENDING_TITLE; wp.text = ''; refreshWaypoint(wp);
                 try {
-                    const r = await identifyPhoto(wp.img);
+                    const r = await identifyPhoto(wp.img, wp.lat, wp.lng);
                     wp.title = r.title; wp.text = r.text; ok++;
                 } catch (e) {
                     wp.title = FAIL_TITLE; wp.text = (e.message || '') + ' — Foto bleibt am Track.';
@@ -2011,10 +2013,17 @@ ${pts}
                 if (busy) return;
                 if (VoiceNote.isRecording()) { await finish(); return; }
                 if (!currentLatLng()) { toast('Noch keine Position — kurz auf GPS warten.'); return; }
+                if (window.DebugWindow) DebugWindow.log('mic env: secure=' + window.isSecureContext +
+                    ' md=' + !!navigator.mediaDevices +
+                    ' gUM=' + !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia) +
+                    ' MR=' + (typeof MediaRecorder !== 'undefined'));
                 if (!VoiceNote.isSupported()) { toast('Audio-Aufnahme hier nicht verfügbar.'); return; }
                 busy = true;
                 try { await VoiceNote.start(); startUI(); }
-                catch (e) { toast('Mikrofon nicht verfügbar: ' + (e.message || e)); }
+                catch (e) {
+                    if (window.DebugWindow) DebugWindow.log('mic ERR: ' + (e && e.name) + ' — ' + (e && e.message));
+                    toast('Mikrofon nicht verfügbar: ' + (e.message || e));
+                }
                 finally { busy = false; }
             });
         })();
