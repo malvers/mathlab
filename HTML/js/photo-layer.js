@@ -259,22 +259,29 @@
         });
         // Touch swipe — same as the arrows: swipe LEFT → next photo, swipe RIGHT → previous.
         // Single finger, mostly-horizontal move past a threshold; pinch/vertical scroll ignored.
-        let sx = 0, sy = 0, swiping = false;
+        let sx = 0, sy = 0, swiping = false, moved = 0, usingTouch = false;
         const lb = $('photo-lightbox');
         lb.addEventListener('touchstart', (e) => {
+            usingTouch = true; // touch device → ignore the synthetic mousemove a tap/drag fires
             if (e.touches.length !== 1) { swiping = false; return; }
-            sx = e.touches[0].clientX; sy = e.touches[0].clientY; swiping = true;
+            sx = e.touches[0].clientX; sy = e.touches[0].clientY; swiping = true; moved = 0;
+        }, { passive: true });
+        lb.addEventListener('touchmove', (e) => {
+            if (!swiping || e.touches.length !== 1) return;
+            moved = Math.max(moved, Math.hypot(e.touches[0].clientX - sx, e.touches[0].clientY - sy));
         }, { passive: true });
         lb.addEventListener('touchend', (e) => {
             if (!swiping) return;
             swiping = false;
             const t = e.changedTouches[0];
             const dx = t.clientX - sx, dy = t.clientY - sy;
+            moved = Math.max(moved, Math.hypot(dx, dy));
             if (Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy) * 1.5) step(dx < 0 ? 1 : -1); // swipe → navigate
-            else showNav(); // a tap (not a swipe) → reveal the arrows + restart the fade timer
+            else if (moved < 10) showNav(); // ONLY a clean tap reveals the arrows — ANY drag shows nothing
         }, { passive: true });
-        // Desktop: any mouse movement over the lightbox reveals the arrows + restarts the timer.
-        lb.addEventListener('mousemove', showNav);
+        // Desktop ONLY (real mouse): movement reveals the arrows. Guarded so a touch-drag's synthetic
+        // mousemove can't trigger it — on touch, the reveal happens strictly via the clean tap above.
+        lb.addEventListener('mousemove', () => { if (!usingTouch) showNav(); });
     }
 
     // Open a photo full-screen. `all` (optional) is the array to step through with the arrows.
