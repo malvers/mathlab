@@ -41,6 +41,11 @@
     background: rgb(176, 36, 24);
 }
 
+/* voice waypoint → blue, distinct from the photo states (green / orange / red) */
+.wp-dot.voice {
+    background: rgb(56, 120, 190);
+}
+
 @keyframes wpPulse {
 
     0%,
@@ -135,6 +140,106 @@
     -webkit-user-drag: none;
 }
 
+/* voice note in the lightbox: a big speech/mic icon where the photo would be, + a CENTRED player */
+#lightbox-voice {
+    display: none; /* shown via .show for voice waypoints */
+    align-self: center;
+    width: min(55vw, 200px);
+    height: min(55vw, 200px);
+    margin: 4vh 0 2vh;
+    border-radius: 28px;
+    background: rgba(56, 120, 190, 0.16);
+    border: 1px solid rgba(56, 120, 190, 0.5);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+    align-items: center;
+    justify-content: center;
+}
+
+#lightbox-voice.show {
+    display: flex;
+}
+
+#lightbox-voice svg {
+    width: 46%;
+    height: 46%;
+    stroke: rgb(120, 170, 230);
+}
+
+#lightbox-audio {
+    display: none; /* the engine only — the visible UI is #lb-player */
+}
+
+/* themed audio player: play/pause + seekable bar + time (replaces the native <audio controls>) */
+#lb-player {
+    display: none;
+    align-self: center;
+    align-items: center;
+    gap: 12px;
+    width: min(90vw, 420px);
+    margin-top: 12px;
+    padding: 9px 14px;
+    box-sizing: border-box;
+    background: rgba(8, 20, 42, 0.9);
+    border: 1px solid rgba(56, 120, 190, 0.5);
+    border-radius: 999px;
+}
+
+#lb-player.show {
+    display: flex;
+}
+
+#lb-play {
+    flex: 0 0 auto;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    border: none;
+    background: rgb(56, 120, 190);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+#lb-play svg {
+    width: 18px;
+    height: 18px;
+}
+
+#lb-track {
+    flex: 1 1 auto;
+    height: 6px;
+    border-radius: 3px;
+    background: rgba(255, 255, 255, 0.18);
+    cursor: pointer;
+    position: relative;
+}
+
+#lb-fill {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 0%;
+    border-radius: 3px;
+    background: var(--orange);
+}
+
+#lb-time {
+    flex: 0 0 auto;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 0.82rem;
+    color: #fff;
+    white-space: nowrap;
+}
+
+/* voice mode → centre the title + duration (photos keep their left-aligned facts table) */
+#photo-lightbox.lb-voice #lightbox-title,
+#photo-lightbox.lb-voice #lightbox-text {
+    text-align: center;
+}
+
 #lightbox-title {
     font-family: 'Orbitron', sans-serif;
     color: var(--orange);
@@ -151,6 +256,35 @@
     white-space: pre-wrap; /* keep the \n breaks AND the \t between label and value */
     -moz-tab-size: 8em;
     tab-size: 8em; /* both labels (≤ ~7em in Arial) clear this stop → values align in a column */
+}
+
+/* AI photo facts rendered as a compact 2-column table (replaces the old \t-aligned text). */
+#lightbox-text .lb-blurb {
+    margin-bottom: 11px;
+}
+#lightbox-text .lb-facts {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+#lightbox-text .lb-facts th,
+#lightbox-text .lb-facts td {
+    text-align: left;
+    vertical-align: top;
+    padding: 6px 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.13);
+    white-space: normal;
+}
+#lightbox-text .lb-facts th {
+    font-weight: 600;
+    white-space: nowrap;
+    width: 1%;
+    padding-right: 16px;
+    color: rgba(255, 255, 255, 0.72);
+}
+#lightbox-text .lb-facts tr:first-child th,
+#lightbox-text .lb-facts tr:first-child td {
+    border-top: none;
 }
 
 #lightbox-close {

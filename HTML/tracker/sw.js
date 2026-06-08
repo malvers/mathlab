@@ -15,8 +15,16 @@
 const CACHE = 'tracker-v1';
 
 self.addEventListener('install', () => {
-  // Take over as soon as installed — no "waiting" generation lingering.
-  self.skipWaiting();
+  // NOTE: we deliberately do NOT skipWaiting() here. The first-ever install has no active
+  // worker to wait for, so it activates at once anyway. An UPDATE, however, is left in the
+  // "waiting" state on purpose → the page detects it and shows a "new version" banner; only
+  // when the user taps it do we activate (see the 'message' handler below). No silent swap.
+});
+
+// The page asks us to take over (user tapped "Aktualisieren"). Activating now fires
+// 'controllerchange' in the page, which reloads once onto the fresh generation.
+self.addEventListener('message', (event) => {
+  if (event.data === 'SKIP_WAITING') self.skipWaiting();
 });
 
 self.addEventListener('activate', (event) => {

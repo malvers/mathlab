@@ -349,7 +349,7 @@ path.pos-marker.pos-shown {
     position: fixed;
     right: 12px;
     top: 50%;
-    transform: translateY(-50%);
+    transform: translateY(calc(-50% - 26px)); /* cam + mic centred AS A GROUP → cam 26px above mid */
     z-index: 600;
     width: 44px;
     height: 44px;
@@ -363,7 +363,7 @@ path.pos-marker.pos-shown {
     justify-content: center;
     backdrop-filter: blur(8px);
     cursor: pointer;
-    transition: transform 0.1s ease, color 0.2s ease;
+    transition: transform 0.1s ease, color 0.2s ease, opacity 0.55s ease;
 }
 
 #cam-fab.shown {
@@ -375,12 +375,89 @@ path.pos-marker.pos-shown {
 }
 
 #cam-fab:active {
-    transform: translateY(-50%) scale(0.94);
+    transform: translateY(calc(-50% - 26px)) scale(0.94);
 }
 
 #cam-fab svg {
     width: 24px;
     height: 24px;
+}
+
+/* ---- Voice waypoint FAB (Voice-Spur), one button-height below the camera FAB ---- */
+#mic-fab {
+    position: fixed;
+    right: 12px;
+    top: 50%;
+    transform: translateY(calc(-50% + 26px));
+    z-index: 600;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    background: rgba(8, 20, 42, 0.82);
+    color: rgba(255, 255, 255, 0.9);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(8px);
+    cursor: pointer;
+    transition: transform 0.1s ease, color 0.2s ease, background 0.2s ease, opacity 0.55s ease;
+}
+
+#mic-fab:hover {
+    color: var(--orange);
+}
+
+#mic-fab:active {
+    transform: translateY(calc(-50% + 26px)) scale(0.94);
+}
+
+#mic-fab svg {
+    width: 24px;
+    height: 24px;
+}
+
+/* recording → Υ red with a gentle pulse */
+#mic-fab.recording {
+    background: rgb(176, 36, 24);
+    color: #fff;
+    animation: micpulse 1.1s ease-in-out infinite;
+}
+
+@keyframes micpulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(176, 36, 24, 0.5); }
+    50%      { box-shadow: 0 0 0 9px rgba(176, 36, 24, 0); }
+}
+
+/* live timer chip, left of the mic FAB while recording */
+#mic-timer {
+    position: fixed;
+    right: 64px;
+    top: 50%;
+    transform: translateY(calc(-50% + 26px));
+    z-index: 600;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 0.9rem;
+    color: #fff;
+    background: rgba(8, 20, 42, 0.82);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 12px;
+    padding: 3px 9px;
+    backdrop-filter: blur(8px);
+    white-space: nowrap;
+    display: none;
+}
+
+#mic-timer.show {
+    display: inline-block;
+}
+
+/* Auto-hide on idle: JS toggles body.ui-idle on/off; the floating controls fade out after 8 s. */
+body.ui-idle #menu-fab,
+body.ui-idle #cam-fab,
+body.ui-idle #mic-fab {
+    opacity: 0;
+    pointer-events: none;
 }
 
 /* ---- Photo waypoint pins (Foto-Spur) ---- */
@@ -681,6 +758,7 @@ path.pos-marker.pos-shown {
     border-radius: 50%;
     backdrop-filter: blur(8px);
     cursor: pointer;
+    transition: opacity 0.55s ease;
 }
 
 #menu-fab span {
@@ -1245,6 +1323,55 @@ path.pos-marker.pos-shown {
 #toast.show {
     opacity: 1;
     transform: translateX(-50%) translateY(0);
+}
+
+/* "Neue Version verfügbar" banner — persistent + tappable (unlike the toast). Sits just
+   above the toast slot so the two never overlap. */
+#update-banner {
+    position: fixed;
+    left: 50%;
+    bottom: max(210px, calc(env(safe-area-inset-bottom) + 192px));
+    transform: translateX(-50%) translateY(8px);
+    z-index: 990;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    max-width: min(92vw, 420px);
+    background: rgba(8, 20, 42, 0.97);
+    border: 1px solid var(--orange);
+    border-radius: 12px;
+    padding: 10px 12px 10px 16px;
+    font-family: system-ui, sans-serif;
+    font-size: 0.82rem;
+    color: #fff;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.4);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+#update-banner.show {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateX(-50%) translateY(0);
+}
+
+#update-banner button {
+    flex: 0 0 auto;
+    background: var(--orange);
+    color: rgb(8, 20, 42);
+    border: none;
+    border-radius: 8px;
+    padding: 7px 14px;
+    font-family: 'Orbitron', system-ui, sans-serif;
+    font-weight: 700;
+    font-size: 0.8rem;
+    cursor: pointer;
+}
+
+#update-banner button:disabled {
+    opacity: 0.6;
+    cursor: default;
 }
 
 /* ---- In-app confirm dialog (replaces the native confirm — Orbitron, dark blue) ---- */

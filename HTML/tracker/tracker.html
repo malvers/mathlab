@@ -29,9 +29,48 @@
          same 10-min cache. -->
     <script>
         if ('serviceWorker' in navigator) {
+            // --- "Neue Version verfügbar" banner -------------------------------------------
+            // A fresh deploy installs a new SW that WAITS (sw.js no longer skipWaiting's on
+            // update). We surface it as a one-tap banner: tap → activate the waiting SW →
+            // 'controllerchange' → reload onto the fresh assets. No re-install, ever.
+            var __updateAccepted = false; // only reload after the user actually taps
+            var __reloading = false;
+            navigator.serviceWorker.addEventListener('controllerchange', function () {
+                // Ignore the initial control hand-off on first install (clients.claim) — only
+                // reload when the user accepted an update.
+                if (!__updateAccepted || __reloading) return;
+                __reloading = true;
+                window.location.reload();
+            });
+            function __showUpdateBanner(worker) {
+                if (!worker) return;
+                var el = document.getElementById('update-banner');
+                var btn = document.getElementById('update-banner-btn');
+                if (!el || !btn) return;
+                el.classList.add('show');
+                btn.onclick = function () {
+                    __updateAccepted = true;
+                    btn.disabled = true;
+                    btn.textContent = 'Aktualisiere …';
+                    worker.postMessage('SKIP_WAITING');
+                };
+            }
             window.addEventListener('load', function () {
                 navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' })
-                    .then(function (r) { if (window.DebugWindow) DebugWindow.log('SW aktiv (scope ' + r.scope + ')'); })
+                    .then(function (r) {
+                        if (window.DebugWindow) DebugWindow.log('SW aktiv (scope ' + r.scope + ')');
+                        // An update was already waiting from a previous visit.
+                        if (r.waiting && navigator.serviceWorker.controller) __showUpdateBanner(r.waiting);
+                        // A newer version is found while the app stays open.
+                        r.addEventListener('updatefound', function () {
+                            var nw = r.installing;
+                            if (!nw) return;
+                            nw.addEventListener('statechange', function () {
+                                // 'installed' WITH an existing controller ⇒ an update (not first install).
+                                if (nw.state === 'installed' && navigator.serviceWorker.controller) __showUpdateBanner(nw);
+                            });
+                        });
+                    })
                     .catch(function (e) { if (window.DebugWindow) DebugWindow.log('SW Fehler: ' + e); });
             });
         }
@@ -94,6 +133,18 @@
         </svg>
     </button>
     <input id="cam-input" type="file" accept="image/*" capture="environment" style="display:none">
+
+    <!-- Voice (just below the camera) → Voice-Spur: record a short note, pin it on the track -->
+    <button id="mic-fab" aria-label="Sprachnotiz aufnehmen" title="Sprachnotiz aufnehmen">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round">
+            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+            <line x1="12" y1="19" x2="12" y2="23"></line>
+            <line x1="8" y1="23" x2="16" y2="23"></line>
+        </svg>
+    </button>
+    <div id="mic-timer" aria-live="polite"></div>
 
     <!-- Left-edge menu hamburger (vertically centred) → opens the radial popup -->
     <button id="menu-fab" aria-label="Menü" title="Menü"><span></span><span></span><span></span></button>
@@ -216,6 +267,13 @@
     <!-- Transient toast (replaces the removed status line for action feedback) -->
     <div id="toast"></div>
 
+    <!-- "New version available" banner: a fresh deploy installs a waiting SW; one tap
+         activates it and reloads onto the new assets — no re-install. (Logic in <head>.) -->
+    <div id="update-banner" role="status">
+        <span id="update-banner-text">Neue Version verfügbar.</span>
+        <button id="update-banner-btn" type="button">Aktualisieren</button>
+    </div>
+
     <!-- Always-on debug readout (one box, readable): build/deploy stamp + movement-gate tuning -->
     <div id="motion-dbg"><div id="dbg-build"></div><div id="dbg-motion"></div></div>
 
@@ -229,7 +287,7 @@
         // so the main init below still finds RainRadar/DebugWindow/PhotoFullscreen ready.
         (function () {
             var v = window.__ASSET_V || '';
-            var js = ['../js/track-render.js', '../js/track-buffer.js', '../js/rain-radar.js', '../js/cyber-clock.js', '../js/debug-window.js', '../js/photo-fullscreen.js', '../js/photo-layer.js'];
+            var js = ['../js/track-render.js', '../js/track-buffer.js', '../js/rain-radar.js', '../js/cyber-clock.js', '../js/debug-window.js', '../js/photo-fullscreen.js', '../js/photo-layer.js', '../js/voice-note.js'];
             for (var i = 0; i < js.length; i++) document.write('<script src="' + js[i] + v + '"><\/script>');
         })();
     </script>
@@ -251,6 +309,10 @@
             touchZoom: true,          // pinch-zoom with two fingers
             doubleClickZoom: false,   // so a double-tap never zooms the map (clock owns double-tap → fullscreen)
             tap: true,
+            zoomSnap: 1,              // whole zoom levels only (stepless/0 was too laggy)
+            wheelPxPerZoomLevel: 160, // Apple Magic Mouse fires hi-res momentum wheel events → default 60
+                                      // accumulated to 2 levels/notch; 160 px/level = one calm step
+            wheelDebounceTime: 60,    // coalesce the momentum burst (default 40)
         }).setView([51.1657, 10.4515], 6); // centre of Germany as a neutral start
         L.control.zoom({ position: 'bottomright' }).addTo(map);
         map.attributionControl.setPrefix(false); // drop the "Leaflet" prefix → shorter bar, stays out from under START
@@ -370,7 +432,11 @@
         let startTime = null;      // ms
         let timerId = null;
         let lastFix = null;        // { lat, lng, t }
-        let waypoints = [];        // Foto-Spur: [{lat, lng, t, img, title, text, _marker}]
+        let waypoints = [];        // Foto-/Voice-Spur: [{type, lat, lng, t, img|audio, dur, mime, title, text, _marker}]
+        // Canonical waypoint → DB/buffer shape: pass ALL fields through (photo `img` and voice
+        // `audio`/`dur`/`type` alike), only drop the runtime-only Leaflet marker. Future fields
+        // (e.g. a transcript) ride along for free — single source, no per-field enumeration.
+        function wpSer(w) { const o = Object.assign({}, w); delete o._marker; return o; }
         let wpMarkers = [];        // their Leaflet markers (kept for clearing)
         let gnssActive = false;    // true once the native GnssStatus listener delivers data
         let gnssLatest = null;     // last native GNSS summary {used, inView, usedByConstellation, ...}
@@ -954,7 +1020,7 @@
             return {
                 v: 1, savedAt: Date.now(), currentTrackId: currentTrackId, name: currentTrackName, startTime: startTime, totalDist: totalDist,
                 track: track, times: times, alts: alts, speeds: speeds, activities: activities,
-                waypoints: waypoints.map(w => ({ lat: w.lat, lng: w.lng, t: w.t, img: w.img, title: w.title, text: w.text })),
+                waypoints: waypoints.map(wpSer),
             };
         }
         function restoreBufferedTrack(buf) {
@@ -962,7 +1028,7 @@
             track = buf.track; times = buf.times || []; alts = buf.alts || [];
             speeds = buf.speeds || []; activities = buf.activities || []; totalDist = buf.totalDist || 0;
             currentTrackId = buf.currentTrackId || null; currentTrackName = buf.name || ''; // re-save UPDATES the same cloud row (no duplicate)
-            (buf.waypoints || []).forEach(w => addWaypoint({ lat: w.lat, lng: w.lng, t: w.t, img: w.img, title: w.title, text: w.text }));
+            (buf.waypoints || []).forEach(w => addWaypoint(w));
             redrawTrack();
             // show the recorded duration; arm pauseStart so CONTINUE doesn't count the closed gap
             const span = (times.length > 1) ? (Date.parse(times[times.length - 1]) - Date.parse(times[0])) : 0;
@@ -1360,7 +1426,7 @@ ${pts}
             // [lat, lng, time, altitude(m), speed(km/h), activity] — alt/speed null when unknown
             const pts = track.map((p, i) => [p[0], p[1], times[i] || null, alts[i] != null ? alts[i] : null, speeds[i] != null ? speeds[i] : null, activities[i] || null]);
             // strip the live Leaflet marker reference before persisting
-            const wps = waypoints.map(w => ({ lat: w.lat, lng: w.lng, t: w.t, img: w.img, title: w.title, text: w.text }));
+            const wps = waypoints.map(wpSer);
             const row = { name: name, distance_m: Math.round(totalDist), points: pts, waypoints: wps, status: status || 'done' };
             const missingCol = e => e && /status/i.test(e.message || ''); // 'status' column not migrated yet
             if (currentTrackId) {                                          // UPDATE the existing (live-synced) row
@@ -1449,7 +1515,7 @@ ${pts}
             for (let i = 1; i < latlngs.length; i++) totalDist += haversine(latlngs[i - 1], latlngs[i]);
             redrawTrack(); // speed-coloured
             clearWaypoints();
-            (wps || []).forEach(w => addWaypoint({ lat: w.lat, lng: w.lng, t: w.t, img: w.img, title: w.title, text: w.text }));
+            (wps || []).forEach(w => addWaypoint(w));
             setDist(totalDist);
             setSpeed(0);
             // show the loaded track's last known altitude (if any)
@@ -1782,7 +1848,7 @@ ${pts}
                 name: name,
                 distance_m: 0,
                 points: [[ll[0], ll[1], wp.t, null, null]],
-                waypoints: [{ lat: wp.lat, lng: wp.lng, t: wp.t, img: wp.img, title: wp.title, text: wp.text }],
+                waypoints: [wpSer(wp)],
             });
             if (error) throw error;
         }
@@ -1832,7 +1898,7 @@ ${pts}
             // (0 rows ⇒ the UPDATE RLS policy on `tracks` is still missing).
             if (currentTrackId == null) return false;
             const c = await ensureSb();
-            const wps = waypoints.map(w => ({ lat: w.lat, lng: w.lng, t: w.t, img: w.img, title: w.title, text: w.text }));
+            const wps = waypoints.map(wpSer);
             const { data, error } = await c.from('tracks').update({ waypoints: wps }).eq('id', currentTrackId).select('id');
             if (error) throw error;
             return !!(data && data.length);
@@ -1888,6 +1954,96 @@ ${pts}
             if (tracking) await addPhotoAt(img, ll);   // pin on the active track
             else await addPhotoPoint(img, ll);          // idle → standalone one-point track
         });
+
+        // Drop a VOICE waypoint at `ll`: a short recorded note pinned on the ACTIVE track.
+        async function addVoiceAt(rec, ll) {
+            const wp = addWaypoint({ type: 'voice', lat: ll[0], lng: ll[1], t: new Date().toISOString(),
+                audio: rec.dataUrl, dur: rec.dur, mime: rec.mime, title: 'Sprachnotiz', text: '' });
+            if (typeof TrackBuffer !== 'undefined') TrackBuffer.saveNow(bufferSnapshot()); // secure it at once
+            doSync();                 // push to the cloud now — you stand still to record
+            refreshWaypoint(wp);
+            toast('Sprachnotiz · ' + rec.dur.toFixed(1) + 's');
+        }
+        // IDLE (not tracking): save the voice note as its own one-point track, like a one-point photo.
+        async function addVoicePoint(rec, ll) {
+            const wp = addWaypoint({ type: 'voice', lat: ll[0], lng: ll[1], t: new Date().toISOString(),
+                audio: rec.dataUrl, dur: rec.dur, mime: rec.mime, title: 'Sprachnotiz', text: '' });
+            refreshWaypoint(wp);
+            const name = 'Sprachnotiz ' + new Date().toLocaleString('de-DE');
+            try { await saveOnePointTrack(name, ll, wp); toast('Gespeichert: Sprachnotiz'); }
+            catch (e) { toast('Speichern fehlgeschlagen: ' + (e.message || e)); }
+            waypoints = waypoints.filter(x => x !== wp); // isolate from any later tracking session
+        }
+
+        // ---- Mic FAB → Voice-Spur: tap to start, tap to stop → pin a voice note (cap 60 s) ----
+        (function () {
+            const micFab = $('mic-fab'), micTimer = $('mic-timer');
+            if (!micFab) return;
+            const MAX_MS = 60000; // cap a note at 60 s (keeps the base64 audio in the jsonb sane)
+            let timerIv = null, autoStop = null, busy = false;
+            const fmt = (ms) => { const s = Math.floor(ms / 1000); return '● ' + Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); };
+            const tick = () => { micTimer.textContent = fmt(Math.min(VoiceNote.elapsedMs(), MAX_MS)); };
+            function startUI() {
+                micFab.classList.add('recording');
+                micTimer.classList.add('show'); tick();
+                timerIv = setInterval(tick, 250);
+                autoStop = setTimeout(finish, MAX_MS); // hard stop at the cap
+            }
+            function stopUI() {
+                micFab.classList.remove('recording');
+                micTimer.classList.remove('show');
+                if (timerIv) { clearInterval(timerIv); timerIv = null; }
+                if (autoStop) { clearTimeout(autoStop); autoStop = null; }
+            }
+            async function finish() {
+                if (!VoiceNote.isRecording()) return;
+                stopUI();
+                let rec;
+                try { rec = await VoiceNote.stop(); }
+                catch (e) { toast('Aufnahme-Fehler: ' + (e.message || e)); return; }
+                if (!rec || rec.dur < 0.4) { toast('Zu kurz — verworfen.'); return; }
+                const ll = currentLatLng();
+                if (!ll) { toast('Position verloren — Notiz verworfen.'); return; }
+                if (tracking) await addVoiceAt(rec, ll);
+                else await addVoicePoint(rec, ll);
+            }
+            micFab.addEventListener('click', async () => {
+                if (busy) return;
+                if (VoiceNote.isRecording()) { await finish(); return; }
+                if (!currentLatLng()) { toast('Noch keine Position — kurz auf GPS warten.'); return; }
+                if (!VoiceNote.isSupported()) { toast('Audio-Aufnahme hier nicht verfügbar.'); return; }
+                busy = true;
+                try { await VoiceNote.start(); startUI(); }
+                catch (e) { toast('Mikrofon nicht verfügbar: ' + (e.message || e)); }
+                finally { busy = false; }
+            });
+        })();
+
+        // ---- Auto-hide the floating controls (HH + camera + mic) after 8 s of no interaction;
+        //      any tap / move / click / key brings them back. Stays put while recording a voice
+        //      note or while the radial popup is open (so Stop / the menu stay reachable). ----
+        (function () {
+            const IDLE_MS = 8000;
+            let idleTimer = null;
+            function popupOpen() { const m = $('mini-stack'); return !!(m && m.classList.contains('popup')); }
+            function hide() {
+                // never fade while you're mid-recording or the menu is fanned out
+                if ((window.VoiceNote && VoiceNote.isRecording()) || popupOpen()) { schedule(); return; }
+                document.body.classList.add('ui-idle');
+            }
+            function schedule() {
+                if (idleTimer) clearTimeout(idleTimer);
+                idleTimer = setTimeout(hide, IDLE_MS);
+            }
+            function wake() {
+                if (document.body.classList.contains('ui-idle')) document.body.classList.remove('ui-idle');
+                schedule();
+            }
+            ['pointerdown', 'pointermove', 'wheel', 'keydown'].forEach(
+                (ev) => document.addEventListener(ev, wake, { passive: true })
+            );
+            schedule(); // start the 8 s countdown
+        })();
 
         // ===============================================================
         // Radial action popup (long-press / right-click) — style from worldclock

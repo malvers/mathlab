@@ -14,16 +14,24 @@
     const FAIL_TITLE = 'Erkennung fehlgeschlagen';
     // Camera glyph, white stroke on the coloured dot.
     const CAM_PIN_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>';
+    // Microphone glyph for voice waypoints (Voice-Spur).
+    const MIC_PIN_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>';
+    // Speaker glyph — the voice note's BIG lightbox visual. The map pin keeps the mic.
+    const SPEAKER_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>';
     const $ = (id) => document.getElementById(id);
 
     // Status pin: green = recognised (.done), orange pulse = identifying (.pending), red = failed.
+    // Voice waypoints get the mic glyph on their own dot (.voice) so they read differently from photos.
     function pinIcon(wp) {
-        let state = ' done';
-        if (wp.title === PENDING_TITLE) state = ' pending';
-        else if (!wp.title || wp.title === FAIL_TITLE) state = ' failed';
+        const isVoice = wp && wp.type === 'voice';
+        let state = isVoice ? ' voice' : ' done';
+        if (!isVoice) {
+            if (wp.title === PENDING_TITLE) state = ' pending';
+            else if (!wp.title || wp.title === FAIL_TITLE) state = ' failed';
+        }
         return global.L.divIcon({
             className: 'wp-pin',
-            html: '<div class="wp-dot' + state + '">' + CAM_PIN_SVG + '</div>',
+            html: '<div class="wp-dot' + state + '">' + (isVoice ? SPEAKER_SVG : CAM_PIN_SVG) + '</div>',
             iconSize: [30, 30], iconAnchor: [15, 30], popupAnchor: [0, -30],
         });
     }
@@ -55,13 +63,94 @@
         if (req) { try { const r = req.call(lb); if (r && r.catch) r.catch(() => {}); } catch (_) {} }
     }
 
+    // The edge function encodes a photo's facts as "Label:\tValue" lines (PlantNet, Google
+    // Gemini, Heimat); every other non-empty line is the free-text blurb. We show the blurb as a
+    // paragraph and the labelled lines as a compact 2-column table. Transport stays plain text
+    // (DB / live broadcast / GPX untouched) — only the lightbox DISPLAY becomes a real table.
+    function esc(s) {
+        return String(s == null ? '' : s).replace(/[&<>"]/g, (c) =>
+            ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+    }
+    // Icon per fact label (matches the mockup): 🌿 botanical specialist, ✨ Gemini, 🌍 origin.
+    const FACT_ICON = { 'PlantNet': '🌿', 'Google Gemini': '✨', 'Heimat': '🌍' };
+    function renderFacts(text) {
+        const blurb = [], rows = [];
+        String(text || '').split('\n').forEach((raw) => {
+            const ln = raw.replace(/\s+$/, '');
+            const ti = ln.indexOf('\t');
+            if (ti > 0) rows.push([ln.slice(0, ti).replace(/:\s*$/, '').trim(), ln.slice(ti + 1).trim()]);
+            else if (ln.trim()) blurb.push(ln.trim());
+        });
+        let html = '';
+        if (blurb.length) html += '<div class="lb-blurb">' + esc(blurb.join(' ')) + '</div>';
+        if (rows.length) html += '<table class="lb-facts"><tbody>' +
+            rows.map((r) => {
+                const ic = FACT_ICON[r[0]]; // prepend the icon when the label is a known one
+                return '<tr><th>' + esc((ic ? ic + ' ' : '') + r[0]) + '</th><td>' + esc(r[1]) + '</td></tr>';
+            }).join('') +
+            '</tbody></table>';
+        return html;
+    }
+
+    // Custom themed audio player driving the hidden #lightbox-audio: play/pause + seekable bar +
+    // time. webm/opus blobs often report duration=Infinity → fall back to the recorded length on
+    // data-dur (set in showAt). Wired once.
+    function fmtClock(s) { s = Math.max(0, Math.floor(s || 0)); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); }
+    function wireAudioPlayer() {
+        const au = $('lightbox-audio'), btn = $('lb-play'), track = $('lb-track'), fill = $('lb-fill'), time = $('lb-time');
+        if (!au || !btn || au.__wired) return;
+        au.__wired = true;
+        const PLAY = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>';
+        const PAUSE = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>';
+        function total() {
+            if (isFinite(au.duration) && au.duration > 0) return au.duration;
+            const d = parseFloat(au.dataset && au.dataset.dur);
+            return isFinite(d) ? d : 0;
+        }
+        function icon() { btn.innerHTML = au.paused ? PLAY : PAUSE; }
+        function paint() {
+            const d = total();
+            if (fill) fill.style.width = (d ? Math.min(100, au.currentTime / d * 100) : 0) + '%';
+            if (time) time.textContent = fmtClock(au.currentTime) + ' / ' + fmtClock(d);
+        }
+        btn.addEventListener('click', () => { if (au.paused) { au.play().catch(() => {}); } else au.pause(); });
+        au.addEventListener('play', icon);
+        au.addEventListener('pause', icon);
+        au.addEventListener('ended', () => { au.currentTime = 0; icon(); paint(); });
+        au.addEventListener('timeupdate', paint);
+        au.addEventListener('loadedmetadata', () => { icon(); paint(); });
+        au.addEventListener('durationchange', paint);
+        if (track) track.addEventListener('click', (e) => {
+            const r = track.getBoundingClientRect(), d = total();
+            if (d) { au.currentTime = Math.min(d, Math.max(0, (e.clientX - r.left) / r.width * d)); paint(); }
+        });
+        icon(); paint();
+    }
+
     function showAt(i) {
         const wp = list[i];
         if (!wp) return;
         idx = i;
-        $('lightbox-img').src = wp.img;
-        $('lightbox-title').textContent = wp.title || '';
-        $('lightbox-text').textContent = wp.text || '';
+        const img = $('lightbox-img'), au = $('lightbox-audio'), vi = $('lightbox-voice'), lb = $('photo-lightbox'), lbp = $('lb-player');
+        if (wp.type === 'voice') {
+            // Voice waypoint → big speech icon in the photo's place + a centred audio player.
+            if (img) { img.removeAttribute('src'); img.style.display = 'none'; }
+            if (vi) vi.classList.add('show');
+            if (lb) lb.classList.add('lb-voice');   // centre title + duration (voice only)
+            if (lbp) lbp.classList.add('show');
+            if (au) { au.src = wp.audio || ''; au.dataset.dur = wp.dur || ''; }
+            $('lightbox-title').textContent = wp.title || 'Sprachnotiz';
+            const head = wp.dur ? Number(wp.dur).toFixed(1) + ' s' : '';
+            $('lightbox-text').textContent = wp.text ? (head ? head + ' — ' + wp.text : wp.text) : head;
+        } else {
+            if (au) { try { au.pause(); } catch (_) {} au.removeAttribute('src'); }
+            if (lbp) lbp.classList.remove('show');
+            if (vi) vi.classList.remove('show');
+            if (lb) lb.classList.remove('lb-voice');
+            if (img) { img.src = wp.img; img.style.display = ''; }
+            $('lightbox-title').textContent = wp.title || '';
+            $('lightbox-text').innerHTML = renderFacts(wp.text);
+        }
         $('lightbox-count').textContent = (i + 1) + '/' + list.length;
     }
     // Step through the photos, wrapping around (loop) at both ends.
@@ -77,6 +166,7 @@
         if (global.PhotoFullscreen) global.PhotoFullscreen.exit(); // leave Android immersive fullscreen
         exitFs(); // …and leave web OS-fullscreen if the toggle button put us there
         $('lightbox-img').removeAttribute('src');
+        const au = $('lightbox-audio'); if (au) { try { au.pause(); } catch (_) {} au.removeAttribute('src'); }
         idx = -1; list = [];
     }
 
@@ -89,7 +179,7 @@
                 '<button id="lightbox-fs" aria-label="Vollbild umschalten" title="Vollbild"></button>' +
                 '<button id="lightbox-close" aria-label="Schließen">&times;</button>' +
                 '<div id="lightbox-count"></div>' +
-                '<div class="lb-inner"><img id="lightbox-img" alt="" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=="><div id="lightbox-title"></div><div id="lightbox-text"></div></div>' +
+                '<div class="lb-inner"><img id="lightbox-img" alt="" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=="><div id="lightbox-voice">' + SPEAKER_SVG + '</div><div id="lb-player"><button id="lb-play" aria-label="Abspielen/Pause"></button><div id="lb-track"><div id="lb-fill"></div></div><span id="lb-time">0:00 / 0:00</span><audio id="lightbox-audio" preload="metadata"></audio></div><div id="lightbox-title"></div><div id="lightbox-text"></div></div>' +
                 '<div id="lightbox-nav">' +
                 '<button class="lb-arrow" id="lb-prev" aria-label="Vorheriges Foto"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg></button>' +
                 '<button class="lb-arrow" id="lb-next" aria-label="Nächstes Foto"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg></button>' +
@@ -110,6 +200,35 @@
                 host.insertBefore(fb, host.firstChild);
             }
         }
+        // A host's inline lightbox (the recorder) predates voice notes → inject the audio player so
+        // voice waypoints can play. Sits inside .lb-inner, right before the title.
+        if (!$('lb-player')) {
+            const inner = document.querySelector('#photo-lightbox .lb-inner') || $('photo-lightbox');
+            if (inner) {
+                const p = document.createElement('div');
+                p.id = 'lb-player';
+                p.innerHTML = '<button id="lb-play" aria-label="Abspielen/Pause"></button>' +
+                    '<div id="lb-track"><div id="lb-fill"></div></div>' +
+                    '<span id="lb-time">0:00 / 0:00</span>' +
+                    '<audio id="lightbox-audio" preload="metadata"></audio>';
+                const t = $('lightbox-title');
+                if (t && t.parentNode === inner) inner.insertBefore(p, t);
+                else inner.appendChild(p);
+            }
+        }
+        // …and the big speaker icon shown in place of the (missing) photo for a voice note.
+        if (!$('lightbox-voice')) {
+            const inner = document.querySelector('#photo-lightbox .lb-inner') || $('photo-lightbox');
+            if (inner) {
+                const v = document.createElement('div');
+                v.id = 'lightbox-voice';
+                v.innerHTML = SPEAKER_SVG;
+                const p = $('lb-player');
+                if (p && p.parentNode === inner) inner.insertBefore(v, p);
+                else inner.appendChild(v);
+            }
+        }
+        wireAudioPlayer();
         $('lightbox-close').addEventListener('click', close);
         if ($('lightbox-fs')) $('lightbox-fs').addEventListener('click', toggleFs);
         document.addEventListener('fullscreenchange', refreshFsIcon);
