@@ -241,6 +241,27 @@ Deno.serve(async (req) => {
       text = gText ? gText.trimEnd() : '';
       source = 'Google Gemini';
     }
+
+    // Usage log: 1 successful identification = 1 Gemini call = the real cost driver. Append a row
+    // (service-role key, auto-injected into the edge env) so the app can show the TRUE usage incl.
+    // re-runs. Fire-and-forget under try/catch — a logging hiccup must never fail the result.
+    try {
+      const sbUrl = Deno.env.get('SUPABASE_URL');
+      const svc = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+      if (sbUrl && svc) {
+        await fetch(sbUrl + '/rest/v1/identify_log', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': svc,
+            'Authorization': 'Bearer ' + svc,
+            'Prefer': 'return=minimal',
+          },
+          body: JSON.stringify({ engine: source }),
+        });
+      }
+    } catch (_) { /* logging must never break identification */ }
+
     return json({ title, text, source, pnRemaining, _diag: diag });
   } catch (e) {
     return json({ error: String((e && (e as Error).message) || e) }, 500);
