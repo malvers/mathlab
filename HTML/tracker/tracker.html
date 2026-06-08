@@ -2013,17 +2013,10 @@ ${pts}
                 if (busy) return;
                 if (VoiceNote.isRecording()) { await finish(); return; }
                 if (!currentLatLng()) { toast('Noch keine Position — kurz auf GPS warten.'); return; }
-                if (window.DebugWindow) DebugWindow.log('mic env: secure=' + window.isSecureContext +
-                    ' md=' + !!navigator.mediaDevices +
-                    ' gUM=' + !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia) +
-                    ' MR=' + (typeof MediaRecorder !== 'undefined'));
                 if (!VoiceNote.isSupported()) { toast('Audio-Aufnahme hier nicht verfügbar.'); return; }
                 busy = true;
                 try { await VoiceNote.start(); startUI(); }
-                catch (e) {
-                    if (window.DebugWindow) DebugWindow.log('mic ERR: ' + (e && e.name) + ' — ' + (e && e.message));
-                    toast('Mikrofon nicht verfügbar: ' + (e.message || e));
-                }
+                catch (e) { toast('Mikrofon nicht verfügbar: ' + (e.message || e)); }
                 finally { busy = false; }
             });
         })();
