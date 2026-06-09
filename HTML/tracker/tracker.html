@@ -2178,6 +2178,17 @@ ${pts}
         // ===============================================================
         const miniStack = $('mini-stack');
 
+        // Grey out track-dependent actions when there's no track to act on. BROADCAST stays usable
+        // while live (so you can always stop). Called whenever the popup or settings panel opens.
+        function refreshMenuState() {
+            const has = !!(track && track.length);
+            const dim = (id, off) => { const b = $(id); if (b) b.classList.toggle('disabled', off); };
+            dim('mb-fit', !has);
+            dim('mb-sharetrack', !has);
+            dim('mb-live', !has && !liveOn);
+            dim('mb-smooth', !has);
+        }
+
         function openPopup() {
             // Radial "Kreis": button centres lie on a true circle (x² + y² = R²) and fan to the
             // RIGHT, rows evenly spaced in y (→ even gaps). The whole fan is then shifted LEFT by dx
@@ -2187,6 +2198,7 @@ ${pts}
             miniStack.style.left = (r.left + r.width / 2) + 'px';   // origin = HH centre
             miniStack.style.top = (r.top + r.height / 2) + 'px';
             miniStack.classList.add('popup');
+            refreshMenuState(); // grey track-dependent buttons when no track is loaded
             const btns = Array.from(miniStack.querySelectorAll('.mini-btn'));
             const n = btns.length, bh = 46, gap = 10, step = bh + gap, bw = 168;
             const halfH = (n - 1) * step / 2;                 // centre-to-centre half-height of the fan
@@ -2335,7 +2347,7 @@ ${pts}
                 $('sync-input').value = '';
             }
         }
-        $('mb-settings').addEventListener('click', () => { closePopup(); updateSyncStatus(); loadUsage(); updateReburnButton(); showPanel('settings-panel'); });
+        $('mb-settings').addEventListener('click', () => { closePopup(); updateSyncStatus(); loadUsage(); updateReburnButton(); refreshMenuState(); showPanel('settings-panel'); });
         // Foto-Spur card → re-run the AI analysis on still-unrecognised photos
         $('set-reburn').addEventListener('click', async () => { await reburnTrack(); updateReburnButton(); });
         // "Code erzeugen" generates AND connects this device in one step
