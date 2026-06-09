@@ -1940,7 +1940,9 @@ ${pts}
         const useNativeCam = !!(NativeCam && Capacitor.isNativePlatform && Capacitor.isNativePlatform());
 
         // Return a JPEG data URL (already ~1024 px wide), or null if the user cancelled.
-        // ---- In-app photo decision overlay: KI (keep + AI) · ✓ (keep, no AI) · ✗ (discard) ----
+        // ---- In-app photo decision overlay ----
+        // KI runs the AI INLINE (overlay stays open, shows the card) so the user can still ✓ keep
+        // or ✗ discard AFTER seeing it. Resolves { action:'keep'|'discard', ai:{title,text}|null }.
         const PD_CHECK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
         const PD_X = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>';
         let pdMounted = false;
@@ -1948,25 +1950,46 @@ ${pts}
             if (pdMounted) return; pdMounted = true;
             const ov = document.createElement('div');
             ov.id = 'photo-decide';
-            ov.innerHTML = '<div class="pd-card"><img id="pd-img" alt="">' +
+            ov.innerHTML = '<div class="pd-card">' +
+                '<div class="pd-scroll"><img id="pd-img" alt=""><div id="pd-result"></div></div>' +
                 '<div class="pd-row">' +
-                '<button class="pd-btn pd-ki" id="pd-ki" type="button" aria-label="Übernehmen mit KI-Erkennung">KI</button>' +
-                '<button class="pd-btn pd-keep" id="pd-keep" type="button" aria-label="Übernehmen ohne KI">' + PD_CHECK + '</button>' +
+                '<button class="pd-btn pd-ki" id="pd-ki" type="button" aria-label="Mit KI erkennen">KI</button>' +
+                '<button class="pd-btn pd-keep" id="pd-keep" type="button" aria-label="Übernehmen">' + PD_CHECK + '</button>' +
                 '<button class="pd-btn pd-x" id="pd-x" type="button" aria-label="Verwerfen">' + PD_X + '</button>' +
                 '</div></div>';
             document.body.appendChild(ov);
         }
-        // Show the captured photo + 3 round buttons; resolves 'ki' | 'keep' | 'discard'.
-        function decidePhoto(img) {
+        // KI = AI as a reviewable PREVIEW: overlay stays open, shows the result, user still decides.
+        function decidePhoto(img, ll) {
             return new Promise((resolve) => {
                 mountDecide();
                 const ov = $('photo-decide');
                 $('pd-img').src = img;
-                ov.classList.add('open');
-                const done = (choice) => { ov.classList.remove('open'); $('pd-img').removeAttribute('src'); resolve(choice); };
-                $('pd-ki').onclick = () => done('ki');
-                $('pd-keep').onclick = () => done('keep');
-                $('pd-x').onclick = () => done('discard');
+                $('pd-result').innerHTML = '';
+                ov.className = 'open'; // reset any prior loading/reviewed state
+                const finish = (res) => {
+                    ov.classList.remove('open', 'loading', 'reviewed');
+                    $('pd-img').removeAttribute('src'); $('pd-result').innerHTML = '';
+                    resolve(res);
+                };
+                $('pd-x').onclick = () => finish({ action: 'discard' });
+                $('pd-keep').onclick = () => finish({ action: 'keep', ai: null }); // ✓ before KI → keep, no AI
+                $('pd-ki').onclick = async () => {
+                    ov.classList.add('loading'); // spinner; hide KI + ✓ (only ✗ stays to cancel)
+                    $('pd-result').innerHTML = '<div class="pd-wait">🤖 KI erkennt …</div>';
+                    let ai = null;
+                    try { ai = await identifyPhoto(img, ll[0], ll[1]); } catch (e) { ai = null; }
+                    ov.classList.remove('loading'); ov.classList.add('reviewed');
+                    if (ai && ai.title) {
+                        $('pd-result').innerHTML = '<div class="pd-title"></div>' +
+                            (window.PhotoLayer && PhotoLayer.renderFacts ? PhotoLayer.renderFacts(ai.text) : '');
+                        $('pd-result').querySelector('.pd-title').textContent = ai.title;
+                        $('pd-keep').onclick = () => finish({ action: 'keep', ai: ai }); // ✓ → keep WITH the AI result
+                    } else {
+                        $('pd-result').innerHTML = '<div class="pd-wait">KI-Erkennung fehlgeschlagen.</div>';
+                        $('pd-keep').onclick = () => finish({ action: 'keep', ai: null }); // ✓ → keep without AI
+                    }
+                };
             });
         }
 
@@ -1996,26 +2019,15 @@ ${pts}
             });
         }
 
-        // Drop the pin at `ll`, then let Gemini name + explain the photo.
-        async function addPhotoAt(img, ll, useAI = true) {
-            toast(useAI ? 'Foto wird verarbeitet …' : 'Foto übernommen.');
-            const wp = addWaypoint({ lat: ll[0], lng: ll[1], t: new Date().toISOString(), img, title: useAI ? PENDING_TITLE : 'Foto', text: '' });
+        // Drop the pin at `ll`. `ai` = {title,text} from the in-overlay KI run, or null (keep, no AI).
+        // The AI already ran in the decision overlay → here we just commit the chosen result.
+        async function addPhotoAt(img, ll, ai) {
+            const wp = addWaypoint({ lat: ll[0], lng: ll[1], t: new Date().toISOString(), img, title: ai ? ai.title : 'Foto', text: ai ? ai.text : '' });
+            toast(ai ? wp.title : 'Foto übernommen.');
             if (typeof TrackBuffer !== 'undefined') TrackBuffer.saveNow(bufferSnapshot()); // secure the new photo at once
-            doSync(); // push the photo to the cloud NOW — don't wait for the next GPS point (you stand still to shoot)
-            addLivePhoto(wp); // …and push a small thumbnail over the live channel right away
-            if (!useAI) { refreshWaypoint(wp); return; } // ✓ keep the photo WITHOUT AI identification
-            try {
-                const r = await identifyPhoto(img, ll[0], ll[1]);
-                wp.title = r.title; wp.text = r.text;
-                toast(wp.title);
-            } catch (e) {
-                wp.title = FAIL_TITLE;
-                wp.text = (e.message || '') + ' — Foto bleibt am Track.';
-                toast('KI-Erkennung fehlgeschlagen.');
-            }
+            doSync(); // push the photo to the cloud NOW — don't wait for the next GPS point
+            addLivePhoto(wp); // push the thumbnail (+ AI title/text) over the live channel
             refreshWaypoint(wp);
-            doSync(); // and again once the AI title/text is in, so the description propagates live
-            addLivePhoto(wp); // re-broadcast the thumbnail with the now-known title (dedup by t)
         }
 
         // New "one-point track" mode: a geotagged photo taken WITHOUT an active recording.
@@ -2030,20 +2042,11 @@ ${pts}
             });
             if (error) throw error;
         }
-        async function addPhotoPoint(img, ll, useAI = true) {
-            toast(useAI ? 'Foto wird verarbeitet …' : 'Foto übernommen.');
-            const wp = addWaypoint({ lat: ll[0], lng: ll[1], t: new Date().toISOString(), img, title: useAI ? PENDING_TITLE : 'Foto', text: '' });
-            if (useAI) {
-                try {
-                    const r = await identifyPhoto(img, ll[0], ll[1]);
-                    wp.title = r.title; wp.text = r.text;
-                } catch (e) {
-                    wp.title = FAIL_TITLE;
-                    wp.text = (e.message || '') + ' — Foto bleibt gespeichert.';
-                }
-            }
+        async function addPhotoPoint(img, ll, ai) {
+            const wp = addWaypoint({ lat: ll[0], lng: ll[1], t: new Date().toISOString(), img, title: ai ? ai.title : 'Foto', text: ai ? ai.text : '' });
+            toast(ai ? wp.title : 'Foto übernommen.');
             refreshWaypoint(wp);
-            const valid = useAI && wp.title && wp.title !== PENDING_TITLE && wp.title !== FAIL_TITLE;
+            const valid = ai && wp.title && wp.title !== PENDING_TITLE && wp.title !== FAIL_TITLE;
             const name = valid ? wp.title : ('Foto ' + new Date().toLocaleString('de-DE'));
             try { await saveOnePointTrack(name, ll, wp); toast('Gespeichert: ' + name); }
             catch (e) { toast('Speichern fehlgeschlagen: ' + (e.message || e)); }
@@ -2129,14 +2132,13 @@ ${pts}
             try { img = await capturePhoto(); }
             catch (e) { toast('Kamera nicht verfügbar: ' + (e.message || e)); return; }
             if (!img) return; // cancelled
-            // In-app decision: KI (übernehmen + KI-Erkennung) · ✓ (übernehmen ohne KI) · ✗ (verwerfen)
-            const choice = await decidePhoto(img);
-            if (choice === 'discard') return;
-            const useAI = choice === 'ki';
             const ll = currentLatLng();
             if (!ll) { toast('Position verloren — nochmal versuchen.'); return; }
-            if (tracking) await addPhotoAt(img, ll, useAI);   // pin on the active track
-            else await addPhotoPoint(img, ll, useAI);          // idle → standalone one-point track
+            // In-app step: KI (KI-Vorschau, dann entscheiden) · ✓ (übernehmen ohne KI) · ✗ (verwerfen)
+            const res = await decidePhoto(img, ll);
+            if (!res || res.action === 'discard') return;
+            if (tracking) await addPhotoAt(img, ll, res.ai);   // pin on the active track
+            else await addPhotoPoint(img, ll, res.ai);          // idle → standalone one-point track
         });
 
         // Drop a VOICE waypoint at `ll`: a short recorded note pinned on the ACTIVE track.
