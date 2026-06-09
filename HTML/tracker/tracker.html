@@ -263,7 +263,7 @@
             <p class="set-card-sub">Das Debug-Fenster ein- oder ausblenden.</p>
             <label class="set-row" for="dbg-window-toggle" style="cursor:pointer">
               <span>Debug-Fenster anzeigen</span>
-              <input type="checkbox" id="dbg-window-toggle">
+              <input type="checkbox" id="dbg-window-toggle" class="tl-check">
             </label>
           </div><!-- /set-card -->
         </div>
@@ -575,7 +575,19 @@
             centerStatLabel(elDist, elDistLbl);
         }
         function setSpeed(kmh) { CyberClock.setNum(elSpeed, kmh); centerStatLabel(elSpeed, elSpeedLbl); }
-        function setAlt(m) { CyberClock.setNum(elAlt, m); centerStatLabel(elAlt, elAltLbl); }
+        function setAlt(m) {
+            if (m == null || isNaN(m)) {
+                // no altitude fix yet → a single centred dash instead of blank slots
+                const boxes = elAlt._ccDigits, intN = elAlt._ccIntN;
+                if (boxes) {
+                    for (let i = 0; i < boxes.length; i++) { boxes[i].textContent = ''; boxes[i].style.display = 'none'; }
+                    boxes[intN - 1].textContent = '–'; boxes[intN - 1].style.display = '';
+                }
+            } else {
+                CyberClock.setNum(elAlt, m);
+            }
+            centerStatLabel(elAlt, elAltLbl);
+        }
         setDist(0); setSpeed(0); setAlt(null);
 
         function setStatus(msg) { if (elStatus) elStatus.textContent = msg; } // status line removed — guard-safe no-op
