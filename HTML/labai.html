@@ -546,7 +546,7 @@
         <div class="canvas-subtitle">LAB AI</div>
     </div>
 
-    <button onclick="localStorage.removeItem('dev_access'); sessionApiKey=''; document.getElementById('cyber-auth-overlay').classList.add('visible'); document.getElementById('cyber-pwd-input').value=''; setTimeout(()=>document.getElementById('cyber-pwd-input').focus(),100);"
+    <button onclick="localStorage.removeItem('dev_access'); sessionPwd=''; document.getElementById('cyber-auth-overlay').classList.add('visible'); document.getElementById('cyber-pwd-input').value=''; setTimeout(()=>document.getElementById('cyber-pwd-input').focus(),100);"
         style="position:fixed;bottom:16px;right:16px;background:rgba(255,0,0,0.12);border:1px solid rgba(255,60,60,0.4);border-radius:8px;color:rgba(255,100,100,0.8);font-family:'Orbitron',monospace;font-size:0.65rem;padding:5px 10px;cursor:pointer;z-index:9998;letter-spacing:1px;">
         LOGOUT
     </button>
@@ -583,12 +583,26 @@
     </div>
 
     <script>
-        const AI_URL = 'https://api.deepseek.com/v1/chat/completions';
+        // DeepSeek proxy — the API key lives server-side as the DEEPSEEK_API_KEY secret, never in this
+        // public client (Rule 18). Access is gated by a password the user types; the proxy verifies it
+        // server-side against the LABAI_PASSWORD secret. (Old in-source encrypted key was rotated +
+        // removed 2026-06-09.)
+        const AI_URL  = 'https://fyfhxzyymmurlaenmzse.supabase.co/functions/v1/deepseek';
+        const SB_ANON = 'sb_publishable_ubQDiMD-X3N0vZvPVi229Q_-5Zootfk'; // publishable anon key — client-safe
         let conversationHistory = [];
 
-        // HIER KOMMT DER VERSCHLÜSSELTE KEY HIN:
-        // Verschlüssele deinen Key in der Browser-Konsole mit: CryptoJS.AES.encrypt("sk-DEIN_KEY", "vsb2026!").toString()
-        const ENCRYPTED_API_KEY = "U2FsdGVkX18xMjM0NTY3OF0Uf+jzF9gByhGWIdT4T2fU3spB2Qdhpje6i/EbkuiEknQzonQJGrEVmzraOCZTng==";
+        // Verify a password against the proxy (server checks LABAI_PASSWORD). No DeepSeek call → no cost.
+        async function verifyPwd(pwd) {
+            if (!pwd) return false;
+            try {
+                const r = await fetch(AI_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'apikey': SB_ANON, 'Authorization': 'Bearer ' + SB_ANON, 'x-app-pass': pwd },
+                    body: JSON.stringify({ ping: true })
+                });
+                return r.ok;
+            } catch (_) { return false; }
+        }
 
         function aesDecrypt(encryptedText, pwd) {
             try {
@@ -599,7 +613,7 @@
             }
         }
 
-        let sessionApiKey = ""; // Wird nach Login gefüllt
+        let sessionPwd = ""; // password the user typed; sent to the proxy as x-app-pass
 
         function togglePwdVisibility() {
             const input = document.getElementById('cyber-pwd-input');
@@ -610,12 +624,12 @@
                 : `<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>`;
         }
 
-        function validateLabAccess() {
+        async function validateLabAccess() {
             const pwd = document.getElementById('cyber-pwd-input').value;
-            const decrypted = aesDecrypt(ENCRYPTED_API_KEY, pwd);
+            const ok = await verifyPwd(pwd);
 
-            if (decrypted.startsWith("sk-")) {
-                sessionApiKey = decrypted;
+            if (ok) {
+                sessionPwd = pwd;
                 const isLocal = location.hostname === "localhost" ||
                     location.hostname === "127.0.0.1" ||
                     location.protocol === "file:" ||
@@ -646,7 +660,7 @@
         const COPY_ICON = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>`;
         const CHECK_ICON = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
 
-        function getApiKey() { return sessionApiKey; }
+        function getPwd() { return sessionPwd; }
 
         let currentModel = localStorage.getItem(MODEL_KEY) || 'deepseek-v4-flash';
 
@@ -844,7 +858,7 @@
 
         async function sendMessage() {
             const userText = messageInput.value.trim();
-            const apiKey = getApiKey();
+            const pwd = getPwd();
 
             if (!userText) return;
 
@@ -858,7 +872,7 @@
                 return;
             }
 
-            if (!apiKey || !apiKey.startsWith('sk-')) {
+            if (!pwd) {
                 document.getElementById('cyber-auth-overlay').classList.add('visible');
                 setTimeout(() => document.getElementById('cyber-pwd-input')?.focus(), 100);
                 return;
@@ -876,7 +890,9 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${apiKey}`
+                        'apikey': SB_ANON,
+                        'Authorization': `Bearer ${SB_ANON}`,
+                        'x-app-pass': pwd
                     },
                     body: JSON.stringify({
                         model: getModel(),
@@ -887,7 +903,7 @@
                 });
                 if (!response.ok) {
                     let err = `Fehler ${response.status}`;
-                    if (response.status === 401) err = 'Ungültiger API-Key';
+                    if (response.status === 401) err = 'Falsches Passwort';
                     if (response.status === 402) err = 'Nicht genug Guthaben – AI-Konto aufladen';
                     throw new Error(err);
                 }
@@ -908,7 +924,7 @@
             }
         }
         // ----- AUTO-LOGIN & AUTH-INITIALISIERUNG -----
-        (function initAuth() {
+        (async function initAuth() {
             const devPwd = localStorage.getItem('dev_access');
             const isLocal = location.hostname === "localhost" ||
                 location.hostname === "127.0.0.1" ||
@@ -916,12 +932,9 @@
                 location.hostname.startsWith("192.168.");
 
             let success = false;
-            if (isLocal && devPwd) {
-                const decrypted = aesDecrypt(ENCRYPTED_API_KEY, devPwd);
-                if (decrypted && decrypted.startsWith("sk-")) {
-                    sessionApiKey = decrypted;
-                    success = true;
-                }
+            if (isLocal && devPwd && await verifyPwd(devPwd)) {
+                sessionPwd = devPwd;
+                success = true;
             }
 
             if (!success) {
