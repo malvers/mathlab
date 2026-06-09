@@ -256,6 +256,16 @@
             <p class="set-card-sub">Welche Satelliten-Systeme &amp; Quellen die App nutzt.</p>
             <button class="sync-btn primary" id="set-info" type="button">Info anzeigen</button>
           </div><!-- /set-card -->
+
+          <!-- Card: Debug — show/hide the on-screen DebugWindow -->
+          <div class="set-card collapsed">
+            <div class="set-card-title">Debug</div>
+            <p class="set-card-sub">Das Debug-Fenster ein- oder ausblenden.</p>
+            <label class="set-row" for="dbg-window-toggle" style="cursor:pointer">
+              <span>Debug-Fenster anzeigen</span>
+              <input type="checkbox" id="dbg-window-toggle">
+            </label>
+          </div><!-- /set-card -->
         </div>
         <button class="ov-close" id="settings-close" aria-label="Schließen">&times;</button>
     </div>
@@ -533,8 +543,10 @@
         // centred. KM/H = 999.9 (1 dec), HÖHE = 9999 m (int).
         const STAT_SIZE = 'clamp(1rem, 4.5vw, 1.4rem)';
         const STAT_COL = 'var(--orange)';
-        CyberClock.mountNum(elSpeed, { intSlots: 3, decimals: 1, size: STAT_SIZE, digitColor: STAT_COL });
-        CyberClock.mountNum(elAlt, { intSlots: 4, decimals: 0, size: STAT_SIZE, digitColor: STAT_COL });
+        const STAT_FONT = 'Arial, Helvetica, sans-serif'; // Doc: stat numbers in Arial, comma decimals
+        const STAT_SEP = ',';
+        CyberClock.mountNum(elSpeed, { intSlots: 3, decimals: 1, size: STAT_SIZE, digitColor: STAT_COL, font: STAT_FONT, decimalSep: STAT_SEP });
+        CyberClock.mountNum(elAlt, { intSlots: 4, decimals: 0, size: STAT_SIZE, digitColor: STAT_COL, font: STAT_FONT, decimalSep: STAT_SEP });
         const elDistLbl = $('trk-dist-lbl'), elSpeedLbl = $('trk-speed-lbl'), elAltLbl = $('trk-alt-lbl');
         // Centre each label under the VISIBLE digits (not the full right-aligned slot box). The
         // number is right-aligned (blank slots on the left), so shift the label right by half the
@@ -554,8 +566,8 @@
             const want = meters ? 'm' : 'km';
             if (elDist.dataset.unit !== want) {
                 CyberClock.mountNum(elDist, meters
-                    ? { intSlots: 3, decimals: 0, size: STAT_SIZE, digitColor: STAT_COL }
-                    : { intSlots: 3, decimals: 2, size: STAT_SIZE, digitColor: STAT_COL });
+                    ? { intSlots: 3, decimals: 0, size: STAT_SIZE, digitColor: STAT_COL, font: STAT_FONT, decimalSep: STAT_SEP }
+                    : { intSlots: 3, decimals: 2, size: STAT_SIZE, digitColor: STAT_COL, font: STAT_FONT, decimalSep: STAT_SEP });
                 elDist.dataset.unit = want;
                 if (elDistLbl) elDistLbl.textContent = meters ? 'm' : 'KM';
             }

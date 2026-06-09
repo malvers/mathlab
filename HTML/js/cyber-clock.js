@@ -39,12 +39,14 @@
         el.classList.add('cyber-clock', 'cyber-num');
         if (opts.size)       el.style.setProperty('--cc-size', opts.size);
         if (opts.digitColor) el.style.setProperty('--cc-digit', opts.digitColor);
+        if (opts.font)       el.style.setProperty('--cc-font', opts.font); // e.g. 'Arial' (default Orbitron)
         const intN = opts.intSlots || 3;
         const decN = opts.decimals || 0;
+        const sep  = opts.decimalSep || '.'; // decimal separator glyph (e.g. ',' for German)
         let html = '';
         for (let i = 0; i < intN; i++) html += '<span class="cc-d"></span>';
         if (decN > 0) {
-            html += '<span class="cc-dot">.</span>';
+            html += '<span class="cc-dot">' + sep + '</span>';
             for (let i = 0; i < decN; i++) html += '<span class="cc-d"></span>';
         }
         el.innerHTML = html;
