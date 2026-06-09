@@ -308,5 +308,5 @@
         if (global.PhotoFullscreen) global.PhotoFullscreen.enter($('photo-lightbox'));
     }
 
-    global.PhotoLayer = { pinIcon, mountLightbox, openLightbox, closeLightbox: close };
+    global.PhotoLayer = { pinIcon, mountLightbox, openLightbox, closeLightbox: close, renderFacts };
 })(window);
