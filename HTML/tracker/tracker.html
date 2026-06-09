@@ -152,7 +152,6 @@
     <!-- Radial action popup (long-press / right-click) — style ported from worldclock -->
     <div id="mini-stack">
         <button class="mini-btn" id="mb-load">LADEN</button>
-        <button class="mini-btn" id="mb-fit">FIT</button>
         <button class="mini-btn" id="mb-sharetrack">SHARE</button>
         <button class="mini-btn" id="mb-live">BROADCAST</button>
         <button class="mini-btn" id="mb-rain">REGENRADAR</button>
@@ -167,7 +166,7 @@
         <div id="tl-actions">
             <button id="tl-deselect" type="button">Abwählen</button>
             <button id="tl-sharesel" type="button">Teilen</button>
-            <button id="tl-loadsel" type="button">Auswahl laden</button>
+            <button id="tl-loadsel" type="button">Laden</button>
         </div>
         <button class="ov-close" id="list-close" aria-label="Schließen">&times;</button>
     </div>
@@ -375,6 +374,7 @@
         // The map auto-follows new fixes until you take over (drag) — ZENTRIEREN re-enables it.
         // The position dot is hidden during zoom animations so it doesn't jump, then fades back.
         let following = !viewRestored; // a restored viewport stays put (don't auto-follow GPS away from it)
+        let fitMode = false; // FIT as a persistent mode: when on, keep the WHOLE track fitted as it grows
         // ≈ 5 mm from the map centre (CSS px ≈ 1/96 in → 5 mm ≈ 19 px); within that the dot is "centred".
         const CENTER_TOL_PX = 19;
         function refreshRecenter() {
@@ -386,12 +386,13 @@
             // within ~5 mm of centre — show the "fit whole track" frame; once you've panned away and the
             // dot sits >5 mm off centre, show the crosshair to re-centre on GPS.
             const d = map.latLngToContainerPoint(pos).distanceTo(map.getSize().divideBy(2));
-            const centred = following || d <= CENTER_TOL_PX;
+            const centred = following || fitMode || d <= CENTER_TOL_PX;
             btn.classList.toggle('fit', centred); // no crosshair (centred) → show the fit-track icon
+            btn.classList.toggle('mode-on', fitMode); // persistent FIT mode → green highlight
             btn.classList.add('show');
         }
         function setFollowing(v) { following = v; refreshRecenter(); }
-        map.on('dragstart', () => setFollowing(false));
+        map.on('dragstart', () => { fitMode = false; setFollowing(false); }); // dragging away exits FIT mode + follow
         map.on('moveend zoomend', refreshRecenter); // view moved → POS may have left/entered the view
         map.on('zoomstart', () => {
             const el = posMarker && posMarker.getElement && posMarker.getElement();
@@ -796,6 +797,12 @@
             lastFix = { lat: latitude, lng: longitude, t: now };
 
             if (following && !still) map.panTo(here, { animate: true }); // don't drift the map when still
+            // FIT mode: keep the whole track in view — re-fit only once it grows beyond the frame
+            // (the -0.12 inset = a little slack, so it doesn't re-zoom on every single point).
+            if (fitMode && track.length > 1) {
+                const tb = L.latLngBounds(track);
+                if (!map.getBounds().pad(-0.12).contains(tb)) { try { map.fitBounds(tb, { padding: [40, 40] }); } catch (e) { } }
+            }
             refreshRecenter(); // show/hide the recenter button as needed
             updateMotionDbg(accuracy, minStep, still);
             if (tracking) setStatus(`Aufzeichnung läuft … ${track.length} Punkte`);
@@ -1308,6 +1315,7 @@
         }
 
         function centerOnPosition() {
+            fitMode = false;    // centring on the dot is the opposite of "keep the whole track fitted"
             setFollowing(true); // re-enable auto-follow (and hide the recenter button)
             // Already have a position → glide there smoothly
             if (posMarker) {
@@ -1628,7 +1636,7 @@ ${pts}
         const loadedTrackIds = new Set();   // ids on the map now → pre-checked when the panel reopens
         function updateLoadSel() {
             const btn = $('tl-loadsel'), acts = $('tl-actions');
-            if (btn) btn.textContent = 'Auswahl laden (' + selectedTracks.size + ')';
+            if (btn) btn.textContent = 'Laden (' + selectedTracks.size + ')';
             if (acts) acts.classList.toggle('show', selectedTracks.size > 0);
         }
         function deselectAll() {
@@ -2241,7 +2249,6 @@ ${pts}
         function refreshMenuState() {
             const has = !!(track && track.length);
             const dim = (id, off) => { const b = $(id); if (b) b.classList.toggle('disabled', off); };
-            dim('mb-fit', !has);
             dim('mb-sharetrack', !has);
             dim('mb-live', !has && !liveOn);
             dim('mb-smooth', !has);
@@ -2326,12 +2333,6 @@ ${pts}
         });
 
         // ---- Popup actions ----
-        // FIT TRACK — zoom/pan the map so the whole current track fits the screen.
-        $('mb-fit').addEventListener('click', () => {
-            closePopup();
-            if (!track || !track.length) { toast('Kein Track zum Einpassen.'); return; }
-            map.fitBounds(L.latLngBounds(track), { padding: [40, 40] });
-        });
 
         // GPS-Nachbearbeitung Stufe 1.2 — non-destructive: toggles a despike+smooth pass on the
         // DISPLAYED line only (TrackSmooth). Stored data stays raw; tap again to see the original.
@@ -2375,8 +2376,16 @@ ${pts}
         $('menu-fab').addEventListener('click', () => openPopup());
         $('recenter-fab').addEventListener('click', () => {
             const btn = $('recenter-fab');
-            if (btn.classList.contains('fit')) {            // centred → zoom out to the whole track
-                if (track.length) { setFollowing(false); try { map.fitBounds(L.latLngBounds(track), { padding: [40, 40] }); } catch (e) { } }
+            if (btn.classList.contains('fit')) {            // centred → toggle the persistent FIT mode
+                fitMode = !fitMode;
+                if (fitMode) {
+                    setFollowing(false);
+                    if (track.length) { try { map.fitBounds(L.latLngBounds(track), { padding: [40, 40] }); } catch (e) { } }
+                    toast('FIT-Modus an — Track bleibt im Bild');
+                } else {
+                    toast('FIT-Modus aus');
+                }
+                refreshRecenter();
             } else {
                 centerOnPosition();                          // off-centre → re-centre on GPS
             }
