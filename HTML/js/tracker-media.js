@@ -509,15 +509,21 @@ window.TrackerMedia = function (T) {
         //      on the track. The clip is uploaded to the media store (Cloudflare R2) via uploadMedia →
         //      wp.video = public URL. If the store isn't ready / offline, the local object-URL stays for
         //      this session (preview) and nothing huge is persisted — never block, never lose the take. ----
+        // ONE persistent change-listener + ONE pending resolver. A cancelled file dialog fires NO
+        // `change`, so a per-call listener would leak and every accumulated one would fire on the next
+        // real pick → duplicate pins (Doc: "3× abgebrochen → 4× Video"). A fresh capture cancels the
+        // stale resolver (null) so only the LATEST pick ever produces a clip.
+        let vidResolve = null;
+        if (vidInput) vidInput.addEventListener('change', () => {
+            const r = vidResolve; vidResolve = null;
+            if (r) r((vidInput.files && vidInput.files[0]) || null);
+        });
         function captureVideo() {
             return new Promise((resolve) => {
                 if (!vidInput) return resolve(null);
-                const onChange = () => {
-                    vidInput.removeEventListener('change', onChange);
-                    resolve((vidInput.files && vidInput.files[0]) || null);
-                };
+                if (vidResolve) { const old = vidResolve; vidResolve = null; old(null); } // drop a stale pending capture
+                vidResolve = resolve;
                 vidInput.value = '';
-                vidInput.addEventListener('change', onChange);
                 vidInput.click();
             });
         }
