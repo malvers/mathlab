@@ -628,6 +628,10 @@ const DebugWindow = (() => {
     return { init, log, clear, toggle, show, hide };
 })();
 
+// Expose on window: a top-level `const` is NOT a window property, so every
+// `if (window.DebugWindow) …` guard in the labs would silently no-op without this.
+window.DebugWindow = DebugWindow;
+
 // Autostart on page load
 document.addEventListener('DOMContentLoaded', () => {
     DebugWindow.init();

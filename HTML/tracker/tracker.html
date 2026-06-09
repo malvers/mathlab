@@ -2466,13 +2466,13 @@ ${pts}
         });
         $('settings-close').addEventListener('click', hidePanels);
 
-        // Settings → Debug: show/hide the on-screen DebugWindow. Default ON (it was always there).
+        // Settings → Debug: show/hide the on-screen DebugWindow. Default OFF; persisted in localStorage.
         // DebugWindow.show/hide auto-init; we wire after DOMContentLoaded so its own init() ran first.
         (function () {
             const KEY = 'tracker.dbgWindow';
             function wire() {
                 const cb = $('dbg-window-toggle'); if (!cb || cb._wired) return; cb._wired = true;
-                const on = localStorage.getItem(KEY) !== '0';
+                const on = localStorage.getItem(KEY) === '1'; // default OFF
                 cb.checked = on;
                 if (window.DebugWindow) (on ? DebugWindow.show() : DebugWindow.hide());
                 cb.addEventListener('change', () => {
@@ -2696,11 +2696,12 @@ ${pts}
         function updateModeIcon() {
             const el = $('mode-icon');
             if (!el) return;
-            // No real GPS (WLAN/cell)? The guessed travel mode is meaningless → hide the icon
-            // entirely (display:none removes its slot so the KM/H value re-centres).
-            if (!gpsReal) { el.style.display = 'none'; return; }
+            const act = effectiveActivity();
+            // Without a real GPS fix the MOVING guesses (walk/bike/car) are meaningless → hide them.
+            // But "standing still" (0 km/h) is always a safe call → show 🧍 right away, no waiting.
+            if (!gpsReal && act !== 'still') { el.style.display = 'none'; return; }
             el.style.display = '';
-            const ic = MODE_ICON[effectiveActivity()] || '📍';
+            const ic = MODE_ICON[act] || '📍';
             el.textContent = ic;
             // Re-centre only when the glyph actually changes (measuring per tick is wasteful).
             if (el.dataset.centered !== ic) { el.dataset.centered = ic; centerModeIcon(el); }
