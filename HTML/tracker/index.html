@@ -281,6 +281,46 @@
             color: var(--orange);
             border-color: rgba(var(--orange-rgb), 0.5);
         }
+
+        /* ---- Samsung Auto Blocker hint ---- */
+        .sg-hint {
+            margin-top: 10px;
+            font-size: 0.78rem;
+            color: var(--muted);
+            background: none;
+            border: none;
+            font-family: inherit;
+            letter-spacing: 0.5px;
+            text-decoration: underline;
+            text-underline-offset: 3px;
+            cursor: pointer;
+        }
+
+        .sg-hint:hover {
+            color: var(--orange);
+        }
+
+        .steps {
+            margin: 4px 0 18px;
+            padding-left: 22px;
+            color: var(--ink);
+            font-size: 0.94rem;
+            line-height: 1.6;
+        }
+
+        .steps li {
+            margin-bottom: 10px;
+        }
+
+        .steps b {
+            color: #fff;
+            font-weight: 600;
+        }
+
+        .steps .path {
+            color: var(--orange);
+            font-weight: 600;
+        }
     </style>
 </head>
 
@@ -319,7 +359,8 @@
             </svg>
             <h2>Android-App</h2>
             <p class="line">Installieren. Starten. Laufen.</p>
-            <a class="btn" href="doc-alvers-tracker.apk" download="doc-alvers-tracker.apk">INSTALLIEREN</a>
+            <a class="btn" href="doc-alvers-tracker.apk" download="doc-alvers-tracker.apk" id="apk-install">INSTALLIEREN</a>
+            <button type="button" class="sg-hint" id="sg-open">Samsung-Gerät? So klappt die Installation</button>
         </div>
     </div>
 
@@ -338,6 +379,26 @@
         </div>
     </div>
 
+    <!-- Samsung Auto Blocker: step-by-step install guide -->
+    <div id="sg-modal" class="modal-backdrop" hidden>
+        <div class="modal" role="dialog" aria-modal="true" aria-labelledby="sg-title">
+            <button class="modal-close" id="sg-close" aria-label="Schließen">&times;</button>
+            <h3 id="sg-title">Samsung: App installieren</h3>
+            <p>Samsung blockt fremde Apps mit dem <b>Auto&nbsp;Blocker</b> („Automatische Sperre"). Erscheint
+                <b>„Unbekannte App gesperrt"</b>, ist das kein Fehler — so schaltest du ihn aus:</p>
+            <ol class="steps">
+                <li>Öffne die <b>Einstellungen</b> deines Geräts.</li>
+                <li>Gehe zu <span class="path">Sicherheit und Datenschutz</span>.</li>
+                <li>Tippe auf <span class="path">Automatische Sperre</span> (Auto&nbsp;Blocker).</li>
+                <li>Schalter <b>ausschalten</b>.</li>
+                <li>Zurück hierher — <b>INSTALLIEREN</b> erneut tippen und die APK installieren.</li>
+                <li>Beim Hinweis <b>„Unbekannte Quellen erlauben"</b> bestätigen.</li>
+            </ol>
+            <p class="wm-vibe">Danach kannst du Auto&nbsp;Blocker wieder einschalten — die App bleibt installiert.</p>
+            <a class="btn" href="doc-alvers-tracker.apk" download="doc-alvers-tracker.apk" id="sg-go">APK jetzt herunterladen</a>
+        </div>
+    </div>
+
     <script>
         // The browser version pauses when its tab loses focus — warn first, then let the user proceed.
         const webModal = document.getElementById('web-modal');
@@ -347,6 +408,24 @@
         document.getElementById('wm-close').addEventListener('click', hideModal);
         webModal.addEventListener('click', (e) => { if (e.target === webModal) hideModal(); }); // backdrop tap
         document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !webModal.hidden) hideModal(); });
+
+        // Samsung Auto Blocker hint. Samsung devices carry an "SM-xxxx" model token in the UA
+        // (Chrome) or "SamsungBrowser" (Samsung Internet) — only those hit Auto Blocker.
+        const isSamsung = /\bSM-[A-Z0-9]+|SamsungBrowser|\bSAMSUNG\b/i.test(navigator.userAgent);
+        const sgModal = document.getElementById('sg-modal');
+        const showSg = () => { sgModal.hidden = false; };
+        const hideSg = () => { sgModal.hidden = true; };
+
+        // On Samsung: intercept the install tap, explain first, then download via the modal CTA.
+        if (isSamsung) {
+            document.getElementById('apk-install').addEventListener('click', (e) => { e.preventDefault(); showSg(); });
+        }
+        // Manual entry point for everyone (and the "Samsung-Gerät?" link).
+        document.getElementById('sg-open').addEventListener('click', showSg);
+        document.getElementById('sg-close').addEventListener('click', hideSg);
+        document.getElementById('sg-go').addEventListener('click', hideSg); // let the download proceed, close box
+        sgModal.addEventListener('click', (e) => { if (e.target === sgModal) hideSg(); });
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !sgModal.hidden) hideSg(); });
     </script>
 </body>
 
