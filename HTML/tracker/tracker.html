@@ -181,6 +181,7 @@
             <p class="live-hint">Vergib einen Namen. Wer ihn kennt, sieht dich live — sag ihn nur, wem du willst (öffentlich).</p>
             <input id="live-name" class="live-url" type="text" aria-label="Live-Name" placeholder="vsb" autocapitalize="off" autocomplete="off" spellcheck="false">
             <button id="live-go" class="live-copy">LIVE senden</button>
+            <button id="live-link" class="live-copy secondary">Link kopieren</button>
         </div>
         <button class="ov-close" id="live-close" aria-label="Schließen">&times;</button>
     </div>
@@ -588,7 +589,8 @@
             }
             centerStatLabel(elAlt, elAltLbl);
         }
-        setDist(0); setSpeed(0); setAlt(null); updateModeIcon(); // 0,0 → 🧍 (stehen) right away
+        setDist(0); setSpeed(0); setAlt(null); // 🧍 mode-icon updates on the first GPS fix — calling
+        // updateModeIcon() here would hit the TDZ (its consts MODE_ICON/ActRec are declared further down)
 
         function setStatus(msg) { if (elStatus) elStatus.textContent = msg; } // status line removed — guard-safe no-op
 
@@ -2354,6 +2356,13 @@ ${pts}
             const v = ($('live-name').value || '').trim() || 'vsb';
             hidePanels();
             beginLive(v);
+        });
+        // Copy the viewer link for the chosen name; keep the panel open (so LIVE senden is still there).
+        $('live-link').addEventListener('click', async () => {
+            const v = (($('live-name').value || '').trim().toLowerCase()) || 'vsb';
+            const url = new URL('view.html?live=' + encodeURIComponent(v), location.href).href;
+            try { await navigator.clipboard.writeText(url); toast('Link kopiert ✓'); }
+            catch (e) { toast(url); } // clipboard blocked → show it so it can be copied manually
         });
 
         // ---- Popup actions ----
