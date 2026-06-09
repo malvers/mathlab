@@ -2453,6 +2453,25 @@ ${pts}
             $('sync-input').focus();
         });
         $('settings-close').addEventListener('click', hidePanels);
+
+        // Settings → Debug: show/hide the on-screen DebugWindow. Default ON (it was always there).
+        // DebugWindow.show/hide auto-init; we wire after DOMContentLoaded so its own init() ran first.
+        (function () {
+            const KEY = 'tracker.dbgWindow';
+            function wire() {
+                const cb = $('dbg-window-toggle'); if (!cb || cb._wired) return; cb._wired = true;
+                const on = localStorage.getItem(KEY) !== '0';
+                cb.checked = on;
+                if (window.DebugWindow) (on ? DebugWindow.show() : DebugWindow.hide());
+                cb.addEventListener('change', () => {
+                    localStorage.setItem(KEY, cb.checked ? '1' : '0');
+                    if (window.DebugWindow) (cb.checked ? DebugWindow.show() : DebugWindow.hide());
+                });
+            }
+            if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', wire);
+            else wire();
+        })();
+
         // Settings cards are collapsible (default collapsed) — tapping a title toggles its card.
         $('settings-panel').addEventListener('click', (e) => {
             const t = e.target.closest('.set-card-title');

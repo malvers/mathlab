@@ -21,23 +21,10 @@
     color: var(--cc-digit);
 }
 .cyber-clock .cc-sep {
-    width: 0.42em;
+    width: var(--cc-sw, 0.6em); /* colon slot — wider than the digit gap → clear air left & right */
     text-align: center;
     font-weight: 700;
     color: var(--cc-colon);
-}
-
-/* Clock digits are paired in a fixed-width, centred group (width = 2 digit slots → SAME total
-   width as before, no jitter). Inside, the two digits keep their NATURAL spacing, so "00" no
-   longer looks crammed and the colon sits centred between the fixed group blocks. The number
-   variant (.cyber-num) has no .cc-grp → it keeps its per-digit fixed slots untouched. */
-.cyber-clock .cc-grp {
-    display: inline-flex;
-    justify-content: center;
-    width: calc(var(--cc-dw) * 2);
-}
-.cyber-clock .cc-grp .cc-d {
-    width: auto;
 }
 
 /* Number variant (stats) — lighter than the clock, with a narrow decimal-point slot.
