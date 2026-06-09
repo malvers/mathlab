@@ -62,9 +62,64 @@
                 + '<div class="row"><div class="grid">' + cells + '</div></div>';
         }
 
-        document.getElementById('out').innerHTML =
+        const out = document.getElementById('out');
+        out.innerHTML =
             block('DWD — Originalpalette · mm/h (gemessen aus der Legende)', DWD_STOPS, MMH)
-            + block('RV — Recolor · mm/h (RainViewer „Universal Blue", offizielle CSV)', RV_STOPS, MMH);
+            + block('RV — Output-Stops · mm/h (unsere Rampe, Hellblau am unteren Ende)', RV_STOPS, MMH);
+
+        // ---- continuous strips: EXACTLY what the renderer draws (256+ steps), via the SAME
+        //      RainRecolor functions the live radar uses. Shows every gradation, incl. the drizzle. ----
+        const RR = window.RainRecolor;
+
+        // RainViewer's NATIVE ramp incl. its warm sand→brown sub-drizzle (MEASURED 2026-06-09 from a
+        // real tile). Debug-only reference, to demo rvToRv across every gradation.
+        const RV_NATIVE = [
+            [99, 97, 89], [127, 120, 103], [158, 147, 117], [194, 180, 130], [222, 208, 151], // sub-drizzle browns → light tan
+            [136, 221, 238], [54, 186, 229], [0, 163, 224], [0, 119, 170], [0, 91, 142], [0, 78, 120], // light → deep blue
+            [255, 224, 0], [255, 170, 0], [217, 27, 0], [255, 159, 255]                       // yellow → orange → red → magenta
+        ];
+
+        function alphaOver(c, bg) { // composite [r,g,b,af?] over an opaque bg [r,g,b]
+            const a = c.length > 3 ? c[3] : 1;
+            return [Math.round(c[0] * a + bg[0] * (1 - a)), Math.round(c[1] * a + bg[1] * (1 - a)), Math.round(c[2] * a + bg[2] * (1 - a))];
+        }
+        function sampleList(list, u) {
+            const n = list.length; if (u <= 0) return list[0]; if (u >= 1) return list[n - 1];
+            const f = u * (n - 1), i = f | 0, t = f - i, a = list[i], c = list[i + 1];
+            return [a[0] + (c[0] - a[0]) * t, a[1] + (c[1] - a[1]) * t, a[2] + (c[2] - a[2]) * t];
+        }
+        function strip(fn, bg) { // 512×34 canvas: column x → fn(x/(W-1)) composited over bg
+            const W = 512, H = 34, cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+            cv.style.cssText = 'width:100%;height:34px;display:block;border-radius:6px;border:1px solid rgba(255,255,255,.12)';
+            const ctx = cv.getContext('2d');
+            for (let x = 0; x < W; x++) { const c = alphaOver(fn(x / (W - 1)), bg); ctx.fillStyle = 'rgb(' + c[0] + ',' + c[1] + ',' + c[2] + ')'; ctx.fillRect(x, 0, 1, H); }
+            return cv;
+        }
+        function section(title, sub) {
+            const h = document.createElement('h2'); h.textContent = title; out.appendChild(h);
+            if (sub) { const p = document.createElement('div'); p.style.cssText = 'font-family:Arial,sans-serif;font-size:.62rem;color:rgba(255,255,255,.6);margin:0 0 8px'; p.textContent = sub; out.appendChild(p); }
+        }
+        function addStrip(fn, bg, note) {
+            const row = document.createElement('div'); row.className = 'row';
+            if (note) { const n = document.createElement('div'); n.style.cssText = 'font-family:Arial,sans-serif;font-size:.6rem;color:rgba(255,255,255,.55);margin-bottom:5px'; n.textContent = note; row.appendChild(n); }
+            row.appendChild(strip(fn, bg)); out.appendChild(row);
+        }
+
+        if (RR) {
+            // 1) the continuous OUTPUT ramp the DWD composite produces (rampAt over u), with alpha,
+            //    shown over white (w-key) and dark (k-key) so the trace-drizzle transparency is visible.
+            section('Output-Verlauf — kontinuierlich (was die Karte zeichnet)',
+                'RainRecolor.rampAt(u): u=0 (0.1 mm/h) links … u=1 (≥150 mm/h) rechts · inkl. Alpha');
+            addStrip(u => RR.rampAt(u), [255, 255, 255], 'über Weiß (w-Taste)');
+            addStrip(u => RR.rampAt(u), [8, 20, 42], 'über Dunkel (k-Taste)');
+
+            // 2) RainViewer NATIVE → our recolour (rvToRv) across EVERY gradation incl. the brown band.
+            section('RainViewer nativ → unser Recolor (rvToRv)',
+                'oben: RVs Originalfarben inkl. Sand/Braun-Niesel · darunter: unser Hellblau-Recolor (warmes Band → blau, echtes Blau/Gelb/Rot unberührt)');
+            addStrip(u => sampleList(RV_NATIVE, u), [255, 255, 255], 'RV nativ (Eingang)');
+            addStrip(u => { const s = sampleList(RV_NATIVE, u); return RR.rvToRv(s[0] | 0, s[1] | 0, s[2] | 0); }, [255, 255, 255], 'Recolor über Weiß');
+            addStrip(u => { const s = sampleList(RV_NATIVE, u); return RR.rvToRv(s[0] | 0, s[1] | 0, s[2] | 0); }, [8, 20, 42], 'Recolor über Dunkel');
+        }
     </script>
 </body>
 
