@@ -15,75 +15,35 @@ const Y_OFFSETS = {
     'mb-load-file':   -16,
 };
 
-function clearPopupPositions() {
-    el.miniStack.querySelectorAll('.mini-btn').forEach(b => {
-        b.style.left = '';
-        b.style.top  = '';
-    });
-}
-
-function openPopup(clientX, clientY) {
-    const W = 320, H = 260;
-    const rx = 105, ry = 95;
-    const x = Math.max(8, Math.min(clientX - W / 2, window.innerWidth  - W - 8));
-    const y = Math.max(8, Math.min(clientY - H / 2, window.innerHeight - H - 8));
-    el.miniStack.style.left = x + 'px';
-    el.miniStack.style.top  = y + 'px';
-    el.miniStack.classList.add('popup');
-
-    const btns = Array.from(el.miniStack.querySelectorAll('.mini-btn'));
+// Full-circle (ellipse) fan-out around the trigger point — info = { x, y } from the right-click /
+// long-press; the stack is clamped into the viewport, buttons sit on an ellipse (rx,ry), one per
+// 360°/n, with small per-button y nudges. Stays ROUND (not a half-circle like tracker/worldclock).
+function layout(stack, btns, info) {
+    const W = 320, H = 260, rx = 105, ry = 95;
+    const cx = info ? info.x : window.innerWidth / 2;
+    const cy = info ? info.y : window.innerHeight / 2;
+    stack.style.left = Math.max(8, Math.min(cx - W / 2, window.innerWidth  - W - 8)) + 'px';
+    stack.style.top  = Math.max(8, Math.min(cy - H / 2, window.innerHeight - H - 8)) + 'px';
     const n = btns.length;
     btns.forEach((b, i) => {
         const angle = (i / n) * 2 * Math.PI - Math.PI / 2;
-        const px = W / 2 + Math.cos(angle) * rx;
-        const py = H / 2 + Math.sin(angle) * ry + (Y_OFFSETS[b.id] || 0);
-        b.style.left = px + 'px';
-        b.style.top  = py + 'px';
+        b.style.left = (W / 2 + Math.cos(angle) * rx) + 'px';
+        b.style.top  = (H / 2 + Math.sin(angle) * ry + (Y_OFFSETS[b.id] || 0)) + 'px';
     });
 }
 
 export function attachPopup() {
-    // open via right-click
-    window.addEventListener('contextmenu', e => {
-        e.preventDefault();
-        openPopup(e.clientX, e.clientY);
+    // Shared radial widget (window.RadialMenu — js/radial-menu.js, loaded as a classic script before
+    // this module) owns open/close + the right-click / long-press / outside-close / tap-close
+    // mechanics; we supply only the round `layout` above. No hamburger → opens at the cursor.
+    window.RadialMenu({
+        stack: el.miniStack,
+        layout,
+        contextMenu: true,
+        longPress: 550,
+        closeOnButtonTap: true,
+        closeOnOutside: true,
     });
-
-    // long-press on touch
-    let lpTimer = null, lpStartX = 0, lpStartY = 0;
-    document.addEventListener('touchstart', e => {
-        if (e.target.closest('button, input, label')) return;
-        if (el.miniStack.classList.contains('popup')) return;
-        const t = e.touches[0];
-        lpStartX = t.clientX;
-        lpStartY = t.clientY;
-        clearTimeout(lpTimer);
-        lpTimer = setTimeout(() => { openPopup(lpStartX, lpStartY); lpTimer = null; }, 550);
-    }, { passive: true });
-    document.addEventListener('touchmove', e => {
-        const t = e.touches[0];
-        if (Math.abs(t.clientX - lpStartX) > 8 || Math.abs(t.clientY - lpStartY) > 8) {
-            clearTimeout(lpTimer); lpTimer = null;
-        }
-    }, { passive: true });
-    document.addEventListener('touchend',   () => { clearTimeout(lpTimer); lpTimer = null; });
-    document.addEventListener('touchcancel',() => { clearTimeout(lpTimer); lpTimer = null; });
-
-    // close on button click inside (click fires AFTER mousedown)
-    el.miniStack.addEventListener('click', e => {
-        if (e.target.tagName === 'BUTTON') {
-            el.miniStack.classList.remove('popup');
-            clearPopupPositions();
-        }
-    });
-    // close on click outside
-    document.addEventListener('mousedown', e => {
-        if (el.miniStack.classList.contains('popup') && !el.miniStack.contains(e.target)) {
-            el.miniStack.classList.remove('popup');
-            clearPopupPositions();
-        }
-    });
-
     wireButtons();
 }
 
