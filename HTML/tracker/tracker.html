@@ -588,7 +588,7 @@
             }
             centerStatLabel(elAlt, elAltLbl);
         }
-        setDist(0); setSpeed(0); setAlt(null);
+        setDist(0); setSpeed(0); setAlt(null); updateModeIcon(); // 0,0 → 🧍 (stehen) right away
 
         function setStatus(msg) { if (elStatus) elStatus.textContent = msg; } // status line removed — guard-safe no-op
 
@@ -1080,7 +1080,7 @@
             const id = currentTrackId;
             currentTrackId = null; currentTrackName = '';
             await clearTrack(true);
-            setDist(0); setSpeed(0); setAlt(null);
+            setDist(0); setSpeed(0); setAlt(null); updateModeIcon(); // 0,0 → 🧍 (stehen) right away
             try { if (typeof TrackBuffer !== 'undefined') await TrackBuffer.clear(); } catch (e) { }
             if (id != null) { try { await removeTrack(id); } catch (e) { toast('Cloud-Löschen fehlgeschlagen: ' + (e.message || e)); } }
             toast('Track verworfen.');
