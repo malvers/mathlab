@@ -357,23 +357,28 @@ const CyberBranding = {
         const EXIT_FS_SVG  = `<svg class="canvas-branding-fs-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4V10H20M10 20V14H4"/></svg>`;
         const currentIcon = () => (document.fullscreenElement ? EXIT_FS_SVG : ENTER_FS_SVG);
 
+        // Hide the fullscreen toggle inside the native Capacitor app — already immersive there.
+        const isNativeApp = !!(window.Capacitor && typeof window.Capacitor.isNativePlatform === "function" && window.Capacitor.isNativePlatform());
+
         const container = document.createElement('div');
         container.className = 'canvas-branding';
-        container.title = "Vollbild umschalten";
+        if (!isNativeApp) container.title = "Vollbild umschalten";
         container.innerHTML = `
-            <h1 id="branding-master-title">${currentIcon()}${topLine}</h1>
+            <h1 id="branding-master-title">${isNativeApp ? "" : currentIcon()}${topLine}</h1>
             <div class="canvas-subtitle" id="branding-module-title">${bottomLine}</div>
         `;
 
-        container.addEventListener('click', (e) => {
-            this.toggleFullscreen();
-        });
-        document.addEventListener('fullscreenchange', () => {
-            const h1 = container.querySelector('#branding-master-title');
-            if (!h1) return;
-            const oldIcon = h1.querySelector('.canvas-branding-fs-icon');
-            if (oldIcon) oldIcon.outerHTML = currentIcon();
-        });
+        if (!isNativeApp) {
+            container.addEventListener('click', (e) => {
+                this.toggleFullscreen();
+            });
+            document.addEventListener('fullscreenchange', () => {
+                const h1 = container.querySelector('#branding-master-title');
+                if (!h1) return;
+                const oldIcon = h1.querySelector('.canvas-branding-fs-icon');
+                if (oldIcon) oldIcon.outerHTML = currentIcon();
+            });
+        }
         const anchor =
             document.getElementById('main-content') ||
             document.getElementById('workspace') ||
