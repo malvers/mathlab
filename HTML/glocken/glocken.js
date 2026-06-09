@@ -11,19 +11,9 @@
   }
   window.dbg = dbg;
 
-  // ====================================================================
-  // LOCAL DEV ONLY — Google Cloud TTS API key bake-in.
-  // REMOVE THIS BLOCK BEFORE `git push` (repo is public).
-  // First load: seeds plain key → vault migration encrypts it on init.
-  // Subsequent loads: skipped if an encrypted key already exists.
-  // ====================================================================
-  const __DEV_GTTS_KEY = 'AIzaSyC12C7FjeQmk7ShpjDskIQhgPu4AuOwL8o';
-  if (__DEV_GTTS_KEY
-      && !localStorage.getItem('gctt_api_key')
-      && !localStorage.getItem('gctt_api_key_enc')) {
-    localStorage.setItem('gctt_api_key', __DEV_GTTS_KEY);
-  }
-  // ====================================================================
+  // No API key is baked in (repo is public, Rule 18). The Google-TTS key is entered ONCE in the
+  // settings (saveApiKey → AES-GCM vault, per device) and never lives in the source. The old leaked
+  // DEV-seed key was rotated + removed on 2026-06-09.
 
   // ===== Stars =====
   const starsEl = document.getElementById('stars');
@@ -1264,35 +1254,32 @@ Regeln:
       .replace(/\s*\[break:\d+(?:\.\d+)?s?\]\s*/gi, ' '); // [break:1s] → space
   }
 
+  // TTS via the Supabase edge-function proxy — the Google key lives ONLY server-side (GOOGLE_API_KEY
+  // secret), never in this public client. Sends { ssml, voice }, gets Google's { audioContent } back.
+  const TTS_PROXY_URL = 'https://fyfhxzyymmurlaenmzse.supabase.co/functions/v1/tts';
+  const TTS_SB_ANON = 'sb_publishable_ubQDiMD-X3N0vZvPVi229Q_-5Zootfk'; // publishable anon key — client-safe by design
   async function googleTTS(text) {
-    const key = gKey();
-    dbg('[TTS] googleTTS called', { hasKey: !!key, textLen: text?.length });
-    if (!key || !text) { dbg('[TTS] googleTTS bailing: no key or no text'); return null; }
+    dbg('[TTS] googleTTS called', { textLen: text?.length });
+    if (!text) { dbg('[TTS] googleTTS bailing: no text'); return null; }
     const voice = gVoice();
     const ssml = toSSML(text);
     const cacheKey = 'gctt_audio_v2_' + voice + '_' + hashStr(ssml);
     const cached = localStorage.getItem(cacheKey);
     if (cached) return cached;
     try {
-      const res = await fetch(
-        'https://texttospeech.googleapis.com/v1/text:synthesize?key=' + encodeURIComponent(key),
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            input: { ssml },
-            voice: { languageCode: 'de-DE', name: voice },
-            audioConfig: { audioEncoding: 'MP3', speakingRate: 0.95, pitch: -1.5 }
-          })
-        }
-      );
+      const res = await fetch(TTS_PROXY_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'apikey': TTS_SB_ANON, 'Authorization': 'Bearer ' + TTS_SB_ANON },
+        body: JSON.stringify({ ssml, voice }),
+      });
       if (!res.ok) {
         const body = await res.text();
-        dbg('[TTS] Google error ' + res.status + ': ' + body.slice(0, 400));
+        dbg('[TTS] proxy error ' + res.status + ': ' + body.slice(0, 400));
         return null;
       }
       const data = await res.json();
       const b64 = data.audioContent;
+      if (!b64) { dbg('[TTS] proxy: no audioContent'); return null; }
       try { localStorage.setItem(cacheKey, b64); } catch (e) { /* quota */ }
       return b64;
     } catch (e) {
