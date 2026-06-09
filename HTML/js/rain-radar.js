@@ -70,6 +70,13 @@
     // In Germany: sharp DWD 1 km (+2 h forecast) on TOP, with a RainViewer base underneath so the
     // rest of the view (NL, FR, …) is filled too. Elsewhere: RainViewer only. Set false → RV only.
     let dwdEnabled = true; // DEBUG: press 'd' to flip → RainViewer everywhere (incl. Germany)
+    // DWD's geoserver goes down for maintenance now and then (HTTP 503 HTML instead of tiles) → the
+    // DE composite tiles never load and the radar seems to "hang for hours" (REGEN-Bug 2026-06-09).
+    // dwdHealthy tracks that; pickProvider() checks it so we fall back to RainViewer when DWD is down
+    // — WITHOUT touching the manual 'd' key state (dwdEnabled). Re-probed on each (re)enable / provider
+    // switch, so a recovered DWD is used again automatically.
+    let dwdHealthy = true;
+    let dwdProbeAt = 0; // ms timestamp of the last probe (throttle)
     // DWD (sharp DE) kicks in as soon as Germany overlaps the VIEW at all — not just when the
     // map is centred there — so partial-DE views still get the sharp 1 km over the German part.
     function germanyInView() {
@@ -79,7 +86,32 @@
             && b.getWest() < GERMANY.e && b.getEast() > GERMANY.w;
     }
     function pickProvider() {
-        return (dwdEnabled && germanyInView()) ? 'dwd' : 'rv';
+        return (dwdEnabled && dwdHealthy && germanyInView()) ? 'dwd' : 'rv';
+    }
+    // Lightweight health probe: a tiny 2×2 GetMap. A healthy geoserver returns a PNG (img onload); a
+    // down one returns a 503 HTML page (img onerror). CORS-free (no canvas read here). Throttled.
+    function probeDwd() {
+        return new Promise(function (resolve) {
+            const now = Date.now();
+            if (now - dwdProbeAt < 60000) { resolve(dwdHealthy); return; } // reuse a recent result
+            dwdProbeAt = now;
+            const url = DWD_WMS + '?service=WMS&version=1.3.0&request=GetMap&layers=' +
+                encodeURIComponent(DWD_RV_LAYER) +
+                '&crs=EPSG:3857&bbox=600000,6000000,1600000,7000000&width=2&height=2' +
+                '&format=image/png&transparent=true&_=' + now;
+            const img = new Image();
+            let done = false;
+            function finish(ok) {
+                if (done) return; done = true;
+                dwdHealthy = ok;
+                dbg('RainRadar: DWD-Probe → ' + (ok ? 'OK' : 'DOWN → RainViewer'));
+                resolve(ok);
+            }
+            const to = setTimeout(function () { finish(false); }, 5000);
+            img.onload = function () { clearTimeout(to); finish(img.width > 0); };
+            img.onerror = function () { clearTimeout(to); finish(false); };
+            img.src = url;
+        });
     }
     // ISO without milliseconds (what WMS time dimensions expect): 2026-06-06T08:35:00Z
     function isoMin(ms) {
@@ -118,41 +150,22 @@
     // continuous intensity u∈[0,1], then sample an RV-like ramp at u. Continuous → the bilinear
     // smoothness survives (no re-banding). Set RECOLOR_DWD=false to fall back to DWD's own colours.
     const RECOLOR_DWD = true;
-    const DWD_STOPS = [ // light → heavy (0.1–0.2 … ≥150 mm/h)
-        [51, 255, 255], [26, 204, 154], [1, 153, 52], [77, 179, 27], [153, 204, 1],
-        [204, 230, 1], [255, 255, 1], [255, 196, 1], [255, 137, 1], [255, 69, 1],
-        [254, 0, 0], [229, 0, 76], [204, 0, 152], [102, 0, 203], [0, 0, 254]
-    ];
-    const RV_STOPS = [ // EXACT RainViewer "Universal Blue" (the scheme RV actually serves — identified
-        // 42/42 colour-match), from the official CSV (rainviewer.com/api/color-schemes). DWD mm/h →
-        // dBZ via Marshall-Palmer (dBZ = 23 + 16·log10 R) → that scheme's colour. tan(drizzle) → blue
-        // → yellow(≈5–7.5 mm/h) → orange → red → magenta(extreme).
-        [194, 180, 130], [222, 208, 151], [0, 163, 224], [0, 119, 170], [0, 91, 142],
-        [0, 78, 120], [255, 224, 0], [255, 197, 0], [255, 170, 0], [255, 129, 0],
-        [217, 27, 0], [168, 0, 0], [93, 0, 0], [255, 159, 255], [255, 119, 255]
-    ];
-    function sampleRamp(stops, u) {
-        const n = stops.length;
-        if (u <= 0) return stops[0];
-        if (u >= 1) return stops[n - 1];
-        const f = u * (n - 1), i = f | 0, t = f - i, a = stops[i], c = stops[i + 1];
-        return [(a[0] + (c[0] - a[0]) * t) | 0, (a[1] + (c[1] - a[1]) * t) | 0, (a[2] + (c[2] - a[2]) * t) | 0];
-    }
-    function dwdToRv(r, g, b) {
-        // nearest point on the DWD stop polyline → global intensity parameter u∈[0,1]
-        let bestD = Infinity, bestU = 0;
-        const n = DWD_STOPS.length;
-        for (let i = 0; i < n - 1; i++) {
-            const a = DWD_STOPS[i], c = DWD_STOPS[i + 1];
-            const dx = c[0] - a[0], dy = c[1] - a[1], dz = c[2] - a[2];
-            const len2 = dx * dx + dy * dy + dz * dz || 1;
-            let t = ((r - a[0]) * dx + (g - a[1]) * dy + (b - a[2]) * dz) / len2;
-            if (t < 0) t = 0; else if (t > 1) t = 1;
-            const px = a[0] + dx * t, py = a[1] + dy * t, pz = a[2] + dz * t;
-            const D = (r - px) * (r - px) + (g - py) * (g - py) + (b - pz) * (b - pz);
-            if (D < bestD) { bestD = D; bestU = (i + t) / (n - 1); }
-        }
-        return sampleRamp(RV_STOPS, bestU);
+    // Palettes live centrally in js/rain-palette.js; the recolour math in js/rain-recolor.js (single
+    // source of truth, both shared with debug.html). BOTH must be loaded BEFORE this file.
+    const RP = global.RainPalette || {};
+    const RV_STOPS = RP.RV_STOPS || [];                // still needed locally for the guards below
+    const RR = global.RainRecolor || {};
+    const dwdToRv = RR.dwdToRv;                          // DWD pixel → our ramp [r,g,b,af]
+    const rvToRv = RR.rvToRv;                            // RainViewer pixel → our ramp [r,g,b,af]
+    // Copy a RainViewer source pixel into the composite, recoloured through our ramp (so the EU fill
+    // around the German coverage matches the DE recolour — no raw tan bleeding in).
+    function writeRvPixel(d, i, rv) {
+        const ra = rv[i + 3];
+        if (ra === 0) { d[i + 3] = 0; return; }
+        if (!RV_STOPS.length) { d[i] = rv[i]; d[i + 1] = rv[i + 1]; d[i + 2] = rv[i + 2]; d[i + 3] = ra; return; }
+        const c = rvToRv(rv[i], rv[i + 1], rv[i + 2]);
+        d[i] = c[0]; d[i + 1] = c[1]; d[i + 2] = c[2];
+        d[i + 3] = (c[3] < 1) ? (ra * c[3]) | 0 : ra;
     }
 
     // `tb` = this tile's web-mercator bounds → used to look each pixel up in the coverage mask.
@@ -182,7 +195,7 @@
                         const mx = tb.minX + (xx + 0.5) / 256 * txSpan;
                         let covCol = ((mx - cMinX) * cInvW) | 0;
                         if (covCol < 0) covCol = 0; else if (covCol >= cw) covCol = cw - 1;
-                        if (cdata[covRow * cw + covCol]) { d[i] = rv[i]; d[i + 1] = rv[i + 1]; d[i + 2] = rv[i + 2]; d[i + 3] = rv[i + 3]; }
+                        if (cdata[covRow * cw + covCol]) writeRvPixel(d, i, rv);
                     }
                     continue;
                 }
@@ -193,7 +206,7 @@
                 if (mxc - mnc < 30) {
                     const avg = (r + g + b) / 3;
                     if (avg >= 85 && avg <= 170) {
-                        if (rv) { d[i] = rv[i]; d[i + 1] = rv[i + 1]; d[i + 2] = rv[i + 2]; d[i + 3] = rv[i + 3]; }
+                        if (rv) writeRvPixel(d, i, rv);
                         else d[i + 3] = 0;
                         continue;
                     }
@@ -203,9 +216,10 @@
                     d[i] = d[i + 1] = d[i + 2] = BOUNDARY_GREY;
                     d[i + 3] = Math.round(a * BOUNDARY_ALPHA_SCALE);
                 } else if (RECOLOR_DWD) {
-                    // DWD rain → remap its DWD-palette colour onto the RainViewer-style ramp (alpha kept)
+                    // DWD rain → remap its DWD-palette colour onto the RainViewer-style ramp
                     const c = dwdToRv(r, g, b);
                     d[i] = c[0]; d[i + 1] = c[1]; d[i + 2] = c[2];
+                    if (c[3] < 1) d[i + 3] = (d[i + 3] * c[3]) | 0; // faint trace drizzle
                 }
             }
         }
@@ -308,9 +322,57 @@
         const Cls = ensureFilteredClass();
         return Cls ? new Cls(DWD_WMS, opts) : L.tileLayer.wms(DWD_WMS, opts);
     }
+    // Recolour a RainViewer tile by remapping EVERY rain pixel through the ramp (rvToRv). Continuous
+    // → antialiased fringes recolour smoothly (no brown edges), and the gradient matches the DWD
+    // composite exactly. Pixels above the drizzle bins map onto unchanged colours, so only the tan
+    // low end actually shifts (to light blue + lower alpha).
+    function recolorRvTile(d) {
+        if (!RV_STOPS.length) return;
+        for (let i = 0; i < d.length; i += 4) {
+            const a = d[i + 3]; if (a === 0) continue;
+            const c = rvToRv(d[i], d[i + 1], d[i + 2]);
+            d[i] = c[0]; d[i + 1] = c[1]; d[i + 2] = c[2];
+            if (c[3] < 1) d[i + 3] = (a * c[3]) | 0;
+        }
+    }
+    function rvUrlFor(host, path, coords) {
+        let tz = coords.z, tx = coords.x, ty = coords.y;
+        if (tz > RV_MAX_NATIVE) { const s = tz - RV_MAX_NATIVE; tz = RV_MAX_NATIVE; tx = tx >> s; ty = ty >> s; }
+        return host + path + '/256/' + tz + '/' + tx + '/' + ty + '/2/1_1.png';
+    }
+    let FilteredRv = null;
+    function ensureFilteredRvClass() {
+        if (FilteredRv || typeof L === 'undefined') return FilteredRv;
+        FilteredRv = L.TileLayer.extend({
+            createTile: function (coords, done) {
+                const tile = document.createElement('canvas');
+                const size = this.getTileSize();
+                tile.width = size.x; tile.height = size.y;
+                const ctx = tile.getContext('2d', { willReadFrequently: true });
+                const img = new Image(); img.crossOrigin = 'anonymous';
+                const self = this;
+                img.onload = function () {
+                    try {
+                        drawRvForCoords(ctx, img, coords, size);
+                        const id = ctx.getImageData(0, 0, size.x, size.y);
+                        recolorRvTile(id.data);
+                        ctx.putImageData(id, 0, 0);
+                    } catch (e) {
+                        try { ctx.clearRect(0, 0, size.x, size.y); ctx.drawImage(img, 0, 0, size.x, size.y); } catch (_) {}
+                    }
+                    tile.complete = true;   // survive Leaflet's _abortLoading across zooms (see DWD note)
+                    done(null, tile);
+                };
+                img.onerror = function () { tile.complete = true; done(null, tile); };
+                img.src = rvUrlFor(self._rvHost, self._rvPath, coords);
+                return tile;
+            }
+        });
+        return FilteredRv;
+    }
     function rvLayer(host, frame) {
         // 256 = tile size · 2 = colour scheme "universal blue" · 1_1 = smoothed + show-snow
-        return L.tileLayer(host + frame.path + '/256/{z}/{x}/{y}/2/1_1.png', {
+        const opts = {
             pane: PANE_NAME,
             opacity: OPACITY,
             tileSize: 256,
@@ -318,7 +380,14 @@
             maxNativeZoom: 7,       // measured: z8+ returns a "Zoom Level Not Supported" placeholder
             maxZoom: 21,
             zIndex: 1,
-        });
+        };
+        const Cls = ensureFilteredRvClass();
+        if (Cls) {
+            const lyr = new Cls('', opts);     // createTile builds the URL from _rvHost/_rvPath
+            lyr._rvHost = host; lyr._rvPath = frame.path;
+            return lyr;
+        }
+        return L.tileLayer(host + frame.path + '/256/{z}/{x}/{y}/2/1_1.png', opts);
     }
 
     // Fetch the current RainViewer frame (host + latest observed path) into rvHost/rvPath, which
@@ -535,6 +604,10 @@
     // Build the timeline for the current position and show it; fall back to a single
     // latest frame (no slider) if the timeline can't be built.
     async function start() {
+        // DWD goes into maintenance (503) and then DE tiles never load ("REGEN dauert Stunden"). If
+        // DWD would be the source, probe it first; down → fall back to RainViewer (key state kept).
+        if (dwdEnabled && germanyInView()) await probeDwd();
+        if (!on) return;
         const which = pickProvider();
         let ok = false;
         try { ok = await buildFrames(which); }
