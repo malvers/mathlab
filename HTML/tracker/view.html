@@ -418,6 +418,32 @@
             }, POLL_MS);
         }
 
+        // Several shared tracks bundled in one link (?s=tok1,tok2,…) → coloured overlay (no live poll).
+        async function loadMulti(tokens) {
+            const COLORS = ['#f5c242', '#00d2ff', '#b02418', '#799e31', '#9d50bb', '#ff8c42'];
+            trackLayer.clearLayers();
+            wpMarkers.forEach(m => map.removeLayer(m)); wpMarkers = []; waypoints = [];
+            const all = [], names = []; let totalDist = 0;
+            for (let i = 0; i < tokens.length; i++) {
+                let row;
+                try { row = await fetchRow(tokens[i]); } catch (_) { continue; }
+                if (!row) continue;
+                const ll = (row.points || []).filter(p => p && p[0] != null).map(p => [p[0], p[1]]);
+                if (ll.length) {
+                    L.polyline(ll, { color: COLORS[i % COLORS.length], weight: 4, opacity: 0.9 }).addTo(trackLayer);
+                    ll.forEach(p => all.push(p));
+                }
+                (row.waypoints || []).forEach(w => addWaypoint(w));
+                totalDist += row.distance_m || 0;
+                names.push(row.name || 'Track');
+            }
+            if (!names.length) { $('msg').textContent = 'Keine Tracks gefunden — Link ungültig oder widerrufen.'; return; }
+            $('trk-name').textContent = names.length + ' Tracks';
+            setStats({ distM: totalDist, durMs: 0, fotos: waypoints.length, speedKmh: 0 });
+            if (all.length) map.fitBounds(L.latLngBounds(all), { padding: [50, 50] });
+            $('msg').classList.add('hidden');
+        }
+
         // ---- ask for a live code when the page is opened bare (no ?live / ?s) ----
         function showLiveCodePrompt() {
             $('msg').innerHTML = '<div style="text-align:center">'
@@ -439,7 +465,9 @@
             $('msg').classList.add('hidden');
             goLive(_liveName.trim().toLowerCase());
         } else if (_token) {
-            load(_token);
+            const _toks = _token.split(',').map(s => s.trim()).filter(Boolean);
+            if (_toks.length > 1) loadMulti(_toks);
+            else load(_toks[0] || _token);
         } else {
             showLiveCodePrompt();
         }

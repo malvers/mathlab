@@ -349,7 +349,7 @@ Deno.serve(async (req) => {
       // "Label:\tValue" lines — the client's lightbox renders these as a 2-column facts table.
       text = (gText ? gText.trimEnd() + '\n\n' : '') +
         'PlantNet:\t' + pnName + ' (' + pct + ' %)\n' +
-        'Google Gemini:\t' + (gTitle || 'unklar');
+        'Gemini:\t' + (gTitle || 'unklar');
       // POWO native range (best-effort) as a third row — the species' true "Heimat".
       const heimat = await powoPromise;
       if (heimat) text += '\nHeimat:\t' + heimat;

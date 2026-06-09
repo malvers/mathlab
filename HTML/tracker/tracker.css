@@ -56,6 +56,31 @@ path.pos-marker.pos-shown {
     opacity: 1;
 }
 
+/* Travel-direction triangle at the position dot — JS rotates it to the heading */
+.heading-icon {
+    background: none;
+    border: none;
+}
+.heading-arrow {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: flex-start; /* triangle sits at the TOP of the box = ahead of the dot */
+    justify-content: center;
+    transform-origin: 50% 50%; /* rotate around the dot in the centre */
+    will-change: transform;
+    pointer-events: none;
+}
+.heading-arrow svg {
+    width: 16px;
+    height: 16px;
+    margin-top: 1px;
+    fill: #fff;
+    stroke: rgba(8, 20, 42, 0.7);
+    stroke-width: 1.5;
+    stroke-linejoin: round;
+}
+
 /* ---- Top HUD: timer + stats ---- */
 #hud-top {
     position: fixed;
@@ -1057,6 +1082,13 @@ body.ui-idle #mic-fab {
     background: rgba(245, 194, 66, 0.22);
 }
 
+/* toggle ON (e.g. GLÄTTEN active) → green, mirroring the old popup toggle */
+.sync-btn.active {
+    background: rgba(121, 158, 49, 0.18);
+    border-color: var(--green);
+    color: var(--green);
+}
+
 /* ---- Simplified sync panel: state-driven ---- */
 /* Settings dialog cards (Sync is the first one) */
 .set-card {
@@ -1073,6 +1105,38 @@ body.ui-idle #mic-fab {
     letter-spacing: 1.5px;
     color: var(--orange);
     margin-bottom: 4px;
+    cursor: pointer; /* the title toggles the card open/closed */
+    position: relative;
+    padding-right: 22px; /* room for the chevron */
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+/* collapse chevron — points down when open, right when collapsed */
+.set-card-title::after {
+    content: '';
+    position: absolute;
+    right: 4px;
+    top: calc(50% - 5px);
+    width: 7px;
+    height: 7px;
+    border-right: 2px solid var(--orange);
+    border-bottom: 2px solid var(--orange);
+    transform: rotate(45deg);
+    transition: transform 0.2s ease;
+}
+
+.set-card.collapsed .set-card-title::after {
+    transform: rotate(-45deg);
+}
+
+.set-card.collapsed .set-card-title {
+    margin-bottom: 0; /* tighten the collapsed bar */
+}
+
+/* collapsed → show only the title, hide the card body */
+.set-card.collapsed > :not(.set-card-title) {
+    display: none;
 }
 
 .set-card-sub {
@@ -1212,11 +1276,11 @@ body.ui-idle #mic-fab {
 .tl-main {
     flex: 1;
     min-width: 0;
-    /* name + meta on ONE line: name left (truncates), date · km right */
+    /* two lines on the phone: name/date on top (fully visible), stats below */
     display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 10px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
 }
 
 .tl-name {
@@ -1233,6 +1297,118 @@ body.ui-idle #mic-fab {
     color: rgba(255, 255, 255, 0.5);
     flex: none;
     white-space: nowrap;
+}
+
+/* row badge (OUR pin style), shown BEFORE the name: blue speaker (voice) / green camera (photos) */
+.tl-badge {
+    position: relative;
+    flex: none;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.tl-badge.voice { background: rgb(56, 120, 190); }   /* like the voice pin */
+.tl-badge.cam   { background: rgb(121, 158, 49); }   /* like a recognised photo pin */
+.tl-badge.track { background: transparent; border: none; box-shadow: none; } /* the app icon is self-contained */
+.tl-badge.track .tl-appicon { width: 30px; height: 30px; display: block; border-radius: 8px; }
+
+/* multi-select: custom checkbox (before the icon) — dark rounded box, green tick when checked */
+.tl-check {
+    flex: none;
+    width: 20px;
+    height: 20px;
+    margin: 0;
+    -webkit-appearance: none;
+    appearance: none;
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    border-radius: 6px;
+    background: rgba(8, 20, 42, 0.6);
+    cursor: pointer;
+    position: relative;
+    transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.tl-check:hover { border-color: var(--green); }
+
+.tl-check:checked {
+    background: var(--green);
+    border-color: var(--green);
+}
+
+.tl-check:checked::after {
+    content: '';
+    position: absolute;
+    left: 5px;
+    top: 1px;
+    width: 6px;
+    height: 11px;
+    border: solid #fff;
+    border-width: 0 2.5px 2.5px 0;
+    transform: rotate(45deg);
+}
+
+/* action bar (shown when ≥1 selected): "Abwählen" + "Auswahl laden (N)" */
+#tl-actions {
+    display: none;
+    gap: 8px;
+    margin: 8px 14px 2px;
+}
+
+#tl-actions.show { display: flex; }
+
+#tl-loadsel {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    border-radius: 10px;
+    background: var(--green);
+    color: #fff;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+}
+
+#tl-deselect, #tl-sharesel {
+    flex: none;
+    padding: 10px 13px;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 10px;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.8);
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.64rem;
+    letter-spacing: 0.06em;
+    cursor: pointer;
+}
+
+.tl-badge svg {
+    width: 15px;
+    height: 15px;
+    stroke: #fff;
+}
+
+/* photo-count chip on the camera badge */
+.tl-badge-n {
+    position: absolute;
+    bottom: -5px;
+    right: -6px;
+    min-width: 17px;
+    height: 16px;
+    padding: 0 3px;
+    box-sizing: border-box;
+    border-radius: 9px;
+    background: rgb(8, 20, 42);
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    color: #fff;
+    font: 700 0.58rem/14px Arial, sans-serif;
+    text-align: center;
 }
 
 .tl-del {
@@ -1256,6 +1432,7 @@ body.ui-idle #mic-fab {
     flex: none;
     width: 34px;
     height: 34px;
+    margin-right: 8px; /* nudge the share icon a bit left, off the panel edge / scrollbar */
     display: inline-flex;
     align-items: center;
     justify-content: center;
