@@ -2484,10 +2484,14 @@ ${pts}
             else wire();
         })();
 
-        // Settings cards are collapsible (default collapsed) — tapping a title toggles its card.
+        // Settings cards are collapsible (default collapsed).
+        // Collapsed → tapping anywhere on the card expands it (big touch target, easy on phones).
+        // Expanded  → only the title bar collapses it, so body controls (checkboxes/buttons) keep working.
         $('settings-panel').addEventListener('click', (e) => {
-            const t = e.target.closest('.set-card-title');
-            if (t && t.parentElement) t.parentElement.classList.toggle('collapsed');
+            const card = e.target.closest('.set-card');
+            if (!card) return;
+            if (card.classList.contains('collapsed')) card.classList.remove('collapsed');
+            else if (e.target.closest('.set-card-title')) card.classList.add('collapsed');
         });
         $('sync-connect').addEventListener('click', async () => {
             const code = $('sync-input').value.trim();

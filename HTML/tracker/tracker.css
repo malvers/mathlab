@@ -1240,21 +1240,22 @@ body.ui-idle #mic-fab {
     margin-bottom: 4px;
     cursor: pointer; /* the title toggles the card open/closed */
     position: relative;
-    padding-right: 22px; /* room for the chevron */
+    padding: 6px 30px 6px 0; /* taller hit area + room for the bigger chevron */
     user-select: none;
     -webkit-user-select: none;
 }
 
-/* collapse chevron — points down when open, right when collapsed */
+/* collapse chevron — points down when open, right when collapsed.
+   Sits in a wide invisible hit zone so it is easy to tap on phones. */
 .set-card-title::after {
     content: '';
     position: absolute;
-    right: 4px;
-    top: calc(50% - 5px);
-    width: 7px;
-    height: 7px;
-    border-right: 2px solid var(--orange);
-    border-bottom: 2px solid var(--orange);
+    right: 6px;
+    top: calc(50% - 6px);
+    width: 10px;
+    height: 10px;
+    border-right: 2.5px solid var(--orange);
+    border-bottom: 2.5px solid var(--orange);
     transform: rotate(45deg);
     transition: transform 0.2s ease;
 }
