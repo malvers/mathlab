@@ -16,7 +16,10 @@
         let html = '';
         for (let g = 0; g < groups; g++) {
             if (g > 0) html += '<span class="cc-sep">:</span>';
-            html += '<span class="cc-d"></span><span class="cc-d"></span>';
+            // Pair the two digits in a fixed-width, centred group → the time + colons never shift,
+            // but the digits sit at their NATURAL spacing inside (a clipped per-digit slot made
+            // "00" look crammed, and the colon off-centre next to a narrow "1").
+            html += '<span class="cc-grp"><span class="cc-d"></span><span class="cc-d"></span></span>';
         }
         el.innerHTML = html;
         el._ccDigits = el.querySelectorAll('.cc-d');              // cache for cheap updates
