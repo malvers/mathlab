@@ -1897,15 +1897,13 @@ function toggleSidebar() {
             if (s.startsWith('\\[') && s.endsWith('\\]')) return s.slice(2, -2).trim();
             return s;
         }
+        // Gemini proxy — the API key lives server-side as the GEMINI_API_KEY secret, never in this
+        // public client (Rule 18). We POST { model, body } and get Gemini's response verbatim.
+        const GEMINI_PROXY_URL = 'https://fyfhxzyymmurlaenmzse.supabase.co/functions/v1/gemini';
+        const GEMINI_SB_ANON   = 'sb_publishable_ubQDiMD-X3N0vZvPVi229Q_-5Zootfk'; // publishable anon key — client-safe
+
         async function recognize() {
-            const apiKey = document.getElementById('g-api-key').value.trim();
             const model  = document.getElementById('g-model').value;
-            if (!apiKey) {
-                DebugWindow.log('⚠ API-Key fehlt');
-                setLatexResult('⚠ API-Key fehlt');
-                return;
-            }
-            try { localStorage.setItem('eocr-g-key', apiKey); } catch (_) {}
             try { localStorage.setItem('eocr-g-model', model); } catch (_) {}
 
             // Pipeline before sending: (a) optional downsample via slider,
@@ -1936,8 +1934,8 @@ function toggleSidebar() {
             // Gemini wants bare base64 in inline_data — strip the data-URL prefix.
             const b64 = dataUrl.split(',', 2)[1];
 
-            DebugWindow.log(`▶ Gemini ${model} (key: …${apiKey.slice(-4)}, b64: ${b64.length} chars)`);
-            console.log('Gemini recognize() start', { model, keyTail: apiKey.slice(-4), b64Len: b64.length });
+            DebugWindow.log(`▶ Gemini ${model} (b64: ${b64.length} chars)`);
+            console.log('Gemini recognize() start', { model, b64Len: b64.length });
             setLatexResult('⏳ Lade…');
             // Show the squiri spinner in the upper half while we await Gemini.
             // renderLatex(latex) overwrites innerHTML when the result arrives.
@@ -1945,7 +1943,7 @@ function toggleSidebar() {
                 '<div class="squiri"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>';
             clearOverlay();
 
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(apiKey)}`;
+            const url = GEMINI_PROXY_URL;
             // Gemini bounding boxes were unreliable — drop them entirely.
             // We still ask for a per-glyph token list (labels only, no boxes)
             // for downstream character-level matching against a LaTeX target.
@@ -1992,8 +1990,8 @@ function toggleSidebar() {
                 DebugWindow.log(`  → fetch POST ${model}:generateContent`);
                 const res = await fetch(url, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(body)
+                    headers: { 'Content-Type': 'application/json', 'apikey': GEMINI_SB_ANON, 'Authorization': 'Bearer ' + GEMINI_SB_ANON },
+                    body: JSON.stringify({ model, body })
                 });
                 DebugWindow.log(`  ← HTTP ${res.status} ${res.statusText} (${Math.round(performance.now() - t0)}ms)`);
                 console.log('Gemini response', res.status, res.statusText);

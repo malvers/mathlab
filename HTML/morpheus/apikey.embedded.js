@@ -1,27 +1,11 @@
-// Embedded Gemini API key — committed to the repo so deploys (docalvers.de
-// etc.) have a working fallback without each environment needing to drop in
-// apikey.local.js. Same XOR + base64 obfuscation as apikey.local.js.
+// NEUTRALISIERT 2026-06-09 (Rule 18 — repo is public).
 //
-// ⚠ This is OBFUSCATION, not encryption. Anyone who reads this file + the
-//    decode loop below can recover the plaintext. For a public GitHub repo
-//    that means the key is effectively public. Protect it via Google Cloud
-//    "API key restrictions" (allowed referrers + locked-down API surface)
-//    rather than relying on this file to keep it secret.
+// This file used to embed a Gemini API key (XOR+base64 obfuscation = effectively plaintext in a
+// public repo). The leaked key was ROTATED in Google Cloud and is now dead. equationocr.html no
+// longer needs a client-side key: it calls the "gemini" Edge Function
+// (https://.../functions/v1/gemini), which injects the GEMINI_API_KEY *server-side* secret.
 //
-// Override mechanism: apikey.local.js (gitignored) loads AFTER this file
-// and replaces window.GEMINI_API_KEY when present, so local development
-// can use a different key without touching this committed file.
-(function () {
-    var BLOB = "LCYIETscNxdVU1RwD0pUFS1dVR4eUgIiD1orJCIPKgthWFJ0T2JQ";
-    var PASS = "morpheus-2026-doc-alvers";
-    try {
-        var raw = atob(BLOB);
-        var out = "";
-        for (var i = 0; i < raw.length; i++) {
-            out += String.fromCharCode(raw.charCodeAt(i) ^ PASS.charCodeAt(i % PASS.length));
-        }
-        window.GEMINI_API_KEY = out;
-    } catch (e) {
-        // atob failure or similar — silently leave key undefined.
-    }
-})();
+// Do NOT bake any key back in here. For local overrides, apikey.local.js (gitignored) may still set
+// window.GEMINI_API_KEY, but production no longer uses it.
+//
+// (No key set on purpose.)
