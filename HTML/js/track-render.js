@@ -87,9 +87,11 @@
         L.polyline(seg, { color: 'rgb(176,36,24)', weight: 4, dashArray: '10 10', dashOffset: '10', interactive: false }).addTo(ctx.layer);
     }
 
-    // Rebuild: split into runs at gaps AND at mode changes; each run coloured by its mode.
-    function redraw(ctx) {
-        ctx.layer.clearLayers();
+    // Draw one track's runs+gaps INTO the layer WITHOUT clearing it first — split into runs at gaps
+    // AND at mode changes, each run speed-coloured by its mode. Because it does not clear, several
+    // tracks can be overlaid on the same layer and each keeps its own speed colours (never a flat
+    // per-track colour just because more than one is shown).
+    function draw(ctx) {
         if (!ctx.track.length) return;
         let run = [0];
         let runAct = ctx.activities[0] || 'unknown';
@@ -102,8 +104,14 @@
         drawRun(ctx, run, runAct);
     }
 
+    // Rebuild a single track: clear the layer, then draw it.
+    function redraw(ctx) {
+        ctx.layer.clearLayers();
+        draw(ctx);
+    }
+
     global.TrackRender = {
         MAX_KMH, COL_ORANGE, SPEED_PALETTE, MODE_COLORS, GAP_SEC, GAP_M,
-        speedToScale, haversine, isGap, drawRun, drawGap, redraw,
+        speedToScale, haversine, isGap, drawRun, drawGap, draw, redraw,
     };
 })(window);

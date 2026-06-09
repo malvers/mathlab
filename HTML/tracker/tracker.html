@@ -146,6 +146,16 @@
     </button>
     <div id="mic-timer" aria-live="polite"></div>
 
+    <!-- Video (below the mic) → Video-Spur: record a short clip, pin it on the track -->
+    <button id="vid-fab" aria-label="Video aufnehmen" title="Video aufnehmen">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round">
+            <polygon points="23 7 16 12 23 17 23 7"></polygon>
+            <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
+        </svg>
+    </button>
+    <input id="vid-input" type="file" accept="video/*" capture="environment" style="display:none">
+
     <!-- Left-edge menu hamburger (vertically centred) → opens the radial popup -->
     <button id="menu-fab" aria-label="Menü" title="Menü"><span></span><span></span><span></span></button>
 
@@ -231,6 +241,7 @@
             <div class="set-card-title">Tracks</div>
             <p class="set-card-sub">Werkzeuge für den angezeigten Track.</p>
             <button class="sync-btn primary" id="mb-smooth" type="button">GLÄTTEN</button>
+            <button class="sync-btn primary" id="mb-dem" type="button">HÖHE NACH GELÄNDEMODELL KORRIGIEREN</button>
           </div><!-- /set-card -->
 
           <!-- Card: Statistik — actual consumption (estimate from the stored photos) -->
@@ -308,7 +319,7 @@
         // so the main init below still finds RainRadar/DebugWindow/PhotoFullscreen ready.
         (function () {
             var v = window.__ASSET_V || '';
-            var js = ['../js/track-render.js', '../js/track-smooth.js', '../js/track-buffer.js', '../js/rain-palette.js', '../js/rain-recolor.js', '../js/rain-radar.js', '../js/cyber-clock.js', '../js/debug-window.js', '../js/photo-fullscreen.js', '../js/photo-layer.js', '../js/voice-note.js', '../js/app-update.js', '../js/radial-menu.js', '../js/tracker-media.js'];
+            var js = ['../js/track-render.js', '../js/track-smooth.js', '../js/track-dem.js', '../js/track-buffer.js', '../js/rain-palette.js', '../js/rain-recolor.js', '../js/rain-radar.js', '../js/cyber-clock.js', '../js/debug-window.js', '../js/photo-fullscreen.js', '../js/photo-layer.js', '../js/voice-note.js', '../js/app-update.js', '../js/radial-menu.js', '../js/upload-media.js', '../js/tracker-media.js'];
             for (var i = 0; i < js.length; i++) document.write('<script src="' + js[i] + v + '"><\/script>');
         })();
     </script>

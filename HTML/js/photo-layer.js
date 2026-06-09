@@ -18,23 +18,27 @@
     const MIC_PIN_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>';
     // Speaker glyph — the voice note's BIG lightbox visual. The map pin keeps the mic.
     const SPEAKER_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>';
+    // Video-camera glyph for video waypoints (Video-Spur). The lightbox itself shows a real <video>.
+    const VIDEO_PIN_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>';
     const $ = (id) => document.getElementById(id);
 
     // Status pin: green = recognised (.done), orange pulse = identifying (.pending), red = failed.
     // Voice waypoints get the mic glyph on their own dot (.voice) so they read differently from photos.
     function pinIcon(wp, count) {
         const isVoice = wp && wp.type === 'voice';
-        let state = isVoice ? ' voice' : ' done';
-        if (!isVoice) {
+        const isVideo = wp && wp.type === 'video';
+        let state = isVoice ? ' voice' : (isVideo ? ' video' : ' done');
+        if (!isVoice && !isVideo) {
             if (wp.title === PENDING_TITLE) state = ' pending';
             else if (!wp.title || wp.title === FAIL_TITLE) state = ' failed';
         }
         // count >= 2 → several waypoints sit on the exact same spot; show a tally
         // badge on the top-most pin so the stack is visible before you even tap it.
         const badge = (count && count > 1) ? '<span class="wp-badge">' + count + '</span>' : '';
+        const glyph = isVoice ? SPEAKER_SVG : (isVideo ? VIDEO_PIN_SVG : CAM_PIN_SVG);
         return global.L.divIcon({
             className: 'wp-pin',
-            html: '<div class="wp-dot' + state + '">' + (isVoice ? SPEAKER_SVG : CAM_PIN_SVG) + '</div>' + badge,
+            html: '<div class="wp-dot' + state + '">' + glyph + '</div>' + badge,
             iconSize: [30, 30], iconAnchor: [15, 30], popupAnchor: [0, -30],
         });
     }
@@ -48,19 +52,26 @@
     //   - Without `map`: falls back to exact-coordinate grouping (zoom-independent).
     // Each marker must carry its waypoint as `m._wp`. The chosen count is stored on `m._badge`
     // so a fan-out can strip the badge and the collapse can restore it.
-    const STACK_PX = 26; // keep in sync with tracker-media.js FAN_DETECT_PX
+    const STACK_PX = 26;     // keep in sync with tracker-media.js FAN_DETECT_PX
+    const STACK_TOP_Z = 900; // raise the badged pin above its plain stackmates (pending = 2000 still wins)
     function exactKey(wp) {
         return (Number(wp && wp.lat) || 0).toFixed(5) + ',' + (Number(wp && wp.lng) || 0).toFixed(5);
     }
-    // `topIdx` = the group member Leaflet actually draws on top, so the badge lands on the
-    // VISIBLE pin (not one hidden underneath). The rest stay plain.
+    function isPending(m) { return !!(m && m._wp && m._wp.title === PENDING_TITLE); }
+    // Badge the group member that ends up on top, and FORCE it on top via zIndexOffset so a
+    // y-tie / DOM-order quirk can't hide the badge behind a sibling. A pending pin is already
+    // force-raised (z 2000) elsewhere, so if the stack has one, the badge goes there instead.
     function stampGroup(group, topIdx) {
         const count = group.length;
-        if (topIdx == null) topIdx = count - 1;
+        const pIdx = group.findIndex(isPending);
+        if (pIdx !== -1) topIdx = pIdx;
+        else if (topIdx == null) topIdx = count - 1;
         group.forEach((m, i) => {
             const badge = (count > 1 && i === topIdx) ? count : 0;
             m._badge = badge;
             m.setIcon(pinIcon(m._wp, badge));
+            // leave pending pins' own z (2000) untouched; raise/relax everyone else
+            if (!isPending(m)) m.setZIndexOffset(badge ? STACK_TOP_Z : 0);
         });
     }
     function applyStackBadges(markers, map) {
@@ -79,25 +90,31 @@
             return;
         }
 
-        // pixel-distance clustering (greedy, seed = first un-grouped marker)
+        // pixel-distance clustering by CONNECTED COMPONENTS (BFS): every pin that overlaps
+        // any other pin in the blob joins the same group, so a dense cluster yields ONE badge
+        // (not several adjacent ones whose pins would cover each other's corners).
+        const n = valid.length;
         const pts = valid.map(m => map.latLngToLayerPoint(m.getLatLng()));
-        const used = new Array(valid.length).fill(false);
-        for (let i = 0; i < valid.length; i++) {
-            if (used[i]) continue;
-            const group = [valid[i]];
-            const ys = [pts[i].y];
-            used[i] = true;
-            for (let j = i + 1; j < valid.length; j++) {
-                if (!used[j] && pts[i].distanceTo(pts[j]) <= STACK_PX) {
-                    group.push(valid[j]);
-                    ys.push(pts[j].y);
-                    used[j] = true;
+        const seen = new Array(n).fill(false);
+        for (let i = 0; i < n; i++) {
+            if (seen[i]) continue;
+            const comp = [i];
+            seen[i] = true;
+            const queue = [i];
+            while (queue.length) {
+                const a = queue.pop();
+                for (let k = 0; k < n; k++) {
+                    if (!seen[k] && pts[a].distanceTo(pts[k]) <= STACK_PX) {
+                        seen[k] = true;
+                        comp.push(k);
+                        queue.push(k);
+                    }
                 }
             }
             // Leaflet stacks markers by projected y (south = larger y = drawn on top).
-            let topIdx = 0;
-            for (let k = 1; k < ys.length; k++) if (ys[k] > ys[topIdx]) topIdx = k;
-            stampGroup(group, topIdx);
+            let topLocal = 0;
+            for (let t = 1; t < comp.length; t++) if (pts[comp[t]].y > pts[comp[topLocal]].y) topLocal = t;
+            stampGroup(comp.map(idx => valid[idx]), topLocal);
         }
     }
 
@@ -199,10 +216,15 @@
         const wp = list[i];
         if (!wp) return;
         idx = i;
-        const img = $('lightbox-img'), au = $('lightbox-audio'), vi = $('lightbox-voice'), lb = $('photo-lightbox'), lbp = $('lb-player');
+        const img = $('lightbox-img'), au = $('lightbox-audio'), vi = $('lightbox-voice'),
+            vid = $('lightbox-video'), lb = $('photo-lightbox'), lbp = $('lb-player');
+        // stop any currently-playing media first
+        if (au) { try { au.pause(); } catch (_) {} au.removeAttribute('src'); }
+        if (vid) { try { vid.pause(); } catch (_) {} }
         if (wp.type === 'voice') {
             // Voice waypoint → big speech icon in the photo's place + a centred audio player.
             if (img) { img.removeAttribute('src'); img.style.display = 'none'; }
+            if (vid) { vid.removeAttribute('src'); vid.style.display = 'none'; }
             if (vi) vi.classList.add('show');
             if (lb) lb.classList.add('lb-voice');   // centre title + duration (voice only)
             if (lbp) lbp.classList.add('show');
@@ -210,10 +232,19 @@
             $('lightbox-title').textContent = wp.title || 'Sprachnotiz';
             const head = wp.dur ? Number(wp.dur).toFixed(1) + ' s' : '';
             $('lightbox-text').textContent = wp.text ? (head ? head + ' — ' + wp.text : wp.text) : head;
-        } else {
-            if (au) { try { au.pause(); } catch (_) {} au.removeAttribute('src'); }
+        } else if (wp.type === 'video') {
+            // Video waypoint → a real <video> player in the photo's place (native controls).
+            if (img) { img.removeAttribute('src'); img.style.display = 'none'; }
             if (lbp) lbp.classList.remove('show');
             if (vi) vi.classList.remove('show');
+            if (lb) lb.classList.remove('lb-voice');
+            if (vid) { vid.src = wp.video || ''; vid.style.display = ''; }
+            $('lightbox-title').textContent = wp.title || 'Video';
+            $('lightbox-text').textContent = wp.text || '';
+        } else {
+            if (lbp) lbp.classList.remove('show');
+            if (vi) vi.classList.remove('show');
+            if (vid) { vid.removeAttribute('src'); vid.style.display = 'none'; }
             if (lb) lb.classList.remove('lb-voice');
             if (img) { img.src = wp.img; img.style.display = ''; }
             $('lightbox-title').textContent = wp.title || '';
@@ -235,6 +266,7 @@
         exitFs(); // …and leave web OS-fullscreen if the toggle button put us there
         $('lightbox-img').removeAttribute('src');
         const au = $('lightbox-audio'); if (au) { try { au.pause(); } catch (_) {} au.removeAttribute('src'); }
+        const vid = $('lightbox-video'); if (vid) { try { vid.pause(); } catch (_) {} vid.removeAttribute('src'); }
         clearTimeout(navTimer);
         const nav = $('lightbox-nav'); if (nav) nav.classList.remove('faded');
         idx = -1; list = [];
@@ -266,7 +298,7 @@
                 '<button id="lightbox-fs" aria-label="Vollbild umschalten" title="Vollbild"></button>' +
                 '<button id="lightbox-close" aria-label="Schließen">&times;</button>' +
                 '<div id="lightbox-count"></div>' +
-                '<div class="lb-inner"><img id="lightbox-img" alt="" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=="><div id="lightbox-voice">' + SPEAKER_SVG + '</div><div id="lb-player"><button id="lb-play" aria-label="Abspielen/Pause"></button><div id="lb-track"><div id="lb-fill"></div></div><span id="lb-time">0:00 / 0:00</span><audio id="lightbox-audio" preload="metadata"></audio></div><div id="lightbox-title"></div><div id="lightbox-text"></div></div>' +
+                '<div class="lb-inner"><img id="lightbox-img" alt="" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=="><video id="lightbox-video" playsinline preload="metadata" controls style="display:none"></video><div id="lightbox-voice">' + SPEAKER_SVG + '</div><div id="lb-player"><button id="lb-play" aria-label="Abspielen/Pause"></button><div id="lb-track"><div id="lb-fill"></div></div><span id="lb-time">0:00 / 0:00</span><audio id="lightbox-audio" preload="metadata"></audio></div><div id="lightbox-title"></div><div id="lightbox-text"></div></div>' +
                 '<div id="lightbox-nav">' +
                 '<button class="lb-arrow" id="lb-prev" aria-label="Vorheriges Foto"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg></button>' +
                 '<button class="lb-arrow" id="lb-next" aria-label="Nächstes Foto"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg></button>' +
@@ -312,6 +344,20 @@
                 v.innerHTML = SPEAKER_SVG;
                 const p = $('lb-player');
                 if (p && p.parentNode === inner) inner.insertBefore(v, p);
+                else inner.appendChild(v);
+            }
+        }
+        // …and a real <video> for video waypoints (a host's inline lightbox predates the Video-Spur).
+        if (!$('lightbox-video')) {
+            const inner = document.querySelector('#photo-lightbox .lb-inner') || $('photo-lightbox');
+            if (inner) {
+                const v = document.createElement('video');
+                v.id = 'lightbox-video';
+                v.setAttribute('playsinline', '');
+                v.controls = true; v.preload = 'metadata';
+                v.style.display = 'none';
+                const im = $('lightbox-img');
+                if (im && im.parentNode === inner) inner.insertBefore(v, im.nextSibling);
                 else inner.appendChild(v);
             }
         }
