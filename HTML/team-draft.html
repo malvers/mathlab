@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DOC ALVERS – TEAM OPS (DRAFT)</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;800;900&family=Raleway:wght@300;400;500;600&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet">
+    <link rel="icon" type="image/png" href="resources/favicon.png">
+    <link rel="stylesheet" href="js/cyber-layout.css">
+    <link rel="stylesheet" href="js/buttons-ultra.css">
+    <link rel="stylesheet" href="js/cyber-lab-overrides.css">
+    <link rel="stylesheet" href="js/branding.styles.extracted.css">
+    <style>
+        :root {
+            --accent: #00d2ff;
+            --accent-2: #9d50bb;
+        }
+
+        /* Normal scrolling page — no poster-scale, no fixed mini-rail slot */
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: #000616 !important;
+            overflow-x: hidden;
+            overflow-y: auto;
+            grid-template-columns: minmax(0, 1fr) !important;
+            grid-template-rows: auto !important;
+        }
+
+        #main-content {
+            grid-column: 1 !important;
+            height: auto !important;
+            min-height: 100vh !important;
+            overflow: visible !important;
+            background: #000616 !important;
+        }
+
+        .team-container {
+            width: 100%;
+            max-width: 1320px;
+            margin: 0 auto;
+            padding: 48px 24px 80px;
+            text-align: center;
+            animation: fadeIn 0.7s ease-out;
+            box-sizing: border-box;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(18px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ---------- HEADER ---------- */
+        .team-title {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            margin: 0 0 6px;
+        }
+        .team-title span {
+            background: linear-gradient(to right, var(--accent), #ffffff, var(--accent-2));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            color: transparent;
+            filter: drop-shadow(0 0 15px rgba(0, 210, 255, 0.3));
+            font-family: 'Orbitron';
+            font-size: clamp(1.8rem, 5vw, 3rem);
+            line-height: 1.1;
+        }
+        .team-subtitle {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 10px;
+            letter-spacing: 3px;
+            color: rgba(0, 210, 255, 0.6);
+            margin-bottom: 48px;
+        }
+
+        /* ---------- GRID ---------- */
+        .team-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+            gap: 20px;
+            width: 100%;
+        }
+
+        .team-member {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(0, 210, 255, 0.12);
+            border-radius: 16px;
+            padding: 22px;
+            display: flex;
+            align-items: center;
+            gap: 22px;
+            transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+                        border-color 0.35s ease, box-shadow 0.35s ease, background 0.35s ease;
+            text-align: left;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+            height: 100%;
+            box-sizing: border-box;
+        }
+
+        .team-member:hover {
+            background: rgba(0, 210, 255, 0.07);
+            border-color: rgba(0, 210, 255, 0.5);
+            box-shadow: 0 15px 35px rgba(0, 210, 255, 0.15);
+            transform: translateY(-5px);
+        }
+
+        /* Pets get a warm accent so the joke reads at a glance */
+        .team-member.is-pet { border-color: rgba(245, 194, 66, 0.22); }
+        .team-member.is-pet:hover {
+            background: rgba(245, 194, 66, 0.07);
+            border-color: rgba(245, 194, 66, 0.5);
+            box-shadow: 0 15px 35px rgba(245, 194, 66, 0.15);
+        }
+        .team-member.is-pet .member-photo { border-color: rgba(245, 194, 66, 0.45); box-shadow: 0 0 15px rgba(245, 194, 66, 0.2); }
+        .team-member.is-pet .member-name  { color: rgb(245, 194, 66); }
+        .team-member.is-pet .member-role  { color: rgba(245, 194, 66, 0.75); }
+
+        .member-photo {
+            width: 110px;
+            height: 110px;
+            border-radius: 12px;
+            border: 2px solid rgba(0, 210, 255, 0.4);
+            flex-shrink: 0;
+            background-size: cover;
+            background-position: center;
+            box-shadow: 0 0 15px rgba(0, 210, 255, 0.2);
+            cursor: zoom-in;
+            transition: transform 0.3s ease;
+        }
+        .member-photo:hover { transform: scale(1.04); }
+
+        .member-info { flex: 1; min-width: 0; }
+        .member-name { font-size: 1.3rem; color: var(--accent); margin-bottom: 5px; text-transform: uppercase; letter-spacing: 2px; font-family: 'Orbitron'; }
+        .member-role { font-size: 0.8rem; color: var(--accent-2); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; font-weight: 600; font-family: 'Orbitron'; }
+        .member-desc { font-size: 0.95rem; color: rgba(255, 255, 255, 0.85); line-height: 1.6; font-family: 'Raleway', sans-serif; font-weight: 400; }
+        .member-desc strong { color: #ffffff; }
+        .member-desc .mirror { display: inline-block; transform: scaleX(-1); }
+
+        /* ---------- SW DEVELOPER HIGHLIGHT ---------- */
+        .sw-highlight {
+            margin-top: 56px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 22px;
+        }
+        .sw-highlight img {
+            width: 100%;
+            max-width: 760px;
+            height: auto;
+            border-radius: 20px;
+            border: 3px solid rgba(157, 80, 187, 0.6);
+            box-shadow: 0 0 50px rgba(157, 80, 187, 0.4);
+            cursor: zoom-in;
+            transition: transform 0.3s ease;
+        }
+        .sw-highlight img:hover { transform: scale(1.02); }
+        .sw-label {
+            font-family: 'Orbitron';
+            color: var(--accent-2);
+            text-shadow: 0 0 15px rgba(157, 80, 187, 0.5);
+            font-size: 1.6rem;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+        }
+
+        /* ---------- FOUNDER HERO ---------- */
+        .founder {
+            margin-top: 72px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 14px;
+        }
+        .founder img {
+            width: 100%;
+            max-width: 380px;
+            border-radius: 20px;
+            border: 3px solid rgba(0, 210, 255, 0.4);
+            box-shadow: 0 0 30px rgba(0, 210, 255, 0.2);
+            cursor: zoom-in;
+            transition: transform 0.3s ease;
+        }
+        .founder img:hover { transform: scale(1.02); }
+        .founder-name { font-family: 'Orbitron'; font-size: clamp(18px, 4vw, 22px); letter-spacing: 2px; color: var(--accent); text-shadow: 0 0 15px rgba(0, 210, 255, 0.5); }
+        .founder-role { font-family: 'Orbitron'; font-size: clamp(20px, 4.5vw, 24px); letter-spacing: 2px; color: #ffffff; text-shadow: 0 0 15px rgba(255, 255, 255, 0.5); }
+
+        /* ---------- MOBILE ---------- */
+        @media (max-width: 600px) {
+            .team-member { flex-direction: column; align-items: center; text-align: center; gap: 16px; }
+            .member-photo { width: 130px; height: 130px; }
+        }
+
+        /* ---------- LIGHTBOX ---------- */
+        .lightbox {
+            position: fixed;
+            inset: 0;
+            background: rgba(3, 4, 18, 0.9);
+            backdrop-filter: blur(15px);
+            display: none; justify-content: center; align-items: center;
+            z-index: 2000; opacity: 0; transition: opacity 0.4s ease;
+            cursor: zoom-out;
+        }
+        .lightbox.active { display: flex; opacity: 1; }
+        .lightbox img { max-width: 90vw; max-height: 85vh; border-radius: 12px; border: 1px solid rgba(0, 210, 255, 0.4); box-shadow: 0 0 50px rgba(0, 210, 255, 0.3); }
+        .close-btn { position: absolute; top: 15px; right: 15px; color: rgba(255, 255, 255, 0.6); cursor: pointer; transition: all 0.2s; z-index: 2001; }
+        .close-btn:hover { transform: scale(1.1); color: var(--accent); }
+    </style>
+</head>
+
+<body>
+    <main id="main-content">
+        <div class="team-container">
+            <h2 class="team-title">
+                <span>DOC ALVERS UND SEIN TEAM</span>
+            </h2>
+            <div class="team-subtitle">VIBE BUSINESS SATIRE</div>
+
+            <div class="team-list">
+                <!-- CEO -->
+                <div class="team-member">
+                    <div class="member-photo" style="background-image: url('resources/team/team_05.png');"
+                        onclick="openLightbox('resources/team/team_05.png')"></div>
+                    <div class="member-info">
+                        <div class="member-name">Chief Executive Officer</div>
+                        <div class="member-role">CEO / Strategic Vision</div>
+                        <div class="member-desc"><strong>Dr. Leachim <span class="mirror">R</span>. Srevla</strong><br>Leitet die globale Strategie und die langfristige Ausrichtung des Labors mit visionärer Kraft.</div>
+                    </div>
+                </div>
+                <!-- CFO -->
+                <div class="team-member">
+                    <div class="member-photo" style="background-image: url('resources/team/team_01.png');"
+                        onclick="openLightbox('resources/team/team_01.png')"></div>
+                    <div class="member-info">
+                        <div class="member-name">Chief Financial Officer</div>
+                        <div class="member-role">CFO / Financial Architect</div>
+                        <div class="member-desc"><strong>Dr. Ella Goldstein</strong><br>Verantwortlich für die finanzielle Stabilität und die ökonomische Skalierung des Labors.</div>
+                    </div>
+                </div>
+                <!-- CM -->
+                <div class="team-member">
+                    <div class="member-photo" style="background-image: url('resources/team/team_07.png');"
+                        onclick="openLightbox('resources/team/team_07.png')"></div>
+                    <div class="member-info">
+                        <div class="member-name">Chief Mathematician</div>
+                        <div class="member-role">Lead Architect / Theory</div>
+                        <div class="member-desc"><strong>Prof. Dr. Arthur Prime (Stanford)</strong><br>Mastermind hinter der theoretischen Architektur und Visionär des mathematischen Labors.</div>
+                    </div>
+                </div>
+                <!-- CSA -->
+                <div class="team-member">
+                    <div class="member-photo" style="background-image: url('resources/team/team_08.png');"
+                        onclick="openLightbox('resources/team/team_08.png')"></div>
+                    <div class="member-info">
+                        <div class="member-name">Chief Software Advisor</div>
+                        <div class="member-role">Software Strategy / Lead</div>
+                        <div class="member-desc"><strong>Victor Code, Ph.D. (Berkeley)</strong><br>Beratender Experte für zukunftsweisende Software-Architekturen und technologische Exzellenz.</div>
+                    </div>
+                </div>
+                <!-- AI -->
+                <div class="team-member">
+                    <div class="member-photo" style="background-image: url('resources/team/team_02.png');"
+                        onclick="openLightbox('resources/team/team_02.png')"></div>
+                    <div class="member-info">
+                        <div class="member-name">Lead AI-Team</div>
+                        <div class="member-role">Logic Engine / Core AI</div>
+                        <div class="member-desc"><strong>Aria Neural</strong><br>Verantwortlich für die algorithmische Präzision und die Implementierung komplexer Logikstrukturen.</div>
+                    </div>
+                </div>
+                <!-- Tech -->
+                <div class="team-member">
+                    <div class="member-photo" style="background-image: url('resources/team/team_03.png');"
+                        onclick="openLightbox('resources/team/team_03.png')"></div>
+                    <div class="member-info">
+                        <div class="member-name">Tech Lead</div>
+                        <div class="member-role">Infrastructure Specialist</div>
+                        <div class="member-desc"><strong>Marcus Grid</strong><br>Hüter der Systeme und Experte für skalierbare High-Performance Infrastrukturen.</div>
+                    </div>
+                </div>
+                <!-- UI -->
+                <div class="team-member">
+                    <div class="member-photo" style="background-image: url('resources/team/team_04.png');"
+                        onclick="openLightbox('resources/team/team_04.png')"></div>
+                    <div class="member-info">
+                        <div class="member-name">UI Designer</div>
+                        <div class="member-role">Cyber Aesthetics</div>
+                        <div class="member-desc"><strong>Luna Pixel</strong><br>Verwandelt komplexe Daten in intuitive, visuell beeindruckende Erlebnisse.</div>
+                    </div>
+                </div>
+                <!-- Ops -->
+                <div class="team-member">
+                    <div class="member-photo" style="background-image: url('resources/team/team_06.png');"
+                        onclick="openLightbox('resources/team/team_06.png')"></div>
+                    <div class="member-info">
+                        <div class="member-name">Ops Lead</div>
+                        <div class="member-role">Operations Manager</div>
+                        <div class="member-desc"><strong>Silas Flow</strong><br>Sorgt für reibungslose Abläufe und koordiniert die Schnittstellen zwischen Theorie und Praxis.</div>
+                    </div>
+                </div>
+                <!-- Security (pet) -->
+                <div class="team-member is-pet">
+                    <div class="member-photo" style="background-image: url('resources/team/team_09.png');"
+                        onclick="openLightbox('resources/team/team_09.png')"></div>
+                    <div class="member-info">
+                        <div class="member-name">Chief Security Officer</div>
+                        <div class="member-role">CSO / Feel-Good Lead</div>
+                        <div class="member-desc"><strong>Buster „The Guardian"</strong><br>Hüter der physischen Sicherheit und Experte für Stressabbau im Labor. Hat immer ein Auge auf die Server (und auf Snacks).</div>
+                    </div>
+                </div>
+                <!-- Aesthetic (pet) -->
+                <div class="team-member is-pet">
+                    <div class="member-photo" style="background-image: url('resources/team/team_10.png');"
+                        onclick="openLightbox('resources/team/team_10.png')"></div>
+                    <div class="member-info">
+                        <div class="member-name">Chief Aesthetic Officer</div>
+                        <div class="member-role">CAO / Silent Supervision</div>
+                        <div class="member-desc"><strong>Seraphina Aristocat</strong><br>Hüterin der Ästhetik und Expertin für lautlose Überwachung. Sorgt dafür, dass im Labor alles mit aristokratischer Eleganz abläuft.</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SW Developer Highlight -->
+            <div class="sw-highlight">
+                <img src="resources/team/SW-Developer.png" alt="SW-Developer"
+                     onclick="openLightbox('resources/team/SW-Developer.png')">
+                <div class="sw-label">Software Developer</div>
+            </div>
+
+            <!-- Founder -->
+            <div class="founder">
+                <img src="resources/team/alvers_final.png" alt="Dr. Michael R. Alvers"
+                     onclick="openLightbox('resources/team/alvers_final.png')">
+                <div class="founder-name">Dr. Michael R. Alvers</div>
+                <div class="founder-role">Ideengeber</div>
+            </div>
+        </div>
+    </main>
+
+    <div class="lightbox" id="lightbox" onclick="closeLightbox()">
+        <div class="close-btn" onclick="closeLightbox()">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+        </div>
+        <img id="lightbox-img" src="" alt="Large View">
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/i18n.js"></script>
+    <script src="js/i18n-de.js"></script>
+    <script src="js/i18n-en.js"></script>
+    <script src="js/i18n-es.js"></script>
+    <script src="js/branding/nav.js"></script>
+    <script src="js/branding.js"></script>
+    <script src="js/ui.js"></script>
+
+    <script>
+        function openLightbox(src) {
+            const lb = document.getElementById('lightbox');
+            const img = document.getElementById('lightbox-img');
+            img.src = src;
+            lb.style.display = 'flex';
+            setTimeout(() => lb.classList.add('active'), 10);
+        }
+        function closeLightbox() {
+            const lb = document.getElementById('lightbox');
+            lb.classList.remove('active');
+            setTimeout(() => { lb.style.display = 'none'; }, 400);
+        }
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeLightbox(); });
+
+        window.addEventListener('load', () => {
+            CyberBranding.init({
+                title: "TEAM OPS",
+                subtitle: "PERSONNEL BRIEFING",
+                skipCanvasBranding: true,
+                skipNavigation: true
+            });
+        });
+    </script>
+</body>
+</html>
