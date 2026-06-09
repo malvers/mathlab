@@ -1480,59 +1480,42 @@ ${pts}
             dim('mb-smooth', !has);
         }
 
-        function openPopup() {
-            // Radial "Kreis": button centres lie on a true circle (x² + y² = R²) and fan to the
-            // RIGHT, rows evenly spaced in y (→ even gaps). The whole fan is then shifted LEFT by dx
-            // so the top & bottom buttons are LEFT-ALIGNED with the hamburger; the middle bulges past
-            // it. R is chosen so the bulge clears the HH's right edge (no overlap).
+        function trackerMenuLayout(stack, btns) {
+            // Radial "Kreis": button centres lie on a true circle (x²+y²=R²) and fan to the RIGHT,
+            // rows evenly spaced in y; the whole fan is shifted LEFT by dx so top & bottom align with
+            // the hamburger, the middle bulges past it. R clears the HH's right edge. (Tracker geometry.)
             const r = $('menu-fab').getBoundingClientRect();
-            miniStack.style.left = (r.left + r.width / 2) + 'px';   // origin = HH centre
-            miniStack.style.top = (r.top + r.height / 2) + 'px';
-            miniStack.classList.add('popup');
-            refreshMenuState(); // grey track-dependent buttons when no track is loaded
-            const btns = Array.from(miniStack.querySelectorAll('.mini-btn'));
+            stack.style.left = (r.left + r.width / 2) + 'px';   // origin = HH centre
+            stack.style.top = (r.top + r.height / 2) + 'px';
             const n = btns.length, bh = 46, gap = 10, step = bh + gap, bw = 168;
-            const halfH = (n - 1) * step / 2;                 // centre-to-centre half-height of the fan
-            const R = halfH + 44;                             // circle radius (arc curvature)
-            const xMin = Math.sqrt(R * R - halfH * halfH);    // smallest circle-x (top & bottom rows)
-            const dx = bw / 2 - r.width / 2 - xMin;           // shift: top/bottom left edge → HH left edge
+            const halfH = (n - 1) * step / 2;
+            const R = halfH + 44;
+            const xMin = Math.sqrt(R * R - halfH * halfH);
+            const dx = bw / 2 - r.width / 2 - xMin;
             btns.forEach((b, i) => {
-                const y = i * step - halfH;                   // evenly spaced rows, centred on the HH
-                const x = Math.sqrt(R * R - y * y) + dx;      // centre on the circle, then shifted left
+                const y = i * step - halfH;
+                const x = Math.sqrt(R * R - y * y) + dx;
                 b.style.left = x + 'px';
                 b.style.top = y + 'px';
             });
         }
-        function closePopup() { miniStack.classList.remove('popup'); }
-
-        window.addEventListener('contextmenu', (e) => {
-            e.preventDefault(); // always suppress the native menu (e.g. Android "save image" on a long-press)
-            // long-press on a photo pin, inside the lightbox, or while a fan is open → do nothing
-            if (e.target.closest('.wp-pin') || e.target.closest('#photo-lightbox') || fannedCluster) return;
-            openPopup();
+        // Radial popup via the shared widget (js/radial-menu.js) — it owns open/close + the long-press /
+        // right-click / outside-close mechanics; we supply the geometry, the per-open grey-out + guards.
+        const radialMenu = RadialMenu({
+            stack: miniStack,
+            layout: trackerMenuLayout,
+            onOpen: refreshMenuState,
+            closeOnButtonTap: false,   // each menu button closes the popup itself
+            shouldOpen: (e) => {
+                const t = e && e.target;
+                if (t && t.closest && (t.closest('.wp-pin') || t.closest('#photo-lightbox'))) return false;
+                if (fannedCluster) return false;                                    // a photo fan is open
+                if ($('photo-lightbox').classList.contains('open')) return false;   // lightbox owns the screen
+                return true;
+            },
         });
-
-        let lpTimer = null, lpX = 0, lpY = 0;
-        document.addEventListener('touchstart', (e) => {
-            if (e.target.closest('button')) return;
-            if (e.target.closest('.wp-pin')) return; // photo pins own their tap (fan/open) — no radial menu
-            if (fannedCluster) return;               // a photo fan is open → no radial menu
-            if (miniStack.classList.contains('popup')) return;
-            if ($('photo-lightbox').classList.contains('open')) return; // lightbox owns the screen
-            const t = e.touches[0];
-            lpX = t.clientX; lpY = t.clientY;
-            clearTimeout(lpTimer);
-            lpTimer = setTimeout(() => { openPopup(); lpTimer = null; }, 550);
-        }, { passive: true });
-        document.addEventListener('touchmove', (e) => {
-            const t = e.touches[0];
-            if (Math.abs(t.clientX - lpX) > 10 || Math.abs(t.clientY - lpY) > 10) { clearTimeout(lpTimer); lpTimer = null; }
-        }, { passive: true });
-        document.addEventListener('touchend', () => { clearTimeout(lpTimer); lpTimer = null; });
-        document.addEventListener('touchcancel', () => { clearTimeout(lpTimer); lpTimer = null; });
-        document.addEventListener('mousedown', (e) => {
-            if (miniStack.classList.contains('popup') && !miniStack.contains(e.target)) closePopup();
-        });
+        function openPopup() { radialMenu.open(); }
+        function closePopup() { radialMenu.close(); }
 
         // ---- Overlay panels (track list + info) ----
         const ovBackdrop = $('ov-backdrop');

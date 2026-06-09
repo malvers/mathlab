@@ -22,18 +22,83 @@
 
     // Status pin: green = recognised (.done), orange pulse = identifying (.pending), red = failed.
     // Voice waypoints get the mic glyph on their own dot (.voice) so they read differently from photos.
-    function pinIcon(wp) {
+    function pinIcon(wp, count) {
         const isVoice = wp && wp.type === 'voice';
         let state = isVoice ? ' voice' : ' done';
         if (!isVoice) {
             if (wp.title === PENDING_TITLE) state = ' pending';
             else if (!wp.title || wp.title === FAIL_TITLE) state = ' failed';
         }
+        // count >= 2 → several waypoints sit on the exact same spot; show a tally
+        // badge on the top-most pin so the stack is visible before you even tap it.
+        const badge = (count && count > 1) ? '<span class="wp-badge">' + count + '</span>' : '';
         return global.L.divIcon({
             className: 'wp-pin',
-            html: '<div class="wp-dot' + state + '">' + (isVoice ? SPEAKER_SVG : CAM_PIN_SVG) + '</div>',
+            html: '<div class="wp-dot' + state + '">' + (isVoice ? SPEAKER_SVG : CAM_PIN_SVG) + '</div>' + badge,
             iconSize: [30, 30], iconAnchor: [15, 30], popupAnchor: [0, -30],
         });
+    }
+
+    // Pins that visually overlap on screen ("a stack") get a tally badge on the TOP pin so
+    // the pile is visible before you tap it. Overlap is a SCREEN concept, so it is measured
+    // in pixels via the map projection and therefore depends on zoom — the count must be
+    // recomputed on every `zoomend`. Threshold matches the recorder's fan-out (FAN_DETECT_PX)
+    // so the badge number equals the number of pins that fan out on tap.
+    //   - When `map` is given: pixel-distance clustering (catches near-but-not-identical fixes).
+    //   - Without `map`: falls back to exact-coordinate grouping (zoom-independent).
+    // Each marker must carry its waypoint as `m._wp`. The chosen count is stored on `m._badge`
+    // so a fan-out can strip the badge and the collapse can restore it.
+    const STACK_PX = 26; // keep in sync with tracker-media.js FAN_DETECT_PX
+    function exactKey(wp) {
+        return (Number(wp && wp.lat) || 0).toFixed(5) + ',' + (Number(wp && wp.lng) || 0).toFixed(5);
+    }
+    // `topIdx` = the group member Leaflet actually draws on top, so the badge lands on the
+    // VISIBLE pin (not one hidden underneath). The rest stay plain.
+    function stampGroup(group, topIdx) {
+        const count = group.length;
+        if (topIdx == null) topIdx = count - 1;
+        group.forEach((m, i) => {
+            const badge = (count > 1 && i === topIdx) ? count : 0;
+            m._badge = badge;
+            m.setIcon(pinIcon(m._wp, badge));
+        });
+    }
+    function applyStackBadges(markers, map) {
+        if (!Array.isArray(markers)) return;
+        const valid = markers.filter(m => m && m._wp);
+
+        if (!map || typeof map.latLngToLayerPoint !== 'function') {
+            // exact-coordinate fallback (all share the same spot → last added is on top)
+            const groups = new Map();
+            valid.forEach(m => {
+                const k = exactKey(m._wp);
+                if (!groups.has(k)) groups.set(k, []);
+                groups.get(k).push(m);
+            });
+            groups.forEach(g => stampGroup(g));
+            return;
+        }
+
+        // pixel-distance clustering (greedy, seed = first un-grouped marker)
+        const pts = valid.map(m => map.latLngToLayerPoint(m.getLatLng()));
+        const used = new Array(valid.length).fill(false);
+        for (let i = 0; i < valid.length; i++) {
+            if (used[i]) continue;
+            const group = [valid[i]];
+            const ys = [pts[i].y];
+            used[i] = true;
+            for (let j = i + 1; j < valid.length; j++) {
+                if (!used[j] && pts[i].distanceTo(pts[j]) <= STACK_PX) {
+                    group.push(valid[j]);
+                    ys.push(pts[j].y);
+                    used[j] = true;
+                }
+            }
+            // Leaflet stacks markers by projected y (south = larger y = drawn on top).
+            let topIdx = 0;
+            for (let k = 1; k < ys.length; k++) if (ys[k] > ys[topIdx]) topIdx = k;
+            stampGroup(group, topIdx);
+        }
     }
 
     // ---- one shared lightbox instance ----
@@ -308,5 +373,5 @@
         if (global.PhotoFullscreen) global.PhotoFullscreen.enter($('photo-lightbox'));
     }
 
-    global.PhotoLayer = { pinIcon, mountLightbox, openLightbox, closeLightbox: close, renderFacts };
+    global.PhotoLayer = { pinIcon, applyStackBadges, mountLightbox, openLightbox, closeLightbox: close, renderFacts };
 })(window);

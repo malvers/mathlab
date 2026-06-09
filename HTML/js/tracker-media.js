@@ -151,6 +151,7 @@ window.TrackerMedia = function (T) {
                 lines.push(L.polyline([centerLatLng, ll], { weight: 1.5, color: COL_ORANGE, opacity: 0.45, interactive: false }).addTo(map));
                 m.setLatLng(ll);
                 m.setZIndexOffset(1000);
+                m.setIcon(PhotoLayer.pinIcon(m._wp, 0)); // fanned apart → drop the stack badge
             });
             // dashed box that groups the fanned-out photos (these belong to one spot)
             const pad = R + 26;
@@ -165,7 +166,7 @@ window.TrackerMedia = function (T) {
         }
         function collapseFan() {
             if (!T.fannedCluster) return;
-            T.fannedCluster.markers.forEach((m, i) => { m.setLatLng(T.fannedCluster.originals[i]); m.setZIndexOffset(0); });
+            T.fannedCluster.markers.forEach((m, i) => { m.setLatLng(T.fannedCluster.originals[i]); m.setZIndexOffset(0); m.setIcon(PhotoLayer.pinIcon(m._wp, m._badge || 0)); });
             T.fannedCluster.lines.forEach(l => map.removeLayer(l));
             if (T.fannedCluster.box) map.removeLayer(T.fannedCluster.box);
             T.fannedCluster = null;
@@ -191,6 +192,8 @@ window.TrackerMedia = function (T) {
         });
         map.on('click', collapseFan);
         map.on('zoomstart', collapseFan);
+        // overlap is pixel-based → recompute the tally badges whenever the zoom level changes
+        map.on('zoomend', () => PhotoLayer.applyStackBadges(T.wpMarkers, map));
 
         function addWaypoint(wp) {
             T.waypoints.push(wp);
@@ -201,6 +204,7 @@ window.TrackerMedia = function (T) {
             wp._marker = m;
             if (wp.title === PENDING_TITLE) m.setZIndexOffset(2000); // see refreshWaypoint
             T.wpMarkers.push(m);
+            PhotoLayer.applyStackBadges(T.wpMarkers, map); // stamp tally badge on any new stack
             return wp;
         }
         function refreshWaypoint(wp) {
@@ -210,6 +214,7 @@ window.TrackerMedia = function (T) {
             // (orange/pending) pops ABOVE the others (high z) so you can see which is in work;
             // once done it drops back to the base layer (0).
             wp._marker.setZIndexOffset(wp.title === PENDING_TITLE ? 2000 : 0);
+            PhotoLayer.applyStackBadges(T.wpMarkers, map); // setIcon above cleared the badge → restore it
         }
         function clearWaypoints() {
             collapseFan();

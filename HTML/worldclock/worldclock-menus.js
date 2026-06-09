@@ -52,24 +52,21 @@
         }
     }
 
-    function clearPositions() {
-        stack.querySelectorAll('.mini-btn').forEach(b => { b.style.left = ''; b.style.top = ''; });
-    }
-
-    // Half-circle anchored at the left-edge hamburger: items fan out to the right (−90°…+90°).
-    function open() {
-        const H = 260, cxC = 56, bulge = 106, rowGap = 50;  // even vertical gaps + a gentle sin bulge to the right (rowGap > button height ⇒ never overlaps); ends (top/bottom) sit at cxC, only the bulged middle three move with `bulge`
-        stack.style.left = '8px';
-        stack.style.top  = (window.innerHeight / 2 - H / 2) + 'px';
+    // refresh labels + mode-specific show/hide BEFORE the fan opens (onOpen runs before layout).
+    function onOpen() {
         refreshLabels();
-        stack.classList.add('popup');
-        if (hamb) hamb.classList.add('open');
         // Mode-specific buttons: GLOBUS + SÜD/NORD only in clock mode; MOND + NEBEL only in the planetarium.
         if (bGlobe) bGlobe.style.display = skyTarget ? 'none' : '';
         if (bDir)   bDir.style.display   = skyTarget ? 'none' : '';
         if (bMoon)  bMoon.style.display  = skyTarget ? '' : 'none';
         if (bNeb)   bNeb.style.display   = skyTarget ? '' : 'none';
-        const btns = Array.from(stack.querySelectorAll('.mini-btn')).filter(b => b.style.display !== 'none');
+    }
+    // Half-circle anchored at the left edge: items fan out to the right (even vertical gaps + a gentle
+    // sin bulge; rowGap > button height ⇒ never overlaps; ends sit at cxC, only the middle bulges).
+    function layout(s, btns) {
+        const H = 260, cxC = 56, bulge = 106, rowGap = 50;
+        s.style.left = '8px';
+        s.style.top  = (window.innerHeight / 2 - H / 2) + 'px';
         const n = btns.length;
         btns.forEach((b, i) => {
             const t = n > 1 ? i / (n - 1) : 0.5;                          // 0 (top) … 1 (bottom)
@@ -77,41 +74,11 @@
             b.style.top  = (H / 2 + (i - (n - 1) / 2) * rowGap) + 'px';   // equal vertical gaps
         });
     }
-    function close() {
-        stack.classList.remove('popup');
-        if (hamb) hamb.classList.remove('open');
-        clearPositions();
-    }
-    function toggle() { stack.classList.contains('popup') ? close() : open(); }
-
-    // primary trigger: the hamburger (tap)
-    if (hamb) hamb.addEventListener('click', () => toggle());
-
-    // alternates: right-click (desktop) + long-press (touch) open the same left-anchored menu
-    window.addEventListener('contextmenu', e => { e.preventDefault(); open(); });
-    let lpTimer = null, lpX = 0, lpY = 0;
-    document.addEventListener('touchstart', e => {
-        if (e.target.closest('button, input, label')) return;
-        if (stack.classList.contains('popup')) return;
-        const t = e.touches[0]; lpX = t.clientX; lpY = t.clientY;
-        clearTimeout(lpTimer);
-        lpTimer = setTimeout(() => { open(); lpTimer = null; }, 550);
-    }, { passive: true });
-    document.addEventListener('touchmove', e => {
-        const t = e.touches[0];
-        if (Math.abs(t.clientX - lpX) > 8 || Math.abs(t.clientY - lpY) > 8) { clearTimeout(lpTimer); lpTimer = null; }
-    }, { passive: true });
-    document.addEventListener('touchend',    () => { clearTimeout(lpTimer); lpTimer = null; });
-    document.addEventListener('touchcancel', () => { clearTimeout(lpTimer); lpTimer = null; });
-
-    // close on button tap inside (after the action) or on a click/tap outside (but not on the hamburger)
-    stack.addEventListener('click', e => { if (e.target.tagName === 'BUTTON') close(); });
-    document.addEventListener('mousedown', e => {
-        if (!stack.classList.contains('popup')) return;
-        if (stack.contains(e.target)) return;
-        if (hamb && hamb.contains(e.target)) return;   // the hamburger toggles itself
-        close();
-    });
+    // Shared widget owns open/close + hamburger / right-click / long-press / outside-close.
+    const menu = RadialMenu({ stack, hamburger: hamb, layout, onOpen, longPress: 550, contextMenu: true, closeOnButtonTap: false });
+    // close after a one-shot action (tap on the button itself); the on/off toggles (MOND/NEBEL)
+    // stopPropagation so they stay open — exact original behaviour.
+    stack.addEventListener('click', e => { if (e.target.tagName === 'BUTTON') menu.close(); });
 
     // actions — mirror the keyboard handlers exactly
     if (bSky)   bSky.addEventListener('click',   () => { skyTarget = skyTarget ? 0 : 1; refreshLabels(); });
@@ -144,14 +111,10 @@
         }
     }
     // Half-circle anchored at the right edge: items fan out to the LEFT (mirror of the left menu).
-    function open() {
+    function layout(s, btns) {
         const H = 260, cxC = 56, bulge = 106, rowGap = 50, W = 320;
-        stack.style.left = (window.innerWidth - 8 - W) + 'px';
-        stack.style.top  = (window.innerHeight / 2 - H / 2) + 'px';
-        refreshToggles();
-        stack.classList.add('popup');
-        if (hamb) hamb.classList.add('open');
-        const btns = Array.from(stack.querySelectorAll('.mini-btn'));
+        s.style.left = (window.innerWidth - 8 - W) + 'px';
+        s.style.top  = (window.innerHeight / 2 - H / 2) + 'px';
         const n = btns.length;
         btns.forEach((b, i) => {
             const t = n > 1 ? i / (n - 1) : 0.5;
@@ -159,25 +122,14 @@
             b.style.top  = (H / 2 + (i - (n - 1) / 2) * rowGap) + 'px';
         });
     }
-    function close() {
-        stack.classList.remove('popup');
-        if (hamb) hamb.classList.remove('open');
-        stack.querySelectorAll('.mini-btn').forEach(b => { b.style.left = ''; b.style.top = ''; });
-    }
-    function toggle() { stack.classList.contains('popup') ? close() : open(); }
-    if (hamb) hamb.addEventListener('click', () => toggle());
+    // Right menu: hamburger only (no right-click / long-press); toggles stay open, close on outside.
+    RadialMenu({ stack, hamburger: hamb, layout, onOpen: refreshToggles, contextMenu: false, longPress: 0, closeOnButtonTap: false });
     // each toggle flips its layer and stays open (so several can be flipped in a row)
     for (const [id, get, set, key] of map) {
         const b = document.getElementById(id);
         if (b) b.addEventListener('click', (e) => { e.stopPropagation(); set(!get()); saveSkyToggle(key, get()); refreshToggles(); });
     }
-    // close on a click/tap outside (but not on its hamburger)
-    document.addEventListener('mousedown', e => {
-        if (!stack.classList.contains('popup')) return;
-        if (stack.contains(e.target)) return;
-        if (hamb && hamb.contains(e.target)) return;
-        close();
-    });
+    // (outside-close + hamburger toggle are handled by RadialMenu)
 })();
 
 // --- Constellation search (top-right): filters German + Latin names; on pick rotates the sky so the chosen

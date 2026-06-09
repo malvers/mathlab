@@ -249,8 +249,10 @@
         function addWaypoint(wp) {
             waypoints.push(wp);
             const m = L.marker([wp.lat, wp.lng], { icon: PhotoLayer.pinIcon(wp) }).addTo(map);
+            m._wp = wp;
             m.on('click', () => PhotoLayer.openLightbox(wp, waypoints)); // tap → full-screen, counter + arrows
             wpMarkers.push(m);
+            PhotoLayer.applyStackBadges(wpMarkers, map); // tally badge on any overlapping stack
         }
         PhotoLayer.mountLightbox(); // inject the shared lightbox + wire its controls (counter / arrows / esc)
 
@@ -303,6 +305,8 @@
         // ---- live position: subscribe to a broadcast channel; show movement live ----
         let liveMarker = null, followLive = true, liveFitDone = false;
         map.on('dragstart', () => { followLive = false; });
+        // overlap is pixel-based → recompute the tally badges on every zoom change
+        map.on('zoomend', () => PhotoLayer.applyStackBadges(wpMarkers, map));
         function ensureLiveMarker(lat, lng) {
             if (!liveMarker) liveMarker = L.circleMarker([lat, lng], { radius: 7, color: '#fff', weight: 2, fillColor: 'rgb(176,36,24)', fillOpacity: 1 }).addTo(map);
             else liveMarker.setLatLng([lat, lng]);
@@ -342,8 +346,10 @@
                 waypoints[i] = wp;
                 if (wpMarkers[i]) map.removeLayer(wpMarkers[i]);
                 const m = L.marker([wp.lat, wp.lng], { icon: PhotoLayer.pinIcon(wp) }).addTo(map);
+                m._wp = wp;
                 m.on('click', () => PhotoLayer.openLightbox(wp, waypoints));
                 wpMarkers[i] = m;
+                PhotoLayer.applyStackBadges(wpMarkers, map); // refresh tally badges after the swap
             } else {
                 addWaypoint(wp);
             }
