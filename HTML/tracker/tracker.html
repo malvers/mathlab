@@ -299,7 +299,7 @@
         // so the main init below still finds RainRadar/DebugWindow/PhotoFullscreen ready.
         (function () {
             var v = window.__ASSET_V || '';
-            var js = ['../js/track-render.js', '../js/track-smooth.js', '../js/track-buffer.js', '../js/rain-radar.js', '../js/cyber-clock.js', '../js/debug-window.js', '../js/photo-fullscreen.js', '../js/photo-layer.js', '../js/voice-note.js', '../js/app-update.js'];
+            var js = ['../js/track-render.js', '../js/track-smooth.js', '../js/track-buffer.js', '../js/rain-palette.js', '../js/rain-recolor.js', '../js/rain-radar.js', '../js/cyber-clock.js', '../js/debug-window.js', '../js/photo-fullscreen.js', '../js/photo-layer.js', '../js/voice-note.js', '../js/app-update.js'];
             for (var i = 0; i < js.length; i++) document.write('<script src="' + js[i] + v + '"><\/script>');
         })();
     </script>
@@ -402,11 +402,30 @@
             if (el) { el.style.transition = ''; el.style.opacity = ''; }
         });
 
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        const baseMap = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxNativeZoom: 19, // OSM tiles stop at z19 …
             maxZoom: 21,       // … Leaflet upscales beyond (blurry) so close photo pins can separate
             attribution: '&copy; OpenStreetMap contributors',
         }).addTo(map);
+
+        // DEBUG: hide the background map → judge the rain-radar colours with no terrain underneath.
+        //   key 'k' → dark backdrop · key 'w' → white backdrop · same key again → map back on.
+        let hgMode = 'on'; // 'on' | 'dark' | 'white'
+        function applyHg(mode) {
+            hgMode = mode;
+            if (mode === 'on') { baseMap.addTo(map); map.getContainer().style.background = ''; }
+            else { map.removeLayer(baseMap); map.getContainer().style.background = (mode === 'white') ? '#ffffff' : 'rgb(8, 20, 42)'; }
+            if (window.DebugWindow && DebugWindow.log)
+                DebugWindow.log('Basemap (HG): ' + (mode === 'on' ? 'AN' : mode === 'white' ? 'AUS · weiß' : 'AUS · dunkel'));
+        }
+        document.addEventListener('keydown', function (e) {
+            const k = e.key;
+            if (k !== 'k' && k !== 'K' && k !== 'w' && k !== 'W') return;
+            const t = e.target;
+            if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
+            if (k === 'w' || k === 'W') applyHg(hgMode === 'white' ? 'on' : 'white');
+            else applyHg(hgMode === 'dark' ? 'on' : 'dark');
+        });
 
         // Track coloured by speed (green slow → orange → red fast) via Leaflet.hotline, but the
         // line is BROKEN at gaps: a stretch where recording paused (movement gate "still", accuracy
