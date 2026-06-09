@@ -73,7 +73,8 @@
             ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
     }
     // Icon per fact label (matches the mockup): 🌿 botanical specialist, ✨ Gemini, 🌍 origin.
-    const FACT_ICON = { 'PlantNet': '🌿', 'Google Gemini': '✨', 'Heimat': '🌍' };
+    const FACT_ICON = { 'PlantNet': '🌿', 'Gemini': '✨', 'Heimat': '🌍' };
+    const FACT_RELABEL = { 'Google Gemini': 'Gemini' }; // shorten legacy stored labels for display
     function renderFacts(text) {
         const blurb = [], rows = [];
         String(text || '').split('\n').forEach((raw) => {
@@ -86,8 +87,9 @@
         if (blurb.length) html += '<div class="lb-blurb">' + esc(blurb.join(' ')) + '</div>';
         if (rows.length) html += '<table class="lb-facts"><tbody>' +
             rows.map((r) => {
-                const ic = FACT_ICON[r[0]]; // prepend the icon when the label is a known one
-                return '<tr><th>' + esc((ic ? ic + ' ' : '') + r[0]) + '</th><td>' + esc(r[1]) + '</td></tr>';
+                const label = FACT_RELABEL[r[0]] || r[0]; // "Google Gemini" → "Gemini"
+                const ic = FACT_ICON[label]; // prepend the icon when the label is a known one
+                return '<tr><th>' + esc((ic ? ic + ' ' : '') + label) + '</th><td>' + esc(r[1]) + '</td></tr>';
             }).join('') +
             '</tbody></table>';
         return html;
@@ -183,6 +185,12 @@
         clearTimeout(navTimer);
         navTimer = setTimeout(() => nav.classList.add('faded'), 8000);
     }
+    // Hide the arrows right away (a swipe navigates → the arrows should get out of the way).
+    function hideNav() {
+        clearTimeout(navTimer);
+        const nav = $('lightbox-nav');
+        if (nav) nav.classList.add('faded');
+    }
 
     // Inject the lightbox DOM once (if the host page doesn't already have it) and wire the controls.
     function mountLightbox() {
@@ -276,7 +284,7 @@
             const t = e.changedTouches[0];
             const dx = t.clientX - sx, dy = t.clientY - sy;
             moved = Math.max(moved, Math.hypot(dx, dy));
-            if (Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy) * 1.5) step(dx < 0 ? 1 : -1); // swipe → navigate
+            if (Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy) * 1.5) { step(dx < 0 ? 1 : -1); hideNav(); } // swipe → navigate + hide arrows
             else if (moved < 10) showNav(); // ONLY a clean tap reveals the arrows — ANY drag shows nothing
         }, { passive: true });
         // Desktop ONLY (real mouse): movement reveals the arrows. Guarded so a touch-drag's synthetic
