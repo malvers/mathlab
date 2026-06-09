@@ -146,6 +146,27 @@
                 ? TrackSmooth.smooth(track, times) : track;
             TrackRender.redraw({ track: t, times, speeds, activities, layer: trackLayer, usesHotline });
         }
+        // Central altitude accessor: every consumer (HÖHE tile, GPX export, ascent) reads through this,
+        // so the DEM toggle has ONE hook — just like positions all go through redrawTrack(). Falls back
+        // to the raw GPS+baro alts whenever DEM is off or not (yet) aligned with the current track.
+        function effectiveAlts() {
+            return (demOn && demAlts.length === track.length) ? demAlts : alts;
+        }
+        // Total climb / descent (m) over an altitude array; nulls are skipped.
+        function ascentDescent(arr) {
+            let up = 0, down = 0, prev = null;
+            for (let i = 0; i < arr.length; i++) {
+                const v = arr[i]; if (v == null) continue;
+                if (prev != null) { const d = v - prev; if (d > 0) up += d; else down -= d; }
+                prev = v;
+            }
+            return { up: Math.round(up), down: Math.round(down) };
+        }
+        // Forget any DEM result + switch the toggle off — called whenever the track changes.
+        function resetDem() {
+            demAlts = []; demOn = false;
+            const b = $('mb-dem'); if (b) b.classList.remove('active');
+        }
         let posMarker = null;
         let headingMarker = null; // small travel-direction triangle at the position dot
 
@@ -160,6 +181,9 @@
         let track = [];            // array of [lat, lng]
         let times = [];            // ISO timestamp per recorded point (index-aligned)
         let alts = [];             // altitude in m per point (fused GPS+baro; null if unknown)
+        let demAlts = [];          // terrain-model altitude per point (filled on demand, parallel to alts)
+        let demOn = false;         // show/export DEM-corrected altitude instead of GPS+baro (non-destructive)
+        let demBusy = false;       // a DEM fetch is in flight → ignore further taps
         let speeds = [];           // speed in km/h per point (index-aligned)
         let activities = [];       // travel mode per point: walking/running/on_bicycle/in_vehicle/still
         let currentTrackId = null; // DB id of the loaded/just-saved track (for the menu "TEILEN")
@@ -172,7 +196,12 @@
         // Canonical waypoint → DB/buffer shape: pass ALL fields through (photo `img` and voice
         // `audio`/`dur`/`type` alike), only drop the runtime-only Leaflet marker. Future fields
         // (e.g. a transcript) ride along for free — single source, no per-field enumeration.
-        function wpSer(w) { const o = Object.assign({}, w); delete o._marker; return o; }
+        function wpSer(w) {
+            const o = Object.assign({}, w); delete o._marker;
+            delete o._blob;                                         // never serialize the raw video File
+            if (o._pending) { o.video = null; delete o._pending; }  // un-uploaded video → no dead blob: URL
+            return o;
+        }
         let wpMarkers = [];
         let fannedCluster = null;  // spiderfy: a photo fan is open (set by tracker-media); core reads it to gate the radial menu
         let __media = null;        // Foto-Spur module instance (js/tracker-media.js)        // their Leaflet markers (kept for clearing)
@@ -644,7 +673,14 @@
         // gives the smooth relative profile; GPS slowly calibrates the absolute.
         // ---------------------------------------------------------------
         function renderAltitude() {
-            setAlt(fusedAlt);
+            if (demOn) {
+                const A = effectiveAlts();
+                let last = null;
+                for (let i = A.length - 1; i >= 0; i--) { if (A[i] != null) { last = A[i]; break; } }
+                setAlt(last);
+            } else {
+                setAlt(fusedAlt);
+            }
         }
         function updateAltitude(gpsAlt) {
             if (baroReady && baroAlt != null) {
@@ -1055,6 +1091,7 @@
             activities = [];
             totalDist = 0;
             lastFix = null;
+            resetDem();
             trackLayer.clearLayers();
             clearWaypoints();
             setDist(0);
@@ -1070,9 +1107,10 @@
         function buildGpx() {
             const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
             const name = 'Doc Alvers Tracker ' + (times[0] || '');
+            const A = effectiveAlts(); // DEM-corrected when the DEM toggle is on, else raw GPS+baro
             const pts = track.map((p, i) =>
                 `      <trkpt lat="${p[0].toFixed(7)}" lon="${p[1].toFixed(7)}">` +
-                (alts[i] != null ? `<ele>${alts[i].toFixed(1)}</ele>` : '') +
+                (A[i] != null ? `<ele>${A[i].toFixed(1)}</ele>` : '') +
                 (times[i] ? `<time>${times[i]}</time>` : '') +
                 `</trkpt>`
             ).join('\n');
@@ -1332,6 +1370,7 @@ ${pts}
             track = latlngs.map(ll => [ll[0], ll[1]]);
             times = points.map(p => p[2] || null);
             alts = points.map(p => (p[3] != null ? p[3] : null));   // older tracks have no p[3] → null
+            resetDem(); // a freshly loaded track has no DEM lookup yet
             speeds = points.map(p => (p[4] != null ? p[4] : null));
             activities = points.map(p => (p[5] != null ? p[5] : null)); // travel mode (older tracks → null)
             totalDist = 0;
@@ -1367,14 +1406,22 @@ ${pts}
             setFollowing(false);
             trackLayer.clearLayers(); clearWaypoints();
             track = []; times = []; alts = []; speeds = []; activities = []; totalDist = 0;
+            resetDem();
             currentTrackId = null; currentTrackName = '';
-            const COLORS = ['#f5c242', '#00d2ff', '#b02418', '#799e31', '#9d50bb', '#ff8c42'];
             const all = [];
-            loaded.forEach((t, i) => {
-                const ll = (t.points || []).filter(p => p && p[0] != null).map(p => [p[0], p[1]]);
-                if (ll.length) {
-                    L.polyline(ll, { color: COLORS[i % COLORS.length], weight: 4, opacity: 0.9 }).addTo(trackLayer);
-                    ll.forEach(p => all.push(p));
+            loaded.forEach((t) => {
+                const pts = (t.points || []).filter(p => p && p[0] != null);
+                if (pts.length) {
+                    // Each overlaid track keeps its speed colours (hotline), exactly like a single
+                    // load — never a flat per-track colour just because several are shown.
+                    TrackRender.draw({
+                        track: pts.map(p => [p[0], p[1]]),
+                        times: pts.map(p => p[2] || null),
+                        speeds: pts.map(p => (p[4] != null ? p[4] : null)),
+                        activities: pts.map(p => (p[5] != null ? p[5] : null)),
+                        layer: trackLayer, usesHotline,
+                    });
+                    pts.forEach(p => all.push([p[0], p[1]]));
                 }
                 (t.waypoints || []).forEach(w => addWaypoint(w));
             });
@@ -1478,6 +1525,7 @@ ${pts}
             dim('mb-sharetrack', !has);
             dim('mb-live', !has && !liveOn);
             dim('mb-smooth', !has);
+            dim('mb-dem', !has);
         }
 
         function trackerMenuLayout(stack, btns) {
@@ -1556,6 +1604,42 @@ ${pts}
             $('mb-smooth').classList.toggle('active', smoothOn); // green when on (like the REGEN toggle)
             redrawTrack();
             toast(smoothOn ? 'Glättung an (nur Anzeige, Daten unberührt)' : 'Glättung aus');
+        });
+
+        // GPS-Nachbearbeitung Stufe 1.3 — DEM height: replace the noisy GPS+baro altitude with the
+        // terrain elevation from a digital elevation model (Open-Meteo / Copernicus GLO-90). Async (one
+        // network fetch, then cached). Non-destructive: fills demAlts[] and flips a display+GPX toggle;
+        // the stored raw alts stay untouched. Tap again to switch back.
+        $('mb-dem').addEventListener('click', async () => {
+            hidePanels();
+            if (demBusy) return;
+            if (!track || !track.length) { toast('Kein Track geladen.'); return; }
+            if (demOn) { // turn off → back to raw GPS+baro
+                demOn = false;
+                $('mb-dem').classList.remove('active');
+                renderAltitude();
+                toast('DEM-Höhe aus');
+                return;
+            }
+            if (demAlts.length !== track.length) { // fetch once per loaded track, then it's cached
+                if (typeof TrackDem === 'undefined') { toast('DEM-Modul fehlt.'); return; }
+                demBusy = true;
+                toast('DEM-Höhe: lade Gelände …');
+                try {
+                    demAlts = await TrackDem.elevations(track, (d, t) => { if (t > 1) toast('DEM-Höhe: ' + d + '/' + t + ' …'); });
+                } catch (e) {
+                    demBusy = false;
+                    toast('DEM fehlgeschlagen (offline?).');
+                    if (window.DebugWindow) DebugWindow.log('DEM: ' + (e && (e.message || e)));
+                    return;
+                }
+                demBusy = false;
+            }
+            demOn = true;
+            $('mb-dem').classList.add('active');
+            renderAltitude();
+            const dem = ascentDescent(demAlts), gps = ascentDescent(alts);
+            toast('DEM-Höhe an · ↑ ' + dem.up + ' m  ↓ ' + dem.down + ' m  (GPS war ↑ ' + gps.up + ')');
         });
 
         $('mb-load').addEventListener('click', async () => {

@@ -27,6 +27,11 @@
     height: 16px;
 }
 
+/* fanned-out pins get a dark-blue ring so the spread-apart set reads as one group */
+.wp-fanned .wp-dot {
+    box-shadow: 0 0 0 3px rgb(14, 36, 78), 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+
 /* tally badge on a stack of waypoints sharing the exact same spot ("2", "3", …) */
 .wp-badge {
     position: absolute;
@@ -66,6 +71,11 @@
 /* voice waypoint → blue, distinct from the photo states (green / orange / red) */
 .wp-dot.voice {
     background: rgb(56, 120, 190);
+}
+
+/* video waypoint → violet, distinct from photo (green) and voice (blue) */
+.wp-dot.video {
+    background: rgb(138, 92, 196);
 }
 
 @keyframes wpPulse {
@@ -160,6 +170,18 @@
     -webkit-user-select: none;
     user-select: none;
     -webkit-user-drag: none;
+}
+
+/* video waypoint in the lightbox: a real <video> player where the photo would be (starts hidden via
+   the element's inline style="display:none"; showAt() clears it to reveal, matching #lightbox-img). */
+#lightbox-video {
+    width: 100%;
+    max-height: 82vh;
+    object-fit: contain;
+    border-radius: 12px;
+    display: block;
+    background: #000;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
 }
 
 /* voice note in the lightbox: a big speech/mic icon where the photo would be, + a CENTRED player */

@@ -23,7 +23,7 @@ for (const g of [
   'L', 'supabase', 'Capacitor', 'CryptoJS',
   'RainRadar', 'RainPalette', 'RainRecolor', 'CyberClock', 'DebugWindow',
   'PhotoLayer', 'PhotoFullscreen', 'VoiceNote', 'TrackRender', 'TrackSmooth',
-  'TrackBuffer', 'AppUpdate', 'TrackerMedia', 'RadialMenu',
+  'TrackBuffer', 'AppUpdate', 'TrackerMedia', 'RadialMenu', 'uploadMedia', 'dataUrlToBlob', 'TrackDem',
 ]) app[g] = 'readonly';
 
 export default [

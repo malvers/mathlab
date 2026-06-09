@@ -131,6 +131,7 @@ window.TrackerMedia = function (T) {
         // ---- Photo-pin fan-out (spiderfy): pins at the (nearly) same spot fan out on
         //      hover (desktop) / tap (touch) so each photo is reachable — even at 100% overlap. ----
         const FAN_DETECT_PX = 26;   // pins within this screen distance count as "stacked"
+        const COL_FAN = 'rgb(14, 36, 78)'; // dark-blue connector lines + ring on fanned-out pins
 
         function pinClusterAround(marker) {
             const p0 = map.latLngToLayerPoint(marker.getLatLng());
@@ -140,7 +141,11 @@ window.TrackerMedia = function (T) {
             collapseFan();
             const n = markers.length;
             if (n < 2) return;
-            const centerLatLng = markers[0].getLatLng();
+            // Centre the fan on the CENTROID of the stack (not markers[0], an edge pin) so the
+            // ring and its connector lines converge under where the badge actually sat.
+            let sumLat = 0, sumLng = 0;
+            markers.forEach(m => { const p = m.getLatLng(); sumLat += p.lat; sumLng += p.lng; });
+            const centerLatLng = L.latLng(sumLat / n, sumLng / n);
             const c = map.latLngToLayerPoint(centerLatLng);
             const R = Math.max(48, n * 5.4); // keep ~34 px spacing around the ring
             const originals = markers.map(m => m.getLatLng());
@@ -148,10 +153,11 @@ window.TrackerMedia = function (T) {
             markers.forEach((m, i) => {
                 const ang = (i / n) * 2 * Math.PI - Math.PI / 2; // start at the top
                 const ll = map.layerPointToLatLng(L.point(c.x + Math.cos(ang) * R, c.y + Math.sin(ang) * R));
-                lines.push(L.polyline([centerLatLng, ll], { weight: 1.5, color: COL_ORANGE, opacity: 0.45, interactive: false }).addTo(map));
+                lines.push(L.polyline([centerLatLng, ll], { weight: 1.5, color: COL_FAN, opacity: 0.55, interactive: false }).addTo(map));
                 m.setLatLng(ll);
                 m.setZIndexOffset(1000);
                 m.setIcon(PhotoLayer.pinIcon(m._wp, 0)); // fanned apart → drop the stack badge
+                if (m._icon) m._icon.classList.add('wp-fanned'); // dark-blue ring marks fanned pins
             });
             // dashed box that groups the fanned-out photos (these belong to one spot)
             const pad = R + 26;
@@ -166,10 +172,11 @@ window.TrackerMedia = function (T) {
         }
         function collapseFan() {
             if (!T.fannedCluster) return;
-            T.fannedCluster.markers.forEach((m, i) => { m.setLatLng(T.fannedCluster.originals[i]); m.setZIndexOffset(0); m.setIcon(PhotoLayer.pinIcon(m._wp, m._badge || 0)); });
+            T.fannedCluster.markers.forEach((m, i) => { m.setLatLng(T.fannedCluster.originals[i]); });
             T.fannedCluster.lines.forEach(l => map.removeLayer(l));
             if (T.fannedCluster.box) map.removeLayer(T.fannedCluster.box);
             T.fannedCluster = null;
+            PhotoLayer.applyStackBadges(T.wpMarkers, map); // restore tally badges + top-z after collapsing
         }
         function onPinClick(marker) {
             // a fanned pin → open it; a stacked pin → fan it; a lone pin → open it
@@ -228,6 +235,7 @@ window.TrackerMedia = function (T) {
         // the browser falls back to the hidden <input capture> picker. Same single source —
         // window.Capacitor is undefined on the web, so the native path is simply skipped.
         const camInput = $('cam-input');
+        const vidInput = $('vid-input');
         const NativeCam = (window.Capacitor && Capacitor.Plugins && Capacitor.Plugins.Camera) || null;
         const useNativeCam = !!(NativeCam && Capacitor.isNativePlatform && Capacitor.isNativePlatform());
 
@@ -494,6 +502,81 @@ window.TrackerMedia = function (T) {
                 try { await VoiceNote.start(); startUI(); }
                 catch (e) { toast('Mikrofon nicht verfügbar: ' + (e.message || e)); }
                 finally { busy = false; }
+            });
+        })();
+
+        // ---- Video-Spur: tap the video FAB → native camera in video mode (file input) → a clip pinned
+        //      on the track. The clip is uploaded to the media store (Cloudflare R2) via uploadMedia →
+        //      wp.video = public URL. If the store isn't ready / offline, the local object-URL stays for
+        //      this session (preview) and nothing huge is persisted — never block, never lose the take. ----
+        function captureVideo() {
+            return new Promise((resolve) => {
+                if (!vidInput) return resolve(null);
+                const onChange = () => {
+                    vidInput.removeEventListener('change', onChange);
+                    resolve((vidInput.files && vidInput.files[0]) || null);
+                };
+                vidInput.value = '';
+                vidInput.addEventListener('change', onChange);
+                vidInput.click();
+            });
+        }
+        // Upload the clip; on success swap the local blob-URL for the public URL + persist. On failure
+        // keep the local preview this session (store not ready / offline). Returns true on real upload.
+        async function finalizeVideo(wp, file) {
+            if (typeof uploadMedia !== 'function') { toast('Video lokal — Upload-Modul fehlt.'); return false; }
+            try {
+                const up = await uploadMedia(file, 'video', { ownerId: 'anon' });
+                try { URL.revokeObjectURL(wp.video); } catch (_) {}
+                wp.video = up.url; wp.mime = up.mime || wp.mime; delete wp._pending; delete wp._blob;
+                refreshWaypoint(wp);
+                if (typeof TrackBuffer !== 'undefined') TrackBuffer.saveNow(bufferSnapshot());
+                doSync();
+                toast('Video hochgeladen.');
+                return true;
+            } catch (e) {
+                if (typeof DebugWindow !== 'undefined') DebugWindow.log('Video-Upload (noch) nicht möglich: ' + (e.message || e));
+                toast('Video lokal — Upload folgt, sobald der Storage steht.');
+                return false;
+            }
+        }
+        function newVideoWp(file, ll) {
+            return addWaypoint({
+                type: 'video', lat: ll[0], lng: ll[1], t: new Date().toISOString(),
+                video: URL.createObjectURL(file), mime: file.type || 'video/mp4',
+                title: 'Video', text: '', _pending: true, _blob: file,
+            });
+        }
+        async function addVideoAt(file, ll) {   // on the ACTIVE track
+            const wp = newVideoWp(file, ll);
+            refreshWaypoint(wp);
+            const mb = file.size ? (Math.round(file.size / 1e5) / 10) + ' MB' : '';
+            toast('Video aufgenommen' + (mb ? ' · ' + mb : ''));
+            await finalizeVideo(wp, file);
+        }
+        async function addVideoPoint(file, ll) { // IDLE → standalone one-point track (like a one-point photo)
+            const wp = newVideoWp(file, ll);
+            refreshWaypoint(wp);
+            const ok = await finalizeVideo(wp, file);
+            if (!ok) return; // not uploaded → keep the session preview, don't persist a dead blob URL
+            const name = 'Video ' + new Date().toLocaleString('de-DE');
+            try { await saveOnePointTrack(name, ll, wp); toast('Gespeichert: ' + name); }
+            catch (e) { toast('Speichern fehlgeschlagen: ' + (e.message || e)); }
+            T.waypoints = T.waypoints.filter(x => x !== wp); // isolate from any later tracking session
+        }
+        (function () {
+            const vidFab = $('vid-fab');
+            if (!vidFab) return;
+            vidFab.addEventListener('click', async () => {
+                if (!currentLatLng()) { toast('Noch keine Position — kurz auf GPS warten.'); return; }
+                let file;
+                try { file = await captureVideo(); }
+                catch (e) { toast('Kamera nicht verfügbar: ' + (e.message || e)); return; }
+                if (!file) return; // cancelled
+                const ll = currentLatLng();
+                if (!ll) { toast('Position verloren — nochmal versuchen.'); return; }
+                if (T.tracking) await addVideoAt(file, ll);
+                else await addVideoPoint(file, ll);
             });
         })();
 
