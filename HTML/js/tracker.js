@@ -210,6 +210,7 @@
         let __media = null;        // Foto-Spur module instance (js/tracker-media.js)        // their Leaflet markers (kept for clearing)
         let __nav = null;          // simple-navigation module instance (js/tracker-nav.js)
         let __speed = null;        // speed-limit sign module instance (js/tracker-speedlimit.js)
+        let __compass = null;      // north/compass module instance (js/tracker-compass.js)
         let gnssActive = false;    // true once the native GnssStatus listener delivers data
         let gnssLatest = null;     // last native GNSS summary {used, inView, usedByConstellation, ...}
         let gpsReal = false;       // true only on a genuine GPS fix (native sats used, or acc ≤ GPS) —
@@ -809,6 +810,7 @@
 
         $('trk-toggle').addEventListener('click', () => {
             if (__speed) __speed.unlockAudio(); // unlock the over-speed chime within this user gesture
+            if (__compass) __compass.enable();  // start the compass (iOS needs this gesture for permission)
             if (trkState === 'idle') beginTracking();
             else if (trkState === 'recording') pauseTracking();
             else resumeTracking(); // paused
@@ -1573,6 +1575,8 @@ ${pts}
         // ---- Speed-limit sign → js/tracker-speedlimit.js. Position-driven (fed from onPosition),
         //      independent of navigation; owns its own #speed-sign badge. ----
         __speed = TrackerSpeedLimit({ $ });
+        // ---- Compass / north indicator → js/tracker-compass.js. Owns its own #compass badge. ----
+        __compass = TrackerCompass({ $ });
         // ===============================================================
         // Radial action popup (long-press / right-click) — style from worldclock
         // ===============================================================

@@ -1732,6 +1732,54 @@ body.ui-idle #trk-controls {
     display: none;
 }
 
+/* Compass — top-right, under the header. The rose rotates with the device (JS) so the red needle
+   and "N" always point to real north. The map itself stays north-up. */
+#compass {
+    position: fixed;
+    right: 12px;
+    top: calc(env(safe-area-inset-top, 0px) + 12px);
+    z-index: 700;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: rgba(8, 20, 42, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+}
+
+#compass[hidden] {
+    display: none;
+}
+
+#compass-rose {
+    position: absolute;
+    inset: 0;
+    transition: transform 0.15s linear;
+}
+
+.compass-needle {
+    position: absolute;
+    left: 50%;
+    top: 5px;
+    width: 0;
+    height: 0;
+    transform: translateX(-50%);
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-bottom: 16px solid rgb(176, 36, 24); /* red end points north */
+}
+
+.compass-n {
+    position: absolute;
+    left: 50%;
+    top: 1px;
+    transform: translateX(-50%);
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 700;
+    font-size: 8px;
+    color: #fff;
+}
+
 /* "Neue Version verfügbar" banner — persistent + tappable (unlike the toast). Sits just
    above the toast slot so the two never overlap. */
 #update-banner {
