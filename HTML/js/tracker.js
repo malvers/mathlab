@@ -208,6 +208,7 @@
         let wpMarkers = [];
         let fannedCluster = null;  // spiderfy: a photo fan is open (set by tracker-media); core reads it to gate the radial menu
         let __media = null;        // Foto-Spur module instance (js/tracker-media.js)        // their Leaflet markers (kept for clearing)
+        let __nav = null;          // simple-navigation module instance (js/tracker-nav.js)
         let gnssActive = false;    // true once the native GnssStatus listener delivers data
         let gnssLatest = null;     // last native GNSS summary {used, inView, usedByConstellation, ...}
         let gpsReal = false;       // true only on a genuine GPS fix (native sats used, or acc ≤ GPS) —
@@ -764,6 +765,7 @@
             if (window.RainRadar && RainRadar.setShifted) RainRadar.setShifted(true); // drop the rain slider below the HUD
             setTrkState('recording');
             setStatus('Suche GPS-Signal …');
+            if (__nav && __nav.hasDestination()) __nav.startNavigation(); // a destination is set → navigate too
         }
 
         // STOP while recording → pause (keep all data, freeze the timer).
@@ -790,6 +792,7 @@
         async function finishTracking() {
             setTrkState('idle');
             stopLive(true);
+            if (__nav) __nav.clearRoute(); // STOP also clears the navigation route + destination pin
             if (track.length >= 1) {
                 const name = currentTrackName || autoTrackName();
                 toast('Speichere …');
@@ -812,6 +815,7 @@
             if (!(await uiConfirm('Track verwerfen? Das lässt sich nicht rückgängig machen.', { danger: true, okText: 'Verwerfen' }))) return;
             setTrkState('idle');
             stopLive(true);
+            if (__nav) __nav.clearRoute(); // discard also clears the navigation route + destination pin
             const id = currentTrackId;
             currentTrackId = null; currentTrackName = '';
             await clearTrack(true);
@@ -1554,6 +1558,12 @@ ${pts}
             get wpMarkers() { return wpMarkers; }, set wpMarkers(v) { wpMarkers = v; },
             get fannedCluster() { return fannedCluster; }, set fannedCluster(v) { fannedCluster = v; },
         });
+        // ---- Simple navigation → js/tracker-nav.js. Owns its own route/destination layers; the core
+        //      only asks hasDestination() on START and clearRoute() on STOP (finish/discard). ----
+        __nav = TrackerNav({
+            map, $, toast, showPanel, hidePanels,
+            get posMarker() { return posMarker; },
+        });
         // ===============================================================
         // Radial action popup (long-press / right-click) — style from worldclock
         // ===============================================================
@@ -1625,6 +1635,7 @@ ${pts}
         $('list-close').addEventListener('click', hidePanels);
         $('info-close').addEventListener('click', hidePanels);
         $('live-close').addEventListener('click', hidePanels);
+        $('nav-close').addEventListener('click', hidePanels);
         // One button: start the live broadcast AND copy the viewer link in one tap.
         $('live-go').addEventListener('click', async () => {
             const v = ($('live-name').value || '').trim() || 'vsb';
@@ -1754,6 +1765,7 @@ ${pts}
             }
         }
         $('mb-settings').addEventListener('click', () => { closePopup(); updateSyncStatus(); loadUsage(); updateReburnButton(); refreshMenuState(); showPanel('settings-panel'); });
+        $('mb-ziel').addEventListener('click', () => { closePopup(); __nav.openPanel(); });
         // Foto-Spur card → re-run the AI analysis on still-unrecognised photos
         $('set-reburn').addEventListener('click', async () => { await reburnTrack(); updateReburnButton(); });
         // "Code erzeugen" generates AND connects this device in one step

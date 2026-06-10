@@ -1,6 +1,8 @@
 # Tracker — Plan: Einfache Navigation (Adresse → Route + Tracking)
 
-> Plan-/Konzept-Notiz, **noch nicht gebaut** (CLAUDE.md Regeln 2/4). Stand: 2026-06-10.
+> Plan-/Konzept-Notiz. **MVP gebaut am 2026-06-10** (Modul `HTML/js/tracker-nav.js`, Radial-Eintrag
+> „ZIEL", Panel `#nav-panel`, START navigiert + trackt, STOP räumt auf). Post-MVP unten offen.
+> Stand: 2026-06-10.
 > Entstanden auf der Fahrt nach Bad Homburg (siehe `../../fahrt-bad-homburg-2026-06-10.md`).
 > Ziel laut Doc: **ganz einfach** — Stadt, Straße, Hausnummer → Route. Kein POI-Auswählen, kein Schnickschnack.
 
