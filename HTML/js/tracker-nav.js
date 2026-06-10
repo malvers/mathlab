@@ -1,13 +1,16 @@
-// js/tracker-nav.js — Simple navigation for the tracker (address → route).
+// js/tracker-nav.js — Simple navigation for the tracker (address → route + turn-by-turn voice).
 //
-// Deliberately minimal (per plan-navigation-einfach.md): the user types a destination address,
-// taps "Ziel setzen", then START both navigates AND records the track. No POI picking, no re-routing,
-// no traffic. Free + key-less services only (CLAUDE.md rule 18):
+// Per plan-navigation-einfach.md: type a destination address, tap "Ziel setzen", then START both
+// navigates AND records the track. Includes off-route re-routing and spoken turn instructions
+// (German, built from OSRM maneuvers — no external phrasing library). Free + key-less services only
+// (CLAUDE.md rule 18):
 //   - Geocoding: Nominatim  (address → lat/lng)
-//   - Routing:   OSRM demo  (driving profile → route geometry + distance/duration)
+//   - Routing:   OSRM demo  (driving profile → geometry + per-step maneuvers)
+//   - Voice:     Web Speech API (speechSynthesis) — on-device, no key
 //
-// Additive: owns its own Leaflet layers (route polyline + destination pin) and the #nav-panel UI;
-// the core (tracker.js) only asks hasDestination() on START and clearRoute() on STOP.
+// Additive: owns its own Leaflet layers (route polyline + destination pin), the #nav-panel UI and the
+// #nav-banner. The core (tracker.js) asks hasDestination() on START, feeds update([lat,lng]) on every
+// GPS fix, and calls clearRoute() on STOP.
 window.TrackerNav = function (ctx) {
     const { map, $, toast, showPanel, hidePanels } = ctx;
 
@@ -17,6 +20,9 @@ window.TrackerNav = function (ctx) {
 
     const OFFROUTE_M = 45;          // beyond this distance from the line → considered "off route"
     const REROUTE_COOLDOWN_MS = 8000; // don't hammer OSRM: at most one reroute per this window
+    const ANNOUNCE_FAR_M = 300;     // distance at which the pre-warning ("In 300 m …") is spoken
+    const ANNOUNCE_NEAR_M = 40;     // distance at which the maneuver ("Jetzt …") is spoken + advanced
+    const VOICE_KEY = 'trk_nav_voice';
 
     let destLatLng = null;  // [lat, lng] of the set destination, or null
     let destLabel = '';     // human-readable address (for the panel + toasts)
@@ -25,6 +31,10 @@ window.TrackerNav = function (ctx) {
     let routeLatLngs = null; // the route's points [[lat,lng]…] — for the off-route distance check
     let lastReroute = 0;    // timestamp of the last (re)route, for the cooldown
     let rerouting = false;  // a reroute fetch is in flight
+    let maneuvers = null;   // [{loc:[lat,lng], type, modifier, exit, name, text}] for spoken guidance
+    let mIdx = 0;           // index of the next maneuver to announce
+    let annFar = false;     // pre-warning already spoken for the current maneuver
+    let voiceOn = true;     // spoken guidance on/off (persisted in localStorage)
 
     function hasDestination() { return !!destLatLng; }
 
@@ -89,6 +99,9 @@ window.TrackerNav = function (ctx) {
         clearRouteLine();
         if (destMarker) { map.removeLayer(destMarker); destMarker = null; }
         destLatLng = null; destLabel = '';
+        maneuvers = null; mIdx = 0; annFar = false;
+        hideBanner();
+        try { if ('speechSynthesis' in window) window.speechSynthesis.cancel(); } catch (e) { }
         refreshPanel();
     }
 
@@ -100,12 +113,13 @@ window.TrackerNav = function (ctx) {
         try {
             // OSRM wants lon,lat order; full geometry as GeoJSON for an easy polyline.
             const coords = from[1] + ',' + from[0] + ';' + destLatLng[1] + ',' + destLatLng[0];
-            const r = await fetch(OSRM + coords + '?overview=full&geometries=geojson');
+            const r = await fetch(OSRM + coords + '?overview=full&geometries=geojson&steps=true');
             data = await r.json();
         } catch (e) { toast('Route fehlgeschlagen (offline?).'); return false; }
         if (!data || data.code !== 'Ok' || !data.routes || !data.routes.length) { toast('Keine Route gefunden.'); return false; }
         const best = data.routes[0];
         drawRoute(best.geometry);
+        setGuidance(best);
         lastReroute = Date.now();
         const km = (best.distance / 1000).toFixed(1);
         const min = Math.round(best.duration / 60);
@@ -155,11 +169,104 @@ window.TrackerNav = function (ctx) {
 
     function update(here) {
         // Only while a route is actually drawn; bail cheaply otherwise (no dest, not started, mid-fetch).
-        if (!destLatLng || !routeLatLngs || rerouting || !here) return;
-        if (distToRouteM(here) <= OFFROUTE_M) return;                 // still on (or near) the line
-        if (Date.now() - lastReroute < REROUTE_COOLDOWN_MS) return;   // throttle the OSRM calls
+        if (!destLatLng || !routeLatLngs || !here) return;
+        if (rerouting) return;
+        guidanceUpdate(here);                                        // announce the upcoming maneuver
+        if (distToRouteM(here) <= OFFROUTE_M) return;                // still on (or near) the line
+        if (Date.now() - lastReroute < REROUTE_COOLDOWN_MS) return;  // throttle the OSRM calls
         rerouting = true;
         computeRoute([here[0], here[1]], true).finally(() => { rerouting = false; });
+    }
+
+    // ---- Turn-by-turn guidance (spoken + on-screen banner) ----
+    function haversine(a, b) {
+        const R = 6371000, t = Math.PI / 180;
+        const dLat = (b[0] - a[0]) * t, dLng = (b[1] - a[1]) * t;
+        const x = Math.sin(dLat / 2) ** 2 + Math.cos(a[0] * t) * Math.cos(b[0] * t) * Math.sin(dLng / 2) ** 2;
+        return 2 * R * Math.asin(Math.sqrt(x));
+    }
+
+    // OSRM maneuver (type + modifier + road name) → a short German instruction. We map the data;
+    // we do not invent phrasings beyond this table.
+    const DIR = {
+        left: 'links', right: 'rechts', 'slight left': 'leicht links', 'slight right': 'leicht rechts',
+        'sharp left': 'scharf links', 'sharp right': 'scharf rechts', straight: 'geradeaus', uturn: 'wenden',
+    };
+    function phrase(man, name) {
+        const onto = name ? ' auf ' + name : '';
+        const dir = DIR[man.modifier] || '';
+        switch (man.type) {
+            case 'depart': return 'Losfahren' + onto;
+            case 'arrive': return 'Ziel erreicht';
+            case 'turn': return man.modifier === 'straight' ? 'Geradeaus weiter' + onto : (dir || 'abbiegen') + ' abbiegen' + onto;
+            case 'merge': return 'Einfädeln' + (dir ? ' ' + dir : '') + onto;
+            case 'on ramp': return 'Auffahren' + (dir ? ' ' + dir : '') + onto;
+            case 'off ramp': return 'Abfahren' + (dir ? ' ' + dir : '') + onto;
+            case 'fork': return (dir ? dir + ' halten' : 'der Spur folgen') + onto;
+            case 'end of road': return (dir || 'abbiegen') + ' abbiegen' + onto;
+            case 'roundabout': case 'rotary':
+                return man.exit ? 'Im Kreisverkehr die ' + man.exit + '. Ausfahrt' + onto : 'In den Kreisverkehr' + onto;
+            case 'continue': return man.modifier && man.modifier !== 'straight' ? dir + onto : 'Weiter' + onto;
+            case 'new name': return 'Weiter' + onto;
+            default: return dir ? dir + onto : 'Weiter' + onto;
+        }
+    }
+
+    function setGuidance(best) {
+        maneuvers = [];
+        (best.legs || []).forEach((leg) => (leg.steps || []).forEach((s) => {
+            const loc = s.maneuver && s.maneuver.location;
+            if (!loc) return;
+            maneuvers.push({
+                loc: [loc[1], loc[0]], type: s.maneuver.type, modifier: s.maneuver.modifier,
+                exit: s.maneuver.exit, name: s.name, text: phrase(s.maneuver, s.name),
+            });
+        }));
+        mIdx = 0;
+        while (mIdx < maneuvers.length && maneuvers[mIdx].type === 'depart') mIdx++; // skip the leading "depart"
+        annFar = false;
+    }
+
+    function announceDist(d) { return d > 500 ? Math.round(d / 100) * 100 : Math.round(d / 50) * 50; }
+    function fmtDist(d) { return d >= 1000 ? (d / 1000).toFixed(1) + ' km' : Math.round(d / 10) * 10 + ' m'; }
+
+    function speak(text) {
+        if (!voiceOn || !('speechSynthesis' in window)) return;
+        try {
+            const u = new SpeechSynthesisUtterance(text);
+            u.lang = 'de-DE';
+            window.speechSynthesis.cancel(); // drop any stale utterance so we never lag behind
+            window.speechSynthesis.speak(u);
+        } catch (e) { }
+    }
+
+    const ARROW = {
+        left: '↰', right: '↱', 'slight left': '↖', 'slight right': '↗',
+        'sharp left': '⮈', 'sharp right': '⮊', straight: '↑', uturn: '⟲',
+    };
+    function showBanner(m, d) {
+        const el = $('nav-banner'); if (!el) return;
+        const arrow = (m.type === 'arrive') ? '⚑' : (ARROW[m.modifier] || '↑');
+        el.textContent = arrow + '  ' + fmtDist(d) + ' · ' + m.text;
+        el.hidden = false;
+    }
+    function hideBanner() { const el = $('nav-banner'); if (el) el.hidden = true; }
+
+    function guidanceUpdate(here) {
+        if (!maneuvers || mIdx >= maneuvers.length) return;
+        const m = maneuvers[mIdx];
+        const d = haversine(here, m.loc);
+        showBanner(m, d);
+        if (d <= ANNOUNCE_NEAR_M) {                       // at the maneuver → say it, advance
+            speak(m.type === 'arrive' ? 'Sie haben das Ziel erreicht.' : 'Jetzt ' + m.text);
+            mIdx++; annFar = false;
+            if (mIdx >= maneuvers.length) setTimeout(hideBanner, 3000);
+        } else if (d <= ANNOUNCE_FAR_M && !annFar) {      // approaching → pre-warning, once
+            annFar = true;
+            speak(m.type === 'arrive'
+                ? 'In ' + announceDist(d) + ' Metern erreichen Sie das Ziel.'
+                : 'In ' + announceDist(d) + ' Metern ' + m.text + '.');
+        }
     }
 
     // ---- Panel ----
@@ -174,6 +281,18 @@ window.TrackerNav = function (ctx) {
     // Wire the panel's own buttons once.
     const setBtn = $('nav-set'); if (setBtn) setBtn.addEventListener('click', setDestination);
     const clrBtn = $('nav-clear'); if (clrBtn) clrBtn.addEventListener('click', () => { clearRoute(); toast('Ziel gelöscht.'); });
+
+    // Voice toggle (persisted): default on, but the user can silence spoken guidance.
+    voiceOn = localStorage.getItem(VOICE_KEY) !== '0';
+    const voiceBox = $('nav-voice');
+    if (voiceBox) {
+        voiceBox.checked = voiceOn;
+        voiceBox.addEventListener('change', () => {
+            voiceOn = voiceBox.checked;
+            localStorage.setItem(VOICE_KEY, voiceOn ? '1' : '0');
+            if (!voiceOn) { try { window.speechSynthesis.cancel(); } catch (e) { } }
+        });
+    }
 
     return { openPanel, hasDestination, startNavigation, clearRoute, update };
 };
