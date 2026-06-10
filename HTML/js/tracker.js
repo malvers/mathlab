@@ -1820,18 +1820,23 @@ ${pts}
         });
         $('settings-close').addEventListener('click', hidePanels);
 
-        // Settings → Debug: show/hide the on-screen DebugWindow. Default OFF; persisted in localStorage.
+        // Settings → Debug: show/hide the on-screen DebugWindow AND the bottom debug bar (BUILD + motion).
+        // Both follow the same toggle; default OFF; persisted in localStorage.
         // DebugWindow.show/hide auto-init; we wire after DOMContentLoaded so its own init() ran first.
         (function () {
             const KEY = 'tracker.dbgWindow';
+            function applyDebug(on) {
+                document.body.classList.toggle('dbg-on', on); // bottom bar (#motion-dbg) visibility
+                if (window.DebugWindow) (on ? DebugWindow.show() : DebugWindow.hide());
+            }
             function wire() {
                 const cb = $('dbg-window-toggle'); if (!cb || cb._wired) return; cb._wired = true;
                 const on = localStorage.getItem(KEY) === '1'; // default OFF
                 cb.checked = on;
-                if (window.DebugWindow) (on ? DebugWindow.show() : DebugWindow.hide());
+                applyDebug(on);
                 cb.addEventListener('change', () => {
                     localStorage.setItem(KEY, cb.checked ? '1' : '0');
-                    if (window.DebugWindow) (cb.checked ? DebugWindow.show() : DebugWindow.hide());
+                    applyDebug(cb.checked);
                 });
             }
             if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', wire);
