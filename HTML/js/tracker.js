@@ -1777,7 +1777,21 @@ ${pts}
                 $('sync-input').value = '';
             }
         }
-        $('mb-settings').addEventListener('click', () => { closePopup(); updateSyncStatus(); loadUsage(); updateReburnButton(); refreshMenuState(); showPanel('settings-panel'); });
+        $('mb-settings').addEventListener('click', () => { closePopup(); updateSyncStatus(); loadUsage(); updateReburnButton(); refreshMenuState(); refreshRainStatus(); showPanel('settings-panel'); });
+        // Settings → Debug: live source-health dots for the rain radar (DWD + RainViewer).
+        function refreshRainStatus() {
+            const setDot = (id, st) => {
+                const el = $(id); if (!el) return;
+                el.classList.remove('ok', 'down', 'unknown');
+                if (st === true) { el.classList.add('ok'); el.textContent = '●'; }
+                else if (st === false) { el.classList.add('down'); el.textContent = '⊘'; }
+                else { el.classList.add('unknown'); el.textContent = '…'; }
+            };
+            setDot('dbg-dwd-status', null); setDot('dbg-rv-status', null); // "probing…"
+            if (window.RainRadar && RainRadar.checkHealth) {
+                RainRadar.checkHealth().then((s) => { setDot('dbg-dwd-status', s.dwd); setDot('dbg-rv-status', s.rv); }).catch(() => { });
+            }
+        }
         $('mb-ziel').addEventListener('click', () => { closePopup(); if (__nav) __nav.openPanel(); });
         // Foto-Spur card → re-run the AI analysis on still-unrecognised photos
         $('set-reburn').addEventListener('click', async () => { await reburnTrack(); updateReburnButton(); });
