@@ -128,47 +128,53 @@ window.TrackerMedia = function (T) {
         //      controls (close / prev-next / Esc / arrows / native immersive fullscreen). ----
         PhotoLayer.mountLightbox();
         function openPhotoLightbox(wp) { PhotoLayer.openLightbox(wp, T.waypoints); }
-        // ---- Photo-pin fan-out (spiderfy): pins at the (nearly) same spot fan out on
-        //      hover (desktop) / tap (touch) so each photo is reachable — even at 100% overlap. ----
-        const FAN_DETECT_PX = 26;   // pins within this screen distance count as "stacked"
+        // ---- Photo-pin fan-out (spiderfy): a stack fans out on hover (desktop) / tap (touch) so each
+        //      photo is reachable — even at 100% overlap. The stack is the SAME connected component the
+        //      badge uses (stored on the marker as `_stack` by PhotoLayer.applyStackBadges), so the
+        //      fanned count always equals the badge number and is independent of which pin you tap.
+        //      ALL geometry runs in DOT-CENTRE pixel space (the marker latlng is the TIP, 15px below
+        //      the visible dot — PhotoLayer.DOT_DY), so the ring, hub and lines sit on the real dots. ----
         const COL_FAN = 'rgb(14, 36, 78)'; // dark-blue connector lines + ring on fanned-out pins
 
-        function pinClusterAround(marker) {
-            const p0 = map.latLngToLayerPoint(marker.getLatLng());
-            return T.wpMarkers.filter(m => map.latLngToLayerPoint(m.getLatLng()).distanceTo(p0) <= FAN_DETECT_PX);
+        function pinClusterComponent(marker) {
+            return (marker._stack && marker._stack.length) ? marker._stack : [marker];
         }
         function fanOut(markers) {
             collapseFan();
             const n = markers.length;
             if (n < 2) return;
-            // Centre the fan on the CENTROID of the stack (not markers[0], an edge pin) so the
-            // ring and its connector lines converge under where the badge actually sat.
-            let sumLat = 0, sumLng = 0;
-            markers.forEach(m => { const p = m.getLatLng(); sumLat += p.lat; sumLng += p.lng; });
-            const centerLatLng = L.latLng(sumLat / n, sumLng / n);
-            const c = map.latLngToLayerPoint(centerLatLng);
+            // Hub = centroid of the DOT CENTRES in pixel space → sits under the visible pile (not 15px
+            // low at the tips, not skewed by lat/lng averaging).
+            const dpts = markers.map(m => PhotoLayer.dotPoint(map, m));
+            let sx = 0, sy = 0;
+            dpts.forEach(p => { sx += p.x; sy += p.y; });
+            const hub = L.point(sx / n, sy / n);
+            const hubLatLng = map.layerPointToLatLng(hub);
             const R = Math.max(48, n * 5.4); // keep ~34 px spacing around the ring
             const originals = markers.map(m => m.getLatLng());
             const lines = [];
             markers.forEach((m, i) => {
                 const ang = (i / n) * 2 * Math.PI - Math.PI / 2; // start at the top
-                const ll = map.layerPointToLatLng(L.point(c.x + Math.cos(ang) * R, c.y + Math.sin(ang) * R));
-                lines.push(L.polyline([centerLatLng, ll], { weight: 1.5, color: COL_FAN, opacity: 0.55, interactive: false }).addTo(map));
-                m.setLatLng(ll);
+                const ringDot = L.point(hub.x + Math.cos(ang) * R, hub.y + Math.sin(ang) * R); // dot centre on ring
+                // line: dot-centre hub → dot-centre on ring (polyline vertices have no anchor offset, so
+                // BOTH ends land exactly on the dots, not 15px below at the tips)
+                lines.push(L.polyline([hubLatLng, map.layerPointToLatLng(ringDot)], { weight: 1.5, color: COL_FAN, opacity: 0.55, interactive: false }).addTo(map));
+                // place the marker so its DOT (not its tip) sits on the ring point
+                m.setLatLng(PhotoLayer.dotPointToLatLng(map, ringDot));
                 m.setZIndexOffset(1000);
                 m.setIcon(PhotoLayer.pinIcon(m._wp, 0)); // fanned apart → drop the stack badge
                 if (m._icon) m._icon.classList.add('wp-fanned'); // dark-blue ring marks fanned pins
             });
-            // dashed box that groups the fanned-out photos (these belong to one spot)
-            const pad = R + 26;
+            // dashed box around the dot ring (+ room for the 30px dot height), centred on the dot hub
+            const pad = R + 22;
             const box = L.rectangle(
                 L.latLngBounds(
-                    map.layerPointToLatLng(L.point(c.x - pad, c.y - pad)),
-                    map.layerPointToLatLng(L.point(c.x + pad, c.y + pad))
+                    map.layerPointToLatLng(L.point(hub.x - pad, hub.y - pad)),
+                    map.layerPointToLatLng(L.point(hub.x + pad, hub.y + pad))
                 ),
                 { color: COL_ORANGE, weight: 1.5, dashArray: '6 6', fill: false, opacity: 0.7, interactive: false }
             ).addTo(map);
-            T.fannedCluster = { markers, originals, lines, box, center: centerLatLng, radius: R };
+            T.fannedCluster = { markers, originals, lines, box, center: hubLatLng, radius: R };
         }
         function collapseFan() {
             if (!T.fannedCluster) return;
@@ -183,13 +189,13 @@ window.TrackerMedia = function (T) {
             if (T.fannedCluster && T.fannedCluster.markers.indexOf(marker) !== -1) {
                 const wp = marker._wp; collapseFan(); openPhotoLightbox(wp); return;
             }
-            const cluster = pinClusterAround(marker);
+            const cluster = pinClusterComponent(marker);
             if (cluster.length > 1) fanOut(cluster);
             else openPhotoLightbox(marker._wp);
         }
         function onPinHover(marker) { // desktop hover → fan a stack open
             if (T.fannedCluster) return;
-            const cluster = pinClusterAround(marker);
+            const cluster = pinClusterComponent(marker);
             if (cluster.length > 1) fanOut(cluster);
         }
         // collapse when the cursor leaves the fanned area, on a map tap, or on zoom

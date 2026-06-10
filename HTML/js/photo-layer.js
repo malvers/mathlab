@@ -46,21 +46,37 @@
     // Pins that visually overlap on screen ("a stack") get a tally badge on the TOP pin so
     // the pile is visible before you tap it. Overlap is a SCREEN concept, so it is measured
     // in pixels via the map projection and therefore depends on zoom — the count must be
-    // recomputed on every `zoomend`. Threshold matches the recorder's fan-out (FAN_DETECT_PX)
-    // so the badge number equals the number of pins that fan out on tap.
+    // recomputed on every `zoomend`. STACK_PX is the single source of truth for the threshold;
+    // the fan-out reuses the SAME grouping (each marker's `_stack`), so the badge number always
+    // equals the number of pins that fan out on tap — structurally, not by coincidence.
     //   - When `map` is given: pixel-distance clustering (catches near-but-not-identical fixes).
     //   - Without `map`: falls back to exact-coordinate grouping (zoom-independent).
     // Each marker must carry its waypoint as `m._wp`. The chosen count is stored on `m._badge`
     // so a fan-out can strip the badge and the collapse can restore it.
-    const STACK_PX = 26;     // keep in sync with tracker-media.js FAN_DETECT_PX
+    const STACK_PX = 26;     // single source of truth: pins whose DOT CENTERS are within this many
+                             // screen px form one stack — badge AND fan-out share this threshold
     const STACK_TOP_Z = 900; // raise the badged pin above its plain stackmates (pending = 2000 still wins)
+    const DOT_DY = 15;       // the visible dot centre sits iconAnchor.y(30) − iconSize/2(15) = 15px ABOVE the tip
+
+    // Project a marker's TIP latlng (its getLatLng, anchored bottom-centre) to the visible DOT-CENTRE
+    // layer point — the optical position used for ALL clustering + fan geometry.
+    function dotPoint(map, m) {
+        const p = map.latLngToLayerPoint(m.getLatLng());
+        return global.L.point(p.x, p.y - DOT_DY);
+    }
+    // Inverse: a DOT-CENTRE layer point → the TIP latlng to assign so the dot lands exactly there.
+    function dotPointToLatLng(map, pt) {
+        return map.layerPointToLatLng(global.L.point(pt.x, pt.y + DOT_DY));
+    }
+
     function exactKey(wp) {
         return (Number(wp && wp.lat) || 0).toFixed(5) + ',' + (Number(wp && wp.lng) || 0).toFixed(5);
     }
     function isPending(m) { return !!(m && m._wp && m._wp.title === PENDING_TITLE); }
-    // Badge the group member that ends up on top, and FORCE it on top via zIndexOffset so a
-    // y-tie / DOM-order quirk can't hide the badge behind a sibling. A pending pin is already
-    // force-raised (z 2000) elsewhere, so if the stack has one, the badge goes there instead.
+    // Badge the group member nearest the cluster's optical centre, FORCE it on top via zIndexOffset
+    // (so a y-tie / DOM-order quirk can't hide the badge), and record the whole group on every marker
+    // as `_stack` so the fan-out reuses the EXACT same partition (badge count == fanned count). A
+    // pending pin is force-raised (z 2000) elsewhere, so if the stack has one the badge goes there.
     function stampGroup(group, topIdx) {
         const count = group.length;
         const pIdx = group.findIndex(isPending);
@@ -69,6 +85,7 @@
         group.forEach((m, i) => {
             const badge = (count > 1 && i === topIdx) ? count : 0;
             m._badge = badge;
+            m._stack = group; // fan-out reads this → fanned set is identical to the badged set
             m.setIcon(pinIcon(m._wp, badge));
             // leave pending pins' own z (2000) untouched; raise/relax everyone else
             if (!isPending(m)) m.setZIndexOffset(badge ? STACK_TOP_Z : 0);
@@ -90,11 +107,11 @@
             return;
         }
 
-        // pixel-distance clustering by CONNECTED COMPONENTS (BFS): every pin that overlaps
-        // any other pin in the blob joins the same group, so a dense cluster yields ONE badge
-        // (not several adjacent ones whose pins would cover each other's corners).
+        // ONE clustering definition (shared with the fan via `m._stack`): connected components (BFS)
+        // over DOT-CENTRE pixel distance, threshold STACK_PX. A dense blob → one component → one badge;
+        // the fan reuses the same group so its count always matches what's shown.
         const n = valid.length;
-        const pts = valid.map(m => map.latLngToLayerPoint(m.getLatLng()));
+        const pts = valid.map(m => dotPoint(map, m));
         const seen = new Array(n).fill(false);
         for (let i = 0; i < n; i++) {
             if (seen[i]) continue;
@@ -111,9 +128,17 @@
                     }
                 }
             }
-            // Leaflet stacks markers by projected y (south = larger y = drawn on top).
-            let topLocal = 0;
-            for (let t = 1; t < comp.length; t++) if (pts[comp[t]].y > pts[comp[topLocal]].y) topLocal = t;
+            // Badge the pin nearest the component's dot-centre centroid (its optical middle, where the
+            // fan erupts) — not the southernmost edge pin.
+            let cx = 0, cy = 0;
+            comp.forEach(idx => { cx += pts[idx].x; cy += pts[idx].y; });
+            cx /= comp.length; cy /= comp.length;
+            const ctr = global.L.point(cx, cy);
+            let topLocal = 0, best = Infinity;
+            for (let t = 0; t < comp.length; t++) {
+                const d = pts[comp[t]].distanceTo(ctr);
+                if (d < best) { best = d; topLocal = t; }
+            }
             stampGroup(comp.map(idx => valid[idx]), topLocal);
         }
     }
@@ -419,5 +444,5 @@
         if (global.PhotoFullscreen) global.PhotoFullscreen.enter($('photo-lightbox'));
     }
 
-    global.PhotoLayer = { pinIcon, applyStackBadges, mountLightbox, openLightbox, closeLightbox: close, renderFacts };
+    global.PhotoLayer = { pinIcon, applyStackBadges, dotPoint, dotPointToLatLng, DOT_DY, mountLightbox, openLightbox, closeLightbox: close, renderFacts };
 })(window);
