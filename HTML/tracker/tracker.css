@@ -625,6 +625,8 @@ body.ui-idle #menu-fab,
 body.ui-idle #cam-fab,
 body.ui-idle #mic-fab,
 body.ui-idle #vid-fab,
+body.ui-idle #compass,
+body.ui-idle #speed-sign,
 body.ui-idle #hud-top,
 body.ui-idle #trk-controls {
     opacity: 0;
@@ -1698,23 +1700,26 @@ body.ui-idle #trk-controls {
 #speed-sign {
     position: fixed;
     left: 12px;
-    top: calc(env(safe-area-inset-top, 0px) + 12px);
-    z-index: 700;
-    width: 54px;
-    height: 54px;
+    top: 50%;
+    transform: translateY(calc(-50% + 52px)); /* left stack: BELOW the hamburger (Nordpfeil · HH · Speed) */
+    z-index: 600;
+    width: 44px;
+    height: 44px;
     border-radius: 50%;
     background: #fff;
-    border: 6px solid rgb(176, 36, 24);
+    border: 5px solid rgb(176, 36, 24);
     color: #111;
-    font-family: 'Orbitron', sans-serif;
-    font-weight: 800;
-    font-size: 1.25rem;
+    /* Arial (road-sign look); sized to fit the inner circle even at 3 digits (120/130), responsive */
+    font-family: Arial, Helvetica, sans-serif;
+    font-weight: 700;
+    font-size: clamp(14px, 4vw, 17px);
+    letter-spacing: -0.3px;
     line-height: 1;
     display: flex;
     align-items: center;
     justify-content: center;
     box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
-    transition: background 0.2s ease, color 0.2s ease;
+    transition: background 0.2s ease, color 0.2s ease, opacity 0.55s ease;
 }
 
 #speed-sign.over {
@@ -1732,19 +1737,22 @@ body.ui-idle #trk-controls {
     display: none;
 }
 
-/* Compass — top-right, under the header. The rose rotates with the device (JS) so the red needle
-   and "N" always point to real north. The map itself stays north-up. */
+/* Compass — left-edge stack, ABOVE the hamburger (matches the right-side FABs: 44px round, same style).
+   The rose rotates with the device (JS) so the red needle and "N" always point to real north. Map stays north-up. */
 #compass {
     position: fixed;
-    right: 12px;
-    top: calc(env(safe-area-inset-top, 0px) + 12px);
-    z-index: 700;
-    width: 48px;
-    height: 48px;
+    left: 12px;
+    top: 50%;
+    transform: translateY(calc(-50% - 52px));
+    z-index: 600;
+    width: 44px;
+    height: 44px;
     border-radius: 50%;
-    background: rgba(8, 20, 42, 0.9);
+    background: rgba(8, 20, 42, 0.82);
     border: 1px solid rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(8px);
     box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+    transition: opacity 0.55s ease;
 }
 
 #compass[hidden] {
@@ -1766,23 +1774,25 @@ body.ui-idle #trk-controls {
 .compass-needle {
     position: absolute;
     left: 50%;
-    top: 5px;
+    top: 11px;
     width: 0;
     height: 0;
     transform: translateX(-50%);
-    border-left: 5px solid transparent;
-    border-right: 5px solid transparent;
-    border-bottom: 16px solid rgb(176, 36, 24); /* red end points north */
+    border-left: 4.5px solid transparent;
+    border-right: 4.5px solid transparent;
+    border-bottom: 14px solid rgb(176, 36, 24); /* red end points north */
+    filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.5));
 }
 
 .compass-n {
     position: absolute;
     left: 50%;
-    top: 1px;
+    top: 2px;
     transform: translateX(-50%);
     font-family: 'Orbitron', sans-serif;
     font-weight: 700;
     font-size: 8px;
+    letter-spacing: 0.5px;
     color: #fff;
 }
 
