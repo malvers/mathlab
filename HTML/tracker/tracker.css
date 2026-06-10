@@ -1695,8 +1695,8 @@ body.ui-idle #trk-controls {
     display: none;
 }
 
-/* Speed-limit sign — classic round white sign with a red ring; top-left, clear of the centred HUD.
-   Turns solid red when the smoothed speed is over the limit (JS toggles .over). */
+/* Speed-limit sign — classic round white sign with a red ring; left-edge stack, BELOW the hamburger
+   (Nordpfeil · HH · Speed). Turns solid red when the smoothed speed is over the limit (JS toggles .over). */
 #speed-sign {
     position: fixed;
     left: 12px;
@@ -1771,29 +1771,52 @@ body.ui-idle #trk-controls {
     transition: transform 0.15s linear;
 }
 
+/* Proper compass needle: a slim diamond pivoting on the centre — red half = north, light half = south. */
 .compass-needle {
     position: absolute;
     left: 50%;
-    top: 11px;
+    top: 9px;
     width: 0;
     height: 0;
     transform: translateX(-50%);
-    border-left: 4.5px solid transparent;
-    border-right: 4.5px solid transparent;
-    border-bottom: 14px solid rgb(176, 36, 24); /* red end points north */
-    filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.5));
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-bottom: 13px solid rgb(176, 36, 24); /* north half */
+    filter: drop-shadow(0 1px 1.5px rgba(0, 0, 0, 0.45));
+}
+.compass-needle::after { /* south half — light grey, mirrored below the pivot */
+    content: '';
+    position: absolute;
+    left: -5px;
+    top: 13px;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 13px solid rgba(230, 236, 243, 0.9);
+}
+/* centre pivot cap (sits on the rose centre, so rotation keeps it put) */
+#compass-rose::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 5px;
+    height: 5px;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.45);
 }
 
 .compass-n {
     position: absolute;
     left: 50%;
-    top: 2px;
+    top: 0;
     transform: translateX(-50%);
     font-family: 'Orbitron', sans-serif;
     font-weight: 700;
-    font-size: 8px;
+    font-size: 7px;
     letter-spacing: 0.5px;
-    color: #fff;
+    color: rgba(255, 255, 255, 0.95);
 }
 
 /* "Neue Version verfügbar" banner — persistent + tappable (unlike the toast). Sits just
