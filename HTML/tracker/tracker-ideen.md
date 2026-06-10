@@ -39,3 +39,7 @@
 
 7. **Heatmap „wo war ich überall"** *(Prio 2)* — alle Tracks übereinander als Wärmekarte: oft gelaufene
    Wege leuchten hell. Persönliche Landkarte der besuchten Orte auf einen Blick.
+
+8. **Geometrie & Statistik deiner Route** — mathematische Auswertung des Wegs: Gesamt-Richtungsänderung,
+   Kurvigkeit, sogar **fraktale Dimension** der Strecke (Mathe-Labor-Spielerei). Plus **das Übliche**:
+   **Max-/Durchschnittsgeschwindigkeit**, Distanz, Dauer, Höhenmeter.
