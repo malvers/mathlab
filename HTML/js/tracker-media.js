@@ -664,9 +664,10 @@ window.TrackerMedia = function (T) {
             });
         })();
 
-        // ---- Auto-hide the floating controls (HH + camera + mic) after 8 s of no interaction;
-        //      any tap / move / click / key brings them back. Stays put while recording a voice
-        //      note or while the radial popup is open (so Stop / the menu stay reachable). ----
+        // ---- Auto-hide the floating controls (HH + camera + mic + video), the top data header and
+        //      the START/STOP control bar after 8 s of no interaction; any tap / move / click / key
+        //      just brings them back (nothing else). Stays put while recording a voice note or while
+        //      the radial popup is open (so Stop / the menu stay reachable). ----
         (function () {
             const IDLE_MS = 8000;
             let idleTimer = null;
