@@ -25,6 +25,7 @@ GPS-Tracker (`HTML/tracker/`). Einstieg/Regeln: [`HTML/tracker/agents.md`](HTML/
 | [plan-live-video-broadcast.md](HTML/tracker/plan-live-video-broadcast.md) | Live-Video durchleiten statt speichern — Transport + Kostenmodelle (P2P/SFU vs. pro Minute) | 📐 Konzept/Plan |
 | `HTML/js/tracker-speedlimit.js` | Tempo-Limit-Schild der aktuellen Straße (OSM `maxspeed` via Overpass), rot bei Übertretung | ✅ umgesetzt |
 | [bug-geschwindigkeitsanzeige.md](HTML/tracker/bug-geschwindigkeitsanzeige.md) | km/h-Anzeige stimmt nicht (Jitter-/Bewegungs-Gate) | 🐞 Bug |
+| [bug-regenradar-kein-regen.md](HTML/tracker/bug-regenradar-kein-regen.md) | Regenradar zeigt in DE keinen Regen (DWD leer/stale, kein RainViewer-Fallback innerhalb Abdeckung) | 🐞 Bug |
 | [activity-debug-morgen.md](HTML/tracker/activity-debug-morgen.md) | Reisemodus/Activity-Erkennung — Test- & Debug-Plan | 📐 Konzept/Plan |
 | [e2e-verschluesselung-plan.md](HTML/tracker/e2e-verschluesselung-plan.md) | Tracks + Fotos in Supabase nur noch als Ciphertext (à la VGP) | 📐 Konzept/Plan |
 | [geo-erkennung-und-voice-spur.md](HTML/tracker/geo-erkennung-und-voice-spur.md) | Geo-gestützte Foto-Erkennung + Sprach-Nachrichten am Track | 📐 Konzept/Plan |
