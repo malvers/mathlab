@@ -52,6 +52,16 @@ window.TrackerMedia = function (T) {
             });
         }
 
+        // Read a Blob into a base64 data-URL (used to feed an R2-hosted photo back to identify).
+        function blobToDataUrl(blob) {
+            return new Promise((resolve, reject) => {
+                const fr = new FileReader();
+                fr.onload = () => resolve(fr.result);
+                fr.onerror = () => reject(fr.error || new Error('FileReader-Fehler'));
+                fr.readAsDataURL(blob);
+            });
+        }
+
         // Ask the identify Edge Function (which holds the Gemini key) what the photo shows.
         async function identifyPhoto(dataUrl, lat, lng) {
             const base64 = dataUrl.slice(dataUrl.indexOf(',') + 1);
@@ -330,10 +340,12 @@ window.TrackerMedia = function (T) {
         async function addPhotoAt(img, ll, ai) {
             const wp = addWaypoint({ lat: ll[0], lng: ll[1], t: new Date().toISOString(), img, title: ai ? ai.title : 'Foto', text: ai ? ai.text : '' });
             toast(ai ? wp.title : 'Foto übernommen.');
-            if (typeof TrackBuffer !== 'undefined') TrackBuffer.saveNow(bufferSnapshot()); // secure the new photo at once
+            refreshWaypoint(wp);                       // pin shows immediately from the base64
+            await finalizePhoto(wp);                   // swap wp.img → R2 URL (failure keeps base64, offline-resilient)
+            // persist + broadcast AFTER the swap so the DB row and the LIVE message carry the small URL
+            if (typeof TrackBuffer !== 'undefined') TrackBuffer.saveNow(bufferSnapshot());
             doSync(); // push the photo to the cloud NOW — don't wait for the next GPS point
             addLivePhoto(wp); // push the thumbnail (+ AI title/text) over the live channel
-            refreshWaypoint(wp);
         }
 
         // New "one-point track" mode: a geotagged photo taken WITHOUT an active recording.
@@ -352,6 +364,7 @@ window.TrackerMedia = function (T) {
             const wp = addWaypoint({ lat: ll[0], lng: ll[1], t: new Date().toISOString(), img, title: ai ? ai.title : 'Foto', text: ai ? ai.text : '' });
             toast(ai ? wp.title : 'Foto übernommen.');
             refreshWaypoint(wp);
+            await finalizePhoto(wp); // R2 BEFORE the insert → the saved row carries the URL; on failure keep base64 and still save
             const valid = ai && wp.title && wp.title !== PENDING_TITLE && wp.title !== FAIL_TITLE;
             const name = valid ? wp.title : ('Foto ' + new Date().toLocaleString('de-DE'));
             try { await saveOnePointTrack(name, ll, wp); toast('Gespeichert: ' + name); }
@@ -404,9 +417,16 @@ window.TrackerMedia = function (T) {
                 const wp = todo[idx];
                 done++;
                 toast('Analysiere … ' + done + '/' + todo.length);
+                // R2-hosted photos: fetch the bytes back to a data-URL for Gemini (identify slices off
+                // the base64). On a fetch failure, SKIP without overwriting the existing title.
+                let src = wp.img;
+                if (/^https?:/.test(src)) {
+                    try { src = await blobToDataUrl(await (await fetch(src)).blob()); }
+                    catch (fe) { DebugWindow.log('Reburn-Fetch übersprungen: ' + (fe.message || fe)); continue; }
+                }
                 wp.title = PENDING_TITLE; wp.text = ''; refreshWaypoint(wp);
                 try {
-                    const r = await identifyPhoto(wp.img, wp.lat, wp.lng);
+                    const r = await identifyPhoto(src, wp.lat, wp.lng);
                     wp.title = r.title; wp.text = r.text; ok++;
                 } catch (e) {
                     wp.title = FAIL_TITLE; wp.text = (e.message || '') + ' — Foto bleibt am Track.';
@@ -451,9 +471,10 @@ window.TrackerMedia = function (T) {
         async function addVoiceAt(rec, ll) {
             const wp = addWaypoint({ type: 'voice', lat: ll[0], lng: ll[1], t: new Date().toISOString(),
                 audio: rec.dataUrl, dur: rec.dur, mime: rec.mime, title: 'Sprachnotiz', text: '' });
-            if (typeof TrackBuffer !== 'undefined') TrackBuffer.saveNow(bufferSnapshot()); // secure it at once
-            doSync();                 // push to the cloud now — you stand still to record
             refreshWaypoint(wp);
+            await finalizeVoice(wp, rec); // swap wp.audio → R2 URL (failure keeps base64, offline-resilient)
+            if (typeof TrackBuffer !== 'undefined') TrackBuffer.saveNow(bufferSnapshot()); // persist the URL now
+            doSync();                 // push to the cloud now — you stand still to record
             toast('Sprachnotiz · ' + rec.dur.toFixed(1) + 's');
         }
         // IDLE (not tracking): save the voice note as its own one-point track, like a one-point photo.
@@ -461,6 +482,7 @@ window.TrackerMedia = function (T) {
             const wp = addWaypoint({ type: 'voice', lat: ll[0], lng: ll[1], t: new Date().toISOString(),
                 audio: rec.dataUrl, dur: rec.dur, mime: rec.mime, title: 'Sprachnotiz', text: '' });
             refreshWaypoint(wp);
+            await finalizeVoice(wp, rec); // R2 BEFORE the insert → the saved row carries the URL; on failure keep base64 and still save
             const name = 'Sprachnotiz ' + new Date().toLocaleString('de-DE');
             try { await saveOnePointTrack(name, ll, wp); toast('Gespeichert: Sprachnotiz'); }
             catch (e) { toast('Speichern fehlgeschlagen: ' + (e.message || e)); }
@@ -538,17 +560,7 @@ window.TrackerMedia = function (T) {
         async function finalizeVideo(wp, file) {
             if (typeof uploadMedia !== 'function') { toast('Video lokal — Upload-Modul fehlt.'); return false; }
             try {
-                // Sign the upload with the signed-in user's token (the GATED media-sign fn verifies it)
-                // and namespace the R2 key under the user's id. Falls back to anon when not signed in
-                // (then the gated fn rejects and the clip stays local — offline-resilient).
-                let authToken, ownerId = 'anon';
-                try {
-                    const { data: { session } } = await (await ensureSb()).auth.getSession();
-                    if (session) {
-                        if (session.access_token) authToken = session.access_token;
-                        if (session.user && session.user.id) ownerId = session.user.id;
-                    }
-                } catch (_) { /* not signed in → anon */ }
+                const { authToken, ownerId } = await mediaAuth();
                 const up = await uploadMedia(file, 'video', { authToken, ownerId });
                 try { URL.revokeObjectURL(wp.video); } catch (_) {}
                 wp.video = up.url; wp.mime = up.mime || wp.mime; delete wp._pending; delete wp._blob;
@@ -561,6 +573,55 @@ window.TrackerMedia = function (T) {
                 if (typeof DebugWindow !== 'undefined') DebugWindow.log('Video-Upload (noch) nicht möglich: ' + (e.message || e));
                 toast('Video lokal — Upload folgt, sobald der Storage steht.');
                 return false;
+            }
+        }
+        // ---- Photo / voice → R2 (mirror the video path). The base64 stays in wp.img/wp.audio as the
+        //      offline fallback; on a successful upload it is swapped for the public URL so the DB row
+        //      and the LIVE message shrink. On failure the base64 stays → a photo/note is never lost. ----
+        async function mediaAuth() {
+            // signed-in user's token (gated media-sign verifies it) + id (namespaces the R2 key);
+            // anon when not signed in → gated fn rejects → caller keeps base64 (offline-resilient)
+            let authToken, ownerId = 'anon';
+            try {
+                const { data: { session } } = await (await ensureSb()).auth.getSession();
+                if (session) {
+                    if (session.access_token) authToken = session.access_token;
+                    if (session.user && session.user.id) ownerId = session.user.id;
+                }
+            } catch (_) { /* not signed in → anon */ }
+            return { authToken, ownerId };
+        }
+        // Upload a captured photo's bytes to R2; on success wp.img becomes the public URL. Identify
+        // already ran on the in-memory base64 in decidePhoto, so it is unaffected. The `^data:` guard
+        // makes it idempotent (a loaded URL track passes straight through).
+        async function finalizePhoto(wp) {
+            if (typeof uploadMedia !== 'function' || typeof dataUrlToBlob !== 'function') return false;
+            if (!/^data:/.test(wp.img || '')) return true; // already a URL → nothing to do
+            try {
+                const { authToken, ownerId } = await mediaAuth();
+                const up = await uploadMedia(dataUrlToBlob(wp.img), 'photo', { authToken, ownerId });
+                wp.img = up.url; // base64 dropped → row + broadcast shrink
+                return true;
+            } catch (e) {
+                if (typeof DebugWindow !== 'undefined') DebugWindow.log('Foto-Upload (noch) nicht möglich: ' + (e.message || e));
+                return false; // keep wp.img = base64 — never lose the photo
+            }
+        }
+        // Upload a voice note's bytes to R2; on success wp.audio becomes the public URL. Browser path
+        // has rec.blob; the native path (rec.blob === null) falls back to dataUrlToBlob(wp.audio).
+        async function finalizeVoice(wp, rec) {
+            if (typeof uploadMedia !== 'function') return false;
+            if (!/^data:/.test(wp.audio || '')) return true; // already a URL (or empty) → nothing to do
+            try {
+                const blob = (rec && rec.blob) || (typeof dataUrlToBlob === 'function' ? dataUrlToBlob(wp.audio) : null);
+                if (!blob) return false;
+                const { authToken, ownerId } = await mediaAuth();
+                const up = await uploadMedia(blob, 'voice', { authToken, ownerId });
+                wp.audio = up.url;
+                return true;
+            } catch (e) {
+                if (typeof DebugWindow !== 'undefined') DebugWindow.log('Sprachnotiz-Upload (noch) nicht möglich: ' + (e.message || e));
+                return false; // keep wp.audio = base64 — never lose the note
             }
         }
         function newVideoWp(file, ll) {

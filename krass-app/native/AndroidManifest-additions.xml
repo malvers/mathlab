@@ -1,0 +1,15 @@
+<!-- Merge these into krass-app/android/app/src/main/AndroidManifest.xml -->
+
+<!-- 1) Permissions: put these just inside <manifest>, before <application>. -->
+<uses-permission android:name="android.permission.RECORD_AUDIO" />
+<uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+<!-- Android 14 (API 34) splits the foreground-service permission by type: -->
+<uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
+<!-- Android 13 (API 33) needs runtime consent to even show the ongoing notification: -->
+<uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+<!-- 2) Service: put this INSIDE <application>, next to the generated <activity>. -->
+<service
+    android:name=".KrassListenerService"
+    android:exported="false"
+    android:foregroundServiceType="microphone" />
