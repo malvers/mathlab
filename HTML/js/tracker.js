@@ -557,6 +557,7 @@
                 }
             }
             refreshRecenter(); // show/hide the recenter button as needed
+            if (__nav && __nav.update) __nav.update(here); // navigation: reroute if we drifted off the line
             updateMotionDbg(accuracy, minStep, still);
             if (tracking) setStatus(`Aufzeichnung läuft … ${track.length} Punkte`);
         }

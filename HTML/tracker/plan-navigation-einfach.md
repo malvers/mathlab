@@ -45,6 +45,10 @@
    Doc drückt STOP selbst (weniger Überraschung mid-trip).
 3. **Fahr-Profil:** *Default:* **driving** (Auto). Später ggf. an Activity-Erkennung koppeln.
 
+## Nachgebaut (2026-06-10)
+- **Re-Routing bei Abweichung:** Off-Route-Erkennung (Abstand Position↔Route > 45 m) → automatische
+  Neuberechnung via `update()` (gedrosselt: max. 1 OSRM-Anfrage / 8 s). Gefüttert vom GPS-Fix in `onPosition()`.
+
 ## Post-MVP (bestätigt „cool, aber nicht jetzt")
 - **Sprach-Ansage** der Abbiegungen (`speechSynthesis`) — passt zu `../../wunsch-antworten-vorlesen.md`.
-- Re-Routing bei Abweichung · Verkehr (Autobahn-API/TomTom/HERE — siehe Fahrt-Notiz) · Abbiege-Liste.
+- Verkehr (Autobahn-API/TomTom/HERE — siehe Fahrt-Notiz) · Abbiege-Liste.
