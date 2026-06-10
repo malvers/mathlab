@@ -19,6 +19,7 @@ GPS-Tracker (`HTML/tracker/`). Einstieg/Regeln: [`HTML/tracker/agents.md`](HTML/
 |---|---|---|
 | [tracker-plan.md](HTML/tracker/tracker-plan.md) | Backlog / offene Punkte, inkl. „Erledigt"-Historie | 📚 Referenz |
 | [cluster-konvexe-huelle-hover.md](HTML/tracker/cluster-konvexe-huelle-hover.md) | Konvexe Außenhülle um das Cluster-Badge beim Maus-Hover | 💡 Idee |
+| [drivecast-audio-poi-am-weg.md](HTML/tracker/drivecast-audio-poi-am-weg.md) | Standort-getriggerter Audio-Reiseführer („WegCast", Vorbild Blitzer.de DriveCast) | 💡 Idee |
 | [bug-geschwindigkeitsanzeige.md](HTML/tracker/bug-geschwindigkeitsanzeige.md) | km/h-Anzeige stimmt nicht (Jitter-/Bewegungs-Gate) | 🐞 Bug |
 | [activity-debug-morgen.md](HTML/tracker/activity-debug-morgen.md) | Reisemodus/Activity-Erkennung — Test- & Debug-Plan | 📐 Konzept/Plan |
 | [e2e-verschluesselung-plan.md](HTML/tracker/e2e-verschluesselung-plan.md) | Tracks + Fotos in Supabase nur noch als Ciphertext (à la VGP) | 📐 Konzept/Plan |
