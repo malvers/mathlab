@@ -23,3 +23,10 @@
 4. **Schätz-Spiel unterwegs** *(Prio 2)* — für Kids: „Wie weit bis zur nächsten Abbiegung? Wie schnell
    sind wir?" → schätzen, dann zeigt der Tracker den echten Wert. Distanz/Tempo/Zeit spielerisch
    lernen — die Mathe-Labor-DNA.
+
+5. **Brotkrumen zurück (offline)** *(Prio 1 — BAUEN)* — verläuft man sich beim Wandern ohne Netz,
+   führt der Tracker einen der **eigenen aufgezeichneten Spur** zurück. Komplett **offline**: braucht
+   keinen Router (OSRM) und keine Karten-Tiles — nur die schon vorhandenen Track-Punkte.
+   - Reststrecke **entlang der Spur** bis zum Start (Summe der Segmente), nicht Luftlinie.
+   - Richtung zum nächsten Krumen-Punkt Richtung Start; „Start erreicht" am Ziel.
+   - Sicherheits-Feature („bring mich heim") → muss zuverlässig sein, daher vor Live-Einsatz testen.
