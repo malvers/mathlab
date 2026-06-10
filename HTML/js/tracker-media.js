@@ -538,7 +538,18 @@ window.TrackerMedia = function (T) {
         async function finalizeVideo(wp, file) {
             if (typeof uploadMedia !== 'function') { toast('Video lokal — Upload-Modul fehlt.'); return false; }
             try {
-                const up = await uploadMedia(file, 'video', { ownerId: 'anon' });
+                // Sign the upload with the signed-in user's token (the GATED media-sign fn verifies it)
+                // and namespace the R2 key under the user's id. Falls back to anon when not signed in
+                // (then the gated fn rejects and the clip stays local — offline-resilient).
+                let authToken, ownerId = 'anon';
+                try {
+                    const { data: { session } } = await (await ensureSb()).auth.getSession();
+                    if (session) {
+                        if (session.access_token) authToken = session.access_token;
+                        if (session.user && session.user.id) ownerId = session.user.id;
+                    }
+                } catch (_) { /* not signed in → anon */ }
+                const up = await uploadMedia(file, 'video', { authToken, ownerId });
                 try { URL.revokeObjectURL(wp.video); } catch (_) {}
                 wp.video = up.url; wp.mime = up.mime || wp.mime; delete wp._pending; delete wp._blob;
                 refreshWaypoint(wp);
