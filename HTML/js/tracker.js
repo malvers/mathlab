@@ -808,6 +808,7 @@
         }
 
         $('trk-toggle').addEventListener('click', () => {
+            if (__speed) __speed.unlockAudio(); // unlock the over-speed chime within this user gesture
             if (trkState === 'idle') beginTracking();
             else if (trkState === 'recording') pauseTracking();
             else resumeTracking(); // paused

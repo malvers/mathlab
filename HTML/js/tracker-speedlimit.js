@@ -10,12 +10,74 @@ window.TrackerSpeedLimit = function (ctx) {
     const OVERPASS = 'https://overpass-api.de/api/interpreter';
     const MIN_INTERVAL_MS = 15000; // never query Overpass more often than this
     const MIN_MOVE_M = 60;         // …and only after the position moved at least this far
-    const OVER_TOL_KMH = 3;        // grace before flagging "too fast" (GPS speed noise)
+    const OVER_TOL_KMH = 3;        // grace before turning the sign red (GPS speed noise)
+    const BING_FACTOR = 1.10;      // play the bell once you're ~10 % over the limit
+    const BING_REPEAT_MS = 12000;  // …and re-remind at most this often while still over
 
     let lastQ = 0;          // timestamp of the last Overpass query
     let lastPos = null;     // [lat,lng] at the last query
     let fetching = false;   // a query is in flight
     let curLimit = null;    // number (km/h) | 'none' (unlimited) | null (unknown)
+    // The over-speed chime = the SMALL bell from glocken.html (its sample), so it sounds identical.
+    const BELL_URL = '../resources/bells/wingsoarstudio-anvil-bell-2-wav-485668.mp3';
+    let actx = null;        // Web Audio context (lazily unlocked on START)
+    let bellBuf = null;     // decoded small-bell sample
+    let bellLoading = false;
+    let lastBing = 0;       // timestamp of the last chime, for the repeat throttle
+
+    function loadBell() {
+        if (bellBuf || bellLoading || !actx) return;
+        bellLoading = true;
+        fetch(BELL_URL)
+            .then((r) => r.arrayBuffer())
+            .then((buf) => actx.decodeAudioData(buf))
+            .then((decoded) => { bellBuf = decoded; })
+            .catch(() => { /* keep bellBuf null → bing() uses the synth fallback */ })
+            .finally(() => { bellLoading = false; });
+    }
+
+    // Play the small glocken bell. If the sample isn't ready (slow/offline), fall back to a short
+    // synthesised bell so there is always an audible cue. Silent until unlockAudio() ran on START.
+    function bing() {
+        if (!actx) return;
+        try {
+            if (actx.state === 'suspended') actx.resume();
+            if (bellBuf) {
+                const src = actx.createBufferSource(); src.buffer = bellBuf;
+                const g = actx.createGain(); g.gain.value = 0.85;
+                src.connect(g); g.connect(actx.destination);
+                src.start();
+                return;
+            }
+            bingSynth();
+        } catch (e) { /* audio not available → no chime */ }
+    }
+
+    function bingSynth() {
+        const now = actx.currentTime;
+        const master = actx.createGain();
+        master.gain.value = 0.22;
+        master.connect(actx.destination);
+        [{ f: 1046, g: 1.0, d: 1.1 }, { f: 1568, g: 0.5, d: 0.9 },
+         { f: 2093, g: 0.3, d: 0.7 }, { f: 2637, g: 0.18, d: 0.5 }].forEach((p) => {
+            const o = actx.createOscillator(); o.type = 'sine'; o.frequency.value = p.f;
+            const g = actx.createGain();
+            g.gain.setValueAtTime(0.0001, now);
+            g.gain.exponentialRampToValueAtTime(p.g, now + 0.005);
+            g.gain.exponentialRampToValueAtTime(0.0001, now + p.d);
+            o.connect(g); g.connect(master);
+            o.start(now); o.stop(now + p.d + 0.05);
+        });
+    }
+
+    // Must be called from within a user gesture (the START tap) so mobile browsers allow audio.
+    function unlockAudio() {
+        try {
+            if (!actx) actx = new (window.AudioContext || window.webkitAudioContext)();
+            if (actx.state === 'suspended') actx.resume();
+            loadBell();
+        } catch (e) { actx = null; }
+    }
 
     function haversine(a, b) {
         const R = 6371000, t = Math.PI / 180;
@@ -70,6 +132,12 @@ window.TrackerSpeedLimit = function (ctx) {
     function update(here, still, speedKmh) {
         if (typeof curLimit === 'number' && speedKmh != null) {
             setSign(curLimit, speedKmh > curLimit + OVER_TOL_KMH);
+            // ~10 % over the limit → the small bell. Re-reminds every BING_REPEAT_MS while still over.
+            if (speedKmh > curLimit * BING_FACTOR) {
+                if (Date.now() - lastBing > BING_REPEAT_MS) { bing(); lastBing = Date.now(); }
+            } else if (speedKmh <= curLimit) {
+                lastBing = 0; // back to legal → re-arm so the next exceedance chimes immediately
+            }
         }
         if (!here || still || fetching) return;
         const now = Date.now();
@@ -79,7 +147,7 @@ window.TrackerSpeedLimit = function (ctx) {
         query(here);
     }
 
-    function clear() { curLimit = null; lastPos = null; setSign(null, false); }
+    function clear() { curLimit = null; lastPos = null; lastBing = 0; setSign(null, false); }
 
-    return { update, clear };
+    return { update, clear, unlockAudio };
 };
