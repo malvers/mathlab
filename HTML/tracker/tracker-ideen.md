@@ -14,3 +14,8 @@
      OSRM-`duration` + jetzt berechnet; bei jedem Reroute aktualisieren.
    - **Für den Live-Zuschauer sichtbar** — die ETA mit in die Live-Broadcast-Nachricht packen, sodass
      wer live mitschaut sieht: „wann ist er/sie hier?".
+
+3. **Auto-Reise-Album** — aus einer Tour automatisch ein Album/PDF: Karte + Fotos + KI-Beschreibungen
+   (Pflanzen/Bauwerke), chronologisch am Weg entlang. Ein Tipp → fertige Erinnerung zum Teilen.
+   - **Speziell fürs Wandern** gedacht, **schönes Layout** (outstanding!) — nicht nur eine Liste,
+     sondern ein gestaltetes Reise-Magazin/Storybook.
