@@ -17,6 +17,8 @@
 - **Prio 3 (groß / „Wow, aber Aufwand"):**
   - 6 Tour-Generator nach Zeit *(Vorschlag — POI-Routing aufwändig)* · 14 3D-Geländekarte *(Vorschlag —
     neue Map-Engine MapLibre)*
+- **Prio 4 (später / Infra):**
+  - 15 Live-Video-Broadcast *(Doc)* — Details + Kosten in `plan-live-video-broadcast.md`.
 
 1. **Zurück zum Start / zum Auto** — ein Tipp routet zurück zum Startpunkt der Aufzeichnung (oder zu
    einem gemerkten Parkplatz-Pin). Baut direkt auf der bestehenden Navigation auf.
@@ -89,3 +91,8 @@
     — live und cool. „Würde ich irrsinnig toll finden."
     - Tech: **MapLibre GL JS** kann 3D-Terrain (DEM-Quelle, Pitch/Bearing, Hillshade); Track als Linie drapiert.
     - Klassische Stats (Max/Avg-Speed, Höhenmeter) bleiben als schlichte Beigabe.
+
+15. **Live-Video-Broadcast** *(Prio 4)* — Video live „durchleiten" statt speichern (ephemer, kein Storage).
+    Empfehlung: **WebRTC-P2P + Supabase-Signaling + eigener TURN (coturn)** → kein Pro-Minute.
+    - Transport, Kostenmodelle und „was brauche ich dazu" ausführlich in **`plan-live-video-broadcast.md`**.
+    - Grobkosten: ~5 €/Mon kleiner VPS (Basis) + Egress nur bei TURN-Relay; bei wenigen Zuschauern faktisch flat.
