@@ -21,6 +21,7 @@ GPS-Tracker (`HTML/tracker/`). Einstieg/Regeln: [`HTML/tracker/agents.md`](HTML/
 | [cluster-konvexe-huelle-hover.md](HTML/tracker/cluster-konvexe-huelle-hover.md) | Konvexe Außenhülle um das Cluster-Badge beim Maus-Hover | 💡 Idee |
 | [drivecast-audio-poi-am-weg.md](HTML/tracker/drivecast-audio-poi-am-weg.md) | Standort-getriggerter Audio-Reiseführer („WegCast", Vorbild Blitzer.de DriveCast) | 💡 Idee |
 | [plan-navigation-einfach.md](HTML/tracker/plan-navigation-einfach.md) | Einfache Navigation: Adresse → Route, START navigiert + trackt (Radial-Eintrag „ZIEL") | 🏗️ teils gebaut |
+| `HTML/js/tracker-speedlimit.js` | Tempo-Limit-Schild der aktuellen Straße (OSM `maxspeed` via Overpass), rot bei Übertretung | ✅ umgesetzt |
 | [bug-geschwindigkeitsanzeige.md](HTML/tracker/bug-geschwindigkeitsanzeige.md) | km/h-Anzeige stimmt nicht (Jitter-/Bewegungs-Gate) | 🐞 Bug |
 | [activity-debug-morgen.md](HTML/tracker/activity-debug-morgen.md) | Reisemodus/Activity-Erkennung — Test- & Debug-Plan | 📐 Konzept/Plan |
 | [e2e-verschluesselung-plan.md](HTML/tracker/e2e-verschluesselung-plan.md) | Tracks + Fotos in Supabase nur noch als Ciphertext (à la VGP) | 📐 Konzept/Plan |

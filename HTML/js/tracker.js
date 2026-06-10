@@ -209,6 +209,7 @@
         let fannedCluster = null;  // spiderfy: a photo fan is open (set by tracker-media); core reads it to gate the radial menu
         let __media = null;        // Foto-Spur module instance (js/tracker-media.js)        // their Leaflet markers (kept for clearing)
         let __nav = null;          // simple-navigation module instance (js/tracker-nav.js)
+        let __speed = null;        // speed-limit sign module instance (js/tracker-speedlimit.js)
         let gnssActive = false;    // true once the native GnssStatus listener delivers data
         let gnssLatest = null;     // last native GNSS summary {used, inView, usedByConstellation, ...}
         let gpsReal = false;       // true only on a genuine GPS fix (native sats used, or acc ≤ GPS) —
@@ -558,6 +559,7 @@
             }
             refreshRecenter(); // show/hide the recenter button as needed
             if (__nav && __nav.update) __nav.update(here); // navigation: reroute if we drifted off the line
+            if (__speed) __speed.update(here, still, shownSpeed); // speed-limit sign for the current road
             updateMotionDbg(accuracy, minStep, still);
             if (tracking) setStatus(`Aufzeichnung läuft … ${track.length} Punkte`);
         }
@@ -794,6 +796,7 @@
             setTrkState('idle');
             stopLive(true);
             if (__nav) __nav.clearRoute(); // STOP also clears the navigation route + destination pin
+            if (__speed) __speed.clear();  // …and the speed-limit sign
             if (track.length >= 1) {
                 const name = currentTrackName || autoTrackName();
                 toast('Speichere …');
@@ -817,6 +820,7 @@
             setTrkState('idle');
             stopLive(true);
             if (__nav) __nav.clearRoute(); // discard also clears the navigation route + destination pin
+            if (__speed) __speed.clear();  // …and the speed-limit sign
             const id = currentTrackId;
             currentTrackId = null; currentTrackName = '';
             await clearTrack(true);
@@ -1565,6 +1569,9 @@ ${pts}
             map, $, toast, showPanel, hidePanels,
             get posMarker() { return posMarker; },
         });
+        // ---- Speed-limit sign → js/tracker-speedlimit.js. Position-driven (fed from onPosition),
+        //      independent of navigation; owns its own #speed-sign badge. ----
+        __speed = TrackerSpeedLimit({ $ });
         // ===============================================================
         // Radial action popup (long-press / right-click) — style from worldclock
         // ===============================================================
