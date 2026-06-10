@@ -1,0 +1,12 @@
+Add the Vosk dependency to  krass-app/android/app/build.gradle  inside the dependencies { } block:
+
+    // Offline speech recognition (keyless, on-device). Pulls the native libs + Java API.
+    implementation "com.alphacephei:vosk-android:0.3.47"
+
+Vosk is on Maven Central, which a Capacitor android project already declares — no extra repository
+needed. If Gradle complains about duplicate native libs (libjnidispatch / libvosk), add inside android { }:
+
+    packagingOptions {
+        pickFirst 'lib/**/libvosk.so'
+        pickFirst 'lib/**/libjnidispatch.so'
+    }

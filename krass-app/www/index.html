@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="de">
+<!-- KRASS Zähler — dashboard for the native Vosk foreground service. The web layer only starts/stops
+     the service and polls its counts; all listening + counting happens natively (KrassCounter plugin). -->
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>KRASS Zähler</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: rgb(8, 20, 42);
+            --bg2: rgb(14, 36, 78);
+            --orange: rgb(245, 194, 66);
+            --green: rgb(121, 158, 49);
+            --red: rgb(176, 36, 24);
+        }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        html, body {
+            margin: 0; width: 100%; height: 100%;
+            background: var(--bg); color: #fff;
+            font-family: 'Orbitron', sans-serif;
+            overflow: hidden; overscroll-behavior: none;
+        }
+        body {
+            display: flex; flex-direction: column; align-items: center;
+            padding: max(20px, env(safe-area-inset-top)) 20px max(20px, env(safe-area-inset-bottom));
+        }
+        h1 {
+            font-size: 1rem; letter-spacing: 3px; color: var(--orange);
+            margin: 6px 0 2px; font-weight: 900; text-align: center;
+        }
+        .sub { font-size: 0.62rem; letter-spacing: 1px; color: rgba(255, 255, 255, 0.5); margin-bottom: 18px; }
+
+        /* Big today's count */
+        .count-wrap { display: flex; flex-direction: column; align-items: center; margin: 8px 0 6px; }
+        #count {
+            font-size: 26vw; line-height: 1; font-weight: 900; color: #fff;
+            font-variant-numeric: tabular-nums; transition: transform 0.12s ease, color 0.25s ease;
+        }
+        #count.bump { transform: scale(1.12); color: var(--orange); }
+        .count-lbl { font-size: 0.7rem; letter-spacing: 4px; color: var(--orange); margin-top: 4px; }
+
+        /* 7-day bars */
+        .week { width: 100%; max-width: 460px; margin: 26px 0 auto; }
+        .week-title { font-size: 0.62rem; letter-spacing: 2px; color: rgba(255, 255, 255, 0.5); margin-bottom: 10px; }
+        .bars { display: flex; align-items: flex-end; gap: 8px; height: 120px; }
+        .bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; }
+        .bar {
+            width: 100%; background: linear-gradient(180deg, var(--orange), var(--bg2));
+            border-radius: 6px 6px 0 0; min-height: 3px; transition: height 0.3s ease;
+        }
+        .bar.today { background: linear-gradient(180deg, #fff, var(--orange)); }
+        .bar-n { font-size: 0.7rem; margin-bottom: 4px; color: #fff; font-variant-numeric: tabular-nums; }
+        .bar-d { font-size: 0.5rem; letter-spacing: 0.5px; color: rgba(255, 255, 255, 0.45); margin-top: 6px; font-family: Arial, sans-serif; }
+
+        /* START / STOP */
+        #toggle {
+            width: 100%; max-width: 460px; padding: 18px; margin-top: 18px;
+            border: none; border-radius: 16px; cursor: pointer;
+            font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 1rem; letter-spacing: 2px;
+            color: #fff; background: var(--green); transition: background 0.2s ease, transform 0.1s ease;
+        }
+        #toggle.on { background: var(--red); }
+        #toggle:active { transform: scale(0.98); }
+        #hint { font-size: 0.58rem; letter-spacing: 0.5px; color: rgba(255, 255, 255, 0.4); margin-top: 10px; text-align: center; min-height: 14px; }
+    </style>
+</head>
+
+<body>
+    <h1>KRASS ZÄHLER</h1>
+    <div class="sub">on-device · offline · zählt im Hintergrund</div>
+
+    <div class="count-wrap">
+        <div id="count">0</div>
+        <div class="count-lbl">HEUTE</div>
+    </div>
+
+    <div class="week">
+        <div class="week-title">LETZTE 7 TAGE</div>
+        <div class="bars" id="bars"></div>
+    </div>
+
+    <button id="toggle" type="button">START</button>
+    <div id="hint"></div>
+
+    <script>
+        // The native plugin (only present inside the built APK). In a desktop browser it's undefined →
+        // we degrade to a read-only preview so the layout can still be checked.
+        const Krass = (window.Capacitor && Capacitor.Plugins && Capacitor.Plugins.KrassCounter) || null;
+        const $ = (id) => document.getElementById(id);
+        const WD = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
+
+        let lastToday = 0, running = false;
+
+        function render(stats) {
+            const today = stats.today || 0;
+            if (today !== lastToday) { // little bump animation when the count ticks up
+                $('count').classList.add('bump');
+                setTimeout(() => $('count').classList.remove('bump'), 140);
+                lastToday = today;
+            }
+            $('count').textContent = today;
+
+            running = !!stats.running;
+            $('toggle').textContent = running ? 'STOP' : 'START';
+            $('toggle').classList.toggle('on', running);
+
+            const days = (stats.days || []).slice().reverse(); // oldest → newest (today last)
+            const max = Math.max(1, ...days.map(d => d.count));
+            $('bars').innerHTML = days.map((d, i) => {
+                const h = Math.round((d.count / max) * 100);
+                const wd = WD[new Date(d.date + 'T00:00:00').getDay()];
+                const isToday = i === days.length - 1;
+                return '<div class="bar-col">'
+                    + '<div class="bar-n">' + d.count + '</div>'
+                    + '<div class="bar' + (isToday ? ' today' : '') + '" style="height:' + h + '%"></div>'
+                    + '<div class="bar-d">' + wd + '</div>'
+                    + '</div>';
+            }).join('');
+        }
+
+        async function poll() {
+            if (!Krass) { $('hint').textContent = 'Vorschau (kein Gerät) — Zählen läuft nur in der App.'; return; }
+            try { render(await Krass.getStats()); } catch (e) { $('hint').textContent = String(e && (e.message || e)); }
+        }
+
+        $('toggle').addEventListener('click', async () => {
+            if (!Krass) return;
+            try {
+                if (running) { await Krass.stop(); $('hint').textContent = 'Gestoppt.'; }
+                else { await Krass.start(); $('hint').textContent = 'Hört zu … (Notification = läuft)'; }
+            } catch (e) { $('hint').textContent = String(e && (e.message || e)); }
+            poll();
+        });
+
+        // Capacitor injects the bridge before this fires; poll once now and then keep it live.
+        document.addEventListener('deviceready', poll);
+        poll();
+        setInterval(poll, 1500);
+    </script>
+</body>
+
+</html>
