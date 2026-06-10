@@ -43,3 +43,10 @@
 8. **Geometrie & Statistik deiner Route** — mathematische Auswertung des Wegs: Gesamt-Richtungsänderung,
    Kurvigkeit, sogar **fraktale Dimension** der Strecke (Mathe-Labor-Spielerei). Plus **das Übliche**:
    **Max-/Durchschnittsgeschwindigkeit**, Distanz, Dauer, Höhenmeter.
+
+9. **Natur-Sammelalbum / „Pokédex"** *(Prio 2)* — über alle Touren hinweg eine **wachsende, entdoppelte
+   Sammlung** aller je erkannten Arten/Bauwerke; „Schon 37 Arten gefunden!". Spielerisch für Kids.
+   - **Abgrenzung zu Idee 3:** Idee 3 = Album *pro Tour* (ein Kapitel); diese = *Register über alle
+     Touren* (alle Kapitel). **Verbinden** (von Doc bestätigt): am Tour-Ende neue Funde mit
+     „neu entdeckt!" ins Sammelalbum; im Album auf eine Art tippen → auf welchen Touren man sie hatte.
+   - Noch genauer anschauen / schärfen.
