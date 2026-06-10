@@ -881,7 +881,10 @@
             toast('Ungesicherter Track wiederhergestellt: ' + track.length + ' Punkte. SPEICHERN nicht vergessen.');
         }
         if (typeof TrackBuffer !== 'undefined') {
-            TrackBuffer.load().then(buf => { if (buf) restoreBufferedTrack(buf); });
+            // An in-progress recording wins; otherwise re-load the last track you had open.
+            TrackBuffer.load().then(buf => { if (buf) restoreBufferedTrack(buf); else restoreLastLoaded(); });
+        } else {
+            restoreLastLoaded();
         }
 
         // ---- Stage 2: cloud autosync on the fly — upsert the row every SYNC_MS while recording.
@@ -1084,6 +1087,7 @@
             // only caller passes silent=true → the await is never reached there, so it stays sync.
             if (!silent && track.length && !(await uiConfirm('Aktuellen Track wirklich löschen?', { danger: true, okText: 'Löschen' }))) return;
             if (typeof TrackBuffer !== 'undefined') TrackBuffer.clear();
+            clearLoaded(); // a cleared/discarded track must not be restored on the next reload
             track = [];
             times = [];
             alts = [];
@@ -1437,10 +1441,42 @@ ${pts}
             const loaded = [];
             for (const id of ids) { try { loaded.push(await fetchTrack(id)); } catch (e) { /* skip a failed one */ } }
             loadedTrackIds.clear(); ids.forEach((id) => loadedTrackIds.add(id));   // remember for re-open
+            persistLoaded(ids.map((id) => ({ id: id, name: '' })));                // survive a reload
             plotMultiple(loaded);
             hidePanels();
             toast(loaded.length + ' Tracks geladen.');
         });
+
+        // ---- Persist the LAST LOADED track(s) across reloads. Stores just the id(s) (+ name for a
+        //      single track) in localStorage; the data is re-fetched from the cloud on startup IF
+        //      there is no in-progress recording buffer (a recording takes priority). clearTrack()
+        //      forgets it, so a discarded/cleared track does not come back. ----
+        const LAST_LOADED_KEY = 'tracker.lastLoaded';
+        function persistLoaded(arr) {
+            try { localStorage.setItem(LAST_LOADED_KEY, JSON.stringify(arr || [])); } catch (e) { /* quota / private mode */ }
+        }
+        function clearLoaded() {
+            try { localStorage.removeItem(LAST_LOADED_KEY); } catch (e) { }
+        }
+        async function restoreLastLoaded() {
+            let arr;
+            try { arr = JSON.parse(localStorage.getItem(LAST_LOADED_KEY) || '[]'); } catch (e) { arr = []; }
+            if (!Array.isArray(arr) || !arr.length) return;
+            const ok = [];
+            for (const it of arr) {
+                try { const t = await fetchTrack(it.id); ok.push({ id: it.id, name: it.name || '', t: t }); }
+                catch (e) { /* track gone / no access → skip it */ }
+            }
+            if (!ok.length) { clearLoaded(); return; } // all gone → forget
+            loadedTrackIds.clear(); ok.forEach((o) => loadedTrackIds.add(o.id));
+            if (ok.length === 1) {
+                plotTrack(ok[0].t.points, ok[0].t.waypoints);
+                currentTrackId = ok[0].id; currentTrackName = ok[0].name;
+            } else {
+                plotMultiple(ok.map((o) => o.t));
+            }
+            if (window.DebugWindow) DebugWindow.log('Geladenen Track wiederhergestellt (' + ok.length + ').');
+        }
 
         // ---- Transient toast (the persistent status line was removed) ----
         let toastTimer = null;
@@ -1841,7 +1877,7 @@ ${pts}
                 row.appendChild(badge);                     // row's first child → left of `main`
                 main.addEventListener('click', async () => {
                     toast('Lade Track …');
-                    try { const t = await fetchTrack(r.id); plotTrack(t.points, t.waypoints); currentTrackId = r.id; currentTrackName = r.name; loadedTrackIds.clear(); loadedTrackIds.add(r.id); hidePanels(); toast(r.name + ' geladen.'); }
+                    try { const t = await fetchTrack(r.id); plotTrack(t.points, t.waypoints); currentTrackId = r.id; currentTrackName = r.name; loadedTrackIds.clear(); loadedTrackIds.add(r.id); persistLoaded([{ id: r.id, name: r.name }]); hidePanels(); toast(r.name + ' geladen.'); }
                     catch (e) { toast('Track laden fehlgeschlagen.'); }
                 });
                 const sh = document.createElement('button');
