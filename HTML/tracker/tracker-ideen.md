@@ -30,3 +30,9 @@
    - Reststrecke **entlang der Spur** bis zum Start (Summe der Segmente), nicht Luftlinie.
    - Richtung zum nächsten Krumen-Punkt Richtung Start; „Start erreicht" am Ziel.
    - Sicherheits-Feature („bring mich heim") → muss zuverlässig sein, daher vor Live-Einsatz testen.
+
+6. **Tour-Generator nach ZEIT** — statt nach Distanz nach **verfügbarer Zeit**: „Ich hab 20 Minuten bis
+   zum Meeting — gib mir eine Tour durch die Stadt." Per **Auto oder zu Fuß**, mit **interessanten
+   Points of Interest** am Weg, Schleife (Start = Ende), passend ins Zeitbudget.
+   - Vorbild: **San Francisco „49-Mile Scenic Drive"** — die kuratierte Stadt-Sightseeing-Runde.
+   - Zeit statt Kilometer als Eingabe; POIs aus OSM/Wikipedia (siehe `drivecast-audio-poi-am-weg.md`).
