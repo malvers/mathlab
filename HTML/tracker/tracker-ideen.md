@@ -50,3 +50,27 @@
      Touren* (alle Kapitel). **Verbinden** (von Doc bestätigt): am Tour-Ende neue Funde mit
      „neu entdeckt!" ins Sammelalbum; im Album auf eine Art tippen → auf welchen Touren man sie hatte.
    - Noch genauer anschauen / schärfen.
+
+10. **Regen-Vorwarnung unterwegs** — das vorhandene Regenradar **vorausschauend** nutzen: „In ~12 Min
+    Regen an deinem Standort / auf deiner Route." Rechtzeitig unterstellen — **besonders für Motorradfahrer**.
+
+11. **Parkplatz automatisch merken** — wechselt die Aktivitätserkennung von „fahren" auf „zu Fuß", setzt
+    der Tracker automatisch einen Pin, wo du geparkt hast. Auto später entspannt wiederfinden, ganz ohne
+    dran zu denken. (Verwandt mit Idee 1.)
+
+12. **Offline-Karten für die Tour vorladen** *(Prio 2 — meist ist man eh online)* — Kartenausschnitt +
+    Route vorab laden, dann läuft alles ohne Netz (Karte, Position, Brotkrumen-Rückweg).
+    - **Daten = OpenStreetMap.** Den OSM-Kachelserver **nicht** massenhaft vorab ziehen (Policy).
+    - **Klein:** Service-Worker cacht die Kacheln, die man eh anschaut (policy-konform).
+    - **Ganze Region:** Vektor-Paket aus OSM — **PMTiles (Protomaps)** oder OpenMapTiles/MapTiler,
+      gerendert mit **MapLibre GL**.
+
+13. **Goldene Stunde & Sonnenstand** *(Prio 1 — UMSETZEN)* — zeigt Sonnenstand + wann an deinem Standort
+    goldene Stunde / Sonnenuntergang ist (bestes Foto-Licht auf der Wanderung). Nutzt die Sonnen-Mathe
+    aus der World Clock. „Bestimmt nicht so schwer."
+
+14. **3D-Geländekarte (statt langweiligem Höhenprofil)** — das klassische Hoch-Runter-Profil ist fad.
+    Stattdessen: **Karte kippen & drehen**, Gelände **echt in 3D** aus dem DEM, deine **Spur darübergelegt**
+    — live und cool. „Würde ich irrsinnig toll finden."
+    - Tech: **MapLibre GL JS** kann 3D-Terrain (DEM-Quelle, Pitch/Bearing, Hillshade); Track als Linie drapiert.
+    - Klassische Stats (Max/Avg-Speed, Höhenmeter) bleiben als schlichte Beigabe.
