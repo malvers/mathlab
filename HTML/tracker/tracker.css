@@ -212,7 +212,7 @@ path.pos-marker.pos-shown {
     transition: opacity 0.5s ease, transform 0.5s ease;
 }
 
-/* Header stays visible at all times (no auto-hide); .shown kept as a harmless no-op */
+/* Header fades with the idle auto-hide (see body.ui-idle below); .shown kept as a harmless no-op */
 #hud-top.shown {
     opacity: 1;
     transform: translateY(0);
@@ -384,6 +384,7 @@ path.pos-marker.pos-shown {
     display: flex;
     align-items: center;
     gap: clamp(14px, 5vw, 28px);
+    transition: opacity 0.5s ease; /* smooth fade with the idle auto-hide */
 }
 
 #trk-toggle,
@@ -617,11 +618,15 @@ path.pos-marker.pos-shown {
 #vid-fab:active { transform: translateY(calc(-50% + 78px)) scale(0.94); }
 #vid-fab svg { width: 24px; height: 24px; }
 
-/* Auto-hide on idle: JS toggles body.ui-idle on/off; the floating controls fade out after 8 s. */
+/* Auto-hide on idle: JS toggles body.ui-idle on/off; the floating controls fade out after 8 s.
+   Includes the top data header (#hud-top) and the START/STOP control bar (#trk-controls); a tap or
+   mouse move brings everything back (see wake() in tracker-media.js) and does nothing else. */
 body.ui-idle #menu-fab,
 body.ui-idle #cam-fab,
 body.ui-idle #mic-fab,
-body.ui-idle #vid-fab {
+body.ui-idle #vid-fab,
+body.ui-idle #hud-top,
+body.ui-idle #trk-controls {
     opacity: 0;
     pointer-events: none;
 }
