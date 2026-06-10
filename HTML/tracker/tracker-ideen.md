@@ -19,3 +19,7 @@
    (Pflanzen/Bauwerke), chronologisch am Weg entlang. Ein Tipp → fertige Erinnerung zum Teilen.
    - **Speziell fürs Wandern** gedacht, **schönes Layout** (outstanding!) — nicht nur eine Liste,
      sondern ein gestaltetes Reise-Magazin/Storybook.
+
+4. **Schätz-Spiel unterwegs** *(Prio 2)* — für Kids: „Wie weit bis zur nächsten Abbiegung? Wie schnell
+   sind wir?" → schätzen, dann zeigt der Tracker den echten Wert. Distanz/Tempo/Zeit spielerisch
+   lernen — die Mathe-Labor-DNA.
