@@ -76,6 +76,7 @@
     // — WITHOUT touching the manual 'd' key state (dwdEnabled). Re-probed on each (re)enable / provider
     // switch, so a recovered DWD is used again automatically.
     let dwdHealthy = true;
+    let rvHealthy = null; // RainViewer reachability: null=unknown, true/false (for the source-status UI)
     let dwdProbeAt = 0; // ms timestamp of the last probe (throttle)
     // DWD (sharp DE) kicks in as soon as Germany overlaps the VIEW at all — not just when the
     // map is centred there — so partial-DE views still get the sharp 1 km over the German part.
@@ -113,6 +114,19 @@
             img.src = url;
         });
     }
+    // RainViewer reachability probe (one JSON call). Mirrors probeDwd for the source-status UI.
+    function probeRv() {
+        return fetch(RV_API, { cache: 'no-store' })
+            .then(function (res) { rvHealthy = !!res.ok; return rvHealthy; })
+            .catch(function () { rvHealthy = false; return false; });
+    }
+    // Current known source health: { dwd, rv } each true=up / false=down / null=unknown.
+    function status() { return { dwd: dwdHealthy, rv: rvHealthy }; }
+    // Force a fresh probe of BOTH sources (used by the Settings→Debug status rows).
+    function checkHealth() {
+        return Promise.all([probeDwd(), probeRv()]).then(status);
+    }
+
     // ISO without milliseconds (what WMS time dimensions expect): 2026-06-06T08:35:00Z
     function isoMin(ms) {
         return new Date(ms).toISOString().replace(/\.\d{3}Z$/, 'Z');
@@ -705,5 +719,5 @@
         return on;
     }
 
-    global.RainRadar = { init, toggle, isOn, setShifted };
+    global.RainRadar = { init, toggle, isOn, setShifted, status, checkHealth };
 })(window);
