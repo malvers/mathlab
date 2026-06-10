@@ -36,3 +36,6 @@
    Points of Interest** am Weg, Schleife (Start = Ende), passend ins Zeitbudget.
    - Vorbild: **San Francisco „49-Mile Scenic Drive"** — die kuratierte Stadt-Sightseeing-Runde.
    - Zeit statt Kilometer als Eingabe; POIs aus OSM/Wikipedia (siehe `drivecast-audio-poi-am-weg.md`).
+
+7. **Heatmap „wo war ich überall"** *(Prio 2)* — alle Tracks übereinander als Wärmekarte: oft gelaufene
+   Wege leuchten hell. Persönliche Landkarte der besuchten Orte auf einen Blick.
