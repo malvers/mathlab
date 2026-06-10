@@ -493,7 +493,7 @@ window.TrackerMedia = function (T) {
         (function () {
             const micFab = $('mic-fab'), micTimer = $('mic-timer');
             if (!micFab) return;
-            const MAX_MS = 60000; // cap a note at 60 s (keeps the base64 audio in the jsonb sane)
+            const MAX_MS = 60000; // cap a note at 60 s (keeps the R2 upload + offline base64 fallback reasonable)
             let timerIv = null, autoStop = null, busy = false;
             const fmt = (ms) => { const s = Math.floor(ms / 1000); return '● ' + Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); };
             const tick = () => { micTimer.textContent = fmt(Math.min(VoiceNote.elapsedMs(), MAX_MS)); };
