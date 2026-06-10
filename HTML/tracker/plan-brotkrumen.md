@@ -38,10 +38,16 @@ Verläuft man sich beim Wandern **ohne Netz**, führt der Tracker einen entlang 
 - **tracker.js (Core):** beim Toggle `TrackerBreadcrumb.start(track)`, pro Fix `update(here)` füttern (analog zu `TrackerNav.update`).
 - **Renderer/GPX:** unberührt.
 
+## Sensorik: GPS vs. Beschleunigung (Doc-Frage 2026-06-10)
+- **GPS ist Pflicht und die Wahrheit.** Die Brotkrumen *sind* GPS-Punkte; ohne GPS keine Spur und keine absolute Position zum Snappen.
+- **Rein aus Beschleunigung geht NICHT:** Position = zweifach integriert → Bias/Rauschen wächst quadratisch, nach ~1 min schon zig–hunderte Meter Drift → für „bring mich heim" unbrauchbar.
+- **IMU nur als Ergänzung:** Jitter im Stand glätten (Motion-Gate, schon da) · kurze GPS-Lücken per Pedestrian Dead Reckoning (Schritte × Schrittlänge + Kompass-Heading) überbrücken (v2, optional) · Kompass liefert die Pfeilrichtung. **Nie** als GPS-Ersatz.
+
 ## Zuverlässigkeit / Tests (Doc: Sicherheits-Feature!)
 Vor Live-Einsatz durchgehen:
 - Out-and-back gerade · Schleife (Start=Ende) · verzweigte/überkreuzte Spur (Snap darf nicht „springen") · GPS-Jitter im Stand · weit **off-track** → Recovery · „Start erreicht"-Schwelle · sehr langer Track (Performance) · geladener vs. live aufgezeichneter Track · komplett offline (Flugmodus).
 - Fallback nie „kein Foto/keine Richtung verlieren": bei leerem/zu kurzem Track → Toggle deaktiviert + Hinweis.
+- **App-Reload mitten im Heim-Modus** → Modus + Snap-Index wiederherstellen (aktiv-Flag + Index in Crash-Buffer/localStorage); ein Sicherheits-Feature darf einen Neustart nicht „vergessen".
 
 ## Offene Fragen / Optionen
 - Snap: nur Vertex (einfach) vs. Segment-Projektion (genauer) — **Segment** empfohlen für Genauigkeit.
