@@ -1766,7 +1766,7 @@ ${pts}
             }
         }
         $('mb-settings').addEventListener('click', () => { closePopup(); updateSyncStatus(); loadUsage(); updateReburnButton(); refreshMenuState(); showPanel('settings-panel'); });
-        $('mb-ziel').addEventListener('click', () => { closePopup(); __nav.openPanel(); });
+        $('mb-ziel').addEventListener('click', () => { closePopup(); if (__nav) __nav.openPanel(); });
         // Foto-Spur card → re-run the AI analysis on still-unrecognised photos
         $('set-reburn').addEventListener('click', async () => { await reburnTrack(); updateReburnButton(); });
         // "Code erzeugen" generates AND connects this device in one step

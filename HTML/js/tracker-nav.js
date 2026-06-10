@@ -31,9 +31,11 @@ window.TrackerNav = function (ctx) {
     let routeLatLngs = null; // the route's points [[lat,lng]…] — for the off-route distance check
     let lastReroute = 0;    // timestamp of the last (re)route, for the cooldown
     let rerouting = false;  // a reroute fetch is in flight
+    let navGen = 0;         // bumped whenever the route is cleared/replaced → invalidates in-flight fetches
     let maneuvers = null;   // [{loc:[lat,lng], type, modifier, exit, name, text}] for spoken guidance
     let mIdx = 0;           // index of the next maneuver to announce
     let annFar = false;     // pre-warning already spoken for the current maneuver
+    let mClosest = Infinity; // closest approach (m) to the current maneuver — to detect an overshoot
     let voiceOn = true;     // spoken guidance on/off (persisted in localStorage)
 
     function hasDestination() { return !!destLatLng; }
@@ -96,10 +98,12 @@ window.TrackerNav = function (ctx) {
 
     // Full teardown — used by "Ziel löschen" and by STOP (finish/discard) in the core.
     function clearRoute() {
+        navGen++;            // invalidate any reroute/route fetch still in flight (its result is now stale)
+        rerouting = false;   // don't let an aborted reroute leave the flag stuck → would block future routing
         clearRouteLine();
         if (destMarker) { map.removeLayer(destMarker); destMarker = null; }
         destLatLng = null; destLabel = '';
-        maneuvers = null; mIdx = 0; annFar = false;
+        maneuvers = null; mIdx = 0; annFar = false; mClosest = Infinity;
         hideBanner();
         try { if ('speechSynthesis' in window) window.speechSynthesis.cancel(); } catch (e) { }
         refreshPanel();
@@ -108,6 +112,7 @@ window.TrackerNav = function (ctx) {
     // ---- Routing: a position → destination, drawn as a polyline ----
     // Shared by START (startNavigation) and the off-route reroute (update). `reroute` only tweaks toasts.
     async function computeRoute(from, reroute) {
+        const gen = navGen; // snapshot: if the route is cleared/replaced during the await, this result is stale
         toast(reroute ? 'Neue Route …' : 'Route wird berechnet …');
         let data;
         try {
@@ -115,7 +120,8 @@ window.TrackerNav = function (ctx) {
             const coords = from[1] + ',' + from[0] + ';' + destLatLng[1] + ',' + destLatLng[0];
             const r = await fetch(OSRM + coords + '?overview=full&geometries=geojson&steps=true');
             data = await r.json();
-        } catch (e) { toast('Route fehlgeschlagen (offline?).'); return false; }
+        } catch (e) { if (gen === navGen) toast('Route fehlgeschlagen (offline?).'); return false; }
+        if (gen !== navGen || !destLatLng) return false; // cleared/superseded while fetching → drop this result
         if (!data || data.code !== 'Ok' || !data.routes || !data.routes.length) { toast('Keine Route gefunden.'); return false; }
         const best = data.routes[0];
         drawRoute(best.geometry);
@@ -224,7 +230,7 @@ window.TrackerNav = function (ctx) {
         }));
         mIdx = 0;
         while (mIdx < maneuvers.length && maneuvers[mIdx].type === 'depart') mIdx++; // skip the leading "depart"
-        annFar = false;
+        annFar = false; mClosest = Infinity;
     }
 
     function announceDist(d) { return d > 500 ? Math.round(d / 100) * 100 : Math.round(d / 50) * 50; }
@@ -252,15 +258,23 @@ window.TrackerNav = function (ctx) {
     }
     function hideBanner() { const el = $('nav-banner'); if (el) el.hidden = true; }
 
+    function advanceManeuver() {
+        mIdx++; annFar = false; mClosest = Infinity;
+        if (mIdx >= maneuvers.length) setTimeout(hideBanner, 3000);
+    }
+
     function guidanceUpdate(here) {
         if (!maneuvers || mIdx >= maneuvers.length) return;
         const m = maneuvers[mIdx];
         const d = haversine(here, m.loc);
+        if (d < mClosest) mClosest = d;
         showBanner(m, d);
-        if (d <= ANNOUNCE_NEAR_M) {                       // at the maneuver → say it, advance
+        if (d <= ANNOUNCE_NEAR_M) {                       // reached the maneuver → say it, advance
             speak(m.type === 'arrive' ? 'Sie haben das Ziel erreicht.' : 'Jetzt ' + m.text);
-            mIdx++; annFar = false;
-            if (mIdx >= maneuvers.length) setTimeout(hideBanner, 3000);
+            advanceManeuver();
+        } else if (mClosest <= 120 && d > mClosest + 30) { // overshot it (a fix skipped the 40 m window) → advance
+            if (m.type === 'arrive') speak('Sie haben das Ziel erreicht.');
+            advanceManeuver();
         } else if (d <= ANNOUNCE_FAR_M && !annFar) {      // approaching → pre-warning, once
             annFar = true;
             speak(m.type === 'arrive'
