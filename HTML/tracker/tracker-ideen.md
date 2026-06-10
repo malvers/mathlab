@@ -2,6 +2,21 @@
 
 > Lose Feature-Ideen für Tracker/Navigation, von Doc unterwegs durchgegangen und einzeln freigegeben.
 > **Noch nicht gebaut** (CLAUDE.md Regeln 2/4). Stand: 2026-06-10.
+> Doc: „Im Allgemeinen waren alle Ideen gut, es ging nur um die Priorität."
+
+## Prioritäts-Skizze
+„(Doc)" = von Doc festgelegt · „(Vorschlag)" = mein Vorschlag, kann Doc kippen.
+
+- **Prio 1 (bald umsetzen):**
+  - 5 Brotkrumen zurück (offline) *(Doc)* · 13 Goldene Stunde & Sonnenstand *(Doc)*
+  - 1 Zurück zum Start/Auto *(Vorschlag — klein, baut auf Navi)* · 10 Regen-Vorwarnung *(Vorschlag —
+    hoher Nutzen, baut auf Regenradar)* · 11 Parkplatz merken *(Vorschlag — klein, delightful)*
+- **Prio 2 (danach):**
+  - 4 Schätz-Spiel *(Doc)* · 7 Heatmap *(Doc)* · 9 Pokédex *(Doc)* · 12 Offline-Karten *(Doc)*
+  - 2 Triff mich / Live-ETA *(Vorschlag)* · 3 Auto-Reise-Album *(Vorschlag)* · 8 Geometrie & Stats *(Vorschlag)*
+- **Prio 3 (groß / „Wow, aber Aufwand"):**
+  - 6 Tour-Generator nach Zeit *(Vorschlag — POI-Routing aufwändig)* · 14 3D-Geländekarte *(Vorschlag —
+    neue Map-Engine MapLibre)*
 
 1. **Zurück zum Start / zum Auto** — ein Tipp routet zurück zum Startpunkt der Aufzeichnung (oder zu
    einem gemerkten Parkplatz-Pin). Baut direkt auf der bestehenden Navigation auf.
