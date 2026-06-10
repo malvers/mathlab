@@ -48,7 +48,11 @@
 ## Nachgebaut (2026-06-10)
 - **Re-Routing bei Abweichung:** Off-Route-Erkennung (Abstand Position↔Route > 45 m) → automatische
   Neuberechnung via `update()` (gedrosselt: max. 1 OSRM-Anfrage / 8 s). Gefüttert vom GPS-Fix in `onPosition()`.
+- **Abbiege-Navigation mit Stimme:** OSRM `steps=true` → Manöver; eigener DE-Mapper (`phrase()`) macht
+  daraus Sätze (links/rechts/leicht/scharf/Kreisverkehr+Ausfahrt/geradeaus/Ziel). Ansage per
+  `speechSynthesis` (de-DE) bei ~300 m („In … Metern …") und ~40 m („Jetzt …"). On-screen-Banner
+  `#nav-banner` mit Pfeil + Distanz + Text. Schalter **„Sprachansage"** im Panel (persistiert).
 
-## Post-MVP (bestätigt „cool, aber nicht jetzt")
-- **Sprach-Ansage** der Abbiegungen (`speechSynthesis`) — passt zu `../../wunsch-antworten-vorlesen.md`.
-- Verkehr (Autobahn-API/TomTom/HERE — siehe Fahrt-Notiz) · Abbiege-Liste.
+## Post-MVP (offen)
+- Verkehr (Autobahn-API/TomTom/HERE — siehe Fahrt-Notiz) · vollständige Abbiege-Liste · „passiert"-Erkennung
+  (Manöver weiterzählen, wenn man bei schneller Fahrt zwischen zwei Fixes daran vorbeikommt).

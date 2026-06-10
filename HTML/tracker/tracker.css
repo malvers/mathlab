@@ -1666,6 +1666,33 @@ body.ui-idle #trk-controls {
     transform: translateX(-50%) translateY(0);
 }
 
+/* Turn-by-turn navigation banner — next maneuver + distance, just under the top HUD.
+   Shown only while navigating (JS toggles [hidden]); non-interactive so map drags pass through. */
+#nav-banner {
+    position: fixed;
+    left: 50%;
+    top: calc(env(safe-area-inset-top, 0px) + 96px);
+    transform: translateX(-50%);
+    z-index: 600;
+    max-width: min(92vw, 460px);
+    background: rgba(8, 20, 42, 0.92);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 14px;
+    padding: 10px 18px;
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 700;
+    font-size: clamp(0.9rem, 3.6vw, 1.15rem);
+    letter-spacing: 0.5px;
+    color: #fff;
+    text-align: center;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.45);
+    pointer-events: none;
+}
+
+#nav-banner[hidden] {
+    display: none;
+}
+
 /* "Neue Version verfügbar" banner — persistent + tappable (unlike the toast). Sits just
    above the toast slot so the two never overlap. */
 #update-banner {
