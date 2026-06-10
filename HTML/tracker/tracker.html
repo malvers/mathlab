@@ -162,6 +162,7 @@
     <!-- Radial action popup (long-press / right-click) — style ported from worldclock -->
     <div id="mini-stack">
         <button class="mini-btn" id="mb-load">LADEN</button>
+        <button class="mini-btn" id="mb-ziel">ZIEL</button>
         <button class="mini-btn" id="mb-sharetrack">SHARE</button>
         <button class="mini-btn" id="mb-live">BROADCAST</button>
         <button class="mini-btn" id="mb-rain">REGENRADAR</button>
@@ -193,6 +194,20 @@
             <button id="live-go" class="live-copy">LIVE senden / Link kopieren</button>
         </div>
         <button class="ov-close" id="live-close" aria-label="Schließen">&times;</button>
+    </div>
+    <!-- Simple navigation: type an address → set destination → START navigates AND records -->
+    <div id="nav-panel" class="ov-panel">
+        <div class="ov-title">Navigation — Ziel</div>
+        <div class="ov-body">
+            <p class="sync-lead">Adresse eingeben, „Ziel setzen", dann START — es wird zugleich navigiert und aufgezeichnet.</p>
+            <input id="nav-city" class="sync-field" type="text" placeholder="Stadt" aria-label="Stadt" autocomplete="off" autocapitalize="words" spellcheck="false">
+            <input id="nav-street" class="sync-field" type="text" placeholder="Straße" aria-label="Straße" autocomplete="off" autocapitalize="words" spellcheck="false">
+            <input id="nav-nr" class="sync-field" type="text" placeholder="Hausnummer" aria-label="Hausnummer" autocomplete="off" autocapitalize="off" spellcheck="false">
+            <button id="nav-set" class="sync-btn primary" type="button">Ziel setzen</button>
+            <div id="nav-current" class="sync-lead" hidden></div>
+            <button id="nav-clear" class="sync-link" type="button" hidden>Ziel löschen</button>
+        </div>
+        <button class="ov-close" id="nav-close" aria-label="Schließen">&times;</button>
     </div>
     <div id="settings-panel" class="ov-panel">
         <div class="ov-title">Einstellungen</div>
@@ -319,7 +334,7 @@
         // so the main init below still finds RainRadar/DebugWindow/PhotoFullscreen ready.
         (function () {
             var v = window.__ASSET_V || '';
-            var js = ['../js/track-render.js', '../js/track-smooth.js', '../js/track-dem.js', '../js/track-buffer.js', '../js/rain-palette.js', '../js/rain-recolor.js', '../js/rain-radar.js', '../js/cyber-clock.js', '../js/debug-window.js', '../js/photo-fullscreen.js', '../js/photo-layer.js', '../js/voice-note.js', '../js/app-update.js', '../js/radial-menu.js', '../js/upload-media.js', '../js/tracker-media.js'];
+            var js = ['../js/track-render.js', '../js/track-smooth.js', '../js/track-dem.js', '../js/track-buffer.js', '../js/rain-palette.js', '../js/rain-recolor.js', '../js/rain-radar.js', '../js/cyber-clock.js', '../js/debug-window.js', '../js/photo-fullscreen.js', '../js/photo-layer.js', '../js/voice-note.js', '../js/app-update.js', '../js/radial-menu.js', '../js/upload-media.js', '../js/tracker-media.js', '../js/tracker-nav.js'];
             for (var i = 0; i < js.length; i++) document.write('<script src="' + js[i] + v + '"><\/script>');
         })();
     </script>
