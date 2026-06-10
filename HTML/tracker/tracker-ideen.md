@@ -19,6 +19,8 @@
     neue Map-Engine MapLibre)*
 - **Prio 4 (später / Infra):**
   - 15 Live-Video-Broadcast *(Doc)* — Details + Kosten in `plan-live-video-broadcast.md`.
+- **Enabler (schaltet mehrere Ideen frei):**
+  - 16 Vektor-Karten (MapLibre) — lesbare Labels (Doc-Schmerzpunkt) + ermöglicht 12 (Offline) & 14 (3D).
 
 1. **Zurück zum Start / zum Auto** — ein Tipp routet zurück zum Startpunkt der Aufzeichnung (oder zu
    einem gemerkten Parkplatz-Pin). Baut direkt auf der bestehenden Navigation auf.
@@ -96,3 +98,13 @@
     Empfehlung: **WebRTC-P2P + Supabase-Signaling + eigener TURN (coturn)** → kein Pro-Minute.
     - Transport, Kostenmodelle und „was brauche ich dazu" ausführlich in **`plan-live-video-broadcast.md`**.
     - Grobkosten: ~5 €/Mon kleiner VPS (Basis) + Egress nur bei TURN-Relay; bei wenigen Zuschauern faktisch flat.
+
+16. **Vektor-Karten (MapLibre GL) — lesbare Labels + Offline + 3D** *(Enabler)* — die heutigen
+    **Raster-Kacheln** (tile.openstreetmap.org) haben die **Städtenamen fest ins Bild gebrannt**: wir
+    können Schrift/Größe/Sprache **nicht** beeinflussen. Doc: „Was nützt das, wenn man nie lesen kann,
+    wo man gerade ist?" → Hauptmotivation: **gut lesbare Beschriftung** unterwegs.
+    - **Umstieg auf Vektor-Kacheln + MapLibre GL** (MapTiler / Protomaps-PMTiles / OpenMapTiles): Labels
+      werden client-seitig aus einem Style gezeichnet → volle Kontrolle über **Schriftart (Orbitron!),
+      Größe, Kontrast/Halo, Label-Dichte pro Zoom und Sprache (`name:de`)**.
+    - **Ein Hebel, drei Features:** ermöglicht zugleich **Idee 12** (Offline-Karten via PMTiles) und
+      **Idee 14** (3D-Geländekarte). Daher strategisch wichtiger Enabler.
