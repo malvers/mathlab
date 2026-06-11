@@ -105,10 +105,30 @@ window.TrackerSpeedLimit = function (ctx) {
         el.hidden = false;
     }
 
+    // Min distance (m) from point p=[lat,lng] to a way's geometry (array of {lat,lon}). Cheap
+    // equirectangular projection + point-to-segment — good enough at street scale.
+    function distToWay(p, geom) {
+        if (!geom || geom.length < 1) return Infinity;
+        const k = Math.cos(p[0] * Math.PI / 180);
+        const xy = (la, lo) => [lo * 111320 * k, la * 110540];
+        const px = xy(p[0], p[1]);
+        let min = Infinity;
+        for (let i = 1; i < geom.length; i++) {
+            const a = xy(geom[i - 1].lat, geom[i - 1].lon), b = xy(geom[i].lat, geom[i].lon);
+            const dx = b[0] - a[0], dy = b[1] - a[1], len2 = dx * dx + dy * dy;
+            let t = len2 ? ((px[0] - a[0]) * dx + (px[1] - a[1]) * dy) / len2 : 0;
+            t = t < 0 ? 0 : t > 1 ? 1 : t;
+            min = Math.min(min, Math.hypot(px[0] - (a[0] + t * dx), px[1] - (a[1] + t * dy)));
+        }
+        if (geom.length === 1) { const a = xy(geom[0].lat, geom[0].lon); min = Math.hypot(px[0] - a[0], px[1] - a[1]); }
+        return min;
+    }
+
     async function query(p) {
         fetching = true;
-        // Roads passing within 25 m of the fix that carry a maxspeed tag — almost always just your road.
-        const q = '[out:json][timeout:8];way(around:25,' + p[0] + ',' + p[1] + ')[highway][maxspeed];out tags 4;';
+        // Ways with a maxspeed within 35 m — we then pick the NEAREST (by geometry), not the first,
+        // so a parallel road / ramp / crossing can't steal the wrong limit (Doc bug 2026-06-11).
+        const q = '[out:json][timeout:8];way(around:35,' + p[0] + ',' + p[1] + ')[highway][maxspeed];out tags geom;';
         try {
             const r = await fetch(OVERPASS, {
                 method: 'POST',
@@ -116,13 +136,15 @@ window.TrackerSpeedLimit = function (ctx) {
                 body: 'data=' + encodeURIComponent(q),
             });
             const j = await r.json();
-            let lim = null;
+            let best = null, bestD = Infinity;
             for (const e of (j && j.elements) || []) {
                 const m = e.tags && parseMax(e.tags.maxspeed);
-                if (m != null) { lim = m; break; } // first road with a parseable limit
+                if (m == null) continue;
+                const d = distToWay(p, e.geometry);
+                if (d < bestD) { bestD = d; best = m; } // nearest road with a parseable limit wins
             }
-            curLimit = lim;
-            setSign(lim, false);
+            curLimit = best;
+            setSign(best, false);
         } catch (e) { /* silent: keep the last known sign */ }
         fetching = false;
     }
