@@ -577,6 +577,8 @@
             <textarea class="message-input" id="messageInput" rows="1"
                 placeholder="Du hast sicher Fragen ... schreib sie hier!"
                 aria-label="Deine Nachricht an die KI"></textarea>
+            <button class="send-button" id="ttsBtn" title="Antworten vorlesen" aria-label="Antworten vorlesen">🔊</button>
+            <button class="send-button" id="micBtn" title="Sprechen" aria-label="Per Stimme diktieren">🎤</button>
             <button class="send-button" id="sendButton">GO</button>
         </div>
 
@@ -914,6 +916,7 @@
                 saveHistory();
                 hideTyping();
                 addMessage('assistant', reply);
+                if (window.speakReply) window.speakReply(reply); // read the answer aloud (voice mode)
             } catch (err) {
                 conversationHistory.pop(); // User-Nachricht bei Fehler wieder entfernen
                 hideTyping();
@@ -943,6 +946,59 @@
                 if (pwdInput) setTimeout(() => pwdInput.focus(), 100);
             } else {
                 setTimeout(() => messageInput.focus(), 100);
+            }
+        })();
+    </script>
+
+    <!-- Voice mode: dictate (🎤) + read answers aloud (🔊). Browser-native, no key. Additive. -->
+    <script>
+        (function () {
+            const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+            const TTS_KEY = 'labai_tts';
+            let ttsOn = localStorage.getItem(TTS_KEY) !== '0';   // default: read aloud ON
+            const ttsBtn = document.getElementById('ttsBtn');
+            const micBtn = document.getElementById('micBtn');
+            const input = document.getElementById('messageInput');
+
+            function reflectTts() { if (ttsBtn) ttsBtn.style.opacity = ttsOn ? '1' : '0.4'; }
+            reflectTts();
+
+            // Read the assistant's reply aloud (called from sendMessage). Strip light markdown first.
+            window.speakReply = function (text) {
+                if (!ttsOn || !('speechSynthesis' in window) || !text) return;
+                try {
+                    const clean = String(text).replace(/[*_`#>]/g, '').replace(/\s+/g, ' ').trim();
+                    const u = new SpeechSynthesisUtterance(clean);
+                    u.lang = 'de-DE';
+                    window.speechSynthesis.cancel();   // never queue stale speech
+                    window.speechSynthesis.speak(u);
+                } catch (e) { }
+            };
+
+            if (ttsBtn) ttsBtn.addEventListener('click', () => {
+                ttsOn = !ttsOn; localStorage.setItem(TTS_KEY, ttsOn ? '1' : '0'); reflectTts();
+                if (!ttsOn) { try { window.speechSynthesis.cancel(); } catch (e) { } }
+            });
+
+            // Dictation: tap mic → listen once (de-DE) → fill the input and send hands-free.
+            let rec = null, listening = false;
+            if (micBtn) {
+                if (!SR) { micBtn.style.display = 'none'; }      // e.g. iOS Safari: no SpeechRecognition
+                else micBtn.addEventListener('click', () => {
+                    if (listening) { try { rec.stop(); } catch (e) { } return; }
+                    try {
+                        rec = new SR(); rec.lang = 'de-DE'; rec.interimResults = false; rec.maxAlternatives = 1;
+                        listening = true; micBtn.textContent = '●'; micBtn.style.opacity = '1';
+                        try { window.speechSynthesis && window.speechSynthesis.cancel(); } catch (e) { } // don't talk over you
+                        rec.onresult = (e) => { if (input) input.value = e.results[0][0].transcript; };
+                        rec.onend = () => {
+                            listening = false; micBtn.textContent = '🎤'; micBtn.style.opacity = '';
+                            if (input && input.value.trim() && typeof sendMessage === 'function') sendMessage();
+                        };
+                        rec.onerror = () => { listening = false; micBtn.textContent = '🎤'; micBtn.style.opacity = ''; };
+                        rec.start();
+                    } catch (e) { listening = false; micBtn.textContent = '🎤'; micBtn.style.opacity = ''; }
+                });
             }
         })();
     </script>
