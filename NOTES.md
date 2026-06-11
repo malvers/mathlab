@@ -21,6 +21,8 @@ GPS-Tracker (`HTML/tracker/`). Einstieg/Regeln: [`HTML/tracker/agents.md`](HTML/
 | [cluster-konvexe-huelle-hover.md](HTML/tracker/cluster-konvexe-huelle-hover.md) | Konvexe Außenhülle um das Cluster-Badge beim Maus-Hover | 💡 Idee |
 | [drivecast-audio-poi-am-weg.md](HTML/tracker/drivecast-audio-poi-am-weg.md) | Standort-getriggerter Audio-Reiseführer („WegCast", Vorbild Blitzer.de DriveCast) | 💡 Idee |
 | [plan-navigation-einfach.md](HTML/tracker/plan-navigation-einfach.md) | Einfache Navigation: Adresse → Route, START navigiert + trackt (Radial-Eintrag „ZIEL") | 🏗️ teils gebaut |
+| [plan-tracking-vs-navigation.md](HTML/tracker/plan-tracking-vs-navigation.md) | Tracking & Navigation entkoppeln (Navi beenden ≠ Track beenden); Vorschläge A/B/C | 📐 Konzept/Plan |
+| [polish-ki-erkennt-indikator.md](HTML/tracker/polish-ki-erkennt-indikator.md) | „KI erkennt"-Roboter (🤖) durch schönen On-Brand-Indikator ersetzen | 💡 Idee |
 | [tracker-ideen.md](HTML/tracker/tracker-ideen.md) | Lose Feature-Ideen (Fahrt-Brainstorm), einzeln gesammelt | 💡 Idee |
 | [plan-live-video-broadcast.md](HTML/tracker/plan-live-video-broadcast.md) | Live-Video durchleiten statt speichern — Transport + Kostenmodelle (P2P/SFU vs. pro Minute) | 📐 Konzept/Plan |
 | `HTML/js/tracker-speedlimit.js` | Tempo-Limit-Schild der aktuellen Straße (OSM `maxspeed` via Overpass), rot bei Übertretung | ✅ umgesetzt |
