@@ -74,12 +74,9 @@
         // The map auto-follows new fixes until you take over (drag) — ZENTRIEREN re-enables it.
         // The position dot is hidden during zoom animations so it doesn't jump, then fades back.
         let following = !viewRestored; // a restored viewport stays put (don't auto-follow GPS away from it)
-        let fitMode = false; // FIT as a persistent mode: when on, keep the position dot roughly centred (dead-zone)
+        let fitMode = false; // FIT as a persistent mode: when on, keep the WHOLE track fitted as it grows
         // ≈ 5 mm from the map centre (CSS px ≈ 1/96 in → 5 mm ≈ 19 px); within that the dot is "centred".
         const CENTER_TOL_PX = 19;
-        // FIT mode dead-zone: the dot may drift within the central 40 % (±20 %) of the viewport before
-        // we re-centre on it — keeps it "ungefähr in der Mitte" without re-panning on every fix.
-        const FIT_DEADZONE = 0.2;
         function refreshRecenter() {
             const btn = $('recenter-fab');
             if (!btn) return;
@@ -549,14 +546,11 @@
             lastFix = { lat: latitude, lng: longitude, t: now };
 
             if (following && !still) map.panTo(here, { animate: true }); // don't drift the map when still
-            // FIT mode: keep the CURRENT position roughly in the middle — pan back only once the dot
-            // drifts out of the central dead-zone, so it doesn't re-centre on every single fix and the
-            // zoom (and thus the surrounding context + trail) stays put.
-            if (fitMode && !still) {
-                const c = map.latLngToContainerPoint(here), sz = map.getSize();
-                if (Math.abs(c.x - sz.x / 2) > sz.x * FIT_DEADZONE || Math.abs(c.y - sz.y / 2) > sz.y * FIT_DEADZONE) {
-                    map.panTo(here, { animate: true });
-                }
+            // FIT mode: keep the whole track in view — re-fit only once it grows beyond the frame
+            // (the -0.12 inset = a little slack, so it doesn't re-zoom on every single point).
+            if (fitMode && track.length > 1) {
+                const tb = L.latLngBounds(track);
+                if (!map.getBounds().pad(-0.12).contains(tb)) { try { map.fitBounds(tb, { padding: [40, 40] }); } catch (e) { } }
             }
             refreshRecenter(); // show/hide the recenter button as needed
             if (__nav && __nav.update) __nav.update(here); // navigation: reroute if we drifted off the line
@@ -1743,8 +1737,8 @@ ${pts}
                 fitMode = !fitMode;
                 if (fitMode) {
                     setFollowing(false);
-                    if (posMarker) { try { map.panTo(posMarker.getLatLng(), { animate: true }); } catch (e) { } }
-                    toast('FIT-Modus an — Punkt bleibt mittig');
+                    if (track.length) { try { map.fitBounds(L.latLngBounds(track), { padding: [40, 40] }); } catch (e) { } }
+                    toast('FIT-Modus an — Track bleibt im Bild');
                 } else {
                     toast('FIT-Modus aus');
                 }
