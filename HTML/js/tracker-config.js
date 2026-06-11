@@ -17,6 +17,9 @@ window.TrackerConfig = (function () {
         set('--cfg-nav-bg', nb.bg);                          // nav banner background ("mach es grün")
         set('--cfg-nav-z', nb.zIndex);                       // z-order ("ganz nach unten")
         set('--cfg-nav-dy', nb.offsetY != null ? nb.offsetY + 'px' : null); // "ein Stück nach Süden"
+        const ct = cfg.controls || {};
+        set('--cfg-controls-color', ct.color);   // START/PAUSE/STOP text colour (was unreadable dark)
+        set('--cfg-controls-weight', ct.weight); // …and its weight
     }
 
     async function poll() {
