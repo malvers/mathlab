@@ -132,7 +132,6 @@
       (straight/left/right/slight/sharp/u-turn/Kreisverkehr/Ziel) in `tracker-nav.js`/`arrowSvg()`.
 
 ## Erledigt (gebaut, diese Session)
-- FIT-Modus hält den Positionspunkt mittig.
 - Idle-Auto-Hide blendet auch Header + Start/Stop-Leiste aus.
 - Einfache Navigation: Adresse → Route, START navigiert + trackt (Radial-Eintrag „ZIEL").
 - Re-Routing bei Routenabweichung (automatische Neuberechnung).
