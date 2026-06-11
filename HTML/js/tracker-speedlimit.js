@@ -25,6 +25,8 @@ window.TrackerSpeedLimit = function (ctx) {
     let bellBuf = null;     // decoded small-bell sample
     let bellLoading = false;
     let lastBing = 0;       // timestamp of the last chime, for the repeat throttle
+    const BELL_KEY = 'trk_speed_bell';
+    let bellOn = localStorage.getItem(BELL_KEY) !== '0'; // over-speed chime on/off (Settings→Debug), default ON
 
     function loadBell() {
         if (bellBuf || bellLoading || !actx) return;
@@ -40,7 +42,7 @@ window.TrackerSpeedLimit = function (ctx) {
     // Play the small glocken bell. If the sample isn't ready (slow/offline), fall back to a short
     // synthesised bell so there is always an audible cue. Silent until unlockAudio() ran on START.
     function bing() {
-        if (!actx) return;
+        if (!actx || !bellOn) return;
         try {
             if (actx.state === 'suspended') actx.resume();
             if (bellBuf) {
@@ -179,5 +181,8 @@ window.TrackerSpeedLimit = function (ctx) {
 
     function clear() { curLimit = null; lastPos = null; lastBing = 0; setSign(null, false); }
 
-    return { update, clear, unlockAudio };
+    function setBell(on) { bellOn = !!on; try { localStorage.setItem(BELL_KEY, bellOn ? '1' : '0'); } catch (e) { } }
+    function bellEnabled() { return bellOn; }
+
+    return { update, clear, unlockAudio, setBell, bellEnabled };
 };

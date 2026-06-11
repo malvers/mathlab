@@ -1847,6 +1847,17 @@ ${pts}
             else wire();
         })();
 
+        // Settings → Debug: toggle the over-speed bell (state lives in the speed-limit module, persisted).
+        (function () {
+            function wire() {
+                const cb = $('speed-bell-toggle'); if (!cb || cb._wired) return; cb._wired = true;
+                cb.checked = !__speed || !__speed.bellEnabled || __speed.bellEnabled(); // default ON
+                cb.addEventListener('change', () => { if (__speed && __speed.setBell) __speed.setBell(cb.checked); });
+            }
+            if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', wire);
+            else wire();
+        })();
+
         // Settings cards are collapsible (default collapsed).
         // Collapsed → tapping anywhere on the card expands it (big touch target, easy on phones).
         // Expanded  → only the title bar collapses it, so body controls (checkboxes/buttons) keep working.
