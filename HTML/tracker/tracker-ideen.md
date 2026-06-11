@@ -140,6 +140,9 @@
     cooler Vorführ-Effekt. Details: `plan-fernsteuerung-remote-config.md`.
 
 ## Erledigt (gebaut, diese Session)
+- **Live-Config-Demo (Idee 19, Modell 1):** `docalvers.de/config.json` → `tracker-config.js` pollt (~20 s,
+  ETag) → CSS-Variablen, ohne Reload. Fernsteuerbar: Stat-Farbe unter der Uhr, Navi-Banner Farbe/z-Order/
+  Süd-Offset. Workflow: Wert in `HTML/config.json` ändern → commit + push → App übernimmt es.
 - Idle-Auto-Hide blendet auch Header + Start/Stop-Leiste aus.
 - Einfache Navigation: Adresse → Route, START navigiert + trackt (Radial-Eintrag „ZIEL").
 - Re-Routing bei Routenabweichung (automatische Neuberechnung).
