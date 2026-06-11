@@ -74,7 +74,7 @@
         // The map auto-follows new fixes until you take over (drag) — ZENTRIEREN re-enables it.
         // The position dot is hidden during zoom animations so it doesn't jump, then fades back.
         let following = !viewRestored; // a restored viewport stays put (don't auto-follow GPS away from it)
-        let fitMode = false; // FIT as a persistent mode: when on, keep the WHOLE track fitted as it grows
+        let fitMode = false; // FIT loop: false → 'all' (whole track) → 'remaining' (rest of route, while navigating) → false
         // ≈ 5 mm from the map centre (CSS px ≈ 1/96 in → 5 mm ≈ 19 px); within that the dot is "centred".
         const CENTER_TOL_PX = 19;
         function refreshRecenter() {
@@ -546,11 +546,14 @@
             lastFix = { lat: latitude, lng: longitude, t: now };
 
             if (following && !still) map.panTo(here, { animate: true }); // don't drift the map when still
-            // FIT mode: keep the whole track in view — re-fit only once it grows beyond the frame
-            // (the -0.12 inset = a little slack, so it doesn't re-zoom on every single point).
-            if (fitMode && track.length > 1) {
+            // FIT mode (3-state): 'all' keeps the WHOLE track in view, 'remaining' keeps the rest of the
+            // route ahead in view. Re-fit only once it grows beyond the frame (-0.12 inset = slack).
+            if (fitMode === 'all' && track.length > 1) {
                 const tb = L.latLngBounds(track);
                 if (!map.getBounds().pad(-0.12).contains(tb)) { try { map.fitBounds(tb, { padding: [40, 40] }); } catch (e) { } }
+            } else if (fitMode === 'remaining' && __nav && __nav.remainingBounds) {
+                const rb = __nav.remainingBounds(here);
+                if (rb && !map.getBounds().pad(-0.12).contains(rb)) { try { map.fitBounds(rb, { padding: [40, 40] }); } catch (e) { } }
             }
             refreshRecenter(); // show/hide the recenter button as needed
             if (__nav && __nav.update) __nav.update(here); // navigation: reroute if we drifted off the line
@@ -1733,14 +1736,21 @@ ${pts}
         $('menu-fab').addEventListener('click', () => openPopup());
         $('recenter-fab').addEventListener('click', () => {
             const btn = $('recenter-fab');
-            if (btn.classList.contains('fit')) {            // centred → toggle the persistent FIT mode
-                fitMode = !fitMode;
-                if (fitMode) {
-                    setFollowing(false);
+            if (btn.classList.contains('fit')) {            // centred → cycle the FIT mode
+                // 3-state loop: off → whole track → (while navigating) remaining route → off.
+                const ll = posMarker && posMarker.getLatLng && posMarker.getLatLng();
+                const rb = (ll && __nav && __nav.remainingBounds) ? __nav.remainingBounds([ll.lat, ll.lng]) : null;
+                if (!fitMode) {                              // off → fit the whole track
+                    fitMode = 'all'; setFollowing(false);
                     if (track.length) { try { map.fitBounds(L.latLngBounds(track), { padding: [40, 40] }); } catch (e) { } }
-                    toast('FIT-Modus an — Track bleibt im Bild');
-                } else {
-                    toast('FIT-Modus aus');
+                    toast('FIT: ganze Route');
+                } else if (fitMode === 'all' && rb) {        // whole → remaining (only if a route exists)
+                    fitMode = 'remaining';
+                    try { map.fitBounds(rb, { padding: [40, 40] }); } catch (e) { }
+                    toast('FIT: Reststrecke');
+                } else {                                     // remaining (or no route) → off
+                    fitMode = false;
+                    toast('FIT aus');
                 }
                 refreshRecenter();
             } else {
