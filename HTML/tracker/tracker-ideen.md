@@ -12,6 +12,7 @@
   - 1 Zurück zum Start/Auto *(Vorschlag — klein, baut auf Navi)* · 10 Regen-Vorwarnung *(Vorschlag —
     hoher Nutzen, baut auf Regenradar)* · 11 Parkplatz merken *(Vorschlag — klein, delightful)*
   - 17 Navi-Route: echtes Google-Blau + gefahrene Strecke zeigt Geschwindigkeit *(Doc)*
+  - 19 App live fernsteuern (Remote-Config-Demo) *(Doc)*
 - **Prio 2 (danach):**
   - 4 Schätz-Spiel *(Doc)* · 7 Heatmap *(Doc)* · 9 Pokédex *(Doc)* · 12 Offline-Karten *(Doc)*
   - 2 Triff mich / Live-ETA *(Vorschlag)* · 3 Auto-Reise-Album *(Vorschlag)* · 8 Geometrie & Stats *(Vorschlag)*
@@ -130,6 +131,13 @@
     Verfügbar überall, wo OSM `turn:lanes` getaggt hat (Autobahn-Ausfahrten meist ja, kleine Straßen nein).
     - **Abbiege-Pfeile selbst:** am 2026-06-11 von Unicode-Glyphen auf **saubere SVG-Pfeile** umgestellt
       (straight/left/right/slight/sharp/u-turn/Kreisverkehr/Ziel) in `tracker-nav.js`/`arrowSvg()`.
+
+19. **App live fernsteuern (Remote-Config-Demo)** *(Prio 1)* — vom Auto aus sagen „mach das Navi-Panel
+    grün" / „z-Order ganz nach unten" / „Panel ein Stück nach Süden" → passiert **live, ohne
+    Neuinstallation**. Aussehen/Parameter (Farben, z-order, Schriftgrößen, Position, Panel-Sichtbarkeit)
+    in `config.json`; App pollt (~30 s) oder via **Supabase Realtime** (instant), anwenden über
+    **CSS-Variablen** → sofort & reload-frei. Nur Präsentation, keine Logik. Intellektuelle Übung +
+    cooler Vorführ-Effekt. Details: `plan-fernsteuerung-remote-config.md`.
 
 ## Erledigt (gebaut, diese Session)
 - Idle-Auto-Hide blendet auch Header + Start/Stop-Leiste aus.
