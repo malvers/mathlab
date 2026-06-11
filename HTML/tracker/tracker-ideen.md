@@ -147,6 +147,10 @@
     `plan-contact-ai-im-tracker.md`.
 
 ## Erledigt (gebaut, diese Session)
+- **labai.html Voice-Modus:** 🎤 diktieren (de-DE, sendet freihändig) + 🔊 Antworten vorlesen (TTS).
+  Backend unverändert (Edge Function), Key server-seitig. (Claude-Anbindung = eigene Edge Function, offen.)
+- **krass-app:** zählt jetzt auch „solita"/„solida" (Trigger-Liste statt nur „krass").
+- **Tempo-Glocke** per Häkchen in Einstellungen → Debug an/aus (persistiert).
 - **FIT-Button als 3-Stufen-Loop:** 1× = ganze Route fitten · 1× (beim Navigieren) = nur Reststrecke ·
   1× = FIT aus. (Mittig-Zentrieren war Blödsinn, raus.)
 - **Steuer-Button-Schrift** weiß + dicker (PAUSE war unlesbar), als Live-Config-Knopf.
@@ -167,7 +171,11 @@
 ## Detail-Notizen (eigene Dokumente, in NOTES.md verlinkt)
 - `polish-ki-erkennt-indikator.md` — „KI erkennt"-Roboter (🤖) durch schönen Indikator ersetzen (Vorschläge).
 - `plan-tracking-vs-navigation.md` — Navigation beenden ohne den Track zu beenden (Vorschläge A/B/C).
+- `plan-fernsteuerung-remote-config.md` — App live fernsteuern (Config + CSS-Variablen) inkl. Konfig-Schema (Idee 19).
+- `plan-contact-ai-im-tracker.md` — „Contact AI": Chat + Agent, der das Repo editiert (Idee 20).
+- `bug-live-broadcast-funktioniert-nicht.md` — Live-Broadcast geht gerade nicht (Realtime-spezifisch, Verdacht eingegrenzt).
 - `bug-regenradar-kein-regen.md` — Regenradar zeigt in DE keinen Regen (DWD leer/stale).
+- `../../krass-app/wakeword-solita-erkennung.md` — Weckwort „Solita" besser erkennen (Wortliste vs. eigene Stimme).
 - `plan-navigation-einfach.md` — Navigations-Plan inkl. „Nachgebaut"-Log.
 - `plan-live-video-broadcast.md` — Live-Video durchleiten + Kostenmodelle.
 - `drivecast-audio-poi-am-weg.md`, `cluster-konvexe-huelle-hover.md`, u. a. — siehe `NOTES.md`.
