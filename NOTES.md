@@ -30,6 +30,8 @@ GPS-Tracker (`HTML/tracker/`). Einstieg/Regeln: [`HTML/tracker/agents.md`](HTML/
 | `HTML/js/tracker-speedlimit.js` | Tempo-Limit-Schild der aktuellen Straße (OSM `maxspeed` via Overpass), rot bei Übertretung | ✅ umgesetzt |
 | [bug-geschwindigkeitsanzeige.md](HTML/tracker/bug-geschwindigkeitsanzeige.md) | km/h-Anzeige stimmt nicht (Jitter-/Bewegungs-Gate) | 🐞 Bug |
 | [bug-regenradar-kein-regen.md](HTML/tracker/bug-regenradar-kein-regen.md) | Regenradar zeigt in DE keinen Regen (DWD leer/stale, kein RainViewer-Fallback innerhalb Abdeckung) | 🐞 Bug |
+| [bug-live-broadcast-funktioniert-nicht.md](HTML/tracker/bug-live-broadcast-funktioniert-nicht.md) | Live-Broadcast geht gerade nicht — gleiches Projekt/Key bestätigt, Realtime-spezifisch (Auth/Config/Pause) | 🐞 Bug |
+| [krass-app/wakeword-solita-erkennung.md](krass-app/wakeword-solita-erkennung.md) | Weckwort „Solita" zuverlässig erkennen — Vosk-Wortliste vs. eigene Stimme trainieren | 💡 Idee |
 | [activity-debug-morgen.md](HTML/tracker/activity-debug-morgen.md) | Reisemodus/Activity-Erkennung — Test- & Debug-Plan | 📐 Konzept/Plan |
 | [e2e-verschluesselung-plan.md](HTML/tracker/e2e-verschluesselung-plan.md) | Tracks + Fotos in Supabase nur noch als Ciphertext (à la VGP) | 📐 Konzept/Plan |
 | [geo-erkennung-und-voice-spur.md](HTML/tracker/geo-erkennung-und-voice-spur.md) | Geo-gestützte Foto-Erkennung + Sprach-Nachrichten am Track | 📐 Konzept/Plan |
