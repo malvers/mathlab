@@ -1878,6 +1878,20 @@ ${pts}
             else wire();
         })();
 
+        // Settings → Debug: mobile shortcut keys — tap fires the otherwise keyboard-only d/k/w handlers.
+        (function () {
+            function wire() {
+                [['sc-d', 'd'], ['sc-k', 'k'], ['sc-w', 'w']].forEach(([id, key]) => {
+                    const b = $(id); if (!b || b._wired) return; b._wired = true;
+                    b.addEventListener('click', () => {
+                        document.dispatchEvent(new KeyboardEvent('keydown', { key: key, bubbles: true }));
+                    });
+                });
+            }
+            if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', wire);
+            else wire();
+        })();
+
         // Settings cards are collapsible (default collapsed).
         // Collapsed → tapping anywhere on the card expands it (big touch target, easy on phones).
         // Expanded  → only the title bar collapses it, so body controls (checkboxes/buttons) keep working.
