@@ -47,6 +47,8 @@ window.TrackerNav = function (ctx) {
     let annFar = false;     // pre-warning already spoken for the current maneuver
     let mClosest = Infinity; // closest approach (m) to the current maneuver — to detect an overshoot
     let voiceOn = true;     // spoken guidance on/off (persisted in localStorage)
+    let routeTotalDist = 0; // whole-route distance (m) at (re)route time — for ETA / remaining
+    let routeTotalDur = 0;  // whole-route duration (s) at (re)route time — for ETA / remaining
 
     function hasDestination() { return !!destLatLng; }
 
@@ -136,6 +138,8 @@ window.TrackerNav = function (ctx) {
         const best = data.routes[0];
         drawRoute(best.geometry);
         setGuidance(best);
+        routeTotalDist = best.distance || 0; // for ETA / remaining in the banner
+        routeTotalDur = best.duration || 0;
         lastReroute = Date.now();
         const km = (best.distance / 1000).toFixed(1);
         const min = Math.round(best.duration / 60);
@@ -228,6 +232,21 @@ window.TrackerNav = function (ctx) {
         }
     }
 
+    // Rich banner detail from OSRM step fields: exit number · road ref/name · signpost destinations.
+    // e.g. "Ausf. 24 · A 60 · → Frankfurt am Main, Darmstadt". Empty → banner falls back to the verb text.
+    function detailOf(s) {
+        const parts = [];
+        if (s.exits) parts.push('Ausf. ' + s.exits);
+        const ref = (s.ref || '').split(';').map((x) => x.trim()).filter(Boolean)[0];
+        const road = ref || s.name || '';
+        if (road) parts.push(road);
+        if (s.destinations) {
+            const dst = s.destinations.replace(/;/g, ', ').replace(/^[^:]*:\s*/, '').trim(); // strip a leading "A60: "
+            if (dst) parts.push('→ ' + dst);
+        }
+        return parts.join(' · ');
+    }
+
     function setGuidance(best) {
         maneuvers = [];
         (best.legs || []).forEach((leg) => (leg.steps || []).forEach((s) => {
@@ -235,12 +254,44 @@ window.TrackerNav = function (ctx) {
             if (!loc) return;
             maneuvers.push({
                 loc: [loc[1], loc[0]], type: s.maneuver.type, modifier: s.maneuver.modifier,
-                exit: s.maneuver.exit, name: s.name, text: phrase(s.maneuver, s.name),
+                exit: s.maneuver.exit, name: s.name, text: phrase(s.maneuver, s.name), detail: detailOf(s),
             });
         }));
         mIdx = 0;
         while (mIdx < maneuvers.length && maneuvers[mIdx].type === 'depart') mIdx++; // skip the leading "depart"
         annFar = false; mClosest = Infinity;
+    }
+
+    // ---- ETA / remaining: distance left ALONG the route from the current position ----
+    function remainingMeters(here) {
+        if (!routeLatLngs || routeLatLngs.length < 2) return null;
+        const k = Math.cos(here[0] * Math.PI / 180);
+        const xy = (ll) => [ll[1] * 111320 * k, ll[0] * 110540];
+        const p = xy(here);
+        let bi = 1, bt = 0, bd = Infinity;
+        for (let i = 1; i < routeLatLngs.length; i++) {
+            const a = xy(routeLatLngs[i - 1]), b = xy(routeLatLngs[i]);
+            const dx = b[0] - a[0], dy = b[1] - a[1], len2 = dx * dx + dy * dy;
+            let t = len2 ? ((p[0] - a[0]) * dx + (p[1] - a[1]) * dy) / len2 : 0;
+            t = t < 0 ? 0 : t > 1 ? 1 : t;
+            const d = Math.hypot(p[0] - (a[0] + t * dx), p[1] - (a[1] + t * dy));
+            if (d < bd) { bd = d; bi = i; bt = t; }
+        }
+        let rem = (1 - bt) * haversine(routeLatLngs[bi - 1], routeLatLngs[bi]);
+        for (let i = bi + 1; i < routeLatLngs.length; i++) rem += haversine(routeLatLngs[i - 1], routeLatLngs[i]);
+        return rem;
+    }
+
+    function tripLine(here) {
+        const rem = remainingMeters(here);
+        if (rem == null || routeTotalDist <= 0) return '';
+        const remSec = routeTotalDur * (rem / routeTotalDist);
+        const eta = new Date(Date.now() + remSec * 1000);
+        const clock = eta.getHours() + ':' + String(eta.getMinutes()).padStart(2, '0');
+        const remKm = rem >= 10000 ? Math.round(rem / 1000) + ' km'
+            : rem >= 1000 ? (rem / 1000).toFixed(1) + ' km'
+                : Math.round(rem / 50) * 50 + ' m';
+        return 'Ankunft ' + clock + '  ·  ' + remKm + '  ·  ' + Math.round(remSec / 60) + ' min';
     }
 
     function announceDist(d) { return d > 500 ? Math.round(d / 100) * 100 : Math.round(d / 50) * 50; }
@@ -282,10 +333,17 @@ window.TrackerNav = function (ctx) {
         return '<svg class="nav-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" '
             + 'stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="' + d + '"/></svg>';
     }
-    function showBanner(m, d) {
+    // Two rows: maneuver (arrow + distance + road/ref + signpost destinations) · trip (ETA · remaining).
+    function showBanner(m, d, trip) {
         const el = $('nav-banner'); if (!el) return;
-        el.innerHTML = arrowSvg(m) + '<span class="nav-banner-txt"></span>'; // SVG from a fixed table (safe)
-        el.querySelector('.nav-banner-txt').textContent = fmtDist(d) + ' · ' + m.text; // road name via textContent
+        el.innerHTML =
+            '<div class="nav-main">' + arrowSvg(m)
+            + '<span class="nav-dist"></span><span class="nav-instr"></span></div>'
+            + '<div class="nav-trip"></div>'; // SVG from a fixed table (safe); text set below via textContent
+        el.querySelector('.nav-dist').textContent = fmtDist(d);
+        el.querySelector('.nav-instr').textContent = m.detail || m.text; // OSM names via textContent (no injection)
+        const t = el.querySelector('.nav-trip');
+        t.textContent = trip || ''; t.hidden = !trip;
         el.hidden = false;
     }
     function hideBanner() { const el = $('nav-banner'); if (el) el.hidden = true; }
@@ -300,7 +358,7 @@ window.TrackerNav = function (ctx) {
         const m = maneuvers[mIdx];
         const d = haversine(here, m.loc);
         if (d < mClosest) mClosest = d;
-        showBanner(m, d);
+        showBanner(m, d, tripLine(here));
         if (d <= ANNOUNCE_NEAR_M) {                       // reached the maneuver → say it, advance
             speak(m.type === 'arrive' ? 'Sie haben das Ziel erreicht.' : 'Jetzt ' + m.text);
             advanceManeuver();
