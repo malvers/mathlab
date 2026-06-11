@@ -37,3 +37,20 @@ Name/Link-Problem, verbunden aber kein Empfang = Sende-Problem. (Eigene Idee —
 ## Dateien
 - `HTML/js/tracker.js` (`beginLive`/`broadcastLive`/`stopLive`, ~971–1013)
 - `HTML/tracker/view.html` (`goLive`, Key aus `?live=`, ~358–367, 466)
+
+## Update 2026-06-11 — eingegrenzt
+- **Ursache 1 (Groß/Klein) ausgeschlossen:** Zuschauer öffnen den **kopierten Link** (lowercase), trotzdem nichts.
+- **Gleiches Projekt/Key bestätigt:** `tracker.js:1200-1201` und `view.html:220-221` nutzen **identisch**
+  `https://fyfhxzyymmurlaenmzse.supabase.co` + denselben **publishable** Key. → „falsches Projekt" raus.
+- ⇒ **Es ist Realtime-spezifisch.** Neue Top-Verdächtige:
+  1. **Realtime-Authorization/Config geändert** (private-channel-Pflicht / „require authorization") → öffentliches
+     Broadcast wird abgelehnt → still nichts. Channel hier ist public (`broadcast:{self:false}`, **kein** `private:true`).
+  2. **Key-Format-Umstieg:** Key ist neues Format `sb_publishable_…`. Realtime-Websocket-Auth könnte damit anders
+     sein als die DB (PostgREST) → DB/Laden geht, **Realtime nicht**.
+  3. **Free-Projekt pausiert** (Inaktivität) oder Realtime-Quota/Connection-Limit.
+- **Entscheidende Frage zum Splitten:** Funktioniert **LADEN (Tracks laden)** noch?
+  - **Ja** → Projekt lebt, Problem ist **Realtime-only** (Verdacht 1/2).
+  - **Nein** → ganzes Projekt down/pausiert (Verdacht 3) / Key.
+- **Schnellster Pinpoint:** in `view.html` den **`subscribe`-Status sichtbar machen** (SUBSCRIBED vs.
+  CHANNEL_ERROR/TIMED_OUT) + Zähler empfangener Nachrichten. Zeigt sofort, ob's am Abo (Auth) oder am Senden liegt.
+  (Aus meiner Sandbox **nicht** testbar — Supabase-Host ist geblockt.)
