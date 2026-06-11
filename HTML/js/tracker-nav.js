@@ -282,6 +282,27 @@ window.TrackerNav = function (ctx) {
         return rem;
     }
 
+    // Bounds of the REMAINING route (current position → end), for the FIT "Reststrecke" mode.
+    // null if no route is drawn. Reuses the nearest-segment search from remainingMeters.
+    function remainingBounds(here) {
+        if (!routeLatLngs || routeLatLngs.length < 2 || !here) return null;
+        const k = Math.cos(here[0] * Math.PI / 180);
+        const xy = (ll) => [ll[1] * 111320 * k, ll[0] * 110540];
+        const p = xy(here);
+        let bi = 1, bd = Infinity;
+        for (let i = 1; i < routeLatLngs.length; i++) {
+            const a = xy(routeLatLngs[i - 1]), b = xy(routeLatLngs[i]);
+            const dx = b[0] - a[0], dy = b[1] - a[1], len2 = dx * dx + dy * dy;
+            let t = len2 ? ((p[0] - a[0]) * dx + (p[1] - a[1]) * dy) / len2 : 0;
+            t = t < 0 ? 0 : t > 1 ? 1 : t;
+            const d = Math.hypot(p[0] - (a[0] + t * dx), p[1] - (a[1] + t * dy));
+            if (d < bd) { bd = d; bi = i; }
+        }
+        const pts = [here].concat(routeLatLngs.slice(bi));   // current pos + everything still ahead
+        if (destLatLng) pts.push(destLatLng);
+        try { return L.latLngBounds(pts); } catch (e) { return null; }
+    }
+
     function tripLine(here) {
         const rem = remainingMeters(here);
         if (rem == null || routeTotalDist <= 0) return '';
@@ -398,5 +419,5 @@ window.TrackerNav = function (ctx) {
         });
     }
 
-    return { openPanel, hasDestination, startNavigation, clearRoute, update };
+    return { openPanel, hasDestination, startNavigation, clearRoute, update, remainingBounds };
 };

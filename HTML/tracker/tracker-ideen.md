@@ -147,6 +147,9 @@
     `plan-contact-ai-im-tracker.md`.
 
 ## Erledigt (gebaut, diese Session)
+- **FIT-Button als 3-Stufen-Loop:** 1× = ganze Route fitten · 1× (beim Navigieren) = nur Reststrecke ·
+  1× = FIT aus. (Mittig-Zentrieren war Blödsinn, raus.)
+- **Steuer-Button-Schrift** weiß + dicker (PAUSE war unlesbar), als Live-Config-Knopf.
 - **Live-Config-Demo (Idee 19, Modell 1):** `docalvers.de/config.json` → `tracker-config.js` pollt (~20 s,
   ETag) → CSS-Variablen, ohne Reload. Fernsteuerbar: Stat-Farbe unter der Uhr, Navi-Banner Farbe/z-Order/
   Süd-Offset. Workflow: Wert in `HTML/config.json` ändern → commit + push → App übernimmt es.
