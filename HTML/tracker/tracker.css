@@ -1674,17 +1674,14 @@ body.ui-idle #trk-controls {
     top: calc(env(safe-area-inset-top, 0px) + 96px);
     transform: translateX(-50%);
     z-index: 480; /* UNDER the header (#hud-top z500): when the header is shown it covers the banner, not vice-versa */
-    max-width: min(92vw, 460px);
-    background: rgba(8, 20, 42, 0.92);
-    border: 1px solid rgba(255, 255, 255, 0.18);
+    max-width: min(94vw, 480px);
+    /* Google-Maps-like navigation green (≈ #188038); Doc fine-tunes from a screenshot. */
+    background: rgb(24, 128, 56);
+    border: 1px solid rgba(255, 255, 255, 0.16);
     border-radius: 14px;
-    padding: 10px 18px;
-    font-family: 'Orbitron', sans-serif;
-    font-weight: 700;
-    font-size: clamp(0.9rem, 3.6vw, 1.15rem);
-    letter-spacing: 0.5px;
+    padding: 9px 16px;
     color: #fff;
-    text-align: center;
+    text-align: left;
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.45);
     pointer-events: none;
 }
@@ -1693,10 +1690,14 @@ body.ui-idle #trk-controls {
     display: none;
 }
 
-/* Maneuver arrow (SVG) inside the nav banner — sits left of the distance/text, vertically centred. */
-#nav-banner { display: flex; align-items: center; justify-content: center; gap: 10px; }
-.nav-arrow { width: 28px; height: 28px; flex: 0 0 auto; }
-.nav-banner-txt { display: inline-block; }
+/* Two rows: maneuver line (arrow + distance + road/destinations) and the trip line (ETA · remaining). */
+#nav-banner { display: flex; flex-direction: column; gap: 3px; }
+.nav-main { display: flex; align-items: center; gap: 10px; }
+.nav-arrow { width: 30px; height: 30px; flex: 0 0 auto; }
+.nav-dist { font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: clamp(0.95rem, 3.8vw, 1.2rem); white-space: nowrap; flex: 0 0 auto; }
+.nav-instr { font-family: system-ui, sans-serif; font-weight: 600; font-size: clamp(0.85rem, 3.4vw, 1.05rem); line-height: 1.2; }
+.nav-trip { font-family: system-ui, sans-serif; font-weight: 500; font-size: clamp(0.72rem, 3vw, 0.86rem); opacity: 0.92; padding-left: 40px; }
+.nav-trip[hidden] { display: none; }
 
 /* Speed-limit sign — classic round white sign with a red ring; top-left, clear of the centred HUD.
    Turns solid red when the smoothed speed is over the limit (JS toggles .over). */
