@@ -8,8 +8,9 @@ window.TrackerSpeedLimit = function (ctx) {
     const { $ } = ctx;
 
     const OVERPASS = 'https://overpass-api.de/api/interpreter';
-    const MIN_INTERVAL_MS = 15000; // never query Overpass more often than this
-    const MIN_MOVE_M = 60;         // …and only after the position moved at least this far
+    const MIN_INTERVAL_MS = 5000;  // never query Overpass more often than this (was 15 s → too laggy when driving)
+    const MIN_MOVE_M = 90;         // …and only after this much travel — limits change per road segment
+    const QUERY_TIMEOUT_MS = 9000; // abort a stuck request so `fetching` can never freeze the sign forever
     const OVER_TOL_KMH = 3;        // grace before turning the sign red (GPS speed noise)
     const BING_FACTOR = 1.10;      // play the bell once you're ~10 % over the limit
     const BING_REPEAT_MS = 12000;  // …and re-remind at most this often while still over
@@ -86,15 +87,19 @@ window.TrackerSpeedLimit = function (ctx) {
         return 2 * R * Math.asin(Math.sqrt(x));
     }
 
-    // OSM maxspeed string → km/h number, 'none' (Autobahn unlimited), or null (unknown/implicit zone).
+    // OSM maxspeed string → km/h number, 'none' (Autobahn unlimited), or null (unknown).
+    // German implicit zone tags resolve to their legal default (so e.g. "DE:rural" shows 100, not blank).
+    const DE_ZONE = { 'DE:urban': 50, 'DE:rural': 100, 'DE:motorway': 'none',
+                      'DE:living_street': 7, 'DE:walk': 7, 'DE:bicycle_road': 30 };
     function parseMax(v) {
         if (!v) return null;
         if (/^\d+$/.test(v)) return parseInt(v, 10);                 // "50", "100"
+        if (Object.prototype.hasOwnProperty.call(DE_ZONE, v)) return DE_ZONE[v]; // "DE:urban" → 50 …
         if (/\bnone\b/i.test(v)) return 'none';                      // "none" → unlimited
         if (/walk/i.test(v)) return 7;                              // "walk" ≈ Schrittgeschwindigkeit
         const mph = v.match(/^(\d+)\s*mph$/i);
         if (mph) return Math.round(parseInt(mph[1], 10) * 1.60934); // "30 mph" → km/h
-        return null; // implicit tags like "DE:urban" carry no explicit number → unknown
+        return null; // other implicit/conditional tags → unknown (show nothing rather than guess)
     }
 
     function setSign(limit, over) {
@@ -129,11 +134,14 @@ window.TrackerSpeedLimit = function (ctx) {
         // Ways with a maxspeed within 35 m — we then pick the NEAREST (by geometry), not the first,
         // so a parallel road / ramp / crossing can't steal the wrong limit (Doc bug 2026-06-11).
         const q = '[out:json][timeout:8];way(around:35,' + p[0] + ',' + p[1] + ')[highway][maxspeed];out tags geom;';
+        const ctrl = new AbortController();
+        const to = setTimeout(() => ctrl.abort(), QUERY_TIMEOUT_MS); // never let a stuck request freeze the sign
         try {
             const r = await fetch(OVERPASS, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                 body: 'data=' + encodeURIComponent(q),
+                signal: ctrl.signal,
             });
             const j = await r.json();
             let best = null, bestD = Infinity;
@@ -145,8 +153,8 @@ window.TrackerSpeedLimit = function (ctx) {
             }
             curLimit = best;
             setSign(best, false);
-        } catch (e) { /* silent: keep the last known sign */ }
-        fetching = false;
+        } catch (e) { /* timeout/offline/parse error → keep the last known sign */ }
+        finally { clearTimeout(to); fetching = false; }
     }
 
     // Called from the core on every GPS fix: update the over-limit colour every time (cheap), and
