@@ -100,7 +100,7 @@ window.TrackerSpeedLimit = function (ctx) {
     function setSign(limit, over) {
         const el = $('speed-sign'); if (!el) return;
         if (limit == null) { el.hidden = true; el.classList.remove('over'); return; }
-        el.textContent = (limit === 'none') ? '∞' : String(limit);
+        el.textContent = (limit === 'none') ? 'c' : String(limit); // 'none' = Autobahn unbegrenzt → c (Lichtgeschwindigkeit, das echte Limit)
         el.classList.toggle('over', !!over && limit !== 'none');
         el.hidden = false;
     }
