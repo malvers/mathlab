@@ -121,3 +121,12 @@
       **nicht** blau. Also: **blaue Navi-Linie nur VORAUS** (ab aktueller Position), **hinter** dir der
       speed-gefärbte Track. (Wie Google die gefahrene Strecke „aufbraucht" — nur statt grau → unsere
       Speed-Farben.) Umsetzung: Route an der aktuellen Position trimmen / Track-Rendering oben drüber.
+    - **(c) erledigt 2026-06-11:** Positionspunkt + weißes Richtungs-Dreieck liegen jetzt **über** der
+      blauen Linie (eigene Map-Ebene `nav-route`, z 350 unter Punkt/Track/Markern).
+
+18. **Spuranweisungen (Lane Guidance)** *(Prio 2)* — „Halte dich auf den rechten zwei Spuren." **OSRM
+    liefert die Daten**: `step.intersections[].lanes` (jede Spur mit `indications` wie straight/left/
+    slight-right + `valid` true/false). Als kleines Spur-Diagramm unter dem Abbiege-Banner anzeigen.
+    Verfügbar überall, wo OSM `turn:lanes` getaggt hat (Autobahn-Ausfahrten meist ja, kleine Straßen nein).
+    - **Abbiege-Pfeile selbst:** am 2026-06-11 von Unicode-Glyphen auf **saubere SVG-Pfeile** umgestellt
+      (straight/left/right/slight/sharp/u-turn/Kreisverkehr/Ziel) in `tracker-nav.js`/`arrowSvg()`.
