@@ -11,6 +11,7 @@
   - 5 Brotkrumen zurück (offline) *(Doc)* · 13 Goldene Stunde & Sonnenstand *(Doc)*
   - 1 Zurück zum Start/Auto *(Vorschlag — klein, baut auf Navi)* · 10 Regen-Vorwarnung *(Vorschlag —
     hoher Nutzen, baut auf Regenradar)* · 11 Parkplatz merken *(Vorschlag — klein, delightful)*
+  - 17 Navi-Route: echtes Google-Blau + gefahrene Strecke zeigt Geschwindigkeit *(Doc)*
 - **Prio 2 (danach):**
   - 4 Schätz-Spiel *(Doc)* · 7 Heatmap *(Doc)* · 9 Pokédex *(Doc)* · 12 Offline-Karten *(Doc)*
   - 2 Triff mich / Live-ETA *(Vorschlag)* · 3 Auto-Reise-Album *(Vorschlag)* · 8 Geometrie & Stats *(Vorschlag)*
@@ -108,3 +109,15 @@
       Größe, Kontrast/Halo, Label-Dichte pro Zoom und Sprache (`name:de`)**.
     - **Ein Hebel, drei Features:** ermöglicht zugleich **Idee 12** (Offline-Karten via PMTiles) und
       **Idee 14** (3D-Geländekarte). Daher strategisch wichtiger Enabler.
+
+17. **Navi-Route: echtes Google-Blau + gefahrene Strecke zeigt Geschwindigkeit** *(Prio 1)*
+    - **(a) Blau angleichen:** unsere Linie ist `rgb(66,135,245)` ≈ **#4287F5**, Google-Maps ist
+      **#4285F4** (`rgb(66,133,244)`) → fast gleich. Der gefühlte Unterschied kommt vermutlich vom
+      **dunklen Casing** (Navy-Rand, weight 11) + Deckkraft, nicht vom Blau. Vorschlag: exakt #4285F4 +
+      **helleres/dünneres Casing** wie Google (heller blauer Rand statt dunkelblau). Doc schickt
+      Screenshot zum Feinabgleich. Code: `COL_ROUTE` / `drawRoute()` in `HTML/js/tracker-nav.js`.
+    - **(b) WICHTIG — gefahrene Strecke nicht mehr blau:** der bereits **zurückgelegte** Teil soll die
+      **gefahrene Geschwindigkeit** zeigen (Speed-Farbverlauf wie der normale Track, leaflet-hotline),
+      **nicht** blau. Also: **blaue Navi-Linie nur VORAUS** (ab aktueller Position), **hinter** dir der
+      speed-gefärbte Track. (Wie Google die gefahrene Strecke „aufbraucht" — nur statt grau → unsere
+      Speed-Farben.) Umsetzung: Route an der aktuellen Position trimmen / Track-Rendering oben drüber.
