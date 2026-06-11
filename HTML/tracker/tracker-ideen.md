@@ -175,6 +175,9 @@
 - `plan-tracking-vs-navigation.md` — Navigation beenden ohne den Track zu beenden (Vorschläge A/B/C).
 - `plan-fernsteuerung-remote-config.md` — App live fernsteuern (Config + CSS-Variablen) inkl. Konfig-Schema (Idee 19).
 - `plan-contact-ai-im-tracker.md` — „Contact AI": Chat + Agent, der das Repo editiert (Idee 20).
+- `agent-name-solita.md` — Agent-Name & Weckwort „Solita" (Begründung, Tagline, Voice-Erkennbarkeit).
+- `verteilung-playstore-tester.md` — Sideload vs. Play Store + 12-Tester-Auflage (nächste Woche).
+- `wissensnotiz-llm-kompression-lebensagent.md` — Tokens/Kompression + Memory-Architektur für den Lebens-Agent.
 - `bug-live-broadcast-funktioniert-nicht.md` — Live-Broadcast geht gerade nicht (Realtime-spezifisch, Verdacht eingegrenzt).
 - `bug-regenradar-kein-regen.md` — Regenradar zeigt in DE keinen Regen (DWD leer/stale).
 - `../../krass-app/wakeword-solita-erkennung.md` — Weckwort „Solita" besser erkennen (Wortliste vs. eigene Stimme).
