@@ -1720,12 +1720,15 @@ body.ui-idle #trk-controls {
     align-items: center;
     justify-content: center;
     box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
-    transition: background 0.2s ease, color 0.2s ease;
+    transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
 }
 
+/* Over the limit → red, pulsing, AND it jumps forward (bigger + top z-index) so it can't be missed. */
 #speed-sign.over {
     background: rgb(176, 36, 24);
     color: #fff;
+    transform: scale(1.35);
+    z-index: 985; /* above the nav banner / FABs / toast slot — unmissable when speeding */
     animation: speedOver 0.8s ease-in-out infinite;
 }
 
