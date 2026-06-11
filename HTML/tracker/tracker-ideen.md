@@ -130,3 +130,24 @@
     Verfügbar überall, wo OSM `turn:lanes` getaggt hat (Autobahn-Ausfahrten meist ja, kleine Straßen nein).
     - **Abbiege-Pfeile selbst:** am 2026-06-11 von Unicode-Glyphen auf **saubere SVG-Pfeile** umgestellt
       (straight/left/right/slight/sharp/u-turn/Kreisverkehr/Ziel) in `tracker-nav.js`/`arrowSvg()`.
+
+## Erledigt (gebaut, diese Session)
+- FIT-Modus hält den Positionspunkt mittig.
+- Idle-Auto-Hide blendet auch Header + Start/Stop-Leiste aus.
+- Einfache Navigation: Adresse → Route, START navigiert + trackt (Radial-Eintrag „ZIEL").
+- Re-Routing bei Routenabweichung (automatische Neuberechnung).
+- Abbiege-Navigation mit Sprachansage (de-DE) + saubere SVG-Abbiegepfeile.
+- Reicheres Navi-Banner: ETA + Straße/Ref + Schild-Ziele, Google-Navi-Grün, liegt unter dem Header.
+- Positionspunkt + weißes Dreieck liegen über der blauen Navi-Linie.
+- Tempolimit-Schild (OSM maxspeed via Overpass): nächste Straße, häufiger/robuster, deutsche Zonen-Tags.
+- Tempo-Schild: „c" statt ∞ bei unbegrenzt; springt beim Überschreiten nach vorne; Glocken-Warnton bei >10 %.
+- Kompass (Nordpfeil) unter dem Header.
+- Regenradar-Quellen-Status (DWD/RainViewer) unter Einstellungen → Debug; untere Debug-Leiste folgt dem Debug-Schalter.
+
+## Detail-Notizen (eigene Dokumente, in NOTES.md verlinkt)
+- `polish-ki-erkennt-indikator.md` — „KI erkennt"-Roboter (🤖) durch schönen Indikator ersetzen (Vorschläge).
+- `plan-tracking-vs-navigation.md` — Navigation beenden ohne den Track zu beenden (Vorschläge A/B/C).
+- `bug-regenradar-kein-regen.md` — Regenradar zeigt in DE keinen Regen (DWD leer/stale).
+- `plan-navigation-einfach.md` — Navigations-Plan inkl. „Nachgebaut"-Log.
+- `plan-live-video-broadcast.md` — Live-Video durchleiten + Kostenmodelle.
+- `drivecast-audio-poi-am-weg.md`, `cluster-konvexe-huelle-hover.md`, u. a. — siehe `NOTES.md`.
