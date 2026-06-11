@@ -74,6 +74,18 @@
         // The map auto-follows new fixes until you take over (drag) — ZENTRIEREN re-enables it.
         // The position dot is hidden during zoom animations so it doesn't jump, then fades back.
         let following = !viewRestored; // a restored viewport stays put (don't auto-follow GPS away from it)
+        let lastAutoZoom = 0;            // throttle the speed-adaptive zoom (ms)
+        const AUTOZOOM_COOLDOWN = 4000;
+        // Speed-adaptive zoom while auto-following: faster → wider view (more lookahead), slower → closer.
+        // Discrete bands + smoothed speed + cooldown avoid constant re-zooming. null = leave zoom alone.
+        function speedZoom(kmh) {
+            if (kmh == null) return null;
+            if (kmh < 10) return 17;     // walking / standing
+            if (kmh < 35) return 16;     // slow town
+            if (kmh < 70) return 15;     // town / country road
+            if (kmh < 110) return 14;    // fast road
+            return 13;                   // autobahn → widest
+        }
         let fitMode = false; // FIT loop: false → 'all' (whole track) → 'remaining' (rest of route, while navigating) → false
         // ≈ 5 mm from the map centre (CSS px ≈ 1/96 in → 5 mm ≈ 19 px); within that the dot is "centred".
         const CENTER_TOL_PX = 19;
@@ -545,7 +557,15 @@
 
             lastFix = { lat: latitude, lng: longitude, t: now };
 
-            if (following && !still) map.panTo(here, { animate: true }); // don't drift the map when still
+            if (following && !still) { // auto-follow: pan to the dot, and zoom to suit the speed
+                const tz = speedZoom(shownSpeed);
+                if (tz != null && Math.abs(map.getZoom() - tz) >= 1 && Date.now() - lastAutoZoom > AUTOZOOM_COOLDOWN) {
+                    lastAutoZoom = Date.now();
+                    map.setView(here, tz, { animate: true }); // pan + zoom together
+                } else {
+                    map.panTo(here, { animate: true });
+                }
+            }
             // FIT mode (3-state): 'all' keeps the WHOLE track in view, 'remaining' keeps the rest of the
             // route ahead in view. Re-fit only once it grows beyond the frame (-0.12 inset = slack).
             if (fitMode === 'all' && track.length > 1) {

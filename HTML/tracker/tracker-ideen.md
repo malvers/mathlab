@@ -147,6 +147,8 @@
     `plan-contact-ai-im-tracker.md`.
 
 ## Erledigt (gebaut, diese Session)
+- **Tempo-abhängiger Zoom** beim Folgen: schnell → weiter raus (mehr Vorausblick), langsam → näher dran
+  (Stufen 17→13, gedrosselt). Nur im Auto-Folgen-Modus.
 - **labai.html Voice-Modus:** 🎤 diktieren (de-DE, sendet freihändig) + 🔊 Antworten vorlesen (TTS).
   Backend unverändert (Edge Function), Key server-seitig. (Claude-Anbindung = eigene Edge Function, offen.)
 - **krass-app:** zählt jetzt auch „solita"/„solida" (Trigger-Liste statt nur „krass").
