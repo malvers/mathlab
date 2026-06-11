@@ -39,6 +39,12 @@ public class KrassListenerService extends Service implements RecognitionListener
     public static final String PREFS = "krass_counts";      // SharedPreferences: "yyyy-MM-dd" -> int
     public static volatile boolean running = false;          // read by the plugin for getStats().running
 
+    // Words that count (case-insensitive). "krass" + the agent wake-word. Two spellings of the new
+    // word, because Vosk's transcription of an invented word is unstable. NOTE: the German small model
+    // knows "krass" well; "solita/solida" are not German words, so the model may hear them as "solide"
+    // (a real word) or miss them — widen this list (e.g. add "solide") if recognition misses it.
+    private static final String[] TRIGGERS = { "krass", "solita", "solida" };
+
     private Model model;
     private SpeechService speech;
 
@@ -83,7 +89,9 @@ public class KrassListenerService extends Service implements RecognitionListener
         try { text = new JSONObject(hypothesis).optString("text", ""); } catch (Exception e) { text = ""; }
         if (text.trim().isEmpty()) return;
         int hits = 0;
-        for (String w : text.split("\\s+")) if (w.equalsIgnoreCase("krass")) hits++;
+        for (String w : text.split("\\s+")) {
+            for (String t : TRIGGERS) if (w.equalsIgnoreCase(t)) { hits++; break; }
+        }
         if (hits == 0) return;
         String day = today();
         SharedPreferences p = prefs();
