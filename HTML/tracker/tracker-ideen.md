@@ -147,6 +147,9 @@
     `plan-contact-ai-im-tracker.md`.
 
 ## Erledigt (gebaut, diese Session)
+- **Tasten-Shortcuts am Handy:** Buttons d/k/w in Einstellungen → Debug lösen die sonst nur per Tastatur
+  erreichbaren Shortcuts aus (d = Regenquelle DWD/RainViewer, k = Karte dunkel, w = Karte weiß).
+  → ermöglicht u. a. den `d`-Regentest mobil. (Schönere UX-Idee: Long-Press-Buchstaben-Panel — offen.)
 - **Tempo-abhängiger Zoom** beim Folgen: schnell → weiter raus (mehr Vorausblick), langsam → näher dran
   (Stufen 17→13, gedrosselt). Nur im Auto-Folgen-Modus.
 - **labai.html Voice-Modus:** 🎤 diktieren (de-DE, sendet freihändig) + 🔊 Antworten vorlesen (TTS).
