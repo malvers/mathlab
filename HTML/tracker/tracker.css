@@ -362,7 +362,7 @@ path.pos-marker.pos-shown {
     font-size: clamp(1rem, 4.5vw, 1.4rem);
     font-weight: 700;
     line-height: 1;
-    color: var(--orange);
+    color: var(--cfg-stat-color, var(--orange)); /* live-config override (tracker-config.js); default = λ-Orange */
     font-variant-numeric: tabular-nums;
     font-feature-settings: 'tnum' 1;
 }
@@ -1671,12 +1671,12 @@ body.ui-idle #trk-controls {
 #nav-banner {
     position: fixed;
     left: 50%;
-    top: calc(env(safe-area-inset-top, 0px) + 96px);
+    top: calc(env(safe-area-inset-top, 0px) + 96px + var(--cfg-nav-dy, 0px)); /* +offset = live-config "nach Süden" */
     transform: translateX(-50%);
-    z-index: 480; /* UNDER the header (#hud-top z500): when the header is shown it covers the banner, not vice-versa */
+    z-index: var(--cfg-nav-z, 480); /* live-config z-order; default UNDER the header (#hud-top z500) */
     max-width: min(94vw, 480px);
-    /* Google-Maps-like navigation green (≈ #188038); Doc fine-tunes from a screenshot. */
-    background: rgb(24, 128, 56);
+    /* Google-Maps-like navigation green (≈ #188038); live-config override via --cfg-nav-bg. */
+    background: var(--cfg-nav-bg, rgb(24, 128, 56));
     border: 1px solid rgba(255, 255, 255, 0.16);
     border-radius: 14px;
     padding: 9px 16px;
