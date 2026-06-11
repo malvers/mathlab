@@ -43,3 +43,15 @@ RainViewer-Fill ist dort **abgeschaltet**. Ist die DWD-Quelle leer/stale → an 
 ## Dateien
 - `HTML/js/rain-radar.js` (Composite, Coverage-Maske, `pickProvider`/`dwdHealthy`, `buildFrames`)
 - `HTML/js/rain-recolor.js`, `HTML/js/rain-palette.js` (Farb-Ramp / Schwellen)
+
+## Update 2026-06-11 — Zeit/UTC-Versatz AUSGESCHLOSSEN
+Docs Verdacht „wir laden UTC, haben aber 1 h Versatz" wurde im Code geprüft und **widerlegt**:
+- `buildFrames('dwd')`: `t0 = Math.floor(Date.now()/MS5)*MS5` — UTC-Epoch, in ms gerundet (zeitzonen-frei).
+- `dwdLayer` schickt `time: isoMin(ms)` → `new Date(ms).toISOString()` = **korrektes UTC mit `Z`**.
+- `frameLabel` zeigt `getHours()/getMinutes()` = **lokale** Zeit (nur Anzeige). → Request UTC, Anzeige lokal, **beides richtig**.
+⇒ **Kein Stunden-Offset im Code.** Ursache liegt weiterhin DWD-seitig (leer/stale) bzw. an der Ein-Frame-Anzeige
+(Slider ist auskommentiert → nur `nowIdx` sichtbar; ist genau dieser eine Frame leer, sieht man nichts).
+- **Möglicher robusterer Default:** statt exakt „jetzt" (`mn=0`) den **letzten verfügbaren** Frame zeigen
+  (z. B. `mn=-5`), falls die DWD-Produktzeit minimal nachläuft. Hypothese — am Gerät verifizieren.
+- **Schnellster Pinpoint bleibt:** Taste **`d`** (RainViewer überall) → erscheint Regen, ist es der DWD-/Coverage-Pfad.
+  Aus der Sandbox nicht testbar (Supabase/DWD-Hosts geblockt).
