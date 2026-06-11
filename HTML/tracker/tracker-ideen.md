@@ -139,6 +139,13 @@
     **CSS-Variablen** → sofort & reload-frei. Nur Präsentation, keine Logik. Intellektuelle Übung +
     cooler Vorführ-Effekt. Details: `plan-fernsteuerung-remote-config.md`.
 
+20. **„Contact AI" im Tracker — Agent direkt aus der App** *(Future Now)* — nicht mehr über die
+    Claude-App reden, sondern **direkt im Tracker**: Stufe 1 = KI-Chat/Foto-Erkennung via Claude API
+    (Edge Function); Stufe 2 = „sprich einen Wunsch rein → Agent ändert Repo + pusht" via Claude Code
+    Routines (kein eigener Server) oder Agent SDK (eigener VPS). App = nur Fernbedienung, Agent läuft
+    server-seitig (nicht im Browser/Capacitor). Schließt den Kreis mit Idee 19. Details:
+    `plan-contact-ai-im-tracker.md`.
+
 ## Erledigt (gebaut, diese Session)
 - **Live-Config-Demo (Idee 19, Modell 1):** `docalvers.de/config.json` → `tracker-config.js` pollt (~20 s,
   ETag) → CSS-Variablen, ohne Reload. Fernsteuerbar: Stat-Farbe unter der Uhr, Navi-Banner Farbe/z-Order/
