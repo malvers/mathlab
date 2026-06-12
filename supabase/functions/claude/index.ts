@@ -66,9 +66,9 @@ Deno.serve(async (req) => {
   const body: Record<string, unknown> = {
     model: typeof b.model === 'string' && b.model ? b.model : DEFAULT_MODEL,
     max_tokens: (typeof b.max_tokens === 'number') ? b.max_tokens : 3000,
-    temperature: (typeof b.temperature === 'number') ? b.temperature : 0.6,
     messages: chat,
   };
+  // NOTE: `temperature` is deprecated on Claude 4.x models (they reject it with HTTP 400) → don't forward it.
   if (system) body.system = system;
 
   try {
