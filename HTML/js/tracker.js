@@ -170,6 +170,42 @@
             demAlts = []; demOn = false;
             const b = $('mb-dem'); if (b) b.classList.remove('active');
         }
+
+        // ---- Track statistics (idea #8): distance, duration, Ø/max speed, ascent/descent ----
+        // Höhenmeter read through effectiveAlts() → they use the DEM-corrected altitude when that
+        // toggle is on, the raw GPS+baro otherwise. Computed on demand when the settings panel opens.
+        function trackStats() {
+            const A = effectiveAlts();
+            const t0 = times.find(Boolean), t1 = times.slice().reverse().find(Boolean);
+            const durMs = (t0 && t1) ? (Date.parse(t1) - Date.parse(t0)) : 0;
+            const avgKmh = durMs > 0 ? (totalDist / 1000) / (durMs / 3600000) : 0;
+            let maxKmh = 0;
+            for (let i = 0; i < speeds.length; i++) if (speeds[i] != null && speeds[i] > maxKmh) maxKmh = speeds[i];
+            const ad = ascentDescent(A);
+            let hi = null, lo = null;
+            for (let i = 0; i < A.length; i++) { const v = A[i]; if (v == null) continue; if (hi == null || v > hi) hi = v; if (lo == null || v < lo) lo = v; }
+            return { distM: totalDist, durMs, avgKmh, maxKmh, up: ad.up, down: ad.down, hi, lo };
+        }
+        function fmtDur(ms) {
+            const s = Math.max(0, Math.round(ms / 1000));
+            const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), ss = s % 60;
+            const p = (n) => String(n).padStart(2, '0');
+            return h > 0 ? h + ':' + p(m) + ':' + p(ss) : m + ':' + p(ss);
+        }
+        function fmtDist(m) { return m < 1000 ? Math.round(m) + ' m' : (m / 1000).toFixed(2) + ' km'; }
+        function renderTrackStats() {
+            const set = (id, v) => { const el = $(id); if (el) el.textContent = v; };
+            if (!track.length) { ['ts-dist', 'ts-dur', 'ts-avg', 'ts-max', 'ts-up', 'ts-down', 'ts-hilo'].forEach((id) => set(id, '–')); return; }
+            const s = trackStats(), dem = demOn ? ' (DEM)' : '';
+            set('ts-dist', fmtDist(s.distM));
+            set('ts-dur', fmtDur(s.durMs));
+            set('ts-avg', s.avgKmh.toFixed(1) + ' km/h');
+            set('ts-max', s.maxKmh.toFixed(1) + ' km/h');
+            set('ts-up', s.up + ' m' + dem);
+            set('ts-down', s.down + ' m' + dem);
+            set('ts-hilo', (s.hi != null ? Math.round(s.hi) : '–') + ' / ' + (s.lo != null ? Math.round(s.lo) : '–') + ' m');
+        }
+
         let posMarker = null;
         let headingMarker = null; // small travel-direction triangle at the position dot
 
@@ -1777,7 +1813,7 @@ ${pts}
                 $('sync-input').value = '';
             }
         }
-        $('mb-settings').addEventListener('click', () => { closePopup(); updateSyncStatus(); loadUsage(); updateReburnButton(); refreshMenuState(); refreshRainStatus(); showPanel('settings-panel'); });
+        $('mb-settings').addEventListener('click', () => { closePopup(); updateSyncStatus(); loadUsage(); updateReburnButton(); refreshMenuState(); refreshRainStatus(); renderTrackStats(); showPanel('settings-panel'); });
         // Settings → Debug: live source-health dots for the rain radar (DWD + RainViewer).
         function refreshRainStatus() {
             const setDot = (id, st) => {
