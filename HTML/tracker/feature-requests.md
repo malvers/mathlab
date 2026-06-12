@@ -44,8 +44,9 @@
 - **Live-Config-Demo** (Idee 19): `docalvers.de/config.json` → `HTML/js/tracker-config.js` pollt (~20 s,
   ETag) → CSS-Variablen, **reload-frei**. Fernsteuerbar: Stat-Farbe unter der Uhr, Navi-Banner Farbe/
   z-Order/Süd-Offset. → produktionsreif machen = **FEAT-10**.
-- **labai.html Voice-Modus:** 🎤 Diktat (de-DE, freihändig senden) + 🔊 Antworten vorlesen (TTS).
-  Claude-Anbindung = eigene Edge Function, **offen**.
+- **solita.html (ex-labai) Voice-Modus:** 🎤 Diktat (de-DE, freihändig senden) + 🔊 Antworten vorlesen (TTS).
+  Am 2026-06-12 zu **Solita** ausgebaut: Wake-Word „Solita", Claude-`claude`-Edge-Function (Code da, Deploy
+  offen), Persona + Kontext-Zusammenfassung. Siehe `plan-contact-ai-im-tracker.md` / FEAT-11.
 - **Navi-Banner reicher:** ETA + Straße/Ref + Schild-Ziele, Google-Navi-Grün, unter dem Header.
 - **Abbiegepfeile** von Unicode auf saubere **SVG-Pfeile** (`arrowSvg()` in `tracker-nav.js`).
 - **Tempolimit-Schild** robuster: nächste Straße, deutsche Zonen-Tags, „c" statt ∞ bei unbegrenzt,
@@ -230,6 +231,19 @@ Klein, einzeln greifbar; Voll-Kontext im Backlog [`tracker-plan.md`](tracker-pla
   `feedback_keep_debug`: nicht eigenmächtig strippen).
 - **Tracking-Notification farbig** (Akzentfarbe/Icon im Benachrichtigungs-Panel) — nativer Eingriff, offen.
 - **Native Background-Test:** START → Screen sperren → laufen → prüfen, dass weiter aufgezeichnet wird.
+
+## FEAT-19 — „SERVER DOWN / OFFLINE"-Banner 📐 spezifiziert · klein
+**Warum:** Der SW (`tracker/sw.js`) ist **network-first mit Offline-Fallback** — ist der Server weg
+(Dev: vergessen zu starten · Feld: Funkloch), liefert er **still die letzte gecachte Kopie**. Man sieht
+dann eine **alte Seite statt eines Fehlers** (genau die „BUILD 09.06 trotz 12.06"-Verwirrung 2026-06-12).
+`file://` hat das Problem nicht (liest direkt von Platte).
+**Auftrag:** Sichtbar machen, wann gerade **Cache statt Live** läuft.
+- `sw.js`: beim Cache-Fallback (Live-`fetch` fehlgeschlagen) `clients.postMessage({type:'OFFLINE_FALLBACK'})`;
+  bei erfolgreichem Live-Fetch `{type:'ONLINE'}`.
+- `tracker.js`: darauf ein **Banner** „⚠️ SERVER DOWN / OFFLINE — zeige Cache (BUILD …)" zeigen/ausblenden.
+  **Vorhandenes Update-Banner-Styling wiederverwenden** (`__showUpdateBanner`), nichts Neues.
+**Nutzt doppelt:** Dev (Server vergessen) **und** Feld (echtes Funkloch — gut zu wissen, dass man auf
+Cache läuft). Zentral (Regel 7: sw.js + tracker.js). Doc: „merken" (2026-06-12), noch nicht bauen.
 
 ---
 

@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>DOC ALVERS – LAB AI</title>
+    <title>SOLITA · Doc Alvers</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&display=swap" rel="stylesheet">
     <script>
         window.MathJax = {
@@ -543,7 +543,7 @@
 
     <div class="canvas-branding">
         <h1>DOC ALVERS MATHE-LABOR</h1>
-        <div class="canvas-subtitle">LAB AI</div>
+        <div class="canvas-subtitle">SOLITA — weiß alles, bleibt nah</div>
     </div>
 
     <button onclick="localStorage.removeItem('dev_access'); sessionPwd=''; document.getElementById('cyber-auth-overlay').classList.add('visible'); document.getElementById('cyber-pwd-input').value=''; setTimeout(()=>document.getElementById('cyber-pwd-input').focus(),100);"
@@ -559,12 +559,13 @@
                 </div>
                 <div class="model-select" id="modelDropdown">
                     <div class="model-select-display" id="modelDisplay">
-                        <span id="modelLabel">V4 FLASH</span>
+                        <span id="modelLabel">SONNET 4.6</span>
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
                     </div>
                     <div class="model-select-options" id="modelOptions">
-                        <div class="model-option" data-value="deepseek-v4-pro">V4 PRO</div>
-                        <div class="model-option selected" data-value="deepseek-v4-flash">V4 FLASH</div>
+                        <div class="model-option" data-value="claude-opus-4-8">OPUS 4.8</div>
+                        <div class="model-option selected" data-value="claude-sonnet-4-6">SONNET 4.6</div>
+                        <div class="model-option" data-value="claude-haiku-4-5-20251001">HAIKU 4.5</div>
                     </div>
                 </div>
             </div>
@@ -579,6 +580,7 @@
                 aria-label="Deine Nachricht an die KI"></textarea>
             <button class="send-button" id="ttsBtn" title="Antworten vorlesen" aria-label="Antworten vorlesen">🔊</button>
             <button class="send-button" id="micBtn" title="Sprechen" aria-label="Per Stimme diktieren">🎤</button>
+            <button class="send-button" id="wakeBtn" title="Solita-Weckwort (freihändig)" aria-label="Solita per Weckwort aktivieren">👂</button>
             <button class="send-button" id="sendButton">GO</button>
         </div>
 
@@ -589,7 +591,7 @@
         // public client (Rule 18). Access is gated by a password the user types; the proxy verifies it
         // server-side against the LABAI_PASSWORD secret. (Old in-source encrypted key was rotated +
         // removed 2026-06-09.)
-        const AI_URL  = 'https://fyfhxzyymmurlaenmzse.supabase.co/functions/v1/deepseek';
+        const AI_URL  = 'https://fyfhxzyymmurlaenmzse.supabase.co/functions/v1/claude';
         const SB_ANON = 'sb_publishable_ubQDiMD-X3N0vZvPVi229Q_-5Zootfk'; // publishable anon key — client-safe
         let conversationHistory = [];
 
@@ -658,13 +660,62 @@
 
         const MODEL_KEY = 'ai_model';
         const HISTORY_KEY = 'ai_history';
+        const SUMMARY_KEY = 'solita_summary';
+
+        // Solita's persona. Sent as a system turn on every request (the proxy lifts it into Anthropic's
+        // top-level `system`). Kept sprechfreundlich because answers are often read aloud.
+        const SOLITA_SYSTEM = "Du bist Solita — die persönliche, kluge und warmherzige Assistentin von "
+            + "Doc Alvers. Du sprichst Deutsch, antwortest natürlich, knapp und auf den Punkt (deine "
+            + "Antworten werden oft vorgelesen, also sprechfreundlich; keine langen Aufzählungen, wenn ein "
+            + "Satz reicht). Du weißt viel und bleibst nah. Was du nicht sicher weißt, sagst du ehrlich.";
+
+        // Rolling summary of older turns so context survives without sending the whole history every time.
+        let runningSummary = localStorage.getItem(SUMMARY_KEY) || '';
+        const KEEP_RECENT = 16;   // recent turns kept verbatim; older ones get folded into runningSummary
+
+        // Build the proxy payload: persona + rolling summary as a system turn, then the recent chat.
+        function buildRequestMessages() {
+            const sys = SOLITA_SYSTEM
+                + (runningSummary ? "\n\nBisheriger Gesprächskontext (Zusammenfassung):\n" + runningSummary : "");
+            return [{ role: 'system', content: sys }].concat(conversationHistory);
+        }
+
+        // Keep context bounded WITHOUT just forgetting: fold the oldest turns into runningSummary, drop them.
+        async function maybeSummarize() {
+            if (conversationHistory.length <= KEEP_RECENT + 8) return;
+            const old = conversationHistory.slice(0, conversationHistory.length - KEEP_RECENT);
+            const transcript = old.map(m => (m.role === 'user' ? 'Doc' : 'Solita') + ': ' + m.content).join('\n');
+            try {
+                const r = await fetch(AI_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'apikey': SB_ANON, 'Authorization': `Bearer ${SB_ANON}`, 'x-app-pass': getPwd() },
+                    body: JSON.stringify({
+                        model: 'claude-haiku-4-5-20251001',   // cheap + fast for summarising
+                        max_tokens: 600,
+                        messages: [
+                            { role: 'system', content: 'Fasse den folgenden Gesprächsausschnitt knapp auf Deutsch zusammen — nur Fakten, Wünsche und Beschlüsse, die für das weitere Gespräch wichtig sind. Stichpunktartig, höchstens 8 Zeilen.' + (runningSummary ? ' Beziehe diese bisherige Zusammenfassung mit ein:\n' + runningSummary : '') },
+                            { role: 'user', content: transcript }
+                        ]
+                    })
+                });
+                if (r.ok) {
+                    const d = await r.json();
+                    const s = d.choices && d.choices[0] && d.choices[0].message.content;
+                    if (s) { runningSummary = s.trim(); localStorage.setItem(SUMMARY_KEY, runningSummary); }
+                }
+            } catch (e) { /* summarising is best-effort; we trim below either way */ }
+            conversationHistory = conversationHistory.slice(-KEEP_RECENT);
+            saveHistory();
+        }
 
         const COPY_ICON = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>`;
         const CHECK_ICON = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
 
         function getPwd() { return sessionPwd; }
 
-        let currentModel = localStorage.getItem(MODEL_KEY) || 'deepseek-v4-flash';
+        let currentModel = localStorage.getItem(MODEL_KEY) || 'claude-sonnet-4-6';
+        // Migrate any legacy (DeepSeek) model id → a real Claude model so the proxy gets a valid id.
+        if (!/^claude-/.test(currentModel)) currentModel = 'claude-sonnet-4-6';
 
         function getModel() { return currentModel; }
 
@@ -757,6 +808,10 @@
                 codeBlocks.push({ lang, code });
                 return placeholder;
             });
+
+            // Security (WP-5): neutralise any raw HTML in the model's text BEFORE we add our own markup,
+            // so an injected <script>/<img onerror> can't run. Markdown chars (#, *, |, `) are untouched.
+            formatted = escapeHtml(formatted);
 
             // 2a. Markdown-Tabellen rendern
             formatted = formatted.replace(/^(\|.+\|)\n\|[-| :]+\|\n((?:\|.+\|\n?)*)/gm, (match, header, body) => {
@@ -867,7 +922,7 @@
             if (userText.toLowerCase() === '%clear') {
                 conversationHistory = [];
                 localStorage.removeItem(HISTORY_KEY);
-                messagesArea.innerHTML = `<div class="message assistant" style="align-items:center;gap:10px;width:100%;"><div class="message-content"><strong>Wie kann ich Dir helfen?</strong></div><div class="model-select" id="modelDropdown"><div class="model-select-display" id="modelDisplay"><span id="modelLabel">V4 FLASH</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></div><div class="model-select-options" id="modelOptions"><div class="model-option" data-value="deepseek-v4-pro">V4 PRO</div><div class="model-option selected" data-value="deepseek-v4-flash">V4 FLASH</div></div></div></div>`;
+                messagesArea.innerHTML = `<div class="message assistant" style="align-items:center;gap:10px;width:100%;"><div class="message-content"><strong>Wie kann ich Dir helfen?</strong></div><div class="model-select" id="modelDropdown"><div class="model-select-display" id="modelDisplay"><span id="modelLabel">SONNET 4.6</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></div><div class="model-select-options" id="modelOptions"><div class="model-option" data-value="claude-opus-4-8">OPUS 4.8</div><div class="model-option selected" data-value="claude-sonnet-4-6">SONNET 4.6</div><div class="model-option" data-value="claude-haiku-4-5-20251001">HAIKU 4.5</div></div></div></div>`;
                 initModelDropdown(document.getElementById('modelDropdown'));
                 messageInput.value = '';
                 messageInput.style.height = 'auto';
@@ -898,7 +953,7 @@
                     },
                     body: JSON.stringify({
                         model: getModel(),
-                        messages: conversationHistory,
+                        messages: buildRequestMessages(),
                         temperature: 0.6,
                         max_tokens: 3000
                     })
@@ -910,13 +965,13 @@
                     throw new Error(err);
                 }
                 const data = await response.json();
-                const reply = data.choices[0].message.content;
+                const reply = (data.choices && data.choices[0] && data.choices[0].message.content) || '(keine Antwort)';
                 conversationHistory.push({ role: 'assistant', content: reply });
-                if (conversationHistory.length > 20) conversationHistory = conversationHistory.slice(-20);
                 saveHistory();
                 hideTyping();
                 addMessage('assistant', reply);
                 if (window.speakReply) window.speakReply(reply); // read the answer aloud (voice mode)
+                maybeSummarize();   // fold older turns into the rolling summary (best-effort, background)
             } catch (err) {
                 conversationHistory.pop(); // User-Nachricht bei Fehler wieder entfernen
                 hideTyping();
@@ -954,7 +1009,7 @@
     <script>
         (function () {
             const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-            const TTS_KEY = 'labai_tts';
+            const TTS_KEY = 'solita_tts';
             let ttsOn = localStorage.getItem(TTS_KEY) !== '0';   // default: read aloud ON
             const ttsBtn = document.getElementById('ttsBtn');
             const micBtn = document.getElementById('micBtn');
@@ -1000,6 +1055,103 @@
                     } catch (e) { listening = false; micBtn.textContent = '🎤'; micBtn.style.opacity = ''; }
                 });
             }
+        })();
+    </script>
+
+    <!-- Wake-word "Solita": hands-free in the car. Continuous SpeechRecognition (Chrome); on hearing
+         "Solita …" it takes the rest of the phrase as the question (or says "Ja?" and listens once more),
+         then sends. Pauses while Solita speaks so she doesn't hear herself. Web listens only in the
+         FOREGROUND — true background / locked-screen wake is the native krass-app (Vosk) path. -->
+    <script>
+        (function () {
+            const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+            const wakeBtn = document.getElementById('wakeBtn');
+            const input = document.getElementById('messageInput');
+            if (!wakeBtn) return;
+            if (!SR) { wakeBtn.style.display = 'none'; return; }   // e.g. iOS Safari: no SpeechRecognition
+
+            const TRIGGERS = ['solita', 'solida', 'rita'];          // Vosk-tested variants (see krass-app note)
+            const WAKE_KEY = 'solita_wake';
+            let wakeOn = localStorage.getItem(WAKE_KEY) === '1';
+            let rec = null, awaitingQuery = false, speaking = false, stopping = false;
+
+            function reflect() { wakeBtn.style.opacity = wakeOn ? '1' : '0.4'; }
+            reflect();
+
+            // Pause listening while Solita speaks (so the mic doesn't pick up her own "Solita"), resume after.
+            const _speak = window.speakReply;
+            window.speakReply = function (text) {
+                if (wakeOn && rec) { speaking = true; try { rec.stop(); } catch (e) { } }
+                if (typeof _speak === 'function') _speak(text);
+                const resume = () => { speaking = false; if (wakeOn) startRec(); };
+                try {
+                    if (window.speechSynthesis) {
+                        const iv = setInterval(() => {
+                            if (!window.speechSynthesis.speaking) { clearInterval(iv); setTimeout(resume, 400); }
+                        }, 300);
+                    } else setTimeout(resume, 800);
+                } catch (e) { setTimeout(resume, 800); }
+            };
+
+            function extractQuery(t) {
+                const low = t.toLowerCase();
+                let idx = -1, hit = '';
+                for (const w of TRIGGERS) {
+                    const i = low.indexOf(w);
+                    if (i !== -1 && (idx === -1 || i < idx)) { idx = i; hit = w; }
+                }
+                if (idx === -1) return null;                         // no wake word in this phrase
+                return t.slice(idx + hit.length).replace(/^[\s,.:!?-]+/, '').trim();
+            }
+
+            function fire(query) {
+                if (!query) {                                        // heard "Solita" alone → prompt + listen once
+                    awaitingQuery = true;
+                    if (window.speakReply) window.speakReply('Ja?');
+                    return;
+                }
+                awaitingQuery = false;
+                if (input) input.value = query;
+                if (typeof sendMessage === 'function') sendMessage();
+            }
+
+            function onResult(e) {
+                if (speaking) return;
+                let txt = '';
+                for (let i = e.resultIndex; i < e.results.length; i++) {
+                    if (e.results[i].isFinal) txt += e.results[i][0].transcript;
+                }
+                txt = txt.trim();
+                if (!txt) return;
+                if (awaitingQuery) { fire(txt); return; }            // wake word already heard last round
+                const q = extractQuery(txt);
+                if (q !== null) fire(q);                              // phrase contained "Solita …"
+            }
+
+            function startRec() {
+                if (!wakeOn || speaking || rec) return;
+                try {
+                    rec = new SR();
+                    rec.lang = 'de-DE'; rec.continuous = true; rec.interimResults = false; rec.maxAlternatives = 1;
+                    rec.onresult = onResult;
+                    rec.onerror = function () { };
+                    rec.onend = function () { rec = null; if (wakeOn && !speaking && !stopping) setTimeout(startRec, 300); };
+                    rec.start();
+                } catch (e) { rec = null; }
+            }
+
+            function stopRec() {
+                stopping = true;
+                if (rec) { try { rec.stop(); } catch (e) { } rec = null; }
+                setTimeout(function () { stopping = false; }, 500);
+            }
+
+            wakeBtn.addEventListener('click', function () {
+                wakeOn = !wakeOn; localStorage.setItem(WAKE_KEY, wakeOn ? '1' : '0'); reflect();
+                if (wakeOn) { awaitingQuery = false; startRec(); } else stopRec();
+            });
+
+            if (wakeOn) setTimeout(startRec, 600);                   // auto-resume if it was left on
         })();
     </script>
 </body>
