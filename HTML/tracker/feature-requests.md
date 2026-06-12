@@ -232,18 +232,19 @@ Klein, einzeln greifbar; Voll-Kontext im Backlog [`tracker-plan.md`](tracker-pla
 - **Tracking-Notification farbig** (Akzentfarbe/Icon im Benachrichtigungs-Panel) — nativer Eingriff, offen.
 - **Native Background-Test:** START → Screen sperren → laufen → prüfen, dass weiter aufgezeichnet wird.
 
-## FEAT-19 — „SERVER DOWN / OFFLINE"-Banner 📐 spezifiziert · klein
+## FEAT-19 — „SERVER DOWN / OFFLINE"-Banner ✅ GEBAUT 2026-06-12 (Commit 578c12a)
 **Warum:** Der SW (`tracker/sw.js`) ist **network-first mit Offline-Fallback** — ist der Server weg
-(Dev: vergessen zu starten · Feld: Funkloch), liefert er **still die letzte gecachte Kopie**. Man sieht
-dann eine **alte Seite statt eines Fehlers** (genau die „BUILD 09.06 trotz 12.06"-Verwirrung 2026-06-12).
-`file://` hat das Problem nicht (liest direkt von Platte).
-**Auftrag:** Sichtbar machen, wann gerade **Cache statt Live** läuft.
-- `sw.js`: beim Cache-Fallback (Live-`fetch` fehlgeschlagen) `clients.postMessage({type:'OFFLINE_FALLBACK'})`;
-  bei erfolgreichem Live-Fetch `{type:'ONLINE'}`.
-- `tracker.js`: darauf ein **Banner** „⚠️ SERVER DOWN / OFFLINE — zeige Cache (BUILD …)" zeigen/ausblenden.
-  **Vorhandenes Update-Banner-Styling wiederverwenden** (`__showUpdateBanner`), nichts Neues.
-**Nutzt doppelt:** Dev (Server vergessen) **und** Feld (echtes Funkloch — gut zu wissen, dass man auf
-Cache läuft). Zentral (Regel 7: sw.js + tracker.js). Doc: „merken" (2026-06-12), noch nicht bauen.
+(Dev: vergessen zu starten · Feld: Funkloch), liefert er **still die letzte gecachte Kopie**. Man sah
+dann eine **alte Seite statt eines Fehlers** (die „BUILD 09.06 trotz 12.06"-Verwirrung, bot Doc 2×).
+**Umgesetzt (Probe statt postMessage — race-frei):**
+- `tracker.html`: eine ehrliche **Frische-Probe** (`fetch('…?_fresh='+ts, {method:'HEAD', cache:'no-store'})`)
+  bei `load` + alle 30 s. Schlägt sie fehl → rotes Fix-Banner `#offline-banner`
+  „⚠ SERVER DOWN / OFFLINE — gecachte Version (BUILD …)". `file://` wird übersprungen (immer frisch).
+- `sw.js`: `?_fresh=`-Requests **bypassen den SW** (gehen direkt ans Netz), sonst würde der Cache den toten
+  Server maskieren und das Banner nie feuern.
+- Orbitron, Υ-Rot, kein Schwarz (Hausregeln). Banner inline-gestylt (kein tracker.css-Eingriff).
+**Hinweis:** greift erst, wenn der **neue SW aktiv** ist (Update-Banner akzeptieren / kalter Neustart) —
+der alte SW maskiert `?_fresh=` noch. Danach dauerhaft. Nützt Dev (Server vergessen) **und** Feld (Funkloch).
 
 ---
 
