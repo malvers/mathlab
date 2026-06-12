@@ -175,6 +175,32 @@ Auf dem Branch liegen drei `fix(tracker)`-Commits gegenüber main:
 
 ---
 
+## BUG-6 — Activity-Erkennung wirkt nur speed-basiert 🐞 offen · 🔍 erst messen
+**Priorität:** mittel (untergräbt alle Activity-abhängigen Features: FEAT-3 Parkplatz, WegCast-Radius, Reisemodus-Icon).
+**Tiefen-Notiz (Pflichtlektüre):** [`activity-debug-morgen.md`](activity-debug-morgen.md)
+
+**Symptom:** Das Reisemodus-Icon (laufen/fahren) reagiert offenbar **nur auf die Geschwindigkeit**, nicht
+auf die echte Play-Services-Activity-Recognition.
+
+**Struktur ist vollständig** (verifiziert): Dependency `play-services-location:21.3.0`, Manifest-Permission
+`ACTIVITY_RECOGNITION`, Plugin registriert (`MainActivity.java:12`), JS-Start `startActivity()`
+(`tracker.html:~1805` / `~2886`), Permission am Gerät erteilt. → „nie gefragt" ausgeschlossen.
+
+**Erst messen (DEBUG-Window, `🚶`-Zeilen):** `requestPermission → granted`, `ActRec.start ✓ / FEHLER`,
+`ActRec event: type=… conf=…`. Pushen → Pixel **kalt** neu starten → ein Stück (auch langsam) fahren → lesen.
+
+**Drei mögliche Befunde → Fix:**
+1. **`start ✓` aber NIE ein `event`** → API streamt nicht. Wahrscheinlich nativ: `RECEIVER_NOT_EXPORTED`
+   in `ActivityRecognitionPlugin.java:100` blockt den Play-Services-Broadcast (Android 14+) → nativer Fix
+   → gezielter APK-Build.
+2. **Events kommen, aber `on_bicycle/walking` beim Autofahren** → JS-Speed-Korrektur (z. B. >25 km/h über
+   X s → `in_vehicle`).
+3. **`FEHLER: …`** → Meldung nennt die Ursache direkt.
+
+**NICHT raten:** zuerst die Log-Zeilen, dann entscheiden ob nativer oder JS-Fix.
+
+---
+
 ## Verwandt / Querverweise
 - Übersicht aller Notizen: [`../../NOTES.md`](../../NOTES.md)
 - Feature-Arbeitsliste: [`feature-requests.md`](feature-requests.md) · Ideen-Triage: [`ideen.md`](ideen.md)

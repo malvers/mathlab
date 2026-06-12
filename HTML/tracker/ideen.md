@@ -76,6 +76,7 @@
 | **„KI erkennt"-Indikator** | 🤖-Roboter durch schönen λ-Spinner ersetzen | 🌿 `polish-ki-erkennt-indikator.md` → FEAT-15 |
 | **Play-Store-Verteilung** | Sideload blockt (Samsung); Play Store = 12 Tester·14 Tage / Firmenkonto | 🌿 `verteilung-playstore-tester.md` — „nächste Woche" |
 | **Lebens-Agent / Kompression** | Tokens vs. Kompression + Memory-Architektur für „Solita/Samantha" | 🌿 `wissensnotiz-llm-kompression-lebensagent.md` — Referenz |
+| **Activity-Erkennung schärfen** | Reisemodus laufen/fahren wirkt nur speed-basiert; Play-Services-Events prüfen | `activity-debug-morgen.md` → Bug/Debug in `bugfixes.md` BUG-6 (Enabler für Parkplatz/WegCast) |
 
 ---
 
