@@ -5,6 +5,31 @@
 > hier steht nur, was **Plan/Prio hat oder schon teilweise gebaut ist**. Erstellt 2026-06-12.
 > **Dupliziert nichts** — verlinkt die Plan-Notizen und destilliert den Auftrag.
 
+## ⚡ Kurz-Übersicht
+- **FEAT-1** Brotkrumen zurück (offline) · Prio 1
+- **FEAT-2** Goldene Stunde & Sonnenstand · Prio 1
+- **FEAT-3** Parkplatz automatisch merken
+- **FEAT-4** Zurück zum Start/Auto (online)
+- **FEAT-5** Regen-Vorwarnung (nach BUG-2)
+- **FEAT-6** 🏗️ Navigation Post-MVP (Abbiege-Liste, Verkehr)
+- **FEAT-7** 🅿️ Medien → Cloudflare R2
+- **FEAT-8** 🅿️ Fotos → Storage-Bucket
+- **FEAT-9** 🏗️ GPS-Postproc: Profil-UI, Map-Matching
+- **FEAT-10** 🏗️ App live fernsteuern (Remote-Config)
+- **FEAT-11** Contact-AI Stufe 1 (Chat/Foto, Solita)
+- **FEAT-12** Contact-AI Stufe 2 (Agent ändert Repo)
+- **FEAT-13** 🏗️ Navi-Blau + gefahrene Strecke speed-gefärbt · Prio 1
+- **FEAT-14** Tracking ↔ Navigation entkoppeln
+- **FEAT-15** „KI erkennt"-Indikator verschönern (🤖 raus)
+- **FEAT-16** Live-Broadcast: Zuschauerzähler/Presence
+- **FEAT-17** Lane Guidance (Spuranweisungen)
+- **FEAT-18** Kleinkram (motion-dbg raus, Notif-Farbe, BG-Test)
+- **FEAT-19** ✅ SERVER-DOWN-Banner (gebaut)
+- **FEAT-20** OSM-Zoom-Buttons weg/schöner
+- **FEAT-21** Instrumente ausblenden → Track mehr Platz
+- **FEAT-22** Pl@ntNet < 10 % ausblenden
+- **FEAT-23** HUD: oberes Element + Genauigkeit zentrieren
+
 ## Hausregeln für JEDEN Subagenten (CLAUDE.md)
 - **Regel 2/4:** NICHTS bauen ohne Docs „go". Diese Liste priorisiert & spezifiziert — sie startet nichts.
 - **Regel 3:** „Neues Tool/Modul" = ein bestehendes kopieren und ausräumen, exakt benennen — nicht von null.

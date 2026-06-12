@@ -6,6 +6,16 @@
 > Erstellt 2026-06-12 als Dispatch-Schicht über den bestehenden Tiefen-Notizen. **Diese Datei dupliziert
 > nichts** — sie verlinkt und destilliert. Stand der Code-Zeilen: 2026-06-12 (nach dem inline→module-Refactor).
 
+## ⚡ Kurz-Übersicht
+- **BUG-1** Speed-Anzeige km/h falsch (Gate koppelt Speed) · 🔍 erst messen
+- **BUG-2** Regenradar zeigt in DE keinen Regen
+- **BUG-3** 🅿️ Track strichelt bei Aufnahme-Pause
+- **BUG-4** 🅿️ geparkte Tracker-Fixes sichten
+- **BUG-5** Live-Broadcast geht nicht (Realtime/Usage-Limit)
+- **BUG-6** Activity-Erkennung nur speed-basiert
+- **BUG-7** Tempolimit-Schild falscher Wert
+- **BUG-8** Erkennung ohne Blickrichtung (Zwinger↔Schloss)
+
 ## Hausregeln für JEDEN Subagenten (CLAUDE.md)
 - **Regel 2/4:** NICHTS bauen/ändern/aufräumen ohne Docs ausdrückliches „go". Diese Liste ist Vorbereitung,
   kein Freibrief. Bei Unklarheit **eine offene Rückfrage**, keine Optionslisten (Regel 20).

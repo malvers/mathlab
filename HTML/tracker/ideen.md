@@ -6,6 +6,14 @@
 > sagt, wohin eine Idee gewandert ist (z. B. „→ als Arbeitsauftrag in `feature-requests.md`").
 > Erstellt 2026-06-12. Doc zu allen 16: „Im Allgemeinen waren alle Ideen gut, es ging nur um die Priorität."
 
+## ⚡ Kurz-Übersicht — offene Ideen (noch nicht zu Features promotet)
+- 2 Live-ETA · 3 Reise-Album (PDF) · 4 Schätz-Spiel · 6 Tour-Generator nach Zeit · 7 Heatmap
+- 8 Routen-Geometrie/Statistik · 9 Pokédex · 12 Offline-Karten · 14 3D-Geländekarte · 15 Live-Video
+- 16 Vektor-Karten (Enabler) · WegCast (Audio-POI) · Cluster-Hülle-Hover · Antworten vorlesen
+- Geo-Erkennung+Voice · Pflanzen-DB · E2E-Verschlüsselung · Update-Hinweis · Solita-Name/Weckwort
+- Lebens-Agent/Kompression · Play-Store-Verteilung
+> (Prio-Board + Status-Tabelle unten; Volltext in `tracker-ideen.md`. Ideen 1/5/10/11/13/17/19/20 sind schon Features.)
+
 ## Für Subagenten
 - Eine Idee ist **noch kein Bau-Auftrag** (CLAUDE.md Regel 2/4). Ideen reifen hier → werden bei Doc-„go" zu
   Einträgen in [`feature-requests.md`](feature-requests.md).
