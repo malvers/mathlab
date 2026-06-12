@@ -37,6 +37,8 @@
 - **Tempo-Limit-Schild** (`HTML/js/tracker-speedlimit.js`): OSM `maxspeed`, rot bei Übertretung.
 - **Tempo-Warnton:** kleine Glocke bei >10 % über Limit.
 - **Idle-Auto-Hide**, **Kompass/Nordpfeil**, **Quellen-Status** (DWD/RainViewer) im Debug.
+- **Cross-Device-Sync ohne Login** (`sync-sketch.md`, ✅ umgesetzt): deterministisches geteiltes Konto →
+  Tracks/Fotos auf mehreren Geräten. Referenz, nicht neu bauen.
 
 **🌿 Session 2026-06-11 (auf dem Branch, NICHT in main):**
 - **Live-Config-Demo** (Idee 19): `docalvers.de/config.json` → `HTML/js/tracker-config.js` pollt (~20 s,
@@ -219,6 +221,15 @@ Erst **BUG-5** klären, dann als Feature.
 **Quelle:** `tracker-ideen.md` Idee 18. OSRM liefert `step.intersections[].lanes` (`indications` +
 `valid`). Kleines Spur-Diagramm unter dem Abbiege-Banner. Nur wo OSM `turn:lanes` getaggt ist
 (Autobahn-Ausfahrten meist ja). SVG-Pfeil-Set existiert bereits (FEAT-13c).
+
+---
+
+## FEAT-18 — Kleinere offene Punkte (aus `tracker-plan.md`)
+Klein, einzeln greifbar; Voll-Kontext im Backlog [`tracker-plan.md`](tracker-plan.md):
+- **`#motion-dbg`-Readout entfernen** (unten links) — bewusst drin gelassen, **raus auf Zuruf** (Memory
+  `feedback_keep_debug`: nicht eigenmächtig strippen).
+- **Tracking-Notification farbig** (Akzentfarbe/Icon im Benachrichtigungs-Panel) — nativer Eingriff, offen.
+- **Native Background-Test:** START → Screen sperren → laufen → prüfen, dass weiter aufgezeichnet wird.
 
 ---
 
