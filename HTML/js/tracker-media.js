@@ -671,8 +671,19 @@ window.TrackerMedia = function (T) {
         (function () {
             const IDLE_MS = 8000;
             let idleTimer = null;
+            // Pin (top-right, under the accuracy): when set, the UI never auto-hides. Persists across reloads.
+            const PIN_KEY = 'tracker_ui_pinned';
+            let pinned = localStorage.getItem(PIN_KEY) === '1';
+            function reflectPin() {
+                const b = document.getElementById('ui-pin');
+                if (b) b.classList.toggle('pinned', pinned);
+                const ft = document.getElementById('ui-fade-toggle'); if (ft) ft.checked = !pinned; // checked = auto-hide ON
+                const dc = document.getElementById('dbg-uipin'); if (dc) dc.checked = pinned;
+                if (pinned) document.body.classList.remove('ui-idle');
+            }
             function popupOpen() { const m = $('mini-stack'); return !!(m && m.classList.contains('popup')); }
             function hide() {
+                if (pinned) return;                                   // pinned → never auto-hide (Doc)
                 // never fade while you're mid-recording or the menu is fanned out
                 if ((window.VoiceNote && VoiceNote.isRecording()) || popupOpen()) { schedule(); return; }
                 document.body.classList.add('ui-idle');
@@ -688,6 +699,41 @@ window.TrackerMedia = function (T) {
             ['pointerdown', 'pointermove', 'wheel', 'keydown'].forEach(
                 (ev) => document.addEventListener(ev, wake, { passive: true })
             );
+            // Robust: delegate on document so attach-timing / DOM order can't matter.
+            document.addEventListener('click', (e) => {
+                if (!(e.target && e.target.closest && e.target.closest('#ui-pin'))) return;
+                e.preventDefault(); e.stopPropagation();
+                pinned = !pinned;
+                localStorage.setItem(PIN_KEY, pinned ? '1' : '0');
+                reflectPin();
+                if (typeof toast === 'function') toast(pinned ? 'UI fixiert — nichts blendet aus' : 'UI-Fixierung aus');
+                if (!pinned) schedule();                              // unpinned → restart the countdown
+            });
+            reflectPin();
+            // Debug toggle (Doc's idea): a reliable checkbox in the DEBUG panel to test the lock
+            // independently of the HUD pin button — it sets the SAME `pinned` flag.
+            window.setUiPinned = function (on) {
+                pinned = !!on;
+                localStorage.setItem(PIN_KEY, pinned ? '1' : '0');
+                reflectPin();
+                if (pinned) document.body.classList.remove('ui-idle'); else schedule();
+            };
+            // Settings toggle "Bedienelemente automatisch ausblenden" (checked = auto-hide ON = NOT pinned).
+            const fadeToggle = document.getElementById('ui-fade-toggle');
+            if (fadeToggle) fadeToggle.addEventListener('change', () => window.setUiPinned(!fadeToggle.checked));
+            (function injectPinCheck(tries) {
+                const content = document.getElementById('debug-content');
+                if (!content) { if (tries > 0) setTimeout(() => injectPinCheck(tries - 1), 300); return; }
+                if (document.getElementById('dbg-uipin')) return;
+                const row = document.createElement('label');
+                row.style.cssText = 'display:flex;align-items:center;gap:6px;padding:5px 8px;font:12px Arial,sans-serif;color:#cfe7ff;cursor:pointer;border-bottom:1px solid rgba(255,255,255,.12);';
+                const cb = document.createElement('input');
+                cb.type = 'checkbox'; cb.id = 'dbg-uipin'; cb.checked = pinned;
+                cb.addEventListener('change', () => window.setUiPinned(cb.checked));
+                row.appendChild(cb);
+                row.appendChild(document.createTextNode('UI fixieren (nicht ausblenden)'));
+                content.parentElement.insertBefore(row, content);
+            })(12);
             schedule(); // start the 8 s countdown
         })();
 

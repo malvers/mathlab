@@ -387,7 +387,7 @@
             padding: 16px 24px;
             background: transparent;   /* nix box: no bottom bar fill */
             display: flex;
-            gap: 16px;
+            gap: 8px;
             align-items: flex-end;
         }
 
@@ -547,11 +547,6 @@
         </div>
     </div>
 
-    <button onclick="localStorage.removeItem('dev_access'); sessionPwd=''; document.getElementById('cyber-auth-overlay').classList.add('visible'); document.getElementById('cyber-pwd-input').value=''; setTimeout(()=>document.getElementById('cyber-pwd-input').focus(),100);"
-        style="position:fixed;bottom:16px;right:16px;background:rgba(255,0,0,0.12);border:1px solid rgba(255,60,60,0.4);border-radius:8px;color:rgba(255,100,100,0.8);font-family:'Orbitron',monospace;font-size:0.65rem;padding:5px 10px;cursor:pointer;z-index:9998;letter-spacing:1px;">
-        LOGOUT
-    </button>
-
     <div class="chat-container">
         <div class="messages-area" id="messagesArea">
             <div class="message assistant" style="align-items: center; gap: 10px; width: 100%;">
@@ -576,14 +571,18 @@
         </div>
 
         <div class="input-area">
-            <textarea class="message-input" id="messageInput" rows="1"
-                placeholder="Du hast sicher Fragen ... schreib sie hier!"
-                aria-label="Deine Nachricht an die KI"></textarea>
             <button class="send-button toggle-btn" id="ttsBtn" title="Vorlesen an/aus" aria-label="Antworten vorlesen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M19 5a10 10 0 0 1 0 14"/></svg></button>
             <button class="send-button" id="micBtn" title="Einmal sprechen" aria-label="Per Stimme diktieren"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10v2a7 7 0 0 0 14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg></button>
             <button class="send-button toggle-btn" id="wakeBtn" title="Solita-Weckwort an/aus" aria-label="Solita per Weckwort aktivieren"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8.5a6.5 6.5 0 1 1 13 0c0 6-6 6-6 10a3.5 3.5 0 1 1-7 0"/><path d="M6.5 12.5a3.5 3.5 0 1 1 7 0c0 2.5-2 2.5-2 5"/></svg></button>
             <button class="send-button" id="sendButton">GO</button>
             <button class="send-button exit-btn" id="exitUiBtn" style="display:none" title="UI-Modus verlassen">EXIT</button>
+            <button class="send-button" id="logoutBtn" title="Logout" aria-label="Logout"
+                onclick="localStorage.removeItem('dev_access'); sessionPwd=''; document.getElementById('cyber-auth-overlay').classList.add('visible'); document.getElementById('cyber-pwd-input').value=''; setTimeout(()=>document.getElementById('cyber-pwd-input').focus(),100);">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            </button>
+            <textarea class="message-input" id="messageInput" rows="1"
+                placeholder="Du hast sicher Fragen ... schreib sie hier!"
+                aria-label="Deine Nachricht an die KI"></textarea>
         </div>
 
     </div>
@@ -1117,7 +1116,10 @@
             window.speakReply = function (text) {
                 if (!ttsOn || !('speechSynthesis' in window) || !text) return;
                 try {
-                    const clean = String(text).replace(/[*_`#>]/g, '').replace(/\s+/g, ' ').trim();
+                    const clean = String(text)
+                        .replace(/[\p{Extended_Pictographic}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}\u{1F1E6}-\u{1F1FF}\uFE0F\u200D]/gu, '') // strip smileys/emoji — don't read them aloud (Doc)
+                        .replace(/[*_`#>]/g, '')
+                        .replace(/\s+/g, ' ').trim();
                     const u = new SpeechSynthesisUtterance(clean);
                     u.lang = 'de-DE';
                     if (!chosenVoice) pickVoice();          // voices may have loaded since init
