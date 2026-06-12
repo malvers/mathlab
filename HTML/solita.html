@@ -961,7 +961,8 @@
                 if (!response.ok) {
                     let err = `Fehler ${response.status}`;
                     if (response.status === 401) err = 'Falsches Passwort';
-                    if (response.status === 402) err = 'Nicht genug Guthaben – AI-Konto aufladen';
+                    else if (response.status === 402) err = 'Nicht genug Guthaben – AI-Konto aufladen';
+                    else { try { const e = await response.json(); if (e && e.error) err += ' — ' + e.error; } catch (_) { } }
                     throw new Error(err);
                 }
                 const data = await response.json();
