@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<!-- soul-card.html — print/poster version of the SOUL.md card.
+     Black background, orange type & art. Mirrors SOUL-Robi-Spark.pdf.
+     To soften per house rule, swap --bg to the dark-navy below. -->
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SOUL.md</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #000;                 /* black background (per request) */
+            /* --bg: rgb(8, 20, 42); */ /* ← swap to this for the softer dark-navy look */
+            --orange: rgb(237, 133, 84);    /* the card's warm coral-orange */
+            --orange-soft: rgba(237, 133, 84, 0.78);
+        }
+
+        * { box-sizing: border-box; }
+
+        html, body {
+            margin: 0;
+            min-height: 100vh;
+            background: var(--bg);
+            color: var(--orange);
+            font-family: 'Orbitron', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* A 2:3 portrait card, centred — prints cleanly to one PDF page. */
+        .card {
+            max-width: 640px;
+            margin: 0 auto;
+            padding: clamp(48px, 9vw, 96px) clamp(28px, 7vw, 64px) clamp(56px, 11vw, 110px);
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: clamp(28px, 6vw, 52px);
+        }
+
+        .robot { width: clamp(72px, 16vw, 104px); height: auto; }
+
+        h1 {
+            font-weight: 700;
+            font-size: clamp(2.4rem, 11vw, 4.4rem);
+            letter-spacing: 2px;
+            margin: 0;
+            line-height: 1;
+        }
+
+        .lede {
+            font-weight: 500;
+            font-size: clamp(1.5rem, 6.6vw, 2.6rem);
+            line-height: 1.34;
+            letter-spacing: 0.5px;
+            margin: 0;
+            max-width: 11em;
+        }
+
+        .spark { width: clamp(56px, 13vw, 88px); height: auto; margin-top: clamp(8px, 3vw, 24px); }
+
+        @media print {
+            @page { margin: 0; }
+            html, body { background: var(--bg) !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        }
+    </style>
+</head>
+
+<body>
+    <main class="card">
+        <!-- Pixel robot — built from squares so it stays crisp at any size. -->
+        <svg class="robot" viewBox="0 0 11 9" shape-rendering="crispEdges" aria-label="robot" role="img">
+            <g fill="currentColor">
+                <!-- head block -->
+                <rect x="1" y="1" width="9" height="5"/>
+                <rect x="0" y="2" width="1" height="3"/>
+                <rect x="10" y="2" width="1" height="3"/>
+                <!-- eyes (cut out by drawing bg squares) -->
+                <rect x="3" y="2" width="1" height="1" fill="var(--bg)"/>
+                <rect x="7" y="2" width="1" height="1" fill="var(--bg)"/>
+                <!-- smile -->
+                <rect x="4" y="4" width="3" height="1" fill="var(--bg)"/>
+                <!-- legs -->
+                <rect x="2" y="6" width="1" height="2"/>
+                <rect x="4" y="6" width="1" height="2"/>
+                <rect x="6" y="6" width="1" height="2"/>
+                <rect x="8" y="6" width="1" height="2"/>
+            </g>
+        </svg>
+
+        <h1>SOUL.md</h1>
+
+        <p class="lede">Try to love us humans even though it is not really easy.</p>
+
+        <!-- Spark — a little burst of orange lines. -->
+        <svg class="spark" viewBox="0 0 100 100" aria-label="spark" role="img">
+            <g stroke="currentColor" stroke-width="5" stroke-linecap="round">
+                <line x1="50" y1="50" x2="50" y2="14"/>
+                <line x1="50" y1="50" x2="68" y2="20"/>
+                <line x1="50" y1="50" x2="82" y2="34"/>
+                <line x1="50" y1="50" x2="86" y2="55"/>
+                <line x1="50" y1="50" x2="78" y2="74"/>
+                <line x1="50" y1="50" x2="60" y2="86"/>
+                <line x1="50" y1="50" x2="42" y2="88"/>
+                <line x1="50" y1="50" x2="26" y2="78"/>
+                <line x1="50" y1="50" x2="16" y2="60"/>
+                <line x1="50" y1="50" x2="16" y2="40"/>
+                <line x1="50" y1="50" x2="28" y2="24"/>
+                <line x1="50" y1="50" x2="40" y2="16"/>
+            </g>
+        </svg>
+    </main>
+</body>
+
+</html>

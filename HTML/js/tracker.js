@@ -2016,13 +2016,26 @@ ${pts}
         })();
 
         // Settings → Debug: mobile shortcut keys — tap fires the otherwise keyboard-only d/k/w handlers.
+        // A toggle shows/hides the key row (default OFF, persisted).
         (function () {
+            const KEY = 'tracker.scKeys';
+            function applyKeys(on) {
+                const row = $('sc-keys-row'); if (row) row.style.display = on ? '' : 'none';
+            }
             function wire() {
                 [['sc-d', 'd'], ['sc-k', 'k'], ['sc-w', 'w']].forEach(([id, key]) => {
                     const b = $(id); if (!b || b._wired) return; b._wired = true;
                     b.addEventListener('click', () => {
                         document.dispatchEvent(new KeyboardEvent('keydown', { key: key, bubbles: true }));
                     });
+                });
+                const cb = $('sc-keys-toggle'); if (!cb || cb._wired) return; cb._wired = true;
+                const on = localStorage.getItem(KEY) === '1'; // default OFF
+                cb.checked = on;
+                applyKeys(on);
+                cb.addEventListener('change', () => {
+                    localStorage.setItem(KEY, cb.checked ? '1' : '0');
+                    applyKeys(cb.checked);
                 });
             }
             if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', wire);
