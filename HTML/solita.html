@@ -409,22 +409,27 @@
         }
 
         .send-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
             background: rgba(255, 255, 255, 0.06);
             border: 1px solid rgba(255, 255, 255, 0.12);
             border-radius: 10px;
-            padding: 12px 18px;
+            padding: 0 14px;
             color: #e6edf3;
             font-family: 'Orbitron', sans-serif;
             font-weight: 600;
-            font-size: 1.4rem;          /* big, clear emoji buttons */
+            font-size: 1rem;
+            letter-spacing: 1px;
             line-height: 1;
             cursor: pointer;
-            transition: background 0.15s, opacity 0.15s;
+            transition: background 0.15s, opacity 0.15s, color 0.15s;
             height: 52px;
             min-width: 52px;
             flex-shrink: 0;
         }
-        #sendButton { font-size: 1rem; letter-spacing: 1px; }
+        .send-button svg { width: 24px; height: 24px; display: block; }
+        .send-button.rec { color: rgb(176, 36, 24); }   /* mic recording */
 
         .send-button:hover:not(:disabled) { background: rgba(255, 255, 255, 0.12); }
 
@@ -533,11 +538,6 @@
         </div>
     </div>
 
-    <div class="canvas-branding">
-        <h1>DOC ALVERS MATHE-LABOR</h1>
-        <div class="canvas-subtitle">SOLITA — weiß alles, bleibt nah</div>
-    </div>
-
     <button onclick="localStorage.removeItem('dev_access'); sessionPwd=''; document.getElementById('cyber-auth-overlay').classList.add('visible'); document.getElementById('cyber-pwd-input').value=''; setTimeout(()=>document.getElementById('cyber-pwd-input').focus(),100);"
         style="position:fixed;bottom:16px;right:16px;background:rgba(255,0,0,0.12);border:1px solid rgba(255,60,60,0.4);border-radius:8px;color:rgba(255,100,100,0.8);font-family:'Orbitron',monospace;font-size:0.65rem;padding:5px 10px;cursor:pointer;z-index:9998;letter-spacing:1px;">
         LOGOUT
@@ -570,9 +570,9 @@
             <textarea class="message-input" id="messageInput" rows="1"
                 placeholder="Du hast sicher Fragen ... schreib sie hier!"
                 aria-label="Deine Nachricht an die KI"></textarea>
-            <button class="send-button toggle-btn" id="ttsBtn" title="Vorlesen an/aus" aria-label="Antworten vorlesen">🔊</button>
-            <button class="send-button" id="micBtn" title="Einmal sprechen" aria-label="Per Stimme diktieren">🎤</button>
-            <button class="send-button toggle-btn" id="wakeBtn" title="Solita-Weckwort an/aus" aria-label="Solita per Weckwort aktivieren">👂</button>
+            <button class="send-button toggle-btn" id="ttsBtn" title="Vorlesen an/aus" aria-label="Antworten vorlesen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M19 5a10 10 0 0 1 0 14"/></svg></button>
+            <button class="send-button" id="micBtn" title="Einmal sprechen" aria-label="Per Stimme diktieren"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10v2a7 7 0 0 0 14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg></button>
+            <button class="send-button toggle-btn" id="wakeBtn" title="Solita-Weckwort an/aus" aria-label="Solita per Weckwort aktivieren"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8.5a6.5 6.5 0 1 1 13 0c0 6-6 6-6 10a3.5 3.5 0 1 1-7 0"/><path d="M6.5 12.5a3.5 3.5 0 1 1 7 0c0 2.5-2 2.5-2 5"/></svg></button>
             <button class="send-button" id="sendButton">GO</button>
         </div>
 
@@ -1036,16 +1036,16 @@
                     if (listening) { try { rec.stop(); } catch (e) { } return; }
                     try {
                         rec = new SR(); rec.lang = 'de-DE'; rec.interimResults = false; rec.maxAlternatives = 1;
-                        listening = true; micBtn.textContent = '●'; micBtn.style.opacity = '1';
+                        listening = true; micBtn.classList.add('rec');
                         try { window.speechSynthesis && window.speechSynthesis.cancel(); } catch (e) { } // don't talk over you
                         rec.onresult = (e) => { if (input) input.value = e.results[0][0].transcript; };
                         rec.onend = () => {
-                            listening = false; micBtn.textContent = '🎤'; micBtn.style.opacity = '';
+                            listening = false; micBtn.classList.remove('rec');
                             if (input && input.value.trim() && typeof sendMessage === 'function') sendMessage();
                         };
-                        rec.onerror = () => { listening = false; micBtn.textContent = '🎤'; micBtn.style.opacity = ''; };
+                        rec.onerror = () => { listening = false; micBtn.classList.remove('rec'); };
                         rec.start();
-                    } catch (e) { listening = false; micBtn.textContent = '🎤'; micBtn.style.opacity = ''; }
+                    } catch (e) { listening = false; micBtn.classList.remove('rec'); }
                 });
             }
         })();
