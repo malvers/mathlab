@@ -43,3 +43,35 @@ RainViewer-Fill ist dort **abgeschaltet**. Ist die DWD-Quelle leer/stale → an 
 ## Dateien
 - `HTML/js/rain-radar.js` (Composite, Coverage-Maske, `pickProvider`/`dwdHealthy`, `buildFrames`)
 - `HTML/js/rain-recolor.js`, `HTML/js/rain-palette.js` (Farb-Ramp / Schwellen)
+
+## Update 2026-06-11 (2) — Ost-Versatz ⇒ VORHERSAGE-Frame (wahrscheinliche Wurzel)
+Doc: im Vergleich zu einer echten Regenradar-App liegt unser Regengebiet **deutlich weiter östlich**;
+über ihm (wo es real regnet) zeigt unsere App **nichts**.
+- **Koordinaten-Zeichnung geprüft — kein Geometrie-Bug:** DWD via Leaflet-Standard-WMS-Bbox, RainViewer
+  via Standard-XYZ + korrekte z7-Hochskalierung. Positionierung stimmt.
+- **Der Versatz ist semantisch:** `dwd:Radar_rv_product` ist ein **Nowcast/VORHERSAGE-Produkt (+0…+2 h)**.
+  Wir zeigen den „jetzt"-Frame (`mn=0`). Läuft die Produkt-Analysezeit nach, ist „jetzt" faktisch eine
+  **kurze Vorhersage** → Regen wird an seiner **künftigen** (östlicheren) Position gezeichnet, nicht an der
+  aktuellen. DE-Regen zieht meist nach Osten ⇒ Gebiet **zu weit östlich**, über dem Standort „Sonne".
+- **RainViewer hätte das nicht** (sein „jetzt" = letzter **beobachteter** Frame) → Quer-Check.
+- **Decisive test:** Taste `d` (RainViewer überall) → sitzt der Regen dann korrekt über dem Standort,
+  ist das DWD-Vorhersage-Bild bestätigt.
+
+### Fix-Optionen (eine wählen, dann umsetzen)
+1. **Beobachtung statt Vorhersage zeigen:** für die Standard-Ansicht ein **Observations-Layer** statt des
+   `rv`-Forecast-Produkts (z. B. ein reines Radar-Composite/„WN/RX") — Position dann korrekt.
+2. **Analysezeit nutzen:** GetCapabilities-Time-Dimension des Layers lesen und deren **Default/letzte
+   beobachtete** Zeit anfragen (statt blind `time=now`).
+3. **Pragmatisch:** Default-Frame ein Stück in die **Vergangenheit** schieben, aber **innerhalb** der
+   Produkt-Zeitspanne (sonst leer) — nur sinnvoll, wenn 1/2 nicht gehen.
+- Aus der Sandbox nicht testbar (DWD-Host geblockt) → erst `d`-Test bestätigen, dann Fix bauen.
+Docs Verdacht „wir laden UTC, haben aber 1 h Versatz" wurde im Code geprüft und **widerlegt**:
+- `buildFrames('dwd')`: `t0 = Math.floor(Date.now()/MS5)*MS5` — UTC-Epoch, in ms gerundet (zeitzonen-frei).
+- `dwdLayer` schickt `time: isoMin(ms)` → `new Date(ms).toISOString()` = **korrektes UTC mit `Z`**.
+- `frameLabel` zeigt `getHours()/getMinutes()` = **lokale** Zeit (nur Anzeige). → Request UTC, Anzeige lokal, **beides richtig**.
+⇒ **Kein Stunden-Offset im Code.** Ursache liegt weiterhin DWD-seitig (leer/stale) bzw. an der Ein-Frame-Anzeige
+(Slider ist auskommentiert → nur `nowIdx` sichtbar; ist genau dieser eine Frame leer, sieht man nichts).
+- **Möglicher robusterer Default:** statt exakt „jetzt" (`mn=0`) den **letzten verfügbaren** Frame zeigen
+  (z. B. `mn=-5`), falls die DWD-Produktzeit minimal nachläuft. Hypothese — am Gerät verifizieren.
+- **Schnellster Pinpoint bleibt:** Taste **`d`** (RainViewer überall) → erscheint Regen, ist es der DWD-/Coverage-Pfad.
+  Aus der Sandbox nicht testbar (Supabase/DWD-Hosts geblockt).

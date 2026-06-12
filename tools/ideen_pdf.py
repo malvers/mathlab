@@ -59,9 +59,15 @@ for l in sketch_lines:
             if m:
                 prio_color.setdefault(int(m.group(1)), cur_col)
 
+# --- split the idea region from any trailing "## ..." sections (Erledigt / Detail-Notizen) ---
+idea_region = raw[first_idea:]
+extra_at = next((i for i, l in enumerate(idea_region) if l.startswith('## ')), len(idea_region))
+idea_block = idea_region[:extra_at]
+extra_block = idea_region[extra_at:]
+
 # --- parse ideas (continuation lines join the current bullet, or the main text) ---
 ideas, cur = [], None
-for l in raw[first_idea:]:
+for l in idea_block:
     m = re.match(r'^(\d+)\.\s+(.*)', l)
     if m:
         if cur: ideas.append(cur)
@@ -76,6 +82,20 @@ for l in raw[first_idea:]:
         else:
             cur['main'] += ' ' + l.strip()
 if cur: ideas.append(cur)
+
+# --- parse trailing sections (## heading + bullets) ---
+sections, sec = [], None
+for l in extra_block:
+    if l.startswith('## '):
+        if sec: sections.append(sec)
+        sec = {'title': l[3:].strip(), 'items': []}
+    elif re.match(r'^\s*-\s+', l):
+        sec['items'].append(re.sub(r'^\s*-\s+', '', l).strip())
+    elif l.strip() == '':
+        continue
+    elif sec and sec['items']:
+        sec['items'][-1] += ' ' + l.strip()
+if sec: sections.append(sec)
 
 styles = getSampleStyleSheet()
 H1   = ParagraphStyle('H1', parent=styles['Title'], textColor=INK, fontSize=22, leading=25, alignment=0, spaceAfter=1)
@@ -123,5 +143,12 @@ story += [pb, Spacer(1, 8), Paragraph('Die Ideen im Detail', H2)]
 for it in ideas:
     story.append(card(it['num'], it['main'], it['bullets']))
 
+# trailing sections (Erledigt / Detail-Notizen)
+for sec in sections:
+    story.append(Paragraph(sec['title'], H2))
+    for it in sec['items']:
+        story.append(Paragraph('• ' + inline(it), SUBB))
+    story.append(Spacer(1, 4))
+
 doc.build(story)
-print('PDF -> %s (%d Ideen)' % (OUT, len(ideas)))
+print('PDF -> %s (%d Ideen, %d Zusatz-Abschnitte)' % (OUT, len(ideas), len(sections)))

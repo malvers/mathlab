@@ -11,6 +11,8 @@
   - 5 Brotkrumen zurück (offline) *(Doc)* · 13 Goldene Stunde & Sonnenstand *(Doc)*
   - 1 Zurück zum Start/Auto *(Vorschlag — klein, baut auf Navi)* · 10 Regen-Vorwarnung *(Vorschlag —
     hoher Nutzen, baut auf Regenradar)* · 11 Parkplatz merken *(Vorschlag — klein, delightful)*
+  - 17 Navi-Route: echtes Google-Blau + gefahrene Strecke zeigt Geschwindigkeit *(Doc)*
+  - 19 App live fernsteuern (Remote-Config-Demo) *(Doc)*
 - **Prio 2 (danach):**
   - 4 Schätz-Spiel *(Doc)* · 7 Heatmap *(Doc)* · 9 Pokédex *(Doc)* · 12 Offline-Karten *(Doc)*
   - 2 Triff mich / Live-ETA *(Vorschlag)* · 3 Auto-Reise-Album *(Vorschlag)* · 8 Geometrie & Stats *(Vorschlag)*
@@ -108,3 +110,80 @@
       Größe, Kontrast/Halo, Label-Dichte pro Zoom und Sprache (`name:de`)**.
     - **Ein Hebel, drei Features:** ermöglicht zugleich **Idee 12** (Offline-Karten via PMTiles) und
       **Idee 14** (3D-Geländekarte). Daher strategisch wichtiger Enabler.
+
+17. **Navi-Route: echtes Google-Blau + gefahrene Strecke zeigt Geschwindigkeit** *(Prio 1)*
+    - **(a) Blau angleichen:** unsere Linie ist `rgb(66,135,245)` ≈ **#4287F5**, Google-Maps ist
+      **#4285F4** (`rgb(66,133,244)`) → fast gleich. Der gefühlte Unterschied kommt vermutlich vom
+      **dunklen Casing** (Navy-Rand, weight 11) + Deckkraft, nicht vom Blau. Vorschlag: exakt #4285F4 +
+      **helleres/dünneres Casing** wie Google (heller blauer Rand statt dunkelblau). Doc schickt
+      Screenshot zum Feinabgleich. Code: `COL_ROUTE` / `drawRoute()` in `HTML/js/tracker-nav.js`.
+    - **(b) WICHTIG — gefahrene Strecke nicht mehr blau:** der bereits **zurückgelegte** Teil soll die
+      **gefahrene Geschwindigkeit** zeigen (Speed-Farbverlauf wie der normale Track, leaflet-hotline),
+      **nicht** blau. Also: **blaue Navi-Linie nur VORAUS** (ab aktueller Position), **hinter** dir der
+      speed-gefärbte Track. (Wie Google die gefahrene Strecke „aufbraucht" — nur statt grau → unsere
+      Speed-Farben.) Umsetzung: Route an der aktuellen Position trimmen / Track-Rendering oben drüber.
+    - **(c) erledigt 2026-06-11:** Positionspunkt + weißes Richtungs-Dreieck liegen jetzt **über** der
+      blauen Linie (eigene Map-Ebene `nav-route`, z 350 unter Punkt/Track/Markern).
+
+18. **Spuranweisungen (Lane Guidance)** *(Prio 2)* — „Halte dich auf den rechten zwei Spuren." **OSRM
+    liefert die Daten**: `step.intersections[].lanes` (jede Spur mit `indications` wie straight/left/
+    slight-right + `valid` true/false). Als kleines Spur-Diagramm unter dem Abbiege-Banner anzeigen.
+    Verfügbar überall, wo OSM `turn:lanes` getaggt hat (Autobahn-Ausfahrten meist ja, kleine Straßen nein).
+    - **Abbiege-Pfeile selbst:** am 2026-06-11 von Unicode-Glyphen auf **saubere SVG-Pfeile** umgestellt
+      (straight/left/right/slight/sharp/u-turn/Kreisverkehr/Ziel) in `tracker-nav.js`/`arrowSvg()`.
+
+19. **App live fernsteuern (Remote-Config-Demo)** *(Prio 1)* — vom Auto aus sagen „mach das Navi-Panel
+    grün" / „z-Order ganz nach unten" / „Panel ein Stück nach Süden" → passiert **live, ohne
+    Neuinstallation**. Aussehen/Parameter (Farben, z-order, Schriftgrößen, Position, Panel-Sichtbarkeit)
+    in `config.json`; App pollt (~30 s) oder via **Supabase Realtime** (instant), anwenden über
+    **CSS-Variablen** → sofort & reload-frei. Nur Präsentation, keine Logik. Intellektuelle Übung +
+    cooler Vorführ-Effekt. Details: `plan-fernsteuerung-remote-config.md`.
+
+20. **„Contact AI" im Tracker — Agent direkt aus der App** *(Future Now)* — nicht mehr über die
+    Claude-App reden, sondern **direkt im Tracker**: Stufe 1 = KI-Chat/Foto-Erkennung via Claude API
+    (Edge Function); Stufe 2 = „sprich einen Wunsch rein → Agent ändert Repo + pusht" via Claude Code
+    Routines (kein eigener Server) oder Agent SDK (eigener VPS). App = nur Fernbedienung, Agent läuft
+    server-seitig (nicht im Browser/Capacitor). Schließt den Kreis mit Idee 19. Details:
+    `plan-contact-ai-im-tracker.md`.
+
+## Erledigt (gebaut, diese Session)
+- **Tasten-Shortcuts am Handy:** Buttons d/k/w in Einstellungen → Debug lösen die sonst nur per Tastatur
+  erreichbaren Shortcuts aus (d = Regenquelle DWD/RainViewer, k = Karte dunkel, w = Karte weiß).
+  → ermöglicht u. a. den `d`-Regentest mobil. (Schönere UX-Idee: Long-Press-Buchstaben-Panel — offen.)
+- **Tempo-abhängiger Zoom** beim Folgen: schnell → weiter raus (mehr Vorausblick), langsam → näher dran
+  (Stufen 17→13, gedrosselt). Nur im Auto-Folgen-Modus.
+- **labai.html Voice-Modus:** 🎤 diktieren (de-DE, sendet freihändig) + 🔊 Antworten vorlesen (TTS).
+  Backend unverändert (Edge Function), Key server-seitig. (Claude-Anbindung = eigene Edge Function, offen.)
+- **krass-app:** zählt jetzt auch „solita"/„solida" (Trigger-Liste statt nur „krass").
+- **Tempo-Glocke** per Häkchen in Einstellungen → Debug an/aus (persistiert).
+- **FIT-Button als 3-Stufen-Loop:** 1× = ganze Route fitten · 1× (beim Navigieren) = nur Reststrecke ·
+  1× = FIT aus. (Mittig-Zentrieren war Blödsinn, raus.)
+- **Steuer-Button-Schrift** weiß + dicker (PAUSE war unlesbar), als Live-Config-Knopf.
+- **Live-Config-Demo (Idee 19, Modell 1):** `docalvers.de/config.json` → `tracker-config.js` pollt (~20 s,
+  ETag) → CSS-Variablen, ohne Reload. Fernsteuerbar: Stat-Farbe unter der Uhr, Navi-Banner Farbe/z-Order/
+  Süd-Offset. Workflow: Wert in `HTML/config.json` ändern → commit + push → App übernimmt es.
+- Idle-Auto-Hide blendet auch Header + Start/Stop-Leiste aus.
+- Einfache Navigation: Adresse → Route, START navigiert + trackt (Radial-Eintrag „ZIEL").
+- Re-Routing bei Routenabweichung (automatische Neuberechnung).
+- Abbiege-Navigation mit Sprachansage (de-DE) + saubere SVG-Abbiegepfeile.
+- Reicheres Navi-Banner: ETA + Straße/Ref + Schild-Ziele, Google-Navi-Grün, liegt unter dem Header.
+- Positionspunkt + weißes Dreieck liegen über der blauen Navi-Linie.
+- Tempolimit-Schild (OSM maxspeed via Overpass): nächste Straße, häufiger/robuster, deutsche Zonen-Tags.
+- Tempo-Schild: „c" statt ∞ bei unbegrenzt; springt beim Überschreiten nach vorne; Glocken-Warnton bei >10 %.
+- Kompass (Nordpfeil) unter dem Header.
+- Regenradar-Quellen-Status (DWD/RainViewer) unter Einstellungen → Debug; untere Debug-Leiste folgt dem Debug-Schalter.
+
+## Detail-Notizen (eigene Dokumente, in NOTES.md verlinkt)
+- `polish-ki-erkennt-indikator.md` — „KI erkennt"-Roboter (🤖) durch schönen Indikator ersetzen (Vorschläge).
+- `plan-tracking-vs-navigation.md` — Navigation beenden ohne den Track zu beenden (Vorschläge A/B/C).
+- `plan-fernsteuerung-remote-config.md` — App live fernsteuern (Config + CSS-Variablen) inkl. Konfig-Schema (Idee 19).
+- `plan-contact-ai-im-tracker.md` — „Contact AI": Chat + Agent, der das Repo editiert (Idee 20).
+- `agent-name-solita.md` — Agent-Name & Weckwort „Solita" (Begründung, Tagline, Voice-Erkennbarkeit).
+- `verteilung-playstore-tester.md` — Sideload vs. Play Store + 12-Tester-Auflage (nächste Woche).
+- `wissensnotiz-llm-kompression-lebensagent.md` — Tokens/Kompression + Memory-Architektur für den Lebens-Agent.
+- `bug-live-broadcast-funktioniert-nicht.md` — Live-Broadcast geht gerade nicht (Realtime-spezifisch, Verdacht eingegrenzt).
+- `bug-regenradar-kein-regen.md` — Regenradar zeigt in DE keinen Regen (DWD leer/stale).
+- `../../krass-app/wakeword-solita-erkennung.md` — Weckwort „Solita" besser erkennen (Wortliste vs. eigene Stimme).
+- `plan-navigation-einfach.md` — Navigations-Plan inkl. „Nachgebaut"-Log.
+- `plan-live-video-broadcast.md` — Live-Video durchleiten + Kostenmodelle.
+- `drivecast-audio-poi-am-weg.md`, `cluster-konvexe-huelle-hover.md`, u. a. — siehe `NOTES.md`.

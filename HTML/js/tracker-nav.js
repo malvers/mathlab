@@ -18,6 +18,16 @@ window.TrackerNav = function (ctx) {
     const OSRM = 'https://router.project-osrm.org/route/v1/driving/';
     const COL_ROUTE = 'rgb(66, 135, 245)'; // blue — distinct from the green/orange track + red position dot
 
+    // Own map pane for the route, BELOW the position dot / heading triangle / track / markers, so the
+    // white heading triangle and the red position dot always sit ON TOP of the blue line (Doc 2026-06-11).
+    // z 350: above basemap tiles (200) + rain radar (250), below overlay paths/markers (400/600).
+    try {
+        if (map.createPane && !map.getPane('nav-route')) {
+            map.createPane('nav-route');
+            map.getPane('nav-route').style.zIndex = 350;
+        }
+    } catch (e) { }
+
     const OFFROUTE_M = 45;          // beyond this distance from the line → considered "off route"
     const REROUTE_COOLDOWN_MS = 8000; // don't hammer OSRM: at most one reroute per this window
     const ANNOUNCE_FAR_M = 300;     // distance at which the pre-warning ("In 300 m …") is spoken
@@ -37,6 +47,8 @@ window.TrackerNav = function (ctx) {
     let annFar = false;     // pre-warning already spoken for the current maneuver
     let mClosest = Infinity; // closest approach (m) to the current maneuver — to detect an overshoot
     let voiceOn = true;     // spoken guidance on/off (persisted in localStorage)
+    let routeTotalDist = 0; // whole-route distance (m) at (re)route time — for ETA / remaining
+    let routeTotalDur = 0;  // whole-route duration (s) at (re)route time — for ETA / remaining
 
     function hasDestination() { return !!destLatLng; }
 
@@ -126,6 +138,8 @@ window.TrackerNav = function (ctx) {
         const best = data.routes[0];
         drawRoute(best.geometry);
         setGuidance(best);
+        routeTotalDist = best.distance || 0; // for ETA / remaining in the banner
+        routeTotalDur = best.duration || 0;
         lastReroute = Date.now();
         const km = (best.distance / 1000).toFixed(1);
         const min = Math.round(best.duration / 60);
@@ -149,8 +163,8 @@ window.TrackerNav = function (ctx) {
         routeLatLngs = latlngs;
         // Two-layer line: a dark casing under a bright core, so the route reads on any map tile.
         routeLine = L.layerGroup([
-            L.polyline(latlngs, { color: 'rgba(8,20,42,0.55)', weight: 11, opacity: 0.9, lineJoin: 'round' }),
-            L.polyline(latlngs, { color: COL_ROUTE, weight: 6, opacity: 0.95, lineJoin: 'round' }),
+            L.polyline(latlngs, { pane: 'nav-route', color: 'rgba(8,20,42,0.55)', weight: 11, opacity: 0.9, lineJoin: 'round' }),
+            L.polyline(latlngs, { pane: 'nav-route', color: COL_ROUTE, weight: 6, opacity: 0.95, lineJoin: 'round' }),
         ]).addTo(map);
     }
 
@@ -218,6 +232,21 @@ window.TrackerNav = function (ctx) {
         }
     }
 
+    // Rich banner detail from OSRM step fields: exit number · road ref/name · signpost destinations.
+    // e.g. "Ausf. 24 · A 60 · → Frankfurt am Main, Darmstadt". Empty → banner falls back to the verb text.
+    function detailOf(s) {
+        const parts = [];
+        if (s.exits) parts.push('Ausf. ' + s.exits);
+        const ref = (s.ref || '').split(';').map((x) => x.trim()).filter(Boolean)[0];
+        const road = ref || s.name || '';
+        if (road) parts.push(road);
+        if (s.destinations) {
+            const dst = s.destinations.replace(/;/g, ', ').replace(/^[^:]*:\s*/, '').trim(); // strip a leading "A60: "
+            if (dst) parts.push('→ ' + dst);
+        }
+        return parts.join(' · ');
+    }
+
     function setGuidance(best) {
         maneuvers = [];
         (best.legs || []).forEach((leg) => (leg.steps || []).forEach((s) => {
@@ -225,12 +254,65 @@ window.TrackerNav = function (ctx) {
             if (!loc) return;
             maneuvers.push({
                 loc: [loc[1], loc[0]], type: s.maneuver.type, modifier: s.maneuver.modifier,
-                exit: s.maneuver.exit, name: s.name, text: phrase(s.maneuver, s.name),
+                exit: s.maneuver.exit, name: s.name, text: phrase(s.maneuver, s.name), detail: detailOf(s),
             });
         }));
         mIdx = 0;
         while (mIdx < maneuvers.length && maneuvers[mIdx].type === 'depart') mIdx++; // skip the leading "depart"
         annFar = false; mClosest = Infinity;
+    }
+
+    // ---- ETA / remaining: distance left ALONG the route from the current position ----
+    function remainingMeters(here) {
+        if (!routeLatLngs || routeLatLngs.length < 2) return null;
+        const k = Math.cos(here[0] * Math.PI / 180);
+        const xy = (ll) => [ll[1] * 111320 * k, ll[0] * 110540];
+        const p = xy(here);
+        let bi = 1, bt = 0, bd = Infinity;
+        for (let i = 1; i < routeLatLngs.length; i++) {
+            const a = xy(routeLatLngs[i - 1]), b = xy(routeLatLngs[i]);
+            const dx = b[0] - a[0], dy = b[1] - a[1], len2 = dx * dx + dy * dy;
+            let t = len2 ? ((p[0] - a[0]) * dx + (p[1] - a[1]) * dy) / len2 : 0;
+            t = t < 0 ? 0 : t > 1 ? 1 : t;
+            const d = Math.hypot(p[0] - (a[0] + t * dx), p[1] - (a[1] + t * dy));
+            if (d < bd) { bd = d; bi = i; bt = t; }
+        }
+        let rem = (1 - bt) * haversine(routeLatLngs[bi - 1], routeLatLngs[bi]);
+        for (let i = bi + 1; i < routeLatLngs.length; i++) rem += haversine(routeLatLngs[i - 1], routeLatLngs[i]);
+        return rem;
+    }
+
+    // Bounds of the REMAINING route (current position → end), for the FIT "Reststrecke" mode.
+    // null if no route is drawn. Reuses the nearest-segment search from remainingMeters.
+    function remainingBounds(here) {
+        if (!routeLatLngs || routeLatLngs.length < 2 || !here) return null;
+        const k = Math.cos(here[0] * Math.PI / 180);
+        const xy = (ll) => [ll[1] * 111320 * k, ll[0] * 110540];
+        const p = xy(here);
+        let bi = 1, bd = Infinity;
+        for (let i = 1; i < routeLatLngs.length; i++) {
+            const a = xy(routeLatLngs[i - 1]), b = xy(routeLatLngs[i]);
+            const dx = b[0] - a[0], dy = b[1] - a[1], len2 = dx * dx + dy * dy;
+            let t = len2 ? ((p[0] - a[0]) * dx + (p[1] - a[1]) * dy) / len2 : 0;
+            t = t < 0 ? 0 : t > 1 ? 1 : t;
+            const d = Math.hypot(p[0] - (a[0] + t * dx), p[1] - (a[1] + t * dy));
+            if (d < bd) { bd = d; bi = i; }
+        }
+        const pts = [here].concat(routeLatLngs.slice(bi));   // current pos + everything still ahead
+        if (destLatLng) pts.push(destLatLng);
+        try { return L.latLngBounds(pts); } catch (e) { return null; }
+    }
+
+    function tripLine(here) {
+        const rem = remainingMeters(here);
+        if (rem == null || routeTotalDist <= 0) return '';
+        const remSec = routeTotalDur * (rem / routeTotalDist);
+        const eta = new Date(Date.now() + remSec * 1000);
+        const clock = eta.getHours() + ':' + String(eta.getMinutes()).padStart(2, '0');
+        const remKm = rem >= 10000 ? Math.round(rem / 1000) + ' km'
+            : rem >= 1000 ? (rem / 1000).toFixed(1) + ' km'
+                : Math.round(rem / 50) * 50 + ' m';
+        return 'Ankunft ' + clock + '  ·  ' + remKm + '  ·  ' + Math.round(remSec / 60) + ' min';
     }
 
     function announceDist(d) { return d > 500 ? Math.round(d / 100) * 100 : Math.round(d / 50) * 50; }
@@ -246,14 +328,43 @@ window.TrackerNav = function (ctx) {
         } catch (e) { }
     }
 
-    const ARROW = {
-        left: '↰', right: '↱', 'slight left': '↖', 'slight right': '↗',
-        'sharp left': '⮈', 'sharp right': '⮊', straight: '↑', uturn: '⟲',
+    // Clean SVG maneuver arrows (24×24, stroke = currentColor) — straight / left / right / slight /
+    // sharp / u-turn / roundabout / arrive. Far nicer than the old Unicode glyphs.
+    const ARROW_PATH = {
+        straight: 'M12 21 V5 M7 10 L12 5 L17 10',
+        left:     'M16 21 V11 a3 3 0 0 0 -3 -3 H8 M11 5 L8 8 L11 11',
+        right:    'M8 21 V11 a3 3 0 0 1 3 -3 H16 M13 5 L16 8 L13 11',
+        sleft:    'M15 21 V13 L7 7 M7 7 H12 M7 7 V12',
+        sright:   'M9 21 V13 L17 7 M17 7 H12 M17 7 V12',
+        shleft:   'M16 20 V13 L7 16 M7 16 H12 M7 16 V11',
+        shright:  'M8 20 V13 L17 16 M17 16 H12 M17 16 V11',
+        uturn:    'M15 21 V12 a3 3 0 0 0 -6 0 V16 M6 13 L9 16 L12 13',
+        roundabout: 'M12 22 V13 M8 11 a4 4 0 1 0 8 0 a4 4 0 1 0 -8 0 M12 11 V4 M9 7 L12 4 L15 7',
+        arrive:   'M7 21 V4 M7 4 H17 L14 7.5 L17 11 H7',
     };
-    function showBanner(m, d) {
+    function arrowKey(m) {
+        if (m.type === 'arrive') return 'arrive';
+        if (m.type === 'roundabout' || m.type === 'rotary') return 'roundabout';
+        if (m.modifier === 'uturn') return 'uturn';
+        return { left: 'left', right: 'right', 'slight left': 'sleft', 'slight right': 'sright',
+                 'sharp left': 'shleft', 'sharp right': 'shright' }[m.modifier] || 'straight';
+    }
+    function arrowSvg(m) {
+        const d = ARROW_PATH[arrowKey(m)] || ARROW_PATH.straight;
+        return '<svg class="nav-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" '
+            + 'stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="' + d + '"/></svg>';
+    }
+    // Two rows: maneuver (arrow + distance + road/ref + signpost destinations) · trip (ETA · remaining).
+    function showBanner(m, d, trip) {
         const el = $('nav-banner'); if (!el) return;
-        const arrow = (m.type === 'arrive') ? '⚑' : (ARROW[m.modifier] || '↑');
-        el.textContent = arrow + '  ' + fmtDist(d) + ' · ' + m.text;
+        el.innerHTML =
+            '<div class="nav-main">' + arrowSvg(m)
+            + '<span class="nav-dist"></span><span class="nav-instr"></span></div>'
+            + '<div class="nav-trip"></div>'; // SVG from a fixed table (safe); text set below via textContent
+        el.querySelector('.nav-dist').textContent = fmtDist(d);
+        el.querySelector('.nav-instr').textContent = m.detail || m.text; // OSM names via textContent (no injection)
+        const t = el.querySelector('.nav-trip');
+        t.textContent = trip || ''; t.hidden = !trip;
         el.hidden = false;
     }
     function hideBanner() { const el = $('nav-banner'); if (el) el.hidden = true; }
@@ -268,7 +379,7 @@ window.TrackerNav = function (ctx) {
         const m = maneuvers[mIdx];
         const d = haversine(here, m.loc);
         if (d < mClosest) mClosest = d;
-        showBanner(m, d);
+        showBanner(m, d, tripLine(here));
         if (d <= ANNOUNCE_NEAR_M) {                       // reached the maneuver → say it, advance
             speak(m.type === 'arrive' ? 'Sie haben das Ziel erreicht.' : 'Jetzt ' + m.text);
             advanceManeuver();
@@ -308,5 +419,5 @@ window.TrackerNav = function (ctx) {
         });
     }
 
-    return { openPanel, hasDestination, startNavigation, clearRoute, update };
+    return { openPanel, hasDestination, startNavigation, clearRoute, update, remainingBounds };
 };

@@ -52,6 +52,10 @@
   daraus Sätze (links/rechts/leicht/scharf/Kreisverkehr+Ausfahrt/geradeaus/Ziel). Ansage per
   `speechSynthesis` (de-DE) bei ~300 m („In … Metern …") und ~40 m („Jetzt …"). On-screen-Banner
   `#nav-banner` mit Pfeil + Distanz + Text. Schalter **„Sprachansage"** im Panel (persistiert).
+- **Reicheres Navi-Banner (2026-06-11):** zwei Zeilen — Manöver (SVG-Pfeil + Distanz + **Straße/Ref +
+  Schild-Ziele** aus OSRM `ref`/`destinations`/`exits`, z. B. „A 60 · → Frankfurt am Main, Darmstadt")
+  und Trip-Zeile (**Ankunftszeit/ETA · Restdistanz · Restzeit**). Hintergrund auf **Google-Navi-Grün**
+  (~#188038). Banner liegt z-mäßig **unter** dem Header. ETA aus Restdistanz entlang der Route × Dauer.
 
 ## Post-MVP (offen)
 - Verkehr (Autobahn-API/TomTom/HERE — siehe Fahrt-Notiz) · vollständige Abbiege-Liste · „passiert"-Erkennung

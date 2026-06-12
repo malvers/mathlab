@@ -58,7 +58,9 @@ service when the phone is idle.
 ---
 
 ## Notes / limits (honest)
-- Counts the **exact word** „krass" (not „krasse/krasser/krass!"). Easy to widen later if you want.
+- Counts the trigger words in `KrassListenerService.java` → `TRIGGERS` (currently **„krass", „solita", „solida"**),
+  exact word match, case-insensitive. NB: the German Vosk model knows „krass" well; the invented
+  „solita/solida" may be heard as „solide" or missed — widen `TRIGGERS` if needed.
 - Mic always-on costs a few %/h battery; the „läuft & hört zu" notification is unavoidable on modern Android.
 - Day rollover is automatic (counts are keyed by date); no server, no account.
 - Orbitron loads from Google Fonts (online); offline it falls back to a system font. Bundling the `.ttf`

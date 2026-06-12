@@ -74,12 +74,21 @@
         // The map auto-follows new fixes until you take over (drag) — ZENTRIEREN re-enables it.
         // The position dot is hidden during zoom animations so it doesn't jump, then fades back.
         let following = !viewRestored; // a restored viewport stays put (don't auto-follow GPS away from it)
-        let fitMode = false; // FIT as a persistent mode: when on, keep the position dot roughly centred (dead-zone)
+        let lastAutoZoom = 0;            // throttle the speed-adaptive zoom (ms)
+        const AUTOZOOM_COOLDOWN = 4000;
+        // Speed-adaptive zoom while auto-following: faster → wider view (more lookahead), slower → closer.
+        // Discrete bands + smoothed speed + cooldown avoid constant re-zooming. null = leave zoom alone.
+        function speedZoom(kmh) {
+            if (kmh == null) return null;
+            if (kmh < 10) return 17;     // walking / standing
+            if (kmh < 35) return 16;     // slow town
+            if (kmh < 70) return 15;     // town / country road
+            if (kmh < 110) return 14;    // fast road
+            return 13;                   // autobahn → widest
+        }
+        let fitMode = false; // FIT loop: false → 'all' (whole track) → 'remaining' (rest of route, while navigating) → false
         // ≈ 5 mm from the map centre (CSS px ≈ 1/96 in → 5 mm ≈ 19 px); within that the dot is "centred".
         const CENTER_TOL_PX = 19;
-        // FIT mode dead-zone: the dot may drift within the central 40 % (±20 %) of the viewport before
-        // we re-centre on it — keeps it "ungefähr in der Mitte" without re-panning on every fix.
-        const FIT_DEADZONE = 0.2;
         function refreshRecenter() {
             const btn = $('recenter-fab');
             if (!btn) return;
@@ -584,15 +593,23 @@
 
             lastFix = { lat: latitude, lng: longitude, t: now };
 
-            if (following && !still) map.panTo(here, { animate: true }); // don't drift the map when still
-            // FIT mode: keep the CURRENT position roughly in the middle — pan back only once the dot
-            // drifts out of the central dead-zone, so it doesn't re-centre on every single fix and the
-            // zoom (and thus the surrounding context + trail) stays put.
-            if (fitMode && !still) {
-                const c = map.latLngToContainerPoint(here), sz = map.getSize();
-                if (Math.abs(c.x - sz.x / 2) > sz.x * FIT_DEADZONE || Math.abs(c.y - sz.y / 2) > sz.y * FIT_DEADZONE) {
+            if (following && !still) { // auto-follow: pan to the dot, and zoom to suit the speed
+                const tz = speedZoom(shownSpeed);
+                if (tz != null && Math.abs(map.getZoom() - tz) >= 1 && Date.now() - lastAutoZoom > AUTOZOOM_COOLDOWN) {
+                    lastAutoZoom = Date.now();
+                    map.setView(here, tz, { animate: true }); // pan + zoom together
+                } else {
                     map.panTo(here, { animate: true });
                 }
+            }
+            // FIT mode (3-state): 'all' keeps the WHOLE track in view, 'remaining' keeps the rest of the
+            // route ahead in view. Re-fit only once it grows beyond the frame (-0.12 inset = slack).
+            if (fitMode === 'all' && track.length > 1) {
+                const tb = L.latLngBounds(track);
+                if (!map.getBounds().pad(-0.12).contains(tb)) { try { map.fitBounds(tb, { padding: [40, 40] }); } catch (e) { } }
+            } else if (fitMode === 'remaining' && __nav && __nav.remainingBounds) {
+                const rb = __nav.remainingBounds(here);
+                if (rb && !map.getBounds().pad(-0.12).contains(rb)) { try { map.fitBounds(rb, { padding: [40, 40] }); } catch (e) { } }
             }
             refreshRecenter(); // show/hide the recenter button as needed
             if (__nav && __nav.update) __nav.update(here); // navigation: reroute if we drifted off the line
@@ -1876,14 +1893,21 @@ ${pts}
         $('menu-fab').addEventListener('click', () => openPopup());
         $('recenter-fab').addEventListener('click', () => {
             const btn = $('recenter-fab');
-            if (btn.classList.contains('fit')) {            // centred → toggle the persistent FIT mode
-                fitMode = !fitMode;
-                if (fitMode) {
-                    setFollowing(false);
-                    if (posMarker) { try { map.panTo(posMarker.getLatLng(), { animate: true }); } catch (e) { } }
-                    toast('FIT-Modus an — Punkt bleibt mittig');
-                } else {
-                    toast('FIT-Modus aus');
+            if (btn.classList.contains('fit')) {            // centred → cycle the FIT mode
+                // 3-state loop: off → whole track → (while navigating) remaining route → off.
+                const ll = posMarker && posMarker.getLatLng && posMarker.getLatLng();
+                const rb = (ll && __nav && __nav.remainingBounds) ? __nav.remainingBounds([ll.lat, ll.lng]) : null;
+                if (!fitMode) {                              // off → fit the whole track
+                    fitMode = 'all'; setFollowing(false);
+                    if (track.length) { try { map.fitBounds(L.latLngBounds(track), { padding: [40, 40] }); } catch (e) { } }
+                    toast('FIT: ganze Route');
+                } else if (fitMode === 'all' && rb) {        // whole → remaining (only if a route exists)
+                    fitMode = 'remaining';
+                    try { map.fitBounds(rb, { padding: [40, 40] }); } catch (e) { }
+                    toast('FIT: Reststrecke');
+                } else {                                     // remaining (or no route) → off
+                    fitMode = false;
+                    toast('FIT aus');
                 }
                 refreshRecenter();
             } else {
@@ -1974,6 +1998,31 @@ ${pts}
                 cb.addEventListener('change', () => {
                     localStorage.setItem(KEY, cb.checked ? '1' : '0');
                     applyDebug(cb.checked);
+                });
+            }
+            if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', wire);
+            else wire();
+        })();
+
+        // Settings → Debug: toggle the over-speed bell (state lives in the speed-limit module, persisted).
+        (function () {
+            function wire() {
+                const cb = $('speed-bell-toggle'); if (!cb || cb._wired) return; cb._wired = true;
+                cb.checked = !__speed || !__speed.bellEnabled || __speed.bellEnabled(); // default ON
+                cb.addEventListener('change', () => { if (__speed && __speed.setBell) __speed.setBell(cb.checked); });
+            }
+            if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', wire);
+            else wire();
+        })();
+
+        // Settings → Debug: mobile shortcut keys — tap fires the otherwise keyboard-only d/k/w handlers.
+        (function () {
+            function wire() {
+                [['sc-d', 'd'], ['sc-k', 'k'], ['sc-w', 'w']].forEach(([id, key]) => {
+                    const b = $(id); if (!b || b._wired) return; b._wired = true;
+                    b.addEventListener('click', () => {
+                        document.dispatchEvent(new KeyboardEvent('keydown', { key: key, bubbles: true }));
+                    });
                 });
             }
             if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', wire);
