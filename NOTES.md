@@ -17,6 +17,9 @@ GPS-Tracker (`HTML/tracker/`). Einstieg/Regeln: [`HTML/tracker/agents.md`](HTML/
 
 | Notiz | Worum es geht | Status |
 |---|---|---|
+| [bugfixes.md](HTML/tracker/bugfixes.md) | **Dispatch-Queue Bugs** (subagenten-tauglich): Speed · Regenradar · Live-Broadcast · geparkte Fixes | 🐞 Arbeitsliste |
+| [feature-requests.md](HTML/tracker/feature-requests.md) | **Dispatch-Queue Features** (Prio/Status): Brotkrumen · Goldene Stunde · Remote-Config · Contact-AI/Solita … | 📐 Arbeitsliste |
+| [ideen.md](HTML/tracker/ideen.md) | **Dispatch-Triage Ideen** (Prio-Board 1–20 + Konzept-Notizen); verlinkt tracker-ideen.md | 💡 Arbeitsliste |
 | [tracker-plan.md](HTML/tracker/tracker-plan.md) | Backlog / offene Punkte, inkl. „Erledigt"-Historie | 📚 Referenz |
 | [cluster-konvexe-huelle-hover.md](HTML/tracker/cluster-konvexe-huelle-hover.md) | Konvexe Außenhülle um das Cluster-Badge beim Maus-Hover | 💡 Idee |
 | [drivecast-audio-poi-am-weg.md](HTML/tracker/drivecast-audio-poi-am-weg.md) | Standort-getriggerter Audio-Reiseführer („WegCast", Vorbild Blitzer.de DriveCast) | 💡 Idee |
