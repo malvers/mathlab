@@ -934,7 +934,13 @@
             TrackBuffer.saveNow(bufferSnapshot()); // keep it persisted across the restore
             toast('Ungesicherter Track wiederhergestellt: ' + track.length + ' Punkte. SPEICHERN nicht vergessen.');
         }
-        if (typeof TrackBuffer !== 'undefined') {
+        const _importTok = new URLSearchParams(location.search).get('import');
+        if (_importTok) {
+            // A friend's "In meinen Tracker laden" link → import a copy. Strip the token first so a
+            // reload doesn't import a second copy; the import outranks restoring the last track.
+            try { history.replaceState(null, '', location.pathname); } catch (e) { }
+            importShared(_importTok.trim());
+        } else if (typeof TrackBuffer !== 'undefined') {
             // An in-progress recording wins; otherwise re-load the last track you had open.
             TrackBuffer.load().then(buf => { if (buf) restoreBufferedTrack(buf); else restoreLastLoaded(); });
         } else {
@@ -1532,6 +1538,34 @@ ${pts}
             if (window.DebugWindow) DebugWindow.log('Geladenen Track wiederhergestellt (' + ok.length + ').');
         }
 
+        // ---- Import a friend's shared track (?import=<token>) into MY account as a copy I own ----
+        // Opened from the read-only viewer's "In meinen Tracker laden" button. We pull the shared row
+        // via the SAME public RPC the viewer uses, plot it, then INSERT it as a fresh track under MY
+        // login (currentTrackId=null → saveTrack inserts, it never touches the friend's row). It then
+        // appears in "Tracks laden", survives a reload, and can be exported / overlaid with our own.
+        async function importShared(token) {
+            toast('Geteilten Track wird geladen …');
+            let row;
+            try {
+                const c = await ensureSb();
+                const { data, error } = await c.rpc('get_shared_track', { p_token: token });
+                if (error) throw error;
+                row = data;
+            } catch (e) { toast('Import fehlgeschlagen: ' + (e.message || e)); return; }
+            if (!row) { toast('Track nicht gefunden — Link ungültig oder widerrufen.'); return; }
+            plotTrack(row.points || [], row.waypoints || []);
+            currentTrackId = null;                          // not my row yet → save INSERTS a copy I own
+            const name = row.name || autoTrackName();
+            $('hud-top').classList.add('shown');            // reveal the header for the loaded track
+            let id;
+            try { id = await saveTrack(name, 'done'); }
+            catch (e) { currentTrackName = name; toast('Geladen, Speichern fehlgeschlagen: ' + (e.message || e)); return; }
+            currentTrackId = id; currentTrackName = name;
+            loadedTrackIds.clear(); loadedTrackIds.add(id);
+            persistLoaded([{ id: id, name: name }]);        // survive a reload like any loaded track
+            toast('In deinen Tracker importiert: ' + name);
+        }
+
         // ---- Transient toast (the persistent status line was removed) ----
         let toastTimer = null;
         function toast(msg) {
@@ -1582,6 +1616,73 @@ ${pts}
                 requestAnimationFrame(() => { ov.classList.add('shown'); ok.focus(); });
             });
         }
+
+        // Styled single-line prompt (paste a value) — same look as uiConfirm, plus a text field.
+        // Resolves the trimmed text, or null on cancel/empty.
+        function uiPrompt(message, opts) {
+            opts = opts || {};
+            return new Promise((resolve) => {
+                const ov = document.createElement('div');
+                ov.className = 'ui-modal-ov';
+                ov.innerHTML =
+                    '<div class="ui-modal" role="dialog" aria-modal="true">' +
+                    '<div class="ui-modal-msg"></div>' +
+                    '<input type="text" class="ui-modal-input" aria-label="Eingabe" autocapitalize="off" autocomplete="off" spellcheck="false">' +
+                    '<div class="ui-modal-btns">' +
+                    '<button type="button" class="ui-btn ui-btn-cancel"></button>' +
+                    '<button type="button" class="ui-btn ui-btn-ok"></button>' +
+                    '</div></div>';
+                ov.querySelector('.ui-modal-msg').textContent = message;
+                const inp = ov.querySelector('.ui-modal-input');
+                inp.placeholder = opts.placeholder || '';
+                if (opts.value) inp.value = opts.value;
+                const cancel = ov.querySelector('.ui-btn-cancel');
+                const ok = ov.querySelector('.ui-btn-ok');
+                cancel.textContent = opts.cancelText || 'Abbrechen';
+                ok.textContent = opts.okText || 'OK';
+                let done = false;
+                function close(v) {
+                    if (done) return;
+                    done = true;
+                    ov.classList.remove('shown');
+                    document.removeEventListener('keydown', onKey);
+                    setTimeout(() => ov.remove(), 200);
+                    resolve(v);
+                }
+                function onKey(e) {
+                    if (e.key === 'Escape') close(null);
+                    else if (e.key === 'Enter') close(inp.value.trim() || null);
+                }
+                cancel.onclick = () => close(null);
+                ok.onclick = () => close(inp.value.trim() || null);
+                ov.onclick = (e) => { if (e.target === ov) close(null); };
+                document.addEventListener('keydown', onKey);
+                document.body.appendChild(ov);
+                requestAnimationFrame(() => { ov.classList.add('shown'); inp.focus(); });
+            });
+        }
+
+        // Pull a share token out of whatever the user pastes: a full view-link (…?s=token), a bare
+        // token, or even a comma-bundle (we take the first). Returns null if nothing usable.
+        function parseShareToken(input) {
+            if (!input) return null;
+            input = String(input).trim();
+            try { const s = new URL(input).searchParams.get('s'); if (s) return s.split(',')[0].trim(); } catch (e) { /* not a URL */ }
+            const m = input.match(/[?&]s=([^&\s]+)/);
+            if (m) return decodeURIComponent(m[1]).split(',')[0].trim();
+            return input.split(',')[0].trim() || null; // assume a bare token was pasted
+        }
+
+        // "Geteilten Track-Link laden" in the Tracks-laden panel: paste a friend's view-link → import
+        // a copy into MY account (importShared does the fetch + save). See importShared above.
+        if ($('tl-import')) $('tl-import').addEventListener('click', async () => {
+            const link = await uiPrompt('Geteilten Track-Link einfügen:', { placeholder: 'https://…/view.html?s=…', okText: 'Laden' });
+            if (!link) return;
+            const tok = parseShareToken(link);
+            if (!tok) { toast('Kein gültiger Link.'); return; }
+            hidePanels();
+            importShared(tok);
+        });
 
         // ---- Foto-Spur / media subsystem → js/tracker-media.js (Phase-2 refactor 2026-06-09).
         //      Forward exports are hoisted functions delegating to the module (callers earlier in
@@ -1916,6 +2017,7 @@ ${pts}
         // Track-list badge glyphs (our pin style): speaker for a voice note, camera for photos.
         const SPEAKER_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>';
         const CAMERA_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>';
+        const VIDEO_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>';
         const APPICON = '<img class="tl-appicon" src="icon.svg" alt="">'; // our app icon = the track badge
         function mkBadge(kind, svg, count) {
             const b = document.createElement('div');
@@ -1939,6 +2041,7 @@ ${pts}
                 row.appendChild(chk);
                 // sensible stats instead of the (redundant) date: km · duration · photos · Ø speed
                 const isVoice = /^Sprachnotiz/i.test(r.name || '');   // one-point voice track
+                const isVideo = /^Video/i.test(r.name || '');         // one-point video clip
                 const isPoint = !r.distance_m;                        // 0 / null → single-point recording (km meaningless)
                 const stats = [];
                 if (!isPoint) {
@@ -1958,6 +2061,7 @@ ${pts}
                 // app-icon TRACK badge for a real track (a camera would lie when the track also holds voice).
                 let badge;
                 if (isVoice) badge = mkBadge('voice', SPEAKER_ICON, 0);
+                else if (isVideo) badge = mkBadge('video', VIDEO_ICON, 0);
                 else if (isPoint) badge = mkBadge('cam', CAMERA_ICON, 0);
                 else badge = mkBadge('track', APPICON, r.photo_count);
                 row.appendChild(badge);                     // row's first child → left of `main`
