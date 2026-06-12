@@ -201,6 +201,40 @@ auf die echte Play-Services-Activity-Recognition.
 
 ---
 
+## BUG-7 — Tempolimit-Schild zeigt falschen Wert 🐞 offen · 🔍 erst messen
+**Quelle:** Fahrt-Notiz 2026-06-12 (Notiz 7). **Nur dokumentiert, noch nicht gefixt** (Regel 2/4).
+**Symptom:** Die angezeigte Geschwindigkeits**begrenzung** (rundes Schild) stimmt offenbar nicht.
+**Wo:** `HTML/js/tracker-speedlimit.js` — Overpass `way(around:35,…)[highway][maxspeed]`, nimmt den
+**nächsten** Weg per Geometrie (`:136-138`), maxspeed-Parser (`:92`), Throttle `MIN_INTERVAL_MS=5000` (`:11`).
+**Verdächtige (erst messen):**
+1. **Falscher Weg gewählt** — bei parallelen Straßen/Kreuzungen ist „nächster binnen 35 m" evtl. die
+   falsche (Nebenstraße statt Hauptstraße, Gegenfahrbahn).
+2. **maxspeed-Tag** fehlt/uneindeutig am richtigen Weg → es greift ein Nachbar.
+3. **Stale** durch Throttle/Overpass-Latenz → Schild hinkt der aktuellen Straße hinterher.
+4. Zonen-/`maxspeed:conditional`-Tags (DE) falsch interpretiert.
+**Erst messen (Regel „nie raten"):** pro Abfrage ins DEBUG-Fenster: gewählter Weg (name/ref), roher
+maxspeed-Tag, Distanz, Kandidatenliste → zeigt, ob's die Wegwahl oder das Parsing ist.
+
+---
+
+## BUG-8 — Erkennung verwechselt Nachbar-Bauwerke (keine Blickrichtung) 🐞 offen
+**Quelle:** Fahrt-Notiz 2026-06-12 (Notiz 3). **Nur dokumentiert** (Regel 2/4).
+**Symptom:** Am Dresdner Standort sagt die Erkennung **immer „Stadtschloss"**, egal wohin die Kamera
+zeigt — tatsächlich ist es der **Zwinger** (beide liegen dicht beieinander).
+**Ursache (belegt):** Es gibt **keine Blickrichtung**:
+- Client `HTML/js/tracker-media.js` schickt **kein** heading/bearing mit dem Foto (0 Treffer).
+- Edge Function `supabase/functions/identify/index.ts` gründet rein auf **lat/lng** (`geoContext`: Wikipedia
+  geosearch `gsradius=600` `:167`, Overpass `around:130-160 m` `:176`, STANDORT-KONTEXT `:198`). Im Radius
+  liegen Zwinger UND Schloss → ohne Heading keine Unterscheidung → es rät nach Nähe.
+**Fix-Richtung (noch nicht bauen):**
+1. **Client:** Heading erfassen (GPS `coords.heading` bei Tempo>0, sonst Kompass/DeviceOrientation) und beim
+   Foto mitschicken.
+2. **identify:** Heading nutzen — POIs im **Sichtkegel voraus** (Bearing Standort→POI ≈ Heading ±X°)
+   bevorzugen statt nur nach Nähe. Passt zu `geo-erkennung-und-voice-spur.md`.
+**Caveat:** Heading im Stehen unzuverlässig (Kompass-Jitter) → breiter Kegel / Fallback auf Nähe.
+
+---
+
 ## Verwandt / Querverweise
 - Übersicht aller Notizen: [`../../NOTES.md`](../../NOTES.md)
 - Feature-Arbeitsliste: [`feature-requests.md`](feature-requests.md) · Ideen-Triage: [`ideen.md`](ideen.md)

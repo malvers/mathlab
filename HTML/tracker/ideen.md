@@ -77,6 +77,8 @@
 | **Play-Store-Verteilung** | Sideload blockt (Samsung); Play Store = 12 Tester·14 Tage / Firmenkonto | 🌿 `verteilung-playstore-tester.md` — „nächste Woche" |
 | **Lebens-Agent / Kompression** | Tokens vs. Kompression + Memory-Architektur für „Solita/Samantha" | 🌿 `wissensnotiz-llm-kompression-lebensagent.md` — Referenz |
 | **Activity-Erkennung schärfen** | Reisemodus laufen/fahren wirkt nur speed-basiert; Play-Services-Events prüfen | `activity-debug-morgen.md` → Bug/Debug in `bugfixes.md` BUG-6 (Enabler für Parkplatz/WegCast) |
+| **Erkennung: Blickrichtung nutzen** | Heading an die Foto-Erkennung → Nachbar-Bauwerke unterscheiden (Zwinger ≠ Schloss) | Fahrt-Notiz 12.06 → `bugfixes.md` BUG-8; verwandt `geo-erkennung-und-voice-spur.md` |
+| **Erkennung: Pl@ntNet-Schwelle** | < ~10 % Konfidenz ausblenden, v. a. wenn Google/Gemini gut ist | Fahrt-Notiz 12.06 → `feature-requests.md` FEAT-22 |
 
 ---
 
