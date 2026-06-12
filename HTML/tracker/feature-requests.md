@@ -248,6 +248,40 @@ der alte SW maskiert `?_fresh=` noch. Danach dauerhaft. Nützt Dev (Server verge
 
 ---
 
+## FEAT-20 — OSM-Zoom-Buttons (+/−): ausblenden oder schöner 📐 · klein
+**Quelle:** Fahrt-Notiz 2026-06-12 (Notiz 1). **Geklärt:** die +/−-Buttons sind **unsere** (Leaflet-
+Default-Control, von uns gesetzt): `tracker.js:18` `zoomControl:false`, dann **`:28`**
+`L.control.zoom({position:'bottomright'}).addTo(map)`.
+**Optionen (Doc entscheidet):**
+- **Weg:** `tracker.js:28` entfernen → keine +/−-Buttons (Pinch-Zoom bleibt).
+- **Schöner:** CSS `.leaflet-control-zoom` / `-in` / `-out` in `tracker.css` on-brand (dunkel/orange,
+  Orbitron), ggf. Position ändern.
+
+## FEAT-21 — Instrumente ausblenden + Track/Karte mehr Platz 📐
+**Quelle:** Fahrt-Notiz 2026-06-12 (Notizen 2 + 6). **Nur Notiz** (Regel 2/4).
+- **Note 2:** im **Debug** einen Check/Schalter, ob die **Instrumente (HUD-Kacheln)** ausgeblendet werden.
+- **Note 6:** Da die Instrumente **zu ~99 %** ausgeblendet sind (wenn der Haken gesetzt ist), soll der
+  **Track / die Karte (FIT) mehr Platz** bekommen — aktuell nimmt der Track zu wenig Fläche ein.
+**Richtung:** Instrumente aus → `#hud-top` kollabieren, Karte den frei werdenden Platz nutzen lassen
+(volle Höhe). Hängt mit Idle-Auto-Hide + der WIP „d/k/w-Tasten-Toggle" zusammen.
+
+## FEAT-22 — Pl@ntNet-Konfidenz-Schwelle 📐
+**Quelle:** Fahrt-Notiz 2026-06-12 (Notiz 4). **Nur Notiz.**
+**Regel-Idee:** Pl@ntNet-Treffer mit Konfidenz **< ~10 %** gar nicht anzeigen; **besonders nicht**, wenn
+**Google/Gemini** ein gutes Ergebnis hat.
+**Offen (erst messen, nie raten):** Pl@ntNet-Score und Google/Gemini-Qualität sind verschiedene Skalen —
+wie vergleichbar machen? Schwellwert empirisch. Wo: Erkennungs-Pipeline (`supabase/functions/identify/`
++ Foto-Spur-Anzeige `tracker-media.js`).
+
+## FEAT-23 — HUD: oberes Element + Genauigkeit als zentrierte Gruppe 📐
+**Quelle:** Fahrt-Notiz 2026-06-12 (Notiz 5). **Nur Notiz.**
+**Wunsch:** das **obere Element [Diktat unklar — vermutlich POSITION/GPS-Chip oder die Uhr, mit Doc klären]**
++ die **Genauigkeit (±m)** in **eine Gruppe** fassen und die **ganze Gruppe zentrieren**.
+**Wo:** `#hud-top` / `#gps-chip` (zeigt schon `gps-src` + `gps-acc ±m`) in `tracker.html` + `tracker.css`.
+Knüpft an die alte `tracker-plan.md`-Idee „POSITION oben zentriert, Genauigkeit dahinter" an.
+
+---
+
 ## Nicht-Tracker / Verteilung & Wissen (Kontext, kein Bau-Auftrag)
 - **Play-Store-Verteilung** (🌿 `verteilung-playstore-tester.md`): Samsung „Auto Blocker" blockt Sideload;
   Play Store braucht für neue persönliche Konten **12 Tester · 14 Tage**. Firmenkonto (D-U-N-S) umgeht die
