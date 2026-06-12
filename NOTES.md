@@ -21,11 +21,20 @@ GPS-Tracker (`HTML/tracker/`). Einstieg/Regeln: [`HTML/tracker/agents.md`](HTML/
 | [cluster-konvexe-huelle-hover.md](HTML/tracker/cluster-konvexe-huelle-hover.md) | Konvexe Außenhülle um das Cluster-Badge beim Maus-Hover | 💡 Idee |
 | [drivecast-audio-poi-am-weg.md](HTML/tracker/drivecast-audio-poi-am-weg.md) | Standort-getriggerter Audio-Reiseführer („WegCast", Vorbild Blitzer.de DriveCast) | 💡 Idee |
 | [plan-navigation-einfach.md](HTML/tracker/plan-navigation-einfach.md) | Einfache Navigation: Adresse → Route, START navigiert + trackt (Radial-Eintrag „ZIEL") | 🏗️ teils gebaut |
+| [plan-tracking-vs-navigation.md](HTML/tracker/plan-tracking-vs-navigation.md) | Tracking & Navigation entkoppeln (Navi beenden ≠ Track beenden); Vorschläge A/B/C | 📐 Konzept/Plan |
+| [polish-ki-erkennt-indikator.md](HTML/tracker/polish-ki-erkennt-indikator.md) | „KI erkennt"-Roboter (🤖) durch schönen On-Brand-Indikator ersetzen | 💡 Idee |
 | [tracker-ideen.md](HTML/tracker/tracker-ideen.md) | Lose Feature-Ideen (Fahrt-Brainstorm), einzeln gesammelt | 💡 Idee |
 | [plan-live-video-broadcast.md](HTML/tracker/plan-live-video-broadcast.md) | Live-Video durchleiten statt speichern — Transport + Kostenmodelle (P2P/SFU vs. pro Minute) | 📐 Konzept/Plan |
+| [plan-fernsteuerung-remote-config.md](HTML/tracker/plan-fernsteuerung-remote-config.md) | App live fernsteuern: Remote-Config (Farben/z-order/Panels) via CSS-Variablen + Supabase-Realtime; OTA via Capgo | 📐 Konzept/Plan |
+| [plan-contact-ai-im-tracker.md](HTML/tracker/plan-contact-ai-im-tracker.md) | „Contact AI" in der App: Chat via Claude API + Agent (Routines/SDK) der Repo editiert & pusht | 📐 Konzept/Plan |
+| [agent-name-solita.md](HTML/tracker/agent-name-solita.md) | Agent-Name & Weckwort „Solita" — Begründung, Tagline, Voice-Erkennbarkeit | 💡 Idee |
+| [verteilung-playstore-tester.md](HTML/tracker/verteilung-playstore-tester.md) | Verteilung: Sideload vs. Play Store, 12-Tester-Auflage, Firmenkonto-Ausnahme (nächste Woche) | 📚 Referenz |
+| [wissensnotiz-llm-kompression-lebensagent.md](HTML/tracker/wissensnotiz-llm-kompression-lebensagent.md) | Wissens-Notiz: Tokens/Kompression, LLM=Kompressor, Memory-Architektur für den Lebens-Agent | 📚 Referenz |
 | `HTML/js/tracker-speedlimit.js` | Tempo-Limit-Schild der aktuellen Straße (OSM `maxspeed` via Overpass), rot bei Übertretung | ✅ umgesetzt |
 | [bug-geschwindigkeitsanzeige.md](HTML/tracker/bug-geschwindigkeitsanzeige.md) | km/h-Anzeige stimmt nicht (Jitter-/Bewegungs-Gate) | 🐞 Bug |
 | [bug-regenradar-kein-regen.md](HTML/tracker/bug-regenradar-kein-regen.md) | Regenradar zeigt in DE keinen Regen (DWD leer/stale, kein RainViewer-Fallback innerhalb Abdeckung) | 🐞 Bug |
+| [bug-live-broadcast-funktioniert-nicht.md](HTML/tracker/bug-live-broadcast-funktioniert-nicht.md) | Live-Broadcast geht gerade nicht — gleiches Projekt/Key bestätigt, Realtime-spezifisch (Auth/Config/Pause) | 🐞 Bug |
+| [krass-app/wakeword-solita-erkennung.md](krass-app/wakeword-solita-erkennung.md) | Weckwort „Solita" zuverlässig erkennen — Vosk-Wortliste vs. eigene Stimme trainieren | 💡 Idee |
 | [activity-debug-morgen.md](HTML/tracker/activity-debug-morgen.md) | Reisemodus/Activity-Erkennung — Test- & Debug-Plan | 📐 Konzept/Plan |
 | [e2e-verschluesselung-plan.md](HTML/tracker/e2e-verschluesselung-plan.md) | Tracks + Fotos in Supabase nur noch als Ciphertext (à la VGP) | 📐 Konzept/Plan |
 | [geo-erkennung-und-voice-spur.md](HTML/tracker/geo-erkennung-und-voice-spur.md) | Geo-gestützte Foto-Erkennung + Sprach-Nachrichten am Track | 📐 Konzept/Plan |
