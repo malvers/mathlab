@@ -15,6 +15,7 @@ window.TrackerConfig = (function () {
         const colors = (cfg.theme && cfg.theme.colors) || {};
         set('--cfg-stat-color', colors.statColor);          // the orange numbers under the clock
         dbg('applied --cfg-stat-color=' + (root.getPropertyValue('--cfg-stat-color') || '(unset)'));
+        set('--cfg-clock-color', colors.clockColor);        // the clock digits (Solita: "mach die Uhr gruen")
         const nb = cfg.navBanner || {};
         set('--cfg-nav-bg', nb.bg);                          // nav banner background ("mach es grün")
         set('--cfg-nav-z', nb.zIndex);                       // z-order ("ganz nach unten")

@@ -678,7 +678,6 @@ window.TrackerMedia = function (T) {
                 const b = document.getElementById('ui-pin');
                 if (b) b.classList.toggle('pinned', pinned);
                 const ft = document.getElementById('ui-fade-toggle'); if (ft) ft.checked = !pinned; // checked = auto-hide ON
-                const dc = document.getElementById('dbg-uipin'); if (dc) dc.checked = pinned;
                 if (pinned) document.body.classList.remove('ui-idle');
             }
             function popupOpen() { const m = $('mini-stack'); return !!(m && m.classList.contains('popup')); }
@@ -721,19 +720,6 @@ window.TrackerMedia = function (T) {
             // Settings toggle "Bedienelemente automatisch ausblenden" (checked = auto-hide ON = NOT pinned).
             const fadeToggle = document.getElementById('ui-fade-toggle');
             if (fadeToggle) fadeToggle.addEventListener('change', () => window.setUiPinned(!fadeToggle.checked));
-            (function injectPinCheck(tries) {
-                const content = document.getElementById('debug-content');
-                if (!content) { if (tries > 0) setTimeout(() => injectPinCheck(tries - 1), 300); return; }
-                if (document.getElementById('dbg-uipin')) return;
-                const row = document.createElement('label');
-                row.style.cssText = 'display:flex;align-items:center;gap:6px;padding:5px 8px;font:12px Arial,sans-serif;color:#cfe7ff;cursor:pointer;border-bottom:1px solid rgba(255,255,255,.12);';
-                const cb = document.createElement('input');
-                cb.type = 'checkbox'; cb.id = 'dbg-uipin'; cb.checked = pinned;
-                cb.addEventListener('change', () => window.setUiPinned(cb.checked));
-                row.appendChild(cb);
-                row.appendChild(document.createTextNode('UI fixieren (nicht ausblenden)'));
-                content.parentElement.insertBefore(row, content);
-            })(12);
             schedule(); // start the 8 s countdown
         })();
 
