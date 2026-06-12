@@ -5,6 +5,7 @@ window.TrackerConfig = (function () {
     const URL = '../config.json';     // HTML/config.json → docalvers.de/config.json (Pages root = HTML/)
     const POLL_MS = 20000;            // gentle heartbeat; ETag makes unchanged checks a 304 (no download)
     let etag = null, timer = null;
+    const dbg = (m) => { if (window.DebugWindow && DebugWindow.log) DebugWindow.log('cfg: ' + m); };
 
     // Map config → CSS custom properties on :root. Missing/null keys keep the CSS default (fallback).
     function applyConfig(cfg) {
@@ -13,6 +14,7 @@ window.TrackerConfig = (function () {
         const set = (name, val) => { if (val != null) root.setProperty(name, String(val)); };
         const colors = (cfg.theme && cfg.theme.colors) || {};
         set('--cfg-stat-color', colors.statColor);          // the orange numbers under the clock
+        dbg('applied --cfg-stat-color=' + (root.getPropertyValue('--cfg-stat-color') || '(unset)'));
         const nb = cfg.navBanner || {};
         set('--cfg-nav-bg', nb.bg);                          // nav banner background ("mach es grün")
         set('--cfg-nav-z', nb.zIndex);                       // z-order ("ganz nach unten")
@@ -26,11 +28,13 @@ window.TrackerConfig = (function () {
         try {
             const headers = etag ? { 'If-None-Match': etag } : {};
             const r = await fetch(URL, { headers, cache: 'no-store' });
-            if (r.status === 304) return;                    // unchanged → nothing to do
-            if (!r.ok) return;
+            if (r.status === 304) { dbg('304 unchanged'); return; }  // nothing to do
+            if (!r.ok) { dbg('HTTP ' + r.status); return; }
             etag = r.headers.get('ETag') || etag;
-            applyConfig(await r.json());
-        } catch (e) { /* offline / missing / bad JSON → keep the current look */ }
+            const cfg = await r.json();
+            dbg('fetched v' + (cfg && cfg.version) + ' statColor=' + (cfg && cfg.theme && cfg.theme.colors && cfg.theme.colors.statColor));
+            applyConfig(cfg);
+        } catch (e) { dbg('ERR ' + (e && (e.message || e))); }
     }
 
     function start() {

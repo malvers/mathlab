@@ -314,7 +314,7 @@
         // changes: right-aligned, no leading zeros (blank slots on the left), group stays
         // centred. KM/H = 999.9 (1 dec), HÖHE = 9999 m (int).
         const STAT_SIZE = 'clamp(1rem, 4.5vw, 1.4rem)';
-        const STAT_COL = 'var(--orange)';
+        const STAT_COL = 'var(--cfg-stat-color, var(--orange))'; // live-config override (tracker-config.js); default = λ-orange
         const STAT_FONT = 'Arial, Helvetica, sans-serif'; // Doc: stat numbers in Arial, comma decimals
         const STAT_SEP = ',';
         CyberClock.mountNum(elSpeed, { intSlots: 3, decimals: 1, size: STAT_SIZE, digitColor: STAT_COL, font: STAT_FONT, decimalSep: STAT_SEP });
