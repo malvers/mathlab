@@ -304,7 +304,7 @@
         // Mount the shared fixed-slot clock so the ticking timer never jitters.
         // Size comes from the #hud-time --cc-size rule; colours are set here.
         CyberClock.mount(elTime, {
-            digitColor: '#fff',
+            digitColor: 'var(--cfg-clock-color, #fff)',   // live-config: Solita "mach die Uhr gruen" → clockColor
             colonColor: 'rgba(255, 255, 255, 0.55)',
             seconds: true,
         });

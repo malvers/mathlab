@@ -574,8 +574,6 @@
             <button class="send-button toggle-btn" id="ttsBtn" title="Vorlesen an/aus" aria-label="Antworten vorlesen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M19 5a10 10 0 0 1 0 14"/></svg></button>
             <button class="send-button" id="micBtn" title="Einmal sprechen" aria-label="Per Stimme diktieren"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10v2a7 7 0 0 0 14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg></button>
             <button class="send-button toggle-btn" id="wakeBtn" title="Solita-Weckwort an/aus" aria-label="Solita per Weckwort aktivieren"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8.5a6.5 6.5 0 1 1 13 0c0 6-6 6-6 10a3.5 3.5 0 1 1-7 0"/><path d="M6.5 12.5a3.5 3.5 0 1 1 7 0c0 2.5-2 2.5-2 5"/></svg></button>
-            <button class="send-button" id="sendButton">GO</button>
-            <button class="send-button exit-btn" id="exitUiBtn" style="display:none" title="UI-Modus verlassen">EXIT</button>
             <button class="send-button" id="logoutBtn" title="Logout" aria-label="Logout"
                 onclick="localStorage.removeItem('dev_access'); sessionPwd=''; document.getElementById('cyber-auth-overlay').classList.add('visible'); document.getElementById('cyber-pwd-input').value=''; setTimeout(()=>document.getElementById('cyber-pwd-input').focus(),100);">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
@@ -657,7 +655,8 @@
 
         const messagesArea = document.getElementById('messagesArea');
         const messageInput = document.getElementById('messageInput');
-        const sendButton = document.getElementById('sendButton');
+        // GO/EXIT buttons removed — Enter sends. Null-object keeps the old .disabled / .addEventListener refs safe.
+        const sendButton = document.getElementById('sendButton') || { disabled: false, addEventListener() {} };
         const exitUiBtn = document.getElementById('exitUiBtn');
 
         // UI-Änderungs-Modus (primer): when ON, every message is a live config change via solita-config.
@@ -1143,13 +1142,19 @@
                 else micBtn.addEventListener('click', () => {
                     if (listening) { try { rec.stop(); } catch (e) { } return; }
                     try {
-                        rec = new SR(); rec.lang = 'de-DE'; rec.interimResults = false; rec.maxAlternatives = 1;
+                        rec = new SR(); rec.lang = 'de-DE'; rec.interimResults = true; rec.maxAlternatives = 1;
                         listening = true; micBtn.classList.add('rec');
                         try { window.speechSynthesis && window.speechSynthesis.cancel(); } catch (e) { } // don't talk over you
-                        rec.onresult = (e) => { if (input) input.value = e.results[0][0].transcript; };
+                        // Live transcript flows into the input line as you speak…
+                        rec.onresult = (e) => {
+                            let txt = '';
+                            for (let i = 0; i < e.results.length; i++) txt += e.results[i][0].transcript;
+                            if (input) { input.value = txt; input.dispatchEvent(new Event('input')); }
+                        };
                         rec.onend = () => {
                             listening = false; micBtn.classList.remove('rec');
-                            if (input && input.value.trim() && typeof sendMessage === 'function') sendMessage();
+                            // …then a short beat so you SEE it in the line, and only THEN submit.
+                            if (input && input.value.trim() && typeof sendMessage === 'function') setTimeout(sendMessage, 700);
                         };
                         rec.onerror = () => { listening = false; micBtn.classList.remove('rec'); };
                         rec.start();
@@ -1212,8 +1217,9 @@
                     return;
                 }
                 awaitingQuery = false;
-                if (input) input.value = query;
-                if (typeof sendMessage === 'function') sendMessage();
+                // Show the heard question in the input line first, then submit a beat later.
+                if (input) { input.value = query; input.dispatchEvent(new Event('input')); }
+                if (typeof sendMessage === 'function') setTimeout(sendMessage, 700);
             }
 
             function onResult(e) {
