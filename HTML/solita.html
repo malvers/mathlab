@@ -32,10 +32,12 @@
 
         body {
             font-family: 'Orbitron', monospace;
-            background: radial-gradient(circle at 20% 30%, #0a0a2a, #030318);
+            background: rgb(8, 20, 42);   /* flat, calm — minimal */
             min-height: 100vh;
             padding: 24px;
         }
+
+        #vsb-motto { display: none; }     /* minimal: drop the decorative motto */
 
         /* Branding Styles matching other labs */
         .canvas-branding {
@@ -50,12 +52,7 @@
         }
 
         .model-select {
-            position: relative;
-            flex: 1;
-            align-self: stretch;
-            font-family: 'Orbitron', sans-serif;
-            font-size: 0.95rem;
-            user-select: none;
+            display: none;   /* minimal: fixed default model (Sonnet), no picker */
         }
 
         .model-select-display {
@@ -116,29 +113,22 @@
 
         .canvas-branding h1 {
             font-family: 'Orbitron', sans-serif;
-            font-size: 22px;
+            font-size: 13px;
             margin: 0;
-            letter-spacing: 3px;
-            background: linear-gradient(to right, #00d2ff, #ffffff, #9d50bb);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-            color: transparent;
-            filter: drop-shadow(0 0 10px rgba(0, 210, 255, 0.4));
+            letter-spacing: 2px;
+            color: #4f5d78;
             text-transform: uppercase;
-            font-weight: 700;
+            font-weight: 600;
             line-height: 1.1;
         }
 
         .canvas-subtitle {
             font-family: 'Orbitron', sans-serif;
-            font-size: 11px;
-            letter-spacing: 5px;
-            color: #00d2ff;
-            margin-top: 4px;
+            font-size: 10px;
+            letter-spacing: 3px;
+            color: #6b7a99;
+            margin-top: 3px;
             text-transform: uppercase;
-            text-shadow: 0 0 7px #00d2ff;
-            opacity: 0.9;
         }
 
         .chat-container {
@@ -238,15 +228,14 @@
         }
 
         .message.user .message-content {
-            background: linear-gradient(125deg, #00a3cc, #5e2a84);
-            color: white;
+            background: #1b2740;
+            color: #e6edf3;
         }
 
         .message.assistant .message-content {
-            background: rgba(0, 20, 40, 0.8);
-            backdrop-filter: blur(4px);
-            color: #ccf5ff;
-            border: 1px solid #4b2c7a;
+            background: rgba(255, 255, 255, 0.04);
+            color: #e6edf3;
+            border: 1px solid rgba(255, 255, 255, 0.10);
             max-width: 80%;
             width: 80%;
             position: relative;
@@ -396,11 +385,11 @@
 
         .message-input {
             flex: 1;
-            background: #070b1a;
-            border: 1px solid #2d2f6e;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.12);
             border-radius: 10px;
             padding: 10px 20px;
-            color: #b5f0ff;
+            color: #e6edf3;
             font-family: 'Helvetica', 'Arial', sans-serif;
             font-size: 1.15rem;
             resize: none;
@@ -416,40 +405,32 @@
 
         .message-input:focus {
             outline: none;
-            border-color: #00d2ff;
-            box-shadow: 0 0 6px #00d2ff;
+            border-color: rgba(255, 255, 255, 0.32);
         }
 
         .send-button {
-            background: linear-gradient(135deg, #00d2ff, #9d50bb);
-            border: none;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.12);
             border-radius: 10px;
             padding: 12px 18px;
-            color: #ffffff;
+            color: #e6edf3;
             font-family: 'Orbitron', sans-serif;
-            font-weight: 700;
-            font-size: 1.4rem;          /* big emoji buttons, clearly tappable */
+            font-weight: 600;
+            font-size: 1.4rem;          /* big, clear emoji buttons */
             line-height: 1;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: background 0.15s, opacity 0.15s;
             height: 52px;
             min-width: 52px;
             flex-shrink: 0;
         }
-        #sendButton { font-size: 1.05rem; }   /* the text button stays sane-sized */
+        #sendButton { font-size: 1rem; letter-spacing: 1px; }
 
-        .send-button:hover:not(:disabled) {
-            transform: scale(1.04);
-            box-shadow: 0 0 14px #9d50bb;
-        }
+        .send-button:hover:not(:disabled) { background: rgba(255, 255, 255, 0.12); }
 
-        /* Toggle buttons (🔊 Vorlesen · 👂 Solita-Weckwort): OFF = muted, ON = unmistakable green glow. */
-        .send-button.toggle-btn { background: #0e1430; color: #6b7a99; box-shadow: none; }
-        .send-button.toggle-btn.active {
-            background: rgb(121, 158, 49);   /* φ green = clearly ON */
-            color: #fff;
-            box-shadow: 0 0 14px rgba(121, 158, 49, 0.7);
-        }
+        /* Toggle buttons (🔊 Vorlesen · 👂 Weckwort): OFF = dim, ON = filled — flat, kein Glow. */
+        .send-button.toggle-btn { background: transparent; border-color: transparent; opacity: 0.4; }
+        .send-button.toggle-btn.active { background: rgba(255, 255, 255, 0.16); border-color: rgba(255, 255, 255, 0.2); opacity: 1; }
 
         /* --- SECURITY CLEARANCE OVERLAY --- */
         .auth-overlay {
