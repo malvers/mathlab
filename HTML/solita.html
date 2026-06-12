@@ -33,8 +33,10 @@
         body {
             font-family: 'Orbitron', monospace;
             background: rgb(8, 20, 42);   /* flat, calm — minimal */
-            min-height: 100vh;
-            padding: 24px;
+            height: 100vh;
+            padding: 0;
+            display: flex;            /* full-window flow: chat fills the viewport, no floating box */
+            flex-direction: column;
         }
 
         #vsb-motto { display: none; }     /* minimal: drop the decorative motto */
@@ -132,22 +134,22 @@
         }
 
         .chat-container {
-            width: 86%;
-            margin: 60px auto 0 auto;
-            background: rgba(5, 7, 25, 0.65);
-            backdrop-filter: blur(12px);
-            border-radius: 10px;
-            border: 1px solid rgba(0, 210, 255, 0.4);
-            box-shadow: 0 25px 45px rgba(0, 0, 0, 0.6);
-            overflow: hidden;
+            width: 100%;               /* nix box: full-bleed, no centered column */
+            margin: 0;
+            flex: 1;                   /* fill the viewport height */
+            min-height: 0;             /* let messages-area scroll instead of clipping */
+            background: transparent;
+            border: none;
+            border-radius: 0;
+            box-shadow: none;
             display: flex;
             flex-direction: column;
-            height: calc((100vh - 180px) * 1.1);
         }
 
         .messages-area {
             flex: 1;
             overflow-y: auto;
+            min-height: 0;             /* flex child must shrink to scroll, not clip */
             padding: 24px;
             display: flex;
             flex-direction: column;
@@ -253,8 +255,14 @@
             padding: 4px 6px;
             font-size: 0.85rem;
             line-height: 1;
-            transition: background 0.2s, color 0.2s;
+            transition: background 0.2s, color 0.2s, opacity 0.15s;
             z-index: 2;
+        }
+
+        /* Copy button only on hover (desktop). Touch devices have no hover → keep it visible. */
+        @media (hover: hover) {
+            .copy-btn { opacity: 0; }
+            .message:hover .copy-btn { opacity: 1; }
         }
 
         .copy-btn:hover {
@@ -377,7 +385,7 @@
 
         .input-area {
             padding: 16px 24px;
-            background: rgba(2, 6, 23, 0.8);
+            background: transparent;   /* nix box: no bottom bar fill */
             display: flex;
             gap: 16px;
             align-items: flex-end;
@@ -430,6 +438,7 @@
         }
         .send-button svg { width: 24px; height: 24px; display: block; }
         .send-button.rec { color: rgb(176, 36, 24); }   /* mic recording */
+        .send-button.exit-btn { color: rgb(176, 36, 24); border-color: rgba(176, 36, 24, 0.55); }  /* leave UI mode */
 
         .send-button:hover:not(:disabled) { background: rgba(255, 255, 255, 0.12); }
 
@@ -574,6 +583,7 @@
             <button class="send-button" id="micBtn" title="Einmal sprechen" aria-label="Per Stimme diktieren"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10v2a7 7 0 0 0 14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg></button>
             <button class="send-button toggle-btn" id="wakeBtn" title="Solita-Weckwort an/aus" aria-label="Solita per Weckwort aktivieren"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8.5a6.5 6.5 0 1 1 13 0c0 6-6 6-6 10a3.5 3.5 0 1 1-7 0"/><path d="M6.5 12.5a3.5 3.5 0 1 1 7 0c0 2.5-2 2.5-2 5"/></svg></button>
             <button class="send-button" id="sendButton">GO</button>
+            <button class="send-button exit-btn" id="exitUiBtn" style="display:none" title="UI-Modus verlassen">EXIT</button>
         </div>
 
     </div>
@@ -584,6 +594,7 @@
         // server-side against the LABAI_PASSWORD secret. (Old in-source encrypted key was rotated +
         // removed 2026-06-09.)
         const AI_URL  = 'https://fyfhxzyymmurlaenmzse.supabase.co/functions/v1/claude';
+        const SOLITA_CONFIG_URL = 'https://fyfhxzyymmurlaenmzse.supabase.co/functions/v1/solita-config'; // Stufe 2a: Solita patcht HTML/config.json live
         const SB_ANON = 'sb_publishable_ubQDiMD-X3N0vZvPVi229Q_-5Zootfk'; // publishable anon key — client-safe
         let conversationHistory = [];
 
@@ -648,6 +659,24 @@
         const messagesArea = document.getElementById('messagesArea');
         const messageInput = document.getElementById('messageInput');
         const sendButton = document.getElementById('sendButton');
+        const exitUiBtn = document.getElementById('exitUiBtn');
+
+        // UI-Änderungs-Modus (primer): when ON, every message is a live config change via solita-config.
+        let uiMode = false;
+        function setUiMode(on) {
+            uiMode = on;
+            messageInput.placeholder = on
+                ? '🔧 UI-Modus — was ändern? („fertig" oder EXIT beendet)'
+                : 'Du hast sicher Fragen ... schreib sie hier!';
+            if (exitUiBtn) exitUiBtn.style.display = on ? 'inline-flex' : 'none';
+        }
+        if (exitUiBtn) exitUiBtn.addEventListener('click', () => {
+            if (!uiMode) return;
+            setUiMode(false);
+            addMessage('assistant', 'UI-Modus aus. 🔧');
+            if (window.speakReply) window.speakReply('Alles klar.');
+            messageInput.focus();
+        });
         messageInput.value = '';
 
         const MODEL_KEY = 'ai_model';
@@ -927,6 +956,63 @@
                 return;
             }
 
+            // ---- UI-Änderungs-Modus (primer) + Einzelbefehl "stell ein: …" → solita-config (live config) ----
+            // In UI-Modus ist JEDER Satz eine Config-Änderung; rein via "UI Änderung"/"Änderung UI", raus via
+            // "fertig"/EXIT. "stell ein: …" wirkt auch ohne Modus als Einzelbefehl. Nicht in den Chat gepusht.
+            const t = userText.trim();
+            const wantsEnterUi = (/\bui\b/i.test(t) && /änder|aender/i.test(t)) || /aussehen\s*änder/i.test(t);
+            const wantsExitUi  = /^(fertig|ende|stop+|schluss|ui\s*aus|raus|normal)\b/i.test(t);
+            const oneShot = t.match(/^\s*(?:solita[\s,:]*)?(?:stell\s+ein|config|konfiguration)\b[\s:]*(.+)/is);
+
+            if (uiMode && wantsExitUi) {                         // leave UI mode
+                addMessage('user', userText);
+                messageInput.value = ''; messageInput.style.height = 'auto';
+                setUiMode(false);
+                addMessage('assistant', 'UI-Modus aus. 🔧');
+                if (window.speakReply) window.speakReply('Alles klar.');
+                return;
+            }
+            if (!uiMode && wantsEnterUi && !oneShot) {           // enter UI mode
+                addMessage('user', userText);
+                messageInput.value = ''; messageInput.style.height = 'auto';
+                setUiMode(true);
+                addMessage('assistant', 'UI-Modus an — sag mir, was ich ändern soll (z. B. „mach die Uhr grün"). „fertig" oder EXIT beendet.');
+                if (window.speakReply) window.speakReply('UI-Modus an. Was soll ich ändern?');
+                return;
+            }
+            if (uiMode || (oneShot && oneShot[1].trim())) {      // a config instruction
+                const instruction = oneShot ? oneShot[1].trim() : t;
+                addMessage('user', userText);
+                messageInput.value = ''; messageInput.style.height = 'auto';
+                sendButton.disabled = true;
+                showTyping();
+                try {
+                    const r = await fetch(SOLITA_CONFIG_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'apikey': SB_ANON, 'Authorization': `Bearer ${SB_ANON}`, 'x-app-pass': pwd },
+                        body: JSON.stringify({ instruction })
+                    });
+                    const data = await r.json().catch(() => ({}));
+                    hideTyping();
+                    if (!r.ok) {
+                        let err = `Fehler ${r.status}`;
+                        if (r.status === 401) err = 'Falsches Passwort';
+                        else if (data && data.error) err += ' — ' + data.error;
+                        addMessage('assistant', `❌ Config: ${err}`);
+                    } else {
+                        addMessage('assistant', `✓ Eingestellt (config v${data.version}).`);
+                        if (window.speakReply) window.speakReply('Erledigt.');
+                    }
+                } catch (e) {
+                    hideTyping();
+                    addMessage('assistant', `❌ Config: ${e.message || e}`);
+                } finally {
+                    sendButton.disabled = false;
+                    messageInput.focus();
+                }
+                return;
+            }
+
             addMessage('user', userText);
             messageInput.value = '';
             messageInput.style.height = 'auto';
@@ -1011,6 +1097,22 @@
             function reflectTts() { if (ttsBtn) ttsBtn.classList.toggle('active', ttsOn); }
             reflectTts();
 
+            // Pick a GOOD German voice — the browser default is often the robotic one. Prefer Chrome's
+            // natural "Google Deutsch", then named female macOS voices (Solita's persona), then any German.
+            // getVoices() loads async, so also re-pick on 'voiceschanged'. (Same approach as the glocken lab.)
+            let chosenVoice = null;
+            function pickVoice() {
+                if (!('speechSynthesis' in window)) return;
+                const voices = window.speechSynthesis.getVoices();
+                if (!voices.length) return;
+                const google = voices.find(v => /^de/i.test(v.lang) && /Google/i.test(v.name));
+                const femaleDE = voices.find(v => /^de(-DE)?/i.test(v.lang) && /Anna|Petra|Helena|Katja|Hedda/i.test(v.name));
+                const anyDE = voices.find(v => /^de(-DE)?/i.test(v.lang));
+                chosenVoice = google || femaleDE || anyDE || voices[0];
+            }
+            pickVoice();
+            if ('speechSynthesis' in window) window.speechSynthesis.addEventListener('voiceschanged', pickVoice);
+
             // Read the assistant's reply aloud (called from sendMessage). Strip light markdown first.
             window.speakReply = function (text) {
                 if (!ttsOn || !('speechSynthesis' in window) || !text) return;
@@ -1018,6 +1120,10 @@
                     const clean = String(text).replace(/[*_`#>]/g, '').replace(/\s+/g, ' ').trim();
                     const u = new SpeechSynthesisUtterance(clean);
                     u.lang = 'de-DE';
+                    if (!chosenVoice) pickVoice();          // voices may have loaded since init
+                    if (chosenVoice) u.voice = chosenVoice;
+                    u.rate = 0.96;                          // a touch slower = calmer, less synthetic
+                    u.pitch = 1.0;
                     window.speechSynthesis.cancel();   // never queue stale speech
                     window.speechSynthesis.speak(u);
                 } catch (e) { }

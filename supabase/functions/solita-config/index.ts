@@ -96,7 +96,8 @@ Deno.serve(async (req) => {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-api-key': key, 'anthropic-version': ANTHROPIC_VERSION },
       body: JSON.stringify({
-        model: MODEL, max_tokens: 4000, temperature: 0,
+        // NOTE: no `temperature` — Claude 4.x models reject it with HTTP 400 (deprecated).
+        model: MODEL, max_tokens: 4000,
         system: sys,
         messages: [{ role: 'user', content: 'AKTUELLE config.json:\n' + JSON.stringify(curObj, null, 2) + '\n\nANWEISUNG:\n' + instruction }],
       }),
