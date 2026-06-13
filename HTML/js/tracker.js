@@ -28,6 +28,18 @@
         L.control.zoom({ position: 'bottomright' }).addTo(map);
         map.attributionControl.setPrefix(false); // drop the "Leaflet" prefix → shorter bar, stays out from under START
 
+        // Smooth two-finger pinch WITHOUT making the (Magic-Mouse) wheel floaty: the wheel/buttons keep
+        // zoomSnap=1 (clean integer steps), but for the duration of a pinch we drop to 0 so it settles
+        // exactly where you lift your fingers — no snap-back "Klingklang". Restored right after the
+        // gesture (deferred so Leaflet's own touchend has already computed the stepless target).
+        const _mapEl = map.getContainer();
+        _mapEl.addEventListener('touchstart', (e) => {
+            if (e.touches && e.touches.length >= 2) map.options.zoomSnap = 0;
+        }, { passive: true });
+        _mapEl.addEventListener('touchend', () => {
+            setTimeout(() => { map.options.zoomSnap = 1; }, 0);
+        }, { passive: true });
+
         // Persist the map viewport (pan + zoom) across reloads: a hard-reload reopens where you
         // last were instead of snapping back. A restored view WINS over the start-up GPS snap
         // (see `viewRestored` in the acquire watch); GPS auto-follow while tracking still takes over.
