@@ -155,7 +155,7 @@
             flex-direction: column;
             gap: 18px;
             scroll-behavior: smooth;
-            scrollbar-color: #5a2080 #0a0f2a;
+            scrollbar-color: rgba(72, 88, 112, 0.9) #0a0f2a;
             scrollbar-width: thin;
         }
 
@@ -185,14 +185,14 @@
         }
 
         .message-content pre::-webkit-scrollbar-thumb {
-            background: #5a2080;
+            background: rgba(72, 88, 112, 0.9);
             border-radius: 10px;
         }
 
         .messages-area::-webkit-scrollbar-thumb,
         .message-input::-webkit-scrollbar-thumb,
         .message-content pre::-webkit-scrollbar-thumb {
-            background: #5a2080;
+            background: rgba(72, 88, 112, 0.9);
             border-radius: 10px;
         }
 
@@ -259,10 +259,10 @@
             z-index: 2;
         }
 
-        /* Copy button only on hover (desktop). Touch devices have no hover → keep it visible. */
+        /* Copy button only on hover INSIDE the box (not the full-width row). Touch: no hover → stays visible. */
         @media (hover: hover) {
             .copy-btn { opacity: 0; }
-            .message:hover .copy-btn { opacity: 1; }
+            .message-content:hover .copy-btn { opacity: 1; }
         }
 
         .copy-btn:hover {
@@ -290,7 +290,7 @@
             overflow-x: auto;
             margin: 8px 0;
             border-left: 3px solid #00d2ff;
-            scrollbar-color: #5a2080 #1a0a2e;
+            scrollbar-color: rgba(72, 88, 112, 0.9) #1a0a2e;
             scrollbar-width: thin;
         }
 
@@ -663,8 +663,9 @@
         let uiMode = false;
         function setUiMode(on) {
             uiMode = on;
+            window.__uiMode = on;   // let the voice recognizer (wake-word) know we're in UI mode
             messageInput.placeholder = on
-                ? '🔧 UI-Modus — was ändern? („fertig" oder EXIT beendet)'
+                ? '🔧 UI-Modus — Wunsch, dann „go" (oder 4 s Pause). „fertig"/EXIT beendet.'
                 : 'Du hast sicher Fragen ... schreib sie hier!';
             if (exitUiBtn) exitUiBtn.style.display = on ? 'inline-flex' : 'none';
         }
@@ -958,7 +959,7 @@
             // In UI-Modus ist JEDER Satz eine Config-Änderung; rein via "UI Änderung"/"Änderung UI", raus via
             // "fertig"/EXIT. "stell ein: …" wirkt auch ohne Modus als Einzelbefehl. Nicht in den Chat gepusht.
             const t = userText.trim();
-            const wantsEnterUi = (/\bui\b/i.test(t) && /änder|aender/i.test(t)) || /aussehen\s*änder/i.test(t);
+            const wantsEnterUi = (/\bui\b/i.test(t) && /(adjust|change|edit|tune|tweak|adapt|änder|aender|anpass)/i.test(t)) || /\bui[\s-]?mode\b/i.test(t);
             const wantsExitUi  = /^(fertig|ende|stop+|schluss|ui\s*aus|raus|normal)\b/i.test(t);
             const oneShot = t.match(/^\s*(?:solita[\s,:]*)?(?:stell\s+ein|config|konfiguration)\b[\s:]*(.+)/is);
 
@@ -974,8 +975,8 @@
                 addMessage('user', userText);
                 messageInput.value = ''; messageInput.style.height = 'auto';
                 setUiMode(true);
-                addMessage('assistant', 'UI-Modus an — sag mir, was ich ändern soll (z. B. „mach die Uhr grün"). „fertig" oder EXIT beendet.');
-                if (window.speakReply) window.speakReply('UI-Modus an. Was soll ich ändern?');
+                addMessage('assistant', 'UI-Modus an — sag deinen Wunsch, dann „go" (oder 4 s Pause). „fertig"/EXIT beendet.');
+                if (window.speakReply) window.speakReply('UI-Modus an. Sag deinen Wunsch, dann go.');
                 return;
             }
             if (uiMode || (oneShot && oneShot[1].trim())) {      // a config instruction
@@ -1189,7 +1190,11 @@
             window.speakReply = function (text) {
                 if (wakeOn && rec) { speaking = true; try { rec.stop(); } catch (e) { } }
                 if (typeof _speak === 'function') _speak(text);
-                const resume = () => { speaking = false; if (wakeOn) startRec(); };
+                const askedSomething = /\?[\s"')\]]*$/.test(String(text || '').trim()); // Solita ended on a question
+                const resume = () => {
+                    speaking = false;
+                    if (wakeOn) { startRec(); if (askedSomething && !window.__uiMode) awaitingQuery = true; } // → answer without "Solita"
+                };
                 try {
                     if (window.speechSynthesis) {
                         const iv = setInterval(() => {
@@ -1222,6 +1227,31 @@
                 if (typeof sendMessage === 'function') setTimeout(sendMessage, 700);
             }
 
+            // UI-mode voice flow (Doc): once in UI mode, speak the wish freely (no "Solita" needed),
+            // then "go" OR a 4 s pause submits it; "fertig" leaves. (sendMessage routes UI-mode text to config.)
+            let uiTimer = null;
+            function uiExec() {
+                if (uiTimer) { clearTimeout(uiTimer); uiTimer = null; }
+                if (input && input.value.trim() && typeof sendMessage === 'function') sendMessage();
+            }
+            function handleUiVoice(txt) {
+                if (/^\s*(fertig|exit|stopp?|ende|raus)\b/i.test(txt)) {   // leave UI mode
+                    if (uiTimer) { clearTimeout(uiTimer); uiTimer = null; }
+                    if (input) { input.value = txt; input.dispatchEvent(new Event('input')); }
+                    if (typeof sendMessage === 'function') sendMessage();
+                    return;
+                }
+                const sawGo = /\bgo\b/i.test(txt);
+                const cmd = txt.replace(/\bgo\b.*$/i, '').trim();          // text before "go"
+                if (cmd && input) {
+                    input.value = (input.value.trim() ? input.value.trim() + ' ' : '') + cmd;
+                    input.dispatchEvent(new Event('input'));
+                }
+                if (sawGo) { uiExec(); return; }                          // "go" → submit now
+                if (uiTimer) clearTimeout(uiTimer);                       // else (re)start the 4 s pause-timer
+                uiTimer = setTimeout(uiExec, 4000);
+            }
+
             function onResult(e) {
                 if (speaking) return;
                 let txt = '';
@@ -1230,6 +1260,7 @@
                 }
                 txt = txt.trim();
                 if (!txt) return;
+                if (window.__uiMode) { handleUiVoice(txt); return; }  // UI mode: accumulate + go/pause
                 if (awaitingQuery) { fire(txt); return; }            // wake word already heard last round
                 const q = extractQuery(txt);
                 if (q !== null) fire(q);                              // phrase contained "Solita …"
