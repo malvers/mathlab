@@ -12,7 +12,7 @@ window.TrackerSpeedLimit = function (ctx) {
     const MIN_MOVE_M = 90;         // …and only after this much travel — limits change per road segment
     const QUERY_TIMEOUT_MS = 9000; // abort a stuck request so `fetching` can never freeze the sign forever
     const OVER_TOL_KMH = 3;        // grace before turning the sign red (GPS speed noise)
-    const BING_FACTOR = 1.10;      // play the bell once you're ~10 % over the limit
+    const BING_OVER_KMH = 8;      // play the bell once you're this many km/h over the limit (absolute)
     const BING_REPEAT_MS = 12000;  // …and re-remind at most this often while still over
 
     let lastQ = 0;          // timestamp of the last Overpass query
@@ -164,8 +164,8 @@ window.TrackerSpeedLimit = function (ctx) {
     function update(here, still, speedKmh) {
         if (typeof curLimit === 'number' && speedKmh != null) {
             setSign(curLimit, speedKmh > curLimit + OVER_TOL_KMH);
-            // ~10 % over the limit → the small bell. Re-reminds every BING_REPEAT_MS while still over.
-            if (speedKmh > curLimit * BING_FACTOR) {
+            // 8 km/h over the limit → the small bell. Re-reminds every BING_REPEAT_MS while still over.
+            if (speedKmh > curLimit + BING_OVER_KMH) {
                 if (Date.now() - lastBing > BING_REPEAT_MS) { bing(); lastBing = Date.now(); }
             } else if (speedKmh <= curLimit) {
                 lastBing = 0; // back to legal → re-arm so the next exceedance chimes immediately
