@@ -355,16 +355,56 @@
             }
             updateLiveStats();
         }
+        // ---- viewer-facing connection errors, so one KNOWS why nothing shows (no dev console needed) ----
+        const SUPA_HOST = 'fyfhxzyymmurlaenmzse.supabase.co'; // shown in errors so a viewer can check it (reuses esc() above)
+        function showMsg(html) { const m = $('msg'); m.innerHTML = html; m.classList.remove('hidden'); }
+        function hideMsg() { $('msg').classList.add('hidden'); }
+        function isNetworkErr(e) {
+            const s = String((e && (e.message || e)) || '').toLowerCase();
+            return s.includes('fetch') || s.includes('network') || s.includes('load failed') || s.includes('failed to');
+        }
+        // The full-screen overlay with a plain-language reason. ws=true → the live WebSocket path,
+        // which is the one corporate firewalls / proxies usually block (HTTPS works, WS does not).
+        function connErrHtml(headline, ws) {
+            return '<div style="max-width:23em;margin:auto;line-height:1.55">'
+                + '<div style="color:var(--orange);font-weight:700;margin-bottom:10px">' + headline + '</div>'
+                + (ws ? 'Die Karte lädt, aber die <b>Live-Daten</b> kommen nicht durch.<br><br>'
+                    : 'Der Server ist nicht erreichbar.<br><br>')
+                + 'Meist blockt ein <b>Firmen-/Schul-Netz, VPN oder Adblocker</b> '
+                + (ws ? 'die <b>WebSocket</b>-Verbindung ' : 'die Verbindung ')
+                + 'zu <code style="font-size:.85em">' + SUPA_HOST + '</code>.<br><br>'
+                + '<b>Tipp:</b> anderes Netz (Mobilfunk/Hotspot), VPN/Adblock aus.'
+                + '<div style="margin-top:14px"><button onclick="location.reload()" '
+                + 'style="padding:9px 16px;border:none;border-radius:10px;background:var(--orange);color:#14110a;font-weight:700;cursor:pointer">Neu versuchen</button></div>'
+                + '</div>';
+        }
+
         function goLive(key) {
+            showMsg('Verbinde mit Live „' + esc(key) + '" …');
+            let gotData = false, timer = null;
+            const arm = (ms, fn) => { if (timer) clearTimeout(timer); timer = setTimeout(fn, ms); };
+            // Nothing arrived in time → the WebSocket almost certainly can't reach the server.
+            arm(9000, () => { if (!gotData) showMsg(connErrHtml('Keine Verbindung', true)); });
+            const markLive = () => { if (!gotData) { gotData = true; if (timer) clearTimeout(timer); hideMsg(); } };
+
             const ch = sb.channel('live:' + key, { config: { broadcast: { self: false } } });
-            ch.on('broadcast', { event: 'trail' }, ({ payload }) => onLiveTrail(payload && payload.pts));
-            ch.on('broadcast', { event: 'pos' }, ({ payload }) => onLivePos(payload));
+            ch.on('broadcast', { event: 'trail' }, ({ payload }) => { markLive(); onLiveTrail(payload && payload.pts); });
+            ch.on('broadcast', { event: 'pos' }, ({ payload }) => { markLive(); onLivePos(payload); });
             ch.on('broadcast', { event: 'photo' }, ({ payload }) => onLivePhoto(payload));
             ch.on('broadcast', { event: 'end' }, () => { const b = $('live-badge'); if (b) b.textContent = '■ beendet'; });
             // On (re)connect, ask the sender for the current state → a reload fills instantly
             // instead of waiting for the next periodic trail (~15 s).
             ch.subscribe((status) => {
-                if (status === 'SUBSCRIBED') ch.send({ type: 'broadcast', event: 'request', payload: {} });
+                if (status === 'SUBSCRIBED') {
+                    ch.send({ type: 'broadcast', event: 'request', payload: {} });
+                    // Connected, but the sender may not be broadcasting right now → tell the viewer (not an error).
+                    arm(7000, () => {
+                        if (!gotData) showMsg('Verbunden — warte auf Live-Daten von „' + esc(key) + '" …'
+                            + '<br><span style="opacity:.6;font-size:.85em">Läuft die Aufzeichnung von „' + esc(key) + '" gerade?</span>');
+                    });
+                } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
+                    if (!gotData) showMsg(connErrHtml('Live-Verbindung fehlgeschlagen (' + status + ')', true));
+                }
             });
         }
 
@@ -415,8 +455,8 @@
         async function load(token) {
             let row;
             try { row = await fetchRow(token); }
-            catch (e) { $('msg').textContent = 'Konnte den Track nicht laden: ' + (e.message || e); return; }
-            if (!row) { $('msg').textContent = 'Track nicht gefunden — der Link ist ungültig oder wurde widerrufen.'; return; }
+            catch (e) { showMsg(isNetworkErr(e) ? connErrHtml('Server nicht erreichbar', false) : 'Konnte den Track nicht laden: ' + esc(e.message || e)); return; }
+            if (!row) { showMsg('Track nicht gefunden — der Link ist ungültig oder wurde widerrufen.'); return; }
             applyRow(row);
             setInterval(async () => {                          // keep the shared view live
                 try { const r = await fetchRow(token); if (r) applyRow(r); }
@@ -428,10 +468,10 @@
         async function loadMulti(tokens) {
             trackLayer.clearLayers();
             wpMarkers.forEach(m => map.removeLayer(m)); wpMarkers = []; waypoints = [];
-            const all = [], names = []; let totalDist = 0;
+            const all = [], names = []; let totalDist = 0, anyNet = false;
             for (let i = 0; i < tokens.length; i++) {
                 let row;
-                try { row = await fetchRow(tokens[i]); } catch (_) { continue; }
+                try { row = await fetchRow(tokens[i]); } catch (e) { if (isNetworkErr(e)) anyNet = true; continue; }
                 if (!row) continue;
                 const pts = (row.points || []).filter(p => p && p[0] != null);
                 if (pts.length) {
@@ -449,7 +489,7 @@
                 totalDist += row.distance_m || 0;
                 names.push(row.name || 'Track');
             }
-            if (!names.length) { $('msg').textContent = 'Keine Tracks gefunden — Link ungültig oder widerrufen.'; return; }
+            if (!names.length) { showMsg(anyNet ? connErrHtml('Server nicht erreichbar', false) : 'Keine Tracks gefunden — Link ungültig oder widerrufen.'); return; }
             $('trk-name').textContent = names.length + ' Tracks';
             setStats({ distM: totalDist, durMs: 0, fotos: waypoints.length, speedKmh: 0 });
             if (all.length) map.fitBounds(L.latLngBounds(all), { padding: [50, 50] });
@@ -474,7 +514,8 @@
         if (_liveName) {
             $('trk-name').textContent = _liveName;
             setStats({ distM: 0, durMs: 0, showFotos: false }); // FOTO tile reveals once the first thumbnail lands
-            $('msg').classList.add('hidden');
+            // goLive() now owns the overlay: it shows "Verbinde …", then hides on first data or
+            // shows a clear firewall/WebSocket message on failure.
             goLive(_liveName.trim().toLowerCase());
         } else if (_token) {
             const _toks = _token.split(',').map(s => s.trim()).filter(Boolean);

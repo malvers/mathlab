@@ -53,3 +53,64 @@ live in der App** — ohne je die Claude-App zu öffnen, ohne SDK im Client.
 - Claude Code programmatisch / headless — https://code.claude.com/docs/en/headless
 - Routine via API feuern — https://platform.claude.com/docs/en/api/claude-code/routines-fire
 - Messages API (Stufe 1) — https://platform.claude.com/docs/en/api/messages
+
+---
+
+## ✅ Stufe 1 GEBAUT (2026-06-12) — „Solita" (Client fertig, Backend-Deploy = Doc)
+Aus `labai.html` wurde **`HTML/solita.html`** (git-rename, Verlauf erhalten). Gebaut:
+- **Claude-Edge-Function** `supabase/functions/claude/index.ts` — Passwort-Gate (`x-app-pass` gegen
+  `LABAI_PASSWORD`), übersetzt die OpenAI-förmige Anfrage auf die **Anthropic Messages API** und gibt
+  wieder `choices[0].message.content` zurück (Client bleibt fast gleich). **Kein Key im Repo** (nur
+  `Deno.env.get('ANTHROPIC_API_KEY')`).
+- **solita.html** zeigt jetzt auf `/functions/v1/claude`, Modell-Auswahl **OPUS 4.8 · SONNET 4.6 (default)
+  · HAIKU 4.5**, Persona-System-Prompt, **Kontext-Zusammenfassung** (ältere Turns werden per Haiku in eine
+  rollende Summary gefaltet statt vergessen), **Wake-Word „Solita"** (Dauer-Zuhören, pausiert beim
+  Vorlesen; Web-Vordergrund — echtes Hintergrund-Wecken bleibt nativ/krass), **XSS-Fix** (WP-5: AI-Text
+  wird vor dem Markdown-Rendern escaped). Vorlesen (TTS) war schon da.
+
+### Deploy (DU, einmalig — Agent setzt keine Secrets):
+```
+supabase functions deploy claude --no-verify-jwt
+```
+Dann in **Supabase → Edge Functions → Secrets** setzen:
+- `ANTHROPIC_API_KEY` = ein Claude-API-Key (console.anthropic.com)
+- `LABAI_PASSWORD` = dasselbe Login-Passwort wie bei labai/deepseek (existiert schon)
+
+Danach `solita.html` öffnen → Passwort eingeben → reden/tippen. ⚠️ Bis zum Deploy antwortet Solita mit
+Fehler (Function fehlt). **Sicherheit offen:** DeepSeek-Key (AUDIT **S3**) in der alten labai-Krypto ist
+toter Code, aber noch **nicht rotiert** — bei Gelegenheit rotieren + den vestigialen Blob aus solita.html
+entfernen.
+
+### Stufe 2 — Solita arbeitet AUF forloop (Wunsch → Repo-Änderung → push). Design 2026-06-12.
+Aufgeteilt in **2a (bounded, zuerst)** und **2b (voller Code-Agent, später)** — passt zu Docs „step by step".
+
+**Stufe 2a — nur Config ändern (sicher, KEIN VPS, baut auf Idee 19 Live-Config):**
+Solita ändert ausschließlich **`HTML/config.json`** (deklarativ, kein Code). Schließt den „Future Now"-Kreis:
+„Solita, mach das Navi-Banner grün" → live in der App, ohne Neuinstallation.
+- **Fluss:** App/Solita → **Edge Function `solita-config`** (hält GitHub-Token als Secret) → Claude
+  übersetzt den Wunsch in einen **config.json-Patch** (structured output gegen das Schema in
+  `plan-fernsteuerung-remote-config.md`) → **validieren & clampen** → Commit von `config.json` via
+  **GitHub Contents API** → `tracker-config.js` zieht es (Realtime/Poll) → sofort sichtbar.
+- **Sicherheit:** Token **repo-scoped** (fine-grained, nur forloop, Contents:write); Function schreibt
+  **nur `config.json`** (Pfad-Whitelist); Claude-Output gegen Schema validiert + geclampt (kaputter Wert
+  kann die UI nicht zerlegen); kein Code → begrenzter Blast-Radius. Alles server-seitig, **kein Secret im
+  Repo** (Regel 18).
+- **Code schon da (inert):** `supabase/functions/solita-config/index.ts` ist fertig geschrieben, aber
+  **NICHT deployt und NICHT in solita.html eingehängt** → tut nichts, bis Doc es bewusst scharf schaltet
+  (eine KI committet damit in den public main — Docs Entscheidung). Schreibt ausschließlich
+  `HTML/config.json` (Pfad-Whitelist), validiert + bumpt `version` server-seitig.
+- **Doc braucht zum Aktivieren:** GitHub-Token (fine-grained, nur forloop, Contents:write) als Secret
+  `GITHUB_TOKEN`, dann `supabase functions deploy solita-config --no-verify-jwt --project-ref fyfhxzyymmurlaenmzse`,
+  und einen Auslöser in solita.html (z. B. „Solita, config: …"). **Reuse:** Live-Config-Demo steht schon.
+
+**Stufe 2b — beliebige Code-Änderungen (später, höheres Risiko):**
+Für echtes „ändere den Code & pushe" — App bleibt nur Fernbedienung, Agent server-seitig:
+1. **Claude Code Routines** (Anthropic-gehostet, kein eigener Server): Routine an forloop binden; App POSTet
+   Trigger (Token in Edge Function). Abrechnung = Claude-Code-Abo. Status Beta → vor Bau verifizieren.
+2. **Claude Agent SDK auf kleinem VPS** (volle Kontrolle): Endpoint nimmt den Wunsch, SDK fährt
+   Read/Edit/Bash/git, committet/pusht. Abrechnung = API. Mehr Setup, volle Freiheit.
+- **Guardrails (beide):** Solita pusht auf einen **`solita/*`-Branch** (nie direkt main, kein Force-Push) →
+  Doc merged (genau wie der OTWA-Flow). Agent-Scope/Rechte eng, Secrets server-seitig.
+
+**Empfehlung:** **2a zuerst** (sicher, demobar, kein VPS, schließt den Live-Config-Kreis), **2b** als Kür,
+wenn 2a steht.

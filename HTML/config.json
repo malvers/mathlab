@@ -1,18 +1,174 @@
 {
-  "_readme": "Live-Config fuer den Tracker (docalvers.de/config.json). Wert aendern -> commit + push -> die App uebernimmt es beim naechsten Poll, OHNE Reload. Nur Aussehen/Parameter, keine Logik.",
-  "version": 1,
+  "_readme": "Live-Config fuer den Tracker (docalvers.de/config.json). Wert aendern -> commit + push -> die App uebernimmt es beim naechsten Poll (alle 20s), OHNE Reload. Nur Aussehen/Parameter, keine Logik. Alles mit fuehrendem _ ist Doku und wird von der App ignoriert (JSON erlaubt keine //-Kommentare). LIVE-Werte stehen in theme/navBanner/controls; _palette = Marken-Farbtokens; _schema = Ontologie (Bedeutung, Typ, Grenzen, Sprach-Aliase fuer Solita).",
+  "version": 6,
+  "_palette": {
+    "_note": "Benanntes Marken-Vokabular. Solita: 'mach es Phi/Lambda' -> rgb-Wert.",
+    "lambda": {
+      "rgb": "rgb(245,194,66)",
+      "aka": [
+        "orange",
+        "λ"
+      ]
+    },
+    "ypsilon": {
+      "rgb": "rgb(176,36,24)",
+      "aka": [
+        "rot",
+        "Υ"
+      ]
+    },
+    "phi": {
+      "rgb": "rgb(121,158,49)",
+      "aka": [
+        "gruen",
+        "φ"
+      ]
+    },
+    "weiss": {
+      "rgb": "#ffffff",
+      "aka": [
+        "weiss",
+        "white"
+      ]
+    }
+  },
   "theme": {
+    "_note": "Farben der Tracker-Anzeige. Doku/Grenzen siehe _schema.",
     "colors": {
-      "statColor": "rgb(245,194,66)"
+      "statColor": "rgb(245,194,66)",
+      "clockColor": "rgb(121,158,49)"
     }
   },
   "navBanner": {
-    "bg": "rgb(24,128,56)",
+    "_note": "Navi-Banner oben (Farbe + Layout). Doku/Grenzen siehe _schema.",
+    "bg": "rgb(121,158,49)",
     "zIndex": 480,
     "offsetY": 0
   },
   "controls": {
+    "_note": "START/PAUSE/STOP-Knoepfe. Doku/Grenzen siehe _schema.",
     "color": "#ffffff",
     "weight": 800
+  },
+  "_schema": {
+    "_note": "Ontologie der customisierbaren Schrauben. 'path' = wo der LIVE-Wert steht; 'kind/unit/range/enum' = was erlaubt ist; 'token' = aktuelles Palette-Token; 'aliases' = Sprachbegriffe, ueber die Solita die Schraube findet.",
+    "knobs": [
+      {
+        "id": "stat.color",
+        "path": "theme.colors.statColor",
+        "label": "Zahlen unter der Uhr (km/h, Distanz, Hoehe)",
+        "kind": "color",
+        "token": "lambda",
+        "default": "rgb(245,194,66)",
+        "aliases": [
+          "Zahlen",
+          "Werte",
+          "Stats",
+          "Tempo-Zahlen",
+          "km/h-Zahlen"
+        ]
+      },
+      {
+        "id": "clock.color",
+        "path": "theme.colors.clockColor",
+        "label": "Uhr (Zifferblatt / Zeiger / Ziffern)",
+        "kind": "color",
+        "token": "phi",
+        "default": "rgb(121,158,49)",
+        "aliases": [
+          "Uhr",
+          "Zifferblatt",
+          "Ziffern",
+          "Zeiger"
+        ]
+      },
+      {
+        "id": "nav.bg",
+        "path": "navBanner.bg",
+        "label": "Hintergrund des Navi-Banners",
+        "kind": "color",
+        "token": "phi",
+        "default": "rgb(121,158,49)",
+        "aliases": [
+          "Banner",
+          "Navi",
+          "Navigationsleiste",
+          "Leiste oben"
+        ]
+      },
+      {
+        "id": "nav.z",
+        "path": "navBanner.zIndex",
+        "label": "Stapel-Reihenfolge des Banners",
+        "kind": "number",
+        "unit": "layer",
+        "range": [
+          0,
+          1000
+        ],
+        "default": 480,
+        "aliases": [
+          "nach vorne",
+          "nach hinten",
+          "ueber alles",
+          "ganz unten",
+          "Stapel"
+        ]
+      },
+      {
+        "id": "nav.dy",
+        "path": "navBanner.offsetY",
+        "label": "Banner vertikal verschieben",
+        "kind": "number",
+        "unit": "px",
+        "range": [
+          0,
+          300
+        ],
+        "default": 0,
+        "aliases": [
+          "nach unten",
+          "nach Sueden",
+          "tiefer",
+          "hoeher",
+          "verschieben"
+        ]
+      },
+      {
+        "id": "controls.color",
+        "path": "controls.color",
+        "label": "Textfarbe START/PAUSE/STOP",
+        "kind": "color",
+        "token": "weiss",
+        "default": "#ffffff",
+        "aliases": [
+          "Knopf-Text",
+          "Button-Text",
+          "Beschriftung",
+          "Knopf-Farbe"
+        ]
+      },
+      {
+        "id": "controls.weight",
+        "path": "controls.weight",
+        "label": "Schriftstaerke der Knoepfe",
+        "kind": "number",
+        "unit": "font-weight",
+        "enum": [
+          400,
+          600,
+          800,
+          900
+        ],
+        "default": 800,
+        "aliases": [
+          "fett",
+          "duenn",
+          "Schriftstaerke",
+          "dicker",
+          "Boldness"
+        ]
+      }
+    ]
   }
 }

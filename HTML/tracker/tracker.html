@@ -75,10 +75,35 @@
             });
         }
     </script>
+    <!-- FEAT-19: warn when the page is served from the SW cache (server down / offline) instead of live.
+         file:// is skipped (always fresh). ?_fresh= bypasses the SW (see sw.js) for an honest probe. -->
+    <script>
+        (function () {
+            if (location.protocol !== 'http:' && location.protocol !== 'https:') return; // file:// = always fresh
+            function banner(show) {
+                var el = document.getElementById('offline-banner'); if (!el) return;
+                if (show) {
+                    var b = document.getElementById('offline-banner-build');
+                    if (b && document.lastModified) b.textContent = 'BUILD ' + document.lastModified;
+                }
+                el.style.display = show ? 'block' : 'none';
+            }
+            function probe() {
+                fetch(location.pathname + '?_fresh=' + Date.now(), { method: 'HEAD', cache: 'no-store' })
+                    .then(function (r) { banner(!r.ok); })
+                    .catch(function () { banner(true); });
+            }
+            window.addEventListener('load', probe);
+            setInterval(probe, 30000);
+        })();
+    </script>
 </head>
 
 <body>
     <div id="map"></div>
+
+    <!-- FEAT-19 banner: shown by the freshness probe above when we're on the SW cache, not the live server. -->
+    <div id="offline-banner" role="status" style="position:fixed;top:0;left:0;right:0;z-index:99999;display:none;background:rgb(176,36,24);color:#fff;font-family:'Orbitron',sans-serif;font-size:13px;font-weight:700;letter-spacing:.5px;text-align:center;padding:6px 10px;box-shadow:0 2px 10px rgba(8,20,42,.6);">⚠ SERVER DOWN / OFFLINE — gecachte Version (<span id="offline-banner-build">?</span>)</div>
 
     <!-- Top HUD -->
     <div id="hud-top">
@@ -174,6 +199,7 @@
     <div id="track-list" class="ov-panel">
         <div class="ov-title">Tracks laden</div>
         <div id="track-list-items" class="ov-body"></div>
+        <button id="tl-import" type="button">+ Geteilten Track-Link laden</button>
         <div id="tl-actions">
             <button id="tl-deselect" type="button">Abwählen</button>
             <button id="tl-sharesel" type="button">Teilen</button>
@@ -263,6 +289,19 @@
             <button class="sync-btn primary" id="mb-dem" type="button">HÖHE NACH GELÄNDEMODELL KORRIGIEREN</button>
           </div><!-- /set-card -->
 
+          <!-- Card: Strecke — statistics for the loaded/recorded track (idea #8) -->
+          <div class="set-card collapsed">
+            <div class="set-card-title">Strecke</div>
+            <p class="set-card-sub">Distanz, Tempo und Höhenmeter der angezeigten Strecke. Höhenmeter folgen der DEM-Korrektur, wenn aktiv.</p>
+            <div class="set-row"><span>Distanz</span><span id="ts-dist">…</span></div>
+            <div class="set-row"><span>Dauer</span><span id="ts-dur">…</span></div>
+            <div class="set-row"><span>Ø-Tempo</span><span id="ts-avg">…</span></div>
+            <div class="set-row"><span>Max-Tempo</span><span id="ts-max">…</span></div>
+            <div class="set-row"><span>Aufstieg ↑</span><span id="ts-up">…</span></div>
+            <div class="set-row"><span>Abstieg ↓</span><span id="ts-down">…</span></div>
+            <div class="set-row"><span>Höchster / tiefster Punkt</span><span id="ts-hilo">…</span></div>
+          </div><!-- /set-card -->
+
           <!-- Card: Statistik — actual consumption (estimate from the stored photos) -->
           <div class="set-card collapsed">
             <div class="set-card-title">Statistik</div>
@@ -290,18 +329,26 @@
           <!-- Card: Debug — show/hide the on-screen DebugWindow -->
           <div class="set-card collapsed">
             <div class="set-card-title">Debug</div>
-            <p class="set-card-sub">Das Debug-Fenster ein- oder ausblenden.</p>
             <label class="set-row" for="dbg-window-toggle" style="cursor:pointer">
               <span>Debug-Fenster anzeigen</span>
               <input type="checkbox" id="dbg-window-toggle" class="tl-check">
+            </label>
+            <label class="set-row" for="ui-fade-toggle" style="cursor:pointer">
+              <span>Bedienelemente automatisch ausblenden</span>
+              <input type="checkbox" id="ui-fade-toggle" class="tl-check">
             </label>
             <label class="set-row" for="speed-bell-toggle" style="cursor:pointer">
               <span>Glocke bei Tempo-Überschreitung</span>
               <input type="checkbox" id="speed-bell-toggle" class="tl-check">
             </label>
             <!-- Tasten-Shortcuts für Mobile (am Handy keine Tastatur): lösen die Keydowns aus -->
-            <div class="set-row">
+            <!-- Toggle blendet die Tasten-Reihe darunter ein/aus; default aus. -->
+            <label class="set-row" for="sc-keys-toggle" style="cursor:pointer">
               <span>Tasten-Shortcuts</span>
+              <input type="checkbox" id="sc-keys-toggle" class="tl-check">
+            </label>
+            <div class="set-row" id="sc-keys-row" style="display:none">
+              <span></span>
               <span class="sc-row">
                 <button class="sc-key" id="sc-d" type="button" title="Regenquelle DWD ⇄ RainViewer">d</button>
                 <button class="sc-key" id="sc-k" type="button" title="Karte dunkel/normal">k</button>

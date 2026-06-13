@@ -263,7 +263,32 @@
             if (lbp) lbp.classList.remove('show');
             if (vi) vi.classList.remove('show');
             if (lb) lb.classList.remove('lb-voice');
-            if (vid) { vid.src = wp.video || ''; vid.style.display = ''; }
+            if (vid) {
+                vid.style.display = '';
+                const _u = wp.video || '';
+                // Debug-Instrumentierung: Ladephasen + Fehler ins DEBUG-Window (Doc hat das offen, nicht DevTools).
+                if (window.DebugWindow) {
+                    const _dbg = (m) => window.DebugWindow.log(m);
+                    if (vid._dbgOff) vid._dbgOff();
+                    const _t0 = Date.now();
+                    const _dt = () => ((Date.now() - _t0) / 1000).toFixed(1) + 's';
+                    const _short = _u.length > 64 ? _u.slice(0, 50) + '…' + _u.slice(-10) : _u;
+                    _dbg('🎬 video laden: ' + (_short || '(leer/kein src!)'));
+                    if (/^blob:/.test(_u)) _dbg('🎬 ⚠ blob:-URL → NICHT hochgeladen, spielt nur am Aufnahme-Gerät!');
+                    const _meta = () => _dbg('🎬 metadata ' + _dt() + ' · ' + vid.videoWidth + '×' + vid.videoHeight + ' · ' + (vid.duration ? vid.duration.toFixed(1) + 's' : '?'));
+                    const _can  = () => _dbg('🎬 spielbar (canplay) ' + _dt());
+                    const _wait = () => _dbg('🎬 stockt (waiting/stalled) ' + _dt() + ' · ready ' + vid.readyState + ' net ' + vid.networkState);
+                    const _err  = () => { const e = vid.error, M = { 1: 'abort', 2: 'network', 3: 'decode', 4: 'src/format' }; _dbg('🎬 ✗ FEHLER ' + _dt() + ' code ' + (e ? e.code : '?') + ' (' + (e ? M[e.code] : '?') + ') net ' + vid.networkState); };
+                    vid.addEventListener('loadedmetadata', _meta);
+                    vid.addEventListener('canplay', _can);
+                    vid.addEventListener('stalled', _wait);
+                    vid.addEventListener('waiting', _wait);
+                    vid.addEventListener('error', _err);
+                    vid._dbgOff = () => { vid.removeEventListener('loadedmetadata', _meta); vid.removeEventListener('canplay', _can); vid.removeEventListener('stalled', _wait); vid.removeEventListener('waiting', _wait); vid.removeEventListener('error', _err); vid._dbgOff = null; };
+                }
+                vid.src = _u;
+                vid.load();
+            }
             $('lightbox-title').textContent = wp.title || 'Video';
             $('lightbox-text').textContent = wp.text || '';
         } else {

@@ -3,8 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-    <title>DOC ALVERS – LAB AI</title>
+    <title>SOLITA · Doc Alvers</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&display=swap" rel="stylesheet">
     <script>
         window.MathJax = {
@@ -33,10 +32,14 @@
 
         body {
             font-family: 'Orbitron', monospace;
-            background: radial-gradient(circle at 20% 30%, #0a0a2a, #030318);
-            min-height: 100vh;
-            padding: 24px;
+            background: rgb(8, 20, 42);   /* flat, calm — minimal */
+            height: 100vh;
+            padding: 0;
+            display: flex;            /* full-window flow: chat fills the viewport, no floating box */
+            flex-direction: column;
         }
+
+        #vsb-motto { display: none; }     /* minimal: drop the decorative motto */
 
         /* Branding Styles matching other labs */
         .canvas-branding {
@@ -51,12 +54,7 @@
         }
 
         .model-select {
-            position: relative;
-            flex: 1;
-            align-self: stretch;
-            font-family: 'Orbitron', sans-serif;
-            font-size: 0.95rem;
-            user-select: none;
+            display: none;   /* minimal: fixed default model (Sonnet), no picker */
         }
 
         .model-select-display {
@@ -117,54 +115,47 @@
 
         .canvas-branding h1 {
             font-family: 'Orbitron', sans-serif;
-            font-size: 22px;
+            font-size: 13px;
             margin: 0;
-            letter-spacing: 3px;
-            background: linear-gradient(to right, #00d2ff, #ffffff, #9d50bb);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-            color: transparent;
-            filter: drop-shadow(0 0 10px rgba(0, 210, 255, 0.4));
+            letter-spacing: 2px;
+            color: #4f5d78;
             text-transform: uppercase;
-            font-weight: 700;
+            font-weight: 600;
             line-height: 1.1;
         }
 
         .canvas-subtitle {
             font-family: 'Orbitron', sans-serif;
-            font-size: 11px;
-            letter-spacing: 5px;
-            color: #00d2ff;
-            margin-top: 4px;
+            font-size: 10px;
+            letter-spacing: 3px;
+            color: #6b7a99;
+            margin-top: 3px;
             text-transform: uppercase;
-            text-shadow: 0 0 7px #00d2ff;
-            opacity: 0.9;
         }
 
         .chat-container {
-            width: 86%;
-            margin: 60px auto 0 auto;
-            background: rgba(5, 7, 25, 0.65);
-            backdrop-filter: blur(12px);
-            border-radius: 10px;
-            border: 1px solid rgba(0, 210, 255, 0.4);
-            box-shadow: 0 25px 45px rgba(0, 0, 0, 0.6);
-            overflow: hidden;
+            width: 100%;               /* nix box: full-bleed, no centered column */
+            margin: 0;
+            flex: 1;                   /* fill the viewport height */
+            min-height: 0;             /* let messages-area scroll instead of clipping */
+            background: transparent;
+            border: none;
+            border-radius: 0;
+            box-shadow: none;
             display: flex;
             flex-direction: column;
-            height: calc((100vh - 180px) * 1.1);
         }
 
         .messages-area {
             flex: 1;
             overflow-y: auto;
+            min-height: 0;             /* flex child must shrink to scroll, not clip */
             padding: 24px;
             display: flex;
             flex-direction: column;
             gap: 18px;
             scroll-behavior: smooth;
-            scrollbar-color: #5a2080 #0a0f2a;
+            scrollbar-color: rgba(72, 88, 112, 0.9) #0a0f2a;
             scrollbar-width: thin;
         }
 
@@ -194,14 +185,14 @@
         }
 
         .message-content pre::-webkit-scrollbar-thumb {
-            background: #5a2080;
+            background: rgba(72, 88, 112, 0.9);
             border-radius: 10px;
         }
 
         .messages-area::-webkit-scrollbar-thumb,
         .message-input::-webkit-scrollbar-thumb,
         .message-content pre::-webkit-scrollbar-thumb {
-            background: #5a2080;
+            background: rgba(72, 88, 112, 0.9);
             border-radius: 10px;
         }
 
@@ -229,25 +220,24 @@
 
 
         .message-content {
-            max-width: 70%;
-            padding: 12px 18px;
+            max-width: 82%;
+            padding: 14px 18px;
             border-radius: 10px;
             font-family: 'Helvetica', 'Arial', sans-serif;
             font-weight: 400;
-            font-size: 0.95rem;
-            line-height: 1.45;
+            font-size: 1.08rem;
+            line-height: 1.5;
         }
 
         .message.user .message-content {
-            background: linear-gradient(125deg, #00a3cc, #5e2a84);
-            color: white;
+            background: #1b2740;
+            color: #e6edf3;
         }
 
         .message.assistant .message-content {
-            background: rgba(0, 20, 40, 0.8);
-            backdrop-filter: blur(4px);
-            color: #ccf5ff;
-            border: 1px solid #4b2c7a;
+            background: rgba(255, 255, 255, 0.04);
+            color: #e6edf3;
+            border: 1px solid rgba(255, 255, 255, 0.10);
             max-width: 80%;
             width: 80%;
             position: relative;
@@ -265,8 +255,14 @@
             padding: 4px 6px;
             font-size: 0.85rem;
             line-height: 1;
-            transition: background 0.2s, color 0.2s;
+            transition: background 0.2s, color 0.2s, opacity 0.15s;
             z-index: 2;
+        }
+
+        /* Copy button only on hover INSIDE the box (not the full-width row). Touch: no hover → stays visible. */
+        @media (hover: hover) {
+            .copy-btn { opacity: 0; }
+            .message-content:hover .copy-btn { opacity: 1; }
         }
 
         .copy-btn:hover {
@@ -294,7 +290,7 @@
             overflow-x: auto;
             margin: 8px 0;
             border-left: 3px solid #00d2ff;
-            scrollbar-color: #5a2080 #1a0a2e;
+            scrollbar-color: rgba(72, 88, 112, 0.9) #1a0a2e;
             scrollbar-width: thin;
         }
 
@@ -389,25 +385,25 @@
 
         .input-area {
             padding: 16px 24px;
-            background: rgba(2, 6, 23, 0.8);
+            background: transparent;   /* nix box: no bottom bar fill */
             display: flex;
-            gap: 16px;
+            gap: 8px;
             align-items: flex-end;
         }
 
         .message-input {
             flex: 1;
-            background: #070b1a;
-            border: 1px solid #2d2f6e;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.12);
             border-radius: 10px;
             padding: 10px 20px;
-            color: #b5f0ff;
+            color: #e6edf3;
             font-family: 'Helvetica', 'Arial', sans-serif;
-            font-size: 1rem;
+            font-size: 1.15rem;
             resize: none;
             outline: none;
-            height: 44px;
-            min-height: 44px;
+            height: 52px;
+            min-height: 52px;
             max-height: 120px;
             overflow-y: hidden;
             transition: height 0.1s ease;
@@ -417,29 +413,38 @@
 
         .message-input:focus {
             outline: none;
-            border-color: #00d2ff;
-            box-shadow: 0 0 6px #00d2ff;
+            border-color: rgba(255, 255, 255, 0.32);
         }
 
         .send-button {
-            background: linear-gradient(135deg, #00d2ff, #9d50bb);
-            border: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.12);
             border-radius: 10px;
-            padding: 12px 24px;
-            color: #ffffff;
+            padding: 0 14px;
+            color: #e6edf3;
             font-family: 'Orbitron', sans-serif;
-            font-weight: 700;
-            font-size: 0.9rem;
+            font-weight: 600;
+            font-size: 1rem;
+            letter-spacing: 1px;
+            line-height: 1;
             cursor: pointer;
-            transition: all 0.2s;
-            height: 44px;
+            transition: background 0.15s, opacity 0.15s, color 0.15s;
+            height: 52px;
+            min-width: 52px;
             flex-shrink: 0;
         }
+        .send-button svg { width: 24px; height: 24px; display: block; }
+        .send-button.rec { color: rgb(176, 36, 24); }   /* mic recording */
+        .send-button.exit-btn { color: rgb(176, 36, 24); border-color: rgba(176, 36, 24, 0.55); }  /* leave UI mode */
 
-        .send-button:hover:not(:disabled) {
-            transform: scale(1.02);
-            box-shadow: 0 0 14px #9d50bb;
-        }
+        .send-button:hover:not(:disabled) { background: rgba(255, 255, 255, 0.12); }
+
+        /* Toggle buttons (🔊 Vorlesen · 👂 Weckwort): OFF = dim, ON = filled — flat, kein Glow. */
+        .send-button.toggle-btn { background: transparent; border-color: transparent; opacity: 0.4; }
+        .send-button.toggle-btn.active { background: rgba(255, 255, 255, 0.16); border-color: rgba(255, 255, 255, 0.2); opacity: 1; }
 
         /* --- SECURITY CLEARANCE OVERLAY --- */
         .auth-overlay {
@@ -506,17 +511,57 @@
             box-shadow: 0 0 10px rgba(0, 210, 255, 0.2);
         }
 
-        /* Responsive: phones — tighten padding/containers and shrink the input row so the
-           textarea + 🔊/🎤/GO buttons fit without overflow (Regel #16). */
-        @media (max-width: 600px) {
-            body { padding: 10px; }
-            .canvas-branding { top: 10px; right: 12px; }
-            .chat-container { width: 100%; margin: 46px auto 0; height: calc(100vh - 96px); }
-            .messages-area { padding: 14px; gap: 14px; }
-            .input-area { padding: 10px 12px; gap: 8px; }
-            .send-button { padding: 10px 13px; font-size: 0.85rem; }
-            .message-input { padding: 9px 14px; }
+        /* Conversation-phase indicator (Solita state): what's going on right now. */
+        #solita-phase {
+            position: fixed; top: 14px; left: 50%; transform: translateX(-50%);
+            display: none; align-items: center; gap: 9px;
+            padding: 6px 15px; border-radius: 999px;
+            background: rgba(8, 20, 42, 0.88); border: 1px solid rgba(255, 255, 255, 0.12);
+            font-family: 'Orbitron', sans-serif; font-size: 0.72rem; letter-spacing: 1.5px;
+            text-transform: uppercase; color: #cfe3ff; z-index: 9999;
+            backdrop-filter: blur(6px); pointer-events: none;
         }
+        #solita-phase[data-state="listening"],
+        #solita-phase[data-state="thinking"],
+        #solita-phase[data-state="speaking"] { display: flex; }
+        #solita-phase .dot { width: 9px; height: 9px; border-radius: 50%; background: #6b7a99; }
+        #solita-phase[data-state="listening"] .dot { background: rgb(121, 158, 49); animation: solita-pulse 1.1s ease-in-out infinite; } /* φ grün — du sprichst, sie hört */
+        #solita-phase[data-state="thinking"]  .dot { background: rgb(245, 194, 66); animation: solita-pulse 0.8s ease-in-out infinite; } /* λ orange — denkt */
+        #solita-phase[data-state="speaking"]  .dot { background: #00d2ff;          animation: solita-pulse 0.7s ease-in-out infinite; } /* cyan — Solita spricht */
+        @keyframes solita-pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.35; transform: scale(1.6); } }
+
+        /* Hamburger → Solita's identity panel (her face). Utilities consolidate here later (Stufe 2). */
+        #solita-hh {
+            display: inline-flex; flex-direction: column; justify-content: center; align-items: center; gap: 5px;
+            height: 52px; min-width: 52px; flex-shrink: 0;
+            background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 10px; cursor: pointer; transition: background 0.15s;
+        }
+        #solita-hh:hover { background: rgba(255, 255, 255, 0.12); }
+        #solita-hh span { width: 18px; height: 2px; background: #cfe3ff; border-radius: 2px; }
+        #solita-hh-panel {
+            position: fixed; bottom: 86px; left: 24px; z-index: 10000;
+            width: 280px; padding: 20px 18px; border-radius: 14px;
+            background: rgba(8, 20, 42, 0.96); border: 1px solid rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(12px); box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+            display: none; flex-direction: column; align-items: center; gap: 4px;
+        }
+        #solita-hh-panel.open { display: flex; }
+        #solita-hh-panel .hh-face {
+            width: 120px; height: 120px; border-radius: 50%; object-fit: cover;
+            border: 2px solid rgba(0, 210, 255, 0.4); margin-bottom: 12px;
+        }
+        #solita-hh-panel .hh-name { font-family: 'Orbitron', sans-serif; font-size: 1rem; letter-spacing: 1px; color: #e6edf3; }
+        #solita-hh-panel .hh-tag { font-family: 'Orbitron', sans-serif; font-size: 0.62rem; letter-spacing: 1.5px; color: #6b7a99; text-transform: uppercase; margin-top: 2px; }
+        #solita-hh-panel .hh-controls { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 16px; }
+        #solita-hh-panel .hh-face { cursor: zoom-in; }
+        #solita-lightbox {
+            position: fixed; inset: 0; z-index: 10001; display: none;
+            align-items: center; justify-content: center;
+            background: rgba(8, 20, 42, 0.92); backdrop-filter: blur(8px); cursor: zoom-out;
+        }
+        #solita-lightbox.open { display: flex; }
+        #solita-lightbox img { max-width: 90vw; max-height: 90vh; border-radius: 16px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6); }
     </style>
 </head>
 
@@ -554,15 +599,27 @@
         </div>
     </div>
 
-    <div class="canvas-branding">
-        <h1>DOC ALVERS MATHE-LABOR</h1>
-        <div class="canvas-subtitle">LAB AI</div>
+    <!-- Hamburger panel → Solita's identity (her face) + the consolidated controls. Opened by the ☰ in the input bar. -->
+    <div id="solita-hh-panel" role="menu" aria-hidden="true">
+        <img class="hh-face" src="resources/team/team_02.png" alt="Solita" onclick="document.getElementById('solita-lightbox').classList.add('open')" onerror="this.style.display='none'">
+        <div class="hh-name">Solita Neural</div>
+        <div class="hh-tag">Deine persönliche Assistentin</div>
+        <div class="hh-controls">
+            <button class="send-button toggle-btn" id="ttsBtn" title="Vorlesen an/aus" aria-label="Antworten vorlesen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M19 5a10 10 0 0 1 0 14"/></svg></button>
+            <button class="send-button" id="micBtn" title="Einmal sprechen" aria-label="Per Stimme diktieren"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10v2a7 7 0 0 0 14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg></button>
+            <button class="send-button toggle-btn" id="wakeBtn" title="Solita-Weckwort an/aus" aria-label="Solita per Weckwort aktivieren"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8.5a6.5 6.5 0 1 1 13 0c0 6-6 6-6 10a3.5 3.5 0 1 1-7 0"/><path d="M6.5 12.5a3.5 3.5 0 1 1 7 0c0 2.5-2 2.5-2 5"/></svg></button>
+            <button class="send-button" id="logoutBtn" title="Logout" aria-label="Logout"
+                onclick="localStorage.removeItem('dev_access'); sessionPwd=''; document.getElementById('cyber-auth-overlay').classList.add('visible'); document.getElementById('cyber-pwd-input').value=''; setTimeout(()=>document.getElementById('cyber-pwd-input').focus(),100);">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            </button>
+        </div>
     </div>
 
-    <button onclick="localStorage.removeItem('dev_access'); sessionPwd=''; document.getElementById('cyber-auth-overlay').classList.add('visible'); document.getElementById('cyber-pwd-input').value=''; setTimeout(()=>document.getElementById('cyber-pwd-input').focus(),100);"
-        style="position:fixed;bottom:16px;right:16px;background:rgba(255,0,0,0.12);border:1px solid rgba(255,60,60,0.4);border-radius:8px;color:rgba(255,100,100,0.8);font-family:'Orbitron',monospace;font-size:0.65rem;padding:5px 10px;cursor:pointer;z-index:9998;letter-spacing:1px;">
-        LOGOUT
-    </button>
+    <!-- Tap Solita's portrait → full-size lightbox. -->
+    <div id="solita-lightbox" onclick="this.classList.remove('open')"><img src="resources/team/team_02.png" alt="Solita"></div>
+
+    <!-- Conversation-phase indicator: höre zu / denkt / spricht (set via window.solitaPhase). -->
+    <div id="solita-phase" aria-live="polite"><span class="dot"></span><span class="lbl"></span></div>
 
     <div class="chat-container">
         <div class="messages-area" id="messagesArea">
@@ -572,12 +629,13 @@
                 </div>
                 <div class="model-select" id="modelDropdown">
                     <div class="model-select-display" id="modelDisplay">
-                        <span id="modelLabel">V4 FLASH</span>
+                        <span id="modelLabel">SONNET 4.6</span>
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
                     </div>
                     <div class="model-select-options" id="modelOptions">
-                        <div class="model-option" data-value="deepseek-v4-pro">V4 PRO</div>
-                        <div class="model-option selected" data-value="deepseek-v4-flash">V4 FLASH</div>
+                        <div class="model-option" data-value="claude-opus-4-8">OPUS 4.8</div>
+                        <div class="model-option selected" data-value="claude-sonnet-4-6">SONNET 4.6</div>
+                        <div class="model-option" data-value="claude-haiku-4-5-20251001">HAIKU 4.5</div>
                     </div>
                 </div>
             </div>
@@ -587,12 +645,10 @@
         </div>
 
         <div class="input-area">
+            <button id="solita-hh" aria-label="Menü" title="Solita"><span></span><span></span><span></span></button>
             <textarea class="message-input" id="messageInput" rows="1"
                 placeholder="Du hast sicher Fragen ... schreib sie hier!"
                 aria-label="Deine Nachricht an die KI"></textarea>
-            <button class="send-button" id="ttsBtn" title="Antworten vorlesen" aria-label="Antworten vorlesen">🔊</button>
-            <button class="send-button" id="micBtn" title="Sprechen" aria-label="Per Stimme diktieren">🎤</button>
-            <button class="send-button" id="sendButton">GO</button>
         </div>
 
     </div>
@@ -602,7 +658,8 @@
         // public client (Rule 18). Access is gated by a password the user types; the proxy verifies it
         // server-side against the LABAI_PASSWORD secret. (Old in-source encrypted key was rotated +
         // removed 2026-06-09.)
-        const AI_URL  = 'https://fyfhxzyymmurlaenmzse.supabase.co/functions/v1/deepseek';
+        const AI_URL  = 'https://fyfhxzyymmurlaenmzse.supabase.co/functions/v1/claude';
+        const SOLITA_CONFIG_URL = 'https://fyfhxzyymmurlaenmzse.supabase.co/functions/v1/solita-config'; // Stufe 2a: Solita patcht HTML/config.json live
         const SB_ANON = 'sb_publishable_ubQDiMD-X3N0vZvPVi229Q_-5Zootfk'; // publishable anon key — client-safe
         let conversationHistory = [];
 
@@ -666,18 +723,109 @@
 
         const messagesArea = document.getElementById('messagesArea');
         const messageInput = document.getElementById('messageInput');
-        const sendButton = document.getElementById('sendButton');
+        // GO/EXIT buttons removed — Enter sends. Null-object keeps the old .disabled / .addEventListener refs safe.
+        const sendButton = document.getElementById('sendButton') || { disabled: false, addEventListener() {} };
+
+        // Conversation-phase indicator: reflect who's "on" right now (listening | thinking | speaking | idle).
+        window.solitaPhase = function (s) {
+            const el = document.getElementById('solita-phase');
+            if (!el) return;
+            const LBL = { listening: 'höre zu …', thinking: 'denkt …', speaking: 'Solita spricht …' };
+            const lbl = el.querySelector('.lbl');
+            if (s && LBL[s]) { el.dataset.state = s; if (lbl) lbl.textContent = LBL[s]; }
+            else { el.removeAttribute('data-state'); if (lbl) lbl.textContent = ''; }
+        };
+
+        // Hamburger toggle (Solita's identity panel). Tap outside closes it.
+        (function () {
+            const hh = document.getElementById('solita-hh'), panel = document.getElementById('solita-hh-panel');
+            if (!hh || !panel) return;
+            hh.addEventListener('click', (e) => { e.stopPropagation(); panel.classList.toggle('open'); });
+            document.addEventListener('click', (e) => {
+                if (panel.classList.contains('open') && !panel.contains(e.target) && !hh.contains(e.target)) panel.classList.remove('open');
+            });
+        })();
+        const exitUiBtn = document.getElementById('exitUiBtn');
+
+        // UI-Änderungs-Modus (primer): when ON, every message is a live config change via solita-config.
+        let uiMode = false;
+        function setUiMode(on) {
+            uiMode = on;
+            window.__uiMode = on;   // let the voice recognizer (wake-word) know we're in UI mode
+            messageInput.placeholder = on
+                ? '🔧 UI-Modus — Wunsch, dann „go" (oder 4 s Pause). „fertig"/EXIT beendet.'
+                : 'Du hast sicher Fragen ... schreib sie hier!';
+            if (exitUiBtn) exitUiBtn.style.display = on ? 'inline-flex' : 'none';
+        }
+        if (exitUiBtn) exitUiBtn.addEventListener('click', () => {
+            if (!uiMode) return;
+            setUiMode(false);
+            addMessage('assistant', 'UI-Modus aus. 🔧');
+            if (window.speakReply) window.speakReply('Alles klar.');
+            messageInput.focus();
+        });
         messageInput.value = '';
 
         const MODEL_KEY = 'ai_model';
         const HISTORY_KEY = 'ai_history';
+        const SUMMARY_KEY = 'solita_summary';
+
+        // Solita's persona. Sent as a system turn on every request (the proxy lifts it into Anthropic's
+        // top-level `system`). Kept sprechfreundlich because answers are often read aloud.
+        const SOLITA_SYSTEM = "Du bist Solita — die persönliche, kluge und warmherzige Assistentin von "
+            + "Doc Alvers. Du sprichst Deutsch und antwortest natürlich und warm. WICHTIG: Fasse dich kurz "
+            + "— normalerweise ein bis zwei Sätze, denn deine Antworten werden meist vorgelesen. Keine "
+            + "Aufzählungen oder Monologe, wenn ein Satz reicht; lieber kurz nachfragen als lang ausholen. "
+            + "Nur wenn Doc ausdrücklich um Details bittet, wirst du ausführlicher. Du weißt viel und "
+            + "bleibst nah. Was du nicht sicher weißt, sagst du ehrlich.";
+
+        // Rolling summary of older turns so context survives without sending the whole history every time.
+        let runningSummary = localStorage.getItem(SUMMARY_KEY) || '';
+        const KEEP_RECENT = 16;   // recent turns kept verbatim; older ones get folded into runningSummary
+
+        // Build the proxy payload: persona + rolling summary as a system turn, then the recent chat.
+        function buildRequestMessages() {
+            const sys = SOLITA_SYSTEM
+                + (runningSummary ? "\n\nBisheriger Gesprächskontext (Zusammenfassung):\n" + runningSummary : "");
+            return [{ role: 'system', content: sys }].concat(conversationHistory);
+        }
+
+        // Keep context bounded WITHOUT just forgetting: fold the oldest turns into runningSummary, drop them.
+        async function maybeSummarize() {
+            if (conversationHistory.length <= KEEP_RECENT + 8) return;
+            const old = conversationHistory.slice(0, conversationHistory.length - KEEP_RECENT);
+            const transcript = old.map(m => (m.role === 'user' ? 'Doc' : 'Solita') + ': ' + m.content).join('\n');
+            try {
+                const r = await fetch(AI_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'apikey': SB_ANON, 'Authorization': `Bearer ${SB_ANON}`, 'x-app-pass': getPwd() },
+                    body: JSON.stringify({
+                        model: 'claude-haiku-4-5-20251001',   // cheap + fast for summarising
+                        max_tokens: 600,
+                        messages: [
+                            { role: 'system', content: 'Fasse den folgenden Gesprächsausschnitt knapp auf Deutsch zusammen — nur Fakten, Wünsche und Beschlüsse, die für das weitere Gespräch wichtig sind. Stichpunktartig, höchstens 8 Zeilen.' + (runningSummary ? ' Beziehe diese bisherige Zusammenfassung mit ein:\n' + runningSummary : '') },
+                            { role: 'user', content: transcript }
+                        ]
+                    })
+                });
+                if (r.ok) {
+                    const d = await r.json();
+                    const s = d.choices && d.choices[0] && d.choices[0].message.content;
+                    if (s) { runningSummary = s.trim(); localStorage.setItem(SUMMARY_KEY, runningSummary); }
+                }
+            } catch (e) { /* summarising is best-effort; we trim below either way */ }
+            conversationHistory = conversationHistory.slice(-KEEP_RECENT);
+            saveHistory();
+        }
 
         const COPY_ICON = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>`;
         const CHECK_ICON = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
 
         function getPwd() { return sessionPwd; }
 
-        let currentModel = localStorage.getItem(MODEL_KEY) || 'deepseek-v4-flash';
+        let currentModel = localStorage.getItem(MODEL_KEY) || 'claude-sonnet-4-6';
+        // Migrate any legacy (DeepSeek) model id → a real Claude model so the proxy gets a valid id.
+        if (!/^claude-/.test(currentModel)) currentModel = 'claude-sonnet-4-6';
 
         function getModel() { return currentModel; }
 
@@ -770,6 +918,10 @@
                 codeBlocks.push({ lang, code });
                 return placeholder;
             });
+
+            // Security (WP-5): neutralise any raw HTML in the model's text BEFORE we add our own markup,
+            // so an injected <script>/<img onerror> can't run. Markdown chars (#, *, |, `) are untouched.
+            formatted = escapeHtml(formatted);
 
             // 2a. Markdown-Tabellen rendern
             formatted = formatted.replace(/^(\|.+\|)\n\|[-| :]+\|\n((?:\|.+\|\n?)*)/gm, (match, header, body) => {
@@ -864,6 +1016,7 @@
             typingDiv.innerHTML = `<div class="message-content"><div class="typing-dots"><span></span><span></span><span></span></div></div>`;
             messagesArea.appendChild(typingDiv);
             messagesArea.scrollTop = messagesArea.scrollHeight;
+            if (window.solitaPhase) solitaPhase('thinking');
         }
 
         function hideTyping() {
@@ -880,7 +1033,7 @@
             if (userText.toLowerCase() === '%clear') {
                 conversationHistory = [];
                 localStorage.removeItem(HISTORY_KEY);
-                messagesArea.innerHTML = `<div class="message assistant" style="align-items:center;gap:10px;width:100%;"><div class="message-content"><strong>Wie kann ich Dir helfen?</strong></div><div class="model-select" id="modelDropdown"><div class="model-select-display" id="modelDisplay"><span id="modelLabel">V4 FLASH</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></div><div class="model-select-options" id="modelOptions"><div class="model-option" data-value="deepseek-v4-pro">V4 PRO</div><div class="model-option selected" data-value="deepseek-v4-flash">V4 FLASH</div></div></div></div>`;
+                messagesArea.innerHTML = `<div class="message assistant" style="align-items:center;gap:10px;width:100%;"><div class="message-content"><strong>Wie kann ich Dir helfen?</strong></div><div class="model-select" id="modelDropdown"><div class="model-select-display" id="modelDisplay"><span id="modelLabel">SONNET 4.6</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></div><div class="model-select-options" id="modelOptions"><div class="model-option" data-value="claude-opus-4-8">OPUS 4.8</div><div class="model-option selected" data-value="claude-sonnet-4-6">SONNET 4.6</div><div class="model-option" data-value="claude-haiku-4-5-20251001">HAIKU 4.5</div></div></div></div>`;
                 initModelDropdown(document.getElementById('modelDropdown'));
                 messageInput.value = '';
                 messageInput.style.height = 'auto';
@@ -890,6 +1043,67 @@
             if (!pwd) {
                 document.getElementById('cyber-auth-overlay').classList.add('visible');
                 setTimeout(() => document.getElementById('cyber-pwd-input')?.focus(), 100);
+                return;
+            }
+
+            // ---- UI-Änderungs-Modus (primer) + Einzelbefehl "stell ein: …" → solita-config (live config) ----
+            // In UI-Modus ist JEDER Satz eine Config-Änderung; rein via "UI Änderung"/"Änderung UI", raus via
+            // "fertig"/EXIT. "stell ein: …" wirkt auch ohne Modus als Einzelbefehl. Nicht in den Chat gepusht.
+            const t = userText.trim();
+            // Enter UI mode: a bare "UI" (incl. de-DE mishearings of the English "you-eye") is enough now — no
+            // verb required. Longer sentences still need ui + a change-verb, or "ui mode".
+            const wantsEnterUi = /^\s*(ui|u\.?\s?i|you\.?\s?i|benutzeroberfläche)(\s+(modus|mode|bitte|an|english|englisch))?\s*[.!?]?\s*$/i.test(t)
+                || (/\bui\b/i.test(t) && /(adjust|change|edit|tune|tweak|adapt|änder|aender|anpass)/i.test(t))
+                || /\bui[\s-]?mode\b/i.test(t);
+            const wantsExitUi  = /^(fertig|ende|stop+|schluss|ui\s*aus|raus|normal)\b/i.test(t);
+            const oneShot = t.match(/^\s*(?:solita[\s,:]*)?(?:stell\s+ein|config|konfiguration)\b[\s:]*(.+)/is);
+
+            if (uiMode && wantsExitUi) {                         // leave UI mode
+                addMessage('user', userText);
+                messageInput.value = ''; messageInput.style.height = 'auto';
+                setUiMode(false);
+                addMessage('assistant', 'UI-Modus aus. 🔧');
+                if (window.speakReply) window.speakReply('Alles klar.');
+                return;
+            }
+            if (!uiMode && wantsEnterUi && !oneShot) {           // enter UI mode
+                addMessage('user', userText);
+                messageInput.value = ''; messageInput.style.height = 'auto';
+                setUiMode(true);
+                addMessage('assistant', 'UI-Modus an — sag deinen Wunsch, dann „go" (oder 4 s Pause). „fertig"/EXIT beendet.');
+                if (window.speakReply) window.speakReply('UI-Modus an. Sag deinen Wunsch, dann go.');
+                return;
+            }
+            if (uiMode || (oneShot && oneShot[1].trim())) {      // a config instruction
+                const instruction = oneShot ? oneShot[1].trim() : t;
+                addMessage('user', userText);
+                messageInput.value = ''; messageInput.style.height = 'auto';
+                sendButton.disabled = true;
+                showTyping();
+                try {
+                    const r = await fetch(SOLITA_CONFIG_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'apikey': SB_ANON, 'Authorization': `Bearer ${SB_ANON}`, 'x-app-pass': pwd },
+                        body: JSON.stringify({ instruction })
+                    });
+                    const data = await r.json().catch(() => ({}));
+                    hideTyping();
+                    if (!r.ok) {
+                        let err = `Fehler ${r.status}`;
+                        if (r.status === 401) err = 'Falsches Passwort';
+                        else if (data && data.error) err += ' — ' + data.error;
+                        addMessage('assistant', `❌ Config: ${err}`);
+                    } else {
+                        addMessage('assistant', `✓ Eingestellt (config v${data.version}).`);
+                        if (window.speakReply) window.speakReply('Erledigt.');
+                    }
+                } catch (e) {
+                    hideTyping();
+                    addMessage('assistant', `❌ Config: ${e.message || e}`);
+                } finally {
+                    sendButton.disabled = false;
+                    messageInput.focus();
+                }
                 return;
             }
 
@@ -911,7 +1125,7 @@
                     },
                     body: JSON.stringify({
                         model: getModel(),
-                        messages: conversationHistory,
+                        messages: buildRequestMessages(),
                         temperature: 0.6,
                         max_tokens: 3000
                     })
@@ -919,17 +1133,18 @@
                 if (!response.ok) {
                     let err = `Fehler ${response.status}`;
                     if (response.status === 401) err = 'Falsches Passwort';
-                    if (response.status === 402) err = 'Nicht genug Guthaben – AI-Konto aufladen';
+                    else if (response.status === 402) err = 'Nicht genug Guthaben – AI-Konto aufladen';
+                    else { try { const e = await response.json(); if (e && e.error) err += ' — ' + e.error; } catch (_) { } }
                     throw new Error(err);
                 }
                 const data = await response.json();
-                const reply = data.choices[0].message.content;
+                const reply = (data.choices && data.choices[0] && data.choices[0].message.content) || '(keine Antwort)';
                 conversationHistory.push({ role: 'assistant', content: reply });
-                if (conversationHistory.length > 20) conversationHistory = conversationHistory.slice(-20);
                 saveHistory();
                 hideTyping();
                 addMessage('assistant', reply);
                 if (window.speakReply) window.speakReply(reply); // read the answer aloud (voice mode)
+                maybeSummarize();   // fold older turns into the rolling summary (best-effort, background)
             } catch (err) {
                 conversationHistory.pop(); // User-Nachricht bei Fehler wieder entfernen
                 hideTyping();
@@ -967,22 +1182,45 @@
     <script>
         (function () {
             const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-            const TTS_KEY = 'labai_tts';
+            const TTS_KEY = 'solita_tts';
             let ttsOn = localStorage.getItem(TTS_KEY) !== '0';   // default: read aloud ON
             const ttsBtn = document.getElementById('ttsBtn');
             const micBtn = document.getElementById('micBtn');
             const input = document.getElementById('messageInput');
 
-            function reflectTts() { if (ttsBtn) ttsBtn.style.opacity = ttsOn ? '1' : '0.4'; }
+            function reflectTts() { if (ttsBtn) ttsBtn.classList.toggle('active', ttsOn); }
             reflectTts();
+
+            // Pick a GOOD German voice — the browser default is often the robotic one. Prefer Chrome's
+            // natural "Google Deutsch", then named female macOS voices (Solita's persona), then any German.
+            // getVoices() loads async, so also re-pick on 'voiceschanged'. (Same approach as the glocken lab.)
+            let chosenVoice = null;
+            function pickVoice() {
+                if (!('speechSynthesis' in window)) return;
+                const voices = window.speechSynthesis.getVoices();
+                if (!voices.length) return;
+                const google = voices.find(v => /^de/i.test(v.lang) && /Google/i.test(v.name));
+                const femaleDE = voices.find(v => /^de(-DE)?/i.test(v.lang) && /Anna|Petra|Helena|Katja|Hedda/i.test(v.name));
+                const anyDE = voices.find(v => /^de(-DE)?/i.test(v.lang));
+                chosenVoice = google || femaleDE || anyDE || voices[0];
+            }
+            pickVoice();
+            if ('speechSynthesis' in window) window.speechSynthesis.addEventListener('voiceschanged', pickVoice);
 
             // Read the assistant's reply aloud (called from sendMessage). Strip light markdown first.
             window.speakReply = function (text) {
                 if (!ttsOn || !('speechSynthesis' in window) || !text) return;
                 try {
-                    const clean = String(text).replace(/[*_`#>]/g, '').replace(/\s+/g, ' ').trim();
+                    const clean = String(text)
+                        .replace(/[\p{Extended_Pictographic}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}\u{1F1E6}-\u{1F1FF}\uFE0F\u200D]/gu, '') // strip smileys/emoji — don't read them aloud (Doc)
+                        .replace(/[*_`#>]/g, '')
+                        .replace(/\s+/g, ' ').trim();
                     const u = new SpeechSynthesisUtterance(clean);
                     u.lang = 'de-DE';
+                    if (!chosenVoice) pickVoice();          // voices may have loaded since init
+                    if (chosenVoice) u.voice = chosenVoice;
+                    u.rate = 0.96;                          // a touch slower = calmer, less synthetic
+                    u.pitch = 1.0;
                     window.speechSynthesis.cancel();   // never queue stale speech
                     window.speechSynthesis.speak(u);
                 } catch (e) { }
@@ -1000,19 +1238,168 @@
                 else micBtn.addEventListener('click', () => {
                     if (listening) { try { rec.stop(); } catch (e) { } return; }
                     try {
-                        rec = new SR(); rec.lang = 'de-DE'; rec.interimResults = false; rec.maxAlternatives = 1;
-                        listening = true; micBtn.textContent = '●'; micBtn.style.opacity = '1';
+                        rec = new SR(); rec.lang = 'de-DE'; rec.interimResults = true; rec.maxAlternatives = 1;
+                        listening = true; micBtn.classList.add('rec');
                         try { window.speechSynthesis && window.speechSynthesis.cancel(); } catch (e) { } // don't talk over you
-                        rec.onresult = (e) => { if (input) input.value = e.results[0][0].transcript; };
-                        rec.onend = () => {
-                            listening = false; micBtn.textContent = '🎤'; micBtn.style.opacity = '';
-                            if (input && input.value.trim() && typeof sendMessage === 'function') sendMessage();
+                        // Live transcript flows into the input line as you speak…
+                        rec.onresult = (e) => {
+                            let txt = '';
+                            for (let i = 0; i < e.results.length; i++) txt += e.results[i][0].transcript;
+                            if (input) { input.value = txt; input.dispatchEvent(new Event('input')); }
                         };
-                        rec.onerror = () => { listening = false; micBtn.textContent = '🎤'; micBtn.style.opacity = ''; };
+                        rec.onend = () => {
+                            listening = false; micBtn.classList.remove('rec');
+                            // …then a short beat so you SEE it in the line, and only THEN submit.
+                            if (input && input.value.trim() && typeof sendMessage === 'function') setTimeout(sendMessage, 700);
+                        };
+                        rec.onerror = () => { listening = false; micBtn.classList.remove('rec'); };
                         rec.start();
-                    } catch (e) { listening = false; micBtn.textContent = '🎤'; micBtn.style.opacity = ''; }
+                    } catch (e) { listening = false; micBtn.classList.remove('rec'); }
                 });
             }
+        })();
+    </script>
+
+    <!-- Wake-word "Solita": hands-free in the car. Continuous SpeechRecognition (Chrome); on hearing
+         "Solita …" it takes the rest of the phrase as the question (or says "Ja?" and listens once more),
+         then sends. Pauses while Solita speaks so she doesn't hear herself. Web listens only in the
+         FOREGROUND — true background / locked-screen wake is the native krass-app (Vosk) path. -->
+    <script>
+        (function () {
+            const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+            const wakeBtn = document.getElementById('wakeBtn');
+            const input = document.getElementById('messageInput');
+            if (!wakeBtn) return;
+            if (!SR) { wakeBtn.style.display = 'none'; return; }   // e.g. iOS Safari: no SpeechRecognition
+
+            const TRIGGERS = ['solita', 'solida', 'rita'];          // Vosk-tested variants (see krass-app note)
+            const WAKE_KEY = 'solita_wake';
+            let wakeOn = localStorage.getItem(WAKE_KEY) === '1';
+            let rec = null, awaitingQuery = false, speaking = false, stopping = false, convo = false;
+
+            function reflect() { wakeBtn.classList.toggle('active', wakeOn); }
+            reflect();
+
+            // Pause listening while Solita speaks (so the mic doesn't pick up her own "Solita"), resume after.
+            const _speak = window.speakReply;
+            window.speakReply = function (text) {
+                if (wakeOn && rec) { speaking = true; try { rec.stop(); } catch (e) { } }
+                if (typeof _speak === 'function') _speak(text);
+                if (window.solitaPhase) solitaPhase('speaking');
+                const resume = () => {
+                    speaking = false;
+                    // Turn-loop: while a conversation is open, reopen the ear after EVERY reply and take the
+                    // next utterance as the answer — no "Solita" per turn. (UI-mode runs its own sub-flow.)
+                    if (wakeOn) { startRec(); if (convo && !window.__uiMode) awaitingQuery = true; }
+                    if (window.solitaPhase) solitaPhase(wakeOn && convo ? 'listening' : 'idle');
+                };
+                try {
+                    if (window.speechSynthesis) {
+                        const iv = setInterval(() => {
+                            if (!window.speechSynthesis.speaking) { clearInterval(iv); setTimeout(resume, 400); }
+                        }, 300);
+                    } else setTimeout(resume, 800);
+                } catch (e) { setTimeout(resume, 800); }
+            };
+
+            function extractQuery(t) {
+                const low = t.toLowerCase();
+                let idx = -1, hit = '';
+                for (const w of TRIGGERS) {
+                    const i = low.indexOf(w);
+                    if (i !== -1 && (idx === -1 || i < idx)) { idx = i; hit = w; }
+                }
+                if (idx === -1) return null;                         // no wake word in this phrase
+                return t.slice(idx + hit.length).replace(/^[\s,.:!?-]+/, '').trim();
+            }
+
+            function fire(query) {
+                convo = true;                                        // addressing Solita opens the conversation thread
+                if (!query) {                                        // heard "Solita" alone → prompt + listen once
+                    awaitingQuery = true;
+                    if (window.speakReply) window.speakReply('Ja?');
+                    return;
+                }
+                awaitingQuery = false;
+                // Show the heard question in the input line first, then submit a beat later.
+                if (input) { input.value = query; input.dispatchEvent(new Event('input')); }
+                if (typeof sendMessage === 'function') setTimeout(sendMessage, 700);
+            }
+
+            // UI-mode voice flow (Doc): once in UI mode, speak the wish freely (no "Solita" needed),
+            // then "go" OR a 4 s pause submits it; "fertig" leaves. (sendMessage routes UI-mode text to config.)
+            let uiTimer = null;
+            function uiExec() {
+                if (uiTimer) { clearTimeout(uiTimer); uiTimer = null; }
+                if (input && input.value.trim() && typeof sendMessage === 'function') sendMessage();
+            }
+            function handleUiVoice(txt) {
+                if (/^\s*(fertig|exit|stopp?|ende|raus)\b/i.test(txt)) {   // leave UI mode
+                    if (uiTimer) { clearTimeout(uiTimer); uiTimer = null; }
+                    if (input) { input.value = txt; input.dispatchEvent(new Event('input')); }
+                    if (typeof sendMessage === 'function') sendMessage();
+                    return;
+                }
+                const sawGo = /\bgo\b/i.test(txt);
+                const cmd = txt.replace(/\bgo\b.*$/i, '').trim();          // text before "go"
+                if (cmd && input) {
+                    input.value = (input.value.trim() ? input.value.trim() + ' ' : '') + cmd;
+                    input.dispatchEvent(new Event('input'));
+                }
+                if (sawGo) { uiExec(); return; }                          // "go" → submit now
+                if (uiTimer) clearTimeout(uiTimer);                       // else (re)start the 4 s pause-timer
+                uiTimer = setTimeout(uiExec, 4000);
+            }
+
+            // Hang up the conversation: a goodbye drops back to idle (wake-word needed again). NOT sent to the API.
+            const FAREWELL = /^(tschü(?:ss?)?|auf wiederhör(?:en)?|das war'?s(?: für (?:heute|jetzt))?|danke,? das war'?s|schluss für (?:heute|jetzt)|beenden?(?: das gespräch)?)\b/i;
+            function endConvo() {
+                convo = false; awaitingQuery = false;
+                if (window.speakReply) window.speakReply('Bis später.');
+            }
+
+            function onResult(e) {
+                if (speaking) return;
+                let txt = '';
+                for (let i = e.resultIndex; i < e.results.length; i++) {
+                    if (e.results[i].isFinal) txt += e.results[i][0].transcript;
+                }
+                txt = txt.trim();
+                if (!txt) return;
+                try { console.log('[solita] heard: "' + txt + '"'); } catch (_) {}  // measure what de-DE actually transcribes
+                if (window.__uiMode) { handleUiVoice(txt); return; }   // UI mode: accumulate + go/pause
+                if (convo && FAREWELL.test(txt)) { endConvo(); return; } // "tschüss" → hang up the thread
+                if (awaitingQuery) { fire(txt); return; }             // in conversation: this utterance is the next turn
+                const q = extractQuery(txt);
+                if (q !== null) fire(q);                               // phrase contained "Solita …" → (re)open convo
+            }
+
+            function startRec() {
+                if (!wakeOn || speaking || rec) return;
+                try {
+                    rec = new SR();
+                    rec.lang = 'de-DE'; rec.continuous = true; rec.interimResults = false; rec.maxAlternatives = 1;
+                    rec.onresult = onResult;
+                    rec.onerror = function () { };
+                    rec.onend = function () { rec = null; if (wakeOn && !speaking && !stopping) setTimeout(startRec, 300); };
+                    rec.start();
+                } catch (e) { rec = null; }
+            }
+
+            function stopRec() {
+                stopping = true;
+                if (rec) { try { rec.stop(); } catch (e) { } rec = null; }
+                setTimeout(function () { stopping = false; }, 500);
+            }
+
+            wakeBtn.addEventListener('click', function () {
+                wakeOn = !wakeOn; localStorage.setItem(WAKE_KEY, wakeOn ? '1' : '0'); reflect();
+                convo = false; awaitingQuery = false;                 // toggling the line always resets the thread
+                if (window.solitaPhase) solitaPhase('idle');
+                if (wakeOn) startRec(); else stopRec();
+            });
+
+            if (wakeOn) setTimeout(startRec, 600);                   // auto-resume if it was left on
         })();
     </script>
 </body>

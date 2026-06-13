@@ -82,7 +82,7 @@
 |---|---|
 | `chat.html` | E2E-verschlüsselter Gruppen-Chat (Supabase) |
 | `vault.html` | Passwort-Tresor (AES-verschlüsselt) |
-| `labai.html` | Lab-AI Assistent |
+| `solita.html` | Solita — Sprach-Assistentin (Claude, ex-labai) |
 | `posterstudio.html` | Poster-Generator |
 | `box-selector.html` | Formula Box Selector |
 | `coordinatensystemtester.html` | Koordinatensystem-Tester |

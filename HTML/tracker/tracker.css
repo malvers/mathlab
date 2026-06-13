@@ -136,6 +136,24 @@ path.pos-marker.pos-shown {
     letter-spacing: 1px;
     padding: 26px 0;
 }
+/* FEAT-15: calm λ-orange ring while the AI works (replaces the 🤖 emoji). Sits as its own
+   child so the failure message — same .pd-wait class — does not spin. */
+.pd-spin {
+    display: block;
+    width: 30px;
+    height: 30px;
+    margin: 0 auto 14px;
+    border-radius: 50%;
+    border: 3px solid rgba(245, 194, 66, 0.25);
+    border-top-color: var(--orange);
+    animation: pd-spin 0.8s linear infinite;
+}
+@keyframes pd-spin {
+    to { transform: rotate(360deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+    .pd-spin { animation: none; }
+}
 .pd-row {
     display: flex;
     gap: 28px;
@@ -276,6 +294,32 @@ path.pos-marker.pos-shown {
 /* the accuracy digit shares .sat-n (Arial) with the sat counts, but here it must NOT be bold */
 #gps-acc .sat-n {
     font-weight: 400;
+}
+
+/* Pin under the accuracy (top-right). When set, the idle auto-hide is disabled — nothing fades. */
+#ui-pin {
+    position: absolute;
+    top: calc(max(14px, env(safe-area-inset-top)) + 22px);
+    right: 14px;
+    width: 26px;
+    height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(8, 20, 42, 0.55);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 8px;
+    color: rgba(255, 255, 255, 0.5);
+    cursor: pointer;
+    z-index: 3;
+    -webkit-tap-highlight-color: transparent;
+    transition: color 0.2s, border-color 0.2s, background 0.2s;
+}
+#ui-pin svg { width: 15px; height: 15px; display: block; }
+#ui-pin.pinned {
+    color: var(--orange);
+    border-color: var(--orange);
+    background: rgba(245, 194, 66, 0.14);
 }
 
 #gps-dot {
@@ -488,7 +532,7 @@ path.pos-marker.pos-shown {
     position: fixed;
     right: 12px;
     top: 50%;
-    transform: translateY(calc(-50% - 26px)); /* cam + mic centred AS A GROUP → cam 26px above mid */
+    transform: translateY(calc(-50% - 52px)); /* cam · mic · video centred AS A GROUP → cam 52px above mid (aligns with the compass) */
     z-index: 600;
     width: 44px;
     height: 44px;
@@ -514,7 +558,7 @@ path.pos-marker.pos-shown {
 }
 
 #cam-fab:active {
-    transform: translateY(calc(-50% - 26px)) scale(0.94);
+    transform: translateY(calc(-50% - 52px)) scale(0.94);
 }
 
 #cam-fab svg {
@@ -527,7 +571,7 @@ path.pos-marker.pos-shown {
     position: fixed;
     right: 12px;
     top: 50%;
-    transform: translateY(calc(-50% + 26px));
+    transform: translateY(-50%); /* middle button → on the vertical centre, aligned with the hamburger */
     z-index: 600;
     width: 44px;
     height: 44px;
@@ -548,7 +592,7 @@ path.pos-marker.pos-shown {
 }
 
 #mic-fab:active {
-    transform: translateY(calc(-50% + 26px)) scale(0.94);
+    transform: translateY(-50%) scale(0.94);
 }
 
 #mic-fab svg {
@@ -573,7 +617,7 @@ path.pos-marker.pos-shown {
     position: fixed;
     right: 64px;
     top: 50%;
-    transform: translateY(calc(-50% + 26px));
+    transform: translateY(-50%); /* level with the mic FAB (now on the vertical centre) */
     z-index: 600;
     font-family: Arial, Helvetica, sans-serif;
     font-size: 0.9rem;
@@ -596,7 +640,7 @@ path.pos-marker.pos-shown {
     position: fixed;
     right: 12px;
     top: 50%;
-    transform: translateY(calc(-50% + 78px)); /* cam(-26) · mic(+26) · video(+78) — stacked down the right edge */
+    transform: translateY(calc(-50% + 52px)); /* cam(-52) · mic(0) · video(+52) — symmetric group, stacked down the right edge */
     z-index: 600;
     width: 44px;
     height: 44px;
@@ -612,7 +656,7 @@ path.pos-marker.pos-shown {
     transition: transform 0.1s ease, color 0.2s ease, opacity 0.55s ease;
 }
 #vid-fab:hover { color: var(--orange); }
-#vid-fab:active { transform: translateY(calc(-50% + 78px)) scale(0.94); }
+#vid-fab:active { transform: translateY(calc(-50% + 52px)) scale(0.94); }
 #vid-fab svg { width: 24px; height: 24px; }
 
 /* Auto-hide on idle: JS toggles body.ui-idle on/off; the floating controls fade out after 8 s.
@@ -622,6 +666,8 @@ body.ui-idle #menu-fab,
 body.ui-idle #cam-fab,
 body.ui-idle #mic-fab,
 body.ui-idle #vid-fab,
+body.ui-idle #compass,
+body.ui-idle #speed-sign,
 body.ui-idle #hud-top,
 body.ui-idle #trk-controls {
     opacity: 0;
@@ -980,7 +1026,7 @@ body.ui-idle #trk-controls {
 #mini-stack.popup .mini-btn {
     position: absolute;
     pointer-events: auto;
-    width: 168px;
+    width: 178px;
     height: 46px;
     padding: 0 12px;
     white-space: nowrap;
@@ -1476,6 +1522,7 @@ body.ui-idle #trk-controls {
 
 .tl-badge.voice { background: rgb(56, 120, 190); }   /* like the voice pin */
 .tl-badge.cam   { background: rgb(121, 158, 49); }   /* like a recognised photo pin */
+.tl-badge.video { background: rgb(138, 92, 196); }   /* like the video pin */
 .tl-badge.track { background: transparent; border: none; box-shadow: none; } /* the app icon is self-contained */
 .tl-badge.track .tl-appicon { width: 30px; height: 30px; display: block; border-radius: 8px; }
 
@@ -1515,6 +1562,26 @@ body.ui-idle #trk-controls {
 }
 
 /* action bar (shown when ≥1 selected): "Abwählen" + "Auswahl laden (N)" */
+/* Import a friend's shared track by pasting its view-link — always visible under the list. */
+#tl-import {
+    display: block;
+    width: calc(100% - 28px);
+    margin: 8px 14px 0;
+    padding: 9px;
+    border: 1px dashed rgba(245, 194, 66, 0.5);
+    border-radius: 10px;
+    background: transparent;
+    color: var(--orange);
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.64rem;
+    letter-spacing: 0.06em;
+    cursor: pointer;
+}
+
+#tl-import:hover {
+    background: rgba(245, 194, 66, 0.08);
+}
+
 #tl-actions {
     display: none;
     gap: 8px;
@@ -1696,28 +1763,32 @@ body.ui-idle #trk-controls {
 .nav-trip { font-family: system-ui, sans-serif; font-weight: 500; font-size: clamp(0.72rem, 3vw, 0.86rem); opacity: 0.92; padding-left: 40px; }
 .nav-trip[hidden] { display: none; }
 
-/* Speed-limit sign — classic round white sign with a red ring; top-left, clear of the centred HUD.
-   Turns solid red when the smoothed speed is over the limit (JS toggles .over). */
+/* Speed-limit sign — classic round white sign with a red ring; left-edge stack, BELOW the hamburger
+   (Nordpfeil · HH · Speed). Turns solid red when the smoothed speed is over the limit (JS toggles .over). */
 #speed-sign {
     position: fixed;
     left: 12px;
-    top: calc(env(safe-area-inset-top, 0px) + 12px);
-    z-index: 700;
-    width: 54px;
-    height: 54px;
+    top: 50%;
+    transform: translateY(calc(-50% + 52px)); /* left stack: BELOW the hamburger (Nordpfeil · HH · Speed) */
+    z-index: 600;
+    width: 44px;
+    height: 44px;
     border-radius: 50%;
     background: #fff;
-    border: 6px solid rgb(176, 36, 24);
+    border: 5px solid rgb(176, 36, 24);
     color: #111;
-    font-family: 'Orbitron', sans-serif;
-    font-weight: 800;
-    font-size: 1.25rem;
+    /* Arial (road-sign look); sized to fit the inner circle even at 3 digits (120/130), responsive */
+    font-family: Arial, Helvetica, sans-serif;
+    font-weight: 700;
+    font-size: clamp(14px, 4vw, 17px);
+    letter-spacing: -0.3px;
     line-height: 1;
     display: flex;
     align-items: center;
     justify-content: center;
     box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
-    transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+    /* opacity → idle auto-hide fade (HEAD); transform → the .over jump-forward (branch). Keep both. */
+    transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease, opacity 0.55s ease;
 }
 
 /* Over the limit → red + a soft pulse. Subtle (no scaling/shift), stays in place. */
@@ -1737,19 +1808,22 @@ body.ui-idle #trk-controls {
     display: none;
 }
 
-/* Compass — top-right, under the header. The rose rotates with the device (JS) so the red needle
-   and "N" always point to real north. The map itself stays north-up. */
+/* Compass — left-edge stack, ABOVE the hamburger (matches the right-side FABs: 44px round, same style).
+   The rose rotates with the device (JS) so the red needle and "N" always point to real north. Map stays north-up. */
 #compass {
     position: fixed;
-    right: 12px;
-    top: calc(env(safe-area-inset-top, 0px) + 12px);
-    z-index: 700;
-    width: 48px;
-    height: 48px;
+    left: 12px;
+    top: 50%;
+    transform: translateY(calc(-50% - 52px));
+    z-index: 600;
+    width: 44px;
+    height: 44px;
     border-radius: 50%;
-    background: rgba(8, 20, 42, 0.9);
+    background: rgba(8, 20, 42, 0.82);
     border: 1px solid rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(8px);
     box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+    transition: opacity 0.55s ease;
 }
 
 #compass[hidden] {
@@ -1777,27 +1851,52 @@ body.ui-idle #trk-controls {
     transition: transform 0.15s linear;
 }
 
+/* Proper compass needle: a slim diamond pivoting on the centre — red half = north, light half = south. */
 .compass-needle {
     position: absolute;
     left: 50%;
-    top: 5px;
+    top: 9px;
     width: 0;
     height: 0;
     transform: translateX(-50%);
     border-left: 5px solid transparent;
     border-right: 5px solid transparent;
-    border-bottom: 16px solid rgb(176, 36, 24); /* red end points north */
+    border-bottom: 13px solid rgb(176, 36, 24); /* north half */
+    filter: drop-shadow(0 1px 1.5px rgba(0, 0, 0, 0.45));
+}
+.compass-needle::after { /* south half — light grey, mirrored below the pivot */
+    content: '';
+    position: absolute;
+    left: -5px;
+    top: 13px;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 13px solid rgba(230, 236, 243, 0.9);
+}
+/* centre pivot cap (sits on the rose centre, so rotation keeps it put) */
+#compass-rose::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 5px;
+    height: 5px;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.45);
 }
 
 .compass-n {
     position: absolute;
     left: 50%;
-    top: 1px;
+    top: 0;
     transform: translateX(-50%);
     font-family: 'Orbitron', sans-serif;
     font-weight: 700;
-    font-size: 8px;
-    color: #fff;
+    font-size: 7px;
+    letter-spacing: 0.5px;
+    color: rgba(255, 255, 255, 0.95);
 }
 
 /* "Neue Version verfügbar" banner — persistent + tappable (unlike the toast). Sits just
@@ -1893,6 +1992,25 @@ body.ui-idle #trk-controls {
     line-height: 1.35;
     letter-spacing: 0.5px;
     text-align: center;
+}
+
+.ui-modal-input {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    margin: 0 0 18px;
+    padding: 11px 13px;
+    border: 1px solid rgba(245, 194, 66, 0.5);
+    border-radius: 10px;
+    background: rgba(8, 20, 42, 0.6);
+    color: #fff;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 0.9rem;
+}
+
+.ui-modal-input:focus {
+    outline: none;
+    border-color: rgba(245, 194, 66, 0.9);
 }
 
 .ui-modal-btns {
