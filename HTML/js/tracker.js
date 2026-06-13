@@ -1063,8 +1063,12 @@
                         }
                     });
                     if (liveTrailTimer) clearInterval(liveTrailTimer);
-                    // refresh the path AND re-send the photo thumbnails so late viewers catch up
-                    liveTrailTimer = setInterval(() => { broadcastTrail(); broadcastPhotos(); }, 15000);
+                    // refresh the path only. Photos are NOT re-sent on a timer — THAT was the egress leak
+                    // (full ~250 KB JPEGs × every photo × every 15 s during a live session = GB-scale).
+                    // Each photo is broadcast once when taken (addLivePhoto), and a (re)connecting viewer
+                    // pulls the whole set via the 'request' handler above (view.html sends it on SUBSCRIBED)
+                    // → late joiners still catch up, at zero idle cost.
+                    liveTrailTimer = setInterval(() => { broadcastTrail(); }, 15000);
                     toast("Live auf '" + canon + "'" + (copied ? ' · Link kopiert ✓' : ' — Namen weitersagen'));
                 } catch (e) { toast('Live fehlgeschlagen: ' + (e.message || e)); liveOn = false; updateLiveBadge(); }
             })();
