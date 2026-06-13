@@ -3,6 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <title>SOLITA · Doc Alvers</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&display=swap" rel="stylesheet">
     <script>
@@ -562,6 +563,16 @@
         }
         #solita-lightbox.open { display: flex; }
         #solita-lightbox img { max-width: 90vw; max-height: 90vh; border-radius: 16px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6); }
+
+        /* Mobile (≤600px): tighten chat + bottom bar so they fit without overflow (Regel 16). */
+        @media (max-width: 600px) {
+            .messages-area { padding: 14px; gap: 12px; }
+            .input-area { padding: 10px 12px; }
+            .message-content { max-width: 90%; font-size: 1rem; padding: 12px 14px; }
+            .message.assistant .message-content { width: auto; max-width: 92%; }
+            #solita-hh-panel { width: calc(100vw - 32px); max-width: 300px; }
+            #solita-phase { font-size: 0.66rem; padding: 5px 12px; }
+        }
     </style>
 </head>
 
@@ -609,7 +620,7 @@
             <button class="send-button" id="micBtn" title="Einmal sprechen" aria-label="Per Stimme diktieren"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10v2a7 7 0 0 0 14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg></button>
             <button class="send-button toggle-btn" id="wakeBtn" title="Solita-Weckwort an/aus" aria-label="Solita per Weckwort aktivieren"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8.5a6.5 6.5 0 1 1 13 0c0 6-6 6-6 10a3.5 3.5 0 1 1-7 0"/><path d="M6.5 12.5a3.5 3.5 0 1 1 7 0c0 2.5-2 2.5-2 5"/></svg></button>
             <button class="send-button" id="logoutBtn" title="Logout" aria-label="Logout"
-                onclick="localStorage.removeItem('dev_access'); sessionPwd=''; document.getElementById('cyber-auth-overlay').classList.add('visible'); document.getElementById('cyber-pwd-input').value=''; setTimeout(()=>document.getElementById('cyber-pwd-input').focus(),100);">
+                onclick="solitaLogout()">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
             </button>
         </div>
@@ -734,6 +745,16 @@
             const lbl = el.querySelector('.lbl');
             if (s && LBL[s]) { el.dataset.state = s; if (lbl) lbl.textContent = LBL[s]; }
             else { el.removeAttribute('data-state'); if (lbl) lbl.textContent = ''; }
+        };
+
+        // Logout — clears access, shows the auth overlay, and turns the mic/wake-word OFF. Used by the
+        // hamburger Logout button AND the voice intent ("Solita, log mich aus").
+        window.solitaLogout = function () {
+            if (window.solitaStopVoice) solitaStopVoice();          // mic off on logout
+            try { localStorage.removeItem('dev_access'); } catch (e) {}
+            sessionPwd = '';
+            const ov = document.getElementById('cyber-auth-overlay'); if (ov) ov.classList.add('visible');
+            const inp = document.getElementById('cyber-pwd-input'); if (inp) { inp.value = ''; setTimeout(() => inp.focus(), 100); }
         };
 
         // Hamburger toggle (Solita's identity panel). Tap outside closes it.
@@ -1358,6 +1379,16 @@
                 if (window.speakReply) window.speakReply('Bis später.');
             }
 
+            // Voice action — logout. Spoken intent ("Solita, log mich aus" / "melde mich ab" / "kannst du
+            // mich ausloggen"). Note: keyword-based, so ASKING about logging out can also trigger it — real
+            // LLM intent-interpretation is the next step. Speaks a goodbye, then logs out (which kills the mic).
+            const LOGOUT = /\bausloggen\b|\babmelden\b|\blogout\b|\blog\s?out\b|\blog+e?\s?mich\s?(aus|raus)\b|\bmelde mich (ab|aus|raus)\b|\bmich (ab|aus)melden\b/i;
+            function doVoiceLogout() {
+                convo = false; awaitingQuery = false;
+                if (window.speakReply) window.speakReply('Logge dich aus. Bis bald.');
+                setTimeout(function () { if (window.solitaLogout) window.solitaLogout(); }, 1700);
+            }
+
             function onResult(e) {
                 if (speaking) return;
                 let txt = '';
@@ -1368,6 +1399,8 @@
                 if (!txt) return;
                 try { console.log('[solita] heard: "' + txt + '"'); } catch (_) {}  // measure what de-DE actually transcribes
                 if (window.__uiMode) { handleUiVoice(txt); return; }   // UI mode: accumulate + go/pause
+                const addressed = convo || awaitingQuery || extractQuery(txt) !== null;
+                if (addressed && LOGOUT.test(txt)) { doVoiceLogout(); return; } // "Solita, log mich aus" → action, not chat
                 if (convo && FAREWELL.test(txt)) { endConvo(); return; } // "tschüss" → hang up the thread
                 if (awaitingQuery) { fire(txt); return; }             // in conversation: this utterance is the next turn
                 const q = extractQuery(txt);
@@ -1391,6 +1424,14 @@
                 if (rec) { try { rec.stop(); } catch (e) { } rec = null; }
                 setTimeout(function () { stopping = false; }, 500);
             }
+
+            // Turn the whole voice line OFF (used on logout). Persists off so a fresh login starts quiet.
+            window.solitaStopVoice = function () {
+                wakeOn = false; try { localStorage.setItem(WAKE_KEY, '0'); } catch (e) {}
+                convo = false; awaitingQuery = false; reflect();
+                if (window.solitaPhase) solitaPhase('idle');
+                stopRec();
+            };
 
             wakeBtn.addEventListener('click', function () {
                 wakeOn = !wakeOn; localStorage.setItem(WAKE_KEY, wakeOn ? '1' : '0'); reflect();
