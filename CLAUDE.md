@@ -24,6 +24,7 @@ A few ground rules:
 16. We work always responsive!
 17. Never say or write "ULTRA"!
 18. **NIEMALS ein Passwort, API-Key, Token oder sonstiges Secret im Quellcode** — auch nicht in Kommentaren, Default-Werten, Beispielen oder als „DEV-Bake-in". Dieses Repo ist public; git-history vergisst nichts. Verschlüsselte Blobs ohne das zugehörige Passwort/Key sind OK; Passwort + Ciphertext zusammen NICHT. Bei Verstoß: SOFORT laut warnen und Rotation vorschlagen, nicht nur Kommentar entfernen.
+19. **Branch-Hygiene (gegen lautlos verlorene Arbeit):** Jede Agenten-Aufgabe startet auf einem **frischen** Branch von aktuellem `origin/main` (`git fetch` → `git switch -c task origin/main`) — **kein** langlebiger Sammel-Branch. Nach **vollem** Merge den Branch löschen (geparkte Branches ausgenommen). Datei-Umzüge als **`git mv` in einem eigenen Commit** (Inhalt erst im nächsten ändern), sonst frisst ein späterer Merge fremde Edits stumm (`modify/delete`). Beim Mergen auf `modify/delete`-Konflikte achten — nie blind die Löschung nehmen.
 
 ## Bevorzugte Farbpalette
 
