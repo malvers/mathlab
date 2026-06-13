@@ -256,6 +256,7 @@
         let __nav = null;          // simple-navigation module instance (js/tracker-nav.js)
         let __speed = null;        // speed-limit sign module instance (js/tracker-speedlimit.js)
         let __compass = null;      // north/compass module instance (js/tracker-compass.js)
+        let __fuel = null;         // fuel-station price layer (js/tracker-fuel.js)
         let gnssActive = false;    // true once the native GnssStatus listener delivers data
         let gnssLatest = null;     // last native GNSS summary {used, inView, usedByConstellation, ...}
         let gpsReal = false;       // true only on a genuine GPS fix (native sats used, or acc ≤ GPS) —
@@ -614,6 +615,7 @@
             refreshRecenter(); // show/hide the recenter button as needed
             if (__nav && __nav.update) __nav.update(here); // navigation: reroute if we drifted off the line
             if (__speed) __speed.update(here, still, shownSpeed); // speed-limit sign for the current road
+            if (__fuel) __fuel.update(here); // refresh nearby fuel-station prices (gentle, throttled)
             updateMotionDbg(accuracy, minStep, still);
             if (tracking) setStatus(`Aufzeichnung läuft … ${track.length} Punkte`);
         }
@@ -1735,6 +1737,11 @@ ${pts}
         __speed = TrackerSpeedLimit({ $ });
         // ---- Compass / north indicator → js/tracker-compass.js. Owns its own #compass badge. ----
         __compass = TrackerCompass({ $ });
+        // ---- Tankstellen-Spur → js/tracker-fuel.js. Position-driven; shows nearby fuel-station
+        //      prices via the 'fuel-prices' Edge Function and glows green when one is notably cheap. ----
+        __fuel = TrackerFuel({
+            map, toast, SUPABASE_URL, SUPABASE_KEY, COL_GREEN, COL_ORANGE, COL_RED,
+        });
         // ===============================================================
         // Radial action popup (long-press / right-click) — style from worldclock
         // ===============================================================
