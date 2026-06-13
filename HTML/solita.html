@@ -510,6 +510,58 @@
             border-color: #00d2ff;
             box-shadow: 0 0 10px rgba(0, 210, 255, 0.2);
         }
+
+        /* Conversation-phase indicator (Solita state): what's going on right now. */
+        #solita-phase {
+            position: fixed; top: 14px; left: 50%; transform: translateX(-50%);
+            display: none; align-items: center; gap: 9px;
+            padding: 6px 15px; border-radius: 999px;
+            background: rgba(8, 20, 42, 0.88); border: 1px solid rgba(255, 255, 255, 0.12);
+            font-family: 'Orbitron', sans-serif; font-size: 0.72rem; letter-spacing: 1.5px;
+            text-transform: uppercase; color: #cfe3ff; z-index: 9999;
+            backdrop-filter: blur(6px); pointer-events: none;
+        }
+        #solita-phase[data-state="listening"],
+        #solita-phase[data-state="thinking"],
+        #solita-phase[data-state="speaking"] { display: flex; }
+        #solita-phase .dot { width: 9px; height: 9px; border-radius: 50%; background: #6b7a99; }
+        #solita-phase[data-state="listening"] .dot { background: rgb(121, 158, 49); animation: solita-pulse 1.1s ease-in-out infinite; } /* φ grün — du sprichst, sie hört */
+        #solita-phase[data-state="thinking"]  .dot { background: rgb(245, 194, 66); animation: solita-pulse 0.8s ease-in-out infinite; } /* λ orange — denkt */
+        #solita-phase[data-state="speaking"]  .dot { background: #00d2ff;          animation: solita-pulse 0.7s ease-in-out infinite; } /* cyan — Solita spricht */
+        @keyframes solita-pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.35; transform: scale(1.6); } }
+
+        /* Hamburger → Solita's identity panel (her face). Utilities consolidate here later (Stufe 2). */
+        #solita-hh {
+            display: inline-flex; flex-direction: column; justify-content: center; align-items: center; gap: 5px;
+            height: 52px; min-width: 52px; flex-shrink: 0;
+            background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 10px; cursor: pointer; transition: background 0.15s;
+        }
+        #solita-hh:hover { background: rgba(255, 255, 255, 0.12); }
+        #solita-hh span { width: 18px; height: 2px; background: #cfe3ff; border-radius: 2px; }
+        #solita-hh-panel {
+            position: fixed; bottom: 86px; left: 24px; z-index: 10000;
+            width: 280px; padding: 20px 18px; border-radius: 14px;
+            background: rgba(8, 20, 42, 0.96); border: 1px solid rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(12px); box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+            display: none; flex-direction: column; align-items: center; gap: 4px;
+        }
+        #solita-hh-panel.open { display: flex; }
+        #solita-hh-panel .hh-face {
+            width: 120px; height: 120px; border-radius: 50%; object-fit: cover;
+            border: 2px solid rgba(0, 210, 255, 0.4); margin-bottom: 12px;
+        }
+        #solita-hh-panel .hh-name { font-family: 'Orbitron', sans-serif; font-size: 1rem; letter-spacing: 1px; color: #e6edf3; }
+        #solita-hh-panel .hh-tag { font-family: 'Orbitron', sans-serif; font-size: 0.62rem; letter-spacing: 1.5px; color: #6b7a99; text-transform: uppercase; margin-top: 2px; }
+        #solita-hh-panel .hh-controls { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 16px; }
+        #solita-hh-panel .hh-face { cursor: zoom-in; }
+        #solita-lightbox {
+            position: fixed; inset: 0; z-index: 10001; display: none;
+            align-items: center; justify-content: center;
+            background: rgba(8, 20, 42, 0.92); backdrop-filter: blur(8px); cursor: zoom-out;
+        }
+        #solita-lightbox.open { display: flex; }
+        #solita-lightbox img { max-width: 90vw; max-height: 90vh; border-radius: 16px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6); }
     </style>
 </head>
 
@@ -547,6 +599,28 @@
         </div>
     </div>
 
+    <!-- Hamburger panel → Solita's identity (her face) + the consolidated controls. Opened by the ☰ in the input bar. -->
+    <div id="solita-hh-panel" role="menu" aria-hidden="true">
+        <img class="hh-face" src="resources/team/team_02.png" alt="Solita" onclick="document.getElementById('solita-lightbox').classList.add('open')" onerror="this.style.display='none'">
+        <div class="hh-name">Solita Neural</div>
+        <div class="hh-tag">Deine persönliche Assistentin</div>
+        <div class="hh-controls">
+            <button class="send-button toggle-btn" id="ttsBtn" title="Vorlesen an/aus" aria-label="Antworten vorlesen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M19 5a10 10 0 0 1 0 14"/></svg></button>
+            <button class="send-button" id="micBtn" title="Einmal sprechen" aria-label="Per Stimme diktieren"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10v2a7 7 0 0 0 14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg></button>
+            <button class="send-button toggle-btn" id="wakeBtn" title="Solita-Weckwort an/aus" aria-label="Solita per Weckwort aktivieren"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8.5a6.5 6.5 0 1 1 13 0c0 6-6 6-6 10a3.5 3.5 0 1 1-7 0"/><path d="M6.5 12.5a3.5 3.5 0 1 1 7 0c0 2.5-2 2.5-2 5"/></svg></button>
+            <button class="send-button" id="logoutBtn" title="Logout" aria-label="Logout"
+                onclick="localStorage.removeItem('dev_access'); sessionPwd=''; document.getElementById('cyber-auth-overlay').classList.add('visible'); document.getElementById('cyber-pwd-input').value=''; setTimeout(()=>document.getElementById('cyber-pwd-input').focus(),100);">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- Tap Solita's portrait → full-size lightbox. -->
+    <div id="solita-lightbox" onclick="this.classList.remove('open')"><img src="resources/team/team_02.png" alt="Solita"></div>
+
+    <!-- Conversation-phase indicator: höre zu / denkt / spricht (set via window.solitaPhase). -->
+    <div id="solita-phase" aria-live="polite"><span class="dot"></span><span class="lbl"></span></div>
+
     <div class="chat-container">
         <div class="messages-area" id="messagesArea">
             <div class="message assistant" style="align-items: center; gap: 10px; width: 100%;">
@@ -571,13 +645,7 @@
         </div>
 
         <div class="input-area">
-            <button class="send-button toggle-btn" id="ttsBtn" title="Vorlesen an/aus" aria-label="Antworten vorlesen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M19 5a10 10 0 0 1 0 14"/></svg></button>
-            <button class="send-button" id="micBtn" title="Einmal sprechen" aria-label="Per Stimme diktieren"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10v2a7 7 0 0 0 14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg></button>
-            <button class="send-button toggle-btn" id="wakeBtn" title="Solita-Weckwort an/aus" aria-label="Solita per Weckwort aktivieren"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8.5a6.5 6.5 0 1 1 13 0c0 6-6 6-6 10a3.5 3.5 0 1 1-7 0"/><path d="M6.5 12.5a3.5 3.5 0 1 1 7 0c0 2.5-2 2.5-2 5"/></svg></button>
-            <button class="send-button" id="logoutBtn" title="Logout" aria-label="Logout"
-                onclick="localStorage.removeItem('dev_access'); sessionPwd=''; document.getElementById('cyber-auth-overlay').classList.add('visible'); document.getElementById('cyber-pwd-input').value=''; setTimeout(()=>document.getElementById('cyber-pwd-input').focus(),100);">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-            </button>
+            <button id="solita-hh" aria-label="Menü" title="Solita"><span></span><span></span><span></span></button>
             <textarea class="message-input" id="messageInput" rows="1"
                 placeholder="Du hast sicher Fragen ... schreib sie hier!"
                 aria-label="Deine Nachricht an die KI"></textarea>
@@ -657,6 +725,26 @@
         const messageInput = document.getElementById('messageInput');
         // GO/EXIT buttons removed — Enter sends. Null-object keeps the old .disabled / .addEventListener refs safe.
         const sendButton = document.getElementById('sendButton') || { disabled: false, addEventListener() {} };
+
+        // Conversation-phase indicator: reflect who's "on" right now (listening | thinking | speaking | idle).
+        window.solitaPhase = function (s) {
+            const el = document.getElementById('solita-phase');
+            if (!el) return;
+            const LBL = { listening: 'höre zu …', thinking: 'denkt …', speaking: 'Solita spricht …' };
+            const lbl = el.querySelector('.lbl');
+            if (s && LBL[s]) { el.dataset.state = s; if (lbl) lbl.textContent = LBL[s]; }
+            else { el.removeAttribute('data-state'); if (lbl) lbl.textContent = ''; }
+        };
+
+        // Hamburger toggle (Solita's identity panel). Tap outside closes it.
+        (function () {
+            const hh = document.getElementById('solita-hh'), panel = document.getElementById('solita-hh-panel');
+            if (!hh || !panel) return;
+            hh.addEventListener('click', (e) => { e.stopPropagation(); panel.classList.toggle('open'); });
+            document.addEventListener('click', (e) => {
+                if (panel.classList.contains('open') && !panel.contains(e.target) && !hh.contains(e.target)) panel.classList.remove('open');
+            });
+        })();
         const exitUiBtn = document.getElementById('exitUiBtn');
 
         // UI-Änderungs-Modus (primer): when ON, every message is a live config change via solita-config.
@@ -685,9 +773,11 @@
         // Solita's persona. Sent as a system turn on every request (the proxy lifts it into Anthropic's
         // top-level `system`). Kept sprechfreundlich because answers are often read aloud.
         const SOLITA_SYSTEM = "Du bist Solita — die persönliche, kluge und warmherzige Assistentin von "
-            + "Doc Alvers. Du sprichst Deutsch, antwortest natürlich, knapp und auf den Punkt (deine "
-            + "Antworten werden oft vorgelesen, also sprechfreundlich; keine langen Aufzählungen, wenn ein "
-            + "Satz reicht). Du weißt viel und bleibst nah. Was du nicht sicher weißt, sagst du ehrlich.";
+            + "Doc Alvers. Du sprichst Deutsch und antwortest natürlich und warm. WICHTIG: Fasse dich kurz "
+            + "— normalerweise ein bis zwei Sätze, denn deine Antworten werden meist vorgelesen. Keine "
+            + "Aufzählungen oder Monologe, wenn ein Satz reicht; lieber kurz nachfragen als lang ausholen. "
+            + "Nur wenn Doc ausdrücklich um Details bittet, wirst du ausführlicher. Du weißt viel und "
+            + "bleibst nah. Was du nicht sicher weißt, sagst du ehrlich.";
 
         // Rolling summary of older turns so context survives without sending the whole history every time.
         let runningSummary = localStorage.getItem(SUMMARY_KEY) || '';
@@ -926,6 +1016,7 @@
             typingDiv.innerHTML = `<div class="message-content"><div class="typing-dots"><span></span><span></span><span></span></div></div>`;
             messagesArea.appendChild(typingDiv);
             messagesArea.scrollTop = messagesArea.scrollHeight;
+            if (window.solitaPhase) solitaPhase('thinking');
         }
 
         function hideTyping() {
@@ -959,7 +1050,11 @@
             // In UI-Modus ist JEDER Satz eine Config-Änderung; rein via "UI Änderung"/"Änderung UI", raus via
             // "fertig"/EXIT. "stell ein: …" wirkt auch ohne Modus als Einzelbefehl. Nicht in den Chat gepusht.
             const t = userText.trim();
-            const wantsEnterUi = (/\bui\b/i.test(t) && /(adjust|change|edit|tune|tweak|adapt|änder|aender|anpass)/i.test(t)) || /\bui[\s-]?mode\b/i.test(t);
+            // Enter UI mode: a bare "UI" (incl. de-DE mishearings of the English "you-eye") is enough now — no
+            // verb required. Longer sentences still need ui + a change-verb, or "ui mode".
+            const wantsEnterUi = /^\s*(ui|u\.?\s?i|you\.?\s?i|benutzeroberfläche)(\s+(modus|mode|bitte|an|english|englisch))?\s*[.!?]?\s*$/i.test(t)
+                || (/\bui\b/i.test(t) && /(adjust|change|edit|tune|tweak|adapt|änder|aender|anpass)/i.test(t))
+                || /\bui[\s-]?mode\b/i.test(t);
             const wantsExitUi  = /^(fertig|ende|stop+|schluss|ui\s*aus|raus|normal)\b/i.test(t);
             const oneShot = t.match(/^\s*(?:solita[\s,:]*)?(?:stell\s+ein|config|konfiguration)\b[\s:]*(.+)/is);
 
@@ -1180,7 +1275,7 @@
             const TRIGGERS = ['solita', 'solida', 'rita'];          // Vosk-tested variants (see krass-app note)
             const WAKE_KEY = 'solita_wake';
             let wakeOn = localStorage.getItem(WAKE_KEY) === '1';
-            let rec = null, awaitingQuery = false, speaking = false, stopping = false;
+            let rec = null, awaitingQuery = false, speaking = false, stopping = false, convo = false;
 
             function reflect() { wakeBtn.classList.toggle('active', wakeOn); }
             reflect();
@@ -1190,10 +1285,13 @@
             window.speakReply = function (text) {
                 if (wakeOn && rec) { speaking = true; try { rec.stop(); } catch (e) { } }
                 if (typeof _speak === 'function') _speak(text);
-                const askedSomething = /\?[\s"')\]]*$/.test(String(text || '').trim()); // Solita ended on a question
+                if (window.solitaPhase) solitaPhase('speaking');
                 const resume = () => {
                     speaking = false;
-                    if (wakeOn) { startRec(); if (askedSomething && !window.__uiMode) awaitingQuery = true; } // → answer without "Solita"
+                    // Turn-loop: while a conversation is open, reopen the ear after EVERY reply and take the
+                    // next utterance as the answer — no "Solita" per turn. (UI-mode runs its own sub-flow.)
+                    if (wakeOn) { startRec(); if (convo && !window.__uiMode) awaitingQuery = true; }
+                    if (window.solitaPhase) solitaPhase(wakeOn && convo ? 'listening' : 'idle');
                 };
                 try {
                     if (window.speechSynthesis) {
@@ -1216,6 +1314,7 @@
             }
 
             function fire(query) {
+                convo = true;                                        // addressing Solita opens the conversation thread
                 if (!query) {                                        // heard "Solita" alone → prompt + listen once
                     awaitingQuery = true;
                     if (window.speakReply) window.speakReply('Ja?');
@@ -1252,6 +1351,13 @@
                 uiTimer = setTimeout(uiExec, 4000);
             }
 
+            // Hang up the conversation: a goodbye drops back to idle (wake-word needed again). NOT sent to the API.
+            const FAREWELL = /^(tschü(?:ss?)?|auf wiederhör(?:en)?|das war'?s(?: für (?:heute|jetzt))?|danke,? das war'?s|schluss für (?:heute|jetzt)|beenden?(?: das gespräch)?)\b/i;
+            function endConvo() {
+                convo = false; awaitingQuery = false;
+                if (window.speakReply) window.speakReply('Bis später.');
+            }
+
             function onResult(e) {
                 if (speaking) return;
                 let txt = '';
@@ -1260,10 +1366,12 @@
                 }
                 txt = txt.trim();
                 if (!txt) return;
-                if (window.__uiMode) { handleUiVoice(txt); return; }  // UI mode: accumulate + go/pause
-                if (awaitingQuery) { fire(txt); return; }            // wake word already heard last round
+                try { console.log('[solita] heard: "' + txt + '"'); } catch (_) {}  // measure what de-DE actually transcribes
+                if (window.__uiMode) { handleUiVoice(txt); return; }   // UI mode: accumulate + go/pause
+                if (convo && FAREWELL.test(txt)) { endConvo(); return; } // "tschüss" → hang up the thread
+                if (awaitingQuery) { fire(txt); return; }             // in conversation: this utterance is the next turn
                 const q = extractQuery(txt);
-                if (q !== null) fire(q);                              // phrase contained "Solita …"
+                if (q !== null) fire(q);                               // phrase contained "Solita …" → (re)open convo
             }
 
             function startRec() {
@@ -1286,7 +1394,9 @@
 
             wakeBtn.addEventListener('click', function () {
                 wakeOn = !wakeOn; localStorage.setItem(WAKE_KEY, wakeOn ? '1' : '0'); reflect();
-                if (wakeOn) { awaitingQuery = false; startRec(); } else stopRec();
+                convo = false; awaitingQuery = false;                 // toggling the line always resets the thread
+                if (window.solitaPhase) solitaPhase('idle');
+                if (wakeOn) startRec(); else stopRec();
             });
 
             if (wakeOn) setTimeout(startRec, 600);                   // auto-resume if it was left on
