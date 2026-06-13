@@ -488,17 +488,15 @@ const LABS_DATA = [
         "keywords": "komplexe zahlen imaginaerteil reell imaginary complex plane gauss i",
         "color": "blue"
     }, */
-    /*
     {
-        "id": "labai",
-        "href": "labai.html",
-        "title": "Lab AI",
-        "description": "Dein intelligenter Assistent im Doc Alvers Mathe-Labor. KI-gestützte Analysen und Hilfe für komplexe Aufgaben.",
-        "tagline": "Künstliche Intelligenz / Assistent",
-        "icon": LAB_ICONS["labai"],
+        "id": "solita",
+        "href": "solita.html",
+        "title": "Solita",
+        "description": "Solita — deine persönliche Sprach-Assistentin (Claude) im Doc Alvers Mathe-Labor. Reden, vorlesen, Kontext behalten.",
+        "tagline": "weiß alles, bleibt nah",
+        "icon": LAB_ICONS["solita"],
         "category": "hot",
-        "keywords": "ai ki artificial intelligence assistent bot hilfe chat",
+        "keywords": "solita ai ki assistent sprache voice chat claude vorlesen weckwort",
         "color": "blue"
     }
-    */
 ];

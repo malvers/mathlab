@@ -86,8 +86,8 @@ window.TrackerMedia = function (T) {
             // specialist made the call (pn=score sci) or Gemini fell back.
             const pn = j._diag && j._diag.plantnet;
             const pnStr = pn && pn !== 'off'
-                ? ' | pn=' + (pn.sci ? pn.score + ' ' + pn.sci
-                             : pn.low != null ? 'low ' + pn.low
+                ? ' | pn=' + (pn.score != null ? pn.score + ' ' + (pn.sci || '')
+                             : pn.low != null ? 'low ' + pn.low + ' ' + (pn.sci || '')
                              : pn.reject ? 'reject ' + pn.reject
                              : pn.err ? 'err' : JSON.stringify(pn))
                 : '';
@@ -292,7 +292,7 @@ window.TrackerMedia = function (T) {
                 $('pd-keep').onclick = () => finish({ action: 'keep', ai: null }); // ✓ before KI → keep, no AI
                 $('pd-ki').onclick = async () => {
                     ov.classList.add('loading'); // spinner; hide KI + ✓ (only ✗ stays to cancel)
-                    $('pd-result').innerHTML = '<div class="pd-wait">🤖 KI erkennt …</div>';
+                    $('pd-result').innerHTML = '<div class="pd-wait"><span class="pd-spin" aria-hidden="true"></span>KI analysiert …</div>';
                     let ai = null;
                     try { ai = await identifyPhoto(img, ll[0], ll[1]); } catch (e) { ai = null; }
                     ov.classList.remove('loading'); ov.classList.add('reviewed');
@@ -493,7 +493,7 @@ window.TrackerMedia = function (T) {
         (function () {
             const micFab = $('mic-fab'), micTimer = $('mic-timer');
             if (!micFab) return;
-            const MAX_MS = 60000; // cap a note at 60 s (keeps the base64 audio in the jsonb sane)
+            const MAX_MS = 60000; // cap a note at 60 s (keeps the R2 upload + offline base64 fallback reasonable)
             let timerIv = null, autoStop = null, busy = false;
             const fmt = (ms) => { const s = Math.floor(ms / 1000); return '● ' + Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); };
             const tick = () => { micTimer.textContent = fmt(Math.min(VoiceNote.elapsedMs(), MAX_MS)); };
@@ -624,6 +624,79 @@ window.TrackerMedia = function (T) {
                 return false; // keep wp.audio = base64 — never lose the note
             }
         }
+        // ---- One-time / maintenance migration: lift EXISTING base64 media (photo/voice/video) OUT of
+        //      the `tracks.waypoints` DB column into Cloudflare R2. THIS is the egress fix — base64 in
+        //      the DB is re-downloaded on every track load / share-view (Supabase egress); an R2 URL is
+        //      served from the CDN (egress free). DRY-RUN by default (counts + MB, writes nothing);
+        //      migrateMediaToR2({ live:true }) performs it. Idempotent (^data: guard → URLs skipped) and
+        //      offline-safe (an upload that fails keeps its base64 → a photo/note is never lost). The
+        //      tracks SELECT/UPDATE is RLS-scoped → only the signed-in account's OWN tracks. Console-run
+        //      while signed in (e.g. localhost:8765 or the live app).
+        async function migrateMediaToR2(opts) {
+            opts = opts || {};
+            const live = opts.live === true;
+            const log = (m) => { try { if (typeof DebugWindow !== 'undefined') DebugWindow.log('[media→R2] ' + m); } catch (_) {} try { console.log('[media→R2] ' + m); } catch (_) {} };
+            const FIELDS = [['img', 'photo'], ['audio', 'voice'], ['video', 'video']];
+            const b64bytes = (s) => { const i = String(s).indexOf(','); return i < 0 ? 0 : Math.floor((s.length - i - 1) * 3 / 4); };
+            if (typeof uploadMedia !== 'function' || typeof dataUrlToBlob !== 'function') { log('upload-media.js fehlt — abgebrochen.'); return null; }
+
+            const c = await ensureSb();
+            if (!c) { log('Kein Sync-Konto / nicht eingeloggt — abgebrochen.'); return null; }
+            const { authToken, ownerId } = await mediaAuth();
+            // Pull ids ONLY first (tiny → no timeout), then read each track's waypoints one at a time.
+            // Selecting ALL waypoints at once hits the 8 s statement timeout — the column is base64-bloated
+            // (that bloat IS the egress problem). Per-track keeps every query small and the run resumable.
+            const { data: idRows, error: idErr } = await c.from('tracks').select('id');
+            if (idErr) { log('tracks-id-SELECT fehlgeschlagen: ' + idErr.message); return null; }
+            const ids = (idRows || []).map((r) => r.id);
+
+            let tracks = 0, items = 0, bytes = 0, uploaded = 0, failed = 0, rowsUpdated = 0, readErr = 0, n = 0;
+            log((live ? 'LIVE' : 'DRY-RUN') + ' — ' + ids.length + ' Tracks, je einzeln …');
+
+            for (const id of ids) {
+                n++;
+                const { data: one, error: rErr } = await c.from('tracks').select('waypoints').eq('id', id).single();
+                if (rErr) { readErr++; log('Lesen fehlgeschlagen (Track ' + id + '): ' + rErr.message); continue; }
+                const wps = Array.isArray(one && one.waypoints) ? one.waypoints : [];
+                let changed = false, hitTrack = false, hitN = 0;
+                for (const wp of wps) {
+                    for (const [field, kind] of FIELDS) {
+                        const v = wp && wp[field];
+                        if (typeof v !== 'string' || !/^data:/.test(v)) continue;   // URL/empty → skip (idempotent)
+                        items++; bytes += b64bytes(v); hitTrack = true; hitN++;
+                        if (!live) continue;                                          // dry-run: count only
+                        try {
+                            const up = await uploadMedia(dataUrlToBlob(v), kind, { authToken, ownerId });
+                            if (up && up.url) {
+                                wp[field] = up.url;                                   // base64 dropped → row shrinks
+                                if (kind === 'video' && up.mime) wp.mime = up.mime;
+                                changed = true; uploaded++;
+                            } else { failed++; log('Upload ohne URL (' + kind + ', Track ' + id + ')'); }
+                        } catch (e) {
+                            failed++; log('Upload fehlgeschlagen (' + kind + ', Track ' + id + '): ' + (e.message || e)); // keep base64
+                        }
+                    }
+                }
+                if (hitTrack) {
+                    tracks++;
+                    log('[' + n + '/' + ids.length + '] Track ' + id + ': ' + hitN + ' base64 — Σ ' + items + ' / ' + (Math.round(bytes / 1e5) / 10) + ' MB');
+                }
+                if (live && changed) {
+                    const { error: uerr } = await c.from('tracks').update({ waypoints: wps }).eq('id', id);
+                    if (uerr) log('Row-UPDATE fehlgeschlagen (Track ' + id + '): ' + uerr.message);
+                    else { rowsUpdated++; log('  → Track ' + id + ' aktualisiert.'); }
+                }
+            }
+
+            const mb = Math.round(bytes / 1e5) / 10;
+            const summary = { live, tracksScanned: ids.length, tracksWithBase64: tracks, base64Items: items, megabytes: mb, uploaded, failed, rowsUpdated, readErrors: readErr };
+            log('FERTIG: ' + JSON.stringify(summary));
+            if (typeof toast === 'function') toast(live
+                ? ('Migration: ' + uploaded + ' hochgeladen · ' + rowsUpdated + ' Tracks aktualisiert' + (failed ? ' · ' + failed + ' Fehler' : ''))
+                : ('DRY-RUN: ' + items + ' base64-Medien (' + mb + ' MB) in ' + tracks + ' Tracks. migrateMediaToR2({live:true}) startet.'));
+            return summary;
+        }
+        window.migrateMediaToR2 = migrateMediaToR2;   // console-triggered (dry-run default)
         function newVideoWp(file, ll) {
             return addWaypoint({
                 type: 'video', lat: ll[0], lng: ll[1], t: new Date().toISOString(),
@@ -671,8 +744,18 @@ window.TrackerMedia = function (T) {
         (function () {
             const IDLE_MS = 8000;
             let idleTimer = null;
+            // Pin (top-right, under the accuracy): when set, the UI never auto-hides. Persists across reloads.
+            const PIN_KEY = 'tracker_ui_pinned';
+            let pinned = localStorage.getItem(PIN_KEY) === '1';
+            function reflectPin() {
+                const b = document.getElementById('ui-pin');
+                if (b) b.classList.toggle('pinned', pinned);
+                const ft = document.getElementById('ui-fade-toggle'); if (ft) ft.checked = !pinned; // checked = auto-hide ON
+                if (pinned) document.body.classList.remove('ui-idle');
+            }
             function popupOpen() { const m = $('mini-stack'); return !!(m && m.classList.contains('popup')); }
             function hide() {
+                if (pinned) return;                                   // pinned → never auto-hide (Doc)
                 // never fade while you're mid-recording or the menu is fanned out
                 if ((window.VoiceNote && VoiceNote.isRecording()) || popupOpen()) { schedule(); return; }
                 document.body.classList.add('ui-idle');
@@ -688,6 +771,28 @@ window.TrackerMedia = function (T) {
             ['pointerdown', 'pointermove', 'wheel', 'keydown'].forEach(
                 (ev) => document.addEventListener(ev, wake, { passive: true })
             );
+            // Robust: delegate on document so attach-timing / DOM order can't matter.
+            document.addEventListener('click', (e) => {
+                if (!(e.target && e.target.closest && e.target.closest('#ui-pin'))) return;
+                e.preventDefault(); e.stopPropagation();
+                pinned = !pinned;
+                localStorage.setItem(PIN_KEY, pinned ? '1' : '0');
+                reflectPin();
+                if (typeof toast === 'function') toast(pinned ? 'UI fixiert — nichts blendet aus' : 'UI-Fixierung aus');
+                if (!pinned) schedule();                              // unpinned → restart the countdown
+            });
+            reflectPin();
+            // Debug toggle (Doc's idea): a reliable checkbox in the DEBUG panel to test the lock
+            // independently of the HUD pin button — it sets the SAME `pinned` flag.
+            window.setUiPinned = function (on) {
+                pinned = !!on;
+                localStorage.setItem(PIN_KEY, pinned ? '1' : '0');
+                reflectPin();
+                if (pinned) document.body.classList.remove('ui-idle'); else schedule();
+            };
+            // Settings toggle "Bedienelemente automatisch ausblenden" (checked = auto-hide ON = NOT pinned).
+            const fadeToggle = document.getElementById('ui-fade-toggle');
+            if (fadeToggle) fadeToggle.addEventListener('change', () => window.setUiPinned(!fadeToggle.checked));
             schedule(); // start the 8 s countdown
         })();
 

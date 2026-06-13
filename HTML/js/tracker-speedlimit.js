@@ -171,7 +171,10 @@ window.TrackerSpeedLimit = function (ctx) {
                 lastBing = 0; // back to legal → re-arm so the next exceedance chimes immediately
             }
         }
-        if (!here || still || fetching) return;
+        // query while moving; ALSO do one query when we still have no limit (e.g. a standing cold
+        // start) so the sign shows immediately on a known road, not only once you start driving.
+        if (!here || fetching) return;
+        if (still && curLimit != null) return;
         const now = Date.now();
         if (now - lastQ < MIN_INTERVAL_MS) return;
         if (lastPos && haversine(here, lastPos) < MIN_MOVE_M) return;

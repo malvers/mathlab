@@ -43,6 +43,9 @@ self.addEventListener('fetch', (event) => {
   // map tiles, CDN libs — all go straight to the network as before.
   if (req.method !== 'GET') return;
   if (new URL(req.url).origin !== self.location.origin) return;
+  // FEAT-19: ?_fresh= freshness probes must BYPASS the SW (hit the real network), otherwise the cache
+  // would mask a dead server and the "SERVER DOWN / OFFLINE" banner could never fire.
+  if (new URL(req.url).searchParams.has('_fresh')) return;
 
   // Network-first: always try the LIVE file (cache:'no-store' skips the WebView's
   // stale HTTP cache); stash a copy for offline; only fall back to that copy when

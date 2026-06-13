@@ -179,6 +179,42 @@
             demAlts = []; demOn = false;
             const b = $('mb-dem'); if (b) b.classList.remove('active');
         }
+
+        // ---- Track statistics (idea #8): distance, duration, Ø/max speed, ascent/descent ----
+        // Höhenmeter read through effectiveAlts() → they use the DEM-corrected altitude when that
+        // toggle is on, the raw GPS+baro otherwise. Computed on demand when the settings panel opens.
+        function trackStats() {
+            const A = effectiveAlts();
+            const t0 = times.find(Boolean), t1 = times.slice().reverse().find(Boolean);
+            const durMs = (t0 && t1) ? (Date.parse(t1) - Date.parse(t0)) : 0;
+            const avgKmh = durMs > 0 ? (totalDist / 1000) / (durMs / 3600000) : 0;
+            let maxKmh = 0;
+            for (let i = 0; i < speeds.length; i++) if (speeds[i] != null && speeds[i] > maxKmh) maxKmh = speeds[i];
+            const ad = ascentDescent(A);
+            let hi = null, lo = null;
+            for (let i = 0; i < A.length; i++) { const v = A[i]; if (v == null) continue; if (hi == null || v > hi) hi = v; if (lo == null || v < lo) lo = v; }
+            return { distM: totalDist, durMs, avgKmh, maxKmh, up: ad.up, down: ad.down, hi, lo };
+        }
+        function fmtDur(ms) {
+            const s = Math.max(0, Math.round(ms / 1000));
+            const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), ss = s % 60;
+            const p = (n) => String(n).padStart(2, '0');
+            return h > 0 ? h + ':' + p(m) + ':' + p(ss) : m + ':' + p(ss);
+        }
+        function fmtDist(m) { return m < 1000 ? Math.round(m) + ' m' : (m / 1000).toFixed(2) + ' km'; }
+        function renderTrackStats() {
+            const set = (id, v) => { const el = $(id); if (el) el.textContent = v; };
+            if (!track.length) { ['ts-dist', 'ts-dur', 'ts-avg', 'ts-max', 'ts-up', 'ts-down', 'ts-hilo'].forEach((id) => set(id, '–')); return; }
+            const s = trackStats(), dem = demOn ? ' (DEM)' : '';
+            set('ts-dist', fmtDist(s.distM));
+            set('ts-dur', fmtDur(s.durMs));
+            set('ts-avg', s.avgKmh.toFixed(1) + ' km/h');
+            set('ts-max', s.maxKmh.toFixed(1) + ' km/h');
+            set('ts-up', s.up + ' m' + dem);
+            set('ts-down', s.down + ' m' + dem);
+            set('ts-hilo', (s.hi != null ? Math.round(s.hi) : '–') + ' / ' + (s.lo != null ? Math.round(s.lo) : '–') + ' m');
+        }
+
         let posMarker = null;
         let headingMarker = null; // small travel-direction triangle at the position dot
 
@@ -268,7 +304,7 @@
         // Mount the shared fixed-slot clock so the ticking timer never jitters.
         // Size comes from the #hud-time --cc-size rule; colours are set here.
         CyberClock.mount(elTime, {
-            digitColor: '#fff',
+            digitColor: 'var(--cfg-clock-color, #fff)',   // live-config: Solita "mach die Uhr gruen" → clockColor
             colonColor: 'rgba(255, 255, 255, 0.55)',
             seconds: true,
         });
@@ -278,7 +314,7 @@
         // changes: right-aligned, no leading zeros (blank slots on the left), group stays
         // centred. KM/H = 999.9 (1 dec), HÖHE = 9999 m (int).
         const STAT_SIZE = 'clamp(1rem, 4.5vw, 1.4rem)';
-        const STAT_COL = 'var(--orange)';
+        const STAT_COL = 'var(--cfg-stat-color, var(--orange))'; // live-config override (tracker-config.js); default = λ-orange
         const STAT_FONT = 'Arial, Helvetica, sans-serif'; // Doc: stat numbers in Arial, comma decimals
         const STAT_SEP = ',';
         CyberClock.mountNum(elSpeed, { intSlots: 3, decimals: 1, size: STAT_SIZE, digitColor: STAT_COL, font: STAT_FONT, decimalSep: STAT_SEP });
@@ -915,7 +951,13 @@
             TrackBuffer.saveNow(bufferSnapshot()); // keep it persisted across the restore
             toast('Ungesicherter Track wiederhergestellt: ' + track.length + ' Punkte. SPEICHERN nicht vergessen.');
         }
-        if (typeof TrackBuffer !== 'undefined') {
+        const _importTok = new URLSearchParams(location.search).get('import');
+        if (_importTok) {
+            // A friend's "In meinen Tracker laden" link → import a copy. Strip the token first so a
+            // reload doesn't import a second copy; the import outranks restoring the last track.
+            try { history.replaceState(null, '', location.pathname); } catch (e) { }
+            importShared(_importTok.trim());
+        } else if (typeof TrackBuffer !== 'undefined') {
             // An in-progress recording wins; otherwise re-load the last track you had open.
             TrackBuffer.load().then(buf => { if (buf) restoreBufferedTrack(buf); else restoreLastLoaded(); });
         } else {
@@ -1021,8 +1063,12 @@
                         }
                     });
                     if (liveTrailTimer) clearInterval(liveTrailTimer);
-                    // refresh the path AND re-send the photo thumbnails so late viewers catch up
-                    liveTrailTimer = setInterval(() => { broadcastTrail(); broadcastPhotos(); }, 15000);
+                    // refresh the path only. Photos are NOT re-sent on a timer — THAT was the egress leak
+                    // (full ~250 KB JPEGs × every photo × every 15 s during a live session = GB-scale).
+                    // Each photo is broadcast once when taken (addLivePhoto), and a (re)connecting viewer
+                    // pulls the whole set via the 'request' handler above (view.html sends it on SUBSCRIBED)
+                    // → late joiners still catch up, at zero idle cost.
+                    liveTrailTimer = setInterval(() => { broadcastTrail(); }, 15000);
                     toast("Live auf '" + canon + "'" + (copied ? ' · Link kopiert ✓' : ' — Namen weitersagen'));
                 } catch (e) { toast('Live fehlgeschlagen: ' + (e.message || e)); liveOn = false; updateLiveBadge(); }
             })();
@@ -1513,6 +1559,34 @@ ${pts}
             if (window.DebugWindow) DebugWindow.log('Geladenen Track wiederhergestellt (' + ok.length + ').');
         }
 
+        // ---- Import a friend's shared track (?import=<token>) into MY account as a copy I own ----
+        // Opened from the read-only viewer's "In meinen Tracker laden" button. We pull the shared row
+        // via the SAME public RPC the viewer uses, plot it, then INSERT it as a fresh track under MY
+        // login (currentTrackId=null → saveTrack inserts, it never touches the friend's row). It then
+        // appears in "Tracks laden", survives a reload, and can be exported / overlaid with our own.
+        async function importShared(token) {
+            toast('Geteilten Track wird geladen …');
+            let row;
+            try {
+                const c = await ensureSb();
+                const { data, error } = await c.rpc('get_shared_track', { p_token: token });
+                if (error) throw error;
+                row = data;
+            } catch (e) { toast('Import fehlgeschlagen: ' + (e.message || e)); return; }
+            if (!row) { toast('Track nicht gefunden — Link ungültig oder widerrufen.'); return; }
+            plotTrack(row.points || [], row.waypoints || []);
+            currentTrackId = null;                          // not my row yet → save INSERTS a copy I own
+            const name = row.name || autoTrackName();
+            $('hud-top').classList.add('shown');            // reveal the header for the loaded track
+            let id;
+            try { id = await saveTrack(name, 'done'); }
+            catch (e) { currentTrackName = name; toast('Geladen, Speichern fehlgeschlagen: ' + (e.message || e)); return; }
+            currentTrackId = id; currentTrackName = name;
+            loadedTrackIds.clear(); loadedTrackIds.add(id);
+            persistLoaded([{ id: id, name: name }]);        // survive a reload like any loaded track
+            toast('In deinen Tracker importiert: ' + name);
+        }
+
         // ---- Transient toast (the persistent status line was removed) ----
         let toastTimer = null;
         function toast(msg) {
@@ -1563,6 +1637,73 @@ ${pts}
                 requestAnimationFrame(() => { ov.classList.add('shown'); ok.focus(); });
             });
         }
+
+        // Styled single-line prompt (paste a value) — same look as uiConfirm, plus a text field.
+        // Resolves the trimmed text, or null on cancel/empty.
+        function uiPrompt(message, opts) {
+            opts = opts || {};
+            return new Promise((resolve) => {
+                const ov = document.createElement('div');
+                ov.className = 'ui-modal-ov';
+                ov.innerHTML =
+                    '<div class="ui-modal" role="dialog" aria-modal="true">' +
+                    '<div class="ui-modal-msg"></div>' +
+                    '<input type="text" class="ui-modal-input" aria-label="Eingabe" autocapitalize="off" autocomplete="off" spellcheck="false">' +
+                    '<div class="ui-modal-btns">' +
+                    '<button type="button" class="ui-btn ui-btn-cancel"></button>' +
+                    '<button type="button" class="ui-btn ui-btn-ok"></button>' +
+                    '</div></div>';
+                ov.querySelector('.ui-modal-msg').textContent = message;
+                const inp = ov.querySelector('.ui-modal-input');
+                inp.placeholder = opts.placeholder || '';
+                if (opts.value) inp.value = opts.value;
+                const cancel = ov.querySelector('.ui-btn-cancel');
+                const ok = ov.querySelector('.ui-btn-ok');
+                cancel.textContent = opts.cancelText || 'Abbrechen';
+                ok.textContent = opts.okText || 'OK';
+                let done = false;
+                function close(v) {
+                    if (done) return;
+                    done = true;
+                    ov.classList.remove('shown');
+                    document.removeEventListener('keydown', onKey);
+                    setTimeout(() => ov.remove(), 200);
+                    resolve(v);
+                }
+                function onKey(e) {
+                    if (e.key === 'Escape') close(null);
+                    else if (e.key === 'Enter') close(inp.value.trim() || null);
+                }
+                cancel.onclick = () => close(null);
+                ok.onclick = () => close(inp.value.trim() || null);
+                ov.onclick = (e) => { if (e.target === ov) close(null); };
+                document.addEventListener('keydown', onKey);
+                document.body.appendChild(ov);
+                requestAnimationFrame(() => { ov.classList.add('shown'); inp.focus(); });
+            });
+        }
+
+        // Pull a share token out of whatever the user pastes: a full view-link (…?s=token), a bare
+        // token, or even a comma-bundle (we take the first). Returns null if nothing usable.
+        function parseShareToken(input) {
+            if (!input) return null;
+            input = String(input).trim();
+            try { const s = new URL(input).searchParams.get('s'); if (s) return s.split(',')[0].trim(); } catch (e) { /* not a URL */ }
+            const m = input.match(/[?&]s=([^&\s]+)/);
+            if (m) return decodeURIComponent(m[1]).split(',')[0].trim();
+            return input.split(',')[0].trim() || null; // assume a bare token was pasted
+        }
+
+        // "Geteilten Track-Link laden" in the Tracks-laden panel: paste a friend's view-link → import
+        // a copy into MY account (importShared does the fetch + save). See importShared above.
+        if ($('tl-import')) $('tl-import').addEventListener('click', async () => {
+            const link = await uiPrompt('Geteilten Track-Link einfügen:', { placeholder: 'https://…/view.html?s=…', okText: 'Laden' });
+            if (!link) return;
+            const tok = parseShareToken(link);
+            if (!tok) { toast('Kein gültiger Link.'); return; }
+            hidePanels();
+            importShared(tok);
+        });
 
         // ---- Foto-Spur / media subsystem → js/tracker-media.js (Phase-2 refactor 2026-06-09).
         //      Forward exports are hoisted functions delegating to the module (callers earlier in
@@ -1801,7 +1942,7 @@ ${pts}
                 $('sync-input').value = '';
             }
         }
-        $('mb-settings').addEventListener('click', () => { closePopup(); updateSyncStatus(); loadUsage(); updateReburnButton(); refreshMenuState(); refreshRainStatus(); showPanel('settings-panel'); });
+        $('mb-settings').addEventListener('click', () => { closePopup(); updateSyncStatus(); loadUsage(); updateReburnButton(); refreshMenuState(); refreshRainStatus(); renderTrackStats(); showPanel('settings-panel'); });
         // Settings → Debug: live source-health dots for the rain radar (DWD + RainViewer).
         function refreshRainStatus() {
             const setDot = (id, st) => {
@@ -1879,13 +2020,26 @@ ${pts}
         })();
 
         // Settings → Debug: mobile shortcut keys — tap fires the otherwise keyboard-only d/k/w handlers.
+        // A toggle shows/hides the key row (default OFF, persisted).
         (function () {
+            const KEY = 'tracker.scKeys';
+            function applyKeys(on) {
+                const row = $('sc-keys-row'); if (row) row.style.display = on ? '' : 'none';
+            }
             function wire() {
                 [['sc-d', 'd'], ['sc-k', 'k'], ['sc-w', 'w']].forEach(([id, key]) => {
                     const b = $(id); if (!b || b._wired) return; b._wired = true;
                     b.addEventListener('click', () => {
                         document.dispatchEvent(new KeyboardEvent('keydown', { key: key, bubbles: true }));
                     });
+                });
+                const cb = $('sc-keys-toggle'); if (!cb || cb._wired) return; cb._wired = true;
+                const on = localStorage.getItem(KEY) === '1'; // default OFF
+                cb.checked = on;
+                applyKeys(on);
+                cb.addEventListener('change', () => {
+                    localStorage.setItem(KEY, cb.checked ? '1' : '0');
+                    applyKeys(cb.checked);
                 });
             }
             if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', wire);
@@ -1929,6 +2083,7 @@ ${pts}
         // Track-list badge glyphs (our pin style): speaker for a voice note, camera for photos.
         const SPEAKER_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>';
         const CAMERA_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>';
+        const VIDEO_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>';
         const APPICON = '<img class="tl-appicon" src="icon.svg" alt="">'; // our app icon = the track badge
         function mkBadge(kind, svg, count) {
             const b = document.createElement('div');
@@ -1952,6 +2107,7 @@ ${pts}
                 row.appendChild(chk);
                 // sensible stats instead of the (redundant) date: km · duration · photos · Ø speed
                 const isVoice = /^Sprachnotiz/i.test(r.name || '');   // one-point voice track
+                const isVideo = /^Video/i.test(r.name || '');         // one-point video clip
                 const isPoint = !r.distance_m;                        // 0 / null → single-point recording (km meaningless)
                 const stats = [];
                 if (!isPoint) {
@@ -1971,6 +2127,7 @@ ${pts}
                 // app-icon TRACK badge for a real track (a camera would lie when the track also holds voice).
                 let badge;
                 if (isVoice) badge = mkBadge('voice', SPEAKER_ICON, 0);
+                else if (isVideo) badge = mkBadge('video', VIDEO_ICON, 0);
                 else if (isPoint) badge = mkBadge('cam', CAMERA_ICON, 0);
                 else badge = mkBadge('track', APPICON, r.photo_count);
                 row.appendChild(badge);                     // row's first child → left of `main`
