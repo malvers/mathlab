@@ -18,6 +18,7 @@
 const MODEL = 'gemini-2.5-flash';
 const PLANTNET_URL = 'https://my-api.plantnet.org/v2/identify/all';
 const PLANTNET_MIN_SCORE = 0.30; // below this, treat the plant guess as too weak → let Gemini decide
+const PLANTNET_SHOW_MIN = 0.10; // below this, hide Pl@ntNet entirely — a sub-10 % top hit is noise (FEAT-22)
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -228,12 +229,16 @@ Deno.serve(async (req) => {
       try {
         const pn = await plantnetIdentify(image, mime, plantKey);
         if (pn.remaining !== undefined) pnRemaining = pn.remaining;
-        if (pn.ok && pn.sci) {
-          // ACCEPT any plant Pl@ntNet returns — even a weak score is worth showing as a second
-          // opinion (Doc: "immer beide"). MIN_SCORE only decides who writes the HEADLINE.
+        if (pn.ok && pn.sci && pn.score >= PLANTNET_SHOW_MIN) {
+          // Show Pl@ntNet as a second opinion once it clears the SHOW floor (FEAT-22). MIN_SCORE
+          // (the higher bar) then only decides who writes the HEADLINE — Pl@ntNet or Gemini.
           plant = { sci: pn.sci, common: pn.common, score: pn.score };
           plantConfident = pn.score >= PLANTNET_MIN_SCORE;
           pnDiag = { score: +pn.score.toFixed(3), sci: pn.sci, conf: plantConfident };
+        } else if (pn.ok && pn.sci) {
+          // Real species name but below SHOW_MIN (~10 %) → statistical noise. Suppress it entirely
+          // so it can't pollute a good Gemini answer; keep it in the diag only (FEAT-22).
+          pnDiag = { low: +pn.score.toFixed(3), sci: pn.sci };
         } else {
           pnDiag = pn.ok ? { empty: true } : { reject: pn.reason };
         }

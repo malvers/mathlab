@@ -86,8 +86,8 @@ window.TrackerMedia = function (T) {
             // specialist made the call (pn=score sci) or Gemini fell back.
             const pn = j._diag && j._diag.plantnet;
             const pnStr = pn && pn !== 'off'
-                ? ' | pn=' + (pn.sci ? pn.score + ' ' + pn.sci
-                             : pn.low != null ? 'low ' + pn.low
+                ? ' | pn=' + (pn.score != null ? pn.score + ' ' + (pn.sci || '')
+                             : pn.low != null ? 'low ' + pn.low + ' ' + (pn.sci || '')
                              : pn.reject ? 'reject ' + pn.reject
                              : pn.err ? 'err' : JSON.stringify(pn))
                 : '';
@@ -292,7 +292,7 @@ window.TrackerMedia = function (T) {
                 $('pd-keep').onclick = () => finish({ action: 'keep', ai: null }); // ✓ before KI → keep, no AI
                 $('pd-ki').onclick = async () => {
                     ov.classList.add('loading'); // spinner; hide KI + ✓ (only ✗ stays to cancel)
-                    $('pd-result').innerHTML = '<div class="pd-wait">🤖 KI erkennt …</div>';
+                    $('pd-result').innerHTML = '<div class="pd-wait"><span class="pd-spin" aria-hidden="true"></span>KI analysiert …</div>';
                     let ai = null;
                     try { ai = await identifyPhoto(img, ll[0], ll[1]); } catch (e) { ai = null; }
                     ov.classList.remove('loading'); ov.classList.add('reviewed');
