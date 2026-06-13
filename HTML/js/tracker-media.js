@@ -624,6 +624,79 @@ window.TrackerMedia = function (T) {
                 return false; // keep wp.audio = base64 — never lose the note
             }
         }
+        // ---- One-time / maintenance migration: lift EXISTING base64 media (photo/voice/video) OUT of
+        //      the `tracks.waypoints` DB column into Cloudflare R2. THIS is the egress fix — base64 in
+        //      the DB is re-downloaded on every track load / share-view (Supabase egress); an R2 URL is
+        //      served from the CDN (egress free). DRY-RUN by default (counts + MB, writes nothing);
+        //      migrateMediaToR2({ live:true }) performs it. Idempotent (^data: guard → URLs skipped) and
+        //      offline-safe (an upload that fails keeps its base64 → a photo/note is never lost). The
+        //      tracks SELECT/UPDATE is RLS-scoped → only the signed-in account's OWN tracks. Console-run
+        //      while signed in (e.g. localhost:8765 or the live app).
+        async function migrateMediaToR2(opts) {
+            opts = opts || {};
+            const live = opts.live === true;
+            const log = (m) => { try { if (typeof DebugWindow !== 'undefined') DebugWindow.log('[media→R2] ' + m); } catch (_) {} try { console.log('[media→R2] ' + m); } catch (_) {} };
+            const FIELDS = [['img', 'photo'], ['audio', 'voice'], ['video', 'video']];
+            const b64bytes = (s) => { const i = String(s).indexOf(','); return i < 0 ? 0 : Math.floor((s.length - i - 1) * 3 / 4); };
+            if (typeof uploadMedia !== 'function' || typeof dataUrlToBlob !== 'function') { log('upload-media.js fehlt — abgebrochen.'); return null; }
+
+            const c = await ensureSb();
+            if (!c) { log('Kein Sync-Konto / nicht eingeloggt — abgebrochen.'); return null; }
+            const { authToken, ownerId } = await mediaAuth();
+            // Pull ids ONLY first (tiny → no timeout), then read each track's waypoints one at a time.
+            // Selecting ALL waypoints at once hits the 8 s statement timeout — the column is base64-bloated
+            // (that bloat IS the egress problem). Per-track keeps every query small and the run resumable.
+            const { data: idRows, error: idErr } = await c.from('tracks').select('id');
+            if (idErr) { log('tracks-id-SELECT fehlgeschlagen: ' + idErr.message); return null; }
+            const ids = (idRows || []).map((r) => r.id);
+
+            let tracks = 0, items = 0, bytes = 0, uploaded = 0, failed = 0, rowsUpdated = 0, readErr = 0, n = 0;
+            log((live ? 'LIVE' : 'DRY-RUN') + ' — ' + ids.length + ' Tracks, je einzeln …');
+
+            for (const id of ids) {
+                n++;
+                const { data: one, error: rErr } = await c.from('tracks').select('waypoints').eq('id', id).single();
+                if (rErr) { readErr++; log('Lesen fehlgeschlagen (Track ' + id + '): ' + rErr.message); continue; }
+                const wps = Array.isArray(one && one.waypoints) ? one.waypoints : [];
+                let changed = false, hitTrack = false, hitN = 0;
+                for (const wp of wps) {
+                    for (const [field, kind] of FIELDS) {
+                        const v = wp && wp[field];
+                        if (typeof v !== 'string' || !/^data:/.test(v)) continue;   // URL/empty → skip (idempotent)
+                        items++; bytes += b64bytes(v); hitTrack = true; hitN++;
+                        if (!live) continue;                                          // dry-run: count only
+                        try {
+                            const up = await uploadMedia(dataUrlToBlob(v), kind, { authToken, ownerId });
+                            if (up && up.url) {
+                                wp[field] = up.url;                                   // base64 dropped → row shrinks
+                                if (kind === 'video' && up.mime) wp.mime = up.mime;
+                                changed = true; uploaded++;
+                            } else { failed++; log('Upload ohne URL (' + kind + ', Track ' + id + ')'); }
+                        } catch (e) {
+                            failed++; log('Upload fehlgeschlagen (' + kind + ', Track ' + id + '): ' + (e.message || e)); // keep base64
+                        }
+                    }
+                }
+                if (hitTrack) {
+                    tracks++;
+                    log('[' + n + '/' + ids.length + '] Track ' + id + ': ' + hitN + ' base64 — Σ ' + items + ' / ' + (Math.round(bytes / 1e5) / 10) + ' MB');
+                }
+                if (live && changed) {
+                    const { error: uerr } = await c.from('tracks').update({ waypoints: wps }).eq('id', id);
+                    if (uerr) log('Row-UPDATE fehlgeschlagen (Track ' + id + '): ' + uerr.message);
+                    else { rowsUpdated++; log('  → Track ' + id + ' aktualisiert.'); }
+                }
+            }
+
+            const mb = Math.round(bytes / 1e5) / 10;
+            const summary = { live, tracksScanned: ids.length, tracksWithBase64: tracks, base64Items: items, megabytes: mb, uploaded, failed, rowsUpdated, readErrors: readErr };
+            log('FERTIG: ' + JSON.stringify(summary));
+            if (typeof toast === 'function') toast(live
+                ? ('Migration: ' + uploaded + ' hochgeladen · ' + rowsUpdated + ' Tracks aktualisiert' + (failed ? ' · ' + failed + ' Fehler' : ''))
+                : ('DRY-RUN: ' + items + ' base64-Medien (' + mb + ' MB) in ' + tracks + ' Tracks. migrateMediaToR2({live:true}) startet.'));
+            return summary;
+        }
+        window.migrateMediaToR2 = migrateMediaToR2;   // console-triggered (dry-run default)
         function newVideoWp(file, ll) {
             return addWaypoint({
                 type: 'video', lat: ll[0], lng: ll[1], t: new Date().toISOString(),
