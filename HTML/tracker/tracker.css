@@ -220,19 +220,18 @@ path.pos-marker.pos-shown {
 
 #gps-chip {
     position: relative;
-    /* 3 columns (1fr · auto · 1fr) → the source label sits in the centre column and is TRULY
-       centred on screen; the accuracy rides in the right column. Holds in WLAN and GPS mode. */
-    display: grid;
-    grid-template-columns: 1fr auto 1fr;
+    /* Satellites + accuracy form ONE group, centred together on screen (was: 3-col grid with the
+       accuracy pinned to the right column). */
+    display: flex;
+    justify-content: center;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
     font-size: 0.72rem;
     letter-spacing: 2px;
     color: rgba(255, 255, 255, 0.85);
 }
 
 #gps-src {
-    grid-column: 2;
     min-width: 0;
     /* keep the four constellations on ONE line on a phone: tighter spacing + a touch smaller */
     font-size: clamp(0.58rem, 2.7vw, 0.72rem);
@@ -266,8 +265,6 @@ path.pos-marker.pos-shown {
 }
 
 #gps-acc {
-    grid-column: 3;
-    justify-self: end;
     white-space: nowrap;
     font-size: clamp(0.58rem, 2.7vw, 0.72rem); /* same size as the sats (#gps-src); digit → .sat-n (Arial) */
     font-weight: 400; /* Doc: not bold — same weight/size as WLAN/GPS, just a quiet annotation */
