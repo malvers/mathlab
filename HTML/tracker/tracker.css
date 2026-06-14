@@ -1756,7 +1756,11 @@ body.ui-idle #trk-controls {
 #nav-banner {
     position: fixed;
     left: 50%;
-    top: calc(env(safe-area-inset-top, 0px) + 96px + var(--cfg-nav-dy, 0px)); /* +offset = live-config "nach Süden" */
+    /* Sit BELOW the instruments while the HUD is shown (so they don't cover the banner); slide UP
+       when the HUD auto-hides (body.ui-idle). --nav-down ≈ the instruments' height — tune by eye.
+       Doc 2026-06-14, notes #6/#7. (+--cfg-nav-dy = live-config "nach Süden".) */
+    top: calc(env(safe-area-inset-top, 0px) + 96px + var(--nav-down, 84px) + var(--cfg-nav-dy, 0px));
+    transition: top 0.25s ease;
     transform: translateX(-50%);
     z-index: var(--cfg-nav-z, 480); /* live-config z-order; default UNDER the header (#hud-top z500) */
     max-width: min(94vw, 480px);
@@ -1773,6 +1777,11 @@ body.ui-idle #trk-controls {
 
 #nav-banner[hidden] {
     display: none;
+}
+
+/* HUD auto-hidden (idle) → instruments gone → banner can move UP to the freed space. */
+body.ui-idle #nav-banner {
+    top: calc(env(safe-area-inset-top, 0px) + 96px + var(--cfg-nav-dy, 0px));
 }
 
 /* Two rows: maneuver line (arrow + distance + road/destinations) and the trip line (ETA · remaining). */
@@ -2313,34 +2322,35 @@ html {
 /* POI pins (FEAT-24, tracker-poi.js) — round category badge + tap popup, on-brand. */
 .poi-pin-wrap { background: none; border: 0; }
 .poi-pin {
-    width: 28px;
-    height: 28px;
+    width: 32px;                      /* match the photo/waypoint pins (≥30px) */
+    height: 32px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 15px;
-    line-height: 1;
-    background: rgba(8, 20, 42, 0.92);
-    border: 2px solid #fff;
+    color: #fff;                      /* white glyph (svg stroke = currentColor) */
+    border: 2px solid #fff;           /* white ring → the colour pops on any map tile */
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
 }
-.poi-a { border-color: rgb(245, 194, 66); }   /* Sehenswürdigkeit */
-.poi-b { border-color: rgb(66, 135, 245); }   /* Aussicht */
-.poi-c { border-color: rgb(176, 36, 24); }    /* Historisch */
-.poi-d { border-color: rgb(121, 158, 49); }   /* Natur */
-.poi-e { border-color: rgb(150, 160, 175); }  /* Rast/Service */
-.poi-f { border-color: rgb(230, 140, 60); }   /* Essen/Trinken */
-.poi-g { border-color: rgb(150, 110, 200); }  /* Übernachten */
-.poi-h { border-color: rgb(64, 200, 200); }   /* Tanken */
-.poi-popup { min-width: 132px; }
-.poi-popup .pp-name { font-family: 'Orbitron', sans-serif; color: var(--orange); font-weight: 700; line-height: 1.2; margin-bottom: 2px; }
+.poi-pin svg { width: 18px; height: 18px; display: block; }
+/* per category: the badge BACKGROUND colour (richer shades so the white glyph stays legible) */
+.poi-a { background: rgb(224, 146, 38); }   /* Sehenswürdigkeit */
+.poi-b { background: rgb(58, 124, 226); }   /* Aussicht */
+.poi-c { background: rgb(178, 58, 44); }    /* Historisch */
+.poi-d { background: rgb(94, 140, 49); }    /* Natur */
+.poi-e { background: rgb(108, 122, 140); }  /* Rast/Service */
+.poi-f { background: rgb(222, 110, 46); }   /* Essen/Trinken */
+.poi-g { background: rgb(142, 98, 196); }   /* Übernachten */
+.poi-h { background: rgb(38, 166, 168); }   /* Tanken */
+.poi-popup { min-width: 132px; text-align: center; }   /* name + type + button all x-centred */
+.poi-popup .pp-name { font-family: 'Orbitron', sans-serif; color: var(--green); font-weight: 700; line-height: 1.2; margin-bottom: 2px; }
 .poi-popup .pp-type { font-size: 0.82em; opacity: 0.75; margin-bottom: 9px; }
 .poi-popup button {
+    display: inline-block;            /* centred by the parent's text-align */
     font-family: 'Orbitron', sans-serif;
     font-size: 0.82rem;
-    background: var(--orange);
-    color: #14110a;
+    background: var(--orange);        /* orange button … */
+    color: #fff;                      /* … white text */
     border: 0;
     border-radius: 8px;
     padding: 7px 14px;
@@ -2355,5 +2365,44 @@ html {
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
 }
 .poi-pop .leaflet-popup-tip { background: rgb(14, 36, 78); }
-.poi-pop a.leaflet-popup-close-button { color: rgba(255, 255, 255, 0.6); }
 .poi-pop .pp-type { color: rgba(255, 255, 255, 0.72); opacity: 1; }
+/* Every Leaflet popup close button: the × centered (flex) in its own box, thin. */
+.leaflet-container a.leaflet-popup-close-button {
+    width: 26px;
+    height: 26px;
+    padding: 0;
+    top: 5px;
+    right: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font: 300 1.2rem/1 system-ui, -apple-system, sans-serif;
+}
+/* POI popup: the × becomes a ROUND button straddling the top-right CORNER — it sits OVER the corner so
+   only ~¼ of it overlaps the popup (title stays free) instead of covering the text. */
+.poi-pop a.leaflet-popup-close-button {
+    width: 26px;
+    height: 26px;
+    top: -13px;
+    right: -13px;
+    padding: 0;
+    border-radius: 50%;
+    background: rgb(14, 36, 78);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    box-shadow: 0 2px 7px rgba(0, 0, 0, 0.5);
+    color: #fff;
+    font-size: 0;            /* hide Leaflet's "×" glyph — the × is drawn pixel-centred from two bars */
+}
+.poi-pop a.leaflet-popup-close-button::before,
+.poi-pop a.leaflet-popup-close-button::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 11px;
+    height: 1.5px;
+    background: currentColor;
+    border-radius: 1px;
+}
+.poi-pop a.leaflet-popup-close-button::before { transform: translate(-50%, -50%) rotate(45deg); }
+.poi-pop a.leaflet-popup-close-button::after { transform: translate(-50%, -50%) rotate(-45deg); }

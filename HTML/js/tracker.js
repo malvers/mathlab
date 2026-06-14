@@ -695,8 +695,10 @@
 
             lastFix = { lat: latitude, lng: longitude, t: now };
 
-            if (following && !still) { // auto-follow: pan to the dot, and zoom to suit the speed
-                const tz = speedZoom(shownSpeed);
+            if (following && !still) { // auto-follow: pan to the dot; zoom by SPEED — but NOT in
+                // 'remaining' FIT mode, where the remaining-route fit (below) owns the zoom so the two
+                // don't fight over it (note #9).
+                const tz = (fitMode === 'remaining') ? null : speedZoom(shownSpeed);
                 if (tz != null && Math.abs(map.getZoom() - tz) >= 1 && Date.now() - lastAutoZoom > AUTOZOOM_COOLDOWN) {
                     lastAutoZoom = Date.now();
                     map.setView(here, tz, { animate: true }); // pan + zoom together
@@ -704,14 +706,22 @@
                     map.panTo(here, { animate: true });
                 }
             }
-            // FIT mode (3-state): 'all' keeps the WHOLE track in view, 'remaining' keeps the rest of the
-            // route ahead in view. Re-fit only once it grows beyond the frame (-0.12 inset = slack).
+            // FIT mode (3-state): 'all' keeps the WHOLE track in view; 'remaining' keeps the rest of the
+            // route ahead in view AND tightens the zoom as the rest shrinks (note #9). The remaining
+            // re-fit is BIDIRECTIONAL with hysteresis + cooldown so it can't flutter: zoom OUT when the
+            // rest spills past the frame (-0.12 slack), zoom IN when it sits well inside (-0.40 inset →
+            // only when there's lots of empty margin). Tune the two insets if it tightens too late/eager.
             if (fitMode === 'all' && track.length > 1) {
                 const tb = L.latLngBounds(track);
                 if (!map.getBounds().pad(-0.12).contains(tb)) { try { map.fitBounds(tb, { padding: fitPad() }); } catch (e) { } }
             } else if (fitMode === 'remaining' && __nav && __nav.remainingBounds) {
                 const rb = __nav.remainingBounds(here);
-                if (rb && !map.getBounds().pad(-0.12).contains(rb)) { try { map.fitBounds(rb, { padding: fitPad() }); } catch (e) { } }
+                if (rb && Date.now() - lastAutoZoom > AUTOZOOM_COOLDOWN) {
+                    const v = map.getBounds();
+                    const grew = !v.pad(-0.12).contains(rb);   // rest spilled out of the frame → zoom OUT
+                    const shrank = v.pad(-0.40).contains(rb);  // rest sits in the inner margin → zoom IN
+                    if (grew || shrank) { lastAutoZoom = Date.now(); try { map.fitBounds(rb, { padding: fitPad() }); } catch (e) { } }
+                }
             }
             refreshRecenter(); // show/hide the recenter button as needed
             if (__nav && __nav.update) __nav.update(here); // navigation: reroute if we drifted off the line
@@ -1106,11 +1116,15 @@
             if (!force && now - lastLiveMs < LIVE_MS) return;
             lastLiveMs = now;
             const i = track.length - 1;
+            // While navigating, ride the ETA along on the same message → the viewer shows "Ankunft …"
+            // in its header (note #3). null when no route → viewer hides the ETA line.
+            const trip = (__nav && __nav.tripData) ? __nav.tripData([track[i][0], track[i][1]]) : null;
             try {
                 liveChannel.send({
                     type: 'broadcast', event: 'pos', payload: {
                         lat: track[i][0], lng: track[i][1], t: times[i] || null,
                         speed: speeds[i] != null ? speeds[i] : null, activity: activities[i] || null,
+                        remSec: trip ? Math.round(trip.remSec) : null, remM: trip ? Math.round(trip.remM) : null,
                     },
                 });
             } catch (e) { /* channel not joined yet → the next fix retries */ }
@@ -1120,22 +1134,39 @@
             const pts = track.map((p, i) => [p[0], p[1], times[i] || null, speeds[i] != null ? speeds[i] : null, activities[i] || null]);
             try { liveChannel.send({ type: 'broadcast', event: 'trail', payload: { pts: pts } }); } catch (e) { }
         }
-        // ---- live PHOTOS over the SAME channel ('photo' event). We send the FULL stored image — the
-        //      same ~1024 px JPEG the share delivers (~130–400 KB). Realtime allows up to 1 MB per
-        //      broadcast message, so it fits comfortably; no thumbnail. livePhotos keeps the set so
-        //      late viewers are re-sent it (like the trail). dedup by t.
-        let livePhotos = [];
-        function broadcastPhoto(p) {
-            if (!liveOn || !liveChannel) return;
-            try { liveChannel.send({ type: 'broadcast', event: 'photo', payload: p }); } catch (e) { }
+        // ---- live MEDIA over the SAME channel: photo / voice / video. Photos ride as the FULL stored
+        //      image (~130–400 KB JPEG, the same the share delivers); voice + video ride as their R2
+        //      URLs (tiny), so a big clip never bloats the message — realtime caps a broadcast at 1 MB.
+        //      liveMedia keeps the set (one entry per waypoint t) so late viewers are re-sent it (like
+        //      the trail). dedup by t.
+        let liveMedia = [];
+        function broadcastOne(item) {
+            if (!liveOn || !liveChannel || !item) return;
+            try { liveChannel.send({ type: 'broadcast', event: item.event, payload: item.payload }); } catch (e) { }
         }
-        function broadcastPhotos() { livePhotos.forEach(broadcastPhoto); } // re-send all → late viewers catch up
-        function addLivePhoto(wp) {
-            if (!liveOn || !liveChannel || !wp || !wp.img) return;
-            const p = { lat: wp.lat, lng: wp.lng, t: wp.t, title: wp.title || '', text: wp.text || '', img: wp.img };
-            const i = livePhotos.findIndex(x => x.t === wp.t);
-            if (i >= 0) livePhotos[i] = p; else livePhotos.push(p); // update on the AI-title re-send
-            broadcastPhoto(p);
+        function broadcastMedia() { liveMedia.forEach(broadcastOne); } // re-send all → late viewers catch up
+        // Build the {event,payload} for a waypoint, or null if it can't ride live yet (a video still on a
+        // local blob: URL is useless to a remote viewer until the R2 upload swapped it for a real URL).
+        function liveItemFor(wp) {
+            if (!wp || wp.lat == null) return null;
+            const lat = wp.lat, lng = wp.lng, t = wp.t, title = wp.title || '', text = wp.text || '';
+            if (wp.type === 'voice') {
+                if (!wp.audio) return null;
+                return { event: 'voice', payload: { lat, lng, t, title, text, type: 'voice', audio: wp.audio, dur: wp.dur || 0, mime: wp.mime || 'audio/webm' } };
+            }
+            if (wp.type === 'video') {
+                if (!wp.video || /^blob:/.test(wp.video)) return null; // wait for the R2 URL
+                return { event: 'video', payload: { lat, lng, t, title, text, type: 'video', video: wp.video, mime: wp.mime || 'video/mp4' } };
+            }
+            if (!wp.img) return null;
+            return { event: 'photo', payload: { lat, lng, t, title, text, img: wp.img } };
+        }
+        function addLiveMedia(wp) {
+            if (!liveOn || !liveChannel) return;
+            const item = liveItemFor(wp); if (!item) return;
+            const i = liveMedia.findIndex(x => x.payload.t === wp.t);
+            if (i >= 0) liveMedia[i] = item; else liveMedia.push(item); // update on the AI-title / R2-URL re-send
+            broadcastOne(item);
         }
         // LIVE: broadcast your position on a chosen PUBLIC channel name (default "vsb"). Anyone who
         // knows the name and opens view.html?live=<name> (or types it) sees you move. No DB, no token.
@@ -1154,22 +1185,22 @@
                     const c = await ensureSb();
                     liveChannel = c.channel('live:' + canon, { config: { broadcast: { self: false } } });
                     liveOn = true; updateLiveBadge();
-                    livePhotos = []; // fresh live session
+                    liveMedia = []; // fresh live session
                     // A (re)connecting viewer asks for the current state → re-send the whole trail,
-                    // the latest position and every photo at once, so a viewer reload fills instantly.
+                    // the latest position and every media waypoint at once, so a reload fills instantly.
                     liveChannel.on('broadcast', { event: 'request' }, () => {
-                        broadcastTrail(); broadcastLive(true); waypoints.forEach(addLivePhoto);
+                        broadcastTrail(); broadcastLive(true); waypoints.forEach(addLiveMedia);
                     });
                     liveChannel.subscribe((status) => {
                         if (status === 'SUBSCRIBED') {
                             broadcastTrail(); broadcastLive(true);
-                            waypoints.forEach(addLivePhoto); // push thumbnails of photos ALREADY on the track
+                            waypoints.forEach(addLiveMedia); // push photo/voice/video ALREADY on the track
                         }
                     });
                     if (liveTrailTimer) clearInterval(liveTrailTimer);
-                    // refresh the path only. Photos are NOT re-sent on a timer — THAT was the egress leak
+                    // refresh the path only. Media is NOT re-sent on a timer — THAT was the egress leak
                     // (full ~250 KB JPEGs × every photo × every 15 s during a live session = GB-scale).
-                    // Each photo is broadcast once when taken (addLivePhoto), and a (re)connecting viewer
+                    // Each item is broadcast once when added (addLiveMedia), and a (re)connecting viewer
                     // pulls the whole set via the 'request' handler above (view.html sends it on SUBSCRIBED)
                     // → late joiners still catch up, at zero idle cost.
                     liveTrailTimer = setInterval(() => { broadcastTrail(); }, 15000);
@@ -1827,7 +1858,7 @@ ${pts}
         function updateReburnButton(...a) { return __media.updateReburnButton(...a); }
         function reburnTrack(...a) { return __media.reburnTrack(...a); }
         __media = TrackerMedia({
-            map, $, toast, ensureSb, wpSer, doSync, bufferSnapshot, addLivePhoto,
+            map, $, toast, ensureSb, wpSer, doSync, bufferSnapshot, addLiveMedia,
             SUPABASE_URL, SUPABASE_KEY, COL_ORANGE, EUR_PER_PHOTO,
             get lastFix() { return lastFix; },
             get tracking() { return tracking; },
