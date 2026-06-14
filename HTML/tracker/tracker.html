@@ -185,6 +185,10 @@
     <!-- Left-edge menu hamburger (vertically centred) → opens the radial popup -->
     <button id="menu-fab" aria-label="Menü" title="Menü"><span></span><span></span><span></span></button>
 
+    <!-- Zoom: round buttons in the two bottom corners (+ left, − right); Leaflet's own control is off -->
+    <button id="zoom-in" aria-label="Reinzoomen" title="Reinzoomen"></button>
+    <button id="zoom-out" aria-label="Rauszoomen" title="Rauszoomen"></button>
+
     <!-- Radial action popup (long-press / right-click) — style ported from worldclock -->
     <div id="mini-stack">
         <button class="mini-btn" id="mb-load">LADEN</button>
@@ -385,8 +389,10 @@
     <!-- Speed-limit sign for the current road (OSM maxspeed via Overpass); red when over the limit -->
     <div id="speed-sign" hidden></div>
 
-    <!-- Compass: rose rotates with the device so N always points to real north (map is north-up) -->
-    <div id="compass" hidden>
+    <!-- Compass: rose rotates with the device so N always points to real north (map is north-up).
+         Visible by default alongside the other FABs; idle-auto-hide (body.ui-idle) hides it with them.
+         Until a magnetometer reading arrives the rose just sits at N-up (a valid north ref on a north-up map). -->
+    <div id="compass">
         <div id="compass-rose">
             <div class="compass-needle"></div>
             <span class="compass-n">N</span>
