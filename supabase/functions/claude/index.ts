@@ -51,14 +51,18 @@ Deno.serve(async (req) => {
 
   if (!Array.isArray(b.messages)) return json({ error: 'keine messages übergeben' }, 400);
 
-  // Split Anthropic's separate `system` from the user/assistant turns. Drop any empty content.
-  const turns = b.messages.filter((m: { role?: string; content?: unknown }) =>
-    m && typeof m.content === 'string' && m.content.trim() !== '');
-  const system = turns.filter((m: { role: string }) => m.role === 'system')
+  // A turn's content may be a string OR an Anthropic content-block array (tool_use / tool_result blocks,
+  // used by Solita's tool-use loop). Keep both; only drop genuinely empty turns.
+  const hasContent = (c: unknown) =>
+    (typeof c === 'string' && c.trim() !== '') || (Array.isArray(c) && c.length > 0);
+  const turns = b.messages.filter((m: { role?: string; content?: unknown }) => m && hasContent(m.content));
+  // System is lifted to Anthropic's top-level field (string-content system turns only).
+  const system = turns
+    .filter((m: { role: string; content: unknown }) => m.role === 'system' && typeof m.content === 'string')
     .map((m: { content: string }) => m.content).join('\n\n');
   let chat = turns
     .filter((m: { role: string }) => m.role === 'user' || m.role === 'assistant')
-    .map((m: { role: string; content: string }) => ({ role: m.role, content: m.content }));
+    .map((m: { role: string; content: unknown }) => ({ role: m.role, content: m.content }));   // pass string OR blocks through
   // Anthropic requires the first turn to be 'user'. Drop any leading assistant turns.
   while (chat.length && chat[0].role === 'assistant') chat = chat.slice(1);
   if (!chat.length) return json({ error: 'keine user-Nachricht' }, 400);
@@ -70,6 +74,9 @@ Deno.serve(async (req) => {
   };
   // NOTE: `temperature` is deprecated on Claude 4.x models (they reject it with HTTP 400) → don't forward it.
   if (system) body.system = system;
+  // Optional Claude tool-use: forward a `tools` schema so Solita can take actions. The CLIENT runs the loop
+  // (executes tool_use blocks, sends tool_result back). No tools field → behaves exactly as before.
+  if (Array.isArray(b.tools) && b.tools.length) body.tools = b.tools;
 
   try {
     const r = await fetch(ANTHROPIC, {
@@ -87,12 +94,18 @@ Deno.serve(async (req) => {
       const msg = (data && data.error && data.error.message) ? data.error.message : 'Claude-Fehler';
       return json({ error: msg }, r.status || 502);
     }
-    // Anthropic: { content: [ { type:'text', text } , ... ] } → reshape to the OpenAI form the client reads.
+    // Back-compat: the existing chat reads choices[0].message.content (joined text).
+    // ADDITIVE: also return the raw Anthropic content blocks + stop_reason so Solita can run the tool-use loop.
     const text = Array.isArray(data.content)
       ? data.content.filter((c: { type: string }) => c.type === 'text')
           .map((c: { text: string }) => c.text).join('\n')
       : '';
-    return json({ choices: [{ message: { role: 'assistant', content: text } }], usage: data.usage });
+    return json({
+      choices: [{ message: { role: 'assistant', content: text } }],
+      content: Array.isArray(data.content) ? data.content : [],
+      stop_reason: data.stop_reason || null,
+      usage: data.usage,
+    });
   } catch (e) {
     return json({ error: String((e && (e as Error).message) || e) }, 502);
   }

@@ -4,6 +4,7 @@
         // removed 2026-06-09.)
         const AI_URL  = 'https://fyfhxzyymmurlaenmzse.supabase.co/functions/v1/claude';
         const SOLITA_CONFIG_URL = 'https://fyfhxzyymmurlaenmzse.supabase.co/functions/v1/solita-config'; // Stufe 2a: Solita patcht HTML/config.json live
+        const SOLITA_NOTE_URL = 'https://fyfhxzyymmurlaenmzse.supabase.co/functions/v1/solita-note';     // Stufe 2a: Solita schreibt Notizen + committet
         const SB_ANON = 'sb_publishable_ubQDiMD-X3N0vZvPVi229Q_-5Zootfk'; // publishable anon key — client-safe
         let conversationHistory = [];
 
@@ -173,7 +174,62 @@
             + "— normalerweise ein bis zwei Sätze, denn deine Antworten werden meist vorgelesen. Keine "
             + "Aufzählungen oder Monologe, wenn ein Satz reicht; lieber kurz nachfragen als lang ausholen. "
             + "Nur wenn Doc ausdrücklich um Details bittet, wirst du ausführlicher. Du weißt viel und "
-            + "bleibst nah. Was du nicht sicher weißt, sagst du ehrlich.";
+            + "bleibst nah. Was du nicht sicher weißt, sagst du ehrlich. "
+            + "Du hast Werkzeuge: change_setting (sichtbare Tracker-/UI-Einstellungen ändern — Farben, Größe, "
+            + "Position, Sichtbarkeit) und write_note (etwas für Doc aufschreiben + sichern). Setze sie NUR ein, "
+            + "wenn Doc klar darum bittet, etwas zu ändern oder aufzuschreiben; sonst antworte einfach. "
+            + "Bestätige eine ausgeführte Aktion knapp in einem Satz.";
+
+        // ----- TOOL-USE (Solita acts, not just talks) -----
+        // Tools handed to Claude on every chat turn. Claude calls one only when Doc clearly asks to change a
+        // setting or note something down (steered by the persona above). The loop in sendMessage executes it.
+        const SOLITA_TOOLS = [
+            {
+                name: 'change_setting',
+                description: 'Ändere eine sichtbare Tracker-/UI-Einstellung (Farben, Größe, Position, z-Index, Sichtbarkeit) per natürlichsprachiger Anweisung, z.B. "mach die Uhr grün" oder "Banner nach unten". Die Änderung wird in HTML/config.json committet und greift live.',
+                input_schema: {
+                    type: 'object',
+                    properties: { instruction: { type: 'string', description: 'Die gewünschte Änderung in natürlicher Sprache.' } },
+                    required: ['instruction']
+                }
+            },
+            {
+                name: 'write_note',
+                description: 'Schreibe eine Notiz auf und sichere sie (Ideen, Wünsche, Erinnerungen für Doc). Nutze dies bei "schreib auf …", "notier …", "merk dir …". Niemals Secrets/Passwörter notieren (public repo).',
+                input_schema: {
+                    type: 'object',
+                    properties: { note: { type: 'string', description: 'Der Notiztext, sauber formuliert.' } },
+                    required: ['note']
+                }
+            }
+        ];
+
+        // Execute one tool call → returns { ok, summary }. The summary goes back to Claude as the tool_result.
+        async function execTool(name, input, pwd) {
+            const H = { 'Content-Type': 'application/json', 'apikey': SB_ANON, 'Authorization': 'Bearer ' + SB_ANON, 'x-app-pass': pwd };
+            try {
+                if (name === 'change_setting') {
+                    const r = await fetch(SOLITA_CONFIG_URL, { method: 'POST', headers: H, body: JSON.stringify({ instruction: String((input && input.instruction) || '') }) });
+                    const d = await r.json().catch(() => ({}));
+                    if (!r.ok) return { ok: false, summary: 'Fehlgeschlagen: ' + (d.error || ('HTTP ' + r.status)) };
+                    return { ok: true, summary: 'Einstellung geändert (config v' + d.version + ', committet).' };
+                }
+                if (name === 'write_note') {
+                    const r = await fetch(SOLITA_NOTE_URL, { method: 'POST', headers: H, body: JSON.stringify({ note: String((input && input.note) || '') }) });
+                    const d = await r.json().catch(() => ({}));
+                    if (!r.ok) return { ok: false, summary: 'Fehlgeschlagen: ' + (d.error || ('HTTP ' + r.status)) };
+                    return { ok: true, summary: 'Notiz gespeichert + committet.' };
+                }
+                return { ok: false, summary: 'Unbekanntes Werkzeug: ' + name };
+            } catch (e) { return { ok: false, summary: 'Fehler: ' + ((e && e.message) || e) }; }
+        }
+
+        // A short chat line shown while a tool runs.
+        function toolBadge(name, input) {
+            if (name === 'change_setting') return '🔧 _ändert Einstellung:_ ' + ((input && input.instruction) || '');
+            if (name === 'write_note') return '📝 _notiert:_ ' + ((input && input.note) || '');
+            return '⚙️ ' + name;
+        }
 
         // Rolling summary of older turns so context survives without sending the whole history every time.
         let runningSummary = localStorage.getItem(SUMMARY_KEY) || '';
@@ -544,35 +600,63 @@
             showTyping();
 
             try {
-                const response = await fetch(AI_URL, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'apikey': SB_ANON,
-                        'Authorization': `Bearer ${SB_ANON}`,
-                        'x-app-pass': pwd
-                    },
-                    body: JSON.stringify({
-                        model: getModel(),
-                        messages: buildRequestMessages(),
-                        temperature: 0.6,
-                        max_tokens: 3000
-                    })
-                });
-                if (!response.ok) {
-                    let err = `Fehler ${response.status}`;
-                    if (response.status === 401) err = 'Falsches Passwort';
-                    else if (response.status === 402) err = 'Nicht genug Guthaben – AI-Konto aufladen';
-                    else { try { const e = await response.json(); if (e && e.error) err += ' — ' + e.error; } catch (_) { } }
-                    throw new Error(err);
+                // Tool-use loop: send the chat + Solita's tools. If Claude calls a tool, execute it, hand the
+                // result back, and continue — until Claude gives a normal answer. Tool turns live ONLY in the
+                // local `msgs` array, so conversationHistory stays string-only (no reload/persist surprises).
+                let msgs = buildRequestMessages();
+                let finalText = '(keine Antwort)';
+                let guard = 0;
+                while (guard++ < 6) {
+                    const response = await fetch(AI_URL, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'apikey': SB_ANON,
+                            'Authorization': `Bearer ${SB_ANON}`,
+                            'x-app-pass': pwd
+                        },
+                        body: JSON.stringify({
+                            model: getModel(),
+                            messages: msgs,
+                            tools: SOLITA_TOOLS,
+                            max_tokens: 3000
+                        })
+                    });
+                    if (!response.ok) {
+                        let err = `Fehler ${response.status}`;
+                        if (response.status === 401) err = 'Falsches Passwort';
+                        else if (response.status === 402) err = 'Nicht genug Guthaben – AI-Konto aufladen';
+                        else { try { const e = await response.json(); if (e && e.error) err += ' — ' + e.error; } catch (_) { } }
+                        throw new Error(err);
+                    }
+                    const data = await response.json();
+                    const blocks = Array.isArray(data.content) ? data.content : [];
+                    const textOut = (data.choices && data.choices[0] && data.choices[0].message.content) || '';
+
+                    // Claude wants to act → execute each tool_use, feed results back, loop. Needs the updated
+                    // claude edge fn; an OLD one returns no stop_reason → we fall straight to the text path.
+                    if (data.stop_reason === 'tool_use' && blocks.some(b => b && b.type === 'tool_use')) {
+                        msgs = msgs.concat([{ role: 'assistant', content: blocks }]);
+                        if (textOut.trim()) { hideTyping(); addMessage('assistant', textOut); showTyping(); }
+                        const toolResults = [];
+                        for (const blk of blocks) {
+                            if (!blk || blk.type !== 'tool_use') continue;
+                            hideTyping(); addMessage('assistant', toolBadge(blk.name, blk.input)); showTyping();
+                            const res = await execTool(blk.name, blk.input, pwd);
+                            toolResults.push({ type: 'tool_result', tool_use_id: blk.id, content: res.summary, is_error: !res.ok });
+                        }
+                        msgs = msgs.concat([{ role: 'user', content: toolResults }]);
+                        continue;   // let Claude respond to the tool results
+                    }
+
+                    finalText = textOut || '(keine Antwort)';
+                    break;
                 }
-                const data = await response.json();
-                const reply = (data.choices && data.choices[0] && data.choices[0].message.content) || '(keine Antwort)';
-                conversationHistory.push({ role: 'assistant', content: reply });
+                conversationHistory.push({ role: 'assistant', content: finalText });   // persist final text only
                 saveHistory();
                 hideTyping();
-                addMessage('assistant', reply);
-                if (window.speakReply) window.speakReply(reply); // read the answer aloud (voice mode)
+                addMessage('assistant', finalText);
+                if (window.speakReply) window.speakReply(finalText); // read the answer aloud (voice mode)
                 maybeSummarize();   // fold older turns into the rolling summary (best-effort, background)
             } catch (err) {
                 conversationHistory.pop(); // User-Nachricht bei Fehler wieder entfernen
