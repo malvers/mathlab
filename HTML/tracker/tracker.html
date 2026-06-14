@@ -429,7 +429,9 @@
     <!-- Supabase client — SELF-HOSTED (same-origin) so a device content-blocker (e.g. Samsung Internet)
          can't block it like the unpkg CDN → fixes "Supabase-Lib nicht geladen" / "Sync fehlgeschlagen". -->
     <script src="../js/vendor/supabase.min.js"></script>
-    <script src="../js/tracker.js"></script>
+    <!-- tracker.js gets the SAME ?v= cache-bust as the other local scripts (it was bare → a JS-only
+         fix could be served stale from the WebView HTTP cache when the SW isn't yet controlling). -->
+    <script>document.write('<script src="../js/tracker.js' + (window.__ASSET_V || '') + '"><\/script>');</script>
 </body>
 
 </html>
