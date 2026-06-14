@@ -276,10 +276,13 @@
         const MOTION_MOVE = 0.10;      // m/s²: above this → "moving" (hysteresis between the two)
         const SPEED_MOVE_KMH = 4;      // km/h: GPS speed above this overrides the gate → always "moving"
                                        // (a vehicle at steady cruise produces almost no dynamic accel)
+        const SPEED_ZERO_KMH = 1.0;    // km/h: readout snaps to 0 below this → kills GPS-Doppler noise at standstill
         let motionReady = false;       // a real accelerometer is delivering data
         let motionStill = true;        // current gate verdict
         let motionEnergy = 0;          // smoothed |dynamic acceleration|
         let shownSpeed = 0;            // smoothed km/h for a flicker-free readout
+        let spdDbg = '';               // BUG-1: speed-source readout appended to the existing #motion-dbg bar
+        let dopplerLogged = false;     // BUG-1: log coords.speed availability to the existing DebugWindow once
         const _grav = { x: 0, y: 0, z: 0 };
 
         // --- Altitude: fuse the (precise but uncalibrated) barometer with the (absolute but
@@ -541,19 +544,41 @@
             // Altitude: fuse the precise barometer profile with the absolute GPS reference.
             updateAltitude(pos.coords.altitude != null ? pos.coords.altitude : null);
 
-            // Speed: 0 when the gate says we're standing still; otherwise GPS value (or derived),
-            // lightly smoothed so the readout doesn't flicker.
+            // Speed display DECOUPLED from the recording gate (BUG-1). The gate only exists to
+            // suppress position jitter while genuinely stopped, but it ALSO nulled the km/h readout
+            // while slowly walking inside the accuracy band → the "0.0 / 1.7" flicker Doc saw. GPS
+            // Doppler (coords.speed) measures velocity directly and is correct even inside that band,
+            // so we trust it regardless of `still`. Only with NO Doppler do we fall back to the old
+            // gated distance/time estimate → regression-free on devices that give no Doppler.
             let kmh = 0;
-            if (!still) {
-                if (speed != null && speed >= 0) kmh = speed * 3.6;
-                else if (lastFix) {
-                    const dt = (now - lastFix.t) / 1000;
-                    if (dt > 0) kmh = (haversine([lastFix.lat, lastFix.lng], here) / dt) * 3.6;
-                }
-                if (kmh > MAX_JUMP_KMH) kmh = 0; // a device-reported nonsense speed → ignore
+            let spdSrc;
+            if (speed != null && speed >= 0) {
+                kmh = speed * 3.6;              // raw GPS Doppler — independent of the gate
+                spdSrc = 'dop';
+            } else if (!still && lastFix) {
+                const dt = (now - lastFix.t) / 1000;
+                if (dt > 0) kmh = (haversine([lastFix.lat, lastFix.lng], here) / dt) * 3.6;
+                spdSrc = 'calc';               // no Doppler → derived from distance/time (gated, as before)
+            } else {
+                spdSrc = 'gate0';              // no Doppler and gate says still → 0
             }
-            shownSpeed = still ? 0 : (0.6 * shownSpeed + 0.4 * kmh);
+            if (kmh > MAX_JUMP_KMH) kmh = 0;   // a device-reported nonsense speed → ignore
+            const rawKmh = kmh;                // pre-floor value — shown in the debug so standstill noise stays visible
+            // Doppler can report a noisy 1–2 km/h at standstill; snap sub-walking-pace to 0 so a
+            // parked readout stays a clean 0 instead of jittering. Tune SPEED_ZERO_KMH if needed.
+            if (kmh < SPEED_ZERO_KMH) kmh = 0;
+            shownSpeed = 0.6 * shownSpeed + 0.4 * kmh; // light EMA; no hard gate-kill anymore
             setSpeed(shownSpeed);
+            // Interesting bits into the EXISTING debug surfaces (no new element):
+            //  • live in the #motion-dbg bar: source + raw→shown km/h (see updateMotionDbg).
+            //  • once in the DebugWindow: whether THIS device delivers coords.speed at all.
+            spdDbg = 'spd:' + spdSrc + '=' + rawKmh.toFixed(1) + '→' + shownSpeed.toFixed(1);
+            if (!dopplerLogged && gpsReal && window.DebugWindow) {
+                dopplerLogged = true;
+                DebugWindow.log(speed != null
+                    ? 'BUG-1 Speed: coords.speed ✓ (' + (speed * 3.6).toFixed(1) + ' km/h Doppler) → Anzeige entkoppelt'
+                    : 'BUG-1 Speed: coords.speed = null → Distanz/Zeit-Fallback');
+            }
             updateModeIcon(); // keep the mode glyph (left of the clock) current
 
             // Travel direction: prefer the GPS heading; else the bearing of the last real step.
@@ -726,9 +751,10 @@
         function updateMotionDbg(acc, minStep, still) {
             const el = $('dbg-motion');
             if (!el) return;
-            el.textContent = motionReady
+            const base = motionReady
                 ? (still ? 'STILL' : 'MOVE') + ' · e=' + motionEnergy.toFixed(2) + ' · step > ' + minStep.toFixed(1) + 'm'
                 : (still ? 'HALT·band' : 'frei') + ' · kein Sensor · step > ' + minStep.toFixed(1) + 'm';
+            el.textContent = spdDbg ? base + ' · ' + spdDbg : base; // BUG-1: append the speed-source readout
         }
 
         // ---------------------------------------------------------------
