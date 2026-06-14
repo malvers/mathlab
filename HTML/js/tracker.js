@@ -1902,6 +1902,8 @@ ${pts}
             layout: trackerMenuLayout,
             onOpen: refreshMenuState,
             closeOnButtonTap: false,   // each menu button closes the popup itself
+            longPress: 0,              // Doc: a long-press anywhere must NOT open the menu — only a tap on HH
+            contextMenu: false,        // …and never open via contextmenu (Android long-press on a map tile <img> fires it)
             shouldOpen: (e) => {
                 const t = e && e.target;
                 if (t && t.closest && (t.closest('.wp-pin') || t.closest('#photo-lightbox'))) return false;
@@ -2037,6 +2039,10 @@ ${pts}
             closePopup();
         });
         $('menu-fab').addEventListener('click', () => openPopup());
+        // Long-press / right-click must do NOTHING now (longPress:0 + contextMenu:false on the menu above).
+        // But the widget used to swallow the native Android long-press menu ("Bild speichern" on map-tile
+        // <img>s) via its own contextmenu handler — keep that suppressed so a long-press just does nothing.
+        window.addEventListener('contextmenu', (e) => e.preventDefault());
         $('zoom-in').addEventListener('click', () => map.zoomIn());
         $('zoom-out').addEventListener('click', () => map.zoomOut());
         $('recenter-fab').addEventListener('click', () => {
