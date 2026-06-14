@@ -28,8 +28,8 @@ window.TrackerNav = function (ctx) {
         }
     } catch (e) { }
 
-    const OFFROUTE_M = 45;          // beyond this distance from the line → considered "off route"
-    const REROUTE_COOLDOWN_MS = 8000; // don't hammer OSRM: at most one reroute per this window
+    const OFFROUTE_M = 30;          // beyond this distance from the line → considered "off route" (Doc 2026-06-14: 45→30 for earlier reroute; watch d2route debug for flapping)
+    const REROUTE_COOLDOWN_MS = 6000; // don't hammer OSRM: at most one reroute per this window (Doc 2026-06-14: 8s→6s)
     const ANNOUNCE_FAR_M = 300;     // distance at which the pre-warning ("In 300 m …") is spoken
     const ANNOUNCE_NEAR_M = 40;     // distance at which the maneuver ("Jetzt …") is spoken + advanced
     const VOICE_KEY = 'trk_nav_voice';
@@ -37,7 +37,8 @@ window.TrackerNav = function (ctx) {
     let destLatLng = null;  // [lat, lng] of the set destination, or null
     let destLabel = '';     // human-readable address (for the panel + toasts)
     let destMarker = null;  // Leaflet pin at the destination
-    let routeLine = null;   // Leaflet polyline of the computed route
+    let routeLine = null;   // Leaflet layerGroup of the computed route (casing + core)
+    let routeCasing = null, routeCore = null; // the two polylines, kept so update() can re-slice them
     let routeLatLngs = null; // the route's points [[lat,lng]…] — for the off-route distance check
     let lastReroute = 0;    // timestamp of the last (re)route, for the cooldown
     let rerouting = false;  // a reroute fetch is in flight
@@ -106,7 +107,7 @@ window.TrackerNav = function (ctx) {
         if (destLatLng) destMarker = L.marker(destLatLng, { icon: destIcon(), title: destLabel }).addTo(map);
     }
 
-    function clearRouteLine() { if (routeLine) { map.removeLayer(routeLine); routeLine = null; } routeLatLngs = null; }
+    function clearRouteLine() { if (routeLine) { map.removeLayer(routeLine); routeLine = null; } routeCasing = null; routeCore = null; routeLatLngs = null; }
 
     // Full teardown — used by "Ziel löschen" and by STOP (finish/discard) in the core.
     function clearRoute() {
@@ -179,10 +180,38 @@ window.TrackerNav = function (ctx) {
         if (!latlngs.length) { routeLatLngs = null; return; }
         routeLatLngs = latlngs;
         // Two-layer line: a dark casing under a bright core, so the route reads on any map tile.
-        routeLine = L.layerGroup([
-            L.polyline(latlngs, { pane: 'nav-route', color: 'rgba(8,20,42,0.55)', weight: 11, opacity: 0.9, lineJoin: 'round' }),
-            L.polyline(latlngs, { pane: 'nav-route', color: COL_ROUTE, weight: 6, opacity: 0.95, lineJoin: 'round' }),
-        ]).addTo(map);
+        // Weights match the own speed track (5) so the route never reads WIDER than the recorded
+        // track (Doc 2026-06-14, note #2). Casing adds just a thin dark edge for contrast.
+        routeCasing = L.polyline(latlngs, { pane: 'nav-route', color: 'rgba(8,20,42,0.55)', weight: 7, opacity: 0.9, lineJoin: 'round' });
+        routeCore = L.polyline(latlngs, { pane: 'nav-route', color: COL_ROUTE, weight: 5, opacity: 0.95, lineJoin: 'round' });
+        routeLine = L.layerGroup([routeCasing, routeCore]).addTo(map);
+    }
+
+    // Nearest route segment to a point: returns the segment end index `bi` and the 0..1 position `bt`
+    // along it. Single source for "draw only ahead" (note #1) + remaining distance/bounds.
+    function nearestSeg(here) {
+        const k = Math.cos(here[0] * Math.PI / 180);
+        const xy = (ll) => [ll[1] * 111320 * k, ll[0] * 110540];
+        const p = xy(here);
+        let bi = 1, bt = 0, bd = Infinity;
+        for (let i = 1; i < routeLatLngs.length; i++) {
+            const a = xy(routeLatLngs[i - 1]), b = xy(routeLatLngs[i]);
+            const dx = b[0] - a[0], dy = b[1] - a[1], len2 = dx * dx + dy * dy;
+            let t = len2 ? ((p[0] - a[0]) * dx + (p[1] - a[1]) * dy) / len2 : 0;
+            t = t < 0 ? 0 : t > 1 ? 1 : t;
+            const d = Math.hypot(p[0] - (a[0] + t * dx), p[1] - (a[1] + t * dy));
+            if (d < bd) { bd = d; bi = i; bt = t; }
+        }
+        return { bi, bt };
+    }
+
+    // Redraw the route so only the part AHEAD of the current position stays blue; the already-driven
+    // stretch is dropped, leaving just the recorded speed track there (Doc 2026-06-14, note #1).
+    function redrawAhead(here) {
+        if (!routeCore || !routeLatLngs || routeLatLngs.length < 2) return;
+        const ahead = [here].concat(routeLatLngs.slice(nearestSeg(here).bi));
+        routeCasing.setLatLngs(ahead);
+        routeCore.setLatLngs(ahead);
     }
 
     // ---- Off-route detection → reroute. Called from the core on every GPS fix with [lat,lng]. ----
@@ -204,13 +233,28 @@ window.TrackerNav = function (ctx) {
         return min;
     }
 
+    // Throttled debug readout of the live off-route distance (note #4) — so we MEASURE at what real
+    // distance a reroute fires (or whether the cooldown is what delays it) instead of guessing.
+    let _navDbgT = 0;
+    function navDbg(d, state) {
+        if (!window.DebugWindow || !DebugWindow.log) return;
+        const now = Date.now();
+        if (now - _navDbgT < 1500) return; // ~1.5 s cadence, don't flood the panel
+        _navDbgT = now;
+        DebugWindow.log('nav: d2route=' + Math.round(d) + 'm (limit ' + OFFROUTE_M + ') · ' + state);
+    }
+
     function update(here) {
         // Only while a route is actually drawn; bail cheaply otherwise (no dest, not started, mid-fetch).
         if (!destLatLng || !routeLatLngs || !here) return;
+        redrawAhead(here);                                           // keep only the road ahead blue (note #1)
         if (rerouting) return;
         guidanceUpdate(here);                                        // announce the upcoming maneuver
-        if (distToRouteM(here) <= OFFROUTE_M) return;                // still on (or near) the line
-        if (Date.now() - lastReroute < REROUTE_COOLDOWN_MS) return;  // throttle the OSRM calls
+        const d = distToRouteM(here);
+        const cooling = Date.now() - lastReroute < REROUTE_COOLDOWN_MS;
+        navDbg(d, d <= OFFROUTE_M ? 'on-route' : (cooling ? 'OFF · cooldown' : 'OFF · REROUTE now'));
+        if (d <= OFFROUTE_M) return;                                 // still on (or near) the line
+        if (cooling) return;                                         // throttle the OSRM calls
         rerouting = true;
         computeRoute([here[0], here[1]], true).finally(() => { rerouting = false; });
     }
@@ -282,67 +326,94 @@ window.TrackerNav = function (ctx) {
     // ---- ETA / remaining: distance left ALONG the route from the current position ----
     function remainingMeters(here) {
         if (!routeLatLngs || routeLatLngs.length < 2) return null;
-        const k = Math.cos(here[0] * Math.PI / 180);
-        const xy = (ll) => [ll[1] * 111320 * k, ll[0] * 110540];
-        const p = xy(here);
-        let bi = 1, bt = 0, bd = Infinity;
-        for (let i = 1; i < routeLatLngs.length; i++) {
-            const a = xy(routeLatLngs[i - 1]), b = xy(routeLatLngs[i]);
-            const dx = b[0] - a[0], dy = b[1] - a[1], len2 = dx * dx + dy * dy;
-            let t = len2 ? ((p[0] - a[0]) * dx + (p[1] - a[1]) * dy) / len2 : 0;
-            t = t < 0 ? 0 : t > 1 ? 1 : t;
-            const d = Math.hypot(p[0] - (a[0] + t * dx), p[1] - (a[1] + t * dy));
-            if (d < bd) { bd = d; bi = i; bt = t; }
-        }
+        const { bi, bt } = nearestSeg(here);
         let rem = (1 - bt) * haversine(routeLatLngs[bi - 1], routeLatLngs[bi]);
         for (let i = bi + 1; i < routeLatLngs.length; i++) rem += haversine(routeLatLngs[i - 1], routeLatLngs[i]);
         return rem;
     }
 
     // Bounds of the REMAINING route (current position → end), for the FIT "Reststrecke" mode.
-    // null if no route is drawn. Reuses the nearest-segment search from remainingMeters.
+    // null if no route is drawn. Reuses the nearest-segment search (nearestSeg).
     function remainingBounds(here) {
         if (!routeLatLngs || routeLatLngs.length < 2 || !here) return null;
-        const k = Math.cos(here[0] * Math.PI / 180);
-        const xy = (ll) => [ll[1] * 111320 * k, ll[0] * 110540];
-        const p = xy(here);
-        let bi = 1, bd = Infinity;
-        for (let i = 1; i < routeLatLngs.length; i++) {
-            const a = xy(routeLatLngs[i - 1]), b = xy(routeLatLngs[i]);
-            const dx = b[0] - a[0], dy = b[1] - a[1], len2 = dx * dx + dy * dy;
-            let t = len2 ? ((p[0] - a[0]) * dx + (p[1] - a[1]) * dy) / len2 : 0;
-            t = t < 0 ? 0 : t > 1 ? 1 : t;
-            const d = Math.hypot(p[0] - (a[0] + t * dx), p[1] - (a[1] + t * dy));
-            if (d < bd) { bd = d; bi = i; }
-        }
-        const pts = [here].concat(routeLatLngs.slice(bi));   // current pos + everything still ahead
+        const pts = [here].concat(routeLatLngs.slice(nearestSeg(here).bi));   // current pos + everything ahead
         if (destLatLng) pts.push(destLatLng);
         try { return L.latLngBounds(pts); } catch (e) { return null; }
     }
 
-    function tripLine(here) {
+    // Raw remaining-distance/-time along the route — single source for both the on-screen banner
+    // (tripLine) and the live broadcast's ETA (note #3, formatted by the viewer). null if no route.
+    function tripData(here) {
         const rem = remainingMeters(here);
-        if (rem == null || routeTotalDist <= 0) return '';
-        const remSec = routeTotalDur * (rem / routeTotalDist);
-        const eta = new Date(Date.now() + remSec * 1000);
+        if (rem == null || routeTotalDist <= 0) return null;
+        return { remM: rem, remSec: routeTotalDur * (rem / routeTotalDist) };
+    }
+    function tripLine(here) {
+        const d = tripData(here);
+        if (!d) return '';
+        const eta = new Date(Date.now() + d.remSec * 1000);
         const clock = eta.getHours() + ':' + String(eta.getMinutes()).padStart(2, '0');
-        const remKm = rem >= 10000 ? Math.round(rem / 1000) + ' km'
-            : rem >= 1000 ? (rem / 1000).toFixed(1) + ' km'
-                : Math.round(rem / 50) * 50 + ' m';
-        return 'Ankunft ' + clock + '  ·  ' + remKm + '  ·  ' + Math.round(remSec / 60) + ' min';
+        const remKm = d.remM >= 10000 ? Math.round(d.remM / 1000) + ' km'
+            : d.remM >= 1000 ? (d.remM / 1000).toFixed(1) + ' km'
+                : Math.round(d.remM / 50) * 50 + ' m';
+        return 'Ankunft ' + clock + '  ·  ' + remKm + '  ·  ' + Math.round(d.remSec / 60) + ' min';
     }
 
     function announceDist(d) { return d > 500 ? Math.round(d / 100) * 100 : Math.round(d / 50) * 50; }
     function fmtDist(d) { return d >= 1000 ? (d / 1000).toFixed(1) + ' km' : Math.round(d / 10) * 10 + ' m'; }
 
-    function speak(text) {
-        if (!voiceOn || !('speechSynthesis' in window)) return;
+    // ---- Spoken guidance, hardened for the Android WebView (note #8) ----
+    // Android's WebView keeps speechSynthesis SILENT until (a) it's been kicked off once inside a real
+    // user gesture ("unlock") and (b) the voice list has loaded. So: load voices (+ on voiceschanged),
+    // prime on the first user tap anywhere, resume if the engine is paused, and prefer a de-DE voice.
+    // Everything is best-effort and logged to the DebugWindow so we can SEE on the Pixel what happens.
+    const hasTts = ('speechSynthesis' in window);
+    let ttsVoice = null, ttsPrimed = false;
+    function ttsLog(m) { try { if (window.DebugWindow && DebugWindow.log) DebugWindow.log('tts: ' + m); } catch (e) { } }
+    function loadVoices() {
+        if (!hasTts) return;
         try {
+            const vs = window.speechSynthesis.getVoices() || [];
+            if (vs.length) {
+                ttsVoice = vs.find(v => /^de([-_]|$)/i.test(v.lang)) || ttsVoice;
+                ttsLog('voices=' + vs.length + (ttsVoice ? ' · de=' + ttsVoice.name : ' · no de voice'));
+            }
+        } catch (e) { ttsLog('getVoices failed: ' + e); }
+    }
+    function primeSpeech() {
+        if (ttsPrimed || !hasTts) return;
+        ttsPrimed = true;
+        try {
+            loadVoices();
+            const u = new SpeechSynthesisUtterance(' '); // silent kick inside the gesture → unlocks the WebView
+            u.volume = 0; u.lang = 'de-DE';
+            window.speechSynthesis.speak(u);
+            ttsLog('primed on user gesture');
+        } catch (e) { ttsLog('prime failed: ' + e); }
+    }
+    if (hasTts) {
+        loadVoices();
+        try { window.speechSynthesis.onvoiceschanged = loadVoices; } catch (e) { }
+        // The first user tap ANYWHERE unlocks speech (one-shot, then detaches).
+        const onGesture = () => { primeSpeech(); document.removeEventListener('pointerdown', onGesture); document.removeEventListener('click', onGesture); };
+        document.addEventListener('pointerdown', onGesture);
+        document.addEventListener('click', onGesture);
+    }
+
+    function speak(text) {
+        if (!voiceOn || !hasTts) { ttsLog(voiceOn ? 'skip (no API)' : 'skip (voice off)'); return; }
+        try {
+            if (!ttsPrimed) primeSpeech();                 // belt-and-braces if no tap seen yet
+            const ss = window.speechSynthesis;
+            if (ss.paused) { try { ss.resume(); } catch (e) { } } // Android can leave it paused
+            if (!ttsVoice) loadVoices();                   // voices may have arrived since init
             const u = new SpeechSynthesisUtterance(text);
             u.lang = 'de-DE';
-            window.speechSynthesis.cancel(); // drop any stale utterance so we never lag behind
-            window.speechSynthesis.speak(u);
-        } catch (e) { }
+            if (ttsVoice) u.voice = ttsVoice;
+            ss.cancel();                                   // drop any stale utterance so we never lag behind
+            ss.speak(u);
+            ttsLog('speak: ' + text);
+        } catch (e) { ttsLog('speak failed: ' + e); }
     }
 
     // Clean SVG maneuver arrows (24×24, stroke = currentColor) — straight / left / right / slight /
@@ -436,5 +507,5 @@ window.TrackerNav = function (ctx) {
         });
     }
 
-    return { openPanel, hasDestination, startNavigation, navigateTo, clearRoute, update, remainingBounds };
+    return { openPanel, hasDestination, startNavigation, navigateTo, clearRoute, update, remainingBounds, tripData };
 };

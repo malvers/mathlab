@@ -90,6 +90,26 @@
             margin-top: 6px;
         }
 
+        /* ETA pill (note #3) — shown in the header while the broadcaster is navigating.
+           Nav-green, same language as the recorder's turn banner. */
+        #v-eta {
+            display: none;
+            margin: 6px auto 0;
+            width: fit-content;
+            padding: 3px 14px;
+            border-radius: 999px;
+            background: rgba(24, 128, 56, 0.92);
+            color: #fff;
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            pointer-events: none;
+        }
+
+        #v-eta.on {
+            display: block;
+        }
+
         /* Live-broadcast badge — hidden until real live positions arrive */
         #live-badge {
             display: none;
@@ -141,6 +161,28 @@
             pointer-events: none;
         }
 
+        /* Fullscreen toggle — top-right, above the header gradient. Standard Fullscreen API
+           (no-ops on iOS Safari, which lacks element fullscreen). */
+        #fs-btn {
+            position: fixed;
+            top: max(10px, env(safe-area-inset-top));
+            right: max(10px, env(safe-area-inset-right));
+            z-index: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            padding: 0;
+            border: none;
+            border-radius: 10px;
+            background: rgba(8, 20, 42, 0.8);
+            color: var(--orange);
+            cursor: pointer;
+            backdrop-filter: blur(4px);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+        }
+
         #foot a {
             display: inline-block;
             padding: 4px 12px;
@@ -179,6 +221,7 @@
     <div id="map"></div>
     <header id="hdr">
         <h1 id="trk-name">Track</h1>
+        <div id="v-eta"></div>
         <div id="hud-stats">
             <div class="hud-stat"><span id="v-dist"></span><span class="hud-lbl" id="v-dist-lbl">KM</span></div>
             <div class="hud-stat"><span id="v-speed"></span><span class="hud-lbl">KM/H</span></div>
@@ -189,6 +232,7 @@
     </header>
     <div id="foot"><a href="index.html">Aufgezeichnet mit Doc Alvers Tracker →</a></div>
     <div id="build-stamp"></div>
+    <button id="fs-btn" type="button" aria-label="Vollbild" title="Vollbild"></button>
 
     <div id="msg">Lade geteilten Track …</div>
 
@@ -215,6 +259,25 @@
                 ? 'BUILD ' + (document.lastModified || '?')
                 : 'BUILD ' + p(lm.getDate()) + '.' + p(lm.getMonth() + 1) + '. '
                   + p(lm.getHours()) + ':' + p(lm.getMinutes()) + ':' + p(lm.getSeconds());
+        })();
+
+        // ---- Fullscreen toggle (note #5) — standard Fullscreen API on the whole page; the icon
+        //      flips expand/compress. No-ops where the browser lacks element fullscreen (iOS Safari).
+        (function () {
+            const btn = $('fs-btn'); if (!btn) return;
+            const root = document.documentElement;
+            const ICON_EXPAND = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3 M21 8V5a2 2 0 0 0-2-2h-3 M3 16v3a2 2 0 0 0 2 2h3 M16 21h3a2 2 0 0 0 2-2v-3"/></svg>';
+            const ICON_COMPRESS = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 8H5a2 2 0 0 1-2-2V3 M16 8h3a2 2 0 0 0 2-2V3 M3 21v-3a2 2 0 0 1 2-2h3 M21 21v-3a2 2 0 0 0-2-2h-3"/></svg>';
+            const fsEl = () => document.fullscreenElement || document.webkitFullscreenElement || null;
+            function toggle() {
+                if (fsEl()) (document.exitFullscreen || document.webkitExitFullscreen || function () {}).call(document);
+                else (root.requestFullscreen || root.webkitRequestFullscreen || function () {}).call(root);
+            }
+            const sync = () => { btn.innerHTML = fsEl() ? ICON_COMPRESS : ICON_EXPAND; };
+            btn.addEventListener('click', toggle);
+            document.addEventListener('fullscreenchange', sync);
+            document.addEventListener('webkitfullscreenchange', sync);
+            sync();
         })();
 
         const SUPABASE_URL = 'https://fyfhxzyymmurlaenmzse.supabase.co';
@@ -311,6 +374,21 @@
             if (!liveMarker) liveMarker = L.circleMarker([lat, lng], { radius: 7, color: '#fff', weight: 2, fillColor: 'rgb(176,36,24)', fillOpacity: 1 }).addTo(map);
             else liveMarker.setLatLng([lat, lng]);
         }
+        // ETA pill (note #3): the sender rides remSec/remM on every pos while navigating; null → hide.
+        function setEta(p) {
+            const el = $('v-eta'); if (!el) return;
+            if (p && p.remSec != null) {
+                const a = new Date(Date.now() + p.remSec * 1000);
+                const clock = a.getHours() + ':' + String(a.getMinutes()).padStart(2, '0');
+                const m = p.remM;
+                const rem = m == null ? '' : (m >= 10000 ? Math.round(m / 1000) + ' km'
+                    : m >= 1000 ? (m / 1000).toFixed(1) + ' km' : Math.round(m / 50) * 50 + ' m');
+                el.textContent = 'Ankunft ' + clock + (rem ? '  ·  ' + rem : '') + '  ·  ' + Math.round(p.remSec / 60) + ' min';
+                el.classList.add('on');
+            } else {
+                el.classList.remove('on');
+            }
+        }
         function onLivePos(p) {
             if (!p || p.lat == null) return;
             const badge = $('live-badge'); if (badge) { badge.textContent = '● LIVE'; badge.classList.add('on'); }
@@ -318,6 +396,7 @@
             speeds.push(p.speed != null ? p.speed : null); activities.push(p.activity != null ? p.activity : null);
             redrawTrack();
             updateLiveStats();
+            setEta(p);
             ensureLiveMarker(p.lat, p.lng);
             if (!liveFitDone) { map.setView([p.lat, p.lng], 15); liveFitDone = true; }
             else if (followLive) map.panTo([p.lat, p.lng], { animate: true });
@@ -336,12 +415,11 @@
             ensureLiveMarker(last[0], last[1]);
             if (!liveFitDone && track.length > 1) { map.fitBounds(L.latLngBounds(track), { padding: [50, 50] }); liveFitDone = true; }
         }
-        // ---- live PHOTO: a small thumbnail pushed over the same channel. Add a pin (dedup by t); a
-        //      later re-send (with the AI title) just updates it. Remove+add the marker in one tick → no flicker.
-        function onLivePhoto(p) {
-            if (!p || p.lat == null || !p.img) return;
-            const wp = { lat: p.lat, lng: p.lng, t: p.t, img: p.img, title: p.title || '', text: p.text || '' };
-            const i = waypoints.findIndex(w => w.t === p.t);
+        // ---- live MEDIA: photo / voice / video pushed over the same channel. Add a pin (dedup by t);
+        //      a later re-send (AI title, or the R2 URL replacing base64) just updates it. Remove+add
+        //      the marker in one tick → no flicker. The shared PhotoLayer renders all three types.
+        function upsertLiveWp(wp) {
+            const i = waypoints.findIndex(w => w.t === wp.t);
             if (i >= 0) {
                 waypoints[i] = wp;
                 if (wpMarkers[i]) map.removeLayer(wpMarkers[i]);
@@ -354,6 +432,18 @@
                 addWaypoint(wp);
             }
             updateLiveStats();
+        }
+        function onLivePhoto(p) {
+            if (!p || p.lat == null || !p.img) return;
+            upsertLiveWp({ lat: p.lat, lng: p.lng, t: p.t, img: p.img, title: p.title || '', text: p.text || '' });
+        }
+        function onLiveVoice(p) {
+            if (!p || p.lat == null || !p.audio) return;
+            upsertLiveWp({ lat: p.lat, lng: p.lng, t: p.t, type: 'voice', audio: p.audio, dur: p.dur || 0, mime: p.mime || 'audio/webm', title: p.title || 'Sprachnotiz', text: p.text || '' });
+        }
+        function onLiveVideo(p) {
+            if (!p || p.lat == null || !p.video) return;
+            upsertLiveWp({ lat: p.lat, lng: p.lng, t: p.t, type: 'video', video: p.video, mime: p.mime || 'video/mp4', title: p.title || 'Video', text: p.text || '' });
         }
         // ---- viewer-facing connection errors, so one KNOWS why nothing shows (no dev console needed) ----
         const SUPA_HOST = 'fyfhxzyymmurlaenmzse.supabase.co'; // shown in errors so a viewer can check it (reuses esc() above)
@@ -391,7 +481,9 @@
             ch.on('broadcast', { event: 'trail' }, ({ payload }) => { markLive(); onLiveTrail(payload && payload.pts); });
             ch.on('broadcast', { event: 'pos' }, ({ payload }) => { markLive(); onLivePos(payload); });
             ch.on('broadcast', { event: 'photo' }, ({ payload }) => onLivePhoto(payload));
-            ch.on('broadcast', { event: 'end' }, () => { const b = $('live-badge'); if (b) b.textContent = '■ beendet'; });
+            ch.on('broadcast', { event: 'voice' }, ({ payload }) => onLiveVoice(payload));
+            ch.on('broadcast', { event: 'video' }, ({ payload }) => onLiveVideo(payload));
+            ch.on('broadcast', { event: 'end' }, () => { const b = $('live-badge'); if (b) b.textContent = '■ beendet'; setEta(null); });
             // On (re)connect, ask the sender for the current state → a reload fills instantly
             // instead of waiting for the next periodic trail (~15 s).
             ch.subscribe((status) => {
