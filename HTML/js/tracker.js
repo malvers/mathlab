@@ -16,7 +16,7 @@
         // ---------------------------------------------------------------
         const map = L.map('map', {
             zoomControl: false,
-            attributionControl: true,
+            attributionControl: false, // we add our own collapsible ⓘ control below (Leaflet's would rebuild & wipe on basemap toggle)
             touchZoom: true,          // pinch-zoom with two fingers
             doubleClickZoom: false,   // so a double-tap never zooms the map (clock owns double-tap → fullscreen)
             tap: true,
@@ -27,7 +27,26 @@
         }).setView([51.1657, 10.4515], 6); // centre of Germany as a neutral start
         // Zoom: custom round buttons in the two bottom corners (#zoom-in / #zoom-out, styled like our
         // FABs, wired further down). Leaflet's own control stays off (zoomControl:false above).
-        map.attributionControl.setPrefix(false); // drop the "Leaflet" prefix → shorter bar, stays out from under START
+        // Collapsible map attribution, pinned to the CENTRE of the viewport. ODbL requires the OSM
+        // credit to be visible, but it should not eat space: show only a tiny ⓘ; a tap reveals
+        // "© OpenStreetMap" (the word is the copyright link). NOT a Leaflet control — a Leaflet
+        // control lives inside #map, whose z-index:1 stacking context would trap a fixed/centred
+        // element BEHIND the clock & FAB overlays (z 600) → invisible. So it is a plain element on
+        // <body>. The tile layer therefore carries NO attribution string.
+        const attribEl = document.createElement('div');
+        attribEl.className = 'attrib-collapsed';
+        attribEl.innerHTML =
+            '<button type="button" class="attrib-toggle" aria-label="Karten-Attribution" title="Karten-Attribution">' +
+            '<svg viewBox="0 0 20 20" aria-hidden="true">' +
+            '<circle cx="10" cy="10" r="8.25" fill="none" stroke="currentColor" stroke-width="1.5"/>' +
+            '<circle cx="10" cy="6.1" r="1.15" fill="currentColor"/>' +
+            '<rect x="8.85" y="8.6" width="2.3" height="5.6" rx="1.15" fill="currentColor"/>' +
+            '</svg></button>' +
+            '<span class="attrib-body">&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a></span>';
+        attribEl.querySelector('.attrib-toggle').addEventListener('click', function () {
+            attribEl.classList.toggle('attrib-open');
+        });
+        document.body.appendChild(attribEl);
 
         // Smooth two-finger pinch WITHOUT making the (Magic-Mouse) wheel floaty: the wheel/buttons keep
         // zoomSnap=1 (clean integer steps), but for the duration of a pinch we drop to 0 so it settles
@@ -119,6 +138,44 @@
         function setFollowing(v) { following = v; refreshRecenter(); }
         map.on('dragstart', () => { fitMode = false; setFollowing(false); }); // dragging away exits FIT mode + follow
         map.on('moveend zoomend', refreshRecenter); // view moved → POS may have left/entered the view
+
+        // Fit insets (used by every map fit below). The map runs zoomSnap:1 (whole zoom levels), so for
+        // FEAT-21's soft idle-zoom a padding tweak alone would resolve to the SAME snapped level
+        // (invisible) → fitBigger() drops to zoomSnap:0 for that one animated fit and restores it after.
+        const FIT_PAD = 40;        // normal fit inset (instruments visible)
+        const FIT_PAD_IDLE = 14;   // tighter inset while the chrome is hidden → track uses the freed space
+        const BASE_ZOOMSNAP = map.options.zoomSnap; // = 1; restored after the fractional soft-fit
+        const fitPad = () => { const p = document.body.classList.contains('ui-idle') ? FIT_PAD_IDLE : FIT_PAD; return [p, p]; };
+        // Chrome HIDES (idle) → remember the exact current view, then fit the track BIGGER into the freed
+        // space (tight inset, fractional zoom so it's visible at zoomSnap:1). Chrome SHOWS again → just
+        // restore that remembered view (Doc's idea — no recompute, so "shown" always lands back exactly).
+        let _savedView = null;
+        function fitBigger() {
+            if (following || track.length < 2) return false; // not while live-following; need a real track
+            const b = (fitMode === 'remaining' && __nav && __nav.remainingBounds && posMarker)
+                ? __nav.remainingBounds([posMarker.getLatLng().lat, posMarker.getLatLng().lng])
+                : L.latLngBounds(track);
+            if (!b) return false;
+            map.options.zoomSnap = 0; // fractional → the zoom-in is actually visible at zoomSnap:1
+            try { map.fitBounds(b, { padding: [FIT_PAD_IDLE, FIT_PAD_IDLE], animate: true, duration: 0.5 }); } catch (e) { }
+            setTimeout(() => { map.options.zoomSnap = BASE_ZOOMSNAP; }, 700);
+            return true;
+        }
+        let _wasIdle = document.body.classList.contains('ui-idle');
+        new MutationObserver(() => {
+            const idle = document.body.classList.contains('ui-idle');
+            if (idle === _wasIdle) return; // only react when ui-idle actually flips
+            _wasIdle = idle;
+            if (idle) {
+                const view = { c: map.getCenter(), z: map.getZoom() }; // remember BEFORE we zoom bigger
+                if (fitBigger()) _savedView = view;                    // saved only if we actually zoomed
+            } else if (_savedView) {
+                map.options.zoomSnap = 0;
+                map.setView(_savedView.c, _savedView.z, { animate: true, duration: 0.5 }); // restore exactly
+                setTimeout(() => { map.options.zoomSnap = BASE_ZOOMSNAP; }, 700);
+                _savedView = null;
+            }
+        }).observe(document.body, { attributes: true, attributeFilter: ['class'] });
         map.on('zoomstart', () => {
             const el = posMarker && posMarker.getElement && posMarker.getElement();
             if (el) { el.style.transition = 'none'; el.style.opacity = '0'; }
@@ -131,7 +188,7 @@
         const baseMap = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxNativeZoom: 19, // OSM tiles stop at z19 …
             maxZoom: 21,       // … Leaflet upscales beyond (blurry) so close photo pins can separate
-            attribution: '&copy; OpenStreetMap contributors',
+            // no `attribution` here — rendered by our collapsible AttribCtl (ⓘ) above
         }).addTo(map);
 
         // DEBUG: hide the background map → judge the rain-radar colours with no terrain underneath.
@@ -332,7 +389,7 @@
         // centred. KM/H = 999.9 (1 dec), HÖHE = 9999 m (int).
         const STAT_SIZE = 'clamp(1rem, 4.5vw, 1.4rem)';
         const STAT_COL = 'var(--cfg-stat-color, var(--orange))'; // live-config override (tracker-config.js); default = λ-orange
-        const STAT_FONT = 'Arial, Helvetica, sans-serif'; // Doc: stat numbers in Arial, comma decimals
+        const STAT_FONT = 'Orbitron'; // Doc: stat numbers back in Orbitron (HUD CSS widens slot + comma so it's not cramped)
         const STAT_SEP = ',';
         CyberClock.mountNum(elSpeed, { intSlots: 3, decimals: 1, size: STAT_SIZE, digitColor: STAT_COL, font: STAT_FONT, decimalSep: STAT_SEP });
         CyberClock.mountNum(elAlt, { intSlots: 4, decimals: 0, size: STAT_SIZE, digitColor: STAT_COL, font: STAT_FONT, decimalSep: STAT_SEP });
@@ -650,10 +707,10 @@
             // route ahead in view. Re-fit only once it grows beyond the frame (-0.12 inset = slack).
             if (fitMode === 'all' && track.length > 1) {
                 const tb = L.latLngBounds(track);
-                if (!map.getBounds().pad(-0.12).contains(tb)) { try { map.fitBounds(tb, { padding: [40, 40] }); } catch (e) { } }
+                if (!map.getBounds().pad(-0.12).contains(tb)) { try { map.fitBounds(tb, { padding: fitPad() }); } catch (e) { } }
             } else if (fitMode === 'remaining' && __nav && __nav.remainingBounds) {
                 const rb = __nav.remainingBounds(here);
-                if (rb && !map.getBounds().pad(-0.12).contains(rb)) { try { map.fitBounds(rb, { padding: [40, 40] }); } catch (e) { } }
+                if (rb && !map.getBounds().pad(-0.12).contains(rb)) { try { map.fitBounds(rb, { padding: fitPad() }); } catch (e) { } }
             }
             refreshRecenter(); // show/hide the recenter button as needed
             if (__nav && __nav.update) __nav.update(here); // navigation: reroute if we drifted off the line
@@ -993,7 +1050,7 @@
             $('hud-top').classList.add('shown');
             if (window.RainRadar && RainRadar.setShifted) RainRadar.setShifted(true);
             setTrkState('paused'); // → CONTINUE | SPEICHERN
-            try { if (track.length) map.fitBounds(L.latLngBounds(track), { padding: [40, 40] }); } catch (e) { }
+            try { if (track.length) map.fitBounds(L.latLngBounds(track), { padding: fitPad() }); } catch (e) { }
             TrackBuffer.saveNow(bufferSnapshot()); // keep it persisted across the restore
             toast('Ungesicherter Track wiederhergestellt: ' + track.length + ' Punkte. SPEICHERN nicht vergessen.');
         }
@@ -1521,7 +1578,7 @@ ${pts}
             const lastAlt = alts.slice().reverse().find(a => a != null);
             fusedAlt = (lastAlt != null) ? lastAlt : null;
             renderAltitude();
-            if (latlngs.length) map.fitBounds(L.latLngBounds(latlngs), { padding: [40, 40] });
+            if (latlngs.length) map.fitBounds(L.latLngBounds(latlngs), { padding: fitPad() });
         }
 
         // ---- Multi-select: load several tracks at once (checkbox per row → coloured overlay) ----
@@ -1563,7 +1620,7 @@ ${pts}
                 (t.waypoints || []).forEach(w => addWaypoint(w));
             });
             setDist(0); setSpeed(0);
-            if (all.length) map.fitBounds(L.latLngBounds(all), { padding: [40, 40] });
+            if (all.length) map.fitBounds(L.latLngBounds(all), { padding: fitPad() });
         }
         if ($('tl-deselect')) $('tl-deselect').addEventListener('click', deselectAll);
         if ($('tl-sharesel')) $('tl-sharesel').addEventListener('click', () => shareMultiple(Array.from(selectedTracks)));
@@ -1962,11 +2019,11 @@ ${pts}
                 const rb = (ll && __nav && __nav.remainingBounds) ? __nav.remainingBounds([ll.lat, ll.lng]) : null;
                 if (!fitMode) {                              // off → fit the whole track
                     fitMode = 'all'; setFollowing(false);
-                    if (track.length) { try { map.fitBounds(L.latLngBounds(track), { padding: [40, 40] }); } catch (e) { } }
+                    if (track.length) { try { map.fitBounds(L.latLngBounds(track), { padding: fitPad() }); } catch (e) { } }
                     toast('FIT: ganze Route');
                 } else if (fitMode === 'all' && rb) {        // whole → remaining (only if a route exists)
                     fitMode = 'remaining';
-                    try { map.fitBounds(rb, { padding: [40, 40] }); } catch (e) { }
+                    try { map.fitBounds(rb, { padding: fitPad() }); } catch (e) { }
                     toast('FIT: Reststrecke');
                 } else {                                     // remaining (or no route) → off
                     fitMode = false;
