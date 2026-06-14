@@ -1543,7 +1543,7 @@ ${pts}
         // re-armed: set ALLOW_DELETE = true, or replace with a proper soft-delete / admin tool.
         // Gates removeTrack() → covers BOTH the LADEN × and the DISCARD button; while false the
         // × button isn't even rendered.
-        const ALLOW_DELETE = false; // ← DEBUG: set true to re-enable deletion
+        const ALLOW_DELETE = true; // ← re-enabled on Doc's request (trash-can per row; still behind a "Track löschen?" confirm)
         async function removeTrack(id) {
             if (!ALLOW_DELETE) return; // hard gate: no row is ever deleted while disabled
             const c = await ensureSb();
@@ -1993,6 +1993,19 @@ ${pts}
             showPanel('track-list');
         });
 
+        // POI (FEAT-24): the radial "POI" entry opens a category checkbox panel à la LADEN. The flags
+        // persist; the POI layer (tracker-poi.js, not built yet) will read them. Default ON:
+        // sights / viewpoints / historic / nature; service / food / lodging default OFF.
+        [['poi-cat-sights', 1], ['poi-cat-views', 1], ['poi-cat-historic', 1], ['poi-cat-nature', 1],
+        ['poi-cat-service', 0], ['poi-cat-food', 0], ['poi-cat-lodging', 0]].forEach(([id, def]) => {
+            const el = $(id); if (!el) return;
+            const saved = localStorage.getItem(id);
+            el.checked = saved == null ? !!def : saved === '1';
+            el.addEventListener('change', () => localStorage.setItem(id, el.checked ? '1' : '0'));
+        });
+        $('mb-poi').addEventListener('click', () => { closePopup(); showPanel('poi-panel'); });
+        $('poi-close').addEventListener('click', hidePanels);
+
         // SHARE TRACK (popup) — share the current track (same action as TEILEN)
         $('mb-sharetrack').addEventListener('click', () => {
             closePopup();
@@ -2211,9 +2224,23 @@ ${pts}
             if (count) { const c = document.createElement('span'); c.className = 'tl-badge-n'; c.textContent = count; b.appendChild(c); }
             return b;
         }
+        // Sort key = the track's REAL recording date, parsed from its name ("DD.MM., HH:MM"), NOT
+        // created_at: an imported copy is created NOW but recorded earlier, so created_at would shove it
+        // to the top. Year comes from the name if present, else inferred from created_at. A renamed track
+        // with no date in its name falls back to created_at. Returns epoch ms.
+        function trackDateMs(r) {
+            const m = ((r && r.name) || '').match(/(\d{1,2})\.(\d{1,2})\.(\d{2,4})?[\s,]*(\d{1,2}):(\d{2})/);
+            if (m) {
+                let yr = m[3] ? +m[3] : (r.created_at ? new Date(r.created_at).getFullYear() : new Date().getFullYear());
+                if (yr < 100) yr += 2000;
+                return new Date(yr, (+m[2]) - 1, +m[1], +m[4], +m[5]).getTime();
+            }
+            return (r && r.created_at) ? new Date(r.created_at).getTime() : 0;
+        }
         function renderTrackList(rows) {
             const box = $('track-list-items');
             box.innerHTML = '';
+            rows = (rows || []).slice().sort((a, b) => trackDateMs(b) - trackDateMs(a)); // newest REAL date first
             selectedTracks.clear(); loadedTrackIds.forEach((id) => selectedTracks.add(id)); updateLoadSel(); // pre-select the loaded tracks
             if (!rows.length) { box.innerHTML = '<div class="tl-empty">Noch keine gespeicherten Tracks.</div>'; return; }
             rows.forEach((r) => {
@@ -2262,7 +2289,8 @@ ${pts}
                 row.appendChild(main); row.appendChild(sh);
                 if (ALLOW_DELETE) { // cloud-delete disabled for now → no × button (see removeTrack)
                     const del = document.createElement('button');
-                    del.className = 'tl-del'; del.textContent = '×'; del.title = 'Löschen';
+                    del.className = 'tl-del'; del.title = 'Löschen';
+                    del.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path></svg>';
                     del.addEventListener('click', async (ev) => {
                         ev.stopPropagation();
                         if (!(await uiConfirm('Track löschen?', { danger: true, okText: 'Löschen' }))) return;
