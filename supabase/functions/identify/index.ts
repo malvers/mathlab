@@ -18,7 +18,7 @@
 const MODEL = 'gemini-2.5-flash';
 const PLANTNET_URL = 'https://my-api.plantnet.org/v2/identify/all';
 const PLANTNET_MIN_SCORE = 0.30; // below this, treat the plant guess as too weak → let Gemini decide
-const PLANTNET_SHOW_MIN = 0.10; // below this, hide Pl@ntNet entirely — a sub-10 % top hit is noise (FEAT-22)
+const PLANTNET_SHOW_MIN = 0.20; // below this, hide Pl@ntNet entirely — a sub-20 % top hit is noise (FEAT-22; Doc 2026-06-14: raised 10 %→20 %)
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',

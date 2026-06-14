@@ -303,9 +303,10 @@ Default-Control, von uns gesetzt): `tracker.js:18` `zoomControl:false`, dann **`
 
 ## FEAT-22 — Pl@ntNet-Konfidenz-Schwelle ✅ GEBAUT + DEPLOYED 2026-06-13 (Commit `1762b4f`)
 > 🔴 **PRIO-0-Korrektur (Doc 2026-06-14, [`../../ideen-wunsche.md`](../../ideen-wunsche.md)):** Schwelle **10 % → 20 %** —
-> alles unter **20 %** komplett ausblenden. Konkret `PLANTNET_SHOW_MIN = 0.10` → `0.20` in
-> `supabase/functions/identify/index.ts:21`, dann Edge Function neu deployen (`supabase functions deploy identify`).
-> Server-Aktion (Deploy) macht Doc.
+> alles unter **20 %** komplett ausblenden.
+> ✅ **Code geändert 2026-06-14:** `PLANTNET_SHOW_MIN = 0.20` in `supabase/functions/identify/index.ts:21`
+> (≥30 % Headline · 20–30 % Zweitmeinung · <20 % ganz weg). **Offen: Deploy durch Doc** →
+> `supabase functions deploy identify --no-verify-jwt`.
 
 **Quelle:** Fahrt-Notiz 2026-06-12 (Notiz 4). **Nur Notiz.**
 **Regel-Idee:** Pl@ntNet-Treffer mit Konfidenz **< ~10 %** gar nicht anzeigen; **besonders nicht**, wenn
