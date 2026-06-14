@@ -2,11 +2,11 @@
 // photo-decision overlay, 'Nachbrennen', voice notes, waypoints, auto-hide). Extracted from
 // tracker.js (Phase-2 refactor, 2026-06-09). tracker.js calls window.TrackerMedia(ctx) once and
 // uses the returned exports. ctx = { map,$,toast,ensureSb,wpSer,doSync,bufferSnapshot,
-// addLivePhoto,SUPABASE_URL,SUPABASE_KEY,COL_ORANGE,EUR_PER_PHOTO + live getters/setters for
+// addLiveMedia,SUPABASE_URL,SUPABASE_KEY,COL_ORANGE,EUR_PER_PHOTO + live getters/setters for
 // lastFix,tracking,posMarker,currentTrackId,waypoints,wpMarkers,fannedCluster }.
 
 window.TrackerMedia = function (T) {
-    const { map, $, toast, ensureSb, wpSer, doSync, bufferSnapshot, addLivePhoto,
+    const { map, $, toast, ensureSb, wpSer, doSync, bufferSnapshot, addLiveMedia,
             SUPABASE_URL, SUPABASE_KEY, COL_ORANGE, EUR_PER_PHOTO } = T;
 
         // ===============================================================
@@ -345,7 +345,7 @@ window.TrackerMedia = function (T) {
             // persist + broadcast AFTER the swap so the DB row and the LIVE message carry the small URL
             if (typeof TrackBuffer !== 'undefined') TrackBuffer.saveNow(bufferSnapshot());
             doSync(); // push the photo to the cloud NOW — don't wait for the next GPS point
-            addLivePhoto(wp); // push the thumbnail (+ AI title/text) over the live channel
+            addLiveMedia(wp); // push the photo (+ AI title/text) over the live channel
         }
 
         // New "one-point track" mode: a geotagged photo taken WITHOUT an active recording.
@@ -475,6 +475,7 @@ window.TrackerMedia = function (T) {
             await finalizeVoice(wp, rec); // swap wp.audio → R2 URL (failure keeps base64, offline-resilient)
             if (typeof TrackBuffer !== 'undefined') TrackBuffer.saveNow(bufferSnapshot()); // persist the URL now
             doSync();                 // push to the cloud now — you stand still to record
+            addLiveMedia(wp);         // push the voice note over the live channel (note #10)
             toast('Sprachnotiz · ' + rec.dur.toFixed(1) + 's');
         }
         // IDLE (not tracking): save the voice note as its own one-point track, like a one-point photo.
@@ -709,7 +710,8 @@ window.TrackerMedia = function (T) {
             refreshWaypoint(wp);
             const mb = file.size ? (Math.round(file.size / 1e5) / 10) + ' MB' : '';
             toast('Video aufgenommen' + (mb ? ' · ' + mb : ''));
-            await finalizeVideo(wp, file);
+            await finalizeVideo(wp, file); // swaps wp.video → R2 URL; addLiveMedia skips a still-blob: clip
+            addLiveMedia(wp);              // push the video (R2 URL) over the live channel (note #10)
         }
         async function addVideoPoint(file, ll) { // IDLE → standalone one-point track (like a one-point photo)
             const wp = newVideoWp(file, ll);
