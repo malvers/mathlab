@@ -25,7 +25,8 @@
                                       // accumulated to 2 levels/notch; 160 px/level = one calm step
             wheelDebounceTime: 60,    // coalesce the momentum burst (default 40)
         }).setView([51.1657, 10.4515], 6); // centre of Germany as a neutral start
-        L.control.zoom({ position: 'bottomright' }).addTo(map);
+        // Zoom: custom round buttons in the two bottom corners (#zoom-in / #zoom-out, styled like our
+        // FABs, wired further down). Leaflet's own control stays off (zoomControl:false above).
         map.attributionControl.setPrefix(false); // drop the "Leaflet" prefix → shorter bar, stays out from under START
 
         // Smooth two-finger pinch WITHOUT making the (Magic-Mouse) wheel floaty: the wheel/buttons keep
@@ -362,7 +363,12 @@
             CyberClock.setNum(elDist, distM == null ? null : (meters ? Math.round(distM) : distM / 1000));
             centerStatLabel(elDist, elDistLbl);
         }
-        function setSpeed(kmh) { CyberClock.setNum(elSpeed, kmh); centerStatLabel(elSpeed, elSpeedLbl); }
+        // Speed label: live readout vs a loaded track's average. setSpeed() restores the LIVE label on
+        // every update (so live tracking, clear and multi-load all read "SPEED KM/H"); plotTrack()
+        // overrides it to the Ø average afterwards when a single saved track is shown.
+        const SPEED_LBL_LIVE = (elSpeedLbl && elSpeedLbl.textContent) || 'SPEED KM/H';
+        const SPEED_LBL_AVG = 'Ø KM/H';
+        function setSpeed(kmh) { if (elSpeedLbl) elSpeedLbl.textContent = SPEED_LBL_LIVE; CyberClock.setNum(elSpeed, kmh); centerStatLabel(elSpeed, elSpeedLbl); }
         function setAlt(m) {
             if (m == null || isNaN(m)) {
                 // no altitude fix yet → a single centred dash instead of blank slots
@@ -1507,7 +1513,10 @@ ${pts}
             clearWaypoints();
             (wps || []).forEach(w => addWaypoint(w));
             setDist(totalDist);
-            setSpeed(0);
+            // Loaded track has no live speed → show its AVERAGE (distance/time, same as the stats panel)
+            // with a Ø symbol so it reads clearly as an average, not a live value.
+            setSpeed(trackStats().avgKmh);
+            if (elSpeedLbl) { elSpeedLbl.textContent = SPEED_LBL_AVG; centerStatLabel(elSpeed, elSpeedLbl); }
             // show the loaded track's last known altitude (if any)
             const lastAlt = alts.slice().reverse().find(a => a != null);
             fusedAlt = (lastAlt != null) ? lastAlt : null;
@@ -1943,6 +1952,8 @@ ${pts}
             closePopup();
         });
         $('menu-fab').addEventListener('click', () => openPopup());
+        $('zoom-in').addEventListener('click', () => map.zoomIn());
+        $('zoom-out').addEventListener('click', () => map.zoomOut());
         $('recenter-fab').addEventListener('click', () => {
             const btn = $('recenter-fab');
             if (btn.classList.contains('fit')) {            // centred → cycle the FIT mode

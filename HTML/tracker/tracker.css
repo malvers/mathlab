@@ -669,6 +669,7 @@ body.ui-idle #vid-fab,
 body.ui-idle #compass,
 body.ui-idle #speed-sign,
 body.ui-idle #hud-top,
+body.ui-idle #recenter-fab,
 body.ui-idle #trk-controls {
     opacity: 0;
     pointer-events: none;
@@ -1829,6 +1830,48 @@ body.ui-idle #trk-controls {
 #compass[hidden] {
     display: none;
 }
+
+/* Zoom: round buttons in the two bottom corners, our FAB style (Leaflet's own control is off).
+   The +/− are drawn as CSS bars (not font glyphs) so they are pixel-perfectly centred and crisp,
+   independent of font metrics. + bottom-left, − bottom-right (above the map's attribution on the right). */
+#zoom-in,
+#zoom-out {
+    position: fixed;
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 18px); /* low in the corners, just above the OSM attribution */
+    z-index: 600;
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    background: rgba(8, 20, 42, 0.82);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(8px);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+    color: rgba(255, 255, 255, 0.92);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform 0.1s ease, color 0.2s ease, border-color 0.2s ease;
+}
+#zoom-in { left: 12px; }    /* + → bottom-left */
+#zoom-out { right: 12px; }  /* − → bottom-right */
+/* the bars: horizontal on both (− and the cross-bar of +), vertical only on + */
+#zoom-in::before,
+#zoom-out::before,
+#zoom-in::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    background: currentColor;
+    border-radius: 2px;
+    transform: translate(-50%, -50%);
+}
+#zoom-in::before,
+#zoom-out::before { width: 22px; height: 3px; }
+#zoom-in::after { width: 3px; height: 22px; }
+#zoom-in:hover,
+#zoom-out:hover { color: var(--orange); border-color: rgba(255, 255, 255, 0.6); }
+#zoom-in:active,
+#zoom-out:active { transform: scale(0.94); }
 
 /* Rain-source status dots in Settings → Debug (DWD / RainViewer): green = reachable, red ⊘ = down */
 .src-dot { font-weight: 700; font-size: 1.05rem; line-height: 1; }
