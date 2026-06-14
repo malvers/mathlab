@@ -1694,6 +1694,9 @@ ${pts}
             loadedTrackIds.clear(); loadedTrackIds.add(id);
             persistLoaded([{ id: id, name: name }]);        // survive a reload like any loaded track
             toast('In deinen Tracker importiert: ' + name);
+            // Refresh + reopen the "Tracks laden" list so the imported copy appears IMMEDIATELY
+            // (pre-selected via loadedTrackIds) — before, it only showed after manually reopening.
+            try { const rows = await listTracks(); renderTrackList(rows); showPanel('track-list'); } catch (e) { /* list refresh is best-effort */ }
         }
 
         // ---- Transient toast (the persistent status line was removed) ----
