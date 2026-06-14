@@ -32,14 +32,19 @@ Deno.serve(async (req) => {
   const b = await req.json().catch(() => ({}));
   if (!b.ssml && !b.text) return json({ error: 'kein Text/ssml übergeben' }, 400);
 
+  // Chirp3-HD voices reject pitch/speakingRate ("This voice does not support pitch parameters") → omit
+  // them for Chirp; everything else (Neural2/Wavenet/Studio, incl. glocken) keeps the same audioConfig.
+  const voiceName = b.voice || 'de-DE-Neural2-B';
+  const isChirp = /chirp/i.test(voiceName);
+  const audioConfig: Record<string, unknown> = { audioEncoding: 'MP3' };
+  if (!isChirp) {
+    audioConfig.speakingRate = (typeof b.speakingRate === 'number') ? b.speakingRate : 0.95;
+    audioConfig.pitch = (typeof b.pitch === 'number') ? b.pitch : -1.5;
+  }
   const body = {
     input: b.ssml ? { ssml: b.ssml } : { text: b.text },
-    voice: { languageCode: b.languageCode || 'de-DE', name: b.voice || 'de-DE-Neural2-B' },
-    audioConfig: {
-      audioEncoding: 'MP3',
-      speakingRate: (typeof b.speakingRate === 'number') ? b.speakingRate : 0.95,
-      pitch: (typeof b.pitch === 'number') ? b.pitch : -1.5,
-    },
+    voice: { languageCode: b.languageCode || 'de-DE', name: voiceName },
+    audioConfig,
   };
 
   try {
