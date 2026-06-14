@@ -150,10 +150,15 @@
                     rec = new SR();
                     rec.lang = 'de-DE'; rec.continuous = true; rec.interimResults = true; rec.maxAlternatives = 1;
                     rec.onresult = onResult;
-                    rec.onerror = function () { };
-                    rec.onend = function () { rec = null; if (wakeOn && !speaking && !stopping) setTimeout(startRec, 300); };
+                    rec.onstart = function () { if (window.DebugWindow) DebugWindow.log('wake: started'); };
+                    rec.onerror = function (e) { if (window.DebugWindow) DebugWindow.log('wake onerror: ' + (e && e.error)); };
+                    rec.onend = function () {
+                        rec = null;
+                        if (window.DebugWindow) DebugWindow.log('wake onend (on=' + wakeOn + ' speak=' + speaking + ' stop=' + stopping + ')');
+                        if (wakeOn && !speaking && !stopping) setTimeout(startRec, 300);
+                    };
                     rec.start();
-                } catch (e) { rec = null; }
+                } catch (e) { rec = null; if (window.DebugWindow) DebugWindow.log('wake start() THROW: ' + ((e && e.message) || e)); }
             }
 
             function stopRec() {
