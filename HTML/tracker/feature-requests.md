@@ -6,6 +6,11 @@
 > **Dupliziert nichts** — verlinkt die Plan-Notizen und destilliert den Auftrag.
 
 ## ⚡ Kurz-Übersicht
+- 🔴 **PRIO 0 — Doc 2026-06-14** (aus [`../../ideen-wunsche.md`](../../ideen-wunsche.md), vor allem anderen):
+  - **FEAT-24** Points of Interest (POI)
+  - **FEAT-25** Karten-PIN setzen + dorthin navigieren
+  - **FEAT-26** Tankstellen/Tankpreise — **nur Server-Aktivierung** (Code ist da)
+  - **FEAT-22-Korrektur** Pl@ntNet-Schwelle 10 % → **20 %**
 - **FEAT-1** Brotkrumen zurück (offline) · Prio 1
 - **FEAT-2** Goldene Stunde & Sonnenstand · Prio 1
 - **FEAT-3** Parkplatz automatisch merken
@@ -297,6 +302,11 @@ Default-Control, von uns gesetzt): `tracker.js:18` `zoomControl:false`, dann **`
 (volle Höhe). Hängt mit Idle-Auto-Hide + der WIP „d/k/w-Tasten-Toggle" zusammen.
 
 ## FEAT-22 — Pl@ntNet-Konfidenz-Schwelle ✅ GEBAUT + DEPLOYED 2026-06-13 (Commit `1762b4f`)
+> 🔴 **PRIO-0-Korrektur (Doc 2026-06-14, [`../../ideen-wunsche.md`](../../ideen-wunsche.md)):** Schwelle **10 % → 20 %** —
+> alles unter **20 %** komplett ausblenden. Konkret `PLANTNET_SHOW_MIN = 0.10` → `0.20` in
+> `supabase/functions/identify/index.ts:21`, dann Edge Function neu deployen (`supabase functions deploy identify`).
+> Server-Aktion (Deploy) macht Doc.
+
 **Quelle:** Fahrt-Notiz 2026-06-12 (Notiz 4). **Nur Notiz.**
 **Regel-Idee:** Pl@ntNet-Treffer mit Konfidenz **< ~10 %** gar nicht anzeigen; **besonders nicht**, wenn
 **Google/Gemini** ein gutes Ergebnis hat.
@@ -317,6 +327,39 @@ verstecken wenn Gemini gut" wäre ein Einzeiler, falls gewünscht.
 + die **Genauigkeit (±m)** in **eine Gruppe** fassen und die **ganze Gruppe zentrieren**.
 **Wo:** `#hud-top` / `#gps-chip` (zeigt schon `gps-src` + `gps-acc ±m`) in `tracker.html` + `tracker.css`.
 Knüpft an die alte `tracker-plan.md`-Idee „POSITION oben zentriert, Genauigkeit dahinter" an.
+
+---
+
+## FEAT-24 — Points of Interest (POI) 📐 · 🔴 PRIO 0
+**Quelle:** [`../../ideen-wunsche.md`](../../ideen-wunsche.md) (Doc 2026-06-14): „Wir brauchen Points of Interest."
+**Wunsch:** POIs am Weg / auf der Karte (Sehenswürdigkeiten, Tankstellen, Aussichtspunkte …).
+**Überschneidung (erst prüfen, nicht doppelt bauen):** WegCast Audio-POI [`drivecast-audio-poi-am-weg.md`](drivecast-audio-poi-am-weg.md),
+Foto-Spur-Erkennung, **FEAT-26** (Tankstellen sind schon POIs).
+**Daten gratis (Regel 18):** Overpass/OSM (`tourism`/`historic`/`natural`), Wikipedia-Geosearch — kein Key.
+**Erst klären (eine Rückfrage):** welche Kategorien + Darstellung (Karten-Pins vs. Liste vs. Audio am Weg)?
+Dann spezifizieren. **Nur Notiz, nicht bauen ohne „go" (Regel 2/4).**
+
+## FEAT-25 — Karten-PIN setzen + dorthin navigieren 📐 · 🔴 PRIO 0
+**Quelle:** [`../../ideen-wunsche.md`](../../ideen-wunsche.md) (Doc 2026-06-14): „Einen PIN auf der Karte setzen,
+wo man ggf. wieder hin navigieren kann."
+**Auftrag:** Long-Press/Tap auf die Karte → PIN; Tipp auf den PIN → **Navigation dorthin** (baut auf
+`HTML/js/tracker-nav.js`, OSRM).
+**Verwandt:** FEAT-3 (Parkplatz automatisch) + FEAT-4 (zurück zum Auto) — gleiche „Pin-als-Navi-Ziel"-Logik;
+gemeinsam denken, nicht dreimal bauen.
+**Wiederverwenden:** `tracker-nav.js` (Route/Banner/Voice), vorhandener Pin-Layer. **Nur Notiz (Regel 2/4).**
+
+## FEAT-26 — Tankstellen / Tankpreise (Tankerkönig) 🅿️ gebaut-aber-inaktiv · 🔴 PRIO 0
+**Quelle:** [`../../ideen-wunsche.md`](../../ideen-wunsche.md) (Doc 2026-06-14): „Wie funktioniert das, ist das
+eingebaut, was muss ich tun?"
+**Stand (verifiziert):** Code ist **vollständig da** — Client `HTML/js/tracker-fuel.js` (`window.TrackerFuel`,
+standardmäßig an) + Edge Function `supabase/functions/fuel-prices/index.ts`. Die Function ist auf das Secret
+**`TANKERKOENIG_KEY`** gegated (fehlt es → HTTP 500 „TANKERKOENIG_KEY fehlt").
+**→ Es fehlt NUR die einmalige Server-Aktivierung (kein Bau):**
+  1. Gratis-Key holen: https://creativecommons.tankerkoenig.de/
+  2. Als Secret setzen: Supabase Dashboard → Edge Functions → Secrets → `TANKERKOENIG_KEY`
+     (**Regel 18:** Key nur server-seitig, nie ins Repo).
+  3. Deployen: `supabase functions deploy fuel-prices --no-verify-jwt`
+**Danach:** am Gerät prüfen, ob `TrackerFuel` Preise zeigt (Toggle `trk-fuel-on`). Server-Aktion durch Doc.
 
 ---
 

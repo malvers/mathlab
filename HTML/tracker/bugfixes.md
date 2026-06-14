@@ -7,6 +7,7 @@
 > nichts** — sie verlinkt und destilliert. Stand der Code-Zeilen: 2026-06-12 (nach dem inline→module-Refactor).
 
 ## ⚡ Kurz-Übersicht
+- 🔴 **BUG-9 · PRIO 0 — Doc 2026-06-14** — Voice-Navigation fehlt / nicht auffindbar (sollte gebaut sein)
 - **BUG-1** Speed-Anzeige km/h falsch · 🏗️ Fix gebaut (Anzeige vom Gate entkoppelt + Debug) · Feld-Test + Push offen
 - **BUG-2** Regenradar zeigt in DE keinen Regen
 - **BUG-3** 🅿️ Track strichelt bei Aufnahme-Pause
@@ -252,6 +253,20 @@ zeigt — tatsächlich ist es der **Zwinger** (beide liegen dicht beieinander).
 2. **identify:** Heading nutzen — POIs im **Sichtkegel voraus** (Bearing Standort→POI ≈ Heading ±X°)
    bevorzugen statt nur nach Nähe. Passt zu `geo-erkennung-und-voice-spur.md`.
 **Caveat:** Heading im Stehen unzuverlässig (Kompass-Jitter) → breiter Kegel / Fallback auf Nähe.
+
+---
+
+## BUG-9 — Voice-Navigation fehlt / nicht auffindbar 🐞 offen · 🔍 erst klären · 🔴 PRIO 0
+**Quelle:** [`../../ideen-wunsche.md`](../../ideen-wunsche.md) (Doc 2026-06-14): „Warum haben wir keine Voice
+Navigation? Ich meine, das wäre schon eingebaut."
+**Fakt:** Die Sprach-**Abbiegeansage IST gebaut** — `HTML/js/tracker-nav.js` (`speechSynthesis` de-DE) +
+On-screen-Banner + persistenter Schalter „Sprachansage" (s. [`feature-requests.md`](feature-requests.md) →
+„Bereits gebaut"). Doc erlebt sie aber nicht → eins von:
+1. **Discoverability:** Schalter „Sprachansage" steht auf aus / wird nicht gefunden.
+2. **Regression:** TTS feuert nicht (Stimme/Autoplay-Policy/`speechSynthesis` im WebView, Modul nicht eingehängt).
+3. **Anderes gemeint:** Doc will evtl. **vollständige** Voice-Steuerung, nicht nur die Abbiege-Ansage.
+**Erst klären/messen (Regel „nie raten"):** **eine Rückfrage** an Doc (welche Stelle genau?) + am Gerät prüfen:
+Schalter an? Spricht das Manöver-Banner? DEBUG-Window auf `speechSynthesis`-Fehler ansehen. **Nicht** blind „neu bauen".
 
 ---
 
