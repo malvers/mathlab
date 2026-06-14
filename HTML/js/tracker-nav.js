@@ -156,6 +156,23 @@ window.TrackerNav = function (ctx) {
         return computeRoute(from, false);
     }
 
+    // Set a destination directly by COORDINATES (a POI / map-pin tap, not a typed address) and route to
+    // it. Shared entry for FEAT-24 (POI), FEAT-25 (map pin) and FEAT-3/4 (park / back-to-car).
+    async function navigateTo(latlng, label) {
+        if (!latlng || latlng[0] == null) return false;
+        navGen++; clearRouteLine();                 // drop any in-flight / old route first
+        destLatLng = [latlng[0], latlng[1]];
+        destLabel = label || 'Ziel';
+        showDestMarker();
+        refreshPanel();
+        const from = curPos();
+        try {
+            if (from) map.fitBounds(L.latLngBounds([from, destLatLng]), { padding: [60, 60] });
+            else map.setView(destLatLng, Math.max(map.getZoom(), 14));
+        } catch (e) { }
+        return startNavigation();                   // routes from the current position + banner/voice
+    }
+
     function drawRoute(geojson) {
         clearRouteLine();
         const latlngs = (geojson.coordinates || []).map(c => [c[1], c[0]]); // GeoJSON is [lon,lat]
@@ -419,5 +436,5 @@ window.TrackerNav = function (ctx) {
         });
     }
 
-    return { openPanel, hasDestination, startNavigation, clearRoute, update, remainingBounds };
+    return { openPanel, hasDestination, startNavigation, navigateTo, clearRoute, update, remainingBounds };
 };

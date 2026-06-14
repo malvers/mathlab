@@ -75,11 +75,12 @@
                     window.__solitaSpeaking = true;     // set SYNCHRONOUSLY → the wake loop polls this
                     try { if (window.__solitaAudio) { window.__solitaAudio.pause(); window.__solitaAudio = null; } } catch (e) { }
                     try { if ('speechSynthesis' in window) window.speechSynthesis.cancel(); } catch (e) { }
-                    const gvoice = localStorage.getItem(GVOICE_KEY) || 'de-DE-Studio-C';
+                    const gvoice = (window.solitaTtsVoice ? window.solitaTtsVoice() : (localStorage.getItem(GVOICE_KEY) || 'de-DE-Studio-C'));
+                    const gLang = (window.solitaTtsLangCode ? window.solitaTtsLangCode() : 'de-DE');
                     fetch(TTS_URL, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json', 'apikey': SB_ANON, 'Authorization': 'Bearer ' + SB_ANON },
-                        body: JSON.stringify({ text: clean, voice: gvoice, languageCode: 'de-DE', speakingRate: 1.0 })
+                        body: JSON.stringify({ text: clean, voice: gvoice, languageCode: gLang, speakingRate: 1.0 })
                     }).then(function (r) { return r.json(); }).then(function (j) {
                         if (!j || !j.audioContent) throw new Error((j && j.error && (j.error.message || JSON.stringify(j.error))) || 'no audio');
                         try { var _m = 'TTS cloud OK: ' + gvoice + ' · ' + (j.audioContent.length) + ' B(b64)'; if (window.DebugWindow) DebugWindow.log(_m); else console.log('[solita] ' + _m); } catch (e) { }
@@ -96,7 +97,7 @@
                 if (!('speechSynthesis' in window)) { window.__solitaSpeaking = false; return; }
                 try {
                     const u = new SpeechSynthesisUtterance(clean);
-                    u.lang = 'de-DE'; if (!chosenVoice) pickVoice(); if (chosenVoice) u.voice = chosenVoice;
+                    u.lang = (window.solitaTtsLangCode ? window.solitaTtsLangCode() : 'de-DE'); if (!chosenVoice) pickVoice(); if (chosenVoice && window.solitaLang === 'de') u.voice = chosenVoice;
                     u.rate = 1.0; u.pitch = 1.0;
                     u.onend = function () { window.__solitaSpeaking = false; };
                     u.onerror = function () { window.__solitaSpeaking = false; };
@@ -116,7 +117,7 @@
                 else micBtn.addEventListener('click', () => {
                     if (listening) { try { rec.stop(); } catch (e) { } return; }
                     try {
-                        rec = new SR(); rec.lang = 'de-DE'; rec.interimResults = true; rec.maxAlternatives = 1;
+                        rec = new SR(); rec.lang = (window.solitaSttLang ? window.solitaSttLang() : 'de-DE'); rec.interimResults = true; rec.maxAlternatives = 1;
                         listening = true; micBtn.classList.add('rec');
                         try { window.speechSynthesis && window.speechSynthesis.cancel(); } catch (e) { } // don't talk over you
                         // Live transcript flows into the input line as you speak…

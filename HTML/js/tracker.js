@@ -327,6 +327,7 @@
         let __speed = null;        // speed-limit sign module instance (js/tracker-speedlimit.js)
         let __compass = null;      // north/compass module instance (js/tracker-compass.js)
         let __fuel = null;         // fuel-station price layer (js/tracker-fuel.js)
+        let __poi = null;          // points-of-interest layer (js/tracker-poi.js)
         let gnssActive = false;    // true once the native GnssStatus listener delivers data
         let gnssLatest = null;     // last native GNSS summary {used, inView, usedByConstellation, ...}
         let gpsReal = false;       // true only on a genuine GPS fix (native sats used, or acc ≤ GPS) —
@@ -1852,6 +1853,13 @@ ${pts}
         __fuel = TrackerFuel({
             map, toast, SUPABASE_URL, SUPABASE_KEY, COL_GREEN, COL_ORANGE, COL_RED,
         });
+        // ---- Points of Interest → js/tracker-poi.js. View-driven (Overpass/OSM, keyless); pins for the
+        //      categories ticked in the POI panel; a pin tap routes there via tracker-nav.navigateTo. ----
+        __poi = TrackerPoi({
+            map, toast,
+            navigateTo: (ll, name) => { if (__nav && __nav.navigateTo) __nav.navigateTo(ll, name); },
+            curPos: () => { const ll = posMarker && posMarker.getLatLng && posMarker.getLatLng(); return ll ? [ll.lat, ll.lng] : null; },
+        });
         // ===============================================================
         // Radial action popup (long-press / right-click) — style from worldclock
         // ===============================================================
@@ -1994,16 +2002,20 @@ ${pts}
         });
 
         // POI (FEAT-24): the radial "POI" entry opens a category checkbox panel à la LADEN. The flags
-        // persist; the POI layer (tracker-poi.js, not built yet) will read them. Default ON:
-        // sights / viewpoints / historic / nature; service / food / lodging default OFF.
+        // persist; the POI layer (tracker-poi.js) reads them and queries OSM/Overpass (keyless). The
+        // sightseeing categories default ON, the rest OFF. "Tanken" is plain OSM amenity=fuel (station
+        // locations, NO key needed) — Tankerkönig live prices stay a separate FEAT-26 enrichment.
         [['poi-cat-sights', 1], ['poi-cat-views', 1], ['poi-cat-historic', 1], ['poi-cat-nature', 1],
-        ['poi-cat-service', 0], ['poi-cat-food', 0], ['poi-cat-lodging', 0]].forEach(([id, def]) => {
+        ['poi-cat-service', 0], ['poi-cat-food', 0], ['poi-cat-lodging', 0], ['poi-cat-fuel', 0]].forEach(([id, def]) => {
             const el = $(id); if (!el) return;
             const saved = localStorage.getItem(id);
             el.checked = saved == null ? !!def : saved === '1';
-            el.addEventListener('change', () => localStorage.setItem(id, el.checked ? '1' : '0'));
+            el.addEventListener('change', () => {
+                localStorage.setItem(id, el.checked ? '1' : '0');
+                if (__poi) __poi.refresh();   // category toggled → re-query the visible area
+            });
         });
-        $('mb-poi').addEventListener('click', () => { closePopup(); showPanel('poi-panel'); });
+        $('mb-poi').addEventListener('click', () => { closePopup(); showPanel('poi-panel'); if (__poi) __poi.refresh(); });
         $('poi-close').addEventListener('click', hidePanels);
 
         // SHARE TRACK (popup) — share the current track (same action as TEILEN)

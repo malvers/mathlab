@@ -448,7 +448,8 @@
 
         /* Toggle buttons (🔊 Vorlesen · 👂 Weckwort): OFF = dim, ON = filled — flat, kein Glow. */
         .send-button.toggle-btn { background: transparent; border-color: transparent; opacity: 0.4; }
-        .send-button.toggle-btn.active { background: rgba(255, 255, 255, 0.16); border-color: rgba(255, 255, 255, 0.2); opacity: 1; }
+        .send-button.toggle-btn.active { background: rgb(121, 158, 49); border-color: rgb(121, 158, 49); color: #fff; opacity: 1; }   /* ON = phi green, white icon */
+        .send-button.toggle-btn.active:hover { background: rgb(134, 173, 56); border-color: rgb(134, 173, 56); }   /* keep green on hover (generic hover would whiten it) */
 
         /* --- SECURITY CLEARANCE OVERLAY --- */
         .auth-overlay {
@@ -562,6 +563,10 @@
         #solita-hh-panel .hh-controls { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 16px; }
         #solita-hh-panel .hh-voice { margin-top: 14px; width: 100%; padding: 8px 10px; border-radius: 8px; background: rgba(255, 255, 255, 0.06); color: #e6edf3; border: 1px solid rgba(255, 255, 255, 0.12); font-family: 'Orbitron', sans-serif; font-size: 0.66rem; cursor: pointer; }
         #solita-hh-panel .hh-voice option { background: #0a0f2a; color: #e6edf3; }
+        #solita-hh-panel .hh-lang { display: flex; gap: 6px; width: 100%; margin-top: 14px; }
+        #solita-hh-panel .hh-lang button { flex: 1; padding: 7px 0; border-radius: 8px; background: rgba(255, 255, 255, 0.06); color: #e6edf3; border: 1px solid rgba(255, 255, 255, 0.12); font-family: 'Orbitron', sans-serif; font-size: 0.7rem; letter-spacing: 1px; cursor: pointer; transition: background 0.15s, color 0.15s; }
+        #solita-hh-panel .hh-lang button:hover { background: rgba(255, 255, 255, 0.12); }
+        #solita-hh-panel .hh-lang button.active { background: rgb(121, 158, 49); border-color: rgb(121, 158, 49); color: #fff; }   /* ON = phi green, like the toggles */
         #solita-hh-panel .hh-face { cursor: zoom-in; }
         #solita-lightbox {
             position: fixed; inset: 0; z-index: 10001; display: none;
@@ -625,11 +630,16 @@
         <div class="hh-controls">
             <button class="send-button toggle-btn" id="ttsBtn" title="Vorlesen an/aus" aria-label="Antworten vorlesen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M19 5a10 10 0 0 1 0 14"/></svg></button>
             <button class="send-button" id="micBtn" title="Einmal sprechen" aria-label="Per Stimme diktieren"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10v2a7 7 0 0 0 14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg></button>
-            <button class="send-button toggle-btn" id="wakeBtn" title="Solita-Weckwort an/aus" aria-label="Solita per Weckwort aktivieren"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8.5a6.5 6.5 0 1 1 13 0c0 6-6 6-6 10a3.5 3.5 0 1 1-7 0"/><path d="M6.5 12.5a3.5 3.5 0 1 1 7 0c0 2.5-2 2.5-2 5"/></svg></button>
+            <button class="send-button toggle-btn" id="wakeBtn" title="Solita-Weckwort an/aus" aria-label="Solita per Weckwort aktivieren"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="9.5" x2="4" y2="14.5"/><line x1="8" y1="6" x2="8" y2="18"/><line x1="12" y1="3" x2="12" y2="21"/><line x1="16" y1="6" x2="16" y2="18"/><line x1="20" y1="9.5" x2="20" y2="14.5"/></svg></button>
             <button class="send-button" id="logoutBtn" title="Logout" aria-label="Logout"
                 onclick="solitaLogout()">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
             </button>
+        </div>
+        <div id="hh-lang" class="hh-lang" role="group" aria-label="Sprache / Language">
+            <button type="button" data-lang="de" aria-label="Deutsch">DE</button>
+            <button type="button" data-lang="en" aria-label="English">EN</button>
+            <button type="button" data-lang="es" aria-label="Español">ES</button>
         </div>
         <select id="hh-voice" class="hh-voice" aria-label="Solitas Stimme" title="Stimme wählen — Vorschau beim Auswählen"></select>
     </div>

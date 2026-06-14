@@ -1206,10 +1206,10 @@ body.ui-idle #trk-controls {
 
 .ov-close {
     position: absolute;
-    top: 10px;
-    right: 10px;
-    width: 34px;
-    height: 34px;
+    top: 9px;
+    right: 6px;
+    width: 30px;
+    height: 30px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1219,7 +1219,8 @@ body.ui-idle #trk-controls {
     background: transparent;
     color: #fff;
     font-family: system-ui, -apple-system, sans-serif;
-    font-size: 1.6rem;
+    font-size: 1.3rem;
+    font-weight: 300;
     line-height: 1;
     cursor: pointer;
 }
@@ -2308,3 +2309,51 @@ html {
     color: rgba(255, 255, 255, 0.92);
     text-decoration: underline;
 }
+
+/* POI pins (FEAT-24, tracker-poi.js) — round category badge + tap popup, on-brand. */
+.poi-pin-wrap { background: none; border: 0; }
+.poi-pin {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    line-height: 1;
+    background: rgba(8, 20, 42, 0.92);
+    border: 2px solid #fff;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+}
+.poi-a { border-color: rgb(245, 194, 66); }   /* Sehenswürdigkeit */
+.poi-b { border-color: rgb(66, 135, 245); }   /* Aussicht */
+.poi-c { border-color: rgb(176, 36, 24); }    /* Historisch */
+.poi-d { border-color: rgb(121, 158, 49); }   /* Natur */
+.poi-e { border-color: rgb(150, 160, 175); }  /* Rast/Service */
+.poi-f { border-color: rgb(230, 140, 60); }   /* Essen/Trinken */
+.poi-g { border-color: rgb(150, 110, 200); }  /* Übernachten */
+.poi-h { border-color: rgb(64, 200, 200); }   /* Tanken */
+.poi-popup { min-width: 132px; }
+.poi-popup .pp-name { font-family: 'Orbitron', sans-serif; color: var(--orange); font-weight: 700; line-height: 1.2; margin-bottom: 2px; }
+.poi-popup .pp-type { font-size: 0.82em; opacity: 0.75; margin-bottom: 9px; }
+.poi-popup button {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.82rem;
+    background: var(--orange);
+    color: #14110a;
+    border: 0;
+    border-radius: 8px;
+    padding: 7px 14px;
+    font-weight: 700;
+    cursor: pointer;
+}
+/* Dark-blue POI popup (scoped via the bindPopup className, so other Leaflet popups stay default). */
+.poi-pop .leaflet-popup-content-wrapper {
+    background: rgb(14, 36, 78);
+    color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+}
+.poi-pop .leaflet-popup-tip { background: rgb(14, 36, 78); }
+.poi-pop a.leaflet-popup-close-button { color: rgba(255, 255, 255, 0.6); }
+.poi-pop .pp-type { color: rgba(255, 255, 255, 0.72); opacity: 1; }
