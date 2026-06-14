@@ -1,0 +1,156 @@
+// js/tracker-fuel.js — Tankstellen-Spur: nearby fuel stations + live prices on the map.
+// While you drive, each pin shows the current price; the cheap ones glow green so a good deal
+// nearby is obvious at a glance ("hier ist es grad besonders günstig"). Prices come from
+// Tankerkönig (Markttransparenzstelle für Kraftstoffe) via the 'fuel-prices' Edge Function — the
+// API key lives ONLY server-side, never in this public repo. Tankerkönig data is CC BY-NC.
+//
+// ctx (from tracker.js): { map, toast, SUPABASE_URL, SUPABASE_KEY, COL_GREEN, COL_ORANGE, COL_RED }
+window.TrackerFuel = function (ctx) {
+    const { map, toast, SUPABASE_URL, SUPABASE_KEY } = ctx;
+    const ENDPOINT = SUPABASE_URL + '/functions/v1/fuel-prices';
+
+    const RAD_KM = 5;            // search radius around the current position
+    const REFRESH_MS = 180000;   // re-poll prices at most every 3 min …
+    const REFRESH_MOVE_M = 2000; // … or once we've moved 2 km from the last fetch
+    const CHEAP_EPS = 0.02;      // ≥2 ct below the local median = "cheap" (green); ≥2 ct above = pricey
+    const FUELS = ['e5', 'e10', 'diesel'];
+
+    const dbg = (m) => { if (window.DebugWindow && DebugWindow.log) DebugWindow.log('fuel: ' + m); };
+
+    let layer = null;
+    let stations = [];
+    let lastLat = null, lastLng = null, lastFetch = 0;
+    let busy = false;
+    let lastCheapId = null;      // so a cheap station is announced only once, not on every poll
+    let fuelType = localStorage.getItem('trk-fuel-type') || 'e5';
+    let enabled = localStorage.getItem('trk-fuel-on') !== '0'; // on by default
+
+    function ensureLayer() {
+        if (!layer) layer = L.layerGroup().addTo(map);
+        return layer;
+    }
+
+    // metres between two lat/lng points (haversine — plenty accurate at city scale)
+    function distM(aLat, aLng, bLat, bLng) {
+        const R = 6371000, toRad = Math.PI / 180;
+        const dLat = (bLat - aLat) * toRad, dLng = (bLng - aLng) * toRad;
+        const s = Math.sin(dLat / 2) ** 2 +
+            Math.cos(aLat * toRad) * Math.cos(bLat * toRad) * Math.sin(dLng / 2) ** 2;
+        return 2 * R * Math.asin(Math.sqrt(s));
+    }
+
+    function priceOf(s) { const p = s[fuelType]; return (typeof p === 'number' && p > 0) ? p : null; }
+    function fmt(p) { return p == null ? '—' : p.toFixed(3).replace('.', ','); } // 1.799 → "1,799"
+
+    // Median price (open stations only) → the local reference for "cheap vs pricey".
+    function medianPrice() {
+        const ps = stations.filter(s => s.isOpen && priceOf(s) != null).map(priceOf).sort((a, b) => a - b);
+        if (!ps.length) return null;
+        const m = Math.floor(ps.length / 2);
+        return ps.length % 2 ? ps[m] : (ps[m - 1] + ps[m]) / 2;
+    }
+
+    function tier(s, med) {
+        const p = priceOf(s);
+        if (p == null || !s.isOpen) return 'na';          // closed / no price → grey
+        if (med == null) return 'mid';
+        if (p <= med - CHEAP_EPS) return 'cheap';         // φ green
+        if (p >= med + CHEAP_EPS) return 'exp';           // Υ red
+        return 'mid';                                     // λ orange
+    }
+
+    function pin(s, med) {
+        const html = '<div class="fuel-pin ' + tier(s, med) + '">' +
+            '<span class="fuel-pump">⛽</span>' +
+            '<span class="fuel-price">' + fmt(priceOf(s)) + '</span></div>';
+        return L.divIcon({ className: 'fuel-pin-wrap', html, iconSize: [56, 22], iconAnchor: [28, 22], popupAnchor: [0, -20] });
+    }
+
+    function popupHtml(s) {
+        const row = (lbl, p) => '<div class="fp-row"><span>' + lbl + '</span><span>' + fmt(p) + ' €</span></div>';
+        const addr = [s.street, s.houseNumber].filter(Boolean).join(' ') + (s.place ? ', ' + s.place : '');
+        return '<div class="fuel-popup">' +
+            '<div class="fp-name">' + (s.brand || s.name || 'Tankstelle') + '</div>' +
+            (addr ? '<div class="fp-addr">' + addr + '</div>' : '') +
+            row('Super E5', s.e5) + row('Super E10', s.e10) + row('Diesel', s.diesel) +
+            '<div class="fp-meta">' + (s.isOpen ? 'geöffnet' : 'geschlossen') +
+            (typeof s.dist === 'number' ? ' · ' + s.dist.toFixed(1) + ' km' : '') + '</div></div>';
+    }
+
+    function render() {
+        const lyr = ensureLayer();
+        lyr.clearLayers();
+        if (!enabled) return;
+        const med = medianPrice();
+        for (const s of stations) {
+            if (typeof s.lat !== 'number' || typeof s.lng !== 'number') continue;
+            L.marker([s.lat, s.lng], { icon: pin(s, med), keyboard: false })
+                .bindPopup(popupHtml(s)).addTo(lyr);
+        }
+        announceCheapest(med);
+    }
+
+    // Gentle heads-up: the closest clearly-cheap open station, announced once (not on every poll).
+    function announceCheapest(med) {
+        if (med == null) { lastCheapId = null; return; }
+        const cheap = stations
+            .filter(s => s.isOpen && priceOf(s) != null && priceOf(s) <= med - CHEAP_EPS)
+            .sort((a, b) => (a.dist || 1e9) - (b.dist || 1e9))[0];
+        if (!cheap) { lastCheapId = null; return; }
+        if (cheap.id === lastCheapId) return;             // already mentioned this one
+        lastCheapId = cheap.id;
+        const name = cheap.brand || cheap.name || 'Tankstelle';
+        if (toast) toast('⛽ Günstig: ' + name + ' ' + fmt(priceOf(cheap)) + ' € (' + fuelType.toUpperCase() + ')');
+    }
+
+    async function fetchStations(lat, lng) {
+        busy = true;
+        try {
+            const res = await fetch(ENDPOINT, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY },
+                body: JSON.stringify({ lat, lng, rad: RAD_KM }),
+            });
+            const d = await res.json().catch(() => ({}));
+            if (!res.ok || !d.ok) { dbg('ERR ' + (d.error || res.status)); return; }
+            stations = d.stations || [];
+            lastLat = lat; lastLng = lng; lastFetch = Date.now();
+            dbg('got ' + stations.length + ' stations (r' + d.rad + 'km)');
+            render();
+        } catch (e) {
+            dbg('ERR ' + (e && (e.message || e)));        // offline / not deployed yet → stay quiet
+        } finally { busy = false; }
+    }
+
+    // Called from onPosition on every GPS fix. Re-polls only when we've moved far enough or enough
+    // time has passed — keeps the (non-commercial) Tankerkönig usage gentle.
+    function update(here) {
+        if (!enabled || busy || !here) return;
+        const lat = here[0], lng = here[1];
+        if (typeof lat !== 'number' || typeof lng !== 'number') return;
+        const moved = (lastLat == null) ? Infinity : distM(lastLat, lastLng, lat, lng);
+        if (moved >= REFRESH_MOVE_M || (Date.now() - lastFetch) >= REFRESH_MS) fetchStations(lat, lng);
+    }
+
+    function setFuelType(t) {
+        if (!FUELS.includes(t)) return;
+        fuelType = t; localStorage.setItem('trk-fuel-type', t);
+        lastCheapId = null; render();                     // recolour + re-evaluate cheap for the new fuel
+    }
+    function setEnabled(on) {
+        enabled = !!on; localStorage.setItem('trk-fuel-on', enabled ? '1' : '0');
+        if (!enabled) { if (layer) layer.clearLayers(); }
+        else if (lastLat != null) render();
+    }
+    function clear() {
+        if (layer) layer.clearLayers();
+        stations = []; lastLat = lastLng = null; lastFetch = 0; lastCheapId = null;
+    }
+
+    return {
+        update, setFuelType, setEnabled, clear,
+        getStations: () => stations,
+        get fuelType() { return fuelType; },
+        get enabled() { return enabled; },
+    };
+};

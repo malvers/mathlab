@@ -28,6 +28,18 @@
         L.control.zoom({ position: 'bottomright' }).addTo(map);
         map.attributionControl.setPrefix(false); // drop the "Leaflet" prefix → shorter bar, stays out from under START
 
+        // Smooth two-finger pinch WITHOUT making the (Magic-Mouse) wheel floaty: the wheel/buttons keep
+        // zoomSnap=1 (clean integer steps), but for the duration of a pinch we drop to 0 so it settles
+        // exactly where you lift your fingers — no snap-back "Klingklang". Restored right after the
+        // gesture (deferred so Leaflet's own touchend has already computed the stepless target).
+        const _mapEl = map.getContainer();
+        _mapEl.addEventListener('touchstart', (e) => {
+            if (e.touches && e.touches.length >= 2) map.options.zoomSnap = 0;
+        }, { passive: true });
+        _mapEl.addEventListener('touchend', () => {
+            setTimeout(() => { map.options.zoomSnap = 1; }, 0);
+        }, { passive: true });
+
         // Persist the map viewport (pan + zoom) across reloads: a hard-reload reopens where you
         // last were instead of snapping back. A restored view WINS over the start-up GPS snap
         // (see `viewRestored` in the acquire watch); GPS auto-follow while tracking still takes over.
@@ -256,6 +268,7 @@
         let __nav = null;          // simple-navigation module instance (js/tracker-nav.js)
         let __speed = null;        // speed-limit sign module instance (js/tracker-speedlimit.js)
         let __compass = null;      // north/compass module instance (js/tracker-compass.js)
+        let __fuel = null;         // fuel-station price layer (js/tracker-fuel.js)
         let gnssActive = false;    // true once the native GnssStatus listener delivers data
         let gnssLatest = null;     // last native GNSS summary {used, inView, usedByConstellation, ...}
         let gpsReal = false;       // true only on a genuine GPS fix (native sats used, or acc ≤ GPS) —
@@ -639,6 +652,7 @@
             refreshRecenter(); // show/hide the recenter button as needed
             if (__nav && __nav.update) __nav.update(here); // navigation: reroute if we drifted off the line
             if (__speed) __speed.update(here, still, shownSpeed); // speed-limit sign for the current road
+            if (__fuel) __fuel.update(here); // refresh nearby fuel-station prices (gentle, throttled)
             updateMotionDbg(accuracy, minStep, still);
             if (tracking) setStatus(`Aufzeichnung läuft … ${track.length} Punkte`);
         }
@@ -1761,6 +1775,11 @@ ${pts}
         __speed = TrackerSpeedLimit({ $ });
         // ---- Compass / north indicator → js/tracker-compass.js. Owns its own #compass badge. ----
         __compass = TrackerCompass({ $ });
+        // ---- Tankstellen-Spur → js/tracker-fuel.js. Position-driven; shows nearby fuel-station
+        //      prices via the 'fuel-prices' Edge Function and glows green when one is notably cheap. ----
+        __fuel = TrackerFuel({
+            map, toast, SUPABASE_URL, SUPABASE_KEY, COL_GREEN, COL_ORANGE, COL_RED,
+        });
         // ===============================================================
         // Radial action popup (long-press / right-click) — style from worldclock
         // ===============================================================
