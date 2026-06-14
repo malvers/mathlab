@@ -440,6 +440,35 @@
                 return;
             }
 
+            if (userText.toLowerCase() === '/list') {
+                messagesArea.insertAdjacentHTML('beforeend', `<div class="message assistant"><div class="message-content"><strong>Sprachbefehle</strong>
+<table style="width:100%;border-collapse:collapse;font-size:0.82rem;margin:6px 0;">
+<thead><tr style="opacity:0.55;"><th style="text-align:left;padding:3px 6px;"></th><th style="text-align:left;padding:3px 6px;">DE</th><th style="text-align:left;padding:3px 6px;">EN</th><th style="text-align:left;padding:3px 6px;">ES</th></tr></thead>
+<tbody>
+<tr><td style="padding:3px 6px;opacity:0.7;">Wecken</td><td style="padding:3px 6px;">Solita</td><td style="padding:3px 6px;">Solita</td><td style="padding:3px 6px;">Solita</td></tr>
+<tr><td style="padding:3px 6px;opacity:0.7;">Pause</td><td style="padding:3px 6px;">pause · chill mal · ruh dich aus · sogni d'oro</td><td style="padding:3px 6px;">pause · chill out · take a break · go to sleep</td><td style="padding:3px 6px;">pausa · descansa · a dormir · duérmete</td></tr>
+<tr><td style="padding:3px 6px;opacity:0.7;">Logout</td><td style="padding:3px 6px;">ausloggen · abmelden</td><td style="padding:3px 6px;">log (me) out · sign (me) out</td><td style="padding:3px 6px;">cierra sesión · desconéctame</td></tr>
+<tr><td style="padding:3px 6px;opacity:0.7;">Tschüss</td><td style="padding:3px 6px;">tschüss · das war's</td><td style="padding:3px 6px;">bye · see you · good night</td><td style="padding:3px 6px;">adiós · hasta luego · chao</td></tr>
+</tbody></table>
+<div style="font-size:0.82rem;opacity:0.85;"><strong>Tippbefehle:</strong> /clear (neue Session) · /list (diese Tabelle) · /de · /en · /es (Sprache)</div>
+<div style="font-size:0.78rem;opacity:0.6;margin-top:4px;">Sprache auch per DE / EN / ES im Menü (☰)</div></div></div>`);
+                messagesArea.scrollTop = messagesArea.scrollHeight;
+                messageInput.value = '';
+                messageInput.style.height = 'auto';
+                return;
+            }
+
+            const langCmd = userText.toLowerCase().match(/^\/(de|en|es)$/);
+            if (langCmd) {                                  // /de · /en · /es → switch language (same as the ☰ buttons)
+                if (window.setSolitaLang) window.setSolitaLang(langCmd[1]);
+                const names = { de: 'Deutsch', en: 'English', es: 'Español' };
+                messagesArea.insertAdjacentHTML('beforeend', '<div style="text-align:center;opacity:0.5;font-size:0.68rem;letter-spacing:1.5px;text-transform:uppercase;margin:12px 0;font-family:Orbitron,sans-serif;color:#cfe3ff;">— ' + names[langCmd[1]] + ' —</div>');
+                messagesArea.scrollTop = messagesArea.scrollHeight;
+                messageInput.value = '';
+                messageInput.style.height = 'auto';
+                return;
+            }
+
             if (!pwd) {
                 document.getElementById('cyber-auth-overlay').classList.add('visible');
                 setTimeout(() => document.getElementById('cyber-pwd-input')?.focus(), 100);

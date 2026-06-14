@@ -55,7 +55,7 @@
                 convo = true;                                        // addressing Solita opens the conversation thread
                 if (!query) {                                        // heard "Solita" alone → prompt + listen once
                     awaitingQuery = true;
-                    if (window.speakReply) window.speakReply('Ja?');
+                    if (window.speakReply) window.speakReply(say('yes'));
                     return;
                 }
                 awaitingQuery = false;
@@ -89,20 +89,31 @@
                 uiTimer = setTimeout(uiExec, 4000);
             }
 
+            // Short spoken responses, per language (so an EN/ES command doesn't get a German reply).
+            const SAY = {
+                de: { yes: 'Ja?', bye: 'Bis später.', logout: 'Logge dich aus. Bis bald.' },
+                en: { yes: 'Yes?', bye: 'See you later.', logout: 'Logging you out. See you soon.' },
+                es: { yes: '¿Sí?', bye: 'Hasta luego.', logout: 'Cerrando sesión. Hasta pronto.' }
+            };
+            function say(key) { return (SAY[window.solitaLang] || SAY.de)[key]; }
+
             // Hang up the conversation: a goodbye drops back to idle (wake-word needed again). NOT sent to the API.
-            const FAREWELL = /^(tschü(?:ss?)?|auf wiederhör(?:en)?|das war'?s(?: für (?:heute|jetzt))?|danke,? das war'?s|schluss für (?:heute|jetzt)|beenden?(?: das gespräch)?)\b/i;
+            //   DE: tschüss · auf wiederhören · das war's · schluss für heute    EN: bye · goodbye · good night ·
+            //   see you · that's all/it · we're done    ES: adiós · hasta luego/pronto/mañana · buenas noches · chao
+            const FAREWELL = /^(tschü(?:ss?)?|auf wiederhör(?:en)?|das war'?s(?: für (?:heute|jetzt))?|danke,? das war'?s|schluss für (?:heute|jetzt)|beenden?(?: das gespräch)?|bye(?:[\s-]?bye)?|goodbye|good ?night|see you(?: later)?|that'?s (?:all|it)|we'?re done|adi[oó]s|hasta (?:luego|pronto|ma[ñn]ana)|buenas noches|chao|ciao|eso es todo)\b/i;
             function endConvo() {
                 convo = false; awaitingQuery = false;
-                if (window.speakReply) window.speakReply('Bis später.');
+                if (window.speakReply) window.speakReply(say('bye'));
             }
 
             // Voice action — logout. Spoken intent ("Solita, log mich aus" / "melde mich ab" / "kannst du
             // mich ausloggen"). Note: keyword-based, so ASKING about logging out can also trigger it — real
             // LLM intent-interpretation is the next step. Speaks a goodbye, then logs out (which kills the mic).
-            const LOGOUT = /\bausloggen\b|\babmelden\b|\blogout\b|\blog\s?out\b|\blog+e?\s?mich\s?(aus|raus)\b|\bmelde mich (ab|aus|raus)\b|\bmich (ab|aus)melden\b/i;
+            //   EN: log (me) out · sign (me) out      ES: cierra(me) (la) sesión · cerrar sesión · desconéctame
+            const LOGOUT = /\bausloggen\b|\babmelden\b|\blogout\b|\blog\s?out\b|\blog+e?\s?mich\s?(aus|raus)\b|\bmelde mich (ab|aus|raus)\b|\bmich (ab|aus)melden\b|\blog ?me ?out\b|\bsign\s?(?:me\s?)?out\b|\bci[eé]rra(?:me)? (?:la )?sesi[oó]n\b|\bcerrar sesi[oó]n\b|\bdescon[eé]ctame\b/i;
             function doVoiceLogout() {
                 convo = false; awaitingQuery = false;
-                if (window.speakReply) window.speakReply('Logge dich aus. Bis bald.');
+                if (window.speakReply) window.speakReply(say('logout'));
                 setTimeout(function () { if (window.solitaLogout) window.solitaLogout(); }, 1700);
             }
 
