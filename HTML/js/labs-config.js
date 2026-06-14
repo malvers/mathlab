@@ -488,6 +488,7 @@ const LABS_DATA = [
         "keywords": "komplexe zahlen imaginaerteil reell imaginary complex plane gauss i",
         "color": "blue"
     }, */
+    /* Solita: PRIVAT — bewusst NICHT im Launcher/Index (Doc). Entkommentieren = wieder im Index.
     {
         "id": "solita",
         "href": "solita.html",
@@ -498,5 +499,5 @@ const LABS_DATA = [
         "category": "hot",
         "keywords": "solita ai ki assistent sprache voice chat claude vorlesen weckwort",
         "color": "blue"
-    }
+    } */
 ];
