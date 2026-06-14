@@ -211,10 +211,13 @@
             },
             {
                 name: 'get_weather',
-                description: 'Hole das aktuelle Wetter + heutige Spanne für einen Ort (live aus dem Internet). Nutze dies, wenn Doc nach dem Wetter fragt. Ohne Ortsangabe wird der aktuelle Standort (GPS) verwendet.',
+                description: 'Hole das Wetter live aus dem Internet — aktuell UND Tagesvorhersage. Nutze dies, wenn Doc nach dem Wetter oder einer Vorhersage fragt. Ohne Ortsangabe wird der aktuelle Standort (GPS) verwendet.',
                 input_schema: {
                     type: 'object',
-                    properties: { location: { type: 'string', description: 'Ort/Stadt, z.B. "Altea" oder "Dresden". Leer lassen für den aktuellen Standort.' } }
+                    properties: {
+                        location: { type: 'string', description: 'Ort/Stadt, z.B. "Altea" oder "Dresden". Leer lassen für den aktuellen Standort.' },
+                        days: { type: 'number', description: 'Anzahl Tage Vorhersage (1–7). 1 oder weglassen = nur heute/jetzt. Bei "nächste Tage"/"diese Woche" z.B. 5–7.' }
+                    }
                 }
             }
         ];
@@ -240,7 +243,7 @@
                     return res.ok ? { ok: true, summary: 'Tabelle der ' + res.count + ' UI-Elemente angezeigt.' } : { ok: false, summary: 'Liste konnte nicht geladen werden.' };
                 }
                 if (name === 'get_weather') {
-                    return await getWeather(input && input.location);
+                    return await getWeather(input && input.location, input && input.days);
                 }
                 return { ok: false, summary: 'Unbekanntes Werkzeug: ' + name };
             } catch (e) { return { ok: false, summary: 'Fehler: ' + ((e && e.message) || e) }; }
@@ -251,7 +254,7 @@
             if (name === 'change_setting') return '🔧 ich ändere die Einstellung …';
             if (name === 'write_note') return '📝 ich notiere „' + ((input && input.note) || '') + '"';
             if (name === 'show_ui_list') return '';   // the table itself is the output → no badge
-            if (name === 'get_weather') return '🌤️ ich hole das Wetter' + ((input && input.location) ? ' für ' + input.location : '') + ' …';
+            if (name === 'get_weather') return '🌤️ ich hole ' + ((input && input.days > 1) ? 'die Vorhersage' : 'das Wetter') + ((input && input.location) ? ' für ' + input.location : '') + ' …';
             return '⚙️ ' + name;
         }
 
@@ -290,7 +293,7 @@
         const WMO = { 0: 'klar', 1: 'überwiegend klar', 2: 'teils bewölkt', 3: 'bedeckt', 45: 'neblig', 48: 'Reifnebel', 51: 'leichter Niesel', 53: 'Niesel', 55: 'starker Niesel', 56: 'gefrierender Niesel', 57: 'gefrierender Niesel', 61: 'leichter Regen', 63: 'Regen', 65: 'starker Regen', 66: 'gefrierender Regen', 67: 'gefrierender Regen', 71: 'leichter Schnee', 73: 'Schnee', 75: 'starker Schnee', 77: 'Schneegriesel', 80: 'Regenschauer', 81: 'Regenschauer', 82: 'heftige Regenschauer', 85: 'Schneeschauer', 86: 'Schneeschauer', 95: 'Gewitter', 96: 'Gewitter mit Hagel', 99: 'schweres Gewitter mit Hagel' };
 
         // get_weather — current weather + today's range via Open-Meteo (FREE, keyless, CORS-ok). No secret/deploy needed.
-        async function getWeather(location) {
+        async function getWeather(location, days) {
             try {
                 let lat, lon, place;
                 if (location && String(location).trim()) {
@@ -304,11 +307,22 @@
                     const pos = await new Promise((res, rej) => navigator.geolocation.getCurrentPosition(res, rej, { timeout: 8000, maximumAge: 600000 }));
                     lat = pos.coords.latitude; lon = pos.coords.longitude; place = 'dem aktuellen Standort';
                 }
-                const w = await fetch('https://api.open-meteo.com/v1/forecast?timezone=auto&forecast_days=1&current=temperature_2m,apparent_temperature,weather_code,wind_speed_10m,relative_humidity_2m&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max&latitude=' + lat + '&longitude=' + lon);
+                const n = Math.max(1, Math.min(7, parseInt(days, 10) || 1));   // forecast days (1 = today/now only)
+                const w = await fetch('https://api.open-meteo.com/v1/forecast?timezone=auto&forecast_days=' + n + '&current=temperature_2m,apparent_temperature,weather_code,wind_speed_10m,relative_humidity_2m&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&latitude=' + lat + '&longitude=' + lon);
                 const j = await w.json();
-                const c = j.current || {}, d = j.daily || {};
-                const r = (x) => (x == null ? '?' : Math.round(x));
-                const summary = 'Wetter in ' + place + ': ' + (WMO[c.weather_code] || ('Code ' + c.weather_code)) + ', ' + r(c.temperature_2m) + '°C (gefühlt ' + r(c.apparent_temperature) + '°C), Wind ' + r(c.wind_speed_10m) + ' km/h, ' + r(c.relative_humidity_2m) + '% Luftfeuchte. Heute ' + r(d.temperature_2m_min && d.temperature_2m_min[0]) + '–' + r(d.temperature_2m_max && d.temperature_2m_max[0]) + '°C, ' + r(d.precipitation_probability_max && d.precipitation_probability_max[0]) + '% Regen.';
+                const c = j.current || {}, d = j.daily || {}, r = (x) => (x == null ? '?' : Math.round(x));
+                let summary = 'Wetter in ' + place + ': jetzt ' + (WMO[c.weather_code] || ('Code ' + c.weather_code)) + ', ' + r(c.temperature_2m) + '°C (gefühlt ' + r(c.apparent_temperature) + '°C), Wind ' + r(c.wind_speed_10m) + ' km/h, ' + r(c.relative_humidity_2m) + '% Luftfeuchte.';
+                const t = d.time || [];
+                if (n <= 1) {
+                    summary += ' Heute ' + r(d.temperature_2m_min && d.temperature_2m_min[0]) + '–' + r(d.temperature_2m_max && d.temperature_2m_max[0]) + '°C, ' + r(d.precipitation_probability_max && d.precipitation_probability_max[0]) + '% Regen.';
+                } else {
+                    const lines = [];
+                    for (let i = 0; i < t.length; i++) {
+                        const wd = new Date(t[i] + 'T12:00:00').toLocaleDateString('de-DE', { weekday: 'short' });
+                        lines.push(wd + ' ' + r(d.temperature_2m_min[i]) + '–' + r(d.temperature_2m_max[i]) + '°C, ' + (WMO[d.weather_code[i]] || '') + ', ' + r(d.precipitation_probability_max[i]) + '% Regen');
+                    }
+                    summary += ' Vorhersage: ' + lines.join(' · ') + '.';
+                }
                 return { ok: true, summary };
             } catch (e) {
                 return { ok: false, summary: 'Wetter konnte nicht geladen werden: ' + ((e && e.message) || e) };
