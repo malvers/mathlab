@@ -7,7 +7,9 @@
 
             const TRIGGERS = ['solita', 'solida', 'rita'];          // Vosk-tested variants (see krass-app note)
             const WAKE_KEY = 'solita_wake';
-            let wakeOn = localStorage.getItem(WAKE_KEY) === '1';
+            // Doc rule: the ear is ALWAYS on — it must never be silently off after a reload/login. The 👂
+            // button only mutes it for the current session; on the next load it is on again.
+            let wakeOn = true;
             let rec = null, awaitingQuery = false, speaking = false, stopping = false, convo = false, paused = false;
 
             function reflect() { wakeBtn.classList.toggle('active', wakeOn); }
@@ -106,7 +108,10 @@
 
             // Pause: a spoken "Pause" makes Solita go dormant — she ignores everything until she hears
             // "Solita" again. The pill shows the half-asleep word. Reuses the wake-word detector to wake.
-            const PAUSE = /\bpause\b|\bpausier/i;   // anywhere (gated by `addressed`) → "ok pause", "mach mal pause", "pausiere" …
+            // Pause words per language → all send her dormant (gated by `addressed`).
+            //   DE: pause · pausier… · chill mal · chillen · ruh(e) dich aus · sogni d'oro (also "soni d'oro")
+            //   EN: pause · chill out · take a break · go to sleep      ES: pausa · descansa · a dormir · duérmete
+            const PAUSE = /\bpause\b|\bpausier|\bchill\s+mal\b|\bchillen\b|\bruhe?\s+dich\s+aus\b|\bso(?:g)?ni\s+d'?\s?oro\b|\bchill\s+out\b|\btake a break\b|\bgo to sleep\b|\bpausa\b|\bdescansa\b|\ba dormir\b|\bdué?rmete\b/i;
             function enterPause() {
                 paused = true; convo = false; awaitingQuery = false;
                 if (window.solitaPhase) solitaPhase('dormant');     // pill → half-asleep
@@ -148,7 +153,7 @@
                 if (!wakeOn || speaking || rec) return;
                 try {
                     rec = new SR();
-                    rec.lang = 'de-DE'; rec.continuous = true; rec.interimResults = true; rec.maxAlternatives = 1;
+                    rec.lang = (window.solitaSttLang ? window.solitaSttLang() : 'de-DE'); rec.continuous = true; rec.interimResults = true; rec.maxAlternatives = 1;
                     rec.onresult = onResult;
                     rec.onstart = function () { if (window.DebugWindow) DebugWindow.log('wake: started'); };
                     rec.onerror = function (e) { if (window.DebugWindow) DebugWindow.log('wake onerror: ' + (e && e.error)); };
@@ -169,10 +174,28 @@
 
             // Turn the whole voice line OFF (used on logout). Persists off so a fresh login starts quiet.
             window.solitaStopVoice = function () {
-                wakeOn = false; try { localStorage.setItem(WAKE_KEY, '0'); } catch (e) {}
+                // Logout stops the live mic while logged out — but NEVER persists "off" (Doc: ear always on),
+                // so it resumes on the next login (solitaStartVoice) or page load.
+                wakeOn = false;
                 convo = false; awaitingQuery = false; paused = false; reflect();
                 if (window.solitaPhase) solitaPhase('idle');
                 stopRec();
+            };
+
+            // Turn the voice line ON — called from the auth flow on every successful login so the ear is always
+            // on once you're in (also restores it after a logout→login without a reload). Resumes in the
+            // SLUMBER resting state (pill visible, waiting for "Solita").
+            window.solitaStartVoice = function () {
+                wakeOn = true; convo = false; awaitingQuery = false; paused = true; reflect();
+                if (window.solitaPhase) solitaPhase('dormant');
+                startRec();
+            };
+
+            // Restart the recognition so a language switch takes effect at once (a fresh rec reads solitaSttLang()).
+            window.solitaRestartVoice = function () {
+                if (!wakeOn) return;
+                if (rec) { try { rec.stop(); } catch (e) { } rec = null; }
+                setTimeout(startRec, 300);
             };
 
             wakeBtn.addEventListener('click', function () {
@@ -182,5 +205,13 @@
                 else { paused = false; if (window.solitaPhase) solitaPhase('idle'); stopRec(); }
             });
 
-            if (wakeOn) { paused = true; if (window.solitaPhase) solitaPhase('dormant'); setTimeout(startRec, 600); }   // left on → resume in SLUMBER (pill visible, waiting for "Solita")
+            // On load, start the ear once auth has settled — but only if already logged in (overlay hidden,
+            // e.g. local auto-login). On production the overlay is still up here; the ear then starts on login
+            // via window.solitaStartVoice. (Ear always on, just not before auth — so the mic stays cold at the
+            // password screen.)
+            setTimeout(function () {
+                const ov = document.getElementById('cyber-auth-overlay');
+                if (ov && ov.classList.contains('visible')) return;     // not logged in yet → wait for login
+                paused = true; if (window.solitaPhase) solitaPhase('dormant'); startRec();
+            }, 600);
         })();

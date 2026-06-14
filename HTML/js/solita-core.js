@@ -52,6 +52,7 @@
                     location.hostname.startsWith("192.168.");
                 if (isLocal) localStorage.setItem('dev_access', pwd);
                 document.getElementById('cyber-auth-overlay').classList.remove('visible');
+                if (window.solitaStartVoice) solitaStartVoice();   // Doc rule: ear always on — (re)start the wake-word on login
                 document.getElementById('messageInput').focus();
             } else {
                 const modal = document.querySelector(".auth-modal");
@@ -124,10 +125,51 @@
         const HISTORY_KEY = 'ai_history';
         const SUMMARY_KEY = 'solita_summary';
 
+        // ----- MULTILINGUAL VOICE -----
+        // One language active at a time (Web SpeechRecognition can't auto-detect). Drives STT lang, TTS voice
+        // + languageCode and the spoken preview. Claude itself replies in whatever language it receives.
+        const SOLITA_LANGS = {
+            de: { stt: 'de-DE', tts: 'de-DE', voice: 'de-DE-Studio-C', hi: 'Hallo, ich bin Solita.' },
+            en: { stt: 'en-US', tts: 'en-US', voice: 'en-US-Studio-O', hi: "Hi, I'm Solita." },
+            es: { stt: 'es-ES', tts: 'es-ES', voice: 'es-ES-Neural2-A', hi: 'Hola, soy Solita.' }
+        };
+        const LANG_KEY = 'solita_lang';
+        window.solitaLang = SOLITA_LANGS[localStorage.getItem(LANG_KEY)] ? localStorage.getItem(LANG_KEY) : 'de';
+        window.solitaSttLang = function () { return (SOLITA_LANGS[window.solitaLang] || SOLITA_LANGS.de).stt; };
+        window.solitaTtsLangCode = function () { return (SOLITA_LANGS[window.solitaLang] || SOLITA_LANGS.de).tts; };
+        window.solitaTtsVoice = function () {
+            const cfg = SOLITA_LANGS[window.solitaLang] || SOLITA_LANGS.de;
+            // German keeps the hand-picked voice (voice picker); EN/ES use the per-language default.
+            if (window.solitaLang === 'de') return localStorage.getItem('solita_gvoice') || cfg.voice;
+            return cfg.voice;
+        };
+        function reflectLang() {
+            document.querySelectorAll('#hh-lang [data-lang]').forEach(function (b) {
+                b.classList.toggle('active', b.getAttribute('data-lang') === window.solitaLang);
+            });
+            const vs = document.getElementById('hh-voice');   // voice picker is German-only for now
+            if (vs) { vs.disabled = (window.solitaLang !== 'de'); vs.style.opacity = (window.solitaLang === 'de') ? '1' : '0.4'; }
+        }
+        window.setSolitaLang = function (code, opts) {
+            if (!SOLITA_LANGS[code]) return;
+            window.solitaLang = code;
+            try { localStorage.setItem(LANG_KEY, code); } catch (e) {}
+            reflectLang();
+            if (window.solitaRestartVoice) window.solitaRestartVoice();   // restart the ear → new STT language now
+            if (!(opts && opts.silent) && window.speakReply) window.speakReply((SOLITA_LANGS[code] || SOLITA_LANGS.de).hi);   // live preview
+        };
+        document.querySelectorAll('#hh-lang [data-lang]').forEach(function (b) {
+            b.addEventListener('click', function () { window.setSolitaLang(b.getAttribute('data-lang')); });
+        });
+        reflectLang();
+
         // Solita's persona. Sent as a system turn on every request (the proxy lifts it into Anthropic's
         // top-level `system`). Kept sprechfreundlich because answers are often read aloud.
         const SOLITA_SYSTEM = "Du bist Solita — die persönliche, kluge und warmherzige Assistentin von "
-            + "Doc Alvers. Du sprichst Deutsch und antwortest natürlich und warm. WICHTIG: Fasse dich kurz "
+            + "Doc Alvers. Antworte immer in derselben Sprache, in der Doc schreibt oder spricht (Deutsch, "
+            + "Englisch oder Spanisch), natürlich und warm. Hänge seinen Namen nicht ständig an deine "
+            + "Antworten an — sprich ihn nur ganz selten mit Namen an, normalerweise ganz ohne Anrede. "
+            + "WICHTIG: Fasse dich kurz "
             + "— normalerweise ein bis zwei Sätze, denn deine Antworten werden meist vorgelesen. Keine "
             + "Aufzählungen oder Monologe, wenn ein Satz reicht; lieber kurz nachfragen als lang ausholen. "
             + "Nur wenn Doc ausdrücklich um Details bittet, wirst du ausführlicher. Du weißt viel und "
@@ -384,11 +426,15 @@
 
             if (!userText) return;
 
-            if (userText.toLowerCase() === '%clear') {
+            if (userText.toLowerCase() === '/clear') {
                 conversationHistory = [];
+                runningSummary = '';                       // wipe long-term memory too → a real fresh start
                 localStorage.removeItem(HISTORY_KEY);
-                messagesArea.innerHTML = `<div class="message assistant" style="align-items:center;gap:10px;width:100%;"><div class="message-content"><strong>Wie kann ich Dir helfen?</strong></div><div class="model-select" id="modelDropdown"><div class="model-select-display" id="modelDisplay"><span id="modelLabel">SONNET 4.6</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></div><div class="model-select-options" id="modelOptions"><div class="model-option" data-value="claude-opus-4-8">OPUS 4.8</div><div class="model-option selected" data-value="claude-sonnet-4-6">SONNET 4.6</div><div class="model-option" data-value="claude-haiku-4-5-20251001">HAIKU 4.5</div></div></div></div>`;
-                initModelDropdown(document.getElementById('modelDropdown'));
+                localStorage.removeItem(SUMMARY_KEY);
+                // Keep the visible transcript on screen (Doc: don't delete the text) — only her MEMORY is wiped.
+                // A subtle divider marks the cut; the old bubbles vanish on the next reload (history is empty now).
+                messagesArea.insertAdjacentHTML('beforeend', '<div style="text-align:center;opacity:0.45;font-size:0.66rem;letter-spacing:1.5px;text-transform:uppercase;margin:16px 0;font-family:Orbitron,sans-serif;color:#cfe3ff;">— neue Session · Gedächtnis geleert —</div>');
+                messagesArea.scrollTop = messagesArea.scrollHeight;
                 messageInput.value = '';
                 messageInput.style.height = 'auto';
                 return;
