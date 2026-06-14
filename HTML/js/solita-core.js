@@ -176,9 +176,11 @@
             + "Nur wenn Doc ausdrücklich um Details bittet, wirst du ausführlicher. Du weißt viel und "
             + "bleibst nah. Was du nicht sicher weißt, sagst du ehrlich. "
             + "Du hast Werkzeuge: change_setting (sichtbare Tracker-/UI-Einstellungen ändern — Farben, Größe, "
-            + "Position, Sichtbarkeit) und write_note (etwas für Doc aufschreiben + sichern). Setze sie NUR ein, "
-            + "wenn Doc klar darum bittet, etwas zu ändern oder aufzuschreiben; sonst antworte einfach. "
-            + "Bestätige eine ausgeführte Aktion knapp in einem Satz.";
+            + "Position, Sichtbarkeit), write_note (etwas für Doc aufschreiben + sichern) und show_ui_list "
+            + "(zeigt die Tabelle der änderbaren UI-Elemente, wenn er fragt, WAS er ändern kann) und get_weather "
+            + "(holt live das aktuelle Wetter aus dem Internet). Setze sie NUR ein, wenn Doc klar darum bittet, "
+            + "etwas zu ändern, aufzuschreiben, die Liste zu sehen oder das Wetter zu erfahren; sonst antworte "
+            + "einfach. Bestätige eine ausgeführte Aktion knapp in einem Satz.";
 
         // ----- TOOL-USE (Solita acts, not just talks) -----
         // Tools handed to Claude on every chat turn. Claude calls one only when Doc clearly asks to change a
@@ -201,6 +203,19 @@
                     properties: { note: { type: 'string', description: 'Der Notiztext, sauber formuliert.' } },
                     required: ['note']
                 }
+            },
+            {
+                name: 'show_ui_list',
+                description: 'Zeige Doc die Tabelle der änderbaren UI-Elemente (mit aktuellem Wert + Beispiel-Formulierung). Nutze dies, wenn er fragt, WAS er ändern kann — z.B. "was kann ich ändern?", "zeig mir die UI-Sachen", "welche Einstellungen gibt es".',
+                input_schema: { type: 'object', properties: {} }
+            },
+            {
+                name: 'get_weather',
+                description: 'Hole das aktuelle Wetter + heutige Spanne für einen Ort (live aus dem Internet). Nutze dies, wenn Doc nach dem Wetter fragt. Ohne Ortsangabe wird der aktuelle Standort (GPS) verwendet.',
+                input_schema: {
+                    type: 'object',
+                    properties: { location: { type: 'string', description: 'Ort/Stadt, z.B. "Altea" oder "Dresden". Leer lassen für den aktuellen Standort.' } }
+                }
             }
         ];
 
@@ -220,15 +235,84 @@
                     if (!r.ok) return { ok: false, summary: 'Fehlgeschlagen: ' + (d.error || ('HTTP ' + r.status)) };
                     return { ok: true, summary: 'Notiz gespeichert + committet.' };
                 }
+                if (name === 'show_ui_list') {
+                    const res = await renderUiList();
+                    return res.ok ? { ok: true, summary: 'Tabelle der ' + res.count + ' UI-Elemente angezeigt.' } : { ok: false, summary: 'Liste konnte nicht geladen werden.' };
+                }
+                if (name === 'get_weather') {
+                    return await getWeather(input && input.location);
+                }
                 return { ok: false, summary: 'Unbekanntes Werkzeug: ' + name };
             } catch (e) { return { ok: false, summary: 'Fehler: ' + ((e && e.message) || e) }; }
         }
 
         // A short chat line shown while a tool runs.
         function toolBadge(name, input) {
-            if (name === 'change_setting') return '🔧 _ändert Einstellung:_ ' + ((input && input.instruction) || '');
-            if (name === 'write_note') return '📝 _notiert:_ ' + ((input && input.note) || '');
+            if (name === 'change_setting') return '🔧 ich ändere die Einstellung …';
+            if (name === 'write_note') return '📝 ich notiere „' + ((input && input.note) || '') + '"';
+            if (name === 'show_ui_list') return '';   // the table itself is the output → no badge
+            if (name === 'get_weather') return '🌤️ ich hole das Wetter' + ((input && input.location) ? ' für ' + input.location : '') + ' …';
             return '⚙️ ' + name;
+        }
+
+        // Render the UI-settings table — shared by the /ui command AND the show_ui_list tool. Live from config.json._schema.
+        async function renderUiList() {
+            try {
+                const r = await fetch('config.json?ts=' + Date.now());
+                const cfg = await r.json();
+                const knobs = (cfg._schema && cfg._schema.knobs) || [];
+                const getPath = (o, p) => p.split('.').reduce((x, k) => (x == null ? x : x[k]), o);
+                let rows = '';
+                for (const k of knobs) {
+                    const now = getPath(cfg, k.path);
+                    const ex = (k.aliases || []).slice(0, 3).join(' · ');
+                    let nowCell = (now == null ? '' : String(now));
+                    if (k.kind === 'color' && now) nowCell = '<span style="display:inline-block;width:11px;height:11px;border-radius:2px;vertical-align:middle;margin-right:5px;background:' + now + ';border:1px solid rgba(255,255,255,0.3);"></span>' + now;
+                    rows += '<tr><td style="padding:3px 6px;opacity:0.85;">' + (k.label || k.id) + '</td>'
+                        + '<td style="padding:3px 6px;font-size:0.74rem;white-space:nowrap;">' + nowCell + '</td>'
+                        + '<td style="padding:3px 6px;opacity:0.6;font-size:0.74rem;">' + ex + '</td></tr>';
+                }
+                messagesArea.insertAdjacentHTML('beforeend', '<div class="message assistant"><div class="message-content"><strong>UI-Elemente, die ich ändern kann</strong> (config v' + cfg.version + ')'
+                    + '<table style="width:100%;border-collapse:collapse;font-size:0.8rem;margin:6px 0;">'
+                    + '<thead><tr style="opacity:0.55;"><th style="text-align:left;padding:3px 6px;">Element</th><th style="text-align:left;padding:3px 6px;">jetzt</th><th style="text-align:left;padding:3px 6px;">sag z.&nbsp;B.</th></tr></thead>'
+                    + '<tbody>' + rows + '</tbody></table>'
+                    + '<div style="font-size:0.76rem;opacity:0.7;margin-top:4px;">Farben: grün · orange · rot · weiß (oder rgb()/#hex). Beispiel: „mach die Zahlen weiß", „Banner nach unten".</div>'
+                    + '<div style="font-size:0.76rem;opacity:0.55;margin-top:2px;">Sag einfach, was du willst — ich verstehe die Absicht; das hier ist nur die Übersicht.</div></div></div>');
+                messagesArea.scrollTop = messagesArea.scrollHeight;
+                return { ok: true, count: knobs.length };
+            } catch (e) {
+                addMessage('assistant', '❌ Konnte die UI-Liste nicht laden: ' + ((e && e.message) || e));
+                return { ok: false, error: (e && e.message) || String(e) };
+            }
+        }
+
+        // WMO weather codes → short German text (Open-Meteo uses these).
+        const WMO = { 0: 'klar', 1: 'überwiegend klar', 2: 'teils bewölkt', 3: 'bedeckt', 45: 'neblig', 48: 'Reifnebel', 51: 'leichter Niesel', 53: 'Niesel', 55: 'starker Niesel', 56: 'gefrierender Niesel', 57: 'gefrierender Niesel', 61: 'leichter Regen', 63: 'Regen', 65: 'starker Regen', 66: 'gefrierender Regen', 67: 'gefrierender Regen', 71: 'leichter Schnee', 73: 'Schnee', 75: 'starker Schnee', 77: 'Schneegriesel', 80: 'Regenschauer', 81: 'Regenschauer', 82: 'heftige Regenschauer', 85: 'Schneeschauer', 86: 'Schneeschauer', 95: 'Gewitter', 96: 'Gewitter mit Hagel', 99: 'schweres Gewitter mit Hagel' };
+
+        // get_weather — current weather + today's range via Open-Meteo (FREE, keyless, CORS-ok). No secret/deploy needed.
+        async function getWeather(location) {
+            try {
+                let lat, lon, place;
+                if (location && String(location).trim()) {
+                    const g = await fetch('https://geocoding-api.open-meteo.com/v1/search?count=1&language=de&name=' + encodeURIComponent(String(location).trim()));
+                    const gj = await g.json();
+                    if (!gj.results || !gj.results.length) return { ok: false, summary: 'Ort "' + location + '" nicht gefunden — frag nach einer genaueren Angabe.' };
+                    lat = gj.results[0].latitude; lon = gj.results[0].longitude;
+                    place = gj.results[0].name + (gj.results[0].country ? ', ' + gj.results[0].country : '');
+                } else {
+                    if (!navigator.geolocation) return { ok: false, summary: 'Kein Standort verfügbar — frag nach einem Ort.' };
+                    const pos = await new Promise((res, rej) => navigator.geolocation.getCurrentPosition(res, rej, { timeout: 8000, maximumAge: 600000 }));
+                    lat = pos.coords.latitude; lon = pos.coords.longitude; place = 'dem aktuellen Standort';
+                }
+                const w = await fetch('https://api.open-meteo.com/v1/forecast?timezone=auto&forecast_days=1&current=temperature_2m,apparent_temperature,weather_code,wind_speed_10m,relative_humidity_2m&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max&latitude=' + lat + '&longitude=' + lon);
+                const j = await w.json();
+                const c = j.current || {}, d = j.daily || {};
+                const r = (x) => (x == null ? '?' : Math.round(x));
+                const summary = 'Wetter in ' + place + ': ' + (WMO[c.weather_code] || ('Code ' + c.weather_code)) + ', ' + r(c.temperature_2m) + '°C (gefühlt ' + r(c.apparent_temperature) + '°C), Wind ' + r(c.wind_speed_10m) + ' km/h, ' + r(c.relative_humidity_2m) + '% Luftfeuchte. Heute ' + r(d.temperature_2m_min && d.temperature_2m_min[0]) + '–' + r(d.temperature_2m_max && d.temperature_2m_max[0]) + '°C, ' + r(d.precipitation_probability_max && d.precipitation_probability_max[0]) + '% Regen.';
+                return { ok: true, summary };
+            } catch (e) {
+                return { ok: false, summary: 'Wetter konnte nicht geladen werden: ' + ((e && e.message) || e) };
+            }
         }
 
         // Rolling summary of older turns so context survives without sending the whole history every time.
@@ -477,10 +561,19 @@
         }
 
         async function sendMessage() {
-            const userText = messageInput.value.trim();
+            let userText = messageInput.value.trim();
             const pwd = getPwd();
 
             if (!userText) return;
+
+            // Voice: spoken "slash ui" / "slash list" arrives as WORDS (not "/ui") → map to the typed command
+            // so it triggers instead of going to Claude (which would just "think"). Only known commands convert.
+            const _sm = userText.toLowerCase().match(/^(?:slash|splash|flash)\s+(.+?)[\s.!?]*$/);
+            if (_sm) {
+                const _w = _sm[1].replace(/[.\s]/g, '');   // "u i" / "u.i." → "ui"
+                const _M = { ui: 'ui', youeye: 'ui', youi: 'ui', list: 'list', liste: 'list', clear: 'clear', de: 'de', deutsch: 'de', en: 'en', english: 'en', es: 'es', spanish: 'es', 'español': 'es', espanol: 'es' };
+                if (_M[_w]) userText = '/' + _M[_w];
+            }
 
             if (userText.toLowerCase() === '/clear') {
                 conversationHistory = [];
@@ -506,11 +599,20 @@
 <tr><td style="padding:3px 6px;opacity:0.7;">Logout</td><td style="padding:3px 6px;">ausloggen · abmelden</td><td style="padding:3px 6px;">log (me) out · sign (me) out</td><td style="padding:3px 6px;">cierra sesión · desconéctame</td></tr>
 <tr><td style="padding:3px 6px;opacity:0.7;">Tschüss</td><td style="padding:3px 6px;">tschüss · das war's</td><td style="padding:3px 6px;">bye · see you · good night</td><td style="padding:3px 6px;">adiós · hasta luego · chao</td></tr>
 </tbody></table>
-<div style="font-size:0.82rem;opacity:0.85;"><strong>Tippbefehle:</strong> /clear (neue Session) · /list (diese Tabelle) · /de · /en · /es (Sprache)</div>
+<div style="font-size:0.82rem;opacity:0.85;"><strong>Tippbefehle:</strong> /clear (neue Session) · /list (diese Tabelle) · /ui (änderbare UI-Elemente) · /de · /en · /es (Sprache)</div>
 <div style="font-size:0.78rem;opacity:0.6;margin-top:4px;">Sprache auch per DE / EN / ES im Menü (☰)</div></div></div>`);
                 messagesArea.scrollTop = messagesArea.scrollHeight;
                 messageInput.value = '';
                 messageInput.style.height = 'auto';
+                return;
+            }
+
+            if (userText.trim().toLowerCase() === '/ui') {   // /ui → the changeable-UI table (shared with the show_ui_list tool)
+                addMessage('user', userText);
+                messageInput.value = ''; messageInput.style.height = 'auto';
+                showTyping();
+                await renderUiList();
+                hideTyping();
                 return;
             }
 
@@ -641,7 +743,7 @@
                         const toolResults = [];
                         for (const blk of blocks) {
                             if (!blk || blk.type !== 'tool_use') continue;
-                            hideTyping(); addMessage('assistant', toolBadge(blk.name, blk.input)); showTyping();
+                            hideTyping(); const _b = toolBadge(blk.name, blk.input); if (_b) addMessage('assistant', _b); showTyping();
                             const res = await execTool(blk.name, blk.input, pwd);
                             toolResults.push({ type: 'tool_result', tool_use_id: blk.id, content: res.summary, is_error: !res.ok });
                         }
