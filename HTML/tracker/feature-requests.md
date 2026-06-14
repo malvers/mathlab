@@ -20,14 +20,14 @@
 - **FEAT-12** Contact-AI Stufe 2 (Agent ändert Repo)
 - **FEAT-13** 🏗️ Navi-Blau + gefahrene Strecke speed-gefärbt · Prio 1
 - **FEAT-14** Tracking ↔ Navigation entkoppeln
-- **FEAT-15** „KI erkennt"-Indikator verschönern (🤖 raus)
+- **FEAT-15** ✅ „KI erkennt"-Indikator verschönert — 🤖 raus, λ-Spinner (gebaut 2026-06-13)
 - **FEAT-16** Live-Broadcast: Zuschauerzähler/Presence
 - **FEAT-17** Lane Guidance (Spuranweisungen)
 - **FEAT-18** Kleinkram (motion-dbg raus, Notif-Farbe, BG-Test)
 - **FEAT-19** ✅ SERVER-DOWN-Banner (gebaut)
 - **FEAT-20** OSM-Zoom-Buttons weg/schöner
 - **FEAT-21** Instrumente ausblenden → Track mehr Platz
-- **FEAT-22** Pl@ntNet < 10 % ausblenden
+- **FEAT-22** ✅ Pl@ntNet < 10 % ausgeblendet (gebaut + deployed 2026-06-13)
 - **FEAT-23** HUD: oberes Element + Genauigkeit zentrieren
 
 ## Hausregeln für JEDEN Subagenten (CLAUDE.md)
@@ -231,12 +231,18 @@ entkoppeln, Hinweis „Navi aktiv") → **Ausbau zu A** (persistenter Navi-Chip 
 **Re-Target** mitten im Track, Navi **ohne** laufende Aufzeichnung). Code: `beginTracking`/
 `finishTracking`/`__nav.*` in `tracker.js`.
 
-## FEAT-15 — „KI erkennt"-Indikator verschönern (🤖 raus) 📐 spezifiziert 🌿 · klein
+## FEAT-15 — „KI erkennt"-Indikator verschönern (🤖 raus) ✅ GEBAUT 2026-06-13 (Commit `1762b4f`)
 **Voll-Spez (🌿 Branch):** `polish-ki-erkennt-indikator.md`. Doc mag den 🤖-Roboter nicht.
 **Ort:** `HTML/js/tracker-media.js:295` (`🤖 KI erkennt …`), CSS `.pd-wait` (`tracker.css:132`); Pin-Text
 `PENDING_TITLE='Wird erkannt …'` in `photo-layer.js`.
 **Auftrag:** Emoji raus, `.pd-wait` als ruhiger λ-Orange-Spinner, Wording einheitlich **„KI analysiert …"**.
 Drei Varianten (Spinner / ✨-Sparkle / „KI"-Badge) — **Doc wählt 1/2/3, dann bauen.** Keine Logik-Änderung.
+**✅ Umgesetzt (Variante 1, Commit `1762b4f`):** 🤖 raus; `.pd-wait` bekommt einen ruhigen λ-Orange-CSS-Spinner
+(`.pd-spin` + `@keyframes pd-spin` + `prefers-reduced-motion`-Abschaltung), Wording „KI analysiert …". Der
+Spinner ist ein **eigenes Kind-Element** → die Fehlermeldung (gleiche `.pd-wait`-Klasse) dreht NICHT mit.
+**Bewusst NICHT angefasst:** der Pin-Sentinel `PENDING_TITLE` (treibt 7 `=== PENDING_TITLE`-Vergleiche in 2
+Dateien — Umbenennen bräche die Pending-Erkennung). Rein clientseitig, **kein Deploy**. Varianten 2 (✨) /
+3 („KI"-Badge) bleiben je ein Einzeiler.
 
 ## FEAT-16 — Live-Broadcast: Presence/Rückkanal 📐 Idee
 Aus BUG-5: Zuschauer-Zähler („3 sehen dich") + Empfangs-Bestätigung („zuletzt empfangen vor 2 s").
@@ -290,13 +296,20 @@ Default-Control, von uns gesetzt): `tracker.js:18` `zoomControl:false`, dann **`
 **Richtung:** Instrumente aus → `#hud-top` kollabieren, Karte den frei werdenden Platz nutzen lassen
 (volle Höhe). Hängt mit Idle-Auto-Hide + der WIP „d/k/w-Tasten-Toggle" zusammen.
 
-## FEAT-22 — Pl@ntNet-Konfidenz-Schwelle 📐
+## FEAT-22 — Pl@ntNet-Konfidenz-Schwelle ✅ GEBAUT + DEPLOYED 2026-06-13 (Commit `1762b4f`)
 **Quelle:** Fahrt-Notiz 2026-06-12 (Notiz 4). **Nur Notiz.**
 **Regel-Idee:** Pl@ntNet-Treffer mit Konfidenz **< ~10 %** gar nicht anzeigen; **besonders nicht**, wenn
 **Google/Gemini** ein gutes Ergebnis hat.
 **Offen (erst messen, nie raten):** Pl@ntNet-Score und Google/Gemini-Qualität sind verschiedene Skalen —
 wie vergleichbar machen? Schwellwert empirisch. Wo: Erkennungs-Pipeline (`supabase/functions/identify/`
 + Foto-Spur-Anzeige `tracker-media.js`).
+**✅ Umgesetzt (Commit `1762b4f`, deployed):** neue Schwelle `PLANTNET_SHOW_MIN = 0.10` in
+`supabase/functions/identify/index.ts`. **Zwei-Stufen-Modell:** ≥ 30 % → PlantNet schreibt die Überschrift ·
+10–30 % → PlantNet als Zweitmeinung (Gemini-Überschrift) · **< 10 % → PlantNet komplett raus** (keine
+„PlantNet:"-Zeile, keine Heimat, nur Gemini). Unterdrückte Treffer bleiben im `_diag` als `{low,sci}`;
+Client-DEBUG (`tracker-media.js`) zeigt sie als `pn=low <score> <sci>`. Edge Function am 2026-06-13 deployed
+(Projekt `fyfhxzyymmurlaenmzse`). **Absolut** umgesetzt (auch wenn Gemini nichts hat) — Variante „nur
+verstecken wenn Gemini gut" wäre ein Einzeiler, falls gewünscht.
 
 ## FEAT-23 — HUD: oberes Element + Genauigkeit als zentrierte Gruppe 📐
 **Quelle:** Fahrt-Notiz 2026-06-12 (Notiz 5). **Nur Notiz.**
