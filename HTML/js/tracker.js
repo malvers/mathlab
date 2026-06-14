@@ -1338,6 +1338,9 @@ ${pts}
         }
 
         async function ensureSb() {
+            // Self-hosted lib loads same-origin before this runs; if it's still settling, wait briefly
+            // (≤2 s) instead of hard-failing — robust on slow devices / first paint.
+            for (let i = 0; i < 20 && !window.supabase; i++) await new Promise((r) => setTimeout(r, 100));
             if (!window.supabase) throw new Error('Supabase-Lib nicht geladen');
             if (!sb) sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
             const code = getSyncCode();
