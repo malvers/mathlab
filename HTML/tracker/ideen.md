@@ -81,12 +81,12 @@
 | **Remote-Config / Fernsteuerung** | App live umfärben/umlayouten ohne Re-Install (CSS-Variablen + Realtime) | 🌿 `plan-fernsteuerung-remote-config.md` (Idee 19, Demo gebaut) |
 | **Contact AI im Tracker** | Stufe 1 Chat/Foto + Stufe 2 Agent editiert Repo & pusht | 🌿 `plan-contact-ai-im-tracker.md` (Idee 20) |
 | **Tracking ↔ Navigation entkoppeln** | Navi beenden ohne Track zu beenden (Dresden→Frankfurt) | 🌿 `plan-tracking-vs-navigation.md` → FEAT-14 |
-| **„KI erkennt"-Indikator** | 🤖-Roboter durch schönen λ-Spinner ersetzen | 🌿 `polish-ki-erkennt-indikator.md` → FEAT-15 |
+| **„KI erkennt"-Indikator** | 🤖-Roboter durch schönen λ-Spinner ersetzen | ✅ gebaut 2026-06-13 → FEAT-15 |
 | **Play-Store-Verteilung** | Sideload blockt (Samsung); Play Store = 12 Tester·14 Tage / Firmenkonto | 🌿 `verteilung-playstore-tester.md` — „nächste Woche" |
 | **Lebens-Agent / Kompression** | Tokens vs. Kompression + Memory-Architektur für „Solita/Samantha" | 🌿 `wissensnotiz-llm-kompression-lebensagent.md` — Referenz |
 | **Activity-Erkennung schärfen** | Reisemodus laufen/fahren wirkt nur speed-basiert; Play-Services-Events prüfen | `activity-debug-morgen.md` → Bug/Debug in `bugfixes.md` BUG-6 (Enabler für Parkplatz/WegCast) |
 | **Erkennung: Blickrichtung nutzen** | Heading an die Foto-Erkennung → Nachbar-Bauwerke unterscheiden (Zwinger ≠ Schloss) | Fahrt-Notiz 12.06 → `bugfixes.md` BUG-8; verwandt `geo-erkennung-und-voice-spur.md` |
-| **Erkennung: Pl@ntNet-Schwelle** | < ~10 % Konfidenz ausblenden, v. a. wenn Google/Gemini gut ist | Fahrt-Notiz 12.06 → `feature-requests.md` FEAT-22 |
+| **Erkennung: Pl@ntNet-Schwelle** | < ~10 % Konfidenz ausblenden, v. a. wenn Google/Gemini gut ist | ✅ gebaut+deployed 2026-06-13 → FEAT-22 |
 
 ---
 

@@ -7,7 +7,7 @@
 > nichts** — sie verlinkt und destilliert. Stand der Code-Zeilen: 2026-06-12 (nach dem inline→module-Refactor).
 
 ## ⚡ Kurz-Übersicht
-- **BUG-1** Speed-Anzeige km/h falsch (Gate koppelt Speed) · 🔍 erst messen
+- **BUG-1** Speed-Anzeige km/h falsch · 🏗️ Fix gebaut (Anzeige vom Gate entkoppelt + Debug) · Feld-Test + Push offen
 - **BUG-2** Regenradar zeigt in DE keinen Regen
 - **BUG-3** 🅿️ Track strichelt bei Aufnahme-Pause
 - **BUG-4** 🅿️ geparkte Tracker-Fixes sichten
@@ -36,7 +36,17 @@
 
 ---
 
-## BUG-1 — Geschwindigkeitsanzeige (km/h) ist unzuverlässig 🐞 offen · 🔍 erst messen
+## BUG-1 — Geschwindigkeitsanzeige (km/h) ist unzuverlässig 🏗️ Fix gebaut (lokal) · Feld-Test offen
+> **✅ Stand 2026-06-13 — lokal gebaut, NOCH NICHT gepusht/feldgetestet** (`HTML/js/tracker.js`):
+> Die km/h-Anzeige ist vom `still`-Gate **entkoppelt** — sie zeigt jetzt den rohen GPS-Doppler
+> `coords.speed × 3.6` unabhängig vom Gate; nur wenn kein Doppler kommt, greift der alte Distanz/Zeit-
+> Fallback (regressionsfrei). Floor `SPEED_ZERO_KMH = 1.0` killt Doppler-Rauschen im Stand. Das Gate
+> steuert weiterhin nur die **Aufzeichnung**, nicht mehr die Anzeige-Zahl. **Debug in vorhandene Surfaces
+> (kein neues):** `#motion-dbg`-Leiste live `spd:<dop|calc|gate0>=<roh>→<shown>`, + einmal im DebugWindow,
+> ob `coords.speed` überhaupt geliefert wird. **Offen:** 10 s stehen / 20 m gehen → je nach Doppler-Befund
+> finalisieren (Floor justieren oder Fallback-Pfad fixen), dann committen+pushen. Doc-Entscheid: „gleich
+> entkoppeln", Messen-zuerst durch das Live-Debug ersetzt.
+
 **Priorität:** hoch (Doc-Schmerzpunkt, betrifft Live-Anzeige UND gespeichertes Speed-Profil).
 **Tiefen-Notiz (Pflichtlektüre):** [`bug-geschwindigkeitsanzeige.md`](bug-geschwindigkeitsanzeige.md)
 — enthält die volle, gegen den Code verifizierte Analyse + den beschlossenen Plan.
