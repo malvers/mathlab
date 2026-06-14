@@ -144,7 +144,13 @@
                 txt = txt.trim();
                 if (!txt) return;
                 try { console.log('[solita] heard: "' + txt + '"'); } catch (_) {}  // measure what de-DE actually transcribes
-                if (paused) {                                          // dormant: ONLY the wake word "Solita" wakes her
+                if (paused) {                                          // dormant: "Solita" wakes her …
+                    // … but spoken slash-commands ("slash ui" / "slash list" …) still fire — quick remote, stays asleep.
+                    if (/^(?:slash|splash|flash)\s+(?:ui|u\s*i|list|liste|clear|de|en|es|deutsch|english|spanish|espa[nñ]ol)\b/i.test(txt)) {
+                        if (input) { input.value = txt; input.dispatchEvent(new Event('input')); }
+                        if (typeof sendMessage === 'function') setTimeout(sendMessage, 200);
+                        return;                                        // run it, stay in slumber
+                    }
                     const w = extractQuery(txt);
                     if (w !== null) { paused = false; fire(w); }       // "Solita …" → wake; rest becomes the first turn
                     return;
