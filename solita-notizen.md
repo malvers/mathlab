@@ -1,4 +1,6 @@
 # Solita-Notizen
 
-> Von Solita aufgeschrieben (Sprach-/Chat-Befehl „schreib auf …" / „notier …").
-> Die Edge Function `solita-note` hängt datierte Einträge hier an und committet sie.
+> Von Solita aufgeschrieben (Sprach-/Chat-Befehl).
+
+## 2026-06-14 16:04
+Tool-Use Test 14. Juni — funktioniert
