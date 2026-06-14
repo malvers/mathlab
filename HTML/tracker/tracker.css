@@ -1158,6 +1158,11 @@ body.ui-idle #trk-controls {
    ::-webkit-scrollbar for Chrome/Safari, scrollbar-width only for Firefox in
    @supports (never both on the same element — Safari would drop the webkit rules). */
 .ov-body {
+    flex: 1 1 auto;      /* take the leftover height between title and the bottom buttons … */
+    min-height: 0;       /* … and ALLOW shrinking below content. Flex items default to min-height:auto,
+                            so a long list refused to shrink and pushed #tl-import + #tl-actions off the
+                            bottom of the screen (the "nix zu sehen" bug). Now the list scrolls internally
+                            and the buttons stay pinned at the panel's bottom edge. */
     overflow-y: auto;
     /* push the scrollbar toward the panel edge (cancel most of the panel's right
        padding); keep the cards clear of the thumb with a small inner padding. */
@@ -1575,6 +1580,7 @@ body.ui-idle #trk-controls {
 /* Import a friend's shared track by pasting its view-link — always visible under the list. */
 #tl-import {
     display: block;
+    flex-shrink: 0;   /* never let the scrolling list squeeze this off the bottom */
     width: calc(100% - 28px);
     margin: 8px 14px 0;
     padding: 9px;
@@ -1594,6 +1600,7 @@ body.ui-idle #trk-controls {
 
 #tl-actions {
     display: none;
+    flex-shrink: 0;   /* stays pinned at the bottom; the list scrolls, not these */
     gap: 8px;
     margin: 8px 14px 2px;
 }
