@@ -1377,10 +1377,15 @@
                 if (window.solitaPhase) solitaPhase('speaking');
                 const resume = () => {
                     speaking = false;
-                    // Turn-loop: while a conversation is open, reopen the ear after EVERY reply and take the
-                    // next utterance as the answer — no "Solita" per turn. (UI-mode runs its own sub-flow.)
-                    if (wakeOn) { startRec(); if (convo && !window.__uiMode) awaitingQuery = true; }
-                    if (window.solitaPhase) solitaPhase(wakeOn && convo ? 'listening' : 'idle');
+                    // Turn-loop: while a conversation is open, reopen the ear after EVERY reply (no "Solita"
+                    // per turn). When the conversation has ENDED, fall back to the SLUMBER resting state —
+                    // visible pill, waiting for "Solita" — instead of an invisible idle. (UI-mode = own flow.)
+                    if (wakeOn) {
+                        startRec();
+                        if (convo && !window.__uiMode) awaitingQuery = true;
+                        else if (!convo) paused = true;   // resting → dormant
+                    }
+                    if (window.solitaPhase) solitaPhase(!wakeOn ? 'idle' : (convo ? 'listening' : 'dormant'));
                 };
                 // _speak set window.__solitaSpeaking synchronously; poll it (covers Cloud audio AND the
                 // browser fallback) → re-open the ear when playback ends.
@@ -1457,7 +1462,7 @@
 
             // Pause: a spoken "Pause" makes Solita go dormant — she ignores everything until she hears
             // "Solita" again. The pill shows the half-asleep word. Reuses the wake-word detector to wake.
-            const PAUSE = /^(solita[\s,]*)?(pause|pausier(e|en)?|mach(e)?\s(mal\s)?pause|leg(e)?\s(mal\s)?ne?\spause\sein)\b/i;
+            const PAUSE = /\bpause\b|\bpausier/i;   // anywhere (gated by `addressed`) → "ok pause", "mach mal pause", "pausiere" …
             function enterPause() {
                 paused = true; convo = false; awaitingQuery = false;
                 if (window.solitaPhase) solitaPhase('dormant');     // pill → half-asleep
@@ -1523,12 +1528,12 @@
 
             wakeBtn.addEventListener('click', function () {
                 wakeOn = !wakeOn; localStorage.setItem(WAKE_KEY, wakeOn ? '1' : '0'); reflect();
-                convo = false; awaitingQuery = false; paused = false; // toggling the line always resets the thread
-                if (window.solitaPhase) solitaPhase('idle');
-                if (wakeOn) startRec(); else stopRec();
+                convo = false; awaitingQuery = false;                 // toggling the line resets the thread
+                if (wakeOn) { paused = true; if (window.solitaPhase) solitaPhase('dormant'); startRec(); }   // ear on → SLUMBER (waiting for "Solita")
+                else { paused = false; if (window.solitaPhase) solitaPhase('idle'); stopRec(); }
             });
 
-            if (wakeOn) setTimeout(startRec, 600);                   // auto-resume if it was left on
+            if (wakeOn) { paused = true; if (window.solitaPhase) solitaPhase('dormant'); setTimeout(startRec, 600); }   // left on → resume in SLUMBER (pill visible, waiting for "Solita")
         })();
     </script>
 </body>
