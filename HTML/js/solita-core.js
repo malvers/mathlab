@@ -47,11 +47,10 @@
 
             if (ok) {
                 sessionPwd = pwd;
-                const isLocal = location.hostname === "localhost" ||
-                    location.hostname === "127.0.0.1" ||
-                    location.protocol === "file:" ||
-                    location.hostname.startsWith("192.168.");
-                if (isLocal) localStorage.setItem('dev_access', pwd);
+                // Persist the password in THIS browser so the auth modal doesn't reappear next visit
+                // (Doc 2026-06-15). Cleared on logout. localStorage only — never written to source (Rule 21).
+                try { localStorage.setItem('dev_access', pwd); } catch (e) {}
+                if (window.DebugWindow) DebugWindow.log('auth: login OK — dev_access gespeichert? ' + (localStorage.getItem('dev_access') ? ('JA (len ' + pwd.length + ')') : 'NEIN/Fehler'));
                 document.getElementById('cyber-auth-overlay').classList.remove('visible');
                 if (window.solitaStartVoice) solitaStartVoice();   // Doc rule: ear always on — (re)start the wake-word on login
                 document.getElementById('messageInput').focus();
@@ -178,9 +177,12 @@
             + "Du hast Werkzeuge: change_setting (sichtbare Tracker-/UI-Einstellungen ändern — Farben, Größe, "
             + "Position, Sichtbarkeit), write_note (etwas für Doc aufschreiben + sichern) und show_ui_list "
             + "(zeigt die Tabelle der änderbaren UI-Elemente, wenn er fragt, WAS er ändern kann) und get_weather "
-            + "(holt live das aktuelle Wetter aus dem Internet). Setze sie NUR ein, wenn Doc klar darum bittet, "
-            + "etwas zu ändern, aufzuschreiben, die Liste zu sehen oder das Wetter zu erfahren; sonst antworte "
-            + "einfach. Bestätige eine ausgeführte Aktion knapp in einem Satz.";
+            + "(holt live das aktuelle Wetter UND die Vorhersage aus dem Internet). change_setting, write_note "
+            + "und show_ui_list setzt du nur ein, wenn Doc klar darum bittet. Bei get_weather bist du großzügig: "
+            + "sobald es in IRGENDEINER Form um Wetter, Vorhersage, Temperatur, Regen oder Wind geht — egal wie "
+            + "formuliert, ob jetzt oder in der Zukunft (z.B. „wie wird das Wetter heute in Dresden“) — rufst du "
+            + "IMMER get_weather auf und beantwortest Wetter NIE aus eigenem Wissen (du hast dafür keine Live-Daten). "
+            + "Sonst antworte einfach. Bestätige eine ausgeführte Aktion knapp in einem Satz.";
 
         // ----- TOOL-USE (Solita acts, not just talks) -----
         // Tools handed to Claude on every chat turn. Claude calls one only when Doc clearly asks to change a
@@ -211,7 +213,7 @@
             },
             {
                 name: 'get_weather',
-                description: 'Hole das Wetter live aus dem Internet — aktuell UND Tagesvorhersage. Nutze dies, wenn Doc nach dem Wetter oder einer Vorhersage fragt. Ohne Ortsangabe wird der aktuelle Standort (GPS) verwendet.',
+                description: 'Hole das Wetter live aus dem Internet — aktuell UND Tagesvorhersage. Nutze dies bei JEDER Wetter-, Vorhersage-, Temperatur-, Regen- oder Windfrage, in JEDER Formulierung und Zeitform (z.B. "wie wird das Wetter heute in Dresden", "regnet es morgen", "Temperatur in Altea"). Beantworte Wetter NIE aus eigenem Wissen. Ohne Ortsangabe wird der aktuelle Standort (GPS) verwendet.',
                 input_schema: {
                     type: 'object',
                     properties: {
@@ -261,7 +263,7 @@
         // Render the UI-settings table — shared by the /ui command AND the show_ui_list tool. Live from config.json._schema.
         async function renderUiList() {
             try {
-                const r = await fetch('config.json?ts=' + Date.now());
+                const r = await fetch('../config.json?ts=' + Date.now());
                 const cfg = await r.json();
                 const knobs = (cfg._schema && cfg._schema.knobs) || [];
                 const getPath = (o, p) => p.split('.').reduce((x, k) => (x == null ? x : x[k]), o);
@@ -585,7 +587,7 @@
             const _sm = userText.toLowerCase().match(/^(?:slash|splash|flash)\s+(.+?)[\s.!?]*$/);
             if (_sm) {
                 const _w = _sm[1].replace(/[.\s]/g, '');   // "u i" / "u.i." → "ui"
-                const _M = { ui: 'ui', youeye: 'ui', youi: 'ui', list: 'list', liste: 'list', clear: 'clear', de: 'de', deutsch: 'de', en: 'en', english: 'en', es: 'es', spanish: 'es', 'español': 'es', espanol: 'es' };
+                const _M = { ui: 'ui', youeye: 'ui', youi: 'ui', list: 'list', liste: 'list', clear: 'clear', logout: 'logout', ausloggen: 'logout', abmelden: 'logout', de: 'de', deutsch: 'de', en: 'en', english: 'en', es: 'es', spanish: 'es', 'español': 'es', espanol: 'es' };
                 if (_M[_w]) userText = '/' + _M[_w];
             }
 
@@ -603,6 +605,12 @@
                 return;
             }
 
+            if (userText.toLowerCase() === '/logout') {        // /logout → same as the spoken "log mich aus" + ☰ button
+                messageInput.value = ''; messageInput.style.height = 'auto';
+                if (window.solitaLogout) window.solitaLogout(); // mic off · clears the persisted pwd · shows the auth overlay
+                return;
+            }
+
             if (userText.toLowerCase() === '/list') {
                 messagesArea.insertAdjacentHTML('beforeend', `<div class="message assistant"><div class="message-content"><strong>Sprachbefehle</strong>
 <table style="width:100%;border-collapse:collapse;font-size:0.82rem;margin:6px 0;">
@@ -613,7 +621,7 @@
 <tr><td style="padding:3px 6px;opacity:0.7;">Logout</td><td style="padding:3px 6px;">ausloggen · abmelden</td><td style="padding:3px 6px;">log (me) out · sign (me) out</td><td style="padding:3px 6px;">cierra sesión · desconéctame</td></tr>
 <tr><td style="padding:3px 6px;opacity:0.7;">Tschüss</td><td style="padding:3px 6px;">tschüss · das war's</td><td style="padding:3px 6px;">bye · see you · good night</td><td style="padding:3px 6px;">adiós · hasta luego · chao</td></tr>
 </tbody></table>
-<div style="font-size:0.82rem;opacity:0.85;"><strong>Tippbefehle:</strong> /clear (neue Session) · /list (diese Tabelle) · /ui (änderbare UI-Elemente) · /de · /en · /es (Sprache)</div>
+<div style="font-size:0.82rem;opacity:0.85;"><strong>Tippbefehle:</strong> /clear (neue Session) · /list (diese Tabelle) · /ui (änderbare UI-Elemente) · /logout (abmelden) · /de · /en · /es (Sprache)</div>
 <div style="font-size:0.78rem;opacity:0.6;margin-top:4px;">Sprache auch per DE / EN / ES im Menü (☰)</div></div></div>`);
                 messagesArea.scrollTop = messagesArea.scrollHeight;
                 messageInput.value = '';
@@ -785,17 +793,17 @@
         }
         // ----- AUTO-LOGIN & AUTH-INITIALISIERUNG -----
         (async function initAuth() {
+            // Auto-unlock from the persisted password on ANY device/origin (Doc 2026-06-15: persist in the
+            // browser). verifyPwd re-checks it server-side → a rotated/wrong password falls back to the modal.
             const devPwd = localStorage.getItem('dev_access');
-            const isLocal = location.hostname === "localhost" ||
-                location.hostname === "127.0.0.1" ||
-                location.protocol === "file:" ||
-                location.hostname.startsWith("192.168.");
+            if (window.DebugWindow) DebugWindow.log('auth: beim Laden — dev_access vorhanden? ' + (devPwd ? ('JA (len ' + devPwd.length + ')') : 'NEIN'));
 
             let success = false;
-            if (isLocal && devPwd && await verifyPwd(devPwd)) {
+            if (devPwd && await verifyPwd(devPwd)) {
                 sessionPwd = devPwd;
                 success = true;
             }
+            if (window.DebugWindow) DebugWindow.log('auth: auto-login erfolgreich? ' + success);
 
             if (!success) {
                 document.getElementById('cyber-auth-overlay').classList.add('visible');

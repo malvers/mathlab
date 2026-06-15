@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Solita — deine persönliche Assistentin</title>
+    <meta name="description"
+        content="Solita: deine persönliche, sprechende Assistentin. Fragen, Wetter, Einstellungen ändern — per Stimme oder Text.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: rgb(8, 20, 42);
+            --cyan: #00d2ff;
+            --cyan-rgb: 0, 210, 255;
+            --violet: #9d50bb;
+            --ink: #f4f4f4;
+            --muted: rgba(244, 244, 244, 0.6);
+            --line: rgba(244, 244, 244, 0.12);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { min-height: 100dvh; }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: clamp(28px, 6vw, 48px) 24px;
+            background:
+                radial-gradient(1200px 600px at 50% -10%, rgba(var(--cyan-rgb), 0.10), transparent 60%),
+                linear-gradient(180deg, var(--bg) 0%, rgb(5, 13, 30) 100%);
+            color: var(--ink);
+            font-family: 'Orbitron', system-ui, -apple-system, sans-serif;
+            line-height: 1.55;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .hero { text-align: center; max-width: 560px; margin: 0 auto clamp(28px, 6vw, 40px); }
+
+        .face {
+            width: clamp(96px, 26vw, 140px);
+            height: clamp(96px, 26vw, 140px);
+            object-fit: cover;
+            border-radius: 50%;
+            display: block;
+            margin: 0 auto 18px;
+            border: 2px solid rgba(var(--cyan-rgb), 0.5);
+            box-shadow: 0 12px 36px rgba(0, 0, 0, 0.5), 0 0 28px rgba(var(--cyan-rgb), 0.25);
+        }
+
+        h1 {
+            font-weight: 900;
+            font-size: clamp(2.2rem, 9vw, 3.2rem);
+            letter-spacing: 2px;
+            line-height: 1.05;
+            background: linear-gradient(to right, var(--cyan), #fff, var(--violet));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .sub {
+            color: var(--cyan);
+            font-size: clamp(0.95rem, 3.4vw, 1.05rem);
+            font-weight: 600;
+            letter-spacing: 2.5px;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+
+        .quip { color: var(--muted); font-size: clamp(0.8rem, 3vw, 0.95rem); letter-spacing: 0.5px; }
+
+        .motto {
+            margin-top: 14px;
+            font-size: clamp(0.72rem, 2.6vw, 0.86rem);
+            color: rgba(var(--cyan-rgb), 0.7);
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+
+        .tiles {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: stretch;
+            gap: clamp(16px, 3vw, 24px);
+            width: 100%;
+            max-width: 760px;
+        }
+
+        .card {
+            flex: 1 1 300px;
+            max-width: 360px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: rgba(14, 36, 78, 0.45);
+            border: 1px solid rgba(var(--cyan-rgb), 0.3);
+            border-radius: 20px;
+            box-shadow: 0 0 28px rgba(var(--cyan-rgb), 0.12);
+            padding: clamp(26px, 5vw, 34px) clamp(22px, 5vw, 30px);
+            text-align: center;
+        }
+
+        .card h2 {
+            font-weight: 700;
+            font-size: clamp(1.05rem, 4vw, 1.25rem);
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+
+        .card .line { color: var(--muted); font-size: 0.96rem; margin-bottom: 22px; max-width: 26ch; }
+
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            background: var(--cyan);
+            color: #06121f;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 600;
+            letter-spacing: 1.5px;
+            font-size: clamp(0.95rem, 3vw, 1.05rem);
+            text-decoration: none;
+            cursor: pointer;
+            margin-top: auto;
+            transition: transform 0.12s ease, box-shadow 0.2s ease;
+            box-shadow: 0 12px 34px rgba(var(--cyan-rgb), 0.28);
+        }
+
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 16px 40px rgba(var(--cyan-rgb), 0.4); }
+
+        .btn.soon {
+            background: transparent;
+            color: var(--muted);
+            border: 1px solid var(--line);
+            box-shadow: none;
+            cursor: default;
+        }
+
+        .note { margin-top: 12px; font-size: 0.8rem; color: var(--muted); }
+    </style>
+</head>
+
+<body>
+    <header class="hero">
+        <img class="face" src="../resources/team/team_02.png" alt="Solita" onerror="this.style.display='none'">
+        <h1>Solita</h1>
+        <div class="sub">Deine persönliche Assistentin</div>
+        <p class="quip">Sprich mit ihr — sie hört, denkt, handelt.</p>
+        <div class="motto">Vita Somnium Breve</div>
+    </header>
+
+    <div class="tiles">
+        <!-- Browser -->
+        <div class="card">
+            <h2>Im Browser</h2>
+            <p class="line">Öffnen, sprechen, fragen. Persönlicher Zugang — Passwort nötig.</p>
+            <a class="btn" href="solita.html">ÖFFNEN</a>
+        </div>
+
+        <!-- Android-App (Stufe B, noch in Arbeit) -->
+        <div class="card">
+            <h2>Android-App</h2>
+            <p class="line">Solita als native App — Wake-Word auch unterwegs.</p>
+            <span class="btn soon">IN ARBEIT</span>
+            <p class="note">Bald als Download (Stufe B · natives Vosk).</p>
+        </div>
+    </div>
+</body>
+
+</html>
