@@ -59,11 +59,32 @@ window.TrackerFuel = function (ctx) {
         return 'mid';                                     // λ orange
     }
 
+    // Pills are sized to their REAL rendered box (font metrics), NOT a guessed fixed width — a wider
+    // price ("1,799" / 4 digits) used to overflow the old [56,22] box and spill out of the coloured
+    // pill ("too narrow"). Leaflet still needs an explicit iconSize, so render the pill once off-screen
+    // and read its offsetWidth/Height. One reused hidden host; the same stylesheet drives both.
+    let measureHost = null;
+    function measurePill(html) {
+        if (!measureHost) {
+            measureHost = document.createElement('div');
+            measureHost.style.cssText = 'position:absolute;left:-9999px;top:-9999px;' +
+                'visibility:hidden;pointer-events:none;display:inline-block;';
+            document.body.appendChild(measureHost);
+        }
+        measureHost.innerHTML = html;
+        const el = measureHost.firstElementChild;
+        return [Math.ceil(el.offsetWidth), Math.ceil(el.offsetHeight)];
+    }
+
     function pin(s, med) {
         const html = '<div class="fuel-pin ' + tier(s, med) + '">' +
             '<span class="fuel-pump">⛽</span>' +
             '<span class="fuel-price">' + fmt(priceOf(s)) + '</span></div>';
-        return L.divIcon({ className: 'fuel-pin-wrap', html, iconSize: [56, 22], iconAnchor: [28, 22], popupAnchor: [0, -20] });
+        const [w, h] = measurePill(html);
+        return L.divIcon({
+            className: 'fuel-pin-wrap', html,
+            iconSize: [w, h], iconAnchor: [Math.round(w / 2), h], popupAnchor: [0, -h + 2],
+        });
     }
 
     function popupHtml(s) {
