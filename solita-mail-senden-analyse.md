@@ -69,3 +69,8 @@ dem „ja" wird gesendet). Das ist der eigentlich überlegenswerte Teil.
 | Solita-Tool | `HTML/js/solita-gmail-send.js` | Kopie von `solita-gmail.js` |
 | Persona-Hinweis | `HTML/js/solita-core.js` (`SOLITA_SYSTEM`) | 1 Zeile |
 | Scope-Token | Supabase-Secret `GMAIL_SEND_REFRESH_TOKEN` | manuell (Doc) |
+
+## Weitere Notizen (separat vom Mailversand)
+
+- **„Share" → „teilen":** Das „Share"-Label auf Deutsch umbenennen → „teilen".
+- **„broadcast" → „live":** Das „broadcast"-Label in „live" ändern.
