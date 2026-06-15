@@ -2039,7 +2039,8 @@ ${pts}
         // sightseeing categories default ON, the rest OFF. "Tanken" is plain OSM amenity=fuel (station
         // locations, NO key needed) — Tankerkönig live prices stay a separate FEAT-26 enrichment.
         [['poi-cat-sights', 1], ['poi-cat-views', 1], ['poi-cat-historic', 1], ['poi-cat-nature', 1],
-        ['poi-cat-service', 0], ['poi-cat-food', 0], ['poi-cat-lodging', 0], ['poi-cat-fuel', 0]].forEach(([id, def]) => {
+        ['poi-cat-service', 0], ['poi-cat-food', 0], ['poi-cat-lodging', 0], ['poi-cat-fuel', 0],
+        ['poi-cat-speedcam', 0]].forEach(([id, def]) => {
             const el = $(id); if (!el) return;
             const saved = localStorage.getItem(id);
             el.checked = saved == null ? !!def : saved === '1';
