@@ -786,6 +786,7 @@
                 conversationHistory.pop(); // User-Nachricht bei Fehler wieder entfernen
                 hideTyping();
                 addMessage('assistant', `❌ Fehler: ${err.message}`);
+                if (window.solitaPhase) solitaPhase('dormant');   // turn failed (e.g. fetch aborted by an app-switch) -> clear the stuck "thinking" pill
             } finally {
                 sendButton.disabled = false;
                 messageInput.focus();
