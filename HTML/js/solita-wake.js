@@ -1,4 +1,8 @@
         (function () {
+            // Solita adapter for the generic ear (js/ear.js). The recognizer mechanics live in Ear;
+            // this file owns ONLY the Solita-specific parts: the wake words, the #wakeBtn + #messageInput
+            // DOM, the spoken-command decoding (pause/farewell/logout/slash), UI-mode, the multilang SAY
+            // map, the speakReply suspend/resume wrapper, the load-init gate, and the window.solita*Voice API.
             const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
             const wakeBtn = document.getElementById('wakeBtn');
             const input = document.getElementById('messageInput');
@@ -8,15 +12,29 @@
             const NATIVE = (!SR && window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.SolitaVoice)
                 ? window.Capacitor.Plugins.SolitaVoice : null;
             if (!SR && !NATIVE) { wakeBtn.style.display = 'none'; return; }   // e.g. iOS Safari: nothing to listen with
-            let nativeListening = false, nativeBound = false;
 
             const TRIGGERS = ['solita', 'solida', 'rita'];          // Vosk-tested variants (see krass-app note)
             const WAKE_KEY = 'solita_wake';
             // Doc rule: the ear is ALWAYS on — it must never be silently off after a reload/login. The 👂
             // button only mutes it for the current session; on the next load it is on again.
             let wakeOn = true;
-            let rec = null, awaitingQuery = false, speaking = false, stopping = false, convo = false, paused = false;
-            let qTimer = null;   // debounce for the spoken question (Android WebView sends cumulative "final" results)
+            // SOURCE OF TRUTH for the Solita conversation state. The ear keeps pure mirrors of these
+            // (pushed via ear.resume/pause/setConvo/setAwaiting); these locals are what the adapter reads.
+            let awaitingQuery = false, convo = false, paused = false;
+
+            // Build the generic ear with Solita's config. The ear knows no Solita words/DOM/globals.
+            const ear = new Ear({
+                triggers: TRIGGERS,
+                getLang: function () { return window.solitaSttLang ? window.solitaSttLang() : 'de-DE'; },
+                nativePlugin: NATIVE,
+                debounceMs: 900,
+                log: function (m) { if (window.DebugWindow) DebugWindow.log(m); },
+                onWake: onWake,
+                onUtterance: onUtterance,
+                onInterim: onInterim,
+                onRawFinal: onRawFinal
+            });
+            ear.setEnabled(wakeOn);
 
             function reflect() { wakeBtn.classList.toggle('active', wakeOn); }
             reflect();
@@ -24,20 +42,28 @@
             // Pause listening while Solita speaks (so the mic doesn't pick up her own "Solita"), resume after.
             const _speak = window.speakReply;
             window.speakReply = function (text) {
-                if (wakeOn && (rec || NATIVE)) { speaking = true; if (rec) { try { rec.stop(); } catch (e) { } } }
+                // Old guard was `if (wakeOn && (rec || NATIVE)) { speaking = true; rec.stop(); }` — it only
+                // muted when a recognizer was actually live. We intentionally simplify to `isEnabled()`:
+                // suspend() sets the mute flag synchronously and is idempotent + harmless when no rec is
+                // running (the `if(suspended)return` gates in Ear.start()/onResult() do the rest), and
+                // resume() clears it unconditionally — so there is no behavioral loss. (SR is guaranteed
+                // truthy here: we early-returned above when neither SR nor NATIVE exists.)
+                if (ear.isEnabled()) ear.suspend();
                 if (typeof _speak === 'function') _speak(text);
                 if (window.solitaPhase) solitaPhase('speaking');
                 const resume = () => {
-                    speaking = false;
+                    ear.unsuspend();   // unconditional, matching the old `speaking = false;` (clears mute even if off)
                     // Turn-loop: while a conversation is open, reopen the ear after EVERY reply (no "Solita"
                     // per turn). When the conversation has ENDED, fall back to the SLUMBER resting state —
                     // visible pill, waiting for "Solita" — instead of an invisible idle. (UI-mode = own flow.)
-                    if (wakeOn) {
-                        startRec();
+                    if (ear.isEnabled()) {
+                        ear.start();
                         if (convo && !window.__uiMode) awaitingQuery = true;
                         else if (!convo) paused = true;   // resting → dormant
+                        ear.resume({ awaitingQuery: awaitingQuery, convo: convo });   // mirror the flags
+                        if (paused) ear.pause();
                     }
-                    if (window.solitaPhase) solitaPhase(!wakeOn ? 'idle' : (convo ? 'listening' : 'dormant'));
+                    if (window.solitaPhase) solitaPhase(!ear.isEnabled() ? 'idle' : (convo ? 'listening' : 'dormant'));
                 };
                 // _speak set window.__solitaSpeaking synchronously; poll it (covers Cloud audio AND the
                 // browser fallback) → re-open the ear when playback ends.
@@ -46,50 +72,19 @@
                 }, 200);
             };
 
-            function extractQuery(t) {
-                const low = t.toLowerCase();
-                let idx = -1, hit = '';
-                for (const w of TRIGGERS) {
-                    const i = low.indexOf(w);
-                    if (i !== -1 && (idx === -1 || i < idx)) { idx = i; hit = w; }
-                }
-                if (idx === -1) return null;                         // no wake word in this phrase
-                return t.slice(idx + hit.length).replace(/^[\s,.:!?-]+/, '').trim();
-            }
-
             function fire(query) {
                 convo = true;                                        // addressing Solita opens the conversation thread
                 if (!query) {                                        // heard "Solita" alone → prompt + listen once
                     awaitingQuery = true;
+                    ear.setConvo(true); ear.setAwaiting(true);
                     if (window.speakReply) window.speakReply(say('yes'));
                     return;
                 }
                 awaitingQuery = false;
+                ear.setConvo(true); ear.setAwaiting(false);
                 // Show the heard question in the input line first, then submit a beat later.
                 if (input) { input.value = query; input.dispatchEvent(new Event('input')); }
                 if (typeof sendMessage === 'function') setTimeout(sendMessage, 700);
-            }
-
-            // Android WebView delivers ONE spoken question as SEVERAL cumulative "final" results
-            // ("wie" → "wie wird" → … → full sentence) — measured on the Pixel. The old code fired on the
-            // FIRST fragment and then cleared the input on the next, so the question was lost. Buffer the
-            // latest (longest) text and submit only once the finals have settled (~900 ms of quiet).
-            // Desktop Chrome sends a single final → this just adds a short, harmless delay.
-            function cancelQuery() { if (qTimer) { clearTimeout(qTimer); qTimer = null; } }
-            function queueQuery(t) {
-                awaitingQuery = true;                                 // stay open while the finals keep growing
-                if (input) { input.value = t; input.dispatchEvent(new Event('input')); }   // show progress live
-                if (qTimer) clearTimeout(qTimer);
-                qTimer = setTimeout(function () {
-                    qTimer = null;
-                    let q = ((input && input.value) || t).trim();
-                    const low = q.toLowerCase();                      // drop a leading wake word if it slipped in
-                    for (const w of TRIGGERS) { if (low.startsWith(w)) { q = q.slice(w.length).replace(/^[\s,.:!?-]+/, '').trim(); break; } }
-                    if (!q) return;
-                    awaitingQuery = false; convo = true;
-                    if (input) { input.value = q; input.dispatchEvent(new Event('input')); }
-                    if (typeof sendMessage === 'function') sendMessage();
-                }, 900);
             }
 
             // UI-mode voice flow (Doc): once in UI mode, speak the wish freely (no "Solita" needed),
@@ -130,8 +125,9 @@
             //   see you · that's all/it · we're done    ES: adiós · hasta luego/pronto/mañana · buenas noches · chao
             const FAREWELL = /^(tschü(?:ss?)?|auf wiederhör(?:en)?|das war'?s(?: für (?:heute|jetzt))?|danke,? das war'?s|schluss für (?:heute|jetzt)|beenden?(?: das gespräch)?|bye(?:[\s-]?bye)?|goodbye|good ?night|see you(?: later)?|that'?s (?:all|it)|we'?re done|adi[oó]s|hasta (?:luego|pronto|ma[ñn]ana)|buenas noches|chao|ciao|eso es todo)\b/i;
             function endConvo() {
-                cancelQuery();
+                ear.cancelPending();
                 convo = false; awaitingQuery = false;
+                ear.setConvo(false); ear.setAwaiting(false);
                 if (window.speakReply) window.speakReply(say('bye'));
             }
 
@@ -141,8 +137,9 @@
             //   EN: log (me) out · sign (me) out      ES: cierra(me) (la) sesión · cerrar sesión · desconéctame
             const LOGOUT = /\bausloggen\b|\babmelden\b|\blogout\b|\blog\s?out\b|\blog+e?\s?mich\s?(aus|raus)\b|\bmelde mich (ab|aus|raus)\b|\bmich (ab|aus)melden\b|\blog ?me ?out\b|\bsign\s?(?:me\s?)?out\b|\bci[eé]rra(?:me)? (?:la )?sesi[oó]n\b|\bcerrar sesi[oó]n\b|\bdescon[eé]ctame\b/i;
             function doVoiceLogout() {
-                cancelQuery();
+                ear.cancelPending();
                 convo = false; awaitingQuery = false;
+                ear.setConvo(false); ear.setAwaiting(false);
                 if (window.speakReply) window.speakReply(say('logout'));
                 setTimeout(function () { if (window.solitaLogout) window.solitaLogout(); }, 1700);
             }
@@ -154,102 +151,69 @@
             //   EN: pause · chill out · take a break · go to sleep      ES: pausa · descansa · a dormir · duérmete
             const PAUSE = /\bpause\b|\bpausier|\bchill\s+mal\b|\bchillen\b|\bruhe?\s+dich\s+aus\b|\bso(?:g)?ni\s+d'?\s?oro\b|\bchill\s+out\b|\btake a break\b|\bgo to sleep\b|\bpausa\b|\bdescansa\b|\ba dormir\b|\bdué?rmete\b/i;
             function enterPause() {
-                cancelQuery();
+                ear.cancelPending();
                 paused = true; convo = false; awaitingQuery = false;
+                ear.pause(); ear.setConvo(false); ear.setAwaiting(false);
                 if (window.solitaPhase) solitaPhase('dormant');     // pill → half-asleep
             }
 
-            function onResult(e) {
-                if (speaking) return;
-                let txt = '', interim = '';
-                for (let i = e.resultIndex; i < e.results.length; i++) {
-                    if (e.results[i].isFinal) txt += e.results[i][0].transcript;
-                    else interim += e.results[i][0].transcript;
-                }
-                // Live: while it's your turn in a conversation, mirror the INTERIM transcript into the input
-                // line as you speak (not committed yet). Skip ambient wake-listening / UI-mode / pause.
-                if (!txt && interim && (convo || awaitingQuery) && !window.__uiMode && !paused) {
-                    if (input) { input.value = interim; input.dispatchEvent(new Event('input')); }
-                    return;
-                }
-                txt = txt.trim();
-                if (!txt) return;
-                try { console.log('[solita] heard: "' + txt + '"'); } catch (_) {}  // measure what de-DE actually transcribes
-                if (paused) {                                          // dormant: "Solita" wakes her …
+            // The wake handler: a trigger word was detected (ambient/dormant or native). The ear already
+            // cleared its own dormant flag; clear the adapter's local mirror too (matches old lines 186/207),
+            // then open the conversation exactly as the old fire() did.
+            function onWake(residual) { paused = false; fire(residual); }
+
+            // Live interim mirror (ear emits only while listening && !dormant && !suspended). Skip UI-mode here
+            // (matches the old `!window.__uiMode` gate) so dictated UI wishes don't echo into the input.
+            function onInterim(t) {
+                if (!window.__uiMode) { if (input) { input.value = t; input.dispatchEvent(new Event('input')); } }
+            }
+
+            // Settled debounced cumulative-finals output. Resolve against the latest text shown in the input
+            // (the "longest shown" wins, exactly as the old queueQuery did) and submit.
+            function onUtterance(q) {
+                let out = ((input && input.value) || q).trim();
+                const low = out.toLowerCase();                       // drop a leading wake word if it slipped in
+                for (const w of TRIGGERS) { if (low.startsWith(w)) { out = out.slice(w.length).replace(/^[\s,.:!?-]+/, '').trim(); break; } }
+                if (!out) return;
+                awaitingQuery = false; convo = true;
+                ear.setConvo(true); ear.setAwaiting(false);
+                if (input) { input.value = out; input.dispatchEvent(new Event('input')); }
+                if (typeof sendMessage === 'function') sendMessage();
+            }
+
+            // THE SEAM: decode every raw trimmed final BEFORE the ear's generic wake/debounce logic. Returns
+            // true when this final was a Solita command (ear then does nothing further). This reproduces the
+            // live onResult if-ladder (old lines 178-197) IN ORDER; the `return false` cases fall through to
+            // the ear's generic fallback (dormant-wake / awaitingQuery-debounce / extractQuery→fire).
+            function onRawFinal(txt) {
+                if (ear.isPaused()) {                                  // dormant: "Solita" wakes her …
                     // … but spoken slash-commands ("slash ui" / "slash list" …) still fire — quick remote, stays asleep.
                     if (/^(?:slash|splash|flash)\s+(?:ui|u\s*i|list|liste|clear|de|en|es|deutsch|english|spanish|espa[nñ]ol)\b/i.test(txt)) {
                         if (input) { input.value = txt; input.dispatchEvent(new Event('input')); }
                         if (typeof sendMessage === 'function') setTimeout(sendMessage, 200);
-                        return;                                        // run it, stay in slumber
+                        return true;                                   // run it, stay in slumber
                     }
-                    const w = extractQuery(txt);
-                    if (w !== null) { paused = false; fire(w); }       // "Solita …" → wake; rest becomes the first turn
-                    return;
+                    return false;                                      // non-slash dormant → ear does extractQuery→wake
                 }
-                if (window.__uiMode) { handleUiVoice(txt); return; }   // UI mode: accumulate + go/pause
+                if (window.__uiMode) { handleUiVoice(txt); return true; }   // UI mode: accumulate + go/pause
                 if (input) input.value = '';                           // final arrived → clear the live interim text
-                const addressed = convo || awaitingQuery || extractQuery(txt) !== null;
-                if (addressed && PAUSE.test(txt)) { enterPause(); return; }     // "Pause" → dormant until "Solita"
-                if (addressed && LOGOUT.test(txt)) { doVoiceLogout(); return; } // "Solita, log mich aus" → action, not chat
-                if (convo && FAREWELL.test(txt)) { endConvo(); return; } // "tschüss" → hang up the thread
-                if (awaitingQuery) { queueQuery(txt); return; }       // buffer cumulative WebView finals, submit once settled
-                const q = extractQuery(txt);
-                if (q !== null) fire(q);                               // phrase contained "Solita …" → (re)open convo
-            }
-
-            function startRec() {
-                if (NATIVE) {                                         // native Vosk path (no Web SpeechRecognition)
-                    if (!wakeOn || speaking || nativeListening) return;
-                    if (!nativeBound) {
-                        nativeBound = true;
-                        NATIVE.addListener('result', function (ev) {  // Vosk heard the wake-word "Solita"
-                            if (speaking || !wakeOn) return;
-                            paused = false;                           // dormant → wake
-                            fire('');                                 // "Ja?" → then type the question (free dictation = next step)
-                        });
-                    }
-                    nativeListening = true;
-                    if (window.DebugWindow) DebugWindow.log('wake: native Vosk start');
-                    try { NATIVE.start().catch(function (e) { nativeListening = false; if (window.DebugWindow) DebugWindow.log('Vosk start reject: ' + ((e && e.message) || e)); }); }
-                    catch (e) { nativeListening = false; }
-                    return;
-                }
-                if (!wakeOn || speaking || rec) return;
-                try {
-                    rec = new SR();
-                    rec.lang = (window.solitaSttLang ? window.solitaSttLang() : 'de-DE'); rec.continuous = true; rec.interimResults = true; rec.maxAlternatives = 1;
-                    rec.onresult = onResult;
-                    rec.onstart = function () { if (window.DebugWindow) DebugWindow.log('wake: started'); };
-                    rec.onerror = function (e) { if (window.DebugWindow) DebugWindow.log('wake onerror: ' + (e && e.error)); };
-                    rec.onend = function () {
-                        rec = null;
-                        if (window.DebugWindow) DebugWindow.log('wake onend (on=' + wakeOn + ' speak=' + speaking + ' stop=' + stopping + ')');
-                        if (wakeOn && !speaking && !stopping) setTimeout(startRec, 300);
-                    };
-                    rec.start();
-                } catch (e) {
-                    rec = null;
-                    if (window.DebugWindow) DebugWindow.log('wake start() THROW: ' + ((e && e.message) || e));
-                    if (wakeOn && !speaking && !stopping) setTimeout(startRec, 1000);   // e.g. mic busy right after unlock → retry, don't die
-                }
-            }
-
-            function stopRec() {
-                if (NATIVE) { nativeListening = false; try { NATIVE.stop().catch(function () { }); } catch (e) { } return; }
-                stopping = true;
-                if (rec) { try { rec.stop(); } catch (e) { } rec = null; }
-                setTimeout(function () { stopping = false; }, 500);
+                const addressed = convo || awaitingQuery || ear.matchTrigger(txt) !== null;
+                if (addressed && PAUSE.test(txt)) { enterPause(); return true; }     // "Pause" → dormant until "Solita"
+                if (addressed && LOGOUT.test(txt)) { doVoiceLogout(); return true; } // "Solita, log mich aus" → action, not chat
+                if (convo && FAREWELL.test(txt)) { endConvo(); return true; } // "tschüss" → hang up the thread
+                return false;   // plain question: ear handles (awaitingQuery→queueQuery, else extractQuery→fire)
             }
 
             // Turn the whole voice line OFF (used on logout). Persists off so a fresh login starts quiet.
             window.solitaStopVoice = function () {
                 // Logout stops the live mic while logged out — but NEVER persists "off" (Doc: ear always on),
                 // so it resumes on the next login (solitaStartVoice) or page load.
-                cancelQuery();
+                ear.cancelPending();
                 wakeOn = false;
                 convo = false; awaitingQuery = false; paused = false; reflect();
+                ear.setEnabled(false); ear.setConvo(false); ear.setAwaiting(false);
                 if (window.solitaPhase) solitaPhase('idle');
-                stopRec();
+                ear.stop();
             };
 
             // Turn the voice line ON — called from the auth flow on every successful login so the ear is always
@@ -257,33 +221,23 @@
             // SLUMBER resting state (pill visible, waiting for "Solita").
             window.solitaStartVoice = function () {
                 wakeOn = true; convo = false; awaitingQuery = false; paused = true; reflect();
+                ear.setEnabled(true); ear.setConvo(false); ear.setAwaiting(false); ear.pause();
                 if (window.solitaPhase) solitaPhase('dormant');
-                startRec();
+                ear.start();
             };
 
             // Restart the recognition so a language switch takes effect at once (a fresh rec reads solitaSttLang()).
             window.solitaRestartVoice = function () {
                 if (!wakeOn) return;
-                if (rec) { try { rec.stop(); } catch (e) { } rec = null; }
-                setTimeout(startRec, 300);
+                ear.restart();
             };
 
             wakeBtn.addEventListener('click', function () {
                 wakeOn = !wakeOn; localStorage.setItem(WAKE_KEY, wakeOn ? '1' : '0'); reflect();
                 convo = false; awaitingQuery = false;                 // toggling the line resets the thread
-                if (wakeOn) { paused = true; if (window.solitaPhase) solitaPhase('dormant'); startRec(); }   // ear on → SLUMBER (waiting for "Solita")
-                else { cancelQuery(); paused = false; if (window.solitaPhase) solitaPhase('idle'); stopRec(); }
-            });
-
-            // Screen lock / app-switch SUSPENDS the WebView → the Web SpeechRecognition dies (or turns into a
-            // zombie: `rec` still set but deaf), while the pill keeps reading "listening" → she stops reacting.
-            // When the page becomes visible again (unlock), force a clean restart so the ear truly works again.
-            // (Native Vosk manages its own lifecycle → skip.)
-            document.addEventListener('visibilitychange', function () {
-                if (document.visibilityState !== 'visible' || !wakeOn || speaking || NATIVE) return;
-                if (window.DebugWindow) DebugWindow.log('wake: visible → restart recognizer');
-                if (rec) { try { rec.onend = null; rec.stop(); } catch (e) { } rec = null; }   // drop a dead/zombie rec
-                setTimeout(startRec, 300);
+                ear.setConvo(false); ear.setAwaiting(false);
+                if (wakeOn) { paused = true; ear.setEnabled(true); ear.pause(); if (window.solitaPhase) solitaPhase('dormant'); ear.start(); }   // ear on → SLUMBER (waiting for "Solita")
+                else { ear.cancelPending(); paused = false; ear.setEnabled(false); if (window.solitaPhase) solitaPhase('idle'); ear.stop(); }
             });
 
             // On load, start the ear once auth has settled — but only if already logged in (overlay hidden,
@@ -293,6 +247,6 @@
             setTimeout(function () {
                 const ov = document.getElementById('cyber-auth-overlay');
                 if (ov && ov.classList.contains('visible')) return;     // not logged in yet → wait for login
-                paused = true; if (window.solitaPhase) solitaPhase('dormant'); startRec();
+                paused = true; ear.pause(); if (window.solitaPhase) solitaPhase('dormant'); ear.start();
             }, 600);
         })();
