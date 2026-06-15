@@ -22,6 +22,11 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    // Vosk ships native libs (libvosk / libjnidispatch) that can collide with other plugins' — keep the first.
+    packagingOptions {
+        pickFirst 'lib/**/libvosk.so'
+        pickFirst 'lib/**/libjnidispatch.so'
+    }
 }
 
 repositories {
@@ -42,6 +47,8 @@ dependencies {
     implementation project(':capacitor-cordova-android-plugins')
     // Activity Recognition API (travel-mode detection) lives in play-services-location.
     implementation "com.google.android.gms:play-services-location:21.3.0"
+    // Offline speech recognition for the Solita wake-word (keyless, on-device) — Stufe B (Vosk).
+    implementation "com.alphacephei:vosk-android:0.3.47"
 }
 
 apply from: 'capacitor.build.gradle'

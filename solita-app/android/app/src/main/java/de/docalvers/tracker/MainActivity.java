@@ -11,6 +11,7 @@ public class MainActivity extends BridgeActivity {
         registerPlugin(BaroPlugin.class);                // expose the barometer (pressure → altitude)
         registerPlugin(ActivityRecognitionPlugin.class); // travel mode: walk / run / bike / vehicle
         registerPlugin(AppUpdatePlugin.class);           // in-app APK self-update (sideload, no Play Store)
+        registerPlugin(SolitaVoicePlugin.class);         // Stufe B: native Vosk wake-word → WebView bridge
         super.onCreate(savedInstanceState);
 
         // Plan A serves the app LIVE from docalvers.de (GitHub Pages → fixed Cache-Control: max-age=600).

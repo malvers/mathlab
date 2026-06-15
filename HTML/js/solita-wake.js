@@ -3,7 +3,12 @@
             const wakeBtn = document.getElementById('wakeBtn');
             const input = document.getElementById('messageInput');
             if (!wakeBtn) return;
-            if (!SR) { wakeBtn.style.display = 'none'; return; }   // e.g. iOS Safari: no SpeechRecognition
+            // Native app (Stufe B): the Android WebView has NO Web SpeechRecognition → listen via the native
+            // Vosk plugin (SolitaVoice) instead. The browser path (SR) stays exactly as before.
+            const NATIVE = (!SR && window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.SolitaVoice)
+                ? window.Capacitor.Plugins.SolitaVoice : null;
+            if (!SR && !NATIVE) { wakeBtn.style.display = 'none'; return; }   // e.g. iOS Safari: nothing to listen with
+            let nativeListening = false, nativeBound = false;
 
             const TRIGGERS = ['solita', 'solida', 'rita'];          // Vosk-tested variants (see krass-app note)
             const WAKE_KEY = 'solita_wake';
@@ -18,7 +23,7 @@
             // Pause listening while Solita speaks (so the mic doesn't pick up her own "Solita"), resume after.
             const _speak = window.speakReply;
             window.speakReply = function (text) {
-                if (wakeOn && rec) { speaking = true; try { rec.stop(); } catch (e) { } }
+                if (wakeOn && (rec || NATIVE)) { speaking = true; if (rec) { try { rec.stop(); } catch (e) { } } }
                 if (typeof _speak === 'function') _speak(text);
                 if (window.solitaPhase) solitaPhase('speaking');
                 const resume = () => {
@@ -167,6 +172,22 @@
             }
 
             function startRec() {
+                if (NATIVE) {                                         // native Vosk path (no Web SpeechRecognition)
+                    if (!wakeOn || speaking || nativeListening) return;
+                    if (!nativeBound) {
+                        nativeBound = true;
+                        NATIVE.addListener('result', function (ev) {  // Vosk heard the wake-word "Solita"
+                            if (speaking || !wakeOn) return;
+                            paused = false;                           // dormant → wake
+                            fire('');                                 // "Ja?" → then type the question (free dictation = next step)
+                        });
+                    }
+                    nativeListening = true;
+                    if (window.DebugWindow) DebugWindow.log('wake: native Vosk start');
+                    try { NATIVE.start().catch(function (e) { nativeListening = false; if (window.DebugWindow) DebugWindow.log('Vosk start reject: ' + ((e && e.message) || e)); }); }
+                    catch (e) { nativeListening = false; }
+                    return;
+                }
                 if (!wakeOn || speaking || rec) return;
                 try {
                     rec = new SR();
@@ -184,6 +205,7 @@
             }
 
             function stopRec() {
+                if (NATIVE) { nativeListening = false; try { NATIVE.stop().catch(function () { }); } catch (e) { } return; }
                 stopping = true;
                 if (rec) { try { rec.stop(); } catch (e) { } rec = null; }
                 setTimeout(function () { stopping = false; }, 500);
