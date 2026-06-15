@@ -227,7 +227,11 @@
                         if (wakeOn && !speaking && !stopping) setTimeout(startRec, 300);
                     };
                     rec.start();
-                } catch (e) { rec = null; if (window.DebugWindow) DebugWindow.log('wake start() THROW: ' + ((e && e.message) || e)); }
+                } catch (e) {
+                    rec = null;
+                    if (window.DebugWindow) DebugWindow.log('wake start() THROW: ' + ((e && e.message) || e));
+                    if (wakeOn && !speaking && !stopping) setTimeout(startRec, 1000);   // e.g. mic busy right after unlock → retry, don't die
+                }
             }
 
             function stopRec() {
@@ -269,6 +273,17 @@
                 convo = false; awaitingQuery = false;                 // toggling the line resets the thread
                 if (wakeOn) { paused = true; if (window.solitaPhase) solitaPhase('dormant'); startRec(); }   // ear on → SLUMBER (waiting for "Solita")
                 else { cancelQuery(); paused = false; if (window.solitaPhase) solitaPhase('idle'); stopRec(); }
+            });
+
+            // Screen lock / app-switch SUSPENDS the WebView → the Web SpeechRecognition dies (or turns into a
+            // zombie: `rec` still set but deaf), while the pill keeps reading "listening" → she stops reacting.
+            // When the page becomes visible again (unlock), force a clean restart so the ear truly works again.
+            // (Native Vosk manages its own lifecycle → skip.)
+            document.addEventListener('visibilitychange', function () {
+                if (document.visibilityState !== 'visible' || !wakeOn || speaking || NATIVE) return;
+                if (window.DebugWindow) DebugWindow.log('wake: visible → restart recognizer');
+                if (rec) { try { rec.onend = null; rec.stop(); } catch (e) { } rec = null; }   // drop a dead/zombie rec
+                setTimeout(startRec, 300);
             });
 
             // On load, start the ear once auth has settled — but only if already logged in (overlay hidden,
