@@ -32,6 +32,9 @@
 
         let sessionPwd = ""; // password the user typed; sent to the proxy as x-app-pass
 
+        // Auth diagnostics → the ONE DebugWindow only (Doc: keine Extra-Debug-Flächen, alles ins Window).
+        function authDbg(msg) { try { if (window.DebugWindow) DebugWindow.log('auth: ' + msg); } catch (e) {} }
+
         function togglePwdVisibility() {
             const input = document.getElementById('cyber-pwd-input');
             const isHidden = input.type === 'password';
@@ -44,13 +47,14 @@
         async function validateLabAccess() {
             const pwd = document.getElementById('cyber-pwd-input').value;
             const ok = await verifyPwd(pwd);
+            authDbg('LOGIN geklickt → verify=' + ok + ' (pwd-len ' + (pwd ? pwd.length : 0) + ')');
 
             if (ok) {
                 sessionPwd = pwd;
                 // Persist the password in THIS browser so the auth modal doesn't reappear next visit
                 // (Doc 2026-06-15). Cleared on logout. localStorage only — never written to source (Rule 21).
                 try { localStorage.setItem('dev_access', pwd); } catch (e) {}
-                if (window.DebugWindow) DebugWindow.log('auth: login OK — dev_access gespeichert? ' + (localStorage.getItem('dev_access') ? ('JA (len ' + pwd.length + ')') : 'NEIN/Fehler'));
+                authDbg('gespeichert? ' + (localStorage.getItem('dev_access') ? ('JA (len ' + pwd.length + ')') : 'NEIN/Fehler'));
                 document.getElementById('cyber-auth-overlay').classList.remove('visible');
                 if (window.solitaStartVoice) solitaStartVoice();   // Doc rule: ear always on — (re)start the wake-word on login
                 document.getElementById('messageInput').focus();
@@ -70,6 +74,16 @@
         const messageInput = document.getElementById('messageInput');
         // GO/EXIT buttons removed — Enter sends. Null-object keeps the old .disabled / .addEventListener refs safe.
         const sendButton = document.getElementById('sendButton') || { disabled: false, addEventListener() {} };
+
+        // Touch: tap a bubble to reveal its copy button (no hover on mobile — Doc 2026-06-15). Tapping the
+        // copy button itself still copies; only one bubble shows its button at a time. On desktop the
+        // .show-copy class has no CSS effect (hover governs there), so this is harmless.
+        messagesArea.addEventListener('click', (e) => {
+            if (e.target.closest('.copy-btn')) return;                 // let the copy button do its job
+            const mc = e.target.closest('.message-content');
+            messagesArea.querySelectorAll('.message-content.show-copy').forEach(el => { if (el !== mc) el.classList.remove('show-copy'); });
+            if (mc) mc.classList.toggle('show-copy');
+        });
 
         // Conversation-phase indicator: reflect who's "on" right now (listening | thinking | speaking | idle).
         window.solitaPhase = function (s) {
@@ -182,11 +196,17 @@
             + "sobald es in IRGENDEINER Form um Wetter, Vorhersage, Temperatur, Regen oder Wind geht — egal wie "
             + "formuliert, ob jetzt oder in der Zukunft (z.B. „wie wird das Wetter heute in Dresden“) — rufst du "
             + "IMMER get_weather auf und beantwortest Wetter NIE aus eigenem Wissen (du hast dafür keine Live-Daten). "
+            + "Du hast außerdem check_gmail (liest READ-ONLY ungelesene Mails — Anzahl + Absender); nutze es, "
+            + "sobald es ums Postfach/neue Mails geht (z.B. „hab ich neue Mails?“, „wer hat geschrieben?“). "
             + "Sonst antworte einfach. Bestätige eine ausgeführte Aktion knapp in einem Satz.";
 
         // ----- TOOL-USE (Solita acts, not just talks) -----
         // Tools handed to Claude on every chat turn. Claude calls one only when Doc clearly asks to change a
         // setting or note something down (steered by the persona above). The loop in sendMessage executes it.
+        // Tool registry: add-on files (e.g. js/solita-gmail.js) push { specs, handlers, badges } here.
+        // Read at send-time (below), so new tools live in their OWN file and never touch this core again.
+        window.SolitaTools = window.SolitaTools || { specs: [], handlers: {}, badges: {} };
+
         const SOLITA_TOOLS = [
             {
                 name: 'change_setting',
@@ -247,6 +267,9 @@
                 if (name === 'get_weather') {
                     return await getWeather(input && input.location, input && input.days);
                 }
+                // Registered add-on tools (e.g. js/solita-gmail.js) — run their handler if present.
+                const ext = window.SolitaTools && window.SolitaTools.handlers && window.SolitaTools.handlers[name];
+                if (ext) return await ext(input, pwd);
                 return { ok: false, summary: 'Unbekanntes Werkzeug: ' + name };
             } catch (e) { return { ok: false, summary: 'Fehler: ' + ((e && e.message) || e) }; }
         }
@@ -257,6 +280,8 @@
             if (name === 'write_note') return '📝 ich notiere „' + ((input && input.note) || '') + '"';
             if (name === 'show_ui_list') return '';   // the table itself is the output → no badge
             if (name === 'get_weather') return '🌤️ ich hole ' + ((input && input.days > 1) ? 'die Vorhersage' : 'das Wetter') + ((input && input.location) ? ' für ' + input.location : '') + ' …';
+            const xb = window.SolitaTools && window.SolitaTools.badges && window.SolitaTools.badges[name];
+            if (xb) return xb(input);
             return '⚙️ ' + name;
         }
 
@@ -742,7 +767,7 @@
                         body: JSON.stringify({
                             model: getModel(),
                             messages: msgs,
-                            tools: SOLITA_TOOLS,
+                            tools: SOLITA_TOOLS.concat((window.SolitaTools && window.SolitaTools.specs) || []),
                             max_tokens: 3000
                         })
                     });
@@ -797,20 +822,21 @@
             // Auto-unlock from the persisted password on ANY device/origin (Doc 2026-06-15: persist in the
             // browser). verifyPwd re-checks it server-side → a rotated/wrong password falls back to the modal.
             const devPwd = localStorage.getItem('dev_access');
-            if (window.DebugWindow) DebugWindow.log('auth: beim Laden — dev_access vorhanden? ' + (devPwd ? ('JA (len ' + devPwd.length + ')') : 'NEIN'));
+            authDbg('Laden: dev_access ' + (devPwd ? ('vorhanden (len ' + devPwd.length + ')') : 'FEHLT'));
 
             let success = false;
             if (devPwd && await verifyPwd(devPwd)) {
                 sessionPwd = devPwd;
                 success = true;
             }
-            if (window.DebugWindow) DebugWindow.log('auth: auto-login erfolgreich? ' + success);
+            authDbg('Laden: auto-login=' + success + (devPwd && !success ? ' (dev_access da, aber verify=NEIN → falsches/rotiertes PW?)' : ''));
 
             if (!success) {
                 document.getElementById('cyber-auth-overlay').classList.add('visible');
                 const pwdInput = document.getElementById('cyber-pwd-input');
                 if (pwdInput) setTimeout(() => pwdInput.focus(), 100);
             } else {
+                document.getElementById('cyber-auth-overlay').classList.remove('visible'); // ensure the modal is hidden on auto-login (robustness)
                 setTimeout(() => messageInput.focus(), 100);
             }
         })();

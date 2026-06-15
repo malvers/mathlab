@@ -263,10 +263,17 @@
             z-index: 2;
         }
 
-        /* Copy button only on hover INSIDE the box (not the full-width row). Touch: no hover → stays visible. */
+        /* Copy button only on hover INSIDE the box (not the full-width row). */
         @media (hover: hover) {
             .copy-btn { opacity: 0; }
             .message-content:hover .copy-btn { opacity: 1; }
+        }
+
+        /* Touch (no hover): copy button hidden until the bubble is TAPPED — sonst kleben die Icons fest
+           dran (Doc 2026-06-15). Tap toggelt .show-copy (Handler in solita-core.js). */
+        @media (hover: none) {
+            .copy-btn { opacity: 0; }
+            .message-content.show-copy .copy-btn { opacity: 1; }
         }
 
         .copy-btn:hover {
@@ -683,6 +690,9 @@
     </div>
 
     <script src="../js/solita-core.js"></script>
+
+    <!-- Tool add-on: check_gmail (READ-ONLY Gmail peek). Self-registers into window.SolitaTools. -->
+    <script src="../js/solita-gmail.js"></script>
 
     <!-- Voice mode: dictate (🎤) + read answers aloud (🔊). Browser-native, no key. Additive. -->
     <script src="../js/solita-tts.js"></script>
