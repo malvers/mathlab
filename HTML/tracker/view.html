@@ -506,7 +506,15 @@
         // the first tick: no new points, no photos, frozen clock. Now we re-fetch every POLL_MS and
         // re-apply, so the token link updates live. fitBounds runs only on the FIRST apply, so the
         // viewer's own pan/zoom is never yanked away.
-        const POLL_MS = 6000;
+        // Egress-safe polling (Doc 2026-06-15): a left-open share polling a big base64 row every 6 s
+        // burned >16 GB egress. So skip while the tab is hidden, and back off when the row stops changing
+        // (a finished track settles to a slow heartbeat instead of pulling MBs every 6 s).
+        const POLL_MIN = 6000, POLL_MAX = 10 * 60000;
+        let _pollMs = POLL_MIN, _lastSig = '', _pollTimer = null, _viewTick = null;
+        function rowSig(row) {                              // cheap change signal — no hashing of the MBs
+            const p = row.points || [], w = row.waypoints || [];
+            return p.length + ':' + w.length + ':' + ((p[p.length - 1] && p[p.length - 1][2]) || '');
+        }
         let _firstApplied = false;
         function applyRow(row) {
             const points = row.points || [], wps = row.waypoints || [];
@@ -549,12 +557,26 @@
             try { row = await fetchRow(token); }
             catch (e) { showMsg(isNetworkErr(e) ? connErrHtml('Server nicht erreichbar', false) : 'Konnte den Track nicht laden: ' + esc(e.message || e)); return; }
             if (!row) { showMsg('Track nicht gefunden — der Link ist ungültig oder wurde widerrufen.'); return; }
-            applyRow(row);
-            setInterval(async () => {                          // keep the shared view live
-                try { const r = await fetchRow(token); if (r) applyRow(r); }
-                catch (_) { /* transient network hiccup → just try again next tick */ }
-            }, POLL_MS);
+            applyRow(row); _lastSig = rowSig(row);
+            _viewTick = async () => {
+                if (!document.hidden) {                        // hidden tab → pull nothing (the big egress sink)
+                    try {
+                        const r = await fetchRow(token);
+                        if (r) {
+                            const sig = rowSig(r);
+                            if (sig !== _lastSig) { _lastSig = sig; _pollMs = POLL_MIN; applyRow(r); } // changed → re-render + poll fast
+                            else { _pollMs = Math.min(_pollMs * 2, POLL_MAX); }                        // unchanged → back off
+                        }
+                    } catch (_) { /* transient → retry next tick */ }
+                }
+                _pollTimer = setTimeout(_viewTick, _pollMs);
+            };
+            _pollTimer = setTimeout(_viewTick, _pollMs);
         }
+        // Returning to the tab → refresh now + go fast again.
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden && _viewTick) { _pollMs = POLL_MIN; if (_pollTimer) clearTimeout(_pollTimer); _viewTick(); }
+        });
 
         // Several shared tracks bundled in one link (?s=tok1,tok2,…) → coloured overlay (no live poll).
         async function loadMulti(tokens) {
