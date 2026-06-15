@@ -20,6 +20,9 @@ window.TrackerPoi = function (ctx) {
         // "Tanken" = station LOCATIONS straight from OSM (keyless) — works without Tankerkönig. Live
         // PRICES remain the optional FEAT-26 enrichment (the separate fuel-price layer, once the key is set).
         'poi-cat-fuel':     { def: false, lbl: 'Tankstelle',       ic: '<path d="M14 13h2a2 2 0 0 1 2 2v2a2 2 0 0 0 4 0v-6.998a2 2 0 0 0-.59-1.42L18 5"/><path d="M14 21V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v16"/><path d="M2 21h13"/><path d="M3 9h11"/>', c: 'h', f: ['["amenity"="fuel"]'] },
+        // Fixed speed cameras straight from OSM (keyless). Display only — no in-drive warning tone
+        // (Germany §23 StVO forbids operating a device that *warns* of traffic enforcement while driving).
+        'poi-cat-speedcam': { def: false, lbl: 'Blitzer',          ic: '<path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/>', c: 'i', f: ['["highway"="speed_camera"]'] },
     };
     const ENDPOINT = 'https://overpass-api.de/api/interpreter';
     const MIN_ZOOM = 11;           // wider than this → area too big → skip (protects Overpass)
@@ -37,6 +40,7 @@ window.TrackerPoi = function (ctx) {
 
     // Which category a result belongs to (icon/colour) — first matching tag wins, roughly in CATS order.
     function catOf(t) {
+        if (t.highway === 'speed_camera') return 'poi-cat-speedcam';
         if (t.amenity === 'fuel') return 'poi-cat-fuel';
         if (t.historic) return 'poi-cat-historic';
         if (t.tourism === 'viewpoint' || t.natural === 'peak' || t.man_made === 'tower') return 'poi-cat-views';
