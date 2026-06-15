@@ -16,6 +16,7 @@
             // button only mutes it for the current session; on the next load it is on again.
             let wakeOn = true;
             let rec = null, awaitingQuery = false, speaking = false, stopping = false, convo = false, paused = false;
+            let qTimer = null;   // debounce for the spoken question (Android WebView sends cumulative "final" results)
 
             function reflect() { wakeBtn.classList.toggle('active', wakeOn); }
             reflect();
@@ -69,6 +70,28 @@
                 if (typeof sendMessage === 'function') setTimeout(sendMessage, 700);
             }
 
+            // Android WebView delivers ONE spoken question as SEVERAL cumulative "final" results
+            // ("wie" → "wie wird" → … → full sentence) — measured on the Pixel. The old code fired on the
+            // FIRST fragment and then cleared the input on the next, so the question was lost. Buffer the
+            // latest (longest) text and submit only once the finals have settled (~900 ms of quiet).
+            // Desktop Chrome sends a single final → this just adds a short, harmless delay.
+            function cancelQuery() { if (qTimer) { clearTimeout(qTimer); qTimer = null; } }
+            function queueQuery(t) {
+                awaitingQuery = true;                                 // stay open while the finals keep growing
+                if (input) { input.value = t; input.dispatchEvent(new Event('input')); }   // show progress live
+                if (qTimer) clearTimeout(qTimer);
+                qTimer = setTimeout(function () {
+                    qTimer = null;
+                    let q = ((input && input.value) || t).trim();
+                    const low = q.toLowerCase();                      // drop a leading wake word if it slipped in
+                    for (const w of TRIGGERS) { if (low.startsWith(w)) { q = q.slice(w.length).replace(/^[\s,.:!?-]+/, '').trim(); break; } }
+                    if (!q) return;
+                    awaitingQuery = false; convo = true;
+                    if (input) { input.value = q; input.dispatchEvent(new Event('input')); }
+                    if (typeof sendMessage === 'function') sendMessage();
+                }, 900);
+            }
+
             // UI-mode voice flow (Doc): once in UI mode, speak the wish freely (no "Solita" needed),
             // then "go" OR a 4 s pause submits it; "fertig" leaves. (sendMessage routes UI-mode text to config.)
             let uiTimer = null;
@@ -107,6 +130,7 @@
             //   see you · that's all/it · we're done    ES: adiós · hasta luego/pronto/mañana · buenas noches · chao
             const FAREWELL = /^(tschü(?:ss?)?|auf wiederhör(?:en)?|das war'?s(?: für (?:heute|jetzt))?|danke,? das war'?s|schluss für (?:heute|jetzt)|beenden?(?: das gespräch)?|bye(?:[\s-]?bye)?|goodbye|good ?night|see you(?: later)?|that'?s (?:all|it)|we'?re done|adi[oó]s|hasta (?:luego|pronto|ma[ñn]ana)|buenas noches|chao|ciao|eso es todo)\b/i;
             function endConvo() {
+                cancelQuery();
                 convo = false; awaitingQuery = false;
                 if (window.speakReply) window.speakReply(say('bye'));
             }
@@ -117,6 +141,7 @@
             //   EN: log (me) out · sign (me) out      ES: cierra(me) (la) sesión · cerrar sesión · desconéctame
             const LOGOUT = /\bausloggen\b|\babmelden\b|\blogout\b|\blog\s?out\b|\blog+e?\s?mich\s?(aus|raus)\b|\bmelde mich (ab|aus|raus)\b|\bmich (ab|aus)melden\b|\blog ?me ?out\b|\bsign\s?(?:me\s?)?out\b|\bci[eé]rra(?:me)? (?:la )?sesi[oó]n\b|\bcerrar sesi[oó]n\b|\bdescon[eé]ctame\b/i;
             function doVoiceLogout() {
+                cancelQuery();
                 convo = false; awaitingQuery = false;
                 if (window.speakReply) window.speakReply(say('logout'));
                 setTimeout(function () { if (window.solitaLogout) window.solitaLogout(); }, 1700);
@@ -129,6 +154,7 @@
             //   EN: pause · chill out · take a break · go to sleep      ES: pausa · descansa · a dormir · duérmete
             const PAUSE = /\bpause\b|\bpausier|\bchill\s+mal\b|\bchillen\b|\bruhe?\s+dich\s+aus\b|\bso(?:g)?ni\s+d'?\s?oro\b|\bchill\s+out\b|\btake a break\b|\bgo to sleep\b|\bpausa\b|\bdescansa\b|\ba dormir\b|\bdué?rmete\b/i;
             function enterPause() {
+                cancelQuery();
                 paused = true; convo = false; awaitingQuery = false;
                 if (window.solitaPhase) solitaPhase('dormant');     // pill → half-asleep
             }
@@ -166,7 +192,7 @@
                 if (addressed && PAUSE.test(txt)) { enterPause(); return; }     // "Pause" → dormant until "Solita"
                 if (addressed && LOGOUT.test(txt)) { doVoiceLogout(); return; } // "Solita, log mich aus" → action, not chat
                 if (convo && FAREWELL.test(txt)) { endConvo(); return; } // "tschüss" → hang up the thread
-                if (awaitingQuery) { fire(txt); return; }             // in conversation: this utterance is the next turn
+                if (awaitingQuery) { queueQuery(txt); return; }       // buffer cumulative WebView finals, submit once settled
                 const q = extractQuery(txt);
                 if (q !== null) fire(q);                               // phrase contained "Solita …" → (re)open convo
             }
@@ -215,6 +241,7 @@
             window.solitaStopVoice = function () {
                 // Logout stops the live mic while logged out — but NEVER persists "off" (Doc: ear always on),
                 // so it resumes on the next login (solitaStartVoice) or page load.
+                cancelQuery();
                 wakeOn = false;
                 convo = false; awaitingQuery = false; paused = false; reflect();
                 if (window.solitaPhase) solitaPhase('idle');
@@ -241,7 +268,7 @@
                 wakeOn = !wakeOn; localStorage.setItem(WAKE_KEY, wakeOn ? '1' : '0'); reflect();
                 convo = false; awaitingQuery = false;                 // toggling the line resets the thread
                 if (wakeOn) { paused = true; if (window.solitaPhase) solitaPhase('dormant'); startRec(); }   // ear on → SLUMBER (waiting for "Solita")
-                else { paused = false; if (window.solitaPhase) solitaPhase('idle'); stopRec(); }
+                else { cancelQuery(); paused = false; if (window.solitaPhase) solitaPhase('idle'); stopRec(); }
             });
 
             // On load, start the ear once auth has settled — but only if already logged in (overlay hidden,
