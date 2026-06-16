@@ -34,3 +34,6 @@ Wunsch: Solita soll auch den Inhalt von E-Mails lesen können (nicht nur Absende
 
 ## 2026-06-16 13:23
 Solita-Logo soll überarbeitet/anders gestaltet werden.
+
+## 2026-06-16 13:24
+Solita soll Lesezugriff auf GitHub bekommen, speziell für die Markdown-Dateien.
