@@ -152,6 +152,38 @@
                 return pick;
             }
 
+            // Login welcome — spoken ONCE right after a MANUAL unlock (solita-core calls window.solitaGreet
+            // there, where a click/keypress gesture exists so the browser actually lets the audio play; on a
+            // silent auto-restore it is NOT called → no autoplay-block, no nag on Doc's constant hard-reloads).
+            // Time-of-day aware, varied, with a warm „Hola"-sprinkle (Solita ↔ Altea). Speaks in solitaLang.
+            const GREET = {
+                de: {
+                    morning: ['Guten Morgen! Ich bin wach.', 'Morgen! Schön, dass du da bist.', 'Hola, guten Morgen!', 'Guten Morgen — leg los.'],
+                    day:     ['Hallo! Ich bin da.', 'Hola! Schön, dich zu hören.', 'Hey, willkommen zurück!', 'Da bin ich. Was geht?'],
+                    evening: ['Guten Abend! Ich bin wach.', 'Hola, guten Abend!', 'Schönen Abend — ich bin da.', 'Abend! Wie kann ich helfen?'],
+                    night:   ['Noch wach? Ich auch.', 'Hola, Nachteule — ich bin da.', 'Späte Stunde — ich höre zu.', 'Spät dran? Ich bin wach.']
+                },
+                en: {
+                    morning: ['Good morning! I’m awake.', 'Morning! Good to have you.', 'Hola, good morning!', 'Up and ready — go ahead.'],
+                    day:     ['Hello! I’m here.', 'Hola! Good to hear you.', 'Hey, welcome back!', 'Here I am. What’s up?'],
+                    evening: ['Good evening! I’m awake.', 'Hola, good evening!', 'Evening — I’m here.', 'Welcome back this evening.'],
+                    night:   ['Still up? Me too.', 'Hola, night owl — I’m here.', 'Late hour — I’m listening.', 'Up late? So am I.']
+                },
+                es: {
+                    morning: ['¡Buenos días! Estoy despierta.', '¡Hola, buenos días!', 'Buenos días — cuando quieras.', '¡Despierta y lista!'],
+                    day:     ['¡Hola! Aquí estoy.', '¡Hola! Me alegro de oírte.', '¡Hey, bienvenido!', 'Aquí estoy. ¿Qué tal?'],
+                    evening: ['¡Buenas tardes! Estoy despierta.', '¡Hola, buenas tardes!', 'Buenas — aquí estoy.', '¡Bienvenido esta tarde!'],
+                    night:   ['¿Todavía despierto? Yo también.', '¡Hola, búho nocturno!', 'Hora tardía — te escucho.', 'Despierta a estas horas.']
+                }
+            };
+            function greetWelcome() {
+                const h = new Date().getHours();
+                const tod = h < 5 ? 'night' : h < 11 ? 'morning' : h < 18 ? 'day' : h < 22 ? 'evening' : 'night';
+                const list = (GREET[window.solitaLang] || GREET.de)[tod];
+                return list[Math.floor(Math.random() * list.length)];
+            }
+            window.solitaGreet = function () { if (window.speakReply) window.speakReply(greetWelcome()); };
+
             // Hang up the conversation: a goodbye drops back to idle (wake-word needed again). NOT sent to the API.
             //   DE: tschüss · auf wiederhören · das war's · schluss für heute    EN: bye · goodbye · good night ·
             //   see you · that's all/it · we're done    ES: adiós · hasta luego/pronto/mañana · buenas noches · chao
