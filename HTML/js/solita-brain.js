@@ -40,6 +40,7 @@
         const onSpeak     = cfg.onSpeak     || function () { };   // (finalText) → read the final answer aloud
         const onError     = cfg.onError     || function () { };   // (err) → show the failure
         const onDone      = cfg.onDone      || function () { };   // () → re-enable input etc. (always runs)
+        const onPersist   = cfg.onPersist   || function () { };   // () → history changed; host may sync it (solita-sync.js)
 
         // ---- state (in-memory; persisted to localStorage under the host's keys) ----
         let conversationHistory = [];
@@ -137,6 +138,7 @@
                 }
                 conversationHistory.push({ role: 'assistant', content: finalText });   // persist final text only
                 saveHistory();
+                onPersist();        // host may push the updated log to the shared server (solita-sync.js)
                 onTyping(false);
                 onAssistant(finalText);
                 onSpeak(finalText);
@@ -167,6 +169,17 @@
             conversationHistory = [];
             runningSummary = '';
             try { localStorage.removeItem(HISTORY_KEY); localStorage.removeItem(SUMMARY_KEY); } catch (e) { }
+            onPersist();   // propagate the wipe to the shared server too (solita-sync.js)
+        }
+
+        // Adopt a history (and optionally summary) from outside — e.g. a merged log pulled from the shared
+        // server (solita-sync.js). Persists locally so a reload shows the same merged state.
+        function setState(history, summary) {
+            if (Array.isArray(history)) { conversationHistory = history; saveHistory(); }
+            if (typeof summary === 'string') {
+                runningSummary = summary;
+                try { localStorage.setItem(SUMMARY_KEY, runningSummary); } catch (e) { }
+            }
         }
 
         // ---- public API ----
@@ -174,6 +187,8 @@
         self.load = load;
         self.clear = clear;
         self.getHistory = function () { return conversationHistory; };
+        self.getSummary = function () { return runningSummary; };
+        self.setState = setState;
     }
 
     window.Brain = Brain;

@@ -429,12 +429,44 @@
             onAssistant: function (text) { addMessage('assistant', text); },
             onSpeak: function (text) { if (window.speakReply) window.speakReply(text); },
             onError: function (err) { addMessage('assistant', '❌ Fehler: ' + ((err && err.message) ? err.message : err)); if (window.solitaPhase) solitaPhase('dormant'); },
-            onDone: function () { sendButton.disabled = false; messageInput.focus(); }
+            onDone: function () { sendButton.disabled = false; messageInput.focus(); },
+            // After every turn, push the updated log to the shared server (js/solita-sync.js) so the other
+            // device (browser ↔ Pixel) converges on the same conversation. No-op until sync is initialised.
+            onPersist: function () { if (window.SolitaSync) SolitaSync.push(brain.getHistory(), brain.getSummary()); }
         });
 
         // Restore persisted history into the brain, then render the bubbles (host owns the DOM).
         const _restored = brain.load();
         if (_restored) { messagesArea.innerHTML = ''; _restored.forEach(function (msg) { addMessage(msg.role, msg.content); }); }
+
+        // Cross-device sync (js/solita-sync.js): Solita is single-user (ONE shared password), so the
+        // browser and the Pixel are the same "Doc" → keep ONE shared conversation log server-side via the
+        // password-gated 'solita-sync' edge function. We wait for a password (cached auto-login or a fresh
+        // login), then pull the shared log (host adopts the merged result via onRemote) and push whatever
+        // this device had so any local-only turns reach the server too. Best-effort: if the edge fn isn't
+        // deployed yet the calls just fail quietly and Solita keeps working device-locally as before.
+        if (window.SolitaSync) {
+            SolitaSync.init({
+                endpoint: AI_URL.replace(/\/claude(\?|$)/, '/solita-sync$1'),
+                anonKey: SB_ANON,
+                getPwd: getPwd,
+                onRemote: function (history, summary) {
+                    if (!Array.isArray(history)) return;
+                    brain.setState(history, summary);
+                    messagesArea.innerHTML = '';
+                    history.forEach(function (msg) { addMessage(msg.role, msg.content); });
+                }
+            });
+            (function kickWhenAuthed(tries) {
+                if (getPwd && getPwd()) {
+                    SolitaSync.pull()
+                        .then(function () { SolitaSync.push(brain.getHistory(), brain.getSummary()); })
+                        .catch(function () { });
+                } else if (tries > 0) {
+                    setTimeout(function () { kickWhenAuthed(tries - 1); }, 1000);
+                }
+            })(30);
+        }
 
         // ----- CHAT-LOGIK -----
         messageInput.addEventListener('input', function () {
