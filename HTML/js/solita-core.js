@@ -196,8 +196,8 @@
             + "sobald es in IRGENDEINER Form um Wetter, Vorhersage, Temperatur, Regen oder Wind geht — egal wie "
             + "formuliert, ob jetzt oder in der Zukunft (z.B. „wie wird das Wetter heute in Dresden“) — rufst du "
             + "IMMER get_weather auf und beantwortest Wetter NIE aus eigenem Wissen (du hast dafür keine Live-Daten). "
-            + "Du hast außerdem check_gmail (liest READ-ONLY ungelesene Mails — Anzahl + Absender); nutze es, "
-            + "sobald es ums Postfach/neue Mails geht (z.B. „hab ich neue Mails?“, „wer hat geschrieben?“). "
+            + "Du hast außerdem check_gmail (liest READ-ONLY ungelesene Mails — Anzahl + Absender, auf Wunsch via read_body auch den vollen Inhalt zum Vorlesen/Zusammenfassen; markiert NICHTS als gelesen); nutze es, "
+            + "sobald es ums Postfach/neue Mails oder Mail-Inhalte geht (z.B. „hab ich neue Mails?“, „wer hat geschrieben?“, „was steht in der Mail von X?“, „lies mir die neueste vor“). "
             + "Sonst antworte einfach. Bestätige eine ausgeführte Aktion knapp in einem Satz.";
 
         // ----- TOOL-USE (Solita acts, not just talks) -----
@@ -616,7 +616,7 @@
             const _sm = userText.toLowerCase().match(/^(?:slash|splash|flash)\s+(.+?)[\s.!?]*$/);
             if (_sm) {
                 const _w = _sm[1].replace(/[.\s]/g, '');   // "u i" / "u.i." → "ui"
-                const _M = { ui: 'ui', youeye: 'ui', youi: 'ui', list: 'list', liste: 'list', clear: 'clear', logout: 'logout', ausloggen: 'logout', abmelden: 'logout', de: 'de', deutsch: 'de', en: 'en', english: 'en', es: 'es', spanish: 'es', 'español': 'es', espanol: 'es' };
+                const _M = { ui: 'ui', youeye: 'ui', youi: 'ui', list: 'list', liste: 'list', clear: 'clear', logout: 'logout', ausloggen: 'logout', abmelden: 'logout', wake: 'wake', aufwachen: 'wake', aufwecken: 'wake', wach: 'wake', de: 'de', deutsch: 'de', en: 'en', english: 'en', es: 'es', spanish: 'es', 'español': 'es', espanol: 'es' };
                 if (_M[_w]) userText = '/' + _M[_w];
             }
 
@@ -637,6 +637,14 @@
                 return;
             }
 
+            if (userText.toLowerCase() === '/wake') {          // /wake → bring her up: ear ON (if off) + open the convo
+                messageInput.value = ''; messageInput.style.height = 'auto';
+                if (window.solitaWake) window.solitaWake();      // mic on (if off) → „Ja?" + listen, like hearing "Solita"
+                messagesArea.insertAdjacentHTML('beforeend', '<div style="text-align:center;opacity:0.5;font-size:0.68rem;letter-spacing:1.5px;text-transform:uppercase;margin:12px 0;font-family:Orbitron,sans-serif;color:#cfe3ff;">— Solita wach · hört zu —</div>');
+                messagesArea.scrollTop = messagesArea.scrollHeight;
+                return;
+            }
+
             if (userText.toLowerCase() === '/list') {
                 messagesArea.insertAdjacentHTML('beforeend', `<div class="message assistant"><div class="message-content"><strong>Sprachbefehle</strong>
 <table style="width:100%;border-collapse:collapse;font-size:0.82rem;margin:6px 0;">
@@ -647,7 +655,7 @@
 <tr><td style="padding:3px 6px;opacity:0.7;">Logout</td><td style="padding:3px 6px;">ausloggen · abmelden</td><td style="padding:3px 6px;">log (me) out · sign (me) out</td><td style="padding:3px 6px;">cierra sesión · desconéctame</td></tr>
 <tr><td style="padding:3px 6px;opacity:0.7;">Tschüss</td><td style="padding:3px 6px;">tschüss · das war's</td><td style="padding:3px 6px;">bye · see you · good night</td><td style="padding:3px 6px;">adiós · hasta luego · chao</td></tr>
 </tbody></table>
-<div style="font-size:0.82rem;opacity:0.85;"><strong>Tippbefehle:</strong> /clear (neue Session) · /list (diese Tabelle) · /ui (änderbare UI-Elemente) · /logout (abmelden) · /de · /en · /es (Sprache)</div>
+<div style="font-size:0.82rem;opacity:0.85;"><strong>Tippbefehle:</strong> /wake (aufwecken) · /clear (neue Session) · /list (diese Tabelle) · /ui (änderbare UI-Elemente) · /logout (abmelden) · /de · /en · /es (Sprache)</div>
 <div style="font-size:0.78rem;opacity:0.6;margin-top:4px;">Sprache auch per DE / EN / ES im Menü (☰)</div></div></div>`);
                 messagesArea.scrollTop = messagesArea.scrollHeight;
                 messageInput.value = '';
