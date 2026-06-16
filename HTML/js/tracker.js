@@ -595,6 +595,14 @@
             showDot();
             if (firstFix) map.setView(here, 17); // snap to the very first fix
 
+            // Ambient, position-driven layer: nearby fuel-station prices. Runs on EVERY fix —
+            // BEFORE the recording accuracy gate below — because its 5 km search radius doesn't
+            // need a ≤ MAX_ACC_M fix (a coarse WLAN/IP browser fix is plenty). It has its own
+            // 3 min / 2 km throttle, so this can't spam Tankerkönig. The track recording itself
+            // stays strict at MAX_ACC_M; only the fuel layer is exempt. (Was below the gate, so it
+            // never ran in a desktop browser where geolocation accuracy is worse than 50 m.)
+            if (__fuel) __fuel.update(here);
+
             // Reject noisy fixes for the recorded track
             if (accuracy != null && accuracy > MAX_ACC_M) {
                 setStatus(`Warte auf besseres Signal … (±${Math.round(accuracy)} m)`);
@@ -726,7 +734,6 @@
             refreshRecenter(); // show/hide the recenter button as needed
             if (__nav && __nav.update) __nav.update(here); // navigation: reroute if we drifted off the line
             if (__speed) __speed.update(here, still, shownSpeed); // speed-limit sign for the current road
-            if (__fuel) __fuel.update(here); // refresh nearby fuel-station prices (gentle, throttled)
             updateMotionDbg(accuracy, minStep, still);
             if (tracking) setStatus(`Aufzeichnung läuft … ${track.length} Punkte`);
         }
