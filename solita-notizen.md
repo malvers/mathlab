@@ -10,3 +10,6 @@ Herkunft des Wortes „Spelunking": „Spelunking" kommt vom lateinischen *spelu
 
 ## 2026-06-16 08:14
 Das mit dem Fit in der App funktioniert noch nicht.
+
+## 2026-06-16 09:00
+Solita kann auch Fotos machen, Voice Messages aufnehmen und weitere Medien-Funktionen nutzen — diese Möglichkeiten noch weiter ausbauen/dokumentieren.
