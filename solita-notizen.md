@@ -28,3 +28,6 @@ Das Fitting muss deutlich optimiert werden.
 
 ## 2026-06-16 13:15
 Kreisanzeigen für die Benzinpreise müssen über den Symbolen für die Tankstelle liegen (z-Index anpassen).
+
+## 2026-06-16 13:16
+Wunsch: Solita soll auch den Inhalt von E-Mails lesen können (nicht nur Absender/Betreff).
