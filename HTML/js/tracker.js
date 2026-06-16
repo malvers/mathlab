@@ -119,24 +119,29 @@
             return 13;                   // autobahn → widest
         }
         let fitMode = false; // FIT loop: false → 'all' (whole track) → 'remaining' (rest of route, while navigating) → false
+        let loadedBounds = null; // bounds of a MULTI-loaded overlay (plotMultiple leaves 'track' empty) → lets FIT still work/show
+        // Nav start shows the whole route for a moment, THEN glides to the crosshair follow-view (note: the
+        // glide is centerOnPosition's flyTo). This timer holds that "moment"; any manual take-over cancels it.
+        let navOverviewTimer = null;
+        const NAV_OVERVIEW_MS = 3000;
         // ≈ 5 mm from the map centre (CSS px ≈ 1/96 in → 5 mm ≈ 19 px); within that the dot is "centred".
         const CENTER_TOL_PX = 19;
         function refreshRecenter() {
             const btn = $('recenter-fab');
             if (!btn) return;
             const pos = posMarker && posMarker.getLatLng && posMarker.getLatLng();
-            if (!pos) { btn.classList.remove('show'); return; }
-            // Two states (button always visible once we have a fix): while auto-following — or the dot
-            // within ~5 mm of centre — show the "fit whole track" frame; once you've panned away and the
-            // dot sits >5 mm off centre, show the crosshair to re-centre on GPS.
-            const d = map.latLngToContainerPoint(pos).distanceTo(map.getSize().divideBy(2));
-            const centred = following || fitMode || d <= CENTER_TOL_PX;
-            btn.classList.toggle('fit', centred); // no crosshair (centred) → show the fit-track icon
-            btn.classList.toggle('mode-on', fitMode); // persistent FIT mode → green highlight
+            const trackPresent = track.length >= 10 || !!loadedBounds;   // ≥10 live pts OR a multi-loaded overlay
+            if (!pos && !trackPresent) { btn.classList.remove('show'); return; } // nothing to centre or fit
+            // ONE button, never both: the FIT frame whenever there's a track to fit (tap cycles; "off" re-centres
+            // on you, see the click handler); otherwise the crosshair to re-centre on GPS.
+            btn.classList.toggle('fit', trackPresent);
+            btn.classList.toggle('mode-on', !!fitMode);   // persistent FIT → green
             btn.classList.add('show');
         }
         function setFollowing(v) { following = v; refreshRecenter(); }
-        map.on('dragstart', () => { fitMode = false; setFollowing(false); }); // dragging away exits FIT mode + follow
+        // Cancel a pending "overview → follow" glide (the user took over, or we stopped/paused).
+        function cancelNavOverview() { if (navOverviewTimer) { clearTimeout(navOverviewTimer); navOverviewTimer = null; } }
+        map.on('dragstart', () => { cancelNavOverview(); fitMode = false; setFollowing(false); }); // dragging away exits FIT mode + follow
         map.on('moveend zoomend', refreshRecenter); // view moved → POS may have left/entered the view
 
         // Fit insets (used by every map fit below). The map runs zoomSnap:1 (whole zoom levels), so for
@@ -943,11 +948,31 @@
             if (window.RainRadar && RainRadar.setShifted) RainRadar.setShifted(true); // drop the rain slider below the HUD
             setTrkState('recording');
             setStatus('Suche GPS-Signal …');
-            if (__nav && __nav.hasDestination()) __nav.startNavigation(); // a destination is set → navigate too
+            if (__nav && __nav.hasDestination()) {
+                // Navigation start: show the WHOLE route first (overview, like the framed map), hold it a
+                // beat, THEN glide into the crosshair follow-view (centerOnPosition's flyTo = the fade).
+                // following stays OFF during the hold so an incoming GPS fix can't yank the map off it.
+                cancelNavOverview();
+                fitMode = false;     // a leftover persistent FIT mode would re-fit every GPS fix → kill the glide
+                setFollowing(false);
+                if (window.DebugWindow) DebugWindow.log('NAV start: following→false, fitMode→false, computing route …');
+                __nav.startNavigation().then(function (ok) {
+                    if (window.DebugWindow) DebugWindow.log('NAV route resolved ok=' + ok);
+                    if (ok === false) { setFollowing(true); return; }   // no route (e.g. offline) → just follow
+                    const framed = __nav.frameRoute();                   // frame start → destination
+                    if (window.DebugWindow) DebugWindow.log('NAV frameRoute=' + framed + ' → glide in ' + NAV_OVERVIEW_MS + 'ms');
+                    navOverviewTimer = setTimeout(function () {
+                        navOverviewTimer = null;
+                        if (window.DebugWindow) DebugWindow.log('NAV glide fire: trkState=' + trkState + ' following=' + following);
+                        if (trkState === 'recording' && !following) centerOnPosition(); // glide to crosshair
+                    }, NAV_OVERVIEW_MS);
+                });
+            }
         }
 
         // STOP while recording → pause (keep all data, freeze the timer).
         function pauseTracking() {
+            cancelNavOverview(); // stopped during the route-overview hold → don't auto-glide afterwards
             pauseStart = Date.now();
             stopGeoWatch(watchId); watchId = null;
             stopActivity(); disableMotion(); stopBaro();
@@ -1294,14 +1319,17 @@
         }
 
         function centerOnPosition() {
+            cancelNavOverview(); // manual re-centre supersedes any pending auto-glide
             fitMode = false;    // centring on the dot is the opposite of "keep the whole track fitted"
             setFollowing(true); // re-enable auto-follow (and hide the recenter button)
             // Already have a position → glide there smoothly
             if (posMarker) {
+                if (window.DebugWindow) DebugWindow.log('centerOnPosition: flyTo dot, zoom ' + Math.max(map.getZoom(), 16));
                 map.flyTo(posMarker.getLatLng(), Math.max(map.getZoom(), 16), { duration: 1.2 });
                 showDot();
                 return;
             }
+            if (window.DebugWindow) DebugWindow.log('centerOnPosition: no posMarker → goToCurrentPosition');
             goToCurrentPosition({ initial: false });
         }
 
@@ -1312,6 +1340,7 @@
             if (typeof TrackBuffer !== 'undefined') TrackBuffer.clear();
             clearLoaded(); // a cleared/discarded track must not be restored on the next reload
             track = [];
+            loadedBounds = null; // no multi-loaded overlay anymore → FIT hides
             times = [];
             alts = [];
             speeds = [];
@@ -1618,6 +1647,8 @@ ${pts}
             fusedAlt = (lastAlt != null) ? lastAlt : null;
             renderAltitude();
             if (latlngs.length) map.fitBounds(L.latLngBounds(latlngs), { padding: fitPad() });
+            loadedBounds = null; // single load uses the live 'track' array for FIT, not a multi-overlay bound
+            refreshRecenter(); // loaded track may have ≥10 pts → reveal the FIT button (moveend alone isn't reliable)
         }
 
         // ---- Multi-select: load several tracks at once (checkbox per row → coloured overlay) ----
@@ -1659,7 +1690,9 @@ ${pts}
                 (t.waypoints || []).forEach(w => addWaypoint(w));
             });
             setDist(0); setSpeed(0);
-            if (all.length) map.fitBounds(L.latLngBounds(all), { padding: fitPad() });
+            loadedBounds = all.length ? L.latLngBounds(all) : null;
+            if (all.length) map.fitBounds(loadedBounds, { padding: fitPad() });
+            refreshRecenter(); // multi-loaded overlay → reveal the FIT button (track[] is empty for multi-load)
         }
         if ($('tl-deselect')) $('tl-deselect').addEventListener('click', deselectAll);
         if ($('tl-sharesel')) $('tl-sharesel').addEventListener('click', () => shareMultiple(Array.from(selectedTracks)));
@@ -2084,28 +2117,26 @@ ${pts}
         window.addEventListener('contextmenu', (e) => e.preventDefault());
         $('zoom-in').addEventListener('click', () => map.zoomIn());
         $('zoom-out').addEventListener('click', () => map.zoomOut());
+        // ONE button: tapping the FIT frame cycles FIT (whole → remaining → off); tapping the crosshair re-centres.
         $('recenter-fab').addEventListener('click', () => {
-            const btn = $('recenter-fab');
-            if (btn.classList.contains('fit')) {            // centred → cycle the FIT mode
-                // 3-state loop: off → whole track → (while navigating) remaining route → off.
-                const ll = posMarker && posMarker.getLatLng && posMarker.getLatLng();
-                const rb = (ll && __nav && __nav.remainingBounds) ? __nav.remainingBounds([ll.lat, ll.lng]) : null;
-                if (!fitMode) {                              // off → fit the whole track
-                    fitMode = 'all'; setFollowing(false);
-                    if (track.length) { try { map.fitBounds(L.latLngBounds(track), { padding: fitPad() }); } catch (e) { } }
-                    toast('FIT: ganze Route');
-                } else if (fitMode === 'all' && rb) {        // whole → remaining (only if a route exists)
-                    fitMode = 'remaining';
-                    try { map.fitBounds(rb, { padding: fitPad() }); } catch (e) { }
-                    toast('FIT: Reststrecke');
-                } else {                                     // remaining (or no route) → off
-                    fitMode = false;
-                    toast('FIT aus');
-                }
-                refreshRecenter();
-            } else {
-                centerOnPosition();                          // off-centre → re-centre on GPS
+            if (!$('recenter-fab').classList.contains('fit')) { centerOnPosition(); return; }   // crosshair → re-centre
+            const ll = posMarker && posMarker.getLatLng && posMarker.getLatLng();
+            const rb = (ll && __nav && __nav.remainingBounds) ? __nav.remainingBounds([ll.lat, ll.lng]) : null;
+            if (!fitMode) {                              // off → fit the whole track (live OR multi-loaded overlay)
+                fitMode = 'all'; setFollowing(false);
+                const fb = track.length > 1 ? L.latLngBounds(track) : loadedBounds;
+                if (fb) { try { map.fitBounds(fb, { padding: fitPad() }); } catch (e) { } }
+                toast('FIT: ganze Route');
+            } else if (fitMode === 'all' && rb) {        // whole → remaining (only if a route exists)
+                fitMode = 'remaining';
+                try { map.fitBounds(rb, { padding: fitPad() }); } catch (e) { }
+                toast('FIT: Reststrecke');
+            } else {                                     // remaining (or no route) → off → re-centre on you (#3)
+                fitMode = false;
+                centerOnPosition();
+                toast('FIT aus');
             }
+            refreshRecenter();
         });
 
         // ---- Sync-Code ----

@@ -25,8 +25,15 @@ window.TrackerFuel = function (ctx) {
     let fuelType = localStorage.getItem('trk-fuel-type') || 'e5';
     let enabled = localStorage.getItem('trk-fuel-on') !== '0'; // on by default
 
+    // Two stacked panes so the price badge ALWAYS sits above the ⛽ station symbol (z1 symbol, z2 badge):
+    // a separate marker each, the symbol on the lower pane, the price on the higher one. This way no
+    // neighbouring station's symbol can ever cover a price — z-index decides, not Leaflet's lat order.
     function ensureLayer() {
-        if (!layer) layer = L.layerGroup().addTo(map);
+        if (!layer) {
+            if (!map.getPane('fuelSym')) map.createPane('fuelSym').style.zIndex = 610;
+            if (!map.getPane('fuelPrice')) map.createPane('fuelPrice').style.zIndex = 620;
+            layer = L.layerGroup().addTo(map);
+        }
         return layer;
     }
 
@@ -76,14 +83,22 @@ window.TrackerFuel = function (ctx) {
         return [Math.ceil(el.offsetWidth), Math.ceil(el.offsetHeight)];
     }
 
-    function pin(s, med) {
+    // Lower layer (z1): the ⛽ station symbol, anchored with its bottom on the geo point (map-pin style).
+    function symIcon() {
+        return L.divIcon({
+            className: 'fuel-sym-wrap', html: '<div class="fuel-sym">⛽</div>',
+            iconSize: [26, 26], iconAnchor: [13, 26],
+        });
+    }
+
+    // Upper layer (z2): the coloured price badge, floating just above the symbol so the price stays readable.
+    function priceIcon(s, med) {
         const html = '<div class="fuel-pin ' + tier(s, med) + '">' +
-            '<span class="fuel-pump">⛽</span>' +
             '<span class="fuel-price">' + fmt(priceOf(s)) + '</span></div>';
         const [w, h] = measurePill(html);
         return L.divIcon({
             className: 'fuel-pin-wrap', html,
-            iconSize: [w, h], iconAnchor: [Math.round(w / 2), h], popupAnchor: [0, -h + 2],
+            iconSize: [w, h], iconAnchor: [Math.round(w / 2), h + 20], popupAnchor: [0, -h - 20],
         });
     }
 
@@ -105,8 +120,11 @@ window.TrackerFuel = function (ctx) {
         const med = medianPrice();
         for (const s of stations) {
             if (typeof s.lat !== 'number' || typeof s.lng !== 'number') continue;
-            L.marker([s.lat, s.lng], { icon: pin(s, med), keyboard: false })
-                .bindPopup(popupHtml(s)).addTo(lyr);
+            const html = popupHtml(s);
+            L.marker([s.lat, s.lng], { icon: symIcon(), pane: 'fuelSym', keyboard: false })
+                .bindPopup(html).addTo(lyr);
+            L.marker([s.lat, s.lng], { icon: priceIcon(s, med), pane: 'fuelPrice', keyboard: false })
+                .bindPopup(html).addTo(lyr);
         }
         announceCheapest(med);
     }

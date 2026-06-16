@@ -72,17 +72,24 @@ window.TrackerNav = function (ctx) {
 
     function shortLabel(s) { return (s || '').split(',').slice(0, 2).join(',').trim(); }
 
-    // ---- Geocoding: the three address fields → the first Nominatim hit ----
+    // ---- Geocoding: the single free-text line → the first Nominatim hit ----
+    // Nominatim does its own parsing, so a free-text "Ort, Straße, Nr." (typed or dictated) works directly.
     async function setDestination() {
-        const city = ($('nav-city').value || '').trim();
-        const street = ($('nav-street').value || '').trim();
-        const nr = ($('nav-nr').value || '').trim();
-        if (!city && !street) { toast('Bitte mindestens Stadt oder Straße angeben.'); return; }
-        const q = [street + (nr ? ' ' + nr : ''), city].filter(Boolean).join(', ');
+        const q = ($('nav-dest').value || '').trim();
+        if (!q) { toast('Bitte ein Ziel eingeben.'); return; }
         toast('Suche Adresse …');
         let data;
         try {
-            const url = NOMINATIM + '?format=jsonv2&limit=1&q=' + encodeURIComponent(q);
+            let url = NOMINATIM + '?format=jsonv2&limit=1&q=' + encodeURIComponent(q);
+            // Bias toward the current position so a bare street name ("Bischofsweg") resolves to the NEARBY
+            // one, not the globally most-prominent (without a bias Nominatim ranks by importance → Köln for
+            // "Bischofsweg"). A soft viewbox (NO bounded) only re-ranks: an explicit far-away city still wins.
+            // ~±0.6° ≈ a regional box (left,top,right,bottom = minLon,maxLat,maxLon,minLat).
+            const from = curPos();
+            if (from) {
+                const d = 0.6;
+                url += '&viewbox=' + [from[1] - d, from[0] + d, from[1] + d, from[0] - d].join(',');
+            }
             const r = await fetch(url, { headers: { Accept: 'application/json' } });
             data = await r.json();
         } catch (e) { toast('Adress-Suche fehlgeschlagen (offline?).'); return; }
@@ -491,9 +498,59 @@ window.TrackerNav = function (ctx) {
 
     function openPanel() { refreshPanel(); showPanel('nav-panel'); }
 
+    // Frame the WHOLE route (start → destination) in view — the overview shown briefly at nav start
+    // before the map glides into the crosshair follow-view. Falls back to current-position↔destination
+    // if the route geometry isn't there yet. Returns true if it framed something.
+    function frameRoute() {
+        try {
+            if (routeLatLngs && routeLatLngs.length > 1) {
+                map.fitBounds(L.latLngBounds(routeLatLngs), { padding: [60, 60] });
+                return true;
+            }
+            const from = curPos();
+            if (from && destLatLng) { map.fitBounds(L.latLngBounds([from, destLatLng]), { padding: [60, 60] }); return true; }
+        } catch (e) { }
+        return false;
+    }
+
     // Wire the panel's own buttons once.
     const setBtn = $('nav-set'); if (setBtn) setBtn.addEventListener('click', setDestination);
     const clrBtn = $('nav-clear'); if (clrBtn) clrBtn.addEventListener('click', () => { clearRoute(); toast('Ziel gelöscht.'); });
+
+    // Enter in the single line = "Ziel setzen" (faster than reaching for the button).
+    const destInput = $('nav-dest');
+    if (destInput) destInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); setDestination(); } });
+
+    // Mic dictation: tap → speak the address → it fills the line (same Web-Speech API Solita uses, but a
+    // simple one-shot here — no wake-word). No SR support (or denied) → the mic just hides; typing stays.
+    (function initNavMic() {
+        const micBtn = $('nav-mic'), input = $('nav-dest');
+        const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!micBtn || !input) return;
+        if (!SR) { micBtn.hidden = true; return; }
+        let rec = null, listening = false;
+        micBtn.addEventListener('click', () => {
+            if (listening) { try { rec && rec.stop(); } catch (e) { } return; }
+            rec = new SR();
+            rec.lang = 'de-DE';
+            rec.interimResults = true;
+            rec.maxAlternatives = 1;
+            rec.continuous = false;
+            let finalText = '';
+            rec.onstart = () => { listening = true; micBtn.classList.add('listening'); };
+            rec.onresult = (e) => {
+                let interim = '';
+                for (let i = e.resultIndex; i < e.results.length; i++) {
+                    const t = e.results[i][0].transcript;
+                    if (e.results[i].isFinal) finalText += t; else interim += t;
+                }
+                input.value = (finalText + interim).replace(/\s+/g, ' ').trim();
+            };
+            rec.onerror = () => { /* denied / no-speech → just stop; onend cleans up */ };
+            rec.onend = () => { listening = false; micBtn.classList.remove('listening'); input.focus(); };
+            try { rec.start(); } catch (e) { listening = false; micBtn.classList.remove('listening'); }
+        });
+    })();
 
     // Voice toggle (persisted): default on, but the user can silence spoken guidance.
     voiceOn = localStorage.getItem(VOICE_KEY) !== '0';
@@ -507,5 +564,5 @@ window.TrackerNav = function (ctx) {
         });
     }
 
-    return { openPanel, hasDestination, startNavigation, navigateTo, clearRoute, update, remainingBounds, tripData };
+    return { openPanel, hasDestination, startNavigation, navigateTo, clearRoute, update, remainingBounds, frameRoute, tripData };
 };
