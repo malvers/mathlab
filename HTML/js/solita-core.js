@@ -455,16 +455,23 @@
                 getPwd: getPwd,
                 onRemote: function (history, summary) {
                     if (!Array.isArray(history)) return;
+                    // Only touch the DOM when the conversation ACTUALLY changed (e.g. the other device added
+                    // turns). A steady-state push would otherwise clear + re-render the whole transcript →
+                    // the "loads ~3× on reload" flicker. Cheap deep-equal via JSON; adopt state regardless.
+                    var changed = JSON.stringify(history) !== JSON.stringify(brain.getHistory());
                     brain.setState(history, summary);
-                    messagesArea.innerHTML = '';
-                    history.forEach(function (msg) { addMessage(msg.role, msg.content); });
+                    if (changed) {
+                        messagesArea.innerHTML = '';
+                        history.forEach(function (msg) { addMessage(msg.role, msg.content); });
+                    }
                 }
             });
             (function kickWhenAuthed(tries) {
                 if (getPwd && getPwd()) {
-                    SolitaSync.pull()
-                        .then(function () { SolitaSync.push(brain.getHistory(), brain.getSummary()); })
-                        .catch(function () { });
+                    // push (NOT pull) on load: the edge fn merges our local log with the server's and returns
+                    // the authoritative result, so this single call both uploads local-only turns AND pulls in
+                    // whatever the other device added — without a separate pull that could briefly wipe to empty.
+                    SolitaSync.push(brain.getHistory(), brain.getSummary());
                 } else if (tries > 0) {
                     setTimeout(function () { kickWhenAuthed(tries - 1); }, 1000);
                 }
