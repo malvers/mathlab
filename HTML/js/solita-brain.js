@@ -60,6 +60,33 @@
             return [{ role: 'system', content: sys }].concat(conversationHistory);
         }
 
+        // --- Kosten-Zähler (Doc: ab sofort Transparenz). Preise $/1M Tokens; Cache-Read ~0,1×, Write 1,25×.
+        // Rechnet je API-Hop (AUCH jeder Tool-Loop-Schritt) aus `usage` die € aus, loggt ins DEBUG-Fenster mit
+        // Cache-Trefferquote (springt nach dem Caching-Deploy von 0% hoch) und summiert in localStorage.
+        const PRICES = { 'claude-sonnet-4-6': [3, 15], 'claude-opus-4-8': [5, 25], 'claude-haiku-4-5': [1, 5] }; // [in,out] $/1M
+        const USD_EUR = 0.92;
+        const COST_KEY = STORE.cost || 'solita_cost_total';
+        function priceFor(model) {
+            const k = model && Object.keys(PRICES).find(function (p) { return model.indexOf(p) === 0; });
+            return PRICES[k] || PRICES['claude-sonnet-4-6'];
+        }
+        function accountUsage(model, u, label) {
+            if (!u) return;
+            const inTok = u.input_tokens || 0, outTok = u.output_tokens || 0;
+            const cr = u.cache_read_input_tokens || 0, cw = u.cache_creation_input_tokens || 0;
+            const p = priceFor(model);
+            // uncached input full price · cache read 0,1× · cache write 1,25× · output full
+            const eur = (inTok * p[0] + cr * p[0] * 0.1 + cw * p[0] * 1.25 + outTok * p[1]) / 1e6 * USD_EUR;
+            let total = 0; try { total = parseFloat(localStorage.getItem(COST_KEY) || '0') || 0; } catch (e) { }
+            total += eur;
+            try { localStorage.setItem(COST_KEY, String(total)); } catch (e) { }
+            const totIn = inTok + cr + cw;
+            const hit = totIn ? Math.round(cr / totIn * 100) : 0;
+            if (window.DebugWindow) window.DebugWindow.log('€ ' + (label || 'chat') + ': ↑' + inTok + ' ↓' + outTok
+                + ' · Cache ' + hit + '% (' + cr + 'r/' + cw + 'w) · ' + (eur * 100).toFixed(2) + '¢ · Σ ' + total.toFixed(3) + ' €');
+            if (typeof window.solitaCostUpdate === 'function') { try { window.solitaCostUpdate(total); } catch (e) { } }
+        }
+
         // Keep context bounded WITHOUT just forgetting: fold the oldest turns into runningSummary, drop them.
         async function maybeSummarize() {
             if (conversationHistory.length <= KEEP_RECENT + 8) return;
@@ -80,6 +107,7 @@
                 });
                 if (r.ok) {
                     const d = await r.json();
+                    accountUsage(summaryModel, d.usage, 'summary');   // cost meter: the background summariser too
                     const s = d.choices && d.choices[0] && d.choices[0].message.content;
                     if (s) { runningSummary = s.trim(); try { localStorage.setItem(SUMMARY_KEY, runningSummary); } catch (e) { } }
                 }
@@ -114,6 +142,7 @@
                         throw new Error(err);
                     }
                     const data = await response.json();
+                    accountUsage(getModel(), data.usage, 'chat');   // cost meter: every hop (tool-loop included)
                     const blocks = Array.isArray(data.content) ? data.content : [];
                     const textOut = (data.choices && data.choices[0] && data.choices[0].message.content) || '';
 

@@ -73,10 +73,19 @@ Deno.serve(async (req) => {
     messages: chat,
   };
   // NOTE: `temperature` is deprecated on Claude 4.x models (they reject it with HTTP 400) → don't forward it.
-  if (system) body.system = system;
+  // Prompt caching (cost): the system turn (persona + rolling summary) and the tool schemas are a large,
+  // mostly-stable prefix that was being re-sent at FULL input price every turn AND every tool-loop hop.
+  // cache_control bills the repeated prefix at ~0.1×. Two tiers — the tools cache on their own breakpoint and
+  // the system on a second, so a summary change re-writes only the system block, not the tools. Render order
+  // is tools → system → messages. Verify it's working via usage.cache_read_input_tokens > 0.
+  if (system) body.system = [{ type: 'text', text: system, cache_control: { type: 'ephemeral' } }];
   // Optional Claude tool-use: forward a `tools` schema so Solita can take actions. The CLIENT runs the loop
   // (executes tool_use blocks, sends tool_result back). No tools field → behaves exactly as before.
-  if (Array.isArray(b.tools) && b.tools.length) body.tools = b.tools;
+  if (Array.isArray(b.tools) && b.tools.length) {
+    const tools = b.tools.map((t: Record<string, unknown>) => ({ ...t }));
+    tools[tools.length - 1] = { ...tools[tools.length - 1], cache_control: { type: 'ephemeral' } };
+    body.tools = tools;
+  }
 
   try {
     const r = await fetch(ANTHROPIC, {
