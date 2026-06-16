@@ -649,6 +649,10 @@
             <button type="button" data-lang="es" aria-label="Español">ES</button>
         </div>
         <select id="hh-voice" class="hh-voice" aria-label="Solitas Stimme" title="Stimme wählen — Vorschau beim Auswählen"></select>
+        <!-- ODbL attribution: where_am_i resolves place names via Nominatim (OpenStreetMap data). -->
+        <div class="hh-attrib" style="margin-top:16px;font-size:0.56rem;line-height:1.45;color:#6b7a99;text-align:center;">
+            Standort-Ortsnamen © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener" style="color:#6b7a99;text-decoration:underline;">OpenStreetMap contributors</a>
+        </div>
     </div>
 
     <!-- Tap Solita's portrait → full-size lightbox. -->
@@ -692,6 +696,9 @@
     <!-- The "brain": LLM conversation + tool-use engine. Generic + reusable — ear.js hears, solita-brain
          thinks, solita-tts speaks → any lab = ear + brain + tts (no iframe). Loads BEFORE its host core. -->
     <script src="../js/solita-brain.js"></script>
+    <!-- Cross-device sync: one shared conversation log via the password-gated 'solita-sync' edge fn.
+         Loads BEFORE the core so the host can wire it. -->
+    <script src="../js/solita-sync.js"></script>
     <script src="../js/solita-core.js"></script>
 
     <!-- Tool add-on: check_gmail (READ-ONLY Gmail peek). Self-registers into window.SolitaTools. -->
