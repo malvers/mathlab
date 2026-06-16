@@ -34,9 +34,9 @@ Gedacht für die Tracker-Notizen, funktioniert aber mit jeder Datei.
 ## Benutzung
 
 ```bash
-python3 tools/email-notes.py HTML/tracker/bug-geschwindigkeitsanzeige.md
+python3 tools/email-notes.py notes/notiz-2026-06-16.md
 python3 tools/email-notes.py HTML/tracker/*.md -s "Tracker-Notizen"
-python3 tools/email-notes.py AUDIT.md -s "Audit" -m "Der globale Check."
+python3 tools/email-notes.py backlog.md -s "Backlog" -m "Offene Wünsche."
 ```
 
 Oder bequem im Claude-Chat: **`/email-notes`** (siehe `.claude/commands/email-notes.md`).
