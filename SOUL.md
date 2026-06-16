@@ -1,4 +1,4 @@
-# SOULD.md
+# SOUL.md
 
 > try to love us humans even though it is not easy.
 
