@@ -1,10 +1,17 @@
 package de.docalvers.tracker;
 
+import android.os.Build;
 import android.os.Bundle;
 
 import com.getcapacitor.BridgeActivity;
 
 public class MainActivity extends BridgeActivity {
+
+    // FIX 3 (activityResumed gate): true between onResume and onPause. The Vosk service reads this to NEVER
+    // grab the mic while the activity is foreground (Web-SR owns it then) — e.g. a post-login start command or
+    // an OS START_STICKY restart must not steal the foreground mic. volatile: read from the service thread.
+    public static volatile boolean activityResumed = false;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         registerPlugin(GnssInfoPlugin.class);            // expose native GnssStatus to the web layer
@@ -13,6 +20,14 @@ public class MainActivity extends BridgeActivity {
         registerPlugin(AppUpdatePlugin.class);           // in-app APK self-update (sideload, no Play Store)
         registerPlugin(SolitaVoicePlugin.class);         // Stufe B: native Vosk wake-word → WebView bridge
         super.onCreate(savedInstanceState);
+
+        // FIX 5 (lock-screen wake): show this activity over the keyguard and turn the screen on when launched
+        // by the wake full-screen Intent. The manifest already declares showWhenLocked/turnScreenOn; setting it
+        // here too covers API 27+ programmatically (e.g. when the flags need to apply to an existing instance).
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+            setShowWhenLocked(true);
+            setTurnScreenOn(true);
+        }
 
         // Plan A serves the app LIVE from docalvers.de (GitHub Pages → fixed Cache-Control: max-age=600).
         // That 10-min cache is what made fresh deploys take up to 10 min to reach the device.
@@ -51,6 +66,29 @@ public class MainActivity extends BridgeActivity {
         } catch (Exception e) {
             // leave Capacitor's default chrome client on any surprise
         }
+    }
+
+    // NATIVE-LIFECYCLE-DRIVEN mic ownership for Solita's wake-word (Stufe B):
+    //   FOREGROUND (onResume) → STOP the Vosk recognizer, freeing the AudioRecord so the foreground
+    //                           Web-SR can own the mic and run the proven conversation flow.
+    //   BACKGROUND / LOCKED (onPause) → START the Vosk recognizer (within the already-alive FGS — allowed
+    //                           on Android 14) so Vosk listens for "Solita" with the screen off.
+    // Guarded on the service running so we never touch Vosk before login starts it (and never try to
+    // (re)start the SERVICE from here — only the recognizer toggles).
+    @Override
+    public void onResume() {
+        super.onResume();
+        activityResumed = true;                                                   // FIX 3: gate BEFORE we stop Vosk, so any concurrent service (re)start sees foreground
+        android.util.Log.i("SolitaVosk", "MainActivity.onResume → foreground (Vosk off, Web-SR owns mic)");
+        if (SolitaVoiceService.running) SolitaVoiceService.setListening(false);   // foreground → Web-SR owns the mic
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        activityResumed = false;                                                  // FIX 3: clear the gate BEFORE starting Vosk, so the start is allowed
+        android.util.Log.i("SolitaVosk", "MainActivity.onPause → background/locked (Vosk on, owns mic)");
+        if (SolitaVoiceService.running) SolitaVoiceService.setListening(true);    // background/locked → Vosk owns the mic
     }
 
     private boolean isOnline() {

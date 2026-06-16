@@ -66,12 +66,22 @@ public class SolitaVoicePlugin extends Plugin {
         call.resolve(r);
     }
 
-    // Mute/unmute the always-on recognizer (the FGS keeps the mic, but Vosk stops decoding). The web layer
-    // calls pause(true) while Solita speaks (no self-trigger) and during a Web-SR turn (mic handoff), then
-    // pause(false) to resume always-on wake detection.
+    // REAL stop/start of the Vosk recognizer (frees / re-acquires the AudioRecord), keeping the service +
+    // model alive. The NATIVE activity lifecycle (MainActivity.onResume/onPause) is the primary driver;
+    // these methods let the web layer also force it as a belt (e.g. stop Vosk around speakReply so Solita
+    // never self-triggers, even in an edge case where she speaks while not strictly foreground).
+    //   pause(true)  → listen=false (stop, free mic)   pause(false) → listen=true (start, own mic)
     @PluginMethod
     public void pause(PluginCall call) {
-        SolitaVoiceService.setPaused(call.getBoolean("pause", Boolean.TRUE));
+        boolean paused = call.getBoolean("pause", Boolean.TRUE);
+        SolitaVoiceService.setListening(!paused);
+        call.resolve();
+    }
+
+    // Explicit, unambiguous control matching the native setListening(boolean) semantics.
+    @PluginMethod
+    public void setListening(PluginCall call) {
+        SolitaVoiceService.setListening(call.getBoolean("listen", Boolean.FALSE));
         call.resolve();
     }
 

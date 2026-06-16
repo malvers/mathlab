@@ -30,7 +30,7 @@
         const onRawFinal = cfg.onRawFinal || function () { return false; };
 
         // ---- state (in-memory only; NO localStorage) ----
-        let rec = null, nativeListening = false, nativeBound = false;
+        let rec = null, nativeBound = false;   // nativeBound: the Vosk wake-listener is wired (mic is native-owned)
         let wakeOn = false;        // set via setEnabled() (was Solita `wakeOn`)
         let suspended = false;     // host is speaking; mute the ear (was Solita `speaking`)
         let stopping = false;
@@ -38,6 +38,9 @@
         let awaitingQuery = false; // a turn is open without a fresh trigger (adapter-driven mirror)
         let convoMirror = false;   // mirror of the adapter's conversation flag — interim-gate parity only
         let qTimer = null;         // debounce for cumulative "final" results
+        let gen = 0;               // generation token: bumped on every stop/suspend/restart/visibility teardown,
+                                   //   so a rec.onend from a SUPERSEDED recognizer can no longer reschedule start()
+                                   //   and relaunch Web-SR to fight the native Vosk AudioRecord.
 
         const self = this;
 
@@ -102,24 +105,30 @@
             if (q !== null) onWake(q);                              // phrase contained a wake word → (re)open
         }
 
+        // Bind the native (Vosk) wake listener ONCE. Idempotent and independent of Web-SR: in the
+        // Capacitor app the native side OWNS the mic handoff by Activity lifecycle (Vosk recognizer
+        // runs only while backgrounded/locked; foreground hands the mic to Web-SR), so the ear must
+        // NOT start/stop the Vosk recognizer here — it only listens for the "background wake" event.
+        // The service brings the Activity to the foreground and emits 'result'; we then open the
+        // conversation via onWake('') so the now-foreground Web-SR captures the question.
+        function bindNativeWake() {
+            if (!NATIVE || nativeBound) return;
+            nativeBound = true;
+            NATIVE.addListener('result', function () {              // Vosk heard the wake-word (background)
+                if (!wakeOn) return;                                // suspended is fine: a real Vosk wake foregrounds us
+                paused = false;                                     // dormant → wake
+                onWake('');                                         // prompt, then take the question via Web-SR
+            });
+            log('wake: native Vosk wake-listener bound');
+        }
+
         function start() {
-            if (NATIVE) {                                           // native Vosk path (no Web SpeechRecognition)
-                if (!wakeOn || suspended || nativeListening) return;
-                if (!nativeBound) {
-                    nativeBound = true;
-                    NATIVE.addListener('result', function () {      // Vosk heard the wake-word
-                        if (suspended || !wakeOn) return;
-                        paused = false;                             // dormant → wake
-                        onWake('');                                 // prompt, then take the question
-                    });
-                }
-                nativeListening = true;
-                log('wake: native Vosk start');
-                try { NATIVE.start().catch(function (e) { nativeListening = false; log('Vosk start reject: ' + ((e && e.message) || e)); }); }
-                catch (e) { nativeListening = false; }
-                return;
-            }
+            // Native app: bind the background wake listener, then CONTINUE to start Web-SR for the
+            // foreground conversation (mic exclusivity is enforced natively by lifecycle, not here).
+            bindNativeWake();
+            if (!SR) return;                                        // no Web-SR (e.g. iOS Safari): native wake only
             if (!wakeOn || suspended || rec) return;
+            const myGen = gen;                                      // tie this recognizer to the current generation
             try {
                 rec = new SR();
                 rec.lang = getLang(); rec.continuous = true; rec.interimResults = true; rec.maxAlternatives = 1;
@@ -128,19 +137,26 @@
                 rec.onerror = function (e) { log('wake onerror: ' + (e && e.error)); };
                 rec.onend = function () {
                     rec = null;
-                    log('wake onend (on=' + wakeOn + ' speak=' + suspended + ' stop=' + stopping + ')');
-                    if (wakeOn && !suspended && !stopping) setTimeout(start, 300);
+                    log('wake onend (on=' + wakeOn + ' speak=' + suspended + ' stop=' + stopping + ' gen=' + myGen + '/' + gen + ')');
+                    // Only reschedule if THIS rec is still the current generation AND the WebView is visible.
+                    // The visibilityState check alone stops a suspended/backgrounded WebView from relaunching
+                    // Web-SR to fight the native Vosk AudioRecord; the gen check kills superseded onend storms.
+                    if (myGen === gen && wakeOn && !suspended && !stopping && document.visibilityState === 'visible') setTimeout(start, 300);
                 };
                 rec.start();
             } catch (e) {
                 rec = null;
                 log('wake start() THROW: ' + ((e && e.message) || e));
-                if (wakeOn && !suspended && !stopping) setTimeout(start, 1000);   // e.g. mic busy right after unlock → retry
+                // Same generation + visibility guard on the throw-retry path (e.g. mic busy right after unlock).
+                if (myGen === gen && wakeOn && !suspended && !stopping && document.visibilityState === 'visible') setTimeout(start, 1000);
             }
         }
 
+        // stop(): stop ONLY the Web-SR recognizer. The native Vosk service is owned by the app's
+        // Activity lifecycle (start once on login, never stop/start the SERVICE from background); the
+        // host stops it explicitly on logout via SolitaVoice.stop(), not through the ear.
         function stop() {
-            if (NATIVE) { nativeListening = false; try { NATIVE.stop().catch(function () { }); } catch (e) { } return; }
+            gen++;                                                  // supersede any in-flight rec → its onend won't restart
             stopping = true;
             if (rec) { try { rec.stop(); } catch (e) { } rec = null; }
             setTimeout(function () { stopping = false; }, 500);
@@ -157,13 +173,14 @@
             if (typeof opts.convo === 'boolean') convoMirror = opts.convo;
         }
         // suspend(): mute while the host speaks — set the flag SYNCHRONOUSLY, then stop the recognizer.
-        function suspend() { suspended = true; if (rec) { try { rec.stop(); } catch (e) { } } }
+        function suspend() { gen++; suspended = true; if (rec) { try { rec.stop(); } catch (e) { } } }
         function unsuspend() { suspended = false; }
         // setEnabled(): mirror the host's on/off; ear does NOT itself start/stop (host pairs with start/stop).
         function setEnabled(on) { wakeOn = !!on; }
         // restart(): drop the current rec and start a fresh one (picks up a new getLang()).
         function restart() {
             if (!wakeOn) return;
+            gen++;                                                  // supersede the old rec so its onend won't double-restart
             if (rec) { try { rec.stop(); } catch (e) { } rec = null; }
             setTimeout(start, 300);
         }
@@ -173,8 +190,12 @@
 
         // Screen lock / app-switch suspends the WebView → Web SpeechRecognition dies (or zombies: `rec`
         // still set but deaf). On becoming visible again, force a clean restart. (Native manages its own.)
+        // On becoming visible again (app resumed / unlocked), the native onResume has ALREADY stopped the
+        // Vosk recognizer and freed the AudioRecord, so Web-SR may reclaim the mic. Force a clean restart
+        // (handles the WebView-suspended zombie rec). Native wake (background) needs no web restart.
         document.addEventListener('visibilitychange', function () {
-            if (document.visibilityState !== 'visible' || !wakeOn || suspended || NATIVE) return;
+            gen++;                                                  // any rec from the previous visibility era is now stale
+            if (document.visibilityState !== 'visible' || !wakeOn || suspended || !SR) return;
             log('wake: visible → restart recognizer');
             if (rec) { try { rec.onend = null; rec.stop(); } catch (e) { } rec = null; }   // drop a dead/zombie rec
             setTimeout(start, 300);
