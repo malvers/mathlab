@@ -66,6 +66,15 @@ public class SolitaVoicePlugin extends Plugin {
         call.resolve(r);
     }
 
+    // Mute/unmute the always-on recognizer (the FGS keeps the mic, but Vosk stops decoding). The web layer
+    // calls pause(true) while Solita speaks (no self-trigger) and during a Web-SR turn (mic handoff), then
+    // pause(false) to resume always-on wake detection.
+    @PluginMethod
+    public void pause(PluginCall call) {
+        SolitaVoiceService.setPaused(call.getBoolean("pause", Boolean.TRUE));
+        call.resolve();
+    }
+
     // Called by the service (background thread) on a wake hit → push to the WebView.
     void emitWake(final String text) {
         JSObject d = new JSObject();
