@@ -7,11 +7,28 @@
             const wakeBtn = document.getElementById('wakeBtn');
             const input = document.getElementById('messageInput');
             if (!wakeBtn) return;
-            // Native app (Stufe B): the Android WebView has NO Web SpeechRecognition → listen via the native
-            // Vosk plugin (SolitaVoice) instead. The browser path (SR) stays exactly as before.
-            const NATIVE = (!SR && window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.SolitaVoice)
+            // Native app (Stufe B): the SolitaVoice plugin gives an ALWAYS-ON Vosk wake-word that survives a
+            // screen-lock (native FGS). It is detected INDEPENDENTLY of SR: the Android WebView HAS Web-SR too,
+            // and we want BOTH — Web-SR runs the proven foreground conversation, Vosk handles background/locked
+            // wake. The native side owns the mic handoff by Activity lifecycle (Vosk recognizer runs only while
+            // backgrounded; foreground frees the mic for Web-SR), so the ear never manages the Vosk mic.
+            const NATIVE = (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.SolitaVoice)
                 ? window.Capacitor.Plugins.SolitaVoice : null;
             if (!SR && !NATIVE) { wakeBtn.style.display = 'none'; return; }   // e.g. iOS Safari: nothing to listen with
+
+            // Start/stop the ALWAYS-ON background Vosk wake SERVICE (native only). Android 14 forbids
+            // (re)starting a mic-FGS from the background, so we start it ONCE while foreground (on login) and
+            // never stop+start it from the background — only the native lifecycle stops/starts the RECOGNIZER.
+            function startNativeWake() { if (NATIVE) { try { NATIVE.start().catch(function () { }); } catch (e) { } } }
+            function stopNativeWake() { if (NATIVE) { try { NATIVE.stop().catch(function () { }); } catch (e) { } } }
+            // Tell the native Vosk recognizer to free the mic NOW for the foreground Web-SR. The Activity
+            // lifecycle (MainActivity.onResume → setListening(false)) is the primary driver, but at LOGIN the
+            // Activity is ALREADY resumed, so onResume will NOT re-fire to stop Vosk — we must do it explicitly
+            // right after start()ing the service, or the fresh service steals the mic from the foreground Web-SR.
+            function freeMicForWebSR() {
+                if (!NATIVE) return;
+                try { window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.SolitaVoice && window.Capacitor.Plugins.SolitaVoice.setListening({ listen: false }); } catch (e) { }
+            }
 
             const TRIGGERS = ['solita', 'solida', 'rita'];          // Vosk-tested variants (see krass-app note)
             const WAKE_KEY = 'solita_wake';
@@ -49,6 +66,9 @@
                 // resume() clears it unconditionally — so there is no behavioral loss. (SR is guaranteed
                 // truthy here: we early-returned above when neither SR nor NATIVE exists.)
                 if (ear.isEnabled()) ear.suspend();
+                // BELT (native): the real fix is the native lifecycle, but while Solita speaks make doubly sure
+                // the Vosk recognizer isn't holding the mic — stop it before TTS so it can't hear her own voice.
+                try { window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.SolitaVoice && window.Capacitor.Plugins.SolitaVoice.setListening({ listen: false }); } catch (e) { }
                 if (typeof _speak === 'function') _speak(text);
                 if (window.solitaPhase) solitaPhase('speaking');
                 const resume = () => {
@@ -214,6 +234,7 @@
                 ear.setEnabled(false); ear.setConvo(false); ear.setAwaiting(false);
                 if (window.solitaPhase) solitaPhase('idle');
                 ear.stop();
+                stopNativeWake();   // logout kills the always-on Vosk service too (resumes on next login)
             };
 
             // Turn the voice line ON — called from the auth flow on every successful login so the ear is always
@@ -223,7 +244,9 @@
                 wakeOn = true; convo = false; awaitingQuery = false; paused = true; reflect();
                 ear.setEnabled(true); ear.setConvo(false); ear.setAwaiting(false); ear.pause();
                 if (window.solitaPhase) solitaPhase('dormant');
-                ear.start();
+                startNativeWake();   // light the always-on Vosk wake service NOW (foreground = Android-14-legal)
+                freeMicForWebSR();   // Activity already resumed at login → onResume won't fire; stop Vosk by hand
+                ear.start();         // …and the Web-SR foreground ear (binds the native wake-listener too)
             };
 
             // Restart the recognition so a language switch takes effect at once (a fresh rec reads solitaSttLang()).
@@ -236,8 +259,8 @@
                 wakeOn = !wakeOn; localStorage.setItem(WAKE_KEY, wakeOn ? '1' : '0'); reflect();
                 convo = false; awaitingQuery = false;                 // toggling the line resets the thread
                 ear.setConvo(false); ear.setAwaiting(false);
-                if (wakeOn) { paused = true; ear.setEnabled(true); ear.pause(); if (window.solitaPhase) solitaPhase('dormant'); ear.start(); }   // ear on → SLUMBER (waiting for "Solita")
-                else { ear.cancelPending(); paused = false; ear.setEnabled(false); if (window.solitaPhase) solitaPhase('idle'); ear.stop(); }
+                if (wakeOn) { paused = true; ear.setEnabled(true); ear.pause(); if (window.solitaPhase) solitaPhase('dormant'); startNativeWake(); freeMicForWebSR(); ear.start(); }   // ear on → SLUMBER (waiting for "Solita")
+                else { ear.cancelPending(); paused = false; ear.setEnabled(false); if (window.solitaPhase) solitaPhase('idle'); ear.stop(); stopNativeWake(); }
             });
 
             // On load, start the ear once auth has settled — but only if already logged in (overlay hidden,
@@ -247,6 +270,6 @@
             setTimeout(function () {
                 const ov = document.getElementById('cyber-auth-overlay');
                 if (ov && ov.classList.contains('visible')) return;     // not logged in yet → wait for login
-                paused = true; ear.pause(); if (window.solitaPhase) solitaPhase('dormant'); ear.start();
+                paused = true; ear.pause(); if (window.solitaPhase) solitaPhase('dormant'); startNativeWake(); freeMicForWebSR(); ear.start();
             }, 600);
         })();
