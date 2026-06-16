@@ -133,12 +133,24 @@
             }
 
             // Short spoken responses, per language (so an EN/ES command doesn't get a German reply).
+            // `yes` is the WAKE-ACK — a list, not one word, so "Solita" never gets the same curt "Ja?"
+            // twice in a row. Picked LOCALLY (no token, zero latency — the ack must be instant) and warm,
+            // with a polyglot sprinkle (Doc: "Sí, jep, jo, ja, Yes, what's up"). bye/logout stay single.
             const SAY = {
-                de: { yes: 'Ja?', bye: 'Bis später.', logout: 'Logge dich aus. Bis bald.' },
-                en: { yes: 'Yes?', bye: 'See you later.', logout: 'Logging you out. See you soon.' },
-                es: { yes: '¿Sí?', bye: 'Hasta luego.', logout: 'Cerrando sesión. Hasta pronto.' }
+                de: { yes: ['Ja?', 'Jo!', 'Jep!', 'Ja bitte?', 'Sí?', 'Yes?', 'Was gibt’s?', 'Bin da!', 'Hey!', 'What’s up?'], bye: 'Bis später.', logout: 'Logge dich aus. Bis bald.' },
+                en: { yes: ['Yes?', 'Yep!', 'Hey!', 'I’m here!', 'What’s up?', 'Go ahead.', 'Sí?', 'Listening!'], bye: 'See you later.', logout: 'Logging you out. See you soon.' },
+                es: { yes: ['¿Sí?', '¿Dime?', '¡Aquí estoy!', '¡Hey!', '¿Qué tal?', 'Te escucho.', '¡Sí, sí!'], bye: 'Hasta luego.', logout: 'Cerrando sesión. Hasta pronto.' }
             };
-            function say(key) { return (SAY[window.solitaLang] || SAY.de)[key]; }
+            let _lastSaid = '';
+            function say(key) {
+                const v = (SAY[window.solitaLang] || SAY.de)[key];
+                if (!Array.isArray(v)) return v;                          // bye/logout: single line
+                let pick = v[Math.floor(Math.random() * v.length)];      // random, but…
+                let guard = 0;                                           // …never the same one twice running (feels mechanical)
+                while (v.length > 1 && pick === _lastSaid && guard++ < 8) pick = v[Math.floor(Math.random() * v.length)];
+                _lastSaid = pick;
+                return pick;
+            }
 
             // Hang up the conversation: a goodbye drops back to idle (wake-word needed again). NOT sent to the API.
             //   DE: tschüss · auf wiederhören · das war's · schluss für heute    EN: bye · goodbye · good night ·
@@ -272,4 +284,14 @@
                 if (ov && ov.classList.contains('visible')) return;     // not logged in yet → wait for login
                 paused = true; ear.pause(); if (window.solitaPhase) solitaPhase('dormant'); startNativeWake(); freeMicForWebSR(); ear.start();
             }, 600);
+
+            // Option A (Doc 2026-06-16): locking the screen sends Solita into the quiet SLUMBER (dormant) — any
+            // active conversation ends and the half-asleep pill shows — while the native Vosk keeps wake-listening
+            // in the lock (always-on preserved; she still wakes on "Solita"). NATIVE app only: a browser tab-switch
+            // must NOT pause her, so this is gated on the Vosk plugin being present.
+            if (NATIVE) {
+                document.addEventListener('visibilitychange', function () {
+                    if (document.visibilityState === 'hidden' && wakeOn && !paused) enterPause();
+                });
+            }
         })();
