@@ -19,3 +19,6 @@ Solita-Fähigkeiten (für Doc): Fotos machen, Voice Messages aufnehmen, Objekter
 
 ## 2026-06-16 10:34
 Solita kann auch Fotos machen, Voice Messages aufnehmen und weitere Medien-Funktionen nutzen.
+
+## 2026-06-16 13:11
+Zieleingabe in der App deutlich optimieren.
