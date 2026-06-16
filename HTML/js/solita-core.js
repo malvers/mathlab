@@ -56,6 +56,9 @@
                 authDbg('gespeichert? ' + (localStorage.getItem('dev_access') ? ('JA (len ' + pwd.length + ')') : 'NEIN/Fehler'));
                 document.getElementById('cyber-auth-overlay').classList.remove('visible');
                 if (window.solitaStartVoice) solitaStartVoice();   // Doc rule: ear always on — (re)start the wake-word on login
+                // Spoken welcome — only here (manual unlock = fresh user gesture, so the browser allows the
+                // audio). The auto-restore path stays silent on purpose (no gesture + Doc reloads constantly).
+                if (window.solitaGreet) setTimeout(window.solitaGreet, 400);
                 document.getElementById('messageInput').focus();
             } else {
                 const modal = document.querySelector(".auth-modal");
