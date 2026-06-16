@@ -13,3 +13,6 @@ Das mit dem Fit in der App funktioniert noch nicht.
 
 ## 2026-06-16 09:00
 Solita kann auch Fotos machen, Voice Messages aufnehmen und weitere Medien-Funktionen nutzen — diese Möglichkeiten noch weiter ausbauen/dokumentieren.
+
+## 2026-06-16 09:38
+Solita-Fähigkeiten (für Doc): Fotos machen, Voice Messages aufnehmen, Objekterkennung und weitere Funktionen sind möglich bzw. geplant.
