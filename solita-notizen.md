@@ -22,3 +22,6 @@ Solita kann auch Fotos machen, Voice Messages aufnehmen und weitere Medien-Funkt
 
 ## 2026-06-16 13:11
 Zieleingabe in der App deutlich optimieren.
+
+## 2026-06-16 13:12
+Das Fitting muss deutlich optimiert werden.
