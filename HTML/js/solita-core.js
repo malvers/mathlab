@@ -6,7 +6,6 @@
         const SOLITA_CONFIG_URL = 'https://fyfhxzyymmurlaenmzse.supabase.co/functions/v1/solita-config'; // Stufe 2a: Solita patcht HTML/config.json live
         const SOLITA_NOTE_URL = 'https://fyfhxzyymmurlaenmzse.supabase.co/functions/v1/solita-note';     // Stufe 2a: Solita schreibt Notizen + committet
         const SB_ANON = 'sb_publishable_ubQDiMD-X3N0vZvPVi229Q_-5Zootfk'; // publishable anon key — client-safe
-        let conversationHistory = [];
 
         // Verify a password against the proxy (server checks LABAI_PASSWORD). No DeepSeek call → no cost.
         async function verifyPwd(pwd) {
@@ -136,8 +135,6 @@
         messageInput.value = '';
 
         const MODEL_KEY = 'ai_model';
-        const HISTORY_KEY = 'ai_history';
-        const SUMMARY_KEY = 'solita_summary';
 
         // ----- MULTILINGUAL VOICE -----
         // One language active at a time (Web SpeechRecognition can't auto-detect). Drives STT lang, TTS voice
@@ -356,44 +353,8 @@
             }
         }
 
-        // Rolling summary of older turns so context survives without sending the whole history every time.
-        let runningSummary = localStorage.getItem(SUMMARY_KEY) || '';
-        const KEEP_RECENT = 16;   // recent turns kept verbatim; older ones get folded into runningSummary
-
-        // Build the proxy payload: persona + rolling summary as a system turn, then the recent chat.
-        function buildRequestMessages() {
-            const sys = SOLITA_SYSTEM
-                + (runningSummary ? "\n\nBisheriger Gesprächskontext (Zusammenfassung):\n" + runningSummary : "");
-            return [{ role: 'system', content: sys }].concat(conversationHistory);
-        }
-
-        // Keep context bounded WITHOUT just forgetting: fold the oldest turns into runningSummary, drop them.
-        async function maybeSummarize() {
-            if (conversationHistory.length <= KEEP_RECENT + 8) return;
-            const old = conversationHistory.slice(0, conversationHistory.length - KEEP_RECENT);
-            const transcript = old.map(m => (m.role === 'user' ? 'Doc' : 'Solita') + ': ' + m.content).join('\n');
-            try {
-                const r = await fetch(AI_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'apikey': SB_ANON, 'Authorization': `Bearer ${SB_ANON}`, 'x-app-pass': getPwd() },
-                    body: JSON.stringify({
-                        model: 'claude-haiku-4-5-20251001',   // cheap + fast for summarising
-                        max_tokens: 600,
-                        messages: [
-                            { role: 'system', content: 'Fasse den folgenden Gesprächsausschnitt knapp auf Deutsch zusammen — nur Fakten, Wünsche und Beschlüsse, die für das weitere Gespräch wichtig sind. Stichpunktartig, höchstens 8 Zeilen.' + (runningSummary ? ' Beziehe diese bisherige Zusammenfassung mit ein:\n' + runningSummary : '') },
-                            { role: 'user', content: transcript }
-                        ]
-                    })
-                });
-                if (r.ok) {
-                    const d = await r.json();
-                    const s = d.choices && d.choices[0] && d.choices[0].message.content;
-                    if (s) { runningSummary = s.trim(); localStorage.setItem(SUMMARY_KEY, runningSummary); }
-                }
-            } catch (e) { /* summarising is best-effort; we trim below either way */ }
-            conversationHistory = conversationHistory.slice(-KEEP_RECENT);
-            saveHistory();
-        }
+        // History, the rolling context summary and the request/summarise plumbing now live in the brain
+        // (js/solita-brain.js). solita-core only WIRES it (below) and renders what it reports.
 
         const COPY_ICON = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>`;
         const CHECK_ICON = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
@@ -448,24 +409,32 @@
             initModelDropdown(document.getElementById('modelDropdown'));
         });
 
-        function saveHistory() {
-            localStorage.setItem(HISTORY_KEY, JSON.stringify(conversationHistory));
-        }
+        // The "brain": the LLM conversation + tool-use engine (js/solita-brain.js). solita-core is now just
+        // its HOST — it supplies auth (pwd), the model, the persona and the tool layer (specs + executor +
+        // badges), and renders whatever the brain reports via callbacks. ear.js hears, solita-brain thinks,
+        // solita-tts speaks. (Tools that touch the DOM, like show_ui_list, stay here in execTool.)
+        const brain = new Brain({
+            apiUrl: AI_URL,
+            anonKey: SB_ANON,
+            summaryModel: 'claude-haiku-4-5-20251001',
+            keepRecent: 16,
+            storage: { history: 'ai_history', summary: 'solita_summary', legacyHistory: 'deepseek_history' },
+            getPwd: getPwd,
+            getModel: getModel,
+            getSystem: function () { return SOLITA_SYSTEM; },
+            getTools: function () { return SOLITA_TOOLS.concat((window.SolitaTools && window.SolitaTools.specs) || []); },
+            execTool: execTool,
+            toolBadge: toolBadge,
+            onTyping: function (on) { if (on) showTyping(); else hideTyping(); },
+            onAssistant: function (text) { addMessage('assistant', text); },
+            onSpeak: function (text) { if (window.speakReply) window.speakReply(text); },
+            onError: function (err) { addMessage('assistant', '❌ Fehler: ' + ((err && err.message) ? err.message : err)); if (window.solitaPhase) solitaPhase('dormant'); },
+            onDone: function () { sendButton.disabled = false; messageInput.focus(); }
+        });
 
-        function loadHistory() {
-            try {
-                const saved = localStorage.getItem(HISTORY_KEY)
-                    || localStorage.getItem('deepseek_history');
-                if (!saved) return;
-                const history = JSON.parse(saved);
-                if (!Array.isArray(history) || history.length === 0) return;
-                conversationHistory = history;
-                messagesArea.innerHTML = '';
-                history.forEach(msg => addMessage(msg.role, msg.content));
-            } catch (e) { }
-        }
-
-        loadHistory();
+        // Restore persisted history into the brain, then render the bubbles (host owns the DOM).
+        const _restored = brain.load();
+        if (_restored) { messagesArea.innerHTML = ''; _restored.forEach(function (msg) { addMessage(msg.role, msg.content); }); }
 
         // ----- CHAT-LOGIK -----
         messageInput.addEventListener('input', function () {
@@ -617,10 +586,7 @@
             }
 
             if (userText.toLowerCase() === '/clear') {
-                conversationHistory = [];
-                runningSummary = '';                       // wipe long-term memory too → a real fresh start
-                localStorage.removeItem(HISTORY_KEY);
-                localStorage.removeItem(SUMMARY_KEY);
+                brain.clear();                             // wipe history + rolling summary + their storage
                 // Keep the visible transcript on screen (Doc: don't delete the text) — only her MEMORY is wiped.
                 // A subtle divider marks the cut; the old bubbles vanish on the next reload (history is empty now).
                 messagesArea.insertAdjacentHTML('beforeend', '<div style="text-align:center;opacity:0.45;font-size:0.66rem;letter-spacing:1.5px;text-transform:uppercase;margin:16px 0;font-family:Orbitron,sans-serif;color:#cfe3ff;">— neue Session · Gedächtnis geleert —</div>');
@@ -745,77 +711,7 @@
             messageInput.value = '';
             messageInput.style.height = 'auto';
             sendButton.disabled = true;
-            conversationHistory.push({ role: 'user', content: userText });
-            showTyping();
-
-            try {
-                // Tool-use loop: send the chat + Solita's tools. If Claude calls a tool, execute it, hand the
-                // result back, and continue — until Claude gives a normal answer. Tool turns live ONLY in the
-                // local `msgs` array, so conversationHistory stays string-only (no reload/persist surprises).
-                let msgs = buildRequestMessages();
-                let finalText = '(keine Antwort)';
-                let guard = 0;
-                while (guard++ < 6) {
-                    const response = await fetch(AI_URL, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'apikey': SB_ANON,
-                            'Authorization': `Bearer ${SB_ANON}`,
-                            'x-app-pass': pwd
-                        },
-                        body: JSON.stringify({
-                            model: getModel(),
-                            messages: msgs,
-                            tools: SOLITA_TOOLS.concat((window.SolitaTools && window.SolitaTools.specs) || []),
-                            max_tokens: 3000
-                        })
-                    });
-                    if (!response.ok) {
-                        let err = `Fehler ${response.status}`;
-                        if (response.status === 401) err = 'Falsches Passwort';
-                        else if (response.status === 402) err = 'Nicht genug Guthaben – AI-Konto aufladen';
-                        else { try { const e = await response.json(); if (e && e.error) err += ' — ' + e.error; } catch (_) { } }
-                        throw new Error(err);
-                    }
-                    const data = await response.json();
-                    const blocks = Array.isArray(data.content) ? data.content : [];
-                    const textOut = (data.choices && data.choices[0] && data.choices[0].message.content) || '';
-
-                    // Claude wants to act → execute each tool_use, feed results back, loop. Needs the updated
-                    // claude edge fn; an OLD one returns no stop_reason → we fall straight to the text path.
-                    if (data.stop_reason === 'tool_use' && blocks.some(b => b && b.type === 'tool_use')) {
-                        msgs = msgs.concat([{ role: 'assistant', content: blocks }]);
-                        if (textOut.trim()) { hideTyping(); addMessage('assistant', textOut); showTyping(); }
-                        const toolResults = [];
-                        for (const blk of blocks) {
-                            if (!blk || blk.type !== 'tool_use') continue;
-                            hideTyping(); const _b = toolBadge(blk.name, blk.input); if (_b) addMessage('assistant', _b); showTyping();
-                            const res = await execTool(blk.name, blk.input, pwd);
-                            toolResults.push({ type: 'tool_result', tool_use_id: blk.id, content: res.summary, is_error: !res.ok });
-                        }
-                        msgs = msgs.concat([{ role: 'user', content: toolResults }]);
-                        continue;   // let Claude respond to the tool results
-                    }
-
-                    finalText = textOut || '(keine Antwort)';
-                    break;
-                }
-                conversationHistory.push({ role: 'assistant', content: finalText });   // persist final text only
-                saveHistory();
-                hideTyping();
-                addMessage('assistant', finalText);
-                if (window.speakReply) window.speakReply(finalText); // read the answer aloud (voice mode)
-                maybeSummarize();   // fold older turns into the rolling summary (best-effort, background)
-            } catch (err) {
-                conversationHistory.pop(); // User-Nachricht bei Fehler wieder entfernen
-                hideTyping();
-                addMessage('assistant', `❌ Fehler: ${err.message}`);
-                if (window.solitaPhase) solitaPhase('dormant');   // turn failed (e.g. fetch aborted by an app-switch) -> clear the stuck "thinking" pill
-            } finally {
-                sendButton.disabled = false;
-                messageInput.focus();
-            }
+            brain.send(userText);   // the brain owns the turn: push history → tool-use loop → render via the wired callbacks
         }
         // ----- AUTO-LOGIN & AUTH-INITIALISIERUNG -----
         (async function initAuth() {
