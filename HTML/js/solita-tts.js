@@ -71,6 +71,7 @@
                         .replace(/[*_`#>]/g, '')
                         .replace(/\bSolita\b/gi, 'Solíta')   // TTS: say her name so-LÍ-ta (stress 2nd syllable), not SÓlita
                         .replace(/\bUI\b/g, 'Ju Ei')         // TTS: say "UI" the English way (you-eye), not German "oo-ee"
+                        .replace(/\bKI\b/g, 'Kah Ih')        // TTS: spell "KI" as the letters K-I (Kah-Ih), not the word „kih"
                         .replace(/\s+/g, ' ').trim();
                     // PRIMARY: Google Cloud TTS via the tts edge fn (warm Neural2 voice) → play MP3.
                     window.__solitaSpeaking = true;     // set SYNCHRONOUSLY → the wake loop polls this
