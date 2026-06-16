@@ -37,7 +37,8 @@
             let wakeOn = true;
             // SOURCE OF TRUTH for the Solita conversation state. The ear keeps pure mirrors of these
             // (pushed via ear.resume/pause/setConvo/setAwaiting); these locals are what the adapter reads.
-            let awaitingQuery = false, convo = false, paused = false;
+            // awaitingConfirm: a lock-wake asked „Soll ich helfen?" and is waiting for the yes/no answer.
+            let awaitingQuery = false, convo = false, paused = false, awaitingConfirm = false, confirmAccepting = false, confirmTimer = null;
 
             // Build the generic ear with Solita's config. The ear knows no Solita words/DOM/globals.
             const ear = new Ear({
@@ -136,10 +137,12 @@
             // `yes` is the WAKE-ACK — a list, not one word, so "Solita" never gets the same curt "Ja?"
             // twice in a row. Picked LOCALLY (no token, zero latency — the ack must be instant) and warm,
             // with a polyglot sprinkle (Doc: "Sí, jep, jo, ja, Yes, what's up"). bye/logout stay single.
+            // `offerHelp` is the lock-wake question (she woke from sleep and asks before acting); `okay` is the
+            // brief acknowledgement when Doc declines, right before she drifts back to sleep.
             const SAY = {
-                de: { yes: ['Ja?', 'Jo!', 'Jep!', 'Ja bitte?', 'Sí?', 'Yes?', 'Was gibt’s?', 'Bin da!', 'Hey!', 'What’s up?'], bye: 'Bis später.', logout: 'Logge dich aus. Bis bald.' },
-                en: { yes: ['Yes?', 'Yep!', 'Hey!', 'I’m here!', 'What’s up?', 'Go ahead.', 'Sí?', 'Listening!'], bye: 'See you later.', logout: 'Logging you out. See you soon.' },
-                es: { yes: ['¿Sí?', '¿Dime?', '¡Aquí estoy!', '¡Hey!', '¿Qué tal?', 'Te escucho.', '¡Sí, sí!'], bye: 'Hasta luego.', logout: 'Cerrando sesión. Hasta pronto.' }
+                de: { yes: ['Ja?', 'Jo!', 'Jep!', 'Ja bitte?', 'Sí?', 'Yes?', 'Was gibt’s?', 'Bin da!', 'Hey!', 'What’s up?'], offerHelp: ['Soll ich helfen?', 'Brauchst du mich?', 'Kann ich helfen?', 'Ja? Soll ich helfen?'], okay: ['Okay.', 'Alles klar.', 'Dann schlafe ich weiter.', 'Bis gleich.'], bye: 'Bis später.', logout: 'Logge dich aus. Bis bald.' },
+                en: { yes: ['Yes?', 'Yep!', 'Hey!', 'I’m here!', 'What’s up?', 'Go ahead.', 'Sí?', 'Listening!'], offerHelp: ['Can I help?', 'Need me?', 'Should I help?', 'Yes? Can I help?'], okay: ['Okay.', 'Alright.', 'Back to sleep then.', 'See you.'], bye: 'See you later.', logout: 'Logging you out. See you soon.' },
+                es: { yes: ['¿Sí?', '¿Dime?', '¡Aquí estoy!', '¡Hey!', '¿Qué tal?', 'Te escucho.', '¡Sí, sí!'], offerHelp: ['¿Te ayudo?', '¿Me necesitas?', '¿Puedo ayudar?', '¿Sí? ¿Te ayudo?'], okay: ['Vale.', 'De acuerdo.', 'Sigo durmiendo.', 'Hasta luego.'], bye: 'Hasta luego.', logout: 'Cerrando sesión. Hasta pronto.' }
             };
             let _lastSaid = '';
             function say(key) {
@@ -215,20 +218,84 @@
             //   EN: pause · chill out · take a break · go to sleep      ES: pausa · descansa · a dormir · duérmete
             const PAUSE = /\bpause\b|\bpausier|\bchill\s+mal\b|\bchillen\b|\bruhe?\s+dich\s+aus\b|\bso(?:g)?ni\s+d'?\s?oro\b|\bchill\s+out\b|\btake a break\b|\bgo to sleep\b|\bpausa\b|\bdescansa\b|\ba dormir\b|\bdué?rmete\b/i;
             function enterPause() {
-                ear.cancelPending();
+                ear.cancelPending(); clearConfirm(); confirmAccepting = false;   // going dormant cancels any pending lock-wake gate
                 paused = true; convo = false; awaitingQuery = false;
                 ear.pause(); ear.setConvo(false); ear.setAwaiting(false);
                 if (window.solitaPhase) solitaPhase('dormant');     // pill → half-asleep
             }
 
+            // ── Lock-wake confirmation gate (Doc 2026-06-16) ─────────────────────────────────────────────
+            // A background/locked wake comes from the native Vosk recognizer, whose "Solita" detection is OOV
+            // and so fires on the homophone "solide" too (fundamental — see solita-vosk-hybrid.md). So a
+            // lock-wake must NOT open a live turn blind: she asks „Soll ich helfen?" first. „Nein" — or no
+            // answer at all (a false fire to an empty room) — sends her straight back to sleep; anything else
+            // counts as yes (optionally carrying the wish) and the normal conversation opens.
+            const NEG_CONFIRM = /\b(nein|nee?|n[öo]|nope|lass(?:\s+(?:mal|gut|stecken))?|vergiss(?:\s+es)?|schon\s+gut|passt\s+schon|kein(?:en)?\s+bedarf|nicht\s+n[öo]tig|brauch(?:e)?\s+(?:dich\s+)?nicht|no\s+gracias|d[eé]jalo|olv[ií]dalo)\b/i;
+            // Greedy leader: strip any run of affirmative fillers („ja", „ja bitte", „na klar gerne", …) so what
+            // remains is the actual wish (empty remainder = a pure „ja" → just open the ear and prompt).
+            const AFFIRM_LEAD = /^[\s,.;:!-]*(?:(?:ja|jo|jep|jawohl|klar|gerne|sicher|na\s+klar|bitte|doch|yes|yeah|yep|sure|ok(?:ay)?|s[ií]|vale|venga)\b[\s,.;:!-]*)+/i;
+            const CONFIRM_MS = 8000;   // no answer within this window → treat as a false fire → back to sleep
+
+            function clearConfirm() { awaitingConfirm = false; if (confirmTimer) { clearTimeout(confirmTimer); confirmTimer = null; } }
+
+            // Ask before acting on a lock-wake. Reuse the proven turn-listen plumbing (convo + awaitingQuery so
+            // speakReply's resume keeps the ear open afterwards) and arm a silence timeout so an empty-room
+            // false fire falls back to sleep on its own.
+            function askConfirm() {
+                awaitingConfirm = true; convo = true; awaitingQuery = true;
+                ear.setConvo(true); ear.setAwaiting(true);
+                if (confirmTimer) clearTimeout(confirmTimer);
+                confirmTimer = setTimeout(confirmTimeout, CONFIRM_MS);
+                if (window.speakReply) window.speakReply(say('offerHelp'));   // „Soll ich helfen?"
+            }
+            // Yes: leave the confirm gate but do NOT act on this first (possibly partial) final. The Android
+            // WebView delivers one phrase as GROWING finals, so route the wish through the ear's cumulative-
+            // finals debounce (onRawFinal returns false → queueQuery → onUtterance), where `confirmAccepting`
+            // decides: a pure „ja" → prompt + listen for the real wish; „ja <wish>" / a direct wish → submit
+            // just the wish. This keeps „ja bitte, lies mir die Mail" from being truncated to „ja" on the Pixel.
+            function beginAccept() {
+                clearConfirm(); paused = false; convo = true; awaitingQuery = true; confirmAccepting = true;
+                ear.setConvo(true); ear.setAwaiting(true);
+            }
+            // No (spoken=true → a brief „Okay." then dormant) or silence (spoken=false → straight to dormant).
+            function declineHelp(spoken) {
+                clearConfirm();
+                convo = false; awaitingQuery = false; paused = true;
+                ear.setConvo(false); ear.setAwaiting(false);
+                if (spoken && window.speakReply) window.speakReply(say('okay'));   // resume() then parks her dormant
+                else enterPause();                                                // silent (timeout) → dormant now
+                goToSleepNative();   // best-effort: drop back behind the lockscreen so Vosk reclaims the mic at once
+            }
+            function confirmTimeout() { confirmTimer = null; if (awaitingConfirm) declineHelp(false); }
+
+            // Best-effort native re-background so Vosk reclaims the mic immediately on a decline (instead of
+            // waiting for the screen to time out). No-op until a native goToSleep()/App plugin exists — the web
+            // path still sleeps correctly: she stays dormant in the foreground (Web-SR keeps wake-listening)
+            // until the screen locks, then the native lifecycle (onPause) hands the mic back to Vosk.
+            function goToSleepNative() {
+                try {
+                    const P = window.Capacitor && window.Capacitor.Plugins;
+                    if (P && P.SolitaVoice && P.SolitaVoice.goToSleep) P.SolitaVoice.goToSleep();
+                    else if (P && P.App && P.App.minimizeApp) P.App.minimizeApp();
+                } catch (e) { }
+            }
+
             // The wake handler: a trigger word was detected (ambient/dormant or native). The ear already
-            // cleared its own dormant flag; clear the adapter's local mirror too (matches old lines 186/207),
-            // then open the conversation exactly as the old fire() did.
-            function onWake(residual) { paused = false; fire(residual); }
+            // cleared its own dormant flag; clear the adapter's local mirror too (matches old lines 186/207).
+            //   native (background/locked) → ask „Soll ich helfen?" first (she may have mis-fired on "solide").
+            //   ambient (Doc is at the phone) → open the conversation directly, exactly as the old fire() did.
+            function onWake(residual, meta) {
+                paused = false;
+                if (meta && meta.native) { askConfirm(); return; }
+                fire(residual);
+            }
 
             // Live interim mirror (ear emits only while listening && !dormant && !suspended). Skip UI-mode here
             // (matches the old `!window.__uiMode` gate) so dictated UI wishes don't echo into the input.
             function onInterim(t) {
+                // While awaiting the lock-wake yes/no, a partial means Doc is speaking → push the silence
+                // timeout out so a slow answer („ja bitte, lies mir …") isn't cut off and sent back to sleep.
+                if (awaitingConfirm && confirmTimer) { clearTimeout(confirmTimer); confirmTimer = setTimeout(confirmTimeout, 6000); }
                 if (!window.__uiMode) { if (input) { input.value = t; input.dispatchEvent(new Event('input')); } }
             }
 
@@ -238,6 +305,12 @@
                 let out = ((input && input.value) || q).trim();
                 const low = out.toLowerCase();                       // drop a leading wake word if it slipped in
                 for (const w of TRIGGERS) { if (low.startsWith(w)) { out = out.slice(w.length).replace(/^[\s,.:!?-]+/, '').trim(); break; } }
+                if (confirmAccepting) {                              // this settled phrase is the answer to „Soll ich helfen?"
+                    confirmAccepting = false;
+                    const wish = out.replace(AFFIRM_LEAD, '').trim();
+                    if (!wish) { fire(''); return; }                 // pure „ja" → speak „Ja?" and listen for the real wish
+                    out = wish;                                      // „ja <wish>" → submit only the wish
+                }
                 if (!out) return;
                 awaitingQuery = false; convo = true;
                 ear.setConvo(true); ear.setAwaiting(false);
@@ -250,6 +323,10 @@
             // live onResult if-ladder (old lines 178-197) IN ORDER; the `return false` cases fall through to
             // the ear's generic fallback (dormant-wake / awaitingQuery-debounce / extractQuery→fire).
             function onRawFinal(txt) {
+                if (awaitingConfirm) {                                 // lock-wake gate: settle yes/no FIRST
+                    if (NEG_CONFIRM.test(txt)) { declineHelp(true); return true; }   // „nein" → „Okay." → back to sleep
+                    beginAccept(); return false;                                     // yes → debounce the (growing) wish
+                }
                 if (ear.isPaused()) {                                  // dormant: "Solita" wakes her …
                     // … but spoken slash-commands ("slash ui" / "slash list" …) still fire — quick remote, stays asleep.
                     if (/^(?:slash|splash|flash)\s+(?:ui|u\s*i|list|liste|clear|de|en|es|deutsch|english|spanish|espa[nñ]ol)\b/i.test(txt)) {
@@ -291,6 +368,15 @@
                 startNativeWake();   // light the always-on Vosk wake service NOW (foreground = Android-14-legal)
                 freeMicForWebSR();   // Activity already resumed at login → onResume won't fire; stop Vosk by hand
                 ear.start();         // …and the Web-SR foreground ear (binds the native wake-listener too)
+            };
+
+            // Programmatic wake (typed /wake, or a future button): make sure the ear is on, then open the
+            // conversation exactly like hearing "Solita" — she answers „Ja?" and listens for the next query.
+            // Especially useful when the mic is OFF (you can't SAY the wake word) → type /wake to bring her up.
+            window.solitaWake = function () {
+                if (!wakeOn) window.solitaStartVoice();   // ear off → turn it on (→ dormant) first
+                paused = false;
+                onWake('', {});                           // ambient wake path → fire('') → „Ja?" + listen
             };
 
             // Restart the recognition so a language switch takes effect at once (a fresh rec reads solitaSttLang()).

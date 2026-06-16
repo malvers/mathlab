@@ -110,14 +110,16 @@
         // runs only while backgrounded/locked; foreground hands the mic to Web-SR), so the ear must
         // NOT start/stop the Vosk recognizer here — it only listens for the "background wake" event.
         // The service brings the Activity to the foreground and emits 'result'; we then open the
-        // conversation via onWake('') so the now-foreground Web-SR captures the question.
+        // conversation via onWake('', {native:true}). The {native:true} flag lets the host distinguish a
+        // background/locked wake (where the recognizer is OOV and may have mis-fired) from a foreground
+        // ambient wake, so it can confirm before acting. Ambient Web-SR wakes call onWake(q) with no flag.
         function bindNativeWake() {
             if (!NATIVE || nativeBound) return;
             nativeBound = true;
             NATIVE.addListener('result', function () {              // Vosk heard the wake-word (background)
                 if (!wakeOn) return;                                // suspended is fine: a real Vosk wake foregrounds us
                 paused = false;                                     // dormant → wake
-                onWake('');                                         // prompt, then take the question via Web-SR
+                onWake('', { native: true });                      // background/locked wake → host may confirm first
             });
             log('wake: native Vosk wake-listener bound');
         }
