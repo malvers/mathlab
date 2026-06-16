@@ -31,3 +31,6 @@ Kreisanzeigen für die Benzinpreise müssen über den Symbolen für die Tankstel
 
 ## 2026-06-16 13:16
 Wunsch: Solita soll auch den Inhalt von E-Mails lesen können (nicht nur Absender/Betreff).
+
+## 2026-06-16 13:23
+Solita-Logo soll überarbeitet/anders gestaltet werden.
