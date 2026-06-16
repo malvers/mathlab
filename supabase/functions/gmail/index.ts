@@ -68,6 +68,34 @@ function fromName(raw: string): string {
   return String(raw || '').trim();
 }
 
+// Decode Gmail's base64url message-body data (UTF-8 safe).
+function decodeB64Url(data: string): string {
+  try {
+    return decodeURIComponent(escape(atob(String(data || '').replace(/-/g, '+').replace(/_/g, '/'))));
+  } catch { return ''; }
+}
+
+// Extract a readable text body from a Gmail message payload: prefer text/plain, fall back to a
+// tag-stripped text/html, else the top-level body. READ-ONLY — never modifies the message.
+// deno-lint-ignore no-explicit-any
+function extractBody(payload: any): string {
+  // deno-lint-ignore no-explicit-any
+  function walk(part: any, want: string): string {
+    if (!part) return '';
+    if (part.mimeType === want && part.body?.data) return decodeB64Url(part.body.data);
+    for (const p of (part.parts || [])) { const r = walk(p, want); if (r) return r; }
+    return '';
+  }
+  let txt = walk(payload, 'text/plain');
+  if (!txt) {
+    const html = walk(payload, 'text/html');
+    if (html) txt = html.replace(/<style[\s\S]*?<\/style>/gi, ' ').replace(/<[^>]+>/g, ' ')
+      .replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/\s+/g, ' ').trim();
+  }
+  if (!txt && payload?.body?.data && String(payload.mimeType || '').startsWith('text/')) txt = decodeB64Url(payload.body.data);
+  return txt.replace(/\r\n/g, '\n').replace(/\n{3,}/g, '\n\n').trim();
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS });
 
@@ -87,7 +115,11 @@ Deno.serve(async (req) => {
   }
 
   const query = (typeof b.query === 'string' && b.query.trim()) ? b.query.trim() : 'is:unread in:inbox';
-  const max = Math.max(1, Math.min(25, parseInt(String(b.max), 10) || 12));
+  // READ-ONLY body reading: only when asked (Claude sets read_body when Doc wants content). Full bodies are
+  // heavier → cap the count lower when bodies are requested, and bound each body's length.
+  const wantBodies = b.bodies === true || b.read_body === true;
+  const max = Math.max(1, Math.min(wantBodies ? 8 : 25, parseInt(String(b.max), 10) || (wantBodies ? 5 : 12)));
+  const bodyMax = Math.max(200, Math.min(8000, parseInt(String(b.bodyMax), 10) || 2500));
 
   let token: string;
   try {
@@ -113,17 +145,26 @@ Deno.serve(async (req) => {
 
   if (!ids.length) return json({ ok: true, count: 0, more: false, senders: [] });
 
-  // 2) From + Subject per message (parallel, metadata only — no body fetched)
+  // 2) per message (parallel): From + Subject + snippet always; the text BODY too when read_body was set.
+  //    Still READ-ONLY — messages.get never marks a mail as read (that needs gmail.modify, which we lack).
   const senders = await Promise.all(ids.map(async (id) => {
     try {
+      const fmt = wantBodies ? 'full' : 'metadata';
       const u = 'https://gmail.googleapis.com/gmail/v1/users/me/messages/' + id
-        + '?format=metadata&metadataHeaders=From&metadataHeaders=Subject';
+        + '?format=' + fmt + '&metadataHeaders=From&metadataHeaders=Subject';
       const r = await fetch(u, { headers: G });
       const d = await r.json().catch(() => ({}));
       const hs: Array<{ name: string; value: string }> = d?.payload?.headers || [];
       const from = hs.find((h) => h.name === 'From')?.value || '';
       const subject = hs.find((h) => h.name === 'Subject')?.value || '(kein Betreff)';
-      return { name: fromName(from), subject };
+      const out: { name: string; subject: string; snippet: string; body?: string } = {
+        name: fromName(from), subject, snippet: String(d?.snippet || '').trim(),
+      };
+      if (wantBodies) {
+        const body = extractBody(d?.payload);
+        out.body = body.length > bodyMax ? body.slice(0, bodyMax) + ' …[gekürzt]' : body;
+      }
+      return out;
     } catch {
       return null;
     }
