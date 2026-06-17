@@ -44,3 +44,6 @@ Solitas Begrüßung beim Aufwachen/Start soll freundlicher gestaltet werden.
 ## 2026-06-17 06:15
 08:15 Uhr, 17.06.2026 — Solita soll Zugriff auf Docs Kalender bekommen.
 08:15 Uhr, 17.06.2026 — Zu jeder Notiz immer die aktuelle Uhrzeit dazuschreiben.
+
+## 2026-06-17 06:16
+08:16 Uhr – Solita soll eine Einkaufsliste / Checkliste-Funktion bekommen.
