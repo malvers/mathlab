@@ -47,3 +47,6 @@ Solitas Begrüßung beim Aufwachen/Start soll freundlicher gestaltet werden.
 
 ## 2026-06-17 06:16
 08:16 Uhr – Solita soll eine Einkaufsliste / Checkliste-Funktion bekommen.
+
+## 2026-06-17 06:17
+08:17 Uhr – Solita soll einen Timer auslösen können.
