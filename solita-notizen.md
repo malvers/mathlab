@@ -68,3 +68,6 @@ Feature request: Always include the system timestamp with messages automatically
 
 ## 2026-06-17 06:29
 Wenn Doc auf Englisch wechseln will, Englisch-Modus aktivieren — ausgelöst durch den Befehl „/en" (Echo November).
+
+## 2026-06-17 06:30
+Pille mit Messages oben ist zu klein.
