@@ -92,3 +92,6 @@ Wir brauchen auch noch eine Funktion — (Doc hat die Formulierung abgebrochen, 
 
 ## 2026-06-17 07:14
 Navigationsfunktion: Auswahl des Wegetyps — Laufen (Fußweg) oder Straße (Fahrroute).
+
+## 2026-06-17 07:31
+/pause → slumber (Solita-Befehl: versetzt Solita in den Schlummermodus)
