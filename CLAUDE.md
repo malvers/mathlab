@@ -25,7 +25,7 @@ A few ground rules:
 17. Never say or write "ULTRA"!
 18. **NIEMALS ein Passwort, API-Key, Token oder sonstiges Secret im Quellcode** — auch nicht in Kommentaren, Default-Werten, Beispielen oder als „DEV-Bake-in". Dieses Repo ist public; git-history vergisst nichts. Verschlüsselte Blobs ohne das zugehörige Passwort/Key sind OK; Passwort + Ciphertext zusammen NICHT. Bei Verstoß: SOFORT laut warnen und Rotation vorschlagen, nicht nur Kommentar entfernen.
 19. **Branch-Hygiene (gegen lautlos verlorene Arbeit):** Jede Agenten-Aufgabe startet auf einem **frischen** Branch von aktuellem `origin/main` (`git fetch` → `git switch -c task origin/main`) — **kein** langlebiger Sammel-Branch. Nach **vollem** Merge den Branch löschen (geparkte Branches ausgenommen). Datei-Umzüge als **`git mv` in einem eigenen Commit** (Inhalt erst im nächsten ändern), sonst frisst ein späterer Merge fremde Edits stumm (`modify/delete`). Beim Mergen auf `modify/delete`-Konflikte achten — nie blind die Löschung nehmen.
-20. **Commit & Push NUR mit Docs ausdrücklicher Zustimmung** — nie automatisch, auch nicht wenn fertig + getestet. Erst arbeiten/testen, dann STOPPEN und auf „commit"/„push" warten. Vorher Diff auf Secrets prüfen (Regel 18); Force-Push bleibt gated.
+20. **Commit & Push automatisch auf einen BRANCH (Remote-/Agent-Sessions):** Nach **jeder** Änderung committen **und** auf den Arbeits-Branch pushen — **nie** auf `main`, **nie** Force-Push (flüchtige Container: nur Gepushtes überlebt das Recycling). Vorher **immer** Diff auf Secrets prüfen (Regel 18). `main` wird ausschließlich per PR/Merge durch Doc oder nach **ausdrücklicher** Einzel-Zustimmung („push to main") geändert. Knappe, sinnvolle Commit-Messages.
 
 ## Bevorzugte Farbpalette
 
