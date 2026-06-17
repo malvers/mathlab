@@ -1934,6 +1934,40 @@ body.ui-idle #nav-banner {
 }
 #zoom-in { left: 12px; }    /* + → bottom-left */
 #zoom-out { right: 12px; }  /* − → bottom-right */
+
+/* Home FAB — bottom-left, stacked above the +-zoom. Hidden until navigating or a home is stored
+   (JS toggles .show). Same glass look as the zoom FABs. */
+#home-fab {
+    position: fixed;
+    left: 12px;
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 18px + 46px + 12px); /* one zoom-FAB row + gap above #zoom-in */
+    z-index: 600;
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(8, 20, 42, 0.82);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+    color: rgba(255, 255, 255, 0.92);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease, transform 0.1s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+#home-fab.show {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+#home-fab svg { width: 24px; height: 24px; }
+#home-fab:active { transform: scale(0.94); }
 /* the bars: horizontal on both (− and the cross-bar of +), vertical only on + */
 #zoom-in::before,
 #zoom-out::before,
