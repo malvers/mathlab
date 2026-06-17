@@ -37,6 +37,8 @@ window.TrackerNav = function (ctx) {
     let destLatLng = null;  // [lat, lng] of the set destination, or null
     let destLabel = '';     // human-readable address (for the panel + toasts)
     let destMarker = null;  // Leaflet pin at the destination
+    const HOME_KEY = 'trk_nav_home';
+    let home = null;        // saved "Zuhause" { lat, lng, label } (localStorage), or null
     let routeLine = null;   // Leaflet layerGroup of the computed route (casing + core)
     let routeCasing = null, routeCore = null; // the two polylines, kept so update() can re-slice them
     let routeLatLngs = null; // the route's points [[lat,lng]…] — for the off-route distance check
@@ -52,6 +54,27 @@ window.TrackerNav = function (ctx) {
     let routeTotalDur = 0;  // whole-route duration (s) at (re)route time — for ETA / remaining
 
     function hasDestination() { return !!destLatLng; }
+
+    // ---- "Zuhause": long-press the house FAB to save the CURRENT destination as home; short tap to
+    //      navigate home. Persisted in localStorage so it survives restarts. ----
+    function loadHome() {
+        try { const h = JSON.parse(localStorage.getItem(HOME_KEY) || 'null'); return (h && h.lat != null && h.lng != null) ? h : null; }
+        catch (e) { return null; }
+    }
+    // Show the house FAB whenever a home is stored OR we're navigating (so it can be set/used).
+    function refreshHome() { const b = $('home-fab'); if (b) b.classList.toggle('show', !!home || hasDestination()); }
+    function saveHome() {
+        if (!destLatLng) { toast('Kein aktives Ziel — erst ein Ziel navigieren, dann das Haus lange drücken.'); return; }
+        home = { lat: destLatLng[0], lng: destLatLng[1], label: destLabel || 'Zuhause' };
+        try { localStorage.setItem(HOME_KEY, JSON.stringify(home)); } catch (e) { }
+        toast('Als Zuhause gespeichert: ' + shortLabel(home.label));
+        refreshHome();
+    }
+    function goHome() {
+        if (!home) { toast('Kein Zuhause gespeichert — ein Ziel navigieren und das Haus lange drücken.'); return; }
+        toast('Navigation nach Hause …');
+        navigateTo([home.lat, home.lng], home.label);
+    }
 
     function curPos() {
         const m = ctx.posMarker;
@@ -107,6 +130,7 @@ window.TrackerNav = function (ctx) {
         } catch (e) { }
         hidePanels();
         toast('Ziel gesetzt: ' + shortLabel(destLabel) + ' — jetzt START');
+        refreshHome();
     }
 
     function showDestMarker() {
@@ -127,6 +151,7 @@ window.TrackerNav = function (ctx) {
         hideBanner();
         try { if ('speechSynthesis' in window) window.speechSynthesis.cancel(); } catch (e) { }
         refreshPanel();
+        refreshHome(); // dest gone, but the FAB stays if a home is stored
     }
 
     // ---- Routing: a position → destination, drawn as a polyline ----
@@ -173,6 +198,7 @@ window.TrackerNav = function (ctx) {
         destLabel = label || 'Ziel';
         showDestMarker();
         refreshPanel();
+        refreshHome();
         const from = curPos();
         try {
             if (from) map.fitBounds(L.latLngBounds([from, destLatLng]), { padding: [60, 60] });
@@ -550,6 +576,25 @@ window.TrackerNav = function (ctx) {
             rec.onend = () => { listening = false; micBtn.classList.remove('listening'); input.focus(); };
             try { rec.start(); } catch (e) { listening = false; micBtn.classList.remove('listening'); }
         });
+    })();
+
+    // Home FAB: long-press → save the current destination as "Zuhause"; short tap → navigate home.
+    (function initHome() {
+        home = loadHome();
+        const btn = $('home-fab');
+        if (!btn) { return; }
+        let pressTimer = null, longFired = false, sx = 0, sy = 0;
+        const cancel = () => { if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; } };
+        btn.addEventListener('pointerdown', (e) => {
+            longFired = false; sx = e.clientX; sy = e.clientY; cancel();
+            pressTimer = setTimeout(() => { pressTimer = null; longFired = true; saveHome(); }, 600);
+        });
+        btn.addEventListener('pointermove', (e) => { if (pressTimer && Math.hypot(e.clientX - sx, e.clientY - sy) > 10) cancel(); });
+        btn.addEventListener('pointerup', cancel);
+        btn.addEventListener('pointercancel', cancel);
+        btn.addEventListener('pointerleave', cancel);
+        btn.addEventListener('click', () => { if (longFired) { longFired = false; return; } goHome(); }); // suppress the click that follows a long-press
+        refreshHome();
     })();
 
     // Voice toggle (persisted): default on, but the user can silence spoken guidance.
