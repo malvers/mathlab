@@ -85,6 +85,8 @@
                         if (paused) ear.pause();
                     }
                     if (window.solitaPhase) solitaPhase(!ear.isEnabled() ? 'idle' : (convo ? 'listening' : 'dormant'));
+                    // Ear reopened and waiting → (re)start the silence countdown for an open conversation.
+                    if (ear.isEnabled() && convo && !paused && !window.__uiMode) armIdle(); else disarmIdle();
                 };
                 // _speak set window.__solitaSpeaking synchronously; poll it (covers Cloud audio AND the
                 // browser fallback) → re-open the ear when playback ends.
@@ -94,6 +96,7 @@
             };
 
             function fire(query) {
+                disarmIdle();                                        // new turn underway → resume() re-arms after the reply
                 convo = true;                                        // addressing Solita opens the conversation thread
                 if (!query) {                                        // heard "Solita" alone → prompt + listen once
                     awaitingQuery = true;
@@ -192,6 +195,7 @@
             //   see you · that's all/it · we're done    ES: adiós · hasta luego/pronto/mañana · buenas noches · chao
             const FAREWELL = /^(tschü(?:ss?)?|auf wiederhör(?:en)?|das war'?s(?: für (?:heute|jetzt))?|danke,? das war'?s|schluss für (?:heute|jetzt)|beenden?(?: das gespräch)?|bye(?:[\s-]?bye)?|goodbye|good ?night|see you(?: later)?|that'?s (?:all|it)|we'?re done|adi[oó]s|hasta (?:luego|pronto|ma[ñn]ana)|buenas noches|chao|ciao|eso es todo)\b/i;
             function endConvo() {
+                disarmIdle();
                 ear.cancelPending();
                 convo = false; awaitingQuery = false;
                 ear.setConvo(false); ear.setAwaiting(false);
@@ -204,6 +208,7 @@
             //   EN: log (me) out · sign (me) out      ES: cierra(me) (la) sesión · cerrar sesión · desconéctame
             const LOGOUT = /\bausloggen\b|\babmelden\b|\blogout\b|\blog\s?out\b|\blog+e?\s?mich\s?(aus|raus)\b|\bmelde mich (ab|aus|raus)\b|\bmich (ab|aus)melden\b|\blog ?me ?out\b|\bsign\s?(?:me\s?)?out\b|\bci[eé]rra(?:me)? (?:la )?sesi[oó]n\b|\bcerrar sesi[oó]n\b|\bdescon[eé]ctame\b/i;
             function doVoiceLogout() {
+                disarmIdle();
                 ear.cancelPending();
                 convo = false; awaitingQuery = false;
                 ear.setConvo(false); ear.setAwaiting(false);
@@ -217,7 +222,23 @@
             //   DE: pause · pausier… · chill mal · chillen · ruh(e) dich aus · sogni d'oro (also "soni d'oro")
             //   EN: pause · chill out · take a break · go to sleep      ES: pausa · descansa · a dormir · duérmete
             const PAUSE = /\bpause\b|\bpausier|\bchill\s+mal\b|\bchillen\b|\bruhe?\s+dich\s+aus\b|\bso(?:g)?ni\s+d'?\s?oro\b|\bchill\s+out\b|\btake a break\b|\bgo to sleep\b|\bpausa\b|\bdescansa\b|\ba dormir\b|\bdué?rmete\b/i;
+            // Idle-to-slumber (Doc 2026-06-17): an open conversation that sits silent for IDLE_MS — Doc said
+            // nothing — drifts into the quiet SLUMBER on its own (same resting state as a spoken "Pause" or a
+            // screen-lock). Re-armed each time the ear reopens for Doc's next turn and pushed out while he is
+            // mid-utterance; the callback re-checks the state so a stale timer can never nap her at a wrong moment.
+            const IDLE_MS = 60000;
+            let idleTimer = null;
+            function disarmIdle() { if (idleTimer) { clearTimeout(idleTimer); idleTimer = null; } }
+            function armIdle() {
+                disarmIdle();
+                idleTimer = setTimeout(function () {
+                    idleTimer = null;
+                    if (convo && !paused && !window.__uiMode && !awaitingConfirm && ear.isEnabled()) enterPause();
+                }, IDLE_MS);
+            }
+
             function enterPause() {
+                disarmIdle();
                 ear.cancelPending(); clearConfirm(); confirmAccepting = false;   // going dormant cancels any pending lock-wake gate
                 paused = true; convo = false; awaitingQuery = false;
                 ear.pause(); ear.setConvo(false); ear.setAwaiting(false);
@@ -242,6 +263,7 @@
             // speakReply's resume keeps the ear open afterwards) and arm a silence timeout so an empty-room
             // false fire falls back to sleep on its own.
             function askConfirm() {
+                disarmIdle();                                        // the confirm gate runs its own silence timeout
                 awaitingConfirm = true; convo = true; awaitingQuery = true;
                 ear.setConvo(true); ear.setAwaiting(true);
                 if (confirmTimer) clearTimeout(confirmTimer);
@@ -296,6 +318,7 @@
                 // While awaiting the lock-wake yes/no, a partial means Doc is speaking → push the silence
                 // timeout out so a slow answer („ja bitte, lies mir …") isn't cut off and sent back to sleep.
                 if (awaitingConfirm && confirmTimer) { clearTimeout(confirmTimer); confirmTimer = setTimeout(confirmTimeout, 6000); }
+                if (convo && !awaitingConfirm) armIdle();             // Doc is talking → push the nap out
                 if (!window.__uiMode) { if (input) { input.value = t; input.dispatchEvent(new Event('input')); } }
             }
 
@@ -312,6 +335,7 @@
                     out = wish;                                      // „ja <wish>" → submit only the wish
                 }
                 if (!out) return;
+                disarmIdle();                                        // query going out → resume() re-arms after the reply
                 awaitingQuery = false; convo = true;
                 ear.setConvo(true); ear.setAwaiting(false);
                 if (input) { input.value = out; input.dispatchEvent(new Event('input')); }
@@ -350,6 +374,7 @@
                 // Logout stops the live mic while logged out — but NEVER persists "off" (Doc: ear always on),
                 // so it resumes on the next login (solitaStartVoice) or page load.
                 ear.cancelPending();
+                disarmIdle();
                 wakeOn = false;
                 convo = false; awaitingQuery = false; paused = false; reflect();
                 ear.setEnabled(false); ear.setConvo(false); ear.setAwaiting(false);
@@ -392,6 +417,9 @@
                 if (wakeOn) { paused = true; ear.setEnabled(true); ear.pause(); if (window.solitaPhase) solitaPhase('dormant'); startNativeWake(); freeMicForWebSR(); ear.start(); }   // ear on → SLUMBER (waiting for "Solita")
                 else { ear.cancelPending(); paused = false; ear.setEnabled(false); if (window.solitaPhase) solitaPhase('idle'); ear.stop(); stopNativeWake(); }
             });
+
+            // Typed activity in an open conversation also defers the nap (Doc may type instead of speak).
+            if (input) input.addEventListener('keydown', function () { if (convo && !window.__uiMode && !awaitingConfirm) armIdle(); });
 
             // On load, start the ear once auth has settled — but only if already logged in (overlay hidden,
             // e.g. local auto-login). On production the overlay is still up here; the ear then starts on login
