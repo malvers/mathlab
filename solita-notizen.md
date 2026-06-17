@@ -62,3 +62,6 @@ If Doc asks to speak English, switch to English mode — triggered by the comman
 
 ## 2026-06-17 06:27
 Pill with messages at the top is too small.
+
+## 2026-06-17 06:28
+Feature request: Always include the system timestamp with messages automatically.
