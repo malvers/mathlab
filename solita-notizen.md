@@ -65,3 +65,6 @@ Pill with messages at the top is too small.
 
 ## 2026-06-17 06:28
 Feature request: Always include the system timestamp with messages automatically.
+
+## 2026-06-17 06:29
+Wenn Doc auf Englisch wechseln will, Englisch-Modus aktivieren — ausgelöst durch den Befehl „/en" (Echo November).
