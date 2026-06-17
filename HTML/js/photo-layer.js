@@ -196,7 +196,10 @@
             rows.map((r) => {
                 const label = FACT_RELABEL[r[0]] || r[0]; // "Google Gemini" → "Gemini"
                 const ic = FACT_ICON[label]; // prepend the icon when the label is a known one
-                return '<tr><th>' + esc((ic ? ic + ' ' : '') + label) + '</th><td>' + esc(r[1]) + '</td></tr>';
+                // Keep "42 %" together: glue digit + space + "%" with a non-breaking space so the
+                // confidence never wraps with the number on one line and "%" on the next.
+                const val = esc(r[1]).replace(/(\d)\s+%/g, '$1 %');
+                return '<tr><th>' + esc((ic ? ic + ' ' : '') + label) + '</th><td>' + val + '</td></tr>';
             }).join('') +
             '</tbody></table>';
         return html;
