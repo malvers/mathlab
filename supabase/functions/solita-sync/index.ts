@@ -36,9 +36,24 @@ const ROW = 'main';
 
 type Turn = { role?: string; content?: unknown };
 
-// Two turns are "the same" if role + content match exactly (content may be a string or a block array).
+// Stable stringify: sort object keys recursively. Postgres jsonb normalizes (reorders) object keys, so a
+// turn read back from the row can serialize differently than the identical turn the client just sent. A
+// plain JSON.stringify would then call them "different" → the merge below re-appends them → duplicates.
+// Array order is preserved (only object key order is normalized).
+function canon(v: unknown): string {
+  return JSON.stringify(v, (_k, val) =>
+    (val && typeof val === 'object' && !Array.isArray(val))
+      ? Object.keys(val as Record<string, unknown>).sort().reduce((o: Record<string, unknown>, k) => {
+        o[k] = (val as Record<string, unknown>)[k]; return o;
+      }, {})
+      : val
+  );
+}
+
+// Two turns are "the same" if role + content match (content may be a string or a block array). Key-order
+// insensitive (canon) so jsonb's reordering doesn't make an identical turn look divergent.
 function sameTurn(a: Turn, b: Turn): boolean {
-  return !!a && !!b && a.role === b.role && JSON.stringify(a.content) === JSON.stringify(b.content);
+  return !!a && !!b && a.role === b.role && canon(a.content) === canon(b.content);
 }
 
 // Merge that cannot lose a turn: keep the longest common prefix, then the server's tail, then the

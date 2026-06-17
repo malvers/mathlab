@@ -441,6 +441,7 @@
         // Restore persisted history into the brain, then render the bubbles (host owns the DOM).
         const _restored = brain.load();
         if (_restored) { messagesArea.innerHTML = ''; _restored.forEach(function (msg) { addMessage(msg.role, msg.content); }); }
+        try { if (window.DebugWindow) DebugWindow.log('🔎 load: brain.load → ' + ((_restored && _restored.length) || 0) + ' turns gerendert'); } catch (e) { }
 
         // Cross-device sync (js/solita-sync.js): Solita is single-user (ONE shared password), so the
         // browser and the Pixel are the same "Doc" → keep ONE shared conversation log server-side via the
@@ -457,8 +458,17 @@
                     if (!Array.isArray(history)) return;
                     // Only touch the DOM when the conversation ACTUALLY changed (e.g. the other device added
                     // turns). A steady-state push would otherwise clear + re-render the whole transcript →
-                    // the "loads ~3× on reload" flicker. Cheap deep-equal via JSON; adopt state regardless.
-                    var changed = JSON.stringify(history) !== JSON.stringify(brain.getHistory());
+                    // the "loads ~3× on reload" flicker. Key-order-insensitive (canon) so a jsonb-reordered
+                    // but identical merge result doesn't trigger a spurious repaint. Adopt state regardless.
+                    var canon = function (v) {
+                        return JSON.stringify(v, function (k, val) {
+                            return (val && typeof val === 'object' && !Array.isArray(val))
+                                ? Object.keys(val).sort().reduce(function (o, kk) { o[kk] = val[kk]; return o; }, {})
+                                : val;
+                        });
+                    };
+                    var changed = canon(history) !== canon(brain.getHistory());
+                    try { if (window.DebugWindow) DebugWindow.log('🔎 onRemote: server=' + history.length + ' local=' + brain.getHistory().length + ' changed=' + changed); } catch (e) { }
                     brain.setState(history, summary);
                     if (changed) {
                         messagesArea.innerHTML = '';
