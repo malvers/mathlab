@@ -28,7 +28,8 @@ window.TrackerPoi = function (ctx) {
         // Feen — kuratierte Sagen-/Märchenorte aus einer LOKALEN JSON (feenorte-poi.json), NICHT Overpass.
         // `local:true` → eigene Leaflet-Ebene, einmal geladen, vom Overpass-Fetch (clearLayers) unberührt.
         // Sparkles-Icon (Lucide). Kein `f` (keine Overpass-Filter) → wird im Fetch-Pfad übersprungen.
-        'poi-cat-feen':     { def: false, local: true, lbl: 'Feen', c: 'j', ic: '<path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/>' },
+        // Minimalist fairy mark: a winged magic wand topped with a star (wings + wand in one clean symbol).
+        'poi-cat-feen':     { def: false, local: true, lbl: 'Feen', c: 'j', ic: '<path d="M12 21V9.5"/><path d="M12 3.2 12.91 4.69 14.4 5.6 12.91 6.51 12 8 11.09 6.51 9.6 5.6 11.09 4.69Z"/><path d="M12 10.5C9 8.5 8 11.5 11 12.5"/><path d="M12 10.5C15 8.5 16 11.5 13 12.5"/>' },
     };
     const ENDPOINT = 'https://overpass-api.de/api/interpreter';
     const MIN_ZOOM = 11;           // wider than this → area too big → skip (protects Overpass)
