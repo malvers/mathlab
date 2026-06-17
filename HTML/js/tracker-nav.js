@@ -55,24 +55,31 @@ window.TrackerNav = function (ctx) {
 
     function hasDestination() { return !!destLatLng; }
 
-    // ---- "Zuhause": long-press the house FAB to save the CURRENT destination as home; short tap to
-    //      navigate home. Persisted in localStorage so it survives restarts. ----
+    // ---- "Zuhause": the #nav-home button INSIDE the "Ziel"-dialog. Short tap → navigate home;
+    //      long-press → save the CURRENT destination as home. Persisted in localStorage. ----
     function loadHome() {
         try { const h = JSON.parse(localStorage.getItem(HOME_KEY) || 'null'); return (h && h.lat != null && h.lng != null) ? h : null; }
         catch (e) { return null; }
     }
-    // Show the house FAB whenever a home is stored OR we're navigating (so it can be set/used).
-    function refreshHome() { const b = $('home-fab'); if (b) b.classList.toggle('show', !!home || hasDestination()); }
+    // Keep the dialog's home hint in sync with whether a home is stored (the button itself lives in the
+    // panel, so it's visible whenever the panel is open — no show/hide needed).
+    function refreshHome() {
+        const hint = $('nav-home-hint');
+        if (hint) hint.textContent = home
+            ? ('Zuhause: ' + shortLabel(home.label) + ' — lang drücken überschreibt mit dem aktuellen Ziel.')
+            : 'Lang drücken: aktuelles Ziel als Zuhause speichern.';
+    }
     function saveHome() {
-        if (!destLatLng) { toast('Kein aktives Ziel — erst ein Ziel navigieren, dann das Haus lange drücken.'); return; }
+        if (!destLatLng) { toast('Kein aktives Ziel — erst ein Ziel setzen, dann „Nach Hause" lang drücken.'); return; }
         home = { lat: destLatLng[0], lng: destLatLng[1], label: destLabel || 'Zuhause' };
         try { localStorage.setItem(HOME_KEY, JSON.stringify(home)); } catch (e) { }
         toast('Als Zuhause gespeichert: ' + shortLabel(home.label));
         refreshHome();
     }
     function goHome() {
-        if (!home) { toast('Kein Zuhause gespeichert — ein Ziel navigieren und das Haus lange drücken.'); return; }
+        if (!home) { toast('Kein Zuhause gespeichert — Ziel setzen, dann „Nach Hause" lang drücken.'); return; }
         toast('Navigation nach Hause …');
+        hidePanels();
         navigateTo([home.lat, home.lng], home.label);
     }
 
@@ -578,10 +585,11 @@ window.TrackerNav = function (ctx) {
         });
     })();
 
-    // Home FAB: long-press → save the current destination as "Zuhause"; short tap → navigate home.
+    // Home button (in the "Ziel"-dialog): long-press → save the current destination as "Zuhause";
+    // short tap → navigate home.
     (function initHome() {
         home = loadHome();
-        const btn = $('home-fab');
+        const btn = $('nav-home');
         if (!btn) { return; }
         let pressTimer = null, longFired = false, sx = 0, sy = 0;
         const cancel = () => { if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; } };
