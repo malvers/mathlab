@@ -86,3 +86,6 @@ Doc vergisst häufig Dinge — im Hinterkopf behalten und bei Bedarf sanft erinn
 
 ## 2026-06-17 07:13
 Tanklog: Wir brauchen noch eine Auswahl für die Benzinsorte.
+
+## 2026-06-17 07:14
+Wir brauchen auch noch eine Funktion — (Doc hat die Formulierung abgebrochen, ggf. nachfragen)
