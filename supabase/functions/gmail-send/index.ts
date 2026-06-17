@@ -35,6 +35,10 @@ function json(obj: unknown, status = 200): Response {
   return new Response(JSON.stringify(obj), { status, headers: { ...CORS, 'Content-Type': 'application/json' } });
 }
 
+// Fixed sign-off appended to EVERY outgoing mail, so Solita's mails are always clearly from us.
+// Enforced server-side — the model cannot skip, shorten or alter it.
+const SIGNATURE = '\n\nLieben Gruß\nSolita\n\n---\nDr. Solita J. Neural\nLead AI-Team\ndocalvers.de';
+
 // UTF-8-safe base64url (for the raw RFC-822 message).
 function b64url(s: string): string {
   const b64 = btoa(unescape(encodeURIComponent(s)));
@@ -92,6 +96,9 @@ Deno.serve(async (req) => {
   if (!bodyText) return json({ error: 'kein body (Inhalt) übergeben' }, 400);
   if (subject.length > 300 || bodyText.length > 20000) return json({ error: 'Betreff/Inhalt zu lang' }, 400);
 
+  // Always sign as Solita. Guard against a double sign-off if the model already wrote one.
+  const signedBody = bodyText.includes('Dr. Solita J. Neural') ? bodyText : bodyText + SIGNATURE;
+
   let token: string;
   try {
     token = await getAccessToken(clientId, clientSecret, refreshToken);
@@ -107,7 +114,7 @@ Deno.serve(async (req) => {
     'Content-Type: text/plain; charset="UTF-8"',
     'Content-Transfer-Encoding: 8bit',
     '',
-    bodyText,
+    signedBody,
   ].join('\r\n');
 
   try {

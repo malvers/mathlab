@@ -28,12 +28,43 @@
         }
     };
 
+    // Audible alert: a short two-tone chime so Doc HEARS the instant a mail send is triggered
+    // (catches a misfire — e.g. a misheard word — even when he isn't watching the screen).
+    function chime() {
+        try {
+            const AC = window.AudioContext || window.webkitAudioContext;
+            if (!AC) return;
+            const ctx = new AC();
+            const beep = (freq, at, dur) => {
+                const o = ctx.createOscillator(), g = ctx.createGain();
+                o.type = 'sine'; o.frequency.value = freq;
+                g.gain.setValueAtTime(0.0001, ctx.currentTime + at);
+                g.gain.exponentialRampToValueAtTime(0.3, ctx.currentTime + at + 0.02);
+                g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + at + dur);
+                o.connect(g); g.connect(ctx.destination);
+                o.start(ctx.currentTime + at); o.stop(ctx.currentTime + at + dur + 0.02);
+            };
+            beep(660, 0, 0.18); beep(990, 0.20, 0.22);          // rising two-tone = "Solita is sending a mail"
+            setTimeout(() => { try { ctx.close(); } catch (e) {} }, 700);
+        } catch (e) { /* audio is best-effort */ }
+    }
+
+    // Record every send trigger to the ONE DebugWindow (Doc keeps it open) + console, with subject + a body preview.
+    function logSend(subject, body) {
+        const preview = String(body).replace(/\s+/g, ' ').trim().slice(0, 200);
+        try { if (window.DebugWindow) DebugWindow.log('✉️ send_gmail AUSGELÖST — Betreff: „' + subject + '" | ' + preview); } catch (e) {}
+        try { console.log('[solita] send_gmail triggered:', { subject, body }); } catch (e) {}
+    }
+
     // Handler — called by solita-core's execTool with (name, input, pwd). Returns { ok, summary }.
     async function handler(input, pwd) {
         try {
             const subject = (input && input.subject) || '(ohne Betreff)';
             const body = (input && input.body) || '';
             if (!String(body).trim()) return { ok: false, summary: 'Kein Inhalt — was soll in der Mail stehen?' };
+            // Mark the trigger BEFORE the network call — so even a failed/odd send leaves a trace + a sound.
+            chime();
+            logSend(subject, body);
             const r = await fetch(SEND_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'apikey': SB_ANON, 'Authorization': 'Bearer ' + SB_ANON, 'x-app-pass': pwd },
