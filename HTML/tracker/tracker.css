@@ -536,6 +536,47 @@ path.pos-marker.pos-shown {
     display: inline-block;
 }
 
+/* Resume arrow (hand-mode): same glass FAB as #recenter-fab, sitting one row ABOVE it. Orange so it
+   reads as "auto is paused — tap to resume". Only visible (.show) while hand-mode is active. */
+#resume-fab {
+    position: fixed;
+    left: 50%;
+    bottom: calc(var(--btm) + clamp(81px, 25.2vw, 111px) + 14px + 60px); /* one 46px row + gap above #recenter-fab */
+    transform: translateX(-50%) translateY(8px);
+    z-index: 500;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 46px;
+    height: 46px;
+    border: 1px solid rgba(245, 194, 66, 0.95);
+    border-radius: 50%;
+    background: rgba(8, 20, 42, 0.82);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    color: var(--orange);
+    cursor: pointer;
+    box-shadow: 0 0 14px rgba(245, 194, 66, 0.45), 0 8px 24px rgba(0, 0, 0, 0.4);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease, transform 0.25s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+#resume-fab.show {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateX(-50%) translateY(0);
+}
+
+#resume-fab svg {
+    width: 24px;
+    height: 24px;
+}
+
+#resume-fab:active {
+    transform: translateX(-50%) scale(0.94);
+}
+
 /* ---- Camera button (top-center) → Foto-Spur ---- */
 #cam-fab {
     position: fixed;
@@ -679,6 +720,7 @@ body.ui-idle #compass,
 body.ui-idle #speed-sign,
 body.ui-idle #hud-top,
 body.ui-idle #recenter-fab,
+body.ui-idle #resume-fab,
 body.ui-idle #trk-controls {
     opacity: 0;
     pointer-events: none;
