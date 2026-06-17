@@ -50,3 +50,6 @@ Solitas Begrüßung beim Aufwachen/Start soll freundlicher gestaltet werden.
 
 ## 2026-06-17 06:17
 08:17 Uhr – Solita soll einen Timer auslösen können.
+
+## 2026-06-17 06:18
+08:18 Uhr – Solita soll im Internet recherchieren können.
