@@ -77,3 +77,6 @@ Systemseitig die Uhrzeit bei Messages immer mitschreiben.
 
 ## 2026-06-17 06:48
 Fehler bei der Ortsbestimmung: "back beim …" wird abgeschnitten — Spracherkennung bricht Satz zu früh ab.
+
+## 2026-06-17 06:54
+Foto-Funktionalität aus dem Tracker isolieren und Solita zur Verfügung stellen.
