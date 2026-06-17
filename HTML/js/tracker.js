@@ -120,6 +120,12 @@
         }
         let fitMode = false; // FIT loop: false → 'all' (whole track) → 'remaining' (rest of route, while navigating) → false
         let loadedBounds = null; // bounds of a MULTI-loaded overlay (plotMultiple leaves 'track' empty) → lets FIT still work/show
+        // Hand-over ("Hand-Modus"): ANY manual viewport/zoom input (drag, +/− buttons, pinch, wheel,
+        // double-click) freezes ALL automatic camera moves — auto-follow AND FIT — so the hand-set view
+        // is never overwritten. A resume arrow (#resume-fab) appears; tapping it (or CENTER / FIT) restores
+        // the auto-mode that was active before the take-over (remembered in `savedAuto`).
+        let handMode = false;
+        let savedAuto = null; // { following, fitMode } captured when hand-mode began → the resume target
         // Nav start shows the whole route for a moment, THEN glides to the crosshair follow-view (note: the
         // glide is centerOnPosition's flyTo). This timer holds that "moment"; any manual take-over cancels it.
         let navOverviewTimer = null;
@@ -139,9 +145,50 @@
             btn.classList.add('show');
         }
         function setFollowing(v) { following = v; refreshRecenter(); }
+        // Show/hide the resume arrow — visible exactly while we're in hand-mode.
+        function refreshResume() { const b = $('resume-fab'); if (b) b.classList.toggle('show', handMode); }
+        // Enter hand-mode: remember whichever auto-mode is driving the camera, then freeze BOTH (follow +
+        // FIT) so the user's hand-set view stays put. No-op if nothing auto was running (then there is
+        // nothing to freeze or resume) or if we're already in hand-mode.
+        function enterHandMode() {
+            if (handMode || (!following && !fitMode)) return;
+            savedAuto = { following: following, fitMode: fitMode };
+            handMode = true;
+            following = false; fitMode = false; // the auto-follow + FIT blocks now no-op → frozen
+            cancelNavOverview();
+            refreshRecenter(); refreshResume();
+        }
+        // Leave hand-mode WITHOUT restoring (used when CENTER / FIT explicitly take over instead).
+        function clearHandMode() { if (!handMode) return; handMode = false; savedAuto = null; refreshResume(); }
+        // Resume the auto-mode that was active before the hand take-over (the resume arrow).
+        function resumeAuto() {
+            const s = savedAuto;
+            clearHandMode();
+            if (!s) return;
+            if (s.fitMode) {
+                fitMode = s.fitMode; following = false;
+                const ll = posMarker && posMarker.getLatLng && posMarker.getLatLng();
+                const b = (s.fitMode === 'remaining' && ll && __nav && __nav.remainingBounds)
+                    ? __nav.remainingBounds([ll.lat, ll.lng])
+                    : (track.length > 1 ? L.latLngBounds(track) : loadedBounds);
+                if (b) { try { map.fitBounds(b, { padding: fitPad() }); } catch (e) { } }
+                refreshRecenter();
+            } else if (s.following) {
+                centerOnPosition(); // re-centre on the dot + setFollowing(true)
+            }
+        }
         // Cancel a pending "overview → follow" glide (the user took over, or we stopped/paused).
         function cancelNavOverview() { if (navOverviewTimer) { clearTimeout(navOverviewTimer); navOverviewTimer = null; } }
-        map.on('dragstart', () => { cancelNavOverview(); fitMode = false; setFollowing(false); }); // dragging away exits FIT mode + follow
+        // ANY hand input → hand-mode (freeze auto). Drag, mouse wheel, two-finger pinch, double-click;
+        // the +/− buttons hook enterHandMode() in their own click handlers below.
+        map.on('dragstart', () => { cancelNavOverview(); enterHandMode(); });
+        map.on('dblclick', enterHandMode);
+        (function wireHandZoom() {
+            const el = map.getContainer && map.getContainer();
+            if (!el) return;
+            el.addEventListener('wheel', enterHandMode, { passive: true });
+            el.addEventListener('touchstart', (e) => { if (e.touches && e.touches.length >= 2) enterHandMode(); }, { passive: true });
+        })();
         map.on('moveend zoomend', refreshRecenter); // view moved → POS may have left/entered the view
 
         // Fit insets (used by every map fit below). The map runs zoomSnap:1 (whole zoom levels), so for
@@ -156,7 +203,7 @@
         // restore that remembered view (Doc's idea — no recompute, so "shown" always lands back exactly).
         let _savedView = null;
         function fitBigger() {
-            if (following || track.length < 2) return false; // not while live-following; need a real track
+            if (handMode || following || track.length < 2) return false; // not in hand-mode, not while live-following; need a real track
             const b = (fitMode === 'remaining' && __nav && __nav.remainingBounds && posMarker)
                 ? __nav.remainingBounds([posMarker.getLatLng().lat, posMarker.getLatLng().lng])
                 : L.latLngBounds(track);
@@ -1320,6 +1367,7 @@
 
         function centerOnPosition() {
             cancelNavOverview(); // manual re-centre supersedes any pending auto-glide
+            clearHandMode();    // CENTER explicitly takes over → leave hand-mode (hide the resume arrow)
             fitMode = false;    // centring on the dot is the opposite of "keep the whole track fitted"
             setFollowing(true); // re-enable auto-follow (and hide the recenter button)
             // Already have a position → glide there smoothly
@@ -2115,10 +2163,13 @@ ${pts}
         // But the widget used to swallow the native Android long-press menu ("Bild speichern" on map-tile
         // <img>s) via its own contextmenu handler — keep that suppressed so a long-press just does nothing.
         window.addEventListener('contextmenu', (e) => e.preventDefault());
-        $('zoom-in').addEventListener('click', () => map.zoomIn());
-        $('zoom-out').addEventListener('click', () => map.zoomOut());
+        $('zoom-in').addEventListener('click', () => { enterHandMode(); map.zoomIn(); });   // hand zoom → freeze auto
+        $('zoom-out').addEventListener('click', () => { enterHandMode(); map.zoomOut(); }); // hand zoom → freeze auto
+        // Resume arrow: back to the auto-mode that was active before the hand take-over (follow OR FIT).
+        $('resume-fab').addEventListener('click', resumeAuto);
         // ONE button: tapping the FIT frame cycles FIT (whole → remaining → off); tapping the crosshair re-centres.
         $('recenter-fab').addEventListener('click', () => {
+            clearHandMode(); // CENTER / FIT explicitly take over → leave hand-mode (hide the resume arrow)
             if (!$('recenter-fab').classList.contains('fit')) { centerOnPosition(); return; }   // crosshair → re-centre
             const ll = posMarker && posMarker.getLatLng && posMarker.getLatLng();
             const rb = (ll && __nav && __nav.remainingBounds) ? __nav.remainingBounds([ll.lat, ll.lng]) : null;
