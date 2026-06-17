@@ -98,3 +98,6 @@ Navigationsfunktion: Auswahl des Wegetyps — Laufen (Fußweg) oder Straße (Fah
 
 ## 2026-06-17 10:38
 Feature-Wunsch: Maßstab auf der Karte beim Tracker anzeigen.
+
+## 2026-06-17 16:55
+Feature-Wunsch Tracker: Sprachbefehl wie „such mir alle Tracks im Umkreis" — dann soll der Tracker alle vorhandenen Tracks im Umkreis von z.B. 10, 20 oder 30 km um die aktuelle Position anzeigen/suchen.
