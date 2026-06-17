@@ -74,3 +74,6 @@ Pille mit Messages oben ist zu klein.
 
 ## 2026-06-17 06:30
 Systemseitig die Uhrzeit bei Messages immer mitschreiben.
+
+## 2026-06-17 06:48
+Fehler bei der Ortsbestimmung: "back beim …" wird abgeschnitten — Spracherkennung bricht Satz zu früh ab.
