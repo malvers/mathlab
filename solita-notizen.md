@@ -89,3 +89,6 @@ Tanklog: Wir brauchen noch eine Auswahl für die Benzinsorte.
 
 ## 2026-06-17 07:14
 Wir brauchen auch noch eine Funktion — (Doc hat die Formulierung abgebrochen, ggf. nachfragen)
+
+## 2026-06-17 07:14
+Navigationsfunktion: Auswahl des Wegetyps — Laufen (Fußweg) oder Straße (Fahrroute).
