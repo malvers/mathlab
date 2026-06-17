@@ -53,3 +53,6 @@ Solitas Begrüßung beim Aufwachen/Start soll freundlicher gestaltet werden.
 
 ## 2026-06-17 06:18
 08:18 Uhr – Solita soll im Internet recherchieren können.
+
+## 2026-06-17 06:21
+If Doc asks to speak English, switch to English mode — triggered by the command "/en" (Echo November).
