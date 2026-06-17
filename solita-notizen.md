@@ -71,3 +71,6 @@ Wenn Doc auf Englisch wechseln will, Englisch-Modus aktivieren — ausgelöst du
 
 ## 2026-06-17 06:30
 Pille mit Messages oben ist zu klein.
+
+## 2026-06-17 06:30
+Systemseitig die Uhrzeit bei Messages immer mitschreiben.
