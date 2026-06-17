@@ -967,6 +967,10 @@
                         if (trkState === 'recording' && !following) centerOnPosition(); // glide to crosshair
                     }, NAV_OVERVIEW_MS);
                 });
+            } else {
+                // No navigation → follow the moving position right away. Otherwise a restored viewport
+                // (or a left-over hand-set view) leaves the GPS dot un-followed while you drive.
+                centerOnPosition();
             }
         }
 
