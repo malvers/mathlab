@@ -19,3 +19,10 @@
   `HTML/js/solita-tts.js`) — Solita liest vor und nimmt Diktat. Frühere geräteseitige
   Behelfe (iOS „Bildschirm sprechen" / Android Select-to-Speak) bleiben als Fallback.
   Verwandt: [`HTML/tracker/archive/drivecast-audio-poi-am-weg.md`](HTML/tracker/archive/drivecast-audio-poi-am-weg.md).
+
+## Voicerecorder
+- ⬜ **Voicerecorder als Capacitor-App verpacken** (Idee, Doc 2026-06-17). Wenn wir den
+  Voicerecorder (`HTML/voicerecorder/`) als Capacitor-App „abmachen" / nativ verpacken — wie
+  Tracker/Solita —, hätten wir voraussichtlich Zugriff auf **alles**: volle native Geräte-APIs
+  (Mikrofon inkl. Hintergrund-Audio, Dateisystem/Speicher, Berechtigungen, ggf. Whisper/On-Device-
+  STT), ohne die Grenzen der Browser-/PWA-Sandbox. Noch zu klären/ausarbeiten.
