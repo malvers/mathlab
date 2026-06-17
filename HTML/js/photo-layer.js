@@ -35,10 +35,12 @@
         // count >= 2 → several waypoints sit on the exact same spot; show a tally
         // badge on the top-most pin so the stack is visible before you even tap it.
         const badge = (count && count > 1) ? '<span class="wp-badge">' + count + '</span>' : '';
+        // A "Falsch" correction got attached → mark the pin so corrected photos stand out on the map.
+        const corr = (wp && wp.correction && wp.correction.text) ? '<span class="wp-corr" aria-label="korrigiert">✗</span>' : '';
         const glyph = isVoice ? SPEAKER_SVG : (isVideo ? VIDEO_PIN_SVG : CAM_PIN_SVG);
         return global.L.divIcon({
             className: 'wp-pin',
-            html: '<div class="wp-dot' + state + '">' + glyph + '</div>' + badge,
+            html: '<div class="wp-dot' + state + '">' + glyph + '</div>' + badge + corr,
             iconSize: [30, 30], iconAnchor: [15, 30], popupAnchor: [0, -30],
         });
     }
@@ -148,6 +150,11 @@
     let idx = -1;    // index into list of the photo on display
     let wired = false;
     let navTimer;    // 8 s idle timer that fades the prev/next arrows out
+    // Host-supplied async persister for a "Falsch" correction: receives the wp (with wp.correction
+    // already set) and writes it back to the DB. Returns true when a row was actually updated.
+    // The recorder sets this; the read-only viewer leaves it null (no DB writes there — Phase 1).
+    let correctionHandler = null;
+    function setCorrectionHandler(fn) { correctionHandler = (typeof fn === 'function') ? fn : null; }
 
     // ---- manual fullscreen toggle (real OS fullscreen) ----
     // The auto-immersive path (PhotoFullscreen) is native-Android-only and no-ops
@@ -196,7 +203,10 @@
             rows.map((r) => {
                 const label = FACT_RELABEL[r[0]] || r[0]; // "Google Gemini" → "Gemini"
                 const ic = FACT_ICON[label]; // prepend the icon when the label is a known one
-                return '<tr><th>' + esc((ic ? ic + ' ' : '') + label) + '</th><td>' + esc(r[1]) + '</td></tr>';
+                // Keep "42 %" together: glue digit + space + "%" with a non-breaking space so the
+                // confidence never wraps with the number on one line and "%" on the next.
+                const val = esc(r[1]).replace(/(\d)\s+%/g, '$1 %');
+                return '<tr><th>' + esc((ic ? ic + ' ' : '') + label) + '</th><td>' + val + '</td></tr>';
             }).join('') +
             '</tbody></table>';
         return html;
@@ -237,10 +247,18 @@
         icon(); paint();
     }
 
+    // The attached "Falsch" correction, rendered as a red row beneath the AI facts.
+    function corrRow(wp) {
+        const t = wp && wp.correction && wp.correction.text;
+        if (!t) return '';
+        return '<div class="lb-correction"><span class="lb-correction-tag">✗ Korrektur</span>' + esc(t) + '</div>';
+    }
+
     function showAt(i) {
         const wp = list[i];
         if (!wp) return;
         idx = i;
+        resetCorrectionUI(); // fresh photo → hide any open "Falsch" button / editor from the last one
         const img = $('lightbox-img'), au = $('lightbox-audio'), vi = $('lightbox-voice'),
             vid = $('lightbox-video'), lb = $('photo-lightbox'), lbp = $('lb-player');
         // stop any currently-playing media first
@@ -298,7 +316,7 @@
             if (lb) lb.classList.remove('lb-voice');
             if (img) { img.src = wp.img; img.style.display = ''; }
             $('lightbox-title').textContent = wp.title || '';
-            $('lightbox-text').innerHTML = renderFacts(wp.text);
+            $('lightbox-text').innerHTML = renderFacts(wp.text) + corrRow(wp);
         }
         $('lightbox-count').textContent = (i + 1) + '/' + list.length;
     }
@@ -319,6 +337,7 @@
         const vid = $('lightbox-video'); if (vid) { try { vid.pause(); } catch (_) {} vid.removeAttribute('src'); }
         clearTimeout(navTimer);
         const nav = $('lightbox-nav'); if (nav) nav.classList.remove('faded');
+        resetCorrectionUI(); // stop the mic + hide the ✗ button/editor if it was open
         idx = -1; list = [];
     }
 
@@ -337,6 +356,110 @@
         clearTimeout(navTimer);
         const nav = $('lightbox-nav');
         if (nav) nav.classList.add('faded');
+    }
+
+    // ---- "Falsch" correction: long-press the AI verdict → ✗ button → dictate/type the right answer ----
+    // Dictation reuses the exact one-shot Web-Speech pattern from the navigation "Ziel"-mic (de-DE).
+    let recog = null, dictating = false;
+    function stopDictation() {
+        if (recog && dictating) { try { recog.stop(); } catch (_) {} }
+        dictating = false;
+        const mic = $('lb-corr-mic'); if (mic) mic.classList.remove('listening');
+    }
+    function startDictation() {
+        const SR = global.SpeechRecognition || global.webkitSpeechRecognition;
+        const mic = $('lb-corr-mic'), inp = $('lb-corr-input');
+        if (!SR || !inp) return;
+        if (dictating) { try { recog && recog.stop(); } catch (_) {} return; } // tap again → stop
+        recog = new SR();
+        recog.lang = 'de-DE';
+        recog.interimResults = true;
+        recog.maxAlternatives = 1;
+        recog.continuous = false;
+        let finalText = inp.value ? inp.value + ' ' : ''; // keep what's already typed, append speech
+        recog.onstart = () => { dictating = true; if (mic) mic.classList.add('listening'); };
+        recog.onresult = (e) => {
+            let interim = '';
+            for (let k = e.resultIndex; k < e.results.length; k++) {
+                const t = e.results[k][0].transcript;
+                if (e.results[k].isFinal) finalText += t; else interim += t;
+            }
+            inp.value = (finalText + interim).replace(/\s+/g, ' ').trim();
+        };
+        recog.onerror = () => { /* denied / no-speech → onend cleans up */ };
+        recog.onend = () => { dictating = false; if (mic) mic.classList.remove('listening'); if (inp) inp.focus(); };
+        try { recog.start(); } catch (_) { dictating = false; if (mic) mic.classList.remove('listening'); }
+    }
+    // Hide the ✗ button + editor (used on open of a new photo and after save/cancel).
+    function resetCorrectionUI() {
+        stopDictation();
+        const w = $('lb-wrong'), ed = $('lb-correct'), inp = $('lb-corr-input');
+        if (w) w.hidden = true;
+        if (ed) ed.hidden = true;
+        if (inp) inp.value = '';
+    }
+    async function saveCorrection() {
+        const wp = list[idx];
+        const inp = $('lb-corr-input');
+        const text = (inp ? inp.value : '').replace(/\s+/g, ' ').trim();
+        stopDictation();
+        if (!wp || !text) { resetCorrectionUI(); return; }
+        wp.correction = { text: text, t: new Date().toISOString() };
+        // Optimistic: mark the pin right away (host persister may still be in flight / offline).
+        if (wp._marker) { try { wp._marker.setIcon(pinIcon(wp, wp._badge || 0)); } catch (_) {} }
+        try { if (correctionHandler) await correctionHandler(wp); } catch (_) { /* handler toasts on failure */ }
+        resetCorrectionUI();
+        if (idx >= 0) showAt(idx); // re-render facts + the new correction row
+    }
+    // Inject the correction controls into .lb-inner (a host's inline lightbox predates this feature).
+    function ensureCorrectionDom() {
+        if ($('lb-wrong')) return;
+        const inner = document.querySelector('#photo-lightbox .lb-inner') || $('photo-lightbox');
+        if (!inner) return;
+        const wrong = document.createElement('button');
+        wrong.id = 'lb-wrong'; wrong.type = 'button'; wrong.hidden = true; wrong.textContent = '✗ Falsch';
+        const ed = document.createElement('div');
+        ed.id = 'lb-correct'; ed.hidden = true;
+        ed.innerHTML =
+            '<button id="lb-corr-mic" type="button" aria-label="Diktieren">' + MIC_PIN_SVG + '</button>' +
+            '<input id="lb-corr-input" type="text" autocomplete="off" placeholder="Was ist richtig?">' +
+            '<button id="lb-corr-save" type="button">Speichern</button>' +
+            '<button id="lb-corr-cancel" type="button" aria-label="Abbrechen">&times;</button>';
+        const txt = $('lightbox-text');
+        if (txt && txt.parentNode === inner) { inner.insertBefore(wrong, txt.nextSibling); inner.insertBefore(ed, wrong.nextSibling); }
+        else { inner.appendChild(wrong); inner.appendChild(ed); }
+    }
+    function wireCorrection() {
+        ensureCorrectionDom();
+        const SR = global.SpeechRecognition || global.webkitSpeechRecognition;
+        const mic = $('lb-corr-mic'); if (mic && !SR) mic.hidden = true; // no speech support → typing only
+        // Long-press the AI verdict (title + facts) → reveal the ✗ button. Recorder + photos only.
+        let pressTimer = null, sx = 0, sy = 0;
+        const cancelPress = () => { if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; } };
+        [$('lightbox-title'), $('lightbox-text')].filter(Boolean).forEach((el) => {
+            el.addEventListener('pointerdown', (e) => {
+                const wp = list[idx];
+                if (!correctionHandler || !wp || wp.type) return; // viewer has no handler; voice/video skip
+                if (!$('lb-correct').hidden) return;               // editor already open
+                sx = e.clientX; sy = e.clientY; cancelPress();
+                pressTimer = setTimeout(() => { pressTimer = null; const b = $('lb-wrong'); if (b) b.hidden = false; }, 500);
+            });
+            el.addEventListener('pointermove', (e) => { if (pressTimer && Math.hypot(e.clientX - sx, e.clientY - sy) > 10) cancelPress(); });
+            el.addEventListener('pointerup', cancelPress);
+            el.addEventListener('pointercancel', cancelPress);
+            el.addEventListener('pointerleave', cancelPress);
+        });
+        $('lb-wrong').addEventListener('click', () => {
+            const wp = list[idx]; if (!wp) return;
+            $('lb-wrong').hidden = true;
+            $('lb-correct').hidden = false;
+            const inp = $('lb-corr-input');
+            if (inp) { inp.value = (wp.correction && wp.correction.text) || ''; inp.focus(); }
+        });
+        $('lb-corr-mic').addEventListener('click', startDictation);
+        $('lb-corr-save').addEventListener('click', saveCorrection);
+        $('lb-corr-cancel').addEventListener('click', resetCorrectionUI);
+        $('lb-corr-input').addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); saveCorrection(); } });
     }
 
     // Inject the lightbox DOM once (if the host page doesn't already have it) and wire the controls.
@@ -412,6 +535,7 @@
             }
         }
         wireAudioPlayer();
+        wireCorrection(); // "Falsch" long-press → ✗ button → dictate/type the correction
         $('lightbox-close').addEventListener('click', close);
         if ($('lightbox-fs')) $('lightbox-fs').addEventListener('click', toggleFs);
         document.addEventListener('fullscreenchange', refreshFsIcon);
@@ -422,6 +546,11 @@
         $('photo-lightbox').addEventListener('click', (e) => { if (e.target.id === 'photo-lightbox') close(); });
         document.addEventListener('keydown', (e) => {
             if (!$('photo-lightbox').classList.contains('open')) return;
+            const ed = $('lb-correct');
+            if (ed && !ed.hidden) { // editing a correction → arrows move the cursor, Esc cancels the editor
+                if (e.key === 'Escape') resetCorrectionUI();
+                return;
+            }
             if (e.key === 'Escape') close();
             else if (e.key === 'ArrowLeft') step(-1);
             else if (e.key === 'ArrowRight') step(1);
@@ -469,5 +598,5 @@
         if (global.PhotoFullscreen) global.PhotoFullscreen.enter($('photo-lightbox'));
     }
 
-    global.PhotoLayer = { pinIcon, applyStackBadges, dotPoint, dotPointToLatLng, DOT_DY, mountLightbox, openLightbox, closeLightbox: close, renderFacts };
+    global.PhotoLayer = { pinIcon, applyStackBadges, dotPoint, dotPointToLatLng, DOT_DY, mountLightbox, openLightbox, closeLightbox: close, renderFacts, setCorrectionHandler };
 })(window);
