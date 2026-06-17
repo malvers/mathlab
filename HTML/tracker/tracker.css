@@ -1812,7 +1812,9 @@ body.ui-idle #trk-controls {
     transition: top 0.25s ease;
     transform: translateX(-50%);
     z-index: var(--cfg-nav-z, 480); /* live-config z-order; default UNDER the header (#hud-top z500) */
-    max-width: min(94vw, 480px);
+    width: 80vw;          /* always 80% of the screen width (Doc: wider so the instruction fits) */
+    max-width: 80vw;
+    box-sizing: border-box;
     /* Google-Maps-like navigation green (≈ #188038); live-config override via --cfg-nav-bg. */
     background: var(--cfg-nav-bg, rgb(24, 128, 56));
     border: 1px solid rgba(255, 255, 255, 0.16);
@@ -1828,9 +1830,9 @@ body.ui-idle #trk-controls {
     display: none;
 }
 
-/* HUD auto-hidden (idle) → instruments gone → banner can move UP to the freed space. */
+/* HUD auto-hidden (idle) → instruments gone → banner moves right UP to the top (Doc: weiter nach oben). */
 body.ui-idle #nav-banner {
-    top: calc(env(safe-area-inset-top, 0px) + 96px + var(--cfg-nav-dy, 0px));
+    top: calc(env(safe-area-inset-top, 0px) + 12px + var(--cfg-nav-dy, 0px));
 }
 
 /* Two rows: maneuver line (arrow + distance + road/destinations) and the trip line (ETA · remaining). */
@@ -1838,7 +1840,8 @@ body.ui-idle #nav-banner {
 .nav-main { display: flex; align-items: center; gap: 10px; }
 .nav-arrow { width: 30px; height: 30px; flex: 0 0 auto; }
 .nav-dist { font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: clamp(0.95rem, 3.8vw, 1.2rem); white-space: nowrap; flex: 0 0 auto; }
-.nav-instr { font-family: system-ui, sans-serif; font-weight: 600; font-size: clamp(0.85rem, 3.4vw, 1.05rem); line-height: 1.2; }
+/* one line only — truncate with an ellipsis instead of wrapping (Doc: kein Zeilenumbruch) */
+.nav-instr { font-family: system-ui, sans-serif; font-weight: 600; font-size: clamp(0.85rem, 3.4vw, 1.05rem); line-height: 1.2; flex: 1 1 auto; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .nav-trip { font-family: system-ui, sans-serif; font-weight: 500; font-size: clamp(0.72rem, 3vw, 0.86rem); opacity: 0.92; padding-left: 40px; }
 .nav-trip[hidden] { display: none; }
 
