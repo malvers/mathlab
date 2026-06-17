@@ -95,3 +95,6 @@ Navigationsfunktion: Auswahl des Wegetyps — Laufen (Fußweg) oder Straße (Fah
 
 ## 2026-06-17 07:31
 /pause → slumber (Solita-Befehl: versetzt Solita in den Schlummermodus)
+
+## 2026-06-17 10:38
+Feature-Wunsch: Maßstab auf der Karte beim Tracker anzeigen.
