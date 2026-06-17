@@ -1187,6 +1187,7 @@
         //      'live:<token>'). No DB/publication change — Broadcast is ephemeral pub/sub; the
         //      persisted trail still comes from the Stage 2 row, so a viewer gets history + live. ----
         let liveOn = false, liveChannel = null, lastLiveMs = 0, liveTrailTimer = null;
+        let liveRejoinTimer = null, liveWasInterrupted = false, liveNetWired = false; // auto-resume after a dead spot
         let liveName = (localStorage.getItem('tracker.liveName') || 'vsb');
         const LIVE_MS = 4000; // position broadcast cadence while live
         function updateLiveBadge() {
@@ -1264,41 +1265,69 @@
             liveName = canon;
             try { localStorage.setItem('tracker.liveName', canon); } catch (e) { }
             if (!track.length) { toast('Erst aufzeichnen, dann LIVE.'); return; }
-            (async () => {
-                try {
-                    const c = await ensureSb();
-                    liveChannel = c.channel('live:' + canon, { config: { broadcast: { self: false } } });
-                    liveOn = true; updateLiveBadge();
-                    liveMedia = []; // fresh live session
-                    // A (re)connecting viewer asks for the current state → re-send the whole trail,
-                    // the latest position and every media waypoint at once, so a reload fills instantly.
-                    liveChannel.on('broadcast', { event: 'request' }, () => {
+            liveOn = true; updateLiveBadge();
+            liveMedia = [];            // fresh live session
+            liveWasInterrupted = false;
+            // Auto-resume: a tunnel / dead spot must NOT kill the broadcast for good. When the device
+            // comes back online, force a rejoin. Wired once.
+            if (!liveNetWired) {
+                liveNetWired = true;
+                window.addEventListener('online', () => { if (liveOn) scheduleRejoin(200); });
+            }
+            joinLive();
+            if (liveTrailTimer) clearInterval(liveTrailTimer);
+            // refresh the path every 15 s AND double as a watchdog: if the channel is no longer joined
+            // (dropped in a dead spot) rebuild it, instead of silently sending into the void. Media is
+            // NOT re-sent on a timer (that was the egress leak) — a (re)connecting viewer pulls it via 'request'.
+            liveTrailTimer = setInterval(() => {
+                if (!liveOn) return;
+                if (liveChannel && liveChannel.state && liveChannel.state !== 'joined') { scheduleRejoin(0); return; }
+                broadcastTrail();
+            }, 15000);
+            toast("Live auf '" + canon + "'" + (copied ? ' · Link kopiert ✓' : ' — Namen weitersagen'));
+        }
+        // (Re)create + subscribe the live channel. Called on start and on every rejoin (so a dropped
+        // channel is rebuilt from scratch — the safest way to recover with supabase-js).
+        async function joinLive() {
+            try {
+                const c = await ensureSb();
+                try { if (liveChannel) c.removeChannel(liveChannel); } catch (e) { } // drop the stale channel first
+                const ch = c.channel('live:' + liveName, { config: { broadcast: { self: false } } });
+                // A (re)connecting viewer asks for the current state → re-send the whole trail + latest pos + media.
+                ch.on('broadcast', { event: 'request' }, () => {
+                    if (window.DebugWindow) DebugWindow.log('live: ◀ request → sende trail/pos/media');
+                    broadcastTrail(); broadcastLive(true); waypoints.forEach(addLiveMedia);
+                });
+                ch.subscribe((status) => {
+                    if (window.DebugWindow) DebugWindow.log('live: status=' + status);
+                    if (status === 'SUBSCRIBED') {
+                        if (liveWasInterrupted) { liveWasInterrupted = false; toast('Live wieder verbunden.'); }
+                        updateLiveBadge();
                         broadcastTrail(); broadcastLive(true); waypoints.forEach(addLiveMedia);
-                    });
-                    liveChannel.subscribe((status) => {
-                        if (status === 'SUBSCRIBED') {
-                            broadcastTrail(); broadcastLive(true);
-                            waypoints.forEach(addLiveMedia); // push photo/voice/video ALREADY on the track
-                        }
-                    });
-                    if (liveTrailTimer) clearInterval(liveTrailTimer);
-                    // refresh the path only. Media is NOT re-sent on a timer — THAT was the egress leak
-                    // (full ~250 KB JPEGs × every photo × every 15 s during a live session = GB-scale).
-                    // Each item is broadcast once when added (addLiveMedia), and a (re)connecting viewer
-                    // pulls the whole set via the 'request' handler above (view.html sends it on SUBSCRIBED)
-                    // → late joiners still catch up, at zero idle cost.
-                    liveTrailTimer = setInterval(() => { broadcastTrail(); }, 15000);
-                    toast("Live auf '" + canon + "'" + (copied ? ' · Link kopiert ✓' : ' — Namen weitersagen'));
-                } catch (e) { toast('Live fehlgeschlagen: ' + (e.message || e)); liveOn = false; updateLiveBadge(); }
-            })();
+                    } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
+                        liveWasInterrupted = true; updateLiveBadge();
+                        if (liveOn) scheduleRejoin(3000); // keep trying while we're still meant to be live
+                    }
+                });
+                liveChannel = ch;
+            } catch (e) {
+                if (window.DebugWindow) DebugWindow.log('live: join-Fehler ' + (e.message || e));
+                if (liveOn) scheduleRejoin(5000);
+            }
+        }
+        // One pending rejoin at a time; `delay` ms before rebuilding the channel.
+        function scheduleRejoin(delay) {
+            if (!liveOn || liveRejoinTimer) return;
+            liveRejoinTimer = setTimeout(() => { liveRejoinTimer = null; if (liveOn) joinLive(); }, delay || 3000);
         }
         function stopLive(silent) {
             if (liveTrailTimer) { clearInterval(liveTrailTimer); liveTrailTimer = null; }
+            if (liveRejoinTimer) { clearTimeout(liveRejoinTimer); liveRejoinTimer = null; }
             if (liveChannel) {
                 try { liveChannel.send({ type: 'broadcast', event: 'end', payload: {} }); } catch (e) { }
                 try { liveChannel.unsubscribe(); } catch (e) { }
             }
-            liveChannel = null; liveOn = false;
+            liveChannel = null; liveOn = false; liveWasInterrupted = false;
             updateLiveBadge();
             if (!silent) toast('Live beendet.');
         }
