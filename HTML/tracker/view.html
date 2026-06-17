@@ -244,7 +244,10 @@
     <script src="../js/track-render.js"></script>
     <script src="../js/cyber-clock.js"></script>
     <script src="../js/photo-layer.js"></script>
-    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <!-- Self-hosted Supabase lib (same as the recorder). The old unpkg CDN could be blocked/unreachable
+         on a viewer's network → window.supabase undefined → createClient() threw → the whole script aborted
+         and the static "Lade geteilten Track …" stayed forever (live AND saved-track load dead). -->
+    <script src="../js/vendor/supabase.min.js"></script>
     <script>
         const $ = id => document.getElementById(id);
 
@@ -283,6 +286,13 @@
         const SUPABASE_URL = 'https://fyfhxzyymmurlaenmzse.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_ubQDiMD-X3N0vZvPVi229Q_-5Zootfk';
         const COL_ORANGE = 'rgb(245, 194, 66)';
+        // Fail loudly (not silently) if the lib didn't load → otherwise the page would just keep showing
+        // the static "Lade geteilten Track …" with no hint why (live AND saved load both dead).
+        if (!window.supabase) {
+            document.getElementById('msg').innerHTML = '<div style="color:var(--orange);font-weight:700">Bibliothek nicht geladen</div>'
+                + '<div style="opacity:.7;margin-top:6px">Supabase-Lib fehlt — anderes Netz/Reload versuchen.</div>';
+            throw new Error('Supabase-Lib nicht geladen');
+        }
         const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY); // shared: RPC load + live channel
 
         const map = L.map('map', { zoomControl: true, attributionControl: true })
@@ -471,10 +481,13 @@
 
         function goLive(key) {
             const chName = 'live:' + key;
-            // Visible diagnostic (the live bug is Realtime-specific → show subscribe status + how many
-            // broadcast messages actually arrive, so a two-device test pinpoints abo-vs-delivery at a glance).
+            // Opt-in diagnostic (append ?diag=1 to the URL): shows subscribe status + how many broadcast
+            // messages actually arrive, so a two-device test pinpoints abo-vs-delivery. Off by default so
+            // a normal viewer never sees the debug line.
+            const DIAG = new URLSearchParams(location.search).has('diag');
             let rx = 0, reqs = 0, lastStatus = '…';
             function diag() {
+                if (!DIAG) return;
                 let el = $('live-diag');
                 if (!el) {
                     el = document.createElement('div'); el.id = 'live-diag';
