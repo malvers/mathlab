@@ -1273,9 +1273,11 @@
                     // A (re)connecting viewer asks for the current state → re-send the whole trail,
                     // the latest position and every media waypoint at once, so a reload fills instantly.
                     liveChannel.on('broadcast', { event: 'request' }, () => {
+                        if (window.DebugWindow) DebugWindow.log('live: ◀ request empfangen → sende trail/pos/media (' + track.length + ' pts)');
                         broadcastTrail(); broadcastLive(true); waypoints.forEach(addLiveMedia);
                     });
                     liveChannel.subscribe((status) => {
+                        if (window.DebugWindow) DebugWindow.log('live: subscribe status=' + status + ' (live:' + canon + ')');
                         if (status === 'SUBSCRIBED') {
                             broadcastTrail(); broadcastLive(true);
                             waypoints.forEach(addLiveMedia); // push photo/voice/video ALREADY on the track

@@ -470,25 +470,48 @@
         }
 
         function goLive(key) {
+            const chName = 'live:' + key;
+            // Visible diagnostic (the live bug is Realtime-specific → show subscribe status + how many
+            // broadcast messages actually arrive, so a two-device test pinpoints abo-vs-delivery at a glance).
+            let rx = 0, reqs = 0, lastStatus = '…';
+            function diag() {
+                let el = $('live-diag');
+                if (!el) {
+                    el = document.createElement('div'); el.id = 'live-diag';
+                    el.style.cssText = 'position:fixed;left:50%;bottom:6px;transform:translateX(-50%);z-index:99998;'
+                        + 'font:11px/1.3 ui-monospace,Menlo,Consolas,monospace;background:rgba(8,20,42,.85);'
+                        + 'color:#9fb3c8;padding:3px 9px;border-radius:8px;pointer-events:none;white-space:nowrap';
+                    document.body.appendChild(el);
+                }
+                el.textContent = chName + ' · ' + lastStatus + ' · rx ' + rx + (reqs ? ' · req ' + reqs : '');
+            }
             showMsg('Verbinde mit Live „' + esc(key) + '" …');
             let gotData = false, timer = null;
             const arm = (ms, fn) => { if (timer) clearTimeout(timer); timer = setTimeout(fn, ms); };
             // Nothing arrived in time → the WebSocket almost certainly can't reach the server.
             arm(9000, () => { if (!gotData) showMsg(connErrHtml('Keine Verbindung', true)); });
             const markLive = () => { if (!gotData) { gotData = true; if (timer) clearTimeout(timer); hideMsg(); } };
+            const rxBump = () => { rx++; diag(); };
+            diag();
 
-            const ch = sb.channel('live:' + key, { config: { broadcast: { self: false } } });
-            ch.on('broadcast', { event: 'trail' }, ({ payload }) => { markLive(); onLiveTrail(payload && payload.pts); });
-            ch.on('broadcast', { event: 'pos' }, ({ payload }) => { markLive(); onLivePos(payload); });
-            ch.on('broadcast', { event: 'photo' }, ({ payload }) => onLivePhoto(payload));
-            ch.on('broadcast', { event: 'voice' }, ({ payload }) => onLiveVoice(payload));
-            ch.on('broadcast', { event: 'video' }, ({ payload }) => onLiveVideo(payload));
-            ch.on('broadcast', { event: 'end' }, () => { const b = $('live-badge'); if (b) b.textContent = '■ beendet'; setEta(null); });
+            const ch = sb.channel(chName, { config: { broadcast: { self: false } } });
+            ch.on('broadcast', { event: 'trail' }, ({ payload }) => { rxBump(); markLive(); onLiveTrail(payload && payload.pts); });
+            ch.on('broadcast', { event: 'pos' }, ({ payload }) => { rxBump(); markLive(); onLivePos(payload); });
+            ch.on('broadcast', { event: 'photo' }, ({ payload }) => { rxBump(); onLivePhoto(payload); });
+            ch.on('broadcast', { event: 'voice' }, ({ payload }) => { rxBump(); onLiveVoice(payload); });
+            ch.on('broadcast', { event: 'video' }, ({ payload }) => { rxBump(); onLiveVideo(payload); });
+            ch.on('broadcast', { event: 'end' }, () => { rxBump(); const b = $('live-badge'); if (b) b.textContent = '■ beendet'; setEta(null); });
             // On (re)connect, ask the sender for the current state → a reload fills instantly
             // instead of waiting for the next periodic trail (~15 s).
             ch.subscribe((status) => {
+                lastStatus = status; diag();
                 if (status === 'SUBSCRIBED') {
-                    ch.send({ type: 'broadcast', event: 'request', payload: {} });
+                    const sendReq = () => { try { ch.send({ type: 'broadcast', event: 'request', payload: {} }); reqs++; diag(); } catch (e) { } };
+                    sendReq();
+                    // Re-ask a few times: the very first 'request' can race the sender's own channel join
+                    // and get lost → without this the viewer would wait up to 15 s for the periodic trail.
+                    let tries = 0;
+                    const ri = setInterval(() => { if (gotData || tries++ >= 5) { clearInterval(ri); return; } sendReq(); }, 3000);
                     // Connected, but the sender may not be broadcasting right now → tell the viewer (not an error).
                     arm(7000, () => {
                         if (!gotData) showMsg('Verbunden — warte auf Live-Daten von „' + esc(key) + '" …'
