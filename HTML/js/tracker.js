@@ -369,6 +369,7 @@
         function wpSer(w) {
             const o = Object.assign({}, w); delete o._marker;
             delete o._blob;                                         // never serialize the raw video File
+            delete o._trackId;                                      // runtime-only: which DB row holds this wp (for corrections)
             if (o._pending) { o.video = null; delete o._pending; }  // un-uploaded video → no dead blob: URL
             return o;
         }

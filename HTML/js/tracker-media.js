@@ -138,6 +138,28 @@ window.TrackerMedia = function (T) {
         //      controls (close / prev-next / Esc / arrows / native immersive fullscreen). ----
         PhotoLayer.mountLightbox();
         function openPhotoLightbox(wp) { PhotoLayer.openLightbox(wp, T.waypoints); }
+        // "Falsch" correction from the lightbox: wp.correction is already set by PhotoLayer; write it
+        // back to the DB row that holds this waypoint. A standalone photo carries wp._trackId; a photo
+        // on the active recording lives under T.currentTrackId. Read-modify-write by the waypoint's
+        // timestamp key so it patches the ONE waypoint without clobbering the others (standalone OR
+        // loaded/active track).
+        async function saveCorrection(wp) {
+            const trackId = (wp && wp._trackId != null) ? wp._trackId : T.currentTrackId;
+            if (trackId == null) { toast('Korrektur nur lokal — kein gespeicherter Track.'); return false; }
+            const c = await ensureSb();
+            const { data, error } = await c.from('tracks').select('waypoints').eq('id', trackId).single();
+            if (error) { toast('Korrektur fehlgeschlagen: ' + (error.message || error)); throw error; }
+            const wps = Array.isArray(data && data.waypoints) ? data.waypoints : [];
+            const i = wps.findIndex(w => w && w.t === wp.t);
+            if (i < 0) { toast('Korrektur: Foto im Track nicht gefunden.'); return false; }
+            wps[i].correction = wp.correction;
+            const { data: u, error: uerr } = await c.from('tracks').update({ waypoints: wps }).eq('id', trackId).select('id');
+            if (uerr) { toast('Korrektur fehlgeschlagen: ' + (uerr.message || uerr)); throw uerr; }
+            const ok = !!(u && u.length);
+            toast(ok ? 'Korrektur gespeichert.' : 'Korrektur NICHT gespeichert (UPDATE-Policy fehlt).');
+            return ok;
+        }
+        PhotoLayer.setCorrectionHandler(saveCorrection);
         // ---- Photo-pin fan-out (spiderfy): a stack fans out on hover (desktop) / tap (touch) so each
         //      photo is reachable — even at 100% overlap. The stack is the SAME connected component the
         //      badge uses (stored on the marker as `_stack` by PhotoLayer.applyStackBadges), so the
@@ -352,13 +374,14 @@ window.TrackerMedia = function (T) {
         // Saved as its own track (1 point + 1 photo waypoint) so it shows up in the list.
         async function saveOnePointTrack(name, ll, wp) {
             const c = await ensureSb();
-            const { error } = await c.from('tracks').insert({
+            const { data, error } = await c.from('tracks').insert({
                 name: name,
                 distance_m: 0,
                 points: [[ll[0], ll[1], wp.t, null, null]],
                 waypoints: [wpSer(wp)],
-            });
+            }).select('id').single();
             if (error) throw error;
+            if (data) wp._trackId = data.id; // remember the row so a later "Falsch" correction can target it
         }
         async function addPhotoPoint(img, ll, ai) {
             const wp = addWaypoint({ lat: ll[0], lng: ll[1], t: new Date().toISOString(), img, title: ai ? ai.title : 'Foto', text: ai ? ai.text : '' });
