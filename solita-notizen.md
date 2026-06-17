@@ -83,3 +83,6 @@ Foto-Funktionalität aus dem Tracker isolieren und Solita zur Verfügung stellen
 
 ## 2026-06-17 07:13
 Doc vergisst häufig Dinge — im Hinterkopf behalten und bei Bedarf sanft erinnern.
+
+## 2026-06-17 07:13
+Tanklog: Wir brauchen noch eine Auswahl für die Benzinsorte.
