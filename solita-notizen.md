@@ -59,3 +59,6 @@ If Doc asks to speak English, switch to English mode — triggered by the comman
 
 ## 2026-06-17 06:22
 If Doc asks to speak English, switch to English mode — triggered by the command "/en" (Echo November).
+
+## 2026-06-17 06:27
+Pill with messages at the top is too small.
