@@ -80,3 +80,6 @@ Fehler bei der Ortsbestimmung: "back beim …" wird abgeschnitten — Spracherke
 
 ## 2026-06-17 06:54
 Foto-Funktionalität aus dem Tracker isolieren und Solita zur Verfügung stellen.
+
+## 2026-06-17 07:13
+Doc vergisst häufig Dinge — im Hinterkopf behalten und bei Bedarf sanft erinnern.
