@@ -40,6 +40,19 @@
             // awaitingConfirm: a lock-wake asked „Soll ich helfen?" and is waiting for the yes/no answer.
             let awaitingQuery = false, convo = false, paused = false, awaitingConfirm = false, confirmAccepting = false, confirmTimer = null;
 
+            // Trigger log (Doc: /trigger) — a small ring buffer recording WHY Solita just acted: the source
+            // (background Vosk wake · mic „Solita" · spoken command), the exact words she heard, and what she
+            // did. Lets a surprise wake or a misheard command be explained after the fact. Pure bookkeeping —
+            // wrapped in try/catch and never alters the wake flow. NOTE: only text is logged; the Web-Speech /
+            // Vosk pipeline yields no audio, so there is no „sound file" of the trigger (see /trigger note).
+            const TRIGGER_LOG = (window.__solitaTriggers = window.__solitaTriggers || []);
+            function logTrigger(source, heard, action) {
+                try {
+                    TRIGGER_LOG.push({ t: Date.now(), source: source || '', heard: String(heard == null ? '' : heard).slice(0, 140), action: action || '' });
+                    if (TRIGGER_LOG.length > 30) TRIGGER_LOG.shift();   // keep it small
+                } catch (e) { }
+            }
+
             // Build the generic ear with Solita's config. The ear knows no Solita words/DOM/globals.
             const ear = new Ear({
                 triggers: TRIGGERS,
@@ -308,7 +321,8 @@
             //   ambient (Doc is at the phone) → open the conversation directly, exactly as the old fire() did.
             function onWake(residual, meta) {
                 paused = false;
-                if (meta && meta.native) { askConfirm(); return; }
+                if (meta && meta.native) { logTrigger('Vosk-Wake (Hintergrund/gesperrt)', residual, 'fragt „Soll ich helfen?"'); askConfirm(); return; }
+                logTrigger('Wake (Mikro: „Solita")', residual, residual ? 'öffnet Gespräch mit Frage' : 'öffnet Gespräch („Ja?")');
                 fire(residual);
             }
 
@@ -338,7 +352,8 @@
                 // Cost guard (Doc: 5€ soll halten): the open mic sometimes transcribes ambient noise as a pure
                 // non-lexical sound (laughter / hesitation). Sending that pays for a full Claude turn on nothing.
                 // Deliberately NOT dropping real short words like „ja"/„ok"/„nein" — those can be genuine answers.
-                if (/^(?:h+m+|m+h+m*|ä+h*m*|öh+|haha(?:ha)*|hihi|haa+)[\s.!?]*$/i.test(out)) return;
+                if (/^(?:h+m+|m+h+m*|ä+h*m*|öh+|haha(?:ha)*|hihi|haa+)[\s.!?]*$/i.test(out)) { logTrigger('Sprache', out, 'verworfen (Nicht-Wort/Geräusch)'); return; }
+                logTrigger(convo ? 'Sprache (Folgefrage)' : 'Sprache (Frage)', out, 'an Claude gesendet');
                 disarmIdle();                                        // query going out → resume() re-arms after the reply
                 awaitingQuery = false; convo = true;
                 ear.setConvo(true); ear.setAwaiting(false);
@@ -357,7 +372,8 @@
                 }
                 if (ear.isPaused()) {                                  // dormant: "Solita" wakes her …
                     // … but spoken slash-commands ("slash ui" / "slash list" …) still fire — quick remote, stays asleep.
-                    if (/^(?:slash|splash|flash)\s+(?:ui|u\s*i|list|liste|clear|de|en|es|deutsch|english|spanish|espa[nñ]ol)\b/i.test(txt)) {
+                    if (/^(?:slash|splash|flash)\s+(?:ui|u\s*i|list|liste|clear|trigger|ausl[öo]ser|de|en|es|deutsch|english|spanish|espa[nñ]ol)\b/i.test(txt)) {
+                        logTrigger('Slash (schlummernd)', txt, 'Slash-Befehl ausgeführt');
                         if (input) { input.value = txt; input.dispatchEvent(new Event('input')); }
                         if (typeof sendMessage === 'function') setTimeout(sendMessage, 200);
                         return true;                                   // run it, stay in slumber
@@ -367,9 +383,9 @@
                 if (window.__uiMode) { handleUiVoice(txt); return true; }   // UI mode: accumulate + go/pause
                 if (input) input.value = '';                           // final arrived → clear the live interim text
                 const addressed = convo || awaitingQuery || ear.matchTrigger(txt) !== null;
-                if (addressed && PAUSE.test(txt)) { enterPause(); return true; }     // "Pause" → dormant until "Solita"
-                if (addressed && LOGOUT.test(txt)) { doVoiceLogout(); return true; } // "Solita, log mich aus" → action, not chat
-                if (convo && FAREWELL.test(txt)) { endConvo(); return true; } // "tschüss" → hang up the thread
+                if (addressed && PAUSE.test(txt)) { logTrigger('Sprachbefehl', txt, '„Pause" → schlummert'); enterPause(); return true; }     // "Pause" → dormant until "Solita"
+                if (addressed && LOGOUT.test(txt)) { logTrigger('Sprachbefehl', txt, '„Logout" → abgemeldet'); doVoiceLogout(); return true; } // "Solita, log mich aus" → action, not chat
+                if (convo && FAREWELL.test(txt)) { logTrigger('Sprachbefehl', txt, '„Tschüss" → Gespräch beendet'); endConvo(); return true; } // "tschüss" → hang up the thread
                 return false;   // plain question: ear handles (awaitingQuery→queueQuery, else extractQuery→fire)
             }
 

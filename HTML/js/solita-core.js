@@ -636,7 +636,7 @@
             const _sm = userText.toLowerCase().match(/^(?:slash|splash|flash)\s+(.+?)[\s.!?]*$/);
             if (_sm) {
                 const _w = _sm[1].replace(/[.\s]/g, '');   // "u i" / "u.i." → "ui"
-                const _M = { ui: 'ui', youeye: 'ui', youi: 'ui', list: 'list', liste: 'list', clear: 'clear', logout: 'logout', ausloggen: 'logout', abmelden: 'logout', wake: 'wake', aufwachen: 'wake', aufwecken: 'wake', wach: 'wake', de: 'de', deutsch: 'de', en: 'en', english: 'en', es: 'es', spanish: 'es', 'español': 'es', espanol: 'es' };
+                const _M = { ui: 'ui', youeye: 'ui', youi: 'ui', list: 'list', liste: 'list', clear: 'clear', trigger: 'trigger', 'auslöser': 'trigger', ausloeser: 'trigger', logout: 'logout', ausloggen: 'logout', abmelden: 'logout', wake: 'wake', aufwachen: 'wake', aufwecken: 'wake', wach: 'wake', de: 'de', deutsch: 'de', en: 'en', english: 'en', es: 'es', spanish: 'es', 'español': 'es', espanol: 'es' };
                 if (_M[_w]) userText = '/' + _M[_w];
             }
 
@@ -683,11 +683,32 @@
 <tr><td style="padding:3px 6px;opacity:0.7;">Logout</td><td style="padding:3px 6px;">ausloggen · abmelden</td><td style="padding:3px 6px;">log (me) out · sign (me) out</td><td style="padding:3px 6px;">cierra sesión · desconéctame</td></tr>
 <tr><td style="padding:3px 6px;opacity:0.7;">Tschüss</td><td style="padding:3px 6px;">tschüss · das war's</td><td style="padding:3px 6px;">bye · see you · good night</td><td style="padding:3px 6px;">adiós · hasta luego · chao</td></tr>
 </tbody></table>
-<div style="font-size:0.82rem;opacity:0.85;"><strong>Tippbefehle:</strong> /wake (aufwecken) · /pause (schlummern) · /clear (neue Session) · /list (diese Tabelle) · /ui (änderbare UI-Elemente) · /logout (abmelden) · /de · /en · /es (Sprache)</div>
+<div style="font-size:0.82rem;opacity:0.85;"><strong>Tippbefehle:</strong> /wake (aufwecken) · /pause (schlummern) · /clear (neue Session) · /list (diese Tabelle) · /ui (änderbare UI-Elemente) · /trigger (warum sie reagiert hat) · /logout (abmelden) · /de · /en · /es (Sprache)</div>
 <div style="font-size:0.78rem;opacity:0.6;margin-top:4px;">Sprache auch per DE / EN / ES im Menü (☰)</div></div></div>`);
                 messagesArea.scrollTop = messagesArea.scrollHeight;
                 messageInput.value = '';
                 messageInput.style.height = 'auto';
+                return;
+            }
+
+            if (userText.trim().toLowerCase() === '/trigger') {   // /trigger → WHY Solita acted (the recent trigger log)
+                const esc = function (s) { return String(s == null ? '' : s).replace(/[<>&]/g, function (c) { return ({ '<': '&lt;', '>': '&gt;', '&': '&amp;' }[c]); }); };
+                const log = (window.__solitaTriggers || []).slice(-15).reverse();   // newest first
+                const rows = log.length ? log.map(function (e) {
+                    const d = new Date(e.t), p = function (n) { return String(n).padStart(2, '0'); };
+                    const tm = p(d.getHours()) + ':' + p(d.getMinutes()) + ':' + p(d.getSeconds());
+                    return '<tr><td style="padding:3px 6px;opacity:0.6;white-space:nowrap;">' + tm + '</td>'
+                        + '<td style="padding:3px 6px;white-space:nowrap;">' + esc(e.source) + '</td>'
+                        + '<td style="padding:3px 6px;">' + (esc(e.heard) || '<span style="opacity:0.4;">—</span>') + '</td>'
+                        + '<td style="padding:3px 6px;opacity:0.85;">' + esc(e.action) + '</td></tr>';
+                }).join('') : '<tr><td colspan="4" style="padding:6px;opacity:0.6;">Noch nichts protokolliert.</td></tr>';
+                messagesArea.insertAdjacentHTML('beforeend', '<div class="message assistant"><div class="message-content"><strong>Auslöser-Protokoll</strong> <span style="opacity:0.55;font-size:0.78rem;">(neueste zuerst)</span>'
+                    + '<table style="width:100%;border-collapse:collapse;font-size:0.8rem;margin:6px 0;">'
+                    + '<thead><tr style="opacity:0.55;"><th style="text-align:left;padding:3px 6px;">Zeit</th><th style="text-align:left;padding:3px 6px;">Quelle</th><th style="text-align:left;padding:3px 6px;">Gehört</th><th style="text-align:left;padding:3px 6px;">Aktion</th></tr></thead>'
+                    + '<tbody>' + rows + '</tbody></table>'
+                    + '<div style="font-size:0.74rem;opacity:0.6;">Nur Text — die Spracherkennung (Web-Speech / Vosk) liefert keinen Ton, daher kein Audio des Auslösers.</div></div></div>');
+                messagesArea.scrollTop = messagesArea.scrollHeight;
+                messageInput.value = ''; messageInput.style.height = 'auto';
                 return;
             }
 
