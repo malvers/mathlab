@@ -343,6 +343,15 @@ public class SolitaVoiceService extends Service implements RecognitionListener {
                 .build();
     }
 
+    @Override public void onTaskRemoved(Intent rootIntent) {
+        // App swiped away from Recents → end ALL listening: drop the foreground notification and
+        // kill the service so START_STICKY can't resurrect it. onDestroy() does the Vosk teardown.
+        wantListening = false;
+        stopForeground(true);   // boolean overload: works back to API 5 (minSdk 22); removes the notification
+        stopSelf();
+        super.onTaskRemoved(rootIntent);
+    }
+
     @Override public void onDestroy() {
         // Grab the model ref now; close it on the SAME background executor AFTER the recognizer teardown so the
         // join()ing stop()/shutdown()/close() never run on the main thread and the Model is freed only once the
