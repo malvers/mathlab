@@ -419,8 +419,12 @@
         //     noisy) GPS height. baro gives the smooth profile, GPS anchors it slowly. ---
         let baroReady = false;     // native pressure sensor delivering data
         let baroAlt = null;        // barometric altitude (m, uncalibrated absolute)
-        let altOffset = null;      // slow EMA of (gpsAlt − baroAlt) → calibrates the baro to GPS
+        let altOffset = null;      // slow EMA of (ref − baroAlt) → calibrates the baro to the absolute anchor (DEM, else GPS)
         let fusedAlt = null;       // current best altitude (m) shown + stored
+        let demElev = null;        // live terrain elevation (DEM/Open-Meteo, m MSL) at our position — the absolute anchor
+        let demElevKey = null;     // grid cell of the last DEM lookup (skip redundant calls)
+        let demElevBusy = false;   // a DEM lookup is in flight
+        let lastGpsAlt = null;     // most recent non-null GPS altitude (fallback anchor when DEM unavailable/offline)
 
         const $ = id => document.getElementById(id);
         const elToggle = $('trk-toggle');
@@ -684,7 +688,8 @@
                 }
             }
 
-            // Altitude: fuse the precise barometer profile with the absolute GPS reference.
+            // Altitude: fuse the precise barometer profile with the absolute anchor (DEM terrain, else GPS).
+            updateDemElev(here);
             updateAltitude(pos.coords.altitude != null ? pos.coords.altitude : null);
 
             // Speed display DECOUPLED from the recording gate (BUG-1). The gate only exists to
@@ -925,15 +930,31 @@
                 setAlt(fusedAlt);
             }
         }
+        // Live terrain elevation (DEM, Open-Meteo via track-dem.js) — the ABSOLUTE anchor for altitude:
+        // true MSL height, noise-free, no GPS geoid offset (Doc 2026-06-18). Cheap: track-dem caches per
+        // ~90 m grid cell → staying in a cell makes NO network call; only a new cell triggers one lookup.
+        function updateDemElev(here) {
+            if (!here || !window.TrackDem) return;
+            const k = Math.round(here[0] * 1000) + ',' + Math.round(here[1] * 1000);
+            if (demElevBusy || (k === demElevKey && demElev != null)) return;
+            demElevBusy = true;
+            TrackDem.elevations([here]).then(function (arr) {
+                if (arr && arr.length && arr[0] != null) { demElev = arr[0]; demElevKey = k; updateAltitude(null); }
+            }).catch(function () { }).finally(function () { demElevBusy = false; });
+        }
+
         function updateAltitude(gpsAlt) {
+            if (gpsAlt != null) lastGpsAlt = gpsAlt;
+            // Anchor preference: DEM (MSL, noise-free) → live GPS → last known GPS.
+            const ref = (demElev != null) ? demElev : (gpsAlt != null ? gpsAlt : lastGpsAlt);
             if (baroReady && baroAlt != null) {
-                if (gpsAlt != null) {
-                    const diff = gpsAlt - baroAlt;
+                if (ref != null) {
+                    const diff = ref - baroAlt;
                     altOffset = (altOffset == null) ? diff : (0.95 * altOffset + 0.05 * diff);
                 }
                 fusedAlt = (altOffset != null) ? baroAlt + altOffset : baroAlt;
             } else {
-                fusedAlt = gpsAlt; // no barometer → raw GPS height (may be null)
+                fusedAlt = ref; // no barometer (idle / web) → DEM terrain height, else GPS fallback (may be null)
             }
             renderAltitude();
         }
@@ -999,6 +1020,9 @@
             lastFix = { lat: here[0], lng: here[1], t: Date.now() };
             renderPosition(here, pos.coords.accuracy);
             showDot();
+            // Idle altitude (no barometer here): show the DEM terrain height directly → no more „−".
+            updateDemElev(here);
+            updateAltitude(pos.coords.altitude != null ? pos.coords.altitude : null);
             if (acquireWatch != null) { navigator.geolocation.clearWatch(acquireWatch); acquireWatch = null; } // initial one-shot now redundant
             if (following && !handMode) {
                 const moved = map.distance(map.getCenter(), L.latLng(here));
