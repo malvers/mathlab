@@ -662,6 +662,14 @@
                 return;
             }
 
+            if (userText.toLowerCase() === '/pause') {         // /pause → drop her into the quiet SLUMBER (dormant)
+                messageInput.value = ''; messageInput.style.height = 'auto';
+                if (window.solitaPause) window.solitaPause();
+                messagesArea.insertAdjacentHTML('beforeend', '<div style="text-align:center;opacity:0.5;font-size:0.68rem;letter-spacing:1.5px;text-transform:uppercase;margin:12px 0;font-family:Orbitron,sans-serif;color:#cfe3ff;">— Solita schlummert · sag „Solita" oder /wake —</div>');
+                messagesArea.scrollTop = messagesArea.scrollHeight;
+                return;
+            }
+
             if (userText.toLowerCase() === '/list') {
                 messagesArea.insertAdjacentHTML('beforeend', `<div class="message assistant"><div class="message-content"><strong>Sprachbefehle</strong>
 <table style="width:100%;border-collapse:collapse;font-size:0.82rem;margin:6px 0;">
@@ -672,7 +680,7 @@
 <tr><td style="padding:3px 6px;opacity:0.7;">Logout</td><td style="padding:3px 6px;">ausloggen · abmelden</td><td style="padding:3px 6px;">log (me) out · sign (me) out</td><td style="padding:3px 6px;">cierra sesión · desconéctame</td></tr>
 <tr><td style="padding:3px 6px;opacity:0.7;">Tschüss</td><td style="padding:3px 6px;">tschüss · das war's</td><td style="padding:3px 6px;">bye · see you · good night</td><td style="padding:3px 6px;">adiós · hasta luego · chao</td></tr>
 </tbody></table>
-<div style="font-size:0.82rem;opacity:0.85;"><strong>Tippbefehle:</strong> /wake (aufwecken) · /clear (neue Session) · /list (diese Tabelle) · /ui (änderbare UI-Elemente) · /logout (abmelden) · /de · /en · /es (Sprache)</div>
+<div style="font-size:0.82rem;opacity:0.85;"><strong>Tippbefehle:</strong> /wake (aufwecken) · /pause (schlummern) · /clear (neue Session) · /list (diese Tabelle) · /ui (änderbare UI-Elemente) · /logout (abmelden) · /de · /en · /es (Sprache)</div>
 <div style="font-size:0.78rem;opacity:0.6;margin-top:4px;">Sprache auch per DE / EN / ES im Menü (☰)</div></div></div>`);
                 messagesArea.scrollTop = messagesArea.scrollHeight;
                 messageInput.value = '';

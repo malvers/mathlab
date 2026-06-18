@@ -213,6 +213,15 @@
     <div id="ov-backdrop"></div>
     <div id="track-list" class="ov-panel">
         <div class="ov-title">Tracks laden</div>
+        <div class="set-row seg-row" id="tl-radius" role="group" aria-label="Umkreis um deine Position">
+            <span>Umkreis</span>
+            <div class="seg-group">
+                <button type="button" class="seg-btn" data-radius="0">Alle</button>
+                <button type="button" class="seg-btn" data-radius="10">10</button>
+                <button type="button" class="seg-btn" data-radius="20">20</button>
+                <button type="button" class="seg-btn" data-radius="30">30 km</button>
+            </div>
+        </div>
         <div id="track-list-items" class="ov-body"></div>
         <button id="tl-import" type="button">+ Geteilten Track-Link laden</button>
         <div id="tl-actions">
@@ -225,12 +234,19 @@
     <div id="poi-panel" class="ov-panel">
         <div class="ov-title">POI — Kategorien</div>
         <div class="ov-body">
-          <label class="set-row" for="poi-cat-fuel" style="cursor:pointer">
-            <span>Tanken</span>
+          <!-- Tanken: category toggle + the fuel-type segment (E5/E10/Diesel) inline behind the label.
+               The seg-buttons sit OUTSIDE the <label> so tapping one never toggles the Tanken checkbox. -->
+          <div class="set-row fuel-row">
+            <label class="fuel-cat" for="poi-cat-fuel" style="cursor:pointer"><span>Tanken</span></label>
+            <div class="seg-group" role="group" aria-label="Benzinsorte">
+              <button type="button" class="seg-btn" data-fuel="e5">SUPER E5</button>
+              <button type="button" class="seg-btn" data-fuel="e10">E10</button>
+              <button type="button" class="seg-btn" data-fuel="diesel">Diesel</button>
+            </div>
             <input type="checkbox" id="poi-cat-fuel" class="tl-check">
-          </label>
+          </div>
           <label class="set-row" for="poi-cat-speedcam" style="cursor:pointer">
-            <span>Fotoagentur</span>
+            <span>Helmut Newton</span>
             <input type="checkbox" id="poi-cat-speedcam" class="tl-check">
           </label>
           <label class="set-row" for="poi-cat-food" style="cursor:pointer">
@@ -262,7 +278,7 @@
             <input type="checkbox" id="poi-cat-nature" class="tl-check">
           </label>
           <label class="set-row" for="poi-cat-feen" style="cursor:pointer">
-            <span>🧚 Feen</span>
+            <span>Feen</span>
             <input type="checkbox" id="poi-cat-feen" class="tl-check">
           </label>
         </div>
@@ -308,6 +324,13 @@
                 </svg>Nach Hause
             </button>
             <p class="sync-lead" id="nav-home-hint" style="margin-top:6px">Lang drücken: aktuelles Ziel als Zuhause speichern.</p>
+            <div class="set-row seg-row" role="group" aria-label="Wegetyp">
+                <span>Wegetyp</span>
+                <div class="seg-group">
+                    <button type="button" class="seg-btn" data-route="car">🚗 Straße</button>
+                    <button type="button" class="seg-btn" data-route="foot">🚶 Laufen</button>
+                </div>
+            </div>
             <label class="set-row" for="nav-voice" style="cursor:pointer">
                 <span>Sprachansage</span>
                 <input type="checkbox" id="nav-voice" class="tl-check" checked>
