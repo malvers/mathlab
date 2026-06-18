@@ -435,6 +435,9 @@ window.TrackerNav = function (ctx) {
             loadVoices();
             const u = new SpeechSynthesisUtterance(' '); // silent kick inside the gesture → unlocks the WebView
             u.volume = 0; u.lang = 'de-DE';
+            u.onstart = () => ttsLog('prime ▶ onstart');
+            u.onend = () => ttsLog('prime ■ onend');
+            u.onerror = (e) => ttsLog('prime ✗ onerror ' + ((e && e.error) || ''));
             window.speechSynthesis.speak(u);
             ttsLog('primed on user gesture');
         } catch (e) { ttsLog('prime failed: ' + e); }
@@ -446,6 +449,9 @@ window.TrackerNav = function (ctx) {
         const onGesture = () => { primeSpeech(); document.removeEventListener('pointerdown', onGesture); document.removeEventListener('click', onGesture); };
         document.addEventListener('pointerdown', onGesture);
         document.addEventListener('click', onGesture);
+        // Android WebView leaves the engine 'paused' mid-utterance (esp. longer ones) → it goes silent.
+        // A gentle periodic resume while it's meant to be speaking keeps audio flowing.
+        setInterval(() => { try { const ss = window.speechSynthesis; if (ss && ss.speaking && ss.paused) ss.resume(); } catch (e) { } }, 4000);
     }
 
     function speak(text) {
@@ -453,14 +459,21 @@ window.TrackerNav = function (ctx) {
         try {
             if (!ttsPrimed) primeSpeech();                 // belt-and-braces if no tap seen yet
             const ss = window.speechSynthesis;
-            if (ss.paused) { try { ss.resume(); } catch (e) { } } // Android can leave it paused
             if (!ttsVoice) loadVoices();                   // voices may have arrived since init
             const u = new SpeechSynthesisUtterance(text);
             u.lang = 'de-DE';
             if (ttsVoice) u.voice = ttsVoice;
-            ss.cancel();                                   // drop any stale utterance so we never lag behind
-            ss.speak(u);
-            ttsLog('speak: ' + text);
+            u.onstart = () => ttsLog('▶ onstart: ' + text);
+            u.onend = () => ttsLog('■ onend');
+            u.onerror = (e) => ttsLog('✗ onerror ' + ((e && e.error) || '') + ' — Android-WebView spricht evtl. nicht (natives TTS-Plugin nötig)');
+            // Android WebView bug: cancel() immediately followed by speak() DROPS the new utterance, and the
+            // engine is often left 'paused'. So cancel, then speak on the NEXT tick (+ resume) so it isn't eaten.
+            try { ss.cancel(); } catch (e) { }
+            setTimeout(() => {
+                try { if (ss.paused) ss.resume(); } catch (e) { }
+                try { ss.speak(u); ttsLog('speak() aufgerufen · voices=' + ((window.speechSynthesis.getVoices() || []).length) + (ttsVoice ? ' · de=' + ttsVoice.name : ' · default') + ' · "' + text + '"'); }
+                catch (e) { ttsLog('speak failed: ' + e); }
+            }, 70);
         } catch (e) { ttsLog('speak failed: ' + e); }
     }
 
