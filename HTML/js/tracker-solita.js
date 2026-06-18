@@ -113,7 +113,7 @@
         getSystem: function () { return PERSONA; },
         getTools: function () { return TOOLS; },
         execTool: execTool,
-        toolBadge: function (n) { return n === 'change_setting' ? '🔧 ich ändere die Einstellung …' : ''; },
+        toolBadge: function (n) { speakBadge(n); return n === 'change_setting' ? '🔧 ich ändere die Einstellung …' : ''; },
         storage: { history: 'tracker_solita_history', summary: 'tracker_solita_summary' },
         onTyping: function (on) { if (on) setState('thinking'); },
         onAssistant: function (text) { bubble(text, true); },
@@ -123,28 +123,40 @@
     });
     try { brain.load(); } catch (e) { }
 
-    // ---- TTS: speak the reply via the tts edge fn (Google Cloud TTS). No password needed (the fn isn't gated).
+    // ---- TTS: speak text via the tts edge fn (Google Cloud TTS). No password needed (the fn isn't gated).
     let audio = null;
+    function playB64(b64, onend) {
+        try { if (audio) audio.pause(); } catch (e) { }
+        audio = new Audio('data:audio/mp3;base64,' + b64);
+        audio.onended = onend || null;
+        audio.onerror = onend || null;
+        audio.play().catch(() => { if (onend) onend(); });
+    }
+    function ttsFetch(text) {
+        return fetch(TTS_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'apikey': SB_ANON, 'Authorization': 'Bearer ' + SB_ANON },
+            body: JSON.stringify({ text: text, voice: 'de-DE-Studio-C', languageCode: 'de-DE', speakingRate: 1.0 })
+        }).then((r) => r.json()).then((d) => (d && d.audioContent) || null);
+    }
     function speak(text) {
         const clean = String(text || '').replace(/[*_`#>•]/g, '').replace(/\s+/g, ' ').trim();
         if (!clean) { setState(''); return; }
         setState('speaking');
-        fetch(TTS_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'apikey': SB_ANON, 'Authorization': 'Bearer ' + SB_ANON },
-            body: JSON.stringify({ text: clean, voice: 'de-DE-Studio-C', languageCode: 'de-DE', speakingRate: 1.0 })
-        })
-            .then((r) => r.json())
-            .then((d) => {
-                if (d && d.audioContent) {
-                    try { if (audio) audio.pause(); } catch (e) { }
-                    audio = new Audio('data:audio/mp3;base64,' + d.audioContent);
-                    audio.onended = () => setState('');
-                    audio.onerror = () => setState('');
-                    audio.play().catch(() => setState(''));
-                } else { setState(''); }
-            })
-            .catch(() => setState(''));
+        ttsFetch(clean).then((b64) => { if (b64) playB64(b64, () => setState('')); else setState(''); }).catch(() => setState(''));
+    }
+
+    // ---- Tool "Zwischentext": speak the interim badge aloud WHILE a tool runs (Doc: "lesen lassen"). The
+    // phrase per tool is FIXED, so synthesise it ONCE and cache the mp3 in localStorage → every later run is
+    // instant + free (no TTS call, no Google cost). Add a line here as Solita gains more tracker tools.
+    const BADGE_SPEAK = { change_setting: 'Ich ändere die Einstellung.' };
+    function speakBadge(name) {
+        const phrase = BADGE_SPEAK[name];
+        if (!phrase) return;
+        const key = 'solita_badge_tts_' + name;
+        let cached = null; try { cached = localStorage.getItem(key); } catch (e) { }
+        if (cached) { playB64(cached); return; }
+        ttsFetch(phrase).then((b64) => { if (b64) { try { localStorage.setItem(key, b64); } catch (e) { } playB64(b64); } }).catch(() => { });
     }
 
     // ---- STT: one-shot Web-Speech (de-DE), same proven pattern as the nav "Ziel"-mic / photo "Falsch" editor.
@@ -152,7 +164,7 @@
     function listen() {
         const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
         if (!SR) { bubble('Spracherkennung wird hier nicht unterstützt.'); return; }
-        if (listening) { try { recog && recog.stop(); } catch (e) { } return; } // tap again → stop
+        if (listening) { dbg('listen: erneuter Aufruf → stoppe'); try { recog && recog.stop(); } catch (e) { } return; } // tap again → stop
         if (!ensurePwd()) { bubble('Kein Solita-Passwort — abgebrochen.'); return; }
         recog = new SR();
         recog.lang = 'de-DE';
@@ -188,7 +200,7 @@
         if (!mapEl) { btn.addEventListener('click', () => { anchorAt(null, null); listen(); }); return; } // fallback
         const HOLD_MS = 550;   // press this long → Solita wakes
         const MOVE_TOL = 12;   // px of drift allowed before it counts as a pan, not a hold
-        let timer = null, sx = 0, sy = 0, pid = null;
+        let timer = null, sx = 0, sy = 0, pid = null, lastPointerType = '';
         function clear() { if (timer) { clearTimeout(timer); timer = null; } pid = null; }
         function blocked(t) {
             if (t && t.closest && t.closest('.wp-pin, .leaflet-marker-icon, .leaflet-popup, .poi-pin-wrap, .fuel-pin-wrap, #photo-lightbox')) return true;
@@ -196,20 +208,24 @@
             const lb = document.getElementById('photo-lightbox');
             return !!(lb && lb.classList.contains('open'));
         }
-        // Right-click (desktop): wake Solita at the cursor. The native menu is already suppressed globally
-        // (tracker.js); we preventDefault here too and skip gestures over pins/popups/panels.
+        // Right-click (DESKTOP) → wake Solita at the cursor. On TOUCH the OS also fires `contextmenu` on a
+        // long-press — but that gesture is already handled by the pointer timer below; firing here too would
+        // call listen() twice and the SECOND call toggles it OFF (the "… ich höre" flashed up and vanished —
+        // Doc's bug). So: always suppress the native menu, but only WAKE from contextmenu on a mouse.
         mapEl.addEventListener('contextmenu', function (e) {
             if (blocked(e.target)) return;
             e.preventDefault();
+            if (lastPointerType === 'touch') { dbg('contextmenu(touch) ignoriert — Long-Press übernimmt'); return; }
             anchorAt(e.clientX, e.clientY);
             listen();
         });
         mapEl.addEventListener('pointerdown', function (e) {
+            lastPointerType = e.pointerType;                         // remember mouse vs touch for the contextmenu guard
             if (e.pointerType === 'mouse' && e.button !== 0) return; // right/middle mouse → handled by contextmenu
             if (pid !== null) { clear(); return; }   // second finger (pinch) → cancel
             if (blocked(e.target)) return;
             pid = e.pointerId; sx = e.clientX; sy = e.clientY;
-            timer = setTimeout(function () { clear(); anchorAt(sx, sy); listen(); }, HOLD_MS);
+            timer = setTimeout(function () { clear(); dbg('Long-Press → wecke Solita'); anchorAt(sx, sy); listen(); }, HOLD_MS);
         }, { passive: true });
         mapEl.addEventListener('pointermove', function (e) {
             if (timer && (Math.abs(e.clientX - sx) > MOVE_TOL || Math.abs(e.clientY - sy) > MOVE_TOL)) clear();
