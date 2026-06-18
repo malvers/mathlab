@@ -367,6 +367,9 @@
         let currentModel = localStorage.getItem(MODEL_KEY) || 'claude-sonnet-4-6';
         // Migrate any legacy (DeepSeek) model id → a real Claude model so the proxy gets a valid id.
         if (!/^claude-/.test(currentModel)) currentModel = 'claude-sonnet-4-6';
+        // Cost guard (Doc: die 5€ sollen halten): never let a stale/left-over 'ai_model' silently run Opus
+        // (~1.67× in+out vs Sonnet) for a voice assistant. The proxy enforces this server-side too.
+        if (/opus/i.test(currentModel)) currentModel = 'claude-sonnet-4-6';
 
         function getModel() { return currentModel; }
 

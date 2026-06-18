@@ -66,6 +66,13 @@
         const PRICES = { 'claude-sonnet-4-6': [3, 15], 'claude-opus-4-8': [5, 25], 'claude-haiku-4-5': [1, 5] }; // [in,out] $/1M
         const USD_EUR = 0.92;
         const COST_KEY = STORE.cost || 'solita_cost_total';
+        // Hard DAILY €-brake (Doc: die 5€ sollen halten). accountUsage only ever counted UP, never blocked —
+        // a stuck tab or a pathological tool-loop could fire paid requests until the balance is gone. We tally
+        // spend per calendar day and refuse new Claude calls once the day's cap is hit. Tune via cfg.dailyCapEur.
+        const DAY_CAP_EUR     = (typeof cfg.dailyCapEur === 'number') ? cfg.dailyCapEur : 1.5;
+        const DAY_COST_PREFIX = STORE.dayCost || 'solita_cost_day_';
+        function dayCostKey() { return DAY_COST_PREFIX + new Date().toISOString().slice(0, 10); }
+        function daySpentEur() { try { return parseFloat(localStorage.getItem(dayCostKey()) || '0') || 0; } catch (e) { return 0; } }
         function priceFor(model) {
             const k = model && Object.keys(PRICES).find(function (p) { return model.indexOf(p) === 0; });
             return PRICES[k] || PRICES['claude-sonnet-4-6'];
@@ -80,6 +87,7 @@
             let total = 0; try { total = parseFloat(localStorage.getItem(COST_KEY) || '0') || 0; } catch (e) { }
             total += eur;
             try { localStorage.setItem(COST_KEY, String(total)); } catch (e) { }
+            try { localStorage.setItem(dayCostKey(), String(daySpentEur() + eur)); } catch (e) { } // per-day tally for the hard brake
             const totIn = inTok + cr + cw;
             const hit = totIn ? Math.round(cr / totIn * 100) : 0;
             if (window.DebugWindow) window.DebugWindow.log('€ ' + (label || 'chat') + ': ↑' + inTok + ' ↓' + outTok
@@ -122,6 +130,12 @@
         // conversationHistory stays string-only (no reload/persist surprises).
         async function send(userText) {
             const pwd = getPwd();
+            // Hard daily brake: refuse the whole turn once today's spend hit the cap (protects the 5€).
+            if (daySpentEur() >= DAY_CAP_EUR) {
+                onError(new Error('Solita-Tageslimit (' + DAY_CAP_EUR.toFixed(2) + ' €) erreicht — Schutz gegen Leerlauf. Morgen wieder, oder cfg.dailyCapEur erhöhen.'));
+                onDone();
+                return;
+            }
             conversationHistory.push({ role: 'user', content: userText });
             onTyping(true);
             try {
@@ -129,6 +143,8 @@
                 let finalText = '(keine Antwort)';
                 let guard = 0;
                 while (guard++ < 6) {
+                    // Mid-turn brake: a pathological tool-loop must not blow past the daily cap either.
+                    if (daySpentEur() >= DAY_CAP_EUR) { finalText = 'Tageslimit erreicht — ich stoppe hier, damit das Guthaben hält.'; break; }
                     const response = await fetch(apiUrl, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json', 'apikey': anonKey, 'Authorization': 'Bearer ' + anonKey, 'x-app-pass': pwd },

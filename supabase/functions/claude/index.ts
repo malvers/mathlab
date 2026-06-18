@@ -19,7 +19,17 @@
 
 const ANTHROPIC = 'https://api.anthropic.com/v1/messages';
 const ANTHROPIC_VERSION = '2023-06-01';
-const DEFAULT_MODEL = 'claude-sonnet-4-6'; // balanced/fast for a voice assistant; client can send opus/haiku
+const DEFAULT_MODEL = 'claude-sonnet-4-6'; // balanced/fast for a voice assistant; client may send haiku (cheaper)
+// Cost guards (Doc: the 5€ must last). Opus is ~1.67× Sonnet in+out → never run it for a voice assistant,
+// even if a stale client localStorage 'ai_model' (reachable with the shared password) asks for it. And cap
+// the requested output: a buggy/abusive client could otherwise set max_tokens huge and run one request to
+// ~$1.60. 4096 is plenty for a spoken answer; the normal client value (3000) passes through unchanged.
+const MAX_OUTPUT_TOKENS = 4096;
+function pickModel(m: unknown): string {
+  if (typeof m !== 'string' || !m) return DEFAULT_MODEL;
+  if (/opus/i.test(m)) return DEFAULT_MODEL; // clamp Opus → Sonnet
+  return m;
+}
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -68,8 +78,8 @@ Deno.serve(async (req) => {
   if (!chat.length) return json({ error: 'keine user-Nachricht' }, 400);
 
   const body: Record<string, unknown> = {
-    model: typeof b.model === 'string' && b.model ? b.model : DEFAULT_MODEL,
-    max_tokens: (typeof b.max_tokens === 'number') ? b.max_tokens : 3000,
+    model: pickModel(b.model),
+    max_tokens: Math.min(Math.max((typeof b.max_tokens === 'number') ? b.max_tokens : 3000, 1), MAX_OUTPUT_TOKENS),
     messages: chat,
   };
   // NOTE: `temperature` is deprecated on Claude 4.x models (they reject it with HTTP 400) → don't forward it.

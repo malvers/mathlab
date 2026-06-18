@@ -335,6 +335,10 @@
                     out = wish;                                      // „ja <wish>" → submit only the wish
                 }
                 if (!out) return;
+                // Cost guard (Doc: 5€ soll halten): the open mic sometimes transcribes ambient noise as a pure
+                // non-lexical sound (laughter / hesitation). Sending that pays for a full Claude turn on nothing.
+                // Deliberately NOT dropping real short words like „ja"/„ok"/„nein" — those can be genuine answers.
+                if (/^(?:h+m+|m+h+m*|ä+h*m*|öh+|haha(?:ha)*|hihi|haa+)[\s.!?]*$/i.test(out)) return;
                 disarmIdle();                                        // query going out → resume() re-arms after the reply
                 awaitingQuery = false; convo = true;
                 ear.setConvo(true); ear.setAwaiting(false);
