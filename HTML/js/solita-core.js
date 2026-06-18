@@ -252,7 +252,9 @@
                     const r = await fetch(SOLITA_CONFIG_URL, { method: 'POST', headers: H, body: JSON.stringify({ instruction: String((input && input.instruction) || '') }) });
                     const d = await r.json().catch(() => ({}));
                     if (!r.ok) return { ok: false, summary: 'Fehlgeschlagen: ' + (d.error || ('HTTP ' + r.status)) };
-                    return { ok: true, summary: 'Einstellung geändert (config v' + d.version + ', committet).' };
+                    // Committed, but live via GitHub Pages + the 20 s config poll → not instant. Let Solita set
+                    // the expectation (from the tool result, not the persona prompt).
+                    return { ok: true, summary: 'Einstellung geändert (config v' + d.version + '). Sag Doc dazu, dass es ein paar Minuten dauern kann, bis er es sieht.' };
                 }
                 if (name === 'write_note') {
                     const r = await fetch(SOLITA_NOTE_URL, { method: 'POST', headers: H, body: JSON.stringify({ note: String((input && input.note) || '') }) });
