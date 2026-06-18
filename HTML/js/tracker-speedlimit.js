@@ -107,7 +107,9 @@ window.TrackerSpeedLimit = function (ctx) {
     function setSign(limit, over) {
         const el = $('speed-sign'); if (!el) return;
         if (limit == null) { el.hidden = true; el.classList.remove('over'); return; }
-        el.textContent = (limit === 'none') ? 'c' : String(limit); // 'none' = Autobahn unbegrenzt → c (Lichtgeschwindigkeit, das echte Limit)
+        const txt = (limit === 'none') ? 'c' : String(limit); // 'none' = Autobahn unbegrenzt → c (Lichtgeschwindigkeit, das echte Limit)
+        el.textContent = txt;
+        el.classList.toggle('s3', txt.length >= 3); // 3-digit limits (100/120/130) → smaller, tighter font to fit the disc
         el.classList.toggle('over', !!over && limit !== 'none');
         el.hidden = false;
     }
