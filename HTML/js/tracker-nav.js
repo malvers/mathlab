@@ -5,7 +5,7 @@
 // (German, built from OSRM maneuvers — no external phrasing library). Free + key-less services only
 // (CLAUDE.md rule 18):
 //   - Geocoding: Nominatim  (address → lat/lng)
-//   - Routing:   OSRM demo  (driving profile → geometry + per-step maneuvers)
+//   - Routing:   FOSSGIS OSRM (keyless) — routed-car (Straße) / routed-foot (Laufen) → geometry + maneuvers
 //   - Voice:     Web Speech API (speechSynthesis) — on-device, no key
 //
 // Additive: owns its own Leaflet layers (route polyline + destination pin), the #nav-panel UI and the
@@ -15,7 +15,15 @@ window.TrackerNav = function (ctx) {
     const { map, $, toast, showPanel, hidePanels } = ctx;
 
     const NOMINATIM = 'https://nominatim.openstreetmap.org/search';
-    const OSRM = 'https://router.project-osrm.org/route/v1/driving/';
+    // Wegetyp (Doc 2026-06-17): Straße (car) or Laufen (foot). FOSSGIS hosts keyless OSRM instances per
+    // profile with the SAME API (geometry + maneuvers), so only the base URL changes. Foot routing uses
+    // footpaths/pedestrian zones a car route can't; the maneuver→German mapping below is profile-agnostic.
+    const OSRM_PROFILES = {
+        car: 'https://routing.openstreetmap.de/routed-car/route/v1/driving/',
+        foot: 'https://routing.openstreetmap.de/routed-foot/route/v1/foot/',
+    };
+    const ROUTE_KEY = 'trk_nav_routetype';
+    let routeType = (localStorage.getItem(ROUTE_KEY) === 'foot') ? 'foot' : 'car';   // default: Straße
     const COL_ROUTE = 'rgb(66, 135, 245)'; // blue — distinct from the green/orange track + red position dot
 
     // Own map pane for the route, BELOW the position dot / heading triangle / track / markers, so the
@@ -170,7 +178,7 @@ window.TrackerNav = function (ctx) {
         try {
             // OSRM wants lon,lat order; full geometry as GeoJSON for an easy polyline.
             const coords = from[1] + ',' + from[0] + ';' + destLatLng[1] + ',' + destLatLng[0];
-            const r = await fetch(OSRM + coords + '?overview=full&geometries=geojson&steps=true');
+            const r = await fetch(OSRM_PROFILES[routeType] + coords + '?overview=full&geometries=geojson&steps=true');
             data = await r.json();
         } catch (e) { if (gen === navGen) toast('Route fehlgeschlagen (offline?).'); return false; }
         if (gen !== navGen || !destLatLng) return false; // cleared/superseded while fetching → drop this result
@@ -616,6 +624,21 @@ window.TrackerNav = function (ctx) {
             if (!voiceOn) { try { window.speechSynthesis.cancel(); } catch (e) { } }
         });
     }
+
+    // Wegetyp toggle (persisted): Straße (car) vs Laufen (foot) → switches the OSRM profile. If a destination
+    // is active we recompute right away so the mode change is visible immediately.
+    (function () {
+        const seg = Array.from(document.querySelectorAll('.seg-btn[data-route]'));
+        if (!seg.length) return;
+        const reflect = () => seg.forEach((b) => b.classList.toggle('active', b.getAttribute('data-route') === routeType));
+        seg.forEach((b) => b.addEventListener('click', () => {
+            const t = b.getAttribute('data-route') === 'foot' ? 'foot' : 'car';
+            if (t === routeType) return;
+            routeType = t; localStorage.setItem(ROUTE_KEY, routeType); reflect();
+            if (destLatLng) { const from = curPos(); if (from) computeRoute(from, false); }   // re-route in the new profile
+        }));
+        reflect();
+    })();
 
     return { openPanel, hasDestination, startNavigation, navigateTo, clearRoute, update, remainingBounds, frameRoute, tripData };
 };

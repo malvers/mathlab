@@ -721,6 +721,7 @@ body.ui-idle #speed-sign,
 body.ui-idle #hud-top,
 body.ui-idle #recenter-fab,
 body.ui-idle #resume-fab,
+body.ui-idle .leaflet-control-scale,
 body.ui-idle #trk-controls {
     opacity: 0;
     pointer-events: none;
@@ -1957,6 +1958,63 @@ body.ui-idle #nav-banner {
 /* Zoom: round buttons in the two bottom corners, our FAB style (Leaflet's own control is off).
    The +/− are drawn as CSS bars (not font glyphs) so they are pixel-perfectly centred and crisp,
    independent of font metrics. + bottom-left, − bottom-right (above the map's attribution on the right). */
+/* Shared segmented control (panels): fuel sort E5/E10/Diesel · nav Wegetyp Straße/Laufen. Active = λ orange. */
+.seg-row { gap: 10px; }
+/* Tanken row: label + fuel segment grouped on the left, checkbox stays right-aligned like every other row. */
+.fuel-row { justify-content: flex-start; align-items: center; }
+.fuel-row .fuel-cat { flex: 0 0 auto; }
+.fuel-row .tl-check { margin-left: auto; }
+.seg-group { display: inline-flex; gap: 4px; }
+.seg-btn {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.72rem;
+    padding: 3px 9px;
+    border-radius: 7px;
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    background: rgba(8, 20, 42, 0.55);
+    color: rgba(255, 255, 255, 0.82);
+    cursor: pointer;
+    white-space: nowrap;
+    -webkit-tap-highlight-color: transparent;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+.seg-btn:active { transform: scale(0.96); }
+.seg-btn.active {
+    background: rgba(245, 194, 66, 0.92);
+    border-color: rgba(245, 194, 66, 0.92);
+    color: #1a1300;
+    font-weight: 700;
+}
+
+/* Map scale bar (Leaflet L.control.scale) — dark/thin, x-CENTERED on screen, sitting in the gap between
+   the centred ⓘ attribution (screen bottom) and the START button. position:fixed lets it escape Leaflet's
+   bottom-left corner container. pointer-events:none → purely informational, never blocks a tap. */
+.leaflet-control-scale {
+    position: fixed !important;
+    left: 50% !important;
+    right: auto !important;
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 44px) !important; /* in the gap between the ⓘ (bottom) and START */
+    transform: translateX(-50%);
+    margin: 0 !important;
+    z-index: 500;
+    pointer-events: none;
+    transition: opacity 0.5s ease; /* fade with the idle auto-hide, like #trk-controls */
+}
+.leaflet-control-scale-line {
+    background: rgba(8, 20, 42, 0.72);
+    border: 1px solid rgba(255, 255, 255, 0.45);
+    border-top: none;
+    color: rgba(255, 255, 255, 0.92);
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.62rem;
+    line-height: 1.25;
+    padding: 1px 6px;
+    text-align: center;   /* centre the "50 m" / "1 km" number inside the measured bar */
+    text-shadow: none;
+    backdrop-filter: blur(6px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+}
+
 #zoom-in,
 #zoom-out {
     position: fixed;
@@ -2438,6 +2496,21 @@ html {
 .poi-h { background: rgb(38, 166, 168); }   /* Tanken */
 .poi-i { background: rgb(206, 58, 132); }   /* Fotoagentur (getarnte Blitzer-Schicht) */
 .poi-j { background: rgb(180, 70, 200); }   /* Feen (lokale Sagen-/Märchenorte) */
+/* POI panel: a mini of each category's map pin, injected before its label (tracker-poi.js).
+   Reuses .poi-pin + the .poi-<c> colour, just smaller, inline with the text. */
+.poi-cat-ic.poi-pin {
+    width: 22px;
+    height: 22px;
+    border-width: 1.5px;
+    box-shadow: none;
+    display: inline-flex;
+    vertical-align: middle;
+    margin-right: 9px;
+    position: relative;
+    top: -1px;
+}
+.poi-cat-ic.poi-pin svg { width: 13px; height: 13px; }
+
 .poi-popup { min-width: 132px; text-align: center; }   /* name + type + button all x-centred */
 .poi-popup .pp-name { font-family: 'Orbitron', sans-serif; color: var(--green); font-weight: 700; line-height: 1.2; margin-bottom: 2px; }
 .poi-popup .pp-type { font-size: 0.82em; opacity: 0.75; margin-bottom: 9px; }

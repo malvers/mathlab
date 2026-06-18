@@ -404,6 +404,13 @@
                 onWake('', {});                           // ambient wake path → fire('') → „Ja?" + listen
             };
 
+            // Programmatic pause (typed /pause): drop her into the quiet SLUMBER (dormant) right away, exactly
+            // like a spoken "Pause" — she ignores everything until she hears "Solita" (or /wake) again.
+            window.solitaPause = function () {
+                if (!wakeOn) return;   // ear already off → nothing to pause
+                enterPause();
+            };
+
             // Restart the recognition so a language switch takes effect at once (a fresh rec reads solitaSttLang()).
             window.solitaRestartVoice = function () {
                 if (!wakeOn) return;

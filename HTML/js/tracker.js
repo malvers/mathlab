@@ -48,6 +48,10 @@
         });
         document.body.appendChild(attribEl);
 
+        // Metric scale bar (Doc 2026-06-17): a small distance reference. metric-only; lifted clear of the
+        // bottom-left zoom (+) button and styled dark/thin in tracker.css (.leaflet-control-scale).
+        L.control.scale({ metric: true, imperial: false, maxWidth: 110, position: 'bottomleft' }).addTo(map);
+
         // Smooth two-finger pinch WITHOUT making the (Magic-Mouse) wheel floaty: the wheel/buttons keep
         // zoomSnap=1 (clean integer steps), but for the duration of a pinch we drop to 0 so it settles
         // exactly where you lift your fingers — no snap-back "Klingklang". Restored right after the
@@ -1623,7 +1627,29 @@ ${pts}
             return currentTrackId;
         }
 
+        // ---- Umkreis-Suche (Doc 2026-06-17): show only tracks whose START is within N km of here. ----
+        let _lastTrackRows = [];      // last rows handed to renderTrackList → re-render when the radius changes
+        let trackStartCache = null;   // id → [lat,lng] first point (lazy; rebuilt whenever the list is refreshed)
+        let listRadiusKm = 0;         // 0 = Alle; else 10/20/30
+
+        // Fetch ONLY each track's first point (server-side points->0 → tiny payload, NOT the heavy points
+        // column → no egress blow-up like the base64 incident). Builds the id→[lat,lng] start map.
+        async function loadTrackStarts() {
+            const c = await ensureSb();
+            const { data, error } = await c.from('tracks').select('id, startpt:points->0');
+            if (error) throw error;
+            const m = {};
+            for (const r of (data || [])) {
+                const p = r.startpt;
+                if (Array.isArray(p) && typeof p[0] === 'number' && typeof p[1] === 'number') m[r.id] = [p[0], p[1]];
+            }
+            trackStartCache = m;
+            if (window.DebugWindow) DebugWindow.log('umkreis: ' + Object.keys(m).length + ' Startpunkte geladen');
+            return m;
+        }
+
         async function listTracks() {
+            trackStartCache = null;   // list refreshed → start points may have changed (new/removed track)
             const c = await ensureSb();
             // Show ALL saved tracks — never hide one by status (a tracker must not make tracks vanish).
             // list_tracks() RPC computes km · duration · photos server-side for EVERY track (old + new)
@@ -2084,6 +2110,24 @@ ${pts}
         }
         ovBackdrop.addEventListener('click', hidePanels);
         $('list-close').addEventListener('click', hidePanels);
+
+        // Umkreis-Filter buttons (Alle / 10 / 20 / 30 km). Lazy-loads each track's start point on first use
+        // (cheap points->0 query), then re-renders the list filtered + sorted nearest-first around here.
+        (function () {
+            const seg = Array.from(document.querySelectorAll('.seg-btn[data-radius]'));
+            if (!seg.length) return;
+            const reflect = () => seg.forEach((b) => b.classList.toggle('active', (parseInt(b.getAttribute('data-radius'), 10) || 0) === listRadiusKm));
+            seg.forEach((b) => b.addEventListener('click', async () => {
+                listRadiusKm = parseInt(b.getAttribute('data-radius'), 10) || 0;
+                reflect();
+                if (listRadiusKm > 0 && !trackStartCache) {
+                    toast('Umkreis: Startpunkte werden geladen …');
+                    try { await loadTrackStarts(); } catch (e) { toast('Umkreis: Laden fehlgeschlagen.'); }
+                }
+                renderTrackList(_lastTrackRows);
+            }));
+            reflect();
+        })();
         $('info-close').addEventListener('click', hidePanels);
         $('live-close').addEventListener('click', hidePanels);
         $('nav-close').addEventListener('click', hidePanels);
@@ -2171,6 +2215,20 @@ ${pts}
                 if (__poi) __poi.refresh();   // category toggled → re-query the visible area
             });
         });
+        // Fuel-type selector (Doc 2026-06-17): the ⛽ price pins (tracker-fuel.js) show THIS fuel's price.
+        // __fuel.setFuelType already persists to localStorage + recolours; here we just reflect the choice.
+        (function () {
+            const seg = Array.from(document.querySelectorAll('.seg-btn[data-fuel]'));
+            const reflect = () => {
+                const cur = (__fuel && __fuel.fuelType) || localStorage.getItem('trk-fuel-type') || 'e5';
+                seg.forEach((b) => b.classList.toggle('active', b.getAttribute('data-fuel') === cur));
+            };
+            seg.forEach((b) => b.addEventListener('click', () => {
+                if (__fuel && __fuel.setFuelType) __fuel.setFuelType(b.getAttribute('data-fuel'));
+                reflect();
+            }));
+            reflect();
+        })();
         $('mb-poi').addEventListener('click', () => { closePopup(); showPanel('poi-panel'); if (__poi) __poi.refresh(); });
         $('poi-close').addEventListener('click', hidePanels);
 
@@ -2413,7 +2471,20 @@ ${pts}
         function renderTrackList(rows) {
             const box = $('track-list-items');
             box.innerHTML = '';
-            rows = (rows || []).slice().sort((a, b) => trackDateMs(b) - trackDateMs(a)); // newest REAL date first
+            _lastTrackRows = (rows || []).slice();
+            rows = _lastTrackRows.slice().sort((a, b) => trackDateMs(b) - trackDateMs(a)); // newest REAL date first
+            // Umkreis filter: distance (km) from here to a track's start, or null if either is unknown.
+            const here = posMarker && posMarker.getLatLng ? posMarker.getLatLng() : null;
+            const distOf = (r) => {
+                const s = trackStartCache && trackStartCache[r.id];
+                return (here && s) ? haversine([here.lat, here.lng], s) / 1000 : null;
+            };
+            if (listRadiusKm > 0) {
+                if (!here) { box.innerHTML = '<div class="tl-empty">Keine GPS-Position — die Umkreis-Suche braucht deinen Standort.</div>'; return; }
+                rows = rows.filter((r) => { const d = distOf(r); return d != null && d <= listRadiusKm; })
+                    .sort((a, b) => distOf(a) - distOf(b));   // nearest first when filtering by radius
+                if (!rows.length) { box.innerHTML = '<div class="tl-empty">Keine Tracks im Umkreis von ' + listRadiusKm + ' km.</div>'; return; }
+            }
             selectedTracks.clear(); loadedTrackIds.forEach((id) => selectedTracks.add(id)); updateLoadSel(); // pre-select the loaded tracks
             if (!rows.length) { box.innerHTML = '<div class="tl-empty">Noch keine gespeicherten Tracks.</div>'; return; }
             rows.forEach((r) => {
@@ -2434,6 +2505,8 @@ ${pts}
                     if (r.duration_s) stats.push(fmtDur(r.duration_s));
                     if (r.duration_s && r.distance_m) stats.push(((r.distance_m / 1000) / (r.duration_s / 3600)).toFixed(1) + ' km/h');
                 }
+                const dKm = distOf(r);
+                if (listRadiusKm > 0 && dKm != null) stats.push('📍 ' + dKm.toFixed(1) + ' km');
                 const main = document.createElement('div');
                 main.className = 'tl-main';
                 const nm = document.createElement('div'); nm.className = 'tl-name';

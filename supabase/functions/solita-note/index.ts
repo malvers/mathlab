@@ -78,8 +78,11 @@ Deno.serve(async (req) => {
     }
   } catch (e) { return json({ error: 'notes laden fehlgeschlagen: ' + String((e as Error).message || e) }, 502); }
 
-  // 2) append a dated entry. (Date is fine here — server-side Deno, not the workflow sandbox.)
-  const stamp = new Date().toISOString().slice(0, 16).replace('T', ' ');
+  // 2) append a dated entry stamped with Doc's LOCAL wall-clock time (Doc 2026-06-18: "immer die aktuelle
+  //    Uhrzeit"). Europe/Berlin = Doc's zone (CET/CEST; Altea/Madrid share it); sv-SE → "YYYY-MM-DD HH:MM".
+  const stamp = new Intl.DateTimeFormat('sv-SE', {
+    timeZone: 'Europe/Berlin', dateStyle: 'short', timeStyle: 'short',
+  }).format(new Date());
   const header = prevText ? '' : '# Solita-Notizen\n\n> Von Solita aufgeschrieben (Sprach-/Chat-Befehl).\n';
   const entry = `\n## ${stamp}\n${note}\n`;
   const newText = header + prevText + entry;
