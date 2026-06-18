@@ -6,7 +6,7 @@
 //
 // ctx (from tracker.js): { map, toast, SUPABASE_URL, SUPABASE_KEY, COL_GREEN, COL_ORANGE, COL_RED }
 window.TrackerFuel = function (ctx) {
-    const { map, toast, SUPABASE_URL, SUPABASE_KEY } = ctx;
+    const { map, toast, SUPABASE_URL, SUPABASE_KEY, navigateTo } = ctx;
     const ENDPOINT = SUPABASE_URL + '/functions/v1/fuel-prices';
 
     const RAD_KM = 5;            // search radius around the current position
@@ -110,7 +110,20 @@ window.TrackerFuel = function (ctx) {
             (addr ? '<div class="fp-addr">' + addr + '</div>' : '') +
             row('Super E5', s.e5) + row('Super E10', s.e10) + row('Diesel', s.diesel) +
             '<div class="fp-meta">' + (s.isOpen ? 'geöffnet' : 'geschlossen') +
-            (typeof s.dist === 'number' ? ' · ' + s.dist.toFixed(1) + ' km' : '') + '</div></div>';
+            (typeof s.dist === 'number' ? ' · ' + s.dist.toFixed(1) + ' km' : '') + '</div>' +
+            '<button type="button" class="fp-nav">Bring mich hin</button></div>';
+    }
+
+    // Wire the "Bring mich hin" button each time the popup opens (Leaflet rebuilds the DOM), routing
+    // to THIS station via tracker-nav. Both the symbol and the price marker share one station object.
+    function bindPopupNav(marker, s) {
+        marker.on('popupopen', (ev) => {
+            const b = ev.popup.getElement().querySelector('.fp-nav');
+            if (b) b.onclick = () => {
+                map.closePopup();
+                if (navigateTo) navigateTo([s.lat, s.lng], s.brand || s.name || 'Tankstelle');
+            };
+        });
     }
 
     function render() {
@@ -121,10 +134,11 @@ window.TrackerFuel = function (ctx) {
         for (const s of stations) {
             if (typeof s.lat !== 'number' || typeof s.lng !== 'number') continue;
             const html = popupHtml(s);
-            L.marker([s.lat, s.lng], { icon: symIcon(), pane: 'fuelSym', keyboard: false })
+            const m1 = L.marker([s.lat, s.lng], { icon: symIcon(), pane: 'fuelSym', keyboard: false })
                 .bindPopup(html).addTo(lyr);
-            L.marker([s.lat, s.lng], { icon: priceIcon(s, med), pane: 'fuelPrice', keyboard: false })
+            const m2 = L.marker([s.lat, s.lng], { icon: priceIcon(s, med), pane: 'fuelPrice', keyboard: false })
                 .bindPopup(html).addTo(lyr);
+            bindPopupNav(m1, s); bindPopupNav(m2, s);
         }
         announceCheapest(med);
     }
