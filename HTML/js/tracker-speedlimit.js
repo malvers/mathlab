@@ -106,8 +106,10 @@ window.TrackerSpeedLimit = function (ctx) {
 
     function setSign(limit, over) {
         const el = $('speed-sign'); if (!el) return;
-        if (limit == null) { el.hidden = true; el.classList.remove('over'); return; }
-        el.textContent = (limit === 'none') ? 'c' : String(limit); // 'none' = Autobahn unbegrenzt → c (Lichtgeschwindigkeit, das echte Limit)
+        // Default to the "unlimited" sign when no concrete limit is known (Doc 2026-06-18: show the ∞ default,
+        // not a blank — „hatten wir schon"). null (unknown) renders exactly like 'none' (Autobahn unbegrenzt).
+        if (limit == null) limit = 'none';
+        el.textContent = (limit === 'none') ? 'c' : String(limit); // 'c' = Lichtgeschwindigkeit (das echte Limit)
         el.classList.toggle('over', !!over && limit !== 'none');
         el.hidden = false;
     }
@@ -186,6 +188,8 @@ window.TrackerSpeedLimit = function (ctx) {
 
     function setBell(on) { bellOn = !!on; try { localStorage.setItem(BELL_KEY, bellOn ? '1' : '0'); } catch (e) { } }
     function bellEnabled() { return bellOn; }
+
+    setSign(null, false); // show the ∞ default right away, before the first GPS fix (Doc 2026-06-18)
 
     return { update, clear, unlockAudio, setBell, bellEnabled };
 };
