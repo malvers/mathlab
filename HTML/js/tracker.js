@@ -2031,6 +2031,7 @@ ${pts}
         //      prices via the 'fuel-prices' Edge Function and glows green when one is notably cheap. ----
         __fuel = TrackerFuel({
             map, toast, SUPABASE_URL, SUPABASE_KEY, COL_GREEN, COL_ORANGE, COL_RED,
+            navigateTo: (ll, name) => { if (__nav && __nav.navigateTo) __nav.navigateTo(ll, name); },
         });
         // ---- Points of Interest → js/tracker-poi.js. View-driven (Overpass/OSM, keyless); pins for the
         //      categories ticked in the POI panel; a pin tap routes there via tracker-nav.navigateTo. ----
