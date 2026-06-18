@@ -150,12 +150,15 @@
         </svg>
     </button>
 
-    <!-- Resume arrow: appears after a manual pan/zoom (hand-mode). While shown, the map's automatic
+    <!-- Resume control: appears after a manual pan/zoom (hand-mode). While shown, the map's automatic
          centring + zoom are FROZEN; tapping it returns to the auto-mode that was active before (follow
-         OR fit). CENTER / FIT also leave hand-mode. -->
+         OR fit). CENTER / FIT also leave hand-mode.
+         Icon (Doc's idea): a small viewport rectangle, off-centre inside the full-extent frame — the
+         size ratio reads as ZOOM and the offset as SHIFT, i.e. "your view has drifted; tap to re-fit". -->
     <button id="resume-fab" aria-label="Automatik fortsetzen" title="Automatik fortsetzen">
-        <svg viewBox="0 0 24 24" fill="currentColor" stroke="none">
-            <polygon points="3 11 22 2 13 21 11 13 3 11"></polygon>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round">
+            <rect x="3" y="4" width="18" height="16" rx="2"></rect>
+            <rect x="12" y="9" width="6" height="5" rx="1"></rect>
         </svg>
     </button>
 
@@ -277,12 +280,13 @@
             <span>Natur</span>
             <input type="checkbox" id="poi-cat-nature" class="tl-check">
           </label>
-          <label class="set-row" for="poi-cat-feen" style="cursor:pointer">
-            <span>Feen</span>
+          <!-- Feen: category toggle + an inline HINZUFÜGEN button (own fairy places). The button sits
+               OUTSIDE the <label> so tapping it never toggles the Feen checkbox (same pattern as Tanken). -->
+          <div class="set-row feen-row">
+            <label class="feen-cat" for="poi-cat-feen" style="cursor:pointer"><span>Feen</span></label>
+            <button type="button" id="feen-add-btn" class="feen-add-btn">HINZUFÜGEN</button>
             <input type="checkbox" id="poi-cat-feen" class="tl-check">
-          </label>
-          <!-- Add your own fairy place. Outside the label so it never toggles the checkbox. -->
-          <button type="button" id="feen-add-btn" class="feen-add-btn">+ Feenort hinzufügen</button>
+          </div>
         </div>
         <button class="ov-close" id="poi-close" aria-label="Schließen">&times;</button>
     </div>
