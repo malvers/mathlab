@@ -65,7 +65,9 @@
             });
             const d = await r.json().catch(() => ({}));
             if (!r.ok) return { ok: false, summary: 'Fehlgeschlagen: ' + (d.error || ('HTTP ' + r.status)) };
-            return { ok: true, summary: 'Einstellung geändert (config v' + d.version + ', committet).' };
+            // The change is committed, but it goes live via GitHub Pages + the 20 s config poll — so it is
+            // NOT instant. Tell Doc to expect a short delay (from the tool result, not the persona prompt).
+            return { ok: true, summary: 'Einstellung geändert (config v' + d.version + '). Sag Doc dazu, dass es ein paar Minuten dauern kann, bis er es sieht.' };
         } catch (e) { return { ok: false, summary: 'Fehler: ' + ((e && e.message) || e) }; }
     }
 
@@ -89,6 +91,19 @@
         if (text && !sticky) bubTimer = setTimeout(() => bub.classList.remove('show'), 6000); // auto-fade finished replies
     }
     function setState(s) { btn.setAttribute('data-state', s || ''); }
+
+    // Anchor the status/reply bubble at a screen point (the gesture position) so "… ich höre" pops up right
+    // where Doc invoked Solita — for right-click, long-press AND touch. Clamped to stay on-screen; null → the
+    // CSS default spot (top-left).
+    function anchorAt(x, y) {
+        if (x == null || y == null) { bub.style.left = bub.style.top = bub.style.right = bub.style.transform = ''; return; }
+        const cx = Math.max(70, Math.min(window.innerWidth - 70, x));
+        const cy = Math.max(72, Math.min(window.innerHeight - 16, y));
+        bub.style.left = cx + 'px';
+        bub.style.top = cy + 'px';
+        bub.style.right = 'auto';
+        bub.style.transform = 'translate(-50%, calc(-100% - 14px))'; // float just above the point
+    }
 
     // ---- Brain (generic conversation + tool-use engine). Own history key so it doesn't mix with solita.html;
     // the cost meter (solita_cost_total + the daily €-cap) is shared, which is what we want — one budget.
@@ -164,13 +179,13 @@
         try { recog.start(); } catch (e) { listening = false; setState(''); }
     }
 
-    // ---- Wake Solita by a LONG-PRESS on the map (replaces the old floating "S" button). A stationary
-    // press for HOLD_MS on the bare map starts listening; any finger drift beyond MOVE_TOL is treated as a
-    // pan (not a hold), a second finger (pinch-zoom) cancels, and presses on pins / popups / the lightbox or
-    // while a panel is open are ignored so Solita never hijacks those gestures.
-    (function wireLongPress() {
+    // ---- Wake Solita on the map: RIGHT-CLICK (desktop) or a LONG-PRESS (touch). Both anchor the "… ich höre"
+    // bubble at the gesture point. A stationary press for HOLD_MS starts listening; drift beyond MOVE_TOL is a
+    // pan (not a hold), a second finger (pinch) cancels, and gestures on pins / popups / lightbox or while a
+    // panel is open are ignored so Solita never hijacks those.
+    (function wireWake() {
         const mapEl = document.getElementById('map');
-        if (!mapEl) { btn.addEventListener('click', listen); return; } // fallback: keep tap if no map
+        if (!mapEl) { btn.addEventListener('click', () => { anchorAt(null, null); listen(); }); return; } // fallback
         const HOLD_MS = 550;   // press this long → Solita wakes
         const MOVE_TOL = 12;   // px of drift allowed before it counts as a pan, not a hold
         let timer = null, sx = 0, sy = 0, pid = null;
@@ -181,11 +196,20 @@
             const lb = document.getElementById('photo-lightbox');
             return !!(lb && lb.classList.contains('open'));
         }
+        // Right-click (desktop): wake Solita at the cursor. The native menu is already suppressed globally
+        // (tracker.js); we preventDefault here too and skip gestures over pins/popups/panels.
+        mapEl.addEventListener('contextmenu', function (e) {
+            if (blocked(e.target)) return;
+            e.preventDefault();
+            anchorAt(e.clientX, e.clientY);
+            listen();
+        });
         mapEl.addEventListener('pointerdown', function (e) {
+            if (e.pointerType === 'mouse' && e.button !== 0) return; // right/middle mouse → handled by contextmenu
             if (pid !== null) { clear(); return; }   // second finger (pinch) → cancel
             if (blocked(e.target)) return;
             pid = e.pointerId; sx = e.clientX; sy = e.clientY;
-            timer = setTimeout(function () { clear(); listen(); }, HOLD_MS);
+            timer = setTimeout(function () { clear(); anchorAt(sx, sy); listen(); }, HOLD_MS);
         }, { passive: true });
         mapEl.addEventListener('pointermove', function (e) {
             if (timer && (Math.abs(e.clientX - sx) > MOVE_TOL || Math.abs(e.clientY - sy) > MOVE_TOL)) clear();
@@ -194,5 +218,5 @@
             mapEl.addEventListener(ev, clear, { passive: true });
         });
     })();
-    dbg('tracker-solita bereit (lange auf die Karte drücken)');
+    dbg('tracker-solita bereit (Rechtsklick oder lange auf die Karte drücken)');
 })();
