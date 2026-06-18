@@ -2035,7 +2035,7 @@ ${pts}
         // ---- Points of Interest → js/tracker-poi.js. View-driven (Overpass/OSM, keyless); pins for the
         //      categories ticked in the POI panel; a pin tap routes there via tracker-nav.navigateTo. ----
         __poi = TrackerPoi({
-            map, toast,
+            map, toast, showPanel, hidePanels,
             navigateTo: (ll, name) => { if (__nav && __nav.navigateTo) __nav.navigateTo(ll, name); },
             curPos: () => { const ll = posMarker && posMarker.getLatLng && posMarker.getLatLng(); return ll ? [ll.lat, ll.lng] : null; },
         });
