@@ -86,6 +86,22 @@ Deno.serve(async (req) => {
     tools[tools.length - 1] = { ...tools[tools.length - 1], cache_control: { type: 'ephemeral' } };
     body.tools = tools;
   }
+  // Cache the CONVERSATION too, not just the static system+tools prefix. The running history (and, in the
+  // tool-use loop, the accumulated tool_use/tool_result blocks) is otherwise re-sent at FULL input price on
+  // every turn AND every loop hop. A breakpoint on the LAST block of the LAST turn makes the whole prior
+  // conversation a cache READ (~0.1×) on the next request/hop. This also pushes the cached prefix past the
+  // model's minimum (2048 Sonnet / 4096 Haiku·Opus), so caching actually fires once the chat has a few turns.
+  // Third breakpoint (tools + system + messages = 3 of the 4 allowed). Render order is tools → system → messages.
+  if (chat.length) {
+    const last = chat[chat.length - 1] as { role: string; content: unknown };
+    if (typeof last.content === 'string') {
+      last.content = [{ type: 'text', text: last.content, cache_control: { type: 'ephemeral' } }];
+    } else if (Array.isArray(last.content) && last.content.length) {
+      const blocks = (last.content as Record<string, unknown>[]).map((blk) => ({ ...blk }));
+      blocks[blocks.length - 1] = { ...blocks[blocks.length - 1], cache_control: { type: 'ephemeral' } };
+      last.content = blocks;
+    }
+  }
 
   try {
     const r = await fetch(ANTHROPIC, {
