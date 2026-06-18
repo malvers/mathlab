@@ -10,6 +10,8 @@ window.TrackerCompass = function (ctx) {
     const { $ } = ctx;
     let listening = false;
     let gotAbsolute = false; // once a true north-referenced reading arrives, ignore relative fallbacks
+    let sawEvent = false;    // did ANY orientation event ever fire? (WebView/permission diagnosis)
+    let watchdog = null;
     const dbg = (m) => { if (window.DebugWindow && window.DebugWindow.log) window.DebugWindow.log('compass: ' + m); };
 
     function applyHeading(h) {
@@ -19,6 +21,12 @@ window.TrackerCompass = function (ctx) {
     }
 
     function onOrient(e) {
+        if (!sawEvent) {                          // log the very first event so we can see what the device sends
+            sawEvent = true;
+            if (watchdog) { clearTimeout(watchdog); watchdog = null; }
+            dbg('1. Ereignis: absolute=' + e.absolute + ' alpha=' + (typeof e.alpha === 'number' ? e.alpha.toFixed(0) : e.alpha) +
+                ' webkit=' + (typeof e.webkitCompassHeading === 'number' ? e.webkitCompassHeading.toFixed(0) : 'n/a'));
+        }
         let h = null, abs = false;
         if (typeof e.webkitCompassHeading === 'number' && !isNaN(e.webkitCompassHeading)) {
             h = e.webkitCompassHeading;                 // iOS: degrees clockwise from north (north-referenced)
@@ -42,6 +50,12 @@ window.TrackerCompass = function (ctx) {
         window.addEventListener('deviceorientationabsolute', onOrient, true);
         window.addEventListener('deviceorientation', onOrient, true);
         dbg('höre auf Orientierung …');
+        // Watchdog: if no event arrives, the sensor isn't reaching this context (typical in the Android
+        // WebView/APK, or motion sensors blocked in the browser) → say so plainly instead of failing silently.
+        if (watchdog) clearTimeout(watchdog);
+        watchdog = setTimeout(function () {
+            if (!sawEvent) dbg('KEINE Sensordaten in 4 s — Kompass nicht verfügbar (WebView/APK oder Bewegungssensor blockiert?)');
+        }, 4000);
     }
 
     // Must run inside a user gesture on iOS (the START tap / first tap). Elsewhere it just starts listening.
