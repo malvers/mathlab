@@ -9,12 +9,12 @@
 // same origin docalvers.de). No solita-core UI baggage. NO continuous wake-word yet — tap-to-talk only, so it
 // never fights the voice-note recorder for the mic (Stufe 2 = real wake-word + mic arbitration).
 (function () {
-    if (!window.Brain) { return; } // solita-brain.js must load before this
+    // The shared Solita engine must load first: solita-brain.js (LLM loop), solita-voice.js (TTS), solita-listen.js (STT).
+    if (!window.Brain || !window.SolitaVoice || !window.SolitaListen) { return; }
 
     // Shared Solita backend (same project as solita.html). SB_ANON is a publishable, client-safe key.
     const AI_URL  = 'https://fyfhxzyymmurlaenmzse.supabase.co/functions/v1/claude';
     const CFG_URL = 'https://fyfhxzyymmurlaenmzse.supabase.co/functions/v1/solita-config';
-    const TTS_URL = 'https://fyfhxzyymmurlaenmzse.supabase.co/functions/v1/tts';
     const SB_ANON = 'sb_publishable_ubQDiMD-X3N0vZvPVi229Q_-5Zootfk';
     const PWD_KEY = 'dev_access'; // Solita stores the app password here (solita-core.js)
 
@@ -92,10 +92,11 @@
     }
     function setState(s) { btn.setAttribute('data-state', s || ''); }
 
-    // Anchor the status/reply bubble at a screen point (the gesture position) so "… ich höre" pops up right
-    // where Doc invoked Solita — for right-click, long-press AND touch. Clamped to stay on-screen; null → the
-    // CSS default spot (top-left).
+    // Anchor the status bubble at a screen point (the gesture position) — "… ich höre" + the live transcript
+    // pop up right where Doc invoked Solita (right-click / long-press / touch). Clamped on-screen.
     function anchorAt(x, y) {
+        bub.classList.remove('top');
+        bub.style.width = bub.style.maxWidth = '';
         if (x == null || y == null) { bub.style.left = bub.style.top = bub.style.right = bub.style.transform = ''; return; }
         const cx = Math.max(70, Math.min(window.innerWidth - 70, x));
         const cy = Math.max(72, Math.min(window.innerHeight - 16, y));
@@ -103,6 +104,24 @@
         bub.style.top = cy + 'px';
         bub.style.right = 'auto';
         bub.style.transform = 'translate(-50%, calc(-100% - 14px))'; // float just above the point
+    }
+
+    // Anchor the bubble as a wide, centred speech bubble near the TOP — used for Solita's ANSWERS (Doc:
+    // "80% breit, ca. 10% unter der Oberkante bzw. 10% unter dem Header, wenn er sichtbar ist").
+    function anchorTop() {
+        const vh = window.innerHeight;
+        const hdr = document.getElementById('hud-top');
+        // NOTE: #hud-top is position:fixed → offsetParent is ALWAYS null, so don't use it to test visibility
+        // (that was the "zu hoch" bug — header undetected → bubble landed on the stats). Use display + idle.
+        const headerVisible = hdr && getComputedStyle(hdr).display !== 'none' && !document.body.classList.contains('ui-idle');
+        const ref = headerVisible ? Math.max(0, hdr.getBoundingClientRect().bottom) : 0;
+        const gap = headerVisible ? Math.round(0.04 * vh) : Math.round(0.10 * vh); // small gap under the header, else 10% from top
+        bub.classList.add('top');
+        bub.style.left = '50%';
+        bub.style.right = 'auto';
+        bub.style.top = (ref + gap) + 'px';
+        bub.style.transform = 'translateX(-50%)';
+        bub.style.width = bub.style.maxWidth = '80%';
     }
 
     // ---- Brain (generic conversation + tool-use engine). Own history key so it doesn't mix with solita.html;
@@ -123,72 +142,28 @@
     });
     try { brain.load(); } catch (e) { }
 
-    // ---- TTS: speak text via the tts edge fn (Google Cloud TTS). No password needed (the fn isn't gated).
-    let audio = null;
-    function playB64(b64, onend) {
-        try { if (audio) audio.pause(); } catch (e) { }
-        audio = new Audio('data:audio/mp3;base64,' + b64);
-        audio.onended = onend || null;
-        audio.onerror = onend || null;
-        audio.play().catch(() => { if (onend) onend(); });
-    }
-    function ttsFetch(text) {
-        return fetch(TTS_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'apikey': SB_ANON, 'Authorization': 'Bearer ' + SB_ANON },
-            body: JSON.stringify({ text: text, voice: 'de-DE-Studio-C', languageCode: 'de-DE', speakingRate: 1.0 })
-        }).then((r) => r.json()).then((d) => (d && d.audioContent) || null);
-    }
-    function speak(text) {
-        const clean = String(text || '').replace(/[*_`#>•]/g, '').replace(/\s+/g, ' ').trim();
-        if (!clean) { setState(''); return; }
-        setState('speaking');
-        ttsFetch(clean).then((b64) => { if (b64) playB64(b64, () => setState('')); else setState(''); }).catch(() => setState(''));
-    }
+    // ---- Voice (TTS) via the SHARED engine (js/solita-voice.js): spoken answers + cached tool badges.
+    const BADGE = { change_setting: 'Ich ändere die Einstellung.' };
+    function speak(text) { SolitaVoice.speak(text, { onstate: function (on) { setState(on ? 'speaking' : ''); } }); }
+    function speakBadge(name) { if (BADGE[name]) SolitaVoice.speakCached('tracker_badge_' + name, BADGE[name]); }
 
-    // ---- Tool "Zwischentext": speak the interim badge aloud WHILE a tool runs (Doc: "lesen lassen"). The
-    // phrase per tool is FIXED, so synthesise it ONCE and cache the mp3 in localStorage → every later run is
-    // instant + free (no TTS call, no Google cost). Add a line here as Solita gains more tracker tools.
-    const BADGE_SPEAK = { change_setting: 'Ich ändere die Einstellung.' };
-    function speakBadge(name) {
-        const phrase = BADGE_SPEAK[name];
-        if (!phrase) return;
-        const key = 'solita_badge_tts_' + name;
-        let cached = null; try { cached = localStorage.getItem(key); } catch (e) { }
-        if (cached) { playB64(cached); return; }
-        ttsFetch(phrase).then((b64) => { if (b64) { try { localStorage.setItem(key, b64); } catch (e) { } playB64(b64); } }).catch(() => { });
-    }
-
-    // ---- STT: one-shot Web-Speech (de-DE), same proven pattern as the nav "Ziel"-mic / photo "Falsch" editor.
-    let recog = null, listening = false;
+    // ---- Listening (STT) via the SHARED engine (js/solita-listen.js): keeps listening through mid-sentence
+    // pauses (~5 s) and finishes on "bin fertig" / a re-trigger. The host only maps the engine's callbacks
+    // onto the bubble (state + live transcript) and sends the final text to the brain.
+    const ear = SolitaListen({
+        silenceMs: 5000,
+        log: dbg,
+        onState: function (s) {
+            if (s === 'listening') setState('listening');
+            else if (s === 'unsupported') bubble('Spracherkennung wird hier nicht unterstützt.');
+            else { setState(''); bubble(''); }                              // idle: no result / error
+        },
+        onPartial: function (t) { bubble(t || '… ich höre', true); },       // '' on first start → "… ich höre"
+        onFinal: function (q) { anchorTop(); setState('thinking'); btn.disabled = true; dbg('frage: „' + q + '"'); brain.send(q); }
+    });
     function listen() {
-        const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-        if (!SR) { bubble('Spracherkennung wird hier nicht unterstützt.'); return; }
-        if (listening) { dbg('listen: erneuter Aufruf → stoppe'); try { recog && recog.stop(); } catch (e) { } return; } // tap again → stop
         if (!ensurePwd()) { bubble('Kein Solita-Passwort — abgebrochen.'); return; }
-        recog = new SR();
-        recog.lang = 'de-DE';
-        recog.interimResults = true;
-        recog.maxAlternatives = 1;
-        recog.continuous = false;
-        let finalText = '';
-        recog.onstart = function () { listening = true; setState('listening'); bubble('… ich höre', true); };
-        recog.onresult = function (e) {
-            let interim = '';
-            for (let k = e.resultIndex; k < e.results.length; k++) {
-                const t = e.results[k][0].transcript;
-                if (e.results[k].isFinal) finalText += t; else interim += t;
-            }
-            bubble((finalText + interim).replace(/\s+/g, ' ').trim() || '… ich höre', true);
-        };
-        recog.onerror = function () { listening = false; setState(''); };
-        recog.onend = function () {
-            listening = false;
-            const q = finalText.replace(/\s+/g, ' ').trim();
-            if (q) { setState('thinking'); btn.disabled = true; dbg('frage: „' + q + '"'); brain.send(q); }
-            else { setState(''); bubble(''); }
-        };
-        try { recog.start(); } catch (e) { listening = false; setState(''); }
+        ear.start();   // calling again while active stops + submits (the engine toggles)
     }
 
     // ---- Wake Solita on the map: RIGHT-CLICK (desktop) or a LONG-PRESS (touch). Both anchor the "… ich höre"
