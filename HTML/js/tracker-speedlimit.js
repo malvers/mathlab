@@ -143,7 +143,9 @@ window.TrackerSpeedLimit = function (ctx) {
         // Default to the "unlimited" sign when no concrete limit is known (Doc 2026-06-18: show the ∞ default,
         // not a blank — „hatten wir schon"). null (unknown) renders exactly like 'none' (Autobahn unbegrenzt).
         if (limit == null) limit = 'none';
-        el.textContent = (limit === 'none') ? 'c' : String(limit); // 'c' = Lichtgeschwindigkeit (das echte Limit)
+        const txt = (limit === 'none') ? 'c' : String(limit); // 'c' = Lichtgeschwindigkeit (das echte Limit)
+        el.textContent = txt;
+        el.classList.toggle('s3', txt.length >= 3); // 3-digit limits (100/120/130) → smaller, tighter font to fit the disc
         el.classList.toggle('over', !!over && limit !== 'none');
         el.hidden = false;
     }
