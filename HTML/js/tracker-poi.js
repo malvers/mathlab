@@ -25,6 +25,11 @@ window.TrackerPoi = function (ctx) {
         // User-facing label is deliberately disguised as "Fotoagentur"; the icon is a hand-drawn
         // dress (Kleid) — Lucide ships no dress glyph, so this is a custom A-line silhouette path.
         'poi-cat-speedcam': { def: false, lbl: 'Fotoagentur',    ic: '<path d="M6.4 4.2 9.2 3 12 4.7 14.8 3 17.6 4.2 14.8 10.9 18.2 21.5 5.8 21.5 9.2 10.9Z"/><path d="M9.2 10.9H14.8"/>', c: 'i', f: ['["highway"="speed_camera"]'] },
+        // Feen — kuratierte Sagen-/Märchenorte aus einer LOKALEN JSON (feenorte-poi.json), NICHT Overpass.
+        // `local:true` → eigene Leaflet-Ebene, einmal geladen, vom Overpass-Fetch (clearLayers) unberührt.
+        // Sparkles-Icon (Lucide). Kein `f` (keine Overpass-Filter) → wird im Fetch-Pfad übersprungen.
+        // Minimalist fairy mark: a winged magic wand topped with a star (wings + wand in one clean symbol).
+        'poi-cat-feen':     { def: false, local: true, lbl: 'Feen', c: 'j', ic: '<path d="M12 21V9.5"/><path d="M12 3.2 12.91 4.69 14.4 5.6 12.91 6.51 12 8 11.09 6.51 9.6 5.6 11.09 4.69Z"/><path d="M12 10.5C9 8.5 8 11.5 11 12.5"/><path d="M12 10.5C15 8.5 16 11.5 13 12.5"/>' },
     };
     const ENDPOINT = 'https://overpass-api.de/api/interpreter';
     const MIN_ZOOM = 11;           // wider than this → area too big → skip (protects Overpass)
@@ -106,7 +111,7 @@ window.TrackerPoi = function (ctx) {
     }
 
     async function fetchPois() {
-        const cats = enabledCats();
+        const cats = enabledCats().filter((id) => !CATS[id].local); // local cats (Feen) load from JSON, not Overpass
         if (!cats.length) { if (layer) layer.clearLayers(); return; }
         // Below MIN_ZOOM the area is too big to query — but DON'T wipe the pins (FEAT-21's idle re-fit
         // zooms out to the whole track; clearing here made the POIs "disappear"). Keep them, skip fetching.
@@ -132,9 +137,55 @@ window.TrackerPoi = function (ctx) {
 
     function schedule() { if (tmr) clearTimeout(tmr); tmr = setTimeout(fetchPois, DEBOUNCE_MS); }
 
+    // ---- Feen: a curated LOCAL POI set (feenorte-poi.json), on its OWN layer so the Overpass
+    //      render()'s clearLayers() can't wipe it. Loaded once, then just toggled on/off. ----
+    const FEEN_URL = 'feenorte-poi.json' + (window.__ASSET_V || ''); // same dir as tracker.html; cache-bust if set
+    let feenLayer = null, feenLoaded = false, feenLoading = false;
+    function feenPopup(p) {
+        const dkm = distKm(p.lat, p.lng);
+        const sub = [p.region, p.kind].filter(Boolean).join(' · ');
+        return '<div class="poi-popup"><div class="pp-name">' + esc(p.name) + '</div>'
+            + '<div class="pp-type">' + esc(sub) + (dkm != null ? ' · ' + dkm.toFixed(1) + ' km' : '') + '</div>'
+            + (p.desc ? '<div class="pp-desc">' + esc(p.desc) + '</div>' : '')
+            + '<button id="poi-nav-btn" type="button">Bring mich hin</button></div>';
+    }
+    async function loadFeen() {
+        if (feenLoaded || feenLoading) return;
+        feenLoading = true;
+        try {
+            const r = await fetch(FEEN_URL);
+            const d = await r.json().catch(() => ({}));
+            const lst = (d && Array.isArray(d.pois)) ? d.pois : [];
+            feenLayer = L.layerGroup();
+            for (const p of lst) {
+                if (p.lat == null || p.lng == null) continue;
+                const m = L.marker([p.lat, p.lng], { icon: pin(CATS['poi-cat-feen']), keyboard: false })
+                    .bindPopup(feenPopup(p), { className: 'poi-pop' });
+                m.on('popupopen', () => {
+                    const b = document.getElementById('poi-nav-btn');
+                    if (b) b.onclick = () => { map.closePopup(); if (navigateTo) navigateTo([p.lat, p.lng], p.name); };
+                });
+                m.addTo(feenLayer);
+            }
+            feenLoaded = true;
+            dbg('feen: ' + lst.length + ' Orte geladen');
+        } catch (e) { dbg('feen ERR ' + (e && (e.message || e))); }
+        finally { feenLoading = false; }
+    }
+    async function updateFeen() {
+        if (on('poi-cat-feen')) {
+            await loadFeen();
+            if (feenLayer && !map.hasLayer(feenLayer)) feenLayer.addTo(map);
+        } else if (feenLayer && map.hasLayer(feenLayer)) {
+            map.removeLayer(feenLayer);
+        }
+    }
+
     // Re-query as the map settles on a new area, and on demand (categories changed / panel opened).
     map.on('moveend', schedule);
-    function refresh() { lastBox = ''; schedule(); }
+    function refresh() { lastBox = ''; updateFeen(); schedule(); }
+
+    updateFeen(); // show the Feen layer on load if its checkbox was left ticked
 
     return { refresh, fetch: fetchPois, clear: () => { if (layer) layer.clearLayers(); } };
 };
