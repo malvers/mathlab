@@ -3,9 +3,11 @@
 // "Navi hierhin" (tracker-nav.js). The active categories are the checkboxes in the POI panel
 // (poi-cat-* in localStorage), so the layer follows what Doc ticked. Skeleton ported from tracker-fuel.js.
 //
-// ctx (from tracker.js): { map, toast, navigateTo(latlng,name), curPos()->[lat,lng]|null }
+// ctx (from tracker.js): { map, toast, navigateTo(latlng,name), curPos()->[lat,lng]|null,
+//                          showPanel(id), hidePanels() }
 window.TrackerPoi = function (ctx) {
-    const { map, toast, navigateTo } = ctx;
+    const { map, toast, navigateTo, showPanel, hidePanels } = ctx;
+    const el = (id) => document.getElementById(id);
 
     // id (checkbox) → { default-on, label, Lucide-icon inner-SVG (stroke=currentColor), colour-class,
     // Overpass tag-filters }. Icons are inline Lucide paths (ISC-licensed) → no request, no emoji.
@@ -140,15 +142,49 @@ window.TrackerPoi = function (ctx) {
     // ---- Feen: a curated LOCAL POI set (feenorte-poi.json), on its OWN layer so the Overpass
     //      render()'s clearLayers() can't wipe it. Loaded once, then just toggled on/off. ----
     const FEEN_URL = 'feenorte-poi.json' + (window.__ASSET_V || ''); // same dir as tracker.html; cache-bust if set
+    const USER_FEEN_KEY = 'trk-feen-user'; // Doc's own added fairy places (this device only)
     let feenLayer = null, feenLoaded = false, feenLoading = false;
-    function feenPopup(p) {
+
+    // Doc's own Feen live in localStorage (the repo's JSON is read-only from the app). Each carries a
+    // stable id so it can be removed again from its popup.
+    function loadUserFeen() { try { return JSON.parse(localStorage.getItem(USER_FEEN_KEY) || '[]'); } catch (e) { return []; } }
+    function saveUserFeen(arr) { try { localStorage.setItem(USER_FEEN_KEY, JSON.stringify(arr)); } catch (e) { } }
+
+    function feenPopup(p, isUser) {
         const dkm = distKm(p.lat, p.lng);
         const sub = [p.region, p.kind].filter(Boolean).join(' · ');
         return '<div class="poi-popup"><div class="pp-name">' + esc(p.name) + '</div>'
             + '<div class="pp-type">' + esc(sub) + (dkm != null ? ' · ' + dkm.toFixed(1) + ' km' : '') + '</div>'
             + (p.desc ? '<div class="pp-desc">' + esc(p.desc) + '</div>' : '')
-            + '<button id="poi-nav-btn" type="button">Bring mich hin</button></div>';
+            + '<button id="poi-nav-btn" type="button">Bring mich hin</button>'
+            + (isUser ? '<button id="poi-del-btn" type="button" class="poi-del">Entfernen</button>' : '')
+            + '</div>';
     }
+
+    // One marker for a fairy place. isUser → the popup also offers "Entfernen" (delete from storage).
+    function addFeenMarker(p, isUser) {
+        if (p.lat == null || p.lng == null || !feenLayer) return null;
+        const m = L.marker([p.lat, p.lng], { icon: pin(CATS['poi-cat-feen']), keyboard: false })
+            .bindPopup(feenPopup(p, isUser), { className: 'poi-pop' });
+        m.on('popupopen', () => {
+            const b = document.getElementById('poi-nav-btn');
+            if (b) b.onclick = () => { map.closePopup(); if (navigateTo) navigateTo([p.lat, p.lng], p.name); };
+            if (isUser) {
+                const del = document.getElementById('poi-del-btn');
+                if (del) del.onclick = () => removeUserFeen(p, m);
+            }
+        });
+        m.addTo(feenLayer);
+        return m;
+    }
+
+    function removeUserFeen(p, marker) {
+        saveUserFeen(loadUserFeen().filter((x) => x.id !== p.id));
+        map.closePopup();
+        if (feenLayer && marker) feenLayer.removeLayer(marker);
+        if (toast) toast('Feenort „' + p.name + '" entfernt.');
+    }
+
     async function loadFeen() {
         if (feenLoaded || feenLoading) return;
         feenLoading = true;
@@ -157,18 +193,11 @@ window.TrackerPoi = function (ctx) {
             const d = await r.json().catch(() => ({}));
             const lst = (d && Array.isArray(d.pois)) ? d.pois : [];
             feenLayer = L.layerGroup();
-            for (const p of lst) {
-                if (p.lat == null || p.lng == null) continue;
-                const m = L.marker([p.lat, p.lng], { icon: pin(CATS['poi-cat-feen']), keyboard: false })
-                    .bindPopup(feenPopup(p), { className: 'poi-pop' });
-                m.on('popupopen', () => {
-                    const b = document.getElementById('poi-nav-btn');
-                    if (b) b.onclick = () => { map.closePopup(); if (navigateTo) navigateTo([p.lat, p.lng], p.name); };
-                });
-                m.addTo(feenLayer);
-            }
+            for (const p of lst) addFeenMarker(p, false);
+            const usr = loadUserFeen();
+            for (const p of usr) addFeenMarker(p, true);
             feenLoaded = true;
-            dbg('feen: ' + lst.length + ' Orte geladen');
+            dbg('feen: ' + lst.length + ' Orte + ' + usr.length + ' eigene geladen');
         } catch (e) { dbg('feen ERR ' + (e && (e.message || e))); }
         finally { feenLoading = false; }
     }
@@ -180,6 +209,67 @@ window.TrackerPoi = function (ctx) {
             map.removeLayer(feenLayer);
         }
     }
+
+    // ---- "Feenort hinzufügen": geocode an address via Nominatim (keyless — Regel 18) or drop the
+    //      current position, persist it to localStorage, and show it right away. ----
+    function addMsg(t) { const m = el('feen-add-msg'); if (m) m.textContent = t || ''; }
+
+    function openAddFeen() {
+        if (el('feen-name')) el('feen-name').value = '';
+        if (el('feen-addr')) el('feen-addr').value = '';
+        if (el('feen-desc')) el('feen-desc').value = '';
+        addMsg('');
+        if (showPanel) showPanel('feen-add-panel');
+    }
+
+    // Save a finished place, make sure the Feen layer is on, show + fly to it. Saved BEFORE the
+    // marker is drawn; if the layer wasn't loaded yet, loadFeen() picks it up from storage (no dupe).
+    async function finishAddFeen(p) {
+        p.id = 'u' + Date.now();
+        saveUserFeen(loadUserFeen().concat([p]));
+        localStorage.setItem('poi-cat-feen', '1');           // turn the category on so it's visible
+        const cb = el('poi-cat-feen'); if (cb) cb.checked = true;
+        if (!feenLoaded) { await loadFeen(); } else { addFeenMarker(p, true); }
+        await updateFeen();
+        if (hidePanels) hidePanels();
+        try { map.setView([p.lat, p.lng], Math.max(map.getZoom(), 13), { animate: true }); } catch (e) { }
+        if (toast) toast('Feenort „' + p.name + '" hinzugefügt.');
+    }
+
+    async function saveFromAddress() {
+        const name = (el('feen-name') && el('feen-name').value || '').trim();
+        const addr = (el('feen-addr') && el('feen-addr').value || '').trim();
+        const desc = (el('feen-desc') && el('feen-desc').value || '').trim();
+        if (!name) { addMsg('Bitte einen Namen eingeben.'); return; }
+        if (!addr) { addMsg('Bitte eine Adresse/Ort eingeben — oder „Aktuelle Position" nehmen.'); return; }
+        addMsg('Suche Adresse …');
+        try {
+            const u = 'https://nominatim.openstreetmap.org/search?format=json&limit=1&q=' + encodeURIComponent(addr);
+            const r = await fetch(u, { headers: { 'Accept': 'application/json' } });
+            const arr = await r.json().catch(() => []);
+            if (!Array.isArray(arr) || !arr.length) { addMsg('Adresse nicht gefunden — bitte genauer angeben.'); return; }
+            const lat = parseFloat(arr[0].lat), lng = parseFloat(arr[0].lon);
+            if (isNaN(lat) || isNaN(lng)) { addMsg('Adresse nicht gefunden — bitte genauer angeben.'); return; }
+            const region = (arr[0].display_name || '').split(',').slice(-2).join(',').trim();
+            await finishAddFeen({ name, lat, lng, region, kind: 'Eigener Ort', desc });
+        } catch (e) { addMsg('Suche fehlgeschlagen (offline?).'); }
+    }
+
+    function saveFromHere() {
+        const c = ctx.curPos && ctx.curPos();
+        if (!c) { addMsg('Keine aktuelle Position verfügbar.'); return; }
+        const name = (el('feen-name') && el('feen-name').value || '').trim() || 'Feenort';
+        const desc = (el('feen-desc') && el('feen-desc').value || '').trim();
+        finishAddFeen({ name, lat: c[0], lng: c[1], region: '', kind: 'Eigener Ort', desc });
+    }
+
+    (function wireAddFeen() {
+        const add = el('feen-add-btn'); if (add) add.onclick = openAddFeen;
+        const save = el('feen-save'); if (save) save.onclick = saveFromAddress;
+        const here = el('feen-here'); if (here) here.onclick = saveFromHere;
+        const close = el('feen-add-close'); if (close) close.onclick = () => { if (hidePanels) hidePanels(); };
+        const addr = el('feen-addr'); if (addr) addr.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); saveFromAddress(); } });
+    })();
 
     // Re-query as the map settles on a new area, and on demand (categories changed / panel opened).
     map.on('moveend', schedule);
