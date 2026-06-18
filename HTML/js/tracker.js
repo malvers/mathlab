@@ -348,6 +348,7 @@
         // Tracking state
         // ---------------------------------------------------------------
         let watchId = null;
+        let ambientId = null;      // idle live-follow watch (runs when NOT recording, so the dot tracks you)
         let acquireWatch = null;   // temporary watch used while acquiring a good initial fix
         let tracking = false;      // true only while actively recording
         let trkState = 'idle';     // 'idle' | 'recording' | 'paused'
@@ -975,6 +976,7 @@
 
         // Shared startup of the live watch + sensors (does NOT touch startTime → caller sets it).
         function startWatch() {
+            stopAmbient(); // recording's own watch (onPosition) takes over the idle live-follow
             if (acquireWatch != null) { navigator.geolocation.clearWatch(acquireWatch); acquireWatch = null; }
             tracking = true;
             timerId = setInterval(updateDuration, 1000);
@@ -983,6 +985,38 @@
             startActivity(); // native travel-mode detection
             enableMotion();  // accelerometer movement gate
             startBaro();     // native barometer → altitude
+        }
+
+        // ---- Idle live-follow ------------------------------------------------------------------
+        // When NOT recording (and not navigating), keep a lightweight foreground position watch so the
+        // dot tracks you and the map follows — like a maps app. Stops automatically while recording
+        // (onPosition owns the watch then). Foreground only (navigator.geolocation, same as the initial
+        // acquire) — NOT the background plugin, so there's no "Aufzeichnung läuft" notification when idle.
+        const AMBIENT_PAN_M = 12; // only re-centre once the dot moved this far → no GPS-jitter jiggle
+        function ambientOnPos(pos) {
+            if (!pos || !pos.coords || pos.coords.latitude == null) return;
+            const here = [pos.coords.latitude, pos.coords.longitude];
+            lastFix = { lat: here[0], lng: here[1], t: Date.now() };
+            renderPosition(here, pos.coords.accuracy);
+            showDot();
+            if (acquireWatch != null) { navigator.geolocation.clearWatch(acquireWatch); acquireWatch = null; } // initial one-shot now redundant
+            if (following && !handMode) {
+                const moved = map.distance(map.getCenter(), L.latLng(here));
+                if (moved > AMBIENT_PAN_M) map.panTo(here, { animate: true });
+            }
+            refreshRecenter();
+        }
+        function startAmbient() {
+            if (ambientId != null || watchId != null) return;     // already on, or recording owns the watch
+            if (!('geolocation' in navigator)) return;
+            following = true; refreshRecenter();                  // idle follows by default (Maps-style; CENTER/drag still toggle it)
+            ambientId = navigator.geolocation.watchPosition(ambientOnPos, () => { },
+                { enableHighAccuracy: true, maximumAge: 2000, timeout: 12000 });
+        }
+        function stopAmbient() {
+            if (ambientId == null) return;
+            try { navigator.geolocation.clearWatch(ambientId); } catch (e) { }
+            ambientId = null;
         }
 
         // START (idle): a brand-new track. The previous (finished+saved) one is cleared from view.
@@ -1037,6 +1071,7 @@
             if (typeof TrackBuffer !== 'undefined') TrackBuffer.saveNow(bufferSnapshot());
             doSync(); // Stage 2: flush to the cloud on pause
             setStatus(track.length ? `Pausiert · ${(totalDist / 1000).toFixed(2)} km` : 'Pausiert.');
+            startAmbient(); // paused → resume idle live-follow so the dot keeps tracking you
         }
 
         // CONTINUE → resume the same track (don't count the pause as elapsed track time).
@@ -1050,6 +1085,7 @@
         // STOP while paused → finish: auto-save the track, back to idle. Track stays drawn.
         async function finishTracking() {
             setTrkState('idle');
+            startAmbient(); // back to idle → resume idle live-follow
             stopLive(true);
             if (__nav) __nav.clearRoute(); // STOP also clears the navigation route + destination pin
             if (__speed) __speed.clear();  // …and the speed-limit sign
@@ -1076,6 +1112,7 @@
         async function discardTracking() {
             if (!(await uiConfirm('Track verwerfen? Das lässt sich nicht rückgängig machen.', { danger: true, okText: 'Verwerfen' }))) return;
             setTrkState('idle');
+            startAmbient(); // back to idle → resume idle live-follow
             stopLive(true);
             if (__nav) __nav.clearRoute(); // discard also clears the navigation route + destination pin
             if (__speed) __speed.clear();  // …and the speed-limit sign
@@ -2720,4 +2757,5 @@ ${pts}
         // On load: jump straight to the current position (no need to press centre),
         // then wait for better data before revealing the red dot.
         goToCurrentPosition({ initial: true });
+        startAmbient(); // …and keep following live while idle (no recording needed) — Maps-style
     
