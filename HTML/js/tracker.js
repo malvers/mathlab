@@ -1295,11 +1295,11 @@
                 const ch = c.channel('live:' + liveName, { config: { broadcast: { self: false } } });
                 // A (re)connecting viewer asks for the current state → re-send the whole trail + latest pos + media.
                 ch.on('broadcast', { event: 'request' }, () => {
-                    if (window.DebugWindow) DebugWindow.log('live: ◀ request → sende trail/pos/media');
+                    if (window.DebugWindow) DebugWindow.log('live: ◀ request → sende trail/pos/media (' + track.length + ' pts)');
                     broadcastTrail(); broadcastLive(true); waypoints.forEach(addLiveMedia);
                 });
                 ch.subscribe((status) => {
-                    if (window.DebugWindow) DebugWindow.log('live: status=' + status);
+                    if (window.DebugWindow) DebugWindow.log('live: status=' + status + ' (live:' + liveName + ')');
                     if (status === 'SUBSCRIBED') {
                         if (liveWasInterrupted) { liveWasInterrupted = false; toast('Live wieder verbunden.'); }
                         updateLiveBadge();
