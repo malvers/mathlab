@@ -1,52 +1,61 @@
 // Solita tool: read_notes — fetch Doc's saved Solita notes so Solita can email / read aloud / summarize them.
 //
-// Self-contained add-on: registers into window.SolitaTools, no core touch (Regel 7). Reads solita-notizen.md
-// from GitHub raw — PUBLIC repo, keyless, CORS-OK (verified: access-control-allow-origin:*). The WRITE side is
-// the solita-note Edge Function; this is the READ side. The notes are public (public repo) — nothing secret.
-//
-// Note: GitHub raw has a ~5 min CDN cache (max-age=300), so a note written seconds ago may lag a few minutes.
+// Self-contained add-on: registers into window.SolitaTools, no core touch (Regel 7). Notes now live in a
+// PRIVATE Supabase table (Doc 2026-06-18) — read via the password-gated 'solita-note' Edge Function, NOT the
+// public repo. The WRITE side is write_note (same function); DELETE is delete_notes. Each note's time comes
+// from created_at and is shown in Doc's LOCAL time here.
 (function () {
     'use strict';
 
-    const NOTES_URL = 'https://raw.githubusercontent.com/malvers/mathlab/main/solita-notizen.md';
-    const MAX_CHARS = 24000; // safety cap so the tool result stays sane (file is small today; this is headroom)
+    const NOTE_URL = 'https://fyfhxzyymmurlaenmzse.supabase.co/functions/v1/solita-note';
+    const SB_ANON = 'sb_publishable_ubQDiMD-X3N0vZvPVi229Q_-5Zootfk'; // publishable anon key — client-safe
+    const MAX_CHARS = 24000; // safety cap so the tool result stays sane
 
     const spec = {
         name: 'read_notes',
         description: 'Hole Docs gespeicherte Solita-Notizen (alles, was du je mit write_note aufgeschrieben hast). '
             + 'Nutze dies, wenn Doc nach seinen/deinen Notizen fragt — z.B. „schick mir deine Notizen (als Mail)", '
             + '„lies mir deine Notizen vor", „was hast du dir notiert?", „zeig mir meine Notizen". Das Werkzeug LIEST nur '
-            + '(kein Schreiben) und braucht keine Parameter. Danach machst DU, was Doc wollte: per Mail → ruf send_gmail mit '
-            + 'den Notizen als Inhalt; vorlesen → fasse sie natürlich gesprochen zusammen; nur fragen → sag ihm, was drinsteht.',
+            + '(kein Schreiben/Löschen) und braucht keine Parameter. Danach machst DU, was Doc wollte: per Mail → ruf send_gmail '
+            + 'mit den Notizen als Inhalt; vorlesen → fasse sie natürlich gesprochen zusammen; nur fragen → sag ihm, was drinsteht.',
         input_schema: { type: 'object', properties: {}, required: [] }
     };
 
-    async function handler() {
-        let text = null, httpFail = false, netFail = false, status = 0;
+    // Format an ISO created_at into a German local-time stamp ("Mi 18.06. 08:15 Uhr").
+    function fmtTime(iso) {
         try {
-            const r = await fetch(NOTES_URL, { headers: { 'Accept': 'text/plain' }, cache: 'no-store' });
-            status = r.status;
-            if (r.status === 404) { /* no notes file created yet */ }
-            else if (!r.ok) httpFail = true;
-            else text = await r.text();
+            const d = new Date(iso);
+            const day = d.toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit' });
+            const time = d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+            return day + ' ' + time + ' Uhr';
+        } catch (e) { return iso || ''; }
+    }
+
+    async function handler(input, pwd) {
+        let notes = null, netFail = false;
+        try {
+            const r = await fetch(NOTE_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'apikey': SB_ANON, 'Authorization': 'Bearer ' + SB_ANON, 'x-app-pass': pwd },
+                body: JSON.stringify({ action: 'list' })
+            });
+            const d = await r.json().catch(() => ({}));
+            if (!r.ok) return { ok: false, summary: 'Ich konnte deine Notizen gerade nicht laden: ' + (d.error || ('HTTP ' + r.status)) };
+            notes = Array.isArray(d.notes) ? d.notes : [];
         } catch (e) {
-            netFail = true;   // offline / "Failed to fetch"
+            netFail = true;
         }
 
         if (netFail) {
             return { ok: false, summary: 'Ich komme gerade nicht an deine Notizen — keine Internet-Verbindung. '
                 + 'Probier es gleich nochmal, dann hole ich sie.' };
         }
-        if (status === 404 || (text != null && !text.trim())) {
+        if (!notes || !notes.length) {
             return { ok: true, summary: 'Es sind noch keine Notizen gespeichert. ANWEISUNG AN DICH (Solita): Sag Doc gesprochen, '
                 + 'dass du bisher nichts notiert hast — und dass er dir jederzeit „notier …" sagen kann, dann hältst du es fest.' };
         }
-        if (httpFail || text == null) {
-            return { ok: false, summary: 'Ich konnte deine Notizen gerade nicht laden (der Server antwortet nicht). '
-                + 'Versuch es gleich nochmal.' };
-        }
 
-        let content = text;
+        let content = notes.map(function (n) { return '## ' + fmtTime(n.created_at) + '\n' + (n.text || ''); }).join('\n\n');
         let truncated = false;
         if (content.length > MAX_CHARS) { content = content.slice(0, MAX_CHARS); truncated = true; }
 
