@@ -1,107 +1,109 @@
-// Tracker/Labs — "solita-note" Edge Function (SOLITA STUFE 2a — bounded "Solita schreibt auf & pusht").
+// Tracker/Labs — "solita-note" Edge Function (Solita writes / lists / deletes Doc's PRIVATE notes).
 //
-// ⚠️ INERT bis Doc es bewusst deployt UND ein GITHUB_TOKEN-Secret setzt (dasselbe wie solita-config).
-//    Solange nicht deployt, passiert NICHTS.
+// PRIVACY (Doc 2026-06-18): notes moved OFF the public repo into a PRIVATE Supabase table
+// public.solita_notes — RLS deny-all, so ONLY this function (service role) can read/write it, exactly like
+// the chat history (solita_history). No GitHub, nothing public anymore. Each note's time lives in the
+// created_at column; the client formats it in Doc's local time on read.
 //
-// Was es tut: nimmt einen Notiz-Text, hängt ihn als datierten Eintrag an EINE Datei (solita-notizen.md)
-// und committet via GitHub Contents API. KEIN Claude-Call nötig (reines Anhängen). tracker/Notizen kann
-// das später live ziehen. Blast-Radius: genau diese eine Markdown-Datei.
+// ⚠️ INERT bis Doc die Tabelle anlegt (SQL unten) UND deployt. Solange nicht da, kommt ein klarer Fehler.
 //
-// Sicherheit (Regel 18): kein Secret im Repo. Token NUR als Env. Pfad fest auf solita-notizen.md
-// (Whitelist) — die Function kann NICHTS anderes schreiben. Passwort-Gate wie die anderen Functions.
-// Der Notiz-Text wird auf offensichtliche Secrets geprüft und sonst abgelehnt (public repo).
+// Client contract (POST, header x-app-pass == LABAI_PASSWORD):
+//   { ping:true }                        -> { ok:true }
+//   { note:"<text>" }                    -> insert → { ok, id }
+//   { action:'list' }                    -> { ok, count, notes:[{id, created_at, text}] }  (oldest first)
+//   { action:'delete', which:'all' }     -> delete ALL → { ok, deleted }
+//   { action:'delete', which:'last' }    -> delete the most recent → { ok, deleted }
+//   { action:'delete', query:'<text>' }  -> delete notes whose text contains <text> (case-insensitive) → { ok, deleted }
 //
-// Client contract:
-//   { ping: true }              -> { ok: true } (Passwort-Check)
-//   { note: "<text>" }          -> hängt an solita-notizen.md an, returns { ok, commit }
+// Deploy: supabase functions deploy solita-note --no-verify-jwt --project-ref fyfhxzyymmurlaenmzse
+// Secrets: LABAI_PASSWORD (exists). SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY are auto-injected at runtime.
 //
-// Deploy (Doc, wenn gewollt):
-//   supabase functions deploy solita-note --no-verify-jwt --project-ref fyfhxzyymmurlaenmzse
-// Secrets (dieselben wie solita-config): LABAI_PASSWORD + GITHUB_TOKEN (fine-grained PAT, malvers/mathlab,
-//   Contents: Read and write).
-
-const OWNER = 'malvers';
-const REPO = 'mathlab';
-const NOTE_PATH = 'solita-notizen.md';         // the ONLY file this function may touch
-const BRANCH = 'main';
+// Table — run ONCE in the Supabase SQL editor (see supabase/solita_notes.sql):
+//   create table if not exists public.solita_notes (
+//     id uuid primary key default gen_random_uuid(),
+//     created_at timestamptz not null default now(),
+//     text text not null
+//   );
+//   alter table public.solita_notes enable row level security;   -- no policies = deny-all to anon
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-app-pass',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
-const GH_HEADERS = (tok: string) => ({
-  'Authorization': 'Bearer ' + tok,
-  'Accept': 'application/vnd.github+json',
-  'User-Agent': 'solita-note',
-  'X-GitHub-Api-Version': '2022-11-28',
-});
 
 function json(obj: unknown, status = 200): Response {
   return new Response(JSON.stringify(obj), { status, headers: { ...CORS, 'Content-Type': 'application/json' } });
-}
-
-// Refuse to commit anything that looks like a secret into the public repo (Regel 18).
-function looksLikeSecret(s: string): boolean {
-  return /AIza[0-9A-Za-z_\-]{20,}|AQ\.[A-Za-z0-9_\-]{10,}|sb_secret_|sk-[a-zA-Z0-9]{20,}|ghp_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,}|-----BEGIN [A-Z ]*PRIVATE KEY|eyJ[A-Za-z0-9_\-]{20,}\.[A-Za-z0-9_\-]{20,}\./.test(s);
 }
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS });
 
   const pass = Deno.env.get('LABAI_PASSWORD');
-  const ghTok = Deno.env.get('GITHUB_TOKEN');
+  const SB_URL = Deno.env.get('SUPABASE_URL');
+  const SVC = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
   if (!pass) return json({ error: 'LABAI_PASSWORD fehlt.' }, 500);
-  if (!ghTok) return json({ error: 'GITHUB_TOKEN fehlt — als Edge-Function-Secret setzen.' }, 500);
+  if (!SB_URL || !SVC) return json({ error: 'SUPABASE_URL/SERVICE_ROLE_KEY fehlen (Runtime-Injection).' }, 500);
 
-  const b = await req.json().catch(() => ({}));
+  const b = await req.json().catch(() => ({} as Record<string, unknown>));
   const given = req.headers.get('x-app-pass') || (typeof b.pass === 'string' ? b.pass : '');
   if (given !== pass) return json({ error: 'unauthorized' }, 401);
   if (b.ping) return json({ ok: true });
 
+  const REST = `${SB_URL}/rest/v1/solita_notes`;
+  const H: Record<string, string> = {
+    apikey: SVC,
+    Authorization: 'Bearer ' + SVC,
+    'Content-Type': 'application/json',
+  };
+
+  const action = typeof b.action === 'string' ? b.action : '';
+
+  // ---- LIST: oldest first (reads as a chronological log) ----
+  if (action === 'list') {
+    const r = await fetch(`${REST}?select=id,created_at,text&order=created_at.asc`, { headers: H });
+    const data = await r.json().catch(() => []);
+    if (!r.ok) return json({ error: 'list ' + r.status + ': ' + (data?.message || '') }, 502);
+    const notes = Array.isArray(data) ? data : [];
+    return json({ ok: true, count: notes.length, notes });
+  }
+
+  // ---- DELETE: all | last | by query (case-insensitive substring). Returns how many were removed. ----
+  if (action === 'delete') {
+    const which = typeof b.which === 'string' ? b.which : '';
+    const query = typeof b.query === 'string' ? b.query.trim() : '';
+    let url = '';
+    if (which === 'all') {
+      url = `${REST}?id=not.is.null`;                 // matches every row
+    } else if (which === 'last') {
+      // newest row id, then delete exactly that one
+      const lr = await fetch(`${REST}?select=id&order=created_at.desc&limit=1`, { headers: H });
+      const ld = await lr.json().catch(() => []);
+      if (!lr.ok) return json({ error: 'delete(last) lookup ' + lr.status }, 502);
+      if (!Array.isArray(ld) || !ld.length) return json({ ok: true, deleted: 0 });
+      url = `${REST}?id=eq.${ld[0].id}`;
+    } else if (query) {
+      url = `${REST}?text=ilike.*${encodeURIComponent(query)}*`;
+    } else {
+      return json({ error: 'delete: which (all|last) oder query nötig' }, 400);
+    }
+    const r = await fetch(url, { method: 'DELETE', headers: { ...H, Prefer: 'return=representation' } });
+    const out = await r.json().catch(() => []);
+    if (!r.ok) return json({ error: 'delete ' + r.status + ': ' + (out?.message || '') }, 502);
+    return json({ ok: true, deleted: Array.isArray(out) ? out.length : 0 });
+  }
+
+  // ---- ADD (default): insert one note (time = created_at default). ----
   const note = typeof b.note === 'string' ? b.note.trim() : '';
   if (!note) return json({ error: 'keine note übergeben' }, 400);
   if (note.length > 4000) return json({ error: 'note zu lang (max 4000 Zeichen)' }, 400);
-  if (looksLikeSecret(note)) return json({ error: 'Notiz sieht aus wie ein Secret — abgelehnt (public repo, Regel 18).' }, 422);
 
-  // 1) current notes file (content + sha) from GitHub. 404 → start a fresh file.
-  let prevText = ''; let sha: string | undefined;
-  try {
-    const r = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${NOTE_PATH}?ref=${BRANCH}`,
-      { headers: GH_HEADERS(ghTok) });
-    if (r.ok) {
-      const g = await r.json();
-      sha = g.sha;
-      prevText = decodeURIComponent(escape(atob(String(g.content).replace(/\n/g, ''))));
-    } else if (r.status !== 404) {
-      return json({ error: `GitHub GET ${r.status}` }, 502);
-    }
-  } catch (e) { return json({ error: 'notes laden fehlgeschlagen: ' + String((e as Error).message || e) }, 502); }
-
-  // 2) append a dated entry stamped with Doc's LOCAL wall-clock time (Doc 2026-06-18: "immer die aktuelle
-  //    Uhrzeit"). Europe/Berlin = Doc's zone (CET/CEST; Altea/Madrid share it); sv-SE → "YYYY-MM-DD HH:MM".
-  const stamp = new Intl.DateTimeFormat('sv-SE', {
-    timeZone: 'Europe/Berlin', dateStyle: 'short', timeStyle: 'short',
-  }).format(new Date());
-  const header = prevText ? '' : '# Solita-Notizen\n\n> Von Solita aufgeschrieben (Sprach-/Chat-Befehl).\n';
-  const entry = `\n## ${stamp}\n${note}\n`;
-  const newText = header + prevText + entry;
-
-  // 3) commit it back to main.
-  try {
-    const content = btoa(unescape(encodeURIComponent(newText)));
-    const put: Record<string, unknown> = {
-      message: `solita: notiz — ${note}`.slice(0, 100),
-      content, branch: BRANCH,
-    };
-    if (sha) put.sha = sha;   // omit on first create
-    const r = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${NOTE_PATH}`, {
-      method: 'PUT',
-      headers: { ...GH_HEADERS(ghTok), 'Content-Type': 'application/json' },
-      body: JSON.stringify(put),
-    });
-    const out = await r.json().catch(() => ({}));
-    if (!r.ok) return json({ error: `GitHub PUT ${r.status}: ${out?.message || ''}` }, 502);
-    return json({ ok: true, commit: out?.commit?.sha || null });
-  } catch (e) { return json({ error: 'commit fehlgeschlagen: ' + String((e as Error).message || e) }, 502); }
+  const r = await fetch(REST, {
+    method: 'POST',
+    headers: { ...H, Prefer: 'return=representation' },
+    body: JSON.stringify({ text: note }),
+  });
+  const out = await r.json().catch(() => []);
+  if (!r.ok) return json({ error: 'insert ' + r.status + ': ' + (out?.message || '') }, 502);
+  return json({ ok: true, id: Array.isArray(out) && out[0] ? out[0].id : null });
 });
