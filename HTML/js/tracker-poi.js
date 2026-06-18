@@ -22,9 +22,9 @@ window.TrackerPoi = function (ctx) {
         'poi-cat-fuel':     { def: false, lbl: 'Tankstelle',       ic: '<path d="M14 13h2a2 2 0 0 1 2 2v2a2 2 0 0 0 4 0v-6.998a2 2 0 0 0-.59-1.42L18 5"/><path d="M14 21V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v16"/><path d="M2 21h13"/><path d="M3 9h11"/>', c: 'h', f: ['["amenity"="fuel"]'] },
         // OSM fixed speed cameras (highway=speed_camera, keyless). Display only — no in-drive warning
         // tone (Germany §23 StVO forbids operating a device that *warns* of enforcement while driving).
-        // User-facing label is deliberately disguised as "Fotoagentur"; the icon is a hand-drawn
-        // dress (Kleid) — Lucide ships no dress glyph, so this is a custom A-line silhouette path.
-        'poi-cat-speedcam': { def: false, lbl: 'Fotoagentur',    ic: '<path d="M6.4 4.2 9.2 3 12 4.7 14.8 3 17.6 4.2 14.8 10.9 18.2 21.5 5.8 21.5 9.2 10.9Z"/><path d="M9.2 10.9H14.8"/>', c: 'i', f: ['["highway"="speed_camera"]'] },
+        // User-facing label is deliberately disguised as "Helmut Newton" (the photographer); the icon is a
+        // hand-drawn dress (Kleid) — Lucide ships no dress glyph, so this is a custom A-line silhouette path.
+        'poi-cat-speedcam': { def: false, lbl: 'Helmut Newton',  ic: '<path d="M6.4 4.2 9.2 3 12 4.7 14.8 3 17.6 4.2 14.8 10.9 18.2 21.5 5.8 21.5 9.2 10.9Z"/><path d="M9.2 10.9H14.8"/>', c: 'i', f: ['["highway"="speed_camera"]'] },
         // Feen — kuratierte Sagen-/Märchenorte aus einer LOKALEN JSON (feenorte-poi.json), NICHT Overpass.
         // `local:true` → eigene Leaflet-Ebene, einmal geladen, vom Overpass-Fetch (clearLayers) unberührt.
         // Sparkles-Icon (Lucide). Kein `f` (keine Overpass-Filter) → wird im Fetch-Pfad übersprungen.
@@ -181,10 +181,27 @@ window.TrackerPoi = function (ctx) {
         }
     }
 
+    // Mirror each category's MAP-PIN icon in front of its panel label (single source: CATS[id].ic + its
+    // colour class) — a mini of the actual pin, so the POI panel reads as one legend. Replaces the old
+    // inline 🧚 emoji on Feen. aria-hidden: the label text already names the category.
+    function paintPanelIcons() {
+        Object.keys(CATS).forEach((id) => {
+            const cb = document.getElementById(id);
+            const row = cb && cb.closest('.set-row');
+            const span = row && row.querySelector('span');
+            if (!span || span.querySelector('.poi-cat-ic')) return;
+            span.insertAdjacentHTML('afterbegin',
+                '<span class="poi-cat-ic poi-pin poi-' + CATS[id].c + '" aria-hidden="true">'
+                + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" '
+                + 'stroke-linecap="round" stroke-linejoin="round">' + CATS[id].ic + '</svg></span>');
+        });
+    }
+
     // Re-query as the map settles on a new area, and on demand (categories changed / panel opened).
     map.on('moveend', schedule);
     function refresh() { lastBox = ''; updateFeen(); schedule(); }
 
+    paintPanelIcons();
     updateFeen(); // show the Feen layer on load if its checkbox was left ticked
 
     return { refresh, fetch: fetchPois, clear: () => { if (layer) layer.clearLayers(); } };
