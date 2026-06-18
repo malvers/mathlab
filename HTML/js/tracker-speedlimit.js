@@ -7,7 +7,15 @@
 window.TrackerSpeedLimit = function (ctx) {
     const { $ } = ctx;
 
-    const OVERPASS = 'https://overpass-api.de/api/interpreter';
+    // Several public Overpass mirrors — the main one is often slow / rate-limited (HTTP 429), which
+    // left the sign blank even on tagged roads. We try them in order until one answers (CLAUDE.md
+    // rule 18: all key-less). Order is rotated each call so we don't always hammer the same mirror.
+    const OVERPASS_MIRRORS = [
+        'https://overpass-api.de/api/interpreter',
+        'https://overpass.kumi.systems/api/interpreter',
+        'https://overpass.private.coffee/api/interpreter',
+    ];
+    let mirrorRot = 0;
     const MIN_INTERVAL_MS = 5000;  // never query Overpass more often than this (was 15 s → too laggy when driving)
     const MIN_MOVE_M = 90;         // …and only after this much travel — limits change per road segment
     const QUERY_TIMEOUT_MS = 9000; // abort a stuck request so `fetching` can never freeze the sign forever
@@ -82,6 +90,10 @@ window.TrackerSpeedLimit = function (ctx) {
         } catch (e) { actx = null; }
     }
 
+    // Optional one-liner into the existing DebugWindow so Doc can tell "no tag on this road" apart
+    // from "Overpass unreachable" without adding any new on-screen element.
+    function dbg(msg) { try { if (window.DebugWindow) DebugWindow.log('🛑 ' + msg); } catch (e) { } }
+
     function haversine(a, b) {
         const R = 6371000, t = Math.PI / 180;
         const dLat = (b[0] - a[0]) * t, dLng = (b[1] - a[1]) * t;
@@ -99,9 +111,31 @@ window.TrackerSpeedLimit = function (ctx) {
         if (Object.prototype.hasOwnProperty.call(DE_ZONE, v)) return DE_ZONE[v]; // "DE:urban" → 50 …
         if (/\bnone\b/i.test(v)) return 'none';                      // "none" → unlimited
         if (/walk/i.test(v)) return 7;                              // "walk" ≈ Schrittgeschwindigkeit
+        const zone = v.match(/^[A-Z]{2}:(\d+)$/i);                   // zone tags like "DE:30" → 30
+        if (zone) return parseInt(zone[1], 10);
         const mph = v.match(/^(\d+)\s*mph$/i);
         if (mph) return Math.round(parseInt(mph[1], 10) * 1.60934); // "30 mph" → km/h
         return null; // other implicit/conditional tags → unknown (show nothing rather than guess)
+    }
+
+    // Road types whose limit we want to show — exclude footways, cycleways, tracks etc. so a parallel
+    // path can never steal the sign for the road you're actually driving on.
+    const DRIVE_HW = new Set(['motorway', 'trunk', 'primary', 'secondary', 'tertiary',
+        'unclassified', 'residential', 'living_street', 'service', 'road',
+        'motorway_link', 'trunk_link', 'primary_link', 'secondary_link', 'tertiary_link']);
+
+    // A way's limit, EXPLICIT first then IMPLICIT. In Germany most roads carry NO `maxspeed` tag —
+    // they only hint the zone via maxspeed:type / zone:maxspeed / source:maxspeed (e.g. "DE:urban" →
+    // 50, "DE:rural" → 100). Reading those is what makes the sign appear on ordinary streets, not
+    // just the rare explicitly-tagged ones. Returns number | 'none' | null (unknown → no sign).
+    function wayLimit(tags) {
+        if (!tags || !DRIVE_HW.has(tags.highway)) return null;
+        const explicit = parseMax(tags.maxspeed);
+        if (explicit != null) return explicit;
+        // Implicit zone hints, in order of how trustworthy they are for the legal default.
+        return parseMax(tags['maxspeed:type'])
+            ?? parseMax(tags['zone:maxspeed'])
+            ?? parseMax(tags['source:maxspeed']);
     }
 
     function setSign(limit, over) {
@@ -131,32 +165,57 @@ window.TrackerSpeedLimit = function (ctx) {
         return min;
     }
 
+    // POST the query to each mirror in turn (rotated start) until one answers; abort a stuck request
+    // after QUERY_TIMEOUT_MS. Returns the parsed JSON, or null if every mirror failed.
+    async function overpass(q) {
+        for (let i = 0; i < OVERPASS_MIRRORS.length; i++) {
+            const url = OVERPASS_MIRRORS[(mirrorRot + i) % OVERPASS_MIRRORS.length];
+            const ctrl = new AbortController();
+            const to = setTimeout(() => ctrl.abort(), QUERY_TIMEOUT_MS);
+            try {
+                const r = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: 'data=' + encodeURIComponent(q),
+                    signal: ctrl.signal,
+                });
+                if (!r.ok) continue;            // 429/5xx → try the next mirror
+                const j = await r.json();
+                mirrorRot = (mirrorRot + i) % OVERPASS_MIRRORS.length; // stick with the one that worked
+                return j;
+            } catch (e) { /* timeout/offline/parse → next mirror */ }
+            finally { clearTimeout(to); }
+        }
+        return null;
+    }
+
     async function query(p) {
         fetching = true;
-        // Ways with a maxspeed within 35 m — we then pick the NEAREST (by geometry), not the first,
-        // so a parallel road / ramp / crossing can't steal the wrong limit (Doc bug 2026-06-11).
-        const q = '[out:json][timeout:8];way(around:35,' + p[0] + ',' + p[1] + ')[highway][maxspeed];out tags geom;';
-        const ctrl = new AbortController();
-        const to = setTimeout(() => ctrl.abort(), QUERY_TIMEOUT_MS); // never let a stuck request freeze the sign
+        // ALL drivable ways within 35 m (not only those carrying an explicit `maxspeed`): most German
+        // roads have none and only hint the zone via maxspeed:type/zone:maxspeed → wayLimit() resolves
+        // those to the legal default. We then pick the NEAREST way that yields a limit, so a parallel
+        // road / ramp / crossing can't steal the wrong sign (Doc bug 2026-06-11).
+        const q = '[out:json][timeout:8];way(around:35,' + p[0] + ',' + p[1] + ')[highway];out tags geom;';
         try {
-            const r = await fetch(OVERPASS, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: 'data=' + encodeURIComponent(q),
-                signal: ctrl.signal,
-            });
-            const j = await r.json();
-            let best = null, bestD = Infinity;
-            for (const e of (j && j.elements) || []) {
-                const m = e.tags && parseMax(e.tags.maxspeed);
+            const j = await overpass(q);
+            if (!j) { dbg('Overpass: alle Mirror fehlgeschlagen → letztes Schild bleibt'); return; }
+            let best = null, bestD = Infinity, ways = 0;
+            for (const e of (j.elements) || []) {
+                ways++;
+                const m = wayLimit(e.tags);
                 if (m == null) continue;
                 const d = distToWay(p, e.geometry);
-                if (d < bestD) { bestD = d; best = m; } // nearest road with a parseable limit wins
+                if (d < bestD) { bestD = d; best = m; } // nearest road with a resolvable limit wins
             }
+            if (best == null) {                 // road untagged → don't blank a previously good sign
+                dbg('Limit: ' + ways + ' Wege, keiner mit (impliziter) Begrenzung → kein Tag');
+                return;
+            }
+            dbg('Limit: ' + best + ' (' + Math.round(bestD) + ' m)');
             curLimit = best;
             setSign(best, false);
-        } catch (e) { /* timeout/offline/parse error → keep the last known sign */ }
-        finally { clearTimeout(to); fetching = false; }
+        } catch (e) { /* parse error → keep the last known sign */ }
+        finally { fetching = false; }
     }
 
     // Called from the core on every GPS fix: update the over-limit colour every time (cheap), and
