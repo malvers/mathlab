@@ -69,17 +69,17 @@
         } catch (e) { return { ok: false, summary: 'Fehler: ' + ((e && e.message) || e) }; }
     }
 
-    // ---- UI: a round Solita button + a reply bubble (created here so no tracker.html layout edit is needed).
+    // ---- UI: a reply bubble + a (detached) state element. Solita is now woken by a LONG-PRESS on the
+    // map (see below) — there is NO visible "S" button anymore. The button object is kept but never added
+    // to the DOM, purely so the existing setState()/btn.disabled bookkeeping keeps working unchanged.
     const btn = document.createElement('button');
     btn.id = 'solita-fab';
     btn.type = 'button';
     btn.setAttribute('aria-label', 'Solita fragen');
-    btn.title = 'Solita fragen — antippen und sprechen';
     btn.innerHTML = '<span>S</span>';
     const bub = document.createElement('div');
     bub.id = 'solita-bubble';
-    document.body.appendChild(btn);
-    document.body.appendChild(bub);
+    document.body.appendChild(bub); // only the reply bubble is shown; btn stays detached (invisible)
 
     let bubTimer = null;
     function bubble(text, sticky) {
@@ -164,6 +164,35 @@
         try { recog.start(); } catch (e) { listening = false; setState(''); }
     }
 
-    btn.addEventListener('click', listen);
-    dbg('tracker-solita bereit (tap-to-talk)');
+    // ---- Wake Solita by a LONG-PRESS on the map (replaces the old floating "S" button). A stationary
+    // press for HOLD_MS on the bare map starts listening; any finger drift beyond MOVE_TOL is treated as a
+    // pan (not a hold), a second finger (pinch-zoom) cancels, and presses on pins / popups / the lightbox or
+    // while a panel is open are ignored so Solita never hijacks those gestures.
+    (function wireLongPress() {
+        const mapEl = document.getElementById('map');
+        if (!mapEl) { btn.addEventListener('click', listen); return; } // fallback: keep tap if no map
+        const HOLD_MS = 550;   // press this long → Solita wakes
+        const MOVE_TOL = 12;   // px of drift allowed before it counts as a pan, not a hold
+        let timer = null, sx = 0, sy = 0, pid = null;
+        function clear() { if (timer) { clearTimeout(timer); timer = null; } pid = null; }
+        function blocked(t) {
+            if (t && t.closest && t.closest('.wp-pin, .leaflet-marker-icon, .leaflet-popup, .poi-pin-wrap, .fuel-pin-wrap, #photo-lightbox')) return true;
+            if (document.querySelector('.ov-panel.open')) return true;          // a panel owns the screen
+            const lb = document.getElementById('photo-lightbox');
+            return !!(lb && lb.classList.contains('open'));
+        }
+        mapEl.addEventListener('pointerdown', function (e) {
+            if (pid !== null) { clear(); return; }   // second finger (pinch) → cancel
+            if (blocked(e.target)) return;
+            pid = e.pointerId; sx = e.clientX; sy = e.clientY;
+            timer = setTimeout(function () { clear(); listen(); }, HOLD_MS);
+        }, { passive: true });
+        mapEl.addEventListener('pointermove', function (e) {
+            if (timer && (Math.abs(e.clientX - sx) > MOVE_TOL || Math.abs(e.clientY - sy) > MOVE_TOL)) clear();
+        }, { passive: true });
+        ['pointerup', 'pointercancel', 'pointerleave'].forEach(function (ev) {
+            mapEl.addEventListener(ev, clear, { passive: true });
+        });
+    })();
+    dbg('tracker-solita bereit (lange auf die Karte drücken)');
 })();
