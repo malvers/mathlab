@@ -3,8 +3,8 @@
 // docalvers.de/config.json → the app picks it up on the next poll (no reload). Presentation only.
 window.TrackerConfig = (function () {
     const URL = '../config.json';     // HTML/config.json → docalvers.de/config.json (Pages root = HTML/)
-    const POLL_MS = 20000;            // gentle heartbeat; ETag makes unchanged checks a 304 (no download)
-    let etag = null, timer = null;
+    const POLL_MS = 20000;            // gentle heartbeat; each poll cache-busts so a change shows within one tick
+    let timer = null;
     const dbg = (m) => { if (window.DebugWindow && DebugWindow.log) DebugWindow.log('cfg: ' + m); };
 
     // Build a token lookup from cfg._palette (the brand vocabulary, config v6+): each token name and
@@ -50,13 +50,15 @@ window.TrackerConfig = (function () {
 
     async function poll() {
         try {
-            const headers = etag ? { 'If-None-Match': etag } : {};
-            const r = await fetch(URL, { headers, cache: 'no-store' });
-            if (r.status === 304) { dbg('304 unchanged'); return; }  // nothing to do
+            // Cache-bust the URL. `cache:'no-store'` only bypasses the BROWSER cache, NOT GitHub Pages' Fastly
+            // CDN (Cache-Control: max-age=600). Worse, the old If-None-Match/ETag let the CDN answer 304
+            // "unchanged" from its stale copy → a fresh config.json could stay invisible up to ~10 min (Doc:
+            // "die Uhr ist immer noch grün"). A unique query per poll = a fresh CDN key → the change shows
+            // within one poll (≤20 s). config.json is tiny, so dropping the 304 optimisation costs nothing.
+            const r = await fetch(URL + (URL.indexOf('?') < 0 ? '?' : '&') + '_=' + Date.now(), { cache: 'no-store' });
             if (!r.ok) { dbg('HTTP ' + r.status); return; }
-            etag = r.headers.get('ETag') || etag;
             const cfg = await r.json();
-            dbg('fetched v' + (cfg && cfg.version) + ' statColor=' + (cfg && cfg.theme && cfg.theme.colors && cfg.theme.colors.statColor));
+            dbg('fetched v' + (cfg && cfg.version) + ' clockColor=' + (cfg && cfg.theme && cfg.theme.colors && cfg.theme.colors.clockColor));
             applyConfig(cfg);
         } catch (e) { dbg('ERR ' + (e && (e.message || e))); }
     }
