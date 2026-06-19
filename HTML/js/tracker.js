@@ -453,6 +453,7 @@
         // the genuine idle state. Runs once a second alongside (but independent of) the recording timer.
         function navActive() { return !!(__nav && __nav.hasDestination && __nav.hasDestination()); }
         function tickIdleClock() {
+            updateDistVisibility(); // catch nav start/stop (which don't route through setTrkState)
             if (trkState !== 'idle' || navActive()) return; // recording/paused/navigating own the display
             const d = new Date(), pad = (n) => String(n).padStart(2, '0');
             CyberClock.set(elTime, `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`);
@@ -515,7 +516,15 @@
             }
             centerStatLabel(elAlt, elAltLbl);
         }
-        setDist(0); setSpeed(0); setAlt(null); // 🧍 mode-icon updates on the first GPS fix — calling
+        // Distance only makes sense once a track is being recorded/navigated. In the genuine idle
+        // state (not recording AND not navigating) the speed readout still updates (live km/h, like a
+        // speedometer) but the DISTANCE tile is hidden — there's nothing to measure yet. visibility
+        // (not display) keeps the 3-tile layout balanced so SPEED/HÖHE don't shift.
+        function updateDistVisibility() {
+            const tile = elDist && elDist.closest('.hud-stat');
+            if (tile) tile.style.visibility = (trkState === 'idle' && !navActive()) ? 'hidden' : '';
+        }
+        setDist(0); setSpeed(0); setAlt(null); updateDistVisibility(); // 🧍 mode-icon updates on the first GPS fix — calling
         // updateModeIcon() here would hit the TDZ (its consts MODE_ICON/ActRec are declared further down)
 
         function setStatus(msg) { if (elStatus) elStatus.textContent = msg; } // status line removed — guard-safe no-op
@@ -995,6 +1004,7 @@
         function setTrkState(s) {
             trkState = s;
             tracking = (s === 'recording');
+            updateDistVisibility(); // idle (& not navigating) → hide DISTANCE; recording/paused → show it
             const tg = $('trk-toggle'), fin = $('trk-finish'), disc = $('trk-discard');
             if (disc) disc.style.display = (s === 'paused') ? 'inline-flex' : 'none';
             if (s === 'idle') {
@@ -1030,7 +1040,17 @@
         function ambientOnPos(pos) {
             if (!pos || !pos.coords || pos.coords.latitude == null) return;
             const here = [pos.coords.latitude, pos.coords.longitude];
-            lastFix = { lat: here[0], lng: here[1], t: Date.now() };
+            const now = Date.now();
+            // Live speedometer while idle: GPS Doppler if the device gives it, else distance/time from
+            // the previous fix. Same flooring/EMA as the recording path so a parked phone reads 0.0.
+            const sp = pos.coords.speed;
+            let kmh = 0;
+            if (sp != null && sp >= 0) kmh = sp * 3.6;
+            else if (lastFix) { const dt = (now - lastFix.t) / 1000; if (dt > 0) kmh = (haversine([lastFix.lat, lastFix.lng], here) / dt) * 3.6; }
+            if (kmh > MAX_JUMP_KMH || kmh < SPEED_ZERO_KMH) kmh = 0;
+            shownSpeed = 0.6 * shownSpeed + 0.4 * kmh;
+            setSpeed(shownSpeed);
+            lastFix = { lat: here[0], lng: here[1], t: now };
             renderPosition(here, pos.coords.accuracy);
             showDot();
             // Idle altitude (no barometer here): show the DEM terrain height directly → no more „−".
