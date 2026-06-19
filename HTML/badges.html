@@ -143,8 +143,8 @@
     <div class="sheet"><div class="block" id="block-backs"><div class="grid" id="backs"></div></div></div>
 
     <script>
-        // 24 first names (alphabetical, incl. Bruno).
-        const NAMES = ['Aria', 'Bella', 'Bruno', 'Christa', 'Elise', 'Fiby', 'Frederik', 'Fritz', 'Greta',
+        // 25 first names (alphabetical, incl. Bruno).
+        const NAMES = ['Aria', 'Bella', 'Bruno', 'Christa', 'Elise', 'Fiby', 'Frederik', 'Friedrich', 'Fritz', 'Greta',
             'Hannah', 'Hannes', 'Hugo', 'Irma', 'Leila', 'Lennard', 'Leo', 'Leonie', 'Linus', 'Max',
             'Pepe', 'Pia', 'Raphael', 'Rosalinde', 'Simon'];
         const BACK = ['THINK THE IMPOSSIBLE', 'VITA SOMNIUM BREVE', 'WWW.DOCALVERS.DE'];
@@ -155,8 +155,7 @@
             const f = document.createElement('div');
             f.className = 'badge';
             f.innerHTML = '<div class="name">' + n + '</div>';
-            // shrink very long names so they never clip the 70mm strip
-            if (n.length >= 9) f.querySelector('.name').style.fontSize = '4.2mm';
+            // all names share one size — they fit the 70mm strip at 5mm
             fronts.appendChild(f);
 
             const b = document.createElement('div');
@@ -168,7 +167,7 @@
         // Cut marks in the margins at EVERY cut line — the badges butt together, so the guides live outside
         // the block. Align a blade between two opposite marks to make each cut.
         function addMarks(block) {
-            const W = 70, H = 12, COLS = 2, ROWS = 12, LEN = 4, OFF = 1, TH = 0.15; // mm
+            const W = 70, H = 12, COLS = 2, ROWS = Math.ceil(NAMES.length / 2), LEN = 4, OFF = 1, TH = 0.15; // mm
             const bw = COLS * W, bh = ROWS * H;
             function tick(s) { const d = document.createElement('div'); d.className = 'cmark'; Object.assign(d.style, s); block.appendChild(d); }
             for (let c = 0; c <= COLS; c++) {            // vertical cut lines → ticks above + below the block

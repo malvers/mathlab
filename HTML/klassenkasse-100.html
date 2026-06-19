@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Klassenkasse 100 € — A3 quer — Doc Alvers</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
+    <style>
+        /* Exact A3 landscape, no printer margins. */
+        @page { size: A3 landscape; margin: 0; }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            background: #444;                   /* screen only */
+            font-family: 'Orbitron', sans-serif;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        .sheet {
+            position: relative;
+            width: 420mm;
+            height: 297mm;
+            margin: 8mm auto;                   /* screen spacing; ignored in print */
+            background: #fff;                   /* nothing painted outside the note */
+            overflow: hidden;
+            box-shadow: 0 4px 26px rgba(0, 0, 0, 0.5);
+        }
+
+        /* The note, as large as fits A3 without distortion, vertically centred. */
+        .note {
+            position: absolute;
+            left: 0; top: 50%;
+            transform: translateY(-50%);
+            width: 420mm;
+            aspect-ratio: 640 / 364;            /* keep the note's true proportions */
+        }
+        .note .scan { width: 100%; height: 100%; display: block; }
+
+        /* Doc's portrait — watermark in the note's blank LEFT zone. */
+        .note .face {
+            position: absolute;
+            left: -3%; top: 50%;
+            transform: translateY(-50%) scaleX(-1);   /* horizontally mirrored */
+            height: 54%;
+            aspect-ratio: 1 / 1;
+            object-fit: cover;
+            opacity: 0.20;                              /* fainter — more like a paper watermark */
+            filter: grayscale(1) contrast(0.82) brightness(1.22) blur(0.3mm);
+            mix-blend-mode: multiply;
+            -webkit-mask-image: radial-gradient(ellipse 46% 48% at 50% 44%, #000 50%, transparent 72%);
+            mask-image: radial-gradient(ellipse 46% 48% at 50% 44%, #000 50%, transparent 72%);
+            pointer-events: none;
+        }
+
+        /* Overprints, ON the note (semi-transparent so the design reads through). */
+        .note .klasse {
+            position: absolute;
+            top: 8.5%; left: 28.75%; width: 45%;
+            text-align: left;                    /* left-aligned under the "B" of BCE above */
+            font-family: Arial, Helvetica, sans-serif;  /* matches the note's sans header */
+            font-weight: 700;
+            font-size: 5.8mm;
+            letter-spacing: 1mm;
+            color: #111;                                 /* darker, like the note's header ink */
+            filter: blur(0.35mm);                        /* soften to match the low-res scan */
+        }
+        .note .web {
+            position: absolute;
+            left: 58%; width: 34%; bottom: 0.95%;   /* lower-right green area (Doc's arrow), nudged down */
+            text-align: center;
+            font-family: Arial, Helvetica, sans-serif;
+            font-weight: 700;
+            font-size: 5.6mm;
+            letter-spacing: 0.6mm;
+            color: #1f1f1f;
+            filter: blur(0.3mm);                 /* soften to match the scan, like KLASSENKASSE */
+        }
+
+        /* ---- Screen-only print UI ---- */
+        .hint {
+            max-width: 420mm;
+            margin: 14mm auto 0;
+            color: #eee;
+            font-family: system-ui, sans-serif;
+            font-size: 14px; line-height: 1.5;
+            padding: 0 8mm;
+        }
+        .hint b { color: #fff; }
+        #pdf-btn {
+            position: fixed; top: 14px; right: 14px; z-index: 10;
+            font-family: 'Orbitron', sans-serif; font-weight: 700;
+            font-size: 14px; letter-spacing: 0.5px;
+            color: #24330f;
+            background: linear-gradient(180deg, #c7dca0, #9cc06a);
+            border: 1px solid rgba(36, 53, 20, 0.4);
+            border-radius: 10px; padding: 10px 16px; cursor: pointer;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+        }
+        #pdf-btn:active { transform: scale(0.97); }
+
+        @media print {
+            .hint, #pdf-btn { display: none; }
+            body { background: #fff; }
+            .sheet { margin: 0; box-shadow: none; }
+        }
+    </style>
+</head>
+
+<body>
+    <button id="pdf-btn" type="button" onclick="window.print()">⬇ Als PDF speichern</button>
+    <div class="hint">
+        <b>PDF:</b> oben rechts <b>„⬇ Als PDF speichern"</b> → <b>A3</b>, <b>Querformat</b>, <b>100 %</b>,
+        <b>„Hintergrundgrafiken" an</b>. Schein-Bild ist niedrig aufgelöst (640×364 → auf A3 weich).
+        Spielgeld für die Klassenkasse — kein Zahlungsmittel.
+    </div>
+
+    <div class="sheet">
+        <div class="note">
+            <img class="scan" src="resources/euro100b.jpg" alt="100-Euro-Schein">
+            <img class="face" src="resources/team/alvers_final.png" alt="">
+            <div class="klasse">KLASSENKASSE 2026</div>
+            <div class="web">WWW.DOCALVERS.DE</div>
+        </div>
+    </div>
+</body>
+
+</html>
