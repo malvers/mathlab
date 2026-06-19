@@ -140,11 +140,11 @@ window.TrackerSpeedLimit = function (ctx) {
 
     function setSign(limit, over) {
         const el = $('speed-sign'); if (!el) return;
-        // Default to the "unlimited" sign when no concrete limit is known (Doc 2026-06-18: show the ∞ default,
-        // not a blank — „hatten wir schon"). null (unknown) renders exactly like 'none' (Autobahn unbegrenzt).
-        if (limit == null) limit = 'none';
-        const txt = (limit === 'none') ? 'c' : String(limit); // 'c' = Lichtgeschwindigkeit (das echte Limit)
+        // 'none' (OSM maxspeed=none, Autobahn unbegrenzt) → 'c' (Lichtgeschwindigkeit, das echte Limit).
+        // null (limit unknown — no OSM hint, e.g. in the browser) → '?' so it reads "unbekannt", not "unbegrenzt".
+        const txt = (limit === 'none') ? 'c' : (limit == null) ? '?' : String(limit);
         el.textContent = txt;
+        el.classList.toggle('cee', txt === 'c'); // 'c' is an x-height glyph → sits low; nudge it up a tick (see CSS)
         el.classList.toggle('s3', txt.length >= 3); // 3-digit limits (100/120/130) → smaller, tighter font to fit the disc
         el.classList.toggle('over', !!over && limit !== 'none');
         el.hidden = false;

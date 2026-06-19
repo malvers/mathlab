@@ -428,10 +428,7 @@
 
         const $ = id => document.getElementById(id);
         const elToggle = $('trk-toggle');
-        const elDist = $('trk-dist');
         const elTime = $('hud-time');
-        const elSpeed = $('trk-speed');
-        const elAlt = $('trk-alt');
         const elAcc = $('gps-acc');
         const elSrc = $('gps-src');
         const elStatus = $('trk-status');
@@ -447,6 +444,13 @@
         });
         CyberClock.set(elTime, '00:00:00');
 
+        // HUD stat tiles (DISTANCE / SPEED / HÖHE) → js/tracker-hud.js. Owns the fixed-slot widgets +
+        // adaptive distance unit. Destructured into the same names so every existing call site stays
+        // unchanged. Constructed HERE (before the idle clock below) so updateDistVisibility is assigned
+        // before tickIdleClock first calls it — a later const would hit the TDZ.
+        const Hud = TrackerHud({ isIdle: () => trkState === 'idle', navActive });
+        const { setDist, setSpeed, setAlt, updateDistVisibility } = Hud;
+
         // Idle clock: when NOT recording and NOT navigating, the top clock shows the real wall-clock time
         // instead of a frozen 00:00:00. While recording it shows the track duration (updateDuration), while
         // paused the frozen duration stays, and during navigation it's left as-is — this tick only acts in
@@ -461,69 +465,6 @@
         tickIdleClock();                       // show the time immediately on load
         setInterval(tickIdleClock, 1000);
 
-        // The three stats use the SAME fixed-slot widget so digits never jump as the value
-        // changes: right-aligned, no leading zeros (blank slots on the left), group stays
-        // centred. KM/H = 999.9 (1 dec), HÖHE = 9999 m (int).
-        const STAT_SIZE = 'clamp(1rem, 4.5vw, 1.4rem)';
-        const STAT_COL = 'var(--cfg-stat-color, var(--orange))'; // live-config override (tracker-config.js); default = λ-orange
-        const STAT_FONT = 'Orbitron'; // Doc: stat numbers back in Orbitron (HUD CSS widens slot + comma so it's not cramped)
-        const STAT_SEP = ',';
-        CyberClock.mountNum(elSpeed, { intSlots: 3, decimals: 1, size: STAT_SIZE, digitColor: STAT_COL, font: STAT_FONT, decimalSep: STAT_SEP });
-        CyberClock.mountNum(elAlt, { intSlots: 4, decimals: 0, size: STAT_SIZE, digitColor: STAT_COL, font: STAT_FONT, decimalSep: STAT_SEP });
-        const elDistLbl = $('trk-dist-lbl'), elSpeedLbl = $('trk-speed-lbl'), elAltLbl = $('trk-alt-lbl');
-        // Centre each label under the VISIBLE digits (not the full right-aligned slot box). The
-        // number is right-aligned (blank slots on the left), so shift the label right by half the
-        // left-blank width — measured from the first non-empty slot → tracks the visible number.
-        function centerStatLabel(w, lbl) {
-            if (!w || !lbl || !w._ccDigits) return;
-            let first = null;
-            for (let i = 0; i < w._ccDigits.length; i++) { if (w._ccDigits[i].textContent !== '') { first = w._ccDigits[i]; break; } }
-            if (!first) { lbl.style.transform = ''; return; }
-            const shift = (first.getBoundingClientRect().left - w.getBoundingClientRect().left) / 2;
-            lbl.style.transform = shift > 0.5 ? 'translateX(' + shift.toFixed(1) + 'px)' : '';
-        }
-        // Distance is ADAPTIVE: < 100 m → whole metres (label "m"); ≥ 100 m → km with 2
-        // decimals (label "KM"). Re-mount only when the unit flips (rare) → no jitter within a unit.
-        function setDist(distM) {
-            const meters = (distM != null && distM < 100);
-            const want = meters ? 'm' : 'km';
-            if (elDist.dataset.unit !== want) {
-                CyberClock.mountNum(elDist, meters
-                    ? { intSlots: 3, decimals: 0, size: STAT_SIZE, digitColor: STAT_COL, font: STAT_FONT, decimalSep: STAT_SEP }
-                    : { intSlots: 3, decimals: 2, size: STAT_SIZE, digitColor: STAT_COL, font: STAT_FONT, decimalSep: STAT_SEP });
-                elDist.dataset.unit = want;
-                if (elDistLbl) elDistLbl.textContent = meters ? 'DISTANCE m' : 'DISTANCE KM';
-            }
-            CyberClock.setNum(elDist, distM == null ? null : (meters ? Math.round(distM) : distM / 1000));
-            centerStatLabel(elDist, elDistLbl);
-        }
-        // Speed label: live readout vs a loaded track's average. setSpeed() restores the LIVE label on
-        // every update (so live tracking, clear and multi-load all read "SPEED KM/H"); plotTrack()
-        // overrides it to the Ø average afterwards when a single saved track is shown.
-        const SPEED_LBL_LIVE = (elSpeedLbl && elSpeedLbl.textContent) || 'SPEED KM/H';
-        const SPEED_LBL_AVG = 'Ø KM/H';
-        function setSpeed(kmh) { if (elSpeedLbl) elSpeedLbl.textContent = SPEED_LBL_LIVE; CyberClock.setNum(elSpeed, kmh); centerStatLabel(elSpeed, elSpeedLbl); }
-        function setAlt(m) {
-            if (m == null || isNaN(m)) {
-                // no altitude fix yet → a single centred dash instead of blank slots
-                const boxes = elAlt._ccDigits, intN = elAlt._ccIntN;
-                if (boxes) {
-                    for (let i = 0; i < boxes.length; i++) { boxes[i].textContent = ''; boxes[i].style.display = 'none'; }
-                    boxes[intN - 1].textContent = '–'; boxes[intN - 1].style.display = '';
-                }
-            } else {
-                CyberClock.setNum(elAlt, m);
-            }
-            centerStatLabel(elAlt, elAltLbl);
-        }
-        // Distance only makes sense once a track is being recorded/navigated. In the genuine idle
-        // state (not recording AND not navigating) the speed readout still updates (live km/h, like a
-        // speedometer) but the DISTANCE tile is hidden — there's nothing to measure yet. visibility
-        // (not display) keeps the 3-tile layout balanced so SPEED/HÖHE don't shift.
-        function updateDistVisibility() {
-            const tile = elDist && elDist.closest('.hud-stat');
-            if (tile) tile.style.visibility = (trkState === 'idle' && !navActive()) ? 'hidden' : '';
-        }
         setDist(0); setSpeed(0); setAlt(null); updateDistVisibility(); // 🧍 mode-icon updates on the first GPS fix — calling
         // updateModeIcon() here would hit the TDZ (its consts MODE_ICON/ActRec are declared further down)
 
@@ -1037,6 +978,31 @@
         // (onPosition owns the watch then). Foreground only (navigator.geolocation, same as the initial
         // acquire) — NOT the background plugin, so there's no "Aufzeichnung läuft" notification when idle.
         const AMBIENT_PAN_M = 12; // only re-centre once the dot moved this far → no GPS-jitter jiggle
+        // Idle ambient temperature → the freed DISTANCE tile shows the current °C while idle (Doc
+        // 2026-06-19). Open-Meteo's keyless forecast API (same provider as the DEM elevation lookup),
+        // throttled like the fuel layer (≥ 10 min OR ≥ 3 km moved) so it stays gentle. Offline / error
+        // → keep the last value silently. Only fetched here in ambientOnPos, i.e. only while idle.
+        const TEMP_REFRESH_MS = 600000; // 10 min
+        const TEMP_REFRESH_M = 3000;    // or once we've moved 3 km
+        let tempBusy = false, lastTempFetch = 0, lastTempLat = null, lastTempLng = null;
+        async function updateAmbientTemp(here) {
+            if (tempBusy || !here) return;
+            const lat = here[0], lng = here[1];
+            if (typeof lat !== 'number' || typeof lng !== 'number') return;
+            const moved = (lastTempLat == null) ? Infinity : haversine([lastTempLat, lastTempLng], here);
+            if (moved < TEMP_REFRESH_M && (Date.now() - lastTempFetch) < TEMP_REFRESH_MS) return;
+            tempBusy = true;
+            try {
+                const url = 'https://api.open-meteo.com/v1/forecast?latitude=' + lat.toFixed(4) +
+                    '&longitude=' + lng.toFixed(4) + '&current=temperature_2m';
+                const r = await fetch(url);
+                const d = await r.json().catch(() => null);
+                const t = d && d.current && typeof d.current.temperature_2m === 'number' ? d.current.temperature_2m : null;
+                if (t != null) { Hud.setTemp(t); lastTempFetch = Date.now(); lastTempLat = lat; lastTempLng = lng; }
+            } catch (e) { /* offline / rate-limited → keep the last reading */ }
+            finally { tempBusy = false; }
+        }
+
         function ambientOnPos(pos) {
             if (!pos || !pos.coords || pos.coords.latitude == null) return;
             const here = [pos.coords.latitude, pos.coords.longitude];
@@ -1056,6 +1022,7 @@
             // Idle altitude (no barometer here): show the DEM terrain height directly → no more „−".
             updateDemElev(here);
             updateAltitude(pos.coords.altitude != null ? pos.coords.altitude : null);
+            updateAmbientTemp(here); // idle-only: current temperature in the (otherwise distance) tile
             if (acquireWatch != null) { navigator.geolocation.clearWatch(acquireWatch); acquireWatch = null; } // initial one-shot now redundant
             if (following && !handMode) {
                 const moved = map.distance(map.getCenter(), L.latLng(here));
@@ -1215,7 +1182,7 @@
         fitControlText();
         window.addEventListener('resize', () => {
             fitControlText();
-            centerStatLabel(elDist, elDistLbl); centerStatLabel(elSpeed, elSpeedLbl); centerStatLabel(elAlt, elAltLbl);
+            Hud.recenterAll();
         });
 
         // ---- Crash-proof live buffer (../js/track-buffer.js): persist the in-progress track on
@@ -1842,8 +1809,7 @@ ${pts}
             setDist(totalDist);
             // Loaded track has no live speed → show its AVERAGE (distance/time, same as the stats panel)
             // with a Ø symbol so it reads clearly as an average, not a live value.
-            setSpeed(trackStats().avgKmh);
-            if (elSpeedLbl) { elSpeedLbl.textContent = SPEED_LBL_AVG; centerStatLabel(elSpeed, elSpeedLbl); }
+            Hud.setSpeedAvg(trackStats().avgKmh);
             // show the loaded track's last known altitude (if any)
             const lastAlt = alts.slice().reverse().find(a => a != null);
             fusedAlt = (lastAlt != null) ? lastAlt : null;
