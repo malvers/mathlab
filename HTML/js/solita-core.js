@@ -464,7 +464,21 @@
             onDone: function () { sendButton.disabled = false; messageInput.focus(); },
             // After every turn, push the updated log to the shared server (js/solita-sync.js) so the other
             // device (browser ↔ Pixel) converges on the same conversation. No-op until sync is initialised.
-            onPersist: function () { if (window.SolitaSync) SolitaSync.push(brain.getHistory(), brain.getSummary()); }
+            onPersist: function () { if (window.SolitaSync) SolitaSync.push(brain.getHistory(), brain.getSummary()); },
+            // Per-query cost (Doc 2026-06-19): a dezente Zeile unter der letzten Antwort. < 1 €/Antwort → Cent,
+            // sonst Euro. Daten kommen schon aus dem claude-Proxy (usage) → reine Anzeige, kein Extra-Call.
+            onCost: function (eur) {
+                if (typeof eur !== 'number' || eur <= 0) return;
+                const cent = eur * 100;
+                const txt = (cent < 100) ? (cent < 10 ? cent.toFixed(2) : cent.toFixed(1)) + ' ¢' : '€ ' + eur.toFixed(2);
+                const cc = messagesArea.querySelectorAll('.message.assistant .message-content');
+                const last = cc[cc.length - 1];
+                if (!last || last.querySelector('.solita-cost')) return;
+                const tag = document.createElement('div');
+                tag.className = 'solita-cost';
+                tag.textContent = '≈ ' + txt;
+                last.appendChild(tag);
+            }
         });
 
         // Restore persisted history into the brain, then render the bubbles (host owns the DOM).

@@ -41,6 +41,7 @@
         const onError     = cfg.onError     || function () { };   // (err) → show the failure
         const onDone      = cfg.onDone      || function () { };   // () → re-enable input etc. (always runs)
         const onPersist   = cfg.onPersist   || function () { };   // () → history changed; host may sync it (solita-sync.js)
+        const onCost      = cfg.onCost      || function () { };   // (eurThisQuery) → host may show the per-query cost
 
         // ---- state (in-memory; persisted to localStorage under the host's keys) ----
         let conversationHistory = [];
@@ -93,6 +94,7 @@
             if (window.DebugWindow) window.DebugWindow.log('€ ' + (label || 'chat') + ': ↑' + inTok + ' ↓' + outTok
                 + ' · Cache ' + hit + '% (' + cr + 'r/' + cw + 'w) · ' + (eur * 100).toFixed(2) + '¢ · Σ ' + total.toFixed(3) + ' €');
             if (typeof window.solitaCostUpdate === 'function') { try { window.solitaCostUpdate(total); } catch (e) { } }
+            return eur;   // so the caller can sum a whole query's cost (tool-loop hops) for the per-query display
         }
 
         // Keep context bounded WITHOUT just forgetting: fold the oldest turns into runningSummary, drop them.
@@ -142,6 +144,7 @@
                 let msgs = buildRequestMessages();
                 let finalText = '(keine Antwort)';
                 let guard = 0;
+                let turnEur = 0;   // sum of all hops in THIS query (tool-loop included) → per-query cost
                 while (guard++ < 6) {
                     // Mid-turn brake: a pathological tool-loop must not blow past the daily cap either.
                     if (daySpentEur() >= DAY_CAP_EUR) { finalText = 'Tageslimit erreicht — ich stoppe hier, damit das Guthaben hält.'; break; }
@@ -158,7 +161,7 @@
                         throw new Error(err);
                     }
                     const data = await response.json();
-                    accountUsage(getModel(), data.usage, 'chat');   // cost meter: every hop (tool-loop included)
+                    turnEur += accountUsage(getModel(), data.usage, 'chat') || 0;   // cost meter: every hop (tool-loop included)
                     const blocks = Array.isArray(data.content) ? data.content : [];
                     const textOut = (data.choices && data.choices[0] && data.choices[0].message.content) || '';
 
@@ -186,6 +189,7 @@
                 onPersist();        // host may push the updated log to the shared server (solita-sync.js)
                 onTyping(false);
                 onAssistant(finalText);
+                onCost(turnEur);    // show what this one query cost (sum of all hops)
                 onSpeak(finalText);
                 maybeSummarize();   // fold older turns into the rolling summary (best-effort, background)
             } catch (err) {
