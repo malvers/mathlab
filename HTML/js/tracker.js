@@ -447,6 +447,19 @@
         });
         CyberClock.set(elTime, '00:00:00');
 
+        // Idle clock: when NOT recording and NOT navigating, the top clock shows the real wall-clock time
+        // instead of a frozen 00:00:00. While recording it shows the track duration (updateDuration), while
+        // paused the frozen duration stays, and during navigation it's left as-is — this tick only acts in
+        // the genuine idle state. Runs once a second alongside (but independent of) the recording timer.
+        function navActive() { return !!(__nav && __nav.hasDestination && __nav.hasDestination()); }
+        function tickIdleClock() {
+            if (trkState !== 'idle' || navActive()) return; // recording/paused/navigating own the display
+            const d = new Date(), pad = (n) => String(n).padStart(2, '0');
+            CyberClock.set(elTime, `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`);
+        }
+        tickIdleClock();                       // show the time immediately on load
+        setInterval(tickIdleClock, 1000);
+
         // The three stats use the SAME fixed-slot widget so digits never jump as the value
         // changes: right-aligned, no leading zeros (blank slots on the left), group stays
         // centred. KM/H = 999.9 (1 dec), HÖHE = 9999 m (int).
