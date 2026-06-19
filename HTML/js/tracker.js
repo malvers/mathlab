@@ -581,17 +581,15 @@
             return 'FUNK';                    // cell tower / IP
         }
 
-        function onPosition(pos) {
-            const { latitude, longitude, accuracy, speed } = pos.coords;
-            const now = pos.timestamp || Date.now();
-            const here = [latitude, longitude];
-
+        function updateGpsReal(accuracy) {
             // Real GPS fix? Native sats in use, or an accuracy only GNSS reaches (≤15 m — the same
             // threshold sourceLabel() calls 'GPS'). Gates the travel-mode icon: in WLAN/cell the
             // speed (and thus the guessed mode) is unreliable → no icon at all.
             gpsReal = (gnssLatest && gnssLatest.used > 0) || (accuracy != null && accuracy <= 15);
             updateModeIcon(); // reflect the source immediately (also on rejected/teleport fixes)
+        }
 
+        function computeMovementGate(speed, accuracy, here) {
             // Movement gate: does the accelerometer confirm we actually move? If the sensor
             // says "still", GPS jitter is suppressed (no points, speed 0, dot + map held).
             // BUT a vehicle at steady cruise has almost no dynamic acceleration, so the sensor
@@ -614,12 +612,18 @@
                 posStill = haversine([shown.lat, shown.lng], here) <= band;
             }
             const still = sensorStill || posStill;
+            return { gpsKmh, still };
+        }
 
+        function renderInitialFix(here, accuracy, still) {
             const firstFix = !posMarker;
             renderPosition(here, accuracy, still && !firstFix);
             showDot();
             if (firstFix) map.setView(here, 17); // snap to the very first fix
+            return firstFix;
+        }
 
+        function updateFuelLayer(here) {
             // Ambient, position-driven layer: nearby fuel-station prices. Runs on EVERY fix —
             // BEFORE the recording accuracy gate below — because its 5 km search radius doesn't
             // need a ≤ MAX_ACC_M fix (a coarse WLAN/IP browser fix is plenty). It has its own
@@ -627,14 +631,19 @@
             // stays strict at MAX_ACC_M; only the fuel layer is exempt. (Was below the gate, so it
             // never ran in a desktop browser where geolocation accuracy is worse than 50 m.)
             if (__fuel) __fuel.update(here);
+        }
 
+        function rejectNoisyFix(accuracy, still) {
             // Reject noisy fixes for the recorded track
             if (accuracy != null && accuracy > MAX_ACC_M) {
                 setStatus(`Warte auf besseres Signal … (±${Math.round(accuracy)} m)`);
                 updateMotionDbg(accuracy, MIN_MOVE_M, still);
-                return;
+                return true;
             }
+            return false;
+        }
 
+        function rejectTeleportFix(latitude, longitude, here, now, still, accuracy) {
             // Drop GPS "teleports": the first fix is often a coarse WLAN/cell guess; when the real
             // GPS fix lands the position leaps km in seconds → an absurd speed (962 km/h!) and a
             // bogus track leg. If a fix implies an impossible ground speed from the previous one,
@@ -647,14 +656,19 @@
                     shownSpeed = 0; setSpeed(0);
                     if (following && !still) map.panTo(here, { animate: true });
                     updateMotionDbg(accuracy, MIN_MOVE_M, still);
-                    return;
+                    return true;
                 }
             }
+            return false;
+        }
 
+        function updateAltitudePhase(pos, here) {
             // Altitude: fuse the precise barometer profile with the absolute anchor (DEM terrain, else GPS).
             updateDemElev(here);
             updateAltitude(pos.coords.altitude != null ? pos.coords.altitude : null);
+        }
 
+        function computeAndDisplaySpeed(speed, here, now, still) {
             // Speed display DECOUPLED from the recording gate (BUG-1). The gate only exists to
             // suppress position jitter while genuinely stopped, but it ALSO nulled the km/h readout
             // while slowly walking inside the accuracy band → the "0.0 / 1.7" flicker Doc saw. GPS
@@ -691,17 +705,20 @@
                     : 'BUG-1 Speed: coords.speed = null → Distanz/Zeit-Fallback');
             }
             updateModeIcon(); // keep the mode glyph (left of the clock) current
+        }
 
+        function computeBearing(hdg, gpsKmh, here, latitude, longitude) {
             // Travel direction: prefer the GPS heading; else the bearing of the last real step.
             // Only while moving → a triangle at the dot rotated to the course (hidden when still).
             let bearing = null;
-            const hdg = pos.coords.heading;
             if (hdg != null && !isNaN(hdg) && (gpsKmh == null || gpsKmh > 1)) bearing = hdg;
             else if (lastFix && haversine([lastFix.lat, lastFix.lng], here) >= MIN_MOVE_M) {
                 bearing = bearingBetween(lastFix.lat, lastFix.lng, latitude, longitude);
             }
-            setHeading(here, bearing, !still && bearing != null);
+            return bearing;
+        }
 
+        function recordTrackPoint(here, accuracy, now, still) {
             // Adaptive minimum step: within the GPS error circle everything is noise, so require
             // a move bigger than a fraction of the accuracy — never below MIN_MOVE_M. Each recorded
             // point carries its altitude (m) + speed (km/h) for the later elevation/speed profile.
@@ -726,9 +743,14 @@
                 if (liveOn) broadcastLive(); // Stage 3: live position to viewers
             }
             setDist(totalDist);
+            return { minStep };
+        }
 
+        function updateLastFix(latitude, longitude, now) {
             lastFix = { lat: latitude, lng: longitude, t: now };
+        }
 
+        function updateAutoFollow(here, still) {
             if (following && !still) { // auto-follow: pan to the dot; zoom by SPEED — but NOT in
                 // 'remaining' FIT mode, where the remaining-route fit (below) owns the zoom so the two
                 // don't fight over it (note #9).
@@ -740,6 +762,9 @@
                     map.panTo(here, { animate: true });
                 }
             }
+        }
+
+        function updateFitMode(here) {
             // FIT mode (3-state): 'all' keeps the WHOLE track in view; 'remaining' keeps the rest of the
             // route ahead in view AND tightens the zoom as the rest shrinks (note #9). The remaining
             // re-fit is BIDIRECTIONAL with hysteresis + cooldown so it can't flutter: zoom OUT when the
@@ -757,11 +782,36 @@
                     if (grew || shrank) { lastAutoZoom = Date.now(); try { map.fitBounds(rb, { padding: fitPad() }); } catch (e) { } }
                 }
             }
+        }
+
+        function updateNavigationAndDebug(here, still, accuracy, minStep) {
             refreshRecenter(); // show/hide the recenter button as needed
             if (__nav && __nav.update) __nav.update(here); // navigation: reroute if we drifted off the line
             if (__speed) __speed.update(here, still, shownSpeed); // speed-limit sign for the current road
             updateMotionDbg(accuracy, minStep, still);
             if (tracking) setStatus(`Aufzeichnung läuft … ${track.length} Punkte`);
+        }
+
+        function onPosition(pos) {
+            const { latitude, longitude, accuracy, speed } = pos.coords;
+            const now = pos.timestamp || Date.now();
+            const here = [latitude, longitude];
+
+            updateGpsReal(accuracy);                                          // Phase 1: source flag + mode icon
+            const { gpsKmh, still } = computeMovementGate(speed, accuracy, here); // Phase 2: movement gate
+            renderInitialFix(here, accuracy, still);                          // Phase 3: render marker + first-fix snap
+            updateFuelLayer(here);                                            // Phase 4: ambient fuel layer (pre-gate)
+            if (rejectNoisyFix(accuracy, still)) return;                      // Phase 5: drop low-accuracy fixes
+            if (rejectTeleportFix(latitude, longitude, here, now, still, accuracy)) return; // Phase 6: drop teleports
+            updateAltitudePhase(pos, here);                                   // Phase 7: barometer/DEM altitude fusion
+            computeAndDisplaySpeed(speed, here, now, still);                  // Phase 8: speed (Doppler/calc) + EMA
+            const bearing = computeBearing(pos.coords.heading, gpsKmh, here, latitude, longitude); // Phase 9: heading
+            setHeading(here, bearing, !still && bearing != null);
+            const { minStep } = recordTrackPoint(here, accuracy, now, still); // Phase 10: record point + sync/broadcast
+            updateLastFix(latitude, longitude, now);                          // Phase 11: re-baseline (every accepted fix)
+            updateAutoFollow(here, still);                                    // Phase 12: auto-follow pan/zoom
+            updateFitMode(here);                                              // Phase 13a: FIT-mode re-fit
+            updateNavigationAndDebug(here, still, accuracy, minStep);         // Phase 13b: nav + speed-sign + debug + status
         }
 
         function onError(err) {
