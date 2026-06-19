@@ -88,13 +88,37 @@
         });
 
         // Conversation-phase indicator: reflect who's "on" right now (listening | thinking | speaking | idle).
+        // „thinking" rotates a random English cognition verb (Claude-spinner style, Doc 2026-06-19) instead of
+        // a static label — list from HTML/solita/denk-spinner-verben.md (EN only; the DE renderings were junk).
+        const THINK_VERBS = ['Thinking', 'Pondering', 'Contemplating', 'Cogitating', 'Cerebrating', 'Considering',
+            'Deliberating', 'Mulling', 'Musing', 'Ruminating', 'Ideating', 'Imagining', 'Envisioning', 'Inferring',
+            'Philosophising', 'Stewing', 'Sussing', 'Deciphering', 'Synthesizing', 'Determining'];
+        let _thinkTimer = null;
         window.solitaPhase = function (s) {
             const el = document.getElementById('solita-phase');
             if (!el) return;
-            const LBL = { listening: 'höre zu …', thinking: 'denkt …', speaking: 'Solita spricht …', dormant: 'Slumber' };
+            const LBL = { listening: 'höre zu …', speaking: 'Solita spricht …', dormant: 'Slumber' };
             const lbl = el.querySelector('.lbl');
-            if (s && LBL[s]) { el.dataset.state = s; if (lbl) lbl.textContent = LBL[s]; }
-            else { el.removeAttribute('data-state'); if (lbl) lbl.textContent = ''; }
+            if (_thinkTimer) { clearInterval(_thinkTimer); _thinkTimer = null; }   // stop any running verb rotation
+            if (s === 'thinking') {
+                el.dataset.state = s;
+                // Claude-spinner vibe (Doc 2026-06-19): a twinkling star glyph BEFORE the verb, fast frames;
+                // the verb itself rotates ~every 1.8 s. One fast timer drives both.
+                const GLYPHS = ['✶', '✷', '✸', '✹', '✺', '✹', '✸', '✷'];
+                let verb = THINK_VERBS[Math.floor(Math.random() * THINK_VERBS.length)];
+                let g = 0, tick = 0;
+                const render = () => { if (lbl) lbl.textContent = GLYPHS[g % GLYPHS.length] + ' ' + verb + ' …'; };
+                render();
+                _thinkTimer = setInterval(() => {
+                    g++;
+                    if (++tick % 13 === 0) verb = THINK_VERBS[Math.floor(Math.random() * THINK_VERBS.length)];
+                    render();
+                }, 140);
+            } else if (s && LBL[s]) {
+                el.dataset.state = s; if (lbl) lbl.textContent = LBL[s];
+            } else {
+                el.removeAttribute('data-state'); if (lbl) lbl.textContent = '';
+            }
         };
 
         // Logout — clears access, shows the auth overlay, and turns the mic/wake-word OFF. Used by the
