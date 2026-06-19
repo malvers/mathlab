@@ -1007,24 +1007,51 @@
             if (!pos || !pos.coords || pos.coords.latitude == null) return;
             const here = [pos.coords.latitude, pos.coords.longitude];
             const now = Date.now();
-            // Live speedometer while idle: GPS Doppler if the device gives it, else distance/time from
-            // the previous fix. Same flooring/EMA as the recording path so a parked phone reads 0.0.
+            const accuracy = pos.coords.accuracy;
             const sp = pos.coords.speed;
-            let kmh = 0;
-            if (sp != null && sp >= 0) kmh = sp * 3.6;
-            else if (lastFix) { const dt = (now - lastFix.t) / 1000; if (dt > 0) kmh = (haversine([lastFix.lat, lastFix.lng], here) / dt) * 3.6; }
-            if (kmh > MAX_JUMP_KMH || kmh < SPEED_ZERO_KMH) kmh = 0;
-            shownSpeed = 0.6 * shownSpeed + 0.4 * kmh;
+
+            // Jitter guard, idle edition — the SAME movement gate the recording path uses (note the
+            // accelerometer now also runs while idle, see startAmbient). A phone resting on a table
+            // must NOT have its dot dance around: if the accelerometer says "still" (and GPS isn't
+            // clearly moving), or the new fix sits inside the GPS error circle of the shown dot, we
+            // HOLD the dot + skip the map pan. A real move (sensor energy, or a step beyond the band)
+            // snaps straight through.
+            const gpsKmh = (sp != null && sp >= 0) ? sp * 3.6 : null;
+            const gpsMoving = gpsKmh != null && gpsKmh > SPEED_MOVE_KMH && (accuracy == null || accuracy <= MAX_ACC_M);
+            const sensorStill = motionReady && motionStill && !gpsMoving;
+            let posStill = false;
+            if (posMarker) {
+                const shown = posMarker.getLatLng();
+                const band = Math.max(MIN_MOVE_M, (accuracy || 0) * ACC_STEP_FACTOR);
+                posStill = haversine([shown.lat, shown.lng], here) <= band;
+            }
+            const firstFix = !posMarker;
+            const still = (sensorStill || posStill) && !firstFix;
+
+            // Live speedometer while idle: ONLY the GPS Doppler (coords.speed) — the velocity the
+            // receiver actually measures. No distance/time fallback: on a device without Doppler
+            // (desktop / coarse WLAN, ±35 m) the jitter between fixes would fake 20+ km/h on a desk.
+            // No Doppler → 0. Same floor/EMA as the recording path.
+            let kmh = (sp != null && sp >= 0) ? sp * 3.6 : 0;
+            if (kmh > MAX_JUMP_KMH || kmh < SPEED_ZERO_KMH || still) kmh = 0; // standing → a clean 0
+            // Snap HARD to 0 when there's no movement — the EMA alone only decays (0.6·old) and gets
+            // stuck around 0,1 km/h on WLAN/standstill (the irritating residual Doc saw). Smooth only
+            // real motion upward.
+            shownSpeed = (kmh === 0) ? 0 : (0.6 * shownSpeed + 0.4 * kmh);
             setSpeed(shownSpeed);
+            // TEMP idle-gate diagnostics → existing #motion-dbg bar (Doc has DEBUG open). Shows whether
+            // the accelerometer is live (STILL/MOVE + e=), the raw Doppler, and the gated speed.
+            spdDbg = 'idle dop=' + (sp != null ? (sp * 3.6).toFixed(1) : 'null') + ' still=' + (still ? '1' : '0') + '→' + shownSpeed.toFixed(1);
+            updateMotionDbg(accuracy, Math.max(MIN_MOVE_M, (accuracy || 0) * ACC_STEP_FACTOR), still);
             lastFix = { lat: here[0], lng: here[1], t: now };
-            renderPosition(here, pos.coords.accuracy);
+            renderPosition(here, accuracy, still); // hold the dot steady when the gate says we stand
             showDot();
             // Idle altitude (no barometer here): show the DEM terrain height directly → no more „−".
             updateDemElev(here);
             updateAltitude(pos.coords.altitude != null ? pos.coords.altitude : null);
             updateAmbientTemp(here); // idle-only: current temperature in the (otherwise distance) tile
             if (acquireWatch != null) { navigator.geolocation.clearWatch(acquireWatch); acquireWatch = null; } // initial one-shot now redundant
-            if (following && !handMode) {
+            if (following && !handMode && !still) {
                 const moved = map.distance(map.getCenter(), L.latLng(here));
                 if (moved > AMBIENT_PAN_M) map.panTo(here, { animate: true });
             }
@@ -1034,6 +1061,7 @@
             if (ambientId != null || watchId != null) return;     // already on, or recording owns the watch
             if (!('geolocation' in navigator)) return;
             following = true; refreshRecenter();                  // idle follows by default (Maps-style; CENTER/drag still toggle it)
+            enableMotion();                                       // accelerometer also in idle → jitter guard works on the resting dot
             ambientId = navigator.geolocation.watchPosition(ambientOnPos, () => { },
                 { enableHighAccuracy: true, maximumAge: 2000, timeout: 12000 });
         }
