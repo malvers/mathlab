@@ -9,7 +9,9 @@ window.TrackerFuel = function (ctx) {
     const { map, toast, SUPABASE_URL, SUPABASE_KEY, navigateTo } = ctx;
     const ENDPOINT = SUPABASE_URL + '/functions/v1/fuel-prices';
 
-    const RAD_KM = 5;            // search radius around the current position
+    const RAD_CHOICES = [1, 2, 5];                                      // selectable search radii (km)
+    let radKm = parseInt(localStorage.getItem('trk-fuel-rad'), 10);     // search radius around the current position
+    if (!RAD_CHOICES.includes(radKm)) radKm = 5;                        // default 5 km
     const REFRESH_MS = 180000;   // re-poll prices at most every 3 min …
     const REFRESH_MOVE_M = 2000; // … or once we've moved 2 km from the last fetch
     const CHEAP_EPS = 0.02;      // ≥2 ct below the local median = "cheap" (green); ≥2 ct above = pricey
@@ -162,7 +164,7 @@ window.TrackerFuel = function (ctx) {
             const res = await fetch(ENDPOINT, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY },
-                body: JSON.stringify({ lat, lng, rad: RAD_KM }),
+                body: JSON.stringify({ lat, lng, rad: radKm }),
             });
             const d = await res.json().catch(() => ({}));
             if (!res.ok || !d.ok) { dbg('ERR ' + (d.error || res.status)); return; }
@@ -190,6 +192,16 @@ window.TrackerFuel = function (ctx) {
         fuelType = t; localStorage.setItem('trk-fuel-type', t);
         lastCheapId = null; render();                     // recolour + re-evaluate cheap for the new fuel
     }
+    // Change the search radius (1/2/5 km). Persist + re-poll immediately at the new radius around the
+    // last known position (don't wait for the move/time throttle).
+    function setRange(km) {
+        const r = parseInt(km, 10);
+        if (!RAD_CHOICES.includes(r) || r === radKm) return;
+        const lat = lastLat, lng = lastLng;
+        radKm = r; localStorage.setItem('trk-fuel-rad', String(r));
+        lastFetch = 0;
+        if (enabled && lat != null && lng != null && !busy) fetchStations(lat, lng);
+    }
     function setEnabled(on) {
         enabled = !!on; localStorage.setItem('trk-fuel-on', enabled ? '1' : '0');
         if (!enabled) { if (layer) layer.clearLayers(); }
@@ -201,9 +213,10 @@ window.TrackerFuel = function (ctx) {
     }
 
     return {
-        update, setFuelType, setEnabled, clear,
+        update, setFuelType, setRange, setEnabled, clear,
         getStations: () => stations,
         get fuelType() { return fuelType; },
+        get range() { return radKm; },
         get enabled() { return enabled; },
     };
 };
