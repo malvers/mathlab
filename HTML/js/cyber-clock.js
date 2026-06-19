@@ -70,8 +70,10 @@
             if (idx >= 0) { boxes[i].textContent = intPart[idx]; boxes[i].style.display = ''; }
             else { boxes[i].textContent = ''; boxes[i].style.display = 'none'; }
         }
-        // fractional slots → left-aligned
-        for (let i = 0; i < decN; i++) boxes[intN + i].textContent = decPart[i] || '0';
+        // fractional slots → left-aligned. Also restore display: a prior dash-fallback (callers that
+        // hide all slots and show one '–') may have left these display:none — int slots get un-hidden
+        // above, so do the same here or the decimal digit stays invisible (Doc: "33," bug, 2026-06-19).
+        for (let i = 0; i < decN; i++) { boxes[intN + i].textContent = decPart[i] || '0'; boxes[intN + i].style.display = ''; }
     }
     window.CyberClock = { mount: mount, set: set, mountNum: mountNum, setNum: setNum };
 })();

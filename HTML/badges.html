@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mini-Badges 70×12mm — Doc Alvers</title>
+    <title>Mini-Badges 70×14mm — Doc Alvers</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
@@ -14,9 +14,10 @@
 
         :root {
             --badge-w: 70mm;
-            --badge-h: 12mm;
-            --col-gap: 0mm;    /* badges butt together (Doc) — cut marks live in the margins */
-            --row-gap: 0mm;
+            --badge-h: 14mm;   /* short side +2mm (Doc) */
+            --col-gap: 4mm;    /* space between badges (Doc) — cut along each badge edge, the gap is the trim strip */
+            --row-gap: 4mm;
+            --bleed: 3mm;      /* Überfüllung: sky overshoots every edge so an off cut still has full sky to the rim */
         }
 
         * { box-sizing: border-box; }
@@ -53,20 +54,40 @@
             row-gap: var(--row-gap);
         }
 
-        /* The badge itself: 70×12mm, blue sky + a few soft clouds, thin dashed cut guide. */
+        /* The badge itself: 70×14mm, blue sky + a few soft clouds. The sky is painted by ::before with a bleed
+           (Überfüllung) so it overshoots every edge — a slightly off cut still has full sky to the rim. */
         .badge {
+            position: relative;          /* anchor + own stacking context for the bleeding ::before */
+            z-index: 0;
             width: var(--badge-w);
             height: var(--badge-h);
-            /* no border — badges butt together seamlessly; cutting is guided by the margin marks only */
-            overflow: hidden;
+            /* no border, no overflow clip — the sky must bleed OUT past the badge box into the gap */
             display: flex;
             align-items: center;
-            justify-content: flex-end;   /* all text right-aligned (Doc, test) */
+            justify-content: flex-end;   /* fronts: hole is on the left → push the name to the right edge */
             text-align: right;
             padding-right: 3mm;
             color: #14365a;
+        }
+
+        /* Backs flip on the long edge, so their hole lands on the RIGHT — left-align the text so the URL
+           never runs into the punch hole. */
+        .badge.back-badge {
+            justify-content: flex-start;
+            text-align: left;
+            padding-right: 0;
+            padding-left: 3mm;
+        }
+
+        /* Bleed layer (Überfüllung): the sky grown --bleed past every side and sitting behind the text, so the
+           gap between badges is filled from both neighbours and the cut line always lands inside printed sky. */
+        .badge::before {
+            content: '';
+            position: absolute;
+            inset: calc(-1 * var(--bleed));
+            z-index: -1;
             /* Real sky photo (CC0, „Fluffy Clouds", Wikimedia Commons) + a translucent white wash so it
-               reads softer/lighter and the dark text stays legible. Raise the 0.40 alpha for even lighter. */
+               reads softer/lighter and the dark text stays legible. Raise the 0.52 alpha for even lighter. */
             background-image: linear-gradient(rgba(255, 255, 255, 0.52), rgba(255, 255, 255, 0.52)), url('resources/sky-clouds.jpg');
             background-size: cover;
             background-position: center;
@@ -133,8 +154,8 @@
         (Mac) bzw. Drucker <b>„Als PDF speichern"</b> wählen → landet in Downloads. Wichtig: Skalierung
         <b>100 %</b>, <b>A4</b>, und <b>„Hintergrundgrafiken/Background graphics" aktivieren</b> (sonst fehlt
         der Himmel). Zum echten Druck: <b>beidseitig</b>, an der <b>langen Kante</b> wenden — Seite 1 = Namen,
-        Seite 2 = identische Rückseiten. Die Badges stoßen aneinander — an den <b>Schnittmarken</b> am Rand
-        ausrichten und durchschneiden.
+        Seite 2 = identische Rückseiten. Zwischen den Badges ist eine Lücke — an den <b>Schnittmarken</b> am Rand
+        ausrichten und an jeder Badge-Kante durchschneiden (der Zwischenraum fällt als Streifen weg).
     </div>
 
     <!-- Page 1: fronts (names) -->
@@ -159,26 +180,32 @@
             fronts.appendChild(f);
 
             const b = document.createElement('div');
-            b.className = 'badge';
+            b.className = 'badge back-badge';
             b.innerHTML = '<div class="back">' + BACK.join('<br>') + '</div>';
             backs.appendChild(b);
         });
 
-        // Cut marks in the margins at EVERY cut line — the badges butt together, so the guides live outside
-        // the block. Align a blade between two opposite marks to make each cut.
+        // Cut marks in the margins at EVERY badge edge — the badges no longer butt together, so each badge is
+        // cut on all four sides (the gap between them is the trim strip). Geometry + gaps are read from the CSS
+        // custom properties so there is ONE source of truth; align a blade between two opposite marks per cut.
         function addMarks(block) {
-            const W = 70, H = 12, COLS = 2, ROWS = Math.ceil(NAMES.length / 2), LEN = 4, OFF = 1, TH = 0.15; // mm
-            const bw = COLS * W, bh = ROWS * H;
+            const cs = getComputedStyle(document.documentElement);
+            const mm = (v) => parseFloat(cs.getPropertyValue(v));   // "70mm" → 70 (all values share the mm unit)
+            const W = mm('--badge-w'), H = mm('--badge-h'), CG = mm('--col-gap'), RG = mm('--row-gap');
+            const COLS = 2, ROWS = Math.ceil(NAMES.length / 2), LEN = 4, OFF = 1, TH = 0.15; // mm
+            const bw = COLS * W + (COLS - 1) * CG, bh = ROWS * H + (ROWS - 1) * RG;
             function tick(s) { const d = document.createElement('div'); d.className = 'cmark'; Object.assign(d.style, s); block.appendChild(d); }
-            for (let c = 0; c <= COLS; c++) {            // vertical cut lines → ticks above + below the block
-                const x = c * W;
-                tick({ left: (x - TH / 2) + 'mm', width: TH + 'mm', top: (-(OFF + LEN)) + 'mm', height: LEN + 'mm' });
-                tick({ left: (x - TH / 2) + 'mm', width: TH + 'mm', top: (bh + OFF) + 'mm', height: LEN + 'mm' });
+            for (let c = 0; c < COLS; c++) {            // vertical cut lines → both edges of each column, ticks above + below the block
+                [c * (W + CG), c * (W + CG) + W].forEach(function (x) {
+                    tick({ left: (x - TH / 2) + 'mm', width: TH + 'mm', top: (-(OFF + LEN)) + 'mm', height: LEN + 'mm' });
+                    tick({ left: (x - TH / 2) + 'mm', width: TH + 'mm', top: (bh + OFF) + 'mm', height: LEN + 'mm' });
+                });
             }
-            for (let r = 0; r <= ROWS; r++) {            // horizontal cut lines → ticks left + right of the block
-                const y = r * H;
-                tick({ top: (y - TH / 2) + 'mm', height: TH + 'mm', left: (-(OFF + LEN)) + 'mm', width: LEN + 'mm' });
-                tick({ top: (y - TH / 2) + 'mm', height: TH + 'mm', left: (bw + OFF) + 'mm', width: LEN + 'mm' });
+            for (let r = 0; r < ROWS; r++) {            // horizontal cut lines → both edges of each row, ticks left + right of the block
+                [r * (H + RG), r * (H + RG) + H].forEach(function (y) {
+                    tick({ top: (y - TH / 2) + 'mm', height: TH + 'mm', left: (-(OFF + LEN)) + 'mm', width: LEN + 'mm' });
+                    tick({ top: (y - TH / 2) + 'mm', height: TH + 'mm', left: (bw + OFF) + 'mm', width: LEN + 'mm' });
+                });
             }
         }
         addMarks(document.getElementById('block-fronts'));
