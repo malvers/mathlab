@@ -41,6 +41,9 @@
         'kein Monolog. Du hast das Werkzeug change_setting: damit änderst du sichtbare Tracker-UI-Einstellungen ' +
         '(Farben, Größe, Position, Sichtbarkeit), z.B. "mach die Uhr cyan" oder "Banner nach unten". Setze es ' +
         'NUR ein, wenn Doc klar um eine Änderung bittet, und bestätige die Aktion danach in einem kurzen Satz. ' +
+        'Du kannst Doc außerdem NAVIGIEREN: bittet er, irgendwohin gebracht/gefahren zu werden oder um eine Route ' +
+        'zu einem Ort, nutze das Werkzeug navigate_to — löse den (oft umgangssprachlichen) Ort aus deinem Wissen zu ' +
+        'einer möglichst genauen Adresse auf und übergib sie; bestätige danach kurz, wohin du routest. ' +
         'Sonst antworte einfach kurz und nah.';
 
     // change_setting → solita-config edits HTML/config.json (the tracker's OWN live config) and commits it;
@@ -56,19 +59,24 @@
     }];
 
     async function execTool(name, input, pwd) {
-        if (name !== 'change_setting') return { ok: false, summary: 'Unbekanntes Werkzeug: ' + name };
-        try {
-            const r = await fetch(CFG_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'apikey': SB_ANON, 'Authorization': 'Bearer ' + SB_ANON, 'x-app-pass': pwd },
-                body: JSON.stringify({ instruction: String((input && input.instruction) || '') })
-            });
-            const d = await r.json().catch(() => ({}));
-            if (!r.ok) return { ok: false, summary: 'Fehlgeschlagen: ' + (d.error || ('HTTP ' + r.status)) };
-            // The change is committed, but it goes live via GitHub Pages + the 20 s config poll — so it is
-            // NOT instant. Tell Doc to expect a short delay (from the tool result, not the persona prompt).
-            return { ok: true, summary: 'Einstellung geändert (config v' + d.version + '). Sag Doc dazu, dass es ein paar Minuten dauern kann, bis er es sieht.' };
-        } catch (e) { return { ok: false, summary: 'Fehler: ' + ((e && e.message) || e) }; }
+        if (name === 'change_setting') {
+            try {
+                const r = await fetch(CFG_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'apikey': SB_ANON, 'Authorization': 'Bearer ' + SB_ANON, 'x-app-pass': pwd },
+                    body: JSON.stringify({ instruction: String((input && input.instruction) || '') })
+                });
+                const d = await r.json().catch(() => ({}));
+                if (!r.ok) return { ok: false, summary: 'Fehlgeschlagen: ' + (d.error || ('HTTP ' + r.status)) };
+                // The change is committed, but it goes live via GitHub Pages + the 20 s config poll — so it is
+                // NOT instant. Tell Doc to expect a short delay (from the tool result, not the persona prompt).
+                return { ok: true, summary: 'Einstellung geändert (config v' + d.version + '). Sag Doc dazu, dass es ein paar Minuten dauern kann, bis er es sieht.' };
+            } catch (e) { return { ok: false, summary: 'Fehler: ' + ((e && e.message) || e) }; }
+        }
+        // Registered add-on tools (e.g. js/solita-navigate.js push into window.SolitaTools) — run their handler.
+        const ext = window.SolitaTools && window.SolitaTools.handlers && window.SolitaTools.handlers[name];
+        if (ext) { try { return await ext(input, pwd); } catch (e) { return { ok: false, summary: 'Fehler: ' + ((e && e.message) || e) }; } }
+        return { ok: false, summary: 'Unbekanntes Werkzeug: ' + name };
     }
 
     // ---- UI: a reply bubble + a (detached) state element. Solita is now woken by a LONG-PRESS on the
@@ -130,9 +138,14 @@
         apiUrl: AI_URL, anonKey: SB_ANON, getPwd: getPwd,
         getModel: function () { return 'claude-sonnet-4-6'; },
         getSystem: function () { return PERSONA; },
-        getTools: function () { return TOOLS; },
+        getTools: function () { return TOOLS.concat((window.SolitaTools && window.SolitaTools.specs) || []); },
         execTool: execTool,
-        toolBadge: function (n) { speakBadge(n); return n === 'change_setting' ? '🔧 ich ändere die Einstellung …' : ''; },
+        toolBadge: function (n, input) {
+            speakBadge(n);
+            if (n === 'change_setting') return '🔧 ich ändere die Einstellung …';
+            const xb = window.SolitaTools && window.SolitaTools.badges && window.SolitaTools.badges[n];
+            return xb ? xb(input) : '';
+        },
         storage: { history: 'tracker_solita_history', summary: 'tracker_solita_summary' },
         onTyping: function (on) { if (on) setState('thinking'); },
         onAssistant: function (text) { bubble(text, true); },
