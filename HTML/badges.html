@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mini-Badges 70×12mm — Doc Alvers</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
+    <style>
+        /* Exact A4, no printer margins — the sheet owns its own inner padding. */
+        @page { size: A4 portrait; margin: 0; }
+
+        :root {
+            --badge-w: 70mm;
+            --badge-h: 12mm;
+            --col-gap: 0mm;    /* badges butt together (Doc) — cut marks live in the margins */
+            --row-gap: 0mm;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            background: #555;                 /* screen only — frames the white sheets */
+            font-family: 'Orbitron', sans-serif;
+            -webkit-print-color-adjust: exact; /* keep the sky when printing (also tick "Background graphics") */
+            print-color-adjust: exact;
+        }
+
+        /* One A4 page. */
+        .sheet {
+            width: 210mm;
+            height: 297mm;
+            background: #fff;
+            margin: 8mm auto;                 /* screen spacing; ignored in print */
+            box-shadow: 0 2px 14px rgba(0, 0, 0, 0.4);
+            display: flex;                    /* centre the badge block → equal crop-mark margins */
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* The badge block (the 2×12 grid). Cut marks are absolutely positioned in its margins. */
+        .block { position: relative; }
+        .cmark { position: absolute; background: #1a1a1a; }
+
+        .grid {
+            display: grid;
+            grid-template-columns: var(--badge-w) var(--badge-w);
+            justify-content: center;
+            column-gap: var(--col-gap);
+            row-gap: var(--row-gap);
+        }
+
+        /* The badge itself: 70×12mm, blue sky + a few soft clouds, thin dashed cut guide. */
+        .badge {
+            width: var(--badge-w);
+            height: var(--badge-h);
+            /* no border — badges butt together seamlessly; cutting is guided by the margin marks only */
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;   /* all text right-aligned (Doc, test) */
+            text-align: right;
+            padding-right: 3mm;
+            color: #14365a;
+            /* Real sky photo (CC0, „Fluffy Clouds", Wikimedia Commons) + a translucent white wash so it
+               reads softer/lighter and the dark text stays legible. Raise the 0.40 alpha for even lighter. */
+            background-image: linear-gradient(rgba(255, 255, 255, 0.52), rgba(255, 255, 255, 0.52)), url('resources/sky-clouds.jpg');
+            background-size: cover;
+            background-position: center;
+        }
+
+        /* Front = the first name. Scales down a touch for the longer ones. */
+        .badge .name {
+            font-weight: 900;
+            font-size: 5mm;
+            letter-spacing: 0.4mm;
+            line-height: 1;
+            text-shadow: 0 0.3mm 0.6mm rgba(255, 255, 255, 0.6);
+            white-space: nowrap;
+        }
+
+        /* Back = three fixed lines. */
+        .badge .back {
+            font-weight: 700;
+            font-size: 2.3mm;
+            line-height: 1.45;
+            letter-spacing: 0.2mm;
+            text-shadow: 0 0.2mm 0.5mm rgba(255, 255, 255, 0.6);
+        }
+
+        /* Screen-only print hint. */
+        .hint {
+            max-width: 210mm;
+            margin: 16mm auto 0;
+            color: #eee;
+            font-family: system-ui, sans-serif;
+            font-size: 14px;
+            line-height: 1.5;
+            padding: 0 8mm;
+        }
+        .hint b { color: #fff; }
+        /* Screen-only "save as PDF" button. */
+        #pdf-btn {
+            position: fixed;
+            top: 14px;
+            right: 14px;
+            z-index: 10;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            font-size: 14px;
+            letter-spacing: 0.5px;
+            color: #14365a;
+            background: linear-gradient(180deg, #aed8f7, #7bbef0);
+            border: 1px solid rgba(20, 54, 90, 0.4);
+            border-radius: 10px;
+            padding: 10px 16px;
+            cursor: pointer;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+        }
+        #pdf-btn:active { transform: scale(0.97); }
+
+        @media print { .hint, #pdf-btn { display: none; } body { background: #fff; } .sheet { margin: 0; box-shadow: none; } }
+    </style>
+</head>
+
+<body>
+    <button id="pdf-btn" type="button" onclick="window.print()">⬇ Als PDF speichern</button>
+    <div class="hint">
+        <b>PDF:</b> oben rechts <b>„⬇ Als PDF speichern"</b> klicken → im Dialog Ziel <b>„Als PDF sichern"</b>
+        (Mac) bzw. Drucker <b>„Als PDF speichern"</b> wählen → landet in Downloads. Wichtig: Skalierung
+        <b>100 %</b>, <b>A4</b>, und <b>„Hintergrundgrafiken/Background graphics" aktivieren</b> (sonst fehlt
+        der Himmel). Zum echten Druck: <b>beidseitig</b>, an der <b>langen Kante</b> wenden — Seite 1 = Namen,
+        Seite 2 = identische Rückseiten. Die Badges stoßen aneinander — an den <b>Schnittmarken</b> am Rand
+        ausrichten und durchschneiden.
+    </div>
+
+    <!-- Page 1: fronts (names) -->
+    <div class="sheet"><div class="block" id="block-fronts"><div class="grid" id="fronts"></div></div></div>
+    <!-- Page 2: backs (identical 3-line text) -->
+    <div class="sheet"><div class="block" id="block-backs"><div class="grid" id="backs"></div></div></div>
+
+    <script>
+        // 24 first names (alphabetical, incl. Bruno).
+        const NAMES = ['Aria', 'Bella', 'Bruno', 'Christa', 'Elise', 'Fiby', 'Frederik', 'Fritz', 'Greta',
+            'Hannah', 'Hannes', 'Hugo', 'Irma', 'Leila', 'Lennard', 'Leo', 'Leonie', 'Linus', 'Max',
+            'Pepe', 'Pia', 'Raphael', 'Rosalinde', 'Simon'];
+        const BACK = ['THINK THE IMPOSSIBLE', 'VITA SOMNIUM BREVE', 'WWW.DOCALVERS.DE'];
+
+        const fronts = document.getElementById('fronts');
+        const backs = document.getElementById('backs');
+        NAMES.forEach(function (n) {
+            const f = document.createElement('div');
+            f.className = 'badge';
+            f.innerHTML = '<div class="name">' + n + '</div>';
+            // shrink very long names so they never clip the 70mm strip
+            if (n.length >= 9) f.querySelector('.name').style.fontSize = '4.2mm';
+            fronts.appendChild(f);
+
+            const b = document.createElement('div');
+            b.className = 'badge';
+            b.innerHTML = '<div class="back">' + BACK.join('<br>') + '</div>';
+            backs.appendChild(b);
+        });
+
+        // Cut marks in the margins at EVERY cut line — the badges butt together, so the guides live outside
+        // the block. Align a blade between two opposite marks to make each cut.
+        function addMarks(block) {
+            const W = 70, H = 12, COLS = 2, ROWS = 12, LEN = 4, OFF = 1, TH = 0.15; // mm
+            const bw = COLS * W, bh = ROWS * H;
+            function tick(s) { const d = document.createElement('div'); d.className = 'cmark'; Object.assign(d.style, s); block.appendChild(d); }
+            for (let c = 0; c <= COLS; c++) {            // vertical cut lines → ticks above + below the block
+                const x = c * W;
+                tick({ left: (x - TH / 2) + 'mm', width: TH + 'mm', top: (-(OFF + LEN)) + 'mm', height: LEN + 'mm' });
+                tick({ left: (x - TH / 2) + 'mm', width: TH + 'mm', top: (bh + OFF) + 'mm', height: LEN + 'mm' });
+            }
+            for (let r = 0; r <= ROWS; r++) {            // horizontal cut lines → ticks left + right of the block
+                const y = r * H;
+                tick({ top: (y - TH / 2) + 'mm', height: TH + 'mm', left: (-(OFF + LEN)) + 'mm', width: LEN + 'mm' });
+                tick({ top: (y - TH / 2) + 'mm', height: TH + 'mm', left: (bw + OFF) + 'mm', width: LEN + 'mm' });
+            }
+        }
+        addMarks(document.getElementById('block-fronts'));
+        addMarks(document.getElementById('block-backs'));
+    </script>
+</body>
+
+</html>
