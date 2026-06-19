@@ -665,12 +665,7 @@
             if (el) el.remove();
         }
 
-        async function sendMessage() {
-            let userText = messageInput.value.trim();
-            const pwd = getPwd();
-
-            if (!userText) return;
-
+        function normalizeVoiceCommand(userText) {
             // Voice: spoken "slash ui" / "slash list" arrives as WORDS (not "/ui") → map to the typed command
             // so it triggers instead of going to Claude (which would just "think"). Only known commands convert.
             const _sm = userText.toLowerCase().match(/^(?:slash|splash|flash)\s+(.+?)[\s.!?]*$/);
@@ -679,7 +674,10 @@
                 const _M = { ui: 'ui', youeye: 'ui', youi: 'ui', list: 'list', liste: 'list', clear: 'clear', logout: 'logout', ausloggen: 'logout', abmelden: 'logout', wake: 'wake', aufwachen: 'wake', aufwecken: 'wake', wach: 'wake', de: 'de', deutsch: 'de', en: 'en', english: 'en', es: 'es', spanish: 'es', 'español': 'es', espanol: 'es' };
                 if (_M[_w]) userText = '/' + _M[_w];
             }
+            return userText;
+        }
 
+        async function handleBuiltInCommands(userText) {
             if (userText.toLowerCase() === '/clear') {
                 brain.clear();                             // wipe history + rolling summary + their storage
                 // Keep the visible transcript on screen (Doc: don't delete the text) — only her MEMORY is wiped.
@@ -688,13 +686,13 @@
                 messagesArea.scrollTop = messagesArea.scrollHeight;
                 messageInput.value = '';
                 messageInput.style.height = 'auto';
-                return;
+                return true;
             }
 
             if (userText.toLowerCase() === '/logout') {        // /logout → same as the spoken "log mich aus" + ☰ button
                 messageInput.value = ''; messageInput.style.height = 'auto';
                 if (window.solitaLogout) window.solitaLogout(); // mic off · clears the persisted pwd · shows the auth overlay
-                return;
+                return true;
             }
 
             if (userText.toLowerCase() === '/wake') {          // /wake → bring her up: ear ON (if off) + open the convo
@@ -702,7 +700,7 @@
                 if (window.solitaWake) window.solitaWake();      // mic on (if off) → „Ja?" + listen, like hearing "Solita"
                 messagesArea.insertAdjacentHTML('beforeend', '<div style="text-align:center;opacity:0.5;font-size:0.68rem;letter-spacing:1.5px;text-transform:uppercase;margin:12px 0;font-family:Orbitron,sans-serif;color:#cfe3ff;">— Solita wach · hört zu —</div>');
                 messagesArea.scrollTop = messagesArea.scrollHeight;
-                return;
+                return true;
             }
 
             if (userText.toLowerCase() === '/pause') {         // /pause → drop her into the quiet SLUMBER (dormant)
@@ -710,7 +708,7 @@
                 if (window.solitaPause) window.solitaPause();
                 messagesArea.insertAdjacentHTML('beforeend', '<div style="text-align:center;opacity:0.5;font-size:0.68rem;letter-spacing:1.5px;text-transform:uppercase;margin:12px 0;font-family:Orbitron,sans-serif;color:#cfe3ff;">— Solita schlummert · sag „Solita" oder /wake —</div>');
                 messagesArea.scrollTop = messagesArea.scrollHeight;
-                return;
+                return true;
             }
 
             if (userText.toLowerCase() === '/list') {
@@ -728,7 +726,7 @@
                 messagesArea.scrollTop = messagesArea.scrollHeight;
                 messageInput.value = '';
                 messageInput.style.height = 'auto';
-                return;
+                return true;
             }
 
             if (userText.trim().toLowerCase() === '/ui') {   // /ui → the changeable-UI table (shared with the show_ui_list tool)
@@ -737,7 +735,7 @@
                 showTyping();
                 await renderUiList();
                 hideTyping();
-                return;
+                return true;
             }
 
             const langCmd = userText.toLowerCase().match(/^\/(de|en|es)$/);
@@ -748,15 +746,51 @@
                 messagesArea.scrollTop = messagesArea.scrollHeight;
                 messageInput.value = '';
                 messageInput.style.height = 'auto';
-                return;
+                return true;
             }
 
+            return false;
+        }
+
+        function checkAuthAndReturnPwd(pwd) {
             if (!pwd) {
                 document.getElementById('cyber-auth-overlay').classList.add('visible');
                 setTimeout(() => document.getElementById('cyber-pwd-input')?.focus(), 100);
-                return;
+                return undefined;
             }
+            return pwd;
+        }
 
+        async function postConfigInstruction(instruction, pwd) {
+            sendButton.disabled = true;
+            showTyping();
+            try {
+                const r = await fetch(SOLITA_CONFIG_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'apikey': SB_ANON, 'Authorization': `Bearer ${SB_ANON}`, 'x-app-pass': pwd },
+                    body: JSON.stringify({ instruction })
+                });
+                const data = await r.json().catch(() => ({}));
+                hideTyping();
+                if (!r.ok) {
+                    let err = `Fehler ${r.status}`;
+                    if (r.status === 401) err = 'Falsches Passwort';
+                    else if (data && data.error) err += ' — ' + data.error;
+                    addMessage('assistant', `❌ Config: ${err}`);
+                } else {
+                    addMessage('assistant', `✓ Eingestellt (config v${data.version}).`);
+                    if (window.speakReply) window.speakReply('Erledigt.');
+                }
+            } catch (e) {
+                hideTyping();
+                addMessage('assistant', `❌ Config: ${e.message || e}`);
+            } finally {
+                sendButton.disabled = false;
+                messageInput.focus();
+            }
+        }
+
+        async function handleConfigOrUiMode(userText, pwd) {
             // ---- UI-Änderungs-Modus (primer) + Einzelbefehl "stell ein: …" → solita-config (live config) ----
             // In UI-Modus ist JEDER Satz eine Config-Änderung; rein via "UI Änderung"/"Änderung UI", raus via
             // "fertig"/EXIT. "stell ein: …" wirkt auch ohne Modus als Einzelbefehl. Nicht in den Chat gepusht.
@@ -775,7 +809,7 @@
                 setUiMode(false);
                 addMessage('assistant', 'UI-Modus aus. 🔧');
                 if (window.speakReply) window.speakReply('Alles klar.');
-                return;
+                return true;
             }
             if (!uiMode && wantsEnterUi && !oneShot) {           // enter UI mode
                 addMessage('user', userText);
@@ -783,46 +817,46 @@
                 setUiMode(true);
                 addMessage('assistant', 'UI-Modus an — sag deinen Wunsch, dann „go" (oder 4 s Pause). „fertig"/EXIT beendet.');
                 if (window.speakReply) window.speakReply('UI-Modus an. Sag deinen Wunsch, dann go.');
-                return;
+                return true;
             }
             if (uiMode || (oneShot && oneShot[1].trim())) {      // a config instruction
                 const instruction = oneShot ? oneShot[1].trim() : t;
                 addMessage('user', userText);
                 messageInput.value = ''; messageInput.style.height = 'auto';
-                sendButton.disabled = true;
-                showTyping();
-                try {
-                    const r = await fetch(SOLITA_CONFIG_URL, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'apikey': SB_ANON, 'Authorization': `Bearer ${SB_ANON}`, 'x-app-pass': pwd },
-                        body: JSON.stringify({ instruction })
-                    });
-                    const data = await r.json().catch(() => ({}));
-                    hideTyping();
-                    if (!r.ok) {
-                        let err = `Fehler ${r.status}`;
-                        if (r.status === 401) err = 'Falsches Passwort';
-                        else if (data && data.error) err += ' — ' + data.error;
-                        addMessage('assistant', `❌ Config: ${err}`);
-                    } else {
-                        addMessage('assistant', `✓ Eingestellt (config v${data.version}).`);
-                        if (window.speakReply) window.speakReply('Erledigt.');
-                    }
-                } catch (e) {
-                    hideTyping();
-                    addMessage('assistant', `❌ Config: ${e.message || e}`);
-                } finally {
-                    sendButton.disabled = false;
-                    messageInput.focus();
-                }
-                return;
+                await postConfigInstruction(instruction, pwd);
+                return true;
             }
+            return false;
+        }
 
+        function executeChatSend(userText) {
             addMessage('user', userText);
             messageInput.value = '';
             messageInput.style.height = 'auto';
             sendButton.disabled = true;
             brain.send(userText);   // the brain owns the turn: push history → tool-use loop → render via the wired callbacks
+        }
+
+        async function sendMessage() {
+            let userText = messageInput.value.trim();
+            const pwd = getPwd();
+
+            if (!userText) return;
+
+            // Voice: map spoken "slash …" words to the typed command.
+            userText = normalizeVoiceCommand(userText);
+
+            // Built-in slash commands (/clear /logout /wake /pause /list /ui /de /en /es).
+            if (await handleBuiltInCommands(userText)) return;
+
+            // Auth gate: no password → show the overlay and stop.
+            if (checkAuthAndReturnPwd(pwd) === undefined) return;
+
+            // UI-change mode + "stell ein: …" one-shot config → solita-config (live config).
+            if (await handleConfigOrUiMode(userText, pwd)) return;
+
+            // Normal turn: hand off to the brain.
+            executeChatSend(userText);
         }
         // ----- AUTO-LOGIN & AUTH-INITIALISIERUNG -----
         (async function initAuth() {
