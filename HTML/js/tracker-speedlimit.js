@@ -240,7 +240,11 @@ window.TrackerSpeedLimit = function (ctx) {
         if (still && curLimit != null) return;
         const now = Date.now();
         if (now - lastQ < MIN_INTERVAL_MS) return;
-        if (lastPos && haversine(here, lastPos) < MIN_MOVE_M) return;
+        // Once we HAVE a limit, only re-query after real travel (limits change per road segment, so no
+        // point hammering Overpass on the same one). But while we still have NO limit — cold start, or a
+        // failed/empty earlier query — keep retrying on the 5 s throttle so the sign appears quickly
+        // instead of staying "?" until 90 m of travel (Doc 2026-06-20: "?" stuck while walking slowly).
+        if (curLimit != null && lastPos && haversine(here, lastPos) < MIN_MOVE_M) return;
         lastQ = now; lastPos = here;
         query(here);
     }
