@@ -7,6 +7,7 @@
 > nichts** — sie verlinkt und destilliert. Stand der Code-Zeilen: 2026-06-12 (nach dem inline→module-Refactor).
 
 ## ⚡ Kurz-Übersicht
+- **BUG-10 · Doc 2026-06-20** — Navigation: Route-Fit ist statisch (nur einmal beim Start, passt sich beim Fahren nicht an)
 - 🔴 **BUG-9 · PRIO 0 — Doc 2026-06-14** — Voice-Navigation fehlt / nicht auffindbar (sollte gebaut sein)
 - **BUG-1** Speed-Anzeige km/h falsch · 🏗️ Fix gebaut (Anzeige vom Gate entkoppelt + Debug) · Feld-Test + Push offen
 - **BUG-2** Regenradar zeigt in DE keinen Regen
@@ -267,6 +268,39 @@ On-screen-Banner + persistenter Schalter „Sprachansage" (s. [`feature-requests
 3. **Anderes gemeint:** Doc will evtl. **vollständige** Voice-Steuerung, nicht nur die Abbiege-Ansage.
 **Erst klären/messen (Regel „nie raten"):** **eine Rückfrage** an Doc (welche Stelle genau?) + am Gerät prüfen:
 Schalter an? Spricht das Manöver-Banner? DEBUG-Window auf `speechSynthesis`-Fehler ansehen. **Nicht** blind „neu bauen".
+
+---
+
+## BUG-10 — Navigation: Route-Fit passt sich beim Fahren nicht an 🐞 offen
+**Quelle:** Doc 2026-06-20 (mündlich, zusammen mit dem Sprachansage-Fix): „Das Fit der Route muss
+**dynamisch** passieren. Das wird einmal gemacht beim Einschalten, aber dann nicht angepasst."
+**Priorität:** mittel (Komfort beim Navigieren — die Reststrecke läuft aus dem Bild).
+
+**Symptom:** Beim Nav-Start wird die **ganze** Route **einmal** ins Bild gerahmt; danach gleitet die Karte
+in die Crosshair-Follow-Ansicht. Beim Weiterfahren wird der Kartenausschnitt **nicht** an die schrumpfende
+**Reststrecke** angepasst — er folgt nur der Position (speed-zoom), das Ziel/der Rest bleibt außerhalb.
+
+**Ursache (belegt):** Der dynamische Reststrecken-Fit **existiert schon**, wird beim Navigieren aber
+**nicht automatisch aktiviert**:
+- Nav-Start macht **genau einen** `frameRoute()` (ganze Route), dann nach `NAV_OVERVIEW_MS` (3 s)
+  `centerOnPosition()` → reiner `following`-Modus. `fitMode` wird sogar explizit auf `false` gesetzt
+  (`HTML/js/tracker.js:1094`, `:1100-1106`).
+- Der bidirektionale Re-Fit auf die Reststrecke (`fitMode === 'remaining'` → `__nav.remainingBounds(here)`,
+  mit Hysterese + Cooldown) ist vorhanden in `HTML/js/tracker.js:751-758`, aber nur per **manuellem**
+  Durchschalten der FIT-Taste erreichbar (3-State: aus → 'all' → 'remaining').
+- `remainingBounds(here)` liefert bereits „aktuelle Position + alles voraus + Ziel" (`HTML/js/tracker-nav.js`).
+
+**Fix-Richtung (zur Entscheidung mit Doc — NICHT ungefragt bauen, Regel 2/4):** Beim Nav-Start nach dem
+einmaligen Overview statt (oder zusätzlich zu) `following` den **`fitMode = 'remaining'`** automatisch
+einschalten, sodass die Reststrecke laufend nachgerahmt wird (die Logik bei `:751-758` greift dann jeden Fix).
+Manuelles Übernehmen (Hand-Modus) / die FIT-Taste müssen das weiterhin überstimmen können.
+
+**Akzeptanz/Test:** Route setzen → START → losfahren: der sichtbare Ausschnitt zieht sich mit der
+Reststrecke zusammen, Ziel bleibt im Bild; kein Flattern (Hysterese/Cooldown); ZENTRIEREN/FIT/Hand-Pan
+übersteuern weiterhin sauber.
+
+**NICHT tun:** den Speed-Zoom der normalen Follow-Ansicht und den Reststrecken-Fit gleichzeitig am Zoom
+zerren lassen (in 'remaining' besitzt der Fit den Zoom — siehe `:732-735`).
 
 ---
 

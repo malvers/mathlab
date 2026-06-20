@@ -6,7 +6,9 @@
 // (CLAUDE.md rule 18):
 //   - Geocoding: Nominatim  (address → lat/lng)
 //   - Routing:   FOSSGIS OSRM (keyless) — routed-car (Straße) / routed-foot (Laufen) → geometry + maneuvers
-//   - Voice:     Web Speech API (speechSynthesis) — on-device, no key
+//   - Voice:     Solita cloud TTS (the `tts` edge fn, js/solita-voice.js) when present — the SAME channel
+//                that already speaks in the Pixel's Android WebView; speechSynthesis only as a fallback,
+//                because on-device speechSynthesis stays SILENT in that WebView (no voice engine bound).
 //
 // Additive: owns its own Leaflet layers (route polyline + destination pin), the #nav-panel UI and the
 // #nav-banner. The core (tracker.js) asks hasDestination() on START, feeds update([lat,lng]) on every
@@ -164,7 +166,7 @@ window.TrackerNav = function (ctx) {
         destLatLng = null; destLabel = '';
         maneuvers = null; mIdx = 0; annFar = false; mClosest = Infinity;
         hideBanner();
-        try { if ('speechSynthesis' in window) window.speechSynthesis.cancel(); } catch (e) { }
+        stopSpeech();
         refreshPanel();
         refreshHome(); // dest gone, but the FAB stays if a home is stored
     }
@@ -454,7 +456,27 @@ window.TrackerNav = function (ctx) {
         setInterval(() => { try { const ss = window.speechSynthesis; if (ss && ss.speaking && ss.paused) ss.resume(); } catch (e) { } }, 4000);
     }
 
+    // Stop ANY in-flight guidance, on whichever engine spoke it (cloud audio + on-device speechSynthesis).
+    function stopSpeech() {
+        try { if (window.SolitaVoice && window.SolitaVoice.stop) window.SolitaVoice.stop(); } catch (e) { }
+        try { if ('speechSynthesis' in window) window.speechSynthesis.cancel(); } catch (e) { }
+    }
+
+    // Speak a guidance line. PRIMARY: Solita's cloud TTS (Google via the `tts` edge fn, js/solita-voice.js) —
+    // the SAME path that already speaks in the Pixel's Android WebView, where on-device speechSynthesis stays
+    // silent (note #8). It plays an mp3 through a single shared <audio>, so a new line interrupts the previous
+    // one (no overlap). FALLBACK: speechSynthesis, only when SolitaVoice isn't loaded (desktop/standalone).
     function speak(text) {
+        if (!voiceOn) { ttsLog('skip (voice off)'); return; }
+        if (window.SolitaVoice && window.SolitaVoice.speak) {
+            try { window.SolitaVoice.speak(text); ttsLog('SolitaVoice ▶ "' + text + '"'); return; }
+            catch (e) { ttsLog('SolitaVoice failed: ' + e + ' — fallback to speechSynthesis'); }
+        }
+        speakSynth(text);
+    }
+
+    // On-device Web-Speech fallback (kept for desktop/standalone; SILENT in the Android WebView — see speak()).
+    function speakSynth(text) {
         if (!voiceOn || !hasTts) { ttsLog(voiceOn ? 'skip (no API)' : 'skip (voice off)'); return; }
         try {
             if (!ttsPrimed) primeSpeech();                 // belt-and-braces if no tap seen yet
@@ -634,7 +656,7 @@ window.TrackerNav = function (ctx) {
         voiceBox.addEventListener('change', () => {
             voiceOn = voiceBox.checked;
             localStorage.setItem(VOICE_KEY, voiceOn ? '1' : '0');
-            if (!voiceOn) { try { window.speechSynthesis.cancel(); } catch (e) { } }
+            if (!voiceOn) stopSpeech();
         });
     }
 
