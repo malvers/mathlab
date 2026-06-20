@@ -10,7 +10,10 @@
     /* Bottom offset for the fixed controls: safe-area added ON TOP of a solid base,
        so on Android (where safe-area-inset-bottom is usually 0) the START button still
        clears the Leaflet attribution instead of sitting right on top of it. */
-    --btm: calc(env(safe-area-inset-bottom, 0px) + clamp(48px, 9vw, 62px));
+    --btm: calc(env(safe-area-inset-bottom, 0px) + clamp(66px, 9vw, 80px)); /* raised +18px so the "50 m" scale + ⓘ clear the round buttons (Doc 2026-06-20) */
+    /* Diameter of the big round control buttons (START/STOP/LÖSCHEN). Single source of truth — also
+       referenced by #recenter-fab / #resume-fab so they stay glued above START. ~3% smaller (Doc 2026-06-20). */
+    --ctrl-dia: clamp(79px, 24.4vw, 108px);
 }
 
 *,
@@ -437,8 +440,8 @@ path.pos-marker.pos-shown {
 #trk-toggle,
 #trk-finish,
 #trk-discard {
-    width: clamp(81px, 25.2vw, 111px);
-    height: clamp(81px, 25.2vw, 111px);
+    width: var(--ctrl-dia);
+    height: var(--ctrl-dia);
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -482,7 +485,7 @@ path.pos-marker.pos-shown {
 #recenter-fab {
     position: fixed;
     left: 50%;
-    bottom: calc(var(--btm) + clamp(81px, 25.2vw, 111px) + 14px);
+    bottom: calc(var(--btm) + var(--ctrl-dia) + 14px);
     transform: translateX(-50%) translateY(8px);
     z-index: 500;
     display: inline-flex;
@@ -541,7 +544,7 @@ path.pos-marker.pos-shown {
 #resume-fab {
     position: fixed;
     left: 50%;
-    bottom: calc(var(--btm) + clamp(81px, 25.2vw, 111px) + 14px + 60px); /* one 46px row + gap above #recenter-fab */
+    bottom: calc(var(--btm) + var(--ctrl-dia) + 14px + 60px); /* one 46px row + gap above #recenter-fab */
     transform: translateX(-50%) translateY(8px);
     z-index: 500;
     display: inline-flex;
