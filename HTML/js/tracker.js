@@ -2123,6 +2123,12 @@ ${pts}
         __nav = TrackerNav({
             map, $, toast, showPanel, hidePanels,
             get posMarker() { return posMarker; },
+            // Dialog "STARTEN": from idle → begin recording + navigation (toggle then shows PAUSE);
+            // while already recording (dialog reopened mid-trip) → just (re)route to the new destination.
+            startTracking: () => {
+                if (trkState === 'idle') beginTracking();
+                else if (__nav && __nav.hasDestination()) __nav.startNavigation();
+            },
         });
         // ---- Speed-limit sign → js/tracker-speedlimit.js. Position-driven (fed from onPosition),
         //      independent of navigation; owns its own #speed-sign badge. ----
