@@ -7,8 +7,8 @@
 > nichts** — sie verlinkt und destilliert. Stand der Code-Zeilen: 2026-06-12 (nach dem inline→module-Refactor).
 
 ## ⚡ Kurz-Übersicht
-- **BUG-10 · Doc 2026-06-20** — Navigation: Route-Fit ist statisch (nur einmal beim Start, passt sich beim Fahren nicht an)
-- 🔴 **BUG-9 · PRIO 0 — Doc 2026-06-14** — Voice-Navigation fehlt / nicht auffindbar (sollte gebaut sein)
+- ✅ **BUG-10 · gefixt 2026-06-20** — Navigation: Route-Fit jetzt dynamisch (Reststrecken-Fit beim Fahren)
+- ✅ **BUG-9 · gefixt 2026-06-20** — Abbiege-Ansagen stumm aufm Pixel → jetzt über Cloud-TTS (`SolitaVoice`)
 - **BUG-1** Speed-Anzeige km/h falsch · 🏗️ Fix gebaut (Anzeige vom Gate entkoppelt + Debug) · Feld-Test + Push offen
 - **BUG-2** Regenradar zeigt in DE keinen Regen
 - **BUG-3** 🅿️ Track strichelt bei Aufnahme-Pause
@@ -257,24 +257,46 @@ zeigt — tatsächlich ist es der **Zwinger** (beide liegen dicht beieinander).
 
 ---
 
-## BUG-9 — Voice-Navigation fehlt / nicht auffindbar 🐞 offen · 🔍 erst klären · 🔴 PRIO 0
+## BUG-9 — Voice-Navigation: Abbiege-Ansagen stumm auf dem Pixel ✅ gefixt 2026-06-20
 **Quelle:** [`../../ideen-wunsche.md`](../../ideen-wunsche.md) (Doc 2026-06-14): „Warum haben wir keine Voice
-Navigation? Ich meine, das wäre schon eingebaut."
-**Fakt:** Die Sprach-**Abbiegeansage IST gebaut** — `HTML/js/tracker-nav.js` (`speechSynthesis` de-DE) +
-On-screen-Banner + persistenter Schalter „Sprachansage" (s. [`feature-requests.md`](feature-requests.md) →
-„Bereits gebaut"). Doc erlebt sie aber nicht → eins von:
-1. **Discoverability:** Schalter „Sprachansage" steht auf aus / wird nicht gefunden.
-2. **Regression:** TTS feuert nicht (Stimme/Autoplay-Policy/`speechSynthesis` im WebView, Modul nicht eingehängt).
-3. **Anderes gemeint:** Doc will evtl. **vollständige** Voice-Steuerung, nicht nur die Abbiege-Ansage.
-**Erst klären/messen (Regel „nie raten"):** **eine Rückfrage** an Doc (welche Stelle genau?) + am Gerät prüfen:
-Schalter an? Spricht das Manöver-Banner? DEBUG-Window auf `speechSynthesis`-Fehler ansehen. **Nicht** blind „neu bauen".
+Navigation? …" → am 2026-06-20 von Doc präzisiert: die **gesprochenen Abbiege-Ansagen** („In 120 Metern
+rechts abbiegen") kommen auf dem **Pixel** nicht.
+
+**✅ Ursache gefunden + gefixt (2026-06-20):** Die Ansagen liefen über **`window.speechSynthesis`** (on-device
+Web-Speech-TTS). Im **Android-System-WebView** (die Pixel-APK ist Capacitor, lädt die Seite als WebView)
+bleibt `speechSynthesis` **stumm** — keine Voice-Engine gebunden, `getVoices()` leer. **Beweis:** Solita
+selbst spricht auf dem Gerät sehr wohl — aber über einen ANDEREN Kanal: Cloud-TTS via `tts`-Edge-Function
+(Google) → mp3 über ein `<audio>`-Element (`HTML/js/solita-voice.js`, `window.SolitaVoice`). `tracker-nav.js`
+war die **einzige** Stelle, die noch `speechSynthesis` nutzte.
+
+**Fix (`HTML/js/tracker-nav.js`):** `speak()` ruft jetzt **primär `SolitaVoice.speak(text)`** (denselben
+Cloud-Weg, der auf dem Pixel schon spricht); `speechSynthesis` bleibt nur als **Fallback** (`speakSynth()`,
+für Desktop/Standalone ohne `SolitaVoice`). Neue Helfer `stopSpeech()` stoppt BEIDE Engines — in
+`clearRoute()` und beim Voice-Toggle. Logs ins DEBUG-Window (`tts: SolitaVoice ▶ "…"`).
+
+**Für andere Agenten — WICHTIG:** Nie wieder `speechSynthesis` für neue Sprachausgabe im Tracker/WebView —
+immer `window.SolitaVoice.speak()` (Cloud-TTS) nutzen. Kostet Netz (kurze Sätze, ok); offline schweigt sie.
+Ein gemeinsamer `<audio>`-Kanal → neue Ansage unterbricht die laufende (gewollt, kein Überlappen).
+
+**Akzeptanz/Test (Doc, am Gerät):** Ziel setzen → START → fahren: Ansage kommt; DEBUG zeigt `SolitaVoice ▶`.
+**Offen (separat):** Vollständige Voice-*Steuerung* per Sprachbefehl bleibt ein eigenes Thema (Solita-STT).
 
 ---
 
-## BUG-10 — Navigation: Route-Fit passt sich beim Fahren nicht an 🐞 offen
+## BUG-10 — Navigation: Route-Fit passt sich beim Fahren nicht an ✅ gefixt 2026-06-20
 **Quelle:** Doc 2026-06-20 (mündlich, zusammen mit dem Sprachansage-Fix): „Das Fit der Route muss
 **dynamisch** passieren. Das wird einmal gemacht beim Einschalten, aber dann nicht angepasst."
 **Priorität:** mittel (Komfort beim Navigieren — die Reststrecke läuft aus dem Bild).
+
+**✅ Fix (2026-06-20, `HTML/js/tracker.js`):** Nach dem einmaligen Routen-Overview schaltet der Nav-Start
+jetzt automatisch in den **dynamischen Reststrecken-Fit** (`fitMode = 'remaining'`) statt in den reinen
+Crosshair-Follow — der vorhandene bidirektionale Re-Fit-Loop (`:751-758`, mit Hysterese + Cooldown) rahmt
+die schrumpfende Reststrecke dann bei JEDEM Fix nach. Fundstelle: der `navOverviewTimer`-Callback im
+START-Handler (vorher `centerOnPosition()`; jetzt `remainingBounds` → `fitMode='remaining'`, Fallback auf
+`centerOnPosition()` falls noch keine Route-Geometrie da ist). Hand-Pan/CENTER/FIT übersteuern weiterhin
+(canceln den Overview-Timer bzw. setzen `fitMode`/`following` selbst).
+**Für andere Agenten:** Der 3-State der FIT-Taste (aus → 'all' → 'remaining') bleibt unverändert; START
+springt nur direkt auf 'remaining'. In 'remaining' besitzt der Fit den Zoom (Speed-Zoom pausiert, `:732-735`).
 
 **Symptom:** Beim Nav-Start wird die **ganze** Route **einmal** ins Bild gerahmt; danach gleitet die Karte
 in die Crosshair-Follow-Ansicht. Beim Weiterfahren wird der Kartenausschnitt **nicht** an die schrumpfende

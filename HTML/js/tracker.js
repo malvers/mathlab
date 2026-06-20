@@ -130,8 +130,9 @@
         // the auto-mode that was active before the take-over (remembered in `savedAuto`).
         let handMode = false;
         let savedAuto = null; // { following, fitMode } captured when hand-mode began → the resume target
-        // Nav start shows the whole route for a moment, THEN glides to the crosshair follow-view (note: the
-        // glide is centerOnPosition's flyTo). This timer holds that "moment"; any manual take-over cancels it.
+        // Nav start shows the whole route for a moment, THEN engages the DYNAMIC remaining-route fit
+        // (fitMode='remaining' → re-frames the rest as it shrinks; falls back to centerOnPosition's flyTo
+        // if no route geometry yet). This timer holds that "moment"; any manual take-over cancels it.
         let navOverviewTimer = null;
         const NAV_OVERVIEW_MS = 3000;
         // ≈ 5 mm from the map centre (CSS px ≈ 1/96 in → 5 mm ≈ 19 px); within that the dot is "centred".
@@ -1102,7 +1103,20 @@
                     navOverviewTimer = setTimeout(function () {
                         navOverviewTimer = null;
                         if (window.DebugWindow) DebugWindow.log('NAV glide fire: trkState=' + trkState + ' following=' + following);
-                        if (trkState === 'recording' && !following) centerOnPosition(); // glide to crosshair
+                        if (trkState !== 'recording' || following) return;   // stopped, or user took over during the hold
+                        // Dynamic route framing (Doc 2026-06-20, BUG-10): keep the REMAINING route in view and
+                        // re-fit it as it shrinks, instead of a one-shot crosshair glide that never re-frames.
+                        // From here the fitMode==='remaining' loop in onSuccess owns the camera (re-fit + zoom).
+                        const ll = posMarker && posMarker.getLatLng && posMarker.getLatLng();
+                        const rb = (ll && __nav && __nav.remainingBounds) ? __nav.remainingBounds([ll.lat, ll.lng]) : null;
+                        if (rb) {
+                            fitMode = 'remaining'; setFollowing(false);
+                            try { map.fitBounds(rb, { padding: fitPad(), animate: true, duration: 0.8 }); } catch (e) { }
+                            refreshRecenter();
+                            if (window.DebugWindow) DebugWindow.log('NAV → dynamic remaining-route fit');
+                        } else {
+                            centerOnPosition();   // no route geometry yet → fall back to the crosshair follow
+                        }
                     }, NAV_OVERVIEW_MS);
                 });
             } else {
