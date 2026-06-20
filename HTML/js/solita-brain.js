@@ -130,68 +130,91 @@
         // If the model calls a tool, execute it (host's executor), feed the result back, and continue —
         // until it gives a normal answer. Tool turns live ONLY in the local `msgs` array, so
         // conversationHistory stays string-only (no reload/persist surprises).
-        async function send(userText) {
-            const pwd = getPwd();
+        function checkDailyCapAtStart() {
             // Hard daily brake: refuse the whole turn once today's spend hit the cap (protects the 5€).
             if (daySpentEur() >= DAY_CAP_EUR) {
                 onError(new Error('Solita-Tageslimit (' + DAY_CAP_EUR.toFixed(2) + ' €) erreicht — Schutz gegen Leerlauf. Morgen wieder, oder cfg.dailyCapEur erhöhen.'));
                 onDone();
-                return;
+                return false;
             }
+            return true;
+        }
+
+        async function callModel(msgs, pwd) {
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'apikey': anonKey, 'Authorization': 'Bearer ' + anonKey, 'x-app-pass': pwd },
+                body: JSON.stringify({ model: getModel(), messages: msgs, tools: getTools(), max_tokens: 3000 })
+            });
+            if (!response.ok) {
+                let err = 'Fehler ' + response.status;
+                if (response.status === 401) err = 'Falsches Passwort';
+                else if (response.status === 402) err = 'Nicht genug Guthaben – AI-Konto aufladen';
+                else { try { const e = await response.json(); if (e && e.error) err += ' — ' + e.error; } catch (_) { } }
+                throw new Error(err);
+            }
+            return await response.json();
+        }
+
+        async function executeToolRound(msgs, blocks, textOut, pwd) {
+            // Model wants to act → record its turn, surface any interim text, then execute each tool_use
+            // and feed the results back as a user turn. Returns the extended message list for the next hop.
+            msgs = msgs.concat([{ role: 'assistant', content: blocks }]);
+            if (textOut.trim()) { onTyping(false); onAssistant(textOut); onTyping(true); }
+            const toolResults = [];
+            for (const blk of blocks) {
+                if (!blk || blk.type !== 'tool_use') continue;
+                onTyping(false); const _b = toolBadge(blk.name, blk.input); if (_b) onAssistant(_b); onTyping(true);
+                const res = await execTool(blk.name, blk.input, pwd);
+                toolResults.push({ type: 'tool_result', tool_use_id: blk.id, content: res.summary, is_error: !res.ok });
+            }
+            return msgs.concat([{ role: 'user', content: toolResults }]);
+        }
+
+        async function runToolUseLoop(msgs, pwd) {
+            let finalText = '(keine Antwort)';
+            let guard = 0;
+            let turnEur = 0;   // sum of all hops in THIS query (tool-loop included) → per-query cost
+            while (guard++ < 6) {
+                // Mid-turn brake: a pathological tool-loop must not blow past the daily cap either.
+                if (daySpentEur() >= DAY_CAP_EUR) { finalText = 'Tageslimit erreicht — ich stoppe hier, damit das Guthaben hält.'; break; }
+                const data = await callModel(msgs, pwd);
+                turnEur += accountUsage(getModel(), data.usage, 'chat') || 0;   // cost meter: every hop (tool-loop included)
+                const blocks = Array.isArray(data.content) ? data.content : [];
+                const textOut = (data.choices && data.choices[0] && data.choices[0].message.content) || '';
+
+                // Needs the updated claude edge fn; an OLD one returns no stop_reason → we fall straight to the text path.
+                if (data.stop_reason === 'tool_use' && blocks.some(b => b && b.type === 'tool_use')) {
+                    msgs = await executeToolRound(msgs, blocks, textOut, pwd);
+                    continue;   // let the model respond to the tool results
+                }
+
+                finalText = textOut || '(keine Antwort)';
+                break;
+            }
+            return { finalText, turnEur };
+        }
+
+        function finalizeAndSave(finalText, turnEur) {
+            conversationHistory.push({ role: 'assistant', content: finalText });   // persist final text only
+            saveHistory();
+            onPersist();        // host may push the updated log to the shared server (solita-sync.js)
+            onTyping(false);
+            onAssistant(finalText);
+            onCost(turnEur);    // show what this one query cost (sum of all hops)
+            onSpeak(finalText);
+            maybeSummarize();   // fold older turns into the rolling summary (best-effort, background)
+        }
+
+        async function send(userText) {
+            const pwd = getPwd();
+            if (!checkDailyCapAtStart()) return;   // daily cap hit → onError + onDone already fired, drop the turn
             conversationHistory.push({ role: 'user', content: userText });
             onTyping(true);
             try {
-                let msgs = buildRequestMessages();
-                let finalText = '(keine Antwort)';
-                let guard = 0;
-                let turnEur = 0;   // sum of all hops in THIS query (tool-loop included) → per-query cost
-                while (guard++ < 6) {
-                    // Mid-turn brake: a pathological tool-loop must not blow past the daily cap either.
-                    if (daySpentEur() >= DAY_CAP_EUR) { finalText = 'Tageslimit erreicht — ich stoppe hier, damit das Guthaben hält.'; break; }
-                    const response = await fetch(apiUrl, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'apikey': anonKey, 'Authorization': 'Bearer ' + anonKey, 'x-app-pass': pwd },
-                        body: JSON.stringify({ model: getModel(), messages: msgs, tools: getTools(), max_tokens: 3000 })
-                    });
-                    if (!response.ok) {
-                        let err = 'Fehler ' + response.status;
-                        if (response.status === 401) err = 'Falsches Passwort';
-                        else if (response.status === 402) err = 'Nicht genug Guthaben – AI-Konto aufladen';
-                        else { try { const e = await response.json(); if (e && e.error) err += ' — ' + e.error; } catch (_) { } }
-                        throw new Error(err);
-                    }
-                    const data = await response.json();
-                    turnEur += accountUsage(getModel(), data.usage, 'chat') || 0;   // cost meter: every hop (tool-loop included)
-                    const blocks = Array.isArray(data.content) ? data.content : [];
-                    const textOut = (data.choices && data.choices[0] && data.choices[0].message.content) || '';
-
-                    // Model wants to act → execute each tool_use, feed results back, loop. Needs the updated
-                    // claude edge fn; an OLD one returns no stop_reason → we fall straight to the text path.
-                    if (data.stop_reason === 'tool_use' && blocks.some(b => b && b.type === 'tool_use')) {
-                        msgs = msgs.concat([{ role: 'assistant', content: blocks }]);
-                        if (textOut.trim()) { onTyping(false); onAssistant(textOut); onTyping(true); }
-                        const toolResults = [];
-                        for (const blk of blocks) {
-                            if (!blk || blk.type !== 'tool_use') continue;
-                            onTyping(false); const _b = toolBadge(blk.name, blk.input); if (_b) onAssistant(_b); onTyping(true);
-                            const res = await execTool(blk.name, blk.input, pwd);
-                            toolResults.push({ type: 'tool_result', tool_use_id: blk.id, content: res.summary, is_error: !res.ok });
-                        }
-                        msgs = msgs.concat([{ role: 'user', content: toolResults }]);
-                        continue;   // let the model respond to the tool results
-                    }
-
-                    finalText = textOut || '(keine Antwort)';
-                    break;
-                }
-                conversationHistory.push({ role: 'assistant', content: finalText });   // persist final text only
-                saveHistory();
-                onPersist();        // host may push the updated log to the shared server (solita-sync.js)
-                onTyping(false);
-                onAssistant(finalText);
-                onCost(turnEur);    // show what this one query cost (sum of all hops)
-                onSpeak(finalText);
-                maybeSummarize();   // fold older turns into the rolling summary (best-effort, background)
+                const msgs = buildRequestMessages();
+                const { finalText, turnEur } = await runToolUseLoop(msgs, pwd);
+                finalizeAndSave(finalText, turnEur);
             } catch (err) {
                 conversationHistory.pop();   // drop the user turn on failure
                 onTyping(false);
