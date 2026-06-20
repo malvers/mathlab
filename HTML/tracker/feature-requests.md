@@ -63,7 +63,9 @@
 **Session 2026-06-10 (in `main`):**
 - **Einfache Navigation** (`HTML/js/tracker-nav.js`): Adresse → Route (Nominatim + OSRM), START
   navigiert **und** trackt, Ziel-Pin, ETA, **Re-Routing** bei Abweichung, **Abbiege-Ansage per Stimme**
-  (`speechSynthesis` de-DE) + On-screen-Banner, Schalter „Sprachansage" (persistiert).
+  (seit 2026-06-20 über **Cloud-TTS** `SolitaVoice` — Pixel-WebView-Fix, s. bugfixes.md BUG-9;
+  `speechSynthesis` nur noch Desktop-Fallback) + On-screen-Banner, Schalter „Sprachansage" (persistiert).
+  Karten-Kamera während der Navigation: **dynamischer Reststrecken-Fit** (BUG-10, 2026-06-20).
 - **Tempo-Limit-Schild** (`HTML/js/tracker-speedlimit.js`): OSM `maxspeed`, rot bei Übertretung.
 - **Tempo-Warnton:** kleine Glocke bei >10 % über Limit.
 - **Idle-Auto-Hide**, **Kompass/Nordpfeil**, **Quellen-Status** (DWD/RainViewer) im Debug.
