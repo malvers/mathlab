@@ -88,7 +88,7 @@ const DebugWindow = (() => {
         header.id = 'debug-header';
         header.style.cssText = `
             display: flex;
-            justify-content: ${collapsed ? 'center' : 'space-between'};
+            justify-content: ${collapsed ? 'center' : 'flex-start'};
             align-items: center;
             margin-bottom: ${collapsed ? '0' : '8px'};
             padding-bottom: ${collapsed ? '0' : '6px'};
@@ -180,7 +180,7 @@ const DebugWindow = (() => {
         // so the destructive C (clear) is no longer glued next to copy (Doc 2026-06-20).
         header.appendChild(btnCopy);
         const headerSpacer = document.createElement('div');
-        headerSpacer.style.cssText = `flex: 1; display: ${collapsed ? 'none' : 'block'};`;
+        headerSpacer.style.cssText = `flex: 1 1 0;`;
         header.appendChild(headerSpacer);
 
         const btnClear = document.createElement('button');
@@ -188,8 +188,8 @@ const DebugWindow = (() => {
         btnClear.title = 'Clear logs';
         btnClear.style.cssText = `
             background: transparent;
-            border: 1px solid #6BA043;
-            color: #6BA043;
+            border: 1px solid rgb(176, 36, 24);
+            color: rgb(176, 36, 24);
             width: 28px;
             height: 24px;
             cursor: pointer;
@@ -226,8 +226,13 @@ const DebugWindow = (() => {
             e.stopPropagation();
             toggle();
         };
-        btnGroup.appendChild(btnCollapse);
         header.appendChild(btnGroup);
+        // second flexible spacer → equal flex on both sides centres the A−/A+/C group between copy and
+        // minimize, responsive to the window width; minimize stays at the far right.
+        const headerSpacer2 = document.createElement('div');
+        headerSpacer2.style.cssText = `flex: 1 1 0;`;
+        header.appendChild(headerSpacer2);
+        header.appendChild(btnCollapse);
 
         const content = document.createElement('div');
         content.id = 'debug-content';
