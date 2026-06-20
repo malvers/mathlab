@@ -1423,6 +1423,22 @@ body.ui-idle #trk-controls {
     50%      { box-shadow: 0 0 0 7px rgba(176, 36, 24, 0); }
 }
 
+/* "la ola" wave INSIDE the mic button while listening: swap the mic glyph for the dancing bars.
+   Reuses the @navEq keyframes; white bars so they read on the red recording background. */
+.nav-mic-wave { display: none; align-items: flex-end; gap: 3px; height: 20px; }
+.nav-mic-btn.listening svg { display: none; }
+.nav-mic-btn.listening .nav-mic-wave { display: inline-flex; }
+.nav-mic-wave i {
+    width: 3px; height: 100%; border-radius: 2px;
+    background: #fff; transform-origin: bottom;
+    animation: navEq 0.9s ease-in-out infinite;
+}
+.nav-mic-wave i:nth-child(1) { animation-delay: 0s; }
+.nav-mic-wave i:nth-child(2) { animation-delay: .15s; }
+.nav-mic-wave i:nth-child(3) { animation-delay: .30s; }
+.nav-mic-wave i:nth-child(4) { animation-delay: .45s; }
+.nav-mic-wave i:nth-child(5) { animation-delay: .60s; }
+
 /* Live "I'm listening" status under the destination row — unmistakable recording feedback. */
 .nav-mic-status {
     display: flex;
