@@ -5,6 +5,7 @@ window.TrackerConfig = (function () {
     const URL = '../config.json';     // HTML/config.json → docalvers.de/config.json (Pages root = HTML/)
     const POLL_MS = 20000;            // gentle heartbeat; each poll cache-busts so a change shows within one tick
     let timer = null;
+    let polling = false;              // in-flight guard: collapse overlapping triggers into ONE fetch
     const dbg = (m) => { if (window.DebugWindow && DebugWindow.log) DebugWindow.log('cfg: ' + m); };
 
     // Build a token lookup from cfg._palette (the brand vocabulary, config v6+): each token name and
@@ -49,6 +50,8 @@ window.TrackerConfig = (function () {
     }
 
     async function poll() {
+        if (polling) return;   // Android WebView fires visibilitychange repeatedly on resume → without this,
+        polling = true;        // 4 parallel fetch+apply ran at once (Doc 2026-06-20 log). Collapse to one.
         try {
             // Cache-bust the URL. `cache:'no-store'` only bypasses the BROWSER cache, NOT GitHub Pages' Fastly
             // CDN (Cache-Control: max-age=600). Worse, the old If-None-Match/ETag let the CDN answer 304
@@ -61,6 +64,7 @@ window.TrackerConfig = (function () {
             dbg('fetched v' + (cfg && cfg.version) + ' clockColor=' + (cfg && cfg.theme && cfg.theme.colors && cfg.theme.colors.clockColor));
             applyConfig(cfg);
         } catch (e) { dbg('ERR ' + (e && (e.message || e))); }
+        finally { polling = false; }
     }
 
     function start() {
