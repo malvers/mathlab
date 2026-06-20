@@ -114,29 +114,32 @@ window.TrackerNav = function (ctx) {
 
     function shortLabel(s) { return (s || '').split(',').slice(0, 2).join(',').trim(); }
 
-    // ---- Geocoding: the single free-text line → the first Nominatim hit ----
-    // Nominatim does its own parsing, so a free-text "Ort, Straße, Nr." (typed or dictated) works directly.
+    // ---- Geocoding: a free-text line → the first Nominatim hit (or null). Shared by the "Ziel setzen"
+    // button, the Enter key, and the live-as-you-type lookup. Nominatim parses "Ort, Straße, Nr." itself.
+    async function geocode(q) {
+        let url = NOMINATIM + '?format=jsonv2&limit=1&q=' + encodeURIComponent(q);
+        // Bias toward the current position so a bare street name ("Bischofsweg") resolves to the NEARBY
+        // one, not the globally most-prominent (without a bias Nominatim ranks by importance → Köln for
+        // "Bischofsweg"). A soft viewbox (NO bounded) only re-ranks: an explicit far-away city still wins.
+        // ~±0.6° ≈ a regional box (left,top,right,bottom = minLon,maxLat,maxLon,minLat).
+        const from = curPos();
+        if (from) {
+            const d = 0.6;
+            url += '&viewbox=' + [from[1] - d, from[0] + d, from[1] + d, from[0] - d].join(',');
+        }
+        const r = await fetch(url, { headers: { Accept: 'application/json' } });
+        const data = await r.json();
+        return (data && data.length) ? data[0] : null;
+    }
+
     async function setDestination() {
         const q = ($('nav-dest').value || '').trim();
         if (!q) { toast('Bitte ein Ziel eingeben.'); return; }
         toast('Suche Adresse …');
-        let data;
-        try {
-            let url = NOMINATIM + '?format=jsonv2&limit=1&q=' + encodeURIComponent(q);
-            // Bias toward the current position so a bare street name ("Bischofsweg") resolves to the NEARBY
-            // one, not the globally most-prominent (without a bias Nominatim ranks by importance → Köln for
-            // "Bischofsweg"). A soft viewbox (NO bounded) only re-ranks: an explicit far-away city still wins.
-            // ~±0.6° ≈ a regional box (left,top,right,bottom = minLon,maxLat,maxLon,minLat).
-            const from = curPos();
-            if (from) {
-                const d = 0.6;
-                url += '&viewbox=' + [from[1] - d, from[0] + d, from[1] + d, from[0] - d].join(',');
-            }
-            const r = await fetch(url, { headers: { Accept: 'application/json' } });
-            data = await r.json();
-        } catch (e) { toast('Adress-Suche fehlgeschlagen (offline?).'); return; }
-        if (!data || !data.length) { toast('Adresse nicht gefunden.'); return; }
-        const hit = data[0];
+        let hit;
+        try { hit = await geocode(q); }
+        catch (e) { toast('Adress-Suche fehlgeschlagen (offline?).'); return; }
+        if (!hit) { toast('Adresse nicht gefunden.'); return; }
         applyDestination([parseFloat(hit.lat), parseFloat(hit.lon)], hit.display_name || q);
     }
 
@@ -156,7 +159,7 @@ window.TrackerNav = function (ctx) {
         hidePanels();
         toast('Ziel gesetzt: ' + shortLabel(destLabel) + ' — jetzt START');
         refreshHome();
-        pushHistory(destLatLng, destLabel);
+        clearFoundUI();   // the explicit set supersedes any live "found" hint
     }
 
     // ---- Navigation history: the last few destinations, as a quick-pick list in the Ziel-dialog ----
@@ -226,6 +229,8 @@ window.TrackerNav = function (ctx) {
         stopSpeech();
         refreshPanel();
         refreshHome(); // dest gone, but the FAB stays if a home is stored
+        clearFoundUI();
+        const di = $('nav-dest'); if (di) di.value = '';
     }
 
     // ---- Routing: a position → destination, drawn as a polyline ----
@@ -256,11 +261,15 @@ window.TrackerNav = function (ctx) {
     }
 
     // Called by the core on START when a destination is set. Fire-and-forget there.
+    // Record the history HERE (one choke point for every path: typed, live, dictated, POI, Solita, home) —
+    // a destination counts as "navigated to" once the route actually computes, not merely when it was set.
     async function startNavigation() {
         if (!destLatLng) return false;
         const from = curPos();
         if (!from) { toast('Navigation: warte auf GPS-Position …'); return false; }
-        return computeRoute(from, false);
+        const ok = await computeRoute(from, false);
+        if (ok) pushHistory(destLatLng, destLabel);
+        return ok;
     }
 
     // Set a destination directly by COORDINATES (a POI / map-pin tap, not a typed address) and route to
@@ -273,7 +282,6 @@ window.TrackerNav = function (ctx) {
         showDestMarker();
         refreshPanel();
         refreshHome();
-        pushHistory(destLatLng, destLabel);
         const from = curPos();
         try {
             if (from) map.fitBounds(L.latLngBounds([from, destLatLng]), { padding: [60, 60] });
@@ -623,6 +631,14 @@ window.TrackerNav = function (ctx) {
         }
     }
 
+    // Reset the live "found" feedback (green line + name hint). Called when the dialog opens, the route is
+    // cleared, or an explicit set supersedes it.
+    function clearFoundUI() {
+        const input = $('nav-dest'), hint = $('nav-found-hint');
+        if (input) input.classList.remove('nav-found');
+        if (hint) hint.hidden = true;
+    }
+
     // ---- Panel ----
     function refreshPanel() {
         const cur = $('nav-current'), clr = $('nav-clear');
@@ -630,7 +646,7 @@ window.TrackerNav = function (ctx) {
         if (clr) clr.hidden = !destLabel;
     }
 
-    function openPanel() { refreshPanel(); renderHistory(); showPanel('nav-panel'); }
+    function openPanel() { refreshPanel(); renderHistory(); clearFoundUI(); showPanel('nav-panel'); }
 
     // Frame the WHOLE route (start → destination) in view — the overview shown briefly at nav start
     // before the map glides into the crosshair follow-view. Falls back to current-position↔destination
@@ -654,6 +670,43 @@ window.TrackerNav = function (ctx) {
     // Enter in the single line = "Ziel setzen" (faster than reaching for the button).
     const destInput = $('nav-dest');
     if (destInput) destInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); setDestination(); } });
+
+    // Live geocoding while typing (Doc 2026-06-20): once a hit is found, turn the line GREEN, show the
+    // resolved name, and SET the destination silently (drop the pin, NO panel-close, NO map-jump) — so
+    // START works without a separate "Ziel setzen" tap. Debounced + position-biased; newer keystrokes win.
+    (function initLiveGeocode() {
+        const input = $('nav-dest'); if (!input) return;
+        const hint = $('nav-found-hint');
+        const nameEl = hint ? hint.querySelector('.nav-found-name') : null;
+        const MIN_LEN = 4, DEBOUNCE_MS = 650;
+        let timer = null, gen = 0, foundFor = '';
+
+        function showFound(label) {
+            input.classList.add('nav-found');
+            if (nameEl) nameEl.textContent = shortLabel(label);
+            if (hint) hint.hidden = false;
+        }
+        async function run(q) {
+            const my = ++gen;
+            let hit;
+            try { hit = await geocode(q); } catch (e) { return; }  // offline → stay quiet, button still works
+            if (my !== gen || ($('nav-dest').value || '').trim() !== q) return; // superseded by a newer keystroke
+            if (!hit) { clearFoundUI(); foundFor = ''; return; }    // no match → no green (don't touch a prior set)
+            destLatLng = [parseFloat(hit.lat), parseFloat(hit.lon)];
+            destLabel = hit.display_name || q;
+            showDestMarker();                                       // drop the pin; do NOT fit/center (no jump while typing)
+            refreshHome();
+            foundFor = q;
+            showFound(destLabel);
+        }
+        input.addEventListener('input', () => {
+            const q = (input.value || '').trim();
+            if (q !== foundFor) clearFoundUI();                     // edited away from the match → drop the stale green
+            if (timer) clearTimeout(timer);
+            if (q.length < MIN_LEN) { gen++; return; }              // too short → cancel any pending lookup
+            timer = setTimeout(() => run(q), DEBOUNCE_MS);
+        });
+    })();
 
     // Mic dictation: tap → speak the address → it fills the line (same Web-Speech API Solita uses, but a
     // simple one-shot here — no wake-word). No SR support (or denied) → the mic just hides; typing stays.
@@ -689,7 +742,9 @@ window.TrackerNav = function (ctx) {
                 input.value = (finalText + interim).replace(/\s+/g, ' ').trim();
             };
             rec.onerror = () => { /* denied / no-speech → just stop; onend cleans up */ };
-            rec.onend = () => { setListeningUI(false); input.focus(); };
+            // After dictation, run the live lookup on the spoken text too (onresult set .value programmatically,
+            // which doesn't fire 'input') → a dictated address also goes green + sets the destination.
+            rec.onend = () => { setListeningUI(false); input.focus(); input.dispatchEvent(new Event('input')); };
             try { rec.start(); } catch (e) { setListeningUI(false); }
         });
     })();
