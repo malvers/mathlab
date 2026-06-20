@@ -48,6 +48,8 @@ window.TrackerNav = function (ctx) {
     let destLabel = '';     // human-readable address (for the panel + toasts)
     let destMarker = null;  // Leaflet pin at the destination
     const HOME_KEY = 'trk_nav_home';
+    const HIST_KEY = 'trk_nav_history';  // recent destinations [{lat,lng,label,t}] (localStorage)
+    const HIST_MAX = 8;                  // keep at most this many, most-recent first
     let home = null;        // saved "Zuhause" { lat, lng, label } (localStorage), or null
     let routeLine = null;   // Leaflet layerGroup of the computed route (casing + core)
     let routeCasing = null, routeCore = null; // the two polylines, kept so update() can re-slice them
@@ -135,11 +137,17 @@ window.TrackerNav = function (ctx) {
         } catch (e) { toast('Adress-Suche fehlgeschlagen (offline?).'); return; }
         if (!data || !data.length) { toast('Adresse nicht gefunden.'); return; }
         const hit = data[0];
-        destLatLng = [parseFloat(hit.lat), parseFloat(hit.lon)];
-        destLabel = hit.display_name || q;
+        applyDestination([parseFloat(hit.lat), parseFloat(hit.lon)], hit.display_name || q);
+    }
+
+    // Apply a KNOWN destination (coords + label) — no geocoding. Shared by setDestination (typed/dictated
+    // address) and the navigation-history quick-pick: drop the pin, frame current pos ↔ destination, close
+    // the panel, record it in the history. Does NOT route — START then navigates+records (same model as typing).
+    function applyDestination(latlng, label) {
+        if (!latlng || latlng[0] == null) return;
+        destLatLng = [latlng[0], latlng[1]];
+        destLabel = label || 'Ziel';
         showDestMarker();
-        // Frame both the current position and the destination so the relationship is clear; if we have
-        // no fix yet, just centre on the destination.
         const from = curPos();
         try {
             if (from) map.fitBounds(L.latLngBounds([from, destLatLng]), { padding: [60, 60] });
@@ -148,6 +156,55 @@ window.TrackerNav = function (ctx) {
         hidePanels();
         toast('Ziel gesetzt: ' + shortLabel(destLabel) + ' — jetzt START');
         refreshHome();
+        pushHistory(destLatLng, destLabel);
+    }
+
+    // ---- Navigation history: the last few destinations, as a quick-pick list in the Ziel-dialog ----
+    function loadHistory() {
+        try { const a = JSON.parse(localStorage.getItem(HIST_KEY) || '[]'); return Array.isArray(a) ? a : []; }
+        catch (e) { return []; }
+    }
+    // Record a destination at the top; drop duplicates (same label OR within ~25 m), cap the list.
+    function pushHistory(latlng, label) {
+        if (!latlng || latlng[0] == null) return;
+        const lab = (label || '').trim() || 'Ziel';
+        let list = loadHistory().filter((h) =>
+            h.label !== lab && haversine([h.lat, h.lng], [latlng[0], latlng[1]]) > 25);
+        list.unshift({ lat: latlng[0], lng: latlng[1], label: lab, t: Date.now() });
+        if (list.length > HIST_MAX) list = list.slice(0, HIST_MAX);
+        try { localStorage.setItem(HIST_KEY, JSON.stringify(list)); } catch (e) { }
+        renderHistory();
+    }
+    function removeHistory(h) {
+        const list = loadHistory().filter((x) => !(x.label === h.label && x.lat === h.lat && x.lng === h.lng));
+        try { localStorage.setItem(HIST_KEY, JSON.stringify(list)); } catch (e) { }
+        renderHistory();
+    }
+    // Rebuild the list DOM (textContent for OSM labels → no injection; the pin SVG is a fixed string).
+    function renderHistory() {
+        const box = $('nav-history'); if (!box) return;
+        const list = loadHistory();
+        box.innerHTML = '';
+        if (!list.length) { box.hidden = true; return; }
+        box.hidden = false;
+        const title = document.createElement('div');
+        title.className = 'nav-history-title'; title.textContent = 'Letzte Ziele';
+        box.appendChild(title);
+        list.forEach((h) => {
+            const item = document.createElement('div'); item.className = 'nav-hist-item';
+            const go = document.createElement('button'); go.type = 'button'; go.className = 'nav-hist-go'; go.title = h.label;
+            go.innerHTML = '<span class="nav-hist-pin"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" '
+                + 'stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'
+                + '<path d="M21 10c0 7-9 12-9 12s-9-5-9-12a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg></span>';
+            const lab = document.createElement('span'); lab.className = 'nav-hist-label'; lab.textContent = shortLabel(h.label);
+            go.appendChild(lab);
+            go.addEventListener('click', () => applyDestination([h.lat, h.lng], h.label));
+            const del = document.createElement('button');
+            del.type = 'button'; del.className = 'nav-hist-del'; del.setAttribute('aria-label', 'Aus Verlauf entfernen'); del.textContent = '×';
+            del.addEventListener('click', (e) => { e.stopPropagation(); removeHistory(h); });
+            item.appendChild(go); item.appendChild(del);
+            box.appendChild(item);
+        });
     }
 
     function showDestMarker() {
@@ -216,6 +273,7 @@ window.TrackerNav = function (ctx) {
         showDestMarker();
         refreshPanel();
         refreshHome();
+        pushHistory(destLatLng, destLabel);
         const from = curPos();
         try {
             if (from) map.fitBounds(L.latLngBounds([from, destLatLng]), { padding: [60, 60] });
@@ -572,7 +630,7 @@ window.TrackerNav = function (ctx) {
         if (clr) clr.hidden = !destLabel;
     }
 
-    function openPanel() { refreshPanel(); showPanel('nav-panel'); }
+    function openPanel() { refreshPanel(); renderHistory(); showPanel('nav-panel'); }
 
     // Frame the WHOLE route (start → destination) in view — the overview shown briefly at nav start
     // before the map glides into the crosshair follow-view. Falls back to current-position↔destination
@@ -601,30 +659,44 @@ window.TrackerNav = function (ctx) {
     // simple one-shot here — no wake-word). No SR support (or denied) → the mic just hides; typing stays.
     (function initNavMic() {
         const micBtn = $('nav-mic'), input = $('nav-dest');
+        const statusEl = $('nav-mic-status');
+        const liveEl = statusEl ? statusEl.querySelector('.nav-mic-live') : null;
         const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
         if (!micBtn || !input) return;
         if (!SR) { micBtn.hidden = true; return; }
         let rec = null, listening = false;
+        // Drive the visible "recording" state: the pulsing red mic AND the "Ich höre …" status bar with the
+        // equalizer. Toggled OPTIMISTICALLY on tap (not waiting for onstart, which is flaky/late in the Android
+        // WebView) so Doc gets instant feedback that the mic is open.
+        function setListeningUI(on) {
+            listening = on;
+            micBtn.classList.toggle('listening', on);
+            if (statusEl) statusEl.hidden = !on;
+            if (!on && liveEl) liveEl.textContent = '';
+        }
         micBtn.addEventListener('click', () => {
-            if (listening) { try { rec && rec.stop(); } catch (e) { } return; }
+            if (listening) { try { rec && rec.stop(); } catch (e) { } return; }   // tap again → stop
             rec = new SR();
             rec.lang = 'de-DE';
             rec.interimResults = true;
             rec.maxAlternatives = 1;
             rec.continuous = false;
             let finalText = '';
-            rec.onstart = () => { listening = true; micBtn.classList.add('listening'); };
+            setListeningUI(true);                                  // instant feedback, before the engine starts
+            rec.onstart = () => setListeningUI(true);
             rec.onresult = (e) => {
                 let interim = '';
                 for (let i = e.resultIndex; i < e.results.length; i++) {
                     const t = e.results[i][0].transcript;
                     if (e.results[i].isFinal) finalText += t; else interim += t;
                 }
-                input.value = (finalText + interim).replace(/\s+/g, ' ').trim();
+                const shown = (finalText + interim).replace(/\s+/g, ' ').trim();
+                input.value = shown;
+                if (liveEl) liveEl.textContent = shown;            // live transcript inside the status bar
             };
             rec.onerror = () => { /* denied / no-speech → just stop; onend cleans up */ };
-            rec.onend = () => { listening = false; micBtn.classList.remove('listening'); input.focus(); };
-            try { rec.start(); } catch (e) { listening = false; micBtn.classList.remove('listening'); }
+            rec.onend = () => { setListeningUI(false); input.focus(); };
+            try { rec.start(); } catch (e) { setListeningUI(false); }
         });
     })();
 
