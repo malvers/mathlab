@@ -100,8 +100,8 @@ const DebugWindow = (() => {
 
         const title = document.createElement('span');
         title.textContent = '🐛 DEBUGING';
-        title.style.flex = '1';
         title.style.display = collapsed ? 'none' : 'block';
+        title.style.marginRight = '8px';
         header.appendChild(title);
 
         const btnGroup = document.createElement('div');
@@ -176,7 +176,12 @@ const DebugWindow = (() => {
                 setTimeout(() => { btnCopy.innerHTML = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="4" width="9" height="10" rx="1"/><rect x="5" y="2" width="9" height="10" rx="1"/></svg>`; }, 1500);
             });
         };
-        btnGroup.appendChild(btnCopy);
+        // copy sits LEFT, right after the title; a flexible gap then pushes A−/A+/C/minimize to the right,
+        // so the destructive C (clear) is no longer glued next to copy (Doc 2026-06-20).
+        header.appendChild(btnCopy);
+        const headerSpacer = document.createElement('div');
+        headerSpacer.style.cssText = `flex: 1; display: ${collapsed ? 'none' : 'block'};`;
+        header.appendChild(headerSpacer);
 
         const btnClear = document.createElement('button');
         btnClear.textContent = 'C';
@@ -192,6 +197,7 @@ const DebugWindow = (() => {
             font-size: 12px;
             padding: 0;
             border-radius: 3px;
+            margin-left: 12px;
             display: ${collapsed ? 'none' : 'block'};
         `;
         btnClear.onclick = (e) => {
