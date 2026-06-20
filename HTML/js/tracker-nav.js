@@ -659,20 +659,16 @@ window.TrackerNav = function (ctx) {
     // simple one-shot here — no wake-word). No SR support (or denied) → the mic just hides; typing stays.
     (function initNavMic() {
         const micBtn = $('nav-mic'), input = $('nav-dest');
-        const statusEl = $('nav-mic-status');
-        const liveEl = statusEl ? statusEl.querySelector('.nav-mic-live') : null;
         const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
         if (!micBtn || !input) return;
         if (!SR) { micBtn.hidden = true; return; }
         let rec = null, listening = false;
-        // Drive the visible "recording" state: the pulsing red mic AND the "Ich höre …" status bar with the
-        // equalizer. Toggled OPTIMISTICALLY on tap (not waiting for onstart, which is flaky/late in the Android
-        // WebView) so Doc gets instant feedback that the mic is open.
+        // Drive the visible "recording" state: the pulsing red mic button with the "la ola" wave inside it.
+        // Toggled OPTIMISTICALLY on tap (not waiting for onstart, which is flaky/late in the Android WebView)
+        // so Doc gets instant feedback that the mic is open.
         function setListeningUI(on) {
             listening = on;
             micBtn.classList.toggle('listening', on);
-            if (statusEl) statusEl.hidden = !on;
-            if (!on && liveEl) liveEl.textContent = '';
         }
         micBtn.addEventListener('click', () => {
             if (listening) { try { rec && rec.stop(); } catch (e) { } return; }   // tap again → stop
@@ -690,9 +686,7 @@ window.TrackerNav = function (ctx) {
                     const t = e.results[i][0].transcript;
                     if (e.results[i].isFinal) finalText += t; else interim += t;
                 }
-                const shown = (finalText + interim).replace(/\s+/g, ' ').trim();
-                input.value = shown;
-                if (liveEl) liveEl.textContent = shown;            // live transcript inside the status bar
+                input.value = (finalText + interim).replace(/\s+/g, ' ').trim();
             };
             rec.onerror = () => { /* denied / no-speech → just stop; onend cleans up */ };
             rec.onend = () => { setListeningUI(false); input.focus(); };
