@@ -663,13 +663,36 @@ window.TrackerNav = function (ctx) {
         return false;
     }
 
+    // "STARTEN" (Doc 2026-06-20): with live geocoding the destination is usually already set while typing.
+    // One tap ensures a destination (geocode the line if it wasn't auto-set), closes the dialog, and kicks
+    // off recording + navigation via the core — the START toggle then flips to PAUSE. The old two-step
+    // "Ziel setzen, dann START" collapses into one.
+    async function startFromDialog() {
+        if (!hasDestination()) {
+            const q = ($('nav-dest').value || '').trim();
+            if (!q) { toast('Bitte ein Ziel eingeben.'); return; }
+            toast('Suche Adresse …');
+            let hit;
+            try { hit = await geocode(q); }
+            catch (e) { toast('Adress-Suche fehlgeschlagen (offline?).'); return; }
+            if (!hit) { toast('Adresse nicht gefunden.'); return; }
+            destLatLng = [parseFloat(hit.lat), parseFloat(hit.lon)];
+            destLabel = hit.display_name || q;
+            showDestMarker();
+            refreshHome();
+        }
+        clearFoundUI();
+        hidePanels();
+        if (ctx.startTracking) ctx.startTracking();   // core: beginTracking() → recording + navigation
+    }
+
     // Wire the panel's own buttons once.
-    const setBtn = $('nav-set'); if (setBtn) setBtn.addEventListener('click', setDestination);
+    const setBtn = $('nav-set'); if (setBtn) setBtn.addEventListener('click', startFromDialog);
     const clrBtn = $('nav-clear'); if (clrBtn) clrBtn.addEventListener('click', () => { clearRoute(); toast('Ziel gelöscht.'); });
 
-    // Enter in the single line = "Ziel setzen" (faster than reaching for the button).
+    // Enter in the single line = STARTEN (faster than reaching for the button).
     const destInput = $('nav-dest');
-    if (destInput) destInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); setDestination(); } });
+    if (destInput) destInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); startFromDialog(); } });
 
     // Live geocoding while typing (Doc 2026-06-20): once a hit is found, turn the line GREEN, show the
     // resolved name, and SET the destination silently (drop the pin, NO panel-close, NO map-jump) — so
