@@ -23,6 +23,7 @@ window.TrackerFuel = function (ctx) {
     let stations = [];
     let lastLat = null, lastLng = null, lastFetch = 0;
     let busy = false;
+    let failUntil = 0, failStreak = 0;  // post-failure backoff so a down/blocked endpoint isn't hammered every GPS fix
     let lastCheapId = null;      // so a cheap station is announced only once, not on every poll
     let fuelType = localStorage.getItem('trk-fuel-type') || 'e5';
     let enabled = localStorage.getItem('trk-fuel-on') !== '0'; // on by default
@@ -160,6 +161,7 @@ window.TrackerFuel = function (ctx) {
 
     async function fetchStations(lat, lng) {
         busy = true;
+        let ok = false;
         try {
             const res = await fetch(ENDPOINT, {
                 method: 'POST',
@@ -172,15 +174,24 @@ window.TrackerFuel = function (ctx) {
             lastLat = lat; lastLng = lng; lastFetch = Date.now();
             dbg('got ' + stations.length + ' stations (r' + d.rad + 'km)');
             render();
+            ok = true;
         } catch (e) {
             dbg('ERR ' + (e && (e.message || e)));        // offline / not deployed yet → stay quiet
-        } finally { busy = false; }
+        } finally {
+            busy = false;
+            // On failure back off exponentially (5s → … → cap REFRESH_MS): lastFetch only advances on
+            // success, so without this update() re-fires on EVERY GPS fix and spams a down/blocked
+            // endpoint (Doc 2026-06-20 log: ~10 "Failed to fetch" in 3 s while Supabase was restricted).
+            if (ok) { failStreak = 0; failUntil = 0; }
+            else { failStreak++; failUntil = Date.now() + Math.min(REFRESH_MS, 5000 * Math.pow(2, failStreak - 1)); }
+        }
     }
 
     // Called from onPosition on every GPS fix. Re-polls only when we've moved far enough or enough
     // time has passed — keeps the (non-commercial) Tankerkönig usage gentle.
     function update(here) {
         if (!enabled || busy || !here) return;
+        if (Date.now() < failUntil) return;          // post-failure backoff (see fetchStations)
         const lat = here[0], lng = here[1];
         if (typeof lat !== 'number' || typeof lng !== 'number') return;
         const moved = (lastLat == null) ? Infinity : distM(lastLat, lastLng, lat, lng);
