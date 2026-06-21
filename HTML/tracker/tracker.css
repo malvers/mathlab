@@ -358,6 +358,13 @@ path.pos-marker.pos-shown {
     -webkit-tap-highlight-color: transparent;
 }
 
+/* Pixel im Querformat (Landscape, wenig Höhe oben): die breitenbasierte --cc-size (8.5vw) bläst die
+   Uhr auf. Auf Telefonen im Querformat die Uhr hart verkleinern (~60%) und an die HÖHE koppeln
+   (Doc 2026-06-21 — Startwert zum Ausprobieren). max-height grenzt Tablets/Desktop aus (genug Höhe). */
+@media (orientation: landscape) and (max-height: 500px) {
+    #hud-time { --cc-size: clamp(1.1rem, 5vh, 1.8rem); }
+}
+
 /* Wrapper so the travel-mode icon hangs to the LEFT of the (still centred) clock. */
 #hud-time-wrap {
     position: relative;
@@ -2053,6 +2060,13 @@ body.ui-idle #trk-controls {
     text-align: left;
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.45);
     pointer-events: none;
+}
+
+/* Wegtyp colour (Doc 2026-06-21): Laufen keeps the green above; Auto (Straße) turns the banner orange
+   (palette λ). White-on-orange is too faint, so the maneuver text + arrow (currentColor) go dark ink. */
+#nav-banner.route-car {
+    background: var(--cfg-nav-bg-car, rgb(245, 194, 66));
+    color: rgb(8, 20, 42);
 }
 
 #nav-banner[hidden] {

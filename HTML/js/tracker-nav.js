@@ -547,10 +547,13 @@ window.TrackerNav = function (ctx) {
         if (!d) return '';
         const eta = new Date(Date.now() + d.remSec * 1000);
         const clock = eta.getHours() + ':' + String(eta.getMinutes()).padStart(2, '0');
-        const remKm = d.remM >= 10000 ? Math.round(d.remM / 1000) + ' km'
-            : d.remM >= 1000 ? (d.remM / 1000).toFixed(1) + ' km'
-                : Math.round(d.remM / 50) * 50 + ' m';
-        return 'Ankunft ' + clock + '  ·  ' + remKm + '  ·  ' + Math.round(d.remSec / 60) + ' min';
+        const fmt = (m) => m >= 10000 ? Math.round(m / 1000) + ' km'
+            : m >= 1000 ? (m / 1000).toFixed(1) + ' km'
+                : Math.round(m / 50) * 50 + ' m';
+        // "Rest / Gesamt" so the banner shows BOTH the remaining distance and the whole route length
+        // (Doc 2026-06-21 — "Gesamtstrecke und die noch zulaufende Strecke"; tune wording if it doesn't land).
+        const dist = fmt(d.remM) + ' / ' + fmt(routeTotalDist);
+        return 'ETA ' + clock + '  ·  ' + dist + '  ·  ' + Math.round(d.remSec / 60) + ' min';
     }
 
     function announceDist(d) { return d > 500 ? Math.round(d / 100) * 100 : Math.round(d / 50) * 50; }
@@ -680,6 +683,8 @@ window.TrackerNav = function (ctx) {
         el.querySelector('.nav-instr').textContent = m.detail || m.text; // OSM names via textContent (no injection)
         const t = el.querySelector('.nav-trip');
         t.textContent = trip || ''; t.hidden = !trip;
+        // Banner colour by Wegtyp: Laufen → green (default), Auto → orange (Doc 2026-06-21).
+        el.classList.toggle('route-car', routeType === 'car');
         el.hidden = false;
     }
     function hideBanner() { const el = $('nav-banner'); if (el) el.hidden = true; }

@@ -15,8 +15,15 @@ export const state = {
     finalText:     '',
     savedFinal:    '',
 
-    // engine selection: 'webspeech' | 'whisper'
-    engine: localStorage.getItem('transcriber.engine') || 'webspeech',
+    // engine selection: 'webspeech' (web) | 'native' (Capacitor app) | 'whisper'
+    engine: (function () {
+        const isNative = !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
+        const stored = localStorage.getItem('transcriber.engine');
+        // In the Capacitor app the WebView has no Web Speech API → use the native plugin.
+        // Honour an explicit Whisper choice, otherwise default to native STT.
+        if (isNative) return stored === 'whisper' ? 'whisper' : 'native';
+        return stored || 'webspeech';
+    })(),
 
     // dirty = audio exists but not yet downloaded
     isDirty: false,
