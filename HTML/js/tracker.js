@@ -2246,6 +2246,7 @@ ${pts}
             map, toast,
             navigateTo: (ll, name) => { if (__nav && __nav.navigateTo) __nav.navigateTo(ll, name); },
             speed: __speed, nav: __nav, voice: (window.SolitaVoice || null),
+            apiUrl: SUPABASE_URL, apiKey: SUPABASE_KEY,   // Phase 2: TomTom proxy (abroad only; graceful until deployed)
         }) : null;
         // Restore the VERKEHR button state (the module self-restores its enabled flag from localStorage).
         if (__traffic && __traffic.enabled) { const tb = document.getElementById('mb-traffic'); if (tb) tb.classList.add('active'); }
