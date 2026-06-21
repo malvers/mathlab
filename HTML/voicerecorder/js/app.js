@@ -4,6 +4,7 @@ import { logRec } from './utils.js';
 import { formatCommands } from './formatter.js';
 import { loadFromDB } from './idb.js';
 import { initRecognition } from './webspeech.js';
+import { initNativeRecognition, isCapacitorNative } from './native-speech.js';
 import { attachRecorder }  from './recording.js';
 import { attachPopup }     from './popup.js';
 import { attachSaveLoad }  from './save-load.js';
@@ -12,7 +13,9 @@ import { loadWhisperModel } from './whisper.js';
 const BUILD_TIME = '2026-05-16 16:57';
 
 bindDom();
-state.recognition = initRecognition();
+// In the Capacitor app always use the native plugin (the WebView has no Web Speech API);
+// on the web use the browser Web Speech API as before.
+state.recognition = isCapacitorNative() ? initNativeRecognition() : initRecognition();
 
 attachRecorder();
 attachPopup();
