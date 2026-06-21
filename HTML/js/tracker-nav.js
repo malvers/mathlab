@@ -48,8 +48,7 @@ window.TrackerNav = function (ctx) {
     let destLabel = '';     // human-readable address (for the panel + toasts)
     let destMarker = null;  // Leaflet pin at the destination
     const HOME_KEY = 'trk_nav_home';
-    const HIST_KEY = 'trk_nav_history';  // recent destinations [{lat,lng,label,t}] (localStorage)
-    const HIST_MAX = 8;                  // keep at most this many, most-recent first
+    const HIST_KEY = 'trk_nav_history';  // recent destinations [{lat,lng,label,t}] (localStorage), unlimited
     let home = null;        // saved "Zuhause" { lat, lng, label } (localStorage), or null
     let routeLine = null;   // Leaflet layerGroup of the computed route (casing + core)
     let routeCasing = null, routeCore = null; // the two polylines, kept so update() can re-slice them
@@ -194,14 +193,14 @@ window.TrackerNav = function (ctx) {
         try { const a = JSON.parse(localStorage.getItem(HIST_KEY) || '[]'); return Array.isArray(a) ? a : []; }
         catch (e) { return []; }
     }
-    // Record a destination at the top; drop duplicates (same label OR within ~25 m), cap the list.
+    // Record a destination at the top; drop duplicates (same label OR within ~25 m). No cap (Doc 2026-06-21):
+    // the list is unlimited — unneeded entries get deleted by hand; the scroll box keeps it compact.
     function pushHistory(latlng, label) {
         if (!latlng || latlng[0] == null) return;
         const lab = (label || '').trim() || 'Ziel';
-        let list = loadHistory().filter((h) =>
+        const list = loadHistory().filter((h) =>
             h.label !== lab && haversine([h.lat, h.lng], [latlng[0], latlng[1]]) > 25);
         list.unshift({ lat: latlng[0], lng: latlng[1], label: lab, t: Date.now() });
-        if (list.length > HIST_MAX) list = list.slice(0, HIST_MAX);
         try { localStorage.setItem(HIST_KEY, JSON.stringify(list)); } catch (e) { }
         renderHistory();
     }
@@ -254,8 +253,8 @@ window.TrackerNav = function (ctx) {
     }
 
     // Rebuild the list DOM (textContent for OSM labels → no injection; the pin SVG is a fixed string).
-    // "Nach Hause" is pinned on top; the recent destinations live in a scroll box that scrolls once there
-    // are more than ~6 of them (.nav-hist-scroll), so home never scrolls away.
+    // "Nach Hause" is pinned on top; the recent destinations live in a scroll box that scrolls from the
+    // 6th entry on (.nav-hist-scroll, unlimited list), so home never scrolls away.
     function renderHistory() {
         const box = $('nav-history'); if (!box) return;
         const list = loadHistory();
