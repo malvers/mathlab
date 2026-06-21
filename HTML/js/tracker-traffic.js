@@ -10,7 +10,7 @@
 //
 // ctx (from tracker.js): { map, toast, navigateTo, speed, nav, voice }
 window.TrackerTraffic = function (ctx) {
-    const { map, toast, navigateTo, speed, nav, voice } = ctx;
+    const { map, toast, navigateTo, speed, nav, voice, apiUrl, apiKey } = ctx;
 
     const AB_BASE = 'https://verkehr.autobahn.de/o/autobahn/';
     const SERVICES = ['closure', 'roadworks', 'warning'];
@@ -34,6 +34,7 @@ window.TrackerTraffic = function (ctx) {
     let lastLat = null, lastLng = null, lastFetch = 0;
     let busy = false;
     let failUntil = 0, failStreak = 0;     // post-failure backoff (mirrors tracker-fuel.js)
+    let attribution = '';                  // '© TomTom' while showing TomTom data (Phase 2), else ''
     const announced = new Set();           // closure identifiers already spoken/toasted (no spam)
     let enabled = localStorage.getItem('trk-traffic-on') === '1'; // default OFF (heavier overlay, like REGEN)
 
@@ -114,6 +115,38 @@ window.TrackerTraffic = function (ctx) {
         return 'warnung';
     }
 
+    // ---- Phase 2: TomTom (abroad). Same pin model, fetched via the tomtom-traffic Edge proxy (key
+    //      server-side). Only used OUTSIDE Germany (the Autobahn API is DE-only); fails gracefully and
+    //      shows nothing until that function is deployed (blocked by the current Supabase 402). ----
+    function inGermany(p) { return p[0] >= 47.2 && p[0] <= 55.1 && p[1] >= 5.8 && p[1] <= 15.1; }
+    // TomTom iconCategory → our kind: 8 = road closed, 9 = roadworks, else jam/generic warning.
+    function tomtomKind(cat) { return cat === 8 ? 'sperrung' : cat === 9 ? 'baustelle' : 'warnung'; }
+    function tomtomItems(incidents, here) {
+        const out = [];
+        for (const f of incidents || []) {
+            const pr = f.properties || {}, g = f.geometry || {};
+            let line = [];
+            if (Array.isArray(g.coordinates)) {
+                if (g.type === 'LineString') line = g.coordinates.map((c) => [c[1], c[0]]);
+                else if (g.type === 'Point') line = [[g.coordinates[1], g.coordinates[0]]];
+            }
+            const anchor = line.length ? line[Math.floor(line.length / 2)] : null;
+            if (!anchor || isNaN(anchor[0])) continue;
+            if (distM(here[0], here[1], anchor[0], anchor[1]) > MAX_NEAR_M) continue;
+            const ev = (pr.events && pr.events[0]) || {};
+            const road = Array.isArray(pr.roadNumbers) ? pr.roadNumbers.join(', ') : '';
+            out.push({
+                id: 'tt|' + anchor[0].toFixed(4) + ',' + anchor[1].toFixed(4) + '|' + (pr.iconCategory || 0),
+                anchor, kind: tomtomKind(pr.iconCategory), future: false,
+                title: (road ? road + ' · ' : '') + (ev.description || 'Verkehr'),
+                subtitle: [pr.from, pr.to].filter(Boolean).join(' → '),
+                description: pr.delay ? ['Verzögerung ca. ' + Math.round(pr.delay / 60) + ' min'] : [],
+                geom: line.length ? line : [anchor],
+            });
+        }
+        return out;
+    }
+
     function pinIcon(kind, future) {
         const cls = 'trf-pin trf-' + kind + (future ? ' trf-future' : '');
         return L.divIcon({
@@ -145,6 +178,10 @@ window.TrackerTraffic = function (ctx) {
     function render() {
         const lyr = ensureLayer();
         lyr.clearLayers();
+        if (map.attributionControl) {                 // show "© TomTom" only while TomTom data is on screen
+            map.attributionControl.removeAttribution('© TomTom');
+            if (enabled && attribution) map.attributionControl.addAttribution(attribution);
+        }
         if (!enabled) return;
         for (const o of items) {
             if (!o.anchor) continue;
@@ -224,16 +261,55 @@ window.TrackerTraffic = function (ctx) {
         }
     }
 
+    // Phase 2 sibling of fetchTraffic: query the TomTom proxy for the current map bbox (abroad).
+    async function fetchTomTom(here) {
+        if (!apiUrl) return;
+        busy = true;
+        let ok = false;
+        const ctrl = new AbortController();
+        const to = setTimeout(() => ctrl.abort(), FETCH_TIMEOUT_MS);
+        try {
+            const bb = map.getBounds();
+            const bbox = { minLon: bb.getWest(), minLat: bb.getSouth(), maxLon: bb.getEast(), maxLat: bb.getNorth() };
+            const r = await fetch(apiUrl + '/functions/v1/tomtom-traffic', {
+                method: 'POST', signal: ctrl.signal,
+                headers: { 'Content-Type': 'application/json', 'apikey': apiKey, 'Authorization': 'Bearer ' + apiKey },
+                body: JSON.stringify({ bbox }),
+            });
+            const d = await r.json().catch(() => ({}));
+            if (!r.ok || !d.ok) { dbg('TomTom ERR ' + (d.error || r.status)); return; }
+            items = tomtomItems(d.incidents, here);
+            attribution = '© TomTom';
+            lastLat = here[0]; lastLng = here[1]; lastFetch = Date.now();
+            dbg('TomTom → ' + items.length + ' Items');
+            render();
+            checkRouteClosures();
+            ok = true;
+        } catch (e) {
+            dbg('TomTom ERR ' + (e && (e.message || e)));
+        } finally {
+            clearTimeout(to);
+            busy = false;
+            if (ok) { failStreak = 0; failUntil = 0; }
+            else { failStreak++; failUntil = Date.now() + Math.min(REFRESH_MS, 5000 * Math.pow(2, failStreak - 1)); }
+        }
+    }
+
     // Called from the position handler on every GPS fix; re-polls only on enough move/time, gated by backoff.
     function update(here) {
         if (!enabled || busy || !here) return;
         if (Date.now() < failUntil) return;
         const lat = here[0], lng = here[1];
         if (typeof lat !== 'number' || typeof lng !== 'number') return;
-        const refs = currentRefs();
-        if (!refs.length) { items = []; render(); return; }  // not on an Autobahn → nothing to show
         const moved = (lastLat == null) ? Infinity : distM(lastLat, lastLng, lat, lng);
-        if (moved >= REFRESH_MOVE_M || (Date.now() - lastFetch) >= REFRESH_MS) fetchTraffic(refs, [lat, lng]);
+        if (moved < REFRESH_MOVE_M && (Date.now() - lastFetch) < REFRESH_MS) return;   // move/time throttle
+        if (inGermany([lat, lng])) {
+            const refs = currentRefs();                          // Phase 1: keyless Autobahn GmbH API
+            if (!refs.length) { items = []; attribution = ''; lastLat = lat; lastLng = lng; lastFetch = Date.now(); render(); return; }
+            fetchTraffic(refs, [lat, lng]);
+        } else if (apiUrl) {
+            fetchTomTom([lat, lng]);                              // Phase 2: TomTom proxy (graceful if not deployed)
+        }
     }
 
     function setEnabled(on) {
@@ -244,6 +320,7 @@ window.TrackerTraffic = function (ctx) {
     function clear() {
         if (layer) layer.clearLayers();
         items = []; lastLat = lastLng = null; lastFetch = 0; announced.clear();
+        attribution = ''; if (map.attributionControl) map.attributionControl.removeAttribution('© TomTom');
     }
 
     return {
