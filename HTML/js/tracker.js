@@ -2248,8 +2248,8 @@ ${pts}
             speed: __speed, nav: __nav, voice: (window.SolitaVoice || null),
             apiUrl: SUPABASE_URL, apiKey: SUPABASE_KEY,   // Phase 2: TomTom proxy (abroad only; graceful until deployed)
         }) : null;
-        // Restore the VERKEHR button state (the module self-restores its enabled flag from localStorage).
-        if (__traffic && __traffic.enabled) { const tb = document.getElementById('mb-traffic'); if (tb) tb.classList.add('active'); }
+        // VERKEHR now lives as a POI category ("Verkehr") — its checkbox reflects/sets __traffic.enabled
+        // (wired in the POI panel block below). The module self-restores its enabled flag from localStorage.
         // ===============================================================
         // Radial action popup (long-press / right-click) — style from worldclock
         // ===============================================================
@@ -2426,6 +2426,18 @@ ${pts}
                 if (__poi) __poi.refresh();   // category toggled → re-query the visible area
             });
         });
+        // "Verkehr" is a POI category that drives the SEPARATE live-Autobahn traffic module
+        // (js/tracker-traffic.js), not an Overpass fetch. Its checkbox mirrors/sets __traffic.enabled
+        // (key trk-traffic-on) — so it can't sit in the generic loop above (no __poi.refresh, own key).
+        (function () {
+            const cb = $('poi-cat-traffic'); if (!cb) return;
+            cb.checked = !!(__traffic && __traffic.enabled);
+            cb.addEventListener('change', () => {
+                if (!__traffic) { toast('Verkehr nicht verfügbar.'); cb.checked = false; return; }
+                __traffic.setEnabled(cb.checked);
+                toast(cb.checked ? 'Verkehr an' : 'Verkehr aus');
+            });
+        })();
         // Fuel selectors (Doc 2026-06-19): two dropdowns behind "Tanken" — fuel type (the ⛽ price pins
         // show THIS fuel's price) and search range (1/2/5 km). __fuel.setFuelType/setRange persist to
         // localStorage themselves; here we just reflect the stored choice into the <select>s.
@@ -2461,16 +2473,6 @@ ${pts}
             e.currentTarget.classList.toggle('active', isOn);
             localStorage.setItem(RAIN_KEY, isOn ? '1' : '0'); // persist REGEN across restarts
             toast(isOn ? 'Regenradar an' : 'Regenradar aus');
-            closePopup();
-        });
-        // VERKEHR toggles the live Autobahn traffic overlay (js/tracker-traffic.js); reflect on/off (.active).
-        const __mbTraffic = $('mb-traffic');
-        if (__mbTraffic) __mbTraffic.addEventListener('click', (e) => {
-            if (!__traffic) { toast('Verkehr nicht verfügbar.'); closePopup(); return; } // module missing → no fake "active"
-            const on = !__traffic.enabled;
-            __traffic.setEnabled(on);
-            e.currentTarget.classList.toggle('active', on);
-            toast(on ? 'Verkehr an' : 'Verkehr aus');
             closePopup();
         });
         $('menu-fab').addEventListener('click', () => openPopup());
