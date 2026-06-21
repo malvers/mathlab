@@ -372,11 +372,19 @@
         // Canonical waypoint → DB/buffer shape: pass ALL fields through (photo `img` and voice
         // `audio`/`dur`/`type` alike), only drop the runtime-only Leaflet marker. Future fields
         // (e.g. a transcript) ride along for free — single source, no per-field enumeration.
-        function wpSer(w) {
+        function wpSer(w, forSync) {
             const o = Object.assign({}, w); delete o._marker;
             delete o._blob;                                         // never serialize the raw video File
             delete o._trackId;                                      // runtime-only: which DB row holds this wp (for corrections)
             if (o._pending) { o.video = null; delete o._pending; }  // un-uploaded video → no dead blob: URL
+            // CLOUD sync copy ONLY: drop un-uploaded base64 (a failed R2 upload leaves a data: URL in
+            // img/audio). Otherwise it re-POSTs hundreds of KB on EVERY 20 s autosync tick (egress audit fix E).
+            // The LOCAL TrackBuffer calls wpSer(w) without forSync → keeps the base64 so the photo is never lost.
+            if (forSync) {
+                if (typeof o.img === 'string' && o.img.startsWith('data:')) o.img = null;
+                if (typeof o.audio === 'string' && o.audio.startsWith('data:')) o.audio = null;
+                if (typeof o.video === 'string' && o.video.startsWith('data:')) o.video = null;
+            }
             return o;
         }
         let wpMarkers = [];
@@ -1345,6 +1353,7 @@
         //      persisted trail still comes from the Stage 2 row, so a viewer gets history + live. ----
         let liveOn = false, liveChannel = null, lastLiveMs = 0, liveTrailTimer = null;
         let liveRejoinTimer = null, liveWasInterrupted = false, liveNetWired = false; // auto-resume after a dead spot
+        let liveRejoinMs = 3000; const LIVE_REJOIN_MAX = 30000; // exponential rejoin backoff (reset to 3 s on SUBSCRIBED)
         let liveName = (localStorage.getItem('tracker.liveName') || 'vsb');
         const LIVE_MS = 4000; // position broadcast cadence while live
         function updateLiveBadge() {
@@ -1459,23 +1468,33 @@
                     if (window.DebugWindow) DebugWindow.log('live: status=' + status + ' (live:' + liveName + ')');
                     if (status === 'SUBSCRIBED') {
                         if (liveWasInterrupted) { liveWasInterrupted = false; toast('Live wieder verbunden.'); }
+                        liveRejoinMs = 3000; // reconnected → reset the rejoin backoff
                         updateLiveBadge();
                         broadcastTrail(); broadcastLive(true); waypoints.forEach(addLiveMedia);
                     } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
                         liveWasInterrupted = true; updateLiveBadge();
-                        if (liveOn) scheduleRejoin(3000); // keep trying while we're still meant to be live
+                        if (liveOn) scheduleRejoin(); // exponential backoff inside; keeps trying while still live
                     }
                 });
                 liveChannel = ch;
             } catch (e) {
                 if (window.DebugWindow) DebugWindow.log('live: join-Fehler ' + (e.message || e));
-                if (liveOn) scheduleRejoin(5000);
+                if (liveOn) scheduleRejoin();
             }
         }
-        // One pending rejoin at a time; `delay` ms before rebuilding the channel.
+        // One pending rejoin at a time, with EXPONENTIAL backoff (3 s → 30 s) — reset to 3 s on SUBSCRIBED.
+        // Also gated by the central breaker: while Supabase is 402-locked / offline, don't reconnect — just
+        // re-check later, so there is no websocket-reconnect storm during the outage (egress audit fix B).
         function scheduleRejoin(delay) {
             if (!liveOn || liveRejoinTimer) return;
-            liveRejoinTimer = setTimeout(() => { liveRejoinTimer = null; if (liveOn) joinLive(); }, delay || 3000);
+            const wait = (delay != null) ? delay : liveRejoinMs;
+            liveRejoinTimer = setTimeout(() => {
+                liveRejoinTimer = null;
+                if (!liveOn) return;
+                liveRejoinMs = Math.min(liveRejoinMs * 2, LIVE_REJOIN_MAX); // grow for the next attempt
+                if (window.SupaGate && !window.SupaGate.ok()) { scheduleRejoin(liveRejoinMs); return; } // breaker open → wait
+                joinLive();
+            }, wait);
         }
         function stopLive(silent) {
             if (liveTrailTimer) { clearInterval(liveTrailTimer); liveTrailTimer = null; }
@@ -1712,7 +1731,10 @@ ${pts}
             // (≤2 s) instead of hard-failing — robust on slow devices / first paint.
             for (let i = 0; i < 20 && !window.supabase; i++) await new Promise((r) => setTimeout(r, 100));
             if (!window.supabase) throw new Error('Supabase-Lib nicht geladen');
-            if (!sb) sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+            // Route ALL Supabase REST/RPC/Edge traffic through the central circuit breaker (js/supa-gate.js)
+            // so a 402 egress-lock / offline pauses every call in ONE place instead of hammering on.
+            if (!sb) sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY,
+                window.SupaGate ? { global: { fetch: window.SupaGate.gatedFetch } } : undefined);
             const code = getSyncCode();
             const want = code ? (await syncCreds(code)).email : null; // null = anonymous identity
             const { data: { session } } = await sb.auth.getSession();
@@ -1764,7 +1786,7 @@ ${pts}
             // [lat, lng, time, altitude(m), speed(km/h), activity] — alt/speed null when unknown
             const pts = track.map((p, i) => [p[0], p[1], times[i] || null, alts[i] != null ? alts[i] : null, speeds[i] != null ? speeds[i] : null, activities[i] || null]);
             // strip the live Leaflet marker reference before persisting
-            const wps = waypoints.map(wpSer);
+            const wps = waypoints.map(w => wpSer(w, true)); // forSync → strip un-uploaded base64 (egress fix E)
             const row = { name: name, distance_m: Math.round(totalDist), points: pts, waypoints: wps, status: status || 'done' };
             const missingCol = e => e && /status/i.test(e.message || ''); // 'status' column not migrated yet
             if (currentTrackId) {                                          // UPDATE the existing (live-synced) row
