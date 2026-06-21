@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ideen — Markdown-Browser</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="../resources/favicon.png">
+    <!-- Markdown lexer+renderer (CDN, versioned). We use marked.lexer() to get exact source offsets so a
+         single section/item can be sliced out of the raw .md and committed back. -->
+    <script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js"></script>
+    <style>
+        :root {
+            --bg: rgb(8, 20, 42);
+            --bg2: rgb(14, 28, 56);
+            --line: rgba(255, 255, 255, 0.12);
+            --txt: rgba(255, 255, 255, 0.92);
+            --muted: rgba(255, 255, 255, 0.5);
+            --orange: rgb(245, 194, 66);
+            --green: rgb(121, 158, 49);
+            --red: rgb(176, 36, 24);
+        }
+        * { box-sizing: border-box; }
+        html, body { margin: 0; background: var(--bg); color: var(--txt); font-family: 'Orbitron', sans-serif; -webkit-text-size-adjust: 100%; }
+        ::-webkit-scrollbar { width: 9px; height: 9px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.18); border-radius: 6px; }
+
+        .wrap { max-width: 880px; margin: 0 auto; padding: 18px 14px 60px; }
+        header.top { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 6px 0 14px; border-bottom: 1px solid var(--line); margin-bottom: 14px; }
+        header.top h1 { font-size: 1.05rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin: 0; color: var(--orange); flex: 1 1 auto; }
+        .count { font-size: 0.7rem; color: var(--muted); letter-spacing: 1px; }
+
+        .btn { font-family: 'Orbitron', sans-serif; font-weight: 700; letter-spacing: 1px; font-size: 0.72rem; text-transform: uppercase; cursor: pointer; border-radius: 9px; padding: 9px 14px; border: 1px solid var(--green); background: var(--green); color: #fff; transition: filter .15s, opacity .15s; }
+        .btn:hover { filter: brightness(1.08); }
+        .btn:disabled { opacity: .5; cursor: default; }
+
+        .grp-title { font-size: 0.64rem; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); margin: 20px 0 8px; font-weight: 500; }
+
+        .row { border: 1px solid var(--line); border-radius: 10px; background: var(--bg2); margin-bottom: 7px; overflow: hidden; }
+        .row-head { display: flex; align-items: center; gap: 10px; padding: 10px 12px; cursor: pointer; transition: background .12s; }
+        .row-head:hover { background: rgba(245, 194, 66, 0.08); }
+        .chev { flex: 0 0 auto; color: var(--orange); font-size: 0.8rem; width: 12px; transition: transform .15s; }
+        .row.open .chev { transform: rotate(90deg); }
+        .fname { flex: 1 1 auto; min-width: 0; }
+        .fname b { font-weight: 700; font-size: 0.82rem; }
+        .fname .path { display: block; font-size: 0.6rem; color: var(--muted); letter-spacing: .5px; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+        /* whole-file delete (two-step) in the row head */
+        .del { flex: 0 0 auto; display: flex; align-items: center; gap: 6px; }
+        .del-btn { background: transparent; border: 1px solid rgba(176, 36, 24, 0.5); color: rgba(255, 255, 255, 0.7); border-radius: 7px; width: 30px; height: 30px; cursor: pointer; font-size: 0.85rem; line-height: 1; }
+        .del-btn:hover { background: rgba(176, 36, 24, 0.25); color: #fff; }
+        .del-confirm { display: none; gap: 6px; }
+        .row.confirming .del-btn { display: none; }
+        .row.confirming .del-confirm { display: flex; }
+        .mini { font-family: 'Orbitron', sans-serif; font-size: 0.6rem; font-weight: 700; letter-spacing: .5px; text-transform: uppercase; border-radius: 7px; padding: 6px 8px; cursor: pointer; border: 1px solid; }
+        .mini.yes { background: var(--red); border-color: var(--red); color: #fff; }
+        .mini.no { background: transparent; border-color: var(--line); color: var(--muted); }
+
+        .body { display: none; border-top: 1px solid var(--line); padding: 6px 14px 14px; }
+        .row.open .body { display: block; }
+        .body.loading, .filenote { color: var(--muted); font-size: 0.72rem; padding: 10px 2px; }
+        .err { color: var(--red); font-size: 0.72rem; }
+
+        /* rendered markdown */
+        .md { font-family: -apple-system, Segoe UI, Roboto, sans-serif; font-size: 0.92rem; line-height: 1.5; color: var(--txt); }
+        .md h1, .md h2, .md h3, .md h4 { font-family: 'Orbitron', sans-serif; color: var(--orange); line-height: 1.25; margin: .5em 0 .3em; }
+        .md h1 { font-size: 1.25rem; } .md h2 { font-size: 1.05rem; } .md h3 { font-size: 0.95rem; } .md h4 { font-size: 0.88rem; }
+        .md a { color: var(--orange); }
+        .md p { margin: .35em 0; }
+        .md code { background: rgba(255, 255, 255, 0.08); padding: 1px 5px; border-radius: 4px; font-size: 0.85em; }
+        .md pre { background: rgba(0, 0, 0, 0.3); padding: 10px 12px; border-radius: 8px; overflow: auto; }
+        .md pre code { background: none; padding: 0; }
+        .md blockquote { border-left: 3px solid var(--orange); margin: 8px 0; padding: 2px 12px; color: var(--muted); }
+        .md table { border-collapse: collapse; } .md th, .md td { border: 1px solid var(--line); padding: 4px 8px; }
+        .md img { max-width: 100%; }
+
+        /* per-block / per-item delete controls (the fine-grained ones) */
+        .blk, .blk-li { position: relative; padding-right: 30px; }
+        .blk-li { list-style: disc; margin-left: 4px; }
+        .xctl { position: absolute; top: 2px; right: 0; display: inline-flex; gap: 4px; opacity: .4; transition: opacity .12s; }
+        .blk:hover > .xctl, .blk-li:hover > .xctl { opacity: 1; }
+        .x { background: transparent; border: 1px solid rgba(176, 36, 24, 0.55); color: rgba(255, 255, 255, 0.75); border-radius: 6px; width: 22px; height: 22px; font-size: 0.7rem; line-height: 1; cursor: pointer; padding: 0; }
+        .x:hover { background: rgba(176, 36, 24, 0.3); color: #fff; }
+        .x.yes { border-color: var(--green); }
+        .x.yes:hover { background: rgba(121, 158, 49, 0.3); }
+        .x[disabled] { opacity: .4; cursor: default; }
+
+        /* auth overlay */
+        .auth { position: fixed; inset: 0; background: rgba(8, 20, 42, 0.96); display: none; align-items: center; justify-content: center; z-index: 1000; }
+        .auth.visible { display: flex; }
+        .auth-box { background: var(--bg2); border: 1px solid var(--line); border-radius: 14px; padding: 26px 24px; width: min(360px, 88vw); text-align: center; }
+        .auth-box h2 { font-size: 0.95rem; letter-spacing: 1.5px; text-transform: uppercase; color: var(--orange); margin: 0 0 16px; }
+        .auth-box input { width: 100%; padding: 11px 12px; border-radius: 9px; border: 1px solid var(--line); background: rgba(0, 0, 0, 0.25); color: var(--txt); font-family: 'Orbitron', sans-serif; font-size: 0.9rem; text-align: center; letter-spacing: 2px; }
+        .auth-box input:focus { outline: none; border-color: var(--orange); }
+        .auth-box .btn { width: 100%; margin-top: 14px; }
+        .auth-box .err { margin-top: 10px; min-height: 1em; }
+    </style>
+</head>
+
+<body>
+    <!-- Password gate: same mechanism as Solita — the typed password is verified SERVER-SIDE (x-app-pass ==
+         LABAI_PASSWORD). No password/hash in this public file (Rule 21). Unlock is remembered in
+         localStorage('dev_access'), SHARED with Solita on this origin → logged into Solita ⇒ already unlocked. -->
+    <div class="auth visible" id="auth">
+        <div class="auth-box">
+            <h2>Passwort</h2>
+            <input type="password" id="pwd" placeholder="••••••••" autocomplete="off" aria-label="Passwort">
+            <button class="btn" id="login-btn" type="button">Login</button>
+            <div class="err" id="auth-err"></div>
+        </div>
+    </div>
+
+    <div class="wrap" id="app" hidden>
+        <header class="top">
+            <h1>Ideen — Markdown</h1>
+            <span class="count" id="count"></span>
+            <button class="btn" id="update-btn" type="button">Update MDs</button>
+        </header>
+        <p class="filenote">Aufklappen → lesen. ✕ pro Datei (Kopf), pro Section/Item/Block (im Text). Jede Löschung committet sofort.</p>
+        <p class="filenote" id="status"></p>
+        <div id="list"></div>
+    </div>
+
+    <script>
+        'use strict';
+        const OWNER = 'malvers', REPO = 'mathlab', BRANCH = 'main';
+        const TREE_URL = `https://api.github.com/repos/${OWNER}/${REPO}/git/trees/${BRANCH}?recursive=1`;
+        const RAW = (p) => `https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/${p.split('/').map(encodeURIComponent).join('/')}`;
+        const EDIT_URL = 'https://fyfhxzyymmurlaenmzse.supabase.co/functions/v1/delete-md'; // edits + deletes
+        const VERIFY_URL = 'https://fyfhxzyymmurlaenmzse.supabase.co/functions/v1/claude';
+        const SB_ANON = 'sb_publishable_ubQDiMD-X3N0vZvPVi229Q_-5Zootfk'; // publishable anon key — client-safe
+
+        const $ = (id) => document.getElementById(id);
+        const el = (tag, cls) => { const e = document.createElement(tag); if (cls) e.className = cls; return e; };
+
+        function excluded(p) {
+            const pl = p.toLowerCase();
+            return ['archive', 'archiv', 'node_modules', '/android/', '/ios/', 'site-packages', '.venv'].some((x) => pl.includes(x));
+        }
+        const GROUP_ORDER = ['Root', 'notes/', 'HTML/tracker/', 'docs/solita/', 'HTML/ (sonst)', 'Apps / Tools / READMEs'];
+        function groupOf(p) {
+            if (p.startsWith('notes/')) return 'notes/';
+            if (p.startsWith('HTML/tracker/')) return 'HTML/tracker/';
+            if (p.startsWith('docs/solita/')) return 'docs/solita/';
+            if (p.startsWith('HTML/')) return 'HTML/ (sonst)';
+            if (!p.includes('/')) return 'Root';
+            return 'Apps / Tools / READMEs';
+        }
+        const baseName = (p) => p.split('/').pop();
+
+        // ---- Auth ----
+        let pwd = '';
+        function unlock() { $('auth').classList.remove('visible'); $('app').hidden = false; load(); }
+        async function verifyPwd(p) {
+            if (!p) return false;
+            try {
+                const r = await fetch(VERIFY_URL, { method: 'POST', headers: { 'Content-Type': 'application/json', 'apikey': SB_ANON, 'Authorization': 'Bearer ' + SB_ANON, 'x-app-pass': p }, body: JSON.stringify({ ping: true }) });
+                return r.ok;
+            } catch (_) { return false; }
+        }
+        async function doLogin() {
+            const p = $('pwd').value;
+            $('auth-err').textContent = 'Prüfe …';
+            if (await verifyPwd(p)) { pwd = p; try { localStorage.setItem('dev_access', p); } catch (_) { } unlock(); }
+            else $('auth-err').textContent = 'Falsch (oder Verify-Endpoint offline).';
+        }
+        $('login-btn').addEventListener('click', doLogin);
+        $('pwd').addEventListener('keydown', (e) => { if (e.key === 'Enter') doLogin(); });
+        (function () {
+            let stored = ''; try { stored = localStorage.getItem('dev_access') || ''; } catch (_) { }
+            if (stored) { pwd = stored; unlock(); } else { $('pwd').focus(); }
+        })();
+
+        // ---- Commit helpers (edit = send new content; delete = omit content) ----
+        async function commit(path, content) {
+            const body = (content === null) ? { path } : { path, content };
+            const r = await fetch(EDIT_URL, { method: 'POST', headers: { 'Content-Type': 'application/json', 'apikey': SB_ANON, 'Authorization': 'Bearer ' + SB_ANON, 'x-app-pass': pwd }, body: JSON.stringify(body) });
+            const d = await r.json().catch(() => ({}));
+            if (!r.ok) throw new Error(d.error || ('HTTP ' + r.status));
+            return d;
+        }
+
+        // A small two-step ✕ control. onConfirm() runs on the second (✓) click.
+        function delControl(title, onConfirm) {
+            const ctl = el('span', 'xctl');
+            function arm() {
+                ctl.innerHTML = '';
+                const x = el('button', 'x'); x.type = 'button'; x.textContent = '✕'; x.title = title + ' löschen';
+                x.addEventListener('click', (e) => { e.stopPropagation(); confirmMode(); });
+                ctl.appendChild(x);
+            }
+            function confirmMode() {
+                ctl.innerHTML = '';
+                const yes = el('button', 'x yes'); yes.type = 'button'; yes.textContent = '✓'; yes.title = 'bestätigen';
+                const no = el('button', 'x'); no.type = 'button'; no.textContent = '✕'; no.title = 'abbrechen';
+                yes.addEventListener('click', (e) => { e.stopPropagation(); yes.disabled = true; no.disabled = true; onConfirm(yes, no, arm); });
+                no.addEventListener('click', (e) => { e.stopPropagation(); arm(); });
+                ctl.appendChild(yes); ctl.appendChild(no);
+            }
+            arm();
+            return ctl;
+        }
+
+        // ---- Granular renderer: lexer tokens → blocks with exact source ranges → ✕ per unit ----
+        function renderBody(bodyEl, path, state) {
+            bodyEl.innerHTML = '';
+            const md = state.md;
+            const wrap = el('div', 'md');
+            let tokens = null;
+            try { tokens = marked.lexer(md); } catch (e) { tokens = null; }
+
+            // Exact offsets only hold if the raw tokens reconstruct the source byte-for-byte.
+            let granular = false, off = 0;
+            if (tokens) {
+                tokens.forEach((t) => { t._start = off; t._end = off + t.raw.length; off += t.raw.length; });
+                granular = (tokens.map((t) => t.raw).join('') === md);
+            }
+            if (!granular) {
+                wrap.innerHTML = marked.parse(md);
+                bodyEl.appendChild(wrap);
+                const n = el('div', 'filenote'); n.textContent = 'Feingranulares Löschen hier nicht möglich (komplexes Markdown) — nutze das ✕ am Datei-Kopf.';
+                bodyEl.appendChild(n);
+                return;
+            }
+
+            // Splice [s,e) out of the source, commit, re-render from the new content.
+            function cut(s, e) {
+                if (state.busy) return; state.busy = true;
+                const newMd = md.slice(0, s) + md.slice(e);
+                const er = bodyEl.querySelector('.err'); if (er) er.remove();
+                commit(path, newMd).then(() => { state.md = newMd; renderBody(bodyEl, path, state); })
+                    .catch((err) => { const e2 = el('div', 'err'); e2.textContent = 'Speichern fehlgeschlagen: ' + err.message + ' (delete-md deployt? Supabase frei?)'; bodyEl.prepend(e2); })
+                    .finally(() => { state.busy = false; });
+            }
+
+            tokens.forEach((t) => {
+                if (t.type === 'space') return;
+                if (t.type === 'list') {
+                    const listEl = el(t.ordered ? 'ol' : 'ul');
+                    let cur = t._start;
+                    t.items.forEach((it) => {
+                        const li = el('li', 'blk-li');
+                        const inner = el('div'); inner.innerHTML = marked.parse(it.text || it.raw);
+                        // marked.parse wraps in <p>; unwrap a single leading <p> so list items read tight
+                        if (inner.children.length === 1 && inner.firstElementChild.tagName === 'P') inner.innerHTML = inner.firstElementChild.innerHTML;
+                        li.appendChild(inner);
+                        const idx = md.indexOf(it.raw, cur);
+                        if (idx >= 0) { const s = idx, e = idx + it.raw.length; cur = e; li.appendChild(delControl('Item', () => cut(s, e))); }
+                        listEl.appendChild(li);
+                    });
+                    wrap.appendChild(listEl);
+                    return;
+                }
+                const blk = el('div', 'blk');
+                blk.innerHTML = marked.parse(t.raw);
+                let s = t._start, e = t._end, label = 'Block';
+                if (t.type === 'heading') {
+                    label = 'Section';
+                    e = md.length; // extend to the next heading of same-or-higher level
+                    for (const o of tokens) { if (o._start > t._start && o.type === 'heading' && o.depth <= t.depth) { e = o._start; break; } }
+                }
+                blk.appendChild(delControl(label, () => cut(s, e)));
+                wrap.appendChild(blk);
+            });
+            bodyEl.appendChild(wrap);
+        }
+
+        function rowEl(path) {
+            const row = el('div', 'row');
+            const head = el('div', 'row-head');
+            head.innerHTML = '<span class="chev">▶</span><span class="fname"><b></b><span class="path"></span></span>';
+            head.querySelector('b').textContent = baseName(path);
+            head.querySelector('.path').textContent = path;
+
+            const del = el('span', 'del');
+            del.innerHTML = '<button class="del-btn" title="ganze Datei löschen" aria-label="Datei löschen">🗑</button>'
+                + '<span class="del-confirm"><button class="mini yes">Datei löschen</button><button class="mini no">Abbrechen</button></span>';
+            const body = el('div', 'body');
+            const state = { md: '', busy: false };
+            let loaded = false;
+
+            head.addEventListener('click', async () => {
+                row.classList.toggle('open');
+                if (row.classList.contains('open') && !loaded) {
+                    loaded = true; body.classList.add('loading'); body.textContent = 'Lade …';
+                    try {
+                        state.md = await (await fetch(RAW(path), { cache: 'no-store' })).text();
+                        body.classList.remove('loading');
+                        renderBody(body, path, state);
+                    } catch (e) { body.classList.remove('loading'); body.innerHTML = '<span class="err">Konnte ' + path + ' nicht laden.</span>'; loaded = false; }
+                }
+            });
+
+            del.querySelector('.del-btn').addEventListener('click', (e) => { e.stopPropagation(); row.classList.add('confirming'); });
+            del.querySelector('.no').addEventListener('click', (e) => { e.stopPropagation(); row.classList.remove('confirming'); });
+            del.querySelector('.yes').addEventListener('click', async (e) => {
+                e.stopPropagation();
+                const yes = del.querySelector('.yes'); yes.textContent = '…'; yes.disabled = true;
+                try { await commit(path, null); row.style.transition = 'opacity .2s'; row.style.opacity = '0'; setTimeout(() => row.remove(), 200); }
+                catch (err) { yes.disabled = false; yes.textContent = 'Datei löschen'; row.classList.remove('confirming'); row.classList.add('open'); body.innerHTML = '<span class="err">Löschen fehlgeschlagen: ' + err.message + ' (delete-md deployt? Supabase frei?)</span>'; }
+            });
+
+            head.appendChild(del);
+            row.appendChild(head); row.appendChild(body);
+            return row;
+        }
+
+        async function fetchTree() {
+            const r = await fetch(TREE_URL, { cache: 'no-store' });
+            if (r.status === 403) throw new Error('GitHub-API-Limit erreicht (60/h ohne Token) — kurz warten.');
+            if (!r.ok) throw new Error('GitHub tree HTTP ' + r.status);
+            const j = await r.json();
+            if (!Array.isArray(j.tree)) throw new Error('Unerwartete Antwort.');
+            return j.tree.filter((t) => t.type === 'blob' && t.path.toLowerCase().endsWith('.md') && !excluded(t.path)).map((t) => t.path).sort((a, b) => a.localeCompare(b));
+        }
+
+        async function load() {
+            $('status').textContent = 'Scanne Repo …';
+            $('update-btn').disabled = true;
+            $('list').innerHTML = '';
+            try {
+                const paths = await fetchTree();
+                const groups = {};
+                paths.forEach((p) => { (groups[groupOf(p)] = groups[groupOf(p)] || []).push(p); });
+                GROUP_ORDER.forEach((g) => {
+                    if (!groups[g]) return;
+                    const title = el('div', 'grp-title'); title.textContent = g + '  (' + groups[g].length + ')';
+                    $('list').appendChild(title);
+                    groups[g].forEach((p) => $('list').appendChild(rowEl(p)));
+                });
+                $('count').textContent = paths.length + ' Dateien';
+                $('status').textContent = '';
+            } catch (e) { $('status').innerHTML = '<span class="err">' + e.message + '</span>'; }
+            finally { $('update-btn').disabled = false; }
+        }
+        $('update-btn').addEventListener('click', load);
+    </script>
+</body>
+
+</html>
