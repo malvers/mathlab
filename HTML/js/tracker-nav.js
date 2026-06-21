@@ -133,6 +133,32 @@ window.TrackerNav = function (ctx) {
         return (data && data.length) ? data[0] : null;
     }
 
+    // ---- Reverse geocoding: current coords → a human label (or null). Keyless Nominatim (rule 18). ----
+    async function reverseGeocode(latlng) {
+        const url = NOMINATIM.replace('/search', '/reverse')
+            + '?format=jsonv2&lat=' + latlng[0] + '&lon=' + latlng[1];
+        const r = await fetch(url, { headers: { Accept: 'application/json' } });
+        const data = await r.json();
+        return (data && data.display_name) ? data.display_name : null;
+    }
+
+    // ---- "Position merken": save the CURRENT position as a pin into the recent-destinations list, so it
+    // shows up under "Letzte Ziele" and can be navigated to later (Doc-Wunsch; FEAT-3-verwandt). Reverse-
+    // geocodes for a readable name; falls back to a timestamp label when offline. ----
+    async function savePin() {
+        const pos = curPos();
+        if (!pos) { toast('Position merken: warte auf GPS-Position …'); return; }
+        toast('Position wird gemerkt …');
+        let label = null;
+        try { label = await reverseGeocode(pos); } catch (e) { /* offline → fall back to coords/time */ }
+        if (!label) {
+            const t = new Date();
+            label = 'Gemerkt ' + t.getHours() + ':' + String(t.getMinutes()).padStart(2, '0');
+        }
+        pushHistory(pos, '📍 ' + label);   // 📍 marks a self-saved spot among the navigated destinations
+        toast('Position gemerkt: ' + shortLabel(label));
+    }
+
     async function setDestination() {
         const q = ($('nav-dest').value || '').trim();
         if (!q) { toast('Bitte ein Ziel eingeben.'); return; }
@@ -737,6 +763,7 @@ window.TrackerNav = function (ctx) {
     // Wire the panel's own buttons once.
     const setBtn = $('nav-set'); if (setBtn) setBtn.addEventListener('click', startFromDialog);
     const clrBtn = $('nav-clear'); if (clrBtn) clrBtn.addEventListener('click', () => { clearRoute(); toast('Ziel gelöscht.'); });
+    const hereBtn = $('nav-here'); if (hereBtn) hereBtn.addEventListener('click', savePin);
 
     // Enter in the single line = STARTEN (faster than reaching for the button).
     const destInput = $('nav-dest');
