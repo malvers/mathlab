@@ -775,20 +775,28 @@
 
         function updateFitMode(here) {
             // FIT mode (3-state): 'all' keeps the WHOLE track in view; 'remaining' keeps the rest of the
-            // route ahead in view AND tightens the zoom as the rest shrinks (note #9). The remaining
-            // re-fit is BIDIRECTIONAL with hysteresis + cooldown so it can't flutter: zoom OUT when the
-            // rest spills past the frame (-0.12 slack), zoom IN when it sits well inside (-0.40 inset →
-            // only when there's lots of empty margin). Tune the two insets if it tightens too late/eager.
+            // route ahead in view (note #9). Two DECOUPLED motions so the frame tracks the shrinking rest
+            // dynamically without zoom flutter (Doc 2026-06-21 — "wird einmal gemacht, dann nicht angepasst":
+            // the missing piece was the continuous PAN; the zoom-only hysteresis left the camera frozen
+            // between steps, and with zoomSnap:1 the snug-fit often never re-crossed the threshold at all):
+            //   • ZOOM — bidirectional, hysteresis + cooldown (can't flutter): out when the rest spills past
+            //     the frame (-0.12 slack), in when it sits well inside (-0.30 inset).
+            //   • PAN  — EVERY fix, re-centre on the remaining route so the frame follows it as it shrinks.
             if (fitMode === 'all' && track.length > 1) {
                 const tb = L.latLngBounds(track);
                 if (!map.getBounds().pad(-0.12).contains(tb)) { try { map.fitBounds(tb, { padding: fitPad() }); } catch (e) { } }
             } else if (fitMode === 'remaining' && __nav && __nav.remainingBounds) {
                 const rb = __nav.remainingBounds(here);
-                if (rb && Date.now() - lastAutoZoom > AUTOZOOM_COOLDOWN) {
+                if (rb) {
                     const v = map.getBounds();
                     const grew = !v.pad(-0.12).contains(rb);   // rest spilled out of the frame → zoom OUT
-                    const shrank = v.pad(-0.40).contains(rb);  // rest sits in the inner margin → zoom IN
-                    if (grew || shrank) { lastAutoZoom = Date.now(); try { map.fitBounds(rb, { padding: fitPad() }); } catch (e) { } }
+                    const shrank = v.pad(-0.30).contains(rb);  // rest sits in the inner margin → zoom IN
+                    if ((grew || shrank) && Date.now() - lastAutoZoom > AUTOZOOM_COOLDOWN) {
+                        lastAutoZoom = Date.now();
+                        try { map.fitBounds(rb, { padding: fitPad() }); } catch (e) { }   // re-frame (zoom + centre)
+                    } else {
+                        try { map.panTo(rb.getCenter(), { animate: true }); } catch (e) { } // keep it centred between zoom steps
+                    }
                 }
             }
         }
