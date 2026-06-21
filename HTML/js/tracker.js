@@ -1234,7 +1234,7 @@
         // cloud row if one exists, wipe the crash buffer, reset the HUD, back to idle.
         // Destructive → confirm first.
         async function discardTracking() {
-            if (!(await uiConfirm('Track verwerfen? Das lässt sich nicht rückgängig machen.', { danger: true, okText: 'Verwerfen' }))) return;
+            if (!(await uiConfirm('Track löschen? Das lässt sich nicht rückgängig machen.', { danger: true, okText: 'Löschen' }))) return;
             setTrkState('idle');
             startAmbient(); // back to idle → resume idle live-follow
             stopLive(true);
