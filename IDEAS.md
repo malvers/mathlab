@@ -62,3 +62,29 @@ Nutzer schreibt handschriftlich (auch) Formeln, die sich kaum merkbar in LaTeX m
 
 - **Live-Sync zwischen Mac & Tablet**: WebSocket-basierter Hot-Reload statt manuell RELOAD drücken.
 - **Replay-Modus für gemalte Formeln**: Aufzeichnen der Strokes mit Timestamps, wiedergeben als Animation.
+
+---
+
+# Distribution / App-Stores (Capacitor + Plan-A live-HTML)
+
+Der Capacitor-Ansatz (native Shell + WebView lädt live HTML von docalvers.de) = Features/Fixes
+**ohne Neuinstallation**. Frage 2026-06-20: „hat Google/Apple was dagegen?" → Notiz, damit's nicht verloren geht.
+
+**Android — heute (sideload):** Google hat **keine Handhabe** (kein Play-Store-Listing = keine Policy).
+Beim Install evtl. nur eine Play-Protect-Warnung. Plan A ist hier völlig sauber. So weiterfahren.
+
+**iPhone für Freunde OHNE App-Store-Listing — GEHT:**
+- **TestFlight (empfohlen):** Apple Developer Account ($99/Jahr); bis **10.000 Tester** per Einladungs-Link;
+  sie installieren die TestFlight-App → dein Build. Nur der *erste* Build je Version kriegt einen *leichten*
+  Beta-Review (kein öffentliches Listing). Builds **laufen nach 90 Tagen ab** → ab und zu Shell neu hochladen
+  (Features kommen eh übers Web). Braucht **Mac + Xcode** (M3 Air reicht) + einmal `npx cap add ios`.
+- **Ad-Hoc:** bis **100 iPhones** per UDID registriert, **kein Review**, dafür UDID-Sammeln fummelig + gedeckelt.
+- **Nicht geeignet:** Enterprise-Programm ($299) ist nur für eigene Mitarbeiter, nicht für Freunde (Sperr-Risiko).
+
+**Falls mal ÖFFENTLICHES Listing (App Store / Play Store):** Grauzone „dynamic code" (Google Device-&-Network-
+Abuse) bzw. Apple **2.5.2** (Apple ist strenger). Linie = **Inhalt vs. Feature**: remote *Content* im WebView
+aktualisieren ist toleriert; ein *neues natives Feature* remote nachschieben (am Review vorbei) bzw.
+Bait-and-Switch nicht. Plus „minimum functionality" (kein reiner Webview-Wrapper — haben wir nicht: GNSS/Baro/
+Offline). **Safe pattern dafür: Kern-HTML/JS in die Binary bündeln, nur Daten/Config/Tiles remote** → Update-
+Komfort UND Review-Sicherheit; nur neue native Features brauchen dann ein Review. Bei ernsthaftem Listing den
+aktuellen Policy-Wortlaut frisch prüfen (ändert sich).
