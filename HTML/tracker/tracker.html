@@ -130,38 +130,66 @@
     </div>
 
 
-    <!-- Recenter button — appears centred above STOP when the position is no longer in view -->
-    <!-- ONE button above STOP. Shows the crosshair (re-centre on GPS) — or, when you're centred on a
-         track with ≥10 pts, the frame (fit the track). Never both: center OR fit (the .fit class swaps). -->
-    <button id="recenter-fab" aria-label="Zentrieren / Track einpassen">
-        <svg class="ic-recenter" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-            stroke-linejoin="round">
-            <circle cx="12" cy="12" r="3"></circle>
-            <line x1="12" y1="2" x2="12" y2="5"></line>
-            <line x1="12" y1="19" x2="12" y2="22"></line>
-            <line x1="2" y1="12" x2="5" y2="12"></line>
-            <line x1="19" y1="12" x2="22" y2="12"></line>
-        </svg>
-        <svg class="ic-fit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-            stroke-linejoin="round">
-            <path d="M4 9V5a1 1 0 0 1 1-1h4"></path>
-            <path d="M20 9V5a1 1 0 0 0-1-1h-4"></path>
-            <path d="M4 15v4a1 1 0 0 0 1 1h4"></path>
-            <path d="M20 15v4a1 1 0 0 1-1 1h-4"></path>
-        </svg>
-    </button>
-
-    <!-- Resume control: appears after a manual pan/zoom (hand-mode). While shown, the map's automatic
-         centring + zoom are FROZEN; tapping it returns to the auto-mode that was active before (follow
-         OR fit). CENTER / FIT also leave hand-mode.
-         Icon (Doc's idea): a small viewport rectangle, off-centre inside the full-extent frame — the
-         size ratio reads as ZOOM and the offset as SHIFT, i.e. "your view has drifted; tap to re-fit". -->
-    <button id="resume-fab" aria-label="Automatik fortsetzen" title="Automatik fortsetzen">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round">
-            <rect x="3" y="4" width="18" height="16" rx="2"></rect>
-            <rect x="12" y="9" width="6" height="5" rx="1"></rect>
-        </svg>
-    </button>
+    <!-- View control — appears centred above STOP. ONE FAB: tapping it opens a fan of the camera modes
+         that are valid RIGHT NOW, laid out side by side to the left (collapsed = options stacked behind
+         the trigger, z). Pick one to apply it. Modes:
+           follow  — crosshair, re-centre on GPS
+           fitall  — fit the whole route
+           fitrem  — fit the remaining route (only while navigating)
+           hand    — your manually zoomed view (only offered after a hand zoom; transient: picking any
+                     other mode drops it, just like before there was only one chance to resume).
+         The trigger shows the icon of the current mode. Replaces the old cycle button + resume arrow. -->
+    <div id="view-fan">
+        <!-- Fan options (left of the trigger; hidden until open). Per-mode visibility + slot index (--i)
+             + the .current highlight are all set in JS (refreshRecenter / buildFanOptions). -->
+        <button class="vf-opt" data-mode="follow" aria-label="Auf Position zentrieren">
+            <svg class="vf-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="3"></circle>
+                <line x1="12" y1="2" x2="12" y2="5"></line><line x1="12" y1="19" x2="12" y2="22"></line>
+                <line x1="2" y1="12" x2="5" y2="12"></line><line x1="19" y1="12" x2="22" y2="12"></line>
+            </svg>
+        </button>
+        <button class="vf-opt" data-mode="fitall" aria-label="Ganze Route einpassen">
+            <svg class="vf-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 9V5a1 1 0 0 1 1-1h4"></path><path d="M20 9V5a1 1 0 0 0-1-1h-4"></path>
+                <path d="M4 15v4a1 1 0 0 0 1 1h4"></path><path d="M20 15v4a1 1 0 0 1-1 1h-4"></path>
+            </svg>
+        </button>
+        <button class="vf-opt" data-mode="fitrem" aria-label="Reststrecke einpassen">
+            <svg class="vf-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 9V5a1 1 0 0 1 1-1h4"></path><path d="M20 9V5a1 1 0 0 0-1-1h-4"></path>
+                <path d="M4 15v4a1 1 0 0 0 1 1h4"></path><path d="M20 15v4a1 1 0 0 1-1 1h-4"></path>
+                <path d="M9 15l6-6"></path><path d="M11 9h4v4"></path>
+            </svg>
+        </button>
+        <button class="vf-opt" data-mode="hand" aria-label="Eigene Ansicht (Hand-Zoom)">
+            <svg class="vf-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round">
+                <rect x="3" y="4" width="18" height="16" rx="2"></rect>
+                <rect x="12" y="9" width="6" height="5" rx="1"></rect>
+            </svg>
+        </button>
+        <!-- Trigger: shows the current mode's icon (data-mode swaps which is visible); tap toggles the fan -->
+        <button id="recenter-fab" aria-label="Ansicht wählen">
+            <svg class="vf-ic ic-follow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="3"></circle>
+                <line x1="12" y1="2" x2="12" y2="5"></line><line x1="12" y1="19" x2="12" y2="22"></line>
+                <line x1="2" y1="12" x2="5" y2="12"></line><line x1="19" y1="12" x2="22" y2="12"></line>
+            </svg>
+            <svg class="vf-ic ic-fitall" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 9V5a1 1 0 0 1 1-1h4"></path><path d="M20 9V5a1 1 0 0 0-1-1h-4"></path>
+                <path d="M4 15v4a1 1 0 0 0 1 1h4"></path><path d="M20 15v4a1 1 0 0 1-1 1h-4"></path>
+            </svg>
+            <svg class="vf-ic ic-fitrem" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 9V5a1 1 0 0 1 1-1h4"></path><path d="M20 9V5a1 1 0 0 0-1-1h-4"></path>
+                <path d="M4 15v4a1 1 0 0 0 1 1h4"></path><path d="M20 15v4a1 1 0 0 1-1 1h-4"></path>
+                <path d="M9 15l6-6"></path><path d="M11 9h4v4"></path>
+            </svg>
+            <svg class="vf-ic ic-hand" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round">
+                <rect x="3" y="4" width="18" height="16" rx="2"></rect>
+                <rect x="12" y="9" width="6" height="5" rx="1"></rect>
+            </svg>
+        </button>
+    </div>
 
     <!-- Camera (top-center) → Foto-Spur: snap → pin on the track + Gemini explains it -->
     <button id="cam-fab" aria-label="Foto aufnehmen" title="Foto aufnehmen">
