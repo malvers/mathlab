@@ -184,6 +184,13 @@ window.TrackerNav = function (ctx) {
         try { localStorage.setItem(HIST_KEY, JSON.stringify(list)); } catch (e) { }
         renderHistory();
     }
+    // The home hint shown by the row's ⓘ as a toast (was a permanent line under the list — Doc 2026-06-21).
+    function homeHintText() {
+        return home
+            ? ('Zuhause: ' + shortLabel(home.label) + ' — lang drücken überschreibt mit dem aktuellen Ziel.')
+            : 'Lang drücken: aktuelles Ziel als Zuhause speichern.';
+    }
+
     // Pinned first row: "Nach Hause". Short tap → set home as the destination (then START); long-press →
     // save the CURRENT destination as home. Never deletable, and it sits ABOVE the scroll box so it never
     // scrolls away. (Replaces the old standalone "Nach Hause" button — Doc 2026-06-21.)
@@ -209,7 +216,14 @@ window.TrackerNav = function (ctx) {
             if (home) applyDestination([home.lat, home.lng], home.label);
             else toast('Kein Zuhause gespeichert — Ziel setzen, dann „Nach Hause" lang drücken.');
         });
-        item.appendChild(go);   // NO delete button → not deletable
+        const info = document.createElement('button');
+        info.type = 'button'; info.className = 'nav-hist-info'; info.setAttribute('aria-label', 'Hinweis');
+        info.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" '
+            + 'stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle>'
+            + '<line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>';
+        info.addEventListener('click', (e) => { e.stopPropagation(); toast(homeHintText()); });
+        item.appendChild(go);     // full-width tap target (set home / long-press save) — NOT deletable
+        item.appendChild(info);   // right: ⓘ → shows the hint as a toast (instead of a permanent line)
         return item;
     }
 
