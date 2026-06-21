@@ -2382,10 +2382,12 @@ ${pts}
             if (selType) {
                 selType.value = (__fuel && __fuel.fuelType) || localStorage.getItem('trk-fuel-type') || 'e5';
                 selType.addEventListener('change', () => { if (__fuel && __fuel.setFuelType) __fuel.setFuelType(selType.value); });
+                if (window.CyberSelect) CyberSelect.enhance(selType); // theme-styled dropdown (native option list can't be styled)
             }
             if (selRange) {
                 selRange.value = String((__fuel && __fuel.range) || localStorage.getItem('trk-fuel-rad') || 5);
                 selRange.addEventListener('change', () => { if (__fuel && __fuel.setRange) __fuel.setRange(selRange.value); });
+                if (window.CyberSelect) CyberSelect.enhance(selRange);
             }
         })();
         $('mb-poi').addEventListener('click', () => { closePopup(); showPanel('poi-panel'); if (__poi) __poi.refresh(); });

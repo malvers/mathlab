@@ -2147,6 +2147,67 @@ body.ui-idle #nav-banner {
     -webkit-tap-highlight-color: transparent;
 }
 .fuel-sel option { background: rgb(14, 36, 78); color: #fff; }
+
+/* CyberSelect — theme-styled stand-in for a native <select> (the OS option list can't be styled).
+   The trigger mirrors the compact .fuel-sel glass look; the panel is appended to <body> (position:fixed)
+   so it escapes the dialog's overflow. See js/cyber-select.js. */
+.cyber-sel-trigger {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.7rem;
+    padding: 3px 22px 3px 8px;
+    border-radius: 7px;
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    background: rgba(8, 20, 42, 0.55);
+    color: rgba(255, 255, 255, 0.9);
+    cursor: pointer;
+    position: relative;
+    flex: 0 0 auto;
+    white-space: nowrap;
+    -webkit-tap-highlight-color: transparent;
+}
+.cyber-sel-trigger::after { /* chevron */
+    content: '';
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    width: 5px;
+    height: 5px;
+    border-right: 2px solid rgba(255, 255, 255, 0.5);
+    border-bottom: 2px solid rgba(255, 255, 255, 0.5);
+    transform: translateY(-70%) rotate(45deg);
+    transition: transform 0.15s ease;
+}
+.cyber-sel-trigger.open::after { transform: translateY(-30%) rotate(-135deg); }
+.cyber-sel-trigger:focus-visible { outline: 1px solid rgba(121, 158, 49, 0.8); outline-offset: 1px; }
+
+.cyber-sel-panel {
+    position: fixed;
+    z-index: 100001;
+    background: rgb(14, 36, 78);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(8, 20, 42, 0.75);
+    padding: 4px;
+    font-family: 'Orbitron', sans-serif;
+    animation: cyberSelIn 0.14s ease;
+}
+@keyframes cyberSelIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+.cyber-sel-opt {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 9px 12px;
+    border-radius: 7px;
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.88);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+}
+.cyber-sel-opt:hover { background: rgba(121, 158, 49, 0.14); }
+.cyber-sel-opt.sel { color: #fff; background: rgba(121, 158, 49, 0.18); }
+.cyber-sel-opt .tick { flex: 0 0 auto; color: rgb(121, 158, 49); font-weight: 700; opacity: 0; }
+.cyber-sel-opt.sel .tick { opacity: 1; }
 .seg-group { display: inline-flex; gap: 4px; flex: 0 1 auto; min-width: 0; flex-wrap: wrap; } /* may shrink/wrap on narrow screens instead of overflowing */
 .seg-btn {
     font-family: 'Orbitron', sans-serif;
