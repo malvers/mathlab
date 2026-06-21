@@ -362,6 +362,7 @@
         let demBusy = false;       // a DEM fetch is in flight → ignore further taps
         let speeds = [];           // speed in km/h per point (index-aligned)
         let activities = [];       // travel mode per point: walking/running/on_bicycle/in_vehicle/still
+        let temps = [];            // ambient temperature in °C per point (Open-Meteo; null if unknown)
         let currentTrackId = null; // DB id of the loaded/just-saved track (for the menu "TEILEN")
         let currentTrackName = '';
         let totalDist = 0;         // metres
@@ -738,12 +739,12 @@
             const actVal = effectiveActivity();
             const ptsBefore = track.length;
             if (track.length === 0) {
-                track.push(here); times.push(stamp); alts.push(altVal); speeds.push(spdVal); activities.push(actVal); redrawTrack();
+                track.push(here); times.push(stamp); alts.push(altVal); speeds.push(spdVal); activities.push(actVal); temps.push(lastTemp); redrawTrack();
             } else if (!still) {
                 const step = haversine(track[track.length - 1], here);
                 if (step >= minStep) {
                     totalDist += step;
-                    track.push(here); times.push(stamp); alts.push(altVal); speeds.push(spdVal); activities.push(actVal); redrawTrack();
+                    track.push(here); times.push(stamp); alts.push(altVal); speeds.push(spdVal); activities.push(actVal); temps.push(lastTemp); redrawTrack();
                 }
             }
             if (track.length !== ptsBefore) {
@@ -803,6 +804,7 @@
 
         function updateNavigationAndDebug(here, still, accuracy, minStep) {
             refreshRecenter(); // show/hide the recenter button as needed
+            updateAmbientTemp(here); // keep the ambient temperature fresh while recording (throttled) → stamped onto each point
             if (__nav && __nav.update) __nav.update(here); // navigation: reroute if we drifted off the line
             if (__speed) __speed.update(here, still, shownSpeed); // speed-limit sign for the current road
             updateMotionDbg(accuracy, minStep, still);
@@ -1051,7 +1053,7 @@
         // → keep the last value silently. Only fetched here in ambientOnPos, i.e. only while idle.
         const TEMP_REFRESH_MS = 600000; // 10 min
         const TEMP_REFRESH_M = 3000;    // or once we've moved 3 km
-        let tempBusy = false, lastTempFetch = 0, lastTempLat = null, lastTempLng = null;
+        let tempBusy = false, lastTempFetch = 0, lastTempLat = null, lastTempLng = null, lastTemp = null;
         async function updateAmbientTemp(here) {
             if (tempBusy || !here) return;
             const lat = here[0], lng = here[1];
@@ -1065,7 +1067,11 @@
                 const r = await fetch(url);
                 const d = await r.json().catch(() => null);
                 const t = d && d.current && typeof d.current.temperature_2m === 'number' ? d.current.temperature_2m : null;
-                if (t != null) { Hud.setTemp(t); lastTempFetch = Date.now(); lastTempLat = lat; lastTempLng = lng; }
+                if (t != null) {
+                    lastTemp = t;                       // remembered for the recorded track (recordTrackPoint stamps each point)
+                    if (!tracking) Hud.setTemp(t);      // show in the tile only while idle — while recording it holds the distance
+                    lastTempFetch = Date.now(); lastTempLat = lat; lastTempLng = lng;
+                }
             } catch (e) { /* offline / rate-limited → keep the last reading */ }
             finally { tempBusy = false; }
         }
@@ -1298,14 +1304,14 @@
         function bufferSnapshot() {
             return {
                 v: 1, savedAt: Date.now(), currentTrackId: currentTrackId, name: currentTrackName, startTime: startTime, totalDist: totalDist,
-                track: track, times: times, alts: alts, speeds: speeds, activities: activities,
+                track: track, times: times, alts: alts, speeds: speeds, activities: activities, temps: temps,
                 waypoints: waypoints.map(wpSer),
             };
         }
         function restoreBufferedTrack(buf) {
             if (trkState !== 'idle' || !buf || !Array.isArray(buf.track) || !buf.track.length) return;
             track = buf.track; times = buf.times || []; alts = buf.alts || [];
-            speeds = buf.speeds || []; activities = buf.activities || []; totalDist = buf.totalDist || 0;
+            speeds = buf.speeds || []; activities = buf.activities || []; temps = buf.temps || []; totalDist = buf.totalDist || 0;
             currentTrackId = buf.currentTrackId || null; currentTrackName = buf.name || ''; // re-save UPDATES the same cloud row (no duplicate)
             (buf.waypoints || []).forEach(w => addWaypoint(w));
             redrawTrack();
@@ -1383,6 +1389,7 @@
                     type: 'broadcast', event: 'pos', payload: {
                         lat: track[i][0], lng: track[i][1], t: times[i] || null,
                         speed: speeds[i] != null ? speeds[i] : null, activity: activities[i] || null,
+                        temp: temps[i] != null ? temps[i] : null,
                         remSec: trip ? Math.round(trip.remSec) : null, remM: trip ? Math.round(trip.remM) : null,
                     },
                 });
@@ -1390,7 +1397,7 @@
         }
         function broadcastTrail() {
             if (!liveOn || !liveChannel || !track.length) return;
-            const pts = track.map((p, i) => [p[0], p[1], times[i] || null, speeds[i] != null ? speeds[i] : null, activities[i] || null]);
+            const pts = track.map((p, i) => [p[0], p[1], times[i] || null, speeds[i] != null ? speeds[i] : null, activities[i] || null, temps[i] != null ? temps[i] : null]);
             try { liveChannel.send({ type: 'broadcast', event: 'trail', payload: { pts: pts } }); } catch (e) { }
         }
         // ---- live MEDIA over the SAME channel: photo / voice / video. Photos ride as the FULL stored
@@ -1611,6 +1618,7 @@
             alts = [];
             speeds = [];
             activities = [];
+            temps = [];
             totalDist = 0;
             lastFix = null;
             resetDem();
@@ -1792,7 +1800,7 @@ ${pts}
         async function saveTrack(name, status) {
             const c = await ensureSb();
             // [lat, lng, time, altitude(m), speed(km/h), activity] — alt/speed null when unknown
-            const pts = track.map((p, i) => [p[0], p[1], times[i] || null, alts[i] != null ? alts[i] : null, speeds[i] != null ? speeds[i] : null, activities[i] || null]);
+            const pts = track.map((p, i) => [p[0], p[1], times[i] || null, alts[i] != null ? alts[i] : null, speeds[i] != null ? speeds[i] : null, activities[i] || null, temps[i] != null ? temps[i] : null]);
             // strip the live Leaflet marker reference before persisting
             const wps = waypoints.map(w => wpSer(w, true)); // forSync → strip un-uploaded base64 (egress fix E)
             const row = { name: name, distance_m: Math.round(totalDist), points: pts, waypoints: wps, status: status || 'done' };
@@ -1923,6 +1931,7 @@ ${pts}
             resetDem(); // a freshly loaded track has no DEM lookup yet
             speeds = points.map(p => (p[4] != null ? p[4] : null));
             activities = points.map(p => (p[5] != null ? p[5] : null)); // travel mode (older tracks → null)
+            temps = points.map(p => (p[6] != null ? p[6] : null));      // ambient °C (older tracks → null)
             totalDist = 0;
             for (let i = 1; i < latlngs.length; i++) totalDist += haversine(latlngs[i - 1], latlngs[i]);
             redrawTrack(); // speed-coloured
@@ -1959,7 +1968,7 @@ ${pts}
             if (acquireWatch != null) { navigator.geolocation.clearWatch(acquireWatch); acquireWatch = null; }
             setFollowing(false);
             trackLayer.clearLayers(); clearWaypoints();
-            track = []; times = []; alts = []; speeds = []; activities = []; totalDist = 0;
+            track = []; times = []; alts = []; speeds = []; activities = []; temps = []; totalDist = 0;
             resetDem();
             currentTrackId = null; currentTrackName = '';
             const all = [];
