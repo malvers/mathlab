@@ -283,10 +283,20 @@ Ein gemeinsamer `<audio>`-Kanal → neue Ansage unterbricht die laufende (gewoll
 
 ---
 
-## BUG-10 — Navigation: Route-Fit passt sich beim Fahren nicht an ✅ gefixt 2026-06-20
+## BUG-10 — Navigation: Route-Fit passt sich beim Fahren nicht an ✅ gefixt 2026-06-20 · Nachtrag 2026-06-21
 **Quelle:** Doc 2026-06-20 (mündlich, zusammen mit dem Sprachansage-Fix): „Das Fit der Route muss
 **dynamisch** passieren. Das wird einmal gemacht beim Einschalten, aber dann nicht angepasst."
 **Priorität:** mittel (Komfort beim Navigieren — die Reststrecke läuft aus dem Bild).
+
+**✅ Nachtrag-Fix (2026-06-21, `HTML/js/tracker.js` `updateFitMode`):** Doc meldete, der Reststrecken-Fit
+sei *immer noch* nicht dynamisch. Ursache war NICHT die Aktivierung (die lief), sondern der Re-Fit-Loop
+selbst: er bewegte die Karte **nur** bei einem Zoom-Hysterese-Wechsel (`grew || shrank`, Cooldown 4 s).
+Dazwischen wurde **nie gepannt** → die Reststrecke nicht nachzentriert; und mit `zoomSnap:1` (ganze
+Zoom-Stufen) liegt `rb` nach einem Fit oft bequem im Rahmen → weder `grew` noch `shrank` → Kamera steht.
+**Korrektur:** Pan und Zoom **entkoppelt** — **Zoom** weiter bidirektional mit Hysterese+Cooldown
+(`-0.12`/`-0.30`), aber **Pan auf den Rest-Mittelpunkt bei JEDEM Fix** (`map.panTo(rb.getCenter())`), sodass
+der Ausschnitt der schrumpfenden Reststrecke laufend folgt. Hand-Pan/CENTER/FIT setzen `fitMode=false` und
+übersteuern weiterhin. (`-0.40`→`-0.30` zieht den Zoom etwas früher nach.)
 
 **✅ Fix (2026-06-20, `HTML/js/tracker.js`):** Nach dem einmaligen Routen-Overview schaltet der Nav-Start
 jetzt automatisch in den **dynamischen Reststrecken-Fit** (`fitMode = 'remaining'`) statt in den reinen
