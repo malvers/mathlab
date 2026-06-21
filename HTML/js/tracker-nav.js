@@ -87,6 +87,7 @@ window.TrackerNav = function (ctx) {
         try { localStorage.setItem(HOME_KEY, JSON.stringify(home)); } catch (e) { }
         toast('Als Zuhause gespeichert: ' + shortLabel(home.label));
         refreshHome();
+        renderHistory();   // refresh the pinned "Nach Hause" row with the new home
     }
     function goHome() {
         if (!home) { toast('Kein Zuhause gespeichert — Ziel setzen, dann „Nach Hause" lang drücken.'); return; }
@@ -183,16 +184,48 @@ window.TrackerNav = function (ctx) {
         try { localStorage.setItem(HIST_KEY, JSON.stringify(list)); } catch (e) { }
         renderHistory();
     }
+    // Pinned first row: "Nach Hause". Short tap → set home as the destination (then START); long-press →
+    // save the CURRENT destination as home. Never deletable, and it sits ABOVE the scroll box so it never
+    // scrolls away. (Replaces the old standalone "Nach Hause" button — Doc 2026-06-21.)
+    function homeRow() {
+        const item = document.createElement('div'); item.className = 'nav-hist-item nav-hist-home';
+        const go = document.createElement('button'); go.type = 'button'; go.className = 'nav-hist-go';
+        go.title = home ? ('Nach Hause: ' + home.label) : 'Nach Hause';
+        go.innerHTML = '<span class="nav-hist-pin"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" '
+            + 'stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'
+            + '<path d="M3 11l9-8 9 8"></path><path d="M5 10v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V10"></path>'
+            + '<path d="M9 21v-6h6v6"></path></svg></span>';
+        const lab = document.createElement('span'); lab.className = 'nav-hist-label'; lab.textContent = 'Nach Hause';
+        go.appendChild(lab);
+        let pressTimer = null, longFired = false, sx = 0, sy = 0;
+        const cancel = () => { if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; } };
+        go.addEventListener('pointerdown', (e) => { longFired = false; sx = e.clientX; sy = e.clientY; cancel(); pressTimer = setTimeout(() => { pressTimer = null; longFired = true; saveHome(); }, 600); });
+        go.addEventListener('pointermove', (e) => { if (pressTimer && Math.hypot(e.clientX - sx, e.clientY - sy) > 10) cancel(); });
+        go.addEventListener('pointerup', cancel);
+        go.addEventListener('pointercancel', cancel);
+        go.addEventListener('pointerleave', cancel);
+        go.addEventListener('click', () => {
+            if (longFired) { longFired = false; return; }   // swallow the click that trails a long-press
+            if (home) applyDestination([home.lat, home.lng], home.label);
+            else toast('Kein Zuhause gespeichert — Ziel setzen, dann „Nach Hause" lang drücken.');
+        });
+        item.appendChild(go);   // NO delete button → not deletable
+        return item;
+    }
+
     // Rebuild the list DOM (textContent for OSM labels → no injection; the pin SVG is a fixed string).
+    // "Nach Hause" is pinned on top; the recent destinations live in a scroll box that scrolls once there
+    // are more than ~6 of them (.nav-hist-scroll), so home never scrolls away.
     function renderHistory() {
         const box = $('nav-history'); if (!box) return;
         const list = loadHistory();
         box.innerHTML = '';
-        if (!list.length) { box.hidden = true; return; }
-        box.hidden = false;
+        box.hidden = false;   // always visible — the pinned Home row is always present
         const title = document.createElement('div');
         title.className = 'nav-history-title'; title.textContent = 'Letzte Ziele';
         box.appendChild(title);
+        box.appendChild(homeRow());   // pinned first, above the scroll area
+        const scroll = document.createElement('div'); scroll.className = 'nav-hist-scroll';
         list.forEach((h) => {
             const item = document.createElement('div'); item.className = 'nav-hist-item';
             const go = document.createElement('button'); go.type = 'button'; go.className = 'nav-hist-go'; go.title = h.label;
@@ -206,8 +239,9 @@ window.TrackerNav = function (ctx) {
             del.type = 'button'; del.className = 'nav-hist-del'; del.setAttribute('aria-label', 'Aus Verlauf entfernen'); del.textContent = '×';
             del.addEventListener('click', (e) => { e.stopPropagation(); removeHistory(h); });
             item.appendChild(go); item.appendChild(del);
-            box.appendChild(item);
+            scroll.appendChild(item);
         });
+        box.appendChild(scroll);
     }
 
     function showDestMarker() {
@@ -772,23 +806,10 @@ window.TrackerNav = function (ctx) {
         });
     })();
 
-    // Home button (in the "Ziel"-dialog): long-press → save the current destination as "Zuhause";
-    // short tap → navigate home.
+    // Load the saved home + sync the hint. The "Nach Hause" action now lives as the pinned first row of
+    // the history list (see homeRow) — tap to go, long-press to save — so there's no standalone button.
     (function initHome() {
         home = loadHome();
-        const btn = $('nav-home');
-        if (!btn) { return; }
-        let pressTimer = null, longFired = false, sx = 0, sy = 0;
-        const cancel = () => { if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; } };
-        btn.addEventListener('pointerdown', (e) => {
-            longFired = false; sx = e.clientX; sy = e.clientY; cancel();
-            pressTimer = setTimeout(() => { pressTimer = null; longFired = true; saveHome(); }, 600);
-        });
-        btn.addEventListener('pointermove', (e) => { if (pressTimer && Math.hypot(e.clientX - sx, e.clientY - sy) > 10) cancel(); });
-        btn.addEventListener('pointerup', cancel);
-        btn.addEventListener('pointercancel', cancel);
-        btn.addEventListener('pointerleave', cancel);
-        btn.addEventListener('click', () => { if (longFired) { longFired = false; return; } goHome(); }); // suppress the click that follows a long-press
         refreshHome();
     })();
 
