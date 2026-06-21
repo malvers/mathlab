@@ -108,7 +108,10 @@ function wireButtons() {
     const refreshEngineLabel = () => { btnEngine.textContent = state.engine.toUpperCase(); };
     refreshEngineLabel();
     btnEngine.addEventListener('click', () => {
-        state.engine = (state.engine === 'webspeech') ? 'whisper' : 'webspeech';
+        // Live engine is native inside the Capacitor app, Web Speech on the web.
+        const isNative = !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
+        const live = isNative ? 'native' : 'webspeech';
+        state.engine = (state.engine === 'whisper') ? live : 'whisper';
         localStorage.setItem('transcriber.engine', state.engine);
         refreshEngineLabel();
         if (state.engine === 'whisper') {

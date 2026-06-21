@@ -73,7 +73,7 @@ async function onRecordClick() {
             el.btnPlay.disabled = true;
             recLog.length = 0;
 
-            if (state.engine === 'webspeech' && state.recognition) {
+            if ((state.engine === 'webspeech' || state.engine === 'native') && state.recognition) {
                 try {
                     state.recognition.start();
                     logRec('recognition.start() called');
@@ -89,7 +89,7 @@ async function onRecordClick() {
                 } catch (e) {
                     logRec(`mediaRecorder.start THREW: ${e.message || e}`);
                 }
-            }, state.engine === 'webspeech' && state.recognition ? 600 : 0);
+            }, (state.engine === 'webspeech' || state.engine === 'native') && state.recognition ? 600 : 0);
 
         } catch (err) {
             el.transcript.textContent = '[Mikrofon-Fehler] ' + (err && err.message ? err.message : err);
