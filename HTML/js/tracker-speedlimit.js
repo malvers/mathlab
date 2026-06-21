@@ -205,21 +205,25 @@ window.TrackerSpeedLimit = function (ctx) {
             const j = await overpass(q);
             if (!j) { dbg('Overpass: alle Mirror fehlgeschlagen → letztes Schild bleibt'); return; }
             let best = null, bestD = Infinity, ways = 0, bestTags = null;
+            let refTags = null, refD = Infinity;   // nearest way carrying a `ref` (for tracker-traffic), even without a resolvable limit
             for (const e of (j.elements) || []) {
                 ways++;
+                const d = distToWay(p, e.geometry);
+                if (e.tags && e.tags.ref && d < refD) { refD = d; refTags = e.tags; }
                 const m = wayLimit(e.tags);
                 if (m == null) continue;
-                const d = distToWay(p, e.geometry);
                 if (d < bestD) { bestD = d; best = m; bestTags = e.tags; } // nearest road with a resolvable limit wins
             }
+            // Road identity for tracker-traffic: prefer the limit-resolving way's tags, else the nearest
+            // ref-bearing way — so a variable-speed Autobahn (no plain maxspeed) still reports its A-ref.
+            const roadTags = bestTags || refTags;
+            if (roadTags) lastRoad = { ref: roadTags.ref || null, name: roadTags.name || null, highway: roadTags.highway || null };
             if (best == null) {                 // road untagged → don't blank a previously good sign
                 dbg('Limit: ' + ways + ' Wege, keiner mit (impliziter) Begrenzung → kein Tag');
                 return;
             }
             dbg('Limit: ' + best + ' (' + Math.round(bestD) + ' m)');
             curLimit = best;
-            // Remember the nearest road's identity so other modules (tracker-traffic) know which Autobahn we're on.
-            lastRoad = bestTags ? { ref: bestTags.ref || null, name: bestTags.name || null, highway: bestTags.highway || null } : lastRoad;
             setSign(best, false);
         } catch (e) { /* parse error → keep the last known sign */ }
         finally { fetching = false; }
@@ -252,7 +256,7 @@ window.TrackerSpeedLimit = function (ctx) {
         query(here);
     }
 
-    function clear() { curLimit = null; lastPos = null; lastBing = 0; setSign(null, false); }
+    function clear() { curLimit = null; lastRoad = null; lastPos = null; lastBing = 0; setSign(null, false); }
 
     function setBell(on) { bellOn = !!on; try { localStorage.setItem(BELL_KEY, bellOn ? '1' : '0'); } catch (e) { } }
     function bellEnabled() { return bellOn; }

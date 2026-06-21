@@ -121,7 +121,7 @@ window.TrackerTraffic = function (ctx) {
     function inGermany(p) { return p[0] >= 47.2 && p[0] <= 55.1 && p[1] >= 5.8 && p[1] <= 15.1; }
     // TomTom iconCategory → our kind: 8 = road closed, 9 = roadworks, else jam/generic warning.
     function tomtomKind(cat) { return cat === 8 ? 'sperrung' : cat === 9 ? 'baustelle' : 'warnung'; }
-    function tomtomItems(incidents, here) {
+    function tomtomItems(incidents) {
         const out = [];
         for (const f of incidents || []) {
             const pr = f.properties || {}, g = f.geometry || {};
@@ -131,8 +131,7 @@ window.TrackerTraffic = function (ctx) {
                 else if (g.type === 'Point') line = [[g.coordinates[1], g.coordinates[0]]];
             }
             const anchor = line.length ? line[Math.floor(line.length / 2)] : null;
-            if (!anchor || isNaN(anchor[0])) continue;
-            if (distM(here[0], here[1], anchor[0], anchor[1]) > MAX_NEAR_M) continue;
+            if (!anchor || isNaN(anchor[0]) || isNaN(anchor[1])) continue;
             const ev = (pr.events && pr.events[0]) || {};
             const road = Array.isArray(pr.roadNumbers) ? pr.roadNumbers.join(', ') : '';
             out.push({
@@ -185,6 +184,8 @@ window.TrackerTraffic = function (ctx) {
         if (!enabled) return;
         for (const o of items) {
             if (!o.anchor) continue;
+            // proximity cull for PINS only — the full fetched set stays in `items` for the route-closure scan
+            if (lastLat != null && distM(lastLat, lastLng, o.anchor[0], o.anchor[1]) > MAX_NEAR_M) continue;
             const m = L.marker(o.anchor, { icon: pinIcon(o.kind, o.future), pane: 'traffic', keyboard: false })
                 .bindPopup(popupHtml(o)).addTo(lyr);
             bindPopupNav(m, o);
@@ -237,15 +238,16 @@ window.TrackerTraffic = function (ctx) {
                 if (seen.has(id)) continue;
                 seen.add(id);
                 const anchor = anchorOf(it);
-                if (!anchor || isNaN(anchor[0])) continue;
-                if (distM(here[0], here[1], anchor[0], anchor[1]) > MAX_NEAR_M) continue; // proximity filter
+                if (!anchor || isNaN(anchor[0]) || isNaN(anchor[1])) continue;
                 out.push({
                     id, anchor, kind: kindOf(it, svc), future: !!it.future,
                     title: it.title, subtitle: it.subtitle, description: it.description,
                     geom: geomLatLng(it, anchor),
                 });
             }
-            items = out;
+            // Keep ALL of this A-road's items so the route-closure scan sees closures the whole route ahead
+            // (render() culls pins to MAX_NEAR_M). Clear any leftover credit — this is keyless Autobahn data.
+            items = out; attribution = '';
             lastLat = here[0]; lastLng = here[1]; lastFetch = Date.now();
             dbg('refs ' + refs.join(',') + ' → ' + items.length + ' Items');
             render();
@@ -269,8 +271,10 @@ window.TrackerTraffic = function (ctx) {
         const ctrl = new AbortController();
         const to = setTimeout(() => ctrl.abort(), FETCH_TIMEOUT_MS);
         try {
-            const bb = map.getBounds();
-            const bbox = { minLon: bb.getWest(), minLat: bb.getSouth(), maxLon: bb.getEast(), maxLat: bb.getNorth() };
+            // Clamp to a driving-scale window (~±33 km) around the position, NOT the whole viewport — keeps
+            // it under TomTom's bbox area cap (silent 400 when zoomed out) and matches the proximity cull.
+            const dLat = 0.30, dLng = 0.30 / Math.max(0.2, Math.cos(here[0] * Math.PI / 180));
+            const bbox = { minLon: here[1] - dLng, minLat: here[0] - dLat, maxLon: here[1] + dLng, maxLat: here[0] + dLat };
             const r = await fetch(apiUrl + '/functions/v1/tomtom-traffic', {
                 method: 'POST', signal: ctrl.signal,
                 headers: { 'Content-Type': 'application/json', 'apikey': apiKey, 'Authorization': 'Bearer ' + apiKey },
@@ -278,7 +282,7 @@ window.TrackerTraffic = function (ctx) {
             });
             const d = await r.json().catch(() => ({}));
             if (!r.ok || !d.ok) { dbg('TomTom ERR ' + (d.error || r.status)); return; }
-            items = tomtomItems(d.incidents, here);
+            items = tomtomItems(d.incidents);
             attribution = '© TomTom';
             lastLat = here[0]; lastLng = here[1]; lastFetch = Date.now();
             dbg('TomTom → ' + items.length + ' Items');
@@ -297,19 +301,21 @@ window.TrackerTraffic = function (ctx) {
 
     // Called from the position handler on every GPS fix; re-polls only on enough move/time, gated by backoff.
     function update(here) {
-        if (!enabled || busy || !here) return;
-        if (Date.now() < failUntil) return;
-        const lat = here[0], lng = here[1];
-        if (typeof lat !== 'number' || typeof lng !== 'number') return;
-        const moved = (lastLat == null) ? Infinity : distM(lastLat, lastLng, lat, lng);
-        if (moved < REFRESH_MOVE_M && (Date.now() - lastFetch) < REFRESH_MS) return;   // move/time throttle
-        if (inGermany([lat, lng])) {
-            const refs = currentRefs();                          // Phase 1: keyless Autobahn GmbH API
-            if (!refs.length) { items = []; attribution = ''; lastLat = lat; lastLng = lng; lastFetch = Date.now(); render(); return; }
-            fetchTraffic(refs, [lat, lng]);
-        } else if (apiUrl) {
-            fetchTomTom([lat, lng]);                              // Phase 2: TomTom proxy (graceful if not deployed)
-        }
+        try {
+            if (!enabled || busy || !here) return;
+            if (Date.now() < failUntil) return;
+            const lat = here[0], lng = here[1];
+            if (typeof lat !== 'number' || typeof lng !== 'number') return;
+            const moved = (lastLat == null) ? Infinity : distM(lastLat, lastLng, lat, lng);
+            if (moved < REFRESH_MOVE_M && (Date.now() - lastFetch) < REFRESH_MS) return;   // move/time throttle
+            if (inGermany([lat, lng])) {
+                const refs = currentRefs();                      // Phase 1: keyless Autobahn GmbH API
+                if (!refs.length) { items = []; attribution = ''; lastLat = lat; lastLng = lng; lastFetch = Date.now(); render(); return; }
+                fetchTraffic(refs, [lat, lng]);
+            } else if (apiUrl) {
+                fetchTomTom([lat, lng]);                          // Phase 2: TomTom proxy (graceful if not deployed)
+            }
+        } catch (e) { dbg('update ERR ' + (e && (e.message || e))); } // never let a throw reach onPosition
     }
 
     function setEnabled(on) {

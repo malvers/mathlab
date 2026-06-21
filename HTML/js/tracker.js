@@ -2466,8 +2466,9 @@ ${pts}
         // VERKEHR toggles the live Autobahn traffic overlay (js/tracker-traffic.js); reflect on/off (.active).
         const __mbTraffic = $('mb-traffic');
         if (__mbTraffic) __mbTraffic.addEventListener('click', (e) => {
-            const on = !(__traffic && __traffic.enabled);
-            if (__traffic) __traffic.setEnabled(on);
+            if (!__traffic) { toast('Verkehr nicht verfügbar.'); closePopup(); return; } // module missing → no fake "active"
+            const on = !__traffic.enabled;
+            __traffic.setEnabled(on);
             e.currentTarget.classList.toggle('active', on);
             toast(on ? 'Verkehr an' : 'Verkehr aus');
             closePopup();
