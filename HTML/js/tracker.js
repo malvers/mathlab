@@ -126,8 +126,8 @@
         let loadedBounds = null; // bounds of a MULTI-loaded overlay (plotMultiple leaves 'track' empty) → lets FIT still work/show
         // Hand-over ("Hand-Modus"): ANY manual viewport/zoom input (drag, +/− buttons, pinch, wheel,
         // double-click) freezes ALL automatic camera moves — auto-follow AND FIT — so the hand-set view
-        // is never overwritten. A resume arrow (#resume-fab) appears; tapping it (or CENTER / FIT) restores
-        // the auto-mode that was active before the take-over (remembered in `savedAuto`).
+        // is never overwritten. Hand becomes the view-fan's current mode (its own icon); picking any other
+        // fan mode (follow / fit) leaves hand-mode — that transient option then drops away.
         let handMode = false;
         let savedAuto = null; // { following, fitMode } captured when hand-mode began → the resume target
         // Nav start shows the whole route for a moment, THEN engages the DYNAMIC remaining-route fit
@@ -137,21 +137,96 @@
         const NAV_OVERVIEW_MS = 3000;
         // ≈ 5 mm from the map centre (CSS px ≈ 1/96 in → 5 mm ≈ 19 px); within that the dot is "centred".
         const CENTER_TOL_PX = 19;
-        function refreshRecenter() {
-            const btn = $('recenter-fab');
-            if (!btn) return;
+        // The view-fan's current mode, derived from state. Hand-zoom wins (it froze everything), then the
+        // active FIT, else "follow" (the crosshair re-centre — also the default when nothing is running).
+        function currentMode() {
+            if (handMode) return 'hand';
+            if (fitMode === 'remaining') return 'fitrem';
+            if (fitMode === 'all') return 'fitall';
+            return 'follow';
+        }
+        // Which modes are valid to OFFER right now: follow needs a position, fitall a track, fitrem a
+        // remaining route (i.e. while navigating), hand only exists once you've actually hand-zoomed.
+        function validModes() {
             const pos = posMarker && posMarker.getLatLng && posMarker.getLatLng();
             const trackPresent = track.length >= 10 || !!loadedBounds;   // ≥10 live pts OR a multi-loaded overlay
-            if (!pos && !trackPresent) { btn.classList.remove('show'); return; } // nothing to centre or fit
-            // ONE button, never both: the FIT frame whenever there's a track to fit (tap cycles; "off" re-centres
-            // on you, see the click handler); otherwise the crosshair to re-centre on GPS.
-            btn.classList.toggle('fit', trackPresent);
-            btn.classList.toggle('mode-on', !!fitMode);   // persistent FIT → green
-            btn.classList.add('show');
+            const rb = (pos && __nav && __nav.remainingBounds) ? __nav.remainingBounds([pos.lat, pos.lng]) : null;
+            return { follow: !!pos, fitall: trackPresent, fitrem: !!rb, hand: handMode };
+        }
+        // Lay out the fan options: hide invalid ones, give each visible one a 1-based slot index (--i,
+        // drives the leftward slide in CSS) and mark the one matching the current mode.
+        function buildFanOptions() {
+            const valid = validModes();
+            const cur = currentMode();
+            let slot = 0;
+            ['follow', 'fitall', 'fitrem', 'hand'].forEach((m) => {
+                const b = document.querySelector('#view-fan .vf-opt[data-mode="' + m + '"]');
+                if (!b) return;
+                if (valid[m]) {
+                    b.hidden = false;
+                    b.style.setProperty('--i', String(++slot));
+                    b.classList.toggle('current', m === cur);
+                } else {
+                    b.hidden = true;
+                    b.classList.remove('current');
+                }
+            });
+        }
+        function refreshRecenter() {
+            const fan = $('view-fan'), btn = $('recenter-fab');
+            if (!fan || !btn) return;
+            const pos = posMarker && posMarker.getLatLng && posMarker.getLatLng();
+            const trackPresent = track.length >= 10 || !!loadedBounds;
+            if (!pos && !trackPresent) { fan.classList.remove('show'); closeFan(); return; } // nothing to centre or fit
+            btn.dataset.mode = currentMode();              // trigger shows the current mode's icon
+            btn.classList.toggle('mode-on', !!fitMode);    // persistent FIT → green
+            fan.classList.add('show');
+            if (fanOpen) buildFanOptions();                // keep slots/highlight fresh while the fan is open
         }
         function setFollowing(v) { following = v; refreshRecenter(); }
-        // Show/hide the resume arrow — visible exactly while we're in hand-mode.
-        function refreshResume() { const b = $('resume-fab'); if (b) b.classList.toggle('show', handMode); }
+        // Hand-mode no longer has its own button — it's just another mode of the fan. Keep the name so the
+        // existing callers (enterHandMode / clearHandMode) stay untouched.
+        function refreshResume() { refreshRecenter(); }
+        // ---- View-fan open/close ----
+        let fanOpen = false, fanTimer = null;
+        function armFanTimeout() { clearFanTimeout(); fanTimer = setTimeout(closeFan, 4000); } // auto-collapse
+        function clearFanTimeout() { if (fanTimer) { clearTimeout(fanTimer); fanTimer = null; } }
+        function onFanOutside(e) { const fan = $('view-fan'); if (fan && !fan.contains(e.target)) closeFan(); }
+        function openFan() {
+            buildFanOptions();
+            fanOpen = true;
+            const fan = $('view-fan'); if (fan) fan.classList.add('open');
+            document.addEventListener('pointerdown', onFanOutside, true); // tap outside → collapse
+            armFanTimeout();
+        }
+        function closeFan() {
+            if (!fanOpen) return;
+            fanOpen = false;
+            const fan = $('view-fan'); if (fan) fan.classList.remove('open');
+            document.removeEventListener('pointerdown', onFanOutside, true);
+            clearFanTimeout();
+        }
+        // Apply a picked mode, then collapse the fan. "hand" is a no-op (you're already in that view);
+        // picking any non-hand mode leaves hand-mode → the transient hand option drops away next open.
+        function selectViewMode(m) {
+            closeFan();
+            if (m === 'hand') return;
+            if (m === 'follow') { centerOnPosition(); return; } // clears hand-mode + fit, re-follows
+            clearHandMode();
+            const ll = posMarker && posMarker.getLatLng && posMarker.getLatLng();
+            if (m === 'fitall') {
+                fitMode = 'all'; setFollowing(false);
+                const fb = track.length > 1 ? L.latLngBounds(track) : loadedBounds;
+                if (fb) { try { map.fitBounds(fb, { padding: fitPad() }); } catch (e) { } }
+                toast('FIT: ganze Route');
+            } else if (m === 'fitrem') {
+                const rb = (ll && __nav && __nav.remainingBounds) ? __nav.remainingBounds([ll.lat, ll.lng]) : null;
+                fitMode = 'remaining'; setFollowing(false);
+                if (rb) { try { map.fitBounds(rb, { padding: fitPad() }); } catch (e) { } }
+                toast('FIT: Reststrecke');
+            }
+            refreshRecenter();
+        }
         // Enter hand-mode: remember whichever auto-mode is driving the camera, then freeze BOTH (follow +
         // FIT) so the user's hand-set view stays put. No-op if nothing auto was running (then there is
         // nothing to freeze or resume) or if we're already in hand-mode.
@@ -2482,29 +2557,10 @@ ${pts}
         window.addEventListener('contextmenu', (e) => e.preventDefault());
         $('zoom-in').addEventListener('click', () => { enterHandMode(); map.zoomIn(); });   // hand zoom → freeze auto
         $('zoom-out').addEventListener('click', () => { enterHandMode(); map.zoomOut(); }); // hand zoom → freeze auto
-        // Resume arrow: back to the auto-mode that was active before the hand take-over (follow OR FIT).
-        $('resume-fab').addEventListener('click', resumeAuto);
-        // ONE button: tapping the FIT frame cycles FIT (whole → remaining → off); tapping the crosshair re-centres.
-        $('recenter-fab').addEventListener('click', () => {
-            clearHandMode(); // CENTER / FIT explicitly take over → leave hand-mode (hide the resume arrow)
-            if (!$('recenter-fab').classList.contains('fit')) { centerOnPosition(); return; }   // crosshair → re-centre
-            const ll = posMarker && posMarker.getLatLng && posMarker.getLatLng();
-            const rb = (ll && __nav && __nav.remainingBounds) ? __nav.remainingBounds([ll.lat, ll.lng]) : null;
-            if (!fitMode) {                              // off → fit the whole track (live OR multi-loaded overlay)
-                fitMode = 'all'; setFollowing(false);
-                const fb = track.length > 1 ? L.latLngBounds(track) : loadedBounds;
-                if (fb) { try { map.fitBounds(fb, { padding: fitPad() }); } catch (e) { } }
-                toast('FIT: ganze Route');
-            } else if (fitMode === 'all' && rb) {        // whole → remaining (only if a route exists)
-                fitMode = 'remaining';
-                try { map.fitBounds(rb, { padding: fitPad() }); } catch (e) { }
-                toast('FIT: Reststrecke');
-            } else {                                     // remaining (or no route) → off → re-centre on you (#3)
-                fitMode = false;
-                centerOnPosition();
-                toast('FIT aus');
-            }
-            refreshRecenter();
+        // View-fan: the trigger toggles the fan open/closed; each option applies its mode.
+        $('recenter-fab').addEventListener('click', () => { fanOpen ? closeFan() : openFan(); });
+        document.querySelectorAll('#view-fan .vf-opt').forEach((b) => {
+            b.addEventListener('click', () => selectViewMode(b.dataset.mode));
         });
 
         // ---- Sync-Code ----

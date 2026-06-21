@@ -12,7 +12,7 @@
        clears the Leaflet attribution instead of sitting right on top of it. */
     --btm: calc(env(safe-area-inset-bottom, 0px) + clamp(66px, 9vw, 80px)); /* raised +18px so the "50 m" scale + ⓘ clear the round buttons (Doc 2026-06-20) */
     /* Diameter of the big round control buttons (START/STOP/LÖSCHEN). Single source of truth — also
-       referenced by #recenter-fab / #resume-fab so they stay glued above START. ~3% smaller (Doc 2026-06-20). */
+       referenced by #view-fan so it stays glued above START. ~3% smaller (Doc 2026-06-20). */
     --ctrl-dia: clamp(79px, 24.4vw, 108px);
 }
 
@@ -488,72 +488,32 @@ path.pos-marker.pos-shown {
     transform: scale(0.96);
 }
 
-/* Recenter button — shown above STOP when the map stops following you */
-#recenter-fab {
+/* View control (fan) — shown above STOP when the map isn't following you (or a track exists).
+   Collapsed: the trigger sits centred, options stacked behind it (z). Open: options fan out to the
+   LEFT, side by side. Replaces the old recenter cycle button + the separate resume arrow. */
+#view-fan {
     position: fixed;
     left: 50%;
     bottom: calc(var(--btm) + var(--ctrl-dia) + 14px);
     transform: translateX(-50%) translateY(8px);
     z-index: 500;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
     width: 46px;          /* same footprint as the zoom + / − FABs */
     height: 46px;
-    /* Match the other glass FABs (zoom + / −): white icon on dark glass, thin white border —
-       deliberately no brand colour. The green .mode-on state (persistent FIT) still overrides below. */
-    border: 1px solid rgba(255, 255, 255, 0.25);
-    border-radius: 50%;
-    background: rgba(8, 20, 42, 0.82);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    color: rgba(255, 255, 255, 0.92);
-    cursor: pointer;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.25s ease, transform 0.25s ease, color 0.2s ease, border-color 0.2s ease;
+    transition: opacity 0.25s ease, transform 0.25s ease;
 }
 
-#recenter-fab.show {
+#view-fan.show {
     opacity: 1;
     pointer-events: auto;
     transform: translateX(-50%) translateY(0);
 }
 
-/* persistent FIT mode → green active state (like REGEN / GLÄTTEN toggles) */
-#recenter-fab.mode-on {
-    border-color: rgba(121, 158, 49, 0.95);
-    color: rgb(121, 158, 49);
-    box-shadow: 0 0 14px rgba(121, 158, 49, 0.55), 0 8px 24px rgba(0, 0, 0, 0.4);
-}
-
-#recenter-fab svg {
-    width: 28px;   /* crosshair spans ~24px on screen → matches the 22px zoom bars optically */
-    height: 28px;
-}
-
-/* two states: crosshair (off-centre → re-centre on GPS) vs frame (centred → fit whole track) */
-#recenter-fab .ic-fit {
-    display: none;
-}
-
-#recenter-fab.fit .ic-recenter {
-    display: none;
-}
-
-#recenter-fab.fit .ic-fit {
-    display: inline-block;
-}
-
-/* Resume control (hand-mode): same neutral glass FAB as #recenter-fab, one row ABOVE it (white icon on
-   dark glass — never orange, Doc). Only visible (.show) while hand-mode is active. */
-#resume-fab {
-    position: fixed;
-    left: 50%;
-    bottom: calc(var(--btm) + var(--ctrl-dia) + 14px + 60px); /* one 46px row + gap above #recenter-fab */
-    transform: translateX(-50%) translateY(8px);
-    z-index: 500;
+/* Shared glass FAB look for the trigger + every fan option: white icon on dark glass, thin white
+   border — deliberately no brand colour. The green .mode-on / .current states override below. */
+#recenter-fab,
+#view-fan .vf-opt {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -567,24 +527,77 @@ path.pos-marker.pos-shown {
     color: rgba(255, 255, 255, 0.92);
     cursor: pointer;
     box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* Trigger sits at the fan's anchor, above the (collapsed) options. */
+#recenter-fab {
+    position: relative;
+    z-index: 2;
+    transition: color 0.2s ease, border-color 0.2s ease, transform 0.12s ease;
+}
+
+#recenter-fab:active {
+    transform: scale(0.94);
+}
+
+/* persistent FIT mode → green active state (like REGEN / GLÄTTEN toggles) */
+#recenter-fab.mode-on {
+    border-color: rgba(121, 158, 49, 0.95);
+    color: rgb(121, 158, 49);
+    box-shadow: 0 0 14px rgba(121, 158, 49, 0.55), 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+/* Options: parked exactly on the trigger when closed (z-stacked); slide LEFT when the fan opens.
+   --i = slot index among the currently-visible options (1-based, set in JS); 56px = 46px + 10px gap. */
+#view-fan .vf-opt {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    z-index: 1;
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.25s ease, transform 0.25s ease, color 0.2s ease, border-color 0.2s ease;
+    transform: translateX(0);
+    transition: transform 0.25s cubic-bezier(.2, .7, .3, 1), opacity 0.18s ease, color 0.2s ease, border-color 0.2s ease;
 }
 
-#resume-fab.show {
+#view-fan.open .vf-opt {
     opacity: 1;
     pointer-events: auto;
-    transform: translateX(-50%) translateY(0);
+    transform: translateX(calc(var(--i, 0) * -56px));
 }
 
-#resume-fab svg {
-    width: 24px;
-    height: 24px;
+/* hidden options take no slot at all */
+#view-fan .vf-opt[hidden] {
+    display: none;
 }
 
-#resume-fab:active {
-    transform: translateX(-50%) scale(0.94);
+/* the option matching the current mode → green highlight (matches the trigger's .mode-on language) */
+#view-fan .vf-opt.current {
+    border-color: rgba(121, 158, 49, 0.95);
+    color: rgb(121, 158, 49);
+}
+
+#view-fan .vf-opt:active {
+    transform: translateX(calc(var(--i, 0) * -56px)) scale(0.94);
+}
+
+/* Icon sizing + per-mode visibility on the trigger (data-mode swaps which one shows). */
+#recenter-fab .vf-ic,
+#view-fan .vf-opt .vf-ic {
+    width: 28px;   /* crosshair spans ~24px on screen → matches the 22px zoom bars optically */
+    height: 28px;
+}
+
+#recenter-fab .vf-ic {
+    display: none;
+}
+
+#recenter-fab[data-mode="follow"] .ic-follow,
+#recenter-fab[data-mode="fitall"] .ic-fitall,
+#recenter-fab[data-mode="fitrem"] .ic-fitrem,
+#recenter-fab[data-mode="hand"] .ic-hand {
+    display: inline-block;
 }
 
 /* Solita in the tracker (tracker-solita.js, Stufe 1 tap-to-talk): a round voice button + reply bubble.
@@ -794,8 +807,7 @@ body.ui-idle #vid-fab,
 body.ui-idle #compass,
 body.ui-idle #speed-sign,
 body.ui-idle #hud-top,
-body.ui-idle #recenter-fab,
-body.ui-idle #resume-fab,
+body.ui-idle #view-fan,
 body.ui-idle .leaflet-control-scale,
 body.ui-idle #trk-controls {
     opacity: 0;
