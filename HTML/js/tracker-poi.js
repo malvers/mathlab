@@ -22,6 +22,11 @@ window.TrackerPoi = function (ctx) {
         // "Tanken" = station LOCATIONS straight from OSM (keyless) — works without Tankerkönig. Live
         // PRICES remain the optional FEAT-26 enrichment (the separate fuel-price layer, once the key is set).
         'poi-cat-fuel':     { def: false, lbl: 'Tankstelle',       ic: '<path d="M14 13h2a2 2 0 0 1 2 2v2a2 2 0 0 0 4 0v-6.998a2 2 0 0 0-.59-1.42L18 5"/><path d="M14 21V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v16"/><path d="M2 21h13"/><path d="M3 9h11"/>', c: 'h', f: ['["amenity"="fuel"]'] },
+        // Verkehr — live Autobahn closures/roadworks/warnings. NOT an Overpass category: `module:true`
+        // marks it so fetchPois skips it (no `f` filters); its checkbox drives the separate traffic
+        // module (js/tracker-traffic.js, key trk-traffic-on) from tracker.js. Icon = warning triangle
+        // (the panel legend; the actual map pins keep their per-kind trf-pin look).
+        'poi-cat-traffic':  { def: false, module: true, lbl: 'Verkehr', c: 'k', ic: '<path d="m21.7 18-8-14a2 2 0 0 0-3.4 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.7-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/>' },
         // OSM fixed speed cameras (highway=speed_camera, keyless). Display only — no in-drive warning
         // tone (Germany §23 StVO forbids operating a device that *warns* of enforcement while driving).
         // User-facing label is deliberately disguised as "Helmut Newton" (the photographer); the icon is a
@@ -113,7 +118,7 @@ window.TrackerPoi = function (ctx) {
     }
 
     async function fetchPois() {
-        const cats = enabledCats().filter((id) => !CATS[id].local); // local cats (Feen) load from JSON, not Overpass
+        const cats = enabledCats().filter((id) => !CATS[id].local && !CATS[id].module); // local (Feen) + module (Verkehr) cats aren't Overpass
         if (!cats.length) { if (layer) layer.clearLayers(); return; }
         // Below MIN_ZOOM the area is too big to query — but DON'T wipe the pins (FEAT-21's idle re-fit
         // zooms out to the whole track; clearing here made the POIs "disappear"). Keep them, skip fetching.

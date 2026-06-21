@@ -22,60 +22,70 @@
     height: 18px;
 }
 
-/* kind → colour (drives both the SVG stroke via currentColor and the border) */
-.trf-sperrung { color: rgb(176, 36, 24); }            /* Υ red */
-.trf-baustelle,
-.trf-warnung { color: rgb(245, 194, 66); }            /* λ orange */
+/* kind → colour (drives the pin SVG stroke via currentColor + the pin border).
+   SCOPED to .trf-pin so it never bleeds into the popup text, which shares the kind class. */
+.trf-pin.trf-sperrung { color: rgb(176, 36, 24); }            /* Υ red */
+.trf-pin.trf-baustelle,
+.trf-pin.trf-warnung { color: rgb(245, 194, 66); }            /* λ orange */
 
 /* future / planned items sit dimmed so they don't compete with what's active now */
 .trf-pin.trf-future { opacity: 0.5; }
 
-/* ---- Popup ---- */
+/* ---- Popup — dark-blue card like the app's other popups (cf. photo card, rgb 8,20,42); Arial body because
+   Doc finds Orbitron hard to read here; kind shown as a coloured badge. className set in JS: "trf-popup-card trf-<kind>". */
+.trf-popup-card .leaflet-popup-content-wrapper {
+    background: rgb(8, 20, 42);
+    color: #fff;
+    border: 1px solid rgba(245, 194, 66, 0.45);
+    border-radius: 12px;
+}
+.trf-popup-card .leaflet-popup-tip { background: rgb(8, 20, 42); }
+.trf-popup-card .leaflet-popup-close-button { color: rgba(255, 255, 255, 0.6); }
+.trf-popup-card.trf-sperrung .leaflet-popup-content-wrapper { border-color: rgba(176, 36, 24, 0.7); } /* red rim for closures */
+
 .trf-popup {
-    font-family: 'Orbitron', sans-serif;
-    min-width: 170px;
-    max-width: 240px;
+    font-family: Arial, Helvetica, sans-serif;   /* Doc: Orbitron is hard to read here */
+    min-width: 172px;
+    max-width: 250px;
+    color: rgba(255, 255, 255, 0.88);            /* light text on the dark-blue card */
 }
-.trf-popup .trf-kind {
-    font-size: 0.58rem;
+.trf-popup .trf-kind {                            /* kind as a small filled badge (exact palette) */
+    display: inline-block;
+    font-size: 10px;
     font-weight: 700;
-    letter-spacing: 1px;
+    letter-spacing: 0.5px;
     text-transform: uppercase;
-    margin-bottom: 3px;
+    color: #fff;
+    padding: 2px 8px;
+    border-radius: 6px;
+    margin-bottom: 7px;
 }
-.trf-popup.trf-sperrung .trf-kind { color: rgb(176, 36, 24); }
+.trf-popup.trf-sperrung .trf-kind { background: rgb(176, 36, 24); }                        /* Υ red, white text */
 .trf-popup.trf-baustelle .trf-kind,
-.trf-popup.trf-warnung .trf-kind { color: rgb(245, 194, 66); }
+.trf-popup.trf-warnung .trf-kind { background: rgb(245, 194, 66); color: rgb(48, 34, 4); }  /* λ orange, dark text */
 .trf-popup .trf-title {
     font-weight: 700;
     font-size: 13px;
     line-height: 1.25;
+    color: #fff;
 }
 .trf-popup .trf-sub {
     font-size: 11px;
-    opacity: 0.8;
-    margin-top: 2px;
+    color: rgba(255, 255, 255, 0.62);
+    margin-top: 3px;
 }
 .trf-popup .trf-desc {
-    font-size: 11px;
-    opacity: 0.7;
-    margin-top: 6px;
-    max-height: 120px;
+    font-size: 12.5px;
+    color: rgba(255, 255, 255, 0.85);
+    margin-top: 7px;
+    max-height: 260px;                            /* generous → normal descriptions never scroll */
     overflow-y: auto;
-    line-height: 1.35;
+    line-height: 1.5;
 }
-/* "Hinfahren" CTA — action = green (Doc: buttons never orange). */
-.trf-popup .trf-nav {
-    display: block;
-    width: 100%;
-    margin-top: 9px;
-    font-family: 'Orbitron', sans-serif;
-    font-size: 12px;
-    font-weight: 700;
-    color: #fff;
-    background: rgb(121, 158, 49);
-    border: 0;
-    border-radius: 8px;
-    padding: 7px 12px;
-    cursor: pointer;
+/* slim dark scrollbar (Doc: like index, the default one is ugly) — webkit + FF applied separately via @supports */
+.trf-popup .trf-desc::-webkit-scrollbar { width: 6px; }
+.trf-popup .trf-desc::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.22); border-radius: 3px; }
+.trf-popup .trf-desc::-webkit-scrollbar-track { background: transparent; }
+@supports not selector(::-webkit-scrollbar) {
+    .trf-popup .trf-desc { scrollbar-width: thin; scrollbar-color: rgba(255, 255, 255, 0.22) transparent; }
 }

@@ -8,9 +8,9 @@
 // Which Autobahn? We reuse the speed-limit module's Overpass road detection (speed.currentRoad().ref) so
 // we only query the A-road you're actually on — no spatial "near me" endpoint exists, it's per-ref.
 //
-// ctx (from tracker.js): { map, toast, navigateTo, speed, nav, voice }
+// ctx (from tracker.js): { map, toast, speed, nav, voice }
 window.TrackerTraffic = function (ctx) {
-    const { map, toast, navigateTo, speed, nav, voice, apiUrl, apiKey } = ctx;
+    const { map, toast, speed, nav, voice, apiUrl, apiKey } = ctx;
 
     const AB_BASE = 'https://verkehr.autobahn.de/o/autobahn/';
     const SERVICES = ['closure', 'roadworks', 'warning'];
@@ -35,6 +35,7 @@ window.TrackerTraffic = function (ctx) {
     let busy = false;
     let failUntil = 0, failStreak = 0;     // post-failure backoff (mirrors tracker-fuel.js)
     let attribution = '';                  // '© TomTom' while showing TomTom data (Phase 2), else ''
+    let lastHere = null;                    // last position seen (even while disabled) → toggle-on can fetch at once
     const announced = new Set();           // closure identifiers already spoken/toasted (no spam)
     let enabled = localStorage.getItem('trk-traffic-on') === '1'; // default OFF (heavier overlay, like REGEN)
 
@@ -75,17 +76,44 @@ window.TrackerTraffic = function (ctx) {
     }
 
     // Which Autobahn ref(s) are we on? From the speed-limit module's Overpass road detection. OSM `ref`
-    // can be "A4" / "A 4" / "A4;A38" → keep only Autobahn refs, normalised to "A4" (what the API uses).
-    function currentRefs() {
+    // OSM `ref` ("A4" / "A 4" / "A4;A38") → normalised Autobahn refs ["A4", …] (what the API uses).
+    function aRefs(ref) {
         const out = new Set();
-        const road = speed && speed.currentRoad && speed.currentRoad();
-        if (road && road.ref) {
-            String(road.ref).split(/[;,]/).forEach((r) => {
-                const m = String(r).trim().match(/^A\s?(\d+)/i);
-                if (m) out.add('A' + m[1]);
-            });
-        }
+        if (ref) String(ref).split(/[;,]/).forEach((r) => { const m = String(r).trim().match(/^A\s?(\d+)/i); if (m) out.add('A' + m[1]); });
         return [...out];
+    }
+    const OVERPASS_MIRRORS = ['https://overpass-api.de/api/interpreter', 'https://overpass.kumi.systems/api/interpreter'];
+    const DETECT_RADIUS_M = 15000;  // find every Autobahn within ~15 km → show the incidents AROUND you (POI-like),
+    const MAX_REFS = 8;             // not just the road under your wheels. Cap the ref count to bound API load.
+    // Own Autobahn detection: motorway/trunk ways carrying a `ref` within DETECT_RADIUS_M. Independent of the
+    // speed-limit module (which only runs while recording) → traffic shows AMBIENTLY, like POIs, even when idle.
+    async function overpassRefs(here) {
+        const q = '[out:json][timeout:25];way(around:' + DETECT_RADIUS_M + ',' + here[0] + ',' + here[1] + ')[highway~"^(motorway|trunk)(_link)?$"][ref];out tags 150;';
+        let gotOk = false;                                  // did ANY mirror answer cleanly (200 + JSON)?
+        for (const url of OVERPASS_MIRRORS) {
+            const ctrl = new AbortController();
+            const to = setTimeout(() => ctrl.abort(), 13000);   // don't let a slow mirror wedge the fetch (busy stays true)
+            try {
+                const r = await fetch(url, { method: 'POST', body: 'data=' + encodeURIComponent(q), signal: ctrl.signal });
+                if (!r.ok) continue;
+                const j = await r.json();
+                gotOk = true;
+                const out = new Set();
+                for (const e of (j.elements || [])) aRefs(e.tags && e.tags.ref).forEach((x) => out.add(x));
+                if (out.size) return [...out].slice(0, MAX_REFS);  // empty 200 → try the other mirror, then trust it as empty
+            } catch (e) { /* try next mirror */ }
+            finally { clearTimeout(to); }
+        }
+        return gotOk ? [] : null;   // [] = genuinely no Autobahn within reach · null = every mirror failed (don't wipe pins)
+    }
+    // Which Autobahn(s) to show? The road you're on (speed module, free while recording) PLUS every Autobahn
+    // within ~15 km (Overpass) — so incidents appear around you like POIs, not only on the road you're driving.
+    async function resolveRefs(here) {
+        const road = speed && speed.currentRoad && speed.currentRoad();
+        const fromSpeed = aRefs(road && road.ref);
+        const area = await overpassRefs(here);              // [] = no Autobahn nearby · null = Overpass unreachable
+        if (area === null) return fromSpeed.length ? fromSpeed : null;  // hard fail → signal it (don't clear pins on a blip)
+        return [...new Set([...fromSpeed, ...area])].slice(0, MAX_REFS);
     }
 
     // "lat,lng" string or {lat,long} object or geometry[0] → [lat, lng] anchor for the pin.
@@ -93,7 +121,7 @@ window.TrackerTraffic = function (ctx) {
         if (it.coordinate && typeof it.coordinate.lat === 'number') return [it.coordinate.lat, it.coordinate.long];
         if (typeof it.point === 'string') {
             const p = it.point.split(',').map(Number);
-            if (p.length === 2 && !isNaN(p[0])) return [p[0], p[1]];
+            if (p.length === 2 && !isNaN(p[0]) && !isNaN(p[1])) return [p[0], p[1]];
         }
         const g = it.geometry && it.geometry.coordinates;
         if (Array.isArray(g) && g.length && Array.isArray(g[0])) return [g[0][1], g[0][0]]; // GeoJSON [long,lat]
@@ -165,13 +193,7 @@ window.TrackerTraffic = function (ctx) {
             '<div class="trf-title">' + esc(o.title) + '</div>' +
             (o.subtitle ? '<div class="trf-sub">' + esc(o.subtitle.trim()) + '</div>' : '') +
             (desc ? '<div class="trf-desc">' + desc + '</div>' : '') +
-            '<button type="button" class="trf-nav">Hinfahren</button></div>';
-    }
-    function bindPopupNav(marker, o) {
-        marker.on('popupopen', (ev) => {
-            const b = ev.popup.getElement().querySelector('.trf-nav');
-            if (b) b.onclick = () => { map.closePopup(); if (navigateTo) navigateTo(o.anchor, o.title || 'Verkehr'); };
-        });
+            '</div>';   // no "Hinfahren" — you don't route yourself INTO a closure/jam (Doc)
     }
 
     function render() {
@@ -186,9 +208,8 @@ window.TrackerTraffic = function (ctx) {
             if (!o.anchor) continue;
             // proximity cull for PINS only — the full fetched set stays in `items` for the route-closure scan
             if (lastLat != null && distM(lastLat, lastLng, o.anchor[0], o.anchor[1]) > MAX_NEAR_M) continue;
-            const m = L.marker(o.anchor, { icon: pinIcon(o.kind, o.future), pane: 'traffic', keyboard: false })
-                .bindPopup(popupHtml(o)).addTo(lyr);
-            bindPopupNav(m, o);
+            L.marker(o.anchor, { icon: pinIcon(o.kind, o.future), pane: 'traffic', keyboard: false })
+                .bindPopup(popupHtml(o), { className: 'trf-popup-card trf-' + o.kind }).addTo(lyr);
         }
     }
 
@@ -218,14 +239,21 @@ window.TrackerTraffic = function (ctx) {
         finally { clearTimeout(to); }
     }
 
-    async function fetchTraffic(refs, here) {
-        busy = true;
+    async function fetchTraffic(here) {
         let ok = false;
         try {
+            busy = true;                            // inside try → a throw (e.g. bad `here`) still hits finally, never wedges busy
+            lastLat = here[0]; lastLng = here[1];   // set NOW so render()'s proximity cull uses the CURRENT position (not the stale one)
+            const refs = await resolveRefs(here);   // [] = no Autobahn nearby · null = Overpass unreachable · else the refs
+            if (refs === null) { dbg('ref-lookup failed (Overpass) — Pins bleiben, Backoff'); return; } // soft fail: keep pins (ok=false → backoff)
+            if (!refs.length) { items = []; attribution = ''; render(); ok = true; return; } // genuinely not on/near an Autobahn → clear
             const raw = [];
-            for (const ref of refs) {
-                const res = await Promise.allSettled(SERVICES.map((svc) => fetchSvc(ref, svc)));
-                res.forEach((r, i) => {
+            const perRef = await Promise.allSettled(   // all refs × services in parallel (was sequential → up to ~72 s worst case)
+                refs.map((ref) => Promise.allSettled(SERVICES.map((svc) => fetchSvc(ref, svc))))
+            );
+            for (const rr of perRef) {
+                if (rr.status !== 'fulfilled') continue;
+                rr.value.forEach((r, i) => {
                     if (r.status === 'fulfilled' && r.value) {
                         const svc = SERVICES[i];
                         (r.value[svc] || []).forEach((it) => raw.push({ it, svc }));
@@ -233,12 +261,13 @@ window.TrackerTraffic = function (ctx) {
                 });
             }
             const seen = new Set(), out = [];
+            let dropped = 0;
             for (const { it, svc } of raw) {
                 const id = it.identifier || (it.title + '|' + (it.point || ''));
                 if (seen.has(id)) continue;
                 seen.add(id);
                 const anchor = anchorOf(it);
-                if (!anchor || isNaN(anchor[0]) || isNaN(anchor[1])) continue;
+                if (!anchor || isNaN(anchor[0]) || isNaN(anchor[1])) { dropped++; continue; } // no/NaN anchor → can't place; logged below
                 out.push({
                     id, anchor, kind: kindOf(it, svc), future: !!it.future,
                     title: it.title, subtitle: it.subtitle, description: it.description,
@@ -248,8 +277,7 @@ window.TrackerTraffic = function (ctx) {
             // Keep ALL of this A-road's items so the route-closure scan sees closures the whole route ahead
             // (render() culls pins to MAX_NEAR_M). Clear any leftover credit — this is keyless Autobahn data.
             items = out; attribution = '';
-            lastLat = here[0]; lastLng = here[1]; lastFetch = Date.now();
-            dbg('refs ' + refs.join(',') + ' → ' + items.length + ' Items');
+            dbg('refs ' + refs.join(',') + ' → ' + items.length + ' Items' + (dropped ? ' (' + dropped + ' ohne Anker verworfen)' : ''));
             render();
             checkRouteClosures();
             ok = true;
@@ -257,6 +285,7 @@ window.TrackerTraffic = function (ctx) {
             dbg('ERR ' + (e && (e.message || e)));
         } finally {
             busy = false;
+            lastFetch = Date.now(); // advance throttle (also on no-refs / fail; position already set up top before render)
             // back off after a failure so a hiccup isn't retried on every GPS fix (mirrors tracker-fuel.js)
             if (ok) { failStreak = 0; failUntil = 0; }
             else { failStreak++; failUntil = Date.now() + Math.min(REFRESH_MS, 5000 * Math.pow(2, failStreak - 1)); }
@@ -266,11 +295,11 @@ window.TrackerTraffic = function (ctx) {
     // Phase 2 sibling of fetchTraffic: query the TomTom proxy for the current map bbox (abroad).
     async function fetchTomTom(here) {
         if (!apiUrl) return;
-        busy = true;
         let ok = false;
         const ctrl = new AbortController();
         const to = setTimeout(() => ctrl.abort(), FETCH_TIMEOUT_MS);
         try {
+            busy = true;                            // inside try → pairs with the finally that clears it (no wedge)
             // Clamp to a driving-scale window (~±33 km) around the position, NOT the whole viewport — keeps
             // it under TomTom's bbox area cap (silent 400 when zoomed out) and matches the proximity cull.
             const dLat = 0.30, dLng = 0.30 / Math.max(0.2, Math.cos(here[0] * Math.PI / 180));
@@ -284,7 +313,7 @@ window.TrackerTraffic = function (ctx) {
             if (!r.ok || !d.ok) { dbg('TomTom ERR ' + (d.error || r.status)); return; }
             items = tomtomItems(d.incidents);
             attribution = '© TomTom';
-            lastLat = here[0]; lastLng = here[1]; lastFetch = Date.now();
+            lastLat = here[0]; lastLng = here[1];
             dbg('TomTom → ' + items.length + ' Items');
             render();
             checkRouteClosures();
@@ -294,6 +323,7 @@ window.TrackerTraffic = function (ctx) {
         } finally {
             clearTimeout(to);
             busy = false;
+            lastFetch = Date.now();   // advance throttle on every path (mirrors fetchTraffic — the abroad path was missing this)
             if (ok) { failStreak = 0; failUntil = 0; }
             else { failStreak++; failUntil = Date.now() + Math.min(REFRESH_MS, 5000 * Math.pow(2, failStreak - 1)); }
         }
@@ -302,30 +332,35 @@ window.TrackerTraffic = function (ctx) {
     // Called from the position handler on every GPS fix; re-polls only on enough move/time, gated by backoff.
     function update(here) {
         try {
-            if (!enabled || busy || !here) return;
-            if (Date.now() < failUntil) return;
+            if (!here) return;
             const lat = here[0], lng = here[1];
             if (typeof lat !== 'number' || typeof lng !== 'number') return;
+            lastHere = [lat, lng];                               // remember position even while disabled (toggle-on uses it)
+            if (!enabled || busy) return;
+            if (Date.now() < failUntil) return;
             const moved = (lastLat == null) ? Infinity : distM(lastLat, lastLng, lat, lng);
             if (moved < REFRESH_MOVE_M && (Date.now() - lastFetch) < REFRESH_MS) return;   // move/time throttle
-            if (inGermany([lat, lng])) {
-                const refs = currentRefs();                      // Phase 1: keyless Autobahn GmbH API
-                if (!refs.length) { items = []; attribution = ''; lastLat = lat; lastLng = lng; lastFetch = Date.now(); render(); return; }
-                fetchTraffic(refs, [lat, lng]);
-            } else if (apiUrl) {
-                fetchTomTom([lat, lng]);                          // Phase 2: TomTom proxy (graceful if not deployed)
-            }
+            if (inGermany([lat, lng])) fetchTraffic([lat, lng]);  // Phase 1: keyless Autobahn GmbH API (resolves refs itself)
+            else if (apiUrl) fetchTomTom([lat, lng]);             // Phase 2: TomTom proxy (graceful if not deployed)
         } catch (e) { dbg('update ERR ' + (e && (e.message || e))); } // never let a throw reach onPosition
     }
 
     function setEnabled(on) {
         enabled = !!on; localStorage.setItem('trk-traffic-on', enabled ? '1' : '0');
-        if (!enabled) { if (layer) layer.clearLayers(); }
-        else { render(); if (lastLat != null) lastFetch = 0; } // re-poll soon when turned on
+        failUntil = 0; failStreak = 0;              // a manual toggle clears any stale backoff window (consistent on/off)
+        if (!enabled) {
+            if (layer) layer.clearLayers();
+            attribution = ''; if (map.attributionControl) map.attributionControl.removeAttribution('© TomTom');
+            return;
+        }
+        // Turned on → fetch right away from the last known position so even a static fix shows pins at once.
+        lastFetch = 0;
+        if (lastHere && !busy) { if (inGermany(lastHere)) fetchTraffic(lastHere); else if (apiUrl) fetchTomTom(lastHere); }
     }
     function clear() {
         if (layer) layer.clearLayers();
-        items = []; lastLat = lastLng = null; lastFetch = 0; announced.clear();
+        items = []; lastLat = lastLng = null; lastHere = null; lastFetch = 0; busy = false; announced.clear();
+        failUntil = 0; failStreak = 0;
         attribution = ''; if (map.attributionControl) map.attributionControl.removeAttribution('© TomTom');
     }
 
