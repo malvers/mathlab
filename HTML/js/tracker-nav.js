@@ -553,7 +553,7 @@ window.TrackerNav = function (ctx) {
         // "Rest / Gesamt" so the banner shows BOTH the remaining distance and the whole route length
         // (Doc 2026-06-21 — "Gesamtstrecke und die noch zulaufende Strecke"; tune wording if it doesn't land).
         const dist = fmt(d.remM) + ' / ' + fmt(routeTotalDist);
-        return 'Ankunft ' + clock + '  ·  ' + dist + '  ·  ' + Math.round(d.remSec / 60) + ' min';
+        return 'ETA ' + clock + '  ·  ' + dist + '  ·  ' + Math.round(d.remSec / 60) + ' min';
     }
 
     function announceDist(d) { return d > 500 ? Math.round(d / 100) * 100 : Math.round(d / 50) * 50; }
