@@ -154,7 +154,7 @@ window.TrackerNav = function (ctx) {
             const t = new Date();
             label = 'Gemerkt ' + t.getHours() + ':' + String(t.getMinutes()).padStart(2, '0');
         }
-        pushHistory(pos, '📍 ' + label);   // 📍 marks a self-saved spot among the navigated destinations
+        pushHistory(pos, '📍 ' + label, true);   // pin flag → grouped first in the scroll box; 📍 marks it visually
         toast('Position gemerkt: ' + shortLabel(label));
     }
 
@@ -195,12 +195,12 @@ window.TrackerNav = function (ctx) {
     }
     // Record a destination at the top; drop duplicates (same label OR within ~25 m). No cap (Doc 2026-06-21):
     // the list is unlimited — unneeded entries get deleted by hand; the scroll box keeps it compact.
-    function pushHistory(latlng, label) {
+    function pushHistory(latlng, label, pin) {
         if (!latlng || latlng[0] == null) return;
         const lab = (label || '').trim() || 'Ziel';
         const list = loadHistory().filter((h) =>
             h.label !== lab && haversine([h.lat, h.lng], [latlng[0], latlng[1]]) > 25);
-        list.unshift({ lat: latlng[0], lng: latlng[1], label: lab, t: Date.now() });
+        list.unshift({ lat: latlng[0], lng: latlng[1], label: lab, t: Date.now(), pin: !!pin });
         try { localStorage.setItem(HIST_KEY, JSON.stringify(list)); } catch (e) { }
         renderHistory();
     }
@@ -252,12 +252,17 @@ window.TrackerNav = function (ctx) {
         return item;
     }
 
+    // A self-saved spot vs a navigated destination. The `pin` flag is authoritative; the 📍 label prefix
+    // is the fallback so pins saved before the flag existed still group correctly.
+    function isPin(h) { return h.pin === true || (h.label || '').startsWith('📍'); }
+
     // Rebuild the list DOM (textContent for OSM labels → no injection; the pin SVG is a fixed string).
-    // "Nach Hause" is pinned on top; the recent destinations live in a scroll box that scrolls from the
-    // 6th entry on (.nav-hist-scroll, unlimited list), so home never scrolls away.
+    // "Nach Hause" is pinned on top (above the scroll box, never scrolls). INSIDE the scroll box the saved
+    // 📍 pins come first, then the navigated destinations — both scroll/can be scrolled out (Doc 2026-06-21).
     function renderHistory() {
         const box = $('nav-history'); if (!box) return;
-        const list = loadHistory();
+        const all = loadHistory();
+        const ordered = [...all.filter(isPin), ...all.filter((h) => !isPin(h))]; // pins first, recency kept within each group
         box.innerHTML = '';
         box.hidden = false;   // always visible — the pinned Home row is always present
         const title = document.createElement('div');
@@ -265,7 +270,7 @@ window.TrackerNav = function (ctx) {
         box.appendChild(title);
         box.appendChild(homeRow());   // pinned first, above the scroll area
         const scroll = document.createElement('div'); scroll.className = 'nav-hist-scroll';
-        list.forEach((h) => {
+        ordered.forEach((h) => {
             const item = document.createElement('div'); item.className = 'nav-hist-item';
             const go = document.createElement('button'); go.type = 'button'; go.className = 'nav-hist-go'; go.title = h.label;
             go.innerHTML = '<span class="nav-hist-pin"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" '
