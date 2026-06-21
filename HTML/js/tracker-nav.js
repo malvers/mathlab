@@ -680,6 +680,8 @@ window.TrackerNav = function (ctx) {
         el.querySelector('.nav-instr').textContent = m.detail || m.text; // OSM names via textContent (no injection)
         const t = el.querySelector('.nav-trip');
         t.textContent = trip || ''; t.hidden = !trip;
+        // Banner colour by Wegtyp: Laufen → green (default), Auto → orange (Doc 2026-06-21).
+        el.classList.toggle('route-car', routeType === 'car');
         el.hidden = false;
     }
     function hideBanner() { const el = $('nav-banner'); if (el) el.hidden = true; }
