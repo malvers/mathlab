@@ -358,6 +358,13 @@ path.pos-marker.pos-shown {
     -webkit-tap-highlight-color: transparent;
 }
 
+/* Pixel im Querformat (Landscape, wenig Höhe oben): die breitenbasierte --cc-size (8.5vw) bläst die
+   Uhr auf. Auf Telefonen im Querformat die Uhr hart verkleinern (~60%) und an die HÖHE koppeln
+   (Doc 2026-06-21 — Startwert zum Ausprobieren). max-height grenzt Tablets/Desktop aus (genug Höhe). */
+@media (orientation: landscape) and (max-height: 500px) {
+    #hud-time { --cc-size: clamp(1.1rem, 5vh, 1.8rem); }
+}
+
 /* Wrapper so the travel-mode icon hangs to the LEFT of the (still centred) clock. */
 #hud-time-wrap {
     position: relative;
