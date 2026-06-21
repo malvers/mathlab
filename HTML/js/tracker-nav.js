@@ -890,7 +890,7 @@ window.TrackerNav = function (ctx) {
         reflect();
     })();
 
-    const api = { openPanel, hasDestination, startNavigation, navigateTo, clearRoute, update, remainingBounds, frameRoute, tripData };
+    const api = { openPanel, hasDestination, startNavigation, navigateTo, clearRoute, update, remainingBounds, frameRoute, tripData, routePoints: () => routeLatLngs };
     // Bridge for the Solita navigate_to add-on (js/solita-navigate.js): the nav instance is module-private
     // in tracker.js (__nav), so publish a handle here so the voice tool can route programmatically without
     // touching tracker.js. Last constructed instance wins (there is only one).

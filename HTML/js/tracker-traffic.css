@@ -1,0 +1,81 @@
+/* Verkehrs-Spur — live Autobahn traffic pins. Colour encodes the kind:
+   Sperrung (closure) = Υ red, Baustelle/Warnung = λ orange. Glass badge on dark blue (never #000). */
+.trf-pin-wrap {
+    background: none;
+    border: none;
+}
+
+.trf-pin {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background: rgba(8, 20, 42, 0.88);
+    border: 1.5px solid currentColor;
+    box-shadow: 0 2px 7px rgba(8, 20, 42, 0.6);
+}
+
+.trf-pin svg {
+    width: 18px;
+    height: 18px;
+}
+
+/* kind → colour (drives both the SVG stroke via currentColor and the border) */
+.trf-sperrung { color: rgb(176, 36, 24); }            /* Υ red */
+.trf-baustelle,
+.trf-warnung { color: rgb(245, 194, 66); }            /* λ orange */
+
+/* future / planned items sit dimmed so they don't compete with what's active now */
+.trf-pin.trf-future { opacity: 0.5; }
+
+/* ---- Popup ---- */
+.trf-popup {
+    font-family: 'Orbitron', sans-serif;
+    min-width: 170px;
+    max-width: 240px;
+}
+.trf-popup .trf-kind {
+    font-size: 0.58rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 3px;
+}
+.trf-popup.trf-sperrung .trf-kind { color: rgb(176, 36, 24); }
+.trf-popup.trf-baustelle .trf-kind,
+.trf-popup.trf-warnung .trf-kind { color: rgb(245, 194, 66); }
+.trf-popup .trf-title {
+    font-weight: 700;
+    font-size: 13px;
+    line-height: 1.25;
+}
+.trf-popup .trf-sub {
+    font-size: 11px;
+    opacity: 0.8;
+    margin-top: 2px;
+}
+.trf-popup .trf-desc {
+    font-size: 11px;
+    opacity: 0.7;
+    margin-top: 6px;
+    max-height: 120px;
+    overflow-y: auto;
+    line-height: 1.35;
+}
+/* "Hinfahren" CTA — action = green (Doc: buttons never orange). */
+.trf-popup .trf-nav {
+    display: block;
+    width: 100%;
+    margin-top: 9px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    color: #fff;
+    background: rgb(121, 158, 49);
+    border: 0;
+    border-radius: 8px;
+    padding: 7px 12px;
+    cursor: pointer;
+}

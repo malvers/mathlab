@@ -27,6 +27,7 @@ window.TrackerSpeedLimit = function (ctx) {
     let lastPos = null;     // [lat,lng] at the last query
     let fetching = false;   // a query is in flight
     let curLimit = null;    // number (km/h) | 'none' (unlimited) | null (unknown)
+    let lastRoad = null;    // { ref, name, highway } of the nearest road (for tracker-traffic) — null until first query
     // The over-speed chime = the SMALL bell from glocken.html (its sample), so it sounds identical.
     const BELL_URL = '../resources/bells/wingsoarstudio-anvil-bell-2-wav-485668.mp3';
     let actx = null;        // Web Audio context (lazily unlocked on START)
@@ -203,13 +204,13 @@ window.TrackerSpeedLimit = function (ctx) {
         try {
             const j = await overpass(q);
             if (!j) { dbg('Overpass: alle Mirror fehlgeschlagen → letztes Schild bleibt'); return; }
-            let best = null, bestD = Infinity, ways = 0;
+            let best = null, bestD = Infinity, ways = 0, bestTags = null;
             for (const e of (j.elements) || []) {
                 ways++;
                 const m = wayLimit(e.tags);
                 if (m == null) continue;
                 const d = distToWay(p, e.geometry);
-                if (d < bestD) { bestD = d; best = m; } // nearest road with a resolvable limit wins
+                if (d < bestD) { bestD = d; best = m; bestTags = e.tags; } // nearest road with a resolvable limit wins
             }
             if (best == null) {                 // road untagged → don't blank a previously good sign
                 dbg('Limit: ' + ways + ' Wege, keiner mit (impliziter) Begrenzung → kein Tag');
@@ -217,6 +218,8 @@ window.TrackerSpeedLimit = function (ctx) {
             }
             dbg('Limit: ' + best + ' (' + Math.round(bestD) + ' m)');
             curLimit = best;
+            // Remember the nearest road's identity so other modules (tracker-traffic) know which Autobahn we're on.
+            lastRoad = bestTags ? { ref: bestTags.ref || null, name: bestTags.name || null, highway: bestTags.highway || null } : lastRoad;
             setSign(best, false);
         } catch (e) { /* parse error → keep the last known sign */ }
         finally { fetching = false; }
@@ -256,5 +259,5 @@ window.TrackerSpeedLimit = function (ctx) {
 
     setSign(null, false); // show the ∞ default right away, before the first GPS fix (Doc 2026-06-18)
 
-    return { update, clear, unlockAudio, setBell, bellEnabled };
+    return { update, clear, unlockAudio, setBell, bellEnabled, currentRoad: () => lastRoad };
 };

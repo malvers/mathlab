@@ -1,0 +1,253 @@
+// js/tracker-traffic.js — Verkehrs-Spur: live German-Autobahn closures / roadworks / warnings on the map.
+// While you drive an Autobahn, nearby Sperrungen (red), Baustellen + Warnungen (λ orange) show up as
+// pins; tapping one routes you there. If a closure lies ON your active navigation route you get a one-off
+// toast + spoken warning. Data: the Autobahn GmbH open API (verkehr.autobahn.de) — KEYLESS, CORS '*',
+// fetched straight from the browser (no Edge function, no secret; fits CLAUDE.md rule 18 like Nominatim/OSRM).
+// Germany + Autobahn only; Spain/city/flow-heatmap is Phase 2 (TomTom via an Edge proxy).
+//
+// Which Autobahn? We reuse the speed-limit module's Overpass road detection (speed.currentRoad().ref) so
+// we only query the A-road you're actually on — no spatial "near me" endpoint exists, it's per-ref.
+//
+// ctx (from tracker.js): { map, toast, navigateTo, speed, nav, voice }
+window.TrackerTraffic = function (ctx) {
+    const { map, toast, navigateTo, speed, nav, voice } = ctx;
+
+    const AB_BASE = 'https://verkehr.autobahn.de/o/autobahn/';
+    const SERVICES = ['closure', 'roadworks', 'warning'];
+    const REFRESH_MS = 180000;     // re-poll at most every 3 min …
+    const REFRESH_MOVE_M = 3000;   // … or once we've moved 3 km (Autobahn scale)
+    const FETCH_TIMEOUT_MS = 9000; // per-request abort
+    const MAX_NEAR_M = 30000;      // only show items within 30 km of the current position
+    const ROUTE_HIT_M = 200;       // a closure this close to the nav route counts as "on your route"
+
+    const dbg = (m) => { if (window.DebugWindow && DebugWindow.log) DebugWindow.log('traffic: ' + m); };
+
+    // Inline Lucide-style glyphs (keyless, no emoji) — stroke uses currentColor (set per kind via CSS).
+    const ICONS = {
+        sperrung: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m4.9 4.9 14.2 14.2"/></svg>',
+        baustelle: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="8" rx="1"/><path d="M17 14v7"/><path d="M7 14v7"/><path d="M17 3v3"/><path d="M7 3v3"/><path d="m8 6 8 8"/></svg>',
+        warnung: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.7 18-8-14a2 2 0 0 0-3.4 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.7-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>',
+    };
+
+    let layer = null;
+    let items = [];
+    let lastLat = null, lastLng = null, lastFetch = 0;
+    let busy = false;
+    let failUntil = 0, failStreak = 0;     // post-failure backoff (mirrors tracker-fuel.js)
+    const announced = new Set();           // closure identifiers already spoken/toasted (no spam)
+    let enabled = localStorage.getItem('trk-traffic-on') === '1'; // default OFF (heavier overlay, like REGEN)
+
+    function ensureLayer() {
+        if (!layer) {
+            // z 615: above the fuel symbol (610), below the fuel price badge (620).
+            if (!map.getPane('traffic')) map.createPane('traffic').style.zIndex = 615;
+            layer = L.layerGroup().addTo(map);
+        }
+        return layer;
+    }
+
+    // metres between two lat/lng points (haversine)
+    function distM(aLat, aLng, bLat, bLng) {
+        const R = 6371000, toRad = Math.PI / 180;
+        const dLat = (bLat - aLat) * toRad, dLng = (bLng - aLng) * toRad;
+        const s = Math.sin(dLat / 2) ** 2 +
+            Math.cos(aLat * toRad) * Math.cos(bLat * toRad) * Math.sin(dLng / 2) ** 2;
+        return 2 * R * Math.asin(Math.sqrt(s));
+    }
+
+    // Point→segment distance (m) via a cheap equirectangular projection — good enough at road scale.
+    function segDistM(p, a, b) {
+        const k = Math.cos(p[0] * Math.PI / 180);
+        const xy = (ll) => [ll[1] * 111320 * k, ll[0] * 110540];
+        const P = xy(p), A = xy(a), B = xy(b);
+        const dx = B[0] - A[0], dy = B[1] - A[1], len2 = dx * dx + dy * dy;
+        let t = len2 ? ((P[0] - A[0]) * dx + (P[1] - A[1]) * dy) / len2 : 0;
+        t = t < 0 ? 0 : t > 1 ? 1 : t;
+        return Math.hypot(P[0] - (A[0] + t * dx), P[1] - (A[1] + t * dy));
+    }
+    // min distance from a point to a polyline [[lat,lng]…]
+    function distToLine(p, line) {
+        if (!line || line.length < 2) return Infinity;
+        let best = Infinity;
+        for (let i = 1; i < line.length; i++) best = Math.min(best, segDistM(p, line[i - 1], line[i]));
+        return best;
+    }
+
+    // Which Autobahn ref(s) are we on? From the speed-limit module's Overpass road detection. OSM `ref`
+    // can be "A4" / "A 4" / "A4;A38" → keep only Autobahn refs, normalised to "A4" (what the API uses).
+    function currentRefs() {
+        const out = new Set();
+        const road = speed && speed.currentRoad && speed.currentRoad();
+        if (road && road.ref) {
+            String(road.ref).split(/[;,]/).forEach((r) => {
+                const m = String(r).trim().match(/^A\s?(\d+)/i);
+                if (m) out.add('A' + m[1]);
+            });
+        }
+        return [...out];
+    }
+
+    // "lat,lng" string or {lat,long} object or geometry[0] → [lat, lng] anchor for the pin.
+    function anchorOf(it) {
+        if (it.coordinate && typeof it.coordinate.lat === 'number') return [it.coordinate.lat, it.coordinate.long];
+        if (typeof it.point === 'string') {
+            const p = it.point.split(',').map(Number);
+            if (p.length === 2 && !isNaN(p[0])) return [p[0], p[1]];
+        }
+        const g = it.geometry && it.geometry.coordinates;
+        if (Array.isArray(g) && g.length && Array.isArray(g[0])) return [g[0][1], g[0][0]]; // GeoJSON [long,lat]
+        return null;
+    }
+    // geometry → [[lat,lng]…] (GeoJSON stores [long,lat]); falls back to the single anchor.
+    function geomLatLng(it, anchor) {
+        const g = it.geometry && it.geometry.coordinates;
+        if (Array.isArray(g) && g.length && Array.isArray(g[0]) && it.geometry.type === 'LineString') {
+            return g.map((c) => [c[1], c[0]]);
+        }
+        return anchor ? [anchor] : [];
+    }
+
+    function kindOf(it, svc) {
+        const blocked = it.isBlocked && String(it.isBlocked) !== 'false';
+        if (svc === 'closure' || blocked || /CLOSURE/i.test(it.display_type || '')) return 'sperrung';
+        if (svc === 'roadworks') return 'baustelle';
+        return 'warnung';
+    }
+
+    function pinIcon(kind, future) {
+        const cls = 'trf-pin trf-' + kind + (future ? ' trf-future' : '');
+        return L.divIcon({
+            className: 'trf-pin-wrap',
+            html: '<div class="' + cls + '">' + (ICONS[kind] || ICONS.warnung) + '</div>',
+            iconSize: [28, 28], iconAnchor: [14, 14], popupAnchor: [0, -14],
+        });
+    }
+
+    function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
+
+    function popupHtml(o) {
+        const desc = Array.isArray(o.description) ? o.description.filter(Boolean).join('<br>') : '';
+        const LABEL = { sperrung: 'Sperrung', baustelle: 'Baustelle', warnung: 'Warnung' };
+        return '<div class="trf-popup trf-' + o.kind + '">' +
+            '<div class="trf-kind">' + LABEL[o.kind] + (o.future ? ' · geplant' : '') + '</div>' +
+            '<div class="trf-title">' + esc(o.title) + '</div>' +
+            (o.subtitle ? '<div class="trf-sub">' + esc(o.subtitle.trim()) + '</div>' : '') +
+            (desc ? '<div class="trf-desc">' + desc + '</div>' : '') +
+            '<button type="button" class="trf-nav">Hinfahren</button></div>';
+    }
+    function bindPopupNav(marker, o) {
+        marker.on('popupopen', (ev) => {
+            const b = ev.popup.getElement().querySelector('.trf-nav');
+            if (b) b.onclick = () => { map.closePopup(); if (navigateTo) navigateTo(o.anchor, o.title || 'Verkehr'); };
+        });
+    }
+
+    function render() {
+        const lyr = ensureLayer();
+        lyr.clearLayers();
+        if (!enabled) return;
+        for (const o of items) {
+            if (!o.anchor) continue;
+            const m = L.marker(o.anchor, { icon: pinIcon(o.kind, o.future), pane: 'traffic', keyboard: false })
+                .bindPopup(popupHtml(o)).addTo(lyr);
+            bindPopupNav(m, o);
+        }
+    }
+
+    // One-off heads-up when an ACTIVE closure sits on the live nav route.
+    function checkRouteClosures() {
+        const route = nav && nav.routePoints && nav.routePoints();
+        if (!route || route.length < 2) return;
+        for (const o of items) {
+            if (o.kind !== 'sperrung' || o.future || announced.has(o.id)) continue;
+            const onRoute = o.geom.some((p) => distToLine(p, route) <= ROUTE_HIT_M);
+            if (!onRoute) continue;
+            announced.add(o.id);
+            const t = o.title || 'Sperrung';
+            if (toast) toast('⚠ Sperrung auf Deiner Route: ' + t);
+            if (voice && voice.speak) { try { voice.speak('Achtung, Sperrung voraus: ' + t); } catch (e) { /* ignore */ } }
+        }
+    }
+
+    async function fetchSvc(ref, svc) {
+        const ctrl = new AbortController();
+        const to = setTimeout(() => ctrl.abort(), FETCH_TIMEOUT_MS);
+        try {
+            const r = await fetch(AB_BASE + encodeURIComponent(ref) + '/services/' + svc, { signal: ctrl.signal });
+            if (!r.ok) return null;
+            return await r.json();
+        } catch (e) { return null; }
+        finally { clearTimeout(to); }
+    }
+
+    async function fetchTraffic(refs, here) {
+        busy = true;
+        let ok = false;
+        try {
+            const raw = [];
+            for (const ref of refs) {
+                const res = await Promise.allSettled(SERVICES.map((svc) => fetchSvc(ref, svc)));
+                res.forEach((r, i) => {
+                    if (r.status === 'fulfilled' && r.value) {
+                        const svc = SERVICES[i];
+                        (r.value[svc] || []).forEach((it) => raw.push({ it, svc }));
+                    }
+                });
+            }
+            const seen = new Set(), out = [];
+            for (const { it, svc } of raw) {
+                const id = it.identifier || (it.title + '|' + (it.point || ''));
+                if (seen.has(id)) continue;
+                seen.add(id);
+                const anchor = anchorOf(it);
+                if (!anchor || isNaN(anchor[0])) continue;
+                if (distM(here[0], here[1], anchor[0], anchor[1]) > MAX_NEAR_M) continue; // proximity filter
+                out.push({
+                    id, anchor, kind: kindOf(it, svc), future: !!it.future,
+                    title: it.title, subtitle: it.subtitle, description: it.description,
+                    geom: geomLatLng(it, anchor),
+                });
+            }
+            items = out;
+            lastLat = here[0]; lastLng = here[1]; lastFetch = Date.now();
+            dbg('refs ' + refs.join(',') + ' → ' + items.length + ' Items');
+            render();
+            checkRouteClosures();
+            ok = true;
+        } catch (e) {
+            dbg('ERR ' + (e && (e.message || e)));
+        } finally {
+            busy = false;
+            // back off after a failure so a hiccup isn't retried on every GPS fix (mirrors tracker-fuel.js)
+            if (ok) { failStreak = 0; failUntil = 0; }
+            else { failStreak++; failUntil = Date.now() + Math.min(REFRESH_MS, 5000 * Math.pow(2, failStreak - 1)); }
+        }
+    }
+
+    // Called from the position handler on every GPS fix; re-polls only on enough move/time, gated by backoff.
+    function update(here) {
+        if (!enabled || busy || !here) return;
+        if (Date.now() < failUntil) return;
+        const lat = here[0], lng = here[1];
+        if (typeof lat !== 'number' || typeof lng !== 'number') return;
+        const refs = currentRefs();
+        if (!refs.length) { items = []; render(); return; }  // not on an Autobahn → nothing to show
+        const moved = (lastLat == null) ? Infinity : distM(lastLat, lastLng, lat, lng);
+        if (moved >= REFRESH_MOVE_M || (Date.now() - lastFetch) >= REFRESH_MS) fetchTraffic(refs, [lat, lng]);
+    }
+
+    function setEnabled(on) {
+        enabled = !!on; localStorage.setItem('trk-traffic-on', enabled ? '1' : '0');
+        if (!enabled) { if (layer) layer.clearLayers(); }
+        else { render(); if (lastLat != null) lastFetch = 0; } // re-poll soon when turned on
+    }
+    function clear() {
+        if (layer) layer.clearLayers();
+        items = []; lastLat = lastLng = null; lastFetch = 0; announced.clear();
+    }
+
+    return {
+        update, setEnabled, clear,
+        get enabled() { return enabled; },
+    };
+};

@@ -396,6 +396,7 @@
         let __compass = null;      // north/compass module instance (js/tracker-compass.js)
         let __fuel = null;         // fuel-station price layer (js/tracker-fuel.js)
         let __poi = null;          // points-of-interest layer (js/tracker-poi.js)
+        let __traffic = null;      // live Autobahn traffic layer (js/tracker-traffic.js)
         let gnssActive = false;    // true once the native GnssStatus listener delivers data
         let gnssLatest = null;     // last native GNSS summary {used, inView, usedByConstellation, ...}
         let gpsReal = false;       // true only on a genuine GPS fix (native sats used, or acc ≤ GPS) —
@@ -641,6 +642,7 @@
             // stays strict at MAX_ACC_M; only the fuel layer is exempt. (Was below the gate, so it
             // never ran in a desktop browser where geolocation accuracy is worse than 50 m.)
             if (__fuel) __fuel.update(here);
+            if (__traffic) __traffic.update(here);   // live Autobahn closures/roadworks/warnings (own throttle)
         }
 
         function rejectNoisyFix(accuracy, still) {
@@ -1123,6 +1125,7 @@
             updateDemElev(here);
             updateAltitude(pos.coords.altitude != null ? pos.coords.altitude : null);
             updateAmbientTemp(here); // idle-only: current temperature in the (otherwise distance) tile
+            if (__traffic) __traffic.update(here);   // live Autobahn traffic also while driving without recording
             if (acquireWatch != null) { navigator.geolocation.clearWatch(acquireWatch); acquireWatch = null; } // initial one-shot now redundant
             if (following && !handMode && !still) {
                 const moved = map.distance(map.getCenter(), L.latLng(here));
@@ -2237,6 +2240,15 @@ ${pts}
             navigateTo: (ll, name) => { if (__nav && __nav.navigateTo) __nav.navigateTo(ll, name); },
             curPos: () => { const ll = posMarker && posMarker.getLatLng && posMarker.getLatLng(); return ll ? [ll.lat, ll.lng] : null; },
         });
+        // ---- Verkehrs-Spur → js/tracker-traffic.js. Position-driven; live German-Autobahn closures /
+        //      roadworks / warnings (verkehr.autobahn.de, keyless) as pins; warns on a closure on the route. ----
+        __traffic = (typeof TrackerTraffic !== 'undefined') ? TrackerTraffic({
+            map, toast,
+            navigateTo: (ll, name) => { if (__nav && __nav.navigateTo) __nav.navigateTo(ll, name); },
+            speed: __speed, nav: __nav, voice: (window.SolitaVoice || null),
+        }) : null;
+        // Restore the VERKEHR button state (the module self-restores its enabled flag from localStorage).
+        if (__traffic && __traffic.enabled) { const tb = document.getElementById('mb-traffic'); if (tb) tb.classList.add('active'); }
         // ===============================================================
         // Radial action popup (long-press / right-click) — style from worldclock
         // ===============================================================
@@ -2448,6 +2460,15 @@ ${pts}
             e.currentTarget.classList.toggle('active', isOn);
             localStorage.setItem(RAIN_KEY, isOn ? '1' : '0'); // persist REGEN across restarts
             toast(isOn ? 'Regenradar an' : 'Regenradar aus');
+            closePopup();
+        });
+        // VERKEHR toggles the live Autobahn traffic overlay (js/tracker-traffic.js); reflect on/off (.active).
+        const __mbTraffic = $('mb-traffic');
+        if (__mbTraffic) __mbTraffic.addEventListener('click', (e) => {
+            const on = !(__traffic && __traffic.enabled);
+            if (__traffic) __traffic.setEnabled(on);
+            e.currentTarget.classList.toggle('active', on);
+            toast(on ? 'Verkehr an' : 'Verkehr aus');
             closePopup();
         });
         $('menu-fab').addEventListener('click', () => openPopup());
