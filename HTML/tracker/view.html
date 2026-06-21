@@ -247,6 +247,7 @@
     <!-- Self-hosted Supabase lib (same as the recorder). The old unpkg CDN could be blocked/unreachable
          on a viewer's network → window.supabase undefined → createClient() threw → the whole script aborted
          and the static "Lade geteilten Track …" stayed forever (live AND saved-track load dead). -->
+    <script src="../js/supa-gate.js"></script>
     <script src="../js/vendor/supabase.min.js"></script>
     <script>
         const $ = id => document.getElementById(id);
@@ -293,7 +294,8 @@
                 + '<div style="opacity:.7;margin-top:6px">Supabase-Lib fehlt — anderes Netz/Reload versuchen.</div>';
             throw new Error('Supabase-Lib nicht geladen');
         }
-        const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY); // shared: RPC load + live channel
+        const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY,
+            window.SupaGate ? { global: { fetch: window.SupaGate.gatedFetch } } : undefined); // routed through the central breaker (supa-gate.js)
 
         const map = L.map('map', { zoomControl: true, attributionControl: true })
             .setView([51.1657, 10.4515], 6);
@@ -603,7 +605,7 @@
                             if (sig !== _lastSig) { _lastSig = sig; _pollMs = POLL_MIN; applyRow(r); } // changed → re-render + poll fast
                             else { _pollMs = Math.min(_pollMs * 2, POLL_MAX); }                        // unchanged → back off
                         }
-                    } catch (_) { /* transient → retry next tick */ }
+                    } catch (_) { _pollMs = Math.min(_pollMs * 2, POLL_MAX); /* error (offline / breaker-open / 402) → back off too */ }
                 }
                 _pollTimer = setTimeout(_viewTick, _pollMs);
             };
