@@ -236,7 +236,13 @@
         // Read at send-time (below), so new tools live in their OWN file and never touch this core again.
         window.SolitaTools = window.SolitaTools || { specs: [], handlers: {}, badges: {} };
 
+        let lastPhoto = null;   // last photo Solita captured (data URL) — kept for the (later) image analysis step
         const SOLITA_TOOLS = [
+            {
+                name: 'take_photo',
+                description: 'Nimm ein Foto mit der Gerätekamera auf, wenn Doc darum bittet — z.B. "mach ein Foto", "nimm ein Bild auf", "Foto bitte". Öffnet die Kamera (bzw. die Foto-Auswahl). Hinweis: die INHALTLICHE Bildanalyse ist noch nicht angebunden — das Foto wird aufgenommen und im Chat gezeigt; du kannst es noch nicht beschreiben.',
+                input_schema: { type: 'object', properties: {} }
+            },
             {
                 name: 'change_setting',
                 description: 'Ändere eine sichtbare Tracker-/UI-Einstellung (Farben, Größe, Position, z-Index, Sichtbarkeit) per natürlichsprachiger Anweisung, z.B. "mach die Uhr grün" oder "Banner nach unten". Die Änderung wird in HTML/config.json committet und greift live.',
@@ -277,6 +283,19 @@
         async function execTool(name, input, pwd) {
             const H = { 'Content-Type': 'application/json', 'apikey': SB_ANON, 'Authorization': 'Bearer ' + SB_ANON, 'x-app-pass': pwd };
             try {
+                if (name === 'take_photo') {
+                    if (!window.PhotoCapture) return { ok: false, summary: 'Foto-Modul nicht geladen.' };
+                    let img = null;
+                    try { img = await PhotoCapture.capture({ onError: function () { } }); } catch (e) { img = null; }
+                    if (!img) return { ok: false, summary: 'Kein Foto aufgenommen (abgebrochen).' };
+                    lastPhoto = img;   // stash for the (later) image-analysis step
+                    // Show the captured photo in the chat (same insert pattern as show_ui_list).
+                    messagesArea.insertAdjacentHTML('beforeend',
+                        '<div class="message user"><div class="message-content" style="padding:6px">' +
+                        '<img src="' + img + '" alt="Foto" style="max-width:240px;border-radius:8px;display:block"></div></div>');
+                    messagesArea.scrollTop = messagesArea.scrollHeight;
+                    return { ok: true, summary: 'Foto aufgenommen und im Chat angezeigt. Die inhaltliche Bildanalyse ist noch nicht angebunden — sag Doc, dass du das Foto hast, es aber noch nicht auswerten kannst.' };
+                }
                 if (name === 'change_setting') {
                     const r = await fetch(SOLITA_CONFIG_URL, { method: 'POST', headers: H, body: JSON.stringify({ instruction: String((input && input.instruction) || '') }) });
                     const d = await r.json().catch(() => ({}));
@@ -307,6 +326,7 @@
 
         // A short chat line shown while a tool runs.
         function toolBadge(name, input) {
+            if (name === 'take_photo') return '📷 ich mache ein Foto …';
             if (name === 'change_setting') return '🔧 ich ändere die Einstellung …';
             if (name === 'write_note') return '📝 ich notiere „' + ((input && input.note) || '') + '"';
             if (name === 'show_ui_list') return '';   // the table itself is the output → no badge
