@@ -510,6 +510,14 @@ path.pos-marker.pos-shown {
     transform: translateX(-50%) translateY(0);
 }
 
+/* When open, shift the whole cluster right by half its leftward extent so the fanned options
+   (2 or 3) appear CENTRED on screen instead of trailing off to the left. --n = visible-option
+   count (set in JS); each option slot is 56px, so the row's midpoint sits at -n*28px from the
+   trigger → push the container back by +n*28px to centre it. */
+#view-fan.open {
+    transform: translateX(calc(-50% + var(--n, 0) * 28px)) translateY(0);
+}
+
 /* Shared glass FAB look for the trigger + every fan option: white icon on dark glass, thin white
    border — deliberately no brand colour. The green .mode-on / .current states override below. */
 #recenter-fab,
