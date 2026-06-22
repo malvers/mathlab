@@ -25,11 +25,9 @@
 - **FEAT-12** Contact-AI Stufe 2 (Agent ändert Repo)
 - **FEAT-13** 🏗️ Navi-Blau + gefahrene Strecke speed-gefärbt · Prio 1
 - **FEAT-14** Tracking ↔ Navigation entkoppeln
-- **FEAT-15** ✅ „KI erkennt"-Indikator verschönert — 🤖 raus, λ-Spinner (gebaut 2026-06-13)
 - **FEAT-16** Live-Broadcast: Zuschauerzähler/Presence
 - **FEAT-17** Lane Guidance (Spuranweisungen)
 - **FEAT-18** Kleinkram (motion-dbg raus, Notif-Farbe, BG-Test)
-- **FEAT-19** ✅ SERVER-DOWN-Banner (gebaut)
 - **FEAT-20** OSM-Zoom-Buttons weg/schöner
 - **FEAT-21** Instrumente ausblenden → Track mehr Platz
 - **FEAT-22** ✅ Pl@ntNet < 10 % ausgeblendet (gebaut + deployed 2026-06-13)
@@ -69,7 +67,7 @@
 - **Tempo-Limit-Schild** (`HTML/js/tracker-speedlimit.js`): OSM `maxspeed`, rot bei Übertretung.
 - **Tempo-Warnton:** kleine Glocke bei >10 % über Limit.
 - **Idle-Auto-Hide**, **Kompass/Nordpfeil**, **Quellen-Status** (DWD/RainViewer) im Debug.
-- **Cross-Device-Sync ohne Login** (`sync-sketch.md`, ✅ umgesetzt): deterministisches geteiltes Konto →
+- **Cross-Device-Sync ohne Login** (`archive/sync-sketch.md`, ✅ umgesetzt): deterministisches geteiltes Konto →
   Tracks/Fotos auf mehreren Geräten. Referenz, nicht neu bauen.
 
 **🌿 Session 2026-06-11 (auf dem Branch, NICHT in main):**
@@ -78,7 +76,7 @@
   z-Order/Süd-Offset. → produktionsreif machen = **FEAT-10**.
 - **solita.html (ex-labai) Voice-Modus:** 🎤 Diktat (de-DE, freihändig senden) + 🔊 Antworten vorlesen (TTS).
   Am 2026-06-12 zu **Solita** ausgebaut: Wake-Word „Solita", Claude-`claude`-Edge-Function (Code da, Deploy
-  offen), Persona + Kontext-Zusammenfassung. Siehe `plan-contact-ai-im-tracker.md` / FEAT-11.
+  offen), Persona + Kontext-Zusammenfassung. Siehe `archive/plan-contact-ai-im-tracker.md` / FEAT-11.
 - **Navi-Banner reicher:** ETA + Straße/Ref + Schild-Ziele, Google-Navi-Grün, unter dem Header.
 - **Abbiegepfeile** von Unicode auf saubere **SVG-Pfeile** (`arrowSvg()` in `tracker-nav.js`).
 - **Tempolimit-Schild** robuster: nächste Straße, deutsche Zonen-Tags, „c" statt ∞ bei unbegrenzt,
@@ -93,7 +91,7 @@
 
 ## FEAT-1 — Brotkrumen zurück (offline) 📐 spezifiziert · **Prio 1, BAUEN**
 **Warum zuerst:** Doc-Prio 1 und **Sicherheits-Feature** („bring mich heim" im Funkloch).
-**Voll-Spezifikation (Pflichtlektüre, fertig ausgearbeitet):** [`plan-brotkrumen.md`](plan-brotkrumen.md)
+**Voll-Spezifikation (Pflichtlektüre, fertig ausgearbeitet):** [`archive/plan-brotkrumen.md`](archive/plan-brotkrumen.md)
 — enthält Algorithmus (cum[]-Distanz, gefensterter Segment-Snap, Off-Track-Recovery), UX, Touch-Points,
 Test-Matrix und Reihenfolge.
 
@@ -112,7 +110,7 @@ komplett **offline** (kein OSRM, keine Tiles, nur die vorhandenen `track`-Punkte
 ---
 
 ## FEAT-2 — Goldene Stunde & Sonnenstand 📐 spezifiziert · **Prio 1**
-**Quelle:** [`tracker-ideen.md`](tracker-ideen.md) Idee 13 (Doc: „bestimmt nicht so schwer").
+**Quelle:** [`archive/tracker-ideen.md`](archive/tracker-ideen.md) Idee 13 (Doc: „bestimmt nicht so schwer").
 **Auftrag:** Zeigt Sonnenstand + Uhrzeit der goldenen Stunde / des Sonnenuntergangs am aktuellen Standort
 (bestes Foto-Licht auf der Wanderung).
 **Wiederverwenden:** die **Sonnen-Mathe aus der World Clock** (`HTML/worldclock/`) — erst dort greppen,
@@ -123,7 +121,7 @@ Rückfrage** stellen, bevor gebaut wird.
 ---
 
 ## FEAT-3 — Parkplatz automatisch merken 📐 spezifiziert · Prio 1 (Vorschlag)
-**Quelle:** [`tracker-ideen.md`](tracker-ideen.md) Idee 11 (klein, delightful; verwandt mit FEAT-4).
+**Quelle:** [`archive/tracker-ideen.md`](archive/tracker-ideen.md) Idee 11 (klein, delightful; verwandt mit FEAT-4).
 **Auftrag:** Wechselt die **Activity-Erkennung** von „fahren" → „zu Fuß", setzt der Tracker automatisch
 einen Park-Pin. Auto später entspannt wiederfinden.
 **Wiederverwenden:** `effectiveActivity()` (Activity-Recognition ist schon da) + Pin-Layer.
@@ -132,7 +130,7 @@ einen Park-Pin. Auto später entspannt wiederfinden.
 ---
 
 ## FEAT-4 — Zurück zum Start / zum Auto 📐 spezifiziert · Prio 1 (Vorschlag)
-**Quelle:** [`tracker-ideen.md`](tracker-ideen.md) Idee 1.
+**Quelle:** [`archive/tracker-ideen.md`](archive/tracker-ideen.md) Idee 1.
 **Auftrag:** Ein Tipp routet **online** (OSRM, baut auf `tracker-nav.js`) zurück zum Startpunkt der
 Aufzeichnung oder zum gemerkten Park-Pin (FEAT-3).
 **Abgrenzung zu FEAT-1:** FEAT-1 folgt offline der eigenen Spur (Wandern/Funkloch); FEAT-4 routet online auf
@@ -141,7 +139,7 @@ Straßen (Auto/Stadt). Gleiche Präsentation (Banner/Pfeil/Voice).
 ---
 
 ## FEAT-5 — Regen-Vorwarnung unterwegs 📐 spezifiziert · Prio 1 (Vorschlag)
-**Quelle:** [`tracker-ideen.md`](tracker-ideen.md) Idee 10.
+**Quelle:** [`archive/tracker-ideen.md`](archive/tracker-ideen.md) Idee 10.
 **Auftrag:** Das vorhandene **Regenradar vorausschauend** nutzen: „In ~12 Min Regen an deinem Standort/auf
 deiner Route." Besonders für Motorradfahrer.
 **Abhängigkeit:** ⚠️ Hängt an **BUG-2** (Regenradar zeigt in DE oft nichts) — eine Vorwarnung auf leeren
@@ -151,19 +149,19 @@ Daten ist sinnlos. **BUG-2 zuerst.**
 ---
 
 ## FEAT-6 — Navigation Post-MVP 🏗️ teils gebaut
-**Quelle:** [`plan-navigation-einfach.md`](plan-navigation-einfach.md) (MVP + Re-Routing + Voice schon gebaut).
+**Quelle:** [`archive/plan-navigation-einfach.md`](archive/plan-navigation-einfach.md) (MVP + Re-Routing + Voice schon gebaut).
 **Noch offen (je ein eigener kleiner Auftrag):**
 - **Vollständige Abbiege-Liste** (statt nur nächstes Manöver).
 - **„passiert"-Erkennung:** Manöver weiterzählen, wenn man bei schneller Fahrt zwischen zwei Fixes daran
   vorbeikommt.
 - **Verkehr/Baustellen:** gratis machbar über **Autobahn-GmbH-API** (DE, kein Key) / DATEX II / Mobilithek;
   farbiger Echtzeit-Stau realistisch nur via TomTom/HERE-Freemium (Recherche in
-  [`../../fahrt-bad-homburg-2026-06-10.md`](../../fahrt-bad-homburg-2026-06-10.md)).
+  [`fahrt-bad-homburg-2026-06-10.md` → archiviert](../../archive.md)).
 
 ---
 
 ## FEAT-7 — Medien (Foto/Voice/Video) nach Cloudflare R2 🅿️ gebaut-aber-geparkt
-**Quelle:** [`plan-r2-media.md`](plan-r2-media.md). Memory `project_tracker_media_r2_migration_parked`.
+**Quelle:** [`plan-r2-media.md`](../../archive.md). Memory `project_tracker_media_r2_migration_parked`.
 **Stand:** Neuer R2-Upload-Code liegt schon im Baum. **Blocker:** 228 Alt-Fotos + 5 Voice (~42,7 MB) sind
 NICHT migriert — `sb_secret_` ist kein JWT für die gated `media-sign`-Funktion.
 **Auftrag (sobald Doc grünes Licht/Key-Lage klärt):** Migrationspfad für Alt-Medien lösen; **kein Secret ins
@@ -172,7 +170,7 @@ Repo** (Regel 18). Bis dahin: nur dokumentieren, nicht „aufräumen".
 ---
 
 ## FEAT-8 — Fotos aus der DB in Storage-Bucket auslagern 🅿️ geparkt (Alternative/Vorstufe zu FEAT-7)
-**Quelle:** [`plan-fotos-in-storage.md`](plan-fotos-in-storage.md). Memory `project_tracker_photos_storage_plan`.
+**Quelle:** [`plan-fotos-in-storage.md`](../../archive.md). Memory `project_tracker_photos_storage_plan`.
 **Stand:** Fotos liegen als base64 in der DB (~28 MB/169 ≈ 5,6 % von 500 MB). Plan: in Supabase-Storage-Bucket.
 Renderer/GPX bleiben unberührt (URL lädt wie base64). **Erst mit Doc klären, ob R2 (FEAT-7) das ablöst** —
 nicht beide parallel bauen.
@@ -188,7 +186,7 @@ Memory/`tracker-plan.md`).
 ---
 
 ## FEAT-10 — App live fernsteuern (Remote-Config) 🏗️ teils gebaut 🌿 · **Prio 1 (Idee 19)**
-**Voll-Spez (Pflichtlektüre, 🌿 Branch):** `plan-fernsteuerung-remote-config.md` — inkl. komplettem,
+**Voll-Spez (Pflichtlektüre, 🌿 Branch):** `archive/plan-fernsteuerung-remote-config.md` — inkl. komplettem,
 an echten DOM-Elementen geerdetem **Konfig-Schema** (`config.json` v7: theme/head/fabs/navBanner/speedSign/
 compass/route/controls/params).
 **Stand:** Demo läuft (s. o., `tracker-config.js` pollt `config.json` → CSS-Variablen, reload-frei).
@@ -199,7 +197,7 @@ ETag-Poll als Fallback). **Regel 18:** Config ist public → **keine Secrets**, 
 **Verallgemeinerbar** aufs ganze forloop-Projekt (zentrale Theme-Config).
 
 ## FEAT-11 — „Contact AI" im Tracker (Solita), Stufe 1: Chat/Foto 📐 spezifiziert 🌿 · **Future Now (Idee 20)**
-**Voll-Spez (Pflichtlektüre, 🌿 Branch):** `plan-contact-ai-im-tracker.md`. Name/Weckwort: `agent-name-solita.md`.
+**Voll-Spez (Pflichtlektüre, 🌿 Branch):** `archive/plan-contact-ai-im-tracker.md`. Name/Weckwort: `archive/agent-name-solita.md`.
 **Grundprinzip:** Die App ist **nur Fernbedienung** — KI läuft **server-seitig**. Kein SDK/Key/git im
 Browser oder in Capacitor.
 **Auftrag Stufe 1:** App → **Supabase Edge Function** → **Claude API** (Key server-seitig, Regel 18) →
@@ -209,7 +207,7 @@ Live-Gefühl. Modelle: `claude-opus-4-8` (1M Kontext), `claude-sonnet-4-6`, `cla
 **Caveat:** Opus = 1M Kontext (Modell), aber das Nutzungs-Kontingent ist plan-gedeckelt → vor Bau prüfen.
 
 ## FEAT-12 — „Contact AI" Stufe 2: Wunsch einsprechen → Agent ändert Repo + pusht 📐 spezifiziert 🌿 · **Future Now**
-**Voll-Spez:** `plan-contact-ai-im-tracker.md` (Stufe 2). Schließt den Kreis mit FEAT-10:
+**Voll-Spez:** `archive/plan-contact-ai-im-tracker.md` (Stufe 2). Schließt den Kreis mit FEAT-10:
 Sprach-Wunsch → Edge Function (hält Token) → Agent editiert `config.json` + push → Live-Config zieht's →
 Änderung erscheint live. **Zwei Heimstätten** für den Agenten: (1) **Claude Code Routines**
 (Anthropic-gehostet, kein eigener Server; App POSTet, Token in Edge Function) oder (2) **Claude Agent SDK
@@ -220,7 +218,7 @@ Agent-Scope/Rechte eng. Status (Routines) = experimentell/Beta → vor Bau verif
 `["krass","solita","[unk]"]`, bei Bedarf openWakeWord/Picovoice auf Docs Stimme.
 
 ## FEAT-13 — Navi-Route: Google-Blau + gefahrene Strecke speed-gefärbt 🏗️ teils gebaut 🌿 · **Prio 1 (Idee 17)**
-**Quelle:** `tracker-ideen.md` Idee 17. Code: `COL_ROUTE`/`drawRoute()` in `HTML/js/tracker-nav.js`.
+**Quelle:** `archive/tracker-ideen.md` Idee 17. Code: `COL_ROUTE`/`drawRoute()` in `HTML/js/tracker-nav.js`.
 - **(a)** Linie exakt **#4285F4** + helleres/dünneres Casing (der gefühlte Unterschied kommt vom dunklen
   Navy-Casing, nicht vom Blau). Doc schickt Screenshot zum Feinabgleich.
 - **(b) WICHTIG:** **blaue Linie nur VORAUS** (ab aktueller Position); der **gefahrene** Teil zeigt die
@@ -229,7 +227,7 @@ Agent-Scope/Rechte eng. Status (Routines) = experimentell/Beta → vor Bau verif
 - **(c) ✅ erledigt 2026-06-11:** Punkt/Dreieck liegen über der Linie (Ebene `nav-route`, z 350).
 
 ## FEAT-14 — Tracking & Navigation entkoppeln 📐 spezifiziert 🌿
-**Voll-Spez (Pflichtlektüre, 🌿 Branch):** `plan-tracking-vs-navigation.md`.
+**Voll-Spez (Pflichtlektüre, 🌿 Branch):** `archive/plan-tracking-vs-navigation.md`.
 **Szenario:** „Track nach Dresden, navigiere hin — Plan ändert sich → **Navigation beenden**, **Track
 weiterlaufen** lassen (weiter nach Frankfurt)." Heute reißt STOP die Navi immer mit; „Navigation beenden"
 ist als „Ziel löschen" versteckt; Navi wird nur aus `onPosition()` (= nur bei Aufzeichnung) gefüttert.
@@ -238,51 +236,24 @@ entkoppeln, Hinweis „Navi aktiv") → **Ausbau zu A** (persistenter Navi-Chip 
 **Re-Target** mitten im Track, Navi **ohne** laufende Aufzeichnung). Code: `beginTracking`/
 `finishTracking`/`__nav.*` in `tracker.js`.
 
-## FEAT-15 — „KI erkennt"-Indikator verschönern (🤖 raus) ✅ GEBAUT 2026-06-13 (Commit `1762b4f`)
-**Voll-Spez (🌿 Branch):** `polish-ki-erkennt-indikator.md`. Doc mag den 🤖-Roboter nicht.
-**Ort:** `HTML/js/tracker-media.js:295` (`🤖 KI erkennt …`), CSS `.pd-wait` (`tracker.css:132`); Pin-Text
-`PENDING_TITLE='Wird erkannt …'` in `photo-layer.js`.
-**Auftrag:** Emoji raus, `.pd-wait` als ruhiger λ-Orange-Spinner, Wording einheitlich **„KI analysiert …"**.
-Drei Varianten (Spinner / ✨-Sparkle / „KI"-Badge) — **Doc wählt 1/2/3, dann bauen.** Keine Logik-Änderung.
-**✅ Umgesetzt (Variante 1, Commit `1762b4f`):** 🤖 raus; `.pd-wait` bekommt einen ruhigen λ-Orange-CSS-Spinner
-(`.pd-spin` + `@keyframes pd-spin` + `prefers-reduced-motion`-Abschaltung), Wording „KI analysiert …". Der
-Spinner ist ein **eigenes Kind-Element** → die Fehlermeldung (gleiche `.pd-wait`-Klasse) dreht NICHT mit.
-**Bewusst NICHT angefasst:** der Pin-Sentinel `PENDING_TITLE` (treibt 7 `=== PENDING_TITLE`-Vergleiche in 2
-Dateien — Umbenennen bräche die Pending-Erkennung). Rein clientseitig, **kein Deploy**. Varianten 2 (✨) /
-3 („KI"-Badge) bleiben je ein Einzeiler.
-
 ## FEAT-16 — Live-Broadcast: Presence/Rückkanal 📐 Idee
 Aus BUG-5: Zuschauer-Zähler („3 sehen dich") + Empfangs-Bestätigung („zuletzt empfangen vor 2 s").
 Macht Sende-Diagnose trivial (0 verbunden = Name/Link; verbunden, kein Empfang = Sendeproblem).
 Erst **BUG-5** klären, dann als Feature.
 
 ## FEAT-17 — Lane Guidance (Spuranweisungen) 📐 · Prio 2 (Idee 18)
-**Quelle:** `tracker-ideen.md` Idee 18. OSRM liefert `step.intersections[].lanes` (`indications` +
+**Quelle:** `archive/tracker-ideen.md` Idee 18. OSRM liefert `step.intersections[].lanes` (`indications` +
 `valid`). Kleines Spur-Diagramm unter dem Abbiege-Banner. Nur wo OSM `turn:lanes` getaggt ist
 (Autobahn-Ausfahrten meist ja). SVG-Pfeil-Set existiert bereits (FEAT-13c).
 
 ---
 
 ## FEAT-18 — Kleinere offene Punkte (aus `tracker-plan.md`)
-Klein, einzeln greifbar; Voll-Kontext im Backlog [`tracker-plan.md`](tracker-plan.md):
+Klein, einzeln greifbar; Voll-Kontext im Backlog [`tracker-plan.md`](../../archive.md):
 - **`#motion-dbg`-Readout entfernen** (unten links) — bewusst drin gelassen, **raus auf Zuruf** (Memory
   `feedback_keep_debug`: nicht eigenmächtig strippen).
 - **Tracking-Notification farbig** (Akzentfarbe/Icon im Benachrichtigungs-Panel) — nativer Eingriff, offen.
 - **Native Background-Test:** START → Screen sperren → laufen → prüfen, dass weiter aufgezeichnet wird.
-
-## FEAT-19 — „SERVER DOWN / OFFLINE"-Banner ✅ GEBAUT 2026-06-12 (Commit 578c12a)
-**Warum:** Der SW (`tracker/sw.js`) ist **network-first mit Offline-Fallback** — ist der Server weg
-(Dev: vergessen zu starten · Feld: Funkloch), liefert er **still die letzte gecachte Kopie**. Man sah
-dann eine **alte Seite statt eines Fehlers** (die „BUILD 09.06 trotz 12.06"-Verwirrung, bot Doc 2×).
-**Umgesetzt (Probe statt postMessage — race-frei):**
-- `tracker.html`: eine ehrliche **Frische-Probe** (`fetch('…?_fresh='+ts, {method:'HEAD', cache:'no-store'})`)
-  bei `load` + alle 30 s. Schlägt sie fehl → rotes Fix-Banner `#offline-banner`
-  „⚠ SERVER DOWN / OFFLINE — gecachte Version (BUILD …)". `file://` wird übersprungen (immer frisch).
-- `sw.js`: `?_fresh=`-Requests **bypassen den SW** (gehen direkt ans Netz), sonst würde der Cache den toten
-  Server maskieren und das Banner nie feuern.
-- Orbitron, Υ-Rot, kein Schwarz (Hausregeln). Banner inline-gestylt (kein tracker.css-Eingriff).
-**Hinweis:** greift erst, wenn der **neue SW aktiv** ist (Update-Banner akzeptieren / kalter Neustart) —
-der alte SW maskiert `?_fresh=` noch. Danach dauerhaft. Nützt Dev (Server vergessen) **und** Feld (Funkloch).
 
 ---
 
@@ -336,7 +307,7 @@ Knüpft an die alte `tracker-plan.md`-Idee „POSITION oben zentriert, Genauigke
 ## FEAT-24 — Points of Interest (POI) 📐 · 🔴 PRIO 0
 **Quelle:** [`../../ideen-wunsche.md`](../../ideen-wunsche.md) (Doc 2026-06-14): „Wir brauchen Points of Interest."
 **Wunsch:** POIs am Weg / auf der Karte (Sehenswürdigkeiten, Tankstellen, Aussichtspunkte …).
-**Überschneidung (erst prüfen, nicht doppelt bauen):** WegCast Audio-POI [`drivecast-audio-poi-am-weg.md`](drivecast-audio-poi-am-weg.md),
+**Überschneidung (erst prüfen, nicht doppelt bauen):** WegCast Audio-POI [`archive/drivecast-audio-poi-am-weg.md`](archive/drivecast-audio-poi-am-weg.md),
 Foto-Spur-Erkennung, **FEAT-26** (Tankstellen sind schon POIs).
 **Daten gratis (Regel 18):** Overpass/OSM (`tourism`/`historic`/`natural`), Wikipedia-Geosearch — kein Key.
 **Erst klären (eine Rückfrage):** welche Kategorien + Darstellung (Karten-Pins vs. Liste vs. Audio am Weg)?
@@ -385,6 +356,52 @@ standardmäßig an) + Edge Function `supabase/functions/fuel-prices/index.ts`. D
 4. **FEAT-5 Regen-Vorwarnung** (erst nach BUG-2).
 5. **FEAT-10 Remote-Config ausbauen** · **FEAT-11/12 Contact-AI/Solita** (Future Now, größer).
 6. Rest nach Doc-Prio.
+
+## FEAT-27 — E2E Phase 0: `tracks`-RLS auf `owner` härten 📐 spezifiziert · **unabhängig, sofort (80/20)**
+**Quelle:** retired `e2e-verschluesselung-plan.md` (Stand 2026-06-09), Phase 0 + Aufwand-Schritt 0. Volltext → [`archive/e2e-verschluesselung-plan.md`](archive/e2e-verschluesselung-plan.md).
+**Warum zuerst:** Billig, **unabhängig** vom restlichen E2E. Heute steht der publishable/anon-Key im public Repo → wer ihn nimmt, kann je nach RLS **alle** Tracks ziehen. RLS-Scope stoppt Zufalls-/Repo-Leser (deckt „nur ich seh die Tracks" zu ~90 % ab). Schützt **nicht** vor DB-/Supabase-Zugriff (das ist erst echtes E2E, FEAT-29ff).
+**Auftrag:** `tracks`-RLS pro Sync-Code/Owner scopen. **Owner-Spalte** `owner` = `PBKDF2(syncCode,'tracker-owner-salt-v1')` → hex, **clear** (gibt nichts preis, erlaubt „meine Tracks listen" + RLS-Scope ohne Entschlüsseln). Kein Sync-Code (rein lokal) → Cloud-Sync ohnehin aus.
+**Erst messen (Regel „nie raten"):** `pg_policies`-Abfrage laufen lassen, **dann** gezielt scopen (knüpft an Memory `project_tracker_e2e_plan` „offen: pg_policies-Check").
+**Caveat (mission-critical, Supabase/R2-Regel):** Policy-Änderung an Live-DB — Backup/Anschauen vor Mutation, reversibel halten, an 1 Track testen+verifizieren. **Nur nach Docs „go" (Regel 2/4).**
+
+## FEAT-28 — E2E Phase 1: geteiltes `HTML/js/crypto-box.js` (aus `vgp-crypto.js`) 📐 spezifiziert · Enabler
+**Quelle:** retired `e2e-verschluesselung-plan.md` („VGP-Modell" + „Wiederverwendung" + Aufwand-Schritt 1). **Aufwand: mittel.** Volltext → [`archive/e2e-verschluesselung-plan.md`](archive/e2e-verschluesselung-plan.md).
+**Audit-Ziel (keine Doppel-Implementierung, Memory `feedback_single_source_of_truth`):** `vgp-crypto.js`-Primitive in ein **geteiltes `HTML/js/crypto-box.js`** ziehen → VGP **und** Tracker teilen eine Krypto-Schicht. Web-Crypto-API, **kein Lib, kein Key am Server** (Regel 18).
+**Zu übernehmende Bausteine (`HTML/vgp/js/vgp-crypto.js`):** Schlüssel = Passwort → `PBKDF2` (200 000 Runden, SHA-256, fester Salt) → **AES-GCM-256**, nie am Server · öffentliche Gruppen-ID = `PBKDF2(passwort, group-salt)` → hex, liegt **clear** (Server gruppiert ohne Entschlüsseln) · Text: `encryptText()` → `iv(12)++ct`, base64, Prefix **`ENC:`**; `decryptText()` lässt Nicht-`ENC:` als Klartext durch (Migration nebenbei) · Bilder/Binär: `encryptBytes()/decryptBytes()` → `iv(12)++ct` als `Uint8Array`.
+**Tracker-Key (kein neues Passwort):** `trackKey = PBKDF2(syncCode,'tracker-key-salt-v1')` → AES-GCM-256 (nur im Speicher, nie hochgeladen). **Voraussetzung für FEAT-29/30/31/32.** **Nur nach Docs „go" (Regel 2/4).**
+
+## FEAT-29 — E2E Phase 2: Tracks verschlüsseln (Kern) 📐 spezifiziert · Aufwand: mittel
+**Quelle:** retired `e2e-verschluesselung-plan.md` (Tabelle „Was wird Ciphertext" + Datenfluss + Aufwand-Schritt 2). **Setzt FEAT-28 voraus.** Volltext → [`archive/e2e-verschluesselung-plan.md`](archive/e2e-verschluesselung-plan.md).
+**Auftrag:** `points` (Route) · `waypoints` (GPS+Titel+Text) · `name` (als `ENC:`) vor `insert/update` durch `encryptText`/`encryptBytes` (Foto → FEAT-30). `owner` (hex) bleibt **clear** (RLS-Scope); `created_at`/`status`/`id`/`share_id` bleiben **clear** (Metadaten, fürs Funktionieren nötig).
+**Datenfluss:** Speichern → vor `insert/update` verschlüsseln, `owner` clear mitschreiben. Laden → nach `select` `decryptText`/`decryptBytes` mit `trackKey`; Alt-Klartext-Zeilen laufen dank `ENC:`-Durchlass weiter.
+**⚠️ Trade-off (load-bearing):** die server-seitige **`list_tracks()`-RPC (km/Dauer) entfällt** — Punkte sind Ciphertext → km/Dauer/Foto-Anzahl **client-seitig** aus den entschlüsselten Punkten rechnen (hatten wir gerade erst eingebaut).
+**Abwägen + Rückfrage:** `distance_m`/`duration_s`/`photo_count` mitverschlüsseln **oder** als grobe Klartext-Metadaten für die Liste lassen? **Eine offene Frage an Doc** (Regel 20).
+**Verlust-Caveat (ehrlich):** Sync-Code verloren → **Tracks sind weg** (kein Server-Recovery, der Preis von echtem E2E). **Nur nach Docs „go" (Regel 2/4).**
+
+## FEAT-30 — E2E Phase 3: Fotos verschlüsseln 📐 spezifiziert · Aufwand: mittel
+**Quelle:** retired `e2e-verschluesselung-plan.md` (Foto-Zeile + Datenfluss „Foto-KI" + Aufwand-Schritt 3). **Setzt FEAT-28/29 voraus.** Volltext → [`archive/e2e-verschluesselung-plan.md`](archive/e2e-verschluesselung-plan.md).
+**Auftrag:** Foto-Bild via `encryptBytes` → `iv(12)++ct`. Ablage **inline base64** **oder** **privater Storage-Bucket** (wie VGPs „media"). **Mit FEAT-7 (R2) / FEAT-8 (Storage-Bucket) gemeinsam denken** — nicht doppelt bauen; der private Bucket ist genau das Storage-Auslagern, nur verschlüsselt.
+**Foto-KI bleibt unberührt:** `identify` bekommt das Foto **bei der Aufnahme im Klartext** (geht eh an Google/Pl@ntNet) — **bevor** verschlüsselt gespeichert wird; es speichert nichts → nur die **gespeicherte** Kopie ist E2E.
+**⚠️ Konsequenz für „BILDER ANALYSIEREN" (Re-Identify aus der Cloud):** muss die Fotos **erst client-seitig entschlüsseln**, sonst bekommt `identify` nur Ciphertext → Re-Identify-Pfad in `tracker-media.js` anpassen. **Nur nach Docs „go" (Regel 2/4).**
+
+## FEAT-31 — E2E Phase 4: Sharing verschlüsseln (Key im URL-Fragment) 📐 spezifiziert · Aufwand: klein-mittel
+**Quelle:** retired `e2e-verschluesselung-plan.md` („Sharing view.html ?s=token" + RLS + Aufwand-Schritt 4). **Setzt FEAT-28/29 voraus.** Volltext → [`archive/e2e-verschluesselung-plan.md`](archive/e2e-verschluesselung-plan.md).
+**Problem:** Der Empfänger hat den Sync-Code **nicht** → saubere Trennung nötig.
+**Auftrag:** Beim Teilen Track unter einem **frischen Zufalls-Share-Key** verschlüsseln, als Share-Zeile ablegen. Link `view.html?s=<token>#k=<share-key-b64>` — das **`#`-Fragment geht NIE an den Server** (Browser sendet es nicht). Viewer holt die Zeile per Token (Ciphertext) und entschlüsselt mit dem Fragment-Key.
+**RLS (defense-in-depth):** Share-Zeilen per Token les-, aber nur als Ciphertext + Fragment-Key entschlüsselbar.
+**⚠️ Trade-off:** Wer den Link hat, kann lesen (gewollt) → der **Link ist das Geheimnis** (nicht über unsichere Kanäle teilen). Baut auf bestehendem Track-Sharing (`view.html`, Memory `project_tracker_share`). **Nur nach Docs „go" (Regel 2/4).**
+
+## FEAT-32 — E2E Phase 5: Live-Broadcast verschlüsseln (Channel-Key im Fragment) 📐 spezifiziert · Aufwand: klein-mittel
+**Quelle:** retired `e2e-verschluesselung-plan.md` („Live-Broadcast" + Aufwand-Schritt 5). **Setzt FEAT-28 voraus.** Volltext → [`archive/e2e-verschluesselung-plan.md`](archive/e2e-verschluesselung-plan.md).
+**Kontext:** Live-Positionen/Fotos gehen über Supabase-Realtime-Broadcast (Channel = Live-Name).
+**Auftrag:** Channel-Key = `PBKDF2(liveSecret, …)`; Payloads vor `channel.send` mit `encryptText/encryptBytes` verschlüsseln. Live-Link trägt das `liveSecret` im **Fragment**: `view.html?live=<name>#k=<secret>` — Viewer entschlüsselt damit (Fragment geht nie an den Server).
+**⚠️ Trade-off:** Link = Geheimnis (s. FEAT-31).
+**Abhängigkeit:** Erst **BUG-5** (Live-Broadcast geht gerade nicht) klären — E2E auf einem kaputten Broadcast bringt nichts. **Nur nach Docs „go" (Regel 2/4).**
+
+## FEAT-33 — E2E Migration: Alt-Klartext → Ciphertext 📐 spezifiziert · Teil von FEAT-29
+**Quelle:** retired `e2e-verschluesselung-plan.md` (Abschnitt „Migration"). Querschnitt zu FEAT-28/29/30. Volltext → [`archive/e2e-verschluesselung-plan.md`](archive/e2e-verschluesselung-plan.md).
+**Strategie (migrations-freundlich, à la VGP):** pro Zeile VGPs **`ENC:`-Prefix** als Marker; `decryptText` lässt **Alt-Klartext durch** → kein Big-Bang, Alt-Zeilen laufen weiter. Alt-Tracks werden beim **nächsten Speichern** automatisch zu Ciphertext; reiner Altbestand bleibt lesbar bis dahin. **Optional:** einmaliges **Re-Encrypt aller eigenen Tracks** (Client iteriert: lädt → verschlüsselt → schreibt zurück).
+**Caveat (mission-critical):** Re-Encrypt-all mutiert Live-Daten → an 1 Track testen+verifizieren, reversibel/Backup (Supabase/R2-Regel). **Nur nach Docs „go" (Regel 2/4).**
 
 ## Querverweise
 - Bug-Liste: [`bugfixes.md`](bugfixes.md) · Ideen-Triage: [`ideen.md`](ideen.md)

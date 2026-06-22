@@ -26,7 +26,7 @@ Design: **standalone** Vollbild (wie `glocken`, KEIN Cyber-Grid). KISS — „Ö
 | `HTML/tracker/icon.svg` | Brand-Icon (dunkelblau, oranger GPS-Trail, grüner Start-, roter Positions-Punkt). |
 | `HTML/tracker/doc-alvers-tracker.apk` | Herunterladbare APK (Kopie aus dem Build; **committen**, nicht git-ignored). |
 | `HTML/tracker.html` (Root) | Nur **Redirect** → `tracker/tracker.html`. |
-| `HTML/tracker/tracker-plan.md` | Backlog / offene Punkte. |
+| `HTML/tracker/{bugfixes,feature-requests,ideen}.md` | **Die 3 gepflegten Queues** — Bugs / entschiedene Features / Ideen-Triage. Alles andere (Quell-Notizen) liegt archiviert unter `archive/`. |
 | `tracker-app/` | Capacitor-Projekt (native APK). **git-ignored**, lokales Build-Projekt. appId `de.docalvers.tracker`, `webDir: www`. |
 | `tracker-app/www/` | **Generiert** aus `tracker.html` — NIE von Hand editieren. |
 | `tracker-app/sync-web.sh` | Kopiert `HTML/tracker/tracker.html` → `www/index.html` und schreibt `../js`/`../resources` root-relativ um. |

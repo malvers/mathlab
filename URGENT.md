@@ -26,21 +26,8 @@ Betroffene Functions: `claude`, `deepseek`, `gemini`, `identify`, `gmail`,
 
 ---
 
-## 2. OFFEN: Solita Prompt-Caching-Fix wartet aufs Deploy
+## 2. Kosten-Kontext
 
-- **Was:** `supabase/functions/claude/index.ts` cacht jetzt auch die
-  **Gesprächs-Historie** (vorher nur System+Tools). Spart im Tool-Loop und über
-  mehrere Turns deutlich Anthropic-Kosten.
-- **Branch:** `claude/solita-cache-message-history`.
-- **MUSS deployed werden** (siehe §1), sonst greift der Fix nicht.
-- **Verifizieren:** In Solitas DEBUG-Fenster die Zeile
-  `€ chat: ↑… ↓… · Cache XX% (…r/…w) …` ansehen. Ab dem 2. Turn / bei Tool-Hops
-  sollte `Cache %` **> 0** sein (`…r` = cache reads). Bleibt es bei **0 %**, ist
-  der gecachte Prefix noch zu klein **oder** die rollende Summary ändert sich zu
-  oft → dann Persona (statisch) und Summary (volatil) in **zwei** System-Blöcke
-  trennen, damit die Persona gecacht bleibt.
-
-### Kosten-Kontext
 - Anthropic-Alert: ~6 €/Tag auf der Org. Treiber sind **(a)** Solita (Claude über
   die `claude`-Edge-Function, Default `claude-sonnet-4-6`) und **(b)** lange
   Claude-Code-Agent-Sessions (Opus 4.8, 1M-Kontext) — beide zählen auf dieselbe Org.
