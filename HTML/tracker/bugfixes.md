@@ -53,6 +53,17 @@
 **Workaround:** vor dem Schließen Logout (👂 aus → `stopNativeWake()`), oder Mikro-Recht „nur während Nutzung".
 **NICHT:** im JS/Web fixen wollen — zwingend `SolitaVoiceService.java` + APK-Rebuild.
 
+## BUG-13 — Solita „mach ein Foto" (take_photo) geht noch nicht 🐞 offen · 🔍 erst am Gerät messen
+**Gemeldet:** Doc 2026-06-22 (im **Solita-APK** getestet). Ziel: „Solita, mach ein Foto" → Kamera auf → Bild im Chat → (später) KI-Analyse. **Kein** Button-UI gewollt, rein per Zuruf (Tool).
+**Symptom:** „mach ein Foto" öffnet keine Kamera; Solita/Claude antwortet direkt. Anfangs waren auch **andere** neue Tools „weg".
+**Ursache 1 — Cache (GEFIXT, Commit `34e4802`):** `solita.html` lud die JS **ohne `?v=`** → die APK (live-load von `docalvers.de`, **kein** Service-Worker) servierte aus dem WebView-HTTP-Cache ein **altes `solita-core.js` ohne `take_photo`** → Claude hatte das Tool gar nicht. Fix: `window.__ASSET_V` aus `document.lastModified` + Loader-Array (wie `tracker.html`). **Greift erst, wenn die alte `solita.html` aus dem ~10-min-Geräte-Cache fällt** → warten ODER Android: App-Daten/Cache von „Solita" leeren.
+**Ursache 2 — Kamera aus async Tool-Call (OFFEN, noch nicht belegt):** `take_photo` ruft `PhotoCapture.capture()` **innerhalb des async Tool-Loops** auf (nach der Modell-Antwort). Verdacht: fehlender **User-Gesten-Kontext** und/oder **Kamera-Permission** im WebView → `NativeCam.getPhoto` öffnet nicht. APK hat `@capacitor/camera` (`solita-app/package.json`) → nativer Pfad sollte greifen.
+**Fundstellen (neu greppen):** `HTML/js/solita-core.js` (`take_photo` in `SOLITA_TOOLS` + `execTool` + `toolBadge`, `lastPhoto`) · `HTML/js/photo-capture.js` (`capture`, `isNative` via Capacitor) · `HTML/solita/solita.html` (Loader) · `solita-app/capacitor.config.json` (`server.url` live-load).
+**Erst messen (DebugWindow, auf CLAUDE — DeepSeek hat KEINE Tools):** Wird `take_photo` überhaupt aufgerufen (Badge „📷")? Loggt `NativeCam.getPhoto` Start/Fehler? Permission-Prompt? → entscheidet Gesten- vs. Permission- vs. Plugin-Problem.
+**Fix-Richtung (falls Gesten/async):** Kamera **innerhalb des User-Send-Taps** öffnen — Keyword-Pre-Intercept im Send-Handler (Foto-Absicht erkennen → `PhotoCapture.capture()` sofort, dann Bild dem Modell anhängen) statt erst im Tool nach dem Round-Trip.
+**Akzeptanz:** „mach ein Foto" (Claude) → native Kamera auf → Bild im Chat (`lastPhoto` gesetzt). **Inhaltliche Bildanalyse = separates Feature** (generischer `gemini`-Proxy, multimodal).
+**NICHT:** auf **DeepSeek** testen (Tools feuern dort nie) · nicht in **Solita-im-Tracker** suchen (anderer Code `tracker-solita.js`, Tool dort nicht eingebaut).
+
 ---
 
 ## Querverweise
