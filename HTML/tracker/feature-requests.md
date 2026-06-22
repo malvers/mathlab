@@ -6,11 +6,6 @@
 > **Dupliziert nichts** — verlinkt die Plan-Notizen und destilliert den Auftrag.
 
 ## ⚡ Kurz-Übersicht
-- 🔴 **PRIO 0 — Doc 2026-06-14** (aus `ideen-wunsche.md` (konsolidiert), vor allem anderen):
-  - **FEAT-24** Points of Interest (POI)
-  - **FEAT-25** Karten-PIN setzen + dorthin navigieren
-  - **FEAT-26** Tankstellen/Tankpreise — **nur Server-Aktivierung** (Code ist da)
-  - **FEAT-22-Korrektur** Pl@ntNet-Schwelle 10 % → **20 %**
 - **FEAT-1** Brotkrumen zurück (offline) · Prio 1
 - **FEAT-2** Goldene Stunde & Sonnenstand · Prio 1
 - **FEAT-3** Parkplatz automatisch merken
