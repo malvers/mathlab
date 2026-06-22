@@ -305,21 +305,8 @@
             $('list').innerHTML = '';
             try {
                 const paths = await fetchTree();
-                const groups = {};
-                paths.forEach((p) => { (groups[groupOf(p)] = groups[groupOf(p)] || []).push(p); });
-                GROUP_ORDER.forEach((g) => {
-                    if (!groups[g]) return;
-                    // Top-level group is itself collapsible — starts CLOSED so the (long) list folds away.
-                    const grp = el('div', 'grp');
-                    const title = el('div', 'grp-title');
-                    title.innerHTML = '<span class="grp-chev">▶</span>';
-                    title.appendChild(document.createTextNode(g + '  (' + groups[g].length + ')'));
-                    title.addEventListener('click', () => grp.classList.toggle('open'));
-                    const gbody = el('div', 'grp-body');
-                    groups[g].forEach((p) => gbody.appendChild(rowEl(p)));
-                    grp.appendChild(title); grp.appendChild(gbody);
-                    $('list').appendChild(grp);
-                });
+                // Flach: nur die 3 Queues → keine Gruppen-Header, die Datei-Zeilen direkt (Doc 2026-06-22).
+                paths.forEach((p) => $('list').appendChild(rowEl(p)));
                 $('count').textContent = paths.length + ' Dateien';
                 $('status').textContent = '';
             } catch (e) { $('status').innerHTML = '<span class="err">' + e.message + '</span>'; }
