@@ -41,7 +41,7 @@
         const onError     = cfg.onError     || function () { };   // (err) → show the failure
         const onDone      = cfg.onDone      || function () { };   // () → re-enable input etc. (always runs)
         const onPersist   = cfg.onPersist   || function () { };   // () → history changed; host may sync it (solita-sync.js)
-        const onCost      = cfg.onCost      || function () { };   // (eurThisQuery) → host may show the per-query cost
+        const onCost      = cfg.onCost      || function () { };   // (eurThisQuery, eurTotalAllTime) → host shows per-query + running total
 
         // ---- state (in-memory; persisted to localStorage under the host's keys) ----
         let conversationHistory = [];
@@ -74,6 +74,7 @@
         const DAY_COST_PREFIX = STORE.dayCost || 'solita_cost_day_';
         function dayCostKey() { return DAY_COST_PREFIX + new Date().toISOString().slice(0, 10); }
         function daySpentEur() { try { return parseFloat(localStorage.getItem(dayCostKey()) || '0') || 0; } catch (e) { return 0; } }
+        function totalSpentEur() { try { return parseFloat(localStorage.getItem(COST_KEY) || '0') || 0; } catch (e) { return 0; } } // running grand total (all-time)
         function priceFor(model) {
             const k = model && Object.keys(PRICES).find(function (p) { return model.indexOf(p) === 0; });
             return PRICES[k] || PRICES['claude-sonnet-4-6'];
@@ -201,7 +202,7 @@
             onPersist();        // host may push the updated log to the shared server (solita-sync.js)
             onTyping(false);
             onAssistant(finalText);
-            onCost(turnEur);    // show what this one query cost (sum of all hops)
+            onCost(turnEur, totalSpentEur());    // per-query cost (sum of all hops) + running all-time total
             onSpeak(finalText);
             maybeSummarize();   // fold older turns into the rolling summary (best-effort, background)
         }
