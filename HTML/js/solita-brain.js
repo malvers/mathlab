@@ -57,11 +57,14 @@
             try { localStorage.setItem(HISTORY_KEY, JSON.stringify(conversationHistory)); } catch (e) { }
         }
 
-        // Build the proxy payload: persona + rolling summary as a system turn, then the recent chat.
+        // Build the proxy payload. Persona (static) and the rolling summary (volatile) go as TWO SEPARATE
+        // system turns so the edge fn can cache the big persona on its OWN breakpoint (read ~0.1× every turn).
+        // Gluing them meant any summary change re-wrote the whole persona at 1.25× — the cache_creation churn
+        // Doc measured (2196w per turn). Split, a summary change re-reads only its own few hundred tokens.
         function buildRequestMessages() {
-            const sys = getSystem()
-                + (runningSummary ? "\n\nBisheriger Gesprächskontext (Zusammenfassung):\n" + runningSummary : "");
-            return [{ role: 'system', content: sys }].concat(conversationHistory);
+            const msgs = [{ role: 'system', content: getSystem() }];
+            if (runningSummary) msgs.push({ role: 'system', content: "Bisheriger Gesprächskontext (Zusammenfassung):\n" + runningSummary });
+            return msgs.concat(conversationHistory);
         }
 
         // --- Kosten-Zähler (Doc: ab sofort Transparenz). Preise $/1M Tokens; Cache-Read ~0,1×, Write 1,25×.
