@@ -294,7 +294,9 @@
             if (!r.ok) throw new Error('GitHub tree HTTP ' + r.status);
             const j = await r.json();
             if (!Array.isArray(j.tree)) throw new Error('Unerwartete Antwort.');
-            return j.tree.filter((t) => t.type === 'blob' && t.path.toLowerCase().endsWith('.md') && !excluded(t.path)).map((t) => t.path).sort((a, b) => a.localeCompare(b));
+            // NUR die 3 kanonischen Tracker-Queues — der einzige Ort, wo wir Bugs/Features/Ideen pflegen (Doc 2026-06-22).
+            const ONLY = ['HTML/tracker/bugfixes.md', 'HTML/tracker/feature-requests.md', 'HTML/tracker/ideen.md'];
+            return j.tree.filter((t) => t.type === 'blob' && ONLY.includes(t.path)).map((t) => t.path).sort((a, b) => a.localeCompare(b));
         }
 
         async function load() {
