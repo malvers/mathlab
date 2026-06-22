@@ -6,7 +6,7 @@
 > **Dupliziert nichts** — verlinkt die Plan-Notizen und destilliert den Auftrag.
 
 ## ⚡ Kurz-Übersicht
-- 🔴 **PRIO 0 — Doc 2026-06-14** (aus [`../../ideen-wunsche.md`](../../ideen-wunsche.md), vor allem anderen):
+- 🔴 **PRIO 0 — Doc 2026-06-14** (aus `ideen-wunsche.md` (konsolidiert), vor allem anderen):
   - **FEAT-24** Points of Interest (POI)
   - **FEAT-25** Karten-PIN setzen + dorthin navigieren
   - **FEAT-26** Tankstellen/Tankpreise — **nur Server-Aktivierung** (Code ist da)
@@ -275,7 +275,7 @@ Default-Control, von uns gesetzt): `tracker.js:18` `zoomControl:false`, dann **`
 (volle Höhe). Hängt mit Idle-Auto-Hide + der WIP „d/k/w-Tasten-Toggle" zusammen.
 
 ## FEAT-22 — Pl@ntNet-Konfidenz-Schwelle ✅ GEBAUT + DEPLOYED 2026-06-13 (Commit `1762b4f`)
-> 🔴 **PRIO-0-Korrektur (Doc 2026-06-14, [`../../ideen-wunsche.md`](../../ideen-wunsche.md)):** Schwelle **10 % → 20 %** —
+> 🔴 **PRIO-0-Korrektur (Doc 2026-06-14, `ideen-wunsche.md` (konsolidiert)):** Schwelle **10 % → 20 %** —
 > alles unter **20 %** komplett ausblenden.
 > ✅ **Code geändert 2026-06-14:** `PLANTNET_SHOW_MIN = 0.20` in `supabase/functions/identify/index.ts:21`
 > (≥30 % Headline · 20–30 % Zweitmeinung · <20 % ganz weg). **Offen: Deploy durch Doc** →
@@ -305,7 +305,7 @@ Knüpft an die alte `tracker-plan.md`-Idee „POSITION oben zentriert, Genauigke
 ---
 
 ## FEAT-24 — Points of Interest (POI) 📐 · 🔴 PRIO 0
-**Quelle:** [`../../ideen-wunsche.md`](../../ideen-wunsche.md) (Doc 2026-06-14): „Wir brauchen Points of Interest."
+**Quelle:** `ideen-wunsche.md` (konsolidiert) (Doc 2026-06-14): „Wir brauchen Points of Interest."
 **Wunsch:** POIs am Weg / auf der Karte (Sehenswürdigkeiten, Tankstellen, Aussichtspunkte …).
 **Überschneidung (erst prüfen, nicht doppelt bauen):** WegCast Audio-POI [`archive/drivecast-audio-poi-am-weg.md`](archive/drivecast-audio-poi-am-weg.md),
 Foto-Spur-Erkennung, **FEAT-26** (Tankstellen sind schon POIs).
@@ -314,7 +314,7 @@ Foto-Spur-Erkennung, **FEAT-26** (Tankstellen sind schon POIs).
 Dann spezifizieren. **Nur Notiz, nicht bauen ohne „go" (Regel 2/4).**
 
 ## FEAT-25 — Karten-PIN setzen + dorthin navigieren 📐 · 🔴 PRIO 0
-**Quelle:** [`../../ideen-wunsche.md`](../../ideen-wunsche.md) (Doc 2026-06-14): „Einen PIN auf der Karte setzen,
+**Quelle:** `ideen-wunsche.md` (konsolidiert) (Doc 2026-06-14): „Einen PIN auf der Karte setzen,
 wo man ggf. wieder hin navigieren kann."
 **Auftrag:** Long-Press/Tap auf die Karte → PIN; Tipp auf den PIN → **Navigation dorthin** (baut auf
 `HTML/js/tracker-nav.js`, OSRM).
@@ -323,7 +323,7 @@ gemeinsam denken, nicht dreimal bauen.
 **Wiederverwenden:** `tracker-nav.js` (Route/Banner/Voice), vorhandener Pin-Layer. **Nur Notiz (Regel 2/4).**
 
 ## FEAT-26 — Tankstellen / Tankpreise (Tankerkönig) 🅿️ gebaut-aber-inaktiv · 🔴 PRIO 0
-**Quelle:** [`../../ideen-wunsche.md`](../../ideen-wunsche.md) (Doc 2026-06-14): „Wie funktioniert das, ist das
+**Quelle:** `ideen-wunsche.md` (konsolidiert) (Doc 2026-06-14): „Wie funktioniert das, ist das
 eingebaut, was muss ich tun?"
 **Stand (verifiziert):** Code ist **vollständig da** — Client `HTML/js/tracker-fuel.js` (`window.TrackerFuel`,
 standardmäßig an) + Edge Function `supabase/functions/fuel-prices/index.ts`. Die Function ist auf das Secret
