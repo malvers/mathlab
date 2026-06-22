@@ -37,7 +37,7 @@ function json(obj: unknown, status = 200): Response {
 
 // Fixed sign-off appended to EVERY outgoing mail, so Solita's mails are always clearly from us.
 // Enforced server-side — the model cannot skip, shorten or alter it.
-const SIGNATURE = '\n\nLieben Gruß\nSolita\n\n---\nDr. Solita J. Neural\nExecutive Assistant Doc Alvers\ndocalvers.de';
+const SIGNATURE = '\n\nLieben Gruß\nSolita\n\n---\nDr. Solita J. Neural\nExecutive Assistant to Doc Alvers\ndocalvers.de';
 
 // UTF-8-safe base64url (for the raw RFC-822 message).
 function b64url(s: string): string {

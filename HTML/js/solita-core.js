@@ -82,6 +82,8 @@
         // .show-copy class has no CSS effect (hover governs there), so this is harmless.
         messagesArea.addEventListener('click', (e) => {
             if (e.target.closest('.copy-btn')) return;                 // let the copy button do its job
+            // A click anywhere in the chat stops EVERYTHING — speaking AND a running answer (typing/thinking).
+            if (window.solitaStopAll) window.solitaStopAll();
             const mc = e.target.closest('.message-content');
             messagesArea.querySelectorAll('.message-content.show-copy').forEach(el => { if (el !== mc) el.classList.remove('show-copy'); });
             if (mc) mc.classList.toggle('show-copy');
@@ -522,6 +524,20 @@
             }
         });
 
+        // "Stop EVERYTHING now" (Doc 2026-06-22): cancel a running Claude turn (brain.abort → drops the
+        // typing/thinking turn quietly, no red bubble), silence any speech, clear the typing indicator and
+        // the phase pill. Wired to the pill tap and a chat click. The ear stays on → she keeps listening.
+        window.solitaStopAll = function () {
+            // Only act when she's actually busy (speaking OR thinking) — otherwise an idle chat click would
+            // needlessly clear the „listening" pill. typingIndicator is present for the whole thinking phase.
+            const busy = window.__solitaSpeaking || !!document.getElementById('typingIndicator');
+            if (!busy) return;
+            try { brain.abort(); } catch (e) { }
+            if (window.solitaStopSpeaking) window.solitaStopSpeaking();
+            hideTyping();
+            if (window.solitaPhase) solitaPhase();   // clear the pill (incl. the thinking-star timer)
+        };
+
         // Restore persisted history into the brain, then render the bubbles (host owns the DOM).
         const _restored = brain.load();
         if (_restored) { messagesArea.innerHTML = ''; _restored.forEach(function (msg) { addMessage(msg.role, msg.content); }); }
@@ -709,10 +725,11 @@
         function normalizeVoiceCommand(userText) {
             // Voice: spoken "slash ui" / "slash list" arrives as WORDS (not "/ui") → map to the typed command
             // so it triggers instead of going to Claude (which would just "think"). Only known commands convert.
-            const _sm = userText.toLowerCase().match(/^(?:slash|splash|flash)\s+(.+?)[\s.!?]*$/);
+            // German STT often mishears the English word "slash" → "gleich"/"klatsch"/"schlag" etc.; accept those too.
+            const _sm = userText.toLowerCase().match(/^(?:slash|splash|flash|gleich|klatsch|glatsch|schlag)\s+(.+?)[\s.!?]*$/);
             if (_sm) {
                 const _w = _sm[1].replace(/[.\s]/g, '');   // "u i" / "u.i." → "ui"
-                const _M = { ui: 'ui', youeye: 'ui', youi: 'ui', list: 'list', liste: 'list', clear: 'clear', logout: 'logout', ausloggen: 'logout', abmelden: 'logout', wake: 'wake', aufwachen: 'wake', aufwecken: 'wake', wach: 'wake', de: 'de', deutsch: 'de', en: 'en', english: 'en', es: 'es', spanish: 'es', 'español': 'es', espanol: 'es' };
+                const _M = { ui: 'ui', youeye: 'ui', youi: 'ui', list: 'list', liste: 'list', clear: 'clear', logout: 'logout', ausloggen: 'logout', abmelden: 'logout', wake: 'wake', aufwachen: 'wake', aufwecken: 'wake', wach: 'wake', de: 'de', deutsch: 'de', german: 'de', aleman: 'de', 'alemán': 'de', en: 'en', english: 'en', englisch: 'en', ingles: 'en', 'inglés': 'en', es: 'es', spanish: 'es', spanisch: 'es', 'español': 'es', espanol: 'es' };
                 if (_M[_w]) userText = '/' + _M[_w];
             }
             return userText;
@@ -739,6 +756,14 @@
             if (userText.toLowerCase() === '/wake') {          // /wake → bring her up: ear ON (if off) + open the convo
                 messageInput.value = ''; messageInput.style.height = 'auto';
                 if (window.solitaWake) window.solitaWake();      // mic on (if off) → „Ja?" + listen, like hearing "Solita"
+                messagesArea.insertAdjacentHTML('beforeend', '<div style="text-align:center;opacity:0.5;font-size:0.68rem;letter-spacing:1.5px;text-transform:uppercase;margin:12px 0;font-family:Orbitron,sans-serif;color:#cfe3ff;">— Solita wach · hört zu —</div>');
+                messagesArea.scrollTop = messagesArea.scrollHeight;
+                return true;
+            }
+
+            if (userText.toLowerCase() === '/spass') {         // /spass → wake her with Doc's joke ack, then listen
+                messageInput.value = ''; messageInput.style.height = 'auto';
+                if (window.solitaWakeWith) window.solitaWakeWith(['Was ist es nuuun schon wieder?', 'Das war natürlich Spaß! Wie kann ich Dir helfen?']);
                 messagesArea.insertAdjacentHTML('beforeend', '<div style="text-align:center;opacity:0.5;font-size:0.68rem;letter-spacing:1.5px;text-transform:uppercase;margin:12px 0;font-family:Orbitron,sans-serif;color:#cfe3ff;">— Solita wach · hört zu —</div>');
                 messagesArea.scrollTop = messagesArea.scrollHeight;
                 return true;
@@ -779,11 +804,16 @@
                 return true;
             }
 
-            const langCmd = userText.toLowerCase().match(/^\/(de|en|es)$/);
-            if (langCmd) {                                  // /de · /en · /es → switch language (same as the ☰ buttons)
-                if (window.setSolitaLang) window.setSolitaLang(langCmd[1]);
+            // /de · /en · /es PLUS spelled-out aliases (typed or spoken "slash english") → switch language.
+            const LANG_ALIAS = { de: 'de', deutsch: 'de', german: 'de', aleman: 'de', 'alemán': 'de',
+                                 en: 'en', english: 'en', englisch: 'en', ingles: 'en', 'inglés': 'en',
+                                 es: 'es', espanol: 'es', 'español': 'es', spanish: 'es', spanisch: 'es' };
+            const langMatch = userText.trim().toLowerCase().match(/^\/([a-zá-úñ]+)$/);
+            const langCode = langMatch ? LANG_ALIAS[langMatch[1]] : null;
+            if (langCode) {                                 // switch language (same as the ☰ buttons)
+                if (window.setSolitaLang) window.setSolitaLang(langCode);
                 const names = { de: 'Deutsch', en: 'English', es: 'Español' };
-                messagesArea.insertAdjacentHTML('beforeend', '<div style="text-align:center;opacity:0.5;font-size:0.68rem;letter-spacing:1.5px;text-transform:uppercase;margin:12px 0;font-family:Orbitron,sans-serif;color:#cfe3ff;">— ' + names[langCmd[1]] + ' —</div>');
+                messagesArea.insertAdjacentHTML('beforeend', '<div style="text-align:center;opacity:0.5;font-size:0.68rem;letter-spacing:1.5px;text-transform:uppercase;margin:12px 0;font-family:Orbitron,sans-serif;color:#cfe3ff;">— ' + names[langCode] + ' —</div>');
                 messagesArea.scrollTop = messagesArea.scrollHeight;
                 messageInput.value = '';
                 messageInput.style.height = 'auto';

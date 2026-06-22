@@ -160,6 +160,10 @@ Deno.serve(async (req) => {
       `• R2-Storage:  ${r2pct}% von ${R2_QUOTA_GB} GB  (${gb(r2)} GB)\n` +
       `• Supabase-DB: ${dbpct}% von ${DB_QUOTA_GB} GB  (${gb(db)} GB)\n` +
       aiSection + `\n` +
+      `Exakte Kosten beim Anbieter:\n` +
+      `• Claude:   https://console.anthropic.com/settings/cost\n` +
+      `• Gemini:   https://console.cloud.google.com/billing/01B7AA-7DDDCA-D629CE\n` +
+      `• DeepSeek: https://platform.deepseek.com/usage\n\n` +
       ((r2pct >= 80 || dbpct >= 80) ? '⚠️ Achtung: ein Wert über 80% — Zeit, aufzuräumen.\n' : 'Alles im grünen Bereich.\n');
     if (!b.dry) await sendMail(subject, body, pass);
     return json({ ok: true, r2pct, dbpct, r2bytes: r2, dbbytes: db, ai: { byProvider: ai.byProvider, total: ai.total, calls: ai.calls }, mailed: !b.dry });

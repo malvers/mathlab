@@ -49,6 +49,7 @@
         // ---- state (in-memory; persisted to localStorage under the host's keys) ----
         let conversationHistory = [];
         let runningSummary = '';
+        let inFlight = null;   // AbortController for the running turn → host can cancel (e.g. tap-to-stop)
         try { runningSummary = localStorage.getItem(SUMMARY_KEY) || ''; } catch (e) { }
 
         const self = this;
@@ -160,7 +161,8 @@
             const response = await fetch(resolveUrl(getModel()), {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'apikey': anonKey, 'Authorization': 'Bearer ' + anonKey, 'x-app-pass': pwd },
-                body: JSON.stringify({ model: getModel(), messages: msgs, tools: getTools(), max_tokens: 3000 })
+                body: JSON.stringify({ model: getModel(), messages: msgs, tools: getTools(), max_tokens: 3000 }),
+                signal: inFlight ? inFlight.signal : undefined   // lets abort() cancel the turn mid-flight
             });
             if (!response.ok) {
                 let err = 'Fehler ' + response.status;
@@ -226,6 +228,7 @@
             const pwd = getPwd();
             if (!checkDailyCapAtStart()) return;   // daily cap hit → onError + onDone already fired, drop the turn
             conversationHistory.push({ role: 'user', content: userText });
+            inFlight = new AbortController();
             onTyping(true);
             try {
                 const msgs = buildRequestMessages();
@@ -234,8 +237,10 @@
             } catch (err) {
                 conversationHistory.pop();   // drop the user turn on failure
                 onTyping(false);
-                onError(err);                // host clears the stuck indicator (e.g. fetch aborted by an app-switch)
+                // A user-triggered abort (tap-to-stop) is NOT an error → clean up quietly, no red bubble.
+                if (!(err && err.name === 'AbortError')) onError(err);
             } finally {
+                inFlight = null;
                 onDone();
             }
         }
@@ -272,6 +277,7 @@
 
         // ---- public API ----
         self.send = send;
+        self.abort = function () { try { if (inFlight) inFlight.abort(); } catch (e) { } };   // cancel the running turn
         self.load = load;
         self.clear = clear;
         self.getHistory = function () { return conversationHistory; };
