@@ -96,8 +96,11 @@
             const outTok = (u.output_tokens != null) ? u.output_tokens : (u.completion_tokens || 0);
             const cw = u.cache_creation_input_tokens || 0;
             const p = priceFor(model);
-            // uncached input full price · cache read 0,1× · cache write 1,25× · output full
-            const eur = (inTok * p[0] + cr * p[0] * 0.1 + cw * p[0] * 1.25 + outTok * p[1]) / 1e6 * USD_EUR;
+            // Cache pricing differs by provider: Anthropic bills cache-READ ~0.1× and cache-WRITE 1.25×.
+            // DeepSeek has no write premium and its cache-HIT input ≈ 0.26× ($0.07 vs 0.27 / $0.14 vs 0.55).
+            const isDS = /^deepseek/.test(model || '');
+            const readMul = isDS ? 0.26 : 0.1, writeMul = isDS ? 1 : 1.25;
+            const eur = (inTok * p[0] + cr * p[0] * readMul + cw * p[0] * writeMul + outTok * p[1]) / 1e6 * USD_EUR;
             let total = 0; try { total = parseFloat(localStorage.getItem(COST_KEY) || '0') || 0; } catch (e) { }
             total += eur;
             try { localStorage.setItem(COST_KEY, String(total)); } catch (e) { }
