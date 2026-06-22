@@ -708,50 +708,34 @@
 
     </div>
 
-    <!-- The "brain": LLM conversation + tool-use engine. Generic + reusable — ear.js hears, solita-brain
-         thinks, solita-tts speaks → any lab = ear + brain + tts (no iframe). Loads BEFORE its host core. -->
-    <script src="../js/solita-brain.js"></script>
-    <!-- Cross-device sync: one shared conversation log via the password-gated 'solita-sync' edge fn.
-         Loads BEFORE the core so the host can wire it. -->
-    <script src="../js/solita-sync.js"></script>
-    <!-- Shared photo-capture mechanics (native Capacitor camera OR web file-input) → the take_photo tool. -->
-    <script src="../js/photo-capture.js"></script>
-    <script src="../js/solita-core.js"></script>
-
-    <!-- Tool add-on: check_gmail (READ-ONLY Gmail peek). Self-registers into window.SolitaTools. -->
-    <script src="../js/solita-gmail.js"></script>
-
-    <!-- Tool add-on: send_gmail (sends a plain-text mail to Doc himself). Self-registers into window.SolitaTools. -->
-    <script src="../js/solita-gmail-send.js"></script>
-
-    <!-- Tool add-on: check_calendar (READ-ONLY Google Calendar peek → upcoming events). Self-registers. -->
-    <script src="../js/solita-calendar.js"></script>
-
-    <!-- Tool add-on: where_am_i (GPS + OpenStreetMap reverse-geocode → tells Doc where he is). Self-registers. -->
-    <script src="../js/solita-where.js"></script>
-
-    <!-- Tool add-on: read_notes (fetch saved notes from the PRIVATE store → email/read/summarize). Self-registers. -->
-    <script src="../js/solita-read-notes.js"></script>
-
-    <!-- Tool add-on: delete_notes (delete notes — two-step, confirms with Doc first). Self-registers. -->
-    <script src="../js/solita-delete-notes.js"></script>
-
-    <!-- Tool add-on: read_markdown (list + read ANY .md in the public repo via GitHub, keyless; AUDIT.md denied).
-         Self-registers into window.SolitaTools. -->
-    <script src="../js/solita-read-md.js"></script>
-
-    <!-- Tool add-on: get_time (device clock + Intl time zones → local or any city's time). Self-registers. -->
-    <script src="../js/solita-time.js"></script>
-
-    <!-- Voice mode: dictate (🎤) + read answers aloud (🔊). Browser-native, no key. Additive. -->
-    <script src="../js/solita-tts.js"></script>
-
-    <!-- Wake-word "Solita": hands-free in the car. Continuous SpeechRecognition (Chrome); on hearing
-         "Solita …" it takes the rest of the phrase as the question (or says "Ja?" and listens once more),
-         then sends. Pauses while Solita speaks so she doesn't hear herself. Web listens only in the
-         FOREGROUND — true background / locked-screen wake is the native krass-app (Vosk) path. -->
-    <script src="../js/ear.js"></script>
-    <script src="../js/solita-wake.js"></script>
+    <!-- Scripts are loaded with a per-deploy ?v= cache-bust (window.__ASSET_V from document.lastModified),
+         the SAME trick tracker.html uses. WITHOUT it the Solita APK — which live-loads docalvers.de but has
+         no service worker — served STALE js from the WebView HTTP cache (a push reached GitHub but Solita
+         kept running old solita-core.js → new tools like take_photo silently missing). Order is preserved:
+         brain → sync → photo-capture → core, then the self-registering tool add-ons, voice, wake-word. -->
+    <script>
+        window.__ASSET_V = '?v=' + encodeURIComponent(document.lastModified);
+        (function () {
+            var js = [
+                '../js/solita-brain.js',        // LLM conversation + tool-use engine (loads before its host core)
+                '../js/solita-sync.js',         // cross-device shared conversation log (before the core)
+                '../js/photo-capture.js',       // shared camera/photo mechanics → the take_photo tool
+                '../js/solita-core.js',         // the host: auth, persona, tools, rendering
+                '../js/solita-gmail.js',        // tool: check_gmail (read-only)
+                '../js/solita-gmail-send.js',   // tool: send_gmail (mail to Doc himself)
+                '../js/solita-calendar.js',     // tool: check_calendar (read-only)
+                '../js/solita-where.js',        // tool: where_am_i (GPS + reverse-geocode)
+                '../js/solita-read-notes.js',   // tool: read_notes
+                '../js/solita-delete-notes.js', // tool: delete_notes (two-step confirm)
+                '../js/solita-read-md.js',      // tool: read_markdown (public repo .md)
+                '../js/solita-time.js',         // tool: get_time
+                '../js/solita-tts.js',          // voice: dictate + read answers aloud
+                '../js/ear.js',                 // wake-word listener core
+                '../js/solita-wake.js'          // wake-word "Solita" (hands-free)
+            ];
+            for (var i = 0; i < js.length; i++) document.write('<script src="' + js[i] + window.__ASSET_V + '"><\/script>');
+        })();
+    </script>
 </body>
 
 </html>
