@@ -122,15 +122,11 @@
       **nicht** blau. Also: **blaue Navi-Linie nur VORAUS** (ab aktueller Position), **hinter** dir der
       speed-gefärbte Track. (Wie Google die gefahrene Strecke „aufbraucht" — nur statt grau → unsere
       Speed-Farben.) Umsetzung: Route an der aktuellen Position trimmen / Track-Rendering oben drüber.
-    - **(c) erledigt 2026-06-11:** Positionspunkt + weißes Richtungs-Dreieck liegen jetzt **über** der
-      blauen Linie (eigene Map-Ebene `nav-route`, z 350 unter Punkt/Track/Markern).
 
 18. **Spuranweisungen (Lane Guidance)** *(Prio 2)* — „Halte dich auf den rechten zwei Spuren." **OSRM
     liefert die Daten**: `step.intersections[].lanes` (jede Spur mit `indications` wie straight/left/
     slight-right + `valid` true/false). Als kleines Spur-Diagramm unter dem Abbiege-Banner anzeigen.
     Verfügbar überall, wo OSM `turn:lanes` getaggt hat (Autobahn-Ausfahrten meist ja, kleine Straßen nein).
-    - **Abbiege-Pfeile selbst:** am 2026-06-11 von Unicode-Glyphen auf **saubere SVG-Pfeile** umgestellt
-      (straight/left/right/slight/sharp/u-turn/Kreisverkehr/Ziel) in `tracker-nav.js`/`arrowSvg()`.
 
 19. **App live fernsteuern (Remote-Config-Demo)** *(Prio 1)* — vom Auto aus sagen „mach das Navi-Panel
     grün" / „z-Order ganz nach unten" / „Panel ein Stück nach Süden" → passiert **live, ohne
@@ -145,33 +141,6 @@
     Routines (kein eigener Server) oder Agent SDK (eigener VPS). App = nur Fernbedienung, Agent läuft
     server-seitig (nicht im Browser/Capacitor). Schließt den Kreis mit Idee 19. Details:
     `plan-contact-ai-im-tracker.md`.
-
-## Erledigt (gebaut, diese Session)
-- **Tasten-Shortcuts am Handy:** Buttons d/k/w in Einstellungen → Debug lösen die sonst nur per Tastatur
-  erreichbaren Shortcuts aus (d = Regenquelle DWD/RainViewer, k = Karte dunkel, w = Karte weiß).
-  → ermöglicht u. a. den `d`-Regentest mobil. (Schönere UX-Idee: Long-Press-Buchstaben-Panel — offen.)
-- **Tempo-abhängiger Zoom** beim Folgen: schnell → weiter raus (mehr Vorausblick), langsam → näher dran
-  (Stufen 17→13, gedrosselt). Nur im Auto-Folgen-Modus.
-- **labai.html Voice-Modus:** 🎤 diktieren (de-DE, sendet freihändig) + 🔊 Antworten vorlesen (TTS).
-  Backend unverändert (Edge Function), Key server-seitig. (Claude-Anbindung = eigene Edge Function, offen.)
-- **krass-app:** zählt jetzt auch „solita"/„solida" (Trigger-Liste statt nur „krass").
-- **Tempo-Glocke** per Häkchen in Einstellungen → Debug an/aus (persistiert).
-- **FIT-Button als 3-Stufen-Loop:** 1× = ganze Route fitten · 1× (beim Navigieren) = nur Reststrecke ·
-  1× = FIT aus. (Mittig-Zentrieren war Blödsinn, raus.)
-- **Steuer-Button-Schrift** weiß + dicker (PAUSE war unlesbar), als Live-Config-Knopf.
-- **Live-Config-Demo (Idee 19, Modell 1):** `docalvers.de/config.json` → `tracker-config.js` pollt (~20 s,
-  ETag) → CSS-Variablen, ohne Reload. Fernsteuerbar: Stat-Farbe unter der Uhr, Navi-Banner Farbe/z-Order/
-  Süd-Offset. Workflow: Wert in `HTML/config.json` ändern → commit + push → App übernimmt es.
-- Idle-Auto-Hide blendet auch Header + Start/Stop-Leiste aus.
-- Einfache Navigation: Adresse → Route, START navigiert + trackt (Radial-Eintrag „ZIEL").
-- Re-Routing bei Routenabweichung (automatische Neuberechnung).
-- Abbiege-Navigation mit Sprachansage (de-DE) + saubere SVG-Abbiegepfeile.
-- Reicheres Navi-Banner: ETA + Straße/Ref + Schild-Ziele, Google-Navi-Grün, liegt unter dem Header.
-- Positionspunkt + weißes Dreieck liegen über der blauen Navi-Linie.
-- Tempolimit-Schild (OSM maxspeed via Overpass): nächste Straße, häufiger/robuster, deutsche Zonen-Tags.
-- Tempo-Schild: „c" statt ∞ bei unbegrenzt; springt beim Überschreiten nach vorne; Glocken-Warnton bei >10 %.
-- Kompass (Nordpfeil) unter dem Header.
-- Regenradar-Quellen-Status (DWD/RainViewer) unter Einstellungen → Debug; untere Debug-Leiste folgt dem Debug-Schalter.
 
 ## Detail-Notizen (eigene Dokumente, in NOTES.md verlinkt)
 - `polish-ki-erkennt-indikator.md` — „KI erkennt"-Roboter (🤖) durch schönen Indikator ersetzen (Vorschläge).

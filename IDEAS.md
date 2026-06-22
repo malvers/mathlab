@@ -22,7 +22,6 @@
 - Brachistochrone / tautochrone race
 - Bezier & B-spline playground (de Casteljau)
 - Catenary chain (hanging rope, soap film)
-- Fourier epicycles (draw → reconstruct from circles)
 - Mandelbulb / Quaternion Julia (3D)
 - Travelling salesman (nearest neighbour vs 2-opt vs ACO)
 - Perlin / Simplex noise visualizer
