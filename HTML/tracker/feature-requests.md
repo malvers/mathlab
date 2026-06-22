@@ -338,10 +338,10 @@ standardmäßig an) + Edge Function `supabase/functions/fuel-prices/index.ts`. D
 ---
 
 ## Nicht-Tracker / Verteilung & Wissen (Kontext, kein Bau-Auftrag)
-- **Play-Store-Verteilung** (🌿 `verteilung-playstore-tester.md`): Samsung „Auto Blocker" blockt Sideload;
+- **Play-Store-Verteilung** (🌿 `archive/verteilung-playstore-tester.md`): Samsung „Auto Blocker" blockt Sideload;
   Play Store braucht für neue persönliche Konten **12 Tester · 14 Tage**. Firmenkonto (D-U-N-S) umgeht die
   Auflage. **Thema „nächste Woche"** — Entscheidung, kein Code.
-- **Wissens-Notiz Lebens-Agent** (🌿 `wissensnotiz-llm-kompression-lebensagent.md`): Tokens/Kompression +
+- **Wissens-Notiz Lebens-Agent** (🌿 `archive/wissensnotiz-llm-kompression-lebensagent.md`): Tokens/Kompression +
   Memory-Architektur (extern speichern, Retrieval, stufenweise verdichten) für den „Solita/Samantha"-
   Lebensbegleiter. Referenz/Hintergrund, kein Auftrag.
 
@@ -358,20 +358,20 @@ standardmäßig an) + Edge Function `supabase/functions/fuel-prices/index.ts`. D
 6. Rest nach Doc-Prio.
 
 ## FEAT-27 — E2E Phase 0: `tracks`-RLS auf `owner` härten 📐 spezifiziert · **unabhängig, sofort (80/20)**
-**Quelle:** retired `e2e-verschluesselung-plan.md` (Stand 2026-06-09), Phase 0 + Aufwand-Schritt 0. Volltext → [`archive/e2e-verschluesselung-plan.md`](archive/e2e-verschluesselung-plan.md).
+**Quelle:** retired `archive/e2e-verschluesselung-plan.md` (Stand 2026-06-09), Phase 0 + Aufwand-Schritt 0. Volltext → [`archive/e2e-verschluesselung-plan.md`](archive/e2e-verschluesselung-plan.md).
 **Warum zuerst:** Billig, **unabhängig** vom restlichen E2E. Heute steht der publishable/anon-Key im public Repo → wer ihn nimmt, kann je nach RLS **alle** Tracks ziehen. RLS-Scope stoppt Zufalls-/Repo-Leser (deckt „nur ich seh die Tracks" zu ~90 % ab). Schützt **nicht** vor DB-/Supabase-Zugriff (das ist erst echtes E2E, FEAT-29ff).
 **Auftrag:** `tracks`-RLS pro Sync-Code/Owner scopen. **Owner-Spalte** `owner` = `PBKDF2(syncCode,'tracker-owner-salt-v1')` → hex, **clear** (gibt nichts preis, erlaubt „meine Tracks listen" + RLS-Scope ohne Entschlüsseln). Kein Sync-Code (rein lokal) → Cloud-Sync ohnehin aus.
 **Erst messen (Regel „nie raten"):** `pg_policies`-Abfrage laufen lassen, **dann** gezielt scopen (knüpft an Memory `project_tracker_e2e_plan` „offen: pg_policies-Check").
 **Caveat (mission-critical, Supabase/R2-Regel):** Policy-Änderung an Live-DB — Backup/Anschauen vor Mutation, reversibel halten, an 1 Track testen+verifizieren. **Nur nach Docs „go" (Regel 2/4).**
 
 ## FEAT-28 — E2E Phase 1: geteiltes `HTML/js/crypto-box.js` (aus `vgp-crypto.js`) 📐 spezifiziert · Enabler
-**Quelle:** retired `e2e-verschluesselung-plan.md` („VGP-Modell" + „Wiederverwendung" + Aufwand-Schritt 1). **Aufwand: mittel.** Volltext → [`archive/e2e-verschluesselung-plan.md`](archive/e2e-verschluesselung-plan.md).
+**Quelle:** retired `archive/e2e-verschluesselung-plan.md` („VGP-Modell" + „Wiederverwendung" + Aufwand-Schritt 1). **Aufwand: mittel.** Volltext → [`archive/e2e-verschluesselung-plan.md`](archive/e2e-verschluesselung-plan.md).
 **Audit-Ziel (keine Doppel-Implementierung, Memory `feedback_single_source_of_truth`):** `vgp-crypto.js`-Primitive in ein **geteiltes `HTML/js/crypto-box.js`** ziehen → VGP **und** Tracker teilen eine Krypto-Schicht. Web-Crypto-API, **kein Lib, kein Key am Server** (Regel 18).
 **Zu übernehmende Bausteine (`HTML/vgp/js/vgp-crypto.js`):** Schlüssel = Passwort → `PBKDF2` (200 000 Runden, SHA-256, fester Salt) → **AES-GCM-256**, nie am Server · öffentliche Gruppen-ID = `PBKDF2(passwort, group-salt)` → hex, liegt **clear** (Server gruppiert ohne Entschlüsseln) · Text: `encryptText()` → `iv(12)++ct`, base64, Prefix **`ENC:`**; `decryptText()` lässt Nicht-`ENC:` als Klartext durch (Migration nebenbei) · Bilder/Binär: `encryptBytes()/decryptBytes()` → `iv(12)++ct` als `Uint8Array`.
 **Tracker-Key (kein neues Passwort):** `trackKey = PBKDF2(syncCode,'tracker-key-salt-v1')` → AES-GCM-256 (nur im Speicher, nie hochgeladen). **Voraussetzung für FEAT-29/30/31/32.** **Nur nach Docs „go" (Regel 2/4).**
 
 ## FEAT-29 — E2E Phase 2: Tracks verschlüsseln (Kern) 📐 spezifiziert · Aufwand: mittel
-**Quelle:** retired `e2e-verschluesselung-plan.md` (Tabelle „Was wird Ciphertext" + Datenfluss + Aufwand-Schritt 2). **Setzt FEAT-28 voraus.** Volltext → [`archive/e2e-verschluesselung-plan.md`](archive/e2e-verschluesselung-plan.md).
+**Quelle:** retired `archive/e2e-verschluesselung-plan.md` (Tabelle „Was wird Ciphertext" + Datenfluss + Aufwand-Schritt 2). **Setzt FEAT-28 voraus.** Volltext → [`archive/e2e-verschluesselung-plan.md`](archive/e2e-verschluesselung-plan.md).
 **Auftrag:** `points` (Route) · `waypoints` (GPS+Titel+Text) · `name` (als `ENC:`) vor `insert/update` durch `encryptText`/`encryptBytes` (Foto → FEAT-30). `owner` (hex) bleibt **clear** (RLS-Scope); `created_at`/`status`/`id`/`share_id` bleiben **clear** (Metadaten, fürs Funktionieren nötig).
 **Datenfluss:** Speichern → vor `insert/update` verschlüsseln, `owner` clear mitschreiben. Laden → nach `select` `decryptText`/`decryptBytes` mit `trackKey`; Alt-Klartext-Zeilen laufen dank `ENC:`-Durchlass weiter.
 **⚠️ Trade-off (load-bearing):** die server-seitige **`list_tracks()`-RPC (km/Dauer) entfällt** — Punkte sind Ciphertext → km/Dauer/Foto-Anzahl **client-seitig** aus den entschlüsselten Punkten rechnen (hatten wir gerade erst eingebaut).
@@ -379,27 +379,27 @@ standardmäßig an) + Edge Function `supabase/functions/fuel-prices/index.ts`. D
 **Verlust-Caveat (ehrlich):** Sync-Code verloren → **Tracks sind weg** (kein Server-Recovery, der Preis von echtem E2E). **Nur nach Docs „go" (Regel 2/4).**
 
 ## FEAT-30 — E2E Phase 3: Fotos verschlüsseln 📐 spezifiziert · Aufwand: mittel
-**Quelle:** retired `e2e-verschluesselung-plan.md` (Foto-Zeile + Datenfluss „Foto-KI" + Aufwand-Schritt 3). **Setzt FEAT-28/29 voraus.** Volltext → [`archive/e2e-verschluesselung-plan.md`](archive/e2e-verschluesselung-plan.md).
+**Quelle:** retired `archive/e2e-verschluesselung-plan.md` (Foto-Zeile + Datenfluss „Foto-KI" + Aufwand-Schritt 3). **Setzt FEAT-28/29 voraus.** Volltext → [`archive/e2e-verschluesselung-plan.md`](archive/e2e-verschluesselung-plan.md).
 **Auftrag:** Foto-Bild via `encryptBytes` → `iv(12)++ct`. Ablage **inline base64** **oder** **privater Storage-Bucket** (wie VGPs „media"). **Mit FEAT-7 (R2) / FEAT-8 (Storage-Bucket) gemeinsam denken** — nicht doppelt bauen; der private Bucket ist genau das Storage-Auslagern, nur verschlüsselt.
 **Foto-KI bleibt unberührt:** `identify` bekommt das Foto **bei der Aufnahme im Klartext** (geht eh an Google/Pl@ntNet) — **bevor** verschlüsselt gespeichert wird; es speichert nichts → nur die **gespeicherte** Kopie ist E2E.
 **⚠️ Konsequenz für „BILDER ANALYSIEREN" (Re-Identify aus der Cloud):** muss die Fotos **erst client-seitig entschlüsseln**, sonst bekommt `identify` nur Ciphertext → Re-Identify-Pfad in `tracker-media.js` anpassen. **Nur nach Docs „go" (Regel 2/4).**
 
 ## FEAT-31 — E2E Phase 4: Sharing verschlüsseln (Key im URL-Fragment) 📐 spezifiziert · Aufwand: klein-mittel
-**Quelle:** retired `e2e-verschluesselung-plan.md` („Sharing view.html ?s=token" + RLS + Aufwand-Schritt 4). **Setzt FEAT-28/29 voraus.** Volltext → [`archive/e2e-verschluesselung-plan.md`](archive/e2e-verschluesselung-plan.md).
+**Quelle:** retired `archive/e2e-verschluesselung-plan.md` („Sharing view.html ?s=token" + RLS + Aufwand-Schritt 4). **Setzt FEAT-28/29 voraus.** Volltext → [`archive/e2e-verschluesselung-plan.md`](archive/e2e-verschluesselung-plan.md).
 **Problem:** Der Empfänger hat den Sync-Code **nicht** → saubere Trennung nötig.
 **Auftrag:** Beim Teilen Track unter einem **frischen Zufalls-Share-Key** verschlüsseln, als Share-Zeile ablegen. Link `view.html?s=<token>#k=<share-key-b64>` — das **`#`-Fragment geht NIE an den Server** (Browser sendet es nicht). Viewer holt die Zeile per Token (Ciphertext) und entschlüsselt mit dem Fragment-Key.
 **RLS (defense-in-depth):** Share-Zeilen per Token les-, aber nur als Ciphertext + Fragment-Key entschlüsselbar.
 **⚠️ Trade-off:** Wer den Link hat, kann lesen (gewollt) → der **Link ist das Geheimnis** (nicht über unsichere Kanäle teilen). Baut auf bestehendem Track-Sharing (`view.html`, Memory `project_tracker_share`). **Nur nach Docs „go" (Regel 2/4).**
 
 ## FEAT-32 — E2E Phase 5: Live-Broadcast verschlüsseln (Channel-Key im Fragment) 📐 spezifiziert · Aufwand: klein-mittel
-**Quelle:** retired `e2e-verschluesselung-plan.md` („Live-Broadcast" + Aufwand-Schritt 5). **Setzt FEAT-28 voraus.** Volltext → [`archive/e2e-verschluesselung-plan.md`](archive/e2e-verschluesselung-plan.md).
+**Quelle:** retired `archive/e2e-verschluesselung-plan.md` („Live-Broadcast" + Aufwand-Schritt 5). **Setzt FEAT-28 voraus.** Volltext → [`archive/e2e-verschluesselung-plan.md`](archive/e2e-verschluesselung-plan.md).
 **Kontext:** Live-Positionen/Fotos gehen über Supabase-Realtime-Broadcast (Channel = Live-Name).
 **Auftrag:** Channel-Key = `PBKDF2(liveSecret, …)`; Payloads vor `channel.send` mit `encryptText/encryptBytes` verschlüsseln. Live-Link trägt das `liveSecret` im **Fragment**: `view.html?live=<name>#k=<secret>` — Viewer entschlüsselt damit (Fragment geht nie an den Server).
 **⚠️ Trade-off:** Link = Geheimnis (s. FEAT-31).
 **Abhängigkeit:** Erst **BUG-5** (Live-Broadcast geht gerade nicht) klären — E2E auf einem kaputten Broadcast bringt nichts. **Nur nach Docs „go" (Regel 2/4).**
 
 ## FEAT-33 — E2E Migration: Alt-Klartext → Ciphertext 📐 spezifiziert · Teil von FEAT-29
-**Quelle:** retired `e2e-verschluesselung-plan.md` (Abschnitt „Migration"). Querschnitt zu FEAT-28/29/30. Volltext → [`archive/e2e-verschluesselung-plan.md`](archive/e2e-verschluesselung-plan.md).
+**Quelle:** retired `archive/e2e-verschluesselung-plan.md` (Abschnitt „Migration"). Querschnitt zu FEAT-28/29/30. Volltext → [`archive/e2e-verschluesselung-plan.md`](archive/e2e-verschluesselung-plan.md).
 **Strategie (migrations-freundlich, à la VGP):** pro Zeile VGPs **`ENC:`-Prefix** als Marker; `decryptText` lässt **Alt-Klartext durch** → kein Big-Bang, Alt-Zeilen laufen weiter. Alt-Tracks werden beim **nächsten Speichern** automatisch zu Ciphertext; reiner Altbestand bleibt lesbar bis dahin. **Optional:** einmaliges **Re-Encrypt aller eigenen Tracks** (Client iteriert: lädt → verschlüsselt → schreibt zurück).
 **Caveat (mission-critical):** Re-Encrypt-all mutiert Live-Daten → an 1 Track testen+verifizieren, reversibel/Backup (Supabase/R2-Regel). **Nur nach Docs „go" (Regel 2/4).**
 

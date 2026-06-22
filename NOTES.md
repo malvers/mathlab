@@ -33,8 +33,8 @@ GPS-Tracker (`HTML/tracker/`). Einstieg/Regeln: [`HTML/tracker/agents.md`](HTML/
 | [plan-fotos-in-storage.md](archive.md) | Foto-base64 aus der DB in einen Supabase-Storage-Bucket | 📐 Konzept/Plan |
 | [plan-r2-media.md](archive.md) | Medien (Foto/Voice/Video) in Cloudflare R2 + erste Bausteine | 🏗️ teils gebaut |
 | [agent-name-solita.md](HTML/tracker/archive/agent-name-solita.md) | Agent-Name & Weckwort „Solita" — Begründung, Tagline, Voice-Erkennbarkeit | 💡 Idee |
-| [verteilung-playstore-tester.md](HTML/tracker/verteilung-playstore-tester.md) | Verteilung: Sideload vs. Play Store, 12-Tester-Auflage, Firmenkonto-Ausnahme | 📚 Referenz |
-| [wissensnotiz-llm-kompression-lebensagent.md](HTML/tracker/wissensnotiz-llm-kompression-lebensagent.md) | Wissens-Notiz: Tokens/Kompression, LLM=Kompressor, Memory-Architektur | 📚 Referenz |
+| [verteilung-playstore-tester.md](HTML/tracker/archive/verteilung-playstore-tester.md) | Verteilung: Sideload vs. Play Store, 12-Tester-Auflage, Firmenkonto-Ausnahme | 📚 Referenz |
+| [wissensnotiz-llm-kompression-lebensagent.md](HTML/tracker/archive/wissensnotiz-llm-kompression-lebensagent.md) | Wissens-Notiz: Tokens/Kompression, LLM=Kompressor, Memory-Architektur | 📚 Referenz |
 
 ## 🗄️ Tracker — Archiv (gebaut/gefixt, in `HTML/tracker/archive/`)
 Code-verifiziert umgesetzt am 2026-06-16 archiviert — als Historie/Referenz, nicht mehr als Arbeitsliste.
