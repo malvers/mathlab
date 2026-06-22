@@ -25,42 +25,11 @@ window.TrackerMedia = function (T) {
             return null;
         }
 
-        // Scale an image source (data URL / object URL) longest-side down to `max` px → JPEG data URL.
-        function downscaleSrcToJpeg(src, max, quality) {
-            return new Promise((resolve, reject) => {
-                const im = new Image();
-                im.onerror = () => reject(new Error('Bild nicht dekodierbar'));
-                im.onload = () => {
-                    let w = im.naturalWidth, h = im.naturalHeight;
-                    if (w >= h && w > max) { h = Math.round(h * max / w); w = max; }
-                    else if (h > w && h > max) { w = Math.round(w * max / h); h = max; }
-                    const cv = document.createElement('canvas');
-                    cv.width = w; cv.height = h;
-                    cv.getContext('2d').drawImage(im, 0, 0, w, h);
-                    resolve(cv.toDataURL('image/jpeg', quality));
-                };
-                im.src = src;
-            });
-        }
-        // Same, but from a File (web file-input path).
-        function downscaleToJpeg(file, max, quality) {
-            return new Promise((resolve, reject) => {
-                const fr = new FileReader();
-                fr.onerror = () => reject(new Error('Datei nicht lesbar'));
-                fr.onload = () => downscaleSrcToJpeg(fr.result, max, quality).then(resolve, reject);
-                fr.readAsDataURL(file);
-            });
-        }
-
-        // Read a Blob into a base64 data-URL (used to feed an R2-hosted photo back to identify).
-        function blobToDataUrl(blob) {
-            return new Promise((resolve, reject) => {
-                const fr = new FileReader();
-                fr.onload = () => resolve(fr.result);
-                fr.onerror = () => reject(fr.error || new Error('FileReader-Fehler'));
-                fr.readAsDataURL(blob);
-            });
-        }
+        // Photo capture + downscale primitives now live in the standalone js/photo-capture.js (so Solita can
+        // reuse the exact same mechanics). Alias them locally so the tracker-specific code below reads unchanged.
+        const downscaleSrcToJpeg = PhotoCapture.downscaleSrcToJpeg;
+        const downscaleToJpeg = PhotoCapture.downscaleToJpeg;
+        const blobToDataUrl = PhotoCapture.blobToDataUrl;
 
         // Ask the identify Edge Function (which holds the Gemini key) what the photo shows.
         async function identifyPhoto(dataUrl, lat, lng) {
@@ -274,8 +243,6 @@ window.TrackerMedia = function (T) {
         // window.Capacitor is undefined on the web, so the native path is simply skipped.
         const camInput = $('cam-input');
         const vidInput = $('vid-input');
-        const NativeCam = (window.Capacitor && Capacitor.Plugins && Capacitor.Plugins.Camera) || null;
-        const useNativeCam = !!(NativeCam && Capacitor.isNativePlatform && Capacitor.isNativePlatform());
 
         // Return a JPEG data URL (already ~1024 px wide), or null if the user cancelled.
         // ---- In-app photo decision overlay ----
@@ -332,29 +299,9 @@ window.TrackerMedia = function (T) {
         }
 
         async function capturePhoto() {
-            if (useNativeCam) {
-                // Capture at full resolution and ALSO save the original to the Photos gallery;
-                // then return a downscaled (~1024 px) copy for the track/Supabase waypoint.
-                const photo = await NativeCam.getPhoto({
-                    resultType: 'dataUrl', source: 'CAMERA',
-                    quality: 90, correctOrientation: true, saveToGallery: true,
-                });
-                if (!(photo && photo.dataUrl)) return null;
-                return await downscaleSrcToJpeg(photo.dataUrl, 1024, 0.7);
-            }
-            // web: trigger the hidden file input and resolve once a file is picked
-            return new Promise((resolve) => {
-                const onChange = async () => {
-                    camInput.removeEventListener('change', onChange);
-                    const file = camInput.files && camInput.files[0];
-                    if (!file) return resolve(null);
-                    try { resolve(await downscaleToJpeg(file, 1024, 0.7)); }
-                    catch (e) { toast('Foto konnte nicht gelesen werden.'); resolve(null); }
-                };
-                camInput.value = '';
-                camInput.addEventListener('change', onChange);
-                camInput.click();
-            });
+            // Delegated to the shared js/photo-capture.js (native Capacitor camera OR the web file input).
+            // We pass the tracker's own #cam-input so the web path stays byte-for-byte as before.
+            return PhotoCapture.capture({ input: camInput, onError: () => toast('Foto konnte nicht gelesen werden.') });
         }
 
         // Drop the pin at `ll`. `ai` = {title,text} from the in-overlay KI run, or null (keep, no AI).
