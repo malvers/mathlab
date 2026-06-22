@@ -82,6 +82,8 @@
         // .show-copy class has no CSS effect (hover governs there), so this is harmless.
         messagesArea.addEventListener('click', (e) => {
             if (e.target.closest('.copy-btn')) return;                 // let the copy button do its job
+            // A click anywhere in the chat stops EVERYTHING — speaking AND a running answer (typing/thinking).
+            if (window.solitaStopAll) window.solitaStopAll();
             const mc = e.target.closest('.message-content');
             messagesArea.querySelectorAll('.message-content.show-copy').forEach(el => { if (el !== mc) el.classList.remove('show-copy'); });
             if (mc) mc.classList.toggle('show-copy');
@@ -107,7 +109,7 @@
                 const GLYPHS = ['✶', '✷', '✸', '✹', '✺', '✹', '✸', '✷'];
                 let verb = THINK_VERBS[Math.floor(Math.random() * THINK_VERBS.length)];
                 let g = 0, tick = 0;
-                const render = () => { if (lbl) lbl.textContent = GLYPHS[g % GLYPHS.length] + ' ' + verb + ' …'; };
+                const render = () => { if (lbl) lbl.innerHTML = '<span class="ts">' + GLYPHS[g % GLYPHS.length] + '</span> ' + verb + ' …'; };
                 render();
                 _thinkTimer = setInterval(() => {
                     g++;
@@ -222,6 +224,9 @@
             + "IMMER get_weather auf und beantwortest Wetter NIE aus eigenem Wissen (du hast dafür keine Live-Daten). "
             + "Du hast außerdem check_gmail (liest READ-ONLY ungelesene Mails — Anzahl + Absender, auf Wunsch via read_body auch den vollen Inhalt zum Vorlesen/Zusammenfassen; markiert NICHTS als gelesen); nutze es, "
             + "sobald es ums Postfach/neue Mails oder Mail-Inhalte geht (z.B. „hab ich neue Mails?“, „wer hat geschrieben?“, „was steht in der Mail von X?“, „lies mir die neueste vor“). "
+            + "Wenn Doc nach einer Formel oder Gleichung fragt, gib sie als LaTeX aus — inline mit $…$, "
+            + "abgesetzt mit $$…$$ — und leite sie mit einem kurzen gesprochenen Satz ein (z.B. „Hier sind "
+            + "die gewünschten Formeln:“), denn die Formel selbst wird nicht vorgelesen. "
             + "Sonst antworte einfach. Bestätige eine ausgeführte Aktion knapp in einem Satz.";
 
         // ----- TOOL-USE (Solita acts, not just talks) -----
@@ -397,7 +402,15 @@
         // (~1.67× in+out vs Sonnet) for a voice assistant. The proxy enforces this server-side too.
         if (/opus/i.test(currentModel)) currentModel = 'claude-sonnet-4-6';
 
-        function getModel() { return currentModel; }
+        // DeepSeek can't use tools (its proxy drops the schemas). When the user clearly wants a tool action
+        // (mail/weather/notes/location/settings), transparently run THAT one turn on Claude so it actually
+        // works; ordinary chat stays on the cheap selected model. `modelOverride` is set per turn in
+        // executeChatSend and cleared in onDone. Keyword-based — tune TOOL_INTENT as needed.
+        const TOOL_INTENT = /(\be-?mails?\b|\bmails?\b|gmail|postfach|\bwetter\b|weather|vorhersage|forecast|temperatur|regne|schneit|kalender|calendar|\btermin(e)?\b|was steht (heute|morgen|diese woche|an)|\bnotiz(en)?\b|merk(e)? dir|schreib(\s+\w+)?\s+auf|erinner|wo bin ich|standort|where am i|einstellung(en)?|\bschalte\b|stell .* (ein|an|aus))/i;
+        const FALLBACK_MODEL = 'claude-sonnet-4-6'; // tool-capable Claude used when DeepSeek hits a tool request
+        let modelOverride = null;                   // forces a single turn onto Claude (tool fallback); cleared in onDone
+        function needsTools(t) { return TOOL_INTENT.test(t || ''); }
+        function getModel() { return modelOverride || currentModel; }
         // DeepSeek lives on its OWN proxy function (no tools — just cheap chat); Claude on /claude. Route by
         // the model's prefix so the summariser (Claude-Haiku) always reaches the claude proxy, even in DeepSeek mode.
         const DS_URL = AI_URL.replace(/\/claude(\?|$)/, '/deepseek$1');
@@ -482,13 +495,13 @@
             onAssistant: function (text) { addMessage('assistant', text); },
             onSpeak: function (text) { if (window.speakReply) window.speakReply(text); },
             onError: function (err) { addMessage('assistant', '❌ Fehler: ' + ((err && err.message) ? err.message : err)); if (window.solitaPhase) solitaPhase('dormant'); },
-            onDone: function () { sendButton.disabled = false; messageInput.focus(); },
+            onDone: function () { modelOverride = null; sendButton.disabled = false; messageInput.focus(); },
             // After every turn, push the updated log to the shared server (js/solita-sync.js) so the other
             // device (browser ↔ Pixel) converges on the same conversation. No-op until sync is initialised.
             onPersist: function () { if (window.SolitaSync) SolitaSync.push(brain.getHistory(), brain.getSummary()); },
             // Per-query cost (Doc 2026-06-19): a dezente Zeile unter der letzten Antwort. < 1 €/Antwort → Cent,
             // sonst Euro. Daten kommen schon aus dem claude-Proxy (usage) → reine Anzeige, kein Extra-Call.
-            onCost: function (eur, total) {
+            onCost: function (eur, total, model) {
                 if (typeof eur !== 'number' || eur <= 0) return;
                 // < 1 € → Cent, sonst Euro (gilt für Einzelpreis UND Summe).
                 const fmt = function (e) {
@@ -500,13 +513,30 @@
                 if (!last || last.querySelector('.solita-cost')) return;
                 const tag = document.createElement('div');
                 tag.className = 'solita-cost';
-                // This query's cost + (behind it) the accumulated all-time total (Doc 2026-06-22).
-                let txt = '≈ ' + fmt(eur);
-                if (typeof total === 'number' && total > 0) txt += '  ·  Σ ' + fmt(total);
-                tag.textContent = txt;
+                // Colour the per-query cost (≈, the first number) by the model that produced it:
+                // DeepSeek = φ-Grün, Claude (+ default) = λ-Orange. The Σ-total stays neutral.
+                const costColor = /deepseek/.test(model || '') ? 'rgb(121,158,49)' : 'rgb(245,194,66)';
+                const esc = function (s) { return String(s).replace(/[<>&]/g, function (c) { return { '<': '&lt;', '>': '&gt;', '&': '&amp;' }[c]; }); };
+                let html = '<span style="color:' + costColor + '">≈ ' + esc(fmt(eur)) + '</span>';
+                if (typeof total === 'number' && total > 0) html += '  ·  Σ ' + esc(fmt(total));
+                tag.innerHTML = html;
                 last.appendChild(tag);
             }
         });
+
+        // "Stop EVERYTHING now" (Doc 2026-06-22): cancel a running Claude turn (brain.abort → drops the
+        // typing/thinking turn quietly, no red bubble), silence any speech, clear the typing indicator and
+        // the phase pill. Wired to the pill tap and a chat click. The ear stays on → she keeps listening.
+        window.solitaStopAll = function () {
+            // Only act when she's actually busy (speaking OR thinking) — otherwise an idle chat click would
+            // needlessly clear the „listening" pill. typingIndicator is present for the whole thinking phase.
+            const busy = window.__solitaSpeaking || !!document.getElementById('typingIndicator');
+            if (!busy) return;
+            try { brain.abort(); } catch (e) { }
+            if (window.solitaStopSpeaking) window.solitaStopSpeaking();
+            hideTyping();
+            if (window.solitaPhase) solitaPhase();   // clear the pill (incl. the thinking-star timer)
+        };
 
         // Restore persisted history into the brain, then render the bubbles (host owns the DOM).
         const _restored = brain.load();
@@ -695,10 +725,11 @@
         function normalizeVoiceCommand(userText) {
             // Voice: spoken "slash ui" / "slash list" arrives as WORDS (not "/ui") → map to the typed command
             // so it triggers instead of going to Claude (which would just "think"). Only known commands convert.
-            const _sm = userText.toLowerCase().match(/^(?:slash|splash|flash)\s+(.+?)[\s.!?]*$/);
+            // German STT often mishears the English word "slash" → "gleich"/"klatsch"/"schlag" etc.; accept those too.
+            const _sm = userText.toLowerCase().match(/^(?:slash|splash|flash|gleich|klatsch|glatsch|schlag)\s+(.+?)[\s.!?]*$/);
             if (_sm) {
                 const _w = _sm[1].replace(/[.\s]/g, '');   // "u i" / "u.i." → "ui"
-                const _M = { ui: 'ui', youeye: 'ui', youi: 'ui', list: 'list', liste: 'list', clear: 'clear', logout: 'logout', ausloggen: 'logout', abmelden: 'logout', wake: 'wake', aufwachen: 'wake', aufwecken: 'wake', wach: 'wake', de: 'de', deutsch: 'de', en: 'en', english: 'en', es: 'es', spanish: 'es', 'español': 'es', espanol: 'es' };
+                const _M = { ui: 'ui', youeye: 'ui', youi: 'ui', list: 'list', liste: 'list', clear: 'clear', logout: 'logout', ausloggen: 'logout', abmelden: 'logout', wake: 'wake', aufwachen: 'wake', aufwecken: 'wake', wach: 'wake', de: 'de', deutsch: 'de', german: 'de', aleman: 'de', 'alemán': 'de', en: 'en', english: 'en', englisch: 'en', ingles: 'en', 'inglés': 'en', es: 'es', spanish: 'es', spanisch: 'es', 'español': 'es', espanol: 'es' };
                 if (_M[_w]) userText = '/' + _M[_w];
             }
             return userText;
@@ -725,6 +756,14 @@
             if (userText.toLowerCase() === '/wake') {          // /wake → bring her up: ear ON (if off) + open the convo
                 messageInput.value = ''; messageInput.style.height = 'auto';
                 if (window.solitaWake) window.solitaWake();      // mic on (if off) → „Ja?" + listen, like hearing "Solita"
+                messagesArea.insertAdjacentHTML('beforeend', '<div style="text-align:center;opacity:0.5;font-size:0.68rem;letter-spacing:1.5px;text-transform:uppercase;margin:12px 0;font-family:Orbitron,sans-serif;color:#cfe3ff;">— Solita wach · hört zu —</div>');
+                messagesArea.scrollTop = messagesArea.scrollHeight;
+                return true;
+            }
+
+            if (userText.toLowerCase() === '/spass') {         // /spass → wake her with Doc's joke ack, then listen
+                messageInput.value = ''; messageInput.style.height = 'auto';
+                if (window.solitaWakeWith) window.solitaWakeWith(['Was ist es nuuun schon wieder?', 'Das war natürlich Spaß! Wie kann ich Dir helfen?']);
                 messagesArea.insertAdjacentHTML('beforeend', '<div style="text-align:center;opacity:0.5;font-size:0.68rem;letter-spacing:1.5px;text-transform:uppercase;margin:12px 0;font-family:Orbitron,sans-serif;color:#cfe3ff;">— Solita wach · hört zu —</div>');
                 messagesArea.scrollTop = messagesArea.scrollHeight;
                 return true;
@@ -765,11 +804,16 @@
                 return true;
             }
 
-            const langCmd = userText.toLowerCase().match(/^\/(de|en|es)$/);
-            if (langCmd) {                                  // /de · /en · /es → switch language (same as the ☰ buttons)
-                if (window.setSolitaLang) window.setSolitaLang(langCmd[1]);
+            // /de · /en · /es PLUS spelled-out aliases (typed or spoken "slash english") → switch language.
+            const LANG_ALIAS = { de: 'de', deutsch: 'de', german: 'de', aleman: 'de', 'alemán': 'de',
+                                 en: 'en', english: 'en', englisch: 'en', ingles: 'en', 'inglés': 'en',
+                                 es: 'es', espanol: 'es', 'español': 'es', spanish: 'es', spanisch: 'es' };
+            const langMatch = userText.trim().toLowerCase().match(/^\/([a-zá-úñ]+)$/);
+            const langCode = langMatch ? LANG_ALIAS[langMatch[1]] : null;
+            if (langCode) {                                 // switch language (same as the ☰ buttons)
+                if (window.setSolitaLang) window.setSolitaLang(langCode);
                 const names = { de: 'Deutsch', en: 'English', es: 'Español' };
-                messagesArea.insertAdjacentHTML('beforeend', '<div style="text-align:center;opacity:0.5;font-size:0.68rem;letter-spacing:1.5px;text-transform:uppercase;margin:12px 0;font-family:Orbitron,sans-serif;color:#cfe3ff;">— ' + names[langCmd[1]] + ' —</div>');
+                messagesArea.insertAdjacentHTML('beforeend', '<div style="text-align:center;opacity:0.5;font-size:0.68rem;letter-spacing:1.5px;text-transform:uppercase;margin:12px 0;font-family:Orbitron,sans-serif;color:#cfe3ff;">— ' + names[langCode] + ' —</div>');
                 messagesArea.scrollTop = messagesArea.scrollHeight;
                 messageInput.value = '';
                 messageInput.style.height = 'auto';
@@ -861,6 +905,9 @@
             messageInput.value = '';
             messageInput.style.height = 'auto';
             sendButton.disabled = true;
+            // DeepSeek can't run tools — if this turn clearly wants one, transparently use Claude just for it.
+            modelOverride = (/^deepseek/.test(currentModel) && needsTools(userText)) ? FALLBACK_MODEL : null;
+            if (modelOverride && window.DebugWindow) DebugWindow.log('Tool-Bedarf erkannt → ' + modelOverride + ' für diese Anfrage (DeepSeek kann keine Tools)');
             brain.send(userText);   // the brain owns the turn: push history → tool-use loop → render via the wired callbacks
         }
 

@@ -143,7 +143,7 @@
             // `offerHelp` is the lock-wake question (she woke from sleep and asks before acting); `okay` is the
             // brief acknowledgement when Doc declines, right before she drifts back to sleep.
             const SAY = {
-                de: { yes: ['Ja?', 'Jo!', 'Jep!', 'Ja bitte?', 'Sí?', 'Yes?', 'Was gibt’s?', 'Bin da!', 'Hey!', 'What’s up?'], offerHelp: ['Soll ich helfen?', 'Brauchst du mich?', 'Kann ich helfen?', 'Ja? Soll ich helfen?'], okay: ['Okay.', 'Alles klar.', 'Dann schlafe ich weiter.', 'Bis gleich.'], bye: 'Bis später.', logout: 'Logge dich aus. Bis bald.' },
+                de: { yes: ['Ja!', 'Sí!', 'Bin da!', 'Kann ich helfen!', 'Yes!', 'Was ist es nun schon wieder? Spaaaaß!!! wie kann ich Dir helfen?'], offerHelp: ['Soll ich helfen?', 'Brauchst du mich?', 'Kann ich helfen?', 'Ja? Soll ich helfen?'], okay: ['Okay.', 'Alles klar.', 'Dann schlafe ich weiter.', 'Bis gleich.'], bye: 'Bis später.', logout: 'Logge dich aus. Bis bald.' },
                 en: { yes: ['Yes?', 'Yep!', 'Hey!', 'I’m here!', 'What’s up?', 'Go ahead.', 'Sí?', 'Listening!'], offerHelp: ['Can I help?', 'Need me?', 'Should I help?', 'Yes? Can I help?'], okay: ['Okay.', 'Alright.', 'Back to sleep then.', 'See you.'], bye: 'See you later.', logout: 'Logging you out. See you soon.' },
                 es: { yes: ['¿Sí?', '¿Dime?', '¡Aquí estoy!', '¡Hey!', '¿Qué tal?', 'Te escucho.', '¡Sí, sí!'], offerHelp: ['¿Te ayudo?', '¿Me necesitas?', '¿Puedo ayudar?', '¿Sí? ¿Te ayudo?'], okay: ['Vale.', 'De acuerdo.', 'Sigo durmiendo.', 'Hasta luego.'], bye: 'Hasta luego.', logout: 'Cerrando sesión. Hasta pronto.' }
             };
@@ -406,6 +406,27 @@
                 if (!wakeOn) window.solitaStartVoice();   // ear off → turn it on (→ dormant) first
                 paused = false;
                 onWake('', {});                           // ambient wake path → fire('') → „Ja?" + listen
+            };
+
+            // Like solitaWake, but she opens with a SPECIFIC spoken line instead of a random „Ja?" ack, then
+            // listens for the wish exactly as after a normal wake. Used by the /spass typed command (Doc's joke ack).
+            // `line` may be a string (single utterance) or an array of segments spoken with a 2 s beat between
+            // them (Web-Speech can't do an inline pause, so we chain segments + a timed gap).
+            window.solitaWakeWith = function (line) {
+                if (!wakeOn) window.solitaStartVoice();   // ear off → turn it on (→ dormant) first
+                paused = false;
+                disarmIdle();
+                convo = true; awaitingQuery = true;
+                ear.setConvo(true); ear.setAwaiting(true);
+                const parts = Array.isArray(line) ? line.slice() : [line];
+                (function speakNext() {
+                    if (!parts.length || !window.speakReply) return;
+                    window.speakReply(parts.shift());
+                    if (!parts.length) return;
+                    const wait = setInterval(function () {        // wait out this segment, then a 2 s beat, then the next
+                        if (!window.__solitaSpeaking) { clearInterval(wait); setTimeout(speakNext, 2000); }
+                    }, 150);
+                })();
             };
 
             // Programmatic pause (typed /pause): drop her into the quiet SLUMBER (dormant) right away, exactly

@@ -44,6 +44,29 @@ function json(obj: unknown, status = 200): Response {
   });
 }
 
+// Fire-and-forget: append ONE token-usage row to ai_cost_log for the daily infra cost mail. A logging
+// hiccup must NEVER affect the chat response (best-effort, try/catch). SUPABASE_URL + service-role key are
+// auto-injected by the Edge runtime. Pricing happens later in infra-usage — here we only record raw tokens.
+async function logAiCost(provider: string, model: string, u: Record<string, number> | undefined) {
+  try {
+    const url = Deno.env.get('SUPABASE_URL');
+    const svc = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    if (!url || !svc || !u) return;
+    await fetch(url + '/rest/v1/ai_cost_log', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'apikey': svc, 'Authorization': 'Bearer ' + svc, 'Prefer': 'return=minimal' },
+      body: JSON.stringify({
+        provider, model,
+        in_tok: u.input_tokens || 0,
+        out_tok: u.output_tokens || 0,
+        cache_read: u.cache_read_input_tokens || 0,
+        cache_write: u.cache_creation_input_tokens || 0,
+        label: 'chat',
+      }),
+    });
+  } catch (_) { /* logging must never break the chat */ }
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS });
 
@@ -66,10 +89,12 @@ Deno.serve(async (req) => {
   const hasContent = (c: unknown) =>
     (typeof c === 'string' && c.trim() !== '') || (Array.isArray(c) && c.length > 0);
   const turns = b.messages.filter((m: { role?: string; content?: unknown }) => m && hasContent(m.content));
-  // System is lifted to Anthropic's top-level field (string-content system turns only).
-  const system = turns
+  // System is lifted to Anthropic's top-level field (string-content system turns only). Kept as SEPARATE
+  // blocks (NOT joined) so each caches independently — the client sends persona + rolling summary as two
+  // system turns; only the persona gets a cache breakpoint (see body.system below).
+  const systemTexts: string[] = turns
     .filter((m: { role: string; content: unknown }) => m.role === 'system' && typeof m.content === 'string')
-    .map((m: { content: string }) => m.content).join('\n\n');
+    .map((m: { content: string }) => m.content);
   let chat = turns
     .filter((m: { role: string }) => m.role === 'user' || m.role === 'assistant')
     .map((m: { role: string; content: unknown }) => ({ role: m.role, content: m.content }));   // pass string OR blocks through
@@ -88,7 +113,14 @@ Deno.serve(async (req) => {
   // cache_control bills the repeated prefix at ~0.1×. Two tiers — the tools cache on their own breakpoint and
   // the system on a second, so a summary change re-writes only the system block, not the tools. Render order
   // is tools → system → messages. Verify it's working via usage.cache_read_input_tokens > 0.
-  if (system) body.system = [{ type: 'text', text: system, cache_control: { type: 'ephemeral' } }];
+  // Cache ONLY the first system block (the static persona). The volatile rolling summary arrives as a SECOND
+  // system turn and stays UNcached → a summary change re-reads just those few hundred tokens at 1× instead of
+  // re-writing the whole persona at 1.25× (the cache_creation churn that made Solita expensive). Still one
+  // system breakpoint total (persona), so the tools + last-message breakpoints are unaffected.
+  if (systemTexts.length) {
+    body.system = systemTexts.map((text: string, i: number) =>
+      i === 0 ? { type: 'text', text, cache_control: { type: 'ephemeral' } } : { type: 'text', text });
+  }
   // Optional Claude tool-use: forward a `tools` schema so Solita can take actions. The CLIENT runs the loop
   // (executes tool_use blocks, sends tool_result back). No tools field → behaves exactly as before.
   if (Array.isArray(b.tools) && b.tools.length) {
@@ -135,6 +167,13 @@ Deno.serve(async (req) => {
       ? data.content.filter((c: { type: string }) => c.type === 'text')
           .map((c: { text: string }) => c.text).join('\n')
       : '';
+    // cost mail: record this hop's token usage in the BACKGROUND so the chat response is never delayed
+    // or affected by the logging POST (waitUntil keeps the worker alive past the response on Supabase Edge).
+    try {
+      const er = (globalThis as { EdgeRuntime?: { waitUntil?: (p: Promise<unknown>) => void } }).EdgeRuntime;
+      const p = logAiCost('claude', String(body.model), data.usage);
+      if (er?.waitUntil) er.waitUntil(p);
+    } catch (_) { /* logging must never affect the chat */ }
     return json({
       choices: [{ message: { role: 'assistant', content: text } }],
       content: Array.isArray(data.content) ? data.content : [],

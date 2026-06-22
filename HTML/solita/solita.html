@@ -403,6 +403,7 @@
         }
 
         .input-area {
+            position: relative;        /* anchor for the phase-pill overlay */
             padding: 16px 24px;
             background: transparent;   /* nix box: no bottom bar fill */
             display: flex;
@@ -533,13 +534,14 @@
 
         /* Conversation-phase indicator (Solita state): what's going on right now. */
         #solita-phase {
-            position: fixed; top: 14px; left: 50%; transform: translateX(-50%);
+            position: absolute; left: 50%; transform: translateX(-50%); bottom: calc(100% - 10px);
             display: none; align-items: center; gap: 9px;
+            white-space: nowrap; max-width: calc(100vw - 16px);
             padding: 6px 15px; border-radius: 999px;
             background: rgba(8, 20, 42, 0.88); border: 1px solid rgba(255, 255, 255, 0.12);
             font-family: 'Orbitron', sans-serif; font-size: 0.72rem; letter-spacing: 1.5px;
             text-transform: uppercase; color: #cfe3ff; z-index: 9999;
-            backdrop-filter: blur(6px); pointer-events: none;
+            backdrop-filter: blur(6px); pointer-events: auto; cursor: pointer;
         }
         #solita-phase[data-state="listening"],
         #solita-phase[data-state="thinking"],
@@ -547,7 +549,8 @@
         #solita-phase[data-state="dormant"] { display: flex; }
         #solita-phase .dot { width: 9px; height: 9px; border-radius: 50%; background: #6b7a99; }
         #solita-phase[data-state="listening"] .dot { background: rgb(121, 158, 49); animation: solita-pulse 1.1s ease-in-out infinite; } /* φ grün — du sprichst, sie hört */
-        #solita-phase[data-state="thinking"]  .dot { background: rgb(245, 194, 66); animation: solita-pulse 0.8s ease-in-out infinite; } /* λ orange — denkt */
+        #solita-phase[data-state="thinking"]  .dot { display: none; }   /* denkt: dot hidden — the yellow twinkling star is the indicator */
+        #solita-phase .ts { color: rgb(245, 194, 66); font-size: 12px; line-height: 1; }   /* twinkling star: λ-yellow, ~dot-sized (9px) */
         #solita-phase[data-state="speaking"]  .dot { background: #00d2ff;          animation: solita-pulse 0.7s ease-in-out infinite; } /* cyan — Solita spricht */
         #solita-phase[data-state="dormant"]   .dot { background: #6b5b95;          animation: solita-pulse 2.6s ease-in-out infinite; } /* muted violet, slow breath — paused/half-asleep */
         @keyframes solita-pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.35; transform: scale(1.6); } }
@@ -671,9 +674,6 @@
     <!-- Tap Solita's portrait → full-size lightbox. -->
     <div id="solita-lightbox" onclick="this.classList.remove('open')"><img src="../resources/team/team_02.png" alt="Solita"></div>
 
-    <!-- Conversation-phase indicator: höre zu / denkt / spricht (set via window.solitaPhase). -->
-    <div id="solita-phase" aria-live="polite"><span class="dot"></span><span class="lbl"></span></div>
-
     <div class="chat-container">
         <div class="messages-area" id="messagesArea">
             <div class="message assistant" style="align-items: center; gap: 10px; width: 100%;">
@@ -698,6 +698,8 @@
         </div>
 
         <div class="input-area">
+            <!-- Conversation-phase indicator: höre zu / denkt / spricht (set via window.solitaPhase). Overlaid just above the input bar. -->
+            <div id="solita-phase" aria-live="polite"><span class="dot"></span><span class="lbl"></span></div>
             <button id="solita-hh" aria-label="Menü" title="Solita"><span></span><span></span><span></span></button>
             <textarea class="message-input" id="messageInput" rows="1"
                 placeholder="Du hast sicher Fragen ... schreib sie hier!"

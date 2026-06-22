@@ -29,6 +29,30 @@ function json(obj: unknown, status = 200): Response {
   });
 }
 
+// Fire-and-forget: append ONE token-usage row to ai_cost_log for the daily infra cost mail. Best-effort
+// (try/catch) — a logging hiccup must NEVER affect the chat. DeepSeek/OpenAI usage shape: prompt_tokens
+// (INCLUDES cache hits) / completion_tokens / prompt_cache_hit_tokens. Pricing happens later in infra-usage.
+async function logAiCost(model: string, u: Record<string, number> | undefined) {
+  try {
+    const url = Deno.env.get('SUPABASE_URL');
+    const svc = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    if (!url || !svc || !u) return;
+    const cr = u.prompt_cache_hit_tokens || 0;
+    await fetch(url + '/rest/v1/ai_cost_log', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'apikey': svc, 'Authorization': 'Bearer ' + svc, 'Prefer': 'return=minimal' },
+      body: JSON.stringify({
+        provider: 'deepseek', model,
+        in_tok: Math.max(0, (u.prompt_tokens || 0) - cr),
+        out_tok: u.completion_tokens || 0,
+        cache_read: cr,
+        cache_write: 0,
+        label: 'chat',
+      }),
+    });
+  } catch (_) { /* logging must never break the chat */ }
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS });
 
@@ -60,6 +84,13 @@ Deno.serve(async (req) => {
       body: JSON.stringify(body),
     });
     const data = await r.json().catch(() => ({}));
+    if (r.ok && data && data.usage) {   // cost mail: record this call's tokens in the background (zero latency)
+      try {
+        const er = (globalThis as { EdgeRuntime?: { waitUntil?: (p: Promise<unknown>) => void } }).EdgeRuntime;
+        const p = logAiCost(body.model, data.usage);
+        if (er?.waitUntil) er.waitUntil(p);
+      } catch (_) { /* never affect the chat */ }
+    }
     return json(data, r.ok ? 200 : (r.status || 502)); // pass DeepSeek's response (or its error) through
   } catch (e) {
     return json({ error: String((e && (e as Error).message) || e) }, 502);

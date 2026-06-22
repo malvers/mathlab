@@ -58,7 +58,12 @@
                 body: JSON.stringify(body)
             });
             const d = await r.json().catch(() => ({}));
-            if (!r.ok) return { ok: false, summary: 'Kalender-Abfrage fehlgeschlagen: ' + (d.error || ('HTTP ' + r.status)) };
+            if (!r.ok) {
+                // Surface the RAW edge-fn error in DEBUG — Claude only shows a softened paraphrase to the user.
+                // e.g. "GCAL_REFRESH_TOKEN fehlt" / "Token-Refresh fehlgeschlagen" / "Calendar list 403".
+                if (window.DebugWindow) DebugWindow.log('📅 calendar ERR ' + r.status + ': ' + (d.error || '(kein Text)'));
+                return { ok: false, summary: 'Kalender-Abfrage fehlgeschlagen: ' + (d.error || ('HTTP ' + r.status)) };
+            }
             if (!d.count) return { ok: true, summary: 'Keine anstehenden Termine im gewählten Zeitraum.' };
             const lines = (d.events || []).map(function (ev) {
                 let line = '• ' + fmtWhen(ev) + ' — ' + ev.title;
