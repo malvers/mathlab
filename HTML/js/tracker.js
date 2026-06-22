@@ -153,8 +153,9 @@
             const rb = (pos && __nav && __nav.remainingBounds) ? __nav.remainingBounds([pos.lat, pos.lng]) : null;
             return { follow: !!pos, fitall: trackPresent, fitrem: !!rb, hand: handMode };
         }
-        // Lay out the fan options: hide invalid ones, give each visible one a 1-based slot index (--i,
-        // drives the leftward slide in CSS) and mark the one matching the current mode.
+        // Lay out the fan options: the fan offers only the OTHER valid modes you can switch TO — never the
+        // current one (that's already shown on the trigger, so listing it again would just double the icon).
+        // Each offered button gets a 1-based slot index (--i, drives the leftward slide). Returns the count.
         function buildFanOptions() {
             const valid = validModes();
             const cur = currentMode();
@@ -162,15 +163,14 @@
             ['follow', 'fitall', 'fitrem', 'hand'].forEach((m) => {
                 const b = document.querySelector('#view-fan .vf-opt[data-mode="' + m + '"]');
                 if (!b) return;
-                if (valid[m]) {
+                if (valid[m] && m !== cur) {            // offer only OTHER valid modes
                     b.hidden = false;
                     b.style.setProperty('--i', String(++slot));
-                    b.classList.toggle('current', m === cur);
                 } else {
                     b.hidden = true;
-                    b.classList.remove('current');
                 }
             });
+            return slot;
         }
         function refreshRecenter() {
             const fan = $('view-fan'), btn = $('recenter-fab');
@@ -181,7 +181,7 @@
             btn.dataset.mode = currentMode();              // trigger shows the current mode's icon
             btn.classList.toggle('mode-on', !!fitMode);    // persistent FIT → green
             fan.classList.add('show');
-            if (fanOpen) buildFanOptions();                // keep slots/highlight fresh while the fan is open
+            if (fanOpen && buildFanOptions() === 0) closeFan(); // state changed away under an open fan → collapse
         }
         function setFollowing(v) { following = v; refreshRecenter(); }
         // Hand-mode no longer has its own button — it's just another mode of the fan. Keep the name so the
@@ -193,7 +193,9 @@
         function clearFanTimeout() { if (fanTimer) { clearTimeout(fanTimer); fanTimer = null; } }
         function onFanOutside(e) { const fan = $('view-fan'); if (fan && !fan.contains(e.target)) closeFan(); }
         function openFan() {
-            buildFanOptions();
+            // No other mode to pick? Then there's nothing to fan — just (re-)apply the current mode
+            // directly (e.g. follow → re-centre, fit → re-frame), like a plain button.
+            if (buildFanOptions() === 0) { selectViewMode(currentMode()); return; }
             fanOpen = true;
             const fan = $('view-fan'); if (fan) fan.classList.add('open');
             document.addEventListener('pointerdown', onFanOutside, true); // tap outside → collapse
