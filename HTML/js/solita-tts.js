@@ -68,6 +68,8 @@
                 try {
                     const clean = String(text)
                         .replace(/[\p{Extended_Pictographic}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}\u{1F1E6}-\u{1F1FF}\uFE0F\u200D]/gu, '') // strip smileys/emoji — don't read them aloud (Doc)
+                        .replace(/\$\$[\s\S]*?\$\$/g, '')   // LaTeX display math — shown on screen, NOT read aloud (Doc 2026-06-22)
+                        .replace(/\$[^$\n]*?\$/g, '')        // LaTeX inline math — shown on screen, NOT read aloud
                         .replace(/[*_`#>]/g, '')
                         .replace(/\bSolita\b/gi, 'Solíta')   // TTS: say her name so-LÍ-ta (stress 2nd syllable), not SÓlita
                         .replace(/\bUI\b/g, 'Ju Ei')         // TTS: say "UI" the English way (you-eye), not German "oo-ee"
@@ -107,9 +109,24 @@
                 } catch (e) { window.__solitaSpeaking = false; }
             }
 
+            // Central "shut up NOW": kill the Cloud-TTS audio AND the browser speechSynthesis. Clearing
+            // __solitaSpeaking lets the wake loop (which polls it) resume listening ~300 ms later.
+            window.solitaStopSpeaking = function () {
+                try { if (window.__solitaAudio) { window.__solitaAudio.pause(); window.__solitaAudio = null; } } catch (e) { }
+                try { if ('speechSynthesis' in window) window.speechSynthesis.cancel(); } catch (e) { }
+                window.__solitaSpeaking = false;
+            };
+
+            // Tap the phase pill while Solita talks → stop her instantly (Doc 2026-06-22). Mid-speech voice
+            // can't work (mic is muted against self-hearing), so the pill is the reliable barge-in.
+            const phasePill = document.getElementById('solita-phase');
+            if (phasePill) phasePill.addEventListener('click', () => {
+                if (window.solitaStopAll) window.solitaStopAll(); else window.solitaStopSpeaking();
+            });
+
             if (ttsBtn) ttsBtn.addEventListener('click', () => {
                 ttsOn = !ttsOn; localStorage.setItem(TTS_KEY, ttsOn ? '1' : '0'); reflectTts();
-                if (!ttsOn) { try { window.speechSynthesis.cancel(); } catch (e) { } try { if (window.__solitaAudio) { window.__solitaAudio.pause(); window.__solitaAudio = null; } } catch (e) { } window.__solitaSpeaking = false; }
+                if (!ttsOn) { window.solitaStopSpeaking(); }
             });
 
             // Dictation: tap mic → listen once (de-DE) → fill the input and send hands-free.

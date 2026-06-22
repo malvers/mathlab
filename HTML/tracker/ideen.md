@@ -6,9 +6,8 @@
 > sagt, wohin eine Idee gewandert ist (z. B. „→ als Arbeitsauftrag in `feature-requests.md`").
 > Erstellt 2026-06-12. Doc zu allen 16: „Im Allgemeinen waren alle Ideen gut, es ging nur um die Priorität."
 
-## 🔴 PRIO 0 — Doc-Wünsche 2026-06-14 ([`../../ideen-wunsche.md`](../../ideen-wunsche.md))
+## 🔴 PRIO 0 — Doc-Wünsche 2026-06-14 (`ideen-wunsche.md` (konsolidiert))
 Frisch von Doc, **vor allem anderen**. Triagiert in die Queues:
-- POI → [`feature-requests.md`](feature-requests.md) **FEAT-24**
 - Karten-PIN + Navi dorthin → **FEAT-25**
 - Tankstellen/Tankpreise (nur Server-Aktivierung, Code da) → **FEAT-26**
 - Pl@ntNet-Schwelle 10 % → **20 %** → **FEAT-22-Korrektur**

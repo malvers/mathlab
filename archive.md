@@ -1556,3 +1556,133 @@ laufende Sitzungs-Summe.
   aber die Client-Rechnung, weil `usage` ohnehin schon ankommt.
 
 ---
+
+
+## Teil 3 — Aus feature-requests.md entfernt 2026-06-22 (Referenz/Ordnung)
+
+## Bereits gebaut (Referenz — NICHT neu bauen) ✅
+**Session 2026-06-10 (in `main`):**
+- **Einfache Navigation** (`HTML/js/tracker-nav.js`): Adresse → Route (Nominatim + OSRM), START
+  navigiert **und** trackt, Ziel-Pin, ETA, **Re-Routing** bei Abweichung, **Abbiege-Ansage per Stimme**
+  (seit 2026-06-20 über **Cloud-TTS** `SolitaVoice` — Pixel-WebView-Fix, s. bugfixes.md BUG-9;
+  `speechSynthesis` nur noch Desktop-Fallback) + On-screen-Banner, Schalter „Sprachansage" (persistiert).
+  Karten-Kamera während der Navigation: **dynamischer Reststrecken-Fit** (BUG-10, 2026-06-20).
+- **Tempo-Limit-Schild** (`HTML/js/tracker-speedlimit.js`): OSM `maxspeed`, rot bei Übertretung.
+- **Tempo-Warnton:** kleine Glocke bei >10 % über Limit.
+- **Idle-Auto-Hide**, **Kompass/Nordpfeil**, **Quellen-Status** (DWD/RainViewer) im Debug.
+- **Cross-Device-Sync ohne Login** (`archive/sync-sketch.md`, ✅ umgesetzt): deterministisches geteiltes Konto →
+  Tracks/Fotos auf mehreren Geräten. Referenz, nicht neu bauen.
+
+**🌿 Session 2026-06-11 (auf dem Branch, NICHT in main):**
+- **Live-Config-Demo** (Idee 19): `docalvers.de/config.json` → `HTML/js/tracker-config.js` pollt (~20 s,
+  ETag) → CSS-Variablen, **reload-frei**. Fernsteuerbar: Stat-Farbe unter der Uhr, Navi-Banner Farbe/
+  z-Order/Süd-Offset. → produktionsreif machen = **FEAT-10**.
+- **solita.html (ex-labai) Voice-Modus:** 🎤 Diktat (de-DE, freihändig senden) + 🔊 Antworten vorlesen (TTS).
+  Am 2026-06-12 zu **Solita** ausgebaut: Wake-Word „Solita", Claude-`claude`-Edge-Function (Code da, Deploy
+  offen), Persona + Kontext-Zusammenfassung. Siehe `archive/plan-contact-ai-im-tracker.md` / FEAT-11.
+- **Navi-Banner reicher:** ETA + Straße/Ref + Schild-Ziele, Google-Navi-Grün, unter dem Header.
+- **Abbiegepfeile** von Unicode auf saubere **SVG-Pfeile** (`arrowSvg()` in `tracker-nav.js`).
+- **Tempolimit-Schild** robuster: nächste Straße, deutsche Zonen-Tags, „c" statt ∞ bei unbegrenzt,
+  springt beim Überschreiten nach vorne.
+- **FIT-Button = 3-Stufen-Loop** (ganze Route → Reststrecke → aus); Mittig-Zentrieren zurückgenommen.
+- **Tempo-abhängiger Zoom** beim Folgen (schnell=raus, langsam=rein).
+- **Tempo-Glocke** per Häkchen (Einstellungen→Debug, persistiert) · **mobile Shortcuts d/k/w** im Debug.
+- **krass-app** zählt jetzt auch „solita"/„solida".
+- Positionspunkt + weißes Richtungs-Dreieck **über** der blauen Navi-Linie.
+
+## Nicht-Tracker / Verteilung & Wissen (Kontext, kein Bau-Auftrag)
+- **Play-Store-Verteilung** (🌿 `archive/verteilung-playstore-tester.md`): Samsung „Auto Blocker" blockt Sideload;
+  Play Store braucht für neue persönliche Konten **12 Tester · 14 Tage**. Firmenkonto (D-U-N-S) umgeht die
+  Auflage. **Thema „nächste Woche"** — Entscheidung, kein Code.
+- **Wissens-Notiz Lebens-Agent** (🌿 `archive/wissensnotiz-llm-kompression-lebensagent.md`): Tokens/Kompression +
+  Memory-Architektur (extern speichern, Retrieval, stufenweise verdichten) für den „Solita/Samantha"-
+  Lebensbegleiter. Referenz/Hintergrund, kein Auftrag.
+
+## Reihenfolge-Empfehlung (Vorschlag — Doc kippt)
+0. **Branch `fit-mode…` nach `main` mergen** (3-Wege) — sonst doppelte/divergente Arbeit.
+1. **BUG-1** (Speed) + **BUG-2** (Regenradar) + **BUG-5** (Live-Broadcast) — Vertrauen in die Basis.
+2. **FEAT-1 Brotkrumen** (Prio 1, Sicherheit) · **FEAT-2 Goldene Stunde** (klein, Prio 1) ·
+   **FEAT-13 Navi-Blau/Speed** (Prio 1) · **FEAT-15 KI-Indikator** (klein, wartet nur auf Variantenwahl).
+3. **FEAT-14 Tracking↔Navi entkoppeln** (Quick-Win C) · **FEAT-3 Parkplatz → FEAT-4 Zurück zum Auto**.
+4. **FEAT-5 Regen-Vorwarnung** (erst nach BUG-2).
+5. **FEAT-10 Remote-Config ausbauen** · **FEAT-11/12 Contact-AI/Solita** (Future Now, größer).
+6. Rest nach Doc-Prio.
+
+
+## Teil 4 — Erledigte/obsolete Bugs aus bugfixes.md 2026-06-22 (g5ubA integriert+gelöscht, gegen Code verifiziert)
+
+## BUG-1 — Geschwindigkeitsanzeige (km/h) ist unzuverlässig 🏗️ Fix gebaut (lokal) · Feld-Test offen
+> **✅ Stand 2026-06-13 — lokal gebaut, NOCH NICHT gepusht/feldgetestet** (`HTML/js/tracker.js`):
+> Die km/h-Anzeige ist vom `still`-Gate **entkoppelt** — sie zeigt jetzt den rohen GPS-Doppler
+> `coords.speed × 3.6` unabhängig vom Gate; nur wenn kein Doppler kommt, greift der alte Distanz/Zeit-
+> Fallback (regressionsfrei). Floor `SPEED_ZERO_KMH = 1.0` killt Doppler-Rauschen im Stand. Das Gate
+> steuert weiterhin nur die **Aufzeichnung**, nicht mehr die Anzeige-Zahl. **Debug in vorhandene Surfaces
+> (kein neues):** `#motion-dbg`-Leiste live `spd:<dop|calc|gate0>=<roh>→<shown>`, + einmal im DebugWindow,
+> ob `coords.speed` überhaupt geliefert wird. **Offen:** 10 s stehen / 20 m gehen → je nach Doppler-Befund
+> finalisieren (Floor justieren oder Fallback-Pfad fixen), dann committen+pushen. Doc-Entscheid: „gleich
+> entkoppeln", Messen-zuerst durch das Live-Debug ersetzt.
+
+**Priorität:** hoch (Doc-Schmerzpunkt, betrifft Live-Anzeige UND gespeichertes Speed-Profil).
+**Tiefen-Notiz (Pflichtlektüre):** [`archive/bug-geschwindigkeitsanzeige.md`](archive/bug-geschwindigkeitsanzeige.md)
+— enthält die volle, gegen den Code verifizierte Analyse + den beschlossenen Plan.
+
+**Symptom:** Beim langsamen **Gehen** zeigt der Tracker oft **0 oder zu niedrig**; bei fehlendem
+Doppler-Speed dagegen **Spikes/zu hoch**. Der Fehler wird zusätzlich **pro Punkt gespeichert** → das
+Speed-Profil der Aufzeichnung erbt ihn.
+
+**Ursache (belegt, 3 Mechanismen):**
+1. **Speed hängt am Aufzeichnungs-Gate.** `shownSpeed = still ? 0 : …` nullt die Anzeige, obwohl das
+   Gate eigentlich nur Positions-Jitter im Stand unterdrücken soll → Konstruktionsfehler.
+2. **`posStill`-Band zu groß beim Gehen:** `band = max(MIN_MOVE_M, accuracy·ACC_STEP_FACTOR)` → bei ±20 m
+   schon 14 m, bei ±50 m → 35 m. Langsame Schritte bleiben im Band → `still=true` → Speed 0.
+3. **Sub-4-km/h überschreibt das Gate nicht** (`SPEED_MOVE_KMH=4`); Gehen ≈ 3–5 km/h.
+
+**Aktuelle Fundstellen (2026-06-12, `HTML/js/tracker.js`):**
+- `:489` `gpsMoving` / `SPEED_MOVE_KMH`
+- `:490` `sensorStill` · `:496-500` `posStill` + `band` (`ACC_STEP_FACTOR`) · `:502` `still = sensorStill || posStill`
+- `:546` **Speed-Kill** `shownSpeed = still ? 0 : (0.6*shownSpeed + 0.4*kmh)`  ← Kern
+- `:563` `minStep` (Aufzeichnungs-Granularität, **getrennt** vom Anzeige-Fix behandeln)
+- Konstanten (`MIN_MOVE_M`, `MAX_ACC_M`, `MAX_JUMP_KMH`, `ACC_STEP_FACTOR`, `SPEED_MOVE_KMH`) im
+  Konstanten-Block oben in `tracker.js` — neu greppen.
+
+**Schritt 1 — ZUERST messen (Regel „nie raten"):** Pro Fix ins DEBUG-Fenster loggen: roher
+`coords.speed`, abgeleitetes `kmh`, `still`/`posStill`/`sensorStill`, `accuracy`, `band`, `dt`. 30 s gehen.
+**Die eine offene Frage:** Liefert Pixel 8a / Lenovo überhaupt `coords.speed` (Doppler)?
+
+**Schritt 2 — fixen je nach Befund:**
+- **Doppler vorhanden →** Anzeige vom Gate **entkoppeln**: `coords.speed × 3.6` direkt zeigen, unabhängig
+  von `still`. Im Stand ist Doppler ≈ 0, die Zahl fällt von selbst → harter Gate-Kill überflüssig.
+  Regressionsfrei: fehlt Doppler, bleibt heutiges Verhalten.
+- **Doppler null →** Fallback-Pfad fixen: `posStill` von der Speed-Logik lösen, `SPEED_MOVE_KMH` ~2,
+  EMA **zeitbasiert** (Gewicht aus `dt` statt pro Fix).
+
+**Akzeptanz/Test:** Langsam (~3 km/h) gehen → Anzeige folgt plausibel statt 0/Sprünge; stehen → fällt auf 0;
+gespeicherter `spdVal` pro Punkt erbt den korrigierten Wert (Profil wird automatisch korrekt).
+Danach Debug-Logging wieder raus **oder** hinter ein Debug-Flag.
+
+**NICHT tun:** die Aufzeichnungs-Granularität (`minStep`, `posStill` fürs Punkte-Setzen) im selben Schritt
+anfassen — Risiko, Jitter im echten Stand wieder reinzuholen. Erst Display, dann separat entscheiden.
+
+> **Hinweis:** Auf Branch `claude/unclear-request-g5ubA` (Commit `f4ee3a1`) liegt bereits ein Teil-Fix
+> „GPS speed overrides the motion gate". Vor Neubau prüfen, ob er den Doppler-Fall schon löst → ggf.
+> cherry-picken statt neu schreiben (siehe BUG-4).
+
+## BUG-3 — Track strichelt bei Aufnahme-Pause (nicht nur bei echtem GPS-Ausfall) 🅿️ geparkt
+**Priorität:** niedrig (kosmetisch), aber Fix liegt schon vor.
+**Wo:** Branch `claude/unclear-request-g5ubA`, Commit `d79cd74` „only dash the track on a real GPS dropout,
+not a recording pause". **UN-integriert.**
+**Aufgabe:** `git diff main..origin/claude/unclear-request-g5ubA -- <track-render>` ansehen; sauber
+cherry-picken/integrieren. **Achtung (Memory `project_tracker_dashfix_parked`):** braucht ein neues
+Punkt-Feld `gaps[]`, das **überall** mitgezogen werden muss (Renderer, Speichern, GPX). Branch **NICHT löschen**.
+**Erst Doc fragen**, ob jetzt integrieren.
+
+## BUG-4 — Geparkte Tracker-Fixes auf `claude/unclear-request-g5ubA` sichten 🅿️ geparkt
+Auf dem Branch liegen drei `fix(tracker)`-Commits gegenüber main:
+- `f4ee3a1` GPS-Speed überschreibt das Motion-Gate (→ relevant für **BUG-1**).
+- `d79cd74` Strichel-Linie nur bei echtem GPS-Dropout (→ **BUG-3**).
+- `efab4a9` Activity-Icon vertikal zentriert neben KM/H (kleiner UI-Fix).
+
+**Aufgabe für den Sichtungs-Subagenten:** `git log --oneline main..origin/claude/unclear-request-g5ubA`
++ `git diff --stat`. Pro Commit beurteilen: noch relevant nach dem Refactor? Konfliktfrei? Empfehlung
+(cherry-pick / neu schreiben / verwerfen) je Commit zurückmelden. **Nicht** blind mergen (Memory
+`feedback_uwa_integration`). Branch **NICHT löschen** (Memory).

@@ -25,6 +25,7 @@
 - Mandelbulb / Quaternion Julia (3D)
 - Travelling salesman (nearest neighbour vs 2-opt vs ACO)
 - Perlin / Simplex noise visualizer
+- Historische Zahlsysteme (Ifrah, „Universalgeschichte der Zahlen"): Dezimalzahl eingeben → Anzeige in babylonisch (Basis 60), Maya (Basis 20), ägyptisch, römisch, indisch-arabisch; Entwicklung von Null & Stellenwertsystem interaktiv
 
 ---
 

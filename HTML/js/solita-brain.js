@@ -49,6 +49,7 @@
         // ---- state (in-memory; persisted to localStorage under the host's keys) ----
         let conversationHistory = [];
         let runningSummary = '';
+        let inFlight = null;   // AbortController for the running turn → host can cancel (e.g. tap-to-stop)
         try { runningSummary = localStorage.getItem(SUMMARY_KEY) || ''; } catch (e) { }
 
         const self = this;
@@ -57,11 +58,14 @@
             try { localStorage.setItem(HISTORY_KEY, JSON.stringify(conversationHistory)); } catch (e) { }
         }
 
-        // Build the proxy payload: persona + rolling summary as a system turn, then the recent chat.
+        // Build the proxy payload. Persona (static) and the rolling summary (volatile) go as TWO SEPARATE
+        // system turns so the edge fn can cache the big persona on its OWN breakpoint (read ~0.1× every turn).
+        // Gluing them meant any summary change re-wrote the whole persona at 1.25× — the cache_creation churn
+        // Doc measured (2196w per turn). Split, a summary change re-reads only its own few hundred tokens.
         function buildRequestMessages() {
-            const sys = getSystem()
-                + (runningSummary ? "\n\nBisheriger Gesprächskontext (Zusammenfassung):\n" + runningSummary : "");
-            return [{ role: 'system', content: sys }].concat(conversationHistory);
+            const msgs = [{ role: 'system', content: getSystem() }];
+            if (runningSummary) msgs.push({ role: 'system', content: "Bisheriger Gesprächskontext (Zusammenfassung):\n" + runningSummary });
+            return msgs.concat(conversationHistory);
         }
 
         // --- Kosten-Zähler (Doc: ab sofort Transparenz). Preise $/1M Tokens; Cache-Read ~0,1×, Write 1,25×.
@@ -93,8 +97,11 @@
             const outTok = (u.output_tokens != null) ? u.output_tokens : (u.completion_tokens || 0);
             const cw = u.cache_creation_input_tokens || 0;
             const p = priceFor(model);
-            // uncached input full price · cache read 0,1× · cache write 1,25× · output full
-            const eur = (inTok * p[0] + cr * p[0] * 0.1 + cw * p[0] * 1.25 + outTok * p[1]) / 1e6 * USD_EUR;
+            // Cache pricing differs by provider: Anthropic bills cache-READ ~0.1× and cache-WRITE 1.25×.
+            // DeepSeek has no write premium and its cache-HIT input ≈ 0.26× ($0.07 vs 0.27 / $0.14 vs 0.55).
+            const isDS = /^deepseek/.test(model || '');
+            const readMul = isDS ? 0.26 : 0.1, writeMul = isDS ? 1 : 1.25;
+            const eur = (inTok * p[0] + cr * p[0] * readMul + cw * p[0] * writeMul + outTok * p[1]) / 1e6 * USD_EUR;
             let total = 0; try { total = parseFloat(localStorage.getItem(COST_KEY) || '0') || 0; } catch (e) { }
             total += eur;
             try { localStorage.setItem(COST_KEY, String(total)); } catch (e) { }
@@ -154,7 +161,8 @@
             const response = await fetch(resolveUrl(getModel()), {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'apikey': anonKey, 'Authorization': 'Bearer ' + anonKey, 'x-app-pass': pwd },
-                body: JSON.stringify({ model: getModel(), messages: msgs, tools: getTools(), max_tokens: 3000 })
+                body: JSON.stringify({ model: getModel(), messages: msgs, tools: getTools(), max_tokens: 3000 }),
+                signal: inFlight ? inFlight.signal : undefined   // lets abort() cancel the turn mid-flight
             });
             if (!response.ok) {
                 let err = 'Fehler ' + response.status;
@@ -211,7 +219,7 @@
             onPersist();        // host may push the updated log to the shared server (solita-sync.js)
             onTyping(false);
             onAssistant(finalText);
-            onCost(turnEur, totalSpentEur());    // per-query cost (sum of all hops) + running all-time total
+            onCost(turnEur, totalSpentEur(), getModel());    // per-query cost + all-time total + the model that produced it (colour)
             onSpeak(finalText);
             maybeSummarize();   // fold older turns into the rolling summary (best-effort, background)
         }
@@ -220,6 +228,7 @@
             const pwd = getPwd();
             if (!checkDailyCapAtStart()) return;   // daily cap hit → onError + onDone already fired, drop the turn
             conversationHistory.push({ role: 'user', content: userText });
+            inFlight = new AbortController();
             onTyping(true);
             try {
                 const msgs = buildRequestMessages();
@@ -228,8 +237,10 @@
             } catch (err) {
                 conversationHistory.pop();   // drop the user turn on failure
                 onTyping(false);
-                onError(err);                // host clears the stuck indicator (e.g. fetch aborted by an app-switch)
+                // A user-triggered abort (tap-to-stop) is NOT an error → clean up quietly, no red bubble.
+                if (!(err && err.name === 'AbortError')) onError(err);
             } finally {
+                inFlight = null;
                 onDone();
             }
         }
@@ -266,6 +277,7 @@
 
         // ---- public API ----
         self.send = send;
+        self.abort = function () { try { if (inFlight) inFlight.abort(); } catch (e) { } };   // cancel the running turn
         self.load = load;
         self.clear = clear;
         self.getHistory = function () { return conversationHistory; };
