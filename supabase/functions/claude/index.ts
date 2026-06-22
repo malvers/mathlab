@@ -44,6 +44,29 @@ function json(obj: unknown, status = 200): Response {
   });
 }
 
+// Fire-and-forget: append ONE token-usage row to ai_cost_log for the daily infra cost mail. A logging
+// hiccup must NEVER affect the chat response (best-effort, try/catch). SUPABASE_URL + service-role key are
+// auto-injected by the Edge runtime. Pricing happens later in infra-usage — here we only record raw tokens.
+async function logAiCost(provider: string, model: string, u: Record<string, number> | undefined) {
+  try {
+    const url = Deno.env.get('SUPABASE_URL');
+    const svc = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    if (!url || !svc || !u) return;
+    await fetch(url + '/rest/v1/ai_cost_log', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'apikey': svc, 'Authorization': 'Bearer ' + svc, 'Prefer': 'return=minimal' },
+      body: JSON.stringify({
+        provider, model,
+        in_tok: u.input_tokens || 0,
+        out_tok: u.output_tokens || 0,
+        cache_read: u.cache_read_input_tokens || 0,
+        cache_write: u.cache_creation_input_tokens || 0,
+        label: 'chat',
+      }),
+    });
+  } catch (_) { /* logging must never break the chat */ }
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS });
 
@@ -144,6 +167,13 @@ Deno.serve(async (req) => {
       ? data.content.filter((c: { type: string }) => c.type === 'text')
           .map((c: { text: string }) => c.text).join('\n')
       : '';
+    // cost mail: record this hop's token usage in the BACKGROUND so the chat response is never delayed
+    // or affected by the logging POST (waitUntil keeps the worker alive past the response on Supabase Edge).
+    try {
+      const er = (globalThis as { EdgeRuntime?: { waitUntil?: (p: Promise<unknown>) => void } }).EdgeRuntime;
+      const p = logAiCost('claude', String(body.model), data.usage);
+      if (er?.waitUntil) er.waitUntil(p);
+    } catch (_) { /* logging must never affect the chat */ }
     return json({
       choices: [{ message: { role: 'assistant', content: text } }],
       content: Array.isArray(data.content) ? data.content : [],

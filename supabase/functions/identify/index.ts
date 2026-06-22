@@ -63,6 +63,29 @@ function json(obj: unknown, status = 200): Response {
   });
 }
 
+// Fire-and-forget: log Gemini token usage to ai_cost_log for the daily infra cost mail. Best-effort —
+// a logging hiccup must NEVER break identification. Gemini shape: usageMetadata.promptTokenCount /
+// candidatesTokenCount (+ cachedContentTokenCount). Pricing happens later in infra-usage.
+async function logGeminiCost(model: string, um: Record<string, number> | undefined) {
+  try {
+    const url = Deno.env.get('SUPABASE_URL');
+    const svc = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    if (!url || !svc || !um) return;
+    await fetch(url + '/rest/v1/ai_cost_log', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'apikey': svc, 'Authorization': 'Bearer ' + svc, 'Prefer': 'return=minimal' },
+      body: JSON.stringify({
+        provider: 'gemini', model,
+        in_tok: um.promptTokenCount || 0,
+        out_tok: um.candidatesTokenCount || 0,
+        cache_read: um.cachedContentTokenCount || 0,
+        cache_write: 0,
+        label: 'identify',
+      }),
+    });
+  } catch (_) { /* logging must never break identification */ }
+}
+
 // Ask Pl@ntNet for the most likely species. Returns the top result, or a reason it didn't apply.
 // Pl@ntNet rejects non-plant photos itself (HTTP 404) → that's the natural "not a plant" signal.
 async function plantnetIdentify(
@@ -327,6 +350,12 @@ Deno.serve(async (req) => {
     }
 
     const data = await r.json();
+    // cost mail: record Gemini token usage in the background (best-effort, never blocks identification).
+    try {
+      const er = (globalThis as { EdgeRuntime?: { waitUntil?: (p: Promise<unknown>) => void } }).EdgeRuntime;
+      const p = logGeminiCost(MODEL, data?.usageMetadata);
+      if (er?.waitUntil) er.waitUntil(p);
+    } catch (_) { /* never affect identification */ }
     const txt = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
     // Gemini's OWN identification (independent of Pl@ntNet).
     let gTitle = '';
