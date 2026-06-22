@@ -56,18 +56,6 @@ live in der App** — ohne je die Claude-App zu öffnen, ohne SDK im Client.
 
 ---
 
-## ✅ Stufe 1 GEBAUT (2026-06-12) — „Solita" (Client fertig, Backend-Deploy = Doc)
-Aus `labai.html` wurde **`HTML/solita.html`** (git-rename, Verlauf erhalten). Gebaut:
-- **Claude-Edge-Function** `supabase/functions/claude/index.ts` — Passwort-Gate (`x-app-pass` gegen
-  `LABAI_PASSWORD`), übersetzt die OpenAI-förmige Anfrage auf die **Anthropic Messages API** und gibt
-  wieder `choices[0].message.content` zurück (Client bleibt fast gleich). **Kein Key im Repo** (nur
-  `Deno.env.get('ANTHROPIC_API_KEY')`).
-- **solita.html** zeigt jetzt auf `/functions/v1/claude`, Modell-Auswahl **OPUS 4.8 · SONNET 4.6 (default)
-  · HAIKU 4.5**, Persona-System-Prompt, **Kontext-Zusammenfassung** (ältere Turns werden per Haiku in eine
-  rollende Summary gefaltet statt vergessen), **Wake-Word „Solita"** (Dauer-Zuhören, pausiert beim
-  Vorlesen; Web-Vordergrund — echtes Hintergrund-Wecken bleibt nativ/krass), **XSS-Fix** (WP-5: AI-Text
-  wird vor dem Markdown-Rendern escaped). Vorlesen (TTS) war schon da.
-
 ### Deploy (DU, einmalig — Agent setzt keine Secrets):
 ```
 supabase functions deploy claude --no-verify-jwt

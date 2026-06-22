@@ -7,8 +7,6 @@
 > nichts** — sie verlinkt und destilliert. Stand der Code-Zeilen: 2026-06-12 (nach dem inline→module-Refactor).
 
 ## ⚡ Kurz-Übersicht
-- ✅ **BUG-10 · gefixt 2026-06-20** — Navigation: Route-Fit jetzt dynamisch (Reststrecken-Fit beim Fahren)
-- ✅ **BUG-9 · gefixt 2026-06-20** — Abbiege-Ansagen stumm aufm Pixel → jetzt über Cloud-TTS (`SolitaVoice`)
 - **BUG-1** Speed-Anzeige km/h falsch · 🏗️ Fix gebaut (Anzeige vom Gate entkoppelt + Debug) · Feld-Test + Push offen
 - **BUG-2** Regenradar zeigt in DE keinen Regen
 - **BUG-3** 🅿️ Track strichelt bei Aufnahme-Pause
@@ -50,7 +48,7 @@
 > entkoppeln", Messen-zuerst durch das Live-Debug ersetzt.
 
 **Priorität:** hoch (Doc-Schmerzpunkt, betrifft Live-Anzeige UND gespeichertes Speed-Profil).
-**Tiefen-Notiz (Pflichtlektüre):** [`bug-geschwindigkeitsanzeige.md`](bug-geschwindigkeitsanzeige.md)
+**Tiefen-Notiz (Pflichtlektüre):** [`archive/bug-geschwindigkeitsanzeige.md`](archive/bug-geschwindigkeitsanzeige.md)
 — enthält die volle, gegen den Code verifizierte Analyse + den beschlossenen Plan.
 
 **Symptom:** Beim langsamen **Gehen** zeigt der Tracker oft **0 oder zu niedrig**; bei fehlendem
@@ -98,7 +96,7 @@ anfassen — Risiko, Jitter im echten Stand wieder reinzuholen. Erst Display, da
 
 ## BUG-2 — Regenradar zeigt in Deutschland keinen Regen 🐞 offen
 **Priorität:** mittel-hoch (live unterwegs bei Frankfurt-Starkregen reproduziert: Karte zeigte 0 Regen).
-**Tiefen-Notiz (Pflichtlektüre):** [`bug-regenradar-kein-regen.md`](bug-regenradar-kein-regen.md)
+**Tiefen-Notiz (Pflichtlektüre):** [`archive/bug-regenradar-kein-regen.md`](archive/bug-regenradar-kein-regen.md)
 
 **Symptom:** Innerhalb der deutschen DWD-Abdeckung zeigt der REGEN-Overlay nichts, obwohl es real stark regnet.
 
@@ -199,7 +197,7 @@ Auf dem Branch liegen drei `fix(tracker)`-Commits gegenüber main:
 
 ## BUG-6 — Activity-Erkennung wirkt nur speed-basiert 🐞 offen · 🔍 erst messen
 **Priorität:** mittel (untergräbt alle Activity-abhängigen Features: FEAT-3 Parkplatz, WegCast-Radius, Reisemodus-Icon).
-**Tiefen-Notiz (Pflichtlektüre):** [`activity-debug-morgen.md`](activity-debug-morgen.md)
+**Tiefen-Notiz (Pflichtlektüre):** [`archive/activity-debug-morgen.md`](archive/activity-debug-morgen.md)
 
 **Symptom:** Das Reisemodus-Icon (laufen/fahren) reagiert offenbar **nur auf die Geschwindigkeit**, nicht
 auf die echte Play-Services-Activity-Recognition.
@@ -252,87 +250,8 @@ zeigt — tatsächlich ist es der **Zwinger** (beide liegen dicht beieinander).
 1. **Client:** Heading erfassen (GPS `coords.heading` bei Tempo>0, sonst Kompass/DeviceOrientation) und beim
    Foto mitschicken.
 2. **identify:** Heading nutzen — POIs im **Sichtkegel voraus** (Bearing Standort→POI ≈ Heading ±X°)
-   bevorzugen statt nur nach Nähe. Passt zu `geo-erkennung-und-voice-spur.md`.
+   bevorzugen statt nur nach Nähe. Passt zu `archive/geo-erkennung-und-voice-spur.md`.
 **Caveat:** Heading im Stehen unzuverlässig (Kompass-Jitter) → breiter Kegel / Fallback auf Nähe.
-
----
-
-## BUG-9 — Voice-Navigation: Abbiege-Ansagen stumm auf dem Pixel ✅ gefixt 2026-06-20
-**Quelle:** [`../../ideen-wunsche.md`](../../ideen-wunsche.md) (Doc 2026-06-14): „Warum haben wir keine Voice
-Navigation? …" → am 2026-06-20 von Doc präzisiert: die **gesprochenen Abbiege-Ansagen** („In 120 Metern
-rechts abbiegen") kommen auf dem **Pixel** nicht.
-
-**✅ Ursache gefunden + gefixt (2026-06-20):** Die Ansagen liefen über **`window.speechSynthesis`** (on-device
-Web-Speech-TTS). Im **Android-System-WebView** (die Pixel-APK ist Capacitor, lädt die Seite als WebView)
-bleibt `speechSynthesis` **stumm** — keine Voice-Engine gebunden, `getVoices()` leer. **Beweis:** Solita
-selbst spricht auf dem Gerät sehr wohl — aber über einen ANDEREN Kanal: Cloud-TTS via `tts`-Edge-Function
-(Google) → mp3 über ein `<audio>`-Element (`HTML/js/solita-voice.js`, `window.SolitaVoice`). `tracker-nav.js`
-war die **einzige** Stelle, die noch `speechSynthesis` nutzte.
-
-**Fix (`HTML/js/tracker-nav.js`):** `speak()` ruft jetzt **primär `SolitaVoice.speak(text)`** (denselben
-Cloud-Weg, der auf dem Pixel schon spricht); `speechSynthesis` bleibt nur als **Fallback** (`speakSynth()`,
-für Desktop/Standalone ohne `SolitaVoice`). Neue Helfer `stopSpeech()` stoppt BEIDE Engines — in
-`clearRoute()` und beim Voice-Toggle. Logs ins DEBUG-Window (`tts: SolitaVoice ▶ "…"`).
-
-**Für andere Agenten — WICHTIG:** Nie wieder `speechSynthesis` für neue Sprachausgabe im Tracker/WebView —
-immer `window.SolitaVoice.speak()` (Cloud-TTS) nutzen. Kostet Netz (kurze Sätze, ok); offline schweigt sie.
-Ein gemeinsamer `<audio>`-Kanal → neue Ansage unterbricht die laufende (gewollt, kein Überlappen).
-
-**Akzeptanz/Test (Doc, am Gerät):** Ziel setzen → START → fahren: Ansage kommt; DEBUG zeigt `SolitaVoice ▶`.
-**Offen (separat):** Vollständige Voice-*Steuerung* per Sprachbefehl bleibt ein eigenes Thema (Solita-STT).
-
----
-
-## BUG-10 — Navigation: Route-Fit passt sich beim Fahren nicht an ✅ gefixt 2026-06-20 · Nachtrag 2026-06-21
-**Quelle:** Doc 2026-06-20 (mündlich, zusammen mit dem Sprachansage-Fix): „Das Fit der Route muss
-**dynamisch** passieren. Das wird einmal gemacht beim Einschalten, aber dann nicht angepasst."
-**Priorität:** mittel (Komfort beim Navigieren — die Reststrecke läuft aus dem Bild).
-
-**✅ Nachtrag-Fix (2026-06-21, `HTML/js/tracker.js` `updateFitMode`):** Doc meldete, der Reststrecken-Fit
-sei *immer noch* nicht dynamisch. Ursache war NICHT die Aktivierung (die lief), sondern der Re-Fit-Loop
-selbst: er bewegte die Karte **nur** bei einem Zoom-Hysterese-Wechsel (`grew || shrank`, Cooldown 4 s).
-Dazwischen wurde **nie gepannt** → die Reststrecke nicht nachzentriert; und mit `zoomSnap:1` (ganze
-Zoom-Stufen) liegt `rb` nach einem Fit oft bequem im Rahmen → weder `grew` noch `shrank` → Kamera steht.
-**Korrektur:** Pan und Zoom **entkoppelt** — **Zoom** weiter bidirektional mit Hysterese+Cooldown
-(`-0.12`/`-0.30`), aber **Pan auf den Rest-Mittelpunkt bei JEDEM Fix** (`map.panTo(rb.getCenter())`), sodass
-der Ausschnitt der schrumpfenden Reststrecke laufend folgt. Hand-Pan/CENTER/FIT setzen `fitMode=false` und
-übersteuern weiterhin. (`-0.40`→`-0.30` zieht den Zoom etwas früher nach.)
-
-**✅ Fix (2026-06-20, `HTML/js/tracker.js`):** Nach dem einmaligen Routen-Overview schaltet der Nav-Start
-jetzt automatisch in den **dynamischen Reststrecken-Fit** (`fitMode = 'remaining'`) statt in den reinen
-Crosshair-Follow — der vorhandene bidirektionale Re-Fit-Loop (`:751-758`, mit Hysterese + Cooldown) rahmt
-die schrumpfende Reststrecke dann bei JEDEM Fix nach. Fundstelle: der `navOverviewTimer`-Callback im
-START-Handler (vorher `centerOnPosition()`; jetzt `remainingBounds` → `fitMode='remaining'`, Fallback auf
-`centerOnPosition()` falls noch keine Route-Geometrie da ist). Hand-Pan/CENTER/FIT übersteuern weiterhin
-(canceln den Overview-Timer bzw. setzen `fitMode`/`following` selbst).
-**Für andere Agenten:** Der 3-State der FIT-Taste (aus → 'all' → 'remaining') bleibt unverändert; START
-springt nur direkt auf 'remaining'. In 'remaining' besitzt der Fit den Zoom (Speed-Zoom pausiert, `:732-735`).
-
-**Symptom:** Beim Nav-Start wird die **ganze** Route **einmal** ins Bild gerahmt; danach gleitet die Karte
-in die Crosshair-Follow-Ansicht. Beim Weiterfahren wird der Kartenausschnitt **nicht** an die schrumpfende
-**Reststrecke** angepasst — er folgt nur der Position (speed-zoom), das Ziel/der Rest bleibt außerhalb.
-
-**Ursache (belegt):** Der dynamische Reststrecken-Fit **existiert schon**, wird beim Navigieren aber
-**nicht automatisch aktiviert**:
-- Nav-Start macht **genau einen** `frameRoute()` (ganze Route), dann nach `NAV_OVERVIEW_MS` (3 s)
-  `centerOnPosition()` → reiner `following`-Modus. `fitMode` wird sogar explizit auf `false` gesetzt
-  (`HTML/js/tracker.js:1094`, `:1100-1106`).
-- Der bidirektionale Re-Fit auf die Reststrecke (`fitMode === 'remaining'` → `__nav.remainingBounds(here)`,
-  mit Hysterese + Cooldown) ist vorhanden in `HTML/js/tracker.js:751-758`, aber nur per **manuellem**
-  Durchschalten der FIT-Taste erreichbar (3-State: aus → 'all' → 'remaining').
-- `remainingBounds(here)` liefert bereits „aktuelle Position + alles voraus + Ziel" (`HTML/js/tracker-nav.js`).
-
-**Fix-Richtung (zur Entscheidung mit Doc — NICHT ungefragt bauen, Regel 2/4):** Beim Nav-Start nach dem
-einmaligen Overview statt (oder zusätzlich zu) `following` den **`fitMode = 'remaining'`** automatisch
-einschalten, sodass die Reststrecke laufend nachgerahmt wird (die Logik bei `:751-758` greift dann jeden Fix).
-Manuelles Übernehmen (Hand-Modus) / die FIT-Taste müssen das weiterhin überstimmen können.
-
-**Akzeptanz/Test:** Route setzen → START → losfahren: der sichtbare Ausschnitt zieht sich mit der
-Reststrecke zusammen, Ziel bleibt im Bild; kein Flattern (Hysterese/Cooldown); ZENTRIEREN/FIT/Hand-Pan
-übersteuern weiterhin sauber.
-
-**NICHT tun:** den Speed-Zoom der normalen Follow-Ansicht und den Reststrecken-Fit gleichzeitig am Zoom
-zerren lassen (in 'remaining' besitzt der Fit den Zoom — siehe `:732-735`).
 
 ---
 

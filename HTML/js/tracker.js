@@ -170,6 +170,8 @@
                     b.hidden = true;
                 }
             });
+            const fan = document.getElementById('view-fan');
+            if (fan) fan.style.setProperty('--n', String(slot)); // visible-option count → CSS centres the open cluster
             return slot;
         }
         function refreshRecenter() {
@@ -2559,8 +2561,16 @@ ${pts}
         window.addEventListener('contextmenu', (e) => e.preventDefault());
         $('zoom-in').addEventListener('click', () => { enterHandMode(); map.zoomIn(); });   // hand zoom → freeze auto
         $('zoom-out').addEventListener('click', () => { enterHandMode(); map.zoomOut(); }); // hand zoom → freeze auto
-        // View-fan: the trigger toggles the fan open/closed; each option applies its mode.
-        $('recenter-fab').addEventListener('click', () => { fanOpen ? closeFan() : openFan(); });
+        // View-fan: the trigger opens the fan — but only when there's more than ONE mode to choose. With a
+        // single valid mode (e.g. crosshair + no track), fanning out one redundant option is just noise →
+        // apply it directly (tap = re-centre), show nothing extra.
+        $('recenter-fab').addEventListener('click', () => {
+            if (fanOpen) { closeFan(); return; }
+            const valid = validModes();
+            const offered = ['follow', 'fitall', 'fitrem', 'hand'].filter((m) => valid[m]);
+            if (offered.length <= 1) { if (offered[0]) selectViewMode(offered[0]); return; }
+            openFan();
+        });
         document.querySelectorAll('#view-fan .vf-opt').forEach((b) => {
             b.addEventListener('click', () => selectViewMode(b.dataset.mode));
         });

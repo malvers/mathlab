@@ -24,10 +24,3 @@ Damit das Self-Update greift, bei JEDEM neuen APK-Release:
 2. `./gradlew assembleDebug` → APK nach `HTML/tracker/doc-alvers-tracker.apk` kopieren.
 3. `HTML/tracker/version.json`: `versionCode`/`versionName` auf denselben Stand.
 4. Doc: committen + pushen. Geräte sehen beim nächsten App-Öffnen das Banner.
-
-## Log: autonome Session 2026-06-08 (In-App-Update gebaut)
-Alles **uncommitted**, nichts gepusht/installiert:
-- Nativ: `AppUpdatePlugin` (getInfo + installApk) + `REQUEST_INSTALL_PACKAGES` + in MainActivity registriert; versionCode 1→2 / 1.0→1.1.
-- Web: `js/app-update.js` (Banner „Neue Version verfügbar → Installieren") im Loader; `HTML/tracker/version.json`.
-- APK gebaut (compile OK, versionCode 2 verifiziert) + nach `HTML/tracker/` kopiert.
-- Offen für Doc: committen + pushen; auf den Geräten **einmal** die vc2-APK installieren (danach Self-Update).
