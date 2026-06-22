@@ -137,6 +137,20 @@
         const NAV_OVERVIEW_MS = 3000;
         // ≈ 5 mm from the map centre (CSS px ≈ 1/96 in → 5 mm ≈ 19 px); within that the dot is "centred".
         const CENTER_TOL_PX = 19;
+        // Bounds for "fit whole route": the driven trail ∪ (while navigating) the remaining route to the
+        // destination — so mid-drive it frames the ENTIRE journey, not just the small bit already driven
+        // (Doc: „ganze Route" hatte nur das Gefahrene gefittet → viertelte mitten auf der Fahrt). Without a
+        // route it's just the driven track (or a multi-loaded overlay). `here` optional → else the dot.
+        function wholeRouteBounds(here) {
+            let b = null;
+            if (track.length > 1) b = L.latLngBounds(track);                                                  // driven trail
+            else if (loadedBounds) b = L.latLngBounds(loadedBounds.getSouthWest(), loadedBounds.getNorthEast()); // overlay (cloned → never mutate it)
+            let ll = here;
+            if (!ll && posMarker && posMarker.getLatLng) { const p = posMarker.getLatLng(); ll = [p.lat, p.lng]; }
+            const rb = (ll && __nav && __nav.remainingBounds) ? __nav.remainingBounds(ll) : null;             // remaining route ahead
+            if (rb) b = b ? b.extend(rb) : rb;
+            return b;
+        }
         // The view-fan's current mode, derived from state. Hand-zoom wins (it froze everything), then the
         // active FIT, else "follow" (the crosshair re-centre — also the default when nothing is running).
         function currentMode() {
@@ -222,7 +236,7 @@
             const ll = posMarker && posMarker.getLatLng && posMarker.getLatLng();
             if (m === 'fitall') {
                 fitMode = 'all'; setFollowing(false);
-                const fb = track.length > 1 ? L.latLngBounds(track) : loadedBounds;
+                const fb = wholeRouteBounds(ll ? [ll.lat, ll.lng] : null);   // driven ∪ remaining (whole journey)
                 if (fb) { try { map.fitBounds(fb, { padding: fitPad() }); } catch (e) { } }
                 toast('FIT: ganze Route');
             } else if (m === 'fitrem') {
@@ -256,7 +270,7 @@
                 const ll = posMarker && posMarker.getLatLng && posMarker.getLatLng();
                 const b = (s.fitMode === 'remaining' && ll && __nav && __nav.remainingBounds)
                     ? __nav.remainingBounds([ll.lat, ll.lng])
-                    : (track.length > 1 ? L.latLngBounds(track) : loadedBounds);
+                    : wholeRouteBounds(ll ? [ll.lat, ll.lng] : null);   // 'all' → driven ∪ remaining
                 if (b) { try { map.fitBounds(b, { padding: fitPad() }); } catch (e) { } }
                 refreshRecenter();
             } else if (s.following) {
@@ -867,8 +881,8 @@
             //     the frame (-0.12 slack), in when it sits well inside (-0.30 inset).
             //   • PAN  — EVERY fix, re-centre on the remaining route so the frame follows it as it shrinks.
             if (fitMode === 'all' && track.length > 1) {
-                const tb = L.latLngBounds(track);
-                if (!map.getBounds().pad(-0.12).contains(tb)) { try { map.fitBounds(tb, { padding: fitPad() }); } catch (e) { } }
+                const tb = wholeRouteBounds(here);   // driven ∪ remaining → keep the WHOLE journey framed as it changes
+                if (tb && !map.getBounds().pad(-0.12).contains(tb)) { try { map.fitBounds(tb, { padding: fitPad() }); } catch (e) { } }
             } else if (fitMode === 'remaining' && __nav && __nav.remainingBounds) {
                 const rb = __nav.remainingBounds(here);
                 if (rb) {
