@@ -12,7 +12,6 @@
 - **FEAT-4** Zurück zum Start/Auto (online)
 - **FEAT-5** Regen-Vorwarnung (nach BUG-2)
 - **FEAT-6** 🏗️ Navigation Post-MVP (Abbiege-Liste, Verkehr)
-- **FEAT-9** 🏗️ GPS-Postproc: Profil-UI, Map-Matching
 - **FEAT-10** 🏗️ App live fernsteuern (Remote-Config)
 - **FEAT-11** Contact-AI Stufe 1 (Chat/Foto, Solita)
 - **FEAT-12** Contact-AI Stufe 2 (Agent ändert Repo)
