@@ -1189,7 +1189,11 @@
             // (desktop / coarse WLAN, ±35 m) the jitter between fixes would fake 20+ km/h on a desk.
             // No Doppler → 0. Same floor/EMA as the recording path.
             let kmh = (sp != null && sp >= 0) ? sp * 3.6 : 0;
-            if (kmh > MAX_JUMP_KMH || kmh < SPEED_ZERO_KMH || still) kmh = 0; // standing → a clean 0
+            // Do NOT zero on `still`: a clear Doppler reading IS real movement even when the dot sits
+            // inside the accuracy band. At slow walking pace each step (~2 m/s) is shorter than the band,
+            // so posStill stays true the whole time — gating speed on it read a steady 0 while walking
+            // (Doc: 7,9 km/h → 0). `still` only holds the DOT steady (renderPosition / pan), not the readout.
+            if (kmh > MAX_JUMP_KMH || kmh < SPEED_ZERO_KMH) kmh = 0; // nonsense / sub-walking floor → clean 0
             // Snap HARD to 0 when there's no movement — the EMA alone only decays (0.6·old) and gets
             // stuck around 0,1 km/h on WLAN/standstill (the irritating residual Doc saw). Smooth only
             // real motion upward.
