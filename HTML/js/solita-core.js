@@ -397,7 +397,15 @@
         // (~1.67× in+out vs Sonnet) for a voice assistant. The proxy enforces this server-side too.
         if (/opus/i.test(currentModel)) currentModel = 'claude-sonnet-4-6';
 
-        function getModel() { return currentModel; }
+        // DeepSeek can't use tools (its proxy drops the schemas). When the user clearly wants a tool action
+        // (mail/weather/notes/location/settings), transparently run THAT one turn on Claude so it actually
+        // works; ordinary chat stays on the cheap selected model. `modelOverride` is set per turn in
+        // executeChatSend and cleared in onDone. Keyword-based — tune TOOL_INTENT as needed.
+        const TOOL_INTENT = /(\be-?mails?\b|\bmails?\b|gmail|postfach|\bwetter\b|weather|vorhersage|forecast|temperatur|regne|schneit|kalender|calendar|\btermin(e)?\b|was steht (heute|morgen|diese woche|an)|\bnotiz(en)?\b|merk(e)? dir|schreib(\s+\w+)?\s+auf|erinner|wo bin ich|standort|where am i|einstellung(en)?|\bschalte\b|stell .* (ein|an|aus))/i;
+        const FALLBACK_MODEL = 'claude-sonnet-4-6'; // tool-capable Claude used when DeepSeek hits a tool request
+        let modelOverride = null;                   // forces a single turn onto Claude (tool fallback); cleared in onDone
+        function needsTools(t) { return TOOL_INTENT.test(t || ''); }
+        function getModel() { return modelOverride || currentModel; }
         // DeepSeek lives on its OWN proxy function (no tools — just cheap chat); Claude on /claude. Route by
         // the model's prefix so the summariser (Claude-Haiku) always reaches the claude proxy, even in DeepSeek mode.
         const DS_URL = AI_URL.replace(/\/claude(\?|$)/, '/deepseek$1');
@@ -482,7 +490,7 @@
             onAssistant: function (text) { addMessage('assistant', text); },
             onSpeak: function (text) { if (window.speakReply) window.speakReply(text); },
             onError: function (err) { addMessage('assistant', '❌ Fehler: ' + ((err && err.message) ? err.message : err)); if (window.solitaPhase) solitaPhase('dormant'); },
-            onDone: function () { sendButton.disabled = false; messageInput.focus(); },
+            onDone: function () { modelOverride = null; sendButton.disabled = false; messageInput.focus(); },
             // After every turn, push the updated log to the shared server (js/solita-sync.js) so the other
             // device (browser ↔ Pixel) converges on the same conversation. No-op until sync is initialised.
             onPersist: function () { if (window.SolitaSync) SolitaSync.push(brain.getHistory(), brain.getSummary()); },
@@ -861,6 +869,9 @@
             messageInput.value = '';
             messageInput.style.height = 'auto';
             sendButton.disabled = true;
+            // DeepSeek can't run tools — if this turn clearly wants one, transparently use Claude just for it.
+            modelOverride = (/^deepseek/.test(currentModel) && needsTools(userText)) ? FALLBACK_MODEL : null;
+            if (modelOverride && window.DebugWindow) DebugWindow.log('Tool-Bedarf erkannt → ' + modelOverride + ' für diese Anfrage (DeepSeek kann keine Tools)');
             brain.send(userText);   // the brain owns the turn: push history → tool-use loop → render via the wired callbacks
         }
 
