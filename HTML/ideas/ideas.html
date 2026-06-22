@@ -31,14 +31,18 @@
 
         .wrap { max-width: 880px; margin: 0 auto; padding: 18px 14px 60px; }
         header.top { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 6px 0 14px; border-bottom: 1px solid var(--line); margin-bottom: 14px; }
-        header.top h1 { font-size: 1.05rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin: 0; color: var(--orange); flex: 1 1 auto; }
+        header.top h1 { font-size: 1.6rem; font-weight: 900; letter-spacing: 2px; text-transform: uppercase; margin: 0; color: var(--green); flex: 1 1 auto; }
         .count { font-size: 0.7rem; color: var(--muted); letter-spacing: 1px; }
 
         .btn { font-family: 'Orbitron', sans-serif; font-weight: 700; letter-spacing: 1px; font-size: 0.72rem; text-transform: uppercase; cursor: pointer; border-radius: 9px; padding: 9px 14px; border: 1px solid var(--green); background: var(--green); color: #fff; transition: filter .15s, opacity .15s; }
         .btn:hover { filter: brightness(1.08); }
         .btn:disabled { opacity: .5; cursor: default; }
 
-        .grp-title { font-size: 0.64rem; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); margin: 20px 0 8px; font-weight: 500; }
+        .grp-title { display: flex; align-items: center; gap: 9px; cursor: pointer; user-select: none; font-size: 1.05rem; letter-spacing: 1.5px; text-transform: uppercase; color: var(--orange); margin: 26px 0 10px; font-weight: 700; }
+        .grp-chev { flex: 0 0 auto; width: 13px; font-size: 0.85rem; transition: transform .15s; }
+        .grp.open .grp-chev { transform: rotate(90deg); }
+        .grp-body { display: none; }
+        .grp.open .grp-body { display: block; }
 
         .row { border: 1px solid var(--line); border-radius: 10px; background: var(--bg2); margin-bottom: 7px; overflow: hidden; }
         .row-head { display: flex; align-items: center; gap: 10px; padding: 10px 12px; cursor: pointer; transition: background .12s; }
@@ -102,19 +106,11 @@
 </head>
 
 <body>
-    <!-- Password gate: same mechanism as Solita — the typed password is verified SERVER-SIDE (x-app-pass ==
-         LABAI_PASSWORD). No password/hash in this public file (Rule 21). Unlock is remembered in
-         localStorage('dev_access'), SHARED with Solita on this origin → logged into Solita ⇒ already unlocked. -->
-    <div class="auth visible" id="auth">
-        <div class="auth-box">
-            <h2>Passwort</h2>
-            <input type="password" id="pwd" placeholder="••••••••" autocomplete="off" aria-label="Passwort">
-            <button class="btn" id="login-btn" type="button">Login</button>
-            <div class="err" id="auth-err"></div>
-        </div>
-    </div>
+    <!-- Open access (Doc 2026-06-21): the password gate was removed — the page opens straight to the list.
+         Any password Solita stored on this origin (localStorage 'dev_access') is still reused as x-app-pass
+         so edits/deletes stay authorized SERVER-SIDE; with none, reading works and writes are rejected. -->
 
-    <div class="wrap" id="app" hidden>
+    <div class="wrap" id="app">
         <header class="top">
             <h1>Ideen — Markdown</h1>
             <span class="count" id="count"></span>
@@ -131,7 +127,6 @@
         const TREE_URL = `https://api.github.com/repos/${OWNER}/${REPO}/git/trees/${BRANCH}?recursive=1`;
         const RAW = (p) => `https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/${p.split('/').map(encodeURIComponent).join('/')}`;
         const EDIT_URL = 'https://fyfhxzyymmurlaenmzse.supabase.co/functions/v1/delete-md'; // edits + deletes
-        const VERIFY_URL = 'https://fyfhxzyymmurlaenmzse.supabase.co/functions/v1/claude';
         const SB_ANON = 'sb_publishable_ubQDiMD-X3N0vZvPVi229Q_-5Zootfk'; // publishable anon key — client-safe
 
         const $ = (id) => document.getElementById(id);
@@ -152,28 +147,12 @@
         }
         const baseName = (p) => p.split('/').pop();
 
-        // ---- Auth ----
+        // ---- No password gate (Doc 2026-06-21): open straight to the list. Reuse any password Solita
+        //      stored on this origin as x-app-pass so edits/deletes stay authorized server-side
+        //      (none → reading still works, writes are rejected by the Edge function). ----
         let pwd = '';
-        function unlock() { $('auth').classList.remove('visible'); $('app').hidden = false; load(); }
-        async function verifyPwd(p) {
-            if (!p) return false;
-            try {
-                const r = await fetch(VERIFY_URL, { method: 'POST', headers: { 'Content-Type': 'application/json', 'apikey': SB_ANON, 'Authorization': 'Bearer ' + SB_ANON, 'x-app-pass': p }, body: JSON.stringify({ ping: true }) });
-                return r.ok;
-            } catch (_) { return false; }
-        }
-        async function doLogin() {
-            const p = $('pwd').value;
-            $('auth-err').textContent = 'Prüfe …';
-            if (await verifyPwd(p)) { pwd = p; try { localStorage.setItem('dev_access', p); } catch (_) { } unlock(); }
-            else $('auth-err').textContent = 'Falsch (oder Verify-Endpoint offline).';
-        }
-        $('login-btn').addEventListener('click', doLogin);
-        $('pwd').addEventListener('keydown', (e) => { if (e.key === 'Enter') doLogin(); });
-        (function () {
-            let stored = ''; try { stored = localStorage.getItem('dev_access') || ''; } catch (_) { }
-            if (stored) { pwd = stored; unlock(); } else { $('pwd').focus(); }
-        })();
+        try { pwd = localStorage.getItem('dev_access') || ''; } catch (_) { }
+        load();
 
         // ---- Commit helpers (edit = send new content; delete = omit content) ----
         async function commit(path, content) {
@@ -328,9 +307,16 @@
                 paths.forEach((p) => { (groups[groupOf(p)] = groups[groupOf(p)] || []).push(p); });
                 GROUP_ORDER.forEach((g) => {
                     if (!groups[g]) return;
-                    const title = el('div', 'grp-title'); title.textContent = g + '  (' + groups[g].length + ')';
-                    $('list').appendChild(title);
-                    groups[g].forEach((p) => $('list').appendChild(rowEl(p)));
+                    // Top-level group is itself collapsible — starts CLOSED so the (long) list folds away.
+                    const grp = el('div', 'grp');
+                    const title = el('div', 'grp-title');
+                    title.innerHTML = '<span class="grp-chev">▶</span>';
+                    title.appendChild(document.createTextNode(g + '  (' + groups[g].length + ')'));
+                    title.addEventListener('click', () => grp.classList.toggle('open'));
+                    const gbody = el('div', 'grp-body');
+                    groups[g].forEach((p) => gbody.appendChild(rowEl(p)));
+                    grp.appendChild(title); grp.appendChild(gbody);
+                    $('list').appendChild(grp);
                 });
                 $('count').textContent = paths.length + ' Dateien';
                 $('status').textContent = '';
