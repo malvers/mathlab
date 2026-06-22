@@ -165,22 +165,12 @@
 
         // A small two-step ✕ control. onConfirm() runs on the second (✓) click.
         function delControl(title, onConfirm) {
+            // Single-Click-Löschen (Doc 2026-06-22: Zwischenschritt weg). cut() hat busy-Guard + Fehler-Handling
+            // und jede Löschung ist EIN git-Commit → reversibel; drum kein Bestätigungs-Schritt mehr.
             const ctl = el('span', 'xctl');
-            function arm() {
-                ctl.innerHTML = '';
-                const x = el('button', 'x'); x.type = 'button'; x.textContent = '✕'; x.title = title + ' löschen';
-                x.addEventListener('click', (e) => { e.stopPropagation(); confirmMode(); });
-                ctl.appendChild(x);
-            }
-            function confirmMode() {
-                ctl.innerHTML = '';
-                const yes = el('button', 'x yes'); yes.type = 'button'; yes.textContent = '✓'; yes.title = 'bestätigen';
-                const no = el('button', 'x'); no.type = 'button'; no.textContent = '✕'; no.title = 'abbrechen';
-                yes.addEventListener('click', (e) => { e.stopPropagation(); yes.disabled = true; no.disabled = true; onConfirm(yes, no, arm); });
-                no.addEventListener('click', (e) => { e.stopPropagation(); arm(); });
-                ctl.appendChild(yes); ctl.appendChild(no);
-            }
-            arm();
+            const x = el('button', 'x'); x.type = 'button'; x.textContent = '✕'; x.title = title + ' sofort löschen';
+            x.addEventListener('click', (e) => { e.stopPropagation(); onConfirm(); });
+            ctl.appendChild(x);
             return ctl;
         }
 
