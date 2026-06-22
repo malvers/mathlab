@@ -255,6 +255,17 @@ zeigt — tatsächlich ist es der **Zwinger** (beide liegen dicht beieinander).
 
 ---
 
+## BUG-12 — Solita-Mikro hört nach App-Kill / Wegwischen weiter 🐞 **kritisch** (Datenschutz), offen · nativ/APK
+**Gemeldet:** Doc 2026-06-18. Das Mikro darf **NIE** aktiv sein, nachdem die App aus „Letzte Apps" gewischt wurde.
+**Symptom:** App weggewischt (WebView/Activity tot) → trotzdem meldet sich Solita gelegentlich im Hintergrund mit „ich höre" / reagiert aufs Weckwort. NICHT der gewollte Vosk-Wake bei gesperrtem Screen — sondern App vom Nutzer beendet, Mikro trotzdem an.
+**Ursache (heißester Verdacht, code-belegt):** `SolitaVoiceService.onStartCommand` liefert **`START_STICKY`** (`solita-app/android/…/SolitaVoiceService.java` ~Z.109) → Android darf den Dienst nach Prozess-Tod neu starten (intent==null), auch wenn `onTaskRemoved` (~Z.346) brav `stopSelf()` ruft. Race/Sticky-Recreate = das Einfallstor. JS (`solita-wake.js`) kann's NICHT fixen — bei toter WebView läuft kein JS; nur die native Seite räumt auf.
+**Fix-Richtung (nur Doc, APK-Rebuild):** (1) `onStartCommand` → **`START_NOT_STICKY`** (Start nur explizit aus Foreground/Login). (2) `onTaskRemoved` hart: Recognizer **synchron** stoppen + Mikro frei + Notification weg + `wantListening=false`. (3) **Audit aller Start-Pfade** (kein BootReceiver/Alarm/WorkManager/`bindService` ohne Nutzeraktion). (4) Invariante: Lauschen ⇒ immer sichtbare Mikro-Notification; nie nach App-Entfernen.
+**Akzeptanz/Repro:** Nach Wegwischen `adb logcat -s SolitaVosk` → erscheint `recognizer STARTED — LISTENING` = belegt. Auch: grüner Mikro-Punkt + ob eine Solita-FGS-Notification liegt (lauscht er OHNE = Regelbruch). Doc hat das Update installiert; passiert's **noch mal** → reproduziert.
+**Workaround:** vor dem Schließen Logout (👂 aus → `stopNativeWake()`), oder Mikro-Recht „nur während Nutzung".
+**NICHT:** im JS/Web fixen wollen — zwingend `SolitaVoiceService.java` + APK-Rebuild. (Volltext-Writeup aus OTWA-Branch `solita-trigger-log`, hier destilliert.)
+
+---
+
 ## Verwandt / Querverweise
 - Übersicht aller Notizen: [`../../NOTES.md`](../../NOTES.md)
 - Feature-Arbeitsliste: [`feature-requests.md`](feature-requests.md) · Ideen-Triage: [`ideen.md`](ideen.md)
