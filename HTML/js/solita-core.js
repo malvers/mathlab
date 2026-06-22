@@ -496,7 +496,7 @@
             onPersist: function () { if (window.SolitaSync) SolitaSync.push(brain.getHistory(), brain.getSummary()); },
             // Per-query cost (Doc 2026-06-19): a dezente Zeile unter der letzten Antwort. < 1 €/Antwort → Cent,
             // sonst Euro. Daten kommen schon aus dem claude-Proxy (usage) → reine Anzeige, kein Extra-Call.
-            onCost: function (eur, total) {
+            onCost: function (eur, total, model) {
                 if (typeof eur !== 'number' || eur <= 0) return;
                 // < 1 € → Cent, sonst Euro (gilt für Einzelpreis UND Summe).
                 const fmt = function (e) {
@@ -508,10 +508,13 @@
                 if (!last || last.querySelector('.solita-cost')) return;
                 const tag = document.createElement('div');
                 tag.className = 'solita-cost';
-                // This query's cost + (behind it) the accumulated all-time total (Doc 2026-06-22).
-                let txt = '≈ ' + fmt(eur);
-                if (typeof total === 'number' && total > 0) txt += '  ·  Σ ' + fmt(total);
-                tag.textContent = txt;
+                // Colour the per-query cost (≈, the first number) by the model that produced it:
+                // DeepSeek = φ-Grün, Claude (+ default) = λ-Orange. The Σ-total stays neutral.
+                const costColor = /deepseek/.test(model || '') ? 'rgb(121,158,49)' : 'rgb(245,194,66)';
+                const esc = function (s) { return String(s).replace(/[<>&]/g, function (c) { return { '<': '&lt;', '>': '&gt;', '&': '&amp;' }[c]; }); };
+                let html = '<span style="color:' + costColor + '">≈ ' + esc(fmt(eur)) + '</span>';
+                if (typeof total === 'number' && total > 0) html += '  ·  Σ ' + esc(fmt(total));
+                tag.innerHTML = html;
                 last.appendChild(tag);
             }
         });

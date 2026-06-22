@@ -217,7 +217,7 @@
             onPersist();        // host may push the updated log to the shared server (solita-sync.js)
             onTyping(false);
             onAssistant(finalText);
-            onCost(turnEur, totalSpentEur());    // per-query cost (sum of all hops) + running all-time total
+            onCost(turnEur, totalSpentEur(), getModel());    // per-query cost + all-time total + the model that produced it (colour)
             onSpeak(finalText);
             maybeSummarize();   // fold older turns into the rolling summary (best-effort, background)
         }
