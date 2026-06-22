@@ -66,10 +66,12 @@ Deno.serve(async (req) => {
   const hasContent = (c: unknown) =>
     (typeof c === 'string' && c.trim() !== '') || (Array.isArray(c) && c.length > 0);
   const turns = b.messages.filter((m: { role?: string; content?: unknown }) => m && hasContent(m.content));
-  // System is lifted to Anthropic's top-level field (string-content system turns only).
-  const system = turns
+  // System is lifted to Anthropic's top-level field (string-content system turns only). Kept as SEPARATE
+  // blocks (NOT joined) so each caches independently — the client sends persona + rolling summary as two
+  // system turns; only the persona gets a cache breakpoint (see body.system below).
+  const systemTexts: string[] = turns
     .filter((m: { role: string; content: unknown }) => m.role === 'system' && typeof m.content === 'string')
-    .map((m: { content: string }) => m.content).join('\n\n');
+    .map((m: { content: string }) => m.content);
   let chat = turns
     .filter((m: { role: string }) => m.role === 'user' || m.role === 'assistant')
     .map((m: { role: string; content: unknown }) => ({ role: m.role, content: m.content }));   // pass string OR blocks through
@@ -88,7 +90,14 @@ Deno.serve(async (req) => {
   // cache_control bills the repeated prefix at ~0.1×. Two tiers — the tools cache on their own breakpoint and
   // the system on a second, so a summary change re-writes only the system block, not the tools. Render order
   // is tools → system → messages. Verify it's working via usage.cache_read_input_tokens > 0.
-  if (system) body.system = [{ type: 'text', text: system, cache_control: { type: 'ephemeral' } }];
+  // Cache ONLY the first system block (the static persona). The volatile rolling summary arrives as a SECOND
+  // system turn and stays UNcached → a summary change re-reads just those few hundred tokens at 1× instead of
+  // re-writing the whole persona at 1.25× (the cache_creation churn that made Solita expensive). Still one
+  // system breakpoint total (persona), so the tools + last-message breakpoints are unaffected.
+  if (systemTexts.length) {
+    body.system = systemTexts.map((text: string, i: number) =>
+      i === 0 ? { type: 'text', text, cache_control: { type: 'ephemeral' } } : { type: 'text', text });
+  }
   // Optional Claude tool-use: forward a `tools` schema so Solita can take actions. The CLIENT runs the loop
   // (executes tool_use blocks, sends tool_result back). No tools field → behaves exactly as before.
   if (Array.isArray(b.tools) && b.tools.length) {
