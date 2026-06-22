@@ -20,7 +20,10 @@
     function Brain(cfg) {
         cfg = cfg || {};
         // ---- config: host wiring (all the app-specific seams) ----
+        // apiUrl may be a plain string OR a function (model) → url, so the host can route by model (e.g.
+        // Claude vs DeepSeek live on different proxy functions). The summariser resolves its OWN model's url.
         const apiUrl       = cfg.apiUrl;
+        const resolveUrl   = (typeof apiUrl === 'function') ? apiUrl : function () { return apiUrl; };
         const anonKey      = cfg.anonKey;
         const getPwd       = cfg.getPwd     || function () { return ''; };
         const getModel     = cfg.getModel   || function () { return 'claude-sonnet-4-6'; };
@@ -64,7 +67,8 @@
         // --- Kosten-Zähler (Doc: ab sofort Transparenz). Preise $/1M Tokens; Cache-Read ~0,1×, Write 1,25×.
         // Rechnet je API-Hop (AUCH jeder Tool-Loop-Schritt) aus `usage` die € aus, loggt ins DEBUG-Fenster mit
         // Cache-Trefferquote (springt nach dem Caching-Deploy von 0% hoch) und summiert in localStorage.
-        const PRICES = { 'claude-sonnet-4-6': [3, 15], 'claude-opus-4-8': [5, 25], 'claude-haiku-4-5': [1, 5] }; // [in,out] $/1M
+        const PRICES = { 'claude-sonnet-4-6': [3, 15], 'claude-opus-4-8': [5, 25], 'claude-haiku-4-5': [1, 5],
+                         'deepseek-chat': [0.27, 1.10], 'deepseek-reasoner': [0.55, 2.19] }; // [in,out] $/1M (DeepSeek ~10× günstiger; Preise können sich ändern)
         const USD_EUR = 0.92;
         const COST_KEY = STORE.cost || 'solita_cost_total';
         // Hard DAILY €-brake (Doc: die 5€ sollen halten). accountUsage only ever counted UP, never blocked —
@@ -81,8 +85,13 @@
         }
         function accountUsage(model, u, label) {
             if (!u) return;
-            const inTok = u.input_tokens || 0, outTok = u.output_tokens || 0;
-            const cr = u.cache_read_input_tokens || 0, cw = u.cache_creation_input_tokens || 0;
+            // Usage field names differ: Claude → input_tokens / output_tokens / cache_read_input_tokens.
+            // DeepSeek (OpenAI shape) → prompt_tokens (INCLUDES cache hits) / completion_tokens /
+            // prompt_cache_hit_tokens. So for DeepSeek the uncached input = prompt − cache_hit.
+            const cr = (u.cache_read_input_tokens != null) ? u.cache_read_input_tokens : (u.prompt_cache_hit_tokens || 0);
+            const inTok = (u.input_tokens != null) ? u.input_tokens : Math.max(0, (u.prompt_tokens || 0) - cr);
+            const outTok = (u.output_tokens != null) ? u.output_tokens : (u.completion_tokens || 0);
+            const cw = u.cache_creation_input_tokens || 0;
             const p = priceFor(model);
             // uncached input full price · cache read 0,1× · cache write 1,25× · output full
             const eur = (inTok * p[0] + cr * p[0] * 0.1 + cw * p[0] * 1.25 + outTok * p[1]) / 1e6 * USD_EUR;
@@ -104,7 +113,7 @@
             const old = conversationHistory.slice(0, conversationHistory.length - KEEP_RECENT);
             const transcript = old.map(m => (m.role === 'user' ? 'Doc' : 'Solita') + ': ' + m.content).join('\n');
             try {
-                const r = await fetch(apiUrl, {
+                const r = await fetch(resolveUrl(summaryModel), {   // summariser routes by ITS model (Claude-Haiku) → claude proxy
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'apikey': anonKey, 'Authorization': 'Bearer ' + anonKey, 'x-app-pass': getPwd() },
                     body: JSON.stringify({
@@ -142,7 +151,7 @@
         }
 
         async function callModel(msgs, pwd) {
-            const response = await fetch(apiUrl, {
+            const response = await fetch(resolveUrl(getModel()), {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'apikey': anonKey, 'Authorization': 'Bearer ' + anonKey, 'x-app-pass': pwd },
                 body: JSON.stringify({ model: getModel(), messages: msgs, tools: getTools(), max_tokens: 3000 })
