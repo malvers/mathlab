@@ -39,7 +39,7 @@ Der always-on-Vosk-Hybrid ist **implementiert + strukturell autonom verifiziert*
 4. **Doze-Lock-Dauer** — sperren, weglegen, Minuten später „Solita" — überlebt Vosk Doze/Battery-Throttling über echte Zeit?
 
 ## Bekannte Grenze (akzeptiert für v1 = dein „A")
-Die **„solide"-Fehlauslösung ist fundamental:** „Solita" ist OOV, die Grammar kollabiert JEDES „solide"-Audio (auch im Satz „eine solide Lösung") auf das Token „solide" → WAKE. Der Single-Token-Gate hilft nicht (Vosk gibt eh nur 1 Token aus). **Echter Fix:** dediziertes KWS = **sherpa-onnx** (keyless, open-vocab, kleine Modelle) — siehe [solita-vosk-wakeword.md](solita-vosk-wakeword.md).
+Die **„solide"-Fehlauslösung ist fundamental:** „Solita" ist OOV, die Grammar kollabiert JEDES „solide"-Audio (auch im Satz „eine solide Lösung") auf das Token „solide" → WAKE. Der Single-Token-Gate hilft nicht (Vosk gibt eh nur 1 Token aus). **Echter Fix:** dediziertes KWS = **sherpa-onnx** (keyless, open-vocab, kleine Modelle) — siehe [solita-vosk-wakeword.md](../../archive.md).
 
 ## Bauen / Installieren / Testen
 ```bash

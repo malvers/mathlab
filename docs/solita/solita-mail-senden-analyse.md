@@ -72,5 +72,4 @@ dem „ja" wird gesendet). Das ist der eigentlich überlegenswerte Teil.
 
 ## Weitere Notizen (separat vom Mailversand)
 
-- **„Share" → „teilen":** Das „Share"-Label auf Deutsch umbenennen → „teilen".
 - **„broadcast" → „live":** Das „broadcast"-Label in „live" ändern.

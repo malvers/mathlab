@@ -11,15 +11,6 @@
   folgenden Datenbanken füllen. **Keine** davon (außer iNaturalist) erkennt aus dem Bild — sie
   brauchen einen Namen.
 
-## POWO — Plants of the World Online (Kew)
-- **Was:** autoritative Taxonomie + Nomenklatur + **Verbreitungsdaten** zu Pflanzenarten.
-- **API:** HTTP-API, offiziell zugänglich über Kews **`pykew`** (Python) bzw. **`kewr`** (R).
-  Liefert akzeptierten Namen, Synonyme, Distribution. **Halb-offiziell** — keine garantierte
-  Stabilität/SLA, Rate-Limits undokumentiert. Unser `identify`-Function ist Deno/TS → wir würden
-  den HTTP-Endpoint direkt per `fetch` anfragen (pykew nur als Referenz für die Endpunkt-Struktur).
-- **Nutzen im Tracker:** Pl@ntNet/Gemini liefert den Namen → POWO bestätigt den **akzeptierten
-  Artnamen** (räumt Synonym-Wirrwarr auf) und liefert das **natürliche Verbreitungsgebiet**.
-
 ## GBIF — Global Biodiversity Information Facility
 - **Was:** riesige, **kostenlose** Arten- und Fundpunkt-Datenbank (**kein API-Key**).
 - **API:** dokumentierte REST-API — **Species API** (Namens-Matching, Taxonomie) + **Occurrence API**
