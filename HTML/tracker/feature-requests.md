@@ -12,7 +12,6 @@
 - **FEAT-4** Zurück zum Start/Auto (online)
 - **FEAT-5** Regen-Vorwarnung (nach BUG-2)
 - **FEAT-6** 🏗️ Navigation Post-MVP (Abbiege-Liste, Verkehr)
-- **FEAT-7** 🅿️ Medien → Cloudflare R2
 - **FEAT-8** 🅿️ Fotos → Storage-Bucket
 - **FEAT-9** 🏗️ GPS-Postproc: Profil-UI, Map-Matching
 - **FEAT-10** 🏗️ App live fernsteuern (Remote-Config)
