@@ -1556,3 +1556,54 @@ laufende Sitzungs-Summe.
   aber die Client-Rechnung, weil `usage` ohnehin schon ankommt.
 
 ---
+
+
+## Teil 3 — Aus feature-requests.md entfernt 2026-06-22 (Referenz/Ordnung)
+
+## Bereits gebaut (Referenz — NICHT neu bauen) ✅
+**Session 2026-06-10 (in `main`):**
+- **Einfache Navigation** (`HTML/js/tracker-nav.js`): Adresse → Route (Nominatim + OSRM), START
+  navigiert **und** trackt, Ziel-Pin, ETA, **Re-Routing** bei Abweichung, **Abbiege-Ansage per Stimme**
+  (seit 2026-06-20 über **Cloud-TTS** `SolitaVoice` — Pixel-WebView-Fix, s. bugfixes.md BUG-9;
+  `speechSynthesis` nur noch Desktop-Fallback) + On-screen-Banner, Schalter „Sprachansage" (persistiert).
+  Karten-Kamera während der Navigation: **dynamischer Reststrecken-Fit** (BUG-10, 2026-06-20).
+- **Tempo-Limit-Schild** (`HTML/js/tracker-speedlimit.js`): OSM `maxspeed`, rot bei Übertretung.
+- **Tempo-Warnton:** kleine Glocke bei >10 % über Limit.
+- **Idle-Auto-Hide**, **Kompass/Nordpfeil**, **Quellen-Status** (DWD/RainViewer) im Debug.
+- **Cross-Device-Sync ohne Login** (`archive/sync-sketch.md`, ✅ umgesetzt): deterministisches geteiltes Konto →
+  Tracks/Fotos auf mehreren Geräten. Referenz, nicht neu bauen.
+
+**🌿 Session 2026-06-11 (auf dem Branch, NICHT in main):**
+- **Live-Config-Demo** (Idee 19): `docalvers.de/config.json` → `HTML/js/tracker-config.js` pollt (~20 s,
+  ETag) → CSS-Variablen, **reload-frei**. Fernsteuerbar: Stat-Farbe unter der Uhr, Navi-Banner Farbe/
+  z-Order/Süd-Offset. → produktionsreif machen = **FEAT-10**.
+- **solita.html (ex-labai) Voice-Modus:** 🎤 Diktat (de-DE, freihändig senden) + 🔊 Antworten vorlesen (TTS).
+  Am 2026-06-12 zu **Solita** ausgebaut: Wake-Word „Solita", Claude-`claude`-Edge-Function (Code da, Deploy
+  offen), Persona + Kontext-Zusammenfassung. Siehe `archive/plan-contact-ai-im-tracker.md` / FEAT-11.
+- **Navi-Banner reicher:** ETA + Straße/Ref + Schild-Ziele, Google-Navi-Grün, unter dem Header.
+- **Abbiegepfeile** von Unicode auf saubere **SVG-Pfeile** (`arrowSvg()` in `tracker-nav.js`).
+- **Tempolimit-Schild** robuster: nächste Straße, deutsche Zonen-Tags, „c" statt ∞ bei unbegrenzt,
+  springt beim Überschreiten nach vorne.
+- **FIT-Button = 3-Stufen-Loop** (ganze Route → Reststrecke → aus); Mittig-Zentrieren zurückgenommen.
+- **Tempo-abhängiger Zoom** beim Folgen (schnell=raus, langsam=rein).
+- **Tempo-Glocke** per Häkchen (Einstellungen→Debug, persistiert) · **mobile Shortcuts d/k/w** im Debug.
+- **krass-app** zählt jetzt auch „solita"/„solida".
+- Positionspunkt + weißes Richtungs-Dreieck **über** der blauen Navi-Linie.
+
+## Nicht-Tracker / Verteilung & Wissen (Kontext, kein Bau-Auftrag)
+- **Play-Store-Verteilung** (🌿 `archive/verteilung-playstore-tester.md`): Samsung „Auto Blocker" blockt Sideload;
+  Play Store braucht für neue persönliche Konten **12 Tester · 14 Tage**. Firmenkonto (D-U-N-S) umgeht die
+  Auflage. **Thema „nächste Woche"** — Entscheidung, kein Code.
+- **Wissens-Notiz Lebens-Agent** (🌿 `archive/wissensnotiz-llm-kompression-lebensagent.md`): Tokens/Kompression +
+  Memory-Architektur (extern speichern, Retrieval, stufenweise verdichten) für den „Solita/Samantha"-
+  Lebensbegleiter. Referenz/Hintergrund, kein Auftrag.
+
+## Reihenfolge-Empfehlung (Vorschlag — Doc kippt)
+0. **Branch `fit-mode…` nach `main` mergen** (3-Wege) — sonst doppelte/divergente Arbeit.
+1. **BUG-1** (Speed) + **BUG-2** (Regenradar) + **BUG-5** (Live-Broadcast) — Vertrauen in die Basis.
+2. **FEAT-1 Brotkrumen** (Prio 1, Sicherheit) · **FEAT-2 Goldene Stunde** (klein, Prio 1) ·
+   **FEAT-13 Navi-Blau/Speed** (Prio 1) · **FEAT-15 KI-Indikator** (klein, wartet nur auf Variantenwahl).
+3. **FEAT-14 Tracking↔Navi entkoppeln** (Quick-Win C) · **FEAT-3 Parkplatz → FEAT-4 Zurück zum Auto**.
+4. **FEAT-5 Regen-Vorwarnung** (erst nach BUG-2).
+5. **FEAT-10 Remote-Config ausbauen** · **FEAT-11/12 Contact-AI/Solita** (Future Now, größer).
+6. Rest nach Doc-Prio.
