@@ -107,7 +107,7 @@
                 const GLYPHS = ['✶', '✷', '✸', '✹', '✺', '✹', '✸', '✷'];
                 let verb = THINK_VERBS[Math.floor(Math.random() * THINK_VERBS.length)];
                 let g = 0, tick = 0;
-                const render = () => { if (lbl) lbl.textContent = GLYPHS[g % GLYPHS.length] + ' ' + verb + ' …'; };
+                const render = () => { if (lbl) lbl.innerHTML = '<span class="ts">' + GLYPHS[g % GLYPHS.length] + '</span> ' + verb + ' …'; };
                 render();
                 _thinkTimer = setInterval(() => {
                     g++;
@@ -222,6 +222,9 @@
             + "IMMER get_weather auf und beantwortest Wetter NIE aus eigenem Wissen (du hast dafür keine Live-Daten). "
             + "Du hast außerdem check_gmail (liest READ-ONLY ungelesene Mails — Anzahl + Absender, auf Wunsch via read_body auch den vollen Inhalt zum Vorlesen/Zusammenfassen; markiert NICHTS als gelesen); nutze es, "
             + "sobald es ums Postfach/neue Mails oder Mail-Inhalte geht (z.B. „hab ich neue Mails?“, „wer hat geschrieben?“, „was steht in der Mail von X?“, „lies mir die neueste vor“). "
+            + "Wenn Doc nach einer Formel oder Gleichung fragt, gib sie als LaTeX aus — inline mit $…$, "
+            + "abgesetzt mit $$…$$ — und leite sie mit einem kurzen gesprochenen Satz ein (z.B. „Hier sind "
+            + "die gewünschten Formeln:“), denn die Formel selbst wird nicht vorgelesen. "
             + "Sonst antworte einfach. Bestätige eine ausgeführte Aktion knapp in einem Satz.";
 
         // ----- TOOL-USE (Solita acts, not just talks) -----
