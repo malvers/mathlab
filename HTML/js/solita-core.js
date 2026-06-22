@@ -391,13 +391,17 @@
         function getPwd() { return sessionPwd; }
 
         let currentModel = localStorage.getItem(MODEL_KEY) || 'claude-sonnet-4-6';
-        // Migrate any legacy (DeepSeek) model id → a real Claude model so the proxy gets a valid id.
-        if (!/^claude-/.test(currentModel)) currentModel = 'claude-sonnet-4-6';
+        // Allow Claude OR DeepSeek (Doc wants to compare); anything else → safe Claude default.
+        if (!/^(claude-|deepseek-)/.test(currentModel)) currentModel = 'claude-sonnet-4-6';
         // Cost guard (Doc: die 5€ sollen halten): never let a stale/left-over 'ai_model' silently run Opus
         // (~1.67× in+out vs Sonnet) for a voice assistant. The proxy enforces this server-side too.
         if (/opus/i.test(currentModel)) currentModel = 'claude-sonnet-4-6';
 
         function getModel() { return currentModel; }
+        // DeepSeek lives on its OWN proxy function (no tools — just cheap chat); Claude on /claude. Route by
+        // the model's prefix so the summariser (Claude-Haiku) always reaches the claude proxy, even in DeepSeek mode.
+        const DS_URL = AI_URL.replace(/\/claude(\?|$)/, '/deepseek$1');
+        function getApiUrl(model) { return /^deepseek/.test(model || currentModel) ? DS_URL : AI_URL; }
 
         function initModelDropdown(dropdownEl) {
             if (!dropdownEl) return;
@@ -431,6 +435,22 @@
             document.querySelectorAll('.model-select.open').forEach(d => d.classList.remove('open'));
         });
 
+        // Model toggle in the hamburger panel (#hh-model): Claude ↔ DeepSeek, so Doc can compare cost/quality.
+        // DeepSeek is cheap chat WITHOUT tools — its proxy doesn't forward Solita's tool schemas.
+        function initModelToggle() {
+            const grp = document.getElementById('hh-model');
+            if (!grp) return;
+            const btns = grp.querySelectorAll('button[data-model]');
+            const sync = () => btns.forEach(b => b.classList.toggle('active', b.dataset.model === currentModel));
+            sync();
+            btns.forEach(b => b.addEventListener('click', () => {
+                currentModel = b.dataset.model;
+                try { localStorage.setItem(MODEL_KEY, currentModel); } catch (e) { }
+                sync();
+                if (window.DebugWindow) DebugWindow.log('Modell → ' + currentModel);
+            }));
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             const pwdInput = document.getElementById('cyber-pwd-input');
             if (pwdInput) {
@@ -439,6 +459,7 @@
                 });
             }
             initModelDropdown(document.getElementById('modelDropdown'));
+            initModelToggle();
         });
 
         // The "brain": the LLM conversation + tool-use engine (js/solita-brain.js). solita-core is now just
@@ -446,7 +467,7 @@
         // badges), and renders whatever the brain reports via callbacks. ear.js hears, solita-brain thinks,
         // solita-tts speaks. (Tools that touch the DOM, like show_ui_list, stay here in execTool.)
         const brain = new Brain({
-            apiUrl: AI_URL,
+            apiUrl: getApiUrl,   // route by model: DeepSeek → /deepseek, Claude (+ summariser) → /claude
             anonKey: SB_ANON,
             summaryModel: 'claude-haiku-4-5-20251001',
             keepRecent: 16,
