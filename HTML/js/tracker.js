@@ -153,9 +153,11 @@
             const rb = (pos && __nav && __nav.remainingBounds) ? __nav.remainingBounds([pos.lat, pos.lng]) : null;
             return { follow: !!pos, fitall: trackPresent, fitrem: !!rb, hand: handMode };
         }
-        // Lay out the fan options: the fan offers only the OTHER valid modes you can switch TO — never the
-        // current one (that's already shown on the trigger, so listing it again would just double the icon).
-        // Each offered button gets a 1-based slot index (--i, drives the leftward slide). Returns the count.
+        // Lay out the fan options. The fan only ever offers DESTINATIONS you can jump to — follow / fitall /
+        // fitrem — and never the current one (it's on the trigger). "hand" is NOT a destination: you can't
+        // "select" your hand-zoom, you only land in it BY zooming, so it must never appear as an option —
+        // hence the explicit m !== 'hand'. (In hand-mode current = 'hand', so no destination is excluded →
+        // the fan then shows ALL escapes: re-centre + both fits.) Returns the visible-option count.
         function buildFanOptions() {
             const valid = validModes();
             const cur = currentMode();
@@ -163,7 +165,7 @@
             ['follow', 'fitall', 'fitrem', 'hand'].forEach((m) => {
                 const b = document.querySelector('#view-fan .vf-opt[data-mode="' + m + '"]');
                 if (!b) return;
-                if (valid[m] && m !== cur) {            // offer only OTHER valid modes
+                if (valid[m] && m !== cur && m !== 'hand') {   // offer only OTHER valid destinations (never hand)
                     b.hidden = false;
                     b.style.setProperty('--i', String(++slot));
                 } else {
@@ -2561,13 +2563,13 @@ ${pts}
         window.addEventListener('contextmenu', (e) => e.preventDefault());
         $('zoom-in').addEventListener('click', () => { enterHandMode(); map.zoomIn(); });   // hand zoom → freeze auto
         $('zoom-out').addEventListener('click', () => { enterHandMode(); map.zoomOut(); }); // hand zoom → freeze auto
-        // View-fan: the trigger opens the fan — but only when there's more than ONE mode to choose. With a
-        // single valid mode (e.g. crosshair + no track), fanning out one redundant option is just noise →
-        // apply it directly (tap = re-centre), show nothing extra.
+        // View-fan: the trigger opens the fan — but only when there's more than ONE destination to choose.
+        // With a single valid destination (e.g. crosshair + no track), fanning out one option is just noise
+        // → apply it directly (tap = re-centre). "hand" is not a destination, so it's never counted here.
         $('recenter-fab').addEventListener('click', () => {
             if (fanOpen) { closeFan(); return; }
             const valid = validModes();
-            const offered = ['follow', 'fitall', 'fitrem', 'hand'].filter((m) => valid[m]);
+            const offered = ['follow', 'fitall', 'fitrem'].filter((m) => valid[m]);
             if (offered.length <= 1) { if (offered[0]) selectViewMode(offered[0]); return; }
             openFan();
         });
