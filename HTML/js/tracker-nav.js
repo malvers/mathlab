@@ -603,28 +603,62 @@ window.TrackerNav = function (ctx) {
         setInterval(() => { try { const ss = window.speechSynthesis; if (ss && ss.speaking && ss.paused) ss.resume(); } catch (e) { } }, 4000);
     }
 
-    // Stop ANY in-flight guidance, on whichever engine spoke it (cloud audio + on-device speechSynthesis).
+    // ---- Spoken-guidance QUEUE ----
+    // Turn prompts that land close together (e.g. "Jetzt links" then "danach rechts") must NOT cut each
+    // other off — we play them ONE AFTER ANOTHER. SolitaVoice.speak's promise resolves at playback START,
+    // so the END is detected via onstate(false) (audio.onended), with a watchdog so a hung/failed synth
+    // can't freeze the queue. A small cap drops the OLDEST still-waiting line (never the one playing) so a
+    // pathological burst can't pile up stale guidance. stopSpeech() empties the queue.
+    let navSpeakQueue = [];
+    let navSpeaking = false;
+    const SPEAK_QUEUE_MAX = 3;   // waiting lines (excl. the one currently playing); beyond this drop the oldest
+    function clearSpeakQueue() { navSpeakQueue = []; navSpeaking = false; }
+    function drainSpeakQueue() {
+        if (navSpeaking) return;
+        const text = navSpeakQueue.shift();
+        if (text == null) return;
+        navSpeaking = true;
+        speakNow(text, function () { navSpeaking = false; drainSpeakQueue(); });
+    }
+    // Play exactly ONE line; call done() once — when it finishes, fails, or the watchdog fires.
+    function speakNow(text, done) {
+        let finished = false;
+        const finish = function () { if (finished) return; finished = true; clearTimeout(wd); done(); };
+        const wd = setTimeout(finish, 15000); // watchdog: never let a stuck synth freeze the queue
+        if (window.SolitaVoice && window.SolitaVoice.speak) {
+            try {
+                window.SolitaVoice.speak(text, { onstate: function (on) { if (!on) finish(); } }); // onstate(false) = playback ended
+                ttsLog('SolitaVoice ▶ "' + text + '"');
+                return;
+            } catch (e) { ttsLog('SolitaVoice failed: ' + e + ' — fallback to speechSynthesis'); }
+        }
+        speakSynth(text, finish);
+    }
+
+    // Stop ANY in-flight guidance + drop everything still queued (cloud audio + on-device speechSynthesis).
     function stopSpeech() {
+        clearSpeakQueue();
         try { if (window.SolitaVoice && window.SolitaVoice.stop) window.SolitaVoice.stop(); } catch (e) { }
         try { if ('speechSynthesis' in window) window.speechSynthesis.cancel(); } catch (e) { }
     }
 
-    // Speak a guidance line. PRIMARY: Solita's cloud TTS (Google via the `tts` edge fn, js/solita-voice.js) —
-    // the SAME path that already speaks in the Pixel's Android WebView, where on-device speechSynthesis stays
-    // silent (note #8). It plays an mp3 through a single shared <audio>, so a new line interrupts the previous
-    // one (no overlap). FALLBACK: speechSynthesis, only when SolitaVoice isn't loaded (desktop/standalone).
+    // Enqueue a guidance line (the queue plays them in order). PRIMARY engine: Solita's cloud TTS (Google
+    // via the `tts` edge fn, js/solita-voice.js) — the SAME path that speaks in the Pixel's Android WebView,
+    // where on-device speechSynthesis stays silent. FALLBACK: speechSynthesis (desktop/standalone). De-dupes
+    // an identical line that's already waiting, so a repeated tick doesn't stutter.
     function speak(text) {
         if (!voiceOn) { ttsLog('skip (voice off)'); return; }
-        if (window.SolitaVoice && window.SolitaVoice.speak) {
-            try { window.SolitaVoice.speak(text); ttsLog('SolitaVoice ▶ "' + text + '"'); return; }
-            catch (e) { ttsLog('SolitaVoice failed: ' + e + ' — fallback to speechSynthesis'); }
-        }
-        speakSynth(text);
+        if (navSpeakQueue[navSpeakQueue.length - 1] === text) return; // identical line already queued
+        navSpeakQueue.push(text);
+        while (navSpeakQueue.length > SPEAK_QUEUE_MAX) navSpeakQueue.shift(); // burst → drop oldest waiting (stale)
+        drainSpeakQueue();
     }
 
     // On-device Web-Speech fallback (kept for desktop/standalone; SILENT in the Android WebView — see speak()).
-    function speakSynth(text) {
-        if (!voiceOn || !hasTts) { ttsLog(voiceOn ? 'skip (no API)' : 'skip (voice off)'); return; }
+    // onDone() (optional) lets the guidance queue advance once this line ends/fails.
+    function speakSynth(text, onDone) {
+        onDone = onDone || function () { };
+        if (!voiceOn || !hasTts) { ttsLog(voiceOn ? 'skip (no API)' : 'skip (voice off)'); onDone(); return; }
         try {
             if (!ttsPrimed) primeSpeech();                 // belt-and-braces if no tap seen yet
             const ss = window.speechSynthesis;
@@ -633,17 +667,17 @@ window.TrackerNav = function (ctx) {
             u.lang = 'de-DE';
             if (ttsVoice) u.voice = ttsVoice;
             u.onstart = () => ttsLog('▶ onstart: ' + text);
-            u.onend = () => ttsLog('■ onend');
-            u.onerror = (e) => ttsLog('✗ onerror ' + ((e && e.error) || '') + ' — Android-WebView spricht evtl. nicht (natives TTS-Plugin nötig)');
+            u.onend = () => { ttsLog('■ onend'); onDone(); };
+            u.onerror = (e) => { ttsLog('✗ onerror ' + ((e && e.error) || '') + ' — Android-WebView spricht evtl. nicht (natives TTS-Plugin nötig)'); onDone(); };
             // Android WebView bug: cancel() immediately followed by speak() DROPS the new utterance, and the
             // engine is often left 'paused'. So cancel, then speak on the NEXT tick (+ resume) so it isn't eaten.
             try { ss.cancel(); } catch (e) { }
             setTimeout(() => {
                 try { if (ss.paused) ss.resume(); } catch (e) { }
                 try { ss.speak(u); ttsLog('speak() aufgerufen · voices=' + ((window.speechSynthesis.getVoices() || []).length) + (ttsVoice ? ' · de=' + ttsVoice.name : ' · default') + ' · "' + text + '"'); }
-                catch (e) { ttsLog('speak failed: ' + e); }
+                catch (e) { ttsLog('speak failed: ' + e); onDone(); }
             }, 70);
-        } catch (e) { ttsLog('speak failed: ' + e); }
+        } catch (e) { ttsLog('speak failed: ' + e); onDone(); }
     }
 
     // Clean SVG maneuver arrows (24×24, stroke = currentColor) — straight / left / right / slight /
