@@ -144,6 +144,23 @@ async function geminiSearchCount(): Promise<number> {
 }
 // Graduated precision so DeepSeek's sub-cent sums don't collapse to "0.0 ¢" (Doc: „mehr NKS"):
 // ≥1 € → Euro · ≥10 ¢ → 1 NKS · ≥1 ¢ → 2 NKS · <1 ¢ → 3 NKS.
+// All-time priced AI total from ai_cost_log (server-authoritative → the cross-device Σ; localStorage counters
+// would clobber when two devices both count). Reuses the SAME pricing as the daily mail (single source).
+async function aiTotalAllTimeEur(): Promise<number> {
+  try {
+    const url = Deno.env.get('SUPABASE_URL'); const key = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    if (!url || !key) return 0;
+    const supa = createClient(url, key, { auth: { persistSession: false } });
+    const { data, error } = await supa.rpc('ai_cost_summary', { days: 36500 });   // ~all time
+    if (error || !Array.isArray(data)) return 0;
+    let total = 0;
+    for (const r of data as Array<Record<string, unknown>>) {
+      total += rowEur(String(r.provider), String(r.model || ''), Number(r.in_tok), Number(r.out_tok), Number(r.cache_read), Number(r.cache_write));
+    }
+    return total;
+  } catch (_) { return 0; }
+}
+
 const eurFmt = (e: number) => {
   const c = e * 100;
   const s = c >= 100 ? '€ ' + e.toFixed(2)
@@ -162,6 +179,12 @@ Deno.serve(async (req) => {
   const given = req.headers.get('x-app-pass') || (typeof b.pass === 'string' ? b.pass : '');
   if (given !== pass) return json({ error: 'unauthorized' }, 401);
   if (b.ping) return json({ ok: true });
+
+  // Fast cost-only mode for Solita's cross-device Σ: just the all-time priced AI total, no R2/DB/mail.
+  if (b.costOnly) {
+    const totalAllTimeEur = await aiTotalAllTimeEur();
+    return json({ ok: true, totalAllTimeEur });
+  }
 
   try {
     const [r2, db, ai, searches] = await Promise.all([r2BytesUsed(), dbBytesUsed(), aiCostToday(), geminiSearchCount()]);
