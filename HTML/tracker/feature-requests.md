@@ -46,10 +46,6 @@ MVP + Re-Routing + Voice sind gebaut. **Noch offen (je ein eigener kleiner Auftr
 **Gebaut:** Client-Glättung (`track-smooth.js`, GLÄTTEN-Toggle) + DEM-Höhe (`track-dem.js`, Open-Meteo, `effectiveAlts`-Funnel).
 **Offen (NEXT):** Aufstiegs-/Profil-UI (Höhenmeter, Profil-Graph), Map-Matching (nur fürs Auto sinnvoll).
 
-## FEAT-10 — App live fernsteuern (Remote-Config) 🏗️ teils gebaut · 🔴 Prio 1
-**Stand:** Demo läuft — `tracker-config.js` pollt `docalvers.de/config.json` (~20 s, ETag) → CSS-Variablen, **reload-frei**; fernsteuerbar: Stat-Farbe, Navi-Banner Farbe/z-Order/Süd-Offset.
-**Auftrag (ausbauen):** Konfig-Schema breiter umsetzen (mehr Knoten auf CSS-Variablen + minimal JS für Sichtbarkeit/z-Index/Position), **Config validieren & clampen** (kaputter Wert darf UI nicht zerlegen, Defaults als Fallback), **Versionsfeld**, optional **Supabase Realtime** statt Polling (instant-Push, ETag-Poll als Fallback). **Regel 18:** Config ist public → keine Secrets. **Verallgemeinerbar** aufs ganze forloop-Projekt (zentrale Theme-Config).
-
 ## FEAT-11 — „Contact AI" im Tracker (Solita), Stufe 1: Chat/Foto 📐 · Future Now
 **Grundprinzip:** Die App ist **nur Fernbedienung** — KI läuft **server-seitig**. Kein SDK/Key/git im Browser/Capacitor.
 **Auftrag Stufe 1:** App → **Supabase Edge Function** → **Claude API** (Key server-seitig, Regel 18) → Antwort. Q&A, **Foto beschreiben/erkennen (multimodal)**, Sprache→Antwort, **Streaming** fürs Live-Gefühl. Modelle: `claude-opus-4-8` (1M Kontext), `claude-sonnet-4-6`, `claude-haiku-4-5`, `claude-fable-5`. ⚠️ Dieser Claude kennt das Repo **nicht** und ändert **keinen** Code.
