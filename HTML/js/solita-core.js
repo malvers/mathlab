@@ -228,6 +228,9 @@
             + "Wenn Doc nach einer Formel oder Gleichung fragt, gib sie als LaTeX aus — inline mit $…$, "
             + "abgesetzt mit $$…$$ — und leite sie mit einem kurzen gesprochenen Satz ein (z.B. „Hier sind "
             + "die gewünschten Formeln:“), denn die Formel selbst wird nicht vorgelesen. "
+            + "Docs Eingabe kommt oft aus deutscher Spracherkennung — englische Fachbegriffe können verzerrt "
+            + "ankommen (z.B. „for loop“ → „vor Luke“, „println“ → „printlein“, „String“ → „Schtring“). "
+            + "Interpretiere solche Eingaben wohlwollend und meine das technisch Naheliegende. "
             + "Sonst antworte einfach. Bestätige eine ausgeführte Aktion knapp in einem Satz.";
 
         // ----- TOOL-USE (Solita acts, not just talks) -----
@@ -779,6 +782,24 @@
             messagesArea.scrollTop = messagesArea.scrollHeight;
         }
 
+        // Render TRUSTED server-generated HTML (e.g. the infra-usage cost table) verbatim — NO escaping.
+        // Only ever call this with HTML we built ourselves on the server, never with model output (WP-5).
+        // The email table is light-themed (navy text/links on white), so we sit it on a light card so its
+        // own colours read correctly inside the dark chat.
+        function addTrustedHtmlMessage(html) {
+            const motto = document.getElementById('vsb-motto');
+            if (motto) motto.remove();
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message assistant';
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            contentDiv.innerHTML =
+                '<div style="background:#ffffff;border-radius:10px;padding:14px 16px;overflow-x:auto;">' + html + '</div>';
+            messageDiv.appendChild(contentDiv);
+            messagesArea.appendChild(messageDiv);
+            messagesArea.scrollTop = messagesArea.scrollHeight;
+        }
+
         function copyText(text, btn) {
             navigator.clipboard.writeText(text).then(() => {
                 btn.innerHTML = CHECK_ICON;
@@ -812,6 +833,24 @@
         function hideTyping() {
             const el = document.getElementById('typingIndicator');
             if (el) el.remove();
+        }
+
+        // German STT mangles English code terms (Doc 2026-06-23: „for loop" → „vor Luke"). Fix the clear
+        // mis-hears BEFORE sending — only phrases that are nonsense as TYPED text, so this is safe on typed
+        // input too. Extend freely as new mis-hears show up.
+        const SPEECH_FIX = [
+            [/\bvor\s?lu(ke|be?|p+|bb)\b/gi, 'for loop'],
+            [/\bfor\s?look\b/gi, 'for loop'],
+            [/\bvor\s?loop\b/gi, 'for loop'],
+            [/\bprint\s?l(ei|i)ne?\b/gi, 'println'],
+            [/\bschtring\b/gi, 'String'],
+            [/\bbull\s?ean\b/gi, 'boolean'],
+            [/\bint\s?eddscher\b/gi, 'Integer'],
+        ];
+        function fixSpeechTerms(t) {
+            var s = String(t || '');
+            for (var i = 0; i < SPEECH_FIX.length; i++) s = s.replace(SPEECH_FIX[i][0], SPEECH_FIX[i][1]);
+            return s;
         }
 
         function normalizeVoiceCommand(userText) {
@@ -1193,8 +1232,9 @@
                 const d = await r.json().catch(function () { return {}; });
                 hideTyping();
                 if (!r.ok) throw new Error((d && d.error) || ('infra-usage ' + r.status));
-                addMessage('assistant', d.body || '(keine Kostendaten)');
-                if (window.speakReply) window.speakReply(d.spoken || 'Konnte die Kosten nicht zusammenfassen.');
+                if (d.html) addTrustedHtmlMessage(d.html);   // the nice table — same one as the daily mail
+                else addMessage('assistant', d.body || '(keine Kostendaten)');
+                if (window.speakReply) window.speakReply('Hier eine Zusammenstellung der Kosten der letzten 24 Stunden.');
             } catch (e) {
                 hideTyping();
                 addMessage('assistant', '❌ Kosten konnten nicht geladen werden: ' + ((e && e.message) || e));
@@ -1221,6 +1261,8 @@
 
             // Voice: map spoken "slash …" words to the typed command.
             userText = normalizeVoiceCommand(userText);
+            // Voice: fix common German-STT mis-hears of English code terms („vor Luke" → „for loop").
+            userText = fixSpeechTerms(userText);
 
             // Built-in slash commands (/clear /logout /wake /pause /list /ui /de /en /es).
             if (await handleBuiltInCommands(userText)) return;
