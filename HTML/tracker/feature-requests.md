@@ -51,11 +51,6 @@ Schließt den Kreis mit FEAT-10: Sprach-Wunsch → Edge Function (hält Token) �
 **Zwei Heimstätten:** (1) **Claude Code Routines** (Anthropic-gehostet, kein eigener Server; App POSTet, Token in Edge Function) oder (2) **Claude Agent SDK auf eigenem VPS** (volle Kontrolle). **Edge Functions können den vollen Agent-Loop NICHT hosten** (Zeitlimit, kein FS/git) — nur Stufe 1 + Routine *feuern*. **Sicherheit:** Token server-seitig, Agent-Scope eng. Routines = Beta → vor Bau verifizieren.
 **Voraussetzung:** Solita-Weckwort — erst Vosk-Wortliste `["krass","solita","[unk]"]`, bei Bedarf openWakeWord/Picovoice auf Docs Stimme.
 
-## FEAT-13 — Navi-Route: Google-Blau + gefahrene Strecke speed-gefärbt 🏗️ teils gebaut · 🔴 Prio 1
-Code: `COL_ROUTE`/`drawRoute()` in `HTML/js/tracker-nav.js`. (c) ist erledigt (Punkt/Dreieck über der Linie, Ebene `nav-route` z350). Offen:
-- **(a)** Linie exakt **#4285F4** + helleres/dünneres Casing (der gefühlte Unterschied kommt vom dunklen Navy-Casing, nicht vom Blau). Doc schickt Screenshot zum Feinabgleich.
-- **(b) WICHTIG:** **blaue Linie nur VORAUS** (ab aktueller Position); der **gefahrene** Teil zeigt die **Geschwindigkeit** (leaflet-hotline wie der normale Track), nicht blau. Route an aktueller Position trimmen / Speed-Track oben drüber.
-
 ## FEAT-14 — Tracking & Navigation entkoppeln 📐
 **Szenario:** „Track nach Dresden, navigiere hin — Plan ändert sich → **Navigation beenden**, **Track weiterlaufen** lassen (weiter nach Frankfurt)." Heute reißt STOP die Navi immer mit; „Navigation beenden" ist als „Ziel löschen" versteckt; Navi wird nur aus `onPosition()` (= nur bei Aufzeichnung) gefüttert.
 **Empfehlung:** **C jetzt** (Quick-Win: „Ziel löschen" → **„Navigation beenden"** umbenennen, STOP entkoppeln, Hinweis „Navi aktiv") → **Ausbau zu A** (persistenter Navi-Chip `→ Dresden · 1:42 ✕`, **Re-Target** mitten im Track, Navi **ohne** laufende Aufzeichnung). Code: `beginTracking`/`finishTracking`/`__nav.*` in `tracker.js`.
