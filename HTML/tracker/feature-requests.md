@@ -138,6 +138,12 @@ Die +/−-Buttons sind **unsere** (Leaflet-Default-Control): `tracker.js:18` `zo
 **Strategie (migrations-freundlich):** pro Zeile `ENC:`-Prefix als Marker; `decryptText` lässt Alt-Klartext durch → kein Big-Bang. Alt-Tracks werden beim **nächsten Speichern** automatisch Ciphertext; reiner Altbestand bleibt lesbar bis dahin. **Optional:** einmaliges Re-Encrypt aller eigenen Tracks (Client: lädt → verschlüsselt → schreibt zurück).
 **Caveat (mission-critical):** Re-Encrypt-all mutiert Live-Daten → an 1 Track testen, reversibel/Backup. Nur nach „go".
 
+## FEAT-34 — Off-Route „echtes Sperren" der abgelehnten Route (Avoid-Area-Router) 📐 · folgt auf die gebaute „go B"-Näherung
+**Kontext (Doc 2026-06-23):** Bei bewusster Abweichung (Anweisung ignoriert, anderen Weg gewählt) soll das Navi NICHT auf die alte/kürzere Route zurückzwingen. **Variante B ist gebaut** (`tracker-nav.js`: Via-Punkt ~450 m voraus in Fahrtrichtung bei der Off-Route-Neuberechnung → OSRM *committet* auf die eigene Richtung; OSRM-Näherung, kein echtes Sperren). Diese FEAT = **Variante A**, die saubere Lösung.
+**Auftrag:** Die abgelehnte Route als **Sperr-Korridor** ans Routing übergeben, sodass der Router sie **gar nicht** nutzen darf (nicht nur „dahin committen" wie B). **Unser OSRM kann das nicht** — `exclude` greift nur auf Build-Zeit-Klassen (Maut/Autobahn/Fähre), keine beliebigen Kanten. Braucht einen **Avoid-Area-fähigen Router**: **GraphHopper** (`block_area`) oder **Valhalla** (`exclude_polygons`/`exclude_locations`) — beide frei nutzbar/hostbar.
+**Trade-off:** anderes Routing-Backend (API-Format, Hosting/Key) statt des öffentlichen OSRM. **Erst bauen, wenn B im Feld zu schwach ist.**
+**Caveat:** „bewusste Abweichung" sauber erkennen (Anweisung ignoriert + kohärent weitergefahren), nicht bei GPS-Zappeln auslösen.
+
 ---
 
 ## Querverweise
