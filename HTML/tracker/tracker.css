@@ -602,6 +602,15 @@ path.pos-marker.pos-shown {
     display: inline-block;
 }
 
+/* Custom (hand) view: the trigger shows the custom-view icon while CLOSED (state indicator). When the fan
+   opens, that icon would otherwise sit among the options as a 4th button (Doc: nicht) — so hide the trigger
+   while the fan is open, leaving just the three escapes (crosshair / fit whole / fit remaining). Other modes
+   keep showing their current icon as the anchor (it IS one of their destinations → no confusion). */
+#view-fan.open #recenter-fab[data-mode="hand"] {
+    opacity: 0;
+    pointer-events: none;
+}
+
 /* Solita in the tracker (tracker-solita.js, Stufe 1 tap-to-talk): a round voice button + reply bubble.
    Provisional spot — top-left under the HUD. Cyan = Solita's signature colour; state colours match her
    phase language (green=hears you · white=thinking · cyan=speaking). Never orange (Doc). */

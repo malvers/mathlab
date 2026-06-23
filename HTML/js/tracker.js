@@ -153,9 +153,9 @@
         }
         // The view-fan's current mode (drives the trigger icon + which destination the fan excludes).
         // Hand-zoom WINS → the trigger shows the custom-view icon so you can SEE you're in a hand-set view
-        // (Doc 2026-06-23: it must be visible as the trigger/state — but NEVER as a fan option, and in
-        // hand-mode a tap re-centres so the fan doesn't open → the icon never sits among the options).
-        // Then active FIT, else 'follow' (crosshair / re-centre).
+        // (Doc 2026-06-23: visible as the closed-state trigger, but NEVER as a fan option). A tap OPENS the
+        // fan with the escapes (crosshair / fit whole / fit remaining); the hand icon is hidden while the fan
+        // is open (CSS) so it never sits among them. Then active FIT, else 'follow' (crosshair / re-centre).
         function currentMode() {
             if (handMode) return 'hand';
             if (fitMode === 'remaining') return 'fitrem';
@@ -172,8 +172,9 @@
         }
         // Lay out the fan options. The fan only ever offers DESTINATIONS you can jump to — follow / fitall /
         // fitrem — and never the current one (it's on the trigger). "hand" is NOT a destination and never gets
-        // a button (m !== 'hand'): you can't "select" a hand-zoom, you only land in it BY zooming, and in
-        // hand-mode a trigger tap just re-centres (see the click handler). Returns the visible-option count.
+        // a button (m !== 'hand'): you can't "select" a hand-zoom, you only land in it BY zooming. In hand-mode
+        // current = 'hand', so NO destination is excluded → the fan shows all three escapes (crosshair + both
+        // fits), and the hand trigger itself is hidden while open (CSS). Returns the visible-option count.
         function buildFanOptions() {
             const valid = validModes();
             const cur = currentMode();
@@ -2585,12 +2586,12 @@ ${pts}
         $('zoom-out').addEventListener('click', () => { enterHandMode(); map.zoomOut(); }); // hand zoom → freeze auto
         // View-fan: the trigger opens the fan — but only when there's more than ONE destination to choose.
         // With a single valid destination (e.g. crosshair + no track), fanning out one option is just noise
-        // → apply it directly (tap = re-centre). "hand" is not a destination, so it's never counted here.
-        // In hand-mode (you panned/zoomed by hand) a tap just snaps back to your position — no fan, and no
-        // hand button ever shows (Doc 2026-06-23). Reach the fits by re-centring first, then tapping again.
+        // → apply it directly (tap = re-centre). "hand" is not a destination, so it's never counted here NOR
+        // shown as an option. In hand-mode (custom view) a tap OPENS the fan with the escapes you can pick —
+        // crosshair / fit whole / fit remaining (Doc 2026-06-23); the hand icon stays the closed-state trigger
+        // and is hidden while the fan is open (CSS) so it never sits among the options.
         $('recenter-fab').addEventListener('click', () => {
             if (fanOpen) { closeFan(); return; }
-            if (handMode) { selectViewMode('follow'); return; }   // hand-zoomed → tap re-centres
             const valid = validModes();
             const offered = ['follow', 'fitall', 'fitrem'].filter((m) => valid[m]);
             if (offered.length <= 1) { if (offered[0]) selectViewMode(offered[0]); return; }
