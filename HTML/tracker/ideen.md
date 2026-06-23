@@ -6,17 +6,6 @@
 > sagt, wohin eine Idee gewandert ist (z. B. „→ als Arbeitsauftrag in `feature-requests.md`").
 > Erstellt 2026-06-12. Doc zu allen 16: „Im Allgemeinen waren alle Ideen gut, es ging nur um die Priorität."
 
-## 🔴 PRIO 0 — Doc-Wünsche 2026-06-14 (`ideen-wunsche.md` (konsolidiert))
-Frisch von Doc, **vor allem anderen**. Triagiert in die Queues:
-- Karten-PIN + Navi dorthin → **FEAT-25**
-- Tankstellen/Tankpreise (nur Server-Aktivierung, Code da) → **FEAT-26**
-- Pl@ntNet-Schwelle 10 % → **20 %** → **FEAT-22-Korrektur**
-- Voice-Navigation fehlt/nicht auffindbar → [`bugfixes.md`](bugfixes.md) **BUG-9**
-- **Noch roh — braucht Klärung:** „**Route von Ulfladen**" — unklar (Ortsname „Ulfladen"? einen Track teilen?
-  Navigationsziel?). **Eine Rückfrage an Doc.**
-
----
-
 ## ⚡ Kurz-Übersicht — offene Ideen (noch nicht zu Features promotet)
 - 2 Live-ETA · 3 Reise-Album (PDF) · 4 Schätz-Spiel · 6 Tour-Generator nach Zeit · 7 Heatmap
 - 8 Routen-Geometrie/Statistik · 9 Pokédex · 12 Offline-Karten · 14 3D-Geländekarte · 15 Live-Video
