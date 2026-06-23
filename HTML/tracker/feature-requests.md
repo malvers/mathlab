@@ -46,11 +46,6 @@ MVP + Re-Routing + Voice sind gebaut. **Noch offen (je ein eigener kleiner Auftr
 **Gebaut:** Client-Glättung (`track-smooth.js`, GLÄTTEN-Toggle) + DEM-Höhe (`track-dem.js`, Open-Meteo, `effectiveAlts`-Funnel).
 **Offen (NEXT):** Aufstiegs-/Profil-UI (Höhenmeter, Profil-Graph), Map-Matching (nur fürs Auto sinnvoll).
 
-## FEAT-11 — „Contact AI" im Tracker (Solita), Stufe 1: Chat/Foto 📐 · Future Now
-**Grundprinzip:** Die App ist **nur Fernbedienung** — KI läuft **server-seitig**. Kein SDK/Key/git im Browser/Capacitor.
-**Auftrag Stufe 1:** App → **Supabase Edge Function** → **Claude API** (Key server-seitig, Regel 18) → Antwort. Q&A, **Foto beschreiben/erkennen (multimodal)**, Sprache→Antwort, **Streaming** fürs Live-Gefühl. Modelle: `claude-opus-4-8` (1M Kontext), `claude-sonnet-4-6`, `claude-haiku-4-5`, `claude-fable-5`. ⚠️ Dieser Claude kennt das Repo **nicht** und ändert **keinen** Code.
-**Caveat:** Opus = 1M Kontext (Modell), aber das Nutzungs-Kontingent ist plan-gedeckelt → vor Bau prüfen. *(Solita ist inzwischen weit gebaut — diesen Eintrag gegen den echten Stand prüfen.)*
-
 ## FEAT-12 — „Contact AI" Stufe 2: Wunsch einsprechen → Agent ändert Repo + pusht 📐 · Future Now
 Schließt den Kreis mit FEAT-10: Sprach-Wunsch → Edge Function (hält Token) → Agent editiert `config.json` + push → Live-Config zieht's → Änderung erscheint live.
 **Zwei Heimstätten:** (1) **Claude Code Routines** (Anthropic-gehostet, kein eigener Server; App POSTet, Token in Edge Function) oder (2) **Claude Agent SDK auf eigenem VPS** (volle Kontrolle). **Edge Functions können den vollen Agent-Loop NICHT hosten** (Zeitlimit, kein FS/git) — nur Stufe 1 + Routine *feuern*. **Sicherheit:** Token server-seitig, Agent-Scope eng. Routines = Beta → vor Bau verifizieren.
