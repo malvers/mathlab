@@ -648,12 +648,32 @@
                     }
                 }
             });
+            // Σ (running total) is SERVER-authoritative (Doc 2026-06-23: „logisch addieren = richtig machen").
+            // Every AI call is logged in ai_cost_log → on load we seed the local Σ counter with the real
+            // all-time total (cross-device, additive). The per-turn „≈" stays client-side; the session then
+            // accumulates from the seeded baseline, and the next load on ANY device re-seeds from the server.
+            window.syncCostBaseline = async function () {
+                try {
+                    const r = await fetch(INFRA_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'apikey': SB_ANON, 'Authorization': 'Bearer ' + SB_ANON, 'x-app-pass': getPwd() },
+                        body: JSON.stringify({ costOnly: true }),
+                    });
+                    const d = await r.json().catch(function () { return {}; });
+                    if (r.ok && typeof d.totalAllTimeEur === 'number') {
+                        localStorage.setItem('solita_cost_total', String(d.totalAllTimeEur));
+                        if (typeof window.solitaCostUpdate === 'function') { try { window.solitaCostUpdate(d.totalAllTimeEur); } catch (e) { } }
+                        if (window.DebugWindow) DebugWindow.log('Σ vom Server geseedet: ' + (d.totalAllTimeEur * 100).toFixed(2) + ' ¢');
+                    }
+                } catch (e) { /* offline → behalte den lokalen Σ */ }
+            };
             (function kickWhenAuthed(tries) {
                 if (getPwd && getPwd()) {
                     // push (NOT pull) on load: the edge fn merges our local log with the server's and returns
                     // the authoritative result, so this single call both uploads local-only turns AND pulls in
                     // whatever the other device added — without a separate pull that could briefly wipe to empty.
                     SolitaSync.push(brain.getHistory(), brain.getSummary());
+                    window.syncCostBaseline();   // seed Σ from the server (authoritative cross-device total)
                 } else if (tries > 0) {
                     setTimeout(function () { kickWhenAuthed(tries - 1); }, 1000);
                 }
