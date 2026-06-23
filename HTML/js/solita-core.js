@@ -297,7 +297,7 @@
                     messagesArea.scrollTop = messagesArea.scrollHeight;
                     // Describe via Gemini (cheap, multimodal) and hand the description back so Claude can relay it.
                     try {
-                        const desc = await describePhoto(img);
+                        const desc = (await describePhoto(img)).text;
                         return { ok: true, summary: 'Foto aufgenommen. Gemini beschreibt es: ' + desc };
                     } catch (e) {
                         return { ok: true, summary: 'Foto aufgenommen und im Chat gezeigt; die Gemini-Beschreibung schlug fehl: ' + ((e && e.message) || e) };
@@ -442,6 +442,7 @@
         // the model's prefix so the summariser (Claude-Haiku) always reaches the claude proxy, even in DeepSeek mode.
         const DS_URL = AI_URL.replace(/\/claude(\?|$)/, '/deepseek$1');
         const GEMINI_URL = AI_URL.replace(/\/claude(\?|$)/, '/gemini$1');   // multimodal photo describe (cheap; Claude stays out)
+        const INFRA_URL = AI_URL.replace(/\/claude(\?|$)/, '/infra-usage$1'); // /costs → live infra/AI costs (dry: no mail)
         function getApiUrl(model) { return /^deepseek/.test(model || currentModel) ? DS_URL : AI_URL; }
 
         function initModelDropdown(dropdownEl) {
@@ -517,7 +518,12 @@
             storage: { history: 'ai_history', summary: 'solita_summary', legacyHistory: 'deepseek_history' },
             getPwd: getPwd,
             getModel: getModel,
-            getSystem: function () { return SOLITA_SYSTEM; },
+            getSystem: function () {
+                // Append TODAY's date (day granularity → busts the cached persona only once per day, not per turn)
+                // so Claude can resolve „morgen/nächsten Dienstag" for create_calendar_event etc.
+                const heute = new Date().toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' });
+                return SOLITA_SYSTEM + ' Zur Orientierung: Heute ist ' + heute + ' (Zeitzone Europe/Berlin).';
+            },
             getTools: function () { return SOLITA_TOOLS.concat((window.SolitaTools && window.SolitaTools.specs) || []); },
             execTool: execTool,
             toolBadge: toolBadge,
@@ -795,7 +801,7 @@
             const _sm = userText.toLowerCase().match(/^(?:slash|splash|flash|gleich|klatsch|glatsch|schlag)\s+(.+?)[\s.!?]*$/);
             if (_sm) {
                 const _w = _sm[1].replace(/[.\s]/g, '');   // "u i" / "u.i." → "ui"
-                const _M = { ui: 'ui', youeye: 'ui', youi: 'ui', list: 'list', liste: 'list', clear: 'clear', logout: 'logout', ausloggen: 'logout', abmelden: 'logout', wake: 'wake', aufwachen: 'wake', aufwecken: 'wake', wach: 'wake', de: 'de', deutsch: 'de', german: 'de', aleman: 'de', 'alemán': 'de', en: 'en', english: 'en', englisch: 'en', ingles: 'en', 'inglés': 'en', es: 'es', spanish: 'es', spanisch: 'es', 'español': 'es', espanol: 'es' };
+                const _M = { ui: 'ui', youeye: 'ui', youi: 'ui', list: 'list', liste: 'list', clear: 'clear', logout: 'logout', ausloggen: 'logout', abmelden: 'logout', wake: 'wake', aufwachen: 'wake', aufwecken: 'wake', wach: 'wake', costs: 'costs', cost: 'costs', kosten: 'costs', de: 'de', deutsch: 'de', german: 'de', aleman: 'de', 'alemán': 'de', en: 'en', english: 'en', englisch: 'en', ingles: 'en', 'inglés': 'en', es: 'es', spanish: 'es', spanisch: 'es', 'español': 'es', espanol: 'es' };
                 if (_M[_w]) userText = '/' + _M[_w];
             }
             return userText;
@@ -853,7 +859,7 @@
 <tr><td style="padding:3px 6px;opacity:0.7;">Logout</td><td style="padding:3px 6px;">ausloggen · abmelden</td><td style="padding:3px 6px;">log (me) out · sign (me) out</td><td style="padding:3px 6px;">cierra sesión · desconéctame</td></tr>
 <tr><td style="padding:3px 6px;opacity:0.7;">Tschüss</td><td style="padding:3px 6px;">tschüss · das war's</td><td style="padding:3px 6px;">bye · see you · good night</td><td style="padding:3px 6px;">adiós · hasta luego · chao</td></tr>
 </tbody></table>
-<div style="font-size:0.82rem;opacity:0.85;"><strong>Tippbefehle:</strong> /wake (aufwecken) · /pause (schlummern) · /clear (neue Session) · /list (diese Tabelle) · /ui (änderbare UI-Elemente) · /logout (abmelden) · /de · /en · /es (Sprache)</div>
+<div style="font-size:0.82rem;opacity:0.85;"><strong>Tippbefehle:</strong> /wake (aufwecken) · /pause (schlummern) · /clear (neue Session) · /list (diese Tabelle) · /ui (änderbare UI-Elemente) · /costs (unsere Kosten) · /logout (abmelden) · /de · /en · /es (Sprache)</div>
 <div style="font-size:0.78rem;opacity:0.6;margin-top:4px;">Sprache auch per DE / EN / ES im Menü (☰)</div></div></div>`);
                 messagesArea.scrollTop = messagesArea.scrollHeight;
                 messageInput.value = '';
@@ -994,7 +1000,41 @@
             if (!r.ok) throw new Error((d && d.error && (d.error.message || d.error)) || ('Gemini ' + r.status));
             const parts = d && d.candidates && d.candidates[0] && d.candidates[0].content && d.candidates[0].content.parts;
             const text = Array.isArray(parts) ? parts.map(function (p) { return (p && p.text) || ''; }).join(' ').trim() : '';
-            return text || '(Gemini hat nichts zurückgegeben.)';
+            return { text: text || '(Gemini hat nichts zurückgegeben.)', usage: d && d.usageMetadata };
+        }
+        // A per-action cost line under the last assistant bubble — same look as the chat cost (Doc 2026-06-23:
+        // „es stehen keine Preise pro Suche mehr da?"). Gemini Flash list price × USD→EUR; green (= cheap).
+        // Per-DAY search counter (the 1500 free-grounding quota is daily) → "🔍 N/1500" on the line.
+        function bumpSearchCountDaily() {
+            const today = new Date().toISOString().slice(0, 10);
+            let o = {}; try { o = JSON.parse(localStorage.getItem('solita_search_count') || '{}') || {}; } catch (e) { }
+            if (o.date !== today) o = { date: today, n: 0 };
+            o.n = (o.n || 0) + 1;
+            try { localStorage.setItem('solita_search_count', JSON.stringify(o)); } catch (e) { }
+            return o.n;
+        }
+        function showGeminiCost(um, label, isSearch) {
+            if (!um) return;
+            const inTok = Number(um.promptTokenCount) || 0, outTok = Number(um.candidatesTokenCount) || 0;
+            const eur = (inTok * 0.30 + outTok * 2.50) / 1e6 * 0.92;   // gemini-2.5-flash [in,out] $/1M × USD→EUR
+            // ONE running Σ across everything (Doc). Grounding is free <1500/day, but the TOKENS always cost a
+            // sliver → never truly zero. The ↑/↓ tokens stay in the DEBUG window; the chat line shows ≈ · Σ · 🔍.
+            let total = 0; try { total = parseFloat(localStorage.getItem('solita_cost_total') || '0') || 0; } catch (e) { }
+            total += eur;
+            try { localStorage.setItem('solita_cost_total', String(total)); } catch (e) { }
+            if (window.DebugWindow) window.DebugWindow.log('€ ' + (isSearch ? 'search' : (label || 'gemini')) + ': ↑' + inTok + ' ↓' + outTok + ' · ' + (eur * 100).toFixed(3) + '¢ · Σ ' + total.toFixed(3) + ' €');
+            const fmt = function (e) { const c = e * 100; return (c < 100) ? (c < 1 ? c.toFixed(3) : c < 10 ? c.toFixed(2) : c.toFixed(1)) + ' ¢' : '€ ' + e.toFixed(2); };
+            const cc = messagesArea.querySelectorAll('.message.assistant .message-content');
+            const last = cc[cc.length - 1];
+            if (!last || last.querySelector('.solita-cost')) return;
+            const tag = document.createElement('div');
+            tag.className = 'solita-cost';
+            tag.style.opacity = '0.92'; tag.style.fontSize = '0.8rem';   // „deutlicher" (Doc) — clearer than the dim chat line
+            let html = '<span style="color:rgb(214,195,155)">≈ ' + fmt(eur) + '</span>  ·  Σ ' + fmt(total);
+            if (isSearch) html += '  ·  🔍 ' + bumpSearchCountDaily() + '/1500';
+            else if (label) html += '  ·  ' + label;
+            tag.innerHTML = html;
+            last.appendChild(tag);
         }
         async function handlePhotoIntent(userText) {
             if (!PHOTO_INTENT.test(userText) || !window.PhotoCapture) return false;
@@ -1014,10 +1054,13 @@
             messagesArea.scrollTop = messagesArea.scrollHeight;
             showTyping();
             try {
-                const desc = await describePhoto(img);
+                const res = await describePhoto(img);
                 hideTyping();
-                addMessage('assistant', desc);
-                if (window.speakReply) window.speakReply(desc);
+                addMessage('assistant', res.text);
+                showGeminiCost(res.usage, '📷 Foto');
+                if (window.speakReply) window.speakReply(res.text);
+                recordMediaTurn('user', userText);
+                recordMediaTurn('assistant', 'Foto-Beschreibung: ' + res.text);
             } catch (e) {
                 hideTyping();
                 addMessage('assistant', '❌ Konnte das Foto nicht beschreiben: ' + ((e && e.message) || e));
@@ -1029,8 +1072,32 @@
         // Model-INDEPENDENT (works even on DeepSeek): the search runs OUTSIDE the chat model, via the cheap
         // `gemini` proxy with the google_search tool. Free up to 1500 grounded prompts/day, then $35/1000 —
         // for a single user effectively free. Sources come back in groundingMetadata; we show + speak the answer.
-        const SEARCH_INTENT = /\b(such(e|st|t)?|googl(e|est?|t)?|recherchier(e|st|t)?)\b|\bim\s+(netz|internet|web)\s+(nach|such)\w*\b|\bschau\s+(mal\s+)?(online|im\s+netz|ins\s+internet)\b|\bneueste[ns]?\s+(nachrichten|news)\b|\bwas\s+gibt'?s\s+neues\b/i;
-        async function searchWeb(query) {
+        // Smarter intent (Doc 2026-06-23): open verb stems (\w*) so ALL forms fire — „recherchieren", „googeln",
+        // „suchen" — plus „finde heraus", „schau nach", and „aktueller/neuester … Preis/Kurs/Nachrichten…"
+        // (incl. glued compounds like „Goldpreis"). Tested against a positive/negative set for precision.
+        const SEARCH_INTENT = /\b(such\w*|googe?l\w*|recherchier\w*)\b|\b(im|ins)\s+(netz|internet|web)\s+(nach|such\w*|find\w*|guck\w*|schau\w*)|\bschau\w*\s+(mal\s+)?(online|nach\b|im\s+netz|ins\s+internet)|\bfind\w*\s+(mal\s+)?(heraus|raus)\b|\b(aktuell\w*|neueste\w*|heutige\w*|momentane\w*)\b[\s\w-]{0,20}(preis|kurs|wert|stand|nachrichten|news|wetter|wechselkurs)\b|\bwas\s+gibt\W?s\s+neues\b/i;
+        // Sticky search (Doc 2026-06-23): a follow-up WITHOUT a search keyword — „wie hat ER sich verändert",
+        // „und in Dollar?" — has no trigger, so it would fall to the chat model („kann ich nicht live"). Right
+        // AFTER a search we treat a referential follow-up as a continued search → it reaches the context-aware
+        // searchWeb and resolves the anaphor. Strong 3rd-person refs only (NOT bare „es/das") to stay precise.
+        const FOLLOWUP_INTENT = /^\s*und\b|\b(er|sie|ihn|ihm|ihr|dieser|diese|dieses|derselbe|davon|damit|dazu|darüber|dafür|dagegen|seitdem|seither)\b/i;
+        let lastSearchActive = false;   // armed after a search; a referential next turn stays in search mode
+        // Recent search/photo exchanges (the chat turns live in brain.getHistory()); together they give the
+        // search its CONTEXT so Gemini can resolve anaphora — „wie hat ER sich verändert" → Bitcoin (Doc).
+        let recentMediaTurns = [];
+        function recordMediaTurn(role, text) {
+            if (!text) return;
+            recentMediaTurns.push({ role: role, text: String(text) });
+            if (recentMediaTurns.length > 8) recentMediaTurns = recentMediaTurns.slice(-8);
+        }
+        async function searchWeb(query, ctx) {
+            let ctxText = '';
+            if (ctx && ctx.length) {
+                ctxText = 'Bisheriger Gesprächsverlauf (nutze ihn, um Bezüge wie „er/sie/es/das/dieser/dort" aufzulösen):\n'
+                    + ctx.map(function (t) { return (t.role === 'assistant' ? 'Solita' : 'Doc') + ': ' + t.text; }).join('\n') + '\n\n';
+            }
+            const prompt = ctxText + 'Aktuelle Frage: ' + query
+                + '\n\nAntworte kurz und natürlich auf Deutsch — ein bis drei Sätze, gesprochen-freundlich, ohne Aufzählung. Stütze dich auf aktuelle Web-Informationen.';
             const r = await fetch(GEMINI_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'apikey': SB_ANON, 'Authorization': 'Bearer ' + SB_ANON },
@@ -1038,7 +1105,7 @@
                     model: 'gemini-2.5-flash',
                     label: 'search',   // cost-log tag → grounded-search count in the daily mail
                     body: {
-                        contents: [{ parts: [{ text: query + '\n\nAntworte kurz und natürlich auf Deutsch — ein bis drei Sätze, gesprochen-freundlich, ohne Aufzählung. Stütze dich auf aktuelle Web-Informationen.' }] }],
+                        contents: [{ parts: [{ text: prompt }] }],
                         tools: [{ google_search: {} }],
                     },
                 }),
@@ -1050,17 +1117,25 @@
             const text = Array.isArray(parts) ? parts.map(function (p) { return (p && p.text) || ''; }).join(' ').trim() : '';
             const chunks = cand && cand.groundingMetadata && cand.groundingMetadata.groundingChunks;
             const sources = Array.isArray(chunks) ? chunks.map(function (c) { return c && c.web; }).filter(Boolean).slice(0, 4) : [];
-            return { text: text || '(Gemini hat nichts zurückgegeben.)', sources: sources };
+            return { text: text || '(Gemini hat nichts zurückgegeben.)', sources: sources, usage: d && d.usageMetadata };
         }
         async function handleSearchIntent(userText) {
-            if (!SEARCH_INTENT.test(userText)) return false;
             addMessage('user', userText);
             messageInput.value = ''; messageInput.style.height = 'auto';
+            // Context = recent chat turns (brain) + recent search/photo turns → lets Gemini resolve „er/sie/es".
+            const histChat = (typeof brain !== 'undefined' && brain.getHistory) ? brain.getHistory() : [];
+            const ctx = histChat.slice(-4).map(function (t) { return { role: t.role, text: t.content }; })
+                .concat(recentMediaTurns.slice(-4)).slice(-6);
+            addMessage('assistant', '🌐 ich recherchiere im Netz …');   // interim line, like the get_weather badge (Doc)
             showTyping();
             try {
-                const res = await searchWeb(userText);
+                const res = await searchWeb(userText, ctx);
                 hideTyping();
                 addMessage('assistant', res.text);
+                const _cells = messagesArea.querySelectorAll('.message.assistant .message-content');
+                const _cell = _cells[_cells.length - 1];
+                if (_cell) _cell.style.color = 'rgb(214,195,155)';   // sand — marks a researched (web) answer (Doc)
+                showGeminiCost(res.usage, null, true);   // search → shows the daily 🔍 N/1500 counter
                 if (res.sources.length) {
                     const links = res.sources.map(function (s) {
                         return '<a href="' + escapeHtml(s.uri || '#') + '" target="_blank" rel="noopener" style="color:rgb(121,158,49)">' + escapeHtml(s.title || s.uri || 'Quelle') + '</a>';
@@ -1070,9 +1145,39 @@
                     messagesArea.scrollTop = messagesArea.scrollHeight;
                 }
                 if (window.speakReply) window.speakReply(res.text);   // answer spoken; sources only shown
+                recordMediaTurn('user', userText);     // remember this exchange so the NEXT search resolves „er/das"
+                recordMediaTurn('assistant', res.text);
             } catch (e) {
                 hideTyping();
                 addMessage('assistant', '❌ Suche fehlgeschlagen: ' + ((e && e.message) || e));
+            }
+            return true;
+        }
+
+        // ---- "/costs" / "sag mir unsere Kosten" → live infra + AI costs, exactly the daily-mail content (Doc) ----
+        // Calls infra-usage with { dry:true } (computes + returns body/spoken, sends NO mail). Password-gated like
+        // the chat proxy → Solita passes the app password. Shows the full mail body, speaks a concise summary.
+        const COSTS_INTENT = /^\s*\/costs?\b|\bunsere\s+(kosten|ausgaben)\b|\bkostenstand\b|\binfra.?kosten\b|\bwas\s+kostet\s+uns\b/i;
+        async function handleCostsIntent(userText) {
+            if (!COSTS_INTENT.test(userText)) return false;
+            addMessage('user', userText);
+            messageInput.value = ''; messageInput.style.height = 'auto';
+            addMessage('assistant', '📊 ich hole unsere Kosten …');
+            showTyping();
+            try {
+                const r = await fetch(INFRA_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'apikey': SB_ANON, 'Authorization': 'Bearer ' + SB_ANON, 'x-app-pass': getPwd() },
+                    body: JSON.stringify({ dry: true }),   // dry → compute + return, but DON'T send the mail
+                });
+                const d = await r.json().catch(function () { return {}; });
+                hideTyping();
+                if (!r.ok) throw new Error((d && d.error) || ('infra-usage ' + r.status));
+                addMessage('assistant', d.body || '(keine Kostendaten)');
+                if (window.speakReply) window.speakReply(d.spoken || 'Konnte die Kosten nicht zusammenfassen.');
+            } catch (e) {
+                hideTyping();
+                addMessage('assistant', '❌ Kosten konnten nicht geladen werden: ' + ((e && e.message) || e));
             }
             return true;
         }
@@ -1103,11 +1208,20 @@
             // Auth gate: no password → show the overlay and stop.
             if (checkAuthAndReturnPwd(pwd) === undefined) return;
 
+            // "/costs" / "sag mir unsere Kosten" → live infra + AI costs (same content as the daily mail).
+            if (await handleCostsIntent(userText)) return;
+
             // "mach ein Foto" → capture NOW (still inside the send tap) + Gemini describes. Before the model.
             if (await handlePhotoIntent(userText)) return;
 
-            // "such mal im Netz …" → Gemini Search-Grounding (model-independent, even on DeepSeek). Before the model.
-            if (await handleSearchIntent(userText)) return;
+            // Web search → Gemini grounding (model-independent, even on DeepSeek). Fires on an explicit trigger,
+            // OR — right after a search — on a referential follow-up („wie hat er sich verändert", „und in $?").
+            if (SEARCH_INTENT.test(userText) || (lastSearchActive && FOLLOWUP_INTENT.test(userText))) {
+                lastSearchActive = true;
+                await handleSearchIntent(userText);
+                return;
+            }
+            lastSearchActive = false;   // a normal chat turn ends search mode
 
             // UI-change mode + "stell ein: …" one-shot config → solita-config (live config).
             if (await handleConfigOrUiMode(userText, pwd)) return;
