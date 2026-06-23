@@ -168,7 +168,9 @@
             const pos = posMarker && posMarker.getLatLng && posMarker.getLatLng();
             const trackPresent = track.length >= 10 || !!loadedBounds;   // ≥10 live pts OR a multi-loaded overlay
             const rb = (pos && __nav && __nav.remainingBounds) ? __nav.remainingBounds([pos.lat, pos.lng]) : null;
-            return { follow: !!pos, fitall: trackPresent, fitrem: !!rb, hand: handMode };
+            // fitall ("ganze Route") is valid with a recorded track OR while navigating (the planned route is
+            // a whole route to fit) — so it doesn't pop in only after 10 recorded points (Doc: "mal da, mal nicht").
+            return { follow: !!pos, fitall: trackPresent || !!rb, fitrem: !!rb, hand: handMode };
         }
         // Lay out the fan options. The fan only ever offers DESTINATIONS you can jump to — follow / fitall /
         // fitrem — and never the current one (it's on the trigger). "hand" is NOT a destination and never gets
@@ -190,7 +192,10 @@
                 }
             });
             const fan = document.getElementById('view-fan');
-            if (fan) fan.style.setProperty('--n', String(slot)); // visible-option count → CSS centres the open cluster
+            // --n centres the open cluster. Normally the cluster = trigger + `slot` options. In hand-mode the
+            // trigger is hidden (CSS) but still holds its slot, so count it as one extra (slot+1) → the visible
+            // options stay centred instead of drifting 28 px left (Doc 2026-06-23).
+            if (fan) fan.style.setProperty('--n', String(handMode ? slot + 1 : slot));
             return slot;
         }
         function refreshRecenter() {
