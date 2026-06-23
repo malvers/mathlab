@@ -64,6 +64,23 @@
 **Akzeptanz:** „mach ein Foto" (Claude) → native Kamera auf → Bild im Chat (`lastPhoto` gesetzt). **Inhaltliche Bildanalyse = separates Feature** (generischer `gemini`-Proxy, multimodal).
 **NICHT:** auf **DeepSeek** testen (Tools feuern dort nie) · nicht in **Solita-im-Tracker** suchen (anderer Code `tracker-solita.js`, Tool dort nicht eingebaut).
 
+## BUG-14 — „nächste Tankstelle/Aldi/Lidl/Hornbach" führt NICHT zum nächstgelegenen 🐞 offen
+**Gemeldet:** Doc 2026-06-23 (am Gerät, funktioniert nicht). „Ich sage Aldi / Lidl / Hornbach und er führt mich nicht zum Nächstgelegenen."
+**Versucht (Commit `7c842d6`, wirkungslos):** `geocode()` holt mit GPS `limit=10` Kandidaten + weichem viewbox-Bias und wählt den **geografisch nächsten** (Haversine) statt Nominatims importance-Top.
+**Warum's nicht reicht (Verdacht):** **Nominatim `/search` ist ADRESS-orientiert, kein POI-/Marken-Finder.** Für Markennamen liefert es den **nahen Filial-Eintrag oft gar nicht** in den Top-10 (global nach „importance" gerankt) — dann kann „nächster aus 10" ihn nicht wählen, weil er **nicht in der Liste** ist. Markennamen sind als POI (`shop=`/`name`) getaggt, nicht als Adresse.
+**Fundstelle:** `HTML/js/tracker-nav.js` → `geocode()`.
+**Fix-Richtung (richtig, noch nicht gebaut):** Für „nächstes X" (Marke/Kategorie) eine **Overpass-Query um die aktuelle Position** (`node/way[shop=…]` bzw. `[amenity=fuel]`, `[name~"Aldi",i]`) im wachsenden Radius, **nach Distanz sortiert** → echtes „nearest". Nominatim nur für echte Adressen. Heuristik: sieht die Eingabe wie Marke/Kategorie aus → Overpass-Pfad; sonst Nominatim.
+**NICHT:** weiter an `limit`/`viewbox` drehen — löst das POI-Problem nicht.
+
+## BUG-15 — Off-Route: Reroute „zieht zurück" / Chaos 🐞 offen · 🔍 erst am Gerät messen
+**Gemeldet:** Doc 2026-06-23: „absolutes Chaos und Desaster." Beim Abweichen soll **sauber eine neue Route VORWÄRTS** berechnet werden, statt auf die alte zurückzuführen.
+**Versucht (Commit `7c842d6`, hilft nicht / macht's evtl. chaotischer):** off-route alte Abbiegeansagen unterdrücken + Banner „Route wird neu berechnet" + Reroute von der aktuellen Position (`update()` / `computeRoute(here,true)`).
+**Warum's nicht reicht (Verdacht):** (a) **Kein Bearing-Constraint:** OSRM nimmt von `here` den **kürzesten** Weg zum Ziel — das ist oft ein **U-Turn zurück** auf die alte Route → genau das „zieht zurück". (b) **Flapping:** `OFFROUTE_M=30 m` + `REROUTE_COOLDOWN_MS=6000` → wiederholte Neuberechnungen, „Route wird neu berechnet" im Loop. (c) die neue Route deviiert evtl. sofort wieder.
+**Fundstelle:** `HTML/js/tracker-nav.js` → `update()`, `computeRoute()` (OSRM-URL baut nur `coords`, **keine** `bearings`).
+**Fix-Richtung (Docs „Trick mit Navigationspunkten"):** OSRM **`bearings=`** mit dem aktuellen GPS-**Heading** an der Startkoordinate → erzwingt Abfahrt in Fahrtrichtung, **kein sofortiger U-Turn**. Alternativ ein **Via-Punkt ~50–100 m voraus** in Fahrtrichtung. Plus **Flapping dämpfen** (Hysterese: Reroute erst nach N aufeinanderfolgenden Off-Route-Fixes, längeres Debounce).
+**Akzeptanz:** eigene Abzweigung nehmen → **eine ruhige** Neuberechnung vorwärts, kein U-Turn-zurück, kein „neu berechnen"-Loop.
+**NICHT:** nur die Ansagen unterdrücken (Symptom) — der Kern ist die **Routing-Richtung** (bearings/via). Erwägen, den wirkungslosen Teil von `7c842d6` zurückzunehmen, bis es richtig gebaut ist.
+
 ---
 
 ## Querverweise
