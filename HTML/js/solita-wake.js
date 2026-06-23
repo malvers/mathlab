@@ -444,6 +444,7 @@
 
             wakeBtn.addEventListener('click', function () {
                 wakeOn = !wakeOn; localStorage.setItem(WAKE_KEY, wakeOn ? '1' : '0'); reflect();
+                if (window.solitaSyncSettings) window.solitaSyncSettings();   // sync wake pref cross-device
                 convo = false; awaitingQuery = false;                 // toggling the line resets the thread
                 ear.setConvo(false); ear.setAwaiting(false);
                 if (wakeOn) { paused = true; ear.setEnabled(true); ear.pause(); if (window.solitaPhase) solitaPhase('dormant'); startNativeWake(); freeMicForWebSR(); ear.start(); }   // ear on → SLUMBER (waiting for "Solita")

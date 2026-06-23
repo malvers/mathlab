@@ -550,10 +550,11 @@ window.TrackerNav = function (ctx) {
         const fmt = (m) => m >= 10000 ? Math.round(m / 1000) + ' km'
             : m >= 1000 ? (m / 1000).toFixed(1) + ' km'
                 : Math.round(m / 50) * 50 + ' m';
-        // "Rest / Gesamt" so the banner shows BOTH the remaining distance and the whole route length
-        // (Doc 2026-06-21 — "Gesamtstrecke und die noch zulaufende Strecke"; tune wording if it doesn't land).
-        const dist = fmt(d.remM) + ' / ' + fmt(routeTotalDist);
-        return 'ETA ' + clock + '  ·  ' + dist + '  ·  ' + Math.round(d.remSec / 60) + ' min';
+        // Labelled so the three numbers read themselves (Doc 2026-06-22): arrival · whole route · remaining.
+        // German decimal comma („6,5 km"); the cryptic "ETA … 4.9 / 6.5 … min" is replaced by named fields.
+        const km = (m) => fmt(m).replace('.', ',');
+        const min = Math.round(d.remSec / 60);
+        return 'ANKUNFT ' + clock + '  ·  STRECKE ' + km(routeTotalDist) + '  ·  ZU FAHREN ' + km(d.remM) + ' (' + min + ' min)';
     }
 
     function announceDist(d) { return d > 500 ? Math.round(d / 100) * 100 : Math.round(d / 50) * 50; }

@@ -196,6 +196,7 @@
             try { localStorage.setItem(LANG_KEY, code); } catch (e) {}
             reflectLang();
             if (window.solitaRestartVoice) window.solitaRestartVoice();   // restart the ear → new STT language now
+            if (!(opts && opts.noSync) && window.solitaSyncSettings) window.solitaSyncSettings();   // not when adopting (echo)
             if (!(opts && opts.silent) && window.speakReply) window.speakReply((SOLITA_LANGS[code] || SOLITA_LANGS.de).hi);   // live preview
         };
         document.querySelectorAll('#hh-lang [data-lang]').forEach(function (b) {
@@ -457,6 +458,7 @@
                 opt.addEventListener('click', () => {
                     currentModel = opt.dataset.value;
                     localStorage.setItem(MODEL_KEY, currentModel);
+                    if (window.solitaSyncSettings) window.solitaSyncSettings();
                     if (label) label.textContent = opt.textContent;
                     options.forEach(o => o.classList.toggle('selected', o === opt));
                     dropdownEl.classList.remove('open');
@@ -480,6 +482,7 @@
                 currentModel = b.dataset.model;
                 try { localStorage.setItem(MODEL_KEY, currentModel); } catch (e) { }
                 sync();
+                if (window.solitaSyncSettings) window.solitaSyncSettings();   // propagate the choice cross-device
                 if (window.DebugWindow) DebugWindow.log('Modell → ' + currentModel);
             }));
         }
@@ -569,11 +572,47 @@
         // login), then pull the shared log (host adopts the merged result via onRemote) and push whatever
         // this device had so any local-only turns reach the server too. Best-effort: if the edge fn isn't
         // deployed yet the calls just fail quietly and Solita keeps working device-locally as before.
+        // ---- Cross-device PREFERENCES (Doc 2026-06-22) ----
+        // The per-origin localStorage trap meant a model/voice/lang pick on one device never reached the Pixel.
+        // We now carry the prefs in the SAME shared sync row (settings jsonb) via the password-gated solita-sync
+        // fn. NEVER the password (Rule 21) — only these keys. Model + language apply LIVE; tts/voice/wake read
+        // their localStorage at load, so they take effect on the device's next start (cross-device that's fine).
+        const SYNCED_PREF_KEYS = ['ai_model', 'solita_tts', 'solita_gvoice', 'solita_voice', 'solita_wake', 'solita_lang'];
+        function collectSettings() {
+            const s = {};
+            SYNCED_PREF_KEYS.forEach(function (k) { const v = localStorage.getItem(k); if (v != null) s[k] = v; });
+            return s;
+        }
+        function reflectModel() {   // mirror currentModel onto the visible #hh-model toggle after an adopted change
+            const grp = document.getElementById('hh-model');
+            if (grp) grp.querySelectorAll('button[data-model]').forEach(function (b) {
+                b.classList.toggle('active', b.dataset.model === currentModel);
+            });
+        }
+        function applySettings(s) {
+            if (!s || typeof s !== 'object') return;
+            // Adopt ONLY keys the server actually has → never clobber a local pref with an empty server value.
+            SYNCED_PREF_KEYS.forEach(function (k) {
+                if (typeof s[k] === 'string') { try { localStorage.setItem(k, s[k]); } catch (e) { } }
+            });
+            if (typeof s.ai_model === 'string' && /^(claude-|deepseek-)/.test(s.ai_model) && !/opus/i.test(s.ai_model)) {
+                currentModel = s.ai_model; reflectModel();
+            }
+            if (typeof s.solita_lang === 'string' && window.setSolitaLang && s.solita_lang !== window.solitaLang) {
+                window.setSolitaLang(s.solita_lang, { silent: true, noSync: true });
+            }
+        }
+        // Any device that changes a pref calls this → the new prefs land in the shared row for the others.
+        window.solitaSyncSettings = function () {
+            if (window.SolitaSync && SolitaSync.pushSettings) SolitaSync.pushSettings(collectSettings());
+        };
+
         if (window.SolitaSync) {
             SolitaSync.init({
                 endpoint: AI_URL.replace(/\/claude(\?|$)/, '/solita-sync$1'),
                 anonKey: SB_ANON,
                 getPwd: getPwd,
+                onSettings: applySettings,
                 onRemote: function (history, summary) {
                     if (!Array.isArray(history)) return;
                     // Only touch the DOM when the conversation ACTUALLY changed (e.g. the other device added
