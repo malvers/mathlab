@@ -79,9 +79,60 @@
     // Short chat line shown while the tool runs.
     function badge() { return '📅 ich schaue in deinen Kalender …'; }
 
+    // ── create_calendar_event — WRITE: lege einen neuen Termin an (Edge-Fn action:'create', eigener Schreib-Token).
+    const createSpec = {
+        name: 'create_calendar_event',
+        description: 'Lege einen NEUEN Termin in Docs Google-Kalender an, wenn er darum bittet — z.B. '
+            + '„trag morgen 15 Uhr Zahnarzt ein", „mach Freitag 12 Uhr Mittagessen mit Anna", „erinnere mich am 3. Juli an X". '
+            + 'Gib „start" als ISO-8601 in LOKALER Zeit (Europe/Berlin) an, z.B. "2026-06-25T15:00:00"; das heutige Datum '
+            + 'steht im System-Kontext, löse „morgen/nächsten Dienstag" daraus auf. Endzeit nur, wenn genannt (sonst 1 Stunde). '
+            + 'Ganztägig: allDay=true und „start" als Datum "YYYY-MM-DD". Lege NUR auf klare Bitte an; bei Unklarheit (Datum/Zeit) frage kurz nach.',
+        input_schema: {
+            type: 'object',
+            properties: {
+                title: { type: 'string', description: 'Titel des Termins, z.B. „Zahnarzt".' },
+                start: { type: 'string', description: 'Start, ISO-8601 lokale Zeit "2026-06-25T15:00:00" (oder Datum "2026-06-25" bei allDay).' },
+                end: { type: 'string', description: 'Optionales Ende (ISO-8601). Weglassen = 1 Stunde nach Start.' },
+                allDay: { type: 'boolean', description: 'true für ganztägige Termine (start/end als Datum ohne Uhrzeit).' },
+                location: { type: 'string', description: 'Optionaler Ort.' },
+                description: { type: 'string', description: 'Optionale Notiz.' }
+            },
+            required: ['title', 'start']
+        }
+    };
+    async function createHandler(input, pwd) {
+        try {
+            const body = { action: 'create', title: input && input.title, start: input && input.start };
+            if (input && input.end) body.end = input.end;
+            if (input && input.allDay) body.allDay = true;
+            if (input && input.location) body.location = input.location;
+            if (input && input.description) body.description = input.description;
+            const r = await fetch(CAL_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'apikey': SB_ANON, 'Authorization': 'Bearer ' + SB_ANON, 'x-app-pass': pwd },
+                body: JSON.stringify(body)
+            });
+            const d = await r.json().catch(function () { return {}; });
+            if (!r.ok) {
+                if (window.DebugWindow) DebugWindow.log('📅 create ERR ' + r.status + ': ' + (d.error || '(kein Text)'));
+                return { ok: false, summary: 'Termin anlegen fehlgeschlagen: ' + (d.error || ('HTTP ' + r.status)) };
+            }
+            const c = d.created || {};
+            let when = c.start || (input && input.start) || '';
+            try { if (when && when.indexOf('T') > 0) when = new Date(when).toLocaleString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) + ' Uhr'; } catch (e) { }
+            return { ok: true, summary: 'Termin angelegt: „' + (c.title || (input && input.title)) + '" — ' + when + '.' };
+        } catch (e) {
+            return { ok: false, summary: 'Fehler beim Anlegen: ' + ((e && e.message) || e) };
+        }
+    }
+    function createBadge() { return '📅 ich trage den Termin ein …'; }
+
     // Register into the shared Solita tool registry (idempotent — works whether core loaded first or not).
     const reg = (window.SolitaTools = window.SolitaTools || { specs: [], handlers: {}, badges: {} });
     reg.specs.push(spec);
     reg.handlers[spec.name] = handler;
     reg.badges[spec.name] = badge;
+    reg.specs.push(createSpec);
+    reg.handlers[createSpec.name] = createHandler;
+    reg.badges[createSpec.name] = createBadge;
 })();

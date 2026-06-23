@@ -42,35 +42,14 @@ MVP + Re-Routing + Voice sind gebaut. **Noch offen (je ein eigener kleiner Auftr
 - **„passiert"-Erkennung:** Manöver weiterzählen, wenn man bei schneller Fahrt zwischen zwei Fixes daran vorbeikommt.
 - **Verkehr/Baustellen:** gratis über **Autobahn-GmbH-API** (DE, kein Key) / DATEX II / Mobilithek; farbiger Echtzeit-Stau realistisch nur via TomTom/HERE-Freemium. *(Verkehrs-Spur Phase 1 inzwischen gebaut — s. Code `tracker-traffic.js`.)*
 
-## FEAT-7 — Medien (Foto/Voice/Video) nach Cloudflare R2 🅿️ gebaut-aber-geparkt
-**Stand:** R2-Upload-Code liegt im Baum (Memory `project_tracker_media_r2_migration_parked`). Die Alt-Medien sind inzwischen migriert (per wrangler) — diesen Eintrag VOR weiterer Arbeit gegen den echten Stand prüfen.
-**Auftrag (falls noch offen):** Migrationspfad für etwaige Alt-Medien sauber; **kein Secret ins Repo** (Regel 18).
-
-## FEAT-8 — Fotos aus der DB in Storage-Bucket auslagern 🅿️ geparkt (Alternative/Vorstufe zu FEAT-7)
-**Stand:** Fotos lagen als base64 in der DB; Plan: in Supabase-Storage-Bucket, Renderer/GPX bleiben unberührt (URL lädt wie base64). **Erst mit Doc klären, ob R2 (FEAT-7) das ablöst** — nicht beide parallel bauen.
-
 ## FEAT-9 — GPS-Nachbearbeitung: nächste Stufen 🏗️ teils gebaut
 **Gebaut:** Client-Glättung (`track-smooth.js`, GLÄTTEN-Toggle) + DEM-Höhe (`track-dem.js`, Open-Meteo, `effectiveAlts`-Funnel).
 **Offen (NEXT):** Aufstiegs-/Profil-UI (Höhenmeter, Profil-Graph), Map-Matching (nur fürs Auto sinnvoll).
-
-## FEAT-10 — App live fernsteuern (Remote-Config) 🏗️ teils gebaut · 🔴 Prio 1
-**Stand:** Demo läuft — `tracker-config.js` pollt `docalvers.de/config.json` (~20 s, ETag) → CSS-Variablen, **reload-frei**; fernsteuerbar: Stat-Farbe, Navi-Banner Farbe/z-Order/Süd-Offset.
-**Auftrag (ausbauen):** Konfig-Schema breiter umsetzen (mehr Knoten auf CSS-Variablen + minimal JS für Sichtbarkeit/z-Index/Position), **Config validieren & clampen** (kaputter Wert darf UI nicht zerlegen, Defaults als Fallback), **Versionsfeld**, optional **Supabase Realtime** statt Polling (instant-Push, ETag-Poll als Fallback). **Regel 18:** Config ist public → keine Secrets. **Verallgemeinerbar** aufs ganze forloop-Projekt (zentrale Theme-Config).
-
-## FEAT-11 — „Contact AI" im Tracker (Solita), Stufe 1: Chat/Foto 📐 · Future Now
-**Grundprinzip:** Die App ist **nur Fernbedienung** — KI läuft **server-seitig**. Kein SDK/Key/git im Browser/Capacitor.
-**Auftrag Stufe 1:** App → **Supabase Edge Function** → **Claude API** (Key server-seitig, Regel 18) → Antwort. Q&A, **Foto beschreiben/erkennen (multimodal)**, Sprache→Antwort, **Streaming** fürs Live-Gefühl. Modelle: `claude-opus-4-8` (1M Kontext), `claude-sonnet-4-6`, `claude-haiku-4-5`, `claude-fable-5`. ⚠️ Dieser Claude kennt das Repo **nicht** und ändert **keinen** Code.
-**Caveat:** Opus = 1M Kontext (Modell), aber das Nutzungs-Kontingent ist plan-gedeckelt → vor Bau prüfen. *(Solita ist inzwischen weit gebaut — diesen Eintrag gegen den echten Stand prüfen.)*
 
 ## FEAT-12 — „Contact AI" Stufe 2: Wunsch einsprechen → Agent ändert Repo + pusht 📐 · Future Now
 Schließt den Kreis mit FEAT-10: Sprach-Wunsch → Edge Function (hält Token) → Agent editiert `config.json` + push → Live-Config zieht's → Änderung erscheint live.
 **Zwei Heimstätten:** (1) **Claude Code Routines** (Anthropic-gehostet, kein eigener Server; App POSTet, Token in Edge Function) oder (2) **Claude Agent SDK auf eigenem VPS** (volle Kontrolle). **Edge Functions können den vollen Agent-Loop NICHT hosten** (Zeitlimit, kein FS/git) — nur Stufe 1 + Routine *feuern*. **Sicherheit:** Token server-seitig, Agent-Scope eng. Routines = Beta → vor Bau verifizieren.
 **Voraussetzung:** Solita-Weckwort — erst Vosk-Wortliste `["krass","solita","[unk]"]`, bei Bedarf openWakeWord/Picovoice auf Docs Stimme.
-
-## FEAT-13 — Navi-Route: Google-Blau + gefahrene Strecke speed-gefärbt 🏗️ teils gebaut · 🔴 Prio 1
-Code: `COL_ROUTE`/`drawRoute()` in `HTML/js/tracker-nav.js`. (c) ist erledigt (Punkt/Dreieck über der Linie, Ebene `nav-route` z350). Offen:
-- **(a)** Linie exakt **#4285F4** + helleres/dünneres Casing (der gefühlte Unterschied kommt vom dunklen Navy-Casing, nicht vom Blau). Doc schickt Screenshot zum Feinabgleich.
-- **(b) WICHTIG:** **blaue Linie nur VORAUS** (ab aktueller Position); der **gefahrene** Teil zeigt die **Geschwindigkeit** (leaflet-hotline wie der normale Track), nicht blau. Route an aktueller Position trimmen / Speed-Track oben drüber.
 
 ## FEAT-14 — Tracking & Navigation entkoppeln 📐
 **Szenario:** „Track nach Dresden, navigiere hin — Plan ändert sich → **Navigation beenden**, **Track weiterlaufen** lassen (weiter nach Frankfurt)." Heute reißt STOP die Navi immer mit; „Navigation beenden" ist als „Ziel löschen" versteckt; Navi wird nur aus `onPosition()` (= nur bei Aufzeichnung) gefüttert.
