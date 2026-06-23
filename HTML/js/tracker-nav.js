@@ -63,6 +63,9 @@ window.TrackerNav = function (ctx) {
     let voiceOn = true;     // spoken guidance on/off (persisted in localStorage)
     let routeTotalDist = 0; // whole-route distance (m) at (re)route time — for ETA / remaining
     let routeTotalDur = 0;  // whole-route duration (s) at (re)route time — for ETA / remaining
+    let tripTotalM = 0;     // total planned distance captured at the FIRST route → the FIXED "Strecke" shown in
+                            // the banner. Reroutes recompute from the current position (→ routeTotalDist shrinks),
+                            // but "Strecke" must stay the whole trip "von Anfang an" (Doc 2026-06-23).
 
     function hasDestination() { return !!destLatLng; }
 
@@ -312,6 +315,7 @@ window.TrackerNav = function (ctx) {
         if (destMarker) { map.removeLayer(destMarker); destMarker = null; }
         destLatLng = null; destLabel = '';
         maneuvers = null; mIdx = 0; annFar = false; mClosest = Infinity;
+        routeTotalDist = 0; routeTotalDur = 0; tripTotalM = 0;
         hideBanner();
         stopSpeech();
         refreshPanel();
@@ -338,6 +342,7 @@ window.TrackerNav = function (ctx) {
         drawRoute(best.geometry);
         setGuidance(best);
         routeTotalDist = best.distance || 0; // for ETA / remaining in the banner
+        if (!reroute) tripTotalM = routeTotalDist; // first route → fix the "Strecke" total; reroutes don't move it
         routeTotalDur = best.duration || 0;
         lastReroute = Date.now();
         const km = (best.distance / 1000).toFixed(1);
@@ -577,7 +582,7 @@ window.TrackerNav = function (ctx) {
         // German decimal comma („6,5 km"); the cryptic "ETA … 4.9 / 6.5 … min" is replaced by named fields.
         const km = (m) => fmt(m).replace('.', ',');
         const min = Math.round(d.remSec / 60);
-        return 'ANKUNFT ' + clock + '  ·  STRECKE ' + km(routeTotalDist) + '  ·  ZU FAHREN ' + km(d.remM) + ' (' + min + ' min)';
+        return 'ANKUNFT ' + clock + '  ·  STRECKE ' + km(tripTotalM || routeTotalDist) + '  ·  ZU FAHREN ' + km(d.remM) + ' (' + min + ' min)';
     }
 
     function announceDist(d) { return d > 500 ? Math.round(d / 100) * 100 : Math.round(d / 50) * 50; }
