@@ -423,6 +423,20 @@
         const COPY_ICON = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>`;
         const CHECK_ICON = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
 
+        // Text-Smileys → Emoji für die Anzeige (Doc 2026-06-23). MUSS hier oben stehen (vor jedem
+        // addMessage-Aufruf, auch dem History-Restore) — sonst Init-TDZ und „nichts lädt". Engine-sicher
+        // OHNE Lookbehind: führende Wortgrenze als Capture ($1) statt (?<!\w). Längere Muster zuerst.
+        const EMOTICONS = [
+            [/(^|[^\w]):'\(/g, '$1😢'],
+            [/(^|[^\w]):-?D(?!\w)/g, '$1😀'],
+            [/(^|[^\w]);-?\)/g, '$1😉'],
+            [/(^|[^\w]):-?\)/g, '$1🙂'],
+            [/(^|[^\w]):-?\(/g, '$1🙁'],
+            [/(^|[^\w]):-?[Pp](?!\w)/g, '$1😛'],
+            [/(^|[^\w]):-?[Oo](?!\w)/g, '$1😮'],
+            [/(^|[^\w])<3(?!\w)/g, '$1❤️'],
+        ];
+
         function getPwd() { return sessionPwd; }
 
         let currentModel = localStorage.getItem(MODEL_KEY) || 'claude-sonnet-4-6';
@@ -715,6 +729,10 @@
             // Security (WP-5): neutralise any raw HTML in the model's text BEFORE we add our own markup,
             // so an injected <script>/<img onerror> can't run. Markdown chars (#, *, |, `) are untouched.
             formatted = escapeHtml(formatted);
+
+            // Text-Smileys → Emoji (Doc 2026-06-23). Code-Blöcke sind hier Platzhalter → geschützt. Der
+            // (?<!\w)-Vorlauf verhindert Treffer mitten in Wörtern/URLs (z.B. „3:(Details").
+            EMOTICONS.forEach(function (e) { formatted = formatted.replace(e[0], e[1]); });
 
             // 2a. Markdown-Tabellen rendern
             formatted = formatted.replace(/^(\|.+\|)\n\|[-| :]+\|\n((?:\|.+\|\n?)*)/gm, (match, header, body) => {
