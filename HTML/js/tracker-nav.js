@@ -513,11 +513,23 @@ window.TrackerNav = function (ctx) {
         return parts.join(' · ');
     }
 
+    // OSRM emits a maneuver for EVERY step — including pure street-NAME changes ('new name') and plain
+    // straight-ahead 'continue'. Those aren't real turns; announcing them spams "Weiter auf …" and sounds
+    // choppy (Doc 2026-06-23: wenn nur der Straßenname wechselt → NICHTS ansagen). Skip them entirely → no
+    // banner, no voice; guidance jumps to the next REAL turn. A 'continue' WITH a direction is kept.
+    function isSilentManeuver(man) {
+        const t = man.type, mod = man.modifier;
+        if (t === 'new name' || t === 'notification') return true;
+        if (t === 'continue' && (!mod || mod === 'straight')) return true;
+        return false;
+    }
+
     function setGuidance(best) {
         maneuvers = [];
         (best.legs || []).forEach((leg) => (leg.steps || []).forEach((s) => {
             const loc = s.maneuver && s.maneuver.location;
             if (!loc) return;
+            if (isSilentManeuver(s.maneuver)) return;   // street-name change / plain continue → no announcement
             maneuvers.push({
                 loc: [loc[1], loc[0]], type: s.maneuver.type, modifier: s.maneuver.modifier,
                 exit: s.maneuver.exit, name: s.name, text: phrase(s.maneuver, s.name), detail: detailOf(s),
