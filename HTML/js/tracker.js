@@ -1953,18 +1953,21 @@ ${pts}
         async function listTracks() {
             trackStartCache = null;   // list refreshed → start points may have changed (new/removed track)
             const c = await ensureSb();
-            // Show ALL saved tracks — never hide one by status (a tracker must not make tracks vanish).
-            // list_tracks() RPC computes km · duration · photos server-side for EVERY track (old + new)
-            // from the existing points/waypoints — WITHOUT loading those heavy columns. Falls back to
-            // the basic select (km only) if the RPC isn't present yet.
-            let { data, error } = await c.rpc('list_tracks');
-            if (error) {
-                ({ data, error } = await c.from('tracks')
-                    .select('id, name, created_at, distance_m')
-                    .order('created_at', { ascending: false }));
-            }
-            if (error) throw error;
-            return data || [];
+            // COMPLETENESS first: a basic list of ALL tracks (tiny — no heavy points/waypoints columns) is the
+            // source of truth so nothing can be hidden ("a tracker must not make tracks vanish"). The
+            // list_tracks() RPC only ENRICHES (server-computed km·duration·photos) — it must NOT be allowed to
+            // DROP one-point tracks (single photo/voice), which it apparently did (Doc 2026-06-23: Einzelfotos
+            // fehlten in der Liste). So: start from the basic list, prefer the rich RPC row where present.
+            const { data: base, error: be } = await c.from('tracks')
+                .select('id, name, created_at, distance_m')
+                .order('created_at', { ascending: false });
+            if (be) throw be;
+            let rich = null;
+            try { const { data, error } = await c.rpc('list_tracks'); if (!error && Array.isArray(data)) rich = data; } catch (e) { }
+            if (!rich) return base || [];
+            const byId = {};
+            rich.forEach((r) => { byId[r.id] = r; });
+            return (base || []).map((r) => byId[r.id] || r);   // every track shown; enriched when the RPC has it
         }
 
         async function fetchTrack(id) {
