@@ -40,6 +40,8 @@ window.TrackerNav = function (ctx) {
 
     const OFFROUTE_M = 30;          // beyond this distance from the line → considered "off route" (Doc 2026-06-14: 45→30 for earlier reroute; watch d2route debug for flapping)
     const REROUTE_COOLDOWN_MS = 6000; // don't hammer OSRM: at most one reroute per this window (Doc 2026-06-14: 8s→6s)
+    const DEVIATION_AHEAD_M = 450;  // off-route reroute: commit a via-point this far along the user's heading (Doc „go B" 2026-06-23)
+    const BRG_MIN_MOVE_M = 12;      // min travel between fixes for a trustworthy movement-derived heading
     const ANNOUNCE_FAR_M = 300;     // distance at which the pre-warning ("In 300 m …") is spoken
     const ANNOUNCE_NEAR_M = 40;     // distance at which the maneuver ("Jetzt …") is spoken + advanced
     const VOICE_KEY = 'trk_nav_voice';
@@ -55,6 +57,8 @@ window.TrackerNav = function (ctx) {
     let routeLatLngs = null; // the route's points [[lat,lng]…] — for the off-route distance check
     let lastReroute = 0;    // timestamp of the last (re)route, for the cooldown
     let rerouting = false;  // a reroute fetch is in flight
+    let lastBrgPos = null;  // last position used to derive the live travel heading
+    let travelBrg = null;   // current travel bearing (deg) from GPS movement → deviation-respecting reroute
     let navGen = 0;         // bumped whenever the route is cleared/replaced → invalidates in-flight fetches
     let maneuvers = null;   // [{loc:[lat,lng], type, modifier, exit, name, text}] for spoken guidance
     let mIdx = 0;           // index of the next maneuver to announce
@@ -322,13 +326,17 @@ window.TrackerNav = function (ctx) {
 
     // ---- Routing: a position → destination, drawn as a polyline ----
     // Shared by START (startNavigation) and the off-route reroute (update). `reroute` only tweaks toasts.
-    async function computeRoute(from, reroute) {
+    async function computeRoute(from, reroute, via) {
         const gen = navGen; // snapshot: if the route is cleared/replaced during the await, this result is stale
         toast(reroute ? 'Neue Route …' : 'Route wird berechnet …');
         let data;
         try {
             // OSRM wants lon,lat order; full geometry as GeoJSON for an easy polyline.
-            const coords = from[1] + ',' + from[0] + ';' + destLatLng[1] + ',' + destLatLng[0];
+            // Off-route reroute (Doc „go B" 2026-06-23): an optional via-point ~450 m ahead in the user's
+            // travel direction makes OSRM COMMIT to where you're heading first, instead of snapping you back
+            // onto the rejected route (the old line is often shorter, so a plain from→dest reroute U-turns you).
+            const mid = via ? (via[1] + ',' + via[0] + ';') : '';
+            const coords = from[1] + ',' + from[0] + ';' + mid + destLatLng[1] + ',' + destLatLng[0];
             const r = await fetch(OSRM_PROFILES[routeType] + coords + '?overview=full&geometries=geojson&steps=true');
             data = await r.json();
         } catch (e) { if (gen === navGen) toast('Route fehlgeschlagen (offline?).'); return false; }
@@ -451,6 +459,9 @@ window.TrackerNav = function (ctx) {
         // Only while a route is actually drawn; bail cheaply otherwise (no dest, not started, mid-fetch).
         if (!destLatLng || !routeLatLngs || !here) return;
         redrawAhead(here);                                           // keep only the road ahead blue (note #1)
+        // Track the live travel heading from GPS movement (drives the deviation-respecting reroute below).
+        if (lastBrgPos == null) { lastBrgPos = here; }
+        else if (haversine(lastBrgPos, here) >= BRG_MIN_MOVE_M) { travelBrg = bearingDeg(lastBrgPos, here); lastBrgPos = here; }
         if (rerouting) return;
         const d = distToRouteM(here);
         const cooling = Date.now() - lastReroute < REROUTE_COOLDOWN_MS;
@@ -461,7 +472,11 @@ window.TrackerNav = function (ctx) {
         showRecomputeBanner();
         if (cooling) return;                                         // throttle the OSRM calls (weaving)
         rerouting = true;
-        computeRoute([here[0], here[1]], true).finally(() => { rerouting = false; });
+        // Via-point ahead in the travel direction (only with a fresh, movement-derived heading) so the new
+        // route commits to YOUR direction instead of forcing you back onto the rejected line (Doc „go B").
+        const via = (travelBrg != null && haversine(here, destLatLng) > DEVIATION_AHEAD_M * 1.5)
+            ? projectAhead(here, travelBrg, DEVIATION_AHEAD_M) : undefined;   // skip near the destination (no overshoot)
+        computeRoute([here[0], here[1]], true, via).finally(() => { rerouting = false; });
     }
 
     // ---- Turn-by-turn guidance (spoken + on-screen banner) ----
@@ -470,6 +485,20 @@ window.TrackerNav = function (ctx) {
         const dLat = (b[0] - a[0]) * t, dLng = (b[1] - a[1]) * t;
         const x = Math.sin(dLat / 2) ** 2 + Math.cos(a[0] * t) * Math.cos(b[0] * t) * Math.sin(dLng / 2) ** 2;
         return 2 * R * Math.asin(Math.sqrt(x));
+    }
+    // Initial bearing (deg, 0=N) from a=[lat,lng] to b=[lat,lng].
+    function bearingDeg(a, b) {
+        const t = Math.PI / 180;
+        const y = Math.sin((b[1] - a[1]) * t) * Math.cos(b[0] * t);
+        const x = Math.cos(a[0] * t) * Math.sin(b[0] * t) - Math.sin(a[0] * t) * Math.cos(b[0] * t) * Math.cos((b[1] - a[1]) * t);
+        return (Math.atan2(y, x) / t + 360) % 360;
+    }
+    // Point `dist` metres ahead of `from`=[lat,lng] along bearing `brg` (deg). OSRM snaps it to a road.
+    function projectAhead(from, brg, dist) {
+        const R = 6371000, t = Math.PI / 180, d = dist / R, br = brg * t, la1 = from[0] * t, lo1 = from[1] * t;
+        const la2 = Math.asin(Math.sin(la1) * Math.cos(d) + Math.cos(la1) * Math.sin(d) * Math.cos(br));
+        const lo2 = lo1 + Math.atan2(Math.sin(br) * Math.sin(d) * Math.cos(la1), Math.cos(d) - Math.sin(la1) * Math.sin(la2));
+        return [la2 / t, lo2 / t];
     }
 
     // OSRM maneuver (type + modifier + road name) → a short German instruction. We map the data;
@@ -704,19 +733,20 @@ window.TrackerNav = function (ctx) {
         } catch (e) { ttsLog('speak failed: ' + e); onDone(); }
     }
 
-    // Clean SVG maneuver arrows (24×24, stroke = currentColor) — straight / left / right / slight /
-    // sharp / u-turn / roundabout / arrive. Far nicer than the old Unicode glyphs.
+    // Maneuver arrows from Mapbox's `directions-icons` set (public domain / CC0): FILLED single-path glyphs,
+    // viewBox 20×20, designed for exactly OSRM's type/modifier — far more legible at banner size than the old
+    // thin outline strokes (Doc 2026-06-23: „nicht gut zu lesen"). Source: github.com/mapbox/directions-icons.
     const ARROW_PATH = {
-        straight: 'M12 21 V5 M7 10 L12 5 L17 10',
-        left:     'M16 21 V11 a3 3 0 0 0 -3 -3 H8 M11 5 L8 8 L11 11',
-        right:    'M8 21 V11 a3 3 0 0 1 3 -3 H16 M13 5 L16 8 L13 11',
-        sleft:    'M15 21 V13 L7 7 M7 7 H12 M7 7 V12',
-        sright:   'M9 21 V13 L17 7 M17 7 H12 M17 7 V12',
-        shleft:   'M16 20 V13 L7 16 M7 16 H12 M7 16 V11',
-        shright:  'M8 20 V13 L17 16 M17 16 H12 M17 16 V11',
-        uturn:    'M15 21 V12 a3 3 0 0 0 -6 0 V16 M6 13 L9 16 L12 13',
-        roundabout: 'M12 22 V13 M8 11 a4 4 0 1 0 8 0 a4 4 0 1 0 -8 0 M12 11 V4 M9 7 L12 4 L15 7',
-        arrive:   'M7 21 V4 M7 4 H17 L14 7.5 L17 11 H7',
+        straight: 'M14.50342,8.96637L11.55157,7.62262A0.35755,0.35755,0,0,0,11.00916,8v9.49652A0.50346,0.50346,0,0,1,10.50568,18h-0.993a0.50346,0.50346,0,0,1-.50348-0.50348V8a0.35756,0.35756,0,0,0-.54242-0.37738L5.51489,8.96637a0.38659,0.38659,0,0,1-.40942-0.62354L10.00916,2l4.90369,6.34283A0.3866,0.3866,0,0,1,14.50342,8.96637Z',
+        left:     'M10,5.97986l0.011,0.00183A6.06019,6.06019,0,0,1,16,12.05493V16H15.99689l0.002,1.50317A0.49614,0.49614,0,0,1,15.50269,18H14.49622A0.49622,0.49622,0,0,1,14,17.50378V12.05493a4.05782,4.05782,0,0,0-3.98877-4.07324H8.01245a0.3576,0.3576,0,0,0-.37738.54248L8.97882,11.476a0.38659,0.38659,0,0,1-.62354.40942L2.0083,7l6.347-4.922a0.38659,0.38659,0,0,1,.62354.40942L7.63507,5.43927a0.35757,0.35757,0,0,0,.37738.54242H10Z',
+        right:    'M9.98877,7.98169A4.05782,4.05782,0,0,0,6,12.05493v5.44885A0.49622,0.49622,0,0,1,5.50378,18H4.49731a0.49614,0.49614,0,0,1-.49615-0.49683L4.00311,16H4V12.05493A6.06019,6.06019,0,0,1,9.989,5.98169L10,5.97986V5.98169h1.98755a0.35757,0.35757,0,0,0,.37738-0.54242L11.02118,2.48743A0.38659,0.38659,0,0,1,11.64471,2.078L17.9917,7l-6.347,4.88544a0.38659,0.38659,0,0,1-.62354-0.40942l1.34375-2.95184a0.3576,0.3576,0,0,0-.37738-0.54248H9.98877Z',
+        sleft:    'M14.9859,14.043v3.46082A0.49621,0.49621,0,0,1,14.48974,18H13.48321a0.49614,0.49614,0,0,1-.49615-0.49683l0.0047-3.60767a5.21819,5.21819,0,0,0-1.665-4.144L8.87854,7.68585a0.35758,0.35758,0,0,0-.6405.16266l-0.91821,3.1106A0.38663,0.38663,0,0,1,6.58044,10.86L5,3l8.00476,0.44965a0.38658,0.38658,0,0,1,.20294.71777L10.25878,5.51758a0.3576,0.3576,0,0,0-.07019.6571l2.45746,2.07385A7.25158,7.25158,0,0,1,14.9859,14.043Z',
+        sright:   'M7.35395,8.24854L9.81141,6.17468a0.3576,0.3576,0,0,0-.07019-0.6571L6.7923,4.16742a0.38658,0.38658,0,0,1,.20294-0.71777L15,3l-1.58044,7.86a0.38663,0.38663,0,0,1-.73938.09912L11.762,7.84851a0.35758,0.35758,0,0,0-.6405-0.16266L8.67328,9.75146a5.21819,5.21819,0,0,0-1.665,4.144l0.0047,3.60767A0.49614,0.49614,0,0,1,6.51679,18H5.51026a0.49621,0.49621,0,0,1-.49615-0.49622V14.043A7.25157,7.25157,0,0,1,7.35395,8.24854Z',
+        shleft:   'M15.49771,17.99542a0.49779,0.49779,0,0,1-.49779-0.49779V4.99933L14.72014,4.993a2.56758,2.56758,0,0,0-2.0957.79L7.22917,10.39583a0.34918,0.34918,0,0,0,.08252.63177l2.92877,1.39331a0.38658,0.38658,0,0,1-.21344.71472l-8.0105.33209,1.69568-7.836a0.38661,0.38661,0,0,1,.74072-0.0882l0.8725,3.12372a0.35757,0.35757,0,0,0,.638.17206L5.9672,8.84377,11.3593,4.23468a4.46634,4.46634,0,0,1,3.38477-1.24121l0.26416,0.002a1.92935,1.92935,0,0,1,1.43408.56885,2.10247,2.10247,0,0,1,.55713,1.46045L16.9999,17.49761a0.49779,0.49779,0,0,1-.49779.49781h-1.0044Z',
+        shright:  'M3.49789,17.99542a0.49779,0.49779,0,0,1-.49779-0.49781L3.00057,5.02472A2.10247,2.10247,0,0,1,3.5577,3.56427a1.92935,1.92935,0,0,1,1.43408-.56885l0.26416-.002A4.46634,4.46634,0,0,1,8.6407,4.23468L14.0328,8.84377l0.00378-.00446a0.35757,0.35757,0,0,0,.638-0.17206l0.8725-3.12372a0.38661,0.38661,0,0,1,.74072.0882l1.69568,7.836L9.973,13.13564a0.38658,0.38658,0,0,1-.21344-0.71472l2.92877-1.39331a0.34918,0.34918,0,0,0,.08252-0.63177L7.37557,5.783a2.56758,2.56758,0,0,0-2.0957-.79l-0.27979.00635v12.4983a0.49779,0.49779,0,0,1-.49779.49779H3.49789Z',
+        uturn:    'M17,8v9.49652A0.50346,0.50346,0,0,1,16.49652,18h-0.993A0.50346,0.50346,0,0,1,15,17.49652V8A3.5,3.5,0,0,0,8,8v4H7.99091a0.35757,0.35757,0,0,0,.54242.37738l2.95184-1.34375a0.3866,0.3866,0,0,1,.40942.62354L6.99091,18,2.08716,11.65717a0.3866,0.3866,0,0,1,.40942-0.62354l2.95184,1.34375A0.3576,0.3576,0,0,0,5.99091,12H6V8A5.5,5.5,0,0,1,17,8Z',
+        roundabout: 'M5.5,10.002a0.17879,0.17879,0,0,0,.27124.18866l1.47589-.67188a0.1933,0.1933,0,0,1,.20471.31177L5,13.002,2.54816,9.83051a0.1933,0.1933,0,0,1,.20471-0.31177l1.476,0.67188A0.17876,0.17876,0,0,0,4.5,10.002V10A5.51888,5.51888,0,0,1,7.25293,5.23437l0.5,0.86523A4.51856,4.51856,0,0,0,5.5,10v0.002Zm6.75146-3.89941A4.51948,4.51948,0,0,1,14.5,10h1a5.5223,5.5223,0,0,0-2.74756-4.7627L12.751,5.23724A0.17878,0.17878,0,0,1,12.72321,4.908L14.043,3.96576a0.19332,0.19332,0,0,0-.16766-0.33319l-3.97247.53766,1.52063,3.70911a0.19331,0.19331,0,0,0,.37238-0.02142L11.952,6.24377A0.17945,0.17945,0,0,1,12.25146,6.10254ZM12.74688,14.766a0.17879,0.17879,0,0,1,.299.14053l0.1561,1.61412a0.1933,0.1933,0,0,0,.37235.02141L15.095,12.833l-3.97245-.53766a0.1933,0.1933,0,0,0-.16764.33317l1.31982,0.94225a0.17879,0.17879,0,0,1-.02781.32923l0.00361-.00254a4.57684,4.57684,0,0,1-4.502,0l-0.501.86523a5.50442,5.50442,0,0,0,5.50391,0Z',
+        arrive:   'M10,5a2,2,0,1,1,2-2A2,2,0,0,1,10,5Zm4.91284,8.35114L10.00916,7.0083,5.10547,13.35114a0.38659,0.38659,0,0,0,.40942.62354l2.95184-1.34375A0.35542,0.35542,0,0,1,9.00769,13H9v5.50006A0.49992,0.49992,0,0,0,9.49994,19h1.00012A0.49992,0.49992,0,0,0,11,18.50006V13.0083h0.00916a0.35757,0.35757,0,0,1,.54242-0.37738l2.95184,1.34375A0.3866,0.3866,0,0,0,14.91284,13.35114Z',
     };
     function arrowKey(m) {
         if (m.type === 'arrive') return 'arrive';
@@ -727,8 +757,8 @@ window.TrackerNav = function (ctx) {
     }
     function arrowSvg(m) {
         const d = ARROW_PATH[arrowKey(m)] || ARROW_PATH.straight;
-        return '<svg class="nav-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" '
-            + 'stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="' + d + '"/></svg>';
+        // Filled glyphs (fill = currentColor) so they keep theming with the banner (dark ink on the orange/green).
+        return '<svg class="nav-arrow" viewBox="0 0 20 20" fill="currentColor"><path d="' + d + '"/></svg>';
     }
     // While off-route (before the new route arrives): show a neutral "recomputing" hint instead of the OLD
     // next turn, so the banner doesn't keep pointing back to the stale route. Guard so we don't re-parse the

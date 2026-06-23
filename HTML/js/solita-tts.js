@@ -67,7 +67,9 @@
             window.speakReply = function (text) {
                 if (!ttsOn || !text) { window.__solitaSpeaking = false; return; }
                 try {
-                    const clean = String(text)
+                    // Code is SHOWN, never read aloud (Doc 2026-06-23): just drop fenced ```code``` from the
+                    // spoken text and read the prose around it (no extra hint — Doc: nervt).
+                    let clean = String(text).replace(/```[\s\S]*?```/g, ' ')
                         .replace(/[\p{Extended_Pictographic}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}\u{1F1E6}-\u{1F1FF}\uFE0F\u200D]/gu, '') // strip smileys/emoji — don't read them aloud (Doc)
                         .replace(/\$\$[\s\S]*?\$\$/g, '')   // LaTeX display math — shown on screen, NOT read aloud (Doc 2026-06-22)
                         .replace(/\$[^$\n]*?\$/g, '')        // LaTeX inline math — shown on screen, NOT read aloud

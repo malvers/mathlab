@@ -144,6 +144,23 @@ async function geminiSearchCount(): Promise<number> {
 }
 // Graduated precision so DeepSeek's sub-cent sums don't collapse to "0.0 ¢" (Doc: „mehr NKS"):
 // ≥1 € → Euro · ≥10 ¢ → 1 NKS · ≥1 ¢ → 2 NKS · <1 ¢ → 3 NKS.
+// All-time priced AI total from ai_cost_log (server-authoritative → the cross-device Σ; localStorage counters
+// would clobber when two devices both count). Reuses the SAME pricing as the daily mail (single source).
+async function aiTotalAllTimeEur(): Promise<number> {
+  try {
+    const url = Deno.env.get('SUPABASE_URL'); const key = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    if (!url || !key) return 0;
+    const supa = createClient(url, key, { auth: { persistSession: false } });
+    const { data, error } = await supa.rpc('ai_cost_summary', { days: 36500 });   // ~all time
+    if (error || !Array.isArray(data)) return 0;
+    let total = 0;
+    for (const r of data as Array<Record<string, unknown>>) {
+      total += rowEur(String(r.provider), String(r.model || ''), Number(r.in_tok), Number(r.out_tok), Number(r.cache_read), Number(r.cache_write));
+    }
+    return total;
+  } catch (_) { return 0; }
+}
+
 const eurFmt = (e: number) => {
   const c = e * 100;
   const s = c >= 100 ? '€ ' + e.toFixed(2)
@@ -163,6 +180,12 @@ Deno.serve(async (req) => {
   if (given !== pass) return json({ error: 'unauthorized' }, 401);
   if (b.ping) return json({ ok: true });
 
+  // Fast cost-only mode for Solita's cross-device Σ: just the all-time priced AI total, no R2/DB/mail.
+  if (b.costOnly) {
+    const totalAllTimeEur = await aiTotalAllTimeEur();
+    return json({ ok: true, totalAllTimeEur });
+  }
+
   try {
     const [r2, db, ai, searches] = await Promise.all([r2BytesUsed(), dbBytesUsed(), aiCostToday(), geminiSearchCount()]);
     const r2pctN = pctN(r2, R2_QUOTA_GB), dbpctN = pctN(db, DB_QUOTA_GB);
@@ -170,7 +193,7 @@ Deno.serve(async (req) => {
     const warn = r2pctN >= 80 || dbpctN >= 80;
     const provs = Object.keys(ai.byProvider).sort();
     const LBL: Record<string, string> = { claude: 'Claude', deepseek: 'DeepSeek', gemini: 'Gemini' };
-    const subject = `📊 Infra: R2 ${r2pct}% · DB ${dbpct}%` + (ai.total > 0 ? ` · KI ${eurFmt(ai.total)}` : '');
+    const subject = `📊 R2 ${r2pct}% · DB ${dbpct}%` + (ai.total > 0 ? ` · KI ${eurFmt(ai.total)}` : '');
 
     // ── Plaintext-Body (Fallback im multipart/alternative) ──
     const aiText = provs.length
@@ -179,7 +202,7 @@ Deno.serve(async (req) => {
         + `\n  Σ ${eurFmt(ai.total)}  (${ai.calls} Calls)\n`
       : '';
     const body =
-      `Tägliche Infra-Auslastung:\n\n` +
+      `Tägliche Auslastung:\n\n` +
       `• R2-Storage:  ${r2pct}% von ${R2_QUOTA_GB} GB  (${gbDe(r2)} GB)\n` +
       `• Supabase-DB: ${dbpct}% von ${de(DB_QUOTA_GB, 1)} GB  (${gbDe(db)} GB)\n` +
       aiText +
@@ -216,7 +239,7 @@ Deno.serve(async (req) => {
       : '';
     const html =
       `<div style="font-family:Arial,Helvetica,sans-serif;color:${C.ink};max-width:580px;padding:4px;">`
-      + `<h2 style="color:${C.navy};margin:0 0 2px;font-size:20px;">📊 Infra-Auslastung</h2>`
+      + `<h2 style="color:${C.navy};margin:0 0 2px;font-size:20px;">📊 Auslastung</h2>`
       + `<p style="color:${C.muted};margin:0 0 18px;font-size:13px;">${stamp}</p>`
       + `<table role="presentation" cellspacing="0" cellpadding="0" style="border-collapse:collapse;width:100%;font-size:14px;">`
       + `<thead><tr style="background:${C.navy};color:#ffffff;">`

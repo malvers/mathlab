@@ -228,6 +228,9 @@
             + "Wenn Doc nach einer Formel oder Gleichung fragt, gib sie als LaTeX aus — inline mit $…$, "
             + "abgesetzt mit $$…$$ — und leite sie mit einem kurzen gesprochenen Satz ein (z.B. „Hier sind "
             + "die gewünschten Formeln:“), denn die Formel selbst wird nicht vorgelesen. "
+            + "Docs Eingabe kommt oft aus deutscher Spracherkennung — englische Fachbegriffe können verzerrt "
+            + "ankommen (z.B. „for loop“ → „vor Luke“, „println“ → „printlein“, „String“ → „Schtring“). "
+            + "Interpretiere solche Eingaben wohlwollend und meine das technisch Naheliegende. "
             + "Sonst antworte einfach. Bestätige eine ausgeführte Aktion knapp in einem Satz.";
 
         // ----- TOOL-USE (Solita acts, not just talks) -----
@@ -419,6 +422,20 @@
 
         const COPY_ICON = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>`;
         const CHECK_ICON = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
+
+        // Text-Smileys → Emoji für die Anzeige (Doc 2026-06-23). MUSS hier oben stehen (vor jedem
+        // addMessage-Aufruf, auch dem History-Restore) — sonst Init-TDZ und „nichts lädt". Engine-sicher
+        // OHNE Lookbehind: führende Wortgrenze als Capture ($1) statt (?<!\w). Längere Muster zuerst.
+        const EMOTICONS = [
+            [/(^|[^\w]):'\(/g, '$1😢'],
+            [/(^|[^\w]):-?D(?!\w)/g, '$1😀'],
+            [/(^|[^\w]);-?\)/g, '$1😉'],
+            [/(^|[^\w]):-?\)/g, '$1🙂'],
+            [/(^|[^\w]):-?\(/g, '$1🙁'],
+            [/(^|[^\w]):-?[Pp](?!\w)/g, '$1😛'],
+            [/(^|[^\w]):-?[Oo](?!\w)/g, '$1😮'],
+            [/(^|[^\w])<3(?!\w)/g, '$1❤️'],
+        ];
 
         function getPwd() { return sessionPwd; }
 
@@ -648,12 +665,32 @@
                     }
                 }
             });
+            // Σ (running total) is SERVER-authoritative (Doc 2026-06-23: „logisch addieren = richtig machen").
+            // Every AI call is logged in ai_cost_log → on load we seed the local Σ counter with the real
+            // all-time total (cross-device, additive). The per-turn „≈" stays client-side; the session then
+            // accumulates from the seeded baseline, and the next load on ANY device re-seeds from the server.
+            window.syncCostBaseline = async function () {
+                try {
+                    const r = await fetch(INFRA_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'apikey': SB_ANON, 'Authorization': 'Bearer ' + SB_ANON, 'x-app-pass': getPwd() },
+                        body: JSON.stringify({ costOnly: true }),
+                    });
+                    const d = await r.json().catch(function () { return {}; });
+                    if (r.ok && typeof d.totalAllTimeEur === 'number') {
+                        localStorage.setItem('solita_cost_total', String(d.totalAllTimeEur));
+                        if (typeof window.solitaCostUpdate === 'function') { try { window.solitaCostUpdate(d.totalAllTimeEur); } catch (e) { } }
+                        if (window.DebugWindow) DebugWindow.log('Σ vom Server geseedet: ' + (d.totalAllTimeEur * 100).toFixed(2) + ' ¢');
+                    }
+                } catch (e) { /* offline → behalte den lokalen Σ */ }
+            };
             (function kickWhenAuthed(tries) {
                 if (getPwd && getPwd()) {
                     // push (NOT pull) on load: the edge fn merges our local log with the server's and returns
                     // the authoritative result, so this single call both uploads local-only turns AND pulls in
                     // whatever the other device added — without a separate pull that could briefly wipe to empty.
                     SolitaSync.push(brain.getHistory(), brain.getSummary());
+                    window.syncCostBaseline();   // seed Σ from the server (authoritative cross-device total)
                 } else if (tries > 0) {
                     setTimeout(function () { kickWhenAuthed(tries - 1); }, 1000);
                 }
@@ -672,6 +709,98 @@
             }
         });
         sendButton.addEventListener('click', sendMessage);
+
+        // ---- Paste an image into the input line → Solita "sees" it (Doc 2026-06-23). Images ALWAYS go to Gemini,
+        // never to Claude (cheap multimodal; Gemini's text answer then enters the Claude chat context). Text/LaTeX
+        // paste needs nothing — the textarea + MathJax already handle it. ----
+        let pastedImage = null;   // data URL of an image pasted into the input, awaiting send
+        function clearPastedImage() {
+            pastedImage = null;
+            const chip = document.getElementById('paste-img-chip');
+            if (chip) chip.remove();
+        }
+        function showPastedImageChip(dataUrl) {
+            let chip = document.getElementById('paste-img-chip');
+            if (!chip) {
+                chip = document.createElement('div');
+                chip.id = 'paste-img-chip';
+                // Floats just above the input bar (.input-area is position:relative) → doesn't disturb the flex row.
+                chip.style.cssText = 'position:absolute;bottom:100%;left:24px;margin-bottom:6px;display:flex;align-items:center;'
+                    + 'gap:8px;background:rgba(8,20,42,.92);border:1px solid rgba(255,255,255,.18);border-radius:10px;padding:6px 8px;z-index:5;';
+                const ia = messageInput.parentElement;
+                if (ia) ia.appendChild(chip);
+            }
+            chip.innerHTML = '<img alt="Eingefügtes Bild" style="height:40px;border-radius:6px;display:block">'
+                + '<button type="button" aria-label="Bild entfernen" title="Bild entfernen" '
+                + 'style="background:none;border:none;color:#e6edf3;font-size:1.1rem;cursor:pointer;line-height:1;padding:0 4px">✕</button>';
+            chip.querySelector('img').src = dataUrl;
+            chip.querySelector('button').addEventListener('click', clearPastedImage);
+        }
+        function acceptImageFile(file) {   // read an image File/Blob → stash as the pending image + show the chip
+            if (!file || !file.type || file.type.indexOf('image/') !== 0) return false;
+            const reader = new FileReader();
+            reader.onload = function () { pastedImage = reader.result; showPastedImageChip(pastedImage); };
+            reader.readAsDataURL(file);
+            return true;
+        }
+        messageInput.addEventListener('paste', function (e) {
+            const items = (e.clipboardData && e.clipboardData.items) || [];
+            for (const it of items) {
+                if (it.kind === 'file' && it.type && it.type.indexOf('image/') === 0) {
+                    e.preventDefault();   // image only — don't also paste a filename/text fallback
+                    if (acceptImageFile(it.getAsFile())) return;
+                }
+            }
+            // no image in the clipboard → let the default text/LaTeX paste happen
+        });
+        // Drag-and-drop an image file anywhere onto the chat (input bar or message area) → same flow as paste.
+        (function wireImageDrop() {
+            const zones = [messageInput, messagesArea, messageInput.parentElement].filter(Boolean);
+            zones.forEach(function (z) {
+                z.addEventListener('dragover', function (e) { e.preventDefault(); });   // required to allow a drop
+                z.addEventListener('drop', function (e) {
+                    const files = (e.dataTransfer && e.dataTransfer.files) || [];
+                    for (const f of files) {
+                        if (f.type && f.type.indexOf('image/') === 0) { e.preventDefault(); acceptImageFile(f); return; }
+                    }
+                    // non-image drop → leave it to the default handler
+                });
+            });
+        })();
+        // A pasted image awaits send → describe it via Gemini (the typed text, if any, is the question about it),
+        // show it as a user bubble, render Gemini's answer as Solita's reply, and fold both into the chat context.
+        async function handlePastedImage(userText) {
+            const img = pastedImage;
+            clearPastedImage();
+            messageInput.value = ''; messageInput.style.height = 'auto';
+            messagesArea.insertAdjacentHTML('beforeend',
+                '<div class="message user"><div class="message-content" style="padding:6px">'
+                + (userText ? '<div style="margin-bottom:6px">' + escapeHtml(userText) + '</div>' : '')
+                + '<img src="' + img + '" alt="Eingefügtes Bild" style="max-width:240px;border-radius:8px;display:block"></div></div>');
+            messagesArea.scrollTop = messagesArea.scrollHeight;
+            showTyping();
+            try {
+                const res = await describePhoto(img, userText);
+                hideTyping();
+                addMessage('assistant', res.text);
+                showGeminiCost(res.usage, '🖼️ Bild');
+                if (window.speakReply) window.speakReply(res.text);
+                // Fold into the Claude conversation (history) so follow-ups ("und die Farbe?") have the image
+                // context — and it syncs cross-device like any other turn. The image itself never goes to Claude;
+                // only Gemini's text description does (Doc: Bilder IMMER an Gemini).
+                if (typeof brain !== 'undefined' && brain.getHistory && brain.setState) {
+                    const h = brain.getHistory().slice();
+                    h.push({ role: 'user', content: (userText ? userText + ' ' : '') + '[Bild eingefügt]' });
+                    h.push({ role: 'assistant', content: 'Bild-Beschreibung: ' + res.text });
+                    brain.setState(h);
+                    // setState only persists locally → push so the other device gets the image context too.
+                    if (window.SolitaSync && SolitaSync.push) { try { SolitaSync.push(brain.getHistory(), brain.getSummary()); } catch (e) { } }
+                }
+            } catch (e) {
+                hideTyping();
+                addMessage('assistant', '❌ Konnte das Bild nicht auswerten: ' + ((e && e.message) || e));
+            }
+        }
 
         function addMessage(role, content) {
             const motto = document.getElementById('vsb-motto');
@@ -692,6 +821,10 @@
             // Security (WP-5): neutralise any raw HTML in the model's text BEFORE we add our own markup,
             // so an injected <script>/<img onerror> can't run. Markdown chars (#, *, |, `) are untouched.
             formatted = escapeHtml(formatted);
+
+            // Text-Smileys → Emoji (Doc 2026-06-23). Code-Blöcke sind hier Platzhalter → geschützt. Der
+            // (?<!\w)-Vorlauf verhindert Treffer mitten in Wörtern/URLs (z.B. „3:(Details").
+            EMOTICONS.forEach(function (e) { formatted = formatted.replace(e[0], e[1]); });
 
             // 2a. Markdown-Tabellen rendern
             formatted = formatted.replace(/^(\|.+\|)\n\|[-| :]+\|\n((?:\|.+\|\n?)*)/gm, (match, header, body) => {
@@ -759,6 +892,24 @@
             messagesArea.scrollTop = messagesArea.scrollHeight;
         }
 
+        // Render TRUSTED server-generated HTML (e.g. the infra-usage cost table) verbatim — NO escaping.
+        // Only ever call this with HTML we built ourselves on the server, never with model output (WP-5).
+        // The email table is light-themed (navy text/links on white), so we sit it on a light card so its
+        // own colours read correctly inside the dark chat.
+        function addTrustedHtmlMessage(html) {
+            const motto = document.getElementById('vsb-motto');
+            if (motto) motto.remove();
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message assistant';
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            contentDiv.innerHTML =
+                '<div style="background:#ffffff;border-radius:10px;padding:14px 16px;overflow-x:auto;">' + html + '</div>';
+            messageDiv.appendChild(contentDiv);
+            messagesArea.appendChild(messageDiv);
+            messagesArea.scrollTop = messagesArea.scrollHeight;
+        }
+
         function copyText(text, btn) {
             navigator.clipboard.writeText(text).then(() => {
                 btn.innerHTML = CHECK_ICON;
@@ -792,6 +943,24 @@
         function hideTyping() {
             const el = document.getElementById('typingIndicator');
             if (el) el.remove();
+        }
+
+        // German STT mangles English code terms (Doc 2026-06-23: „for loop" → „vor Luke"). Fix the clear
+        // mis-hears BEFORE sending — only phrases that are nonsense as TYPED text, so this is safe on typed
+        // input too. Extend freely as new mis-hears show up.
+        const SPEECH_FIX = [
+            [/\bvor\s?lu(ke|be?|p+|bb)\b/gi, 'for loop'],
+            [/\bfor\s?look\b/gi, 'for loop'],
+            [/\bvor\s?loop\b/gi, 'for loop'],
+            [/\bprint\s?l(ei|i)ne?\b/gi, 'println'],
+            [/\bschtring\b/gi, 'String'],
+            [/\bbull\s?ean\b/gi, 'boolean'],
+            [/\bint\s?eddscher\b/gi, 'Integer'],
+        ];
+        function fixSpeechTerms(t) {
+            var s = String(t || '');
+            for (var i = 0; i < SPEECH_FIX.length; i++) s = s.replace(SPEECH_FIX[i][0], SPEECH_FIX[i][1]);
+            return s;
         }
 
         function normalizeVoiceCommand(userText) {
@@ -978,8 +1147,13 @@
         // (BUG-13 Ursache 2). Description goes to GEMINI 2.5 Flash (multimodal, ~0.05 ¢/photo) — Claude is too
         // pricey for this, and the cheap `gemini` proxy is already deployed. No Claude in the photo path at all.
         const PHOTO_INTENT = /\b(mach|nimm|schie[sß]+|knips(e|en)?|take|aufnehmen)\b[^.?!]{0,24}\b(foto|bild|photo|picture)\b|\b(foto|bild|photo)\s+(bitte|machen|aufnehmen|knipsen)\b/i;
-        async function describePhoto(dataUrl) {
-            const b64 = String(dataUrl).replace(/^data:[^,]+,/, '');   // strip the "data:image/jpeg;base64," prefix
+        async function describePhoto(dataUrl, question) {
+            const b64 = String(dataUrl).replace(/^data:[^,]+,/, '');   // strip the "data:image/…;base64," prefix
+            const mime = (String(dataUrl).match(/^data:([^;,]+)/) || [])[1] || 'image/jpeg';   // keep PNG paste as PNG
+            // If Doc typed something with the image, that's the question about it; else just describe it.
+            const ask = (question && question.trim())
+                ? question.trim() + '\n\nAntworte kurz und natürlich auf Deutsch, gesprochen-freundlich, ohne Aufzählung. Beziehe dich auf das Bild.'
+                : 'Beschreibe kurz und natürlich auf Deutsch, was auf diesem Bild zu sehen ist — ein bis drei Sätze, gesprochen-freundlich, ohne Aufzählung.';
             const r = await fetch(GEMINI_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'apikey': SB_ANON, 'Authorization': 'Bearer ' + SB_ANON },
@@ -989,8 +1163,8 @@
                     body: {
                         contents: [{
                             parts: [
-                                { inline_data: { mime_type: 'image/jpeg', data: b64 } },
-                                { text: 'Beschreibe kurz und natürlich auf Deutsch, was auf diesem Foto zu sehen ist — ein bis drei Sätze, gesprochen-freundlich, ohne Aufzählung.' },
+                                { inline_data: { mime_type: mime, data: b64 } },
+                                { text: ask },
                             ],
                         }],
                     },
@@ -1157,7 +1331,9 @@
         // ---- "/costs" / "sag mir unsere Kosten" → live infra + AI costs, exactly the daily-mail content (Doc) ----
         // Calls infra-usage with { dry:true } (computes + returns body/spoken, sends NO mail). Password-gated like
         // the chat proxy → Solita passes the app password. Shows the full mail body, speaks a concise summary.
-        const COSTS_INTENT = /^\s*\/costs?\b|\bunsere\s+(kosten|ausgaben)\b|\bkostenstand\b|\binfra.?kosten\b|\bwas\s+kostet\s+uns\b/i;
+        // „unsere Kosten" in natürlicher Sprache (Doc: „was haben wir für Kosten?" = /costs). Verankert auf
+        // wir/uns/unsere → kollidiert NICHT mit „was kostet Bitcoin" (= Suche). Kosten-Intent läuft vor Suche.
+        const COSTS_INTENT = /^\s*\/costs?\b|\bunsere\s+(kosten|ausgaben)\b|\bkostenstand\b|\binfra.?kosten\b|\bwas\s+kostet\s+uns\b|\bwas\s+haben\s+wir\b[^.?!]{0,25}\b(kosten|gekostet|ausgegeben)\b|\b(was|wie\s?viel|wieviel)\s+kosten\s+wir\b|\bwie\s?viel\s+haben\s+wir\b[^.?!]{0,15}\b(ausgegeben|gekostet)\b/i;
         async function handleCostsIntent(userText) {
             if (!COSTS_INTENT.test(userText)) return false;
             addMessage('user', userText);
@@ -1173,8 +1349,9 @@
                 const d = await r.json().catch(function () { return {}; });
                 hideTyping();
                 if (!r.ok) throw new Error((d && d.error) || ('infra-usage ' + r.status));
-                addMessage('assistant', d.body || '(keine Kostendaten)');
-                if (window.speakReply) window.speakReply(d.spoken || 'Konnte die Kosten nicht zusammenfassen.');
+                if (d.html) addTrustedHtmlMessage(d.html);   // the nice table — same one as the daily mail
+                else addMessage('assistant', d.body || '(keine Kostendaten)');
+                if (window.speakReply) window.speakReply('Hier eine Zusammenstellung der Kosten der letzten 24 Stunden.');
             } catch (e) {
                 hideTyping();
                 addMessage('assistant', '❌ Kosten konnten nicht geladen werden: ' + ((e && e.message) || e));
@@ -1197,10 +1374,16 @@
             let userText = messageInput.value.trim();
             const pwd = getPwd();
 
+            // A pasted image takes priority → ALWAYS Gemini (typed text, if any, is the question about it).
+            // Works with no text too, so don't fall into the empty-input return below.
+            if (pastedImage) { await handlePastedImage(userText); return; }
+
             if (!userText) return;
 
             // Voice: map spoken "slash …" words to the typed command.
             userText = normalizeVoiceCommand(userText);
+            // Voice: fix common German-STT mis-hears of English code terms („vor Luke" → „for loop").
+            userText = fixSpeechTerms(userText);
 
             // Built-in slash commands (/clear /logout /wake /pause /list /ui /de /en /es).
             if (await handleBuiltInCommands(userText)) return;
