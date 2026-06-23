@@ -151,11 +151,13 @@
             if (rb) b = b ? b.extend(rb) : rb;
             return b;
         }
-        // The view-fan's current mode (drives the trigger icon + which destination the fan excludes). Active
-        // FIT wins, else "follow" (the crosshair re-centre). NOTE: hand-zoom is deliberately NOT a mode here —
-        // it must never get its own button (Doc 2026-06-23). In hand-mode following+fitMode are false → this
-        // returns 'follow' (the trigger shows the crosshair) and a tap re-centres (see the click handler).
+        // The view-fan's current mode (drives the trigger icon + which destination the fan excludes).
+        // Hand-zoom WINS → the trigger shows the custom-view icon so you can SEE you're in a hand-set view
+        // (Doc 2026-06-23: it must be visible as the trigger/state — but NEVER as a fan option, and in
+        // hand-mode a tap re-centres so the fan doesn't open → the icon never sits among the options).
+        // Then active FIT, else 'follow' (crosshair / re-centre).
         function currentMode() {
+            if (handMode) return 'hand';
             if (fitMode === 'remaining') return 'fitrem';
             if (fitMode === 'all') return 'fitall';
             return 'follow';
