@@ -151,10 +151,11 @@
             if (rb) b = b ? b.extend(rb) : rb;
             return b;
         }
-        // The view-fan's current mode, derived from state. Hand-zoom wins (it froze everything), then the
-        // active FIT, else "follow" (the crosshair re-centre — also the default when nothing is running).
+        // The view-fan's current mode (drives the trigger icon + which destination the fan excludes). Active
+        // FIT wins, else "follow" (the crosshair re-centre). NOTE: hand-zoom is deliberately NOT a mode here —
+        // it must never get its own button (Doc 2026-06-23). In hand-mode following+fitMode are false → this
+        // returns 'follow' (the trigger shows the crosshair) and a tap re-centres (see the click handler).
         function currentMode() {
-            if (handMode) return 'hand';
             if (fitMode === 'remaining') return 'fitrem';
             if (fitMode === 'all') return 'fitall';
             return 'follow';
@@ -168,10 +169,9 @@
             return { follow: !!pos, fitall: trackPresent, fitrem: !!rb, hand: handMode };
         }
         // Lay out the fan options. The fan only ever offers DESTINATIONS you can jump to — follow / fitall /
-        // fitrem — and never the current one (it's on the trigger). "hand" is NOT a destination: you can't
-        // "select" your hand-zoom, you only land in it BY zooming, so it must never appear as an option —
-        // hence the explicit m !== 'hand'. (In hand-mode current = 'hand', so no destination is excluded →
-        // the fan then shows ALL escapes: re-centre + both fits.) Returns the visible-option count.
+        // fitrem — and never the current one (it's on the trigger). "hand" is NOT a destination and never gets
+        // a button (m !== 'hand'): you can't "select" a hand-zoom, you only land in it BY zooming, and in
+        // hand-mode a trigger tap just re-centres (see the click handler). Returns the visible-option count.
         function buildFanOptions() {
             const valid = validModes();
             const cur = currentMode();
@@ -2584,8 +2584,11 @@ ${pts}
         // View-fan: the trigger opens the fan — but only when there's more than ONE destination to choose.
         // With a single valid destination (e.g. crosshair + no track), fanning out one option is just noise
         // → apply it directly (tap = re-centre). "hand" is not a destination, so it's never counted here.
+        // In hand-mode (you panned/zoomed by hand) a tap just snaps back to your position — no fan, and no
+        // hand button ever shows (Doc 2026-06-23). Reach the fits by re-centring first, then tapping again.
         $('recenter-fab').addEventListener('click', () => {
             if (fanOpen) { closeFan(); return; }
+            if (handMode) { selectViewMode('follow'); return; }   // hand-zoomed → tap re-centres
             const valid = validModes();
             const offered = ['follow', 'fitall', 'fitrem'].filter((m) => valid[m]);
             if (offered.length <= 1) { if (offered[0]) selectViewMode(offered[0]); return; }
