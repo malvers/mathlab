@@ -117,19 +117,28 @@ window.TrackerNav = function (ctx) {
     // ---- Geocoding: a free-text line → the first Nominatim hit (or null). Shared by the "Ziel setzen"
     // button, the Enter key, and the live-as-you-type lookup. Nominatim parses "Ort, Straße, Nr." itself.
     async function geocode(q) {
-        let url = NOMINATIM + '?format=jsonv2&limit=1&q=' + encodeURIComponent(q);
-        // Bias toward the current position so a bare street name ("Bischofsweg") resolves to the NEARBY
-        // one, not the globally most-prominent (without a bias Nominatim ranks by importance → Köln for
-        // "Bischofsweg"). A soft viewbox (NO bounded) only re-ranks: an explicit far-away city still wins.
-        // ~±0.6° ≈ a regional box (left,top,right,bottom = minLon,maxLat,maxLon,minLat).
         const from = curPos();
+        // With a GPS position we fetch SEVERAL candidates and pick the geographically NEAREST — so
+        // "Tankstelle" / "Lidl" / "Bäcker" resolve to the one NEAR you, not Nominatim's globally most
+        // "important" match (Doc 2026-06-23). Without GPS → limit=1, top hit as before.
+        let url = NOMINATIM + '?format=jsonv2&limit=' + (from ? 10 : 1) + '&q=' + encodeURIComponent(q);
+        // Soft bias toward the current position (NO `bounded` → only re-ranks; an explicit far city still
+        // shows up among the candidates). ~±0.6° ≈ a regional box (left,top,right,bottom).
         if (from) {
             const d = 0.6;
             url += '&viewbox=' + [from[1] - d, from[0] + d, from[1] + d, from[0] - d].join(',');
         }
         const r = await fetch(url, { headers: { Accept: 'application/json' } });
         const data = await r.json();
-        return (data && data.length) ? data[0] : null;
+        if (!data || !data.length) return null;
+        if (!from) return data[0];   // no position → fall back to importance ranking
+        // Pick the candidate closest to the current position (great-circle), not the most prominent one.
+        let best = data[0], bestD = Infinity;
+        for (const c of data) {
+            const cd = haversine(from, [parseFloat(c.lat), parseFloat(c.lon)]);
+            if (cd < bestD) { bestD = cd; best = c; }
+        }
+        return best;
     }
 
     // ---- Reverse geocoding: current coords → a human label (or null). Keyless Nominatim (rule 18). ----
@@ -443,12 +452,14 @@ window.TrackerNav = function (ctx) {
         if (!destLatLng || !routeLatLngs || !here) return;
         redrawAhead(here);                                           // keep only the road ahead blue (note #1)
         if (rerouting) return;
-        guidanceUpdate(here);                                        // announce the upcoming maneuver
         const d = distToRouteM(here);
         const cooling = Date.now() - lastReroute < REROUTE_COOLDOWN_MS;
         navDbg(d, d <= OFFROUTE_M ? 'on-route' : (cooling ? 'OFF · cooldown' : 'OFF · REROUTE now'));
-        if (d <= OFFROUTE_M) return;                                 // still on (or near) the line
-        if (cooling) return;                                         // throttle the OSRM calls
+        if (d <= OFFROUTE_M) { guidanceUpdate(here); return; }       // on route → announce the upcoming maneuver
+        // OFF route: do NOT keep speaking the OLD route's turns — they point back to the old line and felt
+        // like being "pulled back" (Doc 2026-06-23). Show a recompute hint and route afresh to the dest ASAP.
+        showRecomputeBanner();
+        if (cooling) return;                                         // throttle the OSRM calls (weaving)
         rerouting = true;
         computeRoute([here[0], here[1]], true).finally(() => { rerouting = false; });
     }
@@ -707,9 +718,20 @@ window.TrackerNav = function (ctx) {
         return '<svg class="nav-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" '
             + 'stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="' + d + '"/></svg>';
     }
+    // While off-route (before the new route arrives): show a neutral "recomputing" hint instead of the OLD
+    // next turn, so the banner doesn't keep pointing back to the stale route. Guard so we don't re-parse the
+    // DOM on every GPS fix; showBanner() clears the flag when normal guidance resumes.
+    function showRecomputeBanner() {
+        const el = $('nav-banner'); if (!el) return;
+        if (el.dataset.recompute === '1') return;
+        el.dataset.recompute = '1';
+        el.innerHTML = '<div class="nav-main"><span class="nav-instr">Route wird neu berechnet …</span></div>';
+        el.hidden = false;
+    }
     // Two rows: maneuver (arrow + distance + road/ref + signpost destinations) · trip (ETA · remaining).
     function showBanner(m, d, trip) {
         const el = $('nav-banner'); if (!el) return;
+        el.dataset.recompute = '';   // normal guidance resumed → allow the recompute hint to show again later
         el.innerHTML =
             '<div class="nav-main">' + arrowSvg(m)
             + '<span class="nav-dist"></span><span class="nav-instr"></span></div>'
