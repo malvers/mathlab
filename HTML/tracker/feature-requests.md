@@ -42,10 +42,6 @@ MVP + Re-Routing + Voice sind gebaut. **Noch offen (je ein eigener kleiner Auftr
 - **„passiert"-Erkennung:** Manöver weiterzählen, wenn man bei schneller Fahrt zwischen zwei Fixes daran vorbeikommt.
 - **Verkehr/Baustellen:** gratis über **Autobahn-GmbH-API** (DE, kein Key) / DATEX II / Mobilithek; farbiger Echtzeit-Stau realistisch nur via TomTom/HERE-Freemium. *(Verkehrs-Spur Phase 1 inzwischen gebaut — s. Code `tracker-traffic.js`.)*
 
-## FEAT-7 — Medien (Foto/Voice/Video) nach Cloudflare R2 🅿️ gebaut-aber-geparkt
-**Stand:** R2-Upload-Code liegt im Baum (Memory `project_tracker_media_r2_migration_parked`). Die Alt-Medien sind inzwischen migriert (per wrangler) — diesen Eintrag VOR weiterer Arbeit gegen den echten Stand prüfen.
-**Auftrag (falls noch offen):** Migrationspfad für etwaige Alt-Medien sauber; **kein Secret ins Repo** (Regel 18).
-
 ## FEAT-8 — Fotos aus der DB in Storage-Bucket auslagern 🅿️ geparkt (Alternative/Vorstufe zu FEAT-7)
 **Stand:** Fotos lagen als base64 in der DB; Plan: in Supabase-Storage-Bucket, Renderer/GPX bleiben unberührt (URL lädt wie base64). **Erst mit Doc klären, ob R2 (FEAT-7) das ablöst** — nicht beide parallel bauen.
 
