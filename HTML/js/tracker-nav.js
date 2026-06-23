@@ -40,8 +40,6 @@ window.TrackerNav = function (ctx) {
 
     const OFFROUTE_M = 30;          // beyond this distance from the line → considered "off route" (Doc 2026-06-14: 45→30 for earlier reroute; watch d2route debug for flapping)
     const REROUTE_COOLDOWN_MS = 6000; // don't hammer OSRM: at most one reroute per this window (Doc 2026-06-14: 8s→6s)
-    const DEVIATION_AHEAD_M = 450;  // off-route reroute: commit a via-point this far along the user's heading (Doc „go B" 2026-06-23)
-    const BRG_MIN_MOVE_M = 12;      // min travel between fixes for a trustworthy movement-derived heading
     const ANNOUNCE_FAR_M = 300;     // distance at which the pre-warning ("In 300 m …") is spoken
     const ANNOUNCE_NEAR_M = 40;     // distance at which the maneuver ("Jetzt …") is spoken + advanced
     const VOICE_KEY = 'trk_nav_voice';
@@ -57,8 +55,6 @@ window.TrackerNav = function (ctx) {
     let routeLatLngs = null; // the route's points [[lat,lng]…] — for the off-route distance check
     let lastReroute = 0;    // timestamp of the last (re)route, for the cooldown
     let rerouting = false;  // a reroute fetch is in flight
-    let lastBrgPos = null;  // last position used to derive the live travel heading
-    let travelBrg = null;   // current travel bearing (deg) from GPS movement → deviation-respecting reroute
     let navGen = 0;         // bumped whenever the route is cleared/replaced → invalidates in-flight fetches
     let maneuvers = null;   // [{loc:[lat,lng], type, modifier, exit, name, text}] for spoken guidance
     let mIdx = 0;           // index of the next maneuver to announce
@@ -326,17 +322,13 @@ window.TrackerNav = function (ctx) {
 
     // ---- Routing: a position → destination, drawn as a polyline ----
     // Shared by START (startNavigation) and the off-route reroute (update). `reroute` only tweaks toasts.
-    async function computeRoute(from, reroute, via) {
+    async function computeRoute(from, reroute) {
         const gen = navGen; // snapshot: if the route is cleared/replaced during the await, this result is stale
         toast(reroute ? 'Neue Route …' : 'Route wird berechnet …');
         let data;
         try {
             // OSRM wants lon,lat order; full geometry as GeoJSON for an easy polyline.
-            // Off-route reroute (Doc „go B" 2026-06-23): an optional via-point ~450 m ahead in the user's
-            // travel direction makes OSRM COMMIT to where you're heading first, instead of snapping you back
-            // onto the rejected route (the old line is often shorter, so a plain from→dest reroute U-turns you).
-            const mid = via ? (via[1] + ',' + via[0] + ';') : '';
-            const coords = from[1] + ',' + from[0] + ';' + mid + destLatLng[1] + ',' + destLatLng[0];
+            const coords = from[1] + ',' + from[0] + ';' + destLatLng[1] + ',' + destLatLng[0];
             const r = await fetch(OSRM_PROFILES[routeType] + coords + '?overview=full&geometries=geojson&steps=true');
             data = await r.json();
         } catch (e) { if (gen === navGen) toast('Route fehlgeschlagen (offline?).'); return false; }
@@ -459,9 +451,6 @@ window.TrackerNav = function (ctx) {
         // Only while a route is actually drawn; bail cheaply otherwise (no dest, not started, mid-fetch).
         if (!destLatLng || !routeLatLngs || !here) return;
         redrawAhead(here);                                           // keep only the road ahead blue (note #1)
-        // Track the live travel heading from GPS movement (drives the deviation-respecting reroute below).
-        if (lastBrgPos == null) { lastBrgPos = here; }
-        else if (haversine(lastBrgPos, here) >= BRG_MIN_MOVE_M) { travelBrg = bearingDeg(lastBrgPos, here); lastBrgPos = here; }
         if (rerouting) return;
         const d = distToRouteM(here);
         const cooling = Date.now() - lastReroute < REROUTE_COOLDOWN_MS;
@@ -472,11 +461,7 @@ window.TrackerNav = function (ctx) {
         showRecomputeBanner();
         if (cooling) return;                                         // throttle the OSRM calls (weaving)
         rerouting = true;
-        // Via-point ahead in the travel direction (only with a fresh, movement-derived heading) so the new
-        // route commits to YOUR direction instead of forcing you back onto the rejected line (Doc „go B").
-        const via = (travelBrg != null && haversine(here, destLatLng) > DEVIATION_AHEAD_M * 1.5)
-            ? projectAhead(here, travelBrg, DEVIATION_AHEAD_M) : undefined;   // skip near the destination (no overshoot)
-        computeRoute([here[0], here[1]], true, via).finally(() => { rerouting = false; });
+        computeRoute([here[0], here[1]], true).finally(() => { rerouting = false; });
     }
 
     // ---- Turn-by-turn guidance (spoken + on-screen banner) ----
@@ -485,20 +470,6 @@ window.TrackerNav = function (ctx) {
         const dLat = (b[0] - a[0]) * t, dLng = (b[1] - a[1]) * t;
         const x = Math.sin(dLat / 2) ** 2 + Math.cos(a[0] * t) * Math.cos(b[0] * t) * Math.sin(dLng / 2) ** 2;
         return 2 * R * Math.asin(Math.sqrt(x));
-    }
-    // Initial bearing (deg, 0=N) from a=[lat,lng] to b=[lat,lng].
-    function bearingDeg(a, b) {
-        const t = Math.PI / 180;
-        const y = Math.sin((b[1] - a[1]) * t) * Math.cos(b[0] * t);
-        const x = Math.cos(a[0] * t) * Math.sin(b[0] * t) - Math.sin(a[0] * t) * Math.cos(b[0] * t) * Math.cos((b[1] - a[1]) * t);
-        return (Math.atan2(y, x) / t + 360) % 360;
-    }
-    // Point `dist` metres ahead of `from`=[lat,lng] along bearing `brg` (deg). OSRM snaps it to a road.
-    function projectAhead(from, brg, dist) {
-        const R = 6371000, t = Math.PI / 180, d = dist / R, br = brg * t, la1 = from[0] * t, lo1 = from[1] * t;
-        const la2 = Math.asin(Math.sin(la1) * Math.cos(d) + Math.cos(la1) * Math.sin(d) * Math.cos(br));
-        const lo2 = lo1 + Math.atan2(Math.sin(br) * Math.sin(d) * Math.cos(la1), Math.cos(d) - Math.sin(la1) * Math.sin(la2));
-        return [la2 / t, lo2 / t];
     }
 
     // OSRM maneuver (type + modifier + road name) → a short German instruction. We map the data;
