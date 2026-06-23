@@ -42,9 +42,6 @@ MVP + Re-Routing + Voice sind gebaut. **Noch offen (je ein eigener kleiner Auftr
 - **„passiert"-Erkennung:** Manöver weiterzählen, wenn man bei schneller Fahrt zwischen zwei Fixes daran vorbeikommt.
 - **Verkehr/Baustellen:** gratis über **Autobahn-GmbH-API** (DE, kein Key) / DATEX II / Mobilithek; farbiger Echtzeit-Stau realistisch nur via TomTom/HERE-Freemium. *(Verkehrs-Spur Phase 1 inzwischen gebaut — s. Code `tracker-traffic.js`.)*
 
-## FEAT-8 — Fotos aus der DB in Storage-Bucket auslagern 🅿️ geparkt (Alternative/Vorstufe zu FEAT-7)
-**Stand:** Fotos lagen als base64 in der DB; Plan: in Supabase-Storage-Bucket, Renderer/GPX bleiben unberührt (URL lädt wie base64). **Erst mit Doc klären, ob R2 (FEAT-7) das ablöst** — nicht beide parallel bauen.
-
 ## FEAT-9 — GPS-Nachbearbeitung: nächste Stufen 🏗️ teils gebaut
 **Gebaut:** Client-Glättung (`track-smooth.js`, GLÄTTEN-Toggle) + DEM-Höhe (`track-dem.js`, Open-Meteo, `effectiveAlts`-Funnel).
 **Offen (NEXT):** Aufstiegs-/Profil-UI (Höhenmeter, Profil-Graph), Map-Matching (nur fürs Auto sinnvoll).
