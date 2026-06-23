@@ -38,6 +38,8 @@ function json(obj: unknown, status = 200): Response {
 // Fixed sign-off appended to EVERY outgoing mail, so Solita's mails are always clearly from us.
 // Enforced server-side — the model cannot skip, shorten or alter it.
 const SIGNATURE = '\n\nLieben Gruß\nSolita\n\n---\nDr. Solita J. Neural\nExecutive Assistant to Doc Alvers\ndocalvers.de';
+// HTML twin of the sign-off, appended to the HTML part of a multipart mail (same guard against doubling).
+const SIGNATURE_HTML = '<br><br>Lieben Gruß<br>Solita<br><br>—<br><b>Dr. Solita J. Neural</b><br>Executive Assistant to Doc Alvers<br><a href="https://docalvers.de" style="color:#0e244e;">docalvers.de</a>';
 
 // UTF-8-safe base64url (for the raw RFC-822 message).
 function b64url(s: string): string {
@@ -93,8 +95,9 @@ Deno.serve(async (req) => {
 
   const subject = (typeof b.subject === 'string' ? b.subject : '').trim() || '(ohne Betreff)';
   const bodyText = (typeof b.body === 'string' ? b.body : '').trim();
+  const html = (typeof b.html === 'string' ? b.html : '').trim();   // optional: HTML twin → multipart/alternative
   if (!bodyText) return json({ error: 'kein body (Inhalt) übergeben' }, 400);
-  if (subject.length > 300 || bodyText.length > 20000) return json({ error: 'Betreff/Inhalt zu lang' }, 400);
+  if (subject.length > 300 || bodyText.length > 20000 || html.length > 100000) return json({ error: 'Betreff/Inhalt zu lang' }, 400);
 
   // Always sign as Solita. Guard against a double sign-off if the model already wrote one.
   const signedBody = bodyText.includes('Dr. Solita J. Neural') ? bodyText : bodyText + SIGNATURE;
@@ -106,16 +109,41 @@ Deno.serve(async (req) => {
     return json({ error: String((e as Error).message || e) }, 502);
   }
 
-  // Build a minimal plain-text RFC-822 message. From is filled by Gmail (the authenticated account).
-  const mime = [
-    'To: ' + to,
-    'Subject: ' + encodeSubject(subject),
-    'MIME-Version: 1.0',
-    'Content-Type: text/plain; charset="UTF-8"',
-    'Content-Transfer-Encoding: 8bit',
-    '',
-    signedBody,
-  ].join('\r\n');
+  // Build the RFC-822 message (From is filled by Gmail). With an HTML body → multipart/alternative
+  // (text fallback + HTML); otherwise a minimal text/plain message (unchanged for existing callers).
+  let mime: string;
+  if (html) {
+    const signedHtml = html.includes('Dr. Solita J. Neural') ? html : html + SIGNATURE_HTML;
+    const bnd = '=_solita_alt_2026_=';
+    mime = [
+      'To: ' + to,
+      'Subject: ' + encodeSubject(subject),
+      'MIME-Version: 1.0',
+      'Content-Type: multipart/alternative; boundary="' + bnd + '"',
+      '',
+      '--' + bnd,
+      'Content-Type: text/plain; charset="UTF-8"',
+      'Content-Transfer-Encoding: 8bit',
+      '',
+      signedBody,
+      '--' + bnd,
+      'Content-Type: text/html; charset="UTF-8"',
+      'Content-Transfer-Encoding: 8bit',
+      '',
+      signedHtml,
+      '--' + bnd + '--',
+    ].join('\r\n');
+  } else {
+    mime = [
+      'To: ' + to,
+      'Subject: ' + encodeSubject(subject),
+      'MIME-Version: 1.0',
+      'Content-Type: text/plain; charset="UTF-8"',
+      'Content-Transfer-Encoding: 8bit',
+      '',
+      signedBody,
+    ].join('\r\n');
+  }
 
   try {
     const r = await fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages/send', {

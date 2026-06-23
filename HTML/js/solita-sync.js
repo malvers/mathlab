@@ -20,6 +20,7 @@
     const REV_KEY = 'solita_rev';
 
     let endpoint = '', anonKey = '', getPwd = function () { return ''; }, onRemote = function () { };
+    let onSettings = function () { };   // host applies adopted UI prefs (model/voice/lang/…) — never the password
     let rev = 0;
     try { rev = parseInt(localStorage.getItem(REV_KEY) || '0', 10) || 0; } catch (e) { }
 
@@ -46,7 +47,9 @@
 
     // Adopt the server's authoritative state when it differs from what this device last knew.
     function adopt(d) {
-        if (!d || typeof d.rev !== 'number') return;
+        if (!d) return;
+        if (d.settings && typeof d.settings === 'object') onSettings(d.settings);   // adopt synced UI prefs
+        if (typeof d.rev !== 'number') return;
         setRev(d.rev);
         if (Array.isArray(d.history)) onRemote(d.history, d.summary || '');
     }
@@ -67,6 +70,7 @@
             anonKey = cfg.anonKey || '';
             if (typeof cfg.getPwd === 'function') getPwd = cfg.getPwd;
             if (typeof cfg.onRemote === 'function') onRemote = cfg.onRemote;
+            if (typeof cfg.onSettings === 'function') onSettings = cfg.onSettings;
             return SolitaSync;
         },
         // Read the shared server log (read-only). Adopts it via onRemote if it differs.
@@ -78,6 +82,11 @@
             lastH = history || []; lastS = summary || '';
             if (inflight) { pending = true; return; }
             return flush();
+        },
+        // Push UI preferences only (model/voice/lang/…). A DEDICATED action that writes just the settings
+        // column — it carries NO history, so it can never wipe the conversation. Fire-and-forget.
+        pushSettings: function (settings) {
+            return call({ action: 'settings', settings: settings || {} }).catch(function () { });
         },
         getRev: function () { return rev; },
     };

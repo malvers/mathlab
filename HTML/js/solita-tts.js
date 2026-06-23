@@ -57,6 +57,7 @@
                 });
                 sel.addEventListener('change', function () {
                     localStorage.setItem(GVOICE_KEY, sel.value);
+                    if (window.solitaSyncSettings) window.solitaSyncSettings();   // sync voice pref cross-device
                     if (window.DebugWindow) DebugWindow.log('🔊 Stimme gewählt: ' + sel.value);
                     if (window.speakReply) window.speakReply('Hallo, ich bin Solita. So klinge ich.');   // live preview
                 });
@@ -126,6 +127,7 @@
 
             if (ttsBtn) ttsBtn.addEventListener('click', () => {
                 ttsOn = !ttsOn; localStorage.setItem(TTS_KEY, ttsOn ? '1' : '0'); reflectTts();
+                if (window.solitaSyncSettings) window.solitaSyncSettings();   // sync pref cross-device
                 if (!ttsOn) { window.solitaStopSpeaking(); }
             });
 
