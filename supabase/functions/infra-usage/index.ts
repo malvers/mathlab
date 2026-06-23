@@ -193,7 +193,7 @@ Deno.serve(async (req) => {
     const warn = r2pctN >= 80 || dbpctN >= 80;
     const provs = Object.keys(ai.byProvider).sort();
     const LBL: Record<string, string> = { claude: 'Claude', deepseek: 'DeepSeek', gemini: 'Gemini' };
-    const subject = `📊 Infra: R2 ${r2pct}% · DB ${dbpct}%` + (ai.total > 0 ? ` · KI ${eurFmt(ai.total)}` : '');
+    const subject = `📊 R2 ${r2pct}% · DB ${dbpct}%` + (ai.total > 0 ? ` · KI ${eurFmt(ai.total)}` : '');
 
     // ── Plaintext-Body (Fallback im multipart/alternative) ──
     const aiText = provs.length
@@ -202,7 +202,7 @@ Deno.serve(async (req) => {
         + `\n  Σ ${eurFmt(ai.total)}  (${ai.calls} Calls)\n`
       : '';
     const body =
-      `Tägliche Infra-Auslastung:\n\n` +
+      `Tägliche Auslastung:\n\n` +
       `• R2-Storage:  ${r2pct}% von ${R2_QUOTA_GB} GB  (${gbDe(r2)} GB)\n` +
       `• Supabase-DB: ${dbpct}% von ${de(DB_QUOTA_GB, 1)} GB  (${gbDe(db)} GB)\n` +
       aiText +
@@ -239,7 +239,7 @@ Deno.serve(async (req) => {
       : '';
     const html =
       `<div style="font-family:Arial,Helvetica,sans-serif;color:${C.ink};max-width:580px;padding:4px;">`
-      + `<h2 style="color:${C.navy};margin:0 0 2px;font-size:20px;">📊 Infra-Auslastung</h2>`
+      + `<h2 style="color:${C.navy};margin:0 0 2px;font-size:20px;">📊 Auslastung</h2>`
       + `<p style="color:${C.muted};margin:0 0 18px;font-size:13px;">${stamp}</p>`
       + `<table role="presentation" cellspacing="0" cellpadding="0" style="border-collapse:collapse;width:100%;font-size:14px;">`
       + `<thead><tr style="background:${C.navy};color:#ffffff;">`
