@@ -84,22 +84,38 @@ Deno.serve(async (req) => {
     'Content-Type': 'application/json',
   };
 
-  // Current server state (the single row).
-  async function loadRow(): Promise<{ history: Turn[]; summary: string; rev: number }> {
-    const rows = await fetch(`${REST}?id=eq.${ROW}&select=history,summary,rev`, { headers: H })
+  // Current server state (the single row). `settings` = synced UI preferences (model/voice/lang/…), a small
+  // jsonb blob independent of the history/rev CAS — writing it can never touch or wipe the conversation.
+  type Settings = Record<string, unknown>;
+  async function loadRow(): Promise<{ history: Turn[]; summary: string; rev: number; settings: Settings }> {
+    const rows = await fetch(`${REST}?id=eq.${ROW}&select=history,summary,rev,settings`, { headers: H })
       .then((r) => r.json()).catch(() => []);
-    const row = Array.isArray(rows) && rows[0] ? rows[0] : { history: [], summary: '', rev: 0 };
+    const row = Array.isArray(rows) && rows[0] ? rows[0] : { history: [], summary: '', rev: 0, settings: {} };
     return {
       history: Array.isArray(row.history) ? row.history : [],
       summary: typeof row.summary === 'string' ? row.summary : '',
       rev: (row.rev | 0),
+      settings: (row.settings && typeof row.settings === 'object') ? row.settings as Settings : {},
     };
   }
 
   const cur = await loadRow();
 
   if (b.action === 'pull') {
-    return json({ ok: true, history: cur.history, summary: cur.summary, rev: cur.rev });
+    return json({ ok: true, history: cur.history, summary: cur.summary, rev: cur.rev, settings: cur.settings });
+  }
+
+  // Preferences-only write — last-writer-wins PER KEY (so a device that only knows about `ai_model` can't wipe
+  // `solita_tts`). Never touches history/summary/rev → a settings push cannot clobber the conversation.
+  if (b.action === 'settings') {
+    const incoming = (b.settings && typeof b.settings === 'object') ? b.settings as Settings : {};
+    const merged: Settings = { ...cur.settings, ...incoming };
+    await fetch(`${REST}?id=eq.${ROW}`, {
+      method: 'PATCH',
+      headers: { ...H, Prefer: 'return=minimal' },
+      body: JSON.stringify({ settings: merged, updated_at: new Date().toISOString() }),
+    });
+    return json({ ok: true, settings: merged });
   }
 
   if (b.action === 'push') {
@@ -146,7 +162,7 @@ Deno.serve(async (req) => {
       attempt = { ok: true, next };
     }
 
-    return json({ ok: true, history: attempt.next.history, summary: attempt.next.summary, rev: attempt.next.rev });
+    return json({ ok: true, history: attempt.next.history, summary: attempt.next.summary, rev: attempt.next.rev, settings: cur.settings });
   }
 
   return json({ error: 'unknown action' }, 400);
