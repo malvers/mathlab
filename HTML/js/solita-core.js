@@ -979,6 +979,7 @@
                 headers: { 'Content-Type': 'application/json', 'apikey': SB_ANON, 'Authorization': 'Bearer ' + SB_ANON },
                 body: JSON.stringify({
                     model: 'gemini-2.5-flash',
+                    label: 'photo',   // cost-log tag → daily mail's Gemini line
                     body: {
                         contents: [{
                             parts: [
@@ -1024,6 +1025,58 @@
             return true;
         }
 
+        // ---- "such mal im Netz …" → Gemini Search-Grounding (Doc 2026-06-23) ----
+        // Model-INDEPENDENT (works even on DeepSeek): the search runs OUTSIDE the chat model, via the cheap
+        // `gemini` proxy with the google_search tool. Free up to 1500 grounded prompts/day, then $35/1000 —
+        // for a single user effectively free. Sources come back in groundingMetadata; we show + speak the answer.
+        const SEARCH_INTENT = /\b(such(e|st|t)?|googl(e|est?|t)?|recherchier(e|st|t)?)\b|\bim\s+(netz|internet|web)\s+(nach|such)\w*\b|\bschau\s+(mal\s+)?(online|im\s+netz|ins\s+internet)\b|\bneueste[ns]?\s+(nachrichten|news)\b|\bwas\s+gibt'?s\s+neues\b/i;
+        async function searchWeb(query) {
+            const r = await fetch(GEMINI_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'apikey': SB_ANON, 'Authorization': 'Bearer ' + SB_ANON },
+                body: JSON.stringify({
+                    model: 'gemini-2.5-flash',
+                    label: 'search',   // cost-log tag → grounded-search count in the daily mail
+                    body: {
+                        contents: [{ parts: [{ text: query + '\n\nAntworte kurz und natürlich auf Deutsch — ein bis drei Sätze, gesprochen-freundlich, ohne Aufzählung. Stütze dich auf aktuelle Web-Informationen.' }] }],
+                        tools: [{ google_search: {} }],
+                    },
+                }),
+            });
+            const d = await r.json().catch(() => ({}));
+            if (!r.ok) throw new Error((d && d.error && (d.error.message || d.error)) || ('Gemini ' + r.status));
+            const cand = d && d.candidates && d.candidates[0];
+            const parts = cand && cand.content && cand.content.parts;
+            const text = Array.isArray(parts) ? parts.map(function (p) { return (p && p.text) || ''; }).join(' ').trim() : '';
+            const chunks = cand && cand.groundingMetadata && cand.groundingMetadata.groundingChunks;
+            const sources = Array.isArray(chunks) ? chunks.map(function (c) { return c && c.web; }).filter(Boolean).slice(0, 4) : [];
+            return { text: text || '(Gemini hat nichts zurückgegeben.)', sources: sources };
+        }
+        async function handleSearchIntent(userText) {
+            if (!SEARCH_INTENT.test(userText)) return false;
+            addMessage('user', userText);
+            messageInput.value = ''; messageInput.style.height = 'auto';
+            showTyping();
+            try {
+                const res = await searchWeb(userText);
+                hideTyping();
+                addMessage('assistant', res.text);
+                if (res.sources.length) {
+                    const links = res.sources.map(function (s) {
+                        return '<a href="' + escapeHtml(s.uri || '#') + '" target="_blank" rel="noopener" style="color:rgb(121,158,49)">' + escapeHtml(s.title || s.uri || 'Quelle') + '</a>';
+                    }).join('  ·  ');
+                    messagesArea.insertAdjacentHTML('beforeend',
+                        '<div class="message assistant"><div class="message-content" style="font-size:0.8rem;opacity:0.85">🌐 ' + links + '</div></div>');
+                    messagesArea.scrollTop = messagesArea.scrollHeight;
+                }
+                if (window.speakReply) window.speakReply(res.text);   // answer spoken; sources only shown
+            } catch (e) {
+                hideTyping();
+                addMessage('assistant', '❌ Suche fehlgeschlagen: ' + ((e && e.message) || e));
+            }
+            return true;
+        }
+
         function executeChatSend(userText) {
             addMessage('user', userText);
             messageInput.value = '';
@@ -1052,6 +1105,9 @@
 
             // "mach ein Foto" → capture NOW (still inside the send tap) + Gemini describes. Before the model.
             if (await handlePhotoIntent(userText)) return;
+
+            // "such mal im Netz …" → Gemini Search-Grounding (model-independent, even on DeepSeek). Before the model.
+            if (await handleSearchIntent(userText)) return;
 
             // UI-change mode + "stell ein: …" one-shot config → solita-config (live config).
             if (await handleConfigOrUiMode(userText, pwd)) return;

@@ -124,6 +124,23 @@ async function aiCostToday(): Promise<{ byProvider: Record<string, number>; tota
   } catch (_) { /* cost section is optional — never fail the watchdog mail */ }
   return { byProvider: out, total, calls };
 }
+
+// Count grounded Google searches in the last 24 h (ai_cost_log rows tagged label='search') → drives the
+// "X / 1500 gratis" line. Google grounds 1500 prompts/day free, then $35/1000 — so this is the cap-watch.
+// Best-effort: any problem → 0 (must never break the watchdog mail).
+async function geminiSearchCount(): Promise<number> {
+  try {
+    const url = Deno.env.get('SUPABASE_URL'); const key = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    if (!url || !key) return 0;
+    const supa = createClient(url, key, { auth: { persistSession: false } });
+    const since = new Date(Date.now() - 24 * 3600 * 1000).toISOString();
+    const { count, error } = await supa.from('ai_cost_log')
+      .select('*', { count: 'exact', head: true })
+      .eq('label', 'search').gte('created_at', since);
+    if (error) return 0;
+    return count || 0;
+  } catch (_) { return 0; }
+}
 // Graduated precision so DeepSeek's sub-cent sums don't collapse to "0.0 ¢" (Doc: „mehr NKS"):
 // ≥1 € → Euro · ≥10 ¢ → 1 NKS · ≥1 ¢ → 2 NKS · <1 ¢ → 3 NKS.
 const eurFmt = (e: number) => {
@@ -145,7 +162,7 @@ Deno.serve(async (req) => {
   if (b.ping) return json({ ok: true });
 
   try {
-    const [r2, db, ai] = await Promise.all([r2BytesUsed(), dbBytesUsed(), aiCostToday()]);
+    const [r2, db, ai, searches] = await Promise.all([r2BytesUsed(), dbBytesUsed(), aiCostToday(), geminiSearchCount()]);
     const r2pct = pct(r2, R2_QUOTA_GB), dbpct = pct(db, DB_QUOTA_GB);
     const provs = Object.keys(ai.byProvider).sort();
     const LBL: Record<string, string> = { claude: 'Claude', deepseek: 'DeepSeek', gemini: 'Gemini' };
@@ -159,7 +176,8 @@ Deno.serve(async (req) => {
       `Tägliche Infra-Auslastung:\n\n` +
       `• R2-Storage:  ${r2pct}% von ${R2_QUOTA_GB} GB  (${gb(r2)} GB)\n` +
       `• Supabase-DB: ${dbpct}% von ${DB_QUOTA_GB} GB  (${gb(db)} GB)\n` +
-      aiSection + `\n` +
+      aiSection +
+      (searches > 0 ? `\nGemini-Suchen (24 h): ${searches} / 1500 gratis\n` : '') + `\n` +
       `Exakte Kosten beim Anbieter:\n` +
       `• Claude:   https://console.anthropic.com/settings/cost\n` +
       `• Gemini:   https://console.cloud.google.com/billing/01B7AA-7DDDCA-D629CE\n` +
