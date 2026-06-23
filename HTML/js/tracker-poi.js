@@ -21,7 +21,7 @@ window.TrackerPoi = function (ctx) {
         'poi-cat-lodging':  { def: false, lbl: 'Übernachten',      ic: '<path d="M2 4v16"/><path d="M2 8h18a2 2 0 0 1 2 2v10"/><path d="M2 17h20"/><path d="M6 8v9"/>', c: 'g', f: ['["tourism"~"^(hotel|guest_house|hostel|camp_site)$"]'] },
         // "Tanken" = station LOCATIONS straight from OSM (keyless) — works without Tankerkönig. Live
         // PRICES remain the optional FEAT-26 enrichment (the separate fuel-price layer, once the key is set).
-        'poi-cat-fuel':     { def: false, lbl: 'Tankstelle',       ic: '<path d="M14 13h2a2 2 0 0 1 2 2v2a2 2 0 0 0 4 0v-6.998a2 2 0 0 0-.59-1.42L18 5"/><path d="M14 21V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v16"/><path d="M2 21h13"/><path d="M3 9h11"/>', c: 'h', f: ['["amenity"="fuel"]'] },
+        'poi-cat-fuel':     { def: false, module: true, lbl: 'Tankstelle', ic: '<path d="M14 13h2a2 2 0 0 1 2 2v2a2 2 0 0 0 4 0v-6.998a2 2 0 0 0-.59-1.42L18 5"/><path d="M14 21V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v16"/><path d="M2 21h13"/><path d="M3 9h11"/>', c: 'h', f: ['["amenity"="fuel"]'] },
         // Verkehr — live Autobahn closures/roadworks/warnings. NOT an Overpass category: `module:true`
         // marks it so fetchPois skips it (no `f` filters); its checkbox drives the separate traffic
         // module (js/tracker-traffic.js, key trk-traffic-on) from tracker.js. Icon = warning triangle

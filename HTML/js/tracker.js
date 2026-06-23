@@ -2523,7 +2523,7 @@ ${pts}
         // sightseeing categories default ON, the rest OFF. "Tanken" is plain OSM amenity=fuel (station
         // locations, NO key needed) — Tankerkönig live prices stay a separate FEAT-26 enrichment.
         [['poi-cat-sights', 1], ['poi-cat-views', 1], ['poi-cat-historic', 1], ['poi-cat-nature', 1],
-        ['poi-cat-service', 0], ['poi-cat-food', 0], ['poi-cat-lodging', 0], ['poi-cat-fuel', 0],
+        ['poi-cat-service', 0], ['poi-cat-food', 0], ['poi-cat-lodging', 0],
         ['poi-cat-speedcam', 0], ['poi-cat-feen', 0]].forEach(([id, def]) => {
             const el = $(id); if (!el) return;
             const saved = localStorage.getItem(id);
@@ -2533,6 +2533,18 @@ ${pts}
                 if (__poi) __poi.refresh();   // category toggled → re-query the visible area
             });
         });
+        // "Tankstelle" drives the SEPARATE fuel-PRICE layer (js/tracker-fuel.js), not an Overpass fetch — so
+        // toggling it OFF hides the station pins AND their prices (Doc 2026-06-23: vorher lief der Preis-Layer
+        // auf eigenem Key trk-fuel-on weiter → POI-Schalter aus, trotzdem sichtbar). Checkbox ⇄ __fuel.enabled.
+        (function () {
+            const cb = $('poi-cat-fuel'); if (!cb) return;
+            cb.checked = !!(__fuel && __fuel.enabled);
+            cb.addEventListener('change', () => {
+                if (!__fuel) { toast('Tankstellen nicht verfügbar.'); cb.checked = false; return; }
+                __fuel.setEnabled(cb.checked);   // off → layer.clearLayers() + update() bails → keine Pins, keine Preise
+                toast(cb.checked ? 'Tankstellen an' : 'Tankstellen aus');
+            });
+        })();
         // "Verkehr" is a POI category that drives the SEPARATE live-Autobahn traffic module
         // (js/tracker-traffic.js), not an Overpass fetch. Its checkbox mirrors/sets __traffic.enabled
         // (key trk-traffic-on) — so it can't sit in the generic loop above (no __poi.refresh, own key).
