@@ -710,6 +710,98 @@
         });
         sendButton.addEventListener('click', sendMessage);
 
+        // ---- Paste an image into the input line → Solita "sees" it (Doc 2026-06-23). Images ALWAYS go to Gemini,
+        // never to Claude (cheap multimodal; Gemini's text answer then enters the Claude chat context). Text/LaTeX
+        // paste needs nothing — the textarea + MathJax already handle it. ----
+        let pastedImage = null;   // data URL of an image pasted into the input, awaiting send
+        function clearPastedImage() {
+            pastedImage = null;
+            const chip = document.getElementById('paste-img-chip');
+            if (chip) chip.remove();
+        }
+        function showPastedImageChip(dataUrl) {
+            let chip = document.getElementById('paste-img-chip');
+            if (!chip) {
+                chip = document.createElement('div');
+                chip.id = 'paste-img-chip';
+                // Floats just above the input bar (.input-area is position:relative) → doesn't disturb the flex row.
+                chip.style.cssText = 'position:absolute;bottom:100%;left:24px;margin-bottom:6px;display:flex;align-items:center;'
+                    + 'gap:8px;background:rgba(8,20,42,.92);border:1px solid rgba(255,255,255,.18);border-radius:10px;padding:6px 8px;z-index:5;';
+                const ia = messageInput.parentElement;
+                if (ia) ia.appendChild(chip);
+            }
+            chip.innerHTML = '<img alt="Eingefügtes Bild" style="height:40px;border-radius:6px;display:block">'
+                + '<button type="button" aria-label="Bild entfernen" title="Bild entfernen" '
+                + 'style="background:none;border:none;color:#e6edf3;font-size:1.1rem;cursor:pointer;line-height:1;padding:0 4px">✕</button>';
+            chip.querySelector('img').src = dataUrl;
+            chip.querySelector('button').addEventListener('click', clearPastedImage);
+        }
+        function acceptImageFile(file) {   // read an image File/Blob → stash as the pending image + show the chip
+            if (!file || !file.type || file.type.indexOf('image/') !== 0) return false;
+            const reader = new FileReader();
+            reader.onload = function () { pastedImage = reader.result; showPastedImageChip(pastedImage); };
+            reader.readAsDataURL(file);
+            return true;
+        }
+        messageInput.addEventListener('paste', function (e) {
+            const items = (e.clipboardData && e.clipboardData.items) || [];
+            for (const it of items) {
+                if (it.kind === 'file' && it.type && it.type.indexOf('image/') === 0) {
+                    e.preventDefault();   // image only — don't also paste a filename/text fallback
+                    if (acceptImageFile(it.getAsFile())) return;
+                }
+            }
+            // no image in the clipboard → let the default text/LaTeX paste happen
+        });
+        // Drag-and-drop an image file anywhere onto the chat (input bar or message area) → same flow as paste.
+        (function wireImageDrop() {
+            const zones = [messageInput, messagesArea, messageInput.parentElement].filter(Boolean);
+            zones.forEach(function (z) {
+                z.addEventListener('dragover', function (e) { e.preventDefault(); });   // required to allow a drop
+                z.addEventListener('drop', function (e) {
+                    const files = (e.dataTransfer && e.dataTransfer.files) || [];
+                    for (const f of files) {
+                        if (f.type && f.type.indexOf('image/') === 0) { e.preventDefault(); acceptImageFile(f); return; }
+                    }
+                    // non-image drop → leave it to the default handler
+                });
+            });
+        })();
+        // A pasted image awaits send → describe it via Gemini (the typed text, if any, is the question about it),
+        // show it as a user bubble, render Gemini's answer as Solita's reply, and fold both into the chat context.
+        async function handlePastedImage(userText) {
+            const img = pastedImage;
+            clearPastedImage();
+            messageInput.value = ''; messageInput.style.height = 'auto';
+            messagesArea.insertAdjacentHTML('beforeend',
+                '<div class="message user"><div class="message-content" style="padding:6px">'
+                + (userText ? '<div style="margin-bottom:6px">' + escapeHtml(userText) + '</div>' : '')
+                + '<img src="' + img + '" alt="Eingefügtes Bild" style="max-width:240px;border-radius:8px;display:block"></div></div>');
+            messagesArea.scrollTop = messagesArea.scrollHeight;
+            showTyping();
+            try {
+                const res = await describePhoto(img, userText);
+                hideTyping();
+                addMessage('assistant', res.text);
+                showGeminiCost(res.usage, '🖼️ Bild');
+                if (window.speakReply) window.speakReply(res.text);
+                // Fold into the Claude conversation (history) so follow-ups ("und die Farbe?") have the image
+                // context — and it syncs cross-device like any other turn. The image itself never goes to Claude;
+                // only Gemini's text description does (Doc: Bilder IMMER an Gemini).
+                if (typeof brain !== 'undefined' && brain.getHistory && brain.setState) {
+                    const h = brain.getHistory().slice();
+                    h.push({ role: 'user', content: (userText ? userText + ' ' : '') + '[Bild eingefügt]' });
+                    h.push({ role: 'assistant', content: 'Bild-Beschreibung: ' + res.text });
+                    brain.setState(h);
+                    // setState only persists locally → push so the other device gets the image context too.
+                    if (window.SolitaSync && SolitaSync.push) { try { SolitaSync.push(brain.getHistory(), brain.getSummary()); } catch (e) { } }
+                }
+            } catch (e) {
+                hideTyping();
+                addMessage('assistant', '❌ Konnte das Bild nicht auswerten: ' + ((e && e.message) || e));
+            }
+        }
+
         function addMessage(role, content) {
             const motto = document.getElementById('vsb-motto');
             if (motto) motto.remove();
@@ -1055,8 +1147,13 @@
         // (BUG-13 Ursache 2). Description goes to GEMINI 2.5 Flash (multimodal, ~0.05 ¢/photo) — Claude is too
         // pricey for this, and the cheap `gemini` proxy is already deployed. No Claude in the photo path at all.
         const PHOTO_INTENT = /\b(mach|nimm|schie[sß]+|knips(e|en)?|take|aufnehmen)\b[^.?!]{0,24}\b(foto|bild|photo|picture)\b|\b(foto|bild|photo)\s+(bitte|machen|aufnehmen|knipsen)\b/i;
-        async function describePhoto(dataUrl) {
-            const b64 = String(dataUrl).replace(/^data:[^,]+,/, '');   // strip the "data:image/jpeg;base64," prefix
+        async function describePhoto(dataUrl, question) {
+            const b64 = String(dataUrl).replace(/^data:[^,]+,/, '');   // strip the "data:image/…;base64," prefix
+            const mime = (String(dataUrl).match(/^data:([^;,]+)/) || [])[1] || 'image/jpeg';   // keep PNG paste as PNG
+            // If Doc typed something with the image, that's the question about it; else just describe it.
+            const ask = (question && question.trim())
+                ? question.trim() + '\n\nAntworte kurz und natürlich auf Deutsch, gesprochen-freundlich, ohne Aufzählung. Beziehe dich auf das Bild.'
+                : 'Beschreibe kurz und natürlich auf Deutsch, was auf diesem Bild zu sehen ist — ein bis drei Sätze, gesprochen-freundlich, ohne Aufzählung.';
             const r = await fetch(GEMINI_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'apikey': SB_ANON, 'Authorization': 'Bearer ' + SB_ANON },
@@ -1066,8 +1163,8 @@
                     body: {
                         contents: [{
                             parts: [
-                                { inline_data: { mime_type: 'image/jpeg', data: b64 } },
-                                { text: 'Beschreibe kurz und natürlich auf Deutsch, was auf diesem Foto zu sehen ist — ein bis drei Sätze, gesprochen-freundlich, ohne Aufzählung.' },
+                                { inline_data: { mime_type: mime, data: b64 } },
+                                { text: ask },
                             ],
                         }],
                     },
@@ -1234,7 +1331,9 @@
         // ---- "/costs" / "sag mir unsere Kosten" → live infra + AI costs, exactly the daily-mail content (Doc) ----
         // Calls infra-usage with { dry:true } (computes + returns body/spoken, sends NO mail). Password-gated like
         // the chat proxy → Solita passes the app password. Shows the full mail body, speaks a concise summary.
-        const COSTS_INTENT = /^\s*\/costs?\b|\bunsere\s+(kosten|ausgaben)\b|\bkostenstand\b|\binfra.?kosten\b|\bwas\s+kostet\s+uns\b/i;
+        // „unsere Kosten" in natürlicher Sprache (Doc: „was haben wir für Kosten?" = /costs). Verankert auf
+        // wir/uns/unsere → kollidiert NICHT mit „was kostet Bitcoin" (= Suche). Kosten-Intent läuft vor Suche.
+        const COSTS_INTENT = /^\s*\/costs?\b|\bunsere\s+(kosten|ausgaben)\b|\bkostenstand\b|\binfra.?kosten\b|\bwas\s+kostet\s+uns\b|\bwas\s+haben\s+wir\b[^.?!]{0,25}\b(kosten|gekostet|ausgegeben)\b|\b(was|wie\s?viel|wieviel)\s+kosten\s+wir\b|\bwie\s?viel\s+haben\s+wir\b[^.?!]{0,15}\b(ausgegeben|gekostet)\b/i;
         async function handleCostsIntent(userText) {
             if (!COSTS_INTENT.test(userText)) return false;
             addMessage('user', userText);
@@ -1274,6 +1373,10 @@
         async function sendMessage() {
             let userText = messageInput.value.trim();
             const pwd = getPwd();
+
+            // A pasted image takes priority → ALWAYS Gemini (typed text, if any, is the question about it).
+            // Works with no text too, so don't fall into the empty-input return below.
+            if (pastedImage) { await handlePastedImage(userText); return; }
 
             if (!userText) return;
 
