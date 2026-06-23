@@ -30,7 +30,7 @@
             if (active && recog) { try { recog.stop(); } catch (e) { } return; } // running → stop (toggle)
             recog = new SR();
             recog.lang = lang; recog.interimResults = true; recog.maxAlternatives = 1; recog.continuous = true;
-            let finalText = '', started = false, stopping = false, silence = null;
+            let committed = '', sessionFinal = '', started = false, stopping = false, silence = null;
             function arm() { if (silence) clearTimeout(silence); silence = setTimeout(finish, SILENCE_MS); }
             function disarm() { if (silence) { clearTimeout(silence); silence = null; } }
             function finish() { stopping = true; disarm(); try { recog && recog.stop(); } catch (e) { } } // → onend submits
@@ -40,21 +40,30 @@
                 if (!started) { started = true; onPartial(''); arm(); } // arm ONCE; restarts mustn't reset the 5 s window
             };
             recog.onresult = function (e) {
-                let interim = '';
-                for (let k = e.resultIndex; k < e.results.length; k++) {
+                // Rebuild THIS session's transcript from the WHOLE results array each event and REPLACE (never
+                // +=). Android's WebView re-delivers the same result with a growing transcript (resultIndex
+                // stuck at 0), so the old `finalText += t` snowballed ("solitasolita mirsolita mir…", Doc
+                // 2026-06-23). `committed` keeps text finalised in PRIOR (restarted) sessions.
+                let finalT = '', interim = '';
+                for (let k = 0; k < e.results.length; k++) {
                     const t = e.results[k][0].transcript;
-                    if (e.results[k].isFinal) finalText += t; else interim += t;
+                    if (e.results[k].isFinal) finalT += t; else interim += t;
                 }
-                const shown = (finalText + interim).replace(/\s+/g, ' ').trim();
+                sessionFinal = finalT;
+                const shown = (committed + ' ' + finalT + ' ' + interim).replace(/\s+/g, ' ').trim();
                 onPartial(shown);
-                if (finishRe.test(shown)) { finalText = strip(finalText + interim); finish(); return; } // explicit "done"
-                arm();                                                                                   // real speech → reset window
+                if (finishRe.test(shown)) { committed = strip(shown); sessionFinal = ''; finish(); return; } // explicit "done"
+                arm();                                                                                       // real speech → reset window
             };
             recog.onerror = function (ev) { dbg('STT-Fehler: ' + (ev && ev.error)); if ((ev && ev.error) === 'no-speech') return; active = false; disarm(); onState('idle'); };
             recog.onend = function () {
-                if (!stopping) { try { recog.start(); dbg('STT: Neustart (weiter zuhören)'); return; } catch (e) { } } // browser ended early → keep going
+                if (!stopping) {
+                    // Carry this session's final text over BEFORE the restart (the new session's results reset).
+                    committed = (committed + ' ' + sessionFinal).replace(/\s+/g, ' ').trim(); sessionFinal = '';
+                    try { recog.start(); dbg('STT: Neustart (weiter zuhören)'); return; } catch (e) { } // browser ended early → keep going
+                }
                 active = false; disarm();
-                const q = strip(finalText);
+                const q = strip((committed + ' ' + sessionFinal).replace(/\s+/g, ' ').trim());
                 if (q) onFinal(q); else onState('idle');
             };
             try { recog.start(); } catch (e) { active = false; onState('idle'); }
