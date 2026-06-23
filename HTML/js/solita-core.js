@@ -295,7 +295,13 @@
                         '<div class="message user"><div class="message-content" style="padding:6px">' +
                         '<img src="' + img + '" alt="Foto" style="max-width:240px;border-radius:8px;display:block"></div></div>');
                     messagesArea.scrollTop = messagesArea.scrollHeight;
-                    return { ok: true, summary: 'Foto aufgenommen und im Chat angezeigt. Die inhaltliche Bildanalyse ist noch nicht angebunden — sag Doc, dass du das Foto hast, es aber noch nicht auswerten kannst.' };
+                    // Describe via Gemini (cheap, multimodal) and hand the description back so Claude can relay it.
+                    try {
+                        const desc = await describePhoto(img);
+                        return { ok: true, summary: 'Foto aufgenommen. Gemini beschreibt es: ' + desc };
+                    } catch (e) {
+                        return { ok: true, summary: 'Foto aufgenommen und im Chat gezeigt; die Gemini-Beschreibung schlug fehl: ' + ((e && e.message) || e) };
+                    }
                 }
                 if (name === 'change_setting') {
                     const r = await fetch(SOLITA_CONFIG_URL, { method: 'POST', headers: H, body: JSON.stringify({ instruction: String((input && input.instruction) || '') }) });
@@ -435,6 +441,7 @@
         // DeepSeek lives on its OWN proxy function (no tools — just cheap chat); Claude on /claude. Route by
         // the model's prefix so the summariser (Claude-Haiku) always reaches the claude proxy, even in DeepSeek mode.
         const DS_URL = AI_URL.replace(/\/claude(\?|$)/, '/deepseek$1');
+        const GEMINI_URL = AI_URL.replace(/\/claude(\?|$)/, '/gemini$1');   // multimodal photo describe (cheap; Claude stays out)
         function getApiUrl(model) { return /^deepseek/.test(model || currentModel) ? DS_URL : AI_URL; }
 
         function initModelDropdown(dropdownEl) {
@@ -959,6 +966,64 @@
             return false;
         }
 
+        // ---- "mach ein Foto" → take + DESCRIBE (Doc 2026-06-23) ----
+        // Capture happens in the SEND tap (transient user-gesture still valid) so the native camera actually
+        // opens — the take_photo TOOL fired only AFTER the model round-trip, by which time the gesture was gone
+        // (BUG-13 Ursache 2). Description goes to GEMINI 2.5 Flash (multimodal, ~0.05 ¢/photo) — Claude is too
+        // pricey for this, and the cheap `gemini` proxy is already deployed. No Claude in the photo path at all.
+        const PHOTO_INTENT = /\b(mach|nimm|schie[sß]+|knips(e|en)?|take|aufnehmen)\b[^.?!]{0,24}\b(foto|bild|photo|picture)\b|\b(foto|bild|photo)\s+(bitte|machen|aufnehmen|knipsen)\b/i;
+        async function describePhoto(dataUrl) {
+            const b64 = String(dataUrl).replace(/^data:[^,]+,/, '');   // strip the "data:image/jpeg;base64," prefix
+            const r = await fetch(GEMINI_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'apikey': SB_ANON, 'Authorization': 'Bearer ' + SB_ANON },
+                body: JSON.stringify({
+                    model: 'gemini-2.5-flash',
+                    body: {
+                        contents: [{
+                            parts: [
+                                { inline_data: { mime_type: 'image/jpeg', data: b64 } },
+                                { text: 'Beschreibe kurz und natürlich auf Deutsch, was auf diesem Foto zu sehen ist — ein bis drei Sätze, gesprochen-freundlich, ohne Aufzählung.' },
+                            ],
+                        }],
+                    },
+                }),
+            });
+            const d = await r.json().catch(() => ({}));
+            if (!r.ok) throw new Error((d && d.error && (d.error.message || d.error)) || ('Gemini ' + r.status));
+            const parts = d && d.candidates && d.candidates[0] && d.candidates[0].content && d.candidates[0].content.parts;
+            const text = Array.isArray(parts) ? parts.map(function (p) { return (p && p.text) || ''; }).join(' ').trim() : '';
+            return text || '(Gemini hat nichts zurückgegeben.)';
+        }
+        async function handlePhotoIntent(userText) {
+            if (!PHOTO_INTENT.test(userText) || !window.PhotoCapture) return false;
+            addMessage('user', userText);
+            messageInput.value = ''; messageInput.style.height = 'auto';
+            let img = null;
+            try { img = await PhotoCapture.capture({ onError: function () { } }); } catch (e) { img = null; }
+            if (!img) {
+                addMessage('assistant', 'Kein Foto aufgenommen. 📷');
+                if (window.speakReply) window.speakReply('Kein Foto aufgenommen.');
+                return true;
+            }
+            // Show the captured photo, then let Gemini describe it.
+            messagesArea.insertAdjacentHTML('beforeend',
+                '<div class="message user"><div class="message-content" style="padding:6px">' +
+                '<img src="' + img + '" alt="Foto" style="max-width:240px;border-radius:8px;display:block"></div></div>');
+            messagesArea.scrollTop = messagesArea.scrollHeight;
+            showTyping();
+            try {
+                const desc = await describePhoto(img);
+                hideTyping();
+                addMessage('assistant', desc);
+                if (window.speakReply) window.speakReply(desc);
+            } catch (e) {
+                hideTyping();
+                addMessage('assistant', '❌ Konnte das Foto nicht beschreiben: ' + ((e && e.message) || e));
+            }
+            return true;
+        }
+
         function executeChatSend(userText) {
             addMessage('user', userText);
             messageInput.value = '';
@@ -984,6 +1049,9 @@
 
             // Auth gate: no password → show the overlay and stop.
             if (checkAuthAndReturnPwd(pwd) === undefined) return;
+
+            // "mach ein Foto" → capture NOW (still inside the send tap) + Gemini describes. Before the model.
+            if (await handlePhotoIntent(userText)) return;
 
             // UI-change mode + "stell ein: …" one-shot config → solita-config (live config).
             if (await handleConfigOrUiMode(userText, pwd)) return;
