@@ -71,6 +71,56 @@ Deno.serve(async (req) => {
   if (given !== pass) return json({ error: 'unauthorized' }, 401);
   if (b.ping) return json({ ok: true });
 
+  // ── CREATE (action:'create') — uses a SEPARATE write-scoped token (calendar.events) so the read path stays
+  // read-only by design. Inert until GCAL_WRITE_REFRESH_TOKEN is set. Inserts ONE event into the primary cal.
+  if (b.action === 'create') {
+    // The write token was minted with its OWN OAuth client (separate Desktop client) → refresh with THAT
+    // client's id+secret, not the Gmail one. Falls back to the Gmail client if the write-client vars are unset.
+    const writeClientId = Deno.env.get('GCAL_WRITE_CLIENT_ID') || clientId;
+    const writeClientSecret = Deno.env.get('GCAL_WRITE_CLIENT_SECRET') || clientSecret;
+    const writeToken = Deno.env.get('GCAL_WRITE_REFRESH_TOKEN');   // scope calendar.events
+    if (!writeClientId || !writeClientSecret || !writeToken) {
+      return json({ error: 'GCAL_WRITE_CLIENT_ID/SECRET/REFRESH_TOKEN fehlen — Schreib-Credentials als Secrets setzen.' }, 500);
+    }
+    const title = (typeof b.title === 'string' && b.title.trim()) ? b.title.trim() : '';
+    const start = (typeof b.start === 'string' && b.start.trim()) ? b.start.trim() : '';
+    if (!title) return json({ error: 'kein Titel (title) übergeben' }, 400);
+    if (!start) return json({ error: 'kein Start (start) übergeben' }, 400);
+    const TZ = 'Europe/Berlin';
+    const ev: Record<string, unknown> = { summary: title };
+    if (typeof b.location === 'string' && b.location.trim()) ev.location = b.location.trim();
+    if (typeof b.description === 'string' && b.description.trim()) ev.description = b.description.trim();
+    if (b.allDay) {
+      const endDate = (typeof b.end === 'string' && b.end) ? b.end.slice(0, 10) : start.slice(0, 10);
+      ev.start = { date: start.slice(0, 10) };
+      ev.end = { date: endDate };
+    } else {
+      const end = (typeof b.end === 'string' && b.end) ? b.end
+        : new Date(new Date(start).getTime() + 3600000).toISOString();   // default: +1 h
+      ev.start = { dateTime: start, timeZone: TZ };
+      ev.end = { dateTime: end, timeZone: TZ };
+    }
+    let wtoken: string;
+    try {
+      wtoken = await getAccessToken(writeClientId, writeClientSecret, writeToken);
+    } catch (e) {
+      return json({ error: String((e as Error).message || e) }, 502);
+    }
+    try {
+      const r = await fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + wtoken, 'Content-Type': 'application/json' },
+        body: JSON.stringify(ev),
+      });
+      const d = await r.json().catch(() => ({}));
+      if (!r.ok) return json({ error: 'Calendar insert ' + r.status + ': ' + (d?.error?.message || '') }, 502);
+      const s = (d.start as Record<string, string>) || {};
+      return json({ ok: true, created: { id: d.id, title: d.summary, start: s.dateTime || s.date || start, htmlLink: d.htmlLink } });
+    } catch (e) {
+      return json({ error: 'Calendar insert fehlgeschlagen: ' + String((e as Error).message || e) }, 502);
+    }
+  }
+
   if (!clientId || !clientSecret || !refreshToken) {
     return json({ error: 'GMAIL_CLIENT_ID/SECRET oder GCAL_REFRESH_TOKEN fehlen — als Edge-Function-Secrets setzen.' }, 500);
   }

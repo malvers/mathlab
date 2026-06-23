@@ -73,19 +73,20 @@ async function dbBytesUsed(): Promise<number> {
 }
 
 // Send the daily mail through the existing gmail-send function (it signs as Solita for us).
-async function sendMail(subject: string, body: string, pass: string): Promise<void> {
+async function sendMail(subject: string, body: string, html: string, pass: string): Promise<void> {
   const url = Deno.env.get('SUPABASE_URL');
   const r = await fetch(url + '/functions/v1/gmail-send', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'x-app-pass': pass },
-    body: JSON.stringify({ subject, body }),
+    body: JSON.stringify({ subject, body, html }),
   });
   const d = await r.json().catch(() => ({}));
   if (!r.ok || !d.ok) throw new Error('gmail-send: ' + (d.error || ('HTTP ' + r.status)));
 }
 
-const pct = (used: number, quotaGb: number) => Math.round((used / (quotaGb * GB)) * 100);
-const gb = (b: number) => (b / GB).toFixed(b < GB ? 3 : 2);
+const pctN = (used: number, quotaGb: number) => (used / (quotaGb * GB)) * 100;   // exact % (number, not rounded)
+const de = (n: number, d: number) => n.toFixed(d).replace('.', ',');             // German decimal comma, fixed places
+const gbDe = (b: number) => de(b / GB, b < GB ? 3 : 2);                          // bytes → GB, German comma
 
 // ── AI-Kosten (Phase 1: GEMESSENE Tokens × Listenpreis → ~die echte Rechnung; Phase 2 holt die echten
 //    Provider-Zahlen). Preistabelle spiegelt solita-brain.js. Cache: Anthropic read 0.1×/write 1.25×,
@@ -145,10 +146,11 @@ async function geminiSearchCount(): Promise<number> {
 // ≥1 € → Euro · ≥10 ¢ → 1 NKS · ≥1 ¢ → 2 NKS · <1 ¢ → 3 NKS.
 const eurFmt = (e: number) => {
   const c = e * 100;
-  if (c >= 100) return '€ ' + e.toFixed(2);
-  if (c >= 10) return c.toFixed(1) + ' ¢';
-  if (c >= 1) return c.toFixed(2) + ' ¢';
-  return c.toFixed(3) + ' ¢';
+  const s = c >= 100 ? '€ ' + e.toFixed(2)
+    : c >= 10 ? c.toFixed(1) + ' ¢'
+      : c >= 1 ? c.toFixed(2) + ' ¢'
+        : c.toFixed(3) + ' ¢';
+  return s.replace('.', ',');   // deutsche Komma-Schreibweise, konsistent mit den Prozenten
 };
 
 Deno.serve(async (req) => {
@@ -163,28 +165,86 @@ Deno.serve(async (req) => {
 
   try {
     const [r2, db, ai, searches] = await Promise.all([r2BytesUsed(), dbBytesUsed(), aiCostToday(), geminiSearchCount()]);
-    const r2pct = pct(r2, R2_QUOTA_GB), dbpct = pct(db, DB_QUOTA_GB);
+    const r2pctN = pctN(r2, R2_QUOTA_GB), dbpctN = pctN(db, DB_QUOTA_GB);
+    const r2pct = de(r2pctN, 2), dbpct = de(dbpctN, 2);   // 2 Nachkommastellen, deutsche Komma-Schreibweise
+    const warn = r2pctN >= 80 || dbpctN >= 80;
     const provs = Object.keys(ai.byProvider).sort();
     const LBL: Record<string, string> = { claude: 'Claude', deepseek: 'DeepSeek', gemini: 'Gemini' };
-    const aiSection = provs.length
+    const subject = `📊 Infra: R2 ${r2pct}% · DB ${dbpct}%` + (ai.total > 0 ? ` · KI ${eurFmt(ai.total)}` : '');
+
+    // ── Plaintext-Body (Fallback im multipart/alternative) ──
+    const aiText = provs.length
       ? `\nKI-Kosten (gemessene Tokens × Listenpreis, letzte 24 h):\n`
         + provs.map((p) => `• ${LBL[p] || p}: ${eurFmt(ai.byProvider[p])}`).join('\n')
         + `\n  Σ ${eurFmt(ai.total)}  (${ai.calls} Calls)\n`
       : '';
-    const subject = `📊 Infra: R2 ${r2pct}% · DB ${dbpct}%` + (ai.total > 0 ? ` · KI ${eurFmt(ai.total)}` : '');
     const body =
       `Tägliche Infra-Auslastung:\n\n` +
-      `• R2-Storage:  ${r2pct}% von ${R2_QUOTA_GB} GB  (${gb(r2)} GB)\n` +
-      `• Supabase-DB: ${dbpct}% von ${DB_QUOTA_GB} GB  (${gb(db)} GB)\n` +
-      aiSection +
+      `• R2-Storage:  ${r2pct}% von ${R2_QUOTA_GB} GB  (${gbDe(r2)} GB)\n` +
+      `• Supabase-DB: ${dbpct}% von ${de(DB_QUOTA_GB, 1)} GB  (${gbDe(db)} GB)\n` +
+      aiText +
       (searches > 0 ? `\nGemini-Suchen (24 h): ${searches} / 1500 gratis\n` : '') + `\n` +
       `Exakte Kosten beim Anbieter:\n` +
       `• Claude:   https://console.anthropic.com/settings/cost\n` +
       `• Gemini:   https://console.cloud.google.com/billing/01B7AA-7DDDCA-D629CE\n` +
       `• DeepSeek: https://platform.deepseek.com/usage\n\n` +
-      ((r2pct >= 80 || dbpct >= 80) ? '⚠️ Achtung: ein Wert über 80% — Zeit, aufzuräumen.\n' : 'Alles im grünen Bereich.\n');
-    if (!b.dry) await sendMail(subject, body, pass);
-    return json({ ok: true, r2pct, dbpct, r2bytes: r2, dbbytes: db, ai: { byProvider: ai.byProvider, total: ai.total, calls: ai.calls }, mailed: !b.dry });
+      (warn ? '⚠️ Achtung: ein Wert über 80% — Zeit, aufzuräumen.\n' : 'Alles im grünen Bereich.\n');
+
+    // ── HTML-Body: die schöne Tabelle (Email-sicher: Inline-Styles, table-basiert, Arial) ──
+    const stamp = new Date().toLocaleString('de-DE', { dateStyle: 'long', timeStyle: 'short' });
+    const C = { ink: '#1a2238', muted: '#6b7a99', line: '#e3e8f0', shade: '#f6f8fc', navy: 'rgb(8,20,42)', green: 'rgb(121,158,49)', red: 'rgb(176,36,24)' };
+    const col = (n: number) => (n >= 80 ? C.red : C.green);
+    const bar = (n: number) =>
+      `<div style="background:${C.line};border-radius:3px;height:6px;width:130px;margin-top:5px;">`
+      + `<div style="background:${col(n)};height:6px;border-radius:3px;width:${Math.max(2, Math.min(100, n)).toFixed(1)}%;"></div></div>`;
+    const cell = (x: string) => `padding:10px 12px;border-bottom:1px solid ${C.line};${x}`;
+    const usageRow = (icon: string, name: string, n: number, pctStr: string, used: string, quota: string, shade: boolean) =>
+      `<tr style="background:${shade ? C.shade : '#ffffff'};">`
+      + `<td style="${cell('')}">${icon}&nbsp; ${name}</td>`
+      + `<td style="${cell('text-align:right;white-space:nowrap;')}"><span style="font-weight:bold;color:${col(n)};font-size:15px;">${pctStr}&nbsp;%</span>${bar(n)}</td>`
+      + `<td style="${cell('text-align:right;white-space:nowrap;color:' + C.ink + ';')}">${used}&nbsp;GB</td>`
+      + `<td style="${cell('text-align:right;white-space:nowrap;color:' + C.muted + ';')}">${quota}</td></tr>`;
+    const aiHtml = provs.length
+      ? `<h3 style="color:${C.navy};font-size:15px;margin:24px 0 8px;">KI-Kosten · letzte 24 h</h3>`
+        + `<table role="presentation" cellspacing="0" cellpadding="0" style="border-collapse:collapse;width:100%;font-size:14px;">`
+        + provs.map((p, i) =>
+            `<tr style="background:${i % 2 ? C.shade : '#ffffff'};"><td style="padding:7px 12px;border-bottom:1px solid ${C.line};">${LBL[p] || p}</td>`
+            + `<td style="padding:7px 12px;border-bottom:1px solid ${C.line};text-align:right;">${eurFmt(ai.byProvider[p])}</td></tr>`).join('')
+        + `<tr><td style="padding:9px 12px;font-weight:bold;">Σ gesamt</td>`
+        + `<td style="padding:9px 12px;text-align:right;font-weight:bold;">${eurFmt(ai.total)} <span style="color:${C.muted};font-weight:normal;">(${ai.calls} Calls)</span></td></tr></table>`
+        + (searches > 0 ? `<p style="color:${C.muted};font-size:13px;margin:8px 0 0;">Gemini-Suchen: <b style="color:${C.ink};">${searches}</b>&nbsp;/&nbsp;1500 gratis</p>` : '')
+      : '';
+    const html =
+      `<div style="font-family:Arial,Helvetica,sans-serif;color:${C.ink};max-width:580px;padding:4px;">`
+      + `<h2 style="color:${C.navy};margin:0 0 2px;font-size:20px;">📊 Infra-Auslastung</h2>`
+      + `<p style="color:${C.muted};margin:0 0 18px;font-size:13px;">${stamp}</p>`
+      + `<table role="presentation" cellspacing="0" cellpadding="0" style="border-collapse:collapse;width:100%;font-size:14px;">`
+      + `<thead><tr style="background:${C.navy};color:#ffffff;">`
+      + `<th style="text-align:left;padding:9px 12px;font-weight:600;">Dienst</th>`
+      + `<th style="text-align:right;padding:9px 12px;font-weight:600;">Auslastung</th>`
+      + `<th style="text-align:right;padding:9px 12px;font-weight:600;">Belegt</th>`
+      + `<th style="text-align:right;padding:9px 12px;font-weight:600;">Limit</th></tr></thead><tbody>`
+      + usageRow('☁️', 'Cloudflare R2', r2pctN, r2pct, gbDe(r2), `${R2_QUOTA_GB} GB`, false)
+      + usageRow('🗄️', 'Supabase DB', dbpctN, dbpct, gbDe(db), `${de(DB_QUOTA_GB, 1)} GB`, true)
+      + `</tbody></table>`
+      + aiHtml
+      + `<div style="margin:22px 0 0;padding:12px 14px;border-radius:8px;font-size:14px;font-weight:bold;`
+      + `background:${warn ? 'rgba(176,36,24,.08)' : 'rgba(121,158,49,.10)'};color:${warn ? C.red : C.green};">`
+      + `${warn ? '⚠️ Achtung: ein Wert über 80 % — Zeit, aufzuräumen.' : '✓ Alles im grünen Bereich.'}</div>`
+      + `<p style="color:${C.muted};font-size:12px;margin:18px 0 0;line-height:1.8;">Exakte Kosten beim Anbieter:<br>`
+      + `Claude · <a href="https://console.anthropic.com/settings/cost" style="color:${C.navy};">console.anthropic.com</a> &nbsp;|&nbsp; `
+      + `Gemini · <a href="https://console.cloud.google.com/billing/01B7AA-7DDDCA-D629CE" style="color:${C.navy};">cloud.google.com</a> &nbsp;|&nbsp; `
+      + `DeepSeek · <a href="https://platform.deepseek.com/usage" style="color:${C.navy};">platform.deepseek.com</a></p></div>`;
+
+    // Gesprochene Zusammenfassung für Solitas /costs (vorgelesen → keine URLs; % ganzzahlig für Hörbarkeit).
+    const eurSpoken = (e: number) => { const c = e * 100; return c < 100 ? (c < 10 ? c.toFixed(2) : c.toFixed(1)) + ' Cent' : e.toFixed(2) + ' Euro'; };
+    const spoken =
+      `Unsere Infra-Auslastung: R2-Speicher ${Math.round(r2pctN)} Prozent, Datenbank ${Math.round(dbpctN)} Prozent`
+      + (ai.total > 0 ? `. KI-Kosten der letzten 24 Stunden ${eurSpoken(ai.total)}` : '')
+      + (searches > 0 ? `, davon ${searches} von 1500 gratis Suchen` : '')
+      + `. ${warn ? 'Achtung, ein Wert liegt über 80 Prozent.' : 'Alles im grünen Bereich.'}`;
+    if (!b.dry) await sendMail(subject, body, html, pass);
+    return json({ ok: true, r2pct, dbpct, r2bytes: r2, dbbytes: db, searches, ai: { byProvider: ai.byProvider, total: ai.total, calls: ai.calls }, body, html, spoken, mailed: !b.dry });
   } catch (e) {
     return json({ error: String((e && (e as Error).message) || e) }, 502);
   }
