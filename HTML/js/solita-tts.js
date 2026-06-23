@@ -67,7 +67,10 @@
             window.speakReply = function (text) {
                 if (!ttsOn || !text) { window.__solitaSpeaking = false; return; }
                 try {
-                    const clean = String(text)
+                    // Code is SHOWN, never read aloud (Doc 2026-06-23). Drop fenced ```code``` from the spoken
+                    // text; if there was any, append a short hint instead of reading the listing.
+                    const hadCode = /```[\s\S]*?```/.test(String(text));
+                    let clean = String(text).replace(/```[\s\S]*?```/g, ' ')
                         .replace(/[\p{Extended_Pictographic}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}\u{1F1E6}-\u{1F1FF}\uFE0F\u200D]/gu, '') // strip smileys/emoji — don't read them aloud (Doc)
                         .replace(/\$\$[\s\S]*?\$\$/g, '')   // LaTeX display math — shown on screen, NOT read aloud (Doc 2026-06-22)
                         .replace(/\$[^$\n]*?\$/g, '')        // LaTeX inline math — shown on screen, NOT read aloud
@@ -76,6 +79,7 @@
                         .replace(/\bUI\b/g, 'Ju Ei')         // TTS: say "UI" the English way (you-eye), not German "oo-ee"
                         .replace(/\bKI\b/g, 'Kah Ih')        // TTS: spell "KI" as the letters K-I (Kah-Ih), not the word „kih"
                         .replace(/\s+/g, ' ').trim();
+                    if (hadCode) clean = (clean ? clean + ' ' : '') + 'Wenn du Fragen zum Code hast, gern!';
                     // PRIMARY: Google Cloud TTS via the tts edge fn (warm Neural2 voice) → play MP3.
                     window.__solitaSpeaking = true;     // set SYNCHRONOUSLY → the wake loop polls this
                     try { if (window.__solitaAudio) { window.__solitaAudio.pause(); window.__solitaAudio = null; } } catch (e) { }
