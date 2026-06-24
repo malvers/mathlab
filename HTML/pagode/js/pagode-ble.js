@@ -60,7 +60,9 @@
         return {
             name: 'Capacitor BLE-Plugin',
             async connect() {
-                await Ble.initialize();
+                // androidNeverForLocation: we don't derive location from BLE → plugin drops the
+                // ACCESS_FINE_LOCATION requirement (matches BLUETOOTH_SCAN neverForLocation in the manifest).
+                await Ble.initialize({ androidNeverForLocation: true });
                 var r = await Ble.requestDevice({ optionalServices: [CFG.SERVICE_STR] });
                 deviceId = r.deviceId;
                 await Ble.connect({ deviceId: deviceId });
