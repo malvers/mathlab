@@ -844,6 +844,9 @@
         }
 
         function recordTrackPoint(here, accuracy, now, still) {
+            // Simulator (Doc 2026-06-24): never write the synthetic drive into the track / buffer / cloud —
+            // the sim only needs the position marker + nav.update to run, not a recorded/synced track.
+            if (simMode) return { minStep: MIN_MOVE_M };
             // Adaptive minimum step: within the GPS error circle everything is noise, so require
             // a move bigger than a fraction of the accuracy — never below MIN_MOVE_M. Each recorded
             // point carries its altitude (m) + speed (km/h) for the later elevation/speed profile.
@@ -862,7 +865,7 @@
                     track.push(here); times.push(stamp); alts.push(altVal); speeds.push(spdVal); activities.push(actVal); temps.push(lastTemp); redrawTrack();
                 }
             }
-            if (track.length !== ptsBefore && !simMode) {   // sim: keep the drawn track local — never buffer/sync/broadcast fake fixes
+            if (track.length !== ptsBefore) {
                 if (typeof TrackBuffer !== 'undefined') TrackBuffer.save(bufferSnapshot());
                 scheduleSync(); // Stage 2: push to the cloud on the fly
                 if (liveOn) broadcastLive(); // Stage 3: live position to viewers
@@ -2339,6 +2342,8 @@ ${pts}
             // Dialog "STARTEN": from idle → begin recording + navigation (toggle then shows PAUSE);
             // while already recording (dialog reopened mid-trip) → just (re)route to the new destination.
             startTracking: () => {
+                // Simulator: STARTEN only (re)computes the route from the car — never begin real recording/GPS.
+                if (simMode) { if (__nav && __nav.hasDestination()) __nav.startNavigation(); return; }
                 if (trkState === 'idle') beginTracking();
                 else if (__nav && __nav.hasDestination()) __nav.startNavigation();
             },
