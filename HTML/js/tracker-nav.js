@@ -58,7 +58,8 @@ window.TrackerNav = function (ctx) {
     let navGen = 0;         // bumped whenever the route is cleared/replaced → invalidates in-flight fetches
     let maneuvers = null;   // [{loc:[lat,lng], type, modifier, exit, name, text}] for spoken guidance
     let mIdx = 0;           // index of the next maneuver to announce
-    let annFar = false;     // pre-warning already spoken for the current maneuver
+    let annFar = false;     // pre-warning ("In … Metern") already spoken for the current maneuver
+    let annNear = false;    // "Jetzt …" already spoken — said at ~40 m, but we DON'T advance until passed
     let mClosest = Infinity; // closest approach (m) to the current maneuver — to detect an overshoot
     let voiceOn = true;     // spoken guidance on/off (persisted in localStorage)
     let routeTotalDist = 0; // whole-route distance (m) at (re)route time — for ETA / remaining
@@ -314,7 +315,7 @@ window.TrackerNav = function (ctx) {
         clearRouteLine();
         if (destMarker) { map.removeLayer(destMarker); destMarker = null; }
         destLatLng = null; destLabel = '';
-        maneuvers = null; mIdx = 0; annFar = false; mClosest = Infinity;
+        maneuvers = null; mIdx = 0; annFar = false; annNear = false; mClosest = Infinity;
         routeTotalDist = 0; routeTotalDur = 0; tripTotalM = 0;
         hideBanner();
         stopSpeech();
@@ -542,7 +543,7 @@ window.TrackerNav = function (ctx) {
         }));
         mIdx = 0;
         while (mIdx < maneuvers.length && maneuvers[mIdx].type === 'depart') mIdx++; // skip the leading "depart"
-        annFar = false; mClosest = Infinity;
+        annFar = false; annNear = false; mClosest = Infinity;
     }
 
     // ---- ETA / remaining: distance left ALONG the route from the current position ----
@@ -765,7 +766,7 @@ window.TrackerNav = function (ctx) {
     function hideBanner() { const el = $('nav-banner'); if (el) el.hidden = true; }
 
     function advanceManeuver() {
-        mIdx++; annFar = false; mClosest = Infinity;
+        mIdx++; annFar = false; annNear = false; mClosest = Infinity;
         if (mIdx >= maneuvers.length) setTimeout(hideBanner, 3000);
     }
 
@@ -775,18 +776,18 @@ window.TrackerNav = function (ctx) {
         const d = haversine(here, m.loc);
         if (d < mClosest) mClosest = d;
         showBanner(m, d, tripLine(here));
-        if (d <= ANNOUNCE_NEAR_M) {                       // reached the maneuver → say it, advance
-            speak(m.type === 'arrive' ? 'Sie haben das Ziel erreicht.' : 'Jetzt ' + m.text);
-            advanceManeuver();
-        } else if (mClosest <= 120 && d > mClosest + 30) { // overshot it (a fix skipped the 40 m window) → advance
-            if (m.type === 'arrive') speak('Sie haben das Ziel erreicht.');
-            advanceManeuver();
-        } else if (d <= ANNOUNCE_FAR_M && !annFar) {      // approaching → pre-warning, once
-            annFar = true;
-            speak(m.type === 'arrive'
-                ? 'In ' + announceDist(d) + ' Metern erreichen Sie das Ziel.'
-                : 'In ' + announceDist(d) + ' Metern ' + m.text + '.');
+        if (m.type === 'arrive') {
+            // Destination: you stop there (no overshoot to detect), so announce + finish at the near window.
+            if (d <= ANNOUNCE_NEAR_M) { speak('Sie haben das Ziel erreicht.'); advanceManeuver(); }
+            else if (d <= ANNOUNCE_FAR_M && !annFar) { annFar = true; speak('In ' + announceDist(d) + ' Metern erreichen Sie das Ziel.'); }
+            return;
         }
+        // Pre-warning at ~300 m, "Jetzt …" at ~40 m — but KEEP this maneuver on the banner until you have
+        // actually PASSED it (overshoot), so it doesn't jump to the NEXT turn while you're still taking this
+        // one (Doc 2026-06-24: "die nächste kommt viel zu schnell, ich hab die eine noch nicht ausgeführt").
+        if (d <= ANNOUNCE_NEAR_M && !annNear) { annNear = true; speak('Jetzt ' + m.text); }
+        else if (d <= ANNOUNCE_FAR_M && !annFar) { annFar = true; speak('In ' + announceDist(d) + ' Metern ' + m.text + '.'); }
+        if (mClosest <= 120 && d > mClosest + 30) advanceManeuver();   // passed the turn → only now show the next
     }
 
     // Reset the live "found" feedback (green line + name hint). Called when the dialog opens, the route is
