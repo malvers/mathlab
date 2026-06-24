@@ -24,18 +24,27 @@
 
         let recog = null, active = false;
         const strip = function (s) { return s.replace(stripRe, '').replace(/\s+/g, ' ').trim(); };
-        // Prefix-aware join. Android's WebView delivers CUMULATIVE recognition results (each result is the
+        // Containment-aware join. Android's WebView delivers CUMULATIVE recognition results (each result is the
         // WHOLE phrase so far, not a disjoint chunk), so naive concatenation snowballed
-        // ("solitasolita mirsolita mir…", Doc 2026-06-23). If the new piece extends what we have, keep the
-        // LONGER; if it's already contained, ignore; only genuinely new text is appended. Standard
-        // (disjoint-result) browsers still concatenate correctly.
+        // ("solitasolita mirsolita mir…", Doc 2026-06-23). Across a recognizer RESTART the re-heard phrase can
+        // also gain NEW LEADING words — session 1 dropped "Solita mir gefällt", sessions 2/3 caught it, so a
+        // prefix-only check (acc must START t) failed and appended a near-duplicate three times over (Doc
+        // 2026-06-24). Fix: if EITHER string fully contains the other, keep the LONGER (no matter where the
+        // overlap sits); if they touch only at the seam, merge there; only genuinely new text is appended.
+        // Standard (disjoint-result) browsers still concatenate correctly.
         const addText = function (acc, t) {
             t = (t || '').replace(/\s+/g, ' ').trim();
             if (!t) return acc;
             if (!acc) return t;
-            if (t.indexOf(acc) === 0) return t;                 // cumulative: t extends acc → take the longer
+            if (t.indexOf(acc) !== -1) return t;                // acc fully inside t (cumulative OR new leading words) → t
             if (acc.indexOf(t) !== -1) return acc;              // t already contained in acc → ignore
-            return acc + ' ' + t;                               // disjoint → append
+            // Seam overlap: a restart can re-hear the boundary, so acc's tail repeats t's head. Merge on the
+            // longest word-aligned overlap (≥2 words) instead of appending a duplicate.
+            const aw = acc.split(' '), tw = t.split(' ');
+            for (let n = Math.min(aw.length, tw.length); n >= 2; n--) {
+                if (aw.slice(-n).join(' ') === tw.slice(0, n).join(' ')) return acc + ' ' + tw.slice(n).join(' ');
+            }
+            return acc + ' ' + t;                               // genuinely disjoint → append
         };
 
         function start() {
