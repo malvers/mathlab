@@ -70,6 +70,12 @@ Der Zündschlüssel bleibt in Stellung **ON** (Zündung + Benzinpumpe laufen). D
 [Bosch 0986332002 Mini-Relais 12 V 70 A (Schließer)](https://www.amazon.de/Bosch-0986332002-10331651-Relais-Arbeitsstrom/dp/B00BHKEFNK)
 - Markenware, IP5K4 — bewusst **nicht** das No-Name-„80 A" (laut Rezensionen oft geschönt, stirbt unter Last).
 
+### 3.3 Stromversorgung (Tisch-Test) ✅ BESTELLT (2026-06-24, Lieferung 25.06.)
+Nur für den Bench-Test — **nicht** fürs Auto (da kommen die 12 V aus der Bordbatterie). 12 V DC genügt, das Modul zieht < 0,15 A.
+- [Sunload 12 V / 2 A Steckernetzteil](https://www.amazon.de/Sunload-Steckernetzteil-2000mA-Hohlstecker-Netzteil/dp/B00J4RVN24) (Hohlstecker 5,5×2,1 mm)
+- [Hohlstecker → 2-Pin-Schraubklemmen-Adapter](https://www.amazon.de/Stecker-Hohlstecker-Terminal-Netzteil-Schraubbar-DC-Block-2-Pin/dp/B08LYPN3JK)
+- Anschluss: Netzteil → Adapter → zwei Drähte in die **DC+ / DC−**-Klemmen des Moduls (Polung beachten).
+
 > **Nicht** gebraucht: das 500-A-Self-Starter-Relais (Vikye o.ä.) — war für die alte „Hauptstrom schalten"-Idee.
 
 ---
@@ -136,9 +142,12 @@ Beide reden mit **einem** Modul über **eine** BLE-Funktion — die APK ist der 
 - [x] `solita-engine.js` gebaut — `start_engine` / `stop_engine`, **SIM_MODE an**
 - [x] in `solita.html` eingebunden → **im Testmodus sprechbar**
 - [x] **BT-Modul bestellt** (2026-06-24 — DSD TECH 2-Kanal BLE, B0DPLCRJ98, SH-HC-08-Chip)
-- [ ] BT-Modul eingetroffen *(Doc)*
-- [ ] **Test-APK** (Capacitor) mit ON/OFF + BLE-Plugin bauen → Modul isoliert prüfen
-- [ ] Protokoll am echten Modul gegenchecken (FFE0/FFE1/A0)
+- [x] **Stromversorgung bestellt** (2026-06-24 — Sunload 12 V/2 A + Klemmen-Adapter, Lieferung 25.06.)
+- [x] **Test-Seite** `HTML/pagode/pagode-remote.html` gebaut (Web Bluetooth + Plugin, FFE0/FFE1/A0)
+- [x] **Capacitor-Scaffold** `pagode-app/` gebaut (BLE-Plugin, Single-Source via `npm run prep`)
+- [ ] BT-Modul + Netzteil eingetroffen *(Doc, ~25.06.)*
+- [ ] im **Chrome** testen: Modul an 12 V → Connect → PULS Kanal 1 → Relais klackt → Protokoll FFE0/FFE1/A0 gegenchecken
+- [ ] **Test-APK** bauen (`pagode-app`: npm install → cap:add → BLE-Permissions → cap:sync → Build)
 - [ ] Solita: `navigator.bluetooth` → `BleClient` (Plugin), Koppel-Knopf, `SIM_MODE=false`
 - [ ] im Auto verdrahten (Bosch-70A an Klemme 50, Kanal-2-NC in die Zündung)
 - [ ] erster echter Start 🎉
