@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>PAGODE · BLE Remote</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&display=swap" rel="stylesheet">
+    <style>
+        /* Standalone BLE hardware-test tool for the DSD TECH 2-channel BLE relay (SH-HC-08, FFE0/FFE1, A0-cmds).
+           On-brand: dark blue (never black), Orbitron, green action buttons (never orange). This page IS the
+           content the Capacitor test-APK will wrap — see Solita_goes_Pagode.md §5.1. */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg: rgb(8, 20, 42);
+            --panel: rgb(14, 36, 78);
+            --green: rgb(121, 158, 49);
+            --green-hi: rgb(150, 196, 60);
+            --red: rgb(176, 36, 24);
+            --orange: rgb(245, 194, 66);
+            --ink: #e8eefc;
+            --muted: #8fa0c4;
+        }
+
+        body {
+            font-family: 'Orbitron', sans-serif;
+            background: var(--bg);
+            color: var(--ink);
+            min-height: 100vh;
+            padding: 22px 16px 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 18px;
+        }
+
+        header { text-align: center; }
+        h1 { font-size: 20px; font-weight: 900; letter-spacing: 3px; }
+        .sub { font-size: 11px; letter-spacing: 2px; color: var(--muted); margin-top: 4px; text-transform: uppercase; }
+
+        .wrap { width: 100%; max-width: 440px; display: flex; flex-direction: column; gap: 16px; }
+
+        /* status pill */
+        .status {
+            display: flex; align-items: center; gap: 10px; justify-content: center;
+            padding: 10px 14px; border-radius: 12px; background: var(--panel);
+            font-size: 13px; letter-spacing: 1px;
+        }
+        .dot { width: 12px; height: 12px; border-radius: 50%; background: var(--red); flex: 0 0 auto; transition: background .2s; }
+        .status.on .dot { background: var(--green-hi); box-shadow: 0 0 10px var(--green-hi); }
+        .status.busy .dot { background: var(--orange); }
+
+        button {
+            font-family: 'Orbitron', sans-serif; font-weight: 800; letter-spacing: 2px;
+            border: none; border-radius: 12px; cursor: pointer; color: var(--ink);
+            padding: 16px; font-size: 15px; transition: transform .05s, filter .15s, background .15s;
+            -webkit-tap-highlight-color: transparent; touch-action: manipulation;
+        }
+        button:active { transform: scale(0.97); }
+        button:disabled { opacity: .4; cursor: not-allowed; }
+
+        .btn-connect { width: 100%; background: var(--panel); color: var(--ink); border: 1px solid #2c4a86; }
+        .btn-connect.connected { background: var(--red); }
+
+        .card {
+            background: var(--panel); border-radius: 14px; padding: 14px;
+            display: flex; flex-direction: column; gap: 10px;
+        }
+        .card h2 { font-size: 13px; letter-spacing: 2px; color: var(--orange); font-weight: 800; }
+        .card .role { font-size: 10px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
+        .row { display: grid; grid-template-columns: 1fr 1fr 1.3fr; gap: 8px; }
+        .btn-on { background: var(--green); }
+        .btn-on:hover { filter: brightness(1.1); }
+        .btn-off { background: #34507f; }
+        .btn-pulse { background: var(--green); filter: brightness(.92); }
+
+        /* log */
+        .log {
+            background: rgb(6, 16, 34); border-radius: 12px; padding: 12px;
+            font-family: 'Menlo', 'Consolas', monospace; font-size: 12px; line-height: 1.5;
+            color: var(--muted); height: 168px; overflow-y: auto; white-space: pre-wrap; word-break: break-word;
+            scrollbar-width: thin; scrollbar-color: #2c4a86 transparent;
+        }
+        .log .ok { color: var(--green-hi); }
+        .log .err { color: #e8736a; }
+        .log .tx { color: var(--orange); }
+
+        .hint { font-size: 11px; color: var(--muted); text-align: center; line-height: 1.6; }
+        code { background: rgba(255,255,255,.06); padding: 1px 5px; border-radius: 4px; font-size: 11px; }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>PAGODE · BLE REMOTE</h1>
+        <div class="sub">DSD TECH 2-Kanal · SH-HC-08</div>
+    </header>
+
+    <div class="wrap">
+        <div class="status" id="status"><span class="dot"></span><span id="status-txt">getrennt</span></div>
+
+        <button class="btn-connect" id="btn-connect" type="button">🔌 Verbinden</button>
+
+        <!-- Channel 1 = START (Klemme 50, Anlasser) -->
+        <div class="card">
+            <h2>KANAL 1</h2>
+            <div class="role">START · Klemme 50 · Anlasser</div>
+            <div class="row">
+                <button class="btn-on" type="button" data-cmd="K1_ON">EIN</button>
+                <button class="btn-off" type="button" data-cmd="K1_OFF">AUS</button>
+                <button class="btn-pulse" type="button" data-pulse="1">PULS ▶</button>
+            </div>
+        </div>
+
+        <!-- Channel 2 = STOP (Zündung unterbrechen) -->
+        <div class="card">
+            <h2>KANAL 2</h2>
+            <div class="role">STOP · Zündung unterbrechen</div>
+            <div class="row">
+                <button class="btn-on" type="button" data-cmd="K2_ON">EIN</button>
+                <button class="btn-off" type="button" data-cmd="K2_OFF">AUS</button>
+                <button class="btn-pulse" type="button" data-pulse="2">PULS ▶</button>
+            </div>
+        </div>
+
+        <div class="log" id="log" aria-label="Protokoll" role="log"></div>
+
+        <div class="hint">
+            Web Bluetooth (Chrome/Android/Desktop) <b>oder</b> APK (BLE-Plugin) — automatisch erkannt.<br>
+            Protokoll: Service <code>0xFFE0</code> · Char <code>0xFFE1</code> · Befehle <code>A0…</code>
+        </div>
+    </div>
+
+    <script>
+        'use strict';
+
+        // ---- CONFIG — SH-HC-08 standard; verify on the real module --------------------------------------------
+        const CFG = {
+            SERVICE: 0xffe0, SERVICE_STR: '0000ffe0-0000-1000-8000-00805f9b34fb',
+            CHAR: 0xffe1, CHAR_STR: '0000ffe1-0000-1000-8000-00805f9b34fb',
+            CMD: {
+                K1_ON: [0xA0, 0x01, 0x01, 0xA2], K1_OFF: [0xA0, 0x01, 0x00, 0xA1],
+                K2_ON: [0xA0, 0x02, 0x01, 0xA3], K2_OFF: [0xA0, 0x02, 0x00, 0xA2]
+            },
+            PULSE_MS: 900   // momentary pulse length (crank / stop)
+        };
+
+        // ---- tiny log + status UI ----------------------------------------------------------------------------
+        const logEl = document.getElementById('log');
+        const statusEl = document.getElementById('status');
+        const statusTxt = document.getElementById('status-txt');
+        function log(msg, cls) {
+            const t = new Date().toLocaleTimeString('de-DE');
+            const line = document.createElement('div');
+            if (cls) line.className = cls;
+            line.textContent = t + '  ' + msg;
+            logEl.appendChild(line);
+            logEl.scrollTop = logEl.scrollHeight;
+        }
+        function setStatus(state, txt) { statusEl.className = 'status' + (state ? ' ' + state : ''); statusTxt.textContent = txt; }
+        const hex = (a) => a.map(b => b.toString(16).padStart(2, '0').toUpperCase()).join(' ');
+        const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+
+        // ---- BLE transport: pick native plugin in the APK, Web Bluetooth in the browser ----------------------
+        const isNative = !!(window.Capacitor && typeof window.Capacitor.isNativePlatform === 'function'
+            && window.Capacitor.isNativePlatform());
+
+        let backend = null;   // { connect(), write(bytes), disconnect() }
+
+        // --- Web Bluetooth (Chrome / Android / Desktop) ---
+        function webBackend() {
+            let device = null, characteristic = null;
+            return {
+                name: 'Web Bluetooth',
+                async connect() {
+                    device = await navigator.bluetooth.requestDevice({
+                        acceptAllDevices: true, optionalServices: [CFG.SERVICE]
+                    });
+                    device.addEventListener('gattserverdisconnected', () => {
+                        characteristic = null; setStatus('', 'getrennt'); markConnected(false); log('Verbindung getrennt', 'err');
+                    });
+                    const server = await device.gatt.connect();
+                    const service = await server.getPrimaryService(CFG.SERVICE);
+                    characteristic = await service.getCharacteristic(CFG.CHAR);
+                    return device.name || 'Relais-Modul';
+                },
+                async write(bytes) {
+                    if (!characteristic) throw new Error('nicht verbunden');
+                    const data = new Uint8Array(bytes);
+                    // FFE1 is usually write-with-response; fall back to without-response if needed.
+                    if (characteristic.properties.write) await characteristic.writeValue(data);
+                    else await characteristic.writeValueWithoutResponse(data);
+                },
+                async disconnect() { try { device && device.gatt.connected && device.gatt.disconnect(); } catch (e) {} }
+            };
+        }
+
+        // --- Capacitor @capacitor-community/bluetooth-le (the APK) ---
+        // Implemented best-effort against the registered plugin; VERIFY when wrapping the APK (Solita_goes_Pagode.md §5.1).
+        function nativeBackend() {
+            const Ble = window.Capacitor.Plugins.BluetoothLe;
+            let deviceId = null;
+            const toB64 = (bytes) => btoa(String.fromCharCode.apply(null, bytes));   // plugin wants base64 value
+            return {
+                name: 'Capacitor BLE-Plugin',
+                async connect() {
+                    await Ble.initialize();
+                    const r = await Ble.requestDevice({ optionalServices: [CFG.SERVICE_STR] });
+                    deviceId = r.deviceId;
+                    await Ble.connect({ deviceId });
+                    return r.name || 'Relais-Modul';
+                },
+                async write(bytes) {
+                    if (!deviceId) throw new Error('nicht verbunden');
+                    await Ble.write({ deviceId, service: CFG.SERVICE_STR, characteristic: CFG.CHAR_STR, value: toB64(bytes) });
+                },
+                async disconnect() { try { deviceId && await Ble.disconnect({ deviceId }); } catch (e) {} }
+            };
+        }
+
+        // ---- wiring ------------------------------------------------------------------------------------------
+        const btnConnect = document.getElementById('btn-connect');
+        let connected = false, busy = false;
+
+        function markConnected(on) {
+            connected = on;
+            btnConnect.classList.toggle('connected', on);
+            btnConnect.textContent = on ? '✖ Trennen' : '🔌 Verbinden';
+            document.querySelectorAll('[data-cmd],[data-pulse]').forEach(b => b.disabled = !on);
+        }
+        markConnected(false);
+
+        async function send(name) {
+            if (busy) return;
+            busy = true; setStatus('busy', 'sende…');
+            try {
+                await backend.write(CFG.CMD[name]);
+                log('TX ' + name + '  [' + hex(CFG.CMD[name]) + ']', 'tx');
+            } catch (e) {
+                log('Fehler beim Senden: ' + (e.message || e), 'err');
+            } finally { busy = false; setStatus(connected ? 'on' : '', connected ? 'verbunden' : 'getrennt'); }
+        }
+
+        async function pulse(channel) {
+            if (busy) return;
+            const on = channel === 1 ? 'K1_ON' : 'K2_ON';
+            const off = channel === 1 ? 'K1_OFF' : 'K2_OFF';
+            busy = true; setStatus('busy', 'Puls ' + CFG.PULSE_MS + ' ms…');
+            try {
+                await backend.write(CFG.CMD[on]); log('TX ' + on + '  [' + hex(CFG.CMD[on]) + ']', 'tx');
+                await sleep(CFG.PULSE_MS);
+                await backend.write(CFG.CMD[off]); log('TX ' + off + '  [' + hex(CFG.CMD[off]) + ']', 'tx');
+                log('Puls Kanal ' + channel + ' fertig (' + CFG.PULSE_MS + ' ms)', 'ok');
+            } catch (e) {
+                log('Fehler beim Puls: ' + (e.message || e), 'err');
+            } finally { busy = false; setStatus(connected ? 'on' : '', connected ? 'verbunden' : 'getrennt'); }
+        }
+
+        btnConnect.addEventListener('click', async () => {
+            if (connected) { await backend.disconnect(); markConnected(false); setStatus('', 'getrennt'); log('getrennt'); return; }
+            // build the right backend (user gesture → requestDevice is allowed here)
+            if (isNative) backend = nativeBackend();
+            else if (navigator.bluetooth) backend = webBackend();
+            else { log('Web Bluetooth nicht verfügbar — braucht HTTPS oder localhost + Chrome (Android/Desktop), nicht Safari/iOS. Über http://LAN-IP geht es NICHT.', 'err'); return; }
+            setStatus('busy', 'verbinde…'); log('verbinde via ' + backend.name + '…');
+            try {
+                const name = await backend.connect();
+                markConnected(true); setStatus('on', 'verbunden'); log('verbunden mit ' + name, 'ok');
+            } catch (e) {
+                setStatus('', 'getrennt'); log('Verbindung fehlgeschlagen: ' + (e.message || e), 'err');
+            }
+        });
+
+        document.querySelectorAll('[data-cmd]').forEach(b => b.addEventListener('click', () => send(b.dataset.cmd)));
+        document.querySelectorAll('[data-pulse]').forEach(b => b.addEventListener('click', () => pulse(Number(b.dataset.pulse))));
+
+        log('Bereit. Transport: ' + (isNative ? 'Capacitor BLE-Plugin (APK)' : (navigator.bluetooth ? 'Web Bluetooth (Browser)' : 'KEINER — kein BLE')) + '.');
+    </script>
+</body>
+
+</html>
