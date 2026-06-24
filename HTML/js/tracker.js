@@ -340,6 +340,18 @@
         // stays glued and crisp. We used to hard-hide it (opacity:0) on zoomstart and restore on zoomend, but
         // because .pos-marker has `transition: opacity 0.6s`, the dot then FADED back in after every zoom →
         // the "Punkt blinkt" Doc saw. Removed: the dot just zooms along, no blink (Doc 2026-06-24).)
+        //
+        // The recorded TRACK is drawn by Leaflet.hotline on a CANVAS (smooth speed gradient); Leaflet bitmap-
+        // SCALES that canvas during a zoom (ugly "Bildpixel hochgezogen"), then redraws it crisp at zoomend.
+        // So we hide the track canvas for the DURATION of the zoom and fade it back in cleanly once it's sharp
+        // again (Doc 2026-06-24). SVG layers (nav route, dot) stay visible — they zoom as crisp vectors.
+        function trackCanvases() { try { return map.getPanes().overlayPane.querySelectorAll('canvas'); } catch (e) { return []; } }
+        map.on('zoomstart', () => { trackCanvases().forEach((c) => { c.style.transition = 'none'; c.style.opacity = '0'; }); });
+        map.on('zoomend', () => {
+            trackCanvases().forEach((c) => {
+                requestAnimationFrame(() => { c.style.transition = 'opacity 0.25s ease'; c.style.opacity = '1'; }); // redrawn crisp → fade in
+            });
+        });
 
         const baseMap = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxNativeZoom: 19, // OSM tiles stop at z19 …
