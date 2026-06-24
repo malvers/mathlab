@@ -58,7 +58,16 @@
         }
     }];
 
+    // Set true once a tool actually changed the tracker this turn → the confirmation toast may auto-dismiss
+    // (a pure answer with no action stays put). Reset on each new question (see onFinal → brain.send).
+    let acted = false;
+
     async function execTool(name, input, pwd) {
+        const res = await runTool(name, input, pwd);
+        if (res && res.ok) acted = true;   // an action took effect → let onDone fade the "Erledigt …" bubble
+        return res;
+    }
+    async function runTool(name, input, pwd) {
         if (name === 'change_setting') {
             try {
                 const r = await fetch(CFG_URL, {
@@ -151,7 +160,14 @@
         onAssistant: function (text) { bubble(text, true); },
         onSpeak: function (text) { speak(text); },
         onError: function (err) { bubble('❌ ' + ((err && err.message) ? err.message : err)); setState(''); btn.disabled = false; },
-        onDone: function () { btn.disabled = false; }
+        onDone: function () {
+            btn.disabled = false;
+            // Solita did something in the tracker → don't let the "Erledigt …" toast linger forever; fade it.
+            if (acted && bub.classList.contains('show')) {
+                if (bubTimer) clearTimeout(bubTimer);
+                bubTimer = setTimeout(() => bub.classList.remove('show'), 6000);
+            }
+        }
     });
     try { brain.load(); } catch (e) { }
 
@@ -172,7 +188,7 @@
             else { setState(''); bubble(''); }                              // idle: no result / error
         },
         onPartial: function (t) { bubble(t || '… ich höre', true); },       // '' on first start → "… ich höre"
-        onFinal: function (q) { anchorTop(); setState('thinking'); btn.disabled = true; dbg('frage: „' + q + '"'); brain.send(q); }
+        onFinal: function (q) { acted = false; anchorTop(); setState('thinking'); btn.disabled = true; dbg('frage: „' + q + '"'); brain.send(q); }
     });
     function listen() {
         if (!ensurePwd()) { bubble('Kein Solita-Passwort — abgebrochen.'); return; }
