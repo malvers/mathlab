@@ -40,6 +40,9 @@ window.TrackerNav = function (ctx) {
 
     const OFFROUTE_M = 30;          // beyond this distance from the line → considered "off route" (Doc 2026-06-14: 45→30 for earlier reroute; watch d2route debug for flapping)
     const REROUTE_COOLDOWN_MS = 6000; // don't hammer OSRM: at most one reroute per this window (Doc 2026-06-14: 8s→6s)
+    const OFFROUTE_CONSEC = 3;      // hysteresis: require this many consecutive off-route fixes before rerouting → no flapping on jitter / a brief excursion (Doc 2026-06-24)
+    const BRG_RANGE_DEG = 90;       // off-route reroute: OSRM may depart within ±this of the travel heading → forbids a U-turn back onto the rejected line ("bitte wenden" unterbunden)
+    const BRG_MIN_MOVE_M = 12;      // min travel between fixes for a trustworthy movement-derived heading
     const ANNOUNCE_FAR_M = 300;     // distance at which the pre-warning ("In 300 m …") is spoken
     const ANNOUNCE_NEAR_M = 40;     // distance at which the maneuver ("Jetzt …") is spoken + advanced
     const VOICE_KEY = 'trk_nav_voice';
@@ -55,6 +58,9 @@ window.TrackerNav = function (ctx) {
     let routeLatLngs = null; // the route's points [[lat,lng]…] — for the off-route distance check
     let lastReroute = 0;    // timestamp of the last (re)route, for the cooldown
     let rerouting = false;  // a reroute fetch is in flight
+    let lastBrgPos = null;  // last position used to derive the live travel heading
+    let travelBrg = null;   // current travel bearing (deg, 0=N) from GPS movement → departure-direction constraint on reroute
+    let offRouteCount = 0;  // consecutive off-route fixes → hysteresis against reroute flapping
     let navGen = 0;         // bumped whenever the route is cleared/replaced → invalidates in-flight fetches
     let maneuvers = null;   // [{loc:[lat,lng], type, modifier, exit, name, text}] for spoken guidance
     let mIdx = 0;           // index of the next maneuver to announce
@@ -311,6 +317,7 @@ window.TrackerNav = function (ctx) {
     function clearRoute() {
         navGen++;            // invalidate any reroute/route fetch still in flight (its result is now stale)
         rerouting = false;   // don't let an aborted reroute leave the flag stuck → would block future routing
+        lastBrgPos = null; travelBrg = null; offRouteCount = 0;  // drop the stale travel heading for the next navigation
         clearRouteLine();
         if (destMarker) { map.removeLayer(destMarker); destMarker = null; }
         destLatLng = null; destLabel = '';
@@ -326,14 +333,18 @@ window.TrackerNav = function (ctx) {
 
     // ---- Routing: a position → destination, drawn as a polyline ----
     // Shared by START (startNavigation) and the off-route reroute (update). `reroute` only tweaks toasts.
-    async function computeRoute(from, reroute) {
+    async function computeRoute(from, reroute, brg) {
         const gen = navGen; // snapshot: if the route is cleared/replaced during the await, this result is stale
         toast(reroute ? 'Neue Route …' : 'Route wird berechnet …');
         let data;
         try {
             // OSRM wants lon,lat order; full geometry as GeoJSON for an easy polyline.
             const coords = from[1] + ',' + from[0] + ';' + destLatLng[1] + ',' + destLatLng[0];
-            const r = await fetch(OSRM_PROFILES[routeType] + coords + '?overview=full&geometries=geojson&steps=true');
+            // Off-route reroute (Doc 2026-06-24): constrain the DEPARTURE direction to the live travel heading
+            // via OSRM `bearings` (one entry per coordinate; the destination stays unconstrained → trailing ";").
+            // This forbids OSRM from starting the new route with a U-turn back onto the rejected line.
+            const bearings = (brg != null) ? '&bearings=' + Math.round(brg) + ',' + BRG_RANGE_DEG + ';' : '';
+            const r = await fetch(OSRM_PROFILES[routeType] + coords + '?overview=full&geometries=geojson&steps=true' + bearings);
             data = await r.json();
         } catch (e) { if (gen === navGen) toast('Route fehlgeschlagen (offline?).'); return false; }
         if (gen !== navGen || !destLatLng) return false; // cleared/superseded while fetching → drop this result
@@ -456,17 +467,29 @@ window.TrackerNav = function (ctx) {
         // Only while a route is actually drawn; bail cheaply otherwise (no dest, not started, mid-fetch).
         if (!destLatLng || !routeLatLngs || !here) return;
         redrawAhead(here);                                           // keep only the road ahead blue (note #1)
+        // Track the live travel heading from GPS movement → feeds the departure-direction constraint on reroute.
+        if (lastBrgPos == null) { lastBrgPos = here; }
+        else if (haversine(lastBrgPos, here) >= BRG_MIN_MOVE_M) { travelBrg = bearingDeg(lastBrgPos, here); lastBrgPos = here; }
         if (rerouting) return;
         const d = distToRouteM(here);
         const cooling = Date.now() - lastReroute < REROUTE_COOLDOWN_MS;
-        navDbg(d, d <= OFFROUTE_M ? 'on-route' : (cooling ? 'OFF · cooldown' : 'OFF · REROUTE now'));
-        if (d <= OFFROUTE_M) { guidanceUpdate(here); return; }       // on route → announce the upcoming maneuver
+        if (d <= OFFROUTE_M) {                                       // on route → announce the upcoming maneuver
+            offRouteCount = 0;
+            navDbg(d, 'on-route');
+            guidanceUpdate(here);
+            return;
+        }
         // OFF route: do NOT keep speaking the OLD route's turns — they point back to the old line and felt
         // like being "pulled back" (Doc 2026-06-23). Show a recompute hint and route afresh to the dest ASAP.
+        offRouteCount++;
+        navDbg(d, 'OFF ' + offRouteCount + '/' + OFFROUTE_CONSEC + (cooling ? ' · cooldown' : ''));
+        if (offRouteCount < OFFROUTE_CONSEC) return;                 // hysteresis: ignore a brief excursion / GPS jitter
         showRecomputeBanner();
         if (cooling) return;                                         // throttle the OSRM calls (weaving)
         rerouting = true;
-        computeRoute([here[0], here[1]], true).finally(() => { rerouting = false; });
+        // Depart in the actual travel direction (when we have a trustworthy heading) so the new route never
+        // begins with a U-turn back onto the rejected line ("bitte wenden" unterbunden — Doc 2026-06-24).
+        computeRoute([here[0], here[1]], true, travelBrg).finally(() => { rerouting = false; });
     }
 
     // ---- Turn-by-turn guidance (spoken + on-screen banner) ----
@@ -475,6 +498,13 @@ window.TrackerNav = function (ctx) {
         const dLat = (b[0] - a[0]) * t, dLng = (b[1] - a[1]) * t;
         const x = Math.sin(dLat / 2) ** 2 + Math.cos(a[0] * t) * Math.cos(b[0] * t) * Math.sin(dLng / 2) ** 2;
         return 2 * R * Math.asin(Math.sqrt(x));
+    }
+    // Initial bearing (deg, 0=N) from a=[lat,lng] to b=[lat,lng] — the live travel heading for reroutes.
+    function bearingDeg(a, b) {
+        const t = Math.PI / 180;
+        const y = Math.sin((b[1] - a[1]) * t) * Math.cos(b[0] * t);
+        const x = Math.cos(a[0] * t) * Math.sin(b[0] * t) - Math.sin(a[0] * t) * Math.cos(b[0] * t) * Math.cos((b[1] - a[1]) * t);
+        return (Math.atan2(y, x) / t + 360) % 360;
     }
 
     // OSRM maneuver (type + modifier + road name) → a short German instruction. We map the data;
