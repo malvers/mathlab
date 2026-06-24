@@ -557,6 +557,7 @@ window.TrackerNav = function (ctx) {
         const t = man.type, mod = man.modifier;
         if (t === 'new name' || t === 'notification') return true;
         if (t === 'continue' && (!mod || mod === 'straight')) return true;
+        if (t === 'turn' && mod === 'straight') return true;   // geradeaus, nur Straßenname wechselt → keine Ansage ("Geradeaus weiter auf X" war der choppy Spam)
         return false;
     }
 
