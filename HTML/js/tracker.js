@@ -2347,6 +2347,25 @@ ${pts}
                 if (trkState === 'idle') beginTracking();
                 else if (__nav && __nav.hasDestination()) __nav.startNavigation();
             },
+            // ---- Cross-device nav prefs (Home + recent destinations) → public.nav_prefs, one row per user,
+            //      RLS auth.uid()=user_id (same isolation as tracks). Roams under the SAME sync code only.
+            //      All cloud failures are swallowed → localStorage stays the working store, sync is a bonus.
+            cloudPrefsLoad: async () => {
+                try {
+                    const c = await ensureSb(); if (!c) return null;
+                    const { data } = await c.from('nav_prefs').select('home, history').maybeSingle();
+                    return data || null;
+                } catch (e) { return null; }
+            },
+            cloudPrefsSave: async (patch) => {
+                try {
+                    const c = await ensureSb(); if (!c) return;
+                    const { data: { user } } = await c.auth.getUser(); if (!user) return;
+                    await c.from('nav_prefs').upsert(
+                        Object.assign({ user_id: user.id, updated_at: new Date().toISOString() }, patch),
+                        { onConflict: 'user_id' });
+                } catch (e) { /* offline / table not migrated yet → localStorage still holds it */ }
+            },
         });
         // ---- Speed-limit sign → js/tracker-speedlimit.js. Position-driven (fed from onPosition),
         //      independent of navigation; owns its own #speed-sign badge. ----
