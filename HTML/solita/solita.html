@@ -416,7 +416,7 @@
             background: rgba(255, 255, 255, 0.04);
             border: 1px solid rgba(255, 255, 255, 0.12);
             border-radius: 10px;
-            padding: 10px 20px;
+            padding: 10px 60px 10px 20px;   /* extra right padding so text clears the inline Pssst icon */
             color: #e6edf3;
             font-family: 'Helvetica', 'Arial', sans-serif;
             font-size: 1.15rem;
@@ -430,6 +430,27 @@
             line-height: 1.45;
             box-sizing: border-box;
         }
+
+        /* Quiet/„Pssst" toggle — the ICE/airport quiet-zone pictogram (profile head + shushing hand), placed
+           INSIDE the input line on the right (overlaid on the textarea). White, big, bold; dim when off,
+           full-white when quiet is ON (Doc 2026-06-24). */
+        .quiet-btn {
+            position: absolute;
+            right: 38px;
+            bottom: 15px;
+            z-index: 5;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0;
+            font-size: 25px;
+            line-height: 1;
+            opacity: 0.4;
+            transition: opacity 0.15s ease, transform 0.1s ease;
+        }
+        .quiet-btn:hover { opacity: 0.7; }
+        .quiet-btn.active { opacity: 1; }
+        .quiet-btn:active { transform: scale(0.92); }
 
         .message-input:focus {
             outline: none;
@@ -715,6 +736,10 @@
             <textarea class="message-input" id="messageInput" rows="1"
                 placeholder="Du hast sicher Fragen ... schreib sie hier!"
                 aria-label="Deine Nachricht an die KI"></textarea>
+            <!-- Quiet/„Pssst": when active Solita answers in writing only (no TTS). Tipping or a Slumber-tap
+                 turns it on automatically; speaking turns it off. Click toggles it manually. -->
+            <button id="solita-quiet" class="quiet-btn" type="button" title="Stumm — Solita antwortet nur schriftlich"
+                aria-label="Stumm an/aus" aria-pressed="false">🤫</button>
         </div>
 
     </div>
@@ -740,6 +765,7 @@
                 '../js/solita-delete-notes.js', // tool: delete_notes (two-step confirm)
                 '../js/solita-read-md.js',      // tool: read_markdown (public repo .md)
                 '../js/solita-time.js',         // tool: get_time
+                '../js/solita-engine.js',       // tool: start_engine / stop_engine (Pagode remote — Solita_goes_Pagode.md)
                 '../js/solita-tts.js',          // voice: dictate + read answers aloud
                 '../js/ear.js',                 // wake-word listener core
                 '../js/solita-wake.js'          // wake-word "Solita" (hands-free)

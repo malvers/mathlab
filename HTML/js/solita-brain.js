@@ -17,6 +17,34 @@
 //   const restored = brain.load();   // host renders the restored bubbles (or null if none)
 //   brain.send('wie ist das Wetter in Altea');
 (function () {
+    // Transient HTTP statuses worth retrying with backoff: rate-limit (429) + server/overload (5xx, 529).
+    // Anthropic returns 529 "Overloaded" at capacity spikes — a brief retry rides it out instead of a red toast.
+    const RETRY_STATUS = { 429: 1, 500: 1, 502: 1, 503: 1, 504: 1, 529: 1 };
+    const MAX_RETRIES  = 3;   // retries AFTER the first attempt → up to 4 total tries
+
+    // Promise that resolves after `ms`, or rejects with an AbortError if the turn is cancelled mid-wait
+    // (tap-to-stop). The AbortError path is treated as a clean cancel upstream (no error bubble).
+    function backoffSleep(ms, signal) {
+        // Plain Error tagged 'AbortError' (not DOMException) so send()'s catch treats a mid-wait cancel
+        // as a clean stop — and avoids leaning on a browser global the linter doesn't know.
+        function abortErr() { const e = new Error('Aborted'); e.name = 'AbortError'; return e; }
+        return new Promise(function (resolve, reject) {
+            if (signal && signal.aborted) { reject(abortErr()); return; }
+            const t = setTimeout(resolve, ms);
+            if (signal) signal.addEventListener('abort', function () {
+                clearTimeout(t); reject(abortErr());
+            }, { once: true });
+        });
+    }
+
+    // Exponential backoff with jitter; honour a numeric Retry-After (seconds) when the server sends one.
+    function backoffDelay(attempt, retryAfter) {
+        const ra = parseFloat(retryAfter);
+        if (retryAfter && isFinite(ra) && ra > 0) return Math.min(ra * 1000, 10000);
+        const base = 500 * Math.pow(2, attempt);            // 500 → 1000 → 2000 ms
+        return base + base * 0.3 * Math.random();           // +0–30% jitter so parallel clients de-sync
+    }
+
     function Brain(cfg) {
         cfg = cfg || {};
         // ---- config: host wiring (all the app-specific seams) ----
@@ -158,20 +186,36 @@
         }
 
         async function callModel(msgs, pwd) {
-            const response = await fetch(resolveUrl(getModel()), {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'apikey': anonKey, 'Authorization': 'Bearer ' + anonKey, 'x-app-pass': pwd },
-                body: JSON.stringify({ model: getModel(), messages: msgs, tools: getTools(), max_tokens: 3000 }),
-                signal: inFlight ? inFlight.signal : undefined   // lets abort() cancel the turn mid-flight
-            });
-            if (!response.ok) {
+            for (let attempt = 0; ; attempt++) {
+                const response = await fetch(resolveUrl(getModel()), {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'apikey': anonKey, 'Authorization': 'Bearer ' + anonKey, 'x-app-pass': pwd },
+                    body: JSON.stringify({ model: getModel(), messages: msgs, tools: getTools(), max_tokens: 3000 }),
+                    signal: inFlight ? inFlight.signal : undefined   // lets abort() cancel the turn mid-flight
+                });
+                if (response.ok) return await response.json();
+
+                // Auth / billing are user-fixable, not transient → surface at once, never retry.
+                if (response.status === 401) throw new Error('Falsches Passwort');
+                if (response.status === 402) throw new Error('Nicht genug Guthaben – AI-Konto aufladen');
+
+                // Overload / rate-limit / server hiccup → back off and try again a few times before giving up.
+                if (RETRY_STATUS[response.status] && attempt < MAX_RETRIES) {
+                    const wait = backoffDelay(attempt, response.headers.get('retry-after'));
+                    try { if (window.DebugWindow) DebugWindow.log('brain: HTTP ' + response.status + ' → retry ' + (attempt + 1) + '/' + MAX_RETRIES + ' in ' + Math.round(wait) + ' ms'); } catch (e) { }
+                    await backoffSleep(wait, inFlight ? inFlight.signal : null);   // throws AbortError if cancelled mid-wait
+                    continue;
+                }
+
+                // Out of retries (or a non-retryable status) → real failure.
                 let err = 'Fehler ' + response.status;
-                if (response.status === 401) err = 'Falsches Passwort';
-                else if (response.status === 402) err = 'Nicht genug Guthaben – AI-Konto aufladen';
-                else { try { const e = await response.json(); if (e && e.error) err += ' — ' + e.error; } catch (_) { } }
-                throw new Error(err);
+                try { const e = await response.json(); if (e && e.error) err += ' — ' + e.error; } catch (_) { }
+                const e2 = new Error(err);
+                // A transient status that survived all retries = the model is genuinely overloaded right now.
+                // Tag it so the host can answer in Solita's own voice instead of a raw red error toast.
+                if (RETRY_STATUS[response.status]) e2.overloaded = true;
+                throw e2;
             }
-            return await response.json();
         }
 
         async function executeToolRound(msgs, blocks, textOut, pwd) {
@@ -237,8 +281,16 @@
             } catch (err) {
                 conversationHistory.pop();   // drop the user turn on failure
                 onTyping(false);
-                // A user-triggered abort (tap-to-stop) is NOT an error → clean up quietly, no red bubble.
-                if (!(err && err.name === 'AbortError')) onError(err);
+                if (err && err.name === 'AbortError') {
+                    // A user-triggered abort (tap-to-stop) is NOT an error → clean up quietly, no bubble.
+                } else if (err && err.overloaded) {
+                    // Model overloaded after every retry → answer in Solita's voice, not a red error toast.
+                    const msg = 'Mein Gehirn ist im Moment überlastet. Gib mir bitte eine Minute.';
+                    onAssistant(msg);
+                    onSpeak(msg);
+                } else {
+                    onError(err);
+                }
             } finally {
                 inFlight = null;
                 onDone();
@@ -283,6 +335,17 @@
         self.getHistory = function () { return conversationHistory; };
         self.getSummary = function () { return runningSummary; };
         self.setState = setState;
+        // Record an out-of-band exchange (search / photo / costs — these render via the host's pre-intercept and
+        // bypass send(), so without this they'd be MISSING from the synced log → devices diverge). Pushes both
+        // turns into the shared history + persists + syncs, exactly like a normal turn (Doc 2026-06-23).
+        self.appendExchange = function (userText, assistantText) {
+            if (!userText && !assistantText) return;
+            conversationHistory.push({ role: 'user', content: String(userText || '') });
+            conversationHistory.push({ role: 'assistant', content: String(assistantText || '') });
+            saveHistory();
+            onPersist();        // → SolitaSync.push: the exchange now reaches the other device
+            maybeSummarize();   // keep the log bounded (best-effort)
+        };
     }
 
     window.Brain = Brain;
