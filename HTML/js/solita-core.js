@@ -705,10 +705,26 @@
         messageInput.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
+                window.__solitaTyped = true;   // typed submit → quiet (no TTS) for this turn
                 sendMessage();
             }
         });
-        sendButton.addEventListener('click', sendMessage);
+        sendButton.addEventListener('click', function () { window.__solitaTyped = true; sendMessage(); });
+
+        // ---- Quiet/„Pssst" mode (Doc 2026-06-24): when ON, Solita answers in writing only (speakReply is
+        // gated on window.solitaQuiet in solita-tts.js). It auto-follows modality each turn — TYPING turns it
+        // ON, SPEAKING turns it OFF — a Slumber-tap forces it ON (silent wake), and the 🤫 icon toggles it.
+        window.solitaQuiet = false;
+        window.solitaSetQuiet = function (on) {
+            window.solitaQuiet = !!on;
+            const btn = document.getElementById('solita-quiet');
+            if (btn) { btn.classList.toggle('active', window.solitaQuiet); btn.setAttribute('aria-pressed', window.solitaQuiet ? 'true' : 'false'); }
+            if (window.solitaQuiet && window.solitaStopSpeaking) window.solitaStopSpeaking();   // turning quiet on → hush now
+        };
+        (function () {
+            const qb = document.getElementById('solita-quiet');
+            if (qb) qb.addEventListener('click', function () { window.solitaSetQuiet(!window.solitaQuiet); });
+        })();
 
         // ---- Paste an image into the input line → Solita "sees" it (Doc 2026-06-23). Images ALWAYS go to Gemini,
         // never to Claude (cheap multimodal; Gemini's text answer then enters the Claude chat context). Text/LaTeX
@@ -1235,6 +1251,7 @@
                 if (window.speakReply) window.speakReply(res.text);
                 recordMediaTurn('user', userText);
                 recordMediaTurn('assistant', 'Foto-Beschreibung: ' + res.text);
+                brain.appendExchange(userText, res.text);   // into the SHARED log → other device sees it too (Bild bleibt lokal)
             } catch (e) {
                 hideTyping();
                 addMessage('assistant', '❌ Konnte das Foto nicht beschreiben: ' + ((e && e.message) || e));
@@ -1321,6 +1338,7 @@
                 if (window.speakReply) window.speakReply(res.text);   // answer spoken; sources only shown
                 recordMediaTurn('user', userText);     // remember this exchange so the NEXT search resolves „er/das"
                 recordMediaTurn('assistant', res.text);
+                brain.appendExchange(userText, res.text);   // into the SHARED log → other device sees it too
             } catch (e) {
                 hideTyping();
                 addMessage('assistant', '❌ Suche fehlgeschlagen: ' + ((e && e.message) || e));
@@ -1352,6 +1370,7 @@
                 if (d.html) addTrustedHtmlMessage(d.html);   // the nice table — same one as the daily mail
                 else addMessage('assistant', d.body || '(keine Kostendaten)');
                 if (window.speakReply) window.speakReply('Hier eine Zusammenstellung der Kosten der letzten 24 Stunden.');
+                brain.appendExchange(userText, d.body || '(Kostenübersicht)');   // into the SHARED log → other device sees it too
             } catch (e) {
                 hideTyping();
                 addMessage('assistant', '❌ Kosten konnten nicht geladen werden: ' + ((e && e.message) || e));
@@ -1373,6 +1392,10 @@
         async function sendMessage() {
             let userText = messageInput.value.trim();
             const pwd = getPwd();
+
+            // Quiet/„Pssst": a TYPED submit answers silently, a VOICE submit speaks. Reset the flag each turn.
+            if (window.solitaSetQuiet) window.solitaSetQuiet(!!window.__solitaTyped);
+            window.__solitaTyped = false;
 
             // A pasted image takes priority → ALWAYS Gemini (typed text, if any, is the question about it).
             // Works with no text too, so don't fall into the empty-input return below.

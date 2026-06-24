@@ -70,8 +70,8 @@
                 // BELT (native): the real fix is the native lifecycle, but while Solita speaks make doubly sure
                 // the Vosk recognizer isn't holding the mic — stop it before TTS so it can't hear her own voice.
                 try { window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.SolitaVoice && window.Capacitor.Plugins.SolitaVoice.setListening({ listen: false }); } catch (e) { }
-                if (typeof _speak === 'function') _speak(text);
-                if (window.solitaPhase) solitaPhase('speaking');
+                if (typeof _speak === 'function') _speak(text);   // no-ops in quiet mode (gated inside _speak)
+                if (!window.solitaQuiet && window.solitaPhase) solitaPhase('speaking');   // no „spricht …" when muted
                 const resume = () => {
                     ear.unsuspend();   // unconditional, matching the old `speaking = false;` (clears mute even if off)
                     // Turn-loop: while a conversation is open, reopen the ear after EVERY reply (no "Solita"
