@@ -63,6 +63,18 @@
         .btn-connect { width: 100%; background: var(--panel); color: var(--ink); border: 1px solid #2c4a86; }
         .btn-connect.connected { background: var(--red); }
 
+        /* secondary action: get the native APK (BLE without the HTTPS/secure-context constraint). */
+        .btn-download {
+            display: block; width: 100%; text-align: center; text-decoration: none;
+            background: var(--panel); color: var(--ink); border: 1px solid #2c4a86;
+            padding: 16px; border-radius: 12px; font-family: 'Orbitron', sans-serif;
+            font-weight: 800; letter-spacing: 2px; font-size: 14px;
+            transition: transform .05s, filter .15s;
+        }
+        .btn-download:hover { filter: brightness(1.12); }
+        .btn-download:active { transform: scale(0.97); }
+        .btn-download small { display: block; font-weight: 400; letter-spacing: 1px; font-size: 10px; color: var(--muted); margin-top: 4px; text-transform: none; }
+
         .card {
             background: var(--panel); border-radius: 14px; padding: 14px;
             display: flex; flex-direction: column; gap: 10px;
@@ -130,21 +142,18 @@
             Web Bluetooth (Chrome/Android/Desktop) <b>oder</b> APK (BLE-Plugin) — automatisch erkannt.<br>
             Protokoll: Service <code>0xFFE0</code> · Char <code>0xFFE1</code> · Befehle <code>A0…</code>
         </div>
+
+        <a class="btn-download" href="doc-alvers-pagode.apk" download="doc-alvers-pagode.apk">⬇ APK HERUNTERLADEN<small>native App — Bluetooth ohne HTTPS, läuft auch im Auto</small></a>
     </div>
 
+    <!-- shared BLE protocol + transport (single source for both Pagode pages + the APK) -->
+    <script src="js/pagode-ble.js"></script>
     <script>
         'use strict';
 
-        // ---- CONFIG — SH-HC-08 standard; verify on the real module --------------------------------------------
-        const CFG = {
-            SERVICE: 0xffe0, SERVICE_STR: '0000ffe0-0000-1000-8000-00805f9b34fb',
-            CHAR: 0xffe1, CHAR_STR: '0000ffe1-0000-1000-8000-00805f9b34fb',
-            CMD: {
-                K1_ON: [0xA0, 0x01, 0x01, 0xA2], K1_OFF: [0xA0, 0x01, 0x00, 0xA1],
-                K2_ON: [0xA0, 0x02, 0x01, 0xA3], K2_OFF: [0xA0, 0x02, 0x00, 0xA2]
-            },
-            PULSE_MS: 900   // momentary pulse length (crank / stop)
-        };
+        // ---- protocol + BLE transport live in the shared single source js/pagode-ble.js ----------------------
+        const CFG = PagodeBLE.CFG;   // FFE0/FFE1 + A0 relay commands
+        const PULSE_MS = 900;        // momentary pulse length (crank / stop) — page policy
 
         // ---- tiny log + status UI ----------------------------------------------------------------------------
         const logEl = document.getElementById('log');
@@ -162,62 +171,8 @@
         const hex = (a) => a.map(b => b.toString(16).padStart(2, '0').toUpperCase()).join(' ');
         const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 
-        // ---- BLE transport: pick native plugin in the APK, Web Bluetooth in the browser ----------------------
-        const isNative = !!(window.Capacitor && typeof window.Capacitor.isNativePlatform === 'function'
-            && window.Capacitor.isNativePlatform());
-
-        let backend = null;   // { connect(), write(bytes), disconnect() }
-
-        // --- Web Bluetooth (Chrome / Android / Desktop) ---
-        function webBackend() {
-            let device = null, characteristic = null;
-            return {
-                name: 'Web Bluetooth',
-                async connect() {
-                    device = await navigator.bluetooth.requestDevice({
-                        acceptAllDevices: true, optionalServices: [CFG.SERVICE]
-                    });
-                    device.addEventListener('gattserverdisconnected', () => {
-                        characteristic = null; setStatus('', 'getrennt'); markConnected(false); log('Verbindung getrennt', 'err');
-                    });
-                    const server = await device.gatt.connect();
-                    const service = await server.getPrimaryService(CFG.SERVICE);
-                    characteristic = await service.getCharacteristic(CFG.CHAR);
-                    return device.name || 'Relais-Modul';
-                },
-                async write(bytes) {
-                    if (!characteristic) throw new Error('nicht verbunden');
-                    const data = new Uint8Array(bytes);
-                    // FFE1 is usually write-with-response; fall back to without-response if needed.
-                    if (characteristic.properties.write) await characteristic.writeValue(data);
-                    else await characteristic.writeValueWithoutResponse(data);
-                },
-                async disconnect() { try { device && device.gatt.connected && device.gatt.disconnect(); } catch (e) {} }
-            };
-        }
-
-        // --- Capacitor @capacitor-community/bluetooth-le (the APK) ---
-        // Implemented best-effort against the registered plugin; VERIFY when wrapping the APK (Solita_goes_Pagode.md §5.1).
-        function nativeBackend() {
-            const Ble = window.Capacitor.Plugins.BluetoothLe;
-            let deviceId = null;
-            const toB64 = (bytes) => btoa(String.fromCharCode.apply(null, bytes));   // plugin wants base64 value
-            return {
-                name: 'Capacitor BLE-Plugin',
-                async connect() {
-                    await Ble.initialize();
-                    const r = await Ble.requestDevice({ optionalServices: [CFG.SERVICE_STR] });
-                    deviceId = r.deviceId;
-                    await Ble.connect({ deviceId });
-                    return r.name || 'Relais-Modul';
-                },
-                async write(bytes) {
-                    if (!deviceId) throw new Error('nicht verbunden');
-                    await Ble.write({ deviceId, service: CFG.SERVICE_STR, characteristic: CFG.CHAR_STR, value: toB64(bytes) });
-                },
-                async disconnect() { try { deviceId && await Ble.disconnect({ deviceId }); } catch (e) {} }
-            };
-        }
+        // ---- BLE transport comes from the shared single source (js/pagode-ble.js) ----------------------------
+        let backend = null;   // { name, connect(), write(bytes), disconnect() } — from PagodeBLE.createBackend()
 
         // ---- wiring ------------------------------------------------------------------------------------------
         const btnConnect = document.getElementById('btn-connect');
@@ -246,12 +201,12 @@
             if (busy) return;
             const on = channel === 1 ? 'K1_ON' : 'K2_ON';
             const off = channel === 1 ? 'K1_OFF' : 'K2_OFF';
-            busy = true; setStatus('busy', 'Puls ' + CFG.PULSE_MS + ' ms…');
+            busy = true; setStatus('busy', 'Puls ' + PULSE_MS + ' ms…');
             try {
                 await backend.write(CFG.CMD[on]); log('TX ' + on + '  [' + hex(CFG.CMD[on]) + ']', 'tx');
-                await sleep(CFG.PULSE_MS);
+                await sleep(PULSE_MS);
                 await backend.write(CFG.CMD[off]); log('TX ' + off + '  [' + hex(CFG.CMD[off]) + ']', 'tx');
-                log('Puls Kanal ' + channel + ' fertig (' + CFG.PULSE_MS + ' ms)', 'ok');
+                log('Puls Kanal ' + channel + ' fertig (' + PULSE_MS + ' ms)', 'ok');
             } catch (e) {
                 log('Fehler beim Puls: ' + (e.message || e), 'err');
             } finally { busy = false; setStatus(connected ? 'on' : '', connected ? 'verbunden' : 'getrennt'); }
@@ -260,9 +215,10 @@
         btnConnect.addEventListener('click', async () => {
             if (connected) { await backend.disconnect(); markConnected(false); setStatus('', 'getrennt'); log('getrennt'); return; }
             // build the right backend (user gesture → requestDevice is allowed here)
-            if (isNative) backend = nativeBackend();
-            else if (navigator.bluetooth) backend = webBackend();
-            else { log('Web Bluetooth nicht verfügbar — braucht HTTPS oder localhost + Chrome (Android/Desktop), nicht Safari/iOS. Über http://LAN-IP geht es NICHT.', 'err'); return; }
+            backend = PagodeBLE.createBackend({
+                onDisconnect() { setStatus('', 'getrennt'); markConnected(false); log('Verbindung getrennt', 'err'); }
+            });
+            if (!backend) { log('Web Bluetooth nicht verfügbar — braucht HTTPS oder localhost + Chrome (Android/Desktop), nicht Safari/iOS. Über http://LAN-IP geht es NICHT.', 'err'); return; }
             setStatus('busy', 'verbinde…'); log('verbinde via ' + backend.name + '…');
             try {
                 const name = await backend.connect();
@@ -275,7 +231,7 @@
         document.querySelectorAll('[data-cmd]').forEach(b => b.addEventListener('click', () => send(b.dataset.cmd)));
         document.querySelectorAll('[data-pulse]').forEach(b => b.addEventListener('click', () => pulse(Number(b.dataset.pulse))));
 
-        log('Bereit. Transport: ' + (isNative ? 'Capacitor BLE-Plugin (APK)' : (navigator.bluetooth ? 'Web Bluetooth (Browser)' : 'KEINER — kein BLE')) + '.');
+        log('Bereit. Transport: ' + (PagodeBLE.isNative ? 'Capacitor BLE-Plugin (APK)' : (navigator.bluetooth ? 'Web Bluetooth (Browser)' : 'KEINER — kein BLE')) + '.');
     </script>
 </body>
 
