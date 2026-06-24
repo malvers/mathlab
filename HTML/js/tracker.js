@@ -508,6 +508,8 @@
         let __fuel = null;         // fuel-station price layer (js/tracker-fuel.js)
         let __poi = null;          // points-of-interest layer (js/tracker-poi.js)
         let __traffic = null;      // live Autobahn traffic layer (js/tracker-traffic.js)
+        let __sim = null;          // desk navigation simulator (js/tracker-navsim.js), only with ?sim=1
+        let simMode = false;       // true while the simulator drives synthetic fixes → suppress cloud sync/broadcast
         let gnssActive = false;    // true once the native GnssStatus listener delivers data
         let gnssLatest = null;     // last native GNSS summary {used, inView, usedByConstellation, ...}
         let gpsReal = false;       // true only on a genuine GPS fix (native sats used, or acc ≤ GPS) —
@@ -860,7 +862,7 @@
                     track.push(here); times.push(stamp); alts.push(altVal); speeds.push(spdVal); activities.push(actVal); temps.push(lastTemp); redrawTrack();
                 }
             }
-            if (track.length !== ptsBefore) {
+            if (track.length !== ptsBefore && !simMode) {   // sim: keep the drawn track local — never buffer/sync/broadcast fake fixes
                 if (typeof TrackBuffer !== 'undefined') TrackBuffer.save(bufferSnapshot());
                 scheduleSync(); // Stage 2: push to the cloud on the fly
                 if (liveOn) broadcastLive(); // Stage 3: live position to viewers
@@ -2367,6 +2369,17 @@ ${pts}
             speed: __speed, nav: __nav, voice: (window.SolitaVoice || null),
             apiUrl: SUPABASE_URL, apiKey: SUPABASE_KEY,   // Phase 2: TomTom proxy (abroad only; graceful until deployed)
         }) : null;
+        // ---- Desk navigation simulator → js/tracker-navsim.js. Only with ?sim=1 in the URL. Feeds synthetic
+        //      GPS fixes through the REAL onPosition pipeline (so reroute/guidance behave 1:1), while simMode
+        //      suppresses cloud sync/broadcast so no fake data ever reaches Supabase. ----
+        if (typeof TrackerNavSim !== 'undefined' && /[?&]sim(=1|=true)?(&|$)/.test(location.search)) {
+            __sim = TrackerNavSim({
+                map, $, toast, nav: __nav,
+                feed: (pos) => onPosition(pos),                  // synthetic W3C position → full real pipeline
+                setSim: (on) => { simMode = !!on; },             // gate cloud side-effects while driving
+                curPos: () => { const ll = posMarker && posMarker.getLatLng && posMarker.getLatLng(); return ll ? [ll.lat, ll.lng] : null; },
+            });
+        }
         // VERKEHR now lives as a POI category ("Verkehr") — its checkbox reflects/sets __traffic.enabled
         // (wired in the POI panel block below). The module self-restores its enabled flag from localStorage.
         // ===============================================================
