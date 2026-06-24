@@ -46,7 +46,7 @@ window.TrackerPoi = function (ctx) {
 
     const dbg = (m) => { if (window.DebugWindow && DebugWindow.log) DebugWindow.log('poi: ' + m); };
 
-    let layer = null, busy = false, lastFetch = 0, lastBox = '', tmr = null;
+    let layer = null, busy = false, lastFetch = 0, lastBox = '', tmr = null, shown = {};
     function ensureLayer() { if (!layer) layer = L.layerGroup().addTo(map); return layer; }
 
     function on(id) { const v = localStorage.getItem(id); return v == null ? CATS[id].def : v === '1'; }
@@ -92,10 +92,17 @@ window.TrackerPoi = function (ctx) {
             + '<button id="poi-nav-btn" type="button">Bring mich hin</button></div>';
     }
 
+    // Diff-render: KEEP markers that are still present, only add new ones and remove the gone ones. Destroying
+    // + recreating every pin on each refresh (and wiping ALL of them on a soft/empty Overpass response) made
+    // them flicker / vanish — speed cameras especially (Doc 2026-06-24). `shown` maps a stable POI id → marker.
     function render(items) {
         const lyr = ensureLayer();
-        lyr.clearLayers();
-        for (const p of items) {
+        const next = {};
+        for (const p of items) next[p.id] = p;
+        for (const id in shown) { if (!next[id]) { lyr.removeLayer(shown[id]); delete shown[id]; } } // gone → remove
+        for (const id in next) {
+            if (shown[id]) continue;                       // already on the map → leave it put (no flicker)
+            const p = next[id];
             const c = CATS[catOf(p.tags)];
             const m = L.marker([p.lat, p.lng], { icon: pin(c), keyboard: false }).bindPopup(popupHtml(p), { className: 'poi-pop' });
             m.on('popupopen', () => {
@@ -103,8 +110,10 @@ window.TrackerPoi = function (ctx) {
                 if (b) b.onclick = () => { map.closePopup(); if (navigateTo) navigateTo([p.lat, p.lng], p.name); };
             });
             m.addTo(lyr);
+            shown[id] = m;
         }
     }
+    function clearAllPois() { if (layer) layer.clearLayers(); shown = {}; }
 
     function bboxStr() {
         const b = map.getBounds();
@@ -119,7 +128,7 @@ window.TrackerPoi = function (ctx) {
 
     async function fetchPois() {
         const cats = enabledCats().filter((id) => !CATS[id].local && !CATS[id].module); // local (Feen) + module (Verkehr) cats aren't Overpass
-        if (!cats.length) { if (layer) layer.clearLayers(); return; }
+        if (!cats.length) { clearAllPois(); return; }
         // Below MIN_ZOOM the area is too big to query — but DON'T wipe the pins (FEAT-21's idle re-fit
         // zooms out to the whole track; clearing here made the POIs "disappear"). Keep them, skip fetching.
         if (map.getZoom() < MIN_ZOOM) { dbg('zoom<' + MIN_ZOOM + ' → keep pins, skip fetch'); return; }
@@ -128,13 +137,17 @@ window.TrackerPoi = function (ctx) {
         busy = true; lastBox = box; lastFetch = Date.now();
         try {
             const r = await fetch(ENDPOINT, { method: 'POST', body: 'data=' + encodeURIComponent(buildQuery(cats, box)) });
+            if (!r.ok) { dbg('HTTP ' + r.status + ' → Pins behalten'); return; }                 // server error → don't wipe
             const d = await r.json().catch(() => ({}));
-            const items = (d.elements || []).map((e) => {
+            // Overpass signals timeout/rate-limit with a `remark` (HTTP 200, no/partial `elements`). Rendering
+            // that as "empty" wiped ALL pins → the flicker. Only render a response we trust (real elements array).
+            if (d.remark || !Array.isArray(d.elements)) { dbg('Overpass remark/leer → Pins behalten' + (d.remark ? ': ' + d.remark : '')); return; }
+            const items = d.elements.map((e) => {
                 const lat = e.lat != null ? e.lat : (e.center && e.center.lat);
                 const lng = e.lon != null ? e.lon : (e.center && e.center.lon);
                 if (lat == null || lng == null) return null;
                 const t = e.tags || {};
-                return { lat, lng, tags: t, name: t.name || typeLabel(t), type: typeLabel(t) };
+                return { id: (e.type || 'n') + '/' + e.id, lat, lng, tags: t, name: t.name || typeLabel(t), type: typeLabel(t) };
             }).filter(Boolean);
             dbg('got ' + items.length + ' POIs (' + cats.length + ' cats)');
             render(items);
