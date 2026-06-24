@@ -55,10 +55,15 @@ Der Zündschlüssel bleibt in Stellung **ON** (Zündung + Benzinpumpe laufen). D
 
 ## 3. Hardware — Einkaufsliste
 
-### 3.1 Das Gehirn — 2-Kanal **BLE**-Relaismodul
-[DSD TECH 2-Kanal Bluetooth 4.0 BLE Relay-Modul](https://www.amazon.de/-/en/2-channel-Bluetooth-module-iPhone-Android/dp/B07MCBX6F1)
-- Echtes **BLE** → Web-Bluetooth-App im Handy-Browser kann direkt drauf (SPP-Module können das nicht).
-- 2 Kanäle mit **NO / COM / NC** → START über NO, STOPP über NC.
+### 3.1 Das Gehirn — 2-Kanal **BLE**-Relaismodul ✅ BESTELLT (2026-06-24)
+[DSD TECH 2-Kanal Bluetooth 4.0 BLE Relay-Modul (12V)](https://www.amazon.de/2-Channel-Bluetooth-Module-iPhone-Android/dp/B0DPLCRJ98) — €16,99
+*(alte ASIN B07MCBX6F1 war ausgelistet → diese ist die aktuelle.)*
+- Echtes **BLE 4.0** (kein SPP/Classic) → von Chrome (Web Bluetooth) **und** von einem nativen BLE-Plugin ansprechbar.
+- Verbauter Chip: **SH-HC-08** (DSD TECHs HM-10-BLE-Modul) → bekanntes Protokoll:
+  - Service-UUID **0xFFE0**, Write-Characteristic **0xFFE1**
+  - Relais-Befehle (A0-Serie): `A0 01 01 A2` = K1 ein, `A0 01 00 A1` = K1 aus, `A0 02 01 A3` = K2 ein, `A0 02 00 A2` = K2 aus — **am echten Modul gegenchecken**
+  - kein Pairing-PIN, keine Verschlüsselung
+- 2 Kanäle mit **NO / COM / NC** → START über NO (Kanal 1), STOPP über NC (Kanal 2).
 - Onboard-Relais 10 A — reicht, weil es nur das Bosch-Relais *ansteuert* (~0,2 A) bzw. die Zündspule schaltet (~4 A).
 
 ### 3.2 Der Muskel für Klemme 50 — Startrelais 70 A
@@ -101,11 +106,26 @@ der Anlasser. (Im Testmodus übersprungen, damit der Flow schnell durchläuft.)
 bestätigt „Pagode gestartet (Testmodus)". → **Genau das können wir JETZT schon testen**, bevor das BT-Modul da ist.
 
 **Wenn die Hardware da ist:**
-1. BLE-Protokoll des DSD-Moduls ermitteln (Datenblatt oder mit *nRF Connect* sniffen): `SERVICE_UUID`,
-   `CHAR_UUID`, Kommando-Bytes für Kanal 1/2 ON/OFF.
-2. Diese Werte in den `CONFIG`-Block von `solita-engine.js` eintragen.
-3. `CONFIG.SIM_MODE = false`.
-4. Koppel-Knopf einbauen (ruft `window.SolitaPagode.pair()` in einer User-Geste).
+1. Protokoll am echten Modul gegenchecken (sollte SH-HC-08-Standard sein: Service **0xFFE0**, Char **0xFFE1**,
+   A0-Befehle) — Datenblatt oder kurz mit *nRF Connect*.
+2. Werte in den `CONFIG`-Block von `solita-engine.js` (bzw. die APK-BLE-Schicht) eintragen, `SIM_MODE = false`.
+3. Koppel-Knopf einbauen (User-Geste → Pairing/Connect).
+
+### 5.1 App-Architektur — entschieden 2026-06-24
+
+Zwei BLE-Transporte, **gleiche** Befehls-Bytes + Timing:
+- **Web Bluetooth** (`navigator.bluetooth`) — nur im **Chrome-Browser** (Android/Desktop). Schneller Smoke-Test
+  ohne Build. **Geht NICHT** im APK-WebView.
+- **Capacitor + natives BLE-Plugin** (`@capacitor-community/bluetooth-le`, `BleClient`) — für die **APK**.
+  Capacitor bleibt, der ganze Web-/Solita-Code bleibt; nur der BT-Aufruf geht durch die native Brücke.
+  **Nicht** voll nativ (kein Kotlin-Neuschrieb, kein Android-Studio-from-scratch).
+
+Vorgehen:
+1. **Test-APK** (Capacitor) mit zwei Knöpfen **ON / OFF** → beweist Modul + Protokoll isoliert. Manuelle Fernbedienung.
+2. **Solita** erbt **dieselbe** BLE-Schicht (connect + `BleClient.write` mit A0-Befehlen). `start_engine` /
+   `stop_engine` lösen per Stimme genau das aus, was die Knöpfe tun. Solita = Sprach-Fernbedienung desselben Moduls.
+
+Beide reden mit **einem** Modul über **eine** BLE-Funktion — die APK ist der Prüfstand, dessen BLE-Teil Solita 1:1 übernimmt.
 
 ---
 
@@ -115,7 +135,10 @@ bestätigt „Pagode gestartet (Testmodus)". → **Genau das können wir JETZT s
 - [x] Hardware ausgewählt (DSD BLE 2-Kanal + Bosch 70 A)
 - [x] `solita-engine.js` gebaut — `start_engine` / `stop_engine`, **SIM_MODE an**
 - [x] in `solita.html` eingebunden → **im Testmodus sprechbar**
-- [ ] BT-Modul bestellt / eingetroffen *(Doc)*
-- [ ] BLE-Protokoll eintragen, `SIM_MODE=false`, Koppel-Knopf
+- [x] **BT-Modul bestellt** (2026-06-24 — DSD TECH 2-Kanal BLE, B0DPLCRJ98, SH-HC-08-Chip)
+- [ ] BT-Modul eingetroffen *(Doc)*
+- [ ] **Test-APK** (Capacitor) mit ON/OFF + BLE-Plugin bauen → Modul isoliert prüfen
+- [ ] Protokoll am echten Modul gegenchecken (FFE0/FFE1/A0)
+- [ ] Solita: `navigator.bluetooth` → `BleClient` (Plugin), Koppel-Knopf, `SIM_MODE=false`
 - [ ] im Auto verdrahten (Bosch-70A an Klemme 50, Kanal-2-NC in die Zündung)
 - [ ] erster echter Start 🎉
