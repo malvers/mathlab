@@ -82,6 +82,31 @@ window.TrackerNav = function (ctx) {
         try { const h = JSON.parse(localStorage.getItem(HOME_KEY) || 'null'); return (h && h.lat != null && h.lng != null) ? h : null; }
         catch (e) { return null; }
     }
+    // ---- Cloud sync of Home + destination history (public.nav_prefs, per user). localStorage stays the
+    //      working store; the cloud just lets the SAME account (same sync code) roam across devices/origins.
+    const cloudLoad = ctx.cloudPrefsLoad, cloudSave = ctx.cloudPrefsSave;
+    function pushHomeCloud() { if (cloudSave) cloudSave({ home: home || null }); }
+    function pushHistoryCloud() { if (cloudSave) cloudSave({ history: loadHistory() }); }
+    // On start: pull the cloud copy (it wins, so a phone-set Home shows up here). If the cloud is empty,
+    // seed it from whatever this device already has locally so the first device populates it.
+    async function hydrateFromCloud() {
+        if (!cloudLoad) return;
+        let row; try { row = await cloudLoad(); } catch (e) { return; }
+        if (!row) {
+            const lh = loadHome(), lhist = loadHistory();
+            if ((lh || (lhist && lhist.length)) && cloudSave) cloudSave({ home: lh || null, history: lhist || [] });
+            return;
+        }
+        if (row.home && row.home.lat != null && row.home.lng != null) {
+            home = row.home;
+            try { localStorage.setItem(HOME_KEY, JSON.stringify(home)); } catch (e) { }
+            refreshHome();
+        }
+        if (Array.isArray(row.history)) {
+            try { localStorage.setItem(HIST_KEY, JSON.stringify(row.history)); } catch (e) { }
+            renderHistory();
+        }
+    }
     // Keep the dialog's home hint in sync with whether a home is stored (the button itself lives in the
     // panel, so it's visible whenever the panel is open — no show/hide needed).
     function refreshHome() {
@@ -94,6 +119,7 @@ window.TrackerNav = function (ctx) {
         if (!destLatLng) { toast('Kein aktives Ziel — erst ein Ziel setzen, dann „Nach Hause" lang drücken.'); return; }
         home = { lat: destLatLng[0], lng: destLatLng[1], label: destLabel || 'Zuhause' };
         try { localStorage.setItem(HOME_KEY, JSON.stringify(home)); } catch (e) { }
+        pushHomeCloud();   // roam the new Home to the user's other devices (same sync code)
         toast('Als Zuhause gespeichert: ' + shortLabel(home.label));
         refreshHome();
         renderHistory();   // refresh the pinned "Nach Hause" row with the new home
@@ -221,11 +247,13 @@ window.TrackerNav = function (ctx) {
             h.label !== lab && haversine([h.lat, h.lng], [latlng[0], latlng[1]]) > 25);
         list.unshift({ lat: latlng[0], lng: latlng[1], label: lab, t: Date.now(), pin: !!pin });
         try { localStorage.setItem(HIST_KEY, JSON.stringify(list)); } catch (e) { }
+        pushHistoryCloud();   // roam the updated destination list to the user's other devices
         renderHistory();
     }
     function removeHistory(h) {
         const list = loadHistory().filter((x) => !(x.label === h.label && x.lat === h.lat && x.lng === h.lng));
         try { localStorage.setItem(HIST_KEY, JSON.stringify(list)); } catch (e) { }
+        pushHistoryCloud();   // roam the deletion to the user's other devices
         renderHistory();
     }
     // The home hint shown by the row's ⓘ as a toast (was a permanent line under the list — Doc 2026-06-21).
@@ -966,8 +994,9 @@ window.TrackerNav = function (ctx) {
     // Load the saved home + sync the hint. The "Nach Hause" action now lives as the pinned first row of
     // the history list (see homeRow) — tap to go, long-press to save — so there's no standalone button.
     (function initHome() {
-        home = loadHome();
+        home = loadHome();   // instant from localStorage …
         refreshHome();
+        hydrateFromCloud();  // … then let the cloud copy (same account) override / seed it
     })();
 
     // Voice toggle (persisted): default on, but the user can silence spoken guidance.
