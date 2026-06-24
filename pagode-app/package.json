@@ -2,19 +2,20 @@
   "name": "pagode-remote",
   "version": "1.0.0",
   "private": true,
-  "description": "Standalone Capacitor app: BLE remote for the Pagode (DSD TECH 2-channel BLE relay, SH-HC-08), two channels ON/OFF/pulse. Web UI is the single source HTML/pagode/pagode-remote.html; `npm run prep` copies it into www/ before sync. See ../Solita_goes_Pagode.md.",
+  "description": "Standalone Capacitor app: BLE remote for the Pagode (DSD TECH 2-channel BLE relay, SH-HC-08). Wrapped UI is the single source HTML/pagode/pagode.html (START/STOP car remote, snakeskin/gold); `npm run prep` copies page + js/pagode-ble.js + snakeskin.png into www/ before sync. See ../Solita_goes_Pagode.md.",
   "scripts": {
-    "prep": "cp ../HTML/pagode/pagode-remote.html www/index.html",
+    "prep": "mkdir -p www/js && cp ../HTML/pagode/pagode.html www/index.html && cp ../HTML/pagode/js/pagode-ble.js www/js/pagode-ble.js && cp ../HTML/pagode/snakeskin.png www/snakeskin.png",
     "cap:add": "npm run prep && npx cap add android",
     "cap:sync": "npm run prep && npx cap sync android",
     "cap:open": "npx cap open android"
   },
   "dependencies": {
+    "@capacitor-community/bluetooth-le": "^6.0.0",
     "@capacitor/android": "^6.0.0",
-    "@capacitor/core": "^6.0.0",
-    "@capacitor-community/bluetooth-le": "^6.0.0"
+    "@capacitor/core": "^6.0.0"
   },
   "devDependencies": {
+    "@capacitor/assets": "^3.0.5",
     "@capacitor/cli": "^6.0.0"
   }
 }

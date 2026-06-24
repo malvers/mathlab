@@ -1,11 +1,14 @@
 # Pagode Remote — Capacitor BLE Test-APK
 
 Kleine Standalone-App: **BLE-Fernbedienung** für das DSD TECH 2-Kanal BLE-Relais (SH-HC-08) der Pagode.
-Zwei Kanäle, je **EIN / AUS / PULS**. Gesamtkonzept & Elektrik: [`../Solita_goes_Pagode.md`](../Solita_goes_Pagode.md).
+Zwei große Knöpfe **START / STOP** im 230-SL-Look. Gesamtkonzept & Elektrik: [`../Solita_goes_Pagode.md`](../Solita_goes_Pagode.md).
 
-Die Web-UI ist **eine einzige Quelle**: [`../HTML/pagode/pagode-remote.html`](../HTML/pagode/pagode-remote.html)
-— die läuft auch direkt im **Chrome** (Web Bluetooth). `npm run prep` kopiert sie nach `www/index.html`,
-die APK wrappt also **genau die Seite**, die du im Browser testest. Kein zweiter Code.
+Die gewrappte UI ist **eine einzige Quelle**: [`../HTML/pagode/pagode.html`](../HTML/pagode/pagode.html)
+— läuft auch direkt im **Chrome** (Web Bluetooth). Die BLE-Schicht (Protokoll + beide Transporte) liegt
+geteilt in [`../HTML/pagode/js/pagode-ble.js`](../HTML/pagode/js/pagode-ble.js) und versorgt beide Pagode-Seiten
+**und** die APK. `npm run prep` kopiert Seite, JS **und** Snakeskin-Bild nach `www/`
+(→ `www/index.html` + `www/js/pagode-ble.js` + `www/snakeskin.png`),
+die APK wrappt also **genau** das, was du im Browser testest. Kein zweiter Code.
 
 ## Bauen (auf Docs Mac, JBR 21 — wie Tracker/Krass)
 
@@ -35,10 +38,11 @@ Innerhalb des `<manifest>`, vor `<application>`:
 
 ## ⚠️ Beim ersten APK-Lauf verifizieren
 
-Der **native** BLE-Pfad in der Seite (`nativeBackend`, `Capacitor.Plugins.BluetoothLe`) ist **best-effort**:
-das Wert-Encoding von `write` (base64 vs. hex) muss am echten Modul gegengecheckt werden. Falls die Relais
-nicht klacken → im Log die TX-Bytes prüfen und ggf. das Encoding in `pagode-remote.html` anpassen.
-Der **Web-Bluetooth-Pfad** (Chrome) ist davon unabhängig und der sichere Smoke-Test.
+Der **native** BLE-Pfad (`nativeBackend`, `Capacitor.Plugins.BluetoothLe`) in [`../HTML/pagode/js/pagode-ble.js`](../HTML/pagode/js/pagode-ble.js)
+ist **best-effort**: das Wert-Encoding von `write` (base64 vs. hex) muss am echten Modul gegengecheckt werden.
+Zum Verifizieren die **Diagnose-Seite** [`../HTML/pagode/pagode-remote.html`](../HTML/pagode/pagode-remote.html) nutzen
+(hat ein TX-Log) — sie teilt sich dieselbe BLE-Schicht. Falls die Relais nicht klacken → TX-Bytes im Log prüfen und
+ggf. das Encoding in `js/pagode-ble.js` anpassen. Der **Web-Bluetooth-Pfad** (Chrome) ist davon unabhängig und der sichere Smoke-Test.
 
 ## Plugin
 

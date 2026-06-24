@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>230 SL · Pagode</title>
+    <!-- Vintage typography (Doc explicitly asked for a vintage look → not Orbitron here):
+         Playfair Display = elegant 1960s Didone for the badge, Cinzel = engraved Roman caps for the knobs. -->
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Playfair+Display:ital,wght@0,500;0,700;1,500&display=swap" rel="stylesheet">
+    <style>
+        /* ---- Car version: two beautiful buttons (START / STOP) in a 1964 Mercedes 230 SL "Pagode" dashboard
+           style — ivory panel, chrome bezels, deep navy leather backdrop (no harsh black). Same BLE backend
+           (FFE0/FFE1, A0 commands) as the diagnostic page; the connect step is folded into the first press so
+           only the two knobs remain. ---- */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --navy: rgb(14, 36, 78);          /* deep vintage navy leather (project dark, not black) */
+            --navy-deep: rgb(8, 20, 42);
+            --ivory: #efe6cf;                 /* dashboard ivory */
+            --ivory-sh: #d9cda9;
+            --ink: #2b2a26;                   /* warm anthracite text */
+            --green: #6f9a34;                 /* φ-grün, vertieft */
+            --red: rgb(176, 36, 24);          /* Υ-rot */
+            --amber: rgb(245, 194, 66);       /* λ-orange (idiot light) */
+            --chrome-hi: #fdfefe;
+            --chrome: #c9cdd2;
+            --chrome-lo: #7b818a;
+            /* golden frames (knob rings + panel bezel) */
+            --gold-hi: #fff3d0;
+            --gold: #e7c873;
+            --gold-lo: #9c7a2e;
+            --gold-deep: #6e521d;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex; align-items: center; justify-content: center;
+            padding: 26px 16px; color: var(--ink);
+            font-family: 'Playfair Display', Georgia, serif;
+        }
+
+        /* ---- switchable backdrops — press "b" to cycle, choice persists ---- */
+        body.bg-navy {
+            background:
+                radial-gradient(120% 90% at 50% 8%, rgba(40, 64, 110, .55), transparent 60%),
+                radial-gradient(140% 120% at 50% 120%, rgba(0, 0, 0, .45), transparent 55%),
+                var(--navy);
+            background-attachment: fixed;
+        }
+        /* Sand leather (1960s Pagode interior). Uses a REAL leather photo when present at leder-sand.jpg;
+           until then a warm sand-grain CSS fallback shows. Drop the photo into HTML/pagode/ and it slots in. */
+        body.bg-sand {
+            background-color: #c9b487;
+            background-image:
+                url('leder-sand.jpg'),
+                radial-gradient(120% 110% at 50% 18%, #ddcb9f, transparent 55%),
+                radial-gradient(130% 120% at 50% 120%, rgba(90, 70, 40, .35), transparent 55%),
+                linear-gradient(0deg, #c3ad7e, #d4c293);
+            background-size: cover, auto, auto, auto;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+        }
+
+        .toast {
+            position: fixed; top: 16px; left: 50%; transform: translateX(-50%);
+            background: rgba(20, 14, 8, .88); color: var(--ivory);
+            font-family: 'Cinzel', serif; font-size: 11px; letter-spacing: 2px; text-transform: uppercase;
+            padding: 8px 16px; border-radius: 20px; border: 1px solid rgba(255, 255, 255, .16);
+            opacity: 0; transition: opacity .3s; pointer-events: none; z-index: 50;
+        }
+        .toast.show { opacity: 1; }
+
+        /* the dashboard panel — snakeskin fascia (real reptile-leather photo).
+           A soft dark overlay over the skin keeps the engraved cream text legible. */
+        .dash {
+            width: 100%; max-width: 400px;
+            background:
+                linear-gradient(180deg, rgba(8, 12, 20, .52), rgba(8, 12, 20, .24) 42%, rgba(8, 12, 20, .48)),
+                url('snakeskin.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            border-radius: 22px;
+            padding: 30px 26px 26px;
+            /* golden rim + soft depth */
+            box-shadow:
+                0 0 0 2px #7a611f,
+                0 0 0 7px var(--gold),
+                0 0 0 8px var(--gold-lo),
+                0 22px 50px rgba(0, 0, 0, .55),
+                inset 0 2px 6px rgba(255, 240, 205, .3);
+            text-align: center;
+        }
+
+        /* badge */
+        /* truly ENGRAVED (incised) gold lettering: dark shadow at the TOP edge (the cut recedes),
+           bright gold lip at the BOTTOM edge (catches the light) — the inverse of an embossed bevel. */
+        .badge-model { font-size: 38px; font-weight: 700; letter-spacing: 1px; line-height: 1; color: #ac8e45; text-shadow: 0 -1px 1px rgba(0, 0, 0, .95), 0 -2px 2px rgba(0, 0, 0, .45), 0 1px 0 rgba(255, 243, 205, .62); }
+        .badge-name {
+            font-family: 'Cinzel', serif; font-weight: 700; font-size: 15px; letter-spacing: 7px;
+            margin-top: 8px; color: #a98e49; padding-left: 7px; text-shadow: 0 -1px 1px rgba(0, 0, 0, .95), 0 1px 0 rgba(255, 240, 198, .58);
+        }
+        .badge-year { font-style: italic; font-size: 13px; color: #9f8650; margin-top: 4px; text-shadow: 0 -1px 1px rgba(0, 0, 0, .9), 0 1px 0 rgba(255, 240, 198, .52); }
+
+        .rule {
+            height: 2px; margin: 18px auto 6px; max-width: 240px;
+            background: linear-gradient(90deg, transparent, #d0b772, transparent);
+        }
+
+        /* connection idiot-light (tap to connect) — not a third "button", just the classic dash lamp */
+        .lamp-row {
+            display: flex; align-items: center; justify-content: center; gap: 9px;
+            margin: 12px 0 22px; cursor: pointer; user-select: none;
+        }
+        .lamp {
+            width: 13px; height: 13px; border-radius: 50%;
+            background: radial-gradient(circle at 40% 35%, #8a8a82, #4f4f49);
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, .6);
+            transition: background .25s, box-shadow .25s;
+        }
+        .lamp-row.on .lamp { background: radial-gradient(circle at 40% 35%, #c7ef8f, var(--green)); box-shadow: 0 0 10px rgba(121, 158, 49, .9); }
+        .lamp-row.busy .lamp { background: radial-gradient(circle at 40% 35%, #ffe39a, var(--amber)); box-shadow: 0 0 10px rgba(245, 194, 66, .9); }
+        .lamp-label { font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 3px; color: #c7b692; text-transform: uppercase; text-shadow: 0 1px 2px rgba(0, 0, 0, .7); }
+
+        /* the two knobs — sitting directly on the snakeskin fascia */
+        .knobs { display: flex; flex-direction: column; align-items: center; gap: 26px; margin-top: 5vh; }
+        .knob {
+            width: 188px; height: 188px; border-radius: 50%; border: none; cursor: pointer;
+            position: relative; padding: 9px; /* the gold ring thickness */
+            background:
+                radial-gradient(circle at 50% 22%, var(--gold-hi), var(--gold) 42%, var(--gold-lo) 72%, #f3e2af 86%, var(--gold-deep));
+            box-shadow: 0 10px 22px rgba(0, 0, 0, .45), inset 0 2px 3px rgba(255, 244, 210, .9);
+            transition: transform .06s ease, box-shadow .12s;
+            -webkit-tap-highlight-color: transparent; touch-action: manipulation;
+        }
+        .knob .face {
+            width: 100%; height: 100%; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-family: 'Cinzel', serif; font-weight: 700; font-size: 30px; letter-spacing: 4px;
+            color: #e3d5a2;
+            /* engraved (incised): dark top edge, light lower lip — a touch deeper */
+            text-shadow: 0 -1px 1px rgba(0, 0, 0, .7), 0 -2px 2px rgba(0, 0, 0, .35), 0 1px 0 rgba(255, 255, 255, .4);
+            box-shadow: inset 0 -6px 14px rgba(0, 0, 0, .5), inset 0 7px 14px rgba(255, 255, 255, .25);
+        }
+        /* English racing green (START) and dark oxblood red (STOP) */
+        .knob.start .face { background: radial-gradient(circle at 50% 34%, #357a4c, #103f27 56%, #06281a); }
+        .knob.stop  .face { background: radial-gradient(circle at 50% 34%, #9e362a, #65140d 56%, #380a06); }
+
+        .knob:active { transform: translateY(2px) scale(.985); box-shadow: 0 5px 12px rgba(0, 0, 0, .45), inset 0 2px 3px rgba(255, 255, 255, .9); }
+        .knob:active .face { box-shadow: inset 0 6px 16px rgba(0, 0, 0, .6), inset 0 -3px 8px rgba(255, 255, 255, .12); }
+        .knob:disabled { cursor: not-allowed; filter: grayscale(.55) brightness(.92); opacity: .8; }
+
+        /* status line */
+        .statusline {
+            margin-top: 22px; font-style: italic; font-size: 13px; color: #cbbb91; min-height: 20px; text-shadow: 0 1px 2px rgba(0, 0, 0, .7);
+        }
+
+        .foot { margin-top: 14px; font-family: 'Cinzel', serif; font-size: 9px; letter-spacing: 2px; color: #bdab80; text-transform: uppercase; text-shadow: 0 1px 2px rgba(0, 0, 0, .7); }
+    </style>
+</head>
+
+<body class="bg-sand">
+    <div class="toast" id="toast"></div>
+    <div class="dash">
+        <div class="badge-model">230 SL</div>
+        <div class="badge-name">Pagode</div>
+        <div class="badge-year">Baujahr 1964</div>
+
+        <div class="rule"></div>
+
+        <div class="knobs">
+            <button class="knob start" id="btn-start" type="button" aria-label="Motor starten"><span class="face">START</span></button>
+            <button class="knob stop" id="btn-stop" type="button" aria-label="Motor stoppen"><span class="face">STOP</span></button>
+        </div>
+
+        <div class="statusline" id="statusline"></div>
+
+        <div class="lamp-row" id="lamp-row" title="Tippen zum Verbinden">
+            <span class="lamp"></span>
+            <span class="lamp-label" id="lamp-label">getrennt</span>
+        </div>
+
+        <div class="foot">Solita · Pagode Remote</div>
+    </div>
+
+    <!-- shared BLE protocol + transport (single source for both Pagode pages + the APK) -->
+    <script src="js/pagode-ble.js"></script>
+    <script>
+        'use strict';
+
+        // ---- protocol + BLE transport live in the shared single source js/pagode-ble.js ----------------------
+        const CFG = PagodeBLE.CFG;   // FFE0/FFE1 + A0 relay commands
+        const CRANK_MS = 900;        // START pulse — momentary, like the key
+        const STOP_MS = 1500;        // STOP pulse — break the ignition long enough to be sure
+
+        const lampRow = document.getElementById('lamp-row');
+        const lampLabel = document.getElementById('lamp-label');
+        const statusline = document.getElementById('statusline');
+        const btnStart = document.getElementById('btn-start');
+        const btnStop = document.getElementById('btn-stop');
+        const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+
+        function setLamp(state, label) { lampRow.className = 'lamp-row' + (state ? ' ' + state : ''); lampLabel.textContent = label; }
+        function say(t) { statusline.textContent = t; }
+
+        // ---- BLE transport comes from the shared single source (js/pagode-ble.js) ----------------------------
+        let backend = null, connected = false, busy = false;
+
+        async function ensureConnected() {
+            if (connected) return true;
+            backend = PagodeBLE.createBackend({ onDisconnect() { connected = false; setLamp('', 'getrennt'); } });
+            if (!backend) { say('Bluetooth geht hier nicht — bitte die APK nutzen (oder Chrome über HTTPS).'); return false; }
+            setLamp('busy', 'verbinde…');
+            try { const name = await backend.connect(); connected = true; setLamp('on', 'verbunden'); say('Verbunden mit ' + name + '.'); return true; }
+            catch (e) {
+                connected = false; setLamp('', 'getrennt');
+                // user just closed the device chooser → benign, no error noise
+                var cancelled = e && (e.name === 'NotFoundError' || /cancel/i.test(e.message || ''));
+                say(cancelled ? '' : 'Verbindung fehlgeschlagen: ' + ((e && (e.message || e.name)) || e));
+                return false;
+            }
+        }
+
+        // pulse a channel ON for ms then OFF (momentary) — the actual START / STOP action
+        async function pulse(channel, ms, onName, offName) {
+            const on = channel === 1 ? CFG.CMD.K1_ON : CFG.CMD.K2_ON;
+            const off = channel === 1 ? CFG.CMD.K1_OFF : CFG.CMD.K2_OFF;
+            await backend.write(on); await sleep(ms); await backend.write(off);
+        }
+
+        async function doAction(kind) {
+            if (busy) return;
+            busy = true; btnStart.disabled = true; btnStop.disabled = true;
+            try {
+                if (!(await ensureConnected())) return;
+                setLamp('busy', kind === 'start' ? 'starte…' : 'stoppe…');
+                if (kind === 'start') { say('Anlasser…'); await pulse(1, CRANK_MS); say('Pagode gestartet. 🚗'); }
+                else { say('Zündung aus…'); await pulse(2, STOP_MS); say('Pagode aus.'); }
+                setLamp('on', 'verbunden');
+            } catch (e) {
+                connected = false; setLamp('', 'getrennt');
+                say('Befehl fehlgeschlagen: ' + ((e && (e.message || e.name)) || e));
+            } finally { busy = false; btnStart.disabled = false; btnStop.disabled = false; }
+        }
+
+        btnStart.addEventListener('click', () => doAction('start'));
+        btnStop.addEventListener('click', () => doAction('stop'));
+        lampRow.addEventListener('click', () => { if (!connected && !busy) ensureConnected(); });
+
+        // ---- switchable backdrop: press "b" to cycle; choice persists in localStorage ----
+        const BGS = [
+            { cls: 'bg-sand', name: 'Sand-Leder' },
+            { cls: 'bg-navy', name: 'Navy-Leder' }
+        ];
+        const toast = document.getElementById('toast');
+        let bgIdx = BGS.findIndex(b => b.cls === localStorage.getItem('pagode-bg'));
+        if (bgIdx < 0) bgIdx = 0;
+        function applyBg(withToast) {
+            document.body.className = BGS[bgIdx].cls;
+            localStorage.setItem('pagode-bg', BGS[bgIdx].cls);
+            if (withToast) {
+                toast.textContent = 'Hintergrund: ' + BGS[bgIdx].name;
+                toast.classList.add('show');
+                clearTimeout(applyBg._t); applyBg._t = setTimeout(() => toast.classList.remove('show'), 1400);
+            }
+        }
+        applyBg(false);
+        document.addEventListener('keydown', (e) => {
+            if ((e.key === 'b' || e.key === 'B') && !e.metaKey && !e.ctrlKey && !e.altKey) {
+                bgIdx = (bgIdx + 1) % BGS.length; applyBg(true);
+            }
+        });
+    </script>
+</body>
+
+</html>
