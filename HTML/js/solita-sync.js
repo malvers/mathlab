@@ -48,7 +48,9 @@
     // Adopt the server's authoritative state when it differs from what this device last knew.
     function adopt(d) {
         if (!d) return;
-        if (d.settings && typeof d.settings === 'object') onSettings(d.settings);   // adopt synced UI prefs
+        // Settings application must NEVER block the history adoption below — wrap it so a prefs error can't
+        // leave the device showing a stale, out-of-sync chat (Doc 2026-06-23: „Chats nicht mehr synchron").
+        if (d.settings && typeof d.settings === 'object') { try { onSettings(d.settings); } catch (e) { } }
         if (typeof d.rev !== 'number') return;
         setRev(d.rev);
         if (Array.isArray(d.history)) onRemote(d.history, d.summary || '');

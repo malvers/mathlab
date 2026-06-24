@@ -66,6 +66,9 @@
             // Read the assistant's reply aloud (called from sendMessage). Strip light markdown first.
             window.speakReply = function (text) {
                 if (!ttsOn || !text) { window.__solitaSpeaking = false; return; }
+                // Quiet/„Pssst" mode (Doc 2026-06-24): answer in writing only — suppress ALL speech (replies,
+                // greetings, search/photo/costs). Set by typing / a Slumber-tap / the 🤫 toggle.
+                if (window.solitaQuiet) { window.__solitaSpeaking = false; return; }
                 try {
                     // Code is SHOWN, never read aloud (Doc 2026-06-23): just drop fenced ```code``` from the
                     // spoken text and read the prose around it (no extra hint — Doc: nervt).
@@ -123,8 +126,27 @@
             // Tap the phase pill while Solita talks → stop her instantly (Doc 2026-06-22). Mid-speech voice
             // can't work (mic is muted against self-hearing), so the pill is the reliable barge-in.
             const phasePill = document.getElementById('solita-phase');
-            if (phasePill) phasePill.addEventListener('click', () => {
-                if (window.solitaStopAll) window.solitaStopAll(); else window.solitaStopSpeaking();
+            // Pill tap toggles the resting state and stops her mid-action (Doc 2026-06-24):
+            //   SLUMBER (dormant) → wake SILENTLY (quiet on first → no „Ja?")   ·   HÖRE ZU (listening) → PAUSE
+            //   spricht / denkt → stop everything.   ESC does the same (handled below).
+            function pillAction() {
+                const st = phasePill && phasePill.dataset.state;
+                if (st === 'dormant') {
+                    if (window.solitaSetQuiet) window.solitaSetQuiet(true);
+                    if (window.solitaWake) window.solitaWake();
+                } else if (st === 'listening') {
+                    if (window.solitaPause) window.solitaPause();
+                } else {
+                    if (window.solitaStopAll) window.solitaStopAll(); else window.solitaStopSpeaking();
+                }
+            }
+            if (phasePill) phasePill.addEventListener('click', pillAction);
+            // ESC → pause while listening (or stop while speaking/thinking) — the keyboard twin of the pill tap.
+            document.addEventListener('keydown', function (e) {
+                if (e.key !== 'Escape') return;
+                const st = phasePill && phasePill.dataset.state;
+                if (st === 'listening') { if (window.solitaPause) window.solitaPause(); }
+                else if (st === 'speaking' || st === 'thinking') { if (window.solitaStopAll) window.solitaStopAll(); }
             });
 
             if (ttsBtn) ttsBtn.addEventListener('click', () => {
