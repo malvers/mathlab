@@ -336,14 +336,10 @@
                 _savedView = null;
             }
         }).observe(document.body, { attributes: true, attributeFilter: ['class'] });
-        map.on('zoomstart', () => {
-            const el = posMarker && posMarker.getElement && posMarker.getElement();
-            if (el) { el.style.transition = 'none'; el.style.opacity = '0'; }
-        });
-        map.on('zoomend', () => {
-            const el = posMarker && posMarker.getElement && posMarker.getElement();
-            if (el) { el.style.transition = ''; el.style.opacity = ''; }
-        });
+        // (The position dot is an SVG circleMarker — Leaflet transforms it WITH the map during a zoom, so it
+        // stays glued and crisp. We used to hard-hide it (opacity:0) on zoomstart and restore on zoomend, but
+        // because .pos-marker has `transition: opacity 0.6s`, the dot then FADED back in after every zoom →
+        // the "Punkt blinkt" Doc saw. Removed: the dot just zooms along, no blink (Doc 2026-06-24).)
 
         const baseMap = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxNativeZoom: 19, // OSM tiles stop at z19 …
