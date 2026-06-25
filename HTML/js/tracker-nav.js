@@ -315,15 +315,22 @@ window.TrackerNav = function (ctx) {
         previewFor = '';
         const two = $('nav-start2'); if (two) two.hidden = true;
     }
+    // Foot mode collapses the two buttons to ONE: walking 'fastest' vs 'shortest' is meaningless (duration ∝
+    // distance — ORS's foot-"fastest" just prefers nicer paths → longer AND "slower"). Doc 2026-06-25.
+    function setFootMode(on) {
+        const two = $('nav-start2'); if (two) two.classList.toggle('foot', !!on);
+    }
     function showStartNoPreview() {         // destination set but times unknown (no ORS/position) → buttons w/o meta
         previewFor = '';
         const two = $('nav-start2'); if (!two) return;
         two.hidden = false;
+        const foot = routeType === 'foot';
+        setFootMode(foot);
         const fm = $('nav-start-fast-meta'), sm = $('nav-start-short-meta');
         if (fm) fm.textContent = ''; if (sm) sm.textContent = '';
         const fb = $('nav-start-fast'), sb = $('nav-start-short');
         if (fb) { fb.classList.remove('alt'); const k = fb.querySelector('.nav-start-kind'); if (k) k.textContent = 'schnellste'; }
-        if (sb) { sb.classList.remove('alt'); const k = sb.querySelector('.nav-start-kind'); if (k) k.textContent = 'kürzeste'; }
+        if (sb) { sb.classList.remove('alt'); const k = sb.querySelector('.nav-start-kind'); if (k) k.textContent = foot ? 'STARTEN' : 'kürzeste'; }
     }
     function fmtDur(sec) {
         const m = Math.round(sec / 60);
@@ -359,13 +366,29 @@ window.TrackerNav = function (ctx) {
         // Times need ORS + a position (WLAN is enough). Without them, still show the two buttons — just without
         // the time/distance line — so a tap always starts (the route is computed on START).
         if (routeEngine !== 'ors' || !from) { showStartNoPreview(); return; }
-        const key = destKey();
-        if (key === previewFor && !two.hidden) return;   // already showing for this destination
+        const key = destKey() + '|' + routeType;                  // profile is part of the preview identity
+        if (key === previewFor && !two.hidden) return;   // already showing for this destination + profile
         previewFor = key;
         const my = ++previewGen;
-        const fm = $('nav-start-fast-meta'), sm = $('nav-start-short-meta');
-        if (fm) fm.textContent = '…'; if (sm) sm.textContent = '…';
         two.hidden = false;
+        const fm = $('nav-start-fast-meta'), sm = $('nav-start-short-meta');
+
+        if (routeType === 'foot') {
+            // Walking → ONE button (the shortest = sensible route); fastest/shortest split makes no sense.
+            setFootMode(true);
+            const sb = $('nav-start-short');
+            if (sb) { sb.classList.remove('alt'); const k = sb.querySelector('.nav-start-kind'); if (k) k.textContent = 'STARTEN'; }
+            if (sm) sm.textContent = '…';
+            let r; try { r = await fetchRerouteORS(from, destLatLng, null, 'shortest'); } catch (e) { r = null; }
+            if (my !== previewGen || (destKey() + '|' + routeType) !== key) return;
+            if (!r) { showStartNoPreview(); return; }
+            if (sm) sm.textContent = fmtRoute(r);
+            return;
+        }
+
+        // Car → two informed buttons (fastest vs shortest) with a recommendation.
+        setFootMode(false);
+        if (fm) fm.textContent = '…'; if (sm) sm.textContent = '…';
         let fast, short;
         try {
             [fast, short] = await Promise.all([
@@ -373,7 +396,7 @@ window.TrackerNav = function (ctx) {
                 fetchRerouteORS(from, destLatLng, null, 'shortest'),
             ]);
         } catch (e) { fast = short = null; }
-        if (my !== previewGen || destKey() !== key) return;       // destination changed meanwhile → stale
+        if (my !== previewGen || (destKey() + '|' + routeType) !== key) return;   // destination/profile changed → stale
         if (!fast && !short) { showStartNoPreview(); return; }     // ORS unreachable → buttons without times
         if (fm) fm.textContent = fmtRoute(fast);
         if (sm) sm.textContent = fmtRoute(short);
