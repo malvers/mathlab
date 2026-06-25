@@ -51,7 +51,7 @@ window.TrackerNav = function (ctx) {
     // Off-route reroute engine: 'osrm' (default, public OSRM) | 'ors' (Google-näher via the `reroute` Edge
     // Function → OpenRouteService: heading tolerance + U-turn handling). 'ors' needs the function deployed
     // and ORS_API_KEY set; on ANY failure it falls back to OSRM, so flipping this is safe (Doc 2026-06-25).
-    const REROUTE_ENGINE = 'osrm';
+    const REROUTE_ENGINE = 'ors';
     const BRG_RANGE_DEG = 90;       // (only used when USE_DEPART_BEARING) OSRM may depart within ±this of the travel heading
     const BRG_MIN_MOVE_M = 12;      // min travel between fixes for a trustworthy movement-derived heading
     const ANNOUNCE_FAR_M = 300;     // distance at which the pre-warning ("In 300 m …") is spoken
