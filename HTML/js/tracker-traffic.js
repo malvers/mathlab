@@ -208,6 +208,14 @@ window.TrackerTraffic = function (ctx) {
             if (!o.anchor) continue;
             // proximity cull for PINS only — the full fetched set stays in `items` for the route-closure scan
             if (lastLat != null && distM(lastLat, lastLng, o.anchor[0], o.anchor[1]) > MAX_NEAR_M) continue;
+            // Draw the closed stretch itself for ACTIVE closures, so you SEE what gets routed around — not just
+            // the pin. Faint wide halo underneath ≈ the avoided corridor (avoidPolygons widens the same line),
+            // a solid dashed Υ-red line on top = the closure. Only kind 'sperrung' & not future, matching the
+            // avoid logic; needs ≥2 geom points (a single anchor stays a plain pin).
+            if (o.kind === 'sperrung' && !o.future && o.geom && o.geom.length >= 2) {
+                L.polyline(o.geom, { pane: 'traffic', color: 'rgb(176,36,24)', weight: 16, opacity: 0.16, interactive: false, lineCap: 'round', lineJoin: 'round' }).addTo(lyr);
+                L.polyline(o.geom, { pane: 'traffic', color: 'rgb(176,36,24)', weight: 4, opacity: 0.95, dashArray: '10 8', interactive: false, lineCap: 'round', lineJoin: 'round' }).addTo(lyr);
+            }
             L.marker(o.anchor, { icon: pinIcon(o.kind, o.future), pane: 'traffic', keyboard: false })
                 .bindPopup(popupHtml(o), { className: 'trf-popup-card trf-' + o.kind }).addTo(lyr);
         }
