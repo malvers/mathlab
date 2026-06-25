@@ -9,7 +9,7 @@
 // touched and no genuine desktop fix can fight the synthetic car.
 //
 // Usage (open with ?sim=1 → "NAV-SIM" panel, bottom-left):
-//   1) "Auto hier" drops the car at the saved Home.
+//   1) "Home" drops the car at the saved Home.
 //   2) Pick a destination via the normal "Ziel" popup.
 //   3) "Fahren" → the car drives the route automatically.
 //   4) "Abweichen" → it leaves the route on purpose → reroute. Watch the DEBUG window (sim: …).
@@ -119,7 +119,7 @@ window.TrackerNavSim = function (ctx) {
     function startLoop() { if (!timer) timer = setInterval(tick, DT_REAL_MS); setGoLabel(); }
     function stopLoop() { if (timer) { clearInterval(timer); timer = null; } setGoLabel(); }
 
-    // ---- "Auto hier" → place the car at the saved Home ----
+    // ---- "Home" → place the car at the saved Home ----
     function loadHome() {
         try { const h = JSON.parse(localStorage.getItem('trk_nav_home') || 'null'); return (h && h.lat != null && h.lng != null) ? [h.lat, h.lng] : null; }
         catch (e) { return null; }
@@ -137,7 +137,7 @@ window.TrackerNavSim = function (ctx) {
 
     // ---- "Fahren" → ensure a route exists, then auto-follow it ----
     async function startDriving() {
-        if (!car) { status('erst „Auto hier"'); dbg('kein Auto — „Auto hier" zuerst'); return; }
+        if (!car) { status('erst „Home"'); dbg('kein Auto — „Home" zuerst'); return; }
         if (!(nav && nav.routePoints && nav.routePoints())) {
             if (nav && nav.hasDestination && nav.hasDestination() && nav.startNavigation) { status('Route wird berechnet …'); await nav.startNavigation(); }
         }
@@ -187,11 +187,11 @@ window.TrackerNavSim = function (ctx) {
         p.appendChild(sRow);
 
         const bRow = document.createElement('div');
-        bRow.appendChild(mkBtn('Auto hier', placeCarAtHome));
+        bRow.appendChild(mkBtn('Home', placeCarAtHome));
         btnGo = mkBtn('GO', onGo);
         bRow.appendChild(btnGo);
         bRow.appendChild(mkBtn('Abweichen', () => {
-            if (!car) { status('erst „Auto hier"'); return; }
+            if (!car) { status('erst „Home"'); return; }
             deviating = DEVIATE_M; startLoop();
             dbg('Abweichen: ' + DEVIATE_M + ' m geradeaus, Heading ' + Math.round(brg));
             status('weicht ab …');
@@ -201,7 +201,7 @@ window.TrackerNavSim = function (ctx) {
 
         elStatus = document.createElement('div');
         elStatus.style.cssText = 'margin-top:8px;color:#9fc0ff;min-height:14px;line-height:1.4;';
-        elStatus.textContent = '„Auto hier" → Ziel via Popup → „GO" → „Abweichen"';
+        elStatus.textContent = '';   // no instructions; this line shows live status only
         p.appendChild(elStatus);
 
         document.body.appendChild(p);
