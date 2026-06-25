@@ -2347,6 +2347,9 @@ ${pts}
                 if (trkState === 'idle') beginTracking();
                 else if (__nav && __nav.hasDestination()) __nav.startNavigation();
             },
+            // Arrived at the nav destination → pause the recording (Doc 2026-06-25), so the trip stops at the
+            // goal showing CONTINUE/SPEICHERN/VERWERFEN. Only while actually recording (no-op in the sim/idle).
+            onArrive: () => { if (trkState === 'recording') pauseTracking(); },
             // ---- Cross-device nav prefs (Home + recent destinations) → public.nav_prefs, one row per user,
             //      RLS auth.uid()=user_id (same isolation as tracks). Roams under the SAME sync code only.
             //      All cloud failures are swallowed → localStorage stays the working store, sync is a bonus.

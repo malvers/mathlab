@@ -868,7 +868,7 @@ window.TrackerNav = function (ctx) {
         showBanner(m, d, tripLine(here));
         if (m.type === 'arrive') {
             // Destination: you stop there (no overshoot to detect), so announce + finish at the near window.
-            if (d <= ANNOUNCE_NEAR_M) { speak('Sie haben das Ziel erreicht.'); advanceManeuver(); }
+            if (d <= ANNOUNCE_NEAR_M) { speak('Sie haben das Ziel erreicht.'); advanceManeuver(); if (ctx.onArrive) ctx.onArrive(); }
             else if (d <= ANNOUNCE_FAR_M && !annFar) { annFar = true; speak('In ' + announceDist(d) + ' Metern erreichen Sie das Ziel.'); }
             return;
         }
