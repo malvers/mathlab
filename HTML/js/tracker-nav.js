@@ -155,7 +155,13 @@ window.TrackerNav = function (ctx) {
         });
     }
 
-    function shortLabel(s) { return (s || '').split(',').slice(0, 2).join(',').trim(); }
+    function shortLabel(s) {
+        const parts = (s || '').split(',').map((x) => x.trim()).filter(Boolean);
+        if (!parts.length) return '';
+        // Nominatim lists the house number FIRST ("8, Sachsenallee, …") → swap to natural German "Straße Nr."
+        if (parts.length >= 2 && /^\d+[a-z]?$/i.test(parts[0])) return parts[1] + ' ' + parts[0];
+        return parts.slice(0, 2).join(', ');
+    }
 
     // ---- Geocoding: a free-text line → the first Nominatim hit (or null). Shared by the "Ziel setzen"
     // button, the Enter key, and the live-as-you-type lookup. Nominatim parses "Ort, Straße, Nr." itself.
