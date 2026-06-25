@@ -837,7 +837,8 @@ window.TrackerNav = function (ctx) {
         // German decimal comma („6,5 km"); the cryptic "ETA … 4.9 / 6.5 … min" is replaced by named fields.
         const km = (m) => fmt(m).replace('.', ',');
         const min = Math.round(d.remSec / 60);
-        return 'ANKUNFT ' + clock + '  ·  STRECKE ' + km(tripTotalM || routeTotalDist) + '  ·  ZU FAHREN ' + km(d.remM) + ' (' + min + ' min)';
+        const verb = routeType === 'foot' ? 'ZU LAUFEN' : 'ZU FAHREN';   // Laufen-Modus: „ZU LAUFEN" (Doc 2026-06-25)
+        return 'ANKUNFT ' + clock + '  ·  STRECKE ' + km(tripTotalM || routeTotalDist) + '  ·  ' + verb + ' ' + km(d.remM) + ' (' + min + ' min)';
     }
 
     function announceDist(d) { return d > 500 ? Math.round(d / 100) * 100 : Math.round(d / 50) * 50; }
