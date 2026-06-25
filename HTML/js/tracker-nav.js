@@ -168,17 +168,23 @@ window.TrackerNav = function (ctx) {
         const parts = full.split(',').map((x) => x.trim()).filter(Boolean);
         if (!parts.length) return '';
         const isNum = (x) => /^\d+[a-z]?$/i.test(x);
-        // German postal code: the LAST 5-digit group in the Nominatim string (sits near the end, before the
-        // country) → appended as "· 01067" so the destination is unambiguous (Doc 2026-06-25).
-        const plzAll = full.match(/\b\d{5}\b/g);
-        const plz = plzAll ? plzAll[plzAll.length - 1] : '';
+        // Postal code + city from the Nominatim string (Doc 2026-06-25): the PLZ is the LAST 5-digit part;
+        // the city is the nearest part BEFORE it that's neither a federal state nor a number → "· 01067 Dresden".
+        const STATES = new Set(['Sachsen', 'Sachsen-Anhalt', 'Bayern', 'Thüringen', 'Brandenburg', 'Berlin',
+            'Hamburg', 'Bremen', 'Hessen', 'Niedersachsen', 'Saarland', 'Baden-Württemberg', 'Rheinland-Pfalz',
+            'Schleswig-Holstein', 'Mecklenburg-Vorpommern', 'Nordrhein-Westfalen']);
+        let plzI = -1; for (let i = parts.length - 1; i >= 0; i--) { if (/^\d{5}$/.test(parts[i])) { plzI = i; break; } }
+        const plz = plzI >= 0 ? parts[plzI] : '';
+        let city = '';
+        for (let i = plzI - 1; i >= 0; i--) { if (!STATES.has(parts[i]) && !isNum(parts[i])) { city = parts[i]; break; } }
+        const tail = plz ? ' · ' + plz + (city ? ' ' + city : '') : '';
         let base;
         // Address: house number listed FIRST ("8, Sachsenallee, …") → natural German "Straße Nr.".
         if (parts.length >= 2 && isNum(parts[0])) base = parts[1] + ' ' + parts[0];
         // Named POI with a house number ("IKEA, 25, Meißner Straße, …") → NAME + "Straße Nr." ("IKEA, Meißner Straße 25").
         else if (parts.length >= 2 && isNum(parts[1])) base = parts[2] ? parts[0] + ', ' + parts[2] + ' ' + parts[1] : parts[0] + ' ' + parts[1];
         else base = parts.slice(0, 2).join(', ');
-        return plz ? base + ' · ' + plz : base;
+        return base + tail;
     }
 
     // ---- Geocoding: a free-text line → the first Nominatim hit (or null). Shared by the "Ziel setzen"
