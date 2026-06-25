@@ -437,13 +437,17 @@
         .quiet-btn {
             position: absolute;
             right: 38px;
-            bottom: 15px;
+            bottom: 16px;              /* box aligns with the textarea's bottom line (== input-area padding) */
+            height: 52px;              /* == single-line textarea height → glyph centers on that line */
             z-index: 5;
+            display: flex;
+            align-items: center;       /* vertical-center the emoji on the input line (Doc 2026-06-24) */
+            justify-content: center;
             background: none;
             border: none;
             cursor: pointer;
             padding: 0;
-            font-size: 25px;
+            font-size: 30px;           /* bigger (Doc 2026-06-24) */
             line-height: 1;
             opacity: 0.4;
             transition: opacity 0.15s ease, transform 0.1s ease;
@@ -571,7 +575,7 @@
         #solita-phase .dot { width: 9px; height: 9px; border-radius: 50%; background: #6b7a99; }
         #solita-phase[data-state="listening"] .dot { background: rgb(121, 158, 49); animation: solita-pulse 1.1s ease-in-out infinite; } /* φ grün — du sprichst, sie hört */
         #solita-phase[data-state="thinking"]  .dot { display: none; }   /* denkt: dot hidden — the yellow twinkling star is the indicator */
-        #solita-phase .ts { color: rgb(245, 194, 66); font-size: 12px; line-height: 1; }   /* twinkling star: λ-yellow, ~dot-sized (9px) */
+        #solita-phase .ts { color: rgb(245, 194, 66); font-size: 14.52px; line-height: 1; }   /* twisting star: λ-yellow, ~dot-sized; +21% from 12px (Doc 2026-06-25) */
         #solita-phase[data-state="speaking"]  .dot { background: #00d2ff;          animation: solita-pulse 0.7s ease-in-out infinite; } /* cyan — Solita spricht */
         #solita-phase[data-state="dormant"]   .dot { background: #6b5b95;          animation: solita-pulse 2.6s ease-in-out infinite; } /* muted violet, slow breath — paused/half-asleep */
         @keyframes solita-pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.35; transform: scale(1.6); } }
