@@ -164,15 +164,21 @@ window.TrackerNav = function (ctx) {
     }
 
     function shortLabel(s) {
-        const parts = (s || '').split(',').map((x) => x.trim()).filter(Boolean);
+        const full = s || '';
+        const parts = full.split(',').map((x) => x.trim()).filter(Boolean);
         if (!parts.length) return '';
         const isNum = (x) => /^\d+[a-z]?$/i.test(x);
+        // German postal code: the LAST 5-digit group in the Nominatim string (sits near the end, before the
+        // country) → appended as "· 01067" so the destination is unambiguous (Doc 2026-06-25).
+        const plzAll = full.match(/\b\d{5}\b/g);
+        const plz = plzAll ? plzAll[plzAll.length - 1] : '';
+        let base;
         // Address: house number listed FIRST ("8, Sachsenallee, …") → natural German "Straße Nr.".
-        if (parts.length >= 2 && isNum(parts[0])) return parts[1] + ' ' + parts[0];
-        // Named POI with a house number ("IKEA, 25, Meißner Straße, …") → NAME + "Straße Nr." in natural
-        // order ("IKEA, Meißner Straße 25"), keeping the number (Doc 2026-06-25).
-        if (parts.length >= 2 && isNum(parts[1])) return parts[2] ? parts[0] + ', ' + parts[2] + ' ' + parts[1] : parts[0] + ' ' + parts[1];
-        return parts.slice(0, 2).join(', ');
+        if (parts.length >= 2 && isNum(parts[0])) base = parts[1] + ' ' + parts[0];
+        // Named POI with a house number ("IKEA, 25, Meißner Straße, …") → NAME + "Straße Nr." ("IKEA, Meißner Straße 25").
+        else if (parts.length >= 2 && isNum(parts[1])) base = parts[2] ? parts[0] + ', ' + parts[2] + ' ' + parts[1] : parts[0] + ' ' + parts[1];
+        else base = parts.slice(0, 2).join(', ');
+        return plz ? base + ' · ' + plz : base;
     }
 
     // ---- Geocoding: a free-text line → the first Nominatim hit (or null). Shared by the "Ziel setzen"
