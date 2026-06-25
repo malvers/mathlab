@@ -2774,6 +2774,20 @@ ${pts}
             else wire();
         })();
 
+        // Settings → Debug: routing engine for the whole navigation — ORS (default) ↔ OSRM (persisted in nav).
+        (function () {
+            function wire() {
+                const cb = $('route-engine-toggle'); if (!cb || cb._wired) return; cb._wired = true;
+                cb.checked = !__nav || !__nav.getEngine || __nav.getEngine() === 'ors'; // default ORS
+                cb.addEventListener('change', () => {
+                    if (__nav && __nav.setEngine) __nav.setEngine(cb.checked ? 'ors' : 'osrm');
+                    toast(cb.checked ? 'Navigation: ORS' : 'Navigation: OSRM');
+                });
+            }
+            if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', wire);
+            else wire();
+        })();
+
         // Settings → Debug: mobile shortcut keys — tap fires the otherwise keyboard-only d/k/w handlers.
         // A toggle shows/hides the key row (default OFF, persisted).
         (function () {

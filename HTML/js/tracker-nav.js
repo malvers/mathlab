@@ -48,10 +48,13 @@ window.TrackerNav = function (ctx) {
     // graph + U-turn penalty decide. So we default the cone OFF; flip USE_DEPART_BEARING back to true to
     // compare in the sim.
     const USE_DEPART_BEARING = false;
-    // Off-route reroute engine: 'osrm' (default, public OSRM) | 'ors' (Google-näher via the `reroute` Edge
-    // Function → OpenRouteService: heading tolerance + U-turn handling). 'ors' needs the function deployed
-    // and ORS_API_KEY set; on ANY failure it falls back to OSRM, so flipping this is safe (Doc 2026-06-25).
-    const REROUTE_ENGINE = 'ors';
+    // Routing engine for the WHOLE navigation (initial route + reroute): 'ors' (default — consistent
+    // maneuvers, Google-näher, via the `reroute` Edge Function → OpenRouteService) | 'osrm' (public OSRM).
+    // Runtime-switchable (Settings → Debug); on ANY ORS failure it auto-falls back to OSRM (Doc 2026-06-25).
+    const ENGINE_KEY = 'trk_route_engine';
+    let routeEngine = (localStorage.getItem(ENGINE_KEY) === 'osrm') ? 'osrm' : 'ors';
+    function setEngine(e) { routeEngine = (e === 'osrm') ? 'osrm' : 'ors'; try { localStorage.setItem(ENGINE_KEY, routeEngine); } catch (x) { } }
+    function getEngine() { return routeEngine; }
     const BRG_RANGE_DEG = 90;       // (only used when USE_DEPART_BEARING) OSRM may depart within ±this of the travel heading
     const BRG_MIN_MOVE_M = 12;      // min travel between fixes for a trustworthy movement-derived heading
     const ANNOUNCE_FAR_M = 300;     // distance at which the pre-warning ("In 300 m …") is spoken
@@ -366,6 +369,7 @@ window.TrackerNav = function (ctx) {
         rerouting = false;   // don't let an aborted reroute leave the flag stuck → would block future routing
         lastBrgPos = null; travelBrg = null; offRouteCount = 0;  // drop the stale travel heading for the next navigation
         clearRouteLine();
+        keepAlive.stop();   // navigation over → release the audio keep-alive (battery / audio focus)
         if (destMarker) { map.removeLayer(destMarker); destMarker = null; }
         destLatLng = null; destLabel = '';
         maneuvers = null; mIdx = 0; annFar = false; annNear = false; mClosest = Infinity;
@@ -413,9 +417,10 @@ window.TrackerNav = function (ctx) {
         toast(reroute ? 'Neue Route …' : 'Route wird berechnet …');
         let data;
         try {
-            // Off-route reroute via the ORS proxy (heading tolerance + U-turn handling) when enabled — and
-            // OSRM otherwise AND as a fallback whenever ORS returns nothing (Doc 2026-06-25).
-            if (REROUTE_ENGINE === 'ors' && reroute) data = await fetchRerouteORS(from, destLatLng, brg);
+            // Route via the ORS proxy (heading tolerance + U-turn handling) for the whole navigation when
+            // selected — OSRM otherwise AND as a fallback whenever ORS returns nothing (Doc 2026-06-25).
+            // On the initial route brg is null → ORS routes plainly; on a reroute brg constrains departure.
+            if (routeEngine === 'ors') data = await fetchRerouteORS(from, destLatLng, brg);
             if (!data) {
                 // OSRM wants lon,lat order; full geometry as GeoJSON for an easy polyline.
                 const coords = from[1] + ',' + from[0] + ';' + destLatLng[1] + ',' + destLatLng[0];
@@ -449,7 +454,7 @@ window.TrackerNav = function (ctx) {
         const from = curPos();
         if (!from) { toast('Navigation: warte auf GPS-Position …'); return false; }
         const ok = await computeRoute(from, false);
-        if (ok) { pushHistory(destLatLng, destLabel); saveLastRoute(); }
+        if (ok) { keepAlive.start(); pushHistory(destLatLng, destLabel); saveLastRoute(); } // hold the audio channel open for background guidance
         return ok;
     }
 
@@ -755,6 +760,50 @@ window.TrackerNav = function (ctx) {
         setInterval(() => { try { const ss = window.speechSynthesis; if (ss && ss.speaking && ss.paused) ss.resume(); } catch (e) { } }, 4000);
     }
 
+    // ---- Background-audio keep-alive (Doc 2026-06-25) ----
+    // Android pauses the WebView's audio OUTPUT the moment the app goes to background, so the cloud-TTS
+    // guidance (new Audio(...).play() in solita-voice.js) goes silent with the screen off — even though the
+    // location foreground-service keeps the process + GPS alive. Fix WITHOUT touching the voice: hold the
+    // audio channel open with a looping SILENT track plus a MediaSession, so Android treats us as an active
+    // media app and keeps the output alive for the TTS clips. Started on navigation (a START tap = user
+    // gesture → autoplay ok; sticky activation survives the awaited route fetch) and on every speak() as a
+    // belt-and-braces; stopped on clearRoute so it never drains battery / holds audio focus while idle.
+    const keepAlive = (function () {
+        let el = null, on = false;
+        // Build a tiny silent WAV (1 s, 8 kHz, 16-bit mono) at runtime — no external asset, no big base64 blob.
+        function silentWavUrl() {
+            const sr = 8000, n = sr, bytes = 44 + n * 2;
+            const b = new ArrayBuffer(bytes), v = new DataView(b);
+            const w = (o, s) => { for (let i = 0; i < s.length; i++) v.setUint8(o + i, s.charCodeAt(i)); };
+            w(0, 'RIFF'); v.setUint32(4, 36 + n * 2, true); w(8, 'WAVE'); w(12, 'fmt ');
+            v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
+            v.setUint32(24, sr, true); v.setUint32(28, sr * 2, true); v.setUint16(32, 2, true);
+            v.setUint16(34, 16, true); w(36, 'data'); v.setUint32(40, n * 2, true); // samples stay 0 = silence
+            let bin = ''; const u8 = new Uint8Array(b); for (let i = 0; i < u8.length; i++) bin += String.fromCharCode(u8[i]);
+            return 'data:audio/wav;base64,' + btoa(bin);
+        }
+        function start() {
+            if (on) return; on = true;
+            try {
+                if (!el) { el = new Audio(silentWavUrl()); el.loop = true; }
+                el.play().then(() => ttsLog('keepalive ▶')).catch((e) => ttsLog('keepalive blocked: ' + e));
+            } catch (e) { ttsLog('keepalive start failed: ' + e); }
+            try {
+                if ('mediaSession' in navigator) {
+                    if (window.MediaMetadata) navigator.mediaSession.metadata = new MediaMetadata({ title: 'Navigation', artist: 'Tracker' });
+                    navigator.mediaSession.playbackState = 'playing';
+                }
+            } catch (e) { }
+        }
+        function stop() {
+            if (!on) return; on = false;
+            try { if (el) el.pause(); } catch (e) { }
+            try { if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'none'; } catch (e) { }
+            ttsLog('keepalive ■');
+        }
+        return { start, stop };
+    })();
+
     // ---- Spoken-guidance QUEUE ----
     // Turn prompts that land close together (e.g. "Jetzt links" then "danach rechts") must NOT cut each
     // other off — we play them ONE AFTER ANOTHER. SolitaVoice.speak's promise resolves at playback START,
@@ -809,6 +858,7 @@ window.TrackerNav = function (ctx) {
     }
     function speak(text) {
         if (!voiceOn) { ttsLog('skip (voice off)'); return; }
+        keepAlive.start();        // ensure the audio channel is open before any guidance (idempotent)
         text = fixSpeech(text);   // spoken-only pronunciation fixes (display text stays correct)
         if (navSpeakQueue[navSpeakQueue.length - 1] === text) return; // identical line already queued
         navSpeakQueue.push(text);
@@ -1113,7 +1163,7 @@ window.TrackerNav = function (ctx) {
         return computeRoute([from[0], from[1]], true, travelBrg).finally(() => { rerouting = false; });
     }
 
-    const api = { openPanel, hasDestination, startNavigation, navigateTo, clearRoute, update, remainingBounds, frameRoute, tripData, avoidReroute, routePoints: () => routeLatLngs };
+    const api = { openPanel, hasDestination, startNavigation, navigateTo, clearRoute, update, remainingBounds, frameRoute, tripData, avoidReroute, setEngine, getEngine, routePoints: () => routeLatLngs };
     // Bridge for the Solita navigate_to add-on (js/solita-navigate.js): the nav instance is module-private
     // in tracker.js (__nav), so publish a handle here so the voice tool can route programmatically without
     // touching tracker.js. Last constructed instance wins (there is only one).
