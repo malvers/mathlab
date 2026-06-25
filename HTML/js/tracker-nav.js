@@ -302,7 +302,7 @@ window.TrackerNav = function (ctx) {
         const input = $('nav-dest'); if (!input) return;
         const hint = $('nav-found-hint'); if (hint) hint.hidden = true;   // name is in the field itself
         if (destLabel) { input.value = shortLabel(destLabel); input.classList.add('nav-found'); previewStart(); }
-        else { input.classList.remove('nav-found'); showSingleStart(); }
+        else { input.classList.remove('nav-found'); hideStart(); }
     }
 
     // ---- Two informed START buttons (Doc 2026-06-25): once a destination is green, replace the single
@@ -311,11 +311,19 @@ window.TrackerNav = function (ctx) {
     let previewFor = '';     // dest key already previewed → avoid recomputing the same pair
     let previewGen = 0;
     function destKey() { return destLatLng ? destLatLng[0].toFixed(5) + ',' + destLatLng[1].toFixed(5) : ''; }
-    function showSingleStart() {
+    function hideStart() {                 // no destination → no START buttons at all
         previewFor = '';
-        const one = $('nav-set'), two = $('nav-start2');
-        if (one) one.hidden = false;
-        if (two) two.hidden = true;
+        const two = $('nav-start2'); if (two) two.hidden = true;
+    }
+    function showStartNoPreview() {         // destination set but times unknown (no ORS/position) → buttons w/o meta
+        previewFor = '';
+        const two = $('nav-start2'); if (!two) return;
+        two.hidden = false;
+        const fm = $('nav-start-fast-meta'), sm = $('nav-start-short-meta');
+        if (fm) fm.textContent = ''; if (sm) sm.textContent = '';
+        const fb = $('nav-start-fast'), sb = $('nav-start-short');
+        if (fb) { fb.classList.remove('alt'); const k = fb.querySelector('.nav-start-kind'); if (k) k.textContent = 'schnellste'; }
+        if (sb) { sb.classList.remove('alt'); const k = sb.querySelector('.nav-start-kind'); if (k) k.textContent = 'kürzeste'; }
     }
     function fmtDur(sec) {
         const m = Math.round(sec / 60);
@@ -345,18 +353,19 @@ window.TrackerNav = function (ctx) {
         if (shortBtn) { shortBtn.classList.toggle('alt', recFast); const k = shortBtn.querySelector('.nav-start-kind'); if (k) k.textContent = (recFast ? '' : '✓ ') + 'kürzeste'; }
     }
     async function previewStart() {
-        const one = $('nav-set'), two = $('nav-start2');
-        if (!one || !two) return;
+        const two = $('nav-start2'); if (!two) return;
+        if (!destLatLng) { hideStart(); return; }
         const from = curPos();
-        // Only ORS can show both variants; without ORS or without ANY position → keep the single STARTEN.
-        if (!destLatLng || routeEngine !== 'ors' || !from) { showSingleStart(); return; }
+        // Times need ORS + a position (WLAN is enough). Without them, still show the two buttons — just without
+        // the time/distance line — so a tap always starts (the route is computed on START).
+        if (routeEngine !== 'ors' || !from) { showStartNoPreview(); return; }
         const key = destKey();
         if (key === previewFor && !two.hidden) return;   // already showing for this destination
         previewFor = key;
         const my = ++previewGen;
         const fm = $('nav-start-fast-meta'), sm = $('nav-start-short-meta');
         if (fm) fm.textContent = '…'; if (sm) sm.textContent = '…';
-        one.hidden = true; two.hidden = false;
+        two.hidden = false;
         let fast, short;
         try {
             [fast, short] = await Promise.all([
@@ -365,7 +374,7 @@ window.TrackerNav = function (ctx) {
             ]);
         } catch (e) { fast = short = null; }
         if (my !== previewGen || destKey() !== key) return;       // destination changed meanwhile → stale
-        if (!fast && !short) { showSingleStart(); return; }        // ORS unreachable → fall back to single button
+        if (!fast && !short) { showStartNoPreview(); return; }     // ORS unreachable → buttons without times
         if (fm) fm.textContent = fmtRoute(fast);
         if (sm) sm.textContent = fmtRoute(short);
         applyRecommendation(fast, short);                          // green = recommended, orange = the alternative
@@ -1096,7 +1105,7 @@ window.TrackerNav = function (ctx) {
         const input = $('nav-dest'), hint = $('nav-found-hint');
         if (input) input.classList.remove('nav-found');
         if (hint) hint.hidden = true;
-        showSingleStart();   // no green destination → back to the single STARTEN
+        hideStart();   // no green destination → no START buttons
     }
 
     // ---- Panel ----
@@ -1147,7 +1156,6 @@ window.TrackerNav = function (ctx) {
     }
 
     // Wire the panel's own buttons once.
-    const setBtn = $('nav-set'); if (setBtn) setBtn.addEventListener('click', startFromDialog);
     // Two informed START buttons → pick the preference, then start (same path as STARTEN).
     const startFast = $('nav-start-fast'); if (startFast) startFast.addEventListener('click', () => { setPref('fastest'); startFromDialog(); });
     const startShort = $('nav-start-short'); if (startShort) startShort.addEventListener('click', () => { setPref('shortest'); startFromDialog(); });
