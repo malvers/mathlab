@@ -2,17 +2,17 @@
 //
 // Purpose: reproduce and MEASURE the off-route reroute behaviour at the desk — no driving, no real GPS.
 // The car AUTO-DRIVES along the computed OSRM route at the set speed, feeding synthetic GPS fixes through
-// the REAL onPosition pipeline (ctx.feed) so navigation/reroute/guidance behave 1:1 with the field. The
-// "Abweichen" button sends it straight off the route (keeps heading, ignores the turn) → off-route → we
-// watch whether the reroute goes FORWARD or says "wenden". While it runs, simMode in tracker.js suppresses
-// recording/cloud-sync (ctx.setSim) and the real navigator.geolocation is neutralised, so nothing real is
-// touched and no genuine desktop fix can fight the synthetic car.
+// the REAL onPosition pipeline (ctx.feed) so navigation/reroute/guidance behave 1:1 with the field. To
+// force an off-route situation, CLICK a point on the map WHILE DRIVING: the car beelines toward it (off the
+// route) → reroute → we watch whether the new route goes FORWARD or says "wenden", then it resumes the new
+// route. While it runs, simMode in tracker.js suppresses recording/cloud-sync (ctx.setSim) and the real
+// navigator.geolocation is neutralised, so nothing real is touched and no desktop fix can fight the car.
 //
-// Usage (open with ?sim=1 → "NAV-SIM" panel, bottom-left):
+// Usage (open with ?sim=1 → "NAVI-SIMULATION" panel, bottom-left):
 //   1) "Home" drops the car at the saved Home.
 //   2) Pick a destination via the normal "Ziel" popup.
-//   3) "Fahren" → the car drives the route automatically.
-//   4) "Abweichen" → it leaves the route on purpose → reroute. Watch the DEBUG window (sim: …).
+//   3) "GO" → the car drives the route automatically (GO toggles to STOP).
+//   4) Click the map mid-drive → the car deviates toward the click → reroute. Watch DEBUG (sim: …).
 window.TrackerNavSim = function (ctx) {
     const { map, feed, setSim, nav } = ctx;
     const dbg = (m) => { if (window.DebugWindow && DebugWindow.log) DebugWindow.log('sim: ' + m); };
@@ -24,14 +24,13 @@ window.TrackerNavSim = function (ctx) {
     let clock = 0;           // sim timestamp (ms) — advances DT_SIM_MS per emitted fix
     const DT_SIM_MS = 1000;  // each fix represents one simulated second (drives the speed maths)
     const DT_REAL_MS = 600;  // wall-clock between fixes (how fast you watch it play out)
-    const DEVIATE_M = 250;   // how far "Abweichen" drives straight off the route before resuming
 
     // route-follow state
     let route = null;        // [[lat,lng]…] the route we're currently following
     let routeRef = null;     // identity of the adopted route array → detect a reroute (new array)
     let routeCum = null;     // cumulative segment lengths (m), routeCum[i] = dist from start to point i
     let s = 0;               // current distance travelled along the route (m)
-    let deviating = 0;       // metres left to drive straight OFF the route (0 = following)
+    let manualTarget = null; // [lat,lng] you clicked to drive toward (off the route); null = following the route
     let lastLog = 0;
 
     // ---- geo helpers (degrees) ----
@@ -100,11 +99,16 @@ window.TrackerNavSim = function (ctx) {
     function tick() {
         if (!car) return;
         const step = (maxKmh / 3.6) * (DT_SIM_MS / 1000); // metres this simulated second
-        if (deviating > 0) {                              // drive straight off the route (keep heading)
-            car = moveAlong(car, brg, step);
-            deviating -= step;
-            emit();
-            if (deviating <= 0) { routeRef = null; dbg('Abweichung beendet → folge der (neuen) Route'); status('zurück auf Route'); }
+        if (manualTarget) {                               // you clicked a point off the route → beeline there
+            const dist = haversine(car, manualTarget);
+            brg = bearingDeg(car, manualTarget);
+            if (dist <= step) {                           // arrived → resume following the (by now rerouted) line
+                car = manualTarget.slice(); manualTarget = null; emit();
+                routeRef = null; dbg('Abweichpunkt erreicht → folge der (neuen) Route'); status('zurück auf Route');
+                return;
+            }
+            car = moveAlong(car, brg, step); emit();
+            if (clock - lastLog >= 3000) { lastLog = clock; dbg('weiche ab → noch ' + Math.round(dist) + ' m'); }
             return;
         }
         if (!syncRoute()) { stopLoop(); status('keine Route — Ziel wählen + STARTEN'); dbg('keine Route zum Folgen'); return; }
@@ -125,7 +129,7 @@ window.TrackerNavSim = function (ctx) {
         catch (e) { return null; }
     }
     function placeCarAtHome() {
-        stopLoop(); deviating = 0; routeRef = null; route = null; s = 0; clock = 0;
+        stopLoop(); manualTarget = null; routeRef = null; route = null; s = 0; clock = 0;
         const h = loadHome();
         if (h) car = h; else { const c = map.getCenter(); car = [c.lat, c.lng]; dbg('kein Home gesetzt → Auto auf Kartenmitte'); }
         brg = 0;
@@ -143,7 +147,7 @@ window.TrackerNavSim = function (ctx) {
         }
         routeRef = null;                       // force a fresh adopt + project
         if (!syncRoute()) { status('kein Ziel — erst im Ziel-Popup wählen'); dbg('kein Ziel/Route → nichts zu fahren'); return; }
-        deviating = 0; s = 0;                  // start at the route's beginning (≈ the car)
+        manualTarget = null; s = 0;            // start at the route's beginning (≈ the car)
         startLoop();
         status('fährt die Route …');
     }
@@ -153,7 +157,15 @@ window.TrackerNavSim = function (ctx) {
     function status(m) { if (elStatus) elStatus.textContent = m; }
     // The drive button is a toggle: GO starts auto-following, STOP halts. Label tracks the loop state.
     function setGoLabel() { if (btnGo) btnGo.textContent = timer ? 'STOP' : 'GO'; }
-    function onGo() { if (timer) { stopLoop(); deviating = 0; status(''); } else { startDriving(); } }
+    function onGo() { if (timer) { stopLoop(); manualTarget = null; status(''); } else { startDriving(); } }
+    // While driving, a map click sets a point to drive toward OFF the route → triggers a reroute. When the
+    // car isn't driving, clicks are ignored so the map stays normally usable (pan/zoom/explore).
+    function onMapClick(e) {
+        if (!timer) return;                    // only deviate while actually driving
+        manualTarget = [e.latlng.lat, e.latlng.lng];
+        dbg('Abweich-Klick → fahre zu ' + manualTarget[0].toFixed(5) + ',' + manualTarget[1].toFixed(5));
+        status('weicht ab (Klick) …');
+    }
     function mkBtn(label, fn) {
         const b = document.createElement('button');
         b.textContent = label;
@@ -190,12 +202,6 @@ window.TrackerNavSim = function (ctx) {
         bRow.appendChild(mkBtn('Home', placeCarAtHome));
         btnGo = mkBtn('GO', onGo);
         bRow.appendChild(btnGo);
-        bRow.appendChild(mkBtn('Abweichen', () => {
-            if (!car) { status('erst „Home"'); return; }
-            deviating = DEVIATE_M; startLoop();
-            dbg('Abweichen: ' + DEVIATE_M + ' m geradeaus, Heading ' + Math.round(brg));
-            status('weicht ab …');
-        }));
         p.appendChild(bRow);
         setGoLabel();
 
@@ -215,6 +221,7 @@ window.TrackerNavSim = function (ctx) {
         navigator.geolocation.clearWatch = function () { };
     }
     buildPanel();
+    map.on('click', onMapClick);   // click while driving → deviate toward that point (off-route → reroute)
     dbg('Simulator aktiv (?sim=1). Recording/Cloud AUS, echtes GPS AUS.');
 
     return { isActive: () => true, setSpeed: (kmh) => { maxKmh = kmh; } };
