@@ -52,6 +52,7 @@ window.TrackerNav = function (ctx) {
     let destMarker = null;  // Leaflet pin at the destination
     const HOME_KEY = 'trk_nav_home';
     const HIST_KEY = 'trk_nav_history';  // recent destinations [{lat,lng,label,t}] (localStorage), unlimited
+    const LAST_KEY = 'trk_nav_last';     // last navigated destination {lat,lng,label} → restored on reload
     let home = null;        // saved "Zuhause" { lat, lng, label } (localStorage), or null
     let routeLine = null;   // Leaflet layerGroup of the computed route (casing + core)
     let routeCasing = null, routeCore = null; // the two polylines, kept so update() can re-slice them
@@ -400,8 +401,22 @@ window.TrackerNav = function (ctx) {
         const from = curPos();
         if (!from) { toast('Navigation: warte auf GPS-Position …'); return false; }
         const ok = await computeRoute(from, false);
-        if (ok) pushHistory(destLatLng, destLabel);
+        if (ok) { pushHistory(destLatLng, destLabel); saveLastRoute(); }
         return ok;
+    }
+
+    // Persist / restore the last navigated destination so a reload doesn't lose it (Doc 2026-06-25).
+    function saveLastRoute() {
+        try { localStorage.setItem(LAST_KEY, JSON.stringify({ lat: destLatLng[0], lng: destLatLng[1], label: destLabel || 'Ziel' })); } catch (e) { }
+    }
+    function restoreLastRoute() {
+        let d; try { d = JSON.parse(localStorage.getItem(LAST_KEY) || 'null'); } catch (e) { return; }
+        if (!d || d.lat == null || d.lng == null) return;
+        destLatLng = [d.lat, d.lng];
+        destLabel = d.label || 'Ziel';
+        showDestMarker();   // re-arm the destination (marker + panel); navigation starts on the next START/GO
+        refreshPanel();
+        refreshHome();
     }
 
     // Set a destination directly by COORDINATES (a POI / map-pin tap, not a typed address) and route to
@@ -735,8 +750,18 @@ window.TrackerNav = function (ctx) {
     // via the `tts` edge fn, js/solita-voice.js) — the SAME path that speaks in the Pixel's Android WebView,
     // where on-device speechSynthesis stays silent. FALLBACK: speechSynthesis (desktop/standalone). De-dupes
     // an identical line that's already waiting, so a repeated tick doesn't stutter.
+    // Spoken-only pronunciation fixes: some voices (esp. on-device "Anna") mangle names — "Dresdner" → it
+    // says "Dräsdner". We respell ONLY what the TTS receives; the on-screen banner keeps the correct spelling.
+    // Add pairs here as more bad pronunciations surface.
+    const SAY_AS = { 'Dresdner': 'Dreesdner' };
+    function fixSpeech(t) {
+        let s = t;
+        for (const k in SAY_AS) s = s.replace(new RegExp(k, 'g'), SAY_AS[k]);
+        return s;
+    }
     function speak(text) {
         if (!voiceOn) { ttsLog('skip (voice off)'); return; }
+        text = fixSpeech(text);   // spoken-only pronunciation fixes (display text stays correct)
         if (navSpeakQueue[navSpeakQueue.length - 1] === text) return; // identical line already queued
         navSpeakQueue.push(text);
         while (navSpeakQueue.length > SPEAK_QUEUE_MAX) navSpeakQueue.shift(); // burst → drop oldest waiting (stale)
@@ -906,7 +931,7 @@ window.TrackerNav = function (ctx) {
 
     // Wire the panel's own buttons once.
     const setBtn = $('nav-set'); if (setBtn) setBtn.addEventListener('click', startFromDialog);
-    const clrBtn = $('nav-clear'); if (clrBtn) clrBtn.addEventListener('click', () => { clearRoute(); toast('Ziel gelöscht.'); });
+    const clrBtn = $('nav-clear'); if (clrBtn) clrBtn.addEventListener('click', () => { clearRoute(); try { localStorage.removeItem(LAST_KEY); } catch (e) { } toast('Ziel gelöscht.'); });
     const hereBtn = $('nav-here'); if (hereBtn) hereBtn.addEventListener('click', savePin);
 
     // Enter in the single line = STARTEN (faster than reaching for the button).
@@ -997,6 +1022,7 @@ window.TrackerNav = function (ctx) {
         home = loadHome();   // instant from localStorage …
         refreshHome();
         hydrateFromCloud();  // … then let the cloud copy (same account) override / seed it
+        restoreLastRoute();  // re-arm the last navigated destination (survives reload)
     })();
 
     // Voice toggle (persisted): default on, but the user can silence spoken guidance.
