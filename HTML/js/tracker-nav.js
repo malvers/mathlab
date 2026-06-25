@@ -1277,7 +1277,11 @@ window.TrackerNav = function (ctx) {
             const t = b.getAttribute('data-route') === 'foot' ? 'foot' : 'car';
             if (t === routeType) return;
             routeType = t; localStorage.setItem(ROUTE_KEY, routeType); reflect();
-            if (destLatLng) { const from = curPos(); if (from) computeRoute(from, false); }   // re-route in the new profile
+            if (destLatLng) {
+                previewFor = '';                                   // profile changed → the cached START preview is stale
+                previewStart();                                    // refresh the two START buttons for the new profile (foot/car)
+                if (routeLatLngs) { const from = curPos(); if (from) computeRoute(from, false); }   // already navigating → re-route the drawn line too
+            }
         }));
         reflect();
     })();
