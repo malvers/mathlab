@@ -43,7 +43,7 @@
             // How long a SPEECH PAUSE must last before Solita decides Doc is done and submits the dictated
             // turn on its own (Doc 2026-06-25: zurück auf eine GROSSE Pause — er will in Ruhe denken). The
             // fast path is the spoken finish word "fertig" or the ✓ button, which submit immediately.
-            const PAUSE_MS = 10000;
+            const PAUSE_MS = 6000;
 
             // Build the generic ear with Solita's config. The ear knows no Solita words/DOM/globals.
             const ear = new Ear({
