@@ -105,7 +105,7 @@ window.TrackerNavSim = function (ctx) {
             detour.s += step;
             if (detour.s >= dtotal) {                      // arrived → resume following the (by now rerouted) line
                 const e = pointAt(detour.pts, detour.cum, dtotal); car = e.pos; brg = e.brg; emit();
-                detour = null; routeRef = null; dbg('Abweichpunkt erreicht → folge der (neuen) Route'); status('zurück auf Route');
+                detour = null; clearDevMarker(); routeRef = null; dbg('Abweichpunkt erreicht → folge der (neuen) Route'); status('zurück auf Route');
                 return;
             }
             const at = pointAt(detour.pts, detour.cum, detour.s); car = at.pos; brg = at.brg; emit();
@@ -130,7 +130,7 @@ window.TrackerNavSim = function (ctx) {
         catch (e) { return null; }
     }
     function placeCarAtHome() {
-        stopLoop(); detour = null; routeRef = null; route = null; s = 0; clock = 0;
+        stopLoop(); detour = null; clearDevMarker(); routeRef = null; route = null; s = 0; clock = 0;
         const h = loadHome();
         if (h) car = h; else { const c = map.getCenter(); car = [c.lat, c.lng]; dbg('kein Home gesetzt → Auto auf Kartenmitte'); }
         brg = 0;
@@ -158,7 +158,7 @@ window.TrackerNavSim = function (ctx) {
     function status(m) { if (elStatus) elStatus.textContent = m; }
     // The drive button is a toggle: GO starts auto-following, STOP halts. Label tracks the loop state.
     function setGoLabel() { if (btnGo) btnGo.textContent = timer ? 'STOP' : 'GO'; }
-    function onGo() { if (timer) { stopLoop(); detour = null; status(''); } else { startDriving(); } }
+    function onGo() { if (timer) { stopLoop(); detour = null; clearDevMarker(); status(''); } else { startDriving(); } }
     // Fetch an OSRM ROAD route (car profile) between two [lat,lng] points → [[lat,lng]…] or null. Used so a
     // deviation drives on real streets, never across fields.
     async function osrmRoute(from, to) {
@@ -170,14 +170,22 @@ window.TrackerNavSim = function (ctx) {
             return (d.routes[0].geometry.coordinates || []).map((x) => [x[1], x[0]]); // GeoJSON [lon,lat] → [lat,lng]
         } catch (e) { return null; }
     }
+    // Deviation-target marker (λ-orange ring) — shows where you clicked; cleared when the car reaches it.
+    let devMarker = null;
+    function setDevMarker(ll) {
+        clearDevMarker();
+        devMarker = L.circleMarker(ll, { radius: 9, color: '#fff', weight: 2, fillColor: 'rgb(245,194,66)', fillOpacity: 0.95 }).addTo(map);
+    }
+    function clearDevMarker() { if (devMarker) { map.removeLayer(devMarker); devMarker = null; } }
     // While driving, a map click routes the car ON ROADS to that point (off the nav route) → triggers a
     // reroute. When not driving, clicks are ignored so the map stays normally usable (pan/zoom/explore).
     async function onMapClick(e) {
         if (!timer || !car) return;            // only deviate while actually driving
         const to = [e.latlng.lat, e.latlng.lng];
+        setDevMarker(to);                      // instant feedback at the clicked point; removed on arrival
         status('Abweich-Route …'); dbg('Abweich-Klick → route via Straßen zu ' + to[0].toFixed(5) + ',' + to[1].toFixed(5));
         const pts = await osrmRoute(car, to);
-        if (!pts || pts.length < 2) { status('keine Straße dahin'); dbg('OSRM: keine Abweich-Route'); return; }
+        if (!pts || pts.length < 2) { clearDevMarker(); status('keine Straße dahin'); dbg('OSRM: keine Abweich-Route'); return; }
         const cum = cumLengths(pts);
         detour = { pts, cum, s: projectDist(pts, cum, car) };  // start at the car's position on the detour
     }
