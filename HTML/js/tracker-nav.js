@@ -163,8 +163,29 @@ window.TrackerNav = function (ctx) {
         });
     }
 
+    // Build a clean label from a Nominatim hit's STRUCTURED address (Doc 2026-06-25): "Name, Straße Nr · PLZ
+    // Ort". Uses city/town/village/municipality for the place → never the Landkreis (the display_name string
+    // can't tell "Meißen" the county from a town). Returns "" if there's nothing usable.
+    function builtLabel(hit) {
+        if (!hit) return '';
+        const a = hit.address || {};
+        const city = a.city || a.town || a.village || a.municipality || a.suburb || a.hamlet || '';
+        const plz = a.postcode || '';
+        const poi = hit.name || a.amenity || a.shop || a.tourism || a.building || '';
+        const street = a.road || a.pedestrian || a.footway || '';
+        const nr = a.house_number || '';
+        let base;
+        if (poi && street) base = poi + ', ' + street + (nr ? ' ' + nr : '');
+        else if (poi) base = poi;
+        else if (street) base = street + (nr ? ' ' + nr : '');
+        else base = (hit.display_name || '').split(',')[0].trim();
+        const loc = plz ? plz + (city ? ' ' + city : '') : city;
+        return loc ? (base + ' · ' + loc) : base;
+    }
+
     function shortLabel(s) {
         const full = s || '';
+        if (full.includes(' · ')) return full;   // already a built label (Name · PLZ Ort) → leave as is
         const parts = full.split(',').map((x) => x.trim()).filter(Boolean);
         if (!parts.length) return '';
         const isNum = (x) => /^\d+[a-z]?$/i.test(x);
@@ -194,7 +215,7 @@ window.TrackerNav = function (ctx) {
         // With a GPS position we fetch SEVERAL candidates and pick the geographically NEAREST — so
         // "Tankstelle" / "Lidl" / "Bäcker" resolve to the one NEAR you, not Nominatim's globally most
         // "important" match (Doc 2026-06-23). Without GPS → limit=1, top hit as before.
-        let url = NOMINATIM + '?format=jsonv2&limit=' + (from ? 10 : 1) + '&q=' + encodeURIComponent(q);
+        let url = NOMINATIM + '?format=jsonv2&addressdetails=1&limit=' + (from ? 10 : 1) + '&q=' + encodeURIComponent(q);
         // Soft bias toward the current position (NO `bounded` → only re-ranks; an explicit far city still
         // shows up among the candidates). ~±0.6° ≈ a regional box (left,top,right,bottom).
         if (from) {
@@ -217,10 +238,11 @@ window.TrackerNav = function (ctx) {
     // ---- Reverse geocoding: current coords → a human label (or null). Keyless Nominatim (rule 18). ----
     async function reverseGeocode(latlng) {
         const url = NOMINATIM.replace('/search', '/reverse')
-            + '?format=jsonv2&lat=' + latlng[0] + '&lon=' + latlng[1];
+            + '?format=jsonv2&addressdetails=1&lat=' + latlng[0] + '&lon=' + latlng[1];
         const r = await fetch(url, { headers: { Accept: 'application/json' } });
         const data = await r.json();
-        return (data && data.display_name) ? data.display_name : null;
+        if (!data) return null;
+        return builtLabel(data) || data.display_name || null;
     }
 
     // ---- "Position merken": save the CURRENT position as a pin into the recent-destinations list, so it
@@ -248,7 +270,7 @@ window.TrackerNav = function (ctx) {
         try { hit = await geocode(q); }
         catch (e) { toast('Adress-Suche fehlgeschlagen (offline?).'); return; }
         if (!hit) { toast('Adresse nicht gefunden.'); return; }
-        applyDestination([parseFloat(hit.lat), parseFloat(hit.lon)], hit.display_name || q);
+        applyDestination([parseFloat(hit.lat), parseFloat(hit.lon)], builtLabel(hit) || hit.display_name || q);
     }
 
     // Apply a KNOWN destination (coords + label) — no geocoding. Shared by setDestination (typed/dictated
@@ -1041,7 +1063,7 @@ window.TrackerNav = function (ctx) {
             catch (e) { toast('Adress-Suche fehlgeschlagen (offline?).'); return; }
             if (!hit) { toast('Adresse nicht gefunden.'); return; }
             destLatLng = [parseFloat(hit.lat), parseFloat(hit.lon)];
-            destLabel = hit.display_name || q;
+            destLabel = builtLabel(hit) || hit.display_name || q;
             showDestMarker();
             refreshHome();
         }
@@ -1081,7 +1103,7 @@ window.TrackerNav = function (ctx) {
             if (my !== gen || ($('nav-dest').value || '').trim() !== q) return; // superseded by a newer keystroke
             if (!hit) { clearFoundUI(); foundFor = ''; return; }    // no match → no green (don't touch a prior set)
             destLatLng = [parseFloat(hit.lat), parseFloat(hit.lon)];
-            destLabel = hit.display_name || q;
+            destLabel = builtLabel(hit) || hit.display_name || q;
             showDestMarker();                                       // drop the pin; do NOT fit/center (no jump while typing)
             refreshHome();
             foundFor = q;
