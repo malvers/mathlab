@@ -248,10 +248,17 @@ window.TrackerNav = function (ctx) {
             if (from) map.fitBounds(L.latLngBounds([from, destLatLng]), { padding: [60, 60] });
             else map.setView(destLatLng, Math.max(map.getZoom(), 13));
         } catch (e) { }
-        hidePanels();
-        toast('Ziel gesetzt: ' + shortLabel(destLabel) + ' — jetzt START');
         refreshHome();
-        clearFoundUI();   // the explicit set supersedes any live "found" hint
+        reflectDestInField();   // show the chosen destination GREEN in the search line; panel STAYS open → press STARTEN
+    }
+
+    // The search line IS the destination indicator (Doc 2026-06-25): a picked/typed destination shows there
+    // in green (same "found" style as live geocoding), instead of a separate "Ziel: …" row.
+    function reflectDestInField() {
+        const input = $('nav-dest'); if (!input) return;
+        const hint = $('nav-found-hint'); if (hint) hint.hidden = true;   // name is in the field itself
+        if (destLabel) { input.value = shortLabel(destLabel); input.classList.add('nav-found'); }
+        else input.classList.remove('nav-found');
     }
 
     // ---- Navigation history: the last few destinations, as a quick-pick list in the Ziel-dialog ----
@@ -983,11 +990,11 @@ window.TrackerNav = function (ctx) {
     // ---- Panel ----
     function refreshPanel() {
         const cur = $('nav-current'), clr = $('nav-clear');
-        if (cur) { cur.textContent = destLabel ? ('Ziel: ' + shortLabel(destLabel)) : ''; cur.hidden = !destLabel; }
+        if (cur) cur.hidden = true;   // destination now shown GREEN in the search field, not as a separate row
         if (clr) clr.hidden = !destLabel;
     }
 
-    function openPanel() { refreshPanel(); renderHistory(); clearFoundUI(); showPanel('nav-panel'); }
+    function openPanel() { refreshPanel(); renderHistory(); clearFoundUI(); reflectDestInField(); showPanel('nav-panel'); }
 
     // Frame the WHOLE route (start → destination) in view — the overview shown briefly at nav start
     // before the map glides into the crosshair follow-view. Falls back to current-position↔destination
