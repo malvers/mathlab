@@ -55,6 +55,12 @@ window.TrackerNav = function (ctx) {
     let routeEngine = (localStorage.getItem(ENGINE_KEY) === 'osrm') ? 'osrm' : 'ors';
     function setEngine(e) { routeEngine = (e === 'osrm') ? 'osrm' : 'ors'; try { localStorage.setItem(ENGINE_KEY, routeEngine); } catch (x) { } }
     function getEngine() { return routeEngine; }
+    // Route preference: 'fastest' (default) | 'shortest'. Only effective on ORS (OSRM = fastest only); a
+    // shortest reroute that falls back to OSRM is simply fastest (Doc 2026-06-25).
+    const PREF_KEY = 'trk_route_pref';
+    let routePref = (localStorage.getItem(PREF_KEY) === 'shortest') ? 'shortest' : 'fastest';
+    function setPref(p) { routePref = (p === 'shortest') ? 'shortest' : 'fastest'; try { localStorage.setItem(PREF_KEY, routePref); } catch (x) { } }
+    function getPref() { return routePref; }
     const BRG_RANGE_DEG = 90;       // (only used when USE_DEPART_BEARING) OSRM may depart within ±this of the travel heading
     const BRG_MIN_MOVE_M = 12;      // min travel between fixes for a trustworthy movement-derived heading
     const ANNOUNCE_FAR_M = 300;     // distance at which the pre-warning ("In 300 m …") is spoken
@@ -446,6 +452,7 @@ window.TrackerNav = function (ctx) {
                     from: [from[0], from[1]], to: [to[0], to[1]],
                     heading: (brg != null ? brg : null),
                     profile: (routeType === 'foot' ? 'foot-walking' : 'driving-car'),
+                    preference: routePref,                // 'fastest' | 'shortest'
                     avoid_polygons: avoid || undefined,   // JSON.stringify drops it when null → option omitted
                 }),
             });
@@ -1208,7 +1215,7 @@ window.TrackerNav = function (ctx) {
         return computeRoute([from[0], from[1]], true, travelBrg).finally(() => { rerouting = false; });
     }
 
-    const api = { openPanel, hasDestination, startNavigation, navigateTo, clearRoute, update, remainingBounds, frameRoute, tripData, avoidReroute, setEngine, getEngine, routePoints: () => routeLatLngs };
+    const api = { openPanel, hasDestination, startNavigation, navigateTo, clearRoute, update, remainingBounds, frameRoute, tripData, avoidReroute, setEngine, getEngine, setPref, getPref, routePoints: () => routeLatLngs };
     // Bridge for the Solita navigate_to add-on (js/solita-navigate.js): the nav instance is module-private
     // in tracker.js (__nav), so publish a handle here so the voice tool can route programmatically without
     // touching tracker.js. Last constructed instance wins (there is only one).
