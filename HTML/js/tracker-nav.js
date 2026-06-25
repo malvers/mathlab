@@ -15,6 +15,7 @@
 // GPS fix, and calls clearRoute() on STOP.
 window.TrackerNav = function (ctx) {
     const { map, $, toast, showPanel, hidePanels } = ctx;
+    const apiUrl = ctx.apiUrl, apiKey = ctx.apiKey;   // Supabase base + anon key → reroute proxy (ORS)
 
     const NOMINATIM = 'https://nominatim.openstreetmap.org/search';
     // Wegetyp (Doc 2026-06-17): Straße (car) or Laufen (foot). FOSSGIS hosts keyless OSRM instances per
@@ -47,6 +48,10 @@ window.TrackerNav = function (ctx) {
     // graph + U-turn penalty decide. So we default the cone OFF; flip USE_DEPART_BEARING back to true to
     // compare in the sim.
     const USE_DEPART_BEARING = false;
+    // Off-route reroute engine: 'osrm' (default, public OSRM) | 'ors' (Google-näher via the `reroute` Edge
+    // Function → OpenRouteService: heading tolerance + U-turn handling). 'ors' needs the function deployed
+    // and ORS_API_KEY set; on ANY failure it falls back to OSRM, so flipping this is safe (Doc 2026-06-25).
+    const REROUTE_ENGINE = 'osrm';
     const BRG_RANGE_DEG = 90;       // (only used when USE_DEPART_BEARING) OSRM may depart within ±this of the travel heading
     const BRG_MIN_MOVE_M = 12;      // min travel between fixes for a trustworthy movement-derived heading
     const ANNOUNCE_FAR_M = 300;     // distance at which the pre-warning ("In 300 m …") is spoken
@@ -373,6 +378,28 @@ window.TrackerNav = function (ctx) {
         const di = $('nav-dest'); if (di) di.value = '';
     }
 
+    // Off-route reroute through the `reroute` Edge Function (→ OpenRouteService). Returns OSRM-shaped data
+    // (so computeRoute parses it unchanged), or null on ANY failure → computeRoute then falls back to OSRM.
+    // `heading` constrains the departure direction (≈±60° server-side) so the new route goes forward, not
+    // back onto the rejected line.
+    async function fetchRerouteORS(from, to, brg) {
+        if (!apiUrl || !apiKey || !to) return null;
+        try {
+            const r = await fetch(apiUrl + '/functions/v1/reroute', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', apikey: apiKey, Authorization: 'Bearer ' + apiKey },
+                body: JSON.stringify({
+                    from: [from[0], from[1]], to: [to[0], to[1]],
+                    heading: (brg != null ? brg : null),
+                    profile: (routeType === 'foot' ? 'foot-walking' : 'driving-car'),
+                }),
+            });
+            if (!r.ok) return null;
+            const d = await r.json();
+            return (d && d.code === 'Ok' && d.routes && d.routes.length) ? d : null;
+        } catch (e) { return null; }
+    }
+
     // ---- Routing: a position → destination, drawn as a polyline ----
     // Shared by START (startNavigation) and the off-route reroute (update). `reroute` only tweaks toasts.
     async function computeRoute(from, reroute, brg) {
@@ -380,14 +407,17 @@ window.TrackerNav = function (ctx) {
         toast(reroute ? 'Neue Route …' : 'Route wird berechnet …');
         let data;
         try {
-            // OSRM wants lon,lat order; full geometry as GeoJSON for an easy polyline.
-            const coords = from[1] + ',' + from[0] + ';' + destLatLng[1] + ',' + destLatLng[0];
-            // Off-route reroute (Doc 2026-06-24): constrain the DEPARTURE direction to the live travel heading
-            // via OSRM `bearings` (one entry per coordinate; the destination stays unconstrained → trailing ";").
-            // This forbids OSRM from starting the new route with a U-turn back onto the rejected line.
-            const bearings = (USE_DEPART_BEARING && brg != null) ? '&bearings=' + Math.round(brg) + ',' + BRG_RANGE_DEG + ';' : '';
-            const r = await fetch(OSRM_PROFILES[routeType] + coords + '?overview=full&geometries=geojson&steps=true' + bearings);
-            data = await r.json();
+            // Off-route reroute via the ORS proxy (heading tolerance + U-turn handling) when enabled — and
+            // OSRM otherwise AND as a fallback whenever ORS returns nothing (Doc 2026-06-25).
+            if (REROUTE_ENGINE === 'ors' && reroute) data = await fetchRerouteORS(from, destLatLng, brg);
+            if (!data) {
+                // OSRM wants lon,lat order; full geometry as GeoJSON for an easy polyline.
+                const coords = from[1] + ',' + from[0] + ';' + destLatLng[1] + ',' + destLatLng[0];
+                // Optional OSRM departure-bearing cone (off by default — it backfired at junctions).
+                const bearings = (USE_DEPART_BEARING && brg != null) ? '&bearings=' + Math.round(brg) + ',' + BRG_RANGE_DEG + ';' : '';
+                const r = await fetch(OSRM_PROFILES[routeType] + coords + '?overview=full&geometries=geojson&steps=true' + bearings);
+                data = await r.json();
+            }
         } catch (e) { if (gen === navGen) toast('Route fehlgeschlagen (offline?).'); return false; }
         if (gen !== navGen || !destLatLng) return false; // cleared/superseded while fetching → drop this result
         if (!data || data.code !== 'Ok' || !data.routes || !data.routes.length) { toast('Keine Route gefunden.'); return false; }
