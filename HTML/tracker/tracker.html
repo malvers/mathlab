@@ -1,4 +1,4 @@
-<!-- deploy: 2026-06-25 #21 Nach Hause sticky in der Scrollbox -->
+<!-- deploy: 2026-06-25 #22 zwei START-Buttons (schnellste/kuerzeste mit Zeit+km) -->
 <!DOCTYPE html>
 <html lang="de">
 
@@ -366,15 +366,11 @@
         <div class="ov-body">
             <!-- Current destination shown at the TOP when one is set (Doc 2026-06-25); refreshPanel toggles it. -->
             <div id="nav-current" class="sync-lead" hidden></div>
-            <!-- Wegetyp + Routen-Präferenz as button groups above the address (Doc 2026-06-25: no labels). -->
+            <!-- Wegetyp (Doc 2026-06-25: no label). Fastest/shortest is now chosen via the two START buttons. -->
             <div class="set-row seg-row" role="group" aria-label="Wegetyp">
                 <div class="seg-group">
                     <button type="button" class="seg-btn" data-route="car">Straße</button>
                     <button type="button" class="seg-btn" data-route="foot">Laufen</button>
-                </div>
-                <div class="seg-group">
-                    <button type="button" class="seg-btn" data-pref="fastest">schnellste</button>
-                    <button type="button" class="seg-btn" data-pref="shortest">kürzeste</button>
                 </div>
             </div>
             <!-- One free-text line: type OR dictate the whole address (Nominatim handles "Ort, Straße, Nr."). -->
@@ -393,6 +389,18 @@
             <!-- Live geocoding: a hit while typing turns the field's text green + shows a target icon (CSS
                  .sync-field.nav-found); the separate "Ziel gesetzt" line was removed (Doc 2026-06-21). -->
             <button id="nav-set" class="sync-btn primary" type="button">STARTEN</button>
+            <!-- Once the destination is green, two informed START buttons replace the single one: left fastest,
+                 right shortest, each with its route's time + distance (Doc 2026-06-25). -->
+            <div id="nav-start2" hidden>
+                <button id="nav-start-fast" class="nav-start-btn" type="button">
+                    <span class="nav-start-kind">schnellste</span>
+                    <span class="nav-start-meta" id="nav-start-fast-meta">…</span>
+                </button>
+                <button id="nav-start-short" class="nav-start-btn" type="button">
+                    <span class="nav-start-kind">kürzeste</span>
+                    <span class="nav-start-meta" id="nav-start-short-meta">…</span>
+                </button>
+            </div>
             <!-- Save the CURRENT position as a pin → it shows up under "Letzte Ziele" and can be
                  navigated to later (Doc-Wunsch; FEAT-3-verwandt). -->
             <button id="nav-here" class="sync-btn" type="button">📍 Position merken</button>
