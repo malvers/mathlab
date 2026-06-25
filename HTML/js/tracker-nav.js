@@ -55,10 +55,10 @@ window.TrackerNav = function (ctx) {
     let routeEngine = (localStorage.getItem(ENGINE_KEY) === 'osrm') ? 'osrm' : 'ors';
     function setEngine(e) { routeEngine = (e === 'osrm') ? 'osrm' : 'ors'; try { localStorage.setItem(ENGINE_KEY, routeEngine); } catch (x) { } }
     function getEngine() { return routeEngine; }
-    // Route preference: 'fastest' (default) | 'shortest'. Only effective on ORS (OSRM = fastest only); a
-    // shortest reroute that falls back to OSRM is simply fastest (Doc 2026-06-25).
+    // Route preference: 'shortest' (DEFAULT — Doc 2026-06-25, umweltfreundlicher) | 'fastest'. Only effective
+    // on ORS (OSRM = fastest only); a shortest reroute that falls back to OSRM is simply fastest.
     const PREF_KEY = 'trk_route_pref';
-    let routePref = (localStorage.getItem(PREF_KEY) === 'shortest') ? 'shortest' : 'fastest';
+    let routePref = (localStorage.getItem(PREF_KEY) === 'fastest') ? 'fastest' : 'shortest';
     function setPref(p) { routePref = (p === 'shortest') ? 'shortest' : 'fastest'; try { localStorage.setItem(PREF_KEY, routePref); } catch (x) { } }
     function getPref() { return routePref; }
     const BRG_RANGE_DEG = 90;       // (only used when USE_DEPART_BEARING) OSRM may depart within ±this of the travel heading
