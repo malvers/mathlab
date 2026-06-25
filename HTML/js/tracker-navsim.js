@@ -27,7 +27,7 @@ window.TrackerNavSim = function (ctx) {
     const DT_REAL_MS = 250;  // wall-clock between fixes → ~4× real-time playback (Aston fast-forward 🏎️)
 
     // ---- speed physics ----
-    const A_LAT = 4.0;       // m/s² lateral (cornering) acceleration → curve speed = √(A_LAT·R); brisk, no posted limits
+    const A_LAT = 15.0;      // m/s² lateral (cornering) acceleration → curve speed = √(A_LAT·R); Aston/race, no posted limits → reaches the slider on all but the sharpest bends
     const A_ACC = 1.8;       // m/s² acceleration on straights
     const A_BRAKE = 3.0;     // m/s² braking into curves
     const V_MIN = 8 / 3.6;   // m/s floor so tight curves don't crawl to a standstill
@@ -240,12 +240,12 @@ window.TrackerNavSim = function (ctx) {
         return m;
     }
     function clearDevMarkers() { devMarkers.forEach((m) => map.removeLayer(m)); devMarkers = []; }
-    // While driving, a map click routes the car ON ROADS to that point (off the nav route) → triggers a
-    // reroute. When not driving, clicks are ignored so the map stays normally usable (pan/zoom/explore).
+    // A map click ALWAYS drops a (persistent) marker — even before any drive (Doc 2026-06-25). While the car
+    // IS driving, it additionally routes ON ROADS to that point (off the nav route) → triggers a reroute.
     async function onMapClick(e) {
-        if (!timer || !car) return;            // only deviate while actually driving
         const to = [e.latlng.lat, e.latlng.lng];
-        const m = addDevMarker(to);            // instant feedback; the marker stays (even when driven over)
+        const m = addDevMarker(to);            // marker first — works with or without an active drive
+        if (!timer || !car) { dbg('Marker gesetzt @ ' + to[0].toFixed(5) + ',' + to[1].toFixed(5)); return; }
         status('Abweich-Route …'); dbg('Abweich-Klick → route via Straßen zu ' + to[0].toFixed(5) + ',' + to[1].toFixed(5));
         const pts = await osrmRoute(car, to);
         if (!pts || pts.length < 2) { map.removeLayer(m); devMarkers = devMarkers.filter((x) => x !== m); status('keine Straße dahin'); dbg('OSRM: keine Abweich-Route'); return; }
