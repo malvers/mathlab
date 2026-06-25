@@ -40,12 +40,17 @@
             // awaitingConfirm: a lock-wake asked „Soll ich helfen?" and is waiting for the yes/no answer.
             let awaitingQuery = false, convo = false, paused = false, awaitingConfirm = false, confirmAccepting = false, confirmTimer = null;
 
+            // How long a SPEECH PAUSE must last before Solita decides Doc is done and submits the dictated
+            // turn on its own (Doc 2026-06-25: zurück auf eine GROSSE Pause — er will in Ruhe denken). The
+            // fast path is the spoken finish word "fertig" or the ✓ button, which submit immediately.
+            const PAUSE_MS = 10000;
+
             // Build the generic ear with Solita's config. The ear knows no Solita words/DOM/globals.
             const ear = new Ear({
                 triggers: TRIGGERS,
                 getLang: function () { return window.solitaSttLang ? window.solitaSttLang() : 'de-DE'; },
                 nativePlugin: NATIVE,
-                debounceMs: 900,
+                debounceMs: PAUSE_MS,
                 log: function (m) { if (window.DebugWindow) DebugWindow.log(m); },
                 onWake: onWake,
                 onUtterance: onUtterance,
@@ -346,6 +351,27 @@
                 if (typeof sendMessage === 'function') sendMessage();
             }
 
+            // Explicit finish (Doc 2026-06-25): submit the dictated turn NOW instead of waiting out the
+            // PAUSE_MS speech-gap. Triggered by the spoken finish word "fertig" OR the ✓ button in the input
+            // line. Strip a trailing "fertig" off the dictated text, then route it through the SAME submit
+            // path as the natural debounce (onUtterance), so wake-word stripping + the hmm-filter still apply.
+            const FINISH = /\b(?:bin\s+)?fertig\b[\s.!?]*$/i;          // "fertig" / „bin fertig" at the very end
+            function stripFinish(s) { return s.replace(/[\s,.;:!-]*\b(?:bin\s+)?fertig\b[\s.!?]*$/i, '').trim(); }
+            function finishNow(spoken) {
+                if (window.__uiMode) { uiExec(); return; }            // UI mode runs its own go/„fertig" flow
+                const buffered = ear.flushPending();                  // cancel the debounce, take its buffered final (or null)
+                const out = stripFinish(((input && input.value) || buffered || spoken || '').trim());
+                if (!out) return;                                     // nothing dictated yet → ignore the tap/word
+                if (input) { input.value = out; input.dispatchEvent(new Event('input')); }
+                onUtterance(out);                                     // resolve + strip wake word + submit
+            }
+            window.solitaFinishTurn = finishNow;
+            // Wire the ✓ button in the input line (mirrors the spoken "fertig").
+            (function () {
+                const fb = document.getElementById('solita-finish');
+                if (fb) fb.addEventListener('click', function () { finishNow(); });
+            })();
+
             // THE SEAM: decode every raw trimmed final BEFORE the ear's generic wake/debounce logic. Returns
             // true when this final was a Solita command (ear then does nothing further). This reproduces the
             // live onResult if-ladder (old lines 178-197) IN ORDER; the `return false` cases fall through to
@@ -367,6 +393,7 @@
                 if (window.__uiMode) { handleUiVoice(txt); return true; }   // UI mode: accumulate + go/pause
                 if (input) input.value = '';                           // final arrived → clear the live interim text
                 const addressed = convo || awaitingQuery || ear.matchTrigger(txt) !== null;
+                if (addressed && FINISH.test(txt)) { finishNow(txt); return true; }  // "fertig" → submit the dictated turn now
                 if (addressed && PAUSE.test(txt)) { enterPause(); return true; }     // "Pause" → dormant until "Solita"
                 if (addressed && LOGOUT.test(txt)) { doVoiceLogout(); return true; } // "Solita, log mich aus" → action, not chat
                 if (convo && FAREWELL.test(txt)) { endConvo(); return true; } // "tschüss" → hang up the thread

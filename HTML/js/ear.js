@@ -38,6 +38,7 @@
         let awaitingQuery = false; // a turn is open without a fresh trigger (adapter-driven mirror)
         let convoMirror = false;   // mirror of the adapter's conversation flag — interim-gate parity only
         let qTimer = null;         // debounce for cumulative "final" results
+        let pending = null;        // last text buffered for the debounced submit (so a host can flush it early)
         let gen = 0;               // generation token: bumped on every stop/suspend/restart/visibility teardown,
                                    //   so a rec.onend from a SUPERSEDED recognizer can no longer reschedule start()
                                    //   and relaunch Web-SR to fight the native Vosk AudioRecord.
@@ -56,7 +57,12 @@
             return t.slice(idx + hit.length).replace(/^[\s,.:!?-]+/, '').trim();
         }
 
-        function cancelPending() { if (qTimer) { clearTimeout(qTimer); qTimer = null; } }
+        function cancelPending() { if (qTimer) { clearTimeout(qTimer); qTimer = null; } pending = null; }
+
+        // flushPending(): cancel the speech-pause debounce and RETURN whatever text was buffered (or null),
+        // so the host can submit a dictated turn NOW (a spoken "fertig" finish word / a ✓ button) instead of
+        // waiting out debounceMs. Mirrors what the qTimer callback would have fired with.
+        function flushPending() { const t = pending; if (qTimer) { clearTimeout(qTimer); qTimer = null; } pending = null; return t; }
 
         // Cumulative-finals buffer (Android WebView delivers ONE spoken question as several growing
         // "final" results). Show progress live via onInterim, then emit the latest RAW buffered text via
@@ -65,10 +71,11 @@
         // (matches the old queueQuery, which resolved `(input.value)||t` and stripped that).
         function queueQuery(t) {
             awaitingQuery = true;                                   // stay open while the finals keep growing
+            pending = t;                                            // remember it so flushPending() can submit early
             onInterim(t);                                           // show progress live (adapter mirrors)
             if (qTimer) clearTimeout(qTimer);
             qTimer = setTimeout(function () {
-                qTimer = null;
+                qTimer = null; pending = null;
                 // NOTE: do NOT clear awaitingQuery here. The host clears it (via setAwaiting) only on a
                 // non-empty result inside onUtterance — matching the old `if(!q)return;` BEFORE the clear,
                 // which keeps the turn open when the settled text strips down to nothing.
@@ -213,6 +220,7 @@
         self.setEnabled = setEnabled;
         self.restart = restart;
         self.cancelPending = cancelPending;
+        self.flushPending = flushPending;
         self.queueQuery = queueQuery;
         self.matchTrigger = matchTrigger;
         self.setConvo = setConvo;

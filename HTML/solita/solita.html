@@ -416,7 +416,7 @@
             background: rgba(255, 255, 255, 0.04);
             border: 1px solid rgba(255, 255, 255, 0.12);
             border-radius: 10px;
-            padding: 10px 60px 10px 20px;   /* extra right padding so text clears the inline Pssst icon */
+            padding: 10px 100px 10px 20px;  /* extra right padding so text clears the inline ✓ + Pssst icons */
             color: #e6edf3;
             font-family: 'Helvetica', 'Arial', sans-serif;
             font-size: 1.15rem;
@@ -436,7 +436,7 @@
            dimmed when she MAY speak (quiet OFF), bright when muted/quiet ON (Doc 2026-06-25). */
         .quiet-btn {
             position: absolute;
-            right: 38px;
+            right: 80px;               /* sits left of the inline ✓ finish button */
             bottom: 16px;              /* box aligns with the textarea's bottom line (== input-area padding) */
             height: 52px;              /* == single-line textarea height → glyph centers on that line */
             z-index: 5;
@@ -454,6 +454,30 @@
         .quiet-btn.active { display: flex; opacity: 1; }   /* muted / writing only → shown, bright */
         .quiet-btn.active:hover { opacity: 0.8; }
         .quiet-btn:active { transform: scale(0.92); }
+
+        /* „Fertig"/blue-check (Doc 2026-06-25): submit the dictated turn NOW (skip the ~10 s speech pause).
+           Inline on the right of the input line, neon-blue; mirrors the spoken "fertig" finish word. */
+        .finish-btn {
+            position: absolute;
+            right: 38px;
+            bottom: 16px;              /* aligns with the textarea's bottom line (== input-area padding) */
+            height: 52px;
+            width: 30px;
+            z-index: 6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0;
+            color: var(--neon-blue, #00d2ff);
+            opacity: 0.85;
+            transition: opacity 0.15s ease, transform 0.1s ease;
+        }
+        .finish-btn svg { width: 26px; height: 26px; display: block; }
+        .finish-btn:hover { opacity: 1; }
+        .finish-btn:active { transform: scale(0.9); }
 
         .message-input:focus {
             outline: none;
@@ -743,6 +767,11 @@
                  turns it on automatically; speaking turns it off. Click toggles it manually. -->
             <button id="solita-quiet" class="quiet-btn" type="button" title="Stumm — Solita antwortet nur schriftlich"
                 aria-label="Stumm an/aus" aria-pressed="false">🤫</button>
+            <!-- „Fertig" / blue check (Doc 2026-06-25): submit the dictated turn NOW instead of waiting out the
+                 ~10 s speech pause. Mirrors the spoken finish word "fertig". -->
+            <button id="solita-finish" class="finish-btn" type="button" title="Fertig — jetzt absenden" aria-label="Fertig — Frage jetzt absenden">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </button>
         </div>
 
     </div>
