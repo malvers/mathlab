@@ -166,8 +166,12 @@ window.TrackerNav = function (ctx) {
     function shortLabel(s) {
         const parts = (s || '').split(',').map((x) => x.trim()).filter(Boolean);
         if (!parts.length) return '';
-        // Nominatim lists the house number FIRST ("8, Sachsenallee, …") → swap to natural German "Straße Nr."
-        if (parts.length >= 2 && /^\d+[a-z]?$/i.test(parts[0])) return parts[1] + ' ' + parts[0];
+        const isNum = (x) => /^\d+[a-z]?$/i.test(x);
+        // Address: house number listed FIRST ("8, Sachsenallee, …") → natural German "Straße Nr.".
+        if (parts.length >= 2 && isNum(parts[0])) return parts[1] + ' ' + parts[0];
+        // Named POI with a house number ("IKEA, 25, Meißner Straße, …") → the lone number is useless without
+        // the street, so show NAME + STREET ("IKEA, Meißner Straße"), not "IKEA, 25" (Doc 2026-06-25).
+        if (parts.length >= 2 && isNum(parts[1])) return parts[2] ? parts[0] + ', ' + parts[2] : parts[0];
         return parts.slice(0, 2).join(', ');
     }
 
