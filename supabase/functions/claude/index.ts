@@ -119,7 +119,7 @@ Deno.serve(async (req) => {
   // system breakpoint total (persona), so the tools + last-message breakpoints are unaffected.
   if (systemTexts.length) {
     body.system = systemTexts.map((text: string, i: number) =>
-      i === 0 ? { type: 'text', text, cache_control: { type: 'ephemeral' } } : { type: 'text', text });
+      i === 0 ? { type: 'text', text, cache_control: { type: 'ephemeral', ttl: '1h' } } : { type: 'text', text });
   }
   // Optional Claude tool-use: forward a `tools` schema so Solita can take actions. The CLIENT runs the loop
   // (executes tool_use blocks, sends tool_result back). No tools field → behaves exactly as before.
