@@ -41,7 +41,13 @@ window.TrackerNav = function (ctx) {
     const OFFROUTE_M = 30;          // beyond this distance from the line → considered "off route" (Doc 2026-06-14: 45→30 for earlier reroute; watch d2route debug for flapping)
     const REROUTE_COOLDOWN_MS = 6000; // don't hammer OSRM: at most one reroute per this window (Doc 2026-06-14: 8s→6s)
     const OFFROUTE_CONSEC = 3;      // hysteresis: require this many consecutive off-route fixes before rerouting → no flapping on jitter / a brief excursion (Doc 2026-06-24)
-    const BRG_RANGE_DEG = 90;       // off-route reroute: OSRM may depart within ±this of the travel heading → forbids a U-turn back onto the rejected line ("bitte wenden" unterbunden)
+    // Off-route reroute strategy (Doc 2026-06-25): the departure-bearing cone backfires at junctions —
+    // forcing "forward-ish" departure makes OSRM drive on and U-turn LATER instead of turning around now
+    // (e.g. immediately round a roundabout). Google reroutes plain fresh-to-destination and lets the road
+    // graph + U-turn penalty decide. So we default the cone OFF; flip USE_DEPART_BEARING back to true to
+    // compare in the sim.
+    const USE_DEPART_BEARING = false;
+    const BRG_RANGE_DEG = 90;       // (only used when USE_DEPART_BEARING) OSRM may depart within ±this of the travel heading
     const BRG_MIN_MOVE_M = 12;      // min travel between fixes for a trustworthy movement-derived heading
     const ANNOUNCE_FAR_M = 300;     // distance at which the pre-warning ("In 300 m …") is spoken
     const ANNOUNCE_NEAR_M = 40;     // distance at which the maneuver ("Jetzt …") is spoken + advanced
@@ -373,7 +379,7 @@ window.TrackerNav = function (ctx) {
             // Off-route reroute (Doc 2026-06-24): constrain the DEPARTURE direction to the live travel heading
             // via OSRM `bearings` (one entry per coordinate; the destination stays unconstrained → trailing ";").
             // This forbids OSRM from starting the new route with a U-turn back onto the rejected line.
-            const bearings = (brg != null) ? '&bearings=' + Math.round(brg) + ',' + BRG_RANGE_DEG + ';' : '';
+            const bearings = (USE_DEPART_BEARING && brg != null) ? '&bearings=' + Math.round(brg) + ',' + BRG_RANGE_DEG + ';' : '';
             const r = await fetch(OSRM_PROFILES[routeType] + coords + '?overview=full&geometries=geojson&steps=true' + bearings);
             data = await r.json();
         } catch (e) { if (gen === navGen) toast('Route fehlgeschlagen (offline?).'); return false; }

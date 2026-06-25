@@ -27,7 +27,7 @@ window.TrackerNavSim = function (ctx) {
     const DT_REAL_MS = 600;  // wall-clock between fixes (how fast you watch it play out)
 
     // ---- speed physics ----
-    const A_LAT = 3.0;       // m/s² comfortable lateral (cornering) acceleration → curve speed = √(A_LAT·R)
+    const A_LAT = 4.0;       // m/s² lateral (cornering) acceleration → curve speed = √(A_LAT·R); brisk, no posted limits
     const A_ACC = 1.8;       // m/s² acceleration on straights
     const A_BRAKE = 3.0;     // m/s² braking into curves
     const V_MIN = 8 / 3.6;   // m/s floor so tight curves don't crawl to a standstill
@@ -71,11 +71,15 @@ window.TrackerNavSim = function (ctx) {
         return area < 1e-6 ? Infinity : (ab * bc * ca) / (4 * area);
     }
     // Per-point curvature speed limit (m/s): √(A_LAT·R), floored at V_MIN; endpoints/straights → "fast".
-    function buildVcurve(pts) {
-        const n = pts.length, v = new Array(n);
+    // Curvature is measured over DISTANCE-spaced neighbours (~SAMPLE_M) so the many dense OSRM vertices on a
+    // straight road don't fake a tight radius and brake the car — only real bends slow it down.
+    function buildVcurve(pts, cum) {
+        const n = pts.length, v = new Array(n), SAMPLE_M = 25;
         for (let i = 0; i < n; i++) {
-            if (i === 0 || i === n - 1) { v[i] = 999; continue; }
-            let lim = Math.sqrt(A_LAT * circumRadius(pts[i - 1], pts[i], pts[i + 1]));
+            let j = i; while (j > 0 && cum[i] - cum[j] < SAMPLE_M) j--;
+            let k = i; while (k < n - 1 && cum[k] - cum[i] < SAMPLE_M) k++;
+            if (j === i || k === i || j === k) { v[i] = 999; continue; }
+            let lim = Math.sqrt(A_LAT * circumRadius(pts[j], pts[i], pts[k]));
             if (!isFinite(lim) || lim > 999) lim = 999;
             v[i] = Math.max(V_MIN, lim);
         }
@@ -132,7 +136,7 @@ window.TrackerNavSim = function (ctx) {
         const rp = nav && nav.routePoints && nav.routePoints();
         if (!rp || rp.length < 2) return false;
         if (rp !== routeRef) {
-            routeRef = rp; route = rp; routeCum = cumLengths(route); routeVc = buildVcurve(route);
+            routeRef = rp; route = rp; routeCum = cumLengths(route); routeVc = buildVcurve(route, routeCum);
             s = car ? projectDist(route, routeCum, car) : 0;
             try { if (nav.frameRoute) nav.frameRoute(); } catch (e) { } // keep the whole (re)route in view
             dbg('Route übernommen (' + route.length + ' Pkt, ' + Math.round(routeCum[routeCum.length - 1]) + ' m)');
@@ -240,7 +244,7 @@ window.TrackerNavSim = function (ctx) {
         const pts = await osrmRoute(car, to);
         if (!pts || pts.length < 2) { clearDevMarker(); status('keine Straße dahin'); dbg('OSRM: keine Abweich-Route'); return; }
         const cum = cumLengths(pts);
-        detour = { pts, cum, vc: buildVcurve(pts), s: projectDist(pts, cum, car) };  // start at the car on the detour
+        detour = { pts, cum, vc: buildVcurve(pts, cum), s: projectDist(pts, cum, car) };  // start at the car on the detour
     }
     function mkBtn(label, fn) {
         const b = document.createElement('button');
