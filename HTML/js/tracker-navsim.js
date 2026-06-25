@@ -19,18 +19,26 @@ window.TrackerNavSim = function (ctx) {
 
     let car = null;          // [lat,lng] current simulated position
     let brg = 0;             // current heading (deg, 0 = N)
-    let maxKmh = 50;         // virtual max speed
+    let maxKmh = 50;         // virtual MAX speed (the slider) — physics keeps it below this in curves
+    let vcur = 0;            // current speed (m/s) — accelerates/brakes toward the target, never jumps
     let timer = null;        // drive interval (real time)
     let clock = 0;           // sim timestamp (ms) — advances DT_SIM_MS per emitted fix
     const DT_SIM_MS = 1000;  // each fix represents one simulated second (drives the speed maths)
     const DT_REAL_MS = 600;  // wall-clock between fixes (how fast you watch it play out)
 
+    // ---- speed physics ----
+    const A_LAT = 3.0;       // m/s² comfortable lateral (cornering) acceleration → curve speed = √(A_LAT·R)
+    const A_ACC = 1.8;       // m/s² acceleration on straights
+    const A_BRAKE = 3.0;     // m/s² braking into curves
+    const V_MIN = 8 / 3.6;   // m/s floor so tight curves don't crawl to a standstill
+
     // route-follow state
     let route = null;        // [[lat,lng]…] the route we're currently following
     let routeRef = null;     // identity of the adopted route array → detect a reroute (new array)
     let routeCum = null;     // cumulative segment lengths (m), routeCum[i] = dist from start to point i
+    let routeVc = null;      // per-point curvature speed limit (m/s) for the nav route
     let s = 0;               // current distance travelled along the route (m)
-    let detour = null;       // {pts,cum,s} an OSRM ROAD route to a clicked deviation point; null = follow nav route
+    let detour = null;       // {pts,cum,vc,s} an OSRM ROAD route to a clicked deviation point; null = follow nav route
     const OSRM_CAR = 'https://routing.openstreetmap.de/routed-car/route/v1/driving/'; // same engine as tracker-nav
     let lastLog = 0;
 
@@ -54,6 +62,46 @@ window.TrackerNavSim = function (ctx) {
         return [la2 / T, ((lo2 / T + 540) % 360) - 180];
     }
     function cumLengths(r) { const c = [0]; for (let i = 1; i < r.length; i++) c[i] = c[i - 1] + haversine(r[i - 1], r[i]); return c; }
+    // Circumradius (m) of three consecutive points → local turn radius (Infinity when ~collinear/straight).
+    function circumRadius(a, b, c) {
+        const k = Math.cos(b[0] * T), X = (ll) => [ll[1] * 111320 * k, ll[0] * 110540];
+        const A = X(a), B = X(b), C = X(c);
+        const ab = Math.hypot(B[0] - A[0], B[1] - A[1]), bc = Math.hypot(C[0] - B[0], C[1] - B[1]), ca = Math.hypot(A[0] - C[0], A[1] - C[1]);
+        const area = Math.abs((B[0] - A[0]) * (C[1] - A[1]) - (C[0] - A[0]) * (B[1] - A[1])) / 2;
+        return area < 1e-6 ? Infinity : (ab * bc * ca) / (4 * area);
+    }
+    // Per-point curvature speed limit (m/s): √(A_LAT·R), floored at V_MIN; endpoints/straights → "fast".
+    function buildVcurve(pts) {
+        const n = pts.length, v = new Array(n);
+        for (let i = 0; i < n; i++) {
+            if (i === 0 || i === n - 1) { v[i] = 999; continue; }
+            let lim = Math.sqrt(A_LAT * circumRadius(pts[i - 1], pts[i], pts[i + 1]));
+            if (!isFinite(lim) || lim > 999) lim = 999;
+            v[i] = Math.max(V_MIN, lim);
+        }
+        return v;
+    }
+    // Tightest curve limit (m/s) within `look` metres ahead of `dist` → lets the car brake in time.
+    function vcurveAhead(cum, vc, dist, look) {
+        let lim = Infinity;
+        for (let i = 0; i < cum.length; i++) {
+            if (cum[i] < dist) continue;
+            if (cum[i] > dist + look) break;
+            if (vc[i] < lim) lim = vc[i];
+        }
+        return lim;
+    }
+    // Update vcur toward the target (curve limit ahead, capped by maxKmh) with real accel/brake limits.
+    // Returns the metres travelled this simulated second.
+    function speedStep(cum, vc, dist) {
+        const dt = DT_SIM_MS / 1000;
+        const look = Math.max(15, (vcur * vcur) / (2 * A_BRAKE) + vcur * 0.8); // braking distance + reaction
+        const ahead = vcurveAhead(cum, vc, dist, look);
+        const target = Math.min(maxKmh / 3.6, isFinite(ahead) ? ahead : 999);
+        if (vcur < target) vcur = Math.min(target, vcur + A_ACC * dt);
+        else vcur = Math.max(target, vcur - A_BRAKE * dt);
+        return vcur * dt;
+    }
     // point + heading at distance `dist` along route r (with cumulative lengths cum)
     function pointAt(r, cum, dist) {
         const total = cum[cum.length - 1];
@@ -84,7 +132,7 @@ window.TrackerNavSim = function (ctx) {
         const rp = nav && nav.routePoints && nav.routePoints();
         if (!rp || rp.length < 2) return false;
         if (rp !== routeRef) {
-            routeRef = rp; route = rp; routeCum = cumLengths(route);
+            routeRef = rp; route = rp; routeCum = cumLengths(route); routeVc = buildVcurve(route);
             s = car ? projectDist(route, routeCum, car) : 0;
             try { if (nav.frameRoute) nav.frameRoute(); } catch (e) { } // keep the whole (re)route in view
             dbg('Route übernommen (' + route.length + ' Pkt, ' + Math.round(routeCum[routeCum.length - 1]) + ' m)');
@@ -94,32 +142,31 @@ window.TrackerNavSim = function (ctx) {
 
     function emit() {
         clock += DT_SIM_MS;
-        feed({ coords: { latitude: car[0], longitude: car[1], accuracy: 5, speed: maxKmh / 3.6, heading: brg, altitude: null }, timestamp: clock });
+        feed({ coords: { latitude: car[0], longitude: car[1], accuracy: 5, speed: vcur, heading: brg, altitude: null }, timestamp: clock });
     }
 
     function tick() {
         if (!car) return;
-        const step = (maxKmh / 3.6) * (DT_SIM_MS / 1000); // metres this simulated second
         if (detour) {                                     // drive the ROAD route to the clicked point (no fields)
             const dtotal = detour.cum[detour.cum.length - 1];
-            detour.s += step;
+            detour.s += speedStep(detour.cum, detour.vc, detour.s);
             if (detour.s >= dtotal) {                      // arrived → resume following the (by now rerouted) line
                 const e = pointAt(detour.pts, detour.cum, dtotal); car = e.pos; brg = e.brg; emit();
                 detour = null; clearDevMarker(); routeRef = null; dbg('Abweichpunkt erreicht → folge der (neuen) Route'); status('zurück auf Route');
                 return;
             }
             const at = pointAt(detour.pts, detour.cum, detour.s); car = at.pos; brg = at.brg; emit();
-            if (clock - lastLog >= 3000) { lastLog = clock; dbg('weiche ab (Straße) → ' + Math.round(detour.s) + '/' + Math.round(dtotal) + ' m'); }
+            if (clock - lastLog >= 3000) { lastLog = clock; dbg('weiche ab (Straße) → ' + Math.round(detour.s) + '/' + Math.round(dtotal) + ' m @ ' + Math.round(vcur * 3.6) + ' km/h'); }
             return;
         }
         if (!syncRoute()) { stopLoop(); status('keine Route — Ziel wählen + STARTEN'); dbg('keine Route zum Folgen'); return; }
         const total = routeCum[routeCum.length - 1];
-        s += step;
+        s += speedStep(routeCum, routeVc, s);
         if (s >= total) { const e = pointAt(route, routeCum, total); car = e.pos; brg = e.brg; emit(); stopLoop(); status('Ziel erreicht'); dbg('Ziel erreicht'); return; }
         const at = pointAt(route, routeCum, s);
         car = at.pos; brg = at.brg;
         emit();
-        if (clock - lastLog >= 3000) { lastLog = clock; dbg('fahre … ' + Math.round(s) + '/' + Math.round(total) + ' m @ ' + maxKmh + ' km/h'); }
+        if (clock - lastLog >= 3000) { lastLog = clock; dbg('fahre … ' + Math.round(s) + '/' + Math.round(total) + ' m @ ' + Math.round(vcur * 3.6) + ' km/h'); }
     }
     function startLoop() { if (!timer) timer = setInterval(tick, DT_REAL_MS); setGoLabel(); }
     function stopLoop() { if (timer) { clearInterval(timer); timer = null; } setGoLabel(); }
@@ -130,7 +177,7 @@ window.TrackerNavSim = function (ctx) {
         catch (e) { return null; }
     }
     function placeCarAtHome() {
-        stopLoop(); detour = null; clearDevMarker(); routeRef = null; route = null; s = 0; clock = 0;
+        stopLoop(); detour = null; clearDevMarker(); routeRef = null; route = null; s = 0; clock = 0; vcur = 0; paused = false;
         const h = loadHome();
         if (h) car = h; else { const c = map.getCenter(); car = [c.lat, c.lng]; dbg('kein Home gesetzt → Auto auf Kartenmitte'); }
         brg = 0;
@@ -148,7 +195,7 @@ window.TrackerNavSim = function (ctx) {
         }
         routeRef = null;                       // force a fresh adopt + project
         if (!syncRoute()) { status('kein Ziel — erst im Ziel-Popup wählen'); dbg('kein Ziel/Route → nichts zu fahren'); return; }
-        detour = null; s = 0;                  // start at the route's beginning (≈ the car)
+        detour = null; s = 0; vcur = 0; paused = false;   // start at the route's beginning (≈ the car), from standstill
         startLoop();
         status('fährt die Route …');
     }
@@ -158,7 +205,13 @@ window.TrackerNavSim = function (ctx) {
     function status(m) { if (elStatus) elStatus.textContent = m; }
     // The drive button is a toggle: GO starts auto-following, STOP halts. Label tracks the loop state.
     function setGoLabel() { if (btnGo) btnGo.textContent = timer ? 'STOP' : 'GO'; }
-    function onGo() { if (timer) { stopLoop(); detour = null; clearDevMarker(); status(''); } else { startDriving(); } }
+    // GO/STOP: STOP pauses (keeps detour + marker + position); GO resumes there, or starts fresh if not paused.
+    let paused = false;
+    function onGo() {
+        if (timer) { stopLoop(); paused = true; status(''); }            // pause — keep everything
+        else if (paused) { paused = false; startLoop(); status('fährt …'); } // resume where we left off
+        else { startDriving(); }                                          // fresh start
+    }
     // Fetch an OSRM ROAD route (car profile) between two [lat,lng] points → [[lat,lng]…] or null. Used so a
     // deviation drives on real streets, never across fields.
     async function osrmRoute(from, to) {
@@ -187,7 +240,7 @@ window.TrackerNavSim = function (ctx) {
         const pts = await osrmRoute(car, to);
         if (!pts || pts.length < 2) { clearDevMarker(); status('keine Straße dahin'); dbg('OSRM: keine Abweich-Route'); return; }
         const cum = cumLengths(pts);
-        detour = { pts, cum, s: projectDist(pts, cum, car) };  // start at the car's position on the detour
+        detour = { pts, cum, vc: buildVcurve(pts), s: projectDist(pts, cum, car) };  // start at the car on the detour
     }
     function mkBtn(label, fn) {
         const b = document.createElement('button');
