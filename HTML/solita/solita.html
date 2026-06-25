@@ -433,14 +433,14 @@
 
         /* Quiet/„Pssst" toggle — the ICE/airport quiet-zone pictogram (profile head + shushing hand), placed
            INSIDE the input line on the right (overlaid on the textarea). White, big, bold; dim when off,
-           full-white when quiet is ON (Doc 2026-06-24). */
+           dimmed when she MAY speak (quiet OFF), bright when muted/quiet ON (Doc 2026-06-25). */
         .quiet-btn {
             position: absolute;
             right: 38px;
             bottom: 16px;              /* box aligns with the textarea's bottom line (== input-area padding) */
             height: 52px;              /* == single-line textarea height → glyph centers on that line */
             z-index: 5;
-            display: flex;
+            display: none;             /* TEST (Doc 2026-06-25): hidden when she MAY speak (quiet OFF) */
             align-items: center;       /* vertical-center the emoji on the input line (Doc 2026-06-24) */
             justify-content: center;
             background: none;
@@ -449,11 +449,10 @@
             padding: 0;
             font-size: 30px;           /* bigger (Doc 2026-06-24) */
             line-height: 1;
-            opacity: 0.4;
             transition: opacity 0.15s ease, transform 0.1s ease;
         }
-        .quiet-btn:hover { opacity: 0.7; }
-        .quiet-btn.active { opacity: 1; }
+        .quiet-btn.active { display: flex; opacity: 1; }   /* muted / writing only → shown, bright */
+        .quiet-btn.active:hover { opacity: 0.8; }
         .quiet-btn:active { transform: scale(0.92); }
 
         .message-input:focus {
