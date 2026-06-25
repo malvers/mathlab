@@ -208,24 +208,86 @@ window.TrackerTraffic = function (ctx) {
             if (!o.anchor) continue;
             // proximity cull for PINS only — the full fetched set stays in `items` for the route-closure scan
             if (lastLat != null && distM(lastLat, lastLng, o.anchor[0], o.anchor[1]) > MAX_NEAR_M) continue;
+            // Draw the closed stretch itself for ACTIVE closures, so you SEE what gets routed around — not just
+            // the pin. Faint wide halo underneath ≈ the avoided corridor (avoidPolygons widens the same line),
+            // a solid dashed Υ-red line on top = the closure. Only kind 'sperrung' & not future, matching the
+            // avoid logic; needs ≥2 geom points (a single anchor stays a plain pin).
+            if (o.kind === 'sperrung' && !o.future && o.geom && o.geom.length >= 2) {
+                L.polyline(o.geom, { pane: 'traffic', color: 'rgb(176,36,24)', weight: 16, opacity: 0.16, interactive: false, lineCap: 'round', lineJoin: 'round' }).addTo(lyr);
+                L.polyline(o.geom, { pane: 'traffic', color: 'rgb(176,36,24)', weight: 4, opacity: 0.95, dashArray: '10 8', interactive: false, lineCap: 'round', lineJoin: 'round' }).addTo(lyr);
+            }
             L.marker(o.anchor, { icon: pinIcon(o.kind, o.future), pane: 'traffic', keyboard: false })
                 .bindPopup(popupHtml(o), { className: 'trf-popup-card trf-' + o.kind }).addTo(lyr);
         }
     }
 
-    // One-off heads-up when an ACTIVE closure sits on the live nav route.
+    // ---- Avoid-Polygone für die Routenplanung: aktive Sperrungen als schmale Korridore, damit ORS
+    //      DRUMHERUM routet statt nur zu warnen. Liefert ein GeoJSON-MultiPolygon in [lon,lat] (ORS-Format,
+    //      siehe reroute Edge-Function → reqBody.options.avoid_polygons) oder null, wenn nichts zu meiden ist
+    //      (Traffic aus / keine aktive Sperrung). Nur echte Sperrungen (kind 'sperrung', nicht geplant) — eine
+    //      Baustelle ist meist befahrbar. Auf ANY ORS-Fehler fällt der Client auf OSRM zurück (kein Avoid), also
+    //      ist das rein additiv. ----
+    const AVOID_HALF_M = 18;     // halbe Korridorbreite um eine Sperrungs-Linie (Straße sicher abgedeckt)
+    const AVOID_MAX_QUADS = 60;  // Deckel über alle Sperrungen → ORS-Payload bleibt klein
+
+    // segment a→b (beide [lat,lng]) → ein konvexer Quad-Ring [[lon,lat]…], um AVOID_HALF_M verbreitert und an
+    // beiden Enden um AVOID_HALF_M verlängert (Überlapp füllt die Gelenke zwischen Nachbar-Quads).
+    function segQuad(a, b, half) {
+        const latMid = (a[0] + b[0]) / 2;
+        const k = Math.cos(latMid * Math.PI / 180) || 1e-6;
+        const toM = (ll) => [ll[1] * 111320 * k, ll[0] * 110540];   // [x(Ost), y(Nord)] in Metern
+        const toLL = (x, y) => [x / (111320 * k), y / 110540];      // → [lon, lat]
+        const A = toM(a), B = toM(b);
+        let dx = B[0] - A[0], dy = B[1] - A[1];
+        const L = Math.hypot(dx, dy) || 1;
+        const ux = dx / L, uy = dy / L;            // Längsrichtung
+        const px = -uy * half, py = ux * half;     // Senkrechte * halbe Breite
+        const ex = ux * half, ey = uy * half;      // Verlängerung an den Enden
+        const A2 = [A[0] - ex, A[1] - ey], B2 = [B[0] + ex, B[1] + ey];
+        const p1 = toLL(A2[0] + px, A2[1] + py), p2 = toLL(B2[0] + px, B2[1] + py);
+        const p3 = toLL(B2[0] - px, B2[1] - py), p4 = toLL(A2[0] - px, A2[1] - py);
+        return [p1, p2, p3, p4, p1];
+    }
+    function squareAround(p, half) {               // einzelner Anker ohne Linie → kleines Quadrat
+        const k = Math.cos(p[0] * Math.PI / 180) || 1e-6;
+        const dLat = half / 110540, dLng = half / (111320 * k), la = p[0], lo = p[1];
+        return [[lo - dLng, la - dLat], [lo + dLng, la - dLat], [lo + dLng, la + dLat], [lo - dLng, la + dLat], [lo - dLng, la - dLat]];
+    }
+    function avoidPolygons() {
+        if (!enabled) return null;
+        const polys = [];
+        for (const o of items) {
+            if (o.kind !== 'sperrung' || o.future) continue;
+            const line = (o.geom && o.geom.length) ? o.geom : (o.anchor ? [o.anchor] : null);
+            if (!line) continue;
+            if (line.length === 1) polys.push([squareAround(line[0], AVOID_HALF_M)]);
+            else for (let i = 1; i < line.length; i++) polys.push([segQuad(line[i - 1], line[i], AVOID_HALF_M)]);
+            if (polys.length >= AVOID_MAX_QUADS) break;
+        }
+        if (!polys.length) return null;
+        return { type: 'MultiPolygon', coordinates: polys.slice(0, AVOID_MAX_QUADS) };
+    }
+
+    // An ACTIVE closure on the live nav route → announce AND proactively route around it RIGHT NOW. This runs
+    // after every traffic fetch, i.e. the moment the closure data lands, so the avoidance happens as soon as
+    // it's known — not at a later off-route event (you don't leave the line by yourself AT a Sperrung, so that
+    // would come too late). One spoken line + one reroute per scan, even if several closures matched; the
+    // reroute's avoid_polygons carry every active closure anyway.
     function checkRouteClosures() {
         const route = nav && nav.routePoints && nav.routePoints();
         if (!route || route.length < 2) return;
+        let hit = false;
         for (const o of items) {
             if (o.kind !== 'sperrung' || o.future || announced.has(o.id)) continue;
             const onRoute = o.geom.some((p) => distToLine(p, route) <= ROUTE_HIT_M);
             if (!onRoute) continue;
             announced.add(o.id);
-            const t = o.title || 'Sperrung';
-            if (toast) toast('⚠ Sperrung auf Deiner Route: ' + t);
-            if (voice && voice.speak) { try { voice.speak('Achtung, Sperrung voraus: ' + t); } catch (e) { /* ignore */ } }
+            hit = true;
+            if (toast) toast('⚠ Sperrung auf Deiner Route — wird umfahren: ' + (o.title || 'Sperrung'));
         }
+        if (!hit) return;
+        if (voice && voice.speak) { try { voice.speak('Achtung, Sperrung voraus. Neue Route.'); } catch (e) { /* ignore */ } }
+        if (nav && nav.avoidReroute) { try { nav.avoidReroute(); } catch (e) { /* ignore */ } }
     }
 
     async function fetchSvc(ref, svc) {
@@ -365,7 +427,7 @@ window.TrackerTraffic = function (ctx) {
     }
 
     return {
-        update, setEnabled, clear,
+        update, setEnabled, clear, avoidPolygons,
         get enabled() { return enabled; },
     };
 };

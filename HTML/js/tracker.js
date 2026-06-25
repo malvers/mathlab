@@ -2340,6 +2340,9 @@ ${pts}
             map, $, toast, showPanel, hidePanels,
             apiUrl: SUPABASE_URL, apiKey: SUPABASE_KEY,   // → `reroute` Edge Function (ORS) when REROUTE_ENGINE='ors'
             get posMarker() { return posMarker; },
+            // Lazy handle to the traffic module (built AFTER nav) → a reroute can pull active closures and
+            // pass them to ORS as avoid_polygons, so it routes AROUND a Sperrung instead of only warning.
+            get traffic() { return __traffic; },
             // Dialog "STARTEN": from idle → begin recording + navigation (toggle then shows PAUSE);
             // while already recording (dialog reopened mid-trip) → just (re)route to the new destination.
             startTracking: () => {

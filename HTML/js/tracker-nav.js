@@ -384,6 +384,11 @@ window.TrackerNav = function (ctx) {
     // back onto the rejected line.
     async function fetchRerouteORS(from, to, brg) {
         if (!apiUrl || !apiKey || !to) return null;
+        // Active road closures from the traffic module → ORS avoid_polygons, so the new route goes AROUND a
+        // Sperrung instead of only warning about it. Null when traffic is off / nothing to avoid; on ANY ORS
+        // failure computeRoute falls back to OSRM (no avoid), so this stays purely additive.
+        let avoid = null;
+        try { avoid = ctx.traffic && ctx.traffic.avoidPolygons && ctx.traffic.avoidPolygons(); } catch (e) { avoid = null; }
         try {
             const r = await fetch(apiUrl + '/functions/v1/reroute', {
                 method: 'POST',
@@ -392,6 +397,7 @@ window.TrackerNav = function (ctx) {
                     from: [from[0], from[1]], to: [to[0], to[1]],
                     heading: (brg != null ? brg : null),
                     profile: (routeType === 'foot' ? 'foot-walking' : 'driving-car'),
+                    avoid_polygons: avoid || undefined,   // JSON.stringify drops it when null → option omitted
                 }),
             });
             if (!r.ok) return null;
@@ -1094,7 +1100,20 @@ window.TrackerNav = function (ctx) {
         reflect();
     })();
 
-    const api = { openPanel, hasDestination, startNavigation, navigateTo, clearRoute, update, remainingBounds, frameRoute, tripData, routePoints: () => routeLatLngs };
+    // Proactive reroute AROUND a freshly-detected obstacle (a closure the traffic module just found ON the
+    // active route). Don't wait for an off-route event — at a Sperrung you don't leave the line by yourself,
+    // so that trigger comes too late (you'd be AT the closure). computeRoute's reroute path runs through ORS,
+    // which gets every active closure as avoid_polygons → the new line goes around it. travelBrg keeps it
+    // forward (no U-turn back onto the rejected stretch).
+    async function avoidReroute() {
+        if (!destLatLng || !routeLatLngs || rerouting) return false;
+        const from = curPos();
+        if (!from) return false;
+        rerouting = true;
+        return computeRoute([from[0], from[1]], true, travelBrg).finally(() => { rerouting = false; });
+    }
+
+    const api = { openPanel, hasDestination, startNavigation, navigateTo, clearRoute, update, remainingBounds, frameRoute, tripData, avoidReroute, routePoints: () => routeLatLngs };
     // Bridge for the Solita navigate_to add-on (js/solita-navigate.js): the nav instance is module-private
     // in tracker.js (__nav), so publish a handle here so the voice tool can route programmatically without
     // touching tracker.js. Last constructed instance wins (there is only one).
