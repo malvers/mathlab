@@ -1509,8 +1509,14 @@ body.ui-idle #trk-controls {
 }
 .nav-hist-del:hover { background: rgba(176, 36, 24, 0.25); color: #fff; }
 
-/* "Nach Hause" pinned first row — sits ABOVE the scroll box so it never scrolls away; not deletable. */
-.nav-hist-home { margin-bottom: 8px; }
+/* "Nach Hause" — first row INSIDE the scroll box but STICKY at the top, so it never scrolls away (Doc
+   2026-06-25). Opaque background so recent entries scroll UNDER it, not through it. */
+.nav-hist-home {
+    position: sticky; top: 0; z-index: 2;
+    background: rgba(8, 20, 42, 0.97);
+    box-shadow: 0 4px 8px rgba(8, 20, 42, 0.55);
+    margin-bottom: 8px;
+}
 /* Right-side ⓘ on the Home row — taps to show the long-press hint as a toast (no permanent line). */
 .nav-hist-info {
     flex: 0 0 auto; width: 34px; align-self: stretch; border: none;

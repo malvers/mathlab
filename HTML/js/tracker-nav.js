@@ -387,8 +387,8 @@ window.TrackerNav = function (ctx) {
         const title = document.createElement('div');
         title.className = 'nav-history-title'; title.textContent = 'Letzte Ziele';
         box.appendChild(title);
-        box.appendChild(homeRow());   // pinned first, above the scroll area
         const scroll = document.createElement('div'); scroll.className = 'nav-hist-scroll';
+        scroll.appendChild(homeRow());   // first row INSIDE the scroll box, kept sticky at the top (Doc 2026-06-25)
         ordered.forEach((h) => {
             const item = document.createElement('div'); item.className = 'nav-hist-item';
             const go = document.createElement('button'); go.type = 'button'; go.className = 'nav-hist-go'; go.title = h.label;
