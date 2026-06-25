@@ -116,8 +116,8 @@ window.TrackerNavSim = function (ctx) {
         emit();
         if (clock - lastLog >= 3000) { lastLog = clock; dbg('fahre … ' + Math.round(s) + '/' + Math.round(total) + ' m @ ' + maxKmh + ' km/h'); }
     }
-    function startLoop() { if (!timer) timer = setInterval(tick, DT_REAL_MS); }
-    function stopLoop() { if (timer) { clearInterval(timer); timer = null; } }
+    function startLoop() { if (!timer) timer = setInterval(tick, DT_REAL_MS); setGoLabel(); }
+    function stopLoop() { if (timer) { clearInterval(timer); timer = null; } setGoLabel(); }
 
     // ---- "Auto hier" → place the car at the saved Home ----
     function loadHome() {
@@ -149,8 +149,11 @@ window.TrackerNavSim = function (ctx) {
     }
 
     // ---- tiny UI panel (Orbitron, dark-blue, green actions per house rules) ----
-    let elStatus = null;
+    let elStatus = null, btnGo = null;
     function status(m) { if (elStatus) elStatus.textContent = m; }
+    // The drive button is a toggle: GO starts auto-following, STOP halts. Label tracks the loop state.
+    function setGoLabel() { if (btnGo) btnGo.textContent = timer ? 'STOP' : 'GO'; }
+    function onGo() { if (timer) { stopLoop(); deviating = 0; status(''); } else { startDriving(); } }
     function mkBtn(label, fn) {
         const b = document.createElement('button');
         b.textContent = label;
@@ -168,7 +171,7 @@ window.TrackerNavSim = function (ctx) {
             + 'box-shadow:0 4px 18px rgba(8,20,42,0.6);';
 
         const title = document.createElement('div');
-        title.textContent = '🧪 NAV-SIM';
+        title.textContent = '🧪 NAVI-SIMULATION';
         title.style.cssText = 'font-weight:700;letter-spacing:1px;margin-bottom:8px;color:#f5c242;';
         p.appendChild(title);
 
@@ -185,19 +188,20 @@ window.TrackerNavSim = function (ctx) {
 
         const bRow = document.createElement('div');
         bRow.appendChild(mkBtn('Auto hier', placeCarAtHome));
-        bRow.appendChild(mkBtn('Fahren', startDriving));
+        btnGo = mkBtn('GO', onGo);
+        bRow.appendChild(btnGo);
         bRow.appendChild(mkBtn('Abweichen', () => {
             if (!car) { status('erst „Auto hier"'); return; }
             deviating = DEVIATE_M; startLoop();
             dbg('Abweichen: ' + DEVIATE_M + ' m geradeaus, Heading ' + Math.round(brg));
             status('weicht ab …');
         }));
-        bRow.appendChild(mkBtn('Stop', () => { stopLoop(); deviating = 0; status('gestoppt'); dbg('gestoppt'); }));
         p.appendChild(bRow);
+        setGoLabel();
 
         elStatus = document.createElement('div');
         elStatus.style.cssText = 'margin-top:8px;color:#9fc0ff;min-height:14px;line-height:1.4;';
-        elStatus.textContent = '„Auto hier" → Ziel via Popup → „Fahren" → „Abweichen"';
+        elStatus.textContent = '„Auto hier" → Ziel via Popup → „GO" → „Abweichen"';
         p.appendChild(elStatus);
 
         document.body.appendChild(p);
