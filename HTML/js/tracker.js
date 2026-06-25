@@ -2338,6 +2338,7 @@ ${pts}
         //      only asks hasDestination() on START and clearRoute() on STOP (finish/discard). ----
         __nav = TrackerNav({
             map, $, toast, showPanel, hidePanels,
+            apiUrl: SUPABASE_URL, apiKey: SUPABASE_KEY,   // → `reroute` Edge Function (ORS) when REROUTE_ENGINE='ors'
             get posMarker() { return posMarker; },
             // Dialog "STARTEN": from idle → begin recording + navigation (toggle then shows PAUSE);
             // while already recording (dialog reopened mid-trip) → just (re)route to the new destination.
