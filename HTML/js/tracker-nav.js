@@ -317,10 +317,32 @@ window.TrackerNav = function (ctx) {
         if (one) one.hidden = false;
         if (two) two.hidden = true;
     }
+    function fmtDur(sec) {
+        const m = Math.round(sec / 60);
+        if (m < 60) return m + ' min';
+        return Math.floor(m / 60) + ':' + String(m % 60).padStart(2, '0') + ' h';   // hh:mm
+    }
     function fmtRoute(d) {
         if (!d || !d.routes || !d.routes.length) return '—';
         const r = d.routes[0];
-        return (r.distance / 1000).toFixed(1) + ' km · ' + Math.round(r.duration / 60) + ' min';
+        return (r.distance / 1000).toFixed(1) + ' km · ' + fmtDur(r.duration);
+    }
+    // Recommendation (Doc 2026-06-25): prefer the SHORTER (greener) route unless the faster one meaningfully
+    // beats it. Rule of thumb from Doc: "2 min faster but 5 km longer → not worth it". Returns 'fast'|'short'.
+    function recommend(fast, short) {
+        if (!fast || !fast.routes || !fast.routes.length) return 'short';
+        if (!short || !short.routes || !short.routes.length) return 'fast';
+        const savedMin = (short.routes[0].duration - fast.routes[0].duration) / 60;   // minutes the fast route saves
+        const extraKm = (fast.routes[0].distance - short.routes[0].distance) / 1000;  // km the fast route is longer
+        if (extraKm <= 0.3) return 'fast';        // barely longer → just take the faster one
+        if (savedMin < 3) return 'short';         // saves little time → take the shorter/greener route
+        return (savedMin / extraKm >= 1.5) ? 'fast' : 'short';   // worth it only if ≥1.5 min saved per extra km
+    }
+    function applyRecommendation(fast, short) {
+        const fastBtn = $('nav-start-fast'), shortBtn = $('nav-start-short');
+        const recFast = recommend(fast, short) === 'fast';
+        if (fastBtn) { fastBtn.classList.toggle('alt', !recFast); const k = fastBtn.querySelector('.nav-start-kind'); if (k) k.textContent = (recFast ? '✓ ' : '') + 'schnellste'; }
+        if (shortBtn) { shortBtn.classList.toggle('alt', recFast); const k = shortBtn.querySelector('.nav-start-kind'); if (k) k.textContent = (recFast ? '' : '✓ ') + 'kürzeste'; }
     }
     async function previewStart() {
         const one = $('nav-set'), two = $('nav-start2');
@@ -346,6 +368,7 @@ window.TrackerNav = function (ctx) {
         if (!fast && !short) { showSingleStart(); return; }        // ORS unreachable → fall back to single button
         if (fm) fm.textContent = fmtRoute(fast);
         if (sm) sm.textContent = fmtRoute(short);
+        applyRecommendation(fast, short);                          // green = recommended, orange = the alternative
     }
 
     // ---- Navigation history: the last few destinations, as a quick-pick list in the Ziel-dialog ----
