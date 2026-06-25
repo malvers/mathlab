@@ -2788,20 +2788,6 @@ ${pts}
             else wire();
         })();
 
-        // Ziel-Panel: route preference — shortest ↔ fastest (persisted in nav; only effective on ORS).
-        (function () {
-            function wire() {
-                const cb = $('route-pref-toggle'); if (!cb || cb._wired) return; cb._wired = true;
-                cb.checked = !!(__nav && __nav.getPref && __nav.getPref() === 'shortest'); // default fastest
-                cb.addEventListener('change', () => {
-                    if (__nav && __nav.setPref) __nav.setPref(cb.checked ? 'shortest' : 'fastest');
-                    toast(cb.checked ? 'Route: kürzeste' : 'Route: schnellste');
-                });
-            }
-            if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', wire);
-            else wire();
-        })();
-
         // Settings → Debug: mobile shortcut keys — tap fires the otherwise keyboard-only d/k/w handlers.
         // A toggle shows/hides the key row (default OFF, persisted).
         (function () {

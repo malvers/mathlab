@@ -1,4 +1,4 @@
-<!-- deploy: 2026-06-25 #17 kuerzeste-schnellste Route (ORS preference) -->
+<!-- deploy: 2026-06-25 #18 schnellste/kuerzeste als Buttons (Wegetyp-Label weg) -->
 <!DOCTYPE html>
 <html lang="de">
 
@@ -367,12 +367,15 @@
             <!-- Current destination shown at the TOP when one is set (Doc 2026-06-25); refreshPanel toggles it. -->
             <div id="nav-current" class="sync-lead" hidden></div>
             <p class="sync-lead">Ziel eintippen oder sprechen. Wird das Ziel erkannt, kann die Navigation sofort gestartet werden.</p>
-            <!-- Wegetyp ABOVE the address line (Doc 2026-06-21): pick Straße/Laufen first, then type the goal. -->
+            <!-- Wegetyp + Routen-Präferenz as button groups above the address (Doc 2026-06-25: no labels). -->
             <div class="set-row seg-row" role="group" aria-label="Wegetyp">
-                <span>Wegetyp</span>
                 <div class="seg-group">
                     <button type="button" class="seg-btn" data-route="car">🚗 Straße</button>
                     <button type="button" class="seg-btn" data-route="foot">🚶 Laufen</button>
+                </div>
+                <div class="seg-group">
+                    <button type="button" class="seg-btn" data-pref="fastest">⚡ schnellste</button>
+                    <button type="button" class="seg-btn" data-pref="shortest">📏 kürzeste</button>
                 </div>
             </div>
             <!-- One free-text line: type OR dictate the whole address (Nominatim handles "Ort, Straße, Nr."). -->
@@ -408,10 +411,6 @@
             <label class="set-row" for="route-engine-toggle" style="cursor:pointer">
                 <span>Navigation über ORS (sonst OSRM)</span>
                 <input type="checkbox" id="route-engine-toggle" class="tl-check">
-            </label>
-            <label class="set-row" for="route-pref-toggle" style="cursor:pointer">
-                <span>Kürzeste Route (sonst schnellste)</span>
-                <input type="checkbox" id="route-pref-toggle" class="tl-check">
             </label>
         </div>
         <button class="ov-close" id="nav-close" aria-label="Schließen">&times;</button>

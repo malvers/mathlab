@@ -1202,6 +1202,20 @@ window.TrackerNav = function (ctx) {
         reflect();
     })();
 
+    // Route-preference segment (fastest ⇄ shortest) — same style as Wegetyp; re-routes on change (Doc 2026-06-25).
+    (function () {
+        const seg = Array.from(document.querySelectorAll('.seg-btn[data-pref]'));
+        if (!seg.length) return;
+        const reflect = () => seg.forEach((b) => b.classList.toggle('active', b.getAttribute('data-pref') === routePref));
+        seg.forEach((b) => b.addEventListener('click', () => {
+            const p = b.getAttribute('data-pref') === 'shortest' ? 'shortest' : 'fastest';
+            if (p === routePref) return;
+            setPref(p); reflect();
+            if (destLatLng) { const from = curPos(); if (from) computeRoute(from, false); }   // re-route with the new preference
+        }));
+        reflect();
+    })();
+
     // Proactive reroute AROUND a freshly-detected obstacle (a closure the traffic module just found ON the
     // active route). Don't wait for an off-route event — at a Sperrung you don't leave the line by yourself,
     // so that trigger comes too late (you'd be AT the closure). computeRoute's reroute path runs through ORS,
