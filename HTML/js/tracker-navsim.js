@@ -142,7 +142,7 @@ window.TrackerNavSim = function (ctx) {
 
     // ---- "Fahren" → ensure a route exists, then auto-follow it ----
     async function startDriving() {
-        if (!car) { status('erst „Home"'); dbg('kein Auto — „Home" zuerst'); return; }
+        if (!car) { status('erst „Go Home"'); dbg('kein Auto — „Go Home" zuerst'); return; }
         if (!(nav && nav.routePoints && nav.routePoints())) {
             if (nav && nav.hasDestination && nav.hasDestination() && nav.startNavigation) { status('Route wird berechnet …'); await nav.startNavigation(); }
         }
@@ -214,7 +214,7 @@ window.TrackerNavSim = function (ctx) {
         p.appendChild(sRow);
 
         const bRow = document.createElement('div');
-        bRow.appendChild(mkBtn('Home', placeCarAtHome));
+        bRow.appendChild(mkBtn('Go Home', placeCarAtHome));
         btnGo = mkBtn('GO', onGo);
         bRow.appendChild(btnGo);
         p.appendChild(bRow);
