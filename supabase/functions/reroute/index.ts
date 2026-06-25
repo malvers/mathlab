@@ -66,10 +66,13 @@ Deno.serve(async (req) => {
     // ORS wants [lon,lat]. Constrain ONLY the departure direction (origin) to the travel heading with a
     // tolerance → forward reroute, no immediate U-turn back; the destination stays unconstrained ([0,180]
     // = any). continue_straight:false → the engine may still U-turn where it is genuinely best (dead end).
+    // Route preference: 'fastest' (default) | 'shortest' | 'recommended' (Doc 2026-06-25).
+    const pref = (body.preference === 'shortest' || body.preference === 'recommended') ? body.preference : 'fastest';
     const reqBody: Record<string, unknown> = {
       coordinates: [[from[1], from[0]], [to[1], to[0]]],
       instructions: true,
       continue_straight: false,
+      preference: pref,
     };
     if (heading != null) reqBody.bearings = [[heading, HEADING_TOLERANCE], [0, 180]];
     if (body.avoid_polygons) reqBody.options = { avoid_polygons: body.avoid_polygons };
