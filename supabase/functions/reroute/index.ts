@@ -58,7 +58,8 @@ Deno.serve(async (req) => {
     const body = await req.json().catch(() => ({}));
     const from = body.from, to = body.to;            // [lat, lng]
     const heading = (typeof body.heading === 'number') ? Math.round(((body.heading % 360) + 360) % 360) : null;
-    const profile = body.profile === 'foot-walking' ? 'foot-walking' : 'driving-car';
+    const ALLOWED = ['driving-car', 'cycling-regular', 'foot-walking', 'foot-hiking'];   // Doc 2026-06-25
+    const profile = ALLOWED.includes(body.profile) ? body.profile : 'driving-car';
     if (!Array.isArray(from) || !Array.isArray(to) || from.length < 2 || to.length < 2) {
       return json({ code: 'Error', error: 'from/to [lat,lng] fehlen' }, 400);
     }

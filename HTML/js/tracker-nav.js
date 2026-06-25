@@ -21,12 +21,22 @@ window.TrackerNav = function (ctx) {
     // Wegetyp (Doc 2026-06-17): Straße (car) or Laufen (foot). FOSSGIS hosts keyless OSRM instances per
     // profile with the SAME API (geometry + maneuvers), so only the base URL changes. Foot routing uses
     // footpaths/pedestrian zones a car route can't; the maneuver→German mapping below is profile-agnostic.
-    const OSRM_PROFILES = {
+    const OSRM_PROFILES = {   // FOSSGIS OSRM (fallback engine only); ORS does the real work
         car: 'https://routing.openstreetmap.de/routed-car/route/v1/driving/',
+        bike: 'https://routing.openstreetmap.de/routed-bike/route/v1/bike/',
         foot: 'https://routing.openstreetmap.de/routed-foot/route/v1/foot/',
     };
+    // Four travel modes (Doc 2026-06-25). `ors` = OpenRouteService profile, `osrm` = OSRM-fallback key,
+    // `verb` = banner wording, `two` = show fastest+shortest (true) or a single START button (false).
+    const MODES = {
+        car:  { ors: 'driving-car',     osrm: 'car',  verb: 'ZU FAHREN',  two: true },
+        bike: { ors: 'cycling-regular', osrm: 'bike', verb: 'ZU RADELN',  two: true },
+        walk: { ors: 'foot-walking',    osrm: 'foot', verb: 'ZU LAUFEN',  two: false },
+        hike: { ors: 'foot-hiking',     osrm: 'foot', verb: 'ZU WANDERN', two: false },
+    };
     const ROUTE_KEY = 'trk_nav_routetype';
-    let routeType = (localStorage.getItem(ROUTE_KEY) === 'foot') ? 'foot' : 'car';   // default: Straße
+    const _storedMode = localStorage.getItem(ROUTE_KEY);
+    let routeType = MODES[_storedMode] ? _storedMode : (_storedMode === 'foot' ? 'walk' : 'car');  // migrate old 'foot'; default Straße
     const COL_ROUTE = 'rgb(66, 135, 245)'; // blue — distinct from the green/orange track + red position dot
 
     // Own map pane for the route, BELOW the position dot / heading triangle / track / markers, so the
@@ -324,13 +334,13 @@ window.TrackerNav = function (ctx) {
         previewFor = '';
         const two = $('nav-start2'); if (!two) return;
         two.hidden = false;
-        const foot = routeType === 'foot';
-        setFootMode(foot);
+        const single = !MODES[routeType].two;       // walk/hike → one START button
+        setFootMode(single);
         const fm = $('nav-start-fast-meta'), sm = $('nav-start-short-meta');
         if (fm) fm.textContent = ''; if (sm) sm.textContent = '';
         const fb = $('nav-start-fast'), sb = $('nav-start-short');
         if (fb) { fb.classList.remove('alt'); const k = fb.querySelector('.nav-start-kind'); if (k) k.textContent = 'schnellste'; }
-        if (sb) { sb.classList.remove('alt'); const k = sb.querySelector('.nav-start-kind'); if (k) k.textContent = foot ? 'STARTEN' : 'kürzeste'; }
+        if (sb) { sb.classList.remove('alt'); const k = sb.querySelector('.nav-start-kind'); if (k) k.textContent = single ? 'STARTEN' : 'kürzeste'; }
     }
     function fmtDur(sec) {
         const m = Math.round(sec / 60);
@@ -373,8 +383,8 @@ window.TrackerNav = function (ctx) {
         two.hidden = false;
         const fm = $('nav-start-fast-meta'), sm = $('nav-start-short-meta');
 
-        if (routeType === 'foot') {
-            // Walking → ONE button (the shortest = sensible route); fastest/shortest split makes no sense.
+        if (!MODES[routeType].two) {
+            // Walk/Hike → ONE button (the shortest = sensible route); fastest/shortest split makes no sense on foot.
             setFootMode(true);
             const sb = $('nav-start-short');
             if (sb) { sb.classList.remove('alt'); const k = sb.querySelector('.nav-start-kind'); if (k) k.textContent = 'STARTEN'; }
@@ -549,7 +559,7 @@ window.TrackerNav = function (ctx) {
                 body: JSON.stringify({
                     from: [from[0], from[1]], to: [to[0], to[1]],
                     heading: (brg != null ? brg : null),
-                    profile: (routeType === 'foot' ? 'foot-walking' : 'driving-car'),
+                    profile: MODES[routeType].ors,
                     preference: prefOverride || routePref,  // 'fastest' | 'shortest' (override for the start preview)
                     avoid_polygons: avoid || undefined,   // JSON.stringify drops it when null → option omitted
                 }),
@@ -576,7 +586,7 @@ window.TrackerNav = function (ctx) {
                 const coords = from[1] + ',' + from[0] + ';' + destLatLng[1] + ',' + destLatLng[0];
                 // Optional OSRM departure-bearing cone (off by default — it backfired at junctions).
                 const bearings = (USE_DEPART_BEARING && brg != null) ? '&bearings=' + Math.round(brg) + ',' + BRG_RANGE_DEG + ';' : '';
-                const r = await fetch(OSRM_PROFILES[routeType] + coords + '?overview=full&geometries=geojson&steps=true' + bearings);
+                const r = await fetch(OSRM_PROFILES[MODES[routeType].osrm] + coords + '?overview=full&geometries=geojson&steps=true' + bearings);
                 data = await r.json();
             }
         } catch (e) { if (gen === navGen) toast('Route fehlgeschlagen (offline?).'); return false; }
@@ -860,7 +870,7 @@ window.TrackerNav = function (ctx) {
         // German decimal comma („6,5 km"); the cryptic "ETA … 4.9 / 6.5 … min" is replaced by named fields.
         const km = (m) => fmt(m).replace('.', ',');
         const min = Math.round(d.remSec / 60);
-        const verb = routeType === 'foot' ? 'ZU LAUFEN' : 'ZU FAHREN';   // Laufen-Modus: „ZU LAUFEN" (Doc 2026-06-25)
+        const verb = MODES[routeType].verb;   // ZU FAHREN / ZU RADELN / ZU LAUFEN / ZU WANDERN (Doc 2026-06-25)
         return 'ANKUNFT ' + clock + '  ·  STRECKE ' + km(tripTotalM || routeTotalDist) + '  ·  ' + verb + ' ' + km(d.remM) + ' (' + min + ' min)';
     }
 
@@ -1297,8 +1307,8 @@ window.TrackerNav = function (ctx) {
         if (!seg.length) return;
         const reflect = () => seg.forEach((b) => b.classList.toggle('active', b.getAttribute('data-route') === routeType));
         seg.forEach((b) => b.addEventListener('click', () => {
-            const t = b.getAttribute('data-route') === 'foot' ? 'foot' : 'car';
-            if (t === routeType) return;
+            const t = b.getAttribute('data-route');
+            if (!MODES[t] || t === routeType) return;
             routeType = t; localStorage.setItem(ROUTE_KEY, routeType); reflect();
             if (destLatLng) {
                 previewFor = '';                                   // profile changed → the cached START preview is stale
