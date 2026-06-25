@@ -301,8 +301,51 @@ window.TrackerNav = function (ctx) {
     function reflectDestInField() {
         const input = $('nav-dest'); if (!input) return;
         const hint = $('nav-found-hint'); if (hint) hint.hidden = true;   // name is in the field itself
-        if (destLabel) { input.value = shortLabel(destLabel); input.classList.add('nav-found'); }
-        else input.classList.remove('nav-found');
+        if (destLabel) { input.value = shortLabel(destLabel); input.classList.add('nav-found'); previewStart(); }
+        else { input.classList.remove('nav-found'); showSingleStart(); }
+    }
+
+    // ---- Two informed START buttons (Doc 2026-06-25): once a destination is green, replace the single
+    //      STARTEN with "schnellste" (left) + "kürzeste" (right), each showing its route's time + distance.
+    //      Needs ORS + a position (WLAN is enough); otherwise the single STARTEN stays as a fallback.
+    let previewFor = '';     // dest key already previewed → avoid recomputing the same pair
+    let previewGen = 0;
+    function destKey() { return destLatLng ? destLatLng[0].toFixed(5) + ',' + destLatLng[1].toFixed(5) : ''; }
+    function showSingleStart() {
+        previewFor = '';
+        const one = $('nav-set'), two = $('nav-start2');
+        if (one) one.hidden = false;
+        if (two) two.hidden = true;
+    }
+    function fmtRoute(d) {
+        if (!d || !d.routes || !d.routes.length) return '—';
+        const r = d.routes[0];
+        return (r.distance / 1000).toFixed(1) + ' km · ' + Math.round(r.duration / 60) + ' min';
+    }
+    async function previewStart() {
+        const one = $('nav-set'), two = $('nav-start2');
+        if (!one || !two) return;
+        const from = curPos();
+        // Only ORS can show both variants; without ORS or without ANY position → keep the single STARTEN.
+        if (!destLatLng || routeEngine !== 'ors' || !from) { showSingleStart(); return; }
+        const key = destKey();
+        if (key === previewFor && !two.hidden) return;   // already showing for this destination
+        previewFor = key;
+        const my = ++previewGen;
+        const fm = $('nav-start-fast-meta'), sm = $('nav-start-short-meta');
+        if (fm) fm.textContent = '…'; if (sm) sm.textContent = '…';
+        one.hidden = true; two.hidden = false;
+        let fast, short;
+        try {
+            [fast, short] = await Promise.all([
+                fetchRerouteORS(from, destLatLng, null, 'fastest'),
+                fetchRerouteORS(from, destLatLng, null, 'shortest'),
+            ]);
+        } catch (e) { fast = short = null; }
+        if (my !== previewGen || destKey() !== key) return;       // destination changed meanwhile → stale
+        if (!fast && !short) { showSingleStart(); return; }        // ORS unreachable → fall back to single button
+        if (fm) fm.textContent = fmtRoute(fast);
+        if (sm) sm.textContent = fmtRoute(short);
     }
 
     // ---- Navigation history: the last few destinations, as a quick-pick list in the Ziel-dialog ----
@@ -437,7 +480,7 @@ window.TrackerNav = function (ctx) {
     // (so computeRoute parses it unchanged), or null on ANY failure → computeRoute then falls back to OSRM.
     // `heading` constrains the departure direction (≈±60° server-side) so the new route goes forward, not
     // back onto the rejected line.
-    async function fetchRerouteORS(from, to, brg) {
+    async function fetchRerouteORS(from, to, brg, prefOverride) {
         if (!apiUrl || !apiKey || !to) return null;
         // Active road closures from the traffic module → ORS avoid_polygons, so the new route goes AROUND a
         // Sperrung instead of only warning about it. Null when traffic is off / nothing to avoid; on ANY ORS
@@ -452,7 +495,7 @@ window.TrackerNav = function (ctx) {
                     from: [from[0], from[1]], to: [to[0], to[1]],
                     heading: (brg != null ? brg : null),
                     profile: (routeType === 'foot' ? 'foot-walking' : 'driving-car'),
-                    preference: routePref,                // 'fastest' | 'shortest'
+                    preference: prefOverride || routePref,  // 'fastest' | 'shortest' (override for the start preview)
                     avoid_polygons: avoid || undefined,   // JSON.stringify drops it when null → option omitted
                 }),
             });
@@ -1030,6 +1073,7 @@ window.TrackerNav = function (ctx) {
         const input = $('nav-dest'), hint = $('nav-found-hint');
         if (input) input.classList.remove('nav-found');
         if (hint) hint.hidden = true;
+        showSingleStart();   // no green destination → back to the single STARTEN
     }
 
     // ---- Panel ----
@@ -1081,6 +1125,9 @@ window.TrackerNav = function (ctx) {
 
     // Wire the panel's own buttons once.
     const setBtn = $('nav-set'); if (setBtn) setBtn.addEventListener('click', startFromDialog);
+    // Two informed START buttons → pick the preference, then start (same path as STARTEN).
+    const startFast = $('nav-start-fast'); if (startFast) startFast.addEventListener('click', () => { setPref('fastest'); startFromDialog(); });
+    const startShort = $('nav-start-short'); if (startShort) startShort.addEventListener('click', () => { setPref('shortest'); startFromDialog(); });
     const clrBtn = $('nav-clear'); if (clrBtn) clrBtn.addEventListener('click', () => { clearRoute(); try { localStorage.removeItem(LAST_KEY); } catch (e) { } toast('Ziel gelöscht.'); });
     const hereBtn = $('nav-here'); if (hereBtn) hereBtn.addEventListener('click', savePin);
 
@@ -1115,6 +1162,7 @@ window.TrackerNav = function (ctx) {
             refreshHome();
             foundFor = q;
             showFound(destLabel);
+            previewStart();                                        // green → show the two informed START buttons
         }
         input.addEventListener('input', () => {
             const q = (input.value || '').trim();
