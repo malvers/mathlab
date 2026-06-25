@@ -1100,7 +1100,20 @@ window.TrackerNav = function (ctx) {
         reflect();
     })();
 
-    const api = { openPanel, hasDestination, startNavigation, navigateTo, clearRoute, update, remainingBounds, frameRoute, tripData, routePoints: () => routeLatLngs };
+    // Proactive reroute AROUND a freshly-detected obstacle (a closure the traffic module just found ON the
+    // active route). Don't wait for an off-route event — at a Sperrung you don't leave the line by yourself,
+    // so that trigger comes too late (you'd be AT the closure). computeRoute's reroute path runs through ORS,
+    // which gets every active closure as avoid_polygons → the new line goes around it. travelBrg keeps it
+    // forward (no U-turn back onto the rejected stretch).
+    async function avoidReroute() {
+        if (!destLatLng || !routeLatLngs || rerouting) return false;
+        const from = curPos();
+        if (!from) return false;
+        rerouting = true;
+        return computeRoute([from[0], from[1]], true, travelBrg).finally(() => { rerouting = false; });
+    }
+
+    const api = { openPanel, hasDestination, startNavigation, navigateTo, clearRoute, update, remainingBounds, frameRoute, tripData, avoidReroute, routePoints: () => routeLatLngs };
     // Bridge for the Solita navigate_to add-on (js/solita-navigate.js): the nav instance is module-private
     // in tracker.js (__nav), so publish a handle here so the voice tool can route programmatically without
     // touching tracker.js. Last constructed instance wins (there is only one).

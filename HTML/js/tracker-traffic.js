@@ -260,19 +260,26 @@ window.TrackerTraffic = function (ctx) {
         return { type: 'MultiPolygon', coordinates: polys.slice(0, AVOID_MAX_QUADS) };
     }
 
-    // One-off heads-up when an ACTIVE closure sits on the live nav route.
+    // An ACTIVE closure on the live nav route → announce AND proactively route around it RIGHT NOW. This runs
+    // after every traffic fetch, i.e. the moment the closure data lands, so the avoidance happens as soon as
+    // it's known — not at a later off-route event (you don't leave the line by yourself AT a Sperrung, so that
+    // would come too late). One spoken line + one reroute per scan, even if several closures matched; the
+    // reroute's avoid_polygons carry every active closure anyway.
     function checkRouteClosures() {
         const route = nav && nav.routePoints && nav.routePoints();
         if (!route || route.length < 2) return;
+        let hit = false;
         for (const o of items) {
             if (o.kind !== 'sperrung' || o.future || announced.has(o.id)) continue;
             const onRoute = o.geom.some((p) => distToLine(p, route) <= ROUTE_HIT_M);
             if (!onRoute) continue;
             announced.add(o.id);
-            const t = o.title || 'Sperrung';
-            if (toast) toast('⚠ Sperrung auf Deiner Route: ' + t);
-            if (voice && voice.speak) { try { voice.speak('Achtung, Sperrung voraus: ' + t); } catch (e) { /* ignore */ } }
+            hit = true;
+            if (toast) toast('⚠ Sperrung auf Deiner Route — wird umfahren: ' + (o.title || 'Sperrung'));
         }
+        if (!hit) return;
+        if (voice && voice.speak) { try { voice.speak('Achtung, Sperrung voraus. Neue Route.'); } catch (e) { /* ignore */ } }
+        if (nav && nav.avoidReroute) { try { nav.avoidReroute(); } catch (e) { /* ignore */ } }
     }
 
     async function fetchSvc(ref, svc) {
