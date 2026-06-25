@@ -384,6 +384,11 @@ window.TrackerNav = function (ctx) {
     // back onto the rejected line.
     async function fetchRerouteORS(from, to, brg) {
         if (!apiUrl || !apiKey || !to) return null;
+        // Active road closures from the traffic module → ORS avoid_polygons, so the new route goes AROUND a
+        // Sperrung instead of only warning about it. Null when traffic is off / nothing to avoid; on ANY ORS
+        // failure computeRoute falls back to OSRM (no avoid), so this stays purely additive.
+        let avoid = null;
+        try { avoid = ctx.traffic && ctx.traffic.avoidPolygons && ctx.traffic.avoidPolygons(); } catch (e) { avoid = null; }
         try {
             const r = await fetch(apiUrl + '/functions/v1/reroute', {
                 method: 'POST',
@@ -392,6 +397,7 @@ window.TrackerNav = function (ctx) {
                     from: [from[0], from[1]], to: [to[0], to[1]],
                     heading: (brg != null ? brg : null),
                     profile: (routeType === 'foot' ? 'foot-walking' : 'driving-car'),
+                    avoid_polygons: avoid || undefined,   // JSON.stringify drops it when null → option omitted
                 }),
             });
             if (!r.ok) return null;
