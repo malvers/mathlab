@@ -156,10 +156,11 @@ window.TrackerNavSim = function (ctx) {
             detour.s += speedStep(detour.cum, detour.vc, detour.s);
             if (detour.s >= dtotal) {                      // arrived → resume following the (by now rerouted) line
                 const e = pointAt(detour.pts, detour.cum, dtotal); car = e.pos; brg = e.brg; emit();
-                detour = null; clearDevMarker(); routeRef = null; dbg('Abweichpunkt erreicht → folge der (neuen) Route'); status('zurück auf Route');
+                detour = null; routeRef = null; dbg('Abweichpunkt erreicht → folge der (neuen) Route'); status('zurück auf Route'); // marker bleibt stehen
                 return;
             }
             const at = pointAt(detour.pts, detour.cum, detour.s); car = at.pos; brg = at.brg; emit();
+            status('↪ ' + Math.round(vcur * 3.6) + ' / ' + maxKmh + ' km/h');   // live speed (deviation)
             if (clock - lastLog >= 3000) { lastLog = clock; dbg('weiche ab (Straße) → ' + Math.round(detour.s) + '/' + Math.round(dtotal) + ' m @ ' + Math.round(vcur * 3.6) + ' km/h'); }
             return;
         }
@@ -170,6 +171,7 @@ window.TrackerNavSim = function (ctx) {
         const at = pointAt(route, routeCum, s);
         car = at.pos; brg = at.brg;
         emit();
+        status('▸ ' + Math.round(vcur * 3.6) + ' / ' + maxKmh + ' km/h');   // live speed (route)
         if (clock - lastLog >= 3000) { lastLog = clock; dbg('fahre … ' + Math.round(s) + '/' + Math.round(total) + ' m @ ' + Math.round(vcur * 3.6) + ' km/h'); }
     }
     function startLoop() { if (!timer) timer = setInterval(tick, DT_REAL_MS); setGoLabel(); }
@@ -181,7 +183,7 @@ window.TrackerNavSim = function (ctx) {
         catch (e) { return null; }
     }
     function placeCarAtHome() {
-        stopLoop(); detour = null; clearDevMarker(); routeRef = null; route = null; s = 0; clock = 0; vcur = 0; paused = false;
+        stopLoop(); detour = null; clearDevMarkers(); routeRef = null; route = null; s = 0; clock = 0; vcur = 0; paused = false;
         const h = loadHome();
         if (h) car = h; else { const c = map.getCenter(); car = [c.lat, c.lng]; dbg('kein Home gesetzt → Auto auf Kartenmitte'); }
         brg = 0;
@@ -228,21 +230,25 @@ window.TrackerNavSim = function (ctx) {
         } catch (e) { return null; }
     }
     // Deviation-target marker (λ-orange ring) — shows where you clicked; cleared when the car reaches it.
-    let devMarker = null;
-    function setDevMarker(ll) {
-        clearDevMarker();
-        devMarker = L.circleMarker(ll, { radius: 9, color: '#fff', weight: 2, fillColor: 'rgb(245,194,66)', fillOpacity: 0.95 }).addTo(map);
+    // Deviation markers PERSIST (Doc 2026-06-25): every click leaves one and it stays — even when the car
+    // drives over it. They only clear on a full reset ("Go Home"). addDevMarker returns the marker so a
+    // failed (no-road) click can remove just that one.
+    let devMarkers = [];
+    function addDevMarker(ll) {
+        const m = L.circleMarker(ll, { radius: 9, color: '#fff', weight: 2, fillColor: 'rgb(245,194,66)', fillOpacity: 0.95 }).addTo(map);
+        devMarkers.push(m);
+        return m;
     }
-    function clearDevMarker() { if (devMarker) { map.removeLayer(devMarker); devMarker = null; } }
+    function clearDevMarkers() { devMarkers.forEach((m) => map.removeLayer(m)); devMarkers = []; }
     // While driving, a map click routes the car ON ROADS to that point (off the nav route) → triggers a
     // reroute. When not driving, clicks are ignored so the map stays normally usable (pan/zoom/explore).
     async function onMapClick(e) {
         if (!timer || !car) return;            // only deviate while actually driving
         const to = [e.latlng.lat, e.latlng.lng];
-        setDevMarker(to);                      // instant feedback at the clicked point; removed on arrival
+        const m = addDevMarker(to);            // instant feedback; the marker stays (even when driven over)
         status('Abweich-Route …'); dbg('Abweich-Klick → route via Straßen zu ' + to[0].toFixed(5) + ',' + to[1].toFixed(5));
         const pts = await osrmRoute(car, to);
-        if (!pts || pts.length < 2) { clearDevMarker(); status('keine Straße dahin'); dbg('OSRM: keine Abweich-Route'); return; }
+        if (!pts || pts.length < 2) { map.removeLayer(m); devMarkers = devMarkers.filter((x) => x !== m); status('keine Straße dahin'); dbg('OSRM: keine Abweich-Route'); return; }
         const cum = cumLengths(pts);
         detour = { pts, cum, vc: buildVcurve(pts, cum), s: projectDist(pts, cum, car) };  // start at the car on the detour
     }
