@@ -19,12 +19,12 @@ window.TrackerNavSim = function (ctx) {
 
     let car = null;          // [lat,lng] current simulated position
     let brg = 0;             // current heading (deg, 0 = N)
-    let maxKmh = 50;         // virtual MAX speed (the slider) — physics keeps it below this in curves
+    let maxKmh = 100;        // virtual MAX speed (the slider) — physics keeps it below this in curves
     let vcur = 0;            // current speed (m/s) — accelerates/brakes toward the target, never jumps
     let timer = null;        // drive interval (real time)
     let clock = 0;           // sim timestamp (ms) — advances DT_SIM_MS per emitted fix
     const DT_SIM_MS = 1000;  // each fix represents one simulated second (drives the speed maths)
-    const DT_REAL_MS = 600;  // wall-clock between fixes (how fast you watch it play out)
+    const DT_REAL_MS = 250;  // wall-clock between fixes → ~4× real-time playback (Aston fast-forward 🏎️)
 
     // ---- speed physics ----
     const A_LAT = 4.0;       // m/s² lateral (cornering) acceleration → curve speed = √(A_LAT·R); brisk, no posted limits
@@ -272,7 +272,7 @@ window.TrackerNavSim = function (ctx) {
         const sLbl = document.createElement('span');
         sLbl.textContent = maxKmh + ' km/h'; sLbl.style.minWidth = '58px';
         const slider = document.createElement('input');
-        slider.type = 'range'; slider.min = '5'; slider.max = '250'; slider.step = '5'; slider.value = String(maxKmh);
+        slider.type = 'range'; slider.min = '5'; slider.max = '320'; slider.step = '5'; slider.value = String(maxKmh);
         slider.setAttribute('aria-label', 'Sim Maximalgeschwindigkeit'); slider.style.flex = '1';
         slider.addEventListener('input', () => { maxKmh = +slider.value; sLbl.textContent = maxKmh + ' km/h'; });
         sRow.appendChild(sLbl); sRow.appendChild(slider);
