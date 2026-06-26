@@ -1215,8 +1215,15 @@ window.TrackerNav = function (ctx) {
         // doesn't jump to the NEXT turn while you're still taking this one (Doc 2026-06-24: "viel zu schnell…").
         if (d <= nearTriggerM() && !annNear) { annNear = true; speak('Jetzt ' + m.text, true); }
         else if (d <= farTriggerM() && !annFar) { annFar = true; speak('In ' + announceDist(d) + ' Metern ' + m.text + '.'); }
+        // Advance the banner to the NEXT turn only once you've PASSED this one (mode-scaled overshoot) AND the
+        // voice for it has finished — else the banner jumps to the next maneuver while you still HEAR the current
+        // one, so screen and voice disagree (Doc 2026-06-26). Hard cap at 2× the overshoot so a lagging/blocked
+        // voice can't freeze the banner on a turn you already took.
         const g = guideCfg();
-        if (mClosest <= g.nearMax && d > mClosest + g.nearMin) advanceManeuver();   // passed the turn (mode-scaled) → only now show the next
+        if (mClosest <= g.nearMax && d > mClosest + g.nearMin) {
+            const speechIdle = !navSpeaking && navSpeakQueue.length === 0;
+            if (speechIdle || d > mClosest + 2 * g.nearMin) advanceManeuver();
+        }
     }
 
     // Reset the live "found" feedback (green line + name hint). Called when the dialog opens, the route is
