@@ -987,6 +987,12 @@ window.TrackerNav = function (ctx) {
             const a = ensure();
             a.onended = null; a.onerror = null; a.loop = true;
             if (a.src !== silentUrl) a.src = silentUrl;
+            // The keep-warm loop runs MUTED: a muted <audio> holds NO Android audio focus, so the
+            // car-radio / device media is NOT ducked between announcements (Doc 2026-06-26 — the
+            // continuous duck was the silent loop claiming focus the whole navigation). The element
+            // still plays, so the channel stays open for the next clip; speakUrl() unmutes only while
+            // a real spoken line is playing → ducking happens ONLY during "links/rechts", as wanted.
+            a.muted = true;
             a.play().catch(() => { });
             session('playing');
         }
@@ -1009,7 +1015,7 @@ window.TrackerNav = function (ctx) {
             let done = false;
             const finish = () => { if (done) return; done = true; toSilence(); if (onended) onended(); };
             a.onended = finish; a.onerror = finish;
-            a.loop = false; a.src = dataUrl;
+            a.loop = false; a.muted = false; a.src = dataUrl;  // unmute → ducks the radio ONLY while the spoken clip plays
             session('playing');
             a.play().catch(() => finish());
         }
