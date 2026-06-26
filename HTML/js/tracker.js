@@ -933,7 +933,7 @@
         function updateNavigationAndDebug(here, still, accuracy, minStep) {
             refreshRecenter(); // show/hide the recenter button as needed
             updateAmbientTemp(here); // keep the ambient temperature fresh while recording (throttled) → stamped onto each point
-            if (__nav && __nav.update) __nav.update(here); // navigation: reroute if we drifted off the line
+            if (__nav && __nav.update) __nav.update(here, shownSpeed); // navigation: reroute + speed-scaled turn lead
             if (__speed) __speed.update(here, still, shownSpeed); // speed-limit sign for the current road
             updateMotionDbg(accuracy, minStep, still);
             if (tracking) setStatus(`Aufzeichnung läuft … ${track.length} Punkte`);

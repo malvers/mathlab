@@ -74,7 +74,18 @@ window.TrackerNav = function (ctx) {
     const BRG_RANGE_DEG = 90;       // (only used when USE_DEPART_BEARING) OSRM may depart within ±this of the travel heading
     const BRG_MIN_MOVE_M = 12;      // min travel between fixes for a trustworthy movement-derived heading
     const ANNOUNCE_FAR_M = 300;     // distance at which the pre-warning ("In 300 m …") is spoken
-    const ANNOUNCE_NEAR_M = 40;     // distance at which the maneuver ("Jetzt …") is spoken + advanced
+    const ANNOUNCE_NEAR_M = 40;     // floor for the "Jetzt …" trigger (walking) — see nearTriggerM()
+    // The "Jetzt …" prompt must arrive BEFORE the turn, not during it. At driving speed a fixed 40 m is only
+    // ~3 s away — too little once cloud-TTS latency is added, so it landed AFTER the turn (Doc 2026-06-26).
+    // Trigger it on a fixed time LEAD instead: nearTrigger = speed · LEAD, floored at the walking-friendly
+    // 40 m and capped so it stays well under the 300 m pre-warning.
+    const NEAR_LEAD_S = 5;          // seconds of lead for the "Jetzt …" prompt (covers TTS latency at speed)
+    const NEAR_MAX_M = 200;         // cap so the imperative never pre-empts the far pre-warning
+    let navSpeedKmh = 0;            // last speed (km/h), fed by the host each fix → drives the speed-scaled lead
+    function nearTriggerM() {
+        const mps = navSpeedKmh > 0 ? navSpeedKmh / 3.6 : 0;
+        return Math.min(NEAR_MAX_M, Math.max(ANNOUNCE_NEAR_M, mps * NEAR_LEAD_S));
+    }
     const VOICE_KEY = 'trk_nav_voice';
 
     let destLatLng = null;  // [lat, lng] of the set destination, or null
@@ -720,9 +731,10 @@ window.TrackerNav = function (ctx) {
         DebugWindow.log('nav: d2route=' + Math.round(d) + 'm (limit ' + OFFROUTE_M + ') · ' + state);
     }
 
-    function update(here) {
+    function update(here, speedKmh) {
         // Only while a route is actually drawn; bail cheaply otherwise (no dest, not started, mid-fetch).
         if (!destLatLng || !routeLatLngs || !here) return;
+        if (typeof speedKmh === 'number' && isFinite(speedKmh)) navSpeedKmh = speedKmh; // → speed-scaled turn lead
         redrawAhead(here);                                           // keep only the road ahead blue (note #1)
         // Track the live travel heading from GPS movement → feeds the departure-direction constraint on reroute.
         if (lastBrgPos == null) { lastBrgPos = here; }
@@ -973,14 +985,17 @@ window.TrackerNav = function (ctx) {
     // pathological burst can't pile up stale guidance. stopSpeech() empties the queue.
     let navSpeakQueue = [];
     let navSpeaking = false;
+    let speakGen = 0;            // generation token: an URGENT line (or a stop) bumps it so the interrupted
+                                 // line's end-callback becomes a no-op and can't restart a stale line.
     const SPEAK_QUEUE_MAX = 3;   // waiting lines (excl. the one currently playing); beyond this drop the oldest
-    function clearSpeakQueue() { navSpeakQueue = []; navSpeaking = false; }
+    function clearSpeakQueue() { navSpeakQueue = []; navSpeaking = false; speakGen++; }
     function drainSpeakQueue() {
         if (navSpeaking) return;
         const text = navSpeakQueue.shift();
         if (text == null) return;
         navSpeaking = true;
-        speakNow(text, function () { navSpeaking = false; drainSpeakQueue(); });
+        const gen = ++speakGen;
+        speakNow(text, function () { if (gen !== speakGen) return; navSpeaking = false; drainSpeakQueue(); });
     }
     // Play exactly ONE line; call done() once — when it finishes, fails, or the watchdog fires.
     function speakNow(text, done) {
@@ -1017,10 +1032,25 @@ window.TrackerNav = function (ctx) {
         for (const k in SAY_AS) s = s.replace(new RegExp(k, 'g'), SAY_AS[k]);
         return s;
     }
-    function speak(text) {
+    function speak(text, urgent) {
         if (!voiceOn) { ttsLog('skip (voice off)'); return; }
         keepAlive.start();        // ensure the audio channel is open before any guidance (idempotent)
         text = fixSpeech(text);   // spoken-only pronunciation fixes (display text stays correct)
+        if (urgent) {
+            // Time-critical "Jetzt …": jump the queue AND cut off any pre-warning still playing, so the
+            // imperative can never arrive behind a stale line (Doc 2026-06-26 — the "Q" delayed it past the turn).
+            navSpeakQueue = [text];   // drop any stale waiting lines
+            if (navSpeaking) {
+                speakGen++;           // invalidate the in-flight end-callback before we stop it
+                navSpeaking = false;  // free the queue for the urgent line
+                try { if (window.SolitaVoice && window.SolitaVoice.stop) window.SolitaVoice.stop(); } catch (e) { }
+                try { if ('speechSynthesis' in window) window.speechSynthesis.cancel(); } catch (e) { }
+                setTimeout(drainSpeakQueue, 60); // let the engine settle after stop (Android WebView quirk), then play
+            } else {
+                drainSpeakQueue();
+            }
+            return;
+        }
         if (navSpeakQueue[navSpeakQueue.length - 1] === text) return; // identical line already queued
         navSpeakQueue.push(text);
         while (navSpeakQueue.length > SPEAK_QUEUE_MAX) navSpeakQueue.shift(); // burst → drop oldest waiting (stale)
@@ -1125,10 +1155,11 @@ window.TrackerNav = function (ctx) {
             else if (d <= ANNOUNCE_FAR_M && !annFar) { annFar = true; speak('In ' + announceDist(d) + ' Metern erreichen Sie das Ziel.'); }
             return;
         }
-        // Pre-warning at ~300 m, "Jetzt …" at ~40 m — but KEEP this maneuver on the banner until you have
-        // actually PASSED it (overshoot), so it doesn't jump to the NEXT turn while you're still taking this
-        // one (Doc 2026-06-24: "die nächste kommt viel zu schnell, ich hab die eine noch nicht ausgeführt").
-        if (d <= ANNOUNCE_NEAR_M && !annNear) { annNear = true; speak('Jetzt ' + m.text); }
+        // Pre-warning at ~300 m; "Jetzt …" on a speed-scaled lead (≈40 m walking, more when driving — see
+        // nearTriggerM) and as an URGENT prompt that jumps the queue so it can't land after the turn. But KEEP
+        // this maneuver on the banner until you have actually PASSED it (overshoot), so it doesn't jump to the
+        // NEXT turn while you're still taking this one (Doc 2026-06-24: "die nächste kommt viel zu schnell…").
+        if (d <= nearTriggerM() && !annNear) { annNear = true; speak('Jetzt ' + m.text, true); }
         else if (d <= ANNOUNCE_FAR_M && !annFar) { annFar = true; speak('In ' + announceDist(d) + ' Metern ' + m.text + '.'); }
         if (mClosest <= 120 && d > mClosest + 30) advanceManeuver();   // passed the turn → only now show the next
     }
