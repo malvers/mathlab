@@ -885,16 +885,57 @@
             lastFix = { lat: latitude, lng: longitude, t: now };
         }
 
+        // ---- Smooth follow glide (Doc 2026-06-26) ----
+        // GPS fixes land ~1×/s. Snapping the dot to each fix and bursting the camera in 0.25 s made the
+        // crosshair view lurch once a second. Instead we glide BOTH together across the measured fix
+        // interval, LINEARLY:
+        //   • the camera via ONE native Leaflet pan (animate + easeLinearity:1 → constant speed; fires
+        //     moveend just ONCE, so saveView/refreshRecenter don't get spammed),
+        //   • the dot + heading via a tiny rAF that only moves the markers (touches no map events).
+        // Same start→here over the same duration, so a centred dot stays dead-centre while the world slides
+        // seamlessly. followPrevLL is the dot's spot BEFORE this fix snapped it → the glide's start point.
+        // A long gap (parked, off-route, mode switch) snaps instead of crawling a slow catch-up.
+        let followPrevLL = null;
+        let dotGlideRAF = null, dotFrom = null, dotTo = null, dotGlideStart = 0, dotGlideDur = 1000, lastFollowFixT = 0;
+        function stopDotGlide() { if (dotGlideRAF) { cancelAnimationFrame(dotGlideRAF); dotGlideRAF = null; } }
+        function dotGlideFrame() {
+            const t = dotGlideDur > 0 ? Math.min(1, (Date.now() - dotGlideStart) / dotGlideDur) : 1;
+            const lat = dotFrom[0] + (dotTo[0] - dotFrom[0]) * t;
+            const lng = dotFrom[1] + (dotTo[1] - dotFrom[1]) * t;
+            if (posMarker) posMarker.setLatLng([lat, lng]);
+            if (headingMarker) headingMarker.setLatLng([lat, lng]);
+            if (t < 1) dotGlideRAF = requestAnimationFrame(dotGlideFrame);
+            else dotGlideRAF = null;
+        }
+        // Start the dot glide toward a new fix. Returns the duration (ms) to pan the camera over, or false
+        // when it should just snap (no dot yet, first fix, or too long a gap to glide nicely).
+        function followSmooth(here) {
+            if (!followPrevLL) return false;
+            const now = Date.now();
+            const interval = lastFollowFixT ? now - lastFollowFixT : 0;
+            lastFollowFixT = now;
+            if (interval <= 0 || interval > 3000) return false; // first fix / long gap → snap, no slow crawl
+            dotFrom = followPrevLL;
+            dotTo = [here[0], here[1]];
+            dotGlideDur = Math.max(500, Math.min(2000, interval));
+            dotGlideStart = now;
+            if (!dotGlideRAF) dotGlideRAF = requestAnimationFrame(dotGlideFrame);
+            return dotGlideDur;
+        }
         function updateAutoFollow(here, still) {
-            if (following && !still) { // auto-follow: pan to the dot; zoom by SPEED — but NOT in
+            if (following && !still) { // auto-follow: glide to the dot; zoom by SPEED — but NOT in
                 // 'remaining' FIT mode, where the remaining-route fit (below) owns the zoom so the two
                 // don't fight over it (note #9).
                 const tz = (fitMode === 'remaining' || autoZoomHold) ? null : speedZoom(shownSpeed);
-                if (tz != null && Math.abs(map.getZoom() - tz) >= 1 && Date.now() - lastAutoZoom > AUTOZOOM_COOLDOWN) {
+                const zoomStep = tz != null && Math.abs(map.getZoom() - tz) >= 1 && Date.now() - lastAutoZoom > AUTOZOOM_COOLDOWN;
+                const durMs = followSmooth(here); // glide the dot; false → snap (first fix / long gap)
+                if (zoomStep) {
                     lastAutoZoom = Date.now();
-                    map.setView(here, tz, { animate: true }); // pan + zoom together
+                    map.setView(here, tz, { animate: true, duration: (durMs ? durMs / 1000 : 0.5), easeLinearity: 1.0 }); // pan + zoom, smooth
+                } else if (durMs) {
+                    map.panTo(here, { animate: true, duration: durMs / 1000, easeLinearity: 1.0 }); // glide camera in lockstep with the dot
                 } else {
-                    map.panTo(here, { animate: true });
+                    map.panTo(here, { animate: true }); // first fix / long gap → plain pan
                 }
             }
         }
@@ -943,6 +984,7 @@
             const { latitude, longitude, accuracy, speed } = pos.coords;
             const now = pos.timestamp || Date.now();
             const here = [latitude, longitude];
+            followPrevLL = posMarker ? [posMarker.getLatLng().lat, posMarker.getLatLng().lng] : null; // dot's spot BEFORE this fix snaps it → glide start
 
             updateGpsReal(accuracy);                                          // Phase 1: source flag + mode icon
             const { gpsKmh, still } = computeMovementGate(speed, accuracy, here); // Phase 2: movement gate
@@ -1726,6 +1768,7 @@
 
         function centerOnPosition() {
             cancelNavOverview(); // manual re-centre supersedes any pending auto-glide
+            stopDotGlide();     // drop any in-flight smooth-follow glide → the flyTo owns the camera now
             clearHandMode();    // CENTER explicitly takes over → leave hand-mode (hide the resume arrow)
             autoZoomHold = false; // explicit "resume auto" → hand the zoom back to speed-driven auto-follow
             fitMode = false;    // centring on the dot is the opposite of "keep the whole track fitted"
