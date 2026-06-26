@@ -360,18 +360,43 @@
             });
         });
 
-        const baseMap = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxNativeZoom: 19, // OSM tiles stop at z19 …
-            maxZoom: 21,       // … Leaflet upscales beyond (blurry) so close photo pins can separate
-            // no `attribution` here — rendered by our collapsible AttribCtl (ⓘ) above
-        }).addTo(map);
-
+        // Basemap themes (Doc 2026-06-26): DARK by default — a near-black map is easier on the eyes while
+        // driving AND saves real battery on the phone's OLED screen (fewer lit pixels). Light (OSM) stays
+        // selectable. CARTO dark_matter is the dark source; both need the OSM credit, dark also CARTO.
+        const BASEMAPS = {
+            dark: {
+                url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png', sub: 'abcd', maxNativeZoom: 20, bg: 'rgb(8, 20, 42)',
+                attrib: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> &middot; &copy; <a href="https://carto.com/attributions" target="_blank" rel="noopener">CARTO</a>',
+            },
+            light: {
+                url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', sub: 'abc', maxNativeZoom: 19, bg: '',
+                attrib: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>',
+            },
+        };
+        const MAP_THEME_KEY = 'trk_map_theme';
+        let mapTheme = (localStorage.getItem(MAP_THEME_KEY) === 'light') ? 'light' : 'dark'; // DEFAULT dark
+        let baseMap = null;
         // DEBUG: hide the background map → judge the rain-radar colours with no terrain underneath.
         //   key 'k' → dark backdrop · key 'w' → white backdrop · same key again → map back on.
         let hgMode = 'on'; // 'on' | 'dark' | 'white'
+        function makeBaseLayer(theme) {
+            const b = BASEMAPS[theme] || BASEMAPS.dark;
+            return L.tileLayer(b.url, { subdomains: b.sub, maxNativeZoom: b.maxNativeZoom, maxZoom: 21 }); // upscales >maxNative so close photo pins separate
+        }
+        function setMapTheme(theme) {
+            theme = BASEMAPS[theme] ? theme : 'dark';
+            mapTheme = theme;
+            try { localStorage.setItem(MAP_THEME_KEY, theme); } catch (e) { }
+            if (baseMap) map.removeLayer(baseMap);
+            baseMap = makeBaseLayer(theme);
+            if (hgMode === 'on') { baseMap.addTo(map); map.getContainer().style.background = BASEMAPS[theme].bg; } // dark bg → no white flash between tiles
+            const ab = document.querySelector('.attrib-body'); // keep the ⓘ credit correct per source (OSM, +CARTO when dark)
+            if (ab) ab.innerHTML = BASEMAPS[theme].attrib;
+        }
+        setMapTheme(mapTheme); // initial basemap (default dark)
         function applyHg(mode) {
             hgMode = mode;
-            if (mode === 'on') { baseMap.addTo(map); map.getContainer().style.background = ''; }
+            if (mode === 'on') { baseMap.addTo(map); map.getContainer().style.background = BASEMAPS[mapTheme].bg; }
             else { map.removeLayer(baseMap); map.getContainer().style.background = (mode === 'white') ? '#ffffff' : 'rgb(8, 20, 42)'; }
             if (window.DebugWindow && DebugWindow.log)
                 DebugWindow.log('Basemap (HG): ' + (mode === 'on' ? 'AN' : mode === 'white' ? 'AUS · weiß' : 'AUS · dunkel'));
@@ -2872,6 +2897,17 @@ ${pts}
                     if (__nav && __nav.setEngine) __nav.setEngine(cb.checked ? 'ors' : 'osrm');
                     toast(cb.checked ? 'Navigation: ORS' : 'Navigation: OSRM');
                 });
+            }
+            if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', wire);
+            else wire();
+        })();
+
+        // Settings: map theme — dark (default; OLED battery + readability while driving) ↔ light. Persisted.
+        (function () {
+            function wire() {
+                const cb = $('map-dark-toggle'); if (!cb || cb._wired) return; cb._wired = true;
+                cb.checked = (mapTheme === 'dark');
+                cb.addEventListener('change', () => { setMapTheme(cb.checked ? 'dark' : 'light'); toast(cb.checked ? 'Karte: dunkel' : 'Karte: hell'); });
             }
             if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', wire);
             else wire();
