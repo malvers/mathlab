@@ -24,6 +24,7 @@ Planungs-/Vorbereitungsphase. Code folgt in Phase 0 (siehe `plan.md`).
 ## Dateien
 
 - `plan.md` — der Masterplan (Architektur, Phasen, Entscheidungen).
+- `docs/marktanalyse.md` — wasserdichte, quellengestützte Wettbewerbs- & Machbarkeitsanalyse (Stand 2026).
 - `docs/architektur.md` — die vier Schichten im Detail.
 - `docs/datenschutz.md` — das Datenschutz-Gate (Pflicht bei einer Tastatur).
 - `docs/floris-fork.md` — Phase 0: wie wir FlorisBoard forken und bauen.
