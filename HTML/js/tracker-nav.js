@@ -73,19 +73,25 @@ window.TrackerNav = function (ctx) {
     function getPref() { return routePref; }
     const BRG_RANGE_DEG = 90;       // (only used when USE_DEPART_BEARING) OSRM may depart within ±this of the travel heading
     const BRG_MIN_MOVE_M = 12;      // min travel between fixes for a trustworthy movement-derived heading
-    const ANNOUNCE_FAR_M = 300;     // distance at which the pre-warning ("In 300 m …") is spoken
-    const ANNOUNCE_NEAR_M = 40;     // floor for the "Jetzt …" trigger (walking) — see nearTriggerM()
-    // The "Jetzt …" prompt must arrive BEFORE the turn, not during it. At driving speed a fixed 40 m is only
-    // ~3 s away — too little once cloud-TTS latency is added, so it landed AFTER the turn (Doc 2026-06-26).
-    // Trigger it on a fixed time LEAD instead: nearTrigger = speed · LEAD, floored at the walking-friendly
-    // 40 m and capped so it stays well under the 300 m pre-warning.
-    const NEAR_LEAD_S = 5;          // seconds of lead for the "Jetzt …" prompt (covers TTS latency at speed)
-    const NEAR_MAX_M = 200;         // cap so the imperative never pre-empts the far pre-warning
+    // Turn-prompt timing must fit the WAY you travel (Doc 2026-06-26): a car needs a 300 m pre-warning and a
+    // "Jetzt" tens of metres out; on foot those are absurd (300 m ≈ 4 min, 40 m ≈ half a minute too early).
+    // So the prompt distances are PER MODE. Within a mode the "Jetzt" still scales with speed via a fixed time
+    // LEAD (covers cloud-TTS latency at speed), floored/capped to that mode's sensible window:
+    //   nearTrigger = clamp(speed · lead, nearMin, nearMax);  pre-warning at `far`.
+    const GUIDE_BY_MODE = {
+        car:  { lead: 5, nearMin: 40, nearMax: 200, far: 300 }, // Straße
+        bike: { lead: 5, nearMin: 25, nearMax: 120, far: 150 }, // Fahrrad
+        walk: { lead: 4, nearMin: 12, nearMax: 40,  far: 60  }, // Laufen
+        hike: { lead: 4, nearMin: 12, nearMax: 40,  far: 60  }, // Wandern
+    };
     let navSpeedKmh = 0;            // last speed (km/h), fed by the host each fix → drives the speed-scaled lead
-    function nearTriggerM() {
+    function guideCfg() { return GUIDE_BY_MODE[routeType] || GUIDE_BY_MODE.car; }
+    function nearTriggerM() {       // "Jetzt …" distance: time-lead, clamped to the current mode's window
+        const g = guideCfg();
         const mps = navSpeedKmh > 0 ? navSpeedKmh / 3.6 : 0;
-        return Math.min(NEAR_MAX_M, Math.max(ANNOUNCE_NEAR_M, mps * NEAR_LEAD_S));
+        return Math.min(g.nearMax, Math.max(g.nearMin, mps * g.lead));
     }
+    function farTriggerM() { return guideCfg().far; } // pre-warning ("In … Metern …") distance for this mode
     const VOICE_KEY = 'trk_nav_voice';
 
     let destLatLng = null;  // [lat, lng] of the set destination, or null
@@ -886,7 +892,13 @@ window.TrackerNav = function (ctx) {
         return 'ANKUNFT ' + clock + '  ·  STRECKE ' + km(tripTotalM || routeTotalDist) + '  ·  ' + verb + ' ' + km(d.remM) + ' (' + min + ' min)';
     }
 
-    function announceDist(d) { return d > 500 ? Math.round(d / 100) * 100 : Math.round(d / 50) * 50; }
+    // Spoken distance, rounded to a natural step for the range: 100 m far out, 50 m mid, 10 m close in
+    // (so a foot pre-warning says "In 60 Metern", not a coarse "In 50 Metern").
+    function announceDist(d) {
+        if (d > 500) return Math.round(d / 100) * 100;
+        if (d > 100) return Math.round(d / 50) * 50;
+        return Math.round(d / 10) * 10;
+    }
     function fmtDist(d) { return d >= 1000 ? (d / 1000).toFixed(1) + ' km' : Math.round(d / 10) * 10 + ' m'; }
 
     // ---- Spoken guidance, hardened for the Android WebView (note #8) ----
@@ -1151,17 +1163,18 @@ window.TrackerNav = function (ctx) {
         showBanner(m, d, tripLine(here));
         if (m.type === 'arrive') {
             // Destination: you stop there (no overshoot to detect), so announce + finish at the near window.
-            if (d <= ANNOUNCE_NEAR_M) { speak('Sie haben das Ziel erreicht.'); advanceManeuver(); if (ctx.onArrive) ctx.onArrive(); }
-            else if (d <= ANNOUNCE_FAR_M && !annFar) { annFar = true; speak('In ' + announceDist(d) + ' Metern erreichen Sie das Ziel.'); }
+            if (d <= nearTriggerM()) { speak('Sie haben das Ziel erreicht.'); advanceManeuver(); if (ctx.onArrive) ctx.onArrive(); }
+            else if (d <= farTriggerM() && !annFar) { annFar = true; speak('In ' + announceDist(d) + ' Metern erreichen Sie das Ziel.'); }
             return;
         }
-        // Pre-warning at ~300 m; "Jetzt …" on a speed-scaled lead (≈40 m walking, more when driving — see
-        // nearTriggerM) and as an URGENT prompt that jumps the queue so it can't land after the turn. But KEEP
-        // this maneuver on the banner until you have actually PASSED it (overshoot), so it doesn't jump to the
-        // NEXT turn while you're still taking this one (Doc 2026-06-24: "die nächste kommt viel zu schnell…").
+        // Pre-warning at `far` and "Jetzt …" at `nearTrigger` — BOTH per mode (car/bike/foot, see GUIDE_BY_MODE)
+        // so foot doesn't get a car's 300 m / 40 m timing. "Jetzt …" is URGENT (jumps the queue so it can't land
+        // after the turn). KEEP this maneuver on the banner until you've actually PASSED it (overshoot), so it
+        // doesn't jump to the NEXT turn while you're still taking this one (Doc 2026-06-24: "viel zu schnell…").
         if (d <= nearTriggerM() && !annNear) { annNear = true; speak('Jetzt ' + m.text, true); }
-        else if (d <= ANNOUNCE_FAR_M && !annFar) { annFar = true; speak('In ' + announceDist(d) + ' Metern ' + m.text + '.'); }
-        if (mClosest <= 120 && d > mClosest + 30) advanceManeuver();   // passed the turn → only now show the next
+        else if (d <= farTriggerM() && !annFar) { annFar = true; speak('In ' + announceDist(d) + ' Metern ' + m.text + '.'); }
+        const g = guideCfg();
+        if (mClosest <= g.nearMax && d > mClosest + g.nearMin) advanceManeuver();   // passed the turn (mode-scaled) → only now show the next
     }
 
     // Reset the live "found" feedback (green line + name hint). Called when the dialog opens, the route is
