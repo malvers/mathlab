@@ -954,7 +954,7 @@ window.TrackerNav = function (ctx) {
     // gesture → autoplay ok; sticky activation survives the awaited route fetch) and on every speak() as a
     // belt-and-braces; stopped on clearRoute so it never drains battery / holds audio focus while idle.
     const keepAlive = (function () {
-        let el = null, on = false;
+        let el = null, on = false, silentUrl = '';
         // Build a tiny silent WAV (1 s, 8 kHz, 16-bit mono) at runtime — no external asset, no big base64 blob.
         function silentWavUrl() {
             const sr = 8000, n = sr, bytes = 44 + n * 2;
@@ -967,26 +967,61 @@ window.TrackerNav = function (ctx) {
             let bin = ''; const u8 = new Uint8Array(b); for (let i = 0; i < u8.length; i++) bin += String.fromCharCode(u8[i]);
             return 'data:audio/wav;base64,' + btoa(bin);
         }
-        function start() {
-            if (on) return; on = true;
-            try {
-                if (!el) { el = new Audio(silentWavUrl()); el.loop = true; }
-                el.play().then(() => ttsLog('keepalive ▶')).catch((e) => ttsLog('keepalive blocked: ' + e));
-            } catch (e) { ttsLog('keepalive start failed: ' + e); }
+        // ONE persistent element, created + first played under the START gesture so it's unlocked. Both the
+        // silent keep-alive loop AND the spoken clips run through it (see speakUrl) — never a fresh Audio().
+        function ensure() {
+            if (!silentUrl) silentUrl = silentWavUrl();
+            if (!el) { el = new Audio(silentUrl); el.loop = true; el.preload = 'auto'; }
+            return el;
+        }
+        function session(state) {
             try {
                 if ('mediaSession' in navigator) {
-                    if (window.MediaMetadata) navigator.mediaSession.metadata = new MediaMetadata({ title: 'Navigation', artist: 'Tracker' });
-                    navigator.mediaSession.playbackState = 'playing';
+                    if (window.MediaMetadata && !navigator.mediaSession.metadata)
+                        navigator.mediaSession.metadata = new MediaMetadata({ title: 'Navigation', artist: 'Tracker' });
+                    navigator.mediaSession.playbackState = state;
                 }
             } catch (e) { }
         }
+        function toSilence() {
+            const a = ensure();
+            a.onended = null; a.onerror = null; a.loop = true;
+            if (a.src !== silentUrl) a.src = silentUrl;
+            a.play().catch(() => { });
+            session('playing');
+        }
+        function start() {
+            if (on) return; on = true;
+            try { toSilence(); ttsLog('keepalive ▶'); } catch (e) { ttsLog('keepalive start failed: ' + e); }
+        }
         function stop() {
             if (!on) return; on = false;
-            try { if (el) el.pause(); } catch (e) { }
-            try { if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'none'; } catch (e) { }
+            try { if (el) { el.onended = null; el.onerror = null; el.loop = true; el.pause(); } } catch (e) { }
+            session('none');
             ttsLog('keepalive ■');
         }
-        return { start, stop };
+        // Play a TTS clip THROUGH this same persistent, gesture-unlocked element (the media-session anchor),
+        // NOT a fresh Audio() — a new element is blocked in the background, this one keeps playing with the
+        // screen off. On end (or error) fall back to the silent loop so the channel stays warm. (Doc 2026-06-26)
+        function speakUrl(dataUrl, onended) {
+            const a = ensure();
+            on = true;
+            let done = false;
+            const finish = () => { if (done) return; done = true; toSilence(); if (onended) onended(); };
+            a.onended = finish; a.onerror = finish;
+            a.loop = false; a.src = dataUrl;
+            session('playing');
+            a.play().catch(() => finish());
+        }
+        // Cut the current clip at once (urgent "Jetzt" interrupt / stop). While navigating, return to the
+        // silent loop to keep the channel warm; once stopped, just halt.
+        function hush() {
+            if (!el) return;
+            el.onended = null; el.onerror = null;
+            if (on) toSilence();
+            else { try { el.loop = true; el.pause(); } catch (e) { } }
+        }
+        return { start, stop, speakUrl, hush };
     })();
 
     // ---- Spoken-guidance QUEUE ----
@@ -1014,10 +1049,16 @@ window.TrackerNav = function (ctx) {
         let finished = false;
         const finish = function () { if (finished) return; finished = true; clearTimeout(wd); done(); };
         const wd = setTimeout(finish, 15000); // watchdog: never let a stuck synth freeze the queue
-        if (window.SolitaVoice && window.SolitaVoice.speak) {
+        if (window.SolitaVoice && window.SolitaVoice.synth) {
             try {
-                window.SolitaVoice.speak(text, { onstate: function (on) { if (!on) finish(); } }); // onstate(false) = playback ended
-                ttsLog('SolitaVoice ▶ "' + text + '"');
+                // Cloud-TTS via Solita, but PLAYED through the keep-alive's persistent element so it's audible
+                // with the screen off (a fresh Audio() is blocked in the background). speechSynthesis stays the
+                // desktop/standalone fallback. (Doc 2026-06-26)
+                const cleaned = window.SolitaVoice.clean ? window.SolitaVoice.clean(text) : text;
+                SolitaVoice.synth(cleaned).then(function (b64) {
+                    if (b64) { keepAlive.speakUrl('data:audio/mp3;base64,' + b64, finish); ttsLog('TTS ▶ keepalive "' + text + '"'); }
+                    else { ttsLog('TTS empty → speechSynthesis'); speakSynth(text, finish); }
+                }).catch(function (e) { ttsLog('TTS synth failed: ' + e + ' → speechSynthesis'); speakSynth(text, finish); });
                 return;
             } catch (e) { ttsLog('SolitaVoice failed: ' + e + ' — fallback to speechSynthesis'); }
         }
@@ -1027,7 +1068,8 @@ window.TrackerNav = function (ctx) {
     // Stop ANY in-flight guidance + drop everything still queued (cloud audio + on-device speechSynthesis).
     function stopSpeech() {
         clearSpeakQueue();
-        try { if (window.SolitaVoice && window.SolitaVoice.stop) window.SolitaVoice.stop(); } catch (e) { }
+        keepAlive.hush(); // silence any clip on the persistent element (keeps the channel warm while navigating)
+        try { if (window.SolitaVoice && window.SolitaVoice.stop) window.SolitaVoice.stop(); } catch (e) { } // belt: any legacy new-Audio clip
         try { if ('speechSynthesis' in window) window.speechSynthesis.cancel(); } catch (e) { }
     }
 
@@ -1055,7 +1097,7 @@ window.TrackerNav = function (ctx) {
             if (navSpeaking) {
                 speakGen++;           // invalidate the in-flight end-callback before we stop it
                 navSpeaking = false;  // free the queue for the urgent line
-                try { if (window.SolitaVoice && window.SolitaVoice.stop) window.SolitaVoice.stop(); } catch (e) { }
+                keepAlive.hush();     // cut the current clip on the persistent element at once
                 try { if ('speechSynthesis' in window) window.speechSynthesis.cancel(); } catch (e) { }
                 setTimeout(drainSpeakQueue, 60); // let the engine settle after stop (Android WebView quirk), then play
             } else {
