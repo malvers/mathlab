@@ -403,6 +403,20 @@
                 ? TrackSmooth.smooth(track, times) : track;
             TrackRender.redraw({ track: t, times, speeds, activities, layer: trackLayer, usesHotline });
         }
+        // Live recording calls redrawTrack on EVERY fix, and redrawTrack re-smooths + rebuilds the WHOLE track
+        // (O(n)) each time → on a long drive that's thousands of segments rebuilt every second (CPU/GPU = battery).
+        // Coalesce the live redraws to at most one per TRACK_REDRAW_MS; one-off redraws (load / toggle / glätten /
+        // stop) still call redrawTrack() directly for an instant rebuild. (Doc 2026-06-26)
+        const TRACK_REDRAW_MS = 2500;
+        let _trackRedrawTimer = null, _trackRedrawLast = 0;
+        function scheduleTrackRedraw() {
+            if (_trackRedrawTimer) return;                       // a rebuild is already pending → it'll include this point
+            const since = Date.now() - _trackRedrawLast;
+            if (since >= TRACK_REDRAW_MS) { _trackRedrawLast = Date.now(); redrawTrack(); return; }
+            _trackRedrawTimer = setTimeout(() => {
+                _trackRedrawTimer = null; _trackRedrawLast = Date.now(); redrawTrack();
+            }, TRACK_REDRAW_MS - since);
+        }
         // Central altitude accessor: every consumer (HÖHE tile, GPX export, ascent) reads through this,
         // so the DEM toggle has ONE hook — just like positions all go through redrawTrack(). Falls back
         // to the raw GPS+baro alts whenever DEM is off or not (yet) aligned with the current track.
@@ -864,12 +878,12 @@
             const actVal = effectiveActivity();
             const ptsBefore = track.length;
             if (track.length === 0) {
-                track.push(here); times.push(stamp); alts.push(altVal); speeds.push(spdVal); activities.push(actVal); temps.push(lastTemp); redrawTrack();
+                track.push(here); times.push(stamp); alts.push(altVal); speeds.push(spdVal); activities.push(actVal); temps.push(lastTemp); scheduleTrackRedraw();
             } else if (!still) {
                 const step = haversine(track[track.length - 1], here);
                 if (step >= minStep) {
                     totalDist += step;
-                    track.push(here); times.push(stamp); alts.push(altVal); speeds.push(spdVal); activities.push(actVal); temps.push(lastTemp); redrawTrack();
+                    track.push(here); times.push(stamp); alts.push(altVal); speeds.push(spdVal); activities.push(actVal); temps.push(lastTemp); scheduleTrackRedraw();
                 }
             }
             if (track.length !== ptsBefore) {
@@ -896,14 +910,20 @@
         // seamlessly. followPrevLL is the dot's spot BEFORE this fix snapped it → the glide's start point.
         // A long gap (parked, off-route, mode switch) snaps instead of crawling a slow catch-up.
         let followPrevLL = null;
-        let dotGlideRAF = null, dotFrom = null, dotTo = null, dotGlideStart = 0, dotGlideDur = 1000, lastFollowFixT = 0;
+        let dotGlideRAF = null, dotFrom = null, dotTo = null, dotGlideStart = 0, dotGlideDur = 1000, lastFollowFixT = 0, lastGlidePaint = 0;
         function stopDotGlide() { if (dotGlideRAF) { cancelAnimationFrame(dotGlideRAF); dotGlideRAF = null; } }
         function dotGlideFrame() {
-            const t = dotGlideDur > 0 ? Math.min(1, (Date.now() - dotGlideStart) / dotGlideDur) : 1;
-            const lat = dotFrom[0] + (dotTo[0] - dotFrom[0]) * t;
-            const lng = dotFrom[1] + (dotTo[1] - dotFrom[1]) * t;
-            if (posMarker) posMarker.setLatLng([lat, lng]);
-            if (headingMarker) headingMarker.setLatLng([lat, lng]);
+            const now = Date.now();
+            const t = dotGlideDur > 0 ? Math.min(1, (now - dotGlideStart) / dotGlideDur) : 1;
+            // Cap the marker repaint to ~30 fps (battery): skip the SVG move on frames < ~33 ms apart, but
+            // always paint the final frame so the dot lands exactly on the fix.
+            if (now - lastGlidePaint >= 33 || t >= 1) {
+                lastGlidePaint = now;
+                const lat = dotFrom[0] + (dotTo[0] - dotFrom[0]) * t;
+                const lng = dotFrom[1] + (dotTo[1] - dotFrom[1]) * t;
+                if (posMarker) posMarker.setLatLng([lat, lng]);
+                if (headingMarker) headingMarker.setLatLng([lat, lng]);
+            }
             if (t < 1) dotGlideRAF = requestAnimationFrame(dotGlideFrame);
             else dotGlideRAF = null;
         }
@@ -1073,7 +1093,11 @@
         // Works on web + native while the screen is on. No sensor (desktop)
         // → motionReady stays false and the gate is simply inactive.
         // ---------------------------------------------------------------
+        let _lastMotionT = 0;
         function onDeviceMotion(e) {
+            const _now = Date.now();
+            if (_now - _lastMotionT < 100) return;  // sensor fires ~60 Hz; ~10 Hz is plenty for the still/move gate
+            _lastMotionT = _now;
             let ax, ay, az;
             const acc = e.acceleration;
             if (acc && acc.x != null) {            // gravity already removed
@@ -1184,6 +1208,7 @@
         function setTrkState(s) {
             trkState = s;
             tracking = (s === 'recording');
+            if (s !== 'recording' && _trackRedrawTimer) { clearTimeout(_trackRedrawTimer); _trackRedrawTimer = null; redrawTrack(); } // flush a pending live redraw → final track is complete at once
             updateDistVisibility(); // idle (& not navigating) → hide DISTANCE; recording/paused → show it
             const tg = $('trk-toggle'), fin = $('trk-finish'), disc = $('trk-discard');
             if (disc) disc.style.display = (s === 'paused') ? 'inline-flex' : 'none';
