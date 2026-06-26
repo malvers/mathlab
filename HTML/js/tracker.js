@@ -124,11 +124,17 @@
         }
         let fitMode = false; // FIT loop: false → 'all' (whole track) → 'remaining' (rest of route, while navigating) → false
         let loadedBounds = null; // bounds of a MULTI-loaded overlay (plotMultiple leaves 'track' empty) → lets FIT still work/show
-        // Hand-over ("Hand-Modus"): ANY manual viewport/zoom input (drag, +/− buttons, pinch, wheel,
+        // Hand-over ("Hand-Modus"): a manual viewport input that MOVES the map (drag, pinch, wheel,
         // double-click) freezes ALL automatic camera moves — auto-follow AND FIT — so the hand-set view
         // is never overwritten. Hand becomes the view-fan's current mode (its own icon); picking any other
         // fan mode (follow / fit) leaves hand-mode — that transient option then drops away.
+        // NOTE: the +/− zoom buttons deliberately do NOT enter hand-mode (Doc 2026-06-26) — see autoZoomHold.
         let handMode = false;
+        // +/− zoom buttons must NOT switch on the private/custom (hand) view. Instead a manual +/− just
+        // HOLDS the zoom: auto-follow keeps panning to the dot (and FIT keeps centering), but the
+        // speed-/fit-driven auto-ZOOM is suspended so the user's chosen zoom sticks. Re-selecting any mode
+        // from the view-fan (follow / fit) — i.e. an explicit "resume auto" — clears the hold.
+        let autoZoomHold = false;
         let savedAuto = null; // { following, fitMode } captured when hand-mode began → the resume target
         // Nav start shows the whole route for a moment, THEN engages the DYNAMIC remaining-route fit
         // (fitMode='remaining' → re-frames the rest as it shrinks; falls back to centerOnPosition's flyTo
@@ -241,6 +247,7 @@
             if (m === 'hand') return;
             if (m === 'follow') { centerOnPosition(); return; } // clears hand-mode + fit, re-follows
             clearHandMode();
+            autoZoomHold = false; // picking a FIT mode is an explicit "resume auto" → let it re-frame the zoom
             const ll = posMarker && posMarker.getLatLng && posMarker.getLatLng();
             if (m === 'fitall') {
                 fitMode = 'all'; setFollowing(false);
@@ -882,7 +889,7 @@
             if (following && !still) { // auto-follow: pan to the dot; zoom by SPEED — but NOT in
                 // 'remaining' FIT mode, where the remaining-route fit (below) owns the zoom so the two
                 // don't fight over it (note #9).
-                const tz = (fitMode === 'remaining') ? null : speedZoom(shownSpeed);
+                const tz = (fitMode === 'remaining' || autoZoomHold) ? null : speedZoom(shownSpeed);
                 if (tz != null && Math.abs(map.getZoom() - tz) >= 1 && Date.now() - lastAutoZoom > AUTOZOOM_COOLDOWN) {
                     lastAutoZoom = Date.now();
                     map.setView(here, tz, { animate: true }); // pan + zoom together
@@ -903,14 +910,17 @@
             //   • PAN  — EVERY fix, re-centre on the remaining route so the frame follows it as it shrinks.
             if (fitMode === 'all' && track.length > 1) {
                 const tb = wholeRouteBounds(here);   // driven ∪ remaining → keep the WHOLE journey framed as it changes
-                if (tb && !map.getBounds().pad(-0.12).contains(tb)) { try { map.fitBounds(tb, { padding: fitPad() }); } catch (e) { } }
+                // autoZoomHold (manual +/−): keep centring on the journey but suspend the zoom re-frame so the held zoom sticks.
+                if (tb && autoZoomHold) { try { map.panTo(tb.getCenter(), { animate: true }); } catch (e) { } }
+                else if (tb && !map.getBounds().pad(-0.12).contains(tb)) { try { map.fitBounds(tb, { padding: fitPad() }); } catch (e) { } }
             } else if (fitMode === 'remaining' && __nav && __nav.remainingBounds) {
                 const rb = __nav.remainingBounds(here);
                 if (rb) {
                     const v = map.getBounds();
                     const grew = !v.pad(-0.12).contains(rb);   // rest spilled out of the frame → zoom OUT
                     const shrank = v.pad(-0.30).contains(rb);  // rest sits in the inner margin → zoom IN
-                    if ((grew || shrank) && Date.now() - lastAutoZoom > AUTOZOOM_COOLDOWN) {
+                    // autoZoomHold (manual +/−) suspends the zoom re-frame → fall through to pan-only so the held zoom sticks.
+                    if ((grew || shrank) && !autoZoomHold && Date.now() - lastAutoZoom > AUTOZOOM_COOLDOWN) {
                         lastAutoZoom = Date.now();
                         try { map.fitBounds(rb, { padding: fitPad() }); } catch (e) { }   // re-frame (zoom + centre)
                     } else {
@@ -1717,6 +1727,7 @@
         function centerOnPosition() {
             cancelNavOverview(); // manual re-centre supersedes any pending auto-glide
             clearHandMode();    // CENTER explicitly takes over → leave hand-mode (hide the resume arrow)
+            autoZoomHold = false; // explicit "resume auto" → hand the zoom back to speed-driven auto-follow
             fitMode = false;    // centring on the dot is the opposite of "keep the whole track fitted"
             setFollowing(true); // re-enable auto-follow (and hide the recenter button)
             // Already have a position → glide there smoothly
@@ -2655,8 +2666,8 @@ ${pts}
         // But the widget used to swallow the native Android long-press menu ("Bild speichern" on map-tile
         // <img>s) via its own contextmenu handler — keep that suppressed so a long-press just does nothing.
         window.addEventListener('contextmenu', (e) => e.preventDefault());
-        $('zoom-in').addEventListener('click', () => { enterHandMode(); map.zoomIn(); });   // hand zoom → freeze auto
-        $('zoom-out').addEventListener('click', () => { enterHandMode(); map.zoomOut(); }); // hand zoom → freeze auto
+        $('zoom-in').addEventListener('click', () => { autoZoomHold = true; map.zoomIn(); });   // manual zoom HOLDS; no hand-mode
+        $('zoom-out').addEventListener('click', () => { autoZoomHold = true; map.zoomOut(); }); // manual zoom HOLDS; no hand-mode
         // View-fan: the trigger opens the fan — but only when there's more than ONE destination to choose.
         // With a single valid destination (e.g. crosshair + no track), fanning out one option is just noise
         // → apply it directly (tap = re-centre). "hand" is not a destination, so it's never counted here NOR
