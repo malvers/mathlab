@@ -1306,10 +1306,10 @@
             }
             refreshRecenter();
         }
-        function startAmbient() {
+        function startAmbient(keepFollow) {
             if (ambientId != null || watchId != null) return;     // already on, or recording owns the watch
             if (!('geolocation' in navigator)) return;
-            following = true; refreshRecenter();                  // idle follows by default (Maps-style; CENTER/drag still toggle it)
+            if (!keepFollow) { following = true; refreshRecenter(); } // idle follows by default (Maps-style; CENTER/drag still toggle it)
             enableMotion();                                       // accelerometer also in idle → jitter guard works on the resting dot
             ambientId = navigator.geolocation.watchPosition(ambientOnPos, () => { },
                 { enableHighAccuracy: true, maximumAge: 2000, timeout: 12000 });
@@ -1319,6 +1319,16 @@
             try { navigator.geolocation.clearWatch(ambientId); } catch (e) { }
             ambientId = null;
         }
+        // Battery: while IDLE (not recording/paused), the idle live-follow keeps a FULL-power GPS watch AND the
+        // accelerometer running the whole time the app is open — and with nothing throttled on background, they
+        // ran on with the screen off too, draining for nothing (you're not even recording). So pause both when
+        // the page is hidden and re-arm on return. Recording/paused are untouched here: their own watch + the
+        // native foreground service must keep going with the screen off. (Doc 2026-06-26)
+        document.addEventListener('visibilitychange', () => {
+            if (trkState !== 'idle') return;                      // recording/paused own the GPS → never touch it here
+            if (document.hidden) { stopAmbient(); disableMotion(); }
+            else { startAmbient(true); }                          // back in view → re-arm idle follow, keep the current follow state
+        });
 
         // START (idle): a brand-new track. The previous (finished+saved) one is cleared from view.
         async function beginTracking() {
