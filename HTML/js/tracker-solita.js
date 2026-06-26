@@ -68,8 +68,11 @@
                 });
                 const d = await r.json().catch(() => ({}));
                 if (!r.ok) return { ok: false, summary: 'Fehlgeschlagen: ' + (d.error || ('HTTP ' + r.status)) };
-                // The change is committed, but it goes live via GitHub Pages + the 20 s config poll — so it is
-                // NOT instant. Tell Doc to expect a short delay (from the tool result, not the persona prompt).
+                // The change is committed, but it goes live via GitHub Pages + the config poll — so it is NOT
+                // instant. The poll no longer runs around the clock (battery), so kick a 3-min fast-poll burst
+                // now → the pushed change shows within ~10 s, then polling stops again. Tell Doc to expect a
+                // short delay (from the tool result, not the persona prompt).
+                try { if (window.TrackerConfig && window.TrackerConfig.burst) window.TrackerConfig.burst(); } catch (e) { }
                 return { ok: true, summary: 'Einstellung geändert (config v' + d.version + '). Sag Doc dazu, dass es ein paar Minuten dauern kann, bis er es sieht.' };
             } catch (e) { return { ok: false, summary: 'Fehler: ' + ((e && e.message) || e) }; }
         }
