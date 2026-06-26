@@ -3,8 +3,6 @@
 // docalvers.de/config.json → the app picks it up on the next poll (no reload). Presentation only.
 window.TrackerConfig = (function () {
     const URL = '../config.json';     // HTML/config.json → docalvers.de/config.json (Pages root = HTML/)
-    const POLL_MS = 20000;            // gentle heartbeat; each poll cache-busts so a change shows within one tick
-    let timer = null;
     let polling = false;              // in-flight guard: collapse overlapping triggers into ONE fetch
     const dbg = (m) => { if (window.DebugWindow && DebugWindow.log) DebugWindow.log('cfg: ' + m); };
 
@@ -67,13 +65,27 @@ window.TrackerConfig = (function () {
         finally { polling = false; }
     }
 
-    function start() {
-        if (timer) return;
-        poll();                                              // apply once on load …
-        timer = setInterval(poll, POLL_MS);                  // … then poll
-        document.addEventListener('visibilitychange', () => { if (!document.hidden) poll(); }); // snappier on focus
+    // Battery: a remote config is "show & tell" — it only matters while Doc is ACTUALLY changing something.
+    // So we don't poll around the clock (that was a needless radio wake every 20 s). We apply the current
+    // config ONCE on load, then stay silent until a change is in flight: change_setting (Solita) calls burst(),
+    // which fast-polls for 3 min so the pushed change shows within ~10 s, then stops. (Doc 2026-06-26)
+    const BURST_MS = 10000;            // poll cadence during a burst
+    const BURST_WINDOW_MS = 180000;    // keep bursting for 3 min after a change request, then stop
+    let burstTimer = null, burstUntil = 0;
+    function stopBurst() { if (burstTimer) { clearInterval(burstTimer); burstTimer = null; } }
+    function burst() {
+        burstUntil = Date.now() + BURST_WINDOW_MS;           // (re)open / extend the fast-poll window
+        poll();                                              // check right away
+        if (burstTimer) return;                              // already bursting → window just got extended
+        burstTimer = setInterval(() => {
+            if (Date.now() >= burstUntil) { stopBurst(); dbg('burst ended'); return; }
+            poll();
+        }, BURST_MS);
+        dbg('burst started (10 s × 3 min)');
     }
 
+    function start() { poll(); }                             // apply the current config once; no standing poll
+
     start();
-    return { start, applyConfig };
+    return { start, applyConfig, burst };
 })();
