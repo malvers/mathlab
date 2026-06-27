@@ -58,6 +58,10 @@ Schließt den Kreis mit FEAT-10: Sprach-Wunsch → Edge Function (hält Token) �
 ## FEAT-16 — Live-Broadcast: Presence/Rückkanal 📐 Idee
 Aus BUG-5: Zuschauer-Zähler („3 sehen dich") + Empfangs-Bestätigung („zuletzt empfangen vor 2 s"). Macht Sende-Diagnose trivial (0 verbunden = Name/Link; verbunden, kein Empfang = Sendeproblem). Erst **BUG-5** klären, dann als Feature.
 
+**📌 Doc 2026-06-27 — „Wissen wir zu 100 %, ob gesendet wird?" (morgen mit den anderen Agenten checken):**
+Nein. Der Viewer (`view.html`) ist ein **passiver Broadcast-Abonnent**. „Verbunden" = nur `SUBSCRIBED` (Viewer ↔ Supabase-Server steht, `view.html:523`) — das sagt **nichts** über den Sender aus. Daten kommen nur rein, wenn der Sender von sich aus broadcastet (`view.html:513–518`); der `request`-Rückfrage-Ping (`:524–529`) hilft nur, wenn der Sender überhaupt online ist und antwortet. Es gibt **keine Presence/keinen Heartbeat** → solange `gotData` false ist, kann der Viewer **nicht unterscheiden**: (a) Sender offline / zeichnet nicht auf vs. (b) Sender online, aber gerade still (zwischen zwei Ticks). Deshalb ist die Meldung bewusst eine **Frage** („Läuft die Aufzeichnung von ‚lili' gerade?") und kein Fehler.
+**Was es lösen würde:** genau dieses FEAT-16 (Supabase **Presence** — Sender trackt sich im Channel, Viewer liest `presenceState` → echte „Sender ist live"-Gewissheit + Zuschauer-Zähler). Die Sende-Diagnose (`subscribe`-Status + `rx`-Zähler) ist über die `DIAG`-Leiste in `view.html` schon teilweise sichtbar (vgl. BUG-5 „schnellster Pinpoint").
+
 ## FEAT-17 — Lane Guidance (Spuranweisungen) 📐 · Prio 2
 OSRM liefert `step.intersections[].lanes` (`indications` + `valid`). Kleines Spur-Diagramm unter dem Abbiege-Banner. Nur wo OSM `turn:lanes` getaggt ist (Autobahn-Ausfahrten meist ja). SVG-Pfeil-Set existiert bereits.
 
