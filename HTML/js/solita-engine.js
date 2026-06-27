@@ -1,41 +1,32 @@
-// Solita tools: start_engine / stop_engine — remote-crank Doc's 1964 Mercedes 230 SL "Pagode" (W113) by voice.
+// Solita tools: start_engine / stop_engine — voice-crank Doc's 1964 Mercedes 230 SL "Pagode" (W113).
 //
 // Self-contained add-on: registers into window.SolitaTools (Regel 7), touches no core, load-order independent —
 // same shape as solita-time.js / solita-where.js (spec + handler returning { ok, summary } + badge).
 //
-// HARDWARE (full write-up: Solita_goes_Pagode.md). A DSD TECH 2-channel BLE relay module sits in the car. The
-// ignition key stays in position ON (ignition + fuel pump live). The two relay channels replicate the key's last
-// two jobs:
-//   * Channel 1 -> drives a 70 A Bosch relay -> terminal 50 (starter-solenoid trigger) = CRANK (momentary).
-//   * Channel 2 -> normally-closed, in series with the ignition coil = KILL (open briefly to stop the engine).
+// BLE goes through the SHARED single source js/pagode-ble.js (window.PagodeBLE): same module, UUIDs (FFE0/FFE1),
+// A0 commands, "DSD TECH" name filter, getDevices auto-reconnect and the space-separated-hex native fix as the
+// Pagode app — no duplicate BLE code here. solita.html must load ../pagode/js/pagode-ble.js BEFORE this file.
+// If PagodeBLE is absent (no Web Bluetooth / no native BLE), the tools fall back to a dry-run so the flow stays testable.
+//
+// HARDWARE (full write-up: Solita_goes_Pagode.md). A DSD TECH 2-channel BLE relay sits in the car, key on ON:
+//   * Channel 1 (K1) -> drives a 70 A Bosch relay -> terminal 50 (starter-solenoid trigger) = CRANK (momentary).
+//   * Channel 2 (K2) -> normally-closed, in series with the ignition coil = KILL (open briefly to stop the engine).
 // The heavy 200-500 A starter current never reaches us: it is switched by the starter's OWN solenoid (terminal 30).
 //
-// BLE: cheap relay modules speak a serial-over-BLE characteristic with short command frames. The exact
-// service/characteristic UUIDs and command bytes are MODULE-SPECIFIC and unknown until the part is in hand, so
-// they live in CONFIG below and the module starts in SIM_MODE (no Bluetooth — it just walks the flow through).
-// navigator.bluetooth.requestDevice() needs a USER GESTURE, so pairing is window.SolitaPagode.pair() (call it
-// from a button/console tap); once paired, the voice tools write without a further gesture.
+// PAIRING: navigator.bluetooth.requestDevice() needs a USER GESTURE, so the first link is window.SolitaPagode.pair()
+// (call it from a button/console tap once). After that — with the Chrome getDevices flag, or natively — the voice
+// tools reconnect on their own without a further gesture.
 //
-// SAFETY: cranking a real engine remotely is risky (car could be in gear). In real mode start_engine is a
-// two-step confirm — the first call asks Doc to confirm, only a confirmed call actually cranks. SIM mode skips it.
+// SAFETY (HIGH CRITICAL — real machine, possibly moving): BOTH start AND stop need a deliberate spoken confirmation.
+// Killing the engine while driving = no power steering/brakes, dangerous; an accidental "ja"/mis-hear must never fire.
+// So actuation requires a confirm_phrase containing "ja" + the action verb + "Pagode" (e.g. "Ja, stoppe die Pagode!").
 (function () {
     'use strict';
 
-    // ---- CONFIG — fill from the DSD TECH datasheet / an nRF-Connect sniff once the module is in hand ----------
     var CONFIG = {
-        SIM_MODE: true,            // true = no Bluetooth, dry-run the flow (test before the hardware arrives)
-        DEVICE_NAME_PREFIX: '',    // optional BLE name filter, e.g. 'DSD' — empty = let Doc pick in the chooser
-        SERVICE_UUID: null,        // e.g. 0xFFE0 (Nordic-UART-like serial service) — UNKNOWN until datasheet
-        CHAR_UUID: null,           // e.g. 0xFFE1 (write characteristic) — UNKNOWN until datasheet
-        // command frames (byte arrays) the module expects — PLACEHOLDERS in the common "LC relay" style:
-        CMD: {
-            CH1_ON:  [0xA0, 0x01, 0x01, 0xA2],
-            CH1_OFF: [0xA0, 0x01, 0x00, 0xA1],
-            CH2_ON:  [0xA0, 0x02, 0x01, 0xA3],
-            CH2_OFF: [0xA0, 0x02, 0x00, 0xA2]
-        },
         CRANK_MS: 900,             // how long to hold the starter (terminal 50) — momentary, like the key
-        STOP_MS: 1500              // how long to break the ignition coil to be sure the engine dies
+        STOP_MS: 1500,             // how long to break the ignition coil to be sure the engine dies
+        MAX_STOP_SPEED_MS: 1.4     // ~5 km/h: at or above this the car counts as moving and stop is refused outright
     };
 
     // tiny debug log -> Doc keeps a DEBUG panel open (feedback_always_log_to_debug); fall back to console.
@@ -45,47 +36,80 @@
         try { console.log('[pagode]', msg); } catch (e) {}
     }
 
-    // ---- BLE link state ----
-    var gattDevice = null, writeChar = null;
+    // ---- SAFETY: deliberate spoken confirmation. A bare "ja" must NOT trigger — require "ja" + verb + "Pagode". ----
+    // Trigger sentences: "Ja, starte die Pagode!" / "Ja, stoppe die Pagode!". This also separates the confirmation
+    // from the initial command (which won't contain all three), so the two-step ask can't be skipped by accident.
+    function confirmOk(input, kind) {
+        var p = (input && input.confirm_phrase ? String(input.confirm_phrase) : '').toLowerCase();
+        if (!/\bja\b/.test(p)) return false;          // an explicit affirmative
+        if (p.indexOf('pagode') < 0) return false;    // must name the car, not a stray "ja"
+        return kind === 'start'
+            ? /\b(start\w*|anlass\w*)\b/.test(p)
+            : /\b(stop\w*|abstell\w*|ausschalt\w*)\b/.test(p) || /\bstell\w*\b.*\bab\b/.test(p);
+    }
 
-    function connected() { return !!(gattDevice && gattDevice.gatt && gattDevice.gatt.connected && writeChar); }
+    // ---- DETERMINISTIC motion gate (NOT the LLM): GPS-Doppler speed. Stop is refused while the car moves. ----
+    // Resolves { known, moving, speed_ms }. Unknown (no geolocation / no speed in the fix, e.g. indoors at the
+    // bench) => allow, because the deliberate-phrase gate still applies. Set window.SolitaPagode.testSpeedMs
+    // (m/s) to simulate motion when bench-testing.
+    function vehicleSpeed() {
+        return new Promise(function (resolve) {
+            var t = window.SolitaPagode && window.SolitaPagode.testSpeedMs;
+            if (typeof t === 'number') { resolve({ known: true, moving: t >= CONFIG.MAX_STOP_SPEED_MS, speed_ms: t }); return; }
+            if (!navigator.geolocation) { resolve({ known: false }); return; }
+            navigator.geolocation.getCurrentPosition(
+                function (pos) {
+                    var s = pos && pos.coords && typeof pos.coords.speed === 'number' ? pos.coords.speed : null;
+                    if (s === null || isNaN(s)) resolve({ known: false });
+                    else resolve({ known: true, moving: s >= CONFIG.MAX_STOP_SPEED_MS, speed_ms: s });
+                },
+                function () { resolve({ known: false }); },
+                { enableHighAccuracy: true, timeout: 4000, maximumAge: 2000 }
+            );
+        });
+    }
 
+    // ---- BLE via the shared single source (window.PagodeBLE from js/pagode-ble.js) ----
+    function PB() { return window.PagodeBLE || null; }
+    function cmd() { var p = PB(); return p && p.CFG && p.CFG.CMD; }
+    // true only if a real BLE transport is available in this runtime (Chrome Web Bluetooth or native plugin)
+    function haveBle() { var p = PB(); return !!(p && p.CFG && p.CFG.CMD && (p.isNative || (navigator && navigator.bluetooth))); }
+
+    var backend = null, linked = false;
+    function ensureBackend() {
+        if (!backend && PB()) backend = PB().createBackend({ onDisconnect: function () { linked = false; dbg('disconnected'); } });
+        return backend;
+    }
+    function connected() { return linked; }
     function sleep(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
 
-    // write one command frame to the relay module
-    async function send(frame) {
-        if (!writeChar) throw new Error('not connected');
-        await writeChar.writeValue(new Uint8Array(frame));
-    }
-
-    // pulse a channel ON for ms, then OFF (momentary). channel = 1 (crank, terminal 50) or 2 (kill, ignition).
-    async function pulse(channel, ms) {
-        var on = channel === 1 ? CONFIG.CMD.CH1_ON : CONFIG.CMD.CH2_ON;
-        var off = channel === 1 ? CONFIG.CMD.CH1_OFF : CONFIG.CMD.CH2_OFF;
-        await send(on);
-        dbg('channel ' + channel + ' ON (' + ms + ' ms)');
-        await sleep(ms);
-        await send(off);
-        dbg('channel ' + channel + ' OFF');
-    }
-
-    // PAIR — must be called from a USER GESTURE (button/tap). Stores the device + write characteristic.
-    async function pair() {
-        if (!navigator.bluetooth) throw new Error('Web Bluetooth steht auf diesem Gerät/Browser nicht zur Verfügung.');
-        var opts = CONFIG.DEVICE_NAME_PREFIX
-            ? { filters: [{ namePrefix: CONFIG.DEVICE_NAME_PREFIX }], optionalServices: [CONFIG.SERVICE_UUID] }
-            : { acceptAllDevices: true, optionalServices: [CONFIG.SERVICE_UUID] };
-        gattDevice = await navigator.bluetooth.requestDevice(opts);
-        var server = await gattDevice.gatt.connect();
-        var service = await server.getPrimaryService(CONFIG.SERVICE_UUID);
-        writeChar = await service.getCharacteristic(CONFIG.CHAR_UUID);
-        dbg('paired with ' + (gattDevice.name || 'relay module'));
+    // connect/reconnect; the FIRST call must come from a user gesture (requestDevice), later ones are gesture-free.
+    async function link() {
+        if (linked) return true;
+        if (!ensureBackend()) throw new Error('Pagode-BLE steht in dieser Umgebung nicht zur Verfügung.');
+        var name = await backend.connect();
+        linked = true;
+        dbg('linked with ' + name);
         return true;
     }
 
-    function disconnect() {
-        try { if (gattDevice && gattDevice.gatt && gattDevice.gatt.connected) gattDevice.gatt.disconnect(); } catch (e) {}
-        gattDevice = null; writeChar = null;
+    // PAIR — bind this to a button/tap (USER GESTURE) for the first connection.
+    async function pair() { return link(); }
+    function disconnect() { try { if (backend) backend.disconnect(); } catch (e) {} linked = false; }
+
+    // best-effort (re)connect before a voice command; ok to fail (then we ask Doc to pair once)
+    async function tryLink() { try { return await link(); } catch (e) { dbg('link failed: ' + (e && e.message)); return false; } }
+
+    // pulse a channel ON for ms, then OFF (momentary). channel = 1 (crank, terminal 50) or 2 (kill, ignition).
+    async function pulse(channel, ms) {
+        var C = cmd();
+        var on = channel === 1 ? C.K1_ON : C.K2_ON;
+        var off = channel === 1 ? C.K1_OFF : C.K2_OFF;
+        await backend.write(on);
+        dbg('channel ' + channel + ' ON (' + ms + ' ms)');
+        await sleep(ms);
+        await backend.write(off);
+        dbg('channel ' + channel + ' OFF');
     }
 
     // expose for a pairing button / console (gesture-bound) and for status
@@ -96,42 +120,52 @@
         name: 'start_engine',
         description: 'Starte den Motor von Docs Mercedes 230 SL „Pagode" (Baujahr 1964) per Bluetooth-Relais. '
             + 'Nutze dies, wenn Doc sinngemäß sagt „starte (mal) die Engine/den Motor", „lass den Wagen/die Pagode an", '
-            + '„Solita, let\'s go". Der Zündschlüssel steht bereits auf ON; dieses Werkzeug betätigt nur kurz den Anlasser '
-            + '(wie der Schlüssel in Stellung „Start"). SICHERHEIT: Das ist eine reale Maschine. Frage Doc IMMER zuerst kurz '
-            + '„Soll ich die Pagode wirklich starten?" und rufe dieses Werkzeug erst mit confirmed=true auf, wenn er '
-            + 'bestätigt hat. Im Testmodus (noch keine Hardware) läuft alles trocken durch.',
+            + '„Solita, let\'s go", „wollen wir (eine kleine Ausfahrt)?", „lass uns (raus)fahren". Der Zündschlüssel steht '
+            + 'bereits auf ON; dieses Werkzeug betätigt nur kurz den Anlasser (wie der Schlüssel in Stellung „Start"). '
+            + 'SICHERHEIT (hoch kritisch, reale Maschine): Frage Doc IMMER zuerst kurz „Soll ich die Pagode wirklich '
+            + 'starten?" und rufe start_engine erst dann erneut auf, wenn Doc als Bestätigung DEUTLICH „Ja, starte die '
+            + 'Pagode!" sagt — übergib seine wörtliche Antwort als confirm_phrase. Bei bloßem „ja", „ok", Unsicherheit '
+            + 'oder Nebengeräusch NICHT starten, sondern erneut nachfragen. Im Testmodus (kein BLE) läuft alles trocken durch.',
         input_schema: {
             type: 'object',
             properties: {
-                confirmed: { type: 'boolean', description: 'true erst, NACHDEM Doc das Starten ausdrücklich bestätigt hat.' }
+                confirm_phrase: {
+                    type: 'string',
+                    description: 'Docs WÖRTLICHE Bestätigung, NACHDEM du ihn gefragt hast — übergib genau das, was er gesagt '
+                        + 'hat. Es wird nur gestartet, wenn er deutlich „Ja, starte die Pagode!" sagt. Bei bloßem „ja"/„ok", '
+                        + 'Unsicherheit oder Nebengeräusch: leer lassen und erneut nachfragen.'
+                }
             }
         }
     };
 
     async function startHandler(input) {
-        var sim = CONFIG.SIM_MODE || !connected();
-        var confirmed = !!(input && input.confirmed);
-
-        // real mode: require an explicit confirm before cranking a real engine
-        if (!sim && !confirmed) {
-            return { ok: true, summary: 'Sicherheitsabfrage vor dem realen Start. ANWEISUNG AN DICH (Solita): Frage Doc '
-                + 'kurz gesprochen „Soll ich die Pagode wirklich starten?" und rufe start_engine erst mit confirmed=true '
-                + 'auf, wenn er bestätigt. Starte NICHT ungefragt.' };
+        // SAFETY GATE FIRST: only a deliberate spoken phrase confirms — never a bare "ja"
+        if (!confirmOk(input, 'start')) {
+            return { ok: true, summary: 'Sicherheitsabfrage vor dem Start (reale Maschine). ANWEISUNG AN DICH (Solita): '
+                + 'Frage Doc kurz gesprochen „Soll ich die Pagode wirklich starten?" und rufe start_engine erst dann erneut '
+                + 'auf, wenn Doc DEUTLICH „Ja, starte die Pagode!" sagt — übergib seine wörtliche Antwort als confirm_phrase. '
+                + 'Bei bloßem „ja", „ok", Unsicherheit oder Nebengeräusch NICHT starten.' };
         }
 
-        if (sim) {
-            dbg('START (SIM) — would crank terminal 50 for ' + CONFIG.CRANK_MS + ' ms');
-            return { ok: true, summary: 'TESTMODUS (keine Hardware verbunden): Der Startbefehl wurde simuliert — in echt '
-                + 'würde jetzt der Anlasser ca. ' + CONFIG.CRANK_MS + ' ms drehen. ANWEISUNG AN DICH (Solita): Bestätige '
-                + 'Doc gesprochen, dass du die Pagode (im Testmodus) gestartet hast, z.B. „Alles klar — Pagode gestartet. '
-                + 'Hinweis: Testmodus, das Relais ist noch nicht angeschlossen."' };
+        if (!haveBle()) {
+            dbg('START (dry-run) — PagodeBLE/Transport nicht verfügbar');
+            return { ok: true, summary: 'TESTMODUS (kein Bluetooth in dieser Umgebung): Der Startbefehl wurde simuliert — '
+                + 'in echt würde jetzt der Anlasser ca. ' + CONFIG.CRANK_MS + ' ms drehen. ANWEISUNG AN DICH (Solita): '
+                + 'Bestätige Doc gesprochen, dass du die Pagode (im Testmodus) gestartet hast.' };
         }
 
+        if (!connected() && !(await tryLink())) {
+            return { ok: false, summary: 'Keine Verbindung zum Pagode-Relais. ANWEISUNG AN DICH (Solita): Sag Doc, er soll '
+                + 'einmal „Pagode koppeln" antippen (Bluetooth braucht beim ersten Mal eine Berührung), danach geht es per '
+                + 'Stimme.' };
+        }
         try {
             await pulse(1, CONFIG.CRANK_MS);   // momentary crank on terminal 50
             return { ok: true, summary: 'Anlasser betätigt (Klemme 50, ' + CONFIG.CRANK_MS + ' ms). ANWEISUNG AN DICH '
                 + '(Solita): Sag Doc gesprochen kurz und freundlich, dass die Pagode gestartet ist.' };
         } catch (e) {
+            linked = false;
             return { ok: false, summary: 'Der Startbefehl kam nicht durch (' + (e && e.message ? e.message : 'Funkfehler') + '). '
                 + 'ANWEISUNG AN DICH (Solita): Sag Doc, dass die Verbindung zum Pagode-Relais gerade nicht steht und er die '
                 + 'Kopplung prüfen soll.' };
@@ -144,23 +178,58 @@
     var stopSpec = {
         name: 'stop_engine',
         description: 'Stelle den Motor von Docs Mercedes 230 SL „Pagode" ab — über das Bluetooth-Relais (unterbricht kurz '
-            + 'die Zündung). Nutze dies, wenn Doc sinngemäß sagt „mach den Motor aus", „stell die Pagode ab", „Motor stop". '
-            + 'Im Testmodus läuft alles trocken durch.',
-        input_schema: { type: 'object', properties: {} }
+            + 'die Zündung). Nutze dies, wenn Doc sinngemäß sagt „mach den Motor aus", „stell die Pagode ab", „Motor stop", '
+            + '„wir sind da". SICHERHEIT (HOCH KRITISCH): Ein versehentliches Abstellen während der Fahrt ist gefährlich '
+            + '(Motor aus = keine Servolenkung/-bremse). Frage Doc daher IMMER zuerst „Soll ich die Pagode wirklich '
+            + 'abstellen?" und rufe stop_engine erst dann erneut auf, wenn Doc als Bestätigung DEUTLICH „Ja, stoppe die '
+            + 'Pagode!" sagt — übergib seine wörtliche Antwort als confirm_phrase. Bei bloßem „ja", Unsicherheit oder '
+            + 'Nebengeräusch NICHT abstellen, sondern erneut nachfragen. Im Testmodus läuft alles trocken durch.',
+        input_schema: {
+            type: 'object',
+            properties: {
+                confirm_phrase: {
+                    type: 'string',
+                    description: 'Docs WÖRTLICHE Bestätigung, NACHDEM du ihn gefragt hast. Es wird nur abgestellt, wenn er '
+                        + 'deutlich „Ja, stoppe die Pagode!" sagt. Bei bloßem „ja"/Unsicherheit: leer lassen und erneut nachfragen.'
+                }
+            }
+        }
     };
 
-    async function stopHandler() {
-        var sim = CONFIG.SIM_MODE || !connected();
-        if (sim) {
-            dbg('STOP (SIM) — would break ignition for ' + CONFIG.STOP_MS + ' ms');
-            return { ok: true, summary: 'TESTMODUS (keine Hardware verbunden): Der Stoppbefehl wurde simuliert. ANWEISUNG '
-                + 'AN DICH (Solita): Bestätige Doc gesprochen, dass du die Pagode (im Testmodus) abgestellt hast.' };
+    async function stopHandler(input) {
+        // DETERMINISTIC SAFETY GATE (not the LLM): never stop a moving car — even with the correct phrase.
+        var m = await vehicleSpeed();
+        if (m.known && m.moving) {
+            var kmh = Math.round(m.speed_ms * 3.6);
+            dbg('STOP refused — moving ~' + kmh + ' km/h');
+            return { ok: false, summary: 'ABSTELLEN VERWEIGERT — der Wagen bewegt sich (~' + kmh + ' km/h). Aus Sicherheit wird '
+                + 'der Motor während der Fahrt NIEMALS abgestellt. ANWEISUNG AN DICH (Solita): Sag Doc ruhig und bestimmt: '
+                + '„Ich kann die Pagode nicht stoppen, solange wir fahren." Stelle NICHT ab.' };
+        }
+
+        // SAFETY GATE: deliberate spoken phrase (a bare "ja" must not trigger)
+        if (!confirmOk(input, 'stop')) {
+            return { ok: true, summary: 'Sicherheitsabfrage vor dem Abstellen (hoch kritisch — niemals versehentlich während '
+                + 'der Fahrt). ANWEISUNG AN DICH (Solita): Frage Doc kurz gesprochen „Soll ich die Pagode wirklich abstellen?" '
+                + 'und rufe stop_engine erst dann erneut auf, wenn Doc DEUTLICH „Ja, stoppe die Pagode!" sagt — übergib seine '
+                + 'wörtliche Antwort als confirm_phrase. Bei bloßem „ja", Unsicherheit oder Nebengeräusch NICHT abstellen.' };
+        }
+
+        if (!haveBle()) {
+            dbg('STOP (dry-run) — PagodeBLE/Transport nicht verfügbar');
+            return { ok: true, summary: 'TESTMODUS (kein Bluetooth in dieser Umgebung): Der Stoppbefehl wurde simuliert. '
+                + 'ANWEISUNG AN DICH (Solita): Bestätige Doc gesprochen, dass du die Pagode (im Testmodus) abgestellt hast.' };
+        }
+        if (!connected() && !(await tryLink())) {
+            return { ok: false, summary: 'Keine Verbindung zum Pagode-Relais. ANWEISUNG AN DICH (Solita): Sag Doc, er soll '
+                + 'einmal „Pagode koppeln" antippen.' };
         }
         try {
             await pulse(2, CONFIG.STOP_MS);    // break ignition coil -> engine dies
             return { ok: true, summary: 'Zündung unterbrochen (' + CONFIG.STOP_MS + ' ms) — Motor aus. ANWEISUNG AN DICH '
                 + '(Solita): Bestätige Doc gesprochen kurz, dass die Pagode aus ist.' };
         } catch (e) {
+            linked = false;
             return { ok: false, summary: 'Der Stoppbefehl kam nicht durch (' + (e && e.message ? e.message : 'Funkfehler') + '). '
                 + 'ANWEISUNG AN DICH (Solita): Sag Doc, dass die Verbindung zum Pagode-Relais gerade nicht steht.' };
         }

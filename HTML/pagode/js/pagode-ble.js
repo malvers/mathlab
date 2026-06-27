@@ -12,6 +12,7 @@
     var CFG = {
         SERVICE: 0xffe0, SERVICE_STR: '0000ffe0-0000-1000-8000-00805f9b34fb',
         CHAR: 0xffe1, CHAR_STR: '0000ffe1-0000-1000-8000-00805f9b34fb',
+        NAME_PREFIX: 'DSD TECH',   // BLE-Gerätename des Moduls → Filter im Geräte-Dialog
         CMD: {
             K1_ON: [0xA0, 0x01, 0x01, 0xA2], K1_OFF: [0xA0, 0x01, 0x00, 0xA1],   // channel 1 = START (Klemme 50)
             K2_ON: [0xA0, 0x02, 0x01, 0xA3], K2_OFF: [0xA0, 0x02, 0x00, 0xA2]    // channel 2 = STOP (ignition)
@@ -28,17 +29,36 @@
         return {
             name: 'Web Bluetooth',
             async connect() {
-                device = await navigator.bluetooth.requestDevice({
-                    acceptAllDevices: true, optionalServices: [CFG.SERVICE]
+                async function attach(d) {
+                    device = d;
+                    d.addEventListener('gattserverdisconnected', function () {
+                        characteristic = null;
+                        if (opts.onDisconnect) opts.onDisconnect();
+                    });
+                    var server = await d.gatt.connect();
+                    var service = await server.getPrimaryService(CFG.SERVICE);
+                    characteristic = await service.getCharacteristic(CFG.CHAR);
+                    return d.name || 'Relais-Modul';
+                }
+                function withTimeout(p, ms) {
+                    return new Promise(function (res, rej) {
+                        var t = setTimeout(function () { rej(new Error('timeout')); }, ms);
+                        p.then(function (v) { clearTimeout(t); res(v); }, function (e) { clearTimeout(t); rej(e); });
+                    });
+                }
+                // 1) reconnect to an already-permitted module WITHOUT the chooser
+                try {
+                    if (navigator.bluetooth.getDevices) {
+                        var known = await navigator.bluetooth.getDevices();
+                        var m = known.filter(function (d) { return (d.name || '').indexOf(CFG.NAME_PREFIX) === 0; })[0];
+                        if (m) return await withTimeout(attach(m), 6000);
+                    }
+                } catch (e) { /* not in range / unsupported → fall back to the chooser */ }
+                // 2) first time (or fallback): filtered chooser → one click
+                var dev = await navigator.bluetooth.requestDevice({
+                    filters: [{ namePrefix: CFG.NAME_PREFIX }], optionalServices: [CFG.SERVICE]
                 });
-                device.addEventListener('gattserverdisconnected', function () {
-                    characteristic = null;
-                    if (opts.onDisconnect) opts.onDisconnect();
-                });
-                var server = await device.gatt.connect();
-                var service = await server.getPrimaryService(CFG.SERVICE);
-                characteristic = await service.getCharacteristic(CFG.CHAR);
-                return device.name || 'Relais-Modul';
+                return await attach(dev);
             },
             async write(bytes) {
                 if (!characteristic) throw new Error('nicht verbunden');
@@ -56,21 +76,21 @@
     function nativeBackend() {
         var Ble = global.Capacitor.Plugins.BluetoothLe;
         var deviceId = null;
-        var toB64 = function (bytes) { return btoa(String.fromCharCode.apply(null, bytes)); };  // plugin wants base64 value
+        var toHex = function (bytes) { return bytes.map(function (b) { return ('0' + (b & 0xff).toString(16)).slice(-2); }).join(' '); };  // plugin parses SPACE-separated hex byte pairs, e.g. "a0 01 01 a2" (NOT base64, NOT joined hex)
         return {
             name: 'Capacitor BLE-Plugin',
             async connect() {
                 // androidNeverForLocation: we don't derive location from BLE → plugin drops the
                 // ACCESS_FINE_LOCATION requirement (matches BLUETOOTH_SCAN neverForLocation in the manifest).
                 await Ble.initialize({ androidNeverForLocation: true });
-                var r = await Ble.requestDevice({ optionalServices: [CFG.SERVICE_STR] });
+                var r = await Ble.requestDevice({ namePrefix: CFG.NAME_PREFIX, optionalServices: [CFG.SERVICE_STR] });
                 deviceId = r.deviceId;
                 await Ble.connect({ deviceId: deviceId });
                 return r.name || 'Relais-Modul';
             },
             async write(bytes) {
                 if (!deviceId) throw new Error('nicht verbunden');
-                await Ble.write({ deviceId: deviceId, service: CFG.SERVICE_STR, characteristic: CFG.CHAR_STR, value: toB64(bytes) });
+                await Ble.write({ deviceId: deviceId, service: CFG.SERVICE_STR, characteristic: CFG.CHAR_STR, value: toHex(bytes) });
             },
             async disconnect() { try { if (deviceId) await Ble.disconnect({ deviceId: deviceId }); } catch (e) { /* ignore */ } }
         };

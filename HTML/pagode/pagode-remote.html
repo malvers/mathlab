@@ -41,15 +41,10 @@
 
         .wrap { width: 100%; max-width: 440px; display: flex; flex-direction: column; gap: 16px; }
 
-        /* status pill */
-        .status {
-            display: flex; align-items: center; gap: 10px; justify-content: center;
-            padding: 10px 14px; border-radius: 12px; background: var(--panel);
-            font-size: 13px; letter-spacing: 1px;
-        }
-        .dot { width: 12px; height: 12px; border-radius: 50%; background: var(--red); flex: 0 0 auto; transition: background .2s; }
-        .status.on .dot { background: var(--green-hi); box-shadow: 0 0 10px var(--green-hi); }
-        .status.busy .dot { background: var(--orange); }
+        /* connection state circle INSIDE the Verbinden button */
+        .conn-dot { width: 15px; height: 15px; border-radius: 50%; flex: 0 0 auto; background: var(--red); box-shadow: 0 0 7px rgba(176, 36, 24, .6); transition: background .2s, box-shadow .2s; }
+        .conn-dot.on { background: var(--green-hi); box-shadow: 0 0 9px var(--green-hi); }
+        .conn-dot.busy { background: var(--orange); box-shadow: 0 0 9px var(--orange); }
 
         button {
             font-family: 'Orbitron', sans-serif; font-weight: 800; letter-spacing: 2px;
@@ -60,8 +55,7 @@
         button:active { transform: scale(0.97); }
         button:disabled { opacity: .4; cursor: not-allowed; }
 
-        .btn-connect { width: 100%; background: var(--panel); color: var(--ink); border: 1px solid #2c4a86; }
-        .btn-connect.connected { background: var(--red); }
+        .btn-connect { width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px; background: var(--panel); color: var(--ink); border: 1px solid #2c4a86; }
 
         /* secondary action: get the native APK (BLE without the HTTPS/secure-context constraint). */
         .btn-download {
@@ -110,9 +104,10 @@
     </header>
 
     <div class="wrap">
-        <div class="status" id="status"><span class="dot"></span><span id="status-txt">getrennt</span></div>
-
-        <button class="btn-connect" id="btn-connect" type="button">🔌 Verbinden</button>
+        <button class="btn-connect" id="btn-connect" type="button">
+            <span class="conn-dot" id="conn-dot"></span>
+            <span id="btn-connect-txt">Verbinden</span>
+        </button>
 
         <!-- Channel 1 = START (Klemme 50, Anlasser) -->
         <div class="card">
@@ -157,8 +152,7 @@
 
         // ---- tiny log + status UI ----------------------------------------------------------------------------
         const logEl = document.getElementById('log');
-        const statusEl = document.getElementById('status');
-        const statusTxt = document.getElementById('status-txt');
+        const connDot = document.getElementById('conn-dot');
         function log(msg, cls) {
             const t = new Date().toLocaleTimeString('de-DE');
             const line = document.createElement('div');
@@ -167,7 +161,7 @@
             logEl.appendChild(line);
             logEl.scrollTop = logEl.scrollHeight;
         }
-        function setStatus(state, txt) { statusEl.className = 'status' + (state ? ' ' + state : ''); statusTxt.textContent = txt; }
+        function setStatus(state) { connDot.className = 'conn-dot' + (state ? ' ' + state : ''); }
         const hex = (a) => a.map(b => b.toString(16).padStart(2, '0').toUpperCase()).join(' ');
         const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 
@@ -178,10 +172,10 @@
         const btnConnect = document.getElementById('btn-connect');
         let connected = false, busy = false;
 
+        const btnConnectTxt = document.getElementById('btn-connect-txt');
         function markConnected(on) {
             connected = on;
-            btnConnect.classList.toggle('connected', on);
-            btnConnect.textContent = on ? '✖ Trennen' : '🔌 Verbinden';
+            btnConnectTxt.textContent = on ? 'Trennen' : 'Verbinden';
             document.querySelectorAll('[data-cmd],[data-pulse]').forEach(b => b.disabled = !on);
         }
         markConnected(false);
