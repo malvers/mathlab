@@ -498,21 +498,66 @@
             document.querySelectorAll('.model-select.open').forEach(d => d.classList.remove('open'));
         });
 
-        // Model toggle in the hamburger panel (#hh-model): Claude ↔ DeepSeek, so Doc can compare cost/quality.
-        // DeepSeek is cheap chat WITHOUT tools — its proxy doesn't forward Solita's tool schemas.
-        function initModelToggle() {
+        // Model picker in the hamburger panel: provider buttons (Claude ↔ DeepSeek) + a per-provider variant
+        // dropdown. DeepSeek is cheap chat WITHOUT tools — its proxy doesn't forward Solita's tool schemas.
+        const DEFAULT_VARIANT = { claude: 'claude-sonnet-4-6', deepseek: 'deepseek-chat' };
+        function providerOf(m) { return /^deepseek/.test(m || '') ? 'deepseek' : 'claude'; }
+        let reflectModelPicker = function () { };   // assigned by initModelPicker; lets applySettings re-sync the UI
+
+        function initModelPicker() {
             const grp = document.getElementById('hh-model');
             if (!grp) return;
-            const btns = grp.querySelectorAll('button[data-model]');
-            const sync = () => btns.forEach(b => b.classList.toggle('active', b.dataset.model === currentModel));
-            sync();
-            btns.forEach(b => b.addEventListener('click', () => {
-                currentModel = b.dataset.model;
+            const btns = Array.from(grp.querySelectorAll('button[data-provider]'));
+            const dds = Array.from(document.querySelectorAll('.hh-model-dd'));
+            // Remember the last variant chosen per provider, so flipping Claude↔DeepSeek restores it.
+            const lastVariant = Object.assign({}, DEFAULT_VARIANT);
+            lastVariant[providerOf(currentModel)] = currentModel;
+
+            function reflect() {
+                const prov = providerOf(currentModel);
+                btns.forEach(b => b.classList.toggle('active', b.dataset.provider === prov));
+                dds.forEach(dd => {
+                    dd.classList.toggle('active', dd.dataset.provider === prov);
+                    const label = dd.querySelector('.hh-dd-label');
+                    dd.querySelectorAll('.model-option').forEach(opt => {
+                        const on = opt.dataset.value === currentModel;
+                        opt.classList.toggle('selected', on);
+                        if (on && label) label.textContent = opt.textContent;
+                    });
+                });
+            }
+            reflectModelPicker = reflect;
+
+            function commit() {
                 try { localStorage.setItem(MODEL_KEY, currentModel); } catch (e) { }
-                sync();
                 if (window.solitaSyncSettings) window.solitaSyncSettings();   // propagate the choice cross-device
                 if (window.DebugWindow) DebugWindow.log('Modell → ' + currentModel);
+                reflect();
+            }
+
+            btns.forEach(b => b.addEventListener('click', () => {
+                const prov = b.dataset.provider;
+                currentModel = lastVariant[prov] || DEFAULT_VARIANT[prov];
+                commit();
             }));
+
+            dds.forEach(dd => {
+                dd.querySelector('.model-select-display').addEventListener('click', e => {
+                    e.stopPropagation();
+                    dd.classList.toggle('open');
+                });
+                dd.querySelectorAll('.model-option').forEach(opt => {
+                    opt.addEventListener('click', e => {
+                        e.stopPropagation();
+                        currentModel = opt.dataset.value;
+                        lastVariant[providerOf(currentModel)] = currentModel;
+                        dd.classList.remove('open');
+                        commit();
+                    });
+                });
+            });
+
+            reflect();
         }
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -523,7 +568,7 @@
                 });
             }
             initModelDropdown(document.getElementById('modelDropdown'));
-            initModelToggle();
+            initModelPicker();
         });
 
         // The "brain": the LLM conversation + tool-use engine (js/solita-brain.js). solita-core is now just
@@ -616,11 +661,8 @@
             SYNCED_PREF_KEYS.forEach(function (k) { const v = localStorage.getItem(k); if (v != null) s[k] = v; });
             return s;
         }
-        function reflectModel() {   // mirror currentModel onto the visible #hh-model toggle after an adopted change
-            const grp = document.getElementById('hh-model');
-            if (grp) grp.querySelectorAll('button[data-model]').forEach(function (b) {
-                b.classList.toggle('active', b.dataset.model === currentModel);
-            });
+        function reflectModel() {   // mirror currentModel onto the HH picker (buttons + variant dropdown) after an adopted change
+            reflectModelPicker();
         }
         function applySettings(s) {
             if (!s || typeof s !== 'object') return;

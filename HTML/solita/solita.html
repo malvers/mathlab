@@ -633,6 +633,11 @@
         #solita-hh-panel .hh-lang button { flex: 1; padding: 7px 0; border-radius: 8px; background: rgba(255, 255, 255, 0.06); color: #e6edf3; border: 1px solid rgba(255, 255, 255, 0.12); font-family: 'Orbitron', sans-serif; font-size: 0.7rem; letter-spacing: 1px; cursor: pointer; transition: background 0.15s, color 0.15s; }
         #solita-hh-panel .hh-lang button:hover { background: rgba(255, 255, 255, 0.12); }
         #solita-hh-panel .hh-lang button.active { background: rgb(121, 158, 49); border-color: rgb(121, 158, 49); color: #fff; }   /* ON = phi green, like the toggles */
+        /* Per-provider variant picker in the HH: only the active provider's dropdown is shown (.active). */
+        #solita-hh-panel .hh-model-dd { position: relative; width: 100%; height: 38px; margin-top: 8px; }
+        #solita-hh-panel .hh-model-dd.active { display: block; }   /* beats the base .model-select{display:none} via #id specificity */
+        #solita-hh-panel .hh-model-dd .model-select-display { padding: 8px 12px; border-radius: 8px; border-color: rgba(255, 255, 255, 0.12); background: rgba(255, 255, 255, 0.06); font-family: 'Orbitron', sans-serif; font-size: 0.7rem; letter-spacing: 1px; color: #e6edf3; }
+        #solita-hh-panel .hh-model-dd .model-option { padding: 9px 12px; font-family: 'Orbitron', sans-serif; font-size: 0.68rem; letter-spacing: 1px; }
         #solita-hh-panel .hh-face { cursor: zoom-in; }
         #solita-lightbox {
             position: fixed; inset: 0; z-index: 10001; display: none;
@@ -720,8 +725,24 @@
         </div>
         <!-- Sprachmodell wählen (zum Vergleichen): Claude (mit Tools) ↔ DeepSeek (günstig, nur Chat, keine Tools). -->
         <div id="hh-model" class="hh-lang" role="group" aria-label="Sprachmodell" title="DeepSeek ist günstig, kann aber keine Tools (Wetter/Kalender/Mail)">
-            <button type="button" data-model="claude-sonnet-4-6" aria-label="Claude (mit Tools)">CLAUDE</button>
-            <button type="button" data-model="deepseek-chat" aria-label="DeepSeek (günstig, ohne Tools)">DEEPSEEK</button>
+            <button type="button" data-provider="claude" aria-label="Claude (mit Tools)">CLAUDE</button>
+            <button type="button" data-provider="deepseek" aria-label="DeepSeek (günstig, ohne Tools)">DEEPSEEK</button>
+        </div>
+        <!-- Variant picker per provider; only the active provider's dropdown is visible (.active toggled in JS). -->
+        <div class="model-select hh-model-dd" id="hhClaudeDD" data-provider="claude">
+            <div class="model-select-display"><span class="hh-dd-label">SONNET 4.6</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></div>
+            <div class="model-select-options">
+                <div class="model-option" data-value="claude-opus-4-8">OPUS 4.8</div>
+                <div class="model-option" data-value="claude-sonnet-4-6">SONNET 4.6</div>
+                <div class="model-option" data-value="claude-haiku-4-5-20251001">HAIKU 4.5</div>
+            </div>
+        </div>
+        <div class="model-select hh-model-dd" id="hhDeepseekDD" data-provider="deepseek">
+            <div class="model-select-display"><span class="hh-dd-label">CHAT</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></div>
+            <div class="model-select-options">
+                <div class="model-option" data-value="deepseek-chat">CHAT</div>
+                <div class="model-option" data-value="deepseek-reasoner">REASONER</div>
+            </div>
         </div>
         <select id="hh-voice" class="hh-voice" aria-label="Solitas Stimme" title="Stimme wählen — Vorschau beim Auswählen"></select>
         <!-- ODbL attribution: where_am_i resolves place names via Nominatim (OpenStreetMap data). -->
@@ -797,6 +818,7 @@
                 '../js/solita-delete-notes.js', // tool: delete_notes (two-step confirm)
                 '../js/solita-read-md.js',      // tool: read_markdown (public repo .md)
                 '../js/solita-time.js',         // tool: get_time
+                '../pagode/js/pagode-ble.js',   // shared Pagode BLE transport (window.PagodeBLE) — MUST load before solita-engine.js
                 '../js/solita-engine.js',       // tool: start_engine / stop_engine (Pagode remote — Solita_goes_Pagode.md)
                 '../js/solita-tts.js',          // voice: dictate + read answers aloud
                 '../js/ear.js',                 // wake-word listener core
