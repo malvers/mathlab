@@ -26,7 +26,8 @@
     var CONFIG = {
         CRANK_MS: 900,             // how long to hold the starter (terminal 50) — momentary, like the key
         STOP_MS: 1500,             // how long to break the ignition coil to be sure the engine dies
-        MAX_STOP_SPEED_MS: 1.4     // ~5 km/h: at or above this the car counts as moving and stop is refused outright
+        MAX_STOP_SPEED_MS: 1.4,    // ~5 km/h: at or above this the car counts as moving and stop is refused outright
+        PENDING_MS: 120000         // a "switch off once we stop" wish expires after 2 min (never a stale kill later)
     };
 
     // tiny debug log -> Doc keeps a DEBUG panel open (feedback_always_log_to_debug); fall back to console.
@@ -67,6 +68,30 @@
                 { enableHighAccuracy: true, timeout: 4000, maximumAge: 2000 }
             );
         });
+    }
+
+    // ---- PENDING STOP: "stop once we halt" wish, asked again proactively when the car stops ------------------
+    // Refusing a stop mid-drive is right, but plain "no" loses Doc's intent. So we REMEMBER it and, the moment
+    // the car comes to a stand, Solita asks once: "we've stopped — switch off?" — Doc still has to confirm with
+    // the deliberate phrase (NEVER an automatic kill: that would cut the engine at a red light). The wish expires
+    // after PENDING_MS so a forgotten command can't trigger a surprise kill at some later halt.
+    var pendingStopAt = 0, stopWatchIv = null;
+    function clearStopWatch() { if (stopWatchIv) { clearInterval(stopWatchIv); stopWatchIv = null; } pendingStopAt = 0; }
+    function armStopWatch() {
+        pendingStopAt = Date.now();
+        if (stopWatchIv) return;   // already polling
+        dbg('STOP gemerkt — frage beim nächsten Halt nach (läuft in ' + (CONFIG.PENDING_MS / 1000) + ' s ab)');
+        stopWatchIv = setInterval(async function () {
+            if (!pendingStopAt || Date.now() - pendingStopAt > CONFIG.PENDING_MS) { dbg('gemerkter Stopp abgelaufen'); clearStopWatch(); return; }
+            var m = await vehicleSpeed();
+            if (m.known && !m.moving) {
+                clearStopWatch();
+                dbg('Wagen steht → Doc proaktiv fragen');
+                var ask = 'Wir stehen jetzt. Soll ich die Pagode abstellen? Sag „Ja, stoppe die Pagode!", dann mache ich es.';
+                if (window.solitaProactive) window.solitaProactive(ask);
+                else if (window.speakReply) window.speakReply(ask);
+            }
+        }, 4000);
     }
 
     // ---- BLE via the shared single source (window.PagodeBLE from js/pagode-ble.js) ----
@@ -149,6 +174,7 @@
                 + 'auf, wenn Doc DEUTLICH „Ja, starte die Pagode!" sagt — übergib seine wörtliche Antwort als confirm_phrase. '
                 + 'Bei bloßem „ja", „ok", Unsicherheit oder Nebengeräusch NICHT starten.' };
         }
+        clearStopWatch();   // a deliberate fresh start cancels any remembered "switch off at the next halt"
 
         if (!haveBle()) {
             dbg('START (dry-run) — PagodeBLE/Transport nicht verfügbar');
@@ -208,10 +234,13 @@
         if (m.known && m.moving) {
             var kmh = Math.round(m.speed_ms * 3.6);
             dbg('STOP refused — moving ~' + kmh + ' km/h');
+            armStopWatch();   // remember the wish; ask again proactively at the next halt (expires after PENDING_MS)
             return { ok: false, summary: 'ABSTELLEN VERWEIGERT — der Wagen bewegt sich (~' + kmh + ' km/h). Aus Sicherheit wird '
-                + 'der Motor während der Fahrt NIEMALS abgestellt. ANWEISUNG AN DICH (Solita): Sag Doc ruhig und bestimmt: '
-                + '„Ich kann die Pagode nicht stoppen, solange wir fahren." Stelle NICHT ab.' };
+                + 'der Motor während der Fahrt NIEMALS abgestellt, auch nicht automatisch. ANWEISUNG AN DICH (Solita): Sag Doc '
+                + 'ruhig und bestimmt, dass du die Pagode während der Fahrt nicht abstellst, dich aber von selbst meldest, '
+                + 'sobald ihr steht. Stelle NICHT ab.' };
         }
+        clearStopWatch();   // stopped (or speed unknown) → any pending "ask at next halt" is moot now
 
         // SAFETY GATE: deliberate spoken phrase (a bare "ja" must not trigger)
         if (!confirmOk(input, 'stop')) {
