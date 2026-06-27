@@ -100,6 +100,18 @@
                 }, 200);
             };
 
+            // Proactive prompt: Solita speaks a line on her OWN initiative (e.g. the Pagode "we've stopped —
+            // shall I switch off?" follow-up) AND opens the conversation so Doc can answer hands-free, no
+            // "Solita" needed. The mic reopens via speakReply's resume() because convo is now true. No-op when
+            // the ear is off / quiet — then it degrades to a plain spoken line with no answer window.
+            window.solitaProactive = function (text) {
+                if (!text) return;
+                disarmIdle();
+                convo = true; awaitingQuery = true;
+                if (ear) { ear.setConvo(true); ear.setAwaiting(true); }
+                if (window.speakReply) window.speakReply(text);
+            };
+
             function fire(query) {
                 disarmIdle();                                        // new turn underway → resume() re-arms after the reply
                 convo = true;                                        // addressing Solita opens the conversation thread
