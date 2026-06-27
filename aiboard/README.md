@@ -10,6 +10,10 @@ den **Ton** umschalten kann und DE/EN-Mischmasch versteht.
 
 Planungs-/Vorbereitungsphase. Code folgt in Phase 0 (siehe `plan.md`).
 
+> **📌 Agents, bitte lesen (Doc 2026-06-27):** neue Idee in `plan.md` → Abschnitt
+> „Ideen" → **„Falscher-Chat"-Warnung** (passt die Nachricht zum Gespräch?).
+> Morgen mit Doc durchgehen. Noch kein Bau-Auftrag (Regel 2/4).
+
 ## Eckdaten
 
 - **Form:** eigene native Android-App (`InputMethodService` / IME, Kotlin) —

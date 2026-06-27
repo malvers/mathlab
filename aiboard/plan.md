@@ -66,6 +66,14 @@ Details: siehe `docs/architektur.md`.
 - Themes in Doc-Farben (λ Orange, Υ Rot, φ Grün), Schrift Orbitron.
 - Feintuning Debounce, Caching, Offline-Verhalten, Akku.
 
+## Ideen (Doc, noch nicht eingeplant)
+
+### „Falscher-Chat"-Warnung — passt die Nachricht zum Gespräch? 📌 Doc 2026-06-27 (morgen mit den Agenten checken)
+**Problem:** Wer mehrere Chats parallel führt, schickt hin und wieder aus Versehen eine Nachricht an die **falsche** Person.
+**Idee:** Die Tastatur liest ohnehin schon den **Kontext im Eingabefeld** mit (siehe „Warum das Gboard begräbt" + Schicht 3). Genau das nutzen, um vor dem Senden zu prüfen: *Passt der getippte Text überhaupt zu diesem Gesprächsverlauf?* Wenn nicht → dezente **Warnung** („Diese Nachricht wirkt, als gehöre sie in einen anderen Chat — trotzdem senden?").
+**Warum es hier hingehört:** Es ist dieselbe Kontext-Lese-Fähigkeit, die wir gerade für AI Board bauen — kein neues Gehirn nötig, nur ein zusätzlicher Check auf dem vorhandenen Kontext.
+**Erst klären (vor Bau, Regel 2/4):** Wie viel Verlauf lesen wir (Datenschutz-Gate!) · läuft der Check on-device oder Cloud · Schwelle/Trigger, damit es nicht nervt · UI der Warnung (vor dem Senden, nicht-blockierend).
+
 ## Offene Punkte (später entscheiden, blockieren P0 nicht)
 
 - Genauer Debounce-Wert + wie viel Kontext (Sätze vor dem Cursor) wir senden.

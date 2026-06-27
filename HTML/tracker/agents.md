@@ -4,6 +4,10 @@ Kanonische Onboarding-Doku für KI-Agents am **Doc Alvers Tracker**. Vor größe
 Allgemeine Arbeitsregeln stehen in `forloop/CLAUDE.md` + globaler `CLAUDE.md` — hier nur Tracker-Spezifisches.
 (Diese Datei ersetzt das frühere `tracker-app/README.md`.)
 
+> **📌 Agents, bitte lesen (Doc 2026-06-27):** offene Frage zum Live-Broadcast in
+> `feature-requests.md` → **FEAT-16** (Note vom 2026-06-27): „Wissen wir zu 100 %,
+> ob gesendet wird?" — nein, kein Presence/Heartbeat; morgen checken. Verwandt: BUG-5.
+
 ---
 
 ## Was ist das
