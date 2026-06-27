@@ -122,10 +122,12 @@
             + 'Nutze dies, wenn Doc sinngemäß sagt „starte (mal) die Engine/den Motor", „lass den Wagen/die Pagode an", '
             + '„Solita, let\'s go", „wollen wir (eine kleine Ausfahrt)?", „lass uns (raus)fahren". Der Zündschlüssel steht '
             + 'bereits auf ON; dieses Werkzeug betätigt nur kurz den Anlasser (wie der Schlüssel in Stellung „Start"). '
-            + 'SICHERHEIT (hoch kritisch, reale Maschine): Frage Doc IMMER zuerst kurz „Soll ich die Pagode wirklich '
-            + 'starten?" und rufe start_engine erst dann erneut auf, wenn Doc als Bestätigung DEUTLICH „Ja, starte die '
-            + 'Pagode!" sagt — übergib seine wörtliche Antwort als confirm_phrase. Bei bloßem „ja", „ok", Unsicherheit '
-            + 'oder Nebengeräusch NICHT starten, sondern erneut nachfragen. Im Testmodus (kein BLE) läuft alles trocken durch.',
+            + 'ABLAUF (WICHTIG): Rufe start_engine SOFORT auf, sobald Doc starten möchte — beim ERSTEN Mal OHNE '
+            + 'confirm_phrase. NICHT vorher von dir aus rückfragen. Das Werkzeug fordert dich dann auf, Docs ausdrückliche '
+            + 'Bestätigung einzuholen — frage „Soll ich die Pagode wirklich starten?" und rufe start_engine erneut auf, '
+            + 'sobald Doc DEUTLICH „Ja, starte die Pagode!" sagt (wörtlich als confirm_phrase). SICHERHEIT (hoch kritisch, '
+            + 'reale Maschine): Bei bloßem „ja", „ok", Unsicherheit oder Nebengeräusch NICHT starten. Im Testmodus (kein '
+            + 'BLE) läuft alles trocken durch.',
         input_schema: {
             type: 'object',
             properties: {
@@ -179,11 +181,15 @@
         name: 'stop_engine',
         description: 'Stelle den Motor von Docs Mercedes 230 SL „Pagode" ab — über das Bluetooth-Relais (unterbricht kurz '
             + 'die Zündung). Nutze dies, wenn Doc sinngemäß sagt „mach den Motor aus", „stell die Pagode ab", „Motor stop", '
-            + '„wir sind da". SICHERHEIT (HOCH KRITISCH): Ein versehentliches Abstellen während der Fahrt ist gefährlich '
-            + '(Motor aus = keine Servolenkung/-bremse). Frage Doc daher IMMER zuerst „Soll ich die Pagode wirklich '
-            + 'abstellen?" und rufe stop_engine erst dann erneut auf, wenn Doc als Bestätigung DEUTLICH „Ja, stoppe die '
-            + 'Pagode!" sagt — übergib seine wörtliche Antwort als confirm_phrase. Bei bloßem „ja", Unsicherheit oder '
-            + 'Nebengeräusch NICHT abstellen, sondern erneut nachfragen. Im Testmodus läuft alles trocken durch.',
+            + '„wir sind da". ABLAUF (WICHTIG): Rufe stop_engine SOFORT auf, sobald Doc abstellen möchte — beim ERSTEN Mal '
+            + 'OHNE confirm_phrase. NICHT vorher von dir aus rückfragen. Das Werkzeug entscheidet dann deterministisch und '
+            + 'sagt dir, was zu tun ist: (a) Fährt der Wagen, lehnt es SOFORT ab — dann KEINE Bestätigung einholen, sondern '
+            + 'Doc nur ruhig sagen, dass während der Fahrt nicht abgestellt wird. (b) Steht der Wagen, fordert es dich auf, '
+            + 'Docs ausdrückliche Bestätigung einzuholen — frage dann „Soll ich die Pagode wirklich abstellen?" und rufe '
+            + 'stop_engine erneut auf, sobald Doc DEUTLICH „Ja, stoppe die Pagode!" sagt (wörtlich als confirm_phrase). '
+            + 'SICHERHEIT (HOCH KRITISCH): Ein versehentliches Abstellen während der Fahrt ist gefährlich (Motor aus = keine '
+            + 'Servolenkung/-bremse); bei bloßem „ja", Unsicherheit oder Nebengeräusch NICHT abstellen. Im Testmodus läuft '
+            + 'alles trocken durch.',
         input_schema: {
             type: 'object',
             properties: {
