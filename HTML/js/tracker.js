@@ -360,9 +360,10 @@
             });
         });
 
-        // Basemap themes (Doc 2026-06-26): DARK by default — a near-black map is easier on the eyes while
-        // driving AND saves real battery on the phone's OLED screen (fewer lit pixels). Light (OSM) stays
-        // selectable. CARTO dark_matter is the dark source; both need the OSM credit, dark also CARTO.
+        // Basemap themes (Doc 2026-06-27): default AUTO — light (OSM) by day, dark (CARTO) at night, decided
+        // from the sun's position at the current fix. Plain dark was too hard to read / see the streets while
+        // driving in daylight. "Hell" / "Dunkel" force one design. CARTO dark_matter is the dark source; both
+        // need the OSM credit, dark also CARTO.
         const BASEMAPS = {
             dark: {
                 url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png', sub: 'abcd', maxNativeZoom: 20, bg: 'rgb(8, 20, 42)',
@@ -374,26 +375,56 @@
             },
         };
         const MAP_THEME_KEY = 'trk_map_theme';
-        let mapTheme = (localStorage.getItem(MAP_THEME_KEY) === 'light') ? 'light' : 'dark'; // DEFAULT dark
+        const MAP_PREFS = ['auto', 'light', 'dark'];
+        let themePref = MAP_PREFS.includes(localStorage.getItem(MAP_THEME_KEY)) ? localStorage.getItem(MAP_THEME_KEY) : 'auto'; // DEFAULT auto
+        let mapTheme = 'light';    // the RESOLVED theme actually on the map (auto → light/dark)
         let baseMap = null;
+        let lastFix = null;        // last GPS fix { lat, lng, t } — declared here so the AUTO map theme can read it at init
         // DEBUG: hide the background map → judge the rain-radar colours with no terrain underneath.
         //   key 'k' → dark backdrop · key 'w' → white backdrop · same key again → map back on.
         let hgMode = 'on'; // 'on' | 'dark' | 'white'
         function makeBaseLayer(theme) {
-            const b = BASEMAPS[theme] || BASEMAPS.dark;
+            const b = BASEMAPS[theme] || BASEMAPS.light;
             return L.tileLayer(b.url, { subdomains: b.sub, maxNativeZoom: b.maxNativeZoom, maxZoom: 21 }); // upscales >maxNative so close photo pins separate
         }
-        function setMapTheme(theme) {
-            theme = BASEMAPS[theme] ? theme : 'dark';
+        // AUTO day/night: true when the sun sits below civil twilight (-6°) at the current fix. Until we have
+        // a GPS position, fall back to a plain clock rule (before 7h / from 21h local = night).
+        function isNightNow() {
+            const now = new Date();
+            if (!lastFix) { const h = now.getHours(); return h < 7 || h >= 21; }
+            const rad = Math.PI / 180;
+            const start = new Date(now.getFullYear(), 0, 0);
+            const doy = Math.floor((now - start) / 86400000);                          // day of year
+            const decl = 23.44 * rad * Math.sin(2 * Math.PI * (doy - 81) / 365);        // solar declination (approx)
+            const utcH = now.getUTCHours() + now.getUTCMinutes() / 60 + now.getUTCSeconds() / 3600;
+            const ha = (utcH + lastFix.lng / 15 - 12) * 15 * rad;                       // hour angle from local solar time
+            const lat = lastFix.lat * rad;
+            const elev = Math.asin(Math.sin(lat) * Math.sin(decl) + Math.cos(lat) * Math.cos(decl) * Math.cos(ha));
+            return elev < -6 * rad;
+        }
+        function resolveTheme(pref) {
+            pref = MAP_PREFS.includes(pref) ? pref : 'auto';
+            return pref === 'auto' ? (isNightNow() ? 'dark' : 'light') : pref;
+        }
+        // Apply the resolved theme to the map. No-op when it already matches (so the 5-min auto poll is cheap).
+        function applyResolvedTheme() {
+            const theme = resolveTheme(themePref);
+            if (theme === mapTheme && baseMap) return;
             mapTheme = theme;
-            try { localStorage.setItem(MAP_THEME_KEY, theme); } catch (e) { }
             if (baseMap) map.removeLayer(baseMap);
             baseMap = makeBaseLayer(theme);
-            if (hgMode === 'on') { baseMap.addTo(map); map.getContainer().style.background = BASEMAPS[theme].bg; } // dark bg → no white flash between tiles
+            if (hgMode === 'on') { baseMap.addTo(map); map.getContainer().style.background = BASEMAPS[theme].bg; } // matching bg → no white flash between tiles
             const ab = document.querySelector('.attrib-body'); // keep the ⓘ credit correct per source (OSM, +CARTO when dark)
             if (ab) ab.innerHTML = BASEMAPS[theme].attrib;
         }
-        setMapTheme(mapTheme); // initial basemap (default dark)
+        // Set + persist the user PREFERENCE (auto/light/dark), then re-render the map.
+        function setMapPref(pref) {
+            themePref = MAP_PREFS.includes(pref) ? pref : 'auto';
+            try { localStorage.setItem(MAP_THEME_KEY, themePref); } catch (e) { }
+            applyResolvedTheme();
+        }
+        applyResolvedTheme(); // initial basemap (auto → light by day)
+        setInterval(() => { if (themePref === 'auto') applyResolvedTheme(); }, 5 * 60 * 1000); // flip at dusk/dawn while driving
         function applyHg(mode) {
             hgMode = mode;
             if (mode === 'on') { baseMap.addTo(map); map.getContainer().style.background = BASEMAPS[mapTheme].bg; }
@@ -525,7 +556,7 @@
         let totalDist = 0;         // metres
         let startTime = null;      // ms
         let timerId = null;
-        let lastFix = null;        // { lat, lng, t }
+        lastFix = null;            // { lat, lng, t } — declared above (near the basemap theme)
         let waypoints = [];        // Foto-/Voice-Spur: [{type, lat, lng, t, img|audio, dur, mime, title, text, _marker}]
         // Canonical waypoint → DB/buffer shape: pass ALL fields through (photo `img` and voice
         // `audio`/`dur`/`type` alike), only drop the runtime-only Leaflet marker. Future fields
@@ -2902,12 +2933,22 @@ ${pts}
             else wire();
         })();
 
-        // Settings: map theme — dark (default; OLED battery + readability while driving) ↔ light. Persisted.
+        // Settings: map design — Auto (light by day, dark at night via sun) · Hell · Dunkel. Persisted; default Auto.
         (function () {
             function wire() {
-                const cb = $('map-dark-toggle'); if (!cb || cb._wired) return; cb._wired = true;
-                cb.checked = (mapTheme === 'dark');
-                cb.addEventListener('change', () => { setMapTheme(cb.checked ? 'dark' : 'light'); toast(cb.checked ? 'Karte: dunkel' : 'Karte: hell'); });
+                const seg = Array.from(document.querySelectorAll('.seg-btn[data-maptheme]'));
+                if (!seg.length || seg[0]._wired) return;
+                const reflect = () => seg.forEach((b) => b.classList.toggle('active', b.getAttribute('data-maptheme') === themePref));
+                seg.forEach((b) => {
+                    b._wired = true;
+                    b.addEventListener('click', () => {
+                        const p = b.getAttribute('data-maptheme');
+                        setMapPref(p);
+                        reflect();
+                        toast(p === 'auto' ? 'Karte: Auto (hell/dunkel nach Sonne)' : p === 'dark' ? 'Karte: dunkel' : 'Karte: hell');
+                    });
+                });
+                reflect();
             }
             if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', wire);
             else wire();
