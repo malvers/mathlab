@@ -115,6 +115,8 @@ window.TrackerNav = function (ctx) {
     let annFar = false;     // pre-warning ("In … Metern") already spoken for the current maneuver
     let annNear = false;    // "Jetzt …" already spoken — said at ~40 m, but we DON'T advance until passed
     let mClosest = Infinity; // closest approach (m) to the current maneuver — to detect an overshoot
+    let freshReroute = false; // a reroute just landed → announce the first turn AT ONCE if we're already inside its
+                              // pre-warning window (the threshold crossing happened during the fetch → otherwise missed)
     let voiceOn = true;     // spoken guidance on/off (persisted in localStorage)
     let routeTotalDist = 0; // whole-route distance (m) at (re)route time — for ETA / remaining
     let routeTotalDur = 0;  // whole-route duration (s) at (re)route time — for ETA / remaining
@@ -548,7 +550,7 @@ window.TrackerNav = function (ctx) {
         keepAlive.stop();   // navigation over → release the audio keep-alive (battery / audio focus)
         if (destMarker) { map.removeLayer(destMarker); destMarker = null; }
         destLatLng = null; destLabel = '';
-        maneuvers = null; mIdx = 0; annFar = false; annNear = false; mClosest = Infinity;
+        maneuvers = null; mIdx = 0; annFar = false; annNear = false; mClosest = Infinity; freshReroute = false;
         routeTotalDist = 0; routeTotalDur = 0; tripTotalM = 0;
         hideBanner();
         stopSpeech();
@@ -612,6 +614,7 @@ window.TrackerNav = function (ctx) {
         const best = data.routes[0];
         drawRoute(best.geometry);
         setGuidance(best);
+        freshReroute = !!reroute;            // reroute → let guidanceUpdate fire the first turn immediately (see below)
         routeTotalDist = best.distance || 0; // for ETA / remaining in the banner
         if (!reroute) tripTotalM = routeTotalDist; // first route → fix the "Strecke" total; reroutes don't move it
         routeTotalDur = best.duration || 0;
@@ -1209,6 +1212,19 @@ window.TrackerNav = function (ctx) {
         const d = haversine(here, m.loc);
         if (d < mClosest) mClosest = d;
         showBanner(m, d, tripLine(here));
+        if (freshReroute) {
+            freshReroute = false;
+            // A reroute just landed. If we're ALREADY inside the pre-warning window, the normal far/near
+            // threshold was crossed DURING the fetch and would never re-fire → the first turn gets missed
+            // ("zu spät / verpasst", Doc 2026-06-27). So announce it AT ONCE here. Beyond `far` there's still
+            // plenty of road → fall through and let the normal pre-warning handle it.
+            if (d <= farTriggerM()) {
+                if (m.type === 'arrive') { annFar = true; speak('In ' + announceDist(d) + ' Metern erreichen Sie das Ziel.'); }
+                else if (d <= nearTriggerM()) { annNear = true; speak('Jetzt ' + m.text, true); }
+                else { annFar = true; speak('In ' + announceDist(d) + ' Metern ' + m.text + '.'); }
+                return;
+            }
+        }
         if (m.type === 'arrive') {
             // Destination: you stop there (no overshoot to detect), so announce + finish at the near window.
             if (d <= nearTriggerM()) { speak('Sie haben das Ziel erreicht.'); advanceManeuver(); if (ctx.onArrive) ctx.onArrive(); }
