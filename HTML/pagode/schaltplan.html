@@ -40,20 +40,24 @@
         .hint { font-family: 'Segoe UI', Arial, sans-serif; font-size: 12px; color: var(--muted); margin-bottom: 12px; }
         .credit { font-family: 'Segoe UI', Arial, sans-serif; font-size: 10px; color: #5a6b8a; margin-top: 10px; }
         .credit a { color: #6f86b8; text-decoration: none; }
-        .warn { width: 100%; max-width: 1220px; margin-top: 16px; background: rgba(176, 36, 24, .10); border: 1px solid rgba(245, 194, 66, .38); border-radius: 12px; padding: 14px 18px; font-family: 'Segoe UI', Arial, sans-serif; font-size: 13px; line-height: 1.6; color: #e8eefc; }
+        .warn { width: 100%; max-width: 1400px; margin-top: 16px; background: rgba(176, 36, 24, .10); border: 1px solid rgba(245, 194, 66, .38); border-radius: 12px; padding: 14px 18px; font-family: 'Segoe UI', Arial, sans-serif; font-size: 13px; line-height: 1.6; color: #e8eefc; }
         .warn-h { font-family: 'Orbitron', sans-serif; font-weight: 800; font-size: 13px; letter-spacing: 1px; color: var(--gold); margin-bottom: 8px; }
         .warn ul { margin: 0; padding-left: 18px; }
         .warn li { margin: 3px 0; }
         .warn b { color: #fff; }
-        .frame { width: 100%; max-width: 1220px; background: rgba(10, 26, 56, .6); border: 1px solid #26406f; border-radius: 16px; padding: 8px; }
+        .frame { width: 100%; max-width: 2400px; background: rgba(10, 26, 56, .6); border: 1px solid #26406f; border-radius: 16px; padding: 8px; }
         svg { width: 100%; height: auto; display: block; touch-action: none; }
 
-        .comp { fill: rgba(14,36,78,.92); stroke: #f5c242; stroke-width: 2; cursor: move; }
+        .comp { fill: rgba(14,36,78,.92); stroke: #5b6b86; stroke-width: 2; cursor: move; }
         .ctitle { font-family: 'Orbitron', sans-serif; font-weight: 800; fill: #f1e8cf; font-size: 15px; text-anchor: middle; pointer-events: none; }
         .csub { font-family: 'Segoe UI', Arial, sans-serif; fill: #aebbd8; font-size: 12px; text-anchor: middle; pointer-events: none; }
         .clbl { font-family: 'Segoe UI', Arial, sans-serif; fill: #cdd8f0; font-size: 11px; pointer-events: none; }
         .amp  { font-family: 'Segoe UI', Arial, sans-serif; fill: #f3c542; font-size: 12px; font-weight: 700; pointer-events: none; }
         .node { fill: #0e244e; stroke: #f5c242; stroke-width: 2; cursor: grab; }
+        .taphandle { cursor: move; }
+        .taphandle:hover { stroke-width: 4; }
+        .fuseh { cursor: grab; }
+        .fuseh:hover { stroke: #ffd86a; }
         .node:hover { fill: #f5c242; }
         .node.gnd { stroke: #9fb0cf; }
         .nlbl { font-family: 'Segoe UI', Arial, sans-serif; fill: #e8eefc; font-size: 11px; font-weight: 700; pointer-events: none; }
@@ -114,24 +118,25 @@
         // ---- components (draggable boxes); motor is a circle ----
         const COMPS = {
             app:   { x: 120, y: -88, w: 86, h: 171, img: 'app-shot.jpg', origin: 'unser' },
-            mod:   { x: 320, y: 290, w: 220, h: 215, title: 'DSD BLE-Modul', sub: 'SH-HC-08 · 2-Kanal', inImg: 'dsd-relaismodul.png', origin: 'unser' },
+            btm:   { x: 117, y: 100, w: 92, h: 70, title: 'BT-Modul', btBig: true, origin: 'unser' },
+            sol:   { x: 113, y: 198, w: 100, h: 118, title: 'Solita', inImg: '../resources/team/team_02.png', origin: 'unser' },
+            mod:   { x: 320, y: 290, w: 220, h: 215, title: 'DSD BLE-Modul', sub: 'SH-HC-08 · 2-Kanal', inImg: 'dsd-relaismodul.png', bt: true, origin: 'unser' },
             bosch: { x: 610, y: 120, w: 180, h: 150, title: 'Bosch 70 A', sub: 'Start-Relais', inImg: 'bosch-relais.png', origin: 'unser' },
             ms:    { x: 840, y: 120, w: 230, h: 230, title: 'Magnetschalter', sub: 'Solenoid = Relais', inImg: 'magnetschalter.png' },
             key:   { x: 320, y: 560, w: 170, h: 60, title: 'Schlüssel', sub: 'Zündschloss · ON' },
             coil:  { x: 630, y: 540, w: 180, h: 80, title: 'Zündspule', sub: '' },
             motor: { x: 1030, y: 420, r: 28, circle: true, title: 'M', sub: 'Anlasser-Motor', decor: 'motor' },
-            vr:    { x: 510, y: 632, w: 120, h: 48, title: 'Vorwiderstand', sub: '0,9 Ω · Serie' },
+            vr:    { x: 510, y: 632, w: 120, h: 48, title: 'Vorwiderstand', sub: '0,9 Ω · Serie', tf: 10, toff: 8 },
             dist:  { x: 880, y: 560, w: 180, h: 95, title: 'Verteiler', sub: 'Unterbrecher · Kondensator' },
             kerz:  { x: 1110, y: 575, w: 90, h: 70, title: 'Kerzen', sub: '1 – 6' },
-            mono:  { x: 320, y: 514, w: 185, h: 44, title: 'Monoflop + Sperre', sub: '<2–3 s · Motor-läuft', origin: 'unser' },
+            mono:  { x: 320, y: 494, w: 185, h: 44, title: 'Monoflop + Sperre', sub: '<2–3 s · Motor-läuft', origin: 'unser' },
         };
 
         // ---- terminals: draggable circles. comp = parent box (moves together). dir = label side ----
         const NODES = {
             batP:   { x: 100, y: 360, label: 'Klemme 30 +', dir: 'r', col: 'gold' },
             batM:   { x: 100, y: 404, label: 'Klemme 31 −', dir: 'r', col: 'gnd' },
-            appBle: { x: 163, y: 83, label: '', dir: 'b', comp: 'app' },
-            bleEnd: { x: 345, y: 285, label: 'BLE', dir: 'r', col: 'ble' },
+            // appBle/bleEnd removed — the BLE link is now a Bluetooth badge on the units
             dcp:    { x: 430, y: 290, label: 'DC+', dir: 't', comp: 'mod' },
             dcm:    { x: 475, y: 505, label: 'DC−', dir: 'b', comp: 'mod' },
             k1com:  { x: 540, y: 372, label: 'K1·COM', dir: 'r', comp: 'mod' },
@@ -162,8 +167,8 @@
             distGnd:{ x: 965, y: 655, label: '', dir: 'b', comp: 'dist' },
             kerzIn: { x: 1110, y: 600, label: '', dir: 'l', comp: 'kerz' },
             kerzGnd:{ x: 1155, y: 645, label: '', dir: 'b', comp: 'kerz' },
-            monoIn: { x: 320, y: 536, label: 'von K1', dir: 'l', comp: 'mono' },
-            monoOut:{ x: 505, y: 536, label: 'zu 86', dir: 'r', comp: 'mono' },
+            monoIn: { x: 320, y: 516, label: 'von K1', dir: 'l', comp: 'mono' },
+            monoOut:{ x: 505, y: 516, label: 'zu 86', dir: 'r', comp: 'mono' },
         };
 
         // ---- wires between nodes (bend: hv = horizontal first, vh = vertical first) ----
@@ -215,13 +220,18 @@
                 for (const id in (p.comps || {})) if (COMPS[id]) Object.assign(COMPS[id], p.comps[id]);
                 for (const id in (p.nodes || {})) if (NODES[id]) Object.assign(NODES[id], p.nodes[id]);
                 LPOS = p.labels || {};
+                const fp = p.feeds || {};
+                FEEDS.forEach(f => { const v = fp[f.a]; if (v == null) return; if (typeof v === 'number') { f.tapX = v; } else { if (v.x != null) f.tapX = v.x; if (v.y != null) f.tapY = v.y; } });
+                if (p.railX != null) railX = p.railX;
             } catch (e) { /* ignore */ }
         }
         function save() {
             const comps = {}, nodes = {};
             for (const id in COMPS) comps[id] = { x: COMPS[id].x, y: COMPS[id].y };
             for (const id in NODES) nodes[id] = { x: NODES[id].x, y: NODES[id].y, lx: NODES[id].lx, ly: NODES[id].ly };
-            localStorage.setItem(LSKEY, JSON.stringify({ comps, nodes, labels: LPOS }));
+            const feeds = {};
+            FEEDS.forEach(f => { if (f.tapX != null || f.tapY != null) feeds[f.a] = { x: f.tapX, y: f.tapY }; });
+            localStorage.setItem(LSKEY, JSON.stringify({ comps, nodes, labels: LPOS, feeds, railX }));
         }
 
         // ---- SVG helpers ----
@@ -254,8 +264,22 @@
         }
         function feedPath(f) {
             const P = np(f.a), railY = f.rail === 'pos' ? RAIL_POS : RAIL_GND;
-            if (f.tapX != null) return `M${P.x},${P.y} H${f.tapX} V${railY}`;
-            return `M${P.x},${P.y} V${railY}`;
+            if (f.tapX == null && f.tapY == null) return `M${P.x},${P.y} V${railY}`;
+            // hand-placed end (drag the ring anywhere): vertical from terminal, kink near the end point
+            const tx = f.tapX != null ? f.tapX : P.x, ty = f.tapY != null ? f.tapY : railY;
+            const d = Math.min(40, Math.abs(ty - P.y) * 0.5);
+            const near = ty + (P.y > ty ? d : -d);
+            return `M${P.x},${P.y} V${near.toFixed(1)} H${tx} V${ty}`;
+        }
+
+        // Bluetooth badge on a unit (replaces the radio wave): dark disc + BT glyph in BLE-blue
+        function btBadge(g, cx, cy, size) {
+            g.appendChild(E('circle', { cx, cy, r: (size * 0.72).toFixed(1), fill: 'rgba(8,20,42,.92)', stroke: '#6fa8ff', 'stroke-width': 1.5 }));
+            const s = size / 24, ox = (cx - size / 2).toFixed(1), oy = (cy - size / 2).toFixed(1);
+            g.appendChild(E('path', {
+                d: 'M17.71 7.71L12 2h-1v7.59L6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 11 14.41V22h1l5.71-5.71-4.3-4.29 4.3-4.29zM13 5.83l1.88 1.88L13 9.59V5.83zm1.88 10.46L13 18.17v-3.76l1.88 1.88z',
+                fill: '#6fa8ff', transform: `translate(${ox},${oy}) scale(${s.toFixed(3)})`
+            }));
         }
 
         // ---- component decor (drawn relative to comp.x/y) ----
@@ -310,10 +334,14 @@
         function render() {
             svg.innerHTML = '';
             // rails
-            svg.appendChild(E('line', { class: 'rail', x1: X0, y1: RAIL_POS, x2: X1, y2: RAIL_POS, stroke: '#f5c242' }));
+            svg.appendChild(E('line', { class: 'rail', x1: railX, y1: RAIL_POS, x2: X1, y2: RAIL_POS, stroke: '#f5c242' }));
             freeLbl(svg, 'railPos', 104, 60, '+12 V · Klemme 30 (Dauerplus)', 'clbl', 'start', '#f5c242', null);
-            svg.appendChild(E('line', { class: 'rail', x1: X0, y1: RAIL_GND, x2: X1, y2: RAIL_GND, stroke: '#5b6b86' }));
+            // both rails share railX as left start (nudge live with ← / →, 1 px)
+            svg.appendChild(E('line', { class: 'rail', x1: railX, y1: RAIL_GND, x2: X1, y2: RAIL_GND, stroke: '#5b6b86' }));
             freeLbl(svg, 'railGnd', 104, 732, 'Masse · Klemme 31', 'clbl', 'start', '#9fb0cf', null);
+
+            // boxes go into an early layer so all cables/wires render ON TOP of them
+            const boxLayer = E('g'); svg.appendChild(boxLayer);
 
             // feeds + wires, grouped for the start/stop toggle
             [...FEEDS.map(f => ({ ...f, d: feedPath(f), w: true })), ...WIRES.map(w => ({ ...w, d: wirePath(w.a, w.b, w.bend) }))]
@@ -327,14 +355,19 @@
                         const P = np(item.a); const fy = (item.rail === 'pos' ? RAIL_POS : RAIL_GND);
                         const fx = item.tapX != null ? item.tapX : P.x;
                         const my = (P.y + fy) / 2;
-                        const fr = E('rect', { x: fx - 9, y: my - 16, width: 18, height: 32, rx: 4, fill: 'none', stroke: '#f5c242', 'stroke-width': 2 });
+                        const fid = 'fuse_' + item.a, fp = LPOS[fid] || { x: fx, y: my };
+                        const fr = E('rect', { class: 'fuseh', x: (fp.x - 9).toFixed(1), y: (fp.y - 16).toFixed(1), width: 18, height: 32, rx: 4, fill: 'rgba(8,20,42,.55)', stroke: '#f5c242', 'stroke-width': 2 });
                         if (item.origin) fr.classList.add('origin-' + item.origin);
+                        if (item.grp) fr.classList.add('grp-' + item.grp);
+                        dragXY(fr, () => (LPOS[fid] || { x: fx, y: my }), (x, y) => { LPOS[fid] = { x, y }; });
                         svg.appendChild(fr);
                     }
                 });
 
-            // BLE wave (App -> draggable end)
-            svg.appendChild(E('path', { class: 'wire w-ble origin-unser', d: wavePath(np('appBle'), np('bleEnd')) }));
+            // blue cable: S/STOP bottom edge -> BT-Modul top edge (straight, no blobs)
+            if (COMPS.btm) { const wa = COMPS.app, wb = COMPS.btm; svg.appendChild(E('path', { class: 'wire w-ble origin-unser', d: `M${wa.x + wa.w / 2},${wa.y + wa.h} L${wb.x + wb.w / 2},${wb.y}` })); }
+            // blue cable: Solita-Modul top edge -> BT-Modul bottom edge
+            if (COMPS.btm && COMPS.sol) { const sa = COMPS.sol, sb = COMPS.btm; svg.appendChild(E('path', { class: 'wire w-ble origin-unser', d: `M${sa.x + sa.w / 2},${sa.y} L${sb.x + sb.w / 2},${sb.y + sb.h}` })); }
 
             // components
             for (const id in COMPS) {
@@ -350,12 +383,14 @@
                     g.appendChild(E('text', { class: 'csub', x: c.x, y: c.y + 56 }, c.sub));
                 } else {
                     g.appendChild(E('rect', { class: 'comp', x: c.x, y: c.y, width: c.w, height: c.h, rx: 14 }));
-                    g.appendChild(E('text', { class: 'ctitle', x: c.x + c.w / 2, y: c.y + 26 }, c.title));
-                    g.appendChild(E('text', { class: 'csub', x: c.x + c.w / 2, y: c.y + 44 }, c.sub));
+                    { const ct = E('text', { class: 'ctitle', x: c.x + c.w / 2, y: c.y + 26 - (c.toff || 0) }, c.title); if (c.tf) ct.setAttribute('style', 'font-size:' + c.tf + 'px'); g.appendChild(ct); }
+                    g.appendChild(E('text', { class: 'csub', x: c.x + c.w / 2, y: c.y + 44 - (c.toff || 0) }, c.sub));
                     if (c.inImg) g.appendChild(E('image', { href: c.inImg, x: c.x + 12, y: c.y + 56, width: c.w - 24, height: c.h - 68, preserveAspectRatio: 'xMidYMid meet', style: 'cursor:move' }));
                 }
+                if (c.bt) btBadge(g, c.x + c.w - 16, c.y + 16, 26);
+                if (c.btBig) btBadge(g, c.x + c.w / 2, c.y + c.h / 2 + 10, 22);
                 makeDraggable(g, id, true);
-                svg.appendChild(g);
+                boxLayer.appendChild(g);
             }
 
             // nodes (terminals) + labels
@@ -384,6 +419,8 @@
             // amp annotations (follow their nodes)
             // background pill behind every label; draggable labels grab via their pill
             Array.from(svg.querySelectorAll('text')).forEach(t => {
+                if (t.getAttribute('data-nopill')) return;   // tap-marker numbers keep their own white badge
+                const _cl = t.getAttribute('class') || ''; if (_cl.indexOf('ctitle') >= 0 || _cl.indexOf('csub') >= 0) return;   // box titles/subs sit on the box — no pill
                 let bb; try { bb = t.getBBox(); } catch (e) { return; }
                 if (!bb || !bb.width) return;
                 const px = 6, py = 2, h = bb.height + 2 * py;
@@ -398,16 +435,32 @@
                 else r.setAttribute('pointer-events', 'none');
                 t.parentNode.insertBefore(r, t);
             });
+
+            // ---- draggable tap handles: drag a feed's drop-line sideways along the rail (declutter) ----
+            FEEDS.forEach(f => {
+                const P = np(f.a), railY = f.rail === 'pos' ? RAIL_POS : RAIL_GND;
+                const tx = f.tapX != null ? f.tapX : P.x, ty = f.tapY != null ? f.tapY : railY;
+                const h = E('circle', { class: 'taphandle', cx: tx, cy: ty, r: 6, fill: '#0e244e', stroke: '#f5c242', 'stroke-width': 2, 'pointer-events': 'all' });
+                if (f.grp) h.classList.add('grp-' + f.grp);
+                if (f.origin) h.classList.add('origin-' + f.origin);
+                h.addEventListener('pointerdown', e => {
+                    e.stopPropagation(); h.setPointerCapture(e.pointerId);
+                    function move(ev) { const p = svgPoint(ev); f.tapX = Math.round(p.x); f.tapY = Math.round(p.y); render(); }
+                    function up() { try { h.releasePointerCapture(e.pointerId); } catch (x) { } svg.removeEventListener('pointermove', move); svg.removeEventListener('pointerup', up); save(); }
+                    svg.addEventListener('pointermove', move); svg.addEventListener('pointerup', up);
+                });
+                svg.appendChild(h);
+            });
         }
         function amp(id, txt, x, y, grp, col) {
             freeLbl(svg, id, x, y, txt, 'amp', 'start', col, grp);
         }
         // tap-in marker: gold ring + numbered badge
         function tapMarker(g, x, y, n) {
-            g.appendChild(E('circle', { cx: x, cy: y, r: 15, fill: 'none', stroke: '#f5c242', 'stroke-width': 3 }));
-            g.appendChild(E('circle', { cx: x + 15, cy: y - 15, r: 9, fill: '#f5c242' }));
-            const t = E('text', { x: x + 15, y: y - 11, 'text-anchor': 'middle', fill: '#08142a' }, String(n));
-            t.setAttribute('font-family', 'Orbitron, sans-serif'); t.setAttribute('font-weight', '800'); t.setAttribute('font-size', '12'); t.setAttribute('pointer-events', 'none');
+            g.appendChild(E('circle', { cx: x, cy: y, r: 15, fill: 'none', stroke: '#e8eefc', 'stroke-width': 3 }));
+            g.appendChild(E('circle', { cx: x + 15, cy: y - 15, r: 9, fill: '#0e244e', stroke: '#e8eefc', 'stroke-width': 2 }));
+            const t = E('text', { x: x + 15, y: y - 11, 'text-anchor': 'middle', fill: '#e8eefc' }, String(n));
+            t.setAttribute('font-family', 'Orbitron, sans-serif'); t.setAttribute('font-weight', '800'); t.setAttribute('font-size', '12'); t.setAttribute('pointer-events', 'none'); t.setAttribute('data-nopill', '1');
             g.appendChild(t);
         }
         // the 3 tap-in points + the start-bypass (D2) — all 'unser', verschwinden im Serie-Modus
@@ -415,11 +468,18 @@
             const g = E('g', { class: 'origin-unser' });
             const A = np('msKl50'), B = np('coilIn');
             const my = Math.max(A.y, B.y) + 120;
-            g.appendChild(E('path', { d: `M${A.x},${A.y} C${A.x},${my} ${B.x},${my} ${B.x},${B.y}`, fill: 'none', stroke: '#e8b04a', 'stroke-width': 2, 'stroke-dasharray': '6 5' }));
-            const dx = (A.x + B.x) / 2, dy = 0.125 * (A.y + B.y) + 0.75 * my;
-            g.appendChild(E('path', { d: `M${dx - 8},${dy - 8} L${dx - 8},${dy + 8} L${dx + 8},${dy} Z`, fill: '#e8b04a' }));
-            g.appendChild(E('line', { x1: dx + 8, y1: dy - 8, x2: dx + 8, y2: dy + 8, stroke: '#e8b04a', 'stroke-width': 2.5 }));
-            g.appendChild(E('text', { x: dx, y: dy + 28, 'text-anchor': 'middle', class: 'amp', fill: '#e8b04a' }, 'Start-Überbrückung · D2'));
+            const defDx = (A.x + B.x) / 2, defDy = 0.125 * (A.y + B.y) + 0.75 * my;
+            const pos = LPOS['d2'] || { x: defDx, y: defDy };
+            const dx = pos.x, dy = pos.y;
+            // bypass arc bends THROUGH the (draggable) diode point
+            g.appendChild(E('path', { d: `M${A.x},${A.y} Q${A.x},${dy} ${dx},${dy} Q${B.x},${dy} ${B.x},${B.y}`, fill: 'none', stroke: '#e8b04a', 'stroke-width': 2, 'stroke-dasharray': '6 5' }));
+            // diode symbol + label = one draggable group (LPOS['d2']); position persists
+            const dg = E('g', { style: 'cursor:grab' });
+            dg.appendChild(E('path', { d: `M${dx - 8},${dy - 8} L${dx - 8},${dy + 8} L${dx + 8},${dy} Z`, fill: '#e8b04a' }));
+            dg.appendChild(E('line', { x1: dx + 8, y1: dy - 8, x2: dx + 8, y2: dy + 8, stroke: '#e8b04a', 'stroke-width': 2.5 }));
+            dg.appendChild(E('text', { x: dx, y: dy + 28, 'text-anchor': 'middle', class: 'amp', fill: '#e8b04a' }, 'Start-Überbrückung · D2'));
+            dragXY(dg, () => (LPOS['d2'] || { x: defDx, y: defDy }), (x, y) => { LPOS['d2'] = { x, y }; });
+            g.appendChild(dg);
             tapMarker(g, np('msKl50').x, np('msKl50').y, 1);
             tapMarker(g, np('k2nc').x, np('k2nc').y, 2);
             tapMarker(g, dx, dy, 3);
@@ -465,6 +525,11 @@
             b.classList.add('active');
             svg.setAttribute('class', 'mode-' + b.dataset.mode);
         }));
+        let railX = X0 - 10;  // both rails' left start; nudge with ← / → (1 px), persisted
+        document.addEventListener('keydown', e => {
+            if (e.key === 'ArrowLeft') { railX -= 1; render(); save(); e.preventDefault(); }
+            else if (e.key === 'ArrowRight') { railX += 1; render(); save(); e.preventDefault(); }
+        });
         load();
         // default label offset per terminal direction (unless a saved offset overrides it)
         const DEFOFF = { l: [-12, 4], r: [12, 4], t: [0, -13], b: [0, 17] };
