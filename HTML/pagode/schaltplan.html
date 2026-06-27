@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>230 SL Pagode · Serie + KI-Fernsteuerung (komplett)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800&display=swap" rel="stylesheet">
+    <style>
+        /* Editable schematic: every terminal is a draggable circle, every component box is draggable,
+           wires follow the nodes, positions persist in localStorage. On-brand navy/Orbitron. */
+        :root {
+            --bg: rgb(8, 20, 42);
+            --panel: rgb(14, 36, 78);
+            --gold: rgb(245, 194, 66);
+            --green: rgb(121, 158, 49);
+            --red: rgb(176, 36, 24);
+            --ink: #e8eefc;
+            --muted: #8fa0c4;
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0; background: var(--bg); color: var(--ink);
+            font-family: 'Orbitron', sans-serif; padding: 20px 14px 50px;
+            display: flex; flex-direction: column; align-items: center;
+        }
+        h1 { font-size: 20px; font-weight: 800; letter-spacing: 2px; margin: 6px 0 26px; line-height: 1.35; text-align: center; }
+        .sub { font-size: 11px; letter-spacing: 1px; color: var(--muted); margin-bottom: 14px; text-transform: uppercase; }
+        .toggles { display: flex; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; justify-content: center; }
+        .toggles button {
+            font-family: 'Orbitron', sans-serif; font-weight: 600; font-size: 12px; letter-spacing: 1px;
+            background: var(--panel); color: var(--ink); border: 1.5px solid #34507f;
+            padding: 9px 16px; border-radius: 10px; cursor: pointer; transition: filter .15s, border-color .15s;
+        }
+        .toggles button:hover { filter: brightness(1.15); }
+        .toggles button.active { border-color: var(--gold); }
+        .toggles button[data-mode="start"].active { border-color: var(--green); }
+        .toggles button[data-mode="stop"].active { border-color: var(--red); }
+        .toggles button.reset { border-color: #6a4; }
+        .hint { font-family: 'Segoe UI', Arial, sans-serif; font-size: 12px; color: var(--muted); margin-bottom: 12px; }
+        .credit { font-family: 'Segoe UI', Arial, sans-serif; font-size: 10px; color: #5a6b8a; margin-top: 10px; }
+        .credit a { color: #6f86b8; text-decoration: none; }
+        .warn { width: 100%; max-width: 1220px; margin-top: 16px; background: rgba(176, 36, 24, .10); border: 1px solid rgba(245, 194, 66, .38); border-radius: 12px; padding: 14px 18px; font-family: 'Segoe UI', Arial, sans-serif; font-size: 13px; line-height: 1.6; color: #e8eefc; }
+        .warn-h { font-family: 'Orbitron', sans-serif; font-weight: 800; font-size: 13px; letter-spacing: 1px; color: var(--gold); margin-bottom: 8px; }
+        .warn ul { margin: 0; padding-left: 18px; }
+        .warn li { margin: 3px 0; }
+        .warn b { color: #fff; }
+        .frame { width: 100%; max-width: 1220px; background: rgba(10, 26, 56, .6); border: 1px solid #26406f; border-radius: 16px; padding: 8px; }
+        svg { width: 100%; height: auto; display: block; touch-action: none; }
+
+        .comp { fill: rgba(14,36,78,.92); stroke: #f5c242; stroke-width: 2; cursor: move; }
+        .ctitle { font-family: 'Orbitron', sans-serif; font-weight: 800; fill: #f1e8cf; font-size: 15px; text-anchor: middle; pointer-events: none; }
+        .csub { font-family: 'Segoe UI', Arial, sans-serif; fill: #aebbd8; font-size: 12px; text-anchor: middle; pointer-events: none; }
+        .clbl { font-family: 'Segoe UI', Arial, sans-serif; fill: #cdd8f0; font-size: 11px; pointer-events: none; }
+        .amp  { font-family: 'Segoe UI', Arial, sans-serif; fill: #f3c542; font-size: 12px; font-weight: 700; pointer-events: none; }
+        .node { fill: #0e244e; stroke: #f5c242; stroke-width: 2; cursor: grab; }
+        .node:hover { fill: #f5c242; }
+        .node.gnd { stroke: #9fb0cf; }
+        .nlbl { font-family: 'Segoe UI', Arial, sans-serif; fill: #e8eefc; font-size: 11px; font-weight: 700; pointer-events: none; }
+        .wire { fill: none; stroke-linecap: round; stroke-linejoin: round; pointer-events: none; }
+        .w-sup { stroke: #f5c242; stroke-width: 2.5; }
+        .w-gnd { stroke: #5b6b86; stroke-width: 2.5; }
+        .w-start { stroke: #9ac24f; stroke-width: 3.5; }
+        .w-stop { stroke: #cf5145; stroke-width: 3.5; }
+        .w-fat { stroke: #e8763a; stroke-width: 5; }
+        .w-ble { stroke: #6fa8ff; stroke-width: 2.5; }
+        .w-act { stroke: #9fb0cf; stroke-width: 2; stroke-dasharray: 5 4; }
+        .sw { stroke: #e8763a; stroke-width: 5; fill: none; stroke-linecap: round; pointer-events: none; }
+        .rail { stroke-width: 4; }
+        #svg.mode-start .grp-stop { opacity: .12; }
+        #svg.mode-stop .grp-start { opacity: .12; }
+        /* Serie-Modus: unser BLE-Zeug aus, stattdessen die direkten Serien-Verbindungen */
+        .origin-serieonly { display: none; }
+        #svg.mode-serie .origin-serieonly { display: inline; }
+        #svg.mode-serie .origin-unser { display: none; }
+    </style>
+</head>
+
+<body>
+    <h1>230 SL Pagode — Komplett: Serie + KI-Fernsteuerung</h1>
+    <div class="toggles">
+        <button data-mode="serie" >Serie (ohne uns)</button>
+        <button data-mode="solita" class="active">Solita</button>
+        <button data-mode="start" >Start</button>
+        <button data-mode="stop"  >Stop</button>
+    </div>
+
+    <div class="frame">
+        <svg id="svg" viewBox="-130 -90 1350 990" xmlns="http://www.w3.org/2000/svg"></svg>
+    </div>
+
+    <div class="warn">
+        <div class="warn-h">⚠ Einklink-Punkte &amp; Sicherheit — vor dem Verdrahten (10+ Prüf-Agenten)</div>
+        <ul>
+            <li><b>① Kl.50 (START):</b> Bosch-87 <b>parallel</b> an Magnetschalter-Kl.50 — Schlüssel-Start bleibt erhalten. Keine Diode nötig, Leitung ≥ 2,5 mm².</li>
+            <li><b>② Kl.15 (STOP):</b> Kanal-2-<b>Öffner VOR den Vorwiderstand</b> in die Fahrt-Kl.15-Leitung. <b>Kl.1 + Kl.4 der Zündspule unangetastet</b> (Kl.1 NIE an Masse!).</li>
+            <li><b>③ Start-Überbrückung (D2):</b> Abgriff am Kl.50-Sammelknoten → Diode D2 → Zündspule-Kl.15 (hinter K2). Löst den Bypass↔K2-Konflikt.</li>
+            <li><b>Not-Stopp bleibt: Schlüssel auf 0.</b> App-STOP wirkt nur auf die Fahrt-Kl.15 — solange Schlüssel auf Start steht oder ein App-Start läuft, läuft die Zündung weiter.</li>
+            <li><b>App-Verriegelung Pflicht:</b> Start &amp; Stop nie gleichzeitig. STOP bricht zuerst den Startimpuls ab (Bosch fällt ab), dann öffnet K2.</li>
+            <li><b>Anlasser nur kurz:</b> Monoflop (&lt;2–3 s) + „Motor-läuft"-Sperre (D+/Drehzahl) im K1→Bosch-86-Pfad — sonst Dauer-Crank / Ritzel-Crash.</li>
+            <li><b>Zusatzteile:</b> D1 (Freilaufdiode über Bosch-Spule 86/85), D2 (Entkopplung im Bypass), RC-Snubber 0,1 µF + 100 Ω über K2 COM–NC.</li>
+            <li><b>Sicherungen:</b> Bosch-30/Kl.50 ~30–50 A (Inrush), Modul-DC+ &amp; K1·COM ~3–5 A.</li>
+            <li><b>Modul:</b> Kanal 2 als echten <b>NC</b> verifizieren (Durchgangsprüfer); <b>Verpolung</b> messen (SH-HC-08 stirbt sofort); DC− als <b>Stern-Masse</b> getrennt vom Anlasser-Rückweg führen.</li>
+            <li><b>Masseband</b> Motor↔Karosse↔Batterie dick/kurz/sauber (200–500 A). Hauptstrom läuft NUR intern im Magnetschalter, nie über Modul/Bosch.</li>
+        </ul>
+    </div>
+
+    <div class="credit">Magnetschalter-Foto: <a href="https://kohl24.de/de/Einzelteile-/-Ersatzteile/Bosch-Anlasser-EJD/00013.....-Serie/Magnetschalter-Bosch-0331302096-0331302596-ZM727-fuer-000109...-Serie-0001314...-Serie-usw.-12-Volt" target="_blank" rel="noopener">kohl24.de</a> &nbsp;·&nbsp; <a href="serie.html">→ Serien-Schaltung (ohne BLE)</a></div>
+
+    <script>
+        'use strict';
+        const RAIL_POS = 70, RAIL_GND = 712, X0 = 100, X1 = 1170;
+
+        // ---- components (draggable boxes); motor is a circle ----
+        const COMPS = {
+            app:   { x: 120, y: -88, w: 86, h: 171, img: 'app-shot.jpg', origin: 'unser' },
+            mod:   { x: 320, y: 290, w: 220, h: 215, title: 'DSD BLE-Modul', sub: 'SH-HC-08 · 2-Kanal', inImg: 'dsd-relaismodul.png', origin: 'unser' },
+            bosch: { x: 610, y: 120, w: 180, h: 150, title: 'Bosch 70 A', sub: 'Start-Relais', inImg: 'bosch-relais.png', origin: 'unser' },
+            ms:    { x: 840, y: 120, w: 230, h: 230, title: 'Magnetschalter', sub: 'Solenoid = Relais', inImg: 'magnetschalter.png' },
+            key:   { x: 320, y: 560, w: 170, h: 60, title: 'Schlüssel', sub: 'Zündschloss · ON' },
+            coil:  { x: 630, y: 540, w: 180, h: 80, title: 'Zündspule', sub: '' },
+            motor: { x: 1030, y: 420, r: 28, circle: true, title: 'M', sub: 'Anlasser-Motor', decor: 'motor' },
+            vr:    { x: 510, y: 632, w: 120, h: 48, title: 'Vorwiderstand', sub: '0,9 Ω · Serie' },
+            dist:  { x: 880, y: 560, w: 180, h: 95, title: 'Verteiler', sub: 'Unterbrecher · Kondensator' },
+            kerz:  { x: 1110, y: 575, w: 90, h: 70, title: 'Kerzen', sub: '1 – 6' },
+            mono:  { x: 320, y: 514, w: 185, h: 44, title: 'Monoflop + Sperre', sub: '<2–3 s · Motor-läuft', origin: 'unser' },
+        };
+
+        // ---- terminals: draggable circles. comp = parent box (moves together). dir = label side ----
+        const NODES = {
+            batP:   { x: 100, y: 360, label: 'Klemme 30 +', dir: 'r', col: 'gold' },
+            batM:   { x: 100, y: 404, label: 'Klemme 31 −', dir: 'r', col: 'gnd' },
+            appBle: { x: 163, y: 83, label: '', dir: 'b', comp: 'app' },
+            bleEnd: { x: 345, y: 285, label: 'BLE', dir: 'r', col: 'ble' },
+            dcp:    { x: 430, y: 290, label: 'DC+', dir: 't', comp: 'mod' },
+            dcm:    { x: 475, y: 505, label: 'DC−', dir: 'b', comp: 'mod' },
+            k1com:  { x: 540, y: 372, label: 'K1·COM', dir: 'r', comp: 'mod' },
+            k1no:   { x: 540, y: 402, label: 'K1·NO', dir: 'r', comp: 'mod' },
+            k2com:  { x: 540, y: 448, label: 'K2·COM', dir: 'r', comp: 'mod' },
+            k2nc:   { x: 540, y: 476, label: 'K2·NC', dir: 'r', comp: 'mod' },
+            b86:    { x: 615, y: 165, label: '86', dir: 'l', comp: 'bosch' },
+            b85:    { x: 615, y: 240, label: '85', dir: 'l', comp: 'bosch' },
+            b30:    { x: 745, y: 150, label: '30', dir: 't', comp: 'bosch' },
+            b87:    { x: 790, y: 205, label: '87', dir: 'r', comp: 'bosch' },
+            msKl30: { x: 840, y: 210, label: 'Klemme 30', dir: 'l', comp: 'ms', col: 'fat' },
+            msKl50: { x: 840, y: 300, label: 'Klemme 50', dir: 'l', comp: 'ms' },
+            msM:    { x: 1030, y: 350, label: 'M', dir: 'r', comp: 'ms', col: 'fat' },
+            msGnd:  { x: 930, y: 320, label: '', dir: 'b', comp: 'ms', col: 'gnd' },
+            motIn:  { x: 1030, y: 392, label: '', dir: 't', comp: 'motor', col: 'fat' },
+            motGnd: { x: 1030, y: 448, label: '', dir: 'b', comp: 'motor', col: 'gnd' },
+            keyIn:  { x: 320, y: 590, label: 'Klemme 30', dir: 'l', comp: 'key' },
+            keyOut: { x: 490, y: 588, label: 'Klemme 15', dir: 'r', comp: 'key' },
+            coilIn: { x: 630, y: 560, label: 'Kl.15 +', dir: 'l', comp: 'coil' },
+            coilGnd:{ x: 715, y: 620, label: 'Kl.1 → Unterbrecher', dir: 'b', comp: 'coil' },
+            coilHV: { x: 810, y: 560, label: 'Kl.4 → Verteiler (HV)', dir: 'r', comp: 'coil' },
+            keyStart:{ x: 490, y: 566, label: 'Kl.50 (Start)', dir: 'r', comp: 'key' },
+            vwIn:   { x: 510, y: 656, label: 'Kl.15', dir: 'l', comp: 'vr' },
+            vwOut:  { x: 630, y: 656, label: 'Kl.15a', dir: 'r', comp: 'vr' },
+            distHV: { x: 880, y: 588, label: 'HV', dir: 'l', comp: 'dist' },
+            distUb: { x: 880, y: 615, label: 'Kl.1', dir: 'l', comp: 'dist' },
+            distOut:{ x: 1060, y: 600, label: '→', dir: 'r', comp: 'dist' },
+            distGnd:{ x: 965, y: 655, label: '', dir: 'b', comp: 'dist' },
+            kerzIn: { x: 1110, y: 600, label: '', dir: 'l', comp: 'kerz' },
+            kerzGnd:{ x: 1155, y: 645, label: '', dir: 'b', comp: 'kerz' },
+            monoIn: { x: 320, y: 536, label: 'von K1', dir: 'l', comp: 'mono' },
+            monoOut:{ x: 505, y: 536, label: 'zu 86', dir: 'r', comp: 'mono' },
+        };
+
+        // ---- wires between nodes (bend: hv = horizontal first, vh = vertical first) ----
+        const WIRES = [
+            // START (unser): K1 -> Monoflop -> Bosch -> Kl.50
+            { a: 'k1no', b: 'monoIn', cls: 'w-start', grp: 'start', bend: 'hv', origin: 'unser' },
+            { a: 'monoOut', b: 'b86', cls: 'w-start', grp: 'start', bend: 'vh', origin: 'unser' },
+            { a: 'b87', b: 'msKl50', cls: 'w-start', grp: 'start', bend: 'vh', origin: 'unser' },
+            // START (Serie): Schlüssel-Kl.50 parallel an Magnetschalter-Kl.50  [Einklink 1]
+            { a: 'keyStart', b: 'msKl50', cls: 'w-start', grp: 'start', bend: 'hv' },
+            // Hauptstrom (Serie): Magnetschalter -> Anlassermotor
+            { a: 'msM', b: 'motIn', cls: 'w-fat', grp: 'start', bend: 'vh' },
+            // STOP [Einklink 2]: Kl.15 -> K2-Öffner -> Vorwiderstand -> Zündspule (unser)
+            { a: 'keyOut', b: 'k2com', cls: 'w-stop', grp: 'stop', bend: 'hv', origin: 'unser' },
+            { a: 'k2nc', b: 'vwIn', cls: 'w-stop', grp: 'stop', bend: 'hv', origin: 'unser' },
+            // Serie-direkt (nur im Serie-Modus): Kl.15 direkt zum Vorwiderstand, ohne K2
+            { a: 'keyOut', b: 'vwIn', cls: 'w-stop', grp: 'stop', bend: 'hv', origin: 'serieonly' },
+            { a: 'vwOut', b: 'coilIn', cls: 'w-stop', grp: 'stop', bend: 'hv' },
+            // Zündung (Serie, unangetastet): Spule -> Verteiler -> Kerzen
+            { a: 'coilGnd', b: 'distUb', cls: 'w-stop', grp: 'stop', bend: 'vh' },
+            { a: 'coilHV', b: 'distHV', cls: 'w-ble', grp: 'stop', bend: 'hv' },
+            { a: 'distOut', b: 'kerzIn', cls: 'w-ble', grp: 'stop', bend: 'hv' },
+        ];
+
+        // ---- rail feeds (node -> +12V or Masse rail) ----
+        const FEEDS = [
+            { a: 'batP', rail: 'pos', cls: 'rail w-sup' },
+            { a: 'batM', rail: 'gnd', cls: 'rail w-gnd' },
+            { a: 'dcp', rail: 'pos', cls: 'w-sup', fuse: true, origin: 'unser' },
+            { a: 'dcm', rail: 'gnd', cls: 'w-gnd', origin: 'unser' },
+            { a: 'k1com', rail: 'pos', cls: 'w-sup', tapX: 585, fuse: true, grp: 'start', origin: 'unser' },
+            { a: 'b30', rail: 'pos', cls: 'w-sup', tapX: 745, fuse: true, grp: 'start', origin: 'unser' },
+            { a: 'b85', rail: 'gnd', cls: 'w-gnd', grp: 'start', origin: 'unser' },
+            { a: 'msKl30', rail: 'pos', cls: 'w-fat', tapX: 815, grp: 'start' },
+            { a: 'msGnd', rail: 'gnd', cls: 'w-gnd', grp: 'start' },
+            { a: 'motGnd', rail: 'gnd', cls: 'w-fat', grp: 'start' },
+            { a: 'keyIn', rail: 'pos', cls: 'w-sup', tapX: 150, fuse: true, grp: 'stop' },
+            { a: 'distGnd', rail: 'gnd', cls: 'w-gnd', grp: 'stop' },
+            { a: 'kerzGnd', rail: 'gnd', cls: 'w-gnd', grp: 'stop' },
+        ];
+
+        let LPOS = {}; // free-label position overrides (rail + amp labels)
+
+        // ---- persistence ----
+        const LSKEY = 'pagode-sp-pos-v2';
+        function load() {
+            try {
+                const p = JSON.parse(localStorage.getItem(LSKEY) || '{}');
+                for (const id in (p.comps || {})) if (COMPS[id]) Object.assign(COMPS[id], p.comps[id]);
+                for (const id in (p.nodes || {})) if (NODES[id]) Object.assign(NODES[id], p.nodes[id]);
+                LPOS = p.labels || {};
+            } catch (e) { /* ignore */ }
+        }
+        function save() {
+            const comps = {}, nodes = {};
+            for (const id in COMPS) comps[id] = { x: COMPS[id].x, y: COMPS[id].y };
+            for (const id in NODES) nodes[id] = { x: NODES[id].x, y: NODES[id].y, lx: NODES[id].lx, ly: NODES[id].ly };
+            localStorage.setItem(LSKEY, JSON.stringify({ comps, nodes, labels: LPOS }));
+        }
+
+        // ---- SVG helpers ----
+        const SVGNS = 'http://www.w3.org/2000/svg';
+        const svg = document.getElementById('svg');
+        function E(tag, attrs, txt) {
+            const e = document.createElementNS(SVGNS, tag);
+            for (const k in attrs) e.setAttribute(k, attrs[k]);
+            if (txt != null) e.textContent = txt;
+            return e;
+        }
+        function np(id) { return NODES[id]; }
+        function wirePath(a, b, bend) {
+            const A = np(a), B = np(b);
+            if (bend === 'curve') return `M${A.x},${A.y} C${A.x + 25},${A.y + 100} ${B.x - 20},${B.y - 80} ${B.x},${B.y}`;
+            if (bend === 'vh') return `M${A.x},${A.y} V${B.y} H${B.x}`;
+            return `M${A.x},${A.y} H${B.x} V${B.y}`;
+        }
+        // sine wave between two points (radio/BLE link); amplitude tapers to 0 at both ends
+        function wavePath(A, B) {
+            const dx = B.x - A.x, dy = B.y - A.y, L = Math.hypot(dx, dy) || 1;
+            const ux = dx / L, uy = dy / L, px = -uy, py = ux;
+            const amp = 7, cycles = Math.max(2, Math.round(L / 16)), n = Math.max(16, Math.round(L / 4));
+            let d = '';
+            for (let i = 0; i <= n; i++) {
+                const t = i / n, s = t * L, off = amp * Math.sin(t * Math.PI * cycles);
+                d += (i === 0 ? 'M' : 'L') + (A.x + ux * s + px * off).toFixed(1) + ',' + (A.y + uy * s + py * off).toFixed(1) + ' ';
+            }
+            return d;
+        }
+        function feedPath(f) {
+            const P = np(f.a), railY = f.rail === 'pos' ? RAIL_POS : RAIL_GND;
+            if (f.tapX != null) return `M${P.x},${P.y} H${f.tapX} V${railY}`;
+            return `M${P.x},${P.y} V${railY}`;
+        }
+
+        // ---- component decor (drawn relative to comp.x/y) ----
+        function decor(id, c, g) {
+            const x = c.x, y = c.y;
+            if (c.decor === 'ms') {
+                // open main contact (Klemme 30 -> M) + coil + mechanical coupling
+                g.appendChild(E('path', { class: 'wire w-fat', d: `M${x},${y + 90} H${x + 45}` }));
+                g.appendChild(E('circle', { cx: x + 45, cy: y + 90, r: 4, fill: '#e8763a' }));
+                g.appendChild(E('path', { class: 'sw', d: `M${x + 45},${y + 90} L${x + 110},${y + 68}` }));
+                g.appendChild(E('circle', { cx: x + 145, cy: y + 90, r: 4, fill: '#e8763a' }));
+                g.appendChild(E('path', { class: 'wire w-fat', d: `M${x + 145},${y + 90} H${x + 190} V${y + 230}` }));
+                g.appendChild(E('text', { class: 'clbl', x: x + 92, y: y + 132, 'text-anchor': 'middle', fill: '#e89a6a' }, 'Hauptkontakt — offen'));
+                g.appendChild(E('rect', { x: x + 32, y: y + 168, width: 116, height: 30, rx: 6, fill: 'none', stroke: '#9ac24f', 'stroke-width': 2 }));
+                g.appendChild(E('text', { class: 'clbl', x: x + 90, y: y + 187, 'text-anchor': 'middle', fill: '#aebbd8' }, 'Spule · Einzug+Halte'));
+                g.appendChild(E('path', { class: 'wire w-start', d: `M${x},${y + 180} H${x + 32}` }));
+                g.appendChild(E('path', { class: 'w-act', d: `M${x + 90},${y + 168} L${x + 72},${y + 78}` }));
+                g.appendChild(E('text', { class: 'clbl', x: x + 96, y: y + 224, fill: '#aebbd8' }, '→ Klemme 31 (Gehäuse-Masse)'));
+            } else if (c.decor === 'bosch') {
+                g.appendChild(E('path', { d: `M${x + 50},${y + 50} q-13,12 0,24 q13,12 0,24`, fill: 'none', stroke: '#9ac24f', 'stroke-width': 3 }));
+                g.appendChild(E('path', { class: 'wire w-start', d: `M${x + 5},${y + 45} H${x + 50}` }));
+                g.appendChild(E('path', { class: 'wire w-gnd', d: `M${x + 50},${y + 98} H${x + 5}` }));
+                g.appendChild(E('path', { class: 'sw', d: `M${x + 135},${y + 30} L${x + 165},${y + 58}` }));
+                g.appendChild(E('path', { class: 'wire w-start', d: `M${x + 165},${y + 58} L${x + 180},${y + 85}` }));
+                g.appendChild(E('text', { class: 'clbl', x: x + 90, y: y + 120, 'text-anchor': 'middle', fill: '#aebbd8' }, 'Spule  ·  Kontakt'));
+            }
+        }
+
+        // ---- generic drag for label positions (offset for node labels, absolute for free labels) ----
+        function dragXY(el, get, set) {
+            el.addEventListener('pointerdown', e => {
+                e.stopPropagation(); el.setPointerCapture(e.pointerId);
+                const s = svgPoint(e), o = get();
+                function move(ev) { const p = svgPoint(ev); set(o.x + (p.x - s.x), o.y + (p.y - s.y)); render(); }
+                function up() { try { el.releasePointerCapture(e.pointerId); } catch (x) { } svg.removeEventListener('pointermove', move); svg.removeEventListener('pointerup', up); save(); }
+                svg.addEventListener('pointermove', move); svg.addEventListener('pointerup', up);
+            });
+        }
+        // free-standing label (rail / amp): absolute position with override, draggable
+        function freeLbl(parent, id, defx, defy, txt, cls, anchor, fill, grp) {
+            const pos = LPOS[id] || { x: defx, y: defy };
+            const t = E('text', { x: pos.x.toFixed(1), y: pos.y.toFixed(1), 'text-anchor': anchor || 'start' }, txt);
+            t.setAttribute('class', cls + (grp ? ' grp-' + grp : ''));
+            if (fill) t.setAttribute('fill', fill);
+            t.__drag = { get: () => LPOS[id] || { x: defx, y: defy }, set: (x, y) => { LPOS[id] = { x, y }; } };
+            parent.appendChild(t);
+            return t;
+        }
+
+        // ---- render ----
+        let dragWrap;
+        function render() {
+            svg.innerHTML = '';
+            // rails
+            svg.appendChild(E('line', { class: 'rail', x1: X0, y1: RAIL_POS, x2: X1, y2: RAIL_POS, stroke: '#f5c242' }));
+            freeLbl(svg, 'railPos', 104, 60, '+12 V · Klemme 30 (Dauerplus)', 'clbl', 'start', '#f5c242', null);
+            svg.appendChild(E('line', { class: 'rail', x1: X0, y1: RAIL_GND, x2: X1, y2: RAIL_GND, stroke: '#5b6b86' }));
+            freeLbl(svg, 'railGnd', 104, 732, 'Masse · Klemme 31', 'clbl', 'start', '#9fb0cf', null);
+
+            // feeds + wires, grouped for the start/stop toggle
+            [...FEEDS.map(f => ({ ...f, d: feedPath(f), w: true })), ...WIRES.map(w => ({ ...w, d: wirePath(w.a, w.b, w.bend) }))]
+                .forEach(item => {
+                    const p = E('path', { class: 'wire ' + item.cls, d: item.d });
+                    if (item.grp) p.classList.add('grp-' + item.grp);
+                    if (item.origin) p.classList.add('origin-' + item.origin);
+                    if (item.cls.indexOf('rail') >= 0) p.classList.add('rail');
+                    svg.appendChild(p);
+                    if (item.fuse) {
+                        const P = np(item.a); const fy = (item.rail === 'pos' ? RAIL_POS : RAIL_GND);
+                        const fx = item.tapX != null ? item.tapX : P.x;
+                        const my = (P.y + fy) / 2;
+                        const fr = E('rect', { x: fx - 9, y: my - 16, width: 18, height: 32, rx: 4, fill: 'none', stroke: '#f5c242', 'stroke-width': 2 });
+                        if (item.origin) fr.classList.add('origin-' + item.origin);
+                        svg.appendChild(fr);
+                    }
+                });
+
+            // BLE wave (App -> draggable end)
+            svg.appendChild(E('path', { class: 'wire w-ble origin-unser', d: wavePath(np('appBle'), np('bleEnd')) }));
+
+            // components
+            for (const id in COMPS) {
+                const c = COMPS[id];
+                const g = E('g', { 'data-comp': id });
+                if (c.grp) g.classList.add('grp-' + c.grp);
+                if (c.origin) g.classList.add('origin-' + c.origin);
+                if (c.img) {
+                    g.appendChild(E('image', { href: c.img, x: c.x, y: c.y, width: c.w, height: c.h, preserveAspectRatio: 'xMidYMid meet', style: 'cursor:move' }));
+                } else if (c.circle) {
+                    g.appendChild(E('circle', { class: 'comp', cx: c.x, cy: c.y, r: c.r, stroke: '#e8763a' }));
+                    g.appendChild(E('text', { class: 'ctitle', x: c.x, y: c.y + 6, fill: '#e8763a', 'font-size': 18 }, c.title));
+                    g.appendChild(E('text', { class: 'csub', x: c.x, y: c.y + 56 }, c.sub));
+                } else {
+                    g.appendChild(E('rect', { class: 'comp', x: c.x, y: c.y, width: c.w, height: c.h, rx: 14 }));
+                    g.appendChild(E('text', { class: 'ctitle', x: c.x + c.w / 2, y: c.y + 26 }, c.title));
+                    g.appendChild(E('text', { class: 'csub', x: c.x + c.w / 2, y: c.y + 44 }, c.sub));
+                    if (c.inImg) g.appendChild(E('image', { href: c.inImg, x: c.x + 12, y: c.y + 56, width: c.w - 24, height: c.h - 68, preserveAspectRatio: 'xMidYMid meet', style: 'cursor:move' }));
+                }
+                makeDraggable(g, id, true);
+                svg.appendChild(g);
+            }
+
+            // nodes (terminals) + labels
+            for (const id in NODES) {
+                const n = NODES[id];
+                const g = E('g', {});
+                const comp = n.comp && COMPS[n.comp];
+                if (comp && comp.grp) g.classList.add('grp-' + comp.grp);
+                if ((comp && comp.origin === 'unser') || n.col === 'ble') g.classList.add('origin-unser');
+                const c = E('circle', { class: 'node' + (n.col === 'gnd' ? ' gnd' : ''), cx: n.x, cy: n.y, r: 6, 'data-node': id });
+                if (n.col === 'fat') c.setAttribute('stroke', '#e8763a');
+                else if (n.col === 'ble') c.setAttribute('stroke', '#6fa8ff');
+                g.appendChild(c);
+                if (n.label) {
+                    const anc = ({ l: 'end', r: 'start', t: 'middle', b: 'middle' })[n.dir];
+                    const tl = E('text', { class: 'nlbl', x: (n.x + n.lx).toFixed(1), y: (n.y + n.ly).toFixed(1), 'text-anchor': anc }, n.label);
+                    tl.__drag = { get: () => ({ x: n.lx, y: n.ly }), set: (x, y) => { n.lx = x; n.ly = y; } };
+                    g.appendChild(tl);
+                }
+                makeDraggable(c, id, false);
+                svg.appendChild(g);
+            }
+
+            extras();
+
+            // amp annotations (follow their nodes)
+            // background pill behind every label; draggable labels grab via their pill
+            Array.from(svg.querySelectorAll('text')).forEach(t => {
+                let bb; try { bb = t.getBBox(); } catch (e) { return; }
+                if (!bb || !bb.width) return;
+                const px = 6, py = 2, h = bb.height + 2 * py;
+                const r = E('rect', {
+                    x: (bb.x - px).toFixed(1), y: (bb.y - py).toFixed(1),
+                    width: (bb.width + 2 * px).toFixed(1), height: h.toFixed(1), rx: (h / 2).toFixed(1),
+                    fill: 'rgba(8,20,42,.82)', stroke: 'rgba(130,160,210,.22)', 'stroke-width': 1
+                });
+                const gm = (t.getAttribute('class') || '').match(/grp-\w+/);
+                if (gm) r.setAttribute('class', gm[0]);
+                if (t.__drag) { r.setAttribute('cursor', 'grab'); dragXY(r, t.__drag.get, t.__drag.set); }
+                else r.setAttribute('pointer-events', 'none');
+                t.parentNode.insertBefore(r, t);
+            });
+        }
+        function amp(id, txt, x, y, grp, col) {
+            freeLbl(svg, id, x, y, txt, 'amp', 'start', col, grp);
+        }
+        // tap-in marker: gold ring + numbered badge
+        function tapMarker(g, x, y, n) {
+            g.appendChild(E('circle', { cx: x, cy: y, r: 15, fill: 'none', stroke: '#f5c242', 'stroke-width': 3 }));
+            g.appendChild(E('circle', { cx: x + 15, cy: y - 15, r: 9, fill: '#f5c242' }));
+            const t = E('text', { x: x + 15, y: y - 11, 'text-anchor': 'middle', fill: '#08142a' }, String(n));
+            t.setAttribute('font-family', 'Orbitron, sans-serif'); t.setAttribute('font-weight', '800'); t.setAttribute('font-size', '12'); t.setAttribute('pointer-events', 'none');
+            g.appendChild(t);
+        }
+        // the 3 tap-in points + the start-bypass (D2) — all 'unser', verschwinden im Serie-Modus
+        function extras() {
+            const g = E('g', { class: 'origin-unser' });
+            const A = np('msKl50'), B = np('coilIn');
+            const my = Math.max(A.y, B.y) + 120;
+            g.appendChild(E('path', { d: `M${A.x},${A.y} C${A.x},${my} ${B.x},${my} ${B.x},${B.y}`, fill: 'none', stroke: '#e8b04a', 'stroke-width': 2, 'stroke-dasharray': '6 5' }));
+            const dx = (A.x + B.x) / 2, dy = 0.125 * (A.y + B.y) + 0.75 * my;
+            g.appendChild(E('path', { d: `M${dx - 8},${dy - 8} L${dx - 8},${dy + 8} L${dx + 8},${dy} Z`, fill: '#e8b04a' }));
+            g.appendChild(E('line', { x1: dx + 8, y1: dy - 8, x2: dx + 8, y2: dy + 8, stroke: '#e8b04a', 'stroke-width': 2.5 }));
+            g.appendChild(E('text', { x: dx, y: dy + 28, 'text-anchor': 'middle', class: 'amp', fill: '#e8b04a' }, 'Start-Überbrückung · D2'));
+            tapMarker(g, np('msKl50').x, np('msKl50').y, 1);
+            tapMarker(g, np('k2nc').x, np('k2nc').y, 2);
+            tapMarker(g, dx, dy, 3);
+            svg.appendChild(g);
+        }
+
+        // ---- dragging ----
+        function svgPoint(evt) {
+            const pt = svg.createSVGPoint(); pt.x = evt.clientX; pt.y = evt.clientY;
+            return pt.matrixTransform(svg.getScreenCTM().inverse());
+        }
+        function makeDraggable(el, id, isComp) {
+            el.addEventListener('pointerdown', (e) => {
+                e.stopPropagation();
+                el.setPointerCapture(e.pointerId);
+                const start = svgPoint(e);
+                const obj = isComp ? COMPS[id] : NODES[id];
+                const ox = obj.x, oy = obj.y;
+                // child nodes that move with a component
+                const kids = isComp ? Object.keys(NODES).filter(k => NODES[k].comp === id) : [];
+                const kidOrig = kids.map(k => ({ k, x: NODES[k].x, y: NODES[k].y }));
+                function move(ev) {
+                    const p = svgPoint(ev);
+                    const dx = p.x - start.x, dy = p.y - start.y;
+                    obj.x = ox + dx; obj.y = oy + dy;
+                    kidOrig.forEach(o => { NODES[o.k].x = o.x + dx; NODES[o.k].y = o.y + dy; });
+                    render();
+                }
+                function up(ev) {
+                    el.releasePointerCapture(e.pointerId);
+                    svg.removeEventListener('pointermove', move);
+                    svg.removeEventListener('pointerup', up);
+                    save();
+                }
+                svg.addEventListener('pointermove', move);
+                svg.addEventListener('pointerup', up);
+            });
+        }
+
+        // ---- mode toggle + reset ----
+        document.querySelectorAll('.toggles button[data-mode]').forEach(b => b.addEventListener('click', () => {
+            document.querySelectorAll('.toggles button[data-mode]').forEach(x => x.classList.remove('active'));
+            b.classList.add('active');
+            svg.setAttribute('class', 'mode-' + b.dataset.mode);
+        }));
+        load();
+        // default label offset per terminal direction (unless a saved offset overrides it)
+        const DEFOFF = { l: [-12, 4], r: [12, 4], t: [0, -13], b: [0, 17] };
+        for (const id in NODES) { const n = NODES[id]; if (n.label) { const d = DEFOFF[n.dir] || [12, 4]; if (n.lx == null) n.lx = d[0]; if (n.ly == null) n.ly = d[1]; } }
+        svg.setAttribute('class', 'mode-solita');
+        render();
+        // re-measure once the Orbitron webfont is loaded, so pills use the real font metrics
+        if (document.fonts && document.fonts.ready) document.fonts.ready.then(render);
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>230 SL Pagode · Serien-Schaltung (ohne BLE)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg: rgb(8,20,42); --gold: rgb(245,194,66); --ink:#e8eefc; --muted:#8fa0c4; }
+        * { box-sizing: border-box; }
+        body { margin: 0; background: var(--bg); color: var(--ink); font-family: 'Orbitron', sans-serif; padding: 20px 14px 50px; display: flex; flex-direction: column; align-items: center; }
+        h1 { font-size: 20px; font-weight: 800; letter-spacing: 2px; margin: 6px 0 6px; line-height: 1.35; text-align: center; }
+        .sub { font-size: 11px; letter-spacing: 1px; color: var(--muted); margin-bottom: 14px; text-transform: uppercase; text-align: center; }
+        .sub a { color: #6f86b8; }
+        .frame { width: 100%; max-width: 1260px; background: rgba(10,26,56,.6); border: 1px solid #26406f; border-radius: 16px; padding: 8px; }
+        svg { width: 100%; height: auto; display: block; }
+        .note { width: 100%; max-width: 1260px; margin-top: 16px; font-family: 'Segoe UI', Arial, sans-serif; font-size: 13px; line-height: 1.7; color: #cdd8f0; }
+        .note h2 { font-family: 'Orbitron', sans-serif; font-size: 13px; letter-spacing: 1px; color: var(--gold); margin: 12px 0 6px; }
+        .note b { color: #fff; }
+    </style>
+</head>
+
+<body>
+    <h1>230 SL Pagode — Serien-Schaltung (ohne unser BLE-Zeug)</h1>
+    <div class="sub">Original W113 · Start &amp; Zündung · <a href="schaltplan.html">→ zur BLE-Fernsteuerung</a></div>
+
+    <div class="frame">
+        <svg viewBox="0 0 1260 800" xmlns="http://www.w3.org/2000/svg">
+            <style>
+                .comp { fill: rgba(14,36,78,.92); stroke: #f5c242; stroke-width: 2; }
+                .t { font-family: 'Orbitron', sans-serif; font-weight: 800; fill: #f1e8cf; font-size: 14px; text-anchor: middle; }
+                .s { font-family: 'Segoe UI', Arial, sans-serif; fill: #aebbd8; font-size: 11px; text-anchor: middle; }
+                .l { font-family: 'Segoe UI', Arial, sans-serif; fill: #cdd8f0; font-size: 11px; }
+                .lc { font-family: 'Segoe UI', Arial, sans-serif; fill: #cdd8f0; font-size: 11px; text-anchor: middle; }
+                .pin { fill: #f5c242; }
+                .w { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+                .sup { stroke: #f5c242; stroke-width: 2.5; }
+                .gnd { stroke: #5b6b86; stroke-width: 2.5; }
+                .start { stroke: #9ac24f; stroke-width: 3; }
+                .ign { stroke: #cf5145; stroke-width: 3; }
+                .fat { stroke: #e8763a; stroke-width: 5; }
+                .hv { stroke: #6fa8ff; stroke-width: 2.5; }
+                .byp { stroke: #e8b04a; stroke-width: 2; stroke-dasharray: 5 5; }
+                .sw { stroke: #e8763a; stroke-width: 5; fill: none; stroke-linecap: round; }
+                .rail { stroke-width: 4; }
+            </style>
+
+            <!-- rails -->
+            <line class="w rail" x1="100" y1="80" x2="1180" y2="80" stroke="#f5c242"/>
+            <text class="l" x="104" y="70" fill="#f5c242">+12 V · Klemme 30 (Dauerplus)</text>
+            <line class="w rail" x1="100" y1="740" x2="1180" y2="740" stroke="#5b6b86"/>
+            <text class="l" x="104" y="762" fill="#9fb0cf">Masse · Klemme 31</text>
+
+            <!-- battery -->
+            <line class="w rail" x1="100" y1="80" x2="100" y2="360" stroke="#f5c242"/>
+            <circle cx="100" cy="372" r="13" fill="rgba(14,36,78,.92)" stroke="#f5c242" stroke-width="2.5"/>
+            <text x="100" y="378" text-anchor="middle" fill="#f5c242" font-family="Arial" font-size="16" font-weight="700">+</text>
+            <circle cx="100" cy="410" r="13" fill="rgba(14,36,78,.92)" stroke="#9fb0cf" stroke-width="2.5"/>
+            <text x="100" y="416" text-anchor="middle" fill="#9fb0cf" font-family="Arial" font-size="16" font-weight="700">−</text>
+            <line class="w rail" x1="100" y1="423" x2="100" y2="740" stroke="#5b6b86"/>
+            <text class="l" x="40" y="395">12 V</text>
+
+            <!-- ============ Zündschloss ============ -->
+            <rect class="comp" x="180" y="300" width="200" height="170" rx="12"/>
+            <text class="t" x="280" y="330">Zünd-Anlaß-Schalter</text>
+            <text class="s" x="280" y="350">Stellungen: 0 · Fahrt · Start</text>
+            <text class="lc" x="280" y="392" fill="#9ac24f">Start: Kl.30 → Kl.50</text>
+            <text class="lc" x="280" y="412" fill="#cf5145">Fahrt: Kl.30 → Kl.15</text>
+            <circle class="pin" cx="180" cy="335" r="4"/><text class="l" x="150" y="330" text-anchor="end">Kl.30</text>
+            <circle class="pin" cx="380" cy="385" r="4"/><text class="l" x="388" y="389">Kl.15 →</text>
+            <circle class="pin" cx="380" cy="430" r="4"/><text class="l" x="388" y="434">Kl.50 →</text>
+            <line class="w sup" x1="210" y1="80" x2="210" y2="335"/><line class="w sup" x1="210" y1="335" x2="180" y2="335"/>
+
+            <!-- ============ Anlasser-Magnetschalter ============ -->
+            <rect class="comp" x="470" y="110" width="220" height="180" rx="12"/>
+            <text class="t" x="580" y="138">Anlasser-Magnetschalter</text>
+            <text class="s" x="580" y="156">Solenoid (Relais am Anlasser)</text>
+            <!-- Kl.30 in (fat) -->
+            <circle class="pin" cx="470" cy="180" r="4"/><text class="l" x="478" y="175">Kl.30</text>
+            <!-- open main contact -->
+            <line class="w fat" x1="470" y1="180" x2="520" y2="180"/>
+            <circle cx="520" cy="180" r="4" fill="#e8763a"/>
+            <path class="sw" d="M520,180 L575,160"/>
+            <circle cx="605" cy="180" r="4" fill="#e8763a"/>
+            <text class="lc" x="560" y="208" fill="#e89a6a">Hauptkontakt (offen)</text>
+            <line class="w fat" x1="605" y1="180" x2="690" y2="180"/>
+            <!-- Kl.50 trigger + coil -->
+            <circle class="pin" cx="470" cy="250" r="4"/><text class="l" x="478" y="245">Kl.50</text>
+            <rect x="510" y="234" width="120" height="30" rx="6" fill="none" stroke="#9ac24f" stroke-width="2"/>
+            <text class="lc" x="570" y="253" fill="#aebbd8" font-size="10">Solenoid-Spule</text>
+            <line class="w start" x1="470" y1="250" x2="510" y2="250"/>
+            <path class="w byp" d="M570,234 L548,192" stroke="#9fb0cf"/>
+            <line class="w gnd" x1="625" y1="264" x2="625" y2="740"/>
+            <text class="l" x="632" y="300">Gehäuse → Kl.31</text>
+            <!-- M out -->
+            <circle class="pin" cx="690" cy="180" r="4"/><text class="l" x="678" y="170" text-anchor="end">M</text>
+
+            <!-- battery fat to Kl.30 -->
+            <line class="w fat" x1="440" y1="80" x2="440" y2="180"/><line class="w fat" x1="440" y1="180" x2="470" y2="180"/>
+            <text class="l" x="380" y="120" fill="#e8763a">200–500 A</text>
+
+            <!-- Zündschloss Kl.50 -> MS Kl.50 -->
+            <path class="w start" d="M380,430 H430 V250 H470"/>
+
+            <!-- ============ Anlassermotor ============ -->
+            <circle cx="865" cy="180" r="28" fill="rgba(14,36,78,.92)" stroke="#e8763a" stroke-width="3"/>
+            <text class="lc" x="865" y="186" fill="#e8763a" font-size="18">M</text>
+            <text class="lc" x="865" y="232" fill="#cdd8f0">Anlasser-Motor</text>
+            <line class="w fat" x1="690" y1="180" x2="837" y2="180"/>
+            <line class="w fat" x1="865" y1="208" x2="865" y2="740"/>
+
+            <!-- ============ Vorwiderstand ============ -->
+            <rect class="comp" x="470" y="478" width="150" height="56" rx="10"/>
+            <text class="t" x="545" y="502" font-size="12">Vorwiderstand</text>
+            <text class="s" x="545" y="520">0,9 Ω (keramisch)</text>
+            <circle class="pin" cx="470" cy="506" r="4"/><text class="l" x="440" y="501" text-anchor="end">Kl.15</text>
+            <circle class="pin" cx="620" cy="506" r="4"/><text class="l" x="628" y="501">Kl.15a</text>
+            <!-- Zündschloss Kl.15 -> Vorwiderstand -->
+            <path class="w ign" d="M380,385 H425 V506 H470"/>
+
+            <!-- ============ Zündspule ============ -->
+            <rect class="comp" x="670" y="460" width="160" height="100" rx="12"/>
+            <text class="t" x="750" y="492">Zündspule</text>
+            <text class="s" x="750" y="510">12 V · Bosch</text>
+            <circle class="pin" cx="670" cy="510" r="4"/><text class="l" x="678" y="505">Kl.15 +</text>
+            <circle class="pin" cx="750" cy="560" r="4"/><text class="lc" x="750" y="578">Kl.1 −</text>
+            <circle class="pin" cx="830" cy="510" r="4"/><text class="l" x="838" y="505">Kl.4 HV</text>
+            <!-- Vorwiderstand -> Spule Kl.15 -->
+            <path class="w ign" d="M620,506 H645 V510 H670"/>
+            <!-- Start-Überbrückung (bypass) -->
+            <path class="w byp" d="M388,430 V612 H650 V510 H670"/>
+            <text class="l" x="392" y="632" fill="#e8b04a">Start-Überbrückung (Vorwiderstand überbrückt)</text>
+
+            <!-- ============ Verteiler ============ -->
+            <rect class="comp" x="900" y="455" width="180" height="120" rx="12"/>
+            <text class="t" x="990" y="485">Verteiler</text>
+            <text class="s" x="990" y="503">Unterbrecher · Kondensator</text>
+            <circle class="pin" cx="900" cy="510" r="4"/>
+            <circle class="pin" cx="900" cy="560" r="4"/>
+            <!-- Spule Kl.4 -> Verteiler (HV) -->
+            <line class="w hv" x1="830" y1="510" x2="900" y2="510"/>
+            <!-- Spule Kl.1 -> Verteiler Unterbrecher -->
+            <line class="w ign" x1="750" y1="560" x2="900" y2="560"/>
+            <!-- Unterbrecher switch to Masse -->
+            <path class="sw" d="M960,560 L1010,540" stroke="#cf5145" stroke-width="3"/>
+            <text class="lc" x="990" y="595" fill="#cf5145">Unterbrecher</text>
+            <line class="w gnd" x1="990" y1="575" x2="990" y2="740"/>
+            <!-- Verteiler -> Kerzen -->
+            <line class="w hv" x1="1080" y1="510" x2="1120" y2="510"/>
+
+            <!-- ============ Zündkerzen ============ -->
+            <rect class="comp" x="1120" y="475" width="80" height="70" rx="10"/>
+            <text class="lc" x="1160" y="505" fill="#f1e8cf" font-family="Orbitron" font-weight="800" font-size="12">Kerzen</text>
+            <text class="lc" x="1160" y="523" fill="#aebbd8" font-size="11">1 – 6</text>
+            <line class="w gnd" x1="1160" y1="545" x2="1160" y2="740"/>
+
+            <!-- legend -->
+            <g transform="translate(0,690)">
+                <line class="w sup"   x1="110" y1="0"  x2="150" y2="0"/>  <text class="l" x="158" y="4">+12 V / Steuerstrom</text>
+                <line class="w start" x1="330" y1="0"  x2="370" y2="0"/>  <text class="l" x="378" y="4">Start-Trigger (Kl.50)</text>
+                <line class="w fat"   x1="560" y1="0"  x2="600" y2="0"/>  <text class="l" x="608" y="4">Anlasser-Hauptstrom 200–500 A</text>
+                <line class="w ign"   x1="110" y1="22" x2="150" y2="22"/> <text class="l" x="158" y="26">Zündung (Primär)</text>
+                <line class="w hv"    x1="330" y1="22" x2="370" y2="22"/> <text class="l" x="378" y="26">Hochspannung</text>
+                <line class="w byp"   x1="560" y1="22" x2="600" y2="22"/> <text class="l" x="608" y="26">Start-Überbrückung</text>
+                <line class="w gnd"   x1="820" y1="22" x2="860" y2="22"/> <text class="l" x="868" y="26">Masse (Kl.31)</text>
+            </g>
+        </svg>
+    </div>
+
+    <div class="note">
+        <h2>So funktioniert die Serie (ohne unser Zeug)</h2>
+        <b>Start:</b> Schlüssel auf <b>Start</b> → Zündschloss verbindet Kl.30 → <b>Kl.50</b> → Anlasser-Magnetschalter zieht an,
+        sein interner Hauptkontakt legt den <b>200–500 A</b>-Strom von Kl.30 auf den Anlassermotor. Lässt man los, federt der
+        Schlüssel auf <b>Fahrt</b> zurück, Kl.50 fällt ab.<br>
+        <b>Zündung:</b> In <b>Fahrt</b> verbindet das Zündschloss Kl.30 → <b>Kl.15</b> → Vorwiderstand (0,9 Ω) → Zündspule Kl.15.
+        Die Spule lädt sich, der <b>Unterbrecher</b> im Verteiler taktet Kl.1 gegen Masse; bei jedem Öffnen bricht das Feld
+        zusammen → Hochspannung an Kl.4 → Verteiler → Kerze. Beim <b>Anlassen</b> wird der Vorwiderstand überbrückt
+        (volle Spannung trotz Spannungseinbruch).<br>
+        <b>Stop:</b> Schlüssel auf <b>0</b> → Kl.15 stromlos → kein Funke. Genau hier setzt unser BLE-Umbau an:
+        Kanal-2-Öffner in die <b>Kl.15</b>-Leitung, Kanal-1 + Bosch-Relais auf <b>Kl.50</b>. <b>Kl.1 und Kl.4 bleiben unangetastet.</b>
+    </div>
+</body>
+
+</html>
