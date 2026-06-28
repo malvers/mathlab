@@ -581,6 +581,7 @@
         let __media = null;        // Foto-Spur module instance (js/tracker-media.js)        // their Leaflet markers (kept for clearing)
         let __nav = null;          // simple-navigation module instance (js/tracker-nav.js)
         let __speed = null;        // speed-limit sign module instance (js/tracker-speedlimit.js)
+        let __streetq = null;      // desktop road-quality hover tip (js/tracker-streetquality.js)
         let __compass = null;      // north/compass module instance (js/tracker-compass.js)
         let __fuel = null;         // fuel-station price layer (js/tracker-fuel.js)
         let __poi = null;          // points-of-interest layer (js/tracker-poi.js)
@@ -2522,6 +2523,10 @@ ${pts}
         // ---- Speed-limit sign → js/tracker-speedlimit.js. Position-driven (fed from onPosition),
         //      independent of navigation; owns its own #speed-sign badge. ----
         __speed = TrackerSpeedLimit({ $ });
+        // ---- Road-quality hover tip → js/tracker-streetquality.js. Mouse-only (Mac): rest the cursor on
+        //      the map → Overpass tells us the road's OSM surface/smoothness in a small tooltip. No-op on
+        //      touch (no hover there). ----
+        __streetq = (typeof TrackerStreetQuality !== 'undefined') ? TrackerStreetQuality({ map }) : null;
         // ---- Compass / north indicator → js/tracker-compass.js. Owns its own #compass badge. ----
         __compass = TrackerCompass({ $ });
         // ---- Tankstellen-Spur → js/tracker-fuel.js. Position-driven; shows nearby fuel-station
