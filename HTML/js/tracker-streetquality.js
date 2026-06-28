@@ -15,7 +15,7 @@ window.TrackerStreetQuality = function (ctx) {
 
     // Overpass now goes through the shared server-side proxy (window.queryOverpass → `overpass` Edge
     // Function), which owns the mirror list + rotation + failover (rule 18: all key-less).
-    const QUERY_TIMEOUT_MS = 9000; // abort a stuck request
+    const QUERY_TIMEOUT_MS = 14000; // client abort; the proxy races all mirrors and answers well within this
     const SEARCH_RADIUS_M = 25;    // only roads within this many metres of the click point count
 
     let lastClient = null;         // { x, y } of the cursor in CSS pixels (for tip placement)

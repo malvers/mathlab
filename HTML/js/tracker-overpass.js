@@ -31,8 +31,12 @@
     async function queryOverpass(ql, opts) {
         opts = opts || {};
         const dbg = typeof opts.dbg === 'function' ? opts.dbg : function () {};
+        // The client waits a touch LONGER than the server's per-mirror race, so on a total miss the
+        // server returns its clean 502 (→ null) instead of us aborting first. Both map to null anyway.
+        const clientMs = opts.timeout || DEFAULT_TIMEOUT_MS;
+        const serverMs = Math.max(3000, clientMs - 1500);
         const ctrl = new AbortController();
-        const to = setTimeout(function () { ctrl.abort(); }, opts.timeout || DEFAULT_TIMEOUT_MS);
+        const to = setTimeout(function () { ctrl.abort(); }, clientMs);
         // If the caller passed its own signal, abort our controller when theirs fires.
         if (opts.signal) {
             if (opts.signal.aborted) ctrl.abort();
@@ -46,7 +50,7 @@
                     'apikey': SUPABASE_KEY,
                     'Authorization': 'Bearer ' + SUPABASE_KEY,
                 },
-                body: JSON.stringify({ data: ql }),
+                body: JSON.stringify({ data: ql, timeout: serverMs }),
                 signal: ctrl.signal,
             });
             if (!r.ok) { dbg('overpass proxy → HTTP ' + r.status); return null; }
