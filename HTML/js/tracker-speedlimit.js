@@ -38,6 +38,7 @@ window.TrackerSpeedLimit = function (ctx) {
     let bellBuf = null;     // decoded small-bell sample
     let bellLoading = false;
     let lastBing = 0;       // timestamp of the last chime, for the repeat throttle
+    let lastSpeedKmh = 0;   // most recent smoothed speed (km/h) — for the fines panel on a sign tap
     const BELL_KEY = 'trk_speed_bell';
     let bellOn = localStorage.getItem(BELL_KEY) !== '0'; // over-speed chime on/off (Settings→Debug), default ON
 
@@ -245,6 +246,7 @@ window.TrackerSpeedLimit = function (ctx) {
             const pl = profile.limitAt(here);
             if (pl !== undefined && pl !== null) { curLimit = pl; setSign(pl, false); fromProfile = true; }
         }
+        if (speedKmh != null) lastSpeedKmh = speedKmh; // remember for the fines panel (sign tap)
         if (typeof curLimit === 'number' && speedKmh != null) {
             setSign(curLimit, speedKmh > curLimit + OVER_TOL_KMH);
             // 8 km/h over the limit → the small bell. Re-reminds every BING_REPEAT_MS while still over.
@@ -281,6 +283,7 @@ window.TrackerSpeedLimit = function (ctx) {
     // setProfile: attach the route profile after init (creation order independent).
     return {
         update, clear, unlockAudio, setBell, bellEnabled, currentRoad: () => lastRoad,
+        currentLimit: () => curLimit, lastSpeed: () => lastSpeedKmh,
         resolveLimit: wayLimit, setProfile: (p) => { profile = p; },
     };
 };

@@ -2141,6 +2141,7 @@ body.ui-idle #nav-banner {
     align-items: center;
     justify-content: center;
     box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+    cursor: pointer; /* tappable → opens the Bußgeld-Risiko panel (js/tracker-fines.js) */
     /* opacity → idle auto-hide fade (HEAD); transform → the .over jump-forward (branch). Keep both. */
     transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease, opacity 0.55s ease;
 }
@@ -2172,6 +2173,106 @@ body.ui-idle #nav-banner {
 
 #speed-sign[hidden] {
     display: none;
+}
+
+/* ---- Bußgeld-Risiko panel (js/tracker-fines.js) — opened by tapping the speed-limit sign ---- */
+.fines-head {
+    text-align: center;
+    margin-bottom: 14px;
+}
+
+.fines-speed {
+    line-height: 1;
+    color: var(--red);
+}
+
+.fines-speed b {
+    font-size: 2.6rem;
+    font-weight: 800;
+}
+
+.fines-speed span {
+    font-size: 1rem;
+    opacity: 0.7;
+    margin-left: 4px;
+}
+
+.fines-vs {
+    margin-top: 6px;
+    font-size: 0.72rem;
+    letter-spacing: 0.5px;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.fines-tiles {
+    display: flex;
+    gap: 10px;
+}
+
+.fines-tile {
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 14px 6px;
+    text-align: center;
+    border: 1px solid rgba(176, 36, 24, 0.55);
+    border-radius: 12px;
+    background: rgba(176, 36, 24, 0.12);
+}
+
+.fines-tile-v {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: var(--orange);
+    line-height: 1.1;
+}
+
+.fines-tile-l {
+    margin-top: 5px;
+    font-size: 0.6rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.fines-note {
+    margin: 14px 0 0;
+    font-size: 0.62rem;
+    line-height: 1.5;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+/* "Alles legal" / "unbegrenzt" / "unbekannt" states — no ticket to price */
+.fines-banner {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.fines-banner.green { border-color: rgba(121, 158, 49, 0.6); background: rgba(121, 158, 49, 0.12); }
+.fines-banner.grey { border-color: rgba(255, 255, 255, 0.18); background: rgba(255, 255, 255, 0.05); }
+
+.fines-banner-glyph {
+    font-size: 2rem;
+    line-height: 1;
+    flex: 0 0 auto;
+}
+
+.fines-banner.green .fines-banner-glyph { color: var(--green); }
+
+.fines-banner-t {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #fff;
+}
+
+.fines-banner-x {
+    margin-top: 4px;
+    font-size: 0.68rem;
+    line-height: 1.5;
+    color: rgba(255, 255, 255, 0.7);
 }
 
 /* Route speed-limit change-point badges (js/tracker-speedprofile.js): little road signs dropped on the

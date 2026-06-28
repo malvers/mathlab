@@ -581,6 +581,7 @@
         let __media = null;        // Foto-Spur module instance (js/tracker-media.js)        // their Leaflet markers (kept for clearing)
         let __nav = null;          // simple-navigation module instance (js/tracker-nav.js)
         let __speed = null;        // speed-limit sign module instance (js/tracker-speedlimit.js)
+        let __fines = null;        // German speeding-fine panel (js/tracker-fines.js)
         let __speedprofile = null; // per-route speed-limit profile (js/tracker-speedprofile.js)
         let __streetq = null;      // desktop road-quality hover tip (js/tracker-streetquality.js)
         let __compass = null;      // north/compass module instance (js/tracker-compass.js)
@@ -2531,6 +2532,15 @@ ${pts}
         __speed = TrackerSpeedLimit({ $, profile: __speedprofile });
         // Give the profile the SAME tag→limit resolver the sign uses, so its precomputed numbers match.
         if (__speedprofile && __speed.resolveLimit) __speedprofile.setResolver(__speed.resolveLimit);
+        // ---- Bußgeld-Risiko → js/tracker-fines.js. Tapping the speed-limit sign opens a panel that
+        //      prices a ticket (€ / Punkte / Fahrverbot) from the static BKatV table for the live
+        //      speed-over-limit. Keyless + offline-safe; most useful when the sign is red. ----
+        if (typeof TrackerFines !== 'undefined') {
+            __fines = TrackerFines({ $, showPanel, speed: __speed });
+            const signEl = $('speed-sign');
+            if (signEl) signEl.addEventListener('click', () => __fines.show());
+            const fc = $('fines-close'); if (fc) fc.addEventListener('click', hidePanels);
+        }
         // ---- Road-quality hover tip → js/tracker-streetquality.js. Mouse-only (Mac): rest the cursor on
         //      the map → Overpass tells us the road's OSM surface/smoothness in a small tooltip. No-op on
         //      touch (no hover there). ----
