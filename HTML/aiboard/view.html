@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AI Board — Korpus</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  /* ── Palette (Forloop project) ───────────────────────────────────────────
+     λ orange rgb(245,194,66) · Υ red rgb(176,36,24) · φ green rgb(121,158,49)
+     Never pure black — dark blue rgba(8,20,42) / rgb(14,36,78). Buttons never orange. */
+  :root{
+    --bg:rgb(8,20,42); --bg2:rgb(14,36,78); --panel:rgba(255,255,255,.04);
+    --line:rgba(255,255,255,.10); --ink:rgba(255,255,255,.92); --ink-dim:rgba(255,255,255,.55);
+    --lam:rgb(245,194,66); --red:rgb(176,36,24); --grn:rgb(121,158,49);
+  }
+  *{box-sizing:border-box}
+  html{font-size:20px}            /* global type scale — everything below is rem-based */
+  html,body{margin:0;height:100%}
+  body{
+    font-family:'Orbitron',system-ui,sans-serif; color:var(--ink);
+    background:radial-gradient(1200px 700px at 70% -10%, var(--bg2), var(--bg) 60%); min-height:100%;
+  }
+  /* slim, dark scrollbars — Webkit and FF applied separately (never both on one element) */
+  *::-webkit-scrollbar{width:9px;height:9px}
+  *::-webkit-scrollbar-thumb{background:rgba(255,255,255,.18);border-radius:6px}
+  *::-webkit-scrollbar-track{background:transparent}
+  @supports (scrollbar-width:thin){.ffscroll{scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.18) transparent}}
+
+  header{display:flex;align-items:center;gap:.7rem;padding:1rem 1.1rem;border-bottom:1px solid var(--line)}
+  header h1{font-size:1.05rem;font-weight:900;letter-spacing:.06em;margin:0}
+  header .lam{color:var(--lam)}
+  header .sub{color:var(--ink-dim);font-size:.72rem;font-weight:400;margin-left:.2rem}
+  .grow{flex:1}
+
+  main{max-width:min(2200px,96vw);margin:0 auto;padding:1.1rem}
+
+  /* ── Lock screen ── */
+  .lock{max-width:460px;margin:8vh auto;padding:1.6rem;border:1px solid var(--line);
+    border-radius:16px;background:var(--panel);text-align:center}
+  .lock h2{font-weight:700;font-size:1rem;margin:.2rem 0 1rem}
+  .lock p{color:var(--ink-dim);font-size:.78rem;line-height:1.5;font-weight:400;margin:0 0 1.2rem}
+  .row{display:flex;gap:.6rem;flex-wrap:wrap}
+  input,select{
+    font-family:inherit;color:var(--ink);background:rgba(0,0,0,.18);
+    border:1px solid var(--line);border-radius:10px;padding:.6rem .7rem;font-size:.85rem;outline:none;
+  }
+  input:focus,select:focus{border-color:var(--lam)}
+  .lock input{flex:1;text-align:center;letter-spacing:.15em}
+  button{
+    font-family:inherit;font-weight:700;letter-spacing:.04em;cursor:pointer;color:#06210a;
+    background:var(--grn);border:none;border-radius:10px;padding:.6rem 1rem;font-size:.82rem;
+    transition:filter .15s;
+  }
+  button:hover{filter:brightness(1.12)}
+  button.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+
+  /* ── Toolbar ── */
+  .bar{display:flex;gap:.6rem;flex-wrap:wrap;align-items:center;margin-bottom:.9rem}
+  .bar input.search{flex:1;min-width:180px}
+  .pill{font-size:.7rem;color:var(--ink-dim);border:1px solid var(--line);border-radius:999px;padding:.28rem .6rem}
+
+  /* ── Stats ── */
+  .stats{display:flex;gap:.6rem;flex-wrap:wrap;margin-bottom:1.1rem}
+  .stat{flex:1;min-width:120px;border:1px solid var(--line);border-radius:12px;background:var(--panel);padding:.7rem .8rem}
+  .stat .n{font-size:1.4rem;font-weight:900;color:var(--lam)}
+  .stat .l{font-size:.66rem;color:var(--ink-dim);text-transform:uppercase;letter-spacing:.08em}
+
+  /* ── People strip ── */
+  .people{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1.1rem}
+  .person{flex:1 1 160px;min-width:140px;border:1px solid var(--line);border-radius:12px;background:var(--panel);
+    padding:.55rem .75rem;cursor:pointer;transition:border-color .15s,background .15s}
+  .person:hover{border-color:rgba(255,255,255,.28)}
+  .person.active{border-color:var(--lam);background:rgba(245,194,66,.10)}
+  .person .nm{font-weight:700;font-size:.82rem;display:flex;align-items:center;gap:.4rem}
+  .person .dot{width:.55rem;height:.55rem;border-radius:50%;display:inline-block}
+  .person .meta{font-size:.66rem;color:var(--ink-dim);font-weight:400;margin-top:.3rem;line-height:1.5}
+
+  /* ── Timeline: one column per day, side by side ── */
+  /* align-items:flex-start → each column is only as tall as its own content
+     (without it, flex stretches every column to the tallest one → phantom vertical space) */
+  .board{display:flex;align-items:flex-start;gap:1rem;overflow-x:auto;padding-bottom:.6rem}
+  .daycol{flex:1 1 360px;min-width:320px;border:1px solid var(--line);border-radius:14px;
+    background:var(--panel);padding:.6rem .7rem;display:flex;flex-direction:column}
+  .daycol .head{font-size:.86rem;font-weight:700;color:var(--lam);letter-spacing:.04em;
+    padding:.2rem .1rem .6rem;border-bottom:1px solid var(--line);margin-bottom:.5rem;position:sticky;top:0}
+  .daycol .head .cnt{color:var(--ink-dim);font-weight:400;font-size:.72rem;margin-left:.35rem}
+  .msg{display:flex;gap:.7rem;padding:.6rem .1rem;border-bottom:1px solid rgba(255,255,255,.05)}
+  .msg:last-child{border-bottom:none}
+  .msg.sensitive .lockline{flex:1;color:var(--red);opacity:.8;font-size:.8rem;padding-top:.2rem;word-break:break-word}
+  .msg .t{font-size:.82rem;color:var(--ink-dim);font-weight:400;min-width:3rem;padding-top:.15rem}
+  .msg .body{flex:1;min-width:0}
+  .msg .chips{display:flex;gap:.4rem;flex-wrap:wrap;align-items:flex-start;margin-bottom:.3rem}
+  .chip{align-self:flex-start;white-space:nowrap}
+  .chip{font-size:.72rem;font-weight:500;border-radius:999px;padding:.16rem .55rem;border:1px solid var(--line)}
+  .chip.app{color:var(--ink-dim)}
+  .chip.peer{color:#06210a;background:var(--grn);border-color:transparent}
+  .chip.peer.unknown{color:var(--ink);background:transparent;border:1px dashed var(--ink-dim)}
+  .chip.lock{color:#fff;background:var(--red);border-color:transparent}
+  /* chat text in Arial — far easier to read than Orbitron for running message text */
+  .msg .txt{font-family:Arial,Helvetica,sans-serif;font-size:1.02rem;line-height:1.5;word-break:break-word}
+  .empty{color:var(--ink-dim);text-align:center;padding:2rem;font-weight:400}
+
+  /* tabs (Korpus | Debug) */
+  .grow{flex:1}
+  .tabs{display:flex;gap:.5rem}
+  .tab{background:transparent;color:var(--ink-dim);border:1px solid var(--line);border-radius:10px;
+    padding:.4rem .9rem;font-size:.8rem;font-weight:700;cursor:pointer}
+  .tab.active{color:var(--lam);border-color:var(--lam);background:rgba(245,194,66,.10)}
+  /* debug view */
+  .dbg{display:flex;align-items:baseline;gap:.5rem;flex-wrap:wrap;border:1px solid var(--line);
+    border-radius:10px;background:var(--panel);padding:.5rem .75rem;margin-bottom:.45rem}
+  .dbg-ctx{font-family:Arial,sans-serif;font-size:.92rem;word-break:break-word}
+  .dbg-arrow{color:var(--ink-dim)}
+  .dbg-native{font-family:Arial,sans-serif;font-size:.92rem;color:var(--lam)}   /* Floris/Google native */
+  .dbg-box{display:inline-block;background:var(--grn);color:#06210a;border-radius:6px;
+    padding:.08rem .42rem;margin-right:.3rem;font-family:Arial,sans-serif;font-size:.9rem;font-weight:700}
+  .dbg-t{font-size:.72rem;color:var(--ink-dim);white-space:nowrap}
+
+  /* chat simulator */
+  .simname{width:96px;cursor:pointer}
+  .simname.active{border-color:var(--grn);background:rgba(121,158,49,.18);color:var(--grn);font-weight:700}
+  #simChat{display:flex;flex-direction:column;gap:.5rem;padding:.7rem;min-height:220px;max-height:60vh;
+    overflow-y:auto;border:1px solid var(--line);border-radius:14px;background:var(--panel)}
+  .smsg{max-width:75%;padding:.5rem .75rem;border-radius:14px;font-family:Arial,sans-serif;font-size:1rem;
+    line-height:1.45;word-break:break-word}
+  .smsg .who{display:block;font-family:'Orbitron',sans-serif;font-size:.62rem;color:var(--ink-dim);margin-bottom:.18rem}
+  .smsg.me{align-self:flex-end;background:rgb(14,36,78);border-top-right-radius:4px}
+  .smsg.partner{align-self:flex-start;background:rgba(255,255,255,.08);border-top-left-radius:4px}
+  .sim-input{display:flex;gap:.5rem;align-items:stretch;margin-top:.6rem}
+  .ta-wrap{position:relative;flex:1;background:rgba(0,0,0,.18);border:1px solid var(--line);border-radius:10px}
+  .ta-wrap:focus-within{border-color:var(--lam)}
+  /* textarea and ghost share IDENTICAL typography/box so the grey suffix lines up after the caret */
+  #simGhost,#simText{box-sizing:border-box;font-family:Arial,sans-serif;font-size:1rem;line-height:1.4;
+    padding:.55rem .7rem;white-space:pre-wrap;word-break:break-word;border:0;margin:0}
+  #simText{display:block;width:100%;resize:none;min-height:2.5rem;max-height:16rem;overflow-y:auto;
+    color:transparent;caret-color:var(--ink);background:transparent;outline:none;position:relative;z-index:1}
+  /* the ghost layer renders ALL visible text → no two-layer drift */
+  #simGhost{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+  #simGhost .g-typed{color:var(--ink)}        /* your typed text (visible) */
+  #simGhost .g-suffix{color:var(--ink-dim)}   /* the grey ghost continuation */
+  #simSend{align-self:stretch}   /* same height as the input line (grows with it) */
+  #simSugg{display:flex;flex-direction:column;align-items:flex-start;gap:.35rem;margin-top:.5rem;min-height:.5rem}
+  .sugg{background:var(--grn);color:#06210a;border:none;border-radius:8px;padding:.32rem .6rem;
+    font-family:Arial,sans-serif;font-size:.92rem;font-weight:700;cursor:pointer;text-align:left}
+  .sugg:hover{filter:brightness(1.12)}
+
+  .status{font-size:.68rem;color:var(--ink-dim);font-weight:400;margin-top:1.4rem;text-align:center}
+  .hidden{display:none!important}
+</style>
+</head>
+<body>
+<header>
+  <h1><span class="lam">AI Board</span></h1>
+  <span class="grow"></span>
+  <div class="tabs">
+    <button id="tabKorpus" class="tab active">Korpus</button>
+    <button id="tabDebug" class="tab">Debug</button>
+    <button id="tabSim" class="tab">Sim</button>
+  </div>
+</header>
+
+<main>
+  <!-- Lock screen -->
+  <section id="lockView" class="lock">
+    <h2>Korpus entsperren</h2>
+    <p>Deine Passphrase leitet den Schlüssel ab (PBKDF2 → AES-GCM). Sie verlässt nie das Gerät —
+       der Server sieht nur Chiffrat. <b>Demo-Modus:</b> die eingebauten Beispiel-Sessions werden mit
+       genau dieser Passphrase ver- und wieder entschlüsselt, damit Du den echten Krypto-Weg siehst.</p>
+    <div class="row">
+      <input id="pass" type="password" placeholder="Passphrase" autocomplete="off" aria-label="Passphrase">
+      <button id="unlock">Entsperren</button>
+    </div>
+    <p id="lockMsg" style="margin:.9rem 0 0;color:var(--red)"></p>
+  </section>
+
+  <!-- Dashboard -->
+  <section id="dash" class="hidden">
+    <div class="bar">
+      <input id="search" class="search" type="search" placeholder="Im Korpus suchen …" aria-label="Suche">
+      <select id="fApp" aria-label="App filtern"><option value="">Alle Apps</option></select>
+      <select id="fPeer" aria-label="Person filtern"><option value="">Alle Personen</option></select>
+      <select id="src" aria-label="Datenquelle">
+        <option value="demo">Demo</option>
+        <option value="real">Real</option>
+      </select>
+      <button id="pushDemo" class="ghost hidden">Demo → Cloud schreiben</button>
+      <button id="clearCloud" class="ghost hidden">Cloud leeren</button>
+      <button id="lockBtn" class="ghost hidden">🔒 Sperren</button>
+    </div>
+
+    <div class="stats" id="stats"></div>
+    <div class="people" id="people"></div>
+    <div id="timeline" class="ffscroll"></div>
+  </section>
+
+  <!-- Debug: live Gemini predictions from aiboard_debug (plaintext, no passphrase) -->
+  <section id="debugView" class="hidden">
+    <div class="bar">
+      <span class="pill">Vorhersage-Debug · aiboard_debug</span>
+      <span class="grow"></span>
+      <button id="dbgRefresh" class="ghost">Aktualisieren</button>
+    </div>
+    <div id="debugList" class="ffscroll"></div>
+  </section>
+
+  <!-- Chat simulator: build a full two-sided conversation; later feed the whole dialog to a predictor -->
+  <section id="simView" class="hidden">
+    <div class="bar">
+      <input id="simMe" class="simname" value="Ich" aria-label="Mein Name">
+      <input id="simPartner" class="simname" value="Lili" aria-label="Partner-Name">
+      <span class="grow"></span>
+      <button id="simClear" class="ghost">Leeren</button>
+    </div>
+    <div id="simChat" class="ffscroll"></div>
+    <div id="simSugg"></div>
+    <div class="sim-input">
+      <div class="ta-wrap">
+        <div id="simGhost" aria-hidden="true"></div>
+        <textarea id="simText" rows="1" placeholder="Nachricht …" aria-label="Nachricht"></textarea>
+      </div>
+      <button id="simSend">Senden</button>
+    </div>
+  </section>
+
+  <div class="status" id="status"></div>
+</main>
+
+<script src="../js/vendor/supabase.min.js"></script>
+<script>
+// ── AI Board corpus viewer ──────────────────────────────────────────────────
+// Standalone, self-contained. Mirrors the VGP crypto conventions so the Android
+// keyboard (Kotlin) and this viewer agree on the wire format:
+//   record  = JSON { v, ts, app, field, sensitive, peer, peerSource, text }
+//   stored  = 'ENC:' + base64( iv(12) ++ AES-GCM(record) )   ← one blob per session
+//   key     = PBKDF2-SHA256(passphrase, 'aiboard-corpus-salt-v1', 200000) → AES-GCM-256
+// Real data arrives once the keyboard ships; the demo round-trips local samples through the
+// SAME encrypt/decrypt path, so what you see here is exactly the production decode flow.
+
+const SALT = 'aiboard-corpus-salt-v1';
+const ITER = 200000;
+
+// --- Supabase (publishable anon key — client-safe, same project as tracker/vgp) ---
+const SUPABASE_URL = 'https://fyfhxzyymmurlaenmzse.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_ubQDiMD-X3N0vZvPVi229Q_-5Zootfk';
+const TABLE = 'aiboard_sessions';
+const GEMINI_URL = SUPABASE_URL + '/functions/v1/gemini';
+let sb = null;
+function db(){ if(!sb) sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY); return sb; }
+
+// --- crypto (identical scheme to HTML/vgp/js/vgp-crypto.js) ---
+async function deriveKey(pass){
+  const km = await crypto.subtle.importKey('raw', new TextEncoder().encode(pass), 'PBKDF2', false, ['deriveKey']);
+  return crypto.subtle.deriveKey(
+    { name:'PBKDF2', salt:new TextEncoder().encode(SALT), iterations:ITER, hash:'SHA-256' },
+    km, { name:'AES-GCM', length:256 }, false, ['encrypt','decrypt']);
+}
+async function encryptText(plain, key){
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const ct = await crypto.subtle.encrypt({name:'AES-GCM',iv}, key, new TextEncoder().encode(plain));
+  const out = new Uint8Array(iv.length + ct.byteLength); out.set(iv); out.set(new Uint8Array(ct), iv.length);
+  return 'ENC:' + btoa(String.fromCharCode(...out));
+}
+async function decryptText(cipherB64, key){
+  if(!cipherB64.startsWith('ENC:')) return cipherB64;
+  const comb = Uint8Array.from(atob(cipherB64.slice(4)), c=>c.charCodeAt(0));
+  const iv = comb.slice(0,12), data = comb.slice(12);
+  const pt = await crypto.subtle.decrypt({name:'AES-GCM',iv}, key, data);
+  return new TextDecoder().decode(pt);
+}
+
+// --- demo corpus: your own typing only (no incoming messages), some with a salutation, some anonymous ---
+// ts are relative offsets (ms) from "now", filled in at load so the timeline always looks fresh.
+const H = 3600e3, M = 60e3;
+const SAMPLE = [
+  // ── today ──
+  { off:-2*M,        app:'com.whatsapp',        field:'text',   peer:'Antje',  text:'Hey Antje! Bin gleich da, max 10 Minuten ⏱️' },
+  { off:-8*M,        app:'com.whatsapp',        field:'text',   peer:null,     text:'und bring ich noch was mit? 😊' },
+  { off:-14*M,       app:'com.whatsapp',        field:'text',   peer:null,     text:'okok dann bis gleich!' },
+  { off:-40*M,       app:'com.android.chrome',  field:'password', peer:null,   sensitive:true, text:'••••••••' },
+  { off:-1*H-5*M,    app:'org.thoughtcrime.securesms', field:'text', peer:'Lili', text:'Hallo Lili, hast du das PDF schon gelesen?' },
+  { off:-1*H-22*M,   app:'org.thoughtcrime.securesms', field:'text', peer:null, text:'die Stelle auf Seite 12 ist der Kern unseres Auftrags.' },
+  { off:-2*H-10*M,   app:'com.whatsapp',        field:'text',   peer:'Tom',    text:'tom alter, kommst du heut abend zum bouldern?' },
+  { off:-2*H-12*M,   app:'com.whatsapp',        field:'text',   peer:null,     text:'7 uhr halle, wie immer' },
+  { off:-3*H,        app:'com.whatsapp',        field:'text',   peer:'Solita', text:'morgen Solita, starte bitte die Pagode 🛕' },
+  { off:-3*H-2*M,    app:'com.whatsapp',        field:'text',   peer:null,     text:'und sag mir wenn der Akku unter 20% fällt' },
+  { off:-4*H,        app:'org.telegram.messenger', field:'text', peer:'Mollie',  text:'Hallo Mollie ❤️ alles gut bei dir?' },
+  { off:-4*H-3*M,    app:'org.telegram.messenger', field:'text', peer:null,    text:'ich ruf dich nachher an, ja? ❤️' },
+  { off:-5*H,        app:'com.android.chrome',  field:'text',   peer:null,     text:'beste pizza altea costa blanca' },
+  { off:-6*H,        app:'com.google.android.gm', field:'text', peer:'Antje',  text:'Liebe Antje, anbei die Unterlagen wie besprochen. Beste Grüße' },
+  { off:-7*H,        app:'com.google.android.gm', field:'text', peer:'Herr Brandt', text:'Sehr geehrter Herr Brandt, vielen Dank für Ihre Nachricht. Ich komme gern auf Ihr Angebot zurück.' },
+  { off:-7*H-30*M,   app:'com.google.android.gm', field:'text', peer:null,     text:'Mit freundlichen Grüßen, M. Alvers' },
+  // ── yesterday ──
+  { off:-26*H,       app:'com.whatsapp',        field:'text',   peer:'Lili',   text:'Hi Lili 🌞 wie war dein Tag?' },
+  { off:-27*H,       app:'com.whatsapp',        field:'text',   peer:null,     text:'haha ja genau das meinte ich 😂😂' },
+  { off:-28*H,       app:'org.thoughtcrime.securesms', field:'text', peer:null, text:'können wir das morgen früh nochmal durchgehen?' },
+  { off:-29*H,       app:'com.whatsapp',        field:'text',   peer:'Tom',    text:'tom schau mal das video an haha 🤙' },
+  { off:-30*H,       app:'com.android.chrome',  field:'text',   peer:null,     text:'xlm-roberta authorship attribution short text' },
+  { off:-31*H,       app:'com.whatsapp',        field:'text',   peer:'Solita', text:'Solita, neue Tankstellen-Spur an bitte ⛽' },
+  { off:-32*H,       app:'org.telegram.messenger', field:'text', peer:null,    text:'ja perfekt, danke dir!' },
+  // ── two days ago ──
+  { off:-50*H,       app:'com.google.android.gm', field:'text', peer:'Herr Brandt', text:'Sehr geehrter Herr Brandt, anbei wie gewünscht der Entwurf. Über Ihr Feedback würde ich mich freuen.' },
+  { off:-51*H,       app:'com.whatsapp',        field:'text',   peer:'Mollie',   text:'Mollie, ich hab dir Fotos geschickt 📸❤️' },
+  { off:-52*H,       app:'com.whatsapp',        field:'text',   peer:null,     text:'die vom Strand sind so schön geworden' },
+  { off:-53*H,       app:'org.thoughtcrime.securesms', field:'text', peer:'Lili', text:'Lili, kurze Frage zum Forschungsauftrag —' },
+  { off:-54*H,       app:'com.android.chrome',  field:'text',   peer:null,     text:'gemini embedding pricing per 1m tokens' },
+];
+
+const APP_LABEL = {
+  'com.whatsapp':'WhatsApp', 'org.thoughtcrime.securesms':'Signal',
+  'com.android.chrome':'Chrome', 'com.google.android.gm':'Gmail',
+  'org.telegram.messenger':'Telegram',
+};
+const PEER_COLORS = ['rgb(245,194,66)','rgb(121,158,49)','rgb(99,179,237)','rgb(214,138,221)','rgb(240,142,90)'];
+
+let KEY = null;        // derived AES key (held only in memory)
+let RECORDS = [];      // decrypted records
+let SOURCE = localStorage.getItem('aiboard_src') || 'demo';   // 'demo' | 'real'
+const $ = s => document.querySelector(s);
+const status = m => { $('#status').textContent = m; };
+
+// --- unlock: derive key, load the selected source, then render ---
+async function unlock(){
+  const pass = $('#pass').value.trim();
+  if(pass.length < 1){ $('#lockMsg').textContent = 'Bitte eine Passphrase eingeben.'; return; }
+  $('#lockMsg').textContent = '';
+  status('Schlüssel wird abgeleitet …');
+  KEY = await deriveKey(pass);
+
+  localStorage.setItem('aiboard_pass', pass);   // persist across reloads; cleared on lock
+  $('#lockBtn').classList.remove('hidden');
+  // only reveal the corpus dashboard if the Korpus tab is active (not Debug) — avoids both views showing
+  if(VIEW === 'korpus'){ $('#lockView').classList.add('hidden'); $('#dash').classList.remove('hidden'); }
+  await loadData();
+}
+
+// Build the demo records (your own typing only). ts = now + offset so the timeline stays fresh.
+function demoRecords(now){
+  return SAMPLE.map(s => ({ v:1, ts: now + s.off, app:s.app, field:s.field,
+    sensitive: s.sensitive || false, peer:s.peer, peerSource: s.peer ? 'anrede':'none', text:s.text }));
+}
+
+// --- load RECORDS from the selected source (Demo = built-in samples, Real = Supabase corpus) ---
+async function loadData(){
+  if(!KEY) return;
+  RECORDS = [];
+  updateRealTools();
+  if(SOURCE === 'demo'){
+    // Round-trip each demo session through encrypt→decrypt, exactly like reading real ENC: rows.
+    for(const rec of demoRecords(Date.now())){
+      const blob = await encryptText(JSON.stringify(rec), KEY);
+      try { RECORDS.push(JSON.parse(await decryptText(blob, KEY))); } catch(e){ /* wrong key */ }
+    }
+    RECORDS.sort((a,b)=>b.ts-a.ts);
+    buildFilters(); render();
+    status(RECORDS.length + ' Demo-Sessions entschlüsselt · ' + new Date().toLocaleString('de-DE'));
+  } else {
+    // SOURCE === 'real' — read the encrypted sessions the keyboard writes to Supabase, decrypt locally.
+    try {
+      const { data, error } = await db().from(TABLE).select('enc').order('ts',{ascending:false}).limit(2000);
+      if(error) throw error;
+      for(const row of (data||[])){
+        try { RECORDS.push(JSON.parse(await decryptText(row.enc, KEY))); } catch(e){ /* wrong key / corrupt */ }
+      }
+      RECORDS.sort((a,b)=>b.ts-a.ts);
+      buildFilters(); render();
+      status(RECORDS.length
+        ? (RECORDS.length + ' Cloud-Sessions entschlüsselt · ' + new Date().toLocaleString('de-DE'))
+        : 'Real-Quelle verbunden — noch keine Sessions. „Demo → Cloud schreiben" zum Testen.');
+    } catch(e){
+      buildFilters(); render();
+      status('Real-Quelle: ' + (e.message || e) + ' — Tabelle ' + TABLE + ' schon angelegt?');
+    }
+  }
+}
+
+// show the Real-only buttons (write/clear) when the Real source is active
+function updateRealTools(){
+  const on = SOURCE === 'real' && !!KEY;
+  $('#pushDemo').classList.toggle('hidden', !on);
+  $('#clearCloud').classList.toggle('hidden', !on);
+}
+
+// --- test helpers: push the demo set into Supabase / clear it, to prove the cloud round-trip ---
+async function pushDemoToCloud(){
+  if(!KEY) return;
+  status('Verschlüssele Demo und schreibe in die Cloud …');
+  const rows = [];
+  for(const rec of demoRecords(Date.now())){
+    rows.push({ ts: new Date(rec.ts).toISOString(), enc: await encryptText(JSON.stringify(rec), KEY) });
+  }
+  const { error } = await db().from(TABLE).insert(rows);
+  if(error){ status('Schreiben fehlgeschlagen: ' + error.message); return; }
+  status(rows.length + ' Demo-Sessions in die Cloud geschrieben.');
+  if(SOURCE === 'real') await loadData();
+}
+async function clearCloud(){
+  const { error } = await db().from(TABLE).delete().gte('ts', '1970-01-01');
+  if(error){ status('Leeren fehlgeschlagen: ' + error.message); return; }
+  status('Cloud-Korpus geleert.');
+  if(SOURCE === 'real') await loadData();
+}
+
+function lock(){
+  KEY = null; RECORDS = [];
+  localStorage.removeItem('aiboard_pass');
+  $('#pass').value = '';
+  $('#dash').classList.add('hidden');
+  $('#lockBtn').classList.add('hidden');
+  $('#lockView').classList.remove('hidden');
+  status('Gesperrt.');
+}
+
+// --- people: build a light style profile from your own messages per inferred person ---
+function peerKey(r){ return r.peer || null; }
+function profiles(){
+  const map = new Map();
+  for(const r of RECORDS){
+    const k = peerKey(r); if(!k) continue;
+    if(!map.has(k)) map.set(k, { name:k, n:0, anchors:0, emojis:new Set(), sie:0, du:0, len:0, apps:new Set() });
+    const p = map.get(k); p.n++; p.len += r.text.length; p.apps.add(r.app);
+    if(r.peerSource==='anrede') p.anchors++;
+    for(const e of (r.text.match(/\p{Extended_Pictographic}/gu)||[])) p.emojis.add(e);
+    if(/\b(Sie|Ihnen|Ihre?)\b/.test(r.text)) p.sie++;
+    if(/\b(du|dir|dich|dein)\b/i.test(r.text)) p.du++;
+  }
+  return [...map.values()].sort((a,b)=>b.n-a.n);
+}
+
+function buildFilters(){
+  const apps = [...new Set(RECORDS.map(r=>r.app))];
+  const peers = [...new Set(RECORDS.map(r=>r.peer).filter(Boolean))];
+  $('#fApp').innerHTML = '<option value="">Alle Apps</option>' +
+    apps.map(a=>`<option value="${a}">${APP_LABEL[a]||a}</option>`).join('');
+  $('#fPeer').innerHTML = '<option value="">Alle Personen</option>' +
+    peers.map(p=>`<option value="${p}">${p}</option>`).join('') +
+    '<option value="__none__">— ohne Anrede —</option>';
+  // restore persisted filters (after options exist; unknown values fall back to "Alle")
+  $('#fApp').value   = localStorage.getItem('aiboard_filter_fApp')   || '';
+  $('#fPeer').value  = localStorage.getItem('aiboard_filter_fPeer')  || '';
+  $('#search').value = localStorage.getItem('aiboard_filter_search') || '';
+}
+
+function filtered(){
+  const q = $('#search').value.trim().toLowerCase();
+  const fa = $('#fApp').value, fp = $('#fPeer').value;
+  return RECORDS.filter(r=>{
+    if(fa && r.app!==fa) return false;
+    if(fp==='__none__'){ if(r.peer) return false; }
+    else if(fp && r.peer!==fp) return false;
+    if(q && !r.text.toLowerCase().includes(q)) return false;
+    return true;
+  });
+}
+
+function peerColor(name){
+  const peers = [...new Set(RECORDS.map(r=>r.peer).filter(Boolean))];
+  const i = peers.indexOf(name);
+  return i<0 ? 'var(--ink-dim)' : PEER_COLORS[i % PEER_COLORS.length];
+}
+
+function render(){
+  const rows = filtered();
+
+  // stats
+  const apps = new Set(rows.map(r=>r.app)), peers = new Set(rows.map(r=>r.peer).filter(Boolean));
+  const anon = rows.filter(r=>!r.peer).length;
+  $('#stats').innerHTML = [
+    ['Sessions', rows.length], ['Apps', apps.size], ['Personen', peers.size], ['ohne Anrede', anon],
+  ].map(([l,n])=>`<div class="stat"><div class="n">${n}</div><div class="l">${l}</div></div>`).join('');
+
+  // people strip — each card is a click filter (like the person combo); active one highlighted
+  const sel = $('#fPeer').value;
+  const profs = profiles();
+  $('#people').innerHTML = profs.map(p=>{
+    const c = peerColor(p.name);
+    const avg = Math.round(p.len/p.n);
+    const tone = p.sie>p.du ? 'Sie' : (p.du>0 ? 'Du' : '–');
+    const em = [...p.emojis].slice(0,6).join('') || '—';
+    return `<div class="person${sel===p.name?' active':''}" data-peer="${p.name}">
+      <div class="nm"><span class="dot" style="background:${c}"></span>${p.name}</div>
+      <div class="meta">${p.n} Sessions · ${p.anchors}× Anrede<br>Ton: ${tone} · ⌀ ${avg} Zeichen<br>Emojis: ${em}</div>
+    </div>`;
+  }).join('') || '';
+
+  // timeline: group rows into one column per day, columns side by side
+  const tl = $('#timeline');
+  if(!rows.length){ tl.innerHTML = '<div class="empty">Nichts gefunden.</div>'; return; }
+  const days = new Map();   // day label -> [rows] (rows already sorted newest-first)
+  for(const r of rows){
+    const day = new Date(r.ts).toLocaleDateString('de-DE',{weekday:'long',day:'2-digit',month:'long'});
+    if(!days.has(day)) days.set(day, []);
+    days.get(day).push(r);
+  }
+  let html = '<div class="board">';
+  for(const [day, list] of days){
+    html += `<div class="daycol"><div class="head">${day}<span class="cnt">${list.length}</span></div>`;
+    for(const r of list){
+      const time = new Date(r.ts).toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'});
+      const appChip = `<span class="chip app">${APP_LABEL[r.app]||r.app}</span>`;
+      // sensitive field (password/PIN): nothing was captured → ONE plain text line, no chips/wrap
+      if(r.sensitive){
+        html += `<div class="msg sensitive">
+          <div class="t">${time}</div>
+          <div class="lockline">${APP_LABEL[r.app]||r.app} · 🔒 Passwortfeld — nicht erfasst</div>
+        </div>`;
+        continue;
+      }
+      const peerChip = r.peer
+        ? `<span class="chip peer" style="background:${peerColor(r.peer)}">${r.peer}</span>`
+        : `<span class="chip peer unknown">ohne Anrede</span>`;
+      html += `<div class="msg">
+        <div class="t">${time}</div>
+        <div class="body">
+          <div class="chips">${appChip}${peerChip}</div>
+          <div class="txt">${escapeHtml(r.text)}</div>
+        </div>
+      </div>`;
+    }
+    html += `</div>`;
+  }
+  html += '</div>';
+  tl.innerHTML = html;
+}
+
+function escapeHtml(s){ return s.replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+// --- view tabs: Korpus (encrypted corpus) | Debug (plaintext aiboard_debug predictions) ---
+const DEBUG_TABLE = 'aiboard_debug';
+let VIEW = 'korpus';
+function showView(v){
+  VIEW = v;
+  localStorage.setItem('aiboard_tab', v);   // remember the active tab across reloads
+  $('#tabKorpus').classList.toggle('active', v === 'korpus');
+  $('#tabDebug').classList.toggle('active', v === 'debug');
+  $('#tabSim').classList.toggle('active', v === 'sim');
+  // hide everything, then reveal the one view
+  ['#debugView','#simView','#lockView','#dash'].forEach(s => $(s).classList.add('hidden'));
+  if(v === 'debug'){ $('#debugView').classList.remove('hidden'); loadDebug(); }
+  else if(v === 'sim'){ $('#simView').classList.remove('hidden'); loadSim(); }
+  else { if(KEY) $('#dash').classList.remove('hidden'); else $('#lockView').classList.remove('hidden'); }
+}
+
+// --- chat simulator: a full two-sided conversation, independent of the AI Board keyboard ---
+let SIM = { me:'Ich', partner:'Lili', speaker:'me', msgs:[] };
+function loadSim(){
+  try { const s = JSON.parse(localStorage.getItem('aiboard_sim')); if(s && s.msgs) SIM = s; } catch(e){}
+  $('#simMe').value = SIM.me; $('#simPartner').value = SIM.partner;
+  renderSim();
+  simPredict();   // show predictions immediately on opening the Sim tab
+}
+function saveSim(){ localStorage.setItem('aiboard_sim', JSON.stringify(SIM)); }
+function renderSim(){
+  const c = $('#simChat');
+  c.innerHTML = SIM.msgs.map(m => {
+    const who = m.who === 'me' ? SIM.me : SIM.partner;
+    return `<div class="smsg ${m.who}"><span class="who">${escapeHtml(who)}</span>${escapeHtml(m.text)}</div>`;
+  }).join('') || '<div class="empty">Noch leer — tippe die erste Nachricht.</div>';
+  c.scrollTop = c.scrollHeight;
+  const cur = SIM.speaker === 'me' ? SIM.me : SIM.partner;
+  $('#simMe').classList.toggle('active', SIM.speaker === 'me');         // active persona glows green
+  $('#simPartner').classList.toggle('active', SIM.speaker === 'partner');
+  $('#simText').placeholder = 'Nachricht als ' + cur + ' …';
+}
+function simSend(){
+  // Enter sends EXACTLY what's in the field. The grey ghost is never auto-sent — Tab pulls it in.
+  const t = $('#simText').value.trim();
+  if(!t) return;
+  SIM.msgs.push({ who: SIM.speaker, text: t });
+  SIM.speaker = SIM.speaker === 'me' ? 'partner' : 'me';   // identity auto-switches after sending
+  $('#simText').value = '';
+  $('#simSugg').innerHTML = '';
+  topSuggestion = ''; simCands = []; updateGhost();
+  saveSim(); renderSim();
+  $('#simText').focus();
+  simPredict();   // auto-suggest the new speaker's next line
+}
+function setSpeaker(who){ if(SIM.speaker === who) return; SIM.speaker = who; $('#simSugg').innerHTML = ''; topSuggestion = ''; updateGhost(); saveSim(); renderSim(); simPredict(); }
+function simClear(){
+  if(SIM.msgs.length && !confirm('Gespräch leeren?')) return;
+  SIM.msgs = []; SIM.speaker = 'me'; $('#simSugg').innerHTML = ''; saveSim(); renderSim();
+}
+
+// --- Gemini prediction: the WHOLE dialog → next line for the current speaker (standalone test bench) ---
+async function callGemini(prompt){
+  const r = await fetch(GEMINI_URL, {
+    method: 'POST',
+    headers: { 'Content-Type':'application/json', 'apikey':SUPABASE_KEY, 'Authorization':'Bearer '+SUPABASE_KEY },
+    body: JSON.stringify({ model:'gemini-2.5-flash', body:{
+      contents: [{ role:'user', parts:[{ text:prompt }] }],
+      generationConfig: { temperature:0.7, maxOutputTokens:200, thinkingConfig:{ thinkingBudget:0 } },
+    }}),
+  });
+  const j = await r.json();
+  return j?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+}
+let simPredictSeq = 0;
+let topSuggestion = '';   // full top prediction; the part AFTER the draft is shown grey inline
+let simCands = [];        // last fetched candidates [{full, disp}] — filtered live as you type
+let simShown = [];        // candidates currently visible (after filtering) — for 1/2/3 quick-pick
+let simJustPicked = false; // true right after a 1/2/3 pick → swallow a trailing "." (so "1." works too)
+function renderChips(list){
+  simShown = list;
+  $('#simSugg').innerHTML = list.map((it, i) =>
+    `<button class="sugg" data-full="${escapeHtml(it.full)}">${i + 1}. ${escapeHtml(it.disp || it.full)}</button>`
+  ).join('') || '<span class="dbg-t">keine Antwort</span>';
+}
+function autoGrow(){
+  // grow the textarea to fit the draft AND the ghost (which may run a few lines longer)
+  const ta = $('#simText'), g = $('#simGhost');
+  ta.style.height = 'auto';
+  ta.style.height = Math.max(ta.scrollHeight, g.scrollHeight) + 'px';
+}
+function updateGhost(){
+  const draft = $('#simText').value;
+  let typed = draft, suffix = '';
+  if(topSuggestion && topSuggestion.toLowerCase().startsWith(draft.toLowerCase())){
+    suffix = topSuggestion.slice(draft.length);          // continue: your text (white) + grey continuation
+  } else if(topSuggestion){
+    typed = ''; suffix = topSuggestion;                  // filter-selected: preview the whole candidate in grey
+  }
+  $('#simGhost').innerHTML = `<span class="g-typed">${escapeHtml(typed)}</span><span class="g-suffix">${escapeHtml(suffix)}</span>`;
+  if(suffix) $('#simText').placeholder = '';
+  autoGrow();
+}
+// Cut the draft off Gemini's full message and return only the continuation — tolerant of Gemini "fixing"
+// the draft (typos/case): match exactly if possible, else skip as many WORDS as the draft has.
+function continuationOf(draft, msg){
+  if(!draft) return msg.trim();
+  if(msg.toLowerCase().startsWith(draft.toLowerCase())) return msg.slice(draft.length);
+  const nWords = draft.trim().split(/\s+/).length;
+  let i = 0, count = 0;
+  while(count < nWords && i < msg.length){
+    while(i < msg.length && /\s/.test(msg[i])) i++;     // skip spaces
+    while(i < msg.length && !/\s/.test(msg[i])) i++;     // skip one word
+    count++;
+  }
+  return msg.slice(i);
+}
+async function simPredict(){
+  const seq = ++simPredictSeq;   // only the newest request is allowed to render
+  const cur = SIM.speaker === 'me' ? SIM.me : SIM.partner;
+  const draft = $('#simText').value.trim();
+  const dialog = SIM.msgs.map(m => (m.who === 'me' ? SIM.me : SIM.partner) + ': ' + m.text).join('\n');
+  const base = SIM.msgs.length ? `Das ist ein Chat zwischen ${SIM.me} und ${SIM.partner}:\n\n${dialog}\n\n` : '';
+  const task = draft
+    ? `${cur} tippt gerade an einer Nachricht und hat bisher GENAU das getippt: "${draft}". Gib 3 verschiedene ` +
+      `VOLLSTÄNDIGE Nachrichten zurück, die JEWEILS EXAKT mit genau diesem getippten Anfang beginnen und ihn dann ` +
+      `natürlich fortsetzen, kurz, auf Deutsch, passend zum Verlauf.`
+    : (SIM.msgs.length
+        ? `Schreibe die nächste Nachricht von ${cur} — kurz, natürlich, auf Deutsch, passend zum Verlauf. 3 verschiedene Varianten.`
+        : `Schreibe eine erste, natürliche Chat-Nachricht von ${SIM.me} an ${SIM.partner}, auf Deutsch. 3 verschiedene Varianten.`);
+  const prompt = base + task + ` Je eine pro Zeile, ohne Nummerierung, ohne Anführungszeichen.`;
+  $('#simSugg').innerHTML = '<span class="dbg-t">… Gemini denkt nach</span>';
+  try {
+    const text = await callGemini(prompt);
+    if(seq !== simPredictSeq) return;   // a newer request superseded this one
+    // strip list markers / wrapping quotes
+    const lines = text.split('\n').filter(s => s.trim())
+      .map(s => s.replace(/^\s*(?:[-•*"»«]|\d+[.)])\s*/, '').replace(/\s*["»«]$/, ''))
+      .slice(0, 3);
+    // Gemini returns the FULL message starting with the draft → strip that repeated draft so chips AND the
+    // ghost show ONLY the continuation, while keeping the user's EXACT draft (casing/typos).
+    const seen = new Set();
+    const items = lines.map(msg => {
+      const cont = continuationOf(draft, msg);                 // tolerant strip (handles typos Gemini fixed)
+      return { full: draft ? draft + cont : cont, disp: cont.trim() };
+    }).filter(it => { const k = it.disp.toLowerCase(); if(!it.disp || seen.has(k)) return false; seen.add(k); return true; });
+    simCands = items;
+    renderChips(items);
+    topSuggestion = items[0] ? items[0].full : '';   // grey inline ghost — always continues the exact draft
+    updateGhost();
+  } catch(e){
+    if(seq !== simPredictSeq) return;
+    $('#simSugg').innerHTML = '';
+    status('Gemini-Fehler: ' + (e.message || e));
+  }
+}
+
+async function loadDebug(){
+  const list = $('#debugList');
+  try {
+    const { data, error } = await db().from(DEBUG_TABLE)
+      .select('ts,midword,last_token,ctx,resp,native').order('ts', { ascending:false }).limit(150);
+    if(error) throw error;
+    if(!data || !data.length){
+      list.innerHTML = '<div class="empty">Noch keine Debug-Einträge. Tippe auf dem Pixel (kurze Pause).</div>';
+      status('Debug: 0 Einträge'); return;
+    }
+    list.innerHTML = data.map(r=>{
+      const t = new Date(r.ts).toLocaleString('de-DE');
+      let ours = []; try { ours = JSON.parse(r.resp) || []; } catch(e){}
+      let nat  = []; try { nat  = JSON.parse(r.native) || []; } catch(e){}
+      const natHtml = nat.length ? `<span class="dbg-native">${escapeHtml(nat.join('  ·  '))}</span>` : '';
+      const boxes   = ours.map(s => `<span class="dbg-box">${escapeHtml(s)}</span>`).join('');
+      return `<div class="dbg">
+        <span class="dbg-ctx">${escapeHtml(r.ctx || '')}</span>
+        <span class="dbg-arrow">→</span>
+        ${natHtml}
+        <span class="dbg-boxes">${boxes}</span>
+        <span class="grow"></span>
+        <span class="dbg-t">${t}</span>
+      </div>`;
+    }).join('');
+    status(data.length + ' Debug-Einträge · ' + new Date().toLocaleTimeString('de-DE'));
+  } catch(e){
+    list.innerHTML = '<div class="empty">Fehler: ' + escapeHtml(e.message || String(e)) + '</div>';
+  }
+}
+
+// wire up
+$('#unlock').addEventListener('click', unlock);
+$('#pass').addEventListener('keydown', e=>{ if(e.key==='Enter') unlock(); });
+$('#lockBtn').addEventListener('click', lock);
+['#search','#fApp','#fPeer'].forEach(s=>$(s).addEventListener('input', e=>{
+  localStorage.setItem('aiboard_filter_' + e.target.id, e.target.value);   // persist across reloads
+  render();
+}));
+
+// click a person card → select that person (toggle off if already selected), like the combo
+$('#people').addEventListener('click', e=>{
+  const card = e.target.closest('.person'); if(!card) return;
+  const next = ($('#fPeer').value === card.dataset.peer) ? '' : card.dataset.peer;
+  $('#fPeer').value = next;
+  localStorage.setItem('aiboard_filter_fPeer', next);
+  render();
+});
+
+// data source combobox (Demo | Real) + Real-only test buttons
+$('#src').value = SOURCE;
+$('#src').addEventListener('change', async e=>{
+  SOURCE = e.target.value;
+  localStorage.setItem('aiboard_src', SOURCE);
+  updateRealTools();
+  if(KEY) await loadData();           // reload under the new source if already unlocked
+});
+$('#pushDemo').addEventListener('click', pushDemoToCloud);
+$('#clearCloud').addEventListener('click', clearCloud);
+
+// view tabs (Korpus | Debug) + live debug auto-refresh every 5 s while on Debug
+$('#tabKorpus').addEventListener('click', () => showView('korpus'));
+$('#tabDebug').addEventListener('click', () => showView('debug'));
+$('#tabSim').addEventListener('click', () => showView('sim'));
+$('#dbgRefresh').addEventListener('click', loadDebug);
+setInterval(() => { if (VIEW === 'debug') loadDebug(); }, 5000);
+
+// chat simulator controls
+$('#simSend').addEventListener('click', simSend);
+$('#simClear').addEventListener('click', simClear);
+$('#simText').addEventListener('keydown', e => {
+  const draft = $('#simText').value;
+  // 1/2/3 (or "1.") on an EMPTY field → pick that suggestion INTO the field (selected, NOT sent)
+  if(!draft && ['1','2','3'].includes(e.key) && simShown[Number(e.key) - 1]){
+    e.preventDefault();
+    topSuggestion = simShown[Number(e.key) - 1].full;   // select as the GUIDE; field stays empty → ghost grey
+    simJustPicked = true; updateGhost();                // Tab then builds it word by word
+    return;
+  }
+  if(e.key === '.' && simJustPicked){ e.preventDefault(); simJustPicked = false; return; }   // swallow the "." of "1."
+  simJustPicked = false;
+  if(e.key === 'Tab' && topSuggestion){
+    e.preventDefault();
+    if(topSuggestion.toLowerCase().startsWith(draft.toLowerCase())){
+      if(topSuggestion.length > draft.length){                      // continue: accept the NEXT word
+        const suffix = topSuggestion.slice(draft.length);
+        $('#simText').value = draft + (suffix.match(/^\s*\S+\s?/) || [suffix])[0];
+        updateGhost();
+      }
+      // else already complete → do nothing
+    } else {                                                         // filter-selected: build word-by-word from the start
+      $('#simText').value = (topSuggestion.match(/^\s*\S+\s?/) || [topSuggestion])[0];
+      updateGhost();
+    }
+  } else if(e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); simSend(); }
+});
+$('#simText').addEventListener('scroll', () => { $('#simGhost').scrollTop = $('#simText').scrollTop; });
+let simTypeTimer = null;
+$('#simText').addEventListener('input', () => {
+  const s = $('#simText').value.trim().toLowerCase();
+  // keep the candidates that CONTAIN what you typed (prefix OR anywhere, e.g. "holst" → "wiederholst")
+  const matches = s ? simCands.filter(c => c.full.toLowerCase().includes(s)) : simCands;
+  clearTimeout(simTypeTimer);
+  if(matches.length){
+    renderChips(matches);                             // non-matching chips drop out
+    const pref = matches.find(c => c.full.toLowerCase().startsWith(s));
+    topSuggestion = pref ? pref.full : (matches.length === 1 ? matches[0].full : '');  // ambiguous → no pick yet
+    updateGhost();
+  } else {
+    topSuggestion = ''; updateGhost();
+    $('#simSugg').innerHTML = '';
+    simTypeTimer = setTimeout(simPredict, 450);       // diverged from all → ask Gemini fresh
+  }
+});
+$('#simMe').addEventListener('input', e => { SIM.me = e.target.value || 'Ich'; saveSim(); renderSim(); });
+$('#simPartner').addEventListener('input', e => { SIM.partner = e.target.value || 'Partner'; saveSim(); renderSim(); });
+$('#simMe').addEventListener('click', () => setSpeaker('me'));            // click a persona name = type as them
+$('#simPartner').addEventListener('click', () => setSpeaker('partner'));
+$('#simSugg').addEventListener('click', e => {
+  const b = e.target.closest('.sugg'); if(!b) return;
+  $('#simText').value = b.dataset.full || b.textContent;   // adopt the clicked message into the field → send it
+  simSend();
+});
+
+// auto-unlock if a passphrase was persisted on this device
+const savedPass = localStorage.getItem('aiboard_pass');
+if(savedPass){ $('#pass').value = savedPass; unlock(); }
+else status('Bereit. Passphrase eingeben.');
+// restore the active tab (Debug/Sim need no passphrase); Korpus is handled by the unlock flow above
+const savedTab = localStorage.getItem('aiboard_tab');
+if(savedTab === 'debug' || savedTab === 'sim') showView(savedTab);
+</script>
+</body>
+</html>
