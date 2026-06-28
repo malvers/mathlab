@@ -3,25 +3,30 @@
 // Why: the browser hitting the public Overpass mirrors directly gets rate-limited / refused / timed
 // out (and is at the mercy of the client's local network — proxy, security tool, flaky mirror). Every
 // tracker module also kept its own copy of the mirror list + fetch + failover. This function
-// centralises that ONE server-side: the client sends the Overpass QL, we POST it to the three public
-// mirrors with rotation + per-mirror timeout + failover, and return the RAW Overpass JSON
-// byte-identical (including any `remark` and element `center`) so callers need NO parsing change.
+// centralises that ONE server-side: the client sends the Overpass QL, we RACE all three public mirrors
+// in parallel (Promise.any) — the first healthy 200 wins, a slow/dead mirror is simply ignored — and
+// return that mirror's RAW Overpass JSON byte-identical (including any `remark` and element `center`)
+// so callers need NO parsing change.
+//
+// Racing (not sequential failover) is the whole point: when a mirror is overloaded it just hangs, and
+// a sequential loop would burn the client's whole timeout budget on the first slow mirror before ever
+// trying a fast one. Parallel means we return as soon as ANY mirror answers.
 //
 // No secret needed — the Overpass mirrors are key-less (CLAUDE.md rule 18). Deploy public, like
 // fuel-prices / tomtom-traffic (it only calls an external API and touches no user data):
 //   supabase functions deploy overpass --no-verify-jwt --project-ref fyfhxzyymmurlaenmzse
 
-// Three key-less public mirrors (same set the modules used). Rotated per request so we don't always
-// hammer the same one first.
+// Three key-less public mirrors (same set the modules used).
 const MIRRORS = [
   'https://overpass-api.de/api/interpreter',
   'https://overpass.kumi.systems/api/interpreter',
   'https://overpass.private.coffee/api/interpreter',
 ];
-let mirrorRot = 0; // module-scoped rotation cursor (survives across invocations in a warm instance)
 
-const MAX_QL = 100000;       // guard: reject absurd bodies (the corridor query is the biggest, ~tens of KB)
-const PER_MIRROR_MS = 28000; // matches the longest client need (speedprofile corridor, server [timeout:25])
+const MAX_QL = 100000;          // guard: reject absurd bodies (the corridor query is the biggest, ~tens of KB)
+const DEFAULT_TIMEOUT_MS = 12000; // per-mirror abort if the client didn't ask for a specific budget
+const MIN_TIMEOUT_MS = 3000;
+const MAX_TIMEOUT_MS = 28000;   // ceiling — covers the speedprofile corridor (server-side [timeout:25])
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -36,24 +41,54 @@ function json(obj: unknown, status = 200): Response {
   });
 }
 
-// Pull the Overpass QL out of the request. Tolerate BOTH shapes:
-//   • JSON body { data: <ql> }  (preferred — what the shared client helper sends, like fuel)
-//   • form body  data=<urlencoded ql>  (what the old direct-to-mirror callers sent)
-async function readQL(req: Request): Promise<string | null> {
+// Pull the Overpass QL (+ optional per-mirror timeout) out of the request. Tolerate BOTH shapes:
+//   • JSON body { data: <ql>, timeout?: <ms> }  (preferred — what the shared client helper sends)
+//   • form body  data=<urlencoded ql>           (legacy direct-to-mirror callers)
+async function readBody(req: Request): Promise<{ ql: string | null; timeout: number }> {
   const ct = (req.headers.get('content-type') || '').toLowerCase();
   try {
     if (ct.includes('application/json')) {
       const b = await req.json().catch(() => ({}));
-      const q = (b && (b.data ?? b.q ?? b.ql));
-      return typeof q === 'string' && q.trim() ? q : null;
+      const ql = b && (b.data ?? b.q ?? b.ql);
+      const t = b && Number(b.timeout);
+      return { ql: typeof ql === 'string' && ql.trim() ? ql : null, timeout: Number.isFinite(t) ? t : 0 };
     }
-    // form-urlencoded (or anything else) → read raw text and parse `data=`
     const raw = await req.text();
-    const params = new URLSearchParams(raw);
-    const q = params.get('data');
-    return q && q.trim() ? q : null;
+    const p = new URLSearchParams(raw);
+    const ql = p.get('data');
+    const t = Number(p.get('timeout'));
+    return { ql: ql && ql.trim() ? ql : null, timeout: Number.isFinite(t) ? t : 0 };
   } catch (_e) {
-    return null;
+    return { ql: null, timeout: 0 };
+  }
+}
+
+// Fetch one mirror, aborting after timeoutMs. Resolves with the upstream JSON TEXT on a clean 200;
+// rejects (so Promise.any moves on) on non-200, timeout, or network error.
+async function tryMirror(url: string, body: string, timeoutMs: number): Promise<string> {
+  const host = url.replace(/^https?:\/\//, '').split('/')[0];
+  const ctrl = new AbortController();
+  const to = setTimeout(() => ctrl.abort(), timeoutMs);
+  try {
+    const r = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'User-Agent': 'DocAlversTracker/1.0 (overpass-proxy)',
+      },
+      body,
+      signal: ctrl.signal,
+    });
+    if (!r.ok) { console.error('overpass mirror', host, 'HTTP', r.status); throw new Error(host + ' HTTP ' + r.status); }
+    const text = await r.text(); // pass the upstream JSON through verbatim (keeps remark / center / etc.)
+    console.log('overpass mirror', host, 'OK', text.length, 'bytes');
+    return text;
+  } catch (e) {
+    const name = e && (e as Error).name;
+    if (name === 'AbortError') console.error('overpass mirror', host, 'TIMEOUT');
+    throw e;
+  } finally {
+    clearTimeout(to);
   }
 }
 
@@ -61,47 +96,21 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS });
   if (req.method !== 'POST') return json({ error: 'POST only' }, 405);
 
-  const ql = await readQL(req);
+  const { ql, timeout } = await readBody(req);
   if (!ql) return json({ error: 'missing Overpass QL (send {"data": "..."})' }, 400);
   if (ql.length > MAX_QL) return json({ error: 'query too large' }, 413);
 
+  const perMirror = Math.min(MAX_TIMEOUT_MS, Math.max(MIN_TIMEOUT_MS, timeout || DEFAULT_TIMEOUT_MS));
   const body = 'data=' + encodeURIComponent(ql);
-  let lastErr = 'all mirrors failed';
 
-  // Try each mirror in turn from a rotated start; abort a stuck mirror after PER_MIRROR_MS and fail
-  // over to the next. On the first clean 200 we stick the rotation cursor to the winner and stream its
-  // JSON back UNCHANGED.
-  for (let i = 0; i < MIRRORS.length; i++) {
-    const idx = (mirrorRot + i) % MIRRORS.length;
-    const url = MIRRORS[idx];
-    const host = url.replace(/^https?:\/\//, '').split('/')[0];
-    const ctrl = new AbortController();
-    const to = setTimeout(() => ctrl.abort(), PER_MIRROR_MS);
-    try {
-      const r = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-          'User-Agent': 'DocAlversTracker/1.0 (overpass-proxy)',
-        },
-        body,
-        signal: ctrl.signal,
-      });
-      if (!r.ok) { lastErr = host + ' HTTP ' + r.status; continue; } // 429/5xx → next mirror
-      const text = await r.text(); // pass the upstream JSON through verbatim (keeps remark / center / etc.)
-      mirrorRot = idx; // stick with the mirror that worked
-      return new Response(text, {
-        status: 200,
-        headers: { ...CORS, 'Content-Type': 'application/json' },
-      });
-    } catch (e) {
-      lastErr = host + ' ' + ((e && (e as Error).name === 'AbortError') ? 'TIMEOUT' : String((e as Error)?.message || e));
-    } finally {
-      clearTimeout(to);
-    }
+  // Race all mirrors; the first clean 200 wins, the rest are abandoned. If every mirror rejects,
+  // Promise.any throws an AggregateError → 502, which the client helper maps to null (callers then
+  // behave exactly as when their old overpass() returned null).
+  try {
+    const text = await Promise.any(MIRRORS.map((u) => tryMirror(u, body, perMirror)));
+    return new Response(text, { status: 200, headers: { ...CORS, 'Content-Type': 'application/json' } });
+  } catch (_e) {
+    console.error('overpass: all mirrors failed');
+    return json({ error: 'overpass: all mirrors failed' }, 502);
   }
-
-  // Every mirror failed → small JSON error with a non-200 status (502). The client helper maps any
-  // non-ok / throw to null, so callers behave exactly as when their old overpass() returned null.
-  return json({ error: 'overpass: ' + lastErr }, 502);
 });
