@@ -193,7 +193,7 @@ Deno.serve(async (req) => {
     const warn = r2pctN >= 80 || dbpctN >= 80;
     const provs = Object.keys(ai.byProvider).sort();
     const LBL: Record<string, string> = { claude: 'Claude', deepseek: 'DeepSeek', gemini: 'Gemini' };
-    const subject = `📊 R2 ${r2pct}% · DB ${dbpct}%` + (ai.total > 0 ? ` · KI ${eurFmt(ai.total)}` : '');
+    const subject = 'Stats and costs';
 
     // ── Plaintext-Body (Fallback im multipart/alternative) ──
     const aiText = provs.length
@@ -209,7 +209,7 @@ Deno.serve(async (req) => {
       (searches > 0 ? `\nGemini-Suchen (24 h): ${searches} / 1500 gratis\n` : '') + `\n` +
       `Verbrauch beim Anbieter:\n` +
       `• Cloudflare R2: https://dash.cloudflare.com/?to=/:account/r2/overview\n` +
-      `• Supabase:      https://supabase.com/dashboard/project/fyfhxzyymmurlaenmzse/usage\n\n` +
+      `• Supabase:      https://supabase.com/dashboard/project/fyfhxzyymmurlaenmzse/reports/database\n\n` +
       `Exakte Kosten beim Anbieter:\n` +
       `• Claude:   https://console.anthropic.com/settings/cost\n` +
       `• Gemini:   https://console.cloud.google.com/billing/01B7AA-7DDDCA-D629CE\n` +
@@ -259,7 +259,7 @@ Deno.serve(async (req) => {
       + `${warn ? '⚠️ Achtung: ein Wert über 80 % — Zeit, aufzuräumen.' : '✓ Alles im grünen Bereich.'}</div>`
       + `<p style="color:${C.muted};font-size:12px;margin:18px 0 0;line-height:1.8;">Verbrauch beim Anbieter:<br>`
       + `Cloudflare R2 · <a href="https://dash.cloudflare.com/?to=/:account/r2/overview" style="color:${C.navy};">dash.cloudflare.com</a> &nbsp;|&nbsp; `
-      + `Supabase · <a href="https://supabase.com/dashboard/project/fyfhxzyymmurlaenmzse/usage" style="color:${C.navy};">supabase.com</a></p>`
+      + `Supabase · <a href="https://supabase.com/dashboard/project/fyfhxzyymmurlaenmzse/reports/database" style="color:${C.navy};">supabase.com</a></p>`
       + `<p style="color:${C.muted};font-size:12px;margin:10px 0 0;line-height:1.8;">Exakte Kosten beim Anbieter:<br>`
       + `Claude · <a href="https://console.anthropic.com/settings/cost" style="color:${C.navy};">console.anthropic.com</a> &nbsp;|&nbsp; `
       + `Gemini · <a href="https://console.cloud.google.com/billing/01B7AA-7DDDCA-D629CE" style="color:${C.navy};">cloud.google.com</a> &nbsp;|&nbsp; `
