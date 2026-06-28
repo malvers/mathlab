@@ -1225,7 +1225,7 @@ window.TrackerNav = function (ctx) {
             // ("zu spät / verpasst", Doc 2026-06-27). So announce it AT ONCE here. Beyond `far` there's still
             // plenty of road → fall through and let the normal pre-warning handle it.
             if (d <= farTriggerM()) {
-                if (m.type === 'arrive') { annFar = true; speak('In ' + announceDist(d) + ' Metern erreichen Sie das Ziel.'); }
+                if (m.type === 'arrive') { annFar = true; speak('In ' + announceDist(d) + ' Metern erreichst du das Ziel.'); }
                 else if (d <= nearTriggerM()) { annNear = true; speak('Jetzt ' + m.text, true); }
                 else { annFar = true; speak('In ' + announceDist(d) + ' Metern ' + m.text + '.'); }
                 return;
@@ -1233,8 +1233,8 @@ window.TrackerNav = function (ctx) {
         }
         if (m.type === 'arrive') {
             // Destination: you stop there (no overshoot to detect), so announce + finish at the near window.
-            if (d <= nearTriggerM()) { speak('Sie haben das Ziel erreicht.'); advanceManeuver(); if (ctx.onArrive) ctx.onArrive(); }
-            else if (d <= farTriggerM() && !annFar) { annFar = true; speak('In ' + announceDist(d) + ' Metern erreichen Sie das Ziel.'); }
+            if (d <= nearTriggerM()) { speak('Du hast das Ziel erreicht.'); advanceManeuver(); if (ctx.onArrive) ctx.onArrive(); }
+            else if (d <= farTriggerM() && !annFar) { annFar = true; speak('In ' + announceDist(d) + ' Metern erreichst du das Ziel.'); }
             return;
         }
         // Pre-warning at `far` and "Jetzt …" at `nearTrigger` — BOTH per mode (car/bike/foot, see GUIDE_BY_MODE)
