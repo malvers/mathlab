@@ -16,13 +16,14 @@
 // fuel-prices / tomtom-traffic (it only calls an external API and touches no user data):
 //   supabase functions deploy overpass --no-verify-jwt --project-ref fyfhxzyymmurlaenmzse
 
-// Key-less public mirrors, raced in parallel. Geographically diverse (DE / CH / FR) so a regional
-// overload or outage of one operator doesn't take us down — the first healthy one wins the race.
+// Key-less public mirrors, raced in parallel — the first healthy one wins, so an overload/outage of one
+// operator doesn't take us down. ALL must be WORLDWIDE instances: a regional extract (e.g. the Swiss
+// overpass.osm.ch, verified 2026-06-28 to hold no Dresden data) would return a fast 200 with EMPTY
+// elements, win the race, and falsely report "no road". overpass.openstreetmap.fr verified worldwide.
 const MIRRORS = [
   'https://overpass-api.de/api/interpreter',
   'https://overpass.kumi.systems/api/interpreter',
   'https://overpass.private.coffee/api/interpreter',
-  'https://overpass.osm.ch/api/interpreter',
   'https://overpass.openstreetmap.fr/api/interpreter',
 ];
 
