@@ -581,6 +581,7 @@
         let __media = null;        // Foto-Spur module instance (js/tracker-media.js)        // their Leaflet markers (kept for clearing)
         let __nav = null;          // simple-navigation module instance (js/tracker-nav.js)
         let __speed = null;        // speed-limit sign module instance (js/tracker-speedlimit.js)
+        let __speedprofile = null; // per-route speed-limit profile (js/tracker-speedprofile.js)
         let __streetq = null;      // desktop road-quality hover tip (js/tracker-streetquality.js)
         let __compass = null;      // north/compass module instance (js/tracker-compass.js)
         let __fuel = null;         // fuel-station price layer (js/tracker-fuel.js)
@@ -2482,8 +2483,13 @@ ${pts}
         });
         // ---- Simple navigation → js/tracker-nav.js. Owns its own route/destination layers; the core
         //      only asks hasDestination() on START and clearRoute() on STOP (finish/discard). ----
+        // ---- Per-route speed-limit profile → js/tracker-speedprofile.js. Built by nav when a route is
+        //      computed; feeds the speed-sign so it switches limits exactly at the precomputed points and
+        //      draws change-point badges on the route. Created BEFORE nav (passed in) + the sign. ----
+        __speedprofile = (typeof TrackerSpeedProfile !== 'undefined') ? TrackerSpeedProfile({ map }) : null;
         __nav = TrackerNav({
             map, $, toast, showPanel, hidePanels,
+            speedProfile: __speedprofile,
             apiUrl: SUPABASE_URL, apiKey: SUPABASE_KEY,   // → `reroute` Edge Function (ORS) when REROUTE_ENGINE='ors'
             get posMarker() { return posMarker; },
             // Lazy handle to the traffic module (built AFTER nav) → a reroute can pull active closures and
@@ -2522,7 +2528,9 @@ ${pts}
         });
         // ---- Speed-limit sign → js/tracker-speedlimit.js. Position-driven (fed from onPosition),
         //      independent of navigation; owns its own #speed-sign badge. ----
-        __speed = TrackerSpeedLimit({ $ });
+        __speed = TrackerSpeedLimit({ $, profile: __speedprofile });
+        // Give the profile the SAME tag→limit resolver the sign uses, so its precomputed numbers match.
+        if (__speedprofile && __speed.resolveLimit) __speedprofile.setResolver(__speed.resolveLimit);
         // ---- Road-quality hover tip → js/tracker-streetquality.js. Mouse-only (Mac): rest the cursor on
         //      the map → Overpass tells us the road's OSM surface/smoothness in a small tooltip. No-op on
         //      touch (no hover there). ----

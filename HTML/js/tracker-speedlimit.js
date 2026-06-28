@@ -6,6 +6,10 @@
 // so failures are silent and the last known limit stays on screen.
 window.TrackerSpeedLimit = function (ctx) {
     const { $ } = ctx;
+    // Optional route speed profile (js/tracker-speedprofile.js): while navigating it gives the limit
+    // INSTANTLY at the exact switch point (and lets us skip live Overpass polling). Attached after init
+    // via setProfile() so creation order doesn't matter.
+    let profile = ctx.profile || null;
 
     // Several public Overpass mirrors — the main one is often slow / rate-limited (HTTP 429), which
     // left the sign blank even on tagged roads. We try them in order until one answers (CLAUDE.md
@@ -232,6 +236,15 @@ window.TrackerSpeedLimit = function (ctx) {
     // Called from the core on every GPS fix: update the over-limit colour every time (cheap), and
     // re-query Overpass only when throttle + movement allow.
     function update(here, still, speedKmh) {
+        // Route profile first: if we're navigating a profiled route, take the precomputed limit for this
+        // exact position — instant + accurate switch points — and skip Overpass entirely this fix. A
+        // `null` from limitAt means "on route but no data here" → fall through to live polling for that
+        // gap; `undefined` means "no profile / off route" → normal live polling.
+        let fromProfile = false;
+        if (here && profile && profile.hasRoute && profile.hasRoute()) {
+            const pl = profile.limitAt(here);
+            if (pl !== undefined && pl !== null) { curLimit = pl; setSign(pl, false); fromProfile = true; }
+        }
         if (typeof curLimit === 'number' && speedKmh != null) {
             setSign(curLimit, speedKmh > curLimit + OVER_TOL_KMH);
             // 8 km/h over the limit → the small bell. Re-reminds every BING_REPEAT_MS while still over.
@@ -241,6 +254,7 @@ window.TrackerSpeedLimit = function (ctx) {
                 lastBing = 0; // back to legal → re-arm so the next exceedance chimes immediately
             }
         }
+        if (fromProfile) return; // the route profile already set the sign → don't poll Overpass this fix
         // query while moving; ALSO do one query when we still have no limit (e.g. a standing cold
         // start) so the sign shows immediately on a known road, not only once you start driving.
         if (!here || fetching) return;
@@ -263,5 +277,10 @@ window.TrackerSpeedLimit = function (ctx) {
 
     setSign(null, false); // show the ∞ default right away, before the first GPS fix (Doc 2026-06-18)
 
-    return { update, clear, unlockAudio, setBell, bellEnabled, currentRoad: () => lastRoad };
+    // resolveLimit: the SAME tag→limit logic the profile must use so its numbers match the live sign.
+    // setProfile: attach the route profile after init (creation order independent).
+    return {
+        update, clear, unlockAudio, setBell, bellEnabled, currentRoad: () => lastRoad,
+        resolveLimit: wayLimit, setProfile: (p) => { profile = p; },
+    };
 };

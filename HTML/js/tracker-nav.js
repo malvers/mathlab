@@ -547,6 +547,7 @@ window.TrackerNav = function (ctx) {
         rerouting = false;   // don't let an aborted reroute leave the flag stuck → would block future routing
         lastBrgPos = null; travelBrg = null; offRouteCount = 0;  // drop the stale travel heading for the next navigation
         clearRouteLine();
+        if (ctx.speedProfile) ctx.speedProfile.clear(); // drop the route's speed-limit badges + profile
         keepAlive.stop();   // navigation over → release the audio keep-alive (battery / audio focus)
         if (destMarker) { map.removeLayer(destMarker); destMarker = null; }
         destLatLng = null; destLabel = '';
@@ -613,6 +614,11 @@ window.TrackerNav = function (ctx) {
         if (!data || data.code !== 'Ok' || !data.routes || !data.routes.length) { toast('Keine Route gefunden.'); return false; }
         const best = data.routes[0];
         drawRoute(best.geometry);
+        // Precompute the speed-limit profile for the whole route → instant, accurate sign switching and
+        // change-point badges on the line (js/tracker-speedprofile.js). Fire-and-forget; cached per route.
+        if (ctx.speedProfile && routeLatLngs && routeLatLngs.length > 1) {
+            ctx.speedProfile.build(routeLatLngs, { mode: routeType, start: from, dest: destLatLng });
+        }
         setGuidance(best);
         freshReroute = !!reroute;            // reroute → let guidanceUpdate fire the first turn immediately (see below)
         routeTotalDist = best.distance || 0; // for ETA / remaining in the banner
