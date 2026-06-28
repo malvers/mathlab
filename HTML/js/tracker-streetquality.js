@@ -13,14 +13,8 @@ window.TrackerStreetQuality = function (ctx) {
     const fine = window.matchMedia && window.matchMedia('(pointer: fine)').matches;
     if (!map || !fine) return { destroy: function () {} };
 
-    // Same key-less Overpass mirrors as tracker-speedlimit.js (rule 18). Rotated so we don't always hit
-    // the same one first.
-    const OVERPASS_MIRRORS = [
-        'https://overpass-api.de/api/interpreter',
-        'https://overpass.kumi.systems/api/interpreter',
-        'https://overpass.private.coffee/api/interpreter',
-    ];
-    let mirrorRot = 0;
+    // Overpass now goes through the shared server-side proxy (window.queryOverpass → `overpass` Edge
+    // Function), which owns the mirror list + rotation + failover (rule 18: all key-less).
     const HOVER_DELAY_MS = 350;    // how long the mouse must rest before we query (debounce)
     const MIN_INTERVAL_MS = 1200;  // never query Overpass more often than this, however fast you wiggle
     const QUERY_TIMEOUT_MS = 9000; // abort a stuck request
@@ -129,27 +123,10 @@ window.TrackerStreetQuality = function (ctx) {
         return min;
     }
 
+    // Thin wrapper around the shared proxy so the call sites below stay unchanged. Keeps the 🛣️ debug
+    // line and this module's QUERY_TIMEOUT_MS client-side abort. Returns parsed JSON or null, as before.
     async function overpass(q) {
-        for (let i = 0; i < OVERPASS_MIRRORS.length; i++) {
-            const url = OVERPASS_MIRRORS[(mirrorRot + i) % OVERPASS_MIRRORS.length];
-            const host = url.replace(/^https?:\/\//, '').split('/')[0];
-            const ctrl = new AbortController();
-            const to = setTimeout(() => ctrl.abort(), QUERY_TIMEOUT_MS);
-            try {
-                const r = await fetch(url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: 'data=' + encodeURIComponent(q),
-                    signal: ctrl.signal,
-                });
-                if (!r.ok) { dbg('mirror ' + host + ' → HTTP ' + r.status); continue; }
-                const j = await r.json();
-                mirrorRot = (mirrorRot + i) % OVERPASS_MIRRORS.length;
-                return j;
-            } catch (e) { dbg('mirror ' + host + ' → ' + (e && e.name === 'AbortError' ? 'TIMEOUT' : (e && e.message) || 'Fehler')); }
-            finally { clearTimeout(to); }
-        }
-        return null;
+        return window.queryOverpass(q, { timeout: QUERY_TIMEOUT_MS, dbg: dbg });
     }
 
     // Build the tip HTML for the nearest drivable way's tags. Returns null if the road carries no
