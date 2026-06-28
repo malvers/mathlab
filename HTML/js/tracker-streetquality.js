@@ -15,17 +15,13 @@ window.TrackerStreetQuality = function (ctx) {
 
     // Overpass now goes through the shared server-side proxy (window.queryOverpass → `overpass` Edge
     // Function), which owns the mirror list + rotation + failover (rule 18: all key-less).
-    const HOVER_DELAY_MS = 350;    // how long the mouse must rest before we query (debounce)
-    const MIN_INTERVAL_MS = 1200;  // never query Overpass more often than this, however fast you wiggle
     const QUERY_TIMEOUT_MS = 9000; // abort a stuck request
-    const SEARCH_RADIUS_M = 25;    // only roads within this many metres of the cursor count
+    const SEARCH_RADIUS_M = 25;    // only roads within this many metres of the click point count
 
-    let lastQ = 0;                 // timestamp of the last Overpass query
-    let hoverTimer = null;         // the rest-debounce timer
     let lastClient = null;         // { x, y } of the cursor in CSS pixels (for tip placement)
-    let lastLatLng = null;         // map coords under the cursor (so Alt-down can query without a move)
+    let lastLatLng = null;         // map coords under the cursor
     let reqId = 0;                 // bumped per query so a slow earlier response can't overwrite a newer one
-    let altDown = false;           // is the Option/Alt key currently held? hover only works while it is
+    let altDown = false;           // is the Option/Alt key currently held? (shows the crosshair cursor)
 
     // The map container — we flip its cursor to a crosshair while Alt is held so it's clear the
     // road-info probe is armed.
@@ -185,47 +181,38 @@ window.TrackerStreetQuality = function (ctx) {
         }
     }
 
-    // Schedule a (throttled, debounced) Overpass query for the current cursor position. Only ever
-    // called while Alt is held — that's the whole gate Doc asked for.
-    function schedule(latlng) {
-        if (hoverTimer) clearTimeout(hoverTimer);
-        hoverTimer = setTimeout(() => {
-            const now = Date.now();
-            if (now - lastQ < MIN_INTERVAL_MS) { dbg('throttle: warte (' + (MIN_INTERVAL_MS - (now - lastQ)) + 'ms)'); return; }
-            lastQ = now;
-            dbg('Abfrage @ ' + latlng.lat.toFixed(5) + ',' + latlng.lng.toFixed(5));
-            query(latlng);
-        }, HOVER_DELAY_MS);
-    }
-
-    // ---- Mouse wiring. While the mouse moves we keep the tip where it is but reposition it; once it
-    //      rests for HOVER_DELAY_MS we fire a query — but ONLY while the Option/Alt key is held.
+    // ---- Mouse wiring. Moving the mouse only keeps an open tip glued to the cursor; the actual
+    //      road-info query fires on an Option/Alt-CLICK (Doc's choice), not on hover-rest.
     function onMove(e) {
         lastClient = { x: e.originalEvent.clientX, y: e.originalEvent.clientY };
         lastLatLng = e.latlng;
         if (tip.style.opacity === '1') place();    // keep an open tip glued to the cursor
-        if (!altDown) return;                      // armed only while Alt is down
-        schedule(e.latlng);
     }
 
-    function onOut() {
-        if (hoverTimer) { clearTimeout(hoverTimer); hoverTimer = null; }
-        hideTip();
+    // Option/Alt + click on the map → probe the road at the clicked point.
+    function onClick(e) {
+        const oe = e.originalEvent;
+        if (!(altDown || (oe && oe.altKey))) return;   // only when Option is held
+        if (oe) lastClient = { x: oe.clientX, y: oe.clientY };
+        lastLatLng = e.latlng;
+        dbg('Klick-Abfrage @ ' + e.latlng.lat.toFixed(5) + ',' + e.latlng.lng.toFixed(5));
+        query(e.latlng);
     }
 
-    // ---- Keyboard gate. Holding Option/Alt arms the probe (crosshair cursor); releasing it disarms
-    //      and clears the tip. blur resets the state so a missed keyup can't leave it stuck on.
+    function onOut() { hideTip(); }
+
+    // ---- Keyboard gate. Holding Option/Alt shows the crosshair cursor so it's clear an Option-click
+    //      will probe the road; releasing it clears the cursor and any open tip. blur resets the state
+    //      so a missed keyup can't leave it stuck on.
     function arm() {
         if (altDown) return;
         altDown = true;
         if (mapEl) mapEl.style.cursor = 'crosshair';
-        if (lastLatLng) schedule(lastLatLng);      // probe immediately, even without a mouse move
     }
     function disarm() {
         if (!altDown) return;
         altDown = false;
         if (mapEl) mapEl.style.cursor = '';
-        if (hoverTimer) { clearTimeout(hoverTimer); hoverTimer = null; }
         hideTip();
     }
     function onKeyDown(e) { if (e.altKey || e.key === 'Alt') arm(); }
@@ -233,6 +220,7 @@ window.TrackerStreetQuality = function (ctx) {
 
     map.on('mousemove', onMove);
     map.on('mouseout', onOut);
+    map.on('click', onClick);
     window.addEventListener('keydown', onKeyDown);
     window.addEventListener('keyup', onKeyUp);
     window.addEventListener('blur', disarm);
@@ -240,14 +228,14 @@ window.TrackerStreetQuality = function (ctx) {
     function destroy() {
         map.off('mousemove', onMove);
         map.off('mouseout', onOut);
+        map.off('click', onClick);
         window.removeEventListener('keydown', onKeyDown);
         window.removeEventListener('keyup', onKeyUp);
         window.removeEventListener('blur', disarm);
-        if (hoverTimer) clearTimeout(hoverTimer);
         if (mapEl) mapEl.style.cursor = '';
         tip.remove();
     }
 
-    dbg('Straßenqualität-Hover aktiv (Maus, Alt-Taste halten)');
+    dbg('Straßenqualität aktiv (Option+Klick auf die Karte)');
     return { destroy };
 };
