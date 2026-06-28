@@ -148,6 +148,17 @@ Beide reden mit **einem** Modul über **eine** BLE-Funktion — die APK ist der 
 - [ ] BT-Modul + Netzteil eingetroffen *(Doc, ~25.06.)*
 - [ ] im **Chrome** testen: Modul an 12 V → Connect → PULS Kanal 1 → Relais klackt → Protokoll FFE0/FFE1/A0 gegenchecken
 - [ ] **Test-APK** bauen (`pagode-app`: npm install → cap:add → BLE-Permissions → cap:sync → Build)
-- [ ] Solita: `navigator.bluetooth` → `BleClient` (Plugin), Koppel-Knopf, `SIM_MODE=false`
+- [x] **Solita auf die gemeinsame BLE-Schicht umgestellt**: `solita-engine.js` nutzt `window.PagodeBLE`
+  (`js/pagode-ble.js`) — dasselbe Modul/Protokoll (FFE0/FFE1/A0) wie die START/STOPP-Knöpfe; die alte
+  Doppel-Kopie ist raus, `SIM_MODE` default **false** (echt nur solange gekoppelt, sonst Trockenlauf). Die
+  Sicherheits-Gates (deliberate Phrase „ja"+Verb+„Pagode" + GPS-Motion-Gate) bleiben.
+- [ ] **Koppel-Knopf** in `solita.html`: Web Bluetooth braucht eine **User-Geste** zum Koppeln (geht nicht aus
+  einem Sprach-Handler); bisher nur per `SolitaPagode.pair()` aus der Konsole. Kleiner „Pagode koppeln"-Knopf,
+  der `pair()` auf Tap aufruft.
+- [ ] **BLE-Plugin in die Solita-APK**: der native Pfad (`@capacitor-community/bluetooth-le`) steckt bisher nur
+  in `pagode-app`, nicht in `solita-app`. In **Chrome** läuft Solita→Modul; in der **Solita-APK** erst nach Einbau.
 - [ ] im Auto verdrahten (Bosch-70A an Klemme 50, Kanal-2-NC in die Zündung)
 - [ ] erster echter Start 🎉
+
+> **Reihenfolge fürs nächste Mal:** erst Hardware in Chrome gegenchecken (Modul an 12 V, Protokoll
+> FFE0/FFE1/A0 bestätigen) → **Koppel-Knopf** → **BLE-Plugin in die Solita-APK** → im Auto verdrahten.
