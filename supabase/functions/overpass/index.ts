@@ -16,11 +16,14 @@
 // fuel-prices / tomtom-traffic (it only calls an external API and touches no user data):
 //   supabase functions deploy overpass --no-verify-jwt --project-ref fyfhxzyymmurlaenmzse
 
-// Three key-less public mirrors (same set the modules used).
+// Key-less public mirrors, raced in parallel. Geographically diverse (DE / CH / FR) so a regional
+// overload or outage of one operator doesn't take us down — the first healthy one wins the race.
 const MIRRORS = [
   'https://overpass-api.de/api/interpreter',
   'https://overpass.kumi.systems/api/interpreter',
   'https://overpass.private.coffee/api/interpreter',
+  'https://overpass.osm.ch/api/interpreter',
+  'https://overpass.openstreetmap.fr/api/interpreter',
 ];
 
 const MAX_QL = 100000;          // guard: reject absurd bodies (the corridor query is the biggest, ~tens of KB)
