@@ -228,6 +228,7 @@
 </main>
 
 <script src="../js/vendor/supabase.min.js"></script>
+<script src="../js/chat-predictor.js"></script>
 <script>
 // ── AI Board corpus viewer ──────────────────────────────────────────────────
 // Standalone, self-contained. Mirrors the VGP crypto conventions so the Android
@@ -564,8 +565,10 @@ function renderSim(){
   $('#simText').placeholder = 'Nachricht als ' + cur + ' …';
 }
 function simSend(){
-  // Enter sends EXACTLY what's in the field. The grey ghost is never auto-sent — Tab pulls it in.
-  const t = $('#simText').value.trim();
+  // Enter sends the field; if the field is EMPTY but a suggestion is active (e.g. after a 1/2/3 pick, or the
+  // auto-ghost), send that whole suggestion. With typed text, only the field goes (ghost never appended).
+  let t = $('#simText').value.trim();
+  if(!t && topSuggestion) t = topSuggestion;
   if(!t) return;
   SIM.msgs.push({ who: SIM.speaker, text: t });
   SIM.speaker = SIM.speaker === 'me' ? 'partner' : 'me';   // identity auto-switches after sending
@@ -582,19 +585,8 @@ function simClear(){
   SIM.msgs = []; SIM.speaker = 'me'; $('#simSugg').innerHTML = ''; saveSim(); renderSim();
 }
 
-// --- Gemini prediction: the WHOLE dialog → next line for the current speaker (standalone test bench) ---
-async function callGemini(prompt){
-  const r = await fetch(GEMINI_URL, {
-    method: 'POST',
-    headers: { 'Content-Type':'application/json', 'apikey':SUPABASE_KEY, 'Authorization':'Bearer '+SUPABASE_KEY },
-    body: JSON.stringify({ model:'gemini-2.5-flash', body:{
-      contents: [{ role:'user', parts:[{ text:prompt }] }],
-      generationConfig: { temperature:0.7, maxOutputTokens:200, thinkingConfig:{ thinkingBudget:0 } },
-    }}),
-  });
-  const j = await r.json();
-  return j?.candidates?.[0]?.content?.parts?.[0]?.text || '';
-}
+// --- Gemini prediction via the reusable ChatPredictor module (the piece VGP will also use) ---
+ChatPredictor.init({ url: GEMINI_URL, key: SUPABASE_KEY });
 let simPredictSeq = 0;
 let topSuggestion = '';   // full top prediction; the part AFTER the draft is shown grey inline
 let simCands = [];        // last fetched candidates [{full, disp}] — filtered live as you type
@@ -624,49 +616,16 @@ function updateGhost(){
   if(suffix) $('#simText').placeholder = '';
   autoGrow();
 }
-// Cut the draft off Gemini's full message and return only the continuation — tolerant of Gemini "fixing"
-// the draft (typos/case): match exactly if possible, else skip as many WORDS as the draft has.
-function continuationOf(draft, msg){
-  if(!draft) return msg.trim();
-  if(msg.toLowerCase().startsWith(draft.toLowerCase())) return msg.slice(draft.length);
-  const nWords = draft.trim().split(/\s+/).length;
-  let i = 0, count = 0;
-  while(count < nWords && i < msg.length){
-    while(i < msg.length && /\s/.test(msg[i])) i++;     // skip spaces
-    while(i < msg.length && !/\s/.test(msg[i])) i++;     // skip one word
-    count++;
-  }
-  return msg.slice(i);
-}
 async function simPredict(){
   const seq = ++simPredictSeq;   // only the newest request is allowed to render
-  const cur = SIM.speaker === 'me' ? SIM.me : SIM.partner;
   const draft = $('#simText').value.trim();
-  const dialog = SIM.msgs.map(m => (m.who === 'me' ? SIM.me : SIM.partner) + ': ' + m.text).join('\n');
-  const base = SIM.msgs.length ? `Das ist ein Chat zwischen ${SIM.me} und ${SIM.partner}:\n\n${dialog}\n\n` : '';
-  const task = draft
-    ? `${cur} tippt gerade an einer Nachricht und hat bisher GENAU das getippt: "${draft}". Gib 3 verschiedene ` +
-      `VOLLSTÄNDIGE Nachrichten zurück, die JEWEILS EXAKT mit genau diesem getippten Anfang beginnen und ihn dann ` +
-      `natürlich fortsetzen, kurz, auf Deutsch, passend zum Verlauf.`
-    : (SIM.msgs.length
-        ? `Schreibe die nächste Nachricht von ${cur} — kurz, natürlich, auf Deutsch, passend zum Verlauf. 3 verschiedene Varianten.`
-        : `Schreibe eine erste, natürliche Chat-Nachricht von ${SIM.me} an ${SIM.partner}, auf Deutsch. 3 verschiedene Varianten.`);
-  const prompt = base + task + ` Je eine pro Zeile, ohne Nummerierung, ohne Anführungszeichen.`;
   $('#simSugg').innerHTML = '<span class="dbg-t">… Gemini denkt nach</span>';
   try {
-    const text = await callGemini(prompt);
+    const preds = await ChatPredictor.predict({
+      messages: SIM.msgs, me: SIM.me, partner: SIM.partner, speaker: SIM.speaker, draft,
+    });
     if(seq !== simPredictSeq) return;   // a newer request superseded this one
-    // strip list markers / wrapping quotes
-    const lines = text.split('\n').filter(s => s.trim())
-      .map(s => s.replace(/^\s*(?:[-•*"»«]|\d+[.)])\s*/, '').replace(/\s*["»«]$/, ''))
-      .slice(0, 3);
-    // Gemini returns the FULL message starting with the draft → strip that repeated draft so chips AND the
-    // ghost show ONLY the continuation, while keeping the user's EXACT draft (casing/typos).
-    const seen = new Set();
-    const items = lines.map(msg => {
-      const cont = continuationOf(draft, msg);                 // tolerant strip (handles typos Gemini fixed)
-      return { full: draft ? draft + cont : cont, disp: cont.trim() };
-    }).filter(it => { const k = it.disp.toLowerCase(); if(!it.disp || seen.has(k)) return false; seen.add(k); return true; });
+    const items = preds.map(p => ({ full: p.full, disp: p.cont }));
     simCands = items;
     renderChips(items);
     topSuggestion = items[0] ? items[0].full : '';   // grey inline ghost — always continues the exact draft
