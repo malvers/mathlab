@@ -88,3 +88,7 @@ Bait-and-Switch nicht. Plus „minimum functionality" (kein reiner Webview-Wrapp
 Offline). **Safe pattern dafür: Kern-HTML/JS in die Binary bündeln, nur Daten/Config/Tiles remote** → Update-
 Komfort UND Review-Sicherheit; nur neue native Features brauchen dann ein Review. Bei ernsthaftem Listing den
 aktuellen Policy-Wortlaut frisch prüfen (ändert sich).
+
+---
+
+- Historische Zahlsysteme (Ifrah, „Universalgeschichte der Zahlen"): Dezimalzahl eingeben → Anzeige in babylonisch (Basis 60), Maya (Basis 20), ägyptisch, römisch, indisch-arabisch; Entwicklung von Null & Stellenwertsystem interaktiv *(gerettet aus Branch kennst-du, 2026-06-27)*
