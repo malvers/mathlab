@@ -29,7 +29,13 @@ window.TrackerStreetQuality = function (ctx) {
     let lastQ = 0;                 // timestamp of the last Overpass query
     let hoverTimer = null;         // the rest-debounce timer
     let lastClient = null;         // { x, y } of the cursor in CSS pixels (for tip placement)
+    let lastLatLng = null;         // map coords under the cursor (so Alt-down can query without a move)
     let reqId = 0;                 // bumped per query so a slow earlier response can't overwrite a newer one
+    let altDown = false;           // is the Option/Alt key currently held? hover only works while it is
+
+    // The map container — we flip its cursor to a crosshair while Alt is held so it's clear the
+    // road-info probe is armed.
+    const mapEl = (map.getContainer && map.getContainer()) || null;
 
     function dbg(msg) { try { if (window.DebugWindow) DebugWindow.log('🛣️ ' + msg); } catch (e) { } }
 
@@ -126,6 +132,7 @@ window.TrackerStreetQuality = function (ctx) {
     async function overpass(q) {
         for (let i = 0; i < OVERPASS_MIRRORS.length; i++) {
             const url = OVERPASS_MIRRORS[(mirrorRot + i) % OVERPASS_MIRRORS.length];
+            const host = url.replace(/^https?:\/\//, '').split('/')[0];
             const ctrl = new AbortController();
             const to = setTimeout(() => ctrl.abort(), QUERY_TIMEOUT_MS);
             try {
@@ -135,11 +142,11 @@ window.TrackerStreetQuality = function (ctx) {
                     body: 'data=' + encodeURIComponent(q),
                     signal: ctrl.signal,
                 });
-                if (!r.ok) continue;
+                if (!r.ok) { dbg('mirror ' + host + ' → HTTP ' + r.status); continue; }
                 const j = await r.json();
                 mirrorRot = (mirrorRot + i) % OVERPASS_MIRRORS.length;
                 return j;
-            } catch (e) { /* timeout/offline/parse → next mirror */ }
+            } catch (e) { dbg('mirror ' + host + ' → ' + (e && e.name === 'AbortError' ? 'TIMEOUT' : (e && e.message) || 'Fehler')); }
             finally { clearTimeout(to); }
         }
         return null;
@@ -176,14 +183,20 @@ window.TrackerStreetQuality = function (ctx) {
             ')[highway];out tags geom;';
         const j = await overpass(q);
         if (id !== reqId) return;                  // a newer hover already fired → drop this stale answer
-        if (!j) { dbg('Overpass: alle Mirror fehlgeschlagen'); return; }
+        if (!j) {
+            dbg('Overpass: alle Mirror fehlgeschlagen');
+            showTip('<div style="opacity:.9">Keine Verbindung möglich.</div>', 'rgb(176, 36, 24)');
+            return;
+        }
+        dbg('Overpass: ' + ((j.elements && j.elements.length) || 0) + ' ways');
         let best = null, bestD = Infinity;
         for (const e of (j.elements) || []) {
             if (!e.tags || !DRIVE_HW.has(e.tags.highway)) continue;
             const d = distToWay(p, e.geometry);
             if (d < bestD) { bestD = d; best = e.tags; }
         }
-        if (!best) { hideTip(); return; }          // no drivable road under the cursor
+        if (!best) { dbg('keine fahrbare Straße in ' + SEARCH_RADIUS_M + 'm'); hideTip(); return; }
+        dbg('nächste: ' + (best.name || best.ref || best.highway) + ' (' + Math.round(bestD) + 'm)');
         const info = describe(best);
         if (info) {
             showTip(info.html, info.color);
@@ -195,18 +208,27 @@ window.TrackerStreetQuality = function (ctx) {
         }
     }
 
-    // ---- Mouse wiring. While the mouse moves we keep the tip where it is but reposition it; once it
-    //      rests for HOVER_DELAY_MS we fire a (throttled) Overpass query.
-    function onMove(e) {
-        lastClient = { x: e.originalEvent.clientX, y: e.originalEvent.clientY };
-        if (tip.style.opacity === '1') place();    // keep an open tip glued to the cursor
+    // Schedule a (throttled, debounced) Overpass query for the current cursor position. Only ever
+    // called while Alt is held — that's the whole gate Doc asked for.
+    function schedule(latlng) {
         if (hoverTimer) clearTimeout(hoverTimer);
         hoverTimer = setTimeout(() => {
             const now = Date.now();
-            if (now - lastQ < MIN_INTERVAL_MS) return;
+            if (now - lastQ < MIN_INTERVAL_MS) { dbg('throttle: warte (' + (MIN_INTERVAL_MS - (now - lastQ)) + 'ms)'); return; }
             lastQ = now;
-            query(e.latlng);
+            dbg('Abfrage @ ' + latlng.lat.toFixed(5) + ',' + latlng.lng.toFixed(5));
+            query(latlng);
         }, HOVER_DELAY_MS);
+    }
+
+    // ---- Mouse wiring. While the mouse moves we keep the tip where it is but reposition it; once it
+    //      rests for HOVER_DELAY_MS we fire a query — but ONLY while the Option/Alt key is held.
+    function onMove(e) {
+        lastClient = { x: e.originalEvent.clientX, y: e.originalEvent.clientY };
+        lastLatLng = e.latlng;
+        if (tip.style.opacity === '1') place();    // keep an open tip glued to the cursor
+        if (!altDown) return;                      // armed only while Alt is down
+        schedule(e.latlng);
     }
 
     function onOut() {
@@ -214,16 +236,41 @@ window.TrackerStreetQuality = function (ctx) {
         hideTip();
     }
 
+    // ---- Keyboard gate. Holding Option/Alt arms the probe (crosshair cursor); releasing it disarms
+    //      and clears the tip. blur resets the state so a missed keyup can't leave it stuck on.
+    function arm() {
+        if (altDown) return;
+        altDown = true;
+        if (mapEl) mapEl.style.cursor = 'crosshair';
+        if (lastLatLng) schedule(lastLatLng);      // probe immediately, even without a mouse move
+    }
+    function disarm() {
+        if (!altDown) return;
+        altDown = false;
+        if (mapEl) mapEl.style.cursor = '';
+        if (hoverTimer) { clearTimeout(hoverTimer); hoverTimer = null; }
+        hideTip();
+    }
+    function onKeyDown(e) { if (e.altKey || e.key === 'Alt') arm(); }
+    function onKeyUp(e) { if (e.key === 'Alt' || !e.altKey) disarm(); }
+
     map.on('mousemove', onMove);
     map.on('mouseout', onOut);
+    window.addEventListener('keydown', onKeyDown);
+    window.addEventListener('keyup', onKeyUp);
+    window.addEventListener('blur', disarm);
 
     function destroy() {
         map.off('mousemove', onMove);
         map.off('mouseout', onOut);
+        window.removeEventListener('keydown', onKeyDown);
+        window.removeEventListener('keyup', onKeyUp);
+        window.removeEventListener('blur', disarm);
         if (hoverTimer) clearTimeout(hoverTimer);
+        if (mapEl) mapEl.style.cursor = '';
         tip.remove();
     }
 
-    dbg('Straßenqualität-Hover aktiv (Maus)');
+    dbg('Straßenqualität-Hover aktiv (Maus, Alt-Taste halten)');
     return { destroy };
 };
