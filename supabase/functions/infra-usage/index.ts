@@ -207,6 +207,9 @@ Deno.serve(async (req) => {
       `• Supabase-DB: ${dbpct}% von ${de(DB_QUOTA_GB, 1)} GB  (${gbDe(db)} GB)\n` +
       aiText +
       (searches > 0 ? `\nGemini-Suchen (24 h): ${searches} / 1500 gratis\n` : '') + `\n` +
+      `Verbrauch beim Anbieter:\n` +
+      `• Cloudflare R2: https://dash.cloudflare.com/?to=/:account/r2/overview\n` +
+      `• Supabase:      https://supabase.com/dashboard/project/fyfhxzyymmurlaenmzse/usage\n\n` +
       `Exakte Kosten beim Anbieter:\n` +
       `• Claude:   https://console.anthropic.com/settings/cost\n` +
       `• Gemini:   https://console.cloud.google.com/billing/01B7AA-7DDDCA-D629CE\n` +
@@ -254,7 +257,10 @@ Deno.serve(async (req) => {
       + `<div style="margin:22px 0 0;padding:12px 14px;border-radius:8px;font-size:14px;font-weight:bold;`
       + `background:${warn ? 'rgba(176,36,24,.08)' : 'rgba(121,158,49,.10)'};color:${warn ? C.red : C.green};">`
       + `${warn ? '⚠️ Achtung: ein Wert über 80 % — Zeit, aufzuräumen.' : '✓ Alles im grünen Bereich.'}</div>`
-      + `<p style="color:${C.muted};font-size:12px;margin:18px 0 0;line-height:1.8;">Exakte Kosten beim Anbieter:<br>`
+      + `<p style="color:${C.muted};font-size:12px;margin:18px 0 0;line-height:1.8;">Verbrauch beim Anbieter:<br>`
+      + `Cloudflare R2 · <a href="https://dash.cloudflare.com/?to=/:account/r2/overview" style="color:${C.navy};">dash.cloudflare.com</a> &nbsp;|&nbsp; `
+      + `Supabase · <a href="https://supabase.com/dashboard/project/fyfhxzyymmurlaenmzse/usage" style="color:${C.navy};">supabase.com</a></p>`
+      + `<p style="color:${C.muted};font-size:12px;margin:10px 0 0;line-height:1.8;">Exakte Kosten beim Anbieter:<br>`
       + `Claude · <a href="https://console.anthropic.com/settings/cost" style="color:${C.navy};">console.anthropic.com</a> &nbsp;|&nbsp; `
       + `Gemini · <a href="https://console.cloud.google.com/billing/01B7AA-7DDDCA-D629CE" style="color:${C.navy};">cloud.google.com</a> &nbsp;|&nbsp; `
       + `DeepSeek · <a href="https://platform.deepseek.com/usage" style="color:${C.navy};">platform.deepseek.com</a></p></div>`;
