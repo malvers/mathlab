@@ -100,7 +100,11 @@
         // Rechnet je API-Hop (AUCH jeder Tool-Loop-Schritt) aus `usage` die € aus, loggt ins DEBUG-Fenster mit
         // Cache-Trefferquote (springt nach dem Caching-Deploy von 0% hoch) und summiert in localStorage.
         const PRICES = { 'claude-sonnet-4-6': [3, 15], 'claude-opus-4-8': [5, 25], 'claude-haiku-4-5': [1, 5],
-                         'deepseek-chat': [0.27, 1.10], 'deepseek-reasoner': [0.55, 2.19] }; // [in,out] $/1M (DeepSeek ~10× günstiger; Preise können sich ändern)
+                         'deepseek-chat': [0.27, 1.10], 'deepseek-reasoner': [0.55, 2.19],
+                         // DeepSeek V4 (live ~Mitte Juli 2026). Werte = REGULÄRE (Off-Peak) cache-miss Preise $/1M [in,out].
+                         // Peak-Stunden ~verdoppeln (UTC 01–04 & 06–10 = CEST 03–06 & 08–12); der Zähler kennt Peak nicht,
+                         // daher Off-Peak als Schätz-Baseline. Bei Umstellung auf v4-Modelnamen aktivieren:
+                         'deepseek-v4-flash': [0.14, 0.28], 'deepseek-v4-pro': [0.435, 0.87] }; // [in,out] $/1M (DeepSeek ~10× günstiger; Preise können sich ändern)
         const USD_EUR = 0.92;
         const COST_KEY = STORE.cost || 'solita_cost_total';
         // Hard DAILY €-brake (Doc: die 5€ sollen halten). accountUsage only ever counted UP, never blocked —
