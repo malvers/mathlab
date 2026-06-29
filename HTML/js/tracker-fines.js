@@ -99,20 +99,17 @@ window.TrackerFines = function (ctx) {
         fitTiles(); // shrink any label/value that's wider than its tile (e.g. "FAHRVERBOT" on a narrow phone)
     }
 
-    // Font-metric fit: measure the real glyphs (incl. uppercase + letter-spacing the CSS adds) and shrink
-    // the font only when the text is wider than its tile — so every label fits, none gets clipped.
-    const fitCanvas = document.createElement('canvas').getContext('2d');
+    // Font fit by REAL DOM metrics: shrink the font-size until the element's own rendered width
+    // (scrollWidth — includes the actual web font Orbitron + letter-spacing) fits its tile. Canvas
+    // measureText underestimated Orbitron (a wide font) and never shrank — scrollWidth can't be fooled.
     function fitToWidth(el, maxPx) {
         if (!el || maxPx <= 0) return;
-        el.style.fontSize = ''; // reset any earlier shrink so we re-measure from the CSS base each time
-        const cs = getComputedStyle(el);
-        let txt = el.textContent;
-        if (cs.textTransform === 'uppercase') txt = txt.toUpperCase();
-        const ls = parseFloat(cs.letterSpacing) || 0;
-        const base = parseFloat(cs.fontSize);
-        fitCanvas.font = cs.fontWeight + ' ' + base + 'px ' + cs.fontFamily;
-        const w = fitCanvas.measureText(txt).width + ls * Math.max(0, txt.length - 1);
-        if (w > maxPx) el.style.fontSize = Math.max(7, Math.floor(base * maxPx / w * 100) / 100) + 'px';
+        el.style.fontSize = ''; // start from the CSS base each render
+        let size = parseFloat(getComputedStyle(el).fontSize);
+        for (let i = 0; i < 60 && el.scrollWidth > maxPx && size > 6; i++) {
+            size -= 0.5;
+            el.style.fontSize = size + 'px';
+        }
     }
     function fitTiles() {
         document.querySelectorAll('#fines-body .fines-tile').forEach((tile) => {
