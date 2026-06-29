@@ -896,9 +896,9 @@ window.TrackerNav = function (ctx) {
         // Labelled so the three numbers read themselves (Doc 2026-06-22): arrival · whole route · remaining.
         // German decimal comma („6,5 km"); the cryptic "ETA … 4.9 / 6.5 … min" is replaced by named fields.
         const km = (m) => fmt(m).replace('.', ',');
-        const min = Math.round(d.remSec / 60);
-        const verb = MODES[routeType].verb;   // ZU FAHREN / ZU RADELN / ZU LAUFEN / ZU WANDERN (Doc 2026-06-25)
-        return 'ANKUNFT ' + clock + '  ·  STRECKE ' + km(tripTotalM || routeTotalDist) + '  ·  ' + verb + ' ' + km(d.remM) + ' (' + min + ' min)';
+        // Remaining time right after the arrival clock: "(noch 13 min)" under an hour, "(noch 1:23 h)"
+        // beyond — fmtDur drops the hours when zero. Remaining distance reads "(noch 5,5 km)" (Doc 2026-06-28).
+        return 'ANKUNFT ' + clock + ' (noch ' + fmtDur(d.remSec) + ')  ·  STRECKE ' + km(tripTotalM || routeTotalDist) + '  ·  (noch ' + km(d.remM) + ')';
     }
 
     // Spoken distance, rounded to a natural step for the range: 100 m far out, 50 m mid, 10 m close in
