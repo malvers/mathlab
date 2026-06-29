@@ -130,18 +130,26 @@ window.TrackerSpeedLimit = function (ctx) {
         'unclassified', 'residential', 'living_street', 'service', 'road',
         'motorway_link', 'trunk_link', 'primary_link', 'secondary_link', 'tertiary_link']);
 
-    // A way's limit, EXPLICIT first then IMPLICIT. In Germany most roads carry NO `maxspeed` tag —
-    // they only hint the zone via maxspeed:type / zone:maxspeed / source:maxspeed (e.g. "DE:urban" →
-    // 50, "DE:rural" → 100). Reading those is what makes the sign appear on ordinary streets, not
-    // just the rare explicitly-tagged ones. Returns number | 'none' | null (unknown → no sign).
+    // The generic "legal default" zone tags — these say only "it's a city/rural/motorway road", NOT that
+    // a real sign was seen. Trusting them showed 50 on streets that are actually Tempo-30 zones whose
+    // 30-sign just isn't mapped (Doc 2026-06-30: "30-Zone zeigt 50"). We now DROP these and show "?"
+    // instead of guessing — better honest-unknown than confidently-wrong.
+    const GENERIC_DEFAULT = /^DE:(urban|rural|motorway)$/i;
+    function implicitLimit(v) {
+        if (!v || GENERIC_DEFAULT.test(v)) return null; // generic default → don't guess
+        return parseMax(v);                              // specific zone (DE:30, living_street, …) → trust
+    }
+
+    // A way's limit. Trust only what's actually SIGNED: an explicit `maxspeed`, or a SPECIFIC implicit
+    // zone (e.g. a tagged 30-zone, living_street). The generic urban/rural/motorway defaults are dropped
+    // (see above) so we never overwrite an unmapped 30-zone with a wrong 50. number | 'none' | null.
     function wayLimit(tags) {
         if (!tags || !DRIVE_HW.has(tags.highway)) return null;
         const explicit = parseMax(tags.maxspeed);
         if (explicit != null) return explicit;
-        // Implicit zone hints, in order of how trustworthy they are for the legal default.
-        return parseMax(tags['maxspeed:type'])
-            ?? parseMax(tags['zone:maxspeed'])
-            ?? parseMax(tags['source:maxspeed']);
+        return implicitLimit(tags['maxspeed:type'])
+            ?? implicitLimit(tags['zone:maxspeed'])
+            ?? implicitLimit(tags['source:maxspeed']);
     }
 
     // Font-metric auto-fit: measure the glyphs with a canvas and pick the largest font size whose text
