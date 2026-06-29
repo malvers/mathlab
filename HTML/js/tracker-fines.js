@@ -132,8 +132,15 @@ window.TrackerFines = function (ctx) {
             <div><div class="fines-banner-t">${title}</div><div class="fines-banner-x">${text}</div></div></div>`;
     }
 
-    function curLimit() { return speed && speed.currentLimit ? speed.currentLimit() : null; }
-    function curSpeed() { return speed && speed.lastSpeed ? speed.lastSpeed() : 0; }
+    // Debug slider: when dragged above 0 it OVERRIDES the live speed so you can watch the fine jump at a
+    // desk. 0 = off (real GPS). If there's no real limit while simulating (e.g. at the desk), assume a
+    // 50-zone so the slider actually demonstrates something instead of "Limit unbekannt".
+    function simSpeed() { const el = $('fines-sim'); const v = el ? +el.value : 0; return v > 0 ? v : null; }
+    function curSpeed() { const s = simSpeed(); return s != null ? s : (speed && speed.lastSpeed ? speed.lastSpeed() : 0); }
+    function curLimit() {
+        const l = speed && speed.currentLimit ? speed.currentLimit() : null;
+        return (simSpeed() != null && typeof l !== 'number') ? 50 : l;
+    }
 
     // Open the panel for the current situation (pulled from the speed-limit module).
     function show() {
@@ -148,6 +155,14 @@ window.TrackerFines = function (ctx) {
         if (!panel || !panel.classList.contains('open')) return;
         renderBody(curSpeed(), curLimit());
     }
+
+    // Wire the debug slider (panel HTML is static → element is available at init). Dragging re-prices
+    // live and updates the label; 0 snaps back to real GPS.
+    const slider = $('fines-sim'), simVal = $('fines-sim-val');
+    if (slider) slider.addEventListener('input', () => {
+        if (simVal) simVal.textContent = +slider.value > 0 ? slider.value + ' km/h' : 'aus';
+        renderBody(curSpeed(), curLimit());
+    });
 
     return { show, refresh, lookup };
 };
