@@ -2159,6 +2159,22 @@ body.ui-idle #nav-banner {
     50% { box-shadow: 0 0 0 3px rgba(176, 36, 24, 0.35), 0 4px 14px rgba(0, 0, 0, 0.4); }
 }
 
+/* Unconfirmed = the generic legal default (DE:urban=50 / DE:rural=100), NOT a mapped sign. Dashed, muted
+   ring + slightly dimmed so at a glance it reads "probably, not confirmed" — honest, never a confident
+   wrong 50 on an unmapped Tempo-30 zone (Doc 2026-06-29). Confirmed signs keep the solid red ring. */
+#speed-sign.unconfirmed {
+    border-style: dashed;
+    border-color: rgba(176, 36, 24, 0.55);
+    color: #555;
+    opacity: 0.82;
+}
+/* Over the limit still dominates visually even on an unconfirmed default. */
+#speed-sign.unconfirmed.over {
+    border-style: solid;
+    color: #fff;
+    opacity: 1;
+}
+
 /* 'c' (Lichtgeschwindigkeit, Autobahn unbegrenzt) is a lowercase x-height glyph → flex-centers visually
    low in the disc. Pad the bottom so the centered glyph rides a tick higher (border-box keeps the disc 44px). */
 #speed-sign.cee {
