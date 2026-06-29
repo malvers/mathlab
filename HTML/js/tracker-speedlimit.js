@@ -172,27 +172,58 @@ window.TrackerSpeedLimit = function (ctx) {
     }
 
     // Min distance (m) from point p=[lat,lng] to a way's geometry (array of {lat,lon}). Cheap
-    // equirectangular projection + point-to-segment — good enough at street scale.
-    function distToWay(p, geom) {
-        if (!geom || geom.length < 1) return Infinity;
+    // equirectangular projection + point-to-segment — good enough at street scale. Returns the nearest
+    // distance (m) AND the compass bearing of that nearest segment, so the caller can reject ways whose
+    // direction doesn't match where you're actually driving (a crossing / perpendicular road).
+    function nearestSeg(p, geom) {
+        if (!geom || geom.length < 1) return { d: Infinity, brg: null };
         const k = Math.cos(p[0] * Math.PI / 180);
         const xy = (la, lo) => [lo * 111320 * k, la * 110540];
         const px = xy(p[0], p[1]);
-        let min = Infinity;
+        let min = Infinity, brg = null;
         for (let i = 1; i < geom.length; i++) {
             const a = xy(geom[i - 1].lat, geom[i - 1].lon), b = xy(geom[i].lat, geom[i].lon);
             const dx = b[0] - a[0], dy = b[1] - a[1], len2 = dx * dx + dy * dy;
             let t = len2 ? ((px[0] - a[0]) * dx + (px[1] - a[1]) * dy) / len2 : 0;
             t = t < 0 ? 0 : t > 1 ? 1 : t;
-            min = Math.min(min, Math.hypot(px[0] - (a[0] + t * dx), px[1] - (a[1] + t * dy)));
+            const d = Math.hypot(px[0] - (a[0] + t * dx), px[1] - (a[1] + t * dy));
+            if (d < min) { min = d; brg = bearingDeg(geom[i - 1], geom[i]); } // bearing of the closest segment
         }
         if (geom.length === 1) { const a = xy(geom[0].lat, geom[0].lon); min = Math.hypot(px[0] - a[0], px[1] - a[1]); }
-        return min;
+        return { d: min, brg };
+    }
+
+    // Compass bearing a→b in degrees [0,360). a/b are {lat,lon} (way nodes) or [lat,lng] (GPS) — read both.
+    function bearingDeg(a, b) {
+        const t = Math.PI / 180;
+        const la1 = (a.lat != null ? a.lat : a[0]) * t, la2 = (b.lat != null ? b.lat : b[0]) * t;
+        const dLon = ((b.lon != null ? b.lon : b[1]) - (a.lon != null ? a.lon : a[1])) * t;
+        const y = Math.sin(dLon) * Math.cos(la2);
+        const x = Math.cos(la1) * Math.sin(la2) - Math.sin(la1) * Math.cos(la2) * Math.cos(dLon);
+        return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
+    }
+
+    // True when two bearings run along the same line (direction-agnostic: a road is the same whether you
+    // drive it N→S or S→N), within `tol` degrees. Used to keep the sign on the road you're travelling.
+    function aligned(travel, seg, tol) {
+        if (travel == null || seg == null) return true; // no reliable heading → don't filter
+        let d = Math.abs(travel - seg) % 180;
+        return Math.min(d, 180 - d) <= tol;
+    }
+
+    // Run the query through the shared server-side proxy (js/tracker-overpass.js → races all mirrors
+    // server-side, no client CORS / rate-limit) when it's loaded — that's the reliable path the other
+    // modules use. Fall back to the direct public mirrors only if the proxy helper isn't present.
+    async function overpass(q) {
+        if (typeof window.queryOverpass === 'function') {
+            return window.queryOverpass(q, { timeout: QUERY_TIMEOUT_MS, dbg });
+        }
+        return overpassDirect(q);
     }
 
     // POST the query to each mirror in turn (rotated start) until one answers; abort a stuck request
     // after QUERY_TIMEOUT_MS. Returns the parsed JSON, or null if every mirror failed.
-    async function overpass(q) {
+    async function overpassDirect(q) {
         for (let i = 0; i < OVERPASS_MIRRORS.length; i++) {
             const url = OVERPASS_MIRRORS[(mirrorRot + i) % OVERPASS_MIRRORS.length];
             const ctrl = new AbortController();
@@ -214,35 +245,51 @@ window.TrackerSpeedLimit = function (ctx) {
         return null;
     }
 
-    async function query(p) {
+    const ALIGN_TOL = 40;   // a candidate road may differ from the travel direction by at most this (deg)
+
+    async function query(p, travelBrg) {
         fetching = true;
-        // ALL drivable ways within 35 m (not only those carrying an explicit `maxspeed`): most German
+        // ALL drivable ways within 30 m (not only those carrying an explicit `maxspeed`): most German
         // roads have none and only hint the zone via maxspeed:type/zone:maxspeed → wayLimit() resolves
-        // those to the legal default. We then pick the NEAREST way that yields a limit, so a parallel
-        // road / ramp / crossing can't steal the wrong sign (Doc bug 2026-06-11).
-        const q = '[out:json][timeout:8];way(around:35,' + p[0] + ',' + p[1] + ')[highway];out tags geom;';
+        // those to the legal default.
+        const q = '[out:json][timeout:8];way(around:30,' + p[0] + ',' + p[1] + ')[highway];out tags geom;';
         try {
             const j = await overpass(q);
-            if (!j) { dbg('Overpass: alle Mirror fehlgeschlagen → letztes Schild bleibt'); return; }
-            let best = null, bestD = Infinity, ways = 0, bestTags = null;
-            let refTags = null, refD = Infinity;   // nearest way carrying a `ref` (for tracker-traffic), even without a resolvable limit
+            if (!j) { dbg('Overpass: keine Antwort → letztes Schild bleibt'); return; }
+            // Collect every way that yields a limit, with its distance + whether it runs along our heading.
+            const cands = [];
+            let ways = 0, refTags = null, refD = Infinity;
             for (const e of (j.elements) || []) {
                 ways++;
-                const d = distToWay(p, e.geometry);
-                if (e.tags && e.tags.ref && d < refD) { refD = d; refTags = e.tags; }
+                const ns = nearestSeg(p, e.geometry);
+                if (e.tags && e.tags.ref && ns.d < refD) { refD = ns.d; refTags = e.tags; }
                 const m = wayLimit(e.tags);
                 if (m == null) continue;
-                if (d < bestD) { bestD = d; best = m; bestTags = e.tags; } // nearest road with a resolvable limit wins
+                cands.push({ m, d: ns.d, tags: e.tags, ok: aligned(travelBrg, ns.brg, ALIGN_TOL) });
             }
-            // Road identity for tracker-traffic: prefer the limit-resolving way's tags, else the nearest
-            // ref-bearing way — so a variable-speed Autobahn (no plain maxspeed) still reports its A-ref.
+            // With a reliable heading we ONLY trust ways that run along it (kills the perpendicular crossing
+            // / parallel side-street that used to steal the sign and show a wrong number). Without a heading
+            // (slow / cold start) fall back to all candidates, nearest wins.
+            const haveHeading = travelBrg != null;
+            const pool = (haveHeading && cands.some((c) => c.ok)) ? cands.filter((c) => c.ok) : cands;
+
+            let best = null, bestD = Infinity, bestTags = null;
+            for (const c of pool) if (c.d < bestD) { bestD = c.d; best = c.m; bestTags = c.tags; }
+
             const roadTags = bestTags || refTags;
             if (roadTags) lastRoad = { ref: roadTags.ref || null, name: roadTags.name || null, highway: roadTags.highway || null };
+
+            // Heading known, roads found, but NONE align with travel → we're likely on/near a junction or
+            // between ways. Better to keep the last sign than flash a wrong limit from a crossing road.
+            if (best == null && haveHeading && cands.length) {
+                dbg('Limit: nur quer/parallel laufende Wege → unsicher, kein Update');
+                return;
+            }
             if (best == null) {                 // road untagged → don't blank a previously good sign
                 dbg('Limit: ' + ways + ' Wege, keiner mit (impliziter) Begrenzung → kein Tag');
                 return;
             }
-            dbg('Limit: ' + best + ' (' + Math.round(bestD) + ' m)');
+            dbg('Limit: ' + best + ' (' + Math.round(bestD) + ' m' + (haveHeading ? ', i. Fahrtricht.' : '') + ')');
             curLimit = best;
             setSign(best, false);
         } catch (e) { /* parse error → keep the last known sign */ }
@@ -283,8 +330,14 @@ window.TrackerSpeedLimit = function (ctx) {
         // failed/empty earlier query — keep retrying on the 5 s throttle so the sign appears quickly
         // instead of staying "?" until 90 m of travel (Doc 2026-06-20: "?" stuck while walking slowly).
         if (curLimit != null && lastPos && haversine(here, lastPos) < MIN_MOVE_M) return;
+        // Travel bearing over the leg since the last query (a long, stable baseline). Only trust it when
+        // we've actually moved a bit and aren't crawling — GPS heading is noise at walking pace.
+        let travelBrg = null;
+        if (lastPos && speedKmh != null && speedKmh >= 10 && haversine(here, lastPos) >= 20) {
+            travelBrg = bearingDeg(lastPos, here);
+        }
         lastQ = now; lastPos = here;
-        query(here);
+        query(here, travelBrg);
     }
 
     function clear() { curLimit = null; lastRoad = null; lastPos = null; lastBing = 0; setSign(null, false); }
