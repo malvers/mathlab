@@ -96,6 +96,31 @@ window.TrackerFines = function (ctx) {
             <div class="fines-tiles">${tiles}</div>
             <p class="fines-note">Regelsatz Pkw nach Bußgeldkatalog (BKatV), Stand 2026. Bei Voreintrag,
             Gefährdung o. Wiederholung kann es teurer werden. Ohne Gewähr.</p>`;
+        fitTiles(); // shrink any label/value that's wider than its tile (e.g. "FAHRVERBOT" on a narrow phone)
+    }
+
+    // Font-metric fit: measure the real glyphs (incl. uppercase + letter-spacing the CSS adds) and shrink
+    // the font only when the text is wider than its tile — so every label fits, none gets clipped.
+    const fitCanvas = document.createElement('canvas').getContext('2d');
+    function fitToWidth(el, maxPx) {
+        if (!el || maxPx <= 0) return;
+        el.style.fontSize = ''; // reset any earlier shrink so we re-measure from the CSS base each time
+        const cs = getComputedStyle(el);
+        let txt = el.textContent;
+        if (cs.textTransform === 'uppercase') txt = txt.toUpperCase();
+        const ls = parseFloat(cs.letterSpacing) || 0;
+        const base = parseFloat(cs.fontSize);
+        fitCanvas.font = cs.fontWeight + ' ' + base + 'px ' + cs.fontFamily;
+        const w = fitCanvas.measureText(txt).width + ls * Math.max(0, txt.length - 1);
+        if (w > maxPx) el.style.fontSize = Math.max(7, Math.floor(base * maxPx / w * 100) / 100) + 'px';
+    }
+    function fitTiles() {
+        document.querySelectorAll('#fines-body .fines-tile').forEach((tile) => {
+            const cs = getComputedStyle(tile);
+            const avail = tile.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+            fitToWidth(tile.querySelector('.fines-tile-v'), avail);
+            fitToWidth(tile.querySelector('.fines-tile-l'), avail);
+        });
     }
 
     function tile(label, value) {
