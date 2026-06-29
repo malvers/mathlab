@@ -37,7 +37,9 @@
 
     const DEFAULT_TIMEOUT_MS = 12000; // client-side guard around the proxy call; the server fails over
     //                                   between mirrors internally within this budget.
-    const DIRECT_TIMEOUT_MS = 9000;   // per-mirror abort on the direct-fallback race
+    const DIRECT_TIMEOUT_MS = 9000;   // FLOOR for the per-mirror abort on the direct-fallback race; a heavier
+    //                                   caller budget (opts.timeout) wins so a [timeout:25] corridor query
+    //                                   isn't killed early on the fallback path.
 
     // queryOverpass(ql, opts?) → Promise<object|null>
     //   ql           : the Overpass QL string (e.g. '[out:json][timeout:8];way(around:25,...)[highway];out tags geom;')
@@ -97,8 +99,14 @@
     // so it can't beat a healthy mirror's real answer.
     async function tryDirectRace(ql, opts, dbg) {
         const body = 'data=' + encodeURIComponent(ql);
+        // Honour the caller's budget: heavy corridor/bbox/radius queries carry [timeout:25] and pass
+        // ~26-28 s — a flat 9 s would abort them on every mirror and the fallback (the whole point of this
+        // file) would do nothing for them. Racing in parallel means a bigger cap never STACKS: the fastest
+        // healthy mirror still wins early; the larger cap only matters when the only responsive mirror
+        // genuinely needs the time. 9 s stays as the floor for the light callers.
+        const directMs = Math.max(DIRECT_TIMEOUT_MS, (opts.timeout || DEFAULT_TIMEOUT_MS) - 1000);
         const attempts = DIRECT_MIRRORS.map(function (url) {
-            return tryDirectMirror(url, body, opts.signal, dbg);
+            return tryDirectMirror(url, body, opts.signal, directMs, dbg);
         });
         try {
             return await promiseAny(attempts);
@@ -109,11 +117,11 @@
     }
 
     // One direct mirror. Resolves with parsed JSON on a clean, non-empty 200; REJECTS otherwise (so the
-    // race moves on to a healthier mirror). Aborts after DIRECT_TIMEOUT_MS.
-    async function tryDirectMirror(url, body, signal, dbg) {
+    // race moves on to a healthier mirror). Aborts after timeoutMs.
+    async function tryDirectMirror(url, body, signal, timeoutMs, dbg) {
         const host = url.replace(/^https?:\/\//, '').split('/')[0];
         const ctrl = new AbortController();
-        const to = setTimeout(function () { ctrl.abort(); }, DIRECT_TIMEOUT_MS);
+        const to = setTimeout(function () { ctrl.abort(); }, timeoutMs);
         linkSignal(signal, ctrl);
         try {
             const r = await fetch(url, {
