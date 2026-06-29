@@ -220,11 +220,14 @@ window.TrackerSpeedLimit = function (ctx) {
     }
 
     // Run the query through the shared server-side proxy (js/tracker-overpass.js → races all mirrors
-    // server-side, no client CORS / rate-limit) when it's loaded — that's the reliable path the other
-    // modules use. Fall back to the direct public mirrors only if the proxy helper isn't present.
+    // server-side, no client CORS / rate-limit) when it's loaded. CRUCIAL: if the proxy answers null
+    // (Edge Function down / cold-start timeout), fall back to the direct public mirrors — otherwise the
+    // live sign was stuck on "?" in the city while navigation (which uses direct mirrors) worked fine.
     async function overpass(q) {
         if (typeof window.queryOverpass === 'function') {
-            return window.queryOverpass(q, { timeout: QUERY_TIMEOUT_MS, dbg });
+            const viaProxy = await window.queryOverpass(q, { timeout: QUERY_TIMEOUT_MS, dbg });
+            if (viaProxy) return viaProxy;
+            dbg('Proxy ohne Antwort → direkte Mirror');
         }
         return overpassDirect(q);
     }
