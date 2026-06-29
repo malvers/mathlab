@@ -212,7 +212,7 @@ Deno.serve(async (req) => {
       `• Supabase:      https://supabase.com/dashboard/project/fyfhxzyymmurlaenmzse/reports/database\n\n` +
       `Exakte Kosten beim Anbieter:\n` +
       `• Claude:   https://console.anthropic.com/settings/cost\n` +
-      `• Gemini:   https://console.cloud.google.com/billing/01B7AA-7DDDCA-D629CE\n` +
+      `• Gemini:   https://aistudio.google.com/spend\n` +
       `• DeepSeek: https://platform.deepseek.com/usage\n\n` +
       (warn ? '⚠️ Achtung: ein Wert über 80% — Zeit, aufzuräumen.\n' : 'Alles im grünen Bereich.\n');
 
@@ -262,7 +262,7 @@ Deno.serve(async (req) => {
       + `Supabase · <a href="https://supabase.com/dashboard/project/fyfhxzyymmurlaenmzse/reports/database" style="color:${C.navy};">supabase.com</a></p>`
       + `<p style="color:${C.muted};font-size:12px;margin:10px 0 0;line-height:1.8;">Exakte Kosten beim Anbieter:<br>`
       + `Claude · <a href="https://console.anthropic.com/settings/cost" style="color:${C.navy};">console.anthropic.com</a> &nbsp;|&nbsp; `
-      + `Gemini · <a href="https://console.cloud.google.com/billing/01B7AA-7DDDCA-D629CE" style="color:${C.navy};">cloud.google.com</a> &nbsp;|&nbsp; `
+      + `Gemini · <a href="https://aistudio.google.com/spend" style="color:${C.navy};">aistudio.google.com</a> &nbsp;|&nbsp; `
       + `DeepSeek · <a href="https://platform.deepseek.com/usage" style="color:${C.navy};">platform.deepseek.com</a></p></div>`;
 
     // Gesprochene Zusammenfassung für Solitas /costs (vorgelesen → keine URLs; % ganzzahlig für Hörbarkeit).
