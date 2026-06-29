@@ -137,3 +137,40 @@ und wäre dümmer.
 
 *„Add your voice and it's at your fingertips. Die volle Power über all das, was
 wir schon wissen." — eine bewegte Zeit. Festgehalten, damit die Vision bleibt.*
+
+---
+
+## Nachtrag (2026-06-29): Solita soll lachen können
+
+Docs Beobachtung: Sprachsynthese kann meist **nicht lachen wie Menschen**.
+Ein Smiley ist nur zum Sehen — echtes, hörbares Lachen ist die viel
+menschlichere, viel schwerere Sache. Fachbegriff: **„non-verbal vocalization"**
+(Lachen, Seufzen, Flüstern, Husten). Genau *das* ist gerade ein heißes
+TTS-Forschungsthema — und es wird gelöst.
+
+**Doc-Vorgabe: Solitas Stimme MUSS lachen können.** Das ist Pflicht, kein
+Nice-to-have — fürs „Samantha"-Gefühl einer der wirkungsvollsten Hebel.
+
+Wichtig: **Lachen ist NICHT ElevenLabs-exklusiv.** Wer es echt kann:
+
+| Option | Lachen? | Preis / Hosting | Notiz |
+|--------|---------|-----------------|-------|
+| **ElevenLabs v3** | ja, `[laughs]`-Tags inline | teuer (Cloud) | das Premium-Ende, schnell zu testen |
+| **Cartesia (Sonic)** | ja, natürlich + in Echtzeit | **~10–15× billiger** als ElevenLabs (Cloud) | starker Preis-Leistungs-Tipp |
+| **Hume (Octave)** | ja, per Klartext-Regie | Cloud | führt bei emotionaler Treue |
+| **Orpheus** (open source) | `<laugh> <chuckle> <sigh> <gasp>` | **lokal, kostenlos** | Apache-2.0, läuft auf dem Mini-PC |
+| **Chatterbox** (Resemble) | `[laugh] [chuckle]` | **lokal, kostenlos** | im Blindtest teils vor ElevenLabs |
+| **Bark** (open source) | sehr natürliche Lacher/Seufzer | **lokal, kostenlos** | bekannt für NVVs |
+
+Heutige Solita nutzt **Google Cloud TTS** — die kann *nicht* echt lachen. Aber
+die Stimm-Schicht ist sauber entkoppelt (`HTML/js/solita-voice.js`), d.h. der
+Stimm-Backend lässt sich tauschen.
+
+**Zwei Pfade:**
+- **Sofort hören, was geht:** ElevenLabs v3 oder Cartesia testweise einbinden
+  (Cloud, in Minuten). Doc ist bereit, für den Test zu zahlen.
+- **Dauerlösung, self-hosted:** lokales Modell (Orpheus/Chatterbox/Bark) auf dem
+  Mini-PC — lacht auch, kostet nichts pro Satz, passt zur Hermes-Richtung.
+
+*Forschungs-/Anbieter-Stand Juni 2026; Modelle ändern sich schnell, vor
+Umsetzung neu prüfen.*
