@@ -74,11 +74,28 @@ window.TrackerSpeedProfile = function (ctx) {
         const d = Math.abs(a - b) % 180;
         return Math.min(d, 180 - d) <= tol;
     }
-    // Local route direction at vertex vi, from the segment spanning its neighbours.
-    function routeBearingAt(pts, vi) {
-        const a = pts[Math.max(0, vi - 1)], b = pts[Math.min(pts.length - 1, vi + 1)];
-        if (a === b) return null;
+    // Local route segment bearings at vertex vi: incoming (vi-1→vi) and outgoing (vi→vi+1). Either may be
+    // absent (route end) or null (coincident vertex). Checking BOTH — not their smoothed average — keeps the
+    // filter correct at a sharp bend on a single OSM way, where the averaged direction would wrongly reject
+    // the road's own segment (and shift/drop a change point that often sits right at the corner).
+    function routeBearingsAt(pts, vi) {
+        const out = [];
+        if (vi > 0) { const b = segBearing(pts[vi - 1], pts[vi]); if (b != null) out.push(b); }
+        if (vi < pts.length - 1) { const b = segBearing(pts[vi], pts[vi + 1]); if (b != null) out.push(b); }
+        return out;
+    }
+    // Bearing of a route segment, or null if its endpoints coincide — compared by VALUE (adjacent vertices
+    // are distinct array objects, so a reference check would never catch a there-and-back duplicate vertex
+    // and bearingDeg would then return a spurious 0°/north).
+    function segBearing(a, b) {
+        if (!a || !b || (a[0] === b[0] && a[1] === b[1])) return null;
         return bearingDeg(a, b);
+    }
+    // True if the way bearing aligns with ANY local route segment (or if we have no route direction at all).
+    function alignedAny(brgs, wayBrg, tol) {
+        if (!brgs.length) return true;
+        for (const b of brgs) if (aligned(b, wayBrg, tol)) return true;
+        return false;
     }
 
     // Nearest route segment to a point → end index `bi`. Mirrors nav.nearestSeg so limitAt() agrees
@@ -146,14 +163,14 @@ window.TrackerSpeedProfile = function (ctx) {
             const p = pts[vi];
             // Local route direction here → reject corridor ways that cross/parallel the route rather than
             // run along it (the crossing side street that stole the limit and flickered the badges).
-            const routeBrg = routeBearingAt(pts, vi);
+            const routeBrgs = routeBearingsAt(pts, vi);
             let best = null, bestD = Infinity;
             for (const w of ways) {
                 const lim = resolveLimit ? resolveLimit(w.tags) : null;
                 if (lim == null) continue;                 // not a drivable, limit-bearing way → ignore
                 const nw = distToWay(p, w.geometry);
                 if (nw.d > CORRIDOR_M + 10) continue;       // outside the corridor → not our road
-                if (!aligned(routeBrg, nw.brg, ALIGN_TOL)) continue; // crosses/parallels the route → skip
+                if (!alignedAny(routeBrgs, nw.brg, ALIGN_TOL)) continue; // crosses/parallels the route → skip
                 if (nw.d < bestD) { bestD = nw.d; best = lim; }
             }
             raw[vi] = best;
@@ -193,7 +210,11 @@ window.TrackerSpeedProfile = function (ctx) {
         for (let i = 1; i <= out.length; i++) {
             if (i === out.length || out[i] !== out[runStart]) {
                 const end = (i === out.length) ? cd[out.length - 1] : cd[i];
-                if (end - cd[runStart] < MIN_RUN_M && runStart > 0) {
+                // Dissolve a stray short run into the KNOWN limit before it — but NOT the leading run
+                // (runStart>0), NOT the trailing run (i!==out.length; the route really ends there, so a
+                // short final stretch is genuine), and NEVER into a null (out[runStart-1]!=null) which
+                // would discard a real resolved limit and blank the sign.
+                if (end - cd[runStart] < MIN_RUN_M && runStart > 0 && i !== out.length && out[runStart - 1] != null) {
                     const fill = out[runStart - 1];
                     for (let k = runStart; k < i; k++) out[k] = fill;
                 }
