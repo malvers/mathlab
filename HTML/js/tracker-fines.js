@@ -71,13 +71,17 @@ window.TrackerFines = function (ctx) {
             return;
         }
 
-        const over = spd - limit;
+        // Measurement tolerance the authorities deduct before charging: 3 km/h up to 100 km/h, 3 % above.
+        // The fine is assessed on this "vorwerfbarer" value, not the raw reading — so we deduct it too.
+        const tolSpeed = spd <= 100 ? spd - 3 : Math.floor(spd * 0.97);
+        const tolNote = spd <= 100 ? '−3 km/h Tol.' : '−3 % Tol.';
+        const over = tolSpeed - limit;
         const urban = limit <= 50;
         const where = urban ? 'innerorts' : 'außerorts';
 
         if (over <= 0) {
             body.innerHTML = banner('green', '✓', 'Alles im grünen Bereich',
-                `${spd} km/h bei erlaubten ${limit} km/h (${where}). Kein Bußgeld.`);
+                `${spd} km/h bei erlaubten ${limit} km/h (${where}), nach Toleranz. Kein Bußgeld.`);
             return;
         }
 
@@ -91,7 +95,7 @@ window.TrackerFines = function (ctx) {
         body.innerHTML = `
             <div class="fines-head">
                 <div class="fines-speed"><b>${spd}</b><span> km/h</span></div>
-                <div class="fines-vs">${over} km/h zu schnell · erlaubt ${limit} (${where})</div>
+                <div class="fines-vs">${over} km/h zu schnell · erlaubt ${limit} (${where}) · ${tolNote}</div>
             </div>
             <div class="fines-tiles">${tiles}</div>
             <p class="fines-note">Regelsatz Pkw nach Bußgeldkatalog (BKatV), Stand 2026. Bei Voreintrag,
