@@ -160,7 +160,8 @@
     if (isOn()) { localStorage.setItem(KEY_ON, '0'); updateToggleUI(); ghostOn(false); topSuggestion=''; renderChips([]); return; }
     const ok = await uiConfirm(
       'Um ein deutlich intelligenteres Chat-Erlebnis zu ermöglichen, involvieren wir die ' +
-      'Künstliche Intelligenz (KI) Google Gemini. Der Chat-Text wird dazu anonym an Gemini gesendet. ' +
+      'Künstliche Intelligenz (KI) Google Gemini. Der Chat-Text wird dazu ohne Deinen Namen oder ' +
+      'Account an Gemini gesendet. ' +
       'Willst Du intelligente Unterstützung bei Chat, dann aktiviere das Brain. Wenn nicht, bleibt ' +
       'Dein Chat 100% sicher unknackbar verschlüsselt und niemand, nicht mal wir, können mitlesen. ' +
       'Es ist eine echte Ende-zu-Ende-Verschlüsselung ohne Hintertüre!',
