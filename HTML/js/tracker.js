@@ -2545,7 +2545,7 @@ ${pts}
         // ---- Road-quality hover tip → js/tracker-streetquality.js. Mouse-only (Mac): rest the cursor on
         //      the map → Overpass tells us the road's OSM surface/smoothness in a small tooltip. No-op on
         //      touch (no hover there). ----
-        __streetq = (typeof TrackerStreetQuality !== 'undefined') ? TrackerStreetQuality({ map }) : null;
+        __streetq = (typeof TrackerStreetQuality !== 'undefined') ? TrackerStreetQuality({ map, speed: __speed }) : null;
         // ---- Compass / north indicator → js/tracker-compass.js. Owns its own #compass badge. ----
         __compass = TrackerCompass({ $ });
         // ---- Tankstellen-Spur → js/tracker-fuel.js. Position-driven; shows nearby fuel-station

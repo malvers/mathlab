@@ -149,6 +149,16 @@ window.TrackerStreetQuality = function (ctx) {
             ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
     }
 
+    // Tempo line for the clicked road — uses the SAME tag→limit logic as the speed-limit sign
+    // (ctx.speed.resolveLimit), so a real signed limit / 30-zone shows, generic guesses don't.
+    // 'none' → unbegrenzt; null (no signed limit in OSM) → muted "nicht getaggt".
+    function speedLine(tags) {
+        const lim = (ctx.speed && ctx.speed.resolveLimit) ? ctx.speed.resolveLimit(tags) : null;
+        if (lim === 'none') return '<div>Tempo: <b>unbegrenzt</b></div>';
+        if (lim == null) return '<div style="opacity:.6">Tempo: nicht getaggt</div>';
+        return '<div>Tempo: <b>' + lim + '</b> km/h</div>';
+    }
+
     async function query(latlng) {
         const p = [latlng.lat, latlng.lng];
         const id = ++reqId;
@@ -172,12 +182,12 @@ window.TrackerStreetQuality = function (ctx) {
         dbg('nächste: ' + (best.name || best.ref || best.highway) + ' (' + Math.round(bestD) + 'm)');
         const info = describe(best);
         if (info) {
-            showTip(info.html, info.color);
+            showTip(info.html + speedLine(best), info.color);
         } else {
-            // Road found but OSM has no quality tags for it — say so honestly.
+            // Road found but OSM has no quality tags for it — say so honestly, but still show the Tempo.
             showTip('<div style="opacity:.7;margin-bottom:3px">' +
                 esc(best.name || best.ref || 'Straße') + '</div>' +
-                '<div style="opacity:.65">keine OSM-Qualitätsdaten</div>', '#555');
+                '<div style="opacity:.65">keine OSM-Qualitätsdaten</div>' + speedLine(best), '#555');
         }
     }
 
