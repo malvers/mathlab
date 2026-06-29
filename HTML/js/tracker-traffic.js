@@ -82,29 +82,18 @@ window.TrackerTraffic = function (ctx) {
         if (ref) String(ref).split(/[;,]/).forEach((r) => { const m = String(r).trim().match(/^A\s?(\d+)/i); if (m) out.add('A' + m[1]); });
         return [...out];
     }
-    const OVERPASS_MIRRORS = ['https://overpass-api.de/api/interpreter', 'https://overpass.kumi.systems/api/interpreter'];
     const DETECT_RADIUS_M = 15000;  // find every Autobahn within ~15 km → show the incidents AROUND you (POI-like),
     const MAX_REFS = 8;             // not just the road under your wheels. Cap the ref count to bound API load.
     // Own Autobahn detection: motorway/trunk ways carrying a `ref` within DETECT_RADIUS_M. Independent of the
     // speed-limit module (which only runs while recording) → traffic shows AMBIENTLY, like POIs, even when idle.
     async function overpassRefs(here) {
         const q = '[out:json][timeout:25];way(around:' + DETECT_RADIUS_M + ',' + here[0] + ',' + here[1] + ')[highway~"^(motorway|trunk)(_link)?$"][ref];out tags 150;';
-        let gotOk = false;                                  // did ANY mirror answer cleanly (200 + JSON)?
-        for (const url of OVERPASS_MIRRORS) {
-            const ctrl = new AbortController();
-            const to = setTimeout(() => ctrl.abort(), 13000);   // don't let a slow mirror wedge the fetch (busy stays true)
-            try {
-                const r = await fetch(url, { method: 'POST', body: 'data=' + encodeURIComponent(q), signal: ctrl.signal });
-                if (!r.ok) continue;
-                const j = await r.json();
-                gotOk = true;
-                const out = new Set();
-                for (const e of (j.elements || [])) aRefs(e.tags && e.tags.ref).forEach((x) => out.add(x));
-                if (out.size) return [...out].slice(0, MAX_REFS);  // empty 200 → try the other mirror, then trust it as empty
-            } catch (e) { /* try next mirror */ }
-            finally { clearTimeout(to); }
-        }
-        return gotOk ? [] : null;   // [] = genuinely no Autobahn within reach · null = every mirror failed (don't wipe pins)
+        // Shared client (js/tracker-overpass.js): proxy + direct-mirror fallback, races mirrors for us.
+        const j = await window.queryOverpass(q, { timeout: 26000 });
+        if (!j) return null;                                // every mirror failed → don't wipe pins
+        const out = new Set();
+        for (const e of (j.elements || [])) aRefs(e.tags && e.tags.ref).forEach((x) => out.add(x));
+        return [...out].slice(0, MAX_REFS);                 // [] = genuinely no Autobahn within reach
     }
     // Which Autobahn(s) to show? The road you're on (speed module, free while recording) PLUS every Autobahn
     // within ~15 km (Overpass) — so incidents appear around you like POIs, not only on the road you're driving.

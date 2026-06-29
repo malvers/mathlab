@@ -19,12 +19,18 @@
 // Key-less public mirrors, raced in parallel — the first healthy one wins, so an overload/outage of one
 // operator doesn't take us down. ALL must be WORLDWIDE instances: a regional extract (e.g. the Swiss
 // overpass.osm.ch, verified 2026-06-28 to hold no Dresden data) would return a fast 200 with EMPTY
-// elements, win the race, and falsely report "no road". overpass.openstreetmap.fr verified worldwide.
+// elements, win the race, and falsely report "no road".
+//
+// Geo-diverse + health-verified 2026-06-29 (the German .de/.kumi/.private set was overloaded and the
+// deployed proxy still lacked the working ones → a flood of 502s, the "Geschwindigkeits-Disaster").
+// openstreetmap.fr (~0.4 s) and maps.mail.ru (~0.4 s) are the fastest reliable worldwide instances;
+// the rest stay in the race as spares (a dead one is simply ignored).
 const MIRRORS = [
+  'https://overpass.openstreetmap.fr/api/interpreter',
+  'https://maps.mail.ru/osm/tools/overpass/api/interpreter',
   'https://overpass-api.de/api/interpreter',
   'https://overpass.kumi.systems/api/interpreter',
   'https://overpass.private.coffee/api/interpreter',
-  'https://overpass.openstreetmap.fr/api/interpreter',
 ];
 
 const MAX_QL = 100000;          // guard: reject absurd bodies (the corridor query is the biggest, ~tens of KB)

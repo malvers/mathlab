@@ -38,7 +38,6 @@ window.TrackerPoi = function (ctx) {
         // Minimalist fairy mark: a winged magic wand topped with a star (wings + wand in one clean symbol).
         'poi-cat-feen':     { def: false, local: true, lbl: 'Feen', c: 'j', ic: '<path d="M12 21V9.5"/><path d="M12 3.2 12.91 4.69 14.4 5.6 12.91 6.51 12 8 11.09 6.51 9.6 5.6 11.09 4.69Z"/><path d="M12 10.5C9 8.5 8 11.5 11 12.5"/><path d="M12 10.5C15 8.5 16 11.5 13 12.5"/>' },
     };
-    const ENDPOINT = 'https://overpass-api.de/api/interpreter';
     const MIN_ZOOM = 11;           // wider than this → area too big → skip (protects Overpass)
     const MIN_INTERVAL_MS = 8000;  // throttle: same view re-queried at most this often
     const MAX_POIS = 80;           // cap pins so the map doesn't turn into a carpet
@@ -136,9 +135,9 @@ window.TrackerPoi = function (ctx) {
         if (busy || (box === lastBox && (Date.now() - lastFetch) < MIN_INTERVAL_MS)) return;
         busy = true; lastBox = box; lastFetch = Date.now();
         try {
-            const r = await fetch(ENDPOINT, { method: 'POST', body: 'data=' + encodeURIComponent(buildQuery(cats, box)) });
-            if (!r.ok) { dbg('HTTP ' + r.status + ' → Pins behalten'); return; }                 // server error → don't wipe
-            const d = await r.json().catch(() => ({}));
+            // Shared client (js/tracker-overpass.js): proxy + direct-mirror fallback. null = total failure.
+            const d = await window.queryOverpass(buildQuery(cats, box), { timeout: 26000, dbg });
+            if (!d) { dbg('Overpass nicht erreichbar → Pins behalten'); return; }                  // don't wipe
             // Overpass signals timeout/rate-limit with a `remark` (HTTP 200, no/partial `elements`). Rendering
             // that as "empty" wiped ALL pins → the flicker. Only render a response we trust (real elements array).
             if (d.remark || !Array.isArray(d.elements)) { dbg('Overpass remark/leer → Pins behalten' + (d.remark ? ': ' + d.remark : '')); return; }
