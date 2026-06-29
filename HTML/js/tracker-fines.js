@@ -106,13 +106,22 @@ window.TrackerFines = function (ctx) {
             <div><div class="fines-banner-t">${title}</div><div class="fines-banner-x">${text}</div></div></div>`;
     }
 
+    function curLimit() { return speed && speed.currentLimit ? speed.currentLimit() : null; }
+    function curSpeed() { return speed && speed.lastSpeed ? speed.lastSpeed() : 0; }
+
     // Open the panel for the current situation (pulled from the speed-limit module).
     function show() {
-        const limit = speed && speed.currentLimit ? speed.currentLimit() : null;
-        const spd = speed && speed.lastSpeed ? speed.lastSpeed() : 0;
-        renderBody(spd, limit);
+        renderBody(curSpeed(), curLimit());
         if (showPanel) showPanel('fines-panel');
     }
 
-    return { show, lookup };
+    // Live update: re-price from the latest GPS fix WHILE the panel is open (called each fix from the
+    // position pipeline). No-op when the panel is closed, so it's free the rest of the time.
+    function refresh() {
+        const panel = $('fines-panel');
+        if (!panel || !panel.classList.contains('open')) return;
+        renderBody(curSpeed(), curLimit());
+    }
+
+    return { show, refresh, lookup };
 };

@@ -144,6 +144,20 @@ window.TrackerSpeedLimit = function (ctx) {
             ?? parseMax(tags['source:maxspeed']);
     }
 
+    // Font-metric auto-fit: measure the glyphs with a canvas and pick the largest font size whose text
+    // width still fits the disc's usable inner area. Replaces the old fixed clamp/.s3 guess that left
+    // "120/130" either overflowing or too small — now ANY string is sized to fill the sign exactly.
+    const fitCanvas = document.createElement('canvas').getContext('2d');
+    function fitSignText(el, txt) {
+        // Disc is 44px with a 5px ring → ~34px inner Ø; keep a hair of padding so glyphs never kiss the ring.
+        const inner = 30;
+        let size = 19; // upper bound for 1–2 digit signs (fills the disc without touching the ring)
+        fitCanvas.font = '700 ' + size + 'px Arial, Helvetica, sans-serif';
+        const w = fitCanvas.measureText(txt).width;
+        if (w > inner) size = Math.max(10, Math.floor(size * inner / w)); // scale down only, never below 10px
+        el.style.fontSize = size + 'px';
+    }
+
     function setSign(limit, over) {
         const el = $('speed-sign'); if (!el) return;
         // 'none' (OSM maxspeed=none, Autobahn unbegrenzt) → 'c' (Lichtgeschwindigkeit, das echte Limit).
@@ -151,8 +165,9 @@ window.TrackerSpeedLimit = function (ctx) {
         const txt = (limit === 'none') ? 'c' : (limit == null) ? '?' : String(limit);
         el.textContent = txt;
         el.classList.toggle('cee', txt === 'c'); // 'c' is an x-height glyph → sits low; nudge it up a tick (see CSS)
-        el.classList.toggle('s3', txt.length >= 3); // 3-digit limits (100/120/130) → smaller, tighter font to fit the disc
+        el.classList.toggle('s3', txt.length >= 3); // 3-digit limits (100/120/130) → tighter letter-spacing (see CSS)
         el.classList.toggle('over', !!over && limit !== 'none');
+        fitSignText(el, txt); // size the glyphs to the disc via measured metrics (overrides the CSS font-size)
         el.hidden = false;
     }
 
