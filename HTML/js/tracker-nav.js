@@ -898,7 +898,7 @@ window.TrackerNav = function (ctx) {
         const km = (m) => fmt(m).replace('.', ',');
         // Remaining time right after the arrival clock: "(noch 13 min)" under an hour, "(noch 1:23 h)"
         // beyond — fmtDur drops the hours when zero. Remaining distance reads "(noch 5,5 km)" (Doc 2026-06-28).
-        return 'ANKUNFT ' + clock + ' (noch ' + fmtDur(d.remSec) + ')  ·  STRECKE ' + km(tripTotalM || routeTotalDist) + '  ·  (noch ' + km(d.remM) + ')';
+        return 'ANKUNFT ' + clock + ' (noch ' + fmtDur(d.remSec) + ')  STRECKE ' + km(tripTotalM || routeTotalDist) + '  ·  (noch ' + km(d.remM) + ')';
     }
 
     // Spoken distance, rounded to a natural step for the range: 100 m far out, 50 m mid, 10 m close in
