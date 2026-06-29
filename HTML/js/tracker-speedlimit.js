@@ -22,6 +22,7 @@ window.TrackerSpeedLimit = function (ctx) {
     let lastPos = null;     // [lat,lng] at the last query
     let fetching = false;   // a query is in flight
     let curLimit = null;    // number (km/h) | 'none' (unlimited) | null (unknown)
+    let curConfirmed = true; // is curLimit a mapped/signed limit (true) or only the generic legal default (false)?
     let lastRoad = null;    // { ref, name, highway } of the nearest road (for tracker-traffic) — null until first query
     // The over-speed chime = the SMALL bell from glocken.html (its sample), so it sounds identical.
     const BELL_URL = '../resources/bells/wingsoarstudio-anvil-bell-2-wav-485668.mp3';
@@ -122,13 +123,27 @@ window.TrackerSpeedLimit = function (ctx) {
         'motorway_link', 'trunk_link', 'primary_link', 'secondary_link', 'tertiary_link']);
 
     // The generic "legal default" zone tags — these say only "it's a city/rural/motorway road", NOT that
-    // a real sign was seen. Trusting them showed 50 on streets that are actually Tempo-30 zones whose
-    // 30-sign just isn't mapped (Doc 2026-06-30: "30-Zone zeigt 50"). We now DROP these and show "?"
-    // instead of guessing — better honest-unknown than confidently-wrong.
+    // a real sign was seen. Trusting them as a SOLID number showed 50 on streets that are actually Tempo-30
+    // zones whose 30-sign just isn't mapped (Doc 2026-06-30: "30-Zone zeigt 50"). wayLimit() therefore
+    // still drops them so a confirmed/signed limit is never invented. BUT dropping them entirely left the
+    // live sign at "?" almost always (most German roads carry ONLY this generic hint), so genericDefault()
+    // below re-surfaces them as an explicitly UNCONFIRMED value (dimmed, dashed ring) — honest, not
+    // confidently-wrong (Doc 2026-06-29, OTWA's idea).
     const GENERIC_DEFAULT = /^DE:(urban|rural|motorway)$/i;
     function implicitLimit(v) {
-        if (!v || GENERIC_DEFAULT.test(v)) return null; // generic default → don't guess
+        if (!v || GENERIC_DEFAULT.test(v)) return null; // generic default → not a confirmed limit
         return parseMax(v);                              // specific zone (DE:30, living_street, …) → trust
+    }
+
+    // The generic legal default for a drivable way that carries ONLY the implicit zone hint (no explicit
+    // maxspeed, no specific zone): DE:urban→50, DE:rural→100, DE:motorway→'none'. number | 'none' | null.
+    // Shown UNCONFIRMED so it can't masquerade as a mapped sign; a confirmed wayLimit() always takes
+    // precedence. null when there isn't even a generic hint (truly unknown → "?").
+    const DE_GENERIC = { 'DE:urban': 50, 'DE:rural': 100, 'DE:motorway': 'none' };
+    function genericDefault(tags) {
+        if (!tags || !DRIVE_HW.has(tags.highway)) return null;
+        const t = tags['maxspeed:type'] || tags['zone:maxspeed'] || tags['source:maxspeed'];
+        return (t && Object.prototype.hasOwnProperty.call(DE_GENERIC, t)) ? DE_GENERIC[t] : null;
     }
 
     // A way's limit. Trust only what's actually SIGNED: an explicit `maxspeed`, or a SPECIFIC implicit
@@ -157,7 +172,9 @@ window.TrackerSpeedLimit = function (ctx) {
         el.style.fontSize = size + 'px';
     }
 
-    function setSign(limit, over) {
+    // confirmed: true = a mapped/signed limit (solid sign); false = the generic legal default (dimmed +
+    // dashed ring so it reads "probably, not confirmed"); omitted → treated as confirmed (legacy callers).
+    function setSign(limit, over, confirmed) {
         const el = $('speed-sign'); if (!el) return;
         // 'none' (OSM maxspeed=none, Autobahn unbegrenzt) → 'c' (Lichtgeschwindigkeit, das echte Limit).
         // null (limit unknown — no OSM hint, e.g. in the browser) → '?' so it reads "unbekannt", not "unbegrenzt".
@@ -166,6 +183,8 @@ window.TrackerSpeedLimit = function (ctx) {
         el.classList.toggle('cee', txt === 'c'); // 'c' is an x-height glyph → sits low; nudge it up a tick (see CSS)
         el.classList.toggle('s3', txt.length >= 3); // 3-digit limits (100/120/130) → tighter letter-spacing (see CSS)
         el.classList.toggle('over', !!over && limit !== 'none');
+        // Unconfirmed = the generic legal default, not a mapped sign → dimmed + dashed ring (see CSS).
+        el.classList.toggle('unconfirmed', confirmed === false && limit != null);
         fitSignText(el, txt); // size the glyphs to the disc via measured metrics (overrides the CSS font-size)
         el.hidden = false;
     }
@@ -227,42 +246,53 @@ window.TrackerSpeedLimit = function (ctx) {
         try {
             const j = await overpass(q);
             if (!j) { dbg('Overpass: keine Antwort → letztes Schild bleibt'); return; }
-            // Collect every way that yields a limit, with its distance + whether it runs along our heading.
-            const cands = [];
+            // Collect ways with a CONFIRMED signed limit (cands) and, separately, ways carrying only the
+            // generic legal default (dflt) — each with its distance + whether it runs along our heading.
+            const cands = [], dflt = [];
             let ways = 0, refTags = null, refD = Infinity;
             for (const e of (j.elements) || []) {
                 ways++;
                 const ns = nearestSeg(p, e.geometry);
                 if (e.tags && e.tags.ref && ns.d < refD) { refD = ns.d; refTags = e.tags; }
+                const ok = aligned(travelBrg, ns.brg, ALIGN_TOL);
                 const m = wayLimit(e.tags);
-                if (m == null) continue;
-                cands.push({ m, d: ns.d, tags: e.tags, ok: aligned(travelBrg, ns.brg, ALIGN_TOL) });
+                if (m != null) { cands.push({ m, d: ns.d, tags: e.tags, ok }); continue; }
+                const g = genericDefault(e.tags);
+                if (g != null) dflt.push({ m: g, d: ns.d, tags: e.tags, ok });
             }
             // With a reliable heading we ONLY trust ways that run along it (kills the perpendicular crossing
             // / parallel side-street that used to steal the sign and show a wrong number). Without a heading
             // (slow / cold start) fall back to all candidates, nearest wins.
             const haveHeading = travelBrg != null;
-            const pool = (haveHeading && cands.some((c) => c.ok)) ? cands.filter((c) => c.ok) : cands;
+            const pick = (arr) => {
+                const pool = (haveHeading && arr.some((c) => c.ok)) ? arr.filter((c) => c.ok) : arr;
+                let m = null, d = Infinity, tags = null;
+                for (const c of pool) if (c.d < d) { d = c.d; m = c.m; tags = c.tags; }
+                return { m, d, tags };
+            };
+            const conf = pick(cands);
+            const def = pick(dflt);
 
-            let best = null, bestD = Infinity, bestTags = null;
-            for (const c of pool) if (c.d < bestD) { bestD = c.d; best = c.m; bestTags = c.tags; }
-
-            const roadTags = bestTags || refTags;
+            const roadTags = conf.tags || def.tags || refTags;
             if (roadTags) lastRoad = { ref: roadTags.ref || null, name: roadTags.name || null, highway: roadTags.highway || null };
 
-            // Heading known, roads found, but NONE align with travel → we're likely on/near a junction or
-            // between ways. Better to keep the last sign than flash a wrong limit from a crossing road.
-            if (best == null && haveHeading && cands.length) {
-                dbg('Limit: nur quer/parallel laufende Wege → unsicher, kein Update');
+            // 1) a confirmed/signed limit wins — solid sign.
+            if (conf.m != null) {
+                dbg('Limit: ' + conf.m + ' (' + Math.round(conf.d) + ' m' + (haveHeading ? ', i. Fahrtricht.' : '') + ')');
+                curLimit = conf.m; curConfirmed = true;
+                setSign(conf.m, false, true);
                 return;
             }
-            if (best == null) {                 // road untagged → don't blank a previously good sign
-                dbg('Limit: ' + ways + ' Wege, keiner mit (impliziter) Begrenzung → kein Tag');
+            // 2) no signed limit → fall back to the generic legal default, shown UNCONFIRMED (dimmed/dashed).
+            if (def.m != null) {
+                dbg('Default (unbestätigt): ' + def.m + ' (' + Math.round(def.d) + ' m' + (haveHeading ? ', i. Fahrtricht.' : '') + ')');
+                curLimit = def.m; curConfirmed = false;
+                setSign(def.m, false, false);
                 return;
             }
-            dbg('Limit: ' + best + ' (' + Math.round(bestD) + ' m' + (haveHeading ? ', i. Fahrtricht.' : '') + ')');
-            curLimit = best;
-            setSign(best, false);
+            // 3) nothing usable (untagged, or only crossing roads) → don't blank a previously good sign.
+            dbg('Limit: ' + ways + ' Wege, kein (impliziter) Tag → kein Update');
+            return;
         } catch (e) { /* parse error → keep the last known sign */ }
         finally { fetching = false; }
     }
@@ -277,13 +307,15 @@ window.TrackerSpeedLimit = function (ctx) {
         let fromProfile = false;
         if (here && profile && profile.hasRoute && profile.hasRoute()) {
             const pl = profile.limitAt(here);
-            if (pl !== undefined && pl !== null) { curLimit = pl; setSign(pl, false); fromProfile = true; }
+            if (pl !== undefined && pl !== null) { curLimit = pl; curConfirmed = true; setSign(pl, false, true); fromProfile = true; }
         }
         if (speedKmh != null) lastSpeedKmh = speedKmh; // remember for the fines panel (sign tap)
         if (typeof curLimit === 'number' && speedKmh != null) {
-            setSign(curLimit, speedKmh > curLimit + OVER_TOL_KMH);
-            // 8 km/h over the limit → the small bell. Re-reminds every BING_REPEAT_MS while still over.
-            if (speedKmh > curLimit + BING_OVER_KMH) {
+            setSign(curLimit, speedKmh > curLimit + OVER_TOL_KMH, curConfirmed);
+            // The audible bell only on a CONFIRMED (mapped/signed) limit — never assert an over-speed
+            // chime on the merely-probable generic default (it might be an unmapped 30-zone; an audible
+            // "you're 10 over 50" would be confidently-wrong, Doc 2026-06-29). The dimmed sign still shows.
+            if (curConfirmed && speedKmh > curLimit + BING_OVER_KMH) {
                 if (Date.now() - lastBing > BING_REPEAT_MS) { bing(); lastBing = Date.now(); }
             } else if (speedKmh <= curLimit) {
                 lastBing = 0; // back to legal → re-arm so the next exceedance chimes immediately
@@ -311,7 +343,7 @@ window.TrackerSpeedLimit = function (ctx) {
         query(here, travelBrg);
     }
 
-    function clear() { curLimit = null; lastRoad = null; lastPos = null; lastBing = 0; setSign(null, false); }
+    function clear() { curLimit = null; curConfirmed = true; lastRoad = null; lastPos = null; lastBing = 0; setSign(null, false); }
 
     function setBell(on) { bellOn = !!on; try { localStorage.setItem(BELL_KEY, bellOn ? '1' : '0'); } catch (e) { } }
     function bellEnabled() { return bellOn; }
@@ -322,7 +354,7 @@ window.TrackerSpeedLimit = function (ctx) {
     // setProfile: attach the route profile after init (creation order independent).
     return {
         update, clear, unlockAudio, setBell, bellEnabled, currentRoad: () => lastRoad,
-        currentLimit: () => curLimit, lastSpeed: () => lastSpeedKmh,
+        currentLimit: () => curLimit, currentConfirmed: () => curConfirmed, lastSpeed: () => lastSpeedKmh,
         resolveLimit: wayLimit, setProfile: (p) => { profile = p; },
     };
 };

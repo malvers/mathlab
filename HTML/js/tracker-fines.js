@@ -56,10 +56,14 @@ window.TrackerFines = function (ctx) {
 
     // Build the panel body for the current speed vs. limit and return an outcome flag so the caller can
     // colour the trigger. limit: number km/h | 'none' (Autobahn, unbegrenzt) | null/undefined (unknown).
-    function renderBody(speedKmh, limit) {
+    // confirmed=false → the limit is only the generic legal default (no mapped sign), so a concrete fine
+    // would be a guess: we mark the basis "~ / unbestätigt" and call the figure an estimate (honest, in
+    // step with the dimmed/dashed sign — Doc 2026-06-29). Omitted/true → priced as a firm ticket.
+    function renderBody(speedKmh, limit, confirmed) {
         const body = $('fines-body');
         if (!body) return;
         const spd = Math.round(speedKmh || 0);
+        const unconf = (confirmed === false);
 
         // No usable limit → can't price a ticket. Be honest instead of guessing.
         if (limit === 'none') {
@@ -78,27 +82,33 @@ window.TrackerFines = function (ctx) {
         const over = tolSpeed - limit;
         const urban = limit <= 50;
         const where = urban ? 'innerorts' : 'außerorts';
+        const lim = (unconf ? '~' : '') + limit;          // mark an unconfirmed limit as approximate
+        const whereTxt = where + (unconf ? ', unbestätigt' : '');
 
         if (over <= 0) {
             body.innerHTML = banner('green', '✓', 'Alles im grünen Bereich',
-                `${spd} km/h bei erlaubten ${limit} km/h (${where}), nach Toleranz. Kein Bußgeld.`);
+                `${spd} km/h bei erlaubten ${lim} km/h (${whereTxt}), nach Toleranz. Kein Bußgeld.`);
             return;
         }
 
         const f = lookup(over, urban);
         const tiles = [
-            tile('Bußgeld', f.euro + ' €'),
+            tile('Bußgeld', (unconf ? '~' : '') + f.euro + ' €'),
             tile('Punkte', f.points ? String(f.points) : '–'),
             tile('Fahrverbot', f.ban ? f.ban + ' Mon.' : '–'),
         ].join('');
 
+        // When the limit is only the generic default, say so plainly and call the figure an estimate.
+        const estimateNote = unconf
+            ? 'Limit ist nur der gesetzliche Regelfall (kein Schild erkannt) — Bußgeld nur als Schätzung. '
+            : '';
         body.innerHTML = `
             <div class="fines-head">
                 <div class="fines-speed"><b>${spd}</b><span> km/h</span></div>
-                <div class="fines-vs">${over} km/h zu schnell · erlaubt ${limit} (${where}) · ${tolNote}</div>
+                <div class="fines-vs">${over} km/h zu schnell · erlaubt ${lim} (${whereTxt}) · ${tolNote}</div>
             </div>
             <div class="fines-tiles">${tiles}</div>
-            <p class="fines-note">Regelsatz Pkw nach Bußgeldkatalog (BKatV), Stand 2026. Bei Voreintrag,
+            <p class="fines-note">${estimateNote}Regelsatz Pkw nach Bußgeldkatalog (BKatV), Stand 2026. Bei Voreintrag,
             Gefährdung o. Wiederholung kann es teurer werden. Ohne Gewähr.</p>`;
         fitTiles(); // shrink any label/value that's wider than its tile (e.g. "FAHRVERBOT" on a narrow phone)
     }
@@ -141,10 +151,16 @@ window.TrackerFines = function (ctx) {
         const l = speed && speed.currentLimit ? speed.currentLimit() : null;
         return (simSpeed() != null && typeof l !== 'number') ? 50 : l;
     }
+    // Is the current limit a mapped/signed value (true) or only the generic legal default / sim fallback?
+    function curConfirmed() {
+        const live = speed && speed.currentLimit ? speed.currentLimit() : null;
+        if (simSpeed() != null && typeof live !== 'number') return false; // injected fallback 50 → estimate
+        return !(speed && speed.currentConfirmed) || speed.currentConfirmed() !== false; // missing API → confirmed
+    }
 
     // Open the panel for the current situation (pulled from the speed-limit module).
     function show() {
-        renderBody(curSpeed(), curLimit());
+        renderBody(curSpeed(), curLimit(), curConfirmed());
         if (showPanel) showPanel('fines-panel');
     }
 
@@ -153,7 +169,7 @@ window.TrackerFines = function (ctx) {
     function refresh() {
         const panel = $('fines-panel');
         if (!panel || !panel.classList.contains('open')) return;
-        renderBody(curSpeed(), curLimit());
+        renderBody(curSpeed(), curLimit(), curConfirmed());
     }
 
     // Wire the debug slider (panel HTML is static → element is available at init). Dragging re-prices
@@ -161,7 +177,7 @@ window.TrackerFines = function (ctx) {
     const slider = $('fines-sim'), simVal = $('fines-sim-val');
     if (slider) slider.addEventListener('input', () => {
         if (simVal) simVal.textContent = +slider.value > 0 ? slider.value + ' km/h' : 'aus';
-        renderBody(curSpeed(), curLimit());
+        renderBody(curSpeed(), curLimit(), curConfirmed());
     });
 
     return { show, refresh, lookup };
