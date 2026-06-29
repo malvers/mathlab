@@ -13,17 +13,14 @@
 window.TrackerSpeedProfile = function (ctx) {
     const { map } = ctx;
 
-    const OVERPASS_MIRRORS = [
-        'https://overpass-api.de/api/interpreter',
-        'https://overpass.kumi.systems/api/interpreter',
-        'https://overpass.private.coffee/api/interpreter',
-    ];
-    let mirrorRot = 0;
     const QUERY_TIMEOUT_MS = 28000;   // > the server-side [timeout:25] below; a whole-route corridor is big
     const CORRIDOR_M = 25;            // ways within this distance of the route count
+    const ALIGN_TOL = 40;            // a corridor way may differ from the local route direction by at most this (deg)
+    const MIN_RUN_M = 50;            // a limit must hold this far along the route to earn a change point (de-flicker)
     const MAX_VERTS = 2500;           // guard: very long routes are downsampled for resolution (cost/time)
     const MAX_CORRIDOR_PTS = 800;     // cap the around-polyline length so the query body stays sane
     const CACHE_PREFIX = 'trk_speedprofile_';
+    const CACHE_VERSION = 2;          // bump to invalidate caches built before the direction filter (noisy badges)
     const CACHE_TTL_MS = 1000 * 60 * 60 * 24 * 60; // 60 days — OSM limits change rarely
 
     let resolveLimit = null;          // injected from the live sign so the logic is identical (setResolver)
@@ -39,21 +36,49 @@ window.TrackerSpeedProfile = function (ctx) {
     function hasRoute() { return !!(vertexLimit && vertexLimit.length && routePts && routePts.length); }
 
     // ---- geometry helpers (equirectangular; same approach as tracker-speedlimit / nav) -------------
+    // Min distance (m) from point p to a way's geometry, PLUS the compass bearing of the nearest segment.
+    // The bearing lets limitsFromWays reject ways that cross/parallel the route instead of running along it
+    // (the crossing Tempo-30 side street that produced the 30↔50 badge-pulk, Doc 2026-06-29). { d, brg }.
     function distToWay(p, geom) {
-        if (!geom || geom.length < 1) return Infinity;
+        if (!geom || geom.length < 1) return { d: Infinity, brg: null };
         const k = Math.cos(p[0] * Math.PI / 180);
         const xy = (la, lo) => [lo * 111320 * k, la * 110540];
         const px = xy(p[0], p[1]);
-        let min = Infinity;
+        let min = Infinity, brg = null;
         for (let i = 1; i < geom.length; i++) {
             const a = xy(geom[i - 1].lat, geom[i - 1].lon), b = xy(geom[i].lat, geom[i].lon);
             const dx = b[0] - a[0], dy = b[1] - a[1], len2 = dx * dx + dy * dy;
             let t = len2 ? ((px[0] - a[0]) * dx + (px[1] - a[1]) * dy) / len2 : 0;
             t = t < 0 ? 0 : t > 1 ? 1 : t;
-            min = Math.min(min, Math.hypot(px[0] - (a[0] + t * dx), px[1] - (a[1] + t * dy)));
+            const d = Math.hypot(px[0] - (a[0] + t * dx), px[1] - (a[1] + t * dy));
+            if (d < min) { min = d; brg = bearingDeg(geom[i - 1], geom[i]); }
         }
         if (geom.length === 1) { const a = xy(geom[0].lat, geom[0].lon); min = Math.hypot(px[0] - a[0], px[1] - a[1]); }
-        return min;
+        return { d: min, brg };
+    }
+
+    // Bearing a→b in degrees [0,360). a/b are {lat,lon} way nodes or [lat,lng] route points (reads both).
+    // (Same math as tracker-speedlimit.bearingDeg — a small pure helper kept local; folding the shared
+    // geometry into one geo-util is a worthwhile later refactor but out of scope for this fix.)
+    function bearingDeg(a, b) {
+        const t = Math.PI / 180;
+        const la1 = (a.lat != null ? a.lat : a[0]) * t, la2 = (b.lat != null ? b.lat : b[0]) * t;
+        const dLon = ((b.lon != null ? b.lon : b[1]) - (a.lon != null ? a.lon : a[1])) * t;
+        const y = Math.sin(dLon) * Math.cos(la2);
+        const x = Math.cos(la1) * Math.sin(la2) - Math.sin(la1) * Math.cos(la2) * Math.cos(dLon);
+        return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
+    }
+    // True when two bearings run along the same line (direction-agnostic), within `tol` degrees.
+    function aligned(a, b, tol) {
+        if (a == null || b == null) return true;       // no reliable heading → don't filter
+        const d = Math.abs(a - b) % 180;
+        return Math.min(d, 180 - d) <= tol;
+    }
+    // Local route direction at vertex vi, from the segment spanning its neighbours.
+    function routeBearingAt(pts, vi) {
+        const a = pts[Math.max(0, vi - 1)], b = pts[Math.min(pts.length - 1, vi + 1)];
+        if (a === b) return null;
+        return bearingDeg(a, b);
     }
 
     // Nearest route segment to a point → end index `bi`. Mirrors nav.nearestSeg so limitAt() agrees
@@ -84,26 +109,10 @@ window.TrackerSpeedProfile = function (ctx) {
     }
 
     // ---- Overpass --------------------------------------------------------------------------------
-    async function overpass(q) {
-        for (let i = 0; i < OVERPASS_MIRRORS.length; i++) {
-            const url = OVERPASS_MIRRORS[(mirrorRot + i) % OVERPASS_MIRRORS.length];
-            const ctrl = new AbortController();
-            const to = setTimeout(() => ctrl.abort(), QUERY_TIMEOUT_MS);
-            try {
-                const r = await fetch(url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: 'data=' + encodeURIComponent(q),
-                    signal: ctrl.signal,
-                });
-                if (!r.ok) continue;
-                const j = await r.json();
-                mirrorRot = (mirrorRot + i) % OVERPASS_MIRRORS.length;
-                return j;
-            } catch (e) { /* timeout/offline/parse → next mirror */ }
-            finally { clearTimeout(to); }
-        }
-        return null;
+    // Goes through the shared client (js/tracker-overpass.js): proxy first, direct-mirror fallback if the
+    // proxy is down — same single source of truth as the live sign (CLAUDE.md rule 7). JSON or null.
+    function overpass(q) {
+        return window.queryOverpass(q, { timeout: QUERY_TIMEOUT_MS, dbg });
     }
 
     // ---- cache -----------------------------------------------------------------------------------
@@ -119,13 +128,13 @@ window.TrackerSpeedProfile = function (ctx) {
             const raw = localStorage.getItem(cacheKey(meta));
             if (!raw) return null;
             const o = JSON.parse(raw);
-            if (!o || o.v !== 1 || !Array.isArray(o.cps)) return null;
+            if (!o || o.v !== CACHE_VERSION || !Array.isArray(o.cps)) return null;
             if (o.t && (Date.now() - o.t) > CACHE_TTL_MS) return null;
             return o.cps;
         } catch (e) { return null; }
     }
     function cachePut(meta, cps) {
-        try { localStorage.setItem(cacheKey(meta), JSON.stringify({ v: 1, t: Date.now(), cps })); } catch (e) { }
+        try { localStorage.setItem(cacheKey(meta), JSON.stringify({ v: CACHE_VERSION, t: Date.now(), cps })); } catch (e) { }
     }
 
     // ---- build the per-vertex limit array --------------------------------------------------------
@@ -135,12 +144,17 @@ window.TrackerSpeedProfile = function (ctx) {
         const raw = new Array(pts.length).fill(null);
         for (let vi = 0; vi < pts.length; vi++) {
             const p = pts[vi];
+            // Local route direction here → reject corridor ways that cross/parallel the route rather than
+            // run along it (the crossing side street that stole the limit and flickered the badges).
+            const routeBrg = routeBearingAt(pts, vi);
             let best = null, bestD = Infinity;
             for (const w of ways) {
                 const lim = resolveLimit ? resolveLimit(w.tags) : null;
                 if (lim == null) continue;                 // not a drivable, limit-bearing way → ignore
-                const d = distToWay(p, w.geometry);
-                if (d < bestD && d <= CORRIDOR_M + 10) { bestD = d; best = lim; }
+                const nw = distToWay(p, w.geometry);
+                if (nw.d > CORRIDOR_M + 10) continue;       // outside the corridor → not our road
+                if (!aligned(routeBrg, nw.brg, ALIGN_TOL)) continue; // crosses/parallels the route → skip
+                if (nw.d < bestD) { bestD = nw.d; best = lim; }
             }
             raw[vi] = best;
         }
@@ -151,6 +165,40 @@ window.TrackerSpeedProfile = function (ctx) {
         let last = null;
         for (let i = 0; i < out.length; i++) {
             if (out[i] == null) out[i] = last; else last = out[i];
+        }
+        return out;
+    }
+
+    // ---- de-flicker -----------------------------------------------------------------------------
+    // Cumulative along-route distance (m) per vertex.
+    function segMeters(a, b) {
+        const R = 6371000, t = Math.PI / 180;
+        const dLat = (b[0] - a[0]) * t, dLng = (b[1] - a[1]) * t;
+        const x = Math.sin(dLat / 2) ** 2 + Math.cos(a[0] * t) * Math.cos(b[0] * t) * Math.sin(dLng / 2) ** 2;
+        return 2 * R * Math.asin(Math.sqrt(x));
+    }
+    function cumDist(pts) {
+        const cd = new Array(pts.length).fill(0);
+        for (let i = 1; i < pts.length; i++) cd[i] = cd[i - 1] + segMeters(pts[i - 1], pts[i]);
+        return cd;
+    }
+    // Safety net on top of the direction filter: dissolve any limit run shorter than MIN_RUN_M along the
+    // route into the limit that precedes it. A real Tempo-30 stretch spans a block; a stray one-vertex
+    // side-street pick spans metres — so this removes residual flicker without erasing genuine zones.
+    function despeckle(pts, limits) {
+        if (pts.length !== limits.length || pts.length < 2) return limits;
+        const cd = cumDist(pts);
+        const out = limits.slice();
+        let runStart = 0;
+        for (let i = 1; i <= out.length; i++) {
+            if (i === out.length || out[i] !== out[runStart]) {
+                const end = (i === out.length) ? cd[out.length - 1] : cd[i];
+                if (end - cd[runStart] < MIN_RUN_M && runStart > 0) {
+                    const fill = out[runStart - 1];
+                    for (let k = runStart; k < i; k++) out[k] = fill;
+                }
+                runStart = i;
+            }
         }
         return out;
     }
@@ -242,8 +290,9 @@ window.TrackerSpeedProfile = function (ctx) {
         const resAt = downsampleIdx(routePts.length, MAX_VERTS);
         const sub = resAt.map((i) => routePts[i]);
         const subLimits = limitsFromWays(sub, ways);
-        // expand the sub-sampled limits back onto every vertex (carry the nearest sample forward).
-        vertexLimit = expandToAll(routePts.length, resAt, subLimits);
+        // expand the sub-sampled limits back onto every vertex (carry the nearest sample forward), then
+        // de-flicker so a stray metres-long blip can't earn its own badge.
+        vertexLimit = despeckle(routePts, expandToAll(routePts.length, resAt, subLimits));
         changePoints = deriveChangePoints(routePts, vertexLimit);
         if (gen !== buildGen) return;
         cachePut(meta, changePoints);

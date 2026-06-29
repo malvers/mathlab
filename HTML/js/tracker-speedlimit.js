@@ -11,15 +11,6 @@ window.TrackerSpeedLimit = function (ctx) {
     // via setProfile() so creation order doesn't matter.
     let profile = ctx.profile || null;
 
-    // Several public Overpass mirrors — the main one is often slow / rate-limited (HTTP 429), which
-    // left the sign blank even on tagged roads. We try them in order until one answers (CLAUDE.md
-    // rule 18: all key-less). Order is rotated each call so we don't always hammer the same mirror.
-    const OVERPASS_MIRRORS = [
-        'https://overpass-api.de/api/interpreter',
-        'https://overpass.kumi.systems/api/interpreter',
-        'https://overpass.private.coffee/api/interpreter',
-    ];
-    let mirrorRot = 0;
     const MIN_INTERVAL_MS = 5000;  // never query Overpass more often than this (was 15 s → too laggy when driving)
     const MIN_MOVE_M = 90;         // …and only after this much travel — limits change per road segment
     const QUERY_TIMEOUT_MS = 9000; // abort a stuck request so `fetching` can never freeze the sign forever
@@ -219,41 +210,10 @@ window.TrackerSpeedLimit = function (ctx) {
         return Math.min(d, 180 - d) <= tol;
     }
 
-    // Run the query through the shared server-side proxy (js/tracker-overpass.js → races all mirrors
-    // server-side, no client CORS / rate-limit) when it's loaded. CRUCIAL: if the proxy answers null
-    // (Edge Function down / cold-start timeout), fall back to the direct public mirrors — otherwise the
-    // live sign was stuck on "?" in the city while navigation (which uses direct mirrors) worked fine.
-    async function overpass(q) {
-        if (typeof window.queryOverpass === 'function') {
-            const viaProxy = await window.queryOverpass(q, { timeout: QUERY_TIMEOUT_MS, dbg });
-            if (viaProxy) return viaProxy;
-            dbg('Proxy ohne Antwort → direkte Mirror');
-        }
-        return overpassDirect(q);
-    }
-
-    // POST the query to each mirror in turn (rotated start) until one answers; abort a stuck request
-    // after QUERY_TIMEOUT_MS. Returns the parsed JSON, or null if every mirror failed.
-    async function overpassDirect(q) {
-        for (let i = 0; i < OVERPASS_MIRRORS.length; i++) {
-            const url = OVERPASS_MIRRORS[(mirrorRot + i) % OVERPASS_MIRRORS.length];
-            const ctrl = new AbortController();
-            const to = setTimeout(() => ctrl.abort(), QUERY_TIMEOUT_MS);
-            try {
-                const r = await fetch(url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: 'data=' + encodeURIComponent(q),
-                    signal: ctrl.signal,
-                });
-                if (!r.ok) continue;            // 429/5xx → try the next mirror
-                const j = await r.json();
-                mirrorRot = (mirrorRot + i) % OVERPASS_MIRRORS.length; // stick with the one that worked
-                return j;
-            } catch (e) { /* timeout/offline/parse → next mirror */ }
-            finally { clearTimeout(to); }
-        }
-        return null;
+    // All Overpass access goes through the shared client (js/tracker-overpass.js), which owns the proxy +
+    // direct-mirror fallback centrally (single source of truth, CLAUDE.md rule 7). Returns JSON or null.
+    function overpass(q) {
+        return window.queryOverpass(q, { timeout: QUERY_TIMEOUT_MS, dbg });
     }
 
     const ALIGN_TOL = 40;   // a candidate road may differ from the travel direction by at most this (deg)
