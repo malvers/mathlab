@@ -13,6 +13,9 @@ window.TrackerSpeedLimit = function (ctx) {
     // Optional logging-only measurement probe (js/tracker-speedprobe.js): observes each query's result to
     // tally how often a backward-carry / persistent memory WOULD agree/cover — no behaviour change.
     const probe = ctx.probe || null;
+    // Is the road currently wet? (Open-Meteo precipitation, fed from tracker.js.) Drives the "bei Nässe"
+    // conditional limit (maxspeed:conditional=… @ wet). Defaults to "dry" when no signal is wired.
+    const isWet = (typeof ctx.isWet === 'function') ? ctx.isWet : (() => false);
 
     const MIN_INTERVAL_MS = 5000;  // never query Overpass more often than this (was 15 s → too laggy when driving)
     const MIN_MOVE_M = 90;         // …and only after this much travel — limits change per road segment
@@ -171,13 +174,15 @@ window.TrackerSpeedLimit = function (ctx) {
             const cond = at[1].trim().replace(/^\(/, '').replace(/\)$/, '').trim();
             const days = parseDays(cond);
             const times = parseTimes(cond);
-            if (days == null && times == null) continue;        // pure non-time condition → can't honour
-            if (/\bPH\b/i.test(cond) && days == null) continue;  // holiday-only clause → can't evaluate
-            rules.push({ limit, days, times });
+            const wet = /\bwet\b/i.test(cond);                   // "@ wet" → applies only when the road is wet
+            if (days == null && times == null && !wet) continue; // pure unhandleable condition → can't honour
+            if (/\bPH\b/i.test(cond) && days == null && !wet) continue;  // holiday-only clause → can't evaluate
+            rules.push({ limit, days, times, wet });
         }
         return rules;
     }
     function ruleActive(rule, date) {
+        if (rule.wet && !isWet()) return false;            // "@ wet" rule only applies on a wet road
         if (rule.days && rule.days.indexOf(date.getDay()) < 0) return false;
         if (rule.times) {
             const mins = date.getHours() * 60 + date.getMinutes();
@@ -203,7 +208,7 @@ window.TrackerSpeedLimit = function (ctx) {
     function limitKey(v) {
         if (!v || typeof v !== 'object') return String(v);
         const rs = (v.rules || []).map((r) =>
-            r.limit + '@' + (r.days ? r.days.join('') : '*') + ':' +
+            r.limit + (r.wet ? '@wet' : '') + '@' + (r.days ? r.days.join('') : '*') + ':' +
             (r.times ? r.times.map((t) => t.from + '-' + t.to).join(',') : '*')).join(';');
         return 'C|' + String(v.base) + '|' + rs;
     }
@@ -293,6 +298,38 @@ window.TrackerSpeedLimit = function (ctx) {
         el.classList.toggle('unconfirmed', confirmed === false && limit != null);
         fitSignText(el, txt); // size the glyphs to the disc via measured metrics (overrides the CSS font-size)
         el.hidden = false;
+    }
+
+    // ---- road advisories: Überholverbot (overtaking=no) + Maut (toll=yes) ------------------------------
+    // Read from the SAME resolved-road tags as the limit → near-free, no extra query. ADVISORY ONLY: OSM
+    // tags these sparsely, so "no badge" does NOT mean "allowed". Small icons under the speed sign, drawn
+    // with inline styles (no CSS dependency). Dark-blue, not black (CLAUDE.md); never orange.
+    let curNoOvertake = false, curToll = false, advEl = null;
+    const NO_OVERTAKE_SVG = '<svg viewBox="0 0 48 48" width="34" height="34" aria-label="Überholverbot">'
+        + '<circle cx="24" cy="24" r="21" fill="#fff" stroke="rgb(176,36,24)" stroke-width="5"/>'
+        + '<rect x="8" y="20" width="14" height="9" rx="2" fill="rgb(176,36,24)"/>'   // overtaking car (red)
+        + '<rect x="26" y="20" width="14" height="9" rx="2" fill="rgb(14,36,78)"/>'   // car being passed (dark blue, not black)
+        + '</svg>';
+    const TOLL_BADGE = '<div style="background:rgb(14,36,78);color:#fff;font:700 11px Arial,sans-serif;'
+        + 'padding:3px 7px;border-radius:7px;letter-spacing:.5px;box-shadow:0 2px 8px rgba(8,20,42,.5)">MAUT</div>';
+    function ensureAdv() {
+        if (advEl) return advEl;
+        advEl = document.createElement('div');
+        advEl.id = 'road-adv';
+        advEl.style.cssText = ['position:fixed', 'left:13px', 'top:50%',
+            'transform:translateY(calc(-50% + 100px))', 'z-index:600', 'display:none',
+            'flex-direction:column', 'gap:6px', 'align-items:center', 'pointer-events:none'].join(';');
+        document.body.appendChild(advEl);
+        return advEl;
+    }
+    function setAdvisories(noOv, toll) {
+        curNoOvertake = !!noOv; curToll = !!toll;
+        const el = ensureAdv();
+        let html = '';
+        if (curNoOvertake) html += '<div style="filter:drop-shadow(0 2px 6px rgba(8,20,42,0.5))">' + NO_OVERTAKE_SVG + '</div>';
+        if (curToll) html += TOLL_BADGE;
+        el.innerHTML = html;
+        el.style.display = (curNoOvertake || curToll) ? 'flex' : 'none';
     }
 
     // Min distance (m) from point p=[lat,lng] to a way's geometry (array of {lat,lon}). Cheap
@@ -390,6 +427,9 @@ window.TrackerSpeedLimit = function (ctx) {
 
             const roadTags = conf.tags || def.tags || refTags;
             if (roadTags) lastRoad = { ref: roadTags.ref || null, name: roadTags.name || null, highway: roadTags.highway || null };
+            // Road advisories from the resolved road (not refTags, which may be a different ref-bearing way).
+            const advTags = conf.tags || def.tags;
+            if (advTags) setAdvisories(advTags.overtaking === 'no', advTags.toll === 'yes');
 
             // 1) a confirmed/signed limit wins — solid sign. A conditional way keeps its raw {base,rules} in
             //    curRaw so update() re-evaluates the window as the clock crosses it (even while parked).
@@ -463,7 +503,7 @@ window.TrackerSpeedLimit = function (ctx) {
         query(here, travelBrg);
     }
 
-    function clear() { curLimit = null; curRaw = null; curConfirmed = true; lastRoad = null; lastPos = null; lastBing = 0; setSign(null, false); }
+    function clear() { curLimit = null; curRaw = null; curConfirmed = true; lastRoad = null; lastPos = null; lastBing = 0; setSign(null, false); setAdvisories(false, false); }
 
     function setBell(on) { bellOn = !!on; try { localStorage.setItem(BELL_KEY, bellOn ? '1' : '0'); } catch (e) { } }
     function bellEnabled() { return bellOn; }
@@ -477,6 +517,7 @@ window.TrackerSpeedLimit = function (ctx) {
     return {
         update, clear, unlockAudio, setBell, bellEnabled, currentRoad: () => lastRoad,
         currentLimit: () => curLimit, currentConfirmed: () => curConfirmed, lastSpeed: () => lastSpeedKmh,
+        currentNoOvertake: () => curNoOvertake, currentToll: () => curToll,
         resolveLimit: wayLimit, evalLimit, limitKey, setProfile: (p) => { profile = p; },
     };
 };
