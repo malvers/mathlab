@@ -26,12 +26,38 @@ window.TrackerHazards = function (ctx) {
     const AHEAD_TOL = 55;           // hazard bearing must be within this of travel direction (i.e. ahead)
     const WARN_REPEAT_MS = 90000;   // never re-warn the SAME hazard within this
 
-    // type → label / glyph / whether it fires a toast (vs pin-only)
+    // Clean inline SVG sign faces (crisper than emoji at pin size; brand red rgb(176,36,24), dark blue
+    // rgb(14,36,78) instead of black). Sized 28 px; the pin adds a drop-shadow for contrast on the map.
+    // Bahnübergang = a Schranke (post + red/white boom); STOP = red octagon; Vorfahrt = inverted triangle;
+    // Zebra = blue Fußgängerüberweg plate with white stripes.
+    const SVG_SCHRANKE =
+        '<svg viewBox="0 0 40 40" width="28" height="28" aria-label="Bahnübergang">'
+        + '<rect x="2.5" y="2.5" width="35" height="35" rx="7" fill="#fff" stroke="rgb(176,36,24)" stroke-width="2.5"/>'
+        + '<rect x="8" y="13" width="4" height="18" rx="1" fill="rgb(14,36,78)"/>'
+        + '<rect x="10" y="13" width="25" height="6" rx="1.5" fill="#fff" stroke="rgb(14,36,78)" stroke-width="0.8"/>'
+        + '<rect x="12" y="13" width="5" height="6" fill="rgb(176,36,24)"/>'
+        + '<rect x="22" y="13" width="5" height="6" fill="rgb(176,36,24)"/>'
+        + '<rect x="32" y="13" width="3" height="6" fill="rgb(176,36,24)"/></svg>';
+    const SVG_STOP =
+        '<svg viewBox="0 0 40 40" width="28" height="28" aria-label="Stopp">'
+        + '<polygon points="13,2.5 27,2.5 37.5,13 37.5,27 27,37.5 13,37.5 2.5,27 2.5,13" fill="rgb(176,36,24)" stroke="#fff" stroke-width="2"/>'
+        + '<text x="20" y="20.5" text-anchor="middle" dominant-baseline="central" fill="#fff" font-family="Arial,Helvetica,sans-serif" font-weight="700" font-size="10">STOP</text></svg>';
+    const SVG_YIELD =
+        '<svg viewBox="0 0 40 40" width="28" height="28" aria-label="Vorfahrt achten">'
+        + '<polygon points="3,6.5 37,6.5 20,36" fill="#fff" stroke="rgb(176,36,24)" stroke-width="4.5" stroke-linejoin="round"/></svg>';
+    const SVG_ZEBRA =
+        '<svg viewBox="0 0 40 40" width="28" height="28" aria-label="Zebrastreifen">'
+        + '<rect x="3" y="3" width="34" height="34" rx="6" fill="rgb(14,36,78)"/>'
+        + '<rect x="10" y="9" width="4" height="22" rx="1" fill="#fff"/>'
+        + '<rect x="18" y="9" width="4" height="22" rx="1" fill="#fff"/>'
+        + '<rect x="26" y="9" width="4" height="22" rx="1" fill="#fff"/></svg>';
+
+    // type → label / sign svg / whether it fires a toast (vs pin-only)
     const TYPES = {
-        level_crossing: { label: 'Bahnübergang',    glyph: '🚂', warn: true },
-        stop:           { label: 'Stopp',            glyph: '🛑', warn: true },
-        give_way:       { label: 'Vorfahrt achten',  glyph: '🔻', warn: false },
-        zebra:          { label: 'Zebrastreifen',    glyph: '🚸', warn: false },
+        level_crossing: { label: 'Bahnübergang',    svg: SVG_SCHRANKE, warn: true },
+        stop:           { label: 'Stopp',            svg: SVG_STOP,     warn: true },
+        give_way:       { label: 'Vorfahrt achten',  svg: SVG_YIELD,    warn: false },
+        zebra:          { label: 'Zebrastreifen',    svg: SVG_ZEBRA,    warn: false },
     };
 
     let layer = null, lastQ = 0, lastQPos = null, fetching = false;
@@ -80,8 +106,8 @@ window.TrackerHazards = function (ctx) {
     function pin(type) {
         return L.divIcon({
             className: 'hazard-pin-wrap',
-            html: '<div style="font-size:17px;line-height:22px;text-align:center;filter:drop-shadow(0 1px 2px rgba(8,20,42,0.6))">' + TYPES[type].glyph + '</div>',
-            iconSize: [22, 22], iconAnchor: [11, 11],
+            html: '<div style="filter:drop-shadow(0 1px 2px rgba(8,20,42,0.55))">' + TYPES[type].svg + '</div>',
+            iconSize: [28, 28], iconAnchor: [14, 14],
         });
     }
     function drawPins() {
@@ -150,7 +176,7 @@ window.TrackerHazards = function (ctx) {
         }
         if (best && now - (warned[best.id] || 0) > WARN_REPEAT_MS) {
             warned[best.id] = now;
-            const msg = TYPES[best.type].glyph + ' ' + TYPES[best.type].label + ' in ' + (Math.round(bestD / 10) * 10) + ' m';
+            const msg = '⚠ ' + TYPES[best.type].label + ' in ' + (Math.round(bestD / 10) * 10) + ' m';
             toast(msg); dbg(msg);
         }
     }
