@@ -13,6 +13,14 @@
 window.TrackerSpeedProfile = function (ctx) {
     const { map } = ctx;
 
+    // PARKED 2026-06-30 (Doc): the precomputed profile overrode the live sign and showed a SOLID wrong
+    // limit while navigating — carryForward/despeckle/alignedAny turned a real Tempo-30 into a solid 50
+    // (e.g. Paradiesstraße inherited the preceding 50). The live sign alone resolved the correct 30, so
+    // until that profile bug is fixed properly we keep the profile OFF: build() no-ops → hasRoute() stays
+    // false → the live sign takes over and no (wrong) change-point badges are drawn. Flip back to true to
+    // re-enable the feature 1:1 once the resolution bug is solved.
+    const ENABLED = false;
+
     const QUERY_TIMEOUT_MS = 28000;   // > the server-side [timeout:25] below; a whole-route corridor is big
     const CORRIDOR_M = 25;            // ways within this distance of the route count
     const ALIGN_TOL = 40;            // a corridor way may differ from the local route direction by at most this (deg)
@@ -284,6 +292,7 @@ window.TrackerSpeedProfile = function (ctx) {
     // meta = { mode, start:[lat,lng], dest:[lat,lng] }. Fire-and-forget from nav after drawRoute().
     async function build(pts, meta) {
         const gen = ++buildGen;
+        if (!ENABLED) { clear(); return; }   // parked → live sign owns the limit, no badges (see top)
         if (!pts || pts.length < 2 || !resolveLimit) { clear(); return; }
         routePts = pts.slice();
 
