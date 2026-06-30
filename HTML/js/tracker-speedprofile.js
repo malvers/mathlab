@@ -28,10 +28,12 @@ window.TrackerSpeedProfile = function (ctx) {
     const MAX_VERTS = 2500;           // guard: very long routes are downsampled for resolution (cost/time)
     const MAX_CORRIDOR_PTS = 800;     // cap the around-polyline length so the query body stays sane
     const CACHE_PREFIX = 'trk_speedprofile_';
-    const CACHE_VERSION = 2;          // bump to invalidate caches built before the direction filter (noisy badges)
+    const CACHE_VERSION = 3;          // v3: change points may carry a time-conditional {base,rules} value
     const CACHE_TTL_MS = 1000 * 60 * 60 * 24 * 60; // 60 days — OSM limits change rarely
 
     let resolveLimit = null;          // injected from the live sign so the logic is identical (setResolver)
+    let evalAt = null;                // evalLimit(value, date) from the live sign — resolves a conditional now
+    let limKey = null;                // limitKey(value) from the live sign — stable equality for compares
     let routePts = null;              // the route [[lat,lng]…] the current profile is aligned to
     let vertexLimit = null;           // carry-forward limit per route vertex: number | 'none' | null
     let changePoints = [];            // [{lat,lng,limit}] where the limit changes — drawn on the route
@@ -39,6 +41,13 @@ window.TrackerSpeedProfile = function (ctx) {
     let buildGen = 0;                 // bumped per build so a slow Overpass answer can't apply to a newer route
 
     function setResolver(fn) { resolveLimit = fn; }
+    // Inject the live sign's conditional evaluator + equality key so a time-conditional limit is resolved at
+    // display time (limitAt/badge) and compared correctly when de-flickering / deriving change points.
+    function setEval(evalFn, keyFn) { evalAt = evalFn; limKey = keyFn; }
+    // Equality that understands a structured conditional value (falls back to === before setEval ran).
+    function sameLimit(a, b) { return limKey ? limKey(a) === limKey(b) : a === b; }
+    // Resolve a possibly-conditional value to the number/'none'/null that applies NOW (identity if no eval).
+    function evalNow(v) { return evalAt ? evalAt(v, new Date()) : v; }
     function dbg(msg) { try { if (window.DebugWindow) DebugWindow.log('🚦 ' + msg); } catch (e) { } }
 
     function hasRoute() { return !!(vertexLimit && vertexLimit.length && routePts && routePts.length); }
@@ -130,7 +139,8 @@ window.TrackerSpeedProfile = function (ctx) {
         if (!hasRoute() || !here) return undefined;
         const bi = nearestSegIdx(here);
         const v = vertexLimit[bi - 1];
-        return (v === undefined) ? null : v; // map a missing slot to null (known gap), never undefined
+        if (v === undefined) return null;     // map a missing slot to null (known gap), never undefined
+        return evalNow(v);                    // resolve a conditional {base,rules} against the clock NOW
     }
 
     // ---- Overpass --------------------------------------------------------------------------------
@@ -216,7 +226,7 @@ window.TrackerSpeedProfile = function (ctx) {
         const out = limits.slice();
         let runStart = 0;
         for (let i = 1; i <= out.length; i++) {
-            if (i === out.length || out[i] !== out[runStart]) {
+            if (i === out.length || !sameLimit(out[i], out[runStart])) {
                 const end = (i === out.length) ? cd[out.length - 1] : cd[i];
                 // Dissolve a stray short run into the KNOWN limit before it — but NOT the leading run
                 // (runStart>0), NOT the trailing run (i!==out.length; the route really ends there, so a
@@ -238,7 +248,7 @@ window.TrackerSpeedProfile = function (ctx) {
         let prev = undefined;
         for (let i = 0; i < pts.length; i++) {
             const v = limits[i];
-            if (v != null && v !== prev) { cps.push({ lat: pts[i][0], lng: pts[i][1], limit: v }); prev = v; }
+            if (v != null && !sameLimit(v, prev)) { cps.push({ lat: pts[i][0], lng: pts[i][1], limit: v }); prev = v; }
         }
         return cps;
     }
@@ -273,9 +283,13 @@ window.TrackerSpeedProfile = function (ctx) {
 
     // ---- markers ---------------------------------------------------------------------------------
     function badgeHtml(limit) {
-        const txt = (limit === 'none') ? '∞' : String(limit);
+        const cond = limit && typeof limit === 'object';   // time-conditional {base,rules}
+        const shown = evalNow(limit);                       // the value active at draw time
+        const txt = (shown === 'none') ? '∞' : (shown == null ? '?' : String(shown));
         const small = txt.length >= 3 ? ' sp-badge-s3' : '';
-        return '<div class="sp-badge' + small + '">' + txt + '</div>';
+        // A conditional badge is drawn ONCE (its number can go stale through the day); the live #speed-sign
+        // stays authoritative. Mark it so CSS can hint "time-dependent" (dashed ring).
+        return '<div class="sp-badge' + small + (cond ? ' sp-badge-cond' : '') + '">' + txt + '</div>';
     }
     function drawMarkers(cps) {
         clearMarkers();
@@ -357,5 +371,5 @@ window.TrackerSpeedProfile = function (ctx) {
         return carryForward(out);
     }
 
-    return { build, clear, limitAt, hasRoute, setResolver };
+    return { build, clear, limitAt, hasRoute, setResolver, setEval };
 };

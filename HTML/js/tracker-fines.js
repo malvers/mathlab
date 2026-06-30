@@ -102,16 +102,67 @@ window.TrackerFines = function (ctx) {
         const estimateNote = unconf
             ? 'Limit ist nur der gesetzliche Regelfall (kein Schild erkannt) — Bußgeld nur als Schätzung. '
             : '';
+        // 3-up head (Doc 2026-06-30): LEFT the limit sign in the normal German design (white face, red
+        // ring, dark number — always solid, the "unbestätigt" nuance lives in the caption); MIDDLE the gap
+        // between the two signs you're too fast (speed − limit, no '+'); RIGHT a red-faced sign with the
+        // current speed. The fine below still uses the tolerance-adjusted `over`, explained in the caption.
+        // The sign numbers are sized by font metrics (fitSigns) to FILL the disc — same as the live sign.
+        const diff = spd - limit;                                   // raw gap between the two signs shown
         body.innerHTML = `
-            <div class="fines-head">
-                <div class="fines-speed"><b>${spd}</b><span> km/h</span></div>
-                <div class="fines-vs">${over} km/h zu schnell · erlaubt ${lim} (${whereTxt}) · ${tolNote}</div>
+            <div class="fines-head3">
+                <div class="fines-col">
+                    <div class="fines-sign fines-sign-limit"><span class="fsn">${limit}</span></div>
+                    <div class="fines-col-lbl">erlaubt</div>
+                </div>
+                <div class="fines-col">
+                    <div class="fines-diff">${diff}</div>
+                    <div class="fines-col-lbl">km/h zu schnell</div>
+                </div>
+                <div class="fines-col">
+                    <div class="fines-sign fines-sign-speed"><span class="fsn">${spd}</span></div>
+                    <div class="fines-col-lbl">gefahren</div>
+                </div>
             </div>
+            <div class="fines-caption">${whereTxt}, ${tolNote}</div>
             <div class="fines-tiles">${tiles}</div>
             <p class="fines-note">${estimateNote}Regelsatz Pkw nach Bußgeldkatalog (BKatV), Stand 2026. Bei Voreintrag,
             Gefährdung o. Wiederholung kann es teurer werden. Ohne Gewähr.</p>`;
         fitTiles(); // shrink any label/value that's wider than its tile (e.g. "FAHRVERBOT" on a narrow phone)
+        fitSigns(); // size each sign's number by font metrics to fill the disc (like the live #speed-sign)
     }
+
+    // Size a round sign's number to FILL its disc by REAL font metrics — measure the glyphs once on a
+    // canvas at a base size, then scale to the disc's inner width. Mirrors the live sign's fitSignText so
+    // a 3-digit "151" is as large + centred as a 2-digit "50" instead of a small clamped guess (Doc).
+    const signCanvas = document.createElement('canvas').getContext('2d');
+    const signFont = (px) => '700 ' + px + 'px Arial, Helvetica, sans-serif';
+    function fitSign(signEl) {
+        const span = signEl && signEl.querySelector('.fsn');
+        if (!span) return;
+        const txt = (span.textContent || '').trim();
+        if (!txt) return;
+        // Width: size the number to fill the disc's inner box (clientWidth already excludes the red ring),
+        // leaving a little air so a glyph never kisses the ring.
+        const inner = (signEl.clientWidth || 52) - 6;
+        const base = 40;
+        signCanvas.font = signFont(base);
+        const wBase = signCanvas.measureText(txt).width || 1;
+        const size = Math.max(14, Math.min(32, Math.floor(base * inner / wBase)));
+        span.style.fontSize = size + 'px';
+        // Height: digits sit optically HIGH in the line box (the font reserves descent space they don't
+        // use). Center the glyph's ACTUAL ink box in the disc by shifting it the measured offset — true
+        // font-metric centering, no magic constant (Doc 2026-06-30 "nicht y zentriert, fontmetrics?").
+        signCanvas.font = signFont(size);
+        const m = signCanvas.measureText(txt);
+        const a = m.actualBoundingBoxAscent, d = m.actualBoundingBoxDescent;
+        const fa = m.fontBoundingBoxAscent, fd = m.fontBoundingBoxDescent;
+        if ([a, d, fa, fd].every((v) => typeof v === 'number' && isFinite(v))) {
+            let off = (fd - fa + a - d) / 2;                    // line-box centre → ink centre (px, +down)
+            off = Math.max(-size / 3, Math.min(size / 3, off)); // clamp to a sane band
+            span.style.transform = 'translateY(' + off.toFixed(2) + 'px)';
+        }
+    }
+    function fitSigns() { document.querySelectorAll('#fines-body .fines-sign').forEach(fitSign); }
 
     // Font fit by REAL DOM metrics: shrink the font-size until the element's own rendered width
     // (scrollWidth — includes the actual web font Orbitron + letter-spacing) fits its tile. Canvas

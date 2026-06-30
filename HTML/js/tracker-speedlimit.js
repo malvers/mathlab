@@ -10,6 +10,12 @@ window.TrackerSpeedLimit = function (ctx) {
     // INSTANTLY at the exact switch point (and lets us skip live Overpass polling). Attached after init
     // via setProfile() so creation order doesn't matter.
     let profile = ctx.profile || null;
+    // Optional logging-only measurement probe (js/tracker-speedprobe.js): observes each query's result to
+    // tally how often a backward-carry / persistent memory WOULD agree/cover — no behaviour change.
+    const probe = ctx.probe || null;
+    // Is the road currently wet? (Open-Meteo precipitation, fed from tracker.js.) Drives the "bei Nässe"
+    // conditional limit (maxspeed:conditional=… @ wet). Defaults to "dry" when no signal is wired.
+    const isWet = (typeof ctx.isWet === 'function') ? ctx.isWet : (() => false);
 
     const MIN_INTERVAL_MS = 5000;  // never query Overpass more often than this (was 15 s → too laggy when driving)
     const MIN_MOVE_M = 90;         // …and only after this much travel — limits change per road segment
@@ -21,7 +27,8 @@ window.TrackerSpeedLimit = function (ctx) {
     let lastQ = 0;          // timestamp of the last Overpass query
     let lastPos = null;     // [lat,lng] at the last query
     let fetching = false;   // a query is in flight
-    let curLimit = null;    // number (km/h) | 'none' (unlimited) | null (unknown)
+    let curLimit = null;    // number (km/h) | 'none' (unlimited) | null (unknown) — the value shown NOW
+    let curRaw = null;      // the raw resolved value when time-conditional ({base,rules}); null when static
     let curConfirmed = true; // is curLimit a mapped/signed limit (true) or only the generic legal default (false)?
     let lastRoad = null;    // { ref, name, highway } of the nearest road (for tracker-traffic) — null until first query
     // The over-speed chime = the SMALL bell from glocken.html (its sample), so it sounds identical.
@@ -116,6 +123,100 @@ window.TrackerSpeedLimit = function (ctx) {
         return null; // other implicit/conditional tags → unknown (show nothing rather than guess)
     }
 
+    // ---- time-conditional limits (maxspeed:conditional) ------------------------------------------
+    // OSM tags a school-zone / night limit as e.g. `maxspeed=50` + `maxspeed:conditional=30 @ (Mo-Fr
+    // 06:00-17:00)`: the base holds, BUT inside the window the lower value is the real legal limit. Such a
+    // limit is TIME-VARYING — it must be evaluated at display time, never baked in (esp. since the route
+    // profile caches for 60 days). wayLimit() returns a structured value { base, rules } for these ways;
+    // evalLimit() resolves it against the current clock; limitKey() is a stable equality key so the
+    // profile's de-flicker / change-point compare still works (Doc 2026-06-30: "Pfotenhauerstraße zeigt 50,
+    // ist aber werktags 6-17 Tempo 30"). Best-effort: only the common "<value> @ (<weekdays> <HH:MM-HH:MM>)"
+    // form is honoured; anything we can't evaluate (wet/snow, holidays) is dropped, never guessed.
+    const DOW = { mo: 1, tu: 2, we: 3, th: 4, fr: 5, sa: 6, su: 0 }; // JS Date.getDay(): Sun=0 … Sat=6
+
+    // Weekday tokens in a condition → sorted array of getDay() ints, or null = "every day" (no weekday
+    // given). A plain ARRAY, not a Set: the profile caches the conditional value as JSON and a Set would
+    // serialize to {} (→ a crash on cache reload). Sorted + de-duped so limitKey() is stable.
+    function parseDays(cond) {
+        const re = /\b(Mo|Tu|We|Th|Fr|Sa|Su)(?:\s*-\s*(Mo|Tu|We|Th|Fr|Sa|Su))?\b/gi;
+        let m, set = null;
+        while ((m = re.exec(cond))) {
+            set = set || new Set();
+            const a = DOW[m[1].toLowerCase()];
+            if (m[2]) { // a range like Mo-Fr or Fr-Su (cyclic; treat Sunday as 7 for ordering)
+                const ai = a === 0 ? 7 : a, b0 = DOW[m[2].toLowerCase()], bi = b0 === 0 ? 7 : b0;
+                const end = bi >= ai ? bi : bi + 7;
+                for (let d = ai; d <= end; d++) set.add(d % 7);
+            } else set.add(a);
+        }
+        return set ? [...set].sort((x, y) => x - y) : null;
+    }
+    // HH:MM-HH:MM ranges (comma-separated allowed) → [{from,to}] in minutes, or null = "all day".
+    function parseTimes(cond) {
+        const re = /(\d{1,2}):(\d{2})\s*-\s*(\d{1,2}):(\d{2})/g;
+        let m, out = null;
+        while ((m = re.exec(cond))) {
+            out = out || [];
+            out.push({ from: (+m[1]) * 60 + (+m[2]), to: (+m[3]) * 60 + (+m[4]) });
+        }
+        return out;
+    }
+    // "<value> @ (<condition>)" rules, ';'-separated. Drops any rule we can't honour (a non-time condition
+    // like "wet", or a holiday clause we can't evaluate) so we never invent a window.
+    function parseConditional(str) {
+        if (!str) return [];
+        const rules = [];
+        for (const part of String(str).split(';')) {
+            const at = part.split('@');
+            if (at.length !== 2) continue;
+            const limit = parseMax(at[0].trim());
+            if (limit == null) continue;                       // unparseable value → skip
+            const cond = at[1].trim().replace(/^\(/, '').replace(/\)$/, '').trim();
+            const days = parseDays(cond);
+            const times = parseTimes(cond);
+            const wet = /\bwet\b/i.test(cond);                   // "@ wet" → applies only when the road is wet
+            if (days == null && times == null && !wet) continue; // pure unhandleable condition → can't honour
+            if (/\bPH\b/i.test(cond) && days == null && !wet) continue;  // holiday-only clause → can't evaluate
+            rules.push({ limit, days, times, wet });
+        }
+        return rules;
+    }
+    function ruleActive(rule, date) {
+        if (rule.wet && !isWet()) return false;            // "@ wet" rule only applies on a wet road
+        if (rule.days && rule.days.indexOf(date.getDay()) < 0) return false;
+        if (rule.times) {
+            const mins = date.getHours() * 60 + date.getMinutes();
+            let inWin = false;
+            for (const w of rule.times) {
+                if (w.from <= w.to) { if (mins >= w.from && mins < w.to) inWin = true; }
+                else if (mins >= w.from || mins < w.to) inWin = true; // window crosses midnight
+            }
+            if (!inWin) return false;
+        }
+        return true;
+    }
+    // Resolve a limit value to the number/'none'/null that applies NOW. Plain values pass through; a
+    // structured { base, rules } returns the first active rule's limit, else its base. date defaults to now.
+    function evalLimit(v, date) {
+        if (!v || typeof v !== 'object') return v;             // number | 'none' | null
+        if (!Array.isArray(v.rules)) return v.base != null ? v.base : null;
+        const d = date || new Date();
+        for (const r of v.rules) if (ruleActive(r, d)) return r.limit;
+        return v.base != null ? v.base : null;
+    }
+    // Stable equality key for any limit value (used by the profile's de-flicker / change-point compare).
+    function limitKey(v) {
+        if (!v || typeof v !== 'object') return String(v);
+        const rs = (v.rules || []).map((r) =>
+            r.limit + (r.wet ? '@wet' : '') + '@' + (r.days ? r.days.join('') : '*') + ':' +
+            (r.times ? r.times.map((t) => t.from + '-' + t.to).join(',') : '*')).join(';');
+        return 'C|' + String(v.base) + '|' + rs;
+    }
+    // Readable form of a possibly-conditional limit for the debug window.
+    function fmtLimit(v) {
+        return (v && typeof v === 'object') ? (evalLimit(v) + ' [bedingt ' + limitKey(v) + ']') : String(v);
+    }
+
     // Road types whose limit we want to show — exclude footways, cycleways, tracks etc. so a parallel
     // path can never steal the sign for the road you're actually driving on.
     const DRIVE_HW = new Set(['motorway', 'trunk', 'primary', 'secondary', 'tertiary',
@@ -148,14 +249,24 @@ window.TrackerSpeedLimit = function (ctx) {
 
     // A way's limit. Trust only what's actually SIGNED: an explicit `maxspeed`, or a SPECIFIC implicit
     // zone (e.g. a tagged 30-zone, living_street). The generic urban/rural/motorway defaults are dropped
-    // (see above) so we never overwrite an unmapped 30-zone with a wrong 50. number | 'none' | null.
+    // (see above) so we never overwrite an unmapped 30-zone with a wrong 50. A way carrying a
+    // `maxspeed:conditional` returns a structured { base, rules } so the time window is evaluated at display
+    // time (evalLimit), not frozen now. number | 'none' | { base, rules } | null.
     function wayLimit(tags) {
         if (!tags || !DRIVE_HW.has(tags.highway)) return null;
-        const explicit = parseMax(tags.maxspeed);
-        if (explicit != null) return explicit;
-        return implicitLimit(tags['maxspeed:type'])
+        const base = parseMax(tags.maxspeed)
+            ?? implicitLimit(tags['maxspeed:type'])
             ?? implicitLimit(tags['zone:maxspeed'])
             ?? implicitLimit(tags['source:maxspeed']);
+        const cond = tags['maxspeed:conditional'];
+        if (cond) {
+            const rules = parseConditional(cond);
+            // Only wrap as conditional when we have a base to fall back to OUTSIDE the window — otherwise the
+            // sign would read "?" off-window, worse than the live poll's generic default. With no base we
+            // still honour the window (base:null → off-window null lets the caller fall through).
+            if (rules.length) return { base: base != null ? base : null, rules };
+        }
+        return base; // static number | 'none' | null
     }
 
     // Font-metric auto-fit: measure the glyphs with a canvas and pick the largest font size whose text
@@ -187,6 +298,38 @@ window.TrackerSpeedLimit = function (ctx) {
         el.classList.toggle('unconfirmed', confirmed === false && limit != null);
         fitSignText(el, txt); // size the glyphs to the disc via measured metrics (overrides the CSS font-size)
         el.hidden = false;
+    }
+
+    // ---- road advisories: Überholverbot (overtaking=no) + Maut (toll=yes) ------------------------------
+    // Read from the SAME resolved-road tags as the limit → near-free, no extra query. ADVISORY ONLY: OSM
+    // tags these sparsely, so "no badge" does NOT mean "allowed". Small icons under the speed sign, drawn
+    // with inline styles (no CSS dependency). Dark-blue, not black (CLAUDE.md); never orange.
+    let curNoOvertake = false, curToll = false, advEl = null;
+    const NO_OVERTAKE_SVG = '<svg viewBox="0 0 48 48" width="34" height="34" aria-label="Überholverbot">'
+        + '<circle cx="24" cy="24" r="21" fill="#fff" stroke="rgb(176,36,24)" stroke-width="5"/>'
+        + '<rect x="8" y="20" width="14" height="9" rx="2" fill="rgb(176,36,24)"/>'   // overtaking car (red)
+        + '<rect x="26" y="20" width="14" height="9" rx="2" fill="rgb(14,36,78)"/>'   // car being passed (dark blue, not black)
+        + '</svg>';
+    const TOLL_BADGE = '<div style="background:rgb(14,36,78);color:#fff;font:700 11px Arial,sans-serif;'
+        + 'padding:3px 7px;border-radius:7px;letter-spacing:.5px;box-shadow:0 2px 8px rgba(8,20,42,.5)">MAUT</div>';
+    function ensureAdv() {
+        if (advEl) return advEl;
+        advEl = document.createElement('div');
+        advEl.id = 'road-adv';
+        advEl.style.cssText = ['position:fixed', 'left:13px', 'top:50%',
+            'transform:translateY(calc(-50% + 100px))', 'z-index:600', 'display:none',
+            'flex-direction:column', 'gap:6px', 'align-items:center', 'pointer-events:none'].join(';');
+        document.body.appendChild(advEl);
+        return advEl;
+    }
+    function setAdvisories(noOv, toll) {
+        curNoOvertake = !!noOv; curToll = !!toll;
+        const el = ensureAdv();
+        let html = '';
+        if (curNoOvertake) html += '<div style="filter:drop-shadow(0 2px 6px rgba(8,20,42,0.5))">' + NO_OVERTAKE_SVG + '</div>';
+        if (curToll) html += TOLL_BADGE;
+        el.innerHTML = html;
+        el.style.display = (curNoOvertake || curToll) ? 'flex' : 'none';
     }
 
     // Min distance (m) from point p=[lat,lng] to a way's geometry (array of {lat,lon}). Cheap
@@ -246,6 +389,15 @@ window.TrackerSpeedLimit = function (ctx) {
         try {
             const j = await overpass(q);
             if (!j) { dbg('Overpass: keine Antwort → letztes Schild bleibt'); return; }
+            // Logging-only measurement (never disturbs the sign): does carry/memory agree/cover here?
+            // Pass a NOW-resolved resolver so the probe scores against the same number the sign shows:
+            // a time-conditional way (wayLimit → {base,rules}) is evaluated against the current clock.
+            if (probe) {
+                try {
+                    const resolveNow = (tags) => { const v = wayLimit(tags); return (v && typeof v === 'object') ? evalLimit(v) : v; };
+                    probe.record(p, travelBrg, j.elements || [], resolveNow, Date.now());
+                } catch (e) { }
+            }
             // Collect ways with a CONFIRMED signed limit (cands) and, separately, ways carrying only the
             // generic legal default (dflt) — each with its distance + whether it runs along our heading.
             const cands = [], dflt = [];
@@ -275,18 +427,23 @@ window.TrackerSpeedLimit = function (ctx) {
 
             const roadTags = conf.tags || def.tags || refTags;
             if (roadTags) lastRoad = { ref: roadTags.ref || null, name: roadTags.name || null, highway: roadTags.highway || null };
+            // Road advisories from the resolved road (not refTags, which may be a different ref-bearing way).
+            const advTags = conf.tags || def.tags;
+            if (advTags) setAdvisories(advTags.overtaking === 'no', advTags.toll === 'yes');
 
-            // 1) a confirmed/signed limit wins — solid sign.
+            // 1) a confirmed/signed limit wins — solid sign. A conditional way keeps its raw {base,rules} in
+            //    curRaw so update() re-evaluates the window as the clock crosses it (even while parked).
             if (conf.m != null) {
-                dbg('Limit: ' + conf.m + ' (' + Math.round(conf.d) + ' m' + (haveHeading ? ', i. Fahrtricht.' : '') + ')');
-                curLimit = conf.m; curConfirmed = true;
-                setSign(conf.m, false, true);
+                curRaw = (typeof conf.m === 'object') ? conf.m : null;
+                curLimit = evalLimit(conf.m); curConfirmed = true;
+                dbg('Limit: ' + fmtLimit(conf.m) + ' (' + Math.round(conf.d) + ' m' + (haveHeading ? ', i. Fahrtricht.' : '') + ')');
+                setSign(curLimit, false, true);
                 return;
             }
             // 2) no signed limit → fall back to the generic legal default, shown UNCONFIRMED (dimmed/dashed).
             if (def.m != null) {
                 dbg('Default (unbestätigt): ' + def.m + ' (' + Math.round(def.d) + ' m' + (haveHeading ? ', i. Fahrtricht.' : '') + ')');
-                curLimit = def.m; curConfirmed = false;
+                curRaw = null; curLimit = def.m; curConfirmed = false;
                 setSign(def.m, false, false);
                 return;
             }
@@ -306,10 +463,13 @@ window.TrackerSpeedLimit = function (ctx) {
         // gap; `undefined` means "no profile / off route" → normal live polling.
         let fromProfile = false;
         if (here && profile && profile.hasRoute && profile.hasRoute()) {
-            const pl = profile.limitAt(here);
-            if (pl !== undefined && pl !== null) { curLimit = pl; curConfirmed = true; setSign(pl, false, true); fromProfile = true; }
+            const pl = profile.limitAt(here); // already time-evaluated by the profile (it owns the clock)
+            if (pl !== undefined && pl !== null) { curRaw = null; curLimit = pl; curConfirmed = true; setSign(pl, false, true); fromProfile = true; }
         }
         if (speedKmh != null) lastSpeedKmh = speedKmh; // remember for the fines panel (sign tap)
+        // A time-conditional live limit must follow the clock even with no new query (e.g. parked across the
+        // 17:00 school-zone boundary) → re-evaluate the cached raw value each fix.
+        if (!fromProfile && curRaw) curLimit = evalLimit(curRaw);
         if (typeof curLimit === 'number' && speedKmh != null) {
             setSign(curLimit, speedKmh > curLimit + OVER_TOL_KMH, curConfirmed);
             // The audible bell only on a CONFIRMED (mapped/signed) limit — never assert an over-speed
@@ -343,7 +503,7 @@ window.TrackerSpeedLimit = function (ctx) {
         query(here, travelBrg);
     }
 
-    function clear() { curLimit = null; curConfirmed = true; lastRoad = null; lastPos = null; lastBing = 0; setSign(null, false); }
+    function clear() { curLimit = null; curRaw = null; curConfirmed = true; lastRoad = null; lastPos = null; lastBing = 0; setSign(null, false); setAdvisories(false, false); }
 
     function setBell(on) { bellOn = !!on; try { localStorage.setItem(BELL_KEY, bellOn ? '1' : '0'); } catch (e) { } }
     function bellEnabled() { return bellOn; }
@@ -351,10 +511,13 @@ window.TrackerSpeedLimit = function (ctx) {
     setSign(null, false); // show the ∞ default right away, before the first GPS fix (Doc 2026-06-18)
 
     // resolveLimit: the SAME tag→limit logic the profile must use so its numbers match the live sign.
+    // evalLimit/limitKey: the profile uses these to evaluate a conditional value at display time and to
+    // compare values when de-flickering / deriving change points (CLAUDE.md rule 7, single source of truth).
     // setProfile: attach the route profile after init (creation order independent).
     return {
         update, clear, unlockAudio, setBell, bellEnabled, currentRoad: () => lastRoad,
         currentLimit: () => curLimit, currentConfirmed: () => curConfirmed, lastSpeed: () => lastSpeedKmh,
-        resolveLimit: wayLimit, setProfile: (p) => { profile = p; },
+        currentNoOvertake: () => curNoOvertake, currentToll: () => curToll,
+        resolveLimit: wayLimit, evalLimit, limitKey, setProfile: (p) => { profile = p; },
     };
 };
