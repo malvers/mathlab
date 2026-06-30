@@ -19,12 +19,15 @@ $$;
 revoke all on function public.db_size_bytes() from public, anon, authenticated;
 grant execute on function public.db_size_bytes() to service_role;
 
--- 2) Daily 06:00 UTC (08:00 CEST): pg_net POSTs to the function with the app password from the Vault.
+-- 2) Daily at 06:00 DOC'S LOCAL TIME (Europe/Berlin), DST-proof: pg_cron itself only speaks UTC, so a fixed
+--    UTC hour would drift by 1 h across the CEST/CET switch. Instead the job fires HOURLY (at :00) but the
+--    POST is gated by a WHERE so it only actually runs when it is 06:00 in Berlin → exactly one mail/day,
+--    year-round, no manual DST fix-up. pg_net POSTs to the function with the app password from the Vault.
 --    Re-running this migration replaces the schedule (unschedule-if-exists, then schedule).
 select cron.unschedule('daily-infra-usage')
 where exists (select 1 from cron.job where jobname = 'daily-infra-usage');
 
-select cron.schedule('daily-infra-usage', '0 6 * * *', $cron$
+select cron.schedule('daily-infra-usage', '0 * * * *', $cron$
   select net.http_post(
     url     := 'https://fyfhxzyymmurlaenmzse.functions.supabase.co/infra-usage',
     headers := jsonb_build_object(
@@ -32,5 +35,6 @@ select cron.schedule('daily-infra-usage', '0 6 * * *', $cron$
       'x-app-pass', (select decrypted_secret from vault.decrypted_secrets where name = 'labai_password')
     ),
     body    := '{}'::jsonb
-  );
+  )
+  where extract(hour from timezone('Europe/Berlin', now())) = 6;
 $cron$);
