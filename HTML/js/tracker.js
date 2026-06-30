@@ -1391,6 +1391,7 @@
             updateAltitude(pos.coords.altitude != null ? pos.coords.altitude : null);
             updateAmbientTemp(here); // idle-only: current temperature in the (otherwise distance) tile
             if (__traffic) __traffic.update(here);   // live Autobahn traffic also while driving without recording
+            if (__speed) __speed.update(here, still, shownSpeed); // speed-limit sign for the current road — also while idle (Doc 2026-06-30)
             updateFuelLayer(here);                   // fuel-station prices also while idle (not only when recording) — Doc 2026-06-23
             if (acquireWatch != null) { navigator.geolocation.clearWatch(acquireWatch); acquireWatch = null; } // initial one-shot now redundant
             if (following && !handMode && !still) {
