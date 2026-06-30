@@ -61,14 +61,19 @@ window.TrackerHazards = function (ctx) {
         return d <= tol;
     }
 
-    // OSM node tags → our hazard type, or null if it isn't one we surface. Crossings are narrowed to the
-    // marked/zebra kind so we don't pin every signalised junction crossing point.
+    // OSM node tags → our hazard type, or null if it isn't one we surface.
     function classify(tags) {
         if (!tags) return null;
         if (tags.railway === 'level_crossing') return 'level_crossing';
         if (tags.highway === 'stop') return 'stop';
         if (tags.highway === 'give_way') return 'give_way';
-        if (tags.highway === 'crossing' && /\b(zebra|marked|uncontrolled)\b/i.test(tags.crossing || tags.crossing_ref || '')) return 'zebra';
+        // ONLY a real Zebrastreifen (Zeichen 293): crossing_ref / crossing:markings / crossing = zebra.
+        // NOT the generic 'marked'/'uncontrolled' crossings — those are every minor pedestrian crossing (a
+        // whole parking lot full near Elbepark, Doc 2026-06-30) and carpet-bombed the map.
+        if (tags.highway === 'crossing') {
+            const z = (tags.crossing_ref || '') + '|' + (tags['crossing:markings'] || '') + '|' + (tags.crossing || '');
+            if (/\bzebra\b/i.test(z)) return 'zebra';
+        }
         return null;
     }
 
@@ -93,12 +98,15 @@ window.TrackerHazards = function (ctx) {
     async function query(here) {
         fetching = true;
         const r = QUERY_R_M, la = here[0], ln = here[1];
-        // one combined node query for all four hazard tags
+        // one combined node query — crossings are narrowed to REAL zebra markings server-side so we never
+        // pull (or pin) the parking-lot full of generic 'marked'/'uncontrolled' crossings.
         const q = '[out:json][timeout:8];('
             + 'node(around:' + r + ',' + la + ',' + ln + ')[railway=level_crossing];'
             + 'node(around:' + r + ',' + la + ',' + ln + ')[highway=stop];'
             + 'node(around:' + r + ',' + la + ',' + ln + ')[highway=give_way];'
-            + 'node(around:' + r + ',' + la + ',' + ln + ')[highway=crossing];'
+            + 'node(around:' + r + ',' + la + ',' + ln + ')[highway=crossing][crossing_ref=zebra];'
+            + 'node(around:' + r + ',' + la + ',' + ln + ')[highway=crossing]["crossing:markings"=zebra];'
+            + 'node(around:' + r + ',' + la + ',' + ln + ')[highway=crossing][crossing=zebra];'
             + ');out;';
         try {
             const j = await window.queryOverpass(q, { timeout: QUERY_TIMEOUT_MS, dbg });
