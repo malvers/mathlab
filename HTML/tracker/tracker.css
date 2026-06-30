@@ -2221,6 +2221,95 @@ body.ui-idle #nav-banner {
     color: rgba(255, 255, 255, 0.7);
 }
 
+/* Panel body in Arial (clean, readable); only the ⚠ header (.ov-title) keeps the display font (Doc). */
+#fines-body {
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Bußgeld head, 3-up (Doc 2026-06-30): limit sign · over-gap · current-speed sign. */
+.fines-head3 {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-around;
+    gap: 8px;
+    margin: 6px 0 10px;
+}
+.fines-head3 .fines-col {
+    flex: 1 1 0;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 7px;
+}
+/* A round traffic-sign disc — the SAME look as the live #speed-sign (Arial road-sign face), just bigger.
+   Limit = white face + red ring + dark number (the normal German sign); speed = solid red face + white
+   number (identical to #speed-sign.over, the "you're over" state). */
+.fines-sign {
+    width: 64px;
+    height: 64px;
+    box-sizing: border-box;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: Arial, Helvetica, sans-serif;   /* road-sign look, matches #speed-sign */
+    font-weight: 700;
+    font-size: 1.7rem;            /* base only; fitSign() sets the real px by metrics to fill the disc */
+    line-height: 1;
+    letter-spacing: 0;           /* no trailing tracking → number sits perfectly centred + measure matches */
+    white-space: nowrap;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+}
+.fines-sign.three {           /* 3-digit limit/speed (100/120/130) → fit the disc */
+    font-size: 1.2rem;
+    letter-spacing: -1px;
+}
+.fines-sign-limit {
+    background: #fff;
+    border: 6px solid rgb(176, 36, 24);
+    color: #111;
+}
+.fines-sign-limit.unconf {    /* only the generic legal default (no mapped sign) → honest dashed ring */
+    border-style: dashed;
+    border-color: rgba(176, 36, 24, 0.55);
+    color: #555;
+    opacity: 0.82;
+}
+.fines-sign-speed {
+    background: rgb(176, 36, 24);
+    border: 6px solid rgb(176, 36, 24);
+    color: #fff;
+}
+/* Inner number span — JS fitSign() shifts it by the measured metric offset for true vertical centering. */
+.fines-sign .fsn {
+    display: inline-block;
+    line-height: 1;
+}
+/* The middle headline: how far over you are (speed − limit). */
+.fines-diff {
+    font-weight: 800;
+    font-size: 2.5rem;
+    line-height: 64px;        /* match the sign height so the number sits vertically centred with the discs */
+    color: var(--orange);
+    white-space: nowrap;
+}
+.fines-col-lbl {
+    font-size: 0.6rem;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.6);
+    text-align: center;
+}
+/* Sub-line under the 3-up head: where + the deducted measurement tolerance (the fine basis). */
+.fines-caption {
+    text-align: center;
+    margin-bottom: 14px;
+    font-size: 0.72rem;
+    letter-spacing: 0.5px;
+    color: rgba(255, 255, 255, 0.7);
+}
+
 .fines-tiles {
     display: flex;
     gap: 10px;
@@ -2231,15 +2320,15 @@ body.ui-idle #nav-banner {
     min-width: 0;
     padding: 14px 6px;
     text-align: center;
-    border: 1px solid rgba(176, 36, 24, 0.55);
+    border: 1px solid rgba(255, 255, 255, 0.16);   /* neutral grey box (Doc 2026-06-30) … */
     border-radius: 12px;
-    background: rgba(176, 36, 24, 0.12);
+    background: rgba(255, 255, 255, 0.05);
 }
 
 .fines-tile-v {
     font-size: 1.25rem;
     font-weight: 800;
-    color: var(--orange);
+    color: var(--red);           /* … with red numbers (Doc 2026-06-30) */
     line-height: 1.1;
     white-space: nowrap; /* single line → JS (fitToWidth) shrinks it to the tile instead of wrapping */
 }
