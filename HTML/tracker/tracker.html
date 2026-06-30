@@ -91,13 +91,30 @@
                 }
                 el.style.display = show ? 'block' : 'none';
             }
-            function probe() {
-                fetch(location.pathname + '?_fresh=' + Date.now(), { method: 'HEAD', cache: 'no-store' })
-                    .then(function (r) { banner(!r.ok); })
-                    .catch(function () { banner(true); });
+            // The banner used to flip on a SINGLE failed probe — but while driving on mobile a momentary
+            // dead-zone (cell handover, tunnel) fails one HEAD and instantly screamed "SERVER DOWN" even
+            // though the server was fine (Doc 2026-06-30: "comes often"). So debounce it: only show after
+            // FAIL_SHOW probes fail IN A ROW, hide again on the first success, and abort a hung probe so it
+            // counts as one clean failure. While in a failing streak we re-check sooner (RETRY_MS) so a REAL
+            // outage still surfaces within ~20 s instead of waiting the full healthy interval each time.
+            var FAIL_SHOW = 3;            // consecutive failures before the banner appears
+            var OK_MS = 30000;           // re-probe this often while healthy
+            var RETRY_MS = 10000;        // …and sooner while failing, to confirm a real outage faster
+            var PROBE_TIMEOUT_MS = 8000; // abort a stuck probe → one failure, never an indefinite hang
+            var fails = 0, timer = null;
+            function schedule(ms) { clearTimeout(timer); timer = setTimeout(probe, ms); }
+            function done(ok) {
+                if (ok) { fails = 0; banner(false); schedule(OK_MS); }
+                else { fails++; if (fails >= FAIL_SHOW) banner(true); schedule(RETRY_MS); }
             }
-            window.addEventListener('load', probe);
-            setInterval(probe, 30000);
+            function probe() {
+                var ctrl = new AbortController();
+                var to = setTimeout(function () { ctrl.abort(); }, PROBE_TIMEOUT_MS);
+                fetch(location.pathname + '?_fresh=' + Date.now(), { method: 'HEAD', cache: 'no-store', signal: ctrl.signal })
+                    .then(function (r) { clearTimeout(to); done(r.ok); })
+                    .catch(function () { clearTimeout(to); done(false); });
+            }
+            window.addEventListener('load', function () { schedule(0); });
         })();
     </script>
 </head>
