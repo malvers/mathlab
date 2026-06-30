@@ -94,18 +94,8 @@
             }
         }
 
-        // Build/deploy stamp in the always-on debug box — document.lastModified = the served
-        // HTML's Last-Modified header → the real deploy time; tells at a glance if a push landed.
-        (function () {
-            const el = document.getElementById('dbg-build');
-            if (!el) return;
-            const lm = new Date(document.lastModified);
-            const p = (n) => String(n).padStart(2, '0');
-            el.textContent = isNaN(lm.getTime())
-                ? 'BUILD ' + (document.lastModified || '?')
-                : 'BUILD ' + p(lm.getDate()) + '.' + p(lm.getMonth() + 1) + '. '
-                  + p(lm.getHours()) + ':' + p(lm.getMinutes()) + ':' + p(lm.getSeconds());
-        })();
+        // Build/deploy stamp now lives at the top of the central DebugWindow header (js/debug-window.js,
+        // Doc 2026-06-30) — no longer painted into the bottom #motion-dbg bar.
 
         // The map auto-follows new fixes until you take over (drag) — ZENTRIEREN re-enables it.
         // The position dot is hidden during zoom animations so it doesn't jump, then fades back.
