@@ -597,10 +597,15 @@ window.TrackerNav = function (ctx) {
         toast(reroute ? 'Neue Route …' : 'Route wird berechnet …');
         let data;
         try {
-            // Route via the ORS proxy (heading tolerance + U-turn handling) for the whole navigation when
-            // selected — OSRM otherwise AND as a fallback whenever ORS returns nothing (Doc 2026-06-25).
-            // On the initial route brg is null → ORS routes plainly; on a reroute brg constrains departure.
-            if (routeEngine === 'ors') data = await fetchRerouteORS(from, destLatLng, brg);
+            // Route via the ORS proxy for the whole navigation when selected — OSRM otherwise AND as a
+            // fallback whenever ORS returns nothing (Doc 2026-06-25).
+            // Reroute PLAIN — no departure-bearing cone, ALSO on ORS (Doc 2026-06-30). The cone backfires:
+            // forcing a forward-ish departure makes the engine drive on and U-turn LATER, which felt like
+            // being "pulled back" onto the rejected line. USE_DEPART_BEARING=false already dropped it for the
+            // OSRM fallback; ORS was still being sent the heading, so the documented "Google reroutes plain"
+            // decision wasn't actually in effect for the default engine. Pass null → let ORS's road graph +
+            // U-turn penalty decide the departure, exactly like Google.
+            if (routeEngine === 'ors') data = await fetchRerouteORS(from, destLatLng, null);
             if (!data) {
                 // OSRM wants lon,lat order; full geometry as GeoJSON for an easy polyline.
                 const coords = from[1] + ',' + from[0] + ';' + destLatLng[1] + ',' + destLatLng[0];

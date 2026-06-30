@@ -80,6 +80,7 @@
 **Fix-Richtung (Docs „Trick mit Navigationspunkten"):** OSRM **`bearings=`** mit dem aktuellen GPS-**Heading** an der Startkoordinate → erzwingt Abfahrt in Fahrtrichtung, **kein sofortiger U-Turn**. Alternativ ein **Via-Punkt ~50–100 m voraus** in Fahrtrichtung. Plus **Flapping dämpfen** (Hysterese: Reroute erst nach N aufeinanderfolgenden Off-Route-Fixes, längeres Debounce).
 **Akzeptanz:** eigene Abzweigung nehmen → **eine ruhige** Neuberechnung vorwärts, kein U-Turn-zurück, kein „neu berechnen"-Loop.
 **NICHT:** nur die Ansagen unterdrücken (Symptom) — der Kern ist die **Routing-Richtung** (bearings/via). Erwägen, den wirkungslosen Teil von `7c842d6` zurückzunehmen, bis es richtig gebaut ist.
+**Update 2026-06-30 (Doc „A"):** Widerspruch gefunden — die 2026-06-25-Notiz „Google reroutet **plain**" (`USE_DEPART_BEARING=false`) galt nur für die OSRM-**Fallback**, der **Default-Motor ORS** bekam beim Reroute weiter das Heading (`computeRoute(...,travelBrg)` → `fetchRerouteORS` → `bearings:[[hdg,60],[0,180]]`). Der Cone zwingt „vorwärts-ish" → fährt weiter und wendet später = das „zieht zurück". **Fix:** `computeRoute()` schickt jetzt auch an ORS `null` als Heading → ORS reroutet plain, Roadgraph + U-Turn-Penalty entscheiden (wie Google). **Noch offen am Gerät zu prüfen:** (b) der Re-Reroute-Loop, solange man bewusst off-line bleibt (`offRouteCount` nullt nur *auf* der Linie) — hier vorerst KEINE Änderung (Doc wählte nur „A").
 
 ---
 
