@@ -94,14 +94,18 @@ window.TrackerFuel = function (ctx) {
         });
     }
 
-    // Upper layer (z2): the coloured price badge, floating just above the symbol so the price stays readable.
+    // Upper layer (z2): the coloured price badge, floating ABOVE the ⛽ symbol so the price stays readable
+    // AND the whole station symbol shows. The lift is the anchor's Y past the pill bottom: it must clear the
+    // 26 px symbol (anchored bottom-on-point) plus a little air, else the badge covers the pump (Doc
+    // 2026-06-30: "Preistag höher, so dass man das T-Symbol sieht").
+    const PRICE_LIFT = 36;       // px the badge bottom sits above the geo point (> 26 px symbol + gap)
     function priceIcon(s, med) {
         const html = '<div class="fuel-pin ' + tier(s, med) + '">' +
             '<span class="fuel-price">' + fmt(priceOf(s)) + '</span></div>';
         const [w, h] = measurePill(html);
         return L.divIcon({
             className: 'fuel-pin-wrap', html,
-            iconSize: [w, h], iconAnchor: [Math.round(w / 2), h + 20], popupAnchor: [0, -h - 20],
+            iconSize: [w, h], iconAnchor: [Math.round(w / 2), h + PRICE_LIFT], popupAnchor: [0, -h - PRICE_LIFT],
         });
     }
 

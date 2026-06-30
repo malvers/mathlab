@@ -603,6 +603,7 @@
         let __fuel = null;         // fuel-station price layer (js/tracker-fuel.js)
         let __poi = null;          // points-of-interest layer (js/tracker-poi.js)
         let __traffic = null;      // live Autobahn traffic layer (js/tracker-traffic.js)
+        let __hazards = null;      // point-hazard pins + voraus-warning (js/tracker-hazards.js)
         let __sim = null;          // desk navigation simulator (js/tracker-navsim.js), only with ?sim=1
         let simMode = false;       // true while the simulator drives synthetic fixes → suppress cloud sync/broadcast
         let gnssActive = false;    // true once the native GnssStatus listener delivers data
@@ -1070,6 +1071,7 @@
             updateAmbientTemp(here); // keep the ambient temperature fresh while recording (throttled) → stamped onto each point
             if (__nav && __nav.update) __nav.update(here, shownSpeed); // navigation: reroute + speed-scaled turn lead
             if (__speed) __speed.update(here, still, shownSpeed); // speed-limit sign for the current road
+            if (__hazards) __hazards.update(here, shownSpeed); // point hazards (Bahnübergang/Stop/…) ahead
             if (__fines) __fines.refresh(); // live-update the Bußgeld panel while it's open
             updateMotionDbg(accuracy, minStep, still);
             if (tracking) setStatus(`Aufzeichnung läuft … ${track.length} Punkte`);
@@ -1326,6 +1328,11 @@
         const TEMP_REFRESH_MS = 600000; // 10 min
         const TEMP_REFRESH_M = 3000;    // or once we've moved 3 km
         let tempBusy = false, lastTempFetch = 0, lastTempLat = null, lastTempLng = null, lastTemp = null;
+        // Road-wet state for the "bei Nässe" speed limit (maxspeed:conditional=… @ wet). Read for free from
+        // the SAME Open-Meteo call that fetches the ambient temperature (one extra field). A road stays wet a
+        // while after the rain stops, so we hold "wet" for WET_PERSIST_MS past the last precipitation reading.
+        const WET_PERSIST_MS = 2 * 60 * 60 * 1000; // 2 h — roads dry slowly
+        let ambientWet = false, lastWetMs = 0;
         async function updateAmbientTemp(here) {
             if (tempBusy || !here) return;
             const lat = here[0], lng = here[1];
@@ -1335,7 +1342,7 @@
             tempBusy = true;
             try {
                 const url = 'https://api.open-meteo.com/v1/forecast?latitude=' + lat.toFixed(4) +
-                    '&longitude=' + lng.toFixed(4) + '&current=temperature_2m';
+                    '&longitude=' + lng.toFixed(4) + '&current=temperature_2m,precipitation';
                 const r = await fetch(url);
                 const d = await r.json().catch(() => null);
                 const t = d && d.current && typeof d.current.temperature_2m === 'number' ? d.current.temperature_2m : null;
@@ -1343,6 +1350,12 @@
                     lastTemp = t;                       // remembered for the recorded track (recordTrackPoint stamps each point)
                     if (!tracking) Hud.setTemp(t);      // show in the tile only while idle — while recording it holds the distance
                     lastTempFetch = Date.now(); lastTempLat = lat; lastTempLng = lng;
+                }
+                // Precipitation (mm in the current period) → road-wet state for the "bei Nässe" limit.
+                const pr = d && d.current && typeof d.current.precipitation === 'number' ? d.current.precipitation : null;
+                if (pr != null) {
+                    if (pr > 0) lastWetMs = Date.now();
+                    ambientWet = pr > 0 || (Date.now() - lastWetMs < WET_PERSIST_MS);
                 }
             } catch (e) { /* offline / rate-limited → keep the last reading */ }
             finally { tempBusy = false; }
@@ -1409,6 +1422,7 @@
             updateAmbientTemp(here); // idle-only: current temperature in the (otherwise distance) tile
             if (__traffic) __traffic.update(here);   // live Autobahn traffic also while driving without recording
             if (__speed) __speed.update(here, still, shownSpeed); // speed-limit sign for the current road — also while idle (Doc 2026-06-30)
+            if (__hazards) __hazards.update(here, shownSpeed); // point hazards ahead — also while idle
             updateFuelLayer(here);                   // fuel-station prices also while idle (not only when recording) — Doc 2026-06-23
             if (acquireWatch != null) { navigator.geolocation.clearWatch(acquireWatch); acquireWatch = null; } // initial one-shot now redundant
             if (following && !handMode && !still) {
@@ -2557,9 +2571,17 @@ ${pts}
         });
         // ---- Speed-limit sign → js/tracker-speedlimit.js. Position-driven (fed from onPosition),
         //      independent of navigation; owns its own #speed-sign badge. ----
-        __speed = TrackerSpeedLimit({ $, profile: __speedprofile });
+        // Logging-only measurement probe (js/tracker-speedprobe.js): tallies whether a backward-carry /
+        // persistent memory would agree/cover the live limit, so Phase 1/2 are decided with numbers, not a
+        // guess (Doc 2026-06-30). No behaviour change. Read via window.__speedProbe in the console.
+        const __speedprobe = (typeof TrackerSpeedProbe !== 'undefined') ? TrackerSpeedProbe() : null;
+        window.__speedProbe = __speedprobe; // console access: __speedProbe.summary() · .stats() · .reset()
+        __speed = TrackerSpeedLimit({ $, profile: __speedprofile, probe: __speedprobe, isWet: () => ambientWet });
         // Give the profile the SAME tag→limit resolver the sign uses, so its precomputed numbers match.
         if (__speedprofile && __speed.resolveLimit) __speedprofile.setResolver(__speed.resolveLimit);
+        // …and the SAME conditional evaluator + equality key, so a time-conditional limit (e.g. a school
+        // zone's "30 Mo-Fr 6-17") is resolved at display time and compared correctly (Doc 2026-06-30).
+        if (__speedprofile && __speed.evalLimit) __speedprofile.setEval(__speed.evalLimit, __speed.limitKey);
         // ---- Bußgeld-Risiko → js/tracker-fines.js. Tapping the speed-limit sign opens a panel that
         //      prices a ticket (€ / Punkte / Fahrverbot) from the static BKatV table for the live
         //      speed-over-limit. Keyless + offline-safe; most useful when the sign is red. ----
@@ -2596,6 +2618,9 @@ ${pts}
             speed: __speed, nav: __nav, voice: (window.SolitaVoice || null),
             apiUrl: SUPABASE_URL, apiKey: SUPABASE_KEY,   // Phase 2: TomTom proxy (abroad only; graceful until deployed)
         }) : null;
+        // ---- Point hazards → js/tracker-hazards.js. Position-driven; OSM level-crossings / stop / give-way /
+        //      zebra as map pins, with a "voraus"-toast for the safety-critical ones. Key-less Overpass. ----
+        __hazards = (typeof TrackerHazards !== 'undefined') ? TrackerHazards({ map, toast }) : null;
         // ---- Desk navigation simulator → js/tracker-navsim.js. Only with ?sim=1 in the URL. Feeds synthetic
         //      GPS fixes through the REAL onPosition pipeline (so reroute/guidance behave 1:1), while simMode
         //      suppresses cloud sync/broadcast so no fake data ever reaches Supabase. ----
