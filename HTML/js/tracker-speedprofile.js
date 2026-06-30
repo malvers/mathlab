@@ -13,18 +13,20 @@
 window.TrackerSpeedProfile = function (ctx) {
     const { map } = ctx;
 
-    // PARKED 2026-06-30 (Doc): the precomputed profile overrode the live sign and showed a SOLID wrong
-    // limit while navigating — carryForward/despeckle/alignedAny turned a real Tempo-30 into a solid 50
-    // (e.g. Paradiesstraße inherited the preceding 50). The live sign alone resolved the correct 30, so
-    // until that profile bug is fixed properly we keep the profile OFF: build() no-ops → hasRoute() stays
-    // false → the live sign takes over and no (wrong) change-point badges are drawn. Flip back to true to
-    // re-enable the feature 1:1 once the resolution bug is solved.
-    const ENABLED = false;
+    // Re-enabled 2026-06-30 after fixing the REAL regression OTWA had to park around. The profile (instant,
+    // accurate switch points + route badges) worked originally; my 9c87f12 added two things on top of the
+    // good direction-filter: (a) a HARD alignment reject (no aligned way → null → carryForward backfilled
+    // the PRECEDING limit) and (b) despeckle() (dissolved any run < 50 m into the previous limit). Together
+    // they turned a real short Tempo-30 (Paradiesstraße) into a carried solid 50 that overrode the live
+    // sign. Fix: limitsFromWays now PREFERS an aligned way but never blanks when only a misaligned one is in
+    // the corridor (so the road you're on is never lost → no wrong carry), and despeckle is GONE (a genuine
+    // short zone must survive). carryForward then only ever holds a REAL resolved limit. Instant-switching
+    // (limitAt) restored; badges back.
+    const ENABLED = true;
 
     const QUERY_TIMEOUT_MS = 28000;   // > the server-side [timeout:25] below; a whole-route corridor is big
     const CORRIDOR_M = 25;            // ways within this distance of the route count
     const ALIGN_TOL = 40;            // a corridor way may differ from the local route direction by at most this (deg)
-    const MIN_RUN_M = 50;            // a limit must hold this far along the route to earn a change point (de-flicker)
     const MAX_VERTS = 2500;           // guard: very long routes are downsampled for resolution (cost/time)
     const MAX_CORRIDOR_PTS = 800;     // cap the around-polyline length so the query body stays sane
     const CACHE_PREFIX = 'trk_speedprofile_';
@@ -134,12 +136,15 @@ window.TrackerSpeedProfile = function (ctx) {
     }
 
     // The precomputed limit at the current position: number | 'none' (unlimited) | null (on route but
-    // unknown — let the live sign fall back) | undefined (no profile / off route).
+    // unknown — let the live sign fall back) | undefined (no profile / off route). Instant + accurate at
+    // the exact switch point (the profile's whole point). Correctness now rests on limitsFromWays NOT
+    // mis-resolving (prefer-aligned-but-never-blank) and on NOT despeckling real short zones away — so a
+    // carried value is only ever a genuine hold of a real limit, never a swallowed Tempo-30.
     function limitAt(here) {
         if (!hasRoute() || !here) return undefined;
         const bi = nearestSegIdx(here);
         const v = vertexLimit[bi - 1];
-        if (v === undefined) return null;     // map a missing slot to null (known gap), never undefined
+        if (v === undefined) return null;     // missing slot → known gap (live sign falls back), never undefined
         return evalNow(v);                    // resolve a conditional {base,rules} against the clock NOW
     }
 
@@ -179,19 +184,22 @@ window.TrackerSpeedProfile = function (ctx) {
         const raw = new Array(pts.length).fill(null);
         for (let vi = 0; vi < pts.length; vi++) {
             const p = pts[vi];
-            // Local route direction here → reject corridor ways that cross/parallel the route rather than
-            // run along it (the crossing side street that stole the limit and flickered the badges).
+            // PREFER a way that runs ALONG the route (kills the crossing/parallel side street that caused the
+            // 30↔50 badge-pulk) — but NEVER blank when only a misaligned limit-way is in the corridor: a hard
+            // reject backfilled null → carryForward dragged the PRECEDING limit over a real Tempo-30 (the
+            // Paradiesstraße 50-over-30 bug). So: best aligned wins; else fall back to the nearest limit-way
+            // (the road you're physically on is the nearest), so the real local limit is never lost.
             const routeBrgs = routeBearingsAt(pts, vi);
-            let best = null, bestD = Infinity;
+            let aLim = null, aD = Infinity, anyLim = null, anyD = Infinity;
             for (const w of ways) {
                 const lim = resolveLimit ? resolveLimit(w.tags) : null;
                 if (lim == null) continue;                 // not a drivable, limit-bearing way → ignore
                 const nw = distToWay(p, w.geometry);
                 if (nw.d > CORRIDOR_M + 10) continue;       // outside the corridor → not our road
-                if (!alignedAny(routeBrgs, nw.brg, ALIGN_TOL)) continue; // crosses/parallels the route → skip
-                if (nw.d < bestD) { bestD = nw.d; best = lim; }
+                if (nw.d < anyD) { anyD = nw.d; anyLim = lim; }
+                if (alignedAny(routeBrgs, nw.brg, ALIGN_TOL) && nw.d < aD) { aD = nw.d; aLim = lim; }
             }
-            raw[vi] = best;
+            raw[vi] = (aLim != null) ? aLim : anyLim;       // aligned preferred, nearest as a never-blank fallback
         }
         return carryForward(raw);
     }
@@ -204,43 +212,9 @@ window.TrackerSpeedProfile = function (ctx) {
         return out;
     }
 
-    // ---- de-flicker -----------------------------------------------------------------------------
-    // Cumulative along-route distance (m) per vertex.
-    function segMeters(a, b) {
-        const R = 6371000, t = Math.PI / 180;
-        const dLat = (b[0] - a[0]) * t, dLng = (b[1] - a[1]) * t;
-        const x = Math.sin(dLat / 2) ** 2 + Math.cos(a[0] * t) * Math.cos(b[0] * t) * Math.sin(dLng / 2) ** 2;
-        return 2 * R * Math.asin(Math.sqrt(x));
-    }
-    function cumDist(pts) {
-        const cd = new Array(pts.length).fill(0);
-        for (let i = 1; i < pts.length; i++) cd[i] = cd[i - 1] + segMeters(pts[i - 1], pts[i]);
-        return cd;
-    }
-    // Safety net on top of the direction filter: dissolve any limit run shorter than MIN_RUN_M along the
-    // route into the limit that precedes it. A real Tempo-30 stretch spans a block; a stray one-vertex
-    // side-street pick spans metres — so this removes residual flicker without erasing genuine zones.
-    function despeckle(pts, limits) {
-        if (pts.length !== limits.length || pts.length < 2) return limits;
-        const cd = cumDist(pts);
-        const out = limits.slice();
-        let runStart = 0;
-        for (let i = 1; i <= out.length; i++) {
-            if (i === out.length || !sameLimit(out[i], out[runStart])) {
-                const end = (i === out.length) ? cd[out.length - 1] : cd[i];
-                // Dissolve a stray short run into the KNOWN limit before it — but NOT the leading run
-                // (runStart>0), NOT the trailing run (i!==out.length; the route really ends there, so a
-                // short final stretch is genuine), and NEVER into a null (out[runStart-1]!=null) which
-                // would discard a real resolved limit and blank the sign.
-                if (end - cd[runStart] < MIN_RUN_M && runStart > 0 && i !== out.length && out[runStart - 1] != null) {
-                    const fill = out[runStart - 1];
-                    for (let k = runStart; k < i; k++) out[k] = fill;
-                }
-                runStart = i;
-            }
-        }
-        return out;
-    }
+    // (No despeckle: it dissolved any run < 50 m into the previous limit and so SWALLOWED genuine short
+    // zones — a real Tempo-30 became the preceding 50. The direction filter alone keeps the badges clean;
+    // a short real zone must survive, so it earns its own change point.)
 
     // Change points = vertices where the carry-forward limit first differs from the previous one.
     function deriveChangePoints(pts, limits) {
@@ -334,9 +308,8 @@ window.TrackerSpeedProfile = function (ctx) {
         const resAt = downsampleIdx(routePts.length, MAX_VERTS);
         const sub = resAt.map((i) => routePts[i]);
         const subLimits = limitsFromWays(sub, ways);
-        // expand the sub-sampled limits back onto every vertex (carry the nearest sample forward), then
-        // de-flicker so a stray metres-long blip can't earn its own badge.
-        vertexLimit = despeckle(routePts, expandToAll(routePts.length, resAt, subLimits));
+        // expand the sub-sampled limits back onto every vertex (carry the nearest sample forward).
+        vertexLimit = expandToAll(routePts.length, resAt, subLimits);
         changePoints = deriveChangePoints(routePts, vertexLimit);
         if (gen !== buildGen) return;
         cachePut(meta, changePoints);
