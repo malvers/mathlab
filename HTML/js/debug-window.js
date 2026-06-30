@@ -99,7 +99,17 @@ const DebugWindow = (() => {
         `;
 
         const title = document.createElement('span');
-        title.textContent = '🐛 DEBUGING';
+        // Header shows the deploy/build stamp instead of a static label: document.lastModified is the
+        // served HTML's Last-Modified → the real deploy time, so you can tell at a glance whether a push
+        // landed (Doc 2026-06-30: build belongs at the top of the debug window, formatted "b: …").
+        (function () {
+            const lm = new Date(document.lastModified);
+            const p = (n) => String(n).padStart(2, '0');
+            title.textContent = isNaN(lm.getTime())
+                ? '🐛 b: ' + (document.lastModified || '?')
+                : '🐛 b: ' + p(lm.getDate()) + '.' + p(lm.getMonth() + 1) + '. '
+                  + p(lm.getHours()) + ':' + p(lm.getMinutes()) + ':' + p(lm.getSeconds());
+        })();
         title.style.display = collapsed ? 'none' : 'block';
         title.style.marginRight = '8px';
         header.appendChild(title);
