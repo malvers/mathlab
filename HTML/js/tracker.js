@@ -1356,11 +1356,19 @@
             const firstFix = !posMarker;
             const still = (sensorStill || posStill) && !firstFix;
 
-            // Live speedometer while idle: ONLY the GPS Doppler (coords.speed) — the velocity the
-            // receiver actually measures. No distance/time fallback: on a device without Doppler
-            // (desktop / coarse WLAN, ±35 m) the jitter between fixes would fake 20+ km/h on a desk.
-            // No Doppler → 0. Same floor/EMA as the recording path.
-            let kmh = (sp != null && sp >= 0) ? sp * 3.6 : 0;
+            // Live speedometer while idle: GPS Doppler (coords.speed) preferred — the velocity the
+            // receiver measures directly. When the device gives NO Doppler, fall back to distance/time
+            // EXACTLY like the recording path (computeAndDisplaySpeed): only when the movement gate says
+            // we're moving (!still) AND the fix is accurate enough → a resting desk / coarse WLAN stays a
+            // clean 0, but a moving car/phone without Doppler now shows its speed when idle too — i.e.
+            // neither tracking nor navigating (Doc 2026-06-30). Same floor/EMA as the other paths.
+            let kmh = 0;
+            if (sp != null && sp >= 0) {
+                kmh = sp * 3.6;                                  // GPS Doppler — preferred, independent of the gate
+            } else if (!still && lastFix && (accuracy == null || accuracy <= MAX_ACC_M)) {
+                const dt = (now - lastFix.t) / 1000;            // no Doppler → derive from distance/time (gated)
+                if (dt > 0) kmh = (haversine([lastFix.lat, lastFix.lng], here) / dt) * 3.6;
+            }
             // Do NOT zero on `still`: a clear Doppler reading IS real movement even when the dot sits
             // inside the accuracy band. At slow walking pace each step (~2 m/s) is shorter than the band,
             // so posStill stays true the whole time — gating speed on it read a steady 0 while walking
