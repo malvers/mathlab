@@ -444,10 +444,35 @@
         // dünner Wrapper, der den lokalen State (track/times/speeds/activities) reinreicht.
         const trackLayer = L.layerGroup().addTo(map);
         let smoothOn = false; // non-destructive GPS smoothing: transforms the DISPLAYED line only
+        // Live "tail" (Doc 2026-06-30): the coloured track redraw is throttled (TRACK_REDRAW_MS) AND a
+        // point is only recorded every minStep, so the DRAWN track lags behind the live position — leaving
+        // an empty gap before the blue route, which redrawAhead trims to `here` every fix. Bridge it with a
+        // small speed-coloured line from the last DRAWN point, through any un-drawn recent points, to the
+        // live position, so the coloured track always reaches the dot. On its OWN map layer so the
+        // throttled redrawTrack (clearLayers on trackLayer) can't wipe it mid-fix.
+        let liveTailLine = null;   // the bridge segment (recording only)
+        let lastDrawnIdx = 0;      // last track index included in the drawn coloured line
         function redrawTrack() {
             const t = (smoothOn && typeof TrackSmooth !== 'undefined' && TrackSmooth.smooth)
                 ? TrackSmooth.smooth(track, times) : track;
             TrackRender.redraw({ track: t, times, speeds, activities, layer: trackLayer, usesHotline });
+            lastDrawnIdx = track.length ? track.length - 1 : 0;
+        }
+        function clearLiveTail() { if (liveTailLine) { map.removeLayer(liveTailLine); liveTailLine = null; } }
+        function updateLiveTail(here) {
+            if (!tracking || !here || !track.length) { clearLiveTail(); return; }
+            const from = Math.max(0, Math.min(lastDrawnIdx, track.length - 1));
+            const tail = track.slice(from);                       // last drawn point + points since last redraw
+            const data = tail.map((p, i) => {
+                const kmh = speeds[from + i] != null ? speeds[from + i] : 0;
+                return [p[0], p[1], TrackRender.speedToScale(kmh)];
+            });
+            data.push([here[0], here[1], TrackRender.speedToScale(shownSpeed)]); // …up to the live dot
+            clearLiveTail();
+            liveTailLine = usesHotline
+                ? L.hotline(data, { weight: 5, outlineWidth: 1, outlineColor: 'rgba(8,20,42,0.6)', palette: TrackRender.SPEED_PALETTE, min: 0, max: 1 })
+                : L.polyline(data.map((d) => [d[0], d[1]]), { color: TrackRender.COL_ORANGE, weight: 5, opacity: 0.9 });
+            liveTailLine.addTo(map);
         }
         // Live recording calls redrawTrack on EVERY fix, and redrawTrack re-smooths + rebuilds the WHOLE track
         // (O(n)) each time → on a long drive that's thousands of segments rebuilt every second (CPU/GPU = battery).
@@ -1071,6 +1096,7 @@
             updateAutoFollow(here, still);                                    // Phase 12: auto-follow pan/zoom
             updateFitMode(here);                                              // Phase 13a: FIT-mode re-fit
             updateNavigationAndDebug(here, still, accuracy, minStep);         // Phase 13b: nav + speed-sign + debug + status
+            updateLiveTail(here);                                             // Phase 14: bridge coloured track → dot (no gap before the route)
         }
 
         function onError(err) {
@@ -1259,6 +1285,7 @@
             trkState = s;
             tracking = (s === 'recording');
             if (s !== 'recording' && _trackRedrawTimer) { clearTimeout(_trackRedrawTimer); _trackRedrawTimer = null; redrawTrack(); } // flush a pending live redraw → final track is complete at once
+            if (s !== 'recording') clearLiveTail(); // pause/finish → no live bridge segment dangling off the dot
             updateDistVisibility(); // idle (& not navigating) → hide DISTANCE; recording/paused → show it
             const tg = $('trk-toggle'), fin = $('trk-finish'), disc = $('trk-discard');
             if (disc) disc.style.display = (s === 'paused') ? 'inline-flex' : 'none';
@@ -1884,6 +1911,7 @@
             if (!silent && track.length && !(await uiConfirm('Aktuellen Track wirklich löschen?', { danger: true, okText: 'Löschen' }))) return;
             if (typeof TrackBuffer !== 'undefined') TrackBuffer.clear();
             clearLoaded(); // a cleared/discarded track must not be restored on the next reload
+            clearLiveTail(); lastDrawnIdx = 0; // drop the live bridge segment with the track
             track = [];
             loadedBounds = null; // no multi-loaded overlay anymore → FIT hides
             times = [];
