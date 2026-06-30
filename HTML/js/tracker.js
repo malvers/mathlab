@@ -151,10 +151,12 @@
             if (rb) b = b ? b.extend(rb) : rb;
             return b;
         }
-        // The view-fan's current mode, derived from state. Hand-zoom wins (it froze everything), then the
-        // active FIT, else "follow" (the crosshair re-centre — also the default when nothing is running).
+        // The view-fan's current mode, derived from state. An active FIT wins, else "follow" (the crosshair
+        // re-centre — also the default when nothing is running). Hand-zoom does NOT get its own mode here
+        // (Doc): it presents exactly like follow — the trigger shows the crosshair and the fan offers the two
+        // fits — so the custom-view box never appears alongside the other options. (handMode is still tracked
+        // separately; tapping the crosshair re-centres and clears it.)
         function currentMode() {
-            if (handMode) return 'hand';
             if (fitMode === 'remaining') return 'fitrem';
             if (fitMode === 'all') return 'fitall';
             return 'follow';
@@ -170,8 +172,8 @@
         // Lay out the fan options. The fan only ever offers DESTINATIONS you can jump to — follow / fitall /
         // fitrem — and never the current one (it's on the trigger). "hand" is NOT a destination: you can't
         // "select" your hand-zoom, you only land in it BY zooming, so it must never appear as an option —
-        // hence the explicit m !== 'hand'. (In hand-mode current = 'hand', so no destination is excluded →
-        // the fan then shows ALL escapes: re-centre + both fits.) Returns the visible-option count.
+        // hence the explicit m !== 'hand'. (In hand-mode currentMode() reports 'follow', so the crosshair is
+        // the trigger and the fan offers the two fits — the hand box never shows.) Returns the option count.
         function buildFanOptions() {
             const valid = validModes();
             const cur = currentMode();
@@ -196,7 +198,7 @@
             const pos = posMarker && posMarker.getLatLng && posMarker.getLatLng();
             const trackPresent = track.length >= 10 || !!loadedBounds;
             if (!pos && !trackPresent) { fan.classList.remove('show'); closeFan(); return; } // nothing to centre or fit
-            btn.dataset.mode = currentMode();              // trigger shows the current mode's icon
+            btn.dataset.mode = currentMode();              // trigger shows the current mode's icon (never 'hand')
             btn.classList.toggle('mode-on', !!fitMode);    // persistent FIT → green
             fan.classList.add('show');
             if (fanOpen && buildFanOptions() === 0) closeFan(); // state changed away under an open fan → collapse
