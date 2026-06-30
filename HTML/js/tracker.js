@@ -2529,9 +2529,17 @@ ${pts}
         });
         // ---- Speed-limit sign → js/tracker-speedlimit.js. Position-driven (fed from onPosition),
         //      independent of navigation; owns its own #speed-sign badge. ----
-        __speed = TrackerSpeedLimit({ $, profile: __speedprofile });
+        // Logging-only measurement probe (js/tracker-speedprobe.js): tallies whether a backward-carry /
+        // persistent memory would agree/cover the live limit, so Phase 1/2 are decided with numbers, not a
+        // guess (Doc 2026-06-30). No behaviour change. Read via window.__speedProbe in the console.
+        const __speedprobe = (typeof TrackerSpeedProbe !== 'undefined') ? TrackerSpeedProbe() : null;
+        window.__speedProbe = __speedprobe; // console access: __speedProbe.summary() · .stats() · .reset()
+        __speed = TrackerSpeedLimit({ $, profile: __speedprofile, probe: __speedprobe });
         // Give the profile the SAME tag→limit resolver the sign uses, so its precomputed numbers match.
         if (__speedprofile && __speed.resolveLimit) __speedprofile.setResolver(__speed.resolveLimit);
+        // …and the SAME conditional evaluator + equality key, so a time-conditional limit (e.g. a school
+        // zone's "30 Mo-Fr 6-17") is resolved at display time and compared correctly (Doc 2026-06-30).
+        if (__speedprofile && __speed.evalLimit) __speedprofile.setEval(__speed.evalLimit, __speed.limitKey);
         // ---- Bußgeld-Risiko → js/tracker-fines.js. Tapping the speed-limit sign opens a panel that
         //      prices a ticket (€ / Punkte / Fahrverbot) from the static BKatV table for the live
         //      speed-over-limit. Keyless + offline-safe; most useful when the sign is red. ----
