@@ -120,14 +120,11 @@ window.TrackerHazards = function (ctx) {
             // highway=traffic_signals node, so without this the map showed no Ampel where there clearly is one
             // (Doc 2026-07-01, Radebeul).
             if (/traffic_signals/i.test(tags.crossing || '') || /traffic_signals/i.test(tags['crossing:signals'] || '')) return 'traffic_signals';
-            // A real Fußgängerüberweg (Zeichen 350): crossing_ref / crossing:markings / crossing = zebra …
+            // ONLY a real Zebrastreifen (Zeichen 350): crossing_ref / crossing:markings / crossing = zebra.
+            // NOT the generic 'marked'/'uncontrolled' crossings — those are every minor pedestrian crossing and
+            // carpet-bombed the map (Doc: Elbepark/IKEA parking).
             const z = (tags.crossing_ref || '') + '|' + (tags['crossing:markings'] || '') + '|' + (tags.crossing || '');
             if (/\bzebra\b/i.test(z)) return 'zebra';
-            // … OR a plain marked crossing ('uncontrolled'/'marked'). The QUERY only pulls these when they sit
-            // on a real drivable road (set .rd), so a parking-lot crossing never reaches here — but a real FGÜ
-            // that OSM only under-tagged as 'uncontrolled' does (Doc 2026-07-01, Serkowitz). 'unmarked' (no
-            // paint) is intentionally excluded.
-            if (/^(uncontrolled|marked)$/i.test(tags.crossing || '')) return 'zebra';
         }
         return null;
     }
@@ -162,15 +159,9 @@ window.TrackerHazards = function (ctx) {
     async function query(here) {
         fetching = true;
         const r = QUERY_R_M, la = here[0], ln = here[1];
-        // Combined node query. Zebra-marked crossings are pulled anywhere; a plain marked crossing (legacy
-        // 'uncontrolled' / modern 'marked') is pulled ONLY when it sits on a real DRIVABLE road (set .rd) —
-        // so a parking-lot full of service-way crossings can't carpet-bomb the map (Doc: Elbepark) while a
-        // real Fußgängerüberweg that OSM only tagged 'uncontrolled' still shows (Doc 2026-07-01, Serkowitz /
-        // Kötzschenbrodaer Str). 'unmarked' crossings (no paint) stay out entirely.
-        const driveRe = '^(residential|living_street|tertiary|secondary|primary|unclassified|trunk|road|motorway_link|trunk_link|primary_link|secondary_link|tertiary_link)$';
-        const q = '[out:json][timeout:8];'
-            + 'way(around:' + r + ',' + la + ',' + ln + ')[highway~"' + driveRe + '"]->.rd;'
-            + '('
+        // Combined node query — crossings are narrowed to REAL zebra markings so we never pull (or pin) the
+        // parking-lot full of generic 'marked'/'uncontrolled' crossings (Doc: Elbepark/IKEA carpet-bomb).
+        const q = '[out:json][timeout:8];('
             + 'node(around:' + r + ',' + la + ',' + ln + ')[railway=level_crossing];'
             + 'node(around:' + r + ',' + la + ',' + ln + ')[highway=stop];'
             + 'node(around:' + r + ',' + la + ',' + ln + ')[highway=give_way];'
@@ -179,7 +170,6 @@ window.TrackerHazards = function (ctx) {
             + 'node(around:' + r + ',' + la + ',' + ln + ')[highway=crossing][crossing_ref=zebra];'
             + 'node(around:' + r + ',' + la + ',' + ln + ')[highway=crossing]["crossing:markings"=zebra];'
             + 'node(around:' + r + ',' + la + ',' + ln + ')[highway=crossing][crossing=zebra];'
-            + 'node(w.rd)[highway=crossing][crossing~"^(uncontrolled|marked)$"];'
             + ');out;';
         try {
             const j = await window.queryOverpass(q, { timeout: QUERY_TIMEOUT_MS, dbg });
