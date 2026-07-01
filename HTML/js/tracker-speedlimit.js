@@ -23,9 +23,13 @@ window.TrackerSpeedLimit = function (ctx) {
     const OVER_TOL_KMH = 3;        // grace before turning the sign red (GPS speed noise)
     const BING_OVER_KMH = 8;      // play the bell once you're this many km/h over the limit (absolute)
     const BING_REPEAT_MS = 12000;  // …and re-remind at most this often while still over
+    const TURN_DEG = 35;           // a heading change this large = you turned onto another road → re-check the limit at once
+    const TURN_INTERVAL_MS = 1200; // …but still rate-limit those turn re-queries a touch (Overpass courtesy)
 
     let lastQ = 0;          // timestamp of the last Overpass query
     let lastPos = null;     // [lat,lng] at the last query
+    let headBrg = null;     // continuously-tracked travel heading (deg) — updated EVERY fix, not only on a query
+    let headPos = null;     // position where headBrg was last computed (the turn-detection baseline)
     let fetching = false;   // a query is in flight
     let curLimit = null;    // number (km/h) | 'none' (unlimited) | null (unknown) — the value shown NOW
     let curRaw = null;      // the raw resolved value when time-conditional ({base,rules}); null when static
@@ -482,28 +486,44 @@ window.TrackerSpeedLimit = function (ctx) {
             }
         }
         if (fromProfile) return; // the route profile already set the sign → don't poll Overpass this fix
+        if (!here || fetching) return;
+        // Turn detection: track the instantaneous heading on EVERY fix (not only on a query). A large heading
+        // change means you turned onto a different road, whose limit may differ → force an immediate re-query
+        // so the new road's (split-)limit shows right at the junction, not only after 90 m of travel on it
+        // (Doc 2026-07-01: abbiegen 50→Landstraße 100, das 100 muss AN der Kreuzung stehen).
+        let turned = false;
+        if (speedKmh != null && speedKmh >= 10 && headPos && haversine(here, headPos) >= 10) {
+            const b = bearingDeg(headPos, here);
+            if (headBrg != null) {
+                let dd = Math.abs(b - headBrg) % 360; if (dd > 180) dd = 360 - dd;
+                if (dd >= TURN_DEG) turned = true;
+            }
+            headBrg = b; headPos = here;
+        } else if (!headPos) headPos = here;
         // query while moving; ALSO do one query when we still have no limit (e.g. a standing cold
         // start) so the sign shows immediately on a known road, not only once you start driving.
-        if (!here || fetching) return;
-        if (still && curLimit != null) return;
+        if (still && curLimit != null && !turned) return;
         const now = Date.now();
-        if (now - lastQ < MIN_INTERVAL_MS) return;
+        // A detected turn re-queries almost at once (short gate); otherwise the normal 5 s throttle.
+        if (now - lastQ < (turned ? TURN_INTERVAL_MS : MIN_INTERVAL_MS)) return;
         // Once we HAVE a limit, only re-query after real travel (limits change per road segment, so no
-        // point hammering Overpass on the same one). But while we still have NO limit — cold start, or a
-        // failed/empty earlier query — keep retrying on the 5 s throttle so the sign appears quickly
-        // instead of staying "?" until 90 m of travel (Doc 2026-06-20: "?" stuck while walking slowly).
-        if (curLimit != null && lastPos && haversine(here, lastPos) < MIN_MOVE_M) return;
-        // Travel bearing over the leg since the last query (a long, stable baseline). Only trust it when
-        // we've actually moved a bit and aren't crawling — GPS heading is noise at walking pace.
-        let travelBrg = null;
-        if (lastPos && speedKmh != null && speedKmh >= 10 && haversine(here, lastPos) >= 20) {
+        // point hammering Overpass on the same one) — EXCEPT right after a turn, where the road (and its
+        // limit) just changed and waiting for MIN_MOVE_M is exactly the ~50 m lag Doc hit. While we still
+        // have NO limit — cold start, or a failed/empty earlier query — keep retrying on the throttle so
+        // the sign appears quickly instead of staying "?" until 90 m (Doc 2026-06-20).
+        if (!turned && curLimit != null && lastPos && haversine(here, lastPos) < MIN_MOVE_M) return;
+        // Heading for the query: prefer the freshly-tracked heading (correct right after a turn); fall back
+        // to the long lastPos→here baseline when none has been tracked yet. GPS heading is noise at walking
+        // pace, so only trust it once we're actually moving.
+        let travelBrg = headBrg;
+        if (travelBrg == null && lastPos && speedKmh != null && speedKmh >= 10 && haversine(here, lastPos) >= 20) {
             travelBrg = bearingDeg(lastPos, here);
         }
         lastQ = now; lastPos = here;
         query(here, travelBrg);
     }
 
-    function clear() { curLimit = null; curRaw = null; curConfirmed = true; lastRoad = null; lastPos = null; lastBing = 0; setSign(null, false); setAdvisories(false, false); }
+    function clear() { curLimit = null; curRaw = null; curConfirmed = true; lastRoad = null; lastPos = null; headBrg = null; headPos = null; lastBing = 0; setSign(null, false); setAdvisories(false, false); }
 
     function setBell(on) { bellOn = !!on; try { localStorage.setItem(BELL_KEY, bellOn ? '1' : '0'); } catch (e) { } }
     function bellEnabled() { return bellOn; }
