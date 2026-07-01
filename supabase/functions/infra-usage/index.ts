@@ -1,9 +1,11 @@
 // Tracker/Labs — "infra-usage" Edge Function: the DAILY infra watchdog.
 //
-// Emails Doc (as Solita) two utilization numbers so a quota overflow can never sneak up on us again
+// Emails Doc (as Solita) the utilization numbers so a quota overflow can never sneak up on us again
 // (the 2026-06-19 egress lockout was the trigger — though egress itself is now ~0 since media moved to R2):
-//   • R2 storage   — % of the 10 GB R2 free quota (all photos/voice live here now → this is the real risk)
-//   • Supabase DB  — % of the 0.5 GB Free-Plan database-size limit
+//   • R2 storage    — % of the 10 GB R2 free quota (all photos/voice live here now → this is the real risk)
+//   • Supabase DB   — % of the 0.5 GB Free-Plan database-size limit
+//   • GitHub Pages  — % of the 1 GB published-site limit (a Pages deploy timed out at ~209 MB on 2026-06-30;
+//                     public repo → no token needed, and Actions minutes/bandwidth aren't a concern here)
 //
 // REUSES existing infra only — NO new tokens/secrets (Rule 18/21):
 //   • R2_*            — same S3 creds the media-sign function already uses (list bucket → sum object sizes)
@@ -33,6 +35,8 @@ function json(obj: unknown, status = 200): Response {
 const GB = 1024 ** 3;
 const R2_QUOTA_GB = 10;    // Cloudflare R2 free storage
 const DB_QUOTA_GB = 0.5;   // Supabase Free-Plan database size limit
+const GH_PAGES_QUOTA_GB = 1;          // GitHub Pages published-site soft limit
+const GH_REPO = 'malvers/mathlab';    // public repo → no token needed for the Git Trees API
 
 // Sum every object's <Size> in the R2 bucket via S3 ListObjectsV2 (paginated). Same creds as media-sign.
 async function r2BytesUsed(): Promise<number> {
@@ -70,6 +74,32 @@ async function dbBytesUsed(): Promise<number> {
   const { data, error } = await supa.rpc('db_size_bytes');
   if (error) throw new Error('db_size_bytes: ' + error.message);
   return Number(data);
+}
+
+// GitHub Pages published size vs the 1 GB soft limit — the only real GitHub "Auslastung" risk for us (a
+// public repo → Actions minutes are free/unlimited, and Pages bandwidth would need a billing token we
+// deliberately don't add, Rule 18). The repo is PUBLIC, so the Git Trees API needs NO auth: one call, sum
+// the blob sizes that end up in the Pages artifact = everything under HTML/ PLUS repo-root
+// resources/screenshots/ (the deploy workflow copies those into the site tree). Best-effort: any problem
+// (rate limit, truncated tree, network) returns null so it can NEVER break the R2/DB watchdog mail.
+async function ghPagesBytesUsed(): Promise<number | null> {
+  try {
+    const r = await fetch(`https://api.github.com/repos/${GH_REPO}/git/trees/main?recursive=1`, {
+      headers: { 'User-Agent': 'infra-usage-watchdog', 'Accept': 'application/vnd.github+json' },
+    });
+    if (!r.ok) return null;
+    const j = await r.json();
+    // A truncated tree would undercount → report nothing rather than a wrong % (honest, no faking).
+    if (!j || !Array.isArray(j.tree) || j.truncated) return null;
+    let total = 0;
+    for (const t of j.tree) {
+      if (t && t.type === 'blob' && typeof t.path === 'string'
+        && (t.path.startsWith('HTML/') || t.path.startsWith('resources/screenshots/'))) {
+        total += Number(t.size) || 0;
+      }
+    }
+    return total;
+  } catch (_) { return null; }
 }
 
 // Send the daily mail through the existing gmail-send function (it signs as Solita for us).
@@ -187,10 +217,12 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const [r2, db, ai, searches] = await Promise.all([r2BytesUsed(), dbBytesUsed(), aiCostToday(), geminiSearchCount()]);
+    const [r2, db, ai, searches, ghBytes] = await Promise.all([r2BytesUsed(), dbBytesUsed(), aiCostToday(), geminiSearchCount(), ghPagesBytesUsed()]);
     const r2pctN = pctN(r2, R2_QUOTA_GB), dbpctN = pctN(db, DB_QUOTA_GB);
     const r2pct = de(r2pctN, 2), dbpct = de(dbpctN, 2);   // 2 Nachkommastellen, deutsche Komma-Schreibweise
-    const warn = r2pctN >= 80 || dbpctN >= 80;
+    const ghPctN = ghBytes != null ? pctN(ghBytes, GH_PAGES_QUOTA_GB) : null;   // null → GitHub unreachable, skip the row
+    const ghpct = ghPctN != null ? de(ghPctN, 2) : '';
+    const warn = r2pctN >= 80 || dbpctN >= 80 || (ghPctN != null && ghPctN >= 80);
     const provs = Object.keys(ai.byProvider).sort();
     const LBL: Record<string, string> = { claude: 'Claude', deepseek: 'DeepSeek', gemini: 'Gemini' };
     const subject = 'Stats and costs';
@@ -205,6 +237,7 @@ Deno.serve(async (req) => {
       `Tägliche Auslastung:\n\n` +
       `• R2-Storage:  ${r2pct}% von ${R2_QUOTA_GB} GB  (${gbDe(r2)} GB)\n` +
       `• Supabase-DB: ${dbpct}% von ${de(DB_QUOTA_GB, 1)} GB  (${gbDe(db)} GB)\n` +
+      (ghPctN != null ? `• GitHub Pages: ${ghpct}% von ${GH_PAGES_QUOTA_GB} GB  (${gbDe(ghBytes!)} GB)\n` : '') +
       aiText +
       (searches > 0 ? `\nGemini-Suchen (24 h): ${searches} / 1500 gratis\n` : '') + `\n` +
       `Verbrauch beim Anbieter:\n` +
@@ -252,6 +285,7 @@ Deno.serve(async (req) => {
       + `<th style="text-align:right;padding:9px 12px;font-weight:600;">Limit</th></tr></thead><tbody>`
       + usageRow('☁️', 'Cloudflare R2', r2pctN, r2pct, gbDe(r2), `${R2_QUOTA_GB} GB`, false)
       + usageRow('🗄️', 'Supabase DB', dbpctN, dbpct, gbDe(db), `${de(DB_QUOTA_GB, 1)} GB`, true)
+      + (ghPctN != null ? usageRow('🐙', 'GitHub Pages', ghPctN, ghpct, gbDe(ghBytes!), `${GH_PAGES_QUOTA_GB} GB`, false) : '')
       + `</tbody></table>`
       + aiHtml
       + `<div style="margin:22px 0 0;padding:12px 14px;border-radius:8px;font-size:14px;font-weight:bold;`
@@ -269,11 +303,12 @@ Deno.serve(async (req) => {
     const eurSpoken = (e: number) => { const c = e * 100; return c < 100 ? (c < 10 ? c.toFixed(2) : c.toFixed(1)) + ' Cent' : e.toFixed(2) + ' Euro'; };
     const spoken =
       `Unsere Infra-Auslastung: R2-Speicher ${Math.round(r2pctN)} Prozent, Datenbank ${Math.round(dbpctN)} Prozent`
+      + (ghPctN != null ? `, GitHub Pages ${Math.round(ghPctN)} Prozent` : '')
       + (ai.total > 0 ? `. KI-Kosten der letzten 24 Stunden ${eurSpoken(ai.total)}` : '')
       + (searches > 0 ? `, davon ${searches} von 1500 gratis Suchen` : '')
       + `. ${warn ? 'Achtung, ein Wert liegt über 80 Prozent.' : 'Alles im grünen Bereich.'}`;
     if (!b.dry) await sendMail(subject, body, html, pass);
-    return json({ ok: true, r2pct, dbpct, r2bytes: r2, dbbytes: db, searches, ai: { byProvider: ai.byProvider, total: ai.total, calls: ai.calls }, body, html, spoken, mailed: !b.dry });
+    return json({ ok: true, r2pct, dbpct, ghpct: ghPctN != null ? ghpct : null, r2bytes: r2, dbbytes: db, ghbytes: ghBytes, searches, ai: { byProvider: ai.byProvider, total: ai.total, calls: ai.calls }, body, html, spoken, mailed: !b.dry });
   } catch (e) {
     return json({ error: String((e && (e as Error).message) || e) }, 502);
   }
