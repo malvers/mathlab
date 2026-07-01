@@ -265,18 +265,79 @@ window.TrackerNav = function (ctx) {
         }
         const r = await fetch(url, { headers: { Accept: 'application/json' } });
         const data = await r.json();
-        // Nominatim indexes a POI name as separate tokens ("Top" "Cut"), so a run-together query ("topcut")
-        // matches NOTHING. When that happens, fall back to Photon, which IS spacing/typo tolerant and finds
-        // "Top Cut" for "topcut" (Doc 2026-07-01). Mapped to the same hit shape → callers/builtLabel unchanged.
-        if (!data || !data.length) { try { return await photonSearch(q, from); } catch (e) { return null; } }
-        if (!from) return data[0];   // no position → fall back to importance ranking
-        // Pick the candidate closest to the current position (great-circle), not the most prominent one.
-        let best = data[0], bestD = Infinity;
-        for (const c of data) {
-            const cd = haversine(from, [parseFloat(c.lat), parseFloat(c.lon)]);
-            if (cd < bestD) { bestD = cd; best = c; }
+        let hit = null, hitD = Infinity;
+        if (data && data.length) {
+            if (!from) hit = data[0];                                  // no position → importance ranking
+            else {                                                     // pick the candidate CLOSEST to us
+                hit = data[0];
+                for (const c of data) {
+                    const cd = haversine(from, [parseFloat(c.lat), parseFloat(c.lon)]);
+                    if (cd < hitD) { hitD = cd; hit = c; }
+                }
+            }
+        } else {
+            // Nominatim indexes a POI name as separate tokens ("Top" "Cut"), so a run-together query
+            // ("topcut") matches NOTHING → fall back to Photon, which IS spacing/typo tolerant (Doc 2026-07-01).
+            try { hit = await photonSearch(q, from); } catch (e) { hit = null; }
         }
-        return best;
+        // Brand / category term (short, no house number) whose best match is far away: Nominatim ranks by
+        // global "importance", so "Lidl" resolved to a branch 170 km away instead of the one around the corner
+        // (Doc 2026-07-01). Do a SPATIAL nearest-branch search via Overpass and take it when it's closer. Only
+        // triggered when the current pick is suspiciously far, so normal/near results cost no extra call.
+        if (from && looksBrandy(q)) {
+            if (hit && hitD === Infinity) hitD = haversine(from, [parseFloat(hit.lat), parseFloat(hit.lon)]);
+            if (!hit || hitD > NEAR_BRAND_M) {
+                const near = await nearestPoi(q, from).catch(() => null);
+                if (near) {
+                    const nd = haversine(from, [near.lat, near.lon]);
+                    if (nd < hitD) hit = near;
+                }
+            }
+        }
+        return hit;
+    }
+
+    // A short brand/category term (1–3 words, letters only, no house number) → we want the NEAREST matching
+    // POI, not the globally most "important" one. Kept permissive: the distance gate in geocode() makes a
+    // false positive harmless (Overpass simply finds nothing → the original hit stays).
+    const NEAR_BRAND_M = 12000;   // only override when the resolved brand hit is farther than this
+    function looksBrandy(q) {
+        const t = (q || '').trim();
+        return t.length >= 2 && t.length <= 30 && !/\d/.test(t) && t.split(/\s+/).length <= 3;
+    }
+    // Spatial "nearest matching POI" via Overpass (keyless, rule 18). name/brand regex, case-insensitive;
+    // expands the radius once if the first ring is empty. Mapped to the Nominatim hit shape. null if nothing.
+    async function nearestPoi(q, from) {
+        const term = (q || '').replace(/[^\p{L}\p{N} ]+/gu, ' ').trim();
+        if (!term || typeof window.queryOverpass !== 'function') return null;
+        for (const R of [25000, 90000]) {
+            const ql = '[out:json][timeout:12];('
+                + 'nwr(around:' + R + ',' + from[0] + ',' + from[1] + ')[name~"' + term + '",i];'
+                + 'nwr(around:' + R + ',' + from[0] + ',' + from[1] + ')[brand~"' + term + '",i];'
+                + ');out center 60;';
+            let j = null; try { j = await window.queryOverpass(ql, { timeout: 14000 }); } catch (e) { j = null; }
+            const els = (j && j.elements) || [];
+            let best = null, bd = Infinity;
+            for (const e of els) {
+                const lat = (e.lat != null) ? e.lat : (e.center && e.center.lat);
+                const lon = (e.lon != null) ? e.lon : (e.center && e.center.lon);
+                if (lat == null || lon == null) continue;
+                const d = haversine(from, [lat, lon]);
+                if (d < bd) { bd = d; best = { lat, lon, tags: e.tags || {} }; }
+            }
+            if (best) {
+                const t = best.tags;
+                return {
+                    lat: best.lat, lon: best.lon, name: t.name || term,
+                    address: {
+                        road: t['addr:street'] || '', house_number: t['addr:housenumber'] || '',
+                        postcode: t['addr:postcode'] || '', city: t['addr:city'] || t['addr:town'] || t['addr:village'] || '',
+                    },
+                    display_name: [t.name || term, t['addr:street'], t['addr:city']].filter(Boolean).join(', '),
+                };
+            }
+        }
+        return null;
     }
 
     // Photon fallback: run-together / mistyped names Nominatim's exact token match misses ("topcut" →
