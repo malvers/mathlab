@@ -1725,7 +1725,11 @@ window.TrackerNav = function (ctx) {
         return computeRoute([from[0], from[1]], true, travelBrg).finally(() => { rerouting = false; });
     }
 
-    const api = { openPanel, hasDestination, startNavigation, navigateTo, clearRoute, update, remainingBounds, frameRoute, tripData, avoidReroute, setEngine, getEngine, setPref, getPref, routePoints: () => routeLatLngs };
+    // isNavigating / distToRoute: so other modules (e.g. hazards) can show only what's relevant to the route
+    // and drop cross-street signs while navigating (Doc 2026-07-01). distToRoute → metres, or null off-nav.
+    const api = { openPanel, hasDestination, startNavigation, navigateTo, clearRoute, update, remainingBounds, frameRoute, tripData, avoidReroute, setEngine, getEngine, setPref, getPref, routePoints: () => routeLatLngs,
+        isNavigating: () => !!(destLatLng && routeLatLngs && routeLatLngs.length > 1),
+        distToRoute: (ll) => (ll && routeLatLngs && routeLatLngs.length > 1) ? distToRouteM(ll) : null };
     // Bridge for the Solita navigate_to add-on (js/solita-navigate.js): the nav instance is module-private
     // in tracker.js (__nav), so publish a handle here so the voice tool can route programmatically without
     // touching tracker.js. Last constructed instance wins (there is only one).
