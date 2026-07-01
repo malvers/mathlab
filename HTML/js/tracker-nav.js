@@ -1275,9 +1275,13 @@ window.TrackerNav = function (ctx) {
         const el = $('nav-banner'); if (!el) return;
         el.dataset.recompute = '';   // normal guidance resumed → allow the recompute hint to show again later
         el.innerHTML =
-            '<div class="nav-main">' + arrowSvg(m)
+            '<div class="nav-dest-head"></div>'   // the actual destination as a heading on top (Doc 2026-07-01)
+            + '<div class="nav-main">' + arrowSvg(m)
             + '<span class="nav-dist"></span><span class="nav-instr"></span></div>'
             + '<div class="nav-trip"></div>'; // SVG from a fixed table (safe); text set below via textContent
+        const head = el.querySelector('.nav-dest-head');
+        head.textContent = destLabel ? shortLabel(destLabel) : ''; // OSM name via textContent (no injection)
+        head.hidden = !destLabel;
         el.querySelector('.nav-dist').textContent = fmtDist(d);
         el.querySelector('.nav-instr').textContent = m.detail || m.text; // OSM names via textContent (no injection)
         const t = el.querySelector('.nav-trip');
