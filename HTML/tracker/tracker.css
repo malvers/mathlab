@@ -2115,16 +2115,19 @@ body.ui-idle #trk-controls {
    Shown only while navigating (JS toggles [hidden]); non-interactive so map drags pass through. */
 #nav-banner {
     position: fixed;
-    left: 50%;
+    /* Full width, flush left AND right with just a small margin (Doc 2026-07-01: „rechts und links bündig")
+       so the destination + instruction have the most room and truncate the least. */
+    left: 10px;
+    right: 10px;
     /* Sit BELOW the instruments while the HUD is shown (so they don't cover the banner); slide UP
        when the HUD auto-hides (body.ui-idle). --nav-down ≈ the instruments' height — tune by eye.
        Doc 2026-06-14, notes #6/#7. (+--cfg-nav-dy = live-config "nach Süden".) */
     top: calc(env(safe-area-inset-top, 0px) + 96px + var(--nav-down, 84px) + var(--cfg-nav-dy, 0px));
     transition: top 0.25s ease;
-    transform: translateX(-50%);
+    transform: none;
     z-index: var(--cfg-nav-z, 480); /* live-config z-order; default UNDER the header (#hud-top z500) */
-    width: 80vw;          /* always 80% of the screen width (Doc: wider so the instruction fits) */
-    max-width: 80vw;
+    width: auto;
+    max-width: none;
     box-sizing: border-box;
     /* Google-Maps-like navigation green (≈ #188038); live-config override via --cfg-nav-bg. */
     background: var(--cfg-nav-bg, rgb(24, 128, 56));
@@ -2175,7 +2178,7 @@ body.ui-idle #nav-banner {
 
 /* Instruments hidden (body.ui-idle) → more screen free, so grow the banner AND its text so it reads at a
    glance while driving (Doc 2026-07-01). */
-body.ui-idle #nav-banner { width: 92vw; max-width: 92vw; padding: 14px 20px; gap: 6px; }
+body.ui-idle #nav-banner { padding: 14px 20px; gap: 6px; }  /* full width already (left/right:10px); just more air + bigger text */
 body.ui-idle #nav-banner .nav-dest-head { font-size: clamp(1.15rem, 5vw, 1.7rem); padding-bottom: 6px; }
 body.ui-idle #nav-banner .nav-arrow { width: 40px; height: 40px; }
 body.ui-idle #nav-banner .nav-dist { font-size: clamp(1.25rem, 5.5vw, 1.8rem); }
