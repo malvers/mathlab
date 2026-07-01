@@ -1209,14 +1209,14 @@
             window.removeEventListener('devicemotion', onDeviceMotion);
             motionReady = false; motionStill = true; motionEnergy = 0;
         }
-        // Tiny tuning readout (Arial per debug convention) — remove once thresholds are dialed in.
+        // Tiny tuning readout (Arial per debug convention) — now a pinned live line INSIDE the DebugWindow
+        // (Doc 2026-07-01: "pack die Infos ins Debug-Window, nicht da zeigen"), no longer the on-screen bar.
         function updateMotionDbg(acc, minStep, still) {
-            const el = $('dbg-motion');
-            if (!el) return;
             const base = motionReady
                 ? (still ? 'STILL' : 'MOVE') + ' · e=' + motionEnergy.toFixed(2) + ' · step > ' + minStep.toFixed(1) + 'm'
                 : (still ? 'HALT·band' : 'frei') + ' · kein Sensor · step > ' + minStep.toFixed(1) + 'm';
-            el.textContent = spdDbg ? base + ' · ' + spdDbg : base; // BUG-1: append the speed-source readout
+            if (window.DebugWindow && DebugWindow.status)
+                DebugWindow.status('motion', spdDbg ? base + ' · ' + spdDbg : base); // BUG-1: append the speed-source readout
         }
 
         // ---------------------------------------------------------------
