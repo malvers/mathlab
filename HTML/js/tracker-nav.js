@@ -604,18 +604,18 @@ window.TrackerNav = function (ctx) {
         try {
             // Route via the ORS proxy for the whole navigation when selected — OSRM otherwise AND as a
             // fallback whenever ORS returns nothing (Doc 2026-06-25).
-            // Reroute PLAIN — no departure-bearing cone, ALSO on ORS (Doc 2026-06-30). The cone backfires:
-            // forcing a forward-ish departure makes the engine drive on and U-turn LATER, which felt like
-            // being "pulled back" onto the rejected line. USE_DEPART_BEARING=false already dropped it for the
-            // OSRM fallback; ORS was still being sent the heading, so the documented "Google reroutes plain"
-            // decision wasn't actually in effect for the default engine. Pass null → let ORS's road graph +
-            // U-turn penalty decide the departure, exactly like Google.
-            if (routeEngine === 'ors') data = await fetchRerouteORS(from, destLatLng, null);
+            // REROUTE departs in the actual TRAVEL direction (Doc 2026-07-01): when you leave the route we send
+            // your live heading so the new route starts the way you're driving — never handing back the exact
+            // line you just rejected ("die neue Route darf nicht die eben aktuelle sein", sehr wichtig). The
+            // INITIAL route (START, brg undefined) still routes plain. This supersedes the 2026-06-30 "reroute
+            // plain" note — plain kept returning the old optimal line, which read as being pulled back.
+            const rerouteBrg = (reroute && brg != null) ? brg : null;
+            if (routeEngine === 'ors') data = await fetchRerouteORS(from, destLatLng, rerouteBrg);
             if (!data) {
                 // OSRM wants lon,lat order; full geometry as GeoJSON for an easy polyline.
                 const coords = from[1] + ',' + from[0] + ';' + destLatLng[1] + ',' + destLatLng[0];
-                // Optional OSRM departure-bearing cone (off by default — it backfired at junctions).
-                const bearings = (USE_DEPART_BEARING && brg != null) ? '&bearings=' + Math.round(brg) + ',' + BRG_RANGE_DEG + ';' : '';
+                // OSRM departure-bearing cone: constrain the reroute to leave in the travel direction too.
+                const bearings = (rerouteBrg != null) ? '&bearings=' + Math.round(rerouteBrg) + ',' + BRG_RANGE_DEG + ';' : '';
                 const r = await fetch(OSRM_PROFILES[MODES[routeType].osrm] + coords + '?overview=full&geometries=geojson&steps=true' + bearings);
                 data = await r.json();
             }
