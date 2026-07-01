@@ -37,10 +37,19 @@ jobs:
           mkdir -p HTML/resources/screenshots
           cp resources/screenshots/*.png HTML/resources/screenshots/ 2>/dev/null || true
 
+      # Keep the Pages artifact lean: HTML/ grew to ~288 MB and the deploy step then timed out
+      # (Doc 2026-07-01, "All jobs have failed" after 10 min). Stage the site WITHOUT the source-only
+      # full-res originals in resources/screenshots_original/ (~77 MB, referenced only by posterstudio.html)
+      # — they stay in git, they're just not published. Live pages use the downscaled resources/screenshots/.
+      - name: Stage site (drop heavy source-only assets)
+        run: |
+          rsync -a --delete --exclude 'resources/screenshots_original/' HTML/ _site/
+          echo "Staged site size:"; du -sh _site
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: HTML
+          path: _site
 
       - name: Deploy to GitHub Pages
         id: deployment
