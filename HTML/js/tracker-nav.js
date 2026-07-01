@@ -284,26 +284,34 @@ window.TrackerNav = function (ctx) {
         // global "importance", so "Lidl" resolved to a branch 170 km away instead of the one around the corner
         // (Doc 2026-07-01). Do a SPATIAL nearest-branch search via Overpass and take it when it's closer. Only
         // triggered when the current pick is suspiciously far, so normal/near results cost no extra call.
+        // ALWAYS do the spatial nearest-branch search for a brand/category term with a position — NO distance
+        // threshold. Nominatim ranks by global "importance", so its top pick is often a corporate HQ (e.g.
+        // "ALDI SE & Co. KG" 7.6 km away) that is NOT the nearest store — a threshold that trusted a
+        // "near-ish" pick routed PAST the real branch 187 m away (Doc 2026-07-01). The live lookup is
+        // debounced, so this is ~one extra call per typing pause; nearestPoi is POI-focused, so a street/place
+        // query finds nothing here and the Nominatim hit stands.
         if (from && looksBrandy(q)) {
             if (hit && hitD === Infinity) hitD = haversine(from, [parseFloat(hit.lat), parseFloat(hit.lon)]);
-            if (!hit || hitD > NEAR_BRAND_M) {
-                const near = await nearestPoi(q, from).catch(() => null);
-                if (near) {
-                    const nd = haversine(from, [near.lat, near.lon]);
-                    if (nd < hitD) hit = near;
-                }
+            const near = await nearestPoi(q, from).catch(() => null);
+            if (near) {
+                const nd = haversine(from, [near.lat, near.lon]);
+                if (!hit || nd < hitD) hit = near;   // take the nearest actual branch whenever it's closer
             }
         }
         return hit;
     }
 
     // A short brand/category term (1–3 words, letters only, no house number) → we want the NEAREST matching
-    // POI, not the globally most "important" one. Kept permissive: the distance gate in geocode() makes a
-    // false positive harmless (Overpass simply finds nothing → the original hit stays).
-    const NEAR_BRAND_M = 12000;   // only override when the resolved brand hit is farther than this
+    // POI, not the globally most "important" one. Kept permissive: a false positive is harmless because the
+    // POI-focused nearestPoi query finds nothing for a street/place term (→ the original Nominatim hit stays)
+    // and we only ever swap in a result that is CLOSER.
+    // Deterministic rule (no word-count guessing): a query WITHOUT a house number is a name/brand/category,
+    // not a precise address — so also look for the nearest matching POI. A digit ⇒ a specific address ⇒
+    // trust Nominatim's exact hit. (Safe either way: the POI-focused nearestPoi finds nothing for a plain
+    // street/place term, and we only ever swap in a CLOSER result.)
     function looksBrandy(q) {
         const t = (q || '').trim();
-        return t.length >= 2 && t.length <= 30 && !/\d/.test(t) && t.split(/\s+/).length <= 3;
+        return t.length >= 2 && !/\d/.test(t);
     }
     // Spatial "nearest matching POI" via Overpass (keyless, rule 18). name/brand regex, case-insensitive;
     // expands the radius once if the first ring is empty. Mapped to the Nominatim hit shape. null if nothing.
