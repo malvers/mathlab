@@ -53,6 +53,11 @@ window.TrackerNav = function (ctx) {
     const OFFROUTE_M = 30;          // beyond this distance from the line → considered "off route" (Doc 2026-06-14: 45→30 for earlier reroute; watch d2route debug for flapping)
     const REROUTE_COOLDOWN_MS = 6000; // don't hammer OSRM: at most one reroute per this window (Doc 2026-06-14: 8s→6s)
     const OFFROUTE_CONSEC = 3;      // hysteresis: require this many consecutive off-route fixes before rerouting → no flapping on jitter / a brief excursion (Doc 2026-06-24)
+    // A SHORTEST route keeps trying to pull you back onto it — one "bitte wenden" is fine, but five in a row
+    // is Mist (Doc 2026-07-01). So after this many reroutes in a streak, stop insisting on shortest and
+    // escalate that reroute to FASTEST (which reroutes forward cleanly). Streak resets after staying on-route.
+    const ESCALATE_REROUTES = 3;      // 3rd consecutive reroute onward → fastest instead of shortest
+    const STREAK_RESET_MS = 30000;    // …until you've held the route for this long, then shortest is retried
     // Off-route reroute strategy (Doc 2026-06-25): the departure-bearing cone backfires at junctions —
     // forcing "forward-ish" departure makes OSRM drive on and U-turn LATER instead of turning around now
     // (e.g. immediately round a roundabout). Google reroutes plain fresh-to-destination and lets the road
@@ -109,6 +114,7 @@ window.TrackerNav = function (ctx) {
     let routeCasing = null, routeCore = null; // the two polylines, kept so update() can re-slice them
     let routeLatLngs = null; // the route's points [[lat,lng]…] — for the off-route distance check
     let lastReroute = 0;    // timestamp of the last (re)route, for the cooldown
+    let rerouteStreak = 0;  // consecutive reroutes without a stable on-route stretch → escalates shortest→fastest
     let rerouting = false;  // a reroute fetch is in flight
     let lastBrgPos = null;  // last position used to derive the live travel heading
     let travelBrg = null;   // current travel bearing (deg, 0=N) from GPS movement → departure-direction constraint on reroute
@@ -692,7 +698,7 @@ window.TrackerNav = function (ctx) {
     function clearRoute() {
         navGen++;            // invalidate any reroute/route fetch still in flight (its result is now stale)
         rerouting = false;   // don't let an aborted reroute leave the flag stuck → would block future routing
-        lastBrgPos = null; travelBrg = null; offRouteCount = 0;  // drop the stale travel heading for the next navigation
+        lastBrgPos = null; travelBrg = null; offRouteCount = 0; rerouteStreak = 0;  // drop the stale travel heading for the next navigation
         clearRouteLine();
         if (ctx.speedProfile) ctx.speedProfile.clear(); // drop the route's speed-limit badges + profile
         keepAlive.stop();   // navigation over → release the audio keep-alive (battery / audio focus)
@@ -739,7 +745,7 @@ window.TrackerNav = function (ctx) {
 
     // ---- Routing: a position → destination, drawn as a polyline ----
     // Shared by START (startNavigation) and the off-route reroute (update). `reroute` only tweaks toasts.
-    async function computeRoute(from, reroute, brg) {
+    async function computeRoute(from, reroute, brg, prefOverride) {
         const gen = navGen; // snapshot: if the route is cleared/replaced during the await, this result is stale
         toast(reroute ? 'Neue Route …' : 'Route wird berechnet …');
         let data;
@@ -752,7 +758,8 @@ window.TrackerNav = function (ctx) {
             // INITIAL route (START, brg undefined) still routes plain. This supersedes the 2026-06-30 "reroute
             // plain" note — plain kept returning the old optimal line, which read as being pulled back.
             const rerouteBrg = (reroute && brg != null) ? brg : null;
-            if (routeEngine === 'ors') data = await fetchRerouteORS(from, destLatLng, rerouteBrg);
+            // prefOverride ('fastest') escalates a shortest route that keeps pulling you back (see update()).
+            if (routeEngine === 'ors') data = await fetchRerouteORS(from, destLatLng, rerouteBrg, prefOverride);
             if (!data) {
                 // OSRM wants lon,lat order; full geometry as GeoJSON for an easy polyline.
                 const coords = from[1] + ',' + from[0] + ';' + destLatLng[1] + ',' + destLatLng[0];
@@ -954,6 +961,8 @@ window.TrackerNav = function (ctx) {
         const cooling = Date.now() - lastReroute < REROUTE_COOLDOWN_MS;
         if (d <= OFFROUTE_M) {                                       // on route → announce the upcoming maneuver
             offRouteCount = 0;
+            // Held the route long enough → the reroute streak is over; a later deviation may use shortest again.
+            if (rerouteStreak && Date.now() - lastReroute > STREAK_RESET_MS) rerouteStreak = 0;
             navDbg(d, 'on-route');
             guidanceUpdate(here);
             return;
@@ -966,9 +975,18 @@ window.TrackerNav = function (ctx) {
         showRecomputeBanner();
         if (cooling) return;                                         // throttle the OSRM calls (weaving)
         rerouting = true;
+        rerouteStreak++;
+        // Shortest that keeps sending you back → after a few reroutes in a row, drop the shortest insistence
+        // for THIS reroute and compute fastest instead (it reroutes forward cleanly). Fastest users are
+        // unaffected. Announce the switch once so it isn't silent (Doc 2026-07-01).
+        let prefOverride = null;
+        if (routePref === 'shortest' && rerouteStreak >= ESCALATE_REROUTES) {
+            prefOverride = 'fastest';
+            if (rerouteStreak === ESCALATE_REROUTES) toast('Kürzeste führt immer wieder zurück — wechsle auf schnellste Route.');
+        }
         // Depart in the actual travel direction (when we have a trustworthy heading) so the new route never
         // begins with a U-turn back onto the rejected line ("bitte wenden" unterbunden — Doc 2026-06-24).
-        computeRoute([here[0], here[1]], true, travelBrg).finally(() => { rerouting = false; });
+        computeRoute([here[0], here[1]], true, travelBrg, prefOverride).finally(() => { rerouting = false; });
     }
 
     // ---- Turn-by-turn guidance (spoken + on-screen banner) ----
