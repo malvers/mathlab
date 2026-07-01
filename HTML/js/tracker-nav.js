@@ -280,8 +280,9 @@ window.TrackerNav = function (ctx) {
     }
 
     // Photon fallback: run-together / mistyped names Nominatim's exact token match misses ("topcut" →
-    // "Top Cut"). Returns the NEAREST hit mapped to the Nominatim hit shape (lat/lon/name/address/
-    // display_name) so builtLabel + setDestination need no change. null when Photon has nothing either.
+    // "Top Cut"). Returns the best hit mapped to the Nominatim hit shape (lat/lon/name/address/display_name)
+    // so builtLabel + setDestination need no change. null when Photon has nothing either.
+    function normName(s) { return String(s || '').toLowerCase().replace(/[^a-z0-9äöüß]+/g, ''); }
     async function photonSearch(q, from) {
         let url = PHOTON + '?limit=10&lang=de&q=' + encodeURIComponent(q);
         if (from) url += '&lat=' + from[0] + '&lon=' + from[1];   // bias toward the current position
@@ -289,15 +290,28 @@ window.TrackerNav = function (ctx) {
         const data = await r.json();
         const feats = (data && data.features) || [];
         if (!feats.length) return null;
-        // Photon already location-biases, but rank by real distance so the nearest match wins (like Nominatim above).
-        let best = feats[0], bestD = Infinity;
-        if (from) for (const f of feats) {
-            const c = f.geometry && f.geometry.coordinates; if (!c) continue;
-            const cd = haversine(from, [c[1], c[0]]);
-            if (cd < bestD) { bestD = cd; best = f; }
+        // Rank by NAME relevance FIRST, proximity only as a tiebreaker. Photon's fuzzy match also returns
+        // loosely related fills; picking the geographically nearest of THOSE grabbed a nearby unrelated shop
+        // ("topcut" → the next-door "TOM-Automobile" instead of "Top Cut", Doc 2026-07-01). So score each hit
+        // by how many query words appear in its NAME (spacing-insensitive), keep the best-scoring, nearest wins
+        // among ties. If NO name matched (pure fuzzy fill), trust Photon's own #1, NOT the nearest.
+        const toks = q.toLowerCase().split(/\s+/).map(normName).filter((t) => t.length >= 3);
+        const cands = feats.map((f) => {
+            const co = f.geometry && f.geometry.coordinates; if (!co) return null;
+            const pr = f.properties || {};
+            const nameNorm = normName(pr.name);
+            let score = 0; for (const t of toks) if (nameNorm && nameNorm.indexOf(t) >= 0) score++;
+            return { c: co, p: pr, score };
+        }).filter(Boolean);
+        if (!cands.length) return null;
+        let bestScore = 0; for (const x of cands) if (x.score > bestScore) bestScore = x.score;
+        const pool = bestScore > 0 ? cands.filter((x) => x.score === bestScore) : [cands[0]];
+        let pick = pool[0], bestD = Infinity;
+        if (from && pool.length > 1) for (const x of pool) {
+            const dd = haversine(from, [x.c[1], x.c[0]]);
+            if (dd < bestD) { bestD = dd; pick = x; }
         }
-        const c = best.geometry && best.geometry.coordinates; if (!c) return null;
-        const p = best.properties || {};
+        const c = pick.c, p = pick.p;
         return {
             lat: c[1], lon: c[0], name: p.name || '',
             address: {
