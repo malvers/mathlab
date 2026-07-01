@@ -18,6 +18,7 @@ window.TrackerNav = function (ctx) {
     const apiUrl = ctx.apiUrl, apiKey = ctx.apiKey;   // Supabase base + anon key → reroute proxy (ORS)
 
     const NOMINATIM = 'https://nominatim.openstreetmap.org/search';
+    const PHOTON = 'https://photon.komoot.io/api/';  // keyless, CORS; typo/spacing-tolerant geocoder fallback
     // Wegetyp (Doc 2026-06-17): Straße (car) or Laufen (foot). FOSSGIS hosts keyless OSRM instances per
     // profile with the SAME API (geometry + maneuvers), so only the base URL changes. Foot routing uses
     // footpaths/pedestrian zones a car route can't; the maneuver→German mapping below is profile-agnostic.
@@ -264,7 +265,10 @@ window.TrackerNav = function (ctx) {
         }
         const r = await fetch(url, { headers: { Accept: 'application/json' } });
         const data = await r.json();
-        if (!data || !data.length) return null;
+        // Nominatim indexes a POI name as separate tokens ("Top" "Cut"), so a run-together query ("topcut")
+        // matches NOTHING. When that happens, fall back to Photon, which IS spacing/typo tolerant and finds
+        // "Top Cut" for "topcut" (Doc 2026-07-01). Mapped to the same hit shape → callers/builtLabel unchanged.
+        if (!data || !data.length) { try { return await photonSearch(q, from); } catch (e) { return null; } }
         if (!from) return data[0];   // no position → fall back to importance ranking
         // Pick the candidate closest to the current position (great-circle), not the most prominent one.
         let best = data[0], bestD = Infinity;
@@ -273,6 +277,35 @@ window.TrackerNav = function (ctx) {
             if (cd < bestD) { bestD = cd; best = c; }
         }
         return best;
+    }
+
+    // Photon fallback: run-together / mistyped names Nominatim's exact token match misses ("topcut" →
+    // "Top Cut"). Returns the NEAREST hit mapped to the Nominatim hit shape (lat/lon/name/address/
+    // display_name) so builtLabel + setDestination need no change. null when Photon has nothing either.
+    async function photonSearch(q, from) {
+        let url = PHOTON + '?limit=10&lang=de&q=' + encodeURIComponent(q);
+        if (from) url += '&lat=' + from[0] + '&lon=' + from[1];   // bias toward the current position
+        const r = await fetch(url, { headers: { Accept: 'application/json' } });
+        const data = await r.json();
+        const feats = (data && data.features) || [];
+        if (!feats.length) return null;
+        // Photon already location-biases, but rank by real distance so the nearest match wins (like Nominatim above).
+        let best = feats[0], bestD = Infinity;
+        if (from) for (const f of feats) {
+            const c = f.geometry && f.geometry.coordinates; if (!c) continue;
+            const cd = haversine(from, [c[1], c[0]]);
+            if (cd < bestD) { bestD = cd; best = f; }
+        }
+        const c = best.geometry && best.geometry.coordinates; if (!c) return null;
+        const p = best.properties || {};
+        return {
+            lat: c[1], lon: c[0], name: p.name || '',
+            address: {
+                road: p.street || '', house_number: p.housenumber || '', postcode: p.postcode || '',
+                city: p.city || p.town || p.village || p.county || '', suburb: p.district || '',
+            },
+            display_name: [p.name, p.street, p.postcode, p.city].filter(Boolean).join(', '),
+        };
     }
 
     // ---- Reverse geocoding: current coords → a human label (or null). Keyless Nominatim (rule 18). ----
