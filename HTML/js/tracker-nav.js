@@ -84,6 +84,9 @@ window.TrackerNav = function (ctx) {
         walk: { lead: 4, nearMin: 12, nearMax: 40,  far: 60  }, // Laufen
         hike: { lead: 4, nearMin: 12, nearMax: 40,  far: 60  }, // Wandern
     };
+    const PASS_MARGIN_M = 15;      // once you're this far PAST a turn's closest approach, the banner flips to the
+                                   // NEXT turn — so it can't keep counting UP ("In 20m… 30m… 40m abbiegen") on a
+                                   // turn you've already taken (Doc 2026-07-01).
     let navSpeedKmh = 0;            // last speed (km/h), fed by the host each fix → drives the speed-scaled lead
     function guideCfg() { return GUIDE_BY_MODE[routeType] || GUIDE_BY_MODE.car; }
     function nearTriggerM() {       // "Jetzt …" distance: time-lead, clamped to the current mode's window
@@ -1253,9 +1256,16 @@ window.TrackerNav = function (ctx) {
         // one, so screen and voice disagree (Doc 2026-06-26). Hard cap at 2× the overshoot so a lagging/blocked
         // voice can't freeze the banner on a turn you already took.
         const g = guideCfg();
-        if (mClosest <= g.nearMax && d > mClosest + g.nearMin) {
+        // You've PASSED the turn once you actually reached it (came within the near window) AND are now
+        // moving away from its point by a small margin → flip the banner to the NEXT turn straight away.
+        // The old code waited a full nearMin (40 m on the road) before advancing, so the banner kept showing
+        // the turn you already took with a GROWING distance — "In 20m… 30m… 40m abbiegen" (Doc 2026-07-01).
+        const reached = mClosest <= nearTriggerM() + 10;  // genuinely arrived at the turn (near window + slack)
+        if (reached && d > mClosest + PASS_MARGIN_M) {
             const speechIdle = !navSpeaking && navSpeakQueue.length === 0;
-            if (speechIdle || d > mClosest + 2 * g.nearMin) advanceManeuver();
+            if (speechIdle || d > mClosest + g.nearMin) advanceManeuver();  // hard cap so a lagging voice can't freeze it
+        } else if (mClosest <= g.nearMax && d > mClosest + 2 * g.nearMin) {
+            advanceManeuver();  // safety: clearly overshot without a clean "reached" (maneuver point offset / GPS gap)
         }
     }
 
