@@ -2117,6 +2117,25 @@ body.ui-idle #nav-banner {
 .nav-trip { font-family: system-ui, sans-serif; font-weight: 500; font-size: clamp(0.72rem, 3vw, 0.86rem); opacity: 0.92; padding-left: 40px; }
 .nav-trip[hidden] { display: none; }
 
+/* The actual destination as a heading on top of the banner (Doc 2026-07-01). One line, ellipsis on overflow. */
+.nav-dest-head {
+    font-family: 'Orbitron', sans-serif; font-weight: 700;
+    font-size: clamp(0.9rem, 3.6vw, 1.15rem); line-height: 1.15;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    padding-bottom: 4px; border-bottom: 1px solid rgba(255, 255, 255, 0.22);
+}
+.nav-dest-head[hidden] { display: none; }
+#nav-banner.route-car .nav-dest-head { border-bottom-color: rgba(8, 20, 42, 0.25); }
+
+/* Instruments hidden (body.ui-idle) → more screen free, so grow the banner AND its text so it reads at a
+   glance while driving (Doc 2026-07-01). */
+body.ui-idle #nav-banner { width: 92vw; max-width: 92vw; padding: 14px 20px; gap: 6px; }
+body.ui-idle #nav-banner .nav-dest-head { font-size: clamp(1.15rem, 5vw, 1.7rem); padding-bottom: 6px; }
+body.ui-idle #nav-banner .nav-arrow { width: 40px; height: 40px; }
+body.ui-idle #nav-banner .nav-dist { font-size: clamp(1.25rem, 5.5vw, 1.8rem); }
+body.ui-idle #nav-banner .nav-instr { font-size: clamp(1.1rem, 5vw, 1.55rem); }
+body.ui-idle #nav-banner .nav-trip { font-size: clamp(0.95rem, 4vw, 1.2rem); padding-left: 50px; }
+
 /* Speed-limit sign — classic round white sign with a red ring; left-edge stack, BELOW the hamburger
    (Nordpfeil · HH · Speed). Turns solid red when the smoothed speed is over the limit (JS toggles .over). */
 #speed-sign {
