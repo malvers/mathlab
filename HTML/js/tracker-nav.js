@@ -249,6 +249,13 @@ window.TrackerNav = function (ctx) {
         return base + tail;
     }
 
+    // "arbeite …" indicator (bouncing dots) in the search row while a geocode runs — the Overpass
+    // nearest-branch lookup can take a few seconds, so give visible feedback (Doc 2026-07-01).
+    function setSearching(on) {
+        const row = $('nav-dest') && $('nav-dest').closest('.nav-dest-row');
+        if (row) row.classList.toggle('searching', !!on);
+    }
+
     // ---- Geocoding: a free-text line → the first Nominatim hit (or null). Shared by the "Ziel setzen"
     // button, the Enter key, and the live-as-you-type lookup. Nominatim parses "Ort, Straße, Nr." itself.
     async function geocode(q) {
@@ -429,8 +436,10 @@ window.TrackerNav = function (ctx) {
         if (!q) { toast('Bitte ein Ziel eingeben.'); return; }
         toast('Suche Adresse …');
         let hit;
+        setSearching(true);
         try { hit = await geocode(q); }
         catch (e) { toast('Adress-Suche fehlgeschlagen (offline?).'); return; }
+        finally { setSearching(false); }
         if (!hit) { toast('Adresse nicht gefunden.'); return; }
         applyDestination([parseFloat(hit.lat), parseFloat(hit.lon)], builtLabel(hit) || hit.display_name || q);
     }
@@ -1474,8 +1483,10 @@ window.TrackerNav = function (ctx) {
             if (!q) { toast('Bitte ein Ziel eingeben.'); return; }
             toast('Suche Adresse …');
             let hit;
+            setSearching(true);
             try { hit = await geocode(q); }
             catch (e) { toast('Adress-Suche fehlgeschlagen (offline?).'); return; }
+            finally { setSearching(false); }
             if (!hit) { toast('Adresse nicht gefunden.'); return; }
             destLatLng = [parseFloat(hit.lat), parseFloat(hit.lon)];
             destLabel = builtLabel(hit) || hit.display_name || q;
@@ -1515,6 +1526,8 @@ window.TrackerNav = function (ctx) {
         }
         async function run(q) {
             const my = ++gen;
+            setSearching(true);
+            try {
             let hit;
             try { hit = await geocode(q); } catch (e) { return; }  // offline → stay quiet, button still works
             if (my !== gen || ($('nav-dest').value || '').trim() !== q) return; // superseded by a newer keystroke
@@ -1526,6 +1539,7 @@ window.TrackerNav = function (ctx) {
             foundFor = q;
             showFound(destLabel);
             previewStart();                                        // green → show the two informed START buttons
+            } finally { if (my === gen) setSearching(false); }     // only the LATEST lookup clears the dots
         }
         input.addEventListener('input', () => {
             const q = (input.value || '').trim();

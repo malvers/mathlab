@@ -1413,11 +1413,38 @@ body.ui-idle #trk-controls {
     gap: 8px;
     align-items: stretch;
     margin-bottom: 12px;
+    position: relative;   /* anchor for the "searching" dots overlaid on the input's right edge */
 }
 
 .nav-dest-row .sync-field {
     flex: 1;
     margin-bottom: 0;
+}
+
+/* "arbeite …" search indicator: three bouncing dots (VGP typing-style) at the input's right edge while a
+   geocode runs. Semantically its OWN cue (the mic wave means "listening"). λ-orange accent = active/working
+   (not φ-green, which the field uses for "found"). Overlaid (absolute) so it never shifts the layout. */
+.nav-search-dots {
+    position: absolute;
+    right: 60px;            /* just left of the 50px mic button + gap */
+    top: 50%;
+    transform: translateY(-50%);
+    display: none;
+    gap: 5px;
+    align-items: center;
+    pointer-events: none;
+}
+.nav-dest-row.searching .nav-search-dots { display: inline-flex; }
+.nav-search-dots i {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: rgb(245, 194, 66);   /* λ orange */
+    animation: navSearchBounce 1.3s infinite ease-in-out;
+}
+.nav-search-dots i:nth-child(2) { animation-delay: .18s; }
+.nav-search-dots i:nth-child(3) { animation-delay: .36s; }
+@keyframes navSearchBounce {
+    0%, 70%, 100% { transform: translateY(0);    opacity: .45; }
+    35%           { transform: translateY(-3px); opacity: 1; }
 }
 
 .nav-mic-btn {
