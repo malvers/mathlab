@@ -311,9 +311,15 @@ window.TrackerNav = function (ctx) {
         const term = (q || '').replace(/[^\p{L}\p{N} ]+/gu, ' ').trim();
         if (!term || typeof window.queryOverpass !== 'function') return null;
         for (const R of [25000, 90000]) {
+            // POI-focused: match the BRAND tag (inherently only on POIs → light + exact, catches
+            // "Aldi Nord/Süd" whose name is just "Aldi") and a name match RESTRICTED to shops/amenities.
+            // The old "[name~term] over ALL nwr" scanned every node/way/relation in the ring → too heavy
+            // (timed out → override silently failed, so "Aldi" fell back to Nominatim's 13 km HQ) and noisy
+            // (matched "Regenrückhaltebecken Aldi", ways named after the brand). Doc 2026-07-01.
             const ql = '[out:json][timeout:12];('
-                + 'nwr(around:' + R + ',' + from[0] + ',' + from[1] + ')[name~"' + term + '",i];'
                 + 'nwr(around:' + R + ',' + from[0] + ',' + from[1] + ')[brand~"' + term + '",i];'
+                + 'nwr(around:' + R + ',' + from[0] + ',' + from[1] + ')[name~"' + term + '",i][shop];'
+                + 'nwr(around:' + R + ',' + from[0] + ',' + from[1] + ')[name~"' + term + '",i][amenity];'
                 + ');out center 60;';
             let j = null; try { j = await window.queryOverpass(ql, { timeout: 14000 }); } catch (e) { j = null; }
             const els = (j && j.elements) || [];
