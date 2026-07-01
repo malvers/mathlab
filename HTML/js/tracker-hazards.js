@@ -30,20 +30,22 @@ window.TrackerHazards = function (ctx) {
 
     // Clean inline SVG sign faces (crisper than emoji at pin size; brand red rgb(176,36,24), dark blue
     // rgb(14,36,78) instead of black). Sized 28 px; the pin adds a drop-shadow for contrast on the map.
-    // Bahnübergang = the Andreaskreuz (Zeichen 201): a red-tipped white saltire on a white plate; STOP =
-    // red octagon; Vorfahrt = inverted triangle; Zebra = blue Fußgängerüberweg plate with white stripes.
+    // Bahnübergang = the Andreaskreuz (Zeichen 201): a FREE-STANDING, Y-stretched (taller-than-wide) red-and-
+    // white saltire — no plate, no background (Doc). STOP = red octagon; Vorfahrt = inverted triangle;
+    // Zebra = blue Fußgängerüberweg plate with white stripes.
     const SVG_ANDREAS =
         '<svg viewBox="0 0 40 40" width="28" height="28" aria-label="Bahnübergang (Andreaskreuz)">'
-        + '<rect x="2.5" y="2.5" width="35" height="35" rx="7" fill="#fff" stroke="rgb(176,36,24)" stroke-width="2.5"/>'
-        // Full-length red bars (round tips), then a white centre on top → the X reads red at the four ends
-        // and white where the bars cross, like the real Andreaskreuz (white with red tips).
-        + '<g stroke-width="5.5" stroke-linecap="round">'
-        + '<line x1="9" y1="9" x2="31" y2="31" stroke="rgb(176,36,24)"/>'
-        + '<line x1="31" y1="9" x2="9" y2="31" stroke="rgb(176,36,24)"/>'
+        // Full-length red bars + a white centre → red tips, white where they cross. A thin dark-blue outline
+        // keeps the frameless/transparent X legible on any map background.
+        + '<g stroke-linecap="round">'
+        + '<line x1="10" y1="4" x2="30" y2="36" stroke="rgb(14,36,78)" stroke-width="7.5"/>'
+        + '<line x1="30" y1="4" x2="10" y2="36" stroke="rgb(14,36,78)" stroke-width="7.5"/>'
+        + '<line x1="10" y1="4" x2="30" y2="36" stroke="rgb(176,36,24)" stroke-width="5.5"/>'
+        + '<line x1="30" y1="4" x2="10" y2="36" stroke="rgb(176,36,24)" stroke-width="5.5"/>'
         + '</g>'
         + '<g stroke-width="5.5">'
-        + '<line x1="13" y1="13" x2="27" y2="27" stroke="#fff"/>'
-        + '<line x1="27" y1="13" x2="13" y2="27" stroke="#fff"/>'
+        + '<line x1="15.5" y1="13" x2="24.5" y2="27" stroke="#fff"/>'
+        + '<line x1="24.5" y1="13" x2="15.5" y2="27" stroke="#fff"/>'
         + '</g></svg>';
     const SVG_STOP =
         '<svg viewBox="0 0 40 40" width="28" height="28" aria-label="Stopp">'
