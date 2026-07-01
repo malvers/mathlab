@@ -325,18 +325,19 @@ window.TrackerNav = function (ctx) {
     async function nearestPoi(q, from) {
         const term = (q || '').replace(/[^\p{L}\p{N} ]+/gu, ' ').trim();
         if (!term || typeof window.queryOverpass !== 'function') return null;
-        for (const R of [25000, 90000]) {
-            // POI-focused: match the BRAND tag (inherently only on POIs → light + exact, catches
-            // "Aldi Nord/Süd" whose name is just "Aldi") and a name match RESTRICTED to shops/amenities.
-            // The old "[name~term] over ALL nwr" scanned every node/way/relation in the ring → too heavy
-            // (timed out → override silently failed, so "Aldi" fell back to Nominatim's 13 km HQ) and noisy
-            // (matched "Regenrückhaltebecken Aldi", ways named after the brand). Doc 2026-07-01.
-            const ql = '[out:json][timeout:12];('
-                + 'nwr(around:' + R + ',' + from[0] + ',' + from[1] + ')[brand~"' + term + '",i];'
-                + 'nwr(around:' + R + ',' + from[0] + ',' + from[1] + ')[name~"' + term + '",i][shop];'
-                + 'nwr(around:' + R + ',' + from[0] + ',' + from[1] + ')[name~"' + term + '",i][amenity];'
-                + ');out center 60;';
-            let j = null; try { j = await window.queryOverpass(ql, { timeout: 14000 }); } catch (e) { j = null; }
+        for (const R of [12000, 40000]) {
+            // POI-focused + LIGHT (Doc 2026-07-01, search was 20-30 s): match the BRAND tag (inherently only
+            // on POIs → exact, catches "Aldi Nord/Süd" whose name is just "Aldi") and a name match RESTRICTED
+            // to shops/amenities. Use `nw` (node+way) — dropping RELATIONS, the heavy part — and a 12 km ring
+            // (a branch is always near). Measured: nwr/25 km ≈ 4 s → nw/12 km ≈ 2 s, so the proxy answers
+            // before its timeout and the slow direct-mirror fallback never kicks in. (The old "[name~] over
+            // all nwr" also matched noise like "Regenrückhaltebecken Aldi" and timed out.)
+            const ql = '[out:json][timeout:10];('
+                + 'nw(around:' + R + ',' + from[0] + ',' + from[1] + ')[brand~"' + term + '",i];'
+                + 'nw(around:' + R + ',' + from[0] + ',' + from[1] + ')[name~"' + term + '",i][shop];'
+                + 'nw(around:' + R + ',' + from[0] + ',' + from[1] + ')[name~"' + term + '",i][amenity];'
+                + ');out center 40;';
+            let j = null; try { j = await window.queryOverpass(ql, { timeout: 11000 }); } catch (e) { j = null; }
             const els = (j && j.elements) || [];
             let best = null, bd = Infinity;
             for (const e of els) {
@@ -1517,7 +1518,7 @@ window.TrackerNav = function (ctx) {
         const input = $('nav-dest'); if (!input) return;
         const hint = $('nav-found-hint');
         const nameEl = hint ? hint.querySelector('.nav-found-name') : null;
-        const MIN_LEN = 4, DEBOUNCE_MS = 650;
+        const MIN_LEN = 2, DEBOUNCE_MS = 650;   // 2 → short brand names like "dm"/"Ja" trigger the live search too
         let timer = null, gen = 0, foundFor = '';
 
         function showFound(label) {
