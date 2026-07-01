@@ -84,9 +84,9 @@ window.TrackerNav = function (ctx) {
         walk: { lead: 4, nearMin: 12, nearMax: 40,  far: 60  }, // Laufen
         hike: { lead: 4, nearMin: 12, nearMax: 40,  far: 60  }, // Wandern
     };
-    const PASS_MARGIN_M = 15;      // once you're this far PAST a turn's closest approach, the banner flips to the
-                                   // NEXT turn — so it can't keep counting UP ("In 20m… 30m… 40m abbiegen") on a
-                                   // turn you've already taken (Doc 2026-07-01).
+    const PASS_EPS_M = 3;          // advance to the next turn the moment route progress reaches (within this) a
+                                   // turn's point — so the banner counts DOWN to it and flips, never counting UP
+                                   // on a turn already taken ("In 10m… 20m abbiegen", Doc 2026-07-01).
     let navSpeedKmh = 0;            // last speed (km/h), fed by the host each fix → drives the speed-scaled lead
     function guideCfg() { return GUIDE_BY_MODE[routeType] || GUIDE_BY_MODE.car; }
     function nearTriggerM() {       // "Jetzt …" distance: time-lead, clamped to the current mode's window
@@ -113,7 +113,9 @@ window.TrackerNav = function (ctx) {
     let travelBrg = null;   // current travel bearing (deg, 0=N) from GPS movement → departure-direction constraint on reroute
     let offRouteCount = 0;  // consecutive off-route fixes → hysteresis against reroute flapping
     let navGen = 0;         // bumped whenever the route is cleared/replaced → invalidates in-flight fetches
-    let maneuvers = null;   // [{loc:[lat,lng], type, modifier, exit, name, text}] for spoken guidance
+    let maneuvers = null;   // [{loc:[lat,lng], type, modifier, exit, name, text, routeDist}] for spoken guidance
+    let routeCum = null;    // cumulative metres to each routeLatLngs vertex → maneuver advance by real route
+                            // PROGRESS (you passed the point), not straight-line overshoot (which counted UP)
     let mIdx = 0;           // index of the next maneuver to announce
     let annFar = false;     // pre-warning ("In … Metern") already spoken for the current maneuver
     let annNear = false;    // "Jetzt …" already spoken — said at ~40 m, but we DON'T advance until passed
@@ -554,7 +556,7 @@ window.TrackerNav = function (ctx) {
         keepAlive.stop();   // navigation over → release the audio keep-alive (battery / audio focus)
         if (destMarker) { map.removeLayer(destMarker); destMarker = null; }
         destLatLng = null; destLabel = '';
-        maneuvers = null; mIdx = 0; annFar = false; annNear = false; mClosest = Infinity; freshReroute = false;
+        maneuvers = null; routeCum = null; mIdx = 0; annFar = false; annNear = false; mClosest = Infinity; freshReroute = false;
         routeTotalDist = 0; routeTotalDur = 0; tripTotalM = 0;
         hideBanner();
         stopSpeech();
@@ -715,6 +717,23 @@ window.TrackerNav = function (ctx) {
         return { bi, bt };
     }
 
+    // Cumulative metres from the route start to each routeLatLngs vertex → lets us express any point as a
+    // single "distance travelled along the route" scalar (monotonic), the basis for progress-based guidance.
+    function buildRouteCum() {
+        if (!routeLatLngs || routeLatLngs.length < 2) { routeCum = null; return; }
+        const cum = [0];
+        for (let i = 1; i < routeLatLngs.length; i++) cum[i] = cum[i - 1] + haversine(routeLatLngs[i - 1], routeLatLngs[i]);
+        routeCum = cum;
+    }
+    // A point's distance ALONG the route (metres from the start), via its nearest segment + projection.
+    // Monotonically increases as you drive → "have I passed this maneuver?" is just a scalar compare, immune
+    // to the straight-line-to-a-fixed-point growth that made the banner count UP after a turn (Doc 2026-07-01).
+    function alongRoute(pt) {
+        if (!routeCum) return null;
+        const { bi, bt } = nearestSeg(pt);
+        return routeCum[bi - 1] + bt * (routeCum[bi] - routeCum[bi - 1]);
+    }
+
     // Redraw the route so only the part AHEAD of the current position stays blue; the already-driven
     // stretch is dropped, leaving just the recorded speed track there (Doc 2026-06-14, note #1).
     function redrawAhead(here) {
@@ -863,6 +882,11 @@ window.TrackerNav = function (ctx) {
                 exit: s.maneuver.exit, name: s.name, text: phrase(s.maneuver, s.name), detail: detailOf(s),
             });
         }));
+        // Map each maneuver onto the route as an along-route distance → guidance advances by real PROGRESS
+        // (you passed the point), so the banner counts DOWN to the next turn and never back UP on the one
+        // you already took (Doc 2026-07-01).
+        buildRouteCum();
+        maneuvers.forEach((m) => { m.routeDist = alongRoute(m.loc); });
         mIdx = 0;
         while (mIdx < maneuvers.length && maneuvers[mIdx].type === 'depart') mIdx++; // skip the leading "depart"
         annFar = false; annNear = false; mClosest = Infinity;
@@ -1222,8 +1246,20 @@ window.TrackerNav = function (ctx) {
 
     function guidanceUpdate(here) {
         if (!maneuvers || mIdx >= maneuvers.length) return;
+        // Advance past every (non-arrival) maneuver we've already driven PAST on the route. This is what stops
+        // the banner counting UP: the instant your route progress reaches a turn's point it flips to the NEXT
+        // turn, instead of lingering on the passed turn with a growing straight-line distance (Doc 2026-07-01).
+        // 'arrive' is left for its own block below (it must announce + fire onArrive, not be silently skipped).
+        const prog = alongRoute(here);
+        if (prog != null) {
+            while (mIdx < maneuvers.length && maneuvers[mIdx].type !== 'arrive'
+                && maneuvers[mIdx].routeDist != null && prog >= maneuvers[mIdx].routeDist - PASS_EPS_M) advanceManeuver();
+            if (mIdx >= maneuvers.length) return;
+        }
         const m = maneuvers[mIdx];
-        const d = haversine(here, m.loc);
+        // Distance to the turn: real along-route remaining (counts DOWN, never back up) when the maneuver could
+        // be mapped onto the route; straight-line only as a fallback (no route geometry).
+        const d = (prog != null && m.routeDist != null) ? Math.max(0, m.routeDist - prog) : haversine(here, m.loc);
         if (d < mClosest) mClosest = d;
         showBanner(m, d, tripLine(here));
         if (freshReroute) {
@@ -1247,26 +1283,10 @@ window.TrackerNav = function (ctx) {
         }
         // Pre-warning at `far` and "Jetzt …" at `nearTrigger` — BOTH per mode (car/bike/foot, see GUIDE_BY_MODE)
         // so foot doesn't get a car's 300 m / 40 m timing. "Jetzt …" is URGENT (jumps the queue so it can't land
-        // after the turn). KEEP this maneuver on the banner until you've actually PASSED it (overshoot), so it
-        // doesn't jump to the NEXT turn while you're still taking this one (Doc 2026-06-24: "viel zu schnell…").
+        // after the turn). The banner itself flips via the progress-based advance at the TOP of this function —
+        // no straight-line overshoot logic here any more (that was the source of the count-up, Doc 2026-07-01).
         if (d <= nearTriggerM() && !annNear) { annNear = true; speak('Jetzt ' + m.text, true); }
         else if (d <= farTriggerM() && !annFar) { annFar = true; speak('In ' + announceDist(d) + ' Metern ' + m.text + '.'); }
-        // Advance the banner to the NEXT turn only once you've PASSED this one (mode-scaled overshoot) AND the
-        // voice for it has finished — else the banner jumps to the next maneuver while you still HEAR the current
-        // one, so screen and voice disagree (Doc 2026-06-26). Hard cap at 2× the overshoot so a lagging/blocked
-        // voice can't freeze the banner on a turn you already took.
-        const g = guideCfg();
-        // You've PASSED the turn once you actually reached it (came within the near window) AND are now
-        // moving away from its point by a small margin → flip the banner to the NEXT turn straight away.
-        // The old code waited a full nearMin (40 m on the road) before advancing, so the banner kept showing
-        // the turn you already took with a GROWING distance — "In 20m… 30m… 40m abbiegen" (Doc 2026-07-01).
-        const reached = mClosest <= nearTriggerM() + 10;  // genuinely arrived at the turn (near window + slack)
-        if (reached && d > mClosest + PASS_MARGIN_M) {
-            const speechIdle = !navSpeaking && navSpeakQueue.length === 0;
-            if (speechIdle || d > mClosest + g.nearMin) advanceManeuver();  // hard cap so a lagging voice can't freeze it
-        } else if (mClosest <= g.nearMax && d > mClosest + 2 * g.nearMin) {
-            advanceManeuver();  // safety: clearly overshot without a clean "reached" (maneuver point offset / GPS gap)
-        }
     }
 
     // Reset the live "found" feedback (green line + name hint). Called when the dialog opens, the route is
