@@ -234,21 +234,38 @@ window.TrackerSpeedLimit = function (ctx) {
     // live sign at "?" almost always (most German roads carry ONLY this generic hint), so genericDefault()
     // below re-surfaces them as an explicitly UNCONFIRMED value (dimmed, dashed ring) — honest, not
     // confidently-wrong (Doc 2026-06-29, OTWA's idea).
-    const GENERIC_DEFAULT = /^DE:(urban|rural|motorway)$/i;
+    const GENERIC_DEFAULT = /^[A-Z]{2}:(urban|rural|motorway)$/i; // any country's generic urban/rural/motorway
     function implicitLimit(v) {
         if (!v || GENERIC_DEFAULT.test(v)) return null; // generic default → not a confirmed limit
         return parseMax(v);                              // specific zone (DE:30, living_street, …) → trust
     }
 
-    // The generic legal default for a drivable way that carries ONLY the implicit zone hint (no explicit
-    // maxspeed, no specific zone): DE:urban→50, DE:rural→100, DE:motorway→'none'. number | 'none' | null.
-    // Shown UNCONFIRMED so it can't masquerade as a mapped sign; a confirmed wayLimit() always takes
-    // precedence. null when there isn't even a generic hint (truly unknown → "?").
-    const DE_GENERIC = { 'DE:urban': 50, 'DE:rural': 100, 'DE:motorway': 'none' };
+    // Per-country generic legal defaults (urban / rural / motorway) for a drivable way that carries ONLY the
+    // implicit zone hint (maxspeed:type=XX:urban …), no explicit maxspeed, no specific zone. The COUNTRY IS
+    // IN THE TAG (e.g. "ES:urban") — no geolocation needed. Values curated from westnordost's
+    // osm-legal-default-speeds data (Doc 2026-07-01, "the world is not enough"); ADDITIVE — DE is unchanged,
+    // the rest is new. Shown UNCONFIRMED (dimmed/dashed) so it never masquerades as a mapped sign; a
+    // confirmed wayLimit() always wins. Extend the list as needed. 'none' = no general limit (Autobahn).
+    // (Nuance the flat table can't hold, e.g. ES urban single-lane = 30 vs 50 multi-lane, is left to a real
+    // signed limit / the lib later; 50 is the safe urban baseline.)
+    const COUNTRY_DEFAULTS = {
+        'DE:urban': 50, 'DE:rural': 100, 'DE:motorway': 'none',
+        'AT:urban': 50, 'AT:rural': 100, 'AT:motorway': 130,
+        'CH:urban': 50, 'CH:rural': 80,  'CH:motorway': 120,
+        'ES:urban': 50, 'ES:rural': 90,  'ES:motorway': 120,
+        'FR:urban': 50, 'FR:rural': 80,  'FR:motorway': 130,
+        'IT:urban': 50, 'IT:rural': 90,  'IT:motorway': 130,
+        'NL:urban': 50, 'NL:rural': 80,  'NL:motorway': 100,
+        'BE:urban': 50, 'BE:rural': 90,  'BE:motorway': 120,
+        'LU:urban': 50, 'LU:rural': 90,  'LU:motorway': 130,
+        'DK:urban': 50, 'DK:rural': 80,  'DK:motorway': 130,
+        'PL:urban': 50, 'PL:rural': 90,  'PL:motorway': 140,
+        'CZ:urban': 50, 'CZ:rural': 90,  'CZ:motorway': 130,
+    };
     function genericDefault(tags) {
         if (!tags || !DRIVE_HW.has(tags.highway)) return null;
         const t = tags['maxspeed:type'] || tags['zone:maxspeed'] || tags['source:maxspeed'];
-        return (t && Object.prototype.hasOwnProperty.call(DE_GENERIC, t)) ? DE_GENERIC[t] : null;
+        return (t && Object.prototype.hasOwnProperty.call(COUNTRY_DEFAULTS, t)) ? COUNTRY_DEFAULTS[t] : null;
     }
 
     // A way's limit. Trust only what's actually SIGNED: an explicit `maxspeed`, or a SPECIFIC implicit
