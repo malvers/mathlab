@@ -105,10 +105,15 @@ window.TrackerHazards = function (ctx) {
         if (tags.highway === 'stop') return 'stop';
         if (tags.highway === 'give_way') return 'give_way';
         if (tags.highway === 'traffic_signals') return 'traffic_signals';
-        // ONLY a real Zebrastreifen (Zeichen 293): crossing_ref / crossing:markings / crossing = zebra.
-        // NOT the generic 'marked'/'uncontrolled' crossings — those are every minor pedestrian crossing (a
-        // whole parking lot full near Elbepark, Doc 2026-06-30) and carpet-bombed the map.
         if (tags.highway === 'crossing') {
+            // A SIGNALISED crossing (Fußgänger-/Bettelampel) is an Ampel too — in DE most town traffic lights
+            // are tagged this way (highway=crossing + crossing=traffic_signals), NOT as a standalone
+            // highway=traffic_signals node, so without this the map showed no Ampel where there clearly is one
+            // (Doc 2026-07-01, Radebeul).
+            if (/traffic_signals/i.test(tags.crossing || '') || /traffic_signals/i.test(tags['crossing:signals'] || '')) return 'traffic_signals';
+            // ONLY a real Zebrastreifen (Zeichen 293): crossing_ref / crossing:markings / crossing = zebra.
+            // NOT the generic 'marked'/'uncontrolled' crossings — those are every minor pedestrian crossing (a
+            // whole parking lot full near Elbepark, Doc 2026-06-30) and carpet-bombed the map.
             const z = (tags.crossing_ref || '') + '|' + (tags['crossing:markings'] || '') + '|' + (tags.crossing || '');
             if (/\bzebra\b/i.test(z)) return 'zebra';
         }
@@ -143,6 +148,7 @@ window.TrackerHazards = function (ctx) {
             + 'node(around:' + r + ',' + la + ',' + ln + ')[highway=stop];'
             + 'node(around:' + r + ',' + la + ',' + ln + ')[highway=give_way];'
             + 'node(around:' + r + ',' + la + ',' + ln + ')[highway=traffic_signals];'
+            + 'node(around:' + r + ',' + la + ',' + ln + ')[highway=crossing][crossing=traffic_signals];'
             + 'node(around:' + r + ',' + la + ',' + ln + ')[highway=crossing][crossing_ref=zebra];'
             + 'node(around:' + r + ',' + la + ',' + ln + ')[highway=crossing]["crossing:markings"=zebra];'
             + 'node(around:' + r + ',' + la + ',' + ln + ')[highway=crossing][crossing=zebra];'
@@ -158,7 +164,12 @@ window.TrackerHazards = function (ctx) {
             }
             nodes = next;
             drawPins();
-            dbg('Hazards: ' + nodes.length + ' im Umkreis ' + r + ' m');
+            // Per-type tally so Doc can SEE in the debug window exactly how many Ampeln (etc.) came back —
+            // "Ampel:0" vs "Ampel:5" tells data-gap from render-bug apart at a glance (Doc 2026-07-01).
+            const by = {};
+            for (const n of nodes) by[n.type] = (by[n.type] || 0) + 1;
+            const tally = Object.keys(TYPES).map((t) => TYPES[t].label + ':' + (by[t] || 0)).join(' · ');
+            dbg('Hazards ' + nodes.length + ' im Umkreis ' + r + ' m → ' + tally);
         } catch (e) { /* keep last set */ }
         finally { fetching = false; }
     }
