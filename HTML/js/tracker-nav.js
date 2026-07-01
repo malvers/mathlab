@@ -995,7 +995,10 @@ window.TrackerNav = function (ctx) {
     // gesture → autoplay ok; sticky activation survives the awaited route fetch) and on every speak() as a
     // belt-and-braces; stopped on clearRoute so it never drains battery / holds audio focus while idle.
     const keepAlive = (function () {
-        let el = null, on = false, silentUrl = '';
+        let el = null, on = false, silentUrl = '', pending = null;
+        const DUCK_LEAD_MS = 280;   // unmute (→ duck the radio) this long BEFORE the clip, so Android's audio-
+        //                             focus/ducking transition lands in SILENCE — otherwise it swallows the first
+        //                             word ("Du hast das Ziel erreicht" → "das Ziel erreicht", Pixel, Doc 2026-07-01)
         // Build a tiny silent WAV (1 s, 8 kHz, 16-bit mono) at runtime — no external asset, no big base64 blob.
         function silentWavUrl() {
             const sr = 8000, n = sr, bytes = 44 + n * 2;
@@ -1054,15 +1057,28 @@ window.TrackerNav = function (ctx) {
             const a = ensure();
             on = true;
             let done = false;
-            const finish = () => { if (done) return; done = true; toSilence(); if (onended) onended(); };
-            a.onended = finish; a.onerror = finish;
-            a.loop = false; a.muted = false; a.src = dataUrl;  // unmute → ducks the radio ONLY while the spoken clip plays
+            const finish = () => { if (done) return; done = true; if (pending) { clearTimeout(pending); pending = null; } toSilence(); if (onended) onended(); };
+            // Phase 1: claim audio focus (unmute) while STILL on the silent loop → the radio ducks NOW, during
+            // silence, so the transition can't eat the clip's first word.
+            a.onended = null; a.onerror = null; a.loop = true;
+            if (a.src !== silentUrl) a.src = silentUrl;
+            a.muted = false;
             session('playing');
-            a.play().catch(() => finish());
+            a.play().catch(() => { });
+            // Phase 2: focus already held → swap in the real clip, which now starts cleanly.
+            if (pending) clearTimeout(pending);
+            pending = setTimeout(() => {
+                pending = null;
+                if (done) return;
+                a.onended = finish; a.onerror = finish;
+                a.loop = false; a.src = dataUrl;
+                a.play().catch(() => finish());
+            }, DUCK_LEAD_MS);
         }
         // Cut the current clip at once (urgent "Jetzt" interrupt / stop). While navigating, return to the
         // silent loop to keep the channel warm; once stopped, just halt.
         function hush() {
+            if (pending) { clearTimeout(pending); pending = null; }  // cancel a clip still in its pre-duck lead
             if (!el) return;
             el.onended = null; el.onerror = null;
             if (on) toSilence();
