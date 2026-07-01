@@ -5,6 +5,8 @@
 //   • railway=level_crossing  → 🚂 Bahnübergang   (warns ahead — safety-critical, rare)
 //   • highway=stop            → 🛑 Stopp          (warns ahead)
 //   • highway=give_way        → 🔻 Vorfahrt achten (pin only — too common in town to chime each one)
+//   • highway=traffic_signals → 🚦 Ampel           (pin only — as common as give_way in town; OSM knows the
+//                                                    POSITION only, never the live red/green state)
 //   • highway=crossing (zebra)→ 🚸 Zebrastreifen   (pin only)
 // All four are drawn as map pins; the two "warn" types fire a one-shot toast when one lies AHEAD within
 // WARN_M of travel. Best-effort and position-driven (fed from onPosition, like the speed sign); silent on
@@ -51,12 +53,21 @@ window.TrackerHazards = function (ctx) {
         + '<rect x="10" y="9" width="4" height="22" rx="1" fill="#fff"/>'
         + '<rect x="18" y="9" width="4" height="22" rx="1" fill="#fff"/>'
         + '<rect x="26" y="9" width="4" height="22" rx="1" fill="#fff"/></svg>';
+    // Ampel = a dark housing with the three real signal lights (red / amber / green — the amber IS the
+    // light, not a UI accent). We know only WHERE it is, never its current state.
+    const SVG_AMPEL =
+        '<svg viewBox="0 0 40 40" width="28" height="28" aria-label="Ampel">'
+        + '<rect x="13" y="3" width="14" height="34" rx="3.5" fill="rgb(14,36,78)" stroke="#fff" stroke-width="1.5"/>'
+        + '<circle cx="20" cy="10" r="3.6" fill="rgb(176,36,24)"/>'
+        + '<circle cx="20" cy="20" r="3.6" fill="rgb(245,194,66)"/>'
+        + '<circle cx="20" cy="30" r="3.6" fill="rgb(121,158,49)"/></svg>';
 
     // type → label / sign svg / whether it fires a toast (vs pin-only)
     const TYPES = {
         level_crossing: { label: 'Bahnübergang',    svg: SVG_SCHRANKE, warn: true },
         stop:           { label: 'Stopp',            svg: SVG_STOP,     warn: true },
         give_way:       { label: 'Vorfahrt achten',  svg: SVG_YIELD,    warn: false },
+        traffic_signals:{ label: 'Ampel',            svg: SVG_AMPEL,    warn: false },
         zebra:          { label: 'Zebrastreifen',    svg: SVG_ZEBRA,    warn: false },
     };
 
@@ -93,6 +104,7 @@ window.TrackerHazards = function (ctx) {
         if (tags.railway === 'level_crossing') return 'level_crossing';
         if (tags.highway === 'stop') return 'stop';
         if (tags.highway === 'give_way') return 'give_way';
+        if (tags.highway === 'traffic_signals') return 'traffic_signals';
         // ONLY a real Zebrastreifen (Zeichen 293): crossing_ref / crossing:markings / crossing = zebra.
         // NOT the generic 'marked'/'uncontrolled' crossings — those are every minor pedestrian crossing (a
         // whole parking lot full near Elbepark, Doc 2026-06-30) and carpet-bombed the map.
@@ -130,6 +142,7 @@ window.TrackerHazards = function (ctx) {
             + 'node(around:' + r + ',' + la + ',' + ln + ')[railway=level_crossing];'
             + 'node(around:' + r + ',' + la + ',' + ln + ')[highway=stop];'
             + 'node(around:' + r + ',' + la + ',' + ln + ')[highway=give_way];'
+            + 'node(around:' + r + ',' + la + ',' + ln + ')[highway=traffic_signals];'
             + 'node(around:' + r + ',' + la + ',' + ln + ')[highway=crossing][crossing_ref=zebra];'
             + 'node(around:' + r + ',' + la + ',' + ln + ')[highway=crossing]["crossing:markings"=zebra];'
             + 'node(around:' + r + ',' + la + ',' + ln + ')[highway=crossing][crossing=zebra];'
