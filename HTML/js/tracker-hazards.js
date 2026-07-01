@@ -18,6 +18,9 @@ window.TrackerHazards = function (ctx) {
 
     const KEY_ON = 'trk_hazards_on';
     let on = localStorage.getItem(KEY_ON) !== '0';   // default ON
+    const nav = (typeof ctx.nav === 'function') ? ctx.nav : () => null;   // nav module handle (route relevance)
+    const ROUTE_HAZARD_M = 7;       // while navigating, only pins THIS close to the route line count as "on my
+    //                                 road" — a cross-street stop/give-way sits farther off and is dropped (Doc 2026-07-01)
 
     const QUERY_R_M = 900;          // fetch hazards within this radius of the position
     const MIN_INTERVAL_MS = 8000;   // …re-query no more often than this
@@ -139,7 +142,16 @@ window.TrackerHazards = function (ctx) {
     function drawPins() {
         const lyr = ensureLayer();
         lyr.clearLayers();
+        // While navigating, show only what's relevant to MY route: a stop/give-way/Ampel on a CROSS street
+        // sits off the route line and is dropped — I only want the signs on the road I'm driving (Doc 2026-07-01).
+        // Bahnübergang is always kept (safety-critical). When NOT navigating, everything shows as before.
+        const n2 = nav();
+        const filtering = !!(n2 && n2.isNavigating && n2.isNavigating());
         for (const n of nodes) {
+            if (filtering && n.type !== 'level_crossing') {
+                const d = n2.distToRoute([n.lat, n.lng]);
+                if (d != null && d > ROUTE_HAZARD_M) continue;   // off my route → a cross-street sign → hide it
+            }
             L.marker([n.lat, n.lng], { icon: pin(n.type), interactive: false, keyboard: false, pane: 'markerPane' })
                 .bindTooltip(TYPES[n.type].label, { direction: 'top', opacity: 0.9 })
                 .addTo(lyr);

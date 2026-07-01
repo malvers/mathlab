@@ -2620,7 +2620,7 @@ ${pts}
         }) : null;
         // ---- Point hazards → js/tracker-hazards.js. Position-driven; OSM level-crossings / stop / give-way /
         //      zebra as map pins, with a "voraus"-toast for the safety-critical ones. Key-less Overpass. ----
-        __hazards = (typeof TrackerHazards !== 'undefined') ? TrackerHazards({ map, toast }) : null;
+        __hazards = (typeof TrackerHazards !== 'undefined') ? TrackerHazards({ map, toast, nav: () => __nav }) : null;
         // ---- Desk navigation simulator → js/tracker-navsim.js. Only with ?sim=1 in the URL. Feeds synthetic
         //      GPS fixes through the REAL onPosition pipeline (so reroute/guidance behave 1:1), while simMode
         //      suppresses cloud sync/broadcast so no fake data ever reaches Supabase. ----
