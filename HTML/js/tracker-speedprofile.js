@@ -27,10 +27,12 @@ window.TrackerSpeedProfile = function (ctx) {
     const QUERY_TIMEOUT_MS = 28000;   // > the server-side [timeout:25] below; a whole-route corridor is big
     const CORRIDOR_M = 25;            // ways within this distance of the route count
     const ALIGN_TOL = 40;            // a corridor way may differ from the local route direction by at most this (deg)
+    const ANTI_JUT_M = 60;           // a short A-B-A limit reversion under this (junction jut) is dissolved
     const MAX_VERTS = 2500;           // guard: very long routes are downsampled for resolution (cost/time)
     const MAX_CORRIDOR_PTS = 800;     // cap the around-polyline length so the query body stays sane
     const CACHE_PREFIX = 'trk_speedprofile_';
-    const CACHE_VERSION = 3;          // v3: change points may carry a time-conditional {base,rules} value
+    const CACHE_VERSION = 4;          // v4: rebuild after the resolution fix (no despeckle; prefer-aligned-
+    //                                   never-blank) so already-driven routes drop their despeckle-era cache
     const CACHE_TTL_MS = 1000 * 60 * 60 * 24 * 60; // 60 days — OSM limits change rarely
 
     let resolveLimit = null;          // injected from the live sign so the logic is identical (setResolver)
@@ -212,9 +214,42 @@ window.TrackerSpeedProfile = function (ctx) {
         return out;
     }
 
-    // (No despeckle: it dissolved any run < 50 m into the previous limit and so SWALLOWED genuine short
-    // zones — a real Tempo-30 became the preceding 50. The direction filter alone keeps the badges clean;
-    // a short real zone must survive, so it earns its own change point.)
+    // ---- de-jut ---------------------------------------------------------------------------------
+    // Cumulative along-route distance (m) per vertex.
+    function segMeters(a, b) {
+        const R = 6371000, t = Math.PI / 180;
+        const dLat = (b[0] - a[0]) * t, dLng = (b[1] - a[1]) * t;
+        const x = Math.sin(dLat / 2) ** 2 + Math.cos(a[0] * t) * Math.cos(b[0] * t) * Math.sin(dLng / 2) ** 2;
+        return 2 * R * Math.asin(Math.sqrt(x));
+    }
+    function cumDist(pts) {
+        const cd = new Array(pts.length).fill(0);
+        for (let i = 1; i < pts.length; i++) cd[i] = cd[i - 1] + segMeters(pts[i - 1], pts[i]);
+        return cd;
+    }
+    // Remove a junction "jut": where a crossing road's limit briefly juts into the route at an intersection
+    // you get a SHORT A-B-A reversion (e.g. 30-50-30 as the Serkowitzer 50 clips the corner, Doc 2026-07-01).
+    // Dissolve a run of B back into A ONLY when it is a genuine reversion (same limit A both sides) AND short
+    // (< ANTI_JUT_M). This is deliberately narrower than the old despeckle: it never touches a real transition
+    // (A-B-C) or a long zone, so a genuine short Tempo-30 (50-30-…, not a reversion) survives.
+    function deJut(pts, limits) {
+        if (pts.length < 3 || pts.length !== limits.length) return limits;
+        const cd = cumDist(pts);
+        const out = limits.slice();
+        let i = 0;
+        while (i < out.length) {
+            let j = i + 1;
+            while (j < out.length && sameLimit(out[j], out[i])) j++;
+            const len = (j < out.length ? cd[j] : cd[cd.length - 1]) - cd[i];
+            if (i > 0 && j < out.length && out[i] != null && out[i - 1] != null
+                && sameLimit(out[i - 1], out[j]) && len < ANTI_JUT_M) {
+                const a = out[i - 1];
+                for (let k = i; k < j; k++) out[k] = a;   // A-B-A, short → dissolve the jut back to A
+            }
+            i = j;
+        }
+        return out;
+    }
 
     // Change points = vertices where the carry-forward limit first differs from the previous one.
     function deriveChangePoints(pts, limits) {
@@ -308,8 +343,8 @@ window.TrackerSpeedProfile = function (ctx) {
         const resAt = downsampleIdx(routePts.length, MAX_VERTS);
         const sub = resAt.map((i) => routePts[i]);
         const subLimits = limitsFromWays(sub, ways);
-        // expand the sub-sampled limits back onto every vertex (carry the nearest sample forward).
-        vertexLimit = expandToAll(routePts.length, resAt, subLimits);
+        // expand the sub-sampled limits onto every vertex, then dissolve short junction juts (A-B-A).
+        vertexLimit = deJut(routePts, expandToAll(routePts.length, resAt, subLimits));
         changePoints = deriveChangePoints(routePts, vertexLimit);
         if (gen !== buildGen) return;
         cachePut(meta, changePoints);
