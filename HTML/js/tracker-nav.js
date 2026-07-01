@@ -1181,7 +1181,9 @@ window.TrackerNav = function (ctx) {
     // gesture → autoplay ok; sticky activation survives the awaited route fetch) and on every speak() as a
     // belt-and-braces; stopped on clearRoute so it never drains battery / holds audio focus while idle.
     const keepAlive = (function () {
-        let el = null, on = false, silentUrl = '', pending = null;
+        let el = null, on = false, silentUrl = '', pending = null, hb = null;
+        const HEARTBEAT_MS = 8000;  // re-arm the (muted) silent loop this often if Android suspended it in the
+        //                             background → the next spoken clip isn't lost ("nicht immer gehört", Doc 2026-07-01)
         const DUCK_LEAD_MS = 280;   // unmute (→ duck the radio) this long BEFORE the clip, so Android's audio-
         //                             focus/ducking transition lands in SILENCE — otherwise it swallows the first
         //                             word ("Du hast das Ziel erreicht" → "das Ziel erreicht", Pixel, Doc 2026-07-01)
@@ -1229,9 +1231,16 @@ window.TrackerNav = function (ctx) {
         function start() {
             if (on) return; on = true;
             try { toSilence(); ttsLog('keepalive ▶'); } catch (e) { ttsLog('keepalive start failed: ' + e); }
+            // Heartbeat: Android can pause/suspend the MUTED loop in the background (it holds no audio focus),
+            // and then the next announcement plays into a dead channel and is never heard. Re-arm it whenever
+            // the system stopped it — but ONLY while it's the silent loop (loop=true); never touch a clip mid-play.
+            if (!hb) hb = setInterval(() => {
+                try { if (on && el && el.loop && el.paused) { toSilence(); ttsLog('keepalive ↺ (re-armed)'); } } catch (e) { }
+            }, HEARTBEAT_MS);
         }
         function stop() {
             if (!on) return; on = false;
+            if (hb) { clearInterval(hb); hb = null; }
             try { if (el) { el.onended = null; el.onerror = null; el.loop = true; el.pause(); } } catch (e) { }
             session('none');
             ttsLog('keepalive ■');
@@ -1258,7 +1267,9 @@ window.TrackerNav = function (ctx) {
                 if (done) return;
                 a.onended = finish; a.onerror = finish;
                 a.loop = false; a.src = dataUrl;
-                a.play().catch(() => finish());
+                // In the background the first play() can be briefly blocked; retry once after a short beat
+                // before giving up, so a background announcement isn't silently dropped (Doc 2026-07-01).
+                a.play().catch(() => { setTimeout(() => { if (!done) a.play().catch(() => finish()); }, 250); });
             }, DUCK_LEAD_MS);
         }
         // Cut the current clip at once (urgent "Jetzt" interrupt / stop). While navigating, return to the
