@@ -450,7 +450,16 @@ window.TrackerSpeedLimit = function (ctx) {
             if (roadTags) lastRoad = { ref: roadTags.ref || null, name: roadTags.name || null, highway: roadTags.highway || null };
             // Road advisories from the resolved road (not refTags, which may be a different ref-bearing way).
             const advTags = conf.tags || def.tags;
-            if (advTags) setAdvisories(advTags.overtaking === 'no', advTags.toll === 'yes');
+            if (advTags) {
+                // Überholverbot also from the DIRECTIONAL tags — most overtaking bans are tagged
+                // overtaking:forward/backward=no, not the plain overtaking=no (Doc 2026-07-01: ~4× more of
+                // them). Direction-agnostic for now (shows the ban even if it's the opposite direction's) —
+                // fine for an advisory hint; a travel-direction refinement can come later.
+                const noOv = advTags.overtaking === 'no'
+                    || advTags['overtaking:forward'] === 'no'
+                    || advTags['overtaking:backward'] === 'no';
+                setAdvisories(noOv, advTags.toll === 'yes');
+            }
 
             // 1) a confirmed/signed limit wins — solid sign. A conditional way keeps its raw {base,rules} in
             //    curRaw so update() re-evaluates the window as the clock crosses it (even while parked).
