@@ -32,7 +32,7 @@ window.TrackerHazards = function (ctx) {
     // rgb(14,36,78) instead of black). Sized 28 px; the pin adds a drop-shadow for contrast on the map.
     // Bahnübergang = the Andreaskreuz (Zeichen 201): a FREE-STANDING, Y-stretched (taller-than-wide) red-and-
     // white saltire — no plate, no background (Doc). STOP = red octagon; Vorfahrt = inverted triangle;
-    // Zebra = blue Fußgängerüberweg plate with white stripes.
+    // Zebra = the Fußgängerüberweg sign (Zeichen 350): blue square + white triangle + walking figure.
     const SVG_ANDREAS =
         '<svg viewBox="0 0 40 40" width="28" height="28" aria-label="Bahnübergang (Andreaskreuz)">'
         // Full-length red bars + a white centre → red tips, white where they cross. A thin dark-blue outline
@@ -54,12 +54,24 @@ window.TrackerHazards = function (ctx) {
     const SVG_YIELD =
         '<svg viewBox="0 0 40 40" width="28" height="28" aria-label="Vorfahrt achten">'
         + '<polygon points="3,6.5 37,6.5 20,36" fill="#fff" stroke="rgb(176,36,24)" stroke-width="4.5" stroke-linejoin="round"/></svg>';
+    // Zebra = the real German Fußgängerüberweg sign (Zeichen 350): blue square, white triangle, a dark-blue
+    // figure walking to the right over the crossing stripes (Doc). Dark blue instead of black.
     const SVG_ZEBRA =
-        '<svg viewBox="0 0 40 40" width="28" height="28" aria-label="Zebrastreifen">'
-        + '<rect x="3" y="3" width="34" height="34" rx="6" fill="rgb(14,36,78)"/>'
-        + '<rect x="10" y="9" width="4" height="22" rx="1" fill="#fff"/>'
-        + '<rect x="18" y="9" width="4" height="22" rx="1" fill="#fff"/>'
-        + '<rect x="26" y="9" width="4" height="22" rx="1" fill="#fff"/></svg>';
+        '<svg viewBox="0 0 40 40" width="28" height="28" aria-label="Fußgängerüberweg">'
+        + '<rect x="2.5" y="2.5" width="35" height="35" rx="5" fill="rgb(0,90,169)"/>'
+        + '<polygon points="20,6 4,34 36,34" fill="#fff"/>'
+        + '<g fill="rgb(14,36,78)">'                                   // crossing stripes under the feet
+        + '<rect x="11" y="29" width="18" height="1.7" rx="0.6"/>'
+        + '<rect x="13" y="31.6" width="14" height="1.7" rx="0.6"/>'
+        + '</g>'
+        + '<g stroke="rgb(14,36,78)" fill="rgb(14,36,78)" stroke-linecap="round">'  // walking pedestrian
+        + '<circle cx="18.5" cy="13" r="2.4" stroke="none"/>'          // head
+        + '<line x1="19" y1="15.4" x2="20.2" y2="22" stroke-width="2.4"/>'   // torso
+        + '<line x1="20.2" y1="22" x2="23.4" y2="28" stroke-width="2.3"/>'   // front leg
+        + '<line x1="20.2" y1="22" x2="16.8" y2="28" stroke-width="2.3"/>'   // back leg
+        + '<line x1="19.6" y1="17" x2="23" y2="19.4" stroke-width="1.9"/>'   // front arm
+        + '<line x1="19.6" y1="17" x2="16.4" y2="19" stroke-width="1.9"/>'   // back arm
+        + '</g></svg>';
     // Ampel = a dark housing with the three real signal lights (red / amber / green — the amber IS the
     // light, not a UI accent). We know only WHERE it is, never its current state.
     const SVG_AMPEL =
