@@ -118,6 +118,9 @@ window.TrackerNav = function (ctx) {
     let routeCum = null;    // cumulative metres to each routeLatLngs vertex → maneuver advance by real route
                             // PROGRESS (you passed the point), not straight-line overshoot (which counted UP)
     let mIdx = 0;           // index of the next maneuver to announce
+    let progIdx = 1;        // monotonic cursor: furthest route segment reached → the live-progress search stays
+                            // LOCAL to it, so a route that passes near itself can't snap progress to a far
+                            // segment and skip every turn (the vanishing banner, Doc 2026-07-01). Reset per route.
     let annFar = false;     // pre-warning ("In … Metern") already spoken for the current maneuver
     let annNear = false;    // "Jetzt …" already spoken — said at ~40 m, but we DON'T advance until passed
     let mClosest = Infinity; // closest approach (m) to the current maneuver — to detect an overshoot
@@ -695,7 +698,7 @@ window.TrackerNav = function (ctx) {
         keepAlive.stop();   // navigation over → release the audio keep-alive (battery / audio focus)
         if (destMarker) { map.removeLayer(destMarker); destMarker = null; }
         destLatLng = null; destLabel = '';
-        maneuvers = null; routeCum = null; mIdx = 0; annFar = false; annNear = false; mClosest = Infinity; freshReroute = false;
+        maneuvers = null; routeCum = null; mIdx = 0; progIdx = 1; annFar = false; annNear = false; mClosest = Infinity; freshReroute = false;
         routeTotalDist = 0; routeTotalDur = 0; tripTotalM = 0;
         hideBanner();
         stopSpeech();
@@ -873,6 +876,32 @@ window.TrackerNav = function (ctx) {
         return routeCum[bi - 1] + bt * (routeCum[bi] - routeCum[bi - 1]);
     }
 
+    // Live DRIVER progress along the route (metres from start). Like alongRoute(), but the segment search is
+    // confined to a WINDOW around the progress reached so far (progIdx), with a monotonic cursor. alongRoute's
+    // global-nearest snaps to whichever bit of the line is closest — so where the route loops / parallels
+    // itself it jumps to a FAR segment, the guidance then thinks every turn is already behind you, and the
+    // banner vanishes (Doc 2026-07-01). Windowing kills that while still catching up after a GPS gap.
+    function progressAlong(here) {
+        if (!routeCum || !routeLatLngs || routeLatLngs.length < 2) return null;
+        const k = Math.cos(here[0] * Math.PI / 180);
+        const xy = (ll) => [ll[1] * 111320 * k, ll[0] * 110540];
+        const p = xy(here);
+        const BACK_M = 80, FWD_M = 1200;                 // only search this far behind / ahead of current progress
+        const cur = routeCum[Math.max(0, progIdx - 1)] || 0;
+        let bi = progIdx, bt = 0, bd = Infinity;
+        for (let i = 1; i < routeLatLngs.length; i++) {
+            if (routeCum[i] < cur - BACK_M || routeCum[i - 1] > cur + FWD_M) continue; // outside the local window
+            const a = xy(routeLatLngs[i - 1]), b = xy(routeLatLngs[i]);
+            const dx = b[0] - a[0], dy = b[1] - a[1], len2 = dx * dx + dy * dy;
+            let t = len2 ? ((p[0] - a[0]) * dx + (p[1] - a[1]) * dy) / len2 : 0;
+            t = t < 0 ? 0 : t > 1 ? 1 : t;
+            const d = Math.hypot(p[0] - (a[0] + t * dx), p[1] - (a[1] + t * dy));
+            if (d < bd) { bd = d; bi = i; bt = t; }
+        }
+        if (bi > progIdx) progIdx = bi;                  // advance the cursor forward only (monotonic)
+        return routeCum[bi - 1] + bt * (routeCum[bi] - routeCum[bi - 1]);
+    }
+
     // Redraw the route so only the part AHEAD of the current position stays blue; the already-driven
     // stretch is dropped, leaving just the recorded speed track there (Doc 2026-06-14, note #1).
     function redrawAhead(here) {
@@ -1026,7 +1055,7 @@ window.TrackerNav = function (ctx) {
         // you already took (Doc 2026-07-01).
         buildRouteCum();
         maneuvers.forEach((m) => { m.routeDist = alongRoute(m.loc); });
-        mIdx = 0;
+        mIdx = 0; progIdx = 1;
         while (mIdx < maneuvers.length && maneuvers[mIdx].type === 'depart') mIdx++; // skip the leading "depart"
         annFar = false; annNear = false; mClosest = Infinity;
     }
@@ -1409,7 +1438,7 @@ window.TrackerNav = function (ctx) {
         // the banner counting UP: the instant your route progress reaches a turn's point it flips to the NEXT
         // turn, instead of lingering on the passed turn with a growing straight-line distance (Doc 2026-07-01).
         // 'arrive' is left for its own block below (it must announce + fire onArrive, not be silently skipped).
-        const prog = alongRoute(here);
+        const prog = progressAlong(here);
         if (prog != null) {
             while (mIdx < maneuvers.length && maneuvers[mIdx].type !== 'arrive'
                 && maneuvers[mIdx].routeDist != null && prog >= maneuvers[mIdx].routeDist - PASS_EPS_M) advanceManeuver();
