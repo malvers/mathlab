@@ -468,6 +468,7 @@ window.TrackerNav = function (ctx) {
         const hint = $('nav-found-hint'); if (hint) hint.hidden = true;   // name is in the field itself
         if (destLabel) { input.value = shortLabel(destLabel); input.classList.add('nav-found'); previewStart(); }
         else { input.classList.remove('nav-found'); hideStart(); }
+        const clr = $('nav-clear'); if (clr) clr.hidden = !destLabel;   // X visible only when a destination is set
     }
 
     // ---- Two informed START buttons (Doc 2026-06-25): once a destination is green, replace the single
@@ -1523,6 +1524,7 @@ window.TrackerNav = function (ctx) {
             input.classList.add('nav-found');
             if (nameEl) nameEl.textContent = shortLabel(label);
             if (hint) hint.hidden = false;
+            const clr = $('nav-clear'); if (clr) clr.hidden = false;   // a live-found destination → show the X
         }
         async function run(q) {
             const my = ++gen;
