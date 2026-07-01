@@ -2639,6 +2639,12 @@ body.ui-idle #nav-banner .nav-trip { font-size: clamp(0.95rem, 4vw, 1.2rem); pad
 #nav-panel .seg-row { gap: 8px; }
 #nav-panel .seg-group { flex: 1 1 0; min-width: 0; flex-wrap: nowrap; }
 #nav-panel .seg-btn { flex: 1 1 0; min-width: 0; text-align: center; }
+/* Wegetyp colour per mode (Doc 2026-07-01): Straße = λ orange, Fahrrad = route blue, Laufen = φ green.
+   The active mode carries the colour; the START buttons go neutral grey (below) so nothing clashes. */
+#nav-panel .seg-btn[data-route="car"].active  { background: rgb(245, 194, 66); border-color: rgb(245, 194, 66); color: rgb(8, 20, 42); }
+#nav-panel .seg-btn[data-route="bike"].active { background: rgb(66, 135, 245);  border-color: rgb(66, 135, 245);  color: #fff; }
+#nav-panel .seg-btn[data-route="walk"].active,
+#nav-panel .seg-btn[data-route="hike"].active { background: rgb(121, 158, 49); border-color: rgb(121, 158, 49); color: #fff; }
 /* Two informed START buttons (left fastest, right shortest) — each shows its route's time + distance. */
 #nav-start2 { display: flex; gap: 10px; margin-top: 6px; }
 #nav-start2[hidden] { display: none; }   /* the id rule would otherwise beat the default [hidden] → keep it hideable */
@@ -2646,20 +2652,22 @@ body.ui-idle #nav-banner .nav-trip { font-size: clamp(0.95rem, 4vw, 1.2rem); pad
     flex: 1 1 0; min-width: 0; min-height: 47px;            /* same height as the search line (Doc 2026-06-25) */
     display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
     padding: 5px 10px; border-radius: 10px;
-    border: 2px solid rgb(121, 158, 49);
-    background: rgb(121, 158, 49); color: #fff;             /* recommended = SOLID Doc φ green */
+    /* Neutral grey, NOT green/orange (Doc 2026-07-01): the Wegetyp buttons now own those colours, so
+       colouring schnellste/kürzeste too would be a semantic clash. Recommended = solid slate grey. */
+    border: 2px solid rgb(104, 118, 140);
+    background: rgb(104, 118, 140); color: #fff;
     cursor: pointer; font-family: 'Orbitron', sans-serif;
     -webkit-tap-highlight-color: transparent;
     transition: filter .15s;
 }
 .nav-start-btn:hover { filter: brightness(1.08); }
 .nav-start-btn:active { transform: scale(0.97); }
-/* The non-recommended alternative = SOLID Doc λ orange; dark text so it stays readable on the light fill. */
-.nav-start-btn.alt { border-color: rgb(245, 194, 66); background: rgb(245, 194, 66); color: rgb(8, 20, 42); }
+/* The non-recommended alternative = dimmer, hollow grey (the ✓ prefix marks the recommendation). */
+.nav-start-btn.alt { border-color: rgba(255, 255, 255, 0.28); background: rgba(8, 20, 42, 0.55); color: rgba(255, 255, 255, 0.9); }
 .nav-start-kind { font-weight: 700; font-size: 0.84rem; letter-spacing: .5px; }
 /* Numbers in Arial (Doc 2026-06-25) — easier to read than Orbitron for figures. */
 .nav-start-meta { font-family: Arial, sans-serif; font-size: 0.78rem; color: rgba(255, 255, 255, 0.92); }
-.nav-start-btn.alt .nav-start-meta { color: rgba(8, 20, 42, 0.85); }   /* dark on orange */
+.nav-start-btn.alt .nav-start-meta { color: rgba(255, 255, 255, 0.7); }
 #nav-here { margin-top: 12px; }   /* Luft über „Position merken" (Doc 2026-06-25) */
 /* Laufen: nur EIN START-Button (schnellste/kürzeste sinnlos zu Fuß) — Doc 2026-06-25. */
 #nav-start2.foot #nav-start-fast { display: none; }
