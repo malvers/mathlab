@@ -99,17 +99,49 @@ const DebugWindow = (() => {
         `;
 
         const title = document.createElement('span');
-        // Header shows the deploy/build stamp instead of a static label: document.lastModified is the
-        // served HTML's Last-Modified → the real deploy time, so you can tell at a glance whether a push
-        // landed (Doc 2026-06-30: build belongs at the top of the debug window, formatted "b: …").
-        (function () {
-            const lm = new Date(document.lastModified);
-            const p = (n) => String(n).padStart(2, '0');
-            title.textContent = isNaN(lm.getTime())
-                ? '🐛 b: ' + (document.lastModified || '?')
-                : '🐛 b: ' + p(lm.getDate()) + '.' + p(lm.getMonth() + 1) + '. '
-                  + p(lm.getHours()) + ':' + p(lm.getMinutes()) + ':' + p(lm.getSeconds());
-        })();
+        // Header shows the deploy/build stamp instead of a static label, so you can tell at a glance whether
+        // your latest change is live (Doc 2026-06-30: build belongs at the top of the debug window, "b: …").
+        //
+        // It must reflect the NEWEST change across ALL loaded modules — if a single JS/CSS file changed by
+        // even one letter, the stamp must jump (Doc 2026-07-01: "da MUSS der aktuelle Build stehen … in
+        // ALLEN Modulen"). On the DEPLOYED site every file shares the one deploy time, so document.lastModified
+        // (the served HTML) already IS the build. But in LOCAL dev you routinely edit a single module without
+        // touching the lab's HTML, and its date would freeze → so on localhost we take the max Last-Modified
+        // across every same-origin <script src> + <link stylesheet> this page loaded. Central here → every lab
+        // that uses DebugWindow gets it automatically.
+        const p2 = (n) => String(n).padStart(2, '0');
+        const setStamp = (d) => {
+            title.textContent = (d && !isNaN(d.getTime()))
+                ? '🐛 b: ' + p2(d.getDate()) + '.' + p2(d.getMonth() + 1) + '. '
+                  + p2(d.getHours()) + ':' + p2(d.getMinutes()) + ':' + p2(d.getSeconds())
+                : '🐛 b: ' + (document.lastModified || '?');
+        };
+        setStamp(new Date(document.lastModified)); // instant provisional = the served HTML's own date
+        if (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname)) {
+            (async () => {
+                try {
+                    const urls = new Set();
+                    document.querySelectorAll('script[src], link[rel="stylesheet"][href]').forEach((el) => {
+                        const raw = el.getAttribute('src') || el.getAttribute('href');
+                        if (!raw) return;
+                        try {
+                            const abs = new URL(raw, document.baseURI);
+                            if (abs.origin === location.origin) { abs.search = ''; urls.add(abs.href); } // drop ?v=
+                        } catch (_) { /* skip an unparseable src */ }
+                    });
+                    let newest = new Date(document.lastModified).getTime() || 0;
+                    await Promise.all([...urls].map(async (u) => {
+                        try {
+                            const r = await fetch(u, { method: 'HEAD', cache: 'no-store' });
+                            const lm = r.headers.get('last-modified');
+                            const t = lm ? new Date(lm).getTime() : NaN;
+                            if (!isNaN(t)) newest = Math.max(newest, t);
+                        } catch (_) { /* one module failing must never break the stamp */ }
+                    }));
+                    if (newest) setStamp(new Date(newest));
+                } catch (_) { /* keep the provisional stamp */ }
+            })();
+        }
         title.style.display = collapsed ? 'none' : 'block';
         title.style.marginRight = '8px';
         header.appendChild(title);
