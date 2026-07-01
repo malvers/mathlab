@@ -1,5 +1,7 @@
 const DebugWindow = (() => {
     let debugEl = null;
+    let statusEl = null;      // pinned live-status block (below header, above the scrolling log)
+    const statusLines = {};   // key → text; live readouts that OVERWRITE (not append) — e.g. the motion gate
     let logs = [];
     let collapsed = false;
     let prevHeight = '300px';
@@ -288,10 +290,29 @@ const DebugWindow = (() => {
             display: ${collapsed ? 'none' : 'block'};
         `;
 
+        // Pinned live-status block: single lines that OVERWRITE per key (motion gate, speed source, …),
+        // so a high-frequency readout doesn't flood the scrolling log. Sits below the header, above the log.
+        statusEl = document.createElement('div');
+        statusEl.id = 'debug-status';
+        statusEl.style.cssText = `
+            flex: 0 0 auto;
+            white-space: pre-wrap;
+            word-break: break-all;
+            line-height: 1.4;
+            font-size: ${fontSize}px;
+            color: #9ec36a;
+            margin-bottom: 6px;
+            padding-bottom: 6px;
+            border-bottom: 1px solid rgba(107, 160, 67, 0.3);
+            display: none;
+        `;
+
         debugEl.style.position = 'fixed';
         debugEl.appendChild(header);
+        debugEl.appendChild(statusEl);
         debugEl.appendChild(content);
         document.body.appendChild(debugEl);
+        renderStatus();
 
         // Create 8 resize handles (4 edges + 4 corners). Hidden when collapsed.
         const EDGE_THICKNESS = 6;
@@ -563,6 +584,23 @@ const DebugWindow = (() => {
         content.scrollTop = content.scrollHeight;
     }
 
+    // Live status line(s): OVERWRITE the value for `key` (empty text → remove it). Unlike log(), this does
+    // NOT scroll or accumulate — meant for high-frequency readouts (motion gate, speed source) that used to
+    // live in an on-screen bar. Rendered pinned at the top of the debug window.
+    function status(key, text) {
+        if (!debugEl) init();
+        if (text == null || text === '') delete statusLines[key];
+        else statusLines[key] = String(text);
+        renderStatus();
+    }
+
+    function renderStatus() {
+        if (!statusEl) return;
+        const lines = Object.keys(statusLines).map((k) => statusLines[k]);
+        statusEl.textContent = lines.join('\n');
+        statusEl.style.display = (lines.length && !collapsed) ? 'block' : 'none';
+    }
+
     function clear() {
         logs = [];
         updateContent();
@@ -574,6 +612,7 @@ const DebugWindow = (() => {
         fontSize = clamped;
         const content = document.getElementById('debug-content');
         if (content) content.style.fontSize = fontSize + 'px';
+        if (statusEl) statusEl.style.fontSize = fontSize + 'px';
         try { localStorage.setItem('debug-window-fontsize', String(fontSize)); } catch (_) {}
     }
 
@@ -609,6 +648,7 @@ const DebugWindow = (() => {
             colLeft = 'auto';
             colTop = 'auto';
             content.style.display = 'none';
+            if (statusEl) statusEl.style.display = 'none';
             resizeHandles.forEach(h => h.style.display = 'none');
             if (title) title.style.display = 'none';
             allBtns.forEach(b => b.style.display = 'none');
@@ -644,6 +684,7 @@ const DebugWindow = (() => {
                 debugEl.style.bottom = '20px';
             }
             content.style.display = 'block';
+            renderStatus();   // restore the pinned status block if it has any lines
             resizeHandles.forEach(h => h.style.display = (h.dataset.dir === 'se') ? 'flex' : 'block');
             if (title) title.style.display = 'block';
             allBtns.forEach(b => {
@@ -678,7 +719,7 @@ const DebugWindow = (() => {
         debugEl.style.display = 'none';
     }
 
-    return { init, log, clear, toggle, show, hide };
+    return { init, log, status, clear, toggle, show, hide };
 })();
 
 // Expose on window: a top-level `const` is NOT a window property, so every
