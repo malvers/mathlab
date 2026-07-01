@@ -30,16 +30,21 @@ window.TrackerHazards = function (ctx) {
 
     // Clean inline SVG sign faces (crisper than emoji at pin size; brand red rgb(176,36,24), dark blue
     // rgb(14,36,78) instead of black). Sized 28 px; the pin adds a drop-shadow for contrast on the map.
-    // Bahnübergang = a Schranke (post + red/white boom); STOP = red octagon; Vorfahrt = inverted triangle;
-    // Zebra = blue Fußgängerüberweg plate with white stripes.
-    const SVG_SCHRANKE =
-        '<svg viewBox="0 0 40 40" width="28" height="28" aria-label="Bahnübergang">'
+    // Bahnübergang = the Andreaskreuz (Zeichen 201): a red-tipped white saltire on a white plate; STOP =
+    // red octagon; Vorfahrt = inverted triangle; Zebra = blue Fußgängerüberweg plate with white stripes.
+    const SVG_ANDREAS =
+        '<svg viewBox="0 0 40 40" width="28" height="28" aria-label="Bahnübergang (Andreaskreuz)">'
         + '<rect x="2.5" y="2.5" width="35" height="35" rx="7" fill="#fff" stroke="rgb(176,36,24)" stroke-width="2.5"/>'
-        + '<rect x="8" y="13" width="4" height="18" rx="1" fill="rgb(14,36,78)"/>'
-        + '<rect x="10" y="13" width="25" height="6" rx="1.5" fill="#fff" stroke="rgb(14,36,78)" stroke-width="0.8"/>'
-        + '<rect x="12" y="13" width="5" height="6" fill="rgb(176,36,24)"/>'
-        + '<rect x="22" y="13" width="5" height="6" fill="rgb(176,36,24)"/>'
-        + '<rect x="32" y="13" width="3" height="6" fill="rgb(176,36,24)"/></svg>';
+        // Full-length red bars (round tips), then a white centre on top → the X reads red at the four ends
+        // and white where the bars cross, like the real Andreaskreuz (white with red tips).
+        + '<g stroke-width="5.5" stroke-linecap="round">'
+        + '<line x1="9" y1="9" x2="31" y2="31" stroke="rgb(176,36,24)"/>'
+        + '<line x1="31" y1="9" x2="9" y2="31" stroke="rgb(176,36,24)"/>'
+        + '</g>'
+        + '<g stroke-width="5.5">'
+        + '<line x1="13" y1="13" x2="27" y2="27" stroke="#fff"/>'
+        + '<line x1="27" y1="13" x2="13" y2="27" stroke="#fff"/>'
+        + '</g></svg>';
     const SVG_STOP =
         '<svg viewBox="0 0 40 40" width="28" height="28" aria-label="Stopp">'
         + '<polygon points="13,2.5 27,2.5 37.5,13 37.5,27 27,37.5 13,37.5 2.5,27 2.5,13" fill="rgb(176,36,24)" stroke="#fff" stroke-width="2"/>'
@@ -64,7 +69,7 @@ window.TrackerHazards = function (ctx) {
 
     // type → label / sign svg / whether it fires a toast (vs pin-only)
     const TYPES = {
-        level_crossing: { label: 'Bahnübergang',    svg: SVG_SCHRANKE, warn: true },
+        level_crossing: { label: 'Bahnübergang',    svg: SVG_ANDREAS,  warn: true },
         stop:           { label: 'Stopp',            svg: SVG_STOP,     warn: true },
         give_way:       { label: 'Vorfahrt achten',  svg: SVG_YIELD,    warn: false },
         traffic_signals:{ label: 'Ampel',            svg: SVG_AMPEL,    warn: false },
