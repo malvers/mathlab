@@ -1447,6 +1447,25 @@ body.ui-idle #trk-controls {
     35%           { transform: translateY(-3px); opacity: 1; }
 }
 
+/* Clear-destination X — shown only when a destination is set (the [hidden] attribute is toggled in JS).
+   Neutral by default, φ-… no: red on hover to read as "delete" (never orange, CLAUDE.md). */
+.nav-clear-btn {
+    flex: 0 0 auto;
+    width: 42px;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: 10px;
+    background: rgba(8, 20, 42, 0.6);
+    color: rgba(255, 255, 255, 0.9);
+    cursor: pointer;
+    transition: background .15s, color .15s, border-color .15s;
+}
+.nav-clear-btn:not([hidden]) { display: flex; }
+.nav-clear-btn svg { width: 20px; height: 20px; }
+.nav-clear-btn:hover { background: rgb(176, 36, 24); border-color: rgb(176, 36, 24); color: #fff; }
+
 .nav-mic-btn {
     flex: 0 0 auto;
     width: 50px;
@@ -1571,8 +1590,8 @@ body.ui-idle #trk-controls {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23799E31' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='12' cy='12' r='8'/%3E%3Cline x1='12' y1='1' x2='12' y2='4'/%3E%3Cline x1='12' y1='20' x2='12' y2='23'/%3E%3Cline x1='1' y1='12' x2='4' y2='12'/%3E%3Cline x1='20' y1='12' x2='23' y2='12'/%3E%3Ccircle cx='12' cy='12' r='1.6' fill='%23799E31' stroke='none'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 12px center;
-    background-size: 18px 18px;
-    padding-right: 40px;
+    background-size: 24px 24px;   /* bigger target (Doc 2026-07-01) */
+    padding-right: 46px;
 }
 .nav-found-hint {
     display: flex; align-items: center; gap: 8px;
