@@ -332,10 +332,16 @@ window.TrackerNav = function (ctx) {
             // (a branch is always near). Measured: nwr/25 km ≈ 4 s → nw/12 km ≈ 2 s, so the proxy answers
             // before its timeout and the slow direct-mirror fallback never kicks in. (The old "[name~] over
             // all nwr" also matched noise like "Regenrückhaltebecken Aldi" and timed out.)
+            // Anchor the regex at the WORD START (^) — not a free substring (Doc 2026-07-01, "dm ist zu kurz,
+            // da kommt Blödsinn raus"). A 2-char substring "dm" also matched mid-word: "LanDMaxx" (1032 m),
+            // "GrunDMühle", "WinDMühle" — the real dm (1006 m) beat Landmaxx by only 26 m, so a few metres of
+            // driving would pick the wrong shop. Brand/shop names LEAD with the brand ("dm", "dm-drogerie
+            // markt", "Aldi Süd", "REWE City"), so ^ keeps every real branch and drops the noise. Deterministic
+            // — no per-brand table (no "dm → Drogeriemarkt" we'd have to maintain for Ja/Rossmann/…).
             const ql = '[out:json][timeout:10];('
-                + 'nw(around:' + R + ',' + from[0] + ',' + from[1] + ')[brand~"' + term + '",i];'
-                + 'nw(around:' + R + ',' + from[0] + ',' + from[1] + ')[name~"' + term + '",i][shop];'
-                + 'nw(around:' + R + ',' + from[0] + ',' + from[1] + ')[name~"' + term + '",i][amenity];'
+                + 'nw(around:' + R + ',' + from[0] + ',' + from[1] + ')[brand~"^' + term + '",i];'
+                + 'nw(around:' + R + ',' + from[0] + ',' + from[1] + ')[name~"^' + term + '",i][shop];'
+                + 'nw(around:' + R + ',' + from[0] + ',' + from[1] + ')[name~"^' + term + '",i][amenity];'
                 + ');out center 40;';
             let j = null; try { j = await window.queryOverpass(ql, { timeout: 11000 }); } catch (e) { j = null; }
             const els = (j && j.elements) || [];
