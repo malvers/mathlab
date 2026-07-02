@@ -1185,9 +1185,14 @@ window.TrackerNav = function (ctx) {
         let el = null, on = false, silentUrl = '', pending = null, hb = null;
         const HEARTBEAT_MS = 8000;  // re-arm the (muted) silent loop this often if Android suspended it in the
         //                             background → the next spoken clip isn't lost ("nicht immer gehört", Doc 2026-07-01)
-        const DUCK_LEAD_MS = 280;   // unmute (→ duck the radio) this long BEFORE the clip, so Android's audio-
+        const DUCK_LEAD_MS = 600;   // unmute (→ duck the radio) this long BEFORE the clip, so Android's audio-
         //                             focus/ducking transition lands in SILENCE — otherwise it swallows the first
-        //                             word ("Du hast das Ziel erreicht" → "das Ziel erreicht", Pixel, Doc 2026-07-01)
+        //                             word ("Du hast das Ziel erreicht" → "das Ziel erreicht", Pixel, Doc 2026-07-01).
+        //                             280 ms was still too short on the Pixel→car-radio (Bluetooth) path: the whole
+        //                             turn announcements felt cut by ~half a second at the start (Doc 2026-07-02).
+        //                             Bluetooth stream warm-up + ducking takes longer there, so lead the clip by
+        //                             more. Harmless for timing: the "Jetzt …" trigger already carries a 4–5 s
+        //                             speed-scaled lead, so ~0.6 s later still lands metres before the turn.
         // Build a tiny silent WAV (1 s, 8 kHz, 16-bit mono) at runtime — no external asset, no big base64 blob.
         function silentWavUrl() {
             const sr = 8000, n = sr, bytes = 44 + n * 2;
