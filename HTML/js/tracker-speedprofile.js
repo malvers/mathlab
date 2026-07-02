@@ -31,8 +31,9 @@ window.TrackerSpeedProfile = function (ctx) {
     const MAX_VERTS = 2500;           // guard: very long routes are downsampled for resolution (cost/time)
     const MAX_CORRIDOR_PTS = 800;     // cap the around-polyline length so the query body stays sane
     const CACHE_PREFIX = 'trk_speedprofile_';
-    const CACHE_VERSION = 4;          // v4: rebuild after the resolution fix (no despeckle; prefer-aligned-
-    //                                   never-blank) so already-driven routes drop their despeckle-era cache
+    const CACHE_VERSION = 5;          // v5: rebuild after bisection-refined change points (see refineChangePoints)
+    //                                   so already-driven routes drop their coarse-vertex cache and re-pin exactly.
+    //                                   v4 was: no despeckle; prefer-aligned-never-blank.
     const CACHE_TTL_MS = 1000 * 60 * 60 * 24 * 60; // 60 days — OSM limits change rarely
 
     let resolveLimit = null;          // injected from the live sign so the logic is identical (setResolver)
@@ -40,7 +41,10 @@ window.TrackerSpeedProfile = function (ctx) {
     let limKey = null;                // limitKey(value) from the live sign — stable equality for compares
     let routePts = null;              // the route [[lat,lng]…] the current profile is aligned to
     let vertexLimit = null;           // carry-forward limit per route vertex: number | 'none' | null
-    let changePoints = [];            // [{lat,lng,limit}] where the limit changes — drawn on the route
+    let changePoints = [];            // [{lat,lng,limit,along}] where the limit changes — drawn on the route.
+    //                                   `along` = distance (m) along the route → limitAt switches EXACTLY there
+    //                                   (not snapped to the nearest coarse vertex), matching the refined badge.
+    let routeCum = null;              // cumulative route distance (m) per vertex → project a position to `along`
     let markers = null;               // Leaflet layerGroup of the change-point badges
     let buildGen = 0;                 // bumped per build so a slow Overpass answer can't apply to a newer route
 
@@ -119,35 +123,45 @@ window.TrackerSpeedProfile = function (ctx) {
         return false;
     }
 
-    // Nearest route segment to a point → end index `bi`. Mirrors nav.nearestSeg so limitAt() agrees
-    // with where the route is drawn.
-    function nearestSegIdx(here) {
+    // Distance (m) of an arbitrary point PROJECTED along the route (nearest segment + in-segment fraction).
+    // The along-route position lets limitAt switch at the exact change-point distance rather than snapping
+    // to a coarse vertex — so a refined switch point on a sparse straight actually takes effect where it is.
+    function projectAlong(here) {
         const k = Math.cos(here[0] * Math.PI / 180);
         const xy = (ll) => [ll[1] * 111320 * k, ll[0] * 110540];
         const p = xy(here);
-        let bi = 1, bd = Infinity;
+        let bi = 1, bd = Infinity, bt = 0;
         for (let i = 1; i < routePts.length; i++) {
             const a = xy(routePts[i - 1]), b = xy(routePts[i]);
             const dx = b[0] - a[0], dy = b[1] - a[1], len2 = dx * dx + dy * dy;
             let t = len2 ? ((p[0] - a[0]) * dx + (p[1] - a[1]) * dy) / len2 : 0;
             t = t < 0 ? 0 : t > 1 ? 1 : t;
             const d = Math.hypot(p[0] - (a[0] + t * dx), p[1] - (a[1] + t * dy));
-            if (d < bd) { bd = d; bi = i; }
+            if (d < bd) { bd = d; bi = i; bt = t; }
         }
-        return bi;
+        return routeCum[bi - 1] + bt * (routeCum[bi] - routeCum[bi - 1]);
+    }
+    // Give each change point its along-route distance (projected onto the current geometry) so limitAt can
+    // do a pure distance lookup. Recomputed on every build/cache-load (the route geometry may have jittered).
+    function attachAlong(cps) {
+        if (!routeCum) return cps;
+        for (const c of cps) c.along = projectAlong([c.lat, c.lng]);
+        return cps;
     }
 
     // The precomputed limit at the current position: number | 'none' (unlimited) | null (on route but
-    // unknown — let the live sign fall back) | undefined (no profile / off route). Instant + accurate at
-    // the exact switch point (the profile's whole point). Correctness now rests on limitsFromWays NOT
-    // mis-resolving (prefer-aligned-but-never-blank) and on NOT despeckling real short zones away — so a
-    // carried value is only ever a genuine hold of a real limit, never a swallowed Tempo-30.
+    // unknown — let the live sign fall back) | undefined (no profile / off route). Switches EXACTLY at the
+    // refined change-point distance (the profile's whole point), not at the nearest coarse vertex. Before the
+    // first change point → null (leading gap; live sign falls back). Correctness rests on limitsFromWays NOT
+    // mis-resolving (prefer-aligned-but-never-blank) and on refineChangePoints only moving a clean crossover.
     function limitAt(here) {
-        if (!hasRoute() || !here) return undefined;
-        const bi = nearestSegIdx(here);
-        const v = vertexLimit[bi - 1];
-        if (v === undefined) return null;     // missing slot → known gap (live sign falls back), never undefined
-        return evalNow(v);                    // resolve a conditional {base,rules} against the clock NOW
+        if (!hasRoute() || !here || !routeCum) return undefined;
+        if (!changePoints.length) return null;   // on route, nothing resolved → live sign falls back
+        const s = projectAlong(here);
+        let v = null;
+        for (const c of changePoints) { if (c.along <= s) v = c.limit; else break; }
+        if (v == null) return null;               // still ahead of the first known limit → gap
+        return evalNow(v);                         // resolve a conditional {base,rules} against the clock NOW
     }
 
     // ---- Overpass --------------------------------------------------------------------------------
@@ -252,12 +266,61 @@ window.TrackerSpeedProfile = function (ctx) {
     }
 
     // Change points = vertices where the carry-forward limit first differs from the previous one.
+    // Each carries its vertex index `i` so refineChangePoints can bisect the bracket [i-1, i]; `i` is
+    // stripped again during refinement so the cached point stays lean.
     function deriveChangePoints(pts, limits) {
         const cps = [];
         let prev = undefined;
         for (let i = 0; i < pts.length; i++) {
             const v = limits[i];
-            if (v != null && !sameLimit(v, prev)) { cps.push({ lat: pts[i][0], lng: pts[i][1], limit: v }); prev = v; }
+            if (v != null && !sameLimit(v, prev)) { cps.push({ lat: pts[i][0], lng: pts[i][1], limit: v, i }); prev = v; }
+        }
+        return cps;
+    }
+
+    // ---- change-point refinement (no extra Overpass) ---------------------------------------------
+    // deriveChangePoints snaps each switch to a ROUTE VERTEX. On a straight road the ORS polyline has
+    // sparse vertices (a maxspeed-only split node is collinear → not emitted), so the coarse point can
+    // sit 100 m+ from the real sign — exactly the "zu spät / ungenau" Doc saw in fast-forward. We already
+    // hold every way's full geometry from the ONE corridor query, so we pin the exact spot by BISECTING
+    // the straight segment between the two bracketing vertices and re-resolving the limit at the midpoint
+    // from those same ways: pure geometry, ZERO extra queries (Doc 2026-07-02). For a very long route that
+    // was vertex-downsampled the bracket is only approximate, but never worse than the coarse vertex.
+    const REFINE_ITERS = 8;   // bisection steps → segment/256; ≤ ~1 m even on a long sparse straight
+
+    // Resolve the limit at an arbitrary point from the already-fetched corridor ways, mirroring
+    // limitsFromWays' prefer-aligned-but-never-blank rule. `brgs` = local route direction(s) for the filter.
+    function resolveAtPoint(p, brgs, ways) {
+        let aLim = null, aD = Infinity, anyLim = null, anyD = Infinity;
+        for (const w of ways) {
+            const lim = resolveLimit ? resolveLimit(w.tags) : null;
+            if (lim == null) continue;
+            const nw = distToWay(p, w.geometry);
+            if (nw.d > CORRIDOR_M + 10) continue;
+            if (nw.d < anyD) { anyD = nw.d; anyLim = lim; }
+            if (alignedAny(brgs, nw.brg, ALIGN_TOL) && nw.d < aD) { aD = nw.d; aLim = lim; }
+        }
+        return (aLim != null) ? aLim : anyLim;
+    }
+    // Move each change point onto the precise crossover between its two bracketing route vertices.
+    function refineChangePoints(pts, cps, ways) {
+        for (const c of cps) {
+            const i = c.i; delete c.i;                 // index only needed here; keep the cached point lean
+            if (i == null || i <= 0) continue;
+            const a = pts[i - 1], b = pts[i];
+            const sb = segBearing(a, b);
+            const brgs = sb != null ? [sb] : routeBearingsAt(pts, i);
+            const limA = resolveAtPoint(a, brgs, ways);
+            const limB = resolveAtPoint(b, brgs, ways);
+            // Only a CLEAN single crossover (old limit at a, new limit at b) is safe to bisect; anything
+            // else (gap, sampling artefact, multi-change) → leave the coarse vertex, never invent a spot.
+            if (sameLimit(limA, c.limit) || !sameLimit(limB, c.limit)) continue;
+            let lo = a, hi = b;                        // limit(lo)=old, limit(hi)=new
+            for (let k = 0; k < REFINE_ITERS; k++) {
+                const mid = [(lo[0] + hi[0]) / 2, (lo[1] + hi[1]) / 2];
+                if (sameLimit(resolveAtPoint(mid, brgs, ways), c.limit)) hi = mid; else lo = mid;
+            }
+            c.lat = hi[0]; c.lng = hi[1];              // hi = first point already carrying the new limit
         }
         return cps;
     }
@@ -318,12 +381,13 @@ window.TrackerSpeedProfile = function (ctx) {
         if (!ENABLED) { clear(); return; }   // parked → live sign owns the limit, no badges (see top)
         if (!pts || pts.length < 2 || !resolveLimit) { clear(); return; }
         routePts = pts.slice();
+        routeCum = cumDist(routePts);   // for projecting a position (and each change point) to along-route metres
 
         // 1) cache hit → align cached change points to this geometry, no Overpass.
         const cached = cacheGet(meta);
         if (cached) {
             vertexLimit = limitsFromChangePoints(routePts, cached);
-            changePoints = cached;
+            changePoints = attachAlong(cached);
             drawMarkers(changePoints);
             dbg('Profil aus Cache: ' + changePoints.length + ' Umschaltpunkte');
             return;
@@ -345,14 +409,15 @@ window.TrackerSpeedProfile = function (ctx) {
         const subLimits = limitsFromWays(sub, ways);
         // expand the sub-sampled limits onto every vertex, then dissolve short junction juts (A-B-A).
         vertexLimit = deJut(routePts, expandToAll(routePts.length, resAt, subLimits));
-        changePoints = deriveChangePoints(routePts, vertexLimit);
+        changePoints = refineChangePoints(routePts, deriveChangePoints(routePts, vertexLimit), ways);
         if (gen !== buildGen) return;
-        cachePut(meta, changePoints);
+        cachePut(meta, changePoints);        // cache stays lean ({lat,lng,limit}) — `along` is derived per load
+        attachAlong(changePoints);
         drawMarkers(changePoints);
         dbg('Profil berechnet: ' + changePoints.length + ' Umschaltpunkte (' + ways.length + ' Wege)');
     }
 
-    function clear() { buildGen++; routePts = null; vertexLimit = null; changePoints = []; clearMarkers(); }
+    function clear() { buildGen++; routePts = null; routeCum = null; vertexLimit = null; changePoints = []; clearMarkers(); }
 
     // ---- small array utilities -------------------------------------------------------------------
     function downsample(arr, maxN) {
