@@ -31,6 +31,14 @@ window.TrackerHazards = function (ctx) {
     const AHEAD_TOL = 55;           // hazard bearing must be within this of travel direction (i.e. ahead)
     const WARN_REPEAT_MS = 90000;   // never re-warn the SAME hazard within this
 
+    // Roads-only + "my road" filtering (Doc 2026-07-02). Only DRIVABLE ways count — no service/footway/
+    // cycleway/path/track (that's what put the Andreaskreuz-pulk into the Lößnitzgrundbahn rail yard, where
+    // only foot/service paths cross the tracks). service is excluded too (parking aisles, driveways).
+    const DRIVE_RE = '^(motorway|trunk|primary|secondary|tertiary|unclassified|residential|living_street|road|motorway_link|trunk_link|primary_link|secondary_link|tertiary_link)$';
+    const COORD_EPS = 1e-6;         // ~0.11 m — a hazard node equals a way vertex byte-for-byte in Overpass out
+    const SNAP_MAX_M = 50;          // if even the nearest drivable way is farther than this, I'm not on a road
+    //                                 (rail yard / parking) → can't name "my road" → fall back to roads-only.
+
     // Clean inline SVG sign faces (crisper than emoji at pin size; brand red rgb(176,36,24), dark blue
     // rgb(14,36,78) instead of black). Sized 28 px; the pin adds a drop-shadow for contrast on the map.
     // Bahnübergang = the Andreaskreuz (Zeichen 201): a FREE-STANDING, Y-stretched (taller-than-wide) red-and-
@@ -82,7 +90,9 @@ window.TrackerHazards = function (ctx) {
 
     let layer = null, lastQ = 0, lastQPos = null, fetching = false;
     let lastUpdPos = null;          // for the travel-bearing baseline
-    let nodes = [];                 // [{ id, lat, lng, type }]
+    let nodes = [];                 // [{ id, lat, lng, type, wayIds[], wayNames[] }]
+    let roadWays = [];              // [{ id, name, pts:[[lat,lng]…] }] — drivable ways in range (with geometry)
+    let lastDrawWayId;              // id of "my road" at the last pin draw ('nav' while navigating) → redraw on change
     const warned = {};              // node id -> last warn timestamp
 
     function dbg(m) { try { if (window.DebugWindow) DebugWindow.log('⚠️ ' + m); } catch (e) { } }
@@ -136,19 +146,62 @@ window.TrackerHazards = function (ctx) {
             iconSize: [28, 28], iconAnchor: [14, 14],
         });
     }
+    // Planar point→segment distance in metres (ENU around p; fine at street scale).
+    function pointToSegM(p, a, b) {
+        const t = Math.PI / 180, mLat = 111320, mLon = 111320 * Math.cos(p[0] * t);
+        const ax = (a[1] - p[1]) * mLon, ay = (a[0] - p[0]) * mLat;
+        const bx = (b[1] - p[1]) * mLon, by = (b[0] - p[0]) * mLat;
+        const dx = bx - ax, dy = by - ay, len2 = dx * dx + dy * dy;
+        let u = len2 ? -((ax * dx + ay * dy) / len2) : 0;
+        u = Math.max(0, Math.min(1, u));
+        return Math.hypot(ax + u * dx, ay + u * dy);   // distance from p (origin) to the closest point
+    }
+    // Which drivable road(s) is a hazard node on? It IS a way member, so its coord equals a way vertex.
+    function waysAtPoint(lat, lon) {
+        const ids = [], names = [];
+        for (const w of roadWays) {
+            for (const pt of w.pts) {
+                if (Math.abs(pt[0] - lat) < COORD_EPS && Math.abs(pt[1] - lon) < COORD_EPS) {
+                    ids.push(w.id); if (w.name) names.push(w.name);
+                    break;
+                }
+            }
+        }
+        return { ids, names };
+    }
+    // Snap the current position onto the nearest drivable way = "my road" (or null if none within SNAP_MAX_M).
+    function snapMyRoad(here) {
+        if (!here || !roadWays.length) return null;
+        let best = null, bd = Infinity;
+        for (const w of roadWays) {
+            for (let i = 1; i < w.pts.length; i++) {
+                const d = pointToSegM(here, w.pts[i - 1], w.pts[i]);
+                if (d < bd) { bd = d; best = w; }
+            }
+        }
+        return (best && bd <= SNAP_MAX_M) ? best : null;
+    }
+
     function drawPins() {
         const lyr = ensureLayer();
         lyr.clearLayers();
-        // While navigating, show only what's relevant to MY route: a stop/give-way/Ampel on a CROSS street
-        // sits off the route line and is dropped — I only want the signs on the road I'm driving (Doc 2026-07-01).
-        // Bahnübergang is always kept (safety-critical). When NOT navigating, everything shows as before.
         const n2 = nav();
-        const filtering = !!(n2 && n2.isNavigating && n2.isNavigating());
+        const navigating = !!(n2 && n2.isNavigating && n2.isNavigating());
+        // Navigating → keep ONLY the signs on my ROUTE (all types incl. Bahnübergang — the old level_crossing
+        // exemption is exactly what carpet-bombed the rail yard, Doc 2026-07-02). Not navigating → keep only
+        // the signs on the road I'm currently on (snapped), so cross-street signs drop too. Can't name my road
+        // (off-road / no way data) → fall back to roads-only (the query already dropped non-drivable ways).
+        const myWay = navigating ? null : snapMyRoad(lastUpdPos || lastQPos);
+        lastDrawWayId = navigating ? 'nav' : (myWay ? myWay.id : null);
         for (const n of nodes) {
-            if (filtering && n.type !== 'level_crossing') {
+            let show = true;
+            if (navigating) {
                 const d = n2.distToRoute([n.lat, n.lng]);
-                if (d != null && d > ROUTE_HAZARD_M) continue;   // off my route → a cross-street sign → hide it
+                show = (d != null && d <= ROUTE_HAZARD_M);
+            } else if (myWay) {
+                show = n.wayIds.indexOf(myWay.id) >= 0 || (!!myWay.name && n.wayNames.indexOf(myWay.name) >= 0);
             }
+            if (!show) continue;
             L.marker([n.lat, n.lng], { icon: pin(n.type), interactive: false, keyboard: false, pane: 'markerPane' })
                 .bindTooltip(TYPES[n.type].label, { direction: 'top', opacity: 0.9 })
                 .addTo(lyr);
@@ -159,28 +212,46 @@ window.TrackerHazards = function (ctx) {
     async function query(here) {
         fetching = true;
         const r = QUERY_R_M, la = here[0], ln = here[1];
-        // Combined node query — crossings are narrowed to REAL zebra markings so we never pull (or pin) the
-        // parking-lot full of generic 'marked'/'uncontrolled' crossings (Doc: Elbepark/IKEA carpet-bomb).
-        const q = '[out:json][timeout:8];('
-            + 'node(around:' + r + ',' + la + ',' + ln + ')[railway=level_crossing];'
-            + 'node(around:' + r + ',' + la + ',' + ln + ')[highway=stop];'
-            + 'node(around:' + r + ',' + la + ',' + ln + ')[highway=give_way];'
-            + 'node(around:' + r + ',' + la + ',' + ln + ')[highway=traffic_signals];'
-            + 'node(around:' + r + ',' + la + ',' + ln + ')[highway=crossing][crossing=traffic_signals];'
-            + 'node(around:' + r + ',' + la + ',' + ln + ')[highway=crossing][crossing_ref=zebra];'
-            + 'node(around:' + r + ',' + la + ',' + ln + ')[highway=crossing]["crossing:markings"=zebra];'
-            + 'node(around:' + r + ',' + la + ',' + ln + ')[highway=crossing][crossing=zebra];'
+        // Roads-only (Doc 2026-07-02): scope every hazard to a DRIVABLE way (.rd) via node(w.rd) — so a
+        // level_crossing where only a foot/service path crosses the tracks (the rail-yard pulk) and any
+        // parking-lot sign never reach us. We also pull the drivable ways WITH GEOMETRY (.rd out geom) so we
+        // can snap the position to "my road" and tell which road each hazard sits on — no second request.
+        // Crossings stay narrowed to REAL zebra markings (no generic 'marked'/'uncontrolled', Doc: Elbepark).
+        const q = '[out:json][timeout:12];'
+            + 'way(around:' + r + ',' + la + ',' + ln + ')[highway~"' + DRIVE_RE + '"]->.rd;'
+            + '.rd out geom;'
+            + '('
+            + 'node(w.rd)[railway=level_crossing];'
+            + 'node(w.rd)[highway=stop];'
+            + 'node(w.rd)[highway=give_way];'
+            + 'node(w.rd)[highway=traffic_signals];'
+            + 'node(w.rd)[highway=crossing][crossing=traffic_signals];'
+            + 'node(w.rd)[highway=crossing][crossing_ref=zebra];'
+            + 'node(w.rd)[highway=crossing]["crossing:markings"=zebra];'
+            + 'node(w.rd)[highway=crossing][crossing=zebra];'
             + ');out;';
         try {
             const j = await window.queryOverpass(q, { timeout: QUERY_TIMEOUT_MS, dbg });
             if (!j || !Array.isArray(j.elements)) { dbg('Hazards: keine Antwort → behalte'); return; }
-            const next = [];
+            // Split the response: drivable ways (with geometry) first, then the hazard nodes.
+            const ways = [], rawNodes = [];
             for (const e of j.elements) {
+                if (e.type === 'way' && Array.isArray(e.geometry)) {
+                    ways.push({ id: e.id, name: (e.tags && (e.tags.name || e.tags.ref)) || '',
+                        pts: e.geometry.map((g) => [g.lat, g.lon]) });
+                } else if (e.type === 'node') { rawNodes.push(e); }
+            }
+            roadWays = ways;
+            const next = [];
+            for (const e of rawNodes) {
                 const type = classify(e.tags);
                 if (!type || e.lat == null || e.lon == null) continue;
-                next.push({ id: (e.type || 'n') + '/' + e.id, lat: e.lat, lng: e.lon, type });
+                const w = waysAtPoint(e.lat, e.lon);
+                next.push({ id: (e.type || 'n') + '/' + e.id, lat: e.lat, lng: e.lon, type,
+                    wayIds: w.ids, wayNames: w.names });
             }
             nodes = next;
+            lastDrawWayId = undefined;   // new set → let drawPins recompute the filter
             drawPins();
             // Per-type tally so Doc can SEE in the debug window exactly how many Ampeln (etc.) came back —
             // "Ampel:0" vs "Ampel:5" tells data-gap from render-bug apart at a glance (Doc 2026-07-01).
@@ -206,6 +277,14 @@ window.TrackerHazards = function (ctx) {
             travelBrg = bearingDeg(lastUpdPos, here);
         }
         lastUpdPos = here;
+        // Follow "my road" between the sparse re-queries: if the snapped road changed (turned into a new
+        // street), redraw the my-road filter. Cheap — snap over the cached ways, no network (Doc 2026-07-02).
+        if (nodes.length) {
+            const n2 = nav();
+            const navng = !!(n2 && n2.isNavigating && n2.isNavigating());
+            const wid = navng ? 'nav' : (function () { const w = snapMyRoad(here); return w ? w.id : null; })();
+            if (wid !== lastDrawWayId) drawPins();
+        }
         if (travelBrg == null) return;
         // nearest "warn" hazard ahead within the window
         let best = null, bestD = Infinity;
