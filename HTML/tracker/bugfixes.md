@@ -32,12 +32,6 @@
 **Drei Befunde → Fix:** (1) `start ✓` aber NIE ein `event` → API streamt nicht; wahrscheinlich nativ `RECEIVER_NOT_EXPORTED` in `ActivityRecognitionPlugin.java:100` blockt den Broadcast (Android 14+) → nativer Fix + APK-Build. (2) Events kommen, aber `on_bicycle/walking` beim Autofahren → JS-Speed-Korrektur (>25 km/h über X s → `in_vehicle`). (3) `FEHLER: …` nennt die Ursache direkt.
 **NICHT raten:** zuerst die Log-Zeilen, dann entscheiden ob nativer oder JS-Fix.
 
-## BUG-7 — Tempolimit-Schild zeigt falschen Wert 🐞 · 🔍 erst messen
-**Symptom:** Die angezeigte Geschwindigkeits**begrenzung** (rundes Schild) stimmt offenbar nicht.
-**Wo:** `HTML/js/tracker-speedlimit.js` — Overpass `way(around:35,…)[highway][maxspeed]`, nimmt den nächsten Weg per Geometrie, maxspeed-Parser, Throttle `MIN_INTERVAL_MS=5000` (neu greppen).
-**Verdächtige (erst messen):** (1) **falscher Weg** — „nächster binnen 35 m" ist evtl. Nebenstraße/Gegenfahrbahn statt Hauptstraße. (2) **maxspeed-Tag** fehlt/uneindeutig → Nachbar greift. (3) **stale** durch Throttle/Overpass-Latenz. (4) Zonen-/`maxspeed:conditional`-Tags (DE) falsch interpretiert.
-**Erst messen:** pro Abfrage ins DEBUG-Fenster: gewählter Weg (name/ref), roher maxspeed-Tag, Distanz, Kandidatenliste → zeigt, ob's die Wegwahl oder das Parsing ist.
-
 ## BUG-8 — Erkennung verwechselt Nachbar-Bauwerke (keine Blickrichtung) 🐞 offen
 **Symptom:** Am Dresdner Standort sagt die Erkennung **immer „Stadtschloss"**, egal wohin die Kamera zeigt — tatsächlich ist es der **Zwinger** (beide dicht beieinander).
 **Ursache (belegt):** Es gibt **keine Blickrichtung** — Client `HTML/js/tracker-media.js` schickt kein heading/bearing mit dem Foto; Edge Function `supabase/functions/identify/index.ts` gründet rein auf **lat/lng** (Wikipedia geosearch `gsradius=600`, Overpass `around:130-160 m`). Im Radius liegen Zwinger UND Schloss → ohne Heading rät es nach Nähe.
