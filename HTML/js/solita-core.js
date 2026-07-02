@@ -1063,14 +1063,6 @@
                 return true;
             }
 
-            if (userText.toLowerCase() === '/spass') {         // /spass → wake her with Doc's joke ack, then listen
-                messageInput.value = ''; messageInput.style.height = 'auto';
-                if (window.solitaWakeWith) window.solitaWakeWith(['Was ist es nuuun schon wieder?', 'Das war natürlich Spaß! Wie kann ich Dir helfen?']);
-                messagesArea.insertAdjacentHTML('beforeend', '<div style="text-align:center;opacity:0.5;font-size:0.68rem;letter-spacing:1.5px;text-transform:uppercase;margin:12px 0;font-family:Orbitron,sans-serif;color:#cfe3ff;">— Solita wach · hört zu —</div>');
-                messagesArea.scrollTop = messagesArea.scrollHeight;
-                return true;
-            }
-
             if (userText.toLowerCase() === '/pause') {         // /pause → drop her into the quiet SLUMBER (dormant)
                 messageInput.value = ''; messageInput.style.height = 'auto';
                 if (window.solitaPause) window.solitaPause();
