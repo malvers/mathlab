@@ -65,6 +65,13 @@ window.TrackerHazards = function (ctx) {
     const SVG_YIELD =
         '<svg viewBox="0 0 40 40" width="28" height="28" aria-label="Vorfahrt achten">'
         + '<polygon points="3,6.5 37,6.5 20,36" fill="#fff" stroke="rgb(176,36,24)" stroke-width="4.5" stroke-linejoin="round"/></svg>';
+    // Vorfahrtstraße (Zeichen 306, colloquially "Hauptstraße"): a square on its point — yellow field inside a
+    // white border. Amtliches Werk (§5 UrhG) → public domain. Thin dark-blue keyline (never black, Doc's rule)
+    // so the white border still reads on OSM's light map (the drop-shadow wrapper alone isn't enough).
+    const SVG_PRIORITY =
+        '<svg viewBox="0 0 40 40" width="28" height="28" aria-label="Vorfahrtstraße">'
+        + '<polygon points="20,1.5 38.5,20 20,38.5 1.5,20" fill="#fff" stroke="rgb(8,20,42)" stroke-width="1.2" stroke-linejoin="round"/>'
+        + '<polygon points="20,6 34,20 20,34 6,20" fill="#FCD116"/></svg>';
     // Zebra = the OFFICIAL German Fußgängerüberweg sign (Zeichen 350-10, walking right). German traffic
     // signs are amtliche Werke (§5 UrhG) → public domain; this SVG is from Wikimedia Commons, metadata
     // stripped + scaled to 28px (Doc 2026-07-01, "findest DAS svg?"). Authentic black figure (not the
@@ -84,6 +91,7 @@ window.TrackerHazards = function (ctx) {
         level_crossing: { label: 'Bahnübergang',    svg: SVG_ANDREAS,  warn: true },
         stop:           { label: 'Stopp',            svg: SVG_STOP,     warn: true },
         give_way:       { label: 'Vorfahrt achten',  svg: SVG_YIELD,    warn: false },
+        priority:       { label: 'Vorfahrtstraße',   svg: SVG_PRIORITY, warn: false },
         traffic_signals:{ label: 'Ampel',            svg: SVG_AMPEL,    warn: false },
         zebra:          { label: 'Zebrastreifen',    svg: SVG_ZEBRA,    warn: false },
     };
@@ -123,6 +131,9 @@ window.TrackerHazards = function (ctx) {
         if (tags.railway === 'level_crossing') return 'level_crossing';
         if (tags.highway === 'stop') return 'stop';
         if (tags.highway === 'give_way') return 'give_way';
+        // Vorfahrtstraße (Zeichen 306, "Hauptstraße") — the physical priority-road sign, tagged on a node as
+        // traffic_sign=DE:306 (also matches a bare "306" or a "DE:306;…" combo). \b306\b so 3060 etc. don't hit.
+        if (/\b306\b/.test(tags.traffic_sign || '')) return 'priority';
         if (tags.highway === 'traffic_signals') return 'traffic_signals';
         if (tags.highway === 'crossing') {
             // A SIGNALISED crossing (Fußgänger-/Bettelampel) is an Ampel too — in DE most town traffic lights
@@ -224,6 +235,7 @@ window.TrackerHazards = function (ctx) {
             + 'node(w.rd)[railway=level_crossing];'
             + 'node(w.rd)[highway=stop];'
             + 'node(w.rd)[highway=give_way];'
+            + 'node(w.rd)[traffic_sign~"306"];'
             + 'node(w.rd)[highway=traffic_signals];'
             + 'node(w.rd)[highway=crossing][crossing=traffic_signals];'
             + 'node(w.rd)[highway=crossing][crossing_ref=zebra];'
