@@ -159,8 +159,8 @@ const DebugWindow = (() => {
         btnFontMinus.title = 'Schrift kleiner';
         btnFontMinus.style.cssText = `
             background: transparent;
-            border: 1px solid #6BA043;
-            color: #6BA043;
+            border: 1px solid #b8b8b8;
+            color: #b8b8b8;
             width: 28px;
             height: 24px;
             cursor: pointer;
@@ -182,8 +182,8 @@ const DebugWindow = (() => {
         btnFontPlus.title = 'Schrift größer';
         btnFontPlus.style.cssText = `
             background: transparent;
-            border: 1px solid #6BA043;
-            color: #6BA043;
+            border: 1px solid #b8b8b8;
+            color: #b8b8b8;
             width: 28px;
             height: 24px;
             cursor: pointer;
