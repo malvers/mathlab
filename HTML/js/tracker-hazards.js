@@ -250,7 +250,8 @@ window.TrackerHazards = function (ctx) {
             for (const e of j.elements) {
                 if (e.type === 'way' && Array.isArray(e.geometry)) {
                     ways.push({ id: e.id, name: (e.tags && (e.tags.name || e.tags.ref)) || '',
-                        pts: e.geometry.map((g) => [g.lat, g.lon]) });
+                        pts: e.geometry.map((g) => [g.lat, g.lon]),
+                        priority: /^(designated|yes)$/i.test((e.tags && e.tags.priority_road) || '') });
                 } else if (e.type === 'node') { rawNodes.push(e); }
             }
             roadWays = ways;
@@ -261,6 +262,30 @@ window.TrackerHazards = function (ctx) {
                 const w = waysAtPoint(e.lat, e.lon);
                 next.push({ id: (e.type || 'n') + '/' + e.id, lat: e.lat, lng: e.lon, type,
                     wayIds: w.ids, wayNames: w.names });
+            }
+            // Vorfahrtstraße (Zeichen 306) is almost never a mapped point sign in DE — it's the WAY tag
+            // priority_road=designated (Doc 2026-07-02, measured at Schloss Wackerbarth: 11 priority_road ways,
+            // zero traffic_sign=306 nodes). The physical yellow diamond stands where such a road crosses a
+            // lesser road, so synthesise a 'priority' pin at each junction shared by a priority_road way AND a
+            // non-priority drivable way. Shared OSM junction nodes carry identical coords across ways → key by
+            // rounded coord. The pin is tagged with the PRIORITY way only, so drawPins shows it when you're ON
+            // the Hauptstraße (you have right of way) — NOT when you're on the crossing side street.
+            const jSeen = new Map();
+            for (const w of ways) {
+                for (const p of w.pts) {
+                    const k = p[0].toFixed(5) + ',' + p[1].toFixed(5);
+                    let e = jSeen.get(k);
+                    if (!e) { e = { ll: p, ids: new Set(), priIds: [], priNames: [], other: false }; jSeen.set(k, e); }
+                    e.ids.add(w.id);
+                    if (w.priority) { e.priIds.push(w.id); if (w.name) e.priNames.push(w.name); }
+                    else { e.other = true; }
+                }
+            }
+            for (const e of jSeen.values()) {
+                if (e.ids.size >= 2 && e.priIds.length && e.other) {
+                    next.push({ id: 'pri/' + e.ll[0].toFixed(5) + ',' + e.ll[1].toFixed(5),
+                        lat: e.ll[0], lng: e.ll[1], type: 'priority', wayIds: e.priIds, wayNames: e.priNames });
+                }
             }
             nodes = next;
             lastDrawWayId = undefined;   // new set → let drawPins recompute the filter
