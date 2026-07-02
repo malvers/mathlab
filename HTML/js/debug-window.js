@@ -9,7 +9,7 @@ const DebugWindow = (() => {
     let prevTop = '';
     let colLeft = '';  // collapsed-pill position (persisted); 'auto'/'' → snap bottom-right
     let colTop = '';
-    let fontSize = 11; // px — persisted; user-adjustable via +/- buttons
+    let fontSize = 14; // px — default (Doc 2026-07-02: größer); persisted; user-adjustable via +/- buttons
     const MIN_FONT = 8;
     const MAX_FONT = 28;
     const MAX_LOGS = 50;
