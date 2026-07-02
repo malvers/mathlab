@@ -204,8 +204,8 @@ const DebugWindow = (() => {
         btnCopy.title = 'Copy to clipboard';
         btnCopy.style.cssText = `
             background: transparent;
-            border: 1px solid #6BA043;
-            color: #6BA043;
+            border: 1px solid rgb(245, 194, 66);
+            color: rgb(245, 194, 66);
             width: 28px;
             height: 24px;
             cursor: pointer;
