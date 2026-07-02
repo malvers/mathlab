@@ -101,7 +101,7 @@
             <li><b>③ Start-Überbrückung (D2):</b> Abgriff am Kl.50-Sammelknoten → Diode D2 → Zündspule-Kl.15 (hinter K2). Löst den Bypass↔K2-Konflikt.</li>
             <li><b>Not-Stopp bleibt: Schlüssel auf 0.</b> App-STOP wirkt nur auf die Fahrt-Kl.15 — solange Schlüssel auf Start steht oder ein App-Start läuft, läuft die Zündung weiter.</li>
             <li><b>App-Verriegelung Pflicht:</b> Start &amp; Stop nie gleichzeitig. STOP bricht zuerst den Startimpuls ab (Bosch fällt ab), dann öffnet K2.</li>
-            <li><b>Anlasser nur kurz:</b> Monoflop (&lt;2–3 s) + „Motor-läuft"-Sperre (D+/Drehzahl) im K1→Bosch-86-Pfad — sonst Dauer-Crank / Ritzel-Crash.</li>
+            <li><b>Startpuls 2–3 s = Software im Modul</b> (Puls-Modus bzw. App/Solita EIN→AUS) — kein Bauteil im Plan, sonst Dauer-Crank / Ritzel-Crash. „Motor-läuft"-Sperre (D+/Drehzahl) noch nicht gebaut.</li>
             <li><b>Zusatzteile:</b> D1 (Freilaufdiode über Bosch-Spule 86/85), D2 (Entkopplung im Bypass), RC-Snubber 0,1 µF + 100 Ω über K2 COM–NC.</li>
             <li><b>Sicherungen:</b> Bosch-30/Kl.50 ~30–50 A (Inrush), Modul-DC+ &amp; K1·COM ~3–5 A.</li>
             <li><b>Modul:</b> Kanal 2 als echten <b>NC</b> verifizieren (Durchgangsprüfer); <b>Verpolung</b> messen (SH-HC-08 stirbt sofort); DC− als <b>Stern-Masse</b> getrennt vom Anlasser-Rückweg führen.</li>
@@ -129,7 +129,6 @@
             vr:    { x: 510, y: 632, w: 120, h: 48, title: 'Vorwiderstand', sub: '0,9 Ω · Serie', tf: 10, toff: 8 },
             dist:  { x: 880, y: 560, w: 180, h: 95, title: 'Verteiler', sub: 'Unterbrecher · Kondensator' },
             kerz:  { x: 1110, y: 575, w: 90, h: 70, title: 'Kerzen', sub: '1 – 6' },
-            mono:  { x: 320, y: 494, w: 185, h: 44, title: 'Monoflop + Sperre', sub: '<2–3 s · Motor-läuft', origin: 'unser' },
         };
 
         // ---- terminals: draggable circles. comp = parent box (moves together). dir = label side ----
@@ -167,15 +166,12 @@
             distGnd:{ x: 965, y: 655, label: '', dir: 'b', comp: 'dist' },
             kerzIn: { x: 1110, y: 600, label: '', dir: 'l', comp: 'kerz' },
             kerzGnd:{ x: 1155, y: 645, label: '', dir: 'b', comp: 'kerz' },
-            monoIn: { x: 320, y: 516, label: 'von K1', dir: 'l', comp: 'mono' },
-            monoOut:{ x: 505, y: 516, label: 'zu 86', dir: 'r', comp: 'mono' },
         };
 
         // ---- wires between nodes (bend: hv = horizontal first, vh = vertical first) ----
         const WIRES = [
-            // START (unser): K1 -> Monoflop -> Bosch -> Kl.50
-            { a: 'k1no', b: 'monoIn', cls: 'w-start', grp: 'start', bend: 'hv', origin: 'unser' },
-            { a: 'monoOut', b: 'b86', cls: 'w-start', grp: 'start', bend: 'vh', origin: 'unser' },
+            // START (unser): K1 -> Bosch 86 -> Kl.50  (Startpuls 2–3 s = Software im Modul)
+            { a: 'k1no', b: 'b86', cls: 'w-start', grp: 'start', bend: 'hv', origin: 'unser' },
             { a: 'b87', b: 'msKl50', cls: 'w-start', grp: 'start', bend: 'vh', origin: 'unser' },
             // START (Serie): Schlüssel-Kl.50 parallel an Magnetschalter-Kl.50  [Einklink 1]
             { a: 'keyStart', b: 'msKl50', cls: 'w-start', grp: 'start', bend: 'hv' },
