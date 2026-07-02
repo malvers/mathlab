@@ -258,8 +258,8 @@ const DebugWindow = (() => {
         btnCollapse.title = 'Collapse/Expand';
         btnCollapse.style.cssText = `
             background: transparent;
-            border: 1px solid ${collapsed ? '#444444' : '#6BA043'};
-            color: ${collapsed ? '#444444' : '#6BA043'};
+            border: 1px solid ${collapsed ? '#444444' : 'rgb(66, 135, 245)'};
+            color: ${collapsed ? '#444444' : 'rgb(66, 135, 245)'};
             width: 28px;
             height: 24px;
             cursor: pointer;
@@ -700,8 +700,8 @@ const DebugWindow = (() => {
             }
             if (btn) {
                 btn.textContent = '▼';
-                btn.style.borderColor = '#6BA043';
-                btn.style.color = '#6BA043';
+                btn.style.borderColor = 'rgb(66, 135, 245)';
+                btn.style.color = 'rgb(66, 135, 245)';
             }
         }
 
