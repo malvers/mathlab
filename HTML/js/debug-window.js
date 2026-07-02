@@ -115,7 +115,7 @@ const DebugWindow = (() => {
         const setStamp = (d) => {
             title.textContent = (d && !isNaN(d.getTime()))
                 ? '🐛 B: ' + p2(d.getDate()) + '.' + p2(d.getMonth() + 1) + '. '
-                  + p2(d.getHours()) + ':' + p2(d.getMinutes()) + ':' + p2(d.getSeconds())
+                  + p2(d.getHours()) + ':' + p2(d.getMinutes())
                 : '🐛 B: ' + (document.lastModified || '?');
         };
         setStamp(new Date(document.lastModified)); // instant provisional = the served HTML's own date
