@@ -114,9 +114,9 @@ const DebugWindow = (() => {
         const p2 = (n) => String(n).padStart(2, '0');
         const setStamp = (d) => {
             title.textContent = (d && !isNaN(d.getTime()))
-                ? '🐛 b: ' + p2(d.getDate()) + '.' + p2(d.getMonth() + 1) + '. '
+                ? '🐛 B: ' + p2(d.getDate()) + '.' + p2(d.getMonth() + 1) + '. '
                   + p2(d.getHours()) + ':' + p2(d.getMinutes()) + ':' + p2(d.getSeconds())
-                : '🐛 b: ' + (document.lastModified || '?');
+                : '🐛 B: ' + (document.lastModified || '?');
         };
         setStamp(new Date(document.lastModified)); // instant provisional = the served HTML's own date
         if (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname)) {
