@@ -84,6 +84,7 @@ const DebugWindow = (() => {
             overflow: hidden;
             transition: height 0.25s ease, width 0.25s ease;
             touch-action: none;
+            cursor: ${collapsed ? 'move' : 'default'};
         `;
 
         const header = document.createElement('div');
@@ -642,6 +643,7 @@ const DebugWindow = (() => {
             debugEl.style.alignItems = 'center';
             debugEl.style.borderColor = '#444444';
             debugEl.style.color = '#444444';
+            debugEl.style.cursor = 'move';   // whole collapsed pill is draggable → show the move cross
             // Snap collapsed pill to bottom-right of viewport (a fresh collapse forgets any moved position)
             debugEl.style.left = 'auto';
             debugEl.style.top = 'auto';
@@ -674,6 +676,7 @@ const DebugWindow = (() => {
             debugEl.style.alignItems = 'stretch';
             debugEl.style.borderColor = '#6BA043';
             debugEl.style.color = '#6BA043';
+            debugEl.style.cursor = 'default';   // expanded → only the header drags
             if (prevLeft || prevTop) {
                 debugEl.style.left = prevLeft;
                 debugEl.style.top = prevTop;
