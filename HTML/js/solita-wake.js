@@ -160,7 +160,7 @@
             // `offerHelp` is the lock-wake question (she woke from sleep and asks before acting); `okay` is the
             // brief acknowledgement when Doc declines, right before she drifts back to sleep.
             const SAY = {
-                de: { yes: ['Ja!', 'Sí!', 'Bin da!', 'Kann ich helfen!', 'Yes!', 'Was ist es nun schon wieder? Spaaaaß!!! wie kann ich Dir helfen?'], offerHelp: ['Soll ich helfen?', 'Brauchst du mich?', 'Kann ich helfen?', 'Ja? Soll ich helfen?'], okay: ['Okay.', 'Alles klar.', 'Dann schlafe ich weiter.', 'Bis gleich.'], bye: 'Bis später.', logout: 'Logge dich aus. Bis bald.' },
+                de: { yes: ['Ja, bin da!', 'Bin da!', 'Kann ich helfen!', 'Yes, bin da!'], offerHelp: ['Soll ich helfen?', 'Brauchst du mich?', 'Kann ich helfen?', 'Ja? Soll ich helfen?'], okay: ['Okay.', 'Alles klar.', 'Dann schlafe ich weiter.', 'Bis gleich.'], bye: 'Bis später.', logout: 'Logge dich aus. Bis bald.' },
                 en: { yes: ['Yes?', 'Yep!', 'Hey!', 'I’m here!', 'What’s up?', 'Go ahead.', 'Sí?', 'Listening!'], offerHelp: ['Can I help?', 'Need me?', 'Should I help?', 'Yes? Can I help?'], okay: ['Okay.', 'Alright.', 'Back to sleep then.', 'See you.'], bye: 'See you later.', logout: 'Logging you out. See you soon.' },
                 es: { yes: ['¿Sí?', '¿Dime?', '¡Aquí estoy!', '¡Hey!', '¿Qué tal?', 'Te escucho.', '¡Sí, sí!'], offerHelp: ['¿Te ayudo?', '¿Me necesitas?', '¿Puedo ayudar?', '¿Sí? ¿Te ayudo?'], okay: ['Vale.', 'De acuerdo.', 'Sigo durmiendo.', 'Hasta luego.'], bye: 'Hasta luego.', logout: 'Cerrando sesión. Hasta pronto.' }
             };
