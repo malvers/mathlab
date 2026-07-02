@@ -146,6 +146,8 @@ const DebugWindow = (() => {
         }
         title.style.display = collapsed ? 'none' : 'block';
         title.style.marginRight = '8px';
+        title.style.fontSize = '17px';   // build stamp deutlich größer (Doc 2026-07-02)
+        title.style.fontWeight = '700';
         header.appendChild(title);
 
         const btnGroup = document.createElement('div');
