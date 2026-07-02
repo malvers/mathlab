@@ -41,13 +41,22 @@ window.TrackerMedia = function (T) {
             } catch (e) { /* fall back to the publishable key */ }
             const kb = Math.round(base64.length * 3 / 4 / 1024);
             const t0 = Date.now();
-            DebugWindow.log('identify → ' + kb + ' KB gesendet …');
+            // The CAMERA's viewing direction (compass bearing) so identify can prefer POIs in the view cone
+            // instead of guessing by pure nearest — BUG-8: standing between Zwinger & Stadtschloss the heading
+            // disambiguates which one you're pointing at. Null when the device has no compass → nearest as before.
+            let heading = null;
+            try {
+                const h = T.compass && T.compass.getHeading && T.compass.getHeading();
+                if (typeof h === 'number' && !isNaN(h)) heading = Math.round((h % 360 + 360) % 360);
+            } catch (e) { /* no compass → identify falls back to nearest, exactly as before */ }
+            const payload = { image: base64, mime: 'image/jpeg' };
+            if (lat != null && lng != null) { payload.lat = lat; payload.lng = lng; }   // location context for Gemini
+            if (heading != null) payload.heading = heading;                             // → view-cone preference
+            DebugWindow.log('identify → ' + kb + ' KB gesendet' + (heading != null ? ' · Blick ' + heading + '°' : '') + ' …');
             const res = await fetch(IDENTIFY_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + token },
-                body: JSON.stringify((lat != null && lng != null)
-                    ? { image: base64, mime: 'image/jpeg', lat: lat, lng: lng }   // give Gemini the location context
-                    : { image: base64, mime: 'image/jpeg' }),
+                body: JSON.stringify(payload),
             });
             const j = await res.json().catch(() => ({}));
             const dt = ((Date.now() - t0) / 1000).toFixed(1);

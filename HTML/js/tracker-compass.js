@@ -12,6 +12,7 @@ window.TrackerCompass = function (ctx) {
     let gotAbsolute = false; // once a true north-referenced reading arrives, ignore relative fallbacks
     let sawEvent = false;    // did ANY orientation event ever fire? (WebView/permission diagnosis)
     let watchdog = null;
+    let lastHeading = null;  // latest bearing in ° (0–360, CW from north); read by the Foto-Spur via getHeading()
     const dbg = (m) => { if (window.DebugWindow && window.DebugWindow.log) window.DebugWindow.log('compass: ' + m); };
 
     function applyHeading(h) {
@@ -40,7 +41,7 @@ window.TrackerCompass = function (ctx) {
             h = (360 - e.alpha) % 360;
         }
         if (abs) gotAbsolute = true;
-        if (h != null && !isNaN(h)) applyHeading(h);
+        if (h != null && !isNaN(h)) { lastHeading = h; applyHeading(h); }
     }
 
     function listen() {
@@ -89,5 +90,9 @@ window.TrackerCompass = function (ctx) {
         } catch (e) { /* no orientation support → widget stays hidden */ }
     })();
 
-    return { enable };
+    // getHeading(): the latest compass bearing in degrees (0–360, clockwise from true north), or null if the
+    // device has no compass / no reading yet. Once an absolute (north-referenced) reading has arrived, relative
+    // fallbacks are ignored (see onOrient) → this is true north when available. Used by the Foto-Spur to send
+    // the CAMERA's viewing direction with a photo so `identify` prefers POIs in that cone (BUG-8). Doc 2026-07-02.
+    return { enable, getHeading: () => lastHeading };
 };
