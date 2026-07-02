@@ -2517,6 +2517,7 @@ ${pts}
             map, $, toast, ensureSb, wpSer, doSync, bufferSnapshot, addLiveMedia,
             SUPABASE_URL, SUPABASE_KEY, COL_ORANGE, EUR_PER_PHOTO,
             get lastFix() { return lastFix; },
+            get compass() { return __compass; },   // camera viewing direction for a photo → identify view-cone (BUG-8)
             get tracking() { return tracking; },
             get posMarker() { return posMarker; },
             get currentTrackId() { return currentTrackId; }, set currentTrackId(v) { currentTrackId = v; },

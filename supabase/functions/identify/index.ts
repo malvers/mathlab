@@ -182,34 +182,66 @@ function withTimeout<T>(p: Promise<T>, ms: number): Promise<T> {
   return Promise.race([p, new Promise<T>((_, rej) => setTimeout(() => rej(new Error('timeout')), ms))]);
 }
 
+// Compass bearing (° clockwise from north) from point 1 → point 2.
+function bearingTo(lat1: number, lng1: number, lat2: number, lng2: number): number {
+  const r = Math.PI / 180;
+  const y = Math.sin((lng2 - lng1) * r) * Math.cos(lat2 * r);
+  const x = Math.cos(lat1 * r) * Math.sin(lat2 * r) -
+    Math.sin(lat1 * r) * Math.cos(lat2 * r) * Math.cos((lng2 - lng1) * r);
+  return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
+}
+// Smallest absolute angle between two bearings (0–180).
+function angDiff(a: number, b: number): number { return Math.abs(((a - b + 540) % 360) - 180); }
+// Great-circle distance in metres.
+function distM(lat1: number, lng1: number, lat2: number, lng2: number): number {
+  const R = 6371000, r = Math.PI / 180;
+  const dLat = (lat2 - lat1) * r, dLng = (lng2 - lng1) * r;
+  const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * r) * Math.cos(lat2 * r) * Math.sin(dLng / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(a));
+}
+// A nearby named place, with its coordinates so we can tell whether it lies in the camera's view cone.
+type GeoHit = { text: string; lat: number; lng: number; dist: number };
+const CONE_HALF = 55; // ±° around the camera heading counted as "in view" — wide enough to survive compass
+//                       jitter (esp. when standing still), tight enough to separate two adjacent landmarks.
+
 // Build a short German LOCATION CONTEXT from two free, key-free, anonymous APIs so Gemini can name the
-// river/bridge/landmark instead of guessing blind from the pixels. Best-effort: any error/timeout is
-// dropped and recognition runs exactly as before. Only anonymous coordinates leave — never the photo.
-async function geoContext(lat: number, lng: number): Promise<string> {
+// river/bridge/landmark instead of guessing blind from the pixels. When a camera `heading` is given, the
+// things IN the view cone are listed first and Gemini is told to strongly prefer them (BUG-8: at a spot
+// where Zwinger AND Stadtschloss are both within 150 m, the heading decides which one you point at).
+// Best-effort: any error/timeout is dropped and recognition runs exactly as before. Only anonymous
+// coordinates leave — never the photo.
+async function geoContext(lat: number, lng: number, heading: number | null): Promise<string> {
   // Wikipedia: the NOTABLE things nearby (Frauenkirche, Schloss Moritzburg, …), sorted by distance.
-  const wiki = (async (): Promise<string[]> => {
+  const wiki = (async (): Promise<GeoHit[]> => {
     const u = `https://de.wikipedia.org/w/api.php?action=query&list=geosearch&gscoord=${lat}%7C${lng}&gsradius=600&gslimit=8&format=json`;
     const r = await fetch(u, { headers: { 'User-Agent': 'DocAlversTracker/1.0 (geo-context)' } });
     const d = await r.json();
-    return (d?.query?.geosearch || []).map((g: { title: string; dist: number }) => `${g.title} (${Math.round(g.dist)} m)`);
+    return (d?.query?.geosearch || [])
+      .filter((g: { lat?: number; lon?: number }) => typeof g.lat === 'number' && typeof g.lon === 'number')
+      .map((g: { title: string; dist: number; lat: number; lon: number }) =>
+        ({ text: `${g.title} (${Math.round(g.dist)} m)`, lat: g.lat, lng: g.lon, dist: g.dist }));
   })();
 
   // Overpass/OSM: the NAMED thing right under you — river / bridge / artwork / historic — which
-  // Wikipedia often has no own article for ("Elbe", a concrete bridge name).
-  const overpass = (async (): Promise<string[]> => {
-    const q = `[out:json][timeout:8];(way(around:160,${lat},${lng})[waterway=river][name];way(around:160,${lat},${lng})[bridge][name];node(around:160,${lat},${lng})[tourism=artwork][name];way(around:130,${lat},${lng})[historic][name];);out tags 14;`;
+  // Wikipedia often has no own article for ("Elbe", a concrete bridge name). `out center` gives each a
+  // coordinate (node position or way centroid) so it too can be placed in / out of the view cone.
+  const overpass = (async (): Promise<GeoHit[]> => {
+    const q = `[out:json][timeout:8];(way(around:160,${lat},${lng})[waterway=river][name];way(around:160,${lat},${lng})[bridge][name];node(around:160,${lat},${lng})[tourism=artwork][name];way(around:130,${lat},${lng})[historic][name];);out center 14;`;
     const r = await fetch('https://overpass-api.de/api/interpreter', {
       method: 'POST',
       headers: { 'User-Agent': 'DocAlversTracker/1.0 (geo-context)' },
       body: 'data=' + encodeURIComponent(q),
     });
     const d = await r.json();
-    const seen = new Set<string>(); const out: string[] = [];
+    const seen = new Set<string>(); const out: GeoHit[] = [];
     for (const e of (d?.elements || [])) {
       const t = e.tags || {}; const n: string = t.name; if (!n || seen.has(n)) continue; seen.add(n);
+      const elat = typeof e.lat === 'number' ? e.lat : e.center?.lat;
+      const elng = typeof e.lon === 'number' ? e.lon : e.center?.lon;
+      if (typeof elat !== 'number' || typeof elng !== 'number') continue;
       const kind = t.waterway ? 'Fluss' : (t.bridge || t.man_made === 'bridge') ? 'Brücke'
         : t.tourism === 'artwork' ? 'Kunstwerk' : t.historic ? 'historisch' : '';
-      out.push(kind ? `${n} (${kind})` : n);
+      out.push({ text: kind ? `${n} (${kind})` : n, lat: elat, lng: elng, dist: distM(lat, lng, elat, elng) });
     }
     return out;
   })();
@@ -220,8 +252,27 @@ async function geoContext(lat: number, lng: number): Promise<string> {
   if (!wikiHits.length && !osmHits.length) return '';
 
   let ctx = `\n\nSTANDORT-KONTEXT (Foto aufgenommen bei ${lat.toFixed(4)}, ${lng.toFixed(4)}):`;
-  if (osmHits.length) ctx += `\nDirekt vor Ort (OpenStreetMap): ${osmHits.slice(0, 6).join('; ')}.`;
-  if (wikiHits.length) ctx += `\nBekanntes in der Nähe (Wikipedia): ${wikiHits.slice(0, 8).join('; ')}.`;
+
+  // With a camera heading: split everything into "in the view cone" vs. the rest and lead with the cone.
+  if (typeof heading === 'number' && !isNaN(heading)) {
+    const all = [...osmHits, ...wikiHits];
+    const inView: GeoHit[] = [], aside: GeoHit[] = [];
+    for (const h of all) (angDiff(bearingTo(lat, lng, h.lat, h.lng), heading) <= CONE_HALF ? inView : aside).push(h);
+    inView.sort((a, b) => a.dist - b.dist); aside.sort((a, b) => a.dist - b.dist);
+    ctx += `\nBLICKRICHTUNG der Kamera: ${Math.round(heading)}° (Kompass, 0=Nord, im Uhrzeigersinn).`;
+    if (inView.length) {
+      ctx += `\nIM SICHTKEGEL (±${CONE_HALF}° voraus — DAHIN zeigt die Kamera): ${inView.slice(0, 8).map((h) => h.text).join('; ')}.`;
+      ctx += `\nBevorzuge STARK ein benanntes Motiv aus dem Sichtkegel — die Kamera ist darauf gerichtet. Nur wenn nichts davon zum Bild passt, ziehe den Rest in Betracht.`;
+      if (aside.length) ctx += `\nSeitlich/hinter dir (nur Fallback): ${aside.slice(0, 6).map((h) => h.text).join('; ')}.`;
+    } else {
+      // Heading given but nothing named in the cone → fall back to the full nearby list (no false steer).
+      ctx += `\nNichts Benanntes exakt im Sichtkegel; in der Nähe: ${aside.slice(0, 8).map((h) => h.text).join('; ')}.`;
+    }
+  } else {
+    // No heading (device has no compass) → the original nearest-based context, unchanged.
+    if (osmHits.length) ctx += `\nDirekt vor Ort (OpenStreetMap): ${osmHits.slice(0, 6).map((h) => h.text).join('; ')}.`;
+    if (wikiHits.length) ctx += `\nBekanntes in der Nähe (Wikipedia): ${wikiHits.slice(0, 8).map((h) => h.text).join('; ')}.`;
+  }
   ctx += `\nBerücksichtige diesen Standort. Wenn das Hauptmotiv ein benannter Fluss, eine Brücke, ein Bauwerk, ein Denkmal oder ein Kunstwerk aus dieser Liste ist, benenne es KONKRET statt generisch. Erfinde aber nichts, was nicht zum Bild passt.`;
   return ctx;
 }
@@ -233,13 +284,18 @@ Deno.serve(async (req) => {
     const key = Deno.env.get('GEMINI_API_KEY');
     if (!key) return json({ error: 'GEMINI_API_KEY fehlt — als Edge-Function-Secret setzen.' }, 500);
 
-    const { image, mime, lat, lng } = await req.json().catch(() => ({}));
+    const { image, mime, lat, lng, heading } = await req.json().catch(() => ({}));
     if (!image) return json({ error: 'kein Bild übergeben' }, 400);
+
+    // Camera viewing direction (BUG-8): a finite compass bearing 0–360 makes geoContext prefer POIs in the
+    // view cone. Anything else (absent / null / NaN) → nearest-based context, exactly as before.
+    const hdg: number | null = (typeof heading === 'number' && isFinite(heading))
+      ? ((heading % 360) + 360) % 360 : null;
 
     // Kick off the location context NOW (best-effort) so it overlaps the Pl@ntNet + POWO hops below
     // and adds no latency of its own. Resolves to '' when no coords or on any error/timeout.
     const geoPromise: Promise<string> = (typeof lat === 'number' && typeof lng === 'number')
-      ? geoContext(lat, lng).catch(() => '')
+      ? geoContext(lat, lng, hdg).catch(() => '')
       : Promise.resolve('');
 
     // ---- Step 1: specialist plant identification (optional, only if a key is configured) ----
