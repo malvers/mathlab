@@ -70,8 +70,10 @@ window.TrackerHazards = function (ctx) {
     // so the white border still reads on OSM's light map (the drop-shadow wrapper alone isn't enough).
     const SVG_PRIORITY =
         '<svg viewBox="0 0 40 40" width="28" height="28" aria-label="Vorfahrtstraße">'
-        + '<polygon points="20,1.5 38.5,20 20,38.5 1.5,20" fill="#fff" stroke="rgb(8,20,42)" stroke-width="1.2" stroke-linejoin="round"/>'
-        + '<polygon points="20,6 34,20 20,34 6,20" fill="#FCD116"/></svg>';
+        + '<g transform="rotate(45 20 20)">'
+        + '<rect x="6.5" y="6.5" width="27" height="27" rx="4.5" fill="#fff" stroke="rgb(8,20,42)" stroke-width="1.2"/>'
+        + '<rect x="13.5" y="13.5" width="13" height="13" rx="3" fill="#FCD116"/>'
+        + '</g></svg>';
     // Zebra = the OFFICIAL German Fußgängerüberweg sign (Zeichen 350-10, walking right). German traffic
     // signs are amtliche Werke (§5 UrhG) → public domain; this SVG is from Wikimedia Commons, metadata
     // stripped + scaled to 28px (Doc 2026-07-01, "findest DAS svg?"). Authentic black figure (not the
