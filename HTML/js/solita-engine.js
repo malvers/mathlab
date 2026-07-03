@@ -185,8 +185,8 @@
 
         if (!connected() && !(await tryLink())) {
             return { ok: false, summary: 'Keine Verbindung zum Pagode-Relais. ANWEISUNG AN DICH (Solita): Sag Doc, er soll '
-                + 'einmal „Pagode koppeln" antippen (Bluetooth braucht beim ersten Mal eine Berührung), danach geht es per '
-                + 'Stimme.' };
+                + 'das ☰-Menü öffnen und dort einmal auf das Bluetooth-Symbol („Pagode koppeln") tippen — Bluetooth '
+                + 'braucht beim ersten Mal eine Berührung, danach starte ich sie per Stimme.' };
         }
         try {
             await pulse(1, CONFIG.CRANK_MS);   // momentary crank on terminal 50
@@ -257,7 +257,7 @@
         }
         if (!connected() && !(await tryLink())) {
             return { ok: false, summary: 'Keine Verbindung zum Pagode-Relais. ANWEISUNG AN DICH (Solita): Sag Doc, er soll '
-                + 'einmal „Pagode koppeln" antippen.' };
+                + 'das ☰-Menü öffnen und dort einmal auf das Bluetooth-Symbol („Pagode koppeln") tippen.' };
         }
         try {
             await pulse(2, CONFIG.STOP_MS);    // break ignition coil -> engine dies
