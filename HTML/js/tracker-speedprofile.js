@@ -28,12 +28,12 @@ window.TrackerSpeedProfile = function (ctx) {
     const CORRIDOR_M = 25;            // ways within this distance of the route count
     const ALIGN_TOL = 40;            // a corridor way may differ from the local route direction by at most this (deg)
     const ANTI_JUT_M = 60;           // a short A-B-A limit reversion under this (junction jut) is dissolved
-    const JUNC_SNAP_M = 45;          // pull a change point back onto a junction turn within this along-route gap
-    const JUNC_TURN_DEG = 30;        // a route bend this sharp = a junction/Ampel (not a gentle road curve)
+    const JUNC_SNAP_M = 45;          // pull a change point back onto a junction node within this along-route gap
     const MAX_VERTS = 2500;           // guard: very long routes are downsampled for resolution (cost/time)
     const MAX_CORRIDOR_PTS = 800;     // cap the around-polyline length so the query body stays sane
     const CACHE_PREFIX = 'trk_speedprofile_';
-    const CACHE_VERSION = 6;          // v6: snap change points onto the junction turn (signs stand AT the Ampel)
+    const CACHE_VERSION = 7;          // v7: snap onto the shared-node junction (any road switch, not just sharp bends)
+    //                                   v6: snap change points onto the junction turn (signs stand AT the Ampel)
     //                                   v5: rebuild after bisection-refined change points (see refineChangePoints)
     //                                   so already-driven routes drop their coarse-vertex cache and re-pin exactly.
     //                                   v4 was: no despeckle; prefer-aligned-never-blank.
@@ -328,34 +328,56 @@ window.TrackerSpeedProfile = function (ctx) {
         return cps;
     }
 
-    // Turn angle (deg) the route makes AT vertex i = |incoming bearing − outgoing bearing|. 0 at the ends or a
-    // coincident vertex. A sharp value marks a junction (you turn onto/off a road) rather than a gentle curve.
-    function turnAt(pts, i) {
-        if (i <= 0 || i >= pts.length - 1) return 0;
-        const a = segBearing(pts[i - 1], pts[i]), b = segBearing(pts[i], pts[i + 1]);
-        if (a == null || b == null) return 0;
-        const d = Math.abs(a - b) % 360;
-        return Math.min(d, 360 - d);
+    // Distance (m) from a point to the nearest route segment — keeps a junction candidate ON the route.
+    function distToRoute(p) {
+        const k = Math.cos(p[0] * Math.PI / 180);
+        const xy = (ll) => [ll[1] * 111320 * k, ll[0] * 110540];
+        const q = xy(p);
+        let bd = Infinity;
+        for (let i = 1; i < routePts.length; i++) {
+            const a = xy(routePts[i - 1]), b = xy(routePts[i]);
+            const dx = b[0] - a[0], dy = b[1] - a[1], len2 = dx * dx + dy * dy;
+            let t = len2 ? ((q[0] - a[0]) * dx + (q[1] - a[1]) * dy) / len2 : 0;
+            t = t < 0 ? 0 : t > 1 ? 1 : t;
+            const d = Math.hypot(q[0] - (a[0] + t * dx), q[1] - (a[1] + t * dy));
+            if (d < bd) bd = d;
+        }
+        return bd;
     }
-    // The speed-limit SIGN stands at the junction, but OSM's maxspeed crossover (hence the bisected point) can
-    // sit a few metres past it — so the badge floats just beyond the Ampel (Doc 2026-07-03). If a sharp route
-    // bend (= a junction) lies just BEHIND a change point, pull the point back onto that bend. Deliberately
-    // narrow: only backward, only a genuinely sharp turn, only within JUNC_SNAP_M — a limit change mid-curve on
-    // an open road (no junction) is left exactly where the bisection put it. Needs routeCum (set in build()).
-    function snapToJunctions(pts, cps) {
-        if (!routeCum) return cps;
-        for (const c of cps) {
-            const s = projectAlong([c.lat, c.lng]);
-            let bestI = -1;
-            for (let i = 1; i < pts.length - 1; i++) {
-                const gap = s - routeCum[i];                       // >0 → vertex i is behind the change point
-                if (gap < -2 || gap > JUNC_SNAP_M) continue;       // only a junction just behind, within reach
-                if (turnAt(pts, i) < JUNC_TURN_DEG) continue;      // gentle curve → not a junction, don't snap
-                if (bestI < 0 || routeCum[i] > routeCum[bestI]) bestI = i;   // nearest sharp bend behind
+    // Every road-to-road switch (X→Y) puts the sign AT the junction, but OSM's maxspeed crossover — hence the
+    // bisected point — can sit a few metres past it (Doc 2026-07-03: "immer wenn ich von einer Straße mit X auf
+    // Y wechsle"). A junction = an OSM node SHARED by ≥2 corridor ways (where roads meet) lying ON the route —
+    // angle-independent, so a straight-through junction (you switch roads without a sharp bend) counts too. If
+    // one sits just BEHIND a change point (≤ JUNC_SNAP_M), pull the point back onto it. A limit change with no
+    // junction behind it (an Ortstafel mid-road) is left exactly where the bisection put it. Needs routeCum.
+    function snapToJunctions(pts, cps, ways) {
+        if (!routeCum || !ways || !ways.length) return cps;
+        const cnt = new Map();                                     // rounded coord → {ll, n} across corridor ways
+        for (const w of ways) {
+            if (!Array.isArray(w.geometry)) continue;
+            for (const nd of w.geometry) {
+                const key = nd.lat.toFixed(5) + ',' + nd.lon.toFixed(5);
+                let e = cnt.get(key);
+                if (!e) { e = { ll: [nd.lat, nd.lon], n: 0 }; cnt.set(key, e); }
+                e.n++;
             }
-            if (bestI >= 0) {
-                dbg('Tempo-' + c.limit + ' an Kreuzung gezogen (' + Math.round(s - routeCum[bestI]) + ' m ←)');
-                c.lat = pts[bestI][0]; c.lng = pts[bestI][1];
+        }
+        const junc = [];                                           // shared nodes that actually sit on the route
+        for (const e of cnt.values()) if (e.n >= 2 && distToRoute(e.ll) <= 8) junc.push(e.ll);
+        if (!junc.length) return cps;
+        for (const c of cps) {
+            const sc = projectAlong([c.lat, c.lng]);
+            let best = null, bestAlong = -1;
+            for (const j of junc) {
+                if (Math.abs(j[0] - c.lat) > 0.001 || Math.abs(j[1] - c.lng) > 0.0015) continue;   // ~100 m prefilter
+                const sj = projectAlong(j);
+                const gap = sc - sj;                               // >0 → junction j is behind the change point
+                if (gap < -2 || gap > JUNC_SNAP_M) continue;       // only a junction just behind, within reach
+                if (sj > bestAlong) { bestAlong = sj; best = j; }  // nearest junction behind
+            }
+            if (best) {
+                dbg('Tempo-' + c.limit + ' an Kreuzung gezogen (' + Math.round(sc - bestAlong) + ' m ←)');
+                c.lat = best[0]; c.lng = best[1];
             }
         }
         return cps;
@@ -445,7 +467,7 @@ window.TrackerSpeedProfile = function (ctx) {
         const subLimits = limitsFromWays(sub, ways);
         // expand the sub-sampled limits onto every vertex, then dissolve short junction juts (A-B-A).
         vertexLimit = deJut(routePts, expandToAll(routePts.length, resAt, subLimits));
-        changePoints = snapToJunctions(routePts, refineChangePoints(routePts, deriveChangePoints(routePts, vertexLimit), ways));
+        changePoints = snapToJunctions(routePts, refineChangePoints(routePts, deriveChangePoints(routePts, vertexLimit), ways), ways);
         if (gen !== buildGen) return;
         cachePut(meta, changePoints);        // cache stays lean ({lat,lng,limit}) — `along` is derived per load
         attachAlong(changePoints);
