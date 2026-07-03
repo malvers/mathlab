@@ -46,6 +46,21 @@ jobs:
           rsync -a --delete --exclude 'resources/screenshots_original/' HTML/ _site/
           echo "Staged site size:"; du -sh _site
 
+      # Stamp a UNIQUE build id (the commit SHA) into every page so its Last-Modified header
+      # bumps on EVERY deploy — even a CSS/JS-only change. document.lastModified drives both the
+      # DebugWindow build stamp and the ?v= asset cache-bust; GitHub Pages only changes a file's
+      # Last-Modified when its BYTES change, so without this a deploy that touched only CSS/JS kept
+      # the old ?v= and shipped stale assets that never reached the device (Doc 2026-07-03).
+      - name: Stamp build id into every page
+        run: |
+          BUILD="${GITHUB_SHA::7}"
+          COUNT=0
+          while IFS= read -r -d '' f; do
+            printf '\n<!-- build %s -->\n' "$BUILD" >> "$f"
+            COUNT=$((COUNT + 1))
+          done < <(find _site -name '*.html' -print0)
+          echo "Stamped build $BUILD into $COUNT pages"
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
