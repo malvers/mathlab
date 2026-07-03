@@ -25,6 +25,15 @@
                                       // accumulated to 2 levels/notch; 160 px/level = one calm step
             wheelDebounceTime: 60,    // coalesce the momentum burst (default 40)
         }).setView([51.1657, 10.4515], 6); // centre of Germany as a neutral start
+
+        // Dedicated pane for the current-position dot + its heading arrow. It must ALWAYS stay on top
+        // of every map symbol (POI pins/markerPane 600, fuel 610/620, traffic 615) so the "you are here"
+        // puck is never hidden behind e.g. a speed-cam pin. Below the tooltip/popup panes (650/700) so
+        // taps still open over it. Both markers below opt into it via `pane: 'posDot'`.
+        if (map.createPane && !map.getPane('posDot')) {
+            map.createPane('posDot');
+            map.getPane('posDot').style.zIndex = 640;
+        }
         // Zoom: custom round buttons in the two bottom corners (#zoom-in / #zoom-out, styled like our
         // FABs, wired further down). Leaflet's own control stays off (zoomControl:false above).
         // Collapsible map attribution, pinned to the CENTRE of the viewport. ODbL requires the OSM
@@ -755,7 +764,7 @@
                 posMarker = L.circleMarker(here, {
                     radius: 7, color: '#fff', weight: 2,
                     fillColor: COL_RED, fillOpacity: 1,
-                    className: 'pos-marker',
+                    className: 'pos-marker', pane: 'posDot', // always on top of map symbols
                 }).addTo(map);
             } else if (!holdPos) {
                 posMarker.setLatLng(here); // hold the dot steady when the gate says we're standing still
@@ -784,7 +793,7 @@
                     html: '<div class="heading-arrow">' + HEADING_SVG + '</div>',
                     iconSize: [40, 40], iconAnchor: [20, 20],
                 });
-                headingMarker = L.marker(here, { icon, interactive: false, keyboard: false }).addTo(map);
+                headingMarker = L.marker(here, { icon, interactive: false, keyboard: false, pane: 'posDot' }).addTo(map);
             } else {
                 headingMarker.setLatLng(here);
             }
