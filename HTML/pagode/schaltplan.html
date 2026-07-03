@@ -77,6 +77,22 @@
         .origin-serieonly { display: none; }
         #svg.mode-serie .origin-serieonly { display: inline; }
         #svg.mode-serie .origin-unser { display: none; }
+
+        /* --- Hell/Hellgrau-Modus (Taste b): Boxen + Label-Pillen bleiben dunkel (Text bleibt lesbar);
+           die hellen Leitungen werden abgedunkelt, damit sie auf dem grauen Canvas nicht verschwinden. --- */
+        body.light { background: #d4d9e1; color: #1c2740; }
+        body.light .sub, body.light .hint { color: #566277; }
+        body.light .credit { color: #5a6577; }
+        body.light .credit a { color: #3a5a9a; }
+        body.light .frame { background: #e6e9ef; border-color: #b6c0d2; }
+        body.light .warn { background: rgba(176, 36, 24, .07); border-color: rgba(176, 36, 24, .35); color: #241a1a; }
+        body.light .warn-h { color: #8a5a00; }
+        body.light .warn b { color: #000; }
+        body.light .w-sup { stroke: #c08a12; }
+        body.light .w-gnd { stroke: #39475f; }
+        body.light .w-start { stroke: #5f8a2a; }
+        body.light .w-ble { stroke: #2f6fd0; }
+        body.light .w-act { stroke: #55637d; }
     </style>
 </head>
 
@@ -219,6 +235,7 @@
                 const fp = p.feeds || {};
                 FEEDS.forEach(f => { const v = fp[f.a]; if (v == null) return; if (typeof v === 'number') { f.tapX = v; } else { if (v.x != null) f.tapX = v.x; if (v.y != null) f.tapY = v.y; } });
                 if (p.railX != null) railX = p.railX;
+                if (p.light) document.body.classList.add('light');
             } catch (e) { /* ignore */ }
         }
         function save() {
@@ -227,7 +244,7 @@
             for (const id in NODES) nodes[id] = { x: NODES[id].x, y: NODES[id].y, lx: NODES[id].lx, ly: NODES[id].ly };
             const feeds = {};
             FEEDS.forEach(f => { if (f.tapX != null || f.tapY != null) feeds[f.a] = { x: f.tapX, y: f.tapY }; });
-            localStorage.setItem(LSKEY, JSON.stringify({ comps, nodes, labels: LPOS, feeds, railX }));
+            localStorage.setItem(LSKEY, JSON.stringify({ comps, nodes, labels: LPOS, feeds, railX, light: !!(document.body && document.body.classList.contains('light')) }));
         }
 
         // ---- SVG helpers ----
@@ -329,11 +346,12 @@
         let dragWrap;
         function render() {
             svg.innerHTML = '';
-            // rails
-            svg.appendChild(E('line', { class: 'rail', x1: railX, y1: RAIL_POS, x2: X1, y2: RAIL_POS, stroke: '#f5c242' }));
+            // rails (inline stroke → set per theme here; CSS can't override an inline attribute)
+            const light = !!(document.body && document.body.classList.contains('light'));
+            svg.appendChild(E('line', { class: 'rail', x1: railX, y1: RAIL_POS, x2: X1, y2: RAIL_POS, stroke: light ? '#c08a12' : '#f5c242' }));
             freeLbl(svg, 'railPos', 104, 60, '+12 V · Klemme 30 (Dauerplus)', 'clbl', 'start', '#f5c242', null);
             // both rails share railX as left start (nudge live with ← / →, 1 px)
-            svg.appendChild(E('line', { class: 'rail', x1: railX, y1: RAIL_GND, x2: X1, y2: RAIL_GND, stroke: '#5b6b86' }));
+            svg.appendChild(E('line', { class: 'rail', x1: railX, y1: RAIL_GND, x2: X1, y2: RAIL_GND, stroke: light ? '#39475f' : '#5b6b86' }));
             freeLbl(svg, 'railGnd', 104, 732, 'Masse · Klemme 31', 'clbl', 'start', '#9fb0cf', null);
 
             // boxes go into an early layer so all cables/wires render ON TOP of them
@@ -525,6 +543,7 @@
         document.addEventListener('keydown', e => {
             if (e.key === 'ArrowLeft') { railX -= 1; render(); save(); e.preventDefault(); }
             else if (e.key === 'ArrowRight') { railX += 1; render(); save(); e.preventDefault(); }
+            else if (e.key === 'b' || e.key === 'B') { document.body.classList.toggle('light'); render(); save(); e.preventDefault(); }
         });
         load();
         // default label offset per terminal direction (unless a saved offset overrides it)
