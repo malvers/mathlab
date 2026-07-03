@@ -16,7 +16,11 @@
     <!-- Reusable fixed-slot clock (shared component) — keeps the timer from jittering -->
     <!-- Cache-bust local CSS/JS by the page's deploy time (document.lastModified) so a
          refreshed HTML always pulls matching-fresh assets, never a stale WebView-cached
-         copy. External CDN libs are already versioned → left untouched. -->
+         copy. External CDN libs are already versioned → left untouched.
+         IMPORTANT: document.lastModified only bumps when THIS file changes. A CSS/JS-only
+         edit keeps the same ?v= → the old asset stays cached and the change never ships.
+         So bump the build marker below on every deploy that touches CSS/JS. -->
+    <!-- build: 2026-07-03T15:52 -->
     <script>
         window.__ASSET_V = '?v=' + encodeURIComponent(document.lastModified);
         document.write('<link rel="stylesheet" href="../js/cyber-clock.css' + window.__ASSET_V + '">');
