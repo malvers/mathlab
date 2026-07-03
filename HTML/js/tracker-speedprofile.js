@@ -28,10 +28,13 @@ window.TrackerSpeedProfile = function (ctx) {
     const CORRIDOR_M = 25;            // ways within this distance of the route count
     const ALIGN_TOL = 40;            // a corridor way may differ from the local route direction by at most this (deg)
     const ANTI_JUT_M = 60;           // a short A-B-A limit reversion under this (junction jut) is dissolved
+    const JUNC_SNAP_M = 45;          // pull a change point back onto a junction turn within this along-route gap
+    const JUNC_TURN_DEG = 30;        // a route bend this sharp = a junction/Ampel (not a gentle road curve)
     const MAX_VERTS = 2500;           // guard: very long routes are downsampled for resolution (cost/time)
     const MAX_CORRIDOR_PTS = 800;     // cap the around-polyline length so the query body stays sane
     const CACHE_PREFIX = 'trk_speedprofile_';
-    const CACHE_VERSION = 5;          // v5: rebuild after bisection-refined change points (see refineChangePoints)
+    const CACHE_VERSION = 6;          // v6: snap change points onto the junction turn (signs stand AT the Ampel)
+    //                                   v5: rebuild after bisection-refined change points (see refineChangePoints)
     //                                   so already-driven routes drop their coarse-vertex cache and re-pin exactly.
     //                                   v4 was: no despeckle; prefer-aligned-never-blank.
     const CACHE_TTL_MS = 1000 * 60 * 60 * 24 * 60; // 60 days — OSM limits change rarely
@@ -325,6 +328,39 @@ window.TrackerSpeedProfile = function (ctx) {
         return cps;
     }
 
+    // Turn angle (deg) the route makes AT vertex i = |incoming bearing − outgoing bearing|. 0 at the ends or a
+    // coincident vertex. A sharp value marks a junction (you turn onto/off a road) rather than a gentle curve.
+    function turnAt(pts, i) {
+        if (i <= 0 || i >= pts.length - 1) return 0;
+        const a = segBearing(pts[i - 1], pts[i]), b = segBearing(pts[i], pts[i + 1]);
+        if (a == null || b == null) return 0;
+        const d = Math.abs(a - b) % 360;
+        return Math.min(d, 360 - d);
+    }
+    // The speed-limit SIGN stands at the junction, but OSM's maxspeed crossover (hence the bisected point) can
+    // sit a few metres past it — so the badge floats just beyond the Ampel (Doc 2026-07-03). If a sharp route
+    // bend (= a junction) lies just BEHIND a change point, pull the point back onto that bend. Deliberately
+    // narrow: only backward, only a genuinely sharp turn, only within JUNC_SNAP_M — a limit change mid-curve on
+    // an open road (no junction) is left exactly where the bisection put it. Needs routeCum (set in build()).
+    function snapToJunctions(pts, cps) {
+        if (!routeCum) return cps;
+        for (const c of cps) {
+            const s = projectAlong([c.lat, c.lng]);
+            let bestI = -1;
+            for (let i = 1; i < pts.length - 1; i++) {
+                const gap = s - routeCum[i];                       // >0 → vertex i is behind the change point
+                if (gap < -2 || gap > JUNC_SNAP_M) continue;       // only a junction just behind, within reach
+                if (turnAt(pts, i) < JUNC_TURN_DEG) continue;      // gentle curve → not a junction, don't snap
+                if (bestI < 0 || routeCum[i] > routeCum[bestI]) bestI = i;   // nearest sharp bend behind
+            }
+            if (bestI >= 0) {
+                dbg('Tempo-' + c.limit + ' an Kreuzung gezogen (' + Math.round(s - routeCum[bestI]) + ' m ←)');
+                c.lat = pts[bestI][0]; c.lng = pts[bestI][1];
+            }
+        }
+        return cps;
+    }
+
     // Rebuild the per-vertex array from cached change points by walking the route and switching the
     // limit each time we pass a change point (projected onto the current geometry). Lets a cached
     // profile align to a freshly-fetched route whose start jittered slightly.
@@ -409,7 +445,7 @@ window.TrackerSpeedProfile = function (ctx) {
         const subLimits = limitsFromWays(sub, ways);
         // expand the sub-sampled limits onto every vertex, then dissolve short junction juts (A-B-A).
         vertexLimit = deJut(routePts, expandToAll(routePts.length, resAt, subLimits));
-        changePoints = refineChangePoints(routePts, deriveChangePoints(routePts, vertexLimit), ways);
+        changePoints = snapToJunctions(routePts, refineChangePoints(routePts, deriveChangePoints(routePts, vertexLimit), ways));
         if (gen !== buildGen) return;
         cachePut(meta, changePoints);        // cache stays lean ({lat,lng,limit}) — `along` is derived per load
         attachAlong(changePoints);
