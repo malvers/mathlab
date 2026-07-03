@@ -2248,10 +2248,12 @@ body.ui-idle #nav-banner .nav-trip { font-size: clamp(0.95rem, 4vw, 1.2rem); pad
     padding-bottom: 2px;
 }
 
-/* 3-digit limits (100/120/130) — the disc's inner area is only ~34px, so shrink + tighten to fit cleanly. */
+/* 3-digit limits (100/120/130): fitSignText (JS) measures the glyphs and scales the font to fill the disc,
+   so the old negative letter-spacing is obsolete and only cramped the digits ("zu geklatscht", Doc 2026-07-03).
+   Reset to natural spacing — the disc-fit already handles width. (font-size here is dead: fitSignText's inline
+   style wins; kept out on purpose.) */
 #speed-sign.s3 {
-    font-size: clamp(12px, 3.3vw, 14px);
-    letter-spacing: -1px;
+    letter-spacing: 0;
 }
 
 #speed-sign[hidden] {
