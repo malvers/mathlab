@@ -713,6 +713,7 @@
             <button class="send-button toggle-btn" id="ttsBtn" title="Vorlesen an/aus" aria-label="Antworten vorlesen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M19 5a10 10 0 0 1 0 14"/></svg></button>
             <button class="send-button" id="micBtn" title="Einmal sprechen" aria-label="Per Stimme diktieren"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10v2a7 7 0 0 0 14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg></button>
             <button class="send-button toggle-btn" id="wakeBtn" title="Solita-Weckwort an/aus" aria-label="Solita per Weckwort aktivieren"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="9.5" x2="4" y2="14.5"/><line x1="8" y1="6" x2="8" y2="18"/><line x1="12" y1="3" x2="12" y2="21"/><line x1="16" y1="6" x2="16" y2="18"/><line x1="20" y1="9.5" x2="20" y2="14.5"/></svg></button>
+            <button class="send-button" id="pagodePairBtn" title="Pagode koppeln (Bluetooth)" aria-label="Pagode per Bluetooth koppeln" onclick="pagodePair(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 6.5l11 11L12 23V1l5.5 5.5L6.5 17.5"/></svg></button>
             <button class="send-button" id="logoutBtn" title="Logout" aria-label="Logout"
                 onclick="solitaLogout()">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
@@ -841,6 +842,28 @@
             b.textContent = 'LOKAL';
             document.body.appendChild(b);
         })();
+    </script>
+    <script>
+        // Pagode koppeln — the ONE-TIME human gesture Web Bluetooth requires: requestDevice() (the chooser)
+        // must run from a real tap; voice/programmatic calls can't grant a device. After this first grant the
+        // engine reconnects gesture-free via getDevices(). See solita-engine.js / pagode-ble.js.
+        window.pagodePair = async function (btn) {
+            var SP = window.SolitaPagode;
+            if (!SP || !SP.pair) { alert('Pagode-BLE ist auf dieser Seite nicht verfügbar (kein Web-Bluetooth?).'); return; }
+            var prevTitle = btn.title;
+            btn.disabled = true; btn.title = 'Koppeln…';
+            try {
+                await SP.pair();                       // chooser → grant + GATT connect (needs this tap)
+                btn.style.color = '#799e31';           // φ-green = gekoppelt (Buttons nie orange)
+                btn.title = 'Pagode gekoppelt ✓';
+            } catch (e) {
+                btn.title = prevTitle;
+                alert('Kopplung fehlgeschlagen: ' + ((e && e.message) || e)
+                    + '\n\nTipp: Modul einschalten. Falls die START/STOP-App noch verbunden ist, dort erst trennen — ein Modul spricht mit nur einem Gerät.');
+            } finally {
+                btn.disabled = false;
+            }
+        };
     </script>
 </body>
 
