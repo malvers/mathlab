@@ -2253,10 +2253,12 @@ ${pts}
             } catch (e) { toast('Teilen fehlgeschlagen: ' + (e.message || e)); return; }
             if (!token) { toast('Kein Link (nicht dein Track?).'); return; }
             const url = SHARE_BASE + '?s=' + token;
-            try {
-                if (navigator.share) await navigator.share({ title: name || 'Track', text: name || 'Mein Track', url });
-                else { await navigator.clipboard.writeText(url); toast('Link kopiert.'); }
-            } catch (e) { /* user cancelled the share sheet → ignore */ }
+            // Always copy to the clipboard FIRST (so the link is safe even if the share sheet is
+            // cancelled), THEN open the OS share sheet on top of that.
+            let copied = false;
+            try { await navigator.clipboard.writeText(url); copied = true; } catch (e) { /* no clipboard perm */ }
+            try { if (navigator.share) await navigator.share({ title: name || 'Track', text: name || 'Mein Track', url }); } catch (e) { /* user cancelled */ }
+            toast(copied ? 'Link kopiert.' : 'Link erstellt.');
         }
 
         // Bundle several tracks into ONE share link (?s=tok1,tok2,…) → view.html overlays them.
@@ -2278,10 +2280,11 @@ ${pts}
             if (!tokens.length) { toast('Kein Link (nicht deine Tracks?).'); return; }
             const url = SHARE_BASE + '?s=' + tokens.join(',');
             const subject = title || (tokens.length + ' Tracks');
-            try {
-                if (navigator.share) await navigator.share({ title: subject, text: subject, url });
-                else { await navigator.clipboard.writeText(url); toast('Link kopiert.'); }
-            } catch (e) { /* user cancelled */ }
+            // Copy to clipboard FIRST (survives a cancelled share sheet), THEN open the share sheet.
+            let copied = false;
+            try { await navigator.clipboard.writeText(url); copied = true; } catch (e) { /* no clipboard perm */ }
+            try { if (navigator.share) await navigator.share({ title: subject, text: subject, url }); } catch (e) { /* user cancelled */ }
+            toast(copied ? 'Link kopiert.' : 'Link erstellt.');
         }
 
         // ⚠️ DEBUG / DEV SAFETY MODE — TEMPORARY, not the final behaviour.
