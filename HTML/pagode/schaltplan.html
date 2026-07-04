@@ -618,23 +618,24 @@
         let sim = 0, simCrank = false, curMode = 'solita', simTimer = null;
         function activateBtn(mode) { document.querySelectorAll('.toggles button[data-mode]').forEach(x => x.classList.toggle('active', x.dataset.mode === mode)); }
         function setStatus(t) { const el = document.getElementById('sim-status'); if (el) el.textContent = t; }
+        function setBtn(t) { const b = document.getElementById('simBtn'); if (b) b.textContent = t; }
         document.querySelectorAll('.toggles button[data-mode]').forEach(b => b.addEventListener('click', () => {
             activateBtn(b.dataset.mode);
             curMode = b.dataset.mode; sim = 0; simCrank = false; if (simTimer) clearTimeout(simTimer);
-            svg.setAttribute('class', 'mode-' + curMode); setStatus(''); render();
+            svg.setAttribute('class', 'mode-' + curMode); setStatus(''); setBtn('▶ Start-Sequenz'); render();
         }));
         // Tippen: ① Zündung EIN → ② Anlassen/Läuft → aus (wie der Schlüssel: 0 → 1 → Start → Lauf).
         function simTap() {
             if (sim === 0) {
                 curMode = 'keyless'; activateBtn('keyless'); svg.setAttribute('class', 'mode-' + curMode);
-                sim = 1; simCrank = false; render(); setStatus('① ZÜNDUNG EIN — K2 hält, Kl.15 unter Strom');
+                sim = 1; simCrank = false; render(); setStatus('① ZÜNDUNG EIN — K2 hält, Kl.15 unter Strom'); setBtn('② Anlassen ▶');
             } else if (sim === 1) {
-                sim = 2; simCrank = true; render(); setStatus('② ANLASSEN … — K1-Puls über Bosch → Kl.50');
+                sim = 2; simCrank = true; render(); setStatus('② ANLASSEN … — K1-Puls über Bosch → Kl.50'); setBtn('⏹ Motor aus');
                 if (simTimer) clearTimeout(simTimer);
                 simTimer = setTimeout(() => { simCrank = false; render(); setStatus('② MOTOR LÄUFT — Zündung gehalten, Anlasser aus'); }, 1600);
             } else {
                 sim = 0; simCrank = false; if (simTimer) clearTimeout(simTimer);
-                render(); setStatus('AUS'); setTimeout(() => { if (sim === 0) setStatus(''); }, 1200);
+                render(); setStatus('AUS'); setBtn('▶ Start-Sequenz'); setTimeout(() => { if (sim === 0) setStatus(''); }, 1200);
             }
         }
         { const sb = document.getElementById('simBtn'); if (sb) sb.addEventListener('click', simTap); }
