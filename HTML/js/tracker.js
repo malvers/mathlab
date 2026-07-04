@@ -2947,6 +2947,13 @@ ${pts}
                 if (window.CyberSelect) CyberSelect.enhance(selRange);
             }
         })();
+        // Fotos / Videos / Voice: hide-or-show OUR own media pins (declutter overlaid tracks). These are
+        // NOT Overpass categories — they drive the media layer's filter (js/tracker-media.js), not __poi.
+        [['media-photo', 'photo'], ['media-video', 'video'], ['media-voice', 'voice']].forEach(([id, kind]) => {
+            const el = $(id); if (!el) return;
+            el.checked = localStorage.getItem('trk-media-' + kind) !== '0';   // default ON (all shown)
+            el.addEventListener('change', () => { if (__media && __media.setMediaVisible) __media.setMediaVisible(kind, el.checked); });
+        });
         $('mb-poi').addEventListener('click', () => { closePopup(); showPanel('poi-panel'); if (__poi) __poi.refresh(); });
         $('poi-close').addEventListener('click', hidePanels);
 
