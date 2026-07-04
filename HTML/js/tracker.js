@@ -3325,17 +3325,25 @@ ${pts}
                 const ic = document.createElement('span'); ic.className = 'tl-fold-ic'; ic.textContent = '📁';
                 const nm = document.createElement('div'); nm.className = 'tl-fold-name'; nm.textContent = folder.name;
                 const cnt = document.createElement('span'); cnt.className = 'tl-fold-count'; cnt.textContent = kids.length;
+                const shr = document.createElement('button'); shr.className = 'tl-fold-shr'; shr.title = 'Ordner teilen';
+                shr.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>';
                 const ren = document.createElement('button'); ren.className = 'tl-fold-ren'; ren.title = 'Umbenennen';
                 ren.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg>';
                 const del = document.createElement('button'); del.className = 'tl-fold-del'; del.title = 'Ordner auflösen';
                 del.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"></path></svg>';
                 head.appendChild(caret); head.appendChild(ic); head.appendChild(nm); head.appendChild(cnt);
-                head.appendChild(ren); head.appendChild(del);
+                head.appendChild(shr); head.appendChild(ren); head.appendChild(del);
                 const body = document.createElement('div'); body.className = 'tl-folder-body';
                 kids.forEach((r) => body.appendChild(buildTrackRow(r)));
                 head.addEventListener('click', () => {
                     const nowCollapsed = sec.classList.toggle('collapsed');
                     if (nowCollapsed) _collapsedFolders.add(folder.id); else _collapsedFolders.delete(folder.id);
+                });
+                shr.addEventListener('click', (ev) => {
+                    ev.stopPropagation();
+                    const ids = kids.map((r) => r.id);
+                    if (!ids.length) { toast('Ordner ist leer.'); return; }
+                    shareMultiple(ids);   // one bundle link (?s=tok1,tok2,…) → view.html overlays the whole group
                 });
                 ren.addEventListener('click', async (ev) => {
                     ev.stopPropagation();

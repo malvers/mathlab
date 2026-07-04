@@ -22,18 +22,24 @@ window.TrackerSignPanel = function (ctx) {
     let pending = null, timer = null;
     const selEls = { num: null, days: null, time: null }; // currently-highlighted chip per role
 
-    // Just the two cars — the white disc + red ring come from the .sp-chip frame (like a real Zeichen 276).
-    // Left car RED (overtaking, a touch forward/larger), right car dark-blue (being passed; never black).
+    // The two FRONT-view cars of the real Zeichen 276 (Doc's reference photo). The white disc + red ring come
+    // from the .sp-chip frame. Left car RED (overtaking), right car dark charcoal (being passed) — a charcoal,
+    // not #000, so it still honours "nie schwarz" while matching the authentic sign. Each: rounded body +
+    // roof, a light windscreen band, two wheels peeking out below.
     const OVERTAKE_SVG = '<svg viewBox="0 0 48 48" width="40" height="40" aria-label="Überholverbot (Zeichen 276)">'
-        + '<g fill="rgb(176,36,24)">'
-        + '<rect x="7" y="19" width="15" height="12" rx="2.5"/>'
-        + '<rect x="10" y="14" width="9" height="6.5" rx="2"/>'
-        + '<circle cx="11" cy="32" r="2.3"/><circle cx="18.5" cy="32" r="2.3"/>'
+        + '<g>'   // red car (left, overtaking)
+        + '<rect x="6.5" y="21" width="18" height="12" rx="3.6" fill="rgb(176,36,24)"/>'
+        + '<rect x="10.2" y="15.3" width="11" height="8.6" rx="3.3" fill="rgb(176,36,24)"/>'
+        + '<rect x="12.2" y="17.3" width="7.2" height="4.3" rx="1.7" fill="#f1dedb"/>'
+        + '<rect x="6.5" y="31.4" width="5.1" height="3.7" rx="1.7" fill="rgb(120,22,16)"/>'
+        + '<rect x="19.4" y="31.4" width="5.1" height="3.7" rx="1.7" fill="rgb(120,22,16)"/>'
         + '</g>'
-        + '<g fill="rgb(14,36,78)">'
-        + '<rect x="27" y="21" width="14" height="11" rx="2.3"/>'
-        + '<rect x="30" y="16.5" width="8" height="6" rx="2"/>'
-        + '<circle cx="31" cy="33" r="2.1"/><circle cx="37.5" cy="33" r="2.1"/>'
+        + '<g>'   // passed car (right, dark charcoal — not #000, honours "nie schwarz")
+        + '<rect x="26" y="22" width="16" height="11" rx="3.3" fill="rgb(38,40,48)"/>'
+        + '<rect x="29.2" y="16.9" width="9.6" height="7.7" rx="2.9" fill="rgb(38,40,48)"/>'
+        + '<rect x="30.9" y="18.6" width="6.2" height="3.8" rx="1.4" fill="#dcdee3"/>'
+        + '<rect x="26" y="31.5" width="4.6" height="3.4" rx="1.5" fill="rgb(20,21,27)"/>'
+        + '<rect x="37.4" y="31.5" width="4.6" height="3.4" rx="1.5" fill="rgb(20,21,27)"/>'
         + '</g></svg>';
 
     // ---- composition state -----------------------------------------------------------------------
@@ -105,7 +111,6 @@ window.TrackerSignPanel = function (ctx) {
         DAYS.forEach((d) => panel.appendChild(disc('sp-pill sp-pill-days', d.label, (el) => tapDays(d, el))));
         TIMES.forEach((t) => panel.appendChild(disc('sp-pill sp-pill-time', t.label, (el) => tapTime(t, el))));
         panel.appendChild(disc('sp-chip sp-chip-overtake', OVERTAKE_SVG, () => tapAdv({ noOvertake: true })));
-        panel.appendChild(disc('sp-chip sp-chip-maut', '<span class="sp-maut">MAUT</span>', () => tapAdv({ toll: true })));
         panel.appendChild(disc('sp-chip sp-chip-clear', '<span class="sp-clear">×</span>', () => tapClear()));
 
         document.body.appendChild(backdrop);
