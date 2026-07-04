@@ -3392,6 +3392,37 @@ ${pts}
                 return sec;
             }
 
+            // Builds an AUTO folder (Fotos / Videos / Voice) for loose single-point media. Membership is
+            // derived from the item type (not stored), so there's no rename/dissolve — just collapse +
+            // share. `key` is a stable string used to remember its collapsed state.
+            function buildVirtualSection(key, emoji, name, kids) {
+                const sec = document.createElement('div');
+                sec.className = 'tl-folder tl-folder-auto';
+                if (_collapsedFolders.has(key)) sec.classList.add('collapsed');
+                const head = document.createElement('div'); head.className = 'tl-folder-head';
+                const caret = document.createElement('span'); caret.className = 'tl-fold-caret'; caret.textContent = '▾';
+                const ic = document.createElement('span'); ic.className = 'tl-fold-ic'; ic.textContent = emoji;
+                const nm = document.createElement('div'); nm.className = 'tl-fold-name'; nm.textContent = name;
+                const cnt = document.createElement('span'); cnt.className = 'tl-fold-count'; cnt.textContent = kids.length;
+                const shr = document.createElement('button'); shr.className = 'tl-fold-shr'; shr.title = 'Alle teilen';
+                shr.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>';
+                head.appendChild(caret); head.appendChild(ic); head.appendChild(nm); head.appendChild(cnt); head.appendChild(shr);
+                const body = document.createElement('div'); body.className = 'tl-folder-body';
+                kids.forEach((r) => body.appendChild(buildTrackRow(r)));
+                head.addEventListener('click', () => {
+                    const nowCollapsed = sec.classList.toggle('collapsed');
+                    if (nowCollapsed) _collapsedFolders.add(key); else _collapsedFolders.delete(key);
+                });
+                shr.addEventListener('click', (ev) => {
+                    ev.stopPropagation();
+                    const ids = kids.map((r) => r.id);
+                    if (!ids.length) return;
+                    shareMultiple(ids, name);
+                });
+                sec.appendChild(head); sec.appendChild(body);
+                return sec;
+            }
+
             // Folders group only in "Alle" mode — a radius search stays a flat nearest-first list.
             const groupingOn = listRadiusKm === 0;
             const validFolderIds = new Set(_folders.map((f) => f.id));
@@ -3399,7 +3430,21 @@ ${pts}
             if (groupingOn) {
                 _folders.forEach((f) => box.appendChild(buildFolderSection(f, rows.filter((r) => r.folder_id === f.id))));
             }
-            rows.filter((r) => !inFolder(r)).forEach((r) => box.appendChild(buildTrackRow(r)));
+            const loose = rows.filter((r) => !inFolder(r));
+            if (!groupingOn) { loose.forEach((r) => box.appendChild(buildTrackRow(r))); return; }
+            // Auto-tuck loose single-point media (a lone photo, a video clip, a voice note — no real GPS
+            // route) into Fotos / Videos / Voice so they don't clutter the route list. Everything else
+            // (real tracks) stays flat above them. Same type test as the row badges.
+            const isVoiceR = (r) => /^Sprachnotiz/i.test(r.name || '');
+            const isVideoR = (r) => /^Video/i.test(r.name || '');
+            const isPhotoR = (r) => !r.distance_m && !isVoiceR(r) && !isVideoR(r);
+            const photos = loose.filter(isPhotoR);
+            const videos = loose.filter(isVideoR);
+            const voices = loose.filter(isVoiceR);
+            loose.filter((r) => !isPhotoR(r) && !isVideoR(r) && !isVoiceR(r)).forEach((r) => box.appendChild(buildTrackRow(r)));
+            if (photos.length) box.appendChild(buildVirtualSection('auto-photo', '📷', 'Fotos', photos));
+            if (videos.length) box.appendChild(buildVirtualSection('auto-video', '🎬', 'Videos', videos));
+            if (voices.length) box.appendChild(buildVirtualSection('auto-voice', '🎙️', 'Voice', voices));
         }
 
         const GNSS_INFO =

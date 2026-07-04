@@ -393,27 +393,9 @@ window.TrackerSpeedLimit = function (ctx) {
     // tags these sparsely, so "no badge" does NOT mean "allowed". Small icons under the speed sign, drawn
     // with inline styles (no CSS dependency). Dark-blue, not black (CLAUDE.md); never orange.
     let curNoOvertake = false, curToll = false, advEl = null;
-    // Authentic Überholverbot (Zeichen 276): white disc, red ring, TWO rear-view cars side by side — the
-    // left one RED (overtaking, drawn a touch forward/larger), the right one dark-blue (being passed; never
-    // black, CLAUDE.md). 50 px so it reads like a real sign, not a dot (Doc 2026-07-04 „bissl mikrig").
-    // Same authentic front-view cars as the sign panel (Doc's Zeichen-276 reference), inside the red ring.
-    const NO_OVERTAKE_SVG = '<svg viewBox="0 0 60 60" width="50" height="50" aria-label="Überholverbot (Zeichen 276)">'
-        + '<circle cx="30" cy="30" r="26.5" fill="#fff" stroke="rgb(176,36,24)" stroke-width="6.5"/>'
-        + '<g transform="translate(6,6)">'
-        + '<g>'   // red car (left, overtaking)
-        + '<rect x="6.5" y="21" width="18" height="12" rx="3.6" fill="rgb(176,36,24)"/>'
-        + '<rect x="10.2" y="15.3" width="11" height="8.6" rx="3.3" fill="rgb(176,36,24)"/>'
-        + '<rect x="12.2" y="17.3" width="7.2" height="4.3" rx="1.7" fill="#f1dedb"/>'
-        + '<rect x="6.5" y="31.4" width="5.1" height="3.7" rx="1.7" fill="rgb(120,22,16)"/>'
-        + '<rect x="19.4" y="31.4" width="5.1" height="3.7" rx="1.7" fill="rgb(120,22,16)"/>'
-        + '</g>'
-        + '<g>'   // passed car (right, dark charcoal)
-        + '<rect x="26" y="22" width="16" height="11" rx="3.3" fill="rgb(38,40,48)"/>'
-        + '<rect x="29.2" y="16.9" width="9.6" height="7.7" rx="2.9" fill="rgb(38,40,48)"/>'
-        + '<rect x="30.9" y="18.6" width="6.2" height="3.8" rx="1.4" fill="#dcdee3"/>'
-        + '<rect x="26" y="31.5" width="4.6" height="3.4" rx="1.5" fill="rgb(20,21,27)"/>'
-        + '<rect x="37.4" y="31.5" width="4.6" height="3.4" rx="1.5" fill="rgb(20,21,27)"/>'
-        + '</g></g></svg>';
+    // The official Zeichen 276, from the shared js/traffic-signs.js (public-domain amtliches Werk) — same
+    // sign as the tap-in panel, one source of truth (CLAUDE.md rule 7). Carries its own disc + red ring.
+    const NO_OVERTAKE_SVG = window.SIGN_UEBERHOLVERBOT ? window.SIGN_UEBERHOLVERBOT(50) : '';
     const TOLL_BADGE = '<div style="background:rgb(14,36,78);color:#fff;font:700 11px Arial,sans-serif;'
         + 'padding:3px 7px;border-radius:7px;letter-spacing:.5px;box-shadow:0 2px 8px rgba(8,20,42,.5)">MAUT</div>';
     function ensureAdv() {
