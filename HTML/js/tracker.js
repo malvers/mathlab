@@ -2360,6 +2360,16 @@ ${pts}
                         activities: pts.map(p => (p[5] != null ? p[5] : null)),
                         layer: trackLayer, usesHotline,
                     });
+                    // Click-to-identify: the coloured hotline isn't clickable, so lay a transparent
+                    // FAT polyline on top that catches the tap and names the track in a popup. Lets
+                    // Doc spot which overlaid line is which (e.g. one accidentally grouped).
+                    const label = ((t.name || '').replace(/^Track\s+/, '') || 'Track');
+                    const hit = L.polyline(pts.map(p => [p[0], p[1]]), { color: '#000', opacity: 0, weight: 16, interactive: true });
+                    const pop = document.createElement('div');
+                    pop.className = 'track-id-pop';
+                    pop.textContent = label;                       // textContent → no HTML injection from names
+                    hit.bindPopup(pop);
+                    hit.addTo(trackLayer);
                     pts.forEach(p => all.push([p[0], p[1]]));
                 }
                 (t.waypoints || []).forEach(w => addWaypoint(w));
@@ -2389,10 +2399,13 @@ ${pts}
             const ids = Array.from(selectedTracks);
             if (!ids.length) return;
             toast('Lade ' + ids.length + ' Tracks …');
+            const nameById = {}; _lastTrackRows.forEach((r) => { nameById[r.id] = r.name || ''; }); // for click-to-identify popups
             const loaded = [];
-            for (const id of ids) { try { loaded.push(await fetchTrack(id)); } catch (e) { /* skip a failed one */ } }
+            // Keep id+name WITH each loaded track so the map popup can name it (and a failed fetch
+            // just drops that one — no index drift between ids[] and loaded[]).
+            for (const id of ids) { try { const t = await fetchTrack(id); loaded.push({ id: id, name: nameById[id] || '', points: t.points, waypoints: t.waypoints }); } catch (e) { /* skip a failed one */ } }
             loadedTrackIds.clear(); ids.forEach((id) => loadedTrackIds.add(id));   // remember for re-open
-            persistLoaded(ids.map((id) => ({ id: id, name: '' })));                // survive a reload
+            persistLoaded(ids.map((id) => ({ id: id, name: nameById[id] || '' }))); // survive a reload (name too)
             plotMultiple(loaded);
             hidePanels();
             toast(loaded.length + ' Tracks geladen.');
@@ -2424,7 +2437,7 @@ ${pts}
                 plotTrack(ok[0].t.points, ok[0].t.waypoints);
                 currentTrackId = ok[0].id; currentTrackName = ok[0].name;
             } else {
-                plotMultiple(ok.map((o) => o.t));
+                plotMultiple(ok.map((o) => ({ id: o.id, name: o.name, points: o.t.points, waypoints: o.t.waypoints })));
             }
             if (window.DebugWindow) DebugWindow.log('Geladenen Track wiederhergestellt (' + ok.length + ').');
         }
