@@ -48,6 +48,15 @@
             background: var(--bg-light);
         }
 
+        /* track-name popup shown when tapping an overlaid track line (click-to-identify) */
+        .track-id-pop {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.74rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            color: rgb(14, 36, 78);
+        }
+
         /* ---- Top header: track name + stats ---- */
         #hdr {
             position: fixed;
@@ -635,6 +644,14 @@
                         activities: pts.map(p => (p[5] != null ? p[5] : null)),
                         layer: trackLayer, usesHotline,
                     });
+                    // Click-to-identify: the coloured hotline isn't clickable, so lay a transparent FAT
+                    // polyline on top that catches the tap and names the track — lets a viewer tell the
+                    // overlaid lines of a shared folder apart (mirrors the recorder's plotMultiple).
+                    const label = ((row.name || '').replace(/^Track\s+/, '') || 'Track');
+                    const hit = L.polyline(pts.map(p => [p[0], p[1]]), { color: '#000', opacity: 0, weight: 16, interactive: true });
+                    const pop = document.createElement('div'); pop.className = 'track-id-pop'; pop.textContent = label;
+                    hit.bindPopup(pop);
+                    hit.addTo(trackLayer);
                     pts.forEach(p => all.push([p[0], p[1]]));
                 }
                 (row.waypoints || []).forEach(w => addWaypoint(w));
