@@ -2747,8 +2747,12 @@ ${pts}
         // while live (so you can always stop). Called whenever the popup or settings panel opens.
         function refreshMenuState() {
             const has = !!(track && track.length);
+            // A loaded GROUP (plotMultiple) leaves `track` empty but is still shareable — it lives in
+            // loadedTrackIds. So SHARE follows "single track OR loaded group"; Live/Smooth/DEM stay
+            // bound to the single `track` array (they operate on its points).
+            const hasShare = has || loadedTrackIds.size > 0;
             const dim = (id, off) => { const b = $(id); if (b) b.classList.toggle('disabled', off); };
-            dim('mb-sharetrack', !has);
+            dim('mb-sharetrack', !hasShare);
             dim('mb-live', !has && !liveOn);
             dim('mb-smooth', !has);
             dim('mb-dem', !has);
