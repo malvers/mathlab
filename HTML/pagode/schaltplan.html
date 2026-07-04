@@ -36,6 +36,7 @@
         .toggles button.active { border-color: var(--gold); }
         .toggles button[data-mode="start"].active { border-color: var(--green); }
         .toggles button[data-mode="stop"].active { border-color: var(--red); }
+        .toggles button[data-mode="keyless"].active { border-color: var(--green); }
         .toggles button.reset { border-color: #6a4; }
         .hint { font-family: 'Segoe UI', Arial, sans-serif; font-size: 12px; color: var(--muted); margin-bottom: 12px; }
         .credit { font-family: 'Segoe UI', Arial, sans-serif; font-size: 10px; color: #5a6b8a; margin-top: 10px; }
@@ -77,6 +78,12 @@
         .origin-serieonly { display: none; }
         #svg.mode-serie .origin-serieonly { display: inline; }
         #svg.mode-serie .origin-unser { display: none; }
+        /* Keyless-Modus („Ohne Schlüssel"): Zünd-Relais schaltet Kl.15, K2 wird Schließer statt Öffner.
+           origin-keyless = nur im keyless-Modus, origin-keyed = überall AUSSER keyless (und serie). */
+        .origin-keyless { display: none; }
+        #svg.mode-keyless .origin-keyless { display: inline; }
+        #svg.mode-serie .origin-keyed { display: none; }
+        #svg.mode-keyless .origin-keyed { display: none; }
 
         /* --- Hell/Hellgrau-Modus (Taste b): Boxen + Label-Pillen bleiben dunkel (Text bleibt lesbar);
            die hellen Leitungen werden abgedunkelt, damit sie auf dem grauen Canvas nicht verschwinden. --- */
@@ -103,6 +110,7 @@
         <button data-mode="solita" class="active">Solita</button>
         <button data-mode="start" >Start</button>
         <button data-mode="stop"  >Stop</button>
+        <button data-mode="keyless">Ohne Schlüssel</button>
     </div>
 
     <div class="frame">
@@ -145,6 +153,7 @@
             vr:    { x: 510, y: 632, w: 120, h: 48, title: 'Vorwiderstand', sub: '0,9 Ω · Serie', tf: 10, toff: 8 },
             dist:  { x: 880, y: 560, w: 180, h: 95, title: 'Verteiler', sub: 'Unterbrecher · Kondensator' },
             kerz:  { x: 1110, y: 575, w: 90, h: 70, title: 'Kerzen', sub: '1 – 6' },
+            ign:   { x: 105, y: 592, w: 182, h: 58, title: 'Zünd-Relais', sub: 'Kl.30 → Kl.15 · ~30 A', origin: 'keyless' },
         };
 
         // ---- terminals: draggable circles. comp = parent box (moves together). dir = label side ----
@@ -182,6 +191,12 @@
             distGnd:{ x: 965, y: 655, label: '', dir: 'b', comp: 'dist' },
             kerzIn: { x: 1110, y: 600, label: '', dir: 'l', comp: 'kerz' },
             kerzGnd:{ x: 1155, y: 645, label: '', dir: 'b', comp: 'kerz' },
+            // keyless: K2 als Schließer (NO) treibt das Zünd-Relais; Relais schaltet Kl.30 -> Kl.15
+            k2no:    { x: 540, y: 504, label: 'K2·NO', dir: 'r', comp: 'mod', origin: 'keyless' },
+            ign30:   { x: 105, y: 620, label: 'Kl.30', dir: 'l', comp: 'ign' },
+            ignCoil: { x: 287, y: 608, label: 'von K2', dir: 'r', comp: 'ign' },
+            ign15:   { x: 287, y: 636, label: 'Kl.15', dir: 'r', comp: 'ign' },
+            ignGnd:  { x: 150, y: 650, label: '', dir: 'b', comp: 'ign', col: 'gnd' },
         };
 
         // ---- wires between nodes (bend: hv = horizontal first, vh = vertical first) ----
@@ -193,9 +208,12 @@
             { a: 'keyStart', b: 'msKl50', cls: 'w-start', grp: 'start', bend: 'hv' },
             // Hauptstrom (Serie): Magnetschalter -> Anlassermotor
             { a: 'msM', b: 'motIn', cls: 'w-fat', grp: 'start', bend: 'vh' },
-            // STOP [Einklink 2]: Kl.15 -> K2-Öffner -> Vorwiderstand -> Zündspule (unser)
-            { a: 'keyOut', b: 'k2com', cls: 'w-stop', grp: 'stop', bend: 'hv', origin: 'unser' },
-            { a: 'k2nc', b: 'vwIn', cls: 'w-stop', grp: 'stop', bend: 'hv', origin: 'unser' },
+            // STOP [Einklink 2] (mit Schlüssel): Kl.15 -> K2-Öffner -> Vorwiderstand -> Zündspule
+            { a: 'keyOut', b: 'k2com', cls: 'w-stop', grp: 'stop', bend: 'hv', origin: 'keyed' },
+            { a: 'k2nc', b: 'vwIn', cls: 'w-stop', grp: 'stop', bend: 'hv', origin: 'keyed' },
+            // KEYLESS („Ohne Schlüssel"): K2 (Schließer) treibt Zünd-Relais; Relais legt Kl.30 -> Kl.15; D3 entkoppelt
+            { a: 'k2no', b: 'ignCoil', cls: 'w-stop', grp: 'stop', bend: 'hv', origin: 'keyless' },
+            { a: 'ign15', b: 'vwIn', cls: 'w-stop', grp: 'stop', bend: 'hv', origin: 'keyless', diode: 'D3' },
             // Serie-direkt (nur im Serie-Modus): Kl.15 direkt zum Vorwiderstand, ohne K2
             { a: 'keyOut', b: 'vwIn', cls: 'w-stop', grp: 'stop', bend: 'hv', origin: 'serieonly' },
             { a: 'vwOut', b: 'coilIn', cls: 'w-stop', grp: 'stop', bend: 'hv' },
@@ -220,6 +238,10 @@
             { a: 'keyIn', rail: 'pos', cls: 'w-sup', tapX: 150, fuse: true, grp: 'stop' },
             { a: 'distGnd', rail: 'gnd', cls: 'w-gnd', grp: 'stop' },
             { a: 'kerzGnd', rail: 'gnd', cls: 'w-gnd', grp: 'stop' },
+            // keyless feeds: +12V an K2·COM (Schließer) und an das Zünd-Relais (Kl.30), Relaisspule an Masse
+            { a: 'k2com', rail: 'pos', cls: 'w-sup', tapX: 565, fuse: true, grp: 'stop', origin: 'keyless' },
+            { a: 'ign30', rail: 'pos', cls: 'w-sup', tapX: 128, fuse: true, grp: 'stop', origin: 'keyless' },
+            { a: 'ignGnd', rail: 'gnd', cls: 'w-gnd', grp: 'stop', origin: 'keyless' },
         ];
 
         let LPOS = {}; // free-label position overrides (rail + amp labels)
@@ -365,6 +387,17 @@
                     if (item.origin) p.classList.add('origin-' + item.origin);
                     if (item.cls.indexOf('rail') >= 0) p.classList.add('rail');
                     svg.appendChild(p);
+                    if (item.diode) {   // diode symbol at the wire midpoint; cathode bar toward b (current a -> b)
+                        const A = np(item.a), B = np(item.b);
+                        const mx = (A.x + B.x) / 2, my = (A.y + B.y) / 2;
+                        const dg = E('g', {});
+                        if (item.origin) dg.classList.add('origin-' + item.origin);
+                        if (item.grp) dg.classList.add('grp-' + item.grp);
+                        dg.appendChild(E('path', { d: `M${(mx - 7).toFixed(1)},${(my - 8).toFixed(1)} L${(mx + 7).toFixed(1)},${my.toFixed(1)} L${(mx - 7).toFixed(1)},${(my + 8).toFixed(1)} Z`, fill: '#cf5145', stroke: '#cf5145' }));
+                        dg.appendChild(E('path', { d: `M${(mx + 7).toFixed(1)},${(my - 8).toFixed(1)} L${(mx + 7).toFixed(1)},${(my + 8).toFixed(1)}`, stroke: '#cf5145', 'stroke-width': 2.5 }));
+                        dg.appendChild(E('text', { x: mx.toFixed(1), y: (my - 13).toFixed(1), 'text-anchor': 'middle', class: 'amp', fill: '#cf5145' }, item.diode));
+                        svg.appendChild(dg);
+                    }
                     if (item.fuse) {
                         const P = np(item.a); const fy = (item.rail === 'pos' ? RAIL_POS : RAIL_GND);
                         const fx = item.tapX != null ? item.tapX : P.x;
@@ -413,7 +446,9 @@
                 const g = E('g', {});
                 const comp = n.comp && COMPS[n.comp];
                 if (comp && comp.grp) g.classList.add('grp-' + comp.grp);
-                if ((comp && comp.origin === 'unser') || n.col === 'ble') g.classList.add('origin-unser');
+                if (comp && comp.origin) g.classList.add('origin-' + comp.origin);
+                if (n.origin) g.classList.add('origin-' + n.origin);
+                if (n.col === 'ble') g.classList.add('origin-unser');
                 const c = E('circle', { class: 'node' + (n.col === 'gnd' ? ' gnd' : ''), cx: n.x, cy: n.y, r: 6, 'data-node': id });
                 if (n.col === 'fat') c.setAttribute('stroke', '#e8763a');
                 else if (n.col === 'ble') c.setAttribute('stroke', '#6fa8ff');
