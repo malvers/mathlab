@@ -37,6 +37,14 @@
         .toggles button[data-mode="start"].active { border-color: var(--green); }
         .toggles button[data-mode="stop"].active { border-color: var(--red); }
         .toggles button[data-mode="keyless"].active { border-color: var(--green); }
+        .toggles button.sim-btn { border-color: var(--green); font-weight: 700; }
+        .sim-status { min-height: 18px; font-family: 'Orbitron', sans-serif; font-weight: 800; letter-spacing: 1px; color: var(--green); text-align: center; font-size: 13px; margin: -4px 0 10px; }
+        /* Start-Sequenz-Simulation: alles gedimmt, aktive Strompfade leuchten + pulsen */
+        #svg.simon g[data-comp], #svg.simon .wire, #svg.simon .node { opacity: .26; transition: opacity .25s; }
+        #svg.simon g[data-comp].lit, #svg.simon .wire.lit { opacity: 1; }
+        #svg.simon .wire.lit { filter: drop-shadow(0 0 5px #eef2ff); animation: simpulse 1.1s ease-in-out infinite; }
+        #svg.simon g[data-comp].lit { filter: drop-shadow(0 0 8px #eef2ff); }
+        @keyframes simpulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
         .toggles button.reset { border-color: #6a4; }
         .hint { font-family: 'Segoe UI', Arial, sans-serif; font-size: 12px; color: var(--muted); margin-bottom: 12px; }
         .credit { font-family: 'Segoe UI', Arial, sans-serif; font-size: 10px; color: #5a6b8a; margin-top: 10px; }
@@ -111,7 +119,9 @@
         <button data-mode="start" >Start</button>
         <button data-mode="stop"  >Stop</button>
         <button data-mode="keyless">Ohne Schlüssel</button>
+        <button id="simBtn" class="sim-btn" type="button">▶ Start-Sequenz</button>
     </div>
+    <div id="sim-status" class="sim-status" role="status" aria-live="polite"></div>
 
     <div class="frame">
         <svg id="svg" viewBox="-130 -90 1350 990" xmlns="http://www.w3.org/2000/svg"></svg>
@@ -368,6 +378,11 @@
         let dragWrap;
         function render() {
             svg.innerHTML = '';
+            svg.classList.toggle('simon', sim > 0);
+            // active current paths for the start-sequence sim: ① ignition chain, ② + crank chain during cranking
+            const litComps = new Set(), litGrps = new Set();
+            if (sim >= 1) { ['mod', 'ign', 'coil', 'vr', 'dist', 'kerz'].forEach(x => litComps.add(x)); litGrps.add('stop'); }
+            if (simCrank) { ['bosch', 'ms', 'motor'].forEach(x => litComps.add(x)); litGrps.add('start'); }
             // rails (inline stroke → set per theme here; CSS can't override an inline attribute)
             const light = !!(document.body && document.body.classList.contains('light'));
             svg.appendChild(E('line', { class: 'rail', x1: railX, y1: RAIL_POS, x2: X1, y2: RAIL_POS, stroke: light ? '#c08a12' : '#f5c242' }));
@@ -386,6 +401,7 @@
                     if (item.grp) p.classList.add('grp-' + item.grp);
                     if (item.origin) p.classList.add('origin-' + item.origin);
                     if (item.cls.indexOf('rail') >= 0) p.classList.add('rail');
+                    if (sim > 0 && item.grp && litGrps.has(item.grp)) p.classList.add('lit');
                     svg.appendChild(p);
                     if (item.fuse) {
                         const P = np(item.a); const fy = (item.rail === 'pos' ? RAIL_POS : RAIL_GND);
@@ -411,6 +427,7 @@
                 const g = E('g', { 'data-comp': id });
                 if (c.grp) g.classList.add('grp-' + c.grp);
                 if (c.origin) g.classList.add('origin-' + c.origin);
+                if (sim > 0 && litComps.has(id)) g.classList.add('lit');
                 if (c.img) {
                     g.appendChild(E('image', { href: c.img, x: c.x, y: c.y, width: c.w, height: c.h, preserveAspectRatio: 'xMidYMid meet', style: 'cursor:move' }));
                 } else if (c.circle) {
@@ -597,12 +614,30 @@
             });
         }
 
-        // ---- mode toggle + reset ----
+        // ---- mode toggle + start-sequence simulator ----
+        let sim = 0, simCrank = false, curMode = 'solita', simTimer = null;
+        function activateBtn(mode) { document.querySelectorAll('.toggles button[data-mode]').forEach(x => x.classList.toggle('active', x.dataset.mode === mode)); }
+        function setStatus(t) { const el = document.getElementById('sim-status'); if (el) el.textContent = t; }
         document.querySelectorAll('.toggles button[data-mode]').forEach(b => b.addEventListener('click', () => {
-            document.querySelectorAll('.toggles button[data-mode]').forEach(x => x.classList.remove('active'));
-            b.classList.add('active');
-            svg.setAttribute('class', 'mode-' + b.dataset.mode);
+            activateBtn(b.dataset.mode);
+            curMode = b.dataset.mode; sim = 0; simCrank = false; if (simTimer) clearTimeout(simTimer);
+            svg.setAttribute('class', 'mode-' + curMode); setStatus(''); render();
         }));
+        // Tippen: ① Zündung EIN → ② Anlassen/Läuft → aus (wie der Schlüssel: 0 → 1 → Start → Lauf).
+        function simTap() {
+            if (sim === 0) {
+                curMode = 'keyless'; activateBtn('keyless'); svg.setAttribute('class', 'mode-' + curMode);
+                sim = 1; simCrank = false; render(); setStatus('① ZÜNDUNG EIN — K2 hält, Kl.15 unter Strom');
+            } else if (sim === 1) {
+                sim = 2; simCrank = true; render(); setStatus('② ANLASSEN … — K1-Puls über Bosch → Kl.50');
+                if (simTimer) clearTimeout(simTimer);
+                simTimer = setTimeout(() => { simCrank = false; render(); setStatus('② MOTOR LÄUFT — Zündung gehalten, Anlasser aus'); }, 1600);
+            } else {
+                sim = 0; simCrank = false; if (simTimer) clearTimeout(simTimer);
+                render(); setStatus('AUS'); setTimeout(() => { if (sim === 0) setStatus(''); }, 1200);
+            }
+        }
+        { const sb = document.getElementById('simBtn'); if (sb) sb.addEventListener('click', simTap); }
         let railX = X0 - 10;  // both rails' left start; nudge with ← / → (1 px), persisted
         document.addEventListener('keydown', e => {
             if (e.key === 'ArrowLeft') { railX -= 1; render(); save(); e.preventDefault(); }
