@@ -192,7 +192,8 @@ async function aiTotalAllTimeEur(): Promise<number> {
 }
 
 const eurFmt = (e: number) => {
-  const c = e * 100;
+  const c = (e || 0) * 100;
+  if (c === 0) return '0 ¢';   // exact zero (provider had no calls) — clean instead of "0,000 ¢"
   const s = c >= 100 ? '€ ' + e.toFixed(2)
     : c >= 10 ? c.toFixed(1) + ' ¢'
       : c >= 1 ? c.toFixed(2) + ' ¢'
@@ -223,14 +224,17 @@ Deno.serve(async (req) => {
     const ghPctN = ghBytes != null ? pctN(ghBytes, GH_PAGES_QUOTA_GB) : null;   // null → GitHub unreachable, skip the row
     const ghpct = ghPctN != null ? de(ghPctN, 2) : '';
     const warn = r2pctN >= 80 || dbpctN >= 80 || (ghPctN != null && ghPctN >= 80);
-    const provs = Object.keys(ai.byProvider).sort();
+    // Always list all three providers — Doc wants Gemini/DeepSeek visible even at 0 (2026-07-04). Any
+    // provider that actually billed but isn't in this fixed order gets appended so nothing is ever hidden.
+    const FIXED_PROVS = ['claude', 'gemini', 'deepseek'];
+    const provs = [...FIXED_PROVS, ...Object.keys(ai.byProvider).filter((p) => !FIXED_PROVS.includes(p)).sort()];
     const LBL: Record<string, string> = { claude: 'Claude', deepseek: 'DeepSeek', gemini: 'Gemini' };
     const subject = 'Stats and costs';
 
     // ── Plaintext-Body (Fallback im multipart/alternative) ──
     const aiText = provs.length
       ? `\nKI-Kosten (gemessene Tokens × Listenpreis, letzte 24 h):\n`
-        + provs.map((p) => `• ${LBL[p] || p}: ${eurFmt(ai.byProvider[p])}`).join('\n')
+        + provs.map((p) => `• ${LBL[p] || p}: ${eurFmt(ai.byProvider[p] || 0)}`).join('\n')
         + `\n  Σ ${eurFmt(ai.total)}  (${ai.calls} Calls)\n`
       : '';
     const body =
@@ -268,7 +272,7 @@ Deno.serve(async (req) => {
         + `<table role="presentation" cellspacing="0" cellpadding="0" style="border-collapse:collapse;width:100%;font-size:14px;">`
         + provs.map((p, i) =>
             `<tr style="background:${i % 2 ? C.shade : '#ffffff'};"><td style="padding:7px 12px;border-bottom:1px solid ${C.line};">${LBL[p] || p}</td>`
-            + `<td style="padding:7px 12px;border-bottom:1px solid ${C.line};text-align:right;">${eurFmt(ai.byProvider[p])}</td></tr>`).join('')
+            + `<td style="padding:7px 12px;border-bottom:1px solid ${C.line};text-align:right;">${eurFmt(ai.byProvider[p] || 0)}</td></tr>`).join('')
         + `<tr><td style="padding:9px 12px;font-weight:bold;">Σ gesamt</td>`
         + `<td style="padding:9px 12px;text-align:right;font-weight:bold;">${eurFmt(ai.total)} <span style="color:${C.muted};font-weight:normal;">(${ai.calls} Calls)</span></td></tr></table>`
         + (searches > 0 ? `<p style="color:${C.muted};font-size:13px;margin:8px 0 0;">Gemini-Suchen: <b style="color:${C.ink};">${searches}</b>&nbsp;/&nbsp;1500 gratis</p>` : '')
