@@ -550,7 +550,7 @@
             const g1 = E('g', { class: 'origin-unser' });
             g1.appendChild(E('path', { d: `M${t86.x},${t86.y} Q${d1.x},${t86.y} ${d1.x},${d1.y} Q${d1.x},${t85.y} ${t85.x},${t85.y}`, fill: 'none', stroke: '#e8b04a', 'stroke-width': 2, 'stroke-dasharray': '6 5' }));
             svg.appendChild(g1);
-            diodeAt(svg, 'd1', d1.x, d1.y, 'D1', 'v', 'unser');
+            diodeAt(svg, 'd1', d1.x, d1.y, 'D1', 'h', 'unser');
             // D3 — Kl.15-Entkopplung auf der keyless-Leitung ign15 → vwIn; Kathode Richtung Kl.15 (vwIn).
             const a3 = np('ign15'), b3 = np('vwIn');
             diodeAt(svg, 'd3', (LPOS['d3'] || { x: (a3.x + b3.x) / 2, y: (a3.y + b3.y) / 2 }).x,
@@ -559,9 +559,9 @@
             const tc = np('ignCoil'), tg = np('ignGnd');
             const d4 = LPOS['d4'] || { x: Math.min(tc.x, tg.x) - 24, y: (tc.y + tg.y) / 2 };
             const g4 = E('g', { class: 'origin-keyless' });
-            g4.appendChild(E('path', { d: `M${tc.x},${tc.y} Q${d4.x},${tc.y} ${d4.x},${d4.y} Q${d4.x},${tg.y} ${tg.x},${tg.y}`, fill: 'none', stroke: '#e8b04a', 'stroke-width': 2, 'stroke-dasharray': '6 5' }));
+            g4.appendChild(E('path', { d: `M${tc.x},${tc.y} Q${tc.x},${d4.y} ${d4.x},${d4.y} Q${tg.x},${d4.y} ${tg.x},${tg.y}`, fill: 'none', stroke: '#e8b04a', 'stroke-width': 2, 'stroke-dasharray': '6 5' }));
             svg.appendChild(g4);
-            diodeAt(svg, 'd4', d4.x, d4.y, 'D4', 'v', 'keyless');
+            diodeAt(svg, 'd4', d4.x, d4.y, 'D4', 'h', 'keyless');
         }
 
         // ---- dragging ----
