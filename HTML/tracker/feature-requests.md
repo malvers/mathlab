@@ -154,6 +154,16 @@ Die +/−-Buttons sind **unsere** (Leaflet-Default-Control): `tracker.js:18` `zo
 **Trade-off:** anderes Routing-Backend (API-Format, Hosting/Key) statt des öffentlichen OSRM. **Erst bauen, wenn B im Feld zu schwach ist.**
 **Caveat:** „bewusste Abweichung" sauber erkennen (Anweisung ignoriert + kohärent weitergefahren), nicht bei GPS-Zappeln auslösen.
 
+## FEAT-35 — Schild selbst erfassen (Tap-Panel) + lokaler Override-Store (+ späterer OSM-Export) 📐 · Prio 2 (Doc, „sounds like a plan" 2026-07-04)
+**Warum:** OSM kennt **temporäre / Baustellen-Schilder praktisch nie** (Feld 2026-07-04: Kötzschenbroder Str. Dresden-Kaditz — real am Mast „**30**, 200 m, **werktags 6–20h**" am Kran-/Baumaschinenhof, in OSM **nichts** → App zeigt korrekt die dauerhaften 50, unser Fenster-Label bleibt leer, weil es keine Datenquelle gibt). Auch dünn getaggtes (Überholverbot, Schritttempo „5/7") fehlt (→ BUG-16). Doc will beim Fahren fehlende Schilder **selbst antippen**: „hier ist ja gar kein Schild → Tap-Tap → Panel → Auswahl → zack, bleibt bei uns", später in geeigneter Weise an OSM/eigenen Store übergeben.
+**Auftrag (MVP):** Tap (auf das Live-Schild `#speed-sign` **oder** eigener FAB) → **großes, fahrbetriebstaugliches Panel** mit den wichtigsten Zeichen: Tempo **5/7/10/30/50/60/70/80/100**, **„Ende der Beschränkung"**, **Tempo-30-Zone**, **Zeitfenster-Beschränkung** (werktags / Mo–Fr / Mo–Sa + von–bis), **Überholverbot**, **Maut**. Auswahl → **sofort** als Override gesetzt und angezeigt (ein/zwei Taps, keine Menütiefe).
+**Override-Store:** zunächst `localStorage` (später Supabase-Tabelle für Crowd / geräteübergreifend), verortet an der **nächsten Fahrbahn** (Overpass-Way-ID aus `lastRoad`/Query) **oder** Punkt + Heading + Reichweite/Ende. Zeitbedingtes über **dieselbe `{base,rules}`-Struktur wie OSM** (`parseConditional`), damit `evalLimit` und das neue Fenster-Label 1:1 greifen (Regel 7, eine Wahrheit).
+**Integration (`tracker-speedlimit.js`, neu greppen):** Override bekommt **höchste Priorität** — vor `conf` (signiert) und `def` (generisch) in `query()`/`update()`; speist auch `curRaw` (Fenster-Label) und `setAdvisories()`. Muss mit Fahrtrichtung/Reichweite wieder **auslaufen** (nicht ewig kleben).
+**Recht/Parser-Notiz:** „**werktags**" = **Mo–Sa** (Samstag zählt, nur Sonn-/Feiertage nicht) — unser Parser macht das bei `Mo-Sa` korrekt (`parseDays`/`ruleActive` verifiziert 2026-07-04); das Panel muss „werktags" also auf **Mo–Sa** mappen, nicht Mo–Fr.
+**Später/Export (groß → parken 🅿️):** Übergabe an **OSM** = eigener Changeset via OSM-API + **OAuth2** (Aufwand hoch, Account/Policy/Editier-Etikette klären — kein Massen-Import) — bis dahin eigener **Supabase-Store** als Zwischenschicht.
+**Abgrenzung:** **kein** Kamera-/OCR-Auto-Erkennen (separate, große Idee) — hier rein **manuelle Schnell-Erfassung**. Sicherheit: großflächig, blind-tippbar, minimaler Blickkontakt im Fahrbetrieb.
+**Akzeptanz:** Tap→Panel→Auswahl setzt Schild < 2 s; Override gewinnt über OSM; zeitbedingter Override zeigt Fenster-Label (aktives Fenster orange); Override läuft nach Reichweite/Richtungswechsel aus; Reload-fest (localStorage); später sauberer Export-Pfad.
+
 ---
 
 ## Querverweise
