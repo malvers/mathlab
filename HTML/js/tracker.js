@@ -2260,7 +2260,10 @@ ${pts}
         }
 
         // Bundle several tracks into ONE share link (?s=tok1,tok2,…) → view.html overlays them.
-        async function shareMultiple(ids) {
+        // `title` is passed to the OS share sheet as the sheet title — most e-mail targets adopt it
+        // as the SUBJECT (not guaranteed by the Web Share API; some apps ignore it). A folder share
+        // passes the folder name here so the mail arrives titled like the group.
+        async function shareMultiple(ids, title) {
             if (!ids.length) return;
             toast('Link wird erstellt …');
             const tokens = [];
@@ -2274,8 +2277,9 @@ ${pts}
             } catch (e) { toast('Teilen fehlgeschlagen: ' + (e.message || e)); return; }
             if (!tokens.length) { toast('Kein Link (nicht deine Tracks?).'); return; }
             const url = SHARE_BASE + '?s=' + tokens.join(',');
+            const subject = title || (tokens.length + ' Tracks');
             try {
-                if (navigator.share) await navigator.share({ title: tokens.length + ' Tracks', text: 'Meine Tracks', url });
+                if (navigator.share) await navigator.share({ title: subject, text: subject, url });
                 else { await navigator.clipboard.writeText(url); toast('Link kopiert.'); }
             } catch (e) { /* user cancelled */ }
         }
@@ -3343,7 +3347,7 @@ ${pts}
                     ev.stopPropagation();
                     const ids = kids.map((r) => r.id);
                     if (!ids.length) { toast('Ordner ist leer.'); return; }
-                    shareMultiple(ids);   // one bundle link (?s=tok1,tok2,…) → view.html overlays the whole group
+                    shareMultiple(ids, folder.name);   // folder name → mail subject; one bundle link overlays the whole group
                 });
                 ren.addEventListener('click', async (ev) => {
                     ev.stopPropagation();

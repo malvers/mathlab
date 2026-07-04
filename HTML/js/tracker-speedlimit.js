@@ -396,18 +396,24 @@ window.TrackerSpeedLimit = function (ctx) {
     // Authentic Überholverbot (Zeichen 276): white disc, red ring, TWO rear-view cars side by side — the
     // left one RED (overtaking, drawn a touch forward/larger), the right one dark-blue (being passed; never
     // black, CLAUDE.md). 50 px so it reads like a real sign, not a dot (Doc 2026-07-04 „bissl mikrig").
+    // Same authentic front-view cars as the sign panel (Doc's Zeichen-276 reference), inside the red ring.
     const NO_OVERTAKE_SVG = '<svg viewBox="0 0 60 60" width="50" height="50" aria-label="Überholverbot (Zeichen 276)">'
         + '<circle cx="30" cy="30" r="26.5" fill="#fff" stroke="rgb(176,36,24)" stroke-width="6.5"/>'
-        + '<g fill="rgb(176,36,24)">'                                                    // left car — red, overtaking
-        + '<rect x="12" y="25" width="17" height="14" rx="3"/>'                          //   body
-        + '<rect x="15.5" y="19.5" width="10" height="7.5" rx="2.5"/>'                   //   cabin
-        + '<circle cx="16.5" cy="40.5" r="2.6"/><circle cx="24.5" cy="40.5" r="2.6"/>'  //   wheels
+        + '<g transform="translate(6,6)">'
+        + '<g>'   // red car (left, overtaking)
+        + '<rect x="6.5" y="21" width="18" height="12" rx="3.6" fill="rgb(176,36,24)"/>'
+        + '<rect x="10.2" y="15.3" width="11" height="8.6" rx="3.3" fill="rgb(176,36,24)"/>'
+        + '<rect x="12.2" y="17.3" width="7.2" height="4.3" rx="1.7" fill="#f1dedb"/>'
+        + '<rect x="6.5" y="31.4" width="5.1" height="3.7" rx="1.7" fill="rgb(120,22,16)"/>'
+        + '<rect x="19.4" y="31.4" width="5.1" height="3.7" rx="1.7" fill="rgb(120,22,16)"/>'
         + '</g>'
-        + '<g fill="rgb(14,36,78)">'                                                     // right car — dark blue, passed
-        + '<rect x="33" y="27" width="15.5" height="12.5" rx="2.8"/>'
-        + '<rect x="36" y="22" width="9" height="6.5" rx="2.2"/>'
-        + '<circle cx="37" cy="41" r="2.3"/><circle cx="44.5" cy="41" r="2.3"/>'
-        + '</g></svg>';
+        + '<g>'   // passed car (right, dark charcoal)
+        + '<rect x="26" y="22" width="16" height="11" rx="3.3" fill="rgb(38,40,48)"/>'
+        + '<rect x="29.2" y="16.9" width="9.6" height="7.7" rx="2.9" fill="rgb(38,40,48)"/>'
+        + '<rect x="30.9" y="18.6" width="6.2" height="3.8" rx="1.4" fill="#dcdee3"/>'
+        + '<rect x="26" y="31.5" width="4.6" height="3.4" rx="1.5" fill="rgb(20,21,27)"/>'
+        + '<rect x="37.4" y="31.5" width="4.6" height="3.4" rx="1.5" fill="rgb(20,21,27)"/>'
+        + '</g></g></svg>';
     const TOLL_BADGE = '<div style="background:rgb(14,36,78);color:#fff;font:700 11px Arial,sans-serif;'
         + 'padding:3px 7px;border-radius:7px;letter-spacing:.5px;box-shadow:0 2px 8px rgba(8,20,42,.5)">MAUT</div>';
     function ensureAdv() {
