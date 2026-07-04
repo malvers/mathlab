@@ -839,6 +839,7 @@ body.ui-idle #mic-fab,
 body.ui-idle #vid-fab,
 body.ui-idle #compass,
 body.ui-idle #speed-sign,
+body.ui-idle #speed-cond,
 body.ui-idle #hud-top,
 body.ui-idle #view-fan,
 body.ui-idle #trk-controls {
@@ -2280,6 +2281,45 @@ body.ui-idle #nav-banner .nav-trip { font-size: clamp(0.95rem, 4vw, 1.2rem); pad
 
 #speed-sign[hidden] {
     display: none;
+}
+
+/* Time-window label for a time-conditional limit (school zone, night limit …): sits directly UNDER
+   #speed-sign, left-aligned, showing "value · days from–to" so Doc sees exactly WHEN the temporary
+   limit applies (Doc 2026-07-04, "von wann bis wann"). The live #speed-sign stays authoritative for
+   the number shown NOW; this is the schedule behind it. Orbitron (rule 8), a hair bigger than a badge. */
+#speed-cond {
+    position: fixed;
+    left: 12px;
+    top: 50%;
+    transform: translateY(calc(-50% + 82px)); /* just below the 44px sign (centre +52 → bottom +74) */
+    z-index: 600;
+    display: none;               /* → flex when there is a window to show (JS) */
+    flex-direction: column;
+    gap: 3px;
+    max-width: 44vw;
+    pointer-events: none;
+    transition: opacity 0.55s ease;
+}
+
+#speed-cond span {
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    line-height: 1.2;
+    color: #fff;
+    background: rgba(8, 20, 42, 0.82);
+    backdrop-filter: blur(6px);
+    padding: 3px 8px;
+    border-radius: 7px;
+    white-space: nowrap;
+    box-shadow: 0 2px 8px rgba(8, 20, 42, 0.5);
+}
+
+/* The window that is in force RIGHT NOW → orange highlight (λ), so the active rule pops. */
+#speed-cond span.now {
+    color: rgb(8, 20, 42);
+    background: rgb(245, 194, 66);
+    font-weight: 700;
 }
 
 /* ---- Bußgeld-Risiko panel (js/tracker-fines.js) — opened by tapping the speed-limit sign ---- */

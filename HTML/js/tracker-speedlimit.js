@@ -221,6 +221,53 @@ window.TrackerSpeedLimit = function (ctx) {
         return (v && typeof v === 'object') ? (evalLimit(v) + ' [bedingt ' + limitKey(v) + ']') : String(v);
     }
 
+    // ---- human-readable window text for the on-screen conditional label -------------------------
+    // Turn a rule's parsed days/times back into "Mo–Fr 6–17" so the driver sees exactly WHEN a
+    // temporary limit applies (Doc 2026-07-04: "genau das möchte ich, von wann bis wann").
+    const DAY_MON1 = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So']; // Monday-first for display
+    function fmtDays(days) {
+        if (!days || !days.length) return 'täglich';               // null = every day (parseDays)
+        const ord = days.map((d) => (d + 6) % 7).sort((a, b) => a - b); // getDay() (Su=0) → Mon-first index
+        const contiguous = ord.every((v, i) => i === 0 || v === ord[i - 1] + 1);
+        if (contiguous && ord.length > 1) return DAY_MON1[ord[0]] + '–' + DAY_MON1[ord[ord.length - 1]];
+        return ord.map((v) => DAY_MON1[v]).join('+');
+    }
+    function fmtClock(min) {
+        const h = Math.floor(min / 60), m = min % 60;
+        return m ? (h + ':' + String(m).padStart(2, '0')) : String(h); // drop ":00" → "6", keep "6:30"
+    }
+    function fmtTimes(times) {
+        if (!times || !times.length) return 'ganztags';
+        return times.map((t) => fmtClock(t.from) + '–' + fmtClock(t.to)).join(', ');
+    }
+
+    // The small label under the speed sign that lists each time-conditional rule ("30 · Mo–Fr 6–17").
+    // Built lazily like the advisories; the window that is IN FORCE right now gets the orange highlight.
+    let condEl = null;
+    function ensureCondLabel() {
+        if (condEl) return condEl;
+        condEl = document.createElement('div');
+        condEl.id = 'speed-cond';
+        document.body.appendChild(condEl);
+        return condEl;
+    }
+    function updateCondLabel() {
+        const el = ensureCondLabel();
+        const v = curRaw;
+        // Only show for a real time-window rule; a plain number / '@ wet'-only rule has no clock window.
+        const rules = (v && Array.isArray(v.rules)) ? v.rules.filter((r) => r.days || r.times) : [];
+        if (!rules.length) { el.style.display = 'none'; el.textContent = ''; return; }
+        const now = new Date();
+        el.textContent = '';
+        for (const r of rules) {
+            const s = document.createElement('span');
+            s.textContent = String(r.limit) + ' · ' + fmtDays(r.days) + ' ' + fmtTimes(r.times);
+            if (ruleActive(r, now)) s.classList.add('now'); // this window applies right now → highlight
+            el.appendChild(s);
+        }
+        el.style.display = 'flex';
+    }
+
     // Road types whose limit we want to show — exclude footways, cycleways, tracks etc. so a parallel
     // path can never steal the sign for the road you're actually driving on.
     const DRIVE_HW = new Set(['motorway', 'trunk', 'primary', 'secondary', 'tertiary',
@@ -468,6 +515,7 @@ window.TrackerSpeedLimit = function (ctx) {
                 curLimit = evalLimit(conf.m); curConfirmed = true;
                 dbg('Limit: ' + fmtLimit(conf.m) + ' (' + Math.round(conf.d) + ' m' + (haveHeading ? ', i. Fahrtricht.' : '') + ')');
                 setSign(curLimit, false, true);
+                updateCondLabel(); // show/refresh the "von–bis" window right away, not only on the next fix
                 return;
             }
             // 2) no signed limit → fall back to the generic legal default, shown UNCONFIRMED (dimmed/dashed).
@@ -475,6 +523,7 @@ window.TrackerSpeedLimit = function (ctx) {
                 dbg('Default (unbestätigt): ' + def.m + ' (' + Math.round(def.d) + ' m' + (haveHeading ? ', i. Fahrtricht.' : '') + ')');
                 curRaw = null; curLimit = def.m; curConfirmed = false;
                 setSign(def.m, false, false);
+                updateCondLabel(); // curRaw is null now → hide any stale window label
                 return;
             }
             // 3) nothing usable (untagged, or only crossing roads) → don't blank a previously good sign.
@@ -500,6 +549,7 @@ window.TrackerSpeedLimit = function (ctx) {
         // A time-conditional live limit must follow the clock even with no new query (e.g. parked across the
         // 17:00 school-zone boundary) → re-evaluate the cached raw value each fix.
         if (!fromProfile && curRaw) curLimit = evalLimit(curRaw);
+        updateCondLabel(); // follows the clock every fix; hides when on a profiled route or a plain limit
         if (typeof curLimit === 'number' && speedKmh != null) {
             setSign(curLimit, speedKmh > curLimit + OVER_TOL_KMH, curConfirmed);
             // The audible bell only on a CONFIRMED (mapped/signed) limit — never assert an over-speed
@@ -549,7 +599,7 @@ window.TrackerSpeedLimit = function (ctx) {
         query(here, travelBrg);
     }
 
-    function clear() { curLimit = null; curRaw = null; curConfirmed = true; lastRoad = null; lastPos = null; headBrg = null; headPos = null; lastBing = 0; setSign(null, false); setAdvisories(false, false); }
+    function clear() { curLimit = null; curRaw = null; curConfirmed = true; lastRoad = null; lastPos = null; headBrg = null; headPos = null; lastBing = 0; setSign(null, false); setAdvisories(false, false); updateCondLabel(); }
 
     function setBell(on) { bellOn = !!on; try { localStorage.setItem(BELL_KEY, bellOn ? '1' : '0'); } catch (e) { } }
     function bellEnabled() { return bellOn; }
