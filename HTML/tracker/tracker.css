@@ -1900,8 +1900,19 @@ body.ui-idle #trk-controls {
     font-family: system-ui, sans-serif;
     font-size: 0.66rem;
     color: rgba(255, 255, 255, 0.5);
-    flex: none;
+    max-width: 100%;
     white-space: nowrap;
+    overflow: hidden;          /* never let km·time·speed spill under the action icons */
+    text-overflow: ellipsis;
+}
+
+/* trailing action icons in one tight group (share · out-of-folder · delete) */
+.tl-acts {
+    flex: none;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    margin-right: 6px;         /* keep the last icon off the panel edge / scrollbar */
 }
 
 /* row badge (OUR pin style), shown BEFORE the name: blue speaker (voice) / green camera (photos) */
@@ -2041,9 +2052,8 @@ body.ui-idle #trk-controls {
 
 .tl-del {
     flex: none;
-    width: 34px;
-    height: 34px;
-    margin-right: 8px;        /* now the rightmost icon → keep it off the panel edge / scrollbar */
+    width: 30px;
+    height: 30px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -2061,9 +2071,8 @@ body.ui-idle #trk-controls {
 
 .tl-share {
     flex: none;
-    width: 34px;
-    height: 34px;
-    margin-right: 8px; /* nudge the share icon a bit left, off the panel edge / scrollbar */
+    width: 30px;
+    height: 30px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -2179,8 +2188,8 @@ body.ui-idle #trk-controls {
 /* "take out of folder" arrow — mirrors the share icon's neutral look */
 .tl-out {
     flex: none;
-    width: 34px;
-    height: 34px;
+    width: 30px;
+    height: 30px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
