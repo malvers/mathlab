@@ -7,12 +7,16 @@
 
 ---
 
+> ## 🔎 Audit 2026-07-04 (Code-Stand)
+> Ideen gegen den echten Code abgeglichen — **2 waren schon gebaut** und sind hier raus (leben still im Archiv):
+> „Triff mich / Live-ETA" (ETA-Pille in `view.html`) · „Agent-Antworten vorlesen" (Solita-TTS).
+> **Teilweise:** Route-Statistik (dist/Ø/max + Höhenmeter da, Kurvigkeit/fraktal fehlt) · 3D-Gelände (DEM verdrahtet, aber kein MapLibre-Relief). Rest offen wie gelistet.
+
 ## Prio 2 — als Nächstes
 - **Schätz-Spiel unterwegs** *(Doc)* — Kids/Mathe: Entfernung / Zeit / Tempo schätzen lassen; Mathe-Labor-DNA.
 - **Heatmap „wo war ich überall"** *(Doc)* — alle gespeicherten Tracks als Wärmekarte.
 - **Natur-Sammelalbum „Pokédex"** *(Doc)* — Register aller erkannten Arten/POIs über alle Touren; mit dem Reise-Album verzahnen.
 - **Offline-Karten vorladen (PMTiles)** *(Doc)* — Karten für Funklöcher cachen; braucht den Vektor-Karten-Enabler; OSM-Tile-Policy beachten.
-- **„Triff mich" / Live-ETA teilen** — Live-Standort + voraussichtliche **Ankunfts-Uhrzeit** teilen; baut auf dem Live-Broadcast auf (erst BUG-5 klären).
 - **Auto-Reise-Album (PDF/Storybook)** — Tour als schön gesetztes PDF/Album (v. a. Wandern); mit „Pokédex" verzahnen.
 - **Geometrie & Statistik der Route** — Kurvigkeit / fraktale Dimension + Max/Avg-Speed; Höhenmeter teils schon via FEAT-9.
 
@@ -29,7 +33,6 @@
 ## Weitere offene Ideen
 - **WegCast — Audio-Sehenswürdigkeiten am Weg** — standort-getriggerter Audio-Reiseführer (vorgelesen), Vorbild Blitzer.de „DriveCast"; MVP = Wikipedia-Geosearch + `speechSynthesis`, Radius/Tiefe via `effectiveActivity()`. **Überschneidet FEAT-24 (POI) — gemeinsam denken.**
 - **Cluster-Hülle beim Hover** — konvexe Außenhülle um einen Pin-Cluster beim Maus-Hover; Desktop-only, reines Overlay in `photo-layer.js`.
-- **Agent-Antworten vorlesen** — hände-frei beim Fahren; heute via Phone-Vorleser, echtes Cloud-TTS nur server-seitig (Regel 18). Sofort-Kompromiss: Antworten kurz halten.
 - **Pflanzen-DB-Enrichment** — POWO / GBIF / iNaturalist zur Veredelung der Pflanzen-Erkennung (Foto-Spur).
 - **GPS-Nachbearbeitung PPK/PPP** — GPS nachträglich verbessern; Stufe 1 (Glättung + DEM-Höhe) ist FEAT-9, echtes PPK/PPP ist die nächste Stufe.
 - **Play-Store-Verteilung** — Sideload blockt teils (Samsung); Play Store braucht 12 Tester · 14 Tage / Firmenkonto.
