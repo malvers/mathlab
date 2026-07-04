@@ -3395,13 +3395,15 @@ ${pts}
             // Builds an AUTO folder (Fotos / Videos / Voice) for loose single-point media. Membership is
             // derived from the item type (not stored), so there's no rename/dissolve — just collapse +
             // share. `key` is a stable string used to remember its collapsed state.
-            function buildVirtualSection(key, emoji, name, kids) {
+            function buildVirtualSection(key, iconSpec, name, kids) {
                 const sec = document.createElement('div');
                 sec.className = 'tl-folder tl-folder-auto';
                 if (_collapsedFolders.has(key)) sec.classList.add('collapsed');
                 const head = document.createElement('div'); head.className = 'tl-folder-head';
                 const caret = document.createElement('span'); caret.className = 'tl-fold-caret'; caret.textContent = '▾';
-                const ic = document.createElement('span'); ic.className = 'tl-fold-ic'; ic.textContent = emoji;
+                // OUR pin icon (coloured circle + glyph), same as the POI panel rows — not an emoji.
+                const ic = document.createElement('span'); ic.className = 'tl-fold-ic poi-cat-ic poi-pin ' + iconSpec.c; ic.setAttribute('aria-hidden', 'true');
+                ic.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + iconSpec.ic + '</svg>';
                 const nm = document.createElement('div'); nm.className = 'tl-fold-name'; nm.textContent = name;
                 const cnt = document.createElement('span'); cnt.className = 'tl-fold-count'; cnt.textContent = kids.length;
                 const shr = document.createElement('button'); shr.className = 'tl-fold-shr'; shr.title = 'Alle teilen';
@@ -3442,9 +3444,15 @@ ${pts}
             const videos = loose.filter(isVideoR);
             const voices = loose.filter(isVoiceR);
             loose.filter((r) => !isPhotoR(r) && !isVideoR(r) && !isVoiceR(r)).forEach((r) => box.appendChild(buildTrackRow(r)));
-            if (photos.length) box.appendChild(buildVirtualSection('auto-photo', '📷', 'Fotos', photos));
-            if (videos.length) box.appendChild(buildVirtualSection('auto-video', '🎬', 'Videos', videos));
-            if (voices.length) box.appendChild(buildVirtualSection('auto-voice', '🎙️', 'Voice', voices));
+            // OUR media pin icons (camera green · video purple · mic blue) — same set as the POI panel.
+            const AUTO_IC = {
+                photo: { c: 'poi-photo', ic: '<path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/>' },
+                video: { c: 'poi-video', ic: '<path d="m22 8-6 4 6 4V8Z"/><rect width="14" height="12" x="2" y="6" rx="2" ry="2"/>' },
+                voice: { c: 'poi-voice', ic: '<path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/>' },
+            };
+            if (photos.length) box.appendChild(buildVirtualSection('auto-photo', AUTO_IC.photo, 'Fotos', photos));
+            if (videos.length) box.appendChild(buildVirtualSection('auto-video', AUTO_IC.video, 'Videos', videos));
+            if (voices.length) box.appendChild(buildVirtualSection('auto-voice', AUTO_IC.voice, 'Voice', voices));
         }
 
         const GNSS_INFO =
