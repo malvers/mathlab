@@ -613,6 +613,7 @@
         let __poi = null;          // points-of-interest layer (js/tracker-poi.js)
         let __traffic = null;      // live Autobahn traffic layer (js/tracker-traffic.js)
         let __hazards = null;      // point-hazard pins + voraus-warning (js/tracker-hazards.js)
+        let __sun = null;          // golden hour / sun position line (js/tracker-sun.js, FEAT-2)
         let __sim = null;          // desk navigation simulator (js/tracker-navsim.js), only with ?sim=1
         let simMode = false;       // true while the simulator drives synthetic fixes → suppress cloud sync/broadcast
         let gnssActive = false;    // true once the native GnssStatus listener delivers data
@@ -1081,6 +1082,7 @@
             if (__nav && __nav.update) __nav.update(here, shownSpeed); // navigation: reroute + speed-scaled turn lead
             if (__speed) __speed.update(here, still, shownSpeed); // speed-limit sign for the current road
             if (__hazards) __hazards.update(here, shownSpeed); // point hazards (Bahnübergang/Stop/…) ahead
+            if (__sun) __sun.update(here);                     // golden hour / sun position line (FEAT-2)
             if (__fines) __fines.refresh(); // live-update the Bußgeld panel while it's open
             updateMotionDbg(accuracy, minStep, still);
             if (tracking) setStatus(`Aufzeichnung läuft … ${track.length} Punkte`);
@@ -1432,6 +1434,7 @@
             if (__traffic) __traffic.update(here);   // live Autobahn traffic also while driving without recording
             if (__speed) __speed.update(here, still, shownSpeed); // speed-limit sign for the current road — also while idle (Doc 2026-06-30)
             if (__hazards) __hazards.update(here, shownSpeed); // point hazards ahead — also while idle
+            if (__sun) __sun.update(here);                     // golden hour / sun position line — also while idle (FEAT-2)
             updateFuelLayer(here);                   // fuel-station prices also while idle (not only when recording) — Doc 2026-06-23
             if (acquireWatch != null) { navigator.geolocation.clearWatch(acquireWatch); acquireWatch = null; } // initial one-shot now redundant
             if (following && !handMode && !still) {
@@ -2631,6 +2634,9 @@ ${pts}
         // ---- Point hazards → js/tracker-hazards.js. Position-driven; OSM level-crossings / stop / give-way /
         //      zebra as map pins, with a "voraus"-toast for the safety-critical ones. Key-less Overpass. ----
         __hazards = (typeof TrackerHazards !== 'undefined') ? TrackerHazards({ map, toast, nav: () => __nav }) : null;
+        // ---- Golden hour / sun position → js/tracker-sun.js (FEAT-2). Fills the #sun-line in the HUD header,
+        //      glows during the golden/blue hour. Position-driven + self-ticking once a minute. ----
+        __sun = (typeof TrackerSun !== 'undefined') ? TrackerSun({ $, toast }) : null;
         // ---- Desk navigation simulator → js/tracker-navsim.js. Only with ?sim=1 in the URL. Feeds synthetic
         //      GPS fixes through the REAL onPosition pipeline (so reroute/guidance behave 1:1), while simMode
         //      suppresses cloud sync/broadcast so no fake data ever reaches Supabase. ----
