@@ -22,10 +22,19 @@ window.TrackerSignPanel = function (ctx) {
     let pending = null, timer = null;
     const selEls = { num: null, days: null, time: null }; // currently-highlighted chip per role
 
-    const OVERTAKE_SVG = '<svg viewBox="0 0 48 48" width="30" height="30" aria-label="Überholverbot">'
-        + '<circle cx="24" cy="24" r="21" fill="#fff" stroke="rgb(176,36,24)" stroke-width="5"/>'
-        + '<rect x="8" y="20" width="14" height="9" rx="2" fill="rgb(176,36,24)"/>'
-        + '<rect x="26" y="20" width="14" height="9" rx="2" fill="rgb(14,36,78)"/></svg>';
+    // Just the two cars — the white disc + red ring come from the .sp-chip frame (like a real Zeichen 276).
+    // Left car RED (overtaking, a touch forward/larger), right car dark-blue (being passed; never black).
+    const OVERTAKE_SVG = '<svg viewBox="0 0 48 48" width="40" height="40" aria-label="Überholverbot (Zeichen 276)">'
+        + '<g fill="rgb(176,36,24)">'
+        + '<rect x="7" y="19" width="15" height="12" rx="2.5"/>'
+        + '<rect x="10" y="14" width="9" height="6.5" rx="2"/>'
+        + '<circle cx="11" cy="32" r="2.3"/><circle cx="18.5" cy="32" r="2.3"/>'
+        + '</g>'
+        + '<g fill="rgb(14,36,78)">'
+        + '<rect x="27" y="21" width="14" height="11" rx="2.3"/>'
+        + '<rect x="30" y="16.5" width="8" height="6" rx="2"/>'
+        + '<circle cx="31" cy="33" r="2.1"/><circle cx="37.5" cy="33" r="2.1"/>'
+        + '</g></svg>';
 
     // ---- composition state -----------------------------------------------------------------------
     function resetPending() { pending = { limit: null, days: null, daysLabel: '', times: null, timeLabel: '' }; }
@@ -95,8 +104,8 @@ window.TrackerSignPanel = function (ctx) {
         NUMS.forEach((v) => panel.appendChild(disc('sp-chip sp-chip-num', '<span class="sp-num">' + v + '</span>', (el) => tapNum(v, el))));
         DAYS.forEach((d) => panel.appendChild(disc('sp-pill sp-pill-days', d.label, (el) => tapDays(d, el))));
         TIMES.forEach((t) => panel.appendChild(disc('sp-pill sp-pill-time', t.label, (el) => tapTime(t, el))));
-        panel.appendChild(disc('sp-chip sp-chip-adv', OVERTAKE_SVG, () => tapAdv({ noOvertake: true })));
-        panel.appendChild(disc('sp-chip sp-chip-adv', '<span class="sp-maut">MAUT</span>', () => tapAdv({ toll: true })));
+        panel.appendChild(disc('sp-chip sp-chip-overtake', OVERTAKE_SVG, () => tapAdv({ noOvertake: true })));
+        panel.appendChild(disc('sp-chip sp-chip-maut', '<span class="sp-maut">MAUT</span>', () => tapAdv({ toll: true })));
         panel.appendChild(disc('sp-chip sp-chip-clear', '<span class="sp-clear">×</span>', () => tapClear()));
 
         document.body.appendChild(backdrop);
