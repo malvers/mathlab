@@ -79,6 +79,11 @@
         .md pre { background: rgba(0, 0, 0, 0.3); padding: 10px 12px; border-radius: 8px; overflow: auto; }
         .md pre code { background: none; padding: 0; }
         .md blockquote { border-left: 3px solid var(--orange); margin: 8px 0; padding: 2px 12px; color: var(--muted); }
+        /* Collapsible entries: each H2 is a fold toggle (Doc 2026-07-04 — the white body was a wall). */
+        .md .sec-head { cursor: pointer; }
+        .md .sec-head:hover h2 { text-decoration: underline; }
+        .md .sec-chev { display: inline-block; width: 0.9em; margin-right: 5px; font-size: 0.7em; color: var(--muted); vertical-align: middle; }
+        .md .sec-body.collapsed { display: none; }
         .md table { border-collapse: collapse; } .md th, .md td { border: 1px solid var(--line); padding: 4px 8px; }
         .md img { max-width: 100%; }
 
@@ -190,6 +195,7 @@
             }
             if (!granular) {
                 wrap.innerHTML = marked.parse(md);
+                makeCollapsible(wrap);
                 bodyEl.appendChild(wrap);
                 const n = el('div', 'filenote'); n.textContent = 'Feingranulares Löschen hier nicht möglich (komplexes Markdown) — nutze das ✕ am Datei-Kopf.';
                 bodyEl.appendChild(n);
@@ -235,7 +241,45 @@
                 blk.appendChild(delControl(label, () => cut(s, e)));
                 wrap.appendChild(blk);
             });
+            makeCollapsible(wrap);
             bodyEl.appendChild(wrap);
+        }
+
+        // Make each H2 entry a collapsible section: click the heading to fold/unfold its body — keeps the
+        // board scannable instead of a wall of white text (Doc 2026-07-04). Default collapsed. Works for both
+        // the granular (.blk) and fallback (bare tags) render paths. Everything ABOVE the first H2 (file title,
+        // intro blockquote, the audit box) stays open. The per-section ✕ (delete) must not trigger a toggle.
+        function makeCollapsible(wrap) {
+            const kids = Array.from(wrap.children);
+            const h2of = (n) => (n.matches && n.matches('h2')) ? n : (n.querySelector ? n.querySelector('h2') : null);
+            const hasH1 = (n) => !!(n.matches && (n.matches('h1') || n.querySelector('h1')));
+            let i = 0;
+            while (i < kids.length) {
+                const c = kids[i];
+                const h2 = h2of(c);
+                if (h2 && !hasH1(c)) {
+                    c.classList.add('sec-head');
+                    const chev = document.createElement('span');
+                    chev.className = 'sec-chev'; chev.textContent = '▶';
+                    h2.insertBefore(chev, h2.firstChild);
+                    const body = document.createElement('div');
+                    body.className = 'sec-body collapsed';
+                    let j = i + 1;
+                    while (j < kids.length) {
+                        const n = kids[j];
+                        if (h2of(n) || hasH1(n)) break;
+                        body.appendChild(n);   // moves n out of wrap into this section's body
+                        j++;
+                    }
+                    c.after(body);
+                    c.addEventListener('click', (e) => {
+                        if (e.target.closest && e.target.closest('.xctl')) return;   // ✕ delete must not toggle
+                        const collapsed = body.classList.toggle('collapsed');
+                        chev.textContent = collapsed ? '▶' : '▼';
+                    });
+                    i = j;
+                } else { i++; }
+            }
         }
 
         function rowEl(path) {
