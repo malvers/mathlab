@@ -22,7 +22,9 @@ window.TrackerSignPanel = function (ctx) {
         { key: '50', kind: 'limit', limit: 50, label: '50' },
         { key: '70', kind: 'limit', limit: 70, label: '70' },
         { key: '100', kind: 'limit', limit: 100, label: '100' },
-        { key: 'w30', kind: 'time', limit: 30, label: '30', sub: 'wt' },
+        // Time windows: days (getDay ints) + from/to in minutes. "werktags" = Mo–Sa (Sa zählt).
+        { key: 'w30', kind: 'time', limit: 30, label: '30', sub: 'wt', days: [1, 2, 3, 4, 5, 6], from: 360, to: 1200, title: '30 · werktags 6–20' },
+        { key: 'mf30', kind: 'time', limit: 30, label: '30', sub: 'M–F', days: [1, 2, 3, 4, 5], from: 420, to: 1080, title: '30 · Mo–Fr 7–18' },
         { key: 'ov', kind: 'adv', noOvertake: true },
         { key: 'maut', kind: 'adv', toll: true, label: 'MAUT' },
         { key: 'clr', kind: 'clear', label: '×' },
@@ -76,11 +78,15 @@ window.TrackerSignPanel = function (ctx) {
         let desc = null, label = '';
         if (s.kind === 'limit') { desc = { limit: s.limit }; label = 'Tempo ' + s.limit; }
         else if (s.kind === 'time') {
-            // werktags 6-20h → 30. "werktags" = Mo–Sa (Sa zählt); base = the limit shown now, else 50.
+            // A time-window limit (e.g. werktags 6–20 → 30). base = the limit shown now, else 50, so
+            // off-window the sign shows a sensible number instead of "?".
             const base = (typeof speed.currentLimit === 'function' && typeof speed.currentLimit() === 'number')
                 ? speed.currentLimit() : 50;
-            desc = { raw: { base, rules: [{ limit: s.limit, days: [1, 2, 3, 4, 5, 6], times: [{ from: 360, to: 1200 }], wet: false }] } };
-            label = '30 · werktags 6–20';
+            const days = s.days || [1, 2, 3, 4, 5, 6];
+            const from = (s.from != null) ? s.from : 360;
+            const to = (s.to != null) ? s.to : 1200;
+            desc = { raw: { base, rules: [{ limit: s.limit, days, times: [{ from, to }], wet: false }] } };
+            label = s.title || (s.limit + ' · Zeitfenster');
         } else if (s.kind === 'adv' && s.noOvertake) { desc = { noOvertake: true }; label = 'Überholverbot'; }
         else if (s.kind === 'adv' && s.toll) { desc = { toll: true }; label = 'Maut'; }
 
