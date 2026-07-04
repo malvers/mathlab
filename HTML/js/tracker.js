@@ -3295,7 +3295,7 @@ ${pts}
                 if (r.folder_id) {
                     const out = document.createElement('button');
                     out.className = 'tl-out'; out.title = 'Aus Ordner nehmen';
-                    out.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V6"></path><path d="M5 12l7-7 7 7"></path></svg>';
+                    out.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"></path></svg>';
                     out.addEventListener('click', async (ev) => {
                         ev.stopPropagation();
                         try { await assignFolder([r.id], null); toast('Aus Ordner genommen.'); const rows2 = await listTracks(); renderTrackList(rows2); }
