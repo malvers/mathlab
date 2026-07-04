@@ -17,10 +17,10 @@
 **Sensorik-Leitplanke (Doc):** GPS = Wahrheit; IMU/Beschleunigung nur Ergänzung, nie GPS-Ersatz.
 **Akzeptanz:** Out-and-back, Schleife, verzweigte Spur, GPS-Jitter, weit off-track→Recovery, „Start erreicht", langer Track (Perf), geladen vs. live, Flugmodus, App-Reload mitten im Heim-Modus (Modus+Snap-Index aus localStorage). Erst nach Feld-Testmatrix „scharf".
 
-## FEAT-2 — Goldene Stunde & Sonnenstand 📐 · 🔴 Prio 1
-**Auftrag:** Zeigt Sonnenstand + Uhrzeit der goldenen Stunde / des Sonnenuntergangs am aktuellen Standort (bestes Foto-Licht auf der Wanderung).
-**Wiederverwenden:** die Sonnen-Mathe aus der **World Clock** (`HTML/worldclock/`) — erst dort greppen, nicht neu herleiten (Memory `feedback_check_existing_first`). Position aus `currentLatLng()`.
-**Offen (eine Rückfrage):** Darstellung — eigene HUD-Kachel vs. Radial-Menü vs. Overlay-Panel? Vor dem Bau klären.
+## FEAT-2 — Goldene Stunde & Sonnenstand ✅ gebaut (Feld-Check offen) · 🔴 Prio 1
+**Gebaut (2026-07-04):** `HTML/js/tracker-sun.js` — schlanke, tippbare Zeile im HUD-Header (`#sun-line`): aktuelle Phase, nächster Meilenstein mit Countdown, Tap → volle Aufschlüsselung (Auf-/Untergang, beide goldene Stunden, blaue Stunde, live Sonnenhöhe + Himmelsrichtung). Glüht λ-orange während der goldenen Stunde.
+**Solarmathe:** eigenständiges NOAA (Lineage wie worldclock `sunPosition()`, aber entkoppelt), auf `window.TrackerSunMath` testbar exponiert. **Verifiziert** gegen Almanach: Berlin-Sonnenwende 04:43/21:33 (exakt), Winter 08:14/15:53, Äquinoktium-Tageslänge 12,17 h (Refraktion), Mittagshöhe 60,9°/Azimut 180°. Goldene Stunde = Sonne −4°…+6°, blaue Stunde −6°…−4°, Auf/Unter −0,833°.
+**→ Offen:** nur der **Layout-Feld-Check** am Gerät (Zeile im HUD, goldene-Stunde-Glow). Darstellungsfrage (HUD-Kachel vs. Panel) wurde als **HUD-Header-Zeile** entschieden.
 
 ## FEAT-3 — Parkplatz automatisch merken 📐 · Prio 1 (Vorschlag)
 **Auftrag:** Wechselt die Activity-Erkennung „fahren"→„zu Fuß", setzt der Tracker automatisch einen Park-Pin. Auto später entspannt wiederfinden.
