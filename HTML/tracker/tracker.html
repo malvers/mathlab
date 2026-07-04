@@ -127,14 +127,13 @@
     <!-- Top HUD -->
     <div id="hud-top">
         <div id="gps-chip"><span id="gps-src"></span><span id="gps-acc">±<span class="sat-n">–</span> m</span></div>
+        <!-- FEAT-2: sunrise ☀ flanks the clock on the LEFT, sunset ☾ on the RIGHT (icon on top, time under
+             it). Filled by js/tracker-sun.js; tap either for the full breakdown. Hidden until GPS is known. -->
         <div id="hud-time-wrap">
-            <div id="live-badge">● LIVE</div>
+            <div class="sun-flank" id="sun-rise" hidden><span class="sf-ico">☀</span><span class="sf-time" id="sun-rise-t">–</span></div>
             <div id="hud-time"></div>
+            <div class="sun-flank" id="sun-set" hidden><span class="sf-ico">☾</span><span class="sf-time" id="sun-set-t">–</span></div>
         </div>
-        <!-- FEAT-2: golden hour / sun position — best photo & hike light. Filled by js/tracker-sun.js;
-             glows during the golden/blue hour. Tap for the full breakdown. Hidden until GPS is known.
-             Sits ABOVE the stats row (Doc 2026-07-04: "muss höher"). -->
-        <div id="sun-line" hidden><span id="sun-ico">☀</span><span id="sun-main"></span><span id="sun-sub"></span></div>
         <div id="hud-stats">
             <div class="hud-stat"><span id="trk-dist"></span><span class="hud-lbl" id="trk-dist-lbl">DISTANCE KM</span></div>
             <div class="hud-stat speed-stat"><div class="speed-col"><span id="trk-speed"></span><span class="hud-lbl" id="trk-speed-lbl">SPEED KM/H</span></div></div>
@@ -148,6 +147,8 @@
         <button id="trk-toggle">START</button>
         <button id="trk-finish">STOP</button>
         <button id="trk-discard">LÖSCHEN</button>
+        <!-- LIVE-Broadcast-Indikator: weiß, pulsierend, sitzt oben auf dem roten PAUSE-Button (Doc 2026-07-04). -->
+        <div id="live-badge">● LIVE</div>
     </div>
 
 

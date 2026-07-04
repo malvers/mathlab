@@ -132,37 +132,23 @@
             return { label: 'Sonnenaufgang', dt: ev2.sunrise };
         }
 
+        // Sunrise ☀ flanks the clock on the LEFT, sunset ☾ on the RIGHT (icon on top, time under it) —
+        // filled into #sun-rise-t / #sun-set-t (Doc 2026-07-04). The golden/blue-hour text line is retired;
+        // phaseOf/nextMilestone/inWord stay defined (used by showDetail's breakdown / future use).
         function render() {
-            const line = $('sun-line'); if (!line) return;
-            if (!pos) { line.hidden = true; return; }
-            const now = new Date();
-            const here = sunAltAz(now, pos[0], pos[1]);
-            const ev = events(now, pos[0], pos[1]);
-            const phase = phaseOf(here.alt);
-            const rising = here.ha < 0;
-
-            // --- Goldene-/Blaue-Stunde-Zeile (Icon + Haupt-Text) vorerst ausgeblendet (Doc 2026-07-04).
-            //     NICHT löschen — nur auskommentiert, damit wir sie jederzeit zurückholen können.
-            // const nx = nextMilestone(ev, now, rising);
-            // const ico = phase === 'day' ? '☀' : phase === 'night' ? '☾' : '✦';
-            // const main = (phase === 'golden' || phase === 'blue')
-            //     ? (phase === 'golden' ? 'Goldene Stunde' : 'Blaue Stunde') + ' · bis ' + hhmm(nx.dt)
-            //     : nx.label + ' ' + hhmm(nx.dt) + (inWord(nx.dt, now) ? ' (' + inWord(nx.dt, now) + ')' : '');
-            // $('sun-ico').textContent = ico;
-            // $('sun-main').textContent = main;
-            $('sun-ico').textContent = '';    // gehört zur ausgeblendeten Zeile → leeren
-            $('sun-main').textContent = '';
-
-            // Auf-/Untergang, etwas größer: Sonne zum Sonnenaufgang, Mond zum Untergang.
-            const sub = '☀ ' + hhmm(ev.sunrise) + '   ☾ ' + hhmm(ev.sunset);
-            $('sun-sub').textContent = sub;
-            line.classList.toggle('golden', phase === 'golden');
-            line.classList.toggle('blue', phase === 'blue');
-            line.hidden = false;
-
+            const rt = $('sun-rise-t'), st = $('sun-set-t');
+            const riseEl = $('sun-rise'), setEl = $('sun-set');
+            if (!rt || !st) return;
+            if (!pos) { if (riseEl) riseEl.hidden = true; if (setEl) setEl.hidden = true; return; }
+            const ev = events(new Date(), pos[0], pos[1]);
+            rt.textContent = hhmm(ev.sunrise);
+            st.textContent = hhmm(ev.sunset);
+            if (riseEl) riseEl.hidden = false;
+            if (setEl) setEl.hidden = false;
             if (!wired) {
                 wired = true;
-                line.addEventListener('click', showDetail);
+                if (riseEl) riseEl.addEventListener('click', showDetail);
+                if (setEl) setEl.addEventListener('click', showDetail);
             }
         }
 
