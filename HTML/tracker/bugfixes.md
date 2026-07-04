@@ -83,6 +83,17 @@
 **NICHT:** nur die Ansagen unterdrücken (Symptom) — der Kern ist die **Routing-Richtung** (bearings/via). Erwägen, den wirkungslosen Teil von `7c842d6` zurückzunehmen, bis es richtig gebaut ist.
 **Update 2026-06-30 (Doc „A"):** Widerspruch gefunden — die 2026-06-25-Notiz „Google reroutet **plain**" (`USE_DEPART_BEARING=false`) galt nur für die OSRM-**Fallback**, der **Default-Motor ORS** bekam beim Reroute weiter das Heading (`computeRoute(...,travelBrg)` → `fetchRerouteORS` → `bearings:[[hdg,60],[0,180]]`). Der Cone zwingt „vorwärts-ish" → fährt weiter und wendet später = das „zieht zurück". **Fix:** `computeRoute()` schickt jetzt auch an ORS `null` als Heading → ORS reroutet plain, Roadgraph + U-Turn-Penalty entscheiden (wie Google). **Noch offen am Gerät zu prüfen:** (b) der Re-Reroute-Loop, solange man bewusst off-line bleibt (`offRouteCount` nullt nur *auf* der Linie) — hier vorerst KEINE Änderung (Doc wählte nur „A").
 
+## BUG-16 — Überholverbot-Badge erscheint im Feld nie (+ Schritttempo „5/7" fehlt) 🔍 erst messen
+**Priorität:** niedrig-mittel (Feld 2026-07-04, Doc: „Überholverbot habe ich im Tracker praktisch **noch nie** gesehen — wir haben nicht mal das Schild dafür"). Ebenfalls beobachtet: ein reales „**5**"-Schild (Schrittgeschwindigkeit) tauchte nicht auf.
+**Symptom:** Das Überholverbot-Icon (und Maut) wird zwar gerendert (`setAdvisories()`), erscheint live aber so gut wie nie. Ein Schritttempo-Schild wurde nicht angezeigt.
+**Vermutete Ursache (noch zu belegen — erst messen):**
+- (a) **OSM taggt dünn:** Überholverbot meist `overtaking:forward/backward=no`, selten `overtaking=no`; wir lesen beide Formen, aber die Basisdaten fehlen oft schlicht.
+- (b) **Advisory hängt an der gewählten Fahrbahn:** `advTags = conf.tags || def.tags` — wenn der Heading-Filter / „nur-signiert" eine andere Fahrbahn wählt (oder keine), gehen die `overtaking*`-Tags verloren.
+- (c) **„5" vs. 7:** verkehrsberuhigter Bereich = `living_street` → wir zeigen **7**, nicht 5. Ein echtes `maxspeed=5` sollte als Zahl durchgehen — prüfen, ob es an Alignment/Query lag oder ob OSM dort schlicht nichts hatte.
+**Fundstellen (`HTML/js/tracker-speedlimit.js`, neu greppen):** `setAdvisories()` · `NO_OVERTAKE_SVG` · `advTags = conf.tags || def.tags` · `overtaking` / `overtaking:forward` / `overtaking:backward` · `parseMax()` (`walk`/`living_street` → 7).
+**Erst messen (DebugWindow, NICHT beim Fahren):** auf einer bekannten Überholverbot-Strecke prüfen, ob Overpass die `overtaking*`-Tags überhaupt liefert und ob `advTags` gesetzt wird — erst dann fixen (Regel: erst messen).
+**Bezug:** Motivation für **FEAT-35** (manuelles Nachtragen, wenn OSM leer/dünn ist).
+
 ---
 
 ## Querverweise
