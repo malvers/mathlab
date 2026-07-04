@@ -2956,10 +2956,25 @@ ${pts}
         })();
         // Fotos / Videos / Voice: hide-or-show OUR own media pins (declutter overlaid tracks). These are
         // NOT Overpass categories — they drive the media layer's filter (js/tracker-media.js), not __poi.
+        // Each row gets a mini pin icon in the SAME colours as its map badge (camera green · video
+        // purple · mic blue), so the panel reads as one legend with the POI categories below.
+        const MEDIA_IC = {
+            photo: { c: 'poi-photo', ic: '<path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/>' },
+            video: { c: 'poi-video', ic: '<path d="m22 8-6 4 6 4V8Z"/><rect width="14" height="12" x="2" y="6" rx="2" ry="2"/>' },
+            voice: { c: 'poi-voice', ic: '<path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/>' },
+        };
         [['media-photo', 'photo'], ['media-video', 'video'], ['media-voice', 'voice']].forEach(([id, kind]) => {
             const el = $(id); if (!el) return;
             el.checked = localStorage.getItem('trk-media-' + kind) !== '0';   // default ON (all shown)
             el.addEventListener('change', () => { if (__media && __media.setMediaVisible) __media.setMediaVisible(kind, el.checked); });
+            const span = el.closest('.set-row') && el.closest('.set-row').querySelector('span');
+            const m = MEDIA_IC[kind];
+            if (span && m && !span.querySelector('.poi-cat-ic')) {
+                span.insertAdjacentHTML('afterbegin',
+                    '<span class="poi-cat-ic poi-pin ' + m.c + '" aria-hidden="true">'
+                    + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" '
+                    + 'stroke-linecap="round" stroke-linejoin="round">' + m.ic + '</svg></span>');
+            }
         });
         $('mb-poi').addEventListener('click', () => { closePopup(); showPanel('poi-panel'); if (__poi) __poi.refresh(); });
         $('poi-close').addEventListener('click', hidePanels);
