@@ -45,6 +45,26 @@ window.TrackerSpeedLimit = function (ctx) {
     const BELL_KEY = 'trk_speed_bell';
     let bellOn = localStorage.getItem(BELL_KEY) !== '0'; // over-speed chime on/off (Settings→Debug), default ON
 
+    // ---- manual sign overrides (FEAT-35 Phase 1) --------------------------------------------------
+    // Signs Doc tapped in via the sign panel (js/tracker-signpanel.js) — for limits OSM lacks (temporary /
+    // Baustellen / thinly-tagged). Each is anchored at the tap position and wins over profile + live OSM
+    // while you're within its radius. Persisted so a reload keeps them; DB sync + OSM upload are later phases.
+    const OVR_KEY = 'trk_sign_overrides';
+    const OVR_RADIUS_M = 70;   // an override applies within this distance of where it was tapped
+    let overrides = [];
+    try { overrides = JSON.parse(localStorage.getItem(OVR_KEY) || '[]') || []; } catch (e) { overrides = []; }
+    function saveOverrides() { try { localStorage.setItem(OVR_KEY, JSON.stringify(overrides)); } catch (e) { } }
+    // Nearest override whose radius covers p=[lat,lng], or null.
+    function overrideAt(p) {
+        if (!p || !overrides.length) return null;
+        let best = null, bd = Infinity;
+        for (const o of overrides) {
+            const d = haversine(p, [o.lat, o.lng]);
+            if (d <= (o.r || OVR_RADIUS_M) && d < bd) { bd = d; best = o; }
+        }
+        return best;
+    }
+
     function loadBell() {
         if (bellBuf || bellLoading || !actx) return;
         bellLoading = true;
@@ -497,16 +517,17 @@ window.TrackerSpeedLimit = function (ctx) {
             if (roadTags) lastRoad = { ref: roadTags.ref || null, name: roadTags.name || null, highway: roadTags.highway || null };
             // Road advisories from the resolved road (not refTags, which may be a different ref-bearing way).
             const advTags = conf.tags || def.tags;
-            if (advTags) {
-                // Überholverbot also from the DIRECTIONAL tags — most overtaking bans are tagged
-                // overtaking:forward/backward=no, not the plain overtaking=no (Doc 2026-07-01: ~4× more of
-                // them). Direction-agnostic for now (shows the ban even if it's the opposite direction's) —
-                // fine for an advisory hint; a travel-direction refinement can come later.
-                const noOv = advTags.overtaking === 'no'
-                    || advTags['overtaking:forward'] === 'no'
-                    || advTags['overtaking:backward'] === 'no';
-                setAdvisories(noOv, advTags.toll === 'yes');
-            }
+            // Überholverbot also from the DIRECTIONAL tags — most overtaking bans are tagged
+            // overtaking:forward/backward=no, not the plain overtaking=no (Doc 2026-07-01: ~4× more of
+            // them). Direction-agnostic for now (shows the ban even if it's the opposite direction's) —
+            // fine for an advisory hint; a travel-direction refinement can come later. A tapped-in advisory
+            // override (FEAT-35) is OR-ed in so it stays sticky even when OSM has no such tag here.
+            const oAdv = overrideAt(p);
+            const noOv = (advTags && (advTags.overtaking === 'no'
+                || advTags['overtaking:forward'] === 'no'
+                || advTags['overtaking:backward'] === 'no')) || (oAdv && !!oAdv.noOvertake);
+            const toll = (advTags && advTags.toll === 'yes') || (oAdv && !!oAdv.toll);
+            setAdvisories(noOv, toll);
 
             // 1) a confirmed/signed limit wins — solid sign. A conditional way keeps its raw {base,rules} in
             //    curRaw so update() re-evaluates the window as the clock crosses it (even while parked).
@@ -533,9 +554,55 @@ window.TrackerSpeedLimit = function (ctx) {
         finally { fetching = false; }
     }
 
+    // Store a tapped-in sign at pos=[lat,lng]. desc: { limit?, raw?, noOvertake?, toll?, r? }.
+    function setOverride(desc, pos) {
+        if (!pos || !desc) return false;
+        overrides = overrides.filter((x) => haversine(pos, [x.lat, x.lng]) > 15); // replace a re-tap on the same spot
+        const o = { lat: pos[0], lng: pos[1], r: desc.r || OVR_RADIUS_M, ts: Date.now() };
+        if (desc.limit !== undefined) o.limit = desc.limit;
+        if (desc.raw) o.raw = desc.raw;
+        if (desc.noOvertake) o.noOvertake = true;
+        if (desc.toll) o.toll = true;
+        overrides.push(o); saveOverrides();
+        return true;
+    }
+    // Remove any override anchored near pos (the panel's "clear here" chip).
+    function clearOverridesNear(pos) {
+        if (!pos) return false;
+        const before = overrides.length;
+        overrides = overrides.filter((x) => haversine(pos, [x.lat, x.lng]) > OVR_RADIUS_M);
+        if (overrides.length === before) return false;
+        saveOverrides(); return true;
+    }
+    // Apply a manual override for the current position. Returns true when a LIMIT override took over the
+    // sign (the caller then skips profile + Overpass this fix). An advisory-only override (Überholverbot/
+    // Maut) sets the badge but returns false so the live limit still resolves underneath.
+    function applyOverride(here, speedKmh) {
+        const o = overrideAt(here);
+        if (!o) return false;
+        const hasLimit = (o.limit !== undefined) || !!o.raw;
+        if (!hasLimit) { setAdvisories(!!o.noOvertake, !!o.toll); return false; }
+        curRaw = o.raw || null;
+        curLimit = o.raw ? evalLimit(o.raw) : o.limit;
+        curConfirmed = true;
+        setAdvisories(!!o.noOvertake, !!o.toll);
+        updateCondLabel();
+        if (typeof curLimit === 'number' && speedKmh != null) {
+            setSign(curLimit, speedKmh > curLimit + OVER_TOL_KMH, true);
+            if (speedKmh > curLimit + BING_OVER_KMH) { if (Date.now() - lastBing > BING_REPEAT_MS) { bing(); lastBing = Date.now(); } }
+            else if (speedKmh <= curLimit) lastBing = 0;
+        } else {
+            setSign(curLimit, false, true);
+        }
+        return true;
+    }
+
     // Called from the core on every GPS fix: update the over-limit colour every time (cheap), and
     // re-query Overpass only when throttle + movement allow.
     function update(here, still, speedKmh) {
+        if (speedKmh != null) lastSpeedKmh = speedKmh; // remember for the fines panel (also during an override)
+        // Manual sign override (FEAT-35) wins over profile + live OSM while in range.
+        if (here && applyOverride(here, speedKmh)) return;
         // Route profile first: if we're navigating a profiled route, take the precomputed limit for this
         // exact position — instant + accurate switch points — and skip Overpass entirely this fix. A
         // `null` from limitAt means "on route but no data here" → fall through to live polling for that
@@ -615,5 +682,6 @@ window.TrackerSpeedLimit = function (ctx) {
         currentLimit: () => curLimit, currentConfirmed: () => curConfirmed, lastSpeed: () => lastSpeedKmh,
         currentNoOvertake: () => curNoOvertake, currentToll: () => curToll,
         resolveLimit: wayLimit, evalLimit, limitKey, setProfile: (p) => { profile = p; },
+        setOverride, clearOverridesNear, // FEAT-35: sign panel writes tapped-in signs here
     };
 };
