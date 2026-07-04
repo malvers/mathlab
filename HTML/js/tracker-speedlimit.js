@@ -393,19 +393,31 @@ window.TrackerSpeedLimit = function (ctx) {
     // tags these sparsely, so "no badge" does NOT mean "allowed". Small icons under the speed sign, drawn
     // with inline styles (no CSS dependency). Dark-blue, not black (CLAUDE.md); never orange.
     let curNoOvertake = false, curToll = false, advEl = null;
-    const NO_OVERTAKE_SVG = '<svg viewBox="0 0 48 48" width="34" height="34" aria-label="Überholverbot">'
-        + '<circle cx="24" cy="24" r="21" fill="#fff" stroke="rgb(176,36,24)" stroke-width="5"/>'
-        + '<rect x="8" y="20" width="14" height="9" rx="2" fill="rgb(176,36,24)"/>'   // overtaking car (red)
-        + '<rect x="26" y="20" width="14" height="9" rx="2" fill="rgb(14,36,78)"/>'   // car being passed (dark blue, not black)
-        + '</svg>';
+    // Authentic Überholverbot (Zeichen 276): white disc, red ring, TWO rear-view cars side by side — the
+    // left one RED (overtaking, drawn a touch forward/larger), the right one dark-blue (being passed; never
+    // black, CLAUDE.md). 50 px so it reads like a real sign, not a dot (Doc 2026-07-04 „bissl mikrig").
+    const NO_OVERTAKE_SVG = '<svg viewBox="0 0 60 60" width="50" height="50" aria-label="Überholverbot (Zeichen 276)">'
+        + '<circle cx="30" cy="30" r="26.5" fill="#fff" stroke="rgb(176,36,24)" stroke-width="6.5"/>'
+        + '<g fill="rgb(176,36,24)">'                                                    // left car — red, overtaking
+        + '<rect x="12" y="25" width="17" height="14" rx="3"/>'                          //   body
+        + '<rect x="15.5" y="19.5" width="10" height="7.5" rx="2.5"/>'                   //   cabin
+        + '<circle cx="16.5" cy="40.5" r="2.6"/><circle cx="24.5" cy="40.5" r="2.6"/>'  //   wheels
+        + '</g>'
+        + '<g fill="rgb(14,36,78)">'                                                     // right car — dark blue, passed
+        + '<rect x="33" y="27" width="15.5" height="12.5" rx="2.8"/>'
+        + '<rect x="36" y="22" width="9" height="6.5" rx="2.2"/>'
+        + '<circle cx="37" cy="41" r="2.3"/><circle cx="44.5" cy="41" r="2.3"/>'
+        + '</g></svg>';
     const TOLL_BADGE = '<div style="background:rgb(14,36,78);color:#fff;font:700 11px Arial,sans-serif;'
         + 'padding:3px 7px;border-radius:7px;letter-spacing:.5px;box-shadow:0 2px 8px rgba(8,20,42,.5)">MAUT</div>';
     function ensureAdv() {
         if (advEl) return advEl;
         advEl = document.createElement('div');
         advEl.id = 'road-adv';
-        advEl.style.cssText = ['position:fixed', 'left:13px', 'top:50%',
-            'transform:translateY(calc(-50% + 100px))', 'z-index:600', 'display:none',
+        // Top of the left rail — ABOVE the compass/speed-sign, so the Überholverbot is the FIRST sign you see
+        // (Doc 2026-07-04 „uns oben als erstes"). Compass sits at −52 px, so −112 clears it with a small gap.
+        advEl.style.cssText = ['position:fixed', 'left:12px', 'top:50%',
+            'transform:translateY(calc(-50% - 112px))', 'z-index:600', 'display:none',
             'flex-direction:column', 'gap:6px', 'align-items:center', 'pointer-events:none'].join(';');
         document.body.appendChild(advEl);
         return advEl;
