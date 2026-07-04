@@ -39,6 +39,13 @@
         let convoMirror = false;   // mirror of the adapter's conversation flag — interim-gate parity only
         let qTimer = null;         // debounce for cumulative "final" results
         let pending = null;        // last text buffered for the debounced submit (so a host can flush it early)
+        let debounce = debounceMs; // ACTIVE speech-pause window; the host may widen it live (setDebounce) so a
+                                   //   long dictation isn't auto-submitted on a thinking pause (Doc 2026-07-03).
+        let committed = '';        // finals from PRIOR rec sessions of the CURRENT open turn — carried across a
+                                   //   recognizer RESTART so a long dictation isn't forgotten each time the browser
+                                   //   ends+restarts SR. Without this a "45-min talk" kept only the LAST session's
+                                   //   words → "…aufschreiben" alone → Claude asked "was soll ich aufschreiben?".
+        let sessionFinal = '';     // finals heard in the CURRENT rec session; folded into `committed` on restart.
         let gen = 0;               // generation token: bumped on every stop/suspend/restart/visibility teardown,
                                    //   so a rec.onend from a SUPERSEDED recognizer can no longer reschedule start()
                                    //   and relaunch Web-SR to fight the native Vosk AudioRecord.
@@ -57,12 +64,32 @@
             return t.slice(idx + hit.length).replace(/^[\s,.:!?-]+/, '').trim();
         }
 
-        function cancelPending() { if (qTimer) { clearTimeout(qTimer); qTimer = null; } pending = null; }
+        // Containment-aware join (ported from solita-listen.js): Android's WebView delivers CUMULATIVE
+        // recognition results (each result is the WHOLE phrase so far), and across a recognizer RESTART the
+        // re-heard phrase can gain new leading words — so if EITHER string fully contains the other, keep the
+        // LONGER; if they overlap only at the seam, merge there; only genuinely new text is appended. Standard
+        // (disjoint-result) browsers still concatenate correctly.
+        const addText = function (acc, t) {
+            t = (t || '').replace(/\s+/g, ' ').trim();
+            if (!t) return acc;
+            if (!acc) return t;
+            if (t.indexOf(acc) !== -1) return t;                // acc fully inside t → t
+            if (acc.indexOf(t) !== -1) return acc;              // t already contained in acc → ignore
+            const aw = acc.split(' '), tw = t.split(' ');
+            for (let n = Math.min(aw.length, tw.length); n >= 2; n--) {
+                if (aw.slice(-n).join(' ') === tw.slice(0, n).join(' ')) return acc + ' ' + tw.slice(n).join(' ');
+            }
+            return acc + ' ' + t;                               // genuinely disjoint → append
+        };
+        // Drop the carried-over dictation buffer — call at every turn boundary (submit, cancel, wake, teardown).
+        function resetHeard() { committed = ''; sessionFinal = ''; }
+
+        function cancelPending() { if (qTimer) { clearTimeout(qTimer); qTimer = null; } pending = null; resetHeard(); }
 
         // flushPending(): cancel the speech-pause debounce and RETURN whatever text was buffered (or null),
         // so the host can submit a dictated turn NOW (a spoken "fertig" finish word / a ✓ button) instead of
-        // waiting out debounceMs. Mirrors what the qTimer callback would have fired with.
-        function flushPending() { const t = pending; if (qTimer) { clearTimeout(qTimer); qTimer = null; } pending = null; return t; }
+        // waiting out the debounce. Mirrors what the qTimer callback would have fired with.
+        function flushPending() { const t = pending; if (qTimer) { clearTimeout(qTimer); qTimer = null; } pending = null; resetHeard(); return t; }
 
         // Cumulative-finals buffer (Android WebView delivers ONE spoken question as several growing
         // "final" results). Show progress live via onInterim, then emit the latest RAW buffered text via
@@ -80,23 +107,30 @@
                 // non-empty result inside onUtterance — matching the old `if(!q)return;` BEFORE the clear,
                 // which keeps the turn open when the settled text strips down to nothing.
                 onUtterance(t);                                     // raw latest final; host resolves + strips + submits
-            }, debounceMs);
+                resetHeard();                                      // turn submitted → start the next one clean
+            }, debounce);
         }
 
         function onResult(e) {
             if (suspended) return;                                  // host is speaking → ignore
-            let txt = '', interim = '';
-            for (let i = e.resultIndex; i < e.results.length; i++) {
-                if (e.results[i].isFinal) txt += e.results[i][0].transcript;
-                else interim += e.results[i][0].transcript;
+            // Rebuild THIS session's transcript from ALL results (not just e.resultIndex), merged prefix-aware:
+            // cumulative (Android) → the join dedups; disjoint (desktop) → it appends. `committed` prepends
+            // whatever earlier rec sessions of this open turn already heard, so a mid-dictation SR restart
+            // (onend→start) no longer wipes what was said before it.
+            let finalT = '', interim = '';
+            for (let i = 0; i < e.results.length; i++) {
+                const t = e.results[i][0].transcript;
+                if (e.results[i].isFinal) finalT = addText(finalT, t);
+                else interim = addText(interim, t);
             }
+            sessionFinal = finalT;                                  // remember for the carry-across-restart in onend
             // Live interim mirror: only while a turn is open and not dormant/suspended. The adapter adds
             // any further host gate (e.g. UI-mode skip). Equals the old gate `(convo||awaitingQuery)&&!paused`.
-            if (!txt && interim && (awaitingQuery || convoMirror) && !paused && !suspended) {
-                onInterim(interim);
+            if (!finalT && interim && (awaitingQuery || convoMirror) && !paused && !suspended) {
+                onInterim(addText(committed, interim));             // show everything heard so far, incl. prior sessions
                 return;
             }
-            txt = txt.trim();
+            const txt = addText(committed, finalT).trim();          // full turn text so far (carried + this session)
             if (!txt) return;
             log('heard: "' + txt + '"');                            // measure what STT actually transcribes
             // THE SEAM: hand the raw trimmed final to the host first. If it consumed it (command), stop.
@@ -104,12 +138,12 @@
             // Generic fallback (host returned false): dormant-wake, then awaitingQuery-debounce, then trigger.
             if (paused) {                                           // dormant: a wake word wakes her
                 const w = matchTrigger(txt);
-                if (w !== null) { paused = false; onWake(w); }      // rest of the phrase = first turn
+                if (w !== null) { paused = false; resetHeard(); onWake(w); }   // rest of the phrase = first turn
                 return;
             }
             if (awaitingQuery) { queueQuery(txt); return; }         // buffer cumulative finals, submit once settled
             const q = matchTrigger(txt);
-            if (q !== null) onWake(q);                              // phrase contained a wake word → (re)open
+            if (q !== null) { resetHeard(); onWake(q); }            // phrase contained a wake word → (re)open
         }
 
         // Bind the native (Vosk) wake listener ONCE. Idempotent and independent of Web-SR: in the
@@ -150,7 +184,10 @@
                     // Only reschedule if THIS rec is still the current generation AND the WebView is visible.
                     // The visibilityState check alone stops a suspended/backgrounded WebView from relaunching
                     // Web-SR to fight the native Vosk AudioRecord; the gen check kills superseded onend storms.
-                    if (myGen === gen && wakeOn && !suspended && !stopping && document.visibilityState === 'visible') setTimeout(start, 300);
+                    if (myGen === gen && wakeOn && !suspended && !stopping && document.visibilityState === 'visible') {
+                        committed = addText(committed, sessionFinal); sessionFinal = '';   // carry heard text across the restart
+                        setTimeout(start, 300);
+                    }
                 };
                 rec.start();
             } catch (e) {
@@ -167,9 +204,17 @@
         function stop() {
             gen++;                                                  // supersede any in-flight rec → its onend won't restart
             stopping = true;
+            resetHeard();                                           // hard stop → drop any half-dictated buffer
             if (rec) { try { rec.stop(); } catch (e) { } rec = null; }
             setTimeout(function () { stopping = false; }, 500);
         }
+        // setDebounce(): widen/narrow the speech-pause window at runtime. The host bumps this up while Doc is
+        // dictating a note (so a long thinking pause doesn't auto-submit) and back down for snappy Q&A.
+        function setDebounce(ms) { if (typeof ms === 'number' && ms > 0) debounce = ms; }
+        // seedHeard(): prime the carry-over buffer with text the host already has (e.g. the residual after the
+        // wake word when Doc dictates in ONE breath: "Solita, mach mir eine Notiz, folgender Inhalt …"), so the
+        // rest of the dictation appends to it instead of starting blank. Merged prefix-aware (no doubling).
+        function seedHeard(t) { committed = addText(committed, t); }
 
         // pause(): go dormant — stay running, only the wake-word triggers, interim mirror off.
         function pause() { paused = true; }
@@ -190,6 +235,7 @@
         function restart() {
             if (!wakeOn) return;
             gen++;                                                  // supersede the old rec so its onend won't double-restart
+            resetHeard();                                           // fresh recognizer (e.g. language switch) → fresh buffer
             if (rec) { try { rec.stop(); } catch (e) { } rec = null; }
             setTimeout(start, 300);
         }
@@ -221,6 +267,8 @@
         self.restart = restart;
         self.cancelPending = cancelPending;
         self.flushPending = flushPending;
+        self.setDebounce = setDebounce;
+        self.seedHeard = seedHeard;
         self.queueQuery = queueQuery;
         self.matchTrigger = matchTrigger;
         self.setConvo = setConvo;
