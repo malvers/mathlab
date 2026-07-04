@@ -216,7 +216,34 @@ window.TrackerMedia = function (T) {
         map.on('click', collapseFan);
         map.on('zoomstart', collapseFan);
         // overlap is pixel-based → recompute the tally badges whenever the zoom level changes
-        map.on('zoomend', () => PhotoLayer.applyStackBadges(T.wpMarkers, map));
+        map.on('zoomend', () => PhotoLayer.applyStackBadges(visibleMarkers(), map));
+
+        // ---- Media filter: show/hide photo · video · voice pins from the POI panel ----
+        // Overlaying many tracks buries the map in media pins. These three switches hide a whole
+        // KIND (never touch the data) and persist. Default: all shown.
+        const MEDIA_KEYS = { photo: 'trk-media-photo', video: 'trk-media-video', voice: 'trk-media-voice' };
+        const mediaShow = {
+            photo: localStorage.getItem(MEDIA_KEYS.photo) !== '0',
+            video: localStorage.getItem(MEDIA_KEYS.video) !== '0',
+            voice: localStorage.getItem(MEDIA_KEYS.voice) !== '0',
+        };
+        function wpKind(wp) { return (wp && wp.type === 'voice') ? 'voice' : ((wp && wp.type === 'video') ? 'video' : 'photo'); }
+        function visibleMarkers() { return T.wpMarkers.filter(m => mediaShow[wpKind(m._wp)]); }
+        function applyMediaFilter() {
+            collapseFan();
+            T.wpMarkers.forEach(m => {
+                const show = mediaShow[wpKind(m._wp)];
+                if (show && !map.hasLayer(m)) m.addTo(map);
+                else if (!show && map.hasLayer(m)) map.removeLayer(m);
+            });
+            PhotoLayer.applyStackBadges(visibleMarkers(), map);
+        }
+        function setMediaVisible(kind, on) {
+            if (!(kind in mediaShow)) return;
+            mediaShow[kind] = !!on;
+            try { localStorage.setItem(MEDIA_KEYS[kind], on ? '1' : '0'); } catch (e) { /* quota / private mode */ }
+            applyMediaFilter();
+        }
 
         function addWaypoint(wp) {
             T.waypoints.push(wp);
@@ -227,7 +254,8 @@ window.TrackerMedia = function (T) {
             wp._marker = m;
             if (wp.title === PENDING_TITLE) m.setZIndexOffset(2000); // see refreshWaypoint
             T.wpMarkers.push(m);
-            PhotoLayer.applyStackBadges(T.wpMarkers, map); // stamp tally badge on any new stack
+            if (!mediaShow[wpKind(wp)]) map.removeLayer(m); // respect the media filter for freshly added pins
+            PhotoLayer.applyStackBadges(visibleMarkers(), map); // stamp tally badge on any new stack
             return wp;
         }
         function refreshWaypoint(wp) {
@@ -237,7 +265,7 @@ window.TrackerMedia = function (T) {
             // (orange/pending) pops ABOVE the others (high z) so you can see which is in work;
             // once done it drops back to the base layer (0).
             wp._marker.setZIndexOffset(wp.title === PENDING_TITLE ? 2000 : 0);
-            PhotoLayer.applyStackBadges(T.wpMarkers, map); // setIcon above cleared the badge → restore it
+            PhotoLayer.applyStackBadges(visibleMarkers(), map); // setIcon above cleared the badge → restore it
         }
         function clearWaypoints() {
             collapseFan();
@@ -778,5 +806,5 @@ window.TrackerMedia = function (T) {
         })();
 
 
-    return { loadUsage, addWaypoint, clearWaypoints, updateReburnButton, reburnTrack };
+    return { loadUsage, addWaypoint, clearWaypoints, updateReburnButton, reburnTrack, setMediaVisible, applyMediaFilter };
 };
