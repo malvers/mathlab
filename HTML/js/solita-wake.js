@@ -40,10 +40,13 @@
             // awaitingConfirm: a lock-wake asked „Soll ich helfen?" and is waiting for the yes/no answer.
             let awaitingQuery = false, convo = false, paused = false, awaitingConfirm = false, confirmAccepting = false, confirmTimer = null;
 
-            // How long a SPEECH PAUSE must last before Solita decides Doc is done and submits the dictated
-            // turn on its own (Doc 2026-06-25: zurück auf eine GROSSE Pause — er will in Ruhe denken). The
-            // fast path is the spoken finish word "fertig" or the ✓ button, which submit immediately.
-            const PAUSE_MS = 6000;
+            // How long a SPEECH PAUSE must last before Solita decides Doc is done and submits the turn on its
+            // own. This is the SHORT window for normal Q&A — snappy (Doc 2026-07-03: 6 s war zu viel). For
+            // DICTATING a note it is deliberately WRONG to end a turn on a pause (Doc wants to think for 20 s+
+            // and keep going), so once note/dictation intent is heard we widen the ear's window to DICT_HOLD_MS
+            // and finish ONLY on the spoken "fertig" / the ✓ button. Both are one-liners to tune.
+            const PAUSE_MS = 4000;
+            const DICT_HOLD_MS = 300000;   // dictation mode: effectively "wait for me" — 5 min, ended by "fertig"/✓
 
             // Build the generic ear with Solita's config. The ear knows no Solita words/DOM/globals.
             const ear = new Ear({
@@ -61,6 +64,30 @@
 
             function reflect() { wakeBtn.classList.toggle('active', wakeOn); }
             reflect();
+
+            // ── Diktier-Modus (Doc 2026-07-03) ───────────────────────────────────────────────────────────
+            // The core bug: Doc says "Solita, mach mir eine Notiz — folgender Inhalt …", talks for AGES with
+            // thinking pauses, and the short PAUSE_MS window keeps ending the turn on each pause → the note is
+            // chopped up (and pre-fix the earlier text was even lost), so she ends up asking "was soll ich
+            // aufschreiben?". Fix: as soon as note/dictation intent is heard, widen the ear's submit window so
+            // pauses no longer end the turn; Doc finishes explicitly with "fertig" or the ✓ button. Any turn
+            // boundary (submit / finish / hang-up / pause / logout) drops back to the snappy PAUSE_MS window.
+            const DICT_INTENT = /\b(notiz|notier|aufschreiben|(?:schreib|notier)[a-zä]*\s+(?:das|dir|mir|es|auf)|merk(?:e)?\s+dir|folgender\s+inhalt|diktier)\b/i;
+            let dictating = false;
+            function enterDictation() {
+                if (dictating) return;
+                dictating = true;
+                ear.setDebounce(DICT_HOLD_MS);
+                if (input) input.placeholder = '📝 Diktier-Modus — sag „fertig" oder tipp ✓, wenn du fertig bist.';
+                if (window.DebugWindow) DebugWindow.log('📝 Diktier-Modus AN — Auto-Absenden pausiert bis „fertig"/✓');
+            }
+            function exitDictation() {
+                if (!dictating) return;
+                dictating = false;
+                ear.setDebounce(PAUSE_MS);
+                if (input) input.placeholder = 'Du hast sicher Fragen ... schreib sie hier!';
+                if (window.DebugWindow) DebugWindow.log('📝 Diktier-Modus aus');
+            }
 
             // Pause listening while Solita speaks (so the mic doesn't pick up her own "Solita"), resume after.
             const _speak = window.speakReply;
@@ -119,6 +146,17 @@
                     awaitingQuery = true;
                     ear.setConvo(true); ear.setAwaiting(true);
                     if (window.speakReply) window.speakReply(say('yes'));
+                    return;
+                }
+                // Dictation intent already in the FIRST breath ("Solita, mach mir eine Notiz, folgender Inhalt …")
+                // → don't fire the 700 ms auto-submit; hold the turn open (keep this text as the seed) and wait
+                // for "fertig"/✓ so the whole dictation lands as ONE note.
+                if (!window.__uiMode && DICT_INTENT.test(query)) {
+                    awaitingQuery = true;
+                    ear.setConvo(true); ear.setAwaiting(true);
+                    ear.seedHeard(query);                            // rest of the dictation appends to this
+                    enterDictation();
+                    if (input) { input.value = query; input.dispatchEvent(new Event('input')); }
                     return;
                 }
                 awaitingQuery = false;
@@ -213,6 +251,7 @@
             const FAREWELL = /^(tschü(?:ss?)?|auf wiederhör(?:en)?|das war'?s(?: für (?:heute|jetzt))?|danke,? das war'?s|schluss für (?:heute|jetzt)|beenden?(?: das gespräch)?|bye(?:[\s-]?bye)?|goodbye|good ?night|see you(?: later)?|that'?s (?:all|it)|we'?re done|adi[oó]s|hasta (?:luego|pronto|ma[ñn]ana)|buenas noches|chao|ciao|eso es todo)\b/i;
             function endConvo() {
                 disarmIdle();
+                exitDictation();
                 ear.cancelPending();
                 convo = false; awaitingQuery = false;
                 ear.setConvo(false); ear.setAwaiting(false);
@@ -226,6 +265,7 @@
             const LOGOUT = /\bausloggen\b|\babmelden\b|\blogout\b|\blog\s?out\b|\blog+e?\s?mich\s?(aus|raus)\b|\bmelde mich (ab|aus|raus)\b|\bmich (ab|aus)melden\b|\blog ?me ?out\b|\bsign\s?(?:me\s?)?out\b|\bci[eé]rra(?:me)? (?:la )?sesi[oó]n\b|\bcerrar sesi[oó]n\b|\bdescon[eé]ctame\b/i;
             function doVoiceLogout() {
                 disarmIdle();
+                exitDictation();
                 ear.cancelPending();
                 convo = false; awaitingQuery = false;
                 ear.setConvo(false); ear.setAwaiting(false);
@@ -256,6 +296,7 @@
 
             function enterPause() {
                 disarmIdle();
+                exitDictation();
                 ear.cancelPending(); clearConfirm(); confirmAccepting = false;   // going dormant cancels any pending lock-wake gate
                 paused = true; convo = false; awaitingQuery = false;
                 ear.pause(); ear.setConvo(false); ear.setAwaiting(false);
@@ -336,6 +377,9 @@
                 // timeout out so a slow answer („ja bitte, lies mir …") isn't cut off and sent back to sleep.
                 if (awaitingConfirm && confirmTimer) { clearTimeout(confirmTimer); confirmTimer = setTimeout(confirmTimeout, 6000); }
                 if (convo && !awaitingConfirm) armIdle();             // Doc is talking → push the nap out
+                // Heard note/dictation intent mid-utterance → hold the turn open (no auto-submit on a pause)
+                // until Doc says "fertig"/taps ✓. Not in UI mode / lock-wake confirm (those own their flow).
+                if (convo && !awaitingConfirm && !window.__uiMode && DICT_INTENT.test(t)) enterDictation();
                 if (!window.__uiMode) { if (input) { input.value = t; input.dispatchEvent(new Event('input')); } }
             }
 
@@ -357,6 +401,7 @@
                 // Deliberately NOT dropping real short words like „ja"/„ok"/„nein" — those can be genuine answers.
                 if (/^(?:h+m+|m+h+m*|ä+h*m*|öh+|haha(?:ha)*|hihi|haa+)[\s.!?]*$/i.test(out)) return;
                 disarmIdle();                                        // query going out → resume() re-arms after the reply
+                exitDictation();                                     // turn submitted → back to the snappy window
                 awaitingQuery = false; convo = true;
                 ear.setConvo(true); ear.setAwaiting(false);
                 if (input) { input.value = out; input.dispatchEvent(new Event('input')); }
@@ -417,6 +462,7 @@
                 // Logout stops the live mic while logged out — but NEVER persists "off" (Doc: ear always on),
                 // so it resumes on the next login (solitaStartVoice) or page load.
                 ear.cancelPending();
+                exitDictation();
                 disarmIdle();
                 wakeOn = false;
                 convo = false; awaitingQuery = false; paused = false; reflect();
@@ -485,6 +531,7 @@
                 wakeOn = !wakeOn; localStorage.setItem(WAKE_KEY, wakeOn ? '1' : '0'); reflect();
                 if (window.solitaSyncSettings) window.solitaSyncSettings();   // sync wake pref cross-device
                 convo = false; awaitingQuery = false;                 // toggling the line resets the thread
+                exitDictation();
                 ear.setConvo(false); ear.setAwaiting(false);
                 if (wakeOn) { paused = true; ear.setEnabled(true); ear.pause(); if (window.solitaPhase) solitaPhase('dormant'); startNativeWake(); freeMicForWebSR(); ear.start(); }   // ear on → SLUMBER (waiting for "Solita")
                 else { ear.cancelPending(); paused = false; ear.setEnabled(false); if (window.solitaPhase) solitaPhase('idle'); ear.stop(); stopNativeWake(); }
