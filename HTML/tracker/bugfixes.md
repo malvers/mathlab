@@ -6,6 +6,12 @@
 
 ---
 
+> ## 🔎 Audit 2026-07-04 (Code-Stand)
+> Automatischer Abgleich **aller** Bugs gegen den echten Code — 56 Agenten, jede „erledigt/teilweise"-Behauptung adversarial gegengeprüft.
+> - **✅ gebaut:** **BUG-8** (Blickrichtung/Sichtkegel — nur `identify`-Deploy + Feld-Check offen).
+> - **⚠️ teilweise:** **BUG-5** (Diagnose/Härtung da, Broadcast-Kern offen) · **BUG-7** (alle Fixes gebaut, nur Mess-Log + Geräte-Bestätigung offen) · **BUG-12** (nativ/APK) · **BUG-13** (Code da, Geräte-Test offen) · **BUG-14** (Marken-Suche gebaut, ein Teilfall offen) · **BUG-15** (Variante B gebaut).
+> - **🐞 wirklich offen:** **BUG-2** (Regenradar-DE) · **BUG-6** (Activity-Erkennung).
+
 ## BUG-2 — Regenradar zeigt in Deutschland keinen Regen 🐞 offen
 **Priorität:** mittel-hoch (live bei Frankfurt-Starkregen reproduziert: Karte zeigte 0 Regen).
 **Symptom:** Innerhalb der deutschen DWD-Abdeckung zeigt der REGEN-Overlay nichts, obwohl es real stark regnet.
@@ -32,7 +38,8 @@
 **Drei Befunde → Fix:** (1) `start ✓` aber NIE ein `event` → API streamt nicht; wahrscheinlich nativ `RECEIVER_NOT_EXPORTED` in `ActivityRecognitionPlugin.java:100` blockt den Broadcast (Android 14+) → nativer Fix + APK-Build. (2) Events kommen, aber `on_bicycle/walking` beim Autofahren → JS-Speed-Korrektur (>25 km/h über X s → `in_vehicle`). (3) `FEHLER: …` nennt die Ursache direkt.
 **NICHT raten:** zuerst die Log-Zeilen, dann entscheiden ob nativer oder JS-Fix.
 
-## BUG-8 — Erkennung verwechselt Nachbar-Bauwerke (keine Blickrichtung) 🐞 offen
+## BUG-8 — Erkennung verwechselt Nachbar-Bauwerke (keine Blickrichtung) ✅ gebaut (Deploy + Feld-Check offen)
+**Gebaut (2026-07-04):** Client schickt die Kamera-**Blickrichtung** (Kompass `getHeading()`) mit dem Foto (`tracker-media.js` → `tracker-compass.js` → `tracker.js`); `identify` bevorzugt POIs im **±55°-Sichtkegel** voraus (`bearingTo`/`angDiff`, Overpass `out center`) statt reiner Nähe. Ohne Kompass byte-identisch zum alten Verhalten. **→ Offen:** `supabase functions deploy identify --no-verify-jwt` (Doc) + Feld-Check Zwinger/Schloss.
 **Symptom:** Am Dresdner Standort sagt die Erkennung **immer „Stadtschloss"**, egal wohin die Kamera zeigt — tatsächlich ist es der **Zwinger** (beide dicht beieinander).
 **Ursache (belegt):** Es gibt **keine Blickrichtung** — Client `HTML/js/tracker-media.js` schickt kein heading/bearing mit dem Foto; Edge Function `supabase/functions/identify/index.ts` gründet rein auf **lat/lng** (Wikipedia geosearch `gsradius=600`, Overpass `around:130-160 m`). Im Radius liegen Zwinger UND Schloss → ohne Heading rät es nach Nähe.
 **Fix-Richtung (noch nicht bauen):** (1) **Client:** Heading erfassen (GPS `coords.heading` bei Tempo>0, sonst Kompass/DeviceOrientation) und beim Foto mitschicken. (2) **identify:** POIs im **Sichtkegel voraus** (Bearing Standort→POI ≈ Heading ±X°) bevorzugen statt nur Nähe.

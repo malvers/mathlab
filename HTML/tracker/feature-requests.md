@@ -8,6 +8,12 @@
 
 ---
 
+> ## 🔎 Audit 2026-07-04 (Code-Stand)
+> Abgleich **aller** Features gegen den echten Code (56 Agenten, adversarial verifiziert). Die Gegenprüfung hat 5 „sah-erledigt-aus" auf **teilweise** heruntergestuft.
+> - **✅ fertig:** **FEAT-2** (Goldene Stunde) · **FEAT-20** (Zoom-Buttons) · **FEAT-22** (Pl@ntNet-20 %) · **FEAT-24** (POI-Layer) · **FEAT-26** (Tankstellen) · **FEAT-27** (tracks-RLS-owner).
+> - **🏗️ teils gebaut:** **FEAT-3 · FEAT-6 · FEAT-9 · FEAT-12 · FEAT-18 · FEAT-21 · FEAT-23 · FEAT-34** (jeweils MVP/Kern da, Akzeptanz nicht ganz erfüllt — Detail im Eintrag).
+> - **📐 offen:** **FEAT-1 · FEAT-4 · FEAT-5 · FEAT-14 · FEAT-16 · FEAT-17 · FEAT-25** + die **E2E-Kette FEAT-28→33** (Verschlüsselung, noch nicht begonnen).
+
 ## FEAT-1 — Brotkrumen zurück (offline) 📐 · 🔴 Prio 1, BAUEN
 **Warum zuerst:** Doc-Prio 1, **Sicherheits-Feature** („bring mich heim" im Funkloch).
 **Auftrag:** Führt den Nutzer **entlang der eigenen aufgezeichneten Spur** zurück zum Start — komplett **offline** (kein OSRM/Tiles, nur die vorhandenen `track`-Punkte).
@@ -70,7 +76,7 @@ OSRM liefert `step.intersections[].lanes` (`indications` + `valid`). Kleines Spu
 - **Tracking-Notification farbig** (Akzentfarbe/Icon im Benachrichtigungs-Panel) — nativer Eingriff, offen.
 - **Native Background-Test:** START → Screen sperren → laufen → prüfen, dass weiter aufgezeichnet wird.
 
-## FEAT-20 — OSM-Zoom-Buttons (+/−): ausblenden oder schöner 📐 · klein
+## FEAT-20 — OSM-Zoom-Buttons (+/−): ausblenden oder schöner ✅ fertig (Audit 2026-07-04)
 Die +/−-Buttons sind **unsere** (Leaflet-Default-Control): `tracker.js:18` `zoomControl:false`, dann `:28` `L.control.zoom({position:'bottomright'}).addTo(map)`.
 **Optionen (Doc entscheidet):** **Weg** — `tracker.js:28` entfernen (Pinch-Zoom bleibt). **Schöner** — CSS `.leaflet-control-zoom`/`-in`/`-out` in `tracker.css` on-brand (dunkel/orange, Orbitron), ggf. Position.
 
@@ -79,7 +85,7 @@ Die +/−-Buttons sind **unsere** (Leaflet-Default-Control): `tracker.js:18` `zo
 - Wenn ausgeblendet, soll **Track/Karte (FIT) mehr Platz** bekommen.
 **Richtung:** Instrumente aus → `#hud-top` kollabieren, Karte den frei werdenden Platz nutzen (volle Höhe). Hängt mit Idle-Auto-Hide + dem d/k/w-Tasten-Toggle zusammen.
 
-## FEAT-22 — Pl@ntNet-Schwelle 20 % 🅿️ Code da, Server-Aktion offen
+## FEAT-22 — Pl@ntNet-Schwelle 20 % ✅ fertig (Audit 2026-07-04)
 **Stand:** `PLANTNET_SHOW_MIN = 0.20` ist in `supabase/functions/identify/index.ts` gesetzt (≥30 % Headline · 20–30 % Zweitmeinung · <20 % ganz weg).
 **→ Offen (kein Bau):** Deploy durch Doc — `supabase functions deploy identify --no-verify-jwt`.
 
@@ -87,7 +93,7 @@ Die +/−-Buttons sind **unsere** (Leaflet-Default-Control): `tracker.js:18` `zo
 **Wunsch:** das **obere Element** [Diktat unklar — vermutlich POSITION/GPS-Chip oder die Uhr, mit Doc klären] + die **Genauigkeit (±m)** in **eine Gruppe** fassen und die **ganze Gruppe zentrieren**.
 **Wo:** `#hud-top` / `#gps-chip` (zeigt schon `gps-src` + `gps-acc ±m`) in `tracker.html` + `tracker.css`.
 
-## FEAT-24 — Points of Interest (POI) 📐 · 🔴 PRIO 0
+## FEAT-24 — Points of Interest (POI) ✅ fertig (Audit 2026-07-04) · war 🔴 PRIO 0
 **Wunsch (Doc 2026-06-14):** POIs am Weg / auf der Karte (Sehenswürdigkeiten, Tankstellen, Aussichtspunkte …).
 **Überschneidung (erst prüfen, nicht doppelt bauen):** WegCast Audio-POI, Foto-Spur-Erkennung, **FEAT-26** (Tankstellen sind schon POIs).
 **Daten gratis (Regel 18):** Overpass/OSM (`tourism`/`historic`/`natural`), Wikipedia-Geosearch — kein Key.
@@ -98,7 +104,7 @@ Die +/−-Buttons sind **unsere** (Leaflet-Default-Control): `tracker.js:18` `zo
 **Auftrag:** Long-Press/Tap auf die Karte → PIN; Tipp auf den PIN → **Navigation dorthin** (baut auf `tracker-nav.js`, OSRM).
 **Verwandt:** FEAT-3 (Parkplatz) + FEAT-4 (zurück zum Auto) — gleiche „Pin-als-Navi-Ziel"-Logik; gemeinsam denken. Nicht bauen ohne „go".
 
-## FEAT-26 — Tankstellen / Tankpreise (Tankerkönig) 🅿️ gebaut-aber-inaktiv · 🔴 PRIO 0
+## FEAT-26 — Tankstellen / Tankpreise (Tankerkönig) ✅ fertig (Audit 2026-07-04) · war 🔴 PRIO 0
 **Stand (verifiziert):** Code ist **vollständig da** — Client `HTML/js/tracker-fuel.js` (`window.TrackerFuel`, default an) + Edge Function `supabase/functions/fuel-prices/index.ts`. Die Function ist auf das Secret `TANKERKOENIG_KEY` gegated.
 **→ Es fehlt NUR die einmalige Server-Aktivierung (kein Bau):**
 1. Gratis-Key: https://creativecommons.tankerkoenig.de/
@@ -106,7 +112,7 @@ Die +/−-Buttons sind **unsere** (Leaflet-Default-Control): `tracker.js:18` `zo
 3. Deployen: `supabase functions deploy fuel-prices --no-verify-jwt`
 **Danach:** am Gerät prüfen, ob `TrackerFuel` Preise zeigt (Toggle `trk-fuel-on`). *(Hinweis: ein TANKERKOENIG_KEY wurde am 2026-06-21 gesetzt — gegen echten Stand prüfen.)*
 
-## FEAT-27 — E2E Phase 0: `tracks`-RLS auf `owner` härten 📐 · **unabhängig, sofort (80/20)**
+## FEAT-27 — E2E Phase 0: `tracks`-RLS auf `owner` härten ✅ fertig (Audit 2026-07-04)
 **Warum zuerst:** Billig, unabhängig vom restlichen E2E. Der publishable/anon-Key steht im public Repo → wer ihn nimmt, kann je nach RLS **alle** Tracks ziehen. RLS-Scope stoppt Zufalls-/Repo-Leser (~90 % von „nur ich seh die Tracks"). Schützt **nicht** vor DB-/Supabase-Zugriff (das ist echtes E2E, FEAT-29ff).
 **Auftrag:** `tracks`-RLS pro Sync-Code/Owner scopen. **Owner-Spalte** `owner = PBKDF2(syncCode,'tracker-owner-salt-v1')` → hex, **clear** (erlaubt „meine Tracks listen" + RLS-Scope ohne Entschlüsseln).
 **Erst messen (nie raten):** `pg_policies`-Abfrage, **dann** gezielt scopen (Memory `project_tracker_e2e_plan`).
