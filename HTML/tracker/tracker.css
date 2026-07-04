@@ -2003,7 +2003,7 @@ body.ui-idle #trk-controls {
     cursor: pointer;
 }
 
-#tl-deselect, #tl-sharesel {
+#tl-deselect, #tl-sharesel, #tl-group {
     flex: 1;
     padding: 10px 13px;
     border: 1px solid rgba(255, 255, 255, 0.25);
@@ -2083,6 +2083,117 @@ body.ui-idle #trk-controls {
     color: rgba(255, 255, 255, 0.5);
     font-size: 0.74rem;
     padding: 8px 0;
+}
+
+/* ---- Track folders (grouping): collapsible section with a header + indented body ---- */
+.tl-folder {
+    margin: 2px 0 6px;
+}
+
+.tl-folder-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 8px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.04);
+    cursor: pointer;
+}
+
+.tl-folder-head:hover {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.tl-fold-caret {
+    flex: none;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.7rem;
+    transition: transform 0.15s ease;
+}
+
+.tl-folder.collapsed .tl-fold-caret {
+    transform: rotate(-90deg);
+}
+
+.tl-fold-ic {
+    flex: none;
+    font-size: 0.95rem;
+}
+
+.tl-fold-name {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.72rem;
+    letter-spacing: 0.04em;
+    color: var(--orange);   /* orange TEXT accent only — the action button below stays green */
+}
+
+.tl-fold-count {
+    flex: none;
+    font: 700 0.58rem/16px Arial, sans-serif;
+    color: rgba(255, 255, 255, 0.6);
+    background: rgba(8, 20, 42, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 9px;
+    padding: 0 7px;
+}
+
+.tl-fold-ren, .tl-fold-del {
+    flex: none;
+    width: 30px;
+    height: 30px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.5);
+    cursor: pointer;
+}
+
+.tl-fold-ren:hover {
+    background: rgba(245, 194, 66, 0.18);
+    color: var(--orange);
+}
+
+.tl-fold-del:hover {
+    background: rgba(255, 255, 255, 0.12);
+    color: #fff;
+}
+
+.tl-folder-body {
+    margin: 4px 0 0 12px;
+    padding-left: 6px;
+    border-left: 2px solid rgba(245, 194, 66, 0.25);
+}
+
+.tl-folder.collapsed .tl-folder-body {
+    display: none;
+}
+
+/* "take out of folder" arrow — mirrors the share icon's neutral look */
+.tl-out {
+    flex: none;
+    width: 34px;
+    height: 34px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.5);
+    cursor: pointer;
+}
+
+.tl-out:hover {
+    background: rgba(245, 194, 66, 0.18);
+    color: var(--orange);
 }
 
 /* GNSS info text */

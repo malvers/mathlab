@@ -2149,6 +2149,8 @@ ${pts}
         let _lastTrackRows = [];      // last rows handed to renderTrackList → re-render when the radius changes
         let trackStartCache = null;   // id → [lat,lng] first point (lazy; rebuilt whenever the list is refreshed)
         let listRadiusKm = 0;         // 0 = Alle; else 10/20/30
+        let _folders = [];            // track_folders rows [{id,name}] → collapsible sections in the list
+        const _collapsedFolders = new Set(); // folder ids the user has collapsed (kept in memory only)
 
         // Fetch ONLY each track's first point (server-side points->0 → tiny payload, NOT the heavy points
         // column → no egress blow-up like the base64 incident). Builds the id→[lat,lng] start map.
@@ -2174,16 +2176,60 @@ ${pts}
             // list_tracks() RPC only ENRICHES (server-computed km·duration·photos) — it must NOT be allowed to
             // DROP one-point tracks (single photo/voice), which it apparently did (Doc 2026-06-23: Einzelfotos
             // fehlten in der Liste). So: start from the basic list, prefer the rich RPC row where present.
-            const { data: base, error: be } = await c.from('tracks')
-                .select('id, name, created_at, distance_m')
-                .order('created_at', { ascending: false });
+            // Try WITH folder_id (grouping). If the column isn't migrated yet the query errors →
+            // retry WITHOUT it so the list ALWAYS loads (a tracker must not make tracks vanish).
+            let base, be;
+            ({ data: base, error: be } = await c.from('tracks')
+                .select('id, name, created_at, distance_m, folder_id')
+                .order('created_at', { ascending: false }));
+            if (be) {
+                ({ data: base, error: be } = await c.from('tracks')
+                    .select('id, name, created_at, distance_m')
+                    .order('created_at', { ascending: false }));
+            }
             if (be) throw be;
+            try { await loadFolders(); } catch (e) { _folders = []; }   // folders best-effort; tracks still show
             let rich = null;
             try { const { data, error } = await c.rpc('list_tracks'); if (!error && Array.isArray(data)) rich = data; } catch (e) { }
             if (!rich) return base || [];
             const byId = {};
             rich.forEach((r) => { byId[r.id] = r; });
-            return (base || []).map((r) => byId[r.id] || r);   // every track shown; enriched when the RPC has it
+            // every track shown; enriched when the RPC has it — but ALWAYS keep folder_id from the base
+            // row (the RPC doesn't return it, so a naive replace would silently drop the grouping).
+            return (base || []).map((r) => { const rr = byId[r.id]; return rr ? Object.assign({}, rr, { folder_id: r.folder_id }) : r; });
+        }
+
+        // ---- Folders: group tracks into renamable sections (track_folders table + tracks.folder_id) ----
+        async function loadFolders() {
+            const c = await ensureSb();
+            const { data, error } = await c.from('track_folders').select('id, name, created_at').order('created_at');
+            if (error) throw error;
+            _folders = data || [];
+            return _folders;
+        }
+        async function createFolder(name) {
+            const c = await ensureSb();
+            const { data, error } = await c.from('track_folders').insert({ name: name }).select('id').single();
+            if (error) throw error;
+            return data.id;
+        }
+        async function renameFolder(id, name) {
+            const c = await ensureSb();
+            const { error } = await c.from('track_folders').update({ name: name }).eq('id', id);
+            if (error) throw error;
+        }
+        // Dissolve a folder: deletes only the folder row. tracks.folder_id has ON DELETE SET NULL,
+        // so its tracks return to the main list — they are NEVER deleted.
+        async function deleteFolder(id) {
+            const c = await ensureSb();
+            const { error } = await c.from('track_folders').delete().eq('id', id);
+            if (error) throw error;
+        }
+        async function assignFolder(ids, folderId) {
+            if (!ids.length) return;
+            const c = await ensureSb();
+            const { error } = await c.from('tracks').update({ folder_id: folderId }).in('id', ids);
+            if (error) throw error;
         }
 
         async function fetchTrack(id) {
@@ -2325,6 +2371,20 @@ ${pts}
         }
         if ($('tl-deselect')) $('tl-deselect').addEventListener('click', deselectAll);
         if ($('tl-sharesel')) $('tl-sharesel').addEventListener('click', () => shareMultiple(Array.from(selectedTracks)));
+        // Group the checked tracks into a new (renamable) folder.
+        if ($('tl-group')) $('tl-group').addEventListener('click', async () => {
+            const ids = Array.from(selectedTracks);
+            if (!ids.length) return;
+            const name = await uiPrompt('Ordnername:', { value: 'Neuer Ordner', okText: 'Gruppieren' });
+            if (!name) return;
+            toast('Ordner wird angelegt …');
+            try {
+                const fid = await createFolder(name);
+                await assignFolder(ids, fid);
+            } catch (e) { toast('Gruppieren fehlgeschlagen: ' + (e.message || e)); return; }
+            toast(ids.length + ' Tracks in „' + name + '" gruppiert.');
+            try { const rows = await listTracks(); renderTrackList(rows); } catch (e) { /* refresh best-effort */ }
+        });
         if ($('tl-loadsel')) $('tl-loadsel').addEventListener('click', async () => {
             const ids = Array.from(selectedTracks);
             if (!ids.length) return;
@@ -3159,11 +3219,13 @@ ${pts}
             }
             selectedTracks.clear(); loadedTrackIds.forEach((id) => selectedTracks.add(id)); updateLoadSel(); // pre-select the loaded tracks
             if (!rows.length) { box.innerHTML = '<div class="tl-empty">Noch keine gespeicherten Tracks.</div>'; return; }
-            rows.forEach((r) => {
+            // Builds ONE track row (checkbox · badge · name/meta · share · delete). Returned so it can
+            // sit either directly in the list or inside a folder section's body.
+            function buildTrackRow(r) {
                 const row = document.createElement('div');
                 row.className = 'tl-row';
                 const chk = document.createElement('input');                 // multi-select checkbox, before the icon
-                chk.type = 'checkbox'; chk.className = 'tl-check'; chk.title = 'Für Mehrfach-Laden auswählen';
+                chk.type = 'checkbox'; chk.className = 'tl-check'; chk.title = 'Auswählen (Laden · Teilen · Gruppieren)';
                 chk.checked = selectedTracks.has(r.id);
                 chk.addEventListener('change', () => { if (chk.checked) selectedTracks.add(r.id); else selectedTracks.delete(r.id); updateLoadSel(); });
                 row.appendChild(chk);
@@ -3205,6 +3267,18 @@ ${pts}
                 sh.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>';
                 sh.addEventListener('click', (ev) => { ev.stopPropagation(); shareTrack(r.id, r.name); });
                 row.appendChild(main); row.appendChild(sh);
+                // Move a track OUT of its folder back to the main list (only shown for grouped tracks).
+                if (r.folder_id) {
+                    const out = document.createElement('button');
+                    out.className = 'tl-out'; out.title = 'Aus Ordner nehmen';
+                    out.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V6"></path><path d="M5 12l7-7 7 7"></path></svg>';
+                    out.addEventListener('click', async (ev) => {
+                        ev.stopPropagation();
+                        try { await assignFolder([r.id], null); toast('Aus Ordner genommen.'); const rows2 = await listTracks(); renderTrackList(rows2); }
+                        catch (e) { toast('Verschieben fehlgeschlagen.'); }
+                    });
+                    row.appendChild(out);
+                }
                 if (ALLOW_DELETE) { // cloud-delete disabled for now → no × button (see removeTrack)
                     const del = document.createElement('button');
                     del.className = 'tl-del'; del.title = 'Löschen';
@@ -3217,8 +3291,57 @@ ${pts}
                     });
                     row.appendChild(del);
                 }
-                box.appendChild(row);
-            });
+                return row;
+            }
+
+            // Builds a collapsible folder section: header (caret · 📁 · name · count · rename · dissolve)
+            // plus a body holding its track rows.
+            function buildFolderSection(folder, kids) {
+                const sec = document.createElement('div');
+                sec.className = 'tl-folder';
+                if (_collapsedFolders.has(folder.id)) sec.classList.add('collapsed');
+                const head = document.createElement('div'); head.className = 'tl-folder-head';
+                const caret = document.createElement('span'); caret.className = 'tl-fold-caret'; caret.textContent = '▾';
+                const ic = document.createElement('span'); ic.className = 'tl-fold-ic'; ic.textContent = '📁';
+                const nm = document.createElement('div'); nm.className = 'tl-fold-name'; nm.textContent = folder.name;
+                const cnt = document.createElement('span'); cnt.className = 'tl-fold-count'; cnt.textContent = kids.length;
+                const ren = document.createElement('button'); ren.className = 'tl-fold-ren'; ren.title = 'Umbenennen';
+                ren.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg>';
+                const del = document.createElement('button'); del.className = 'tl-fold-del'; del.title = 'Ordner auflösen';
+                del.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"></path></svg>';
+                head.appendChild(caret); head.appendChild(ic); head.appendChild(nm); head.appendChild(cnt);
+                head.appendChild(ren); head.appendChild(del);
+                const body = document.createElement('div'); body.className = 'tl-folder-body';
+                kids.forEach((r) => body.appendChild(buildTrackRow(r)));
+                head.addEventListener('click', () => {
+                    const nowCollapsed = sec.classList.toggle('collapsed');
+                    if (nowCollapsed) _collapsedFolders.add(folder.id); else _collapsedFolders.delete(folder.id);
+                });
+                ren.addEventListener('click', async (ev) => {
+                    ev.stopPropagation();
+                    const name = await uiPrompt('Ordner umbenennen:', { value: folder.name, okText: 'Umbenennen' });
+                    if (!name || name === folder.name) return;
+                    try { await renameFolder(folder.id, name); folder.name = name; nm.textContent = name; toast('Umbenannt.'); }
+                    catch (e) { toast('Umbenennen fehlgeschlagen.'); }
+                });
+                del.addEventListener('click', async (ev) => {
+                    ev.stopPropagation();
+                    if (!(await uiConfirm('Ordner auflösen? Die Tracks bleiben erhalten und wandern zurück in die Liste.', { okText: 'Auflösen' }))) return;
+                    try { await deleteFolder(folder.id); toast('Ordner aufgelöst.'); const rows2 = await listTracks(); renderTrackList(rows2); }
+                    catch (e) { toast('Auflösen fehlgeschlagen.'); }
+                });
+                sec.appendChild(head); sec.appendChild(body);
+                return sec;
+            }
+
+            // Folders group only in "Alle" mode — a radius search stays a flat nearest-first list.
+            const groupingOn = listRadiusKm === 0;
+            const validFolderIds = new Set(_folders.map((f) => f.id));
+            const inFolder = (r) => groupingOn && r.folder_id && validFolderIds.has(r.folder_id);
+            if (groupingOn) {
+                _folders.forEach((f) => box.appendChild(buildFolderSection(f, rows.filter((r) => r.folder_id === f.id))));
+            }
+            rows.filter((r) => !inFolder(r)).forEach((r) => box.appendChild(buildTrackRow(r)));
         }
 
         const GNSS_INFO =
