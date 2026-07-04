@@ -29,7 +29,7 @@ window.TrackerSignPanel = function (ctx) {
     // The OFFICIAL Zeichen 276 (Überholverbot), from Wikimedia Commons. German traffic signs are amtliche
     // Werke (§5 UrhG) → public domain, same basis as the Zebrastreifen sign already in the code. The sign
     // carries its own white disc + red ring, so its chip is frameless (see .sp-chip-overtake).
-    const OVERTAKE_SVG = SIGN_UEBERHOLVERBOT(46);
+    const OVERTAKE_SVG = window.SIGN_UEBERHOLVERBOT ? window.SIGN_UEBERHOLVERBOT(46) : '';
 
     // ---- composition state -----------------------------------------------------------------------
     function resetPending() { pending = { limit: null, days: null, daysLabel: '', times: null, timeLabel: '' }; }
