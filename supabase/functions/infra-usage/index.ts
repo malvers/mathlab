@@ -191,6 +191,33 @@ async function aiTotalAllTimeEur(): Promise<number> {
   } catch (_) { return 0; }
 }
 
+// Priced AI total since a given ISO timestamp — the running month-to-date sum for the mail. Reads
+// ai_cost_log directly (service-role bypasses RLS, like geminiSearchCount) and prices each row with the
+// SAME rowEur() as the 24 h section (single pricing source). Paginated so a full month never gets capped at
+// PostgREST's 1000-row default. Best-effort → 0 on any problem (must never break the watchdog mail).
+async function aiTotalSinceEur(sinceISO: string): Promise<number> {
+  try {
+    const url = Deno.env.get('SUPABASE_URL'); const key = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    if (!url || !key) return 0;
+    const supa = createClient(url, key, { auth: { persistSession: false } });
+    let total = 0, from = 0; const page = 1000;
+    for (;;) {
+      const { data, error } = await supa.from('ai_cost_log')
+        .select('provider, model, in_tok, out_tok, cache_read, cache_write')
+        .gte('created_at', sinceISO)
+        .order('id', { ascending: true })
+        .range(from, from + page - 1);
+      if (error || !Array.isArray(data)) break;
+      for (const r of data as Array<Record<string, unknown>>) {
+        total += rowEur(String(r.provider), String(r.model || ''), Number(r.in_tok), Number(r.out_tok), Number(r.cache_read), Number(r.cache_write));
+      }
+      if (data.length < page) break;
+      from += page;
+    }
+    return total;
+  } catch (_) { return 0; }
+}
+
 const eurFmt = (e: number) => {
   const c = (e || 0) * 100;
   if (c === 0) return '0 ¢';   // exact zero (provider had no calls) — clean instead of "0,000 ¢"
@@ -218,7 +245,11 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const [r2, db, ai, searches, ghBytes] = await Promise.all([r2BytesUsed(), dbBytesUsed(), aiCostToday(), geminiSearchCount(), ghPagesBytesUsed()]);
+    // Running month-to-date AI total (resets automatically on the 1st → "seit 1. Juli" in July, etc.).
+    const nowD = new Date();
+    const monthStart = new Date(Date.UTC(nowD.getUTCFullYear(), nowD.getUTCMonth(), 1));
+    const monthLabel = monthStart.toLocaleDateString('de-DE', { day: 'numeric', month: 'long', timeZone: 'UTC' });
+    const [r2, db, ai, searches, ghBytes, monthTotal] = await Promise.all([r2BytesUsed(), dbBytesUsed(), aiCostToday(), geminiSearchCount(), ghPagesBytesUsed(), aiTotalSinceEur(monthStart.toISOString())]);
     const r2pctN = pctN(r2, R2_QUOTA_GB), dbpctN = pctN(db, DB_QUOTA_GB);
     const r2pct = de(r2pctN, 2), dbpct = de(dbpctN, 2);   // 2 Nachkommastellen, deutsche Komma-Schreibweise
     const ghPctN = ghBytes != null ? pctN(ghBytes, GH_PAGES_QUOTA_GB) : null;   // null → GitHub unreachable, skip the row
@@ -235,7 +266,8 @@ Deno.serve(async (req) => {
     const aiText = provs.length
       ? `\nKI-Kosten (gemessene Tokens × Listenpreis, letzte 24 h):\n`
         + provs.map((p) => `• ${LBL[p] || p}: ${eurFmt(ai.byProvider[p] || 0)}`).join('\n')
-        + `\n  Σ ${eurFmt(ai.total)}  (${ai.calls} Calls)\n`
+        + `\n  Σ 24 h ${eurFmt(ai.total)}  (${ai.calls} Calls)`
+        + `\n  Σ seit ${monthLabel}: ${eurFmt(monthTotal)}\n`
       : '';
     const body =
       `Tägliche Auslastung:\n\n` +
@@ -273,8 +305,10 @@ Deno.serve(async (req) => {
         + provs.map((p, i) =>
             `<tr style="background:${i % 2 ? C.shade : '#ffffff'};"><td style="padding:7px 12px;border-bottom:1px solid ${C.line};">${LBL[p] || p}</td>`
             + `<td style="padding:7px 12px;border-bottom:1px solid ${C.line};text-align:right;">${eurFmt(ai.byProvider[p] || 0)}</td></tr>`).join('')
-        + `<tr><td style="padding:9px 12px;font-weight:bold;">Σ gesamt</td>`
-        + `<td style="padding:9px 12px;text-align:right;font-weight:bold;">${eurFmt(ai.total)} <span style="color:${C.muted};font-weight:normal;">(${ai.calls} Calls)</span></td></tr></table>`
+        + `<tr><td style="padding:9px 12px;font-weight:bold;">Σ 24 h</td>`
+        + `<td style="padding:9px 12px;text-align:right;font-weight:bold;">${eurFmt(ai.total)} <span style="color:${C.muted};font-weight:normal;">(${ai.calls} Calls)</span></td></tr>`
+        + `<tr><td style="padding:9px 12px;font-weight:bold;color:${C.navy};border-top:2px solid ${C.line};">Σ seit ${monthLabel}</td>`
+        + `<td style="padding:9px 12px;text-align:right;font-weight:bold;color:${C.navy};border-top:2px solid ${C.line};">${eurFmt(monthTotal)}</td></tr></table>`
         + (searches > 0 ? `<p style="color:${C.muted};font-size:13px;margin:8px 0 0;">Gemini-Suchen: <b style="color:${C.ink};">${searches}</b>&nbsp;/&nbsp;1500 gratis</p>` : '')
       : '';
     const html =
@@ -309,10 +343,11 @@ Deno.serve(async (req) => {
       `Unsere Infra-Auslastung: R2-Speicher ${Math.round(r2pctN)} Prozent, Datenbank ${Math.round(dbpctN)} Prozent`
       + (ghPctN != null ? `, GitHub Pages ${Math.round(ghPctN)} Prozent` : '')
       + (ai.total > 0 ? `. KI-Kosten der letzten 24 Stunden ${eurSpoken(ai.total)}` : '')
+      + (monthTotal > 0 ? `, seit ${monthLabel} zusammen ${eurSpoken(monthTotal)}` : '')
       + (searches > 0 ? `, davon ${searches} von 1500 gratis Suchen` : '')
       + `. ${warn ? 'Achtung, ein Wert liegt über 80 Prozent.' : 'Alles im grünen Bereich.'}`;
     if (!b.dry) await sendMail(subject, body, html, pass);
-    return json({ ok: true, r2pct, dbpct, ghpct: ghPctN != null ? ghpct : null, r2bytes: r2, dbbytes: db, ghbytes: ghBytes, searches, ai: { byProvider: ai.byProvider, total: ai.total, calls: ai.calls }, body, html, spoken, mailed: !b.dry });
+    return json({ ok: true, r2pct, dbpct, ghpct: ghPctN != null ? ghpct : null, r2bytes: r2, dbbytes: db, ghbytes: ghBytes, searches, ai: { byProvider: ai.byProvider, total: ai.total, calls: ai.calls, monthTotal, monthLabel }, body, html, spoken, mailed: !b.dry });
   } catch (e) {
     return json({ error: String((e && (e as Error).message) || e) }, 502);
   }
