@@ -213,7 +213,7 @@
             { a: 'k2nc', b: 'vwIn', cls: 'w-stop', grp: 'stop', bend: 'hv', origin: 'keyed' },
             // KEYLESS („Ohne Schlüssel"): K2 (Schließer) treibt Zünd-Relais; Relais legt Kl.30 -> Kl.15; D3 entkoppelt
             { a: 'k2no', b: 'ignCoil', cls: 'w-stop', grp: 'stop', bend: 'hv', origin: 'keyless' },
-            { a: 'ign15', b: 'vwIn', cls: 'w-stop', grp: 'stop', bend: 'hv', origin: 'keyless', diode: 'D3' },
+            { a: 'ign15', b: 'vwIn', cls: 'w-stop', grp: 'stop', bend: 'hv', origin: 'keyless' },
             // Serie-direkt (nur im Serie-Modus): Kl.15 direkt zum Vorwiderstand, ohne K2
             { a: 'keyOut', b: 'vwIn', cls: 'w-stop', grp: 'stop', bend: 'hv', origin: 'serieonly' },
             { a: 'vwOut', b: 'coilIn', cls: 'w-stop', grp: 'stop', bend: 'hv' },
@@ -387,17 +387,6 @@
                     if (item.origin) p.classList.add('origin-' + item.origin);
                     if (item.cls.indexOf('rail') >= 0) p.classList.add('rail');
                     svg.appendChild(p);
-                    if (item.diode) {   // diode symbol at the wire midpoint; cathode bar toward b (current a -> b)
-                        const A = np(item.a), B = np(item.b);
-                        const mx = (A.x + B.x) / 2, my = (A.y + B.y) / 2;
-                        const dg = E('g', {});
-                        if (item.origin) dg.classList.add('origin-' + item.origin);
-                        if (item.grp) dg.classList.add('grp-' + item.grp);
-                        dg.appendChild(E('path', { d: `M${(mx - 7).toFixed(1)},${(my - 8).toFixed(1)} L${(mx + 7).toFixed(1)},${my.toFixed(1)} L${(mx - 7).toFixed(1)},${(my + 8).toFixed(1)} Z`, fill: '#cf5145', stroke: '#cf5145' }));
-                        dg.appendChild(E('path', { d: `M${(mx + 7).toFixed(1)},${(my - 8).toFixed(1)} L${(mx + 7).toFixed(1)},${(my + 8).toFixed(1)}`, stroke: '#cf5145', 'stroke-width': 2.5 }));
-                        dg.appendChild(E('text', { x: mx.toFixed(1), y: (my - 13).toFixed(1), 'text-anchor': 'middle', class: 'amp', fill: '#cf5145' }, item.diode));
-                        svg.appendChild(dg);
-                    }
                     if (item.fuse) {
                         const P = np(item.a); const fy = (item.rail === 'pos' ? RAIL_POS : RAIL_GND);
                         const fx = item.tapX != null ? item.tapX : P.x;
@@ -464,6 +453,7 @@
             }
 
             extras();
+            drawDiodes();
 
             // amp annotations (follow their nodes)
             // background pill behind every label; draggable labels grab via their pill
@@ -533,6 +523,45 @@
             tapMarker(g, np('k2nc').x, np('k2nc').y, 2);
             tapMarker(g, dx, dy, 3);
             svg.appendChild(g);
+        }
+
+        // D2-style diode: filled triangle (points to the cathode) + cathode bar + label; draggable & persisted.
+        // orient 'h' = current left→right (cathode right); 'v' = current bottom→top (cathode top).
+        function diodeAt(parent, id, x, y, label, orient, origin) {
+            const g = E('g', { style: 'cursor:grab' });
+            if (origin) g.classList.add('origin-' + origin);
+            if (orient === 'v') {
+                g.appendChild(E('path', { d: `M${x - 8},${y + 8} L${x + 8},${y + 8} L${x},${y - 8} Z`, fill: '#e8b04a' }));
+                g.appendChild(E('line', { x1: x - 8, y1: y - 8, x2: x + 8, y2: y - 8, stroke: '#e8b04a', 'stroke-width': 2.5 }));
+                g.appendChild(E('text', { x: x + 13, y: y + 4, class: 'amp', fill: '#e8b04a' }, label));
+            } else {
+                g.appendChild(E('path', { d: `M${x - 8},${y - 8} L${x - 8},${y + 8} L${x + 8},${y} Z`, fill: '#e8b04a' }));
+                g.appendChild(E('line', { x1: x + 8, y1: y - 8, x2: x + 8, y2: y + 8, stroke: '#e8b04a', 'stroke-width': 2.5 }));
+                g.appendChild(E('text', { x: x, y: y + 28, 'text-anchor': 'middle', class: 'amp', fill: '#e8b04a' }, label));
+            }
+            dragXY(g, () => (LPOS[id] || { x, y }), (px, py) => { LPOS[id] = { x: px, y: py }; });
+            parent.appendChild(g);
+        }
+        // D1 (Bosch-Spule Freilauf) · D3 (Kl.15-Entkopplung, keyless) · D4 (Zünd-Relais-Spule Freilauf, keyless)
+        function drawDiodes() {
+            // D1 — Freilauf über Bosch-Spule; Kathode zu 86 (+). Zuleitungen folgen dem (ziehbaren) Diodenpunkt.
+            const t86 = np('b86'), t85 = np('b85');
+            const d1 = LPOS['d1'] || { x: Math.min(t86.x, t85.x) - 26, y: (t86.y + t85.y) / 2 };
+            const g1 = E('g', { class: 'origin-unser' });
+            g1.appendChild(E('path', { d: `M${t86.x},${t86.y} L${d1.x},${d1.y} L${t85.x},${t85.y}`, fill: 'none', stroke: '#e8b04a', 'stroke-width': 2 }));
+            svg.appendChild(g1);
+            diodeAt(svg, 'd1', d1.x, d1.y, 'D1', 'v', 'unser');
+            // D3 — Kl.15-Entkopplung auf der keyless-Leitung ign15 → vwIn; Kathode Richtung Kl.15 (vwIn).
+            const a3 = np('ign15'), b3 = np('vwIn');
+            diodeAt(svg, 'd3', (LPOS['d3'] || { x: (a3.x + b3.x) / 2, y: (a3.y + b3.y) / 2 }).x,
+                (LPOS['d3'] || { x: (a3.x + b3.x) / 2, y: (a3.y + b3.y) / 2 }).y, 'D3', 'h', 'keyless');
+            // D4 — Freilauf über Zünd-Relais-Spule; Kathode zu ignCoil (+).
+            const tc = np('ignCoil'), tg = np('ignGnd');
+            const d4 = LPOS['d4'] || { x: Math.min(tc.x, tg.x) - 24, y: (tc.y + tg.y) / 2 };
+            const g4 = E('g', { class: 'origin-keyless' });
+            g4.appendChild(E('path', { d: `M${tc.x},${tc.y} L${d4.x},${d4.y} L${tg.x},${tg.y}`, fill: 'none', stroke: '#e8b04a', 'stroke-width': 2 }));
+            svg.appendChild(g4);
+            diodeAt(svg, 'd4', d4.x, d4.y, 'D4', 'v', 'keyless');
         }
 
         // ---- dragging ----
