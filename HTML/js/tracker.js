@@ -614,6 +614,7 @@
         let __traffic = null;      // live Autobahn traffic layer (js/tracker-traffic.js)
         let __hazards = null;      // point-hazard pins + voraus-warning (js/tracker-hazards.js)
         let __sun = null;          // golden hour / sun position line (js/tracker-sun.js, FEAT-2)
+        let __signpanel = null;    // tap-in-a-sign panel (js/tracker-signpanel.js, FEAT-35)
         let __sim = null;          // desk navigation simulator (js/tracker-navsim.js), only with ?sim=1
         let simMode = false;       // true while the simulator drives synthetic fixes → suppress cloud sync/broadcast
         let gnssActive = false;    // true once the native GnssStatus listener delivers data
@@ -2637,6 +2638,13 @@ ${pts}
         // ---- Golden hour / sun position → js/tracker-sun.js (FEAT-2). Fills the #sun-line in the HUD header,
         //      glows during the golden/blue hour. Position-driven + self-ticking once a minute. ----
         __sun = (typeof TrackerSun !== 'undefined') ? TrackerSun({ $, toast }) : null;
+        // ---- Sign panel → js/tracker-signpanel.js (FEAT-35 Phase 1). Double-tap the map → a left column of
+        //      the most important signs; a tap writes a LOCAL override into __speed (wins over OSM) for the
+        //      temporary / thinly-tagged signs OSM lacks. DB sync + OSM upload are later phases. ----
+        __signpanel = (typeof TrackerSignPanel !== 'undefined') ? TrackerSignPanel({
+            map, toast, speed: __speed,
+            curPos: () => { const ll = posMarker && posMarker.getLatLng && posMarker.getLatLng(); return ll ? [ll.lat, ll.lng] : null; },
+        }) : null;
         // ---- Desk navigation simulator → js/tracker-navsim.js. Only with ?sim=1 in the URL. Feeds synthetic
         //      GPS fixes through the REAL onPosition pipeline (so reroute/guidance behave 1:1), while simMode
         //      suppresses cloud sync/broadcast so no fake data ever reaches Supabase. ----

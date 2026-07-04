@@ -2322,6 +2322,71 @@ body.ui-idle #nav-banner .nav-trip { font-size: clamp(0.95rem, 4vw, 1.2rem); pad
     font-weight: 700;
 }
 
+/* ---- Sign panel (FEAT-35 Phase 1, js/tracker-signpanel.js) — double-tap the map to tap in a sign OSM
+   lacks (temporary / Baustelle). Vertical column of round sign discs on the left; a tap writes a local
+   override that wins over OSM. Same road-sign look as #speed-sign. ---- */
+#sign-panel-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 640;
+    background: rgba(8, 20, 42, 0.28);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+}
+#sign-panel-backdrop.open { opacity: 1; pointer-events: auto; }
+
+#sign-panel {
+    position: fixed;
+    left: 10px;
+    top: 50%;
+    transform: translate(-130%, -50%); /* parked off-screen left → slides in when .open */
+    z-index: 650;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 86vh;
+    overflow-y: auto;
+    padding: 6px;
+    -webkit-overflow-scrolling: touch;
+    opacity: 0;
+    pointer-events: none;
+    transition: transform 0.22s ease, opacity 0.22s ease;
+}
+#sign-panel.open { transform: translate(0, -50%); opacity: 1; pointer-events: auto; }
+#sign-panel::-webkit-scrollbar { display: none; }
+
+.sp-chip {
+    flex: 0 0 auto;
+    width: 52px;
+    height: 52px;
+    box-sizing: border-box;
+    border-radius: 50%;
+    background: #fff;
+    border: 5px solid rgb(176, 36, 24);
+    color: #111;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-family: Arial, Helvetica, sans-serif;
+    font-weight: 700;
+    line-height: 1;
+    padding: 0;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+    -webkit-tap-highlight-color: transparent;
+    transition: transform 0.08s ease;
+}
+.sp-chip:active { transform: scale(0.93); }
+.sp-num { font-size: 17px; letter-spacing: -0.5px; }
+.sp-sub { font-size: 8px; font-weight: 700; margin-top: 1px; color: rgb(176, 36, 24); }
+/* advisory chips carry their own artwork (SVG / MAUT pill) → no disc frame */
+.sp-chip-adv { border: none; background: transparent; box-shadow: none; }
+.sp-maut { background: rgb(14, 36, 78); color: #fff; font: 700 11px Arial, sans-serif; padding: 6px 8px; border-radius: 8px; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4); }
+.sp-chip-clear { border-color: rgba(176, 36, 24, 0.55); border-style: dashed; }
+.sp-clear { font-size: 26px; color: #555; line-height: 1; }
+
 /* ---- Bußgeld-Risiko panel (js/tracker-fines.js) — opened by tapping the speed-limit sign ---- */
 .fines-head {
     text-align: center;
