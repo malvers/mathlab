@@ -136,6 +136,9 @@
             <div class="hud-stat speed-stat"><div class="speed-col"><span id="trk-speed"></span><span class="hud-lbl" id="trk-speed-lbl">SPEED KM/H</span></div></div>
             <div class="hud-stat"><span id="trk-alt"></span><span class="hud-lbl" id="trk-alt-lbl">Höhe m</span></div>
         </div>
+        <!-- FEAT-2: golden hour / sun position — best photo & hike light. Filled by js/tracker-sun.js;
+             glows during the golden/blue hour. Tap for the full breakdown. Hidden until GPS is known. -->
+        <div id="sun-line" hidden><span id="sun-ico">☀</span><span id="sun-main"></span><span id="sun-sub"></span></div>
     </div>
 
     <!-- Bottom controls: one round button (START/PAUSE), three side by side when paused
@@ -645,7 +648,7 @@
         // so the main init below still finds RainRadar/DebugWindow/PhotoFullscreen ready.
         (function () {
             var v = window.__ASSET_V || '';
-            var js = ['../js/track-render.js', '../js/track-smooth.js', '../js/track-dem.js', '../js/track-buffer.js', '../js/rain-palette.js', '../js/rain-recolor.js', '../js/rain-radar.js', '../js/cyber-clock.js', '../js/debug-window.js', '../js/supa-gate.js', '../js/photo-fullscreen.js', '../js/photo-layer.js', '../js/voice-note.js', '../js/app-update.js', '../js/radial-menu.js', '../js/cyber-select.js', '../js/upload-media.js', '../js/photo-capture.js', '../js/tracker-media.js', '../js/tracker-overpass.js', '../js/tracker-nav.js', '../js/tracker-speedprofile.js', '../js/tracker-speedprobe.js', '../js/tracker-speedlimit.js', '../js/tracker-fines.js', '../js/tracker-streetquality.js', '../js/tracker-compass.js', '../js/tracker-config.js', '../js/tracker-hud.js', '../js/tracker-fuel.js', '../js/tracker-poi.js', '../js/tracker-traffic.js', '../js/tracker-hazards.js', '../js/tracker-navsim.js', '../js/solita-brain.js', '../js/solita-voice.js', '../js/solita-listen.js', '../js/tracker-solita.js', '../js/solita-navigate.js'];
+            var js = ['../js/track-render.js', '../js/track-smooth.js', '../js/track-dem.js', '../js/track-buffer.js', '../js/rain-palette.js', '../js/rain-recolor.js', '../js/rain-radar.js', '../js/cyber-clock.js', '../js/debug-window.js', '../js/supa-gate.js', '../js/photo-fullscreen.js', '../js/photo-layer.js', '../js/voice-note.js', '../js/app-update.js', '../js/radial-menu.js', '../js/cyber-select.js', '../js/upload-media.js', '../js/photo-capture.js', '../js/tracker-media.js', '../js/tracker-overpass.js', '../js/tracker-nav.js', '../js/tracker-speedprofile.js', '../js/tracker-speedprobe.js', '../js/tracker-speedlimit.js', '../js/tracker-fines.js', '../js/tracker-streetquality.js', '../js/tracker-compass.js', '../js/tracker-config.js', '../js/tracker-hud.js', '../js/tracker-sun.js', '../js/tracker-fuel.js', '../js/tracker-poi.js', '../js/tracker-traffic.js', '../js/tracker-hazards.js', '../js/tracker-navsim.js', '../js/solita-brain.js', '../js/solita-voice.js', '../js/solita-listen.js', '../js/tracker-solita.js', '../js/solita-navigate.js'];
             for (var i = 0; i < js.length; i++) document.write('<script src="' + js[i] + v + '"><\/script>');
         })();
     </script>

@@ -431,6 +431,28 @@ path.pos-marker.pos-shown {
 .hud-stat .cyber-num { --cc-dw: 0.85em; gap: 0.12em; } /* gap = air BETWEEN digits — slot width alone left them geklatscht on Pixel (Doc 2026-06-22) */
 .hud-stat .cyber-num .cc-dot { width: 0.42em; }
 
+/* FEAT-2: golden hour / sun position — a slim tappable line under the HUD stats. The header itself is
+   pointer-events:none, so this re-enables the tap. λ-orange glow during the golden hour is a TEXT accent
+   (not a button) → within the palette rules. */
+#sun-line {
+    margin-top: 7px;
+    pointer-events: auto;
+    cursor: pointer;
+    font-family: 'Orbitron', sans-serif;
+    color: rgba(230, 238, 255, 0.85);
+    line-height: 1.2;
+    user-select: none;
+    transition: color 0.6s ease, text-shadow 0.6s ease;
+}
+#sun-line[hidden] { display: none; }
+#sun-ico { margin-right: 6px; }
+#sun-main { font-weight: 700; font-size: clamp(0.72rem, 3vw, 0.9rem); letter-spacing: 0.5px; }
+#sun-sub { display: block; margin-top: 2px; font-size: clamp(0.6rem, 2.4vw, 0.72rem); opacity: 0.6; letter-spacing: 0.4px; white-space: pre; }
+#sun-line.golden { color: rgb(245, 194, 66); text-shadow: 0 0 11px rgba(245, 194, 66, 0.55); }
+#sun-line.golden #sun-sub { opacity: 0.82; }
+#sun-line.blue { color: rgb(140, 172, 236); text-shadow: 0 0 9px rgba(120, 150, 235, 0.45); }
+#sun-line.blue #sun-sub { opacity: 0.78; }
+
 /* ---- Big round START / STOP ---- */
 #trk-controls {
     position: fixed;
