@@ -140,17 +140,21 @@
             const ev = events(now, pos[0], pos[1]);
             const phase = phaseOf(here.alt);
             const rising = here.ha < 0;
-            const nx = nextMilestone(ev, now, rising);
 
-            const ico = phase === 'day' ? '☀' : phase === 'night' ? '☾' : '✦';
-            const main = (phase === 'golden' || phase === 'blue')
-                ? (phase === 'golden' ? 'Goldene Stunde' : 'Blaue Stunde') + ' · bis ' + hhmm(nx.dt)
-                : nx.label + ' ' + hhmm(nx.dt) + (inWord(nx.dt, now) ? ' (' + inWord(nx.dt, now) + ')' : '');
-            const sub = '↑ ' + hhmm(ev.sunrise) + '  ↓ ' + hhmm(ev.sunset)
-                + '   ' + (here.alt >= 0 ? '☉ ' + Math.round(here.alt) + '° ' + dir(here.az) : '');
+            // --- Goldene-/Blaue-Stunde-Zeile (Icon + Haupt-Text) vorerst ausgeblendet (Doc 2026-07-04).
+            //     NICHT löschen — nur auskommentiert, damit wir sie jederzeit zurückholen können.
+            // const nx = nextMilestone(ev, now, rising);
+            // const ico = phase === 'day' ? '☀' : phase === 'night' ? '☾' : '✦';
+            // const main = (phase === 'golden' || phase === 'blue')
+            //     ? (phase === 'golden' ? 'Goldene Stunde' : 'Blaue Stunde') + ' · bis ' + hhmm(nx.dt)
+            //     : nx.label + ' ' + hhmm(nx.dt) + (inWord(nx.dt, now) ? ' (' + inWord(nx.dt, now) + ')' : '');
+            // $('sun-ico').textContent = ico;
+            // $('sun-main').textContent = main;
+            $('sun-ico').textContent = '';    // gehört zur ausgeblendeten Zeile → leeren
+            $('sun-main').textContent = '';
 
-            $('sun-ico').textContent = ico;
-            $('sun-main').textContent = main;
+            // Auf-/Untergang, etwas größer: Sonne zum Sonnenaufgang, Mond zum Untergang.
+            const sub = '☀ ' + hhmm(ev.sunrise) + '   ☾ ' + hhmm(ev.sunset);
             $('sun-sub').textContent = sub;
             line.classList.toggle('golden', phase === 'golden');
             line.classList.toggle('blue', phase === 'blue');
