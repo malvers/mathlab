@@ -365,14 +365,22 @@ path.pos-marker.pos-shown {
     #hud-time { --cc-size: clamp(1.1rem, 5vh, 1.8rem); }
 }
 
-/* Wrapper so the travel-mode icon hangs to the LEFT of the (still centred) clock. */
+/* Central layout: the clock MUST sit dead-centre on screen, independent of the flank widths.
+   An inline-flex row centres the WHOLE group (☀ | clock | ☾), so any width difference between
+   the flanks (wide sun emoji ☀ vs. narrow moon glyph ☾) pushes the clock sideways. A 3-column
+   grid (1fr | auto | 1fr) puts the clock in the centred auto column → always screen-centred,
+   whatever the flanks do (or even while they're still hidden pre-GPS). Doc 2026-07-05. */
 #hud-time-wrap {
     position: relative;
-    display: inline-flex;      /* sunrise ☀ | clock | sunset ☾ in one centred row */
+    display: grid;
+    grid-template-columns: 1fr auto 1fr; /* clock = centred auto column */
     align-items: center;
-    gap: clamp(10px, 4vw, 22px);
+    column-gap: clamp(10px, 4vw, 22px);
     margin-top: clamp(6px, 2vw, 12px);
 }
+/* flanks hug the clock (inner edge of their 1fr column) rather than drifting to the screen edge */
+#sun-rise { justify-self: end; }
+#sun-set  { justify-self: start; }
 
 /* Sun/moon flanks: icon on top, time under it (Doc 2026-07-04). */
 .sun-flank {
