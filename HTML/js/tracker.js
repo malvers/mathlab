@@ -2374,6 +2374,26 @@ ${pts}
             document.querySelectorAll('#track-list-items .tl-check').forEach((c) => { c.checked = false; });
             updateLoadSel();
         }
+        // Stats for a track from its raw points ([lat,lng,tIso,…]) — format-independent, so it works
+        // for the click-to-identify popup without needing the list's server-computed row.
+        function trackStatsFromPoints(pts) {
+            let d = 0;
+            for (let i = 1; i < pts.length; i++) d += haversine([pts[i - 1][0], pts[i - 1][1]], [pts[i][0], pts[i][1]]);
+            const ts = pts.map(p => p[2]).filter(Boolean);
+            let durMs = 0;
+            if (ts.length > 1) { const a = Date.parse(ts[0]), b = Date.parse(ts[ts.length - 1]); if (!isNaN(a) && !isNaN(b)) durMs = Math.max(0, b - a); }
+            return { distKm: d / 1000, durMs };
+        }
+        // "3.14 km · 1:23 h · 4.8 km/h · 📷 6" — drops parts that don't apply.
+        function trackStatsLine(st, photoCount) {
+            const parts = [];
+            if (st.distKm >= 0.01) parts.push(st.distKm.toFixed(2) + ' km');
+            if (st.durMs > 0) parts.push(fmtDur(Math.round(st.durMs / 1000)));
+            if (st.durMs > 0 && st.distKm > 0) parts.push((st.distKm / (st.durMs / 3600000)).toFixed(1) + ' km/h');
+            if (photoCount) parts.push('📷 ' + photoCount);
+            return parts.join(' · ');
+        }
+
         // Overlay several loaded tracks, each in its own colour; fit the map to them all.
         function plotMultiple(loaded) {
             if (acquireWatch != null) { navigator.geolocation.clearWatch(acquireWatch); acquireWatch = null; }
@@ -2397,13 +2417,16 @@ ${pts}
                         layer: trackLayer, usesHotline,
                     });
                     // Click-to-identify: the coloured hotline isn't clickable, so lay a transparent
-                    // FAT polyline on top that catches the tap and names the track in a popup. Lets
-                    // Doc spot which overlaid line is which (e.g. one accidentally grouped).
+                    // FAT polyline on top that catches the tap and names the track (+ length · duration ·
+                    // Ø speed) in a popup. Lets Doc spot which overlaid line is which.
                     const label = ((t.name || '').replace(/^Track\s+/, '') || 'Track');
+                    const st = trackStatsFromPoints(pts);
                     const hit = L.polyline(pts.map(p => [p[0], p[1]]), { color: '#000', opacity: 0, weight: 16, interactive: true });
-                    const pop = document.createElement('div');
-                    pop.className = 'track-id-pop';
-                    pop.textContent = label;                       // textContent → no HTML injection from names
+                    const pop = document.createElement('div'); pop.className = 'track-id-pop';
+                    const nmEl = document.createElement('div'); nmEl.className = 'track-id-name'; nmEl.textContent = label; // textContent → no injection
+                    pop.appendChild(nmEl);
+                    const metaTxt = trackStatsLine(st, (t.waypoints || []).length);
+                    if (metaTxt) { const mEl = document.createElement('div'); mEl.className = 'track-id-meta'; mEl.textContent = metaTxt; pop.appendChild(mEl); }
                     hit.bindPopup(pop);
                     hit.addTo(trackLayer);
                     pts.forEach(p => all.push([p[0], p[1]]));
