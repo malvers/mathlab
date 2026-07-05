@@ -2311,6 +2311,10 @@ ${pts}
             if (error) throw error;
         }
 
+        // Diagnostic switch: flip to true to re-surface the plotTrack nav/media DebugWindow logs
+        // (kept dormant, not deleted — handy the next time a load/navigate/pin issue needs measuring).
+        const PLOT_DEBUG = false;
+
         // Plot a loaded track onto the map (replaces the current line + photo pins)
         function plotTrack(points, wps) {
             // Loading a track must NOT get yanked back to the live position: stop the initial
@@ -2344,16 +2348,15 @@ ${pts}
             // fail to move, so pan+zoom to the single point instead. If the point only lives in the
             // waypoint (no route point), use that so clicking the orphan still navigates.
             const zoomTo = (ll) => map.setView(ll, Math.max(map.getZoom() || 0, 16));
-            const _c0 = map.getCenter();
-            if (window.DebugWindow) DebugWindow.log('plotTrack nav: pts=' + latlngs.length
+            if (PLOT_DEBUG && window.DebugWindow) { const _c0 = map.getCenter(); DebugWindow.log('plotTrack nav: pts=' + latlngs.length
                 + ' target=' + (latlngs[0] ? latlngs[0][0].toFixed(5) + ',' + latlngs[0][1].toFixed(5)
                     : (wps && wps[0] ? wps[0].lat + ',' + wps[0].lng : '—'))
-                + ' from=' + _c0.lat.toFixed(5) + ',' + _c0.lng.toFixed(5) + '@z' + map.getZoom());
+                + ' from=' + _c0.lat.toFixed(5) + ',' + _c0.lng.toFixed(5) + '@z' + map.getZoom()); }
             if (latlngs.length > 1) map.fitBounds(L.latLngBounds(latlngs), { padding: fitPad() });
             else if (latlngs.length === 1) zoomTo(latlngs[0]);
             else if (wps && wps.length && wps[0].lat != null) zoomTo([wps[0].lat, wps[0].lng]);
-            if (window.DebugWindow) { const c = map.getCenter(); DebugWindow.log('plotTrack nav → now ' + c.lat.toFixed(5) + ',' + c.lng.toFixed(5) + '@z' + map.getZoom()); }
-            if (window.DebugWindow && __media && __media.mediaDebug) DebugWindow.log('plotTrack media: ' + __media.mediaDebug());
+            if (PLOT_DEBUG && window.DebugWindow) { const c = map.getCenter(); DebugWindow.log('plotTrack nav → now ' + c.lat.toFixed(5) + ',' + c.lng.toFixed(5) + '@z' + map.getZoom()); }
+            if (PLOT_DEBUG && window.DebugWindow && __media && __media.mediaDebug) DebugWindow.log('plotTrack media: ' + __media.mediaDebug());
             loadedBounds = null; // single load uses the live 'track' array for FIT, not a multi-overlay bound
             refreshRecenter(); // loaded track may have ≥10 pts → reveal the FIT button (moveend alone isn't reliable)
         }

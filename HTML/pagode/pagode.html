@@ -52,12 +52,12 @@
         /* Dark brown leather (1960s Pagode interior). Uses a REAL leather photo when present at leder-braun.jpg;
            until then a warm dark-leather CSS fallback shows. Drop the photo into HTML/pagode/ and it slots in. */
         body.bg-sand {
-            background-color: #2a1c0f;
+            background-color: #312c25;   /* matched to snakeskin avg #31302e, a hair warmer/browner */
             background-image:
                 url('leder-braun.jpg'),
-                radial-gradient(120% 110% at 50% 14%, #4a3320, transparent 55%),
-                radial-gradient(130% 120% at 50% 120%, rgba(0, 0, 0, .58), transparent 55%),
-                linear-gradient(0deg, #1c1208, #33230f);
+                radial-gradient(120% 110% at 50% 14%, #363027, transparent 55%),
+                radial-gradient(130% 120% at 50% 120%, rgba(0, 0, 0, .5), transparent 55%),
+                linear-gradient(0deg, #262119, #362f27);
             background-size: cover, auto, auto, auto;
             background-position: center;
             background-repeat: no-repeat;
@@ -110,7 +110,7 @@
             font-family: 'Cinzel', serif; font-weight: 700; font-size: 15px; letter-spacing: 7px;
             margin-top: 8px; padding-left: 7px;
         }
-        .badge-year { font-style: italic; font-size: 16px; margin-top: 5px; }
+        .badge-year { font-style: italic; font-size: 16px; margin-top: 5px; letter-spacing: 2px; }
 
         .rule {
             height: 2px; margin: 18px auto 6px; max-width: 240px;
@@ -122,6 +122,7 @@
         .lamp-row {
             display: flex; align-items: center; justify-content: center;
             margin: 30px 0 12px; padding: 8px; cursor: pointer; user-select: none;
+            -webkit-tap-highlight-color: transparent; outline: none;
         }
         .lamp {
             width: 15px; height: 15px; border-radius: 50%; flex: none;
@@ -140,6 +141,28 @@
         .lamp-row.busy .lamp {
             background: radial-gradient(circle at 42% 36%, #dcb64f, #b9871f 54%, #79540e 92%);
         }
+        /* connect/disconnect dialog — vintage leather panel with a gold rim */
+        .dlg-overlay {
+            position: fixed; inset: 0; z-index: 100; display: none;
+            align-items: center; justify-content: center;
+            background: rgba(10, 7, 4, .6); -webkit-tap-highlight-color: transparent;
+        }
+        .dlg-overlay.open { display: flex; }
+        .dlg {
+            min-width: 210px; padding: 22px 24px 24px; text-align: center;
+            background: linear-gradient(180deg, #322c22, #241f18);
+            border: 1px solid var(--gold-lo); border-radius: 16px;
+            box-shadow: 0 14px 34px rgba(0, 0, 0, .6), inset 0 1px 0 rgba(255, 243, 205, .12);
+        }
+        .dlg-title { font-family: 'Cinzel', serif; letter-spacing: 3px; text-transform: uppercase; font-size: 11px; color: #c7b692; margin-bottom: 18px; }
+        .dlg-btn {
+            font-family: 'Cinzel', serif; font-weight: 700; letter-spacing: 2px; font-size: 15px; color: #f1e6c4;
+            border: 1px solid var(--gold-lo); border-radius: 11px; padding: 13px 30px; cursor: pointer;
+            background: radial-gradient(circle at 50% 30%, #357a4c, #103f27 62%, #06281a);
+            -webkit-tap-highlight-color: transparent; text-shadow: 0 1px 2px rgba(0, 0, 0, .6);
+        }
+        .dlg-btn.trennen { background: radial-gradient(circle at 50% 30%, #9e362a, #65140d 62%, #380a06); }
+        .dlg-btn:active { filter: brightness(1.12); }
         .lamp-label { font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 3px; color: #c7b692; text-transform: uppercase; text-shadow: 0 1px 2px rgba(0, 0, 0, .7); }
 
         /* the two knobs — sitting directly on the snakeskin fascia */
@@ -199,6 +222,13 @@
         <div class="foot">Solita lernt fahren</div>
     </div>
 
+    <div class="dlg-overlay" id="dlg-overlay">
+        <div class="dlg">
+            <div class="dlg-title">Bluetooth</div>
+            <button class="dlg-btn" id="dlg-action" type="button">Verbinden</button>
+        </div>
+    </div>
+
     <!-- shared BLE protocol + transport (single source for both Pagode pages + the APK) -->
     <script src="js/pagode-ble.js"></script>
     <script>
@@ -249,7 +279,22 @@
         btn.addEventListener('pointerup', release);
         btn.addEventListener('pointerleave', release);
         btn.addEventListener('pointercancel', release);
-        lampRow.addEventListener('click', () => { if (!connected) ensureConnected(); });
+        // tap the telltale → connect/disconnect dialog (styled, no browser/plugin picker)
+        const dlgOverlay = document.getElementById('dlg-overlay');
+        const dlgAction = document.getElementById('dlg-action');
+        function openDlg() {
+            dlgAction.textContent = connected ? 'Trennen' : 'Verbinden';
+            dlgAction.className = 'dlg-btn' + (connected ? ' trennen' : '');
+            dlgOverlay.classList.add('open');
+        }
+        function closeDlg() { dlgOverlay.classList.remove('open'); }
+        lampRow.addEventListener('click', openDlg);
+        dlgAction.addEventListener('click', async () => {
+            closeDlg();
+            if (connected) { try { if (backend) await backend.disconnect(); } catch (e) { } connected = false; setLamp(''); }
+            else { await ensureConnected(); }
+        });
+        dlgOverlay.addEventListener('click', (e) => { if (e.target === dlgOverlay) closeDlg(); });
         updateBtn();
 
         // ---- switchable backdrop: press "b" to cycle; choice persists in localStorage ----
