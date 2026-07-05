@@ -18,6 +18,7 @@
 
     const DB_NAME = 'tracker';
     const STORE = 'active';
+    const OUTBOX = 'outbox'; // durable multi-slot queue of FINISHED tracks awaiting a confirmed cloud save
     const KEY = 'current';
     const MIN_MS = 5000; // shortest gap between throttled writes
 
@@ -31,10 +32,14 @@
     function openDb() {
         if (dbPromise) return dbPromise;
         dbPromise = new Promise(function (resolve, reject) {
-            const req = indexedDB.open(DB_NAME, 1);
+            const req = indexedDB.open(DB_NAME, 2);
             req.onupgradeneeded = function () {
                 const db = req.result;
                 if (!db.objectStoreNames.contains(STORE)) db.createObjectStore(STORE);
+                // v2: durable OUTBOX of FINISHED-but-unconfirmed tracks (multi-slot, keyed by a stable
+                //     local id). A failed offline SPEICHERN is queued here and auto-retried — and can
+                //     never be clobbered by the next recording (unlike the single 'active' slot).
+                if (!db.objectStoreNames.contains(OUTBOX)) db.createObjectStore(OUTBOX, { keyPath: 'id' });
             };
             req.onsuccess = function () { resolve(req.result); };
             req.onerror = function () { reject(req.error); };
@@ -67,6 +72,38 @@
             return new Promise(function (resolve, reject) {
                 const tx = db.transaction(STORE, 'readwrite');
                 tx.objectStore(STORE).delete(KEY);
+                tx.oncomplete = function () { resolve(); };
+                tx.onerror = function () { reject(tx.error); };
+            });
+        });
+    }
+
+    // ---- durable OUTBOX (multi-slot): finished tracks awaiting a confirmed cloud upload ----
+    function outboxPut(entry) {
+        return openDb().then(function (db) {
+            return new Promise(function (resolve, reject) {
+                const tx = db.transaction(OUTBOX, 'readwrite');
+                tx.objectStore(OUTBOX).put(entry); // keyPath 'id'
+                tx.oncomplete = function () { resolve(); };
+                tx.onerror = function () { reject(tx.error); };
+            });
+        });
+    }
+    function outboxAll() {
+        return openDb().then(function (db) {
+            return new Promise(function (resolve, reject) {
+                const tx = db.transaction(OUTBOX, 'readonly');
+                const rq = tx.objectStore(OUTBOX).getAll();
+                rq.onsuccess = function () { resolve(rq.result || []); };
+                rq.onerror = function () { reject(rq.error); };
+            });
+        });
+    }
+    function outboxDel(id) {
+        return openDb().then(function (db) {
+            return new Promise(function (resolve, reject) {
+                const tx = db.transaction(OUTBOX, 'readwrite');
+                tx.objectStore(OUTBOX).delete(id);
                 tx.oncomplete = function () { resolve(); };
                 tx.onerror = function () { reject(tx.error); };
             });
@@ -112,5 +149,13 @@
         return idbDel().catch(function (e) { dbg('del failed ' + e); });
     }
 
-    global.TrackBuffer = { save: save, saveNow: saveNow, load: load, clear: clear };
+    global.TrackBuffer = {
+        save: save, saveNow: saveNow, load: load, clear: clear,
+        // durable multi-slot outbox for finished tracks awaiting a confirmed cloud save
+        outbox: {
+            put: function (entry) { return hasIDB ? outboxPut(entry) : Promise.resolve(); },
+            all: function () { return hasIDB ? outboxAll().catch(function (e) { dbg('outbox all failed ' + e); return []; }) : Promise.resolve([]); },
+            del: function (id) { return hasIDB ? outboxDel(id).catch(function (e) { dbg('outbox del failed ' + e); }) : Promise.resolve(); }
+        }
+    };
 })(window);
