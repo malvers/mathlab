@@ -227,17 +227,23 @@ window.TrackerMedia = function (T) {
             video: localStorage.getItem(MEDIA_KEYS.video) !== '0',
             voice: localStorage.getItem(MEDIA_KEYS.voice) !== '0',
         };
+        // The filter only DECLUTTERS a multi-track overlay (a shared/loaded folder). A single explicit
+        // load must always show its pins — you deliberately opened THAT item — so plotTrack turns the
+        // filter off for its load and plotMultiple turns it on. When inactive, every pin shows.
+        let filterActive = true;
         function wpKind(wp) { return (wp && wp.type === 'voice') ? 'voice' : ((wp && wp.type === 'video') ? 'video' : 'photo'); }
-        function visibleMarkers() { return T.wpMarkers.filter(m => mediaShow[wpKind(m._wp)]); }
+        function shownKind(wp) { return !filterActive || mediaShow[wpKind(wp)]; }
+        function visibleMarkers() { return T.wpMarkers.filter(m => shownKind(m._wp)); }
         function applyMediaFilter() {
             collapseFan();
             T.wpMarkers.forEach(m => {
-                const show = mediaShow[wpKind(m._wp)];
+                const show = shownKind(m._wp);
                 if (show && !map.hasLayer(m)) m.addTo(map);
                 else if (!show && map.hasLayer(m)) map.removeLayer(m);
             });
             PhotoLayer.applyStackBadges(visibleMarkers(), map);
         }
+        function setFilterActive(on) { filterActive = !!on; applyMediaFilter(); }
         function setMediaVisible(kind, on) {
             if (!(kind in mediaShow)) return;
             mediaShow[kind] = !!on;
@@ -258,7 +264,7 @@ window.TrackerMedia = function (T) {
             wp._marker = m;
             if (wp.title === PENDING_TITLE) m.setZIndexOffset(2000); // see refreshWaypoint
             T.wpMarkers.push(m);
-            if (!mediaShow[wpKind(wp)]) map.removeLayer(m); // respect the media filter for freshly added pins
+            if (!shownKind(wp)) map.removeLayer(m); // respect the media filter (unless inactive) for fresh pins
             PhotoLayer.applyStackBadges(visibleMarkers(), map); // stamp tally badge on any new stack
             return wp;
         }
@@ -810,5 +816,5 @@ window.TrackerMedia = function (T) {
         })();
 
 
-    return { loadUsage, addWaypoint, clearWaypoints, updateReburnButton, reburnTrack, setMediaVisible, applyMediaFilter, mediaDebug };
+    return { loadUsage, addWaypoint, clearWaypoints, updateReburnButton, reburnTrack, setMediaVisible, applyMediaFilter, setFilterActive, mediaDebug };
 };
