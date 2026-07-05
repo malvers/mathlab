@@ -3412,9 +3412,15 @@ ${pts}
                 if (!_openFolders.has(key)) sec.classList.add('collapsed');   // default closed
                 const head = document.createElement('div'); head.className = 'tl-folder-head';
                 const caret = document.createElement('span'); caret.className = 'tl-fold-caret'; caret.textContent = '▾';
-                // OUR pin icon (coloured circle + glyph), same as the POI panel rows — not an emoji.
-                const ic = document.createElement('span'); ic.className = 'tl-fold-ic poi-cat-ic poi-pin ' + iconSpec.c; ic.setAttribute('aria-hidden', 'true');
-                ic.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + iconSpec.ic + '</svg>';
+                // OUR icon: the app icon for the routes folder, else the coloured POI pin glyph.
+                const ic = document.createElement('span'); ic.setAttribute('aria-hidden', 'true');
+                if (iconSpec.app) {
+                    ic.className = 'tl-fold-ic tl-fold-app';
+                    ic.innerHTML = APPICON;   // our app icon = the track badge
+                } else {
+                    ic.className = 'tl-fold-ic poi-cat-ic poi-pin ' + iconSpec.c;
+                    ic.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + iconSpec.ic + '</svg>';
+                }
                 const nm = document.createElement('div'); nm.className = 'tl-fold-name'; nm.textContent = name;
                 const cnt = document.createElement('span'); cnt.className = 'tl-fold-count'; cnt.textContent = kids.length;
                 const shr = document.createElement('button'); shr.className = 'tl-fold-shr'; shr.title = 'Alle teilen';
@@ -3458,7 +3464,7 @@ ${pts}
             const tracks = loose.filter((r) => !isPhotoR(r) && !isVideoR(r) && !isVoiceR(r));   // real GPS routes
             // OUR pin icons (route · camera green · video purple · mic blue) — same set as the POI panel.
             const AUTO_IC = {
-                track: { c: 'poi-route', ic: '<circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/><circle cx="18" cy="5" r="3"/>' },
+                track: { app: true },   // our app icon (icon.svg), same badge as a real track row
                 photo: { c: 'poi-photo', ic: '<path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/>' },
                 video: { c: 'poi-video', ic: '<path d="m22 8-6 4 6 4V8Z"/><rect width="14" height="12" x="2" y="6" rx="2" ry="2"/>' },
                 voice: { c: 'poi-voice', ic: '<path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/>' },
