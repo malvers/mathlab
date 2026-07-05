@@ -3107,6 +3107,36 @@ body.ui-idle #nav-banner .nav-trip { font-size: clamp(0.95rem, 4vw, 1.2rem); pad
 #zoom-in:active,
 #zoom-out:active { transform: scale(0.94); }
 
+/* Durable-save pending indicator (js/tracker.js): shows while finished tracks await a confirmed cloud
+   upload. Persists (unlike a toast) so an offline-saved track is never silently forgotten. Tap = retry.
+   Υ-red = attention (never orange). Sits top-centre below the HUD; move if it ever crowds the clock. */
+#save-badge {
+    position: fixed;
+    top: calc(env(safe-area-inset-top, 0px) + 60px);
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 700;
+    display: none;
+    align-items: center;
+    gap: 6px;
+    max-width: calc(100vw - 24px);
+    padding: 7px 14px;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 999px;
+    background: rgba(176, 36, 24, 0.92);
+    color: #fff;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+    cursor: pointer;
+    backdrop-filter: blur(6px);
+    box-shadow: 0 3px 12px rgba(8, 20, 42, 0.5);
+    -webkit-tap-highlight-color: transparent;
+}
+#save-badge.shown { display: inline-flex; }
+
 /* Rain-source status dots in Settings → Debug (DWD / RainViewer): green = reachable, red ⊘ = down */
 .src-dot { font-weight: 700; font-size: 1.05rem; line-height: 1; }
 .src-dot.ok { color: rgb(121, 158, 49); }

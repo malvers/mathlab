@@ -1553,9 +1553,24 @@
             if (__speed) __speed.clear();  // …and the speed-limit sign
             if (track.length >= 1) {
                 const name = currentTrackName || autoTrackName();
+                currentTrackName = name;
                 toast('Speichere …');
-                try { currentTrackId = await saveTrack(name, 'done'); currentTrackName = name; if (typeof TrackBuffer !== 'undefined') await TrackBuffer.clear(); toast('Gespeichert: ' + name); }
-                catch (e) { toast('Speichern fehlgeschlagen (lokal gesichert): ' + (e.message || e)); }
+                try {
+                    currentTrackId = await saveTrack(name, 'done');   // proven online happy path (unchanged)
+                    if (typeof TrackBuffer !== 'undefined') await TrackBuffer.clear();
+                    refreshOutboxCount();
+                    toast('Gespeichert: ' + name);
+                } catch (e) {
+                    // Save failed (offline / breaker-open). Put the finished track in the DURABLE multi-slot
+                    // outbox — the next recording can no longer clobber it — then free the single live buffer.
+                    // The auto-retry uploader lifts it to the cloud as soon as the network returns.
+                    const entry = { id: currentTrackId || genLocalId(), snapshot: bufferSnapshot(), queuedAt: Date.now() };
+                    try { if (typeof TrackBuffer !== 'undefined' && TrackBuffer.outbox) await TrackBuffer.outbox.put(entry); } catch (_) { }
+                    if (typeof TrackBuffer !== 'undefined') await TrackBuffer.clear();
+                    refreshOutboxCount();
+                    scheduleFlush(4000);
+                    toast('Offline gesichert – lädt automatisch hoch, sobald Netz da ist.');
+                }
             } else {
                 setStatus('Beendet.');
             }
@@ -2144,6 +2159,93 @@ ${pts}
             currentTrackId = data ? data.id : null;
             return currentTrackId;
         }
+
+        // ---- Durable save queue (Doc 2026-07-05) --------------------------------------------------
+        //  A finished track that fails to save (offline / breaker-open) is written to a multi-slot
+        //  IndexedDB OUTBOX (track-buffer.js) and lifted to the cloud from there. Unlike the single
+        //  'active' crash slot it can NEVER be clobbered by the next recording, and it is auto-retried
+        //  whenever the network returns — so a recorded track can no longer be silently lost (the
+        //  21.06 case). Uploads are idempotent (a fixed local id → upsert the SAME row, no duplicates)
+        //  and go through the central breaker via ensureSb. The online happy path stays plain saveTrack.
+        let _flushingOutbox = false, _outboxTimer = null, _outboxCount = 0;
+        function genLocalId() {
+            try { if (window.crypto && crypto.randomUUID) return crypto.randomUUID(); } catch (e) { }
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (ch) {
+                const r = Math.floor(Math.random() * 16), v = (ch === 'x') ? r : ((r & 0x3) | 0x8);
+                return v.toString(16);
+            });
+        }
+        // Upload ONE queued entry from its self-contained snapshot (independent of the live globals),
+        // upserting by its stable id so a retry updates the SAME cloud row instead of duplicating it.
+        async function uploadQueuedEntry(entry) {
+            const c = await ensureSb();
+            const s = entry.snapshot || {};
+            const tk = s.track || [];
+            const pts = tk.map(function (p, i) {
+                return [p[0], p[1], (s.times && s.times[i]) || null,
+                    (s.alts && s.alts[i] != null) ? s.alts[i] : null,
+                    (s.speeds && s.speeds[i] != null) ? s.speeds[i] : null,
+                    (s.activities && s.activities[i]) || null,
+                    (s.temps && s.temps[i] != null) ? s.temps[i] : null];
+            });
+            const wps = (s.waypoints || []).map(function (w) { return wpSer(w, true); }); // drop base64 for the cloud copy
+            const row = { id: entry.id, name: s.name || autoTrackName(), distance_m: Math.round(s.totalDist || 0), points: pts, waypoints: wps, status: 'done' };
+            const missingCol = function (e) { return e && /status/i.test(e.message || ''); };
+            let { error } = await c.from('tracks').upsert(row);
+            if (missingCol(error)) { const { status: _s, ...bare } = row; ({ error } = await c.from('tracks').upsert(bare)); }
+            if (error) throw error;
+        }
+        // Drain the outbox: upload each queued track, remove it on success. Stop on the first failure
+        // (offline / breaker-open / 402) and retry on the next trigger. Guarded against re-entry.
+        async function flushOutbox() {
+            if (_flushingOutbox) return;
+            if (typeof navigator !== 'undefined' && navigator.onLine === false) { refreshOutboxCount(); return; }
+            if (typeof TrackBuffer === 'undefined' || !TrackBuffer.outbox) return;
+            _flushingOutbox = true;
+            try {
+                const entries = await TrackBuffer.outbox.all();
+                _outboxCount = entries.length; updateSaveBadge();
+                for (let k = 0; k < entries.length; k++) {
+                    try {
+                        await uploadQueuedEntry(entries[k]);
+                        await TrackBuffer.outbox.del(entries[k].id);
+                        _outboxCount = Math.max(0, _outboxCount - 1); updateSaveBadge();
+                        if (window.DebugWindow) DebugWindow.log('outbox: uploaded ' + (entries[k].snapshot && entries[k].snapshot.name || entries[k].id));
+                    } catch (e) { if (window.DebugWindow) DebugWindow.log('outbox: retry later (' + (e.message || e) + ')'); break; }
+                }
+            } catch (e) { if (window.DebugWindow) DebugWindow.log('outbox flush: ' + (e.message || e)); }
+            finally { _flushingOutbox = false; refreshOutboxCount(); }
+        }
+        function scheduleFlush(delay) {
+            if (_outboxTimer) return;
+            _outboxTimer = setTimeout(function () { _outboxTimer = null; flushOutbox(); }, delay || 1500);
+        }
+        async function refreshOutboxCount() {
+            try {
+                if (typeof TrackBuffer !== 'undefined' && TrackBuffer.outbox) _outboxCount = (await TrackBuffer.outbox.all()).length;
+            } catch (e) { }
+            updateSaveBadge();
+        }
+        // Unmissable pending indicator (persists until the queue drains — not just a vanishing toast).
+        // Tap → force a retry now. Created lazily; lives on <body>, styled via #save-badge in tracker.css.
+        function updateSaveBadge() {
+            let el = $('save-badge');
+            if (!el) {
+                el = document.createElement('button');
+                el.id = 'save-badge'; el.type = 'button';
+                el.setAttribute('aria-label', 'Nicht hochgeladene Tracks – jetzt erneut hochladen');
+                el.addEventListener('click', function () { toast('Lade hoch …'); flushOutbox(); });
+                document.body.appendChild(el);
+            }
+            if (_outboxCount > 0) { el.textContent = '⬆ ' + _outboxCount + ' nicht hochgeladen'; el.classList.add('shown'); }
+            else { el.classList.remove('shown'); }
+        }
+        // Startup + connectivity triggers (after the state `let`s above → no TDZ at load): show any
+        // pending count at once, drain shortly after start, and retry on reconnect / on a gentle interval.
+        refreshOutboxCount();
+        scheduleFlush(2500);
+        try { window.addEventListener('online', function () { flushOutbox(); }); } catch (e) { }
+        setInterval(function () { flushOutbox(); }, 60000);
 
         // ---- Umkreis-Suche (Doc 2026-06-17): show only tracks whose START is within N km of here. ----
         let _lastTrackRows = [];      // last rows handed to renderTrackList → re-render when the radius changes
