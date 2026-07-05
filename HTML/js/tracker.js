@@ -2352,6 +2352,7 @@ ${pts}
             else if (latlngs.length === 1) zoomTo(latlngs[0]);
             else if (wps && wps.length && wps[0].lat != null) zoomTo([wps[0].lat, wps[0].lng]);
             if (window.DebugWindow) { const c = map.getCenter(); DebugWindow.log('plotTrack nav → now ' + c.lat.toFixed(5) + ',' + c.lng.toFixed(5) + '@z' + map.getZoom()); }
+            if (window.DebugWindow && __media && __media.mediaDebug) DebugWindow.log('plotTrack media: ' + __media.mediaDebug());
             loadedBounds = null; // single load uses the live 'track' array for FIT, not a multi-overlay bound
             refreshRecenter(); // loaded track may have ≥10 pts → reveal the FIT button (moveend alone isn't reliable)
         }

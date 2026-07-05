@@ -244,6 +244,10 @@ window.TrackerMedia = function (T) {
             try { localStorage.setItem(MEDIA_KEYS[kind], on ? '1' : '0'); } catch (e) { /* quota / private mode */ }
             applyMediaFilter();
         }
+        function mediaDebug() {
+            const onMap = T.wpMarkers.filter(m => map.hasLayer(m)).length;
+            return 'show=' + JSON.stringify(mediaShow) + ' markers=' + T.wpMarkers.length + ' onMap=' + onMap;
+        }
 
         function addWaypoint(wp) {
             T.waypoints.push(wp);
@@ -806,5 +810,5 @@ window.TrackerMedia = function (T) {
         })();
 
 
-    return { loadUsage, addWaypoint, clearWaypoints, updateReburnButton, reburnTrack, setMediaVisible, applyMediaFilter };
+    return { loadUsage, addWaypoint, clearWaypoints, updateReburnButton, reburnTrack, setMediaVisible, applyMediaFilter, mediaDebug };
 };
