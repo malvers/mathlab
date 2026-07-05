@@ -21,6 +21,11 @@ window.TrackerHazards = function (ctx) {
     const nav = (typeof ctx.nav === 'function') ? ctx.nav : () => null;   // nav module handle (route relevance)
     const ROUTE_HAZARD_M = 7;       // while navigating, only pins THIS close to the route line count as "on my
     //                                 road" — a cross-street stop/give-way sits farther off and is dropped (Doc 2026-07-01)
+    // …but a side-street give_way/stop sits AT the junction (~0 m from the route) yet governs cross-traffic,
+    // not me (Doc 2026-07-05). So a right-of-way sign additionally has to sit on a way that RUNS ALONG the
+    // route: we sample its own way this far either side of the node and require both to stay near the route.
+    const ALONG_SAMPLE_M = 20;      // sample the sign's own way this far each side of the node
+    const ALONG_TOL_M = 14;         // …both samples must stay within this of the route to count as "my road"
 
     const QUERY_R_M = 900;          // fetch hazards within this radius of the position
     const MIN_INTERVAL_MS = 8000;   // …re-query no more often than this
@@ -188,6 +193,46 @@ window.TrackerHazards = function (ctx) {
         return (best && bd <= SNAP_MAX_M) ? best : null;
     }
 
+    // A point ~`meters` along `pts` from index `idx` in direction `dir` (+1/-1). Null if the way ends first.
+    function pointAlongWay(pts, idx, dir, meters) {
+        let acc = 0, i = idx;
+        for (;;) {
+            const j = i + dir;
+            if (j < 0 || j >= pts.length) return null;
+            const seg = haversine(pts[i], pts[j]);
+            if (seg > 0 && acc + seg >= meters) {
+                const t = (meters - acc) / seg;
+                return [pts[i][0] + (pts[j][0] - pts[i][0]) * t, pts[i][1] + (pts[j][1] - pts[i][1]) * t];
+            }
+            acc += seg; i = j;
+        }
+    }
+    // True when the sign's OWN way runs ALONG the route (both sampled sides stay near it), rather than
+    // merely touching it at a junction — a side-street give_way sits ~0 m from the route but its way
+    // veers off immediately, so one sample lands far away and it's dropped. Uses only distToRoute, so it
+    // stays self-contained. Unknown geometry → true (never over-drop a sign we can't resolve).
+    function wayAlongRoute(n, distToRoute) {
+        if (!n.wayIds || !n.wayIds.length) return true;
+        for (const wid of n.wayIds) {
+            const w = roadWays.find((x) => x.id === wid);
+            if (!w || w.pts.length < 2) continue;
+            let idx = -1;
+            for (let i = 0; i < w.pts.length; i++) {
+                if (Math.abs(w.pts[i][0] - n.lat) < COORD_EPS && Math.abs(w.pts[i][1] - n.lng) < COORD_EPS) { idx = i; break; }
+            }
+            if (idx < 0) continue;
+            const pB = pointAlongWay(w.pts, idx, -1, ALONG_SAMPLE_M);
+            const pA = pointAlongWay(w.pts, idx, +1, ALONG_SAMPLE_M);
+            const dB = pB ? distToRoute(pB) : null;
+            const dA = pA ? distToRoute(pA) : null;
+            const nearB = (pB == null) || (dB != null && dB <= ALONG_TOL_M); // missing end = neutral
+            const nearA = (pA == null) || (dA != null && dA <= ALONG_TOL_M);
+            const realNear = (pB != null && dB != null && dB <= ALONG_TOL_M) || (pA != null && dA != null && dA <= ALONG_TOL_M);
+            if (nearB && nearA && realNear) return true;   // this way follows the route → my sign
+        }
+        return false;   // no on-route way found → it's a cross street
+    }
+
     function drawPins() {
         const lyr = ensureLayer();
         lyr.clearLayers();
@@ -204,6 +249,12 @@ window.TrackerHazards = function (ctx) {
             if (navigating) {
                 const d = n2.distToRoute([n.lat, n.lng]);
                 show = (d != null && d <= ROUTE_HAZARD_M);
+                // Right-of-way signs (Vorfahrt gewähren/Stopp/Vorfahrtstraße) must also sit on a way that
+                // runs ALONG my route — else a side-street sign AT the junction (~0 m off route) shows
+                // though it governs cross-traffic, not me (Doc 2026-07-05).
+                if (show && (n.type === 'give_way' || n.type === 'stop' || n.type === 'priority')) {
+                    show = wayAlongRoute(n, (ll) => n2.distToRoute(ll));
+                }
             } else if (myWay) {
                 show = n.wayIds.indexOf(myWay.id) >= 0 || (!!myWay.name && n.wayNames.indexOf(myWay.name) >= 0);
             }
