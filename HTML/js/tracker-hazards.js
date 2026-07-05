@@ -58,13 +58,10 @@ window.TrackerHazards = function (ctx) {
         + '<line x1="15.5" y1="13" x2="24.5" y2="27" stroke="#fff"/>'
         + '<line x1="24.5" y1="13" x2="15.5" y2="27" stroke="#fff"/>'
         + '</g></svg>';
-    const SVG_STOP =
-        '<svg viewBox="0 0 40 40" width="28" height="28" aria-label="Stopp">'
-        + '<polygon points="13,2.5 27,2.5 37.5,13 37.5,27 27,37.5 13,37.5 2.5,27 2.5,13" fill="rgb(176,36,24)" stroke="#fff" stroke-width="2"/>'
-        + '<text x="20" y="20.5" text-anchor="middle" dominant-baseline="central" fill="#fff" font-family="Arial,Helvetica,sans-serif" font-weight="700" font-size="10">STOP</text></svg>';
-    const SVG_YIELD =
-        '<svg viewBox="0 0 40 40" width="28" height="28" aria-label="Vorfahrt achten">'
-        + '<polygon points="3,6.5 37,6.5 20,36" fill="#fff" stroke="rgb(176,36,24)" stroke-width="4.5" stroke-linejoin="round"/></svg>';
+    // Stopp (Zeichen 206) + Vorfahrt gewähren (Zeichen 205) — official signs from the shared
+    // js/traffic-signs.js (public-domain amtliche Werke, one source of truth, CLAUDE.md rule 7).
+    const SVG_STOP = window.SIGN_STOP ? window.SIGN_STOP(28) : '';
+    const SVG_YIELD = window.SIGN_VORFAHRT_ACHTEN ? window.SIGN_VORFAHRT_ACHTEN(28) : '';
     // Vorfahrtstraße (Zeichen 306, "Hauptstraße") — the OFFICIAL sign from the shared js/traffic-signs.js
     // (public-domain amtliches Werk, one source of truth, CLAUDE.md rule 7): white square-on-point, black
     // keyline, yellow inner diamond.
@@ -74,8 +71,9 @@ window.TrackerHazards = function (ctx) {
     // stripped + scaled to 28px (Doc 2026-07-01, "findest DAS svg?"). Authentic black figure (not the
     // house dark-blue) because it's the real sign; blue #154889.
     const SVG_ZEBRA = '<svg aria-label="Fußgängerüberweg (Zeichen 350)" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:svg="http://www.w3.org/2000/svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 601.00134 601.00159" height="28" width="28" xml:space="preserve" id="svg5392" version="1.1"><defs id="defs5396" /><g transform="matrix(1.3333333,0,0,-1.3333333,0,601.00159)" id="g5400"><g id="g5402"><path id="path5404" style="fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none" d="m 27.375,450.376 c -27.059,0.016 -27,-27.004 -27,-27.004 V 27.376 c 0,0 -0.059,-27.023 27,-27 h 396 c 27.234,-0.027 27,27 27,27 v 395.996 c 0,0 0.223,27.094 -27,27.004 z" /><path id="path5406" style="fill:#154889;fill-opacity:1;fill-rule:nonzero;stroke:none" d="m 27.375,441.376 c -9.937,0 -18,-8.058 -18,-18 v -396 c 0,-9.949 8.063,-18 18,-18 h 396 c 9.941,0 18,8.051 18,18 v 396 c 0,9.942 -8.059,18 -18,18 z" /><path id="path5408" style="fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none" d="M 27.375,450.751 C 13.719,450.759 6.805,443.892 3.391,437.048 -0.023,430.204 0,423.368 0,423.368 V 27.376 C 0,27.376 -0.02,20.54 3.391,13.7 6.805,6.857 13.719,-0.011 27.375,0.001 h 396 c 13.742,-0.015 20.66,6.856 24.051,13.699 3.387,6.84 3.324,13.672 3.324,13.676 v 395.996 c 0,0.004 0.059,6.852 -3.332,13.7 -3.391,6.851 -10.309,13.722 -24.043,13.679 z m 0,-0.375 h 396 c 27.223,0.09 27,-27.004 27,-27.004 V 27.376 c 0,0 0.234,-27.027 -27,-27 h -396 c -27.059,-0.023 -27,27 -27,27 v 395.996 c 0,0 -0.059,27.02 27,27.004 z" /><path id="path5410" style="fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none" d="M 37.48,71.661 H 413.27 L 225.383,397.095" /><path id="path5412" style="fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none" d="m 237.309,320.38 c 0,-9.641 -7.829,-17.469 -17.469,-17.469 -9.645,0 -17.461,7.828 -17.461,17.469 0,9.645 7.816,17.461 17.461,17.461 9.64,0 17.469,-7.816 17.469,-17.461 z m 8.734,-51.941 v -50.645 h -34.93 v 41.879 l -22.679,-34.926 c -4.602,-7.078 -14.063,-9.09 -21.137,-4.5 l 42.965,66.184 c 6.566,10.109 20.093,12.984 30.203,6.418 0.742,-0.488 1.453,-1.024 2.144,-1.59 l 29.305,-24.59 c 2.965,-2.488 4.68,-6.168 4.68,-10.031 v -21.387 c 0,-8.437 -6.848,-15.277 -15.278,-15.277 v 35.644 z M 228.57,204.63 187.344,128.689 c -4.602,-8.461 -15.199,-11.61 -23.672,-6.996 l 46.387,85.425 c 0.691,1.27 1.054,2.704 1.054,4.157 v 2.16 h 34.93 v -2.16 c 0,-1.453 0.348,-2.887 1.055,-4.157 l 34.675,-63.867 c 4.59,-8.472 1.454,-19.07 -7.019,-23.683 z m 105.407,-117 -28.204,63.879 h 28.375 L 372.313,87.63 Z m -63.879,0 -8.325,45.817 11.051,-20.375 4.215,2.285 c 10.801,5.871 14.809,19.375 8.938,30.164 l -3.247,5.988 h 4.122 L 308.434,87.63 Z m -63.879,0 4.976,63.879 h 28.371 l 4.989,-63.879 z m -63.891,0 21.57,63.879 h 10.508 l -17.23,-31.746 4.203,-2.285 c 8.152,-4.43 18.207,-3.34 25.215,2.75 l -5.93,-32.598 z m -63.875,0 38.16,63.879 h 28.375 L 116.773,87.63" /></g></g></svg>';
-    // Ampel = a dark housing with the three real signal lights (red / amber / green — the amber IS the
-    // light, not a UI accent). We know only WHERE it is, never its current state.
+    // Ampel PIN = the traffic-light DEVICE itself (a dark housing with the three real lights) — because this
+    // marks an actual traffic light AT this spot. NOT Zeichen 131 (the "Ampel voraus" WARNING sign) — that
+    // means something different (a sign ahead of a light), kept as window.SIGN_AMPEL_VORAUS for when we want it.
     const SVG_AMPEL =
         '<svg viewBox="0 0 40 40" width="28" height="28" aria-label="Ampel">'
         + '<rect x="13" y="3" width="14" height="34" rx="3.5" fill="rgb(14,36,78)" stroke="#fff" stroke-width="1.5"/>'
