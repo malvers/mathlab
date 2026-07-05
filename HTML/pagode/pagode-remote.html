@@ -80,6 +80,11 @@
         .btn-on:hover { filter: brightness(1.1); }
         .btn-off { background: #34507f; }
         .btn-pulse { background: var(--green); filter: brightness(.92); }
+        /* single hold button for both channels (no pulse): green=START holds K1, red=STOP holds K2 */
+        .btn-power { width: 100%; padding: 22px; font-size: 20px; font-weight: 800; letter-spacing: 2px;
+            background: var(--green); touch-action: none; user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent; }
+        .btn-power.is-stop { background: #9e362a; }
+        .btn-power:active { filter: brightness(1.15); }
 
         /* log */
         .log {
@@ -109,26 +114,10 @@
             <span id="btn-connect-txt">Verbinden</span>
         </button>
 
-        <!-- Channel 1 = START (Klemme 50, Anlasser) -->
+        <!-- ONE button for both channels: HOLD = relay ON (no pulse), release = OFF; role flips START <-> STOP -->
         <div class="card">
-            <h2>KANAL 1</h2>
-            <div class="role">START · Klemme 50 · Anlasser</div>
-            <div class="row">
-                <button class="btn-on" type="button" data-cmd="K1_ON">EIN</button>
-                <button class="btn-off" type="button" data-cmd="K1_OFF">AUS</button>
-                <button class="btn-pulse" type="button" data-pulse="1">PULS ▶</button>
-            </div>
-        </div>
-
-        <!-- Channel 2 = STOP (Zündung unterbrechen) -->
-        <div class="card">
-            <h2>KANAL 2</h2>
-            <div class="role">STOP · Zündung unterbrechen</div>
-            <div class="row">
-                <button class="btn-on" type="button" data-cmd="K2_ON">EIN</button>
-                <button class="btn-off" type="button" data-cmd="K2_OFF">AUS</button>
-                <button class="btn-pulse" type="button" data-pulse="2">PULS ▶</button>
-            </div>
+            <div class="role" id="power-role">START · Kanal 1 · Klemme 50 · Anlasser</div>
+            <button class="btn-power" id="btn-power" type="button" disabled>START — halten</button>
         </div>
 
         <div class="log" id="log" aria-label="Protokoll" role="log"></div>
@@ -173,37 +162,37 @@
         let connected = false, busy = false;
 
         const btnConnectTxt = document.getElementById('btn-connect-txt');
+        const btnPower = document.getElementById('btn-power');
+        const powerRole = document.getElementById('power-role');
         function markConnected(on) {
             connected = on;
             btnConnectTxt.textContent = on ? 'Trennen' : 'Verbinden';
-            document.querySelectorAll('[data-cmd],[data-pulse]').forEach(b => b.disabled = !on);
+            btnPower.disabled = !on;
         }
         markConnected(false);
 
-        async function send(name) {
-            if (busy) return;
-            busy = true; setStatus('busy', 'sende…');
-            try {
-                await backend.write(CFG.CMD[name]);
-                log('TX ' + name + '  [' + hex(CFG.CMD[name]) + ']', 'tx');
-            } catch (e) {
-                log('Fehler beim Senden: ' + (e.message || e), 'err');
-            } finally { busy = false; setStatus(connected ? 'on' : '', connected ? 'verbunden' : 'getrennt'); }
+        // ONE button, both channels: HOLD = relay ON (no pulse), release = OFF; role flips START(K1) <-> STOP(K2).
+        let running = false, holding = false;
+        function updatePower() {
+            btnPower.textContent = (running ? 'STOP' : 'START') + ' — halten';
+            btnPower.classList.toggle('is-stop', running);
+            powerRole.textContent = running ? 'STOP · Kanal 2 · Zündung unterbrechen' : 'START · Kanal 1 · Klemme 50 · Anlasser';
         }
-
-        async function pulse(channel) {
-            if (busy) return;
-            const on = channel === 1 ? 'K1_ON' : 'K2_ON';
-            const off = channel === 1 ? 'K1_OFF' : 'K2_OFF';
-            busy = true; setStatus('busy', 'Puls ' + PULSE_MS + ' ms…');
-            try {
-                await backend.write(CFG.CMD[on]); log('TX ' + on + '  [' + hex(CFG.CMD[on]) + ']', 'tx');
-                await sleep(PULSE_MS);
-                await backend.write(CFG.CMD[off]); log('TX ' + off + '  [' + hex(CFG.CMD[off]) + ']', 'tx');
-                log('Puls Kanal ' + channel + ' fertig (' + PULSE_MS + ' ms)', 'ok');
-            } catch (e) {
-                log('Fehler beim Puls: ' + (e.message || e), 'err');
-            } finally { busy = false; setStatus(connected ? 'on' : '', connected ? 'verbunden' : 'getrennt'); }
+        async function powerDown(e) {
+            e.preventDefault();
+            if (!connected || holding) return;
+            holding = true; setStatus('busy');
+            const on = running ? 'K2_ON' : 'K1_ON';
+            try { await backend.write(CFG.CMD[on]); log('TX ' + on + '  [' + hex(CFG.CMD[on]) + ']  (halten)', 'tx'); }
+            catch (err) { holding = false; setStatus('on'); log('Fehler: ' + (err.message || err), 'err'); }
+        }
+        async function powerUp() {
+            if (!holding) return;
+            holding = false; setStatus('on');
+            const off = running ? 'K2_OFF' : 'K1_OFF';
+            try { await backend.write(CFG.CMD[off]); log('TX ' + off + '  [' + hex(CFG.CMD[off]) + ']  (los)', 'tx'); }
+            catch (err) { log('Fehler: ' + (err.message || err), 'err'); return; }
+            running = !running; updatePower();
         }
 
         btnConnect.addEventListener('click', async () => {
@@ -222,8 +211,11 @@
             }
         });
 
-        document.querySelectorAll('[data-cmd]').forEach(b => b.addEventListener('click', () => send(b.dataset.cmd)));
-        document.querySelectorAll('[data-pulse]').forEach(b => b.addEventListener('click', () => pulse(Number(b.dataset.pulse))));
+        btnPower.addEventListener('pointerdown', powerDown);
+        btnPower.addEventListener('pointerup', powerUp);
+        btnPower.addEventListener('pointerleave', powerUp);
+        btnPower.addEventListener('pointercancel', powerUp);
+        updatePower();
 
         log('Bereit. Transport: ' + (PagodeBLE.isNative ? 'Capacitor BLE-Plugin (APK)' : (navigator.bluetooth ? 'Web Bluetooth (Browser)' : 'KEINER — kein BLE')) + '.');
     </script>

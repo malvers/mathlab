@@ -134,7 +134,7 @@
                 radial-gradient(circle at 50% 22%, var(--gold-hi), var(--gold) 42%, var(--gold-lo) 72%, #f3e2af 86%, var(--gold-deep));
             box-shadow: 0 10px 22px rgba(0, 0, 0, .45), inset 0 2px 3px rgba(255, 244, 210, .9);
             transition: transform .06s ease, box-shadow .12s;
-            -webkit-tap-highlight-color: transparent; touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent; touch-action: none; user-select: none; -webkit-user-select: none;
         }
         .knob .face {
             width: 100%; height: 100%; border-radius: 50%;
@@ -172,14 +172,10 @@
         <div class="rule"></div>
 
         <div class="knobs">
-            <button class="knob start" id="btn-start" type="button" aria-label="Motor starten"><span class="face">START</span></button>
-            <button class="knob stop" id="btn-stop" type="button" aria-label="Motor stoppen"><span class="face">STOP</span></button>
+            <button class="knob start" id="btn-power" type="button" aria-label="Motor starten und stoppen — gedrückt halten"><span class="face">START</span></button>
         </div>
 
-        <div class="statusline" id="statusline"></div>
-
         <div class="lamp-row" id="lamp-row" title="Tippen zum Verbinden">
-            <span class="lamp"></span>
             <span class="lamp-label" id="lamp-label">getrennt</span>
         </div>
 
@@ -193,62 +189,52 @@
 
         // ---- protocol + BLE transport live in the shared single source js/pagode-ble.js ----------------------
         const CFG = PagodeBLE.CFG;   // FFE0/FFE1 + A0 relay commands
-        const CRANK_MS = 900;        // START pulse — momentary, like the key
-        const STOP_MS = 1500;        // STOP pulse — break the ignition long enough to be sure
 
         const lampRow = document.getElementById('lamp-row');
         const lampLabel = document.getElementById('lamp-label');
-        const statusline = document.getElementById('statusline');
-        const btnStart = document.getElementById('btn-start');
-        const btnStop = document.getElementById('btn-stop');
-        const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+        const btn = document.getElementById('btn-power');
 
         function setLamp(state, label) { lampRow.className = 'lamp-row' + (state ? ' ' + state : ''); lampLabel.textContent = label; }
-        function say(t) { statusline.textContent = t; }
 
         // ---- BLE transport comes from the shared single source (js/pagode-ble.js) ----------------------------
-        let backend = null, connected = false, busy = false;
+        let backend = null, connected = false;
 
         async function ensureConnected() {
             if (connected) return true;
             backend = PagodeBLE.createBackend({ onDisconnect() { connected = false; setLamp('', 'getrennt'); } });
-            if (!backend) { say('Bluetooth geht hier nicht — bitte die APK nutzen (oder Chrome über HTTPS).'); return false; }
+            if (!backend) { setLamp('', 'kein BLE'); return false; }
             setLamp('busy', 'verbinde…');
-            try { const name = await backend.connect(); connected = true; setLamp('on', 'verbunden'); say('Verbunden mit ' + name + '.'); return true; }
-            catch (e) {
-                connected = false; setLamp('', 'getrennt');
-                // user just closed the device chooser → benign, no error noise
-                var cancelled = e && (e.name === 'NotFoundError' || /cancel/i.test(e.message || ''));
-                say(cancelled ? '' : 'Verbindung fehlgeschlagen: ' + ((e && (e.message || e.name)) || e));
-                return false;
-            }
+            try { await backend.connect(); connected = true; setLamp('on', 'verbunden'); return true; }
+            catch (e) { connected = false; setLamp('', 'getrennt'); return false; }
         }
 
-        // pulse a channel ON for ms then OFF (momentary) — the actual START / STOP action
-        async function pulse(channel, ms, onName, offName) {
-            const on = channel === 1 ? CFG.CMD.K1_ON : CFG.CMD.K2_ON;
-            const off = channel === 1 ? CFG.CMD.K1_OFF : CFG.CMD.K2_OFF;
-            await backend.write(on); await sleep(ms); await backend.write(off);
+        // ---- ONE button: HOLD = relay ON (no pulse), release = OFF. Role flips each cycle:
+        //   running=false → START (green, holds K1 = Anlasser). running=true → STOP (red, holds K2 = Zündung). ----
+        let running = false, holding = false;
+        function updateBtn() {
+            btn.className = 'knob ' + (running ? 'stop' : 'start');
+            btn.querySelector('.face').textContent = running ? 'STOP' : 'START';
         }
-
-        async function doAction(kind) {
-            if (busy) return;
-            busy = true; btnStart.disabled = true; btnStop.disabled = true;
-            try {
-                if (!(await ensureConnected())) return;
-                setLamp('busy', kind === 'start' ? 'starte…' : 'stoppe…');
-                if (kind === 'start') { say('Anlasser…'); await pulse(1, CRANK_MS); say('Pagode gestartet. 🚗'); }
-                else { say('Zündung aus…'); await pulse(2, STOP_MS); say('Pagode aus.'); }
-                setLamp('on', 'verbunden');
-            } catch (e) {
-                connected = false; setLamp('', 'getrennt');
-                say('Befehl fehlgeschlagen: ' + ((e && (e.message || e.name)) || e));
-            } finally { busy = false; btnStart.disabled = false; btnStop.disabled = false; }
+        async function press() {
+            if (!connected) { ensureConnected(); return; }   // first touch just connects; hold again to act
+            if (holding) return;
+            holding = true;
+            try { await backend.write(running ? CFG.CMD.K2_ON : CFG.CMD.K1_ON); }
+            catch (e) { holding = false; connected = false; setLamp('', 'getrennt'); }
         }
-
-        btnStart.addEventListener('click', () => doAction('start'));
-        btnStop.addEventListener('click', () => doAction('stop'));
-        lampRow.addEventListener('click', () => { if (!connected && !busy) ensureConnected(); });
+        async function release() {
+            if (!holding) return;
+            holding = false;
+            try { await backend.write(running ? CFG.CMD.K2_OFF : CFG.CMD.K1_OFF); }
+            catch (e) { connected = false; setLamp('', 'getrennt'); return; }
+            running = !running; updateBtn();
+        }
+        btn.addEventListener('pointerdown', (e) => { e.preventDefault(); press(); });
+        btn.addEventListener('pointerup', release);
+        btn.addEventListener('pointerleave', release);
+        btn.addEventListener('pointercancel', release);
+        lampRow.addEventListener('click', () => { if (!connected) ensureConnected(); });
+        updateBtn();
 
         // ---- switchable backdrop: press "b" to cycle; choice persists in localStorage ----
         const BGS = [
