@@ -2431,6 +2431,25 @@ ${pts}
             toast(ids.length + ' Tracks in „' + name + '" gruppiert.');
             try { const rows = await listTracks(); renderTrackList(rows); } catch (e) { /* refresh best-effort */ }
         });
+        // Move the checked tracks INTO an existing folder (or a new one via the picker).
+        if ($('tl-move')) $('tl-move').addEventListener('click', async () => {
+            const ids = Array.from(selectedTracks);
+            if (!ids.length) return;
+            const choice = await uiPickFolder(_folders);
+            if (!choice) return;
+            let fid, fname;
+            if (choice.new) {
+                fname = await uiPrompt('Ordnername:', { value: 'Neuer Ordner', okText: 'Anlegen' });
+                if (!fname) return;
+                try { fid = await createFolder(fname); } catch (e) { toast('Anlegen fehlgeschlagen: ' + (e.message || e)); return; }
+            } else {
+                fid = choice.id;
+                fname = (_folders.find((f) => f.id === fid) || {}).name || 'Ordner';
+            }
+            try { await assignFolder(ids, fid); } catch (e) { toast('Verschieben fehlgeschlagen: ' + (e.message || e)); return; }
+            toast(ids.length + ' → „' + fname + '"');
+            try { const rows = await listTracks(); renderTrackList(rows); } catch (e) { /* refresh best-effort */ }
+        });
         if ($('tl-loadsel')) $('tl-loadsel').addEventListener('click', async () => {
             const ids = Array.from(selectedTracks);
             if (!ids.length) return;
@@ -2507,6 +2526,41 @@ ${pts}
             // Refresh + reopen the "Tracks laden" list so the imported copy appears IMMEDIATELY
             // (pre-selected via loadedTrackIds) — before, it only showed after manually reopening.
             try { const rows = await listTracks(); renderTrackList(rows); showPanel('track-list'); } catch (e) { /* list refresh is best-effort */ }
+        }
+
+        // Styled folder picker (move selection into a folder). Lists existing folders + a "new folder"
+        // entry. Resolves { id } for an existing folder, { new: true } to create one, or null on cancel.
+        function uiPickFolder(folders) {
+            return new Promise((resolve) => {
+                const ov = document.createElement('div');
+                ov.className = 'ui-modal-ov';
+                const box = document.createElement('div'); box.className = 'ui-modal'; box.setAttribute('role', 'dialog'); box.setAttribute('aria-modal', 'true');
+                const msg = document.createElement('div'); msg.className = 'ui-modal-msg'; msg.textContent = 'Verschieben nach …';
+                const list = document.createElement('div'); list.className = 'ui-pick-list';
+                let done = false;
+                function close(v) { if (done) return; done = true; ov.classList.remove('shown'); document.removeEventListener('keydown', onKey); setTimeout(() => ov.remove(), 200); resolve(v); }
+                function onKey(e) { if (e.key === 'Escape') close(null); }
+                (folders || []).forEach((f) => {
+                    const b = document.createElement('button'); b.type = 'button'; b.className = 'ui-pick-item';
+                    b.textContent = f.name;
+                    b.onclick = () => close({ id: f.id });
+                    list.appendChild(b);
+                });
+                const nb = document.createElement('button'); nb.type = 'button'; nb.className = 'ui-pick-item ui-pick-new';
+                nb.textContent = '＋ Neuer Ordner …';
+                nb.onclick = () => close({ new: true });
+                list.appendChild(nb);
+                const btns = document.createElement('div'); btns.className = 'ui-modal-btns';
+                const cancel = document.createElement('button'); cancel.type = 'button'; cancel.className = 'ui-btn ui-btn-cancel'; cancel.textContent = 'Abbrechen';
+                cancel.onclick = () => close(null);
+                btns.appendChild(cancel);
+                box.appendChild(msg); box.appendChild(list); box.appendChild(btns);
+                ov.appendChild(box);
+                ov.onclick = (e) => { if (e.target === ov) close(null); };
+                document.addEventListener('keydown', onKey);
+                document.body.appendChild(ov);
+                requestAnimationFrame(() => ov.classList.add('shown'));
+            });
         }
 
         // ---- Transient toast (the persistent status line was removed) ----
