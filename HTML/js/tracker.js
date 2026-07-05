@@ -2329,6 +2329,7 @@ ${pts}
             for (let i = 1; i < latlngs.length; i++) totalDist += haversine(latlngs[i - 1], latlngs[i]);
             redrawTrack(); // speed-coloured
             clearWaypoints();
+            if (__media && __media.setFilterActive) __media.setFilterActive(false); // single load → always show its pins
             (wps || []).forEach(w => addWaypoint(w));
             setDist(totalDist);
             // Loaded track has no live speed → show its AVERAGE (distance/time, same as the stats panel)
@@ -2375,6 +2376,7 @@ ${pts}
             if (acquireWatch != null) { navigator.geolocation.clearWatch(acquireWatch); acquireWatch = null; }
             setFollowing(false);
             trackLayer.clearLayers(); clearWaypoints();
+            if (__media && __media.setFilterActive) __media.setFilterActive(true); // overlay → declutter via the media filter
             track = []; times = []; alts = []; speeds = []; activities = []; temps = []; totalDist = 0;
             resetDem();
             currentTrackId = null; currentTrackName = '';
