@@ -2013,6 +2013,7 @@ body.ui-idle #trk-controls {
 #tl-actions {
     display: none;
     flex-shrink: 0;   /* stays pinned at the bottom; the list scrolls, not these */
+    flex-wrap: wrap;  /* five actions → wrap to a second row on narrow phones instead of squishing */
     gap: 8px;
     margin: 8px 14px 2px;
 }
@@ -2020,7 +2021,7 @@ body.ui-idle #trk-controls {
 #tl-actions.show { display: flex; }
 
 #tl-loadsel {
-    flex: 1;
+    flex: 1 1 27%;
     padding: 10px;
     border: none;
     border-radius: 10px;
@@ -2032,8 +2033,8 @@ body.ui-idle #trk-controls {
     cursor: pointer;
 }
 
-#tl-deselect, #tl-sharesel, #tl-group {
-    flex: 1;
+#tl-deselect, #tl-sharesel, #tl-group, #tl-move {
+    flex: 1 1 27%;
     padding: 10px 13px;
     border: 1px solid rgba(255, 255, 255, 0.25);
     border-radius: 10px;
@@ -2043,6 +2044,7 @@ body.ui-idle #trk-controls {
     font-size: 0.64rem;
     letter-spacing: 0.06em;
     cursor: pointer;
+    white-space: nowrap;
 }
 
 .tl-badge svg {
@@ -3249,6 +3251,43 @@ body.ui-idle #nav-banner .nav-trip { font-size: clamp(0.95rem, 4vw, 1.2rem); pad
 .ui-modal-input:focus {
     outline: none;
     border-color: rgba(245, 194, 66, 0.9);
+}
+
+/* folder picker (move-to) — a scrollable list of tappable folder rows */
+.ui-pick-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-height: 46vh;
+    overflow-y: auto;
+    margin: 0 0 18px;
+}
+
+.ui-pick-item {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 12px 14px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 10px;
+    background: rgba(8, 20, 42, 0.6);
+    color: #fff;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.82rem;
+    letter-spacing: 0.03em;
+    text-align: left;
+    cursor: pointer;
+}
+
+.ui-pick-item:hover {
+    border-color: var(--green);
+    background: rgba(121, 158, 49, 0.14);
+}
+
+.ui-pick-new {
+    color: var(--orange);
+    border-style: dashed;
+    border-color: rgba(245, 194, 66, 0.5);
 }
 
 .ui-modal-btns {
