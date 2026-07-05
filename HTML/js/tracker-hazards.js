@@ -65,15 +65,10 @@ window.TrackerHazards = function (ctx) {
     const SVG_YIELD =
         '<svg viewBox="0 0 40 40" width="28" height="28" aria-label="Vorfahrt achten">'
         + '<polygon points="3,6.5 37,6.5 20,36" fill="#fff" stroke="rgb(176,36,24)" stroke-width="4.5" stroke-linejoin="round"/></svg>';
-    // Vorfahrtstraße (Zeichen 306, colloquially "Hauptstraße"): a square on its point — yellow field inside a
-    // white border. Amtliches Werk (§5 UrhG) → public domain. Thin dark-blue keyline (never black, Doc's rule)
-    // so the white border still reads on OSM's light map (the drop-shadow wrapper alone isn't enough).
-    const SVG_PRIORITY =
-        '<svg viewBox="0 0 40 40" width="28" height="28" aria-label="Vorfahrtstraße">'
-        + '<g transform="rotate(45 20 20)">'
-        + '<rect x="6.5" y="6.5" width="27" height="27" rx="4.5" fill="#fff" stroke="rgb(8,20,42)" stroke-width="1.2"/>'
-        + '<rect x="13.5" y="13.5" width="13" height="13" rx="3" fill="#FCD116"/>'
-        + '</g></svg>';
+    // Vorfahrtstraße (Zeichen 306, "Hauptstraße") — the OFFICIAL sign from the shared js/traffic-signs.js
+    // (public-domain amtliches Werk, one source of truth, CLAUDE.md rule 7): white square-on-point, black
+    // keyline, yellow inner diamond.
+    const SVG_PRIORITY = window.SIGN_VORFAHRTSTRASSE ? window.SIGN_VORFAHRTSTRASSE(28) : '';
     // Zebra = the OFFICIAL German Fußgängerüberweg sign (Zeichen 350-10, walking right). German traffic
     // signs are amtliche Werke (§5 UrhG) → public domain; this SVG is from Wikimedia Commons, metadata
     // stripped + scaled to 28px (Doc 2026-07-01, "findest DAS svg?"). Authentic black figure (not the
