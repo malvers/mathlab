@@ -2338,7 +2338,14 @@ ${pts}
             const lastAlt = alts.slice().reverse().find(a => a != null);
             fusedAlt = (lastAlt != null) ? lastAlt : null;
             renderAltitude();
-            if (latlngs.length) map.fitBounds(L.latLngBounds(latlngs), { padding: fitPad() });
+            // Navigate to the loaded track. A real route → fit its bounds. A ONE-POINT item (a lone
+            // photo / voice / video) → fitBounds on a zero-size bounds over-zooms to grey tiles and can
+            // fail to move, so pan+zoom to the single point instead. If the point only lives in the
+            // waypoint (no route point), use that so clicking the orphan still navigates.
+            const zoomTo = (ll) => map.setView(ll, Math.max(map.getZoom() || 0, 16));
+            if (latlngs.length > 1) map.fitBounds(L.latLngBounds(latlngs), { padding: fitPad() });
+            else if (latlngs.length === 1) zoomTo(latlngs[0]);
+            else if (wps && wps.length && wps[0].lat != null) zoomTo([wps[0].lat, wps[0].lng]);
             loadedBounds = null; // single load uses the live 'track' array for FIT, not a multi-overlay bound
             refreshRecenter(); // loaded track may have ≥10 pts → reveal the FIT button (moveend alone isn't reliable)
         }
