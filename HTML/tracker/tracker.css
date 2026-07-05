@@ -397,6 +397,18 @@ path.pos-marker.pos-shown {
 .sun-flank[hidden] { display: none; }
 .sf-ico { font-size: clamp(0.95rem, 4.2vw, 1.3rem); }
 .sf-time { font-size: clamp(0.72rem, 3vw, 0.95rem); font-weight: 600; letter-spacing: 0.5px; }
+/* Sunset marker: a SOLID (filled) crescent moon in currentColor, so it matches the monochrome
+   sun ☀ and never depends on a font/emoji rendering the ☾ outline. A full disc with a circular
+   bite masked out of the right side → crescent (bulge left, open right, like the old ☾).
+   Doc 2026-07-05 — wanted the moon filled, not the thin outline. */
+.sf-moon {
+    width: 1em;
+    height: 1em;
+    background: currentColor;
+    border-radius: 50%;
+    -webkit-mask: radial-gradient(circle at 135% 50%, transparent 55%, #000 56%);
+    mask: radial-gradient(circle at 135% 50%, transparent 55%, #000 56%);
+}
 
 #mode-icon {
     /* travel-mode figure, inline to the RIGHT of the KM/H value, mirrored, ~as tall as the
