@@ -2150,7 +2150,17 @@ ${pts}
         let trackStartCache = null;   // id → [lat,lng] first point (lazy; rebuilt whenever the list is refreshed)
         let listRadiusKm = 0;         // 0 = Alle; else 10/20/30
         let _folders = [];            // track_folders rows [{id,name}] → collapsible sections in the list
-        const _collapsedFolders = new Set(); // folder ids the user has collapsed (kept in memory only)
+        // Persisted set of EXPANDED folder ids/keys (manual folders by uuid, auto folders by string
+        // key). Default = NOT in the set = collapsed → every folder starts closed, and whatever the
+        // user opens survives a reload.
+        const OPEN_FOLDERS_KEY = 'trk-open-folders';
+        const _openFolders = (function () {
+            try { const a = JSON.parse(localStorage.getItem(OPEN_FOLDERS_KEY) || '[]'); return new Set(Array.isArray(a) ? a : []); }
+            catch (e) { return new Set(); }
+        })();
+        function saveOpenFolders() {
+            try { localStorage.setItem(OPEN_FOLDERS_KEY, JSON.stringify(Array.from(_openFolders))); } catch (e) { /* quota / private mode */ }
+        }
 
         // Fetch ONLY each track's first point (server-side points->0 → tiny payload, NOT the heavy points
         // column → no egress blow-up like the base64 incident). Builds the id→[lat,lng] start map.
@@ -3349,7 +3359,7 @@ ${pts}
             function buildFolderSection(folder, kids) {
                 const sec = document.createElement('div');
                 sec.className = 'tl-folder';
-                if (_collapsedFolders.has(folder.id)) sec.classList.add('collapsed');
+                if (!_openFolders.has(folder.id)) sec.classList.add('collapsed');   // default closed
                 const head = document.createElement('div'); head.className = 'tl-folder-head';
                 const caret = document.createElement('span'); caret.className = 'tl-fold-caret'; caret.textContent = '▾';
                 const ic = document.createElement('span'); ic.className = 'tl-fold-ic'; ic.textContent = '📁';
@@ -3367,7 +3377,8 @@ ${pts}
                 kids.forEach((r) => body.appendChild(buildTrackRow(r)));
                 head.addEventListener('click', () => {
                     const nowCollapsed = sec.classList.toggle('collapsed');
-                    if (nowCollapsed) _collapsedFolders.add(folder.id); else _collapsedFolders.delete(folder.id);
+                    if (nowCollapsed) _openFolders.delete(folder.id); else _openFolders.add(folder.id);
+                    saveOpenFolders();
                 });
                 shr.addEventListener('click', (ev) => {
                     ev.stopPropagation();
@@ -3398,7 +3409,7 @@ ${pts}
             function buildVirtualSection(key, iconSpec, name, kids) {
                 const sec = document.createElement('div');
                 sec.className = 'tl-folder tl-folder-auto';
-                if (_collapsedFolders.has(key)) sec.classList.add('collapsed');
+                if (!_openFolders.has(key)) sec.classList.add('collapsed');   // default closed
                 const head = document.createElement('div'); head.className = 'tl-folder-head';
                 const caret = document.createElement('span'); caret.className = 'tl-fold-caret'; caret.textContent = '▾';
                 // OUR pin icon (coloured circle + glyph), same as the POI panel rows — not an emoji.
@@ -3413,7 +3424,8 @@ ${pts}
                 kids.forEach((r) => body.appendChild(buildTrackRow(r)));
                 head.addEventListener('click', () => {
                     const nowCollapsed = sec.classList.toggle('collapsed');
-                    if (nowCollapsed) _collapsedFolders.add(key); else _collapsedFolders.delete(key);
+                    if (nowCollapsed) _openFolders.delete(key); else _openFolders.add(key);
+                    saveOpenFolders();
                 });
                 shr.addEventListener('click', (ev) => {
                     ev.stopPropagation();
@@ -3443,13 +3455,16 @@ ${pts}
             const photos = loose.filter(isPhotoR);
             const videos = loose.filter(isVideoR);
             const voices = loose.filter(isVoiceR);
-            loose.filter((r) => !isPhotoR(r) && !isVideoR(r) && !isVoiceR(r)).forEach((r) => box.appendChild(buildTrackRow(r)));
-            // OUR media pin icons (camera green · video purple · mic blue) — same set as the POI panel.
+            const tracks = loose.filter((r) => !isPhotoR(r) && !isVideoR(r) && !isVoiceR(r));   // real GPS routes
+            // OUR pin icons (route · camera green · video purple · mic blue) — same set as the POI panel.
             const AUTO_IC = {
+                track: { c: 'poi-route', ic: '<circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/><circle cx="18" cy="5" r="3"/>' },
                 photo: { c: 'poi-photo', ic: '<path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/>' },
                 video: { c: 'poi-video', ic: '<path d="m22 8-6 4 6 4V8Z"/><rect width="14" height="12" x="2" y="6" rx="2" ry="2"/>' },
                 voice: { c: 'poi-voice', ic: '<path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/>' },
             };
+            // Everything is now grouped: real routes into an auto "Tracks" folder, media below.
+            if (tracks.length) box.appendChild(buildVirtualSection('auto-tracks', AUTO_IC.track, 'Tracks', tracks));
             if (photos.length) box.appendChild(buildVirtualSection('auto-photo', AUTO_IC.photo, 'Fotos', photos));
             if (videos.length) box.appendChild(buildVirtualSection('auto-video', AUTO_IC.video, 'Videos', videos));
             if (voices.length) box.appendChild(buildVirtualSection('auto-voice', AUTO_IC.voice, 'Voice', voices));
