@@ -110,19 +110,31 @@
             background: linear-gradient(90deg, transparent, #d0b772, transparent);
         }
 
-        /* connection idiot-light (tap to connect) — not a third "button", just the classic dash lamp */
+        /* connection telltale — a 1960s brass dashboard indicator lamp: a glass lens in a brass bezel.
+           dark green glass = getrennt · lit green = verbunden · amber = verbinde… (matches the panel bezel) */
         .lamp-row {
-            display: flex; align-items: center; justify-content: center; gap: 9px;
-            margin: 12px 0 22px; cursor: pointer; user-select: none;
+            display: flex; align-items: center; justify-content: center; gap: 12px;
+            margin: 14px 0 22px; cursor: pointer; user-select: none;
         }
         .lamp {
-            width: 13px; height: 13px; border-radius: 50%;
-            background: radial-gradient(circle at 40% 35%, #8a8a82, #4f4f49);
-            box-shadow: inset 0 1px 2px rgba(0, 0, 0, .6);
-            transition: background .25s, box-shadow .25s;
+            width: 15px; height: 15px; border-radius: 50%; flex: none;
+            background: radial-gradient(circle at 42% 34%, #38492c, #1a2712 68%, #0f1a0a);
+            box-shadow:
+                0 0 0 2px var(--gold-deep),
+                0 0 0 4px var(--gold),
+                0 0 0 5px rgba(0, 0, 0, .55),
+                inset 0 2px 2px rgba(255, 255, 255, .22),
+                inset 0 -2px 3px rgba(0, 0, 0, .6);
+            transition: background .3s, filter .3s;
         }
-        .lamp-row.on .lamp { background: radial-gradient(circle at 40% 35%, #c7ef8f, var(--green)); box-shadow: 0 0 10px rgba(121, 158, 49, .9); }
-        .lamp-row.busy .lamp { background: radial-gradient(circle at 40% 35%, #ffe39a, var(--amber)); box-shadow: 0 0 10px rgba(245, 194, 66, .9); }
+        .lamp-row.on .lamp {
+            background: radial-gradient(circle at 42% 32%, #e2fbb0, #7fbf34 52%, #4a8215 86%);
+            filter: drop-shadow(0 0 7px rgba(121, 158, 49, .95));
+        }
+        .lamp-row.busy .lamp {
+            background: radial-gradient(circle at 42% 32%, #ffe9a6, #e8ae2e 55%, #9c6f12 88%);
+            filter: drop-shadow(0 0 7px rgba(245, 194, 66, .9));
+        }
         .lamp-label { font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 3px; color: #c7b692; text-transform: uppercase; text-shadow: 0 1px 2px rgba(0, 0, 0, .7); }
 
         /* the two knobs — sitting directly on the snakeskin fascia */
@@ -176,6 +188,7 @@
         </div>
 
         <div class="lamp-row" id="lamp-row" title="Tippen zum Verbinden">
+            <span class="lamp"></span>
             <span class="lamp-label" id="lamp-label">getrennt</span>
         </div>
 
