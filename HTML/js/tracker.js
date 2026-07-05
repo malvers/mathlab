@@ -3376,7 +3376,30 @@ ${pts}
                 return row;
             }
 
-            // Builds a collapsible folder section: header (caret · 📁 · name · count · rename · dissolve)
+            // Long-press (hold ~500 ms, touch or mouse) on a folder header → select/deselect ALL its
+            // tracks at once. Suppresses the click that would otherwise toggle the collapse.
+            function attachLongPress(el, onLong) {
+                let timer = null, longFired = false, sx = 0, sy = 0;
+                const cancel = () => { if (timer) { clearTimeout(timer); timer = null; } };
+                el.addEventListener('pointerdown', (e) => { sx = e.clientX; sy = e.clientY; longFired = false; cancel(); timer = setTimeout(() => { longFired = true; onLong(); }, 500); });
+                el.addEventListener('pointermove', (e) => { if (timer && (Math.abs(e.clientX - sx) > 10 || Math.abs(e.clientY - sy) > 10)) cancel(); });
+                el.addEventListener('pointerup', cancel);
+                el.addEventListener('pointerleave', cancel);
+                el.addEventListener('pointercancel', cancel);
+                el.addEventListener('click', (e) => { if (longFired) { e.stopImmediatePropagation(); e.preventDefault(); longFired = false; } }, true); // eat the collapse-click after a long-press
+            }
+            // Toggle-select every track in a folder (checks/unchecks all its row checkboxes).
+            function selectToggleFolder(kids, body) {
+                const ids = kids.map((r) => r.id);
+                if (!ids.length) return;
+                const allSel = ids.every((id) => selectedTracks.has(id));
+                ids.forEach((id) => { if (allSel) selectedTracks.delete(id); else selectedTracks.add(id); });
+                body.querySelectorAll('.tl-check').forEach((c) => { c.checked = !allSel; });
+                updateLoadSel();
+                toast(allSel ? 'Auswahl aufgehoben' : (ids.length + ' ausgewählt'));
+            }
+
+            // Builds a collapsible folder section: header (caret · folder · name · count · rename · dissolve)
             // plus a body holding its track rows.
             function buildFolderSection(folder, kids) {
                 const sec = document.createElement('div');
@@ -3384,7 +3407,9 @@ ${pts}
                 if (!_openFolders.has(folder.id)) sec.classList.add('collapsed');   // default closed
                 const head = document.createElement('div'); head.className = 'tl-folder-head';
                 const caret = document.createElement('span'); caret.className = 'tl-fold-caret'; caret.textContent = '▾';
-                const ic = document.createElement('span'); ic.className = 'tl-fold-ic'; ic.textContent = '📁';
+                // OUR folder pin (gold circle + folder glyph), matching the auto-folder icons — not an emoji.
+                const ic = document.createElement('span'); ic.className = 'tl-fold-ic poi-cat-ic poi-pin poi-folder'; ic.setAttribute('aria-hidden', 'true');
+                ic.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg>';
                 const nm = document.createElement('div'); nm.className = 'tl-fold-name'; nm.textContent = folder.name;
                 const cnt = document.createElement('span'); cnt.className = 'tl-fold-count'; cnt.textContent = kids.length;
                 const shr = document.createElement('button'); shr.className = 'tl-fold-shr'; shr.title = 'Ordner teilen';
@@ -3397,6 +3422,7 @@ ${pts}
                 head.appendChild(shr); head.appendChild(ren); head.appendChild(del);
                 const body = document.createElement('div'); body.className = 'tl-folder-body';
                 kids.forEach((r) => body.appendChild(buildTrackRow(r)));
+                attachLongPress(head, () => selectToggleFolder(kids, body)); // hold → (de)select all in folder
                 head.addEventListener('click', () => {
                     const nowCollapsed = sec.classList.toggle('collapsed');
                     if (nowCollapsed) _openFolders.delete(folder.id); else _openFolders.add(folder.id);
@@ -3450,6 +3476,7 @@ ${pts}
                 head.appendChild(caret); head.appendChild(ic); head.appendChild(nm); head.appendChild(cnt); head.appendChild(shr);
                 const body = document.createElement('div'); body.className = 'tl-folder-body';
                 kids.forEach((r) => body.appendChild(buildTrackRow(r)));
+                attachLongPress(head, () => selectToggleFolder(kids, body)); // hold → (de)select all in folder
                 head.addEventListener('click', () => {
                     const nowCollapsed = sec.classList.toggle('collapsed');
                     if (nowCollapsed) _openFolders.delete(key); else _openFolders.add(key);
