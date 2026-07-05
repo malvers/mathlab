@@ -111,29 +111,27 @@
         }
 
         /* connection telltale — a 1960s brass dashboard indicator lamp: a glass lens in a brass bezel.
-           dark green glass = getrennt · lit green = verbunden · amber = verbinde… (matches the panel bezel) */
+           pale red = getrennt · lit green = verbunden · amber = verbinde… (no text — the lamp says it) */
         .lamp-row {
-            display: flex; align-items: center; justify-content: center; gap: 12px;
-            margin: 14px 0 22px; cursor: pointer; user-select: none;
+            display: flex; align-items: center; justify-content: center;
+            margin: 10px 0 20px; padding: 8px; cursor: pointer; user-select: none;
         }
         .lamp {
             width: 15px; height: 15px; border-radius: 50%; flex: none;
-            background: radial-gradient(circle at 42% 34%, #38492c, #1a2712 68%, #0f1a0a);
+            background: radial-gradient(circle at 42% 34%, #eaa89f, #bf6459 56%, #7f3a33 88%);
             box-shadow:
                 0 0 0 2px var(--gold-deep),
                 0 0 0 4px var(--gold),
                 0 0 0 5px rgba(0, 0, 0, .55),
                 inset 0 2px 2px rgba(255, 255, 255, .22),
                 inset 0 -2px 3px rgba(0, 0, 0, .6);
-            transition: background .3s, filter .3s;
+            transition: background .3s;
         }
         .lamp-row.on .lamp {
-            background: radial-gradient(circle at 42% 32%, #e2fbb0, #7fbf34 52%, #4a8215 86%);
-            filter: drop-shadow(0 0 7px rgba(121, 158, 49, .95));
+            background: radial-gradient(circle at 42% 32%, #cfe89a, #6fa834 54%, #3f6f1a 88%);
         }
         .lamp-row.busy .lamp {
-            background: radial-gradient(circle at 42% 32%, #ffe9a6, #e8ae2e 55%, #9c6f12 88%);
-            filter: drop-shadow(0 0 7px rgba(245, 194, 66, .9));
+            background: radial-gradient(circle at 42% 32%, #f4dc9a, #d29f2c 56%, #8a6010 88%);
         }
         .lamp-label { font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 3px; color: #c7b692; text-transform: uppercase; text-shadow: 0 1px 2px rgba(0, 0, 0, .7); }
 
@@ -189,7 +187,6 @@
 
         <div class="lamp-row" id="lamp-row" title="Tippen zum Verbinden">
             <span class="lamp"></span>
-            <span class="lamp-label" id="lamp-label">getrennt</span>
         </div>
 
         <div class="foot">Solita · Pagode Remote</div>
@@ -204,10 +201,9 @@
         const CFG = PagodeBLE.CFG;   // FFE0/FFE1 + A0 relay commands
 
         const lampRow = document.getElementById('lamp-row');
-        const lampLabel = document.getElementById('lamp-label');
         const btn = document.getElementById('btn-power');
 
-        function setLamp(state, label) { lampRow.className = 'lamp-row' + (state ? ' ' + state : ''); lampLabel.textContent = label; }
+        function setLamp(state) { lampRow.className = 'lamp-row' + (state ? ' ' + state : ''); }
 
         // ---- BLE transport comes from the shared single source (js/pagode-ble.js) ----------------------------
         let backend = null, connected = false;
