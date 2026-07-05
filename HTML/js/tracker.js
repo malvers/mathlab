@@ -3320,7 +3320,10 @@ ${pts}
                 else if (isPoint) badge = mkBadge('cam', CAMERA_ICON, 0);
                 else badge = mkBadge('track', APPICON, r.photo_count);
                 row.appendChild(badge);                     // row's first child → left of `main`
-                main.addEventListener('click', async () => {
+                // Load on a tap ANYWHERE on the row (badge/icon included — a media item invites tapping
+                // its thumbnail), except on the checkbox or the action buttons (those handle themselves).
+                row.addEventListener('click', async (ev) => {
+                    if (ev.target.closest('.tl-check, .tl-acts, button')) return;
                     toast('Lade Track …');
                     try { const t = await fetchTrack(r.id); plotTrack(t.points, t.waypoints); currentTrackId = r.id; currentTrackName = r.name; loadedTrackIds.clear(); loadedTrackIds.add(r.id); persistLoaded([{ id: r.id, name: r.name }]); hidePanels(); toast(r.name + ' geladen.'); }
                     catch (e) { toast('Track laden fehlgeschlagen.'); }
