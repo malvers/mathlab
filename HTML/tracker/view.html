@@ -51,10 +51,20 @@
         /* track-name popup shown when tapping an overlaid track line (click-to-identify) */
         .track-id-pop {
             font-family: 'Orbitron', sans-serif;
+            color: rgb(14, 36, 78);
+        }
+        .track-id-name {
             font-size: 0.74rem;
             font-weight: 600;
             letter-spacing: 0.02em;
-            color: rgb(14, 36, 78);
+        }
+        .track-id-meta {
+            margin-top: 3px;
+            font-family: system-ui, sans-serif;
+            font-size: 0.66rem;
+            font-weight: 500;
+            color: rgba(14, 36, 78, 0.7);
+            white-space: nowrap;
         }
 
         /* ---- Top header: track name + stats ---- */
@@ -161,7 +171,7 @@
            at a glance which build of the view actually loaded (GH-Pages caches ~10 min). */
         #build-stamp {
             position: fixed;
-            bottom: max(6px, env(safe-area-inset-bottom));
+            bottom: calc(max(6px, env(safe-area-inset-bottom)) + 66px); /* clear the bottom-left zoom button */
             left: max(8px, env(safe-area-inset-left));
             z-index: 500;
             font-size: 0.6rem;
@@ -204,6 +214,88 @@
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
         }
 
+        /* ---- Media toggles (top-left): show/hide photo · voice · video pins ---- */
+        #media-toggles {
+            position: fixed;
+            top: max(10px, env(safe-area-inset-top));
+            left: max(10px, env(safe-area-inset-left));
+            z-index: 600;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .media-tgl {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            padding: 0;
+            border: none;
+            border-radius: 10px;
+            background: rgba(8, 20, 42, 0.8);
+            color: var(--orange);
+            cursor: pointer;
+            backdrop-filter: blur(4px);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+            transition: color 0.15s ease;
+        }
+        .media-tgl svg { width: 22px; height: 22px; }
+        /* OFF (hidden) state: dim the icon + a diagonal strike, so "hidden" reads at a glance */
+        .media-tgl.off { color: rgba(255, 255, 255, 0.4); }
+        .media-tgl.off::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 26px;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 2px;
+            transform: translate(-50%, -50%) rotate(-45deg);
+            pointer-events: none;
+        }
+
+        /* ---- Zoom: app-style round buttons, bottom corners (+ left, − right) ---- */
+        #zoom-in,
+        #zoom-out {
+            position: fixed;
+            bottom: calc(env(safe-area-inset-bottom, 0px) + 18px);
+            z-index: 600;
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            background: rgba(8, 20, 42, 0.82);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(8px);
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+            color: rgba(255, 255, 255, 0.92);
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+            transition: transform 0.1s ease, color 0.2s ease, border-color 0.2s ease;
+        }
+        #zoom-in { left: 12px; }    /* + → bottom-left */
+        #zoom-out { right: 12px; }  /* − → bottom-right */
+        #zoom-in::before,
+        #zoom-out::before,
+        #zoom-in::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            background: currentColor;
+            border-radius: 2px;
+            transform: translate(-50%, -50%);
+        }
+        #zoom-in::before,
+        #zoom-out::before { width: 22px; height: 3px; }
+        #zoom-in::after { width: 3px; height: 22px; }
+        #zoom-in:hover,
+        #zoom-out:hover { color: var(--orange); border-color: rgba(255, 255, 255, 0.6); }
+        #zoom-in:active,
+        #zoom-out:active { transform: scale(0.94); }
+
         /* ---- Loading / error overlay ---- */
         #msg {
             position: fixed;
@@ -242,6 +334,12 @@
     <div id="foot"><a href="index.html">Aufgezeichnet mit Doc Alvers Tracker →</a></div>
     <div id="build-stamp"></div>
     <button id="fs-btn" type="button" aria-label="Vollbild" title="Vollbild"></button>
+    <!-- Media toggles (top-left): show/hide photo · voice · video pins. JS reveals only the types the
+         loaded track actually contains. Mirrors the recorder's media filter. -->
+    <div id="media-toggles" role="group" aria-label="Medien ein-/ausblenden"></div>
+    <!-- Zoom: app-style round buttons in the bottom corners (+ left, − right); Leaflet's own control off. -->
+    <button id="zoom-in" type="button" aria-label="Reinzoomen" title="Reinzoomen"></button>
+    <button id="zoom-out" type="button" aria-label="Rauszoomen" title="Rauszoomen"></button>
 
     <div id="msg">Lade geteilten Track …</div>
 
@@ -306,12 +404,16 @@
         const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY,
             window.SupaGate ? { global: { fetch: window.SupaGate.gatedFetch } } : undefined); // routed through the central breaker (supa-gate.js)
 
-        const map = L.map('map', { zoomControl: true, attributionControl: true })
+        const map = L.map('map', { zoomControl: false, attributionControl: true })
             .setView([51.1657, 10.4515], 6);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxNativeZoom: 19, maxZoom: 21, attribution: '&copy; OpenStreetMap contributors',
         }).addTo(map);
         map.attributionControl.setPrefix(false);
+
+        // Zoom: app-style round buttons (Leaflet's own +/- control is off above). Pinch/scroll still zoom.
+        $('zoom-in').addEventListener('click', () => map.zoomIn());
+        $('zoom-out').addEventListener('click', () => map.zoomOut());
 
         // ---- track data (filled from the shared row) ----
         let track = [], times = [], speeds = [], activities = [], waypoints = [], wpMarkers = [];
@@ -332,13 +434,66 @@
 
         function addWaypoint(wp) {
             waypoints.push(wp);
-            const m = L.marker([wp.lat, wp.lng], { icon: PhotoLayer.pinIcon(wp) }).addTo(map);
+            const m = L.marker([wp.lat, wp.lng], { icon: PhotoLayer.pinIcon(wp) });
             m._wp = wp;
             m.on('click', () => PhotoLayer.openLightbox(wp, waypoints)); // tap → full-screen, counter + arrows
             wpMarkers.push(m);
-            PhotoLayer.applyStackBadges(wpMarkers, map); // tally badge on any overlapping stack
+            applyWpVisibility(m);                                 // respect the media toggle (hidden types stay off)
+            PhotoLayer.applyStackBadges(visibleWpMarkers(), map); // tally badge on any overlapping VISIBLE stack
         }
         PhotoLayer.mountLightbox(); // inject the shared lightbox + wire its controls (counter / arrows / esc)
+
+        // ---- media toggle: show/hide photo · voice · video pins (declutter a shared track). Mirrors the
+        //      recorder's media filter (js/tracker.js) — same per-type semantics + localStorage keys. Each
+        //      toggle button appears ONLY when that media type is actually present in the loaded track. ----
+        const MEDIA_KINDS = ['photo', 'voice', 'video'];
+        const MEDIA_GLYPH = {
+            photo: '<path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/>',
+            video: '<path d="m22 8-6 4 6 4V8Z"/><rect width="14" height="12" x="2" y="6" rx="2" ry="2"/>',
+            voice: '<path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/>',
+        };
+        const MEDIA_TITLE = { photo: 'Fotos', voice: 'Sprachnotizen', video: 'Videos' };
+        const mediaVis = { photo: true, voice: true, video: true };
+        MEDIA_KINDS.forEach(k => { if (localStorage.getItem('trk-media-' + k) === '0') mediaVis[k] = false; });
+        function wpKind(wp) { return (wp && wp.type === 'voice') ? 'voice' : ((wp && wp.type === 'video') ? 'video' : 'photo'); }
+        function visibleWpMarkers() { return wpMarkers.filter(m => map.hasLayer(m)); }
+        function applyWpVisibility(m) {
+            if (!m || !m._wp) return;
+            const on = mediaVis[wpKind(m._wp)];
+            if (on && !map.hasLayer(m)) m.addTo(map);
+            else if (!on && map.hasLayer(m)) map.removeLayer(m);
+        }
+        function applyMediaFilter() { wpMarkers.forEach(applyWpVisibility); PhotoLayer.applyStackBadges(visibleWpMarkers(), map); }
+        // (Re)build the toggle buttons for the types that exist, reflecting each on/off state.
+        function syncMediaButtons() {
+            const box = $('media-toggles'); if (!box) return;
+            const present = {};
+            waypoints.forEach(w => { present[wpKind(w)] = true; });
+            MEDIA_KINDS.forEach(kind => {
+                let btn = box.querySelector('[data-kind="' + kind + '"]');
+                if (present[kind] && !btn) {
+                    btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.className = 'media-tgl' + (mediaVis[kind] ? '' : ' off');
+                    btn.dataset.kind = kind;
+                    btn.setAttribute('aria-label', MEDIA_TITLE[kind] + ' ein-/ausblenden');
+                    btn.title = MEDIA_TITLE[kind];
+                    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + MEDIA_GLYPH[kind] + '</svg>';
+                    btn.addEventListener('click', () => {
+                        mediaVis[kind] = !mediaVis[kind];
+                        localStorage.setItem('trk-media-' + kind, mediaVis[kind] ? '1' : '0');
+                        btn.classList.toggle('off', !mediaVis[kind]);
+                        applyMediaFilter();
+                    });
+                    box.appendChild(btn);
+                }
+                if (btn) {
+                    btn.style.display = present[kind] ? '' : 'none';
+                    btn.classList.toggle('off', !mediaVis[kind]);
+                }
+            });
+        }
+        function refreshMedia() { applyMediaFilter(); syncMediaButtons(); }
 
         function fmtClock(ms) {
             const s = Math.max(0, Math.round(ms / 1000));
@@ -390,7 +545,7 @@
         let liveMarker = null, followLive = true, liveFitDone = false;
         map.on('dragstart', () => { followLive = false; });
         // overlap is pixel-based → recompute the tally badges on every zoom change
-        map.on('zoomend', () => PhotoLayer.applyStackBadges(wpMarkers, map));
+        map.on('zoomend', () => PhotoLayer.applyStackBadges(visibleWpMarkers(), map));
         function ensureLiveMarker(lat, lng) {
             if (!liveMarker) liveMarker = L.circleMarker([lat, lng], { radius: 7, color: '#fff', weight: 2, fillColor: 'rgb(176,36,24)', fillOpacity: 1 }).addTo(map);
             else liveMarker.setLatLng([lat, lng]);
@@ -444,15 +599,17 @@
             if (i >= 0) {
                 waypoints[i] = wp;
                 if (wpMarkers[i]) map.removeLayer(wpMarkers[i]);
-                const m = L.marker([wp.lat, wp.lng], { icon: PhotoLayer.pinIcon(wp) }).addTo(map);
+                const m = L.marker([wp.lat, wp.lng], { icon: PhotoLayer.pinIcon(wp) });
                 m._wp = wp;
                 m.on('click', () => PhotoLayer.openLightbox(wp, waypoints));
                 wpMarkers[i] = m;
-                PhotoLayer.applyStackBadges(wpMarkers, map); // refresh tally badges after the swap
+                applyWpVisibility(m);                                 // respect the media toggle
+                PhotoLayer.applyStackBadges(visibleWpMarkers(), map); // refresh tally badges after the swap
             } else {
                 addWaypoint(wp);
             }
             updateLiveStats();
+            syncMediaButtons(); // a new media type may have just appeared → reveal its toggle
         }
         function onLivePhoto(p) {
             if (!p || p.lat == null || !p.img) return;
@@ -575,6 +732,7 @@
             // after capture (the recorder pushes the photo twice: on snap, then once identified).
             wpMarkers.forEach(m => map.removeLayer(m)); wpMarkers = []; waypoints = [];
             wps.forEach(w => addWaypoint(w));
+            refreshMedia(); // keep hidden media types hidden across polls + reveal any newly-present type
 
             $('trk-name').textContent = row.name || 'Track';
             const t0 = times.find(Boolean), t1 = [...times].reverse().find(Boolean);
@@ -648,8 +806,21 @@
                     // polyline on top that catches the tap and names the track — lets a viewer tell the
                     // overlaid lines of a shared folder apart (mirrors the recorder's plotMultiple).
                     const label = ((row.name || '').replace(/^Track\s+/, '') || 'Track');
+                    // length · duration · Ø speed · photos, so the popup identifies AND summarises the line
+                    let d = 0; for (let i = 1; i < pts.length; i++) d += TrackRender.haversine([pts[i - 1][0], pts[i - 1][1]], [pts[i][0], pts[i][1]]);
+                    const ts = pts.map(p => p[2]).filter(Boolean);
+                    let durMs = 0; if (ts.length > 1) { const a = Date.parse(ts[0]), b = Date.parse(ts[ts.length - 1]); if (!isNaN(a) && !isNaN(b)) durMs = Math.max(0, b - a); }
+                    const distKm = (row.distance_m != null ? row.distance_m / 1000 : d / 1000);
+                    const parts = [];
+                    if (distKm >= 0.01) parts.push(distKm.toFixed(2) + ' km');
+                    if (durMs > 0) parts.push(fmtClock(durMs));
+                    if (durMs > 0 && distKm > 0) parts.push((distKm / (durMs / 3600000)).toFixed(1) + ' km/h');
+                    const np = (row.waypoints || []).length; if (np) parts.push('📷 ' + np);
                     const hit = L.polyline(pts.map(p => [p[0], p[1]]), { color: '#000', opacity: 0, weight: 16, interactive: true });
-                    const pop = document.createElement('div'); pop.className = 'track-id-pop'; pop.textContent = label;
+                    const pop = document.createElement('div'); pop.className = 'track-id-pop';
+                    const nmEl = document.createElement('div'); nmEl.className = 'track-id-name'; nmEl.textContent = label;
+                    pop.appendChild(nmEl);
+                    if (parts.length) { const mEl = document.createElement('div'); mEl.className = 'track-id-meta'; mEl.textContent = parts.join(' · '); pop.appendChild(mEl); }
                     hit.bindPopup(pop);
                     hit.addTo(trackLayer);
                     pts.forEach(p => all.push([p[0], p[1]]));
@@ -660,6 +831,7 @@
             }
             if (!names.length) { showMsg(anyNet ? connErrHtml('Server nicht erreichbar', false) : 'Keine Tracks gefunden — Link ungültig oder widerrufen.'); return; }
             $('trk-name').textContent = names.length + ' Tracks';
+            refreshMedia(); // reveal media toggles for the types present across the bundled tracks
             setStats({ distM: totalDist, durMs: 0, fotos: waypoints.length, speedKmh: 0 });
             if (all.length) map.fitBounds(L.latLngBounds(all), { padding: [50, 50] });
             $('msg').classList.add('hidden');
