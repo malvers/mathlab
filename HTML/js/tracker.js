@@ -2704,6 +2704,53 @@ ${pts}
             importShared(tok);
         });
 
+        // ---- Import a GPX file (e.g. a Komoot planned route) → plot it + save it as a track ----
+        // Parses <trkpt> (recorded) or <rtept> (planned route) into our point format
+        // [lat,lng,time,alt,speed,activity,temp]. Highlights/POIs (<wpt>) are skipped in v1 — just the
+        // route line, which is what you follow. It then saves like any track (appears in the list,
+        // survives a reload); group it into e.g. a "Komoot" folder afterwards.
+        function parseGpx(text) {
+            const xml = new DOMParser().parseFromString(text, 'application/xml');
+            if (xml.getElementsByTagName('parsererror').length) throw new Error('kein gültiges GPX');
+            const nameEl = xml.querySelector('trk > name') || xml.querySelector('rte > name') || xml.querySelector('metadata > name') || xml.querySelector('name');
+            let els = Array.from(xml.getElementsByTagName('trkpt'));
+            if (!els.length) els = Array.from(xml.getElementsByTagName('rtept'));
+            const points = [];
+            for (const el of els) {
+                const lat = parseFloat(el.getAttribute('lat')), lon = parseFloat(el.getAttribute('lon'));
+                if (!isFinite(lat) || !isFinite(lon)) continue;
+                const eleEl = el.getElementsByTagName('ele')[0];
+                const timeEl = el.getElementsByTagName('time')[0];
+                const ele = eleEl ? parseFloat(eleEl.textContent) : NaN;
+                const time = timeEl ? (timeEl.textContent || '').trim() : '';
+                points.push([lat, lon, time || null, isFinite(ele) ? ele : null, null, null, null]);
+            }
+            return { name: (nameEl ? nameEl.textContent : '').trim(), points };
+        }
+        if ($('tl-gpx')) $('tl-gpx').addEventListener('click', () => { const inp = $('gpx-input'); if (inp) inp.click(); });
+        if ($('gpx-input')) $('gpx-input').addEventListener('change', async (ev) => {
+            const file = ev.target.files && ev.target.files[0];
+            ev.target.value = '';                              // let the same file be re-picked later
+            if (!file) return;
+            toast('GPX wird geladen …');
+            let parsed;
+            try { parsed = parseGpx(await file.text()); }
+            catch (e) { toast('GPX-Fehler: ' + (e.message || e)); return; }
+            if (!parsed.points.length) { toast('Keine Punkte im GPX gefunden.'); return; }
+            plotTrack(parsed.points, []);                      // draw the imported route on the map
+            currentTrackId = null;                             // fresh import → INSERT a new row (never overwrite)
+            const name = parsed.name || autoTrackName();
+            $('hud-top').classList.add('shown');
+            let id;
+            try { id = await saveTrack(name, 'done'); }
+            catch (e) { currentTrackName = name; hidePanels(); toast('Geladen, Speichern fehlgeschlagen: ' + (e.message || e)); return; }
+            currentTrackId = id; currentTrackName = name;
+            loadedTrackIds.clear(); loadedTrackIds.add(id);
+            persistLoaded([{ id: id, name: name }]);
+            hidePanels();
+            toast('GPX importiert: ' + name + ' (' + parsed.points.length + ' Punkte)');
+        });
+
         // ---- Foto-Spur / media subsystem → js/tracker-media.js (Phase-2 refactor 2026-06-09).
         //      Forward exports are hoisted functions delegating to the module (callers earlier in
         //      this file keep working); __media is created right below with the shared context. ----
