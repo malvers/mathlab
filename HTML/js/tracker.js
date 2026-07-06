@@ -3505,7 +3505,9 @@ ${pts}
         }
         $('mb-ziel').addEventListener('click', () => { closePopup(); if (__nav) __nav.openPanel(); });
         // Foto-Spur card → re-run the AI analysis on still-unrecognised photos
-        $('set-reburn').addEventListener('click', async () => { await reburnTrack(); updateReburnButton(); });
+        // "Nicht analysierte Fotos" card removed from settings (Doc 2026-07-06); reburnTrack() stays in
+        // code (reachable if we resurface it later). Guard so the missing button can't crash init.
+        if ($('set-reburn')) $('set-reburn').addEventListener('click', async () => { await reburnTrack(); updateReburnButton(); });
         // "Code erzeugen" generates AND connects this device in one step
         $('sync-gen').addEventListener('click', async () => {
             toast('Verbinde …');
