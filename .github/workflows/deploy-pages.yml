@@ -49,20 +49,13 @@ jobs:
           rsync -a --delete --exclude 'resources/screenshots_original/' HTML/ _site/
           echo "Staged site size:"; du -sh _site
 
-      # Stamp a UNIQUE build id (the commit SHA) into every page so its Last-Modified header
-      # bumps on EVERY deploy — even a CSS/JS-only change. document.lastModified drives both the
-      # DebugWindow build stamp and the ?v= asset cache-bust; GitHub Pages only changes a file's
-      # Last-Modified when its BYTES change, so without this a deploy that touched only CSS/JS kept
-      # the old ?v= and shipped stale assets that never reached the device (Doc 2026-07-03).
-      - name: Stamp build id into every page
-        run: |
-          BUILD="${GITHUB_SHA::7}"
-          COUNT=0
-          while IFS= read -r -d '' f; do
-            printf '\n<!-- build %s -->\n' "$BUILD" >> "$f"
-            COUNT=$((COUNT + 1))
-          done < <(find _site -name '*.html' -print0)
-          echo "Stamped build $BUILD into $COUNT pages"
+      # EXPERIMENT (Doc 2026-07-06): the "Stamp build id into every page" step (13a6e0d, 2026-07-03) is
+      # REMOVED. It appended a <!-- build SHA --> to ALL ~103 HTML files on every deploy, forcing GitHub to
+      # re-sync every page each time. Pages deploy failures escalated exactly from 2026-07-03 (≈0% for
+      # months → 20→33%), every one failing at the "syncing_files" stage — prime suspect. Watching whether
+      # the failure rate falls back to ~0% without it. Trade-off while removed: a CSS/JS-only deploy may keep
+      # a stale ?v= cache-bust (document.lastModified only bumps when the HTML's bytes change). Restore or
+      # replace with a lighter version-bump (touch only the few ?v= pages) via: git show 13a6e0d.
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
