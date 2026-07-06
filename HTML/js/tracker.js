@@ -2552,20 +2552,14 @@ ${pts}
         }
         // Stats for a track from its raw points ([lat,lng,tIso,…]) — format-independent, so it works
         // for the click-to-identify popup without needing the list's server-computed row.
-        function trackStatsFromPoints(pts) {
-            let d = 0;
-            for (let i = 1; i < pts.length; i++) d += haversine([pts[i - 1][0], pts[i - 1][1]], [pts[i][0], pts[i][1]]);
-            const ts = pts.map(p => p[2]).filter(Boolean);
-            let durMs = 0;
-            if (ts.length > 1) { const a = Date.parse(ts[0]), b = Date.parse(ts[ts.length - 1]); if (!isNaN(a) && !isNaN(b)) durMs = Math.max(0, b - a); }
-            return { distKm: d / 1000, durMs };
-        }
-        // "3.14 km · 1:23 h · 4.8 km/h · 📷 6" — drops parts that don't apply.
+        // "3.14 km · 1:23 h · 4.8 km/h · 📷 6" from TrackOverlay.statsFromPoints() output ({distM,durMs}).
+        // App-specific formatting (fmtDur "min/h") stays here; the number-crunching is shared.
         function trackStatsLine(st, photoCount) {
+            const km = st.distM / 1000;
             const parts = [];
-            if (st.distKm >= 0.01) parts.push(st.distKm.toFixed(2) + ' km');
+            if (km >= 0.01) parts.push(km.toFixed(2) + ' km');
             if (st.durMs > 0) parts.push(fmtDur(Math.round(st.durMs / 1000)));
-            if (st.durMs > 0 && st.distKm > 0) parts.push((st.distKm / (st.durMs / 3600000)).toFixed(1) + ' km/h');
+            if (st.durMs > 0 && km > 0) parts.push((km / (st.durMs / 3600000)).toFixed(1) + ' km/h');
             if (photoCount) parts.push('📷 ' + photoCount);
             return parts.join(' · ');
         }
@@ -2583,29 +2577,12 @@ ${pts}
             loaded.forEach((t) => {
                 const pts = (t.points || []).filter(p => p && p[0] != null);
                 if (pts.length) {
-                    // Each overlaid track keeps its speed colours (hotline), exactly like a single
-                    // load — never a flat per-track colour just because several are shown.
-                    TrackRender.draw({
-                        track: pts.map(p => [p[0], p[1]]),
-                        times: pts.map(p => p[2] || null),
-                        speeds: pts.map(p => (p[4] != null ? p[4] : null)),
-                        activities: pts.map(p => (p[5] != null ? p[5] : null)),
-                        layer: trackLayer, usesHotline,
-                    });
-                    // Click-to-identify: the coloured hotline isn't clickable, so lay a transparent
-                    // FAT polyline on top that catches the tap and names the track (+ length · duration ·
-                    // Ø speed) in a popup. Lets Doc spot which overlaid line is which.
+                    // Speed-coloured line + click-to-identify popup: SAME shared glue the viewer/tour use
+                    // (TrackOverlay.drawStage) — the app no longer keeps its own copy. Media pins stay on
+                    // the app's own filter-aware addWaypoint below.
                     const label = ((t.name || '').replace(/^Track\s+/, '') || 'Track');
-                    const st = trackStatsFromPoints(pts);
-                    const hit = L.polyline(pts.map(p => [p[0], p[1]]), { color: '#000', opacity: 0, weight: 16, interactive: true });
-                    const pop = document.createElement('div'); pop.className = 'track-id-pop';
-                    const nmEl = document.createElement('div'); nmEl.className = 'track-id-name'; nmEl.textContent = label; // textContent → no injection
-                    pop.appendChild(nmEl);
-                    const metaTxt = trackStatsLine(st, (t.waypoints || []).length);
-                    if (metaTxt) { const mEl = document.createElement('div'); mEl.className = 'track-id-meta'; mEl.textContent = metaTxt; pop.appendChild(mEl); }
-                    hit.bindPopup(pop);
-                    hit.addTo(trackLayer);
-                    pts.forEach(p => all.push([p[0], p[1]]));
+                    const metaTxt = trackStatsLine(TrackOverlay.statsFromPoints(pts), (t.waypoints || []).length);
+                    TrackOverlay.drawStage(map, trackLayer, pts, { usesHotline, name: label, meta: metaTxt }).forEach(p => all.push(p));
                 }
                 (t.waypoints || []).forEach(w => addWaypoint(w));
             });
