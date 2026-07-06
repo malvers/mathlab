@@ -58,6 +58,27 @@ html, body {
 #zoom-in:hover, #zoom-out:hover { color: var(--orange); border-color: rgba(255, 255, 255, 0.6); }
 #zoom-in:active, #zoom-out:active { transform: scale(0.94); }
 
+/* "fit whole route" button (crosshair) — stacked just above the + zoom button, bottom-left */
+#fit-btn {
+    position: fixed;
+    left: 12px;
+    bottom: calc(var(--zoom-bottom, calc(env(safe-area-inset-bottom, 0px) + 18px)) + 56px);
+    z-index: 600;
+    width: 46px; height: 46px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(8, 20, 42, 0.82);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(8px);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+    color: rgba(255, 255, 255, 0.92);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform 0.1s ease, color 0.2s ease, border-color 0.2s ease;
+}
+#fit-btn svg { width: 22px; height: 22px; }
+#fit-btn:hover { color: var(--orange); border-color: rgba(255, 255, 255, 0.6); }
+#fit-btn:active { transform: scale(0.94); }
+
 /* loading / error overlay */
 #msg {
     position: fixed; inset: 0; z-index: 900;

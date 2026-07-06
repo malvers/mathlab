@@ -235,6 +235,9 @@
          loaded track actually contains. Mirrors the recorder's media filter. -->
     <div id="media-toggles" role="group" aria-label="Medien ein-/ausblenden"></div>
     <!-- Zoom: app-style round buttons in the bottom corners (+ left, − right); Leaflet's own control off. -->
+    <button id="fit-btn" type="button" aria-label="Ganze Route zeigen" title="Ganze Route zeigen">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M12 2v3M12 19v3M2 12h3M19 12h3"></path></svg>
+    </button>
     <button id="zoom-in" type="button" aria-label="Reinzoomen" title="Reinzoomen"></button>
     <button id="zoom-out" type="button" aria-label="Rauszoomen" title="Rauszoomen"></button>
 
@@ -303,6 +306,8 @@
         }
         // Map + OSM tiles + round zoom buttons (all wired by the shared scaffold).
         const map = ViewerBase.createMap([51.1657, 10.4515], 6);
+        let _fitBounds = null;   // current route bounds → the crosshair (#fit-btn) re-frames to it
+        ViewerBase.wireFit(map, () => _fitBounds);
 
         // ---- track data (filled from the shared row) ----
         let track = [], times = [], speeds = [], activities = [], waypoints = [], wpMarkers = [];
@@ -477,7 +482,8 @@
             updateLiveStats();
             const last = track[track.length - 1];
             ensureLiveMarker(last[0], last[1]);
-            if (!liveFitDone && track.length > 1) { map.fitBounds(L.latLngBounds(track), { padding: [50, 50] }); liveFitDone = true; }
+            if (track.length > 1) _fitBounds = L.latLngBounds(track);
+            if (!liveFitDone && track.length > 1) { map.fitBounds(_fitBounds, { padding: [50, 50] }); liveFitDone = true; }
         }
         // ---- live MEDIA: photo / voice / video pushed over the same channel. Add a pin (dedup by t);
         //      a later re-send (AI title, or the R2 URL replacing base64) just updates it. Remove+add
@@ -633,7 +639,7 @@
 
             if (!_firstApplied) {
                 _firstApplied = true;
-                if (track.length) map.fitBounds(L.latLngBounds(track), { padding: [50, 50] });
+                if (track.length) { _fitBounds = L.latLngBounds(track); map.fitBounds(_fitBounds, { padding: [50, 50] }); }
                 else if (wps.length) map.setView([wps[0].lat, wps[0].lng], 15);
                 $('msg').classList.add('hidden');
             }
@@ -701,7 +707,7 @@
             $('trk-name').textContent = names.length + ' Tracks';
             refreshMedia(); // reveal media toggles for the types present across the bundled tracks
             setStats({ distM: totalDist, durMs: 0, fotos: waypoints.length, speedKmh: 0 });
-            if (all.length) map.fitBounds(L.latLngBounds(all), { padding: [50, 50] });
+            if (all.length) { _fitBounds = L.latLngBounds(all); map.fitBounds(_fitBounds, { padding: [50, 50] }); }
             $('msg').classList.add('hidden');
         }
 

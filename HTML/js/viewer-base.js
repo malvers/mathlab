@@ -35,5 +35,17 @@
         return map;
     }
 
-    global.ViewerBase = { SUPABASE_URL, SUPABASE_KEY, SUPA_HOST, esc, showMsg, hideMsg, supa, createMap };
+    // Wire the "fit whole route" button (#fit-btn, crosshair): on click, frame the bounds the page
+    // supplies via getBounds() (an L.latLngBounds or null). Lets the viewer jump back to the full
+    // route after panning/zooming away — both read-only pages only auto-fit once on load.
+    function wireFit(map, getBounds) {
+        const b = $('fit-btn');
+        if (!b) return;
+        b.addEventListener('click', () => {
+            const bb = getBounds && getBounds();
+            if (bb && bb.isValid && bb.isValid()) map.fitBounds(bb, { padding: [50, 50] });
+        });
+    }
+
+    global.ViewerBase = { SUPABASE_URL, SUPABASE_KEY, SUPA_HOST, esc, showMsg, hideMsg, supa, createMap, wireFit };
 })(window);
