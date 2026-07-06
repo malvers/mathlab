@@ -2817,7 +2817,7 @@ ${pts}
             const nameEl = xml.querySelector('trk > name') || xml.querySelector('rte > name') || xml.querySelector('metadata > name') || xml.querySelector('name');
             let els = Array.from(xml.getElementsByTagName('trkpt'));
             if (!els.length) els = Array.from(xml.getElementsByTagName('rtept'));
-            const points = [];
+            const raw = [];
             for (const el of els) {
                 const lat = parseFloat(el.getAttribute('lat')), lon = parseFloat(el.getAttribute('lon'));
                 if (!isFinite(lat) || !isFinite(lon)) continue;
@@ -2825,7 +2825,31 @@ ${pts}
                 const timeEl = el.getElementsByTagName('time')[0];
                 const ele = eleEl ? parseFloat(eleEl.textContent) : NaN;
                 const time = timeEl ? (timeEl.textContent || '').trim() : '';
-                points.push([lat, lon, time || null, isFinite(ele) ? ele : null, null, null, null]);
+                raw.push([lat, lon, time || null, isFinite(ele) ? ele : null, null, null, null]);
+            }
+            // A planned route (Komoot etc.) is sampled COARSELY — points 30–100 m apart. At walking pace
+            // that's >20 s AND >30 m per segment, which the renderer mistakes for GPS-loss GAPS (red/white
+            // barber-pole) and which also makes the speed colour look chunky. So densify: interpolate
+            // (lat/lng/time/ele) to ≤15 m spacing. A genuine big jump (>300 m = real dropout) is left as a
+            // gap. Speed is derived AFTER, so each sub-segment keeps its segment's pace.
+            const points = [];
+            const MAXSEG = 15, GAPCAP = 300;
+            for (let i = 0; i < raw.length; i++) {
+                if (i > 0) {
+                    const a = raw[i - 1], b = raw[i];
+                    const d = haversine([a[0], a[1]], [b[0], b[1]]);
+                    if (d > MAXSEG && d <= GAPCAP) {
+                        const n = Math.floor(d / MAXSEG);
+                        const ta = a[2] ? Date.parse(a[2]) : null, tb = b[2] ? Date.parse(b[2]) : null;
+                        for (let k = 1; k <= n; k++) {
+                            const f = k / (n + 1);
+                            const t = (ta != null && tb != null) ? new Date(ta + (tb - ta) * f).toISOString() : null;
+                            const e = (a[3] != null && b[3] != null) ? a[3] + (b[3] - a[3]) * f : null;
+                            points.push([a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f, t, e, null, null, null]);
+                        }
+                    }
+                }
+                points.push(raw[i]);
             }
             // Derive per-point speed (km/h) from consecutive time+distance so the loaded track is
             // speed-COLOURED like a recorded one — otherwise speed stays null → the renderer paints it
