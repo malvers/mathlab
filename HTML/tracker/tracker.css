@@ -239,6 +239,15 @@ path.pos-marker.pos-shown {
     transform: translateY(0);
 }
 
+/* Banner extras (satellites + sunrise/sunset) auto-hide 8 s after they appear; a tap on the clock brings
+   them back for another 8 s, then they fade again (Doc 2026-07-06). The clock and stat tiles stay put.
+   .hud-collapsed forces them gone regardless of the live updaters; expanded, each flank's own [hidden]
+   (pre-GPS) still governs. Fade via opacity so the layout holds and the clock never jumps. */
+#gps-chip, #sun-rise, #sun-set { transition: opacity 0.45s ease; }
+#hud-top.hud-collapsed #gps-chip,
+#hud-top.hud-collapsed #sun-rise,
+#hud-top.hud-collapsed #sun-set { opacity: 0; pointer-events: none; }
+
 #gps-chip {
     position: relative;
     /* Satellites + accuracy form ONE group, centred together on screen (was: 3-col grid with the

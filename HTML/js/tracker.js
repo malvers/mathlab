@@ -675,6 +675,23 @@
         });
         CyberClock.set(elTime, '00:00:00');
 
+        // Banner extras (satellites #gps-chip + sunrise/sunset flanks) auto-hide 8 s after they appear;
+        // tapping the clock brings them back for another 8 s, then they fade again (Doc 2026-07-06). The
+        // clock and stat tiles stay put. Pure UI: a class on #hud-top drives the CSS; no data path touched.
+        const BANNER_HIDE_MS = 8000;
+        const elHudTop = $('hud-top');
+        let bannerHideTimer = null;
+        function armBannerHide() {
+            if (bannerHideTimer) clearTimeout(bannerHideTimer);
+            bannerHideTimer = setTimeout(() => { if (elHudTop) elHudTop.classList.add('hud-collapsed'); }, BANNER_HIDE_MS);
+        }
+        function showBannerExtras() {
+            if (elHudTop) elHudTop.classList.remove('hud-collapsed');
+            armBannerHide();
+        }
+        if (elTime) elTime.addEventListener('click', showBannerExtras);
+        armBannerHide(); // start the first 8 s countdown on load
+
         // HUD stat tiles (DISTANCE / SPEED / HÖHE) → js/tracker-hud.js. Owns the fixed-slot widgets +
         // adaptive distance unit. Destructured into the same names so every existing call site stays
         // unchanged. Constructed HERE (before the idle clock below) so updateDistVisibility is assigned
@@ -3086,6 +3103,10 @@ ${pts}
         __speed = TrackerSpeedLimit({ $, profile: __speedprofile, probe: __speedprobe, isWet: () => ambientWet });
         // Give the profile the SAME tag→limit resolver the sign uses, so its precomputed numbers match.
         if (__speedprofile && __speed.resolveLimit) __speedprofile.setResolver(__speed.resolveLimit);
+        // …and the generic legal default (DE:urban=50 …). The profile carries a CONFIRMED limit forward across
+        // untagged gaps; this lets it STOP that carry where the road's own generic default contradicts it, so a
+        // rural 100 can't bleed into the city and override the honest dimmed sign (Doc 2026-07-06).
+        if (__speedprofile && __speedprofile.setGeneric && __speed.resolveGeneric) __speedprofile.setGeneric(__speed.resolveGeneric);
         // …and the SAME conditional evaluator + equality key, so a time-conditional limit (e.g. a school
         // zone's "30 Mo-Fr 6-17") is resolved at display time and compared correctly (Doc 2026-06-30).
         if (__speedprofile && __speed.evalLimit) __speedprofile.setEval(__speed.evalLimit, __speed.limitKey);
