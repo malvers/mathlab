@@ -1,0 +1,69 @@
+/* Shared scaffold for the read-only viewer pages (view.html + tour.html): base theme, map, the
+   round zoom buttons, the click-to-identify popup, and the loading/error overlay. One source of truth
+   so the chrome isn't copied per page (Doc 2026-07-06). Page-specific chrome stays in each page's
+   own <style>. Requires the Orbitron font + Leaflet CSS (the page includes those). */
+:root {
+    --bg: rgb(8, 20, 42);
+    --bg-light: rgb(14, 36, 78);
+    --orange: rgb(245, 194, 66);
+    --green: rgb(121, 158, 49);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body {
+    margin: 0;
+    height: 100%;
+    background: var(--bg);
+    color: #fff;
+    font-family: 'Orbitron', sans-serif;
+    overflow: hidden;
+}
+
+#map { position: fixed; inset: 0; z-index: 1; }
+.leaflet-container { background: var(--bg-light); }
+
+/* track-name popup shown when tapping an overlaid stage line (click-to-identify) */
+.track-id-pop { font-family: 'Orbitron', sans-serif; color: rgb(14, 36, 78); }
+.track-id-name { font-size: 0.74rem; font-weight: 600; letter-spacing: 0.02em; }
+.track-id-meta {
+    margin-top: 3px; font-family: system-ui, sans-serif; font-size: 0.66rem;
+    font-weight: 500; color: rgba(14, 36, 78, 0.7); white-space: nowrap;
+}
+
+/* round zoom buttons, bottom corners (+ left, − right). Each page sets --zoom-bottom to clear its
+   own bottom chrome (view: footer; tour: elevation profile + legs button). */
+#zoom-in, #zoom-out {
+    position: fixed;
+    bottom: var(--zoom-bottom, calc(env(safe-area-inset-bottom, 0px) + 18px));
+    z-index: 600;
+    width: 46px; height: 46px; border-radius: 50%;
+    background: rgba(8, 20, 42, 0.82);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(8px);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+    color: rgba(255, 255, 255, 0.92);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform 0.1s ease, color 0.2s ease, border-color 0.2s ease;
+}
+#zoom-in { left: 12px; }
+#zoom-out { right: 12px; }
+#zoom-in::before, #zoom-out::before, #zoom-in::after {
+    content: ''; position: absolute; top: 50%; left: 50%;
+    background: currentColor; border-radius: 2px; transform: translate(-50%, -50%);
+}
+#zoom-in::before, #zoom-out::before { width: 22px; height: 3px; }
+#zoom-in::after { width: 3px; height: 22px; }
+#zoom-in:hover, #zoom-out:hover { color: var(--orange); border-color: rgba(255, 255, 255, 0.6); }
+#zoom-in:active, #zoom-out:active { transform: scale(0.94); }
+
+/* loading / error overlay */
+#msg {
+    position: fixed; inset: 0; z-index: 900;
+    display: flex; align-items: center; justify-content: center;
+    padding: 24px; text-align: center; background: var(--bg);
+    font-size: 0.95rem; line-height: 1.5;
+}
+#msg.hidden { display: none; }
+#msg a { color: var(--orange); }

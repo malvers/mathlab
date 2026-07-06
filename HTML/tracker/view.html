@@ -13,59 +13,13 @@
         integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
     <!-- shared fixed-slot number/clock widget — same component the recorder HUD uses -->
     <link rel="stylesheet" href="../js/cyber-clock.css">
+    <!-- shared viewer scaffold (theme · map · zoom · popup · overlay) + photo pins/lightbox -->
+    <link rel="stylesheet" href="../js/viewer-base.css">
     <!-- shared photo pins (status colours) + lightbox — the SAME renderer the app uses -->
     <link rel="stylesheet" href="../js/photo-layer.css">
     <style>
-        :root {
-            --bg: rgb(8, 20, 42);
-            --bg-light: rgb(14, 36, 78);
-            --orange: rgb(245, 194, 66);
-        }
-
-        *,
-        *::before,
-        *::after {
-            box-sizing: border-box;
-        }
-
-        html,
-        body {
-            margin: 0;
-            height: 100%;
-            background: var(--bg);
-            color: #fff;
-            font-family: 'Orbitron', sans-serif;
-            overflow: hidden;
-        }
-
-        #map {
-            position: fixed;
-            inset: 0;
-            z-index: 1;
-        }
-
-        .leaflet-container {
-            background: var(--bg-light);
-        }
-
-        /* track-name popup shown when tapping an overlaid track line (click-to-identify) */
-        .track-id-pop {
-            font-family: 'Orbitron', sans-serif;
-            color: rgb(14, 36, 78);
-        }
-        .track-id-name {
-            font-size: 0.74rem;
-            font-weight: 600;
-            letter-spacing: 0.02em;
-        }
-        .track-id-meta {
-            margin-top: 3px;
-            font-family: system-ui, sans-serif;
-            font-size: 0.66rem;
-            font-weight: 500;
-            color: rgba(14, 36, 78, 0.7);
-            white-space: nowrap;
-        }
+        /* base theme, #map, .leaflet-container, .track-id popup, #zoom-in/out and #msg now live in
+           the shared viewer-base.css — only view-specific chrome remains here. */
 
         /* ---- Top header: track name + stats ---- */
         #hdr {
@@ -257,64 +211,7 @@
             pointer-events: none;
         }
 
-        /* ---- Zoom: app-style round buttons, bottom corners (+ left, − right) ---- */
-        #zoom-in,
-        #zoom-out {
-            position: fixed;
-            bottom: calc(env(safe-area-inset-bottom, 0px) + 18px);
-            z-index: 600;
-            width: 46px;
-            height: 46px;
-            border-radius: 50%;
-            background: rgba(8, 20, 42, 0.82);
-            border: 1px solid rgba(255, 255, 255, 0.25);
-            backdrop-filter: blur(8px);
-            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
-            color: rgba(255, 255, 255, 0.92);
-            cursor: pointer;
-            -webkit-tap-highlight-color: transparent;
-            transition: transform 0.1s ease, color 0.2s ease, border-color 0.2s ease;
-        }
-        #zoom-in { left: 12px; }    /* + → bottom-left */
-        #zoom-out { right: 12px; }  /* − → bottom-right */
-        #zoom-in::before,
-        #zoom-out::before,
-        #zoom-in::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            background: currentColor;
-            border-radius: 2px;
-            transform: translate(-50%, -50%);
-        }
-        #zoom-in::before,
-        #zoom-out::before { width: 22px; height: 3px; }
-        #zoom-in::after { width: 3px; height: 22px; }
-        #zoom-in:hover,
-        #zoom-out:hover { color: var(--orange); border-color: rgba(255, 255, 255, 0.6); }
-        #zoom-in:active,
-        #zoom-out:active { transform: scale(0.94); }
-
-        /* ---- Loading / error overlay ---- */
-        #msg {
-            position: fixed;
-            inset: 0;
-            z-index: 900;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 24px;
-            text-align: center;
-            background: var(--bg);
-            font-size: 0.95rem;
-            line-height: 1.5;
-        }
-
-        #msg.hidden {
-            display: none;
-        }
-
+        /* (zoom buttons + loading/error overlay now live in the shared viewer-base.css) */
     </style>
 </head>
 
@@ -358,6 +255,7 @@
          and the static "Lade geteilten Track …" stayed forever (live AND saved-track load dead). -->
     <script src="../js/supa-gate.js"></script>
     <script src="../js/vendor/supabase.min.js"></script>
+    <script src="../js/viewer-base.js"></script>
     <script>
         const $ = id => document.getElementById(id);
 
@@ -393,29 +291,18 @@
             sync();
         })();
 
-        const SUPABASE_URL = 'https://fyfhxzyymmurlaenmzse.supabase.co';
-        const SUPABASE_KEY = 'sb_publishable_ubQDiMD-X3N0vZvPVi229Q_-5Zootfk';
         const COL_ORANGE = 'rgb(245, 194, 66)';
+        const { esc, showMsg, hideMsg, SUPA_HOST } = ViewerBase;   // shared scaffold (theme/map/zoom/overlay)
         // Fail loudly (not silently) if the lib didn't load → otherwise the page would just keep showing
         // the static "Lade geteilten Track …" with no hint why (live AND saved load both dead).
-        if (!window.supabase) {
-            document.getElementById('msg').innerHTML = '<div style="color:var(--orange);font-weight:700">Bibliothek nicht geladen</div>'
+        const sb = ViewerBase.supa();
+        if (!sb) {
+            $('msg').innerHTML = '<div style="color:var(--orange);font-weight:700">Bibliothek nicht geladen</div>'
                 + '<div style="opacity:.7;margin-top:6px">Supabase-Lib fehlt — anderes Netz/Reload versuchen.</div>';
             throw new Error('Supabase-Lib nicht geladen');
         }
-        const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY,
-            window.SupaGate ? { global: { fetch: window.SupaGate.gatedFetch } } : undefined); // routed through the central breaker (supa-gate.js)
-
-        const map = L.map('map', { zoomControl: false, attributionControl: true })
-            .setView([51.1657, 10.4515], 6);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxNativeZoom: 19, maxZoom: 21, attribution: '&copy; OpenStreetMap contributors',
-        }).addTo(map);
-        map.attributionControl.setPrefix(false);
-
-        // Zoom: app-style round buttons (Leaflet's own +/- control is off above). Pinch/scroll still zoom.
-        $('zoom-in').addEventListener('click', () => map.zoomIn());
-        $('zoom-out').addEventListener('click', () => map.zoomOut());
+        // Map + OSM tiles + round zoom buttons (all wired by the shared scaffold).
+        const map = ViewerBase.createMap([51.1657, 10.4515], 6);
 
         // ---- track data (filled from the shared row) ----
         let track = [], times = [], speeds = [], activities = [], waypoints = [], wpMarkers = [];
@@ -432,7 +319,6 @@
 
         // ---- photo pins + lightbox ----
         const CAM_PIN_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="rgb(8,20,42)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>';
-        const esc = s => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
         function addWaypoint(wp) {
             waypoints.push(wp);
@@ -626,9 +512,7 @@
             upsertLiveWp({ lat: p.lat, lng: p.lng, t: p.t, type: 'video', video: p.video, mime: p.mime || 'video/mp4', title: p.title || 'Video', text: p.text || '' });
         }
         // ---- viewer-facing connection errors, so one KNOWS why nothing shows (no dev console needed) ----
-        const SUPA_HOST = 'fyfhxzyymmurlaenmzse.supabase.co'; // shown in errors so a viewer can check it (reuses esc() above)
-        function showMsg(html) { const m = $('msg'); m.innerHTML = html; m.classList.remove('hidden'); }
-        function hideMsg() { $('msg').classList.add('hidden'); }
+        // esc · showMsg · hideMsg · SUPA_HOST come from the shared ViewerBase (destructured up top).
         function isNetworkErr(e) {
             const s = String((e && (e.message || e)) || '').toLowerCase();
             return s.includes('fetch') || s.includes('network') || s.includes('load failed') || s.includes('failed to');
