@@ -351,6 +351,8 @@
     <script src="../js/track-render.js"></script>
     <script src="../js/cyber-clock.js"></script>
     <script src="../js/photo-layer.js"></script>
+    <script src="../js/track-overlay.js"></script>
+
     <!-- Self-hosted Supabase lib (same as the recorder). The old unpkg CDN could be blocked/unreachable
          on a viewer's network → window.supabase undefined → createClient() threw → the whole script aborted
          and the static "Lade geteilten Track …" stayed forever (live AND saved-track load dead). -->
@@ -794,36 +796,18 @@
                 if (!row) continue;
                 const pts = (row.points || []).filter(p => p && p[0] != null);
                 if (pts.length) {
-                    // Speed-coloured (hotline) like a single track — never a flat per-track colour.
-                    TrackRender.draw({
-                        track: pts.map(p => [p[0], p[1]]),
-                        times: pts.map(p => p[2] || null),
-                        speeds: pts.map(p => (p[4] != null ? p[4] : null)),
-                        activities: pts.map(p => (p[5] != null ? p[5] : null)),
-                        layer: trackLayer, usesHotline,
-                    });
-                    // Click-to-identify: the coloured hotline isn't clickable, so lay a transparent FAT
-                    // polyline on top that catches the tap and names the track — lets a viewer tell the
-                    // overlaid lines of a shared folder apart (mirrors the recorder's plotMultiple).
+                    // Draw + click-to-identify handled centrally by TrackOverlay (shared with tour.html).
+                    // The popup meta stays view-specific: length · duration · Ø speed · photos.
                     const label = ((row.name || '').replace(/^Track\s+/, '') || 'Track');
-                    // length · duration · Ø speed · photos, so the popup identifies AND summarises the line
-                    let d = 0; for (let i = 1; i < pts.length; i++) d += TrackRender.haversine([pts[i - 1][0], pts[i - 1][1]], [pts[i][0], pts[i][1]]);
-                    const ts = pts.map(p => p[2]).filter(Boolean);
-                    let durMs = 0; if (ts.length > 1) { const a = Date.parse(ts[0]), b = Date.parse(ts[ts.length - 1]); if (!isNaN(a) && !isNaN(b)) durMs = Math.max(0, b - a); }
-                    const distKm = (row.distance_m != null ? row.distance_m / 1000 : d / 1000);
+                    const st = TrackOverlay.statsFromPoints(pts);
+                    const distKm = (row.distance_m != null ? row.distance_m / 1000 : st.distM / 1000);
                     const parts = [];
                     if (distKm >= 0.01) parts.push(distKm.toFixed(2) + ' km');
-                    if (durMs > 0) parts.push(fmtClock(durMs));
-                    if (durMs > 0 && distKm > 0) parts.push((distKm / (durMs / 3600000)).toFixed(1) + ' km/h');
+                    if (st.durMs > 0) parts.push(fmtClock(st.durMs));
+                    if (st.durMs > 0 && distKm > 0) parts.push((distKm / (st.durMs / 3600000)).toFixed(1) + ' km/h');
                     const np = (row.waypoints || []).length; if (np) parts.push('📷 ' + np);
-                    const hit = L.polyline(pts.map(p => [p[0], p[1]]), { color: '#000', opacity: 0, weight: 16, interactive: true });
-                    const pop = document.createElement('div'); pop.className = 'track-id-pop';
-                    const nmEl = document.createElement('div'); nmEl.className = 'track-id-name'; nmEl.textContent = label;
-                    pop.appendChild(nmEl);
-                    if (parts.length) { const mEl = document.createElement('div'); mEl.className = 'track-id-meta'; mEl.textContent = parts.join(' · '); pop.appendChild(mEl); }
-                    hit.bindPopup(pop);
-                    hit.addTo(trackLayer);
-                    pts.forEach(p => all.push([p[0], p[1]]));
+                    const ll = TrackOverlay.drawStage(map, trackLayer, pts, { usesHotline, name: label, meta: parts.join(' · ') });
+                    ll.forEach(p => all.push(p));
                 }
                 (row.waypoints || []).forEach(w => addWaypoint(w));
                 totalDist += row.distance_m || 0;
