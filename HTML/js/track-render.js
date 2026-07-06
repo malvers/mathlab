@@ -70,14 +70,19 @@
         if (!idxs.length) return;
         // Standing still: the GPS fix can wander 100s of metres before it settles, which drawn as a line
         // paints a weird white "Halbkreis". Two goals now: never paint that wander arc, and never leave a
-        // gap. So bridge the run's first→last point with a short STRAIGHT segment — the track stays
-        // continuous across the stop, minus the jitter. Only a genuinely LONG stop (>= STILL_DOT_SEC) also
-        // earns a white "you stood here" dot; brief still-blips (lights, junctions) would otherwise litter
-        // the line with dots (Doc 2026-07-06).
+        // gap. So bridge the run's first→last point with a short STRAIGHT segment drawn by the SAME
+        // renderer as the track at 0 km/h (white core, dark casing) — it joins seamlessly, no jitter arc,
+        // no gap, no colour/width mismatch. Only a genuinely LONG stop (>= STILL_DOT_SEC) also earns a
+        // white "you stood here" dot; brief still-blips (lights, junctions) would otherwise litter it.
         if (activity === 'still') {
             const first = ctx.track[idxs[0]];
             const last = ctx.track[idxs[idxs.length - 1]];
-            L.polyline([first, last], { color: 'rgb(150,165,190)', weight: 5, opacity: 0.9, interactive: false }).addTo(ctx.layer);
+            if (ctx.usesHotline) {
+                L.hotline([[first[0], first[1], 0], [last[0], last[1], 0]],
+                    { weight: 5, outlineWidth: 1, outlineColor: 'rgba(8,20,42,0.6)', palette: { 0: '#ffffff', 1: '#ffffff' }, min: 0, max: 1 }).addTo(ctx.layer);
+            } else {
+                L.polyline([first, last], { color: '#ffffff', weight: 5, opacity: 0.95, interactive: false }).addTo(ctx.layer);
+            }
             const t0 = ctx.times[idxs[0]], t1 = ctx.times[idxs[idxs.length - 1]];
             const dwellSec = (t0 && t1) ? (Date.parse(t1) - Date.parse(t0)) / 1000 : 0;
             if (dwellSec >= STILL_DOT_SEC)
