@@ -23,6 +23,14 @@
     var isNative = !!(global.Capacitor && typeof global.Capacitor.isNativePlatform === 'function'
         && global.Capacitor.isNativePlatform());
 
+    // remember the paired module so the native app reconnects silently (no picker after the first time)
+    var LS_ID = 'pagode-ble-deviceid', LS_NAME = 'pagode-ble-name';
+    var LS = {
+        get: function (k) { try { return (typeof localStorage !== 'undefined') ? localStorage.getItem(k) : null; } catch (e) { return null; } },
+        set: function (k, v) { try { if (typeof localStorage !== 'undefined') localStorage.setItem(k, v); } catch (e) { } },
+        del: function (k) { try { if (typeof localStorage !== 'undefined') localStorage.removeItem(k); } catch (e) { } }
+    };
+
     // ---- Web Bluetooth (Chrome / Android / Desktop) ----
     function webBackend(opts) {
         var device = null, characteristic = null;
@@ -77,15 +85,27 @@
         var Ble = global.Capacitor.Plugins.BluetoothLe;
         var deviceId = null;
         var toHex = function (bytes) { return bytes.map(function (b) { return ('0' + (b & 0xff).toString(16)).slice(-2); }).join(' '); };  // plugin parses SPACE-separated hex byte pairs, e.g. "a0 01 01 a2" (NOT base64, NOT joined hex)
+        function withTimeout(p, ms) { return new Promise(function (res, rej) { var t = setTimeout(function () { rej(new Error('timeout')); }, ms); p.then(function (v) { clearTimeout(t); res(v); }, function (e) { clearTimeout(t); rej(e); }); }); }
         return {
             name: 'Capacitor BLE-Plugin',
             async connect() {
                 // androidNeverForLocation: we don't derive location from BLE → plugin drops the
                 // ACCESS_FINE_LOCATION requirement (matches BLUETOOTH_SCAN neverForLocation in the manifest).
                 await Ble.initialize({ androidNeverForLocation: true });
+                // 1) silent reconnect to a REMEMBERED module (deviceId = Android MAC) — no picker
+                var savedId = LS.get(LS_ID);
+                if (savedId) {
+                    try {
+                        await withTimeout(Ble.connect({ deviceId: savedId }), 8000);
+                        deviceId = savedId;
+                        return LS.get(LS_NAME) || 'Relais-Modul';
+                    } catch (e) { /* module gone/changed/out of range → fall through to the picker */ }
+                }
+                // 2) first time ever (or fallback): the plugin picker, then remember the choice
                 var r = await Ble.requestDevice({ namePrefix: CFG.NAME_PREFIX, optionalServices: [CFG.SERVICE_STR] });
                 deviceId = r.deviceId;
                 await Ble.connect({ deviceId: deviceId });
+                LS.set(LS_ID, r.deviceId); LS.set(LS_NAME, r.name || 'Relais-Modul');
                 return r.name || 'Relais-Modul';
             },
             async write(bytes) {
@@ -106,5 +126,5 @@
         return null;
     }
 
-    global.PagodeBLE = { CFG: CFG, isNative: isNative, createBackend: createBackend };
+    global.PagodeBLE = { CFG: CFG, isNative: isNative, createBackend: createBackend, forget: function () { LS.del(LS_ID); LS.del(LS_NAME); } };
 })(window);
