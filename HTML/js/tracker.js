@@ -697,7 +697,32 @@
             if (elHudTop) elHudTop.classList.remove('hud-collapsed');
             armBannerHide();
         }
-        if (elTime) elTime.addEventListener('click', showBannerExtras);
+        // Header clock gestures: a SHORT tap re-shows OTWA's banner extras (+ re-arms the 8 s collapse);
+        // a LONG-PRESS (500 ms) toggles the FULL-UI idle auto-hide via the shared `pinned` flag
+        // (window.setUiPinned, tracker-media.js) — pinned = nothing fades. Turning auto-hide ON hides the
+        // whole HUD right away instead of waiting out the idle timer (Doc 2026-07-06). #hud-top is
+        // pointer-events:none, so the clock is the header's interactive target; the long-press click is
+        // swallowed so it never also re-shows the extras.
+        if (elTime) {
+            elTime.addEventListener('click', showBannerExtras);
+            let uiLongFired = false, uiTimer = null;
+            const uiCancel = () => { if (uiTimer) { clearTimeout(uiTimer); uiTimer = null; } };
+            elTime.addEventListener('pointerdown', () => {
+                uiLongFired = false; uiCancel();
+                uiTimer = setTimeout(() => {
+                    uiLongFired = true;
+                    const nowPinned = localStorage.getItem('tracker_ui_pinned') === '1'; // shared source of truth
+                    const enableAutoHide = nowPinned; // currently pinned → this long-press turns auto-hide ON
+                    if (typeof window.setUiPinned === 'function') window.setUiPinned(!nowPinned);
+                    if (enableAutoHide) document.body.classList.add('ui-idle'); // auto-hide on → hide everything now
+                    toast(enableAutoHide ? 'Auto-Ausblenden: an' : 'Alles fixiert — nichts blendet aus');
+                }, 500);
+            });
+            elTime.addEventListener('pointerup', uiCancel);
+            elTime.addEventListener('pointercancel', uiCancel);
+            elTime.addEventListener('pointerleave', uiCancel);
+            elTime.addEventListener('click', (e) => { if (uiLongFired) { e.stopImmediatePropagation(); e.preventDefault(); uiLongFired = false; } }, true);
+        }
         armBannerHide(); // start the first 8 s countdown on load
 
         // HUD stat tiles (DISTANCE / SPEED / HÖHE) → js/tracker-hud.js. Owns the fixed-slot widgets +
