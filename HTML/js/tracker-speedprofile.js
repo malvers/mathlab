@@ -32,7 +32,9 @@ window.TrackerSpeedProfile = function (ctx) {
     const MAX_VERTS = 2500;           // guard: very long routes are downsampled for resolution (cost/time)
     const MAX_CORRIDOR_PTS = 800;     // cap the around-polyline length so the query body stays sane
     const CACHE_PREFIX = 'trk_speedprofile_';
-    const CACHE_VERSION = 7;          // v7: snap onto the shared-node junction (any road switch, not just sharp bends)
+    const CACHE_VERSION = 8;          // v8: generic-default barrier — stop carrying a confirmed limit into a
+    //                                   contradicting zone (rural 100 no longer bleeds into town); null gap CPs.
+    //                                   v7: snap onto the shared-node junction (any road switch, not just sharp bends)
     //                                   v6: snap change points onto the junction turn (signs stand AT the Ampel)
     //                                   v5: rebuild after bisection-refined change points (see refineChangePoints)
     //                                   so already-driven routes drop their coarse-vertex cache and re-pin exactly.
@@ -40,6 +42,9 @@ window.TrackerSpeedProfile = function (ctx) {
     const CACHE_TTL_MS = 1000 * 60 * 60 * 24 * 60; // 60 days — OSM limits change rarely
 
     let resolveLimit = null;          // injected from the live sign so the logic is identical (setResolver)
+    let resolveGeneric = null;        // genericDefault(tags) from the live sign — the road's generic legal
+    //                                   default (DE:urban=50 …). Only used to BREAK the carry-forward where a
+    //                                   carried confirmed limit contradicts the local default (setGeneric).
     let evalAt = null;                // evalLimit(value, date) from the live sign — resolves a conditional now
     let limKey = null;                // limitKey(value) from the live sign — stable equality for compares
     let routePts = null;              // the route [[lat,lng]…] the current profile is aligned to
@@ -52,6 +57,7 @@ window.TrackerSpeedProfile = function (ctx) {
     let buildGen = 0;                 // bumped per build so a slow Overpass answer can't apply to a newer route
 
     function setResolver(fn) { resolveLimit = fn; }
+    function setGeneric(fn) { resolveGeneric = fn; }
     // Inject the live sign's conditional evaluator + equality key so a time-conditional limit is resolved at
     // display time (limitAt/badge) and compared correctly when de-flickering / deriving change points.
     function setEval(evalFn, keyFn) { evalAt = evalFn; limKey = keyFn; }
@@ -200,7 +206,8 @@ window.TrackerSpeedProfile = function (ctx) {
     // Resolve a raw limit for each route vertex from the corridor ways, then CARRY FORWARD across gaps
     // so a short untagged stretch doesn't blank the sign. Returns the carry-forward array.
     function limitsFromWays(pts, ways) {
-        const raw = new Array(pts.length).fill(null);
+        const conf = new Array(pts.length).fill(null);  // confirmed/signed limit per vertex (null where none)
+        const gen = new Array(pts.length).fill(null);   // the road's generic legal default per vertex (for the barrier)
         for (let vi = 0; vi < pts.length; vi++) {
             const p = pts[vi];
             // PREFER a way that runs ALONG the route (kills the crossing/parallel side street that caused the
@@ -209,24 +216,50 @@ window.TrackerSpeedProfile = function (ctx) {
             // Paradiesstraße 50-over-30 bug). So: best aligned wins; else fall back to the nearest limit-way
             // (the road you're physically on is the nearest), so the real local limit is never lost.
             const routeBrgs = routeBearingsAt(pts, vi);
-            let aLim = null, aD = Infinity, anyLim = null, anyD = Infinity;
+            let aLim = null, aD = Infinity, anyLim = null, anyD = Infinity;      // confirmed limit
+            let aGen = null, aGD = Infinity, anyGen = null, anyGD = Infinity;    // generic default (same aligned-preferred rule)
             for (const w of ways) {
                 const lim = resolveLimit ? resolveLimit(w.tags) : null;
-                if (lim == null) continue;                 // not a drivable, limit-bearing way → ignore
+                const g = resolveGeneric ? resolveGeneric(w.tags) : null;
+                if (lim == null && g == null) continue;    // neither a confirmed nor a generic-default way → ignore
                 const nw = distToWay(p, w.geometry);
                 if (nw.d > CORRIDOR_M + 10) continue;       // outside the corridor → not our road
-                if (nw.d < anyD) { anyD = nw.d; anyLim = lim; }
-                if (alignedAny(routeBrgs, nw.brg, ALIGN_TOL) && nw.d < aD) { aD = nw.d; aLim = lim; }
+                const al = alignedAny(routeBrgs, nw.brg, ALIGN_TOL);
+                if (lim != null) {
+                    if (nw.d < anyD) { anyD = nw.d; anyLim = lim; }
+                    if (al && nw.d < aD) { aD = nw.d; aLim = lim; }
+                }
+                if (g != null) {
+                    if (nw.d < anyGD) { anyGD = nw.d; anyGen = g; }
+                    if (al && nw.d < aGD) { aGD = nw.d; aGen = g; }
+                }
             }
-            raw[vi] = (aLim != null) ? aLim : anyLim;       // aligned preferred, nearest as a never-blank fallback
+            conf[vi] = (aLim != null) ? aLim : anyLim;      // aligned preferred, nearest as a never-blank fallback
+            gen[vi] = (aGen != null) ? aGen : anyGen;
         }
-        return carryForward(raw);
+        return carryForwardBarrier(conf, gen);
     }
-    function carryForward(raw) {
-        const out = raw.slice();
+    // Carry a confirmed limit forward across untagged gaps — the original behaviour so a short untagged stretch
+    // doesn't blank the sign — but STOP the carry where the road's OWN generic legal default contradicts it.
+    // Leaving a town the rural limit must not bleed into the city: the urban stretch tags only DE:urban=50,
+    // which resolveLimit (wayLimit) drops to null → without a barrier the previous 100 got dragged straight
+    // through, shown as a CONFIRMED (solid) sign, overriding the honest dimmed 50 (Doc 2026-07-06 „da steht
+    // hundert, das ist falsch"). At such a spot we emit null instead → deriveChangePoints marks a gap →
+    // limitAt returns null there → the LIVE sign falls back to ITS unconfirmed generic default. We never
+    // inject the generic value as a profile limit: the profile only ever shows CONFIRMED signs, and a generic
+    // default must stay unconfirmed (it might be an unmapped 30-zone). A genuinely untagged gap with no
+    // generic hint (gen==null) still carries as before — nothing contradicts the carry there.
+    function carryForwardBarrier(conf, gen) {
+        const out = conf.slice();
         let last = null;
         for (let i = 0; i < out.length; i++) {
-            if (out[i] == null) out[i] = last; else last = out[i];
+            if (out[i] != null) { last = out[i]; continue; }            // an own confirmed limit here → carry it on
+            if (last != null && gen[i] != null && !sameLimit(gen[i], last)) {
+                last = null;                                            // generic default disagrees → break the carry
+                out[i] = null;                                          // …and leave a real gap for the live sign
+            } else {
+                out[i] = last;                                          // agrees, or no generic hint → carry as before
+            }
         }
         return out;
     }
@@ -271,12 +304,17 @@ window.TrackerSpeedProfile = function (ctx) {
     // Change points = vertices where the carry-forward limit first differs from the previous one.
     // Each carries its vertex index `i` so refineChangePoints can bisect the bracket [i-1, i]; `i` is
     // stripped again during refinement so the cached point stays lean.
+    // A transition TO null (a barrier gap opened by carryForwardBarrier) is emitted as a change point with
+    // limit:null so limitAt returns null there and the live sign takes over — otherwise the preceding limit
+    // would keep applying right through the gap. A LEADING null run (before the first real limit) emits
+    // nothing (limitAt returns null there anyway).
     function deriveChangePoints(pts, limits) {
         const cps = [];
-        let prev = undefined;
+        let prev = undefined;                                          // undefined = nothing emitted yet
         for (let i = 0; i < pts.length; i++) {
             const v = limits[i];
-            if (v != null && !sameLimit(v, prev)) { cps.push({ lat: pts[i][0], lng: pts[i][1], limit: v, i }); prev = v; }
+            if (prev === undefined && v == null) continue;             // skip the leading gap
+            if (!sameLimit(v, prev)) { cps.push({ lat: pts[i][0], lng: pts[i][1], limit: v, i }); prev = v; }
         }
         return cps;
     }
@@ -396,7 +434,10 @@ window.TrackerSpeedProfile = function (ctx) {
             for (let c = 0; c < cps.length; c++) { if (cpIdx[c] <= i) lim = cps[c].limit; else break; }
             out[i] = lim;
         }
-        return carryForward(out);
+        // Walking the change points already carries each limit forward to the next switch — including a
+        // null (barrier) change point, which must STAY null through its gap (a trailing carryForward would
+        // wrongly refill it with the preceding limit, re-introducing the rural-100-into-town bug on reload).
+        return out;
     }
     function nearestIdxOn(pts, here) {
         const k = Math.cos(here[0] * Math.PI / 180);
@@ -425,6 +466,7 @@ window.TrackerSpeedProfile = function (ctx) {
         clearMarkers();
         markers = L.layerGroup();
         for (const c of cps) {
+            if (c.limit == null) continue;   // a barrier gap-start has no sign to show (the live sign takes over there)
             const icon = L.divIcon({ className: 'sp-badge-wrap', html: badgeHtml(c.limit), iconSize: [26, 26], iconAnchor: [13, 13] });
             L.marker([c.lat, c.lng], { icon, interactive: false, keyboard: false, pane: 'markerPane' }).addTo(markers);
         }
@@ -492,15 +534,18 @@ window.TrackerSpeedProfile = function (ctx) {
         if (out[out.length - 1] !== n - 1) out.push(n - 1);
         return out;
     }
-    // Map limits sampled at indices `idx` back onto all n vertices (carry the last sample forward).
+    // Map limits sampled at indices `idx` back onto all n vertices — each sample fills the span up to the
+    // next one. The samples come already carried (carryForwardBarrier) so a null sample is a real barrier
+    // gap: it must STAY null across its span (no trailing carryForward, which would refill it and drag the
+    // preceding limit through the gap again). idx always starts at 0, so there is no leading null to fill.
     function expandToAll(n, idx, sampled) {
         const out = new Array(n).fill(null);
         for (let s = 0; s < idx.length; s++) {
             const from = idx[s], to = (s + 1 < idx.length) ? idx[s + 1] : n;
             for (let i = from; i < to; i++) out[i] = sampled[s];
         }
-        return carryForward(out);
+        return out;
     }
 
-    return { build, clear, limitAt, hasRoute, setResolver, setEval };
+    return { build, clear, limitAt, hasRoute, setResolver, setGeneric, setEval };
 };
