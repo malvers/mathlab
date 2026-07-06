@@ -683,7 +683,15 @@
         let bannerHideTimer = null;
         function armBannerHide() {
             if (bannerHideTimer) clearTimeout(bannerHideTimer);
-            bannerHideTimer = setTimeout(() => { if (elHudTop) elHudTop.classList.add('hud-collapsed'); }, BANNER_HIDE_MS);
+            bannerHideTimer = setTimeout(() => {
+                if (!elHudTop) return;
+                // Slide the whole header up by exactly the satellite row's height, so hiding it leaves no gap
+                // (Doc 2026-07-06). Measured live (survives orientation changes); the CSS transform transition
+                // does the slow slide. #gps-chip keeps its layout box while faded, so offsetHeight is valid.
+                const chip = $('gps-chip');
+                if (chip) elHudTop.style.setProperty('--hud-shift', chip.offsetHeight + 'px');
+                elHudTop.classList.add('hud-collapsed');
+            }, BANNER_HIDE_MS);
         }
         function showBannerExtras() {
             if (elHudTop) elHudTop.classList.remove('hud-collapsed');
