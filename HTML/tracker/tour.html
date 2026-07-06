@@ -95,6 +95,9 @@
         <div id="stats"></div>
     </header>
     <div id="profile"><svg viewBox="0 0 1000 74" preserveAspectRatio="none" aria-hidden="true"></svg></div>
+    <button id="fit-btn" type="button" aria-label="Ganze Route zeigen" title="Ganze Route zeigen">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M12 2v3M12 19v3M2 12h3M19 12h3"></path></svg>
+    </button>
     <button id="zoom-in" type="button" aria-label="Hineinzoomen"></button>
     <button id="zoom-out" type="button" aria-label="Herauszoomen"></button>
     <button id="legs-btn" type="button">Etappen ▴</button>
@@ -123,6 +126,8 @@
         const sb = ViewerBase.supa();
         if (!sb) { showMsg('<b style="color:var(--orange)">Bibliothek nicht geladen</b><br>Anderes Netz/Reload versuchen.'); throw new Error('supabase lib missing'); }
         const map = ViewerBase.createMap([51.05, 13.74], 11);
+        let _fitBounds = null;                          // whole-tour bounds → the crosshair re-frames to it
+        ViewerBase.wireFit(map, () => _fitBounds);
 
         const usesHotline = !!L.hotline;
         const trackLayer = L.layerGroup().addTo(map);
@@ -233,7 +238,7 @@
 
             drawProfile(profPts);
             $('legs-btn').textContent = 'Etappen (' + tracks.length + ') ▴';
-            if (allLatLng.length) map.fitBounds(L.latLngBounds(allLatLng), { padding: [50, 50] });
+            if (allLatLng.length) { _fitBounds = L.latLngBounds(allLatLng); map.fitBounds(_fitBounds, { padding: [50, 50] }); }
             hideMsg();
         })();
 
