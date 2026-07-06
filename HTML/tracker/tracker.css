@@ -2357,7 +2357,7 @@ body.ui-idle #trk-controls {
        when the HUD auto-hides (body.ui-idle). --nav-down ≈ the instruments' height — tune by eye.
        Doc 2026-06-14, notes #6/#7. (+--cfg-nav-dy = live-config "nach Süden".) */
     top: calc(env(safe-area-inset-top, 0px) + 96px + var(--nav-down, 84px) + var(--cfg-nav-dy, 0px));
-    transition: top 0.25s ease;
+    transition: top 0.25s ease, transform 0.6s ease;
     transform: none;
     z-index: var(--cfg-nav-z, 480); /* live-config z-order; default UNDER the header (#hud-top z500) */
     width: auto;
@@ -2388,6 +2388,14 @@ body.ui-idle #trk-controls {
 /* HUD auto-hidden (idle) → instruments gone → banner moves right UP to the top (Doc: weiter nach oben). */
 body.ui-idle #nav-banner {
     top: calc(env(safe-area-inset-top, 0px) + 12px + var(--cfg-nav-dy, 0px));
+}
+
+/* Banner-Extras eingeklappt (Header um --hud-shift hochgeschoben) → die Navi-Anweisung um genau denselben
+   Betrag mit nach oben ziehen, damit der Abstand zum Header gleich bleibt; Tipp auf die Uhr zieht sie wieder
+   runter (Doc 2026-07-06). Per transform (eigene 0,6-s-Transition, wie der Header) statt top, damit es sich
+   nicht mit der top-Animation beißt. NUR wenn NICHT idle — im Idle geht der Banner ohnehin ganz nach oben. */
+body:not(.ui-idle) #hud-top.hud-collapsed ~ #nav-banner {
+    transform: translateY(calc(-1 * var(--hud-shift, 0px)));
 }
 
 /* Two rows: maneuver line (arrow + distance + road/destinations) and the trip line (ETA · remaining). */
