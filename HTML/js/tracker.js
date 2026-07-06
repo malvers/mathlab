@@ -2428,6 +2428,7 @@ ${pts}
             times = points.map(p => p[2] || null);
             alts = points.map(p => (p[3] != null ? p[3] : null));   // older tracks have no p[3] → null
             resetDem(); // a freshly loaded track has no DEM lookup yet
+            smoothOn = false; const _sb = $('mb-smooth'); if (_sb) _sb.classList.remove('active'); // fresh load starts unsmoothed
             speeds = points.map(p => (p[4] != null ? p[4] : null));
             activities = points.map(p => (p[5] != null ? p[5] : null)); // travel mode (older tracks → null)
             temps = points.map(p => (p[6] != null ? p[6] : null));      // ambient °C (older tracks → null)
@@ -2686,6 +2687,127 @@ ${pts}
                 document.body.appendChild(ov);
                 requestAnimationFrame(() => ov.classList.add('shown'));
             });
+        }
+
+        // ---- Per-track ⋯ menu: one action sheet holding every track function (Doc 2026-07-06) ----
+        // A styled list of actions (+ cancel). Each item: { label, danger?, hidden?, run() }.
+        function uiActionSheet(title, items) {
+            const ov = document.createElement('div'); ov.className = 'ui-modal-ov';
+            const box = document.createElement('div'); box.className = 'ui-modal'; box.setAttribute('role', 'dialog'); box.setAttribute('aria-modal', 'true');
+            const msg = document.createElement('div'); msg.className = 'ui-modal-msg'; msg.textContent = title;
+            const list = document.createElement('div'); list.className = 'ui-pick-list';
+            let done = false;
+            function close() { if (done) return; done = true; ov.classList.remove('shown'); document.removeEventListener('keydown', onKey); setTimeout(() => ov.remove(), 200); }
+            function onKey(e) { if (e.key === 'Escape') close(); }
+            (items || []).forEach((it) => {
+                if (it.hidden) return;
+                const b = document.createElement('button'); b.type = 'button';
+                b.className = 'ui-pick-item' + (it.danger ? ' ui-pick-danger' : '');
+                b.textContent = it.label;
+                b.onclick = () => { close(); if (it.run) it.run(); };
+                list.appendChild(b);
+            });
+            const btns = document.createElement('div'); btns.className = 'ui-modal-btns';
+            const cancel = document.createElement('button'); cancel.type = 'button'; cancel.className = 'ui-btn ui-btn-cancel'; cancel.textContent = 'Abbrechen'; cancel.onclick = close;
+            btns.appendChild(cancel);
+            box.appendChild(msg); box.appendChild(list); box.appendChild(btns);
+            ov.appendChild(box); ov.onclick = (e) => { if (e.target === ov) close(); };
+            document.addEventListener('keydown', onKey); document.body.appendChild(ov);
+            requestAnimationFrame(() => ov.classList.add('shown'));
+        }
+
+        // Read-only stats dialog (Distanz · Dauer · Ø/Max · Auf-/Abstieg · Höchster/tiefster).
+        function uiStatsDialog(title, rows) {
+            const ov = document.createElement('div'); ov.className = 'ui-modal-ov';
+            const box = document.createElement('div'); box.className = 'ui-modal'; box.setAttribute('role', 'dialog');
+            const msg = document.createElement('div'); msg.className = 'ui-modal-msg'; msg.textContent = title;
+            const list = document.createElement('div'); list.className = 'ui-stat-list';
+            rows.forEach(([k, v]) => {
+                const row = document.createElement('div'); row.className = 'ui-stat-row';
+                const a = document.createElement('span'); a.className = 'ui-stat-k'; a.textContent = k;
+                const c = document.createElement('span'); c.className = 'ui-stat-v'; c.textContent = v;
+                row.appendChild(a); row.appendChild(c); list.appendChild(row);
+            });
+            let done = false;
+            function close() { if (done) return; done = true; ov.classList.remove('shown'); document.removeEventListener('keydown', onKey); setTimeout(() => ov.remove(), 200); }
+            function onKey(e) { if (e.key === 'Escape' || e.key === 'Enter') close(); }
+            const btns = document.createElement('div'); btns.className = 'ui-modal-btns';
+            const ok = document.createElement('button'); ok.type = 'button'; ok.className = 'ui-btn ui-btn-ok'; ok.textContent = 'OK'; ok.onclick = close;
+            btns.appendChild(ok);
+            box.appendChild(msg); box.appendChild(list); box.appendChild(btns);
+            ov.appendChild(box); ov.onclick = (e) => { if (e.target === ov) close(); };
+            document.addEventListener('keydown', onKey); document.body.appendChild(ov);
+            requestAnimationFrame(() => ov.classList.add('shown'));
+        }
+        function showStatsDialog(name) {
+            const s = trackStats(), dem = demOn ? ' (DEM)' : '';
+            uiStatsDialog((name || 'Track').replace(/^Track\s+/, ''), [
+                ['Distanz', fmtDist(s.distM)],
+                ['Dauer', fmtDur(s.durMs)],
+                ['Ø-Tempo', s.avgKmh.toFixed(1) + ' km/h'],
+                ['Max-Tempo', s.maxKmh.toFixed(1) + ' km/h'],
+                ['Aufstieg ↑', s.up + ' m' + dem],
+                ['Abstieg ↓', s.down + ' m' + dem],
+                ['Höchster / tiefster', (s.hi != null ? Math.round(s.hi) : '–') + ' / ' + (s.lo != null ? Math.round(s.lo) : '–') + ' m'],
+            ]);
+        }
+
+        // Load a track row onto the map, then optionally apply a follow-up (smooth / DEM / stats / GPX).
+        async function loadRow(r, opts) {
+            opts = opts || {};
+            toast('Lade Track …');
+            let t;
+            try { t = await fetchTrack(r.id); } catch (e) { toast('Track laden fehlgeschlagen.'); return; }
+            plotTrack(t.points, t.waypoints);
+            currentTrackId = r.id; currentTrackName = r.name;
+            loadedTrackIds.clear(); loadedTrackIds.add(r.id);
+            persistLoaded([{ id: r.id, name: r.name }]);
+            hidePanels();
+            if (opts.smooth) toggleSmooth();
+            else if (opts.dem) await toggleDem();
+            else if (opts.stats) showStatsDialog(r.name);
+            else if (opts.exportGpx) exportGpx();
+            else toast((r.name || 'Track') + ' geladen.');
+        }
+        // Move ONE track into a folder (existing or new) via the folder picker.
+        async function moveRow(r) {
+            const choice = await uiPickFolder(_folders);
+            if (!choice) return;
+            let fid, fname;
+            if (choice.new) {
+                fname = await uiPrompt('Ordnername:', { value: 'Neuer Ordner', okText: 'Anlegen' });
+                if (!fname) return;
+                try { fid = await createFolder(fname); } catch (e) { toast('Anlegen fehlgeschlagen: ' + (e.message || e)); return; }
+            } else { fid = choice.id; fname = (_folders.find((f) => f.id === fid) || {}).name || 'Ordner'; }
+            try { await assignFolder([r.id], fid); } catch (e) { toast('Verschieben fehlgeschlagen: ' + (e.message || e)); return; }
+            toast('„' + ((r.name || 'Track').replace(/^Track\s+/, '')) + '" → „' + fname + '"');
+            try { const rows = await listTracks(); renderTrackList(rows); } catch (e) { /* refresh best-effort */ }
+        }
+        // The per-track ⋯ menu: every action for THAT track in one sheet.
+        function openTrackMenu(r, rowEl) {
+            const title = (r.name || 'Track').replace(/^Track\s+/, '').replace(/^Sprachnotiz\s+/i, '');
+            uiActionSheet(title, [
+                { label: 'Laden', run: () => loadRow(r) },
+                { label: 'Statistik …', run: () => loadRow(r, { stats: true }) },
+                { label: 'Teilen', run: () => shareTrack(r.id, r.name) },
+                { label: 'Verschieben …', run: () => moveRow(r) },
+                {
+                    label: 'Aus Ordner nehmen', hidden: !r.folder_id, run: async () => {
+                        try { await assignFolder([r.id], null); toast('Aus Ordner genommen.'); const rows = await listTracks(); renderTrackList(rows); }
+                        catch (e) { toast('Verschieben fehlgeschlagen.'); }
+                    },
+                },
+                { label: 'Als GPX exportieren', run: () => loadRow(r, { exportGpx: true }) },
+                { label: 'Glätten', run: () => loadRow(r, { smooth: true }) },
+                { label: 'Höhe nach Geländemodell', run: () => loadRow(r, { dem: true }) },
+                {
+                    label: 'Löschen', danger: true, hidden: !ALLOW_DELETE, run: async () => {
+                        if (!(await uiConfirm('Track löschen?', { danger: true, okText: 'Löschen' }))) return;
+                        try { await removeTrack(r.id); if (rowEl) rowEl.remove(); toast('Gelöscht.'); }
+                        catch (e) { toast('Löschen fehlgeschlagen.'); }
+                    },
+                },
+            ]);
         }
 
         // ---- Transient toast (the persistent status line was removed) ----
@@ -3137,31 +3259,26 @@ ${pts}
 
         // ---- Popup actions ----
 
-        // GPS-Nachbearbeitung Stufe 1.2 — non-destructive: toggles a despike+smooth pass on the
-        // DISPLAYED line only (TrackSmooth). Stored data stays raw; tap again to see the original.
-        $('mb-smooth').addEventListener('click', () => {
-            hidePanels(); // GLÄTTEN now lives in the settings "Tracks" card → close it so the track is visible
+        // Non-destructive display smoothing (despike+smooth pass on the DISPLAYED line only,
+        // TrackSmooth). Stored data stays raw. Toggle — invoked from a track's ⋯ menu.
+        function toggleSmooth() {
             if (!track || !track.length) { toast('Kein Track geladen.'); return; }
             smoothOn = !smoothOn;
-            $('mb-smooth').classList.toggle('active', smoothOn); // green when on (like the REGEN toggle)
+            const b = $('mb-smooth'); if (b) b.classList.toggle('active', smoothOn);
             redrawTrack();
             toast(smoothOn ? 'Glättung an (nur Anzeige, Daten unberührt)' : 'Glättung aus');
-        });
-
-        // Export the loaded track as a .gpx download (trackpoints + elevation + photo waypoints).
-        if ($('mb-gpx-export')) $('mb-gpx-export').addEventListener('click', () => { hidePanels(); exportGpx(); });
+        }
 
         // GPS-Nachbearbeitung Stufe 1.3 — DEM height: replace the noisy GPS+baro altitude with the
         // terrain elevation from a digital elevation model (Open-Meteo / Copernicus GLO-90). Async (one
         // network fetch, then cached). Non-destructive: fills demAlts[] and flips a display+GPX toggle;
-        // the stored raw alts stay untouched. Tap again to switch back.
-        $('mb-dem').addEventListener('click', async () => {
-            hidePanels();
+        // the stored raw alts stay untouched. Toggle — invoked from a track's ⋯ menu.
+        async function toggleDem() {
             if (demBusy) return;
             if (!track || !track.length) { toast('Kein Track geladen.'); return; }
             if (demOn) { // turn off → back to raw GPS+baro
                 demOn = false;
-                $('mb-dem').classList.remove('active');
+                const b = $('mb-dem'); if (b) b.classList.remove('active');
                 renderAltitude();
                 toast('DEM-Höhe aus');
                 return;
@@ -3181,11 +3298,11 @@ ${pts}
                 demBusy = false;
             }
             demOn = true;
-            $('mb-dem').classList.add('active');
+            const b = $('mb-dem'); if (b) b.classList.add('active');
             renderAltitude();
             const dem = ascentDescent(demAlts), gps = ascentDescent(alts);
             toast('DEM-Höhe an · ↑ ' + dem.up + ' m  ↓ ' + dem.down + ' m  (GPS war ↑ ' + gps.up + ')');
-        });
+        }
 
         $('mb-load').addEventListener('click', async () => {
             closePopup();
@@ -3605,39 +3722,13 @@ ${pts}
                     try { const t = await fetchTrack(r.id); plotTrack(t.points, t.waypoints); currentTrackId = r.id; currentTrackName = r.name; loadedTrackIds.clear(); loadedTrackIds.add(r.id); persistLoaded([{ id: r.id, name: r.name }]); hidePanels(); toast(r.name + ' geladen.'); }
                     catch (e) { toast('Track laden fehlgeschlagen.'); }
                 });
-                const sh = document.createElement('button');
-                sh.className = 'tl-share'; sh.title = 'Teilen';
-                sh.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>';
-                sh.addEventListener('click', (ev) => { ev.stopPropagation(); shareTrack(r.id, r.name); });
-                // The trailing action icons live in one tight flex group (share · out · delete) so they
-                // sit close together and never crowd/overlap the km·time·speed meta line.
-                const acts = document.createElement('div'); acts.className = 'tl-acts';
-                acts.appendChild(sh);
-                // Move a track OUT of its folder back to the main list (only shown for grouped tracks).
-                if (r.folder_id) {
-                    const out = document.createElement('button');
-                    out.className = 'tl-out'; out.title = 'Aus Ordner nehmen';
-                    out.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"></path></svg>';
-                    out.addEventListener('click', async (ev) => {
-                        ev.stopPropagation();
-                        try { await assignFolder([r.id], null); toast('Aus Ordner genommen.'); const rows2 = await listTracks(); renderTrackList(rows2); }
-                        catch (e) { toast('Verschieben fehlgeschlagen.'); }
-                    });
-                    acts.appendChild(out);
-                }
-                if (ALLOW_DELETE) { // cloud-delete disabled for now → no × button (see removeTrack)
-                    const del = document.createElement('button');
-                    del.className = 'tl-del'; del.title = 'Löschen';
-                    del.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path></svg>';
-                    del.addEventListener('click', async (ev) => {
-                        ev.stopPropagation();
-                        if (!(await uiConfirm('Track löschen?', { danger: true, okText: 'Löschen' }))) return;
-                        try { await removeTrack(r.id); row.remove(); toast('Gelöscht.'); }
-                        catch (e) { toast('Löschen fehlgeschlagen.'); }
-                    });
-                    acts.appendChild(del);
-                }
-                row.appendChild(main); row.appendChild(acts);
+                // One ⋯ menu per row holds EVERY track action (Laden · Statistik · Teilen · Verschieben ·
+                // Aus Ordner · GPX-Export · Glätten · Höhe · Löschen) — replaces the old share/×/trash icons.
+                const menuBtn = document.createElement('button');
+                menuBtn.className = 'tl-menu-btn'; menuBtn.title = 'Aktionen'; menuBtn.setAttribute('aria-label', 'Aktionen');
+                menuBtn.innerHTML = '<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><circle cx="12" cy="5" r="2"></circle><circle cx="12" cy="12" r="2"></circle><circle cx="12" cy="19" r="2"></circle></svg>';
+                menuBtn.addEventListener('click', (ev) => { ev.stopPropagation(); openTrackMenu(r, row); });
+                row.appendChild(main); row.appendChild(menuBtn);
                 return row;
             }
 
