@@ -2827,6 +2827,18 @@ ${pts}
                 const time = timeEl ? (timeEl.textContent || '').trim() : '';
                 points.push([lat, lon, time || null, isFinite(ele) ? ele : null, null, null, null]);
             }
+            // Derive per-point speed (km/h) from consecutive time+distance so the loaded track is
+            // speed-COLOURED like a recorded one — otherwise speed stays null → the renderer paints it
+            // all at 0 km/h (flat deep green). Any timestamped GPX benefits; a GPX without <time> stays null.
+            for (let i = 1; i < points.length; i++) {
+                const a = points[i - 1], b = points[i];
+                if (!a[2] || !b[2]) continue;
+                const dt = (Date.parse(b[2]) - Date.parse(a[2])) / 1000;   // s
+                if (!(dt > 0)) continue;
+                const dm = haversine([a[0], a[1]], [b[0], b[1]]);          // m
+                b[4] = Math.round(dm / dt * 3.6 * 10) / 10;                // km/h into this point
+            }
+            if (points.length > 1 && points[0][4] == null) points[0][4] = points[1][4]; // seed the first point
             return { name: (nameEl ? nameEl.textContent : '').trim(), points };
         }
         if ($('tl-gpx')) $('tl-gpx').addEventListener('click', () => { const inp = $('gpx-input'); if (inp) inp.click(); });
