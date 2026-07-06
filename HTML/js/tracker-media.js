@@ -80,23 +80,23 @@ window.TrackerMedia = function (T) {
         // waypoints; analyses = count of identify_log rows = TRUE number of Gemini calls incl.
         // re-runs (the real cost driver). Re-indexing a photo doesn't add a photo but DOES add
         // an analysis → cost tracks analyses, not photos.
+        // "Fotos gespeichert" — the one number we can attribute honestly to the tracker (Σ photo
+        // waypoints across all tracks, via the usage_stats() RPC). The old per-track analyses/cost log
+        // (identify_log) is gone and ai_cost_log mixes all apps, so cost is left to the live dashboard
+        // link instead of a fabricated figure (Doc 2026-07-06).
         async function loadUsage() {
-            const photoEl = $('use-photos'), anaEl = $('use-analyses'), costEl = $('use-cost');
+            const photoEl = $('use-photos');
             if (!photoEl) return;
-            photoEl.textContent = '…'; if (anaEl) anaEl.textContent = '…'; costEl.textContent = '…';
+            photoEl.textContent = '…';
             try {
                 const c = await ensureSb();
                 const { data, error } = await c.rpc('usage_stats');
                 if (error) throw error;
                 const row = Array.isArray(data) ? data[0] : data;
                 const photos = Number((row && row.photos) || 0);
-                const analyses = Number((row && row.analyses) || 0);
-                photoEl.textContent = photos + (photos === 1 ? ' Foto' : ' Fotos');
-                if (anaEl) anaEl.textContent = analyses.toLocaleString('de-DE') + '×';
-                // Cost follows the ANALYSES (each run = 1 Gemini call), not the stored photos.
-                costEl.textContent = '~' + (analyses * EUR_PER_PHOTO).toLocaleString('de-DE', { style: 'currency', currency: 'EUR' });
+                photoEl.textContent = photos.toLocaleString('de-DE') + (photos === 1 ? ' Foto' : ' Fotos');
             } catch (e) {
-                photoEl.textContent = '–'; if (anaEl) anaEl.textContent = '–'; costEl.textContent = '–';
+                photoEl.textContent = '–';
                 if (window.DebugWindow) DebugWindow.log('Verbrauch: ' + (e && (e.message || e)));
             }
         }
