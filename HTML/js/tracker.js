@@ -3148,6 +3148,9 @@ ${pts}
             toast(smoothOn ? 'Glättung an (nur Anzeige, Daten unberührt)' : 'Glättung aus');
         });
 
+        // Export the loaded track as a .gpx download (trackpoints + elevation + photo waypoints).
+        if ($('mb-gpx-export')) $('mb-gpx-export').addEventListener('click', () => { hidePanels(); exportGpx(); });
+
         // GPS-Nachbearbeitung Stufe 1.3 — DEM height: replace the noisy GPS+baro altitude with the
         // terrain elevation from a digital elevation model (Open-Meteo / Copernicus GLO-90). Async (one
         // network fetch, then cached). Non-destructive: fills demAlts[] and flips a display+GPX toggle;
