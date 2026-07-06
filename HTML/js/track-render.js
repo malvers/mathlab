@@ -65,6 +65,16 @@
 
     // Draw one continuous run, coloured by its travel mode (white → mode-colour by speed).
     function drawRun(ctx, idxs, activity) {
+        if (!idxs.length) return;
+        // Standing still: the GPS fix can wander 100s of metres before it settles (acquisition), and
+        // drawing that as a line paints a weird white "Halbkreis". So a STILL run isn't a line at all —
+        // mark the stop with ONE white dot at the settled position (the last point, just before moving
+        // on). "You stood here" stays white/visible; the jitter arc is gone (Doc 2026-07-06).
+        if (activity === 'still') {
+            const p = ctx.track[idxs[idxs.length - 1]];
+            L.circleMarker(p, { radius: 4, color: 'rgba(8,20,42,0.55)', weight: 1.5, fillColor: '#fff', fillOpacity: 0.95, interactive: false }).addTo(ctx.layer);
+            return;
+        }
         if (idxs.length < 2) return; // a lone point has no segment to draw
         const mode = MODE_COLORS[activity];
         if (ctx.usesHotline) {
