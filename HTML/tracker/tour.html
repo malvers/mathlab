@@ -164,6 +164,7 @@
     <script src="https://unpkg.com/leaflet-hotline@0.4.0/dist/leaflet.hotline.min.js"></script>
     <script src="../js/track-render.js"></script>
     <script src="../js/photo-layer.js"></script>
+    <script src="../js/track-overlay.js"></script>
     <script src="../js/supa-gate.js"></script>
     <script src="../js/vendor/supabase.min.js"></script>
     <script>
@@ -188,37 +189,11 @@
 
         const usesHotline = !!L.hotline;
         const trackLayer = L.layerGroup().addTo(map);
-        const waypoints = [], wpMarkers = [];
+        const wpState = { waypoints: [], wpMarkers: [] };   // media pins — shared glue in TrackOverlay
         PhotoLayer.mountLightbox();
-        function addWaypoint(wp) {
-            waypoints.push(wp);
-            const m = L.marker([wp.lat, wp.lng], { icon: PhotoLayer.pinIcon(wp) }).addTo(map);
-            m._wp = wp;
-            m.on('click', () => PhotoLayer.openLightbox(wp, waypoints));
-            wpMarkers.push(m);
-            PhotoLayer.applyStackBadges(wpMarkers, map);
-        }
-        map.on('zoomend', () => PhotoLayer.applyStackBadges(wpMarkers, map));
+        map.on('zoomend', () => PhotoLayer.applyStackBadges(wpState.wpMarkers, map));
 
-        const hav = TrackRender.haversine;
-        function fmtClock(ms) {
-            const s = Math.max(0, Math.round(ms / 1000)), p = n => String(n).padStart(2, '0');
-            const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60);
-            return h > 0 ? h + ':' + p(m) + ' h' : m + ' min';
-        }
-        // Stats for one stage from its raw points ([lat,lng,tIso,alt,speed,…]).
-        function stageStats(pts) {
-            let d = 0, up = 0, down = 0, prevA = null;
-            for (let i = 0; i < pts.length; i++) {
-                if (i > 0) d += hav(pts[i - 1], pts[i]);
-                const a = pts[i][3];
-                if (a != null) { if (prevA != null) { const dv = a - prevA; if (dv > 0) up += dv; else down -= dv; } prevA = a; }
-            }
-            const ts = pts.map(p => p[2]).filter(Boolean);
-            let durMs = 0;
-            if (ts.length > 1) { const a = Date.parse(ts[0]), b = Date.parse(ts[ts.length - 1]); if (!isNaN(a) && !isNaN(b)) durMs = Math.max(0, b - a); }
-            return { distM: d, durMs, up: Math.round(up), down: Math.round(down) };
-        }
+        const hav = TrackOverlay.haversine, fmtClock = TrackOverlay.fmtClock;
         function statTile(val, lbl) { return '<div class="stat"><b>' + val + '</b><small>' + lbl + '</small></div>'; }
 
         // Draw the elevation profile of the whole tour (all stages concatenated, cum-distance × altitude).
@@ -275,28 +250,17 @@
 
             tracks.forEach((t, i) => {
                 const pts = (t.points || []).filter(p => p && p[0] != null);
-                const st = stageStats(pts);
+                const st = TrackOverlay.statsFromPoints(pts);
                 const distM = (t.distance_m != null ? Number(t.distance_m) : st.distM);
                 totDist += distM; totDur += st.durMs; totUp += st.up; totDown += st.down;
 
                 if (pts.length) {
-                    TrackRender.draw({
-                        track: pts.map(p => [p[0], p[1]]),
-                        times: pts.map(p => p[2] || null),
-                        speeds: pts.map(p => (p[4] != null ? p[4] : null)),
-                        activities: pts.map(p => (p[5] != null ? p[5] : null)),
-                        layer: trackLayer, usesHotline,
-                    });
-                    // click-to-identify: transparent fat hit-line naming the stage + its stats
-                    const label = ((t.name || '').replace(/^Track\s+/, '') || ('Etappe ' + (i + 1)));
+                    // click-to-identify popup: "N. name" + km · dauer
+                    const label = (i + 1) + '. ' + ((t.name || '').replace(/^Track\s+/, '') || ('Etappe ' + (i + 1)));
                     const parts = [];
                     if (distM >= 10) parts.push((distM / 1000).toFixed(2) + ' km');
                     if (st.durMs > 0) parts.push(fmtClock(st.durMs));
-                    const hit = L.polyline(pts.map(p => [p[0], p[1]]), { color: '#000', opacity: 0, weight: 16, interactive: true });
-                    const pop = document.createElement('div'); pop.className = 'track-id-pop';
-                    const nm = document.createElement('div'); nm.className = 'track-id-name'; nm.textContent = (i + 1) + '. ' + label; pop.appendChild(nm);
-                    if (parts.length) { const me = document.createElement('div'); me.className = 'track-id-meta'; me.textContent = parts.join(' · '); pop.appendChild(me); }
-                    hit.bindPopup(pop); hit.addTo(trackLayer);
+                    TrackOverlay.drawStage(map, trackLayer, pts, { usesHotline, name: label, meta: parts.join(' · ') });
                     // profile: append this stage's points with running cumulative distance
                     for (let k = 0; k < pts.length; k++) {
                         if (k > 0) cum += hav(pts[k - 1], pts[k]);
@@ -304,7 +268,7 @@
                         allLatLng.push([pts[k][0], pts[k][1]]);
                     }
                 }
-                (t.waypoints || []).forEach(w => { if (w && w.lat != null) { addWaypoint(w); photos++; } });
+                (t.waypoints || []).forEach(w => { if (w && w.lat != null) { TrackOverlay.addWaypoint(map, wpState, w); photos++; } });
 
                 // legs list row
                 const row = document.createElement('div'); row.className = 'leg';
