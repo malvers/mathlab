@@ -368,15 +368,27 @@
                 url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png', sub: 'abcd', maxNativeZoom: 20, bg: 'rgb(8, 20, 42)',
                 attrib: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> &middot; &copy; <a href="https://carto.com/attributions" target="_blank" rel="noopener">CARTO</a>',
             },
-            light: {
+            // Day, "lean" — CARTO Voyager: same OSM data, a navigation render (muted land, road hierarchy,
+            // far fewer POIs) → much less cluttered than raw OSM Standard while driving (Doc 2026-07-06).
+            lean: {
+                url: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png', sub: 'abcd', maxNativeZoom: 20, bg: '',
+                attrib: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> &middot; &copy; <a href="https://carto.com/attributions" target="_blank" rel="noopener">CARTO</a>',
+            },
+            // Day, dense — raw OpenStreetMap Standard tiles (everything mappers put on the map).
+            osm: {
                 url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', sub: 'abc', maxNativeZoom: 19, bg: '',
                 attrib: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>',
             },
         };
         const MAP_THEME_KEY = 'trk_map_theme';
         const MAP_PREFS = ['auto', 'light', 'dark'];
+        // The DAY (light) basemap has two flavours, independent of the Auto/Hell/Dunkel brightness axis:
+        // 'osm' = raw OSM Standard (default), 'lean' = CARTO Voyager (Google-Maps-lean, but fainter). Persisted.
+        const DAY_STYLE_KEY = 'trk_day_style';
+        const DAY_STYLES = ['osm', 'lean'];
+        let dayStyle = DAY_STYLES.includes(localStorage.getItem(DAY_STYLE_KEY)) ? localStorage.getItem(DAY_STYLE_KEY) : 'osm'; // DEFAULT osm
         let themePref = MAP_PREFS.includes(localStorage.getItem(MAP_THEME_KEY)) ? localStorage.getItem(MAP_THEME_KEY) : 'auto'; // DEFAULT auto
-        let mapTheme = 'light';    // the RESOLVED theme actually on the map (auto → light/dark)
+        let mapTheme = 'osm';    // the RESOLVED basemap key on the map ('osm' | 'lean' | 'dark')
         let baseMap = null;
         let lastFix = null;        // last GPS fix { lat, lng, t } — declared here so the AUTO map theme can read it at init
         // DEBUG: hide the background map → judge the rain-radar colours with no terrain underneath.
@@ -403,7 +415,8 @@
         }
         function resolveTheme(pref) {
             pref = MAP_PREFS.includes(pref) ? pref : 'auto';
-            return pref === 'auto' ? (isNightNow() ? 'dark' : 'light') : pref;
+            const wantDark = pref === 'dark' || (pref === 'auto' && isNightNow());
+            return wantDark ? 'dark' : dayStyle; // 'dark' | 'lean' | 'osm'
         }
         // Apply the resolved theme to the map. No-op when it already matches (so the 5-min auto poll is cheap).
         function applyResolvedTheme() {
@@ -422,7 +435,13 @@
             try { localStorage.setItem(MAP_THEME_KEY, themePref); } catch (e) { }
             applyResolvedTheme();
         }
-        applyResolvedTheme(); // initial basemap (auto → light by day)
+        // Set + persist the DAY basemap flavour ('lean' | 'osm'); re-render live if a day map is showing.
+        function setDayStyle(s) {
+            dayStyle = DAY_STYLES.includes(s) ? s : 'lean';
+            try { localStorage.setItem(DAY_STYLE_KEY, dayStyle); } catch (e) { }
+            applyResolvedTheme();
+        }
+        applyResolvedTheme(); // initial basemap (auto → OSM day map by default)
         setInterval(() => { if (themePref === 'auto') applyResolvedTheme(); }, 5 * 60 * 1000); // flip at dusk/dawn while driving
         function applyHg(mode) {
             hgMode = mode;
@@ -3677,6 +3696,27 @@ ${pts}
                         setMapPref(p);
                         reflect();
                         toast(p === 'auto' ? 'Karte: Auto (hell/dunkel nach Sonne)' : p === 'dark' ? 'Karte: dunkel' : 'Karte: hell');
+                    });
+                });
+                reflect();
+            }
+            if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', wire);
+            else wire();
+        })();
+
+        // Settings: day-map style — Schlank (CARTO Voyager) · OSM (Standard). Persisted; default Schlank.
+        (function () {
+            function wire() {
+                const seg = Array.from(document.querySelectorAll('.seg-btn[data-daystyle]'));
+                if (!seg.length || seg[0]._wired) return;
+                const reflect = () => seg.forEach((b) => b.classList.toggle('active', b.getAttribute('data-daystyle') === dayStyle));
+                seg.forEach((b) => {
+                    b._wired = true;
+                    b.addEventListener('click', () => {
+                        const s = b.getAttribute('data-daystyle');
+                        setDayStyle(s);
+                        reflect();
+                        toast(s === 'osm' ? 'Kartenstil: OSM (dichter)' : 'Kartenstil: schlank (Voyager)');
                     });
                 });
                 reflect();
