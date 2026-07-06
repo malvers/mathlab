@@ -707,8 +707,10 @@
                 // Slide the whole header up by exactly the satellite row's height, so hiding it leaves no gap
                 // (Doc 2026-07-06). Measured live (survives orientation changes); the CSS transform transition
                 // does the slow slide. #gps-chip keeps its layout box while faded, so offsetHeight is valid.
+                // Set on :root so BOTH the header (slide-up transform) and the nav-banner (which is a sibling,
+                // not a child, of #hud-top) can read it and move up by the same amount.
                 const chip = $('gps-chip');
-                if (chip) elHudTop.style.setProperty('--hud-shift', chip.offsetHeight + 'px');
+                if (chip) document.documentElement.style.setProperty('--hud-shift', chip.offsetHeight + 'px');
                 elHudTop.classList.add('hud-collapsed');
             }, BANNER_HIDE_MS);
         }
