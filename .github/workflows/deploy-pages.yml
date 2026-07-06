@@ -15,7 +15,10 @@ permissions:
 
 concurrency:
   group: pages
-  cancel-in-progress: true
+  # Keep FALSE for Pages (GitHub's recommended setting): cancelling an in-flight Pages deploy reports the
+  # run as a FAILURE and can jam the Pages backend so later deploys fail with "Deployment failed, try again
+  # later". Flipping this to true (1814ad2, 2026-07-05) caused exactly that on 2026-07-06 — reverted (Doc).
+  cancel-in-progress: false
 
 jobs:
   deploy:
