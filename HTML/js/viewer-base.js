@@ -35,17 +35,24 @@
         return map;
     }
 
-    // Wire the "fit whole route" button (#fit-btn, crosshair): on click, frame the bounds the page
-    // supplies via getBounds() (an L.latLngBounds or null). Lets the viewer jump back to the full
-    // route after panning/zooming away — both read-only pages only auto-fit once on load.
-    function wireFit(map, getBounds) {
+    // Recenter control for #fit-btn: frame the bounds the page supplies via getBounds() (L.latLngBounds
+    // or null). Mirrors the app's recenter FAB — the crosshair (×) shows while the whole route is framed;
+    // once the user pans/zooms away it flips to the "custom view" icon (tap → re-frame). Returns { fit }
+    // so the page routes its initial auto-fit through here too, keeping the mode in sync.
+    function fitControl(map, getBounds) {
         const b = $('fit-btn');
-        if (!b) return;
-        b.addEventListener('click', () => {
+        let programmatic = false;
+        function fit() {
             const bb = getBounds && getBounds();
-            if (bb && bb.isValid && bb.isValid()) map.fitBounds(bb, { padding: [50, 50] });
+            if (bb && bb.isValid && bb.isValid()) { programmatic = true; map.fitBounds(bb, { padding: [50, 50] }); if (b) b.dataset.mode = 'fit'; }
+        }
+        if (b) b.addEventListener('click', fit);
+        map.on('moveend', () => {
+            if (programmatic) { programmatic = false; return; }   // our own fit → stay framed
+            if (b) b.dataset.mode = 'custom';                     // user moved → custom view
         });
+        return { fit };
     }
 
-    global.ViewerBase = { SUPABASE_URL, SUPABASE_KEY, SUPA_HOST, esc, showMsg, hideMsg, supa, createMap, wireFit };
+    global.ViewerBase = { SUPABASE_URL, SUPABASE_KEY, SUPA_HOST, esc, showMsg, hideMsg, supa, createMap, fitControl };
 })(window);

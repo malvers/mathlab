@@ -58,10 +58,13 @@ html, body {
 #zoom-in:hover, #zoom-out:hover { color: var(--orange); border-color: rgba(255, 255, 255, 0.6); }
 #zoom-in:active, #zoom-out:active { transform: scale(0.94); }
 
-/* "fit whole route" button (crosshair) — stacked just above the + zoom button, bottom-left */
+/* Recenter / "fit whole route" button — bottom-CENTRE, one row above the zoom (mirrors the app's
+   recenter FAB). Two icons swapped by [data-mode]: crosshair (×) when the whole route is framed,
+   the "custom view" screen icon once you've panned/zoomed away (tap → re-frame). */
 #fit-btn {
     position: fixed;
-    left: 12px;
+    left: 50%;
+    transform: translateX(-50%);
     bottom: calc(var(--zoom-bottom, calc(env(safe-area-inset-bottom, 0px) + 18px)) + 56px);
     z-index: 600;
     width: 46px; height: 46px; border-radius: 50%;
@@ -73,11 +76,17 @@ html, body {
     color: rgba(255, 255, 255, 0.92);
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
-    transition: transform 0.1s ease, color 0.2s ease, border-color 0.2s ease;
+    transition: color 0.2s ease, border-color 0.2s ease, transform 0.12s ease;
 }
-#fit-btn svg { width: 22px; height: 22px; }
+#fit-btn svg { width: 26px; height: 26px; }
 #fit-btn:hover { color: var(--orange); border-color: rgba(255, 255, 255, 0.6); }
-#fit-btn:active { transform: scale(0.94); }
+#fit-btn:active { transform: translateX(-50%) scale(0.94); }
+/* icon swap by mode */
+#fit-btn .ic-custom { display: none; }
+#fit-btn[data-mode="custom"] .ic-fit { display: none; }
+#fit-btn[data-mode="custom"] .ic-custom { display: inline-block; }
+/* custom-view state → orange highlight so you SEE you left the full view */
+#fit-btn[data-mode="custom"] { color: var(--orange); border-color: rgba(245, 194, 66, 0.7); }
 
 /* loading / error overlay */
 #msg {
