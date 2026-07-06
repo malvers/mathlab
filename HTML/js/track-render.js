@@ -38,6 +38,8 @@
     };
     const GAP_SEC = 20;   // s between two consecutive recorded points
     const GAP_M = 30;     // m — only when there's a real jump too (not a standing-still pause)
+    const STILL_DOT_SEC = 120; // a STILL run only earns a "you stood here" dot once the stop lasts this
+                               // long; shorter stops (lights, junctions) just bridge, keeping the line clean
 
     function speedToScale(kmh) {
         if (kmh <= 5) return (kmh / 5) * 0.5;                       // 0–5 km/h  → 0.0–0.5 (walking)
@@ -66,13 +68,20 @@
     // Draw one continuous run, coloured by its travel mode (white → mode-colour by speed).
     function drawRun(ctx, idxs, activity) {
         if (!idxs.length) return;
-        // Standing still: the GPS fix can wander 100s of metres before it settles (acquisition), and
-        // drawing that as a line paints a weird white "Halbkreis". So a STILL run isn't a line at all —
-        // mark the stop with ONE white dot at the settled position (the last point, just before moving
-        // on). "You stood here" stays white/visible; the jitter arc is gone (Doc 2026-07-06).
+        // Standing still: the GPS fix can wander 100s of metres before it settles, which drawn as a line
+        // paints a weird white "Halbkreis". Two goals now: never paint that wander arc, and never leave a
+        // gap. So bridge the run's first→last point with a short STRAIGHT segment — the track stays
+        // continuous across the stop, minus the jitter. Only a genuinely LONG stop (>= STILL_DOT_SEC) also
+        // earns a white "you stood here" dot; brief still-blips (lights, junctions) would otherwise litter
+        // the line with dots (Doc 2026-07-06).
         if (activity === 'still') {
-            const p = ctx.track[idxs[idxs.length - 1]];
-            L.circleMarker(p, { radius: 4, color: 'rgba(8,20,42,0.55)', weight: 1.5, fillColor: '#fff', fillOpacity: 0.95, interactive: false }).addTo(ctx.layer);
+            const first = ctx.track[idxs[0]];
+            const last = ctx.track[idxs[idxs.length - 1]];
+            L.polyline([first, last], { color: 'rgb(150,165,190)', weight: 5, opacity: 0.9, interactive: false }).addTo(ctx.layer);
+            const t0 = ctx.times[idxs[0]], t1 = ctx.times[idxs[idxs.length - 1]];
+            const dwellSec = (t0 && t1) ? (Date.parse(t1) - Date.parse(t0)) / 1000 : 0;
+            if (dwellSec >= STILL_DOT_SEC)
+                L.circleMarker(last, { radius: 4, color: 'rgba(8,20,42,0.55)', weight: 1.5, fillColor: '#fff', fillOpacity: 0.95, interactive: false }).addTo(ctx.layer);
             return;
         }
         if (idxs.length < 2) return; // a lone point has no segment to draw
@@ -121,7 +130,7 @@
     }
 
     global.TrackRender = {
-        MAX_KMH, COL_ORANGE, SPEED_PALETTE, MODE_COLORS, GAP_SEC, GAP_M,
+        MAX_KMH, COL_ORANGE, SPEED_PALETTE, MODE_COLORS, GAP_SEC, GAP_M, STILL_DOT_SEC,
         speedToScale, haversine, isGap, drawRun, drawGap, draw, redraw,
     };
 })(window);
