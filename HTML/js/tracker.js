@@ -2364,7 +2364,11 @@ ${pts}
         // ---- Folders: group tracks into renamable sections (track_folders table + tracks.folder_id) ----
         async function loadFolders() {
             const c = await ensureSb();
-            const { data, error } = await c.from('track_folders').select('id, name, created_at').order('created_at');
+            // share_slug added by the "Website erstellen" migration; select defensively so the list still
+            // loads if that column isn't there yet (retry without it on error).
+            let data, error;
+            ({ data, error } = await c.from('track_folders').select('id, name, created_at, share_slug').order('created_at'));
+            if (error) ({ data, error } = await c.from('track_folders').select('id, name, created_at').order('created_at'));
             if (error) throw error;
             _folders = data || [];
             return _folders;
@@ -2855,6 +2859,60 @@ ${pts}
                         if (!(await uiConfirm('Track löschen?', { danger: true, okText: 'Löschen' }))) return;
                         try { await removeTrack(r.id); if (rowEl) rowEl.remove(); toast('Gelöscht.'); }
                         catch (e) { toast('Löschen fehlgeschlagen.'); }
+                    },
+                },
+            ]);
+        }
+
+        // ---- Folder ⋯ menu + "Website erstellen" (public tour showcase page) ----
+        const TOUR_BASE = 'https://docalvers.de/tracker/tour.html';
+        // Readable slug from the folder name (lowercase, umlauts stripped, spaces → '-').
+        function folderSlug(name) {
+            return (name || 'tour').toString().toLowerCase().normalize('NFKD')
+                .replace(/[̀-ͯ]/g, '').replace(/ß/g, 'ss')
+                .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'tour';
+        }
+        async function setFolderSlug(id, slug) {
+            const c = await ensureSb();
+            const { error } = await c.from('track_folders').update({ share_slug: slug }).eq('id', id);
+            return error;
+        }
+        // Publish the folder as a public tour page: set its share_slug (from the name) → hand out the
+        // clean …/tour.html?t=<slug> link. Re-runnable; a name clash gets a short suffix.
+        async function createWebsite(folder, kids) {
+            if (!kids || !kids.length) { toast('Ordner ist leer.'); return; }
+            toast('Website wird erstellt …');
+            let slug = folderSlug(folder.name);
+            let err = await setFolderSlug(folder.id, slug);
+            if (err && (err.code === '23505' || /duplicate|unique/i.test(err.message || ''))) {
+                slug = slug + '-' + Math.random().toString(36).slice(2, 6);   // slug taken by another folder
+                err = await setFolderSlug(folder.id, slug);
+            }
+            if (err) { toast('Website fehlgeschlagen: ' + (err.message || err)); return; }
+            folder.share_slug = slug;
+            const url = TOUR_BASE + '?t=' + encodeURIComponent(slug);
+            let copied = false;
+            try { await navigator.clipboard.writeText(url); copied = true; } catch (e) { /* no clipboard */ }
+            try { if (navigator.share) await navigator.share({ title: folder.name, text: folder.name, url }); } catch (e) { /* cancelled */ }
+            toast(copied ? 'Website-Link kopiert.' : 'Website erstellt.');
+        }
+        function openFolderMenu(folder, kids, nmEl) {
+            uiActionSheet(folder.name, [
+                {
+                    label: 'Umbenennen …', run: async () => {
+                        const name = await uiPrompt('Ordner umbenennen:', { value: folder.name, okText: 'Umbenennen' });
+                        if (!name || name === folder.name) return;
+                        try { await renameFolder(folder.id, name); folder.name = name; if (nmEl) nmEl.textContent = name; toast('Umbenannt.'); }
+                        catch (e) { toast('Umbenennen fehlgeschlagen.'); }
+                    },
+                },
+                { label: 'Teilen', run: () => { const ids = kids.map((r) => r.id); if (!ids.length) { toast('Ordner ist leer.'); return; } shareMultiple(ids, folder.name); } },
+                { label: 'Website erstellen …', run: () => createWebsite(folder, kids) },
+                {
+                    label: 'Auflösen', danger: true, run: async () => {
+                        if (!(await uiConfirm('Ordner auflösen? Die Tracks bleiben erhalten und wandern zurück in die Liste.', { okText: 'Auflösen' }))) return;
+                        try { await deleteFolder(folder.id); toast('Ordner aufgelöst.'); const rows = await listTracks(); renderTrackList(rows); }
+                        catch (e) { toast('Auflösen fehlgeschlagen.'); }
                     },
                 },
             ]);
@@ -3824,14 +3882,11 @@ ${pts}
                 ic.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg>';
                 const nm = document.createElement('div'); nm.className = 'tl-fold-name'; nm.textContent = folder.name;
                 const cnt = document.createElement('span'); cnt.className = 'tl-fold-count'; cnt.textContent = kids.length;
-                const shr = document.createElement('button'); shr.className = 'tl-fold-shr'; shr.title = 'Ordner teilen';
-                shr.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>';
-                const ren = document.createElement('button'); ren.className = 'tl-fold-ren'; ren.title = 'Umbenennen';
-                ren.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg>';
-                const del = document.createElement('button'); del.className = 'tl-fold-del'; del.title = 'Ordner auflösen';
-                del.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"></path></svg>';
-                head.appendChild(caret); head.appendChild(ic); head.appendChild(nm); head.appendChild(cnt);
-                head.appendChild(shr); head.appendChild(ren); head.appendChild(del);
+                // One ⋯ menu per folder (Umbenennen · Teilen · Website erstellen · Auflösen) — replaces the
+                // separate share/pencil/× icons, matching the per-track ⋯.
+                const menuBtn = document.createElement('button'); menuBtn.className = 'tl-fold-menu'; menuBtn.title = 'Ordner-Aktionen'; menuBtn.setAttribute('aria-label', 'Ordner-Aktionen');
+                menuBtn.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><circle cx="12" cy="5" r="2"></circle><circle cx="12" cy="12" r="2"></circle><circle cx="12" cy="19" r="2"></circle></svg>';
+                head.appendChild(caret); head.appendChild(ic); head.appendChild(nm); head.appendChild(cnt); head.appendChild(menuBtn);
                 const body = document.createElement('div'); body.className = 'tl-folder-body';
                 kids.forEach((r) => body.appendChild(buildTrackRow(r)));
                 attachLongPress(head, () => selectToggleFolder(kids, body)); // hold → (de)select all in folder
@@ -3840,25 +3895,7 @@ ${pts}
                     if (nowCollapsed) _openFolders.delete(folder.id); else _openFolders.add(folder.id);
                     saveOpenFolders();
                 });
-                shr.addEventListener('click', (ev) => {
-                    ev.stopPropagation();
-                    const ids = kids.map((r) => r.id);
-                    if (!ids.length) { toast('Ordner ist leer.'); return; }
-                    shareMultiple(ids, folder.name);   // folder name → mail subject; one bundle link overlays the whole group
-                });
-                ren.addEventListener('click', async (ev) => {
-                    ev.stopPropagation();
-                    const name = await uiPrompt('Ordner umbenennen:', { value: folder.name, okText: 'Umbenennen' });
-                    if (!name || name === folder.name) return;
-                    try { await renameFolder(folder.id, name); folder.name = name; nm.textContent = name; toast('Umbenannt.'); }
-                    catch (e) { toast('Umbenennen fehlgeschlagen.'); }
-                });
-                del.addEventListener('click', async (ev) => {
-                    ev.stopPropagation();
-                    if (!(await uiConfirm('Ordner auflösen? Die Tracks bleiben erhalten und wandern zurück in die Liste.', { okText: 'Auflösen' }))) return;
-                    try { await deleteFolder(folder.id); toast('Ordner aufgelöst.'); const rows2 = await listTracks(); renderTrackList(rows2); }
-                    catch (e) { toast('Auflösen fehlgeschlagen.'); }
-                });
+                menuBtn.addEventListener('click', (ev) => { ev.stopPropagation(); openFolderMenu(folder, kids, nm); });
                 sec.appendChild(head); sec.appendChild(body);
                 return sec;
             }
