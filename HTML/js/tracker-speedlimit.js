@@ -645,7 +645,10 @@ window.TrackerSpeedLimit = function (ctx) {
         } else if (!headPos) headPos = here;
         // query while moving; ALSO do one query when we still have no limit (e.g. a standing cold
         // start) so the sign shows immediately on a known road, not only once you start driving.
-        if (still && curLimit != null && !turned) return;
+        // Parked: query a spot at most ONCE. Also skip when we've already queried this exact spot even if
+        // it came back untagged (curLimit still null) — else a parked untagged road re-hits Overpass every
+        // MIN_INTERVAL forever (Doc 2026-07-06). Cold-start's first query still runs; resumes on move/turn.
+        if (still && !turned && (curLimit != null || (lastPos && haversine(here, lastPos) < MIN_MOVE_M))) return;
         const now = Date.now();
         // A detected turn re-queries almost at once (short gate); otherwise the normal 5 s throttle.
         if (now - lastQ < (turned ? TURN_INTERVAL_MS : MIN_INTERVAL_MS)) return;
