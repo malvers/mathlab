@@ -684,7 +684,7 @@ window.TrackerSpeedLimit = function (ctx) {
         update, clear, unlockAudio, setBell, bellEnabled, currentRoad: () => lastRoad,
         currentLimit: () => curLimit, currentConfirmed: () => curConfirmed, lastSpeed: () => lastSpeedKmh,
         currentNoOvertake: () => curNoOvertake, currentToll: () => curToll,
-        resolveLimit: wayLimit, evalLimit, limitKey, setProfile: (p) => { profile = p; },
+        resolveLimit: wayLimit, resolveGeneric: genericDefault, evalLimit, limitKey, setProfile: (p) => { profile = p; },
         setOverride, clearOverridesNear, // FEAT-35: sign panel writes tapped-in signs here
     };
 };

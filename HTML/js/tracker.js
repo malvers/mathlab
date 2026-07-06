@@ -2964,6 +2964,10 @@ ${pts}
         __speed = TrackerSpeedLimit({ $, profile: __speedprofile, probe: __speedprobe, isWet: () => ambientWet });
         // Give the profile the SAME tag→limit resolver the sign uses, so its precomputed numbers match.
         if (__speedprofile && __speed.resolveLimit) __speedprofile.setResolver(__speed.resolveLimit);
+        // …and the generic legal default (DE:urban=50 …). The profile carries a CONFIRMED limit forward across
+        // untagged gaps; this lets it STOP that carry where the road's own generic default contradicts it, so a
+        // rural 100 can't bleed into the city and override the honest dimmed sign (Doc 2026-07-06).
+        if (__speedprofile && __speedprofile.setGeneric && __speed.resolveGeneric) __speedprofile.setGeneric(__speed.resolveGeneric);
         // …and the SAME conditional evaluator + equality key, so a time-conditional limit (e.g. a school
         // zone's "30 Mo-Fr 6-17") is resolved at display time and compared correctly (Doc 2026-06-30).
         if (__speedprofile && __speed.evalLimit) __speedprofile.setEval(__speed.evalLimit, __speed.limitKey);
