@@ -3488,7 +3488,7 @@ ${pts}
                 $('sync-input').value = '';
             }
         }
-        $('mb-settings').addEventListener('click', () => { closePopup(); updateSyncStatus(); loadUsage(); updateReburnButton(); refreshMenuState(); refreshRainStatus(); renderTrackStats(); showPanel('settings-panel'); });
+        $('mb-settings').addEventListener('click', () => { closePopup(); updateSyncStatus(); loadUsage(); updateReburnButton(); refreshMenuState(); refreshRainStatus(); showPanel('settings-panel'); }); // Strecke-Stats → per-track ⋯ menu now
         // Settings → Debug: live source-health dots for the rain radar (DWD + RainViewer).
         function refreshRainStatus() {
             const setDot = (id, st) => {
