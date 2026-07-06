@@ -675,6 +675,23 @@
         });
         CyberClock.set(elTime, '00:00:00');
 
+        // Banner extras (satellites #gps-chip + sunrise/sunset flanks) auto-hide 8 s after they appear;
+        // tapping the clock brings them back for another 8 s, then they fade again (Doc 2026-07-06). The
+        // clock and stat tiles stay put. Pure UI: a class on #hud-top drives the CSS; no data path touched.
+        const BANNER_HIDE_MS = 8000;
+        const elHudTop = $('hud-top');
+        let bannerHideTimer = null;
+        function armBannerHide() {
+            if (bannerHideTimer) clearTimeout(bannerHideTimer);
+            bannerHideTimer = setTimeout(() => { if (elHudTop) elHudTop.classList.add('hud-collapsed'); }, BANNER_HIDE_MS);
+        }
+        function showBannerExtras() {
+            if (elHudTop) elHudTop.classList.remove('hud-collapsed');
+            armBannerHide();
+        }
+        if (elTime) elTime.addEventListener('click', showBannerExtras);
+        armBannerHide(); // start the first 8 s countdown on load
+
         // HUD stat tiles (DISTANCE / SPEED / HÖHE) → js/tracker-hud.js. Owns the fixed-slot widgets +
         // adaptive distance unit. Destructured into the same names so every existing call site stays
         // unchanged. Constructed HERE (before the idle clock below) so updateDistVisibility is assigned
