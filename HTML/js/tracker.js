@@ -2600,21 +2600,8 @@ ${pts}
         }
         if ($('tl-deselect')) $('tl-deselect').addEventListener('click', deselectAll);
         if ($('tl-sharesel')) $('tl-sharesel').addEventListener('click', () => shareMultiple(Array.from(selectedTracks)));
-        // Group the checked tracks into a new (renamable) folder.
-        if ($('tl-group')) $('tl-group').addEventListener('click', async () => {
-            const ids = Array.from(selectedTracks);
-            if (!ids.length) return;
-            const name = await uiPrompt('Ordnername:', { value: 'Neuer Ordner', okText: 'Gruppieren' });
-            if (!name) return;
-            toast('Ordner wird angelegt …');
-            try {
-                const fid = await createFolder(name);
-                await assignFolder(ids, fid);
-            } catch (e) { toast('Gruppieren fehlgeschlagen: ' + (e.message || e)); return; }
-            toast(ids.length + ' Tracks in „' + name + '" gruppiert.');
-            try { const rows = await listTracks(); renderTrackList(rows); } catch (e) { /* refresh best-effort */ }
-        });
-        // Move the checked tracks INTO an existing folder (or a new one via the picker).
+        // "In Ordner …": move the checked tracks into an existing folder OR a new one (the picker offers
+        // both) — this replaced the separate "Gruppieren" button, which only ever made a NEW folder.
         if ($('tl-move')) $('tl-move').addEventListener('click', async () => {
             const ids = Array.from(selectedTracks);
             if (!ids.length) return;
@@ -3100,26 +3087,67 @@ ${pts}
         }
         if ($('tl-gpx')) $('tl-gpx').addEventListener('click', () => { const inp = $('gpx-input'); if (inp) inp.click(); });
         if ($('gpx-input')) $('gpx-input').addEventListener('change', async (ev) => {
-            const file = ev.target.files && ev.target.files[0];
-            ev.target.value = '';                              // let the same file be re-picked later
-            if (!file) return;
-            toast('GPX wird geladen …');
-            let parsed;
-            try { parsed = parseGpx(await file.text()); }
-            catch (e) { toast('GPX-Fehler: ' + (e.message || e)); return; }
-            if (!parsed.points.length) { toast('Keine Punkte im GPX gefunden.'); return; }
-            plotTrack(parsed.points, []);                      // draw the imported route on the map
-            currentTrackId = null;                             // fresh import → INSERT a new row (never overwrite)
-            const name = parsed.name || autoTrackName();
-            $('hud-top').classList.add('shown');
-            let id;
-            try { id = await saveTrack(name, 'done'); }
-            catch (e) { currentTrackName = name; hidePanels(); toast('Geladen, Speichern fehlgeschlagen: ' + (e.message || e)); return; }
-            currentTrackId = id; currentTrackName = name;
-            loadedTrackIds.clear(); loadedTrackIds.add(id);
-            persistLoaded([{ id: id, name: name }]);
+            const files = Array.from(ev.target.files || []);
+            ev.target.value = '';                              // let the same file(s) be re-picked later
+            if (!files.length) return;
+            // Import in filename order so "01…15" line up as Etappe 1…N (their <time> already encodes it).
+            files.sort((a, b) => (a.name || '').localeCompare(b.name || '', undefined, { numeric: true }));
+
+            // ---- Single file → the original focused behaviour (plot + save + persist one track) ----
+            if (files.length === 1) {
+                const file = files[0];
+                toast('GPX wird geladen …');
+                let parsed;
+                try { parsed = parseGpx(await file.text()); }
+                catch (e) { toast('GPX-Fehler: ' + (e.message || e)); return; }
+                if (!parsed.points.length) { toast('Keine Punkte im GPX gefunden.'); return; }
+                plotTrack(parsed.points, []);                  // draw the imported route on the map
+                currentTrackId = null;                         // fresh import → INSERT a new row (never overwrite)
+                const name = parsed.name || autoTrackName();
+                $('hud-top').classList.add('shown');
+                let id;
+                try { id = await saveTrack(name, 'done'); }
+                catch (e) { currentTrackName = name; hidePanels(); toast('Geladen, Speichern fehlgeschlagen: ' + (e.message || e)); return; }
+                currentTrackId = id; currentTrackName = name;
+                loadedTrackIds.clear(); loadedTrackIds.add(id);
+                persistLoaded([{ id: id, name: name }]);
+                hidePanels();
+                toast('GPX importiert: ' + name + ' (' + parsed.points.length + ' Punkte)');
+                return;
+            }
+
+            // ---- Multiple files → bulk import. Each GPX becomes its own saved track. The Tracks panel
+            //      stays open through the loop, so the per-file plot/fit doesn't flash on the map; at the
+            //      end we overlay them all (plotMultiple) and pre-select them (loadedTrackIds) so one
+            //      "Gruppieren" turns the batch into a folder → tour. ----
+            const loaded = [], failed = [];
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                toast('Importiere GPX ' + (i + 1) + '/' + files.length + ' …');
+                let parsed;
+                try { parsed = parseGpx(await file.text()); }
+                catch (e) { failed.push(file.name); continue; }
+                if (!parsed.points.length) { failed.push(file.name); continue; }
+                plotTrack(parsed.points, []);                  // fills the globals saveTrack persists
+                currentTrackId = null;                         // fresh row per file (never overwrite)
+                const name = parsed.name || file.name.replace(/\.gpx$/i, '') || autoTrackName();
+                let id;
+                try { id = await saveTrack(name, 'done'); }
+                catch (e) { failed.push(file.name); continue; }
+                loaded.push({ id: id, name: name, points: parsed.points, waypoints: [] });
+            }
+            currentTrackId = null; currentTrackName = '';
+            if (loaded.length) {
+                loadedTrackIds.clear(); loaded.forEach((t) => loadedTrackIds.add(t.id));
+                persistLoaded(loaded.map((t) => ({ id: t.id, name: t.name })));
+                plotMultiple(loaded);                          // overlay all stages, each its own colour
+            }
             hidePanels();
-            toast('GPX importiert: ' + name + ' (' + parsed.points.length + ' Punkte)');
+            let msg = loaded.length + ' Etappen importiert.';
+            if (failed.length) msg += ' ' + failed.length + ' fehlgeschlagen.';
+            if (loaded.length) msg += ' „Tracks" öffnen (vorausgewählt) → Gruppieren.';
+            toast(msg);
+            try { const rows = await listTracks(); renderTrackList(rows); } catch (e) { /* list refresh best-effort */ }
         });
 
         // ---- Foto-Spur / media subsystem → js/tracker-media.js (Phase-2 refactor 2026-06-09).
@@ -3814,6 +3842,18 @@ ${pts}
             }
             selectedTracks.clear(); loadedTrackIds.forEach((id) => selectedTracks.add(id)); updateLoadSel(); // pre-select the loaded tracks
             if (!rows.length) { box.innerHTML = '<div class="tl-empty">Noch keine gespeicherten Tracks.</div>'; return; }
+            // Classify a track as 🚗 Auto vs 🚶 zu Fuß from its average speed (distance ÷ duration — the
+            // only speed signal a list row carries). Doc's tracks split cleanly: hikes ~4–5 km/h, drives
+            // >20, so one threshold is robust. '' when there's no usable duration (one-point items or a
+            // row the list_tracks() RPC didn't enrich).
+            const FOOT_MAX_KMH = 14;                 // ≤ this ⇒ on foot (walk/run); above ⇒ vehicle
+            function trackModeIcon(r) {
+                if (!r.distance_m || !r.duration_s) return '';
+                const kmh = (r.distance_m / 1000) / (r.duration_s / 3600);
+                if (!(kmh > 0)) return '';
+                return kmh > FOOT_MAX_KMH ? '🚗' : '🚶';
+            }
+
             // Builds ONE track row (checkbox · badge · name/meta · share · delete). Returned so it can
             // sit either directly in the list or inside a folder section's body.
             function buildTrackRow(r) {
@@ -3833,6 +3873,7 @@ ${pts}
                     stats.push((r.distance_m / 1000).toFixed(2) + ' km');
                     if (r.duration_s) stats.push(fmtDur(r.duration_s));
                     if (r.duration_s && r.distance_m) stats.push(((r.distance_m / 1000) / (r.duration_s / 3600)).toFixed(1) + ' km/h');
+                    if (r.photo_count) stats.push('📷 ' + r.photo_count);   // was on the (now-removed) badge
                 }
                 const dKm = distOf(r);
                 if (listRadiusKm > 0 && dKm != null) stats.push('📍 ' + dKm.toFixed(1) + ' km');
@@ -3844,16 +3885,11 @@ ${pts}
                 mt.textContent = stats.join(' · ');
                 main.appendChild(nm);
                 if (mt.textContent) main.appendChild(mt);   // skip an empty meta line
-                // OUR badge BEFORE the name: blue speaker (voice note), green camera (single photo),
-                // app-icon TRACK badge for a real track (a camera would lie when the track also holds voice).
-                let badge;
-                if (isVoice) badge = mkBadge('voice', SPEAKER_ICON, 0);
-                else if (isVideo) badge = mkBadge('video', VIDEO_ICON, 0);
-                else if (isPoint) badge = mkBadge('cam', CAMERA_ICON, 0);
-                else badge = mkBadge('track', APPICON, r.photo_count);
-                row.appendChild(badge);                     // row's first child → left of `main`
-                // Load on a tap ANYWHERE on the row (badge/icon included — a media item invites tapping
-                // its thumbnail), except on the checkbox or the action buttons (those handle themselves).
+                // No leading badge (Doc 2026-07-07): the grouping folders (Zu Fuß · Auto · Fotos · Videos ·
+                // Voice) already say what a row is, so the per-row icon was redundant. Photo count moved
+                // into the meta line above.
+                // Load on a tap ANYWHERE on the row (except the checkbox or the action buttons, which
+                // handle themselves).
                 row.addEventListener('click', async (ev) => {
                     if (ev.target.closest('.tl-check, .tl-acts, button')) return;
                     toast('Lade Track …');
@@ -3893,7 +3929,17 @@ ${pts}
                 toast(allSel ? 'Auswahl aufgehoben' : (ids.length + ' ausgewählt'));
             }
 
-            // Builds a collapsible folder section: header (caret · folder · name · count · rename · dissolve)
+            // Total distance of a folder's real tracks → a muted "xx.x km" after the name (Doc idea).
+            // null when nothing measurable (media-only folders), so the caller just skips it.
+            function folderKmSpan(kids) {
+                const m = kids.reduce((s, r) => s + (r.distance_m || 0), 0);
+                if (!(m > 0)) return null;
+                const el = document.createElement('span'); el.className = 'tl-fold-km';
+                el.textContent = (m / 1000).toFixed(1) + ' km';
+                return el;
+            }
+
+            // Builds a collapsible folder section: header (caret · folder · name · km · count · rename · dissolve)
             // plus a body holding its track rows.
             function buildFolderSection(folder, kids) {
                 const sec = document.createElement('div');
@@ -3910,7 +3956,8 @@ ${pts}
                 // separate share/pencil/× icons, matching the per-track ⋯.
                 const menuBtn = document.createElement('button'); menuBtn.className = 'tl-fold-menu'; menuBtn.title = 'Ordner-Aktionen'; menuBtn.setAttribute('aria-label', 'Ordner-Aktionen');
                 menuBtn.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><circle cx="12" cy="5" r="2"></circle><circle cx="12" cy="12" r="2"></circle><circle cx="12" cy="19" r="2"></circle></svg>';
-                head.appendChild(caret); head.appendChild(ic); head.appendChild(nm); head.appendChild(cnt); head.appendChild(menuBtn);
+                const km = folderKmSpan(kids);
+                head.appendChild(caret); head.appendChild(ic); head.appendChild(nm); if (km) head.appendChild(km); head.appendChild(cnt); head.appendChild(menuBtn);
                 const body = document.createElement('div'); body.className = 'tl-folder-body';
                 kids.forEach((r) => body.appendChild(buildTrackRow(r)));
                 attachLongPress(head, () => selectToggleFolder(kids, body)); // hold → (de)select all in folder
@@ -3946,7 +3993,8 @@ ${pts}
                 const cnt = document.createElement('span'); cnt.className = 'tl-fold-count'; cnt.textContent = kids.length;
                 const shr = document.createElement('button'); shr.className = 'tl-fold-shr'; shr.title = 'Alle teilen';
                 shr.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>';
-                head.appendChild(caret); head.appendChild(ic); head.appendChild(nm); head.appendChild(cnt); head.appendChild(shr);
+                const km = folderKmSpan(kids);   // null for media folders (0 km) → auto-hidden; shown for route folders
+                head.appendChild(caret); head.appendChild(ic); head.appendChild(nm); if (km) head.appendChild(km); head.appendChild(cnt); head.appendChild(shr);
                 const body = document.createElement('div'); body.className = 'tl-folder-body';
                 kids.forEach((r) => body.appendChild(buildTrackRow(r)));
                 attachLongPress(head, () => selectToggleFolder(kids, body)); // hold → (de)select all in folder
@@ -3990,9 +4038,15 @@ ${pts}
                 photo: { c: 'poi-photo', ic: '<path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/>' },
                 video: { c: 'poi-video', ic: '<path d="m22 8-6 4 6 4V8Z"/><rect width="14" height="12" x="2" y="6" rx="2" ry="2"/>' },
                 voice: { c: 'poi-voice', ic: '<path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/>' },
+                foot: { c: 'poi-foot', ic: '<path d="M4 16v-2.38C4 11.5 2.97 10.5 3 8c.03-2.72 1.49-6 4.5-6C9.37 2 10 3.8 10 5.5c0 3.11-2 5.66-2 8.68V16a2 2 0 1 1-4 0Z"/><path d="M20 20v-2.38c0-2.12 1.03-3.12 1-5.62-.03-2.72-1.49-6-4.5-6C14.63 6 14 7.8 14 9.5c0 3.11 2 5.66 2 8.68V20a2 2 0 1 0 4 0Z"/><path d="M16 17h4"/><path d="M4 13h4"/>' },   // Zu Fuß — Lucide footprints
+                drive: { c: 'poi-drive', ic: '<path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/>' },   // Auto — Lucide car
             };
-            // Everything is now grouped: real routes into an auto "Tracks" folder, media below.
-            if (tracks.length) box.appendChild(buildVirtualSection('auto-tracks', AUTO_IC.track, 'Tracks', tracks));
+            // Real routes are split by the SAME avg-speed classifier as the row 🚶/🚗 glyph: on-foot vs
+            // vehicle. Unknown-duration routes (no usable Ø speed) default to "Zu Fuß". Media below.
+            const footTracks = tracks.filter((r) => trackModeIcon(r) !== '🚗');
+            const driveTracks = tracks.filter((r) => trackModeIcon(r) === '🚗');
+            if (footTracks.length) box.appendChild(buildVirtualSection('auto-foot', AUTO_IC.foot, 'Zu Fuß', footTracks));
+            if (driveTracks.length) box.appendChild(buildVirtualSection('auto-drive', AUTO_IC.drive, 'Auto', driveTracks));
             if (photos.length) box.appendChild(buildVirtualSection('auto-photo', AUTO_IC.photo, 'Fotos', photos));
             if (videos.length) box.appendChild(buildVirtualSection('auto-video', AUTO_IC.video, 'Videos', videos));
             if (voices.length) box.appendChild(buildVirtualSection('auto-voice', AUTO_IC.voice, 'Voice', voices));
