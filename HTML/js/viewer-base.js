@@ -47,10 +47,10 @@
             if (bb && bb.isValid && bb.isValid()) { programmatic = true; map.fitBounds(bb, { padding: [50, 50] }); if (b) b.dataset.mode = 'fit'; }
         }
         if (b) b.addEventListener('click', fit);
-        map.on('moveend', () => {
-            if (programmatic) { programmatic = false; return; }   // our own fit → stay framed
-            if (b) b.dataset.mode = 'custom';                     // user moved → custom view
-        });
+        // Flip to the custom-view icon the INSTANT a pan/zoom BEGINS (not only when it ends) — unless it's
+        // our own fit. moveend/zoomend then clears the "our fit" flag.
+        map.on('movestart zoomstart', () => { if (!programmatic && b) b.dataset.mode = 'custom'; });
+        map.on('moveend zoomend', () => { programmatic = false; });
         return { fit };
     }
 
