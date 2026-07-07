@@ -57,17 +57,26 @@
             cursor: pointer; backdrop-filter: blur(6px); box-shadow: 0 3px 12px rgba(0, 0, 0, 0.45);
         }
         #legs-panel {
-            position: fixed; left: 0; right: 0; bottom: 0; z-index: 570;
-            max-height: 66vh; overflow-y: auto;
-            padding: 16px 16px calc(env(safe-area-inset-bottom, 0px) + 18px);
-            background: rgba(8, 20, 42, 0.97); border-top: 1px solid rgba(255, 255, 255, 0.12);
-            transform: translateY(100%); transition: transform 0.25s ease;
-            box-shadow: 0 -8px 26px rgba(0, 0, 0, 0.5);
+            position: fixed; left: 50%;
+            bottom: calc(env(safe-area-inset-bottom, 0px) + 60px);
+            z-index: 570; width: min(400px, calc(100vw - 24px));
+            display: flex; flex-direction: column;
+            max-height: min(60vh, 560px); overflow: hidden;   /* clips the inner scroll to the rounded corners */
+            padding: 16px 0 0;
+            background: rgba(8, 20, 42, 0.97);
+            border: 1px solid rgba(245, 194, 66, 0.28); border-radius: 16px;
+            transform: translate(-50%, 14px); opacity: 0; pointer-events: none;
+            transition: transform 0.22s ease, opacity 0.22s ease;
+            box-shadow: 0 14px 36px rgba(0, 0, 0, 0.55);
         }
-        #legs-panel.open { transform: translateY(0); }
+        #legs-panel.open { transform: translate(-50%, 0); opacity: 1; pointer-events: auto; }
+        #legs-scroll {
+            flex: 1 1 auto; min-height: 0; overflow-y: auto;   /* real scroller — parent clip keeps corners rounded */
+            padding: 0 18px calc(env(safe-area-inset-bottom, 0px) + 18px);
+        }
         #legs-title {
             display: flex; justify-content: space-between; align-items: center;
-            font-size: 0.8rem; letter-spacing: 1px; color: var(--orange); margin-bottom: 12px;
+            font-size: 0.8rem; letter-spacing: 1px; color: var(--orange); margin: 0 18px 12px;
         }
         #legs-close { background: none; border: none; color: rgba(255, 255, 255, 0.7); font-size: 1.3rem; cursor: pointer; }
         .leg {
@@ -83,6 +92,15 @@
         .leg-main { flex: 1; min-width: 0; }
         .leg-name { font-size: 0.74rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .leg-meta { font-family: system-ui, sans-serif; font-size: 0.66rem; color: rgba(255, 255, 255, 0.5); margin-top: 2px; }
+
+        /* slim dark scrollbar like index — webkit + FF applied separately via @supports (never on the same element) */
+        #legs-scroll::-webkit-scrollbar { width: 8px; }
+        #legs-scroll::-webkit-scrollbar-track { background: transparent; margin: 6px 0; }
+        #legs-scroll::-webkit-scrollbar-thumb { background: rgba(72, 88, 112, 0.9); border-radius: 999px; }
+        #legs-scroll::-webkit-scrollbar-thumb:hover { background: rgba(92, 108, 134, 0.98); }
+        @supports not selector(::-webkit-scrollbar) {
+            #legs-scroll { scrollbar-width: thin; scrollbar-color: rgba(72, 88, 112, 0.9) transparent; }
+        }
 
         /* (base theme, #map, #zoom-in/out and #msg live in the shared viewer-base.css) */
     </style>
@@ -104,9 +122,11 @@
     <button id="legs-btn" type="button">Etappen ▴</button>
     <div id="legs-panel">
         <div id="legs-title"><span>Etappen</span><button id="legs-close" type="button" aria-label="Schließen">&times;</button></div>
-        <div id="legs-list"></div>
-        <div style="text-align:center;margin-top:14px">
-            <a href="index.html" style="color:var(--orange);text-decoration:none;font-size:0.66rem;letter-spacing:1px">Doc Alvers Tracker →</a>
+        <div id="legs-scroll">
+            <div id="legs-list"></div>
+            <div style="text-align:center;margin-top:14px">
+                <a href="index.html" style="color:var(--orange);text-decoration:none;font-size:0.66rem;letter-spacing:1px">Doc Alvers Tracker →</a>
+            </div>
         </div>
     </div>
     <div id="foot"></div>
@@ -185,10 +205,12 @@
             $('tour-name').textContent = data.name || 'Tour';
             document.title = 'Tour — ' + (data.name || '');
 
-            // chronological order (oldest stage first)
-            const tracks = data.tracks.slice().sort((a, b) => Date.parse(a.created_at || 0) - Date.parse(b.created_at || 0));
+            // real walked order by geography (not upload time) — a built/imported stage with no real
+            // recording date otherwise sorts to the end and tears the profile apart. See orderStages().
+            const tracks = TrackOverlay.orderStages(data.tracks);
             const allLatLng = [], profPts = [];
             let cum = 0, totDist = 0, totDur = 0, totUp = 0, totDown = 0, photos = 0;
+            let seamAlt = null, seamLL = null;   // previous stage's end (altitude + position) for baseline stitching
             const legsList = $('legs-list');
 
             tracks.forEach((t, i) => {
@@ -204,12 +226,26 @@
                     if (distM >= 10) parts.push((distM / 1000).toFixed(2) + ' km');
                     if (st.durMs > 0) parts.push(fmtClock(st.durMs));
                     TrackOverlay.drawStage(map, trackLayer, pts, { usesHotline, name: label, meta: parts.join(' · ') });
-                    // profile: append this stage's points with running cumulative distance
+                    // Stitch this stage's altitude baseline onto the previous stage's end. Each stage was
+                    // recorded on a different DAY, so its barometric zero/drift differs — raw concatenation
+                    // makes a fake cliff at every seam where two stages meet at the SAME spot (measured up to
+                    // ~160 m on this tour). One offset shifts the whole stage, so its real internal climbs are
+                    // untouched; only the baseline moves. Only when the seam truly connects (< 500 m apart) —
+                    // a genuine gap keeps its own baseline. Totals (up/down tiles) use raw per-stage data, so
+                    // they stay honest; this only smooths the drawn profile.
+                    let firstAlt = null;
+                    for (let k = 0; k < pts.length; k++) { if (pts[k][3] != null) { firstAlt = pts[k][3]; break; } }
+                    const connects = seamLL && hav(seamLL, [pts[0][0], pts[0][1]]) < 500;
+                    const off = (connects && seamAlt != null && firstAlt != null) ? seamAlt - firstAlt : 0;
+                    // profile: append this stage's points with running cumulative distance (baseline-stitched)
                     for (let k = 0; k < pts.length; k++) {
                         if (k > 0) cum += hav(pts[k - 1], pts[k]);
-                        profPts.push({ d: cum, alt: (pts[k][3] != null ? pts[k][3] : null) });
+                        const a = pts[k][3] != null ? pts[k][3] + off : null;
+                        profPts.push({ d: cum, alt: a });
+                        if (a != null) seamAlt = a;
                         allLatLng.push([pts[k][0], pts[k][1]]);
                     }
+                    seamLL = [pts[pts.length - 1][0], pts[pts.length - 1][1]];
                 }
                 (t.waypoints || []).forEach(w => { if (w && w.lat != null) { TrackOverlay.addWaypoint(map, wpState, w); photos++; } });
 
