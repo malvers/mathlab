@@ -757,7 +757,12 @@
         // instead of a frozen 00:00:00. While recording it shows the track duration (updateDuration), while
         // paused the frozen duration stays, and during navigation it's left as-is — this tick only acts in
         // the genuine idle state. Runs once a second alongside (but independent of) the recording timer.
-        function navActive() { return !!(__nav && __nav.hasDestination && __nav.hasDestination()); }
+        // "Actively navigating" = a destination is set AND a route is actually drawn/guiding — NOT merely an
+        // armed destination. The last destination is restored on reload (nav.restoreLastRoute), so
+        // hasDestination() alone stays true while you just stand there → the DISTANCE tile showed 0 instead of
+        // the idle temperature, and this idle clock froze (Doc 2026-07-07). routePoints() is null until
+        // startNavigation draws the line (the ETA preview does not set it), so it cleanly means "really guiding".
+        function navActive() { return !!(__nav && __nav.hasDestination && __nav.hasDestination() && __nav.routePoints && __nav.routePoints()); }
         function tickIdleClock() {
             updateDistVisibility(); // catch nav start/stop (which don't route through setTrkState)
             if (trkState !== 'idle' || navActive()) return; // recording/paused/navigating own the display
