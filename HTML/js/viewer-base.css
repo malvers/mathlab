@@ -96,3 +96,38 @@ html, body {
 }
 #msg.hidden { display: none; }
 #msg a { color: var(--orange); }
+
+/* Media show/hide toggles (left edge, centred): photo · voice · video pins. Built + wired by
+   TrackOverlay.mediaToggles — shared by view.html and tour.html so look + behaviour live in one place. */
+#media-toggles {
+    position: fixed;
+    top: 50%;
+    transform: translateY(-50%);   /* vertically centred on the left edge */
+    left: max(10px, env(safe-area-inset-left));
+    z-index: 600;
+    display: flex; flex-direction: column; gap: 8px;
+}
+.media-tgl {
+    position: relative;
+    display: flex; align-items: center; justify-content: center;
+    width: 40px; height: 40px; padding: 0;
+    border: none; border-radius: 10px;
+    background: rgba(8, 20, 42, 0.8);
+    color: var(--orange);
+    cursor: pointer; backdrop-filter: blur(4px);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+    transition: color 0.15s ease;
+}
+/* OUR icon colours — same as the map pins (green camera · violet video · blue mic) */
+.media-tgl[data-kind="photo"] { color: rgb(121, 158, 49); }
+.media-tgl[data-kind="video"] { color: rgb(134, 97, 206); }   /* exact inverse of the camera green */
+.media-tgl[data-kind="voice"] { color: rgb(56, 120, 190); }
+.media-tgl svg { width: 22px; height: 22px; }
+/* OFF (hidden) state: dim the icon + a diagonal strike, so "hidden" reads at a glance */
+.media-tgl.off { color: rgba(255, 255, 255, 0.4); }
+.media-tgl.off::after {
+    content: ''; position: absolute; top: 50%; left: 50%;
+    width: 26px; height: 2px; background: rgba(255, 255, 255, 0.6);
+    border-radius: 2px; transform: translate(-50%, -50%) rotate(-45deg);
+    pointer-events: none;
+}

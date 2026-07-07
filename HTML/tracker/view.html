@@ -168,50 +168,7 @@
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
         }
 
-        /* ---- Media toggles (top-left): show/hide photo · voice · video pins ---- */
-        #media-toggles {
-            position: fixed;
-            top: max(10px, env(safe-area-inset-top));
-            left: max(10px, env(safe-area-inset-left));
-            z-index: 600;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-        .media-tgl {
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 40px;
-            height: 40px;
-            padding: 0;
-            border: none;
-            border-radius: 10px;
-            background: rgba(8, 20, 42, 0.8);
-            color: var(--orange);
-            cursor: pointer;
-            backdrop-filter: blur(4px);
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
-            transition: color 0.15s ease;
-        }
-        .media-tgl svg { width: 22px; height: 22px; }
-        /* OFF (hidden) state: dim the icon + a diagonal strike, so "hidden" reads at a glance */
-        .media-tgl.off { color: rgba(255, 255, 255, 0.4); }
-        .media-tgl.off::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 26px;
-            height: 2px;
-            background: rgba(255, 255, 255, 0.6);
-            border-radius: 2px;
-            transform: translate(-50%, -50%) rotate(-45deg);
-            pointer-events: none;
-        }
-
-        /* (zoom buttons + loading/error overlay now live in the shared viewer-base.css) */
+        /* (media toggles, zoom buttons + loading/error overlay now live in the shared viewer-base.css) */
     </style>
 </head>
 
@@ -332,62 +289,16 @@
             m._wp = wp;
             m.on('click', () => PhotoLayer.openLightbox(wp, waypoints)); // tap → full-screen, counter + arrows
             wpMarkers.push(m);
-            applyWpVisibility(m);                                 // respect the media toggle (hidden types stay off)
+            media.applyOne(m);                                   // respect the media toggle (hidden types stay off)
             PhotoLayer.applyStackBadges(visibleWpMarkers(), map); // tally badge on any overlapping VISIBLE stack
         }
         PhotoLayer.mountLightbox(); // inject the shared lightbox + wire its controls (counter / arrows / esc)
 
-        // ---- media toggle: show/hide photo · voice · video pins (declutter a shared track). Mirrors the
-        //      recorder's media filter (js/tracker.js) — same per-type semantics + localStorage keys. Each
-        //      toggle button appears ONLY when that media type is actually present in the loaded track. ----
-        const MEDIA_KINDS = ['photo', 'voice', 'video'];
-        const MEDIA_GLYPH = {
-            photo: '<path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/>',
-            video: '<path d="m22 8-6 4 6 4V8Z"/><rect width="14" height="12" x="2" y="6" rx="2" ry="2"/>',
-            voice: '<path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/>',
-        };
-        const MEDIA_TITLE = { photo: 'Fotos', voice: 'Sprachnotizen', video: 'Videos' };
-        const mediaVis = { photo: true, voice: true, video: true };
-        MEDIA_KINDS.forEach(k => { if (localStorage.getItem('trk-media-' + k) === '0') mediaVis[k] = false; });
-        function wpKind(wp) { return (wp && wp.type === 'voice') ? 'voice' : ((wp && wp.type === 'video') ? 'video' : 'photo'); }
+        // ---- media toggle: show/hide photo · voice · video pins (declutter a shared track). The buttons,
+        //      per-type filtering and localStorage keys live centrally in TrackOverlay.mediaToggles — shared
+        //      verbatim with tour.html. visibleWpMarkers() stays local (the stack-badge code below uses it too).
         function visibleWpMarkers() { return wpMarkers.filter(m => map.hasLayer(m)); }
-        function applyWpVisibility(m) {
-            if (!m || !m._wp) return;
-            const on = mediaVis[wpKind(m._wp)];
-            if (on && !map.hasLayer(m)) m.addTo(map);
-            else if (!on && map.hasLayer(m)) map.removeLayer(m);
-        }
-        function applyMediaFilter() { wpMarkers.forEach(applyWpVisibility); PhotoLayer.applyStackBadges(visibleWpMarkers(), map); }
-        // (Re)build the toggle buttons for the types that exist, reflecting each on/off state.
-        function syncMediaButtons() {
-            const box = $('media-toggles'); if (!box) return;
-            const present = {};
-            waypoints.forEach(w => { present[wpKind(w)] = true; });
-            MEDIA_KINDS.forEach(kind => {
-                let btn = box.querySelector('[data-kind="' + kind + '"]');
-                if (present[kind] && !btn) {
-                    btn = document.createElement('button');
-                    btn.type = 'button';
-                    btn.className = 'media-tgl' + (mediaVis[kind] ? '' : ' off');
-                    btn.dataset.kind = kind;
-                    btn.setAttribute('aria-label', MEDIA_TITLE[kind] + ' ein-/ausblenden');
-                    btn.title = MEDIA_TITLE[kind];
-                    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + MEDIA_GLYPH[kind] + '</svg>';
-                    btn.addEventListener('click', () => {
-                        mediaVis[kind] = !mediaVis[kind];
-                        localStorage.setItem('trk-media-' + kind, mediaVis[kind] ? '1' : '0');
-                        btn.classList.toggle('off', !mediaVis[kind]);
-                        applyMediaFilter();
-                    });
-                    box.appendChild(btn);
-                }
-                if (btn) {
-                    btn.style.display = present[kind] ? '' : 'none';
-                    btn.classList.toggle('off', !mediaVis[kind]);
-                }
-            });
-        }
-        function refreshMedia() { applyMediaFilter(); syncMediaButtons(); }
+        const media = TrackOverlay.mediaToggles(map, 'media-toggles', () => wpMarkers);
 
         function fmtClock(ms) {
             const s = Math.max(0, Math.round(ms / 1000));
@@ -498,13 +409,13 @@
                 m._wp = wp;
                 m.on('click', () => PhotoLayer.openLightbox(wp, waypoints));
                 wpMarkers[i] = m;
-                applyWpVisibility(m);                                 // respect the media toggle
+                media.applyOne(m);                                   // respect the media toggle
                 PhotoLayer.applyStackBadges(visibleWpMarkers(), map); // refresh tally badges after the swap
             } else {
                 addWaypoint(wp);
             }
             updateLiveStats();
-            syncMediaButtons(); // a new media type may have just appeared → reveal its toggle
+            media.sync(); // a new media type may have just appeared → reveal its toggle
         }
         function onLivePhoto(p) {
             if (!p || p.lat == null || !p.img) return;
@@ -625,7 +536,7 @@
             // after capture (the recorder pushes the photo twice: on snap, then once identified).
             wpMarkers.forEach(m => map.removeLayer(m)); wpMarkers = []; waypoints = [];
             wps.forEach(w => addWaypoint(w));
-            refreshMedia(); // keep hidden media types hidden across polls + reveal any newly-present type
+            media.refresh(); // keep hidden media types hidden across polls + reveal any newly-present type
 
             $('trk-name').textContent = row.name || 'Track';
             const t0 = times.find(Boolean), t1 = [...times].reverse().find(Boolean);
@@ -706,7 +617,7 @@
             }
             if (!names.length) { showMsg(anyNet ? connErrHtml('Server nicht erreichbar', false) : 'Keine Tracks gefunden — Link ungültig oder widerrufen.'); return; }
             $('trk-name').textContent = names.length + ' Tracks';
-            refreshMedia(); // reveal media toggles for the types present across the bundled tracks
+            media.refresh(); // reveal media toggles for the types present across the bundled tracks
             setStats({ distM: totalDist, durMs: 0, fotos: waypoints.length, speedKmh: 0 });
             if (all.length) { _fitBounds = L.latLngBounds(all); _fitc.fit(); }
             $('msg').classList.add('hidden');

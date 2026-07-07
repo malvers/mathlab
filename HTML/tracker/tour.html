@@ -108,6 +108,7 @@
 
 <body>
     <div id="map"></div>
+    <div id="media-toggles" role="group" aria-label="Medien ein-/ausblenden"></div>
     <header id="hdr">
         <h1 id="tour-name">Tour</h1>
         <div id="stats"></div>
@@ -138,6 +139,7 @@
     <script src="../js/track-render.js"></script>
     <script src="../js/photo-layer.js"></script>
     <script src="../js/track-overlay.js"></script>
+    <script src="../js/track-dem.js"></script>
     <script src="../js/supa-gate.js"></script>
     <script src="../js/vendor/supabase.min.js"></script>
     <script src="../js/viewer-base.js"></script>
@@ -153,6 +155,7 @@
         const usesHotline = !!L.hotline;
         const trackLayer = L.layerGroup().addTo(map);
         const wpState = { waypoints: [], wpMarkers: [] };   // media pins — shared glue in TrackOverlay
+        const media = TrackOverlay.mediaToggles(map, 'media-toggles', () => wpState.wpMarkers);   // show/hide toggles (shared with view.html)
         PhotoLayer.mountLightbox();
         map.on('zoomend', () => PhotoLayer.applyStackBadges(wpState.wpMarkers, map));
 
@@ -182,6 +185,53 @@
             svg.innerHTML =
                 '<path d="' + area + '" fill="rgba(245,194,66,0.14)"/>' +
                 '<path d="' + dPath.trim() + '" fill="none" stroke="rgb(245,194,66)" stroke-width="1.6" vector-effect="non-scaling-stroke"/>';
+        }
+
+        // The coarse overview DEM grid returns one height per ~350 m cell, so mapping it onto every point
+        // makes a staircase. Smooth it: drop one anchor at the MIDDLE of each equal-height run (the cell's
+        // representative sample) and linearly interpolate the profile between anchors by cumulative distance.
+        // Mutates pp[].alt in place; returns the anchor heights (for a clean, step-free ascent figure).
+        function deStair(pp, demArr) {
+            const ax = [], ay = [];
+            let s = 0;
+            for (let i = 1; i <= demArr.length; i++) {
+                if (i === demArr.length || demArr[i] !== demArr[s]) {
+                    if (demArr[s] != null) { const mid = (s + i - 1) >> 1; ax.push(pp[mid].d); ay.push(demArr[s]); }
+                    s = i;
+                }
+            }
+            if (ax.length < 2) { for (let i = 0; i < pp.length; i++) if (demArr[i] != null) pp[i].alt = demArr[i]; return ay; }
+            // Kill single-cell DEM spikes: an isolated anchor >50 m off the median of its two neighbours is
+            // a model glitch (real terrain spans several cells), so snap it to that median before drawing.
+            for (let i = 1; i < ay.length - 1; i++) {
+                const a = ay[i - 1], b = ay[i], c = ay[i + 1];
+                const med = a + b + c - Math.max(a, b, c) - Math.min(a, b, c);   // median of 3
+                if (Math.abs(b - med) > 50) ay[i] = med;
+            }
+            let k = 0;   // single forward pointer — pp[].d is non-decreasing
+            for (let i = 0; i < pp.length; i++) {
+                const d = pp[i].d;
+                if (d <= ax[0]) { pp[i].alt = ay[0]; continue; }
+                if (d >= ax[ax.length - 1]) { pp[i].alt = ay[ay.length - 1]; continue; }
+                while (k < ax.length - 2 && ax[k + 1] < d) k++;
+                const d0 = ax[k], d1 = ax[k + 1];
+                pp[i].alt = (d1 > d0) ? ay[k] + (ay[k + 1] - ay[k]) * ((d - d0) / (d1 - d0)) : ay[k];
+            }
+            return ay;
+        }
+
+        // Cumulative ascent with a hysteresis threshold: only bank a climb once it rises `thresh` metres
+        // above the running low, so DEM sampling wiggles (±few m between adjacent cells) don't inflate the
+        // total. This is how Komoot/Strava report gain — a raw sum of every up-step counts pure noise.
+        function cumGain(ys, thresh) {
+            let gain = 0, ref = null;
+            for (let i = 0; i < ys.length; i++) {
+                const y = ys[i]; if (y == null) continue;
+                if (ref == null) { ref = y; continue; }
+                if (y > ref + thresh) { gain += y - ref; ref = y; }
+                else if (y < ref) ref = y;
+            }
+            return gain;
         }
 
         // ---- entry: ?t=<folder slug> ----
@@ -235,8 +285,10 @@
                     // they stay honest; this only smooths the drawn profile.
                     let firstAlt = null;
                     for (let k = 0; k < pts.length; k++) { if (pts[k][3] != null) { firstAlt = pts[k][3]; break; } }
-                    const connects = seamLL && hav(seamLL, [pts[0][0], pts[0][1]]) < 500;
+                    const seamGap = seamLL ? hav(seamLL, [pts[0][0], pts[0][1]]) : 0;
+                    const connects = !!seamLL && seamGap < 500;   // stages meet (baro baseline stitchable); a wider gap is a real break in the recording
                     const off = (connects && seamAlt != null && firstAlt != null) ? seamAlt - firstAlt : 0;
+                    cum += seamGap;   // advance x across the inter-stage gap so a REAL gap slopes instead of dropping vertically (≈0 for connected stages)
                     // profile: append this stage's points with running cumulative distance (baseline-stitched)
                     for (let k = 0; k < pts.length; k++) {
                         if (k > 0) cum += hav(pts[k - 1], pts[k]);
@@ -262,21 +314,41 @@
                 legsList.appendChild(row);
             });
 
-            // combined stats tiles
+            // combined stats tiles (HÖHE re-rendered once the DEM ascent replaces the baro one below)
             const durTxt = totDur > 0 ? fmtClock(totDur) : '–';
             const avg = (totDur > 0) ? ((totDist / 1000) / (totDur / 3600000)).toFixed(1) : '0';
-            $('stats').innerHTML =
-                statTile(tracks.length, 'ETAPPEN') +
-                statTile((totDist / 1000).toFixed(1), 'KM') +
-                statTile(durTxt, 'DAUER') +
-                statTile(avg, 'KM/H') +
-                statTile('↑' + totUp, 'HÖHE') +
-                (photos ? statTile(photos, 'FOTOS') : '');
+            function renderStats(upVal) {
+                $('stats').innerHTML =
+                    statTile(tracks.length, 'ETAPPEN') +
+                    statTile((totDist / 1000).toFixed(1), 'KM') +
+                    statTile(durTxt, 'DAUER') +
+                    statTile(avg, 'KM/H') +
+                    statTile('↑' + upVal, 'HÖHE') +
+                    (photos ? statTile(photos, 'FOTOS') : '');
+            }
+            renderStats(totUp);
 
             drawProfile(profPts);
+            media.refresh();   // build the photo/voice/video toggles for the types present + apply saved filter
             $('legs-btn').textContent = 'Etappen (' + tracks.length + ') ▴';
             if (allLatLng.length) { _fitBounds = L.latLngBounds(allLatLng); _fitc.fit(); }
             hideMsg();
+
+            // Upgrade the profile from per-day BAROMETRIC height (baseline jumps at each stage seam — the
+            // stitch above is only a fallback) to absolute DEM terrain height: one reference for the whole
+            // tour, so the seams vanish for real and the ascent is clean. Best-effort + async — if the DEM
+            // API is unreachable, the baro-stitched profile already on screen stays put.
+            if (window.TrackDem && allLatLng.length) {
+                try {
+                    // coarse ~350 m grid for the overview profile → few cells → no rate-limit wall
+                    const dem = await TrackDem.elevations(allLatLng, null, 200);
+                    if (dem.filter(v => v != null).length >= allLatLng.length * 0.5) {
+                        const ay = deStair(profPts, dem);           // smooth the staircase + kill single-cell spikes
+                        drawProfile(profPts);
+                        renderStats(Math.round(cumGain(ay, 12)));   // clean ascent (hysteresis threshold kills DEM noise)
+                    }
+                } catch (e) { /* DEM unreachable → keep the baro-stitched profile already shown */ }
+            }
         })();
 
         // legs sheet open/close
