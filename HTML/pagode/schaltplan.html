@@ -268,6 +268,7 @@
                 FEEDS.forEach(f => { const v = fp[f.a]; if (v == null) return; if (typeof v === 'number') { f.tapX = v; } else { if (v.x != null) f.tapX = v.x; if (v.y != null) f.tapY = v.y; } });
                 if (p.railX != null) railX = p.railX;
                 if (p.light) document.body.classList.add('light');
+                if (p.mode) curMode = p.mode;
             } catch (e) { /* ignore */ }
         }
         function save() {
@@ -276,7 +277,7 @@
             for (const id in NODES) nodes[id] = { x: NODES[id].x, y: NODES[id].y, lx: NODES[id].lx, ly: NODES[id].ly };
             const feeds = {};
             FEEDS.forEach(f => { if (f.tapX != null || f.tapY != null) feeds[f.a] = { x: f.tapX, y: f.tapY }; });
-            localStorage.setItem(LSKEY, JSON.stringify({ comps, nodes, labels: LPOS, feeds, railX, light: !!(document.body && document.body.classList.contains('light')) }));
+            localStorage.setItem(LSKEY, JSON.stringify({ comps, nodes, labels: LPOS, feeds, railX, light: !!(document.body && document.body.classList.contains('light')), mode: curMode }));
         }
 
         // ---- SVG helpers ----
@@ -604,7 +605,7 @@
                     render();
                 }
                 function up(ev) {
-                    el.releasePointerCapture(e.pointerId);
+                    try { el.releasePointerCapture(e.pointerId); } catch (x) { }   // el was destroyed by render() during move → guard so save() ALWAYS runs
                     svg.removeEventListener('pointermove', move);
                     svg.removeEventListener('pointerup', up);
                     save();
@@ -622,7 +623,7 @@
         document.querySelectorAll('.toggles button[data-mode]').forEach(b => b.addEventListener('click', () => {
             activateBtn(b.dataset.mode);
             curMode = b.dataset.mode; sim = 0; simCrank = false; if (simTimer) clearTimeout(simTimer);
-            svg.setAttribute('class', 'mode-' + curMode); setStatus(''); setBtn('▶ Start-Sequenz'); render();
+            svg.setAttribute('class', 'mode-' + curMode); setStatus(''); setBtn('▶ Start-Sequenz'); render(); save();
         }));
         // Tippen: ① Zündung EIN → ② Anlassen/Läuft → aus (wie der Schlüssel: 0 → 1 → Start → Lauf).
         function simTap() {
@@ -649,7 +650,7 @@
         // default label offset per terminal direction (unless a saved offset overrides it)
         const DEFOFF = { l: [-12, 4], r: [12, 4], t: [0, -13], b: [0, 17] };
         for (const id in NODES) { const n = NODES[id]; if (n.label) { const d = DEFOFF[n.dir] || [12, 4]; if (n.lx == null) n.lx = d[0]; if (n.ly == null) n.ly = d[1]; } }
-        svg.setAttribute('class', 'mode-solita');
+        svg.setAttribute('class', 'mode-' + curMode); activateBtn(curMode);
         render();
         // re-measure once the Orbitron webfont is loaded, so pills use the real font metrics
         if (document.fonts && document.fonts.ready) document.fonts.ready.then(render);
