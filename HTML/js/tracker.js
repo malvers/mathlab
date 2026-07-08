@@ -1504,6 +1504,7 @@
             lastFix = { lat: here[0], lng: here[1], t: now };
             renderPosition(here, accuracy, still); // hold the dot steady when the gate says we stand
             showDot();
+            if (liveOn) broadcastLive(); // Stage 3: also broadcast while idle → live WITHOUT recording (Doc 2026-07-08)
             // Idle altitude (no barometer here): show the DEM terrain height directly → no more „−".
             updateDemElev(here);
             updateAltitude(pos.coords.altitude != null ? pos.coords.altitude : null);
@@ -1791,28 +1792,45 @@
         }
         // 'pos' = latest fix (throttled); 'trail' = whole path (so late viewers see the history).
         function broadcastLive(force) {
-            if (!liveOn || !liveChannel || !track.length) return;
+            if (!liveOn || !liveChannel) return;
             const now = Date.now();
             if (!force && now - lastLiveMs < LIVE_MS) return;
+            // Position source: the recorded track's last point, or — when broadcasting WITHOUT recording
+            // (idle live-follow, no track) — the last idle GPS fix (lastFix). No fix yet → nothing to send.
+            let lat, lng, t = null, speed = null, activity = null, temp = null;
+            if (track.length) {
+                const i = track.length - 1;
+                lat = track[i][0]; lng = track[i][1]; t = times[i] || null;
+                speed = speeds[i] != null ? speeds[i] : null; activity = activities[i] || null;
+                temp = temps[i] != null ? temps[i] : null;
+            } else if (lastFix) {
+                lat = lastFix.lat; lng = lastFix.lng; t = lastFix.t;
+                speed = (typeof shownSpeed === 'number') ? shownSpeed : null;
+                temp = (typeof lastTemp === 'number') ? lastTemp : null;
+            } else return;
             lastLiveMs = now;
-            const i = track.length - 1;
             // While navigating, ride the ETA along on the same message → the viewer shows "Ankunft …"
             // in its header (note #3). null when no route → viewer hides the ETA line.
-            const trip = (__nav && __nav.tripData) ? __nav.tripData([track[i][0], track[i][1]]) : null;
+            const trip = (__nav && __nav.tripData) ? __nav.tripData([lat, lng]) : null;
             try {
                 liveChannel.send({
                     type: 'broadcast', event: 'pos', payload: {
-                        lat: track[i][0], lng: track[i][1], t: times[i] || null,
-                        speed: speeds[i] != null ? speeds[i] : null, activity: activities[i] || null,
-                        temp: temps[i] != null ? temps[i] : null,
+                        lat: lat, lng: lng, t: t,
+                        speed: speed, activity: activity, temp: temp,
                         remSec: trip ? Math.round(trip.remSec) : null, remM: trip ? Math.round(trip.remM) : null,
                     },
                 });
             } catch (e) { /* channel not joined yet → the next fix retries */ }
         }
         function broadcastTrail() {
-            if (!liveOn || !liveChannel || !track.length) return;
-            const pts = track.map((p, i) => [p[0], p[1], times[i] || null, speeds[i] != null ? speeds[i] : null, activities[i] || null, temps[i] != null ? temps[i] : null]);
+            if (!liveOn || !liveChannel) return;
+            let pts;
+            if (track.length) {
+                pts = track.map((p, i) => [p[0], p[1], times[i] || null, speeds[i] != null ? speeds[i] : null, activities[i] || null, temps[i] != null ? temps[i] : null]);
+            } else if (lastFix) {
+                // Broadcasting without recording: no trail history — send just the current fix as a 1-point trail.
+                pts = [[lastFix.lat, lastFix.lng, lastFix.t, (typeof shownSpeed === 'number') ? shownSpeed : null, null, (typeof lastTemp === 'number') ? lastTemp : null]];
+            } else return;
             try { liveChannel.send({ type: 'broadcast', event: 'trail', payload: { pts: pts } }); } catch (e) { }
         }
         // ---- live MEDIA over the SAME channel: photo / voice / video. Photos ride as the FULL stored
@@ -1860,7 +1878,9 @@
             const canon = (name || '').trim().toLowerCase() || 'vsb';
             liveName = canon;
             try { localStorage.setItem('tracker.liveName', canon); } catch (e) { }
-            if (!track.length) { toast('Erst aufzeichnen, dann LIVE.'); return; }
+            // Broadcasting no longer requires an active recording (Doc 2026-07-08): a GPS fix is enough,
+            // so you can go live in the normal (idle) mode too. Only bail if we have no position at all.
+            if (!track.length && !lastFix) { toast('Warte auf GPS-Position …'); return; }
             liveOn = true; updateLiveBadge();
             liveMedia = [];            // fresh live session
             liveWasInterrupted = false;
@@ -3309,7 +3329,7 @@ ${pts}
             const hasShare = has || loadedTrackIds.size > 0;
             const dim = (id, off) => { const b = $(id); if (b) b.classList.toggle('disabled', off); };
             dim('mb-sharetrack', !hasShare);
-            dim('mb-live', !has && !liveOn);
+            dim('mb-live', !has && !liveOn && !lastFix);   // broadcast needs only a GPS fix now, not a recording
             dim('mb-smooth', !has);
             dim('mb-dem', !has);
         }
