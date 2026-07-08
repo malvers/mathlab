@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>230 SL Pagode · Übersicht</title>
+    <!-- same vintage typography as the car remote: Playfair Display (badge) + Cinzel (engraved caps) -->
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Playfair+Display:ital,wght@0,500;0,700;1,500&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --ink: #2b2a26;
+            --gold-hi: #fff3d0;
+            --gold: #e7c873;
+            --gold-lo: #9c7a2e;
+            --gold-deep: #6e521d;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex; align-items: center; justify-content: center;
+            padding: 26px 16px; color: var(--ink);
+            font-family: 'Playfair Display', Georgia, serif;
+            /* dark brown leather (matched to snakeskin avg #31302e) — leder-braun.jpg slots in when present */
+            background-color: #312c25;
+            background-image:
+                url('leder-braun.jpg'),
+                radial-gradient(120% 110% at 50% 14%, #363027, transparent 55%),
+                radial-gradient(130% 120% at 50% 120%, rgba(0, 0, 0, .5), transparent 55%),
+                linear-gradient(0deg, #262119, #362f27);
+            background-size: cover, auto, auto, auto;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+        }
+
+        /* snakeskin fascia with a golden rim — same panel as the car remote */
+        .dash {
+            width: 100%; max-width: 400px;
+            background:
+                linear-gradient(180deg, rgba(8, 12, 20, .52), rgba(8, 12, 20, .24) 42%, rgba(8, 12, 20, .48)),
+                url('snakeskin.png');
+            background-size: cover; background-position: center; background-repeat: no-repeat;
+            border-radius: 22px; padding: 30px 24px 24px;
+            box-shadow:
+                0 0 0 2px #7a611f,
+                0 0 0 7px var(--gold),
+                0 0 0 8px var(--gold-lo),
+                0 22px 50px rgba(0, 0, 0, .55),
+                inset 0 2px 6px rgba(255, 240, 205, .3);
+            text-align: center;
+        }
+
+        /* raised gold 3D lettering — same as the car remote badges */
+        .gold3d {
+            background: linear-gradient(180deg, #fffdf5, #fbeeba 30%, #f2dc8e 55%, #e2c268 78%, #be9a44);
+            -webkit-background-clip: text; background-clip: text;
+            -webkit-text-fill-color: transparent; color: transparent;
+            text-shadow: 0 1px 0 #7c5d21, 0 1px 3px rgba(0, 0, 0, .45);
+        }
+        .badge-model { font-size: 38px; font-weight: 700; letter-spacing: 1px; line-height: 1; }
+        .badge-name { font-family: 'Cinzel', serif; font-weight: 700; font-size: 15px; letter-spacing: 7px; margin-top: 8px; padding-left: 7px; }
+        .badge-year { font-style: italic; font-size: 16px; margin-top: 5px; letter-spacing: 2px; }
+        .rule { height: 2px; margin: 18px auto 4px; max-width: 240px; background: linear-gradient(90deg, transparent, #d0b772, transparent); }
+
+        /* link menu — brass-rimmed rows over the snakeskin */
+        .menu { display: flex; flex-direction: column; gap: 13px; margin-top: 24px; }
+        .link {
+            display: flex; align-items: center; gap: 14px; text-decoration: none;
+            padding: 14px 16px; border-radius: 12px;
+            background: linear-gradient(180deg, rgba(18, 13, 7, .62), rgba(18, 13, 7, .42));
+            border: 1px solid var(--gold-lo);
+            box-shadow: inset 0 1px 0 rgba(255, 243, 205, .14), 0 4px 12px rgba(0, 0, 0, .4);
+            -webkit-tap-highlight-color: transparent;
+            transition: filter .15s, transform .06s, border-color .15s;
+        }
+        .link:hover { filter: brightness(1.14); border-color: var(--gold); }
+        .link:active { transform: translateY(1px); }
+        .link .tx { flex: 1; text-align: left; }
+        .link .t { font-family: 'Cinzel', serif; font-weight: 700; letter-spacing: 2px; font-size: 15px; color: #f0e2b8; text-transform: uppercase; text-shadow: 0 1px 2px rgba(0, 0, 0, .6); }
+        .link .s { font-family: 'Playfair Display', serif; font-style: italic; font-size: 12px; color: #c7b692; margin-top: 2px; }
+        .link .ar { flex: none; font-family: 'Cinzel', serif; font-size: 22px; line-height: 1; color: var(--gold); opacity: .85; }
+
+        .foot { margin-top: 22px; font-family: 'Cinzel', serif; font-size: 9px; letter-spacing: 2px; color: #bdab80; text-transform: uppercase; text-shadow: 0 1px 2px rgba(0, 0, 0, .7); }
+    </style>
+</head>
+
+<body>
+    <div class="dash">
+        <div class="badge-model gold3d">230 SL</div>
+        <div class="badge-name gold3d">Pagode</div>
+        <div class="badge-year gold3d">Baujahr 1964</div>
+        <div class="rule"></div>
+
+        <nav class="menu">
+            <a class="link" href="pagode.html">
+                <span class="tx"><span class="t">Start / Stop</span><span class="s">Motor per Funk starten &amp; stoppen</span></span>
+                <span class="ar">&rsaquo;</span>
+            </a>
+            <a class="link" href="pagode-remote.html">
+                <span class="tx"><span class="t">BLE-Remote</span><span class="s">Diagnose · Kanäle testen · Protokoll</span></span>
+                <span class="ar">&rsaquo;</span>
+            </a>
+            <a class="link" href="schaltplan.html">
+                <span class="tx"><span class="t">Schaltplan</span><span class="s">Serie + KI-Fernsteuerung, interaktiv</span></span>
+                <span class="ar">&rsaquo;</span>
+            </a>
+            <a class="link" href="doc-alvers-pagode.apk" download>
+                <span class="tx"><span class="t">Android-App</span><span class="s">Native APK · Bluetooth ohne HTTPS</span></span>
+                <span class="ar">&rsaquo;</span>
+            </a>
+        </nav>
+
+        <div class="foot">Solita lernt fahren</div>
+    </div>
+</body>
+
+</html>
