@@ -143,7 +143,7 @@
     // ---- tool: start_engine ------------------------------------------------------------------------------------
     var startSpec = {
         name: 'start_engine',
-        description: 'Starte den Motor von Docs Mercedes 230 SL „Pagode" (Baujahr 1964) per Bluetooth-Relais. '
+        description: 'Starte den Motor von Docs Mercedes 230 SL „Pagode" (1964) per Bluetooth-Relais. '
             + 'Nutze dies, wenn Doc sinngemäß sagt „starte (mal) die Engine/den Motor", „lass den Wagen/die Pagode an", '
             + '„Solita, let\'s go", „wollen wir (eine kleine Ausfahrt)?", „lass uns (raus)fahren". Der Zündschlüssel steht '
             + 'bereits auf ON; dieses Werkzeug betätigt nur kurz den Anlasser (wie der Schlüssel in Stellung „Start"). '
