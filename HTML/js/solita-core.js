@@ -442,9 +442,10 @@
 
         function getPwd() { return sessionPwd; }
 
-        let currentModel = localStorage.getItem(MODEL_KEY) || 'claude-sonnet-4-6';
-        // Allow Claude OR DeepSeek (Doc wants to compare); anything else → safe Claude default.
-        if (!/^(claude-|deepseek-)/.test(currentModel)) currentModel = 'claude-sonnet-4-6';
+        // Default = DeepSeek (Doc: cheap chat is the agreed baseline; Claude only borrows a turn for tools).
+        let currentModel = localStorage.getItem(MODEL_KEY) || 'deepseek-chat';
+        // Allow Claude OR DeepSeek (Doc wants to compare); anything else → safe DeepSeek default.
+        if (!/^(claude-|deepseek-)/.test(currentModel)) currentModel = 'deepseek-chat';
         // Cost guard (Doc: die 5€ sollen halten): never let a stale/left-over 'ai_model' silently run Opus
         // (~1.67× in+out vs Sonnet) for a voice assistant. The proxy enforces this server-side too.
         if (/opus/i.test(currentModel)) currentModel = 'claude-sonnet-4-6';
