@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WeDrive — Flow-Plan</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="../resources/favicon.png">
+    <style>
+        /* Self-contained flow plan. All content lives in the STEPS data array (script below) so the plan
+           is populatable — refine by editing the array, not the DOM. On-brand navy/Orbitron, palette per
+           CLAUDE.md. Body prose uses a readable system sans (Orbitron only for headings/labels). */
+        :root {
+            --bg: rgb(8, 20, 42);
+            --panel2: rgb(12, 28, 60);
+            --line: rgba(255, 255, 255, 0.12);
+            --ink: #e8eefc;
+            --muted: #8fa0c4;
+            --gold: rgb(245, 194, 66);
+            --green: rgb(121, 158, 49);
+            --red: rgb(176, 36, 24);
+            --blue: #6fa8ff;
+        }
+        * { box-sizing: border-box; }
+        /* One lever for overall text size — all type is in rem, so this scales the whole page. */
+        html, body { margin: 0; background: var(--bg); color: var(--ink); font-family: 'Orbitron', sans-serif; font-size: 17.5px; -webkit-text-size-adjust: 100%; }
+        ::-webkit-scrollbar { width: 9px; height: 9px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.18); border-radius: 6px; }
+
+        .wrap { max-width: 940px; margin: 0 auto; padding: 22px 16px 70px; }
+
+        header.top { border-bottom: 1px solid var(--line); padding-bottom: 14px; margin-bottom: 16px; }
+        header.top h1 { font-size: 1.7rem; font-weight: 900; letter-spacing: 3px; text-transform: uppercase; margin: 0; color: var(--green); }
+        header.top .sub { font-size: 0.8rem; letter-spacing: 1.5px; color: var(--muted); text-transform: uppercase; margin-top: 6px; }
+
+        /* Core-principle banner (gold-accent, like the schaltplan .warn box) */
+        .principle { margin: 16px 0 6px; background: rgba(245, 194, 66, 0.08); border: 1px solid rgba(245, 194, 66, 0.35); border-radius: 12px; padding: 12px 16px; }
+        .principle .p-h { font-size: 0.72rem; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--gold); margin-bottom: 5px; }
+        .principle .p-b { font-family: -apple-system, "Segoe UI", Roboto, sans-serif; font-size: 0.92rem; line-height: 1.5; color: var(--ink); }
+        .principle b { color: #fff; }
+
+        .controls { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 16px 0 8px; }
+        .hint { font-family: -apple-system, "Segoe UI", Roboto, sans-serif; font-size: 0.8rem; color: var(--muted); flex: 1 1 auto; min-width: 180px; }
+        .btn { font-family: 'Orbitron', sans-serif; font-weight: 700; letter-spacing: 1px; font-size: 0.68rem; text-transform: uppercase; cursor: pointer; border-radius: 9px; padding: 9px 14px; border: 1px solid var(--green); background: var(--green); color: #fff; transition: filter .15s; }
+        .btn:hover { filter: brightness(1.1); }
+
+        /* the flow spine + step cards */
+        .flow { position: relative; margin-top: 8px; }
+        .flow::before { content: ''; position: absolute; left: 17px; top: 22px; bottom: 22px; width: 2px; background: linear-gradient(180deg, rgba(245,194,66,.5), rgba(245,194,66,.12)); }
+
+        .step { position: relative; padding-left: 56px; margin-bottom: 12px; }
+        .num { position: absolute; left: 0; top: 12px; width: 36px; height: 36px; border-radius: 50%; background: var(--bg); border: 2px solid var(--gold); color: var(--gold); font-weight: 900; font-size: 1rem; display: flex; align-items: center; justify-content: center; z-index: 1; }
+        .step.danger .num { border-color: var(--red); color: #e88; }
+        .num-g { border-color: var(--green); color: #a9c46a; }
+        /* Glossary is its own card, set apart from the 6 steps (no spine, extra gap above) */
+        .gloss-step { margin-top: 44px; }
+
+        .card { border: 1px solid var(--line); border-radius: 12px; background: var(--panel2); overflow: hidden; }
+        .step.danger .card { border-color: rgba(176, 36, 24, 0.45); }
+        .head { display: flex; align-items: center; gap: 12px; padding: 13px 15px; cursor: pointer; user-select: none; transition: background .12s; }
+        .head:hover { background: rgba(245, 194, 66, 0.06); }
+        .head .txt { flex: 1 1 auto; min-width: 0; }
+        .head .title { font-size: 0.98rem; font-weight: 700; letter-spacing: 0.5px; color: var(--ink); margin: 0; }
+        .head .summary { display: block; font-family: -apple-system, "Segoe UI", Roboto, sans-serif; font-size: 0.8rem; color: var(--muted); margin-top: 3px; line-height: 1.4; }
+        .chev { flex: 0 0 auto; color: var(--gold); font-size: 0.8rem; width: 14px; text-align: center; transition: transform .15s; }
+        .step.open .chev { transform: rotate(90deg); }
+
+        .body { display: none; border-top: 1px solid var(--line); padding: 6px 16px 16px; }
+        .step.open .body { display: block; }
+
+        /* slots — the populatable units inside each step */
+        .slot { margin-top: 13px; }
+        .slot-label { font-size: 0.62rem; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--gold); margin-bottom: 5px; }
+        .slot-label.blue { color: var(--blue); }
+        .slot-label.red { color: #e0796b; }
+        .slot-content { font-family: -apple-system, "Segoe UI", Roboto, sans-serif; font-size: 0.9rem; line-height: 1.55; color: var(--ink); }
+        .slot-content b { color: #fff; }
+
+        /* attack -> defense pairs */
+        .threat { margin: 7px 0; border: 1px solid var(--line); border-radius: 9px; overflow: hidden; font-family: -apple-system, "Segoe UI", Roboto, sans-serif; font-size: 0.86rem; line-height: 1.5; }
+        .t-a { padding: 7px 11px; background: rgba(176, 36, 24, 0.12); }
+        .t-s { padding: 7px 11px; background: rgba(121, 158, 49, 0.12); border-top: 1px solid var(--line); }
+        .t-a b { color: #e0796b; } .t-s b { color: #a9c46a; }
+
+        /* open questions */
+        ul.offen { margin: 4px 0 0; padding: 0; list-style: none; font-family: -apple-system, "Segoe UI", Roboto, sans-serif; font-size: 0.88rem; line-height: 1.5; }
+        ul.offen li { position: relative; padding: 4px 0 4px 18px; color: #e7d29a; }
+        ul.offen li::before { content: '▢'; position: absolute; left: 0; color: var(--gold); font-size: 0.7rem; top: 6px; }
+
+        @media (max-width: 520px) {
+            .step { padding-left: 46px; }
+            .flow::before { left: 15px; }
+            .num { width: 32px; height: 32px; font-size: 0.9rem; }
+        }
+
+        /* --- Glossary (filterable term list below the flow) --- */
+        .gloss-controls { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 6px; }
+        .gloss-search { flex: 1 1 240px; max-width: 340px; padding: 10px 12px; border-radius: 9px; border: 1px solid var(--line); background: rgba(8, 20, 42, 0.55); color: var(--ink); font-family: 'Orbitron', sans-serif; font-size: 0.8rem; }
+        .gloss-search:focus { outline: none; border-color: var(--gold); }
+        .gloss-cat { margin: 22px 0 0; font-size: 0.95rem; font-weight: 900; letter-spacing: 1.5px; text-transform: uppercase; color: var(--gold); border-bottom: 1px solid var(--line); padding-bottom: 5px; }
+        .gloss-item { border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
+        .gloss-head { display: flex; align-items: center; gap: 10px; padding: 9px 2px; cursor: pointer; user-select: none; }
+        .gloss-head:hover .gt { color: var(--gold); }
+        .gt { flex: 1 1 auto; min-width: 0; font-weight: 700; color: var(--ink); font-size: 0.9rem; }
+        .gchev { flex: 0 0 auto; color: var(--gold); font-size: 0.7rem; width: 12px; text-align: center; transition: transform .15s; }
+        .gloss-item.open .gchev { transform: rotate(90deg); }
+        .gloss-item .d { display: none; padding: 0 2px 11px; font-family: -apple-system, "Segoe UI", Roboto, sans-serif; font-size: 0.86rem; line-height: 1.5; color: #cdd8f0; }
+        .gloss-item.open .d { display: block; }
+        .gloss-item .d b { color: #fff; }
+        .gloss-empty { font-family: -apple-system, "Segoe UI", Roboto, sans-serif; color: var(--muted); font-size: 0.85rem; padding: 12px 2px; }
+        .jump { font-family: -apple-system, "Segoe UI", Roboto, sans-serif; font-size: 0.74rem; color: var(--gold); text-decoration: none; letter-spacing: 0.5px; display: inline-block; padding: 7px 4px; }
+        .jump:hover { text-decoration: underline; }
+        /* Long German compounds must break instead of being clipped by .card{overflow:hidden} on narrow phones */
+        .gt, .slot-content, .gloss-item .d, .head .title, .head .summary, .principle .p-b, .t-a, .t-s, ul.offen li { overflow-wrap: break-word; }
+    </style>
+</head>
+
+<body>
+    <div class="wrap">
+        <header class="top">
+            <h1>WeDrive</h1>
+            <div class="sub">Flow-Plan · Identität &amp; Vertrauen · v1</div>
+        </header>
+
+        <div class="principle">
+            <div class="p-h">Leitprinzip</div>
+            <div class="p-b">Der Personalausweis <b>verhindert nichts</b> — WeDrive verwandelt jede Fahrt von <b>„anonym &amp; ungeklärt"</b>
+                in <b>„sofort nachvollziehbar &amp; verfolgbar"</b>. Positionierung: <b>nachvollziehbar</b>, nicht nur „sicher".</div>
+        </div>
+
+        <div class="controls">
+            <span class="hint">Klick auf einen Schritt → Details aufklappen. Inhalt wird im <b>STEPS</b>-Array (Script) gepflegt — hier bestücken wir.</span>
+            <button class="btn" id="toggle-all" type="button">Alle aufklappen</button>
+            <a class="jump" href="#glossar">Glossar ↓</a>
+        </div>
+
+        <div class="flow" id="flow"></div>
+
+        <div class="step gloss-step" id="glossar">
+            <div class="num num-g">G</div>
+            <div class="card">
+                <div class="head" id="gloss-toggle">
+                    <div class="txt">
+                        <h2 class="title">Glossar</h2>
+                        <span class="summary">Alle Fachbegriffe aus dem Plan, alphabetisch · klappbar · tippen zum Filtern.</span>
+                    </div>
+                    <span class="chev" aria-hidden="true">▶</span>
+                </div>
+                <div class="body">
+                    <div class="gloss-controls">
+                        <input class="gloss-search" id="gloss-search" type="text" placeholder="Begriff suchen …" aria-label="Glossar filtern" autocomplete="off">
+                        <button class="btn" id="gloss-all" type="button">Alle aufklappen</button>
+                    </div>
+                    <div id="glossary"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        'use strict';
+
+        /* ---- THE PLAN. To populate: edit this array. Empty slots are simply omitted; `offen` = open questions
+               (rendered as gold TODO checkboxes); `threats` = attack → defense pairs. Inline <b> allowed. ---- */
+        const STEPS = [
+            {
+                title: 'Registrierung (einmalig, je ~3 Min.)',
+                summary: 'Personalausweis per NFC + PIN → staatlich verifizierte Identität. Selfie an den Namen gekoppelt. Alles verschlüsselt ins Escrow.',
+                zweck: 'Fahrer und Mitfahrer bombensicher, staatlich verifiziert identifizieren — und ein <b>Gesicht</b> an diese Identität binden.',
+                ablauf: 'NFC: Personalausweis ans Fon, 6-stellige PIN → der Ident-Dienstleister bestätigt Name / Geburtsdatum / Adresse. Direkt danach ein <b>Selfie-Liveness</b> → Gesicht ↔ verifizierter Name.',
+                tech: 'eID-Online-Ausweisfunktion über einen <b>Identifizierungsdiensteanbieter</b> (§ 21b PAuswG) — AusweisIDent (Governikus; urspr. mit Bundesdruckerei/D-Trust entwickelt), IDnow, Nect. Integration per <b>OpenID Connect / OAuth2</b>; <b>AusweisApp-SDK</b> für NFC/PIN direkt in der App. Liveness nach <b>ISO/IEC 30107-3, iBeta Level 2</b>.',
+                threats: [
+                    { a: 'Gestohlener Personalausweis.', s: 'Ohne PIN nutzlos — Besitz + Wissen = Zwei-Faktor.' },
+                    { a: 'Fremdes Gesicht / Foto bei der Selfie-Bindung.', s: 'Liveness (PAD) + 1:1-Match gegen den frisch verifizierten Namen.' }
+                ],
+                recht: 'Ausweisdaten <b>und</b> Gesichts-Template (Art. 9!) liegen verschlüsselt im <b>Escrow</b>, nur per Break-Glass lesbar. <b>DPIA</b> Pflicht, Verarbeitung nur mit <b>ausdrücklicher Einwilligung</b> (Art. 9(2)a).',
+                offen: [
+                    'Eigenes Berechtigungszertifikat (VfB/BVA) später — oder dauerhaft über Dienstleister?',
+                    'Gesichts-Template <b>on-device</b> (kein zentraler Honeypot) vs. zentral im Escrow?'
+                ]
+            },
+            {
+                title: 'Fahrtwunsch &amp; Match (an der Haltestelle)',
+                summary: 'Mitfahrer tippt „Mitfahrt". Die GPS-/Tracker-Mechanik matcht ein passendes Auto auf der Route.',
+                zweck: 'Angebot und Nachfrage räumlich zusammenbringen — Deine bestehende <b>GPS-/Tracker-Mechanik</b>.',
+                ablauf: 'Mitfahrer setzt Ziel + „Mitfahrt". System sieht nahe Fahrer auf passender Route → Fahrer bekommt Anfrage (Name, ★-Rating, Richtung) → nimmt an.',
+                tech: 'GPS + Routen-Matching auf der vorhandenen Tracker-Engine. <b>TODO:</b> Matching-Logik, Suchradius, ETA, „vorbeifahrend" vs. geplant.',
+                threats: [
+                    { a: 'Fake-Standort / GPS-Spoofing zum Account-Farming.', s: 'TODO — Geräte-Attestierung, Plausibilität, Rate-Limits.' }
+                ],
+                recht: 'Standortdaten strikt minimieren — nur während aktiver Suche, danach verwerfen. <b>TODO</b> Datenkonzept.',
+                offen: [
+                    'Wie eng matchen (Umweg-Toleranz)?',
+                    'Nur spontan an der Haltestelle — oder auch Voraus-Buchung?'
+                ]
+            },
+            {
+                title: 'Einsteigen — der Präsenz-Check',
+                summary: 'Zwei getrennte Prüfungen: richtiges Auto (Handshake) + wirklich sie (Selfie-Liveness). Erst bei A ✓ und B ✓ startet die Fahrt.',
+                zweck: 'Sicherstellen, dass die <b>registrierten</b> Personen <b>wirklich &amp; live</b> zusammen in genau <b>diesem</b> Auto sind.',
+                ablauf: '<b>A) Rendezvous-Handshake:</b> App zeigt Foto / Kennzeichen / Modell (visuell) + gegenseitiges <b>Codewort/PIN</b>. <b>B) Präsenz:</b> je ein <b>3-Sek-Selfie-Liveness</b> auf beiden Seiten. Start erst bei <b>A ✓ und B ✓</b>.',
+                tech: 'Codewort/PIN (Uber-Modell) als Default — dunkeltauglich, kein Scannen. NFC-Tap / QR optional als „stärkerer Modus". Liveness-SDK (iProov / FaceTec / Anbieter).',
+                threats: [
+                    { a: 'Decoy-Auto — Fremder gibt sich als der Fahrer aus.', s: 'Handshake bindet echte Co-Präsenz (Codewort/NFC).' },
+                    { a: 'Handy-Handoff / fremder Account.', s: 'Selfie-Liveness + 1:1-Match gegen das Registrierungs-Gesicht.' },
+                    { a: 'Injection / Deepfake in die Kamera-Pipeline.', s: 'Geräte-Attestierung (Play Integrity / App Attest), Virtual-Camera-Erkennung, injection-resistente Liveness (z. B. iProov Farb-Blitz).' }
+                ],
+                recht: 'Weitere biometrische Erfassung → gleiche Einwilligungs- und Escrow-Regel wie in Schritt 1.',
+                offen: [
+                    'Default-Handshake: Codewort vs. QR vs. NFC?',
+                    'Barrierefreiheit (blinde Nutzer, Tremor) — Fallback?'
+                ]
+            },
+            {
+                title: 'Fahrt — auf Record',
+                summary: 'Route live geloggt, SOS griffbereit, Fahrt mit einer Vertrauensperson geteilt. Unaufdringlich — im Normalfall merkt keiner was.',
+                zweck: 'Im <b>Moment</b> schützen <b>und</b> einen lückenlosen Nachweis erzeugen.',
+                ablauf: 'Track läuft live (Tracker-Engine). Mitfahrer teilt die Fahrt vorab mit einer <b>Vertrauensperson</b>. <b>SOS-Button</b> griffbereit. <b>Routen-Anomalie</b>-Erkennung (Abweichung, unerwarteter Stopp).',
+                tech: 'Bestehende Tracker-/GPS-Engine; Live-Share-Link; Anomalie-Heuristik. <b>TODO:</b> Schwellen, Offline-Verhalten, Akku.',
+                threats: [
+                    { a: 'App-Kill / Flugmodus mitten in der Fahrt.', s: 'TODO — „letzter Standpunkt"-Alarm, Heartbeat.' }
+                ],
+                recht: 'Track = personenbezogen → verschlüsselt, zweckgebunden (Sicherheit), <b>Aufbewahrungsfrist definieren</b>. TODO.',
+                offen: [
+                    'Audio-Mitschnitt / Telematik — ja/nein?',
+                    'Wie lange werden Tracks aufbewahrt?'
+                ]
+            },
+            {
+                title: 'Ankunft',
+                summary: 'Beide steigen aus, gegenseitiges ★-Rating, Track verschlüsselt archiviert. 99,9 % der Fahrten enden hier.',
+                zweck: 'Sauberer Abschluss + Reputationssignal als weitere Vertrauensschicht.',
+                ablauf: 'Ende der Fahrt → beidseitiges <b>★-Rating</b> → Track wird verschlüsselt archiviert.',
+                tech: 'Rating-/Reputationssystem. <b>TODO:</b> Modell, Missbrauchsschutz.',
+                recht: 'Lösch-/Aufbewahrungskonzept der abgeschlossenen Fahrt. TODO.',
+                offen: [
+                    'Reputationsmodell: nur ★, oder auch Meldungen/Reports?',
+                    'Schutz gegen Rache-Ratings?'
+                ]
+            },
+            {
+                title: 'Ernstfall — „es passiert dennoch was"',
+                summary: 'Trigger (Anomalie + SOS) → Break-Glass → verifizierte Identitäten + Track an die Polizei.',
+                danger: true,
+                zweck: 'Aus <b>„anonym &amp; ungeklärt"</b> wird <b>„sofort nachvollziehbar &amp; verfolgbar"</b>.',
+                ablauf: '<b>Trigger:</b> Routen-Anomalie und/oder SOS. → Vertrauensperson + WeDrive-Notfall erhalten Live-Standort + Track. → <b>Break-Glass</b> (protokolliert, Rollen-/4-Augen) entschlüsselt beide Identitäten → Übergabe an die <b>Polizei</b>.',
+                tech: 'Break-Glass-Zeremonie über Key-Escrow (Schlüssel geteilt, jeder Zugriff geloggt). <b>TODO:</b> Schlüsselverwahrung — HSM? Shamir Secret Sharing? externer Treuhänder?',
+                threats: [
+                    { a: 'Missbrauch des Break-Glass durch Innentäter.', s: '4-Augen-Prinzip, lückenloses Protokoll, ggf. externer Vertrauens-Dritter als Mit-Schlüsselhalter.' }
+                ],
+                recht: 'Datenweitergabe an Strafverfolgung als dokumentierter, rechtssicherer Prozess. Achtung <b>Verkehrssicherungspflicht/Haftung</b>: je stärker das Sicherheitsversprechen, desto höher die Messlatte.',
+                offen: [
+                    'Wer hält den Break-Glass-Schlüssel — intern, Notar, Treuhänder?',
+                    'Schwellen für automatischen Alarm (ohne SOS)?',
+                    'Rechtsrahmen PBefG: genehmigungsfrei nur unter dem Entgelt-Deckel je km (§ 1 Abs. 2 Nr. 1, ~0,30 €/km) — gilt auch geschäftsmäßig; früh klären.'
+                ]
+            }
+        ];
+
+        /* ---- render ---- */
+        const $ = (id) => document.getElementById(id);
+        const el = (tag, cls) => { const e = document.createElement(tag); if (cls) e.className = cls; return e; };
+        // Wire a <div> as an accessible disclosure toggle: role/tabindex + click and Enter/Space,
+        // keeping aria-expanded in sync. toggleFn performs the toggle and returns the new open state.
+        function wireToggle(headEl, toggleFn) {
+            headEl.setAttribute('role', 'button');
+            headEl.setAttribute('tabindex', '0');
+            const run = () => headEl.setAttribute('aria-expanded', toggleFn() ? 'true' : 'false');
+            headEl.addEventListener('click', run);
+            headEl.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); run(); } });
+        }
+        const LSKEY = 'wedrive-flow-open-v1';
+
+        function loadOpen() {
+            try { return new Set(JSON.parse(localStorage.getItem(LSKEY) || '[0]')); } catch (_) { return new Set([0]); }
+        }
+        function saveOpen(set) {
+            try { localStorage.setItem(LSKEY, JSON.stringify([...set])); } catch (_) { }
+        }
+        const openSet = loadOpen();
+
+        function slot(label, html, cls) {
+            if (!html) return '';
+            return '<div class="slot"><div class="slot-label ' + (cls || '') + '">' + label + '</div><div class="slot-content">' + html + '</div></div>';
+        }
+        function threatSlot(arr) {
+            if (!arr || !arr.length) return '';
+            const rows = arr.map((t) => '<div class="threat"><div class="t-a"><b>Angriff:</b> ' + t.a + '</div><div class="t-s"><b>Schutz:</b> ' + t.s + '</div></div>').join('');
+            return '<div class="slot"><div class="slot-label red">Angriff → Schutz</div>' + rows + '</div>';
+        }
+        function offenSlot(arr) {
+            if (!arr || !arr.length) return '';
+            return '<div class="slot"><div class="slot-label">Offene Fragen</div><ul class="offen">' + arr.map((o) => '<li>' + o + '</li>').join('') + '</ul></div>';
+        }
+
+        function bodyHtml(s) {
+            return slot('Zweck', s.zweck)
+                + slot('Ablauf', s.ablauf, 'blue')
+                + slot('Tech / Anbieter', s.tech, 'blue')
+                + threatSlot(s.threats)
+                + slot('Recht / Datenschutz', s.recht)
+                + offenSlot(s.offen);
+        }
+
+        function render() {
+            const flow = $('flow');
+            flow.innerHTML = '';
+            STEPS.forEach((s, i) => {
+                const step = el('div', 'step' + (s.danger ? ' danger' : '') + (openSet.has(i) ? ' open' : ''));
+                const num = el('div', 'num'); num.textContent = String(i + 1);
+                const card = el('div', 'card');
+                const head = el('div', 'head');
+                head.innerHTML = '<div class="txt"><h2 class="title">' + s.title + '</h2><span class="summary">' + s.summary + '</span></div><span class="chev" aria-hidden="true">▶</span>';
+                const body = el('div', 'body');
+                body.innerHTML = bodyHtml(s);
+                wireToggle(head, () => {
+                    const open = step.classList.toggle('open');
+                    if (open) openSet.add(i); else openSet.delete(i);
+                    saveOpen(openSet);
+                    syncToggleBtn();
+                    return open;
+                });
+                head.setAttribute('aria-expanded', openSet.has(i) ? 'true' : 'false');
+                card.appendChild(head); card.appendChild(body);
+                step.appendChild(num); step.appendChild(card);
+                flow.appendChild(step);
+            });
+            syncToggleBtn();
+        }
+
+        function syncToggleBtn() {
+            $('toggle-all').textContent = (openSet.size >= STEPS.length) ? 'Alle zuklappen' : 'Alle aufklappen';
+        }
+        $('toggle-all').addEventListener('click', () => {
+            if (openSet.size >= STEPS.length) { openSet.clear(); } else { STEPS.forEach((_, i) => openSet.add(i)); }
+            saveOpen(openSet);
+            render();
+        });
+
+        render();
+
+        /* ---- Glossary — flat term list, rendered alphabetically with letter headers + live filter.
+               To populate: add { t, d } entries (inline <b> allowed); sort order is automatic. ---- */
+        const GLOSSARY = [
+            { t: '4-Augen-Prinzip', d: 'Kein Einzelzugriff; zwei Berechtigte nötig, um den Break-Glass auszulösen.' },
+            { t: 'Aktive vs. passive Liveness', d: 'Aktiv: zufällige Mini-Aufgabe (Kopf drehen, näher kommen). Passiv: Analyse ohne Zutun (Haut-Textur, 3D-Tiefe).' },
+            { t: 'Art. 4(14) DSGVO', d: 'Definition „biometrische Daten": aus technischer Verarbeitung gewonnene Merkmale, die eine Person <b>eindeutig identifizieren</b>.' },
+            { t: 'Art. 9 DSGVO', d: '<b>Besondere Kategorien</b> (Biometrie, Gesundheit, …). Verarbeitung grundsätzlich <b>verboten</b> — außer mit ausdrücklicher Einwilligung.' },
+            { t: 'Ausdrückliche Einwilligung (Art. 9(2)a)', d: 'Für ein Startup faktisch die einzige Rechtsgrundlage, Biometrie zu verarbeiten.' },
+            { t: 'AusweisApp / AusweisApp-SDK', d: 'Die staatliche App für den Chip-Lesevorgang; das <b>SDK</b> bettet ihn in die eigene App ein — kein App-Wechsel nötig.' },
+            { t: 'AusweisIDent', d: 'eID-Identifizierungsdienst, seit 11/2025 allein von Governikus betrieben (urspr. mit Bundesdruckerei/D-Trust entwickelt) — ein Startup-Weg zur Ausweisprüfung.' },
+            { t: 'Berechtigungszertifikat', d: 'Staatlich vergebene Leseerlaubnis, die der Chip <b>vor jedem Lesen</b> prüft; legt fest, welche Datenfelder ein Anbieter abfragen darf.' },
+            { t: 'Break-Glass', d: 'Bewusst schwer auslösbarer Notfall-Zugriff auf verschlüsselte Daten — protokolliert und rollenkontrolliert.' },
+            { t: 'Co-Presence / Näheweis', d: 'Kryptografischer Beleg, dass zwei Geräte am selben Ort sind.' },
+            { t: 'Codewort-/PIN-Bestätigung', d: 'Beide Apps zeigen denselben Code; er wird gegenseitig bestätigt — dunkeltauglich, kein Scannen (Uber-Modell).' },
+            { t: 'Deepfake', d: 'KI-erzeugtes Gesicht/Video zur Täuschung der Gesichtserkennung.' },
+            { t: 'DPIA / Datenschutz-Folgenabschätzung', d: 'Pflicht-Risikoanalyse bei riskanter Verarbeitung — bei Biometrie in großem Maßstab praktisch zwingend.' },
+            { t: 'DSGVO / GDPR', d: 'EU-Datenschutz-Grundverordnung.' },
+            { t: 'eID-Server', d: 'Server, der die Chip-Kommunikation abwickelt und die verifizierten Attribute zurückgibt.' },
+            { t: 'eIDAS 2.0 / EUDI-Wallet', d: 'EU-Rahmen + kommende EU-Identitäts-Wallet; künftig auch mobiler Führerschein.' },
+            { t: 'Escrow / Key-Escrow', d: 'Verschlüsselte Verwahrung, bei der ein <b>kontrollierter</b> Zugriff im Ernstfall möglich bleibt.' },
+            { t: 'Extended Access Control (EAC) / Terminal-Authentication', d: 'Chip-Schutz: der Ausweis gibt Daten nur an ein Terminal frei, das ein gültiges Berechtigungszertifikat vorweist.' },
+            { t: 'FaceTec', d: 'Anbieter für Gesichts-Liveness und 3D-Match.' },
+            { t: 'Face-Match (1:1-Verifikation)', d: 'Vergleich eines Live-Gesichts mit genau <b>einem</b> hinterlegten Gesicht (nicht Suche in einer Datenbank).' },
+            { t: 'Fahrt-auf-Record', d: 'Die Fahrt wird live geloggt: Track, mit Vertrauensperson geteilt, SOS griffbereit.' },
+            { t: 'Führungszeugnis', d: 'Behördlicher Vorstrafen-Nachweis. Der Ausweis sagt darüber <b>nichts</b> („verifiziert ≠ ungefährlich").' },
+            { t: 'Geräte-Attestierung (Play Integrity / App Attest)', d: 'Das Betriebssystem bestätigt, dass App und Gerät echt und unmanipuliert sind.' },
+            { t: 'Gesichts-Template / Embedding', d: 'Mathematischer Gesichts-„Fingerabdruck" (Zahlenvektor), <b>kein Foto</b>; verglichen wird über die Distanz zweier Vektoren.' },
+            { t: 'Honeypot', d: 'Begehrenswerte Datensammlung, die Angreifer anzieht — z. B. gebündelte verifizierte Identitäten + Biometrie.' },
+            { t: 'HSM (Hardware Security Module)', d: 'Manipulationssichere Hardware zur Schlüsselverwahrung.' },
+            { t: 'iBeta', d: 'Prüflabor, das Liveness-Verfahren zertifiziert (Level 1 = Foto/Maske, Level 2 = anspruchsvoller).' },
+            { t: 'Identifizierungsdiensteanbieter (§ 21b PAuswG)', d: 'Dienst, der Zertifikat + eID-Server hält und Identitätsprüfung als API anbietet — der praktische Startup-Weg.' },
+            { t: 'IDnow', d: 'Identifizierungsdienstleister (eID + Video-Ident).' },
+            { t: 'Injection-Attack', d: 'Einspeisen eines <b>synthetischen Videostreams</b> direkt in die Kamera-Pipeline; umgeht „Vorhalten"-Liveness.' },
+            { t: 'iProov', d: 'Liveness-Anbieter; nutzt injection-resistente Farb-Blitze, die vom echten Gesicht reflektiert werden.' },
+            { t: 'ISO/IEC 30107-3', d: 'Der Standard für Presentation Attack Detection (PAD); Grundlage der Zertifizierung.' },
+            { t: 'KYC / Video-Ident', d: '„Know Your Customer" — Identitätsprüfung; klassisch per Video + Ausweis, hier per eID.' },
+            { t: 'Liveness / PAD (Presentation Attack Detection)', d: 'Erkennung, ob ein <b>echter Mensch</b> präsent ist — nicht Foto, Video oder Maske.' },
+            { t: 'mDL (mobile Driving License)', d: 'Digitaler Führerschein — separat von der Ausweis-Identität.' },
+            { t: 'Mitfahrgelegenheit / Kostenteilung', d: 'Teilen der Fahrtkosten unter dem km-Entgelt-Deckel (§ 5 Abs. 2 S. 1 BRKG, ~0,30 €/km) — genehmigungsfrei.' },
+            { t: 'Nect', d: 'Identifizierungsdienstleister; KI-basierte Selbst-Identifikation, integriert AusweisIDent.' },
+            { t: 'NFC', d: 'Nahfeld-Funk; liest den Chip, wenn der Ausweis ans Telefon gehalten wird.' },
+            { t: 'Online-Ausweisfunktion', d: 'Der Modus, mit dem man sich mit dem Personalausweis digital ausweist: Ausweis ans Telefon (NFC) + 6-stellige PIN.' },
+            { t: 'OpenID Connect / OAuth2', d: 'Offene Web-Standards, über die der Identifizierungsdienst angebunden wird.' },
+            { t: 'PAuswG', d: 'Personalausweisgesetz. <b>§ 21b</b> regelt die Identifizierungsdiensteanbieter.' },
+            { t: 'PBefG', d: 'Personenbeförderungsgesetz. Genehmigungsfrei, solange das Gesamtentgelt je km den Satz nach § 5 Abs. 2 S. 1 BRKG (~0,30 €/km) nicht übersteigt (§ 1 Abs. 2 Nr. 1) — das gilt ausdrücklich auch geschäftsmäßig. Auslöser ist der km-Deckel, nicht „gewerblich".' },
+            { t: 'Personalausweis (eID)', d: 'Der deutsche Ausweis mit <b>Online-Ausweisfunktion</b> — digitale Identität per NFC + PIN.' },
+            { t: 'Rating / Reputation', d: 'Gegenseitige Bewertung nach der Fahrt — zusätzliche Vertrauensschicht.' },
+            { t: 'Rendezvous-Handshake', d: 'Prüfung beim Einsteigen, dass beide <b>physisch zusammen</b> im richtigen Auto sind (Codewort/QR/NFC).' },
+            { t: 'Routen-Anomalie', d: 'Abweichung von der Route oder unerwarteter Stopp — löst einen Alarm-Trigger aus.' },
+            { t: 'Secure Enclave / TEE', d: 'Abgeschotteter Hardware-Bereich; hier läuft der Fingerabdruck-/Schlüssel-Vergleich, ohne dass die App die Rohdaten je sieht.' },
+            { t: 'Selfie-Liveness', d: 'Kurze Selfie-Prüfung mit zwei Jobs: (1) gleiches Gesicht wie bei der Registrierung, (2) echter, lebendiger Mensch <b>jetzt</b>.' },
+            { t: 'Shamir Secret Sharing', d: 'Der Schlüssel wird in n Teile gespalten; erst k davon rekonstruieren ihn — verhindert Einzel-Zugriff.' },
+            { t: 'smart-eID', d: 'Ausweis-Identität im Secure Element des Handys hinterlegt (ohne Karte); noch begrenzt verfügbar.' },
+            { t: 'SOS / Panik', d: 'Notfallknopf; teilt sofort Live-Standort + Track mit Vertrauensperson und WeDrive-Notfall.' },
+            { t: 'Template-Inversion', d: 'Angriff, der aus dem Vektor ein Gesicht teilweise <b>zurückrechnet</b> — daher ist „nur Zahlen" kein Freibrief.' },
+            { t: 'Verantwortlicher / Auftragsverarbeiter', d: 'Wer über die Verarbeitung entscheidet (WeDrive) vs. wer im Auftrag verarbeitet (der Anbieter).' },
+            { t: 'Vergabestelle für Berechtigungszertifikate (VfB)', d: 'Stelle im <b>Bundesverwaltungsamt (BVA)</b>, die die Zertifikate vergibt — verlangt Nachweis eines „berechtigten Interesses".' },
+            { t: 'Verkehrssicherungspflicht', d: 'Haftungsprinzip: wer eine Gefahrenquelle eröffnet oder etwas verspricht, muss zumutbar schützen — je stärker das Versprechen, desto höher die Messlatte.' },
+            { t: 'Verschlüsselung at rest', d: 'Daten liegen <b>gespeichert</b> verschlüsselt (nicht nur beim Transport).' },
+            { t: 'Virtual Camera', d: 'Software-vorgetäuschte Kamera als Einfallstor für Injection-Angriffe.' }
+        ];
+
+        const glossOpen = new Set();  // terms the user manually expanded — survives filtering / re-render
+        function syncGlossBtn() {
+            const items = Array.from(document.querySelectorAll('.gloss-item'));
+            const allOpen = items.length > 0 && items.every((i) => i.classList.contains('open'));
+            $('gloss-all').textContent = allOpen ? 'Alle zuklappen' : 'Alle aufklappen';
+        }
+        function renderGlossary(q) {
+            const box = $('glossary'); box.innerHTML = '';
+            const needle = (q || '').trim().toLowerCase();
+            const items = GLOSSARY
+                .filter((it) => !needle || (it.t + ' ' + it.d.replace(/<[^>]+>/g, '')).toLowerCase().indexOf(needle) >= 0)
+                .slice()
+                .sort((a, b) => a.t.localeCompare(b.t, 'de'));
+            if (!items.length) { const e = el('div', 'gloss-empty'); e.textContent = 'Kein Treffer.'; box.appendChild(e); syncGlossBtn(); return; }
+            let cur = '';
+            items.forEach((it) => {
+                const c0 = it.t.charAt(0);
+                const letter = /[A-Za-zÀ-ÿ]/.test(c0) ? c0.toUpperCase() : '#';
+                if (letter !== cur) { cur = letter; const h = el('h3', 'gloss-cat'); h.textContent = letter; box.appendChild(h); }
+                // open when filtering (show matches) or when the user manually expanded this term (persists across re-render)
+                const isOpen = !!needle || glossOpen.has(it.t);
+                const item = el('div', 'gloss-item' + (isOpen ? ' open' : ''));
+                const head = el('div', 'gloss-head');
+                head.innerHTML = '<span class="gt"></span><span class="gchev" aria-hidden="true">▶</span>';
+                head.querySelector('.gt').textContent = it.t;
+                const def = el('div', 'd'); def.innerHTML = it.d;
+                wireToggle(head, () => {
+                    const open = item.classList.toggle('open');
+                    if (open) glossOpen.add(it.t); else glossOpen.delete(it.t);
+                    syncGlossBtn();
+                    return open;
+                });
+                head.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+                item.appendChild(head); item.appendChild(def);
+                box.appendChild(item);
+            });
+            syncGlossBtn();
+        }
+        $('gloss-search').addEventListener('input', (e) => renderGlossary(e.target.value));
+        $('gloss-all').addEventListener('click', () => {
+            const items = Array.from(document.querySelectorAll('.gloss-item'));
+            const open = !(items.length > 0 && items.every((i) => i.classList.contains('open')));
+            items.forEach((i) => {
+                i.classList.toggle('open', open);
+                const h = i.querySelector('.gloss-head'); if (h) h.setAttribute('aria-expanded', open ? 'true' : 'false');
+                const term = i.querySelector('.gt') ? i.querySelector('.gt').textContent : null;
+                if (term) { if (open) glossOpen.add(term); else glossOpen.delete(term); }
+            });
+            syncGlossBtn();
+        });
+        renderGlossary('');
+
+        // Glossary card: collapsible like a step, its open state persisted separately
+        (function () {
+            const step = $('glossar');
+            const head = $('gloss-toggle');
+            try { if (localStorage.getItem('wedrive-glossar-open') === '1') step.classList.add('open'); } catch (_) { }
+            wireToggle(head, () => {
+                const open = step.classList.toggle('open');
+                try { localStorage.setItem('wedrive-glossar-open', open ? '1' : '0'); } catch (_) { }
+                return open;
+            });
+            head.setAttribute('aria-expanded', step.classList.contains('open') ? 'true' : 'false');
+        })();
+    </script>
+</body>
+
+</html>
