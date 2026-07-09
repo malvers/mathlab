@@ -116,15 +116,39 @@
         };
     }
 
+    // ---- Simulation (no hardware) — dry-run the whole flow in Chrome or the APK ----
+    // A fake module that "connects" instantly and just acknowledges the relay commands, so the
+    // connect → gate (PIN/Biometrie) → hold-to-crank → START/STOP flow can be tested without the
+    // real DSD module. Enabled via ?sim=1 / #sim in the URL or the persisted 'pagode-sim' flag.
+    var LS_SIM = 'pagode-sim';
+    function simActive() {
+        try {
+            if (typeof location !== 'undefined' && (/[?&]sim=1\b/.test(location.search) || location.hash === '#sim')) return true;
+        } catch (e) { }
+        return LS.get(LS_SIM) === '1';
+    }
+    var SIM = { active: simActive, set: function (on) { on ? LS.set(LS_SIM, '1') : LS.del(LS_SIM); } };
+    function simBackend() {
+        var conn = false;
+        function delay(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+        return {
+            name: 'Simulation',
+            async connect() { await delay(300); conn = true; return 'Simulator'; },
+            async write(bytes) { if (!conn) throw new Error('nicht verbunden'); await delay(120); },
+            async disconnect() { conn = false; }
+        };
+    }
+
     // Pick the right transport for this runtime; returns null if no BLE is available.
     // opts.onDisconnect() is called on an unexpected GATT disconnect (Web Bluetooth path).
     // Call this inside a user gesture — connect() triggers requestDevice().
     function createBackend(opts) {
         opts = opts || {};
+        if (simActive()) return simBackend();
         if (isNative) return nativeBackend();
         if (navigator.bluetooth) return webBackend(opts);
         return null;
     }
 
-    global.PagodeBLE = { CFG: CFG, isNative: isNative, createBackend: createBackend, forget: function () { LS.del(LS_ID); LS.del(LS_NAME); } };
+    global.PagodeBLE = { CFG: CFG, isNative: isNative, createBackend: createBackend, sim: SIM, forget: function () { LS.del(LS_ID); LS.del(LS_NAME); } };
 })(window);
