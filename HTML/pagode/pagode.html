@@ -199,11 +199,24 @@
         }
 
         .foot { margin-top: 14px; font-family: 'Cinzel', serif; font-size: 9px; letter-spacing: 2px; color: #bdab80; text-transform: uppercase; text-shadow: 0 1px 2px rgba(0, 0, 0, .7); }
+
+        /* security gear — top-right, opens the Aus/PIN/Biometrie chooser */
+        .gear {
+            position: fixed; top: env(safe-area-inset-top, 0px); right: 0;
+            margin: 12px 14px; width: 40px; height: 40px; border-radius: 50%;
+            border: 1px solid var(--gold-lo); cursor: pointer; z-index: 50;
+            background: radial-gradient(circle at 50% 30%, #3a3226, #241f18);
+            color: #e3d5a2; font-size: 20px; line-height: 1;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, .45), inset 0 1px 0 rgba(255, 243, 205, .12);
+            -webkit-tap-highlight-color: transparent;
+        }
+        .gear:active { filter: brightness(1.15); }
     </style>
 </head>
 
 <body class="bg-sand">
     <div class="toast" id="toast"></div>
+    <button class="gear" id="gear" type="button" aria-label="Sicherheit — Startschutz wählen">⚙</button>
     <div class="dash">
         <div class="badge-model gold3d">230 SL</div>
         <div class="badge-name gold3d">Pagode</div>
@@ -231,6 +244,8 @@
 
     <!-- shared BLE protocol + transport (single source for both Pagode pages + the APK) -->
     <script src="js/pagode-ble.js"></script>
+    <!-- optional security gate (Aus / PIN / Biometrie) in front of START -->
+    <script src="js/pagode-auth.js"></script>
     <script>
         'use strict';
 
@@ -256,14 +271,24 @@
 
         // ---- ONE button: HOLD = relay ON (no pulse), release = OFF. Role flips each cycle:
         //   running=false → START (green, holds K1 = Anlasser). running=true → STOP (red, holds K2 = Zündung). ----
-        let running = false, holding = false;
+        let running = false, holding = false, authed = false;
         function updateBtn() {
             btn.className = 'knob ' + (running ? 'stop' : 'start');
             btn.querySelector('.face').textContent = running ? 'STOP' : 'START';
         }
+        function flash(text) {
+            toast.textContent = text; toast.classList.add('show');
+            clearTimeout(flash._t); flash._t = setTimeout(() => toast.classList.remove('show'), 1600);
+        }
         async function press() {
             if (!connected) { ensureConnected(); return; }   // first touch just connects; hold again to act
             if (holding) return;
+            // security gate — only before START (STOP is never gated so kill-off is always instant).
+            // First press unlocks (biometrics/PIN break the hold gesture anyway); then hold to crank.
+            if (!running && !authed && PagodeAuth.getMode() !== 'off') {
+                if (await PagodeAuth.gate()) { authed = true; flash('entsperrt – halten zum Starten'); }
+                return;
+            }
             holding = true;
             try { await backend.write(running ? CFG.CMD.K2_ON : CFG.CMD.K1_ON); }
             catch (e) { holding = false; connected = false; setLamp('', 'getrennt'); }
@@ -274,6 +299,7 @@
             try { await backend.write(running ? CFG.CMD.K2_OFF : CFG.CMD.K1_OFF); }
             catch (e) { connected = false; setLamp('', 'getrennt'); return; }
             running = !running; updateBtn();
+            if (running) authed = false;   // START consumed the unlock → next start re-authorises
         }
         btn.addEventListener('pointerdown', (e) => { e.preventDefault(); press(); });
         btn.addEventListener('pointerup', release);
@@ -295,6 +321,8 @@
             else { await ensureConnected(); }
         });
         dlgOverlay.addEventListener('click', (e) => { if (e.target === dlgOverlay) closeDlg(); });
+        // gear → security settings (Aus / PIN / Biometrie)
+        document.getElementById('gear').addEventListener('click', () => PagodeAuth.openSettings());
         updateBtn();
 
         // ---- switchable backdrop: press "b" to cycle; choice persists in localStorage ----
