@@ -30,6 +30,15 @@
         { id: 'bio', label: 'Biometrie', hint: 'Finger oder Gesicht (App)' }
     ];
 
+    // simulation flag — shared with pagode-ble.js (URL ?sim=1 / #sim or persisted 'pagode-sim').
+    // When on, Biometrie is testable in the browser via a fake fingerprint prompt (no hardware).
+    function simActive() {
+        try {
+            if (typeof location !== 'undefined' && (/[?&]sim=1\b/.test(location.search) || location.hash === '#sim')) return true;
+        } catch (e) { }
+        return LS.get('pagode-sim') === '1';
+    }
+
     function getMode() {
         var m = LS.get(LS_MODE);
         return (m === 'pin' || m === 'bio') ? m : 'off';
@@ -74,13 +83,13 @@
     }
     async function bioAvailable() {
         var p = bioPlugin();
-        if (!p) return false;
+        if (!p) return simActive();   // no native plugin (browser) → only offered in simulation
         try { var r = await p.checkBiometry(); return !!(r && (r.isAvailable || r.strongBiometryIsAvailable)); }
         catch (e) { return false; }
     }
     async function bioAuth() {
         var p = bioPlugin();
-        if (!p) return false;
+        if (!p) return simActive() ? await simBioPrompt() : false;   // fake fingerprint prompt in the browser
         try {
             // allowDeviceCredential lets the phone fall back to its own lock PIN/pattern if
             // biometrics fail — same as the bank apps. The system chooses finger vs. face.
@@ -120,6 +129,8 @@
             '.pgauth-key.wide{grid-column:span 1}',
             '.pgauth-msg{font-family:"Playfair Display",Georgia,serif;font-style:italic;font-size:12px;color:#cbbb91;min-height:16px;margin-top:12px}',
             '.pgauth-msg.err{color:#e08a7a}',
+            '.pgauth-fp{display:inline-flex;align-items:center;justify-content:center;width:96px;height:96px;margin:6px auto 4px;border-radius:50%;border:1px solid #6e521d;cursor:pointer;background:radial-gradient(circle at 50% 34%,#3a3226,#241f18);box-shadow:inset 0 2px 6px rgba(0,0,0,.5),0 0 0 rgba(231,200,115,0);-webkit-tap-highlight-color:transparent;transition:box-shadow .2s}',
+            '.pgauth-fp:active{box-shadow:inset 0 2px 6px rgba(0,0,0,.5),0 0 18px rgba(231,200,115,.55)}',
             '.pgauth-x{margin-top:14px;font-size:11px;letter-spacing:2px;color:#c7b692;cursor:pointer;text-transform:uppercase}'
         ].join('');
         document.head.appendChild(css);
@@ -131,6 +142,34 @@
         return ov;
     }
     function close(ov) { ov.classList.remove('open'); setTimeout(function () { if (ov.parentNode) ov.parentNode.removeChild(ov); }, 0); }
+
+    // Fake fingerprint prompt for the browser simulation — tap the print = unlock, resolves bool.
+    // In the real APK this path is never reached (the native BiometricPrompt runs instead).
+    function simBioPrompt() {
+        ensureUI();
+        return new Promise(function (resolve) {
+            var ov = overlay(); ov.classList.add('open');
+            var card = document.createElement('div'); card.className = 'pgauth-card';
+            card.innerHTML =
+                '<div class="pgauth-title">Biometrie · Simulation</div>' +
+                '<button class="pgauth-fp" data-fp aria-label="Fingerabdruck – antippen zum Entsperren">' +
+                '<svg viewBox="0 0 24 24" width="56" height="56" fill="none" stroke="#e7c873" stroke-width="1.3" stroke-linecap="round">' +
+                '<path d="M12 2a9 9 0 0 0-9 9v3"/><path d="M21 13v-2a9 9 0 0 0-4-7.5"/>' +
+                '<path d="M7 20a12 12 0 0 1-1-5 6 6 0 0 1 11-3"/><path d="M12 11a3 3 0 0 1 3 3c0 2 .3 4 1 5.5"/>' +
+                '<path d="M9 22a15 15 0 0 1-1.5-6.5"/><path d="M12 15v1a12 12 0 0 0 1.2 5.2"/></svg></button>' +
+                '<div class="pgauth-msg" data-m>antippen zum Entsperren</div>' +
+                '<div class="pgauth-x" data-x>Abbrechen</div>';
+            ov.appendChild(card);
+            function done(ok) { close(ov); resolve(ok); }
+            card.addEventListener('click', function (e) {
+                if (e.target.getAttribute && e.target.getAttribute('data-x') !== null) { done(false); return; }
+                if (e.target.closest && e.target.closest('[data-fp]')) {
+                    var m = card.querySelector('[data-m]'); m.textContent = 'erkannt ✓'; m.style.color = '#8fbf6a';
+                    setTimeout(function () { done(true); }, 260);
+                }
+            });
+        });
+    }
 
     // PIN keypad — flow: 'verify' (enter once) or 'set' (enter, then confirm). Resolves bool.
     function pinKeypad(flow) {
