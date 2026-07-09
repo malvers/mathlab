@@ -133,6 +133,32 @@ Vorgehen:
 
 Beide reden mit **einem** Modul über **eine** BLE-Funktion — die APK ist der Prüfstand, dessen BLE-Teil Solita 1:1 übernimmt.
 
+### 5.2 Startschutz + Sim-Modus (2026-07-09)
+
+Optionaler **Startschutz** vor START (STOP bleibt immer ungated — Motor-aus muss sofort gehen). Zentrales
+Modul `HTML/pagode/js/pagode-auth.js` (Single-Source wie `pagode-ble.js`), Zahnrad oben rechts in `pagode.html`.
+Drei per Zahnrad wählbare Modi (gemerkt in `localStorage`):
+- **Aus** — kein Schutz (Default)
+- **PIN** — app-eigene PIN, nur **salted SHA-256** im `localStorage` (nie die PIN selbst); überall (Chrome + APK)
+- **Biometrie** — System-`BiometricPrompt` via `@aparajita/capacitor-biometric-auth` (Finger *oder* Gesicht,
+  das Handy entscheidet — die App kann keins erzwingen). **Nur APK**; im Browser als „nur in der App" gemeldet.
+
+**Sim-Modus** (hardware-frei, Chrome + APK): Fake-Modul, das sofort „verbindet" und die Relais-Befehle nur
+quittiert → ganzer Ablauf connect → Gate → halten → START/STOP ohne echtes Modul testbar. An per `?sim=1` / `#sim`
+oder Knopf **Simulation** im Blauzahn-Dialog (Lämpchen antippen). Im Sim zeigt **Biometrie** einen
+**Fake-Fingerabdruck** (antippen = entsperrt) statt der „nur in der App"-Meldung.
+
+**APK-Neubau nötig, damit Biometrie echt greift** (die alte `doc-alvers-pagode.apk` vom 7.7. ist noch ohne).
+Plugin (`package.json`, `^8` für Capacitor 6) + `USE_BIOMETRIC` im Manifest sind schon eingetragen — auf dem Mac:
+
+```bash
+cd pagode-app
+git pull origin main   # holt diesen Stand auf den Mac (pull = Hol-Richtung; kein PR nötig)
+npm install            # holt Biometrie-Plugin + Capacitor
+npm run cap:sync       # kopiert Seite + js (auch pagode-auth.js) + Plugin nach android/
+npm run cap:open       # Android Studio → Build → APK
+```
+
 ---
 
 ## 6. Status
@@ -145,6 +171,8 @@ Beide reden mit **einem** Modul über **eine** BLE-Funktion — die APK ist der 
 - [x] **Stromversorgung bestellt** (2026-06-24 — Sunload 12 V/2 A + Klemmen-Adapter, Lieferung 25.06.)
 - [x] **Test-Seite** `HTML/pagode/pagode-remote.html` gebaut (Web Bluetooth + Plugin, FFE0/FFE1/A0)
 - [x] **Capacitor-Scaffold** `pagode-app/` gebaut (BLE-Plugin, Single-Source via `npm run prep`)
+- [x] **Startschutz** (Aus / PIN / Biometrie) + **Sim-Modus** + Fake-Fingerabdruck gebaut (2026-07-09, siehe §5.2)
+- [ ] **Pagode-APK neu bauen** auf dem Mac → Biometrie echt (git pull → npm install → cap:sync → Build)
 - [ ] BT-Modul + Netzteil eingetroffen *(Doc, ~25.06.)*
 - [ ] im **Chrome** testen: Modul an 12 V → Connect → PULS Kanal 1 → Relais klackt → Protokoll FFE0/FFE1/A0 gegenchecken
 - [ ] **Test-APK** bauen (`pagode-app`: npm install → cap:add → BLE-Permissions → cap:sync → Build)
