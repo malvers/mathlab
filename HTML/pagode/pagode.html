@@ -162,6 +162,7 @@
             -webkit-tap-highlight-color: transparent; text-shadow: 0 1px 2px rgba(0, 0, 0, .6);
         }
         .dlg-btn.trennen { background: radial-gradient(circle at 50% 30%, #9e362a, #65140d 62%, #380a06); }
+        .dlg-btn.sim { margin-top: 10px; font-size: 13px; background: radial-gradient(circle at 50% 30%, #6e5a24, #3a2f13 62%, #241d0c); }
         .dlg-btn:active { filter: brightness(1.12); }
         .lamp-label { font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 3px; color: #c7b692; text-transform: uppercase; text-shadow: 0 1px 2px rgba(0, 0, 0, .7); }
 
@@ -239,6 +240,7 @@
         <div class="dlg">
             <div class="dlg-title gold3d">Blauzahn</div>
             <button class="dlg-btn" id="dlg-action" type="button">Verbinden</button>
+            <button class="dlg-btn sim" id="dlg-sim" type="button">Simulation</button>
         </div>
     </div>
 
@@ -308,9 +310,11 @@
         // tap the telltale → connect/disconnect dialog (styled, no browser/plugin picker)
         const dlgOverlay = document.getElementById('dlg-overlay');
         const dlgAction = document.getElementById('dlg-action');
+        const dlgSim = document.getElementById('dlg-sim');
         function openDlg() {
             dlgAction.textContent = connected ? 'Trennen' : 'Verbinden';
             dlgAction.className = 'dlg-btn' + (connected ? ' trennen' : '');
+            dlgSim.textContent = PagodeBLE.sim.active() ? 'Simulation: an' : 'Simulation';
             dlgOverlay.classList.add('open');
         }
         function closeDlg() { dlgOverlay.classList.remove('open'); }
@@ -319,6 +323,15 @@
             closeDlg();
             if (connected) { try { if (backend) await backend.disconnect(); } catch (e) { } connected = false; setLamp(''); }
             else { await ensureConnected(); }
+        });
+        // toggle the hardware-free simulation, then fake-connect right away so the flow is testable
+        dlgSim.addEventListener('click', async () => {
+            const on = !PagodeBLE.sim.active();
+            PagodeBLE.sim.set(on);
+            closeDlg();
+            if (connected) { try { if (backend) await backend.disconnect(); } catch (e) { } connected = false; running = false; authed = false; updateBtn(); setLamp(''); }
+            flash(on ? 'Simulation an' : 'Simulation aus');
+            if (on) await ensureConnected();
         });
         dlgOverlay.addEventListener('click', (e) => { if (e.target === dlgOverlay) closeDlg(); });
         // gear → security settings (Aus / PIN / Biometrie)
