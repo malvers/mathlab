@@ -5,6 +5,7 @@
 
 ## Suggested — neue eigenständige Labs
 
+- **★ WICHTIG (Doc, 2026-07-20) — „Vom Strom zum Code": didaktische Mini-Software, die ein für alle Mal klarmacht, dass Computer auf 0/1 (on/off) beruhen.** Die ganze Kette *richtig, richtig klar* zeichnen: Strom/„Blitz" (Spannung an/aus) → Bit → Byte → Hex → Maschinencode → Assembler → Hochsprache. Jede Ebene interaktiv, mit sichtbarem Übergang zur nächsten (dieselbe Information, andere Abstraktion). Ziel: der „Aha"-Weg von der Physik bis zur Programmiersprache.
 - Sierpinski / Chaos game (n-gon variants)
 - Newton fractal (root basins of complex polynomials)
 - Logistic map & bifurcation diagram (period-doubling, Feigenbaum)
