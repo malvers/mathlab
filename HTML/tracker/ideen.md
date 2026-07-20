@@ -31,6 +31,7 @@
 - **Vektor-Karten (MapLibre GL)** — strategisch: lesbare Labels (Orbitron!) + schaltet **Offline-Karten** und **3D-Gelände** frei.
 
 ## Weitere offene Ideen
+- **★ „Vom Strom zum Code" (Mathe-Labor)** *(Doc, 2026-07-20)* — didaktische Mini-Software, die ein für alle Mal klarmacht: Computer = 0/1 (on/off). Die ganze Kette *richtig klar* zeichnen: Strom/„Blitz" (Spannung an/aus) → Bit → Byte → Hex → Maschinencode → Assembler → Hochsprache; jede Ebene interaktiv, mit sichtbarem Übergang zur nächsten (gleiche Info, andere Abstraktion). Auch in [`../../IDEAS.md`](../../IDEAS.md) notiert.
 - **WegCast — Audio-Sehenswürdigkeiten am Weg** — standort-getriggerter Audio-Reiseführer (vorgelesen), Vorbild Blitzer.de „DriveCast"; MVP = Wikipedia-Geosearch + `speechSynthesis`, Radius/Tiefe via `effectiveActivity()`. **Überschneidet FEAT-24 (POI) — gemeinsam denken.**
 - **Cluster-Hülle beim Hover** — konvexe Außenhülle um einen Pin-Cluster beim Maus-Hover; Desktop-only, reines Overlay in `photo-layer.js`.
 - **Pflanzen-DB-Enrichment** — POWO / GBIF / iNaturalist zur Veredelung der Pflanzen-Erkennung (Foto-Spur).
