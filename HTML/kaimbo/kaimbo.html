@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>KAIMBO STUDIO</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet">
+    <link rel="icon" type="image/png" href="../resources/favicon.png">
+    <link rel="stylesheet" href="kaimbo.css">
+</head>
+
+<body>
+    <!-- ============ top bar: brand | menus | search | folder chip ============ -->
+    <header id="topbar">
+        <div id="brand" title="Kaimbo Studio — Web">KAIMBO<span>STUDIO</span></div>
+        <nav id="menubar"></nav>
+        <div id="search-wrap">
+            <input id="search-line" type="text" placeholder="Search here ..." autocomplete="off" spellcheck="false"
+                aria-label="Search tasks">
+            <div id="collect-popup" class="hidden"></div>
+        </div>
+        <button id="folder-chip" class="chip chip-off" title="Connect the DataLearnLanguages folder">no folder</button>
+    </header>
+
+    <!-- ============ main split: sidebar (tree/filters) | content tabs ============ -->
+    <div id="main">
+        <aside id="sidebar">
+            <div class="tabbar" id="sidebar-tabs">
+                <button class="tab active" data-pane="tree-pane">Language filters</button>
+                <button class="tab" data-pane="special-pane">Special filters</button>
+            </div>
+            <div id="tree-pane" class="pane active">
+                <div id="filter-tree"></div>
+                <div id="topic-tree" tabindex="0"></div>
+            </div>
+            <div id="special-pane" class="pane"></div>
+        </aside>
+        <div id="divider" title="Drag to resize — Ctrl+O toggles the sidebar"></div>
+        <section id="content">
+            <div class="tabbar" id="content-tabs">
+                <button class="tab active" data-pane="learning-pane">Learning</button>
+                <button class="tab" data-pane="tasklist-pane">Task List</button>
+                <button class="tab" data-pane="help-pane">Help</button>
+            </div>
+            <div id="learning-pane" class="pane active">
+                <div id="stage" tabindex="0">
+                    <div id="stage-bg"></div>
+                    <div id="newbie-line" class="hidden">Ctrl H shows Help page. Right click on a task row for actions.
+                    </div>
+                    <div id="need-image-dot" class="hidden" title="Task needs a new image"></div>
+                    <div id="lang-rows"></div>
+                    <div id="empty-state" class="hidden">
+                        <div class="empty-logo">KAIMBO</div>
+                        <div class="empty-hint">No tasks loaded. Menu — File | Import tasks … or connect your
+                            DataLearnLanguages folder.</div>
+                    </div>
+                    <button id="hot-delete" class="hotspot" title="Delete current task (Backspace)">
+                        <svg viewBox="0 0 24 24"><path d="M6 7h12l-1 14H7L6 7zm3-3h6l1 2h4v2H4V6h4l1-2z"/></svg>
+                    </button>
+                    <button id="hot-new" class="hotspot" title="New task (Ctrl+N)">
+                        <svg viewBox="0 0 24 24"><path d="M11 5h2v6h6v2h-6v6h-2v-6H5v-2h6V5z"/></svg>
+                    </button>
+                    <button id="hot-info" class="hotspot" title="Task info (I)">
+                        <svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm-1 7h2v9h-2V9zm0-4h2v2h-2V5z"/></svg>
+                    </button>
+                </div>
+            </div>
+            <div id="tasklist-pane" class="pane"></div>
+            <div id="help-pane" class="pane"></div>
+        </section>
+    </div>
+
+    <!-- ============ status bar (replaces the Swing frame-title status line) ============ -->
+    <footer id="statusbar"><span id="status-text">Kaimbo Studio</span><span id="repeat-badge"
+            class="hidden"></span></footer>
+
+    <!-- ============ overlays ============ -->
+    <div id="task-dialog" class="overlay hidden"></div>
+    <div id="recorder" class="floatwin hidden"></div>
+    <div id="infobox" class="floatwin hidden"></div>
+    <div id="stats-win" class="floatwin hidden"></div>
+    <div id="simulator" class="overlay hidden"></div>
+    <div id="ctx-menu" class="ctxmenu hidden"></div>
+    <div id="modal" class="overlay hidden"></div>
+    <div id="dbg-win" class="floatwin hidden"></div>
+
+    <script src="js/kaimbo-core.js"></script>
+    <script src="js/kaimbo-formats.js"></script>
+    <script src="js/kaimbo-store.js"></script>
+    <script src="js/kaimbo-audio.js"></script>
+    <script src="js/kaimbo-search.js"></script>
+    <script src="js/kaimbo-filters.js"></script>
+    <script src="js/kaimbo-tree.js"></script>
+    <script src="js/kaimbo-learning.js"></script>
+    <script src="js/kaimbo-dialog.js"></script>
+    <script src="js/kaimbo-table.js"></script>
+    <script src="js/kaimbo-simulator.js"></script>
+    <script src="js/kaimbo-app.js"></script>
+</body>
+
+</html>
