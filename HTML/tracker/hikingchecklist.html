@@ -319,12 +319,15 @@
                 background: linear-gradient(180deg, #f6e3c5 0%, #f2c98d 45%, #e8975a 70%, #7a5a48 100%);
             }
 
+            /* real <img> instead of a CSS background: Chrome's PDF writer mis-anchors
+               backgrounds inside rotated elements (preview ok, exported PDF sliced) */
             .pback .photo {
                 position: absolute;
                 inset: 0;
-                background-image: url('checklist-view.jpg');
-                background-size: cover;
-                background-position: center;
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                display: block;
             }
 
             .pback .emergency {
@@ -585,7 +588,8 @@
             const contact = ($('contact').value || '').trim();
             const contactHtml = contact ? esc(contact).replace(/\n/g, '<br>') : '____________________';
             $('sheet-back').innerHTML = Array(6).fill(
-                '<div class="pback"><div class="photo"></div><div class="emergency">' +
+                '<div class="pback"><img class="photo" src="checklist-view.jpg" alt="" ' +
+                'onerror="this.style.display=\'none\'"><div class="emergency">' +
                 UI.de.emergency.map(esc).join('<br>') +
                 '<div class="phone">' + contactHtml + '</div>' +
                 '</div></div>').join('');
