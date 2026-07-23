@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>MATHTRAINER — Manualito</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Raleway:wght@300;400&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet">
+    <link rel="icon" type="image/png" href="../resources/favicon.png">
+    <style>
+        /* document page — palette matches mathtrainer.css (darkBlue, niceGreen, orange) */
+        :root {
+            --dark-blue: rgb(0, 0, 40);
+            --dark-soft: rgb(10, 14, 60);
+            --nice-green: rgb(113, 197, 37);
+            --org: orange;
+            --blue: rgb(67, 151, 255);
+            --lam: rgb(245, 194, 66);
+            --ups: rgb(176, 36, 24);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: var(--dark-blue);
+            color: #dfe8f5;
+            font-family: 'Outfit', 'Segoe UI', sans-serif;
+            font-size: 16px;
+            line-height: 1.65;
+        }
+
+        header {
+            background: linear-gradient(180deg, var(--dark-soft), var(--dark-blue));
+            border-bottom: 1px solid rgba(255, 165, 0, 0.3);
+            padding: 26px 20px 20px 20px;
+            text-align: center;
+        }
+
+        .brand {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            font-size: clamp(22px, 5vw, 34px);
+            letter-spacing: 3px;
+            color: var(--org);
+        }
+
+        .school { font-family: 'Raleway', sans-serif; color: #9fb6dc; margin-top: 4px; font-size: 16px; }
+
+        .subtitle { color: #93a8c9; margin-top: 6px; font-size: 15px; }
+
+        .subtitle a { color: var(--blue); }
+
+        main { max-width: 860px; margin: 0 auto; padding: 24px 20px 80px 20px; }
+
+        h2 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 15px;
+            letter-spacing: 2px;
+            color: var(--org);
+            margin: 40px 0 12px 0;
+            padding-top: 10px;
+            border-top: 1px solid rgba(255, 255, 255, 0.12);
+        }
+
+        h2 .n { color: #5c6f92; margin-right: 8px; }
+
+        p { margin: 10px 0; }
+
+        b { color: #fff; font-weight: 600; }
+
+        kbd {
+            font-family: ui-monospace, Menlo, monospace;
+            font-size: 13px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(164, 213, 255, 0.3);
+            border-bottom-width: 2px;
+            border-radius: 6px;
+            padding: 1px 7px;
+            white-space: nowrap;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.045);
+            border: 1px solid rgba(164, 213, 255, 0.12);
+            border-radius: 12px;
+            padding: 14px 18px;
+            margin: 14px 0;
+        }
+
+        .card.tip { border-left: 4px solid var(--nice-green); }
+
+        .card.warn { border-left: 4px solid var(--ups); }
+
+        .steps { counter-reset: s; list-style: none; margin: 14px 0; }
+
+        .steps li { counter-increment: s; position: relative; padding: 6px 0 6px 46px; }
+
+        .steps li::before {
+            content: counter(s);
+            position: absolute;
+            left: 0;
+            top: 6px;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: var(--nice-green);
+            color: #fff;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        table { border-collapse: collapse; width: 100%; margin: 12px 0; font-size: 14.5px; }
+
+        .tablewrap { overflow-x: auto; }
+
+        th {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 10.5px;
+            letter-spacing: 1px;
+            color: var(--org);
+            text-align: left;
+            padding: 6px 12px 6px 0;
+            border-bottom: 1px solid rgba(255, 165, 0, 0.35);
+        }
+
+        td {
+            padding: 6px 12px 6px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+            vertical-align: top;
+        }
+
+        td:first-child { white-space: nowrap; color: var(--blue); }
+
+        .cd { display: inline-block; width: 26px; height: 26px; border: 2px solid; border-radius: 4px;
+              text-align: center; line-height: 22px; font-size: 15px; font-weight: 700; margin-right: 6px; }
+
+        .cd.c1 { border-color: rgb(0, 178, 178); color: rgb(0, 178, 178); }
+
+        .cd.c2 { border-color: orange; color: orange; }
+
+        .cd.c3 { border-color: red; color: red; }
+
+        .op { font-family: 'Times New Roman', serif; font-size: 20px; font-weight: 700; }
+
+        .toc { columns: 2; column-gap: 30px; font-size: 14.5px; margin: 14px 0; }
+
+        .toc a { color: var(--blue); text-decoration: none; display: block; padding: 2px 0; }
+
+        .toc a:hover { color: #fff; }
+
+        code {
+            font-family: ui-monospace, Menlo, monospace;
+            font-size: 13.5px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 5px;
+            padding: 1px 6px;
+        }
+
+        .footer-note { margin-top: 50px; color: #5c6f92; font-size: 13px; text-align: center; }
+
+        @media (max-width: 640px) { .toc { columns: 1; } }
+
+        @media print {
+            body { background: #fff; color: #222; }
+            header { background: #fff; border-color: #ccc; }
+            .brand, h2 { color: #b06a00; }
+            b { color: #000; }
+            .card { border-color: #ccc; background: #f7f7f7; }
+            td, th { border-color: #ddd; }
+            td:first-child, .toc a { color: #1a4d8f; }
+            kbd, code { background: #eee; border-color: #bbb; }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="brand">MATHTRAINER</div>
+        <div class="school">School is cool!</div>
+        <div class="subtitle">Manualito — die Kurzanleitung · <a href="mathtrainer.html">→ zur App</a></div>
+    </header>
+
+    <main>
+        <p><b>Was ist das hier?</b> Dein SchoolTrainer für den Unterricht, jetzt im Browser:
+            Ein Team wird der Reihe nach aufgerufen (Foto + Name + Stimme), jeder Schüler bekommt
+            seine Aufgabe — Kopfrechnen-1x1 oder Deine eigenen Aufgabendateien mit LaTeX —,
+            der 10-Sekunden-Countdown läuft, falsche Antworten kosten 10 Strafsekunden, und am
+            Ende steht die <b>Teamzeit</b>. Alles läuft über zwei Tasten: <kbd>↓</kbd> und <kbd>→</kbd>.</p>
+
+        <nav class="toc">
+            <a href="#start">1 · Schnellstart</a>
+            <a href="#ablauf">2 · Der Unterrichts-Ablauf</a>
+            <a href="#einmaleins">3 · 1x1-Modus</a>
+            <a href="#dateien">4 · Aufgaben-Dateien</a>
+            <a href="#teams">5 · Teams &amp; Anwesenheit</a>
+            <a href="#picker">6 · Der Zufalls-Picker 🎲</a>
+            <a href="#namen">7 · Namen, Fotos, Stimme</a>
+            <a href="#anzeige">8 · Anzeige &amp; Sound</a>
+            <a href="#daten">9 · Deine Daten</a>
+            <a href="#cheat">10 · Spickzettel</a>
+        </nav>
+
+        <h2 id="start"><span class="n">1</span>SCHNELLSTART</h2>
+        <ol class="steps">
+            <li><b>App öffnen</b> — <code>mathtrainer/mathtrainer.html</code> im Chrome, am besten
+                gleich auf dem Beamer-Rechner.</li>
+            <li><b>Ordner verbinden</b> — oben rechts auf <b>„no folder“</b> klicken und Deinen
+                <code>MathTrainer/resources</code>-Ordner wählen (der Projekt-Ordner geht auch).
+                Damit sind Teams, Schülerfotos, Namens-Stimmen, Aufgabendateien und die
+                1x1-Hintergrundbilder da. Ohne Ordner: Demo-Team (Ada Lovelace &amp; Co.) — zum
+                Ausprobieren völlig okay.</li>
+            <li><b>Team wählen</b> (Rechtsklick → Team) — und <kbd>↓</kbd> drücken. Los geht’s.</li>
+        </ol>
+
+        <h2 id="ablauf"><span class="n">2</span>DER UNTERRICHTS-ABLAUF</h2>
+        <div class="tablewrap"><table>
+            <tr><th>Taste</th><th>Was passiert</th></tr>
+            <tr><td><kbd>↓</kbd> / <kbd>Space</kbd> / <kbd>PageDown</kbd></td>
+                <td>Das Herzstück: erst erscheint die <b>Frage</b> mit Foto + Name (der Vorname wird
+                    gesprochen), nochmal drücken zeigt die <b>Antwort</b>, nochmal = nächster Schüler.
+                    PageDown heißt: Dein Presenter-Klicker funktioniert auch.</td></tr>
+            <tr><td><kbd>→</kbd></td>
+                <td><b>Falsch!</b> +10 Strafsekunden auf die Teamzeit, dann geht’s normal weiter.
+                    (Zählt für den Schüler nicht als gelöst.)</td></tr>
+            <tr><td>Countdown</td>
+                <td><span class="cd c1">9</span><span class="cd c2">3</span><span class="cd c3">1</span>
+                    10 Sekunden pro Frage; unter 4 wird’s orange, unter 2 rot — bei 0 deckt sich die
+                    Antwort von selbst auf (zählt nicht als gelöst). <kbd>C</kbd> schaltet den
+                    Countdown ganz aus. Öffnest Du zwischendurch eine Seite (Hilfe, Studenten …),
+                    <b>pausiert</b> er und läuft danach weiter.</td></tr>
+            <tr><td><kbd>Esc</kbd></td>
+                <td>Zurück zum Startbild — <b>ohne</b> den Lauf zu verlieren: das nächste <kbd>↓</kbd>
+                    macht genau dort weiter. (Neu mischen: <kbd>B</kbd>.)</td></tr>
+            <tr><td>Ende</td>
+                <td>Nach der letzten Aufgabe: <b>„Gesamtzeit für das Team“</b> (rot, wenn Strafsekunden
+                    dabei sind) und die Zeit pro Aufgabe pro Schüler. <kbd>Esc</kbd> startet ein neues Spiel.</td></tr>
+            <tr><td><kbd>B</kbd></td><td>New game: Team neu gemischt, Uhr auf null.</td></tr>
+            <tr><td><kbd>+</kbd> / <kbd>−</kbd></td><td>Mehr / weniger Aufgaben pro Schüler (Standard 3).</td></tr>
+        </table></div>
+
+        <h2 id="einmaleins"><span class="n">3</span>1x1-MODUS (Taste <kbd>1</kbd>)</h2>
+        <p>Kopfrechnen mit den vier Grundrechenarten. Unten links siehst Du
+            <span class="op" style="color:cyan"> + </span><span class="op" style="color:rgb(178,0,0)"> − </span>
+            <span class="op" style="color:rgb(0,255,0)"> × </span><span class="op" style="color:orange"> ÷ </span> —
+            anklicken schaltet die Operation an/aus (weiß = aus; sind alle aus, bleibt × an).
+            Division geht <b>immer</b> ganzzahlig auf, Minus wird nie negativ — dafür sorgt der
+            Generator wie im Original. Bei × und ÷ erscheint das passende Bild aus Deiner
+            9×10-Bildermatrix im Hintergrund.</p>
+        <p><kbd>E</kbd> öffnet die <b>Serien-Seite</b> (2er- bis 9er-Reihe an/aus) — die Auswahl
+            bestimmt die erste Zahl jeder Aufgabe. <kbd>L</kbd> beschränkt zusätzlich die zweite
+            Zahl darauf („limit to selected series“ erscheint oben).</p>
+
+        <h2 id="dateien"><span class="n">4</span>AUFGABEN-DATEIEN (Taste <kbd>2</kbd>)</h2>
+        <p>Deine eigenen Fragen — Physik, English, Latein, Wurzeln … Eine simple Textdatei,
+            pro Zeile <b>Frage :: Antwort</b>, Kommentare mit <code>//</code>:</p>
+        <div class="card"><code>\( \sqrt{4n + 13} = 9 \) :: \( n = 17 \)</code><br>
+            <code>Capital of Spain? :: Madrid</code></div>
+        <p>Alles in <code>\( … \)</code> wird als <b>LaTeX</b> gerendert (orange, wie gewohnt).
+            Laden geht auf drei Wegen: <kbd>O</kbd> zeigt Deine <code>tasks/</code>-Dateien aus dem
+            Ordner (Roots, Fractions, Physics …), eine .txt-Datei einfach <b>ins Fenster ziehen</b>,
+            oder Taste <kbd>2</kbd> ohne Datei lädt einen kleinen Demo-Satz. Der Dateiname steht
+            oben als Themen-Überschrift; der zuletzt geladene Satz bleibt auch nach einem
+            Neustart erhalten.</p>
+        <div class="card warn"><b>Hinweis:</b> In Deiner <code>English.txt</code> ist die erste Zeile
+            ein GPT-Überbleibsel („Of course! Here is …“) — die würde als Aufgabe drankommen.
+            Zeile löschen oder mit <code>//</code> auskommentieren.</div>
+
+        <h2 id="teams"><span class="n">5</span>TEAMS &amp; ANWESENHEIT</h2>
+        <p><b>Rechtsklick</b> öffnet das Menü: Team wählen (Deine 8 Kurse aus
+            <code>teamNames.txt</code>), Modus wechseln, Seiten öffnen, Sound/Countdown/Namen
+            an/aus. Ein Team-Wechsel mischt <b>nicht</b> neu — „New game“ / <kbd>B</kbd> schon.</p>
+        <p><kbd>S</kbd> öffnet die <b>Studenten-Seite</b>: Zeile anklicken = anwesend ✅ /
+            abwesend ❌. Abwesende bekommen beim nächsten Spiel keine Aufgaben. Dahinter siehst Du
+            pro Schüler die zugeteilten Aufgaben und die gelösten („right“ zählt nur, was ohne
+            <kbd>→</kbd> und vor Countdown-Ablauf aufgedeckt wurde).</p>
+
+        <h2 id="picker"><span class="n">6</span>DER ZUFALLS-PICKER 🎲 (Taste <kbd>P</kbd>)</h2>
+        <p>„Wer kommt dran?“ — <kbd>P</kbd> oder der 🎲-Button unten rechts zieht einen zufälligen
+            anwesenden Schüler, groß mit Foto, Name wird gesprochen. Niemand kommt zweimal dran,
+            bevor nicht <b>alle</b> einmal dran waren (dann startet Runde 2). <kbd>P</kbd> zieht den
+            nächsten, jede andere Taste schließt.</p>
+
+        <h2 id="namen"><span class="n">7</span>NAMEN, FOTOS, STIMME</h2>
+        <div class="tablewrap"><table>
+            <tr><th>Taste</th><th>Wirkung</th></tr>
+            <tr><td><kbd>N</kbd></td><td>Name + Foto + Namens-Audio an/aus.</td></tr>
+            <tr><td><kbd>Shift N</kbd></td><td>Voller Name ↔ nur Vorname.</td></tr>
+            <tr><td><kbd>Alt N</kbd> (⌥N)</td><td><b>Name-Learning-Modus</b>: großes Foto als Karteikarte,
+                keine Aufgaben — zum Namenlernen am Schuljahresanfang.</td></tr>
+            <tr><td><kbd>Q</kbd></td><td>Frage vorlesen an/aus (bei Text-Aufgaben, englische Stimme).</td></tr>
+        </table></div>
+        <p>Die Stimmen kommen aus Deinen <code>sound/</code>-WAVs; fehlt eine, spricht die
+            Browser-Stimme (Deutsch) den Namen — es müssen also keine neuen WAVs mehr erzeugt werden.
+            Fotos werden über den Namen gefunden (Umlaute inklusive), ohne Foto gibt’s 🙂.</p>
+
+        <h2 id="anzeige"><span class="n">8</span>ANZEIGE &amp; SOUND</h2>
+        <div class="tablewrap"><table>
+            <tr><th>Taste</th><th>Wirkung</th></tr>
+            <tr><td><kbd>F</kbd></td><td><b>Fullscreen</b> an/aus — fürs Beamer-Bild ohne Browser-Rahmen. (<kbd>Esc</kbd> verlässt den Fullscreen zuerst, das zweite <kbd>Esc</kbd> pausiert das Spiel.)</td></tr>
+            <tr><td><kbd>0</kbd></td><td>Die 4 Farbschemata durchschalten (hellgrau, dunkelgrau, navy/orange, navy/grün).</td></tr>
+            <tr><td><kbd>T</kbd> / <kbd>Shift T</kbd></td><td>Hintergrundbild stärker / schwächer abdunkeln.</td></tr>
+            <tr><td><kbd>*</kbd> / <kbd>_</kbd></td><td>Aufgaben-Schrift größer / kleiner.</td></tr>
+            <tr><td><kbd>A</kbd></td><td>Aufgabentext verstecken/zeigen (z.&nbsp;B. für mündliche Runden).</td></tr>
+            <tr><td><kbd>M</kbd></td><td>Hintergrundmusik an/aus — bevorzugt Deine Musikdatei aus <code>sound/</code>
+                (werbefrei, offline). Ohne Ordner spielt stattdessen ein kleiner <b>YouTube-Mini-Player</b> unten links
+                „Frozen (Boral Kibil Remix)“ — <b>exakt</b> Deine 8-Minuten-Fassung (per Audio-Korrelation
+                verifiziert; braucht Internet, evtl. Werbung; anderes Video: Rechtsklick → YouTube music …).</td></tr>
+            <tr><td><kbd>V</kbd> / <kbd>Shift V</kbd></td><td>Leiser / lauter.</td></tr>
+            <tr><td><kbd>H</kbd></td><td>Hilfe-Seite in der App.</td></tr>
+        </table></div>
+
+        <h2 id="daten"><span class="n">9</span>DEINE DATEN</h2>
+        <div class="tablewrap"><table>
+            <tr><th>Im resources-Ordner</th><th>Wofür</th></tr>
+            <tr><td>teams/ + teamNames.txt</td><td>Deine 8 Kurslisten und ihre Anzeigenamen.</td></tr>
+            <tr><td>photos/</td><td>Schülerfotos (Dateiname = Name).</td></tr>
+            <tr><td>sound/</td><td>Namens-WAVs + Musik.</td></tr>
+            <tr><td>tasks/</td><td>Deine 14 Aufgabendateien (Roots, Physics, English …).</td></tr>
+            <tr><td>images/</td><td>Die 9×10-Bildermatrix für × und ÷.</td></tr>
+        </table></div>
+        <p>Die Web-App <b>liest nur</b> — sie verändert nichts in Deinem Ordner. Einstellungen
+            (Team, Modus, Schriftgröße, Serien …) merkt sich der Browser. Und wichtig:
+            <b>Schülerfotos und -namen bleiben komplett auf Deinem Rechner</b> — nichts davon liegt
+            im Netz oder im Repo; die Java-App und die Web-App können denselben Ordner nutzen.</p>
+
+        <h2 id="cheat"><span class="n">10</span>SPICKZETTEL</h2>
+        <div class="tablewrap"><table>
+            <tr><th>Taste</th><th>Aktion</th><th>Taste</th><th>Aktion</th></tr>
+            <tr><td><kbd>↓</kbd>/<kbd>Space</kbd>/<kbd>PgDn</kbd></td><td>Weiter</td><td><kbd>→</kbd></td><td>Falsch (+10 s)</td></tr>
+            <tr><td><kbd>Esc</kbd></td><td>Pause / zurück</td><td><kbd>B</kbd></td><td>New game</td></tr>
+            <tr><td><kbd>1</kbd> / <kbd>2</kbd></td><td>1x1 / Dateien</td><td><kbd>O</kbd></td><td>Datei öffnen</td></tr>
+            <tr><td><kbd>+</kbd> / <kbd>−</kbd></td><td>Aufgaben pro Schüler</td><td><kbd>*</kbd> / <kbd>_</kbd></td><td>Schriftgröße</td></tr>
+            <tr><td><kbd>C</kbd></td><td>Countdown an/aus</td><td><kbd>Q</kbd></td><td>Frage vorlesen</td></tr>
+            <tr><td><kbd>E</kbd></td><td>Serien-Seite</td><td><kbd>L</kbd></td><td>Limit-Modus</td></tr>
+            <tr><td><kbd>S</kbd></td><td>Studenten-Seite</td><td><kbd>P</kbd> / 🎲</td><td>Zufalls-Picker</td></tr>
+            <tr><td><kbd>N</kbd> / <kbd>Shift N</kbd> / <kbd>Alt N</kbd></td><td>Namen / Vorname / Lernen</td><td><kbd>A</kbd></td><td>Aufgabe verstecken</td></tr>
+            <tr><td><kbd>0</kbd> / <kbd>T</kbd></td><td>Farben / Abdunkeln</td><td><kbd>M</kbd> / <kbd>V</kbd></td><td>Musik / Lautstärke</td></tr>
+            <tr><td><kbd>F</kbd></td><td>Fullscreen</td><td><kbd>H</kbd></td><td>Hilfe</td></tr>
+            <tr><td>Rechtsklick</td><td>Menü (Teams, Modi, Toggles)</td><td></td><td></td></tr>
+        </table></div>
+
+        <p class="footer-note">Manualito · MathTrainer Web · SchoolTrainer by Dr. Michael R. Alvers — School is cool!</p>
+    </main>
+</body>
+
+</html>
