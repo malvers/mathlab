@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>KAIMBO STUDIO — Manualito</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet">
+    <link rel="icon" type="image/png" href="../resources/favicon.png">
+    <style>
+        /* document page — own compact styles, palette identical to kaimbo.css */
+        :root {
+            --navy-deep: rgb(8, 20, 42);
+            --navy: rgb(14, 36, 78);
+            --lam: rgb(245, 194, 66);
+            --ups: rgb(176, 36, 24);
+            --phi: rgb(121, 158, 49);
+            --nice-green: rgb(146, 208, 80);
+            --nice-blue: rgb(67, 151, 255);
+            --nice-lightblue: rgb(164, 213, 255);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: var(--navy-deep);
+            color: #dfe8f5;
+            font-family: 'Outfit', 'Segoe UI', sans-serif;
+            font-size: 16px;
+            line-height: 1.65;
+        }
+
+        header {
+            background: linear-gradient(180deg, var(--navy), var(--navy-deep));
+            border-bottom: 1px solid rgba(245, 194, 66, 0.25);
+            padding: 26px 20px 20px 20px;
+            text-align: center;
+        }
+
+        .brand {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            font-size: clamp(22px, 5vw, 34px);
+            letter-spacing: 3px;
+            color: var(--lam);
+        }
+
+        .brand span { color: #9fb6dc; font-weight: 400; }
+
+        .subtitle { color: #93a8c9; margin-top: 6px; font-size: 15px; }
+
+        .subtitle a { color: var(--nice-lightblue); }
+
+        main { max-width: 860px; margin: 0 auto; padding: 24px 20px 80px 20px; }
+
+        h2 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 15px;
+            letter-spacing: 2px;
+            color: var(--lam);
+            margin: 40px 0 12px 0;
+            padding-top: 10px;
+            border-top: 1px solid rgba(164, 213, 255, 0.15);
+        }
+
+        h2 .n { color: #5c6f92; margin-right: 8px; }
+
+        p { margin: 10px 0; }
+
+        b { color: #fff; font-weight: 600; }
+
+        kbd {
+            font-family: ui-monospace, Menlo, monospace;
+            font-size: 13px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(164, 213, 255, 0.3);
+            border-bottom-width: 2px;
+            border-radius: 6px;
+            padding: 1px 7px;
+            white-space: nowrap;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.045);
+            border: 1px solid rgba(164, 213, 255, 0.12);
+            border-radius: 12px;
+            padding: 14px 18px;
+            margin: 14px 0;
+        }
+
+        .card.tip { border-left: 4px solid var(--phi); }
+
+        .card.warn { border-left: 4px solid var(--ups); }
+
+        .steps { counter-reset: s; list-style: none; margin: 14px 0; }
+
+        .steps li {
+            counter-increment: s;
+            position: relative;
+            padding: 6px 0 6px 46px;
+        }
+
+        .steps li::before {
+            content: counter(s);
+            position: absolute;
+            left: 0;
+            top: 6px;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: var(--phi);
+            color: #fff;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        table { border-collapse: collapse; width: 100%; margin: 12px 0; font-size: 14.5px; }
+
+        .tablewrap { overflow-x: auto; }
+
+        th {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 10.5px;
+            letter-spacing: 1px;
+            color: var(--lam);
+            text-align: left;
+            padding: 6px 12px 6px 0;
+            border-bottom: 1px solid rgba(245, 194, 66, 0.3);
+        }
+
+        td {
+            padding: 6px 12px 6px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+            vertical-align: top;
+        }
+
+        td:first-child { white-space: nowrap; color: var(--nice-lightblue); }
+
+        .dot { display: inline-block; width: 12px; height: 12px; border-radius: 4px; margin-right: 6px; vertical-align: -1px; }
+
+        .quiz-exact { color: var(--nice-green); font-weight: 600; }
+
+        .quiz-prefix { color: rgb(100, 190, 100); font-weight: 600; }
+
+        .quiz-inside { color: rgb(60, 170, 185); font-weight: 600; }
+
+        .quiz-wrong { color: rgb(235, 120, 108); font-weight: 600; }
+
+        .ladder {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            align-items: center;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 12px;
+            margin: 10px 0;
+        }
+
+        .ladder .step {
+            background: rgba(164, 213, 255, 0.15);
+            border: 1px solid rgba(164, 213, 255, 0.3);
+            border-radius: 8px;
+            padding: 4px 10px;
+        }
+
+        .ladder .arrow { color: #5c6f92; }
+
+        .toc { columns: 2; column-gap: 30px; font-size: 14.5px; margin: 14px 0; }
+
+        .toc a { color: var(--nice-lightblue); text-decoration: none; display: block; padding: 2px 0; }
+
+        .toc a:hover { color: #fff; }
+
+        .footer-note { margin-top: 50px; color: #5c6f92; font-size: 13px; text-align: center; }
+
+        @media (max-width: 640px) { .toc { columns: 1; } }
+
+        @media print {
+            body { background: #fff; color: #222; }
+            header { background: #fff; border-color: #ccc; }
+            .brand { color: #b07f10; }
+            h2 { color: #b07f10; border-color: #ddd; }
+            b { color: #000; }
+            .card { border-color: #ccc; background: #f7f7f7; }
+            td, th { border-color: #ddd; }
+            td:first-child, .toc a { color: #1a4d8f; }
+            kbd { background: #eee; border-color: #bbb; }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="brand">KAIMBO<span>STUDIO</span></div>
+        <div class="subtitle">Manualito — die Kurzanleitung · <a href="kaimbo.html">→ zur App</a></div>
+    </header>
+
+    <main>
+        <p><b>Was ist das hier?</b> Kaimbo Studio ist Dein Autoren-Studio für Sprachlern-Inhalte.
+            Die Grundeinheit ist der <b>Task</b>: ein Satz oder Wort in fünf Sprachen
+            (Deutsch, Italienisch, Spanisch, Englisch + eine „Flexi“-Sprache, historisch Französisch)
+            mit Bild, Ton und eigenem Lernstand pro Sprache. Du blätterst, hörst, tippst im Quiz —
+            und das Studio merkt sich per Spaced Repetition, wann welcher Task wieder dran ist.</p>
+
+        <nav class="toc">
+            <a href="#start">1 · Schnellstart</a>
+            <a href="#ui">2 · Die Oberfläche</a>
+            <a href="#browse">3 · Blättern &amp; Suchen</a>
+            <a href="#new">4 · Neue Tasks &amp; Bilder</a>
+            <a href="#quiz">5 · Lernen: Quiz &amp; Wiederholung</a>
+            <a href="#master">6 · Die Master-Sprache</a>
+            <a href="#tree">7 · Der Themenbaum</a>
+            <a href="#filter">8 · Filter</a>
+            <a href="#sound">9 · Ton &amp; Recorder</a>
+            <a href="#sim">10 · Der Simulator</a>
+            <a href="#data">11 · Deine Daten</a>
+            <a href="#cheat">12 · Spickzettel</a>
+        </nav>
+
+        <h2 id="start"><span class="n">1</span>SCHNELLSTART</h2>
+        <ol class="steps">
+            <li><b>App öffnen</b> — <code>kaimbo/kaimbo.html</code> im Chrome.</li>
+            <li><b>Ordner verbinden</b> — oben rechts auf den roten Chip <b>„no folder“</b> klicken und
+                <code>KaimboStudio/DataLearnLanguages</code> auswählen. Ab jetzt liest und schreibt die App
+                direkt Deine echten Dateien (Vocabulary.txt, mytopics.pnk, Bilder, Sounds) — mit
+                automatischen Backups. Der Chip wird grün.</li>
+            <li><b>Blättern</b> — <kbd>↓</kbd> / <kbd>↑</kbd> zeigen den nächsten/vorigen Task. Das war’s, Du bist drin.</li>
+        </ol>
+        <div class="card tip">Ohne verbundenen Ordner läuft alles genauso — nur eben im Browser-Speicher
+            (localStorage). Der grüne Weg ist der richtige: Java-App und Web-App können sich denselben
+            Datenordner teilen.</div>
+
+        <h2 id="ui"><span class="n">2</span>DIE OBERFLÄCHE</h2>
+        <div class="tablewrap"><table>
+            <tr><th>Bereich</th><th>Was er tut</th></tr>
+            <tr><td>Topbar</td><td>Menüs (File/Edit/View/Select/Modi/Help), das <b>Suchfeld</b> und der <b>Ordner-Chip</b>.</td></tr>
+            <tr><td>Links</td><td>Zwei Tabs: <b>Language filters</b> (Filterliste + Dein Themenbaum) und <b>Special filters</b> (Qualitäts-Checks). Breite per Ziehen am Rand, <kbd>Ctrl O</kbd> blendet alles aus.</td></tr>
+            <tr><td>Mitte</td><td>Drei Tabs: <b>Learning</b> (die Hauptansicht: Bild + Sprachzeilen), <b>Task List</b> (Tabelle aller gefilterten Tasks, Klick springt hin), <b>Help</b> (Shortcuts).</td></tr>
+            <tr><td>Statusleiste</td><td>Unten: welcher Task, wie viele sichtbar/insgesamt, und rechts der Wiederholungs-Zähler („n to repeat“).</td></tr>
+        </table></div>
+        <p>In der Learning-Ansicht liegen drei <b>Ecken-Buttons</b> auf dem Bild:
+            oben rechts 🗑 <b>Task löschen</b>, unten rechts ＋ <b>neuer Task</b>, unten links ⓘ <b>Notiz</b>
+            zum Task (der Punkt wird grün, wenn eine Notiz existiert). Ein roter Punkt oben links heißt:
+            „Task braucht noch ein richtiges Bild“. Klick auf freie Bildfläche versteckt die Textzeilen
+            (und holt sie zurück).</p>
+
+        <h2 id="browse"><span class="n">3</span>BLÄTTERN &amp; SUCHEN</h2>
+        <div class="tablewrap"><table>
+            <tr><th>Aktion</th><th>So geht’s</th></tr>
+            <tr><td><kbd>↑</kbd> <kbd>↓</kbd></td><td>Voriger / nächster Task — übersprungen wird, was der Filter versteckt; am Ende geht’s vorne weiter.</td></tr>
+            <tr><td>Zahl tippen</td><td>Springt zu Task Nr. n (der Zähler aus der Statusleiste).</td></tr>
+            <tr><td>Einfach lostippen</td><td>Buchstaben landen automatisch im Suchfeld: Live-Suche in der <b>Master-Sprache</b>. Vorschlagsliste: erst „beginnt mit“, dann „enthält“. <kbd>↑</kbd>/<kbd>↓</kbd> wandern durch die Vorschläge und filtern live, <kbd>Enter</kbd> übernimmt, <kbd>Esc</kbd> räumt auf.</td></tr>
+            <tr><td>Themen-Klick</td><td>Ein Klick auf ein Thema im Baum schiebt dessen Namen in die Suche (siehe Kapitel 7).</td></tr>
+        </table></div>
+
+        <h2 id="new"><span class="n">4</span>NEUE TASKS &amp; BILDER</h2>
+        <ol class="steps">
+            <li><kbd>Ctrl N</kbd> (oder ＋) öffnet den Dialog. Tippe Deinen Satz in <b>genau ein</b> Sprachfeld — das hellgrüne Feld ist die Quelle.</li>
+            <li><kbd>Enter</kbd> → die anderen vier Sprachen werden automatisch übersetzt. Einzelne Übersetzungen kannst Du danach direkt korrigieren.</li>
+            <li>Noch mal <kbd>Enter</kbd> → Task wird gespeichert (ganz vorn einsortiert), die Felder leeren sich für den nächsten. <kbd>Esc</kbd> verwirft/schließt.</li>
+        </ol>
+        <p><b>Bild dazu:</b> Bild kopieren und mit <kbd>Cmd V</kbd> einfügen — oder eine Bilddatei einfach auf
+            die Learning-Fläche ziehen. Es landet als Datei in <code>images/</code>, benannt nach dem englischen Text.
+            <b>Zurechtrücken:</b> <kbd>Alt ←→↑↓</kbd> verschiebt, <kbd>Alt +</kbd>/<kbd>Alt -</kbd>-Tasten
+            (<kbd>Alt ]</kbd>/<kbd>Alt /</kbd> auf US-Layout) zoomen, <kbd>Alt R</kbd> setzt zurück — alles pro Task gespeichert.
+            <b>Bildersuche:</b> Rechtsklick auf eine Sprachzeile → Pixabay / Unsplash / Google Images.</p>
+        <p><kbd>Ctrl E</kbd> editiert den aktuellen Task (Änderungen greifen sofort),
+            <kbd>Backspace</kbd> löscht ihn (mit Rückfrage), <kbd>Ctrl I</kbd> markiert „braucht neues Bild“.</p>
+
+        <h2 id="quiz"><span class="n">5</span>LERNEN: QUIZ &amp; WIEDERHOLUNG</h2>
+        <p><kbd>Ctrl C</kbd> deckt die Master-Sprache zu — jetzt bist Du dran: tippe den Satz.
+            Die Farbe sagt Dir live, wo Du stehst:</p>
+        <div class="tablewrap"><table>
+            <tr><th>Farbe</th><th>Bedeutung</th></tr>
+            <tr><td><span class="dot" style="background:rgb(146,208,80)"></span><span class="quiz-exact">grün</span></td><td>Exakt richtig! Ton spielt, kurz danach kommt automatisch der nächste Task.</td></tr>
+            <tr><td><span class="dot" style="background:rgb(100,190,100)"></span><span class="quiz-prefix">hellgrün</span></td><td>Stimmt bis hierhin — weiter so.</td></tr>
+            <tr><td><span class="dot" style="background:rgb(0,109,122)"></span><span class="quiz-inside">cyan</span></td><td>Kommt im Satz vor, aber nicht am Anfang.</td></tr>
+            <tr><td><span class="dot" style="background:rgb(176,36,24)"></span><span class="quiz-wrong">rot + „Dong“</span></td><td>Falsch abgebogen. Ab dem dritten Fehler steigt der Task eine Lernstufe ab.</td></tr>
+        </table></div>
+        <p><b>Dahinter steckt:</b> Jeder Task hat pro Sprache einen <b>Repeats</b>-Zähler und eine <b>Lernstufe</b> in Tagen:</p>
+        <div class="ladder">
+            <span class="step">0</span><span class="arrow">→</span><span class="step">1</span><span class="arrow">→</span>
+            <span class="step">2</span><span class="arrow">→</span><span class="step">4</span><span class="arrow">→</span>
+            <span class="step">7</span><span class="arrow">→</span><span class="step">14</span><span class="arrow">→</span>
+            <span class="step">60</span><span class="arrow">→</span><span class="step">180 Tage</span>
+        </div>
+        <p>Richtig getippt halbiert die Repeats; bei 0 klettert der Task eine Stufe hoch und ist erst nach
+            der Wartezeit wieder fällig. Fehler (auch manuelles Aufdecken mit <kbd>Ctrl C</kbd>!) zählen als
+            Fehlversuch. Die <b>Badges auf der Master-Zeile</b> zeigen den Stand:
+            orange = heute fällige Tasks (grüner Smiley = nichts fällig), blau = Lernstufe in Tagen,
+            grau = Datum der nächsten Wiederholung, rechts der Repeats-Zähler (grün = gelernt).
+            Sind beim Start Wiederholungen fällig, springt die App automatisch in „Show not learned“.
+            <kbd>Ctrl P</kbd> zeigt die Statistik: wie viele Tasks an welchem Tag fällig werden.</p>
+
+        <h2 id="master"><span class="n">6</span>DIE MASTER-SPRACHE</h2>
+        <p>Genau eine Sprachzeile ist die <b>Master-Sprache</b> (weiß hinterlegt) — Du wechselst sie mit
+            einem Klick auf den <b>linken Rand</b> einer Zeile (Kästchen + Sprachkürzel). Sie bestimmt:
+            wo die Suche sucht, was im Quiz abgefragt wird, welche Sprache Statistik/Filter/„learned“
+            meinen und was der Recorder aufnimmt. Kurz: Master = die Sprache, die Du gerade lernst.
+            Die fünfte Zeile („Flexi“) stellst Du unter Modi → Choose flexible language um.</p>
+
+        <h2 id="tree"><span class="n">7</span>DER THEMENBAUM</h2>
+        <p>Themen sortieren Deine Tasks — die Zuordnung passiert automatisch: ein Thema „fängt“ alle Tasks,
+            deren <b>englischer</b> Text das Themenwort enthält (als ganzes Wort) oder gleich ist.
+            Die Zahl rechts ist der Treffer-Count (inklusive Unterthemen).</p>
+        <div class="tablewrap"><table>
+            <tr><th>Aktion</th><th>So geht’s</th></tr>
+            <tr><td>Checkbox klicken</td><td><span class="dot" style="background:rgb(146,208,80)"></span>grün = Filter an: nur noch Tasks der angehakten Themen (inkl. Unterbaum) sind sichtbar. Rechtsklick auf die Box = <span class="dot" style="background:rgb(67,151,255)"></span>blau (additiv dazu). Nochmal klicken = aus.</td></tr>
+            <tr><td>Label klicken</td><td>Wählt das Thema aus und schiebt seinen Namen in die Suche.</td></tr>
+            <tr><td>Doppelklick</td><td>Thema umbenennen. ▸/▾ klappt auf und zu.</td></tr>
+            <tr><td><kbd>Shift</kbd>+Klick</td><td>Neues Unterthema, benannt nach dem aktuellen Task.</td></tr>
+            <tr><td>Rechtsklick</td><td>Alles Weitere: neues Thema, löschen, gruppieren, Cut/Copy/Paste, hoch/runter, sperren, Struktur-Knoten, Export/Import, <b>Undo/Redo</b> (<kbd>Ctrl Z</kbd>).</td></tr>
+            <tr><td><kbd>Esc</kbd></td><td>Alle Häkchen weg, alle Tasks wieder sichtbar.</td></tr>
+        </table></div>
+
+        <h2 id="filter"><span class="n">8</span>FILTER</h2>
+        <p>Über dem Baum sitzt die <b>Select-Liste</b>: Show all / not learned / learned, „no image“,
+            „need new image“, „no sound“, „unclassified“ sowie die Lernstufen (New today, Level 1–6, Learned).
+            Ein Klick = Filter aktiv, die Learning-Ansicht springt zum ersten Treffer.
+            Im Tab <b>Special filters</b> findest Du dieselben Qualitäts-Checks als Checkboxen mit
+            Treffer-Zähler — perfekt zum Aufräumen („welche Tasks haben noch kein eigenes Bild?“).
+            <kbd>Esc</kbd> oder Klick ins Leere stellt alles zurück.</p>
+
+        <h2 id="sound"><span class="n">9</span>TON &amp; RECORDER</h2>
+        <p>Der ▶-Knopf rechts in jeder Zeile spielt den Ton: zuerst eine echte WAV-Datei aus
+            <code>sounds/&lt;sprache&gt;/</code> (Person-Icon = Deine eigene Aufnahme), sonst die
+            Browser-Sprachausgabe. <b>Eigene Stimme aufnehmen:</b> <kbd>Ctrl R</kbd> öffnet den Recorder —
+            roter Knopf startet/stoppt (blinkt beim Aufnehmen), danach spielt die Aufnahme automatisch ab
+            und wird unter <code>Sprecher_Text_Stimme.wav</code> im Ordner gespeichert.
+            <kbd>Space</kbd> = nochmal anhören, <kbd>↑</kbd>/<kbd>↓</kbd> = Task wechseln, Klick auf den
+            Namen unten = Sprecher umbenennen, <kbd>Esc</kbd> = schließen.</p>
+
+        <h2 id="sim"><span class="n">10</span>DER SIMULATOR</h2>
+        <p><kbd>Alt S</kbd> zeigt das Handy-Preview: Deine Themen als sieben bunte Knöpfe.
+            Klick bohrt in die Unterthemen, <b>Rechtsklick geht hoch</b>. Ein Klick auf ein Blatt-Thema
+            (oder Alt-Klick → einen Modus wählen) startet den <b>Play-Modus</b>: Bild + italienischer und
+            deutscher Balken, beide werden vorgelesen, dann kommt automatisch die nächste Karte.
+            Balken antippen (de)aktiviert die Sprache, Maus drüber zeigt die Steuerung
+            (Play/Pause, vor/zurück), <kbd>Esc</kbd> beendet.</p>
+
+        <h2 id="data"><span class="n">11</span>DEINE DATEN</h2>
+        <div class="tablewrap"><table>
+            <tr><th>Datei/Ordner</th><th>Inhalt</th></tr>
+            <tr><td>Vocabulary.txt</td><td>Alle Tasks — <b>das</b> Original-Format, 1:1 kompatibel zur Java-App.</td></tr>
+            <tr><td>mytopics.pnk</td><td>Der Themenbaum (inkl. Aufgeklappt-Zustand).</td></tr>
+            <tr><td>images/ · sounds/</td><td>Task-Bilder und Ton-Dateien.</td></tr>
+            <tr><td>Infos_*/</td><td>Deine Notizen aus dem ⓘ-Fenster.</td></tr>
+            <tr><td>backup/</td><td>Zeitgestempelte Sicherungen — bei jedem Laden automatisch (Tasks <b>und</b> Baum).</td></tr>
+        </table></div>
+        <p>Gespeichert wird bei jeder Änderung automatisch, <kbd>Ctrl S</kbd> erzwingt es.
+            File → Import/Export tauscht einzelne <code>.txt</code>-Pakete und <code>.pnk</code>-Teilbäume aus
+            (z.&nbsp;B. „Italy.pnk“). Übersetzt wird standardmäßig über den freien MyMemory-Dienst;
+            unter File → Translate settings kannst Du einen eigenen Google-Key hinterlegen —
+            der bleibt ausschließlich in Deinem Browser.</p>
+        <div class="card warn"><b>Falls mal etwas klemmt:</b> <kbd>Ctrl L</kbd> öffnet das Debug-Fenster mit dem
+            Log. Und wenn eine Datei beschädigt aussieht, lädt die App sie gar nicht erst und speichert auch
+            nichts — Original und <code>backup/</code> bleiben unangetastet.</div>
+
+        <h2 id="cheat"><span class="n">12</span>SPICKZETTEL</h2>
+        <div class="tablewrap"><table>
+            <tr><th>Taste</th><th>Aktion</th><th>Taste</th><th>Aktion</th></tr>
+            <tr><td><kbd>↑</kbd> <kbd>↓</kbd></td><td>Task vor/zurück</td><td><kbd>Ctrl N</kbd> / <kbd>Ctrl E</kbd></td><td>Neu / Editieren</td></tr>
+            <tr><td>Tippen</td><td>Suche</td><td><kbd>Backspace</kbd></td><td>Task löschen</td></tr>
+            <tr><td><kbd>Ctrl C</kbd></td><td>Quiz an/aus</td><td><kbd>Ctrl S</kbd></td><td>Speichern</td></tr>
+            <tr><td><kbd>Ctrl O</kbd></td><td>Seitenleiste</td><td><kbd>Ctrl P</kbd></td><td>Statistik</td></tr>
+            <tr><td><kbd>Ctrl R</kbd></td><td>Recorder</td><td><kbd>Alt S</kbd></td><td>Simulator</td></tr>
+            <tr><td><kbd>Ctrl I</kbd></td><td>„Braucht Bild“</td><td><kbd>Ctrl H</kbd></td><td>Hilfe-Tab</td></tr>
+            <tr><td><kbd>Alt</kbd>+Pfeile</td><td>Bild schieben</td><td><kbd>Alt R</kbd></td><td>Bild zurücksetzen</td></tr>
+            <tr><td><kbd>Cmd V</kbd></td><td>Bild einfügen</td><td><kbd>Esc</kbd></td><td>Der Aufräumer</td></tr>
+        </table></div>
+        <div class="tablewrap"><table>
+            <tr><th>Maus auf Sprachzeile</th><th>Öffnet</th></tr>
+            <tr><td>Klick</td><td>LEO-Wörterbuch</td></tr>
+            <tr><td><kbd>Shift</kbd>+Klick</td><td>Reverso-Beispielsätze</td></tr>
+            <tr><td><kbd>Ctrl</kbd>+Klick</td><td>Google Translate</td></tr>
+            <tr><td><kbd>Alt</kbd>+Klick</td><td>Reverso-Konjugator</td></tr>
+            <tr><td><kbd>Cmd</kbd>+Klick</td><td>Google-Bildersuche</td></tr>
+            <tr><td>Rechtsklick</td><td>Alles davon als Menü + Pixabay/Unsplash + „needs correction“</td></tr>
+        </table></div>
+
+        <p class="footer-note">Manualito · Kaimbo Studio Web · <kbd>Esc</kbd> macht fast immer das Richtige. Ci vediamo!</p>
+    </main>
+</body>
+
+</html>
