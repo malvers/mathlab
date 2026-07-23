@@ -92,7 +92,10 @@
             height: 100%;
             width: 0%;
             border-radius: 999px;
-            background: linear-gradient(90deg, var(--green), var(--orange));
+            /* traffic-light gradient over the FULL bar width (background-size is set in
+               JS inversely to the fill width) — the tip always shows the current color */
+            background-image: linear-gradient(90deg, var(--red), var(--orange), var(--green));
+            background-size: 100% 100%;
             transition: width 0.25s;
         }
 
@@ -136,6 +139,25 @@
         .item.done .box { background: var(--green); border-color: var(--green); }
 
         .item.done .txt { color: #9fb6dc; text-decoration: line-through; text-decoration-thickness: 1px; }
+
+        .item .txt { flex: 1; }
+
+        .item .del {
+            flex: 0 0 auto;
+            background: none;
+            border: none;
+            color: #7f93b5;
+            font-size: 17px;
+            padding: 10px 12px;
+            cursor: pointer;
+            border-radius: 8px;
+        }
+
+        .item .del:hover { color: #fff; background: rgba(176, 36, 24, 0.5); }
+
+        .item.add { border-style: dashed; color: #9fb6dc; }
+
+        .item.add .box { border-style: dashed; color: #9fb6dc; }
 
         /* ---------------- rule + emergency ---------------- */
         .card-block {
@@ -399,6 +421,8 @@
                 contactLabel: 'Wird auf die Kartenrückseite gedruckt (Name + Nummer):',
                 privacy: 'Bleibt nur in DIESEM Browser (localStorage) — steht bewusst nicht im öffentlichen Code.',
                 export: 'EXPORT / DRUCKEN', reset: 'RESET',
+                addItem: 'Eigenen Punkt hinzufügen …', addPrompt: 'Neuer Punkt:',
+                restore: 'Auch die gelöschten Standard-Punkte wiederherstellen?',
                 printhint: 'Druckt 6 Karten in Kreditkartengröße (2× DE, EN, ES) + Rückseiten. Duplex: „Über lange Kante spiegeln". Rückseiten-Foto: checklist-view.jpg im Tracker-Ordner.',
                 progress: (n, t) => n + ' von ' + t + ' erledigt', go: 'Good to go! 🥾',
                 emergency: ['Im Notfall verständigen Sie bitte:', 'In case of an emergency, please call:', 'En caso de emergencia, por favor llame a:']
@@ -410,6 +434,8 @@
                 contactLabel: 'Printed on the card back (name + number):',
                 privacy: 'Stays in THIS browser only (localStorage) — deliberately not in the public code.',
                 export: 'EXPORT / PRINT', reset: 'RESET',
+                addItem: 'Add your own item …', addPrompt: 'New item:',
+                restore: 'Also restore the deleted standard items?',
                 printhint: 'Prints 6 credit-card-sized cards (2× DE, EN, ES) + backs. Duplex: “flip on long edge”. Back photo: checklist-view.jpg in the tracker folder.',
                 progress: (n, t) => n + ' of ' + t + ' done', go: 'Good to go! 🥾',
                 emergency: ['Im Notfall verständigen Sie bitte:', 'In case of an emergency, please call:', 'En caso de emergencia, por favor llame a:']
@@ -421,6 +447,8 @@
                 contactLabel: 'Se imprime en el dorso de la tarjeta (nombre + número):',
                 privacy: 'Se guarda solo en ESTE navegador (localStorage) — a propósito no está en el código público.',
                 export: 'EXPORTAR / IMPRIMIR', reset: 'RESET',
+                addItem: 'Añadir punto propio …', addPrompt: 'Nuevo punto:',
+                restore: '¿Restaurar también los puntos estándar borrados?',
                 printhint: 'Imprime 6 tarjetas tamaño tarjeta de crédito (2× DE, EN, ES) + dorsos. Dúplex: “voltear por el borde largo”. Foto del dorso: checklist-view.jpg en la carpeta del tracker.',
                 progress: (n, t) => n + ' de ' + t + ' hecho', go: '¡Good to go! 🥾',
                 emergency: ['Im Notfall verständigen Sie bitte:', 'In case of an emergency, please call:', 'En caso de emergencia, por favor llame a:']
@@ -428,16 +456,33 @@
         };
 
         const LS_STATE = 'hikecheck.state', LS_LANG = 'hikecheck.lang', LS_CONTACT = 'hikecheck.contact';
+        const LS_REMOVED = 'hikecheck.removed', LS_CUSTOM = 'hikecheck.custom';
         let lang = localStorage.getItem(LS_LANG) || 'de';
-        let state = [];
-        try { state = JSON.parse(localStorage.getItem(LS_STATE) || '[]'); } catch (e) { state = []; }
-        while (state.length < ITEMS.de.length) state.push(false);
+        let state = {};        // item id -> checked ('s0'..'s18' standard, 'c<ts>' custom)
+        let removed = [];      // hidden standard-item indices
+        let custom = [];       // [{id, txt}] — user items, shown in all languages as typed
+        try {
+            const raw = JSON.parse(localStorage.getItem(LS_STATE) || '{}');
+            if (Array.isArray(raw)) raw.forEach((v, i) => { if (v) state['s' + i] = true; });  // migrate old format
+            else state = raw || {};
+        } catch (e) { state = {}; }
+        try { removed = JSON.parse(localStorage.getItem(LS_REMOVED) || '[]'); } catch (e) { removed = []; }
+        try { custom = JSON.parse(localStorage.getItem(LS_CUSTOM) || '[]'); } catch (e) { custom = []; }
 
         const $ = id => document.getElementById(id);
 
         function save() {
             localStorage.setItem(LS_STATE, JSON.stringify(state));
+            localStorage.setItem(LS_REMOVED, JSON.stringify(removed));
+            localStorage.setItem(LS_CUSTOM, JSON.stringify(custom));
             localStorage.setItem(LS_LANG, lang);
+        }
+
+        // effective list for a language: standard minus deleted, plus custom items
+        function itemsFor(l) {
+            return ITEMS[l].map((txt, i) => ({ id: 's' + i, txt, idx: i }))
+                .filter(it => !removed.includes(it.idx))
+                .concat(custom.map(c => ({ id: c.id, txt: c.txt, custom: true })));
         }
 
         function render() {
@@ -455,16 +500,40 @@
 
             const list = $('list');
             list.innerHTML = '';
-            ITEMS[lang].forEach((txt, i) => {
+            const items = itemsFor(lang);
+            items.forEach(it => {
                 const row = document.createElement('div');
-                row.className = 'item' + (state[i] ? ' done' : '');
-                row.innerHTML = '<span class="box">' + (state[i] ? '✓' : '') + '</span><span class="txt"></span>';
-                row.querySelector('.txt').textContent = txt;
-                row.addEventListener('click', () => { state[i] = !state[i]; save(); render(); });
+                row.className = 'item' + (state[it.id] ? ' done' : '');
+                row.innerHTML = '<span class="box">' + (state[it.id] ? '✓' : '') + '</span>' +
+                    '<span class="txt"></span><button class="del" aria-label="Delete item" title="✕">✕</button>';
+                row.querySelector('.txt').textContent = it.txt;
+                row.addEventListener('click', () => { state[it.id] = !state[it.id]; save(); render(); });
+                row.querySelector('.del').addEventListener('click', e => {
+                    e.stopPropagation();
+                    if (it.custom) custom = custom.filter(c => c.id !== it.id);
+                    else removed.push(it.idx);
+                    delete state[it.id];
+                    save(); render();
+                });
                 list.appendChild(row);
             });
-            const n = state.filter(Boolean).length, t = ITEMS.de.length;
-            $('progress-fill').style.width = (n * 100 / t) + '%';
+            // "+" row: add an own item
+            const add = document.createElement('div');
+            add.className = 'item add';
+            add.innerHTML = '<span class="box">+</span><span class="txt">' + u.addItem + '</span>';
+            add.addEventListener('click', () => {
+                const txt = (prompt(u.addPrompt) || '').trim();
+                if (!txt) return;
+                custom.push({ id: 'c' + Date.now(), txt });
+                save(); render();
+            });
+            list.appendChild(add);
+
+            const n = items.filter(it => state[it.id]).length, t = items.length;
+            const pct = t ? n * 100 / t : 0;
+            $('progress-fill').style.width = pct + '%';
+            // stretch the gradient to the full bar so the fill reveals red → orange → green
+            $('progress-fill').style.backgroundSize = pct > 0 ? (10000 / pct) + '% 100%' : '100% 100%';
             $('progress-text').innerHTML = n === t
                 ? '<span class="go">' + u.go + '</span>'
                 : u.progress(n, t);
@@ -509,7 +578,7 @@
             $('sheet-front').innerHTML = front.map(l =>
                 '<div class="pcard"><img class="sky" src="checklist-sky.jpg" alt="">' +
                 '<h3>DOC ALVERS · ' + UI[l].title + '</h3><ul>' +
-                ITEMS[l].map(t => '<li>' + t.replace(/</g, '&lt;') + '</li>').join('') +
+                itemsFor(l).map(it => '<li>' + it.txt.replace(/&/g, '&amp;').replace(/</g, '&lt;') + '</li>').join('') +
                 '</ul><div class="rule">' + UI[l].rule + '</div>' + VSB_LOGO + '</div>').join('');
             // backs are identical (photo + trilingual emergency) — duplex-safe by symmetry
             const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
@@ -525,7 +594,11 @@
         /* ---- wiring ---- */
         document.querySelectorAll('.lang').forEach(b =>
             b.addEventListener('click', () => { lang = b.dataset.l; save(); render(); }));
-        $('btn-reset').addEventListener('click', () => { state = state.map(() => false); save(); render(); });
+        $('btn-reset').addEventListener('click', () => {
+            state = {};
+            if (removed.length && confirm(UI[lang].restore)) removed = [];
+            save(); render();
+        });
         $('btn-export').addEventListener('click', async () => {
             buildPrintSheet();
             // wait until the back photo is really decoded — otherwise Chrome's print
