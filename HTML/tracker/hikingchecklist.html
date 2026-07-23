@@ -155,6 +155,20 @@
 
         .item .del:hover { color: #fff; background: rgba(176, 36, 24, 0.5); }
 
+        .item .edit {
+            flex: 0 0 auto;
+            background: none;
+            border: none;
+            color: #7f93b5;
+            font-size: 16px;
+            padding: 10px 8px;
+            cursor: pointer;
+            border-radius: 8px;
+            transform: scaleX(-1);   /* mirror the pencil horizontally */
+        }
+
+        .item .edit:hover { color: #fff; background: rgba(121, 158, 49, 0.5); }
+
         .item.add { border-style: dashed; color: #9fb6dc; }
 
         .item.add .box { border-style: dashed; color: #9fb6dc; }
@@ -217,6 +231,71 @@
         .btn.reset { background: transparent; border: 1px solid rgba(255, 255, 255, 0.3); color: #cdd8ec; flex: 0 0 auto; }
 
         .print-hint { font-size: 10.5px; color: #7f93b5; text-align: center; padding: 0 20px 20px 20px; line-height: 1.5; }
+
+        /* ---------------- modal dialog (replaces native prompt/confirm) ---------------- */
+        #modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(8, 20, 42, 0.72);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            z-index: 100;
+        }
+
+        #modal.open { display: flex; }
+
+        .modal-card {
+            width: 100%;
+            max-width: 420px;
+            background: var(--bg-light);
+            border: 1px solid rgba(245, 194, 66, 0.4);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 20px 60px rgba(8, 20, 42, 0.6);
+        }
+
+        .modal-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 13px;
+            letter-spacing: 1px;
+            color: var(--orange);
+            margin-bottom: 14px;
+        }
+
+        .modal-msg { font-size: 14px; line-height: 1.5; color: #e6edf8; margin-bottom: 16px; }
+
+        #modal-input {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            border-radius: 10px;
+            color: #fff;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 16px;
+            padding: 12px;
+            margin-bottom: 16px;
+        }
+
+        #modal-input:focus { outline: none; border-color: var(--green); }
+
+        .modal-btns { display: flex; gap: 10px; justify-content: flex-end; }
+
+        .modal-btn {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 12px;
+            letter-spacing: 1px;
+            padding: 12px 18px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            min-height: 44px;
+        }
+
+        .modal-btn.ok { background: var(--green); color: #fff; }
+
+        .modal-btn.cancel { background: transparent; border: 1px solid rgba(255, 255, 255, 0.3); color: #cdd8ec; }
 
         /* ---------------- print sheet (hidden on screen) ---------------- */
         #print-sheet { display: none; }
@@ -379,6 +458,19 @@
     </div>
     <div class="print-hint" id="t-printhint"></div>
 
+    <!-- styled dialog (replaces native prompt/confirm) -->
+    <div id="modal" role="dialog" aria-modal="true">
+        <div class="modal-card">
+            <div class="modal-title" id="modal-title"></div>
+            <div class="modal-msg" id="modal-msg"></div>
+            <input id="modal-input" type="text" aria-label="Eingabe">
+            <div class="modal-btns">
+                <button class="modal-btn cancel" id="modal-cancel"></button>
+                <button class="modal-btn ok" id="modal-ok"></button>
+            </div>
+        </div>
+    </div>
+
     <!-- print sheet: page 1 fronts (2×DE, 2×EN, 2×ES), page 2 mirrored backs -->
     <div id="print-sheet">
         <div class="sheet" id="sheet-front"></div>
@@ -425,6 +517,8 @@
                 privacy: 'Bleibt nur in DIESEM Browser (localStorage) — steht bewusst nicht im öffentlichen Code.',
                 export: 'EXPORT / DRUCKEN', reset: 'RESET',
                 addItem: 'Eigenen Punkt hinzufügen …', addPrompt: 'Neuer Punkt:',
+                editPrompt: 'Punkt bearbeiten:',
+                dlgOk: 'OK', dlgCancel: 'Abbrechen', confirmTitle: 'Bestätigen',
                 restore: 'Auch die gelöschten Standard-Punkte wiederherstellen?',
                 printhint: 'Druckt 6 Karten in Kreditkartengröße (2× DE, EN, ES) + Rückseiten. Duplex: „Über lange Kante spiegeln". Rückseiten-Foto: checklist-view.jpg im Tracker-Ordner.',
                 progress: (n, t) => n + ' von ' + t + ' erledigt', go: 'Good to go! 🥾',
@@ -438,6 +532,8 @@
                 privacy: 'Stays in THIS browser only (localStorage) — deliberately not in the public code.',
                 export: 'EXPORT / PRINT', reset: 'RESET',
                 addItem: 'Add your own item …', addPrompt: 'New item:',
+                editPrompt: 'Edit item:',
+                dlgOk: 'OK', dlgCancel: 'Cancel', confirmTitle: 'Confirm',
                 restore: 'Also restore the deleted standard items?',
                 printhint: 'Prints 6 credit-card-sized cards (2× DE, EN, ES) + backs. Duplex: “flip on long edge”. Back photo: checklist-view.jpg in the tracker folder.',
                 progress: (n, t) => n + ' of ' + t + ' done', go: 'Good to go! 🥾',
@@ -451,6 +547,8 @@
                 privacy: 'Se guarda solo en ESTE navegador (localStorage) — a propósito no está en el código público.',
                 export: 'EXPORTAR / IMPRIMIR', reset: 'RESET',
                 addItem: 'Añadir punto propio …', addPrompt: 'Nuevo punto:',
+                editPrompt: 'Editar punto:',
+                dlgOk: 'OK', dlgCancel: 'Cancelar', confirmTitle: 'Confirmar',
                 restore: '¿Restaurar también los puntos estándar borrados?',
                 printhint: 'Imprime 6 tarjetas tamaño tarjeta de crédito (2× DE, EN, ES) + dorsos. Dúplex: “voltear por el borde largo”. Foto del dorso: checklist-view.jpg en la carpeta del tracker.',
                 progress: (n, t) => n + ' de ' + t + ' hecho', go: '¡Good to go! 🥾',
@@ -459,11 +557,12 @@
         };
 
         const LS_STATE = 'hikecheck.state', LS_LANG = 'hikecheck.lang', LS_CONTACT = 'hikecheck.contact';
-        const LS_REMOVED = 'hikecheck.removed', LS_CUSTOM = 'hikecheck.custom';
+        const LS_REMOVED = 'hikecheck.removed', LS_CUSTOM = 'hikecheck.custom', LS_OVERRIDES = 'hikecheck.overrides';
         let lang = localStorage.getItem(LS_LANG) || 'de';
         let state = {};        // item id -> checked ('s0'..'s18' standard, 'c<ts>' custom)
         let removed = [];      // hidden standard-item indices
         let custom = [];       // [{id, txt}] — user items, shown in all languages as typed
+        let overrides = {};    // standard idx -> {de,en,es} — edited standard items (kept in place)
         try {
             const raw = JSON.parse(localStorage.getItem(LS_STATE) || '{}');
             if (Array.isArray(raw)) raw.forEach((v, i) => { if (v) state['s' + i] = true; });  // migrate old format
@@ -471,6 +570,7 @@
         } catch (e) { state = {}; }
         try { removed = JSON.parse(localStorage.getItem(LS_REMOVED) || '[]'); } catch (e) { removed = []; }
         try { custom = JSON.parse(localStorage.getItem(LS_CUSTOM) || '[]'); } catch (e) { custom = []; }
+        try { overrides = JSON.parse(localStorage.getItem(LS_OVERRIDES) || '{}'); } catch (e) { overrides = {}; }
         // migrate old custom items (plain string) to the trilingual form
         custom = custom.map(c => typeof c.txt === 'string'
             ? { id: c.id, txt: { de: c.txt, en: c.txt, es: c.txt } } : c);
@@ -481,12 +581,16 @@
             localStorage.setItem(LS_STATE, JSON.stringify(state));
             localStorage.setItem(LS_REMOVED, JSON.stringify(removed));
             localStorage.setItem(LS_CUSTOM, JSON.stringify(custom));
+            localStorage.setItem(LS_OVERRIDES, JSON.stringify(overrides));
             localStorage.setItem(LS_LANG, lang);
         }
 
         // effective list for a language: standard minus deleted, plus custom items
         function itemsFor(l) {
-            return ITEMS[l].map((txt, i) => ({ id: 's' + i, txt, idx: i }))
+            return ITEMS[l].map((txt, i) => ({
+                id: 's' + i, idx: i,
+                txt: overrides[i] ? (overrides[i][l] || overrides[i].de || txt) : txt
+            }))
                 .filter(it => !removed.includes(it.idx))
                 .concat(custom.map(c => ({ id: c.id, txt: c.txt[l] || c.txt.de || '', custom: true })));
         }
@@ -511,9 +615,12 @@
                 const row = document.createElement('div');
                 row.className = 'item' + (state[it.id] ? ' done' : '');
                 row.innerHTML = '<span class="box">' + (state[it.id] ? '✓' : '') + '</span>' +
-                    '<span class="txt"></span><button class="del" aria-label="Delete item" title="✕">✕</button>';
+                    '<span class="txt"></span>' +
+                    '<button class="edit" aria-label="Edit item" title="✎">✎</button>' +
+                    '<button class="del" aria-label="Delete item" title="✕">✕</button>';
                 row.querySelector('.txt').textContent = it.txt;
                 row.addEventListener('click', () => { state[it.id] = !state[it.id]; save(); render(); });
+                row.querySelector('.edit').addEventListener('click', e => { e.stopPropagation(); editItem(it); });
                 row.querySelector('.del').addEventListener('click', e => {
                     e.stopPropagation();
                     if (it.custom) custom = custom.filter(c => c.id !== it.id);
@@ -527,14 +634,15 @@
             const add = document.createElement('div');
             add.className = 'item add';
             add.innerHTML = '<span class="box">+</span><span class="txt">' + u.addItem + '</span>';
-            add.addEventListener('click', () => {
-                const txt = (prompt(u.addPrompt) || '').trim();
+            add.addEventListener('click', async () => {
+                const txt = ((await askText(u.addPrompt, '')) || '').trim();
                 if (!txt) return;
                 const id = 'c' + Date.now();
                 // appears immediately in all languages; translations patch in async
-                custom.push({ id, txt: { de: txt, en: txt, es: txt } });
+                const item = { id, txt: { de: txt, en: txt, es: txt } };
+                custom.push(item);
                 save(); render();
-                translateCustom(id, txt, lang);
+                patchTranslations(item.txt, txt, lang);
             });
             list.appendChild(add);
 
@@ -604,8 +712,29 @@
                 '</div></div>').join('');
         }
 
-        /* ---- auto-translate custom items (free MyMemory service, offline-safe) ---- */
-        async function translateCustom(id, txt, from) {
+        /* ---- edit an item (own or standard) — keeps position, re-translates ---- */
+        async function editItem(it) {
+            const u = UI[lang];
+            const nv = ((await askText(u.editPrompt, it.txt)) || '').trim();
+            if (!nv || nv === it.txt) return;
+            if (it.custom) {
+                const c = custom.find(x => x.id === it.id);
+                if (!c) return;
+                c.txt[lang] = nv;                       // edited language shows at once
+                save(); render();
+                patchTranslations(c.txt, nv, lang);     // other two patch in async
+            } else {
+                // standard item: store a trilingual override at the same index (order stays)
+                const o = overrides[it.idx] ||
+                    (overrides[it.idx] = { de: ITEMS.de[it.idx], en: ITEMS.en[it.idx], es: ITEMS.es[it.idx] });
+                o[lang] = nv;
+                save(); render();
+                patchTranslations(o, nv, lang);
+            }
+        }
+
+        /* ---- auto-translate a {de,en,es} text object (free MyMemory, offline-safe) ---- */
+        async function patchTranslations(txtObj, txt, from) {
             for (const to of ['de', 'en', 'es'].filter(l => l !== from)) {
                 try {
                     const res = await fetch('https://api.mymemory.translated.net/get?q=' +
@@ -613,19 +742,62 @@
                     if (!res.ok) continue;
                     const j = await res.json();
                     const t = j.responseData && j.responseData.translatedText;
-                    const item = custom.find(c => c.id === id);
-                    if (t && item) { item.txt[to] = t; save(); }
+                    if (t) { txtObj[to] = t; save(); }
                 } catch (e) { /* offline on a mountain: same text stays in all languages */ }
             }
             render();
         }
 
+        /* ---- styled modal dialog (replaces native prompt/confirm) ---- */
+        const modal = { el: $('modal'), resolve: null };
+
+        function openModal(opts) {
+            return new Promise(res => {
+                modal.resolve = res;
+                const isConfirm = opts.type === 'confirm';
+                $('modal-title').textContent = opts.title || '';
+                $('modal-msg').textContent = isConfirm ? (opts.message || '') : '';
+                $('modal-msg').style.display = isConfirm ? 'block' : 'none';
+                const inp = $('modal-input');
+                inp.style.display = isConfirm ? 'none' : 'block';
+                inp.value = opts.initial || '';
+                $('modal-ok').textContent = UI[lang].dlgOk;
+                $('modal-cancel').textContent = UI[lang].dlgCancel;
+                modal.el.classList.add('open');
+                if (isConfirm) $('modal-ok').focus();
+                else { inp.focus(); inp.select(); }
+            });
+        }
+
+        function closeModal(val) {
+            modal.el.classList.remove('open');
+            const r = modal.resolve; modal.resolve = null;
+            if (r) r(val);
+        }
+
+        // text prompt → resolves to the string, or null on cancel
+        function askText(title, initial) { return openModal({ type: 'text', title, initial }); }
+        // confirm → resolves to true/false
+        function askConfirm(message) { return openModal({ type: 'confirm', title: UI[lang].confirmTitle, message }); }
+
+        $('modal-ok').addEventListener('click', () =>
+            closeModal($('modal-input').style.display === 'none' ? true : $('modal-input').value));
+        $('modal-cancel').addEventListener('click', () =>
+            closeModal($('modal-input').style.display === 'none' ? false : null));
+        // click on the dim backdrop = cancel
+        modal.el.addEventListener('click', e => { if (e.target === modal.el) $('modal-cancel').click(); });
+        // Enter = OK, Escape = cancel
+        modal.el.addEventListener('keydown', e => {
+            if (e.key === 'Enter') { e.preventDefault(); $('modal-ok').click(); }
+            else if (e.key === 'Escape') { e.preventDefault(); $('modal-cancel').click(); }
+        });
+
         /* ---- wiring ---- */
         document.querySelectorAll('.lang').forEach(b =>
             b.addEventListener('click', () => { lang = b.dataset.l; save(); render(); }));
-        $('btn-reset').addEventListener('click', () => {
+        $('btn-reset').addEventListener('click', async () => {
             state = {};
-            if (removed.length && confirm(UI[lang].restore)) removed = [];
+            if (removed.length && await askConfirm(UI[lang].restore)) removed = [];
             save(); render();
         });
         $('btn-export').addEventListener('click', async () => {
