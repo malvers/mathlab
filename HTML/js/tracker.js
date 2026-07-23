@@ -3555,6 +3555,7 @@ ${pts}
             }
         });
         $('mb-poi').addEventListener('click', () => { closePopup(); showPanel('poi-panel'); if (__poi) __poi.refresh(); });
+        $('mb-checklist').addEventListener('click', () => { closePopup(); location.href = 'hikingchecklist.html'; }); // Wander-Checkliste (Doc 2026-07-23)
         $('poi-close').addEventListener('click', hidePanels);
 
         // SHARE TRACK (popup) — share the current track (same action as TEILEN)
