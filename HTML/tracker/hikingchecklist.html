@@ -556,27 +556,30 @@
                 '<path id="vsb-arc" d="M 14 50 A 36 36 0 0 1 86 50" fill="none"/>' +
                 // bottom arc, same left→right direction but through the bottom → glyphs stay upright
                 '<path id="vsb-arc-b" d="M 14 50 A 36 36 0 0 0 86 50" fill="none"/>' +
-                '<radialGradient id="vsb-green" cx="42%" cy="36%" r="75%">' +
-                '<stop offset="0%" stop-color="rgb(6,88,50)"/><stop offset="100%" stop-color="rgb(0,50,28)"/>' +
+                // ONE upper-left light source: disc highlight, gold axis, shadow direction
+                // and the gradient baked into the tree PNG all agree
+                '<radialGradient id="vsb-green" cx="38%" cy="30%" r="80%">' +
+                '<stop offset="0%" stop-color="rgb(8,92,52)"/><stop offset="100%" stop-color="rgb(0,48,27)"/>' +
                 '</radialGradient>' +
-                '<linearGradient id="vsb-gold" x1="0" y1="0" x2="0" y2="1">' +
+                '<linearGradient id="vsb-gold" x1="0.1" y1="0" x2="0.5" y2="1">' +
                 '<stop offset="0%" stop-color="#F3DC8B"/><stop offset="50%" stop-color="#D4AF37"/>' +
                 '<stop offset="100%" stop-color="#9A7A24"/>' +
                 '</linearGradient>' +
                 '<filter id="vsb-emb" x="-20%" y="-20%" width="140%" height="140%">' +
-                '<feDropShadow dx="0.35" dy="0.5" stdDeviation="0.35" flood-color="#001a0e" flood-opacity="0.65"/>' +
+                '<feDropShadow dx="0.5" dy="0.7" stdDeviation="0.35" flood-color="#0b0704" flood-opacity="0.6"/>' +
                 '</filter>' +
                 '</defs>' +
                 '<circle cx="50" cy="50" r="49" fill="url(#vsb-green)"/>' +
                 '<circle cx="50" cy="50" r="48" fill="none" stroke="url(#vsb-gold)" stroke-width="2.5" filter="url(#vsb-emb)"/>' +
                 '<circle cx="50" cy="50" r="43" fill="none" stroke="url(#vsb-gold)" stroke-width="0.8" filter="url(#vsb-emb)"/>' +
-                '<text font-family="\'Times New Roman\', Times, serif" font-size="7.25" letter-spacing="1.1" fill="url(#vsb-gold)" filter="url(#vsb-emb)">' +
+                '<text font-family="\'Times New Roman\', Times, serif" font-size="7.25" letter-spacing="1.1" fill="#D4AF37" filter="url(#vsb-emb)">' +
                 '<textPath href="#vsb-arc" startOffset="50%" text-anchor="middle">VITA · SOMNIUM · BREVE</textPath></text>' +
                 // Doc's celtic Yggdrasil, gold on the seal green (white mapped to the green ground)
                 '<image href="vsb-yggdrasil-gold.png" x="24" y="24" width="52" height="52" filter="url(#vsb-emb)"/>' +
                 // same font & treatment as the motto arc above — just on the bottom path
-                '<text font-family="\'Times New Roman\', Times, serif" font-size="7.25" letter-spacing="4" fill="url(#vsb-gold)" filter="url(#vsb-emb)">' +
-                '<textPath href="#vsb-arc-b" startOffset="50%" text-anchor="middle">V · S · B</textPath></text>' +
+                // en-spaces instead of letter-spacing: trailing spacing would de-center the arc text
+                '<text font-family="\'Times New Roman\', Times, serif" font-size="9.5" fill="#D4AF37" filter="url(#vsb-emb)">' +
+                '<textPath href="#vsb-arc-b" startOffset="50%" text-anchor="middle">V · S · B</textPath></text>' +
                 '</svg>';
             $('sheet-front').innerHTML = front.map(l =>
                 '<div class="pcard"><img class="sky" src="checklist-sky.jpg" alt="">' +
