@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>Wander-Checkliste — Doc Alvers Tracker</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="icon" href="icon.svg" type="image/svg+xml">
+    <!-- the back-side photo lives only in the print sheet — preload it so the
+         print-preview snapshot never races the image load (blank photo otherwise) -->
+    <link rel="preload" as="image" href="checklist-view.jpg">
+    <link rel="preload" as="image" href="vsb-yggdrasil-gold.png">
+    <link rel="preload" as="image" href="checklist-sky.jpg">
+    <style>
+        /* ---- tracker palette (same as tracker.css) ---- */
+        :root {
+            --bg: rgb(8, 20, 42);
+            --bg-light: rgb(14, 36, 78);
+            --orange: rgb(245, 194, 66);
+            --red: rgb(176, 36, 24);
+            --green: rgb(121, 158, 49);
+            --card-blue: rgb(30, 60, 120);   /* print card text, like the original MRA cards */
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: var(--bg);
+            color: #fff;
+            /* Doc 2026-07-23: content in Arial for readability — Orbitron stays on title + buttons */
+            font-family: Arial, Helvetica, sans-serif;
+            min-height: 100vh;
+            padding-bottom: 40px;
+        }
+
+        /* ---------------- app header ---------------- */
+        header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 16px;
+            background: linear-gradient(180deg, var(--bg-light), var(--bg));
+            border-bottom: 1px solid rgba(245, 194, 66, 0.3);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .back {
+            color: var(--orange);
+            text-decoration: none;
+            font-size: 14px;
+            padding: 12px 12px;
+            border: 1px solid rgba(245, 194, 66, 0.4);
+            border-radius: 10px;
+            white-space: nowrap;
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+        }
+
+        h1 { font-family: 'Orbitron', sans-serif; font-size: 15px; letter-spacing: 1.5px; color: var(--orange); flex: 1; }
+
+        .langs { display: flex; gap: 9px; }
+
+        .lang {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 12px;
+            padding: 12px 12px;
+            min-height: 44px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            background: transparent;
+            color: #cdd8ec;
+            cursor: pointer;
+        }
+
+        .lang.active { background: var(--green); border-color: var(--green); color: #fff; }
+
+        /* ---------------- progress ---------------- */
+        #progress-wrap { padding: 14px 16px 4px 16px; }
+
+        #progress-bar {
+            height: 10px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.12);
+            overflow: hidden;
+        }
+
+        #progress-fill {
+            height: 100%;
+            width: 0%;
+            border-radius: 999px;
+            background: linear-gradient(90deg, var(--green), var(--orange));
+            transition: width 0.25s;
+        }
+
+        #progress-text { font-size: 12px; color: #9fb6dc; margin-top: 6px; }
+
+        #progress-text .go { color: var(--green); font-weight: 700; }
+
+        /* ---------------- checklist ---------------- */
+        #list { padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; }
+
+        .item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 14px;
+            background: var(--bg-light);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 14px;
+            cursor: pointer;
+            user-select: none;
+            font-size: 13.5px;
+            line-height: 1.45;
+            min-height: 52px;
+        }
+
+        .item .box {
+            width: 26px;
+            height: 26px;
+            flex: 0 0 auto;
+            border-radius: 8px;
+            border: 2px solid rgba(255, 255, 255, 0.35);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 17px;
+            color: #fff;
+        }
+
+        .item.done { border-color: rgba(121, 158, 49, 0.7); }
+
+        .item.done .box { background: var(--green); border-color: var(--green); }
+
+        .item.done .txt { color: #9fb6dc; text-decoration: line-through; text-decoration-thickness: 1px; }
+
+        /* ---------------- rule + emergency ---------------- */
+        .card-block {
+            margin: 14px 12px;
+            padding: 14px;
+            border-radius: 14px;
+            background: rgba(176, 36, 24, 0.15);
+            border: 1px solid rgba(176, 36, 24, 0.5);
+            font-size: 12.5px;
+            line-height: 1.6;
+        }
+
+        .card-block b { color: var(--orange); }
+
+        .contact-block {
+            margin: 0 12px 14px 12px;
+            padding: 14px;
+            border-radius: 14px;
+            background: var(--bg-light);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+        }
+
+        .contact-block label { font-size: 11px; color: #9fb6dc; display: block; margin: 8px 0 4px 0; }
+
+        .contact-block textarea {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            color: #fff;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 15px;
+            padding: 10px;
+            resize: none;
+            height: 44px;
+        }
+
+        .privacy-hint { font-size: 10.5px; color: #7f93b5; margin-top: 8px; line-height: 1.5; }
+
+        /* ---------------- action buttons ---------------- */
+        #actions { display: flex; gap: 10px; padding: 4px 12px 20px 12px; }
+
+        .btn {
+            font-family: 'Orbitron', sans-serif;
+            flex: 1;
+            font-size: 13px;
+            letter-spacing: 1px;
+            padding: 14px;
+            border: none;
+            border-radius: 14px;
+            cursor: pointer;
+            color: #fff;
+        }
+
+        .btn.export { background: var(--green); }
+
+        .btn.reset { background: transparent; border: 1px solid rgba(255, 255, 255, 0.3); color: #cdd8ec; flex: 0 0 auto; }
+
+        .print-hint { font-size: 10.5px; color: #7f93b5; text-align: center; padding: 0 20px 20px 20px; line-height: 1.5; }
+
+        /* ---------------- print sheet (hidden on screen) ---------------- */
+        #print-sheet { display: none; }
+
+        @media print {
+            body > header, #progress-wrap, #list, .card-block, .contact-block, #actions, .print-hint { display: none !important; }
+
+            body { background: #fff; padding: 0; }
+
+            #print-sheet { display: block; }
+
+            @page { size: A4 landscape; margin: 8mm; }
+
+            .sheet {
+                display: grid;
+                grid-template-columns: repeat(3, 85.6mm);
+                grid-auto-rows: 53.98mm;
+                gap: 5mm 6mm;
+                justify-content: center;
+                align-content: center;
+                /* explicit height so the vertical centering ACTUALLY happens — required
+                   for long-edge duplex: fronts and backs must mirror about page center */
+                height: 193mm;
+                page-break-after: always;
+            }
+
+            .sheet:last-child { page-break-after: auto; }   /* no blank page 3 */
+
+            /* front: checklist card — white, blue text like the MRA original, no crop marks */
+            .pcard {
+                width: 85.6mm;
+                height: 53.98mm;
+                border: 0.3mm solid #b9c2d0;
+                border-radius: 2.5mm;
+                padding: 2.6mm 3mm;
+                overflow: hidden;
+                /* items in a narrow sans like the MRA original — Orbitron is too wide at 1.6 mm */
+                font-family: Arial, Helvetica, sans-serif;
+                color: var(--card-blue);
+                background: #fff;
+                position: relative;   /* anchor for the VSB emblem */
+            }
+
+            /* VSB emblem in the empty right half — inline SVG, prints regardless of
+               the "background graphics" setting */
+            .vsb-logo {
+                position: absolute;
+                right: 4mm;
+                top: 53%;
+                transform: translateY(-50%);
+                width: 22mm;
+                height: 22mm;
+            }
+
+            /* very faint sky (from Doc's own view photo) behind the checklist — an <img>
+               (not a CSS background) so it prints regardless of the browser setting */
+            .pcard .sky {
+                position: absolute;
+                inset: 0;
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                opacity: 0.40;
+                z-index: 0;
+            }
+
+            /* keep all card content above the sky layer */
+            .pcard h3, .pcard ul, .pcard .rule { position: relative; z-index: 1; }
+
+            .vsb-logo { z-index: 1; }
+
+            .pcard h3 { font-family: 'Orbitron', sans-serif; font-size: 2.4mm; letter-spacing: 0.2mm; margin-bottom: 1.1mm; }
+
+            .pcard ul { list-style: none; }
+
+            .pcard li { font-size: 1.62mm; line-height: 2.05mm; white-space: nowrap; overflow: hidden; }
+
+            .pcard li::before { content: '☐  '; }
+
+            .pcard .rule { font-size: 1.55mm; line-height: 2mm; margin-top: 1mm; white-space: normal; }
+
+            /* back: photo + emergency — rotated 180° and column-mirrored for long-edge duplex */
+            /* force background printing — Chrome's default "no background graphics"
+               would otherwise print empty backs (no photo, no white band) */
+            .pback, .pback .photo, .pback .emergency {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            .pback {
+                width: 85.6mm;
+                height: 53.98mm;
+                border: 0.3mm solid #b9c2d0;
+                border-radius: 2.5mm;
+                overflow: hidden;
+                transform: rotate(180deg);
+                position: relative;
+                color: var(--card-blue);
+                /* fallback sunset gradient until checklist-view.jpg exists */
+                background: linear-gradient(180deg, #f6e3c5 0%, #f2c98d 45%, #e8975a 70%, #7a5a48 100%);
+            }
+
+            .pback .photo {
+                position: absolute;
+                inset: 0;
+                background-image: url('checklist-view.jpg');
+                background-size: cover;
+                background-position: center;
+            }
+
+            .pback .emergency {
+                position: absolute;
+                left: 0; right: 0; bottom: 0;
+                background: rgba(255, 255, 255, 0.82);
+                padding: 1.8mm 3mm;
+                font-family: Arial, Helvetica, sans-serif;
+                font-size: 1.8mm;
+                line-height: 2.6mm;
+            }
+
+            /* sized so a full "Name - +49 xxx xxx xx xx" line stays on ONE line (Doc 2026-07-23) */
+            .pback .emergency .phone { font-size: 2.5mm; line-height: 3.4mm; font-weight: 700; letter-spacing: 0.15mm; margin-top: 0.5mm; }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <a class="back" href="tracker.html">←</a>
+        <h1 id="t-title">WANDER-CHECKLISTE</h1>
+        <div class="langs">
+            <button class="lang" data-l="de">DE</button>
+            <button class="lang" data-l="en">EN</button>
+            <button class="lang" data-l="es">ES</button>
+        </div>
+    </header>
+
+    <div id="progress-wrap">
+        <div id="progress-bar"><div id="progress-fill"></div></div>
+        <div id="progress-text"></div>
+    </div>
+
+    <div id="list"></div>
+
+    <div class="card-block" id="t-rule"></div>
+
+    <div class="contact-block">
+        <b id="t-contact-head" style="font-size:12px;color:var(--orange)"></b>
+        <label id="t-contact-label" for="contact"></label>
+        <textarea id="contact" spellcheck="false"></textarea>
+        <div class="privacy-hint" id="t-privacy"></div>
+    </div>
+
+    <div id="actions">
+        <button class="btn export" id="btn-export"></button>
+        <button class="btn reset" id="btn-reset"></button>
+    </div>
+    <div class="print-hint" id="t-printhint"></div>
+
+    <!-- print sheet: page 1 fronts (2×DE, 2×EN, 2×ES), page 2 mirrored backs -->
+    <div id="print-sheet">
+        <div class="sheet" id="sheet-front"></div>
+        <div class="sheet" id="sheet-back"></div>
+    </div>
+
+    <script>
+        'use strict';
+
+        /* ---- content: the MRA-Wandercheckliste in three languages ---- */
+        const ITEMS = {
+            de: ['Gehirn einschalten', 'Gehirn auf Genieß- und Alert-Modus stellen 😎',
+                'Wetterbericht gecheckt? Good to go?', 'Passende Wanderschuhe und -kleidung',
+                'Wasser und Proviant (high calories)', 'Ersatzbrille Lesen / Ferne',
+                'Schmerzmittel, ggf. Medikamente', '2 Feuerzeuge, ggf. Streichhölzer',
+                '2 Taschenlampen', '1. Hilfe', 'Messer mit Schere', 'Sonnenbrille', 'Schnur',
+                'Papiertaschentücher', 'Fernglas, Altimeter – kalibriert – Stoppuhr, Uhr',
+                'Fon geladen?', 'WiFi, Bluetooth und Hotspot ausschalten', 'Powerbank mit Kabel',
+                'Tracker einschalten'],
+            en: ['Switch your brain on', 'Set brain to enjoy & alert mode 😎',
+                'Weather forecast checked? Good to go?', 'Proper hiking boots and clothing',
+                'Water and provisions (high calories)', 'Spare glasses reading / distance',
+                'Painkillers, personal meds', '2 lighters, matches as backup',
+                '2 flashlights', 'First aid kit', 'Knife with scissors', 'Sunglasses', 'Cord',
+                'Paper tissues', 'Binoculars, altimeter – calibrated – stopwatch, watch',
+                'Phone charged?', 'Turn OFF WiFi, Bluetooth and hotspot', 'Power bank with cable',
+                'Switch the tracker ON'],
+            es: ['Encender el cerebro', 'Poner el cerebro en modo disfrutar y alerta 😎',
+                '¿Pronóstico del tiempo revisado? ¿Good to go?', 'Botas y ropa de montaña adecuadas',
+                'Agua y provisiones (muchas calorías)', 'Gafas de repuesto lectura / lejos',
+                'Analgésicos y medicamentos personales', '2 mecheros, cerillas de reserva',
+                '2 linternas', 'Botiquín', 'Navaja con tijeras', 'Gafas de sol', 'Cordel',
+                'Pañuelos de papel', 'Prismáticos, altímetro – calibrado – cronómetro, reloj',
+                '¿Móvil cargado?', 'Apagar WiFi, Bluetooth y hotspot', 'Batería externa con cable',
+                'Encender el tracker']
+        };
+
+        const UI = {
+            de: {
+                title: 'WANDER-CHECKLISTE',
+                rule: '<b>Generelle Regel:</b> Wenn man sich verlieren sollte, geht man zum letzten gemeinsam erlebten Punkt zurück! · Notruf: <b>112</b>',
+                contactHead: 'NOTFALL-KONTAKT',
+                contactLabel: 'Wird auf die Kartenrückseite gedruckt (Name + Nummer):',
+                privacy: 'Bleibt nur in DIESEM Browser (localStorage) — steht bewusst nicht im öffentlichen Code.',
+                export: 'EXPORT / DRUCKEN', reset: 'RESET',
+                printhint: 'Druckt 6 Karten in Kreditkartengröße (2× DE, EN, ES) + Rückseiten. Duplex: „Über lange Kante spiegeln". Rückseiten-Foto: checklist-view.jpg im Tracker-Ordner.',
+                progress: (n, t) => n + ' von ' + t + ' erledigt', go: 'Good to go! 🥾',
+                emergency: ['Im Notfall verständigen Sie bitte:', 'In case of an emergency, please call:', 'En caso de emergencia, por favor llame a:']
+            },
+            en: {
+                title: 'HIKING CHECKLIST',
+                rule: '<b>General rule:</b> If you get separated, go back to the last point you experienced together! · Emergency: <b>112</b>',
+                contactHead: 'EMERGENCY CONTACT',
+                contactLabel: 'Printed on the card back (name + number):',
+                privacy: 'Stays in THIS browser only (localStorage) — deliberately not in the public code.',
+                export: 'EXPORT / PRINT', reset: 'RESET',
+                printhint: 'Prints 6 credit-card-sized cards (2× DE, EN, ES) + backs. Duplex: “flip on long edge”. Back photo: checklist-view.jpg in the tracker folder.',
+                progress: (n, t) => n + ' of ' + t + ' done', go: 'Good to go! 🥾',
+                emergency: ['Im Notfall verständigen Sie bitte:', 'In case of an emergency, please call:', 'En caso de emergencia, por favor llame a:']
+            },
+            es: {
+                title: 'LISTA DE SENDERISMO',
+                rule: '<b>Regla general:</b> Si te pierdes, ¡vuelve al último punto vivido juntos! · Emergencia: <b>112</b>',
+                contactHead: 'CONTACTO DE EMERGENCIA',
+                contactLabel: 'Se imprime en el dorso de la tarjeta (nombre + número):',
+                privacy: 'Se guarda solo en ESTE navegador (localStorage) — a propósito no está en el código público.',
+                export: 'EXPORTAR / IMPRIMIR', reset: 'RESET',
+                printhint: 'Imprime 6 tarjetas tamaño tarjeta de crédito (2× DE, EN, ES) + dorsos. Dúplex: “voltear por el borde largo”. Foto del dorso: checklist-view.jpg en la carpeta del tracker.',
+                progress: (n, t) => n + ' de ' + t + ' hecho', go: '¡Good to go! 🥾',
+                emergency: ['Im Notfall verständigen Sie bitte:', 'In case of an emergency, please call:', 'En caso de emergencia, por favor llame a:']
+            }
+        };
+
+        const LS_STATE = 'hikecheck.state', LS_LANG = 'hikecheck.lang', LS_CONTACT = 'hikecheck.contact';
+        let lang = localStorage.getItem(LS_LANG) || 'de';
+        let state = [];
+        try { state = JSON.parse(localStorage.getItem(LS_STATE) || '[]'); } catch (e) { state = []; }
+        while (state.length < ITEMS.de.length) state.push(false);
+
+        const $ = id => document.getElementById(id);
+
+        function save() {
+            localStorage.setItem(LS_STATE, JSON.stringify(state));
+            localStorage.setItem(LS_LANG, lang);
+        }
+
+        function render() {
+            const u = UI[lang];
+            document.documentElement.lang = lang;
+            $('t-title').textContent = u.title;
+            $('t-rule').innerHTML = u.rule;
+            $('t-contact-head').textContent = u.contactHead;
+            $('t-contact-label').textContent = u.contactLabel;
+            $('t-privacy').textContent = u.privacy;
+            $('btn-export').textContent = u.export;
+            $('btn-reset').textContent = u.reset;
+            $('t-printhint').textContent = u.printhint;
+            document.querySelectorAll('.lang').forEach(b => b.classList.toggle('active', b.dataset.l === lang));
+
+            const list = $('list');
+            list.innerHTML = '';
+            ITEMS[lang].forEach((txt, i) => {
+                const row = document.createElement('div');
+                row.className = 'item' + (state[i] ? ' done' : '');
+                row.innerHTML = '<span class="box">' + (state[i] ? '✓' : '') + '</span><span class="txt"></span>';
+                row.querySelector('.txt').textContent = txt;
+                row.addEventListener('click', () => { state[i] = !state[i]; save(); render(); });
+                list.appendChild(row);
+            });
+            const n = state.filter(Boolean).length, t = ITEMS.de.length;
+            $('progress-fill').style.width = (n * 100 / t) + '%';
+            $('progress-text').innerHTML = n === t
+                ? '<span class="go">' + u.go + '</span>'
+                : u.progress(n, t);
+        }
+
+        /* ---- print sheet: 2 front cards per language + mirrored backs ---- */
+        function buildPrintSheet() {
+            const langsOrder = ['de', 'en', 'es'];
+            const front = [];
+            // rows of 3: [de, en, es] twice — so each pair of neighbours differs
+            for (let r = 0; r < 2; r++) for (const l of langsOrder) front.push(l);
+            // VSB emblem: double ring with the motto, peaks, sun (tracker orange), waypoint trail
+            // English-green seal with gold type & tree, subtle 3D (gold gradient + soft drop shadow)
+            const VSB_LOGO =
+                '<svg class="vsb-logo" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">' +
+                '<defs>' +
+                '<path id="vsb-arc" d="M 14 50 A 36 36 0 0 1 86 50" fill="none"/>' +
+                // bottom arc, same left→right direction but through the bottom → glyphs stay upright
+                '<path id="vsb-arc-b" d="M 14 50 A 36 36 0 0 0 86 50" fill="none"/>' +
+                '<radialGradient id="vsb-green" cx="42%" cy="36%" r="75%">' +
+                '<stop offset="0%" stop-color="rgb(6,88,50)"/><stop offset="100%" stop-color="rgb(0,50,28)"/>' +
+                '</radialGradient>' +
+                '<linearGradient id="vsb-gold" x1="0" y1="0" x2="0" y2="1">' +
+                '<stop offset="0%" stop-color="#F3DC8B"/><stop offset="50%" stop-color="#D4AF37"/>' +
+                '<stop offset="100%" stop-color="#9A7A24"/>' +
+                '</linearGradient>' +
+                '<filter id="vsb-emb" x="-20%" y="-20%" width="140%" height="140%">' +
+                '<feDropShadow dx="0.35" dy="0.5" stdDeviation="0.35" flood-color="#001a0e" flood-opacity="0.65"/>' +
+                '</filter>' +
+                '</defs>' +
+                '<circle cx="50" cy="50" r="49" fill="url(#vsb-green)"/>' +
+                '<circle cx="50" cy="50" r="48" fill="none" stroke="url(#vsb-gold)" stroke-width="2.5" filter="url(#vsb-emb)"/>' +
+                '<circle cx="50" cy="50" r="43" fill="none" stroke="url(#vsb-gold)" stroke-width="0.8" filter="url(#vsb-emb)"/>' +
+                '<text font-family="\'Times New Roman\', Times, serif" font-size="7.25" letter-spacing="1.1" fill="url(#vsb-gold)" filter="url(#vsb-emb)">' +
+                '<textPath href="#vsb-arc" startOffset="50%" text-anchor="middle">VITA · SOMNIUM · BREVE</textPath></text>' +
+                // Doc's celtic Yggdrasil, gold on the seal green (white mapped to the green ground)
+                '<image href="vsb-yggdrasil-gold.png" x="24" y="24" width="52" height="52" filter="url(#vsb-emb)"/>' +
+                // same font & treatment as the motto arc above — just on the bottom path
+                '<text font-family="\'Times New Roman\', Times, serif" font-size="7.25" letter-spacing="4" fill="url(#vsb-gold)" filter="url(#vsb-emb)">' +
+                '<textPath href="#vsb-arc-b" startOffset="50%" text-anchor="middle">V · S · B</textPath></text>' +
+                '</svg>';
+            $('sheet-front').innerHTML = front.map(l =>
+                '<div class="pcard"><img class="sky" src="checklist-sky.jpg" alt="">' +
+                '<h3>DOC ALVERS · ' + UI[l].title + '</h3><ul>' +
+                ITEMS[l].map(t => '<li>' + t.replace(/</g, '&lt;') + '</li>').join('') +
+                '</ul><div class="rule">' + UI[l].rule + '</div>' + VSB_LOGO + '</div>').join('');
+            // backs are identical (photo + trilingual emergency) — duplex-safe by symmetry
+            const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+            const contact = ($('contact').value || '').trim();
+            const contactHtml = contact ? esc(contact).replace(/\n/g, '<br>') : '____________________';
+            $('sheet-back').innerHTML = Array(6).fill(
+                '<div class="pback"><div class="photo"></div><div class="emergency">' +
+                UI.de.emergency.map(esc).join('<br>') +
+                '<div class="phone">' + contactHtml + '</div>' +
+                '</div></div>').join('');
+        }
+
+        /* ---- wiring ---- */
+        document.querySelectorAll('.lang').forEach(b =>
+            b.addEventListener('click', () => { lang = b.dataset.l; save(); render(); }));
+        $('btn-reset').addEventListener('click', () => { state = state.map(() => false); save(); render(); });
+        $('btn-export').addEventListener('click', async () => {
+            buildPrintSheet();
+            // wait until the back photo is really decoded — otherwise Chrome's print
+            // snapshot can fire before the background image exists (photo missing)
+            try {
+                await Promise.all(['checklist-view.jpg', 'vsb-yggdrasil-gold.png', 'checklist-sky.jpg'].map(src => {
+                    const img = new Image();
+                    img.src = src;
+                    return img.decode();
+                }));
+            } catch (e) { /* missing image → fallback/blank spot, printing still works */ }
+            window.print();
+        });
+        $('contact').value = localStorage.getItem(LS_CONTACT) || '';
+        $('contact').addEventListener('input', () => localStorage.setItem(LS_CONTACT, $('contact').value));
+
+        render();
+    </script>
+</body>
+
+</html>
