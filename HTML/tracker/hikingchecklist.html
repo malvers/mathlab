@@ -471,6 +471,9 @@
         } catch (e) { state = {}; }
         try { removed = JSON.parse(localStorage.getItem(LS_REMOVED) || '[]'); } catch (e) { removed = []; }
         try { custom = JSON.parse(localStorage.getItem(LS_CUSTOM) || '[]'); } catch (e) { custom = []; }
+        // migrate old custom items (plain string) to the trilingual form
+        custom = custom.map(c => typeof c.txt === 'string'
+            ? { id: c.id, txt: { de: c.txt, en: c.txt, es: c.txt } } : c);
 
         const $ = id => document.getElementById(id);
 
@@ -485,7 +488,7 @@
         function itemsFor(l) {
             return ITEMS[l].map((txt, i) => ({ id: 's' + i, txt, idx: i }))
                 .filter(it => !removed.includes(it.idx))
-                .concat(custom.map(c => ({ id: c.id, txt: c.txt, custom: true })));
+                .concat(custom.map(c => ({ id: c.id, txt: c.txt[l] || c.txt.de || '', custom: true })));
         }
 
         function render() {
@@ -527,8 +530,11 @@
             add.addEventListener('click', () => {
                 const txt = (prompt(u.addPrompt) || '').trim();
                 if (!txt) return;
-                custom.push({ id: 'c' + Date.now(), txt });
+                const id = 'c' + Date.now();
+                // appears immediately in all languages; translations patch in async
+                custom.push({ id, txt: { de: txt, en: txt, es: txt } });
                 save(); render();
+                translateCustom(id, txt, lang);
             });
             list.appendChild(add);
 
@@ -596,6 +602,22 @@
                 UI.de.emergency.map(esc).join('<br>') +
                 '<div class="phone">' + contactHtml + '</div>' +
                 '</div></div>').join('');
+        }
+
+        /* ---- auto-translate custom items (free MyMemory service, offline-safe) ---- */
+        async function translateCustom(id, txt, from) {
+            for (const to of ['de', 'en', 'es'].filter(l => l !== from)) {
+                try {
+                    const res = await fetch('https://api.mymemory.translated.net/get?q=' +
+                        encodeURIComponent(txt) + '&langpair=' + from + '|' + to);
+                    if (!res.ok) continue;
+                    const j = await res.json();
+                    const t = j.responseData && j.responseData.translatedText;
+                    const item = custom.find(c => c.id === id);
+                    if (t && item) { item.txt[to] = t; save(); }
+                } catch (e) { /* offline on a mountain: same text stays in all languages */ }
+            }
+            render();
         }
 
         /* ---- wiring ---- */
