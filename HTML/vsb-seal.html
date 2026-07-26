@@ -711,6 +711,7 @@
                 if (SAVED.vsel) vSel = SAVED.vsel.filter(s => vModel[s.pi] && vModel[s.pi].subs[s.si] && vModel[s.pi].subs[s.si].nodes[s.ni]);
                 vapply();
             }
+            centerVSBToMid();    // Doc 2026-07-26: keep V·S·B in the mid-band (internal)
             schedulePreview();   // sync STICK & HOLZ with the restored model
         });
         function fmt(p) { return p[0].toFixed(3) + ' ' + p[1].toFixed(3); }
@@ -729,6 +730,47 @@
             }
             pm.el.setAttribute('d', d);
             writeMaster();
+        }
+        // ---- internal correction (Doc 2026-07-26): on load, keep the V·S·B group in
+        // the seal's mid-band — r-centre 51.45 = midway between tree-ring (r39) and
+        // inner ring (r63.9), matching the master. The change lives in the internal
+        // model; rebuild()/writeMaster() sync it to the SVG like any edit. No-op once
+        // it already sits centred (0.3 mm tolerance), so it never fights a saved state.
+        function centerVSBToMid() {
+            try {
+                const pm = vModel.find(m => m.id === 'lettering');
+                if (!pm) return;
+                const cx0 = 75, cy0 = 75, TARGET = 51.45, TOL = 0.3;
+                const grp = []; let minR = 1e9, maxR = -1e9;
+                for (const sub of pm.subs) {
+                    let sx = 0, sy = 0;
+                    for (const nd of sub.nodes) { sx += nd.p[0]; sy += nd.p[1]; }
+                    const cx = sx / sub.nodes.length, cy = sy / sub.nodes.length;
+                    const a = (Math.atan2(cy - cy0, cx - cx0) * 180 / Math.PI + 360) % 360;
+                    if (cy > cy0 && Math.abs(a - 90) < 70) {          // bottom arc = V · S · B
+                        grp.push({ sub, ang: Math.atan2(cy - cy0, cx - cx0) });
+                        for (const nd of sub.nodes) {
+                            const r = Math.hypot(nd.p[0] - cx0, nd.p[1] - cy0);
+                            if (r < minR) minR = r;
+                            if (r > maxR) maxR = r;
+                        }
+                    }
+                }
+                if (!grp.length) return;
+                const dR = TARGET - (minR + maxR) / 2;
+                if (Math.abs(dR) < TOL) return;                       // already centred
+                for (const g of grp) {
+                    const dx = dR * Math.cos(g.ang), dy = dR * Math.sin(g.ang);
+                    for (const nd of g.sub.nodes) {
+                        nd.p[0] += dx; nd.p[1] += dy;
+                        nd.cin[0] += dx; nd.cin[1] += dy;
+                        nd.cout[0] += dx; nd.cout[1] += dy;
+                    }
+                }
+                rebuild(pm);
+                vnodesDraw(); saveState();
+                vinfo('V·S·B intern zentriert (' + (dR > 0 ? '+' : '') + dR.toFixed(2) + ' mm)');
+            } catch (e) { }
         }
         let vToastT = null;
         function vinfo(msg) {
