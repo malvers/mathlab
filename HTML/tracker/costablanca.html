@@ -104,7 +104,7 @@
         #progress-text .go { color: var(--green); font-weight: 700; }
 
         /* ---------------- spot list ---------------- */
-        #list { padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; }
+        #list { padding: 10px 12px 0 12px; display: flex; flex-direction: column; gap: 8px; }
 
         .spot {
             background: var(--bg-light);
@@ -150,12 +150,12 @@
         .spot .chev {
             flex: 0 0 auto;
             color: #9fb6dc;
-            font-size: 15px;
+            font-size: 18px;
             transition: transform 0.28s ease;
             padding: 0 2px;
         }
 
-        .spot.open .chev { transform: rotate(180deg); }
+        .spot.open .chev { transform: rotate(90deg); }
 
         /* collapsible description — animate via grid-template-rows 0fr -> 1fr */
         .spot .desc {
@@ -257,7 +257,17 @@
             background: var(--bg-light);
             border: 1px solid rgba(245, 194, 66, 0.28);
             border-radius: 16px;
+            text-decoration: none;
+            color: inherit;
+            cursor: pointer;
+            transition: border-color 0.15s, background 0.15s;
         }
+
+        .signoff:hover { border-color: rgba(245, 194, 66, 0.6); background: rgb(18, 44, 92); }
+
+        .signoff .teamlink { font-size: 11.5px; color: var(--green); margin-top: 6px; }
+
+        .signoff:hover .teamlink { text-decoration: underline; }
 
         .signoff .avatar {
             width: 76px;
@@ -281,12 +291,135 @@
         .signoff .ti { font-size: 12px; color: #cdd8ec; }
 
         .signoff .sub { font-size: 10.5px; color: #7f93b5; margin-top: 3px; }
+        /* drag handle (mouse reorder) + move-to-pool (x) on each item row */
+        .spot .grip {
+            flex: 0 0 auto;
+            color: #6b7ea3;
+            font-size: 18px;
+            line-height: 1;
+            padding: 4px 2px;
+            cursor: grab;
+        }
+
+        .spot .grip:active { cursor: grabbing; }
+        .spot.dragging { opacity: 0.55; border-color: rgba(245, 194, 66, 0.7); }
+
+        .spot .topool {
+            flex: 0 0 auto;
+            height: 28px;
+            min-width: 34px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: none;
+            border: none;
+            color: #7f93b5;
+            font-size: 22px;
+            line-height: 1;
+            cursor: pointer;
+            border-radius: 8px;
+        }
+
+        .spot .topool:hover { color: #fff; background: rgba(176, 36, 24, 0.55); }
+
+        /* ---------------- Pool card (green bg, blue text, same shape as items) ---------------- */
+        #pool {
+            margin: 8px 12px 14px 12px;
+            background: var(--green);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            border-radius: 14px;
+            overflow: hidden;
+            color: rgb(14, 36, 78);
+        }
+
+        .pool-head {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 14px;
+            cursor: pointer;
+            user-select: none;
+            min-height: 52px;
+        }
+
+        .pool-title { font-size: 17px; color: rgb(14, 36, 78); }
+        .pool-count { flex: 1; font-size: 12px; color: rgba(14, 36, 78, 0.72); }
+        .pool-count::before { content: '('; }
+        .pool-count::after { content: ')'; }
+
+        .pool-head .chev { flex: 0 0 auto; color: rgb(14, 36, 78); font-size: 18px; transition: transform 0.28s ease; }
+        #pool.open .pool-head .chev { transform: rotate(90deg); }
+
+        .pool-body { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.28s ease; }
+        #pool.open .pool-body { grid-template-rows: 1fr; }
+        .pool-inner { overflow: hidden; }
+
+        .pool-hint { padding: 0 14px 8px 14px; font-size: 11.5px; color: rgba(14, 36, 78, 0.8); line-height: 1.5; }
+        .poolempty { padding: 0 14px 12px 14px; font-size: 12.5px; color: rgba(14, 36, 78, 0.8); }
+
+        #pool-list { padding: 0 12px 12px 12px; display: flex; flex-direction: column; gap: 6px; }
+
+        .poolitem {
+            background: rgba(255, 255, 255, 0.22);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .poolrow { display: flex; align-items: center; gap: 10px; padding: 8px 10px; cursor: pointer; user-select: none; }
+        .poolitem .poolname { flex: 1; font-size: 15px; color: rgb(14, 36, 78); }
+        .poolitem .chev { flex: 0 0 auto; color: rgba(14, 36, 78, 0.8); font-size: 18px; transition: transform 0.28s ease; }
+        .poolitem.open .chev { transform: rotate(90deg); }
+
+        .poolitem .desc { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.28s ease; }
+        .poolitem.open .desc { grid-template-rows: 1fr; }
+        .poolitem .descInner { overflow: hidden; }
+
+        .poolitem .shots { display: block; padding: 2px 12px 6px 12px; }
+        .poolitem .shots:empty { display: none; }
+        .poolitem .shot {
+            display: block;
+            max-width: 100%;
+            max-height: 360px;
+            height: auto;
+            width: auto;
+            border-radius: 10px;
+            border: 1px solid rgba(14, 36, 78, 0.25);
+            margin-bottom: 6px;
+        }
+
+        .poolitem .credit { padding: 0 12px 6px 12px; font-size: 11px; color: rgba(14, 36, 78, 0.7); }
+        .poolitem .credit:empty { display: none; }
+        .poolitem .text { padding: 0 12px 12px 12px; font-size: 15px; line-height: 1.55; color: rgb(14, 36, 78); }
+
+        .topmain {
+            flex: 0 0 auto;
+            height: 28px;
+            min-width: 34px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: none;
+            border: none;
+            color: rgb(14, 36, 78);
+            font-size: 22px;
+            line-height: 1;
+            cursor: pointer;
+            border-radius: 8px;
+        }
+
+        .topmain:hover { background: rgba(255, 255, 255, 0.35); }
     </style>
 </head>
 
 <body>
     <header>
-        <a class="back" href="tracker.html">←</a>
+        <a class="back" href="tracker.html" aria-label="Zurück">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <line x1="19" y1="12" x2="5" y2="12" />
+                <polyline points="12 19 5 12 12 5" />
+            </svg>
+        </a>
         <h1 id="t-title">Highlights Costa Blanca</h1>
         <div class="langs">
             <button class="lang" data-l="de">DE</button>
@@ -305,15 +438,28 @@
 
     <div id="list"></div>
 
+    <!-- Pool: parking area. + pulls a target up into the list; x above sends an item down here -->
+    <div id="pool">
+        <div class="pool-head" id="pool-head">
+            <span class="pool-title" id="pool-title"></span>
+            <span class="pool-count" id="pool-count"></span>
+            <span class="chev">▸</span>
+        </div>
+        <div class="pool-body"><div class="pool-inner">
+            <div id="pool-list"></div>
+        </div></div>
+    </div>
+
     <!-- Solita sign-off: her portrait (from the team page) + name/title -->
-    <section class="signoff">
+    <a class="signoff" href="../team.html" title="Das ganze AI-Team ansehen">
         <img class="avatar" src="cb/solita.jpg" alt="Dr. Solita J. Neural" loading="lazy">
         <div class="who">
             <span class="nm">Dr. Solita J. Neural</span>
             <span class="ti">Executive Assistant to Doc Alvers</span>
             <span class="sub">zusammengestellt für Eva &amp; Crew</span>
+            <span class="teamlink">Das ganze Team ansehen →</span>
         </div>
-    </section>
+    </a>
 
     <footer>
         <svg class="sealsvg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
@@ -364,7 +510,8 @@
             "en": "Crowning Altea's old town, the Iglesia de Nuestra Señora del Consuelo lifts its twin blue-and-white tiled domes above a maze of whitewashed, bougainvillea-draped lanes that have drawn artists here for generations. Wander from the Plaza de la Iglesia to the Portal Vell and on to the Mirador de los Cronistas, where the whole Bay of Altea opens up toward Benidorm and the Peñón de Ifach at Calpe. Come up in the late afternoon: leave the car down on the Paseo Marítimo and climb the cobbled steps on foot, since parking at the top is near-impossible. Then settle onto a terrace on the church square with a drink as the blue domes catch the last of the sun.",
             "es": "Coronando el casco antiguo de Altea, la Iglesia de Nuestra Señora del Consuelo alza sus cúpulas gemelas de azulejos azules y blancos sobre un laberinto de callejuelas encaladas y cubiertas de buganvillas, hogar de artistas desde hace generaciones. Desde la Plaza de la Iglesia puedes acercarte al Portal Vell y al Mirador de los Cronistas, donde se abre toda la bahía de Altea hacia Benidorm y el Peñón de Ifach de Calpe. Sube a última hora de la tarde: deja el coche abajo, en el Paseo Marítimo, y afronta a pie las escaleras empedradas, porque aparcar arriba es casi imposible. Luego siéntate en una terraza de la plaza de la iglesia con algo para beber mientras las cúpulas azules atrapan la última luz del día."
         },
-        "credit": "Foto: ConradMoeller · CC BY-SA 2.5 · Wikimedia Commons"
+        "credit": "Foto: ConradMoeller · CC BY-SA 2.5 · Wikimedia Commons",
+        "defaultPool": false
     },
     {
         "key": "valencia",
@@ -379,7 +526,8 @@
             "en": "Just over an hour and a half north on the AP-7, this is a city where the space-age and the medieval sit side by side: Calatrava's futuristic Ciudad de las Artes y las Ciencias in the old Turia riverbed, home to the Oceanogràfic (Europe's largest aquarium), and a few streets away the Gothic Silk Exchange with its spiralling twisted columns and the Art Nouveau Mercado Central. Climb the Miguelete bell tower for old-town views, or wander the 9 km Jardín del Turia, the green ribbon that loops around it all. A little insider advice: book your Oceanogràfic and Hemisfèric tickets online ahead of time (the combined ticket saves money) and arrive early, before the City of Arts fills up at midday. And save room for the real thing — authentic paella Valenciana, eaten as a slow lunch out at the Albufera rice fields, just the way the locals do it.",
             "es": "A poco más de hora y media al norte por la AP-7, es una ciudad donde el futuro y la Edad Media conviven sin esfuerzo: la futurista Ciudad de las Artes y las Ciencias de Calatrava, en el antiguo cauce del Turia, con el Oceanogràfic, el mayor acuario de Europa, y a unas calles la gótica Lonja de la Seda con sus columnas retorcidas y el modernista Mercado Central. Sube al Miguelete para ver el casco antiguo desde lo alto o pasea por los 9 km del Jardín del Turia, la cinta verde que lo rodea todo. Un consejo práctico: reserva las entradas del Oceanogràfic y el Hemisfèric por internet con antelación (la entrada combinada sale más a cuenta) y llega temprano, antes de que la Ciudad de las Artes se llene a mediodía. Y deja hueco para lo auténtico: una buena paella valenciana, comida con calma al mediodía junto a los arrozales de la Albufera, como hacen los de aquí."
         },
-        "credit": "Foto: Diego Delso · CC BY-SA 3.0 · Wikimedia Commons"
+        "credit": "Foto: Diego Delso · CC BY-SA 3.0 · Wikimedia Commons",
+        "defaultPool": false
     },
     {
         "key": "alicante",
@@ -394,7 +542,8 @@
             "en": "Just about 50 minutes south of Altea via the AP-7 (or by TRAM, changing at Benidorm), the capital of the Costa Blanca is crowned by the Castillo de Santa Bárbara — one of Spain's largest medieval fortresses, perched atop the 166 m Mount Benacantil, with 9th-century Moorish roots and sweeping views over the bay, marina and beaches. Skip the steep climb: take the lift (ascensor) from the tunnel entrance across the road from Playa del Postiguet straight to the top — entry to the castle grounds is free. Down below, stroll the palm-lined Explanada de España with its wavy mosaic of roughly 6.6 million marble tiles, wander the flower-decked lanes of the old Barrio de Santa Cruz, and from the beach look up for the \"Cara del Moro,\" the Face of the Moor in the cliff. Go in the late afternoon for the best light and a sunset over the bay.",
             "es": "A solo unos 50 minutos al sur de Altea por la AP-7 (o en TRAM, haciendo transbordo en Benidorm), la capital de la Costa Blanca está coronada por el Castillo de Santa Bárbara: una de las mayores fortalezas medievales de España, en lo alto del monte Benacantil (166 m), con origen árabe del siglo IX y vistas increíbles sobre la bahía, el puerto y las playas. Ahórrate la subida a pie: coge el ascensor desde la entrada del túnel, frente a la Playa del Postiguet, que te lleva directo arriba — y la entrada al recinto del castillo es gratis. Abajo, pasea por la Explanada de España y su ondulante mosaico de unos 6,6 millones de teselas de mármol, piérdete por las callejuelas floridas del Barrio de Santa Cruz y, desde la playa, busca la \"Cara del Moro\" en la roca del acantilado. Ve a última hora de la tarde: la mejor luz y una puesta de sol sobre la bahía."
         },
-        "credit": "Foto: Diego Delso · CC BY-SA 3.0 · Wikimedia Commons"
+        "credit": "Foto: Diego Delso · CC BY-SA 3.0 · Wikimedia Commons",
+        "defaultPool": false
     },
     {
         "key": "denia",
@@ -409,7 +558,8 @@
             "en": "Dénia is a day trip where the journey is half the joy: from Altea take TRAM Line 1 up to Benidorm, then change to Line 9 — the historic 1915 Trenet de la Marina — which hugs the coast and hills through Calp, Teulada and Gata de Gorgos before rolling right into town. Crowning the hill is the Moorish Castell de Dénia with its Palau del Governador and sweeping views over the marina and the 753 m Montgó massif that looms above everything. Dénia is a UNESCO Creative City of Gastronomy, so come hungry and book a lunch table for the gamba roja — the prized deep-red prawn from 500–800 m down, sweeter than any ordinary one and best simply grilled with olive oil and sea salt (pricey, and worth it). There's no direct train, so mind the change at Benidorm and time your return, since Line 9 runs less often than Line 1.",
             "es": "Dénia es una excursión donde el propio viaje ya es un placer: desde Altea toma el TRAM Línea 1 hasta Benidorm y allí cambia a la Línea 9, el histórico Trenet de la Marina de 1915, que bordea la costa y las colinas pasando por Calp, Teulada y Gata de Gorgos hasta llegar al centro. En lo alto se alza el Castell de Dénia de origen árabe, con el Palau del Governador y vistas amplias sobre el puerto y el macizo del Montgó, que domina la ciudad con sus 753 m. Dénia es Ciudad Creativa de la Gastronomía de la UNESCO, así que ven con hambre y reserva mesa para la gamba roja, ese preciado marisco rojo intenso de aguas profundas, más dulce que cualquier otra y mejor a la plancha con aceite de oliva y sal marina (cara, pero lo vale). No hay tren directo, así que no olvides el cambio en Benidorm y calcula bien la vuelta, porque la Línea 9 pasa con menos frecuencia que la Línea 1."
         },
-        "credit": "Foto: Diego Delso · CC BY-SA 4.0 · Wikimedia Commons"
+        "credit": "Foto: Diego Delso · CC BY-SA 4.0 · Wikimedia Commons",
+        "defaultPool": false
     },
     {
         "key": "tarbena",
@@ -424,7 +574,8 @@
             "en": "A tiny white mountain village above Altea that has spoken Mallorquí for over 400 years — resettled with families from Mallorca after the 1609 Morisco expulsion, and you can still hear it in the Balearic article \"sa\". At the rustic Can Pinet, right beside the parish church, a fireplace crackles in the middle of the dining room and the house signature is sobrassada amb mel: Mallorcan cured sausage drizzled with honey. Come for lunch (closed Mondays, roughly 8:00–17:30), order exactly that, and grab a vacuum-packed sobrasada to take home — and on the drive up, break the trip at the Fonts de l'Algar waterfalls.",
             "es": "Un diminuto pueblo blanco de montaña por encima de Altea que habla mallorquín desde hace más de 400 años — repoblado con familias de Mallorca tras la expulsión morisca de 1609, y todavía se nota en el artículo salado «sa». En el rústico Can Pinet, junto a la iglesia parroquial, la chimenea crepita en medio del comedor y la especialidad de la casa es la sobrassada amb mel: embutido mallorquín regado con miel. Id a mediodía (cerrado los lunes, de 8:00 a 17:30 aprox.), pedid justo ese plato y llevaos una sobrasada envasada al vacío; de camino, parad en las cascadas de las Fonts de l'Algar."
         },
-        "credit": ""
+        "credit": "",
+        "defaultPool": false
     },
     {
         "key": "cabonao",
@@ -439,7 +590,8 @@
             "en": "Stand at the very edge of the Costa Blanca, where the white 1928 lighthouse crowns a cliff falling 122 m into turquoise water and the mirador looks straight out to open sea — on a clear morning you can even pick out Ibiza on the horizon. Come at sunrise: the viewpoint faces east, so it's the perfect place to watch the sun climb right out of the water in front of you. Park at the lighthouse and fold in a swim at Cala de la Granadella, the gorgeous pebble cove just a couple of kilometres back down the same road. Below your feet the sea hides the Cova dels Orgues, and the surrounding waters teem with life for snorkelling and diving.",
             "es": "Aquí te asomas al extremo más oriental de la Costa Blanca: el faro blanco de 1928 corona un acantilado que cae 122 m sobre el agua turquesa, y el mirador mira de frente al mar abierto — en las mañanas despejadas hasta se distingue Ibiza en el horizonte. Ve al amanecer, porque el mirador da al este y verás el sol salir justo delante de ti sobre el mar. Aparca junto al faro y combínalo con un baño en la Cala de la Granadella, la preciosa cala de cantos rodados a apenas dos kilómetros por la misma carretera. Bajo los acantilados se esconde la Cova dels Orgues y las aguas de alrededor rebosan de vida para bucear y hacer snórquel."
         },
-        "credit": "Foto: Joanbanjo · CC BY-SA 4.0 · Wikimedia Commons"
+        "credit": "Foto: Joanbanjo · CC BY-SA 4.0 · Wikimedia Commons",
+        "defaultPool": false
     },
     {
         "key": "ifach",
@@ -454,7 +606,8 @@
             "en": "The Peñón de Ifach is the 332-metre limestone monolith that rises straight out of the sea beside Calpe's harbour — the emblem of the Costa Blanca, barely a 20-minute drive up the coast from Altea. The summit trail runs through a short tunnel bored through the rock back in the 1920s; beyond it the polished limestone turns dark and slippery, with a fixed rope to help you up. From the top the whole Marina Alta coastline lies at your feet, and on exceptionally clear days Ibiza floats on the horizon. Set out early — the port parking fills fast and the exposed rock bakes by midday, so bring water and grippy shoes; this is a steep scramble, not a stroll.",
             "es": "El Peñón de Ifach es el monolito de caliza de 332 metros que se alza directo desde el mar junto al puerto de Calpe: el emblema de la Costa Blanca, a apenas veinte minutos en coche subiendo desde Altea. El sendero a la cima cruza un túnel excavado en la roca en los años veinte, y al otro lado la caliza pulida se vuelve oscura y resbaladiza, con una cuerda fija que ayuda a subir. Desde arriba se abre toda la Marina Alta a tus pies, y en los días muy despejados se ve Ibiza en el horizonte. Sal temprano: el aparcamiento del puerto se llena enseguida y la roca aprieta el calor a mediodía, así que lleva agua y calzado con buen agarre; es una subida empinada, no un paseo."
         },
-        "credit": "Foto: Diego Delso · CC BY-SA 4.0 · Wikimedia Commons"
+        "credit": "Foto: Diego Delso · CC BY-SA 4.0 · Wikimedia Commons",
+        "defaultPool": false
     },
     {
         "key": "noumanolin",
@@ -469,7 +622,8 @@
             "en": "A genuine Alicante institution since 1971, still run by the founding family across the second and third generations — about a 45-minute drive from Altea down the AP-7. The heart of it is the legendary ground-floor barra: a standing tapas bar, first-come-first-served, where every tapa is made fresh to order right in front of you. Come early or off-peak to grab a bar stool for the full experience — or, if you're a group, book the dining room upstairs and don't miss one of the famous arroces, cooked in the classic Alicante rice tradition. With seafood straight from the nearby Mercado Central, it's Alicante on a plate.",
             "es": "Una auténtica institución alicantina desde 1971, aún en manos de la familia fundadora en su segunda y tercera generación — a unos 45 minutos de Altea por la AP-7. Su corazón es la legendaria barra de la planta baja: tapas de pie, por orden de llegada y sin reservas, preparadas al momento delante de ti. Ve pronto o fuera de las horas punta para pillar un taburete y vivirlo de verdad — o, si vais en grupo, reserva el comedor de arriba y no te pierdas uno de sus famosos arroces. Con pescado fresco del Mercado Central a un paso: Alicante en el plato."
         },
-        "credit": ""
+        "credit": "",
+        "defaultPool": false
     },
     {
         "key": "inder",
@@ -484,7 +638,8 @@
             "en": "Tucked down by the turning circle at Arenal-Bol, just steps from the sand, Punjabi Curry is the Indian spot Calpe locals swear by. Fragrant curries straight from the tandoor, warm family-run service and honest prices round off a beach day beautifully. Best enjoyed outside, with the breeze coming off Arenal-Bol.",
             "es": "Abajo, junto a la rotonda de giro del Arenal-Bol y a pocos pasos de la arena, se esconde Punjabi Curry, el indio que adoran los que conocen Calpe. Currys aromáticos recién salidos del tandoor, trato familiar y precios honestos son el broche perfecto para un día de playa. Mejor aún en la terraza, con la brisa del Arenal-Bol."
         },
-        "credit": ""
+        "credit": "",
+        "defaultPool": false
     },
     {
         "key": "guadalest",
@@ -499,7 +654,8 @@
             "en": "Barely 40 minutes from the house, this village clings to a crag high above a turquoise reservoir ringed by the Aitana sierras — and you enter the old town through the Portal de Sant Josep, a gateway tunnelled straight through solid rock. Up top, the whitewashed bell tower perched on its own rock spur is the picture everyone comes for, alongside the 11th-century Moorish castle ruins and a cluster of wonderfully odd little museums (microminiatures, dolls' houses, even a torture museum). Go early morning or late afternoon to dodge the Benidorm coach crowds, leave the car in the paid lot at the bottom, and walk up through the car-free cobbled lanes.",
             "es": "A apenas 40 minutos de casa, este pueblo se aferra a un risco sobre un embalse turquesa rodeado por las sierras de Aitana, Serrella y Xortà, y se entra al casco antiguo por el Portal de Sant Josep, una puerta excavada directamente en la roca viva. Arriba te espera el campanario encalado del Peñón de la Alcalá, la imagen más fotografiada del lugar, junto a las ruinas del castillo árabe del siglo XI y un puñado de museos diminutos y curiosísimos (microminiaturas, casas de muñecas, hasta uno de la tortura). Ve a primera hora o a última de la tarde para esquivar los autobuses de Benidorm, deja el coche en el aparcamiento de pago de abajo y sube a pie por las callejuelas empedradas."
         },
-        "credit": "Foto: Diego Delso · CC BY-SA 4.0 · Wikimedia Commons"
+        "credit": "Foto: Diego Delso · CC BY-SA 4.0 · Wikimedia Commons",
+        "defaultPool": false
     },
     {
         "key": "albirmercado",
@@ -514,7 +670,8 @@
             "en": "Every Sunday, all year round, the big car park along the Avenida del Albir turns into one of the Costa Blanca's best morning markets — officially recognized by the regional health authority as one of the best-run in the Comunidad Valenciana. It splits neatly into two worlds: seasonal fruit and veg, local honey, spices and fresh-baked bread on one side; clothing, leather, jewellery and handmade crafts on the other. It sits right by l'Albir's palm-lined Paseo de las Estrellas seafront, so you can wander from the stalls to a coffee by the sea — or tack on the flat 2.4 km walk out to the Faro del Albir lighthouse. Go early, before 10:00: parking is still easy and the produce is at its best, and while many stalls now take contactless, a little cash keeps things smooth.",
             "es": "Cada domingo, todo el año, el gran aparcamiento de la Avenida del Albir se convierte en uno de los mejores mercadillos de la Costa Blanca — reconocido por Sanidad como uno de los mejor gestionados de la Comunidad Valenciana. Se divide con claridad en dos zonas: fruta y verdura de temporada, miel local, especias y pan recién hecho por un lado; ropa, piel, bisutería y artesanía por el otro. Está junto al Paseo de las Estrellas, el precioso paseo marítimo de l'Albir bordeado de palmeras, así que puedes pasar de los puestos a un café frente al mar — o sumar la ruta llana de 2,4 km hasta el Faro del Albir. Ve temprano, antes de las 10:00: aún se aparca fácil y el género está en su mejor momento, y aunque muchos puestos ya aceptan tarjeta, llevar algo de efectivo siempre viene bien."
         },
-        "credit": "Foto: Jesús Alenda · CC BY 2.0 · Wikimedia Commons"
+        "credit": "Foto: Jesús Alenda · CC BY 2.0 · Wikimedia Commons",
+        "defaultPool": false
     },
     {
         "key": "xalomercado",
@@ -529,7 +686,8 @@
             "en": "Every Saturday morning the dry riverbed in Xaló fills with 200-plus stalls of antiques, brocante and pure bric-a-brac — one of the Costa Blanca's biggest and best-loved flea markets, stretching more than a kilometre along the rambla. Right across the road the village wine co-op, Bodegas Xaló, pours its famous sweet Mistela and Moscatel, while a farmers' market alongside heaps up local almonds, olive oil and embutidos. Go early: it ends at 14:00 sharp and parking fills fast, so aim for around 09:30, then wander over to the bodega to taste the Mistela before you head home. It all sits among the vineyards and almond groves of the Jalón Valley, about a 35-minute drive inland from Altea.",
             "es": "Cada sábado por la mañana el cauce seco de Xaló se llena de más de 200 puestos de antigüedades, brocante y objetos de todo tipo: uno de los rastros más grandes y queridos de la Costa Blanca, que se extiende más de un kilómetro a lo largo de la rambla. Justo enfrente, la cooperativa del pueblo, Bodegas Xaló, sirve sus célebres Mistela y Moscatel dulces, y al lado un mercat de la terra rebosa de almendras, aceite de oliva y embutidos locales. Ve temprano: termina a las 14:00 en punto y el aparcamiento se llena rápido, así que llega hacia las 09:30 y luego cruza a la bodega para probar la Mistela antes de volver. Todo ello entre viñedos y almendros del Valle del Jalón (Vall de Pop), a unos 35 minutos tierra adentro desde Altea."
         },
-        "credit": ""
+        "credit": "",
+        "defaultPool": false
     },
     {
         "key": "barcalpe",
@@ -544,7 +702,8 @@
             "en": "High up on the 8th-floor rooftop of Hotel Bahía Calpe waits one of the finest views on the whole Costa Blanca: the mighty Peñón de Ifach rising like a ship’s prow from the turquoise sea, with Calpe’s sweeping bay below. The rooftop “Calpe Diem” bar (SkyBar) shares the floor with the pool and terrace — settle in with a cold drink as the late sun turns rock and water gold. The perfect place to toast the day (roughly 10:00–20:00).",
             "es": "En la azotea de la 8ª planta del Hotel Bahía Calpe te espera una de las vistas más bonitas de toda la Costa Blanca: el imponente Peñón de Ifach alzándose como la proa de un barco sobre el mar turquesa, con la amplia bahía de Calpe a tus pies. El bar de azotea «Calpe Diem» (SkyBar) comparte planta con la piscina y la terraza — con una copa fresca, la luz de la tarde dora la roca y el agua. El lugar perfecto para despedir el día (sobre las 10:00–20:00)."
         },
-        "credit": ""
+        "credit": "",
+        "defaultPool": false
     },
     {
         "key": "moraira",
@@ -559,7 +718,72 @@
             "en": "Just a 30-40 minute drive up the coast from Altea, Moraira is an easygoing, low-rise seaside town between Calpe and Jávea, where the little Castillo de Moraira — with its curious 'ox-hoof' (pezuña de buey) shape — sits right on Playa de l'Ampolla, a leftover from the days of pirate lookouts. Walk the clifftop path up to the Torre del Cap d'Or above El Portet for wide sea views, then wander down to the marina where the fishing lonja and portside restaurants serve the day's catch. Come on a Friday morning for one of the biggest markets on the Costa Blanca, then head over to El Portet's turquoise cove to swim and have lunch — but get there early, as parking is tiny; better to leave the car in town and walk or take the little beach shuttle. And do try the local Moscatel wine while you're at it.",
             "es": "A solo 30-40 minutos por la costa desde Altea, Moraira es un tranquilo pueblo costero de casas bajas entre Calpe y Jávea, donde el pequeño Castillo de Moraira —con su curiosa forma de 'pezuña de buey'— se alza junto a la Playa de l'Ampolla, recuerdo de los tiempos de vigías contra los piratas. Sube por el sendero del acantilado hasta la Torre del Cap d'Or, sobre El Portet, para disfrutar de amplias vistas al mar, y baja luego al puerto, donde la lonja y los restaurantes junto al muelle sirven pescado fresco. Ve un viernes por la mañana a uno de los mercados más grandes de la Costa Blanca y después acércate a la cala turquesa de El Portet para bañarte y comer, pero llega pronto: hay muy pocas plazas de aparcamiento, así que mejor deja el coche en el pueblo y ve andando o en el pequeño bus de playa. Y no te vayas sin probar el Moscatel de la tierra."
         },
-        "credit": "Foto: Joan Ivars Cervera · Public domain · Wikimedia Commons"
+        "credit": "Foto: Joan Ivars Cervera · Public domain · Wikimedia Commons",
+        "defaultPool": false
+    },
+    {
+        "key": "bernia",
+        "name": {
+            "de": "Serra de Bèrnia",
+            "en": "Serra de Bèrnia",
+            "es": "Serra de Bèrnia"
+        },
+        "uncertain": false,
+        "blurb": {
+            "de": "Der Felskamm der Bèrnia trennt die Küste von Altea und Calpe vom Hinterland — die Rundtour zählt zu den schönsten der Marina. Highlight ist der Forat, ein enger Tunnel, durch den man auf die Meerseite kriecht und plötzlich die ganze Bucht bis zum Peñón de Ifach vor sich hat. Dazu die Ruine des Fort de Bèrnia aus dem 16. Jahrhundert. Am besten im Frühjahr oder Herbst und früh starten — im Hochsommer ist der Fels gnadenlos.",
+            "en": "The Bèrnia ridge walls the Altea and Calpe coast off from the interior, and its loop is one of the finest walks in the Marina. The highlight is the Forat, a narrow tunnel you crawl through onto the seaward side, where the whole bay opens up to the Peñón de Ifach. Along the way stand the ruins of the 16th-century Fort de Bèrnia. Go in spring or autumn and start early — high summer bakes the rock.",
+            "es": "La cresta de Bèrnia separa la costa de Altea y Calpe del interior, y su ruta circular es una de las más bonitas de la Marina. Lo mejor es el Forat, un túnel estrecho que se cruza gateando hasta la vertiente del mar, donde se abre toda la bahía hasta el Peñón de Ifach. De paso, las ruinas del Fort de Bèrnia (siglo XVI). Mejor en primavera u otoño y madrugando: en pleno verano la roca no perdona."
+        },
+        "credit": "Foto: Joanbanjo · CC BY-SA 4.0 · Wikimedia Commons",
+        "defaultPool": true
+    },
+    {
+        "key": "aitana",
+        "name": {
+            "de": "Aitana",
+            "en": "Aitana",
+            "es": "Aitana"
+        },
+        "uncertain": false,
+        "blurb": {
+            "de": "Mit 1558 m der höchste Gipfel der Provinz Alicante — an klaren Tagen reicht der Blick von der Küste weit ins Landesinnere, im Winter liegt hier oben Schnee. Der Weg führt an den Simas (tiefen Felsspalten) vorbei und durch den Pas de la Rabosa, eine schmale Felspassage. Der eigentliche Gipfel trägt Militär-Radar und ist gesperrt, doch der Kamm davor genügt völlig. Ideal im Frühjahr und Herbst; im Sommer früh los und viel Wasser mitnehmen.",
+            "en": "At 1,558 m the highest peak in Alicante province — on a clear day the view runs from the coast far inland, and snow settles up here in winter. The route passes the Simas (deep rock clefts) and threads the Pas de la Rabosa, a narrow ledge. The true summit carries military radar and is off-limits, but the ridge just before it is reward enough. Best in spring and autumn; in summer set off early and carry plenty of water.",
+            "es": "Con 1.558 m, la cima más alta de la provincia de Alicante: en días despejados se ve desde la costa hasta el interior, y en invierno nieva ahí arriba. La ruta pasa por las Simas (profundas grietas) y el Pas de la Rabosa, un paso estrecho. La cumbre real tiene radar militar y está cerrada, pero la cresta previa compensa de sobra. Ideal en primavera y otoño; en verano, temprano y con mucha agua."
+        },
+        "credit": "Foto: Ximonic (Simo Räsänen) · CC BY-SA 4.0 · Wikimedia Commons",
+        "defaultPool": true
+    },
+    {
+        "key": "puigcampana",
+        "name": {
+            "de": "Puig Campana",
+            "en": "Puig Campana",
+            "es": "Puig Campana"
+        },
+        "uncertain": false,
+        "blurb": {
+            "de": "Mit 1406 m der markante Zweithöchste der Gegend, direkt über Finestrat — unverkennbar an der Kerbe im Grat. Die Legende sagt, der Ritter Roldán habe das fehlende Stück ins Meer getreten: die Insel vor Benidorm. Der Aufstieg ist steil und fordernd, oben belohnt ein Rundumblick über die ganze Küste. Nichts für die Sommerhitze — Frühjahr, Herbst oder ein klarer Wintertag.",
+            "en": "At 1,406 m the striking second-highest peak around, rising right above Finestrat and unmistakable for the notch in its crest. Legend says the knight Roldán kicked the missing piece into the sea — the island off Benidorm. The climb is steep and genuinely demanding, but the summit repays you with a full sweep of the coast. Not one for summer heat — spring, autumn or a clear winter's day.",
+            "es": "Con 1.406 m, el llamativo segundo pico de la zona, justo sobre Finestrat e inconfundible por la muesca de su cresta. Cuenta la leyenda que el caballero Roldán lanzó de una patada el trozo que falta al mar: la isla de Benidorm. La subida es empinada y exigente, pero la cima devuelve una panorámica completa de la costa. Nada para el calor del verano: primavera, otoño o un día claro de invierno."
+        },
+        "credit": "Foto: Fernan79 · CC BY-SA 2.5 · Wikimedia Commons",
+        "defaultPool": true
+    },
+    {
+        "key": "montgo",
+        "name": {
+            "de": "Montgó",
+            "en": "Montgó",
+            "es": "Montgó"
+        },
+        "uncertain": false,
+        "blurb": {
+            "de": "Der 753 m hohe Kalkriese zwischen Dénia und Jávea — von See aus wie ein liegender Elefant. Der Naturpark ist ein Paradies für seltene Pflanzen und Vögel, und vom Gipfel sieht man an klaren Tagen bis Ibiza. Aufstiege gibt es von beiden Seiten (Dénia und Jávea); unterwegs liegt die Cova de l'Aigua, eine alte Wasserhöhle. Oben kein Schatten — also Frühjahr oder Herbst, früh los und Wasser mit.",
+            "en": "The 753 m limestone giant between Dénia and Jávea — from the sea it looks like a sleeping elephant. Its natural park is a haven for rare plants and birds, and on a clear day the summit sees all the way to Ibiza. You can climb from either side (Dénia or Jávea); on the way lies the Cova de l'Aigua, an old water cave. No shade up top, so spring or autumn, start early and bring water.",
+            "es": "El gigante calcáreo de 753 m entre Dénia y Jávea: desde el mar parece un elefante tumbado. Su parque natural es un refugio de plantas y aves raras, y en días claros la cima llega a ver Ibiza. Se sube por ambas vertientes (Dénia o Jávea); de camino, la Cova de l'Aigua, una antigua cueva de agua. Arriba no hay sombra: primavera u otoño, temprano y con agua."
+        },
+        "credit": "Foto: Concepción Amat Orta · CC BY 3.0 · Wikimedia Commons",
+        "defaultPool": true
     }
 ];
 
@@ -584,12 +808,38 @@
             }
         };
 
-        const LS_STATE = 'cbspots.state', LS_LANG = 'cbspots.lang', LS_OPEN = 'cbspots.open';
+        const LS_STATE = 'cbspots.state', LS_LANG = 'cbspots.lang', LS_OPEN = 'cbspots.open',
+              LS_POOL = 'cbspots.pool', LS_ORDER = 'cbspots.order', LS_POOLOPEN = 'cbspots.poolopen';
         let lang = localStorage.getItem(LS_LANG) || 'de';
         let state = {};   // spot key -> visited
         let open = {};    // spot key -> expanded
         try { state = JSON.parse(localStorage.getItem(LS_STATE) || '{}') || {}; } catch (e) { state = {}; }
         try { open = JSON.parse(localStorage.getItem(LS_OPEN) || '{}') || {}; } catch (e) { open = {}; }
+
+        const byKey = {};
+        SPOTS.forEach(s => { byKey[s.key] = s; });
+
+        // custom display order (superset of all keys); reconcile with SPOTS so new keys appear & stale drop
+        let order;
+        try { order = JSON.parse(localStorage.getItem(LS_ORDER) || 'null'); } catch (e) { order = null; }
+        if (!Array.isArray(order)) order = SPOTS.map(s => s.key);
+        order = order.filter(k => byKey[k]);
+        SPOTS.forEach(s => { if (!order.includes(s.key)) order.push(s.key); });
+
+        // pool: keys parked in the Pool card (seed from defaultPool on first run)
+        let pool;
+        try {
+            const raw = localStorage.getItem(LS_POOL);
+            pool = new Set(raw ? JSON.parse(raw) : SPOTS.filter(s => s.defaultPool).map(s => s.key));
+        } catch (e) { pool = new Set(SPOTS.filter(s => s.defaultPool).map(s => s.key)); }
+        let poolOpen = localStorage.getItem(LS_POOLOPEN) === '1';   // pool card collapsed by default
+        let dragEl = null;   // currently dragged .spot element (mouse reorder)
+
+        const POOL_UI = {
+            de: { title: 'Pool', empty: 'Pool ist leer.', hint: 'Ziele zum Hochholen (+) — im Sommer bleiben die Berge hier geparkt.' },
+            en: { title: 'Pool', empty: 'Pool is empty.', hint: 'Targets to pull up (+) — in summer the peaks stay parked here.' },
+            es: { title: 'Pool', empty: 'El pool está vacío.', hint: 'Destinos para subir (+) — en verano las montañas se quedan aquí.' }
+        };
 
         const $ = id => document.getElementById(id);
 
@@ -597,17 +847,23 @@
             localStorage.setItem(LS_STATE, JSON.stringify(state));
             localStorage.setItem(LS_OPEN, JSON.stringify(open));
             localStorage.setItem(LS_LANG, lang);
+            localStorage.setItem(LS_POOL, JSON.stringify([...pool]));
+            localStorage.setItem(LS_ORDER, JSON.stringify(order));
+            localStorage.setItem(LS_POOLOPEN, poolOpen ? '1' : '0');
         }
 
         function pick(obj) { return obj[lang] || obj.de || ''; }
 
+        function activeKeys() { return order.filter(k => byKey[k] && !pool.has(k)); }
+
         function updateProgress() {
             const u = UI[lang];
-            const n = SPOTS.filter(s => state[s.key]).length, t = SPOTS.length;
+            const act = activeKeys();
+            const n = act.filter(k => state[k]).length, t = act.length;
             const pct = t ? n * 100 / t : 0;
             $('progress-fill').style.width = pct + '%';
             $('progress-fill').style.backgroundSize = pct > 0 ? (10000 / pct) + '% 100%' : '100% 100%';
-            $('progress-text').innerHTML = n === t
+            $('progress-text').innerHTML = (t && n === t)
                 ? '<span class="go">' + u.done + '</span>'
                 : u.progress(n, t);
         }
@@ -621,15 +877,19 @@
 
             const list = $('list');
             list.innerHTML = '';
-            SPOTS.forEach(s => {
-                const done = !!state[s.key], isOpen = !!open[s.key];
+            const act = activeKeys();
+            act.forEach((key, idx) => {
+                const s = byKey[key];
+                const done = !!state[key], isOpen = !!open[key];
                 const el = document.createElement('div');
                 el.className = 'spot' + (done ? ' done' : '') + (isOpen ? ' open' : '');
                 el.innerHTML =
                     '<div class="row">' +
+                    '<span class="grip" title="ziehen zum Sortieren" aria-hidden="true">⠿</span>' +
                     '<span class="box" role="checkbox" tabindex="0"></span>' +
                     '<span class="name"></span>' +
-                    '<span class="chev">▾</span>' +
+                    '<span class="chev">▸</span>' +
+                    '<button class="topool" title="in den Pool" aria-label="in den Pool">×</button>' +
                     '</div>' +
                     '<div class="desc"><div class="descInner">' +
                     (s.uncertain ? '<p class="warn"></p>' : '') +
@@ -652,19 +912,101 @@
                 if (s.uncertain) el.querySelector('.warn').textContent = '⚠ ' + (s.note ? pick(s.note) : u.warn);
 
                 el.querySelector('.row').addEventListener('click', () => {
-                    open[s.key] = !open[s.key];
-                    el.classList.toggle('open', open[s.key]);
+                    open[key] = !open[key];
+                    el.classList.toggle('open', open[key]);
                     save();
                 });
-                box.addEventListener('click', e => { e.stopPropagation(); toggleDone(s.key, el); });
+                box.addEventListener('click', e => { e.stopPropagation(); toggleDone(key, el); });
                 box.addEventListener('keydown', e => {
-                    if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); toggleDone(s.key, el); }
+                    if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); toggleDone(key, el); }
                 });
+                el.dataset.key = key;
+                const grip = el.querySelector('.grip');
+                grip.draggable = true;
+                grip.addEventListener('click', e => e.stopPropagation());
+                grip.addEventListener('dragstart', e => {
+                    dragEl = el;
+                    e.dataTransfer.effectAllowed = 'move';
+                    try { e.dataTransfer.setData('text/plain', key); } catch (_) { }
+                    if (e.dataTransfer.setDragImage) e.dataTransfer.setDragImage(el, 24, 24);
+                    setTimeout(() => el.classList.add('dragging'), 0);
+                });
+                grip.addEventListener('dragend', () => {
+                    el.classList.remove('dragging');
+                    if (dragEl) {
+                        const domKeys = [...$('list').children].map(x => x.dataset.key);
+                        order = [...domKeys, ...order.filter(k => !domKeys.includes(k))];
+                        save();
+                    }
+                    dragEl = null;
+                    render();
+                });
+                el.querySelector('.topool').addEventListener('click', e => { e.stopPropagation(); moveToPool(key); });
 
                 list.appendChild(el);
             });
+            renderPool();
             updateProgress();
         }
+
+        function renderPool() {
+            const pu = POOL_UI[lang];
+            const pooled = order.filter(k => byKey[k] && pool.has(k)).map(k => byKey[k]);
+            $('pool-title').textContent = pu.title;
+            $('pool-count').textContent = pooled.length;
+            $('pool').classList.toggle('open', poolOpen);
+            const body = $('pool-list');
+            body.innerHTML = '';
+            if (!pooled.length) {
+                const empty = document.createElement('div');
+                empty.className = 'poolempty';
+                empty.textContent = pu.empty;
+                body.appendChild(empty);
+                return;
+            }
+            pooled.forEach(s => {
+                const isOpen = !!open[s.key];
+                const it = document.createElement('div');
+                it.className = 'poolitem' + (isOpen ? ' open' : '');
+                it.innerHTML =
+                    '<div class="poolrow">' +
+                    '<span class="poolname"></span>' +
+                    '<span class="chev">▸</span>' +
+                    '<button class="topmain" title="nach oben holen" aria-label="nach oben holen">+</button>' +
+                    '</div>' +
+                    '<div class="desc"><div class="descInner">' +
+                    '<div class="shots">' +
+                    '<img class="shot" loading="lazy" alt="" src="cb/' + s.key + '.jpg" onerror="this.remove()">' +
+                    '<img class="shot" loading="lazy" alt="" src="cb/' + s.key + '-2.jpg" onerror="this.remove()">' +
+                    '</div>' +
+                    '<p class="credit"></p>' +
+                    '<p class="text"></p>' +
+                    '</div></div>';
+                it.querySelector('.poolname').textContent = pick(s.name);
+                it.querySelector('.text').textContent = pick(s.blurb);
+                if (s.credit) it.querySelector('.credit').textContent = s.credit;
+                it.querySelectorAll('.shot').forEach(im => { im.alt = pick(s.name); });
+                it.querySelector('.poolrow').addEventListener('click', () => {
+                    open[s.key] = !open[s.key];
+                    it.classList.toggle('open', open[s.key]);
+                    save();
+                });
+                it.querySelector('.topmain').addEventListener('click', e => { e.stopPropagation(); moveToMain(s.key); });
+                body.appendChild(it);
+            });
+        }
+
+        function moveItem(key, dir) {
+            const act = activeKeys();
+            const i = act.indexOf(key), j = i + dir;
+            if (j < 0 || j >= act.length) return;
+            const a = order.indexOf(key), b = order.indexOf(act[j]);
+            const tmp = order[a]; order[a] = order[b]; order[b] = tmp;
+            save(); render();
+        }
+
+        function moveToPool(key) { pool.add(key); open[key] = false; save(); render(); }
+        function moveToMain(key) { pool.delete(key); order = [key, ...order.filter(k => k !== key)]; save(); render(); }
 
         function toggleDone(key, el) {
             state[key] = !state[key];
@@ -681,6 +1023,25 @@
         document.querySelectorAll('.lang').forEach(b =>
             b.addEventListener('click', () => { lang = b.dataset.l; save(); render(); }));
         $('btn-reset').addEventListener('click', () => { state = {}; save(); render(); });
+        $('pool-head').addEventListener('click', () => {
+            poolOpen = !poolOpen; $('pool').classList.toggle('open', poolOpen); save();
+        });
+
+        // mouse drag-reorder of the active list (grip handle sets dragEl)
+        $('list').addEventListener('dragover', e => {
+            if (!dragEl) return;
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            const list = $('list');
+            const after = [...list.children].find(c => {
+                if (c === dragEl) return false;
+                const rect = c.getBoundingClientRect();
+                return e.clientY < rect.top + rect.height / 2;
+            });
+            if (after) list.insertBefore(dragEl, after);
+            else list.appendChild(dragEl);
+        });
+        $('list').addEventListener('drop', e => e.preventDefault());
 
         render();
     </script>
