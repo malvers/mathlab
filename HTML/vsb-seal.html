@@ -500,23 +500,30 @@
         let wood = WOODS[0][1];
 
         const hmImg = new Image();
-        hmImg.onload = () => {
-            hmN = hmImg.width;
-            const oc = document.createElement('canvas'); oc.width = oc.height = hmN;
-            const octx = oc.getContext('2d');
-            octx.drawImage(hmImg, 0, 0);
-            const d = octx.getImageData(0, 0, hmN, hmN).data;
-            hmH = new Float32Array(hmN * hmN);
-            for (let i = 0; i < hmN * hmN; i++) hmH[i] = d[i * 4] / 255 * HM.hmax_mm;
+        function buildHM(gray, n) {
+            hmN = n;
+            hmH = new Float32Array(n * n);
+            for (let i = 0; i < n * n; i++) hmH[i] = gray[i] / 255 * HM.hmax_mm;
             // one light box blur: hides the 8-bit terracing in the shading
-            const b = new Float32Array(hmN * hmN);
-            for (let y = 1; y < hmN - 1; y++)
-                for (let x = 1; x < hmN - 1; x++) {
-                    const i = y * hmN + x;
-                    b[i] = (hmH[i] * 4 + hmH[i - 1] + hmH[i + 1] + hmH[i - hmN] + hmH[i + hmN]) / 8;
+            const b = new Float32Array(n * n);
+            for (let y = 1; y < n - 1; y++)
+                for (let x = 1; x < n - 1; x++) {
+                    const i = y * n + x;
+                    b[i] = (hmH[i] * 4 + hmH[i - 1] + hmH[i + 1] + hmH[i - n] + hmH[i + n]) / 8;
                 }
             hmH = b;
+            woodOff = null;
             holzShow();
+        }
+        hmImg.onload = () => {
+            const n = hmImg.width;
+            const oc = document.createElement('canvas'); oc.width = oc.height = n;
+            const octx = oc.getContext('2d');
+            octx.drawImage(hmImg, 0, 0);
+            const d = octx.getImageData(0, 0, n, n).data;
+            const g = new Uint8Array(n * n);
+            for (let i = 0; i < n * n; i++) g[i] = d[i * 4];
+            buildHM(g, n);
         };
         hmImg.src = window.VSB_HM;
 
@@ -704,6 +711,7 @@
                 if (SAVED.vsel) vSel = SAVED.vsel.filter(s => vModel[s.pi] && vModel[s.pi].subs[s.si] && vModel[s.pi].subs[s.si].nodes[s.ni]);
                 vapply();
             }
+            schedulePreview();   // sync STICK & HOLZ with the restored model
         });
         function fmt(p) { return p[0].toFixed(3) + ' ' + p[1].toFixed(3); }
         function rebuild(pm) {
@@ -1531,7 +1539,6 @@
                     if (r.ok || r.status === 204) {
                         vPutOk = true;
                         fileStatus('Auf Server gespeichert ' + new Date().toLocaleTimeString('de-DE') + '.');
-                        scheduleBuild();   // stick & holz follow automatically
                         return 'server';
                     }
                     vPutOk = false;
@@ -1552,54 +1559,85 @@
         function writeMaster(immediate) {
             clearTimeout(vWriteT);
             vWriteT = setTimeout(writeMasterNow, immediate ? 0 : 800);
+            schedulePreview();   // STICK & HOLZ follow every edit
         }
-        // ---- auto pipeline: after each saved edit, rebuild stick/holz and refresh ----
-        let vBuildT = null, vBuilding = false;
-        function scheduleBuild() {
-            clearTimeout(vBuildT);
-            vBuildT = setTimeout(startBuild, 2500);
+        // ---- in-browser pipeline (vsb-pipeline.js in a worker): every edit
+        // rebuilds STICK & HOLZ live; SPEICHERN additionally produces the files ----
+        let vWorker = null, vPipeSeq = 0;
+        const vPipeWait = new Map();
+        function getWorker() {
+            if (vWorker) return vWorker;
+            vWorker = new Worker('vsb-pipeline-worker.js');
+            vWorker.onmessage = e => {
+                const w = vPipeWait.get(e.data.id);
+                if (!w) return;
+                vPipeWait.delete(e.data.id);
+                e.data.ok ? w.res(e.data) : w.rej(new Error(e.data.error));
+            };
+            vWorker.onerror = e => {
+                for (const w of vPipeWait.values()) w.rej(new Error(e.message || 'Worker-Fehler'));
+                vPipeWait.clear();
+                vWorker.terminate(); vWorker = null;   // next call gets a fresh worker
+            };
+            return vWorker;
         }
-        function loadScript(url) {
+        function runPipeline(full) {
+            const id = ++vPipeSeq;
             return new Promise((res, rej) => {
-                const s = document.createElement('script');
-                s.src = url; s.onload = () => { s.remove(); res(); }; s.onerror = rej;
-                document.head.appendChild(s);
+                vPipeWait.set(id, { res, rej });
+                getWorker().postMessage({ id, svg: serializeSVG(), full });
             });
         }
-        async function reloadDerived() {
-            const v = Date.now();
-            try {
-                await loadScript('vsb-stick-daten.js?v=' + v);
-                await loadScript('vsb-holz-daten.js?v=' + v);
-            } catch (e) { return; }
-            D = window.VSB_DATA;
-            ovlReady = false;
-            ovlImg.src = window.VSB_OVERLAY;
-            updateStats(); draw();
-            hmH = null; woodOff = null;
-            hmImg.src = window.VSB_HM;   // onload rebuilds the relief
+        function overlayFromMask(tm) {
+            const n = 592, c = document.createElement('canvas'); c.width = c.height = n;
+            const g = c.getContext('2d'); const im = g.createImageData(n, n);
+            for (let i = 0; i < n * n; i++)
+                if (tm[i]) { im.data[4 * i] = 206; im.data[4 * i + 1] = 172; im.data[4 * i + 2] = 86; im.data[4 * i + 3] = 255; }
+            g.putImageData(im, 0, 0);
+            return c.toDataURL('image/png');
         }
-        async function startBuild() {
-            if (vBuilding) { scheduleBuild(); return; }
-            vBuilding = true;
-            const b = document.getElementById('gsave');
+        function applyResult(r) {
+            D = r.viewer; window.VSB_DATA = r.viewer;
+            ovlReady = false;
+            ovlImg.src = overlayFromMask(r.tm);
+            updateStats(); draw();
+            buildHM(r.hv, 1040);
+        }
+        let vBuildT = null, vPrevBusy = false, vPrevDirty = false;
+        async function preview() {
+            if (vPrevBusy) { vPrevDirty = true; return; }
+            vPrevBusy = true;
+            try { applyResult(await runPipeline(false)); } catch (e) { }
+            vPrevBusy = false;
+            if (vPrevDirty) { vPrevDirty = false; preview(); }
+        }
+        function schedulePreview() {
+            clearTimeout(vBuildT);
+            vBuildT = setTimeout(preview, 700);
+        }
+        // ---- output folder (vsb-seal-data) via File System Access API ----
+        let vDir = null;
+        async function ensureOutDir(interactive) {
+            if (vDir) return vDir;
             try {
-                const r = await fetch('/__pipeline', { method: 'POST' });
-                if (r.status === 409) { vBuilding = false; scheduleBuild(); return; }
-                for (; ;) {
-                    await new Promise(res => setTimeout(res, 1500));
-                    const st = await (await fetch('/__pipeline/status')).json();
-                    const m = (st.log.match(/== (\w+) ==/g) || []).pop();
-                    b.textContent = '⏳ ' + (m ? m.replace(/=|\s/g, '').toUpperCase() : 'BAUT') + '…';
-                    if (!st.running) break;
+                const h = await idb.get('outdir');
+                if (h) {
+                    if (await h.queryPermission({ mode: 'readwrite' }) === 'granted') { vDir = h; return h; }
+                    if (interactive && await h.requestPermission({ mode: 'readwrite' }) === 'granted') { vDir = h; return h; }
                 }
-                await reloadDerived();
-                b.classList.add('done'); b.textContent = '✓ STICK & HOLZ AKTUELL';
-                setTimeout(() => { b.classList.remove('done'); b.textContent = 'SPEICHERN ⌘S'; }, 2200);
-            } catch (e) {
-                b.textContent = 'SPEICHERN ⌘S';
-            }
-            vBuilding = false;
+            } catch (e) { }
+            if (!interactive || typeof showDirectoryPicker !== 'function') return null;
+            try {
+                const h = await showDirectoryPicker({ id: 'vsbseal', mode: 'readwrite', startIn: 'desktop' });
+                vDir = h; await idb.set('outdir', h);
+                return h;
+            } catch (e) { return null; }
+        }
+        async function writeOut(dir, name, data) {
+            const fh = await dir.getFileHandle(name, { create: true });
+            const w = await fh.createWritable();
+            await w.write(data);
+            await w.close();
         }
         function serializeSVG(px) {
             const svg = vinner.querySelector('svg').cloneNode(true);
@@ -1709,13 +1747,46 @@
         async function saveAll() {
             saveState();
             const b = document.getElementById('gsave');
-            b.textContent = '⏳ SPEICHERE…';
-            const how = await writeMasterNow();
-            if (how === 'server') { clearTimeout(vBuildT); startBuild(); }
-            else {
-                b.classList.add('done'); b.textContent = '✓ GESPEICHERT (' + how + ')';
-                setTimeout(() => { b.classList.remove('done'); b.textContent = 'SPEICHERN ⌘S'; }, 1600);
+            b.textContent = '⏳ BAUT…';
+            const how = await writeMasterNow();          // master -> server/file (repo copy)
+            let r;
+            try {
+                r = await runPipeline(true);
+                applyResult(r);
+            } catch (e) {
+                b.textContent = 'FEHLER: ' + e.message;
+                setTimeout(() => { b.textContent = 'SPEICHERN ⌘S'; }, 3000);
+                return;
             }
+            b.textContent = '⏳ SCHREIBE…';
+            const files = [
+                ['vsb-siegel-master.svg', new Blob([serializeSVG()], { type: 'image/svg+xml' })],
+                ['vsb-stick.dst', r.files.dst],
+                ['vsb-relief.stl', r.files.stlRaised],
+                ['vsb-relief-engraved.stl', r.files.stlEngraved],
+                ['vsb-sw-150mm.png', r.files.png]
+            ];
+            const dir = await ensureOutDir(true);
+            let done = 0, where;
+            if (dir) {
+                try {
+                    for (const [n, d] of files) { await writeOut(dir, n, d); done++; }
+                    where = dir.name + '/';
+                } catch (e) { fileStatus('Ordner-Schreibfehler: ' + e.name + ' — ' + e.message); }
+            }
+            if (!done) {                                  // fallback: downloads
+                for (const [n, d] of files) {
+                    const a = document.createElement('a');
+                    a.href = URL.createObjectURL(d instanceof Blob ? d : new Blob([d]));
+                    a.download = n; a.click();
+                    setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+                    done++;
+                }
+                where = 'Downloads/';
+            }
+            fileStatus('Master: ' + how + ' · ' + done + ' Dateien → ' + where + ' ' + new Date().toLocaleTimeString('de-DE'));
+            b.classList.add('done'); b.textContent = '✓ ' + done + ' DATEIEN → ' + where.replace(/\/$/, '').toUpperCase();
+            setTimeout(() => { b.classList.remove('done'); b.textContent = 'SPEICHERN ⌘S'; }, 2600);
         }
         document.getElementById('gsave').addEventListener('click', saveAll);
         window.addEventListener('keydown', e => {
