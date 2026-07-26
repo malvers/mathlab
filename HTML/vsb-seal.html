@@ -1,0 +1,1797 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>VSB Siegel — Werkbank</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html, body { height: 100%; overflow: hidden; }
+
+        body {
+            background: rgb(8, 20, 42);
+            color: #fff;
+            font-family: Arial, Helvetica, sans-serif;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 10px 14px;
+            background: linear-gradient(180deg, rgb(14, 36, 78), rgb(8, 20, 42));
+            border-bottom: 1px solid rgba(245, 194, 66, 0.3);
+            flex-wrap: wrap;
+        }
+
+        h1 { font-family: 'Orbitron', sans-serif; font-size: 15px; letter-spacing: 1.5px; color: rgb(245, 194, 66); }
+
+        #tabs { display: flex; gap: 6px; }
+
+        .tab {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 12px;
+            letter-spacing: 1px;
+            padding: 9px 14px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            background: transparent;
+            color: #cdd8ec;
+            cursor: pointer;
+        }
+
+        .tab.active { background: rgb(121, 158, 49); border-color: rgb(121, 158, 49); color: #fff; }
+
+        #gsave {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 12px;
+            letter-spacing: 1px;
+            padding: 9px 14px;
+            border-radius: 10px;
+            border: 1px solid rgba(121, 200, 120, 0.6);
+            background: transparent;
+            color: rgb(121, 200, 120);
+            cursor: pointer;
+        }
+
+        #gsave:hover { background: rgb(121, 158, 49); color: #fff; }
+
+        #gsave.done { background: rgb(121, 158, 49); border-color: rgb(121, 158, 49); color: #fff; }
+
+        #stats { font-size: 12px; color: #9fb6dc; margin-left: auto; }
+
+        .main { flex: 1; display: none; min-height: 0; }
+
+        .main.active { display: flex; }
+
+        .panel {
+            width: 250px;
+            flex: 0 0 auto;
+            overflow-y: auto;
+            padding: 12px;
+            background: rgb(11, 27, 56);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 12.5px;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(245, 194, 66, 0.4) transparent;
+        }
+
+        .panel h2 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 11px;
+            letter-spacing: 1px;
+            color: rgb(245, 194, 66);
+            margin: 14px 0 6px 0;
+        }
+
+        .panel h2:first-child { margin-top: 0; }
+
+        .row { display: flex; align-items: center; gap: 8px; margin: 6px 0; }
+
+        .row label { flex: 1; }
+
+        .val { color: rgb(245, 194, 66); font-weight: bold; min-width: 62px; text-align: right; }
+
+        input[type=range] { width: 100%; accent-color: rgb(121, 158, 49); }
+
+        input[type=checkbox] { accent-color: rgb(121, 158, 49); width: 16px; height: 16px; }
+
+        .btnrow { display: flex; gap: 6px; flex-wrap: wrap; margin: 6px 0; }
+
+        button {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 12px;
+            padding: 7px 10px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            background: transparent;
+            color: #cdd8ec;
+            cursor: pointer;
+        }
+
+        button.active, button:hover { background: rgb(121, 158, 49); border-color: rgb(121, 158, 49); color: #fff; }
+
+        .wrap { flex: 1; position: relative; min-width: 0; overflow: hidden; }
+
+        .wrap canvas { position: absolute; inset: 0; width: 100%; height: 100%; cursor: grab; touch-action: none; }
+
+        .hint { font-size: 11px; color: #7f93b5; margin-top: 10px; line-height: 1.5; }
+
+        a.dl { color: rgb(121, 200, 120); display: block; margin: 4px 0; }
+
+        .key {
+            margin-left: auto;
+            font-size: 10px;
+            color: rgb(245, 194, 66);
+            border: 1px solid rgba(245, 194, 66, 0.4);
+            border-radius: 5px;
+            padding: 1px 6px;
+            white-space: nowrap;
+        }
+
+        button .key { margin-left: 6px; border-color: rgba(255, 255, 255, 0.3); color: inherit; }
+
+        .row .key { min-width: 38px; text-align: center; }
+
+        /* vector tab: inline SVG, CSS-transformed — stays vector-sharp at any zoom */
+        #vec-wrap { background: #fff; cursor: grab; touch-action: none; }
+
+        #vec-wrap.editing { cursor: crosshair; }
+
+        #vec-inner { position: absolute; left: 0; top: 0; transform-origin: 0 0; will-change: transform; }
+
+        #vtoast {
+            position: absolute;
+            left: 50%;
+            top: 16px;
+            transform: translateX(-50%);
+            background: rgba(8, 20, 42, 0.92);
+            color: #fff;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 14px;
+            padding: 10px 18px;
+            border-radius: 10px;
+            border: 1px solid rgba(245, 194, 66, 0.5);
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 5;
+            max-width: 80%;
+            text-align: center;
+        }
+
+        #vtoast.show { opacity: 1; }
+
+        #vec-inner svg { display: block; }
+
+        @media (max-width: 700px) {
+            .main.active { flex-direction: column; }
+
+            .panel { width: 100%; max-height: 45%; border-right: none; border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>VSB SIEGEL</h1>
+        <div id="tabs">
+            <button class="tab active" data-t="stick">STICK</button>
+            <button class="tab" data-t="holz">HOLZ</button>
+            <button class="tab" data-t="vektor">VEKTOR</button>
+        </div>
+        <button id="gsave" title="Alles speichern (Master → Server + Zustand)">SPEICHERN ⌘S</button>
+        <span id="stats"></span>
+    </header>
+
+    <!-- ================= STICK ================= -->
+    <div class="main active" id="m-stick">
+        <div class="panel">
+            <h2>Garn</h2>
+            <div class="row"><label for="garn">Garnstärke</label><span class="val" id="garnval"></span></div>
+            <input type="range" id="garn" min="0.15" max="0.60" step="0.01" value="0.40" aria-label="Garnstärke in mm">
+            <div class="hint">40 wt ≈ 0,40 mm · 60 wt ≈ 0,25 mm · 75 wt ≈ 0,20 mm</div>
+            <h2>Original-Overlay</h2>
+            <div class="row"><label for="ovl">Deckkraft</label><span class="val" id="ovlval"></span></div>
+            <input type="range" id="ovl" min="0" max="100" step="1" value="0" aria-label="Overlay-Deckkraft in Prozent">
+            <h2>Ebenen</h2>
+            <div id="layers"></div>
+            <div class="row">
+                <input type="checkbox" id="colored" aria-label="Ebenen einfärben">
+                <label for="colored">Ebenen einfärben (Diagnose)</label>
+            </div>
+            <h2>Stoff</h2>
+            <div class="btnrow" id="fabrics"></div>
+            <h2>Ansicht</h2>
+            <div class="btnrow" id="views"></div>
+            <div class="hint">Ziehen = verschieben · Rad/Pinch = zoomen · Doppelklick = Gesamt</div>
+            <h2>Export</h2>
+            <div class="btnrow">
+                <button id="ex-stick-view">PNG Ansicht</button>
+                <button id="ex-stick-full">PNG Gesamt 4000 px</button>
+            </div>
+        </div>
+        <div class="wrap"><canvas id="cv"></canvas></div>
+    </div>
+
+    <!-- ================= HOLZ ================= -->
+    <div class="main" id="m-holz">
+        <div class="panel">
+            <h2>Variante</h2>
+            <div class="btnrow" id="wvariant"></div>
+            <h2>Holz</h2>
+            <div class="btnrow" id="wwood"></div>
+            <div class="row">
+                <input type="checkbox" id="wgold" aria-label="Gravur mit Gold auslegen">
+                <label for="wgold">Gravur vergoldet (Wachs)</label>
+            </div>
+            <h2>Licht</h2>
+            <div class="row"><label for="waz">Richtung</label><span class="val" id="wazval"></span></div>
+            <input type="range" id="waz" min="0" max="360" step="1" value="315" aria-label="Licht-Richtung in Grad">
+            <div class="row"><label for="wel">Höhe</label><span class="val" id="welval"></span></div>
+            <input type="range" id="wel" min="10" max="80" step="1" value="35" aria-label="Licht-Höhe in Grad">
+            <h2>Relief</h2>
+            <div class="row"><label for="wex">Verstärkung</label><span class="val" id="wexval"></span></div>
+            <input type="range" id="wex" min="1" max="3" step="0.1" value="1.5" aria-label="Relief-Verstärkung">
+            <div class="hint">Simulation aus der echten Fräs-Heightmap (Ø 100 mm, Motive 2 mm). Ziehen/zoomen wie gewohnt.</div>
+            <h2>Export</h2>
+            <div class="btnrow">
+                <button id="ex-holz-view">PNG Ansicht</button>
+                <button id="ex-holz-full">PNG Relief nativ</button>
+            </div>
+        </div>
+        <div class="wrap"><canvas id="wcv"></canvas></div>
+    </div>
+
+    <!-- ================= VEKTOR ================= -->
+    <div class="main" id="m-vektor">
+        <div class="panel">
+            <h2>Vektor-Master</h2>
+            <div class="hint">Rad/Pinch = Zoom · Ziehen = Pan · Doppelklick: Kurve = Punkt einfügen · Knoten = ganzer Pfad · leer = Anpassen</div>
+            <h2>Tools</h2>
+            <div class="row"><input type="checkbox" id="vA" checked aria-label="Artwork"><label for="vA">Artwork</label><span class="key">A</span></div>
+            <div class="row"><input type="checkbox" id="vH" checked aria-label="Handles"><label for="vH">Handles</label><span class="key">H</span></div>
+            <div class="row"><input type="checkbox" id="vN" aria-label="Knoten"><label for="vN">Knoten</label><span class="key">N</span></div>
+            <div class="row"><input type="checkbox" id="vO" aria-label="Outlines"><label for="vO">Outlines</label><span class="key">O</span></div>
+            <div class="row"><input type="checkbox" id="vP" aria-label="Polygon-Auswahl"><label for="vP">Polygon-Auswahl</label><span class="key">⇧P</span></div>
+            <h2>Bearbeiten</h2>
+            <div class="btnrow">
+                <button id="vopen">Auftrennen<span class="key">C</span></button>
+                <button id="vclose">Schließen<span class="key">J</span></button>
+            </div>
+            <div class="btnrow">
+                <button id="vdel">Löschen<span class="key">⌫</span></button>
+                <button id="vfit">Anpassen<span class="key">F</span></button>
+                <button id="vsimp">Vereinfachen<span class="key">L</span></button>
+            </div>
+            <div class="btnrow">
+                <button id="vundo">Rückgängig<span class="key">⌘Z</span></button>
+                <button id="vredo">Wiederholen<span class="key">⇧⌘Z</span></button>
+            </div>
+            <div class="hint">Klick wählt · CapsLock/Shift sammelt · Ziehen formt · Pfeile bewegen Auswahl (⇧ = grob) · <b>C</b>: 1 Knoten öffnet, 2 auf einer Kontur teilt, 2 auf zwei Konturen = Kanal · <b>F</b> Ansicht · <b>Esc</b> abbrechen</div>
+            <div class="hint" id="vcaps"></div>
+            <div class="hint" id="vinfo"></div>
+            <h2>Export</h2>
+            <div class="row"><label for="vcm">Größe</label><span class="val" id="vcmval"></span></div>
+            <input type="range" id="vcm" min="5" max="100" step="1" value="15" aria-label="Export-Größe in Zentimetern">
+            <div class="btnrow" id="vdpi"></div>
+            <div class="hint" id="vpxinfo"></div>
+            <div class="btnrow"><button id="ex-vec">PNG exportieren</button></div>
+            <h2>Datei</h2>
+            <div class="btnrow">
+                <button id="vconnect">Master verbinden</button>
+                <button id="vsave">SVG herunterladen</button>
+                <button id="vreset">Datei neu laden</button>
+            </div>
+            <div class="hint" id="vfilestat"></div>
+            <div class="hint">Edits speichern sich automatisch intern (überleben jeden Reload). <b>Speichern</b> lädt den aktuellen Stand als SVG herunter — die eine Datei, die alles enthält. „Datei neu laden" verwirft die internen Edits.</div>
+        </div>
+        <div class="wrap" id="vec-wrap">
+            <div id="vec-inner"></div>
+            <div id="vtoast"></div>
+        </div>
+    </div>
+
+    <script src="vsb-stick-daten.js"></script>
+    <script src="vsb-holz-daten.js"></script>
+    <script>
+        'use strict';
+        // ---------- tabs ----------
+        const tabs = document.querySelectorAll('.tab');
+        tabs.forEach(t => t.addEventListener('click', () => {
+            tabs.forEach(x => x.classList.remove('active'));
+            t.classList.add('active');
+            document.querySelectorAll('.main').forEach(m => m.classList.remove('active'));
+            document.getElementById('m-' + t.dataset.t).classList.add('active');
+            if (t.dataset.t === 'stick') { if (!view.init) fit(); draw(); }
+            if (t.dataset.t === 'holz') holzShow();
+            if (t.dataset.t === 'vektor') { if (!vview.init) vecFit(); else vapply(); }
+        }));
+
+        // generic pan/zoom binder: cb(dx,dy) for pan, zb(px,py,f) for zoom, dbl() for reset
+        function bindPanZoom(el, cb, zb, dbl) {
+            const pointers = new Map(); let lastPinch = 0;
+            el.addEventListener('pointerdown', e => { el.setPointerCapture(e.pointerId); pointers.set(e.pointerId, [e.clientX, e.clientY]); });
+            el.addEventListener('pointerup', e => { pointers.delete(e.pointerId); lastPinch = 0; });
+            el.addEventListener('pointercancel', e => { pointers.delete(e.pointerId); lastPinch = 0; });
+            el.addEventListener('pointermove', e => {
+                if (!pointers.has(e.pointerId)) return;
+                const prev = pointers.get(e.pointerId);
+                pointers.set(e.pointerId, [e.clientX, e.clientY]);
+                if (pointers.size === 1) cb(e.clientX - prev[0], e.clientY - prev[1]);
+                else if (pointers.size === 2) {
+                    const [p1, p2] = [...pointers.values()];
+                    const d = Math.hypot(p1[0] - p2[0], p1[1] - p2[1]);
+                    const r = el.getBoundingClientRect();
+                    if (lastPinch) zb((p1[0] + p2[0]) / 2 - r.left, (p1[1] + p2[1]) / 2 - r.top, d / lastPinch);
+                    lastPinch = d;
+                }
+            });
+            el.addEventListener('wheel', e => {
+                e.preventDefault();
+                const r = el.getBoundingClientRect();
+                zb(e.clientX - r.left, e.clientY - r.top, Math.exp(-e.deltaY * 0.0015));
+            }, { passive: false });
+            el.addEventListener('dblclick', dbl);
+        }
+
+        // ================= STICK (as in vsb-stick-viewer) =================
+        let D = window.VSB_DATA;
+        const GOLD = '#CEAC56';
+        const LAYERS = [
+            ['ringe', 'Ringe'],
+            ['baum_underlay', 'Baum-Underlay'],
+            ['baum_fuellung', 'Baum-Füllung'],
+            ['baum_kontur', 'Baum-Kontur'],
+            ['motto', 'Motto'],
+            ['vsb', 'V·S·B'],
+        ];
+        const DIAG = { ringe: '#e6be5a', baum_underlay: '#78c8f0', baum_fuellung: '#e6be5a', baum_kontur: '#f07878', motto: '#8cf08c', vsb: '#dc8cf0' };
+        const FABRICS = [['Grün', '#1d5231'], ['Rot', '#7a1410'], ['Anthrazit', '#232428']];
+        const cv = document.getElementById('cv');
+        const ctx = cv.getContext('2d');
+        let fabric = FABRICS[0][1];
+        const on = {}; LAYERS.forEach(([k]) => on[k] = true);
+        let garn = 0.40, ovl = 0, colored = false;
+        let view = { x: 0, y: 0, s: 6 };
+        const ovlImg = new Image(); let ovlReady = false;
+        ovlImg.onload = () => { ovlReady = true; draw(); };
+        ovlImg.src = window.VSB_OVERLAY;
+        function updateStats() {
+            let nSt = 0;
+            for (const [k] of LAYERS) for (const sq of D.groups[k]) nSt += sq.length;
+            document.getElementById('stats').textContent = 'Ø 120/100/150 mm · Stick ' + nSt.toLocaleString('de-DE') + ' Punkte';
+        }
+        updateStats();
+
+        function fit() {
+            const w = cv.clientWidth, h = cv.clientHeight;
+            view.init = true;
+            view.s = 0.92 * Math.min(w, h) / (2 * D.disc_r);   // seal disc = 92% viewport
+            view.x = w / 2 - D.size_mm / 2 * view.s;
+            view.y = h / 2 - D.size_mm / 2 * view.s;
+        }
+        function focus(cxm, cym, mmSpan) {
+            const w = cv.clientWidth, h = cv.clientHeight;
+            view.s = Math.min(w, h) / mmSpan;
+            view.x = w / 2 - cxm * view.s;
+            view.y = h / 2 - cym * view.s;
+        }
+        function paintStick(g, v) {
+            g.save(); g.translate(v.x, v.y); g.scale(v.s, v.s);
+            const c = D.size_mm / 2;
+            g.beginPath(); g.arc(c, c, D.disc_r, 0, 2 * Math.PI);
+            g.fillStyle = fabric; g.fill();
+            g.lineCap = 'round'; g.lineJoin = 'round'; g.lineWidth = garn;
+            for (const [k] of LAYERS) {
+                if (!on[k]) continue;
+                g.strokeStyle = colored ? DIAG[k] : GOLD;
+                for (const sq of D.groups[k]) {
+                    g.beginPath();
+                    g.moveTo(sq[0][0], sq[0][1]);
+                    for (let i = 1; i < sq.length; i++) g.lineTo(sq[i][0], sq[i][1]);
+                    g.stroke();
+                }
+            }
+            if (ovl > 0 && ovlReady) {
+                g.globalAlpha = ovl / 100;
+                g.drawImage(ovlImg, D.tree_x, D.tree_x, D.tree_s, D.tree_s);
+                g.globalAlpha = 1;
+            }
+            g.restore();
+        }
+        function draw() {
+            const dpr = window.devicePixelRatio || 1;
+            const w = cv.clientWidth, h = cv.clientHeight;
+            if (!w) return;
+            if (cv.width !== w * dpr || cv.height !== h * dpr) { cv.width = w * dpr; cv.height = h * dpr; }
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            ctx.fillStyle = 'rgb(16,17,19)'; ctx.fillRect(0, 0, w, h);
+            paintStick(ctx, view);
+            saveState();
+        }
+        // shared download helper
+        function dl(canvas, name) {
+            canvas.toBlob(b => {
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(b); a.download = name; a.click();
+                setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+            }, 'image/png');
+        }
+        const garnEl = document.getElementById('garn'), garnVal = document.getElementById('garnval');
+        const ovlEl = document.getElementById('ovl'), ovlVal = document.getElementById('ovlval');
+        function syncLabels() {
+            garnVal.textContent = garn.toFixed(2).replace('.', ',') + ' mm';
+            ovlVal.textContent = ovl + ' %';
+        }
+        garnEl.addEventListener('input', () => { garn = +garnEl.value; syncLabels(); draw(); });
+        ovlEl.addEventListener('input', () => { ovl = +ovlEl.value; syncLabels(); draw(); });
+        const layersDiv = document.getElementById('layers');
+        for (const [k, label] of LAYERS) {
+            const row = document.createElement('div'); row.className = 'row';
+            const cb = document.createElement('input'); cb.type = 'checkbox'; cb.checked = true; cb.id = 'l_' + k;
+            cb.setAttribute('aria-label', label);
+            const la = document.createElement('label'); la.textContent = label; la.htmlFor = cb.id;
+            cb.addEventListener('change', () => { on[k] = cb.checked; draw(); });
+            row.appendChild(cb); row.appendChild(la); layersDiv.appendChild(row);
+        }
+        document.getElementById('colored').addEventListener('change', e => { colored = e.target.checked; draw(); });
+        const fabDiv = document.getElementById('fabrics');
+        FABRICS.forEach(([name, col], i) => {
+            const b = document.createElement('button'); b.textContent = name;
+            if (i === 0) b.classList.add('active');
+            b.addEventListener('click', () => {
+                fabric = col;
+                fabDiv.querySelectorAll('button').forEach(x => x.classList.remove('active'));
+                b.classList.add('active'); draw();
+            });
+            fabDiv.appendChild(b);
+        });
+        const c0 = D.size_mm / 2;
+        const VIEWS = [
+            ['Gesamt', () => fit()],
+            ['Baum', () => focus(c0, c0, D.tree_s * 1.1)],
+            ['Motto', () => focus(c0, c0 - 46, 40)],
+            ['V·S·B', () => focus(c0, c0 + 42, 40)],
+            ['E links', () => focus(c0 - 41, c0 - 26, 16)],
+            ['E rechts', () => focus(c0 + 44, c0 - 4, 16)],
+        ];
+        const viewsDiv = document.getElementById('views');
+        for (const [name, fn] of VIEWS) {
+            const b = document.createElement('button'); b.textContent = name;
+            b.addEventListener('click', () => { fn(); draw(); });
+            viewsDiv.appendChild(b);
+        }
+        function zoomAt(px, py, f) {
+            f = Math.max(0.2, Math.min(5, f));
+            const ns = Math.max(1, Math.min(600, view.s * f));
+            const r = ns / view.s;
+            view.x = px - (px - view.x) * r;
+            view.y = py - (py - view.y) * r;
+            view.s = ns; draw();
+        }
+        bindPanZoom(cv, (dx, dy) => { view.x += dx; view.y += dy; draw(); }, zoomAt, () => { fit(); draw(); });
+        document.getElementById('ex-stick-view').addEventListener('click', () => dl(cv, 'vsb-stick-ansicht.png'));
+        document.getElementById('ex-stick-full').addEventListener('click', () => {
+            const px = 4000, oc = document.createElement('canvas');
+            oc.width = oc.height = px;
+            const g = oc.getContext('2d');
+            g.fillStyle = 'rgb(16,17,19)'; g.fillRect(0, 0, px, px);
+            const s = px / (D.size_mm * 1.02);
+            paintStick(g, { s, x: px / 2 - D.size_mm / 2 * s, y: px / 2 - D.size_mm / 2 * s });
+            dl(oc, 'vsb-stick-4000.png');
+        });
+
+        // ================= HOLZ =================
+        const wcv = document.getElementById('wcv');
+        const wctx = wcv.getContext('2d');
+        const HM = window.VSB_HM_META;
+        let hmH = null, hmN = 0;          // height field in mm, N x N
+        let woodOff = null;               // offscreen shaded canvas
+        let wview = { x: 0, y: 0, s: 1 };
+        let wvar = 'erhaben', wgold = false;
+        let waz = 315, wel = 35, wex = 1.5;
+        const WOODS = [['Buche', [222, 184, 135]], ['Nussbaum', [121, 84, 56]], ['Eiche', [186, 148, 96]]];
+        let wood = WOODS[0][1];
+
+        const hmImg = new Image();
+        hmImg.onload = () => {
+            hmN = hmImg.width;
+            const oc = document.createElement('canvas'); oc.width = oc.height = hmN;
+            const octx = oc.getContext('2d');
+            octx.drawImage(hmImg, 0, 0);
+            const d = octx.getImageData(0, 0, hmN, hmN).data;
+            hmH = new Float32Array(hmN * hmN);
+            for (let i = 0; i < hmN * hmN; i++) hmH[i] = d[i * 4] / 255 * HM.hmax_mm;
+            // one light box blur: hides the 8-bit terracing in the shading
+            const b = new Float32Array(hmN * hmN);
+            for (let y = 1; y < hmN - 1; y++)
+                for (let x = 1; x < hmN - 1; x++) {
+                    const i = y * hmN + x;
+                    b[i] = (hmH[i] * 4 + hmH[i - 1] + hmH[i + 1] + hmH[i - hmN] + hmH[i + hmN]) / 8;
+                }
+            hmH = b;
+            holzShow();
+        };
+        hmImg.src = window.VSB_HM;
+
+        function shade() {
+            if (!hmH) return;
+            if (!woodOff) { woodOff = document.createElement('canvas'); woodOff.width = woodOff.height = hmN; }
+            const octx = woodOff.getContext('2d');
+            const img = octx.createImageData(hmN, hmN);
+            const px_mm = HM.frame_mm / hmN;
+            const az = waz * Math.PI / 180, el = wel * Math.PI / 180;
+            const L = [Math.cos(el) * Math.sin(az), -Math.cos(el) * Math.cos(az), Math.sin(el)];
+            const engr = wvar === 'graviert';
+            const motifThr = HM.field_mm + (HM.hmax_mm - HM.field_mm) / 2;   // 7mm
+            for (let y = 0; y < hmN; y++) {
+                for (let x = 0; x < hmN; x++) {
+                    const i = y * hmN + x;
+                    let h = hmH[i];
+                    let hL = hmH[i - (x > 0 ? 1 : 0)], hR = hmH[i + (x < hmN - 1 ? 1 : 0)];
+                    let hU = hmH[i - (y > 0 ? hmN : 0)], hD = hmH[i + (y < hmN - 1 ? hmN : 0)];
+                    if (engr) {
+                        // engraved: plate stays high, motifs cut down (heights mirrored above field level)
+                        const f = v => v < 3 ? 1 : (2 * HM.hmax_mm - 2) - v;
+                        h = f(h); hL = f(hL); hR = f(hR); hU = f(hU); hD = f(hD);
+                    }
+                    const dzdx = (hR - hL) / (2 * px_mm) * wex;
+                    const dzdy = (hD - hU) / (2 * px_mm) * wex;
+                    const inv = 1 / Math.sqrt(dzdx * dzdx + dzdy * dzdy + 1);
+                    const ndl = Math.max(0, (-dzdx * L[0] - dzdy * L[1] + L[2]) * inv);
+                    let base = wood;
+                    const isMotif = hmH[i] > motifThr;
+                    if (engr && wgold && isMotif) base = [212, 175, 55];
+                    else if (!engr && isMotif) base = [wood[0] * 0.92, wood[1] * 0.9, wood[2] * 0.88]; // raised motif slightly darker end-grain
+                    const skirt = hmH[i] < 3;
+                    const amb = 0.32, dif = 0.68 * ndl;
+                    const spec = Math.pow(ndl, 18) * 0.18 * 255;
+                    for (let c = 0; c < 3; c++)
+                        img.data[i * 4 + c] = skirt ? 24 : Math.min(255, base[c] * (amb + dif) + spec);
+                    img.data[i * 4 + 3] = 255;
+                }
+            }
+            octx.putImageData(img, 0, 0);
+        }
+
+        function wfit() {
+            const w = wcv.clientWidth, h = wcv.clientHeight;
+            const discPx = hmN * 100.0 / HM.frame_mm;          // seal O100 in the 104mm frame
+            wview.s = 0.92 * Math.min(w, h) / discPx;
+            wview.x = w / 2 - hmN / 2 * wview.s;
+            wview.y = h / 2 - hmN / 2 * wview.s;
+        }
+        function wdraw() {
+            const dpr = window.devicePixelRatio || 1;
+            const w = wcv.clientWidth, h = wcv.clientHeight;
+            if (!w) return;
+            if (wcv.width !== w * dpr || wcv.height !== h * dpr) { wcv.width = w * dpr; wcv.height = h * dpr; }
+            wctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            wctx.fillStyle = 'rgb(16,17,19)'; wctx.fillRect(0, 0, w, h);
+            if (!woodOff) return;
+            wctx.imageSmoothingEnabled = true;
+            wctx.save(); wctx.translate(wview.x, wview.y); wctx.scale(wview.s, wview.s);
+            wctx.drawImage(woodOff, 0, 0);
+            wctx.restore();
+            saveState();
+        }
+        function holzShow() {
+            if (!hmH) return;
+            shade();
+            // only fit once the canvas is actually visible — a hidden tab has
+            // clientWidth 0 and would freeze the view at scale 0
+            if (!wview.init && wcv.clientWidth) { wfit(); wview.init = true; }
+            wdraw();
+        }
+
+        const wvarDiv = document.getElementById('wvariant');
+        [['Erhaben', 'erhaben'], ['Graviert', 'graviert']].forEach(([name, v], i) => {
+            const b = document.createElement('button'); b.textContent = name;
+            if (i === 0) b.classList.add('active');
+            b.addEventListener('click', () => {
+                wvar = v;
+                wvarDiv.querySelectorAll('button').forEach(x => x.classList.remove('active'));
+                b.classList.add('active'); shade(); wdraw();
+            });
+            wvarDiv.appendChild(b);
+        });
+        const wwoodDiv = document.getElementById('wwood');
+        WOODS.forEach(([name, col], i) => {
+            const b = document.createElement('button'); b.textContent = name;
+            if (i === 0) b.classList.add('active');
+            b.addEventListener('click', () => {
+                wood = col;
+                wwoodDiv.querySelectorAll('button').forEach(x => x.classList.remove('active'));
+                b.classList.add('active'); shade(); wdraw();
+            });
+            wwoodDiv.appendChild(b);
+        });
+        document.getElementById('wgold').addEventListener('change', e => { wgold = e.target.checked; shade(); wdraw(); });
+        function wslider(id, valId, setter, fmt) {
+            const el = document.getElementById(id), val = document.getElementById(valId);
+            const upd = () => { setter(+el.value); val.textContent = fmt(+el.value); shade(); wdraw(); };
+            el.addEventListener('input', upd);
+            val.textContent = fmt(+el.value);
+        }
+        wslider('waz', 'wazval', v => waz = v, v => v + '°');
+        wslider('wel', 'welval', v => wel = v, v => v + '°');
+        wslider('wex', 'wexval', v => wex = v, v => v.toFixed(1).replace('.', ',') + '×');
+        function wzoomAt(px, py, f) {
+            f = Math.max(0.2, Math.min(5, f));
+            const ns = Math.max(0.05, Math.min(40, wview.s * f));
+            const r = ns / wview.s;
+            wview.x = px - (px - wview.x) * r;
+            wview.y = py - (py - wview.y) * r;
+            wview.s = ns; wdraw();
+        }
+        bindPanZoom(wcv, (dx, dy) => { wview.x += dx; wview.y += dy; wdraw(); }, wzoomAt, () => { wfit(); wdraw(); });
+        document.getElementById('ex-holz-view').addEventListener('click', () => dl(wcv, 'vsb-holz-ansicht.png'));
+        document.getElementById('ex-holz-full').addEventListener('click', () => { if (woodOff) dl(woodOff, 'vsb-holz-relief.png'); });
+
+        // ================= VEKTOR =================
+        const vwrap = document.getElementById('vec-wrap');
+        const vinner = document.getElementById('vec-inner');
+        let vview = { x: 0, y: 0, s: 1 }, vw = 1000;
+        let vShowNodes = false, vHandles = true;
+        // editable model: per path, subpaths — {open, nodes:[{p, cin, cout}]}
+        // (cout = outgoing control, cin = incoming control of the NEXT segment's end)
+        let vModel = [];          // [{id, el, subs}]
+        let vSel = [];            // multi-select: [{pi, si, ni}, ...]
+        const vUndo = [];
+        // node overlay: canvas above the SVG, redrawn per transform
+        const vov = document.createElement('canvas');
+        vov.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;pointer-events:none;';
+        vwrap.appendChild(vov);
+        (async () => {
+            let fileText = null;
+            try {
+                const h = await idb.get('master');
+                if (h && await h.queryPermission({ mode: 'readwrite' }) === 'granted') {
+                    vFile = h;
+                    fileText = await (await h.getFile()).text();
+                } else if (h) {
+                    fileStatus('Master-Datei: einmal „Master verbinden" klicken (Berechtigung).');
+                }
+            } catch (e) { }
+            return fileText !== null ? fileText : await (await fetch('vsb-siegel-150mm-edit.svg')).text();
+        })().then(t => {
+            vinner.innerHTML = t;
+            const svg = vinner.querySelector('svg');
+            svg.setAttribute('width', '1000'); svg.setAttribute('height', '1000');
+            // internal persistence: continue from the last edited state — unless the
+            // master file is live-connected (then the file IS the current state)
+            if (!vFile && SAVED && SAVED.model) for (const id of ['lettering', 'tree']) {
+                const el2 = svg.querySelector('#' + id);
+                if (el2 && SAVED.model[id]) el2.setAttribute('d', SAVED.model[id]);
+            }
+            for (const id of ['lettering', 'tree']) {
+                const el = svg.querySelector('#' + id);
+                if (!el) continue;
+                const subs = [];
+                let segs = null, p0 = null;
+                const flush = () => {
+                    if (!segs || segs.length < 2) { segs = null; return; }
+                    const n = segs.length;
+                    const nodes = [];
+                    for (let i = 0; i < n; i++) nodes.push({ p: i === 0 ? p0 : segs[i - 1].p, cin: null, cout: null });
+                    for (let i = 0; i < n; i++) {
+                        nodes[i].cout = segs[i].c1;
+                        nodes[(i + 1) % n].cin = segs[i].c2;
+                    }
+                    subs.push({ open: false, nodes }); segs = null;
+                };
+                for (const c of el.getAttribute('d').matchAll(/([MCZ])([-\d. ]*)/g)) {
+                    const nm = c[2].trim() ? c[2].trim().split(/\s+/).map(Number) : [];
+                    if (c[1] === 'M') { flush(); p0 = [nm[0], nm[1]]; segs = []; }
+                    else if (c[1] === 'C') segs.push({ c1: [nm[0], nm[1]], c2: [nm[2], nm[3]], p: [nm[4], nm[5]] });
+                    else if (c[1] === 'Z') flush();
+                }
+                flush();
+                vModel.push({ id, el, subs });
+            }
+            vinfo();
+            applyArtwork(vArtwork);
+            if (!vview.init) vecFit(); else vapply();
+            // re-apply persisted vektor state once the model exists
+            if (SAVED) {
+                if (SAVED.vview) { vview = SAVED.vview; vview.init = true; }
+                if (SAVED.vsel) vSel = SAVED.vsel.filter(s => vModel[s.pi] && vModel[s.pi].subs[s.si] && vModel[s.pi].subs[s.si].nodes[s.ni]);
+                vapply();
+            }
+        });
+        function fmt(p) { return p[0].toFixed(3) + ' ' + p[1].toFixed(3); }
+        function rebuild(pm) {
+            let d = '';
+            for (const sub of pm.subs) {
+                const nodes = sub.nodes, n = nodes.length;
+                if (n < 2) continue;
+                d += 'M' + fmt(nodes[0].p);
+                const last = sub.open ? n - 1 : n;   // open path: no wrap-around segment
+                for (let i = 0; i < last; i++) {
+                    const j = (i + 1) % n;
+                    d += 'C' + fmt(nodes[i].cout) + ' ' + fmt(nodes[j].cin) + ' ' + fmt(nodes[j].p);
+                }
+                if (!sub.open) d += 'Z';
+            }
+            pm.el.setAttribute('d', d);
+            writeMaster();
+        }
+        let vToastT = null;
+        function vinfo(msg) {
+            let n = 0;
+            for (const pm of vModel) for (const s of pm.subs) n += s.nodes.length;
+            document.getElementById('vinfo').textContent = (msg ? msg + ' · ' : '') + n.toLocaleString('de-DE') + ' Knoten';
+            if (msg) {   // loud, visible toast so nothing ever "silently does nothing"
+                const t = document.getElementById('vtoast');
+                t.textContent = msg; t.classList.add('show');
+                clearTimeout(vToastT);
+                vToastT = setTimeout(() => t.classList.remove('show'), 2000);
+            }
+        }
+        const vRedo = [];
+        function snapshot() { return JSON.stringify(vModel.map(pm => pm.subs)); }
+        function applySnapshot(str) {
+            const subs = JSON.parse(str);
+            vModel.forEach((pm, i) => { pm.subs = subs[i]; rebuild(pm); });
+        }
+        function pushUndo() {
+            vUndo.push(snapshot());
+            if (vUndo.length > 80) vUndo.shift();
+            vRedo.length = 0;   // a fresh edit invalidates the redo stack
+        }
+        function doUndo() {
+            if (!vUndo.length) { vinfo('nichts rückgängig zu machen'); return; }
+            vRedo.push(snapshot());
+            applySnapshot(vUndo.pop());
+            vSel = []; vinfo('Rückgängig'); vnodesDraw(); saveState();
+        }
+        function doRedo() {
+            if (!vRedo.length) { vinfo('nichts wiederherzustellen'); return; }
+            vUndo.push(snapshot());
+            applySnapshot(vRedo.pop());
+            vSel = []; vinfo('Wiederhergestellt'); vnodesDraw(); saveState();
+        }
+        // ---- polygon (lasso) selection with true cut-out ----
+        let vLasso = null;          // {pts:[[x,y] mm]} while drawing
+        let vLassoSel = false;      // selection came from a polygon -> Entf cuts open
+        let vMouseMM = null;
+        let vOutlines = false;      // O: blue bezier outlines
+        let vArtwork = true;        // A: artwork fill on/off
+        function pip(p, poly) {     // point-in-polygon, ray casting
+            let inside = false;
+            for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+                const a = poly[i], b = poly[j];
+                if ((a[1] > p[1]) !== (b[1] > p[1]) &&
+                    p[0] < (b[0] - a[0]) * (p[1] - a[1]) / (b[1] - a[1]) + a[0]) inside = !inside;
+            }
+            return inside;
+        }
+        function closeLasso() {
+            if (!vLasso || vLasso.pts.length < 3) return;
+            const poly = vLasso.pts;
+            const multi = true;     // polygon always adds to what's already selected
+            const have = new Set(vSel.map(s => s.pi + ':' + s.si + ':' + s.ni));
+            vModel.forEach((pm, pi) => pm.subs.forEach((sub, si) => sub.nodes.forEach((nd, ni) => {
+                if (pip(nd.p, poly) && !have.has(pi + ':' + si + ':' + ni)) vSel.push({ pi, si, ni });
+            })));
+            vLasso = null; vLassoSel = true;
+            setLassoUI(false);
+            vinfo(vSel.length + ' im Polygon — Entf schneidet aus');
+            vnodesDraw();
+        }
+        function cutDelete() {
+            // remove selected nodes; subpaths crossing the cut are OPENED:
+            // every surviving run of consecutive outside-nodes becomes an open path
+            if (!vSel.length) return;
+            pushUndo();
+            const bySub = new Map();
+            for (const s of vSel) {
+                const k = s.pi + ':' + s.si;
+                if (!bySub.has(k)) bySub.set(k, { pi: s.pi, si: s.si, del: new Set() });
+                bySub.get(k).del.add(s.ni);
+            }
+            const byPath = new Map();
+            for (const e of bySub.values()) {
+                if (!byPath.has(e.pi)) byPath.set(e.pi, []);
+                byPath.get(e.pi).push(e);
+            }
+            for (const [pi, list] of byPath) {
+                const pm = vModel[pi];
+                for (const e of list.sort((a, b) => b.si - a.si)) {
+                    const sub = pm.subs[e.si];
+                    const n = sub.nodes.length;
+                    if (e.del.size >= n) { pm.subs.splice(e.si, 1); continue; }
+                    // collect maximal runs of surviving nodes
+                    const runs = [];
+                    let cur = null;
+                    for (let i = 0; i < n; i++) {
+                        if (e.del.has(i)) { if (cur) { runs.push(cur); cur = null; } }
+                        else { if (!cur) cur = []; cur.push(sub.nodes[i]); }
+                    }
+                    if (cur) runs.push(cur);
+                    // closed path: first and last run wrap together
+                    if (!sub.open && runs.length > 1 && !e.del.has(0) && !e.del.has(n - 1)) {
+                        runs[0] = runs.pop().concat(runs[0]);
+                    }
+                    const pieces = runs.filter(r => r.length >= 2).map(r => ({ open: true, nodes: r }));
+                    pm.subs.splice(e.si, 1, ...pieces);
+                }
+                rebuild(pm);
+            }
+            vSel = []; vLassoSel = false;
+            vinfo('ausgeschnitten'); vnodesDraw(); saveState();
+        }
+        function closeSel() {
+            // close: two open ends of DIFFERENT subpaths -> join into one path;
+            //        otherwise close each selected open subpath back into a loop
+            if (!vSel.length) { vinfo('Knoten eines offenen Pfades wählen'); return; }
+            const endInfo = s => {
+                const sub = vModel[s.pi].subs[s.si];
+                if (!sub.open) return null;
+                if (s.ni === 0) return 'start';
+                if (s.ni === sub.nodes.length - 1) return 'end';
+                return null;
+            };
+            const revNodes = ns => ns.slice().reverse().map(nd => ({
+                p: nd.p, cin: nd.cout, cout: nd.cin   // reversing swaps the handles
+            }));
+            if (vSel.length === 2) {
+                const [a, b] = vSel, ea = endInfo(a), eb = endInfo(b);
+                if (ea && eb && !(a.pi === b.pi && a.si === b.si)) {
+                    pushUndo();
+                    let A = vModel[a.pi].subs[a.si].nodes.slice();
+                    let B = vModel[b.pi].subs[b.si].nodes.slice();
+                    if (ea === 'start') A = revNodes(A);   // selected end -> tail of A
+                    if (eb === 'end') B = revNodes(B);     // selected end -> head of B
+                    const merged = { open: true, nodes: A.concat(B) };
+                    // remove both originals (higher index first if same path array)
+                    const rm = [{ pi: a.pi, si: a.si }, { pi: b.pi, si: b.si }];
+                    const byPath = {};
+                    rm.forEach(r => (byPath[r.pi] = byPath[r.pi] || []).push(r.si));
+                    for (const pi in byPath) byPath[pi].sort((x, y) => y - x).forEach(si => vModel[pi].subs.splice(si, 1));
+                    vModel[a.pi].subs.push(merged);
+                    [...new Set(rm.map(r => r.pi))].forEach(pi => rebuild(vModel[pi]));
+                    vSel = []; vinfo('Stränge verbunden'); vnodesDraw(); saveState();
+                    return;
+                }
+            }
+            // fallback: close each distinct selected open subpath into a loop
+            const subs = new Map();
+            for (const s of vSel) subs.set(s.pi + ':' + s.si, s);
+            pushUndo(); let did = 0; const touched = new Set();
+            for (const s of subs.values()) {
+                const sub = vModel[s.pi].subs[s.si];
+                if (sub.open) { sub.open = false; did++; touched.add(s.pi); }
+            }
+            if (!did) { vUndo.pop(); vinfo('nichts Offenes gewählt'); return; }
+            touched.forEach(pi => rebuild(vModel[pi]));
+            vinfo(did + ' Pfad(e) geschlossen'); vnodesDraw(); saveState();
+        }
+        // --- simplify: remove nodes while a least-squares refit keeps the shape ---
+        function bezAt(p0, c1, c2, p3, tt) {
+            const mt = 1 - tt;
+            return [mt * mt * mt * p0[0] + 3 * mt * mt * tt * c1[0] + 3 * mt * tt * tt * c2[0] + tt * tt * tt * p3[0],
+                    mt * mt * mt * p0[1] + 3 * mt * mt * tt * c1[1] + 3 * mt * tt * tt * c2[1] + tt * tt * tt * p3[1]];
+        }
+        function tryMerge(A, M, B) {
+            const S = [];
+            for (let k = 0; k <= 12; k++) S.push(bezAt(A.p, A.cout, M.cin, M.p, k / 12));
+            for (let k = 1; k <= 12; k++) S.push(bezAt(M.p, M.cout, B.cin, B.p, k / 12));
+            const u = [0]; let L = 0;
+            for (let k = 1; k < S.length; k++) { L += Math.hypot(S[k][0] - S[k - 1][0], S[k][1] - S[k - 1][1]); u.push(L); }
+            if (L < 1e-9) return null;
+            for (let k = 0; k < u.length; k++) u[k] /= L;
+            const unit = (x, y) => { const l = Math.hypot(x, y); return l > 1e-9 ? [x / l, y / l] : null; };
+            const t0 = unit(A.cout[0] - A.p[0], A.cout[1] - A.p[1]) || unit(B.p[0] - A.p[0], B.p[1] - A.p[1]);
+            const t1 = unit(B.cin[0] - B.p[0], B.cin[1] - B.p[1]) || unit(A.p[0] - B.p[0], A.p[1] - B.p[1]);
+            if (!t0 || !t1) return null;
+            let C00 = 0, C01 = 0, C11 = 0, X0 = 0, X1 = 0;
+            for (let k = 0; k < S.length; k++) {
+                const tt = u[k], mt = 1 - tt;
+                const b0 = mt * mt * mt, b1 = 3 * mt * mt * tt, b2 = 3 * mt * tt * tt, b3 = tt * tt * tt;
+                const A0 = [t0[0] * b1, t0[1] * b1], A1 = [t1[0] * b2, t1[1] * b2];
+                const base = [(b0 + b1) * A.p[0] + (b2 + b3) * B.p[0], (b0 + b1) * A.p[1] + (b2 + b3) * B.p[1]];
+                const d = [S[k][0] - base[0], S[k][1] - base[1]];
+                C00 += A0[0] * A0[0] + A0[1] * A0[1];
+                C01 += A0[0] * A1[0] + A0[1] * A1[1];
+                C11 += A1[0] * A1[0] + A1[1] * A1[1];
+                X0 += A0[0] * d[0] + A0[1] * d[1];
+                X1 += A1[0] * d[0] + A1[1] * d[1];
+            }
+            const det = C00 * C11 - C01 * C01;
+            const seg = Math.hypot(B.p[0] - A.p[0], B.p[1] - A.p[1]);
+            let a0, a1;
+            if (Math.abs(det) < 1e-12) { a0 = a1 = seg / 3; }
+            else { a0 = (X0 * C11 - X1 * C01) / det; a1 = (C00 * X1 - C01 * X0) / det; }
+            if (!(a0 > 1e-6) || !(a1 > 1e-6) || a0 > seg * 3 || a1 > seg * 3) { a0 = Math.max(seg / 6, Math.min(a0, seg)); a1 = Math.max(seg / 6, Math.min(a1, seg)); }
+            const c1 = [A.p[0] + t0[0] * a0, A.p[1] + t0[1] * a0];
+            const c2 = [B.p[0] + t1[0] * a1, B.p[1] + t1[1] * a1];
+            let err = 0;
+            for (let k = 0; k < S.length; k++) {
+                const q = bezAt(A.p, c1, c2, B.p, u[k]);
+                err = Math.max(err, Math.hypot(q[0] - S[k][0], q[1] - S[k][1]));
+            }
+            return { c1, c2, err };
+        }
+        function simplifySub(sub, tol) {
+            for (; ;) {
+                const nodes = sub.nodes, n = nodes.length;
+                if (n < (sub.open ? 3 : 4)) return;
+                let best = null;
+                const lo = sub.open ? 1 : 0, hi = sub.open ? n - 1 : n;
+                for (let i = lo; i < hi; i++) {
+                    const A = nodes[(i - 1 + n) % n], M = nodes[i], B = nodes[(i + 1) % n];
+                    const m = tryMerge(A, M, B);
+                    if (m && m.err < tol && (!best || m.err < best.m.err)) best = { i, m, A, B };
+                }
+                if (!best) return;
+                best.A.cout = best.m.c1;
+                best.B.cin = best.m.c2;
+                nodes.splice(best.i, 1);
+            }
+        }
+        function simplifySel() {
+            if (!vModel.length) return;
+            const TOL = 0.08;   // mm max shape deviation per pass — press again to thin more
+            const targets = new Map();
+            if (vSel.length) for (const s of vSel) targets.set(s.pi + ':' + s.si, { pi: s.pi, si: s.si });
+            else vModel.forEach((pm, pi) => pm.subs.forEach((_, si) => targets.set(pi + ':' + si, { pi, si })));
+            pushUndo();
+            let before = 0, after = 0;
+            const touched = new Set();
+            for (const { pi, si } of targets.values()) {
+                const sub = vModel[pi] && vModel[pi].subs[si];
+                if (!sub) continue;
+                before += sub.nodes.length;
+                simplifySub(sub, TOL);
+                after += sub.nodes.length;
+                touched.add(pi);
+            }
+            touched.forEach(pi => rebuild(vModel[pi]));
+            vSel = [];
+            vinfo('Vereinfacht: ' + before + ' → ' + after + ' Knoten (nochmal L dünnt weiter aus)');
+            vnodesDraw(); saveState();
+        }
+        function deleteSel() {
+            if (!vSel.length) return;
+            if (vLassoSel) { cutDelete(); return; }
+            pushUndo();
+            const byPath = new Map();
+            for (const s of vSel) {
+                if (!byPath.has(s.pi)) byPath.set(s.pi, new Map());
+                const bySub = byPath.get(s.pi);
+                if (!bySub.has(s.si)) bySub.set(s.si, []);
+                bySub.get(s.si).push(s.ni);
+            }
+            for (const [pi, bySub] of byPath) {
+                const drop = [];
+                for (const [si, nis] of bySub) {
+                    const sub = vModel[pi].subs[si];
+                    const uniq = [...new Set(nis)].sort((a, b) => b - a);
+                    const min = sub.open ? 2 : 3;
+                    if (sub.nodes.length - uniq.length < min) { drop.push(si); continue; }
+                    for (const ni of uniq) sub.nodes.splice(ni, 1);
+                }
+                drop.sort((a, b) => b - a).forEach(si => vModel[pi].subs.splice(si, 1));
+                rebuild(vModel[pi]);
+            }
+            vSel = []; vinfo('gelöscht'); vnodesDraw(); saveState();
+        }
+        function openSel() {
+            // C = break the path at EVERY selected node. No special cases, no error.
+            //  · 1 node on a closed loop  -> loop opens into a band (node duplicated)
+            //  · 2 nodes on a closed loop -> two arcs (Doc's rectangle: A–B and A'–B' via fill)
+            //  · open paths / different subpaths -> each is simply cut at its nodes
+            if (!vSel.length) { vinfo('Knoten wählen'); return; }
+            // TWO nodes on DIFFERENT closed contours: CHANNEL CUT — Doc's hand sequence
+            // in one stroke: open both loops (A->A,A' / B->B,B'), cross-connect A–B and
+            // A'–B'. The two contours become ONE and the black between them is severed.
+            if (vSel.length === 2 && vSel[0].pi === vSel[1].pi && vSel[0].si !== vSel[1].si) {
+                const pi = vSel[0].pi, pm = vModel[pi];
+                const [sa, sb] = vSel;
+                const P = pm.subs[sa.si], Q = pm.subs[sb.si];
+                if (!P.open && !Q.open) {
+                    pushUndo();
+                    const cpn = nd => JSON.parse(JSON.stringify(nd));
+                    const band = (S, k) => {          // closed loop -> open band [N ... N'] at node k
+                        const rot = S.nodes.slice(k).concat(S.nodes.slice(0, k)).map(cpn);
+                        rot.push(cpn(rot[0]));
+                        return rot;
+                    };
+                    const rev = ns => ns.slice().reverse().map(nd => ({ p: nd.p, cin: nd.cout, cout: nd.cin }));
+                    const spread = (nd, key, d) => {  // slide a junction node along its curve tangent
+                        const vx = nd[key][0] - nd.p[0], vy = nd[key][1] - nd.p[1];
+                        const l = Math.hypot(vx, vy) || 1;
+                        const dx = vx / l * d, dy = vy / l * d;
+                        nd.p[0] += dx; nd.p[1] += dy;
+                        nd.cin[0] += dx; nd.cin[1] += dy;
+                        nd.cout[0] += dx; nd.cout[1] += dy;
+                    };
+                    const mirror = (nd, from, to) => {   // continue the curve tangent through the joint
+                        nd[to] = [2 * nd.p[0] - nd[from][0], 2 * nd.p[1] - nd[from][1]];
+                    };
+                    const segInt = (p1, p2, p3, p4) => { // do the two connectors cross?
+                        const d = (a, b, c) => (c[0] - a[0]) * (b[1] - a[1]) - (b[0] - a[0]) * (c[1] - a[1]);
+                        const d1 = d(p3, p4, p1), d2 = d(p3, p4, p2), d3 = d(p1, p2, p3), d4 = d(p1, p2, p4);
+                        return ((d1 > 0) !== (d2 > 0)) && ((d3 > 0) !== (d4 > 0));
+                    };
+                    const D = 0.45;                   // channel half-width (mm), visible but slight
+                    const build = reverseQ => {       // assemble one variant, joints smoothed
+                        const bp = band(P, sa.ni);    // A ... A'
+                        let b2 = band(Q, sb.ni);      // B ... B'
+                        if (reverseQ) b2 = rev(b2);
+                        const nodes = bp.concat(b2);
+                        const iA = 0, iA2 = bp.length - 1, iB1 = bp.length, iB2 = nodes.length - 1;
+                        spread(nodes[iA], 'cout', D); spread(nodes[iA2], 'cin', D);
+                        spread(nodes[iB1], 'cout', D); spread(nodes[iB2], 'cin', D);
+                        // straight connectors — proven clean; curves can be bent afterwards
+                        // by dragging the green handles if a softer look is wanted
+                        const straight = (u, v) => {
+                            const p0 = u.p, p1 = v.p;
+                            u.cout = [p0[0] + (p1[0] - p0[0]) / 3, p0[1] + (p1[1] - p0[1]) / 3];
+                            v.cin = [p0[0] + 2 * (p1[0] - p0[0]) / 3, p0[1] + 2 * (p1[1] - p0[1]) / 3];
+                        };
+                        straight(nodes[iA2], nodes[iB1]);
+                        straight(nodes[iB2], nodes[iA]);
+                        const cross = segInt(nodes[iA2].p, nodes[iB1].p, nodes[iB2].p, nodes[iA].p);
+                        return { nodes, cross };
+                    };
+                    // the ends are joined IN ORDER — pick the variant whose two
+                    // connecting segments do NOT cross (depends on contour winding)
+                    const v1 = build(true), v2 = build(false);
+                    const pick = (v1.cross && !v2.cross) ? v2 : (!v1.cross ? v1 : v2);
+                    const siHi = Math.max(sa.si, sb.si), siLo = Math.min(sa.si, sb.si);
+                    pm.subs.splice(siHi, 1);
+                    pm.subs.splice(siLo, 1, { open: false, nodes: pick.nodes });
+                    rebuild(pm);
+                    vSel = [];
+                    vinfo('Konturen verbunden — Kanal durchs Schwarze geschnitten');
+                    vnodesDraw(); saveState();
+                    return;
+                }
+            }
+            const cp = arr => arr.map(nd => JSON.parse(JSON.stringify(nd)));
+            // group selected node indices per subpath
+            const groups = new Map();
+            for (const s of vSel) {
+                const key = s.pi + ':' + s.si;
+                if (!groups.has(key)) groups.set(key, { pi: s.pi, si: s.si, idx: new Set() });
+                groups.get(key).idx.add(s.ni);
+            }
+            // pull a piece's two cut-endpoints slightly apart from the cut line, toward
+            // the piece's own side — so the split is visible, not zero-width coincident
+            const partApart = piece => {
+                const nds = piece.nodes, m = nds.length;
+                if (m < 2) return;
+                const A = nds[0].p, B = nds[m - 1].p;
+                const dx = B[0] - A[0], dy = B[1] - A[1], len = Math.hypot(dx, dy);
+                if (len < 0.05) return;                        // coincident ends (single break) -> no gap
+                let px = -dy / len, py = dx / len;             // unit perpendicular to the cut
+                let cx = 0, cy = 0; for (const nd of nds) { cx += nd.p[0]; cy += nd.p[1]; }
+                cx /= m; cy /= m;
+                const mx = (A[0] + B[0]) / 2, my = (A[1] + B[1]) / 2;
+                if ((cx - mx) * px + (cy - my) * py < 0) { px = -px; py = -py; }   // toward centroid
+                let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
+                for (const nd of nds) { x0 = Math.min(x0, nd.p[0]); y0 = Math.min(y0, nd.p[1]); x1 = Math.max(x1, nd.p[0]); y1 = Math.max(y1, nd.p[1]); }
+                const gap = Math.min(1.0, Math.max(0.3, 0.22 * Math.hypot(x1 - x0, y1 - y0)));   // visible, still slight
+                for (const idx of [0, m - 1]) {
+                    const nd = nds[idx];
+                    nd.p[0] += px * gap; nd.p[1] += py * gap;
+                    if (nd.cin) { nd.cin[0] += px * gap; nd.cin[1] += py * gap; }
+                    if (nd.cout) { nd.cout[0] += px * gap; nd.cout[1] += py * gap; }
+                }
+            };
+            pushUndo();
+            // process each affected subpath, highest si first so splices stay valid
+            const byPath = new Map();
+            for (const g of groups.values()) (byPath.get(g.pi) || byPath.set(g.pi, []).get(g.pi)).push(g);
+            let pieceCount = 0, cutCount = 0, realSplits = 0, lastSplit = null;   // realSplits = subpaths cut into ≥2 faces
+            for (const [pi, list] of byPath) {
+                const pm = vModel[pi];
+                list.sort((a, b) => b.si - a.si);
+                for (const g of list) {
+                    const sub = pm.subs[g.si];
+                    const nodes = sub.nodes, n = nodes.length;
+                    const cuts = [...g.idx].sort((a, b) => a - b);
+                    cutCount += cuts.length;
+                    const pieces = [];
+                    const straighten = arc => {   // make the closing (cut) edge a straight chord
+                        const p0 = arc[arc.length - 1].p, p1 = arc[0].p;
+                        arc[arc.length - 1].cout = [p0[0] + (p1[0] - p0[0]) / 3, p0[1] + (p1[1] - p0[1]) / 3];
+                        arc[0].cin = [p0[0] + 2 * (p1[0] - p0[0]) / 3, p0[1] + 2 * (p1[1] - p0[1]) / 3];
+                    };
+                    if (!sub.open) {
+                        if (cuts.length === 1) {
+                            // single cut: open the loop into a band (node duplicated, no gap)
+                            const a = cuts[0];
+                            pieces.push({ open: true, nodes: cp(nodes.slice(a).concat(nodes.slice(0, a + 1))) });
+                        } else {
+                            // k cuts -> k CLOSED faces, each an arc + straight cut edge (A–B / A'–B')
+                            for (let j = 0; j < cuts.length; j++) {
+                                const a = cuts[j], b = cuts[(j + 1) % cuts.length];
+                                const arc = (j < cuts.length - 1)
+                                    ? cp(nodes.slice(a, b + 1))
+                                    : cp(nodes.slice(a).concat(nodes.slice(0, b + 1)));   // wrap
+                                if (arc.length >= 2) { straighten(arc); pieces.push({ open: false, nodes: arc }); }
+                            }
+                        }
+                    } else {
+                        // open path: k cuts -> k+1 open pieces
+                        const bounds = [0, ...cuts.filter(c => c > 0 && c < n - 1), n - 1];
+                        for (let j = 0; j < bounds.length - 1; j++) {
+                            const arc = cp(nodes.slice(bounds[j], bounds[j + 1] + 1));
+                            if (arc.length >= 2) pieces.push({ open: true, nodes: arc });
+                        }
+                    }
+                    if (pieces.length > 1) { pieces.forEach(partApart); realSplits++; lastSplit = { pi, si: g.si, len: pieces[0].nodes.length }; }
+                    if (pieces.length) { pm.subs.splice(g.si, 1, ...pieces); pieceCount += pieces.length; }
+                }
+                rebuild(pm);
+            }
+            // auto-select one new face so the split is unmistakably visible (gold nodes)
+            vSel = [];
+            if (lastSplit) for (let ni = 0; ni < lastSplit.len; ni++) vSel.push({ pi: lastSplit.pi, si: lastSplit.si, ni });
+            if (realSplits > 0)
+                vinfo(realSplits + ' Form(en) geschnitten → ' + pieceCount + ' Teile · das GOLDENE Teil ist gewählt (Entf löscht, oder ziehen)');
+            else
+                vinfo('nur geöffnet (kein Schnitt) — für einen Schnitt: 2 Knoten auf DERSELBEN Kontur wählen');
+            vnodesDraw(); saveState();
+        }
+        function vnodesDraw() {
+            const dpr = window.devicePixelRatio || 1;
+            const w = vwrap.clientWidth, h = vwrap.clientHeight;
+            if (!w) return;
+            if (vov.width !== w * dpr || vov.height !== h * dpr) { vov.width = w * dpr; vov.height = h * dpr; }
+            const g = vov.getContext('2d');
+            g.setTransform(dpr, 0, 0, dpr, 0, 0);
+            g.clearRect(0, 0, w, h);
+            if (!vShowNodes && !vOutlines && !vLasso) return;
+            const k = (vw / 150) * vview.s;   // mm -> screen px
+            const P = ([x, y]) => [vview.x + x * k, vview.y + y * k];
+            const vis = (px, py) => px > -30 && py > -30 && px < w + 30 && py < h + 30;
+            for (const pm of vModel) for (const sub of pm.subs) {
+                const nodes = sub.nodes, n = nodes.length;
+                const last = sub.open ? n - 1 : n;
+                for (let i = 0; i < last; i++) {
+                    const j = (i + 1) % n;
+                    const p0 = P(nodes[i].p), c1 = P(nodes[i].cout), c2 = P(nodes[j].cin), p3 = P(nodes[j].p);
+                    if (!vis(p0[0], p0[1]) && !vis(p3[0], p3[1])) continue;
+                    // the curve itself, editor-blue
+                    if (vOutlines) {
+                        g.lineWidth = 1.5; g.strokeStyle = 'rgba(58,140,255,0.9)';
+                        g.beginPath(); g.moveTo(p0[0], p0[1]);
+                        g.bezierCurveTo(c1[0], c1[1], c2[0], c2[1], p3[0], p3[1]); g.stroke();
+                    }
+                    if (vShowNodes && vHandles && k > 8) {   // handles only with nodes on
+                        g.lineWidth = 1;
+                        g.strokeStyle = 'rgba(121,158,49,0.85)'; g.fillStyle = 'rgba(121,158,49,0.95)';
+                        g.beginPath(); g.moveTo(p0[0], p0[1]); g.lineTo(c1[0], c1[1]); g.stroke();
+                        g.beginPath(); g.moveTo(p3[0], p3[1]); g.lineTo(c2[0], c2[1]); g.stroke();
+                        for (const c of [c1, c2]) { g.beginPath(); g.arc(c[0], c[1], 3.5, 0, 2 * Math.PI); g.fill(); }
+                    }
+                }
+            }
+            // lasso polygon while drawing: red outline + rubber band to the cursor
+            if (vLasso && vLasso.pts.length) {
+                const sp = vLasso.pts.map(P);
+                g.lineWidth = 1.5; g.strokeStyle = 'rgba(220,60,40,0.95)';
+                g.beginPath(); g.moveTo(sp[0][0], sp[0][1]);
+                for (let i = 1; i < sp.length; i++) g.lineTo(sp[i][0], sp[i][1]);
+                if (vMouseMM) { const mp = P(vMouseMM); g.lineTo(mp[0], mp[1]); }
+                g.stroke();
+                g.fillStyle = 'rgba(220,60,40,0.95)';
+                for (const p of sp) { g.beginPath(); g.arc(p[0], p[1], 3.5, 0, 2 * Math.PI); g.fill(); }
+                g.strokeStyle = '#fff';
+                g.beginPath(); g.arc(sp[0][0], sp[0][1], 6, 0, 2 * Math.PI); g.stroke();
+            }
+            // anchors on top; selected ones in gold, larger
+            if (!vShowNodes) return;
+            const selSet = new Set(vSel.map(s => s.pi + ':' + s.si + ':' + s.ni));
+            vModel.forEach((pm, pi) => pm.subs.forEach((sub, si) => sub.nodes.forEach((nd, ni) => {
+                const [px, py] = P(nd.p);
+                if (!vis(px, py)) return;
+                const sel = selSet.has(pi + ':' + si + ':' + ni);
+                g.fillStyle = sel ? 'rgba(245,194,66,1)' : 'rgba(176,36,24,0.95)';
+                g.strokeStyle = '#fff'; g.lineWidth = 1;
+                const r = sel ? 6 : 3.5;
+                g.fillRect(px - r, py - r, 2 * r, 2 * r);
+                g.strokeRect(px - r, py - r, 2 * r, 2 * r);
+            })));
+        }
+        function vapply() {
+            // keep the svg's pixel size pinned — overlay math assumes vw=1000
+            const svg = vinner.querySelector('svg');
+            if (svg && svg.getAttribute('width') !== '1000') {
+                svg.setAttribute('width', '1000'); svg.setAttribute('height', '1000');
+            }
+            vinner.style.transform = `translate(${vview.x}px,${vview.y}px) scale(${vview.s})`;
+            vnodesDraw();
+            saveState();
+        }
+        function vecFit() {
+            const w = vwrap.clientWidth, h = vwrap.clientHeight;
+            if (!w) return;
+            vview.init = true;
+            const discPx = vw * (2 * 73.875) / 150.0;          // outer ring O147.75mm in the 150mm frame
+            vview.s = 0.92 * Math.min(w, h) / discPx;
+            vview.x = (w - vw * vview.s) / 2;
+            vview.y = (h - vw * vview.s) / 2;
+            vapply();
+        }
+        function vzoomAt(px, py, f) {
+            f = Math.max(0.2, Math.min(5, f));
+            const ns = Math.max(0.05, Math.min(200, vview.s * f));
+            const r = ns / vview.s;
+            vview.x = px - (px - vview.x) * r;
+            vview.y = py - (py - vview.y) * r;
+            vview.s = ns; vapply();
+        }
+        // double-click on a node selects its ENTIRE subpath; on empty space it fits the view
+        function insertNodeAt(mx, my) {
+            // split the nearest bezier segment at the clicked spot — shape-preserving
+            const k = (vw / 150) * vview.s;
+            let best = null;
+            vModel.forEach((pm, pi) => pm.subs.forEach((sub, si) => {
+                const nodes = sub.nodes, n = nodes.length, last = sub.open ? n - 1 : n;
+                for (let i = 0; i < last; i++) {
+                    const j = (i + 1) % n;
+                    const p0 = nodes[i].p, c1 = nodes[i].cout, c2 = nodes[j].cin, p3 = nodes[j].p;
+                    const sx = vview.x + p0[0] * k, sy = vview.y + p0[1] * k;
+                    const ex = vview.x + p3[0] * k, ey = vview.y + p3[1] * k;
+                    if (Math.min(Math.hypot(sx - mx, sy - my), Math.hypot(ex - mx, ey - my)) > 220) continue;
+                    for (let s = 1; s < 24; s++) {
+                        const u = s / 24, v = 1 - u;
+                        const qx = v * v * v * p0[0] + 3 * v * v * u * c1[0] + 3 * v * u * u * c2[0] + u * u * u * p3[0];
+                        const qy = v * v * v * p0[1] + 3 * v * v * u * c1[1] + 3 * v * u * u * c2[1] + u * u * u * p3[1];
+                        const dx = vview.x + qx * k - mx, dy = vview.y + qy * k - my;
+                        const d = dx * dx + dy * dy;
+                        if (!best || d < best.d) best = { pi, si, i, j, t: u, d };
+                    }
+                }
+            }));
+            if (!best || Math.sqrt(best.d) > 9) return false;
+            pushUndo();
+            const sub = vModel[best.pi].subs[best.si], nodes = sub.nodes;
+            const Ni = nodes[best.i], Nj = nodes[best.j], u = best.t;
+            const L = (a, b) => [a[0] + (b[0] - a[0]) * u, a[1] + (b[1] - a[1]) * u];
+            const q0 = L(Ni.p, Ni.cout), q1 = L(Ni.cout, Nj.cin), q2 = L(Nj.cin, Nj.p);
+            const r0 = L(q0, q1), r1 = L(q1, q2), sp = L(r0, r1);
+            Ni.cout = q0; Nj.cin = q2;
+            nodes.splice(best.i + 1, 0, { p: sp, cin: r0, cout: r1 });
+            rebuild(vModel[best.pi]);
+            vSel = [{ pi: best.pi, si: best.si, ni: best.i + 1 }];
+            vinfo('Knoten eingefügt');
+            vnodesDraw(); saveState();
+            return true;
+        }
+        function vecDbl(e) {
+            if (vLasso) return;   // while drawing a polygon, double-click is just two corners
+            if ((vShowNodes || vOutlines) && vModel.length) {
+                const r = vwrap.getBoundingClientRect();
+                const mx = e.clientX - r.left, my = e.clientY - r.top;
+                const k = (vw / 150) * vview.s;
+                let best = null, bd = 10;
+                vModel.forEach((pm, pi) => pm.subs.forEach((sub, si) => sub.nodes.forEach((nd, ni) => {
+                    const d = Math.hypot(vview.x + nd.p[0] * k - mx, vview.y + nd.p[1] * k - my);
+                    if (d < bd) { bd = d; best = { pi, si, ni }; }
+                })));
+                if (!best && insertNodeAt(mx, my)) return;
+                if (best) {
+                    const whole = vModel[best.pi].subs[best.si].nodes.map((_, ni) => ({ pi: best.pi, si: best.si, ni }));
+                    const multi = e.shiftKey || (e.getModifierState && e.getModifierState('CapsLock'));
+                    if (multi) {
+                        const have = new Set(vSel.map(s => s.pi + ':' + s.si + ':' + s.ni));
+                        for (const s of whole) if (!have.has(s.pi + ':' + s.si + ':' + s.ni)) vSel.push(s);
+                    } else vSel = whole;
+                    vinfo('ganzer Pfad gewählt — Entf löscht ihn komplett');
+                    vnodesDraw(); saveState();
+                    return;
+                }
+            }
+            vecFit();
+        }
+        bindPanZoom(vwrap, (dx, dy) => { if (vDrag) return; vview.x += dx; vview.y += dy; vapply(); }, vzoomAt, vecDbl);
+        // click (no drag) selects the nearest node within 10px; drag on a node moves it
+        let vDown = null, vDrag = null;
+        function nodeAt(mx, my) {
+            const k = (vw / 150) * vview.s;
+            // handles first (they sit on top and are only live when shown) then anchors
+            if (vHandles && k > 8) {
+                let best = null, bd = 9;
+                vModel.forEach((pm, pi) => pm.subs.forEach((sub, si) => sub.nodes.forEach((nd, ni) => {
+                    for (const h of ['cin', 'cout']) {
+                        if (!nd[h]) continue;
+                        const d = Math.hypot(vview.x + nd[h][0] * k - mx, vview.y + nd[h][1] * k - my);
+                        if (d < bd) { bd = d; best = { pi, si, ni, handle: h }; }
+                    }
+                })));
+                if (best) return best;
+            }
+            let best = null, bd = 10;
+            vModel.forEach((pm, pi) => pm.subs.forEach((sub, si) => sub.nodes.forEach((nd, ni) => {
+                const d = Math.hypot(vview.x + nd.p[0] * k - mx, vview.y + nd.p[1] * k - my);
+                if (d < bd) { bd = d; best = { pi, si, ni }; }
+            })));
+            return best;
+        }
+        vwrap.addEventListener('pointerdown', e => {
+            vDown = [e.clientX, e.clientY];
+            if (!vShowNodes || vLasso) return;
+            const r = vwrap.getBoundingClientRect();
+            const hit = nodeAt(e.clientX - r.left, e.clientY - r.top);
+            if (hit) {
+                vDrag = { ...hit, moved: false, last: [e.clientX, e.clientY] };   // start node/handle drag
+                vwrap.setPointerCapture(e.pointerId);
+                pushUndo();
+                e.stopPropagation();
+            }
+        });
+        vwrap.addEventListener('pointermove', e => {
+            if (!vDrag) return;
+            const k = (vw / 150) * vview.s;
+            const nd = vModel[vDrag.pi].subs[vDrag.si].nodes[vDrag.ni];
+            // client-position delta — robust even when movementX is 0 under capture
+            const dx = (e.clientX - vDrag.last[0]) / k, dy = (e.clientY - vDrag.last[1]) / k;
+            vDrag.last = [e.clientX, e.clientY];
+            if (vDrag.handle) {
+                nd[vDrag.handle][0] += dx; nd[vDrag.handle][1] += dy;   // move just this control point
+            } else {
+                nd.p[0] += dx; nd.p[1] += dy;                 // move anchor + both handles rigidly
+                if (nd.cin) { nd.cin[0] += dx; nd.cin[1] += dy; }
+                if (nd.cout) { nd.cout[0] += dx; nd.cout[1] += dy; }
+            }
+            vDrag.moved = true;
+            vSel = [{ pi: vDrag.pi, si: vDrag.si, ni: vDrag.ni }];
+            rebuild(vModel[vDrag.pi]); vnodesDraw();
+        });
+        vwrap.addEventListener('pointerup', () => {
+            if (!vDrag) return;
+            if (!vDrag.moved) vUndo.pop();                // pure click -> discard undo snapshot
+            else { vinfo('Knoten verschoben'); saveState(); }
+            vDrag = null;
+        });
+        vwrap.addEventListener('pointerup', e => {
+            if (!vDown || Math.hypot(e.clientX - vDown[0], e.clientY - vDown[1]) > 5) { vDown = null; return; }
+            vDown = null;
+            if (!vShowNodes) return;
+            const r = vwrap.getBoundingClientRect();
+            const mx = e.clientX - r.left, my = e.clientY - r.top;
+            const k = (vw / 150) * vview.s;
+            if (vLasso) {   // lasso mode: clicks set polygon corners; near start closes
+                const mm = [(mx - vview.x) / k, (my - vview.y) / k];
+                const pts = vLasso.pts;
+                if (pts.length > 2) {
+                    const d0 = Math.hypot(vview.x + pts[0][0] * k - mx, vview.y + pts[0][1] * k - my);
+                    if (d0 < 12) { closeLasso(); return; }
+                }
+                pts.push(mm); vnodesDraw();
+                return;
+            }
+            let best = null, bd = 10;
+            vModel.forEach((pm, pi) => pm.subs.forEach((sub, si) => sub.nodes.forEach((nd, ni) => {
+                const d = Math.hypot(vview.x + nd.p[0] * k - mx, vview.y + nd.p[1] * k - my);
+                if (d < bd) { bd = d; best = { pi, si, ni }; }
+            })));
+            // CapsLock ON = sticky "select more" mode (Shift-click works too)
+            const multi = e.shiftKey || (e.getModifierState && e.getModifierState('CapsLock'));
+            const key = s => s.pi + ':' + s.si + ':' + s.ni;
+            if (best) {
+                if (multi) {
+                    const i = vSel.findIndex(s => key(s) === key(best));
+                    if (i >= 0) vSel.splice(i, 1); else vSel.push(best);
+                } else vSel = [best];
+            } else if (!multi) vSel = [];
+            vinfo(vSel.length ? vSel.length + ' gewählt (Entf löscht)' : '');
+            vnodesDraw(); saveState();
+        });
+
+        let vArrowT = 0;   // groups a burst of arrow-moves into ONE undo step
+        window.addEventListener('keydown', e => {
+            if (e.target && e.target.tagName === 'INPUT') return;
+            if (e.key.toLowerCase() === 'f' && !e.metaKey && !e.ctrlKey && !e.shiftKey) {
+                const act = document.querySelector('.tab.active').dataset.t;
+                if (act === 'stick') { e.preventDefault(); fit(); draw(); return; }
+                if (act === 'holz') { e.preventDefault(); wfit(); wdraw(); return; }
+                // vektor falls through to its own handler below
+            }
+            if (!document.getElementById('m-vektor').classList.contains('active')) return;
+            const mod = e.metaKey || e.ctrlKey;
+            const k = e.key.toLowerCase();
+            if (e.key.startsWith('Arrow') && vSel.length && !mod) {
+                e.preventDefault();
+                const step = e.shiftKey ? 1.0 : 0.1;   // mm; Shift = coarse
+                const dx = e.key === 'ArrowLeft' ? -step : e.key === 'ArrowRight' ? step : 0;
+                const dy = e.key === 'ArrowUp' ? -step : e.key === 'ArrowDown' ? step : 0;
+                const now = Date.now();
+                if (now - vArrowT > 800) pushUndo();
+                vArrowT = now;
+                const touched = new Set();
+                for (const s of vSel) {
+                    const pm = vModel[s.pi], nd = pm && pm.subs[s.si] && pm.subs[s.si].nodes[s.ni];
+                    if (!nd) continue;
+                    nd.p[0] += dx; nd.p[1] += dy;
+                    nd.cin[0] += dx; nd.cin[1] += dy;
+                    nd.cout[0] += dx; nd.cout[1] += dy;
+                    touched.add(s.pi);
+                }
+                touched.forEach(pi => rebuild(vModel[pi]));
+                vnodesDraw(); saveState();
+                return;
+            }
+            if (mod && k === 'z') { e.preventDefault(); e.shiftKey ? doRedo() : doUndo(); return; }
+            if (mod) return;   // leave other Cmd/Ctrl combos to the browser
+            if (e.key === 'Delete' || e.key === 'Backspace') { if (vSel.length) { e.preventDefault(); deleteSel(); } return; }
+            if (e.key === 'Enter') { if (vLasso) { e.preventDefault(); closeLasso(); } return; }
+            if (e.key === 'Escape') {
+                e.preventDefault();
+                if (vLasso) { vLasso = null; setLassoUI(false); vinfo('Polygon abgebrochen'); }
+                else if (vSel.length) { vSel = []; vinfo('Auswahl aufgehoben'); }
+                vnodesDraw(); return;
+            }
+            switch (k) {
+                case 'p': e.preventDefault(); if (e.shiftKey) flip('vP'); break;      // Shift+P = polygon mode
+                case 'o': e.preventDefault(); flip('vO'); break;              // outlines
+                case 'n': e.preventDefault(); flip('vN'); break;              // nodes
+                case 'h': e.preventDefault(); flip('vH'); break;              // handles
+                case 'a': e.preventDefault(); flip('vA'); break;              // artwork fill
+                case 'c': e.preventDefault(); openSel(); break;              // cut = auftrennen
+                case 'j': e.preventDefault(); closeSel(); break;            // join = schließen
+                case 'f': e.preventDefault(); vecFit(); break;             // fit view
+                case 'l': e.preventDefault(); simplifySel(); break;        // simplify
+            }
+        });
+        function setLassoUI(on) { document.getElementById('vP').checked = on; }
+        function startLasso() {
+            if (!vShowNodes) flip('vN');   // lasso needs the node layer
+            vLasso = { pts: [] };
+            setLassoUI(true);
+            vinfo('Polygon zeichnen: klicken · Enter/Startpunkt schließt · Esc bricht ab');
+        }
+        function stopLasso(msg) {
+            vLasso = null; setLassoUI(false);
+            if (msg) vinfo(msg);
+            vnodesDraw();
+        }
+        document.getElementById('vP').addEventListener('change', e => {
+            if (e.target.checked) startLasso(); else stopLasso('Polygon abgebrochen');
+        });
+        document.getElementById('vfit').addEventListener('click', () => { vecFit(); });
+        document.getElementById('vsimp').addEventListener('click', simplifySel);
+        vwrap.addEventListener('pointermove', e => {
+            if (!vLasso) return;
+            const r = vwrap.getBoundingClientRect();
+            const k = (vw / 150) * vview.s;
+            vMouseMM = [(e.clientX - r.left - vview.x) / k, (e.clientY - r.top - vview.y) / k];
+            vnodesDraw();
+        });
+        // live CapsLock mode indicator
+        function capsInfo(e) {
+            if (!e.getModifierState) return;
+            const on = e.getModifierState('CapsLock');
+            const el = document.getElementById('vcaps');
+            el.textContent = on ? '⇪ SAMMEL-MODUS AKTIV' : '';
+            el.style.color = on ? 'rgb(121,158,49)' : '';
+        }
+        window.addEventListener('keydown', capsInfo);
+        window.addEventListener('keyup', capsInfo);
+        vwrap.addEventListener('pointermove', capsInfo);
+        document.getElementById('vdel').addEventListener('click', deleteSel);
+        document.getElementById('vopen').addEventListener('click', openSel);
+        document.getElementById('vclose').addEventListener('click', closeSel);
+        document.getElementById('vundo').addEventListener('click', doUndo);
+        document.getElementById('vredo').addEventListener('click', doRedo);
+        // ---- live master-file sync (File System Access API) ----
+        const idb = {
+            open: () => new Promise((res, rej) => {
+                const r = indexedDB.open('vsbseal', 1);
+                r.onupgradeneeded = () => r.result.createObjectStore('kv');
+                r.onsuccess = () => res(r.result); r.onerror = rej;
+            }),
+            get: async k => { const d = await idb.open(); return new Promise(res => { const t = d.transaction('kv').objectStore('kv').get(k); t.onsuccess = () => res(t.result); t.onerror = () => res(null); }); },
+            set: async (k, v) => { const d = await idb.open(); return new Promise(res => { const t = d.transaction('kv', 'readwrite'); t.objectStore('kv').put(v, k); t.oncomplete = res; }); },
+        };
+        let vFile = null, vWriteT = null;
+        function fileStatus(msg) {
+            const base = vPutOk ? 'Server-Sync aktiv. ' : (vFile ? 'Datei verbunden. ' : '');
+            document.getElementById('vfilestat').textContent =
+                base + (msg || (vPutOk || vFile ? '' : 'Edits intern — „Master verbinden" oder Server mit PUT koppelt die Datei.'));
+        }
+        async function connectMaster(existing) {
+            try {
+                if (typeof showOpenFilePicker !== 'function') {
+                    fileStatus('Dieser Browser kann die Datei-API nicht — Server-PUT nutzen (siehe serve-8765.py).');
+                    return;
+                }
+                let h = existing;
+                if (!h) {
+                    [h] = await showOpenFilePicker({ types: [{ description: 'SVG', accept: { 'image/svg+xml': ['.svg'] } }] });
+                }
+                if (await h.requestPermission({ mode: 'readwrite' }) !== 'granted') { fileStatus('Schreibrecht verweigert.'); return; }
+                vFile = h; await idb.set('master', h);
+                fileStatus(); writeMaster();
+                vinfo('Master verbunden — Datei schreibt ab jetzt live mit');
+            } catch (e) {
+                if (e && e.name === 'AbortError') { fileStatus('Auswahl abgebrochen.'); return; }
+                fileStatus('Verbinden fehlgeschlagen: ' + (e && (e.name + ' — ' + e.message)));
+            }
+        }
+        let vPutOk = null;   // null = untested, true/false after first attempt
+        async function writeMasterNow() {
+            if (!vModel.length) return 'leer';
+            const svg = serializeSVG();
+            if (vPutOk !== false) {
+                try {
+                    const r = await fetch('vsb-siegel-150mm-edit.svg', { method: 'PUT', body: svg });
+                    if (r.ok || r.status === 204) {
+                        vPutOk = true;
+                        fileStatus('Auf Server gespeichert ' + new Date().toLocaleTimeString('de-DE') + '.');
+                        scheduleBuild();   // stick & holz follow automatically
+                        return 'server';
+                    }
+                    vPutOk = false;
+                } catch (e) { vPutOk = false; }
+            }
+            if (vFile) {
+                try {
+                    const w = await vFile.createWritable();
+                    await w.write(svg);
+                    await w.close();
+                    fileStatus('In Datei gespeichert ' + new Date().toLocaleTimeString('de-DE') + '.');
+                    return 'file';
+                } catch (e) { fileStatus('SCHREIBFEHLER Datei: ' + e.name + ' — bitte neu verbinden.'); return 'fehler'; }
+            }
+            fileStatus('Nur intern gespeichert (Server ohne PUT, keine Datei verbunden).');
+            return 'intern';
+        }
+        function writeMaster(immediate) {
+            clearTimeout(vWriteT);
+            vWriteT = setTimeout(writeMasterNow, immediate ? 0 : 800);
+        }
+        // ---- auto pipeline: after each saved edit, rebuild stick/holz and refresh ----
+        let vBuildT = null, vBuilding = false;
+        function scheduleBuild() {
+            clearTimeout(vBuildT);
+            vBuildT = setTimeout(startBuild, 2500);
+        }
+        function loadScript(url) {
+            return new Promise((res, rej) => {
+                const s = document.createElement('script');
+                s.src = url; s.onload = () => { s.remove(); res(); }; s.onerror = rej;
+                document.head.appendChild(s);
+            });
+        }
+        async function reloadDerived() {
+            const v = Date.now();
+            try {
+                await loadScript('vsb-stick-daten.js?v=' + v);
+                await loadScript('vsb-holz-daten.js?v=' + v);
+            } catch (e) { return; }
+            D = window.VSB_DATA;
+            ovlReady = false;
+            ovlImg.src = window.VSB_OVERLAY;
+            updateStats(); draw();
+            hmH = null; woodOff = null;
+            hmImg.src = window.VSB_HM;   // onload rebuilds the relief
+        }
+        async function startBuild() {
+            if (vBuilding) { scheduleBuild(); return; }
+            vBuilding = true;
+            const b = document.getElementById('gsave');
+            try {
+                const r = await fetch('/__pipeline', { method: 'POST' });
+                if (r.status === 409) { vBuilding = false; scheduleBuild(); return; }
+                for (; ;) {
+                    await new Promise(res => setTimeout(res, 1500));
+                    const st = await (await fetch('/__pipeline/status')).json();
+                    const m = (st.log.match(/== (\w+) ==/g) || []).pop();
+                    b.textContent = '⏳ ' + (m ? m.replace(/=|\s/g, '').toUpperCase() : 'BAUT') + '…';
+                    if (!st.running) break;
+                }
+                await reloadDerived();
+                b.classList.add('done'); b.textContent = '✓ STICK & HOLZ AKTUELL';
+                setTimeout(() => { b.classList.remove('done'); b.textContent = 'SPEICHERN ⌘S'; }, 2200);
+            } catch (e) {
+                b.textContent = 'SPEICHERN ⌘S';
+            }
+            vBuilding = false;
+        }
+        function serializeSVG(px) {
+            const svg = vinner.querySelector('svg').cloneNode(true);
+            // never bake the wireframe preview (fill-opacity) into a saved file
+            svg.querySelectorAll('path').forEach(p => p.style.fillOpacity = '');
+            if (px) { svg.setAttribute('width', px); svg.setAttribute('height', px); }
+            else { svg.setAttribute('width', '150mm'); svg.setAttribute('height', '150mm'); }
+            return new XMLSerializer().serializeToString(svg);
+        }
+        function saveSVG() {
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(new Blob([serializeSVG()], { type: 'image/svg+xml' }));
+            a.download = 'vsb-siegel-150mm-edit.svg'; a.click();
+            setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+            vinfo('SVG gespeichert (Downloads)');
+        }
+        document.getElementById('vsave').addEventListener('click', saveSVG);
+        document.getElementById('vconnect').addEventListener('click', () => connectMaster());
+        document.getElementById('vreset').addEventListener('click', () => {
+            try {
+                const s = JSON.parse(localStorage.getItem(LSKEY) || '{}');
+                delete s.model; delete s.vsel;
+                localStorage.setItem(LSKEY, JSON.stringify(s));
+            } catch (e) { }
+            location.reload();
+        });
+        function applyArtwork(on) {
+            vArtwork = on;
+            const svg = vinner.querySelector('svg');
+            if (svg) svg.querySelectorAll('path').forEach(p => p.style.fillOpacity = on ? '' : '0.06');
+        }
+        const bindView = (id, setter) => document.getElementById(id).addEventListener('change', e => {
+            setter(e.target.checked); vnodesDraw(); saveState();
+        });
+        bindView('vN', v => { vShowNodes = v; vwrap.classList.toggle('editing', v); });
+        bindView('vH', v => { vHandles = v; });
+        bindView('vO', v => { vOutlines = v; });
+        bindView('vA', v => applyArtwork(v));
+        const flip = id => {   // keyboard toggles go through the same checkbox path
+            const cb = document.getElementById(id);
+            cb.checked = !cb.checked; cb.dispatchEvent(new Event('change'));
+        };
+
+        const vcmEl = document.getElementById('vcm');
+        let vDpi = 600;
+        const DPIS = [300, 600, 1200];
+        const vdpiDiv = document.getElementById('vdpi');
+        DPIS.forEach(d => {
+            const b = document.createElement('button');
+            b.textContent = d + ' dpi';
+            if (d === vDpi) b.classList.add('active');
+            b.addEventListener('click', () => {
+                vDpi = d;
+                vdpiDiv.querySelectorAll('button').forEach(x => x.classList.remove('active'));
+                b.classList.add('active');
+                exInfo(); saveState();
+            });
+            vdpiDiv.appendChild(b);
+        });
+        const exPx = () => Math.round(+vcmEl.value / 2.54 * vDpi);
+        function exInfo() {
+            document.getElementById('vcmval').textContent = vcmEl.value + ' cm';
+            document.getElementById('vpxinfo').textContent = '= ' + exPx().toLocaleString('de-DE') + ' px bei ' + vDpi + ' dpi (Druckgröße wird eingebettet)';
+        }
+        vcmEl.addEventListener('input', () => { exInfo(); saveState(); });
+        exInfo();
+        // PNG pHYs chunk: physical size baked into the file
+        const crcT = (() => { const c = new Uint32Array(256); for (let n = 0; n < 256; n++) { let v = n; for (let k = 0; k < 8; k++) v = v & 1 ? 0xEDB88320 ^ (v >>> 1) : v >>> 1; c[n] = v; } return c; })();
+        const crc32 = bytes => { let c = 0xFFFFFFFF; for (const b of bytes) c = crcT[(c ^ b) & 0xFF] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; };
+        function pngWithDpi(buf, dpi) {
+            const src = new Uint8Array(buf);
+            const ppm = Math.round(dpi / 0.0254);
+            const chunk = new Uint8Array(21), dv = new DataView(chunk.buffer);
+            dv.setUint32(0, 9);
+            chunk.set([0x70, 0x48, 0x59, 0x73], 4);   // "pHYs"
+            dv.setUint32(8, ppm); dv.setUint32(12, ppm); chunk[16] = 1;
+            dv.setUint32(17, crc32(chunk.subarray(4, 17)));
+            const at = 8 + 8 + 13 + 4;                // after IHDR
+            const out = new Uint8Array(src.length + 21);
+            out.set(src.subarray(0, at), 0); out.set(chunk, at); out.set(src.subarray(at), at + 21);
+            return out;
+        }
+        document.getElementById('ex-vec').addEventListener('click', () => {
+            if (!vModel.length) return;
+            const px = exPx(), cm = +vcmEl.value, dpi = vDpi;
+            const url = URL.createObjectURL(new Blob([serializeSVG(px)], { type: 'image/svg+xml' }));
+            const img = new Image();
+            img.onload = () => {
+                const oc = document.createElement('canvas'); oc.width = oc.height = px;
+                const g = oc.getContext('2d');
+                g.fillStyle = '#fff'; g.fillRect(0, 0, px, px);
+                g.drawImage(img, 0, 0, px, px);
+                URL.revokeObjectURL(url);
+                oc.toBlob(b => b.arrayBuffer().then(buf => {
+                    const a = document.createElement('a');
+                    a.href = URL.createObjectURL(new Blob([pngWithDpi(buf, dpi)], { type: 'image/png' }));
+                    a.download = 'vsb-siegel-' + cm + 'cm-' + dpi + 'dpi.png';
+                    a.click();
+                    setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+                    vinfo('PNG exportiert: ' + cm + ' cm · ' + dpi + ' dpi · ' + px + ' px');
+                }), 'image/png');
+            };
+            img.src = url;
+        });
+
+        // ---------- global save: master -> server/file + full state ----------
+        async function saveAll() {
+            saveState();
+            const b = document.getElementById('gsave');
+            b.textContent = '⏳ SPEICHERE…';
+            const how = await writeMasterNow();
+            if (how === 'server') { clearTimeout(vBuildT); startBuild(); }
+            else {
+                b.classList.add('done'); b.textContent = '✓ GESPEICHERT (' + how + ')';
+                setTimeout(() => { b.classList.remove('done'); b.textContent = 'SPEICHERN ⌘S'; }, 1600);
+            }
+        }
+        document.getElementById('gsave').addEventListener('click', saveAll);
+        window.addEventListener('keydown', e => {
+            if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 's') {
+                e.preventDefault(); saveAll();
+            }
+        });
+
+        // ---------- persistence: zoom + settings + selection survive reload ----------
+        const LSKEY = 'vsbseal.state';
+        let SAVED = null;
+        try { SAVED = JSON.parse(localStorage.getItem(LSKEY) || 'null'); } catch (e) { }
+        function saveState() {
+            clearTimeout(saveState.t);
+            saveState.t = setTimeout(() => {
+                try {
+                    localStorage.setItem(LSKEY, JSON.stringify({
+                        tab: document.querySelector('.tab.active').dataset.t,
+                        garn, ovl, colored, fabric, on, view,
+                        wvar, wood, wgold, waz, wel, wex, wview,
+                        vN: vShowNodes, vH: vHandles, vO: vOutlines, vA: vArtwork,
+                        vview, vcm: +vcmEl.value, vdpi: vDpi, vsel: vSel,
+                        model: vModel.length
+                            ? Object.fromEntries(vModel.map(pm => [pm.id, pm.el.getAttribute('d')]))
+                            : (SAVED && SAVED.model) || undefined,
+                    }));
+                } catch (e) { }
+            }, 250);
+        }
+        function restoreState() {
+            const s = SAVED;
+            if (!s) return;
+            const dis = (id, val, ev) => {
+                const el = document.getElementById(id);
+                if (el && val !== undefined) {
+                    el[typeof val === 'boolean' ? 'checked' : 'value'] = val;
+                    el.dispatchEvent(new Event(ev));
+                }
+            };
+            dis('garn', s.garn, 'input'); dis('ovl', s.ovl, 'input'); dis('colored', s.colored, 'change');
+            if (s.on) for (const k in s.on) {
+                const cb = document.getElementById('l_' + k);
+                if (cb && cb.checked !== s.on[k]) { cb.checked = s.on[k]; cb.dispatchEvent(new Event('change')); }
+            }
+            if (s.fabric) { const i = FABRICS.findIndex(f => f[1] === s.fabric); if (i >= 0) fabDiv.children[i].click(); }
+            if (s.wood) { const i = WOODS.findIndex(wd => wd[1][0] === s.wood[0]); if (i >= 0) wwoodDiv.children[i].click(); }
+            if (s.wvar) wvarDiv.children[s.wvar === 'graviert' ? 1 : 0].click();
+            dis('wgold', s.wgold, 'change'); dis('waz', s.waz, 'input'); dis('wel', s.wel, 'input'); dis('wex', s.wex, 'input');
+            if (s.vcm !== undefined) { vcmEl.value = s.vcm; }
+            if (s.vdpi !== undefined) {
+                vDpi = s.vdpi;
+                vdpiDiv.querySelectorAll('button').forEach(b => b.classList.toggle('active', parseInt(b.textContent) === vDpi));
+            }
+            exInfo();
+            const views = [['vN', s.vN !== undefined ? s.vN : s.vnodes],
+                           ['vH', s.vH],
+                           ['vO', s.vO !== undefined ? s.vO : s.voutl],
+                           ['vA', s.vA !== undefined ? s.vA : (s.vwire !== undefined ? !s.vwire : undefined)]];
+            for (const [id, val] of views) if (val !== undefined) {
+                const cb = document.getElementById(id);
+                if (cb.checked !== val) { cb.checked = val; cb.dispatchEvent(new Event('change')); }
+            }
+            vnodesDraw();
+            if (s.tab) { const b = [...tabs].find(t => t.dataset.t === s.tab); if (b) b.click(); }
+            // view transforms last — the tab click above re-fits its view
+            if (s.view) { view = s.view; view.init = true; draw(); }
+            if (s.wview) { wview = s.wview; wview.init = true; wdraw(); }
+            if (s.vview) { vview = s.vview; vview.init = true; vapply(); }
+        }
+        setTimeout(restoreState, 120);
+
+        window.addEventListener('resize', () => { draw(); wdraw(); vapply(); });   // never re-fit on resize
+        fileStatus();
+        syncLabels(); fit(); draw();
+        requestAnimationFrame(() => { fit(); draw(); });
+    </script>
+</body>
+
+</html>

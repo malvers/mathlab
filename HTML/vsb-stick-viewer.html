@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>VSB Stich-Viewer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html, body { height: 100%; overflow: hidden; }
+
+        body {
+            background: rgb(8, 20, 42);
+            color: #fff;
+            font-family: Arial, Helvetica, sans-serif;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 10px 14px;
+            background: linear-gradient(180deg, rgb(14, 36, 78), rgb(8, 20, 42));
+            border-bottom: 1px solid rgba(245, 194, 66, 0.3);
+            flex-wrap: wrap;
+        }
+
+        h1 { font-family: 'Orbitron', sans-serif; font-size: 15px; letter-spacing: 1.5px; color: rgb(245, 194, 66); }
+
+        #stats { font-size: 12px; color: #9fb6dc; }
+
+        #main { flex: 1; display: flex; min-height: 0; }
+
+        #panel {
+            width: 250px;
+            flex: 0 0 auto;
+            overflow-y: auto;
+            padding: 12px;
+            background: rgb(11, 27, 56);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 12.5px;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(245, 194, 66, 0.4) transparent;
+        }
+
+        #panel h2 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 11px;
+            letter-spacing: 1px;
+            color: rgb(245, 194, 66);
+            margin: 14px 0 6px 0;
+        }
+
+        #panel h2:first-child { margin-top: 0; }
+
+        .row { display: flex; align-items: center; gap: 8px; margin: 6px 0; }
+
+        .row label { flex: 1; }
+
+        .val { color: rgb(245, 194, 66); font-weight: bold; min-width: 62px; text-align: right; }
+
+        input[type=range] { width: 100%; accent-color: rgb(121, 158, 49); }
+
+        input[type=checkbox] { accent-color: rgb(121, 158, 49); width: 16px; height: 16px; }
+
+        .btnrow { display: flex; gap: 6px; flex-wrap: wrap; margin: 6px 0; }
+
+        button {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 12px;
+            padding: 7px 10px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            background: transparent;
+            color: #cdd8ec;
+            cursor: pointer;
+        }
+
+        button.active, button:hover { background: rgb(121, 158, 49); border-color: rgb(121, 158, 49); color: #fff; }
+
+        #wrap { flex: 1; position: relative; min-width: 0; }
+
+        canvas { position: absolute; inset: 0; width: 100%; height: 100%; cursor: grab; touch-action: none; }
+
+        .hint { font-size: 11px; color: #7f93b5; margin-top: 10px; line-height: 1.5; }
+
+        @media (max-width: 700px) {
+            #main { flex-direction: column; }
+
+            #panel { width: 100%; max-height: 45%; border-right: none; border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>VSB STICH-VIEWER</h1>
+        <span id="stats"></span>
+    </header>
+    <div id="main">
+        <div id="panel">
+            <h2>Garn</h2>
+            <div class="row"><label for="garn">Garnstärke</label><span class="val" id="garnval"></span></div>
+            <input type="range" id="garn" min="0.15" max="0.60" step="0.01" value="0.40" aria-label="Garnstärke in mm">
+            <div class="hint">40 wt ≈ 0,40 mm · 60 wt ≈ 0,25 mm · 75 wt ≈ 0,20 mm</div>
+
+            <h2>Original-Overlay</h2>
+            <div class="row"><label for="ovl">Deckkraft</label><span class="val" id="ovlval"></span></div>
+            <input type="range" id="ovl" min="0" max="100" step="1" value="0" aria-label="Overlay-Deckkraft in Prozent">
+            <div class="hint">Legt das Original-Artwork über den Baum — direkt gegen die Stiche vergleichen.</div>
+
+            <h2>Ebenen</h2>
+            <div id="layers"></div>
+            <div class="row">
+                <input type="checkbox" id="colored" aria-label="Ebenen einfärben">
+                <label for="colored">Ebenen einfärben (Diagnose)</label>
+            </div>
+
+            <h2>Stoff</h2>
+            <div class="btnrow" id="fabrics"></div>
+
+            <h2>Ansicht</h2>
+            <div class="btnrow" id="views"></div>
+            <div class="hint">Ziehen = verschieben · Rad/Pinch = zoomen (zum Cursor) · Doppelklick = Gesamt</div>
+        </div>
+        <div id="wrap"><canvas id="cv"></canvas></div>
+    </div>
+
+    <script src="vsb-stick-daten.js"></script>
+    <script>
+        'use strict';
+        const D = window.VSB_DATA;
+        const GOLD = '#CEAC56';
+        // stitch order = draw order: rings, underlay, fill, outlines, lettering
+        const LAYERS = [
+            ['ringe', 'Ringe'],
+            ['baum_underlay', 'Baum-Underlay'],
+            ['baum_fuellung', 'Baum-Füllung'],
+            ['baum_kontur', 'Baum-Kontur'],
+            ['motto', 'Motto'],
+            ['vsb', 'V·S·B'],
+        ];
+        const DIAG = { ringe: '#e6be5a', baum_underlay: '#78c8f0', baum_fuellung: '#e6be5a', baum_kontur: '#f07878', motto: '#8cf08c', vsb: '#dc8cf0' };
+        const FABRICS = [['Grün', '#1d5231'], ['Rot', '#7a1410'], ['Anthrazit', '#232428']];
+
+        const cv = document.getElementById('cv');
+        const ctx = cv.getContext('2d');
+        let fabric = FABRICS[0][1];
+        const on = {}; LAYERS.forEach(([k]) => on[k] = true);
+        let garn = 0.40, ovl = 0, colored = false;
+        // view transform: world mm -> screen px
+        let view = { x: 0, y: 0, s: 6 };
+
+        const ovlImg = new Image();
+        let ovlReady = false;
+        ovlImg.onload = () => { ovlReady = true; draw(); };
+        ovlImg.src = window.VSB_OVERLAY;
+
+        let nSt = 0;
+        for (const [k] of LAYERS) for (const sq of D.groups[k]) nSt += sq.length;
+        document.getElementById('stats').textContent =
+            'Ø ' + D.size_mm.toFixed(0) + ' mm · ' + nSt.toLocaleString('de-DE') + ' Stichpunkte';
+
+        function fit() {
+            const w = cv.clientWidth, h = cv.clientHeight;
+            view.s = Math.min(w, h) / (D.size_mm * 1.06);
+            view.x = w / 2 - D.size_mm / 2 * view.s;
+            view.y = h / 2 - D.size_mm / 2 * view.s;
+        }
+
+        function focus(cxm, cym, mmSpan) {
+            const w = cv.clientWidth, h = cv.clientHeight;
+            view.s = Math.min(w, h) / mmSpan;
+            view.x = w / 2 - cxm * view.s;
+            view.y = h / 2 - cym * view.s;
+        }
+
+        function draw() {
+            const dpr = window.devicePixelRatio || 1;
+            const w = cv.clientWidth, h = cv.clientHeight;
+            if (cv.width !== w * dpr || cv.height !== h * dpr) { cv.width = w * dpr; cv.height = h * dpr; }
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            ctx.fillStyle = 'rgb(16,17,19)';
+            ctx.fillRect(0, 0, w, h);
+            ctx.save();
+            ctx.translate(view.x, view.y);
+            ctx.scale(view.s, view.s);
+            // fabric disc
+            const c = D.size_mm / 2;
+            ctx.beginPath(); ctx.arc(c, c, D.disc_r, 0, 2 * Math.PI);
+            ctx.fillStyle = fabric; ctx.fill();
+            // thread
+            ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+            ctx.lineWidth = garn;
+            for (const [k] of LAYERS) {
+                if (!on[k]) continue;
+                ctx.strokeStyle = colored ? DIAG[k] : GOLD;
+                for (const sq of D.groups[k]) {
+                    ctx.beginPath();
+                    ctx.moveTo(sq[0][0], sq[0][1]);
+                    for (let i = 1; i < sq.length; i++) ctx.lineTo(sq[i][0], sq[i][1]);
+                    ctx.stroke();
+                }
+            }
+            // source-artwork overlay across the tree square
+            if (ovl > 0 && ovlReady) {
+                ctx.globalAlpha = ovl / 100;
+                ctx.drawImage(ovlImg, D.tree_x, D.tree_x, D.tree_s, D.tree_s);
+                ctx.globalAlpha = 1;
+            }
+            ctx.restore();
+        }
+
+        // ---- controls ----
+        const garnEl = document.getElementById('garn'), garnVal = document.getElementById('garnval');
+        const ovlEl = document.getElementById('ovl'), ovlVal = document.getElementById('ovlval');
+        function syncLabels() {
+            garnVal.textContent = garn.toFixed(2).replace('.', ',') + ' mm';
+            ovlVal.textContent = ovl + ' %';
+        }
+        garnEl.addEventListener('input', () => { garn = +garnEl.value; syncLabels(); draw(); });
+        ovlEl.addEventListener('input', () => { ovl = +ovlEl.value; syncLabels(); draw(); });
+
+        const layersDiv = document.getElementById('layers');
+        for (const [k, label] of LAYERS) {
+            const row = document.createElement('div'); row.className = 'row';
+            const cb = document.createElement('input'); cb.type = 'checkbox'; cb.checked = true; cb.id = 'l_' + k;
+            cb.setAttribute('aria-label', label);
+            const la = document.createElement('label'); la.textContent = label; la.htmlFor = cb.id;
+            cb.addEventListener('change', () => { on[k] = cb.checked; draw(); });
+            row.appendChild(cb); row.appendChild(la); layersDiv.appendChild(row);
+        }
+        document.getElementById('colored').addEventListener('change', e => { colored = e.target.checked; draw(); });
+
+        const fabDiv = document.getElementById('fabrics');
+        FABRICS.forEach(([name, col], i) => {
+            const b = document.createElement('button'); b.textContent = name;
+            if (i === 0) b.classList.add('active');
+            b.addEventListener('click', () => {
+                fabric = col;
+                fabDiv.querySelectorAll('button').forEach(x => x.classList.remove('active'));
+                b.classList.add('active'); draw();
+            });
+            fabDiv.appendChild(b);
+        });
+
+        const c0 = D.size_mm / 2;
+        const VIEWS = [
+            ['Gesamt', () => fit()],
+            ['Baum', () => focus(c0, c0, D.tree_s * 1.1)],
+            ['Motto', () => focus(c0, c0 - 46, 40)],
+            ['V·S·B', () => focus(c0, c0 + 42, 40)],
+            ['E links', () => focus(c0 - 41, c0 - 26, 16)],
+            ['E rechts', () => focus(c0 + 44, c0 - 4, 16)],
+        ];
+        const viewsDiv = document.getElementById('views');
+        for (const [name, fn] of VIEWS) {
+            const b = document.createElement('button'); b.textContent = name;
+            b.addEventListener('click', () => { fn(); draw(); });
+            viewsDiv.appendChild(b);
+        }
+
+        // ---- pan & zoom (mouse, wheel, touch pinch) ----
+        const pointers = new Map();
+        let lastPinch = 0;
+        cv.addEventListener('pointerdown', e => { cv.setPointerCapture(e.pointerId); pointers.set(e.pointerId, [e.clientX, e.clientY]); });
+        cv.addEventListener('pointerup', e => { pointers.delete(e.pointerId); lastPinch = 0; });
+        cv.addEventListener('pointercancel', e => { pointers.delete(e.pointerId); lastPinch = 0; });
+        cv.addEventListener('pointermove', e => {
+            if (!pointers.has(e.pointerId)) return;
+            const prev = pointers.get(e.pointerId);
+            pointers.set(e.pointerId, [e.clientX, e.clientY]);
+            if (pointers.size === 1) {
+                view.x += e.clientX - prev[0]; view.y += e.clientY - prev[1]; draw();
+            } else if (pointers.size === 2) {
+                const [p1, p2] = [...pointers.values()];
+                const d = Math.hypot(p1[0] - p2[0], p1[1] - p2[1]);
+                const r = cv.getBoundingClientRect();
+                const mx = (p1[0] + p2[0]) / 2 - r.left, my = (p1[1] + p2[1]) / 2 - r.top;
+                if (lastPinch) zoomAt(mx, my, d / lastPinch);
+                lastPinch = d;
+            }
+        });
+        function zoomAt(px, py, f) {
+            f = Math.max(0.2, Math.min(5, f));
+            const ns = Math.max(1, Math.min(600, view.s * f));
+            const r = ns / view.s;
+            view.x = px - (px - view.x) * r;
+            view.y = py - (py - view.y) * r;
+            view.s = ns; draw();
+        }
+        cv.addEventListener('wheel', e => {
+            e.preventDefault();
+            // canvas-local coords — clientX/Y would anchor the zoom off by the panel offset
+            const r = cv.getBoundingClientRect();
+            zoomAt(e.clientX - r.left, e.clientY - r.top, Math.exp(-e.deltaY * 0.0015));
+        }, { passive: false });
+        cv.addEventListener('dblclick', () => { fit(); draw(); });
+
+        window.addEventListener('resize', () => { draw(); });
+        syncLabels(); fit(); draw();
+        // canvas sizes settle after first layout on some browsers
+        requestAnimationFrame(() => { fit(); draw(); });
+    </script>
+</body>
+
+</html>
