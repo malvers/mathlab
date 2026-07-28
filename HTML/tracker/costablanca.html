@@ -110,7 +110,6 @@
             background: var(--bg-light);
             border: 1px solid rgba(255, 255, 255, 0.08);
             border-radius: 14px;
-            overflow: hidden;
         }
 
         .spot.done { border-color: rgba(121, 158, 49, 0.7); }
@@ -142,6 +141,30 @@
         .spot .box:focus-visible { outline: 2px solid var(--orange); outline-offset: 2px; }
 
         .spot.done .box { background: var(--green); border-color: var(--green); }
+
+        /* mini thumbnail next to the checkbox / in the pool row; grows into a preview on hover */
+        .spot .thumb, .poolitem .thumb {
+            flex: 0 0 auto;
+            width: 38px;
+            height: 38px;
+            object-fit: cover;
+            border-radius: 7px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            cursor: zoom-in;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-radius 0.2s ease;
+        }
+
+        .spot .thumb:hover, .poolitem .thumb:hover {
+            transform: scale(3.6);
+            transform-origin: left center;
+            position: relative;
+            z-index: 30;
+            border-radius: 10px;
+            box-shadow: 0 10px 34px rgba(8, 20, 42, 0.85);
+        }
+
+        /* let the enlarged pool thumbnail escape the pool's clipping while hovered */
+        #pool:has(.thumb:hover), .pool-inner:has(.thumb:hover), .poolitem:has(.thumb:hover) { overflow: visible; }
 
         .spot .name { flex: 1; font-size: 17px; line-height: 1.4; }
 
@@ -949,6 +972,7 @@
                     '<div class="row">' +
                     '<span class="grip" title="ziehen zum Sortieren" aria-hidden="true">⠿</span>' +
                     '<span class="box" role="checkbox" tabindex="0"></span>' +
+                    '<img class="thumb" loading="lazy" alt="" src="cb/' + s.key + '.jpg" onerror="this.remove()">' +
                     '<span class="name"></span>' +
                     '<span class="chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 6 15 12 9 18"/></svg></span>' +
                     '<button class="topool" title="in den Pool" aria-label="in den Pool">×</button>' +
@@ -1032,6 +1056,7 @@
                 it.className = 'poolitem' + (isOpen ? ' open' : '');
                 it.innerHTML =
                     '<div class="poolrow">' +
+                    '<img class="thumb" loading="lazy" alt="" src="cb/' + s.key + '.jpg" onerror="this.remove()">' +
                     '<span class="poolname"></span>' +
                     '<span class="chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 6 15 12 9 18"/></svg></span>' +
                     '<button class="topmain" title="nach oben holen" aria-label="nach oben holen">+</button>' +
