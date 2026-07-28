@@ -166,6 +166,29 @@
         /* let the enlarged pool thumbnail escape the pool's clipping while hovered */
         #pool:has(.thumb:hover), .pool-inner:has(.thumb:hover), .poolitem:has(.thumb:hover) { overflow: visible; }
 
+        /* lightbox: tap a thumbnail to see the full image (touch-friendly) */
+        #lightbox {
+            position: fixed;
+            inset: 0;
+            background: rgba(8, 20, 42, 0.9);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            z-index: 200;
+            cursor: zoom-out;
+        }
+
+        #lightbox.open { display: flex; }
+
+        #lightbox img {
+            max-width: 96%;
+            max-height: 92%;
+            border-radius: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 20px 60px rgba(8, 20, 42, 0.7);
+        }
+
         .spot .name { flex: 1; font-size: 17px; line-height: 1.4; }
 
         .spot.done .name { color: #9fb6dc; text-decoration: line-through; text-decoration-thickness: 1px; }
@@ -517,6 +540,8 @@
             </text>
         </svg>
     </footer>
+
+    <div id="lightbox" role="dialog" aria-modal="true"><img alt=""></div>
 
     <script>
         'use strict';
@@ -919,6 +944,17 @@
 
         const $ = id => document.getElementById(id);
 
+        // tap/click a thumbnail -> full-image lightbox (touch-friendly); desktop keeps the hover-zoom too
+        const lightbox = $('lightbox');
+        function openLightbox(src, alt) {
+            const im = lightbox.querySelector('img');
+            im.src = src; im.alt = alt || '';
+            lightbox.classList.add('open');
+        }
+        function closeLightbox() { lightbox.classList.remove('open'); lightbox.querySelector('img').removeAttribute('src'); }
+        lightbox.addEventListener('click', closeLightbox);
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
+
         function save() {
             localStorage.setItem(LS_STATE, JSON.stringify(state));
             localStorage.setItem(LS_OPEN, JSON.stringify(open));
@@ -1028,6 +1064,8 @@
                     render();
                 });
                 el.querySelector('.topool').addEventListener('click', e => { e.stopPropagation(); moveToPool(key); });
+                const th = el.querySelector('.thumb');
+                if (th) th.addEventListener('click', e => { e.stopPropagation(); openLightbox(th.src, pick(s.name)); });
 
                 list.appendChild(el);
             });
@@ -1079,6 +1117,8 @@
                     save();
                 });
                 it.querySelector('.topmain').addEventListener('click', e => { e.stopPropagation(); moveToMain(s.key); });
+                const pth = it.querySelector('.thumb');
+                if (pth) pth.addEventListener('click', e => { e.stopPropagation(); openLightbox(pth.src, pick(s.name)); });
                 body.appendChild(it);
             });
         }
