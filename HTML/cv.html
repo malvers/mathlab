@@ -270,6 +270,7 @@ const CV = {
     label: "EN", langName: "English",
     title: "CV – Dr Michael R. Alvers",
     photoAlt: "Portrait of Dr Michael R. Alvers",
+    noPhoto: true,   /* UK/US convention: no photo on the CV */
     printLabel: "Print / PDF",
     name: "Dr Michael R. Alvers",
     contact: [
@@ -636,7 +637,16 @@ function setLang(code, updateUrl) {
   document.documentElement.lang = code;
   document.title = cv.title;
   document.getElementById("cvName").textContent = cv.name;
-  document.getElementById("cvPhoto").alt = cv.photoAlt;
+  const photo = document.getElementById("cvPhoto");
+  if (cv.noPhoto) {
+    photo.hidden = true;
+    photo.removeAttribute("src");
+    photo.alt = "";
+  } else {
+    photo.hidden = false;
+    photo.src = "resources/mra.jpg";
+    photo.alt = cv.photoAlt;
+  }
   document.getElementById("printBtn").textContent = cv.printLabel;
   renderContact(document.getElementById("cvContact"), cv.contact);
   renderSections(document.getElementById("cvMain"), cv.sections);
