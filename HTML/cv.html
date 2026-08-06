@@ -8,101 +8,99 @@
 <link rel="icon" href="resources/favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
+<!-- Non-blocking font load: page renders instantly on bad networks, Orbitron swaps in when available -->
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet"></noscript>
 <style>
+  /* Monochrome "sleek" theme: graphite greys, hairlines, no colour */
   :root {
-    --bg: rgb(8, 20, 42);
-    --panel: rgb(14, 36, 78);
-    --panel-soft: rgba(14, 36, 78, 0.55);
-    --lambda: rgb(245, 194, 66);   /* orange – text/accents only */
-    --phi: rgb(121, 158, 49);      /* green – actions/active */
-    --upsilon: rgb(176, 36, 24);   /* red – sparingly */
-    --text: #e8eef9;
-    --muted: #9fb0cc;
-    --line: rgba(159, 176, 204, 0.25);
+    --bg: #141518;
+    --card: #1b1d21;
+    --text: #e8eaed;
+    --muted: #979da6;
+    --hair: rgba(255, 255, 255, 0.10);
+    --hair-strong: rgba(255, 255, 255, 0.28);
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html { scroll-behavior: smooth; }
   body {
-    background: radial-gradient(1200px 600px at 70% -10%, rgba(121, 158, 49, 0.08), transparent 60%),
-                radial-gradient(900px 500px at 10% 110%, rgba(245, 194, 66, 0.06), transparent 60%),
+    background: radial-gradient(1100px 500px at 50% -20%, rgba(255, 255, 255, 0.045), transparent 65%),
                 var(--bg);
     color: var(--text);
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    line-height: 1.55;
+    line-height: 1.6;
     min-height: 100vh;
-    padding: 24px 16px 48px;
+    padding: 28px 16px 52px;
   }
-  .wrap { max-width: 940px; margin: 0 auto; }
+  ::selection { background: rgba(255, 255, 255, 0.18); }
+  .wrap { max-width: 920px; margin: 0 auto; }
 
   /* ---------- top bar: language switcher + print ---------- */
   .topbar {
     display: flex; justify-content: flex-end; align-items: center; gap: 10px;
-    flex-wrap: wrap; margin-bottom: 18px;
+    flex-wrap: wrap; margin-bottom: 20px;
   }
-  .langs { display: flex; gap: 8px; flex-wrap: wrap; }
+  .langs { display: flex; gap: 7px; flex-wrap: wrap; }
   .lang-btn {
-    font-family: "Orbitron", sans-serif; font-weight: 700; font-size: 0.82rem;
-    letter-spacing: 0.08em; color: var(--muted);
-    background: var(--panel-soft); border: 1px solid var(--line); border-radius: 8px;
-    padding: 8px 13px; cursor: pointer; transition: all 0.18s ease;
+    font-family: "Orbitron", sans-serif; font-weight: 500; font-size: 0.8rem;
+    letter-spacing: 0.1em; color: var(--muted);
+    background: transparent; border: 1px solid var(--hair); border-radius: 999px;
+    padding: 8px 15px; cursor: pointer; transition: all 0.18s ease;
   }
-  .lang-btn:hover { color: var(--text); border-color: var(--phi); }
+  .lang-btn:hover { color: var(--text); border-color: var(--hair-strong); }
   .lang-btn.active {
-    color: #eaf3d8; border-color: var(--phi);
-    background: rgba(121, 158, 49, 0.28);
-    box-shadow: 0 0 10px rgba(121, 158, 49, 0.35);
+    color: #17181b; background: var(--text); border-color: var(--text);
+    font-weight: 700;
   }
   .print-btn {
-    font-family: "Orbitron", sans-serif; font-weight: 700; font-size: 0.82rem;
-    letter-spacing: 0.08em; color: #eaf3d8;
-    background: rgba(121, 158, 49, 0.28); border: 1px solid var(--phi); border-radius: 8px;
-    padding: 8px 13px; cursor: pointer; transition: all 0.18s ease;
+    font-family: "Orbitron", sans-serif; font-weight: 500; font-size: 0.8rem;
+    letter-spacing: 0.1em; color: var(--text);
+    background: transparent; border: 1px solid var(--hair-strong); border-radius: 999px;
+    padding: 8px 15px; cursor: pointer; transition: all 0.18s ease;
   }
-  .print-btn:hover { box-shadow: 0 0 12px rgba(121, 158, 49, 0.45); }
+  .print-btn:hover { background: rgba(255, 255, 255, 0.08); }
 
   /* ---------- card ---------- */
   .card {
-    background: linear-gradient(180deg, rgba(14, 36, 78, 0.85), rgba(10, 26, 56, 0.9));
-    border: 1px solid var(--line); border-radius: 16px;
-    padding: clamp(22px, 4vw, 44px);
-    box-shadow: 0 18px 50px rgba(0, 0, 0, 0.45);
+    background: var(--card);
+    border: 1px solid var(--hair); border-radius: 18px;
+    padding: clamp(24px, 4.5vw, 52px);
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
   }
 
   /* ---------- header ---------- */
   header.cv-head {
-    display: flex; gap: clamp(18px, 3vw, 34px); align-items: center;
-    flex-wrap: wrap; margin-bottom: 8px;
+    display: flex; gap: clamp(18px, 3vw, 36px); align-items: center;
+    flex-wrap: wrap; margin-bottom: 6px;
   }
   .head-text { flex: 1 1 320px; min-width: 260px; }
   h1 {
-    font-family: "Orbitron", sans-serif; font-weight: 900;
-    font-size: clamp(1.45rem, 4.4vw, 2.35rem);
-    color: var(--lambda); letter-spacing: 0.04em; line-height: 1.15;
-    text-shadow: 0 0 22px rgba(245, 194, 66, 0.25);
-    margin-bottom: 12px;
+    font-family: "Orbitron", sans-serif; font-weight: 700;
+    font-size: clamp(1.4rem, 4.2vw, 2.2rem);
+    color: #ffffff; letter-spacing: 0.06em; line-height: 1.18;
+    margin-bottom: 13px;
   }
-  .contact { color: var(--muted); font-size: 0.95rem; }
+  .contact { color: var(--muted); font-size: 0.94rem; }
   .contact .row { margin: 2px 0; }
-  .contact a { color: var(--text); text-decoration: none; border-bottom: 1px dotted var(--phi); }
-  .contact a:hover { color: #eaf3d8; }
-  .contact .sep { color: var(--upsilon); padding: 0 7px; }
+  .contact a { color: var(--text); text-decoration: none; border-bottom: 1px solid var(--hair-strong); }
+  .contact a:hover { color: #ffffff; border-bottom-color: #ffffff; }
+  .contact .sep { color: var(--hair-strong); padding: 0 8px; }
   .photo {
-    width: clamp(120px, 18vw, 168px); height: clamp(120px, 18vw, 168px);
-    border-radius: 14px; object-fit: cover; object-position: center 20%;
-    border: 1px solid var(--line);
-    box-shadow: 0 8px 26px rgba(0, 0, 0, 0.5);
+    width: clamp(120px, 18vw, 164px); height: clamp(120px, 18vw, 164px);
+    border-radius: 12px; object-fit: cover; object-position: center 20%;
+    border: 1px solid var(--hair-strong);
+    filter: grayscale(1) contrast(1.04);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.55);
   }
 
   /* ---------- sections ---------- */
-  section { margin-top: clamp(22px, 3.4vw, 34px); }
+  section { margin-top: clamp(24px, 3.6vw, 38px); }
   h2 {
-    font-family: "Orbitron", sans-serif; font-weight: 700;
-    font-size: clamp(0.95rem, 2.4vw, 1.12rem);
-    color: var(--lambda); letter-spacing: 0.12em; text-transform: uppercase;
-    padding-bottom: 7px; margin-bottom: 13px;
-    border-bottom: 1px solid transparent;
-    border-image: linear-gradient(90deg, var(--lambda), rgba(245, 194, 66, 0)) 1;
+    font-family: "Orbitron", sans-serif; font-weight: 500;
+    font-size: clamp(0.88rem, 2.2vw, 1rem);
+    color: #ffffff; letter-spacing: 0.22em; text-transform: uppercase;
+    padding-bottom: 8px; margin-bottom: 14px;
+    border-bottom: 1px solid var(--hair);
   }
   p.lead { text-align: justify; hyphens: auto; }
   ul.plain { list-style: none; }
@@ -110,47 +108,48 @@
     padding-left: 20px; position: relative; margin-bottom: 8px;
     text-align: justify; hyphens: auto;
   }
-  ul.plain li::before { content: "▸"; position: absolute; left: 2px; color: var(--phi); }
+  ul.plain li::before { content: "–"; position: absolute; left: 1px; color: var(--muted); }
 
   /* jobs */
-  .job { margin-bottom: 16px; }
+  .job { margin-bottom: 17px; }
   .job-head { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; align-items: baseline; }
-  .job-role { font-weight: 700; color: var(--text); }
-  .job-date { color: var(--lambda); font-size: 0.88rem; white-space: nowrap; font-family: "Orbitron", sans-serif; font-weight: 500; letter-spacing: 0.03em; }
-  .job-org { color: var(--muted); font-style: italic; font-size: 0.95rem; margin: 1px 0 4px; }
+  .job-role { font-weight: 600; color: #ffffff; }
+  .job-date { color: var(--muted); font-size: 0.85rem; white-space: nowrap; font-family: "Orbitron", sans-serif; font-weight: 500; letter-spacing: 0.05em; }
+  .job-org { color: var(--muted); font-style: italic; font-size: 0.94rem; margin: 1px 0 4px; }
   .job ul.plain li { margin-bottom: 4px; }
 
   footer {
-    text-align: center; color: var(--muted); font-size: 0.82rem;
-    margin-top: 26px;
+    text-align: center; color: var(--muted); font-size: 0.8rem;
+    margin-top: 28px; letter-spacing: 0.03em;
   }
-  footer a { color: var(--muted); text-decoration: none; border-bottom: 1px dotted var(--phi); }
+  footer a { color: var(--muted); text-decoration: none; border-bottom: 1px solid var(--hair-strong); }
+  footer a:hover { color: var(--text); }
 
-  noscript { display: block; text-align: center; color: var(--lambda); padding: 30px 0; }
+  noscript { display: block; text-align: center; color: var(--muted); padding: 30px 0; }
 
   @media (max-width: 560px) {
     body { padding: 14px 8px 32px; }
     header.cv-head { flex-direction: column-reverse; text-align: center; }
-    .photo { width: 150px; height: 150px; }
+    .photo { width: 148px; height: 148px; }
     .contact .row { line-height: 1.7; }
     .job-head { flex-direction: column; gap: 0; }
     p.lead, ul.plain li { text-align: left; }
   }
 
-  /* ---------- print: clean light CV ---------- */
+  /* ---------- print: clean light CV, greyscale ---------- */
   @media print {
-    body { background: #fff; color: #16233c; padding: 0; font-size: 11pt; }
+    body { background: #fff; color: #1c1e21; padding: 0; font-size: 11pt; }
     .topbar, footer, noscript { display: none !important; }
     .card { background: #fff; border: none; box-shadow: none; border-radius: 0; padding: 0; }
-    h1 { color: #1f3864; text-shadow: none; }
-    h2 { color: #1f3864; border-image: none; border-bottom: 1.5px solid #1f3864; }
-    .contact, .job-org { color: #47566f; }
-    .contact a { color: #16233c; border-bottom: none; }
-    .contact .sep { color: #b02418; }
-    .job-role { color: #16233c; }
-    .job-date { color: #1f3864; }
-    ul.plain li::before { color: #799e31; }
-    .photo { box-shadow: none; border: 1px solid #ccd3de; }
+    h1 { color: #111; }
+    h2 { color: #111; border-bottom: 1.5px solid #111; }
+    .contact, .job-org { color: #55595f; }
+    .contact a { color: #1c1e21; border-bottom: none; }
+    .contact .sep { color: #9aa0a8; }
+    .job-role { color: #111; }
+    .job-date { color: #55595f; }
+    ul.plain li::before { color: #9aa0a8; }
+    .photo { box-shadow: none; border: 1px solid #d5d8dc; filter: grayscale(1); }
     section, .job { break-inside: avoid; }
   }
 </style>
@@ -269,6 +268,8 @@ const CV = {
   en: {
     label: "EN", langName: "English",
     title: "CV – Dr Michael R. Alvers",
+    /* UK convention: no photo on the CV (matches the UK PDF) */
+    photo: false,
     photoAlt: "Portrait of Dr Michael R. Alvers",
     printLabel: "Print / PDF",
     name: "Dr Michael R. Alvers",
@@ -636,7 +637,9 @@ function setLang(code, updateUrl) {
   document.documentElement.lang = code;
   document.title = cv.title;
   document.getElementById("cvName").textContent = cv.name;
-  document.getElementById("cvPhoto").alt = cv.photoAlt;
+  const photo = document.getElementById("cvPhoto");
+  photo.alt = cv.photoAlt;
+  photo.style.display = cv.photo === false ? "none" : "";
   document.getElementById("printBtn").textContent = cv.printLabel;
   renderContact(document.getElementById("cvContact"), cv.contact);
   renderSections(document.getElementById("cvMain"), cv.sections);
