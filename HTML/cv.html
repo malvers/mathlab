@@ -80,11 +80,11 @@
     color: #ffffff; letter-spacing: 0.06em; line-height: 1.18;
     margin-bottom: 13px;
   }
+  /* Contact details stacked – one line per item, no separators needed */
   .contact { color: var(--muted); font-size: 0.94rem; }
-  .contact .row { margin: 2px 0; }
+  .contact .ci { display: block; margin: 2px 0; }
   .contact a { color: var(--text); text-decoration: none; border-bottom: 1px solid var(--hair-strong); }
   .contact a:hover { color: #ffffff; border-bottom-color: #ffffff; }
-  .contact .sep { color: var(--hair-strong); padding: 0 8px; }
   .photo {
     width: clamp(120px, 18vw, 164px); height: clamp(120px, 18vw, 164px);
     border-radius: 12px; object-fit: cover; object-position: center 20%;
@@ -126,6 +126,7 @@
   footer a:hover { color: var(--text); }
 
   noscript { display: block; text-align: center; color: var(--muted); padding: 30px 0; }
+  .print-footer { display: none; } /* print only */
 
   @media (max-width: 560px) {
     body { padding: 14px 8px 32px; }
@@ -136,21 +137,55 @@
     p.lead, ul.plain li { text-align: left; }
   }
 
-  /* ---------- print: clean light CV, greyscale ---------- */
+  /* ---------- print: clean light CV, greyscale, A4 ---------- */
   @media print {
-    body { background: #fff; color: #1c1e21; padding: 0; font-size: 11pt; }
+    @page { size: A4; margin: 12mm 15mm 16mm; } /* extra bottom room for our own footer */
+    body { background: #fff; color: #1c1e21; padding: 0; font-size: 10.5pt; line-height: 1.45; }
     .topbar, footer, noscript { display: none !important; }
+    .wrap { max-width: none; }
     .card { background: #fff; border: none; box-shadow: none; border-radius: 0; padding: 0; }
-    h1 { color: #111; }
-    h2 { color: #111; border-bottom: 1.5px solid #111; }
-    .contact, .job-org { color: #55595f; }
+    /* PDF generator mode (?pdf=1): Chrome draws the footer into the real
+       page margin via footerTemplate – hide the in-page fallback footer */
+    html.pdfmode .print-footer { display: none !important; }
+    /* Browser print: footer ONCE at the end of the document, in normal flow.
+       A repeating fixed overlay per page inevitably masks or collides with
+       the last text line on full pages (browser CSS cannot reserve per-page
+       space) – the generated PDFs (scripts/make-cv-pdfs.mjs) carry the
+       per-page footer with page numbers in the real margin instead. */
+    .print-footer {
+      display: block;
+      text-align: center;
+      border-top: 0.5pt solid #d5d8dc; padding-top: 2mm; margin-top: 8mm;
+      font-family: "Orbitron", sans-serif; font-weight: 500;
+      font-size: 7.5pt; letter-spacing: 0.16em; color: #9aa0a8;
+      break-inside: avoid;
+    }
+    header.cv-head { gap: 8mm; margin-bottom: 1mm; }
+    h1 { color: #111; font-size: 18.5pt; letter-spacing: 0.05em; margin-bottom: 7px; }
+    .contact { color: #55595f; font-size: 9.5pt; }
     .contact a { color: #1c1e21; border-bottom: none; }
-    .contact .sep { color: #9aa0a8; }
-    .job-role { color: #111; }
-    .job-date { color: #55595f; }
+    /* px instead of mm: Firefox drops the img from printouts when it is
+       sized in physical units (verified 2026-08-06, FF on macOS) */
+    .photo {
+      width: 114px; height: 114px;
+      box-shadow: none; border: 1px solid #d5d8dc; filter: grayscale(1);
+    }
+    section { margin-top: 5.5mm; }
+    h2 {
+      color: #111; border-bottom: 1px solid #111;
+      font-size: 10pt; letter-spacing: 0.15em;
+      padding-bottom: 4px; margin-bottom: 8px;
+      break-after: avoid;
+    }
+    ul.plain li { margin-bottom: 4px; }
     ul.plain li::before { color: #9aa0a8; }
-    .photo { box-shadow: none; border: 1px solid #d5d8dc; filter: grayscale(1); }
-    section, .job { break-inside: avoid; }
+    .job { margin-bottom: 9px; break-inside: avoid; }
+    .job-role { color: #111; }
+    .job-date { color: #55595f; font-size: 8.5pt; }
+    .job-org { color: #55595f; }
+    /* NOTE: no break-inside:avoid on whole sections – long sections (experience)
+       would otherwise jump to the next page and leave huge gaps */
+    p.lead, ul.plain li { break-inside: avoid; }
   }
 </style>
 </head>
@@ -173,8 +208,10 @@
     <main id="cvMain"></main>
   </div>
 
-  <footer>© 2026 Dr. Michael R. Alvers · <a href="https://docalvers.de">docalvers.de</a></footer>
+  <footer>© 2026 Dr. Michael R. Alvers · <a href="https://docalvers.de">docalvers.de</a> · <a href="cv-help.html">Hilfe</a></footer>
 </div>
+
+<div class="print-footer" id="printFooter" aria-hidden="true"></div>
 
 <noscript>Bitte JavaScript aktivieren. / Please enable JavaScript.</noscript>
 
@@ -194,6 +231,7 @@ const CV = {
     title: "Lebenslauf – Dr. Michael R. Alvers",
     photoAlt: "Porträt von Dr. Michael R. Alvers",
     printLabel: "Drucken / PDF",
+    docfoot: "Dr. Michael R. Alvers · Lebenslauf · docalvers.de",
     name: "Dr. Michael R. Alvers",
     contact: [
       { t: "Moritzburg bei Dresden, Deutschland" },
@@ -272,6 +310,7 @@ const CV = {
     photo: false,
     photoAlt: "Portrait of Dr Michael R. Alvers",
     printLabel: "Print / PDF",
+    docfoot: "Dr Michael R. Alvers · Curriculum Vitae · docalvers.de",
     name: "Dr Michael R. Alvers",
     contact: [
       { t: "Moritzburg (near Dresden), Germany" },
@@ -347,12 +386,14 @@ const CV = {
     title: "Currículum – Dr. Michael R. Alvers",
     photoAlt: "Retrato del Dr. Michael R. Alvers",
     printLabel: "Imprimir / PDF",
+    docfoot: "Dr. Michael R. Alvers · Currículum Vítae · docalvers.de",
     name: "Dr. Michael R. Alvers",
     contact: [
       { t: "Moritzburg (Dresde), Alemania" },
       { t: "michael.r.alvers@gmail.com", href: "mailto:michael.r.alvers@gmail.com" },
       { t: "docalvers.de", href: "https://docalvers.de" },
-      { t: "Fecha de nacimiento: 12 de noviembre de 1963 · Nacionalidad: alemana" }
+      { t: "Fecha de nacimiento: 12 de noviembre de 1963" },
+      { t: "Nacionalidad: alemana" }
     ],
     sections: [
       { h: "Perfil profesional", p: "Docente y emprendedor tecnológico con 40 años de experiencia en enseñanza secundaria, investigación científica y dirección de empresas. Fundador y ex director general de Transinsight GmbH, empresa de búsqueda semántica para la industria farmacéutica, vendida en 2019. Doctor en Geofísica (magna cum laude) con titulación de posgrado en Pedagogía Terapéutica. Profunda experiencia práctica diaria en IA moderna – desde los grandes modelos de lenguaje y los sistemas agénticos hasta dos décadas de tecnologías semánticas – y creador de docalvers.de, una plataforma interactiva de aprendizaje de matemáticas y física. Líder contrastado de equipos internacionales, con vínculos académicos con el mundo hispanohablante (profesor invitado en la Universidad Nacional de La Plata, Argentina). Docente de secundaria desde 2020; a partir de agosto de 2026, profesor de Informática (cursos 9.º a 12.º) en el IBB Gymnasium de Dresde." },
@@ -423,12 +464,14 @@ const CV = {
     title: "CV – Dr Michael R. Alvers",
     photoAlt: "Portrait du Dr Michael R. Alvers",
     printLabel: "Imprimer / PDF",
+    docfoot: "Dr Michael R. Alvers · Curriculum Vitae · docalvers.de",
     name: "Dr Michael R. Alvers",
     contact: [
       { t: "Moritzburg (près de Dresde), Allemagne" },
       { t: "michael.r.alvers@gmail.com", href: "mailto:michael.r.alvers@gmail.com" },
       { t: "docalvers.de", href: "https://docalvers.de" },
-      { t: "Né le 12 novembre 1963 · Nationalité : allemande" }
+      { t: "Né le 12 novembre 1963" },
+      { t: "Nationalité : allemande" }
     ],
     sections: [
       { h: "Profil professionnel", p: "Enseignant et entrepreneur technologique fort de 40 ans d’expérience dans l’enseignement secondaire, la recherche scientifique et la direction d’entreprise. Fondateur et ancien directeur général de Transinsight GmbH, société de recherche sémantique au service de l’industrie pharmaceutique, vendue en 2019. Docteur en géophysique (magna cum laude), titulaire d’un diplôme de troisième cycle en pédagogie spécialisée. Pratique quotidienne approfondie de l’IA moderne – des grands modèles de langage et systèmes agentiques à deux décennies de technologies sémantiques – et créateur de docalvers.de, une plateforme interactive d’apprentissage des mathématiques et de la physique. Leader confirmé d’équipes internationales, enseignant dans le secondaire depuis 2020 ; à partir d’août 2026, professeur d’informatique (classes 9 à 12) au lycée IBB de Dresde." },
@@ -499,12 +542,14 @@ const CV = {
     title: "CV – Dr. Michael R. Alvers",
     photoAlt: "Ritratto del Dr. Michael R. Alvers",
     printLabel: "Stampa / PDF",
+    docfoot: "Dr. Michael R. Alvers · Curriculum Vitae · docalvers.de",
     name: "Dr. Michael R. Alvers",
     contact: [
       { t: "Moritzburg (Dresda), Germania" },
       { t: "michael.r.alvers@gmail.com", href: "mailto:michael.r.alvers@gmail.com" },
       { t: "docalvers.de", href: "https://docalvers.de" },
-      { t: "Nato il 12 novembre 1963 · Nazionalità: tedesca" }
+      { t: "Nato il 12 novembre 1963" },
+      { t: "Nazionalità: tedesca" }
     ],
     sections: [
       { h: "Profilo professionale", p: "Docente e imprenditore tecnologico con 40 anni di esperienza tra insegnamento secondario, ricerca scientifica e direzione d’impresa. Fondatore ed ex amministratore delegato di Transinsight GmbH, azienda di ricerca semantica per l’industria farmaceutica, venduta nel 2019. Dottore di ricerca in Geofisica (magna cum laude) con specializzazione post-laurea in pedagogia speciale. Profonda pratica quotidiana nell’IA moderna – dai grandi modelli linguistici e sistemi agentici fino a due decenni di tecnologie semantiche – e creatore di docalvers.de, una piattaforma interattiva per l’apprendimento di matematica e fisica. Leader esperto di team internazionali, insegnante nella scuola secondaria dal 2020; da agosto 2026 professore di Informatica (classi 9–12) presso l’IBB Gymnasium di Dresda." },
@@ -585,17 +630,18 @@ function el(tag, cls, text) {
 function renderContact(container, items) {
   container.replaceChildren();
   const row = el("div", "row");
-  items.forEach((it, i) => {
-    if (i > 0) row.appendChild(el("span", "sep", "•"));
+  items.forEach((it) => {
+    const ci = el("span", "ci");
     if (it.href) {
       const a = document.createElement("a");
       a.href = it.href;
       a.textContent = it.t;
       if (it.href.startsWith("http")) { a.target = "_blank"; a.rel = "noopener"; }
-      row.appendChild(a);
+      ci.appendChild(a);
     } else {
-      row.appendChild(document.createTextNode(it.t));
+      ci.appendChild(document.createTextNode(it.t));
     }
+    row.appendChild(ci);
   });
   container.appendChild(row);
 }
@@ -641,6 +687,7 @@ function setLang(code, updateUrl) {
   photo.alt = cv.photoAlt;
   photo.style.display = cv.photo === false ? "none" : "";
   document.getElementById("printBtn").textContent = cv.printLabel;
+  document.getElementById("printFooter").textContent = cv.docfoot;
   renderContact(document.getElementById("cvContact"), cv.contact);
   renderSections(document.getElementById("cvMain"), cv.sections);
   document.querySelectorAll(".lang-btn").forEach(b => {
@@ -668,6 +715,11 @@ function pickInitialLang() {
     if (CV[c]) return c;
   }
   return "en";
+}
+
+/* PDF generator mode: footer comes from Chrome's footerTemplate instead */
+if (new URLSearchParams(location.search).get("pdf") === "1") {
+  document.documentElement.classList.add("pdfmode");
 }
 
 /* build language buttons */
