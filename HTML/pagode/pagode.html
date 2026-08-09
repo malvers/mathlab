@@ -282,6 +282,13 @@
             toast.textContent = text; toast.classList.add('show');
             clearTimeout(flash._t); flash._t = setTimeout(() => toast.classList.remove('show'), 1600);
         }
+        // TEMP live debug readout (in the footer) — sim · connection · security mode · unlocked · running
+        function dbg() {
+            var f = document.querySelector('.foot');
+            if (!f) return;
+            f.textContent = 'sim:' + (PagodeBLE.sim.active() ? 'AN' : 'aus') + ' · conn:' + (connected ? 'JA' : 'nein')
+                + ' · mode:' + PagodeAuth.getMode() + ' · auth:' + (authed ? 'JA' : 'nein') + ' · run:' + (running ? 'JA' : 'nein');
+        }
         async function press() {
             if (!connected) { ensureConnected(); return; }   // first touch just connects; hold again to act
             if (holding) return;
@@ -337,6 +344,7 @@
         // gear → security settings (Aus / PIN / Biometrie)
         document.getElementById('gear').addEventListener('click', () => PagodeAuth.openSettings());
         updateBtn();
+        setInterval(dbg, 500); dbg();   // TEMP: keep the footer debug line live
 
         // ---- switchable backdrop: press "b" to cycle; choice persists in localStorage ----
         const BGS = [

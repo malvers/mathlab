@@ -20,6 +20,12 @@ const LAB_ICONS = {
             <line x1="50" y1="35" x2="50" y2="65" stroke="#00d2ff" stroke-width="6" stroke-linecap="round" />
             <line x1="35" y1="50" x2="65" y2="50" stroke="#00d2ff" stroke-width="6" stroke-linecap="round" />
         </svg>`,
+    "einsundeins": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <rect x="14" y="14" width="72" height="72" rx="12" fill="rgba(245, 194, 66, 0.08)" stroke="#F5C242" stroke-width="2" />
+            <text x="50" y="45" text-anchor="middle" font-family="Orbitron, sans-serif" font-weight="700" font-size="23" fill="#F5C242">1+1</text>
+            <line x1="28" y1="56" x2="72" y2="56" stroke="rgba(255,255,255,0.28)" stroke-width="1.5" />
+            <text x="50" y="79" text-anchor="middle" font-family="'Courier New', monospace" font-weight="700" font-size="21" fill="#799E31">10</text>
+        </svg>`,
     "subtraktion": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
             <rect x="15" y="15" width="70" height="70" rx="10" fill="rgba(255, 77, 77, 0.1)" stroke="#ff4d4d" stroke-width="2" />
             <line x1="32" y1="50" x2="68" y2="50" stroke="#ff4d4d" stroke-width="6" stroke-linecap="round" />

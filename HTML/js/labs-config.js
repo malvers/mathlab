@@ -79,6 +79,17 @@ const LABS_DATA = [
         "color": "blue"
     },
     {
+        "id": "einsundeins",
+        "href": "einsundeinsgleichzwei.html",
+        "title": "1 + 1 = 2",
+        "description": "Eine einzige Rechnung, vier Ebenen tiefer: Hochsprache → Assembler → Maschinenbytes → Volladdierer aus Logikgattern. Auf jeder Ebene dieselbe Information, nur eine Abstraktion tiefer — der Übertrag rieselt sichtbar durch die Gatter, und ein Bit ist am Ende nur Spannung an oder aus.",
+        "tagline": "Vom Code zu den Bits / Wie ein Computer rechnet",
+        "icon": LAB_ICONS["einsundeins"],
+        "category": "arithmetik logik fun hot highlight grade8 grade9",
+        "keywords": "binär bit byte hex assembler maschinencode informatik volladdierer logikgatter xor and übertrag carry null eins strom spannung transistor cpu",
+        "color": "gold"
+    },
+    {
         "id": "subtraktion",
         "href": "subtraktion.html",
         "title": "Schriftliche Subtraktion",
