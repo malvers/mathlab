@@ -16,6 +16,7 @@ Märkte Tárbena/Xaló) bekommen Docs eigene Fotos.
 | guadalest.jpg | Campanario de Guadalest | Diego Delso | CC BY-SA 4.0 | https://commons.wikimedia.org/wiki/File:Campanario,_Guadalest,_Alicante,_España,_2023-01-21,_DD_21.jpg |
 | albirmercado.jpg | Faro de l'Albir | Jesús Alenda | CC BY 2.0 | https://commons.wikimedia.org/wiki/File:Faro_de_l%27Albir_(detail).jpg |
 | moraira.jpg | Castillo de Moraira | Joan Ivars Cervera | Public domain | https://commons.wikimedia.org/wiki/File:CastMoraira01.jpg |
+| cumbredelsol.jpg | Cumbre del Sol / Cala del Moraig | Joanbanjo | CC BY-SA 4.0 | https://commons.wikimedia.org/wiki/File:Cala_del_Moraig_des_dels_miradors.JPG |
 | bernia.jpg | Serra de Bèrnia (Kamm) | Joanbanjo | CC BY-SA 4.0 | https://commons.wikimedia.org/wiki/File:Cresteria_de_la_serra_de_Bèrnia.JPG |
 | aitana.jpg | Sierra de Aitana | Ximonic (Simo Räsänen) | CC BY-SA 4.0 | https://commons.wikimedia.org/wiki/File:Sierra_de_Aitana_mountains_as_seen_from_the_hills_of_Relleu,_Alicante,_Spain,_2022_January.jpg |
 | puigcampana.jpg | Puig Campana | Fernan79 | CC BY-SA 2.5 | https://commons.wikimedia.org/wiki/File:Puig_Campana_Finestrat.JPG |
