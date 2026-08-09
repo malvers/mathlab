@@ -60,6 +60,28 @@
   }
   .print-btn:hover { background: rgba(255, 255, 255, 0.08); }
 
+  /* ---------- edit mode (?edit=1): login + save in the topbar ---------- */
+  .editbar { display: flex; gap: 7px; align-items: center; flex-wrap: wrap; }
+  .editbar input {
+    font: inherit; font-size: 0.85rem; color: var(--text);
+    background: rgba(255, 255, 255, 0.05); border: 1px solid var(--hair);
+    border-radius: 999px; padding: 7px 13px; max-width: 220px;
+  }
+  .editbar input:focus { outline: none; border-color: var(--hair-strong); }
+  .edit-status { color: var(--muted); font-size: 0.8rem; letter-spacing: 0.03em; }
+  /* Pencil pill button – toggles edit mode. Muted when off, English green when on.
+     (scaleX(-1): glyph mirrored so the pencil points right) */
+  .edit-toggle {
+    font-size: 1.05rem; line-height: 1; color: var(--muted);
+    background: transparent; border: 1px solid var(--hair); border-radius: 999px;
+    padding: 7px 13px 8px; cursor: pointer; transition: all 0.18s ease;
+  }
+  .edit-toggle .g { display: inline-block; transform: scaleX(-1); }
+  .edit-toggle:hover { color: var(--text); border-color: var(--hair-strong); }
+  .edit-toggle.on, .edit-toggle.on:hover { color: #3fae6d; border-color: #3fae6d; }
+  [contenteditable] { outline: 1px dashed var(--hair-strong); outline-offset: 3px; border-radius: 3px; }
+  [contenteditable]:focus { outline: 1px solid #fff; }
+
   /* ---------- card ---------- */
   .card {
     background: var(--card);
@@ -142,6 +164,7 @@
     @page { size: A4; margin: 12mm 15mm 16mm; } /* extra bottom room for our own footer */
     body { background: #fff; color: #1c1e21; padding: 0; font-size: 10.5pt; line-height: 1.45; }
     .topbar, footer, noscript { display: none !important; }
+    [contenteditable] { outline: none !important; }
     .wrap { max-width: none; }
     .card { background: #fff; border: none; box-shadow: none; border-radius: 0; padding: 0; }
     /* PDF generator mode (?pdf=1): Chrome draws the footer into the real
@@ -194,6 +217,14 @@
 
   <div class="topbar">
     <nav class="langs" id="langs" aria-label="Language selection"></nav>
+    <button class="edit-toggle" id="editToggle" type="button" aria-label="Bearbeiten"
+      aria-pressed="false" title="Bearbeiten"><span class="g">&#9998;</span></button>
+    <div class="editbar" id="editBar" hidden>
+      <input id="editEmail" type="email" autocomplete="email" placeholder="E-Mail" aria-label="E-Mail">
+      <input id="editPwd" type="password" autocomplete="current-password" placeholder="Passwort" aria-label="Passwort">
+      <button class="print-btn" id="editLoginBtn" type="button">Login</button>
+      <span class="edit-status" id="editStatus"></span>
+    </div>
     <button class="print-btn" id="printBtn" type="button" onclick="window.print()">Drucken / PDF</button>
   </div>
 
@@ -627,11 +658,20 @@ function el(tag, cls, text) {
   return n;
 }
 
+/* el() plus a data-path pointing into the current CV language object –
+   the edit mode uses these paths to write edited text back */
+function pathEl(tag, cls, text, path) {
+  const n = el(tag, cls, text);
+  n.dataset.path = path;
+  return n;
+}
+
 function renderContact(container, items) {
   container.replaceChildren();
   const row = el("div", "row");
-  items.forEach((it) => {
+  items.forEach((it, i) => {
     const ci = el("span", "ci");
+    ci.dataset.path = "contact." + i + ".t";
     if (it.href) {
       const a = document.createElement("a");
       a.href = it.href;
@@ -648,41 +688,48 @@ function renderContact(container, items) {
 
 function renderSections(main, sections) {
   main.replaceChildren();
-  for (const s of sections) {
+  sections.forEach((s, si) => {
+    const sp = "sections." + si;
     const sec = el("section");
-    sec.appendChild(el("h2", null, s.h));
-    if (s.p) sec.appendChild(el("p", "lead", s.p));
+    sec.appendChild(pathEl("h2", null, s.h, sp + ".h"));
+    if (s.p) sec.appendChild(pathEl("p", "lead", s.p, sp + ".p"));
     if (s.items) {
       const ul = el("ul", "plain");
-      s.items.forEach(t => ul.appendChild(el("li", null, t)));
+      s.items.forEach((t, ii) => ul.appendChild(pathEl("li", null, t, sp + ".items." + ii)));
       sec.appendChild(ul);
     }
     if (s.jobs) {
-      for (const j of s.jobs) {
+      s.jobs.forEach((j, ji) => {
+        const jp = sp + ".jobs." + ji;
         const job = el("div", "job");
         const head = el("div", "job-head");
-        head.appendChild(el("span", "job-role", j.r));
-        head.appendChild(el("span", "job-date", j.d));
+        head.appendChild(pathEl("span", "job-role", j.r, jp + ".r"));
+        head.appendChild(pathEl("span", "job-date", j.d, jp + ".d"));
         job.appendChild(head);
-        job.appendChild(el("div", "job-org", j.o));
+        job.appendChild(pathEl("div", "job-org", j.o, jp + ".o"));
         if (j.b && j.b.length) {
           const ul = el("ul", "plain");
-          j.b.forEach(t => ul.appendChild(el("li", null, t)));
+          j.b.forEach((t, bi) => ul.appendChild(pathEl("li", null, t, jp + ".b." + bi)));
           job.appendChild(ul);
         }
         sec.appendChild(job);
-      }
+      });
     }
     main.appendChild(sec);
-  }
+  });
 }
 
 function setLang(code, updateUrl) {
   const cv = CV[code];
   if (!cv) return;
+  /* user switches language while holding unsaved edits → auto-save the old language
+     first (sync DOM collect, async upsert) so the re-render cannot lose anything */
+  if (updateUrl && window.CvEdit && CvEdit.active && CvEdit.dirty) CvEdit.autoSave();
   document.documentElement.lang = code;
   document.title = cv.title;
-  document.getElementById("cvName").textContent = cv.name;
+  const nameEl = document.getElementById("cvName");
+  nameEl.textContent = cv.name;
+  nameEl.dataset.path = "name";
   const photo = document.getElementById("cvPhoto");
   photo.alt = cv.photoAlt;
   photo.style.display = cv.photo === false ? "none" : "";
@@ -701,6 +748,8 @@ function setLang(code, updateUrl) {
     url.searchParams.set("lang", code);
     history.replaceState(null, "", url);
   }
+  /* re-render wiped the contenteditable flags → re-apply while editing */
+  if (window.CvEdit && CvEdit.active) { CvEdit.applyEditable(); CvEdit.takeSnapshot(); }
 }
 
 function pickInitialLang() {
@@ -737,6 +786,256 @@ for (const code of LANG_ORDER) {
 }
 
 setLang(pickInitialLang(), false);
+
+/* ============================================================
+   Remote content – Supabase table cv_content (lang, data jsonb).
+   Public read via REST; the baked-in CV above stays as offline /
+   error fallback. Editing (?edit=1) requires a Supabase login –
+   RLS lets only Doc's account write.
+   ============================================================ */
+const DB_URL = "https://fyfhxzyymmurlaenmzse.supabase.co";
+const DB_KEY = "sb_publishable_ubQDiMD-X3N0vZvPVi229Q_-5Zootfk"; /* publishable key – public by design */
+
+async function loadRemoteCv() {
+  try {
+    const res = await fetch(DB_URL + "/rest/v1/cv_content?select=lang,data", {
+      headers: { apikey: DB_KEY, Authorization: "Bearer " + DB_KEY }
+    });
+    if (!res.ok) return;
+    const rows = await res.json();
+    let touched = false;
+    for (const row of rows) {
+      if (CV[row.lang] && row.data && typeof row.data === "object") {
+        /* merge so newly baked-in fields survive an older DB row */
+        CV[row.lang] = Object.assign({}, CV[row.lang], row.data);
+        touched = true;
+      }
+    }
+    if (touched) setLang(document.documentElement.lang, false);
+  } catch (e) { /* offline → keep baked-in content */ }
+}
+const cvRemoteReady = loadRemoteCv();
+
+/* ============================================================
+   Edit mode (?edit=1) – login, contenteditable, save to DB
+   ============================================================ */
+const CvEdit = { active: false, dirty: false, snapshot: null, pending: {} };
+window.CvEdit = CvEdit;
+
+CvEdit.applyEditable = function () {
+  document.querySelectorAll("[data-path]").forEach((n) => {
+    n.contentEditable = "plaintext-only";
+    if (!n.isContentEditable) n.contentEditable = "true"; /* browsers without plaintext-only */
+  });
+};
+
+/* the save-diff (→ minimal translation set) is computed against this copy */
+CvEdit.takeSnapshot = function () {
+  CvEdit.snapshot = JSON.parse(JSON.stringify(CV[document.documentElement.lang]));
+};
+
+CvEdit.pendingCount = function () {
+  return Object.values(CvEdit.pending).reduce((n, m) => n + Object.keys(m).length, 0);
+};
+
+function setByPath(obj, path, value) {
+  const parts = path.split(".");
+  let o = obj;
+  for (let i = 0; i < parts.length - 1; i++) o = o[parts[i]];
+  o[parts[parts.length - 1]] = value;
+}
+
+function getByPath(obj, path) {
+  let o = obj;
+  for (const part of path.split(".")) {
+    if (o === null || typeof o !== "object") return undefined;
+    o = o[part];
+  }
+  return o;
+}
+
+(function initEdit() {
+  const toggle = document.getElementById("editToggle");
+  const bar = document.getElementById("editBar");
+  const email = document.getElementById("editEmail");
+  const pwd = document.getElementById("editPwd");
+  const loginBtn = document.getElementById("editLoginBtn");
+  const statusEl = document.getElementById("editStatus");
+  let sb = null;
+  const status = (t) => { statusEl.textContent = t; };
+
+  function loadScript(src) {
+    return new Promise((ok, err) => {
+      const s = document.createElement("script");
+      s.src = src; s.onload = ok; s.onerror = err;
+      document.head.appendChild(s);
+    });
+  }
+
+  async function ensureSb() {
+    if (sb) return sb;
+    if (!window.supabase) await loadScript("js/vendor/supabase.min.js");
+    /* own storageKey: same-origin apps (tracker!) log in with their own Supabase
+       users – without this the pencil would silently reuse THEIR session */
+    sb = window.supabase.createClient(DB_URL, DB_KEY, { auth: { storageKey: "cv-auth" } });
+    return sb;
+  }
+
+  function showLogin() {
+    bar.hidden = false;
+    email.hidden = pwd.hidden = loginBtn.hidden = false;
+    status("");
+    email.focus();
+  }
+
+  function startEditing() {
+    bar.hidden = false;
+    email.hidden = pwd.hidden = loginBtn.hidden = true;
+    CvEdit.active = true;
+    CvEdit.applyEditable();
+    CvEdit.takeSnapshot();
+    toggle.classList.add("on");
+    toggle.setAttribute("aria-pressed", "true");
+    status("");
+  }
+
+  /* leave edit mode visually; the bar stays visible while save/translate report status */
+  function exitEditingUi() {
+    document.querySelectorAll("[data-path]").forEach((n) => n.removeAttribute("contenteditable"));
+    CvEdit.active = false;
+    toggle.classList.remove("on");
+    toggle.setAttribute("aria-pressed", "false");
+  }
+
+  async function onToggle() {
+    if (CvEdit.active) {
+      /* pencil off = auto-save, then auto-translate whatever changed */
+      const code = document.documentElement.lang;
+      const hadEdits = CvEdit.dirty;
+      collect(code); /* sync: DOM → CV object + pending, before the editable flags go away */
+      exitEditingUi();
+      try {
+        if (hadEdits) {
+          status("Speichern …");
+          await persist(code);
+          status("Gespeichert ✓ (" + code.toUpperCase() + ")");
+        }
+        if (CvEdit.pendingCount()) await translate();
+      } catch (e) {
+        CvEdit.dirty = true; /* next pencil-off retries the save */
+        status("Fehler: " + e.message);
+        return; /* keep the bar visible so the error is readable */
+      }
+      setTimeout(() => { if (!CvEdit.active) { bar.hidden = true; status(""); } }, 2500);
+      return;
+    }
+    if (!bar.hidden) { bar.hidden = true; return; } /* login form open → close it */
+    try { /* valid session from last time? → skip the login form */
+      const client = await ensureSb();
+      const { data } = await client.auth.getSession();
+      if (data && data.session) { startEditing(); return; }
+    } catch (e) { /* fall through to login */ }
+    showLogin();
+  }
+
+  async function login() {
+    status("Login …");
+    try {
+      const client = await ensureSb();
+      /* sign-in ONLY – no signUp here, the account is created in the Supabase dashboard */
+      const { error } = await client.auth.signInWithPassword({
+        email: email.value.trim(), password: pwd.value
+      });
+      if (error) { status("Login fehlgeschlagen: " + error.message); return; }
+      startEditing();
+    } catch (e) { status("Fehler: " + e.message); }
+  }
+
+  /* sync: pull every edited text node back into the CV object; the diff vs the snapshot
+     becomes the minimal translation set (sections only – name/contact stay manual) */
+  function collect(code) {
+    document.querySelectorAll("[data-path]").forEach((n) => {
+      const path = n.dataset.path;
+      const txt = n.textContent.replace(/\s+/g, " ").trim();
+      if (path.indexOf("sections.") === 0 && CvEdit.snapshot &&
+          getByPath(CvEdit.snapshot, path) !== txt) {
+        const p = CvEdit.pending[code] = CvEdit.pending[code] || {};
+        p[path] = txt;
+      }
+      setByPath(CV[code], path, txt);
+    });
+    CvEdit.dirty = false;
+    CvEdit.takeSnapshot();
+  }
+
+  async function persist(code) {
+    const client = await ensureSb();
+    const { error } = await client.from("cv_content").upsert(
+      { lang: code, data: CV[code], updated_at: new Date().toISOString() });
+    if (error) throw new Error(error.message);
+  }
+
+  /* language switch while editing (called from setLang BEFORE the re-render) */
+  CvEdit.autoSave = function () {
+    const code = document.documentElement.lang;
+    collect(code);
+    persist(code).then(() => status("Gespeichert ✓ (" + code.toUpperCase() + ")"))
+      .catch((e) => { CvEdit.dirty = true; status("Fehler: " + e.message); });
+  };
+
+  async function translate() {
+    status("Übersetzen …");
+    const client = await ensureSb();
+    const { data: sess } = await client.auth.getSession();
+    if (!sess || !sess.session) throw new Error("Bitte neu einloggen");
+    /* seed rows for languages not in the DB yet – the function only patches existing rows */
+    const res = await fetch(DB_URL + "/rest/v1/cv_content?select=lang", {
+      headers: { apikey: DB_KEY, Authorization: "Bearer " + DB_KEY }
+    });
+    const have = res.ok ? (await res.json()).map((r) => r.lang) : [];
+    const missing = LANG_ORDER.filter((l) => have.indexOf(l) < 0);
+    if (missing.length) {
+      const { error } = await client.from("cv_content").upsert(missing.map((l) => (
+        { lang: l, data: CV[l], updated_at: new Date().toISOString() })));
+      if (error) throw new Error(error.message);
+    }
+    for (const src of Object.keys(CvEdit.pending)) {
+      const changes = Object.keys(CvEdit.pending[src]).map((path) => (
+        { path, text: CvEdit.pending[src][path] }));
+      if (!changes.length) { delete CvEdit.pending[src]; continue; }
+      const r = await fetch(DB_URL + "/functions/v1/cv-translate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json", apikey: DB_KEY,
+          Authorization: "Bearer " + sess.session.access_token
+        },
+        body: JSON.stringify({ src: src, changes: changes })
+      });
+      const out = await r.json().catch(() => ({}));
+      if (!r.ok || !out.ok) throw new Error(out.error || ("HTTP " + r.status));
+      delete CvEdit.pending[src];
+    }
+    await loadRemoteCv(); /* re-render with the fresh translations */
+    status("Übersetzt ✓");
+  }
+
+  toggle.addEventListener("click", onToggle);
+  loginBtn.addEventListener("click", login);
+  pwd.addEventListener("keydown", (e) => { if (e.key === "Enter") login(); });
+  document.addEventListener("input", (e) => {
+    if (CvEdit.active && e.target.closest && e.target.closest("[data-path]")) CvEdit.dirty = true;
+  });
+  window.addEventListener("beforeunload", (e) => {
+    if (CvEdit.dirty || CvEdit.pendingCount()) { e.preventDefault(); e.returnValue = ""; }
+  });
+
+  /* edit mode starts OFF – the pencil is the only way in; drop a stale ?edit=1 from the URL */
+  if (new URLSearchParams(location.search).get("edit") === "1") {
+    const url = new URL(location.href);
+    url.searchParams.delete("edit");
+    history.replaceState(null, "", url);
+  }
+})();
 </script>
 </body>
 </html>
