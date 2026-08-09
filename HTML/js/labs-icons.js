@@ -354,5 +354,106 @@ const LAB_ICONS = {
             <circle cx="64" cy="36" r="6" fill="rgba(0,210,255,0.2)" stroke="var(--neon-blue)" stroke-width="1.4"/>
             <text x="73" y="30" font-family="'Orbitron',sans-serif" font-size="13" fill="var(--neon-blue)" opacity="0.95">i</text>
         </svg>`,
-    "solita": "✨"
+    "solita": "✨",
+    "gameoflife": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <rect x="14" y="14" width="72" height="72" rx="10" fill="rgba(121, 158, 49, 0.08)" stroke="#799E31" stroke-width="2" />
+            <g fill="#799E31">
+                <rect x="42" y="24" width="12" height="12" rx="2" />
+                <rect x="56" y="38" width="12" height="12" rx="2" />
+                <rect x="28" y="52" width="12" height="12" rx="2" />
+                <rect x="42" y="52" width="12" height="12" rx="2" />
+                <rect x="56" y="52" width="12" height="12" rx="2" />
+            </g>
+            <g fill="rgba(121, 158, 49, 0.25)">
+                <rect x="28" y="24" width="12" height="12" rx="2" />
+                <rect x="70" y="66" width="12" height="12" rx="2" />
+            </g>
+        </svg>`,
+    "burningship": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <rect x="14" y="14" width="72" height="72" rx="10" fill="rgba(255, 140, 0, 0.08)" stroke="#ff8c00" stroke-width="2" />
+            <path d="M 26 74 L 42 74 L 42 46 L 50 60 L 54 38 L 60 54 L 66 30 L 74 74 Z"
+                  fill="rgba(255, 140, 0, 0.25)" stroke="#ff8c00" stroke-width="2" stroke-linejoin="round" />
+            <line x1="22" y1="74" x2="78" y2="74" stroke="#ff8c00" stroke-width="2.5" stroke-linecap="round" />
+        </svg>`,
+    "reaction-diffusion": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <rect x="14" y="14" width="72" height="72" rx="10" fill="rgba(186, 85, 255, 0.08)" stroke="#ba55ff" stroke-width="2" />
+            <path d="M 24 34 Q 38 22 50 34 T 76 34" fill="none" stroke="#ba55ff" stroke-width="4" stroke-linecap="round" />
+            <path d="M 24 50 Q 38 62 50 50 T 76 50" fill="none" stroke="#ba55ff" stroke-width="4" stroke-linecap="round" />
+            <path d="M 24 66 Q 38 54 50 66 T 76 66" fill="none" stroke="rgba(186, 85, 255, 0.45)" stroke-width="4" stroke-linecap="round" />
+        </svg>`,
+    "gravitation": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <rect x="14" y="14" width="72" height="72" rx="10" fill="rgba(0, 210, 255, 0.08)" stroke="#00d2ff" stroke-width="2" />
+            <ellipse cx="50" cy="50" rx="28" ry="14" fill="none" stroke="rgba(0, 210, 255, 0.5)" stroke-width="1.6" transform="rotate(-18 50 50)" />
+            <circle cx="50" cy="50" r="9" fill="#F5C242" />
+            <circle cx="73" cy="38" r="4.5" fill="#00d2ff" />
+        </svg>`,
+    "glocken": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <rect x="14" y="14" width="72" height="72" rx="10" fill="rgba(255, 215, 0, 0.08)" stroke="#ffd700" stroke-width="2" />
+            <path d="M 50 26 C 62 26 64 40 64 52 L 70 62 L 30 62 L 36 52 C 36 40 38 26 50 26 Z"
+                  fill="rgba(255, 215, 0, 0.2)" stroke="#ffd700" stroke-width="2" stroke-linejoin="round" />
+            <circle cx="50" cy="69" r="4.5" fill="#ffd700" />
+        </svg>`,
+    "langley": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <rect x="14" y="14" width="72" height="72" rx="10" fill="rgba(121, 158, 49, 0.08)" stroke="#799E31" stroke-width="2" />
+            <path d="M 50 24 L 26 72 L 74 72 Z" fill="none" stroke="#799E31" stroke-width="2.5" stroke-linejoin="round" />
+            <line x1="26" y1="72" x2="61" y2="46" stroke="rgba(121, 158, 49, 0.6)" stroke-width="1.8" />
+            <line x1="74" y1="72" x2="39" y2="46" stroke="rgba(121, 158, 49, 0.6)" stroke-width="1.8" />
+            <path d="M 34 72 A 8 8 0 0 0 32.5 67.5" fill="none" stroke="#F5C242" stroke-width="2" />
+            <text x="40" y="68" font-family="Orbitron, sans-serif" font-size="10" fill="#F5C242">?</text>
+        </svg>`,
+    "batman": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <rect x="14" y="14" width="72" height="72" rx="10" fill="rgba(0, 210, 255, 0.08)" stroke="#00d2ff" stroke-width="2" />
+            <path d="M 22 52 Q 30 40 38 46 Q 42 38 46 44 L 48 40 L 50 46 L 52 40 L 54 44 Q 58 38 62 46 Q 70 40 78 52 Q 66 50 62 58 Q 56 52 50 62 Q 44 52 38 58 Q 34 50 22 52 Z"
+                  fill="rgba(0, 210, 255, 0.3)" stroke="#00d2ff" stroke-width="1.8" stroke-linejoin="round" />
+        </svg>`,
+    "worldclock": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <rect x="14" y="14" width="72" height="72" rx="10" fill="rgba(0, 210, 255, 0.08)" stroke="#00d2ff" stroke-width="2" />
+            <circle cx="50" cy="50" r="26" fill="none" stroke="#00d2ff" stroke-width="2" />
+            <ellipse cx="50" cy="50" rx="11" ry="26" fill="none" stroke="rgba(0, 210, 255, 0.5)" stroke-width="1.4" />
+            <line x1="24" y1="50" x2="76" y2="50" stroke="rgba(0, 210, 255, 0.5)" stroke-width="1.4" />
+            <line x1="50" y1="50" x2="50" y2="34" stroke="#F5C242" stroke-width="2.5" stroke-linecap="round" />
+            <line x1="50" y1="50" x2="61" y2="56" stroke="#F5C242" stroke-width="2.5" stroke-linecap="round" />
+        </svg>`,
+    "tracker": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <rect x="14" y="14" width="72" height="72" rx="10" fill="rgba(121, 158, 49, 0.08)" stroke="#799E31" stroke-width="2" />
+            <path d="M 24 72 Q 36 58 34 46 Q 33 36 44 38 Q 56 40 54 52 Q 52 62 64 58" fill="none"
+                  stroke="rgba(121, 158, 49, 0.6)" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="1 7" />
+            <path d="M 66 26 C 74 26 79 32 79 39 C 79 48 66 58 66 58 C 66 58 53 48 53 39 C 53 32 58 26 66 26 Z"
+                  fill="rgba(121, 158, 49, 0.25)" stroke="#799E31" stroke-width="2" />
+            <circle cx="66" cy="39" r="4.5" fill="#799E31" />
+        </svg>`,
+    "kaimbo": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <rect x="14" y="14" width="72" height="72" rx="10" fill="rgba(245, 194, 66, 0.08)" stroke="#F5C242" stroke-width="2" />
+            <path d="M 24 30 h 32 a 6 6 0 0 1 6 6 v 14 a 6 6 0 0 1 -6 6 h -18 l -8 8 v -8 h -6 a 6 6 0 0 1 -6 -6 v -14 a 6 6 0 0 1 6 -6 Z"
+                  fill="rgba(245, 194, 66, 0.15)" stroke="#F5C242" stroke-width="2" stroke-linejoin="round" />
+            <text x="40" y="49" text-anchor="middle" font-family="Orbitron, sans-serif" font-weight="700" font-size="14" fill="#F5C242">A</text>
+            <path d="M 46 52 h 26 a 5 5 0 0 1 5 5 v 10 a 5 5 0 0 1 -5 5 h -4 v 7 l -7 -7 h -15 a 5 5 0 0 1 -5 -5 v -10 a 5 5 0 0 1 5 -5 Z"
+                  fill="rgba(0, 210, 255, 0.12)" stroke="#00d2ff" stroke-width="2" stroke-linejoin="round" />
+            <text x="60" y="67" text-anchor="middle" font-family="Orbitron, sans-serif" font-weight="700" font-size="12" fill="#00d2ff">文</text>
+        </svg>`,
+    "pagode": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <rect x="14" y="14" width="72" height="72" rx="10" fill="rgba(245, 194, 66, 0.08)" stroke="#F5C242" stroke-width="2" />
+            <path d="M 22 62 L 26 52 Q 28 48 34 47 L 42 40 Q 45 38 52 38 L 62 38 Q 68 39 71 47 L 78 52 L 78 62 Z"
+                  fill="rgba(245, 194, 66, 0.2)" stroke="#F5C242" stroke-width="2" stroke-linejoin="round" />
+            <circle cx="35" cy="63" r="6" fill="rgba(8,20,42,0.8)" stroke="#F5C242" stroke-width="2" />
+            <circle cx="66" cy="63" r="6" fill="rgba(8,20,42,0.8)" stroke="#F5C242" stroke-width="2" />
+            <path d="M 60 24 q 5 5 0 10 M 66 20 q 8 9 0 18" fill="none" stroke="#00d2ff" stroke-width="2" stroke-linecap="round" />
+        </svg>`,
+    "voicerecorder": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <rect x="14" y="14" width="72" height="72" rx="10" fill="rgba(255, 140, 0, 0.08)" stroke="#ff8c00" stroke-width="2" />
+            <rect x="42" y="24" width="16" height="30" rx="8" fill="rgba(255, 140, 0, 0.25)" stroke="#ff8c00" stroke-width="2" />
+            <path d="M 34 46 a 16 16 0 0 0 32 0" fill="none" stroke="#ff8c00" stroke-width="2.5" stroke-linecap="round" />
+            <line x1="50" y1="62" x2="50" y2="70" stroke="#ff8c00" stroke-width="2.5" stroke-linecap="round" />
+            <g stroke="rgba(255, 140, 0, 0.6)" stroke-width="2" stroke-linecap="round">
+                <line x1="24" y1="72" x2="24" y2="78" /><line x1="31" y1="68" x2="31" y2="78" />
+                <line x1="66" y1="70" x2="66" y2="78" /><line x1="73" y1="74" x2="73" y2="78" />
+                <line x1="80" y1="71" x2="80" y2="78" />
+            </g>
+        </svg>`,
+    "mathtrainer": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <rect x="14" y="14" width="72" height="72" rx="10" fill="rgba(0, 210, 255, 0.08)" stroke="#00d2ff" stroke-width="2" />
+            <rect x="26" y="24" width="48" height="52" rx="6" fill="rgba(0, 210, 255, 0.1)" stroke="#00d2ff" stroke-width="1.8" />
+            <text x="50" y="45" text-anchor="middle" font-family="Orbitron, sans-serif" font-weight="700" font-size="16" fill="#00d2ff">+×</text>
+            <path d="M 36 60 l 7 7 l 14 -14" fill="none" stroke="#799E31" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>`
 };

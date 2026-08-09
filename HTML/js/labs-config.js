@@ -85,7 +85,7 @@ const LABS_DATA = [
         "description": "Eine einzige Rechnung, vier Ebenen tiefer: Hochsprache → Assembler → Maschinenbytes → Volladdierer aus Logikgattern. Auf jeder Ebene dieselbe Information, nur eine Abstraktion tiefer — der Übertrag rieselt sichtbar durch die Gatter, und ein Bit ist am Ende nur Spannung an oder aus.",
         "tagline": "Vom Code zu den Bits / Wie ein Computer rechnet",
         "icon": LAB_ICONS["einsundeins"],
-        "category": "arithmetik logik fun hot highlight grade8 grade9",
+        "category": "arithmetik logik fun hot highlight neu grade8 grade9",
         "keywords": "binär bit byte hex assembler maschinencode informatik volladdierer logikgatter xor and übertrag carry null eins strom spannung transistor cpu",
         "color": "gold"
     },
@@ -499,7 +499,7 @@ const LABS_DATA = [
         "keywords": "komplexe zahlen imaginaerteil reell imaginary complex plane gauss i",
         "color": "blue"
     }, */
-    /* Solita: PRIVAT — bewusst NICHT im Launcher/Index (Doc). Entkommentieren = wieder im Index.
+    /* Solita: war privat; seit 2026-08-09 auf Docs GO als App verlinkt (Passwort-Gate in der App). */
     {
         "id": "solita",
         "href": "solita.html",
@@ -507,8 +507,151 @@ const LABS_DATA = [
         "description": "Solita — deine persönliche Sprach-Assistentin (Claude) im Doc Alvers Mathe-Labor. Reden, vorlesen, Kontext behalten.",
         "tagline": "weiß alles, bleibt nah",
         "icon": LAB_ICONS["solita"],
-        "category": "hot",
+        "category": "apps",
         "keywords": "solita ai ki assistent sprache voice chat claude vorlesen weckwort",
         "color": "blue"
-    } */
+    },
+    {
+        "id": "gameoflife",
+        "href": "gameoflife/gameoflife.html",
+        "title": "Game of Life",
+        "description": "Conways zellulärer Automat: Aus drei simplen Regeln entstehen Gleiter, Oszillatoren und ganze Welten. Zeichne Startmuster und sieh zu, wie Ordnung und Chaos sich abwechseln.",
+        "tagline": "Zellulärer Automat / Emergenz",
+        "icon": LAB_ICONS["gameoflife"],
+        "category": "fun logik neu grade8 grade9",
+        "keywords": "game of life conway zellulärer automat gleiter glider emergenz simulation muster regeln",
+        "color": "green"
+    },
+    {
+        "id": "burningship",
+        "href": "burningship.html",
+        "title": "Burning Ship",
+        "description": "Das dunkle Schwesterfraktal der Mandelbrot-Menge: Ein einziger Betrag in der Iterationsformel lässt brennende Schiffe am Horizont erscheinen. Zoome in die flammende Struktur.",
+        "tagline": "Fraktale / Komplexe Dynamik",
+        "icon": LAB_ICONS["burningship"],
+        "category": "fraktale neu uni grade11 grade12",
+        "keywords": "burning ship fraktal mandelbrot komplexe zahlen iteration escape time zoom",
+        "color": "orange"
+    },
+    {
+        "id": "reaction-diffusion",
+        "href": "reaction-diffusion.html",
+        "title": "Reaction-Diffusion",
+        "description": "Turing-Muster live: Zwei Chemikalien reagieren und diffundieren — heraus kommen Streifen, Punkte und Korallen wie auf Tierfellen. Stelle Zufuhr und Zerfall ein und züchte eigene Muster.",
+        "tagline": "Turing-Muster / Gray-Scott",
+        "icon": LAB_ICONS["reaction-diffusion"],
+        "category": "fun neu uni grade11 grade12",
+        "keywords": "reaction diffusion turing muster gray scott simulation chemie pattern streifen punkte",
+        "color": "purple"
+    },
+    {
+        "id": "gravitation",
+        "href": "gravitation.html",
+        "title": "Gravitation",
+        "description": "Newtons Gravitationsgesetz zum Anfassen: Setze Massen ins All, gib ihnen Startgeschwindigkeit und beobachte Bahnen, Einfänge und Kollisionen im Mehrkörper-Tanz.",
+        "tagline": "Physik / Mehrkörperproblem",
+        "icon": LAB_ICONS["gravitation"],
+        "category": "fun physik neu grade9 grade10",
+        "keywords": "gravitation newton schwerkraft orbit planet bahn mehrkörper simulation physik masse",
+        "color": "blue"
+    },
+    {
+        "id": "glocken",
+        "href": "glocken/glocken.html",
+        "title": "Die Glocken von Bagdad",
+        "description": "Wann schlagen alle Glocken gleichzeitig? Eine Geschichte aus Bagdad führt zum kleinsten gemeinsamen Vielfachen — mit Tutor, der Schritt für Schritt zu kgV und Brüchen begleitet.",
+        "tagline": "Arithmetik / kgV mit Tutor",
+        "icon": LAB_ICONS["glocken"],
+        "category": "arithmetik fun neu grade5 grade6",
+        "keywords": "glocken bagdad kgv kleinstes gemeinsames vielfaches brüche teiler tutor quest",
+        "color": "gold"
+    },
+    {
+        "id": "langley",
+        "href": "lenglay.html",
+        "title": "Langley-Labor",
+        "description": "Langleys berüchtigtes Winkelrätsel von 1922: Ein gleichschenkliges Dreieck, zwei innere Linien — und ein Winkel, der die Welt seit 100 Jahren ärgert. Miss, probiere, beweise.",
+        "tagline": "Geometrie / Adventitious Angles",
+        "icon": LAB_ICONS["langley"],
+        "category": "geometrie dreiecke neu grade8 grade9",
+        "keywords": "langley winkel dreieck rätsel geometrie beweis adventitious angles 80 20",
+        "color": "green"
+    },
+    {
+        "id": "batman",
+        "href": "batman.html",
+        "title": "Batman-Kurve",
+        "description": "Eine einzige Gleichung, die als Graph das Batman-Logo zeichnet: Beträge, Wurzeln und Fallunterscheidungen als Superhelden-Mathematik. Zerlege die Formel Stück für Stück.",
+        "tagline": "Funktionen / Implizite Kurven",
+        "icon": LAB_ICONS["batman"],
+        "category": "fun funktionen neu grade10 grade11",
+        "keywords": "batman kurve gleichung graph implizit betrag wurzel funktion logo",
+        "color": "blue"
+    },
+    {
+        "id": "worldclock",
+        "href": "worldclock/worldclock.html",
+        "title": "Weltuhr",
+        "description": "Die Erde als Uhr: Zeitzonen, Sonnenstand und Tag-Nacht-Grenze live auf der Weltkarte. Sieh, wo gerade die Sonne aufgeht, während bei uns Mitternacht schlägt.",
+        "tagline": "Zeitzonen / Astronomie",
+        "icon": LAB_ICONS["worldclock"],
+        "category": "fun neu",
+        "keywords": "weltuhr zeitzonen erde sonne tag nacht terminator karte uhrzeit utc",
+        "color": "blue"
+    },
+    {
+        "id": "tracker",
+        "href": "tracker/index.html",
+        "title": "Doc Alvers Tracker",
+        "description": "GPS-Tracking als Web-App: Touren aufzeichnen mit Höhenprofil, Foto-, Voice- und Wissens-Wegpunkten, Regenradar und Live-Sharing. Läuft im Browser und als Android-App.",
+        "tagline": "GPS / Touren & Wegpunkte",
+        "icon": LAB_ICONS["tracker"],
+        "category": "apps",
+        "keywords": "tracker gps tour wandern aufzeichnen karte höhenprofil wegpunkte foto radar android app",
+        "color": "green"
+    },
+    {
+        "id": "kaimbo",
+        "href": "kaimbo/kaimbo.html",
+        "title": "Kaimbo Studio",
+        "description": "Sprachenlernen mit eigenen Aufgabenlisten: Vokabeln und Sätze als Aufgaben-Serien organisieren, filtern und trainieren — das Studio zu Docs Sprachlern-Werkzeug, jetzt im Browser.",
+        "tagline": "Sprachen / Aufgaben-Studio",
+        "icon": LAB_ICONS["kaimbo"],
+        "category": "apps",
+        "keywords": "kaimbo sprachen lernen vokabeln aufgaben training studio languages app",
+        "color": "gold"
+    },
+    {
+        "id": "pagode",
+        "href": "pagode/index.html",
+        "title": "Pagode (230 SL)",
+        "description": "Ein Mercedes 230 SL von 1964 trifft Bluetooth: Motor per Funk starten, Kanäle testen, interaktiver Schaltplan — und Solita lernt fahren. Oldtimer-Elektrik mit KI-Fernsteuerung.",
+        "tagline": "Oldtimer / BLE-Fernsteuerung",
+        "icon": LAB_ICONS["pagode"],
+        "category": "apps",
+        "keywords": "pagode 230sl mercedes oldtimer ble bluetooth fernsteuerung motor start schaltplan auto app",
+        "color": "gold"
+    },
+    {
+        "id": "voicerecorder",
+        "href": "voicerecorder/index.html",
+        "title": "Voice Recorder",
+        "description": "Aufnehmen und live transkribieren: Sprich — er hört zu, schreibt mit und speichert. Im Browser per Web Speech API, als Android-App mit nativer Spracherkennung.",
+        "tagline": "Audio / Live-Transkription",
+        "icon": LAB_ICONS["voicerecorder"],
+        "category": "apps",
+        "keywords": "voice recorder aufnahme diktat transkription sprache mikrofon audio notiz app",
+        "color": "orange"
+    },
+    {
+        "id": "mathtrainer",
+        "href": "mathtrainer/mathtrainer.html",
+        "title": "MathTrainer",
+        "description": "Mathe trainieren mit Aufgaben-Serien: Kopfrechnen und Schulaufgaben üben, Serien auswählen, Tempo steigern — School is cool. Der SchoolTrainer als Web-App.",
+        "tagline": "Training / Aufgaben-Serien",
+        "icon": LAB_ICONS["mathtrainer"],
+        "category": "apps",
+        "keywords": "mathtrainer schooltrainer mathe training üben aufgaben serien kopfrechnen schule app",
+        "color": "blue"
+    }
 ];
