@@ -92,10 +92,11 @@
 
         .note-body {
             width: 100%;
-            min-height: 60px;
+            min-height: 140px;
             background: none;
             border: none;
-            resize: none;
+            resize: vertical;
+            overflow-y: auto;
             color: var(--text);
             font-family: 'Outfit', sans-serif;
             font-weight: 300;
@@ -106,6 +107,45 @@
 
         .note-body:focus { outline: none; }
 
+        .note-body:empty::before {
+            content: attr(data-placeholder);
+            color: var(--muted);
+        }
+
+        .note-fmtbar {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            flex-wrap: wrap;
+            margin: 2px 0 8px;
+        }
+
+        .fmt-btn {
+            background: none;
+            border: 1px solid var(--line);
+            border-radius: 6px;
+            color: var(--text);
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.8rem;
+            min-width: 28px;
+            padding: 3px 7px;
+            cursor: pointer;
+        }
+
+        .fmt-btn:hover { border-color: rgba(245, 194, 66, 0.5); }
+
+        .fmt-dot {
+            display: inline-block;
+            width: 13px;
+            height: 13px;
+            border-radius: 50%;
+            vertical-align: -2px;
+        }
+
+        .note-card:not(.open) .note-fmtbar { display: none; }
+
+        @media print { .note-fmtbar { display: none !important; } }
+
         .empty-hint {
             max-width: 1200px;
             margin: 30px auto;
@@ -113,6 +153,11 @@
             color: var(--muted);
             font-size: 0.95rem;
         }
+
+        /* Logged out → page is locked: no notes, no actions, only the login. */
+        body.locked #notes-list,
+        body.locked #empty-hint,
+        body.locked .needs-auth { display: none; }
 
         .save-state {
             font-size: 0.75rem;
@@ -123,6 +168,76 @@
         }
 
         .save-state.visible { opacity: 1; }
+
+        .cloud-state {
+            font-size: 0.75rem;
+            color: var(--muted);
+        }
+
+        .cloud-state.on { color: var(--cyan); }
+
+        .login-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(4, 10, 24, 0.75);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+
+        .login-overlay.show { display: flex; }
+
+        .login-card {
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            padding: 22px 24px;
+            width: min(92vw, 340px);
+            display: grid;
+            gap: 10px;
+        }
+
+        .login-title {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--lambda);
+            font-size: 0.95rem;
+            letter-spacing: 0.05em;
+        }
+
+        .login-card input {
+            background: rgba(8, 20, 42, 0.6);
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            color: var(--text);
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.95rem;
+            padding: 9px 12px;
+        }
+
+        .login-card input:focus { outline: none; border-color: rgba(245, 194, 66, 0.4); }
+
+        .login-actions { display: flex; gap: 10px; }
+        .login-actions .action { flex: 1; }
+
+        .pwd-row { display: flex; gap: 8px; align-items: center; }
+        .pwd-row input { flex: 1; min-width: 0; }
+
+        .pwd-eye {
+            background: rgba(8, 20, 42, 0.6);
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            color: var(--muted);
+            font-size: 0.95rem;
+            padding: 8px 10px;
+            cursor: pointer;
+        }
+
+        .pwd-eye:hover { border-color: rgba(245, 194, 66, 0.4); }
+
+        .login-status { font-size: 0.78rem; color: rgb(235, 120, 105); min-height: 1em; }
+
+        @media print { .login-overlay, .cloud-state { display: none !important; } }
 
         @media print {
             .note-card { border-color: #bbb; background: #fff; }
@@ -142,21 +257,59 @@
     </header>
 
     <div class="toolbar">
-        <button class="action" onclick="addNote()">+ Neue Notiz</button>
-        <button class="action" onclick="toggleAllNotes()">Alle auf/zu</button>
-        <button class="action" onclick="window.print()">Drucken</button>
+        <button class="action needs-auth" onclick="addNote()">+ Neue Notiz</button>
+        <button class="action needs-auth" onclick="toggleAllNotes()">Alle auf/zu</button>
+        <button class="action needs-auth" onclick="window.print()">Drucken</button>
+        <button class="action secondary" id="auth-btn" onclick="authClick()">☁ Anmelden</button>
         <span class="save-state" id="save-state">gespeichert ✓</span>
+        <span class="cloud-state" id="cloud-state">nur lokal</span>
+    </div>
+
+    <div class="login-overlay" id="login-overlay">
+        <div class="login-card">
+            <div class="login-title">Login</div>
+            <input type="email" id="login-email" placeholder="E-Mail" aria-label="E-Mail" autocomplete="username">
+            <div class="pwd-row">
+                <input type="password" id="login-pwd" placeholder="Passwort" aria-label="Passwort"
+                    autocomplete="current-password">
+                <button type="button" class="pwd-eye" onclick="togglePwd(this)" aria-label="Passwort anzeigen">👁</button>
+            </div>
+            <div class="login-actions">
+                <button class="action secondary" onclick="hideLogin()">Abbrechen</button>
+                <button class="action" onclick="doLogin()">Login</button>
+            </div>
+            <div class="login-status" id="login-status"></div>
+        </div>
     </div>
 
     <div class="notes-list" id="notes-list"></div>
     <div class="empty-hint" id="empty-hint" hidden>Noch keine Notizen &mdash; oben auf &bdquo;+ Neue Notiz&ldquo; klicken.</div>
+    <div class="empty-hint" id="locked-hint" hidden>Bitte anmelden, um die Notizen zu sehen.</div>
 
     <footer class="page-foot">
-        Notizen werden beim Tippen automatisch gespeichert &mdash; lokal in diesem Browser (localStorage),
-        nicht ger&auml;te&uuml;bergreifend. L&ouml;schen: zweimal klicken (erst scharf schalten, dann best&auml;tigen).
+        Notizen werden beim Tippen automatisch gespeichert &mdash; immer lokal in diesem Browser, und nach
+        &bdquo;&#9729; Anmelden&ldquo; zus&auml;tzlich in der Cloud (Supabase, nur eigener Account) &mdash;
+        damit ger&auml;te&uuml;bergreifend. L&ouml;schen: zweimal klicken (erst scharf schalten, dann best&auml;tigen).
     </footer>
 
     <script>
+        /* Dev-only cleanup: old service workers on localhost used to serve stale pages and
+           intercepted/hung fetches (login!). Unregister them + purge the Cache API, then reload
+           once. localStorage (the notes!) is untouched. docalvers.de keeps its SW (VGP push). */
+        if ((location.hostname === 'localhost' || location.hostname === '127.0.0.1') &&
+            'serviceWorker' in navigator && !sessionStorage.getItem('sw-purged')) {
+            navigator.serviceWorker.getRegistrations().then(async (regs) => {
+                if (!regs.length) return;
+                await Promise.all(regs.map(r => r.unregister()));
+                if (window.caches) {
+                    const keys = await caches.keys();
+                    await Promise.all(keys.map(k => caches.delete(k)));
+                }
+                sessionStorage.setItem('sw-purged', '1');
+                location.reload();
+            }).catch(() => {});
+        }
+
         // Simple local notes: [{id, title, body, ts}] in localStorage, newest first.
         const KEY = 'svp-notes';
         const list = document.getElementById('notes-list');
@@ -164,6 +317,12 @@
         const saveState = document.getElementById('save-state');
         let notes = [];
         try { notes = JSON.parse(localStorage.getItem(KEY)) || []; } catch (e) { notes = []; }
+
+        /* Persisted open/closed state — cleared on logout (collapse all). */
+        const OPEN_KEY = 'svp-notes-open';
+        let openSet;
+        try { openSet = new Set(JSON.parse(localStorage.getItem(OPEN_KEY)) || []); } catch (e) { openSet = new Set(); }
+        function persistOpen() { localStorage.setItem(OPEN_KEY, JSON.stringify([...openSet])); }
 
         let saveTimer = null;
         function save(showBadge) {
@@ -175,25 +334,286 @@
             }
         }
 
+        /* ============================================================
+           Supabase sync (svp_notes, RLS: owner only). localStorage stays
+           as offline cache; logged in, the cloud is the shared store.
+           Same pattern as cv.html — publishable key, own storageKey.
+           ============================================================ */
+        const DB_URL = 'https://fyfhxzyymmurlaenmzse.supabase.co';
+        const DB_KEY = 'sb_publishable_ubQDiMD-X3N0vZvPVi229Q_-5Zootfk'; /* publishable key – public by design */
+        const SESSION_KEY = 'svp-session'; /* own token store — no supabase-js involved */
+        let cloudOn = false;
+        let session = null;
+        try { session = JSON.parse(localStorage.getItem(SESSION_KEY)); } catch (e) { session = null; }
+        const authBtn = document.getElementById('auth-btn');
+        const cloudState = document.getElementById('cloud-state');
+        const loginOverlay = document.getElementById('login-overlay');
+        const loginStatus = document.getElementById('login-status');
+
+        function setCloud(text, on) {
+            cloudState.textContent = text;
+            cloudState.classList.toggle('on', !!on);
+        }
+
+        function updateAuthUi() {
+            authBtn.textContent = cloudOn ? 'Abmelden' : '☁ Anmelden';
+            setCloud(cloudOn ? '☁ synchron' : '', cloudOn);
+            document.body.classList.toggle('locked', !cloudOn);
+            document.getElementById('locked-hint').hidden = cloudOn;
+        }
+        updateAuthUi();
+
+        function storeSession(s) {
+            session = s;
+            if (s) localStorage.setItem(SESSION_KEY, JSON.stringify(s));
+            else localStorage.removeItem(SESSION_KEY);
+        }
+
+        function withTimeout(promise, ms, step) {
+            return Promise.race([
+                promise,
+                new Promise((_, rej) => setTimeout(() => rej(new Error('Timeout bei: ' + step)), ms))
+            ]);
+        }
+
+        function loadScript(src) {
+            return new Promise((res, rej) => {
+                const s = document.createElement('script');
+                s.src = src; s.onload = res; s.onerror = () => rej(new Error('Bibliothek lädt nicht'));
+                document.head.appendChild(s);
+            });
+        }
+
+        /* Refresh the access token via plain fetch when it is about to expire. */
+        async function ensureFreshToken() {
+            if (!session) throw new Error('nicht angemeldet');
+            if (session.expires_at && Date.now() / 1000 < session.expires_at - 60) return;
+            const res = await fetch(DB_URL + '/auth/v1/token?grant_type=refresh_token', {
+                method: 'POST',
+                headers: { apikey: DB_KEY, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ refresh_token: session.refresh_token })
+            });
+            const data = await res.json().catch(() => ({}));
+            if (!res.ok) {
+                storeSession(null);
+                cloudOn = false;
+                updateAuthUi();
+                throw new Error('Session abgelaufen — bitte neu anmelden');
+            }
+            storeSession({
+                access_token: data.access_token,
+                refresh_token: data.refresh_token,
+                expires_at: data.expires_at || Math.floor(Date.now() / 1000) + (data.expires_in || 3600)
+            });
+        }
+
+        /* PostgREST call with fresh token; one retry after a 401. */
+        async function api(path, opts, retry) {
+            await ensureFreshToken();
+            const res = await fetch(DB_URL + '/rest/v1/' + path, Object.assign({}, opts, {
+                headers: Object.assign({
+                    apikey: DB_KEY,
+                    Authorization: 'Bearer ' + session.access_token,
+                    'Content-Type': 'application/json'
+                }, (opts && opts.headers) || {})
+            }));
+            if (res.status === 401 && !retry) {
+                session.expires_at = 0; /* force refresh */
+                return api(path, opts, true);
+            }
+            return res;
+        }
+
+        function rowFromNote(n) {
+            return {
+                id: n.id, title: n.title || '', body: n.body || '',
+                fmt: n.fmt ? 1 : 0, h: n.h || null, ts: new Date(n.ts).toISOString()
+            };
+        }
+
+        async function syncRemote() {
+            let data;
+            try {
+                const res = await api('svp_notes?select=*');
+                if (!res.ok) { setCloud('☁ Fehler: HTTP ' + res.status, false); return; }
+                data = await res.json();
+            } catch (e) { setCloud('☁ ' + e.message, false); return; }
+            const remoteIds = new Set();
+            const toPush = [];
+            for (const r of data) {
+                remoteIds.add(r.id);
+                const rts = Date.parse(r.ts);
+                const l = notes.find(n => n.id === r.id);
+                if (!l) {
+                    notes.push({ id: r.id, title: r.title, body: r.body, fmt: r.fmt, h: r.h || undefined, ts: rts });
+                } else if (rts > l.ts) {
+                    Object.assign(l, { title: r.title, body: r.body, fmt: r.fmt, h: r.h || undefined, ts: rts });
+                } else if (rts < l.ts) {
+                    toPush.push(l);
+                }
+            }
+            for (const l of notes) if (!remoteIds.has(l.id)) toPush.push(l);
+            notes.sort((a, b) => b.ts - a.ts);
+            save(false);
+            render();
+            if (toPush.length) {
+                try {
+                    const res = await api('svp_notes', {
+                        method: 'POST',
+                        headers: { Prefer: 'resolution=merge-duplicates,return=minimal' },
+                        body: JSON.stringify(toPush.map(rowFromNote))
+                    });
+                    if (!res.ok) { setCloud('☁ Fehler: HTTP ' + res.status, false); return; }
+                } catch (e) { setCloud('☁ ' + e.message, false); return; }
+            }
+            updateAuthUi();
+        }
+
+        const pushTimers = {};
+        function supaUpsert(note) {
+            if (!cloudOn) return;
+            clearTimeout(pushTimers[note.id]);
+            pushTimers[note.id] = setTimeout(async () => {
+                try {
+                    const res = await api('svp_notes', {
+                        method: 'POST',
+                        headers: { Prefer: 'resolution=merge-duplicates,return=minimal' },
+                        body: JSON.stringify([rowFromNote(note)])
+                    });
+                    setCloud(res.ok ? '☁ synchron' : '☁ Fehler: HTTP ' + res.status, res.ok);
+                } catch (e) { setCloud('☁ ' + e.message, false); }
+            }, 600);
+        }
+
+        function supaDelete(id) {
+            if (!cloudOn) return;
+            api('svp_notes?id=eq.' + encodeURIComponent(id), { method: 'DELETE' })
+                .then(res => { if (!res.ok) setCloud('☁ Fehler: HTTP ' + res.status, false); })
+                .catch(e => setCloud('☁ ' + e.message, false));
+        }
+
+        window.authClick = async function () {
+            if (cloudOn) {
+                /* best-effort server logout, then drop the local session */
+                if (session) {
+                    fetch(DB_URL + '/auth/v1/logout', {
+                        method: 'POST',
+                        headers: { apikey: DB_KEY, Authorization: 'Bearer ' + session.access_token }
+                    }).catch(() => {});
+                }
+                storeSession(null);
+                cloudOn = false;
+                openSet.clear();   /* logout collapses everything */
+                persistOpen();
+                render();
+                updateAuthUi();
+            } else {
+                loginStatus.textContent = '';
+                loginOverlay.classList.add('show');
+                document.getElementById('login-email').focus();
+            }
+        };
+
+        window.hideLogin = function () { loginOverlay.classList.remove('show'); };
+
+        window.togglePwd = function (btn) {
+            const pwd = document.getElementById('login-pwd');
+            pwd.type = pwd.type === 'password' ? 'text' : 'password';
+            btn.setAttribute('aria-label', pwd.type === 'password' ? 'Passwort anzeigen' : 'Passwort verbergen');
+        };
+
+        /* Login path 1 — the proven cv.html pattern: lazy SDK client on click,
+           signInWithPassword. Throwaway client: storage, auto-refresh and URL
+           detection are off, we only extract the tokens. */
+        async function sdkLogin(email, password) {
+            if (!window.supabase) await withTimeout(loadScript('../js/vendor/supabase.min.js'), 10000, 'Bibliothek laden');
+            const client = window.supabase.createClient(DB_URL, DB_KEY, {
+                auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false, storageKey: 'svp-auth-tmp' }
+            });
+            const { data, error } = await withTimeout(
+                client.auth.signInWithPassword({ email, password }), 12000, 'Anmeldung');
+            if (error) throw new Error(error.message);
+            return data.session;
+        }
+
+        /* Login path 2 — direct fetch to the auth endpoint (no SDK), as fallback. */
+        async function fetchLogin(email, password) {
+            const ctrl = new AbortController();
+            const timer = setTimeout(() => ctrl.abort(), 12000);
+            let res;
+            try {
+                res = await fetch(DB_URL + '/auth/v1/token?grant_type=password', {
+                    method: 'POST',
+                    headers: { apikey: DB_KEY, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password }),
+                    signal: ctrl.signal
+                });
+            } catch (e) {
+                clearTimeout(timer);
+                throw new Error(ctrl.signal.aborted ? 'Timeout — Request kommt nicht durch' : 'Netzwerkfehler: ' + e.message);
+            }
+            clearTimeout(timer);
+            const data = await res.json().catch(() => ({}));
+            if (!res.ok) throw new Error(data.msg || data.error_description || ('HTTP ' + res.status));
+            return data;
+        }
+
+        window.doLogin = async function () {
+            const email = document.getElementById('login-email').value.trim();
+            /* strip paste artifacts (trailing newline/CR) — never part of a real password */
+            const password = document.getElementById('login-pwd').value.replace(/[\r\n]+$/, '');
+            loginStatus.textContent = 'Anmelden …';
+            let s = null;
+            try {
+                s = await sdkLogin(email, password);
+            } catch (e1) {
+                try {
+                    s = await fetchLogin(email, password);
+                } catch (e2) {
+                    loginStatus.textContent = e2.message +
+                        ' — gesendet: ' + email + ' · Passwort-Länge ' + password.length;
+                    return;
+                }
+            }
+            loginStatus.textContent = '';
+            storeSession({
+                access_token: s.access_token,
+                refresh_token: s.refresh_token,
+                expires_at: s.expires_at || Math.floor(Date.now() / 1000) + (s.expires_in || 3600)
+            });
+            cloudOn = true;
+            loginOverlay.classList.remove('show');
+            updateAuthUi();
+            await syncRemote();
+        };
+
+        /* resume an existing session on load — otherwise offer the login right away */
+        if (session && session.refresh_token) {
+            cloudOn = true;
+            updateAuthUi();
+            syncRemote();
+        } else {
+            loginOverlay.classList.add('show');
+            document.getElementById('login-email').focus();
+        }
+
         function fmtDate(ts) {
             const d = new Date(ts);
             return d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: '2-digit' }) +
                 ' ' + d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
         }
 
+        // Only grow with content — never shrink, so a manually dragged height sticks.
         function autoGrow(el) {
-            el.style.height = 'auto';
-            el.style.height = el.scrollHeight + 'px';
+            if (el.scrollHeight > el.clientHeight) el.style.height = el.scrollHeight + 'px';
         }
 
-        // Open/closed lives only in the DOM: page loads collapsed, new notes open.
-        function render(openIds) {
-            openIds = openIds || [];
+        function render() {
             list.textContent = '';
             emptyHint.hidden = notes.length > 0;
             for (const note of notes) {
                 const card = document.createElement('div');
-                card.className = 'note-card' + (openIds.includes(note.id) ? ' open' : '');
+                card.className = 'note-card' + (openSet.has(note.id) ? ' open' : '');
 
                 const head = document.createElement('div');
                 head.className = 'note-head';
@@ -202,7 +622,11 @@
                 chev.className = 'note-chev';
                 chev.textContent = '▸';
                 chev.setAttribute('aria-label', 'Notiz auf-/zuklappen');
-                chev.addEventListener('click', () => card.classList.toggle('open'));
+                chev.addEventListener('click', () => {
+                    const open = card.classList.toggle('open');
+                    if (open) openSet.add(note.id); else openSet.delete(note.id);
+                    persistOpen();
+                });
 
                 const title = document.createElement('input');
                 title.className = 'note-title';
@@ -214,6 +638,7 @@
                     note.ts = Date.now();
                     date.textContent = fmtDate(note.ts);
                     save(true);
+                    supaUpsert(note);
                 });
 
                 const date = document.createElement('span');
@@ -227,7 +652,10 @@
                 del.addEventListener('click', () => {
                     if (del.dataset.armed) {
                         notes = notes.filter(n => n.id !== note.id);
+                        openSet.delete(note.id);
+                        persistOpen();
                         save(true);
+                        supaDelete(note.id);
                         render();
                     } else {
                         del.dataset.armed = '1';
@@ -244,46 +672,104 @@
                 head.appendChild(date);
                 head.appendChild(del);
 
-                const body = document.createElement('textarea');
+                // Rich-text body (contenteditable); legacy plain-text notes are migrated on first save
+                const body = document.createElement('div');
                 body.className = 'note-body';
-                body.placeholder = 'Notiz …';
-                body.value = note.body;
+                body.contentEditable = 'true';
+                body.dataset.placeholder = 'Notiz …';
                 body.setAttribute('aria-label', 'Text der Notiz');
+                body.setAttribute('role', 'textbox');
+                if (note.fmt) { body.innerHTML = note.body; } else { body.innerText = note.body || ''; }
                 body.addEventListener('input', () => {
-                    note.body = body.value;
+                    note.body = body.innerHTML;
+                    note.fmt = 1;
                     note.ts = Date.now();
                     date.textContent = fmtDate(note.ts);
-                    autoGrow(body);
                     save(true);
+                    supaUpsert(note);
                 });
 
+                const fmtbar = buildFmtBar();
+
                 card.appendChild(head);
+                card.appendChild(fmtbar);
                 card.appendChild(body);
                 list.appendChild(card);
+                if (note.h) body.style.height = note.h + 'px';
                 autoGrow(body);
+
+                // Remember a manually dragged height per note
+                new ResizeObserver(() => {
+                    const h = Math.round(body.offsetHeight);
+                    if (h && h !== note.h) {
+                        note.h = h;
+                        save(false);
+                        supaUpsert(note);
+                    }
+                }).observe(body);
             }
+        }
+
+        // Formatting toolbar: bold/italic/underline/strike, page colors, marker, clear.
+        // mousedown is prevented so the text selection in the note survives the click.
+        function buildFmtBar() {
+            const bar = document.createElement('div');
+            bar.className = 'note-fmtbar';
+            const mk = (html, title, fn) => {
+                const b = document.createElement('button');
+                b.className = 'fmt-btn';
+                b.innerHTML = html;
+                b.title = title;
+                b.setAttribute('aria-label', title);
+                b.addEventListener('mousedown', e => e.preventDefault());
+                b.addEventListener('click', fn);
+                return b;
+            };
+            const cmd = (c, v) => () => document.execCommand(c, false, v || null);
+
+            bar.appendChild(mk('<b>B</b>', 'Fett (Cmd+B)', cmd('bold')));
+            bar.appendChild(mk('<i>I</i>', 'Kursiv (Cmd+I)', cmd('italic')));
+            bar.appendChild(mk('<u>U</u>', 'Unterstrichen (Cmd+U)', cmd('underline')));
+            bar.appendChild(mk('<s>S</s>', 'Durchgestrichen', cmd('strikeThrough')));
+
+            const colors = [
+                ['rgb(245, 194, 66)', 'Orange (λ)'],
+                ['rgb(121, 158, 49)', 'Grün (φ)'],
+                ['rgb(235, 120, 105)', 'Rot (Υ)'],
+                ['rgb(90, 190, 230)', 'Cyan'],
+                ['rgb(225, 235, 250)', 'Weiß (Standard)']
+            ];
+            for (const [col, name] of colors) {
+                bar.appendChild(mk('<span class="fmt-dot" style="background:' + col + '"></span>',
+                    'Textfarbe ' + name, cmd('foreColor', col)));
+            }
+
+            bar.appendChild(mk('<span style="background: rgba(245,194,66,0.35); padding: 0 4px; border-radius: 3px">M</span>',
+                'Marker', cmd('hiliteColor', 'rgba(245, 194, 66, 0.3)')));
+            bar.appendChild(mk('Tx', 'Formatierung entfernen', () => {
+                document.execCommand('removeFormat');
+                document.execCommand('unlink');
+            }));
+            return bar;
         }
 
         function addNote() {
             const note = { id: Date.now() + '-' + Math.random().toString(36).slice(2, 8), title: '', body: '', ts: Date.now() };
             notes.unshift(note);
+            openSet.add(note.id);
+            persistOpen();
             save(false);
-            render([note.id, ...openNoteIds()]);
+            supaUpsert(note);
+            render();
             const first = list.querySelector('.note-title');
             if (first) first.focus();
         }
 
-        function openNoteIds() {
-            return Array.from(list.querySelectorAll('.note-card.open')).map((card, i) => {
-                const idx = Array.from(list.children).indexOf(card);
-                return notes[idx] ? notes[idx].id : null;
-            }).filter(Boolean);
-        }
-
         function toggleAllNotes() {
-            const cards = Array.from(list.querySelectorAll('.note-card'));
-            const anyClosed = cards.some(c => !c.classList.contains('open'));
-            cards.forEach(c => c.classList.toggle('open', anyClosed));
+            const anyClosed = notes.some(n => !openSet.has(n.id));
+            openSet = anyClosed ? new Set(notes.map(n => n.id)) : new Set();
+            persistOpen();
+            render();
         }
 
         render();
