@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stoffverteilungsplan Informatik 9 | SJ 2026/27</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet">
+    <link rel="icon" type="image/png" href="../resources/favicon.png">
+    <link rel="stylesheet" href="informatik.css">
+</head>
+
+<body>
+    <header class="page-head">
+        <h1>Stoffverteilungsplan Informatik &middot; Klasse 9</h1>
+        <div class="subtitle">
+            Oberschule &middot; Schuljahr 2026/27 &middot; 1 Ustd./Woche &middot;
+            Lehrplan: <a href="https://www.schulportal.sachsen.de/lplandb/lehrplan/514" target="_blank"
+                rel="noopener">Lehrplan Oberschule Informatik (2022)</a>
+        </div>
+    </header>
+
+    <div class="meta-cards">
+        <div class="meta-card">
+            <div class="k">Lernbereich 1</div>
+            <div class="v">Informationen und Daten &middot; 13 Ustd.</div>
+        </div>
+        <div class="meta-card">
+            <div class="k">Lernbereich 2</div>
+            <div class="v">Komplexaufgabe zur Algorithmierung &middot; 12 Ustd.</div>
+        </div>
+        <div class="meta-card">
+            <div class="k">Wahlbereich</div>
+            <div class="v">Informatik und Automatisierung &middot; 2 Ustd.</div>
+        </div>
+        <div class="meta-card">
+            <div class="k">Schuljahr</div>
+            <div class="v">Mo 17.08.2026 &ndash; Fr 09.07.2027</div>
+        </div>
+    </div>
+
+    <div class="toolbar">
+        <button class="action" onclick="window.print()">Drucken</button>
+        <div class="legend">
+            <span><span class="dot" style="background: var(--lambda)"></span>LB 1</span>
+            <span><span class="dot" style="background: var(--cyan)"></span>LB 2</span>
+            <span><span class="dot" style="background: var(--phi)"></span>Wahlbereich</span>
+            <span><span class="dot" style="background: var(--ypsilon)"></span>Leistung</span>
+            <span><span class="dot" style="background: rgba(170,190,220,0.5)"></span>Orga/Puffer</span>
+        </div>
+    </div>
+
+    <div class="table-wrap">
+        <table id="plan-table">
+            <thead>
+                <tr>
+                    <th>Nr.</th>
+                    <th>KW</th>
+                    <th>Woche</th>
+                    <th>Bereich</th>
+                    <th>Ustd.</th>
+                    <th>Thema / Inhalte</th>
+                    <th>Bemerkungen</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <footer class="page-foot">
+        Ferientermine Sachsen 2026/27 (SMK): Herbst 12.&ndash;24.10.26 &middot; Weihnachten 23.12.26&ndash;02.01.27
+        &middot; Winter 08.&ndash;19.02.27 &middot; Ostern 26.03.&ndash;02.04.27 &middot; Pfingsten 07.05. + 15.&ndash;18.05.27
+        &middot; Sommer ab 10.07.27 &middot; Bu&szlig;- und Bettag Mi 18.11.26 unterrichtsfrei.
+        Zeitrichtwerte gem&auml;&szlig; Lehrplan; Reihenfolge und Puffer in Verantwortung der Lehrkraft.
+    </footer>
+
+    <script>
+        // Data-driven plan: one entry per school week (or holiday block).
+        // Kept as a plain array so an Excel/CSV export can be added later.
+        // type: lb1 | lb2 | wb | lk | org | ferien
+        window.PLAN = [
+            { nr: 1, kw: 34, date: '17.–21.08.26', type: 'org', u: '', topic: 'Schuljahresauftakt: Organisation, Regeln PC-Raum, Themen-Überblick, Wdh. Kl. 8', remark: 'Erster Schultag Mo 17.08.' },
+            { nr: 2, kw: 35, date: '24.–28.08.26', type: 'lb1', u: '1/13', topic: 'Große Datensammlungen im Alltag', remark: 'Beispiele aus dem Erfahrungsbereich, Big Data' },
+            { nr: 3, kw: 36, date: '31.08.–04.09.26', type: 'lb1', u: '2/13', topic: 'Automatisierte Datenbeschaffung — Künstliche Intelligenz', remark: 'Browserverläufe, Standortdaten, statistische Daten' },
+            { nr: 4, kw: 37, date: '07.–11.09.26', type: 'lb1', u: '3/13', topic: 'Aufbau von Datenbanksystemen', remark: 'DBMS + Datenbasis als Einheit' },
+            { nr: 5, kw: 38, date: '14.–18.09.26', type: 'lb1', u: '4/13', topic: 'Tabelle, Datensatz, Datenfeld', remark: 'einfache Anwendungen lokal oder online' },
+            { nr: 6, kw: 39, date: '21.–25.09.26', type: 'lb1', u: '5/13', topic: 'Felddatentypen', remark: 'Text, Zahl, Datum, Währung, Wahrheitswert' },
+            { nr: 7, kw: 40, date: '28.09.–02.10.26', type: 'lb1', u: '6/13', topic: 'Einfache Datenmodelle entwerfen', remark: 'Planen einer Datenbasis mit Entwurfsmodellen' },
+            { nr: 8, kw: 41, date: '05.–09.10.26', type: 'lb1', u: '7/13', topic: 'Vom Datenmodell zur Datenbankstruktur', remark: 'Klassen und Objekte in der Datenbank' },
+            { ferien: 'Herbstferien · 12.–24.10.2026 (KW 42–43)' },
+            { nr: 9, kw: 44, date: '26.–30.10.26', type: 'lk', u: 'LK 1', topic: 'Wiederholung + Leistungskontrolle 1 (LB 1: Grundlagen Datenbanken)', remark: '' },
+            { nr: 10, kw: 45, date: '02.–06.11.26', type: 'lb1', u: '8/13', topic: 'Operationen auf Datenbanken I: Daten einfügen', remark: '' },
+            { nr: 11, kw: 46, date: '09.–13.11.26', type: 'lb1', u: '9/13', topic: 'Operationen II: Sortieren und Filtern', remark: 'grafische Oberfläche oder Abfragesprache' },
+            { nr: 12, kw: 47, date: '16.–20.11.26', type: 'lb1', u: '10/13', topic: 'Operationen III: Auswerten und Zusammenfassen', remark: 'Mi 18.11. Buß- und Bettag (unterrichtsfrei)' },
+            { nr: 13, kw: 48, date: '23.–27.11.26', type: 'lb1', u: '11/13', topic: 'Abfrageergebnisse interpretieren und kritisch bewerten', remark: '' },
+            { nr: 14, kw: 49, date: '30.11.–04.12.26', type: 'lb1', u: '12/13', topic: 'Chancen und Risiken automatisierter Datenverarbeitung', remark: 'Industrie 4.0, Internet der Dinge, Big Data' },
+            { nr: 15, kw: 50, date: '07.–11.12.26', type: 'lb1', u: '13/13', topic: 'Datenschutz, Persönlichkeitsrechte, gesetzliche Grundlagen', remark: 'LB 1 abgeschlossen' },
+            { nr: 16, kw: 51, date: '14.–18.12.26', type: 'org', u: '', topic: 'Vertiefung / Puffer: Übungsstunde Datenbanken', remark: '' },
+            { nr: 17, kw: 52, date: '21.–22.12.26', type: 'org', u: '', topic: 'Puffer / Jahresausklang', remark: 'nur Mo/Di — entfällt je nach Stundentag' },
+            { ferien: 'Weihnachtsferien · 23.12.2026–02.01.2027' },
+            { nr: 18, kw: 1, date: '04.–08.01.27', type: 'wb', u: '1/2', topic: 'Wahlbereich „Informatik und Automatisierung" I', remark: 'Bots, Smarthome, Sprachassistenten, Drohnen' },
+            { nr: 19, kw: 2, date: '11.–15.01.27', type: 'wb', u: '2/2', topic: 'Wahlbereich II: Datenschutz, Datensicherheit, politische Meinungsbildung', remark: '' },
+            { nr: 20, kw: 3, date: '18.–22.01.27', type: 'lk', u: 'LK 2', topic: 'Leistungskontrolle 2 (LB 1 gesamt)', remark: '' },
+            { nr: 21, kw: 4, date: '25.–29.01.27', type: 'lb2', u: '1/12', topic: 'Projektphasen: Was ist ein Projekt? Definition und Ablauf', remark: '' },
+            { nr: 22, kw: 5, date: '01.–05.02.27', type: 'lb2', u: '2/12', topic: 'Projektplanung, Qualitätskreislauf, Teambildung', remark: 'Fr 05.02. Halbjahresende / Zeugnisse' },
+            { ferien: 'Winterferien · 08.–19.02.2027 (KW 6–7)' },
+            { nr: 23, kw: 8, date: '22.–26.02.27', type: 'lb2', u: '3/12', topic: 'Projektstart: Themenwahl und Problemanalyse', remark: 'Computerspiele, Simulation, Robotik, Grafik' },
+            { nr: 24, kw: 9, date: '01.–05.03.27', type: 'lb2', u: '4/12', topic: 'Strategien zur Problemlösung: Lösungsentwurf I', remark: '' },
+            { nr: 25, kw: 10, date: '08.–12.03.27', type: 'lb2', u: '5/12', topic: 'Lösungsentwurf II, Aufgabenverteilung im Team', remark: '' },
+            { nr: 26, kw: 11, date: '15.–19.03.27', type: 'lb2', u: '6/12', topic: 'Umsetzung I', remark: '' },
+            { nr: 27, kw: 12, date: '22.–25.03.27', type: 'lb2', u: '7/12', topic: 'Umsetzung II', remark: 'ab Fr 26.03. Osterferien' },
+            { ferien: 'Osterferien · 26.03.–02.04.2027' },
+            { nr: 28, kw: 14, date: '05.–09.04.27', type: 'lb2', u: '8/12', topic: 'Umsetzung III: Kommunikations- und Kooperationstools', remark: 'webbasierte E-Learning-Plattform' },
+            { nr: 29, kw: 15, date: '12.–16.04.27', type: 'lb2', u: '9/12', topic: 'Umsetzung IV: Fertigstellung', remark: '' },
+            { nr: 30, kw: 16, date: '19.–23.04.27', type: 'lb2', u: '10/12', topic: 'Test und Fehlersuche', remark: '' },
+            { nr: 31, kw: 17, date: '26.–30.04.27', type: 'lb2', u: '11/12', topic: 'Dokumentation des Projektverlaufs', remark: '' },
+            { nr: 32, kw: 18, date: '03.–05.05.27', type: 'org', u: '', topic: 'Projektarbeit / Puffer', remark: 'Do 06.05. Himmelfahrt + Fr 07.05. unterrichtsfrei' },
+            { nr: 33, kw: 19, date: '10.–14.05.27', type: 'lb2', u: '12/12', topic: 'Präsentation der Projekte I', remark: 'LB 2 abgeschlossen' },
+            { ferien: 'Pfingsten · Mo 17.05. Pfingstmontag + Di 18.05.2027 Ferientag' },
+            { nr: 34, kw: 20, date: '19.–21.05.27', type: 'org', u: '', topic: 'Präsentationen II / Puffer', remark: 'nur Mi–Fr' },
+            { nr: 35, kw: 21, date: '24.–28.05.27', type: 'lk', u: '', topic: 'Projektauswertung, Bewertung, Reflexion', remark: 'Note Projektarbeit' },
+            { nr: 36, kw: 22, date: '31.05.–04.06.27', type: 'org', u: '', topic: 'Vertiefung: kollaboratives, cloudbasiertes Arbeiten', remark: 'Anknüpfung an Kl. 10' },
+            { nr: 37, kw: 23, date: '07.–11.06.27', type: 'org', u: '', topic: 'Wiederholung Jahresstoff, Quiz', remark: '' },
+            { nr: 38, kw: 24, date: '14.–18.06.27', type: 'org', u: '', topic: 'Exkurs: KI aktuell, Berufsorientierung', remark: '' },
+            { nr: 39, kw: 25, date: '21.–25.06.27', type: 'org', u: '', topic: 'Puffer', remark: 'Reserve für Projekttage / Wandertag' },
+            { nr: 40, kw: 26, date: '28.06.–02.07.27', type: 'org', u: '', topic: 'Puffer / Jahresrückblick, Feedback', remark: '' },
+            { nr: 41, kw: 27, date: '05.–09.07.27', type: 'org', u: '', topic: 'Ausklang', remark: 'Fr 09.07. letzter Schultag, Zeugnisse' },
+            { ferien: 'Sommerferien · ab 10.07.2027' }
+        ];
+
+        window.BADGE = {
+            lb1: ['b-orange', 'LB 1'],
+            lb2: ['b-cyan', 'LB 2'],
+            wb: ['b-green', 'WAHL'],
+            lk: ['b-red', 'LEISTUNG'],
+            org: ['b-grey', 'ORGA']
+        };
+    </script>
+    <script src="informatik-plan.js"></script>
+</body>
+
+</html>
