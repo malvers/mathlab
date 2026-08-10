@@ -261,22 +261,23 @@ a.link-card .card-desc { font-size: 0.86rem; font-weight: 400; }
 /* Expandable week rows with detail bullet lists */
 tr.expandable { cursor: pointer; }
 
+/* Chevron sits out of the text flow (absolute) — it can never wrap onto its own line,
+   and wrapped topic lines all align at the same left edge. */
+tr.expandable td.topic {
+    position: relative;
+    padding-left: 34px;
+}
+
 tr.expandable .chev {
-    display: inline-block;
-    width: 14px;
-    margin-right: 8px;
+    position: absolute;
+    left: 11px;
+    top: 10px;
     color: var(--muted);
     font-size: 0.95rem;
     transition: transform 0.15s;
 }
 
 tr.expandable.open .chev { transform: rotate(90deg); }
-
-/* Hanging indent: wrapped topic lines align with the text, not under the chevron */
-tr.expandable td.topic {
-    padding-left: 34px;
-    text-indent: -22px;
-}
 
 tr.detail-row { display: none; }
 tr.detail-row.open { display: table-row; }
