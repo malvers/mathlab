@@ -15,11 +15,65 @@
     // Per-row references for edit mode and persistence.
     const rendered = [];
 
+    // --- LaTeX support ---------------------------------------------------
+    // Formulas in PLAN strings use $...$ (KaTeX inline math). KaTeX is loaded
+    // on demand, only when a page actually contains math. Edit mode always
+    // shows and saves the raw $...$ source (see setEditable).
+    const KATEX = 'https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min';
+    const mathEls = new Set();
+
+    function renderMathInto(el) {
+        const src = el.dataset.src || '';
+        if (!window.katex) { el.textContent = src; return; }
+        el.textContent = '';
+        src.split(/\$([^$]+)\$/).forEach((part, idx) => {
+            if (!part) return;
+            if (idx % 2 === 0) {
+                el.appendChild(document.createTextNode(part));
+            } else {
+                const span = document.createElement('span');
+                try { katex.render(part, span, { throwOnError: false }); }
+                catch (e) { span.textContent = '$' + part + '$'; }
+                el.appendChild(span);
+            }
+        });
+    }
+
+    function ensureKatex() {
+        if (window.katex || document.getElementById('katex-js')) return;
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = KATEX + '.css';
+        document.head.appendChild(link);
+        const s = document.createElement('script');
+        s.id = 'katex-js';
+        s.src = KATEX + '.js';
+        s.onload = () => {
+            if (document.body.classList.contains('editing')) return;
+            mathEls.forEach(el => { if (el.isConnected) renderMathInto(el); });
+        };
+        document.head.appendChild(s);
+    }
+
+    // Sets text that may contain $...$ math; keeps the raw source in data-src.
+    function setMathText(el, text) {
+        text = text == null ? '' : String(text);
+        el.dataset.src = text;
+        if (text.includes('$')) {
+            mathEls.add(el);
+            ensureKatex();
+            renderMathInto(el);
+        } else {
+            mathEls.delete(el);
+            el.textContent = text;
+        }
+    }
+
     function buildDetailList(ul, items) {
         ul.textContent = '';
         for (const item of items) {
             const li = document.createElement('li');
-            li.textContent = item;
+            setMathText(li, item);
             ul.appendChild(li);
         }
     }
@@ -58,17 +112,18 @@
                 span.className = 'badge ' + badgeClass;
                 span.textContent = badgeLabel;
                 td.appendChild(span);
-            } else if (idx !== 5) {
+            } else if (idx !== 5 && idx !== 6) {
                 td.textContent = text;
             }
             tds.push(td);
             tr.appendChild(td);
         });
+        setMathText(tds[6], values[6][1]);
 
         // Topic cell: optional chevron + editable text span.
         const topicSpan = document.createElement('span');
         topicSpan.className = 'topic-text';
-        topicSpan.textContent = ov.topic != null ? ov.topic : row.topic;
+        setMathText(topicSpan, ov.topic != null ? ov.topic : row.topic);
         tds[5].appendChild(topicSpan);
         tbody.appendChild(tr);
 
@@ -120,6 +175,16 @@
         setAllDetails(rows.some(r => !r.classList.contains('open')));
     };
 
+    // Cells that may contain $...$ math (detail lis queried live — edit mode
+    // can add new ones via Enter inside the contenteditable ul).
+    function eachMathCandidate(fn) {
+        for (const r of rendered) {
+            if (r.topicSpan) fn(r.topicSpan);
+            if (r.remarkTd) fn(r.remarkTd);
+            if (r.ul) r.ul.querySelectorAll('li').forEach(fn);
+        }
+    }
+
     function setEditable(on) {
         const flag = on ? 'true' : 'false';
         for (const r of rendered) {
@@ -127,6 +192,15 @@
                 if (el) el.setAttribute('contenteditable', flag);
             }
         }
+        // While editing show the raw $...$ source; on exit re-render from the
+        // (possibly edited) text. saveEdits runs before this, so it saves raw.
+        eachMathCandidate(el => {
+            if (on) {
+                if (el.dataset.src != null) el.textContent = el.dataset.src;
+            } else {
+                setMathText(el, el.textContent);
+            }
+        });
     }
 
     function saveEdits() {
