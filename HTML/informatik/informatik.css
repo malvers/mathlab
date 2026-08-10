@@ -31,6 +31,20 @@ body {
 
 header.page-head { max-width: 1200px; margin: 0 auto 22px; }
 
+a.back-link {
+    display: inline-block;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+    color: var(--cyan);
+    text-decoration: none;
+    margin-bottom: 10px;
+}
+
+a.back-link:hover { text-decoration: underline; }
+
+@media print { a.back-link { display: none; } }
+
 h1 {
     font-family: 'Orbitron', sans-serif;
     font-size: clamp(1.15rem, 3.2vw, 1.9rem);
@@ -73,6 +87,15 @@ h1 {
 
 .meta-card .v { font-size: 0.92rem; font-weight: 400; }
 
+/* Colored meta-card headers, matching the legend/badge palette */
+.meta-card .k.c-orange { color: var(--lambda); }
+.meta-card .k.c-cyan { color: var(--cyan); }
+.meta-card .k.c-violet { color: var(--violet); }
+.meta-card .k.c-teal { color: var(--teal); }
+.meta-card .k.c-pink { color: var(--pink); }
+.meta-card .k.c-green { color: var(--phi); }
+.meta-card .k.c-bright { color: var(--text); }
+
 .toolbar {
     max-width: 1200px;
     margin: 0 auto 14px;
@@ -95,6 +118,20 @@ button.action {
 }
 
 button.action:hover { filter: brightness(1.12); }
+
+button.action.secondary {
+    background: linear-gradient(180deg, rgba(60, 90, 150, 0.6), rgba(40, 64, 110, 0.6));
+    border-color: rgba(120, 160, 220, 0.4);
+    color: var(--text);
+}
+
+/* Edit mode: dashed outlines on editable cells */
+.editing [contenteditable="true"] {
+    outline: 1px dashed rgba(245, 194, 66, 0.4);
+    outline-offset: -1px;
+    cursor: text;
+    border-radius: 3px;
+}
 
 .legend {
     display: flex;
@@ -133,7 +170,7 @@ table { width: 100%; border-collapse: collapse; min-width: 760px; }
 
 thead th {
     font-family: 'Orbitron', sans-serif;
-    font-size: 0.62rem;
+    font-size: 0.68rem;
     letter-spacing: 0.09em;
     text-transform: uppercase;
     color: var(--lambda);
@@ -149,7 +186,7 @@ thead th {
 tbody td {
     padding: 9px 12px;
     border-bottom: 1px solid rgba(120, 160, 220, 0.12);
-    font-size: 0.86rem;
+    font-size: 0.98rem;
     vertical-align: top;
 }
 
@@ -158,7 +195,7 @@ tbody tr:last-child td { border-bottom: none; }
 td.num { color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
 td.date { white-space: nowrap; color: var(--muted); font-variant-numeric: tabular-nums; }
 td.topic { font-weight: 400; min-width: 220px; }
-td.remark { color: var(--muted); font-size: 0.8rem; min-width: 160px; }
+td.remark { color: var(--muted); font-size: 0.88rem; min-width: 160px; }
 
 .badge {
     display: inline-block;
@@ -221,6 +258,47 @@ a.link-card .card-desc { font-size: 0.86rem; font-weight: 400; }
     gap: 14px;
 }
 
+/* Expandable week rows with detail bullet lists */
+tr.expandable { cursor: pointer; }
+
+tr.expandable .chev {
+    display: inline-block;
+    width: 14px;
+    margin-right: 8px;
+    color: var(--muted);
+    font-size: 0.95rem;
+    transition: transform 0.15s;
+}
+
+tr.expandable.open .chev { transform: rotate(90deg); }
+
+/* Hanging indent: wrapped topic lines align with the text, not under the chevron */
+tr.expandable td.topic {
+    padding-left: 34px;
+    text-indent: -22px;
+}
+
+tr.detail-row { display: none; }
+tr.detail-row.open { display: table-row; }
+
+tr.detail-row td {
+    background: rgba(8, 20, 42, 0.45);
+    padding: 4px 12px 12px 12px;
+}
+
+tr.detail-row ul {
+    margin: 6px 0 2px 0;
+    padding-left: 34px;
+}
+
+tr.detail-row li {
+    font-size: 0.92rem;
+    color: var(--muted);
+    padding: 2px 0;
+}
+
+tr.detail-row li::marker { color: var(--lambda); }
+
 tr.ferien td {
     background: rgba(90, 190, 230, 0.07);
     color: var(--cyan);
@@ -244,6 +322,10 @@ footer.page-foot a:hover { text-decoration: underline; }
 @media print {
     body { background: #fff; color: #111; padding: 8mm; }
     .toolbar { display: none; }
+    tr.detail-row { display: table-row !important; }
+    tr.detail-row td { background: #fff; }
+    tr.detail-row li { color: #444; }
+    .chev { display: none !important; }
     h1 { color: #8a6400; }
     .subtitle, .meta-card .v, footer.page-foot { color: #333; }
     .meta-card, .table-wrap { background: #fff; border-color: #bbb; }
