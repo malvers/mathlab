@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notizen | Stoffverteilungspläne</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript>
+        <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+            rel="stylesheet">
+    </noscript>
+    <link rel="icon" type="image/png" href="../resources/favicon.png">
+    <link rel="stylesheet" href="svp.css">
+    <style>
+        .notes-list {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            gap: 14px;
+        }
+
+        .note-card {
+            background: var(--card-soft);
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            padding: 14px 16px;
+        }
+
+        .note-head {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+
+        .note-chev {
+            background: none;
+            border: none;
+            color: var(--muted);
+            font-size: 0.95rem;
+            cursor: pointer;
+            padding: 4px 6px;
+            transition: transform 0.15s;
+        }
+
+        .note-card.open .note-chev { transform: rotate(90deg); }
+
+        .note-card:not(.open) .note-body { display: none; }
+
+        .note-card:not(.open) .note-head { margin-bottom: 0; }
+
+        .note-title {
+            flex: 1;
+            background: none;
+            border: none;
+            border-bottom: 1px solid transparent;
+            color: var(--lambda);
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.95rem;
+            letter-spacing: 0.03em;
+            padding: 4px 2px;
+        }
+
+        .note-title:focus {
+            outline: none;
+            border-bottom-color: rgba(245, 194, 66, 0.4);
+        }
+
+        .note-date {
+            font-size: 0.72rem;
+            color: var(--muted);
+            white-space: nowrap;
+        }
+
+        .note-del {
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.78rem;
+            color: rgb(235, 120, 105);
+            background: none;
+            border: 1px solid rgba(176, 36, 24, 0.45);
+            border-radius: 6px;
+            padding: 4px 10px;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .note-del:hover { background: rgba(176, 36, 24, 0.15); }
+
+        .note-body {
+            width: 100%;
+            min-height: 60px;
+            background: none;
+            border: none;
+            resize: none;
+            color: var(--text);
+            font-family: 'Outfit', sans-serif;
+            font-weight: 300;
+            font-size: 0.98rem;
+            line-height: 1.5;
+            padding: 2px;
+        }
+
+        .note-body:focus { outline: none; }
+
+        .empty-hint {
+            max-width: 1200px;
+            margin: 30px auto;
+            text-align: center;
+            color: var(--muted);
+            font-size: 0.95rem;
+        }
+
+        .save-state {
+            font-size: 0.75rem;
+            color: var(--phi);
+            margin-left: 4px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .save-state.visible { opacity: 1; }
+
+        @media print {
+            .note-card { border-color: #bbb; background: #fff; }
+            .note-title { color: #8a6400; }
+            .note-body { color: #111; }
+            .note-del, .note-chev { display: none; }
+            .note-card:not(.open) .note-body { display: block; }
+        }
+    </style>
+</head>
+
+<body>
+    <header class="page-head">
+        <a class="back-link" href="./">&larr; Stoffverteilungspl&auml;ne</a>
+        <h1>Notizen</h1>
+        <div class="subtitle">Pers&ouml;nliche Ablage &middot; Auto-Save lokal in diesem Browser</div>
+    </header>
+
+    <div class="toolbar">
+        <button class="action" onclick="addNote()">+ Neue Notiz</button>
+        <button class="action" onclick="toggleAllNotes()">Alle auf/zu</button>
+        <button class="action" onclick="window.print()">Drucken</button>
+        <span class="save-state" id="save-state">gespeichert ✓</span>
+    </div>
+
+    <div class="notes-list" id="notes-list"></div>
+    <div class="empty-hint" id="empty-hint" hidden>Noch keine Notizen &mdash; oben auf &bdquo;+ Neue Notiz&ldquo; klicken.</div>
+
+    <footer class="page-foot">
+        Notizen werden beim Tippen automatisch gespeichert &mdash; lokal in diesem Browser (localStorage),
+        nicht ger&auml;te&uuml;bergreifend. L&ouml;schen: zweimal klicken (erst scharf schalten, dann best&auml;tigen).
+    </footer>
+
+    <script>
+        // Simple local notes: [{id, title, body, ts}] in localStorage, newest first.
+        const KEY = 'svp-notes';
+        const list = document.getElementById('notes-list');
+        const emptyHint = document.getElementById('empty-hint');
+        const saveState = document.getElementById('save-state');
+        let notes = [];
+        try { notes = JSON.parse(localStorage.getItem(KEY)) || []; } catch (e) { notes = []; }
+
+        let saveTimer = null;
+        function save(showBadge) {
+            localStorage.setItem(KEY, JSON.stringify(notes));
+            if (showBadge) {
+                saveState.classList.add('visible');
+                clearTimeout(saveTimer);
+                saveTimer = setTimeout(() => saveState.classList.remove('visible'), 1200);
+            }
+        }
+
+        function fmtDate(ts) {
+            const d = new Date(ts);
+            return d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: '2-digit' }) +
+                ' ' + d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+        }
+
+        function autoGrow(el) {
+            el.style.height = 'auto';
+            el.style.height = el.scrollHeight + 'px';
+        }
+
+        // Open/closed lives only in the DOM: page loads collapsed, new notes open.
+        function render(openIds) {
+            openIds = openIds || [];
+            list.textContent = '';
+            emptyHint.hidden = notes.length > 0;
+            for (const note of notes) {
+                const card = document.createElement('div');
+                card.className = 'note-card' + (openIds.includes(note.id) ? ' open' : '');
+
+                const head = document.createElement('div');
+                head.className = 'note-head';
+
+                const chev = document.createElement('button');
+                chev.className = 'note-chev';
+                chev.textContent = '▸';
+                chev.setAttribute('aria-label', 'Notiz auf-/zuklappen');
+                chev.addEventListener('click', () => card.classList.toggle('open'));
+
+                const title = document.createElement('input');
+                title.className = 'note-title';
+                title.placeholder = 'Titel …';
+                title.value = note.title;
+                title.setAttribute('aria-label', 'Titel der Notiz');
+                title.addEventListener('input', () => {
+                    note.title = title.value;
+                    note.ts = Date.now();
+                    date.textContent = fmtDate(note.ts);
+                    save(true);
+                });
+
+                const date = document.createElement('span');
+                date.className = 'note-date';
+                date.textContent = fmtDate(note.ts);
+
+                const del = document.createElement('button');
+                del.className = 'note-del';
+                del.textContent = '✕';
+                del.setAttribute('aria-label', 'Notiz löschen');
+                del.addEventListener('click', () => {
+                    if (del.dataset.armed) {
+                        notes = notes.filter(n => n.id !== note.id);
+                        save(true);
+                        render();
+                    } else {
+                        del.dataset.armed = '1';
+                        del.textContent = 'Wirklich löschen?';
+                        setTimeout(() => {
+                            delete del.dataset.armed;
+                            del.textContent = '✕';
+                        }, 3000);
+                    }
+                });
+
+                head.appendChild(chev);
+                head.appendChild(title);
+                head.appendChild(date);
+                head.appendChild(del);
+
+                const body = document.createElement('textarea');
+                body.className = 'note-body';
+                body.placeholder = 'Notiz …';
+                body.value = note.body;
+                body.setAttribute('aria-label', 'Text der Notiz');
+                body.addEventListener('input', () => {
+                    note.body = body.value;
+                    note.ts = Date.now();
+                    date.textContent = fmtDate(note.ts);
+                    autoGrow(body);
+                    save(true);
+                });
+
+                card.appendChild(head);
+                card.appendChild(body);
+                list.appendChild(card);
+                autoGrow(body);
+            }
+        }
+
+        function addNote() {
+            const note = { id: Date.now() + '-' + Math.random().toString(36).slice(2, 8), title: '', body: '', ts: Date.now() };
+            notes.unshift(note);
+            save(false);
+            render([note.id, ...openNoteIds()]);
+            const first = list.querySelector('.note-title');
+            if (first) first.focus();
+        }
+
+        function openNoteIds() {
+            return Array.from(list.querySelectorAll('.note-card.open')).map((card, i) => {
+                const idx = Array.from(list.children).indexOf(card);
+                return notes[idx] ? notes[idx].id : null;
+            }).filter(Boolean);
+        }
+
+        function toggleAllNotes() {
+            const cards = Array.from(list.querySelectorAll('.note-card'));
+            const anyClosed = cards.some(c => !c.classList.contains('open'));
+            cards.forEach(c => c.classList.toggle('open', anyClosed));
+        }
+
+        render();
+    </script>
+</body>
+
+</html>

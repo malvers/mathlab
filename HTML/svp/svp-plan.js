@@ -159,11 +159,20 @@
         if (btn) btn.textContent = editing ? '✔ Fertig' : '✎ Bearbeiten';
     };
 
-    window.resetPlanEdits = function () {
-        if (confirm('Lokale Änderungen verwerfen und Original laden?')) {
-            localStorage.removeItem(KEY);
-            location.reload();
+    // Two-click confirm (no native dialogs): first click arms the button, second click resets.
+    window.resetPlanEdits = function (btn) {
+        if (btn && !btn.dataset.armed) {
+            btn.dataset.armed = '1';
+            const original = btn.textContent;
+            btn.textContent = 'Wirklich? Nochmal klicken';
+            setTimeout(() => {
+                delete btn.dataset.armed;
+                btn.textContent = original;
+            }, 3000);
+            return;
         }
+        localStorage.removeItem(KEY);
+        location.reload();
     };
 
     // Safety net: persist pending edits when the tab closes mid-edit.
