@@ -69,6 +69,21 @@
   }
   .editbar input:focus { outline: none; border-color: var(--hair-strong); }
   .edit-status { color: var(--muted); font-size: 0.8rem; letter-spacing: 0.03em; }
+  /* busy state ("Übersetzen …", "Speichern …"): spinner + breathing text */
+  .edit-status:not(:empty) {
+    display: inline-flex; align-items: center;
+    border: 1px solid var(--hair); border-radius: 999px;
+    padding: 7px 13px; background: rgba(255, 255, 255, 0.05);
+  }
+  .login-dlg .edit-status:not(:empty) { justify-content: center; }
+  .edit-status.busy { color: var(--text); animation: cv-breathe 1.2s ease-in-out infinite; }
+  .edit-status.busy::before {
+    content: ""; flex: none; width: 0.85em; height: 0.85em; margin-right: 7px;
+    border: 2px solid currentColor; border-top-color: transparent; border-radius: 50%;
+    animation: cv-spin 0.8s linear infinite;
+  }
+  @keyframes cv-spin { to { transform: rotate(360deg); } }
+  @keyframes cv-breathe { 0%, 100% { opacity: 0.45; } 50% { opacity: 1; } }
 
   /* ---------- login dialog (pencil) ---------- */
   .login-overlay {
@@ -933,8 +948,16 @@ function getByPath(obj, path) {
   const statusEl = document.getElementById("editStatus");
   const dlgStatus = document.getElementById("dlgStatus");
   let sb = null;
-  /* one status() feeds both places: dialog while logging in, topbar while saving */
-  const status = (t) => { statusEl.textContent = t; dlgStatus.textContent = t; };
+  /* one status() feeds both places: dialog while logging in, topbar while saving.
+     A trailing "…" marks a busy state -> spinner + pulse via .busy class */
+  const status = (t) => {
+    const busy = /…\s*$/.test(t);
+    const txt = busy ? t.replace(/\s*…\s*$/, "") : t;
+    [statusEl, dlgStatus].forEach((el) => {
+      el.textContent = txt;
+      el.classList.toggle("busy", busy);
+    });
+  };
 
   function loadScript(src) {
     return new Promise((ok, err) => {
