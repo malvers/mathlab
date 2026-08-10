@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stoffverteilungsplan Informatiksysteme 11 | SJ 2026/27</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet">
+    <link rel="icon" type="image/png" href="../resources/favicon.png">
+    <link rel="stylesheet" href="informatik.css">
+</head>
+
+<body>
+    <header class="page-head">
+        <h1>Stoffverteilungsplan Informatiksysteme &middot; Klasse 11</h1>
+        <div class="subtitle">
+            Berufliches Gymnasium (Einf&uuml;hrungsphase) &middot; Schuljahr 2026/27 &middot; 4 Ustd./Woche &middot;
+            Lehrplan: <a href="https://www.schulportal.sachsen.de/lplandb/lehrplan/207" target="_blank"
+                rel="noopener">Informatiksysteme BGY (2020)</a>
+        </div>
+    </header>
+
+    <div class="meta-cards">
+        <div class="meta-card">
+            <div class="k">Lernbereich 1</div>
+            <div class="v">Einordnung in die Informatik &middot; 4 Ustd.</div>
+        </div>
+        <div class="meta-card">
+            <div class="k">Lernbereich 2</div>
+            <div class="v">Grundlagen der Programmierung &middot; 38 Ustd.</div>
+        </div>
+        <div class="meta-card">
+            <div class="k">Lernbereich 3</div>
+            <div class="v">Programmentwicklung &middot; 46 Ustd.</div>
+        </div>
+        <div class="meta-card">
+            <div class="k">Lernbereich 4</div>
+            <div class="v">Projekt Programmentwicklung &middot; 16 Ustd.</div>
+        </div>
+        <div class="meta-card">
+            <div class="k">Wahlbereich</div>
+            <div class="v">K&uuml;nstliche Intelligenz &middot; 8 Ustd.</div>
+        </div>
+        <div class="meta-card">
+            <div class="k">Schuljahr</div>
+            <div class="v">Mo 17.08.2026 &ndash; Fr 09.07.2027</div>
+        </div>
+    </div>
+
+    <div class="toolbar">
+        <button class="action" onclick="window.print()">Drucken</button>
+        <div class="legend">
+            <span><span class="dot" style="background: var(--lambda)"></span>LB 1</span>
+            <span><span class="dot" style="background: var(--cyan)"></span>LB 2</span>
+            <span><span class="dot" style="background: var(--violet)"></span>LB 3</span>
+            <span><span class="dot" style="background: var(--teal)"></span>LB 4</span>
+            <span><span class="dot" style="background: var(--phi)"></span>Wahlbereich</span>
+            <span><span class="dot" style="background: var(--ypsilon)"></span>Leistung</span>
+            <span><span class="dot" style="background: rgba(170,190,220,0.5)"></span>Orga/Puffer</span>
+        </div>
+    </div>
+
+    <div class="table-wrap">
+        <table id="plan-table">
+            <thead>
+                <tr>
+                    <th>Nr.</th>
+                    <th>KW</th>
+                    <th>Woche</th>
+                    <th>Bereich</th>
+                    <th>Ustd.</th>
+                    <th>Thema / Inhalte</th>
+                    <th>Bemerkungen</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <footer class="page-foot">
+        Ferientermine Sachsen 2026/27 (SMK): Herbst 12.&ndash;24.10.26 &middot; Weihnachten 23.12.26&ndash;02.01.27
+        &middot; Winter 08.&ndash;19.02.27 &middot; Ostern 26.03.&ndash;02.04.27 &middot; Pfingsten 07.05. + 15.&ndash;18.05.27
+        &middot; Sommer ab 10.07.27 &middot; Bu&szlig;- und Bettag Mi 18.11.26 unterrichtsfrei.
+        Klassenarbeitstermine an den Klausurplan der Schule anpassen. Zeitrichtwerte gem&auml;&szlig; Lehrplan
+        (104 Ustd. verbindlich + 2 Wochen Wahl); Reihenfolge und Puffer in Verantwortung der Lehrkraft.
+    </footer>
+
+    <script>
+        // Data-driven plan: one entry per school week (or holiday block).
+        // 4 Ustd./week; u shows the cumulative Ustd. range within the Lernbereich.
+        // type: lb1 | lb2 | lb3 | lb4 | wb | lk | org | ferien
+        window.PLAN = [
+            { nr: 1, kw: 34, date: '17.–21.08.26', type: 'org', u: '', topic: 'Schuljahresauftakt: Organisation, PC-Raum, Entwicklungsumgebung einrichten, Überblick Kl. 11', remark: 'Erster Schultag Mo 17.08.' },
+            { nr: 2, kw: 35, date: '24.–28.08.26', type: 'lb1', u: '1–4/4', topic: 'Einordnung des Faches: Teilgebiete der Informatik, gesellschaftliche Bedeutung', remark: 'Mindmap; LB 1 abgeschlossen' },
+            { nr: 3, kw: 36, date: '31.08.–04.09.26', type: 'lb2', u: '1–4/38', topic: 'Begriffe und Modelle der prozeduralen und objektorientierten Programmierung; Algorithmusbegriff', remark: '' },
+            { nr: 4, kw: 37, date: '07.–11.09.26', type: 'lb2', u: '5–8/38', topic: 'Daten- und Programmstruktur; Syntaxdiagramme, EBNF', remark: '' },
+            { nr: 5, kw: 38, date: '14.–18.09.26', type: 'lb2', u: '9–12/38', topic: 'Struktogramme; elementare und strukturierte Datentypen', remark: 'Strukturdiagramm, Entscheidungstabelle' },
+            { nr: 6, kw: 39, date: '21.–25.09.26', type: 'lb2', u: '13–16/38', topic: 'Algorithmierung: Programmstrukturen (Sequenz, Verzweigung, Schleife)', remark: '' },
+            { nr: 7, kw: 40, date: '28.09.–02.10.26', type: 'lb2', u: '17–20/38', topic: 'Unterprogramme: Prozeduren, Funktionen, Module', remark: '' },
+            { nr: 8, kw: 41, date: '05.–09.10.26', type: 'lb2', u: '21–24/38', topic: 'Algorithmen auf Tabellen I: Berechnen (Summe, Durchschnitt), Vergleichen (Min/Max)', remark: '' },
+            { ferien: 'Herbstferien · 12.–24.10.2026 (KW 42–43)' },
+            { nr: 9, kw: 44, date: '26.–30.10.26', type: 'lb2', u: '25–28/38', topic: 'Algorithmen auf Tabellen II: Suchen (sequenziell, binär), Sortieren (Bubble, Selection Sort)', remark: '' },
+            { nr: 10, kw: 45, date: '02.–06.11.26', type: 'lk', u: 'KA 1', topic: 'Wiederholung + Klassenarbeit 1 (LB 1 + LB 2: Algorithmik)', remark: 'Termin nach Klausurplan' },
+            { nr: 11, kw: 46, date: '09.–13.11.26', type: 'lb2', u: '29–32/38', topic: 'Objektorientierung: Objekt, Klasse, Attribut, Methode', remark: 'abstrakte Klassen, Konstruktoren' },
+            { nr: 12, kw: 47, date: '16.–20.11.26', type: 'lb2', u: '33–36/38', topic: 'Vererbung, Polymorphie; Botschaft und Ereignis', remark: 'Mi 18.11. Buß- und Bettag (unterrichtsfrei)' },
+            { nr: 13, kw: 48, date: '23.–27.11.26', type: 'lb2', u: '37–38/38', topic: 'Objektklassenentwurf: UML (Use-Case-, Klassendiagramm), Klassen- und Methodenfindung', remark: 'LB 2 abgeschlossen; + 2 Ustd. Übung' },
+            { nr: 14, kw: 49, date: '30.11.–04.12.26', type: 'lb3', u: '1–4/46', topic: 'Methodik der Programmentwicklung: Problemanalyse', remark: 'Komplexreduzierung, relevante Eigenschaften' },
+            { nr: 15, kw: 50, date: '07.–11.12.26', type: 'lb3', u: '5–8/46', topic: 'Programmentwurf: strukturiert, modular, objektorientiert; top-down / bottom-up', remark: '' },
+            { nr: 16, kw: 51, date: '14.–18.12.26', type: 'lb3', u: '9–12/46', topic: 'Implementation I: problemorientierte Programmiersprache', remark: '' },
+            { nr: 17, kw: 52, date: '21.–22.12.26', type: 'org', u: '', topic: 'Puffer / Übung', remark: 'nur Mo/Di — ab Mi 23.12. Ferien' },
+            { ferien: 'Weihnachtsferien · 23.12.2026–02.01.2027' },
+            { nr: 18, kw: 1, date: '04.–08.01.27', type: 'lb3', u: '13–16/46', topic: 'Implementation II: Übungskomplexe', remark: '' },
+            { nr: 19, kw: 2, date: '11.–15.01.27', type: 'lb3', u: '17–20/46', topic: 'Visuelles Softwareentwicklungssystem: Formulare, visuelle und nicht-visuelle Komponenten', remark: '' },
+            { nr: 20, kw: 3, date: '18.–22.01.27', type: 'lb3', u: '21–24/46', topic: 'Testung und Fehlerbehebung: Black-Box-, White-Box-Test', remark: '' },
+            { nr: 21, kw: 4, date: '25.–29.01.27', type: 'lk', u: 'KA 2', topic: 'Wiederholung + Klassenarbeit 2 (LB 2 / LB 3)', remark: 'Termin nach Klausurplan' },
+            { nr: 22, kw: 5, date: '01.–05.02.27', type: 'lb3', u: '25–28/46', topic: 'Dokumentation und Bewertung der Problemlösung', remark: 'Fr 05.02. Halbjahresende / Zeugnisse' },
+            { ferien: 'Winterferien · 08.–19.02.2027 (KW 6–7)' },
+            { nr: 23, kw: 8, date: '22.–26.02.27', type: 'lb3', u: '29–32/46', topic: 'Verarbeiten von Text- und HTML-Dateien', remark: '' },
+            { nr: 24, kw: 9, date: '01.–05.03.27', type: 'lb3', u: '33–36/46', topic: 'Komponenten vertieft: Ereignissteuerung, GUI-Gestaltung', remark: '' },
+            { nr: 25, kw: 10, date: '08.–12.03.27', type: 'lb3', u: '37–40/46', topic: 'Komplexe Übungsaufgaben I', remark: '' },
+            { nr: 26, kw: 11, date: '15.–19.03.27', type: 'lb3', u: '41–44/46', topic: 'Komplexe Übungsaufgaben II', remark: '' },
+            { nr: 27, kw: 12, date: '22.–25.03.27', type: 'lb3', u: '45–46/46', topic: 'Abschluss LB 3 + Übung', remark: 'LB 3 abgeschlossen; ab Fr 26.03. Osterferien' },
+            { ferien: 'Osterferien · 26.03.–02.04.2027' },
+            { nr: 28, kw: 14, date: '05.–09.04.27', type: 'lb4', u: '1–4/16', topic: 'Projekt Programmentwicklung: Themenwahl und Modellierung', remark: 'Texteditor, Kalender, Taschenrechner, MC-Test, Bildeditor' },
+            { nr: 29, kw: 15, date: '12.–16.04.27', type: 'lb4', u: '5–8/16', topic: 'Projekt: Programmentwicklung I', remark: '' },
+            { nr: 30, kw: 16, date: '19.–23.04.27', type: 'lb4', u: '9–12/16', topic: 'Projekt: Programmentwicklung II + Dokumentation', remark: '' },
+            { nr: 31, kw: 17, date: '26.–30.04.27', type: 'lb4', u: '13–16/16', topic: 'Projekt: Fertigstellung, Dokumentation, Präsentation', remark: 'LB 4 abgeschlossen; Projektnote' },
+            { nr: 32, kw: 18, date: '03.–05.05.27', type: 'org', u: '', topic: 'Projektnachlese / Puffer', remark: 'Do 06.05. Himmelfahrt + Fr 07.05. unterrichtsfrei' },
+            { nr: 33, kw: 19, date: '10.–14.05.27', type: 'lk', u: 'KA 3', topic: 'Wiederholung + Klassenarbeit 3 (LB 3 / LB 4)', remark: 'Termin nach Klausurplan' },
+            { ferien: 'Pfingsten · Mo 17.05. Pfingstmontag + Di 18.05.2027 Ferientag' },
+            { nr: 34, kw: 20, date: '19.–21.05.27', type: 'org', u: '', topic: 'Übung / Puffer', remark: 'nur Mi–Fr' },
+            { nr: 35, kw: 21, date: '24.–28.05.27', type: 'wb', u: '1–4/8', topic: 'Wahlbereich „Künstliche Intelligenz" I: Teilgebiete der KI', remark: 'visuelle, sprachliche, manipulative, rationale Intelligenz' },
+            { nr: 36, kw: 22, date: '31.05.–04.06.27', type: 'wb', u: '5–8/8', topic: 'Wahlbereich KI II: Methoden (Suchen, Planen, Optimieren) + Positionierung zu Anwendungen', remark: 'Spracherkennung, LLMs, aktive Sicherheitssysteme' },
+            { nr: 37, kw: 23, date: '07.–11.06.27', type: 'org', u: '', topic: 'Vertiefung: Programmier-Challenges / Wettbewerbsaufgaben', remark: '' },
+            { nr: 38, kw: 24, date: '14.–18.06.27', type: 'org', u: '', topic: 'Exkurs: Berechenbarkeit (Halteproblem) oder hardwarenahe Programmierung', remark: 'Schnuppern in Wahlbereiche 3/4' },
+            { nr: 39, kw: 25, date: '21.–25.06.27', type: 'org', u: '', topic: 'Puffer', remark: 'Reserve für Projekttage / Exkursion' },
+            { nr: 40, kw: 26, date: '28.06.–02.07.27', type: 'org', u: '', topic: 'Jahresrückblick; Ausblick Jgst. 12: Leistungskurs Informatiksysteme', remark: '' },
+            { nr: 41, kw: 27, date: '05.–09.07.27', type: 'org', u: '', topic: 'Ausklang', remark: 'Fr 09.07. letzter Schultag, Zeugnisse' },
+            { ferien: 'Sommerferien · ab 10.07.2027' }
+        ];
+
+        window.BADGE = {
+            lb1: ['b-orange', 'LB 1'],
+            lb2: ['b-cyan', 'LB 2'],
+            lb3: ['b-violet', 'LB 3'],
+            lb4: ['b-teal', 'LB 4'],
+            wb: ['b-green', 'WAHL'],
+            lk: ['b-red', 'LEISTUNG'],
+            org: ['b-grey', 'ORGA']
+        };
+    </script>
+    <script src="informatik-plan.js"></script>
+</body>
+
+</html>
