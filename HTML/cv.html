@@ -69,6 +69,45 @@
   }
   .editbar input:focus { outline: none; border-color: var(--hair-strong); }
   .edit-status { color: var(--muted); font-size: 0.8rem; letter-spacing: 0.03em; }
+
+  /* ---------- login dialog (pencil) ---------- */
+  .login-overlay {
+    position: fixed; inset: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(0, 0, 0, 0.55); backdrop-filter: blur(6px);
+    padding: 16px;
+  }
+  .login-overlay[hidden] { display: none; }
+  .login-dlg {
+    position: relative; width: min(360px, 100%);
+    display: flex; flex-direction: column; gap: 12px;
+    background: linear-gradient(160deg, #2a2d34 0%, var(--card) 38%, #121316 100%);
+    border: 1px solid var(--hair); border-radius: 18px;
+    padding: 26px 24px 20px;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6);
+  }
+  .login-dlg::before {
+    content: ""; position: absolute; top: -1px; left: 12%; right: 12%; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.55), transparent);
+  }
+  .login-dlg h3 {
+    font-family: "Orbitron", sans-serif; font-weight: 500;
+    font-size: 0.95rem; color: #ffffff;
+    letter-spacing: 0.22em; text-transform: uppercase;
+    padding-bottom: 8px; margin-bottom: 2px;
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0.12) 55%, transparent 95%)
+                bottom left / 100% 2px no-repeat;
+  }
+  .login-dlg input {
+    font: inherit; font-size: 0.9rem; color: var(--text);
+    background: rgba(255, 255, 255, 0.05); border: 1px solid var(--hair);
+    border-radius: 999px; padding: 10px 16px; width: 100%;
+  }
+  .login-dlg input:focus { outline: none; border-color: var(--hair-strong); }
+  .login-row { display: flex; justify-content: flex-end; gap: 8px; margin-top: 4px; }
+  .login-go { color: #17181b; background: var(--text); border-color: var(--text); font-weight: 700; }
+  .login-go:hover { background: #ffffff; }
+  .login-dlg .edit-status { min-height: 1.2em; text-align: center; }
   /* Pencil pill button – toggles edit mode. Muted when off, English green when on.
      (scaleX(-1): glyph mirrored so the pencil points right) */
   .edit-toggle {
@@ -84,10 +123,17 @@
 
   /* ---------- card ---------- */
   .card {
-    background: var(--card);
+    /* Diagonal sheen: lighter top-left fading into near-black bottom-right */
+    background: linear-gradient(160deg, #2a2d34 0%, var(--card) 38%, #121316 100%);
     border: 1px solid var(--hair); border-radius: 18px;
     padding: clamp(24px, 4.5vw, 52px);
     box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+    position: relative;
+  }
+  /* Polished top edge: bright highlight fading out to both sides */
+  .card::before {
+    content: ""; position: absolute; top: -1px; left: 8%; right: 8%; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.55), transparent);
   }
 
   /* ---------- header ---------- */
@@ -101,6 +147,10 @@
     font-size: clamp(1.4rem, 4.2vw, 2.2rem);
     color: #ffffff; letter-spacing: 0.06em; line-height: 1.18;
     margin-bottom: 13px;
+    /* Brushed-metal gradient text (screen only; print resets to solid) */
+    background: linear-gradient(180deg, #ffffff 0%, #e8ebef 32%, #9aa1ab 50%, #d4d9df 62%, #626973 100%);
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
   }
   /* Contact details stacked – one line per item, no separators needed */
   .contact { color: var(--muted); font-size: 0.94rem; }
@@ -122,7 +172,10 @@
     font-size: clamp(0.88rem, 2.2vw, 1rem);
     color: #ffffff; letter-spacing: 0.22em; text-transform: uppercase;
     padding-bottom: 8px; margin-bottom: 14px;
-    border-bottom: 1px solid var(--hair);
+    /* Hairline that fades out to the right instead of a flat border */
+    border-bottom: none;
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0.12) 55%, transparent 95%)
+                bottom left / 100% 2px no-repeat;
   }
   p.lead { text-align: justify; hyphens: auto; }
   ul.plain { list-style: none; }
@@ -163,10 +216,11 @@
   @media print {
     @page { size: A4; margin: 12mm 15mm 16mm; } /* extra bottom room for our own footer */
     body { background: #fff; color: #1c1e21; padding: 0; font-size: 10.5pt; line-height: 1.45; }
-    .topbar, footer, noscript { display: none !important; }
+    .topbar, footer, noscript, .login-overlay { display: none !important; }
     [contenteditable] { outline: none !important; }
     .wrap { max-width: none; }
     .card { background: #fff; border: none; box-shadow: none; border-radius: 0; padding: 0; }
+    .card::before { display: none; }
     /* PDF generator mode (?pdf=1): Chrome draws the footer into the real
        page margin via footerTemplate – hide the in-page fallback footer */
     html.pdfmode .print-footer { display: none !important; }
@@ -184,7 +238,10 @@
       break-inside: avoid;
     }
     header.cv-head { gap: 8mm; margin-bottom: 1mm; }
-    h1 { color: #111; font-size: 18.5pt; letter-spacing: 0.05em; margin-bottom: 7px; }
+    h1 {
+      color: #111; font-size: 18.5pt; letter-spacing: 0.05em; margin-bottom: 7px;
+      background: none; -webkit-text-fill-color: initial;
+    }
     .contact { color: #55595f; font-size: 9.5pt; }
     .contact a { color: #1c1e21; border-bottom: none; }
     /* px instead of mm: Firefox drops the img from printouts when it is
@@ -195,7 +252,7 @@
     }
     section { margin-top: 5.5mm; }
     h2 {
-      color: #111; border-bottom: 1px solid #111;
+      color: #111; border-bottom: 1px solid #111; background: none;
       font-size: 10pt; letter-spacing: 0.15em;
       padding-bottom: 4px; margin-bottom: 8px;
       break-after: avoid;
@@ -220,9 +277,6 @@
     <button class="edit-toggle" id="editToggle" type="button" aria-label="Bearbeiten"
       aria-pressed="false" title="Bearbeiten"><span class="g">&#9998;</span></button>
     <div class="editbar" id="editBar" hidden>
-      <input id="editEmail" type="email" autocomplete="email" placeholder="E-Mail" aria-label="E-Mail">
-      <input id="editPwd" type="password" autocomplete="current-password" placeholder="Passwort" aria-label="Passwort">
-      <button class="print-btn" id="editLoginBtn" type="button">Login</button>
       <span class="edit-status" id="editStatus"></span>
     </div>
     <button class="print-btn" id="printBtn" type="button" onclick="window.print()">Drucken / PDF</button>
@@ -240,6 +294,20 @@
   </div>
 
   <footer>© 2026 Dr. Michael R. Alvers · <a href="https://docalvers.de">docalvers.de</a> · <a href="cv-help.html">Hilfe</a></footer>
+</div>
+
+<!-- Login dialog (pencil click) – same sleek card look as the CV itself -->
+<div class="login-overlay" id="loginOverlay" hidden>
+  <div class="login-dlg" role="dialog" aria-modal="true" aria-labelledby="loginTitle">
+    <h3 id="loginTitle">Login</h3>
+    <input id="editEmail" type="email" autocomplete="email" placeholder="E-Mail" aria-label="E-Mail">
+    <input id="editPwd" type="password" autocomplete="current-password" placeholder="Passwort" aria-label="Passwort">
+    <div class="login-row">
+      <button class="print-btn" id="loginCancelBtn" type="button">Abbrechen</button>
+      <button class="print-btn login-go" id="editLoginBtn" type="button">Login</button>
+    </div>
+    <span class="edit-status" id="dlgStatus"></span>
+  </div>
 </div>
 
 <div class="print-footer" id="printFooter" aria-hidden="true"></div>
@@ -857,12 +925,16 @@ function getByPath(obj, path) {
 (function initEdit() {
   const toggle = document.getElementById("editToggle");
   const bar = document.getElementById("editBar");
+  const overlay = document.getElementById("loginOverlay");
   const email = document.getElementById("editEmail");
   const pwd = document.getElementById("editPwd");
   const loginBtn = document.getElementById("editLoginBtn");
+  const cancelBtn = document.getElementById("loginCancelBtn");
   const statusEl = document.getElementById("editStatus");
+  const dlgStatus = document.getElementById("dlgStatus");
   let sb = null;
-  const status = (t) => { statusEl.textContent = t; };
+  /* one status() feeds both places: dialog while logging in, topbar while saving */
+  const status = (t) => { statusEl.textContent = t; dlgStatus.textContent = t; };
 
   function loadScript(src) {
     return new Promise((ok, err) => {
@@ -882,15 +954,15 @@ function getByPath(obj, path) {
   }
 
   function showLogin() {
-    bar.hidden = false;
-    email.hidden = pwd.hidden = loginBtn.hidden = false;
+    overlay.hidden = false;
     status("");
     email.focus();
   }
 
   function startEditing() {
+    overlay.hidden = true;
+    pwd.value = "";
     bar.hidden = false;
-    email.hidden = pwd.hidden = loginBtn.hidden = true;
     CvEdit.active = true;
     CvEdit.applyEditable();
     CvEdit.takeSnapshot();
@@ -929,7 +1001,7 @@ function getByPath(obj, path) {
       setTimeout(() => { if (!CvEdit.active) { bar.hidden = true; status(""); } }, 2500);
       return;
     }
-    if (!bar.hidden) { bar.hidden = true; return; } /* login form open → close it */
+    if (!overlay.hidden) { overlay.hidden = true; return; } /* dialog open → close it */
     try { /* valid session from last time? → skip the login form */
       const client = await ensureSb();
       const { data } = await client.auth.getSession();
@@ -1022,6 +1094,11 @@ function getByPath(obj, path) {
   toggle.addEventListener("click", onToggle);
   loginBtn.addEventListener("click", login);
   pwd.addEventListener("keydown", (e) => { if (e.key === "Enter") login(); });
+  cancelBtn.addEventListener("click", () => { overlay.hidden = true; });
+  overlay.addEventListener("click", (e) => { if (e.target === overlay) overlay.hidden = true; });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && !overlay.hidden) overlay.hidden = true;
+  });
   document.addEventListener("input", (e) => {
     if (CvEdit.active && e.target.closest && e.target.closest("[data-path]")) CvEdit.dirty = true;
   });
