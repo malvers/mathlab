@@ -84,8 +84,12 @@
 
             const detailTr = document.createElement('tr');
             detailTr.className = 'detail-row';
+            // Empty spacer under columns 1-5 so the bullets sit under the topic column.
+            const spacer = document.createElement('td');
+            spacer.colSpan = 5;
+            detailTr.appendChild(spacer);
             const td = document.createElement('td');
-            td.colSpan = 7;
+            td.colSpan = 2;
             const ul = document.createElement('ul');
             buildDetailList(ul, detailItems);
             td.appendChild(ul);
