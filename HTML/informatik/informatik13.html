@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stoffverteilungsplan Informatiksysteme 13 | SJ 2026/27</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet">
+    <link rel="icon" type="image/png" href="../resources/favicon.png">
+    <link rel="stylesheet" href="informatik.css">
+</head>
+
+<body>
+    <header class="page-head">
+        <a class="back-link" href="./">&larr; &Uuml;bersicht Stoffverteilungspl&auml;ne</a>
+        <h1>Stoffverteilungsplan Informatiksysteme &middot; Jahrgangsstufe 13</h1>
+        <div class="subtitle">
+            Berufliches Gymnasium (Leistungskurs, Abiturjahrgang) &middot; Schuljahr 2026/27 &middot; 6 Ustd./Woche &middot;
+            Lehrplan: <a href="https://www.schulportal.sachsen.de/lplandb/lehrplan/207" target="_blank"
+                rel="noopener">Informatiksysteme BGY (2020)</a>
+        </div>
+    </header>
+
+    <div class="meta-cards">
+        <div class="meta-card">
+            <div class="k c-orange">Lernbereich 4</div>
+            <div class="v">IT-Projektmanagement im Unternehmen &middot; 20 Ustd.</div>
+        </div>
+        <div class="meta-card">
+            <div class="k c-cyan">Lernbereich 6</div>
+            <div class="v">Grundlagen des Software-Engineering &middot; 32 Ustd.</div>
+        </div>
+        <div class="meta-card">
+            <div class="k c-violet">Lernbereich 7</div>
+            <div class="v">Anwendungs-Entwicklung &middot; 26 Ustd.</div>
+        </div>
+        <div class="meta-card">
+            <div class="k c-teal">Lernbereich 8</div>
+            <div class="v">Informatikprojekt &middot; 54 Ustd.</div>
+        </div>
+        <div class="meta-card">
+            <div class="k c-bright">Abitur 2027</div>
+            <div class="v">schriftlich ca. Mitte April &ndash; Mitte Mai &middot; m&uuml;ndlich Mai/Juni</div>
+        </div>
+        <div class="meta-card">
+            <div class="k c-bright">Kursjahr</div>
+            <div class="v">Mo 17.08.2026 &ndash; Kursende ca. Mitte April 2027</div>
+        </div>
+    </div>
+
+    <div class="toolbar">
+        <button class="action" onclick="window.print()">Drucken</button>
+        <button class="action" onclick="togglePlanDetails()">Alle auf/zu</button>
+        <button class="action" onclick="togglePlanEdit(this)">✎ Bearbeiten</button>
+        <button class="action secondary" onclick="resetPlanEdits()">Zurücksetzen</button>
+        <div class="legend">
+            <span><span class="dot" style="background: var(--lambda)"></span>LB 4</span>
+            <span><span class="dot" style="background: var(--cyan)"></span>LB 6</span>
+            <span><span class="dot" style="background: var(--violet)"></span>LB 7</span>
+            <span><span class="dot" style="background: var(--teal)"></span>LB 8</span>
+            <span><span class="dot" style="background: var(--ypsilon)"></span>Leistung</span>
+            <span><span class="dot" style="background: rgba(170,190,220,0.5)"></span>Orga/Puffer</span>
+        </div>
+    </div>
+
+    <div class="table-wrap">
+        <table id="plan-table">
+            <thead>
+                <tr>
+                    <th>Nr.</th>
+                    <th>KW</th>
+                    <th>Woche</th>
+                    <th>Bereich</th>
+                    <th>Ustd.</th>
+                    <th>Thema / Inhalte</th>
+                    <th>Bemerkungen</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <footer class="page-foot">
+        Wochenzeile anklicken &rarr; Stundenskizze ausklappen; beim Drucken werden alle Details ausgeklappt.
+        &bdquo;Bearbeiten&ldquo; macht Themen, Bemerkungen und Bullets editierbar (Speichern beim Klick auf
+        &bdquo;Fertig&ldquo;, lokal im Browser); &bdquo;Zur&uuml;cksetzen&ldquo; l&auml;dt das Original.
+        Jgst. 13 = 22 verbindliche Wochen (132 Ustd. = 22 &times; 6): LB 4 + LB 6 + LB 7 + LB 8; die
+        Lernbereiche 1, 2, 3 und 5 liegen in Jgst. 12. Die Abiturtermine 2027 (BGY) waren bei Erstellung
+        noch nicht ver&ouml;ffentlicht &mdash; Pr&uuml;fungsbl&ouml;cke unten sind Richtwerte, bitte an den
+        SMK-Terminplan und den Pr&uuml;fungsplan der Schule anpassen. Klausurtermine nach Klausurplan.
+        Ferientermine Sachsen 2026/27 (SMK): Herbst 12.&ndash;24.10.26 &middot; Weihnachten 23.12.26&ndash;02.01.27
+        &middot; Winter 08.&ndash;19.02.27 &middot; Ostern 26.03.&ndash;02.04.27 &middot;
+        Bu&szlig;- und Bettag Mi 18.11.26 unterrichtsfrei.
+    </footer>
+
+    <script>
+        // Data-driven plan: one entry per school week (or holiday/info block).
+        // 6 Ustd./week; u shows the cumulative Ustd. range within the Lernbereich.
+        // details: bullet list shown in the expandable sub-row (lesson sketch).
+        // type: lb4 | lb6 | lb7 | lb8 | lk | org | ferien
+        window.PLAN = [
+            { nr: 1, kw: 34, date: '17.–21.08.26', type: 'lb4', u: '1–6/20', topic: 'Kursauftakt + LB 4: unternehmerisches Handeln im IT-Modellunternehmen, Geschäftsprozesse', remark: 'Erster Schultag Mo 17.08.', details: [
+                'Kursauftakt Abiturjahr: Ablauf, Klausuren, Prüfungsschwerpunkte',
+                'IT-Modellunternehmen: Geschäftsaktivitäten und Services im Internet (Fallstudie)',
+                'Geschäftsprozesse: Kern- und Serviceprozesse unterscheiden'
+            ] },
+            { nr: 2, kw: 35, date: '24.–28.08.26', type: 'lb4', u: '7–12/20', topic: 'Prozessmodellierung: eEPK und BPMN, ARIS-Modell', remark: '', details: [
+                'Erweiterte Ereignisprozesskette (eEPK) lesen und erstellen',
+                'BPMN: Prozesse dokumentieren; Einordnung ARIS',
+                'Übung: einen Schulprozess (z. B. Exkursionsantrag) modellieren'
+            ] },
+            { nr: 3, kw: 36, date: '31.08.–04.09.26', type: 'lb4', u: '13–18/20', topic: 'IT-Projektmanagement: Projektarten, Projektphasen, Netzplantechnik, Gantt-Diagramm', remark: '', details: [
+                'Projektarten: Hardware-/Softwareprojekt; allgemeine Projektphasen',
+                'Terminliche Planung: Ablaufplan, Netzplantechnik (Überblick), Gantt',
+                'Übung: Gantt-Diagramm für ein Mini-Projekt erstellen'
+            ] },
+            { nr: 4, kw: 37, date: '07.–11.09.26', type: 'lb4', u: '19–20/20', topic: 'Terminplanung mit Industriekalender + Übung; Abschluss LB 4', remark: 'LB 4 abgeschlossen', details: [
+                'Industriekalender und realistische Terminplanung',
+                'Vergleich der Projektarten mit dem allgemeinen Grundmodell',
+                'Abschlussübung LB 4 — Vorgriff aufs Informatikprojekt (LB 8)'
+            ] },
+            { nr: 5, kw: 38, date: '14.–18.09.26', type: 'lb6', u: '1–6/32', topic: 'Software-Engineering: Lebenszyklus-Modell, Phasenmodelle', remark: '', details: [
+                'Lebenszyklus von Software; Wasserfall vs. iterative Modelle',
+                'Prototyping, Rapid Application Development, Reengineering',
+                'Diskussion: Welches Modell passt zu welchem Projekt?'
+            ] },
+            { nr: 6, kw: 39, date: '21.–25.09.26', type: 'lb6', u: '7–12/32', topic: 'Prinzipien der Software-Entwicklung: Qualitätskriterien', remark: '', details: [
+                'Verwertbarkeit, Zuverlässigkeit, Effizienz, Benutzbarkeit, Wartbarkeit, Portabilität',
+                'Praxis: Eingabeprüfungen und universelle Routinen implementieren',
+                'Modularisierung und nachnutzbare Module'
+            ] },
+            { nr: 7, kw: 40, date: '28.09.–02.10.26', type: 'lb6', u: '13–18/32', topic: 'UML vertieft I: Use-Case-, Klassen-, Aktivitätsdiagramm', remark: '', details: [
+                'Use-Case- und Klassendiagramm auffrischen (Anschluss Kl. 11)',
+                'Aktivitätsdiagramm: Abläufe modellieren',
+                'Übung am Fallbeispiel im Modellierungseditor (draw.io/UMLet)'
+            ] },
+            { nr: 8, kw: 41, date: '05.–09.10.26', type: 'lb6', u: '19–24/32', topic: 'UML vertieft II: Zustands-, Sequenzdiagramm; konventionelle Modelle', remark: '', details: [
+                'Zustands- und Sequenzdiagramm an Beispielen',
+                'Konventionelle Modelle: Struktogramm, ER-Diagramm und Relationenmodell',
+                'Mix-Übung: passendes Modell zur Aufgabe wählen'
+            ] },
+            { ferien: 'Herbstferien · 12.–24.10.2026 (KW 42–43)' },
+            { nr: 9, kw: 44, date: '26.–30.10.26', type: 'lk', u: 'KL 1', topic: 'Wiederholung + Klausur 1 (LB 4 + LB 6)', remark: 'Termin nach Klausurplan', details: [
+                'Wiederholung: Prozessmodellierung, Projektmanagement, UML',
+                'Klausur 1 (90 min)'
+            ] },
+            { nr: 10, kw: 45, date: '02.–06.11.26', type: 'lb6', u: '25–30/32', topic: 'Modelle auf die Software-Entwicklung anwenden; Modellierungseditor', remark: '', details: [
+                'Durchgängiges Beispiel: von der Anforderung zum Modell zur Umsetzung',
+                'Editor mit Modell-Symbolik sicher beherrschen',
+                'Auswertung Klausur 1'
+            ] },
+            { nr: 11, kw: 46, date: '09.–13.11.26', type: 'lb6', u: '31–32/32', topic: 'Abschluss LB 6 + LB 7 Auftakt: Vorgehensmodell wählen', remark: 'LB 6 abgeschlossen; LB 7: 1–4/26', details: [
+                'Mindmap Software-Engineering als Abschluss',
+                'LB 7: Vorgehensmodell für die Anwendungsentwicklung festlegen',
+                'Problemstellungen aus Informatik, Wirtschaft, Verwaltung sichten'
+            ] },
+            { nr: 12, kw: 47, date: '16.–20.11.26', type: 'lb7', u: '5–10/26', topic: 'Exemplarische Entwicklung berufsbezogener Anwendersoftware I', remark: 'Mi 18.11. Buß- und Bettag (unterrichtsfrei)', details: [
+                'Projektarbeit: Anforderungen analysieren, Entwurf anfertigen',
+                'Implementierung beginnen (IDE, ggf. mit DB-Anbindung aus Jgst. 12)'
+            ] },
+            { nr: 13, kw: 48, date: '23.–27.11.26', type: 'lb7', u: '11–16/26', topic: 'Anwendungs-Entwicklung II', remark: '', details: [
+                'Implementierung fortsetzen; Zwischenstände dokumentieren',
+                'Code-Review: Prinzipien aus LB 6 anwenden'
+            ] },
+            { nr: 14, kw: 49, date: '30.11.–04.12.26', type: 'lb7', u: '17–22/26', topic: 'Anwendungs-Entwicklung III + Qualitätssicherung', remark: '', details: [
+                'Testfälle ableiten und systematisch testen',
+                'Qualitätssicherung: Prinzipien auf die eigene Software übertragen'
+            ] },
+            { nr: 15, kw: 50, date: '07.–11.12.26', type: 'lb7', u: '23–26/26', topic: 'Bewertung von Anwendersoftware + Übung; Abschluss LB 7', remark: 'LB 7 abgeschlossen', details: [
+                'Fremdsoftware nach Kriterien bewerten',
+                'Präsentation der Ergebnisse im Kurs'
+            ] },
+            { nr: 16, kw: 51, date: '14.–18.12.26', type: 'org', u: '', topic: 'Vertiefung: Abiturtraining (Stoff Jgst. 12 auffrischen)', remark: '', details: [
+                'SQL-Aufgaben im Abiturformat',
+                'Netzwerke: Subnetting und Protokolle wiederholen'
+            ] },
+            { nr: 17, kw: 52, date: '21.–22.12.26', type: 'org', u: '', topic: 'Puffer', remark: 'nur Mo/Di — ab Mi 23.12. Ferien', details: [
+                'Offene Fragen; Ausblick Informatikprojekt'
+            ] },
+            { ferien: 'Weihnachtsferien · 23.12.2026–02.01.2027' },
+            { nr: 18, kw: 1, date: '04.–08.01.27', type: 'lb8', u: '1–6/54', topic: 'Informatikprojekt: Projektstart, Anforderungsdefinition', remark: 'Schulverwaltung, Kursplanung, Inventar, Buchhaltung, Lohnabrechnung', details: [
+                'Teams und Themen festlegen (komplexe berufsbezogene Aufgabenstellung)',
+                'Anforderungsdefinition schriftlich fixieren',
+                'Bewertungskriterien transparent machen'
+            ] },
+            { nr: 19, kw: 2, date: '11.–15.01.27', type: 'lb8', u: '7–12/54', topic: 'Projektmanagement anwenden: Vorgehensmodell, Meilensteine, Qualitätsmanagement', remark: '', details: [
+                'Projektplan mit Meilensteinen (Gantt aus LB 4 anwenden)',
+                'Rollen im Team; Qualitätsmanagement festlegen'
+            ] },
+            { nr: 20, kw: 3, date: '18.–22.01.27', type: 'lb8', u: '13–18/54', topic: 'Softwareentwicklung I', remark: '', details: [
+                'Implementierung Kernfunktionen',
+                'Wöchentliches Stand-up und Fortschrittskontrolle'
+            ] },
+            { nr: 21, kw: 4, date: '25.–29.01.27', type: 'lb8', u: '19–24/54', topic: 'Softwareentwicklung II; Zwischenstand', remark: '', details: [
+                'Implementierung fortsetzen',
+                'Zwischenstand je Team kurz vorstellen'
+            ] },
+            { nr: 22, kw: 5, date: '01.–05.02.27', type: 'lk', u: 'KL 2', topic: 'Wiederholung + Klausur 2 (LB 6 / LB 7 / Projektkontext)', remark: 'Kurshalbjahresgrenze laut Terminplan der Schule', details: [
+                'Wiederholung Software-Engineering und Anwendungs-Entwicklung',
+                'Klausur 2 (90 min)'
+            ] },
+            { ferien: 'Winterferien · 08.–19.02.2027 (KW 6–7)' },
+            { nr: 23, kw: 8, date: '22.–26.02.27', type: 'lb8', u: '25–30/54', topic: 'Softwareentwicklung III; Zwischenpräsentation', remark: '', details: [
+                'Implementierung; Blocker lösen',
+                'Zwischenpräsentation mit Feedback von Kurs und Lehrkraft'
+            ] },
+            { nr: 24, kw: 9, date: '01.–05.03.27', type: 'lb8', u: '31–36/54', topic: 'Softwareentwicklung IV; Test', remark: '', details: [
+                'Feature-Freeze vorbereiten; Testphase',
+                'Fremdtest zwischen den Teams, Fehlerprotokolle'
+            ] },
+            { nr: 25, kw: 10, date: '08.–12.03.27', type: 'lb8', u: '37–42/54', topic: 'Dokumentation', remark: '', details: [
+                'Projektdokumentation: Verlauf, Architektur, Bedienung',
+                'Verschiedene Formate zur Gestaltung und Veröffentlichung nutzen'
+            ] },
+            { nr: 26, kw: 11, date: '15.–19.03.27', type: 'lb8', u: '43–48/54', topic: 'Fertigstellung; Generalprobe der Präsentation', remark: '', details: [
+                'Letzte Korrekturen an Produkt und Doku',
+                'Generalprobe: Vortrag + Live-Demo im Team'
+            ] },
+            { nr: 27, kw: 12, date: '22.–25.03.27', type: 'lb8', u: '49–54/54', topic: 'Präsentation und Verteidigung des Informatikprojekts', remark: 'LB 8 abgeschlossen; ab Fr 26.03. Osterferien', details: [
+                'Präsentation in schriftlicher und mündlicher Form; kritische Bewertung',
+                'Note Informatikprojekt'
+            ] },
+            { ferien: 'Osterferien · 26.03.–02.04.2027' },
+            { nr: 28, kw: 14, date: '05.–09.04.27', type: 'org', u: '', topic: 'Abiturvorbereitung I: Schwerpunkte Datenbanken, Netzwerke, Software-Engineering', remark: 'Prüfungsschwerpunkte SMK beachten', details: [
+                'Wiederholung nach Prüfungsschwerpunkten',
+                'Aufgabenformate und Operatoren trainieren'
+            ] },
+            { nr: 29, kw: 15, date: '12.–16.04.27', type: 'org', u: '', topic: 'Abiturvorbereitung II: Übungsklausur unter Prüfungsbedingungen', remark: '', details: [
+                'Probeklausur im Abiturformat + Auswertung',
+                'Individuelle Schwerpunkte klären'
+            ] },
+            { nr: 30, kw: 16, date: '19.–23.04.27', type: 'org', u: '', topic: 'Abiturvorbereitung III / Konsultationen', remark: 'Kursende 13/II laut Terminplan der Schule', details: [
+                'Letzte Konsultationen, offene Fragen',
+                'Organisatorisches zur Prüfung'
+            ] },
+            { ferien: 'Schriftliche Abiturprüfungen · ca. Mitte April – Mitte Mai 2027 (Termine SMK/Schule)' },
+            { ferien: 'Konsultationen + mündliche Abiturprüfungen · Mai/Juni 2027 (Termine Schule)' },
+            { ferien: 'Zeugnisausgabe Allgemeine Hochschulreife · Juni/Juli 2027' }
+        ];
+
+        window.BADGE = {
+            lb4: ['b-orange', 'LB 4'],
+            lb6: ['b-cyan', 'LB 6'],
+            lb7: ['b-violet', 'LB 7'],
+            lb8: ['b-teal', 'LB 8'],
+            lk: ['b-red', 'LEISTUNG'],
+            org: ['b-grey', 'ORGA']
+        };
+    </script>
+    <script src="informatik-plan.js"></script>
+</body>
+
+</html>

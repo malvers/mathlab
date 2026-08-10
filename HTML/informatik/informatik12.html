@@ -13,6 +13,7 @@
 
 <body>
     <header class="page-head">
+        <a class="back-link" href="./">&larr; &Uuml;bersicht Stoffverteilungspl&auml;ne</a>
         <h1>Stoffverteilungsplan Informatiksysteme &middot; Jahrgangsstufe 12</h1>
         <div class="subtitle">
             Berufliches Gymnasium (Leistungskurs) &middot; Schuljahr 2026/27 &middot; 6 Ustd./Woche &middot;
@@ -23,33 +24,36 @@
 
     <div class="meta-cards">
         <div class="meta-card">
-            <div class="k">Lernbereich 1</div>
+            <div class="k c-orange">Lernbereich 1</div>
             <div class="v">Architektur und Betrieb von IuK-Systemen &middot; 26 Ustd.</div>
         </div>
         <div class="meta-card">
-            <div class="k">Lernbereich 2</div>
+            <div class="k c-cyan">Lernbereich 2</div>
             <div class="v">Datenbank-Technologie &middot; 52 Ustd.</div>
         </div>
         <div class="meta-card">
-            <div class="k">Lernbereich 3</div>
+            <div class="k c-violet">Lernbereich 3</div>
             <div class="v">IuK-Systeme in Netzwerken &middot; 38 Ustd.</div>
         </div>
         <div class="meta-card">
-            <div class="k">Lernbereich 5</div>
+            <div class="k c-pink">Lernbereich 5</div>
             <div class="v">Analyse, Entwurf, Realisierung &middot; 40 Ustd.</div>
         </div>
         <div class="meta-card">
-            <div class="k">Jgst. 13 (Ausblick)</div>
+            <div class="k c-bright">Jgst. 13 (Ausblick)</div>
             <div class="v">LB 4 (IT-PM) + LB 6&ndash;8 &middot; 132 Ustd.</div>
         </div>
         <div class="meta-card">
-            <div class="k">Schuljahr</div>
+            <div class="k c-bright">Schuljahr</div>
             <div class="v">Mo 17.08.2026 &ndash; Fr 09.07.2027</div>
         </div>
     </div>
 
     <div class="toolbar">
         <button class="action" onclick="window.print()">Drucken</button>
+        <button class="action" onclick="togglePlanDetails()">Alle auf/zu</button>
+        <button class="action" onclick="togglePlanEdit(this)">✎ Bearbeiten</button>
+        <button class="action secondary" onclick="resetPlanEdits()">Zurücksetzen</button>
         <div class="legend">
             <span><span class="dot" style="background: var(--lambda)"></span>LB 1</span>
             <span><span class="dot" style="background: var(--cyan)"></span>LB 2</span>
@@ -79,6 +83,9 @@
     </div>
 
     <footer class="page-foot">
+        Wochenzeile anklicken &rarr; Stundenskizze ausklappen; beim Drucken werden alle Details ausgeklappt.
+        &bdquo;Bearbeiten&ldquo; macht Themen, Bemerkungen und Bullets editierbar (Speichern beim Klick auf
+        &bdquo;Fertig&ldquo;, lokal im Browser); &bdquo;Zur&uuml;cksetzen&ldquo; l&auml;dt das Original.
         Aufteilung 12/13: LB 1+2+3+5 in Jgst. 12 (156 Ustd. = 26 Wochen &times; 6), LB 4+6+7+8 in Jgst. 13
         (132 Ustd. = 22 Wochen &times; 6) &mdash; so gehen die Zeitrichtwerte exakt auf, und LB 4
         (IT-Projektmanagement) liegt direkt vor dem Informatikprojekt (LB 8).
@@ -91,54 +98,188 @@
     <script>
         // Data-driven plan: one entry per school week (or holiday block).
         // 6 Ustd./week; u shows the cumulative Ustd. range within the Lernbereich.
+        // details: bullet list shown in the expandable sub-row (lesson sketch).
         // type: lb1 | lb2 | lb3 | lb5 | wb | lk | org | ferien
         window.PLAN = [
-            { nr: 1, kw: 34, date: '17.–21.08.26', type: 'lb1', u: '1–6/26', topic: 'Kursauftakt + LB 1: technische Grundlagen, Grundschaltungen der Prozessor- und Speichertechnik', remark: 'Erster Schultag Mo 17.08.' },
-            { nr: 2, kw: 35, date: '24.–28.08.26', type: 'lb1', u: '7–12/26', topic: 'Schaltungen zur Datenübertragung: Multiplexer, Demultiplexer; Simulation', remark: '' },
-            { nr: 3, kw: 36, date: '31.08.–04.09.26', type: 'lb1', u: '13–18/26', topic: 'Rechnerarchitekturen: v.-Neumann-Rechner, aktuelle PC-Hardware, Prozessoren, Bus- und Speichersysteme', remark: '' },
-            { nr: 4, kw: 37, date: '07.–11.09.26', type: 'lb1', u: '19–24/26', topic: 'Betriebssysteme: Klassifikation, Auswahl, Aufbau und Funktion', remark: 'Desktop, Mobiles, Tablets' },
-            { nr: 5, kw: 38, date: '14.–18.09.26', type: 'lb1', u: '25–26/26', topic: 'Systemsoftware bewerten: kommerziell vs. Open Source, Urheberrecht, Lizenzmodelle + Übung', remark: 'LB 1 abgeschlossen' },
-            { nr: 6, kw: 39, date: '21.–25.09.26', type: 'lb2', u: '1–6/52', topic: 'Architektur von Datenbank-Systemen: 3-Ebenen-Modell, DBMS, Datenbankmodelle', remark: '' },
-            { nr: 7, kw: 40, date: '28.09.–02.10.26', type: 'lb2', u: '7–12/52', topic: 'Datenmodellierung I: Entity-Relationship-Modell', remark: '' },
-            { nr: 8, kw: 41, date: '05.–09.10.26', type: 'lb2', u: '13–18/52', topic: 'Datenmodellierung II: Normalisierung nach Codd bis zur 3. Normalform', remark: '' },
+            { nr: 1, kw: 34, date: '17.–21.08.26', type: 'lb1', u: '1–6/26', topic: 'Kursauftakt + LB 1: technische Grundlagen, Grundschaltungen der Prozessor- und Speichertechnik', remark: 'Erster Schultag Mo 17.08.', details: [
+                'Kursauftakt: Abläufe, Bewertung, Klausuren im LK',
+                'Logikgatter UND/ODER/NICHT; einfache Schaltungen in Logisim',
+                'Halb- und Volladdierer aufbauen und testen'
+            ] },
+            { nr: 2, kw: 35, date: '24.–28.08.26', type: 'lb1', u: '7–12/26', topic: 'Schaltungen zur Datenübertragung: Multiplexer, Demultiplexer; Simulation', remark: '', details: [
+                'Flipflop als Speicherelement; Register im Überblick',
+                'Multiplexer/Demultiplexer in Logisim bauen',
+                'Übung: unbekannte Schaltung analysieren und beschreiben'
+            ] },
+            { nr: 3, kw: 36, date: '31.08.–04.09.26', type: 'lb1', u: '13–18/26', topic: 'Rechnerarchitekturen: v.-Neumann-Rechner, aktuelle PC-Hardware, Prozessoren, Bus- und Speichersysteme', remark: '', details: [
+                'V.-Neumann-Architektur: Blockschaltbild und Befehlszyklus (Simulator, z. B. Johnny)',
+                'Aktuelle Hardware: CPU, Bussysteme, RAM, SSD — Datenblätter lesen',
+                'Nachhaltigkeit: Energiebedarf und Lebenszyklus digitaler Technik'
+            ] },
+            { nr: 4, kw: 37, date: '07.–11.09.26', type: 'lb1', u: '19–24/26', topic: 'Betriebssysteme: Klassifikation, Auswahl, Aufbau und Funktion', remark: 'Desktop, Mobiles, Tablets', details: [
+                'Aufgaben eines Betriebssystems; Klassifikation (Einzelplatz, Netz, Terminal)',
+                'Prozesse und Speicherverwaltung im Überblick (Taskmanager-Analyse)',
+                'Einsatzfälle: Desktop vs. Mobil vs. Server'
+            ] },
+            { nr: 5, kw: 38, date: '14.–18.09.26', type: 'lb1', u: '25–26/26', topic: 'Systemsoftware bewerten: kommerziell vs. Open Source, Urheberrecht, Lizenzmodelle + Übung', remark: 'LB 1 abgeschlossen', details: [
+                'Lizenzmodelle: proprietär, Open Source, Freeware; Urheberrecht',
+                'Debatte: Was setzt ein Unternehmen ein — und warum?',
+                'Übung/Abschlussquiz LB 1'
+            ] },
+            { nr: 6, kw: 39, date: '21.–25.09.26', type: 'lb2', u: '1–6/52', topic: 'Architektur von Datenbank-Systemen: 3-Ebenen-Modell, DBMS, Datenbankmodelle', remark: '', details: [
+                '3-Ebenen-Modell; Aufgaben des DBMS',
+                'Datenbankmodelle: relational, objektorientiert, hierarchisch, netzförmig',
+                'Setup: MySQL/MariaDB oder SQLite einrichten'
+            ] },
+            { nr: 7, kw: 40, date: '28.09.–02.10.26', type: 'lb2', u: '7–12/52', topic: 'Datenmodellierung I: Entity-Relationship-Modell', remark: '', details: [
+                'Entitäten, Attribute, Beziehungen, Kardinalitäten',
+                'Fallbeispiel modellieren (z. B. Fahrschule, Online-Shop) in draw.io'
+            ] },
+            { nr: 8, kw: 41, date: '05.–09.10.26', type: 'lb2', u: '13–18/52', topic: 'Datenmodellierung II: Normalisierung nach Codd bis zur 3. Normalform', remark: '', details: [
+                'Redundanz und Anomalien an Beispielen',
+                'Normalisierung 1.–3. NF Schritt für Schritt',
+                'Übung: unsaubere Tabelle normalisieren'
+            ] },
             { ferien: 'Herbstferien · 12.–24.10.2026 (KW 42–43)' },
-            { nr: 9, kw: 44, date: '26.–30.10.26', type: 'lb2', u: '19–24/52', topic: 'Relationenmodell und Datendefinitionssprache: Tabellen, Datentypen, Primärschlüssel', remark: '' },
-            { nr: 10, kw: 45, date: '02.–06.11.26', type: 'lb2', u: '25–30/52', topic: 'Datenmanipulationssprache: Einfügen, Aktualisieren, Archivieren, Löschen; Datensicherung', remark: '' },
-            { nr: 11, kw: 46, date: '09.–13.11.26', type: 'lk', u: 'KL 1', topic: 'Wiederholung + Klausur 1 (LB 1 + LB 2: Modellierung)', remark: 'Termin nach Klausurplan' },
-            { nr: 12, kw: 47, date: '16.–20.11.26', type: 'lb2', u: '31–36/52', topic: 'Datenabfragesprache I: Relationentheorie, Selektion und Projektion', remark: 'Mi 18.11. Buß- und Bettag (unterrichtsfrei)' },
-            { nr: 13, kw: 48, date: '23.–27.11.26', type: 'lb2', u: '37–42/52', topic: 'Datenabfragesprache II: Mengen-/Verbundoperationen; Abfragen mit Berechnung, Gruppierung, Sortierung', remark: '' },
-            { nr: 14, kw: 49, date: '30.11.–04.12.26', type: 'lb2', u: '43–48/52', topic: 'Administration der Datenbasis: Benutzerkonzepte, Rechte; Datensicherheit in DB-Systemen', remark: '' },
-            { nr: 15, kw: 50, date: '07.–11.12.26', type: 'lb2', u: '49–52/52', topic: 'Applikation mit Datenbankanbindung: Schnittstellen, Komponenten, Formular und Report + Übung', remark: 'LB 2 abgeschlossen' },
-            { nr: 16, kw: 51, date: '14.–18.12.26', type: 'org', u: '', topic: 'Vertiefung SQL / komplexe Übungsaufgaben', remark: '' },
-            { nr: 17, kw: 52, date: '21.–22.12.26', type: 'org', u: '', topic: 'Puffer', remark: 'nur Mo/Di — ab Mi 23.12. Ferien' },
+            { nr: 9, kw: 44, date: '26.–30.10.26', type: 'lb2', u: '19–24/52', topic: 'Relationenmodell und Datendefinitionssprache: Tabellen, Datentypen, Primärschlüssel', remark: '', details: [
+                'ER-Modell in Relationenmodell überführen',
+                'SQL-DDL: CREATE TABLE, Datentypen, Primär- und Fremdschlüssel'
+            ] },
+            { nr: 10, kw: 45, date: '02.–06.11.26', type: 'lb2', u: '25–30/52', topic: 'Datenmanipulationssprache: Einfügen, Aktualisieren, Archivieren, Löschen; Datensicherung', remark: '', details: [
+                'SQL-DML: INSERT, UPDATE, DELETE',
+                'Export/Import; Datensicherung der Übungsdatenbank',
+                'Übungsdatenbank gemeinsam befüllen'
+            ] },
+            { nr: 11, kw: 46, date: '09.–13.11.26', type: 'lk', u: 'KL 1', topic: 'Wiederholung + Klausur 1 (LB 1 + LB 2: Modellierung)', remark: 'Termin nach Klausurplan', details: [
+                'Wiederholung: Architektur + ER/Normalisierung',
+                'Klausur 1 (90 min)'
+            ] },
+            { nr: 12, kw: 47, date: '16.–20.11.26', type: 'lb2', u: '31–36/52', topic: 'Datenabfragesprache I: Relationentheorie, Selektion und Projektion', remark: 'Mi 18.11. Buß- und Bettag (unterrichtsfrei)', details: [
+                'SELECT: Projektion und Selektion (WHERE)',
+                'Relationentheorie: Grundoperationen verstehen',
+                'Übungen ergänzend mit SQLBolt / SQL-Island'
+            ] },
+            { nr: 13, kw: 48, date: '23.–27.11.26', type: 'lb2', u: '37–42/52', topic: 'Datenabfragesprache II: Mengen-/Verbundoperationen; Abfragen mit Berechnung, Gruppierung, Sortierung', remark: '', details: [
+                'JOINs und Mengenoperationen',
+                'Aggregatfunktionen, GROUP BY, ORDER BY',
+                'Komplexe Abfragen am Fallbeispiel'
+            ] },
+            { nr: 14, kw: 49, date: '30.11.–04.12.26', type: 'lb2', u: '43–48/52', topic: 'Administration der Datenbasis: Benutzerkonzepte, Rechte; Datensicherheit in DB-Systemen', remark: '', details: [
+                'Benutzer, Rollen, Rechte (GRANT/REVOKE); Aufgaben des DB-Administrators',
+                'Datensicherheit und Datenschutz in Datenbanksystemen'
+            ] },
+            { nr: 15, kw: 50, date: '07.–11.12.26', type: 'lb2', u: '49–52/52', topic: 'Applikation mit Datenbankanbindung: Schnittstellen, Komponenten, Formular und Report + Übung', remark: 'LB 2 abgeschlossen', details: [
+                'Zugriffsmethode kennenlernen; Formular und Report bauen (z. B. Base oder Python)',
+                'Abschluss LB 2: Gesamtübung Datenbank'
+            ] },
+            { nr: 16, kw: 51, date: '14.–18.12.26', type: 'org', u: '', topic: 'Vertiefung SQL / komplexe Übungsaufgaben', remark: '', details: [
+                'SQL-Übungszirkel auf Klausur-/Abiturniveau',
+                'Typische Fehlerbilder analysieren'
+            ] },
+            { nr: 17, kw: 52, date: '21.–22.12.26', type: 'org', u: '', topic: 'Puffer', remark: 'nur Mo/Di — ab Mi 23.12. Ferien', details: [
+                'Restarbeiten; Krypto-Rätsel zum Jahresausklang'
+            ] },
             { ferien: 'Weihnachtsferien · 23.12.2026–02.01.2027' },
-            { nr: 18, kw: 1, date: '04.–08.01.27', type: 'lb3', u: '1–6/38', topic: 'Vernetzung von IuK-Systemen: Klassifikation, Netztopologien, OSI-Referenzmodell', remark: '' },
-            { nr: 19, kw: 2, date: '11.–15.01.27', type: 'lb3', u: '7–12/38', topic: 'Zugriffsverfahren (CSMA, Token), Übertragungsmedien, Netzwerk-Komponenten', remark: '' },
-            { nr: 20, kw: 3, date: '18.–22.01.27', type: 'lb3', u: '13–18/38', topic: 'Protokolle des Internetschichtenmodells: ARP, IP, TCP, UDP, HTTP, FTP, SSH; IPv4/IPv6', remark: '' },
-            { nr: 21, kw: 4, date: '25.–29.01.27', type: 'lb3', u: '19–24/38', topic: 'IP-Routing: Netzwerkadressen, Subnetze, Routing-Verfahren, Masquerading', remark: '' },
-            { nr: 22, kw: 5, date: '01.–05.02.27', type: 'lk', u: 'KL 2', topic: 'Wiederholung + Klausur 2 (LB 2 / LB 3)', remark: 'Fr 05.02. Halbjahresende / Zeugnisse' },
+            { nr: 18, kw: 1, date: '04.–08.01.27', type: 'lb3', u: '1–6/38', topic: 'Vernetzung von IuK-Systemen: Klassifikation, Netztopologien, OSI-Referenzmodell', remark: '', details: [
+                'PAN/LAN/WAN; Topologien Stern, Ring, Bus',
+                'OSI-Referenzmodell im Überblick',
+                'Filius: erstes eigenes Netz aufbauen'
+            ] },
+            { nr: 19, kw: 2, date: '11.–15.01.27', type: 'lb3', u: '7–12/38', topic: 'Zugriffsverfahren (CSMA, Token), Übertragungsmedien, Netzwerk-Komponenten', remark: '', details: [
+                'CSMA, Token, FDDI; Medien: Koaxial, Twisted Pair, LWL, Funk',
+                'Komponenten Hub/Switch/Router/Accesspoint nach OSI-Layer einordnen'
+            ] },
+            { nr: 20, kw: 3, date: '18.–22.01.27', type: 'lb3', u: '13–18/38', topic: 'Protokolle des Internetschichtenmodells: ARP, IP, TCP, UDP, HTTP, FTP, SSH; IPv4/IPv6', remark: '', details: [
+                'Protokolle in Filius beobachten; Pakete mit Wireshark ansehen',
+                'IPv4 vs. IPv6: Adressen und Notation'
+            ] },
+            { nr: 21, kw: 4, date: '25.–29.01.27', type: 'lb3', u: '19–24/38', topic: 'IP-Routing: Netzwerkadressen, Subnetze, Routing-Verfahren, Masquerading', remark: '', details: [
+                'Subnetting rechnen (Netz-/Broadcast-Adresse, Hosts)',
+                'Routing-Tabellen lesen; NAT/Masquerading',
+                'Übungsaufgaben Subnetze'
+            ] },
+            { nr: 22, kw: 5, date: '01.–05.02.27', type: 'lk', u: 'KL 2', topic: 'Wiederholung + Klausur 2 (LB 2 / LB 3)', remark: 'Fr 05.02. Halbjahresende / Zeugnisse', details: [
+                'Wiederholung SQL + Netzwerke',
+                'Klausur 2 (90 min)'
+            ] },
             { ferien: 'Winterferien · 08.–19.02.2027 (KW 6–7)' },
-            { nr: 23, kw: 8, date: '22.–26.02.27', type: 'lb3', u: '25–30/38', topic: 'LAN-Praxis: Aufbau, Konfiguration oder Simulation eines Netzwerks', remark: 'praktische Übungen' },
-            { nr: 24, kw: 9, date: '01.–05.03.27', type: 'lb3', u: '31–36/38', topic: 'Informationssicherheit: RAID, USV, Backup, Firewall, Antiviren-Software', remark: '' },
-            { nr: 25, kw: 10, date: '08.–12.03.27', type: 'lb3', u: '37–38/38', topic: 'Maßnahmen zur Informationssicherheit beurteilen + Übung', remark: 'LB 3 abgeschlossen' },
-            { nr: 26, kw: 11, date: '15.–19.03.27', type: 'lb5', u: '1–6/40', topic: 'Projektierung von IuK-Systemen: Methoden, Werkzeuge; Ist-Zustands-Analyse, Zielbestimmung', remark: 'an einem Kernprozess (Beschaffung, Produktion, Absatz)' },
-            { nr: 27, kw: 12, date: '22.–25.03.27', type: 'lb5', u: '7–10/40', topic: 'Sollkonzept und Lastenheft', remark: 'ab Fr 26.03. Osterferien' },
+            { nr: 23, kw: 8, date: '22.–26.02.27', type: 'lb3', u: '25–30/38', topic: 'LAN-Praxis: Aufbau, Konfiguration oder Simulation eines Netzwerks', remark: 'praktische Übungen', details: [
+                'Filius: DHCP, DNS und Webserver im simulierten Netz einrichten',
+                'Alternativ: reales Mini-LAN konfigurieren'
+            ] },
+            { nr: 24, kw: 9, date: '01.–05.03.27', type: 'lb3', u: '31–36/38', topic: 'Informationssicherheit: RAID, USV, Backup, Firewall, Antiviren-Software', remark: '', details: [
+                'RAID-Level, USV, Backup-Strategien (3-2-1-Regel)',
+                'Firewall und Antiviren-Software: Funktionsweise'
+            ] },
+            { nr: 25, kw: 10, date: '08.–12.03.27', type: 'lb3', u: '37–38/38', topic: 'Maßnahmen zur Informationssicherheit beurteilen + Übung', remark: 'LB 3 abgeschlossen', details: [
+                'Szenario-Analyse: Sicherheitskonzept für eine kleine Firma bewerten',
+                'Verhaltensregeln bei digitaler Interaktion; Abschluss LB 3'
+            ] },
+            { nr: 26, kw: 11, date: '15.–19.03.27', type: 'lb5', u: '1–6/40', topic: 'Projektierung von IuK-Systemen: Methoden, Werkzeuge; Ist-Zustands-Analyse, Zielbestimmung', remark: 'an einem Kernprozess (Beschaffung, Produktion, Absatz)', details: [
+                'Vorgehen: Ist-Analyse an einem Kernprozess durchführen',
+                'Zielbestimmung; Schwachstellen dokumentieren'
+            ] },
+            { nr: 27, kw: 12, date: '22.–25.03.27', type: 'lb5', u: '7–10/40', topic: 'Sollkonzept und Lastenheft', remark: 'ab Fr 26.03. Osterferien', details: [
+                'Sollkonzept ableiten',
+                'Lastenheft nach Gliederung schreiben'
+            ] },
             { ferien: 'Osterferien · 26.03.–02.04.2027' },
-            { nr: 28, kw: 14, date: '05.–09.04.27', type: 'lb5', u: '11–16/40', topic: 'Pflichtenheft: fachliche Spezifikation für ein gemischtes Hardware-/Softwareprojekt', remark: '' },
-            { nr: 29, kw: 15, date: '12.–16.04.27', type: 'lb5', u: '17–22/40', topic: 'Projekt IuK-System-Entwurf: Grob-/Feinkonzept, Beschaffung von Waren und Leistungen', remark: 'Rollenspiel Auftraggeber/Auftragnehmer' },
-            { nr: 30, kw: 16, date: '19.–23.04.27', type: 'lb5', u: '23–28/40', topic: 'Leistungsverzeichnis, Vergabearten, Ausschreibung; Angebotserstellung mit Handelskalkulation', remark: '' },
-            { nr: 31, kw: 17, date: '26.–30.04.27', type: 'lb5', u: '29–34/40', topic: 'Angebotsbewertung: Prüfung, Vergleich, Entscheidung, Auftragserteilung', remark: 'Beurteilungskriterien mit Gewichtung' },
-            { nr: 32, kw: 18, date: '03.–05.05.27', type: 'lb5', u: '35–37/40', topic: 'Einführung von IuK-Systemen: Methoden, Installation, Datenbasis, Benutzer und Rechte', remark: 'Do 06.05. Himmelfahrt + Fr 07.05. unterrichtsfrei' },
-            { nr: 33, kw: 19, date: '10.–14.05.27', type: 'lk', u: 'KL 3', topic: 'Wiederholung + Klausur 3 (LB 5)', remark: 'Termin nach Klausurplan' },
+            { nr: 28, kw: 14, date: '05.–09.04.27', type: 'lb5', u: '11–16/40', topic: 'Pflichtenheft: fachliche Spezifikation für ein gemischtes Hardware-/Softwareprojekt', remark: '', details: [
+                'Abgrenzung Lastenheft ↔ Pflichtenheft',
+                'Pflichtenheft für das Projekt erarbeiten'
+            ] },
+            { nr: 29, kw: 15, date: '12.–16.04.27', type: 'lb5', u: '17–22/40', topic: 'Projekt IuK-System-Entwurf: Grob-/Feinkonzept, Beschaffung von Waren und Leistungen', remark: 'Rollenspiel Auftraggeber/Auftragnehmer', details: [
+                'Rollenspiel: Auftraggeber ↔ Auftragnehmer',
+                'Grob- und Feinkonzept; Beschaffung: Recherche, Bestellung, Lieferschein, Rechnung'
+            ] },
+            { nr: 30, kw: 16, date: '19.–23.04.27', type: 'lb5', u: '23–28/40', topic: 'Leistungsverzeichnis, Vergabearten, Ausschreibung; Angebotserstellung mit Handelskalkulation', remark: '', details: [
+                'Leistungsverzeichnis und Vergabearten (auch freihändige Vergabe)',
+                'Angebot kalkulieren (Tabellenkalkulation, Handelskalkulation)'
+            ] },
+            { nr: 31, kw: 17, date: '26.–30.04.27', type: 'lb5', u: '29–34/40', topic: 'Angebotsbewertung: Prüfung, Vergleich, Entscheidung, Auftragserteilung', remark: 'Beurteilungskriterien mit Gewichtung', details: [
+                'Angebote prüfen und mit Nutzwertanalyse gewichten',
+                'Vergleich, Entscheidung, Auftragserteilung dokumentieren'
+            ] },
+            { nr: 32, kw: 18, date: '03.–05.05.27', type: 'lb5', u: '35–37/40', topic: 'Einführung von IuK-Systemen: Methoden, Installation, Datenbasis, Benutzer und Rechte', remark: 'Do 06.05. Himmelfahrt + Fr 07.05. unterrichtsfrei', details: [
+                'Einführungsmethoden; terminliche Planung',
+                'Installation, Datenübernahme, Benutzer- und Rechtevergabe'
+            ] },
+            { nr: 33, kw: 19, date: '10.–14.05.27', type: 'lk', u: 'KL 3', topic: 'Wiederholung + Klausur 3 (LB 5)', remark: 'Termin nach Klausurplan', details: [
+                'Wiederholung LB 5',
+                'Klausur 3 (90 min)'
+            ] },
             { ferien: 'Pfingsten · Mo 17.05. Pfingstmontag + Di 18.05.2027 Ferientag' },
-            { nr: 34, kw: 20, date: '19.–21.05.27', type: 'lb5', u: '38–40/40', topic: 'Qualitätssicherung, Informationssicherheit, Datenschutz (SächsDSG, BDSG)', remark: 'LB 5 abgeschlossen; nur Mi–Fr' },
-            { nr: 35, kw: 21, date: '24.–28.05.27', type: 'org', u: '', topic: 'Vertiefung: komplexe Übung Datenbank + Netzwerk (Abitur-Niveau)', remark: '' },
-            { nr: 36, kw: 22, date: '31.05.–04.06.27', type: 'wb', u: '1–6/12', topic: 'Wahlbereich „Informationsmanagement im Unternehmen" I: Data-Warehouse-Systeme', remark: 'Cube, Stern-/Snowflake-Schema' },
-            { nr: 37, kw: 23, date: '07.–11.06.27', type: 'wb', u: '7–12/12', topic: 'Wahlbereich II: Data Marts, Datenmonitoring; gläserner Kunde, Geomarketing', remark: '' },
-            { nr: 38, kw: 24, date: '14.–18.06.27', type: 'org', u: '', topic: 'Exkurs: KI in IuK-Systemen — aktuelle Entwicklungen, LLMs im Unternehmen', remark: '' },
-            { nr: 39, kw: 25, date: '21.–25.06.27', type: 'org', u: '', topic: 'Puffer', remark: 'Reserve für Exkursion / Projekttage' },
-            { nr: 40, kw: 26, date: '28.06.–02.07.27', type: 'org', u: '', topic: 'Jahresrückblick; Ausblick Jgst. 13: IT-Projektmanagement, Software-Engineering, Informatikprojekt', remark: '' },
-            { nr: 41, kw: 27, date: '05.–09.07.27', type: 'org', u: '', topic: 'Ausklang', remark: 'Fr 09.07. letzter Schultag, Zeugnisse' },
+            { nr: 34, kw: 20, date: '19.–21.05.27', type: 'lb5', u: '38–40/40', topic: 'Qualitätssicherung, Informationssicherheit, Datenschutz (SächsDSG, BDSG)', remark: 'LB 5 abgeschlossen; nur Mi–Fr', details: [
+                'Qualitätssicherung: Zero-Day-Schwachstellen, schadenbegrenzende Updates',
+                'Datenschutz-Fallbeispiele: SächsDSG, BDSG; Abschluss LB 5'
+            ] },
+            { nr: 35, kw: 21, date: '24.–28.05.27', type: 'org', u: '', topic: 'Vertiefung: komplexe Übung Datenbank + Netzwerk (Abitur-Niveau)', remark: '', details: [
+                'Komplexübung im Abiturformat: DB-Modellierung + SQL + Netzplanung',
+                'Auswertung Klausur 3'
+            ] },
+            { nr: 36, kw: 22, date: '31.05.–04.06.27', type: 'wb', u: '1–6/12', topic: 'Wahlbereich „Informationsmanagement im Unternehmen" I: Data-Warehouse-Systeme', remark: 'Cube, Stern-/Snowflake-Schema', details: [
+                'Data-Warehouse-Idee: Trennung operative Daten / Auswertung',
+                'Datenmodelle: Cube, Stern- und Snowflake-Schema'
+            ] },
+            { nr: 37, kw: 23, date: '07.–11.06.27', type: 'wb', u: '7–12/12', topic: 'Wahlbereich II: Data Marts, Datenmonitoring; gläserner Kunde, Geomarketing', remark: '', details: [
+                'Data Marts und Datenmonitoring in praktischen Demos',
+                'Bewertung: gläserner Kunde, Geomarketing, Persönlichkeitsrechte'
+            ] },
+            { nr: 38, kw: 24, date: '14.–18.06.27', type: 'org', u: '', topic: 'Exkurs: KI in IuK-Systemen — aktuelle Entwicklungen, LLMs im Unternehmen', remark: '', details: [
+                'LLMs im Unternehmenseinsatz: Chancen, Risiken, Datenschutz',
+                'Aktuelle Entwicklungen gemeinsam einordnen'
+            ] },
+            { nr: 39, kw: 25, date: '21.–25.06.27', type: 'org', u: '', topic: 'Puffer', remark: 'Reserve für Exkursion / Projekttage', details: [
+                'Reserve — je nach Schuljahresplanung'
+            ] },
+            { nr: 40, kw: 26, date: '28.06.–02.07.27', type: 'org', u: '', topic: 'Jahresrückblick; Ausblick Jgst. 13: IT-Projektmanagement, Software-Engineering, Informatikprojekt', remark: '', details: [
+                'Jahresrückblick: Kernthemen LB 1/2/3/5',
+                'Ausblick 13: IT-PM (LB 4), Software-Engineering (LB 6/7), Informatikprojekt (LB 8)'
+            ] },
+            { nr: 41, kw: 27, date: '05.–09.07.27', type: 'org', u: '', topic: 'Ausklang', remark: 'Fr 09.07. letzter Schultag, Zeugnisse', details: [
+                'Accounts und Abgaben aufräumen',
+                'Logik- und Strategiespiele zum Abschluss'
+            ] },
             { ferien: 'Sommerferien · ab 10.07.2027' }
         ];
 
