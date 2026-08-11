@@ -224,6 +224,8 @@
             }
         }
         localStorage.setItem(KEY, JSON.stringify(out));
+        localStorage.setItem(TS_KEY, new Date().toISOString());
+        pushRemote();
     }
 
     window.togglePlanEdit = function (btn) {
@@ -250,11 +252,103 @@
             return;
         }
         localStorage.removeItem(KEY);
-        location.reload();
+        localStorage.removeItem(TS_KEY);
+        const done = () => location.reload();
+        if (window.svpAuth && svpAuth.hasSession()) {
+            svpAuth.api('svp_plan_edits?page=eq.' + encodeURIComponent(location.pathname), { method: 'DELETE' })
+                .catch(() => {}).then(done, done);
+        } else done();
     };
 
     // Safety net: persist pending edits when the tab closes mid-edit.
     window.addEventListener('beforeunload', () => {
         if (document.body.classList.contains('editing')) saveEdits();
     });
+
+    // --- Supabase sync (table svp_plan_edits, RLS owner-only) ------------
+    // Reuses the svp-session login from notes.html (shared svp-auth.js).
+    // Logged out: local-only, exactly as before. Logged in: whole edits
+    // object is synced per page, last write wins by timestamp (TS_KEY).
+    const TS_KEY = 'svp-edits-ts:' + location.pathname;
+    const cloudEl = document.createElement(window.svpAuth && svpAuth.hasSession() ? 'span' : 'a');
+    cloudEl.className = 'cloud';
+    (function () {
+        const bar = document.querySelector('.toolbar');
+        if (!bar) return;
+        if (cloudEl.tagName === 'A') {
+            cloudEl.href = '../notes.html';
+            cloudEl.textContent = '☁ lokal';
+            cloudEl.title = 'Edits nur in diesem Browser — für Cloud-Sync über die Notizen-Seite anmelden';
+        }
+        bar.appendChild(cloudEl);
+    })();
+
+    function setCloud(text, ok) {
+        if (cloudEl.tagName === 'A') return; /* logged out: keep the login hint */
+        cloudEl.textContent = text;
+        cloudEl.classList.toggle('on', !!ok);
+    }
+
+    // Re-applies an edits object to the already rendered table (remote wins).
+    function applyEdits(map) {
+        for (const r of rendered) {
+            const ov = map[r.i] || {};
+            const row = window.PLAN[r.i];
+            if (r.ferienTd) {
+                r.ferienTd.textContent = ov.ferien || row.ferien;
+                continue;
+            }
+            r.dateTd.textContent = ov.date != null ? ov.date : row.date;
+            r.uTd.textContent = ov.u != null ? ov.u : row.u;
+            setMathText(r.topicSpan, ov.topic != null ? ov.topic : row.topic);
+            setMathText(r.remarkTd, ov.remark != null ? ov.remark : row.remark);
+            if (r.ul) buildDetailList(r.ul, ov.details || row.details || []);
+        }
+    }
+
+    function pushRemote() {
+        if (!window.svpAuth || !svpAuth.hasSession()) return;
+        const ts = localStorage.getItem(TS_KEY) || new Date().toISOString();
+        svpAuth.api('svp_plan_edits', {
+            method: 'POST',
+            headers: { Prefer: 'resolution=merge-duplicates,return=minimal' },
+            body: JSON.stringify([{
+                page: location.pathname,
+                edits: JSON.parse(localStorage.getItem(KEY) || '{}'),
+                ts: ts
+            }])
+        }).then(res => setCloud(res.ok ? '☁ synchron' : '☁ Fehler: HTTP ' + res.status, res.ok))
+            .catch(e => setCloud('☁ ' + e.message, false));
+    }
+
+    async function syncFromRemote() {
+        if (!window.svpAuth || !svpAuth.hasSession()) return;
+        try {
+            const res = await svpAuth.api(
+                'svp_plan_edits?page=eq.' + encodeURIComponent(location.pathname) + '&select=edits,ts');
+            if (!res.ok) { setCloud('☁ Fehler: HTTP ' + res.status, false); return; }
+            const rows = await res.json();
+            const localTs = Date.parse(localStorage.getItem(TS_KEY) || '') || 0;
+            if (!rows.length) {
+                /* nothing in the cloud yet — seed it from local edits if any */
+                if (localStorage.getItem(KEY)) pushRemote();
+                else setCloud('☁ synchron', true);
+                return;
+            }
+            const remoteTs = Date.parse(rows[0].ts) || 0;
+            if (remoteTs > localTs) {
+                saved = rows[0].edits || {};
+                localStorage.setItem(KEY, JSON.stringify(saved));
+                localStorage.setItem(TS_KEY, rows[0].ts);
+                applyEdits(saved);
+                setCloud('☁ synchron', true);
+            } else if (localTs > remoteTs) {
+                pushRemote(); /* offline edits from this browser win */
+            } else {
+                setCloud('☁ synchron', true);
+            }
+        } catch (e) { setCloud('☁ ' + e.message, false); }
+    }
+
+    syncFromRemote();
 })();
