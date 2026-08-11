@@ -37,6 +37,20 @@
             margin-bottom: 8px;
         }
 
+        .note-grip {
+            cursor: grab;
+            color: var(--muted);
+            font-size: 0.9rem;
+            padding: 4px 2px;
+            user-select: none;
+            touch-action: none;
+        }
+
+        .note-card.dragging {
+            opacity: 0.85;
+            border-color: rgba(245, 194, 66, 0.5);
+        }
+
         .note-chev {
             background: none;
             border: none;
@@ -243,7 +257,7 @@
             .note-card { border-color: #bbb; background: #fff; }
             .note-title { color: #8a6400; }
             .note-body { color: #111; }
-            .note-del, .note-chev { display: none; }
+            .note-del, .note-chev, .note-grip { display: none; }
             .note-card:not(.open) .note-body { display: block; }
         }
     </style>
@@ -389,15 +403,36 @@
         }
 
         function rowFromNote(n) {
-            return {
+            const row = {
                 id: n.id, title: n.title || '', body: n.body || '',
                 fmt: n.fmt ? 1 : 0, h: n.h || null, ts: new Date(n.ts).toISOString()
             };
+            /* only send ord once the column exists in the cloud table */
+            if (hasOrdColumn && Number.isFinite(n.ord)) row.ord = n.ord;
+            return row;
+        }
+
+        /* Manual y-order: notes with ord sort by it; notes never dragged fall back
+           to a key derived from ts (newest first) — deterministic on every device. */
+        const orderKey = n => Number.isFinite(n.ord) ? n.ord : -n.ts / 1e9;
+        function sortNotes() { notes.sort((a, b) => orderKey(a) - orderKey(b)); }
+
+        /* The svp_notes cloud table may not have the ord column yet — probe once. */
+        let hasOrdColumn = false;
+        let ordProbed = false;
+        async function probeOrdColumn() {
+            if (ordProbed) return;
+            try {
+                const res = await api('svp_notes?select=ord&limit=1');
+                hasOrdColumn = res.ok;
+                ordProbed = true;
+            } catch (e) { /* keep probing on next sync */ }
         }
 
         async function syncRemote() {
             let data;
             try {
+                await probeOrdColumn();
                 const res = await api('svp_notes?select=*');
                 if (!res.ok) { setCloud('☁ Fehler: HTTP ' + res.status, false); return; }
                 data = await res.json();
@@ -408,16 +443,18 @@
                 remoteIds.add(r.id);
                 const rts = Date.parse(r.ts);
                 const l = notes.find(n => n.id === r.id);
+                const rOrd = Number.isFinite(r.ord) ? r.ord : undefined;
                 if (!l) {
-                    notes.push({ id: r.id, title: r.title, body: r.body, fmt: r.fmt, h: r.h || undefined, ts: rts });
+                    notes.push({ id: r.id, title: r.title, body: r.body, fmt: r.fmt, h: r.h || undefined, ord: rOrd, ts: rts });
                 } else if (rts > l.ts) {
-                    Object.assign(l, { title: r.title, body: r.body, fmt: r.fmt, h: r.h || undefined, ts: rts });
+                    /* keep the local ord if the remote row has none (old client / no column yet) */
+                    Object.assign(l, { title: r.title, body: r.body, fmt: r.fmt, h: r.h || undefined, ord: rOrd !== undefined ? rOrd : l.ord, ts: rts });
                 } else if (rts < l.ts) {
                     toPush.push(l);
                 }
             }
             for (const l of notes) if (!remoteIds.has(l.id)) toPush.push(l);
-            notes.sort((a, b) => b.ts - a.ts);
+            sortNotes();
             save(false);
             render();
             if (toPush.length) {
@@ -573,15 +610,74 @@
             if (el.scrollHeight > el.clientHeight) el.style.height = el.scrollHeight + 'px';
         }
 
+        /* Drag a card by its grip along y; the card is live-reinserted while dragging,
+           on release the new order is written back into the notes array (ord = index). */
+        function makeDraggable(card, grip) {
+            grip.addEventListener('pointerdown', e => {
+                e.preventDefault();
+                grip.setPointerCapture(e.pointerId);
+                card.classList.add('dragging');
+                const move = ev => {
+                    const y = ev.clientY;
+                    const others = [...list.querySelectorAll('.note-card:not(.dragging)')];
+                    const next = others.find(el => {
+                        const r = el.getBoundingClientRect();
+                        return y < r.top + r.height / 2;
+                    });
+                    if (next) { if (next !== card.nextSibling) list.insertBefore(card, next); }
+                    else if (list.lastChild !== card) list.appendChild(card);
+                };
+                const startIdx = [...list.children].indexOf(card);
+                const up = ev => {
+                    grip.removeEventListener('pointermove', move);
+                    grip.removeEventListener('pointerup', up);
+                    grip.removeEventListener('pointercancel', up);
+                    card.classList.remove('dragging');
+                    if ([...list.children].indexOf(card) !== startIdx) applyDomOrder(card.dataset.id);
+                };
+                grip.addEventListener('pointermove', move);
+                grip.addEventListener('pointerup', up);
+                grip.addEventListener('pointercancel', up);
+            });
+        }
+
+        /* Only the dragged note changes: it gets an ord between its new neighbors,
+           so the other notes keep their timestamps and nothing else needs a push. */
+        function applyDomOrder(draggedId) {
+            const ids = [...list.children].map(c => c.dataset.id);
+            notes.sort((a, b) => ids.indexOf(a.id) - ids.indexOf(b.id));
+            const i = notes.findIndex(n => n.id === draggedId);
+            if (i < 0) return;
+            const n = notes[i];
+            const prev = i > 0 ? orderKey(notes[i - 1]) : undefined;
+            const next = i < notes.length - 1 ? orderKey(notes[i + 1]) : undefined;
+            if (prev === undefined && next === undefined) return;
+            if (prev === undefined) n.ord = next - 1;
+            else if (next === undefined) n.ord = prev + 1;
+            else n.ord = (prev + next) / 2;
+            n.ts = Date.now();
+            save(true);
+            supaUpsert(n);
+            render();
+        }
+
         function render() {
+            sortNotes();
             list.textContent = '';
             emptyHint.hidden = notes.length > 0;
             for (const note of notes) {
                 const card = document.createElement('div');
                 card.className = 'note-card' + (openSet.has(note.id) ? ' open' : '');
+                card.dataset.id = note.id;
 
                 const head = document.createElement('div');
                 head.className = 'note-head';
+
+                const grip = document.createElement('span');
+                grip.className = 'note-grip';
+                grip.textContent = '⠿';
+                grip.title = 'Verschieben';
+                makeDraggable(card, grip);
 
                 const chev = document.createElement('button');
                 chev.className = 'note-chev';
@@ -632,6 +728,7 @@
                     }
                 });
 
+                head.appendChild(grip);
                 head.appendChild(chev);
                 head.appendChild(title);
                 head.appendChild(date);
@@ -720,6 +817,8 @@
 
         function addNote() {
             const note = { id: Date.now() + '-' + Math.random().toString(36).slice(2, 8), title: '', body: '', ts: Date.now() };
+            /* new notes go on top: smaller ord than everything else */
+            note.ord = notes.length ? Math.min(...notes.map(orderKey)) - 1 : 0;
             notes.unshift(note);
             openSet.add(note.id);
             persistOpen();
@@ -739,6 +838,7 @@
 
         render();
     </script>
+    <script src="svp-nav.js"></script>
 </body>
 
 </html>
