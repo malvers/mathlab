@@ -121,6 +121,23 @@
 
         .note-body:focus { outline: none; }
 
+        /* Slim dark scrollbar — webkit here, Firefox via the @supports guard below */
+        .note-body::-webkit-scrollbar { width: 8px; }
+        .note-body::-webkit-scrollbar-track { background: transparent; }
+        .note-body::-webkit-scrollbar-thumb { background: rgba(120, 160, 220, 0.35); border-radius: 4px; }
+
+        /* Replace the boxed native resize grabber with two quiet diagonal strokes */
+        .note-body::-webkit-resizer {
+            background-color: transparent;
+            background-image: linear-gradient(135deg,
+                    transparent 0 46%, rgba(120, 160, 220, 0.4) 46% 54%,
+                    transparent 54% 68%, rgba(120, 160, 220, 0.4) 68% 76%, transparent 76%);
+        }
+
+        @supports (-moz-appearance: none) {
+            .note-body { scrollbar-width: thin; scrollbar-color: rgba(120, 160, 220, 0.35) transparent; }
+        }
+
         .note-body:empty::before {
             content: attr(data-placeholder);
             color: var(--muted);
@@ -173,22 +190,21 @@
         body.locked #empty-hint,
         body.locked .needs-auth { display: none; }
 
-        .save-state {
-            font-size: 0.75rem;
-            color: var(--phi);
-            margin-left: 4px;
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-
-        .save-state.visible { opacity: 1; }
-
         .cloud-state {
             font-size: 0.75rem;
             color: var(--muted);
         }
 
-        .cloud-state.on { color: var(--cyan); }
+        /* gray while a save is pending, green (φ) once synced */
+        .cloud-state.on { color: var(--phi); }
+
+        /* badge as superscript at the top right of the word */
+        h1 .cloud-state {
+            vertical-align: super;
+            font-size: 0.72rem;
+            letter-spacing: 0.02em;
+            white-space: nowrap;
+        }
 
         .login-overlay {
             position: fixed;
@@ -266,8 +282,7 @@
 <body>
     <header class="page-head">
         <a class="back-link" href="./">&larr; Stoffverteilungspl&auml;ne</a>
-        <h1>Notizen</h1>
-        <div class="subtitle">Pers&ouml;nliche Ablage &middot; Auto-Save lokal in diesem Browser</div>
+        <h1>Notizen <span class="cloud-state" id="cloud-state"></span></h1>
     </header>
 
     <div class="toolbar">
@@ -275,8 +290,6 @@
         <button class="action needs-auth" onclick="toggleAllNotes()">Alle auf/zu</button>
         <button class="action needs-auth" onclick="window.print()">Drucken</button>
         <button class="action secondary" id="auth-btn" onclick="authClick()">☁ Anmelden</button>
-        <span class="save-state" id="save-state">gespeichert ✓</span>
-        <span class="cloud-state" id="cloud-state">nur lokal</span>
     </div>
 
     <div class="login-overlay" id="login-overlay">
@@ -329,7 +342,6 @@
         const KEY = 'svp-notes';
         const list = document.getElementById('notes-list');
         const emptyHint = document.getElementById('empty-hint');
-        const saveState = document.getElementById('save-state');
         let notes = [];
         try { notes = JSON.parse(localStorage.getItem(KEY)) || []; } catch (e) { notes = []; }
 
@@ -339,14 +351,9 @@
         try { openSet = new Set(JSON.parse(localStorage.getItem(OPEN_KEY)) || []); } catch (e) { openSet = new Set(); }
         function persistOpen() { localStorage.setItem(OPEN_KEY, JSON.stringify([...openSet])); }
 
-        let saveTimer = null;
-        function save(showBadge) {
+        /* Save status is shown by the cloud badge alone: gray = pending, green = synced. */
+        function save() {
             localStorage.setItem(KEY, JSON.stringify(notes));
-            if (showBadge) {
-                saveState.classList.add('visible');
-                clearTimeout(saveTimer);
-                saveTimer = setTimeout(() => saveState.classList.remove('visible'), 1200);
-            }
         }
 
         /* ============================================================
@@ -455,7 +462,7 @@
             }
             for (const l of notes) if (!remoteIds.has(l.id)) toPush.push(l);
             sortNotes();
-            save(false);
+            save();
             render();
             if (toPush.length) {
                 try {
@@ -473,6 +480,7 @@
         const pushTimers = {};
         function supaUpsert(note) {
             if (!cloudOn) return;
+            setCloud('☁ synchron', false);   /* gray until the push confirms */
             clearTimeout(pushTimers[note.id]);
             pushTimers[note.id] = setTimeout(async () => {
                 try {
@@ -488,8 +496,9 @@
 
         function supaDelete(id) {
             if (!cloudOn) return;
+            setCloud('☁ synchron', false);
             api('svp_notes?id=eq.' + encodeURIComponent(id), { method: 'DELETE' })
-                .then(res => { if (!res.ok) setCloud('☁ Fehler: HTTP ' + res.status, false); })
+                .then(res => setCloud(res.ok ? '☁ synchron' : '☁ Fehler: HTTP ' + res.status, res.ok))
                 .catch(e => setCloud('☁ ' + e.message, false));
         }
 
@@ -656,7 +665,7 @@
             else if (next === undefined) n.ord = prev + 1;
             else n.ord = (prev + next) / 2;
             n.ts = Date.now();
-            save(true);
+            save();
             supaUpsert(n);
             render();
         }
@@ -698,7 +707,7 @@
                     note.title = title.value;
                     note.ts = Date.now();
                     date.textContent = fmtDate(note.ts);
-                    save(true);
+                    save();
                     supaUpsert(note);
                 });
 
@@ -715,7 +724,7 @@
                         notes = notes.filter(n => n.id !== note.id);
                         openSet.delete(note.id);
                         persistOpen();
-                        save(true);
+                        save();
                         supaDelete(note.id);
                         render();
                     } else {
@@ -747,7 +756,7 @@
                     note.fmt = 1;
                     note.ts = Date.now();
                     date.textContent = fmtDate(note.ts);
-                    save(true);
+                    save();
                     supaUpsert(note);
                 });
 
@@ -765,7 +774,7 @@
                     const h = Math.round(body.offsetHeight);
                     if (h && h !== note.h) {
                         note.h = h;
-                        save(false);
+                        save();
                         supaUpsert(note);
                     }
                 }).observe(body);
@@ -822,7 +831,7 @@
             notes.unshift(note);
             openSet.add(note.id);
             persistOpen();
-            save(false);
+            save();
             supaUpsert(note);
             render();
             const first = list.querySelector('.note-title');
