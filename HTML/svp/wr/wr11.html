@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stoffverteilungsplan Wirtschaftslehre/Recht 11 | SJ 2026/27</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript>
+        <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    </noscript>
+    <link rel="icon" type="image/png" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="../svp.css">
+</head>
+
+<body>
+    <header class="page-head">
+        <a class="back-link" href="./">&larr; Wirtschaftslehre/Recht</a>
+        <div class="head-row">
+            <h1>Wirtschaftslehre/Recht &middot; Klasse 11</h1>
+            <button class="action orange" onclick="window.open('../lehrplaene/lehrplan_bgy_wirtschaftslehre_recht.pdf', '_blank')">Lehrplan (PDF)</button>
+        </div>
+        <div class="subtitle">
+            Stoffverteilungsplan &middot; Berufliches Gymnasium (Einf&uuml;hrungsphase) &middot; Schuljahr 2026/27
+            (Mo 17.08.26 &ndash; Fr 09.07.27) &middot; 2 Ustd./Woche &middot;
+            Lehrplan: <a href="../lehrplaene/lehrplan_bgy_wirtschaftslehre_recht.pdf" target="_blank"
+                rel="noopener">Wirtschaftslehre/Recht BGY (2026)</a>
+        </div>
+    </header>
+
+    <div class="meta-cards">
+        <div class="meta-card" data-lb="lb1">
+            <div class="k c-orange">Lernbereich 1</div>
+            <div class="v">Pers&ouml;nliches Informationsmanagement</div>
+            <div class="vu">6 Ustd.</div>
+        </div>
+        <div class="meta-card" data-lb="lb2">
+            <div class="k c-cyan">Lernbereich 2</div>
+            <div class="v">Projektmanagement und Gesch&auml;ftsprozesse</div>
+            <div class="vu">6 Ustd.</div>
+        </div>
+        <div class="meta-card" data-lb="lb3">
+            <div class="k c-violet">Lernbereich 3</div>
+            <div class="v">Unternehmerisches Handeln</div>
+            <div class="vu">24 Ustd.</div>
+        </div>
+        <div class="meta-card" data-lb="lb4">
+            <div class="k c-teal">Lernbereich 4</div>
+            <div class="v">BGB als Grundlage f&uuml;r wirtschaftliche Entscheidungen</div>
+            <div class="vu">16 Ustd.</div>
+        </div>
+    </div>
+
+    <div class="toolbar">
+        <button class="action" onclick="window.print()">Drucken</button>
+        <button class="action" onclick="togglePlanDetails()">Alle auf/zu</button>
+        <button class="action" onclick="togglePlanEdit(this)">✎ Bearbeiten</button>
+        <button class="action secondary" onclick="resetPlanEdits(this)">Zurücksetzen</button>
+        <div class="legend"></div>
+    </div>
+
+    <div class="table-wrap">
+        <table id="plan-table">
+            <thead>
+                <tr>
+                    <th>Nr.</th>
+                    <th>KW</th>
+                    <th>Woche</th>
+                    <th>Bereich</th>
+                    <th>Ustd.</th>
+                    <th>Thema / Inhalte</th>
+                    <th>Bemerkungen</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <footer class="page-foot">
+        Wochenzeile anklicken &rarr; Stundenskizze ausklappen; beim Drucken werden alle Details ausgeklappt.
+        &bdquo;Bearbeiten&ldquo; macht Themen, Bemerkungen und Bullets editierbar; &bdquo;Zur&uuml;cksetzen&ldquo;
+        l&auml;dt das Original. Ferientermine Sachsen 2026/27 (SMK): Herbst 12.&ndash;24.10.26 &middot;
+        Weihnachten 23.12.26&ndash;02.01.27 &middot; Winter 08.&ndash;19.02.27 &middot; Ostern 26.03.&ndash;02.04.27
+        &middot; Pfingsten 07.05. + 15.&ndash;18.05.27 &middot; Sommer ab 10.07.27 &middot; Bu&szlig;- und Bettag
+        Mi 18.11.26 unterrichtsfrei. Klassenarbeitstermine an den Klausurplan der Schule anpassen.
+        Zeitrichtwerte gem&auml;&szlig; Lehrplan 2026 (52 Ustd. verbindlich in 26 Wochen; der neue Lehrplan
+        f&uuml;hrt in Kl. 11 keine Wahlbereiche); restliche Wochen f&uuml;r Vertiefung und Aktuelles.
+    </footer>
+
+    <script>
+        // Data-driven plan: one entry per school week (or holiday block).
+        // 2 Ustd./week; u shows the cumulative Ustd. range within the Lernbereich.
+        // details: bullet list shown in the expandable sub-row (lesson sketch).
+        // type: lb1 | lb2 | lb3 | lb4 | lk | org | ferien
+        window.PLAN = [
+            { nr: 1, kw: 34, date: '17.–21.08.26', type: 'org', u: '', topic: 'Schuljahresauftakt: Organisation, Überblick W/R in Kl. 11, aktuelle Wirtschaftsthemen', remark: 'Erster Schultag Mo 17.08.', details: [
+                'Organisatorisches; Fahrplan: Informationsmanagement → Projekte/Prozesse → Unternehmen → Recht',
+                'Einstiegsdiskussion: Welche wirtschaftlichen Entscheidungen treffen wir täglich?'
+            ] },
+            { nr: 2, kw: 35, date: '24.–28.08.26', type: 'lb1', u: '1–2/6', topic: 'Daten, Informationen, Wissen; Informations- und Wissensmanagement', remark: 'Wissenspyramide', details: [
+                'Wissenspyramide: Daten → Informationen → Wissen an Beispielen',
+                'Informationsflut; Large Language Models als Informationsquelle kritisch nutzen'
+            ] },
+            { nr: 3, kw: 36, date: '31.08.–04.09.26', type: 'lb1', u: '3–4/6', topic: 'Ebenen des Informationsmanagements; Datenschutz, Datensicherheit, Urheberrecht', remark: '', details: [
+                'Persönliches, betriebliches und gesellschaftliches Informationsmanagement',
+                'Notwendigkeit von Datenschutz und Datensicherheit; Urheberrecht bei eigenen Arbeiten'
+            ] },
+            { nr: 4, kw: 37, date: '07.–11.09.26', type: 'lb1', u: '5–6/6', topic: 'Beschaffung und Strukturierung von Informationen: Quellen, Relevanz, Aktualität, Wahrheit', remark: 'LB 1 abgeschlossen', details: [
+                'Informationsquellen auswählen und bewerten; rechtliche Vorgaben',
+                'Informationen, Termine und Aufgaben mit digitalen Tools verwalten'
+            ] },
+            { nr: 5, kw: 38, date: '14.–18.09.26', type: 'lb2', u: '1–2/6', topic: 'Grundlagen des Projektmanagements', remark: 'Modellunternehmen', details: [
+                'Projektbegriff, Phasen, Rollen am Modellunternehmen',
+                'Mini-Projekt im Team planen'
+            ] },
+            { nr: 6, kw: 39, date: '21.–25.09.26', type: 'lb2', u: '3–4/6', topic: 'Geschäftsprozesse: Kern- und Serviceprozesse, betriebliche Grundfunktionen', remark: '', details: [
+                'Kern- vs. Serviceprozesse in Produktions- und Dienstleistungsunternehmen',
+                'Betriebliche Grundfunktionen zuordnen (fachrichtungsbezogene Beispiele)'
+            ] },
+            { nr: 7, kw: 40, date: '28.09.–02.10.26', type: 'lb2', u: '5–6/6', topic: 'Visualisierung eines Geschäftsprozesses', remark: 'LB 2 abgeschlossen', details: [
+                'Einen realen Geschäftsprozess aufnehmen und visualisieren',
+                'Prozessdarstellungen vergleichen und verbessern'
+            ] },
+            { nr: 8, kw: 41, date: '05.–09.10.26', type: 'lb3', u: '1–2/24', topic: 'Motive wirtschaftlichen Handelns: Bedürfnisse, Güter, ökonomisches Prinzip', remark: '', details: [
+                'Bedürfnisarten; latente und manipulierte Bedürfnisse (Werbung)',
+                'Güterarten; Minimal- und Maximalprinzip an Beispielen'
+            ] },
+            { ferien: 'Herbstferien · 12.–24.10.2026 (KW 42–43)' },
+            { nr: 9, kw: 44, date: '26.–30.10.26', type: 'lb3', u: '3–4/24', topic: 'Volks- und betriebswirtschaftliche Produktionsfaktoren', remark: '', details: [
+                'Boden, Arbeit, Kapital vs. betriebliche Faktoren',
+                'Nachhaltigkeit: Umgang mit knappen Ressourcen'
+            ] },
+            { nr: 10, kw: 45, date: '02.–06.11.26', type: 'lb3', u: '5–6/24', topic: 'Gesetzmäßigkeiten des Marktes I: Angebot, Nachfrage, Gleichgewichtspreis', remark: '', details: [
+                'Angebots- und Nachfragekurve; Preisbildung am Markt',
+                'Übung: Marktdiagramme zeichnen und interpretieren'
+            ] },
+            { nr: 11, kw: 46, date: '09.–13.11.26', type: 'lb3', u: '7–8/24', topic: 'Gesetzmäßigkeiten des Marktes II: Marktarten und Marktformen', remark: '', details: [
+                'Marktarten; Polypol, Oligopol, Monopol mit aktuellen Beispielen',
+                'Digital gestütztes Selbstlernen: Marktformen-Quiz'
+            ] },
+            { nr: 12, kw: 47, date: '16.–20.11.26', type: 'lb3', u: '9–10/24', topic: 'Wirtschaftsbeziehungen: einfacher und erweiterter Wirtschaftskreislauf', remark: 'Mi 18.11. Buß- und Bettag (unterrichtsfrei)', details: [
+                'Einfacher Wirtschaftskreislauf: Haushalte und Unternehmen',
+                'Erweiterung um Staat und Banken; rechnerische Veranschaulichung'
+            ] },
+            { nr: 13, kw: 48, date: '23.–27.11.26', type: 'lk', u: 'KA 1', topic: 'Wiederholung + Klassenarbeit 1 (LB 1–3: bis Markt und Kreislauf)', remark: 'Termin nach Klausurplan', details: [
+                'Wiederholung: Informationsmanagement, Prozesse, Markt',
+                'Klassenarbeit 1 (45 min)'
+            ] },
+            { nr: 14, kw: 49, date: '30.11.–04.12.26', type: 'lb3', u: '11–12/24', topic: 'Vollständiger Wirtschaftskreislauf; aktueller Bezug', remark: '', details: [
+                'Vollständiger Kreislauf inkl. Ausland',
+                'Aktuelle Wirtschaftsdaten einordnen (Statistiken lesen)'
+            ] },
+            { nr: 15, kw: 50, date: '07.–11.12.26', type: 'lb3', u: '13–14/24', topic: 'Unternehmensgründung I: Voraussetzungen, Unternehmensidee, Businessplan', remark: 'Projekt: Gründung eines Schülerunternehmens', details: [
+                'Persönliche und rechtliche Voraussetzungen der Gründung',
+                'Projektstart Schülerunternehmen: Idee und Businessplan-Gerüst'
+            ] },
+            { nr: 16, kw: 51, date: '14.–18.12.26', type: 'lb3', u: '15–16/24', topic: 'Unternehmensgründung II: Unternehmensziele; Arbeit am Schülerunternehmen', remark: 'Mindmap', details: [
+                'Zielsysteme: Sach- und Formalziele, Zielkonflikte',
+                'Businessplan des Schülerunternehmens weiterentwickeln'
+            ] },
+            { nr: 17, kw: 52, date: '21.–22.12.26', type: 'org', u: '', topic: 'Puffer / Aktuelles', remark: 'nur Mo/Di — ab Mi 23.12. Ferien', details: [
+                'Wirtschafts-Jahresrückblick als Quiz'
+            ] },
+            { ferien: 'Weihnachtsferien · 23.12.2026–02.01.2027' },
+            { nr: 18, kw: 1, date: '04.–08.01.27', type: 'lb3', u: '17–18/24', topic: 'Kaufmannseigenschaften; Arbeit mit dem Handelsgesetzbuch (HGB)', remark: '', details: [
+                'Kaufmannsbegriff im HGB; Übungen mit dem Gesetzestext',
+                'Handelsregistereintragung und ihre Wirkung'
+            ] },
+            { nr: 19, kw: 2, date: '11.–15.01.27', type: 'lb3', u: '19–20/24', topic: 'Firmenarten und Firmengrundsätze; Einzelunternehmung', remark: '', details: [
+                'Firmenwahrheit, -beständigkeit, -ausschließlichkeit an Fällen',
+                'Einzelunternehmung: Chancen, Risiken, Haftung'
+            ] },
+            { nr: 20, kw: 3, date: '18.–22.01.27', type: 'lb3', u: '21–22/24', topic: 'Personen- vs. Kapitalgesellschaften: exemplarischer Vergleich', remark: '', details: [
+                'GbR/OHG/KG vs. GmbH/AG: Gründung, Haftung, Leitung',
+                'Rechtsformwahl für das Schülerunternehmen begründen'
+            ] },
+            { nr: 21, kw: 4, date: '25.–29.01.27', type: 'lb3', u: '23–24/24', topic: 'Abschluss LB 3: Präsentation der Schülerunternehmen', remark: 'LB 3 abgeschlossen', details: [
+                'Businesspläne präsentieren; Peer-Feedback',
+                'Zusammenfassung unternehmerisches Handeln'
+            ] },
+            { nr: 22, kw: 5, date: '01.–05.02.27', type: 'org', u: '', topic: 'Halbjahresabschluss: Auswertung, Vertiefung, Aktuelles', remark: 'Fr 05.02. Halbjahresende / Zeugnisse', details: [
+                'Offene Punkte aus LB 1–3; kurzer Halbjahresrückblick'
+            ] },
+            { ferien: 'Winterferien · 08.–19.02.2027 (KW 6–7)' },
+            { nr: 23, kw: 8, date: '22.–26.02.27', type: 'lb4', u: '1–2/16', topic: 'Notwendigkeit einer Rechtsordnung: Recht und Gerechtigkeit, Sitte und Moral', remark: 'ggf. Besuch einer Gerichtsverhandlung planen', details: [
+                'Einstiegsdiskussion: Warum braucht Wirtschaft Recht?',
+                'Gesellschaftliche Veränderungen und Recht; Expertenbefragung vorbereiten'
+            ] },
+            { nr: 24, kw: 9, date: '01.–05.03.27', type: 'lb4', u: '3–4/16', topic: 'Grundlagen des Rechts: Rechtsquellen, Privatrecht/öffentliches Recht, Rechtssubjekte', remark: '', details: [
+                'Rangordnung der Rechtsquellen; objektives und subjektives Recht',
+                'Rechtssubjekte und Rechtsobjekte an Fällen'
+            ] },
+            { nr: 25, kw: 10, date: '08.–12.03.27', type: 'lb4', u: '5–6/16', topic: 'BGB anwenden I: Rechts- und Geschäftsfähigkeit', remark: 'Aufbau und Struktur des BGB', details: [
+                'Aufbau des BGB; Arbeit mit dem Gesetzestext',
+                'Geschäftsfähigkeitsstufen: Fallbeispiele und Rollenspiel'
+            ] },
+            { nr: 26, kw: 11, date: '15.–19.03.27', type: 'lb4', u: '7–8/16', topic: 'BGB anwenden II: Besitz und Eigentum', remark: '', details: [
+                'Besitz vs. Eigentum an Alltagsfällen',
+                'Eigentumsübertragung beweglicher Sachen'
+            ] },
+            { nr: 27, kw: 12, date: '22.–25.03.27', type: 'lb4', u: '9–10/16', topic: 'Verträge I: Zustandekommen von Rechtsgeschäften; Nichtigkeit und Anfechtbarkeit', remark: 'ab Fr 26.03. Osterferien', details: [
+                'Willenserklärung, Antrag und Annahme; E-Commerce-Beispiele',
+                'Nichtigkeits- und Anfechtungsgründe an Fällen'
+            ] },
+            { ferien: 'Osterferien · 26.03.–02.04.2027' },
+            { nr: 28, kw: 14, date: '05.–09.04.27', type: 'lb4', u: '11–12/16', topic: 'Verträge II: Vertragsarten; Inhalt des Kaufvertrages', remark: '', details: [
+                'Vertragsarten im Überblick (Kauf, Miete, Werk, Dienst)',
+                'Kaufvertrag: Verpflichtungs- und Erfüllungsgeschäft'
+            ] },
+            { nr: 29, kw: 15, date: '12.–16.04.27', type: 'lb4', u: '13–14/16', topic: 'Leistungsstörungen im Überblick', remark: 'Gruppenarbeit', details: [
+                'Nicht-Rechtzeitig-Lieferung, Schlechtleistung, Zahlungsverzug',
+                'Fallarbeit in Gruppen mit Gesetzestexten'
+            ] },
+            { nr: 30, kw: 16, date: '19.–23.04.27', type: 'lb4', u: '15–16/16', topic: 'Mahnung, Verjährung, Zwangsvollstreckung (exemplarisch)', remark: 'LB 4 abgeschlossen', details: [
+                'Mahnverfahren Schritt für Schritt',
+                'Verjährungsfristen; Zwangsvollstreckung im Überblick'
+            ] },
+            { nr: 31, kw: 17, date: '26.–30.04.27', type: 'lk', u: 'KA 2', topic: 'Wiederholung + Klassenarbeit 2 (LB 4: Recht)', remark: 'Termin nach Klausurplan', details: [
+                'Wiederholung: Rechtsordnung, BGB, Verträge, Leistungsstörungen',
+                'Klassenarbeit 2 (45 min)'
+            ] },
+            { nr: 32, kw: 18, date: '03.–05.05.27', type: 'org', u: '', topic: 'Auswertung / Aktuelles', remark: 'Do 06.05. Himmelfahrt + Fr 07.05. unterrichtsfrei', details: [
+                'Auswertung und Berichtigung der Klassenarbeit'
+            ] },
+            { nr: 33, kw: 19, date: '10.–14.05.27', type: 'org', u: '', topic: 'Vertiefung: Besuch einer Gerichtsverhandlung / Expertenbefragung', remark: 'Termin nach Absprache', details: [
+                'Gerichtsbesuch oder Experte im Unterricht; Nachbereitung'
+            ] },
+            { ferien: 'Pfingsten · Mo 17.05. Pfingstmontag + Di 18.05.2027 Ferientag' },
+            { nr: 34, kw: 20, date: '19.–21.05.27', type: 'org', u: '', topic: 'Übung / Puffer', remark: 'nur Mi–Fr', details: [
+                'Fallübungen nach Bedarf'
+            ] },
+            { nr: 35, kw: 21, date: '24.–28.05.27', type: 'org', u: '', topic: 'Vertiefung: Planspiel Wirtschaft', remark: '', details: [
+                'Planspiel (z. B. Unternehmenssimulation) I'
+            ] },
+            { nr: 36, kw: 22, date: '31.05.–04.06.27', type: 'org', u: '', topic: 'Planspiel Wirtschaft II + Auswertung', remark: '', details: [
+                'Planspiel-Auswertung: Entscheidungen und Folgen reflektieren'
+            ] },
+            { nr: 37, kw: 23, date: '07.–11.06.27', type: 'org', u: '', topic: 'Aktuelle Wirtschafts- und Rechtsthemen', remark: '', details: [
+                'Schülerreferate zu aktuellen Fällen'
+            ] },
+            { nr: 38, kw: 24, date: '14.–18.06.27', type: 'org', u: '', topic: 'Vertiefung nach Bedarf', remark: '', details: [
+                'Wiederholung schwieriger Themen aus LB 3/4'
+            ] },
+            { nr: 39, kw: 25, date: '21.–25.06.27', type: 'org', u: '', topic: 'Puffer', remark: 'Reserve für Projekttage / Exkursion', details: [
+                'Reserve — je nach Schuljahresplanung'
+            ] },
+            { nr: 40, kw: 26, date: '28.06.–02.07.27', type: 'org', u: '', topic: 'Jahresrückblick; Ausblick Jgst. 12: Finanzwirtschaft, Arbeitsrecht', remark: '', details: [
+                'Jahresrückblick in 10 Fragen',
+                'Ausblick Gk 12/13: Finanzierung, Arbeitsrecht, Wirtschaftspolitik'
+            ] },
+            { nr: 41, kw: 27, date: '05.–09.07.27', type: 'org', u: '', topic: 'Ausklang', remark: 'Fr 09.07. letzter Schultag, Zeugnisse', details: [
+                'Unterlagen ordnen; Wirtschafts-Quiz zum Abschluss'
+            ] },
+            { ferien: 'Sommerferien · ab 10.07.2027' }
+        ];
+
+        // Lernbereich summaries for the clickable meta cards (see svp-plan.js).
+        window.LB_INFO = {
+            pdf: '../lehrplaene/lehrplan_bgy_wirtschaftslehre_recht.pdf',
+            page: 17,
+            lb1: {
+                page: 18,
+                bullets: [
+                    'Daten, Informationen, Wissen (Wissenspyramide); Informationsflut und LLMs',
+                    'Ebenen des Informationsmanagements; Datenschutz, Datensicherheit, Urheberrecht',
+                    'Informationen beschaffen und strukturieren: Quellen, Relevanz, Aktualität, Wahrheit',
+                    'Termine und Aufgaben mit digitalen Tools verwalten'
+                ]
+            },
+            lb2: {
+                page: 18,
+                bullets: [
+                    'Grundlagen des Projektmanagements am Modellunternehmen',
+                    'Geschäftsprozesse: Kern- und Serviceprozesse, betriebliche Grundfunktionen',
+                    'Visualisierung eines Geschäftsprozesses'
+                ]
+            },
+            lb3: {
+                page: 18,
+                bullets: [
+                    'Motive wirtschaftlichen Handelns: Bedürfnisse, Güter, ökonomisches Prinzip, Produktionsfaktoren',
+                    'Markt: Angebot und Nachfrage, Gleichgewichtspreis, Marktarten und -formen',
+                    'Wirtschaftskreislauf: einfach, erweitert, vollständig (auch rechnerisch)',
+                    'Unternehmensgründung: Voraussetzungen, Businessplan, Projekt Schülerunternehmen',
+                    'Kaufmannseigenschaften, Firmenarten, HGB; Personen- vs. Kapitalgesellschaften'
+                ]
+            },
+            lb4: {
+                page: 19,
+                bullets: [
+                    'Notwendigkeit einer Rechtsordnung: Recht und Gerechtigkeit, Sitte und Moral',
+                    'Grundlagen des Rechts: Rechtsquellen, Privatrecht/öffentliches Recht, Rechtssubjekte',
+                    'BGB: Rechts- und Geschäftsfähigkeit, Besitz und Eigentum',
+                    'Verträge: Zustandekommen, Nichtigkeit und Anfechtbarkeit, Kaufvertrag',
+                    'Leistungsstörungen; Mahnung, Verjährung, Zwangsvollstreckung'
+                ]
+            }
+        };
+
+        window.BADGE = {
+            lb1: ['b-orange', 'LB 1'],
+            lb2: ['b-cyan', 'LB 2'],
+            lb3: ['b-violet', 'LB 3'],
+            lb4: ['b-teal', 'LB 4'],
+            lk: ['b-red', 'LEISTUNG'],
+            org: ['b-grey', 'ORGA']
+        };
+    </script>
+    <script src="../svp-auth.js"></script>
+    <script src="../svp-plan.js"></script>
+</body>
+
+</html>
