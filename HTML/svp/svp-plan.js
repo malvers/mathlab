@@ -366,6 +366,10 @@
 
     syncFromRemote();
 
+    // The LB info panel and the bridge panel are mutually exclusive —
+    // opening one closes the other (hooks set by the two blocks below).
+    let closeLbPanel = null, closeBridgePanel = null;
+
     // --- Lernbereich info panels -----------------------------------------
     // Meta cards carrying data-lb open a shared summary panel below the
     // card row: bullets from the page's LB_INFO, week stats computed from
@@ -380,6 +384,12 @@
         panel.hidden = true;
         grid.insertAdjacentElement('afterend', panel);
         let openKey = null;
+
+        closeLbPanel = function () {
+            openKey = null;
+            panel.hidden = true;
+            cards.forEach(c => c.classList.remove('open'));
+        };
 
         function statsFor(key) {
             const rows = window.PLAN.filter(r => r.type === key);
@@ -399,6 +409,7 @@
                 return;
             }
             openKey = key;
+            if (closeBridgePanel) closeBridgePanel();
             cards.forEach(c => c.classList.toggle('open', c === card));
             const info = window.LB_INFO[key] || {};
             panel.textContent = '';
@@ -468,21 +479,28 @@
         panel.hidden = true;
         grid.insertAdjacentElement('afterend', panel);
 
+        // Hint sits at the top right of the box (before the editable body).
+        const foot = document.createElement('div');
+        foot.className = 'lb-panel-foot bridge-hint';
+        const HINT = '✎ frei editierbar — speichert automatisch';
+        foot.textContent = HINT;
+        panel.appendChild(foot);
+
         const body = document.createElement('div');
         body.className = 'bridge-body';
         body.setAttribute('contenteditable', 'true');
         body.innerHTML = localStorage.getItem(BKEY) || window.BRIDGE.html || '';
         panel.appendChild(body);
 
-        const foot = document.createElement('div');
-        foot.className = 'lb-panel-foot';
-        const HINT = '✎ frei editierbar — speichert automatisch';
-        foot.textContent = HINT;
-        panel.appendChild(foot);
+        closeBridgePanel = function () {
+            panel.hidden = true;
+            card.classList.remove('open');
+        };
 
         card.addEventListener('click', () => {
             panel.hidden = !panel.hidden;
             card.classList.toggle('open', !panel.hidden);
+            if (!panel.hidden && closeLbPanel) closeLbPanel();
         });
 
         function pushBridge() {

@@ -46,8 +46,69 @@ header.page-head { max-width: 1200px; margin: 0 auto 22px; position: relative; }
 
 @media print { .page-head button.action.orange { display: none; } }
 
+/* Quick-nav: pill shortcuts to all svp pages (injected by svp-nav.js) —
+   top row of the header, right-aligned; wraps without overlapping anything */
+nav.quick-nav {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px;
+    margin-bottom: 12px;
+}
+
+/* Bridge panel: the edit/save hint sits top right inside the box */
+.lb-panel-foot.bridge-hint {
+    text-align: right;
+    margin-bottom: 6px;
+}
+
+nav.quick-nav a.badge { text-decoration: none; }
+
+/* Back pill left of the Start pill */
+nav.quick-nav a.nav-back { color: var(--cyan); }
+
+/* Central school-year line above the pill row (injected by svp-nav.js) */
+.nav-year {
+    text-align: center;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.66rem;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--muted);
+}
+
+/* Full-width blue band at the page top holding year + pills, both centered
+   vertically via symmetric padding (negative margins undo the body padding) */
+.nav-band {
+    background: rgb(12, 30, 64);
+    border-bottom: 1px solid var(--line);
+    margin: calc(-1 * clamp(12px, 3vw, 40px)) calc(-1 * clamp(12px, 3vw, 40px)) 20px;
+    padding: 14px clamp(12px, 3vw, 40px);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 8px;
+}
+
+.nav-band nav.quick-nav { margin-bottom: 0; }
+
+@media print {
+    .nav-band { background: none; border: none; margin: 0; padding: 0; }
+    .nav-year { color: #444; }
+}
+
+nav.quick-nav a.badge:hover { filter: brightness(1.35); }
+
+nav.quick-nav a.badge.active {
+    outline: 1px solid currentColor;
+    filter: brightness(1.25);
+}
+
+@media print { nav.quick-nav { display: none; } }
+
+/* Old per-page back-link retired 2026-08-11 — the quick-nav's ← button replaces it */
 a.back-link {
-    display: inline-block;
+    display: none;
     font-family: 'Orbitron', sans-serif;
     font-size: 0.68rem;
     letter-spacing: 0.08em;
@@ -354,11 +415,31 @@ a.link-card .card-sub {
 
 a.link-card .card-desc { font-size: 0.86rem; font-weight: 400; }
 
+/* Accent-colored link-cards (Notizen, Konzepte) — title, background + border tint */
+a.link-card.c-cyan .card-title { color: var(--cyan); }
+a.link-card.c-cyan {
+    background: rgba(90, 190, 230, 0.17);
+    border-color: rgba(90, 190, 230, 0.42);
+}
+a.link-card.c-cyan:hover { border-color: rgba(90, 190, 230, 0.7); }
+a.link-card.c-violet .card-title { color: var(--violet); }
+a.link-card.c-violet {
+    background: rgba(155, 130, 225, 0.17);
+    border-color: rgba(155, 130, 225, 0.42);
+}
+a.link-card.c-violet:hover { border-color: rgba(155, 130, 225, 0.7); }
+
+/* Forces a card into column 1 → starts a new grid row (separates the
+   Fach cards from the personal cards, works with any responsive column count) */
+a.link-card.row-break { grid-column: 1; }
+
 .card-grid {
     max-width: 1200px;
     margin: 0 auto;
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    /* All rows share the height of the tallest card — cards line up evenly */
+    grid-auto-rows: 1fr;
     gap: 14px;
 }
 

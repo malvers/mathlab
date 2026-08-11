@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stoffverteilungsplan Mathematik 13 | SJ 2026/27</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript>
+        <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    </noscript>
+    <link rel="icon" type="image/png" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="../svp.css">
+</head>
+
+<body>
+    <header class="page-head">
+        <a class="back-link" href="./">&larr; &Uuml;bersicht Mathematik</a>
+        <div class="head-row">
+            <h1>Mathematik &middot; Jahrgangsstufe 13</h1>
+            <button class="action orange" onclick="window.open('../lehrplaene/lehrplan_bgy_mathematik.pdf', '_blank')">Lehrplan (PDF)</button>
+        </div>
+        <div class="subtitle">
+            Stoffverteilungsplan &middot; Berufliches Gymnasium (Grundkurs, Abiturjahrgang) &middot;
+            Kursende ca. Mitte April 2027 &middot; 4 Ustd./Woche &middot;
+            Lehrplan: <a href="https://www.schulportal.sachsen.de/lplandb/lehrplan/183" target="_blank"
+                rel="noopener">Mathematik BGY (2021)</a>
+        </div>
+    </header>
+
+    <div class="meta-cards">
+        <div class="meta-card" data-lb="lb3">
+            <div class="k c-violet">Lernbereich 3</div>
+            <div class="v">Integralrechnung</div>
+            <div class="vu">36 Ustd.</div>
+        </div>
+        <div class="meta-card" data-lb="lb4">
+            <div class="k c-pink">Lernbereich 4</div>
+            <div class="v">Beurteilende Statistik</div>
+            <div class="vu">12 Ustd.</div>
+        </div>
+        <div class="meta-card" data-lb="wp">
+            <div class="k c-green">Wahlpflicht 1</div>
+            <div class="v">Analytische Geometrie der Geraden und Ebenen</div>
+            <div class="vu">20 Ustd.</div>
+        </div>
+        <div class="meta-card" data-lb="lb6">
+            <div class="k c-orange">Lernbereich 6</div>
+            <div class="v">Weitere Anwendungen</div>
+            <div class="vu">8 Ustd.</div>
+        </div>
+        <div class="meta-card">
+            <div class="k c-bright">Abitur 2027</div>
+            <div class="v">schriftlich ca. Mitte April &ndash; Mitte Mai &middot; m&uuml;ndlich Mai/Juni</div>
+        </div>
+    </div>
+
+    <div class="toolbar">
+        <button class="action" onclick="window.print()">Drucken</button>
+        <button class="action" onclick="togglePlanDetails()">Alle auf/zu</button>
+        <button class="action" onclick="togglePlanEdit(this)">✎ Bearbeiten</button>
+        <button class="action secondary" onclick="resetPlanEdits(this)">Zurücksetzen</button>
+        <div class="legend">
+            <span><span class="dot" style="background: var(--violet)"></span>LB 3</span>
+            <span><span class="dot" style="background: var(--pink)"></span>LB 4</span>
+            <span><span class="dot" style="background: var(--phi)"></span>WP 1</span>
+            <span><span class="dot" style="background: var(--lambda)"></span>LB 6</span>
+            <span><span class="dot" style="background: var(--ypsilon)"></span>Leistung</span>
+            <span><span class="dot" style="background: rgba(170,190,220,0.5)"></span>Orga/Puffer</span>
+        </div>
+    </div>
+
+    <div class="table-wrap">
+        <table id="plan-table">
+            <thead>
+                <tr>
+                    <th>Nr.</th>
+                    <th>KW</th>
+                    <th>Woche</th>
+                    <th>Bereich</th>
+                    <th>Ustd.</th>
+                    <th>Thema / Inhalte</th>
+                    <th>Bemerkungen</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <footer class="page-foot">
+        Wochenzeile anklicken &rarr; Stundenskizze ausklappen; beim Drucken werden alle Details ausgeklappt.
+        &bdquo;Bearbeiten&ldquo; macht Themen, Bemerkungen und Bullets editierbar; &bdquo;Zur&uuml;cksetzen&ldquo;
+        l&auml;dt das Original. Jgst. 13 = LB 3 Integralrechnung (36) + LB 4 Beurteilende Statistik (12) +
+        Wahlpflicht 1 Analytische Geometrie (20; Alternative: Wahlpflicht 2 Matrizenrechnung) + LB 6 Weitere
+        Anwendungen (8) + Abiturvorbereitung. Klausuren: 13/I regul&auml;r, 13/II unter Abiturbedingungen &mdash;
+        Termine an den Klausurplan der Schule anpassen. Abiturtermine 2027: Richtwerte &mdash; verbindliche
+        Termine nach Ver&ouml;ffentlichung SMK/Schule nachtragen. Ferientermine Sachsen 2026/27 (SMK):
+        Herbst 12.&ndash;24.10.26 &middot; Weihnachten 23.12.26&ndash;02.01.27 &middot; Winter 08.&ndash;19.02.27
+        &middot; Ostern 26.03.&ndash;02.04.27 &middot; Bu&szlig;- und Bettag Mi 18.11.26 unterrichtsfrei.
+    </footer>
+
+    <script>
+        // Data-driven plan: one entry per school week (or holiday block).
+        // 4 Ustd./week (Grundkurs); u shows the cumulative Ustd. range within the Lernbereich.
+        // details: bullet list shown in the expandable sub-row (lesson sketch).
+        // type: lb3 | lb4 | wp | lb6 | lk | org | ferien
+        window.PLAN = [
+            { nr: 1, kw: 34, date: '17.–21.08.26', type: 'org', u: '', topic: 'Kursauftakt: Organisation Abiturjahr, Wiederholung Differenzialrechnung', remark: 'Erster Schultag Mo 17.08.; Rückblick Jgst. 12', details: [
+                'Organisation: Abiturablauf, Termine, Bewertung',
+                'Wiederholung: Ableitungskalkül und Graphenanalyse aus Jgst. 12',
+                'Ausgangspunkt: Änderungsrate rückwärts gedacht — Motivation Integral'
+            ] },
+            { nr: 2, kw: 35, date: '24.–28.08.26', type: 'lb3', u: '1–4/36', topic: 'Stammfunktion und unbestimmtes Integral', remark: '', details: [
+                'Begriff Stammfunktion; Nachweis von Stammfunktionen',
+                'Unbestimmtes Integral; Konstante $C$',
+                'Zusammenhang zum Ableiten'
+            ] },
+            { nr: 3, kw: 36, date: '31.08.–04.09.26', type: 'lb3', u: '5–8/36', topic: 'Integrieren ohne Hilfsmittel: ganzrationale und Potenzfunktionen', remark: '', details: [
+                'Integration ganzrationaler Funktionen',
+                'Potenzfunktionen mit rationalen Exponenten $\\ne -1$',
+                'Kalkültraining'
+            ] },
+            { nr: 4, kw: 37, date: '07.–11.09.26', type: 'lb3', u: '9–12/36', topic: 'Integrieren von $\\mathrm{e}^x$ und $\\sin x$; CAS', remark: '', details: [
+                'Stammfunktionen von $f(x) = \\mathrm{e}^x$ und $f(x) = \\sin x$',
+                'Mit CAS: Integrieren beliebiger integrierbarer Funktionen'
+            ] },
+            { nr: 5, kw: 38, date: '14.–18.09.26', type: 'lb3', u: '13–16/36', topic: 'Bestimmtes Integral als rekonstruierter Bestand', remark: '', details: [
+                'Deutung des bestimmten Integrals als rekonstruierter Bestand',
+                'Bestände aus Änderungsraten und Anfangsbestand berechnen',
+                'Beispiele aus Physik, Wirtschaft, Technik'
+            ] },
+            { nr: 6, kw: 39, date: '21.–25.09.26', type: 'lb3', u: '17–20/36', topic: 'Eigenschaften des bestimmten Integrals; Hauptsatz', remark: '', details: [
+                'Eigenschaften: Intervalladditivität, Linearität',
+                'Hauptsatz der Differenzial- und Integralrechnung',
+                '$\\int_a^b f(x)\\,dx = F(b) - F(a)$'
+            ] },
+            { nr: 7, kw: 40, date: '28.09.–02.10.26', type: 'lb3', u: '21–24/36', topic: 'Flächeninhalte zwischen Funktionsgraph und x-Achse', remark: '', details: [
+                'Flächen unter- und oberhalb der x-Achse (Vorzeichen!)',
+                'Zerlegung an Nullstellen'
+            ] },
+            { nr: 8, kw: 41, date: '05.–09.10.26', type: 'lb3', u: '25–28/36', topic: 'Flächeninhalte zwischen zwei Funktionsgraphen', remark: '', details: [
+                'Differenzfunktion und Schnittstellen',
+                'Anwendungsaufgaben mit CAS'
+            ] },
+            { ferien: 'Herbstferien · 12.–24.10.2026 (KW 42–43)' },
+            { nr: 9, kw: 44, date: '26.–30.10.26', type: 'lb3', u: '29–32/36', topic: 'Numerische Integration: Rechteck- und Trapezmethode', remark: '', details: [
+                'Rechteck- und Trapezmethode auch mit digitalen Hilfsmitteln',
+                'Genauigkeit und Grenzen numerischer Verfahren',
+                'Brücke zur Numerik aus Kl. 11 (Wahlbereich)'
+            ] },
+            { nr: 10, kw: 45, date: '02.–06.11.26', type: 'lb3', u: '33–36/36', topic: 'Anwendungen des bestimmten Integrals; LB-Abschluss', remark: 'LB 3 abgeschlossen', details: [
+                'Vermischte inner- und außermathematische Probleme',
+                'LB-3-Abschluss: Selbstcheck'
+            ] },
+            { nr: 11, kw: 46, date: '09.–13.11.26', type: 'lk', u: 'KL 13/I', topic: 'Wiederholung + Klausur 13/I (LB 3: Integralrechnung)', remark: 'Termin nach Klausurplan', details: [
+                'Wiederholung Integralrechnung',
+                'Klausur Kurshalbjahr 13/I (90 min)'
+            ] },
+            { nr: 12, kw: 47, date: '16.–20.11.26', type: 'lb4', u: '1–4/12', topic: 'Beurteilende Statistik: Grundgesamtheit und Stichprobe', remark: 'Mi 18.11. Buß- und Bettag (unterrichtsfrei)', details: [
+                'Schätz- und Testprobleme; inhaltliche Abgrenzung an Beispielen',
+                'Grundgesamtheit, Stichprobe; Stichprobenmittel und -varianz',
+                'Auswertung Klausur 13/I'
+            ] },
+            { nr: 13, kw: 48, date: '23.–27.11.26', type: 'lb4', u: '5–8/12', topic: 'Signifikanztests für binomialverteilte Zufallsgrößen', remark: '', details: [
+                'Nullhypothese, Testgröße, Signifikanzniveau',
+                'Kritischer Wert, Ablehnungsbereich, Entscheidungsregel',
+                'Einseitige und zweiseitige Tests (CAS)'
+            ] },
+            { nr: 14, kw: 49, date: '30.11.–04.12.26', type: 'lb4', u: '9–12/12', topic: 'Fehler 1. und 2. Art; statistische Sicherheit', remark: 'LB 4 abgeschlossen', details: [
+                'Fehler erster und zweiter Art unterscheiden und deuten',
+                'Übungen: vollständige Testdurchführung',
+                'LB-4-Abschluss'
+            ] },
+            { nr: 15, kw: 50, date: '07.–11.12.26', type: 'wp', u: '1–4/20', topic: 'Analytische Geometrie: Parametergleichungen von Geraden', remark: 'Alternative: WP 2 Matrizenrechnung', details: [
+                'Wiederholung Vektoren (Jgst. 12, LB 5)',
+                'Parametergleichung einer Geraden: Stütz- und Richtungsvektor',
+                'Punktprobe; Veranschaulichung mit DGS'
+            ] },
+            { nr: 16, kw: 51, date: '14.–18.12.26', type: 'wp', u: '5–8/20', topic: 'Ebenen: Parameterform und Normalenvektor', remark: '', details: [
+                'Parametergleichung einer Ebene',
+                'Normalenvektor mit dem Vektorprodukt bestimmen'
+            ] },
+            { nr: 17, kw: 52, date: '21.–22.12.26', type: 'org', u: '', topic: 'Puffer', remark: 'nur Mo/Di — ab Mi 23.12. Ferien', details: [
+                'Restarbeiten und offene Fragen'
+            ] },
+            { ferien: 'Weihnachtsferien · 23.12.2026–02.01.2027' },
+            { nr: 18, kw: 1, date: '04.–08.01.27', type: 'wp', u: '9–12/20', topic: 'Parameterfreie Ebenengleichungen; Lagebeziehungen I', remark: '', details: [
+                'Parameterfreie (Koordinaten-)Gleichung von Ebenen',
+                'Lagebeziehungen Punkt–Gerade, Punkt–Ebene'
+            ] },
+            { nr: 19, kw: 2, date: '11.–15.01.27', type: 'wp', u: '13–16/20', topic: 'Lagebeziehungen II: Schnittmengen und Spurpunkte', remark: '', details: [
+                'Gerade–Gerade: identisch, parallel, schneidend, windschief',
+                'Spurpunkte von Geraden',
+                'Nutzung von CAS und DGS'
+            ] },
+            { nr: 20, kw: 3, date: '18.–22.01.27', type: 'wp', u: '17–20/20', topic: 'Schnittwinkel; Oberflächen von Prismen und Pyramiden', remark: 'Wahlpflicht 1 abgeschlossen', details: [
+                'Schnittwinkel Gerade–Gerade, Gerade–Ebene, Ebene–Ebene',
+                'Oberflächeninhalte von Prismen und Pyramiden; Volumen elementargeometrisch'
+            ] },
+            { nr: 21, kw: 4, date: '25.–29.01.27', type: 'lb6', u: '1–4/8', topic: 'Weitere Anwendungen I: Funktionenscharen; Abstände im Raum', remark: '', details: [
+                'Parameter in einfachen Funktionenscharen (CAS, DGS)',
+                'Extremwertprobleme: Abstandsbestimmung im Raum (→ WP 1)'
+            ] },
+            { nr: 22, kw: 5, date: '01.–05.02.27', type: 'lb6', u: '5–8/8', topic: 'Weitere Anwendungen II: Parameter in LGS; Kosten, Erlöse, Gewinne', remark: 'LB 6 abgeschlossen · Fr 05.02. Ende 13/I / Zeugnisse', details: [
+                'Lösbarkeit parametrisierter linearer Gleichungssysteme',
+                'Extremwertprobleme zu Kosten, Erlösen und Gewinnen'
+            ] },
+            { ferien: 'Winterferien · 08.–19.02.2027 (KW 6–7)' },
+            { nr: 23, kw: 8, date: '22.–26.02.27', type: 'org', u: '', topic: 'Abiturvorbereitung I: Differenzialrechnung', remark: '', details: [
+                'Graphenanalyse, Extremwertprobleme, Steckbriefaufgaben',
+                'Aufgaben im Abiturformat (mit/ohne Hilfsmittel)'
+            ] },
+            { nr: 24, kw: 9, date: '01.–05.03.27', type: 'org', u: '', topic: 'Abiturvorbereitung II: Integralrechnung', remark: '', details: [
+                'Flächen, rekonstruierter Bestand, Hauptsatz',
+                'Aufgaben im Abiturformat'
+            ] },
+            { nr: 25, kw: 10, date: '08.–12.03.27', type: 'lk', u: 'KL 13/II', topic: 'Klausur 13/II unter Abiturbedingungen', remark: 'Termin nach Klausurplan', details: [
+                'Klausur unter Abiturbedingungen (Umfang/Hilfsmittel wie Prüfung)'
+            ] },
+            { nr: 26, kw: 11, date: '15.–19.03.27', type: 'org', u: '', topic: 'Abiturvorbereitung III: Stochastik', remark: '', details: [
+                'Binomialverteilung, Kenngrößen, Signifikanztests',
+                'Auswertung Klausur 13/II'
+            ] },
+            { nr: 27, kw: 12, date: '22.–25.03.27', type: 'org', u: '', topic: 'Abiturvorbereitung IV: Geometrie', remark: 'ab Fr 26.03. Osterferien', details: [
+                'Vektoren, Geraden und Ebenen, Lagebeziehungen, Winkel',
+                'Vermischte Abituraufgaben'
+            ] },
+            { ferien: 'Osterferien · 26.03.–02.04.2027' },
+            { nr: 28, kw: 14, date: '05.–09.04.27', type: 'org', u: '', topic: 'Generalprobe: Musterabitur + Konsultationen', remark: '', details: [
+                'Musterabitur unter Zeitbedingungen, Besprechung',
+                'Individuelle Konsultationen'
+            ] },
+            { nr: 29, kw: 15, date: '12.–16.04.27', type: 'org', u: '', topic: 'Konsultationen / Prüfungszeitraum beginnt', remark: 'Kursende', details: [
+                'Letzte Konsultationen nach Plan der Schule'
+            ] },
+            { ferien: 'Schriftliche Abiturprüfungen · ca. Mitte April – Mitte Mai 2027 (Termine SMK/Schule)' },
+            { ferien: 'Konsultationen + mündliche Abiturprüfungen · Mai/Juni 2027 (Termine Schule)' },
+            { ferien: 'Zeugnisausgabe Allgemeine Hochschulreife · Juni/Juli 2027' }
+        ];
+
+        // Lernbereich summaries for the clickable meta cards (see svp-plan.js).
+        window.LB_INFO = {
+            pdf: '../lehrplaene/lehrplan_bgy_mathematik.pdf',
+            page: 16,
+            lb3: {
+                page: 24,
+                bullets: [
+                    'Stammfunktion und unbestimmtes Integral; Integrieren ganzrationaler und Potenzfunktionen, $\\mathrm{e}^x$, $\\sin x$; CAS',
+                    'Bestimmtes Integral: rekonstruierter Bestand, Hauptsatz, Eigenschaften',
+                    'Flächeninhalte zwischen Graphen; numerische Integration (Rechteck-/Trapezmethode)',
+                ]
+            },
+            lb4: {
+                page: 25,
+                bullets: [
+                    'Grundgesamtheit, Stichprobe, Stichprobenmittel und -varianz',
+                    'Ein- und zweiseitige Signifikanztests für binomialverteilte Zufallsgrößen',
+                    'Fehler 1. und 2. Art, statistische Sicherheit',
+                ]
+            },
+            wp: {
+                page: 26,
+                bullets: [
+                    'Parametergleichungen von Geraden und Ebenen; Normalenvektor (Vektorprodukt); parameterfreie Form',
+                    'Lagebeziehungen: Schnittmengen, Spurpunkte, Schnittwinkel',
+                    'Oberflächeninhalte von Prismen und Pyramiden',
+                    'Alternative: Wahlpflicht 2 — Anwendungen der Matrizenrechnung (Leontief-Modell)',
+                ]
+            },
+            lb6: {
+                page: 26,
+                bullets: [
+                    'Parameter in einfachen Funktionenscharen sowie in Matrizen und Vektoren',
+                    'Extremwertprobleme: Abstandsbestimmung im Raum; Kosten, Erlöse und Gewinne',
+                ]
+            },
+        };
+
+        window.BADGE = {
+            lb3: ['b-violet', 'LB 3'],
+            lb4: ['b-pink', 'LB 4'],
+            wp: ['b-green', 'WP 1'],
+            lb6: ['b-orange', 'LB 6'],
+            lk: ['b-red', 'LEISTUNG'],
+            org: ['b-grey', 'ORGA']
+        };
+    </script>
+    <script src="../svp-auth.js"></script>
+    <script src="../svp-plan.js"></script>
+    <script src="../svp-nav.js"></script>
+</body>
+
+</html>
