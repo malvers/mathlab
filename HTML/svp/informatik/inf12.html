@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stoffverteilungsplan Informatik 12 | SJ 2026/27</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript>
+        <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    </noscript>
+    <link rel="icon" type="image/png" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="../svp.css">
+</head>
+
+<body>
+    <header class="page-head">
+        <a class="back-link" href="inf.html">&larr; Informatik (BGY)</a>
+        <div class="head-row">
+            <h1>Informatik &middot; Jahrgangsstufe 12</h1>
+            <button class="action orange" onclick="window.open('../lehrplaene/lehrplan_bgy_informatik.pdf', '_blank')">Lehrplan (PDF)</button>
+        </div>
+        <div class="subtitle">
+            Stoffverteilungsplan &middot; Berufliches Gymnasium (Grundkurs) &middot; Schuljahr 2026/27 (Mo 17.08.26 &ndash; Fr 09.07.27) &middot; 2 Ustd./Woche &middot;
+            Lehrplan: <a href="../lehrplaene/lehrplan_bgy_informatik.pdf" target="_blank"
+                rel="noopener">Informatik BGY (2020)</a>
+        </div>
+    </header>
+
+    <div class="meta-cards">
+        <div class="meta-card" data-lb="lb1">
+            <div class="k c-orange">Lernbereich 1</div>
+            <div class="v">Informatische Modellierung</div>
+            <div class="vu">22 Ustd.</div>
+        </div>
+        <div class="meta-card" data-lb="lb2">
+            <div class="k c-cyan">Lernbereich 2</div>
+            <div class="v">Modellierung von Datenbanken</div>
+            <div class="vu">24 Ustd.</div>
+        </div>
+        <div class="meta-card" data-lb="lb3">
+            <div class="k c-violet">Lernbereich 3</div>
+            <div class="v">Algorithmen und Programme (Beginn)</div>
+            <div class="vu">6 von 24 Ustd.</div>
+        </div>
+        <div class="meta-card" data-lb="wb">
+            <div class="k c-green">Wahlbereich</div>
+            <div class="v">K&uuml;nstliche Intelligenz</div>
+            <div class="vu">4 Ustd.</div>
+        </div>
+    </div>
+
+    <div class="toolbar">
+        <button class="action" onclick="window.print()">Drucken</button>
+        <button class="action" onclick="togglePlanDetails()">Alle auf/zu</button>
+        <button class="action" onclick="togglePlanEdit(this)">✎ Bearbeiten</button>
+        <button class="action secondary" onclick="resetPlanEdits(this)">Zurücksetzen</button>
+        <div class="legend">
+            <span><span class="dot" style="background: var(--lambda)"></span>LB 1</span>
+            <span><span class="dot" style="background: var(--cyan)"></span>LB 2</span>
+            <span><span class="dot" style="background: var(--violet)"></span>LB 3</span>
+            <span><span class="dot" style="background: var(--phi)"></span>Wahlbereich</span>
+            <span><span class="dot" style="background: var(--ypsilon)"></span>Leistung</span>
+            <span><span class="dot" style="background: rgba(170,190,220,0.5)"></span>Orga/Puffer</span>
+        </div>
+    </div>
+
+    <div class="table-wrap">
+        <table id="plan-table">
+            <thead>
+                <tr>
+                    <th>Nr.</th>
+                    <th>KW</th>
+                    <th>Woche</th>
+                    <th>Bereich</th>
+                    <th>Ustd.</th>
+                    <th>Thema / Inhalte</th>
+                    <th>Bemerkungen</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <footer class="page-foot">
+        Wochenzeile anklicken &rarr; Stundenskizze ausklappen; beim Drucken werden alle Details ausgeklappt.
+        &bdquo;Bearbeiten&ldquo; macht Themen, Bemerkungen und Bullets editierbar; &bdquo;Zur&uuml;cksetzen&ldquo;
+        l&auml;dt das Original. Ferientermine Sachsen 2026/27 (SMK): Herbst 12.&ndash;24.10.26 &middot;
+        Weihnachten 23.12.26&ndash;02.01.27 &middot; Winter 08.&ndash;19.02.27 &middot; Ostern 26.03.&ndash;02.04.27
+        &middot; Pfingsten 07.05. + 15.&ndash;18.05.27 &middot; Sommer ab 10.07.27 &middot; Bu&szlig;- und Bettag
+        Mi 18.11.26 unterrichtsfrei. Klausurtermine an den Klausurplan der Schule anpassen.
+        Aufteilung des Grundkurses (LB 1&ndash;4 &uuml;ber Jgst. 12+13): LB 1 (22) + LB 2 (24) + Beginn LB 3
+        (6 von 24) = 52 Ustd. in 26 verbindlichen Wochen; LB 3 wird in Jgst. 13 fortgesetzt.
+    </footer>
+
+    <script>
+        // Data-driven plan: one entry per school week (or holiday block).
+        // 2 Ustd./week; u shows the cumulative Ustd. range within the Lernbereich.
+        // details: bullet list shown in the expandable sub-row (lesson sketch).
+        // type: lb1 | lb2 | lb3 | wb | lk | org | ferien
+        window.PLAN = [
+            { nr: 1, kw: 34, date: '17.–21.08.26', type: 'org', u: '', topic: 'Kursauftakt: Organisation, Überblick Grundkurs 12/13, Rückblick Kl. 11', remark: 'Erster Schultag Mo 17.08.', details: [
+                'Organisatorisches; Fahrplan: Modellierung → Datenbanken → Algorithmen → Projekt (13)',
+                'Kurze Reaktivierung: Informationsmanagement und IT-Sicherheit aus Kl. 11'
+            ] },
+            { nr: 2, kw: 35, date: '24.–28.08.26', type: 'lb1', u: '1–2/22', topic: 'Systematik informatischer Modellierung: Modellbegriff', remark: 'Lernplakat', details: [
+                'Modell als Ersatzobjekt für einen Ausschnitt der Realität (materiell/ideell)',
+                'Beispiele sammeln: Karte, Klimamodell, Datenmodell, Simulation'
+            ] },
+            { nr: 3, kw: 36, date: '31.08.–04.09.26', type: 'lb1', u: '3–4/22', topic: 'Schrittfolge bei der Modellbildung; Eigenschaften von Modellen', remark: '', details: [
+                'Abgrenzen → Abstrahieren → Modellieren → Prüfen',
+                'Eigenschaften: Verkürzung, Abbildung, Pragmatik (an Beispielen)'
+            ] },
+            { nr: 4, kw: 37, date: '07.–11.09.26', type: 'lb1', u: '5–6/22', topic: 'Grenzen von Modellen', remark: '', details: [
+                'Wo Modelle versagen: Vereinfachung vs. Realität',
+                'Diskussion: Wettervorhersage, Verkehrsprognosen, KI-Modelle'
+            ] },
+            { nr: 5, kw: 38, date: '14.–18.09.26', type: 'lb1', u: '7–8/22', topic: 'Modellierung von Prozessen: Ziele und Grundsätze', remark: '', details: [
+                'Vom realen Prozess zum Modell: Abstraktion an einem Geschäftsprozess',
+                'Beispielprozess der Schule/eines Modellunternehmens aufnehmen'
+            ] },
+            { nr: 6, kw: 39, date: '21.–25.09.26', type: 'lb1', u: '9–10/22', topic: 'Prozessketten I: erweitertes Ereignisprozesskettendiagramm (eEPK)', remark: '', details: [
+                'eEPK-Notation: Ereignis, Funktion, Konnektoren',
+                'Einen Alltagsprozess als eEPK modellieren'
+            ] },
+            { nr: 7, kw: 40, date: '28.09.–02.10.26', type: 'lb1', u: '11–12/22', topic: 'Prozessketten II: Business Process Model and Notation (BPMN)', remark: '', details: [
+                'BPMN-Grundelemente: Pools, Lanes, Tasks, Gateways',
+                'Denselben Prozess in BPMN modellieren und mit eEPK vergleichen'
+            ] },
+            { nr: 8, kw: 41, date: '05.–09.10.26', type: 'lb1', u: '13–14/22', topic: 'Dokumentation eines Prozessmodells', remark: '', details: [
+                'Prozessmodell sauber dokumentieren (Annahmen, Rollen, Schnittstellen)',
+                'Peer-Review der Modelle'
+            ] },
+            { ferien: 'Herbstferien · 12.–24.10.2026 (KW 42–43)' },
+            { nr: 9, kw: 44, date: '26.–30.10.26', type: 'lb1', u: '15–16/22', topic: 'Projektmanagement I: Grundlagen', remark: 'Geschäftsprozesse als Basis', details: [
+                'Projektbegriff, Phasen, Rollen',
+                'Modellierung als Werkzeug des Projektmanagements'
+            ] },
+            { nr: 10, kw: 45, date: '02.–06.11.26', type: 'lb1', u: '17–18/22', topic: 'Projektmanagement II: Planung — Ablaufplan, Netzplantechnik, Gantt-Diagramm', remark: '', details: [
+                'Netzplan: Vorgänge, Abhängigkeiten, kritischer Pfad',
+                'Gantt-Diagramm zu einem Mini-Projekt erstellen (Tool oder Papier)'
+            ] },
+            { nr: 11, kw: 46, date: '09.–13.11.26', type: 'lb1', u: '19–20/22', topic: 'Alternative Modellierung: Klassen-Objekte-Attribute-Methoden-Modell', remark: '', details: [
+                'Objektorientierte Sicht auf einen Prozess',
+                'Sich positionieren: Wann Prozesskette, wann Objektmodell?'
+            ] },
+            { nr: 12, kw: 47, date: '16.–20.11.26', type: 'lb1', u: '21–22/22', topic: 'Anwendung und Abschluss LB 1: Modellierung eines Modellunternehmens', remark: 'Mi 18.11. Buß- und Bettag (unterrichtsfrei); LB 1 abgeschlossen', details: [
+                'Komplexübung: Geschäftsprozess modellieren und Projekt dazu planen',
+                'Lernplakat vervollständigen'
+            ] },
+            { nr: 13, kw: 48, date: '23.–27.11.26', type: 'lk', u: 'KL 1', topic: 'Wiederholung + Klausur 1 (LB 1: Informatische Modellierung)', remark: 'Termin nach Klausurplan', details: [
+                'Wiederholung: Modellbegriff, eEPK/BPMN, Projektplanung',
+                'Klausur 1'
+            ] },
+            { nr: 14, kw: 49, date: '30.11.–04.12.26', type: 'lb2', u: '1–2/24', topic: 'Strukturierung von Daten: Datenhierarchie', remark: 'Bit – Byte – Datenfeld – Datensatz – Datei', details: [
+                'Datenhierarchie an konkreten Dateien nachvollziehen',
+                'Von der Tabelle zur Datei: Wie speichert ein Rechner strukturierte Daten?'
+            ] },
+            { nr: 15, kw: 50, date: '07.–11.12.26', type: 'lb2', u: '3–4/24', topic: 'Aufbau und Aufgaben eines Datenbanksystems: DBMS + Datenbank', remark: '', details: [
+                'Datenbanksystem = Datenbasis + Datenbankmanagementsystem',
+                'Erste Schritte im DBMS (z. B. SQLite/MySQL): Datenbank anlegen'
+            ] },
+            { nr: 16, kw: 51, date: '14.–18.12.26', type: 'lb2', u: '5–6/24', topic: 'Relationales DBMS: Eingabe und Sortieren von Daten', remark: '', details: [
+                'Tabellen anlegen, Datentypen wählen, Datensätze einfügen',
+                'ORDER BY: Daten sortiert ausgeben'
+            ] },
+            { nr: 17, kw: 52, date: '21.–22.12.26', type: 'org', u: '', topic: 'Puffer / Übung', remark: 'nur Mo/Di — ab Mi 23.12. Ferien', details: [
+                'SQL-Fingerübungen zum Jahresausklang'
+            ] },
+            { ferien: 'Weihnachtsferien · 23.12.2026–02.01.2027' },
+            { nr: 18, kw: 1, date: '04.–08.01.27', type: 'lb2', u: '7–8/24', topic: 'Datenbankauswertung mit Abfragen I: Selektion und Projektion (SQL)', remark: 'deklarative Sprache', details: [
+                'SELECT, WHERE: Zeilen und Spalten gezielt auswählen',
+                'Übungsaufgaben auf einer Beispieldatenbank'
+            ] },
+            { nr: 19, kw: 2, date: '11.–15.01.27', type: 'lb2', u: '9–10/24', topic: 'Datenbankauswertung mit Abfragen II: Verbund von Tabellen (JOIN)', remark: '', details: [
+                'JOIN über Fremdschlüssel; mehrstufige Abfragen',
+                'Aggregatfunktionen als Ausblick (COUNT, SUM)'
+            ] },
+            { nr: 20, kw: 3, date: '18.–22.01.27', type: 'lb2', u: '11–12/24', topic: 'Semantische und logische Datenmodellierung; Entity-Relationship-Modell I', remark: '', details: [
+                'Entitäten, Attribute, Beziehungen, Kardinalitäten',
+                'ER-Diagramm zu einem fachbezogenen Beispiel entwerfen'
+            ] },
+            { nr: 21, kw: 4, date: '25.–29.01.27', type: 'lb2', u: '13–14/24', topic: 'ER-Modell II: vom ER-Diagramm zum Relationenschema', remark: '', details: [
+                'Überführungsregeln anwenden',
+                'Eigenes ER-Modell in Tabellen umsetzen'
+            ] },
+            { nr: 22, kw: 5, date: '01.–05.02.27', type: 'lb2', u: '15–16/24', topic: 'Normalisierung bis zur dritten Normalform', remark: 'Fr 05.02. Halbjahresende / Zeugnisse', details: [
+                'Redundanzen und Anomalien erkennen',
+                '1. bis 3. Normalform an Beispieltabellen durchführen'
+            ] },
+            { ferien: 'Winterferien · 08.–19.02.2027 (KW 6–7)' },
+            { nr: 23, kw: 8, date: '22.–26.02.27', type: 'lb2', u: '17–18/24', topic: 'Anforderungen an Datenbanken: Redundanz, Konsistenz, Integrität', remark: '', details: [
+                'Integritätsregeln und Konsistenz an Fallbeispielen',
+                'Constraints im DBMS praktisch setzen'
+            ] },
+            { nr: 24, kw: 9, date: '01.–05.03.27', type: 'lb2', u: '19–20/24', topic: 'Planung und Erstellung einer eigenen relationalen Datenbank I', remark: 'fachrichtungsbezogenes Beispiel', details: [
+                'Eigenes Thema wählen (fächerverbindend oder gesellschaftlich relevant)',
+                'ER-Modell entwerfen, normalisieren'
+            ] },
+            { nr: 25, kw: 10, date: '08.–12.03.27', type: 'lb2', u: '21–22/24', topic: 'Eigene Datenbank II: Implementierung und Abfragen', remark: 'nachhaltige Entwicklung beachten', details: [
+                'Datenbank implementieren, Beispieldaten einpflegen',
+                'Auswertungsabfragen formulieren und präsentieren'
+            ] },
+            { nr: 26, kw: 11, date: '15.–19.03.27', type: 'lb2', u: '23–24/24', topic: 'Datensicherheit und Datenschutz bei Datenbanken; große Datenmengen', remark: 'LB 2 abgeschlossen', details: [
+                'Sich positionieren: Speicherung und Verarbeitung großer Datenmengen',
+                'DSGVO, BDSG, Sächsisches Datenschutzgesetz im Datenbankkontext'
+            ] },
+            { nr: 27, kw: 12, date: '22.–25.03.27', type: 'lk', u: 'KL 2', topic: 'Wiederholung + Klausur 2 (LB 2: Datenbanken)', remark: 'Termin nach Klausurplan; ab Fr 26.03. Osterferien', details: [
+                'Wiederholung: SQL, ER-Modell, Normalisierung',
+                'Klausur 2'
+            ] },
+            { ferien: 'Osterferien · 26.03.–02.04.2027' },
+            { nr: 28, kw: 14, date: '05.–09.04.27', type: 'lb3', u: '1–2/24', topic: 'Programmiersprachen als Schnittstelle Mensch–Maschine: Grundbegriffe', remark: 'LB 3 wird in Jgst. 13 fortgesetzt', details: [
+                'Syntax und Semantik; Compiler vs. Interpreter',
+                'Historische Entwicklung der Programmiersprachen im Überblick'
+            ] },
+            { nr: 29, kw: 15, date: '12.–16.04.27', type: 'lb3', u: '3–4/24', topic: 'Klassifizierung von Programmiersprachen: imperativ und deklarativ', remark: '', details: [
+                'Imperative vs. deklarative Sprachen an Beispielen (Python/Java vs. SQL)',
+                'Zuordnungsübung mit Codeschnipseln'
+            ] },
+            { nr: 30, kw: 16, date: '19.–23.04.27', type: 'lb3', u: '5–6/24', topic: 'Problemlösestrategien: Visualisierung von Programmstrukturen', remark: 'Programmablaufplan, Struktogramm', details: [
+                'PAP und Struktogramm lesen und erstellen',
+                'Kleine Aufgaben visualisieren — Implementierung folgt in Jgst. 13'
+            ] },
+            { nr: 31, kw: 17, date: '26.–30.04.27', type: 'wb', u: '1–2/4', topic: 'Wahlbereich „Künstliche Intelligenz" I: Teilgebiete und Methoden', remark: '', details: [
+                'Teilgebiete der KI; Methoden: Suchen, Planen, Optimieren, logisches Schließen',
+                'Praxis: kleines ML-Experiment (z. B. Teachable Machine)'
+            ] },
+            { nr: 32, kw: 18, date: '03.–05.05.27', type: 'wb', u: '3–4/4', topic: 'Wahlbereich KI II: Risiken von KI-Anwendungen', remark: 'Do 06.05. Himmelfahrt + Fr 07.05. unterrichtsfrei', details: [
+                'Spracherkennung, Computerspiele, aktive Sicherheitssysteme',
+                'Positionierung: Arbeitswelt, autonomer Verkehr, autonome Waffen'
+            ] },
+            { nr: 33, kw: 19, date: '10.–14.05.27', type: 'org', u: '', topic: 'Auswertung Klausuren / Übung', remark: '', details: [
+                'Auswertung und Berichtigung; offene Fragen klären'
+            ] },
+            { ferien: 'Pfingsten · Mo 17.05. Pfingstmontag + Di 18.05.2027 Ferientag' },
+            { nr: 34, kw: 20, date: '19.–21.05.27', type: 'org', u: '', topic: 'Übung / Puffer', remark: 'nur Mi–Fr', details: [
+                'SQL- und Modellierungsübungen nach Bedarf'
+            ] },
+            { nr: 35, kw: 21, date: '24.–28.05.27', type: 'org', u: '', topic: 'Vertiefung: SQL-Komplexübungen', remark: '', details: [
+                'Größere Abfrageaufgaben auf realistischen Datensätzen'
+            ] },
+            { nr: 36, kw: 22, date: '31.05.–04.06.27', type: 'org', u: '', topic: 'Exkurs: Interaktion von IT-Systemen (Schnuppern in Wahlbereich 7)', remark: 'Repeater – Switch – Router', details: [
+                'Netzwerkkomponenten und TCP/IP-Schichtenmodell mit Simulationssoftware (z. B. Filius)'
+            ] },
+            { nr: 37, kw: 23, date: '07.–11.06.27', type: 'org', u: '', topic: 'Exkurs: Augmented und Virtual Reality (Schnuppern in Wahlbereich 3)', remark: '', details: [
+                'Mensch-Maschine-Interaktion; Komponenten einer Datenbrille',
+                'AR-Demos ausprobieren und bewerten'
+            ] },
+            { nr: 38, kw: 24, date: '14.–18.06.27', type: 'org', u: '', topic: 'Vertiefung: Modellierungs-Komplexaufgabe', remark: '', details: [
+                'Prozess + Datenmodell + Projektplan zu einem Szenario kombinieren'
+            ] },
+            { nr: 39, kw: 25, date: '21.–25.06.27', type: 'org', u: '', topic: 'Puffer', remark: 'Reserve für Projekttage / Exkursion', details: [
+                'Reserve — je nach Schuljahresplanung'
+            ] },
+            { nr: 40, kw: 26, date: '28.06.–02.07.27', type: 'org', u: '', topic: 'Jahresrückblick; Ausblick Jgst. 13: Algorithmen + Projekt Webtechnologie', remark: '', details: [
+                'Jahresrückblick: Modellierung und Datenbanken in 10 Fragen',
+                'Ausblick 13: Programmieren, Projekt, Abitur'
+            ] },
+            { nr: 41, kw: 27, date: '05.–09.07.27', type: 'org', u: '', topic: 'Ausklang', remark: 'Fr 09.07. letzter Schultag, Zeugnisse', details: [
+                'Accounts und Abgaben aufräumen; Logikrätsel zum Abschluss'
+            ] },
+            { ferien: 'Sommerferien · ab 10.07.2027' }
+        ];
+
+        // Lernbereich summaries for the clickable meta cards (see svp-plan.js).
+        window.LB_INFO = {
+            pdf: '../lehrplaene/lehrplan_bgy_informatik.pdf',
+            page: 21,
+            lb1: {
+                page: 21,
+                bullets: [
+                    'Modellbegriff, Schrittfolge und Grenzen der Modellbildung',
+                    'Geschäftsprozesse modellieren: eEPK und BPMN',
+                    'Projektmanagement: Ablaufplan, Netzplantechnik, Gantt-Diagramm',
+                    'Alternative Sicht: Klassen-Objekte-Attribute-Methoden-Modell',
+                ]
+            },
+            lb2: {
+                page: 22,
+                bullets: [
+                    'Datenhierarchie: Bit — Byte — Datenfeld — Datensatz — Datei',
+                    'Relationales DBMS: SQL mit Selektion, Projektion und Verbund (JOIN)',
+                    'ER-Modell und Normalisierung bis zur 3. Normalform',
+                    'Eigene Datenbank planen, implementieren und auswerten',
+                    'Datensicherheit und Datenschutz (DSGVO, BDSG, SächsDSG)',
+                ]
+            },
+            lb3: {
+                page: 22,
+                bullets: [
+                    'Programmiersprachen: Syntax und Semantik, Compiler und Interpreter',
+                    'Klassifizierung: imperative und deklarative Sprachen',
+                    'Visualisierung: Programmablaufplan und Struktogramm — Fortsetzung in Jgst. 13',
+                ]
+            },
+            wb: {
+                page: 25,
+                bullets: [
+                    'Teilgebiete und Methoden der KI',
+                    'Risiken: Verdrängung aus der Arbeitswelt, autonomer Verkehr, autonome Waffen',
+                ]
+            },
+        };
+
+        window.BADGE = {
+            lb1: ['b-orange', 'LB 1'],
+            lb2: ['b-cyan', 'LB 2'],
+            lb3: ['b-violet', 'LB 3'],
+            wb: ['b-green', 'WAHL'],
+            lk: ['b-red', 'LEISTUNG'],
+            org: ['b-grey', 'ORGA']
+        };
+    </script>
+    <script src="../svp-auth.js"></script>
+    <script src="../svp-plan.js"></script>
+</body>
+
+</html>

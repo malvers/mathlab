@@ -31,12 +31,18 @@ body {
 
 header.page-head { max-width: 1200px; margin: 0 auto 22px; position: relative; }
 
-/* Lehrplan (PDF) button sits top right in the header, level with the subtitle */
-.page-head button.action.orange { position: absolute; right: 0; bottom: 0; }
-
-@media (max-width: 760px) {
-    .page-head button.action.orange { position: static; margin-top: 12px; }
+/* Header row: h1 and the Lehrplan (PDF) button share one line,
+   button aligned to the heading baseline; wraps on narrow screens */
+.page-head .head-row {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 6px;
 }
+
+.page-head .head-row h1 { margin-bottom: 0; }
 
 @media print { .page-head button.action.orange { display: none; } }
 
@@ -147,6 +153,45 @@ button.action.secondary {
     cursor: text;
     border-radius: 3px;
 }
+
+/* Lernbereich tiles: Ustd. value on its own line */
+.meta-card .vu {
+    margin-top: 3px;
+    font-size: 0.78rem;
+    color: rgba(170, 190, 220, 0.7);
+}
+
+/* Clickable Lernbereich tiles + shared summary panel */
+.meta-card[data-lb] { cursor: pointer; transition: border-color 0.15s; }
+.meta-card[data-lb]:hover { border-color: rgba(120, 160, 220, 0.55); }
+.meta-card.open { border-color: var(--cyan); }
+
+.lb-panel {
+    max-width: 1200px;
+    margin: 0 auto 18px;
+    padding: 14px 18px;
+    background: rgba(14, 36, 78, 0.35);
+    border: 1px solid rgba(120, 160, 220, 0.3);
+    border-radius: 12px;
+}
+
+.lb-panel-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.72rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--cyan);
+    margin-bottom: 8px;
+}
+
+.lb-panel ul { margin: 0 0 10px 18px; }
+.lb-panel li { margin: 3px 0; }
+.lb-panel li::marker { color: var(--lambda); }
+
+.lb-panel-foot { font-size: 0.8rem; color: rgba(170, 190, 220, 0.85); }
+.lb-panel-foot a { color: var(--lambda); }
+
+@media print { .lb-panel { display: none; } }
 
 /* Cloud sync state in the toolbar (plan pages) */
 .toolbar .cloud {

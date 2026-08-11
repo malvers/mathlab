@@ -18,40 +18,43 @@
 
 <body>
     <header class="page-head">
-        <a class="back-link" href="./">&larr; &Uuml;bersicht Informatik</a>
-        <h1>Stoffverteilungsplan Informatiksysteme &middot; Jahrgangsstufe 12</h1>
+        <a class="back-link" href="is.html">&larr; Informatiksysteme</a>
+        <div class="head-row">
+            <h1>Informatiksysteme &middot; Jahrgangsstufe 12</h1>
+            <button class="action orange" onclick="window.open('../lehrplaene/lehrplan_bgy_informatiksysteme.pdf', '_blank')">Lehrplan (PDF)</button>
+        </div>
         <div class="subtitle">
-            Berufliches Gymnasium (Leistungskurs) &middot; Schuljahr 2026/27 &middot; 6 Ustd./Woche &middot;
+            Stoffverteilungsplan &middot; Berufliches Gymnasium (Leistungskurs) &middot; Schuljahr 2026/27 (Mo 17.08.26 &ndash; Fr 09.07.27) &middot; 6 Ustd./Woche &middot;
             Lehrplan: <a href="https://www.schulportal.sachsen.de/lplandb/lehrplan/207" target="_blank"
                 rel="noopener">Informatiksysteme BGY (2020)</a>
         </div>
-        <button class="action orange" onclick="window.open('../lehrplaene/lehrplan_bgy_informatiksysteme.pdf', '_blank')">Lehrplan (PDF)</button>
     </header>
 
     <div class="meta-cards">
-        <div class="meta-card">
+        <div class="meta-card" data-lb="lb1">
             <div class="k c-orange">Lernbereich 1</div>
-            <div class="v">Architektur und Betrieb von IuK-Systemen &middot; 26 Ustd.</div>
+            <div class="v">Architektur und Betrieb von IuK-Systemen</div>
+            <div class="vu">26 Ustd.</div>
         </div>
-        <div class="meta-card">
+        <div class="meta-card" data-lb="lb2">
             <div class="k c-cyan">Lernbereich 2</div>
-            <div class="v">Datenbank-Technologie &middot; 52 Ustd.</div>
+            <div class="v">Datenbank-Technologie</div>
+            <div class="vu">52 Ustd.</div>
         </div>
-        <div class="meta-card">
+        <div class="meta-card" data-lb="lb3">
             <div class="k c-violet">Lernbereich 3</div>
-            <div class="v">IuK-Systeme in Netzwerken &middot; 38 Ustd.</div>
+            <div class="v">IuK-Systeme in Netzwerken</div>
+            <div class="vu">38 Ustd.</div>
         </div>
-        <div class="meta-card">
+        <div class="meta-card" data-lb="lb5">
             <div class="k c-pink">Lernbereich 5</div>
-            <div class="v">Analyse, Entwurf, Realisierung &middot; 40 Ustd.</div>
+            <div class="v">Analyse, Entwurf, Realisierung</div>
+            <div class="vu">40 Ustd.</div>
         </div>
         <div class="meta-card">
             <div class="k c-bright">Jgst. 13 (Ausblick)</div>
-            <div class="v">LB 4 (IT-PM) + LB 6&ndash;8 &middot; 132 Ustd.</div>
-        </div>
-        <div class="meta-card">
-            <div class="k c-bright">Schuljahr</div>
-            <div class="v">Mo 17.08.2026 &ndash; Fr 09.07.2027</div>
+            <div class="v">LB 4 (IT-PM) + LB 6&ndash;8</div>
+            <div class="vu">132 Ustd.</div>
         </div>
     </div>
 
@@ -288,6 +291,49 @@
             ] },
             { ferien: 'Sommerferien · ab 10.07.2027' }
         ];
+
+        // Lernbereich summaries for the clickable meta cards (see svp-plan.js).
+        window.LB_INFO = {
+            pdf: '../lehrplaene/lehrplan_bgy_informatiksysteme.pdf',
+            page: 20,
+            lb1: {
+                page: 20,
+                bullets: [
+                    'Grundschaltungen der Prozessor- und Speichertechnik; Multiplexer/Demultiplexer',
+                    'Rechnerarchitekturen: von-Neumann-Rechner, aktuelle Hardware, Bus- und Speichersysteme',
+                    'Betriebssysteme: Klassifikation, Aufbau, Funktion',
+                    'Systemsoftware bewerten: kommerziell vs. Open Source, Urheberrecht, Lizenzen',
+                ]
+            },
+            lb2: {
+                page: 20,
+                bullets: [
+                    'Architektur von Datenbanksystemen: 3-Ebenen-Modell, DBMS, Datenbankmodelle',
+                    'ER-Modellierung und Normalisierung nach Codd (bis 3. Normalform)',
+                    'SQL: Datendefinition, -manipulation und -abfrage bis Gruppierung und Verbund',
+                    'Administration: Benutzerkonzepte, Rechte, Datensicherheit',
+                    'Applikation mit Datenbankanbindung: Formular und Report',
+                ]
+            },
+            lb3: {
+                page: 20,
+                bullets: [
+                    'Netztopologien, OSI-Referenzmodell, Zugriffsverfahren, Übertragungsmedien',
+                    'Protokolle: ARP, IP, TCP, UDP, HTTP, FTP, SSH; IPv4/IPv6',
+                    'IP-Routing: Netzwerkadressen, Subnetze, Masquerading',
+                    'LAN-Praxis: Aufbau/Simulation; Informationssicherheit: RAID, USV, Backup, Firewall',
+                ]
+            },
+            lb5: {
+                page: 20,
+                bullets: [
+                    'Ist-Analyse, Zielbestimmung, Sollkonzept; Lasten- und Pflichtenheft',
+                    'Grob- und Feinkonzept; Beschaffung, Ausschreibung, Handelskalkulation',
+                    'Angebotsbewertung: Prüfung, Vergleich, Entscheidung, Auftragserteilung',
+                    'Einführung von IuK-Systemen; Qualitätssicherung, Datenschutz (SächsDSG, BDSG)',
+                ]
+            },
+        };
 
         window.BADGE = {
             lb1: ['b-orange', 'LB 1'],

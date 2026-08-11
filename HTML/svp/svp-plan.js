@@ -162,6 +162,20 @@
         rendered.push(ref);
     });
 
+    // Legend: replace the static dot list with the same pills as the
+    // Bereich column, generated from the page's BADGE definition.
+    const legend = document.querySelector('.toolbar .legend');
+    if (legend) {
+        legend.textContent = '';
+        for (const key in window.BADGE) {
+            const [cls, label] = window.BADGE[key];
+            const pill = document.createElement('span');
+            pill.className = 'badge ' + cls;
+            pill.textContent = label;
+            legend.appendChild(pill);
+        }
+    }
+
     function setAllDetails(open) {
         document.querySelectorAll('tr.detail-row').forEach(r => {
             r.classList.toggle('open', open);
@@ -351,4 +365,77 @@
     }
 
     syncFromRemote();
+
+    // --- Lernbereich info panels -----------------------------------------
+    // Meta cards carrying data-lb open a shared summary panel below the
+    // card row: bullets from the page's LB_INFO, week stats computed from
+    // PLAN, and a deep link into the Lehrplan PDF (#page=N).
+    (function () {
+        const cards = document.querySelectorAll('.meta-card[data-lb]');
+        const grid = document.querySelector('.meta-cards');
+        if (!cards.length || !grid || !window.LB_INFO) return;
+
+        const panel = document.createElement('div');
+        panel.className = 'lb-panel';
+        panel.hidden = true;
+        grid.insertAdjacentElement('afterend', panel);
+        let openKey = null;
+
+        function statsFor(key) {
+            const rows = window.PLAN.filter(r => r.type === key);
+            if (!rows.length) return '';
+            const first = rows[0], last = rows[rows.length - 1];
+            if (rows.length === 1) return 'Im Plan: Woche ' + first.nr + ' (' + first.date + ')';
+            return 'Im Plan: ' + rows.length + ' Wochen, von Woche ' + first.nr + ' (' + first.date +
+                ') bis Woche ' + last.nr + ' (' + last.date + ')';
+        }
+
+        cards.forEach(card => card.addEventListener('click', () => {
+            const key = card.dataset.lb;
+            if (openKey === key) {
+                openKey = null;
+                panel.hidden = true;
+                cards.forEach(c => c.classList.remove('open'));
+                return;
+            }
+            openKey = key;
+            cards.forEach(c => c.classList.toggle('open', c === card));
+            const info = window.LB_INFO[key] || {};
+            panel.textContent = '';
+
+            const title = document.createElement('div');
+            title.className = 'lb-panel-title';
+            const kEl = card.querySelector('.k');
+            const vEl = card.querySelector('.v');
+            title.textContent = (kEl ? kEl.textContent + ' — ' : '') + (vEl ? vEl.textContent : '');
+            panel.appendChild(title);
+
+            const ul = document.createElement('ul');
+            (info.bullets || []).forEach(b => {
+                const li = document.createElement('li');
+                setMathText(li, b);
+                ul.appendChild(li);
+            });
+            panel.appendChild(ul);
+
+            const foot = document.createElement('div');
+            foot.className = 'lb-panel-foot';
+            foot.textContent = statsFor(key);
+            if (window.LB_INFO.pdf) {
+                const a = document.createElement('a');
+                const pg = info.page || window.LB_INFO.page;
+                a.href = window.LB_INFO.pdf + (pg ? '#page=' + pg : '');
+                a.target = '_blank';
+                a.rel = 'noopener';
+                a.textContent = 'im Lehrplan (PDF)';
+                foot.appendChild(document.createTextNode(' · '));
+                foot.appendChild(a);
+            }
+            panel.appendChild(foot);
+            panel.hidden = false;
+        }));
+
+        // First Lernbereich starts open.
+        cards[0].click();
+    })();
 })();
