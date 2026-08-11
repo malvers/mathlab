@@ -29,7 +29,16 @@ body {
     padding: clamp(12px, 3vw, 40px);
 }
 
-header.page-head { max-width: 1200px; margin: 0 auto 22px; }
+header.page-head { max-width: 1200px; margin: 0 auto 22px; position: relative; }
+
+/* Lehrplan (PDF) button sits top right in the header, level with the subtitle */
+.page-head button.action.orange { position: absolute; right: 0; bottom: 0; }
+
+@media (max-width: 760px) {
+    .page-head button.action.orange { position: static; margin-top: 12px; }
+}
+
+@media print { .page-head button.action.orange { display: none; } }
 
 a.back-link {
     display: inline-block;
