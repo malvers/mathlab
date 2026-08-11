@@ -292,6 +292,7 @@
         damit ger&auml;te&uuml;bergreifend. L&ouml;schen: zweimal klicken (erst scharf schalten, dann best&auml;tigen).
     </footer>
 
+    <script src="svp-auth.js"></script>
     <script>
         /* Dev-only cleanup: old service workers on localhost used to serve stale pages and
            intercepted/hung fetches (login!). Unregister them + purge the Cache API, then reload
@@ -339,12 +340,11 @@
            as offline cache; logged in, the cloud is the shared store.
            Same pattern as cv.html — publishable key, own storageKey.
            ============================================================ */
-        const DB_URL = 'https://fyfhxzyymmurlaenmzse.supabase.co';
-        const DB_KEY = 'sb_publishable_ubQDiMD-X3N0vZvPVi229Q_-5Zootfk'; /* publishable key – public by design */
-        const SESSION_KEY = 'svp-session'; /* own token store — no supabase-js involved */
+        /* Auth core (session, token refresh, api) lives in shared svp-auth.js */
+        const DB_URL = svpAuth.DB_URL;
+        const DB_KEY = svpAuth.DB_KEY;
+        const storeSession = svpAuth.storeSession;
         let cloudOn = false;
-        let session = null;
-        try { session = JSON.parse(localStorage.getItem(SESSION_KEY)); } catch (e) { session = null; }
         const authBtn = document.getElementById('auth-btn');
         const cloudState = document.getElementById('cloud-state');
         const loginOverlay = document.getElementById('login-overlay');
@@ -363,12 +363,6 @@
         }
         updateAuthUi();
 
-        function storeSession(s) {
-            session = s;
-            if (s) localStorage.setItem(SESSION_KEY, JSON.stringify(s));
-            else localStorage.removeItem(SESSION_KEY);
-        }
-
         function withTimeout(promise, ms, step) {
             return Promise.race([
                 promise,
@@ -384,44 +378,14 @@
             });
         }
 
-        /* Refresh the access token via plain fetch when it is about to expire. */
-        async function ensureFreshToken() {
-            if (!session) throw new Error('nicht angemeldet');
-            if (session.expires_at && Date.now() / 1000 < session.expires_at - 60) return;
-            const res = await fetch(DB_URL + '/auth/v1/token?grant_type=refresh_token', {
-                method: 'POST',
-                headers: { apikey: DB_KEY, 'Content-Type': 'application/json' },
-                body: JSON.stringify({ refresh_token: session.refresh_token })
-            });
-            const data = await res.json().catch(() => ({}));
-            if (!res.ok) {
-                storeSession(null);
-                cloudOn = false;
-                updateAuthUi();
-                throw new Error('Session abgelaufen — bitte neu anmelden');
+        /* PostgREST call via shared core; on a dead session also reset the UI. */
+        async function api(path, opts) {
+            try {
+                return await svpAuth.api(path, opts);
+            } catch (e) {
+                if (!svpAuth.hasSession()) { cloudOn = false; updateAuthUi(); }
+                throw e;
             }
-            storeSession({
-                access_token: data.access_token,
-                refresh_token: data.refresh_token,
-                expires_at: data.expires_at || Math.floor(Date.now() / 1000) + (data.expires_in || 3600)
-            });
-        }
-
-        /* PostgREST call with fresh token; one retry after a 401. */
-        async function api(path, opts, retry) {
-            await ensureFreshToken();
-            const res = await fetch(DB_URL + '/rest/v1/' + path, Object.assign({}, opts, {
-                headers: Object.assign({
-                    apikey: DB_KEY,
-                    Authorization: 'Bearer ' + session.access_token,
-                    'Content-Type': 'application/json'
-                }, (opts && opts.headers) || {})
-            }));
-            if (res.status === 401 && !retry) {
-                session.expires_at = 0; /* force refresh */
-                return api(path, opts, true);
-            }
-            return res;
         }
 
         function rowFromNote(n) {
@@ -495,6 +459,7 @@
         window.authClick = async function () {
             if (cloudOn) {
                 /* best-effort server logout, then drop the local session */
+                const session = svpAuth.session;
                 if (session) {
                     fetch(DB_URL + '/auth/v1/logout', {
                         method: 'POST',
@@ -588,7 +553,7 @@
         };
 
         /* resume an existing session on load — otherwise offer the login right away */
-        if (session && session.refresh_token) {
+        if (svpAuth.hasSession()) {
             cloudOn = true;
             updateAuthUi();
             syncRemote();
