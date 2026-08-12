@@ -13,6 +13,7 @@
         ['mathe/mathe11.html', 'MA 11', 'b-orange'],
         ['mathe/mathe12.html', 'MA 12', 'b-orange'],
         ['mathe/mathe13.html', 'MA 13', 'b-orange'],
+        ['mathe/uebung.html', 'Üben', 'b-orange'],
         ['wr/wr11.html', 'W/R 11', 'b-teal'],
         ['informatik/informatik9.html', 'INF 9', 'b-green'],
         ['informatik/inf11.html', 'INF 11', 'b-green'],
