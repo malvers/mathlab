@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stoffverteilungsplan Informatik FOS 12 | SJ 2026/27</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript>
+        <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    </noscript>
+    <link rel="icon" type="image/png" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="../svp.css">
+</head>
+
+<body>
+    <header class="page-head">
+        <a class="back-link" href="./">&larr; Informatik</a>
+        <div class="head-row">
+            <h1>Informatik &middot; Fachoberschule 12</h1>
+            <button class="action orange" onclick="window.open('../lehrplaene/lehrplan_fos_informatik.pdf', '_blank')">Lehrplan (PDF)</button>
+        </div>
+        <div class="subtitle">
+            Stoffverteilungsplan &middot; Fachoberschule, Klassenstufe 12 &middot; 2 Ustd./Woche &middot;
+            Lehrplan: <a href="https://www.schulportal.sachsen.de/lplandb/lehrplan/846" target="_blank"
+                rel="noopener">Informatik FOS (2023)</a>
+        </div>
+    </header>
+
+    <div class="meta-cards">
+        <div class="meta-card" data-lb="lb1">
+            <div class="k c-orange">Lernbereich 1</div>
+            <div class="v">Modellierung von Datenbanken</div>
+            <div class="vu">15 Ustd.</div>
+        </div>
+        <div class="meta-card" data-lb="lb2">
+            <div class="k c-cyan">Lernbereich 2</div>
+            <div class="v">Algorithmen und Programme</div>
+            <div class="vu">15 Ustd.</div>
+        </div>
+        <div class="meta-card" data-lb="lb3">
+            <div class="k c-violet">Lernbereich 3A</div>
+            <div class="v">Projekt Webtechnologie</div>
+            <div class="vu">20 Ustd.</div>
+        </div>
+        <div class="meta-card" data-lb="wb">
+            <div class="k c-green">Wahlbereich 2</div>
+            <div class="v">Objektorientierte Programmierung</div>
+            <div class="vu">4 Ustd.</div>
+        </div>
+        <div class="meta-card">
+            <div class="k c-bright">FHR-Pr&uuml;fungen 2027</div>
+            <div class="v">schriftlich ca. Ende Mai &middot; m&uuml;ndlich Juni (Richtwerte)</div>
+        </div>
+    </div>
+
+    <div class="toolbar">
+        <button class="action" onclick="window.print()">Drucken</button>
+        <button class="action" onclick="togglePlanDetails()">Alle auf/zu</button>
+        <button class="action" onclick="togglePlanEdit(this)">✎ Bearbeiten</button>
+        <button class="action secondary" onclick="resetPlanEdits(this)">Zurücksetzen</button>
+        <div class="legend">
+            <span><span class="dot" style="background: var(--lambda)"></span>LB 1</span>
+            <span><span class="dot" style="background: var(--cyan)"></span>LB 2</span>
+            <span><span class="dot" style="background: var(--violet)"></span>LB 3A</span>
+            <span><span class="dot" style="background: var(--phi)"></span>Wahlbereich</span>
+            <span><span class="dot" style="background: var(--ypsilon)"></span>Leistung</span>
+            <span><span class="dot" style="background: rgba(170,190,220,0.5)"></span>Orga/Puffer</span>
+        </div>
+    </div>
+
+    <div class="table-wrap">
+        <table id="plan-table">
+            <thead>
+                <tr>
+                    <th>Nr.</th>
+                    <th>KW</th>
+                    <th>Woche</th>
+                    <th>Bereich</th>
+                    <th>Ustd.</th>
+                    <th>Thema / Inhalte</th>
+                    <th>Bemerkungen</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <footer class="page-foot">
+        Wochenzeile anklicken &rarr; Stundenskizze ausklappen; beim Drucken werden alle Details ausgeklappt.
+        &bdquo;Bearbeiten&ldquo; macht Themen, Bemerkungen und Bullets editierbar; &bdquo;Zur&uuml;cksetzen&ldquo;
+        l&auml;dt das Original. FOS 12 = LB 1 Modellierung von Datenbanken (15) + LB 2 Algorithmen und
+        Programme (15) + LB 3 Projekt (20) + Wahlbereich (4). Als Projekt ist <b>3A Webtechnologie</b>
+        gew&auml;hlt (Alternativen: 3B Technische Informatik, 3C Datenmanagement, 3D 3D-Objekte,
+        3E Anwendungsentwicklung); als Wahlbereich <b>2 Objektorientierte Programmierung</b> (Alternativen:
+        Nichtdezimale Zahlensysteme, Theoretische Informatik, Quanteninformatik). Pr&uuml;fungstermine 2027:
+        Richtwerte &mdash; verbindliche FHR-Termine nach Bekanntgabe SMK/Schule nachtragen; Klausurtermine an
+        den Klausurplan anpassen. Ferientermine Sachsen 2026/27 (SMK): Herbst 12.&ndash;24.10.26 &middot;
+        Weihnachten 23.12.26&ndash;02.01.27 &middot; Winter 08.&ndash;19.02.27 &middot; Ostern
+        26.03.&ndash;02.04.27 &middot; Pfingsten 07.05. + 15.&ndash;18.05.27 &middot; Sommer ab 10.07.27
+        &middot; Bu&szlig;- und Bettag Mi 18.11.26 unterrichtsfrei.
+    </footer>
+
+    <script>
+        // Data-driven plan: one entry per school week (or holiday block).
+        // 2 Ustd./week; u shows the cumulative Ustd. range within the Lernbereich.
+        // details: bullet list shown in the expandable sub-row (lesson sketch).
+        // type: lb1 | lb2 | lb3 | wb | lk | org | ferien
+        window.PLAN = [
+            { nr: 1, kw: 34, date: '17.–21.08.26', type: 'org', u: '', topic: 'Kursauftakt: Organisation, Überblick Klasse 12, Rückblick Kl. 11', remark: 'Erster Schultag Mo 17.08.; gemeinsame Beschulung 1-/2-jähriger Bildungsgang', details: [
+                'Organisatorisches; Fahrplan: Datenbanken → Programmieren → Projekt → Prüfungsphase',
+                'Reaktivierung Kl. 11: Informationsmanagement, IT-Sicherheit (bei Einjährigen: OS-Wissen)'
+            ] },
+            { nr: 2, kw: 35, date: '24.–28.08.26', type: 'lb1', u: '1–2/15', topic: 'Relationale Datenbanksysteme: Datenbanken im Alltag; Datenbasis und DBMS', remark: '', details: [
+                'Datenbanken im Alltag sammeln (Schule, Handel, Verwaltung, Gesundheit)',
+                'Datenbanksystem = Datenbasis + Datenbankmanagementsystem'
+            ] },
+            { nr: 3, kw: 36, date: '31.08.–04.09.26', type: 'lb1', u: '3–4/15', topic: 'Anforderungen an Datenbanken: Redundanz, Konsistenz, Integrität', remark: '', details: [
+                'Anomalien und Redundanz an einer „schlechten" Tabelle erleben',
+                'Integritätsregeln an Fallbeispielen'
+            ] },
+            { nr: 4, kw: 37, date: '07.–11.09.26', type: 'lb1', u: '5–6/15', topic: 'Bedienung eines relationalen DBMS I: Eingabe und Sortieren von Daten', remark: 'Vorgabe eines Datenbanksystems mit Beziehungen', details: [
+                'Tabellen und Datensätze im DBMS anlegen (z. B. SQLite/LibreOffice Base/MySQL)',
+                'Sortieren: ORDER BY bzw. grafische Oberfläche'
+            ] },
+            { nr: 5, kw: 38, date: '14.–18.09.26', type: 'lb1', u: '7–8/15', topic: 'Bedienung eines relationalen DBMS II: Suchen und Auswerten von Daten', remark: 'Abfragesprache und grafische Oberfläche', details: [
+                'SELECT/WHERE bzw. Abfrage-Assistent: Zeilen und Spalten gezielt auswählen',
+                'Kleine Auswertungsaufgaben auf einer Beispieldatenbank'
+            ] },
+            { nr: 6, kw: 39, date: '21.–25.09.26', type: 'lb1', u: '9–10/15', topic: 'Entity-Relationship-Modell I: Entitäten, Attribute, Beziehungen', remark: 'Beschreibung von Realweltausschnitten', details: [
+                'ER-Notation und Kardinalitäten',
+                'Fachrichtungsbezogenes Beispiel als ER-Diagramm entwerfen'
+            ] },
+            { nr: 7, kw: 40, date: '28.09.–02.10.26', type: 'lb1', u: '11–12/15', topic: 'Entity-Relationship-Modell II: Überführung in ein Datenbanksystem', remark: '', details: [
+                'Überführungsregeln: Entitäten → Tabellen, Beziehungen → Fremdschlüssel',
+                'Eigenes ER-Modell im DBMS umsetzen'
+            ] },
+            { nr: 8, kw: 41, date: '05.–09.10.26', type: 'lb1', u: '13–14/15', topic: 'Normalisierung', remark: '', details: [
+                'Redundanzen erkennen; 1.–3. Normalform an Beispieltabellen',
+                'Eigenes Modell prüfen und normalisieren'
+            ] },
+            { ferien: 'Herbstferien · 12.–24.10.2026 (KW 42–43)' },
+            { nr: 9, kw: 44, date: '26.–30.10.26', type: 'lb1', u: '15/15', topic: 'Abschluss LB 1: eigene Mini-Datenbank komplett (Modell → Implementierung → Auswertung)', remark: 'LB 1 abgeschlossen; nachhaltige Entwicklung bei der Implementierung beachten', details: [
+                'Komplexübung: Realweltausschnitt beschreiben, modellieren, implementieren, abfragen',
+                'Peer-Review der Datenmodelle'
+            ] },
+            { nr: 10, kw: 45, date: '02.–06.11.26', type: 'lk', u: 'KL 1', topic: 'Wiederholung + Klausur 1 (LB 1: Datenbanken)', remark: 'Termin nach Klausurplan', details: [
+                'Wiederholung: DBMS-Bedienung, ER-Modell, Normalisierung',
+                'Klausur 1'
+            ] },
+            { nr: 11, kw: 46, date: '09.–13.11.26', type: 'lb2', u: '1–2/15', topic: 'Programmiersprachen als Schnittstelle Mensch–Maschine: Grundbegriffe', remark: '', details: [
+                'Algorithmus, Syntax, Semantik',
+                'Eigenschaften eines Algorithmus (Eindeutigkeit, Endlichkeit, Allgemeingültigkeit …)'
+            ] },
+            { nr: 12, kw: 47, date: '16.–20.11.26', type: 'lb2', u: '3–4/15', topic: 'Visualisierung von Programmstrukturen: Struktogramm, Programmablaufplan, GRAFCET', remark: 'Mi 18.11. Buß- und Bettag (unterrichtsfrei)', details: [
+                'Struktogramm und PAP lesen und zeichnen',
+                'Alltagsabläufe als Diagramm; Übergabe an die Programmierung'
+            ] },
+            { nr: 13, kw: 48, date: '23.–27.11.26', type: 'lb2', u: '5–6/15', topic: 'Programmierumgebung und Datentypen', remark: 'höhere Sprache nach Wahl, z. B. Python', details: [
+                'Erste Schritte in der Programmierumgebung',
+                'Einfache und strukturierte Datentypen; Variablen'
+            ] },
+            { nr: 14, kw: 49, date: '30.11.–04.12.26', type: 'lb2', u: '7–8/15', topic: 'Grundstrukturen I: Folge / Sequenz', remark: '', details: [
+                'Ein- und Ausgabe, Zuweisungen, einfache Berechnungsprogramme',
+                'Vom Struktogramm zum lauffähigen Programm'
+            ] },
+            { nr: 15, kw: 50, date: '07.–11.12.26', type: 'lb2', u: '9–10/15', topic: 'Grundstrukturen II: Selektion / Entscheidung', remark: '', details: [
+                'if/else an fachbezogenen Beispielen',
+                'Verschachtelte Entscheidungen; Testfälle notieren'
+            ] },
+            { nr: 16, kw: 51, date: '14.–18.12.26', type: 'lb2', u: '11–12/15', topic: 'Grundstrukturen III: Zyklus / Wiederholung', remark: '', details: [
+                'Zählschleife und bedingte Schleife',
+                'Klassiker: Summen, Mittelwerte, Raten-Spiel'
+            ] },
+            { nr: 17, kw: 52, date: '21.–22.12.26', type: 'org', u: '', topic: 'Puffer / Programmierübung', remark: 'nur Mo/Di — ab Mi 23.12. Ferien', details: [
+                'Kleine Übungsaufgaben zum Jahresausklang'
+            ] },
+            { ferien: 'Weihnachtsferien · 23.12.2026–02.01.2027' },
+            { nr: 18, kw: 1, date: '04.–08.01.27', type: 'lb2', u: '13–14/15', topic: 'Modularisierung: Problemlösungen strukturieren', remark: '', details: [
+                'Funktionen/Prozeduren mit Parametern und Rückgabewerten',
+                'Ein größeres Problem in Teilprobleme zerlegen'
+            ] },
+            { nr: 19, kw: 2, date: '11.–15.01.27', type: 'lb2', u: '15/15', topic: 'Abschluss LB 2: Komplexübung Problemlösungsstrategie', remark: 'LB 2 abgeschlossen', details: [
+                'Komplette Kette: Problem → Visualisierung → Programm → Test',
+                'Codereview in Partnerarbeit'
+            ] },
+            { nr: 20, kw: 3, date: '18.–22.01.27', type: 'wb', u: '1–2/4', topic: 'Wahlbereich „Objektorientierte Programmierung" I: Klasse, Objekt, Attribut, Methode', remark: 'knüpft an LB 2 an', details: [
+                'Klasse als Bauplan; Objekt/Instanz',
+                'Erste eigene Klasse in der vertrauten Programmierumgebung'
+            ] },
+            { nr: 21, kw: 4, date: '25.–29.01.27', type: 'wb', u: '3–4/4', topic: 'Wahlbereich OOP II: Vererbung, Kapselung, Polymorphie', remark: '', details: [
+                'Vererbung an einem kleinen Klassenbaum; Schnittstellen und Botschaften',
+                'Sich positionieren: Wann lohnt OOP? Modularisierung im Vergleich'
+            ] },
+            { nr: 22, kw: 5, date: '01.–05.02.27', type: 'lk', u: 'KL 2', topic: 'Wiederholung + Klausur 2 (LB 2 + OOP)', remark: 'Termin nach Klausurplan; Fr 05.02. Halbjahresende / Zeugnisse', details: [
+                'Wiederholung: Grundstrukturen, Modularisierung, OOP-Begriffe',
+                'Klausur 2'
+            ] },
+            { ferien: 'Winterferien · 08.–19.02.2027 (KW 6–7)' },
+            { nr: 23, kw: 8, date: '22.–26.02.27', type: 'lb3', u: '1–2/20', topic: 'Projekt Webtechnologie: Kickoff — Projektphasen, Teams, Themen', remark: 'fächerverbindende, fachrichtungsbezogene Beispiele', details: [
+                'Planung: Team, Termine, Ressourcen; Themenwahl (persönlich bedeutsam oder gesellschaftlich relevant)',
+                'Digitale Werkzeuge für Zusammenarbeit und Dokumentation festlegen'
+            ] },
+            { nr: 24, kw: 9, date: '01.–05.03.27', type: 'lb3', u: '3–4/20', topic: 'Statische Webseiten I: HTML — Elemente einer Dokumentenauszeichnungssprache', remark: '', details: [
+                'HTML-Grundgerüst, Überschriften, Listen, Links, Bilder',
+                'Erste eigene Seiten zum Projektthema'
+            ] },
+            { nr: 25, kw: 10, date: '08.–12.03.27', type: 'lb3', u: '5–6/20', topic: 'Statische Webseiten II: CSS — Trennung von Inhalt und Layout', remark: '', details: [
+                'CSS-Selektoren, Farben, Layoutgrundlagen',
+                'Gestaltungsregeln; responsives Grundlayout'
+            ] },
+            { nr: 26, kw: 11, date: '15.–19.03.27', type: 'lb3', u: '7–8/20', topic: 'Dynamische Webanwendungen: HTTP-Protokoll, client- und serverseitige Technologien', remark: '', details: [
+                'Request/Response am Beispiel nachvollziehen (Entwicklertools)',
+                'Client- vs. serverseitig: JavaScript, PHP & Co. einordnen'
+            ] },
+            { nr: 27, kw: 12, date: '22.–25.03.27', type: 'lb3', u: '9–10/20', topic: 'Datenbankanbindung der Webpräsenz planen', remark: 'Anschluss an LB 1; ab Fr 26.03. Osterferien', details: [
+                'Datenmodell fürs Projekt (ER-Modell aus LB 1 wiederverwenden)',
+                'Problemanalyse und Lösungsentwurf dokumentieren'
+            ] },
+            { ferien: 'Osterferien · 26.03.–02.04.2027' },
+            { nr: 28, kw: 14, date: '05.–09.04.27', type: 'lb3', u: '11–12/20', topic: 'Umsetzung I: Implementierung der Webpräsenz', remark: '', details: [
+                'Seitenstruktur und Datenbankanbindung umsetzen',
+                'Arbeitsstand im Team dokumentieren'
+            ] },
+            { nr: 29, kw: 15, date: '12.–16.04.27', type: 'lb3', u: '13–14/20', topic: 'Umsetzung II: Implementierung und Test', remark: '', details: [
+                'Funktionen fertigstellen; Testfälle systematisch abarbeiten',
+                'Feedbackrunde zwischen den Teams'
+            ] },
+            { nr: 30, kw: 16, date: '19.–23.04.27', type: 'lb3', u: '15–16/20', topic: 'Datensicherheit und Datenschutz der Webanwendung', remark: 'Notwendigkeit und Maßnahmen', details: [
+                'Passwörter, Formulareingaben, personenbezogene Daten im Projekt prüfen',
+                'Maßnahmen umsetzen und dokumentieren (Anschluss Kl. 11, LB 2)'
+            ] },
+            { nr: 31, kw: 17, date: '26.–30.04.27', type: 'lb3', u: '17–18/20', topic: 'Fertigstellung: Test, Dokumentation, Generalprobe', remark: '', details: [
+                'Restarbeiten; Projektdokumentation abschließen',
+                'Präsentation vorbereiten (Beurteilungskriterien aus Kl. 11 nutzen)'
+            ] },
+            { nr: 32, kw: 18, date: '03.–05.05.27', type: 'lb3', u: '19–20/20', topic: 'Projektabschluss: Präsentationen', remark: 'Do 06.05. Himmelfahrt + Fr 07.05. unterrichtsfrei; LB 3A abgeschlossen', details: [
+                'Teams präsentieren Webpräsenz, Arbeitsablauf und Ergebnisse',
+                'Auswertung: kritische Würdigung der Problemlösungen'
+            ] },
+            { nr: 33, kw: 19, date: '10.–14.05.27', type: 'org', u: '', topic: 'Auswertung / Puffer; Übergang in die Prüfungsphase', remark: '', details: [
+                'Projektauswertung und Notenbekanntgabe',
+                'Organisation der Prüfungswochen'
+            ] },
+            { nr: 34, kw: 20, date: '19.–21.05.27', type: 'org', u: '', topic: 'Prüfungsphase: schriftliche FHR-Prüfungen (fachrichtungsbezogen) — Richtwert', remark: 'Mo 17.05. Pfingstmontag + Di 18.05. Ferientag', details: [
+                'Zentrale schriftliche Prüfungen beginnen (Termine nach Bekanntgabe)'
+            ] },
+            { nr: 35, kw: 21, date: '24.–28.05.27', type: 'org', u: '', topic: 'Prüfungsphase: schriftliche FHR-Prüfungen Deutsch / Mathematik / Englisch — Richtwert', remark: 'Richtwert Mi 26.05.27', details: [
+                'Kein regulärer Fachunterricht in den Prüfungswochen'
+            ] },
+            { nr: 36, kw: 22, date: '31.05.–04.06.27', type: 'org', u: '', topic: 'Nach den schriftlichen Prüfungen: Übung / Wiederholung nach Bedarf', remark: '', details: [
+                'Angebote nach Schulorganisation'
+            ] },
+            { nr: 37, kw: 23, date: '07.–11.06.27', type: 'org', u: '', topic: 'Mündliche Prüfungen (Zeitraum ca. 10.06.–01.07.) — Richtwert', remark: '', details: [
+                'Prüfungsplan der Schule beachten'
+            ] },
+            { nr: 38, kw: 24, date: '14.–18.06.27', type: 'org', u: '', topic: 'Prüfungszeitraum / Projekttage', remark: 'je nach Schulorganisation', details: [
+                'Reserve — je nach Schuljahresplanung'
+            ] },
+            { nr: 39, kw: 25, date: '21.–25.06.27', type: 'org', u: '', topic: 'Prüfungszeitraum / Puffer', remark: '', details: [
+                'Reserve — je nach Schuljahresplanung'
+            ] },
+            { nr: 40, kw: 26, date: '28.06.–02.07.27', type: 'org', u: '', topic: 'Jahresabschluss', remark: '', details: [
+                'Rückblick; Accounts und Abgaben aufräumen'
+            ] },
+            { nr: 41, kw: 27, date: '05.–09.07.27', type: 'org', u: '', topic: 'Ausklang / Zeugnisausgabe', remark: 'Fr 09.07. letzter Schultag', details: [
+                'Verabschiedung des Jahrgangs'
+            ] },
+            { ferien: 'Sommerferien · ab 10.07.2027' }
+        ];
+
+        // Lernbereich summaries for the clickable meta cards (see svp-plan.js).
+        window.LB_INFO = {
+            pdf: '../lehrplaene/lehrplan_fos_informatik.pdf',
+            page: 16,
+            lb1: {
+                page: 20,
+                bullets: [
+                    'Relationales Datenbanksystem: Datenbasis + DBMS; Datenbanken im Alltag',
+                    'Anforderungen: Redundanz, Konsistenz, Integrität',
+                    'DBMS bedienen: Eingabe, Sortieren, Suchen/Auswerten (Abfragesprache, GUI)',
+                    'ER-Modell entwerfen und in ein Datenbanksystem überführen; Normalisierung',
+                ]
+            },
+            lb2: {
+                page: 21,
+                bullets: [
+                    'Grundbegriffe: Algorithmus, Syntax, Semantik; Eigenschaften eines Algorithmus',
+                    'Visualisierung: Struktogramm, Programmablaufplan, GRAFCET',
+                    'Höhere Programmiersprache: Datentypen, Folge, Selektion, Zyklus',
+                    'Modularisierung als Problemlösungsstrategie',
+                ]
+            },
+            lb3: {
+                page: 22,
+                bullets: [
+                    'Projekt Webpräsenz mit Datenbankanbindung (Projektphasen: Planung → Durchführung → Präsentation)',
+                    'Statische Webseiten: Auszeichnungssprache, Trennung Inhalt/Layout',
+                    'Dynamische Webanwendungen: HTTP, client-/serverseitige Technologien',
+                    'Datensicherheit und Datenschutz: Notwendigkeit und Maßnahmen',
+                ]
+            },
+            wb: {
+                page: 27,
+                bullets: [
+                    'Objektorientierte Programmierumgebung: Klasse, Attribut, Methode; Objekt/Instanz',
+                    'Eigene Klassen erstellen; Objekte erzeugen und verwenden',
+                    'Vererbung, Kapselung, Austauschbarkeit, Polymorphie',
+                ]
+            },
+        };
+
+        window.BADGE = {
+            lb1: ['b-orange', 'LB 1'],
+            lb2: ['b-cyan', 'LB 2'],
+            lb3: ['b-violet', 'LB 3A'],
+            wb: ['b-green', 'WAHL'],
+            lk: ['b-red', 'LEISTUNG'],
+            org: ['b-grey', 'ORGA']
+        };
+    </script>
+    <script src="../svp-auth.js"></script>
+    <script src="../svp-plan.js"></script>
+    <script src="../svp-nav.js"></script>
+</body>
+
+</html>
