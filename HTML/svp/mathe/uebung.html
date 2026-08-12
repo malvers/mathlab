@@ -15,6 +15,7 @@
     </noscript>
     <link rel="icon" type="image/png" href="../../resources/favicon.png">
     <link rel="stylesheet" href="../svp.css">
+    <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js" defer></script>
     <style>
         /* ---- practice-log sheet (screen) ---- */
         .sheet-head {
@@ -61,6 +62,43 @@
             border-radius: 6px;
             transition: width 0.3s, background-color 0.3s;
         }
+
+        /* QR overlay: white card so every scanner reads it, click closes */
+        .qr-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(8, 20, 42, 0.85);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            cursor: pointer;
+        }
+
+        .qr-overlay.open { display: flex; }
+
+        .qr-card {
+            background: #fff;
+            padding: 22px 22px 14px;
+            border-radius: 14px;
+            text-align: center;
+        }
+
+        .qr-card svg {
+            display: block;
+            width: min(70vw, 300px);
+            height: auto;
+        }
+
+        .qr-card .qr-url {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.62rem;
+            letter-spacing: 0.03em;
+            color: #333;
+            margin-top: 10px;
+        }
+
+        @media print { .qr-overlay { display: none !important; } }
 
         /* fireworks overlay at 100% (adapted from happybirthday.html) */
         #fx {
@@ -328,6 +366,15 @@
         <button class="action secondary" data-k="12" onclick="setKlasse('12')">Klasse 12</button>
         <button class="action secondary" data-k="13" onclick="setKlasse('13')">Klasse 13</button>
         <button class="action" onclick="window.print()">Drucken / PDF</button>
+        <button class="action secondary" onclick="showQr()" title="QR-Code zum Teilen">&#9638; QR</button>
+        <button class="action secondary" id="sound-btn" onclick="toggleSound()" aria-label="Ton an/aus">&#128266;</button>
+    </div>
+
+    <div class="qr-overlay" id="qr-overlay" onclick="this.classList.remove('open')">
+        <div class="qr-card">
+            <div id="qr-box"></div>
+            <div class="qr-url" id="qr-url"></div>
+        </div>
     </div>
 
     <div class="progress no-print" id="progress">
@@ -497,6 +544,42 @@
                 done + ' von ' + total + ' Übungstagen im Schuljahr (Mo–Fr, ohne Ferien)';
         }
 
+        // Sound: crowd cheer ("Hurray" by starlite, Public Domain, Wikimedia
+        // Commons, converted to mp3) + synthetic firework booms via WebAudio
+        // (noise burst through a falling lowpass). Toggle persists; audio only
+        // ever starts from a user gesture, so autoplay policies are satisfied.
+        let soundOn = localStorage.getItem('svp-uebung-sound') !== 'off';
+        let actx = null;
+        const cheer = new Audio('../jubel.mp3');
+
+        function boom() {
+            if (!soundOn || !actx) return;
+            const t0 = actx.currentTime + Math.random() * 0.05;
+            const dur = 0.5;
+            const buf = actx.createBuffer(1, actx.sampleRate * dur, actx.sampleRate);
+            const d = buf.getChannelData(0);
+            for (let i = 0; i < d.length; i++)
+                d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / d.length, 2);
+            const src = actx.createBufferSource();
+            src.buffer = buf;
+            const lp = actx.createBiquadFilter();
+            lp.type = 'lowpass';
+            lp.frequency.setValueAtTime(900 + Math.random() * 500, t0);
+            lp.frequency.exponentialRampToValueAtTime(120, t0 + dur);
+            const g = actx.createGain();
+            g.gain.setValueAtTime(0.45 + Math.random() * 0.2, t0);
+            g.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+            src.connect(lp); lp.connect(g); g.connect(actx.destination);
+            src.start(t0);
+        }
+
+        function toggleSound() {
+            soundOn = !soundOn;
+            localStorage.setItem('svp-uebung-sound', soundOn ? 'on' : 'off');
+            document.getElementById('sound-btn').innerHTML = soundOn ? '&#128266;' : '&#128263;';
+        }
+        if (!soundOn) document.getElementById('sound-btn').innerHTML = '&#128263;';
+
         // Fireworks at 100 % — rockets + bursts adapted from happybirthday.html,
         // drawn on a transparent overlay (trail fade via destination-out).
         const fxCanvas = document.getElementById('fx');
@@ -530,7 +613,7 @@
             let i = 0;
             const steps = 22;
             const launch = setInterval(() => {
-                if (i > steps) { clearInterval(launch); burst(toX, toY, hue); return; }
+                if (i > steps) { clearInterval(launch); burst(toX, toY, hue); boom(); return; }
                 particles.push({
                     x: fromX + dx * (i / steps), y: innerHeight + 20 + dy * (i / steps),
                     vx: 0, vy: 0, life: 24, age: 0, hue, size: 1.6, g: 0
@@ -570,6 +653,13 @@
             fxCanvas.style.height = innerHeight + 'px';
             fctx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
             fxCanvas.style.display = 'block';
+            if (soundOn) {
+                if (!actx) actx = new (window.AudioContext || window.webkitAudioContext)();
+                if (actx.state === 'suspended') actx.resume();
+                cheer.currentTime = 0;
+                cheer.volume = 0.9;
+                cheer.play().catch(function () {});
+            }
             rocket();
             if (fxTimer) clearInterval(fxTimer);
             fxTimer = setInterval(rocket, 900);
@@ -577,12 +667,32 @@
             if (!fxRaf) fxRaf = requestAnimationFrame(drawFx);
         }
 
-        let current = localStorage.getItem('svp-uebung-klasse') || '11';
+        // Class comes from ?k=11/12/13 (QR deep link) first, then localStorage.
+        const urlK = new URLSearchParams(location.search).get('k');
+        let current = ['11', '12', '13'].indexOf(urlK) > -1 ? urlK
+            : (localStorage.getItem('svp-uebung-klasse') || '11');
 
         function setKlasse(k) {
             current = k;
             localStorage.setItem('svp-uebung-klasse', k);
+            history.replaceState(null, '', '?k=' + k);
             render(k);
+        }
+
+        // QR overlay: deep link to the live page incl. the selected class
+        function showQr() {
+            const url = 'https://www.docalvers.de/svp/mathe/uebung.html?k=' + current;
+            const box = document.getElementById('qr-box');
+            if (typeof qrcode === 'undefined') {
+                box.textContent = 'QR-Bibliothek nicht geladen — Link:';
+            } else {
+                const qr = qrcode(0, 'M');
+                qr.addData(url);
+                qr.make();
+                box.innerHTML = qr.createSvgTag({ scalable: true });
+            }
+            document.getElementById('qr-url').textContent = url + ' · Klasse ' + current;
+            document.getElementById('qr-overlay').classList.add('open');
         }
 
         // Click on a day cell toggles its checkbox and persists locally.
