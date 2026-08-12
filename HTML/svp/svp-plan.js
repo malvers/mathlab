@@ -8,6 +8,25 @@
     const tbody = document.querySelector('#plan-table tbody');
     if (!tbody || !window.PLAN || !window.BADGE) return;
 
+    // Badge pills deep-link into the Lehrplan PDF (#page=N) when the page
+    // provides LB_INFO with a page number for that type (rows + legend).
+    function lbPdfLink(key) {
+        const info = window.LB_INFO && window.LB_INFO[key];
+        return (info && info.page && window.LB_INFO.pdf)
+            ? window.LB_INFO.pdf + '#page=' + info.page : null;
+    }
+
+    function linkBadge(el, key) {
+        const href = lbPdfLink(key);
+        if (!href) return;
+        el.classList.add('badge-link');
+        el.title = 'Lehrplan (PDF) an dieser Stelle öffnen';
+        el.addEventListener('click', function (e) {
+            e.stopPropagation(); // keep the row's detail toggle untouched
+            window.open(href, '_blank');
+        });
+    }
+
     const KEY = 'svp-edits:' + location.pathname;
     let saved = {};
     try { saved = JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) { saved = {}; }
@@ -111,6 +130,7 @@
                 const span = document.createElement('span');
                 span.className = 'badge ' + badgeClass;
                 span.textContent = badgeLabel;
+                linkBadge(span, row.type);
                 td.appendChild(span);
             } else if (idx !== 5 && idx !== 6) {
                 td.textContent = text;
@@ -169,11 +189,59 @@
         legend.textContent = '';
         for (const key in window.BADGE) {
             const [cls, label] = window.BADGE[key];
+            const alts = window.ALT_BADGES && window.ALT_BADGES[key];
+
+            // Bereich with variants (window.ALT_BADGES[key] = [[label, pdfPage],
+            // ...]): one pill with a caret that opens a dropdown — chosen
+            // variant first, then the alternatives, each deep-linking into the
+            // Lehrplan PDF.
+            if (alts && window.LB_INFO && window.LB_INFO.pdf) {
+                const wrap = document.createElement('span');
+                wrap.className = 'badge-drop';
+
+                const pill = document.createElement('span');
+                pill.className = 'badge ' + cls;
+                pill.textContent = label + ' ▾';
+                pill.title = 'Varianten anzeigen';
+                pill.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    const wasOpen = wrap.classList.contains('open');
+                    document.querySelectorAll('.badge-drop.open')
+                        .forEach(d => d.classList.remove('open'));
+                    wrap.classList.toggle('open', !wasOpen);
+                });
+                wrap.appendChild(pill);
+
+                const menu = document.createElement('div');
+                menu.className = 'drop-menu';
+                const entries = [[label + ' ✓', lbPdfLink(key) || window.LB_INFO.pdf, true]].concat(
+                    alts.map(([l, p]) => [l, window.LB_INFO.pdf + '#page=' + p, false]));
+                for (const [entryLabel, href, chosen] of entries) {
+                    const item = document.createElement('span');
+                    item.className = 'badge badge-link ' + cls + (chosen ? ' chosen' : '');
+                    item.textContent = entryLabel;
+                    item.title = (chosen ? 'Gewählte Variante' : 'Nicht gewählte Variante') +
+                        ' — Lehrplan (PDF) an dieser Stelle öffnen';
+                    item.addEventListener('click', function () { window.open(href, '_blank'); });
+                    menu.appendChild(item);
+                }
+                wrap.appendChild(menu);
+                legend.appendChild(wrap);
+                continue;
+            }
+
             const pill = document.createElement('span');
             pill.className = 'badge ' + cls;
             pill.textContent = label;
+            linkBadge(pill, key);
             legend.appendChild(pill);
         }
+
+        // Any click outside closes open variant dropdowns.
+        document.addEventListener('click', function () {
+            document.querySelectorAll('.badge-drop.open')
+                .forEach(d => d.classList.remove('open'));
+        });
     }
 
     function setAllDetails(open) {
