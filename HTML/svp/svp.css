@@ -18,6 +18,66 @@
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
+/* Password gate (svp-gate.js): while locked, nothing but the overlay shows */
+html.svp-locked body > *:not(.svp-gate-overlay) { display: none !important; }
+
+.svp-gate-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg);
+}
+
+.svp-gate-card {
+    background: var(--card-soft);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 30px 34px;
+    text-align: center;
+    width: min(90vw, 360px);
+}
+
+.svp-gate-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.05rem;
+    letter-spacing: 0.06em;
+    color: var(--lambda);
+    margin-bottom: 6px;
+}
+
+.svp-gate-sub {
+    font-size: 0.85rem;
+    color: var(--muted);
+    margin-bottom: 18px;
+}
+
+.svp-gate-card input {
+    width: 100%;
+    background: rgba(8, 20, 42, 0.7);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'Outfit', sans-serif;
+    font-size: 1rem;
+    padding: 10px 12px;
+    margin-bottom: 12px;
+    text-align: center;
+}
+
+.svp-gate-card input:focus { outline: 1px solid var(--cyan); }
+
+.svp-gate-card button { width: 100%; }
+
+.svp-gate-err {
+    margin-top: 10px;
+    font-size: 0.8rem;
+    color: rgb(235, 120, 105);
+    min-height: 1em;
+}
+
 html { scrollbar-color: rgba(120, 160, 220, 0.35) rgba(8, 20, 42, 0.9); }
 
 body {
@@ -372,6 +432,36 @@ td.remark { color: var(--muted); font-size: 0.88rem; min-width: 160px; }
     border: 1px solid;
     white-space: nowrap;
 }
+
+/* Badges that deep-link into the Lehrplan PDF (set by svp-plan.js) */
+.badge-link { cursor: pointer; }
+.badge-link:hover { filter: brightness(1.4); }
+
+/* Variant dropdown in the legend (ALT_BADGES): pill with caret, menu in the
+   same pill style — chosen entry outlined, all deep-linking into the PDF */
+.badge-drop { position: relative; display: inline-block; }
+.badge-drop > .badge { cursor: pointer; }
+
+.badge-drop .drop-menu {
+    display: none;
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    z-index: 60;
+    flex-direction: column;
+    gap: 6px;
+    padding: 8px;
+    background: rgb(12, 30, 64);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.45);
+    white-space: nowrap;
+}
+
+.badge-drop.open .drop-menu { display: flex; }
+
+.drop-menu .badge { text-align: center; }
+.drop-menu .badge.chosen { outline: 1px solid currentColor; }
 
 .b-orange { color: var(--lambda); border-color: rgba(245, 194, 66, 0.45); background: rgba(245, 194, 66, 0.08); }
 .b-cyan   { color: var(--cyan); border-color: rgba(90, 190, 230, 0.45); background: rgba(90, 190, 230, 0.08); }
