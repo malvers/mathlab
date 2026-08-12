@@ -22,6 +22,8 @@
         ['informatik/informatik11.html', 'IS 11', 'b-pink'],
         ['informatik/informatik12.html', 'IS 12', 'b-pink'],
         ['informatik/informatik13.html', 'IS 13', 'b-pink'],
+        ['informatik/fos11.html', 'FOS 11', 'b-cyan'],
+        ['informatik/fos12.html', 'FOS 12', 'b-cyan'],
         ['notes.html', 'Notizen', 'b-cyan'],
         ['konzepte.html', 'Konzepte', 'b-violet'],
     ];

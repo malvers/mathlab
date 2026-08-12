@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stoffverteilungsplan Informatik FOS 11 | SJ 2026/27</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript>
+        <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    </noscript>
+    <link rel="icon" type="image/png" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="../svp.css">
+</head>
+
+<body>
+    <header class="page-head">
+        <a class="back-link" href="./">&larr; Informatik</a>
+        <div class="head-row">
+            <h1>Informatik &middot; Fachoberschule 11</h1>
+            <button class="action orange" onclick="window.open('../lehrplaene/lehrplan_fos_informatik.pdf', '_blank')">Lehrplan (PDF)</button>
+        </div>
+        <div class="subtitle">
+            Stoffverteilungsplan &middot; Fachoberschule, Klassenstufe 11 &middot; 1 Ustd./Woche &middot;
+            Lehrplan: <a href="https://www.schulportal.sachsen.de/lplandb/lehrplan/846" target="_blank"
+                rel="noopener">Informatik FOS (2023)</a>
+        </div>
+    </header>
+
+    <div class="meta-cards">
+        <div class="meta-card" data-lb="lb1">
+            <div class="k c-orange">Lernbereich 1</div>
+            <div class="v">Pers&ouml;nliches Informationsmanagement</div>
+            <div class="vu">17 Ustd.</div>
+        </div>
+        <div class="meta-card" data-lb="lb2">
+            <div class="k c-cyan">Lernbereich 2</div>
+            <div class="v">IT-Sicherheit und &Ouml;kologie</div>
+            <div class="vu">8 Ustd.</div>
+        </div>
+        <div class="meta-card" data-lb="wb">
+            <div class="k c-green">Wahlbereich 2</div>
+            <div class="v">Kryptografie in der Informatik</div>
+            <div class="vu">2 Ustd.</div>
+        </div>
+        <div class="meta-card">
+            <div class="k c-bright">Klassenstufe 11</div>
+            <div class="v">ganzj&auml;hrig parallel zum Praktikum (FPTA) &middot; keine zentralen Pr&uuml;fungen</div>
+        </div>
+    </div>
+
+    <div class="toolbar">
+        <button class="action" onclick="window.print()">Drucken</button>
+        <button class="action" onclick="togglePlanDetails()">Alle auf/zu</button>
+        <button class="action" onclick="togglePlanEdit(this)">✎ Bearbeiten</button>
+        <button class="action secondary" onclick="resetPlanEdits(this)">Zurücksetzen</button>
+        <div class="legend">
+            <span><span class="dot" style="background: var(--lambda)"></span>LB 1</span>
+            <span><span class="dot" style="background: var(--cyan)"></span>LB 2</span>
+            <span><span class="dot" style="background: var(--phi)"></span>Wahlbereich</span>
+            <span><span class="dot" style="background: var(--ypsilon)"></span>Leistung</span>
+            <span><span class="dot" style="background: rgba(170,190,220,0.5)"></span>Orga/Puffer</span>
+        </div>
+    </div>
+
+    <div class="table-wrap">
+        <table id="plan-table">
+            <thead>
+                <tr>
+                    <th>Nr.</th>
+                    <th>KW</th>
+                    <th>Woche</th>
+                    <th>Bereich</th>
+                    <th>Ustd.</th>
+                    <th>Thema / Inhalte</th>
+                    <th>Bemerkungen</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <footer class="page-foot">
+        Wochenzeile anklicken &rarr; Stundenskizze ausklappen; beim Drucken werden alle Details ausgeklappt.
+        &bdquo;Bearbeiten&ldquo; macht Themen, Bemerkungen und Bullets editierbar; &bdquo;Zur&uuml;cksetzen&ldquo;
+        l&auml;dt das Original. FOS 11 = LB 1 Pers&ouml;nliches Informationsmanagement (17) + LB 2
+        IT-Sicherheit und &Ouml;kologie (8) + Wahlbereich (2). Als Wahlbereich ist <b>2 Kryptografie</b>
+        gew&auml;hlt &mdash; schlie&szlig;t an LB 2 an (Alternativen: Zahlen/Zeichen in IT-Systemen,
+        Informatik in der Gesellschaft, Pr&auml;sentieren, Diskriminierung im Internet; die Exkurs-Wochen am
+        Jahresende schnuppern in diese Bereiche). Bei 1 Ustd./Woche Stundenplanlage und FPTA-Rhythmus
+        beachten; Klausurtermine an den Klausurplan anpassen. Ferientermine Sachsen 2026/27 (SMK): Herbst
+        12.&ndash;24.10.26 &middot; Weihnachten 23.12.26&ndash;02.01.27 &middot; Winter 08.&ndash;19.02.27
+        &middot; Ostern 26.03.&ndash;02.04.27 &middot; Pfingsten 07.05. + 15.&ndash;18.05.27 &middot; Sommer
+        ab 10.07.27 &middot; Bu&szlig;- und Bettag Mi 18.11.26 unterrichtsfrei.
+    </footer>
+
+    <script>
+        // Data-driven plan: one entry per school week (or holiday block).
+        // 1 Ustd./week; u shows the cumulative Ustd. within the Lernbereich.
+        // details: bullet list shown in the expandable sub-row (lesson sketch).
+        // type: lb1 | lb2 | wb | lk | org | ferien
+        window.PLAN = [
+            { nr: 1, kw: 34, date: '17.–21.08.26', type: 'org', u: '', topic: 'Kursauftakt: Organisation, Überblick FOS-Informatik 11/12', remark: 'Erster Schultag Mo 17.08.', details: [
+                'Organisatorisches; Fahrplan: Informationsmanagement → IT-Sicherheit → Kryptografie',
+                'Erwartungsabfrage; Vorerfahrungen aus der Oberschule aktivieren'
+            ] },
+            { nr: 2, kw: 35, date: '24.–28.08.26', type: 'lb1', u: '1/17', topic: 'Technische Grundlagen der Informationsverarbeitung', remark: '', details: [
+                'Signale, Nachrichten, Daten und Informationen unterscheiden'
+            ] },
+            { nr: 3, kw: 36, date: '31.08.–04.09.26', type: 'lb1', u: '2/17', topic: 'Arbeitsweise von Informationssystemen', remark: '', details: [
+                'Produktion, Beschaffung, Verteilung, Verarbeitung im Bezugssystem Mensch–Maschine',
+                'Chancen und Gefahren des technologischen Fortschritts andiskutieren'
+            ] },
+            { nr: 4, kw: 37, date: '07.–11.09.26', type: 'lb1', u: '3/17', topic: 'Beschaffung von Informationen: Recherchestrategien', remark: 'rechtliche Vorgaben beachten', details: [
+                'Gezielt recherchieren: Suchoperatoren, Quellenarten',
+                'Relevante Quellen identifizieren und zusammenführen'
+            ] },
+            { nr: 5, kw: 38, date: '14.–18.09.26', type: 'lb1', u: '4/17', topic: 'Auswahl von Informationsquellen: Qualität und Vertrauenswürdigkeit', remark: '', details: [
+                'Kriterien: Qualität, Vertrauenswürdigkeit, Zielgruppenorientierung',
+                'Umgang mit der Informationsflut: selektieren und bewerten'
+            ] },
+            { nr: 6, kw: 39, date: '21.–25.09.26', type: 'lb1', u: '5/17', topic: 'Strukturierung von Informationen', remark: '', details: [
+                'Informationen ordnen: Ablagestrukturen, Schlagworte, Wissensspeicher',
+                'Persönliches Informationsmanagement: Strategien vergleichen'
+            ] },
+            { nr: 7, kw: 40, date: '28.09.–02.10.26', type: 'lb1', u: '6/17', topic: 'Digitale Werkzeuge für Kommunikation und Kooperation', remark: '', details: [
+                'Werkzeuge für Zusammenarbeit erproben (gemeinsame Dokumente, Aufgabenboards)',
+                'Nutzen fürs Praktikum (FPTA) herausarbeiten'
+            ] },
+            { nr: 8, kw: 41, date: '05.–09.10.26', type: 'lb1', u: '7/17', topic: 'Darstellungsarten von Informationen: zielgruppenadäquate Methode', remark: '', details: [
+                'Medienorientiert wählen: Bild, Papier, Vortrag, Web',
+                'Beispiele bewerten: Wann passt welches Medium?'
+            ] },
+            { ferien: 'Herbstferien · 12.–24.10.2026 (KW 42–43)' },
+            { nr: 9, kw: 44, date: '26.–30.10.26', type: 'lb1', u: '8/17', topic: 'Gestaltungsregeln für Layout und Visualisierung', remark: '', details: [
+                'Grundregeln: Kontrast, Ausrichtung, Nähe, Wiederholung',
+                'Gute und schlechte Beispiele analysieren'
+            ] },
+            { nr: 10, kw: 45, date: '02.–06.11.26', type: 'lb1', u: '9/17', topic: 'Publikationssysteme I: Content-Management-Systeme', remark: '', details: [
+                'Aufbau eines CMS; Rollen und Workflows',
+                'Kurzer Praxisblick in ein CMS (z. B. WordPress-Demo)'
+            ] },
+            { nr: 11, kw: 46, date: '09.–13.11.26', type: 'lb1', u: '10/17', topic: 'Publikationssysteme II: Blogs und soziale Netzwerke', remark: '', details: [
+                'Mechanismen: Reichweite, Algorithmen, Interaktion',
+                'Perspektivwechsel Anbieter und Nutzer'
+            ] },
+            { nr: 12, kw: 47, date: '16.–20.11.26', type: 'lb1', u: '11/17', topic: 'Vielfalt der digitalen Medienlandschaft: Vor- und Nachteile von Informationsdarstellungen', remark: 'Mi 18.11. Buß- und Bettag (unterrichtsfrei)', details: [
+                'Dieselbe Nachricht in verschiedenen Medien vergleichen',
+                'Soziale Potenziale: Teilhabe, Barrierefreiheit'
+            ] },
+            { nr: 13, kw: 48, date: '23.–27.11.26', type: 'lb1', u: '12/17', topic: 'Identität im Netz: Authentizität und Inszenierung', remark: 'Werteorientierung', details: [
+                'Selbstdarstellung in sozialen Medien: echt oder inszeniert?',
+                'Sich positionieren: eigene digitale Identität'
+            ] },
+            { nr: 14, kw: 49, date: '30.11.–04.12.26', type: 'lb1', u: '13/17', topic: 'Komplexübung I: Informationsprodukt planen', remark: 'Belegarbeit möglich (Abstimmung mit DE)', details: [
+                'Thema wählen (fachrichtungsbezogen oder gesellschaftlich relevant)',
+                'Recherche und Strukturierung; Zielgruppe und Medium festlegen'
+            ] },
+            { nr: 15, kw: 50, date: '07.–11.12.26', type: 'lb1', u: '14/17', topic: 'Komplexübung II: Informationsprodukt erstellen', remark: '', details: [
+                'Umsetzung nach Gestaltungsregeln',
+                'Peer-Feedback einholen'
+            ] },
+            { nr: 16, kw: 51, date: '14.–18.12.26', type: 'lb1', u: '15/17', topic: 'Komplexübung III: Präsentation der Ergebnisse', remark: '', details: [
+                'Ergebnisse vorstellen; Beurteilungskriterien anwenden'
+            ] },
+            { nr: 17, kw: 52, date: '21.–22.12.26', type: 'org', u: '', topic: 'Puffer', remark: 'nur Mo/Di — ab Mi 23.12. Ferien', details: [
+                'Restarbeiten; Jahresausklang'
+            ] },
+            { ferien: 'Weihnachtsferien · 23.12.2026–02.01.2027' },
+            { nr: 18, kw: 1, date: '04.–08.01.27', type: 'lb1', u: '16/17', topic: 'Informationsflut und Selektionsstrategien: Zusammenfassung', remark: '', details: [
+                'Strategien des persönlichen Informationsmanagements systematisieren'
+            ] },
+            { nr: 19, kw: 2, date: '11.–15.01.27', type: 'lb1', u: '17/17', topic: 'Abschluss LB 1: Wiederholung und Festigung', remark: 'LB 1 abgeschlossen', details: [
+                'Wiederholung in Stationen; offene Fragen klären'
+            ] },
+            { nr: 20, kw: 3, date: '18.–22.01.27', type: 'lk', u: 'KL 1', topic: 'Klausur 1 (LB 1: Persönliches Informationsmanagement)', remark: 'Termin nach Klausurplan', details: [
+                'Klausur 1'
+            ] },
+            { nr: 21, kw: 4, date: '25.–29.01.27', type: 'lb2', u: '1/8', topic: 'Rechtliche Grundlagen von Datenschutz und Datensicherheit', remark: '', details: [
+                'Recht auf informationelle Selbstbestimmung',
+                'Internationales, europäisches und nationales Recht; Unternehmensrichtlinien'
+            ] },
+            { nr: 22, kw: 5, date: '01.–05.02.27', type: 'lb2', u: '2/8', topic: 'Bedrohungslagen I: Falschnachrichten und Manipulation', remark: 'Fr 05.02. Halbjahresende / Zeugnisse', details: [
+                'Wirtschaftssabotage und -spionage, Cyber-Krieg, Cyber-Mobbing',
+                'Wahrheit und Lüge, Original und Abbild'
+            ] },
+            { ferien: 'Winterferien · 08.–19.02.2027 (KW 6–7)' },
+            { nr: 23, kw: 8, date: '22.–26.02.27', type: 'lb2', u: '3/8', topic: 'Bedrohungslagen II: Angriffe auf Infrastrukturen, Social Engineering', remark: '', details: [
+                'Manipulation, Überlastung und Missbrauch von IT-Geräten und -Strukturen',
+                'Social Engineering: Schutz vertraulicher Informationen und Passwörter'
+            ] },
+            { nr: 24, kw: 9, date: '01.–05.03.27', type: 'lb2', u: '4/8', topic: 'Vertrauenswürdigkeit von Software', remark: '', details: [
+                'Back-Doors und Trojaner',
+                'Woran erkennt man vertrauenswürdige Software?'
+            ] },
+            { nr: 25, kw: 10, date: '08.–12.03.27', type: 'lb2', u: '5/8', topic: 'Sicherheitskonzepte I: Schutz vor Datenmissbrauch', remark: '', details: [
+                'Integrität, Authentizität, Vertraulichkeit, Verfügbarkeit, Verbindlichkeit',
+                'Fremde und eigene Persönlichkeitsrechte'
+            ] },
+            { nr: 26, kw: 11, date: '15.–19.03.27', type: 'lb2', u: '6/8', topic: 'Sicherheitskonzepte II: soziale Netzwerke und Datensicherheit', remark: '', details: [
+                'Persönlichkeitsprofile und Datenverknüpfung; Sicherheitseinstellungen',
+                'Baulich-technische und organisatorische Strategien; Backup-Konzepte (lokal, webbasiert)'
+            ] },
+            { nr: 27, kw: 12, date: '22.–25.03.27', type: 'lb2', u: '7/8', topic: 'Ökologisch und sozial verträgliche Nutzung von Medien', remark: 'ab Fr 26.03. Osterferien', details: [
+                'Wirtschaftliche Bedeutung digitaler Medien; politische Meinungsbildung',
+                'Gesundheitsbewusste Nutzung; Pro- und Kontra-Debatte'
+            ] },
+            { ferien: 'Osterferien · 26.03.–02.04.2027' },
+            { nr: 28, kw: 14, date: '05.–09.04.27', type: 'lb2', u: '8/8', topic: 'Abschluss LB 2: Umweltauswirkungen digitaler Technologien', remark: 'LB 2 abgeschlossen', details: [
+                'Problemanalyse; ggf. Expertengespräch',
+                'Bildung für nachhaltige Entwicklung: eigenes Nutzungsverhalten reflektieren'
+            ] },
+            { nr: 29, kw: 15, date: '12.–16.04.27', type: 'lk', u: 'KL 2', topic: 'Wiederholung + Klausur 2 (LB 2: IT-Sicherheit und Ökologie)', remark: 'Termin nach Klausurplan', details: [
+                'Wiederholung: Bedrohungslagen, Sicherheitskonzepte',
+                'Klausur 2'
+            ] },
+            { nr: 30, kw: 16, date: '19.–23.04.27', type: 'wb', u: '1/2', topic: 'Wahlbereich „Kryptografie" I: Ziele und Aufgaben von Verschlüsselung', remark: 'knüpft an LB 2 an', details: [
+                'Wozu Verschlüsselung? Schutzziele wiedererkennen',
+                'Cäsar-Chiffre praktisch knacken'
+            ] },
+            { nr: 31, kw: 17, date: '26.–30.04.27', type: 'wb', u: '2/2', topic: 'Wahlbereich Kryptografie II: Prinzip eines ausgewählten Verfahrens', remark: '', details: [
+                'Enigma, SSL, DES oder RSA im Prinzip verstehen',
+                'Simulationssoftware (z. B. CrypTool) einsetzen'
+            ] },
+            { nr: 32, kw: 18, date: '03.–05.05.27', type: 'org', u: '', topic: 'Exkurs: Zahlen und Zeichen in IT-Systemen (Schnuppern in Wahlbereich 1)', remark: 'Do 06.05. Himmelfahrt + Fr 07.05. unterrichtsfrei', details: [
+                'Dual- und Hexadezimalsystem, ASCII an Beispielen'
+            ] },
+            { nr: 33, kw: 19, date: '10.–14.05.27', type: 'org', u: '', topic: 'Exkurs: Informatik in der Gesellschaft (Schnuppern in Wahlbereich 3)', remark: '', details: [
+                'Einflüsse von IT-Systemen: Industrie, Verkehr, Finanzen, Bildung, Kultur'
+            ] },
+            { nr: 34, kw: 20, date: '19.–21.05.27', type: 'org', u: '', topic: 'Exkurs: Präsentieren (Schnuppern in Wahlbereich 4)', remark: 'Mo 17.05. Pfingstmontag + Di 18.05. Ferientag', details: [
+                'Gestaltungsprinzipien und Präsentationstechniken — Nutzen für FPTA-Berichte'
+            ] },
+            { nr: 35, kw: 21, date: '24.–28.05.27', type: 'org', u: '', topic: 'Exkurs: Diskriminierung im Internet (Schnuppern in Wahlbereich 5)', remark: '', details: [
+                'Hate Speech und Counter Speech; rechtliche Möglichkeiten',
+                'Kampagnen mit Counter Narratives'
+            ] },
+            { nr: 36, kw: 22, date: '31.05.–04.06.27', type: 'org', u: '', topic: 'Vertiefung: Sicherheits-Check fürs eigene digitale Leben', remark: '', details: [
+                'Passwort-Hygiene, 2FA, Backups: persönlichen Maßnahmenplan erstellen'
+            ] },
+            { nr: 37, kw: 23, date: '07.–11.06.27', type: 'org', u: '', topic: 'Auswertung Klausuren / Übung', remark: '', details: [
+                'Auswertung und Berichtigung; offene Fragen klären'
+            ] },
+            { nr: 38, kw: 24, date: '14.–18.06.27', type: 'org', u: '', topic: 'Puffer / Projekttage', remark: 'je nach Schulorganisation', details: [
+                'Reserve — je nach Schuljahresplanung'
+            ] },
+            { nr: 39, kw: 25, date: '21.–25.06.27', type: 'org', u: '', topic: 'Puffer', remark: '', details: [
+                'Reserve — je nach Schuljahresplanung'
+            ] },
+            { nr: 40, kw: 26, date: '28.06.–02.07.27', type: 'org', u: '', topic: 'Jahresrückblick; Ausblick Kl. 12: Datenbanken, Programmieren, Projekt', remark: '', details: [
+                'Jahresrückblick in 10 Fragen',
+                'Ausblick auf Klasse 12 und die FHR-Prüfungen'
+            ] },
+            { nr: 41, kw: 27, date: '05.–09.07.27', type: 'org', u: '', topic: 'Ausklang', remark: 'Fr 09.07. letzter Schultag, Zeugnisse', details: [
+                'Accounts und Abgaben aufräumen; Logikrätsel zum Abschluss'
+            ] },
+            { ferien: 'Sommerferien · ab 10.07.2027' }
+        ];
+
+        // Lernbereich summaries for the clickable meta cards (see svp-plan.js).
+        window.LB_INFO = {
+            pdf: '../lehrplaene/lehrplan_fos_informatik.pdf',
+            page: 16,
+            lb1: {
+                page: 17,
+                bullets: [
+                    'Technische Grundlagen: Signale, Nachrichten, Daten, Informationen',
+                    'Informationen beschaffen, bewerten und strukturieren (Qualität, Vertrauenswürdigkeit)',
+                    'Darstellung und Verbreitung: Medienwahl, Gestaltungsregeln, CMS/Blogs/soziale Netzwerke',
+                    'Identität im Spannungsfeld von Authentizität und Inszenierung',
+                ]
+            },
+            lb2: {
+                page: 18,
+                bullets: [
+                    'Rechtliche Grundlagen von Datenschutz und Datensicherheit',
+                    'Bedrohungslagen: Falschnachrichten, Angriffe auf Infrastrukturen, Social Engineering',
+                    'Sicherheitskonzepte: Schutzziele, soziale Netzwerke, Backup-Konzepte',
+                    'Ökologisch und sozial verträgliche Mediennutzung',
+                ]
+            },
+            wb: {
+                page: 19,
+                bullets: [
+                    'Ziele und Aufgaben von Verschlüsselung',
+                    'Prinzipien eines Verfahrens: Cäsar, Enigma, SSL, DES, RSA',
+                    'Einsatz von Simulationssoftware',
+                ]
+            },
+        };
+
+        window.BADGE = {
+            lb1: ['b-orange', 'LB 1'],
+            lb2: ['b-cyan', 'LB 2'],
+            wb: ['b-green', 'WAHL'],
+            lk: ['b-red', 'LEISTUNG'],
+            org: ['b-grey', 'ORGA']
+        };
+    </script>
+    <script src="../svp-auth.js"></script>
+    <script src="../svp-plan.js"></script>
+    <script src="../svp-nav.js"></script>
+</body>
+
+</html>
