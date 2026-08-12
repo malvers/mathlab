@@ -97,6 +97,143 @@
         }
     }
 
+    // --- Print export ------------------------------------------------------
+    // Printing a plan page produces a clean, light SVP document (Raleway),
+    // built fresh from PLAN + local edits on every print: header block,
+    // Lernbereich banners (from the meta cards) and one row per week.
+    document.body.classList.add('has-export');
+    (function loadRaleway() {
+        const l = document.createElement('link');
+        l.rel = 'stylesheet';
+        l.href = 'https://fonts.googleapis.com/css2?family=Raleway:wght@300;400;600;700&display=swap';
+        document.head.appendChild(l);
+    })();
+
+    function buildExport() {
+        const old = document.getElementById('svp-export');
+        if (old) old.remove();
+        const ex = document.createElement('div');
+        ex.id = 'svp-export';
+
+        const h1 = document.querySelector('h1');
+        const sub = document.querySelector('.page-head .subtitle');
+        const head = document.createElement('header');
+        head.innerHTML =
+            '<div class="x-doc">Stoffverteilungsplan · Schuljahr 2026/27</div>' +
+            '<div class="x-title"></div>' +
+            '<div class="x-sub"></div>' +
+            '<div class="x-meta">Name: Dr. Michael Alvers · IBB Berufliche Schulen Dresden · Stand: ' +
+            new Date().toLocaleDateString('de-DE') + '</div>';
+        head.querySelector('.x-title').textContent = h1 ? h1.textContent : 'Stoffverteilungsplan';
+        head.querySelector('.x-sub').textContent =
+            sub ? sub.textContent.replace(/\s+/g, ' ').trim() : '';
+        ex.appendChild(head);
+
+        // Lernbereich meta (banner text per type) from the meta cards.
+        const metaByType = {};
+        document.querySelectorAll('.meta-card[data-lb]').forEach(card => {
+            metaByType[card.dataset.lb] = {
+                k: card.querySelector('.k') ? card.querySelector('.k').textContent : '',
+                v: card.querySelector('.v') ? card.querySelector('.v').textContent : '',
+                vu: card.querySelector('.vu') ? card.querySelector('.vu').textContent : ''
+            };
+        });
+
+        // Ziele column (Vorlage: Inhalte | Ziele | Bemerkungen) — only when
+        // the page's PLAN rows carry ziel fields (derived from the Lerninhalte).
+        const hasZiele = window.PLAN.some(r => r.ziel);
+        const cols = hasZiele ? 6 : 5;
+
+        const table = document.createElement('table');
+        table.innerHTML =
+            '<thead><tr><th>KW</th><th>Woche</th><th>Ustd.</th>' +
+            '<th>Unterrichtsinhalte</th>' + (hasZiele ? '<th>Ziele</th>' : '') +
+            '<th>Bemerkungen</th></tr></thead>';
+        const xbody = document.createElement('tbody');
+        const seenLb = new Set();
+
+        window.PLAN.forEach((row, i) => {
+            const ov = saved[i] || {};
+            if (row.ferien) {
+                const tr = document.createElement('tr');
+                tr.className = 'x-fer';
+                const td = document.createElement('td');
+                td.colSpan = cols;
+                td.textContent = ov.ferien || row.ferien;
+                tr.appendChild(td);
+                xbody.appendChild(tr);
+                return;
+            }
+            const [badgeClass] = window.BADGE[row.type];
+
+            // First week of a Lernbereich: banner row with name + Ustd.
+            if (metaByType[row.type] && !seenLb.has(row.type)) {
+                seenLb.add(row.type);
+                const m = metaByType[row.type];
+                const tr = document.createElement('tr');
+                tr.className = 'x-lb ' + badgeClass;
+                const td = document.createElement('td');
+                td.colSpan = cols;
+                td.textContent = m.k + ' · ' + m.v + (m.vu ? ' · ' + m.vu : '');
+                tr.appendChild(td);
+                xbody.appendChild(tr);
+            }
+
+            const tr = document.createElement('tr');
+            tr.className = 'x-week ' + badgeClass;
+            const kw = document.createElement('td');
+            kw.className = 'x-kw';
+            kw.textContent = row.kw;
+            const date = document.createElement('td');
+            date.className = 'x-date';
+            date.textContent = ov.date != null ? ov.date : row.date;
+            const u = document.createElement('td');
+            u.className = 'x-u';
+            u.textContent = ov.u != null ? ov.u : row.u;
+            const inh = document.createElement('td');
+            inh.className = 'x-inh';
+            const strong = document.createElement('b');
+            setMathText(strong, ov.topic != null ? ov.topic : row.topic);
+            inh.appendChild(strong);
+            const items = ov.details || row.details;
+            if (items && items.length) {
+                const ul = document.createElement('ul');
+                buildDetailList(ul, items);
+                inh.appendChild(ul);
+            }
+            const cells = [kw, date, u, inh];
+            if (hasZiele) {
+                // Ziel cell: leading Lernziel verb (Kennen/Beherrschen/…) bold,
+                // like in the official template.
+                const ziel = document.createElement('td');
+                ziel.className = 'x-ziel';
+                const text = ov.ziel != null ? ov.ziel : (row.ziel || '');
+                const sp = text.indexOf(' ');
+                if (sp > 0) {
+                    const b = document.createElement('b');
+                    b.textContent = text.slice(0, sp);
+                    ziel.appendChild(b);
+                    ziel.appendChild(document.createTextNode(text.slice(sp)));
+                } else {
+                    ziel.textContent = text;
+                }
+                cells.push(ziel);
+            }
+            const rem = document.createElement('td');
+            rem.className = 'x-rem';
+            setMathText(rem, ov.remark != null ? ov.remark : row.remark);
+            cells.push(rem);
+            cells.forEach(td => tr.appendChild(td));
+            xbody.appendChild(tr);
+        });
+
+        table.appendChild(xbody);
+        ex.appendChild(table);
+        document.body.appendChild(ex);
+    }
+
+    window.addEventListener('beforeprint', buildExport);
+
     window.PLAN.forEach((row, i) => {
         const ov = saved[i] || {};
         const tr = document.createElement('tr');
