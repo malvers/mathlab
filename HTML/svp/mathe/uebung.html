@@ -40,7 +40,48 @@
         /* IBB logo: print/PDF only, top right of the sheet head */
         .ibb-logo { display: none; }
 
-        .toolbar { max-width: 760px; }
+        /* Progress bar (screen only): gray track, fill = checked share of ALL
+           practice days (Mo–Fr, no holidays) — colored red → green with progress */
+        .progress {
+            max-width: 760px;
+            margin: 0 auto 12px;
+        }
+
+        .progress .track {
+            height: 10px;
+            background: rgba(170, 190, 220, 0.12);
+            border: 1px solid var(--line);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .progress .bar {
+            height: 100%;
+            width: 0;
+            border-radius: 6px;
+            transition: width 0.3s, background-color 0.3s;
+        }
+
+        /* fireworks overlay at 100% (adapted from happybirthday.html) */
+        #fx {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 999;
+            display: none;
+        }
+
+        .progress .plabel {
+            display: block;
+            text-align: right;
+            margin-bottom: 2px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.6rem;
+            color: var(--muted);
+            letter-spacing: 0.04em;
+        }
+
+        .toolbar { max-width: 760px; margin-bottom: 4px; }
         .toolbar button.action[aria-pressed="true"] {
             outline: 2px solid var(--lambda);
             outline-offset: 1px;
@@ -60,6 +101,20 @@
         table.uebung thead th { position: static; }
 
         table.uebung col.c-kw { width: 200px; }
+        table.uebung col.c-wa { width: 34px; }
+
+        /* week traffic light: one dot per row — filled by status, outline when
+           the week is still ahead, hidden in holiday weeks */
+        .wdot {
+            display: block;
+            margin: 0 auto;
+            width: 11px;
+            height: 11px;
+            border-radius: 50%;
+            border: 1.5px solid var(--line);
+        }
+
+        tr.fer .wdot { display: none; }
 
         table.uebung td.kw {
             text-align: left;
@@ -87,7 +142,7 @@
 
         /* day cells: one checkbox per day, click toggles a ✗ (stored locally only) */
         table.uebung td.day { cursor: pointer; }
-        table.uebung td.day:hover .box { border-color: var(--lambda); }
+        table.uebung td.day:hover .box { border-color: var(--phi); }
 
         /* block + auto margin centers x, vertical-align middle centers y */
         table.uebung tbody td { vertical-align: middle; }
@@ -105,17 +160,27 @@
 
         td.we .box { border-color: rgba(170, 190, 220, 0.22); }
 
-        /* holiday weeks: gray boxes (chilling allowed), rest of the row stays normal */
+        /* holiday weeks: gray boxes + weekend-like background (chilling allowed) */
+        tr.fer td { background: rgba(8, 20, 42, 0.35); }
         tr.fer .box { border-color: rgba(170, 190, 220, 0.22); }
         tr.fer td.day.on .box::after { color: rgba(170, 190, 220, 0.5); }
 
-        td.day.on .box::after {
-            content: '\2717';
-            color: var(--phi);
-            font-weight: 600;
+        /* checked: solid green fill with a light 3D look (top highlight,
+           soft drop shadow), white cross on top */
+        td.day.on .box {
+            background: linear-gradient(180deg, rgb(150, 190, 64), rgb(100, 133, 38));
+            border: none;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35),
+                        inset 0 -1px 0 rgba(0, 0, 0, 0.25),
+                        0 1px 3px rgba(0, 0, 0, 0.45);
         }
 
-        td.we.on .box::after { color: rgba(170, 190, 220, 0.5); }
+        /* weekend/holiday checks stay muted: gray fill instead of green */
+        td.we.on .box,
+        tr.fer td.day.on .box {
+            background: linear-gradient(180deg, rgba(170, 190, 220, 0.35), rgba(170, 190, 220, 0.16));
+            border: none;
+        }
 
         /* weekend columns: gray lines + gray text — weekends are for chilling */
         table.uebung th.we,
@@ -161,6 +226,17 @@
                row "52 21.12. WEIHNACHTSFERIEN" needs 37.1mm (Outfit 8pt/6.24pt
                + Orbitron 5pt with 0.04em tracking + margins + 2×1.5mm padding) */
             table.uebung col.c-kw { width: 38mm; }
+            table.uebung col.c-wa { width: 7mm; }
+
+            .wdot {
+                width: 3mm;
+                height: 3mm;
+                border: 0.3mm solid #999;
+                print-color-adjust: exact;
+                -webkit-print-color-adjust: exact;
+                box-shadow: none;
+            }
+
 
             table.uebung th,
             table.uebung td {
@@ -225,8 +301,9 @@
                 font-size: 9pt;
             }
 
+            /* on paper a colored fill won't do — print keeps the classic cross */
+            td.day.on .box::after { content: '\2717'; color: #111; font-weight: 600; }
             td.we .box { border-color: #aaa; }
-            td.day.on .box::after { color: #111; }
             td.we.on .box::after { color: #999; }
 
             tr.fer .box { border-color: #aaa; }
@@ -253,15 +330,22 @@
         <button class="action" onclick="window.print()">Drucken / PDF</button>
     </div>
 
+    <div class="progress no-print" id="progress">
+        <span class="plabel" id="progress-pct">0%</span>
+        <div class="track"><div class="bar" id="progress-bar"></div></div>
+    </div>
+
     <div class="table-wrap">
         <table class="uebung">
             <colgroup>
                 <col class="c-kw">
+                <col class="c-wa">
                 <col><col><col><col><col><col><col>
             </colgroup>
             <thead>
                 <tr>
                     <th>KW</th>
+                    <th class="wa" title="Wochen-Ampel"></th>
                     <th>Mo</th>
                     <th>Di</th>
                     <th>Mi</th>
@@ -274,6 +358,8 @@
             <tbody id="weeks"></tbody>
         </table>
     </div>
+
+    <canvas id="fx" class="no-print"></canvas>
 
     <footer class="page-foot no-print">
         Klick auf ein K&auml;stchen setzt ein &#10007; &mdash; wird nur lokal in diesem Browser gespeichert
@@ -340,7 +426,8 @@
                 const fer = TAGS[key] && TAGS[key].indexOf('ferien') > -1;
                 rows.push(
                     '<tr' + (fer ? ' class="fer"' : '') + '><td class="kw"><b>' + key.split('/')[0] + '</b>' +
-                    '<span class="d">' + fmt(mo) + '</span>' + tag + '</td>' + cells + '</tr>'
+                    '<span class="d">' + fmt(mo) + '</span>' + tag + '</td>' +
+                    '<td class="wa"><span class="wdot"></span></td>' + cells + '</tr>'
                 );
             }
             document.getElementById('weeks').innerHTML = rows.join('');
@@ -353,6 +440,141 @@
 
             document.querySelectorAll('.toolbar [data-k]').forEach(b =>
                 b.setAttribute('aria-pressed', b.dataset.k === klasse ? 'true' : 'false'));
+            updateProgress(klasse);
+        }
+
+        // Shared color ramp (palette): 0 = red → orange → 1 = green. Used by
+        // the progress bar (share of all practice days) and the per-week dots
+        // (checked weekdays / 5) — continuous interpolation, no discrete steps.
+        const C_RED = [176, 36, 24], C_ORANGE = [245, 194, 66], C_GREEN = [121, 158, 49];
+
+        function ramp(t) {
+            const lerp = (a, b, u) => a.map((v, k) => Math.round(v + (b[k] - v) * u));
+            const c = t < 0.5 ? lerp(C_RED, C_ORANGE, t * 2) : lerp(C_ORANGE, C_GREEN, (t - 0.5) * 2);
+            return c.join(',');
+        }
+
+        function updateProgress(klasse) {
+            const n = klasse === '13' ? WEEKS_ABI : WEEKS_FULL;
+            const checks = loadChecks(klasse);
+            const dots = document.querySelectorAll('#weeks td.wa .wdot');
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            let total = 0, done = 0;
+            for (let i = 0; i < n; i++) {
+                const fer = TAGS[kwKey(i)] && TAGS[kwKey(i)].indexOf('ferien') > -1;
+                const mon = new Date(START);
+                mon.setDate(mon.getDate() + i * 7);
+                const started = mon <= today;
+                let wDone = 0;
+                for (let j = 0; j < 5; j++) {
+                    if (checks[i + '-' + j]) wDone++;
+                    if (!fer) { total++; if (checks[i + '-' + j]) done++; }
+                }
+                if (dots[i] && !fer) {
+                    if (!started && wDone === 0) {
+                        // week not running yet: empty ring
+                        dots[i].style.backgroundColor = '';
+                        dots[i].style.borderColor = '';
+                        dots[i].style.boxShadow = '';
+                    } else {
+                        const c = ramp(wDone / 5);
+                        dots[i].style.backgroundColor = 'rgb(' + c + ')';
+                        dots[i].style.borderColor = 'transparent';
+                        dots[i].style.boxShadow = '0 0 6px rgba(' + c + ',0.65)';
+                    }
+                }
+            }
+            const t = total ? done / total : 0;
+            const bar = document.getElementById('progress-bar');
+            bar.style.width = (t * 100) + '%';
+            bar.style.backgroundColor = 'rgb(' + ramp(t) + ')';
+            // full house → fireworks (once per crossing, re-armed below 100 %)
+            if (t >= 1 && !celebrated) { celebrated = true; fireworks(); }
+            if (t < 1) celebrated = false;
+            document.getElementById('progress-pct').textContent = Math.round(t * 100) + '%';
+            document.getElementById('progress').title =
+                done + ' von ' + total + ' Übungstagen im Schuljahr (Mo–Fr, ohne Ferien)';
+        }
+
+        // Fireworks at 100 % — rockets + bursts adapted from happybirthday.html,
+        // drawn on a transparent overlay (trail fade via destination-out).
+        const fxCanvas = document.getElementById('fx');
+        const fctx = fxCanvas.getContext('2d');
+        let particles = [], fxRaf = null, fxTimer = null, celebrated = false;
+
+        function burst(x, y, hue) {
+            const count = 40 + Math.floor(Math.random() * 20);
+            for (let i = 0; i < count; i++) {
+                const angle = (Math.PI * 2 * i) / count + Math.random() * 0.05;
+                const speed = 2 + Math.random() * 5;
+                particles.push({
+                    x, y,
+                    vx: Math.cos(angle) * speed,
+                    vy: Math.sin(angle) * speed,
+                    life: 90 + Math.random() * 40,
+                    age: 0,
+                    hue: hue + (Math.random() * 40 - 20),
+                    size: 2 + Math.random() * 1.5,
+                    g: 0.04 + Math.random() * 0.02
+                });
+            }
+        }
+
+        function rocket() {
+            const toX = innerWidth * (0.15 + Math.random() * 0.7);
+            const toY = innerHeight * (0.15 + Math.random() * 0.35);
+            const fromX = toX + (Math.random() * 200 - 100);
+            const dx = toX - fromX, dy = toY - (innerHeight + 20);
+            const hue = Math.random() * 360;
+            let i = 0;
+            const steps = 22;
+            const launch = setInterval(() => {
+                if (i > steps) { clearInterval(launch); burst(toX, toY, hue); return; }
+                particles.push({
+                    x: fromX + dx * (i / steps), y: innerHeight + 20 + dy * (i / steps),
+                    vx: 0, vy: 0, life: 24, age: 0, hue, size: 1.6, g: 0
+                });
+                i++;
+            }, 14);
+        }
+
+        function drawFx() {
+            fctx.globalCompositeOperation = 'destination-out';
+            fctx.fillStyle = 'rgba(0, 0, 0, 0.18)';
+            fctx.fillRect(0, 0, innerWidth, innerHeight);
+            fctx.globalCompositeOperation = 'lighter';
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const p = particles[i];
+                p.age++;
+                p.x += p.vx; p.y += p.vy; p.vy += p.g;
+                p.vx *= 0.992; p.vy *= 0.992;
+                const t = 1 - p.age / p.life;
+                if (t <= 0) { particles.splice(i, 1); continue; }
+                // no shadowBlur here — it is the classic canvas performance killer
+                fctx.globalAlpha = Math.max(0, t);
+                fctx.fillStyle = 'hsl(' + p.hue + ', 100%, ' + (50 + 40 * t) + '%)';
+                fctx.beginPath();
+                fctx.arc(p.x, p.y, p.size * (0.4 + 0.6 * t), 0, Math.PI * 2);
+                fctx.fill();
+            }
+            fctx.globalAlpha = 1;
+            if (particles.length || fxTimer) fxRaf = requestAnimationFrame(drawFx);
+            else { fxCanvas.style.display = 'none'; fxRaf = null; }
+        }
+
+        function fireworks() {
+            fxCanvas.width = innerWidth * devicePixelRatio;
+            fxCanvas.height = innerHeight * devicePixelRatio;
+            fxCanvas.style.width = innerWidth + 'px';
+            fxCanvas.style.height = innerHeight + 'px';
+            fctx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
+            fxCanvas.style.display = 'block';
+            rocket();
+            if (fxTimer) clearInterval(fxTimer);
+            fxTimer = setInterval(rocket, 900);
+            setTimeout(() => { clearInterval(fxTimer); fxTimer = null; }, 5000);
+            if (!fxRaf) fxRaf = requestAnimationFrame(drawFx);
         }
 
         let current = localStorage.getItem('svp-uebung-klasse') || '11';
@@ -372,6 +594,28 @@
             if (checks[key]) delete checks[key]; else checks[key] = 1;
             localStorage.setItem('svp-uebung-checks-' + current, JSON.stringify(checks));
             td.classList.toggle('on');
+            updateProgress(current);
+        });
+
+        // DEBUG: key sets the progress for the current class — 0 = no checks,
+        // 1–9 = 10–90 %, C = centurio (100 %). Checks fill row by row
+        // (week 34 Mo–Fr, then week 35, …) like real usage over the year.
+        document.addEventListener('keydown', function (e) {
+            if (e.metaKey || e.ctrlKey || e.altKey) return;
+            if (e.key === 'b' || e.key === 'B') { fireworks(); return; } // debug: fireworks
+            const cent = e.key === 'c' || e.key === 'C';
+            if (!cent && (e.key < '0' || e.key > '9')) return;
+            const pct = cent ? 100 : parseInt(e.key, 10) * 10;
+            const n = current === '13' ? WEEKS_ABI : WEEKS_FULL;
+            const cells = [];
+            for (let i = 0; i < n; i++)
+                if (!(TAGS[kwKey(i)] && TAGS[kwKey(i)].indexOf('ferien') > -1))
+                    for (let j = 0; j < 5; j++)
+                        cells.push(i + '-' + j);
+            const checks = {};
+            cells.slice(0, Math.round(cells.length * pct / 100)).forEach(k => checks[k] = 1);
+            localStorage.setItem('svp-uebung-checks-' + current, JSON.stringify(checks));
+            render(current);
         });
 
         render(current);
