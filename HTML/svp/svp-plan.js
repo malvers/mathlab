@@ -74,13 +74,17 @@
         document.head.appendChild(s);
     }
 
+    // While the print export is being built its cells are transient: they must
+    // not be tracked for re-render and must not kick off a KaTeX load, which
+    // would stall the print dialog on a network request.
+    let building = false;
+
     // Sets text that may contain $...$ math; keeps the raw source in data-src.
     function setMathText(el, text) {
         text = text == null ? '' : String(text);
         el.dataset.src = text;
         if (text.includes('$')) {
-            mathEls.add(el);
-            ensureKatex();
+            if (!building) { mathEls.add(el); ensureKatex(); }
             renderMathInto(el);
         } else {
             mathEls.delete(el);
@@ -110,6 +114,7 @@
     })();
 
     function buildExport() {
+        building = true;
         const old = document.getElementById('svp-export');
         if (old) old.remove();
         const ex = document.createElement('div');
@@ -122,7 +127,7 @@
             '<div class="x-doc">Stoffverteilungsplan · Schuljahr 2026/27</div>' +
             '<div class="x-title"></div>' +
             '<div class="x-sub"></div>' +
-            '<div class="x-meta">Name: Dr. Michael Alvers · IBB Berufliche Schulen Dresden · Stand: ' +
+            '<div class="x-meta">Name: Dr. Michael R. Alvers · IBB Berufliche Schulen Dresden · Stand: ' +
             new Date().toLocaleDateString('de-DE') + '</div>';
         head.querySelector('.x-title').textContent = h1 ? h1.textContent : 'Stoffverteilungsplan';
         head.querySelector('.x-sub').textContent =
@@ -186,10 +191,37 @@
             kw.textContent = row.kw;
             const date = document.createElement('td');
             date.className = 'x-date';
-            date.textContent = ov.date != null ? ov.date : row.date;
+            // Drop the trailing year (17.–21.08.26 → 17.–21.08.; the school year
+            // is in the header) and set start/end on their own lines, so the
+            // column stays as narrow as one date.
+            const dtxt = String(ov.date != null ? ov.date : row.date).replace(/\.\d{2}$/, '.');
+            const dash = dtxt.indexOf('–');
+            if (dash > -1) {
+                const a = document.createElement('span');
+                a.textContent = dtxt.slice(0, dash + 1);
+                const b = document.createElement('span');
+                b.textContent = dtxt.slice(dash + 1);
+                date.appendChild(a);
+                date.appendChild(b);
+            } else {
+                date.textContent = dtxt;
+            }
             const u = document.createElement('td');
             u.className = 'x-u';
-            u.textContent = ov.u != null ? ov.u : row.u;
+            // Ustd. like "7/13" or "19–20/24" break after the slash, same idea
+            // as the date: two short lines instead of one wide column.
+            const utxt = String(ov.u != null ? ov.u : (row.u || ''));
+            const slash = utxt.indexOf('/');
+            if (slash > -1) {
+                const a = document.createElement('span');
+                a.textContent = utxt.slice(0, slash + 1);
+                const b = document.createElement('span');
+                b.textContent = utxt.slice(slash + 1);
+                u.appendChild(a);
+                u.appendChild(b);
+            } else {
+                u.textContent = utxt;
+            }
             const inh = document.createElement('td');
             inh.className = 'x-inh';
             const strong = document.createElement('b');
@@ -230,9 +262,43 @@
         table.appendChild(xbody);
         ex.appendChild(table);
         document.body.appendChild(ex);
+        building = false;
     }
 
-    window.addEventListener('beforeprint', buildExport);
+    // The PDF file name comes from document.title, so swap in a clean one for
+    // the duration of the print: "SVP Informatik OS Kl 9 SJ 2026-27".
+    // Schulform abbreviations are the ones the Lehrpläne use (OS/BGY/FOS).
+    const SHORT = [
+        [/Berufliches Gymnasium/g, 'BGY'],
+        [/Fachoberschule/g, 'FOS'],
+        [/Oberschule/g, 'OS'],
+        [/Jahrgangsstufe/g, 'Jgst'],
+        [/Klassenstufe/g, 'Kl'],
+        [/Klasse/g, 'Kl']
+    ];
+
+    function exportTitle() {
+        const h1 = document.querySelector('h1');
+        let name = h1 ? h1.textContent : 'Stoffverteilungsplan';
+        for (const [re, rep] of SHORT) name = name.replace(re, rep);
+        name = name.replace(/·/g, ' ').replace(/[\\/:*?"<>|]/g, '-').replace(/\s+/g, ' ').trim();
+        return 'SVP ' + name + ' SJ 2026-27';
+    }
+
+    let pageTitle = document.title;
+
+    window.addEventListener('beforeprint', function () {
+        pageTitle = document.title;
+        buildExport();
+        document.title = exportTitle();
+    });
+
+    // Drop the export again afterwards — the live page keeps a light DOM.
+    window.addEventListener('afterprint', function () {
+        document.title = pageTitle;
+        const ex = document.getElementById('svp-export');
+        if (ex) ex.remove();
+    });
 
     window.PLAN.forEach((row, i) => {
         const ov = saved[i] || {};

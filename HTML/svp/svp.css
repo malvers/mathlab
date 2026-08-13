@@ -643,7 +643,9 @@ footer.page-foot a:hover { text-decoration: underline; }
         border-bottom: 0.5mm solid #1c1c1c;
     }
 
-    #svp-export table { width: 100%; border-collapse: collapse; font-size: 9pt; }
+    /* min-width: 0 undoes the global table rule (760px ≈ 201mm), which pushed
+       the export table wider than the page — the head rule then looked short */
+    #svp-export table { width: 100%; min-width: 0; border-collapse: collapse; font-size: 9pt; }
 
     #svp-export thead th {
         background: none;
@@ -658,16 +660,23 @@ footer.page-foot a:hover { text-decoration: underline; }
     }
 
     #svp-export td {
-        padding: 1.8mm 2mm;
+        padding: 1.8mm 1.5mm;
         border-bottom: 1px solid #e2e2e2;
         vertical-align: top;
     }
 
+    /* narrow columns need no extra gap to the colored spine */
+    #svp-export .x-kw, #svp-export .x-date, #svp-export .x-u { padding-right: 1mm; }
+
     #svp-export tr { page-break-inside: avoid; }
 
-    #svp-export .x-kw { font-weight: 700; width: 8mm; }
-    #svp-export .x-date { color: #666; white-space: nowrap; width: 26mm; font-variant-numeric: tabular-nums; }
-    #svp-export .x-u { color: #666; white-space: nowrap; width: 16mm; font-variant-numeric: tabular-nums; }
+    #svp-export .x-kw { font-weight: 700; width: 4.5mm; }
+    /* date on two lines (start / end) — column only as wide as one date */
+    #svp-export .x-date { color: #666; width: 11mm; font-size: 7.5pt; line-height: 1.25; font-variant-numeric: tabular-nums; }
+    #svp-export .x-date span { display: block; white-space: nowrap; }
+    /* Ustd. also on two lines (numerator/ + total) */
+    #svp-export .x-u { color: #666; width: 6mm; font-size: 7.5pt; line-height: 1.25; font-variant-numeric: tabular-nums; }
+    #svp-export .x-u span { display: block; white-space: nowrap; }
     #svp-export .x-inh b { font-weight: 600; }
     #svp-export .x-rem { color: #555; font-size: 8pt; width: 30mm; }
     #svp-export .x-ziel { font-size: 8pt; color: #333; width: 34mm; }
