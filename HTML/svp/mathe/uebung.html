@@ -21,7 +21,7 @@
         .sheet-head {
             max-width: 760px;
             margin: 0 auto 14px;
-            text-align: center;
+            text-align: left;
         }
 
         .sheet-head .motto {
@@ -301,7 +301,7 @@
 
             table.uebung th,
             table.uebung td {
-                border: 1px solid #666;
+                border: 0.25mm solid #444;
                 padding: 0.35mm 1.5mm;
                 font-size: 8pt;
                 height: 4.4mm;
@@ -337,7 +337,6 @@
             /* weekend: gray lines + gray labels (visibly gray, not washed out) */
             table.uebung th.we,
             table.uebung td.we {
-                border-color: #aaa;
                 color: #888;
                 background: #fff;
             }
@@ -346,12 +345,20 @@
                color and slightly heavier than the grid, AFTER the gray weekend
                rules so Sa/So cells can't tint the frame. No wrapper border,
                so nothing doubles up (fat top/left) or goes missing (right). */
-            table.uebung thead th { border-top: 0.3mm solid #333; }
+            /* Screen rules for .we/.fei are more specific than the generic cell
+               rule above, so their light blue border-color would survive into
+               print — override it here with matching specificity. */
+            table.uebung th.we,
+            table.uebung td.we,
+            table.uebung td.fei,
+            table.uebung tr.fer td { border-color: #444; }
+
+            table.uebung thead th { border-top: 0.25mm solid #444; }
             table.uebung th:first-child,
-            table.uebung td:first-child { border-left: 0.3mm solid #333; }
+            table.uebung td:first-child { border-left: 0.25mm solid #444; }
             table.uebung th:last-child,
-            table.uebung td:last-child { border-right: 0.3mm solid #333; }
-            table.uebung tbody tr:last-child td { border-bottom: 0.3mm solid #333; }
+            table.uebung td:last-child { border-right: 0.25mm solid #444; }
+            table.uebung tbody tr:last-child td { border-bottom: 0.25mm solid #444; }
 
             .box {
                 width: 3.8mm;
@@ -367,7 +374,20 @@
             td.we .box { border-color: #aaa; }
             td.we.on .box::after { color: #999; }
 
-            tr.fer .box, td.fei .box { border-color: #aaa; }
+            /* Ferien/Feiertage: nur zart getönt statt satt grau (der Screen-Wert
+               rgba(8,20,42,.35) druckt sonst als kräftiges Grau) */
+            tr.fer td,
+            table.uebung td.fei { background: #f4f6f8; }
+
+            /* Kästchen bleiben überall sichtbar — an freien Tagen nur leiser:
+               weiß gefüllt mit hellem Rand statt unsichtbar auf Grau */
+            tr.fer .box,
+            td.fei .box,
+            td.we .box {
+                background: #fff;
+                border-color: #c4c4c4;
+            }
+
             tr.fer td.day.on .box::after,
             td.fei.on .box::after { color: #999; }
         }
@@ -535,7 +555,9 @@
                 for (let j = 0; j < 7; j++) {
                     const on = checks[i + '-' + j] ? ' on' : '';
                     const fei = j < 5 ? feiertag(i, j) : null;
-                    if (fei && feiNames.indexOf(fei) < 0) feiNames.push(fei);
+                    // 'schulfrei' days stay gray but get no label — the holiday
+                    // next to them already explains the short week.
+                    if (fei && fei !== 'schulfrei' && feiNames.indexOf(fei) < 0) feiNames.push(fei);
                     cells += '<td class="day' + (j > 4 ? ' we' : '') + (fei ? ' fei' : '') + on +
                         '" data-i="' + i + '" data-j="' + j +
                         (fei ? '" title="' + fei : '') +
