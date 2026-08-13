@@ -255,7 +255,10 @@
 
         /* ---- print: compact A4 handout, one page per class ---- */
         @media print {
-            @page { size: A4 portrait; margin: 8mm 12mm; }
+            /* 14mm seitlich: mit border-collapse liegt die äußere Linie halb
+               außerhalb des Tabellenkastens — bei knappen Druckerrändern (v. a.
+               Windows) fiel sie rechts in den nicht druckbaren Bereich. */
+            @page { size: A4 portrait; margin: 8mm 14mm; }
 
             body { padding: 0; }
 
@@ -278,7 +281,9 @@
             .sheet-head .motto .hint { color: #555; }
             .sheet-head .klasse-line { color: #444; font-size: 8.5pt; }
 
-            .table-wrap { border: none; border-radius: 0; overflow: visible; }
+            /* 0.5mm Luft rechts, damit die kollabierte Außenlinie garantiert
+               innerhalb der druckbaren Fläche bleibt */
+            .table-wrap { border: none; border-radius: 0; overflow: visible; padding-right: 0.5mm; }
 
             /* Fixed total height: rows distribute the space evenly, so the
                sheet always fills the A4 page (297 − 2×8 margins − ~21mm head) */
