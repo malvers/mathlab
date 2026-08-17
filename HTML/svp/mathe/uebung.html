@@ -405,7 +405,7 @@
         <img class="ibb-logo" src="../ibb-logo.svg" alt="IBB Berufliche Schulen">
         <h1>&Uuml;bung macht den Meister</h1>
         <div class="motto">
-            &bdquo;Ich habe <b>mindestens 20&nbsp;Minuten</b> Mathe ge&uuml;bt.&ldquo;
+            &bdquo;Ich habe <b>mindestens 20&nbsp;Minuten</b> <span id="fach-short">Mathe</span> ge&uuml;bt.&ldquo;
             <span class="hint">&rarr; pro Tag ein Kreuz</span>
         </div>
         <div class="klasse-line" id="klasse-line"></div>
@@ -583,7 +583,7 @@
             document.getElementById('weeks').innerHTML = rows.join('');
 
             document.getElementById('klasse-line').textContent =
-                'Mathematik · Klasse ' + klasse + ' · Schuljahr 2026/27 · ' +
+                FACH_LONG + ' · Klasse ' + klasse + ' · Schuljahr 2026/27 · ' +
                 (klasse === '13'
                     ? 'KW 34 bis zum Abitur (Prüfung Mathe 06.05.2027, KW 18)'
                     : 'KW 34/2026 – KW 27/2027 (letzter Schultag Fr 09.07.2027)');
@@ -779,16 +779,24 @@
         let current = ['11', '12', '13'].indexOf(urlK) > -1 ? urlK
             : (localStorage.getItem('svp-uebung-klasse') || '11');
 
+        // Subject comes from ?fach=… (e.g. ?fach=Englisch); default is Mathe.
+        // Short form goes into the motto, long form into the class line + title.
+        const FACH = new URLSearchParams(location.search).get('fach') || 'Mathe';
+        const FACH_LONG = FACH === 'Mathe' ? 'Mathematik' : FACH;
+        const fachQS = FACH === 'Mathe' ? '' : '&fach=' + encodeURIComponent(FACH);
+        document.getElementById('fach-short').textContent = FACH;
+        document.title = 'Übung macht den Meister | ' + FACH_LONG + ' SJ 2026/27';
+
         function setKlasse(k) {
             current = k;
             localStorage.setItem('svp-uebung-klasse', k);
-            history.replaceState(null, '', '?k=' + k);
+            history.replaceState(null, '', '?k=' + k + fachQS);
             render(k);
         }
 
         // QR overlay: deep link to the live page incl. the selected class
         function showQr() {
-            const url = 'https://www.docalvers.de/svp/mathe/uebung.html?k=' + current;
+            const url = 'https://www.docalvers.de/svp/mathe/uebung.html?k=' + current + fachQS;
             const box = document.getElementById('qr-box');
             if (typeof qrcode === 'undefined') {
                 box.textContent = 'QR-Bibliothek nicht geladen — Link:';
