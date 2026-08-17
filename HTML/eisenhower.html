@@ -459,7 +459,12 @@
             }
         }
 
-        /* ---------- print: the chart alone, A4 landscape ---------- */
+        /* ---------- print: a dedicated static sheet, built from state ---------- */
+        /* The interactive grid/flex layout collapsed in print; a plain table cannot. */
+        #print-sheet {
+            display: none;
+        }
+
         @media print {
             @page {
                 size: A4 landscape;
@@ -473,88 +478,113 @@
                 background: #fff;
                 color: #000;
                 display: block;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
             }
 
             .topbar,
-            .q-add,
-            .item-act,
+            .frame,
             .modal,
             .movemenu,
             .qr-overlay {
                 display: none !important;
             }
 
-            .frame {
-                display: grid;
-                grid-template-columns: 7mm 1fr;
-                grid-template-rows: 1fr 7mm;
-                height: 180mm;
-                padding: 0;
-                gap: 2mm;
+            #print-sheet {
+                display: block;
             }
 
-            .axis-y,
-            .axis-x {
-                display: flex;
-                color: #333;
-                font-size: 9pt;
-            }
-
-            .grid {
-                grid-template-columns: 1fr 1fr;
-                grid-template-rows: 1fr 1fr;
-                gap: 4mm;
-                overflow: visible;
-            }
-
-            .q {
-                background: #fff;
-                border: 0.25mm solid #666;
-                border-top: 0.8mm solid var(--q-color);
-            }
-
-            .q-head {
-                border-bottom: 0.25mm solid #bbb;
-            }
-
-            .q-title {
-                font-size: 10pt;
-            }
-
-            .q-hint,
-            .q-count {
-                color: #555;
-            }
-
-            .q-list {
-                overflow: visible;
-            }
-
-            .item {
-                background: #fff;
-                border: 0.2mm solid #bbb;
-                cursor: default;
-            }
-
-            .item-text {
+            #print-sheet h2 {
+                font-family: 'Orbitron', sans-serif;
+                font-size: 13pt;
+                font-weight: 700;
+                letter-spacing: 0.14em;
+                text-transform: uppercase;
                 color: #000;
+                margin: 0 0 4mm;
+            }
+
+            table.ps {
+                width: 100%;
+                border-collapse: separate;
+                border-spacing: 2mm;
+                table-layout: fixed;
+            }
+
+            td.ps-y {
+                width: 7mm;
+                vertical-align: middle;
+                text-align: center;
+            }
+
+            td.ps-y span {
+                writing-mode: vertical-rl;
+                transform: rotate(180deg);
+                font-family: 'Orbitron', sans-serif;
+                font-size: 9pt;
+                letter-spacing: 0.18em;
+                text-transform: uppercase;
+                color: #333;
+            }
+
+            td.ps-x {
+                text-align: center;
+                font-family: 'Orbitron', sans-serif;
+                font-size: 9pt;
+                letter-spacing: 0.18em;
+                text-transform: uppercase;
+                color: #333;
+                padding-top: 1mm;
+            }
+
+            td.ps-q {
+                height: 76mm;
+                vertical-align: top;
+                border: 0.25mm solid #666;
+                border-radius: 2mm;
+                padding: 3mm 3.5mm;
+            }
+
+            .ps-title {
+                font-family: 'Orbitron', sans-serif;
                 font-size: 10pt;
+                font-weight: 700;
+                letter-spacing: 0.08em;
+                text-transform: uppercase;
+                color: #333;
             }
 
-            .item.done .item-text {
-                color: #666;
+            .ps-hint {
+                font-size: 9pt;
+                color: #555;
+                margin: 1mm 0 2.5mm;
+                border-bottom: 0.25mm solid #bbb;
+                padding-bottom: 1.5mm;
             }
 
-            .item-box {
+            .ps-item {
+                font-size: 10pt;
+                line-height: 1.45;
+                margin: 0 0 1.2mm;
+            }
+
+            .ps-box {
+                display: inline-block;
+                width: 3.2mm;
+                height: 3.2mm;
                 border: 0.3mm solid #555;
+                border-radius: 0.6mm;
+                margin-right: 2mm;
+                vertical-align: -0.4mm;
+                text-align: center;
+                font-size: 8pt;
+                line-height: 3mm;
             }
 
-            .q-empty {
-                display: none;
+            .ps-item.done {
+                color: #666;
+                text-decoration: line-through;
             }
         }
+
     </style>
 </head>
 
@@ -570,8 +600,8 @@
                 <path d="M6.75 6.75h.75v.75h-.75v-.75ZM6.75 16.5h.75v.75h-.75v-.75ZM16.5 6.75h.75v.75h-.75v-.75ZM13.5 13.5h.75v.75h-.75v-.75ZM13.5 19.5h.75v.75h-.75v-.75ZM19.5 13.5h.75v.75h-.75v-.75ZM19.5 19.5h.75v.75h-.75v-.75ZM16.5 16.5h.75v.75h-.75v-.75Z"></path>
             </svg>
         </button>
+        <button class="btn" onclick="window.print()">Drucken / PDF</button>
         <!-- parked for now — unhide when needed -->
-        <button class="btn" hidden onclick="window.print()">Drucken / PDF</button>
         <button class="btn" hidden onclick="exportJson()">Als JSON sichern</button>
         <button class="btn" hidden onclick="document.getElementById('file').click()">JSON laden</button>
         <button class="btn danger" hidden onclick="clearAll()">Alles löschen</button>
@@ -592,6 +622,8 @@
             </div>
         </div>
     </div>
+
+    <div id="print-sheet"></div>
 
     <div class="qr-overlay" id="qr-overlay" onclick="this.classList.remove('open')">
         <div class="qr-card">
@@ -723,7 +755,36 @@
             });
         }
 
+        /* static print sheet: plain table, rebuilt from state */
+        function esc(t) {
+            return String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        }
+
+        function buildPrintSheet() {
+            const cell = (q) => {
+                const items = state[q.id]
+                    .filter(it => !(hideDone && it.done))
+                    .map(it => '<div class="ps-item' + (it.done ? ' done' : '') + '">' +
+                        '<span class="ps-box">' + (it.done ? '✓' : '') + '</span>' + esc(it.text) + '</div>')
+                    .join('');
+                return '<td class="ps-q" style="border-top: 0.8mm solid ' + q.color + '">' +
+                    '<div class="ps-title">' + q.title + '</div>' +
+                    '<div class="ps-hint">→ ' + q.hint + '</div>' + items + '</td>';
+            };
+            document.getElementById('print-sheet').innerHTML =
+                '<h2>Eisenhower-Matrix</h2>' +
+                '<table class="ps">' +
+                '<tr><td class="ps-y" rowspan="2"><span>Dringlichkeit</span></td>' +
+                cell(QUADS[0]) + cell(QUADS[1]) + '</tr>' +
+                '<tr>' + cell(QUADS[2]) + cell(QUADS[3]) + '</tr>' +
+                '<tr><td></td><td class="ps-x" colspan="2">Wichtigkeit</td></tr>' +
+                '</table>';
+        }
+
+        window.addEventListener('beforeprint', buildPrintSheet);
+
         function render() {
+            buildPrintSheet();
             QUADS.forEach(q => {
                 const list = document.getElementById('list-' + q.id);
                 const items = state[q.id].filter(it => !(hideDone && it.done));
