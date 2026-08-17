@@ -39,18 +39,24 @@
             align-items: center;
             gap: 14px;
             flex-wrap: wrap;
-            padding: 14px 18px 10px;
+            /* left edge lines up with the quadrant boxes: 14px pad + 34px axis + 4px gap */
+            padding: 14px 18px 10px 52px;
         }
 
         .topbar h1 {
             margin: 0;
             font-family: 'Orbitron', sans-serif;
-            font-size: 1.05rem;
+            font-size: 1.45rem;
             font-weight: 700;
             letter-spacing: 0.14em;
             text-transform: uppercase;
             color: rgba(214, 232, 255, 0.95);
             margin-right: auto;
+            cursor: pointer;
+        }
+
+        .topbar h1:hover {
+            color: #fff;
         }
 
         .btn {
@@ -436,10 +442,68 @@
             height: auto;
         }
 
+        /* ---------- concept explainer ---------- */
+        .info-box {
+            background: rgb(14, 36, 78);
+            border: 1px solid rgba(120, 150, 200, 0.45);
+            border-radius: 12px;
+            padding: 24px 28px;
+            max-width: 620px;
+            max-height: 84vh;
+            overflow-y: auto;
+            cursor: auto;
+        }
+
+        .info-box h2 {
+            margin: 0 0 12px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1rem;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: rgba(214, 232, 255, 0.95);
+        }
+
+        .info-box p {
+            margin: 0 0 12px;
+            font-size: 0.95rem;
+            line-height: 1.55;
+            color: rgba(214, 232, 255, 0.9);
+        }
+
+        .info-box ul {
+            margin: 0 0 12px;
+            padding: 0;
+            list-style: none;
+        }
+
+        .info-box li {
+            margin: 0 0 8px;
+            padding-left: 16px;
+            border-left: 3px solid var(--c);
+            font-size: 0.95rem;
+            line-height: 1.5;
+            color: rgba(214, 232, 255, 0.9);
+        }
+
+        .info-box li b {
+            color: var(--c);
+        }
+
+        .info-box blockquote {
+            margin: 0 0 16px;
+            font-size: 0.92rem;
+            font-style: italic;
+            color: rgba(190, 214, 246, 0.75);
+        }
+
         /* ---------- responsive: stack quadrants ---------- */
         @media (max-width: 820px) {
             body {
                 overflow: auto;
+            }
+
+            .topbar {
+                padding-left: 14px;
             }
 
             .frame {
@@ -590,7 +654,7 @@
 
 <body>
     <header class="topbar">
-        <h1>Eisenhower-Matrix</h1>
+        <h1 onclick="document.getElementById('info').hidden = false" title="Klick: Was ist die Eisenhower-Matrix?">Eisenhower-Matrix</h1>
         <button class="btn" id="btn-hide" onclick="toggleHideDone()">Erledigte ausblenden</button>
         <button class="btn" onclick="clearDone()">Erledigte entfernen</button>
         <button class="btn qr-btn" onclick="showQr()" title="QR-Code zum Teilen" aria-label="QR-Code zum Teilen">
@@ -619,6 +683,33 @@
             <div class="modal-row">
                 <button class="btn" id="modal-no">Abbrechen</button>
                 <button class="btn danger" id="modal-yes">Löschen</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="info" hidden onclick="if (event.target === this) this.hidden = true">
+        <div class="info-box">
+            <h2>Das Eisenhower-Prinzip</h2>
+            <p>Zurück geht es auf Dwight D. Eisenhower (US-Präsident 1953–61). Jede Aufgabe wird an zwei
+                unabhängigen Fragen gemessen: <b>Ist sie wichtig?</b> — bringt sie mich meinen Zielen näher?
+                <b>Ist sie dringend?</b> — verlangt sie sofortige Reaktion? Daraus entstehen vier Quadranten
+                mit je einer klaren Handlungsanweisung:</p>
+            <ul>
+                <li style="--c: rgb(214,80,66)"><b>Wichtig &amp; dringend</b> — sofort selbst erledigen:
+                    Krisen, Fristen, akute Probleme.</li>
+                <li style="--c: rgb(121,158,49)"><b>Wichtig, nicht dringend</b> — fest einplanen: Planung,
+                    Lernen, Beziehungen, Vorsorge. Hier entsteht der eigentliche Fortschritt.</li>
+                <li style="--c: rgb(245,194,66)"><b>Dringend, nicht wichtig</b> — delegieren oder bewusst
+                    kurz halten: viele Mails, Anrufe, Unterbrechungen.</li>
+                <li style="--c: rgba(150,175,210,0.8)"><b>Weder noch</b> — bewusst weglassen: Zeitfresser
+                    ohne Wirkung.</li>
+            </ul>
+            <p>Der Kern: <b>Dringend heißt nicht wichtig.</b> Wer nur auf Dringendes reagiert, kommt nie zum
+                grünen Quadranten — dem, der langfristig zählt.</p>
+            <blockquote>„What is important is seldom urgent, and what is urgent is seldom important."
+                — Eisenhower zugeschrieben</blockquote>
+            <div class="modal-row">
+                <button class="btn" onclick="document.getElementById('info').hidden = true">Verstanden</button>
             </div>
         </div>
     </div>
@@ -969,7 +1060,9 @@
         document.addEventListener('click', e => {
             if (menuEl && !menuEl.contains(e.target)) closeMoveMenu();
         });
-        window.addEventListener('keydown', e => { if (e.key === 'Escape') closeMoveMenu(); });
+        window.addEventListener('keydown', e => {
+            if (e.key === 'Escape') { closeMoveMenu(); document.getElementById('info').hidden = true; }
+        });
 
         /* ---------- confirm dialog ---------- */
         function ask(text, onYes, yesLabel) {
