@@ -98,6 +98,15 @@ const CyberI18n = {
         return result;
     },
 
+    /** Like get(), but with a fallback that actually fires.
+     *  get() returns the key itself when a translation is missing, and a
+     *  non-empty key string is truthy — so `get(k) || fallback` silently
+     *  renders the raw key instead of the fallback. Use this instead. */
+    getOr: function (key, fallback, replacements = {}) {
+        const value = this.get(key, replacements);
+        return (value === key || value === undefined || value === null) ? fallback : value;
+    },
+
     /** Floating canvas masthead (coach line): always German, independent of UI language */
     /** Brand masthead line — fixed German wording; not localized. */
     getBrandMastheadTitle: function () {

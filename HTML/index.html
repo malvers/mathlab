@@ -2075,7 +2075,7 @@
                 let description = CyberI18n.get(descKey);
                 if (description === descKey) description = lab.description; // Fallback if key not found
                 
-                const missionStart = CyberI18n.get('index.ui.mission_start') || "Mission Start";
+                const missionStart = CyberI18n.getOr('index.ui.mission_start', "Mission Start");
                 const cardHref =
                     ext || typeof CyberI18n.appendLangToRelativeHref !== 'function'
                         ? lab.href
@@ -2125,7 +2125,7 @@
 
         // Centralized Search Engine Hook
         CyberUI.init();
-        const searchHint = CyberI18n.get('index.ui.search_placeholder') || "LABOR-SCAN STARTEN...";
+        const searchHint = CyberI18n.getOr('index.ui.search_placeholder', "LABOR-SCAN STARTEN...");
         CyberUI.createSearch('search-mount', searchHint, (val) => {
             filterLabs(val);
         });
@@ -2190,14 +2190,14 @@
             const categoryToken = (filter === 'university' || filter === 'uni') ? 'uni' : filter;
 
             const titles = {
-                'grade5': (CyberI18n.get('index.ui.grade_title') || 'GRADE') + ' 5',
-                'grade6': (CyberI18n.get('index.ui.grade_title') || 'GRADE') + ' 6',
-                'grade7': (CyberI18n.get('index.ui.grade_title') || 'GRADE') + ' 7',
-                'grade8': (CyberI18n.get('index.ui.grade_title') || 'GRADE') + ' 8',
-                'grade9': (CyberI18n.get('index.ui.grade_title') || 'GRADE') + ' 9',
-                'grade10': (CyberI18n.get('index.ui.grade_title') || 'GRADE') + ' 10',
-                'grade11': (CyberI18n.get('index.ui.grade_title') || 'GRADE') + ' 11',
-                'grade12': (CyberI18n.get('index.ui.grade_title') || 'GRADE') + ' 12',
+                'grade5': (CyberI18n.getOr('index.ui.grade_title', 'GRADE')) + ' 5',
+                'grade6': (CyberI18n.getOr('index.ui.grade_title', 'GRADE')) + ' 6',
+                'grade7': (CyberI18n.getOr('index.ui.grade_title', 'GRADE')) + ' 7',
+                'grade8': (CyberI18n.getOr('index.ui.grade_title', 'GRADE')) + ' 8',
+                'grade9': (CyberI18n.getOr('index.ui.grade_title', 'GRADE')) + ' 9',
+                'grade10': (CyberI18n.getOr('index.ui.grade_title', 'GRADE')) + ' 10',
+                'grade11': (CyberI18n.getOr('index.ui.grade_title', 'GRADE')) + ' 11',
+                'grade12': (CyberI18n.getOr('index.ui.grade_title', 'GRADE')) + ' 12',
                 'fun': CyberI18n.get('index.ui.fun'),
                 'lgs': CyberI18n.get('index.ui.lgs'),
                 'pythagoras': CyberI18n.get('index.ui.pythagoras'),
@@ -2278,7 +2278,7 @@
             if (!subtitle) return;
             const tagline =
                 typeof CyberI18n !== 'undefined' && typeof CyberI18n.get === 'function'
-                    ? CyberI18n.get('index.header.subtitle') || 'INTERAKTIVE MATHEMATIK'
+                    ? CyberI18n.getOr('index.header.subtitle', 'INTERAKTIVE MATHEMATIK')
                     : 'INTERAKTIVE MATHEMATIK';
             subtitle.textContent = `${count} · ${tagline}`;
         }
@@ -2583,7 +2583,7 @@
         window.addEventListener('load', () => {
             if (typeof CyberBranding !== 'undefined') {
                 CyberBranding.init({
-                    title: CyberI18n.get('index.header.title') || "Doc Alvers Mathe-Labor",
+                    title: CyberI18n.getOr('index.header.title', "Doc Alvers Mathe-Labor"),
                     subtitle: "MISSION CONTROL",
                     skipCanvasBranding: true,
                     skipNavigation: true
@@ -2598,7 +2598,7 @@
     <script>
     window.addEventListener('load', () => {
         // Page Title
-        document.title = (CyberI18n.get('index.header.title') || "Doc Alvers Mathe-Labor") + " | " + (CyberI18n.get('index.header.author') || "Dr. Michael R. Alvers");
+        document.title = (CyberI18n.getOr('index.header.title', "Doc Alvers Mathe-Labor")) + " | " + (CyberI18n.getOr('index.header.author', "Dr. Michael R. Alvers"));
         
         // Admin Gate
         if (document.getElementById('gate-title')) document.getElementById('gate-title').innerHTML = CyberI18n.get('index.admin_gate.title');
@@ -2619,11 +2619,11 @@
         });
         if (document.getElementById('contact-link-credits')) {
             document.getElementById('contact-link-credits').textContent =
-                CyberI18n.get('index.ui.credits') || 'CREDITS';
+                CyberI18n.getOr('index.ui.credits', 'CREDITS');
         }
         if (document.getElementById('contact-link-impressum')) {
             document.getElementById('contact-link-impressum').textContent =
-                CyberI18n.get('index.ui.impressum') || 'IMPRESSUM';
+                CyberI18n.getOr('index.ui.impressum', 'IMPRESSUM');
         }
         if (document.getElementById('btn-qr')) document.getElementById('btn-qr').title = CyberI18n.get('index.ui.qr_title');
         // Modals
@@ -2642,7 +2642,7 @@
         const h1 = document.getElementById('header-title');
         // Do not translate the main title name
         /* if (h1 && h1.childNodes[0]) {
-             h1.childNodes[0].nodeValue = (CyberI18n.get('index.header.title') || "Doc Alvers ").replace("Mathe-Labor", "");
+             h1.childNodes[0].nodeValue = (CyberI18n.getOr('index.header.title', "Doc Alvers ")).replace("Mathe-Labor", "");
         } */
         updateToolCount();
         if (document.getElementById('header-author')) document.getElementById('header-author').innerHTML = CyberI18n.get('index.header.author');
@@ -2681,11 +2681,11 @@
         // Footer
         if (document.getElementById('footer-credits')) {
             document.getElementById('footer-credits').textContent =
-                CyberI18n.get('index.ui.credits') || 'CREDITS';
+                CyberI18n.getOr('index.ui.credits', 'CREDITS');
         }
         if (document.getElementById('footer-impressum')) {
             document.getElementById('footer-impressum').textContent =
-                CyberI18n.get('index.ui.impressum') || 'IMPRESSUM';
+                CyberI18n.getOr('index.ui.impressum', 'IMPRESSUM');
         }
         
         // Admin
