@@ -769,8 +769,8 @@
             const intro = filteredData.find(lab => lab.id === 'cinematic-intro');
             const otherLabs = filteredData.filter(lab => lab.id !== 'cinematic-intro')
                                           .sort((a, b) => {
-                                              const titleA = CyberI18n.get('index.labs.' + a.id + '.title') || a.title || "";
-                                              const titleB = CyberI18n.get('index.labs.' + b.id + '.title') || b.title || "";
+                                              const titleA = CyberI18n.getOr('index.labs.' + a.id + '.title', a.title || "");
+                                              const titleB = CyberI18n.getOr('index.labs.' + b.id + '.title', b.title || "");
                                               return titleA.localeCompare(titleB, CyberI18n.current || undefined, {
                                                   sensitivity: 'base'
                                               });
@@ -780,7 +780,7 @@
 
             grid.innerHTML = sortedLabs.map(lab => {
                 const muteChrome = lab.id === 'mandelbrot-deep' ? ' tool-button--mute-chrome' : '';
-                const locTitle = CyberI18n.get('index.labs.' + lab.id + '.title') || lab.title;
+                const locTitle = CyberI18n.getOr('index.labs.' + lab.id + '.title', lab.title);
                 const toolHref = withLang(lab.href);
                 return `
                 <a href="${toolHref}" target="_blank" class="tool-button color-${lab.color || 'blue'}${muteChrome}">
@@ -799,7 +799,7 @@
         // Initialize launcher and UI
         CyberUI.init();
         
-        const searchHint = CyberI18n.get('index.ui.search_placeholder') || 'START LAB SCAN…';
+        const searchHint = CyberI18n.getOr('index.ui.search_placeholder', 'START LAB SCAN…');
         CyberUI.createSearch('search-mount', searchHint, (val) => {
             renderLauncher(val);
         });
@@ -860,14 +860,14 @@
         const closeEl = document.getElementById('tools-hub-close');
         if (closeEl) {
             closeEl.href = withLang('index.html');
-            closeEl.title = CyberI18n.get('index.view.back_title') || 'Back';
+            closeEl.title = CyberI18n.getOr('index.view.back_title', 'Back');
             const closeAria = CyberI18n.get('index.ui.tools_close_aria');
             if (closeAria !== 'index.ui.tools_close_aria') closeEl.setAttribute('aria-label', closeAria);
         }
         const universeBtn = document.getElementById('universe-btn');
         if (universeBtn) {
             universeBtn.href = withLang('universe.html');
-            universeBtn.title = CyberI18n.get('index.ui.universe_tip') || 'Universe';
+            universeBtn.title = CyberI18n.getOr('index.ui.universe_tip', 'Universe');
             const uAria = CyberI18n.get('index.ui.tools_universe_aria');
             if (uAria !== 'index.ui.tools_universe_aria') universeBtn.setAttribute('aria-label', uAria);
         }
@@ -887,11 +887,11 @@
         const fc = document.getElementById('footer-credits');
         const fi = document.getElementById('footer-impressum');
         if (fc) {
-            fc.textContent = CyberI18n.get('index.ui.credits') || 'CREDITS';
+            fc.textContent = CyberI18n.getOr('index.ui.credits', 'CREDITS');
             fc.href = withLang('credits.html');
         }
         if (fi) {
-            fi.textContent = CyberI18n.get('index.ui.impressum') || 'IMPRESSUM';
+            fi.textContent = CyberI18n.getOr('index.ui.impressum', 'IMPRESSUM');
             fi.href = withLang('impressum.html');
         }
 

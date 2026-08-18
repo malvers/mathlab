@@ -126,6 +126,22 @@
                 "cinematic-intro": { title: "Cinematic Intro", description: "Erlebe den monumentalen Start in das Doc Alvers Labor. ULTRA v5.3.8 Visual Identity." },
                 "stanford-portal": { title: "Stanford University", description: "Elite-Forschungsuni im Silicon Valley: Spitzenforschung, offene Ideen und Campus-Kultur." },
                 "happy-birthday-ulf": { title: "Happy Birthday Ulf!", description: "Eine mathematische Überraschung zum Geburtstag. Feier mit Doc Alvers!" }
+            ,
+                "einsundeins": { title: "1 + 1 = 2", description: "Eine einzige Rechnung, vier Ebenen tiefer: Hochsprache → Assembler → Maschinenbytes → Volladdierer aus Logikgattern. Auf jeder Ebene dieselbe Information, nur eine Abstraktion tiefer — der Übertrag rieselt sichtbar durch die Gatter, und ein Bit ist am Ende nur Spannung an oder aus." },
+                "solita": { title: "Solita", description: "Solita — deine persönliche Sprach-Assistentin (Claude) im Doc Alvers Mathe-Labor. Reden, vorlesen, Kontext behalten." },
+                "gameoflife": { title: "Game of Life", description: "Conways zellulärer Automat: Aus drei simplen Regeln entstehen Gleiter, Oszillatoren und ganze Welten. Zeichne Startmuster und sieh zu, wie Ordnung und Chaos sich abwechseln." },
+                "burningship": { title: "Burning Ship", description: "Das dunkle Schwesterfraktal der Mandelbrot-Menge: Ein einziger Betrag in der Iterationsformel lässt brennende Schiffe am Horizont erscheinen. Zoome in die flammende Struktur." },
+                "reaction-diffusion": { title: "Reaction-Diffusion", description: "Turing-Muster live: Zwei Chemikalien reagieren und diffundieren — heraus kommen Streifen, Punkte und Korallen wie auf Tierfellen. Stelle Zufuhr und Zerfall ein und züchte eigene Muster." },
+                "gravitation": { title: "Gravitation", description: "Newtons Gravitationsgesetz zum Anfassen: Setze Massen ins All, gib ihnen Startgeschwindigkeit und beobachte Bahnen, Einfänge und Kollisionen im Mehrkörper-Tanz." },
+                "glocken": { title: "Die Glocken von Bagdad", description: "Wann schlagen alle Glocken gleichzeitig? Eine Geschichte aus Bagdad führt zum kleinsten gemeinsamen Vielfachen — mit Tutor, der Schritt für Schritt zu kgV und Brüchen begleitet." },
+                "langley": { title: "Langley-Labor", description: "Langleys berüchtigtes Winkelrätsel von 1922: Ein gleichschenkliges Dreieck, zwei innere Linien — und ein Winkel, der die Welt seit 100 Jahren ärgert. Miss, probiere, beweise." },
+                "batman": { title: "Batman-Kurve", description: "Eine einzige Gleichung, die als Graph das Batman-Logo zeichnet: Beträge, Wurzeln und Fallunterscheidungen als Superhelden-Mathematik. Zerlege die Formel Stück für Stück." },
+                "worldclock": { title: "Weltuhr", description: "Die Erde als Uhr: Zeitzonen, Sonnenstand und Tag-Nacht-Grenze live auf der Weltkarte. Sieh, wo gerade die Sonne aufgeht, während bei uns Mitternacht schlägt." },
+                "tracker": { title: "Doc Alvers Tracker", description: "GPS-Tracking als Web-App: Touren aufzeichnen mit Höhenprofil, Foto-, Voice- und Wissens-Wegpunkten, Regenradar und Live-Sharing. Läuft im Browser und als Android-App." },
+                "kaimbo": { title: "Kaimbo Studio", description: "Sprachenlernen mit eigenen Aufgabenlisten: Vokabeln und Sätze als Aufgaben-Serien organisieren, filtern und trainieren — das Studio zu Docs Sprachlern-Werkzeug, jetzt im Browser." },
+                "pagode": { title: "Pagode (230 SL)", description: "Ein Mercedes 230 SL von 1964 trifft Bluetooth: Motor per Funk starten, Kanäle testen, interaktiver Schaltplan — und Solita lernt fahren. Oldtimer-Elektrik mit KI-Fernsteuerung." },
+                "voicerecorder": { title: "Voice Recorder", description: "Aufnehmen und live transkribieren: Sprich — er hört zu, schreibt mit und speichert. Im Browser per Web Speech API, als Android-App mit nativer Spracherkennung." },
+                "mathtrainer": { title: "MathTrainer", description: "Mathe trainieren mit Aufgaben-Serien: Kopfrechnen und Schulaufgaben üben, Serien auswählen, Tempo steigern — School is cool. Der SchoolTrainer als Web-App." }
             }
         },
         en: {
@@ -244,6 +260,23 @@
                 "cinematic-intro": { title: "Cinematic Intro", description: "Experience the monumental start into Doc Alvers' lab. ULTRA v5.3.8 Visual Identity." },
                 "stanford-portal": { title: "Stanford University", description: "Elite research university in Silicon Valley: top research, open ideas and campus culture." },
                 "happy-birthday-ulf": { title: "Happy Birthday Ulf!", description: "A mathematical surprise for the birthday. Celebrate with Doc Alvers!" }
+            ,
+                "einsundeins": { title: "1 + 1 = 2", description: "One sum, four levels down: high-level language to assembler to machine bytes to a full adder built from logic gates. The same information on every level, just one abstraction deeper." },
+                "solita": { title: "Solita", description: "Solita — your personal voice assistant (Claude) in the Doc Alvers Maths Lab. Talk, have things read aloud, keep the context." },
+                "gameoflife": { title: "Game of Life", description: "Conway's cellular automaton: three simple rules give rise to gliders, oscillators and whole worlds. Draw a starting pattern and watch order and chaos take turns." },
+                "burningship": { title: "Burning Ship", description: "The dark sister fractal of the Mandelbrot set: a single absolute value in the iteration formula makes burning ships appear on the horizon. Zoom into the flaming structure." },
+                "reaction-diffusion": { title: "Reaction-Diffusion", description: "Turing patterns live: two chemicals react and diffuse — out come stripes, spots and corals like animal markings. Tune feed and decay and grow your own patterns." },
+                "gravitation": { title: "Gravitation", description: "Newton's law of gravitation, hands on: place masses in space, give them an initial velocity and watch orbits, captures and collisions in the many-body dance." },
+                "glocken": { title: "The Bells of Baghdad", description: "When do all the bells strike together? A story from Baghdad leads to the least common multiple — with a tutor guiding you step by step to LCM and fractions." },
+                "langley": { title: "Langley Lab", description: "Langley's notorious angle puzzle of 1922: an isosceles triangle, two inner lines — and one angle that has vexed the world for a hundred years. Measure, try, prove." },
+                "batman": { title: "Batman Curve", description: "A single equation whose graph draws the Batman logo: absolute values, roots and case distinctions as superhero mathematics. Take the formula apart piece by piece." },
+                "worldclock": { title: "World Clock", description: "The Earth as a clock: time zones, the position of the sun and the day-night line live on the world map. See where the sun is rising while midnight strikes here." },
+                "tracker": { title: "Doc Alvers Tracker", description: "GPS tracking as a web app: record tours with elevation profile, photo, voice and knowledge waypoints, rain radar and live sharing. Runs in the browser and as an Android app." },
+                "kaimbo": { title: "Kaimbo Studio", description: "Language learning with your own task lists: organise, filter and drill vocabulary and sentences as task series — the studio for Doc's language tool, now in the browser." },
+                "pagode": { title: "Pagoda (230 SL)", description: "A 1964 Mercedes 230 SL meets Bluetooth: start the engine by radio, test channels, explore an interactive wiring diagram — and Solita learns to drive. Classic-car electrics with AI remote control." },
+                "voicerecorder": { title: "Voice Recorder", description: "Record and transcribe live: speak — it listens, writes along and saves. In the browser via the Web Speech API, as an Android app with native speech recognition." },
+                "mathtrainer": { title: "MathTrainer", description: "Practise maths with task series: train mental arithmetic and school exercises, pick a series, pick up the pace — school is cool. The SchoolTrainer as a web app." },
+                "imaginarynumbers": { title: "Imaginary numbers", description: "Complex numbers in the Gaussian plane: real part, imaginary part and the imaginary unit — explore them interactively." }
             }
         },
         es: {
@@ -362,6 +395,23 @@
                 "cinematic-intro": { title: "Intro Cinemática", description: "Experimente el monumental comienzo del laboratorio del Doc Alvers. Identidad visual ULTRA v5.3.8." },
                 "stanford-portal": { title: "Stanford University", description: "Universidad de investigación de élite en Silicon Valley: investigación de vanguardia, ideas abiertas y cultura de campus." },
                 "happy-birthday-ulf": { title: "¡Feliz Cumpleaños Ulf!", description: "Una sorpresa matemática para el cumpleaños. ¡Celebra con el Doc Alvers!" }
+            ,
+                "einsundeins": { title: "1 + 1 = 2", description: "Una sola operación, cuatro niveles más abajo: lenguaje de alto nivel, ensamblador, bytes de máquina y un sumador completo hecho de puertas lógicas. La misma información en cada nivel, solo una abstracción más profunda." },
+                "solita": { title: "Solita", description: "Solita: tu asistente personal de voz (Claude) en el Laboratorio de Matemáticas de Doc Alvers. Habla, escucha lecturas en voz alta, conserva el contexto." },
+                "gameoflife": { title: "Game of Life", description: "El autómata celular de Conway: de tres reglas simples surgen planeadores, osciladores y mundos enteros. Dibuja un patrón inicial y observa cómo se alternan el orden y el caos." },
+                "burningship": { title: "Burning Ship", description: "El fractal hermano oscuro del conjunto de Mandelbrot: un solo valor absoluto en la fórmula de iteración hace aparecer barcos en llamas en el horizonte. Amplía la estructura ardiente." },
+                "reaction-diffusion": { title: "Reacción-Difusión", description: "Patrones de Turing en vivo: dos sustancias reaccionan y se difunden, y salen rayas, puntos y corales como en las pieles de los animales. Ajusta aporte y desintegración y cultiva tus propios patrones." },
+                "gravitation": { title: "Gravitación", description: "La ley de la gravitación de Newton para tocarla: coloca masas en el espacio, dales una velocidad inicial y observa órbitas, capturas y colisiones en la danza de muchos cuerpos." },
+                "glocken": { title: "Las campanas de Bagdad", description: "¿Cuándo suenan todas las campanas a la vez? Una historia de Bagdad conduce al mínimo común múltiplo, con un tutor que te acompaña paso a paso hasta el m.c.m. y las fracciones." },
+                "langley": { title: "Laboratorio Langley", description: "El famoso problema del ángulo de Langley de 1922: un triángulo isósceles, dos líneas interiores y un ángulo que lleva cien años incomodando al mundo. Mide, prueba, demuestra." },
+                "batman": { title: "Curva de Batman", description: "Una sola ecuación cuyo gráfico dibuja el logotipo de Batman: valores absolutos, raíces y distinciones de casos como matemática de superhéroes. Descompón la fórmula pieza a pieza." },
+                "worldclock": { title: "Reloj mundial", description: "La Tierra como reloj: husos horarios, posición del Sol y línea día-noche en vivo sobre el mapamundi. Mira dónde amanece mientras aquí es medianoche." },
+                "tracker": { title: "Doc Alvers Tracker", description: "Seguimiento por GPS como aplicación web: registra rutas con perfil de altitud, puntos de foto, voz y conocimiento, radar de lluvia y uso compartido en vivo. Funciona en el navegador y como aplicación Android." },
+                "kaimbo": { title: "Kaimbo Studio", description: "Aprender idiomas con tus propias listas de tareas: organiza, filtra y practica vocabulario y frases como series de tareas. El estudio de la herramienta de idiomas de Doc, ahora en el navegador." },
+                "pagode": { title: "Pagoda (230 SL)", description: "Un Mercedes 230 SL de 1964 se encuentra con Bluetooth: arranca el motor por radio, prueba canales, explora un esquema eléctrico interactivo, y Solita aprende a conducir. Electricidad clásica con mando a distancia por IA." },
+                "voicerecorder": { title: "Grabadora de voz", description: "Grabar y transcribir en vivo: habla y el programa escucha, escribe y guarda. En el navegador con la Web Speech API, como aplicación Android con reconocimiento de voz nativo." },
+                "mathtrainer": { title: "MathTrainer", description: "Practicar matemáticas con series de tareas: entrena el cálculo mental y los ejercicios escolares, elige una serie y aumenta el ritmo. School is cool: el SchoolTrainer como aplicación web." },
+                "imaginarynumbers": { title: "Números imaginarios", description: "Números complejos en el plano de Gauss: parte real, parte imaginaria y la unidad imaginaria, para explorar de forma interactiva." }
             }
         },
         fr: {
@@ -480,6 +530,23 @@
                 "cinematic-intro": { title: "Intro Cinématique", description: "Vivez le départ monumental dans le laboratoire de Doc Alvers. Identité visuelle ULTRA v5.3.8." },
                 "stanford-portal": { title: "Université Stanford", description: "Université de recherche d'élite dans la Silicon Valley : recherche de pointe, idées ouvertes et culture de campus." },
                 "happy-birthday-ulf": { title: "Joyeux Anniversaire Ulf!", description: "Une surprise mathématique pour l'anniversaire. Célébrez avec Doc Alvers!" }
+            ,
+                "einsundeins": { title: "1 + 1 = 2", description: "Un seul calcul, quatre niveaux plus bas : langage évolué, assembleur, octets machine, puis un additionneur complet fait de portes logiques. La même information à chaque niveau, une abstraction plus bas." },
+                "solita": { title: "Solita", description: "Solita — ton assistante vocale personnelle (Claude) dans le Laboratoire de mathématiques de Doc Alvers. Parler, se faire lire des textes, garder le contexte." },
+                "gameoflife": { title: "Game of Life", description: "L'automate cellulaire de Conway : trois règles simples font naître des planeurs, des oscillateurs et des mondes entiers. Dessine un motif de départ et regarde l'ordre et le chaos alterner." },
+                "burningship": { title: "Burning Ship", description: "La fractale sœur sombre de l'ensemble de Mandelbrot : une seule valeur absolue dans la formule d'itération fait apparaître des navires en flammes à l'horizon. Zoome dans la structure ardente." },
+                "reaction-diffusion": { title: "Réaction-Diffusion", description: "Les motifs de Turing en direct : deux substances réagissent et diffusent, et il en sort des rayures, des points et des coraux comme sur les pelages. Règle l'apport et la décroissance et cultive tes propres motifs." },
+                "gravitation": { title: "Gravitation", description: "La loi de la gravitation de Newton à portée de main : place des masses dans l'espace, donne-leur une vitesse initiale et observe orbites, captures et collisions dans la danse à plusieurs corps." },
+                "glocken": { title: "Les cloches de Bagdad", description: "Quand toutes les cloches sonnent-elles ensemble ? Une histoire de Bagdad mène au plus petit commun multiple, avec un tuteur qui accompagne pas à pas jusqu'au PPCM et aux fractions." },
+                "langley": { title: "Laboratoire Langley", description: "Le fameux problème d'angle de Langley de 1922 : un triangle isocèle, deux lignes intérieures, et un angle qui agace le monde depuis cent ans. Mesure, essaie, démontre." },
+                "batman": { title: "Courbe de Batman", description: "Une seule équation dont le graphe dessine le logo de Batman : valeurs absolues, racines et distinctions de cas comme mathématiques de super-héros. Démonte la formule morceau par morceau." },
+                "worldclock": { title: "Horloge mondiale", description: "La Terre comme horloge : fuseaux horaires, position du Soleil et ligne jour-nuit en direct sur la carte du monde. Vois où le soleil se lève alors qu'ici il est minuit." },
+                "tracker": { title: "Doc Alvers Tracker", description: "Suivi GPS en application web : enregistre des parcours avec profil d'altitude, points photo, voix et savoir, radar de pluie et partage en direct. Fonctionne dans le navigateur et comme application Android." },
+                "kaimbo": { title: "Kaimbo Studio", description: "Apprendre les langues avec ses propres listes de tâches : organiser, filtrer et travailler vocabulaire et phrases en séries. Le studio de l'outil de langues de Doc, maintenant dans le navigateur." },
+                "pagode": { title: "Pagode (230 SL)", description: "Une Mercedes 230 SL de 1964 rencontre le Bluetooth : démarrer le moteur par radio, tester les canaux, explorer un schéma électrique interactif, et Solita apprend à conduire. Électricité de collection avec télécommande par IA." },
+                "voicerecorder": { title: "Dictaphone", description: "Enregistrer et transcrire en direct : parle, il écoute, écrit et enregistre. Dans le navigateur via la Web Speech API, en application Android avec reconnaissance vocale native." },
+                "mathtrainer": { title: "MathTrainer", description: "S'entraîner en maths avec des séries d'exercices : calcul mental et exercices scolaires, choisir une série, accélérer le rythme. School is cool : le SchoolTrainer en application web." },
+                "imaginarynumbers": { title: "Nombres imaginaires", description: "Les nombres complexes dans le plan de Gauss : partie réelle, partie imaginaire et unité imaginaire, à explorer de façon interactive." }
             }
         },
         it: {
@@ -598,6 +665,23 @@
                 "cinematic-intro": { title: "Intro Cinematografica", description: "Vivi il lancio monumentale nel laboratorio del Doc Alvers. Identità visiva ULTRA v5.3.8." },
                 "stanford-portal": { title: "Università di Stanford", description: "Università di ricerca d'élite nella Silicon Valley: ricerca all'avanguardia, idee aperte e cultura del campus." },
                 "happy-birthday-ulf": { title: "Buon Compleanno Ulf!", description: "Una sorpresa matematica per il compleanno. Festeggia con Doc Alvers!" }
+            ,
+                "einsundeins": { title: "1 + 1 = 2", description: "Un solo calcolo, quattro livelli più in basso: linguaggio evoluto, assembler, byte macchina e un sommatore completo fatto di porte logiche. La stessa informazione a ogni livello, solo un'astrazione più in profondità." },
+                "solita": { title: "Solita", description: "Solita — la tua assistente vocale personale (Claude) nel Laboratorio di matematica di Doc Alvers. Parlare, farsi leggere i testi, mantenere il contesto." },
+                "gameoflife": { title: "Game of Life", description: "L'automa cellulare di Conway: da tre regole semplici nascono alianti, oscillatori e mondi interi. Disegna uno schema iniziale e guarda ordine e caos alternarsi." },
+                "burningship": { title: "Burning Ship", description: "Il frattale sorella oscura dell'insieme di Mandelbrot: un solo valore assoluto nella formula di iterazione fa comparire navi in fiamme all'orizzonte. Ingrandisci la struttura fiammeggiante." },
+                "reaction-diffusion": { title: "Reazione-Diffusione", description: "Schemi di Turing in diretta: due sostanze reagiscono e diffondono, e ne escono strisce, punti e coralli come sui manti degli animali. Regola apporto e decadimento e coltiva i tuoi schemi." },
+                "gravitation": { title: "Gravitazione", description: "La legge di gravitazione di Newton da toccare: metti masse nello spazio, dai loro una velocità iniziale e osserva orbite, catture e collisioni nella danza a molti corpi." },
+                "glocken": { title: "Le campane di Baghdad", description: "Quando suonano tutte le campane insieme? Una storia da Baghdad porta al minimo comune multiplo, con un tutor che accompagna passo per passo fino al m.c.m. e alle frazioni." },
+                "langley": { title: "Laboratorio Langley", description: "Il famigerato problema dell'angolo di Langley del 1922: un triangolo isoscele, due linee interne e un angolo che infastidisce il mondo da cento anni. Misura, prova, dimostra." },
+                "batman": { title: "Curva di Batman", description: "Una sola equazione il cui grafico disegna il logo di Batman: valori assoluti, radici e distinzioni di casi come matematica da supereroi. Smonta la formula pezzo per pezzo." },
+                "worldclock": { title: "Orologio mondiale", description: "La Terra come orologio: fusi orari, posizione del Sole e linea giorno-notte in diretta sulla mappa del mondo. Guarda dove sorge il sole mentre qui è mezzanotte." },
+                "tracker": { title: "Doc Alvers Tracker", description: "Tracciamento GPS come applicazione web: registra percorsi con profilo altimetrico, punti foto, voce e conoscenza, radar della pioggia e condivisione dal vivo. Funziona nel browser e come app Android." },
+                "kaimbo": { title: "Kaimbo Studio", description: "Imparare le lingue con i propri elenchi di compiti: organizzare, filtrare ed esercitare vocaboli e frasi come serie di compiti. Lo studio dello strumento linguistico di Doc, ora nel browser." },
+                "pagode": { title: "Pagoda (230 SL)", description: "Una Mercedes 230 SL del 1964 incontra il Bluetooth: avviare il motore via radio, provare i canali, esplorare uno schema elettrico interattivo, e Solita impara a guidare. Elettrica d'epoca con telecomando a IA." },
+                "voicerecorder": { title: "Registratore vocale", description: "Registrare e trascrivere in diretta: parla e lui ascolta, scrive e salva. Nel browser con la Web Speech API, come app Android con riconoscimento vocale nativo." },
+                "mathtrainer": { title: "MathTrainer", description: "Allenarsi in matematica con serie di esercizi: calcolo mentale ed esercizi scolastici, scegli una serie, aumenta il ritmo. School is cool: lo SchoolTrainer come applicazione web." },
+                "imaginarynumbers": { title: "Numeri immaginari", description: "I numeri complessi nel piano di Gauss: parte reale, parte immaginaria e unità immaginaria, da esplorare in modo interattivo." }
             }
         },
         nl: {
@@ -716,6 +800,23 @@
                 "cinematic-intro": { title: "Filmische intro", description: "Het monumentale begin van het lab van Doc Alvers. ULTRA v5.3.8 visuele identiteit." },
                 "stanford-portal": { title: "Stanford University", description: "Eliteonderzoeksuniversiteit in Silicon Valley: topresearch, open ideeën en campuscultuur." },
                 "happy-birthday-ulf": { title: "Gefeliciteerd Ulf!", description: "Een wiskundige verrassing voor je verjaardag. Vier mee met Doc Alvers!" }
+            ,
+                "einsundeins": { title: "1 + 1 = 2", description: "Eén berekening, vier lagen dieper: hogere programmeertaal, assembler, machinebytes en een volledige opteller van logische poorten. Op elke laag dezelfde informatie, alleen één abstractie dieper." },
+                "solita": { title: "Solita", description: "Solita — je persoonlijke spraakassistent (Claude) in het Doc Alvers Wiskundelab. Praten, laten voorlezen, context onthouden." },
+                "gameoflife": { title: "Game of Life", description: "Conways cellulaire automaat: uit drie eenvoudige regels ontstaan zweefvliegers, oscillatoren en hele werelden. Teken een beginpatroon en zie orde en chaos elkaar afwisselen." },
+                "burningship": { title: "Burning Ship", description: "De donkere zusterfractal van de Mandelbrotverzameling: één absolute waarde in de iteratieformule laat brandende schepen aan de horizon verschijnen. Zoom in op de vlammende structuur." },
+                "reaction-diffusion": { title: "Reactie-Diffusie", description: "Turingpatronen live: twee stoffen reageren en diffunderen, en eruit komen strepen, stippen en koralen zoals op dierenvachten. Stel toevoer en verval in en kweek je eigen patronen." },
+                "gravitation": { title: "Gravitatie", description: "De gravitatiewet van Newton om aan te raken: zet massa's in de ruimte, geef ze een beginsnelheid en bekijk banen, invangingen en botsingen in de meerlichamendans." },
+                "glocken": { title: "De klokken van Bagdad", description: "Wanneer slaan alle klokken tegelijk? Een verhaal uit Bagdad leidt naar het kleinste gemene veelvoud, met een tutor die stap voor stap naar het kgv en breuken begeleidt." },
+                "langley": { title: "Langley-lab", description: "Langleys beruchte hoekraadsel uit 1922: een gelijkbenige driehoek, twee binnenlijnen en één hoek die de wereld al honderd jaar dwarszit. Meet, probeer, bewijs." },
+                "batman": { title: "Batman-kromme", description: "Eén vergelijking waarvan de grafiek het Batman-logo tekent: absolute waarden, wortels en gevalsonderscheidingen als superheldenwiskunde. Ontleed de formule stuk voor stuk." },
+                "worldclock": { title: "Wereldklok", description: "De aarde als klok: tijdzones, zonnestand en de dag-nachtgrens live op de wereldkaart. Zie waar de zon opkomt terwijl het hier middernacht is." },
+                "tracker": { title: "Doc Alvers Tracker", description: "Gps-tracking als webapp: routes vastleggen met hoogteprofiel, foto-, spraak- en kenniswaypoints, regenradar en live delen. Werkt in de browser en als Android-app." },
+                "kaimbo": { title: "Kaimbo Studio", description: "Talen leren met je eigen takenlijsten: woorden en zinnen als takenreeksen organiseren, filteren en trainen. De studio bij Docs taalleergereedschap, nu in de browser." },
+                "pagode": { title: "Pagode (230 SL)", description: "Een Mercedes 230 SL uit 1964 ontmoet bluetooth: de motor via radio starten, kanalen testen, een interactief schakelschema verkennen, en Solita leert rijden. Oldtimerelektriciteit met AI-afstandsbesturing." },
+                "voicerecorder": { title: "Voice Recorder", description: "Opnemen en live transcriberen: spreek, hij luistert, schrijft mee en bewaart. In de browser via de Web Speech API, als Android-app met native spraakherkenning." },
+                "mathtrainer": { title: "MathTrainer", description: "Wiskunde trainen met opgavenreeksen: hoofdrekenen en schoolopgaven oefenen, een reeks kiezen, het tempo opvoeren. School is cool: de SchoolTrainer als webapp." },
+                "imaginarynumbers": { title: "Imaginaire getallen", description: "Complexe getallen in het complexe vlak van Gauss: reëel deel, imaginair deel en de imaginaire eenheid, interactief te verkennen." }
             }
         },
 pt: {
@@ -834,6 +935,23 @@ pt: {
                 "cinematic-intro": { title: "Introdução Cinematográfica", description: "Experimente o início monumental. ULTRA v5.3.8." },
                 "stanford-portal": { title: "Universidade de Stanford", description: "Universidade de pesquisa de elite no Vale do Silício." },
                 "happy-birthday-ulf": { title: "Feliz Aniversário Ulf!", description: "Uma surpresa matemática de aniversário." }
+            ,
+                "einsundeins": { title: "1 + 1 = 2", description: "Uma única conta, quatro níveis abaixo: linguagem de alto nível, assembler, bytes de máquina e um somador completo feito de portas lógicas. A mesma informação em cada nível, apenas uma abstração mais fundo." },
+                "solita": { title: "Solita", description: "Solita — a tua assistente de voz pessoal (Claude) no Laboratório de Matemática do Doc Alvers. Falar, ouvir leituras em voz alta, manter o contexto." },
+                "gameoflife": { title: "Game of Life", description: "O autómato celular de Conway: de três regras simples surgem planadores, osciladores e mundos inteiros. Desenha um padrão inicial e observa a ordem e o caos a alternar." },
+                "burningship": { title: "Burning Ship", description: "O fractal irmão escuro do conjunto de Mandelbrot: um único valor absoluto na fórmula de iteração faz aparecer navios em chamas no horizonte. Amplia a estrutura flamejante." },
+                "reaction-diffusion": { title: "Reação-Difusão", description: "Padrões de Turing ao vivo: duas substâncias reagem e difundem-se, e saem listas, pontos e corais como nas pelagens dos animais. Ajusta a alimentação e o decaimento e cultiva os teus próprios padrões." },
+                "gravitation": { title: "Gravitação", description: "A lei da gravitação de Newton para tocar: coloca massas no espaço, dá-lhes uma velocidade inicial e observa órbitas, capturas e colisões na dança de muitos corpos." },
+                "glocken": { title: "Os sinos de Bagdade", description: "Quando é que todos os sinos tocam ao mesmo tempo? Uma história de Bagdade leva ao mínimo comum múltiplo, com um tutor que acompanha passo a passo até ao m.m.c. e às frações." },
+                "langley": { title: "Laboratório Langley", description: "O famoso problema do ângulo de Langley de 1922: um triângulo isósceles, duas linhas interiores e um ângulo que incomoda o mundo há cem anos. Mede, experimenta, demonstra." },
+                "batman": { title: "Curva de Batman", description: "Uma única equação cujo gráfico desenha o logótipo do Batman: valores absolutos, raízes e distinções de casos como matemática de super-heróis. Desmonta a fórmula peça por peça." },
+                "worldclock": { title: "Relógio mundial", description: "A Terra como relógio: fusos horários, posição do Sol e linha dia-noite ao vivo no mapa-múndi. Vê onde o sol nasce enquanto aqui é meia-noite." },
+                "tracker": { title: "Doc Alvers Tracker", description: "Registo de GPS como aplicação web: grava percursos com perfil de altitude, pontos de foto, voz e conhecimento, radar de chuva e partilha ao vivo. Funciona no navegador e como aplicação Android." },
+                "kaimbo": { title: "Kaimbo Studio", description: "Aprender línguas com as tuas próprias listas de tarefas: organizar, filtrar e treinar vocabulário e frases como séries de tarefas. O estúdio da ferramenta de línguas do Doc, agora no navegador." },
+                "pagode": { title: "Pagode (230 SL)", description: "Um Mercedes 230 SL de 1964 encontra o Bluetooth: arrancar o motor por rádio, testar canais, explorar um esquema elétrico interativo, e a Solita aprende a conduzir. Eletricidade clássica com comando à distância por IA." },
+                "voicerecorder": { title: "Gravador de voz", description: "Gravar e transcrever ao vivo: fala e ele ouve, escreve e guarda. No navegador através da Web Speech API, como aplicação Android com reconhecimento de voz nativo." },
+                "mathtrainer": { title: "MathTrainer", description: "Treinar matemática com séries de exercícios: cálculo mental e exercícios escolares, escolher uma série, aumentar o ritmo. School is cool: o SchoolTrainer como aplicação web." },
+                "imaginarynumbers": { title: "Números imaginários", description: "Números complexos no plano de Gauss: parte real, parte imaginária e a unidade imaginária, para explorar de forma interativa." }
             }
         },
         sw: {
@@ -952,6 +1070,23 @@ pt: {
                 "cinematic-intro": { title: "Utangulizi wa Sinema", description: "Furahia mwanzo mkubwa katika maabara ya Doc Alvers. ULTRA v5.3.8 Utambulisho Unaoonekana." },
                 "stanford-portal": { title: "Chuo Kikuu cha Stanford", description: "Chuo kikuu cha utafiti wa wasomi huko Silicon Valley: utafiti wa juu, maoni wazi na utamaduni wa chuo kikuu." },
                 "happy-birthday-ulf": { title: "Heri ya Siku ya Kuzaliwa Ulf!", description: "Mshangao wa hisabati kwa siku ya kuzaliwa. Sherehekea pamoja na Doc Alvers!" }
+            ,
+                "einsundeins": { title: "1 + 1 = 2", description: "Hesabu moja, viwango vinne chini: lugha ya juu, asemblia, baiti za mashine na kikusanyaji kamili kilichoundwa kwa geti za mantiki. Habari hiyo hiyo katika kila kiwango, ni uondoaji mmoja tu wa ndani zaidi." },
+                "solita": { title: "Solita", description: "Solita — msaidizi wako wa sauti (Claude) katika Maabara ya Hisabati ya Doc Alvers. Zungumza, sikiliza usomaji, hifadhi muktadha." },
+                "gameoflife": { title: "Game of Life", description: "Otomatiki ya seli ya Conway: kutoka kanuni tatu rahisi huzuka vitelezi, viondosho na ulimwengu mzima. Chora mchoro wa kuanzia na tazama utaratibu na vurugu vikipishana." },
+                "burningship": { title: "Burning Ship", description: "Fractal dada mweusi wa seti ya Mandelbrot: thamani moja kamili katika fomula ya marudio huifanya meli zinazowaka zionekane upeo wa macho. Karibia muundo unaowaka." },
+                "reaction-diffusion": { title: "Mwitikio-Usambaaji", description: "Michoro ya Turing moja kwa moja: kemikali mbili huitikia na kusambaa, na hutokea milia, madoa na matumbawe kama kwenye manyoya ya wanyama. Rekebisha ulishaji na uharibikaji na kuza michoro yako." },
+                "gravitation": { title: "Uvutano", description: "Sheria ya uvutano ya Newton kwa mkono: weka uzito angani, wape mwendo wa kuanzia na tazama mizingo, unasaji na migongano katika mchezo wa miili mingi." },
+                "glocken": { title: "Kengele za Baghdad", description: "Kengele zote hupigwa pamoja lini? Hadithi kutoka Baghdad inaelekeza kwenye kizidishi kidogo cha pamoja, na mkufunzi anayekusaidia hatua kwa hatua hadi KKP na sehuu." },
+                "langley": { title: "Maabara ya Langley", description: "Kitendawili maarufu cha pembe cha Langley cha 1922: pembetatu ya miguu sawa, mistari miwili ya ndani, na pembe moja iliyoudhi ulimwengu kwa miaka mia moja. Pima, jaribu, thibitisha." },
+                "batman": { title: "Mkunjo wa Batman", description: "Mlingano mmoja ambao grafu yake huchora alama ya Batman: thamani kamili, mizizi na utenganishaji wa hali kama hisabati ya mashujaa. Vunja fomula kipande kwa kipande." },
+                "worldclock": { title: "Saa ya dunia", description: "Dunia kama saa: mikanda ya saa, mahali pa Jua na mstari wa mchana-usiku moja kwa moja kwenye ramani ya dunia. Tazama jua linapochomoza wakati hapa ni usiku wa manane." },
+                "tracker": { title: "Doc Alvers Tracker", description: "Ufuatiliaji wa GPS kama programu ya wavuti: rekodi safari na wasifu wa mwinuko, alama za picha, sauti na maarifa, rada ya mvua na kushiriki moja kwa moja. Hufanya kazi kwenye kivinjari na kama programu ya Android." },
+                "kaimbo": { title: "Kaimbo Studio", description: "Kujifunza lugha kwa orodha zako za kazi: panga, chuja na fanyia mazoezi msamiati na sentensi kama mfululizo wa kazi. Studio ya chombo cha lugha cha Doc, sasa kwenye kivinjari." },
+                "pagode": { title: "Pagode (230 SL)", description: "Mercedes 230 SL ya 1964 inakutana na Bluetooth: washa injini kwa redio, jaribu njia, chunguza mchoro wa waya unaoshirikisha, na Solita anajifunza kuendesha. Umeme wa gari la kale na udhibiti wa mbali wa AI." },
+                "voicerecorder": { title: "Kirekodi sauti", description: "Rekodi na andika moja kwa moja: sema, kinasikiliza, kinaandika na kinahifadhi. Kwenye kivinjari kwa Web Speech API, kama programu ya Android kwa utambuzi wa sauti wa asili." },
+                "mathtrainer": { title: "MathTrainer", description: "Fanya mazoezi ya hisabati kwa mfululizo wa kazi: hesabu za kichwa na mazoezi ya shule, chagua mfululizo, ongeza kasi. School is cool: SchoolTrainer kama programu ya wavuti." },
+                "imaginarynumbers": { title: "Namba za kuwazia", description: "Namba changamano katika uwanda wa Gauss: sehemu halisi, sehemu ya kuwazia na kipimo cha kuwazia — gundua kwa kushirikiana." }
             }
         },
         tr: {
@@ -1070,6 +1205,23 @@ pt: {
                 "cinematic-intro": { title: "Sinematik Giriş", description: "Doc Alvers laboratuvarına anıtsal bir başlangıç ​​yapın. ULTRA v5.3.8 Görsel Kimlik." },
                 "stanford-portal": { title: "Stanford Üniversitesi", description: "Silikon Vadisi'ndeki seçkin araştırma üniversitesi: üst düzeyde araştırma, açık fikirler ve kampüs kültürü." },
                 "happy-birthday-ulf": { title: "Doğum günün kutlu olsun Ulf!", description: "Doğum günü için matematiksel bir sürpriz. Doc Alvers ile kutlayın!" }
+            ,
+                "einsundeins": { title: "1 + 1 = 2", description: "Tek bir işlem, dört katman aşağıda: yüksek seviyeli dil, assembler, makine baytları ve mantık kapılarından kurulu bir tam toplayıcı. Her katmanda aynı bilgi, yalnızca bir soyutlama daha derinde." },
+                "solita": { title: "Solita", description: "Solita — Doc Alvers Matematik Laboratuvarı'ndaki kişisel sesli asistanın (Claude). Konuş, metinleri sesli dinle, bağlamı koru." },
+                "gameoflife": { title: "Game of Life", description: "Conway'in hücresel özdevinimi: üç basit kuraldan planörler, salınıcılar ve koca dünyalar doğar. Bir başlangıç deseni çiz ve düzenle kaosun sırayla geldiğini izle." },
+                "burningship": { title: "Burning Ship", description: "Mandelbrot kümesinin karanlık kardeş fraktalı: yineleme formülündeki tek bir mutlak değer, ufukta yanan gemiler belirmesine yol açar. Alevli yapıya yaklaş." },
+                "reaction-diffusion": { title: "Tepkime-Yayınım", description: "Turing desenleri canlı: iki madde tepkimeye girip yayılır ve ortaya hayvan derilerindeki gibi şeritler, noktalar ve mercanlar çıkar. Besleme ile bozunmayı ayarla ve kendi desenlerini yetiştir." },
+                "gravitation": { title: "Kütleçekimi", description: "Newton'un kütleçekim yasasına dokun: uzaya kütleler yerleştir, onlara başlangıç hızı ver ve çok cisimli dansta yörüngeleri, yakalanmaları ve çarpışmaları izle." },
+                "glocken": { title: "Bağdat'ın çanları", description: "Bütün çanlar ne zaman aynı anda çalar? Bağdat'tan bir hikâye en küçük ortak kata götürür; bir öğretici seni adım adım EKOK'a ve kesirlere ulaştırır." },
+                "langley": { title: "Langley Laboratuvarı", description: "Langley'in 1922'deki ünlü açı bilmecesi: bir ikizkenar üçgen, iki iç doğru ve yüz yıldır dünyayı uğraştıran bir açı. Ölç, dene, kanıtla." },
+                "batman": { title: "Batman eğrisi", description: "Grafiği Batman logosunu çizen tek bir denklem: mutlak değerler, kökler ve durum ayrımları süper kahraman matematiği olarak. Formülü parça parça sök." },
+                "worldclock": { title: "Dünya saati", description: "Saat olarak Dünya: zaman dilimleri, Güneş'in konumu ve gece-gündüz çizgisi dünya haritasında canlı. Burada gece yarısı olurken güneşin nerede doğduğunu gör." },
+                "tracker": { title: "Doc Alvers Tracker", description: "Web uygulaması olarak GPS takibi: yükseklik profili, fotoğraf, ses ve bilgi ara noktaları, yağış radarı ve canlı paylaşımla turlar kaydet. Tarayıcıda ve Android uygulaması olarak çalışır." },
+                "kaimbo": { title: "Kaimbo Studio", description: "Kendi görev listelerinle dil öğrenme: kelimeleri ve cümleleri görev serileri olarak düzenle, süz ve çalış. Doc'un dil öğrenme aracının stüdyosu, artık tarayıcıda." },
+                "pagode": { title: "Pagode (230 SL)", description: "1964 model bir Mercedes 230 SL Bluetooth ile buluşuyor: motoru telsizle çalıştır, kanalları dene, etkileşimli devre şemasını incele ve Solita araba sürmeyi öğrensin. Yapay zekâ kumandalı klasik otomobil elektriği." },
+                "voicerecorder": { title: "Ses kaydedici", description: "Kaydet ve anında yazıya çevir: sen konuş, o dinler, yazar ve saklar. Tarayıcıda Web Speech API ile, Android uygulamasında yerel konuşma tanımayla." },
+                "mathtrainer": { title: "MathTrainer", description: "Alıştırma serileriyle matematik çalış: zihinden hesap ve okul alıştırmaları, bir seri seç, hızını artır. School is cool: web uygulaması olarak SchoolTrainer." },
+                "imaginarynumbers": { title: "Sanal sayılar", description: "Gauss düzleminde karmaşık sayılar: gerçek kısım, sanal kısım ve sanal birim — etkileşimli olarak keşfet." }
             }
         }
     };
