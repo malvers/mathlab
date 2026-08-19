@@ -606,6 +606,19 @@
             .catch(e => setCloud('☁ ' + e.message, false));
     }
 
+    /* Read-only fetch without login: plan edits are public to READ
+       (RLS: select for anon), writing still needs the owner session.
+       So every visitor sees the current plan state. */
+    async function fetchPublicEdits(page) {
+        const res = await fetch(svpAuth.DB_URL + '/rest/v1/svp_plan_edits?page=eq.' +
+            encodeURIComponent(page) + '&select=edits,ts', {
+            headers: { apikey: svpAuth.DB_KEY, Authorization: 'Bearer ' + svpAuth.DB_KEY }
+        });
+        if (!res.ok) return null;
+        const rows = await res.json();
+        return rows.length ? rows[0] : null;
+    }
+
     async function syncFromRemote() {
         if (!window.svpAuth || !svpAuth.hasSession()) return;
         try {
@@ -635,7 +648,24 @@
         } catch (e) { setCloud('☁ ' + e.message, false); }
     }
 
-    syncFromRemote();
+    if (window.svpAuth && svpAuth.hasSession()) {
+        syncFromRemote();
+    } else if (window.svpAuth) {
+        /* visitor without login: apply the published plan state read-only */
+        (async function () {
+            try {
+                const row = await fetchPublicEdits(location.pathname);
+                if (!row) return;
+                const localTs = Date.parse(localStorage.getItem(TS_KEY) || '') || 0;
+                if ((Date.parse(row.ts) || 0) > localTs) {
+                    saved = row.edits || {};
+                    localStorage.setItem(KEY, JSON.stringify(saved));
+                    localStorage.setItem(TS_KEY, row.ts);
+                    applyEdits(saved);
+                }
+            } catch (e) { /* offline: local state stays */ }
+        })();
+    }
 
     // The LB info panel and the bridge panel are mutually exclusive —
     // opening one closes the other (hooks set by the two blocks below).
@@ -826,7 +856,20 @@
         });
 
         (async function pullBridge() {
-            if (!window.svpAuth || !svpAuth.hasSession()) return;
+            if (!window.svpAuth) return;
+            if (!svpAuth.hasSession()) {
+                /* visitor without login: read-only pull of the bridge text */
+                try {
+                    const row = await fetchPublicEdits(PAGE);
+                    const localTs = Date.parse(localStorage.getItem(BTS) || '') || 0;
+                    if (row && (Date.parse(row.ts) || 0) > localTs) {
+                        localStorage.setItem(BKEY, row.edits.html || '');
+                        localStorage.setItem(BTS, row.ts);
+                        body.innerHTML = row.edits.html || '';
+                    }
+                } catch (e) { /* offline: local copy stays */ }
+                return;
+            }
             try {
                 const res = await svpAuth.api(
                     'svp_plan_edits?page=eq.' + encodeURIComponent(PAGE) + '&select=edits,ts');
