@@ -102,6 +102,61 @@
 
         .op-table strong { font-weight: 600; }
 
+        /* "Beispiel" button behind each operator + collapsible example row */
+        .op-table td.op-exc {
+            width: 1%;
+            white-space: nowrap;
+            text-align: right;
+            vertical-align: middle;
+        }
+
+        .op-ex-btn {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.6rem;
+            letter-spacing: 0.05em;
+            padding: 3px 10px;
+            border-radius: 999px;
+            border: 1px solid rgba(121, 158, 49, 0.55);
+            background: rgba(121, 158, 49, 0.1);
+            color: var(--phi);
+            cursor: pointer;
+        }
+
+        .op-ex-btn:hover { background: rgba(121, 158, 49, 0.22); }
+
+        .op-ex-row { display: none; }
+        .op-ex-row.open { display: table-row; }
+
+        .op-ex-row td {
+            border-top: none;
+            padding-top: 0;
+            color: var(--muted);
+            font-size: 0.9rem;
+        }
+
+        /* Sample answer directly below the example, same look */
+        .op-ans { margin-top: 4px; }
+
+        /* Subject switch (Informatik/Mathematik) above the cards */
+        .op-fach {
+            max-width: 1200px;
+            margin: 0 auto 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .op-fach .of-label {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.6rem;
+            letter-spacing: 0.07em;
+            text-transform: uppercase;
+            color: var(--muted);
+        }
+
+        .op-fach .badge { cursor: pointer; opacity: 0.55; user-select: none; }
+        .op-fach .badge.on { opacity: 1; outline: 1px solid currentColor; }
+
         @media (max-width: 560px) {
             .op-table td.op-name { white-space: normal; }
         }
@@ -109,6 +164,9 @@
         @media print {
             .op-card:not(.open) .op-body { display: block; }
             .op-chev { display: none; }
+            .op-ex-row { display: table-row; }
+            .op-ex-btn { display: none; }
+            .op-fach { display: none; }
         }
     </style>
 </head>
@@ -269,8 +327,215 @@
     </div>
 
     <footer class="page-foot">
-        Karte anklicken &rarr; Bereich auf-/zuklappen; beim Drucken werden alle Bereiche ausgeklappt.
+        Karte anklicken &rarr; Bereich auf-/zuklappen; &bdquo;Beispiel&ldquo; zeigt eine Beispielaufgabe,
+        &bdquo;Antwort&ldquo; eine m&ouml;gliche L&ouml;sung; beim Drucken wird alles ausgeklappt.
     </footer>
+    <script>
+        // One example task + sample answer per operator, in two flavours
+        // (Informatik / Mathematik) — the pills above the cards switch the set,
+        // the choice persists per browser. "Beispiel" behind each row toggles
+        // task + answer. Rows/buttons are built here so the markup stays clean.
+        (function () {
+            // Per operator: { inf: [task, answer], ma: [task, answer] }
+            const DATA = {
+                'nennen': {
+                    inf: ['Nennen Sie drei Datentypen in Python.',
+                        'int, float und str (weitere: bool, list, dict …).'],
+                    ma: ['Nennen Sie drei Vierecke mit mindestens einem Paar paralleler Seiten.',
+                        'Quadrat, Rechteck und Trapez (auch: Parallelogramm, Raute).']
+                },
+                'wiedergeben': {
+                    inf: ['Geben Sie mit eigenen Worten wieder, was das EVA-Prinzip besagt.',
+                        'Daten werden eingegeben (E), vom Rechner verarbeitet (V) und das Ergebnis wird ausgegeben (A) — jede Datenverarbeitung folgt diesen drei Schritten.'],
+                    ma: ['Geben Sie den Satz des Pythagoras mit eigenen Worten wieder.',
+                        'In jedem rechtwinkligen Dreieck ist die Summe der Kathetenquadrate gleich dem Quadrat der Hypotenuse: a² + b² = c².']
+                },
+                'darstellen': {
+                    inf: ['Stellen Sie den Ablauf eines Login-Vorgangs in einem Flussdiagramm dar.',
+                        'Start → Eingabe von Name und Passwort → Prüfung gegen die Datenbank → korrekt: Startseite anzeigen, falsch: Fehlermeldung und zurück zur Eingabe.'],
+                    ma: ['Stellen Sie die Funktion f(x) = x² für x = −2 bis 2 in einer Wertetabelle dar.',
+                        'x: −2, −1, 0, 1, 2 → f(x): 4, 1, 0, 1, 4.']
+                },
+                'skizzieren': {
+                    inf: ['Skizzieren Sie den Aufbau eines Von-Neumann-Rechners.',
+                        'Blöcke: Steuerwerk + Rechenwerk (= CPU), Speicher (Programme und Daten gemeinsam), Ein-/Ausgabewerk — verbunden über Busse.'],
+                    ma: ['Skizzieren Sie den Graphen von f(x) = sin(x) auf [0; 2π].',
+                        'Wellenlinie: Start bei 0, Maximum 1 bei π/2, Nullstelle bei π, Minimum −1 bei 3π/2, zurück auf 0 bei 2π.']
+                },
+                'beschreiben': {
+                    inf: ['Beschreiben Sie die Merkmale des Datentyps Liste in Python.',
+                        'Geordnete, veränderbare Sammlung von Elementen; Zugriff über den Index; kann Elemente verschiedener Typen enthalten.'],
+                    ma: ['Beschreiben Sie den Verlauf des Graphen der Funktion f(x) = x².',
+                        'Nach oben geöffnete Normalparabel mit Scheitel im Ursprung, symmetrisch zur y-Achse; für wachsendes |x| steigen die Werte unbeschränkt.']
+                },
+                'kennzeichnen': {
+                    inf: ['Kennzeichnen Sie die wesentlichen Merkmale einer objektorientierten Programmiersprache.',
+                        'Klassen und Objekte, Kapselung von Daten und Methoden, Vererbung, Polymorphie.'],
+                    ma: ['Kennzeichnen Sie die besonderen Punkte des Graphen von f(x) = x³ − 3x.',
+                        'Nullstellen bei x = 0 und x = ±√3; Hochpunkt (−1|2), Tiefpunkt (1|−2); Wendepunkt (0|0).']
+                },
+                'definieren': {
+                    inf: ['Definieren Sie den Begriff „Algorithmus“.',
+                        'Ein Algorithmus ist eine endliche, eindeutige Handlungsvorschrift, die ein Problem in endlich vielen Schritten löst.'],
+                    ma: ['Definieren Sie den Begriff „Primzahl“.',
+                        'Eine Primzahl ist eine natürliche Zahl größer als 1, die nur durch 1 und sich selbst teilbar ist.']
+                },
+                'gliedern': {
+                    inf: ['Gliedern Sie die Phasen der Softwareentwicklung in eine sinnvolle Reihenfolge.',
+                        'Analyse → Entwurf → Implementierung → Test → Auslieferung/Wartung.'],
+                    ma: ['Gliedern Sie die Schritte einer Kurvendiskussion in eine sinnvolle Reihenfolge.',
+                        'Definitionsbereich → Nullstellen → Ableitungen → Extrempunkte → Wendepunkte → Verhalten im Unendlichen → Skizze.']
+                },
+                'übertragen': {
+                    inf: ['Übertragen Sie das Prinzip der binären Suche auf die Suche in einem Telefonbuch.',
+                        'Buch in der Mitte aufschlagen, Namen vergleichen, in der passenden Hälfte weitersuchen — durch fortgesetztes Halbieren ist der Eintrag nach wenigen Schritten gefunden.'],
+                    ma: ['Übertragen Sie die p-q-Formel auf die Gleichung 2x² − 8x + 6 = 0.',
+                        'Normieren: x² − 4x + 3 = 0; p-q-Formel: x = 2 ± √(4 − 3) → x₁ = 1, x₂ = 3.']
+                },
+                'ein- und zuordnen': {
+                    inf: ['Ordnen Sie Tastatur, CPU, Monitor, Scanner und Drucker den Kategorien Eingabe, Verarbeitung und Ausgabe zu.',
+                        'Eingabe: Tastatur, Scanner; Verarbeitung: CPU; Ausgabe: Monitor, Drucker.'],
+                    ma: ['Ordnen Sie die Funktionen f(x) = x², g(x) = 2^x und h(x) = 1/x den drei Graphen zu.',
+                        'Parabel → f; wachsende Exponentialkurve → g; Hyperbel → h.']
+                },
+                'gegenüberstellen': {
+                    inf: ['Stellen Sie Vor- und Nachteile von Cloud-Speicher und lokaler Speicherung tabellarisch gegenüber.',
+                        'Cloud: überall verfügbar, automatische Backups — laufende Kosten, Datenschutz-Abhängigkeit. Lokal: volle Kontrolle, einmalige Kosten — Verlustrisiko, kein Fernzugriff.'],
+                    ma: ['Stellen Sie p-q-Formel und quadratische Ergänzung tabellarisch gegenüber.',
+                        'p-q-Formel: schnell, braucht normierte Form, Formel muss sitzen. Quadratische Ergänzung: immer nachvollziehbar, liefert die Scheitelform mit, mehr Rechenschritte.']
+                },
+                'vergleichen': {
+                    inf: ['Vergleichen Sie Bubblesort und Quicksort hinsichtlich Laufzeit und Speicherbedarf.',
+                        'Laufzeit: Bubblesort O(n²), Quicksort im Mittel O(n·log n); Speicher: beide sortieren in-place. Schlussfolgerung: für große n ist Quicksort klar vorzuziehen.'],
+                    ma: ['Vergleichen Sie lineares und exponentielles Wachstum hinsichtlich der Zunahme pro Schritt.',
+                        'Linear: konstante Zunahme (+ d je Schritt); exponentiell: konstanter Faktor (· q je Schritt). Schlussfolgerung: exponentielles Wachstum überholt jedes lineare.']
+                },
+                'erklären / erläutern': {
+                    inf: ['Erklären Sie, warum HTTPS die Vertraulichkeit der Datenübertragung sichert.',
+                        'HTTPS verschlüsselt die Verbindung per TLS: Mitlesende Dritte sehen nur Chiffretext, und das Server-Zertifikat belegt, dass man wirklich mit dem richtigen Server spricht.'],
+                    ma: ['Erklären Sie, warum eine quadratische Gleichung höchstens zwei Lösungen hat.',
+                        'Der Graph ist eine Parabel und schneidet die x-Achse in höchstens zwei Punkten; algebraisch: ein Polynom 2. Grades hat höchstens zwei Nullstellen.']
+                },
+                'ableiten': {
+                    inf: ['Leiten Sie aus den Laufzeitmessungen ab, wie sich das Programm bei doppelter Eingabegröße verhält.',
+                        'Die Messwerte vervierfachen sich bei doppelter Eingabegröße → quadratisches Wachstum, Laufzeit O(n²).'],
+                    ma: ['Leiten Sie aus der Wertetabelle ab, ob exponentielles Wachstum vorliegt.',
+                        'Der Quotient aufeinanderfolgender Werte ist konstant (z. B. stets · 1,5) → exponentielles Wachstum, N(t) = N₀ · 1,5^t.']
+                },
+                'untersuchen, analysieren': {
+                    inf: ['Analysieren Sie den vorgegebenen Quelltext auf mögliche Endlosschleifen.',
+                        'Frage an den Code: Läuft die Laufvariable auf die Abbruchbedingung zu? Etwa endet while x != 0 mit x = x + 2 bei ungeradem Startwert nie — Begründung: x bleibt stets ungerade.'],
+                    ma: ['Untersuchen Sie f(x) = x³ − 3x auf Extrempunkte.',
+                        'f′(x) = 3x² − 3 = 0 → x = ±1; f″(−1) < 0 → Hochpunkt (−1|2), f″(1) > 0 → Tiefpunkt (1|−2).']
+                },
+                'prüfen, überprüfen': {
+                    inf: ['Überprüfen Sie die These „Open-Source-Software ist immer sicherer“ anhand der vorliegenden Fakten.',
+                        'Pro: offener Code ist von allen prüfbar. Contra: Sicherheit hängt von Pflege und Updates ab (Beispiel Heartbleed). Widerspruch erkannt — in dieser Absolutheit ist die These nicht haltbar.'],
+                    ma: ['Überprüfen Sie die These „Jede ganzrationale Funktion dritten Grades hat genau eine Nullstelle“.',
+                        'Gegenbeispiel f(x) = x³ − 3x mit drei Nullstellen (0, ±√3) → These widerlegt; richtig ist: mindestens eine, höchstens drei.']
+                },
+                'begründen': {
+                    inf: ['Begründen Sie, warum hier eine Datenbank einer Tabellenkalkulation vorzuziehen ist.',
+                        'Eine Datenbank sichert Konsistenz (Schlüssel, Transaktionen), erlaubt gleichzeitige Zugriffe mehrerer Nutzer und gezielte Abfragen (SQL) — bei wachsender Datenmenge und Mehrbenutzerbetrieb ist sie daher die folgerichtige Wahl.'],
+                    ma: ['Begründen Sie, warum √2 keine rationale Zahl ist.',
+                        'Wäre √2 = p/q (vollständig gekürzt), folgt p² = 2q² → p gerade → p = 2r → q² = 2r² → q gerade — Widerspruch zur Kürzung, also ist √2 irrational.']
+                },
+                'beurteilen': {
+                    inf: ['Beurteilen Sie, ob der vorgeschlagene Sortieralgorithmus für große Datenmengen geeignet ist.',
+                        'Kriterium Laufzeit: bei O(n²) und n = 10⁶ fallen rund 10¹² Operationen an — Urteil: für große Datenmengen ungeeignet.'],
+                    ma: ['Beurteilen Sie, ob das lineare Modell die Messreihe angemessen beschreibt.',
+                        'Die Abweichungen (Residuen) wachsen systematisch mit x — Urteil: das lineare Modell ist unangemessen, ein quadratisches Modell passt besser.']
+                },
+                'bewerten, deuten': {
+                    inf: ['Bewerten Sie den Einsatz von KI-Chatbots im Unterricht aus Ihrer persönlichen Sicht.',
+                        'Eigenes, begründetes Urteil mit Wertbezug, z. B.: Für mich überwiegen die Chancen (individuelles Üben, schnelle Rückmeldung), sofern Ergebnisse kritisch geprüft werden — andere Positionen sind zu respektieren.'],
+                    ma: ['Bewerten Sie den Einsatz von Taschenrechner/CAS in Klausuren aus Ihrer persönlichen Sicht.',
+                        'Eigenes, begründetes Urteil mit Wertbezug, z. B.: Für mich überwiegt der Nutzen (realistische Aufgaben statt Rechenroutine), sofern Grundfertigkeiten weiterhin ohne Hilfsmittel geprüft werden — andere Sichtweisen sind zu respektieren.']
+                },
+                'diskutieren, erörtern': {
+                    inf: ['Erörtern Sie Chancen und Risiken sozialer Netzwerke für Jugendliche.',
+                        'Pro: Vernetzung, Information, Kreativität. Contra: Ablenkung, Cybermobbing, Datenschutz. Ausgewogenes Sachurteil, z. B.: Nutzung ist sinnvoll, wenn Medienkompetenz vermittelt und Bildschirmzeit begrenzt wird.'],
+                    ma: ['Erörtern Sie die These „Mathematik braucht man im Alltag nicht“.',
+                        'Contra: Prozente und Zinsen, Statistik in den Medien, Modellieren im Beruf. Pro: spezielles Schulwissen wird selten direkt gebraucht. Sachurteil: mathematische Grundkompetenz ist unverzichtbar, auch wenn nicht jedes Detail gebraucht wird.']
+                }
+            };
+
+            // Chosen subject, persisted per browser
+            const FACH_KEY = 'svp-op-fach';
+            let fach = 'inf';
+            try { if (localStorage.getItem(FACH_KEY) === 'ma') fach = 'ma'; } catch (e) { }
+
+            const updaters = []; // one per example row, re-renders on subject switch
+
+            document.querySelectorAll('.op-table tr').forEach(function (tr) {
+                const name = tr.querySelector('td.op-name');
+                if (!name) return;
+                const btnCell = document.createElement('td');
+                btnCell.className = 'op-exc';
+                const entry = DATA[name.textContent.trim()];
+                if (entry) {
+                    const exRow = document.createElement('tr');
+                    exRow.className = 'op-ex-row';
+                    // Empty spacer cell → example + answer line up with the description column
+                    exRow.appendChild(document.createElement('td'));
+                    const exTd = document.createElement('td');
+                    exTd.colSpan = 2;
+                    const exLine = document.createElement('div');
+                    const ans = document.createElement('div');
+                    ans.className = 'op-ans';
+                    exTd.appendChild(exLine);
+                    exTd.appendChild(ans);
+                    exRow.appendChild(exTd);
+                    tr.after(exRow);
+
+                    function render() {
+                        const pair = entry[fach] || entry.inf;
+                        exLine.textContent = 'Beispiel: „' + pair[0] + '“';
+                        ans.textContent = 'Antwort: ' + pair[1];
+                    }
+                    render();
+                    updaters.push(render);
+
+                    const btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.className = 'op-ex-btn';
+                    btn.textContent = 'Beispiel';
+                    btn.addEventListener('click', function () {
+                        exRow.classList.toggle('open');
+                    });
+                    btnCell.appendChild(btn);
+                }
+                tr.appendChild(btnCell);
+            });
+
+            // Subject pills above the cards
+            const bar = document.createElement('div');
+            bar.className = 'op-fach';
+            const lbl = document.createElement('span');
+            lbl.className = 'of-label';
+            lbl.textContent = 'Beispiele:';
+            bar.appendChild(lbl);
+
+            const FACHS = [['inf', 'Informatik', 'b-green'], ['ma', 'Mathematik', 'b-orange']];
+            const fachBtns = {};
+            function applyFach(next) {
+                fach = next;
+                for (const key in fachBtns) fachBtns[key].classList.toggle('on', key === next);
+                updaters.forEach(function (u) { u(); });
+                try { localStorage.setItem(FACH_KEY, next); } catch (e) { }
+            }
+            for (const [key, label, cls] of FACHS) {
+                const b = document.createElement('span');
+                b.className = 'badge ' + cls;
+                b.textContent = label;
+                b.addEventListener('click', function () { applyFach(key); });
+                fachBtns[key] = b;
+                bar.appendChild(b);
+            }
+            fachBtns[fach].classList.add('on');
+            document.querySelector('.op-list').before(bar);
+        })();
+    </script>
     <script src="svp-nav.js"></script>
 </body>
 
