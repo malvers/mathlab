@@ -26,10 +26,11 @@
         ['informatik/fos12.html', 'FOS 12', 'b-cyan'],
         ['notes.html', 'Notizen', 'b-cyan'],
         ['konzepte.html', 'Konzepte', 'b-violet'],
+        ['operatoren.html', 'Operatoren', 'b-red'],
     ];
 
     // These open in a new tab so the current plan stays put.
-    const NEW_TAB = new Set(['notes.html', 'konzepte.html']);
+    const NEW_TAB = new Set(['notes.html', 'konzepte.html', 'operatoren.html']);
 
     // '/svp/' and '/svp/index.html' are the same page.
     function norm(path) { return path.replace(/index\.html$/, ''); }
