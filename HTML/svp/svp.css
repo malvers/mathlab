@@ -227,6 +227,146 @@ nav.quick-nav a.badge.active {
    panel of toggle pills (off = dimmed); choice persists in localStorage */
 nav.quick-nav a.badge.nav-hidden { display: none; }
 
+/* Material: compact 📎 marker in the week row, link pills down in the
+   expanded sub-row where there is room */
+#plan-table td.mat { white-space: nowrap; }
+#plan-table td.mat .mat-flag { cursor: pointer; font-size: 0.9em; }
+.mat-block { margin: 8px 0 2px; text-align: right; }
+.mat-block a.mat-pill {
+    display: inline-block;
+    margin: 2px 0 2px 6px;
+    max-width: 220px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    vertical-align: middle;
+    text-decoration: none;
+    cursor: pointer;
+}
+.mat-block .mat-note { font-size: 0.85em; color: var(--muted); }
+
+/* Sub-row side zone (under Bemerkungen/Material) + section label */
+#plan-table .detail-row td.sub-side { vertical-align: top; }
+.sub-label {
+    display: inline-block;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-right: 8px;
+    vertical-align: middle;
+}
+
+/* Material quick-add: per-week + button, inline input and drop highlight */
+#plan-table td.mat { text-align: right; }
+#plan-table td.mat .mat-add {
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    line-height: 22px;
+    text-align: center;
+    border: 1px dashed var(--line);
+    border-radius: 999px;
+    color: var(--muted);
+    font-size: 16px;
+    margin: 2px 0 2px 6px;
+    vertical-align: middle;
+    cursor: pointer;
+    user-select: none;
+}
+#plan-table td.mat .mat-add:hover { color: inherit; border-color: currentColor; }
+#plan-table td.mat.drop { outline: 2px dashed rgb(121, 158, 49); outline-offset: -2px; }
+
+/* Material modal (pretty dialog, no native prompts) */
+.mat-modal-wrap {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    background: rgba(8, 20, 42, 0.55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+}
+.mat-modal {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    box-shadow: 0 12px 40px rgba(8, 20, 42, 0.35);
+    padding: 18px;
+    width: min(460px, 94vw);
+}
+.mat-modal .mm-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.85rem;
+    letter-spacing: 0.06em;
+    margin-bottom: 14px;
+}
+.mm-list { margin-bottom: 12px; }
+.mm-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 6px;
+}
+.mm-del {
+    background: none;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    width: 22px;
+    height: 22px;
+    color: var(--muted);
+    cursor: pointer;
+    line-height: 1;
+}
+.mm-del:hover { color: rgb(176, 36, 24); border-color: currentColor; }
+.mm-item .mat-pill { cursor: pointer; }
+.mm-item.sel .mat-pill { outline: 2px solid rgb(121, 158, 49); }
+.mat-modal input {
+    display: block;
+    width: 100%;
+    margin-bottom: 10px;
+    font: inherit;
+    font-size: 0.9rem;
+    padding: 8px 10px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: transparent;
+    color: inherit;
+}
+.mat-modal input.bad { border-color: rgb(176, 36, 24); }
+.mm-btns {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 4px;
+}
+.mm-btn {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.8rem;
+    border-radius: 10px;
+    padding: 8px 16px;
+    cursor: pointer;
+    border: 1px solid var(--line);
+    background: transparent;
+    color: inherit;
+}
+.mm-btn.primary { background: rgb(121, 158, 49); border-color: rgb(121, 158, 49); color: #fff; }
+.mm-btn.primary:hover { filter: brightness(1.08); }
+#plan-table td.mat .mat-input {
+    width: 100%;
+    min-width: 130px;
+    font: inherit;
+    font-size: 0.85em;
+    background: transparent;
+    color: inherit;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 3px 6px;
+}
+@media print { #plan-table td.mat .mat-add, #plan-table td.mat .mat-input { display: none; } }
+
 /* Separated Login/Logout pill at the right end of the pill row: extra gap
    plus a thin divider line set it apart from the nav pills */
 nav.quick-nav a.nav-auth {
