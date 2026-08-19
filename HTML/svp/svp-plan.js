@@ -27,6 +27,266 @@
         });
     }
 
+    // Material column (links to OneDrive slides etc.) is injected centrally
+    // so the per-page table headers stay untouched.
+    const headRow = document.querySelector('#plan-table thead tr');
+    if (headRow) {
+        const matTh = document.createElement('th');
+        matTh.textContent = 'Material';
+        headRow.appendChild(matTh);
+    }
+
+    // Renders the raw material text ("Label https://... Label2 https://...")
+    // as compact link pills; text without any URL shows as a plain note.
+    // The raw source is kept in data-src for edit mode.
+    // File-type icon for a material pill; SharePoint share links carry the
+    // app in the path (/:p:/ = PowerPoint, /:w:/ = Word, /:x:/ = Excel,
+    // /:b:/ = PDF), otherwise the label/extension decides.
+    function matIcon(url, label) {
+        const l = (label + ' ' + url).toLowerCase();
+        if (url.indexOf('/:p:/') >= 0 || l.indexOf('ppt') >= 0) return '📽 ';
+        if (url.indexOf('/:w:/') >= 0 || l.indexOf('.doc') >= 0) return '📄 ';
+        if (url.indexOf('/:x:/') >= 0 || l.indexOf('.xls') >= 0) return '📊 ';
+        if (url.indexOf('/:b:/') >= 0 || l.indexOf('pdf') >= 0) return '📕 ';
+        return '🔗 ';
+    }
+
+    // Default pill label when none was typed: derived from the link type.
+    function matDefaultLabel(url) {
+        const l = url.toLowerCase();
+        if (url.indexOf('/:p:/') >= 0 || l.indexOf('ppt') >= 0) return 'PPT';
+        if (url.indexOf('/:w:/') >= 0 || l.indexOf('.doc') >= 0) return 'Doc';
+        if (url.indexOf('/:x:/') >= 0 || l.indexOf('.xls') >= 0) return 'Excel';
+        if (url.indexOf('/:b:/') >= 0 || l.indexOf('pdf') >= 0) return 'PDF';
+        return 'Link';
+    }
+
+    function renderMaterial(el, text) {
+        text = text == null ? '' : String(text).trim();
+        el.dataset.src = text;
+        el.textContent = '';
+        const parts = text.split(/(https?:\/\/[^\s]+)/);
+        if (parts.length === 1) { el.textContent = text; return; }
+        for (let k = 1; k < parts.length; k += 2) {
+            const label = parts[k - 1].replace(/[\s|:,;·–-]+$/, '').trim();
+            const a = document.createElement('a');
+            a.className = 'badge b-green mat-pill';
+            a.href = parts[k];
+            a.target = '_blank';
+            a.rel = 'noopener';
+            a.textContent = matIcon(parts[k], label) + (label || matDefaultLabel(parts[k]));
+            a.title = parts[k];
+            el.appendChild(a);
+        }
+        const tail = parts[parts.length - 1].trim();
+        if (tail) {
+            const note = document.createElement('span');
+            note.className = 'mat-note';
+            note.textContent = tail;
+            el.appendChild(note);
+        }
+    }
+
+    // --- Material quick-add (per week row, owner only) -------------------
+    // A small + button in each material cell opens an inline input to paste
+    // "Label https://..."; links can also be dragged onto the cell. Both are
+    // wired only when the owner session exists — visitors just see pills.
+    const CAN_EDIT_MAT = !!(window.svpAuth && svpAuth.hasSession());
+
+    // Renders a ref's material state: pills into the sub-row block, a compact
+    // 📎 marker (with link count) into the week row cell.
+    function updateMaterial(ref, text) {
+        text = text == null ? '' : String(text).trim();
+        ref.matTd.dataset.src = text;
+        renderMaterial(ref.matBlock, text);
+        ref.matTd.textContent = '';
+        if (text) {
+            const n = (text.match(/https?:\/\//g) || []).length;
+            const flag = document.createElement('span');
+            flag.className = 'mat-flag';
+            flag.textContent = '📎' + (n > 1 ? ' ' + n : '');
+            flag.title = 'Material — Zeile aufklappen';
+            ref.matTd.appendChild(flag);
+            if (!ref.matBlock.parentNode) ref.ensureSubRow().side.appendChild(ref.matBlock);
+        } else if (ref.matBlock.parentNode) {
+            ref.matBlock.remove();
+        }
+        decorateMatCell(ref);
+    }
+
+    function saveMaterial(ref, src) {
+        src = (src || '').trim();
+        updateMaterial(ref, src);
+        if (src) ref.openSubRow();
+        if (!saved[ref.i]) saved[ref.i] = {};
+        if (src) saved[ref.i].material = src;
+        else delete saved[ref.i].material;
+        localStorage.setItem(KEY, JSON.stringify(saved));
+        localStorage.setItem(TS_KEY, new Date().toISOString());
+        pushRemote();
+    }
+
+    // Pretty modal (no native dialogs): add a link with optional label,
+    // existing links are listed and removable via X.
+    let matModal = null;
+    function closeMatModal() {
+        if (matModal) { matModal.remove(); matModal = null; }
+    }
+
+    function openMatModal(ref) {
+        closeMatModal();
+        const planRow = window.PLAN[ref.i] || {};
+        const wrap = document.createElement('div');
+        wrap.className = 'mat-modal-wrap';
+        const box = document.createElement('div');
+        box.className = 'mat-modal';
+
+        const title = document.createElement('div');
+        title.className = 'mm-title';
+        title.textContent = 'Material · Woche ' + (planRow.nr || '') + ' · ' +
+            ref.dateTd.textContent.trim();
+        box.appendChild(title);
+
+        // Current entries, parsed from the raw source.
+        const entries = [];
+        const parts = (ref.matTd.dataset.src || '').split(/(https?:\/\/[^\s]+)/);
+        for (let k = 1; k < parts.length; k += 2) {
+            entries.push({
+                label: parts[k - 1].replace(/[\s|:,;·–-]+$/, '').trim(),
+                url: parts[k]
+            });
+        }
+        function persist() {
+            saveMaterial(ref, entries
+                .map(en => (en.label ? en.label + ' ' : '') + en.url).join(' '));
+        }
+
+        // Input fields (created first — the pill list below writes into them).
+        const labIn = document.createElement('input');
+        labIn.type = 'text';
+        labIn.placeholder = 'Label (optional, z. B. „Einstieg KI“)';
+        labIn.setAttribute('aria-label', 'Label für den Link');
+        const urlIn = document.createElement('input');
+        urlIn.type = 'url';
+        urlIn.placeholder = 'https://… Link hier einfügen';
+        urlIn.setAttribute('aria-label', 'Link-Adresse');
+
+        // Clicking a pill loads its attributes into the fields for editing
+        // (it does NOT open the link); the primary button then updates it.
+        let editIdx = null;
+        if (entries.length) {
+            const list = document.createElement('div');
+            list.className = 'mm-list';
+            entries.forEach(function (en, idx) {
+                const item = document.createElement('div');
+                item.className = 'mm-item';
+                const pill = document.createElement('span');
+                pill.className = 'badge b-green mat-pill';
+                pill.title = en.url;
+                pill.textContent = matIcon(en.url, en.label) + (en.label || matDefaultLabel(en.url));
+                pill.addEventListener('click', function () {
+                    editIdx = idx;
+                    labIn.value = en.label;
+                    urlIn.value = en.url;
+                    ok.textContent = 'Speichern';
+                    list.querySelectorAll('.mm-item').forEach(el => el.classList.remove('sel'));
+                    item.classList.add('sel');
+                    labIn.focus();
+                });
+                const del = document.createElement('button');
+                del.type = 'button';
+                del.className = 'mm-del';
+                del.textContent = '✕';
+                del.title = 'Link entfernen';
+                del.setAttribute('aria-label', 'Link entfernen');
+                del.addEventListener('click', function () {
+                    entries.splice(idx, 1);
+                    persist();
+                    openMatModal(ref); /* rebuild with fresh list */
+                });
+                item.appendChild(pill);
+                item.appendChild(del);
+                list.appendChild(item);
+            });
+            box.appendChild(list);
+        }
+        box.appendChild(labIn);
+        box.appendChild(urlIn);
+
+        const btns = document.createElement('div');
+        btns.className = 'mm-btns';
+        const cancel = document.createElement('button');
+        cancel.type = 'button';
+        cancel.className = 'mm-btn';
+        cancel.textContent = 'Abbrechen';
+        cancel.addEventListener('click', closeMatModal);
+        const ok = document.createElement('button');
+        ok.type = 'button';
+        ok.className = 'mm-btn primary';
+        ok.textContent = 'Hinzufügen';
+        function add() {
+            const url = urlIn.value.trim();
+            if (!/^https?:\/\//.test(url)) {
+                urlIn.classList.add('bad');
+                urlIn.focus();
+                return;
+            }
+            const en = { label: labIn.value.trim(), url: url };
+            if (editIdx != null) entries[editIdx] = en; /* update selected */
+            else entries.push(en);
+            persist();
+            closeMatModal();
+        }
+        ok.addEventListener('click', add);
+        btns.appendChild(cancel);
+        btns.appendChild(ok);
+        box.appendChild(btns);
+
+        wrap.addEventListener('click', function (e) {
+            if (e.target === wrap) closeMatModal();
+        });
+        wrap.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') closeMatModal();
+            if (e.key === 'Enter') add();
+        });
+        wrap.appendChild(box);
+        document.body.appendChild(wrap);
+        matModal = wrap;
+        urlIn.focus();
+    }
+
+    function decorateMatCell(ref) {
+        if (!CAN_EDIT_MAT || !ref.matTd || ref.matTd.querySelector('.mat-add')) return;
+        const btn = document.createElement('span');
+        btn.className = 'mat-add';
+        btn.textContent = '+';
+        btn.title = 'Link einfügen (oder Link hierher ziehen)';
+        btn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            openMatModal(ref);
+        });
+        ref.matTd.appendChild(btn);
+    }
+
+    function wireMaterialDrop(ref) {
+        if (!CAN_EDIT_MAT) return;
+        const td = ref.matTd;
+        td.addEventListener('dragover', function (e) {
+            e.preventDefault();
+            td.classList.add('drop');
+        });
+        td.addEventListener('dragleave', function () { td.classList.remove('drop'); });
+        td.addEventListener('drop', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            td.classList.remove('drop');
+            const url = (e.dataTransfer.getData('text/uri-list') ||
+                e.dataTransfer.getData('text/plain') || '').split('\n')[0].trim();
+            if (!/^https?:\/\//.test(url)) return;
+            saveMaterial(ref, (td.dataset.src || '') + ' ' + url);
+        });
+    }
+
     const KEY = 'svp-edits:' + location.pathname;
     let saved = {};
     try { saved = JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) { saved = {}; }
@@ -300,14 +560,35 @@
         if (ex) ex.remove();
     });
 
+    // Open/closed state of the week sub-rows is remembered per page and
+    // browser (same idea as the LB panels). Not touched while editing —
+    // edit mode force-opens everything only temporarily.
+    const OPEN_KEY = 'svp-week-open:' + location.pathname;
+    let openWeeks;
+    try { openWeeks = new Set(JSON.parse(localStorage.getItem(OPEN_KEY) || '[]')); }
+    catch (e) { openWeeks = new Set(); }
+    function syncOpenWeeks() {
+        if (document.body.classList.contains('editing')) return;
+        openWeeks.clear();
+        document.querySelectorAll('tr.expandable.open[data-i]').forEach(function (row) {
+            openWeeks.add(Number(row.dataset.i));
+        });
+        try { localStorage.setItem(OPEN_KEY, JSON.stringify([...openWeeks])); } catch (e) { }
+    }
+
+    // Snapshot for the restore pass: syncOpenWeeks rebuilds the live set from
+    // the DOM, which is still incomplete while the table is being built.
+    const initialOpen = new Set(openWeeks);
+
     window.PLAN.forEach((row, i) => {
         const ov = saved[i] || {};
         const tr = document.createElement('tr');
+        tr.dataset.i = i;
 
         if (row.ferien) {
             tr.className = 'ferien';
             const td = document.createElement('td');
-            td.colSpan = 7;
+            td.colSpan = 8;
             td.textContent = ov.ferien || row.ferien;
             tr.appendChild(td);
             tbody.appendChild(tr);
@@ -343,6 +624,12 @@
         });
         setMathText(tds[6], values[6][1]);
 
+        // Material cell (week row): only a compact 📎 marker + quick-add;
+        // the pills themselves live in the expandable sub-row (more room).
+        const matTd = document.createElement('td');
+        matTd.className = 'mat';
+        tr.appendChild(matTd);
+
         // Topic cell: optional chevron + editable text span.
         const topicSpan = document.createElement('span');
         topicSpan.className = 'topic-text';
@@ -350,38 +637,63 @@
         tds[5].appendChild(topicSpan);
         tbody.appendChild(tr);
 
-        const ref = { i, dateTd: tds[2], uTd: tds[4], topicSpan, remarkTd: tds[6], ul: null };
+        const ref = { i, dateTd: tds[2], uTd: tds[4], topicSpan, remarkTd: tds[6], matTd, ul: null };
 
-        const detailItems = ov.details || row.details;
-        if (detailItems && detailItems.length) {
+        // Expandable sub-row, created on demand: bullets under the topic
+        // column, materials in the free area under Bemerkungen/Material.
+        let detailTr = null, subMain = null, subSide = null;
+        function ensureSubRow() {
+            if (detailTr) return { main: subMain, side: subSide };
+            detailTr = document.createElement('tr');
+            detailTr.className = 'detail-row';
+            // Empty spacer under columns 1-5 so the content sits under the topic column.
+            const spacer = document.createElement('td');
+            spacer.colSpan = 5;
+            detailTr.appendChild(spacer);
+            subMain = document.createElement('td');
+            subMain.colSpan = 1;
+            detailTr.appendChild(subMain);
+            subSide = document.createElement('td');
+            subSide.colSpan = 2;
+            subSide.className = 'sub-side';
+            detailTr.appendChild(subSide);
+            tr.after(detailTr);
             tr.classList.add('expandable');
             const chev = document.createElement('span');
             chev.className = 'chev';
             chev.textContent = '▸';
             tds[5].insertBefore(chev, topicSpan);
+            return { main: subMain, side: subSide };
+        }
+        ref.ensureSubRow = ensureSubRow;
+        ref.openSubRow = function () {
+            if (!detailTr) return;
+            tr.classList.add('open');
+            detailTr.classList.add('open');
+            syncOpenWeeks();
+        };
 
-            const detailTr = document.createElement('tr');
-            detailTr.className = 'detail-row';
-            // Empty spacer under columns 1-5 so the bullets sit under the topic column.
-            const spacer = document.createElement('td');
-            spacer.colSpan = 5;
-            detailTr.appendChild(spacer);
-            const td = document.createElement('td');
-            td.colSpan = 2;
+        tr.addEventListener('click', () => {
+            if (document.body.classList.contains('editing')) return;
+            if (!detailTr) return;
+            tr.classList.toggle('open');
+            detailTr.classList.toggle('open');
+            syncOpenWeeks();
+        });
+
+        const detailItems = ov.details || row.details;
+        if (detailItems && detailItems.length) {
             const ul = document.createElement('ul');
             buildDetailList(ul, detailItems);
-            td.appendChild(ul);
-            detailTr.appendChild(td);
-            tbody.appendChild(detailTr);
+            ensureSubRow().main.appendChild(ul);
             ref.ul = ul;
-
-            tr.addEventListener('click', () => {
-                if (document.body.classList.contains('editing')) return;
-                tr.classList.toggle('open');
-                detailTr.classList.toggle('open');
-            });
         }
 
+        ref.matBlock = document.createElement('div');
+        ref.matBlock.className = 'mat-block';
+        updateMaterial(ref, ov.material != null ? ov.material : row.material);
+        wireMaterialDrop(ref);
+        if (initialOpen.has(i)) ref.openSubRow(); /* restore remembered state */
         rendered.push(ref);
     });
 
@@ -452,6 +764,7 @@
             r.classList.toggle('open', open);
             r.previousElementSibling.classList.toggle('open', open);
         });
+        syncOpenWeeks();
     }
 
     // Toolbar helper: expand/collapse all detail rows at once.
@@ -473,8 +786,14 @@
     function setEditable(on) {
         const flag = on ? 'true' : 'false';
         for (const r of rendered) {
-            for (const el of [r.ferienTd, r.dateTd, r.uTd, r.topicSpan, r.remarkTd, r.ul]) {
+            for (const el of [r.ferienTd, r.dateTd, r.uTd, r.topicSpan, r.remarkTd, r.matTd, r.ul]) {
                 if (el) el.setAttribute('contenteditable', flag);
+            }
+            // Material: edit the raw "Label URL" source in the week row cell,
+            // pills re-render into the sub-row on exit.
+            if (r.matTd) {
+                if (on) r.matTd.textContent = r.matTd.dataset.src || '';
+                else updateMaterial(r, r.matTd.textContent);
             }
         }
         // While editing show the raw $...$ source; on exit re-render from the
@@ -500,6 +819,11 @@
                     topic: r.topicSpan.textContent.trim(),
                     remark: r.remarkTd.textContent.trim()
                 };
+                /* while editing the cell holds the raw source text; an empty
+                   cell is NOT saved so baked-in row.material keeps showing */
+                if (r.matTd && r.matTd.textContent.trim()) {
+                    entry.material = r.matTd.textContent.trim();
+                }
                 if (r.ul) {
                     entry.details = Array.from(r.ul.querySelectorAll('li'))
                         .map(li => li.textContent.trim())
@@ -587,6 +911,7 @@
             r.uTd.textContent = ov.u != null ? ov.u : row.u;
             setMathText(r.topicSpan, ov.topic != null ? ov.topic : row.topic);
             setMathText(r.remarkTd, ov.remark != null ? ov.remark : row.remark);
+            if (r.matTd) updateMaterial(r, ov.material != null ? ov.material : row.material);
             if (r.ul) buildDetailList(r.ul, ov.details || row.details || []);
         }
     }
