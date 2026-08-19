@@ -33,7 +33,7 @@
         }
 
         .card-head {
-            font-family: 'Orbitron', sans-serif;
+            font-family: Arial, sans-serif;
             font-size: 12px;
             letter-spacing: 1.6px;
             color: rgb(245, 194, 66);
@@ -48,10 +48,11 @@
         }
 
         .num-row .lbl {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 13px;
+            font-family: 'Courier New', monospace;
+            font-size: 24px;
+            font-weight: 700;
             color: #fff;
-            width: 20px;
+            width: 32px;
         }
 
         .stepbtn {
@@ -73,7 +74,8 @@
         .numval {
             flex: 1;
             text-align: center;
-            font-family: 'Orbitron', sans-serif;
+            font-family: 'Courier New', monospace;
+            font-weight: 700;
             font-size: 21px;
             color: rgb(121, 158, 49);
             background: rgba(8, 20, 42, 0.7);
@@ -101,7 +103,7 @@
             border: 1px solid rgba(121, 158, 49, 0.8);
             background: rgba(121, 158, 49, 0.22);
             color: #fff;
-            font-family: 'Orbitron', sans-serif;
+            font-family: Arial, sans-serif;
             font-size: 12px;
             letter-spacing: 1.2px;
             cursor: pointer;
@@ -159,13 +161,13 @@
                 <div class="num-row">
                     <span class="lbl" style="color:rgb(121,158,49)">a</span>
                     <button class="stepbtn" id="a-minus" aria-label="a verringern">−</button>
-                    <div class="numval" id="a-val">1</div>
+                    <div class="numval" id="a-val">–</div>
                     <button class="stepbtn" id="a-plus" aria-label="a erhöhen">+</button>
                 </div>
                 <div class="num-row">
                     <span class="lbl" style="color:rgb(80,170,255)">b</span>
                     <button class="stepbtn" id="b-minus" aria-label="b verringern">−</button>
-                    <div class="numval bcol" id="b-val">1</div>
+                    <div class="numval bcol" id="b-val">–</div>
                     <button class="stepbtn" id="b-plus" aria-label="b erhöhen">+</button>
                 </div>
                 <div class="hinttext">0…255 — oder unten im Addierwerk direkt auf die Bits tippen.<br>
@@ -192,14 +194,14 @@
 
             <div class="instrument-card">
                 <div class="card-head">ANSICHT</div>
-                <label class="chk"><input type="checkbox" id="chk-strom"> Strom-Epilog (Bit = Spannung)</label>
+                <label class="chk"><input type="checkbox" id="chk-ki"> KI-Prolog (Ebene 0)</label>
+                <label class="chk"><input type="checkbox" id="chk-strom"> Bit-Spannung (Ebene 5)</label>
             </div>
         </div>
     </aside>
 
     <main id="main-content">
         <div id="canvas-container">
-            <div class="cyber-grid"></div>
             <div id="math-coach-box">
                 <div class="coach-title" id="coach-title-slot"></div>
                 <div id="coach-content" class="coach-message"></div>
@@ -207,6 +209,75 @@
             <canvas id="canvas"></canvas>
         </div>
     </main>
+
+    <!-- assembler mnemonic overlay -->
+    <div id="asm-help" style="display:none; position:fixed; inset:0; z-index:99998; background:rgba(8,20,42,0.72); align-items:center; justify-content:center;" onclick="if(event.target===this)this.style.display='none'">
+        <div style="max-width:680px; width:92%; max-height:82vh; overflow:auto; background:rgb(14,36,78); border:1px solid rgba(245,194,66,0.55); border-radius:14px; padding:26px 30px; font-family:Arial,sans-serif; color:rgba(255,255,255,0.9); font-size:15px; line-height:1.5; box-shadow:0 12px 48px rgba(0,0,0,0.5);">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                <b style="color:rgb(245,194,66); font-size:18px;">Die wichtigsten Assembler-Befehle (x86)</b>
+                <button aria-label="Schließen" onclick="document.getElementById('asm-help').style.display='none'" style="background:none; border:none; color:#fff; font-size:22px; cursor:pointer; line-height:1;">×</button>
+            </div>
+            <table style="width:100%; border-collapse:collapse;">
+                <tr style="color:rgb(245,194,66); text-align:left;"><th style="padding:6px 10px;">Befehl</th><th style="padding:6px 10px;">Beispiel</th><th style="padding:6px 10px;">Was er tut</th></tr>
+                <tr><td style="padding:5px 10px; font-family:'Courier New',monospace; font-weight:700; color:rgb(215,55,40);">mov</td><td style="padding:5px 10px; font-family:'Courier New',monospace;">mov eax, 1</td><td style="padding:5px 10px;">legt einen Wert in ein Register</td></tr>
+                <tr><td style="padding:5px 10px; font-family:'Courier New',monospace; font-weight:700; color:rgb(215,55,40);">add / sub</td><td style="padding:5px 10px; font-family:'Courier New',monospace;">add eax, 1</td><td style="padding:5px 10px;">addiert / subtrahiert auf ein Register</td></tr>
+                <tr><td style="padding:5px 10px; font-family:'Courier New',monospace; font-weight:700; color:rgb(215,55,40);">cmp</td><td style="padding:5px 10px; font-family:'Courier New',monospace;">cmp eax, 0</td><td style="padding:5px 10px;">vergleicht — merkt sich das Ergebnis in Flags</td></tr>
+                <tr><td style="padding:5px 10px; font-family:'Courier New',monospace; font-weight:700; color:rgb(215,55,40);">and / or / xor</td><td style="padding:5px 10px; font-family:'Courier New',monospace;">xor eax, eax</td><td style="padding:5px 10px;">Bit-Logik (xor eax, eax = Register auf 0)</td></tr>
+                <tr><td style="padding:5px 10px; font-family:'Courier New',monospace; font-weight:700; color:rgb(215,55,40);">inc / dec</td><td style="padding:5px 10px; font-family:'Courier New',monospace;">inc eax</td><td style="padding:5px 10px;">+1 / −1</td></tr>
+                <tr><td style="padding:5px 10px; font-family:'Courier New',monospace; font-weight:700; color:rgb(215,55,40);">push / pop</td><td style="padding:5px 10px; font-family:'Courier New',monospace;">push eax</td><td style="padding:5px 10px;">auf den Stapel legen / zurückholen</td></tr>
+                <tr><td style="padding:5px 10px; font-family:'Courier New',monospace; font-weight:700; color:rgb(215,55,40);">call / ret</td><td style="padding:5px 10px; font-family:'Courier New',monospace;">call rechne</td><td style="padding:5px 10px;">Unterprogramm aufrufen / zurückkehren</td></tr>
+                <tr><td style="padding:5px 10px; font-family:'Courier New',monospace; font-weight:700; color:rgb(215,55,40);">jmp</td><td style="padding:5px 10px; font-family:'Courier New',monospace;">jmp marke</td><td style="padding:5px 10px;">springt an eine andere Code-Stelle</td></tr>
+                <tr><td style="padding:5px 10px; font-family:'Courier New',monospace; font-weight:700; color:rgb(215,55,40);">je / jne</td><td style="padding:5px 10px; font-family:'Courier New',monospace;">je marke</td><td style="padding:5px 10px;">springt nach cmp: wenn gleich / ungleich</td></tr>
+                <tr><td style="padding:5px 10px; font-family:'Courier New',monospace; font-weight:700; color:rgb(215,55,40);">nop</td><td style="padding:5px 10px; font-family:'Courier New',monospace;">nop</td><td style="padding:5px 10px;">tut nichts — Füllbyte</td></tr>
+            </table>
+            <p style="margin:12px 0 0; color:rgba(255,255,255,0.65);">Jede Zeile hier ist genau ein CPU-Befehl — der Assembler übersetzt sie 1:1 in die Bytes von Box 3.</p>
+        </div>
+    </div>
+
+    <!-- opcode table overlay -->
+    <div id="op-help" style="display:none; position:fixed; inset:0; z-index:99998; background:rgba(8,20,42,0.72); align-items:center; justify-content:center;" onclick="if(event.target===this)this.style.display='none'">
+        <div style="max-width:680px; width:92%; max-height:82vh; overflow:auto; background:rgb(14,36,78); border:1px solid rgba(245,194,66,0.55); border-radius:14px; padding:26px 30px; font-family:Arial,sans-serif; color:rgba(255,255,255,0.9); font-size:15px; line-height:1.5; box-shadow:0 12px 48px rgba(0,0,0,0.5);">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                <b style="color:rgb(245,194,66); font-size:18px;">Die wichtigsten Opcodes (x86, 1 Byte)</b>
+                <button aria-label="Schließen" onclick="document.getElementById('op-help').style.display='none'" style="background:none; border:none; color:#fff; font-size:22px; cursor:pointer; line-height:1;">×</button>
+            </div>
+            <table style="width:100%; border-collapse:collapse;">
+                <tr style="color:rgb(245,194,66); text-align:left;"><th style="padding:6px 10px;">Hex</th><th style="padding:6px 10px;">Befehl</th><th style="padding:6px 10px;">Was er tut</th></tr>
+                <tr><td style="padding:5px 10px; font-family:'Courier New',monospace; font-weight:700; color:rgb(215,55,40);">B8–BF</td><td style="padding:5px 10px; font-family:'Courier New',monospace;">mov reg, Zahl</td><td style="padding:5px 10px;">legt eine Zahl in ein Register (B8+Nr.: B8 = eax, B9 = ecx …)</td></tr>
+                <tr><td style="padding:5px 10px; font-family:'Courier New',monospace; font-weight:700; color:rgb(215,55,40);">05</td><td style="padding:5px 10px; font-family:'Courier New',monospace;">add eax, Zahl</td><td style="padding:5px 10px;">addiert die Zahl auf eax</td></tr>
+                <tr><td style="padding:5px 10px; font-family:'Courier New',monospace; font-weight:700; color:rgb(215,55,40);">2D</td><td style="padding:5px 10px; font-family:'Courier New',monospace;">sub eax, Zahl</td><td style="padding:5px 10px;">zieht die Zahl von eax ab</td></tr>
+                <tr><td style="padding:5px 10px; font-family:'Courier New',monospace; font-weight:700; color:rgb(215,55,40);">3D</td><td style="padding:5px 10px; font-family:'Courier New',monospace;">cmp eax, Zahl</td><td style="padding:5px 10px;">vergleicht — merkt sich das Ergebnis in Flags</td></tr>
+                <tr><td style="padding:5px 10px; font-family:'Courier New',monospace; font-weight:700; color:rgb(215,55,40);">25 / 0D / 35</td><td style="padding:5px 10px; font-family:'Courier New',monospace;">and / or / xor</td><td style="padding:5px 10px;">Bit-Logik auf eax — dieselben Gatter wie in Box 4</td></tr>
+                <tr><td style="padding:5px 10px; font-family:'Courier New',monospace; font-weight:700; color:rgb(215,55,40);">50–57 / 58–5F</td><td style="padding:5px 10px; font-family:'Courier New',monospace;">push / pop reg</td><td style="padding:5px 10px;">Register auf den Stapel legen / zurückholen</td></tr>
+                <tr><td style="padding:5px 10px; font-family:'Courier New',monospace; font-weight:700; color:rgb(215,55,40);">E8 / E9</td><td style="padding:5px 10px; font-family:'Courier New',monospace;">call / jmp</td><td style="padding:5px 10px;">Unterprogramm aufrufen / im Code springen</td></tr>
+                <tr><td style="padding:5px 10px; font-family:'Courier New',monospace; font-weight:700; color:rgb(215,55,40);">74 / 75</td><td style="padding:5px 10px; font-family:'Courier New',monospace;">je / jne</td><td style="padding:5px 10px;">springen, wenn gleich / ungleich (nach cmp)</td></tr>
+                <tr><td style="padding:5px 10px; font-family:'Courier New',monospace; font-weight:700; color:rgb(215,55,40);">C3</td><td style="padding:5px 10px; font-family:'Courier New',monospace;">ret</td><td style="padding:5px 10px;">zurück zum Aufrufer</td></tr>
+                <tr><td style="padding:5px 10px; font-family:'Courier New',monospace; font-weight:700; color:rgb(215,55,40);">90</td><td style="padding:5px 10px; font-family:'Courier New',monospace;">nop</td><td style="padding:5px 10px;">tut nichts — Füllbyte</td></tr>
+                <tr><td style="padding:5px 10px; font-family:'Courier New',monospace; font-weight:700; color:rgb(215,55,40);">CC</td><td style="padding:5px 10px; font-family:'Courier New',monospace;">int3</td><td style="padding:5px 10px;">Haltepunkt für den Debugger</td></tr>
+                <tr><td style="padding:5px 10px; font-family:'Courier New',monospace; font-weight:700; color:rgb(215,55,40);">F4</td><td style="padding:5px 10px; font-family:'Courier New',monospace;">hlt</td><td style="padding:5px 10px;">hält die CPU an</td></tr>
+            </table>
+            <p style="margin:12px 0 0; color:rgba(255,255,255,0.65);">Modernes x86 hat hunderte Befehle, meist mehrbytig (0F-Präfix, REX für 64-Bit) — das hier ist das Ein-Byte-Grundgerüst von 1978, das bis heute läuft.</p>
+        </div>
+    </div>
+
+    <!-- full-adder explanation overlay -->
+    <div id="va-help" style="display:none; position:fixed; inset:0; z-index:99998; background:rgba(8,20,42,0.72); align-items:center; justify-content:center;" onclick="if(event.target===this)this.style.display='none'">
+        <div style="max-width:640px; width:92%; background:rgb(14,36,78); border:1px solid rgba(245,194,66,0.55); border-radius:14px; padding:26px 30px; font-family:Arial,sans-serif; color:rgba(255,255,255,0.9); font-size:16px; line-height:1.55; box-shadow:0 12px 48px rgba(0,0,0,0.5);">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                <b style="color:rgb(245,194,66); font-size:18px;">Volladdierer — die fünf Gatter</b>
+                <button aria-label="Schließen" onclick="document.getElementById('va-help').style.display='none'" style="background:none; border:none; color:#fff; font-size:22px; cursor:pointer; line-height:1;">×</button>
+            </div>
+            <p style="margin:0 0 10px;">Jede VA-Box hat <b>3 Eingänge</b> (Bit <b style="color:rgb(121,158,49)">a</b>, Bit <b style="color:rgb(80,170,255)">b</b>, <b style="color:rgb(215,55,40)">Übertrag</b> von rechts) und <b>2 Ausgänge</b> (Summenbit <b style="color:rgb(245,194,66)">s</b>, neuer Übertrag <b style="color:rgb(215,55,40)">c</b>):</p>
+            <ul style="margin:0 0 10px; padding-left:22px;">
+                <li><b>XOR&nbsp;#1:</b> h = a ⊕ b &nbsp;(1 genau dann, wenn a ≠ b)</li>
+                <li><b>XOR&nbsp;#2:</b> <b style="color:rgb(245,194,66)">s</b> = h ⊕ Übertrag &nbsp;→ das Summenbit</li>
+                <li><b>AND&nbsp;#1:</b> a ∧ b</li>
+                <li><b>AND&nbsp;#2:</b> h ∧ Übertrag</li>
+                <li><b>OR:</b> <b style="color:rgb(215,55,40)">c</b> = (a∧b) ∨ (h∧Übertrag) &nbsp;→ 1, sobald zwei der drei Eingänge 1 sind</li>
+            </ul>
+            <p style="margin:0;">Beispiel 1+1: VA&nbsp;0 bekommt a=1, b=1 → s = 0, c = 1. VA&nbsp;1 bekommt 0, 0 und den Übertrag 1 → s = 1. Von rechts gelesen: 10₂ = 2.</p>
+        </div>
+    </div>
 
     <script src="js/cyber-left-chrome.js"></script>
     <script src="js/branding/briefings.js"></script>
@@ -251,7 +322,7 @@
             const t = document.getElementById('coach-title-slot');
             if (t) t.textContent = 'Vom Code zu den Bits';
             const c = document.getElementById('coach-content');
-            if (c) c.textContent = 'Eine Rechnung, vier Ebenen: Hochsprache, Assembler, Maschinenbytes, Addierwerk. Jede Zahl behält ihre Farbe — tippe sie an, und ein Faden zeigt sie auf jeder Ebene wieder. ABSPIELEN spielt die ganze Reise: Compiler → Assembler → CPU → und das Ergebnis kommt zurück nach oben.';
+            if (c) c.textContent = 'Eine Rechnung, vier Ebenen: Programmiersprache, Assembler, Maschinenbytes, Addierwerk. Jede Zahl behält ihre Farbe — tippe sie an, und ein Faden zeigt sie auf jeder Ebene wieder. ABSPIELEN spielt die ganze Reise: Compiler → Assembler → CPU → und das Ergebnis kommt zurück nach oben.';
         })();
 
         if (window.CyberLeftChrome && typeof CyberLeftChrome.configure === 'function') {
@@ -268,22 +339,26 @@
         const GREEN = 'rgb(121,158,49)';    // number a
         const BLUE = 'rgb(80,170,255)';     // number b
         const RED = 'rgb(176,36,24)';       // carry
-        const OPCOL = 'rgb(226,226,242)';   // operation: + / mnemonics / opcodes / gates
+        const OPCOL = 'rgb(215,55,40)';     // operation: + / mnemonics / opcodes / gates — red
         const DIM = 'rgba(255,255,255,0.55)';
         const WHITE = '#fff';
         const PANEL_BG = 'rgba(14,36,78,0.55)';
         const PANEL_BORDER = 'rgba(245,194,66,0.35)';
         const ECOL = { a: GREEN, b: BLUE, c: ORANGE, op: OPCOL };
-        const EDGE = { a: 'rgba(121,158,49,', b: 'rgba(80,170,255,', c: 'rgba(245,194,66,', op: 'rgba(226,226,242,' };
+        const EDGE = { a: 'rgba(121,158,49,', b: 'rgba(80,170,255,', c: 'rgba(245,194,66,', op: 'rgba(215,55,40,' };
 
         // ---------- state ----------
-        let A = 1, B = 1;
+        let A = null, B = null;   // unset until Doc picks values — nothing is in the register yet
         const BITS = 8;
         let stepIdx = -1;           // -1 = nothing computed, 0..7 = bits done up to idx
         let mode = 'idle';          // 'idle' | 'journey'
         let phase = 0, phaseT = 0, journeyDone = false;
         let hoverE = null;          // hovered entity: 'a' | 'b' | 'c' | 'op' | null
+        let helpHit = null;         // click target of the adder help icon
+        let helpHit3 = null;        // click target of the opcode-table help icon
+        let helpHitA = null;        // click target of the asm-mnemonics help icon
         let showStrom = false;
+        let showKI = false;         // level 0: natural language / AI prologue
         let hits = [], bitHits = [], anchors = null, cAnchor = null, retFrom = null;
         let S = 1;                  // global ui scale
 
@@ -348,9 +423,9 @@
             ctx.roundRect(x, y, w, h, 10);
             ctx.fill(); ctx.stroke();
             ctx.fillStyle = ORANGE;
-            ctx.font = '700 ' + Math.round(S * 13) + 'px Orbitron';
+            ctx.font = '700 ' + Math.round(S * 18) + 'px Arial, sans-serif';
             ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
-            ctx.fillText(title, x + S * 12, y + S * 14);
+            ctx.fillText(title, x + S * 12, y + S * 17);
         }
 
         // draw a run of coloured tokens; entity tokens become hover targets + thread anchors
@@ -386,8 +461,10 @@
             const ps = [...buckets.values()].map(b => ({ x: b.x / b.n, y: b.y / b.n })).sort((u, v) => u.y - v.y);
             if (ps.length < 2) return;
             ctx.save();
+            // draw the thread BENEATH everything already painted ("under water")
+            ctx.globalCompositeOperation = 'destination-over';
             ctx.strokeStyle = ECOL[hoverE];
-            ctx.globalAlpha = 0.7;
+            ctx.globalAlpha = 0.28;
             ctx.lineWidth = 1.8;
             ctx.setLineDash([7, 6]);
             ctx.beginPath();
@@ -409,19 +486,25 @@
             anchors = { a: [], b: [], c: [], op: [] };
             cAnchor = null; retFrom = null;
 
+            const unset = A === null || B === null;
             const tr = adderTrace();
-            const sum = A + B;
+            const sum = (A ?? 0) + (B ?? 0);
             const narrow = W < 720;
-            const showC = (mode === 'idle' && stepIdx >= BITS - 1) || journeyDone
-                || (mode === 'journey' && phase === 4 && phaseT > 0.55);
+            const showC = !unset && ((mode === 'idle' && stepIdx >= BITS - 1) || journeyDone
+                || (mode === 'journey' && phase === 4 && phaseT > 0.55));
 
             // scale so the whole ladder fits
-            S = Math.max(0.55, Math.min(W / 900, H / (showStrom ? 950 : 828)));
+            // keep the whole ladder below the floating branding masthead
+            const brandEl = document.querySelector('.canvas-branding');
+            // offsetTop/offsetHeight ignore the fade-in transform — getBoundingClientRect would
+            // measure 10px too high during the 1.2s entry animation and make the layout jump
+            const topPad = brandEl ? Math.max(0, brandEl.offsetTop + brandEl.offsetHeight + 10) : 0;
+            S = Math.max(0.55, Math.min(W / 900, (H - topPad) / ((showStrom ? 1138 : 1000) + (showKI ? 138 : 0))));
             const M = S * 14;
             const px = M, pw = W - 2 * M;
-            const hCode = S * 92, hAsm = S * 128, hMach = S * 148, hAdd = S * 318, hStrom = S * 92;
-            const gap = S * 30;    // room for the labelled actor arrows
-            let y = M;
+            const hCode = S * 92, hAsm = S * 140, hMach = S * 210, hAdd = S * 368, hStrom = S * 92;
+            const gap = S * 46;    // room for the labelled actor arrows
+            let y = topPad + M;
 
             // arrow in the gap between two panels, naming WHO translates
             const flowArrow = (yTop, idx, label) => {
@@ -429,15 +512,15 @@
                 const y1 = yTop + S * 3, y2 = yTop + gap - S * 3;
                 const active = mode === 'journey' && !journeyDone && phase === idx;
                 const past = journeyDone || (mode === 'journey' && phase > idx);
-                const col = active ? ORANGE : (past ? GREEN : 'rgba(255,255,255,0.38)');
+                const col = active ? ORANGE : (past ? GREEN : 'rgba(255,255,255,0.82)');
                 ctx.save();
                 ctx.strokeStyle = col; ctx.fillStyle = col;
-                ctx.lineWidth = active ? 2.2 : 1.3;
+                ctx.lineWidth = active ? 2.6 : 2;
                 ctx.beginPath(); ctx.moveTo(x, y1); ctx.lineTo(x, y2 - S * 5); ctx.stroke();
                 ctx.beginPath();
-                ctx.moveTo(x, y2); ctx.lineTo(x - S * 4.5, y2 - S * 8); ctx.lineTo(x + S * 4.5, y2 - S * 8);
+                ctx.moveTo(x, y2); ctx.lineTo(x - S * 6, y2 - S * 10); ctx.lineTo(x + S * 6, y2 - S * 10);
                 ctx.closePath(); ctx.fill();
-                ctx.font = '700 ' + Math.round(S * 10.5) + 'px Orbitron';
+                ctx.font = '700 ' + Math.round(S * 15) + 'px Arial, sans-serif';
                 ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
                 ctx.fillText(label, x + S * 14, (y1 + y2) / 2);
                 if (active) {
@@ -447,100 +530,178 @@
                 ctx.restore();
             };
 
+            // ? badge sitting on a panel's top-right corner rounding; returns its hit rect
+            const helpIcon = (yTop) => {
+                const hr = S * 11, hx = px + pw - S * 16, hy = yTop + S * 16;
+                ctx.save();
+                ctx.fillStyle = 'rgb(14,36,78)';
+                ctx.beginPath(); ctx.arc(hx, hy, hr + S * 2.5, 0, 7); ctx.fill();
+                ctx.strokeStyle = ORANGE; ctx.fillStyle = ORANGE;
+                ctx.lineWidth = 1.6;
+                ctx.beginPath(); ctx.arc(hx, hy, hr, 0, 7); ctx.stroke();
+                ctx.font = '700 ' + Math.round(S * 16) + 'px Arial, sans-serif';
+                ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                ctx.fillText('?', hx, hy + S * 1);
+                ctx.restore();
+                return { x: hx - hr - S * 3, y: hy - hr - S * 3, w: (hr + S * 3) * 2, h: (hr + S * 3) * 2 };
+            };
+
+            // ---- 0) KI-PROLOG (optional) ----
+            if (showKI) {
+                panel(px, y, pw, hCode, '0  KÜNSTLICHE INTELLIGENZ  (z. B. Claude)');
+                ctx.save();
+                ctx.font = '700 ' + Math.round(S * 22) + 'px Arial, sans-serif';
+                ctx.fillStyle = WHITE;
+                ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+                ctx.fillText('„Schreib mir Code, der 1 + 1 ausrechnet."', px + S * 24, y + hCode * 0.62);
+                ctx.font = Math.round(S * 18) + 'px Arial, sans-serif';
+                ctx.fillStyle = 'rgba(255,255,255,0.80)';
+                [
+                    'Ganz oben: ein Satz in Menschensprache.',
+                    'Die KI schreibt daraus den Code der folgenden',
+                    'Ebene: die Programmiersprache.'
+                ].forEach((t, i) => ctx.fillText(t, px + pw * 0.58, y + S * 26 + i * S * 23));
+                ctx.restore();
+                y += hCode;
+                flowArrow(y, 99, 'KI  schreibt den Code');
+                y += gap;
+            }
+
             // ---- 1) HOCHSPRACHE ----
-            panel(px, y, pw, hCode, 'HOCHSPRACHE');
-            ctx.font = Math.round(S * 26) + 'px "Courier New", monospace';
+            panel(px, y, pw, hCode, '1  PROGRAMMIERSPRACHE  (z. B. JavaScript)');
+            ctx.font = '700 ' + Math.round(S * 26) + 'px "Courier New", monospace';
             textRun(px + S * 24, y + hCode * 0.62, [
                 { t: 'let ', col: DIM }, { t: 'c', e: 'c' }, { t: ' = ', col: DIM },
-                { t: String(A), e: 'a' }, { t: ' + ', e: 'op' }, { t: String(B), e: 'b' }, { t: ';', col: DIM },
-                { t: '   → c = ', col: DIM },
+                { t: 'a', e: 'a' }, { t: ' + ', e: 'op' }, { t: 'b', e: 'b' }, { t: ';', col: DIM },
+                { t: '   → ', col: DIM }, { t: 'c', e: 'c' }, { t: ' = ', col: DIM },
                 { t: showC ? String(sum) : '?', e: 'c', id: 'cval' }
             ]);
+            // plain-language explanation, right half of the box
+            ctx.save();
+            ctx.font = Math.round(S * 18) + 'px Arial, sans-serif';
+            ctx.fillStyle = 'rgba(255,255,255,0.80)';
+            ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+            [
+                'Eine Zeile Code — zwei Zahlen, ein +.',
+                'Was c ist, soll der Rechner herausfinden.'
+            ].forEach((t, i) => ctx.fillText(t, px + pw * 0.58, y + S * 40 + i * S * 24));
+            ctx.restore();
             y += hCode;
             flowArrow(y, 0, 'COMPILER  übersetzt');
             y += gap;
 
             // ---- 2) ASSEMBLER ----
-            panel(px, y, pw, hAsm, 'ASSEMBLER  (x86-64)');
-            ctx.font = Math.round(S * 20) + 'px "Courier New", monospace';
+            panel(px, y, pw, hAsm, '2  ASSEMBLER  (x86-64)');
+            helpHitA = helpIcon(y);   // mnemonic table
+            ctx.font = '700 ' + Math.round(S * 26) + 'px "Courier New", monospace';
             const asmLines = [
-                [{ t: 'mov ', e: 'op' }, { t: 'eax', col: WHITE }, { t: ', ', col: DIM }, { t: String(A), e: 'a' }, { t: '      ; Register eax := ' + A, col: DIM }],
-                [{ t: 'add ', e: 'op' }, { t: 'eax', col: WHITE }, { t: ', ', col: DIM }, { t: String(B), e: 'b' }, { t: '      ; eax := eax + ' + B, col: DIM }]
+                [{ t: 'mov ', col: WHITE }, { t: 'eax', col: WHITE }, { t: ', ', col: DIM }, { t: unset ? 'a' : String(A), e: 'a' }],
+                [{ t: 'add ', e: 'op' }, { t: 'eax', col: WHITE }, { t: ', ', col: DIM }, { t: unset ? 'b' : String(B), e: 'b' }]
             ];
             asmLines.forEach((line, i) => {
                 const al = reveal(0, easeT(phaseT * 2.4 - i * 1.0));
                 if (al <= 0.01) return;
                 ctx.save(); ctx.globalAlpha *= al;
-                ctx.font = Math.round(S * 20) + 'px "Courier New", monospace';
-                textRun(px + S * 24, y + S * 52 + i * S * 34, line);
+                ctx.font = '700 ' + Math.round(S * 26) + 'px "Courier New", monospace';
+                textRun(px + S * 24, y + S * 54 + i * S * 40, line);
                 ctx.restore();
             });
+            // plain-language explanation, right half of the box
+            ctx.save();
+            ctx.font = Math.round(S * 18) + 'px Arial, sans-serif';
+            ctx.fillStyle = 'rgba(255,255,255,0.80)';
+            ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+            [
+                'Der Compiler macht daraus zwei CPU-Befehle:',
+                'mov legt die erste Zahl ins Rechenregister eax,',
+                'add addiert die zweite dazu — eax enthält dann c.'
+            ].forEach((t, i) => ctx.fillText(t, px + pw * 0.58, y + S * 44 + i * S * 24));
+            ctx.restore();
             y += hAsm;
             flowArrow(y, 1, 'ASSEMBLER  kodiert');
             y += gap;
 
             // ---- 3) MASCHINENCODE ----
-            panel(px, y, pw, hMach, 'MASCHINENCODE  (Bytes, wie sie im Speicher liegen)');
+            panel(px, y, pw, hMach, '3  MASCHINENCODE  (Bytes, wie sie im Speicher liegen)');
+            helpHit3 = helpIcon(y);   // opcode table
             const rows = [
-                { op: 'B8', imm: immLE(A), e: 'a', label: 'mov eax,' + A },
-                { op: '05', imm: immLE(B), e: 'b', label: 'add eax,' + B }
+                { op: 'B8', opE: null, imm: unset ? [null, null, null, null] : immLE(A), e: 'a', label: 'mov' },
+                { op: '05', opE: 'op', imm: unset ? [null, null, null, null] : immLE(B), e: 'b', label: 'add' }
             ];
-            const byteW = Math.min(S * 92, (pw - S * 48) / 5.6);
+            const byteW = Math.min(S * 118, (pw - S * 48) / 5.6);
             rows.forEach((r, i) => {
                 const rowAl = reveal(1, easeT(phaseT * 2.4 - i * 1.0));
                 if (rowAl <= 0.01) return;
-                const ry = y + S * 44 + i * S * 50;
+                const ry = y + S * 44 + i * S * 76;
                 let bx = px + S * 24;
-                const all = [r.op].concat(r.imm.map(hex2));
+                const all = [r.op].concat(r.imm.map(v => v === null ? null : hex2(v)));
                 all.forEach((hb, j) => {
-                    const e = j === 0 ? 'op' : r.e;
+                    const e = j === 0 ? r.opE : r.e;
                     // pulse the value bytes while the CPU loads them into the adder
                     const loading = mode === 'journey' && !journeyDone && phase === 2 && j > 0;
                     const fillA = loading ? 0.14 + 0.16 * Math.abs(Math.sin(phaseT * 9)) : 0.14;
                     ctx.save();
                     ctx.globalAlpha *= rowAl * galpha(e);
-                    ctx.fillStyle = EDGE[e] + fillA + ')';
-                    ctx.strokeStyle = ECOL[e];
+                    const empty = hb === null;   // value byte not known yet
+                    const eEdge = e ? EDGE[e] : 'rgba(226,226,242,';
+                    const eCol = e ? ECOL[e] : 'rgba(235,235,245,0.9)';
+                    ctx.fillStyle = empty ? 'rgba(255,255,255,0.04)' : eEdge + fillA + ')';
+                    ctx.strokeStyle = empty ? 'rgba(255,255,255,0.22)' : eCol;
                     ctx.lineWidth = 1;
-                    ctx.beginPath(); ctx.roundRect(bx, ry, byteW - S * 6, S * 38, 6); ctx.fill(); ctx.stroke();
-                    ctx.fillStyle = ECOL[e];
-                    ctx.font = '700 ' + Math.round(S * 15) + 'px "Courier New", monospace';
+                    ctx.beginPath(); ctx.roundRect(bx, ry, byteW - S * 6, S * 62, 9); ctx.fill(); ctx.stroke();
+                    ctx.fillStyle = empty ? DIM : eCol;
+                    ctx.font = '700 ' + Math.round(S * 24) + 'px "Courier New", monospace';
                     ctx.textAlign = 'center';
-                    ctx.fillText(hb, bx + (byteW - S * 6) / 2, ry + S * 13);
+                    ctx.fillText(empty ? '–' : hb, bx + (byteW - S * 6) / 2, ry + S * 22);
                     ctx.fillStyle = DIM;
-                    ctx.font = Math.round(S * 9.5) + 'px "Courier New", monospace';
-                    ctx.fillText(parseInt(hb, 16).toString(2).padStart(8, '0'), bx + (byteW - S * 6) / 2, ry + S * 29);
+                    ctx.font = '700 ' + Math.round(S * 15) + 'px "Courier New", monospace';
+                    ctx.fillText(empty ? '········' : parseInt(hb, 16).toString(2).padStart(8, '0'), bx + (byteW - S * 6) / 2, ry + S * 47);
                     ctx.restore();
-                    if (rowAl > 0.5) {
-                        hits.push({ x: bx, y: ry, w: byteW - S * 6, h: S * 38, e: e });
-                        anchors[e].push({ x: bx + (byteW - S * 6) / 2, y: ry + S * 19 });
+                    if (rowAl > 0.5 && e && !empty) {
+                        hits.push({ x: bx, y: ry, w: byteW - S * 6, h: S * 62, e: e });
+                        anchors[e].push({ x: bx + (byteW - S * 6) / 2, y: ry + S * 31 });
                     }
                     bx += byteW;
                 });
-                ctx.save();
-                ctx.globalAlpha *= rowAl;
-                ctx.fillStyle = DIM;
-                ctx.font = Math.round(S * 11) + 'px Outfit, Arial';
-                ctx.textAlign = 'left';
-                if (!narrow) ctx.fillText(r.label + '   (Opcode + 4 Bytes, little endian)', bx + S * 8, ry + S * 19);
-                ctx.restore();
             });
+            // plain-language explanation, right of the byte rows
+            if (!narrow) {
+                ctx.save();
+                ctx.font = Math.round(S * 18) + 'px Arial, sans-serif';
+                ctx.fillStyle = 'rgba(255,255,255,0.80)';
+                ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+                [
+                    'Der Assembler kodiert jeden Befehl in 5 Bytes:',
+                    'erst der Befehl selbst (B8 = mov, 05 = add),',
+                    'dann die Zahl in 4 Bytes — kleinstes Byte zuerst.'
+                ].forEach((t, i) => ctx.fillText(t, px + pw * 0.58, y + S * 52 + i * S * 24));
+                ctx.restore();
+            }
             ctx.textAlign = 'left';
             y += hMach;
             flowArrow(y, 2, 'CPU  lädt die Bytes');
             y += gap;
 
             // ---- 4) ADDIERWERK ----
-            panel(px, y, pw, hAdd, 'ADDIERWERK  —  8 Volladdierer, Übertrag rieselt von rechts nach links');
+            panel(px, y, pw, hAdd, '4  ADDIERWERK  —  8 Volladdierer, Übertrag rieselt von rechts nach links');
+            helpHit = helpIcon(y);    // full-adder gates
             const cols = BITS;
-            const colW = Math.min(S * 96, (pw - S * 90) / cols);
+            const colW = (pw - S * 96) / cols;
             const x0 = px + pw - S * 30 - colW;      // bit 0 sits right
-            const rowA = y + S * 56, rowB = rowA + S * 34;
-            const rowGate = rowB + S * 52, rowSum = rowGate + S * 96;
-            ctx.font = '700 ' + Math.round(S * 12) + 'px Orbitron';
-            ctx.fillStyle = GREEN; ctx.fillText('a', px + S * 16, rowA + S * 10);
-            ctx.fillStyle = BLUE; ctx.fillText('b', px + S * 16, rowB + S * 10);
-            ctx.fillStyle = ORANGE; ctx.fillText('s', px + S * 16, rowSum + S * 10);
+            const rowA = y + S * 56, rowB = rowA + S * 42;
+            const rowGate = rowB + S * 58, rowSum = rowGate + S * 112;
+            // row labels: same size as the code line, hoverable, c only once the result exists
+            ctx.font = '700 ' + Math.round(S * 26) + 'px "Courier New", monospace';
+            const rowLabel = (txt, e, ry, col) => {
+                ctx.save();
+                ctx.globalAlpha *= galpha(e);
+                ctx.fillStyle = col;
+                ctx.fillText(txt, px + S * 16, ry + S * 15);
+                ctx.restore();
+                hits.push({ x: px + S * 8, y: ry - S * 12, w: S * 30, h: S * 34, e: e });
+            };
+            rowLabel('a', 'a', rowA, GREEN);
+            rowLabel('b', 'b', rowB, BLUE);
 
             for (let i = 0; i < cols; i++) {
                 const cxm = x0 - i * colW + colW / 2;
@@ -552,31 +713,31 @@
                 // bit value boxes a & b (clickable, colour-coded)
                 const drawBit = (val, ry, e, alpha) => {
                     if (alpha <= 0.01) return;
-                    const bw = S * 30;
+                    const bw = S * 42;
                     const bxx = cxm - bw / 2, byy = ry - S * 6;
                     ctx.save();
                     ctx.globalAlpha *= alpha * galpha(e);
                     ctx.fillStyle = val ? EDGE[e] + '0.30)' : 'rgba(255,255,255,0.06)';
-                    ctx.strokeStyle = val ? ECOL[e] : 'rgba(255,255,255,0.25)';
-                    ctx.lineWidth = 1.4;
-                    ctx.beginPath(); ctx.roundRect(bxx, byy, bw, S * 26, 6); ctx.fill(); ctx.stroke();
-                    ctx.fillStyle = val ? WHITE : DIM;
-                    ctx.font = '700 ' + Math.round(S * 15) + 'px "Courier New", monospace';
+                    ctx.strokeStyle = val ? ECOL[e] : 'rgba(255,255,255,0.45)';
+                    ctx.lineWidth = 1.6;
+                    ctx.beginPath(); ctx.roundRect(bxx, byy, bw, S * 34, 7); ctx.fill(); ctx.stroke();
+                    ctx.fillStyle = val ? WHITE : 'rgba(255,255,255,0.75)';
+                    ctx.font = '700 ' + Math.round(S * 20) + 'px "Courier New", monospace';
                     ctx.textAlign = 'center';
-                    ctx.fillText(String(val), cxm, byy + S * 13);
+                    ctx.fillText(val === null ? '–' : String(val), cxm, byy + S * 17);
                     ctx.restore();
                     if (alpha > 0.5) {
-                        bitHits.push({ x: bxx, y: byy, w: bw, h: S * 26, which: e, i });
-                        hits.push({ x: bxx, y: byy, w: bw, h: S * 26, e: e });
-                        anchors[e].push({ x: cxm, y: byy + S * 13 });
+                        bitHits.push({ x: bxx, y: byy, w: bw, h: S * 34, which: e, i });
+                        hits.push({ x: bxx, y: byy, w: bw, h: S * 34, e: e });
+                        anchors[e].push({ x: cxm, y: byy + S * 17 });
                     }
                 };
-                drawBit(t.a, rowA, 'a', abAl);
-                drawBit(t.b, rowB, 'b', abAl);
+                drawBit(unset ? null : t.a, rowA, 'a', abAl);
+                drawBit(unset ? null : t.b, rowB, 'b', abAl);
 
                 // full-adder gate box
                 const gAl = (mode === 'journey' && !journeyDone && phase < 2) ? 0.18 : 1;
-                const gw = colW - S * 10, gh = S * 76;
+                const gw = colW - S * 12, gh = S * 92;
                 const gx = cxm - gw / 2, gy = rowGate - S * 8;
                 ctx.save();
                 ctx.globalAlpha *= gAl * galpha('op');
@@ -584,18 +745,18 @@
                 ctx.strokeStyle = activeNow ? ORANGE : (done ? GREEN : 'rgba(255,255,255,0.22)');
                 ctx.lineWidth = activeNow ? 2 : 1.2;
                 ctx.beginPath(); ctx.roundRect(gx, gy, gw, gh, 8); ctx.fill(); ctx.stroke();
-                ctx.fillStyle = done || activeNow ? WHITE : DIM;
-                ctx.font = '700 ' + Math.round(S * 10.5) + 'px Orbitron';
+                ctx.fillStyle = done || activeNow ? WHITE : 'rgba(255,255,255,0.8)';
+                ctx.font = '700 ' + Math.round(S * 15) + 'px Arial, sans-serif';
                 ctx.textAlign = 'center';
-                ctx.fillText('VA ' + i, cxm, gy + S * 12);
-                ctx.font = Math.round(S * 10) + 'px "Courier New", monospace';
-                ctx.fillStyle = done ? DIM : 'rgba(255,255,255,0.3)';
-                ctx.fillText('XOR XOR', cxm, gy + S * 30);
-                ctx.fillText('AND AND OR', cxm, gy + S * 44);
+                ctx.fillText('VA ' + i, cxm, gy + S * 16);
+                ctx.font = '700 ' + Math.round(S * 13) + 'px "Courier New", monospace';
+                ctx.fillStyle = done ? DIM : 'rgba(255,255,255,0.55)';
+                ctx.fillText('XOR XOR', cxm, gy + S * 38);
+                ctx.fillText('AND AND OR', cxm, gy + S * 55);
                 if (done) {
                     ctx.fillStyle = GREEN;
-                    ctx.font = '700 ' + Math.round(S * 10) + 'px "Courier New", monospace';
-                    ctx.fillText('s=' + t.s + ' c=' + t.co, cxm, gy + S * 62);
+                    ctx.font = '700 ' + Math.round(S * 13) + 'px "Courier New", monospace';
+                    ctx.fillText('s=' + t.s + ' c=' + t.co, cxm, gy + S * 76);
                 }
                 ctx.restore();
                 if (gAl > 0.5) {
@@ -624,20 +785,20 @@
 
                 // sum bit
                 if (done) {
-                    const bw = S * 30;
+                    const bw = S * 42;
                     ctx.save();
                     ctx.globalAlpha *= galpha('c');
                     ctx.fillStyle = t.s ? 'rgba(245,194,66,0.28)' : 'rgba(255,255,255,0.06)';
-                    ctx.strokeStyle = t.s ? ORANGE : 'rgba(255,255,255,0.25)';
-                    ctx.lineWidth = 1.4;
-                    ctx.beginPath(); ctx.roundRect(cxm - bw / 2, rowSum - S * 6, bw, S * 26, 6); ctx.fill(); ctx.stroke();
-                    ctx.fillStyle = t.s ? WHITE : DIM;
-                    ctx.font = '700 ' + Math.round(S * 15) + 'px "Courier New", monospace';
+                    ctx.strokeStyle = t.s ? ORANGE : 'rgba(255,255,255,0.45)';
+                    ctx.lineWidth = 1.6;
+                    ctx.beginPath(); ctx.roundRect(cxm - bw / 2, rowSum - S * 6, bw, S * 34, 7); ctx.fill(); ctx.stroke();
+                    ctx.fillStyle = t.s ? WHITE : 'rgba(255,255,255,0.75)';
+                    ctx.font = '700 ' + Math.round(S * 20) + 'px "Courier New", monospace';
                     ctx.textAlign = 'center';
-                    ctx.fillText(String(t.s), cxm, rowSum + S * 7);
+                    ctx.fillText(String(t.s), cxm, rowSum + S * 11);
                     ctx.restore();
-                    hits.push({ x: cxm - bw / 2, y: rowSum - S * 6, w: bw, h: S * 26, e: 'c' });
-                    anchors.c.push({ x: cxm, y: rowSum + S * 7 });
+                    hits.push({ x: cxm - bw / 2, y: rowSum - S * 6, w: bw, h: S * 34, e: 'c' });
+                    anchors.c.push({ x: cxm, y: rowSum + S * 11 });
                 }
             }
             // carry-out of the last column = bit 8
@@ -653,27 +814,55 @@
             // bottom line: result — or journey narration
             ctx.textAlign = 'left';
             if (showC) {
-                ctx.font = '700 ' + Math.round(S * 16) + 'px Orbitron';
-                ctx.fillStyle = ORANGE;
+                ctx.save();
+                ctx.globalAlpha *= galpha('c');
+                ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+                const yb = y + hAdd - S * 24;
+                const fMain = '700 ' + Math.round(S * 26) + 'px "Courier New", monospace';
+                const fSub = '700 ' + Math.round(S * 15) + 'px "Courier New", monospace';
                 const sumBits = (sum > 255 ? '1' : '') + bits(sum & 255).slice().reverse().join('');
-                ctx.fillText(sumBits + '₂  =  ' + sum + '₁₀', px + S * 24, y + hAdd - S * 22);
+                let tx = px + S * 16;
+                ctx.fillStyle = ORANGE;
+                // hand-drawn subscripts: small font, slightly below the baseline
+                const seg = (main, sub) => {
+                    ctx.font = fMain; ctx.fillText(main, tx, yb); tx += ctx.measureText(main).width;
+                    if (sub) { ctx.font = fSub; ctx.fillText(sub, tx + S * 1, yb + S * 7); tx += ctx.measureText(sub).width + S * 4; }
+                };
+                seg('c = ' + sumBits, '2');
+                // arrow: the runtime (software!) renders the bits as decimal digits
+                const ax0 = tx + S * 16, ax1 = ax0 + S * 150, ay = yb - S * 9;
+                ctx.strokeStyle = 'rgba(255,255,255,0.82)'; ctx.fillStyle = 'rgba(255,255,255,0.82)';
+                ctx.lineWidth = 2;
+                ctx.beginPath(); ctx.moveTo(ax0, ay); ctx.lineTo(ax1 - S * 10, ay); ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(ax1, ay); ctx.lineTo(ax1 - S * 10, ay - S * 6); ctx.lineTo(ax1 - S * 10, ay + S * 6);
+                ctx.closePath(); ctx.fill();
+                ctx.font = '700 ' + Math.round(S * 13) + 'px Arial, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText('RUNTIME  zeigt an', (ax0 + ax1) / 2, ay + S * 18);
+                ctx.textAlign = 'left';
+                tx = ax1 + S * 16;
+                ctx.fillStyle = ORANGE;
+                seg(String(sum), '10');
+                hits.push({ x: px + S * 16, y: yb - S * 26, w: tx - px - S * 16, h: S * 40, e: 'c' });
+                ctx.restore();
             } else {
-                ctx.font = Math.round(S * 13) + 'px Outfit, Arial';
-                ctx.fillStyle = mode === 'journey' ? ORANGE : DIM;
-                ctx.fillText(mode === 'journey' ? PHASE_TEXT[phase]
-                    : 'ABSPIELEN: die ganze Reise vom Code bis zu den Gattern · SCHRITT: Addierer einzeln …',
-                    px + S * 24, y + hAdd - S * 22);
+                if (mode === 'journey') {
+                    ctx.font = '700 ' + Math.round(S * 17) + 'px Outfit, Arial';
+                    ctx.fillStyle = ORANGE;
+                    ctx.fillText(PHASE_TEXT[phase], px + S * 24, y + hAdd - S * 22);
+                }
             }
             y += hAdd + (showStrom ? gap : 0);
 
             // ---- 5) STROM-EPILOG (optional) ----
             if (showStrom) {
-                panel(px, y, pw, hStrom, 'UND PHYSISCH?  Ein Bit ist nur: Spannung an / aus');
+                panel(px, y, pw, hStrom, '5  UND PHYSISCH?  Ein Bit ist nur: Spannung an / aus');
                 const t0 = tr[0];
                 ctx.save();
                 ctx.globalAlpha *= galpha('a');
                 const lx = px + S * 30, lyy = y + hStrom * 0.62;
-                ctx.font = Math.round(S * 15) + 'px Outfit, Arial';
+                ctx.font = '700 ' + Math.round(S * 18) + 'px Outfit, Arial';
                 ctx.fillStyle = DIM;
                 ctx.textAlign = 'left';
                 ctx.fillText('Bit 0 von a gerade:', lx, lyy);
@@ -686,18 +875,18 @@
                 ctx.fillStyle = t0.a ? 'rgba(245,194,66,0.85)' : 'rgba(255,255,255,0.08)';
                 ctx.fill(); ctx.stroke();
                 ctx.fillStyle = t0.a ? 'rgb(14,36,78)' : DIM;
-                ctx.font = '700 ' + Math.round(S * 11) + 'px Orbitron';
+                ctx.font = '700 ' + Math.round(S * 11) + 'px Arial, sans-serif';
                 ctx.textAlign = 'center';
                 ctx.fillText(String(t0.a), swx + S * 100, lyy + S * 1);
                 ctx.textAlign = 'left';
                 ctx.fillStyle = DIM;
-                ctx.font = Math.round(S * 13) + 'px Outfit, Arial';
+                ctx.font = '700 ' + Math.round(S * 17) + 'px Outfit, Arial';
                 ctx.fillText(t0.a ? '≈ 1 Volt → „1"' : '≈ 0 Volt → „0"', swx + S * 130, lyy);
                 ctx.restore();
             }
 
             // the thread: hovered datum, connected across all levels
-            drawThread();
+            // drawThread();   // hover thread disabled for now (Doc 2026-08-19) — code kept
 
             // phase 4: the result travels back up into the source line
             if (mode === 'journey' && !journeyDone && phase === 4 && cAnchor && retFrom) {
@@ -718,7 +907,7 @@
                 const qy = q * q * sy + 2 * q * p * ((sy + ey) / 2) + p * p * ey;
                 ctx.fillStyle = ORANGE;
                 ctx.beginPath(); ctx.arc(qx, qy, S * 7, 0, 7); ctx.fill();
-                ctx.font = '700 ' + Math.round(S * 11) + 'px Orbitron';
+                ctx.font = '700 ' + Math.round(S * 11) + 'px Arial, sans-serif';
                 ctx.textAlign = 'left';
                 ctx.fillText('eax = ' + sum, qx + S * 12, qy);
                 ctx.restore();
@@ -727,37 +916,62 @@
 
         // ---------- interaction ----------
         function setVals(a, b) {
-            A = clamp(a); B = clamp(b);
-            document.getElementById('a-val').textContent = A;
-            document.getElementById('b-val').textContent = B;
+            A = a === null ? null : clamp(a); B = b === null ? null : clamp(b);
+            document.getElementById('a-val').textContent = A === null ? '–' : A;
+            document.getElementById('b-val').textContent = B === null ? '–' : B;
             stepIdx = -1; mode = 'idle'; journeyDone = false;
             draw();
         }
-        document.getElementById('a-minus').onclick = () => setVals(A - 1, B);
-        document.getElementById('a-plus').onclick = () => setVals(A + 1, B);
-        document.getElementById('b-minus').onclick = () => setVals(A, B - 1);
-        document.getElementById('b-plus').onclick = () => setVals(A, B + 1);
+        document.getElementById('a-minus').onclick = () => setVals(A === null ? 0 : A - 1, B);
+        document.getElementById('a-plus').onclick = () => setVals(A === null ? 1 : A + 1, B);
+        document.getElementById('b-minus').onclick = () => setVals(A, B === null ? 0 : B - 1);
+        document.getElementById('b-plus').onclick = () => setVals(A, B === null ? 1 : B + 1);
 
         document.getElementById('btn-step').onclick = () => {
+            if (A === null || B === null) return;   // nothing to compute yet
             mode = 'idle';
             if (stepIdx < BITS - 1) { stepIdx++; draw(); }
         };
         document.getElementById('btn-play').onclick = () => {
+            if (A === null || B === null) return;   // nothing to compute yet
             stepIdx = -1; journeyDone = false;
             mode = 'journey'; phase = 0; phaseT = 0;
         };
         document.getElementById('btn-reset').onclick = () => {
-            mode = 'idle'; journeyDone = false; stepIdx = -1; draw();
+            mode = 'idle'; journeyDone = false; stepIdx = -1;
+            setVals(null, null);   // back to the pristine "nothing chosen yet" state
         };
-        document.getElementById('chk-strom').onchange = e => { showStrom = e.target.checked; draw(); };
+        // ANSICHT toggles persist across reloads
+        const VIEW_KEY = 'einsundeins-view';
+        try {
+            const v = JSON.parse(localStorage.getItem(VIEW_KEY) || '{}');
+            showKI = !!v.ki; showStrom = !!v.strom;
+            document.getElementById('chk-ki').checked = showKI;
+            document.getElementById('chk-strom').checked = showStrom;
+        } catch (e) { /* corrupt storage: fall back to defaults */ }
+        const saveView = () => localStorage.setItem(VIEW_KEY, JSON.stringify({ ki: showKI, strom: showStrom }));
+        document.getElementById('chk-strom').onchange = e => { showStrom = e.target.checked; saveView(); draw(); };
+        document.getElementById('chk-ki').onchange = e => { showKI = e.target.checked; saveView(); draw(); };
 
         canvas.addEventListener('pointerdown', e => {
             const r = canvas.getBoundingClientRect();
             const mx = e.clientX - r.left, my = e.clientY - r.top;
+            if (helpHit && mx >= helpHit.x && mx <= helpHit.x + helpHit.w && my >= helpHit.y && my <= helpHit.y + helpHit.h) {
+                document.getElementById('va-help').style.display = 'flex';
+                return;
+            }
+            if (helpHit3 && mx >= helpHit3.x && mx <= helpHit3.x + helpHit3.w && my >= helpHit3.y && my <= helpHit3.y + helpHit3.h) {
+                document.getElementById('op-help').style.display = 'flex';
+                return;
+            }
+            if (helpHitA && mx >= helpHitA.x && mx <= helpHitA.x + helpHitA.w && my >= helpHitA.y && my <= helpHitA.y + helpHitA.h) {
+                document.getElementById('asm-help').style.display = 'flex';
+                return;
+            }
             for (const h of bitHits) {
                 if (mx >= h.x && mx <= h.x + h.w && my >= h.y && my <= h.y + h.h) {
-                    if (h.which === 'a') setVals(A ^ (1 << h.i), B);
-                    else setVals(A, B ^ (1 << h.i));
+                    if (h.which === 'a') setVals((A ?? 0) ^ (1 << h.i), B);
+                    else setVals(A, (B ?? 0) ^ (1 << h.i));
                     return;
                 }
             }
@@ -770,14 +984,25 @@
             for (const h of hits) {
                 if (mx >= h.x && mx <= h.x + h.w && my >= h.y && my <= h.y + h.h) { ne = h.e; break; }
             }
+            const inRect = (h) => h && mx >= h.x && mx <= h.x + h.w && my >= h.y && my <= h.y + h.h;
+            const overHelp = inRect(helpHit) || inRect(helpHit3) || inRect(helpHitA);
             if (ne !== hoverE) {
                 hoverE = ne;
-                canvas.style.cursor = ne ? 'pointer' : 'default';
                 if (mode !== 'journey') draw();
             }
+            canvas.style.cursor = (ne || overHelp) ? 'pointer' : 'default';
         });
         canvas.addEventListener('pointerleave', () => {
             if (hoverE) { hoverE = null; canvas.style.cursor = 'default'; if (mode !== 'journey') draw(); }
+        });
+
+        // hovering a/b in the sidebar highlights that entity across all levels
+        [['a-val', 'a'], ['b-val', 'b']].forEach(([id, e]) => {
+            const row = document.getElementById(id).closest('.num-row');
+            row.addEventListener('pointerenter', () => { hoverE = e; if (mode !== 'journey') draw(); });
+            row.addEventListener('pointerleave', () => {
+                if (hoverE === e) { hoverE = null; if (mode !== 'journey') draw(); }
+            });
         });
 
         // ---------- animation loop ----------
@@ -804,6 +1029,15 @@
 
         window.addEventListener('resize', init);
         document.fonts.ready.then(init);
+
+        // the floating branding is injected after our first draw and shifts the layout —
+        // redraw once it appears so nothing jumps on the first hover
+        if (!document.querySelector('.canvas-branding')) {
+            const mo = new MutationObserver(() => {
+                if (document.querySelector('.canvas-branding')) { mo.disconnect(); init(); }
+            });
+            mo.observe(document.body, { childList: true, subtree: true });
+        }
     </script>
 </body>
 
