@@ -16,6 +16,10 @@
 })();
 
 (function () {
+    // TEMP (2026-08-19, Doc): gate disabled — set GATE_OFF to false to re-enable.
+    const GATE_OFF = true;
+    if (GATE_OFF) return;
+
     const HASH = '517ac27fb0b499ddd50da49532cc40d47d4d36a9a49a43e1558f16eec5cbeda4';
     const KEY = 'svp-gate';
 
