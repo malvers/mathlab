@@ -168,7 +168,10 @@
 
   const DB_URL = 'https://fyfhxzyymmurlaenmzse.supabase.co';
   const DB_KEY = 'sb_publishable_ubQDiMD-X3N0vZvPVi229Q_-5Zootfk'; /* publishable key - public by design */
-  const QUIZ_ID = 'infotest9-v8'; /* new question set -> fresh counters */
+  const PARAMS = new URLSearchParams(location.search);
+  /* ?test = demo mode: separate data pool, key r, unlimited submits */
+  const TEST_MODE = PARAMS.has('test');
+  const QUIZ_ID = TEST_MODE ? 'infotest9-test' : 'infotest9-v9';
   /* soft lock against double submits per browser; tied to QUIZ_ID so a new
      quiz version automatically resets the lock */
   const DONE_KEY = 'done-' + QUIZ_ID;
@@ -422,7 +425,7 @@
      plus aggregated per-question counters. */
   function sendStats(score) {
     const avgEl = document.getElementById('classavg');
-    const alreadyDone = localStorage.getItem(DONE_KEY) === '1';
+    const alreadyDone = !TEST_MODE && localStorage.getItem(DONE_KEY) === '1';
     const call = alreadyDone
       ? fetch(DB_URL + '/rest/v1/quiz_stats?quiz=eq.' + QUIZ_ID + '&order=q', {
           headers: { apikey: DB_KEY, Authorization: 'Bearer ' + DB_KEY }
@@ -444,7 +447,7 @@
 
     call.then(function (res) {
       if (!res.ok) throw new Error('HTTP ' + res.status);
-      if (!alreadyDone) localStorage.setItem(DONE_KEY, '1');
+      if (!alreadyDone && !TEST_MODE) localStorage.setItem(DONE_KEY, '1');
       return res.json();
     }).then(function (rows) {
       showAverage(rows, avgEl);
@@ -583,13 +586,13 @@
     el.innerHTML = html || 'Noch keine Daten.';
   }
 
-  if (new URLSearchParams(location.search).has('auswertung')) {
+  if (PARAMS.has('auswertung')) {
     initDashboard();
   } else {
     submitBtn.addEventListener('click', submit);
     render();
     /* Demo helper (?test): key r fills a random answer set, ~95% correct. */
-    if (new URLSearchParams(location.search).has('test')) {
+    if (TEST_MODE) {
       document.addEventListener('keydown', function (e) {
         if (e.key !== 'r' || locked) return;
         QUESTIONS.forEach(function (item, qi) {
