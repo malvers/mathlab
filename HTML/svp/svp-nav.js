@@ -71,7 +71,7 @@
     const pencil = document.createElement('a');
     pencil.className = 'badge b-grey nav-edit';
     pencil.href = '#';
-    pencil.textContent = '✎';
+    pencil.textContent = '⚙';
     pencil.title = 'Pillen ein-/ausblenden';
     editWrap.appendChild(pencil);
 
