@@ -268,9 +268,59 @@
         ref.matTd.appendChild(btn);
     }
 
+    // --- Drag&drop tracing via the central DebugWindow (?debug) ----------
+    // Loads js/debug-window.js on demand; site root serves HTML/ so the
+    // absolute path works on localhost:8765 and docalvers.de alike.
+    const MAT_DEBUG = new URLSearchParams(location.search).has('debug');
+    let dbgQueue = [];
+    function dbg(msg) {
+        if (!MAT_DEBUG) return;
+        if (window.DebugWindow) DebugWindow.log(msg);
+        else if (dbgQueue) dbgQueue.push(msg);
+    }
+    if (MAT_DEBUG) {
+        const s = document.createElement('script');
+        s.src = '/js/debug-window.js';
+        s.onload = function () {
+            DebugWindow.init();
+            dbgQueue.forEach(function (m) { DebugWindow.log(m); });
+            dbgQueue = null;
+        };
+        document.head.appendChild(s);
+        dbg('svp material: eingeloggt=' + CAN_EDIT_MAT + ' · Zeilen=' + window.PLAN.length);
+        let lastDocLog = 0;
+        document.addEventListener('dragover', function (e) {
+            const now = Date.now();
+            if (now - lastDocLog < 1000) return;
+            lastDocLog = now;
+            const t = e.target;
+            dbg('doc dragover über <' + t.tagName.toLowerCase() +
+                (t.className ? ' .' + String(t.className).split(' ')[0] : '') + '>');
+        });
+        document.addEventListener('drop', function (e) {
+            dbg('doc drop über <' + e.target.tagName.toLowerCase() + '> types=' +
+                Array.from(e.dataTransfer.types).join(','));
+        }, true);
+    }
+
+    // Brief inline feedback under the cell when a drop cannot be used.
+    function matToast(td, msg) {
+        const old = td.querySelector('.mat-toast');
+        if (old) old.remove();
+        const t = document.createElement('span');
+        t.className = 'mat-toast';
+        t.textContent = msg;
+        td.appendChild(t);
+        setTimeout(function () { t.remove(); }, 3000);
+    }
+
     function wireMaterialDrop(ref) {
         if (!CAN_EDIT_MAT) return;
         const td = ref.matTd;
+        td.addEventListener('dragenter', function (e) {
+            dbg('Zelle ' + ref.i + ' dragenter · types=' +
+                Array.from(e.dataTransfer.types).join(','));
+        });
         td.addEventListener('dragover', function (e) {
             e.preventDefault();
             td.classList.add('drop');
@@ -280,9 +330,18 @@
             e.preventDefault();
             e.stopPropagation();
             td.classList.remove('drop');
-            const url = (e.dataTransfer.getData('text/uri-list') ||
-                e.dataTransfer.getData('text/plain') || '').split('\n')[0].trim();
-            if (!/^https?:\/\//.test(url)) return;
+            const uri = e.dataTransfer.getData('text/uri-list');
+            const plain = e.dataTransfer.getData('text/plain');
+            dbg('Zelle ' + ref.i + ' DROP · uri="' + uri + '" · plain="' + plain +
+                '" · files=' + (e.dataTransfer.files ? e.dataTransfer.files.length : 0));
+            const url = (uri || plain || '').split('\n')[0].trim();
+            if (!/^https?:\/\//.test(url)) {
+                // A file drag (OneDrive tile, Finder) carries no share URL.
+                matToast(td, e.dataTransfer.files && e.dataTransfer.files.length
+                    ? 'Datei-Drop geht nicht — bitte den LINK ziehen (oder + nutzen)'
+                    : 'Kein Link erkannt — bitte eine https://…-Adresse ziehen');
+                return;
+            }
             saveMaterial(ref, (td.dataset.src || '') + ' ' + url);
         });
     }
