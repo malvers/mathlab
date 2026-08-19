@@ -298,6 +298,9 @@ nav.quick-nav a.nav-edit { cursor: pointer; }
 .nav-edit-panel .ep-item input {
     appearance: none;
     -webkit-appearance: none;
+    /* UA stylesheet pins input color (FieldText) — force-inherit the row's
+       subject colour so currentColor below really is orange/green/... */
+    color: inherit;
     flex: none;
     position: relative;
     width: 20px;
@@ -309,18 +312,19 @@ nav.quick-nav a.nav-edit { cursor: pointer; }
     cursor: pointer;
 }
 
+/* Checked: box filled in the subject colour, dark tick optically centred */
 .nav-edit-panel .ep-item input:checked { background: currentColor; }
 
 .nav-edit-panel .ep-item input:checked::after {
     content: '';
     position: absolute;
-    left: 6px;
-    top: 2.5px;
+    left: 50%;
+    top: 50%;
     width: 5px;
     height: 10px;
     border: solid var(--panel);
     border-width: 0 2.2px 2.2px 0;
-    transform: rotate(43deg);
+    transform: translate(-50%, -58%) rotate(43deg);
 }
 
 /* Pill exactly as tall as its checkbox */
@@ -333,6 +337,8 @@ nav.quick-nav a.nav-edit { cursor: pointer; }
 
 .nav-edit-panel .badge { cursor: pointer; opacity: 0.55; user-select: none; }
 .nav-edit-panel .badge.on { opacity: 1; outline: 1px solid currentColor; }
+/* Current page's pill: fatter border */
+.nav-edit-panel .badge.active { outline: 2px solid currentColor; }
 
 /* Old per-page back-link retired 2026-08-11; the quick-nav's ← button that
    replaced it is gone too (2026-08-19) — browser back does the job */

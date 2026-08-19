@@ -97,6 +97,8 @@
 
         const t = document.createElement('span');
         t.className = 'badge ' + cls + (hidden.has(href) ? '' : ' on');
+        // Mark the current page's pill so it can carry a fatter border.
+        if (pills[href].classList.contains('active')) t.classList.add('active');
         t.textContent = longLabel || label;
 
         box.addEventListener('change', function () {
