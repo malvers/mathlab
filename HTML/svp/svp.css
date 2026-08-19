@@ -184,9 +184,6 @@ nav.quick-nav {
    Orbitron gives taller boxes to labels with umlauts/descenders */
 nav.quick-nav .badge { text-decoration: none; line-height: 14px; }
 
-/* Back pill left of the Start pill */
-nav.quick-nav a.nav-back { color: var(--cyan); }
-
 /* Central school-year line above the pill row (injected by svp-nav.js) */
 .nav-year {
     text-align: center;
@@ -273,10 +270,72 @@ nav.quick-nav a.nav-edit { cursor: pointer; }
     max-width: min(340px, 86vw);
 }
 
-.nav-edit-panel .badge { cursor: pointer; opacity: 0.3; user-select: none; }
+/* Pill toggles as one spelled-out row each: checkbox + pill, left aligned */
+.nav-edit-panel .ep-list {
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    gap: 3px;
+    max-height: min(58vh, 520px);
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+.nav-edit-panel .ep-item {
+    display: flex;
+    background: transparent;   /* the colour class here only tints the checkbox */
+    align-items: center;
+    gap: 9px;
+    padding: 2px 4px;
+    border-radius: 7px;
+    cursor: pointer;
+}
+
+.nav-edit-panel .ep-item:hover { background: rgba(170, 190, 220, 0.07); }
+
+/* Own checkbox instead of the OS one: same rounded corners as the pill, in the
+   subject colour, with a hand-drawn tick (accent-color can't do the tick hue) */
+.nav-edit-panel .ep-item input {
+    appearance: none;
+    -webkit-appearance: none;
+    flex: none;
+    position: relative;
+    width: 20px;
+    height: 20px;
+    margin: 0;
+    border: 1.5px solid currentColor;
+    border-radius: 6px;
+    background: transparent;
+    cursor: pointer;
+}
+
+.nav-edit-panel .ep-item input:checked { background: currentColor; }
+
+.nav-edit-panel .ep-item input:checked::after {
+    content: '';
+    position: absolute;
+    left: 6px;
+    top: 2.5px;
+    width: 5px;
+    height: 10px;
+    border: solid var(--panel);
+    border-width: 0 2.2px 2.2px 0;
+    transform: rotate(43deg);
+}
+
+/* Pill exactly as tall as its checkbox */
+.nav-edit-panel .ep-item .badge {
+    display: inline-flex;
+    align-items: center;
+    height: 20px;
+    text-align: left;
+}
+
+.nav-edit-panel .badge { cursor: pointer; opacity: 0.55; user-select: none; }
 .nav-edit-panel .badge.on { opacity: 1; outline: 1px solid currentColor; }
 
-/* Old per-page back-link retired 2026-08-11 — the quick-nav's ← button replaces it */
+/* Old per-page back-link retired 2026-08-11; the quick-nav's ← button that
+   replaced it is gone too (2026-08-19) — browser back does the job */
 a.back-link {
     display: none;
     font-family: 'Orbitron', sans-serif;
