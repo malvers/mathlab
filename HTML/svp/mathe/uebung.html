@@ -32,6 +32,22 @@
 
         .sheet-head .motto .hint { color: var(--muted); font-size: 0.85em; }
 
+        /* the subject is editable in place — click and type (e.g. Englisch) */
+        #fach-short {
+            cursor: text;
+            padding: 0 0.12em;
+            border-radius: 3px;
+            border-bottom: 1px dashed rgba(245, 194, 66, 0.5);
+            outline: none;
+        }
+
+        #fach-short:hover { background: rgba(245, 194, 66, 0.12); }
+
+        #fach-short:focus {
+            background: rgba(245, 194, 66, 0.18);
+            border-bottom-color: rgb(245, 194, 66);
+        }
+
         .sheet-head .klasse-line {
             margin-top: 4px;
             font-size: 0.9rem;
@@ -279,6 +295,8 @@
             h1 { font-size: 14pt; margin-bottom: 1mm; }
             .sheet-head .motto { font-size: 10pt; color: #111; margin-top: 1mm; }
             .sheet-head .motto .hint { color: #555; }
+            /* no edit affordance on the printed sheet */
+            #fach-short { border-bottom: none; background: none; }
             .sheet-head .klasse-line { color: #444; font-size: 8.5pt; }
 
             /* 0.5mm Luft rechts, damit die kollabierte Außenlinie garantiert
@@ -405,7 +423,9 @@
         <img class="ibb-logo" src="../ibb-logo.svg" alt="IBB Berufliche Schulen">
         <h1>&Uuml;bung macht den Meister</h1>
         <div class="motto">
-            &bdquo;Ich habe <b>mindestens 20&nbsp;Minuten</b> <span id="fach-short">Mathe</span> ge&uuml;bt.&ldquo;
+            &bdquo;Ich habe <b>mindestens 20&nbsp;Minuten</b> <span id="fach-short" contenteditable="true"
+                spellcheck="false" role="textbox" aria-label="Fach &auml;ndern"
+                title="Klicken und Fach eintragen (z.&nbsp;B. Englisch)">Mathematik</span> ge&uuml;bt.&ldquo;
             <span class="hint">&rarr; pro Tag ein Kreuz</span>
         </div>
         <div class="klasse-line" id="klasse-line"></div>
@@ -541,6 +561,15 @@
             catch (e) { return {}; }
         }
 
+        // Line under the motto. The subject part follows the editable word;
+        // the 06.05.2027 date is the maths Abitur and stays as it is.
+        function klasseLineText(klasse) {
+            return FACH + ' · Klasse ' + klasse + ' · Schuljahr 2026/27 · ' +
+                (klasse === '13'
+                    ? 'KW 34 bis zum Abitur (Prüfung Mathe 06.05.2027, KW 18)'
+                    : 'KW 34/2026 – KW 27/2027 (letzter Schultag Fr 09.07.2027)');
+        }
+
         function render(klasse) {
             // body.k<klasse> drives class-specific print sizing (13 = larger rows)
             document.body.classList.remove('k11', 'k12', 'k13');
@@ -582,11 +611,7 @@
             }
             document.getElementById('weeks').innerHTML = rows.join('');
 
-            document.getElementById('klasse-line').textContent =
-                FACH_LONG + ' · Klasse ' + klasse + ' · Schuljahr 2026/27 · ' +
-                (klasse === '13'
-                    ? 'KW 34 bis zum Abitur (Prüfung Mathe 06.05.2027, KW 18)'
-                    : 'KW 34/2026 – KW 27/2027 (letzter Schultag Fr 09.07.2027)');
+            document.getElementById('klasse-line').textContent = klasseLineText(klasse);
 
             document.querySelectorAll('.toolbar [data-k]').forEach(b =>
                 b.setAttribute('aria-pressed', b.dataset.k === klasse ? 'true' : 'false'));
@@ -779,13 +804,65 @@
         let current = ['11', '12', '13'].indexOf(urlK) > -1 ? urlK
             : (localStorage.getItem('svp-uebung-klasse') || '11');
 
-        // Subject comes from ?fach=… (e.g. ?fach=Englisch); default is Mathe.
-        // Short form goes into the motto, long form into the class line + title.
-        const FACH = new URLSearchParams(location.search).get('fach') || 'Mathe';
-        const FACH_LONG = FACH === 'Mathe' ? 'Mathematik' : FACH;
-        const fachQS = FACH === 'Mathe' ? '' : '&fach=' + encodeURIComponent(FACH);
-        document.getElementById('fach-short').textContent = FACH;
-        document.title = 'Übung macht den Meister | ' + FACH_LONG + ' SJ 2026/27';
+        // Subject: ?fach=… (QR deep link) wins, then the locally edited value,
+        // then Mathematik. The word in the motto is contenteditable — typing
+        // there updates class line, title, URL and QR link. Same spelled-out
+        // form everywhere ('Mathe' from older links expands to 'Mathematik').
+        const FACH_DEFAULT = 'Mathematik';
+        const fachEl = document.getElementById('fach-short');
+        let FACH = new URLSearchParams(location.search).get('fach')
+            || localStorage.getItem('svp-uebung-fach') || FACH_DEFAULT;
+        if (FACH === 'Mathe') FACH = FACH_DEFAULT;
+        let fachQS;
+
+        // Derives everything that carries the subject. Never touches fachEl's own
+        // text — that would kill the caret while typing.
+        function applyFach() {
+            fachQS = FACH === FACH_DEFAULT ? '' : '&fach=' + encodeURIComponent(FACH);
+            document.title = 'Übung macht den Meister | ' + FACH + ' SJ 2026/27';
+            const line = document.getElementById('klasse-line');
+            if (line.textContent) line.textContent = klasseLineText(current);
+        }
+        fachEl.textContent = FACH;
+        applyFach();
+
+        // Live: the class line under the motto follows every keystroke.
+        fachEl.addEventListener('input', function () {
+            FACH = (fachEl.textContent || '').replace(/\s+/g, ' ').trim() || FACH_DEFAULT;
+            applyFach();
+        });
+
+        // Keep the pasted text plain — contenteditable would swallow markup.
+        fachEl.addEventListener('paste', function (e) {
+            e.preventDefault();
+            const t = (e.clipboardData || window.clipboardData).getData('text');
+            document.execCommand('insertText', false, t.replace(/\s+/g, ' ').trim());
+        });
+
+        // Escape restores what was there when the field got focus — FACH itself
+        // has already moved on, because input updates it live.
+        let fachBefore = FACH;
+        fachEl.addEventListener('focus', function () { fachBefore = FACH; });
+
+        fachEl.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') { e.preventDefault(); fachEl.blur(); }
+            if (e.key === 'Escape') {
+                FACH = fachBefore;
+                fachEl.textContent = FACH;
+                applyFach();
+                fachEl.blur();
+            }
+        });
+
+        // Leaving the field is the commit: clamp, store, update URL + QR link.
+        fachEl.addEventListener('blur', function () {
+            const v = (fachEl.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 24);
+            FACH = v || FACH_DEFAULT;
+            fachEl.textContent = FACH;
+            localStorage.setItem('svp-uebung-fach', FACH);
+            applyFach();
+            history.replaceState(null, '', '?k=' + current + fachQS);
+        });
 
         function setKlasse(k) {
             current = k;
@@ -827,6 +904,8 @@
         // (week 34 Mo–Fr, then week 35, …) like real usage over the year.
         document.addEventListener('keydown', function (e) {
             if (e.metaKey || e.ctrlKey || e.altKey) return;
+            // typing the subject must not trigger the debug fill
+            if (e.target.isContentEditable) return;
             if (e.key === 'b' || e.key === 'B') { fireworks(); return; } // debug: fireworks
             const cent = e.key === 'c' || e.key === 'C';
             if (!cent && (e.key < '0' || e.key > '9')) return;
