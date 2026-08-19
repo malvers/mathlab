@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Operatoren | Stoffverteilungspl&auml;ne</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript>
+        <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+            rel="stylesheet">
+    </noscript>
+    <link rel="icon" type="image/png" href="../resources/favicon.png">
+    <link rel="stylesheet" href="svp.css">
+    <script src="svp-gate.js"></script>
+    <style>
+        /* Operator cards: one collapsible card per Anforderungsbereich,
+           same look as the concept cards on konzepte.html */
+        .op-list {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            gap: 14px;
+        }
+
+        .op-card {
+            background: var(--card-soft);
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            padding: 14px 16px;
+        }
+
+        .op-head {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            cursor: pointer;
+        }
+
+        .op-chev {
+            color: var(--muted);
+            font-size: 0.95rem;
+            padding-top: 2px;
+            transition: transform 0.15s;
+        }
+
+        .op-card.open .op-chev { transform: rotate(90deg); }
+
+        .op-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.95rem;
+            letter-spacing: 0.03em;
+        }
+
+        .op-card.afb1 .op-title { color: var(--phi); }
+        .op-card.afb2 .op-title { color: var(--lambda); }
+        .op-card.afb3 .op-title { color: rgb(235, 120, 105); }
+
+        .op-sub {
+            font-size: 0.82rem;
+            color: var(--muted);
+            margin-top: 3px;
+        }
+
+        .op-card:not(.open) .op-body { display: none; }
+
+        .op-body {
+            padding: 10px 2px 2px 26px;
+            line-height: 1.5;
+            font-size: 0.95rem;
+        }
+
+        /* Operator table: term column + description column */
+        .op-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .op-table td {
+            padding: 7px 10px;
+            border-top: 1px solid var(--row-line);
+            vertical-align: top;
+        }
+
+        .op-table tr:first-child td { border-top: none; }
+
+        .op-table td.op-name {
+            font-weight: 600;
+            white-space: nowrap;
+            width: 1%;
+        }
+
+        .op-card.afb1 td.op-name { color: var(--phi); }
+        .op-card.afb2 td.op-name { color: var(--lambda); }
+        .op-card.afb3 td.op-name { color: rgb(235, 120, 105); }
+
+        html.svp-light .op-card.afb3 .op-title,
+        html.svp-light .op-card.afb3 td.op-name { color: var(--ypsilon); }
+
+        .op-table strong { font-weight: 600; }
+
+        @media (max-width: 560px) {
+            .op-table td.op-name { white-space: normal; }
+        }
+
+        @media print {
+            .op-card:not(.open) .op-body { display: block; }
+            .op-chev { display: none; }
+        }
+    </style>
+</head>
+
+<body>
+    <header class="page-head">
+        <a class="back-link" href="./">&larr; &Uuml;bersicht</a>
+        <h1>Operatoren</h1>
+        <div class="subtitle">Operatorenliste &middot; drei Anforderungsbereiche (AFB I&ndash;III)</div>
+    </header>
+
+    <div class="op-list">
+        <section class="op-card afb1 open" id="afb1">
+            <div class="op-head" onclick="this.parentElement.classList.toggle('open')">
+                <span class="op-chev">&#9656;</span>
+                <div>
+                    <div class="op-title">AFB I &mdash; Reproduktion</div>
+                    <div class="op-sub">Einfache Reproduktion von Wissen und Informationen aus Materialien</div>
+                </div>
+            </div>
+            <div class="op-body">
+                <table class="op-table">
+                    <tr>
+                        <td class="op-name">nennen</td>
+                        <td>Informationen aufgrund von gelerntem Wissen oder vorgegebenem Material
+                            <strong>unkommentiert angeben</strong></td>
+                    </tr>
+                    <tr>
+                        <td class="op-name">wiedergeben</td>
+                        <td>Gelerntes, Erarbeitetes oder aus vorgegebenem Material Entnommenes mit eigenen
+                            Worten darlegen und dabei <strong>zusammenfassen</strong></td>
+                    </tr>
+                    <tr>
+                        <td class="op-name">darstellen</td>
+                        <td>einen Sachverhalt (Gegenst&auml;nde, Abl&auml;ufe) mit <strong>Text, Diagramm,
+                            Tabelle</strong> usw. <strong>ausf&uuml;hrlich wiedergeben</strong></td>
+                    </tr>
+                    <tr>
+                        <td class="op-name">skizzieren</td>
+                        <td>in groben Z&uuml;gen das <strong>Wichtigste verdeutlichen</strong>, einen
+                            <strong>&Uuml;berblick geben</strong></td>
+                    </tr>
+                    <tr>
+                        <td class="op-name">beschreiben</td>
+                        <td><strong>Reproduktion von Merkmalen</strong> eines Lerngegenstandes</td>
+                    </tr>
+                    <tr>
+                        <td class="op-name">kennzeichnen</td>
+                        <td><strong>wesentliche Aspekte</strong>, Typisches / Auff&auml;lliges
+                            <strong>herausstellen</strong>, ggf. veranschaulichen</td>
+                    </tr>
+                    <tr>
+                        <td class="op-name">definieren</td>
+                        <td>einen <strong>Begriff exakt bestimmen</strong>, um ihn von anderen
+                            <strong>abzugrenzen</strong></td>
+                    </tr>
+                </table>
+            </div>
+        </section>
+
+        <section class="op-card afb2 open" id="afb2">
+            <div class="op-head" onclick="this.parentElement.classList.toggle('open')">
+                <span class="op-chev">&#9656;</span>
+                <div>
+                    <div class="op-title">AFB II &mdash; Zusammenh&auml;nge</div>
+                    <div class="op-sub">Zusammenh&auml;nge darstellen</div>
+                </div>
+            </div>
+            <div class="op-body">
+                <table class="op-table">
+                    <tr>
+                        <td class="op-name">gliedern</td>
+                        <td>Informationen in eine <strong>logische Ordnung</strong> bringen</td>
+                    </tr>
+                    <tr>
+                        <td class="op-name">&uuml;bertragen</td>
+                        <td>Bekanntes / Vorgegebenes <strong>auf ein anderes Beispiel anwenden</strong></td>
+                    </tr>
+                    <tr>
+                        <td class="op-name">ein- und zuordnen</td>
+                        <td>einfache <strong>Zusammenh&auml;nge verdeutlichen</strong></td>
+                    </tr>
+                    <tr>
+                        <td class="op-name">gegen&uuml;berstellen</td>
+                        <td>Informationen / Sachverhalte nach einem Kriterium <strong>beschreibend</strong> in
+                            zwei Spalten ordnen</td>
+                    </tr>
+                    <tr>
+                        <td class="op-name">vergleichen</td>
+                        <td><strong>Erfassen und Gegen&uuml;berstellen</strong> von Gemeinsamkeiten und
+                            Unterschieden <strong>nach Vergleichskriterien</strong> und Ableiten von
+                            Schlussfolgerungen</td>
+                    </tr>
+                    <tr>
+                        <td class="op-name">erkl&auml;ren / erl&auml;utern</td>
+                        <td><strong>Darstellung</strong> des Lerngegenstandes <strong>in seinem
+                            Zusammenhang</strong></td>
+                    </tr>
+                </table>
+            </div>
+        </section>
+
+        <section class="op-card afb3 open" id="afb3">
+            <div class="op-head" onclick="this.parentElement.classList.toggle('open')">
+                <span class="op-chev">&#9656;</span>
+                <div>
+                    <div class="op-title">AFB III &mdash; Transfer</div>
+                    <div class="op-sub">Transferbereich</div>
+                </div>
+            </div>
+            <div class="op-body">
+                <table class="op-table">
+                    <tr>
+                        <td class="op-name">ableiten</td>
+                        <td>auf der Grundlage vorhandener Ergebnisse eigene <strong>Schlussfolgerungen
+                            ziehen</strong></td>
+                    </tr>
+                    <tr>
+                        <td class="op-name">untersuchen, analysieren</td>
+                        <td>an Material oder Information <strong>gezielte Fragen stellen</strong>, diese
+                            <strong>beantworten</strong> und die <strong>Antworten begr&uuml;nden</strong></td>
+                    </tr>
+                    <tr>
+                        <td class="op-name">pr&uuml;fen, &uuml;berpr&uuml;fen</td>
+                        <td>vorgegebene These oder Hypothese / Erkl&auml;rung an Fakten oder <strong>innerer
+                            Logik</strong> messen, <strong>Widerspr&uuml;che erkennen</strong></td>
+                    </tr>
+                    <tr>
+                        <td class="op-name">begr&uuml;nden</td>
+                        <td>in <strong>zusammenh&auml;ngender Darstellung</strong> komplexen
+                            <strong>Grundgedanken argumentativ entwickeln</strong> (auch unter Verwendung von
+                            Material), entscheidend ist der <strong>schl&uuml;ssige, folgerichtige
+                            Gedankengang</strong></td>
+                    </tr>
+                    <tr>
+                        <td class="op-name">beurteilen</td>
+                        <td><strong>Hypothesen</strong> oder <strong>Behauptungen im Zusammenhang
+                            pr&uuml;fen</strong> und eine Aussage &uuml;ber deren Richtigkeit, Angemessenheit
+                            usw. machen</td>
+                    </tr>
+                    <tr>
+                        <td class="op-name">bewerten, deuten</td>
+                        <td><strong>fordert &uuml;ber &bdquo;beurteilen&ldquo; hinaus pers&ouml;nlichen
+                            Wertebezug</strong> &mdash; da eine solche Entscheidung nicht immer verbindlich und
+                            allgemein sein kann, m&uuml;ssen Pluralit&auml;t und Toleranz gew&auml;hrleistet
+                            sein</td>
+                    </tr>
+                    <tr>
+                        <td class="op-name">diskutieren, er&ouml;rtern</td>
+                        <td>zu einer vorgegebenen Problemstellung <strong>eigene Gedanken entwickeln</strong>
+                            und zu einem ausgewogenen <strong>Sachurteil</strong> f&uuml;hren, dabei
+                            <strong>verschiedene Standpunkte auff&uuml;hren</strong> und
+                            <strong>begr&uuml;nden</strong> (Argumente, Beispiele)</td>
+                    </tr>
+                </table>
+            </div>
+        </section>
+    </div>
+
+    <footer class="page-foot">
+        Karte anklicken &rarr; Bereich auf-/zuklappen; beim Drucken werden alle Bereiche ausgeklappt.
+    </footer>
+    <script src="svp-nav.js"></script>
+</body>
+
+</html>
