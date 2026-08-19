@@ -656,6 +656,24 @@
         grid.insertAdjacentElement('afterend', panel);
         let openKey = null;
 
+        // Which card is open is remembered per page, per browser.
+        const STORE_KEY = 'svp-lb-open:' + location.pathname;
+        function remember(key) {
+            try {
+                if (key) localStorage.setItem(STORE_KEY, key);
+                else localStorage.removeItem(STORE_KEY);
+            } catch (e) { }
+        }
+
+        // Chevron marks the cards as expandable, matching the plan rows.
+        cards.forEach(card => {
+            card.classList.add('expandable');
+            const chev = document.createElement('span');
+            chev.className = 'chev';
+            chev.textContent = '▸';
+            card.insertBefore(chev, card.firstChild);
+        });
+
         closeLbPanel = function () {
             openKey = null;
             panel.hidden = true;
@@ -671,14 +689,8 @@
                 ') bis Woche ' + last.nr + ' (' + last.date + ')';
         }
 
-        cards.forEach(card => card.addEventListener('click', () => {
+        function showCard(card) {
             const key = card.dataset.lb;
-            if (openKey === key) {
-                openKey = null;
-                panel.hidden = true;
-                cards.forEach(c => c.classList.remove('open'));
-                return;
-            }
             openKey = key;
             if (closeBridgePanel) closeBridgePanel();
             cards.forEach(c => c.classList.toggle('open', c === card));
@@ -715,10 +727,25 @@
             }
             panel.appendChild(foot);
             panel.hidden = false;
+        }
+
+        cards.forEach(card => card.addEventListener('click', () => {
+            if (openKey === card.dataset.lb) {
+                closeLbPanel();
+                remember(null);
+                return;
+            }
+            showCard(card);
+            remember(card.dataset.lb);
         }));
 
-        // First Lernbereich starts open.
-        cards[0].click();
+        // Nothing opens by default — restore the card left open last time.
+        let stored = null;
+        try { stored = localStorage.getItem(STORE_KEY); } catch (e) { }
+        if (stored) {
+            const card = [...cards].find(c => c.dataset.lb === stored);
+            if (card) showCard(card);
+        }
     })();
 
     // --- Bridge card (cross-subject links, free-form editable) ------------

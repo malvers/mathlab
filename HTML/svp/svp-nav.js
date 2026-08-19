@@ -28,8 +28,21 @@
         ['konzepte.html', 'Konzepte', 'b-violet'],
     ];
 
+    // These open in a new tab so the current plan stays put.
+    const NEW_TAB = new Set(['notes.html', 'konzepte.html']);
+
     // '/svp/' and '/svp/index.html' are the same page.
     function norm(path) { return path.replace(/index\.html$/, ''); }
+
+    // Per-browser pill visibility, keyed by href (stable across label changes).
+    const STORE_KEY = 'svp-nav-hidden';
+    let hidden;
+    try { hidden = new Set(JSON.parse(localStorage.getItem(STORE_KEY) || '[]')); }
+    catch (e) { hidden = new Set(); }
+    hidden.delete('index.html'); // Start can never be hidden (cleans up old stored state)
+    function saveHidden() {
+        try { localStorage.setItem(STORE_KEY, JSON.stringify([...hidden])); } catch (e) { }
+    }
 
     const header = document.querySelector('header.page-head') || document.body;
     const nav = document.createElement('nav');
@@ -44,14 +57,121 @@
     back.addEventListener('click', function (e) { e.preventDefault(); history.back(); });
     nav.appendChild(back);
 
+    const pills = {}; // href -> nav pill element, for live show/hide from the panel
     for (const [href, label, cls] of LINKS) {
         const a = document.createElement('a');
         a.className = 'badge ' + cls;
         a.href = base + href;
         a.textContent = label;
+        if (NEW_TAB.has(href)) { a.target = '_blank'; a.rel = 'noopener'; }
         if (norm(a.pathname) === norm(location.pathname)) a.classList.add('active');
+        // Hidden pills stay hidden — except the one for the current page.
+        if (hidden.has(href) && !a.classList.contains('active')) a.classList.add('nav-hidden');
+        pills[href] = a;
         nav.appendChild(a);
     }
+
+    // Pencil at the right end of the pill row: opens a panel to choose which
+    // pills are visible (stored in localStorage, per browser).
+    const editWrap = document.createElement('div');
+    editWrap.className = 'nav-edit-wrap';
+    const pencil = document.createElement('a');
+    pencil.className = 'badge b-grey nav-edit';
+    pencil.href = '#';
+    pencil.textContent = '✎';
+    pencil.title = 'Pillen ein-/ausblenden';
+    editWrap.appendChild(pencil);
+
+    const panel = document.createElement('div');
+    panel.className = 'nav-edit-panel';
+    const panelTitle = document.createElement('div');
+    panelTitle.className = 'ep-title';
+    panelTitle.textContent = 'Sichtbare Pillen — Klick schaltet ein/aus';
+    panel.appendChild(panelTitle);
+    const grid = document.createElement('div');
+    grid.className = 'ep-grid';
+    for (const [href, label, cls] of LINKS) {
+        if (href === 'index.html') continue; // Start is always visible, not toggleable
+        const t = document.createElement('span');
+        t.className = 'badge ' + cls + (hidden.has(href) ? '' : ' on');
+        t.textContent = label;
+        t.addEventListener('click', function () {
+            if (hidden.has(href)) hidden.delete(href); else hidden.add(href);
+            t.classList.toggle('on', !hidden.has(href));
+            const pill = pills[href];
+            pill.classList.toggle('nav-hidden',
+                hidden.has(href) && !pill.classList.contains('active'));
+            applyCardVisibility();
+            saveHidden();
+        });
+        grid.appendChild(t);
+    }
+    panel.appendChild(grid);
+
+    // Colour scheme switch below the pill toggles. svp-gate.js applies the
+    // stored choice in <head>, so a reload never flashes the wrong scheme.
+    const themeTitle = document.createElement('div');
+    themeTitle.className = 'ep-title ep-title-2';
+    themeTitle.textContent = 'Farbschema';
+    panel.appendChild(themeTitle);
+
+    const themeRow = document.createElement('div');
+    themeRow.className = 'ep-grid';
+    const THEMES = [['dark', 'Dunkel'], ['light', 'Hell']];
+    let theme = 'dark';
+    try { if (localStorage.getItem('svp-theme') === 'light') theme = 'light'; } catch (e) { }
+    // uebung.html has no svp-gate.js, so apply the class here as well.
+    document.documentElement.classList.toggle('svp-light', theme === 'light');
+
+    const themeBtns = {};
+    function applyTheme(next) {
+        theme = next;
+        document.documentElement.classList.toggle('svp-light', next === 'light');
+        for (const key in themeBtns) themeBtns[key].classList.toggle('on', key === next);
+        try { localStorage.setItem('svp-theme', next); } catch (e) { }
+    }
+    for (const [key, label] of THEMES) {
+        const t = document.createElement('span');
+        t.className = 'badge b-grey';
+        t.textContent = label;
+        t.addEventListener('click', function () { applyTheme(key); });
+        themeBtns[key] = t;
+        themeRow.appendChild(t);
+    }
+    themeBtns[theme].classList.add('on');
+    panel.appendChild(themeRow);
+
+    editWrap.appendChild(panel);
+    nav.appendChild(editWrap);
+
+    // Link cards on the overview pages follow the pill choice: a card whose
+    // target has its pill hidden is hidden too.
+    const pathToHref = {};
+    for (const [href] of LINKS) pathToHref[norm(new URL(base + href).pathname)] = href;
+
+    function applyCardVisibility() {
+        for (const card of document.querySelectorAll('a.link-card')) {
+            const href = pathToHref[norm(card.pathname)];
+            if (href) card.classList.toggle('nav-hidden', hidden.has(href));
+        }
+    }
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', applyCardVisibility);
+    } else {
+        applyCardVisibility();
+    }
+
+    function closePanel() { editWrap.classList.remove('open'); }
+    pencil.addEventListener('click', function (e) {
+        e.preventDefault();
+        editWrap.classList.toggle('open');
+    });
+    document.addEventListener('click', function (e) {
+        if (!editWrap.contains(e.target)) closePanel();
+    });
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') closePanel();
+    });
     // Central school-year line above the pill row (the per-page subtitles
     // no longer repeat it).
     const year = document.createElement('div');
