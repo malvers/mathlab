@@ -83,6 +83,10 @@
             min-width: 56px;
         }
 
+        .numval.bcol {
+            color: rgb(80, 170, 255);
+        }
+
         .act-row {
             display: flex;
             gap: 8px;
@@ -153,22 +157,28 @@
             <div class="instrument-card">
                 <div class="card-head">EINGABE</div>
                 <div class="num-row">
-                    <span class="lbl">a</span>
+                    <span class="lbl" style="color:rgb(121,158,49)">a</span>
                     <button class="stepbtn" id="a-minus" aria-label="a verringern">−</button>
                     <div class="numval" id="a-val">1</div>
                     <button class="stepbtn" id="a-plus" aria-label="a erhöhen">+</button>
                 </div>
                 <div class="num-row">
-                    <span class="lbl">b</span>
+                    <span class="lbl" style="color:rgb(80,170,255)">b</span>
                     <button class="stepbtn" id="b-minus" aria-label="b verringern">−</button>
-                    <div class="numval" id="b-val">1</div>
+                    <div class="numval bcol" id="b-val">1</div>
                     <button class="stepbtn" id="b-plus" aria-label="b erhöhen">+</button>
                 </div>
-                <div class="hinttext">0…255 — oder unten im Addierwerk direkt auf die Bits tippen.</div>
+                <div class="hinttext">0…255 — oder unten im Addierwerk direkt auf die Bits tippen.<br>
+                    Jede Zahl hat eine Farbe:
+                    <b style="color:rgb(121,158,49)">a</b> ·
+                    <b style="color:rgb(80,170,255)">b</b> ·
+                    <b style="color:rgb(245,194,66)">Ergebnis</b> ·
+                    <b style="color:rgb(176,36,24)">Übertrag</b>.
+                    Antippen zeigt ihren Faden durch alle Ebenen.</div>
             </div>
 
             <div class="instrument-card">
-                <div class="card-head">ADDIERWERK</div>
+                <div class="card-head">DIE REISE</div>
                 <div class="act-row" style="margin-bottom:10px;">
                     <button class="actbtn" id="btn-play">ABSPIELEN</button>
                     <button class="actbtn secondary" id="btn-step">SCHRITT</button>
@@ -176,6 +186,8 @@
                 </div>
                 <label for="speed" class="hinttext" style="display:block;margin-bottom:4px;">Tempo</label>
                 <input type="range" id="speed" min="1" max="10" value="4" aria-label="Animationstempo">
+                <div class="hinttext" style="margin-top:8px;">ABSPIELEN spielt alles: Compiler → Assembler →
+                    CPU → Rechnung → Ergebnis zurück. SCHRITT schaltet die Volladdierer einzeln.</div>
             </div>
 
             <div class="instrument-card">
@@ -239,7 +251,7 @@
             const t = document.getElementById('coach-title-slot');
             if (t) t.textContent = 'Vom Code zu den Bits';
             const c = document.getElementById('coach-content');
-            if (c) c.textContent = 'Eine einzige Rechnung, vier Ebenen tiefer: Hochsprache, Assembler, Maschinenbytes, Addierwerk. Auf jeder Ebene steckt dieselbe Information — nur eine Abstraktion tiefer. ABSPIELEN lässt den Übertrag durch die Gatter rieseln.';
+            if (c) c.textContent = 'Eine Rechnung, vier Ebenen: Hochsprache, Assembler, Maschinenbytes, Addierwerk. Jede Zahl behält ihre Farbe — tippe sie an, und ein Faden zeigt sie auf jeder Ebene wieder. ABSPIELEN spielt die ganze Reise: Compiler → Assembler → CPU → und das Ergebnis kommt zurück nach oben.';
         })();
 
         if (window.CyberLeftChrome && typeof CyberLeftChrome.configure === 'function') {
@@ -251,24 +263,52 @@
         const container = document.getElementById('canvas-container');
 
         // ---------- palette ----------
-        const ORANGE = 'rgb(245,194,66)';   // labels, opcodes
-        const GREEN = 'rgb(121,158,49)';    // values, active signals
+        // one datum = one colour, on every level (the whole point of this lab)
+        const ORANGE = 'rgb(245,194,66)';   // result c
+        const GREEN = 'rgb(121,158,49)';    // number a
+        const BLUE = 'rgb(80,170,255)';     // number b
         const RED = 'rgb(176,36,24)';       // carry
+        const OPCOL = 'rgb(226,226,242)';   // operation: + / mnemonics / opcodes / gates
         const DIM = 'rgba(255,255,255,0.55)';
         const WHITE = '#fff';
         const PANEL_BG = 'rgba(14,36,78,0.55)';
         const PANEL_BORDER = 'rgba(245,194,66,0.35)';
+        const ECOL = { a: GREEN, b: BLUE, c: ORANGE, op: OPCOL };
+        const EDGE = { a: 'rgba(121,158,49,', b: 'rgba(80,170,255,', c: 'rgba(245,194,66,', op: 'rgba(226,226,242,' };
 
         // ---------- state ----------
         let A = 1, B = 1;
         const BITS = 8;
-        let stepIdx = -1;          // -1 = nothing computed yet, 0..7 = bits done up to idx
-        let playing = false, playT = 0;
+        let stepIdx = -1;           // -1 = nothing computed, 0..7 = bits done up to idx
+        let mode = 'idle';          // 'idle' | 'journey'
+        let phase = 0, phaseT = 0, journeyDone = false;
+        let hoverE = null;          // hovered entity: 'a' | 'b' | 'c' | 'op' | null
         let showStrom = false;
-        let bitHits = [];          // clickable bit boxes, rebuilt every frame
+        let hits = [], bitHits = [], anchors = null, cAnchor = null, retFrom = null;
+        let S = 1;                  // global ui scale
+
+        // journey phases: compile, assemble, load, compute, return
+        const PHASE_BASE = [1900, 1900, 2100, 2900, 2000];
+        const PHASE_TEXT = [
+            'Der COMPILER übersetzt die Zeile in Assembler-Befehle …',
+            'Der ASSEMBLER kodiert die Befehle als Bytes …',
+            'Die CPU lädt die Bytes — die Zahl-Bytes SIND die Bit-Reihen!',
+            'Die Volladdierer rechnen — der Übertrag rieselt nach links …',
+            'Das Ergebnis wandert zurück in die Variable c.'
+        ];
 
         function clamp(v) { return Math.max(0, Math.min(255, v)); }
         function bits(v) { const o = []; for (let i = 0; i < BITS; i++) o.push((v >> i) & 1); return o; }
+        function kSpeed() { return 4 / Number(document.getElementById('speed').value); }
+        function easeT(t) { t = Math.max(0, Math.min(1, t)); return t * t * (3 - 2 * t); }
+        function galpha(e) { return hoverE && e && e !== hoverE ? 0.2 : 1; }
+        // visibility of content that appears during journey phase pi
+        function reveal(pi, frac) {
+            if (mode !== 'journey' || journeyDone) return 1;
+            if (phase > pi) return 1;
+            if (phase < pi) return 0;
+            return frac;
+        }
 
         // full-adder chain with all intermediate signals per bit
         function adderTrace() {
@@ -313,85 +353,182 @@
             ctx.fillText(title, x + S * 12, y + S * 14);
         }
 
-        let S = 1;   // global ui scale
+        // draw a run of coloured tokens; entity tokens become hover targets + thread anchors
+        function textRun(x, y, parts) {
+            ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+            for (const p of parts) {
+                const w = ctx.measureText(p.t).width;
+                ctx.save();
+                ctx.globalAlpha *= galpha(p.e);
+                ctx.fillStyle = p.col || (p.e ? ECOL[p.e] : DIM);
+                ctx.fillText(p.t, x, y);
+                ctx.restore();
+                if (p.e) {
+                    hits.push({ x: x, y: y - S * 13, w: w, h: S * 26, e: p.e });
+                    anchors[p.e].push({ x: x + w / 2, y: y });
+                }
+                if (p.id === 'cval') cAnchor = { x: x + w / 2, y: y };
+                x += w;
+            }
+            return x;
+        }
+
+        // the coloured thread: connect the hovered entity across all levels
+        function drawThread() {
+            if (!hoverE || !anchors[hoverE] || anchors[hoverE].length < 2) return;
+            const buckets = new Map();
+            for (const p of anchors[hoverE]) {
+                const k = Math.round(p.y / (S * 110));
+                const b = buckets.get(k) || { x: 0, y: 0, n: 0 };
+                b.x += p.x; b.y += p.y; b.n++;
+                buckets.set(k, b);
+            }
+            const ps = [...buckets.values()].map(b => ({ x: b.x / b.n, y: b.y / b.n })).sort((u, v) => u.y - v.y);
+            if (ps.length < 2) return;
+            ctx.save();
+            ctx.strokeStyle = ECOL[hoverE];
+            ctx.globalAlpha = 0.7;
+            ctx.lineWidth = 1.8;
+            ctx.setLineDash([7, 6]);
+            ctx.beginPath();
+            ctx.moveTo(ps[0].x, ps[0].y + S * 15);
+            for (let i = 1; i < ps.length; i++) {
+                const a = ps[i - 1], b = ps[i];
+                ctx.quadraticCurveTo(a.x, (a.y + b.y) / 2, b.x, b.y - S * 15);
+                ctx.moveTo(b.x, b.y - S * 15);
+            }
+            ctx.stroke();
+            ctx.restore();
+        }
 
         function draw() {
             const rect = container.getBoundingClientRect();
             const W = rect.width, H = rect.height;
             ctx.clearRect(0, 0, W, H);
-            bitHits = [];
+            hits = []; bitHits = [];
+            anchors = { a: [], b: [], c: [], op: [] };
+            cAnchor = null; retFrom = null;
 
             const tr = adderTrace();
             const sum = A + B;
             const narrow = W < 720;
+            const showC = (mode === 'idle' && stepIdx >= BITS - 1) || journeyDone
+                || (mode === 'journey' && phase === 4 && phaseT > 0.55);
 
             // scale so the whole ladder fits
-            const nPanels = showStrom ? 5 : 4;
-            S = Math.max(0.55, Math.min(W / 900, H / (nPanels === 5 ? 940 : 840)));
-            const M = S * 14;                       // outer margin
+            S = Math.max(0.55, Math.min(W / 900, H / (showStrom ? 950 : 828)));
+            const M = S * 14;
             const px = M, pw = W - 2 * M;
-            const hCode = S * 96, hAsm = S * 132, hMach = S * 150, hAdd = S * 330, hStrom = S * 96;
-            const gap = S * 12;
+            const hCode = S * 92, hAsm = S * 128, hMach = S * 148, hAdd = S * 318, hStrom = S * 92;
+            const gap = S * 30;    // room for the labelled actor arrows
             let y = M;
+
+            // arrow in the gap between two panels, naming WHO translates
+            const flowArrow = (yTop, idx, label) => {
+                const x = px + S * 34;
+                const y1 = yTop + S * 3, y2 = yTop + gap - S * 3;
+                const active = mode === 'journey' && !journeyDone && phase === idx;
+                const past = journeyDone || (mode === 'journey' && phase > idx);
+                const col = active ? ORANGE : (past ? GREEN : 'rgba(255,255,255,0.38)');
+                ctx.save();
+                ctx.strokeStyle = col; ctx.fillStyle = col;
+                ctx.lineWidth = active ? 2.2 : 1.3;
+                ctx.beginPath(); ctx.moveTo(x, y1); ctx.lineTo(x, y2 - S * 5); ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(x, y2); ctx.lineTo(x - S * 4.5, y2 - S * 8); ctx.lineTo(x + S * 4.5, y2 - S * 8);
+                ctx.closePath(); ctx.fill();
+                ctx.font = '700 ' + Math.round(S * 10.5) + 'px Orbitron';
+                ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+                ctx.fillText(label, x + S * 14, (y1 + y2) / 2);
+                if (active) {
+                    const t = (phaseT * 2) % 1;
+                    ctx.beginPath(); ctx.arc(x, y1 + (y2 - y1) * t, S * 4, 0, 7); ctx.fill();
+                }
+                ctx.restore();
+            };
 
             // ---- 1) HOCHSPRACHE ----
             panel(px, y, pw, hCode, 'HOCHSPRACHE');
             ctx.font = Math.round(S * 26) + 'px "Courier New", monospace';
-            ctx.textAlign = 'left';
-            let cx = px + S * 24;
-            const cy1 = y + hCode * 0.62;
-            const frag = [['let c = ', DIM], [String(A), GREEN], [' + ', WHITE], [String(B), GREEN], [';', DIM],
-            ['   → c = ', DIM], [stepIdx >= BITS - 1 ? String(sum) : '?', stepIdx >= BITS - 1 ? ORANGE : DIM]];
-            for (const [txt, col] of frag) { ctx.fillStyle = col; ctx.fillText(txt, cx, cy1); cx += ctx.measureText(txt).width; }
-            y += hCode + gap;
+            textRun(px + S * 24, y + hCode * 0.62, [
+                { t: 'let ', col: DIM }, { t: 'c', e: 'c' }, { t: ' = ', col: DIM },
+                { t: String(A), e: 'a' }, { t: ' + ', e: 'op' }, { t: String(B), e: 'b' }, { t: ';', col: DIM },
+                { t: '   → c = ', col: DIM },
+                { t: showC ? String(sum) : '?', e: 'c', id: 'cval' }
+            ]);
+            y += hCode;
+            flowArrow(y, 0, 'COMPILER  übersetzt');
+            y += gap;
 
             // ---- 2) ASSEMBLER ----
             panel(px, y, pw, hAsm, 'ASSEMBLER  (x86-64)');
             ctx.font = Math.round(S * 20) + 'px "Courier New", monospace';
             const asmLines = [
-                [['mov ', ORANGE], ['eax', WHITE], [', ' + A, GREEN], ['      ; Register eax := ' + A, DIM]],
-                [['add ', ORANGE], ['eax', WHITE], [', ' + B, GREEN], ['      ; eax := eax + ' + B, DIM]]
+                [{ t: 'mov ', e: 'op' }, { t: 'eax', col: WHITE }, { t: ', ', col: DIM }, { t: String(A), e: 'a' }, { t: '      ; Register eax := ' + A, col: DIM }],
+                [{ t: 'add ', e: 'op' }, { t: 'eax', col: WHITE }, { t: ', ', col: DIM }, { t: String(B), e: 'b' }, { t: '      ; eax := eax + ' + B, col: DIM }]
             ];
             asmLines.forEach((line, i) => {
-                let lx = px + S * 24;
-                const ly = y + S * 52 + i * S * 34;
-                for (const [txt, col] of line) { ctx.fillStyle = col; ctx.fillText(txt, lx, ly); lx += ctx.measureText(txt).width; }
+                const al = reveal(0, easeT(phaseT * 2.4 - i * 1.0));
+                if (al <= 0.01) return;
+                ctx.save(); ctx.globalAlpha *= al;
+                ctx.font = Math.round(S * 20) + 'px "Courier New", monospace';
+                textRun(px + S * 24, y + S * 52 + i * S * 34, line);
+                ctx.restore();
             });
-            y += hAsm + gap;
+            y += hAsm;
+            flowArrow(y, 1, 'ASSEMBLER  kodiert');
+            y += gap;
 
             // ---- 3) MASCHINENCODE ----
             panel(px, y, pw, hMach, 'MASCHINENCODE  (Bytes, wie sie im Speicher liegen)');
             const rows = [
-                { op: 'B8', imm: immLE(A), label: 'mov eax,' + A },
-                { op: '05', imm: immLE(B), label: 'add eax,' + B }
+                { op: 'B8', imm: immLE(A), e: 'a', label: 'mov eax,' + A },
+                { op: '05', imm: immLE(B), e: 'b', label: 'add eax,' + B }
             ];
             const byteW = Math.min(S * 92, (pw - S * 48) / 5.6);
             rows.forEach((r, i) => {
+                const rowAl = reveal(1, easeT(phaseT * 2.4 - i * 1.0));
+                if (rowAl <= 0.01) return;
                 const ry = y + S * 44 + i * S * 50;
                 let bx = px + S * 24;
                 const all = [r.op].concat(r.imm.map(hex2));
                 all.forEach((hb, j) => {
-                    const isOp = j === 0;
-                    ctx.fillStyle = isOp ? 'rgba(245,194,66,0.16)' : 'rgba(121,158,49,0.14)';
-                    ctx.strokeStyle = isOp ? ORANGE : GREEN;
+                    const e = j === 0 ? 'op' : r.e;
+                    // pulse the value bytes while the CPU loads them into the adder
+                    const loading = mode === 'journey' && !journeyDone && phase === 2 && j > 0;
+                    const fillA = loading ? 0.14 + 0.16 * Math.abs(Math.sin(phaseT * 9)) : 0.14;
+                    ctx.save();
+                    ctx.globalAlpha *= rowAl * galpha(e);
+                    ctx.fillStyle = EDGE[e] + fillA + ')';
+                    ctx.strokeStyle = ECOL[e];
                     ctx.lineWidth = 1;
                     ctx.beginPath(); ctx.roundRect(bx, ry, byteW - S * 6, S * 38, 6); ctx.fill(); ctx.stroke();
-                    ctx.fillStyle = isOp ? ORANGE : GREEN;
+                    ctx.fillStyle = ECOL[e];
                     ctx.font = '700 ' + Math.round(S * 15) + 'px "Courier New", monospace';
                     ctx.textAlign = 'center';
                     ctx.fillText(hb, bx + (byteW - S * 6) / 2, ry + S * 13);
                     ctx.fillStyle = DIM;
                     ctx.font = Math.round(S * 9.5) + 'px "Courier New", monospace';
                     ctx.fillText(parseInt(hb, 16).toString(2).padStart(8, '0'), bx + (byteW - S * 6) / 2, ry + S * 29);
+                    ctx.restore();
+                    if (rowAl > 0.5) {
+                        hits.push({ x: bx, y: ry, w: byteW - S * 6, h: S * 38, e: e });
+                        anchors[e].push({ x: bx + (byteW - S * 6) / 2, y: ry + S * 19 });
+                    }
                     bx += byteW;
                 });
+                ctx.save();
+                ctx.globalAlpha *= rowAl;
                 ctx.fillStyle = DIM;
                 ctx.font = Math.round(S * 11) + 'px Outfit, Arial';
                 ctx.textAlign = 'left';
                 if (!narrow) ctx.fillText(r.label + '   (Opcode + 4 Bytes, little endian)', bx + S * 8, ry + S * 19);
+                ctx.restore();
             });
             ctx.textAlign = 'left';
-            y += hMach + gap;
+            y += hMach;
+            flowArrow(y, 2, 'CPU  lädt die Bytes');
+            y += gap;
 
             // ---- 4) ADDIERWERK ----
             panel(px, y, pw, hAdd, 'ADDIERWERK  —  8 Volladdierer, Übertrag rieselt von rechts nach links');
@@ -401,43 +538,55 @@
             const rowA = y + S * 56, rowB = rowA + S * 34;
             const rowGate = rowB + S * 52, rowSum = rowGate + S * 96;
             ctx.font = '700 ' + Math.round(S * 12) + 'px Orbitron';
-            ctx.fillStyle = DIM;
-            ctx.fillText('a', px + S * 16, rowA + S * 10);
-            ctx.fillText('b', px + S * 16, rowB + S * 10);
-            ctx.fillText('s', px + S * 16, rowSum + S * 10);
+            ctx.fillStyle = GREEN; ctx.fillText('a', px + S * 16, rowA + S * 10);
+            ctx.fillStyle = BLUE; ctx.fillText('b', px + S * 16, rowB + S * 10);
+            ctx.fillStyle = ORANGE; ctx.fillText('s', px + S * 16, rowSum + S * 10);
 
             for (let i = 0; i < cols; i++) {
                 const cxm = x0 - i * colW + colW / 2;
                 const t = tr[i];
                 const done = stepIdx >= i;
-                const activeNow = playing && stepIdx + 1 === i;
+                const activeNow = mode === 'journey' && !journeyDone && phase === 3 && stepIdx + 1 === i;
+                const abAl = reveal(2, easeT(phaseT * 1.5 - i * 0.13));
 
-                // bit value boxes a & b (clickable)
-                const drawBit = (val, ry, which) => {
+                // bit value boxes a & b (clickable, colour-coded)
+                const drawBit = (val, ry, e, alpha) => {
+                    if (alpha <= 0.01) return;
                     const bw = S * 30;
                     const bxx = cxm - bw / 2, byy = ry - S * 6;
-                    ctx.fillStyle = val ? 'rgba(121,158,49,0.30)' : 'rgba(255,255,255,0.06)';
-                    ctx.strokeStyle = val ? GREEN : 'rgba(255,255,255,0.25)';
+                    ctx.save();
+                    ctx.globalAlpha *= alpha * galpha(e);
+                    ctx.fillStyle = val ? EDGE[e] + '0.30)' : 'rgba(255,255,255,0.06)';
+                    ctx.strokeStyle = val ? ECOL[e] : 'rgba(255,255,255,0.25)';
                     ctx.lineWidth = 1.4;
                     ctx.beginPath(); ctx.roundRect(bxx, byy, bw, S * 26, 6); ctx.fill(); ctx.stroke();
                     ctx.fillStyle = val ? WHITE : DIM;
                     ctx.font = '700 ' + Math.round(S * 15) + 'px "Courier New", monospace';
                     ctx.textAlign = 'center';
                     ctx.fillText(String(val), cxm, byy + S * 13);
-                    if (which) bitHits.push({ x: bxx, y: byy, w: bw, h: S * 26, which, i });
+                    ctx.restore();
+                    if (alpha > 0.5) {
+                        bitHits.push({ x: bxx, y: byy, w: bw, h: S * 26, which: e, i });
+                        hits.push({ x: bxx, y: byy, w: bw, h: S * 26, e: e });
+                        anchors[e].push({ x: cxm, y: byy + S * 13 });
+                    }
                 };
-                drawBit(t.a, rowA, 'a');
-                drawBit(t.b, rowB, 'b');
+                drawBit(t.a, rowA, 'a', abAl);
+                drawBit(t.b, rowB, 'b', abAl);
 
                 // full-adder gate box
+                const gAl = (mode === 'journey' && !journeyDone && phase < 2) ? 0.18 : 1;
                 const gw = colW - S * 10, gh = S * 76;
                 const gx = cxm - gw / 2, gy = rowGate - S * 8;
+                ctx.save();
+                ctx.globalAlpha *= gAl * galpha('op');
                 ctx.fillStyle = activeNow ? 'rgba(245,194,66,0.20)' : (done ? 'rgba(121,158,49,0.12)' : 'rgba(255,255,255,0.05)');
                 ctx.strokeStyle = activeNow ? ORANGE : (done ? GREEN : 'rgba(255,255,255,0.22)');
                 ctx.lineWidth = activeNow ? 2 : 1.2;
                 ctx.beginPath(); ctx.roundRect(gx, gy, gw, gh, 8); ctx.fill(); ctx.stroke();
                 ctx.fillStyle = done || activeNow ? WHITE : DIM;
                 ctx.font = '700 ' + Math.round(S * 10.5) + 'px Orbitron';
+                ctx.textAlign = 'center';
                 ctx.fillText('VA ' + i, cxm, gy + S * 12);
                 ctx.font = Math.round(S * 10) + 'px "Courier New", monospace';
                 ctx.fillStyle = done ? DIM : 'rgba(255,255,255,0.3)';
@@ -448,12 +597,19 @@
                     ctx.font = '700 ' + Math.round(S * 10) + 'px "Courier New", monospace';
                     ctx.fillText('s=' + t.s + ' c=' + t.co, cxm, gy + S * 62);
                 }
+                ctx.restore();
+                if (gAl > 0.5) {
+                    hits.push({ x: gx, y: gy, w: gw, h: gh, e: 'op' });
+                    anchors.op.push({ x: cxm, y: gy + gh / 2 });
+                }
 
                 // carry arrow to the next column (leftwards)
                 if (i < cols - 1) {
                     const fromX = cxm - gw / 2, toX = x0 - (i + 1) * colW + colW / 2 + gw / 2;
                     const cyA = gy + gh / 2;
                     const on = done && t.co === 1;
+                    ctx.save();
+                    ctx.globalAlpha *= gAl;
                     ctx.strokeStyle = on ? RED : 'rgba(255,255,255,0.18)';
                     ctx.lineWidth = on ? 2.4 : 1;
                     ctx.beginPath(); ctx.moveTo(fromX, cyA); ctx.lineTo(toX, cyA); ctx.stroke();
@@ -463,18 +619,25 @@
                         ctx.moveTo(toX, cyA); ctx.lineTo(toX + S * 8, cyA - S * 4.5); ctx.lineTo(toX + S * 8, cyA + S * 4.5);
                         ctx.closePath(); ctx.fill();
                     }
+                    ctx.restore();
                 }
 
                 // sum bit
                 if (done) {
                     const bw = S * 30;
+                    ctx.save();
+                    ctx.globalAlpha *= galpha('c');
                     ctx.fillStyle = t.s ? 'rgba(245,194,66,0.28)' : 'rgba(255,255,255,0.06)';
                     ctx.strokeStyle = t.s ? ORANGE : 'rgba(255,255,255,0.25)';
                     ctx.lineWidth = 1.4;
                     ctx.beginPath(); ctx.roundRect(cxm - bw / 2, rowSum - S * 6, bw, S * 26, 6); ctx.fill(); ctx.stroke();
                     ctx.fillStyle = t.s ? WHITE : DIM;
                     ctx.font = '700 ' + Math.round(S * 15) + 'px "Courier New", monospace';
+                    ctx.textAlign = 'center';
                     ctx.fillText(String(t.s), cxm, rowSum + S * 7);
+                    ctx.restore();
+                    hits.push({ x: cxm - bw / 2, y: rowSum - S * 6, w: bw, h: S * 26, e: 'c' });
+                    anchors.c.push({ x: cxm, y: rowSum + S * 7 });
                 }
             }
             // carry-out of the last column = bit 8
@@ -485,23 +648,34 @@
                 ctx.textAlign = 'center';
                 ctx.fillText('Übertrag: 1', cxm + S * 6, rowSum + S * 7);
             }
-            // decimal readout
+            retFrom = { x: x0 + colW / 2, y: rowSum + S * 8 };
+
+            // bottom line: result — or journey narration
             ctx.textAlign = 'left';
-            ctx.font = '700 ' + Math.round(S * 16) + 'px Orbitron';
-            ctx.fillStyle = stepIdx >= BITS - 1 ? ORANGE : DIM;
-            const sumBits = (sum > 255 ? '1' : '') + bits(sum & 255).slice().reverse().join('');
-            ctx.fillText(stepIdx >= BITS - 1
-                ? sumBits + '₂  =  ' + sum + '₁₀'
-                : 'ABSPIELEN oder SCHRITT drücken …', px + S * 24, y + hAdd - S * 22);
-            y += hAdd + gap;
+            if (showC) {
+                ctx.font = '700 ' + Math.round(S * 16) + 'px Orbitron';
+                ctx.fillStyle = ORANGE;
+                const sumBits = (sum > 255 ? '1' : '') + bits(sum & 255).slice().reverse().join('');
+                ctx.fillText(sumBits + '₂  =  ' + sum + '₁₀', px + S * 24, y + hAdd - S * 22);
+            } else {
+                ctx.font = Math.round(S * 13) + 'px Outfit, Arial';
+                ctx.fillStyle = mode === 'journey' ? ORANGE : DIM;
+                ctx.fillText(mode === 'journey' ? PHASE_TEXT[phase]
+                    : 'ABSPIELEN: die ganze Reise vom Code bis zu den Gattern · SCHRITT: Addierer einzeln …',
+                    px + S * 24, y + hAdd - S * 22);
+            }
+            y += hAdd + (showStrom ? gap : 0);
 
             // ---- 5) STROM-EPILOG (optional) ----
             if (showStrom) {
                 panel(px, y, pw, hStrom, 'UND PHYSISCH?  Ein Bit ist nur: Spannung an / aus');
                 const t0 = tr[0];
+                ctx.save();
+                ctx.globalAlpha *= galpha('a');
                 const lx = px + S * 30, lyy = y + hStrom * 0.62;
                 ctx.font = Math.round(S * 15) + 'px Outfit, Arial';
                 ctx.fillStyle = DIM;
+                ctx.textAlign = 'left';
                 ctx.fillText('Bit 0 von a gerade:', lx, lyy);
                 const swx = lx + S * 190;
                 ctx.strokeStyle = t0.a ? GREEN : DIM;
@@ -519,6 +693,35 @@
                 ctx.fillStyle = DIM;
                 ctx.font = Math.round(S * 13) + 'px Outfit, Arial';
                 ctx.fillText(t0.a ? '≈ 1 Volt → „1"' : '≈ 0 Volt → „0"', swx + S * 130, lyy);
+                ctx.restore();
+            }
+
+            // the thread: hovered datum, connected across all levels
+            drawThread();
+
+            // phase 4: the result travels back up into the source line
+            if (mode === 'journey' && !journeyDone && phase === 4 && cAnchor && retFrom) {
+                const p = easeT(phaseT);
+                const sx = retFrom.x, sy = retFrom.y;
+                const exx = cAnchor.x, ey = cAnchor.y;
+                const midX = Math.min(W - S * 18, Math.max(sx, exx) + S * 80);
+                ctx.save();
+                ctx.strokeStyle = 'rgba(245,194,66,0.35)';
+                ctx.lineWidth = 1.2;
+                ctx.setLineDash([5, 5]);
+                ctx.beginPath(); ctx.moveTo(sx, sy);
+                ctx.quadraticCurveTo(midX, (sy + ey) / 2, exx, ey);
+                ctx.stroke();
+                ctx.setLineDash([]);
+                const q = 1 - p;
+                const qx = q * q * sx + 2 * q * p * midX + p * p * exx;
+                const qy = q * q * sy + 2 * q * p * ((sy + ey) / 2) + p * p * ey;
+                ctx.fillStyle = ORANGE;
+                ctx.beginPath(); ctx.arc(qx, qy, S * 7, 0, 7); ctx.fill();
+                ctx.font = '700 ' + Math.round(S * 11) + 'px Orbitron';
+                ctx.textAlign = 'left';
+                ctx.fillText('eax = ' + sum, qx + S * 12, qy);
+                ctx.restore();
             }
         }
 
@@ -527,7 +730,7 @@
             A = clamp(a); B = clamp(b);
             document.getElementById('a-val').textContent = A;
             document.getElementById('b-val').textContent = B;
-            stepIdx = -1; playing = false;
+            stepIdx = -1; mode = 'idle'; journeyDone = false;
             draw();
         }
         document.getElementById('a-minus').onclick = () => setVals(A - 1, B);
@@ -536,14 +739,16 @@
         document.getElementById('b-plus').onclick = () => setVals(A, B + 1);
 
         document.getElementById('btn-step').onclick = () => {
-            playing = false;
+            mode = 'idle';
             if (stepIdx < BITS - 1) { stepIdx++; draw(); }
         };
         document.getElementById('btn-play').onclick = () => {
-            if (stepIdx >= BITS - 1) stepIdx = -1;
-            playing = true; playT = 0;
+            stepIdx = -1; journeyDone = false;
+            mode = 'journey'; phase = 0; phaseT = 0;
         };
-        document.getElementById('btn-reset').onclick = () => { stepIdx = -1; playing = false; draw(); };
+        document.getElementById('btn-reset').onclick = () => {
+            mode = 'idle'; journeyDone = false; stepIdx = -1; draw();
+        };
         document.getElementById('chk-strom').onchange = e => { showStrom = e.target.checked; draw(); };
 
         canvas.addEventListener('pointerdown', e => {
@@ -558,23 +763,36 @@
             }
         });
 
+        canvas.addEventListener('pointermove', e => {
+            const r = canvas.getBoundingClientRect();
+            const mx = e.clientX - r.left, my = e.clientY - r.top;
+            let ne = null;
+            for (const h of hits) {
+                if (mx >= h.x && mx <= h.x + h.w && my >= h.y && my <= h.y + h.h) { ne = h.e; break; }
+            }
+            if (ne !== hoverE) {
+                hoverE = ne;
+                canvas.style.cursor = ne ? 'pointer' : 'default';
+                if (mode !== 'journey') draw();
+            }
+        });
+        canvas.addEventListener('pointerleave', () => {
+            if (hoverE) { hoverE = null; canvas.style.cursor = 'default'; if (mode !== 'journey') draw(); }
+        });
+
         // ---------- animation loop ----------
         let lastT = 0;
         function tick(ts) {
             requestAnimationFrame(tick);
             const dt = Math.min(100, ts - lastT); lastT = ts;
-            if (playing) {
-                playT += dt;
-                const speed = Number(document.getElementById('speed').value);
-                const stepMs = 1400 / speed;
-                if (playT >= stepMs) {
-                    playT = 0;
-                    stepIdx++;
-                    if (stepIdx >= BITS - 1) playing = false;
-                    draw();
-                } else if (stepIdx < BITS - 1) {
-                    draw();   // keep the active-column highlight pulsing
+            if (mode === 'journey') {
+                phaseT += dt / (PHASE_BASE[phase] * kSpeed());
+                if (phase === 3) stepIdx = Math.min(BITS - 1, Math.floor(phaseT * BITS));
+                if (phaseT >= 1) {
+                    phase++; phaseT = 0;
+                    if (phase > 4) { mode = 'idle'; journeyDone = true; stepIdx = BITS - 1; }
                 }
+                draw();
             }
         }
         requestAnimationFrame(tick);
