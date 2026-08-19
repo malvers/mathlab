@@ -153,6 +153,35 @@
     editWrap.appendChild(panel);
     nav.appendChild(editWrap);
 
+    // Separated auth pill at the right end of the row: "Login" links to the
+    // notes page (shared svp-session login for all svp pages), "Logout"
+    // clears the session in this browser. Reads localStorage directly so it
+    // also works on pages that do not load svp-auth.js.
+    const authPill = document.createElement('a');
+    authPill.className = 'badge nav-auth';
+    function hasSession() {
+        try { return !!JSON.parse(localStorage.getItem('svp-session')); }
+        catch (e) { return false; }
+    }
+    function renderAuthPill() {
+        const on = hasSession();
+        authPill.classList.toggle('b-grey', on);
+        authPill.classList.toggle('b-green', !on);
+        authPill.textContent = on ? 'Logout' : 'Login';
+        authPill.title = on
+            ? 'svp-Session in diesem Browser beenden'
+            : 'Anmelden für Cloud-Sync (über die Notizen-Seite)';
+        authPill.href = on ? '#' : base + 'notes.html';
+    }
+    authPill.addEventListener('click', function (e) {
+        if (!hasSession()) return; /* logged out: follow the login link */
+        e.preventDefault();
+        try { localStorage.removeItem('svp-session'); } catch (e2) { }
+        location.reload();
+    });
+    renderAuthPill();
+    nav.appendChild(authPill);
+
     // Link cards on the overview pages follow the pill choice: a card whose
     // target has its pill hidden is hidden too.
     const pathToHref = {};
