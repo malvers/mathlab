@@ -14,6 +14,64 @@
     --violet: rgb(155, 130, 225);
     --teal: rgb(80, 200, 170);
     --pink: rgb(225, 130, 190);
+
+    /* Surfaces that sit above the page: nav band, dropdowns, sticky heads */
+    --panel: rgb(12, 30, 64);
+    /* Surfaces that sit below it: detail rows, inputs, scrollbar troughs */
+    --sunken: rgba(8, 20, 42, 0.45);
+    --input-bg: rgba(8, 20, 42, 0.7);
+    --trough: rgba(8, 20, 42, 0.9);
+    --thumb: rgba(120, 160, 220, 0.35);
+    --shadow: rgba(0, 0, 0, 0.45);
+    --row-line: rgba(120, 160, 220, 0.12);
+    --panel-soft: rgba(14, 36, 78, 0.35);
+    --scrim: rgba(4, 10, 24, 0.75);
+    --edit-line: rgba(245, 194, 66, 0.4);
+    --edit-fill: transparent;
+}
+
+/* Light scheme — toggled in the quick-nav pencil panel (svp-nav.js sets the
+   class on <html> and stores the choice in localStorage). Only variables
+   change; the accent hues are darkened for contrast on white. */
+html.svp-light {
+    --bg: rgb(246, 248, 252);
+    --card: rgb(255, 255, 255);
+    --card-soft: rgba(255, 255, 255, 0.85);
+    --line: rgba(40, 70, 120, 0.22);
+    --text: rgb(24, 34, 52);
+    --muted: rgb(96, 112, 140);
+    --lambda: rgb(176, 128, 12);
+    --ypsilon: rgb(176, 36, 24);
+    --phi: rgb(92, 122, 32);
+    --cyan: rgb(28, 118, 158);
+    --violet: rgb(104, 78, 178);
+    --teal: rgb(26, 130, 108);
+    --pink: rgb(178, 74, 136);
+
+    --panel: rgb(232, 238, 248);
+    --sunken: rgba(232, 238, 248, 0.75);
+    --input-bg: rgb(255, 255, 255);
+    --trough: rgba(220, 228, 240, 0.9);
+    --thumb: rgba(60, 100, 160, 0.35);
+    --shadow: rgba(30, 50, 90, 0.18);
+    --row-line: rgba(40, 70, 120, 0.14);
+    --panel-soft: rgba(255, 255, 255, 0.8);
+    --scrim: rgba(30, 45, 75, 0.4);
+    /* Pale amber on white is nearly invisible — stronger line plus a fill */
+    --edit-line: rgba(150, 108, 8, 0.85);
+    --edit-fill: rgba(245, 194, 66, 0.16);
+}
+
+/* Light-scheme fixes for the few places where a variable swap isn't enough:
+   brightening filters and the dark secondary button read wrong on white. */
+html.svp-light nav.quick-nav a.badge:hover { filter: brightness(0.92); }
+html.svp-light nav.quick-nav a.badge.active { filter: none; background: rgba(40, 70, 120, 0.08); }
+html.svp-light .badge-link:hover { filter: brightness(0.92); }
+
+html.svp-light button.action.secondary {
+    background: linear-gradient(180deg, rgb(255, 255, 255), rgb(232, 238, 248));
+    border-color: rgba(40, 70, 120, 0.3);
+    color: var(--text);
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -56,7 +114,7 @@ html.svp-locked body > *:not(.svp-gate-overlay) { display: none !important; }
 
 .svp-gate-card input {
     width: 100%;
-    background: rgba(8, 20, 42, 0.7);
+    background: var(--input-bg);
     border: 1px solid var(--line);
     border-radius: 8px;
     color: var(--text);
@@ -78,7 +136,7 @@ html.svp-locked body > *:not(.svp-gate-overlay) { display: none !important; }
     min-height: 1em;
 }
 
-html { scrollbar-color: rgba(120, 160, 220, 0.35) rgba(8, 20, 42, 0.9); }
+html { scrollbar-color: var(--thumb) var(--trough); }
 
 body {
     background: var(--bg);
@@ -122,7 +180,9 @@ nav.quick-nav {
     margin-bottom: 6px;
 }
 
-nav.quick-nav a.badge { text-decoration: none; }
+/* Fixed line box so every pill is exactly the same height — with 'normal',
+   Orbitron gives taller boxes to labels with umlauts/descenders */
+nav.quick-nav .badge { text-decoration: none; line-height: 14px; }
 
 /* Back pill left of the Start pill */
 nav.quick-nav a.nav-back { color: var(--cyan); }
@@ -131,7 +191,7 @@ nav.quick-nav a.nav-back { color: var(--cyan); }
 .nav-year {
     text-align: center;
     font-family: 'Orbitron', sans-serif;
-    font-size: 0.66rem;
+    font-size: clamp(0.78rem, 1.5vw, 0.95rem);
     letter-spacing: 0.09em;
     text-transform: uppercase;
     color: var(--muted);
@@ -140,7 +200,7 @@ nav.quick-nav a.nav-back { color: var(--cyan); }
 /* Full-width blue band at the page top holding year + pills, both centered
    vertically via symmetric padding (negative margins undo the body padding) */
 .nav-band {
-    background: rgb(12, 30, 64);
+    background: var(--panel);
     border-bottom: 1px solid var(--line);
     margin: calc(-1 * clamp(12px, 3vw, 40px)) calc(-1 * clamp(12px, 3vw, 40px)) 20px;
     padding: 14px clamp(12px, 3vw, 40px);
@@ -165,6 +225,56 @@ nav.quick-nav a.badge.active {
 }
 
 @media print { nav.quick-nav { display: none; } }
+
+/* Pill-visibility editor: pencil at the right end of the pill row opens a
+   panel of toggle pills (off = dimmed); choice persists in localStorage */
+nav.quick-nav a.badge.nav-hidden { display: none; }
+
+/* Overview cards follow the pill choice — hidden pill, hidden card */
+a.link-card.nav-hidden { display: none; }
+
+/* inline-flex kills the wrapper's own 16px text strut, which made the div
+   taller than the pill inside (pill looked flatter than its neighbors) */
+.nav-edit-wrap { position: relative; display: inline-flex; }
+
+nav.quick-nav a.nav-edit { cursor: pointer; }
+
+.nav-edit-panel {
+    display: none;
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    z-index: 80;
+    padding: 10px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    box-shadow: 0 8px 22px var(--shadow);
+}
+
+.nav-edit-wrap.open .nav-edit-panel { display: block; }
+
+.nav-edit-panel .ep-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.6rem;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+    white-space: nowrap;
+}
+
+.nav-edit-panel .ep-title-2 { margin-top: 12px; }
+
+.nav-edit-panel .ep-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    max-width: min(340px, 86vw);
+}
+
+.nav-edit-panel .badge { cursor: pointer; opacity: 0.3; user-select: none; }
+.nav-edit-panel .badge.on { opacity: 1; outline: 1px solid currentColor; }
 
 /* Old per-page back-link retired 2026-08-11 — the quick-nav's ← button replaces it */
 a.back-link {
@@ -269,20 +379,41 @@ button.action.secondary {
 
 /* Edit mode: dashed outlines on editable cells */
 .editing [contenteditable="true"] {
-    outline: 1px dashed rgba(245, 194, 66, 0.4);
+    outline: 1px dashed var(--edit-line);
     outline-offset: -1px;
+    background: var(--edit-fill);
     cursor: text;
     border-radius: 3px;
+}
+
+/* The focused box is the one you are typing in — make that unmistakable */
+.editing [contenteditable="true"]:focus {
+    outline: 2px solid var(--lambda);
+    background: var(--edit-fill);
 }
 
 /* Lernbereich tiles: Ustd. value on its own line */
 .meta-card .vu {
     margin-top: 3px;
     font-size: 0.78rem;
-    color: rgba(170, 190, 220, 0.7);
+    color: var(--muted);
 }
 
 /* Clickable Lernbereich tiles + shared summary panel */
+/* Expandable meta cards carry the same chevron as the expandable plan rows */
+.meta-card.expandable { position: relative; padding-left: 32px; }
+
+.meta-card.expandable > .chev {
+    position: absolute;
+    left: 12px;
+    top: 9px;
+    color: var(--muted);
+    font-size: 0.95rem;
+    transition: transform 0.15s;
+}
+
+.meta-card.expandable.open > .chev { transform: rotate(90deg); }
+
 .meta-card[data-lb] { cursor: pointer; transition: border-color 0.15s; }
 .meta-card[data-lb]:hover { border-color: rgba(120, 160, 220, 0.55); }
 .meta-card.open { border-color: var(--cyan); }
@@ -291,7 +422,7 @@ button.action.secondary {
     max-width: 1200px;
     margin: 0 auto 18px;
     padding: 14px 18px;
-    background: rgba(14, 36, 78, 0.35);
+    background: var(--panel-soft);
     border: 1px solid rgba(120, 160, 220, 0.3);
     border-radius: 12px;
 }
@@ -309,7 +440,7 @@ button.action.secondary {
 .lb-panel li { margin: 3px 0; }
 .lb-panel li::marker { color: var(--lambda); }
 
-.lb-panel-foot { font-size: 0.8rem; color: rgba(170, 190, 220, 0.85); }
+.lb-panel-foot { font-size: 0.8rem; color: var(--muted); }
 .lb-panel-foot a { color: var(--lambda); }
 
 /* Bridge card: always-editable rich-text panel */
@@ -342,7 +473,7 @@ button.action.secondary {
 .bridge-body p { margin: 0 0 10px; }
 .bridge-body ul { margin: 0 0 12px 18px; }
 .bridge-body li { margin: 5px 0; }
-.bridge-body:focus { box-shadow: inset 0 0 0 1px rgba(120, 160, 220, 0.25); border-radius: 6px; }
+.bridge-body:focus { box-shadow: inset 0 0 0 1px var(--edit-line); border-radius: 6px; }
 
 @media print { .lb-panel { display: none; } }
 
@@ -350,7 +481,7 @@ button.action.secondary {
 .toolbar .cloud {
     font-size: 0.7rem;
     letter-spacing: 0.04em;
-    color: rgba(170, 190, 220, 0.55);
+    color: var(--muted);
     text-decoration: none;
 }
 
@@ -385,10 +516,10 @@ button.action.secondary {
 
 /* Slim dark scrollbar — webkit on the scroll container, Firefox via @supports guard */
 .table-wrap::-webkit-scrollbar { height: 8px; }
-.table-wrap::-webkit-scrollbar-track { background: rgba(8, 20, 42, 0.9); }
-.table-wrap::-webkit-scrollbar-thumb { background: rgba(120, 160, 220, 0.35); border-radius: 4px; }
+.table-wrap::-webkit-scrollbar-track { background: var(--trough); }
+.table-wrap::-webkit-scrollbar-thumb { background: var(--thumb); border-radius: 4px; }
 @supports (-moz-appearance: none) {
-    .table-wrap { scrollbar-width: thin; scrollbar-color: rgba(120, 160, 220, 0.35) rgba(8, 20, 42, 0.9); }
+    .table-wrap { scrollbar-width: thin; scrollbar-color: var(--thumb) var(--trough); }
 }
 
 table { width: 100%; border-collapse: collapse; min-width: 760px; }
@@ -405,12 +536,12 @@ thead th {
     white-space: nowrap;
     position: sticky;
     top: 0;
-    background: rgb(12, 30, 64);
+    background: var(--panel);
 }
 
 tbody td {
     padding: 9px 12px;
-    border-bottom: 1px solid rgba(120, 160, 220, 0.12);
+    border-bottom: 1px solid var(--row-line);
     font-size: 0.98rem;
     vertical-align: top;
 }
@@ -451,10 +582,10 @@ td.remark { color: var(--muted); font-size: 0.88rem; min-width: 160px; }
     flex-direction: column;
     gap: 6px;
     padding: 8px;
-    background: rgb(12, 30, 64);
+    background: var(--panel);
     border: 1px solid var(--line);
     border-radius: 10px;
-    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.45);
+    box-shadow: 0 8px 22px var(--shadow);
     white-space: nowrap;
 }
 
@@ -558,7 +689,7 @@ tr.detail-row { display: none; }
 tr.detail-row.open { display: table-row; }
 
 tr.detail-row td {
-    background: rgba(8, 20, 42, 0.45);
+    background: var(--sunken);
     padding: 4px 12px 12px 12px;
 }
 
@@ -732,6 +863,7 @@ footer.page-foot a:hover { text-decoration: underline; }
     tr.detail-row td { background: #fff; }
     tr.detail-row li { color: #444; }
     .chev { display: none !important; }
+    .meta-card.expandable { padding-left: 14px; }
     h1 { color: #8a6400; }
     .subtitle, .meta-card .v, footer.page-foot { color: #333; }
     .meta-card, .table-wrap { background: #fff; border-color: #bbb; }

@@ -1,0 +1,18 @@
+<!DOCTYPE html><html lang="de"><head><meta charset="UTF-8">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="svp.css"></head><body>
+<script src="svp-nav.js"></script>
+<script>
+window.addEventListener('load', function(){
+  document.fonts.ready.then(function(){
+    var out = [];
+    document.querySelectorAll('nav.quick-nav .badge').forEach(function(b){
+      var r = b.getBoundingClientRect();
+      var cs = getComputedStyle(b);
+      out.push(b.textContent.trim()+': h='+r.height.toFixed(1)+' lh='+cs.lineHeight+' fs='+cs.fontSize+' ff='+cs.fontFamily.split(',')[0]);
+    });
+    var pre = document.createElement('pre'); pre.id='RESULT'; pre.textContent = out.join('\n');
+    document.body.appendChild(pre);
+  });
+});
+</script></body></html>

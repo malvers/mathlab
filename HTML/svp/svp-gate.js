@@ -4,6 +4,17 @@
 // passphrase itself), unlock state persists per browser in localStorage.
 // Include EARLY in <head>: <script src="svp-gate.js"></script> (root) or
 // "../svp-gate.js" (subdirs).
+// Colour scheme (chosen in the quick-nav pencil panel) is applied here rather
+// than in svp-nav.js because this file is the only one loaded in <head> —
+// setting the class before first paint avoids a dark flash on light pages.
+(function () {
+    try {
+        if (localStorage.getItem('svp-theme') === 'light') {
+            document.documentElement.classList.add('svp-light');
+        }
+    } catch (e) { }
+})();
+
 (function () {
     const HASH = '517ac27fb0b499ddd50da49532cc40d47d4d36a9a49a43e1558f16eec5cbeda4';
     const KEY = 'svp-gate';
