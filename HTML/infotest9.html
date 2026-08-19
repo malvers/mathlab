@@ -171,7 +171,11 @@
   const PARAMS = new URLSearchParams(location.search);
   /* ?test = demo mode: separate data pool, key r, unlimited submits */
   const TEST_MODE = PARAMS.has('test');
-  const QUIZ_ID = TEST_MODE ? 'infotest9-test' : 'infotest9-v9';
+  /* ?klasse=9a = own data pool (and own submit lock) per class/run;
+     a "reset" is simply a new value, e.g. ?klasse=9a-2 */
+  const KLASSE = (PARAMS.get('klasse') || '').replace(/[^a-z0-9_-]/gi, '').slice(0, 20);
+  const QUIZ_ID = TEST_MODE ? 'infotest9-test'
+                            : 'infotest9-v9' + (KLASSE ? '-' + KLASSE : '');
   /* soft lock against double submits per browser; tied to QUIZ_ID so a new
      quiz version automatically resets the lock */
   const DONE_KEY = 'done-' + QUIZ_ID;
@@ -586,11 +590,20 @@
     el.innerHTML = html || 'Noch keine Daten.';
   }
 
+  /* make the active pool visible in the sub line */
+  function tagSubline() {
+    const sub = document.querySelector('.sub');
+    if (TEST_MODE) sub.textContent += ' · TESTMODUS';
+    else if (KLASSE) sub.textContent += ' · Klasse ' + KLASSE;
+  }
+
   if (PARAMS.has('auswertung')) {
     initDashboard();
+    tagSubline();
   } else {
     submitBtn.addEventListener('click', submit);
     render();
+    tagSubline();
     /* Demo helper (?test): key r fills a random answer set, ~95% correct. */
     if (TEST_MODE) {
       document.addEventListener('keydown', function (e) {
