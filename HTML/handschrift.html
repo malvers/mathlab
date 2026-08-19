@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DOC ALVERS MATHE-LABORE | Handschrift</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet">
+    <link rel="icon" type="image/png" href="resources/favicon.png">
+    <link rel="stylesheet" href="js/cyber-layout.css">
+    <link rel="stylesheet" href="js/buttons-ultra.css">
+    <link rel="stylesheet" href="js/cyber-lab-overrides.css">
+    <link rel="stylesheet" href="js/branding.styles.extracted.css">
+    <link rel="stylesheet" href="js/lab-shell-minimal.css">
+    <style>
+        /* --- tool-specific panes only; shared chrome stays in js/cyber-*.css --- */
+        #canvas-container {
+            overflow: hidden;
+        }
+
+        .htr-split {
+            position: absolute;
+            inset: 0;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            padding: 14px;
+            box-sizing: border-box;
+        }
+
+        /* responsive: stack panes on narrow screens */
+        @media (max-width: 900px) {
+            .htr-split {
+                grid-template-columns: 1fr;
+                grid-template-rows: 1fr 1fr;
+            }
+        }
+
+        .htr-pane {
+            position: relative;
+            min-width: 0;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+            background: rgba(8, 20, 42, 0.72);
+            border: 1px solid rgba(120, 150, 200, 0.28);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .htr-head {
+            flex: 0 0 auto;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.68rem;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: rgba(190, 214, 246, 0.85);
+            padding: 8px 12px;
+            border-bottom: 1px solid rgba(120, 150, 200, 0.2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .htr-body {
+            flex: 1 1 auto;
+            min-height: 0;
+            overflow: auto;
+            position: relative;
+        }
+
+        #drop {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 10px;
+            text-align: center;
+            color: rgba(190, 214, 246, 0.6);
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.9rem;
+            padding: 20px;
+        }
+
+        #drop.hot {
+            background: rgba(121, 158, 49, 0.14);
+            outline: 2px dashed rgba(121, 158, 49, 0.75);
+            outline-offset: -10px;
+        }
+
+        #preview {
+            display: block;
+            max-width: 100%;
+            margin: 0 auto;
+        }
+
+        #out {
+            width: 100%;
+            height: 100%;
+            box-sizing: border-box;
+            border: 0;
+            resize: none;
+            background: transparent;
+            color: #eaf2ff;
+            font-family: 'Outfit', system-ui, sans-serif;
+            font-size: 0.95rem;
+            line-height: 1.55;
+            padding: 12px 14px;
+            outline: none;
+            white-space: pre-wrap;
+        }
+
+        .htr-count {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.62rem;
+            color: rgb(121, 158, 49);
+        }
+
+        #dbg {
+            font-family: 'Menlo', 'Consolas', monospace;
+            font-size: 0.65rem;
+            line-height: 1.5;
+            color: rgba(190, 214, 246, 0.78);
+            background: rgba(8, 20, 42, 0.9);
+            border: 1px solid rgba(120, 150, 200, 0.25);
+            border-radius: 6px;
+            padding: 8px;
+            max-height: 150px;
+            overflow: auto;
+            white-space: pre-wrap;
+            margin-top: 8px;
+        }
+
+        /* slim scrollbars, same look as index.html (FF props and webkit rules kept apart) */
+        .htr-body,
+        #dbg {
+            scrollbar-width: thin;
+            scrollbar-color: rgba(72, 88, 112, 0.95) rgba(38, 46, 64, 0.88);
+        }
+
+        .htr-body::-webkit-scrollbar,
+        #dbg::-webkit-scrollbar {
+            width: 11px;
+            height: 11px;
+        }
+
+        .htr-body::-webkit-scrollbar-track,
+        #dbg::-webkit-scrollbar-track {
+            background: rgba(40, 48, 68, 0.72);
+            border-radius: 999px;
+            margin: 6px 0;
+        }
+
+        .htr-body::-webkit-scrollbar-thumb,
+        #dbg::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, rgba(78, 92, 118, 0.95) 0%, rgba(52, 64, 86, 0.92) 100%);
+            border-radius: 999px;
+            border: 2px solid rgba(34, 42, 58, 0.85);
+            box-shadow: 0 0 8px rgba(0, 0, 0, 0.35);
+        }
+
+        .htr-busy {
+            color: rgb(245, 194, 66);
+        }
+
+        .htr-ok {
+            color: rgb(121, 158, 49);
+        }
+
+        .htr-err {
+            color: rgb(214, 92, 82);
+        }
+    </style>
+</head>
+
+<body>
+    <nav id="mini-rail">
+        <div class="nav-btn" onclick="toggleSidebar()" title="Toggle Menu">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </div>
+    </nav>
+
+    <aside id="side-panel">
+        <header id="sidebar-header"></header>
+        <div id="ui-container"></div>
+    </aside>
+
+    <main id="main-content">
+        <div id="canvas-container">
+            <div class="cyber-grid"></div>
+            <div class="htr-split">
+                <section class="htr-pane">
+                    <div class="htr-head"><span>Vorlage</span><span class="htr-count" id="imginfo"></span></div>
+                    <div class="htr-body" id="imgbody">
+                        <img id="preview" alt="Vorlage" hidden>
+                        <div id="drop">
+                            <div style="font-size:2rem">📄</div>
+                            <div>Bild hierher ziehen, einfügen (Cmd-V)<br>oder in der Seitenleiste auswählen</div>
+                        </div>
+                    </div>
+                </section>
+                <section class="htr-pane">
+                    <div class="htr-head"><span>Transkription</span><span class="htr-count" id="txtinfo"></span></div>
+                    <div class="htr-body">
+                        <textarea id="out" spellcheck="false" aria-label="Transkription"
+                            placeholder="Das Ergebnis erscheint hier — bearbeitbar."></textarea>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <input type="file" id="file" accept="image/*" hidden aria-label="Bilddatei wählen">
+    <a id="dl" hidden aria-hidden="true"></a>
+
+    <script src="js/cyber-left-chrome.js"></script>
+    <script src="js/branding/briefings.js"></script>
+    <script src="js/branding/overlays.js"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/i18n-de.js"></script>
+    <script src="js/i18n-en.js"></script>
+    <script src="js/branding/nav.js"></script>
+    <script src="js/branding.js"></script>
+    <script src="js/ui.js"></script>
+    <script>
+        function toggleSidebar() {
+            const panel = document.getElementById('side-panel');
+            panel.classList.toggle('collapsed');
+            setTimeout(() => window.dispatchEvent(new Event('resize')), 400);
+        }
+
+        CyberBranding.init({
+            useExternalStyles: true,
+            title: 'Handschrift',
+            subtitle: 'Lokale Transkription',
+        });
+        CyberUI.init();
+
+        /* ---------- state ---------- */
+        const OLLAMA = 'http://localhost:11434';
+        let img = null;              // loaded HTMLImageElement
+        let running = null;          // AbortController while transcribing
+
+        const $ = (id) => document.getElementById(id);
+        const dbg = (msg, cls) => {
+            const el = $('dbg');
+            if (!el) return;
+            const t = new Date().toLocaleTimeString('de-DE');
+            el.insertAdjacentHTML('beforeend',
+                '<div class="' + (cls || '') + '">' + t + '  ' + String(msg).replace(/</g, '&lt;') + '</div>');
+            el.scrollTop = el.scrollHeight;
+        };
+        const setStatus = (msg, cls) => {
+            const el = $('status');
+            if (el) { el.textContent = msg; el.className = cls || ''; }
+        };
+
+        /* The transcription instruction. Deliberately strict: a vision model will happily
+           invent fluent, plausible text for an illegible word — that is the one failure
+           mode that makes a transcript worthless, so unreadable spots must stay marked. */
+        const PROMPT = [
+            'Du bist ein Transkriptions-Werkzeug für handschriftliche Dokumente.',
+            'Gib den Text dieses Bildes exakt so wieder, wie er dort steht.',
+            '',
+            'Regeln:',
+            '- Wörtlich transkribieren. Nichts korrigieren, nichts ergänzen, nichts zusammenfassen.',
+            '- Rechtschreibfehler und alte Schreibweisen des Originals bleiben stehen.',
+            '- Zeilenumbrüche des Originals beibehalten.',
+            '- Unleserliche Stelle: [?] schreiben. Unsicheres Wort: Wort[?] schreiben.',
+            '- NIEMALS raten und NIEMALS Text erfinden, der nicht im Bild steht.',
+            '- Nur den transkribierten Text ausgeben, keine Kommentare, keine Einleitung.',
+            '- Enthält das Bild keinen Text, gib nichts aus.'
+        ].join('\n');
+
+        /* ---------- sidebar ---------- */
+        function setupUI() {
+            CyberUI.createCard('ui-container', 'Dokument', `
+                <button class="cyber-btn" style="width:100%" onclick="document.getElementById('file').click()">
+                    Bild wählen
+                </button>
+                <div style="margin-top:10px; font-family:'Outfit'; font-size:0.72rem; color:rgba(190,214,246,0.62); line-height:1.5">
+                    PNG/JPG. PDF vorher wandeln:<br>
+                    <code style="font-size:0.68rem; color:rgb(245,194,66)">pdftoppm -r 300 -png doc.pdf seite</code>
+                </div>
+            `, '#00d2ff');
+
+            CyberUI.createCard('ui-container', 'Erkennung', `
+                <div class="cyber-control-group">
+                    <label class="cyber-label" for="model">Modell</label>
+                    <select id="model" class="cyber-select"></select>
+                </div>
+                <div class="cyber-control-group" style="margin-top:16px">
+                    <label class="cyber-label" for="strips">Streifen pro Seite</label>
+                    <select id="strips" class="cyber-select">
+                        <option value="1">1 — ganze Seite</option>
+                        <option value="3" selected>3 — genauer</option>
+                        <option value="6">6 — sehr genau, langsam</option>
+                    </select>
+                </div>
+                <div style="margin-top:8px; font-family:'Outfit'; font-size:0.7rem; color:rgba(190,214,246,0.6); line-height:1.45">
+                    Mehr Streifen = größere Schrift pro Anfrage = bessere Trefferquote,
+                    aber an den Schnittkanten kann eine Zeile doppelt erscheinen.
+                </div>
+                <button class="cyber-btn" id="go" style="width:100%; margin-top:18px; border-color:rgb(121,158,49); color:rgb(160,200,90)"
+                    onclick="transcribe()">Transkribieren</button>
+                <button class="cyber-btn" id="stop" style="width:100%; margin-top:8px; border-color:rgb(176,36,24)"
+                    onclick="stopRun()" hidden>Abbrechen</button>
+            `, 'rgb(121,158,49)');
+
+            CyberUI.createCard('ui-container', 'Ergebnis', `
+                <button class="cyber-btn" style="width:100%" onclick="copyOut()">Kopieren</button>
+                <button class="cyber-btn" style="width:100%; margin-top:8px" onclick="saveOut()">Als .txt sichern</button>
+            `, '#00d2ff');
+
+            CyberUI.createCard('ui-container', 'Status', `
+                <div id="status" style="font-family:'Orbitron'; font-size:0.68rem; min-height:18px"></div>
+                <div id="dbg"></div>
+            `, 'rgb(245,194,66)', { collapsible: true });
+        }
+
+        /* ---------- image loading ---------- */
+        function loadFile(f) {
+            if (!f || !f.type.startsWith('image/')) { dbg('Keine Bilddatei: ' + (f && f.type), 'htr-err'); return; }
+            const url = URL.createObjectURL(f);
+            const im = new Image();
+            im.onload = () => {
+                img = im;
+                const p = $('preview');
+                p.src = url; p.hidden = false;
+                $('drop').style.display = 'none';
+                $('imginfo').textContent = im.naturalWidth + ' × ' + im.naturalHeight + ' px';
+                dbg('Geladen: ' + f.name + ' (' + im.naturalWidth + '×' + im.naturalHeight + ')', 'htr-ok');
+                setStatus('Bereit', 'htr-ok');
+            };
+            im.onerror = () => dbg('Bild nicht lesbar', 'htr-err');
+            im.src = url;
+        }
+
+        $('file').addEventListener('change', (e) => loadFile(e.target.files[0]));
+
+        const body = $('imgbody');
+        ['dragenter', 'dragover'].forEach(ev => body.addEventListener(ev, (e) => {
+            e.preventDefault(); $('drop').classList.add('hot');
+        }));
+        ['dragleave', 'drop'].forEach(ev => body.addEventListener(ev, (e) => {
+            e.preventDefault(); $('drop').classList.remove('hot');
+        }));
+        body.addEventListener('drop', (e) => {
+            if (e.dataTransfer.files && e.dataTransfer.files[0]) loadFile(e.dataTransfer.files[0]);
+        });
+        window.addEventListener('paste', (e) => {
+            for (const it of (e.clipboardData || {}).items || []) {
+                if (it.type.startsWith('image/')) { loadFile(it.getAsFile()); break; }
+            }
+        });
+
+        /* ---------- ollama ---------- */
+        async function loadModels() {
+            const sel = $('model');
+            try {
+                const r = await fetch(OLLAMA + '/api/tags');
+                const d = await r.json();
+                const names = (d.models || []).map(m => m.name);
+                if (!names.length) {
+                    sel.innerHTML = '<option value="">— kein Modell geladen —</option>';
+                    setStatus('Ollama läuft, aber kein Modell da', 'htr-busy');
+                    dbg('ollama pull qwen3-vl:8b', 'htr-busy');
+                    return;
+                }
+                /* vision models first — they are the only ones that can read an image */
+                const vis = names.filter(n => /vl|vision|llava|minicpm|ocr|gemma3/i.test(n));
+                const order = vis.concat(names.filter(n => !vis.includes(n)));
+                sel.innerHTML = order.map(n => '<option value="' + n + '">' + n + '</option>').join('');
+                setStatus('Ollama bereit · ' + names.length + ' Modell(e)', 'htr-ok');
+                dbg('Modelle: ' + names.join(', '));
+                if (!vis.length) dbg('Achtung: kein Bild-Modell erkannt', 'htr-busy');
+            } catch (e) {
+                sel.innerHTML = '<option value="">— Ollama nicht erreichbar —</option>';
+                setStatus('Ollama nicht erreichbar', 'htr-err');
+                dbg('Start mit: ollama serve', 'htr-err');
+            }
+        }
+
+        /* Cut the page into horizontal strips. A vision model sees a fixed pixel budget,
+           so a full A4 page of handwriting arrives too small to read; strips restore scale. */
+        function stripsOf(n) {
+            const MAXW = 1500;               // cap width, keeps requests a sane size
+            const scale = Math.min(1, MAXW / img.naturalWidth);
+            const w = Math.round(img.naturalWidth * scale);
+            const h = Math.round(img.naturalHeight * scale);
+            const out = [];
+            const sh = h / n;
+            const ov = n > 1 ? Math.round(sh * 0.05) : 0;   // small overlap so no line is cut
+            for (let i = 0; i < n; i++) {
+                const y0 = Math.max(0, Math.round(i * sh) - ov);
+                const y1 = Math.min(h, Math.round((i + 1) * sh) + ov);
+                const c = document.createElement('canvas');
+                c.width = w; c.height = y1 - y0;
+                const g = c.getContext('2d');
+                g.imageSmoothingQuality = 'high';
+                g.drawImage(img, 0, y0 / scale, img.naturalWidth, (y1 - y0) / scale, 0, 0, w, y1 - y0);
+                out.push(c.toDataURL('image/png').split(',')[1]);
+            }
+            return out;
+        }
+
+        async function transcribe() {
+            if (!img) { setStatus('Erst ein Bild laden', 'htr-busy'); return; }
+            const model = $('model').value;
+            if (!model) { setStatus('Kein Modell gewählt', 'htr-err'); return; }
+            const n = parseInt($('strips').value, 10);
+            const parts = stripsOf(n);
+            $('out').value = '';
+            $('go').hidden = true; $('stop').hidden = false;
+            running = new AbortController();
+            const t0 = Date.now();
+            dbg('Start: ' + model + ', ' + n + ' Streifen');
+            try {
+                for (let i = 0; i < parts.length; i++) {
+                    /* live counters: this model "thinks" first and emits no visible text
+                       while doing so — without them the UI looks frozen on strip 1/N */
+                    const tS = Date.now();
+                    let nThink = 0, nText = 0, firstTok = 0;
+                    const tick = setInterval(() => {
+                        const s = ((Date.now() - tS) / 1000).toFixed(0);
+                        setStatus('Streifen ' + (i + 1) + '/' + parts.length + ' · ' + s + ' s · '
+                            + (nText ? nText + ' Zeichen' : (nThink ? 'denkt (' + nThink + ')' : 'wartet …')),
+                            'htr-busy');
+                    }, 250);
+                    const res = await fetch(OLLAMA + '/api/generate', {
+                        method: 'POST',
+                        signal: running.signal,
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            model: model,
+                            prompt: PROMPT,
+                            images: [parts[i]],
+                            stream: true,
+                            options: { temperature: 0, top_p: 0.9 }
+                        })
+                    });
+                    if (!res.ok) {
+                        clearInterval(tick);
+                        throw new Error('HTTP ' + res.status + ' ' + (await res.text()).slice(0, 200));
+                    }
+                    const reader = res.body.getReader();
+                    const dec = new TextDecoder();
+                    let buf = '';
+                    try {
+                        for (;;) {
+                            const { done, value } = await reader.read();
+                            if (done) break;
+                            buf += dec.decode(value, { stream: true });
+                            const lines = buf.split('\n');
+                            buf = lines.pop();
+                            for (const ln of lines) {
+                                if (!ln.trim()) continue;
+                                let o; try { o = JSON.parse(ln); } catch (_) { continue; }
+                                if (o.thinking) nThink += o.thinking.length;
+                                if (o.response) {
+                                    if (!firstTok) {
+                                        firstTok = Date.now() - tS;
+                                        dbg('Streifen ' + (i + 1) + ': erstes Zeichen nach '
+                                            + (firstTok / 1000).toFixed(1) + ' s'
+                                            + (nThink ? ' (davor ' + nThink + ' Zeichen Denken)' : ''));
+                                    }
+                                    nText += o.response.length;
+                                    $('out').value += o.response;
+                                    $('out').scrollTop = $('out').scrollHeight;
+                                    $('txtinfo').textContent = $('out').value.length + ' Zeichen';
+                                }
+                            }
+                        }
+                    } finally { clearInterval(tick); }
+                    const dt = (Date.now() - tS) / 1000;
+                    dbg('Streifen ' + (i + 1) + '/' + parts.length + ' fertig: ' + nText
+                        + ' Zeichen in ' + dt.toFixed(1) + ' s'
+                        + (nText < 60 ? '  ← auffällig wenig, siehe Hinweis' : ''),
+                        nText < 60 ? 'htr-busy' : 'htr-ok');
+                    if (nText < 60) {
+                        dbg('  Tipp: mehr Streifen wählen oder Bild schärfer/größer scannen', 'htr-busy');
+                    }
+                    if (i < parts.length - 1) $('out').value += '\n';
+                }
+                const s = Math.round((Date.now() - t0) / 1000);
+                setStatus('Fertig in ' + s + ' s', 'htr-ok');
+                dbg('Fertig: ' + $('out').value.length + ' Zeichen in ' + s + ' s', 'htr-ok');
+            } catch (e) {
+                if (e.name === 'AbortError') { setStatus('Abgebrochen', 'htr-busy'); dbg('Abgebrochen'); }
+                else { setStatus('Fehler', 'htr-err'); dbg('Fehler: ' + e.message, 'htr-err'); }
+            } finally {
+                running = null;
+                $('go').hidden = false; $('stop').hidden = true;
+            }
+        }
+
+        function stopRun() { if (running) running.abort(); }
+
+        function copyOut() {
+            navigator.clipboard.writeText($('out').value)
+                .then(() => setStatus('Kopiert', 'htr-ok'))
+                .catch(() => setStatus('Kopieren blockiert', 'htr-err'));
+        }
+
+        function saveOut() {
+            const blob = new Blob([$('out').value], { type: 'text/plain;charset=utf-8' });
+            const a = $('dl');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'transkription.txt';
+            a.click();
+            setStatus('Gesichert', 'htr-ok');
+        }
+
+        $('out').addEventListener('input', () => {
+            $('txtinfo').textContent = $('out').value.length + ' Zeichen';
+        });
+
+        setupUI();
+        loadModels();
+        dbg('Bereit. Alles läuft lokal — kein Byte verlässt den Rechner.');
+    </script>
+</body>
+
+</html>
