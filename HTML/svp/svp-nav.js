@@ -7,26 +7,27 @@
     if (!script || !script.src) return;
     const base = script.src.replace(/svp-nav\.js.*$/, '');
 
-    // [href relative to svp root, label, badge color class]
+    // [href relative to svp root, short label (pill row), badge color class,
+    //  spelled-out label for the edit panel]
     const LINKS = [
-        ['index.html', 'Start', 'b-grey'],
-        ['mathe/mathe11.html', 'MA 11', 'b-orange'],
-        ['mathe/mathe12.html', 'MA 12', 'b-orange'],
-        ['mathe/mathe13.html', 'MA 13', 'b-orange'],
-        ['mathe/uebung.html', 'Üben', 'b-orange'],
-        ['wr/wr11.html', 'W/R 11', 'b-teal'],
-        ['informatik/informatik9.html', 'INF 9', 'b-green'],
-        ['informatik/inf11.html', 'INF 11', 'b-green'],
-        ['informatik/inf12.html', 'INF 12', 'b-green'],
-        ['informatik/inf13.html', 'INF 13', 'b-green'],
-        ['informatik/informatik11.html', 'IS 11', 'b-pink'],
-        ['informatik/informatik12.html', 'IS 12', 'b-pink'],
-        ['informatik/informatik13.html', 'IS 13', 'b-pink'],
-        ['informatik/fos11.html', 'FOS 11', 'b-cyan'],
-        ['informatik/fos12.html', 'FOS 12', 'b-cyan'],
-        ['notes.html', 'Notizen', 'b-cyan'],
-        ['konzepte.html', 'Konzepte', 'b-violet'],
-        ['operatoren.html', 'Operatoren', 'b-red'],
+        ['index.html', 'Start', 'b-grey', 'Startseite'],
+        ['mathe/mathe11.html', 'MA 11', 'b-orange', 'Mathematik Klasse 11'],
+        ['mathe/mathe12.html', 'MA 12', 'b-orange', 'Mathematik Klasse 12'],
+        ['mathe/mathe13.html', 'MA 13', 'b-orange', 'Mathematik Klasse 13'],
+        ['mathe/uebung.html', 'Üben', 'b-orange', 'Übung macht den Meister'],
+        ['wr/wr11.html', 'W/R 11', 'b-teal', 'Wirtschaftslehre/Recht Klasse 11'],
+        ['informatik/informatik9.html', 'INF 9', 'b-green', 'Informatik Klasse 9'],
+        ['informatik/inf11.html', 'INF 11', 'b-green', 'Informatik Klasse 11'],
+        ['informatik/inf12.html', 'INF 12', 'b-green', 'Informatik Klasse 12'],
+        ['informatik/inf13.html', 'INF 13', 'b-green', 'Informatik Klasse 13'],
+        ['informatik/informatik11.html', 'IS 11', 'b-pink', 'Informatiksysteme Klasse 11'],
+        ['informatik/informatik12.html', 'IS 12', 'b-pink', 'Informatiksysteme Klasse 12'],
+        ['informatik/informatik13.html', 'IS 13', 'b-pink', 'Informatiksysteme Klasse 13'],
+        ['informatik/fos11.html', 'FOS 11', 'b-cyan', 'Informatik FOS Klasse 11'],
+        ['informatik/fos12.html', 'FOS 12', 'b-cyan', 'Informatik FOS Klasse 12'],
+        ['notes.html', 'Notizen', 'b-cyan', 'Notizen'],
+        ['konzepte.html', 'Konzepte', 'b-violet', 'Konzepte'],
+        ['operatoren.html', 'Operatoren', 'b-red', 'Operatoren'],
     ];
 
     // These open in a new tab so the current plan stays put.
@@ -48,15 +49,6 @@
     const header = document.querySelector('header.page-head') || document.body;
     const nav = document.createElement('nav');
     nav.className = 'quick-nav';
-
-    // Back button left of the Start pill — pill design like the rest.
-    const back = document.createElement('a');
-    back.className = 'badge b-grey nav-back';
-    back.href = '#';
-    back.textContent = '←';
-    back.title = 'zurück';
-    back.addEventListener('click', function (e) { e.preventDefault(); history.back(); });
-    nav.appendChild(back);
 
     const pills = {}; // href -> nav pill element, for live show/hide from the panel
     for (const [href, label, cls] of LINKS) {
@@ -89,23 +81,37 @@
     panelTitle.className = 'ep-title';
     panelTitle.textContent = 'Sichtbare Pillen — Klick schaltet ein/aus';
     panel.appendChild(panelTitle);
+    // One spelled-out pill per row, each with its own checkbox in front.
     const grid = document.createElement('div');
-    grid.className = 'ep-grid';
-    for (const [href, label, cls] of LINKS) {
+    grid.className = 'ep-grid ep-list';
+    for (const [href, label, cls, longLabel] of LINKS) {
         if (href === 'index.html') continue; // Start is always visible, not toggleable
+        // The colour class rides on the row too — the checkbox picks it up via
+        // accent-color: currentColor, so each box matches its subject.
+        const row = document.createElement('label');
+        row.className = 'ep-item ' + cls;
+
+        const box = document.createElement('input');
+        box.type = 'checkbox';
+        box.checked = !hidden.has(href);
+
         const t = document.createElement('span');
         t.className = 'badge ' + cls + (hidden.has(href) ? '' : ' on');
-        t.textContent = label;
-        t.addEventListener('click', function () {
-            if (hidden.has(href)) hidden.delete(href); else hidden.add(href);
-            t.classList.toggle('on', !hidden.has(href));
+        t.textContent = longLabel || label;
+
+        box.addEventListener('change', function () {
+            if (box.checked) hidden.delete(href); else hidden.add(href);
+            t.classList.toggle('on', box.checked);
             const pill = pills[href];
             pill.classList.toggle('nav-hidden',
                 hidden.has(href) && !pill.classList.contains('active'));
             applyCardVisibility();
             saveHidden();
         });
-        grid.appendChild(t);
+
+        row.appendChild(box);
+        row.appendChild(t);
+        grid.appendChild(row);
     }
     panel.appendChild(grid);
 
