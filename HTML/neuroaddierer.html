@@ -1,0 +1,1019 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DOC ALVERS MATHE-LABORE | Der gelernte Addierer</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet">
+    <link rel="icon" type="image/png" href="resources/favicon.png">
+    <link rel="stylesheet" href="js/cyber-layout.css">
+    <link rel="stylesheet" href="js/buttons-ultra.css">
+    <link rel="stylesheet" href="js/cyber-lab-overrides.css">
+    <link rel="stylesheet" href="js/branding.styles.extracted.css">
+    <link rel="stylesheet" href="js/lab-shell-minimal.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <style>
+        #side-panel #ui-container {
+            width: 100% !important;
+            max-width: none !important;
+            align-self: stretch !important;
+        }
+
+        #side-panel .instrument-card {
+            background: rgba(255, 255, 255, 0.055);
+            border: 1px solid rgba(245, 194, 66, 0.32);
+            border-radius: 12px;
+            padding: 12px;
+            width: 100% !important;
+            max-width: none !important;
+            box-sizing: border-box !important;
+            margin-bottom: 12px;
+        }
+
+        .card-head {
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+            letter-spacing: 1.6px;
+            color: rgb(245, 194, 66);
+            margin-bottom: 10px;
+        }
+
+        .num-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .num-row .lbl {
+            font-family: 'Courier New', monospace;
+            font-size: 24px;
+            font-weight: 700;
+            color: #fff;
+            width: 32px;
+        }
+
+        .stepbtn {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            border: 1px solid rgba(121, 158, 49, 0.7);
+            background: rgba(121, 158, 49, 0.18);
+            color: #fff;
+            font-size: 19px;
+            cursor: pointer;
+            flex: 0 0 auto;
+        }
+
+        .stepbtn:active {
+            background: rgba(121, 158, 49, 0.45);
+        }
+
+        .numval {
+            flex: 1;
+            text-align: center;
+            font-family: 'Courier New', monospace;
+            font-weight: 700;
+            font-size: 21px;
+            color: rgb(121, 158, 49);
+            background: rgba(8, 20, 42, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            border-radius: 10px;
+            padding: 6px 0;
+            min-width: 56px;
+        }
+
+        .numval.bcol {
+            color: rgb(80, 170, 255);
+        }
+
+        .act-row {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .actbtn {
+            flex: 1;
+            min-width: 96px;
+            padding: 11px 8px;
+            border-radius: 10px;
+            border: 1px solid rgba(121, 158, 49, 0.8);
+            background: rgba(121, 158, 49, 0.22);
+            color: #fff;
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+            letter-spacing: 1.2px;
+            cursor: pointer;
+        }
+
+        .actbtn:active {
+            background: rgba(121, 158, 49, 0.5);
+        }
+
+        .actbtn.secondary {
+            border-color: rgba(255, 255, 255, 0.28);
+            background: rgba(255, 255, 255, 0.07);
+        }
+
+        .hinttext {
+            font-family: Outfit, Arial, sans-serif;
+            font-size: 12.5px;
+            line-height: 1.45;
+            color: rgba(255, 255, 255, 0.75);
+        }
+
+        label.chk {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: Outfit, Arial, sans-serif;
+            font-size: 13px;
+            color: #fff;
+            cursor: pointer;
+            margin-bottom: 6px;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            accent-color: rgb(121, 158, 49);
+        }
+    </style>
+</head>
+
+<body>
+    <nav id="mini-rail">
+        <div class="nav-btn" onclick="toggleSidebar()" title="Toggle Menu">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </div>
+    </nav>
+
+    <aside id="side-panel">
+        <header id="sidebar-header"></header>
+        <div id="ui-container">
+            <div class="instrument-card">
+                <div class="card-head">LERNVERFAHREN</div>
+                <label class="chk"><input type="radio" name="method" id="m-es" checked> Evolution (CMA-ES)</label>
+                <label class="chk"><input type="radio" name="method" id="m-bp"> Backpropagation</label>
+                <div class="act-row" style="margin-top:10px;">
+                    <button class="actbtn" id="btn-learn">LERNEN</button>
+                    <button class="actbtn secondary" id="btn-step">SCHRITT</button>
+                    <button class="actbtn secondary" id="btn-reset">RESET</button>
+                </div>
+                <div style="margin-top:10px;">
+                    <div class="hinttext">Tempo</div>
+                    <input type="range" id="speed" min="1" max="10" value="3" aria-label="Lerntempo">
+                </div>
+                <div class="hinttext" style="margin-top:8px;">Beide Kurven bleiben stehen — so kann man
+                    Evolution und Backpropagation direkt vergleichen.</div>
+            </div>
+
+            <div class="instrument-card">
+                <div class="card-head">RECHNEN</div>
+                <div class="num-row">
+                    <span class="lbl" style="color:rgb(121,158,49)">a</span>
+                    <button class="stepbtn" id="a-minus" aria-label="a verringern">&minus;</button>
+                    <div class="numval" id="a-val">3</div>
+                    <button class="stepbtn" id="a-plus" aria-label="a erhoehen">+</button>
+                </div>
+                <div class="num-row">
+                    <span class="lbl" style="color:rgb(80,170,255)">b</span>
+                    <button class="stepbtn" id="b-minus" aria-label="b verringern">&minus;</button>
+                    <div class="numval bcol" id="b-val">6</div>
+                    <button class="stepbtn" id="b-plus" aria-label="b erhoehen">+</button>
+                </div>
+                <div class="hinttext">Erst lernen lassen — dann rechnen acht Kopien des gelernten Netzes
+                    hintereinander jede Summe von 0 bis 255.</div>
+            </div>
+        </div>
+    </aside>
+
+    <main id="main-content">
+        <div id="canvas-container">
+            <div id="math-coach-box">
+                <div class="coach-title" id="coach-title-slot"></div>
+                <div id="coach-content" class="coach-message"></div>
+            </div>
+            <canvas id="canvas"></canvas>
+        </div>
+    </main>
+
+    <!-- how the net computes -->
+    <div id="net-help" style="display:none; position:fixed; inset:0; z-index:99998; background:rgba(8,20,42,0.72); align-items:center; justify-content:center;" onclick="if(event.target===this)this.style.display='none'">
+        <div style="max-width:660px; width:92%; max-height:82vh; overflow:auto; background:rgb(14,36,78); border:1px solid rgba(245,194,66,0.55); border-radius:14px; padding:26px 30px; font-family:Arial,sans-serif; color:rgba(255,255,255,0.9); font-size:15px; line-height:1.55; box-shadow:0 12px 48px rgba(0,0,0,0.5);">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                <b style="color:rgb(245,194,66); font-size:18px;">Was das Netz eigentlich rechnet</b>
+                <button aria-label="Schliessen" onclick="document.getElementById('net-help').style.display='none'" style="background:none; border:none; color:#fff; font-size:22px; cursor:pointer; line-height:1;">&times;</button>
+            </div>
+            <p style="margin:0 0 10px;">Jede Verbindung tr&auml;gt eine Zahl, das <b>Gewicht</b>. Ein Neuron
+                multipliziert jeden Eingang mit seinem Gewicht, addiert alles auf, addiert seine eigene
+                <b>Schwelle</b> dazu und quetscht das Ergebnis durch eine weiche Kurve.</p>
+            <div id="formel-h" style="margin:14px 0; text-align:center; font-family:'Courier New',monospace; color:rgb(245,194,66);">
+                h = tanh(w&#8321;&middot;a + w&#8322;&middot;b + w&#8323;&middot;&uuml; + Schwelle)</div>
+            <p style="margin:0 0 4px;">Und die beiden Ausg&auml;nge fassen zusammen, was die f&uuml;nf gemeldet haben:</p>
+            <div id="formel-s" style="margin:10px 0 14px; text-align:center; font-family:'Courier New',monospace; color:rgb(245,194,66);">
+                s = &sigma;(v&#8321;&middot;h&#8321; + &hellip; + v&#8325;&middot;h&#8325; + Schwelle)</div>
+            <p style="margin:0 0 10px;">Mehr ist es nicht. Gez&auml;hlt wird zweierlei: <b>25 Synapsen</b>
+                (3 &times; 5 = 15 Linien nach vorne, 5 &times; 2 = 10 nach hinten) und <b>7 Schwellen</b>,
+                eine pro rechnendem Neuron. Zusammen <b>32 Zahlen</b> — und diese 32 Zahlen <i>sind</i> das Netz,
+                sonst gibt es nichts.</p>
+            <p style="margin:0 0 10px;">Die Ausg&auml;nge sind deshalb auch nie exakt 0 oder 1, sondern etwa 0,03 oder 0,97.
+                Erst das Runden macht daraus wieder ein Bit — genau das tut Digitaltechnik an jedem Gatter auch.</p>
+
+            <b style="color:rgb(245,194,66); display:block; margin:16px 0 8px;">Und im Kopf?</b>
+            <p style="margin:0 0 10px;">Ein <b>Neuron</b> ist der Knoten, also der Kreis. Seine <b>Dendriten</b>
+                sind die Empfangs&auml;ste, mit denen es lauscht, sein <b>Axon</b> das Ausgangskabel. Eine
+                <b>Synapse</b> ist die Kontaktstelle <i>dazwischen</i> — dort, wo das Axon des einen auf den
+                Dendriten des n&auml;chsten trifft. Im Bild also: Kreise sind Neuronen, Linien sind Synapsen.
+                Dendriten sieht man nicht, sie stecken in den Kreisen.</p>
+            <p style="margin:0 0 10px;">Von den zehn Kreisen sind nur <b>sieben echte Neuronen</b> — die drei
+                vorne rechnen nichts, sie liefern blo&szlig; Werte, wie Sinneszellen. Und weil jedes rechnende
+                Neuron seine eigene Reizschwelle hat, gibt es genau sieben Schwellen.</p>
+            <p style="margin:0;">Wie grob die Analogie ist, sei ehrlich gesagt: Ein echtes Neuron hat nicht f&uuml;nf
+                Synapsen, sondern Tausende, es feuert in Spitzen &uuml;ber die Zeit statt eine glatte Zahl auszugeben,
+                und im Kopf sitzen rund 86 Milliarden davon. Dieses Modell ist die Karikatur von McCulloch und Pitts
+                aus dem Jahr 1943 — genau deshalb passt es in 32 Zahlen.</p>
+        </div>
+    </div>
+
+    <!-- why evolution -->
+    <div id="es-help" style="display:none; position:fixed; inset:0; z-index:99998; background:rgba(8,20,42,0.72); align-items:center; justify-content:center;" onclick="if(event.target===this)this.style.display='none'">
+        <div style="max-width:680px; width:92%; max-height:82vh; overflow:auto; background:rgb(14,36,78); border:1px solid rgba(245,194,66,0.55); border-radius:14px; padding:26px 30px; font-family:Arial,sans-serif; color:rgba(255,255,255,0.9); font-size:15px; line-height:1.55; box-shadow:0 12px 48px rgba(0,0,0,0.5);">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                <b style="color:rgb(245,194,66); font-size:18px;">Evolution gegen Backpropagation</b>
+                <button aria-label="Schliessen" onclick="document.getElementById('es-help').style.display='none'" style="background:none; border:none; color:#fff; font-size:22px; cursor:pointer; line-height:1;">&times;</button>
+            </div>
+            <p style="margin:0 0 10px;"><b style="color:rgb(245,194,66);">CMA-ES</b> (Covariance Matrix Adaptation
+                Evolution Strategy) zieht in jeder Generation 14 zuf&auml;llige Varianten der 32 Zahlen, bewertet sie,
+                behaelt die besseren H&auml;lfte und passt daraus nicht nur den Mittelpunkt an, sondern die ganze
+                <b>Kovarianzmatrix</b> — also die Form der Wolke, aus der als N&auml;chstes gezogen wird. Das Verfahren
+                lernt so die Gestalt des Tals, in das es hinabsteigt.</p>
+            <p style="margin:0 0 10px;">Entscheidend: Es fragt die Fitness nur nach <b>besser oder schlechter</b>.
+                Es braucht <b>keine Ableitung</b>. Man kann damit auch optimieren, wo es gar keinen Gradienten gibt —
+                Linsen, Fl&uuml;gelprofile, Bytefolgen.</p>
+            <p style="margin:0 0 10px;"><b>Backpropagation</b> darf mehr wissen: Sie rechnet aus, in welche Richtung
+                jede der 32 Zahlen ge&auml;ndert werden muss, damit der Fehler sinkt. Dieses Mehr an Information
+                zahlt sich aus.</p>
+            <p style="margin:0;">Gemessen an diesem Netz (je 40 L&auml;ufe): Backpropagation braucht im Median
+                <b>127</b> Durchl&auml;ufe durch die Tabelle, CMA-ES <b>896</b>. Faktor sieben — bezahlt daf&uuml;r,
+                dass die Evolution nie eine Ableitung sieht.</p>
+        </div>
+    </div>
+
+    <script src="js/cyber-left-chrome.js"></script>
+    <script src="js/branding/briefings.js"></script>
+    <script src="js/branding/overlays.js"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/i18n-de.js"></script>
+    <script src="js/i18n-en.js"></script>
+    <script src="js/i18n-es.js"></script>
+    <script src="js/i18n-fr.js"></script>
+    <script src="js/i18n-it.js"></script>
+    <script src="js/i18n-pt.js"></script>
+    <script src="js/i18n-sw.js"></script>
+    <script src="js/i18n-tr.js"></script>
+    <script src="js/i18n-nl.js"></script>
+    <script src="js/branding/nav.js"></script>
+    <script src="js/branding.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/cmaes-logic.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script>
+        function toggleSidebar() {
+            const panel = document.getElementById('side-panel');
+            panel.classList.toggle('collapsed');
+            if (window.CyberLeftChrome && typeof CyberLeftChrome.publishResolvedScale === 'function') {
+                CyberLeftChrome.publishResolvedScale();
+            }
+            setTimeout(() => {
+                window.dispatchEvent(new Event('resize'));
+                if (typeof init === 'function') init();
+                if (window.CyberLeftChrome && typeof CyberLeftChrome.publishResolvedScale === 'function') {
+                    CyberLeftChrome.publishResolvedScale();
+                }
+            }, 400);
+        }
+
+        CyberBranding.init({
+            useExternalStyles: true,
+            title: CyberI18n.get('ui.coach_title'),
+            subtitle: 'Der gelernte Addierer',
+        });
+        CyberUI.init();
+
+        (function setCoach() {
+            const t = document.getElementById('coach-title-slot');
+            if (t) t.textContent = 'Ein Netz lernt das Rechnen';
+            const c = document.getElementById('coach-content');
+            if (c) c.textContent = 'Im Lab "1 + 1 = 2" sind die Volladdierer fest verdrahtet. Hier ist keiner verdrahtet: Ein winziges neuronales Netz aus 32 Zahlen soll die Wahrheitstabelle selbst herausfinden — durch Evolution, ohne eine einzige Ableitung. Danach rechnen acht Kopien davon in Reihe jede Summe bis 255.';
+        })();
+
+        if (window.CyberLeftChrome && typeof CyberLeftChrome.configure === 'function') {
+            CyberLeftChrome.configure({ viewportOnlyZoom: true });
+        }
+
+        // the two neuron formulas in LaTeX; the plain-text markup stays as fallback
+        (function renderFormulas() {
+            if (typeof katex === 'undefined') return;
+            [['formel-h', 'h = \\tanh\\bigl(w_1\\,{\\color{#799E31}a} + w_2\\,{\\color{#50AAFF}b}'
+                + ' + w_3\\,{\\color{#D73728}\\text{ü}} + \\text{Schwelle}\\bigr)'],
+             ['formel-s', '{\\color{#F5C242}s} = \\sigma\\bigl(v_1 h_1 + v_2 h_2 + \\cdots + v_5 h_5'
+                + ' + \\text{Schwelle}\\bigr)']
+            ].forEach(f => {
+                const el = document.getElementById(f[0]);
+                if (!el) return;
+                try { katex.render(f[1], el, { displayMode: true, throwOnError: false }); }
+                catch (e) { /* keep the plain-text fallback */ }
+            });
+        })();
+
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const container = document.getElementById('canvas-container');
+
+        // ---------- palette (same language as the 1+1 lab) ----------
+        const ORANGE = 'rgb(245,194,66)';   // sum bit / result
+        const GREEN = 'rgb(121,158,49)';    // number a
+        const BLUE = 'rgb(80,170,255)';     // number b
+        const RED = 'rgb(215,55,40)';       // carry
+        const WHITE = '#fff';
+        const DIM = 'rgba(255,255,255,0.55)';
+        const PANEL_BG = 'rgba(14,36,78,0.55)';
+        const PANEL_BORDER = 'rgba(245,194,66,0.35)';
+
+        // ---------- the network: 3 -> H -> 2 ----------
+        const H = 5;
+        const NP = 4 * H + H * 2 + 2;      // 15 + 5 + 10 + 2 = 32
+        const OUT_BASE = 4 * H;
+        const sig = z => 1 / (1 + Math.exp(-z));
+
+        // full-adder truth table: s = a xor b xor carry, carry-out = majority
+        const DATA = [];
+        for (let a = 0; a < 2; a++)
+            for (let b = 0; b < 2; b++)
+                for (let ci = 0; ci < 2; ci++)
+                    DATA.push({ in: [a, b, ci], out: [a ^ b ^ ci, (a + b + ci) >= 2 ? 1 : 0] });
+
+        function forward(p, x) {
+            const h = [];
+            for (let j = 0; j < H; j++) {
+                let s = p[3 * H + j];
+                for (let i = 0; i < 3; i++) s += p[j * 3 + i] * x[i];
+                h.push(Math.tanh(s));
+            }
+            const o = [];
+            for (let j = 0; j < 2; j++) {
+                let s = p[OUT_BASE + 2 * H + j];
+                for (let i = 0; i < H; i++) s += p[OUT_BASE + j * H + i] * h[i];
+                o.push(sig(s));
+            }
+            return { h, o };
+        }
+
+        function mse(p) {
+            let e = 0;
+            for (const d of DATA) {
+                const o = forward(p, d.in).o;
+                e += (o[0] - d.out[0]) ** 2 + (o[1] - d.out[1]) ** 2;
+            }
+            return e / (DATA.length * 2);
+        }
+
+        // smallest distance any output keeps from the 0.5 decision line;
+        // -1 as soon as a single row rounds to the wrong bit
+        function decisionMargin(p) {
+            if (!p) return -1;
+            let m = 1;
+            for (const d of DATA) {
+                const o = forward(p, d.in).o;
+                for (let j = 0; j < 2; j++) {
+                    if (Math.round(o[j]) !== d.out[j]) return -1;
+                    m = Math.min(m, Math.abs(o[j] - 0.5));
+                }
+            }
+            return m;
+        }
+
+        function correctRows(p) {
+            if (!p) return 0;
+            let n = 0;
+            for (const d of DATA) {
+                const o = forward(p, d.in).o;
+                if (Math.round(o[0]) === d.out[0] && Math.round(o[1]) === d.out[1]) n++;
+            }
+            return n;
+        }
+
+        // ---------- training state ----------
+        let method = 'es';                 // 'es' | 'bp'
+        let es = null, esGen = 0, esEvals = 0, esRestarts = 0;
+        let bpP = null, bpEpoch = 0, bpEvals = 0;
+        let histES = [], histBP = [];      // {e: table passes, f: error}
+        let running = false, solved = false;
+        const LR = 1.0;                    // measured: median 127 epochs, 40/40 runs
+        const SIGMA0 = 0.5;
+
+        function params() { return method === 'es' ? (es && es.best.x) : bpP; }
+        function curErr() {
+            const p = params();
+            return p ? mse(p) : null;
+        }
+
+        function newES() { es = new CMAES(new Array(NP).fill(0), SIGMA0); }
+        function randInit() {
+            return new Array(NP).fill(0).map(() => (Math.random() * 2 - 1) * 0.8);
+        }
+
+        function stepES() {
+            if (!es) newES();
+            const X = es.ask();
+            const F = X.map(mse);
+            es.tell(X, F);
+            esGen++; esEvals += X.length;
+            histES.push({ e: esEvals, f: es.best.f });
+            // safety net: a collapsed step size means the search is stuck — start over
+            if (es.sigma < 1e-9 && decisionMargin(es.best.x) < 0.2) { newES(); esRestarts++; }
+        }
+
+        function bpEpochStep() {
+            if (!bpP) bpP = randInit();
+            const p = bpP, g = new Array(NP).fill(0);
+            for (const d of DATA) {
+                const { h, o } = forward(p, d.in);
+                const dOut = [0, 0];
+                for (let j = 0; j < 2; j++) dOut[j] = 2 * (o[j] - d.out[j]) * o[j] * (1 - o[j]);
+                for (let j = 0; j < 2; j++) {
+                    for (let i = 0; i < H; i++) g[OUT_BASE + j * H + i] += dOut[j] * h[i];
+                    g[OUT_BASE + 2 * H + j] += dOut[j];
+                }
+                for (let i = 0; i < H; i++) {
+                    let dh = 0;
+                    for (let j = 0; j < 2; j++) dh += dOut[j] * p[OUT_BASE + j * H + i];
+                    const dz = dh * (1 - h[i] * h[i]);
+                    for (let q = 0; q < 3; q++) g[i * 3 + q] += dz * d.in[q];
+                    g[3 * H + i] += dz;
+                }
+            }
+            for (let i = 0; i < NP; i++) p[i] -= LR * g[i] / DATA.length;
+            bpEpoch++; bpEvals++;
+            histBP.push({ e: bpEvals, f: mse(p) });
+        }
+
+        function trainStep() {
+            if (method === 'es') stepES(); else bpEpochStep();
+            const p = params();
+            if (decisionMargin(p) >= 0.2) {
+                solved = true; running = false;
+                const btn = document.getElementById('btn-learn');
+                if (btn) btn.textContent = 'GESCHAFFT';
+            }
+        }
+
+        function resetAll() {
+            es = null; esGen = 0; esEvals = 0; esRestarts = 0;
+            bpP = null; bpEpoch = 0; bpEvals = 0;
+            histES = []; histBP = [];
+            running = false; solved = false;
+            draw();
+        }
+
+        // ---------- canvas plumbing ----------
+        function resizeCanvasToContainer() {
+            const dpr = window.devicePixelRatio || 1;
+            const rect = container.getBoundingClientRect();
+            const w = Math.max(1, rect.width);
+            const h = Math.max(1, rect.height);
+            canvas.width = Math.floor(w * dpr);
+            canvas.height = Math.floor(h * dpr);
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.scale(dpr, dpr);
+        }
+
+        let S = 1;
+        let hoverRow = null;               // truth-table row under the cursor
+        let rowHits = [], helpNet = null, helpES = null;
+
+        function panel(x, y, w, h, title) {
+            ctx.fillStyle = PANEL_BG;
+            ctx.strokeStyle = PANEL_BORDER;
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.roundRect(x, y, w, h, 10);
+            ctx.fill(); ctx.stroke();
+            ctx.fillStyle = ORANGE;
+            ctx.font = '700 ' + Math.round(S * 18) + 'px Arial, sans-serif';
+            ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+            ctx.fillText(title, x + S * 12, y + S * 17);
+        }
+
+        function fmt2(v) { return v.toFixed(2).replace('.', ','); }
+
+        function draw() {
+            const rect = container.getBoundingClientRect();
+            const W = rect.width, Hh = rect.height;
+            ctx.clearRect(0, 0, W, Hh);
+            rowHits = [];
+
+            const brandEl = document.querySelector('.canvas-branding');
+            const topPad = brandEl ? Math.max(0, brandEl.offsetTop + brandEl.offsetHeight + 10) : 0;
+
+            const hTab = 240, hNet = 214, hLrn = 176, hCal = 190, hRes = 72, gapU = 30;
+            const totalU = hTab + hNet + hLrn + hCal + hRes + 4 * gapU + 28;
+            S = Math.max(0.5, Math.min(W / 900, (Hh - topPad) / totalU));
+
+            const M = S * 14;
+            const px = M, pw = W - 2 * M;
+            const gap = S * gapU;
+            let y = topPad + M;
+            const p = params();
+            const EXPX = px + pw * 0.60;
+
+            const expl = (lines, yTop, dy) => {
+                ctx.save();
+                ctx.font = Math.round(S * 17) + 'px Arial, sans-serif';
+                ctx.fillStyle = 'rgba(255,255,255,0.80)';
+                ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+                lines.forEach((t, i) => ctx.fillText(t, EXPX, yTop + i * (dy || S * 23)));
+                ctx.restore();
+            };
+
+            const helpIcon = (yTop) => {
+                const hr = S * 11, hx = px + pw - S * 16, hy = yTop + S * 16;
+                ctx.save();
+                ctx.fillStyle = 'rgb(14,36,78)';
+                ctx.beginPath(); ctx.arc(hx, hy, hr + S * 2.5, 0, 7); ctx.fill();
+                ctx.strokeStyle = ORANGE; ctx.fillStyle = ORANGE;
+                ctx.lineWidth = 1.6;
+                ctx.beginPath(); ctx.arc(hx, hy, hr, 0, 7); ctx.stroke();
+                ctx.font = '700 ' + Math.round(S * 16) + 'px Arial, sans-serif';
+                ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                ctx.fillText('?', hx, hy + S * 1);
+                ctx.restore();
+                return { x: hx - hr - S * 3, y: hy - hr - S * 3, w: (hr + S * 3) * 2, h: (hr + S * 3) * 2 };
+            };
+
+            // ================= 1) TRUTH TABLE =================
+            panel(px, y, pw, S * hTab, '1  DIE AUFGABE  —  Wahrheitstabelle des Volladdierers');
+            {
+                const cx = [px + S * 40, px + S * 88, px + S * 140, px + S * 226, px + S * 278, px + S * 372, px + S * 448];
+                ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+
+                ctx.font = '700 ' + Math.round(S * 13) + 'px Arial, sans-serif';
+                ctx.fillStyle = DIM;
+                ctx.fillText('EINGANG', (cx[0] + cx[2]) / 2, y + S * 40);
+                ctx.fillText('SOLL', (cx[3] + cx[4]) / 2, y + S * 40);
+                ctx.fillStyle = ORANGE;
+                ctx.fillText('WAS DAS NETZ SAGT', (cx[5] + cx[6]) / 2, y + S * 40);
+
+                // the carry appears twice — once coming in, once going out; label both
+                const fBig = '700 ' + Math.round(S * 17) + 'px "Courier New", monospace';
+                const fTiny = '700 ' + Math.round(S * 11) + 'px Arial, sans-serif';
+                const heads = [['a', GREEN, ''], ['b', BLUE, ''], ['ü', RED, 'ein'], ['s', ORANGE, ''],
+                               ['ü', RED, 'aus'], ['s', ORANGE, ''], ['ü', RED, 'aus']];
+                heads.forEach((hd, i) => {
+                    ctx.fillStyle = hd[1];
+                    ctx.font = fBig;
+                    if (!hd[2]) { ctx.fillText(hd[0], cx[i], y + S * 62); return; }
+                    const wBig = ctx.measureText(hd[0]).width;
+                    ctx.font = fTiny;
+                    const small = ' ' + hd[2];
+                    const wSmall = ctx.measureText(small).width;
+                    const sx = cx[i] - (wBig + wSmall) / 2;
+                    ctx.textAlign = 'left';
+                    ctx.font = fBig; ctx.fillText(hd[0], sx, y + S * 62);
+                    ctx.font = fTiny; ctx.fillText(small, sx + wBig, y + S * 63);
+                    ctx.textAlign = 'center';
+                });
+
+                ctx.strokeStyle = 'rgba(255,255,255,0.18)';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(px + S * 24, y + S * 72); ctx.lineTo(px + S * 496, y + S * 72); ctx.stroke();
+
+                DATA.forEach((d, r) => {
+                    const ry = y + S * 90 + r * S * 19;
+                    const hot = hoverRow === r;
+                    if (hot) {
+                        ctx.fillStyle = 'rgba(255,255,255,0.07)';
+                        ctx.beginPath();
+                        ctx.roundRect(px + S * 24, ry - S * 9, S * 472, S * 19, 4);
+                        ctx.fill();
+                    }
+                    ctx.font = '700 ' + Math.round(S * 16) + 'px "Courier New", monospace';
+                    const vals = [[d.in[0], GREEN], [d.in[1], BLUE], [d.in[2], RED], [d.out[0], ORANGE], [d.out[1], RED]];
+                    vals.forEach((v, i) => {
+                        ctx.fillStyle = v[0] ? v[1] : 'rgba(255,255,255,0.5)';
+                        ctx.fillText(String(v[0]), cx[i], ry);
+                    });
+                    if (p) {
+                        const o = forward(p, d.in).o;
+                        [0, 1].forEach(j => {
+                            const good = Math.round(o[j]) === d.out[j];
+                            ctx.fillStyle = good ? 'rgba(150,220,130,0.95)' : RED;
+                            ctx.fillText(fmt2(o[j]), cx[5 + j], ry);
+                        });
+                    } else {
+                        ctx.fillStyle = 'rgba(255,255,255,0.28)';
+                        ctx.fillText('–', cx[5], ry); ctx.fillText('–', cx[6], ry);
+                    }
+                    rowHits.push({ x: px + S * 24, y: ry - S * 9, w: S * 472, h: S * 19, row: r });
+                });
+                ctx.textAlign = 'left';
+                expl([
+                    'Acht Zeilen, mehr bekommt das Netz nicht zu sehen.',
+                    'Es kennt weder XOR noch Übertrag — nur diese Tabelle.',
+                    '',
+                    'ü ist der Übertrag. Von rechts kommt einer herein',
+                    '(ü ein), nach links geht einer hinaus (ü aus) —',
+                    'genau wie beim Addieren mit Papier und Bleistift.',
+                    '',
+                    'Fahre über eine Zeile: unten leuchtet auf,',
+                    'wie das Netz sie gerade durchrechnet.'
+                ], y + S * 66, S * 20);
+            }
+            y += S * hTab + gap;
+
+            // ================= 2) THE NET =================
+            panel(px, y, pw, S * hNet, '2  DAS NETZ  —  3 → ' + H + ' → 2:  ' + (5 * H)
+                + ' Synapsen + ' + (H + 2) + ' Schwellen = ' + NP + ' Zahlen');
+            helpNet = helpIcon(y);
+            {
+                const probe = hoverRow !== null ? forward(p || new Array(NP).fill(0), DATA[hoverRow].in) : null;
+                const colX = [px + pw * 0.10, px + pw * 0.28, px + pw * 0.46];
+                const yTop = y + S * 56, yBot = y + S * (hNet - 26);
+                const nodeY = (n, i) => n === 1 ? (yTop + yBot) / 2 : yTop + (yBot - yTop) * i / (n - 1);
+                const inY = i => nodeY(3, i) * 0.82 + ((yTop + yBot) / 2) * 0.18;
+                const outY = i => nodeY(2, i) * 0.7 + ((yTop + yBot) / 2) * 0.3;
+                const R = S * 15;
+
+                // edges first, so nodes sit on top
+                const edgeColor = w => (w >= 0 ? 'rgba(245,194,66,' : 'rgba(80,170,255,')
+                    + Math.min(0.92, 0.14 + Math.abs(w) / 5).toFixed(3) + ')';
+                for (let j = 0; j < H; j++) {
+                    for (let i = 0; i < 3; i++) {
+                        const w = p ? p[j * 3 + i] : 0;
+                        ctx.strokeStyle = edgeColor(w);
+                        ctx.lineWidth = Math.max(0.6, Math.min(S * 4, Math.abs(w) * S * 1.1));
+                        ctx.beginPath();
+                        ctx.moveTo(colX[0] + R, inY(i)); ctx.lineTo(colX[1] - R, nodeY(H, j)); ctx.stroke();
+                    }
+                }
+                for (let j = 0; j < 2; j++) {
+                    for (let i = 0; i < H; i++) {
+                        const w = p ? p[OUT_BASE + j * H + i] : 0;
+                        ctx.strokeStyle = edgeColor(w);
+                        ctx.lineWidth = Math.max(0.6, Math.min(S * 4, Math.abs(w) * S * 1.1));
+                        ctx.beginPath();
+                        ctx.moveTo(colX[1] + R, nodeY(H, i)); ctx.lineTo(colX[2] - R, outY(j)); ctx.stroke();
+                    }
+                }
+
+                const node = (x, yy, col, label, act) => {
+                    ctx.save();
+                    ctx.beginPath(); ctx.arc(x, yy, R, 0, 7);
+                    ctx.fillStyle = act === null ? 'rgba(8,20,42,0.9)'
+                        : 'rgba(' + (col === GREEN ? '121,158,49' : col === BLUE ? '80,170,255' : col === RED ? '215,55,40' : '245,194,66') + ',' + (0.12 + 0.7 * act) + ')';
+                    ctx.fill();
+                    ctx.strokeStyle = col; ctx.lineWidth = 1.6; ctx.stroke();
+                    if (label) {
+                        // a strongly filled node swallows same-coloured text
+                        ctx.fillStyle = (act !== null && act > 0.45) ? WHITE : col;
+                        ctx.font = '700 ' + Math.round(S * 17) + 'px "Courier New", monospace';
+                        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                        ctx.fillText(label, x, yy);
+                    }
+                    ctx.restore();
+                };
+
+                const inLabels = [['a', GREEN], ['b', BLUE], ['ü', RED]];
+                const caption = (x, yy, txt, col) => {
+                    ctx.save();
+                    ctx.font = '700 ' + Math.round(S * 11) + 'px Arial, sans-serif';
+                    ctx.fillStyle = col; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                    ctx.fillText(txt, x, yy);
+                    ctx.restore();
+                };
+                for (let i = 0; i < 3; i++) {
+                    const act = probe ? DATA[hoverRow].in[i] : null;
+                    node(colX[0], inY(i), inLabels[i][1], inLabels[i][0], act);
+                }
+                caption(colX[0], inY(2) + R + S * 11, 'ein', RED);
+                for (let j = 0; j < H; j++) {
+                    const act = probe ? (probe.h[j] + 1) / 2 : null;
+                    node(colX[1], nodeY(H, j), ORANGE, '', act);
+                }
+                const outLabels = [['s', ORANGE], ['ü', RED]];
+                for (let j = 0; j < 2; j++) {
+                    const act = probe ? probe.o[j] : null;
+                    node(colX[2], outY(j), outLabels[j][1], outLabels[j][0], act);
+                }
+                caption(colX[2], outY(1) + R + S * 11, 'aus', RED);
+
+                if (probe && p) {
+                    ctx.font = '700 ' + Math.round(S * 15) + 'px "Courier New", monospace';
+                    ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+                    [0, 1].forEach(j => {
+                        ctx.fillStyle = outLabels[j][1];
+                        ctx.fillText(fmt2(probe.o[j]), colX[2] + R + S * 8, outY(j));
+                    });
+                }
+
+                ctx.textAlign = 'left';
+                expl(p ? [
+                    'Jede Linie ist eine Zahl: golden heißt positiv,',
+                    'blau negativ, die Dicke ist ihr Betrag.',
+                    '',
+                    'Diese ' + NP + ' Zahlen sind das ganze Netz.',
+                    'Niemand hat sie gesetzt — sie sind gewachsen.'
+                ] : [
+                    'Noch ist nichts gelernt: alle Gewichte sind null,',
+                    'das Netz ist ein leeres Blatt.',
+                    '',
+                    'Golden wird positiv, blau negativ,',
+                    'die Dicke zeigt den Betrag.'
+                ], y + S * 78);
+            }
+            y += S * hNet + gap;
+
+            // ================= 3) LEARNING =================
+            panel(px, y, pw, S * hLrn, '3  DAS LERNEN  —  Evolution ohne eine einzige Ableitung');
+            helpES = helpIcon(y);
+            {
+                const gx = px + S * 40, gy = y + S * 44, gw = pw * 0.42, gh = S * (hLrn - 76);
+                ctx.strokeStyle = 'rgba(255,255,255,0.22)';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(gx, gy); ctx.lineTo(gx, gy + gh); ctx.lineTo(gx + gw, gy + gh); ctx.stroke();
+
+                const maxE = Math.max(120, histES.length ? histES[histES.length - 1].e : 0,
+                    histBP.length ? histBP[histBP.length - 1].e : 0);
+                const yOf = f => {
+                    const t = (Math.log10(Math.max(1e-4, f)) + 4) / 4;   // 1e-4 .. 1
+                    return gy + gh - t * gh;
+                };
+                ctx.font = Math.round(S * 11) + 'px Arial, sans-serif';
+                ctx.fillStyle = DIM; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+                [[1, '1'], [0.01, '0,01'], [1e-4, '0,0001']].forEach(t => ctx.fillText(t[1], gx - S * 5, yOf(t[0])));
+                ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+                ctx.fillText('Durchläufe durch die Tabelle  →  ' + Math.round(maxE), gx + gw / 2, gy + gh + S * 6);
+
+                const curve = (hist, col, wdt) => {
+                    if (hist.length < 2) return;
+                    ctx.strokeStyle = col; ctx.lineWidth = wdt;
+                    ctx.beginPath();
+                    hist.forEach((pt, i) => {
+                        const X = gx + (pt.e / maxE) * gw, Y = yOf(pt.f);
+                        if (i === 0) ctx.moveTo(X, Y); else ctx.lineTo(X, Y);
+                    });
+                    ctx.stroke();
+                };
+                curve(histBP, 'rgba(255,255,255,0.75)', 1.6);
+                curve(histES, ORANGE, 2.2);
+
+                // legend + numbers
+                ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+                ctx.font = '700 ' + Math.round(S * 14) + 'px Arial, sans-serif';
+                const lx = gx + gw + S * 22;
+                [[ORANGE, 'Evolution', histES.length, 0], ['rgba(255,255,255,0.75)', 'Backprop', histBP.length, 1]].forEach(l => {
+                    const ly = gy + S * 14 + l[3] * S * 24;
+                    const ran = l[2] > 0;
+                    ctx.strokeStyle = ran ? l[0] : 'rgba(255,255,255,0.20)';
+                    ctx.lineWidth = 2.4;
+                    ctx.beginPath(); ctx.moveTo(lx, ly); ctx.lineTo(lx + S * 20, ly); ctx.stroke();
+                    ctx.fillStyle = ran ? l[0] : 'rgba(255,255,255,0.32)';
+                    ctx.fillText(l[1], lx + S * 28, ly);
+                });
+                // say why a curve is missing instead of leaving a dead legend entry
+                if (!histES.length || !histBP.length) {
+                    const missing = !histBP.length ? 'Backpropagation' : 'Evolution';
+                    ctx.font = Math.round(S * 13) + 'px Arial, sans-serif';
+                    ctx.fillStyle = 'rgba(255,255,255,0.45)';
+                    ctx.fillText(missing + ' ist noch nicht gelaufen — links umschalten, dann LERNEN.',
+                        gx + S * 10, gy + gh - S * 14);
+                }
+
+                const err = curErr();
+                const nOk = correctRows(p);
+                const stat = (label, value, col, i) => {
+                    const sy = y + S * 52 + i * S * 28;
+                    ctx.font = Math.round(S * 15) + 'px Arial, sans-serif';
+                    ctx.fillStyle = DIM; ctx.textAlign = 'left';
+                    ctx.fillText(label, EXPX, sy);
+                    ctx.font = '700 ' + Math.round(S * 18) + 'px "Courier New", monospace';
+                    ctx.fillStyle = col;
+                    ctx.fillText(value, EXPX + pw * 0.22, sy);
+                };
+                stat(method === 'es' ? 'Generation' : 'Epoche',
+                    String(method === 'es' ? esGen : bpEpoch), WHITE, 0);
+                stat('Fehler', err === null ? '–' : err.toFixed(4).replace('.', ','), ORANGE, 1);
+                stat('richtige Zeilen', nOk + ' / 8', nOk === 8 ? 'rgba(150,220,130,0.95)' : WHITE, 2);
+                if (solved) {
+                    ctx.font = '700 ' + Math.round(S * 17) + 'px Arial, sans-serif';
+                    ctx.fillStyle = 'rgba(150,220,130,0.95)';
+                    ctx.fillText('GESCHAFFT — das Netz kann addieren.', EXPX, y + S * 140);
+                } else if (esRestarts > 0 && method === 'es') {
+                    ctx.font = Math.round(S * 15) + 'px Arial, sans-serif';
+                    ctx.fillStyle = DIM;
+                    ctx.fillText('Neustart nach Sackgasse: ' + esRestarts, EXPX, y + S * 140);
+                }
+            }
+            y += S * hLrn + gap;
+
+            // ================= 4) CHAINED ADDER =================
+            let chain = null;
+            panel(px, y, pw, S * hCal, '4  UND JETZT RECHNEN  —  acht Kopien des gelernten Netzes in Reihe');
+            {
+                const ready = p && correctRows(p) === 8;
+                const cols = 8;
+                const colW = (pw - S * 120) / cols;
+                const x0 = px + pw - S * 40 - colW;
+                const rowA = y + S * 44, rowB = rowA + S * 28, rowNet = rowB + S * 24, rowS = rowNet + S * 56;
+
+                ctx.font = '700 ' + Math.round(S * 22) + 'px "Courier New", monospace';
+                ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+                ctx.fillStyle = GREEN; ctx.fillText('a', px + S * 18, rowA);
+                ctx.fillStyle = BLUE; ctx.fillText('b', px + S * 18, rowB);
+
+                let carry = 0;
+                const outBits = [], rawS = [];
+                for (let i = 0; i < cols; i++) {
+                    const ai = (A >> i) & 1, bi = (B >> i) & 1;
+                    if (ready) {
+                        const o = forward(p, [ai, bi, carry]).o;
+                        rawS.push(o[0]);
+                        outBits.push(Math.round(o[0]));
+                        carry = Math.round(o[1]);
+                    } else {
+                        rawS.push(null); outBits.push(null);
+                    }
+                }
+
+                for (let i = 0; i < cols; i++) {
+                    const cxm = x0 - i * colW + colW / 2;
+                    const ai = (A >> i) & 1, bi = (B >> i) & 1;
+
+                    const bitBox = (val, ry, col) => {
+                        const bw = S * 34, bx = cxm - bw / 2, by = ry - S * 13;
+                        ctx.fillStyle = val ? col.replace('rgb', 'rgba').replace(')', ',0.28)') : 'rgba(255,255,255,0.05)';
+                        ctx.strokeStyle = val ? col : 'rgba(255,255,255,0.35)';
+                        ctx.lineWidth = 1.4;
+                        ctx.beginPath(); ctx.roundRect(bx, by, bw, S * 26, 6); ctx.fill(); ctx.stroke();
+                        ctx.fillStyle = val ? WHITE : 'rgba(255,255,255,0.6)';
+                        ctx.font = '700 ' + Math.round(S * 17) + 'px "Courier New", monospace';
+                        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                        ctx.fillText(val === null ? '–' : String(val), cxm, ry);
+                    };
+                    bitBox(ai, rowA, GREEN);
+                    bitBox(bi, rowB, BLUE);
+
+                    // one little copy of the net
+                    const nw = colW - S * 14, nh = S * 30;
+                    ctx.fillStyle = ready ? 'rgba(245,194,66,0.10)' : 'rgba(255,255,255,0.04)';
+                    ctx.strokeStyle = ready ? 'rgba(245,194,66,0.55)' : 'rgba(255,255,255,0.18)';
+                    ctx.lineWidth = 1.2;
+                    ctx.beginPath(); ctx.roundRect(cxm - nw / 2, rowNet, nw, nh, 7); ctx.fill(); ctx.stroke();
+                    ctx.fillStyle = ready ? 'rgba(255,255,255,0.85)' : DIM;
+                    ctx.font = '700 ' + Math.round(S * 12) + 'px Arial, sans-serif';
+                    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                    ctx.fillText('NETZ', cxm, rowNet + nh / 2);
+
+                    bitBox(outBits[i], rowS, ORANGE);
+                    if (rawS[i] !== null) {
+                        ctx.fillStyle = DIM;
+                        ctx.font = '700 ' + Math.round(S * 12) + 'px "Courier New", monospace';
+                        ctx.fillText(fmt2(rawS[i]), cxm, rowS + S * 22);
+                    }
+                }
+
+                chain = ready
+                    ? { value: outBits.reduce((acc, b, i) => acc + b * (1 << i), 0) + carry * 256,
+                        bitsTxt: (carry ? '1' : '') + outBits.slice().reverse().join('') }
+                    : null;
+            }
+            y += S * hCal + gap;
+
+            // ================= 5) THE RESULT =================
+            panel(px, y, pw, S * hRes, '5  DAS ERGEBNIS');
+            {
+                ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+                const yb = y + S * 50;
+                if (chain) {
+                    const fMain = '700 ' + Math.round(S * 26) + 'px "Courier New", monospace';
+                    const fSub = '700 ' + Math.round(S * 15) + 'px "Courier New", monospace';
+                    let tx = px + S * 18;
+                    ctx.fillStyle = ORANGE;
+                    const seg = (main, sub) => {
+                        ctx.font = fMain; ctx.fillText(main, tx, yb); tx += ctx.measureText(main).width;
+                        if (sub) { ctx.font = fSub; ctx.fillText(sub, tx + S * 1, yb + S * 8); tx += ctx.measureText(sub).width + S * 4; }
+                    };
+                    seg('c = ' + chain.bitsTxt, '2');
+                    seg('  =  ' + chain.value, '10');
+                    ctx.font = Math.round(S * 17) + 'px Arial, sans-serif';
+                    ctx.fillStyle = chain.value === A + B ? 'rgba(150,220,130,0.95)' : RED;
+                    ctx.fillText(chain.value === A + B ? '   richtig   (' + A + ' + ' + B + ' = ' + (A + B) + ')'
+                        : '   falsch — erwartet ' + (A + B), tx + S * 10, yb);
+                } else {
+                    ctx.font = Math.round(S * 17) + 'px Arial, sans-serif';
+                    ctx.fillStyle = DIM;
+                    ctx.fillText('Erst links LERNEN drücken — solange das Netz die Tabelle nicht kann, rechnet auch die Kette nichts.',
+                        px + S * 18, yb);
+                }
+            }
+        }
+
+        // ---------- values for the chained adder ----------
+        let A = 3, B = 6;
+        const clamp = v => Math.max(0, Math.min(255, v));
+        function setVals(a, b) {
+            A = clamp(a); B = clamp(b);
+            document.getElementById('a-val').textContent = A;
+            document.getElementById('b-val').textContent = B;
+            draw();
+        }
+        document.getElementById('a-minus').onclick = () => setVals(A - 1, B);
+        document.getElementById('a-plus').onclick = () => setVals(A + 1, B);
+        document.getElementById('b-minus').onclick = () => setVals(A, B - 1);
+        document.getElementById('b-plus').onclick = () => setVals(A, B + 1);
+
+        // ---------- controls ----------
+        const btnLearn = document.getElementById('btn-learn');
+        btnLearn.onclick = () => {
+            if (solved) return;
+            running = !running;
+            btnLearn.textContent = running ? 'PAUSE' : 'LERNEN';
+        };
+        document.getElementById('btn-step').onclick = () => {
+            if (solved) return;
+            running = false; btnLearn.textContent = 'LERNEN';
+            trainStep(); draw();
+        };
+        document.getElementById('btn-reset').onclick = () => {
+            btnLearn.textContent = 'LERNEN';
+            resetAll();
+        };
+        document.getElementById('m-es').onchange = () => { method = 'es'; solved = false; running = false; btnLearn.textContent = 'LERNEN'; draw(); };
+        document.getElementById('m-bp').onchange = () => { method = 'bp'; solved = false; running = false; btnLearn.textContent = 'LERNEN'; draw(); };
+
+        const SPEED = [1, 1, 2, 3, 5, 8, 12, 20, 35, 60];
+        const stepsPerFrame = () => SPEED[document.getElementById('speed').value - 1];
+
+        // ---------- interaction ----------
+        const inRect = (h, mx, my) => h && mx >= h.x && mx <= h.x + h.w && my >= h.y && my <= h.y + h.h;
+
+        canvas.addEventListener('pointermove', e => {
+            const r = canvas.getBoundingClientRect();
+            const mx = e.clientX - r.left, my = e.clientY - r.top;
+            let nr = null;
+            for (const h of rowHits) if (inRect(h, mx, my)) { nr = h.row; break; }
+            const overHelp = inRect(helpNet, mx, my) || inRect(helpES, mx, my);
+            if (nr !== hoverRow) { hoverRow = nr; if (!running) draw(); }
+            canvas.style.cursor = (nr !== null || overHelp) ? 'pointer' : 'default';
+        });
+        canvas.addEventListener('pointerleave', () => {
+            if (hoverRow !== null) { hoverRow = null; if (!running) draw(); }
+        });
+        canvas.addEventListener('pointerdown', e => {
+            const r = canvas.getBoundingClientRect();
+            const mx = e.clientX - r.left, my = e.clientY - r.top;
+            if (inRect(helpNet, mx, my)) { document.getElementById('net-help').style.display = 'flex'; return; }
+            if (inRect(helpES, mx, my)) { document.getElementById('es-help').style.display = 'flex'; return; }
+        });
+
+        // ---------- animation loop ----------
+        function tick() {
+            requestAnimationFrame(tick);
+            if (!running) return;
+            const n = stepsPerFrame();
+            for (let i = 0; i < n && running; i++) trainStep();
+            if (!running) btnLearn.textContent = 'LERNEN';
+            draw();
+        }
+        requestAnimationFrame(tick);
+
+        function init() {
+            resizeCanvasToContainer();
+            draw();
+        }
+
+        window.addEventListener('resize', init);
+        document.fonts.ready.then(init);
+
+        // the floating branding is injected after the first draw and shifts the layout —
+        // redraw once it appears so nothing jumps later
+        if (!document.querySelector('.canvas-branding')) {
+            const mo = new MutationObserver(() => {
+                if (document.querySelector('.canvas-branding')) { mo.disconnect(); init(); }
+            });
+            mo.observe(document.body, { childList: true, subtree: true });
+        }
+    </script>
+</body>
+
+</html>

@@ -867,5 +867,4 @@ class ESLens {
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = { CMAES, CMAESParameters, CMAESLogic, ESLens };
 }
-module.exports = { CMAES, CMAESParameters, CMAESLogic, ESLens };
 
