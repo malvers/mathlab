@@ -975,7 +975,7 @@ footer.page-foot a:hover { text-decoration: underline; }
 #svp-export { display: none; }
 
 @media print {
-    body.has-export > *:not(#svp-export) { display: none !important; }
+    body.has-export:not(.map-print) > *:not(#svp-export) { display: none !important; }
 
     body.has-export #svp-export {
         display: block;
@@ -1108,4 +1108,130 @@ footer.page-foot a:hover { text-decoration: underline; }
     td.num, td.date, td.remark { color: #444; }
     tr.ferien td { background: #f0f4f8; color: #365; }
     .badge { background: none !important; }
+}
+
+
+/* ---- Modulablaufplan export (svp-plan.js builds #svp-map) ---------------
+   Rebuild of the IBB "Modulablaufplan" form: A4 landscape, IBB logo in the
+   thead (repeats per printed page), "Erstellt (Datum):" in the tfoot, seven
+   columns in the widths of the original. Invisible until printed; ?map on a
+   plan page shows the same document on screen as a preview. */
+#svp-map { display: none; }
+
+@page map-page { size: A4 landscape; margin: 6mm 20mm 6mm 25mm; }
+
+body.map-print #svp-map,
+body.map-preview #svp-map {
+    display: block;
+    font-family: Arial, Helvetica, sans-serif;
+    color: #000;
+    font-size: 10pt;
+    line-height: 1.35;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+}
+
+#svp-map table {
+    width: 100%;
+    min-width: 0;
+    border-collapse: collapse;
+    table-layout: fixed;
+    font-size: 9pt;
+    background: none;
+}
+
+#svp-map td {
+    border: 0.2mm solid #000;
+    padding: 1.2mm 1.4mm;
+    vertical-align: top;
+    overflow-wrap: break-word;
+    color: #000;
+    background: none;
+}
+
+#svp-map tbody tr { page-break-inside: avoid; break-inside: avoid; }
+
+/* running head: logo right + separating rule, repeated via thead */
+#svp-map tr.m-runhead td {
+    border: none;
+    padding: 3mm 0 4mm;
+    border-bottom: 0.2mm solid #b9b9b9;
+    text-align: right;
+}
+
+#svp-map .m-logo { width: 50mm; height: auto; }
+
+/* running foot via tfoot — faint, as in the original */
+#svp-map tr.m-runfoot td {
+    border: none;
+    padding: 2.5mm 0 0;
+    font-size: 7pt;
+    color: #cfcfcf;
+    text-align: left;
+}
+
+/* head block, first page only (plain tbody rows) */
+#svp-map tr.m-meta td { border: none; padding: 0; }
+
+#svp-map tr.m-title td { padding: 9mm 0 7mm; }
+
+#svp-map tr.m-title div {
+    display: flex;
+    align-items: center;
+    gap: 4mm;
+    font-size: 12pt;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+#svp-map tr.m-title div::before,
+#svp-map tr.m-title div::after {
+    content: '';
+    flex: 1;
+    border-top: 0.2mm solid #b9b9b9;
+}
+
+#svp-map tr.m-fach td { font-size: 11pt; line-height: 1.5; }
+#svp-map tr.m-klasse td { font-size: 11pt; line-height: 1.5; padding-bottom: 5mm; }
+
+/* column titles: own row, not repeated (the original repeats only the logo) */
+#svp-map tr.m-head td {
+    background: #f2dcdc;
+    font-weight: 700;
+    font-size: 8.5pt;
+    line-height: 1.25;
+}
+
+#svp-map .m-c { text-align: center; }
+#svp-map .m-date { font-variant-numeric: tabular-nums; white-space: nowrap; }
+#svp-map .m-mod b { display: block; }
+#svp-map .m-mod > b + b { margin-top: 0.4mm; }
+
+/* dashes instead of bullets, hanging indent — as in the original form */
+#svp-map ul { margin: 1.2mm 0 0; padding: 0; list-style: none; }
+#svp-map li { position: relative; padding-left: 6mm; margin-bottom: 0.6mm; }
+#svp-map li::before { content: '–'; position: absolute; left: 2mm; }
+
+#svp-map .m-cap { margin-top: 1.2mm; }
+#svp-map .m-cap:first-child { margin-top: 0; }
+#svp-map .m-note { margin-top: 1.4mm; font-style: italic; color: #444; }
+#svp-map .m-lnw { font-size: 8.5pt; }
+
+@media print {
+    body.map-print { page: map-page; padding: 0 !important; background: #fff; }
+    body.map-print > *:not(#svp-map) { display: none !important; }
+}
+
+/* ?map preview: same document on screen, on a paper-like sheet */
+@media screen {
+    body.map-preview { background: #6a6f78; padding: 10mm 0; }
+    body.map-preview > *:not(#svp-map) { display: none !important; }
+
+    body.map-preview #svp-map {
+        width: 297mm;
+        box-sizing: border-box;
+        margin: 0 auto;
+        padding: 6mm 20mm 6mm 25mm;
+        background: #fff;
+    }
 }
