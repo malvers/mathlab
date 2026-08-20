@@ -184,13 +184,26 @@
 
     // Link cards on the overview pages follow the pill choice: a card whose
     // target has its pill hidden is hidden too.
+    // Subject cards point at a folder (mathe/, wr/, informatik/) instead of a
+    // single page — those follow the folder: hidden once every pill inside it is.
+    const basePath = new URL(base).pathname;
     const pathToHref = {};
     for (const [href] of LINKS) pathToHref[norm(new URL(base + href).pathname)] = href;
 
+    function cardHidden(card) {
+        const path = norm(card.pathname);
+        const href = pathToHref[path];
+        if (href) return hidden.has(href);
+        if (!path.startsWith(basePath)) return false;
+        const dir = path.slice(basePath.length); // e.g. 'wr/'
+        if (!dir.endsWith('/')) return false;
+        const inDir = LINKS.filter(([h]) => h.startsWith(dir));
+        return inDir.length > 0 && inDir.every(([h]) => hidden.has(h));
+    }
+
     function applyCardVisibility() {
         for (const card of document.querySelectorAll('a.link-card')) {
-            const href = pathToHref[norm(card.pathname)];
-            if (href) card.classList.toggle('nav-hidden', hidden.has(href));
+            card.classList.toggle('nav-hidden', cardHidden(card));
         }
     }
     if (document.readyState === 'loading') {
