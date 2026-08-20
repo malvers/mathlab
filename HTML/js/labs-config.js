@@ -90,6 +90,17 @@ const LABS_DATA = [
         "color": "gold"
     },
     {
+        "id": "neuroaddierer",
+        "href": "neuroaddierer.html",
+        "title": "Der gelernte Addierer",
+        "description": "Im Lab 1 + 1 = 2 sind die Volladdierer fest verdrahtet \u2014 hier ist keiner verdrahtet. Ein winziges neuronales Netz aus 32 Zahlen bekommt nur die acht Zeilen der Wahrheitstabelle zu sehen und soll das Addieren selbst finden: durch Evolution (CMA-ES), ganz ohne Ableitung. Danach rechnen acht Kopien des gelernten Netzes in Reihe jede Summe bis 255 \u2014 und man sieht, dass seine Ausg\u00e4nge nie exakt 0 oder 1 sind, sondern 0,03 und 0,97.",
+        "tagline": "Netz lernt Rechnen / Evolution statt Backpropagation",
+        "icon": LAB_ICONS["neuroaddierer"],
+        "category": "logik informatik fun hot highlight neu grade9 grade10",
+        "keywords": "ki neuronales netz machine learning evolution cmaes rechenberg evolutionsstrategie backpropagation gewichte training volladdierer xor \u00fcbertrag carry bit lernen gradient",
+        "color": "gold"
+    },
+    {
         "id": "subtraktion",
         "href": "subtraktion.html",
         "title": "Schriftliche Subtraktion",

@@ -26,6 +26,22 @@ const LAB_ICONS = {
             <line x1="28" y1="56" x2="72" y2="56" stroke="rgba(255,255,255,0.28)" stroke-width="1.5" />
             <text x="50" y="79" text-anchor="middle" font-family="'Courier New', monospace" font-weight="700" font-size="21" fill="#799E31">10</text>
         </svg>`,
+    "neuroaddierer": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <rect x="14" y="14" width="72" height="72" rx="12" fill="rgba(245, 194, 66, 0.08)" stroke="#F5C242" stroke-width="2" />
+            <g stroke-width="1.6" opacity="0.85">
+                <line x1="33" y1="32" x2="67" y2="42" stroke="#F5C242" />
+                <line x1="33" y1="32" x2="67" y2="62" stroke="#50AAFF" />
+                <line x1="33" y1="50" x2="67" y2="42" stroke="#50AAFF" />
+                <line x1="33" y1="50" x2="67" y2="62" stroke="#F5C242" />
+                <line x1="33" y1="68" x2="67" y2="42" stroke="#F5C242" />
+                <line x1="33" y1="68" x2="67" y2="62" stroke="#50AAFF" />
+            </g>
+            <circle cx="33" cy="32" r="5.5" fill="rgba(121,158,49,0.35)" stroke="#799E31" stroke-width="1.8" />
+            <circle cx="33" cy="50" r="5.5" fill="rgba(80,170,255,0.35)" stroke="#50AAFF" stroke-width="1.8" />
+            <circle cx="33" cy="68" r="5.5" fill="rgba(215,55,40,0.35)" stroke="#D73728" stroke-width="1.8" />
+            <circle cx="67" cy="42" r="5.5" fill="rgba(245,194,66,0.35)" stroke="#F5C242" stroke-width="1.8" />
+            <circle cx="67" cy="62" r="5.5" fill="rgba(215,55,40,0.35)" stroke="#D73728" stroke-width="1.8" />
+        </svg>`,
     "subtraktion": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
             <rect x="15" y="15" width="70" height="70" rx="10" fill="rgba(255, 77, 77, 0.1)" stroke="#ff4d4d" stroke-width="2" />
             <line x1="32" y1="50" x2="68" y2="50" stroke="#ff4d4d" stroke-width="6" stroke-linecap="round" />

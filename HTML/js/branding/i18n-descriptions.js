@@ -627,8 +627,7 @@ Artificial neural networks can learn. They are not programmed to recognize patte
 
 FEATURES & CONTROLS:
 - Training Management: The network can be trained with various batches of training data.
-- Validation: Test the recognition rate for hand-drawn or mouse-written numbers in real time.`
-    },
+- Validation: Test the recognition rate for hand-drawn or mouse-written numbers in real time.`,
 
         "easyhard": `OVERVIEW:
 Module "easy/hard" – tiered tasks or difficulty levels for targeted training.
@@ -636,7 +635,19 @@ Module "easy/hard" – tiered tasks or difficulty levels for targeted training.
 FEATURES & CONTROLS:
 - Difficulty Choice: Toggle between basic and expert mode.
 - Task Matrix: Structured presentation of didactic units.
-- Help System: Quick access to info via navigation icon.
+- Help System: Quick access to info via navigation icon.`
+    },
+
+    "es": {
+
+        "addition": `ANTECEDENTES MATEMÁTICOS:
+La suma escrita es uno de los algoritmos fundamentales de la aritmética y se basa en el sistema decimal posicional: se suma cifra por cifra de derecha a izquierda, y cuando una suma parcial alcanza 10 o más se genera un acarreo hacia la posición siguiente.
+
+CARACTERÍSTICAS Y CONTROLES:
+- Entrada de sumandos: dos números de hasta 7 cifras.
+- Paso a paso: las flechas de navegación recorren el algoritmo columna por columna.
+- Visualización del acarreo: las cifras pequeñas sobre las columnas muestran el acarreo activo.
+- Código de colores: la posición que el algoritmo está calculando queda resaltada.
 
 INTERFAZ:
 - Campos (Arriba): Definir números base.
