@@ -959,12 +959,27 @@
         btn.textContent = 'Modulablaufplan';
         btn.title = 'IBB-Modulablaufplan (Querformat) drucken / als PDF sichern';
         btn.addEventListener('click', function () {
-            mapMode = true;
-            window.print();
+            withEditGate(function () {
+                mapMode = true;
+                window.print();
+            });
         });
         const first = bar.querySelector('button.action');
         if (first) bar.insertBefore(btn, first.nextSibling);
         else bar.appendChild(btn);
+    })();
+
+    // Password-gate the plain "Drucken" button too — centrally, overriding the
+    // inline onclick="window.print()" every plan page ships with.
+    (function gatePrintButton() {
+        document.querySelectorAll('.toolbar button').forEach(function (b) {
+            if (b.textContent.trim() === 'Drucken') {
+                b.onclick = null; /* drop the inline handler */
+                b.addEventListener('click', function () {
+                    withEditGate(function () { window.print(); });
+                });
+            }
+        });
     })();
 
     // ?map — on-screen preview of the form (also what headless print uses).
@@ -1298,7 +1313,68 @@
         pushRemote();
     }
 
+    // --- Edit gate: "✎ Bearbeiten" asks for the SVP passphrase once per ---
+    // browser. Same rule as svp-gate.js: only the SHA-256 hash lives in the
+    // code (public repo), never the passphrase itself.
+    const EDIT_HASH = '517ac27fb0b499ddd50da49532cc40d47d4d36a9a49a43e1558f16eec5cbeda4';
+    const EDIT_KEY = 'svp-edit-gate';
+
+    function editUnlocked() {
+        try { return localStorage.getItem(EDIT_KEY) === EDIT_HASH; } catch (e) { return false; }
+    }
+
+    async function editSha256hex(text) {
+        const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+        return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    // Styled dialog (never a native prompt), reusing the svp-gate overlay CSS.
+    function askEditPwd(onOk) {
+        const overlay = document.createElement('div');
+        overlay.className = 'svp-gate-overlay';
+        overlay.innerHTML =
+            '<div class="svp-gate-card">' +
+            '  <div class="svp-gate-title">Doc Alvers &middot; SVP</div>' +
+            '  <div class="svp-gate-sub">Bitte Passwort eingeben</div>' +
+            '  <input type="password" id="svp-edit-pwd" aria-label="Passwort" autocomplete="current-password">' +
+            '  <button type="button" class="action" id="svp-edit-go">Freischalten</button>' +
+            '  <div class="svp-gate-err" id="svp-edit-err">&nbsp;</div>' +
+            '</div>';
+        document.body.appendChild(overlay);
+
+        const input = overlay.querySelector('#svp-edit-pwd');
+        const err = overlay.querySelector('#svp-edit-err');
+
+        async function tryUnlock() {
+            const hex = await editSha256hex(input.value);
+            if (hex === EDIT_HASH) {
+                try { localStorage.setItem(EDIT_KEY, EDIT_HASH); } catch (e) { }
+                overlay.remove();
+                onOk();
+            } else {
+                err.textContent = 'Leider nein — nochmal probieren.';
+                input.value = '';
+                input.focus();
+            }
+        }
+
+        overlay.querySelector('#svp-edit-go').addEventListener('click', tryUnlock);
+        input.addEventListener('keydown', e => { if (e.key === 'Enter') tryUnlock(); });
+        // Click on the dark backdrop (not the card) cancels.
+        overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+        input.focus();
+    }
+
+    // Run fn immediately if unlocked, otherwise after a successful password.
+    function withEditGate(fn) {
+        if (editUnlocked()) fn(); else askEditPwd(fn);
+    }
+
     window.togglePlanEdit = function (btn) {
+        if (!document.body.classList.contains('editing') && !editUnlocked()) {
+            askEditPwd(() => window.togglePlanEdit(btn));
+            return;
+        }
         const editing = document.body.classList.toggle('editing');
         if (editing) {
             setAllDetails(true);
