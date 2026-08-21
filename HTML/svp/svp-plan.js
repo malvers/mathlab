@@ -225,7 +225,11 @@
         ok.className = 'mm-btn primary';
         ok.textContent = 'Hinzufügen';
         function add() {
-            const url = urlIn.value.trim();
+            let url = urlIn.value.trim();
+            // Bare domains ("docalvers.de/…") get https:// prepended — the
+            // stored format needs the scheme (entries are split on it).
+            if (url && !/^https?:\/\//i.test(url) && /^[\w-]+(\.[\w-]+)+([/?#]|$)/.test(url))
+                url = 'https://' + url;
             if (!/^https?:\/\//.test(url)) {
                 urlIn.classList.add('bad');
                 urlIn.focus();
