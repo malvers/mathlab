@@ -391,6 +391,48 @@ nav.quick-nav a.nav-auth::before {
     border-left: 1px solid var(--line);
 }
 
+/* QR pill in the quick-nav + the usual white-card QR overlay (svp-nav.js).
+   White card so every scanner reads it; click anywhere closes. */
+nav.quick-nav a.nav-qr { display: inline-flex; align-items: center; }
+nav.quick-nav a.nav-qr svg { display: block; }
+
+.qr-overlay {
+    position: fixed;
+    inset: 0;
+    background: var(--panel);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    cursor: pointer;
+}
+
+.qr-overlay.open { display: flex; }
+
+.qr-card {
+    background: #fff;
+    padding: 22px 22px 14px;
+    border-radius: 14px;
+    text-align: center;
+}
+
+.qr-card .qr-label {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.85rem;
+    letter-spacing: 0.08em;
+    color: #222;
+    margin-top: 12px;
+    max-width: min(70vw, 300px);
+}
+
+.qr-card .qr-box svg {
+    display: block;
+    width: min(70vw, 300px);
+    height: auto;
+}
+
+@media print { .qr-overlay { display: none !important; } }
+
 /* Overview cards follow the pill choice — hidden pill, hidden card */
 a.link-card.nav-hidden { display: none; }
 

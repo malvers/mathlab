@@ -182,6 +182,55 @@
     renderAuthPill();
     nav.appendChild(authPill);
 
+    // QR pill next to Login/Logout: opens the usual white-card overlay with
+    // a QR code deep-linking to this page's live URL. qrcode.min.js is only
+    // loaded on first click (uebung.html already ships it — reused then).
+    const qrPill = document.createElement('a');
+    qrPill.className = 'badge b-grey nav-qr';
+    qrPill.href = '#';
+    qrPill.title = 'QR-Code zum Teilen dieser Seite';
+    qrPill.setAttribute('aria-label', 'QR-Code zum Teilen dieser Seite');
+    qrPill.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'
+        + '<path d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 3.75 9.375v-4.5ZM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 0 1-1.125-1.125v-4.5ZM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 13.5 9.375v-4.5Z"></path>'
+        + '<path d="M6.75 6.75h.75v.75h-.75v-.75ZM6.75 16.5h.75v.75h-.75v-.75ZM16.5 6.75h.75v.75h-.75v-.75ZM13.5 13.5h.75v.75h-.75v-.75ZM13.5 19.5h.75v.75h-.75v-.75ZM19.5 13.5h.75v.75h-.75v-.75ZM19.5 19.5h.75v.75h-.75v-.75ZM16.5 16.5h.75v.75h-.75v-.75Z"></path></svg>';
+    qrPill.addEventListener('click', function (e) { e.preventDefault(); showQr(); });
+    nav.appendChild(qrPill);
+
+    let qrOverlay = null;
+    function renderQr() {
+        // Live URL even when testing locally: strip the /HTML/ dev prefix.
+        const livePath = location.pathname.replace(/^\/HTML\//, '/');
+        const url = 'https://www.docalvers.de' + livePath + location.search;
+        const box = qrOverlay.querySelector('.qr-box');
+        if (typeof qrcode === 'undefined') {
+            box.textContent = url; /* library missing: show the link instead */
+        } else {
+            const qr = qrcode(0, 'M');
+            qr.addData(url);
+            qr.make();
+            box.innerHTML = qr.createSvgTag({ scalable: true });
+        }
+        qrOverlay.querySelector('.qr-label').textContent = document.title;
+        qrOverlay.classList.add('open');
+    }
+    function showQr() {
+        if (!qrOverlay) {
+            qrOverlay = document.createElement('div');
+            qrOverlay.className = 'qr-overlay';
+            qrOverlay.innerHTML = '<div class="qr-card"><div class="qr-box"></div><div class="qr-label"></div></div>';
+            qrOverlay.addEventListener('click', function () { qrOverlay.classList.remove('open'); });
+            document.body.appendChild(qrOverlay);
+        }
+        if (typeof qrcode === 'undefined' && !document.querySelector('script[data-svp-qr]')) {
+            const s = document.createElement('script');
+            s.src = base + 'qrcode.min.js';
+            s.dataset.svpQr = '1';
+            s.onload = renderQr;
+            s.onerror = renderQr;
+            document.head.appendChild(s);
+        } else renderQr();
+    }
+
     // Link cards on the overview pages follow the pill choice: a card whose
     // target has its pill hidden is hidden too.
     // Subject cards point at a folder (mathe/, wr/, informatik/) instead of a
