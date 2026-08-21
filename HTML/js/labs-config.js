@@ -672,7 +672,7 @@ const LABS_DATA = [
         "description": "Costa-Blanca-Ausflüge zum Abhaken: 22 recherchierte Ziele von Altea bis Valencia mit Fotos, Insider-Tipps und Fortschrittsbalken — in vier Sprachen (DE/EN/ES/IT).",
         "tagline": "Reise / Ausflugs-Checkliste",
         "icon": LAB_ICONS["costablanca"],
-        "category": "sonst",
+        "category": "sonst neu",
         "keywords": "costa blanca altea calpe checkliste ausflüge reise spanien highlights urlaub",
         "color": "orange"
     }
