@@ -22,25 +22,30 @@ const LAB_ICONS = {
         </svg>`,
     "einsundeins": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
             <rect x="14" y="14" width="72" height="72" rx="12" fill="rgba(245, 194, 66, 0.08)" stroke="#F5C242" stroke-width="2" />
-            <text x="50" y="45" text-anchor="middle" font-family="Orbitron, sans-serif" font-weight="700" font-size="23" fill="#F5C242">1+1</text>
-            <line x1="28" y1="56" x2="72" y2="56" stroke="rgba(255,255,255,0.28)" stroke-width="1.5" />
-            <text x="50" y="79" text-anchor="middle" font-family="'Courier New', monospace" font-weight="700" font-size="21" fill="#799E31">10</text>
+            <text x="50" y="43" text-anchor="middle" font-family="Orbitron, sans-serif" font-weight="700" font-size="23" fill="#F5C242">1+1</text>
+            <g stroke="rgba(255,255,255,0.5)" stroke-width="2.2" stroke-linecap="round">
+                <line x1="50" y1="50" x2="50" y2="58" />
+            </g>
+            <polygon points="50,64 45.5,56.5 54.5,56.5" fill="rgba(255,255,255,0.5)" />
+            <text x="50" y="82" text-anchor="middle" font-family="'Courier New', monospace" font-weight="700" font-size="21" fill="#799E31">10<tspan font-size="12" dy="4">2</tspan></text>
         </svg>`,
     "neuroaddierer": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
             <rect x="14" y="14" width="72" height="72" rx="12" fill="rgba(245, 194, 66, 0.08)" stroke="#F5C242" stroke-width="2" />
-            <g stroke-width="1.6" opacity="0.85">
-                <line x1="33" y1="32" x2="67" y2="42" stroke="#F5C242" />
-                <line x1="33" y1="32" x2="67" y2="62" stroke="#50AAFF" />
-                <line x1="33" y1="50" x2="67" y2="42" stroke="#50AAFF" />
-                <line x1="33" y1="50" x2="67" y2="62" stroke="#F5C242" />
-                <line x1="33" y1="68" x2="67" y2="42" stroke="#F5C242" />
-                <line x1="33" y1="68" x2="67" y2="62" stroke="#50AAFF" />
+            <g stroke-width="1.7" opacity="0.8">
+                <line x1="29" y1="32" x2="50" y2="50" stroke="#799E31" />
+                <line x1="29" y1="50" x2="50" y2="50" stroke="#50AAFF" />
+                <line x1="29" y1="68" x2="50" y2="50" stroke="#D73728" />
+                <line x1="50" y1="50" x2="74" y2="39" stroke="#F5C242" />
+                <line x1="50" y1="50" x2="74" y2="61" stroke="#D73728" />
             </g>
-            <circle cx="33" cy="32" r="5.5" fill="rgba(121,158,49,0.35)" stroke="#799E31" stroke-width="1.8" />
-            <circle cx="33" cy="50" r="5.5" fill="rgba(80,170,255,0.35)" stroke="#50AAFF" stroke-width="1.8" />
-            <circle cx="33" cy="68" r="5.5" fill="rgba(215,55,40,0.35)" stroke="#D73728" stroke-width="1.8" />
-            <circle cx="67" cy="42" r="5.5" fill="rgba(245,194,66,0.35)" stroke="#F5C242" stroke-width="1.8" />
-            <circle cx="67" cy="62" r="5.5" fill="rgba(215,55,40,0.35)" stroke="#D73728" stroke-width="1.8" />
+            <circle cx="50" cy="50" r="15" fill="rgb(8,20,42)" />
+            <circle cx="50" cy="50" r="15" fill="rgba(245,194,66,0.18)" stroke="#F5C242" stroke-width="1.8" />
+            <text x="50" y="61" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="30" fill="#F5C242">+</text>
+            <circle cx="29" cy="32" r="5" fill="rgba(121,158,49,0.4)" stroke="#799E31" stroke-width="1.7" />
+            <circle cx="29" cy="50" r="5" fill="rgba(80,170,255,0.4)" stroke="#50AAFF" stroke-width="1.7" />
+            <circle cx="29" cy="68" r="5" fill="rgba(215,55,40,0.4)" stroke="#D73728" stroke-width="1.7" />
+            <circle cx="74" cy="39" r="5" fill="rgba(245,194,66,0.4)" stroke="#F5C242" stroke-width="1.7" />
+            <circle cx="74" cy="61" r="5" fill="rgba(215,55,40,0.4)" stroke="#D73728" stroke-width="1.7" />
         </svg>`,
     "subtraktion": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
             <rect x="15" y="15" width="70" height="70" rx="10" fill="rgba(255, 77, 77, 0.1)" stroke="#ff4d4d" stroke-width="2" />
