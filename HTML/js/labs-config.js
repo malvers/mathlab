@@ -664,5 +664,16 @@ const LABS_DATA = [
         "category": "apps",
         "keywords": "mathtrainer schooltrainer mathe training üben aufgaben serien kopfrechnen schule app",
         "color": "blue"
+    },
+    {
+        "id": "costablanca",
+        "href": "tracker/costablanca.html",
+        "title": "Highlights Costa Blanca",
+        "description": "Costa-Blanca-Ausflüge zum Abhaken: 22 recherchierte Ziele von Altea bis Valencia mit Fotos, Insider-Tipps und Fortschrittsbalken — in vier Sprachen (DE/EN/ES/IT).",
+        "tagline": "Reise / Ausflugs-Checkliste",
+        "icon": LAB_ICONS["costablanca"],
+        "category": "sonst",
+        "keywords": "costa blanca altea calpe checkliste ausflüge reise spanien highlights urlaub",
+        "color": "orange"
     }
 ];

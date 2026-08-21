@@ -430,6 +430,15 @@ const LAB_ICONS = {
             <line x1="50" y1="50" x2="50" y2="34" stroke="#F5C242" stroke-width="2.5" stroke-linecap="round" />
             <line x1="50" y1="50" x2="61" y2="56" stroke="#F5C242" stroke-width="2.5" stroke-linecap="round" />
         </svg>`,
+    "costablanca": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <rect x="14" y="14" width="72" height="72" rx="10" fill="rgba(245, 194, 66, 0.08)" stroke="#F5C242" stroke-width="2" />
+            <circle cx="38" cy="38" r="10" fill="rgba(245, 194, 66, 0.25)" stroke="#F5C242" stroke-width="2" />
+            <path d="M 38 22 v -5 M 38 54 v 5 M 22 38 h -4 M 54 38 h 4 M 27 27 l -3 -3 M 49 49 l 3 3 M 49 27 l 3 -3 M 27 49 l -3 3"
+                  stroke="#F5C242" stroke-width="2" stroke-linecap="round" />
+            <path d="M 20 70 Q 27 63 34 70 T 48 70 T 62 70 T 76 70" fill="none"
+                  stroke="#00d2ff" stroke-width="2.5" stroke-linecap="round" />
+            <path d="M 56 34 l 7 8 l 14 -16" fill="none" stroke="#799E31" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>`,
     "tracker": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
             <rect x="14" y="14" width="72" height="72" rx="10" fill="rgba(121, 158, 49, 0.08)" stroke="#799E31" stroke-width="2" />
             <path d="M 24 72 Q 36 58 34 46 Q 33 36 44 38 Q 56 40 54 52 Q 52 62 64 58" fill="none"
