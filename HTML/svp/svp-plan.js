@@ -1354,7 +1354,7 @@
         function place() {
             const nav = document.querySelector('nav.quick-nav');
             const bar = document.querySelector('.toolbar');
-            if (nav) nav.appendChild(cloudEl);
+            if (nav) nav.insertBefore(cloudEl, nav.querySelector('.nav-qr')); /* before the QR pill */
             else if (bar) bar.appendChild(cloudEl);
         }
         if (document.readyState === 'loading')
