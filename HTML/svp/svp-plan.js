@@ -1339,14 +1339,23 @@
     const cloudEl = document.createElement(window.svpAuth && svpAuth.hasSession() ? 'span' : 'a');
     cloudEl.className = 'cloud';
     (function () {
-        const bar = document.querySelector('.toolbar');
-        if (!bar) return;
         if (cloudEl.tagName === 'A') {
             cloudEl.href = '../notes.html';
             cloudEl.textContent = '☁ lokal';
             cloudEl.title = 'Edits nur in diesem Browser — für Cloud-Sync über die Notizen-Seite anmelden';
         }
-        bar.appendChild(cloudEl);
+        // Sits next to the Login/Logout pill in the quick-nav. svp-nav.js
+        // runs after this script, so the nav only exists at DOMContentLoaded;
+        // pages without a quick-nav fall back to the toolbar as before.
+        function place() {
+            const nav = document.querySelector('nav.quick-nav');
+            const bar = document.querySelector('.toolbar');
+            if (nav) nav.appendChild(cloudEl);
+            else if (bar) bar.appendChild(cloudEl);
+        }
+        if (document.readyState === 'loading')
+            document.addEventListener('DOMContentLoaded', place);
+        else place();
     })();
 
     function setCloud(text, ok) {
