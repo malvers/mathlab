@@ -553,7 +553,14 @@
                 ctx.font = '700 ' + Math.round(S * 22) + 'px Arial, sans-serif';
                 ctx.fillStyle = WHITE;
                 ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
-                ctx.fillText('„Schreib mir Code, der 1 + 1 ausrechnet."', px + S * 24, y + hCode * 0.62);
+                // the prompt names the CURRENT operands, so the human sentence and the
+                // machine below always talk about the same two numbers
+                textRun(px + S * 24, y + hCode * 0.62, [
+                    { t: '„Schreib mir den Code, der ', col: WHITE },
+                    { t: unset ? 'a' : String(A), e: 'a' }, { t: ' + ', e: 'op' },
+                    { t: unset ? 'b' : String(B), e: 'b' },
+                    { t: ' ausrechnet."', col: WHITE }
+                ]);
                 ctx.font = Math.round(S * 18) + 'px Arial, sans-serif';
                 ctx.fillStyle = 'rgba(255,255,255,0.80)';
                 [
