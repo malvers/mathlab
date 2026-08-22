@@ -162,7 +162,17 @@ header.page-head { max-width: 1200px; margin: 0 auto 22px; position: relative; }
 
 .page-head .head-row h1 { margin-bottom: 0; }
 
-@media print { .page-head button.action.orange { display: none; } }
+/* Buttons that belong to the heading itself (e.g. "Test") sit right behind it,
+   while the head-row keeps pushing the primary action to the far right. */
+.page-head .head-row .title-group {
+    display: flex;
+    align-items: flex-end;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+/* No action buttons on paper - the toolbar has its own print rule. */
+@media print { .page-head button.action { display: none; } }
 
 /* Quick-nav: pill shortcuts to all svp pages (injected by svp-nav.js) —
    top row of the header, right-aligned; wraps without overlapping anything */
