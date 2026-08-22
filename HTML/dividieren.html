@@ -525,12 +525,15 @@
             const drawNumber = (num, colEnd, row, color, isRightAligned = true) => {
                 const s = String(num);
                 ctx.fillStyle = color;
+                const prevAlign = ctx.textAlign;
+                ctx.textAlign = 'center';   // centre digits in their column cells — narrow glyphs ("1") no longer leave a gap
                 for (let i = 0; i < s.length; i++) {
                     const charX = isRightAligned ? 
                         getColX(colEnd - (s.length - 1 - i)) : 
                         getColX(colEnd + i);
                     ctx.fillText(s[i], charX, getRowY(row));
                 }
+                ctx.textAlign = prevAlign;
             };
 
             // --- 1. BASE EQUATION (Row 0) ---
@@ -707,7 +710,7 @@
                 } else if (step.type === 'bringDown') {
                     message = CyberI18n.get('arithmetic.div.bring_down', { d: `<span class="coach-math-highlight">${step.digit}</span>`, newVal: step.newVal });
                 } else if (step.type === 'final') {
-                    message = `<b>${CyberI18n.get('arithmetic.div.complete', { result: `<span class="coach-math-highlight">${step.quotient}</span>` })}</b>${step.remainder > 0 ? ' with ' + CyberI18n.get('arithmetic.div.rem', { rem: step.remainder }) : ''}.`;
+                    message = `<b>${CyberI18n.get('arithmetic.div.complete', { result: `<span class="coach-math-highlight">${step.quotient}</span>` })}</b>${step.remainder > 0 ? ' ' + CyberI18n.get('arithmetic.div.rem', { rem: step.remainder }) : ''}`;
                 }
             }
 

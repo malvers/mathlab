@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>Outro</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+<script src="qrcode.min.js"></script>
+<style>
+  /* Video outro frames in the docalvers.de intro look: starfield + gradient Orbitron.
+     Modes via URL params: ?text=DAS%20CRAZY!&emoji=😎  or  ?logo=1&qr=<url> */
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #0a0a1a; }
+  #stars { position: fixed; inset: 0; }
+  .wrap { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2.6vw; }
+  .headline {
+    font-family: 'Orbitron', sans-serif; font-weight: 900; letter-spacing: 0.04em;
+    font-size: 7.5vw; white-space: nowrap;
+    background: linear-gradient(to right, #00d2ff, #ffffff, #b06ee8);
+    -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 0 40px rgba(0, 210, 255, 0.55));
+    opacity: 0; animation: fadein 1.2s ease-out 0.2s forwards;
+  }
+  .emoji { font-size: 8.6vw; opacity: 0; animation: fadein 1s ease-out 0.7s forwards; }
+  #qrbox { background: #fff; padding: 1.1vw; border-radius: 1.1vw; opacity: 0;
+           animation: fadein 1.2s ease-out 0.9s forwards; box-shadow: 0 0 44px rgba(0, 210, 255, 0.35); }
+  .qrlabel { font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 1.6vw; color: #9fd8ff;
+             letter-spacing: 0.12em; opacity: 0; animation: fadein 1.2s ease-out 1.1s forwards; }
+  @keyframes fadein { to { opacity: 1; } }
+</style>
+</head>
+<body>
+<canvas id="stars"></canvas>
+<div class="wrap" id="wrap"></div>
+<script>
+  // slow drifting starfield with twinkle + soft milky-way band
+  const cv = document.getElementById('stars'), cx = cv.getContext('2d');
+  const DPR = window.devicePixelRatio || 1;
+  function fit() { cv.width = innerWidth * DPR; cv.height = innerHeight * DPR; cx.setTransform(DPR, 0, 0, DPR, 0, 0); }
+  fit(); addEventListener('resize', fit);
+  const stars = Array.from({ length: 420 }, () => ({
+    x: Math.random() * innerWidth, y: Math.random() * innerHeight,
+    r: 0.4 + Math.random() * 1.4, p: Math.random() * Math.PI * 2, s: 0.02 + Math.random() * 0.05,
+  }));
+  function draw(t) {
+    cx.fillStyle = '#0a0a1a'; cx.fillRect(0, 0, innerWidth, innerHeight);
+    const g = cx.createLinearGradient(0, innerHeight * 0.7, innerWidth, innerHeight * 0.3);
+    g.addColorStop(0, 'rgba(120,130,180,0)'); g.addColorStop(0.5, 'rgba(150,160,210,0.08)'); g.addColorStop(1, 'rgba(120,130,180,0)');
+    cx.fillStyle = g; cx.fillRect(0, 0, innerWidth, innerHeight);
+    for (const s of stars) {
+      s.x -= s.s; if (s.x < 0) s.x = innerWidth;
+      const a = 0.35 + 0.65 * Math.abs(Math.sin(s.p + t / 900));
+      cx.globalAlpha = a; cx.fillStyle = '#dfe8ff';
+      cx.beginPath(); cx.arc(s.x, s.y, s.r, 0, Math.PI * 2); cx.fill();
+    }
+    cx.globalAlpha = 1;
+    requestAnimationFrame(draw);
+  }
+  requestAnimationFrame(draw);
+
+  const q = new URLSearchParams(location.search);
+  const wrap = document.getElementById('wrap');
+  if (q.get('logo')) {
+    wrap.innerHTML = '<div class="headline">DOCALVERS.DE</div>';
+    const qr = q.get('qr');
+    if (qr) {
+      const box = document.createElement('div'); box.id = 'qrbox'; wrap.appendChild(box);
+      const code = qrcode(0, 'M'); code.addData(qr); code.make();
+      box.innerHTML = code.createSvgTag({ cellSize: 8, margin: 0 });
+      const svg = box.querySelector('svg');
+      svg.style.width = '14.8vw'; svg.style.height = 'auto'; svg.style.display = 'block';
+      const lab = document.createElement('div'); lab.className = 'qrlabel';
+      lab.textContent = qr.replace(/^https?:\/\//, ''); wrap.appendChild(lab);
+    }
+  } else {
+    wrap.innerHTML = '<div class="headline">' + (q.get('text') || 'DAS CRAZY!') + '</div>' +
+      (q.get('emoji') ? '<div class="emoji">' + q.get('emoji') + '</div>' : '');
+  }
+</script>
+</body>
+</html>
