@@ -176,7 +176,7 @@
 <body>
 <div class="wrap">
   <h1>Anonymer Eingangstest Mathematik · Klasse 11</h1>
-  <div class="sub">Berufliches Gymnasium · Jahrgangsstufe 11 · Stand Mittlerer Schulabschluss · 20 Rechenfragen + 10 zum Schmunzeln · genau eine Antwort pro Frage</div>
+  <div class="sub">Berufliches Gymnasium · Jahrgangsstufe 11 · Stand Mittlerer Schulabschluss · 23 Rechenfragen + 11 zum Schmunzeln · genau eine Antwort pro Frage</div>
 
   <div id="quiz"></div>
 
@@ -206,6 +206,7 @@
   <footer>Doc Alvers Mathe-Labor · Es werden keine persönlichen Daten gespeichert, nur anonyme Gesamt-Zähler.</footer>
 </div>
 
+<script src="js/quiz-collapse.js"></script>
 <script>
 (function () {
   'use strict';
@@ -237,6 +238,9 @@
   /* Questions: entry test for BGY class 11 — everything is Oberschule level
      (up to the Mittlerer Schulabschluss). Pattern: two calculation questions,
      then one general-knowledge ("Spass") question, repeated ten times.
+     The last four questions are a later addition (antiproportionality and
+     growth processes) and are appended at the end on purpose: the anonymous
+     per-question counters in the database are keyed by index.
      Exactly one correct option per question.
      Formulas are written as $...$ and rendered with KaTeX. */
   const QUESTIONS = [
@@ -700,6 +704,67 @@
         'Das Produktzeichen ist dagegen das große Pi: $\\prod$.'
       ],
       solution: 1
+    },
+    {
+      q: 'Welche beiden Größen sind zueinander antiproportional (indirekt proportional)?',
+      opts: [
+        'Anzahl der Äpfel und Gesamtpreis',
+        'Geschwindigkeit und Fahrzeit bei fester Strecke',
+        'Kantenlänge und Umfang eines Quadrats',
+        'Arbeitszeit und Lohn bei festem Stundenlohn'
+      ],
+      steps: [
+        'Antiproportional heißt: die eine Größe wird doppelt so groß, die andere halb so groß — das Produkt bleibt konstant.',
+        'Doppelte Geschwindigkeit → halbe Fahrzeit, denn $v \\cdot t = s$ ist die feste Strecke.',
+        'Bei den anderen drei Paaren wächst beides im gleichen Verhältnis mit — das ist proportional, der Quotient bleibt konstant.'
+      ],
+      solution: 1
+    },
+    {
+      q: '1000 € liegen zwei Jahre lang zu 5 % Zinsen auf dem Konto, die Zinsen bleiben liegen. Wie viel ist am Ende da?',
+      opts: [
+        '$1100{,}00$ €',
+        '$1102{,}50$ €',
+        '$1050{,}00$ €',
+        '$1250{,}00$ €'
+      ],
+      steps: [
+        'Ein Jahr mit $5\\,\\%$ Zuwachs bedeutet: mit dem Wachstumsfaktor $q = 1{,}05$ multiplizieren.',
+        'Zwei Jahre nacheinander: $1000\\ € \\cdot 1{,}05^2 = 1000\\ € \\cdot 1{,}1025 = 1102{,}50$ €',
+        'Die $2{,}50$ € über den $1100$ € sind der Zinseszins: im zweiten Jahr verzinsen sich auch die Zinsen des ersten Jahres.',
+        'Merksatz für Wachstumsprozesse: $B(n) = B_0 \\cdot q^{\\,n}$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'In der Legende vom Schachbrett verdoppelt sich die Reismenge von Feld zu Feld: 1, 2, 4, 8, … Wie viel Reis liegt am Ende auf allen 64 Feldern?',
+      opts: [
+        'ungefähr ein voller Sack',
+        'genau eine Million Körner',
+        'mehr als eine ganze Welt-Jahresernte',
+        'ungefähr 4096 Körner'
+      ],
+      steps: [
+        'Auf Feld $n$ liegen $2^{\\,n-1}$ Körner, zusammen $2^{64} - 1 \\approx 1{,}8 \\cdot 10^{19}$ Körner.',
+        'Das sind etwa 500 Milliarden Tonnen Reis — ein Vielfaches dessen, was die Welt in einem Jahr erntet.',
+        'Genau das ist exponentielles Wachstum: erst sieht es harmlos aus, dann läuft es davon.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein Auto kostet neu 20 000 € und verliert jedes Jahr 20 % seines Wertes. Was ist es nach 2 Jahren wert?',
+      opts: [
+        '$12\\,800$ €',
+        '$12\\,000$ €',
+        '$16\\,000$ €',
+        '$13\\,000$ €'
+      ],
+      steps: [
+        '$20\\,\\%$ Verlust heißt: es bleiben $80\\,\\%$ übrig, der Wachstumsfaktor ist $q = 0{,}8$.',
+        'Nach zwei Jahren: $20\\,000\\ € \\cdot 0{,}8^2 = 20\\,000\\ € \\cdot 0{,}64 = 12\\,800$ €',
+        'Die Falle: „$2 \\cdot 20\\,\\% = 40\\,\\%$“ ergäbe $12\\,000$ € — falsch, weil sich die $20\\,\\%$ im zweiten Jahr auf den bereits kleineren Wert beziehen.'
+      ],
+      solution: 0
     }
   ];
 
@@ -1070,6 +1135,7 @@
   } else {
     if (submitBtn) submitBtn.addEventListener('click', submit);
     render();
+    QuizCollapse.init(quizEl);
     updateSubmitState();
     tagSubline();
     /* Demo helper (?test): key r fills a random answer set, ~95% correct. */
