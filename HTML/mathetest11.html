@@ -1,0 +1,1095 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Eingangstest Mathematik 11 — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<style>
+  :root {
+    --blue: rgb(14, 36, 78);
+    --blue-soft: rgba(8, 20, 42, 0.08);
+    --green: rgb(121, 158, 49);
+    --green-dark: rgb(96, 128, 36);
+    --orange: rgb(245, 194, 66);
+    --red: rgb(176, 36, 24);
+    --bg: #f6f7fb;
+    --card: #ffffff;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--blue);
+    font-family: Arial, Helvetica, sans-serif;
+    min-height: 100vh;
+    padding: 16px;
+  }
+  .wrap { max-width: 680px; margin: 0 auto; }
+  h1 {
+    font-family: 'Orbitron', sans-serif;
+    font-size: clamp(1.15rem, 4.5vw, 1.6rem);
+    margin: 8px 0 2px;
+  }
+  .sub { color: rgba(14, 36, 78, 0.65); font-size: 0.9rem; margin-bottom: 18px; }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--blue-soft);
+    border-radius: 14px;
+    box-shadow: 0 2px 10px rgba(8, 20, 42, 0.06);
+    padding: 18px;
+    margin-bottom: 14px;
+  }
+  .qnum {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.75rem;
+    color: var(--orange);
+    letter-spacing: 0.08em;
+    margin-bottom: 6px;
+  }
+  /* solution toggle sits below the answer options */
+  .solbtn {
+    margin-top: 4px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.68rem;
+    letter-spacing: 0.06em;
+    background: transparent;
+    color: var(--green-dark);
+    border: 1px solid rgba(121, 158, 49, 0.6);
+    border-radius: 999px;
+    padding: 3px 11px;
+    cursor: pointer;
+  }
+  .solbtn:hover:not(:disabled) { background: rgba(121, 158, 49, 0.14); }
+  .solbtn:disabled {
+    color: rgba(14, 36, 78, 0.35);
+    border-color: rgba(14, 36, 78, 0.18);
+    cursor: default;
+  }
+  .solbtn[aria-expanded="true"] { background: var(--green); border-color: var(--green); color: #fff; }
+  .solution {
+    background: rgba(121, 158, 49, 0.08);
+    border-left: 3px solid var(--green);
+    border-radius: 0 10px 10px 0;
+    padding: 12px 14px;
+    margin: 10px 0 2px;
+    font-size: 0.95rem;
+    line-height: 1.55;
+    overflow-x: auto;
+  }
+  .solution .soltitle {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.06em;
+    color: var(--green-dark);
+    margin-bottom: 8px;
+  }
+  .solution ol { margin: 0 0 8px 20px; }
+  .solution li { margin-bottom: 5px; }
+  .solution .solanswer { font-weight: bold; color: var(--green-dark); }
+  .qtext { font-size: 1.02rem; font-weight: bold; margin-bottom: 12px; }
+  .opt {
+    display: block;
+    width: 100%;
+    text-align: left;
+    background: var(--bg);
+    border: 2px solid var(--blue-soft);
+    border-radius: 10px;
+    padding: 11px 12px;
+    margin-bottom: 8px;
+    font-size: 0.98rem;
+    color: var(--blue);
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .opt:hover { border-color: rgba(121, 158, 49, 0.5); }
+  /* single choice: exactly one option per question carries .sel */
+  .opt.sel { border-color: var(--green); background: rgba(121, 158, 49, 0.12); }
+  .opt.correct { border-color: var(--green); background: rgba(121, 158, 49, 0.18); }
+  .opt.wrong { border-color: var(--red); background: rgba(176, 36, 24, 0.1); }
+  .opt:disabled { cursor: default; opacity: 1; }
+  .letter { font-family: 'Orbitron', sans-serif; font-size: 0.8rem; margin-right: 8px; }
+  .actions { text-align: center; margin: 20px 0; }
+  .btn {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1rem;
+    background: var(--green);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    padding: 13px 34px;
+    cursor: pointer;
+  }
+  .btn:hover { background: var(--green-dark); }
+  .btn:disabled { opacity: 0.45; cursor: default; }
+  .hint { color: var(--red); font-size: 0.9rem; margin-top: 10px; min-height: 1.2em; }
+  #result h2 { font-family: 'Orbitron', sans-serif; font-size: 1.1rem; margin-bottom: 10px; }
+  .score { font-family: 'Orbitron', sans-serif; font-size: 2rem; margin: 6px 0 14px; }
+  .avg { font-size: 0.95rem; margin-top: 4px; }
+  .avg b { color: var(--green-dark); }
+  .bar {
+    background: var(--blue-soft);
+    border-radius: 6px;
+    height: 10px;
+    overflow: hidden;
+    margin: 4px 0 10px;
+  }
+  .bar > div { background: var(--green); height: 100%; border-radius: 6px; }
+  .barlabel { font-size: 0.82rem; color: rgba(14, 36, 78, 0.7); }
+  footer { text-align: center; font-size: 0.78rem; color: rgba(14, 36, 78, 0.5); margin: 24px 0 8px; }
+  /* teacher dashboard (?auswertung) */
+  .dashhead { font-family: 'Orbitron', sans-serif; font-size: 1.05rem; margin-bottom: 10px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0 4px; }
+  .chip {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.9rem;
+    background: rgba(121, 158, 49, 0.14);
+    border: 1px solid rgba(121, 158, 49, 0.45);
+    border-radius: 8px;
+    padding: 6px 10px;
+  }
+  .chip.low { background: rgba(176, 36, 24, 0.08); border-color: rgba(176, 36, 24, 0.4); }
+  .live { color: rgba(14, 36, 78, 0.55); font-size: 0.8rem; }
+  /* result table */
+  .revtable { width: 100%; border-collapse: collapse; font-size: 0.92rem; margin-bottom: 12px; }
+  .revtable th {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.72rem;
+    letter-spacing: 0.05em;
+    text-align: left;
+    padding: 6px 8px;
+    border-bottom: 2px solid var(--blue-soft);
+  }
+  .revtable td { padding: 5px 8px; border-bottom: 1px solid var(--blue-soft); }
+  .revtable td.num { text-align: right; white-space: nowrap; }
+  .revtable td.pct { width: 45%; min-width: 110px; }
+  .revtable td.pct .bar { margin: 0; }
+  .katex { font-size: 1.05em; }
+  .qtext .katex, .opt .katex { white-space: nowrap; }
+  .ok { color: var(--green-dark); font-weight: bold; }
+  .nok { color: var(--red); font-weight: bold; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Eingangstest Mathematik · Klasse 11</h1>
+  <div class="sub">Berufliches Gymnasium · Jahrgangsstufe 11 · Stand Mittlerer Schulabschluss · 20 Rechenfragen + 10 zum Schmunzeln · genau eine Antwort pro Frage · anonym</div>
+
+  <div id="quiz"></div>
+
+  <div id="dash" style="display:none">
+    <div class="card">
+      <div class="dashhead">Einzelleistungen <span class="live" id="liveinfo"></span></div>
+      <div id="dashscores">Noch keine Abgaben.</div>
+    </div>
+    <div class="card">
+      <div class="dashhead">Gruppenleistung pro Frage</div>
+      <div id="dashquestions"></div>
+    </div>
+  </div>
+
+  <div class="actions" id="submitBox">
+    <button class="btn" id="submitBtn" type="button">Abgeben</button>
+    <div class="hint" id="hint"></div>
+  </div>
+
+  <div class="card" id="result" style="display:none">
+    <h2>Dein Ergebnis</h2>
+    <div class="score" id="score"></div>
+    <div id="review"></div>
+    <div class="avg" id="classavg">Klassen-Durchschnitt wird geladen …</div>
+  </div>
+
+  <footer>Doc Alvers Mathe-Labor · Es werden keine persönlichen Daten gespeichert, nur anonyme Gesamt-Zähler.</footer>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  const DB_URL = 'https://fyfhxzyymmurlaenmzse.supabase.co';
+  const DB_KEY = 'sb_publishable_ubQDiMD-X3N0vZvPVi229Q_-5Zootfk'; /* publishable key - public by design */
+  const PARAMS = new URLSearchParams(location.search);
+  /* ?test = demo mode: separate data pool, key r, unlimited submits */
+  const TEST_MODE = PARAMS.has('test');
+  /* ?klasse=9a = own data pool (and own submit lock) per class/run;
+     a "reset" is simply a new value, e.g. ?klasse=9a-2 */
+  const KLASSE = (PARAMS.get('klasse') || '').replace(/[^a-z0-9_-]/gi, '').slice(0, 20);
+  const QUIZ_ID = TEST_MODE ? 'mathetest11-eingang-test'
+                            : 'mathetest11-eingang-v1' + (KLASSE ? '-' + KLASSE : '');
+  /* soft lock against double submits per browser; tied to QUIZ_ID so a new
+     quiz version automatically resets the lock */
+  const DONE_KEY = 'done-' + QUIZ_ID;
+
+  /* Grading scale: [min percentage, grade]. Adjust here if IBB uses other cuts. */
+  const GRADE_SCALE = [[95, 1], [80, 2], [60, 3], [40, 4], [20, 5], [0, 6]];
+
+  function gradeFor(pct) {
+    for (let i = 0; i < GRADE_SCALE.length; i++) {
+      if (pct >= GRADE_SCALE[i][0]) return GRADE_SCALE[i][1];
+    }
+    return 6;
+  }
+
+  /* Questions: entry test for BGY class 11 — everything is Oberschule level
+     (up to the Mittlerer Schulabschluss). Pattern: two calculation questions,
+     then one general-knowledge ("Spass") question, repeated ten times.
+     Exactly one correct option per question.
+     Formulas are written as $...$ and rendered with KaTeX. */
+  const QUESTIONS = [
+    {
+      q: 'Berechne $\\dfrac{2}{3} + \\dfrac{1}{4}$.',
+      opts: [
+        '$\\dfrac{3}{7}$',
+        '$\\dfrac{3}{12}$',
+        '$\\dfrac{11}{12}$',
+        '$\\dfrac{2}{12}$'
+      ],
+      steps: [
+        'Brüche brauchen einen gemeinsamen Nenner. Der Hauptnenner von $3$ und $4$ ist $12$.',
+        'Erweitern: $\\dfrac{2}{3} = \\dfrac{8}{12}$ und $\\dfrac{1}{4} = \\dfrac{3}{12}$',
+        'Zähler addieren, Nenner behalten: $\\dfrac{8}{12} + \\dfrac{3}{12} = \\dfrac{11}{12}$',
+        'Niemals Zähler und Nenner getrennt addieren — das ergäbe $\\dfrac{3}{7}$ und ist falsch.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein Pullover kostet 60 €. Im Schlussverkauf gibt es 25 % Rabatt. Was kostet er jetzt?',
+      opts: [
+        '45 €',
+        '35 €',
+        '48 €',
+        '15 €'
+      ],
+      steps: [
+        'Rabatt berechnen: $25\\,\\%$ von $60$ € $= 0{,}25 \\cdot 60$ € $= 15$ €',
+        'Vom Preis abziehen: $60$ € $-\\ 15$ € $= 45$ €',
+        'Schneller mit dem Faktor: $100\\,\\% - 25\\,\\% = 75\\,\\%$, also $0{,}75 \\cdot 60$ € $= 45$ €'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Was ist eine binomische Formel?',
+      opts: [
+        'Eine Formel, die immer genau zwei Lösungen liefert.',
+        'Eine Regel, mit der man Klammern wie $(a+b)^2$ schnell ausmultipliziert.',
+        'Eine Rechenregel für Zahlen mit zwei Ziffern.',
+        'Eine Formel aus der Biologie zur Benennung von Arten.'
+      ],
+      steps: [
+        '„Binom“ heißt „Zwei-Term“: ein Ausdruck aus zwei Gliedern, zum Beispiel $a+b$.',
+        'Die drei binomischen Formeln: $(a+b)^2 = a^2+2ab+b^2$, $(a-b)^2 = a^2-2ab+b^2$ und $(a+b)(a-b) = a^2-b^2$',
+        'Kleine Falle: die binomische Nomenklatur („Homo sapiens“) gibt es wirklich — aber in der Biologie, nicht in der Mathematik.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Fasse zusammen: $3(2x-4) - 2(x-5)$',
+      opts: [
+        '$4x - 22$',
+        '$8x - 2$',
+        '$4x + 2$',
+        '$4x - 2$'
+      ],
+      steps: [
+        'Erste Klammer ausmultiplizieren: $3(2x-4) = 6x - 12$',
+        'Zweite Klammer: $-2(x-5) = -2x + 10$ — das Minus vor der Klammer dreht beide Vorzeichen um.',
+        'Zusammenfassen: $6x - 2x = 4x$ und $-12 + 10 = -2$',
+        'Ergebnis: $4x - 2$'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie lautet $(a+5)^2$ ausmultipliziert?',
+      opts: [
+        '$a^2 + 25$',
+        '$a^2 + 10a + 25$',
+        '$a^2 + 5a + 25$',
+        '$a^2 + 10a + 10$'
+      ],
+      steps: [
+        '1. binomische Formel: $(a+b)^2 = a^2 + 2ab + b^2$ mit $b = 5$',
+        '$2ab = 2 \\cdot a \\cdot 5 = 10a$ und $b^2 = 25$',
+        'Ergebnis: $a^2 + 10a + 25$',
+        'Häufigster Fehler ist $a^2 + 25$ — dann fehlt das gemischte Glied $10a$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Was ist die Kreiszahl $\\pi$?',
+      opts: [
+        'Der Flächeninhalt eines Kreises mit Radius 1.',
+        'Genau $\\dfrac{22}{7}$.',
+        'Der 16. Buchstabe des griechischen Alphabets und sonst nichts.',
+        'Das Verhältnis von Umfang zu Durchmesser eines Kreises, ungefähr $3{,}14$.'
+      ],
+      steps: [
+        'Bei jedem Kreis gilt $U = \\pi \\cdot d$, also $\\pi = \\dfrac{U}{d}$ — unabhängig davon, wie groß der Kreis ist.',
+        '$\\pi = 3{,}14159\\ldots$ ist irrational: die Dezimaldarstellung bricht nie ab und wiederholt sich nie.',
+        '$\\dfrac{22}{7} \\approx 3{,}1429$ ist nur eine brauchbare Näherung, nicht der exakte Wert.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Löse die Gleichung $5x - 7 = 3x + 9$.',
+      opts: [
+        '$x = 8$',
+        '$x = 1$',
+        '$x = 2$',
+        '$x = 16$'
+      ],
+      steps: [
+        'Auf beiden Seiten $3x$ abziehen: $2x - 7 = 9$',
+        'Auf beiden Seiten $7$ addieren: $2x = 16$',
+        'Durch $2$ teilen: $x = 8$',
+        'Probe: $5\\cdot 8 - 7 = 33$ und $3\\cdot 8 + 9 = 33$ ✓'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Löse das Gleichungssystem $x + y = 10$ und $x - y = 4$.',
+      opts: [
+        '$x = 3$, $y = 7$',
+        '$x = 6$, $y = 4$',
+        '$x = 7$, $y = 3$',
+        '$x = 5$, $y = 5$'
+      ],
+      steps: [
+        'Additionsverfahren: beide Gleichungen addieren, dabei fällt $y$ weg: $2x = 14$',
+        'Also $x = 7$',
+        'Einsetzen in $x + y = 10$: $7 + y = 10 \\Rightarrow y = 3$',
+        'Probe in der zweiten Gleichung: $7 - 3 = 4$ ✓'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welche der folgenden Zahlen ist eine Primzahl?',
+      opts: [
+        '$97$',
+        '$1$',
+        '$51$',
+        '$91$'
+      ],
+      steps: [
+        'Eine Primzahl hat genau zwei Teiler: $1$ und sich selbst.',
+        '$1$ hat nur einen Teiler und ist deshalb per Definition keine Primzahl.',
+        '$51 = 3 \\cdot 17$ und $91 = 7 \\cdot 13$ — beide zusammengesetzt.',
+        '$97$ ist durch keine Primzahl bis $\\sqrt{97} \\approx 9{,}8$ teilbar (also nicht durch 2, 3, 5, 7) und damit prim.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welchen Anstieg hat die Gerade durch $P(0|3)$ und $Q(4|11)$?',
+      opts: [
+        '$m = 4$',
+        '$m = 2$',
+        '$m = 8$',
+        '$m = 3$'
+      ],
+      steps: [
+        'Anstieg $= \\dfrac{\\text{Höhenunterschied}}{\\text{waagerechter Abstand}} = \\dfrac{y_2 - y_1}{x_2 - x_1}$',
+        'Einsetzen: $m = \\dfrac{11 - 3}{4 - 0} = \\dfrac{8}{4}$',
+        '$m = 2$; die Gerade lautet $y = 2x + 3$ — der $y$-Achsenabschnitt steht schon in $P$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Welche Lösungen hat die Gleichung $x^2 - 9 = 0$?',
+      opts: [
+        'nur $x = 3$',
+        '$x = 9$ und $x = -9$',
+        'keine Lösung',
+        '$x = 3$ und $x = -3$'
+      ],
+      steps: [
+        'Umstellen: $x^2 = 9$',
+        'Wurzelziehen liefert hier zwei Lösungen: $x = \\pm\\sqrt{9} = \\pm 3$',
+        'Kontrolle mit der 3. binomischen Formel: $x^2 - 9 = (x-3)(x+3)$ — Nullstellen bei $3$ und $-3$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wer war Pythagoras?',
+      opts: [
+        'Ein römischer Feldherr, der nebenbei die Geometrie erfand.',
+        'Ein deutscher Mathematiker des 19. Jahrhunderts.',
+        'Ein griechischer Mathematiker und Philosoph der Antike (etwa 570–510 v. Chr.).',
+        'Eine erfundene Figur aus einem Schulbuch.'
+      ],
+      steps: [
+        'Pythagoras von Samos lebte im 6. Jahrhundert v. Chr. und gründete eine Schule in Süditalien.',
+        'Der Zusammenhang $a^2 + b^2 = c^2$ war Babyloniern und Ägyptern schon vorher bekannt — der Beweis entstand im griechischen Umfeld.',
+        'Seine Schule beschäftigte sich auch mit Musik und Zahlenverhältnissen.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein rechtwinkliges Dreieck hat die Katheten $a = 3$ cm und $b = 4$ cm. Wie lang ist die Hypotenuse?',
+      opts: [
+        '$7$ cm',
+        '$\\sqrt{7}$ cm',
+        '$5$ cm',
+        '$12$ cm'
+      ],
+      steps: [
+        'Satz des Pythagoras: $a^2 + b^2 = c^2$',
+        'Einsetzen: $3^2 + 4^2 = 9 + 16 = 25$',
+        '$c = \\sqrt{25} = 5$ cm — das berühmte „3-4-5-Dreieck“.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Im rechtwinkligen Dreieck gilt $\\sin\\alpha = \\dfrac{\\ ?\\ }{\\ ?\\ }$. Welches Verhältnis ist gemeint?',
+      opts: [
+        '$\\dfrac{\\text{Gegenkathete}}{\\text{Hypotenuse}}$',
+        '$\\dfrac{\\text{Ankathete}}{\\text{Hypotenuse}}$',
+        '$\\dfrac{\\text{Gegenkathete}}{\\text{Ankathete}}$',
+        '$\\dfrac{\\text{Hypotenuse}}{\\text{Gegenkathete}}$'
+      ],
+      steps: [
+        'Merkhilfe GAGA–HHAG: $\\sin = \\dfrac{\\text{G}}{\\text{H}}$, $\\cos = \\dfrac{\\text{A}}{\\text{H}}$, $\\tan = \\dfrac{\\text{G}}{\\text{A}}$',
+        'Der Sinus nimmt also die Gegenkathete des Winkels, geteilt durch die Hypotenuse.',
+        'Weil die Hypotenuse die längste Seite ist, gilt immer $\\sin\\alpha \\le 1$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wofür steht das Zeichen $\\infty$?',
+      opts: [
+        'Für eine sehr große Zahl, etwa eine Billion.',
+        'Für die Null in liegender Schreibweise.',
+        'Für „ungefähr gleich“.',
+        'Für „unendlich“ — kein Zahlenwert, sondern ein Symbol für „ohne Ende“.'
+      ],
+      steps: [
+        'Das Symbol heißt Lemniskate und wurde 1655 von John Wallis eingeführt.',
+        '$\\infty$ ist keine Zahl: man darf damit nicht wie mit Zahlen rechnen — $\\infty - \\infty$ ist nicht definiert.',
+        '„Ungefähr gleich“ ist übrigens $\\approx$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie groß ist der Flächeninhalt eines Kreises mit Radius $r = 5$ cm?',
+      opts: [
+        '$10\\pi\\ \\mathrm{cm^2}$',
+        '$5\\pi\\ \\mathrm{cm^2}$',
+        '$50\\pi\\ \\mathrm{cm^2}$',
+        '$25\\pi\\ \\mathrm{cm^2} \\approx 78{,}5\\ \\mathrm{cm^2}$'
+      ],
+      steps: [
+        'Formel für den Kreis: $A = \\pi r^2$',
+        'Einsetzen: $A = \\pi \\cdot 5^2 = 25\\pi$',
+        '$25\\pi \\approx 78{,}5\\ \\mathrm{cm^2}$',
+        'Vorsicht: $U = 2\\pi r = 10\\pi$ wäre der Umfang, nicht die Fläche.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Eine Pyramide hat die Grundfläche $G = 12\\ \\mathrm{cm^2}$ und die Höhe $h = 5$ cm. Wie groß ist ihr Volumen?',
+      opts: [
+        '$60\\ \\mathrm{cm^3}$',
+        '$20\\ \\mathrm{cm^3}$',
+        '$30\\ \\mathrm{cm^3}$',
+        '$17\\ \\mathrm{cm^3}$'
+      ],
+      steps: [
+        'Formel: $V = \\dfrac{1}{3}\\,G\\,h$',
+        'Einsetzen: $V = \\dfrac{1}{3} \\cdot 12 \\cdot 5$',
+        '$V = 4 \\cdot 5 = 20\\ \\mathrm{cm^3}$',
+        'Der Faktor $\\tfrac{1}{3}$ gilt für Pyramide und Kegel: drei solche Körper füllen genau das Prisma bzw. den Zylinder.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Was ist ein „Googol“?',
+      opts: [
+        'Die Zahl $10^{100}$, also eine Eins mit hundert Nullen.',
+        'Ein Schreibfehler der Suchmaschine Google.',
+        'Die größte Zahl, die es gibt.',
+        'Eine besondere Zahl aus der Bruchrechnung.'
+      ],
+      steps: [
+        'Den Namen erfand 1920 der neunjährige Milton Sirotta für seinen Onkel, den Mathematiker Edward Kasner.',
+        '$10^{100}$ ist größer als die geschätzte Zahl aller Atome im sichtbaren Universum (etwa $10^{80}$).',
+        'Eine größte Zahl gibt es nicht: zu jeder Zahl $n$ existiert $n+1$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Auf einer Karte im Maßstab 1 : 25 000 sind zwei Orte 4 cm voneinander entfernt. Wie weit sind sie in Wirklichkeit auseinander?',
+      opts: [
+        '$1$ km',
+        '$100$ m',
+        '$2{,}5$ km',
+        '$10$ km'
+      ],
+      steps: [
+        '1 cm auf der Karte entspricht 25 000 cm in Wirklichkeit.',
+        '$4\\ \\mathrm{cm} \\cdot 25\\,000 = 100\\,000\\ \\mathrm{cm}$',
+        'Umrechnen: $100\\,000\\ \\mathrm{cm} = 1\\,000\\ \\mathrm{m} = 1\\ \\mathrm{km}$'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Berechne $2^3 \\cdot 2^4$.',
+      opts: [
+        '$2^{12} = 4096$',
+        '$4^{7}$',
+        '$2^{7} = 128$',
+        '$2^{3\\cdot 4}$'
+      ],
+      steps: [
+        'Potenzgesetz: bei gleicher Basis werden die Exponenten addiert, $a^m \\cdot a^n = a^{m+n}$',
+        '$2^3 \\cdot 2^4 = 2^{3+4} = 2^7$',
+        '$2^7 = 128$',
+        'Multipliziert werden die Exponenten nur beim Potenzieren einer Potenz: $(2^3)^4 = 2^{12}$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Was versteht man unter dem „Goldenen Schnitt“?',
+      opts: [
+        'Den kürzesten Schnitt durch ein Dreieck.',
+        'Ein Teilungsverhältnis von etwa $1{,}618$, das als besonders harmonisch gilt.',
+        'Eine Rechenregel für Prozentaufgaben.',
+        'Die Halbierung einer Strecke.'
+      ],
+      steps: [
+        'Eine Strecke wird so geteilt, dass sich die ganze Strecke zum größeren Teil verhält wie der größere Teil zum kleineren.',
+        'Das Verhältnis ist $\\Phi = \\dfrac{1+\\sqrt{5}}{2} \\approx 1{,}618$.',
+        'Es taucht in Kunst und Architektur auf — und in der Fibonacci-Folge: die Quotienten aufeinanderfolgender Glieder nähern sich $\\Phi$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Vereinfache $\\sqrt{50}$ so weit wie möglich.',
+      opts: [
+        '$25\\sqrt{2}$',
+        '$5\\sqrt{2}$',
+        '$2\\sqrt{5}$',
+        'lässt sich nicht vereinfachen'
+      ],
+      steps: [
+        'Quadratzahl abspalten: $50 = 25 \\cdot 2$',
+        'Wurzelgesetz $\\sqrt{a \\cdot b} = \\sqrt{a} \\cdot \\sqrt{b}$: $\\sqrt{50} = \\sqrt{25} \\cdot \\sqrt{2}$',
+        '$= 5\\sqrt{2} \\approx 7{,}07$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Berechne $-3 - (-7)$.',
+      opts: [
+        '$-10$',
+        '$-4$',
+        '$10$',
+        '$4$'
+      ],
+      steps: [
+        'Minus und Minus ergeben Plus: $-(-7) = +7$',
+        'Also $-3 + 7$',
+        '$= 4$ — auf dem Zahlenstrahl sieben Schritte nach rechts, von $-3$ aus.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie heißt die längste Seite im rechtwinkligen Dreieck?',
+      opts: [
+        'Hypothese',
+        'Hyperbel',
+        'Hypotenuse',
+        'Hypnose'
+      ],
+      steps: [
+        'Die Hypotenuse liegt dem rechten Winkel gegenüber und ist deshalb immer die längste Seite.',
+        'Die beiden kürzeren Seiten heißen Katheten.',
+        'Die anderen drei Wörter stammen aus Wissenschaft (Hypothese), Geometrie (Hyperbel) und Psychologie (Hypnose).'
+      ],
+      solution: 2
+    },
+    {
+      q: '4 Arbeiter brauchen für eine Mauer 12 Tage. Wie lange brauchen 6 Arbeiter bei gleicher Leistung?',
+      opts: [
+        '$18$ Tage',
+        '$10$ Tage',
+        '$8$ Tage',
+        '$6$ Tage'
+      ],
+      steps: [
+        'Mehr Arbeiter bedeutet weniger Zeit: die Größen sind antiproportional.',
+        'Gesamtarbeit bestimmen: $4 \\cdot 12 = 48$ Arbeitstage',
+        '$48 : 6 = 8$ Tage',
+        'Beim antiproportionalen Dreisatz bleibt das Produkt konstant, nicht der Quotient.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie groß ist der Median der Werte $3;\\ 5;\\ 7;\\ 8;\\ 20$?',
+      opts: [
+        '$7$',
+        '$8{,}6$',
+        '$8$',
+        '$11{,}5$'
+      ],
+      steps: [
+        'Der Median ist der mittlere Wert der der Größe nach geordneten Liste.',
+        'Die Liste ist bereits geordnet und hat 5 Werte — der dritte steht in der Mitte.',
+        'Median $= 7$',
+        'Das arithmetische Mittel wäre $\\dfrac{43}{5} = 8{,}6$: der Ausreißer $20$ zieht den Mittelwert nach oben, den Median nicht.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie geht die Folge $1,\\ 1,\\ 2,\\ 3,\\ 5,\\ 8,\\ \\ldots$ weiter?',
+      opts: [
+        '$13$',
+        '$10$',
+        '$11$',
+        '$16$'
+      ],
+      steps: [
+        'Es ist die Fibonacci-Folge: jedes Glied ist die Summe der beiden vorhergehenden.',
+        '$5 + 8 = 13$',
+        'Leonardo von Pisa, genannt Fibonacci, beschrieb sie 1202 an einem Kaninchen-Modell; sie taucht in Tannenzapfen und Sonnenblumen auf.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Ein fairer Würfel wird einmal geworfen. Wie groß ist die Wahrscheinlichkeit für eine gerade Augenzahl?',
+      opts: [
+        '$\\tfrac{1}{6}$',
+        '$\\tfrac{1}{3}$',
+        '$\\tfrac{2}{3}$',
+        '$\\tfrac{1}{2}$'
+      ],
+      steps: [
+        'Günstige Ergebnisse: $2$, $4$, $6$ — das sind drei.',
+        'Mögliche Ergebnisse: $1$ bis $6$ — das sind sechs.',
+        'Laplace-Regel: $P = \\dfrac{3}{6} = \\dfrac{1}{2} = 50\\,\\%$'
+      ],
+      solution: 3
+    },
+    {
+      q: '500 € liegen ein Jahr lang zu 2 % Zinsen auf dem Konto. Wie viel Zinsen gibt es?',
+      opts: [
+        '$1$ €',
+        '$10$ €',
+        '$20$ €',
+        '$100$ €'
+      ],
+      steps: [
+        'Zinsformel für ein Jahr: $Z = K \\cdot p$ mit dem Zinssatz $p$ als Dezimalzahl.',
+        '$Z = 500 \\cdot 0{,}02$ (Beträge in Euro)',
+        '$Z = 10$, also 10 € Zinsen — auf dem Konto liegen danach 510 €.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wofür steht das Zeichen $\\sum$ in der Mathematik?',
+      opts: [
+        'Für ein Produkt — mehrere Werte werden multipliziert.',
+        'Für eine Summe — mehrere Werte werden addiert.',
+        'Für die Wurzel aus einer Zahl.',
+        'Für Summe und Differenz gleichzeitig.'
+      ],
+      steps: [
+        '$\\sum$ ist das große griechische Sigma, der Anfangsbuchstabe von „Summe“.',
+        'Beispiel: $\\sum_{i=1}^{4} i = 1 + 2 + 3 + 4 = 10$',
+        'Das Produktzeichen ist dagegen das große Pi: $\\prod$.'
+      ],
+      solution: 1
+    }
+  ];
+
+  const LETTERS = ['A', 'B', 'C', 'D'];
+  const answers = new Array(QUESTIONS.length).fill(-1);
+  let locked = false;
+
+  /* Formulas are written as $...$ inside the question/option strings and
+     rendered with KaTeX. Plain text parts stay plain text (no innerHTML). */
+  function renderMath(el, src) {
+    el.dataset.src = src;
+    el.textContent = '';
+    src.split(/\$([^$]+)\$/).forEach(function (part, idx) {
+      if (!part) return;
+      if (idx % 2 === 0) {
+        el.appendChild(document.createTextNode(part));
+      } else if (window.katex) {
+        const span = document.createElement('span');
+        try { katex.render(part, span, { throwOnError: false }); }
+        catch (e) { span.textContent = part; }
+        el.appendChild(span);
+      } else {
+        el.appendChild(document.createTextNode(part));
+      }
+    });
+  }
+
+  const quizEl = document.getElementById('quiz');
+  const hintEl = document.getElementById('hint');
+  const submitBtn = document.getElementById('submitBtn');
+
+  /* Step-by-step solution panel: numbered steps plus the correct option. */
+  function buildSolution(item) {
+    const box = document.createElement('div');
+    box.className = 'solution';
+    box.hidden = true;
+    const title = document.createElement('div');
+    title.className = 'soltitle';
+    title.textContent = 'SCHRITT FÜR SCHRITT';
+    box.appendChild(title);
+    const ol = document.createElement('ol');
+    (item.steps || []).forEach(function (step) {
+      const li = document.createElement('li');
+      renderMath(li, step);
+      ol.appendChild(li);
+    });
+    box.appendChild(ol);
+    const ans = document.createElement('div');
+    ans.className = 'solanswer';
+    const head = document.createElement('span');
+    head.textContent = 'Richtige Antwort: ' + LETTERS[item.solution] + ' — ';
+    ans.appendChild(head);
+    const val = document.createElement('span');
+    renderMath(val, item.opts[item.solution]);
+    ans.appendChild(val);
+    box.appendChild(ans);
+    return box;
+  }
+
+  function render() {
+    QUESTIONS.forEach(function (item, qi) {
+      const card = document.createElement('div');
+      card.className = 'card';
+      const num = document.createElement('div');
+      num.className = 'qnum';
+      num.textContent = 'FRAGE ' + (qi + 1) + ' / ' + QUESTIONS.length;
+      const qt = document.createElement('div');
+      qt.className = 'qtext';
+      renderMath(qt, item.q);
+      card.appendChild(num);
+      card.appendChild(qt);
+      item.opts.forEach(function (opt, oi) {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'opt';
+        b.dataset.q = qi;
+        b.dataset.o = oi;
+        b.setAttribute('aria-label', 'Frage ' + (qi + 1) + ', Antwort ' + LETTERS[oi]);
+        const lt = document.createElement('span');
+        lt.className = 'letter';
+        lt.textContent = LETTERS[oi];
+        b.appendChild(lt);
+        const txt = document.createElement('span');
+        renderMath(txt, opt);
+        b.appendChild(txt);
+        b.addEventListener('click', function () { pick(qi, oi, card); });
+        card.appendChild(b);
+      });
+
+      /* Solution toggle below the answer options; the step-by-step panel
+         opens directly underneath the button. */
+      const sol = buildSolution(item);
+      const solBtn = document.createElement('button');
+      solBtn.type = 'button';
+      solBtn.className = 'solbtn';
+      solBtn.textContent = TEST_MODE ? 'Lösung ausblenden' : 'Lösung';
+      solBtn.setAttribute('aria-expanded', TEST_MODE ? 'true' : 'false');
+      solBtn.setAttribute('aria-label', 'Lösung zu Frage ' + (qi + 1) + ' anzeigen');
+      solBtn.disabled = !TEST_MODE;
+      solBtn.title = TEST_MODE ? '' : 'Wird nach dem Abgeben freigeschaltet';
+      sol.hidden = !TEST_MODE;
+      solBtn.addEventListener('click', function () {
+        const open = sol.hidden;
+        sol.hidden = !open;
+        solBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+        solBtn.textContent = open ? 'Lösung ausblenden' : 'Lösung';
+      });
+      card.appendChild(solBtn);
+      card.appendChild(sol);
+
+      quizEl.appendChild(card);
+    });
+  }
+
+  /* "Abgeben" unlocks only once every question has been answered. */
+  function updateSubmitState() {
+    if (!submitBtn) return;
+    if (TEST_MODE) { submitBtn.disabled = false; return; }
+    const open = answers.filter(function (a) { return a < 0; }).length;
+    submitBtn.disabled = open > 0;
+    if (hintEl) {
+      hintEl.textContent = open === 0 ? ''
+        : 'Noch ' + open + (open === 1 ? ' Frage offen.' : ' Fragen offen.');
+    }
+  }
+
+  /* Single choice: picking an option always clears the previous one. */
+  function pick(qi, oi, card) {
+    if (locked) return;
+    answers[qi] = oi;
+    card.querySelectorAll('.opt').forEach(function (b) {
+      b.classList.toggle('sel', Number(b.dataset.o) === oi);
+    });
+    updateSubmitState();
+  }
+
+  function submit() {
+    if (locked) return;
+    locked = true;
+    if (submitBtn) submitBtn.disabled = true;
+
+    let score = 0;
+    document.querySelectorAll('.opt').forEach(function (b) {
+      b.disabled = true;
+      const qi = Number(b.dataset.q), oi = Number(b.dataset.o);
+      if (oi === QUESTIONS[qi].solution) b.classList.add('correct');
+      else if (answers[qi] === oi) b.classList.add('wrong');
+    });
+    QUESTIONS.forEach(function (item, qi) { if (answers[qi] === item.solution) score++; });
+
+    document.querySelectorAll('.solbtn').forEach(function (b) {
+      b.disabled = false;
+      b.title = '';
+    });
+
+    const box = document.getElementById('submitBox');
+    if (box) box.style.display = 'none';
+    const resEl = document.getElementById('result');
+    resEl.style.display = 'block';
+    const pctOwn = Math.round(score / QUESTIONS.length * 100);
+    document.getElementById('score').innerHTML =
+      score + ' / ' + QUESTIONS.length +
+      ' <span style="font-size:0.6em">· ' + pctOwn + ' % · Note <span style="color:' +
+      barColor(pctOwn) + '">' + gradeFor(pctOwn) + '</span></span>';
+
+    resEl.scrollIntoView({ behavior: 'smooth' });
+
+    sendStats(score);
+  }
+
+  /* Send answers once; server stores one anonymous submission row ("12/20")
+     plus aggregated per-question counters. */
+  function sendStats(score) {
+    const avgEl = document.getElementById('classavg');
+    const alreadyDone = !TEST_MODE && localStorage.getItem(DONE_KEY) === '1';
+    const call = alreadyDone
+      ? fetch(DB_URL + '/rest/v1/quiz_stats?quiz=eq.' + QUIZ_ID + '&order=q', {
+          headers: { apikey: DB_KEY, Authorization: 'Bearer ' + DB_KEY }
+        })
+      : fetch(DB_URL + '/rest/v1/rpc/quiz_vote', {
+          method: 'POST',
+          headers: {
+            apikey: DB_KEY,
+            Authorization: 'Bearer ' + DB_KEY,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            p_quiz: QUIZ_ID,
+            p_answers: answers,
+            p_score: score,
+            p_total: QUESTIONS.length
+          })
+        });
+
+    call.then(function (res) {
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      if (!alreadyDone && !TEST_MODE) localStorage.setItem(DONE_KEY, '1');
+      return res.json();
+    }).then(function (rows) {
+      showAverage(rows, avgEl);
+    }).catch(function () {
+      renderReview(null); /* still show own richtig/falsch without class data */
+      avgEl.textContent = 'Klassendurchschnitt gerade nicht verfügbar.';
+    });
+  }
+
+  /* Bar color ramp: palette red (0%) -> orange (50%) -> green (100%). */
+  function barColor(pct) {
+    const red = [176, 36, 24], orange = [245, 194, 66], green = [121, 158, 49];
+    const a = pct <= 50 ? red : orange;
+    const b = pct <= 50 ? orange : green;
+    const t = (pct <= 50 ? pct : pct - 50) / 50;
+    const c = a.map(function (v, i) { return Math.round(v + (b[i] - v) * t); });
+    return 'rgb(' + c.join(',') + ')';
+  }
+
+  /* Per question: own answer as richtig/falsch plus the class percentage. */
+  function renderReview(rows) {
+    const byQ = {};
+    (rows || []).forEach(function (r) { byQ[r.q] = r; });
+    let html = '<table class="revtable"><thead><tr>' +
+               '<th>Frage</th><th>Deine Antwort</th><th colspan="2">Klassendurchschnitt</th>' +
+               '</tr></thead><tbody>';
+    QUESTIONS.forEach(function (item, qi) {
+      const ok = answers[qi] === item.solution;
+      let pct = null;
+      const row = byQ[qi];
+      if (row) {
+        const counts = row.counts || [];
+        const total = counts.reduce(function (a, b) { return a + b; }, 0);
+        const correct = counts[item.solution] || 0;
+        if (total) pct = Math.round(correct / total * 100);
+      }
+      html += '<tr><td>' + (qi + 1) + '</td>' +
+              '<td class="' + (ok ? 'ok' : 'nok') + '">' + (ok ? 'richtig' : 'falsch') + '</td>' +
+              '<td class="pct">' + (pct === null ? '' :
+                '<div class="bar"><div style="width:' + pct + '%;background:' +
+                barColor(pct) + '"></div></div>') + '</td>' +
+              '<td class="num">' + (pct === null ? '–' : pct + ' %') + '</td></tr>';
+    });
+    html += '</tbody></table>';
+    document.getElementById('review').innerHTML = html;
+  }
+
+  function showAverage(rows, avgEl) {
+    renderReview(rows);
+    if (!rows || !rows.length) { avgEl.textContent = ''; return; }
+    let sumRate = 0, n = 0, submissions = 0;
+    rows.forEach(function (row) {
+      if (row.q < 0 || row.q >= QUESTIONS.length) return;
+      const counts = row.counts || [0, 0, 0, 0, 0];
+      const total = counts.reduce(function (a, b) { return a + b; }, 0);
+      const correct = counts[QUESTIONS[row.q].solution] || 0;
+      sumRate += total ? correct / total : 0; n++;
+      submissions = Math.max(submissions, total);
+    });
+    const avg = n ? Math.round((sumRate / n) * 100) : 0;
+    avgEl.innerHTML = '<div class="avg">Klassendurchschnitt gesamt: <b>' + avg +
+      ' % richtig</b> bei ' + submissions + ' Abgaben.</div>';
+  }
+
+  /* --- Teacher dashboard (?auswertung): anonymous individual scores counting
+     up live while students submit, plus group performance per question. --- */
+  function initDashboard() {
+    const box = document.getElementById('submitBox');
+    if (box) box.style.display = 'none';
+    document.querySelector('.sub').textContent = 'BGY · Klasse 11 · Eingangstest · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Frage';
+    document.getElementById('dash').style.display = 'block';
+    refreshDashboard();
+    setInterval(refreshDashboard, 5000);
+  }
+
+  function refreshDashboard() {
+    fetch(DB_URL + '/rest/v1/quiz_submissions?quiz=eq.' + QUIZ_ID +
+          '&select=id,score,total&order=id', {
+      headers: { apikey: DB_KEY, Authorization: 'Bearer ' + DB_KEY }
+    }).then(function (res) {
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      return res.json();
+    }).then(function (subs) {
+      renderScores(subs);
+      return fetch(DB_URL + '/rest/v1/quiz_stats?quiz=eq.' + QUIZ_ID + '&order=q', {
+        headers: { apikey: DB_KEY, Authorization: 'Bearer ' + DB_KEY }
+      });
+    }).then(function (res) { return res.json(); })
+      .then(renderQuestionStats)
+      .catch(function () {
+        document.getElementById('liveinfo').textContent = '(Verbindung gestört — versuche weiter …)';
+      });
+  }
+
+  function renderScores(subs) {
+    const el = document.getElementById('dashscores');
+    const info = document.getElementById('liveinfo');
+    if (!subs.length) {
+      el.textContent = 'Noch keine Abgaben.';
+      info.textContent = '(live, aktualisiert alle 5 s)';
+      return;
+    }
+    let sum = 0;
+    let html = '<div class="chips">';
+    subs.forEach(function (s, i) {
+      sum += s.score;
+      const low = s.score < s.total / 2 ? ' low' : '';
+      html += '<span class="chip' + low + '" title="Abgabe ' + (i + 1) + '">' +
+              s.score + '/' + s.total + '</span>';
+    });
+    html += '</div>';
+    const avg = sum / subs.length;
+    el.innerHTML = html +
+      '<div class="avg">Ø <b>' + (Math.round(avg * 10) / 10) + ' / ' + QUESTIONS.length +
+      '</b> (' + Math.round(avg / QUESTIONS.length * 100) + ' %)</div>';
+    info.textContent = '(' + subs.length + ' Abgaben · live, aktualisiert alle 5 s)';
+  }
+
+  function renderQuestionStats(rows) {
+    const el = document.getElementById('dashquestions');
+    const frag = document.createDocumentFragment();
+    let html = '';
+    rows.forEach(function (row) {
+      if (row.q < 0 || row.q >= QUESTIONS.length) return;
+      const item = QUESTIONS[row.q];
+      const counts = row.counts || [0, 0, 0, 0, 0];
+      /* counts[0..3] = options A-D, counts[4] = no answer.
+         Single choice: anything but the correct option is simply wrong. */
+      const total = counts.reduce(function (a, b) { return a + b; }, 0);
+      const correct = counts[item.solution] || 0;
+      const wrong = total - correct;
+      const pct = total ? Math.round(correct / total * 100) : 0;
+      const label = document.createElement('div');
+      label.className = 'barlabel';
+      const b = document.createElement('b');
+      b.textContent = 'Frage ' + (row.q + 1);
+      label.appendChild(b);
+      const rest = document.createElement('span');
+      renderMath(rest, ' (' + correct + ' richtig · ' + wrong + ' falsch = ' + pct + ' %): ' + item.q);
+      label.appendChild(rest);
+      frag.appendChild(label);
+      const bar = document.createElement('div');
+      bar.className = 'bar';
+      bar.innerHTML = '<div style="width:' + pct + '%;background:' + barColor(pct) + '"></div>';
+      frag.appendChild(bar);
+      html = '1';
+    });
+    el.textContent = '';
+    if (html) el.appendChild(frag); else el.textContent = 'Noch keine Daten.';
+  }
+
+  /* make the active pool visible in the sub line */
+  function tagSubline() {
+    const sub = document.querySelector('.sub');
+    if (TEST_MODE) sub.textContent += ' · TESTMODUS';
+    else if (KLASSE) sub.textContent += ' · Klasse ' + KLASSE;
+  }
+
+  /* KaTeX is deferred: if it arrives after the first paint, redraw the math.
+     Every element rendered by renderMath() keeps its source in data-src. */
+  window.addEventListener('load', function () {
+    if (!window.katex) return;
+    document.querySelectorAll('[data-src]').forEach(function (el) {
+      renderMath(el, el.dataset.src);
+    });
+  });
+
+  if (PARAMS.has('auswertung')) {
+    initDashboard();
+    tagSubline();
+  } else {
+    if (submitBtn) submitBtn.addEventListener('click', submit);
+    render();
+    updateSubmitState();
+    tagSubline();
+    /* Demo helper (?test): key r fills a random answer set, ~95% correct. */
+    if (TEST_MODE) {
+      document.addEventListener('keydown', function (e) {
+        if (e.key !== 'r' || locked) return;
+        QUESTIONS.forEach(function (item, qi) {
+          let oi;
+          if (Math.random() < 0.95) {
+            oi = item.solution;
+          } else {
+            do { oi = Math.floor(Math.random() * 4); } while (oi === item.solution);
+          }
+          const btn = document.querySelector('.opt[data-q="' + qi + '"][data-o="' + oi + '"]');
+          if (btn) btn.click();
+        });
+      });
+    }
+  }
+})();
+</script>
+</body>
+</html>

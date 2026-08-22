@@ -3,10 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Online-Test Informatik 9 — Doc Alvers Mathe-Labor</title>
+<title>Abschlusstest Mathematik 11 — Doc Alvers Mathe-Labor</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
 <style>
   :root {
     --blue: rgb(14, 36, 78);
@@ -48,6 +50,41 @@
     letter-spacing: 0.08em;
     margin-bottom: 6px;
   }
+  /* solution toggle sits below the answer options */
+  .solbtn {
+    margin-top: 4px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.68rem;
+    letter-spacing: 0.06em;
+    background: transparent;
+    color: var(--green-dark);
+    border: 1px solid rgba(121, 158, 49, 0.6);
+    border-radius: 999px;
+    padding: 3px 11px;
+    cursor: pointer;
+  }
+  .solbtn:hover { background: rgba(121, 158, 49, 0.14); }
+  .solbtn[aria-expanded="true"] { background: var(--green); border-color: var(--green); color: #fff; }
+  .solution {
+    background: rgba(121, 158, 49, 0.08);
+    border-left: 3px solid var(--green);
+    border-radius: 0 10px 10px 0;
+    padding: 12px 14px;
+    margin: 10px 0 2px;
+    font-size: 0.95rem;
+    line-height: 1.55;
+    overflow-x: auto;
+  }
+  .solution .soltitle {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.06em;
+    color: var(--green-dark);
+    margin-bottom: 8px;
+  }
+  .solution ol { margin: 0 0 8px 20px; }
+  .solution li { margin-bottom: 5px; }
+  .solution .solanswer { font-weight: bold; color: var(--green-dark); }
   .qtext { font-size: 1.02rem; font-weight: bold; margin-bottom: 12px; }
   .opt {
     display: block;
@@ -125,14 +162,16 @@
   .revtable td.num { text-align: right; white-space: nowrap; }
   .revtable td.pct { width: 45%; min-width: 110px; }
   .revtable td.pct .bar { margin: 0; }
+  .katex { font-size: 1.05em; }
+  .qtext .katex, .opt .katex { white-space: nowrap; }
   .ok { color: var(--green-dark); font-weight: bold; }
   .nok { color: var(--red); font-weight: bold; }
 </style>
 </head>
 <body>
 <div class="wrap">
-  <h1>Online-Test Informatik · Klasse 9</h1>
-  <div class="sub">Oberschule · Eingangstest Klasse 9 · 31 Fragen · genau eine Antwort pro Frage · anonym</div>
+  <h1>Abschlusstest Mathematik · Klasse 11</h1>
+  <div class="sub">Berufliches Gymnasium · Jahrgangsstufe 11 · Stoff des Schuljahres (LB 1–4) · 20 Fragen · genau eine Antwort pro Frage · anonym</div>
 
   <div id="quiz"></div>
 
@@ -147,10 +186,12 @@
     </div>
   </div>
 
+  <!-- Abgeben deaktiviert (Übungsmodus): zum Reaktivieren diesen Kommentar entfernen.
   <div class="actions" id="submitBox">
     <button class="btn" id="submitBtn" type="button">Abgeben</button>
     <div class="hint" id="hint"></div>
   </div>
+  -->
 
   <div class="card" id="result" style="display:none">
     <h2>Dein Ergebnis</h2>
@@ -174,8 +215,8 @@
   /* ?klasse=9a = own data pool (and own submit lock) per class/run;
      a "reset" is simply a new value, e.g. ?klasse=9a-2 */
   const KLASSE = (PARAMS.get('klasse') || '').replace(/[^a-z0-9_-]/gi, '').slice(0, 20);
-  const QUIZ_ID = TEST_MODE ? 'infotest9-test'
-                            : 'infotest9-v9' + (KLASSE ? '-' + KLASSE : '');
+  const QUIZ_ID = TEST_MODE ? 'mathetest11-abschluss-test'
+                            : 'mathetest11-abschluss-v1' + (KLASSE ? '-' + KLASSE : '');
   /* soft lock against double submits per browser; tied to QUIZ_ID so a new
      quiz version automatically resets the lock */
   const DONE_KEY = 'done-' + QUIZ_ID;
@@ -190,163 +231,218 @@
     return 6;
   }
 
-  /* Questions: Lehrplan OS Sachsen, Informatik Kl. 7-9 (incl. TC basics).
-     Order: grade 7 -> 8 -> 9. Exactly one correct option per question. */
+  /* Questions: Lehrplan Mathematik, Berufliches Gymnasium Sachsen (2021),
+     Jahrgangsstufe 11. Order follows the Stoffverteilungsplan:
+     LB 2 (Gleichungen/Figuren) -> LB 3 (Funktionen) -> LB 4 (LGS/Matrizen)
+     -> LB 1 (Stochastik). Exactly one correct option per question.
+     Formulas are written as $...$ and rendered with KaTeX. */
   const QUESTIONS = [
-    /* Lehrplan OS Sachsen Kl. 7/8; acronym questions mixed in every third slot */
     {
-      q: 'Was ist ein Bit?',
-      opts: ['Ein kleines Computerprogramm.', 'Die kleinste Informationseinheit: 0 oder 1.', 'Ein Speicherstick.', 'Die Geschwindigkeit des Internets.'],
+      q: 'Die Formel $s = \\tfrac{a}{2}\\,t^2$ soll nach $t$ umgestellt werden ($a>0$, $t>0$). Wie lautet das Ergebnis?',
+      opts: ['$t = \\sqrt{\\dfrac{2s}{a}}$', '$t = \\dfrac{2s}{a}$', '$t = \\sqrt{\\dfrac{s}{2a}}$', '$t = \\dfrac{a}{2s}$'],
+      steps: [
+        'Beide Seiten mit $2$ multiplizieren: $2s = a\\,t^2$',
+        'Durch $a$ teilen: $t^2 = \\dfrac{2s}{a}$',
+        'Wurzel ziehen; wegen $t>0$ nur die positive Lösung: $t = \\sqrt{\\dfrac{2s}{a}}$'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie lautet $(3x-2)^2$ ausmultipliziert?',
+      opts: ['$9x^2 - 4$', '$9x^2 - 12x + 4$', '$9x^2 + 12x + 4$', '$3x^2 - 12x + 4$'],
+      steps: [
+        '2. binomische Formel: $(a-b)^2 = a^2 - 2ab + b^2$, hier $a = 3x$, $b = 2$',
+        '$a^2 = (3x)^2 = 9x^2$  ·  $2ab = 2\\cdot 3x\\cdot 2 = 12x$  ·  $b^2 = 4$',
+        'Zusammensetzen: $(3x-2)^2 = 9x^2 - 12x + 4$'
+      ],
       solution: 1
     },
     {
-      q: 'Wofür steht das EVA-Prinzip?',
-      opts: ['Ausgabe – Verarbeitung – Eingabe', 'Eingabe – Verarbeitung – Ausgabe', 'Eingabe – Verwaltung – Anzeige', 'Erfassen – Verändern – Archivieren'],
-      solution: 1
-    },
-    {
-      q: 'Wie viele Bit sind 1 Byte?',
-      opts: ['4 Bit', '10 Bit', '8 Bit', '1024 Bit'],
+      q: 'Ein Preis wird zuerst um 20 % gesenkt und danach wieder um 20 % erhöht. Wie verhält sich der Endpreis zum Ausgangspreis?',
+      opts: ['Er ist genauso hoch.', 'Er ist 4 % höher.', 'Er ist 4 % niedriger.', 'Er ist 20 % niedriger.'],
+      steps: [
+        'Senkung um 20 % bedeutet Faktor $0{,}8$',
+        'Erhöhung um 20 % bedeutet Faktor $1{,}2$',
+        'Nacheinander heißt multiplizieren: $0{,}8 \\cdot 1{,}2 = 0{,}96$',
+        '$96\\,\\%$ des Ausgangspreises, also 4 % niedriger. Merke: Prozentänderungen werden multipliziert, nicht addiert.'
+      ],
       solution: 2
     },
     {
-      q: 'LAN heißt?',
-      opts: ['Local Area Network', 'Lautes Antennen-Netz', 'Lange Arbeits-Nacht', 'Licht Aus, Nachtruhe'],
-      solution: 0
-    },
-    {
-      q: 'Welcher Speicher verliert seinen Inhalt, wenn der Computer ausgeschaltet wird?',
-      opts: ['Festplatte', 'USB-Stick', 'ROM', 'RAM'],
-      solution: 3
-    },
-    {
-      q: 'Welche Dateiendung gehört typischerweise zu einem Bild?',
-      opts: ['.png', '.docx', '.mp3', '.exe'],
-      solution: 0
-    },
-    {
-      q: 'WLAN heißt?',
-      opts: ['Weites Licht-Antennen-Netz', 'Wackelige Leitung Am Nachmittag', 'Wireless Local Area Network', 'Wilde Lamas Ackern Nie'],
-      solution: 2
-    },
-    {
-      q: 'Was passiert, wenn man eine Pixelgrafik stark vergrößert?',
-      opts: ['Sie bleibt beliebig scharf.', 'Sie wird automatisch zur Vektorgrafik.', 'Die Farben kehren sich um.', 'Sie wird unscharf und „pixelig“.'],
-      solution: 3
-    },
-    {
-      q: 'Ein Textabsatz hat die Schriftfarbe Rot. Was ist „Rot“ im Sinne der Objektorientierung?',
-      opts: ['Eine Klasse', 'Eine Methode', 'Ein Attributwert', 'Ein Objekt'],
-      solution: 2
-    },
-    {
-      q: 'USB heißt?',
-      opts: ['Unter-Strom-Buchse', 'Universal Serial Bus', 'Uralte Speicher-Box', 'Unsichtbare Super-Bytes'],
+      q: 'Ein Zylinder hat den Radius $r = 2$ cm und die Höhe $h = 3$ cm. Wie groß ist seine Oberfläche $A = 2\\pi r(r+h)$?',
+      opts: ['$12\\pi\\ \\mathrm{cm^2}$', '$20\\pi\\ \\mathrm{cm^2}$', '$10\\pi\\ \\mathrm{cm^2}$', '$24\\pi\\ \\mathrm{cm^2}$'],
+      steps: [
+        'Formel notieren: $A = 2\\pi r (r+h)$',
+        'Einsetzen: $A = 2\\pi \\cdot 2\\,(2+3)$',
+        'Ausrechnen: $A = 2\\pi \\cdot 2 \\cdot 5 = 20\\pi\\ \\mathrm{cm^2} \\approx 62{,}8\\ \\mathrm{cm^2}$'
+      ],
       solution: 1
     },
     {
-      q: 'Du möchtest ein fremdes Foto aus dem Internet in deiner Präsentation verwenden. Was gilt?',
-      opts: ['Ich brauche eine Erlaubnis (Lizenz) und gebe die Quelle an.', 'Alles aus dem Internet darf frei verwendet werden.', 'Erlaubt, wenn ich das Bild vorher leicht verändere.', 'Erlaubt, solange ich es nur in der Schule zeige.'],
-      solution: 0
-    },
-    {
-      q: 'Was ist ein Algorithmus?',
-      opts: ['Eine beliebige Sammlung von Ideen.', 'Eine eindeutige, endliche Handlungsvorschrift zur Lösung eines Problems.', 'Eine Fehlermeldung des Betriebssystems.', 'Ein Gerät zur Datenübertragung.'],
-      solution: 1
-    },
-    {
-      q: 'CPU heißt?',
-      opts: ['Computer Power Ufo', 'Coole Pixel-Union', 'Chip-Prüf-Uhr', 'Central Processing Unit'],
+      q: 'Welchen größtmöglichen Definitionsbereich hat $f(x) = \\dfrac{1}{x-3}$?',
+      opts: ['$\\mathbb{R}$', '$\\mathbb{R}\\setminus\\{0\\}$', '$x > 3$', '$\\mathbb{R}\\setminus\\{3\\}$'],
+      steps: [
+        'Ein Bruch ist nur definiert, wenn der Nenner nicht null ist: $x - 3 \\neq 0$',
+        'Auflösen: $x \\neq 3$',
+        'Also $D = \\mathbb{R}\\setminus\\{3\\}$ — bei $x=3$ liegt eine Polstelle.'
+      ],
       solution: 3
     },
     {
-      q: '„Rühre den Teig, bis er glatt ist.“ — Welche algorithmische Grundstruktur ist das?',
-      opts: ['Sequenz', 'Verzweigung', 'Wiederholung', 'Variable'],
+      q: 'Welche Symmetrie besitzt der Graph von $f(x) = x^4 - 3x^2$?',
+      opts: ['Achsensymmetrisch zur $y$-Achse', 'Punktsymmetrisch zum Ursprung', 'Achsensymmetrisch zur $x$-Achse', 'Keine Symmetrie'],
+      steps: [
+        'Symmetrie prüft man mit $f(-x)$: $f(-x) = (-x)^4 - 3(-x)^2$',
+        'Gerade Exponenten schlucken das Minus: $f(-x) = x^4 - 3x^2$',
+        'Es gilt $f(-x) = f(x)$ ⇒ achsensymmetrisch zur $y$-Achse (nur gerade Exponenten ⇒ gerade Funktion).'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Eine Gerade verläuft durch die Punkte $P(1|5)$ und $Q(3|11)$. Wie lautet ihre Gleichung?',
+      opts: ['$y = 3x + 2$', '$y = 2x + 3$', '$y = 3x - 2$', '$y = 6x - 1$'],
+      steps: [
+        'Anstieg aus zwei Punkten: $m = \\dfrac{y_2-y_1}{x_2-x_1} = \\dfrac{11-5}{3-1} = \\dfrac{6}{2} = 3$',
+        '$P(1|5)$ in $y = 3x + n$ einsetzen: $5 = 3\\cdot 1 + n \\Rightarrow n = 2$',
+        'Gleichung: $y = 3x + 2$; Probe mit $Q$: $3\\cdot 3 + 2 = 11$ ✓'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Ein Kapital von 1000 € wird 5 Jahre lang mit 3 % pro Jahr verzinst (Zinseszins). Welcher Ansatz ist richtig?',
+      opts: ['$1000 \\cdot 0{,}03 \\cdot 5$', '$1000 \\cdot 1{,}03 \\cdot 5$', '$1000 \\cdot 1{,}03^{5}$', '$1000 + 1{,}03^{5}$'],
+      steps: [
+        '3 % Zinsen bedeuten pro Jahr den Wachstumsfaktor $q = 1{,}03$',
+        'Bei Zinseszins wirkt der Faktor jedes Jahr erneut: $K_n = K_0 \\cdot q^{\\,n}$',
+        'Einsetzen: $K_5 = 1000 \\cdot 1{,}03^{5} \\approx 1159{,}27$ €',
+        '$1000\\cdot 0{,}03\\cdot 5 = 150$ € wären nur einfache Zinsen — ohne Zins auf die Zinsen.'
+      ],
       solution: 2
     },
     {
-      q: '„WENN es regnet, DANN nimm den Schirm, SONST die Sonnenbrille.“ — Welche Grundstruktur ist das?',
-      opts: ['Verzweigung', 'Wiederholung', 'Sequenz', 'Endlosschleife'],
-      solution: 0
-    },
-    {
-      q: 'RAM heißt?',
-      opts: ['Random Access Memory', 'Rechner-Alarm-Modus', 'Riesige Antennen-Maschine', 'Rasend Aktive Mäuse'],
-      solution: 0
-    },
-    {
-      q: 'Was ist ein Struktogramm?',
-      opts: ['Eine Tabelle mit Messwerten.', 'Ein Netzwerkplan.', 'Ein Diagramm des Speicherverbrauchs.', 'Eine grafische Darstellung eines Algorithmus.'],
-      solution: 3
-    },
-    {
-      q: 'Welches Gerät verbindet dein Heimnetzwerk mit dem Internet?',
-      opts: ['Switch', 'Monitor', 'Sensor', 'Router'],
-      solution: 3
-    },
-    {
-      q: 'ROM heißt?',
-      opts: ['Rechner Ohne Maus', 'Rote Online-Meldung', 'Read Only Memory', 'Runde Oberflächen-Maschine'],
+      q: 'Wie viel Prozent eines radioaktiven Stoffes sind nach drei Halbwertszeiten noch vorhanden?',
+      opts: ['50 %', '25 %', '12,5 %', '0 %'],
+      steps: [
+        'Jede Halbwertszeit halbiert den Bestand: Faktor $\\tfrac{1}{2}$',
+        'Drei Halbwertszeiten: $\\left(\\tfrac{1}{2}\\right)^3 = \\tfrac{1}{8}$',
+        '$\\tfrac{1}{8} = 0{,}125 = 12{,}5\\,\\%$ — exponentieller Zerfall erreicht nie exakt null.'
+      ],
       solution: 2
     },
     {
-      q: 'Was ist eine IP-Adresse?',
-      opts: ['Das Passwort für das WLAN.', 'Der Name einer Webseite.', 'Eine E-Mail-Adresse.', 'Die eindeutige Adresse eines Geräts im Netzwerk.'],
-      solution: 3
-    },
-    {
-      q: 'Wozu dient das DNS (Domain Name System)?',
-      opts: ['Es übersetzt Namen wie www.schule.de in IP-Adressen.', 'Es verschlüsselt E-Mails.', 'Es misst die Übertragungsgeschwindigkeit.', 'Es speichert Passwörter.'],
-      solution: 0
-    },
-    {
-      q: 'WWW heißt?',
-      opts: ['Wilde Weite Wüste', 'World Wide Web', 'Wir Wollen Wissen', 'Warme Winter-Wolken'],
+      q: 'Welche Lösungen hat die Gleichung $x^2 - 5x + 6 = 0$?',
+      opts: ['$x_1 = -2$, $x_2 = -3$', '$x_1 = 2$, $x_2 = 3$', '$x_1 = 1$, $x_2 = 6$', '$x_1 = 5$, $x_2 = 6$'],
+      steps: [
+        'Normalform ablesen: $p = -5$, $q = 6$',
+        '$p$-$q$-Formel: $x_{1,2} = -\\dfrac{p}{2} \\pm \\sqrt{\\left(\\dfrac{p}{2}\\right)^2 - q} = 2{,}5 \\pm \\sqrt{6{,}25 - 6}$',
+        '$x_{1,2} = 2{,}5 \\pm 0{,}5$, also $x_1 = 2$ und $x_2 = 3$',
+        'Probe mit Vieta: $x_1 + x_2 = 5 = -p$  und  $x_1 \\cdot x_2 = 6 = q$ ✓'
+      ],
       solution: 1
     },
     {
-      q: 'Caesar-Verschlüsselung mit Verschiebung 3: Was wird aus dem Klartext-Buchstaben A?',
-      opts: ['C', 'D', 'Z', 'B'],
-      solution: 1
-    },
-    {
-      q: 'Was ist beim Verschlüsseln der „Schlüssel“?',
-      opts: ['Der Geheimtext.', 'Das Passwort des Betriebssystems.', 'Die geheime Information zum Ver- und Entschlüsseln.', 'Das Übertragungskabel.'],
+      q: 'Wo liegt der Scheitelpunkt der Parabel $f(x) = (x-3)^2 - 4$?',
+      opts: ['$S(-3|-4)$', '$S(3|4)$', '$S(3|-4)$', '$S(-3|4)$'],
+      steps: [
+        'Scheitelpunktform: $f(x) = a\\,(x-d)^2 + e$ mit Scheitel $S(d|e)$',
+        'Vergleich mit $f(x) = (x-3)^2 - 4$: $d = 3$, $e = -4$',
+        '$S(3|-4)$ — Vorsicht: das Minus in der Klammer dreht das Vorzeichen von $d$ um.'
+      ],
       solution: 2
     },
     {
-      q: 'URL heißt?',
-      opts: ['Unser Rechner Lädt', 'Ultra-Rasante Leitung', 'Universelle Router-Lampe', 'Uniform Resource Locator'],
-      solution: 3
-    },
-    {
-      q: 'Welches der folgenden Programme ist ein Betriebssystem?',
-      opts: ['Word', 'Windows', 'Firefox', 'Intel Core i5'],
-      solution: 1
-    },
-    {
-      q: 'Was bedeutet „Open-Source-Software“?',
-      opts: ['Kostenlose Software mit geheimem Quellcode.', 'Software, deren Quellcode offen einsehbar und veränderbar ist.', 'Software, die nur online läuft.', 'Eine Testversion, die nach 30 Tagen abläuft.'],
-      solution: 1
-    },
-    {
-      q: 'PDF heißt?',
-      opts: ['Portable Document Format', 'Praktisch-Digitales Foto', 'Papier-Drucker-Fehler', 'Perfekt Dokumentierter Frosch'],
+      q: 'Welche Periode hat die Funktion $f(x) = \\sin(2x)$?',
+      opts: ['$\\pi$', '$2\\pi$', '$4\\pi$', '$\\tfrac{\\pi}{2}$'],
+      steps: [
+        'Allgemein hat $\\sin(bx)$ die Periode $T = \\dfrac{2\\pi}{|b|}$',
+        'Hier ist $b = 2$',
+        '$T = \\dfrac{2\\pi}{2} = \\pi$ — die Schwingung läuft doppelt so schnell wie $\\sin x$.'
+      ],
       solution: 0
     },
     {
-      q: 'Was beschreibt ein Pfad wie C:\\Bilder\\urlaub\\strand.jpg?',
-      opts: ['Die Größe der Datei.', 'Den Dateityp.', 'Den Speicherort der Datei im Ordnersystem.', 'Das Erstellungsdatum.'],
+      q: 'Wie erhält man den Graphen der Umkehrfunktion aus dem Graphen von $f$?',
+      opts: ['Durch Spiegelung an der $x$-Achse', 'Durch Spiegelung an der Geraden $y = x$', 'Durch Spiegelung an der $y$-Achse', 'Durch Verschiebung um 1 nach oben'],
+      steps: [
+        'Umkehren heißt: $x$ und $y$ tauschen die Rollen',
+        'Vertauschte Koordinaten $(a|b) \\rightarrow (b|a)$ entsprechen geometrisch der Spiegelung an der Winkelhalbierenden $y = x$',
+        'Beispiel: $f(x) = x^2$ für $x \\ge 0$ hat $(2|4)$, die Umkehrung $f^{-1}(x) = \\sqrt{x}$ hat $(4|2)$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Welchen Wert hat $x$ in der Gleichung $2^x = 0{,}25$?',
+      opts: ['$x = 2$', '$x = -2$', '$x = 0{,}5$', '$x = -4$'],
+      steps: [
+        '$0{,}25$ als Bruch schreiben: $0{,}25 = \\dfrac{1}{4} = \\dfrac{1}{2^2}$',
+        'Als Potenz mit Basis 2: $\\dfrac{1}{2^2} = 2^{-2}$',
+        'Gleiche Basis ⇒ gleiche Exponenten: $2^x = 2^{-2} \\Rightarrow x = -2$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein Guthaben wächst jährlich um 5 %. Nach welcher Zeit hat es sich verdoppelt, d. h. $1{,}05^{\\,t} = 2$?',
+      opts: ['$t = \\dfrac{\\ln 2}{\\ln 1{,}05} \\approx 14{,}2$ Jahre', '$t = \\dfrac{2}{1{,}05} \\approx 1{,}9$ Jahre', '$t = \\ln 2 \\cdot \\ln 1{,}05 \\approx 0{,}03$ Jahre', '$t = 20$ Jahre'],
+      steps: [
+        'Ansatz: $1{,}05^{\\,t} = 2$',
+        'Beide Seiten logarithmieren: $\\ln\\left(1{,}05^{\\,t}\\right) = \\ln 2$',
+        'Logarithmusgesetz $\\ln(a^t) = t\\cdot\\ln a$: $t \\cdot \\ln 1{,}05 = \\ln 2$',
+        '$t = \\dfrac{\\ln 2}{\\ln 1{,}05} \\approx \\dfrac{0{,}693}{0{,}0488} \\approx 14{,}2$ Jahre'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie entsteht der Graph von $g(x) = f(x+2)$ aus dem Graphen von $f$?',
+      opts: ['Verschiebung um 2 nach rechts', 'Verschiebung um 2 nach oben', 'Verschiebung um 2 nach links', 'Streckung mit dem Faktor 2'],
+      steps: [
+        'Der Parameter steht im Argument: $g(x) = f(x + c)$ mit $c = 2$',
+        '$g$ nimmt an der Stelle $x$ schon den Wert an, den $f$ erst bei $x+2$ hat',
+        'Der Graph wandert also 2 Einheiten nach links — im Argument wirkt $+c$ gegenläufig',
+        'Zum Vergleich: $f(x) + 2$ verschiebt um 2 nach oben.'
+      ],
       solution: 2
     },
     {
-      q: 'Was ist der Unterschied zwischen LAN und WLAN?',
-      opts: ['LAN nutzt Kabel, WLAN funkt kabellos.', 'WLAN ist immer schneller als LAN.', 'LAN funktioniert nur ohne Internet.', 'WLAN nutzt Kabel, LAN funkt kabellos.'],
+      q: 'Wie heißt die Matrix $\\begin{pmatrix} 1 & 0 \\\\ 0 & 1 \\end{pmatrix}$?',
+      opts: ['Nullmatrix', 'Diagonalmatrix ohne besonderen Namen', 'Einheitsmatrix', 'Dreiecksmatrix'],
+      steps: [
+        'Die Matrix ist quadratisch ($2\\times 2$)',
+        'Auf der Hauptdiagonale stehen nur Einsen, sonst nur Nullen',
+        'Das ist die Einheitsmatrix $E$ (auch $I$) — das neutrale Element: $E \\cdot \\vec{x} = \\vec{x}$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Beim Gauß-Verfahren entsteht in der letzten Zeile die Aussage $0 = 5$. Was folgt daraus für das lineare Gleichungssystem?',
+      opts: ['Es hat genau eine Lösung.', 'Es hat unendlich viele Lösungen.', 'Es hat keine Lösung.', 'Es muss neu aufgestellt werden — so etwas kann nicht auftreten.'],
+      steps: [
+        'Die Zeile ausgeschrieben lautet $0\\cdot x + 0\\cdot y + 0\\cdot z = 5$',
+        'Die linke Seite ist für jede Belegung $0$ — die Aussage $0 = 5$ ist ein Widerspruch',
+        'Also $L = \\{\\,\\}$: keine Lösung. Geometrisch haben die drei Ebenen keinen gemeinsamen Punkt.',
+        'Zum Vergleich: Ergäbe sich $0 = 0$, gäbe es unendlich viele Lösungen (freier Parameter).'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein Würfel wird zweimal geworfen. Wie groß ist die Wahrscheinlichkeit, zweimal eine Sechs zu würfeln (Pfadmultiplikation)?',
+      opts: ['$\\tfrac{1}{36}$', '$\\tfrac{1}{12}$', '$\\tfrac{1}{6}$', '$\\tfrac{2}{6}$'],
+      steps: [
+        'Zweistufiger Zufallsversuch, die Stufen sind unabhängig',
+        'Jede Stufe: $P(\\text{Sechs}) = \\tfrac{1}{6}$',
+        '1. Pfadregel (Pfadmultiplikation): $P = \\tfrac{1}{6} \\cdot \\tfrac{1}{6}$',
+        '$P = \\tfrac{1}{36} \\approx 2{,}8\\,\\%$'
+      ],
       solution: 0
     },
     {
-      q: 'HTTP heißt?',
-      opts: ['Heißes Turbo-Tastatur-Programm', 'Hardware-Test-Tool-Paket', 'Hypertext Transfer Protocol', 'Hüpfende Tasten Tanzen Polka'],
+      q: 'Von 100 befragten Personen tragen 40 eine Brille; 25 dieser Brillenträger sind Frauen. Eine zufällig ausgewählte Person trägt eine Brille. Mit welcher Wahrscheinlichkeit ist es eine Frau?',
+      opts: ['25 %', '40 %', '62,5 %', '65 %'],
+      steps: [
+        'Gesucht ist die bedingte Wahrscheinlichkeit $P(\\text{Frau} \\mid \\text{Brille})$',
+        'Vierfeldertafel: Brillenträger gesamt $= 40$, davon Frauen $= 25$',
+        '$P(\\text{Frau} \\mid \\text{Brille}) = \\dfrac{25}{40} = 0{,}625 = 62{,}5\\,\\%$',
+        'Nicht $\\tfrac{25}{100}$: die Bedingung „trägt Brille“ verkleinert die Grundmenge von 100 auf 40.'
+      ],
       solution: 2
     }
   ];
@@ -355,9 +451,57 @@
   const answers = new Array(QUESTIONS.length).fill(-1);
   let locked = false;
 
+  /* Formulas are written as $...$ inside the question/option strings and
+     rendered with KaTeX. Plain text parts stay plain text (no innerHTML). */
+  function renderMath(el, src) {
+    el.dataset.src = src;
+    el.textContent = '';
+    src.split(/\$([^$]+)\$/).forEach(function (part, idx) {
+      if (!part) return;
+      if (idx % 2 === 0) {
+        el.appendChild(document.createTextNode(part));
+      } else if (window.katex) {
+        const span = document.createElement('span');
+        try { katex.render(part, span, { throwOnError: false }); }
+        catch (e) { span.textContent = part; }
+        el.appendChild(span);
+      } else {
+        el.appendChild(document.createTextNode(part));
+      }
+    });
+  }
+
   const quizEl = document.getElementById('quiz');
   const hintEl = document.getElementById('hint');
   const submitBtn = document.getElementById('submitBtn');
+
+  /* Step-by-step solution panel: numbered steps plus the correct option. */
+  function buildSolution(item) {
+    const box = document.createElement('div');
+    box.className = 'solution';
+    box.hidden = true;
+    const title = document.createElement('div');
+    title.className = 'soltitle';
+    title.textContent = 'SCHRITT FÜR SCHRITT';
+    box.appendChild(title);
+    const ol = document.createElement('ol');
+    (item.steps || []).forEach(function (step) {
+      const li = document.createElement('li');
+      renderMath(li, step);
+      ol.appendChild(li);
+    });
+    box.appendChild(ol);
+    const ans = document.createElement('div');
+    ans.className = 'solanswer';
+    const head = document.createElement('span');
+    head.textContent = 'Richtige Antwort: ' + LETTERS[item.solution] + ' — ';
+    ans.appendChild(head);
+    const val = document.createElement('span');
+    renderMath(val, item.opts[item.solution]);
+    ans.appendChild(val);
+    box.appendChild(ans);
+    return box;
+  }
 
   function render() {
     QUESTIONS.forEach(function (item, qi) {
@@ -368,7 +512,7 @@
       num.textContent = 'FRAGE ' + (qi + 1) + ' / ' + QUESTIONS.length;
       const qt = document.createElement('div');
       qt.className = 'qtext';
-      qt.textContent = item.q;
+      renderMath(qt, item.q);
       card.appendChild(num);
       card.appendChild(qt);
       item.opts.forEach(function (opt, oi) {
@@ -378,24 +522,37 @@
         b.dataset.q = qi;
         b.dataset.o = oi;
         b.setAttribute('aria-label', 'Frage ' + (qi + 1) + ', Antwort ' + LETTERS[oi]);
-        b.innerHTML = '<span class="letter">' + LETTERS[oi] + '</span>' + opt;
+        const lt = document.createElement('span');
+        lt.className = 'letter';
+        lt.textContent = LETTERS[oi];
+        b.appendChild(lt);
+        const txt = document.createElement('span');
+        renderMath(txt, opt);
+        b.appendChild(txt);
         b.addEventListener('click', function () { pick(qi, oi, card); });
         card.appendChild(b);
       });
+
+      /* Solution toggle below the answer options; the step-by-step panel
+         opens directly underneath the button. */
+      const sol = buildSolution(item);
+      const solBtn = document.createElement('button');
+      solBtn.type = 'button';
+      solBtn.className = 'solbtn';
+      solBtn.textContent = 'Lösung';
+      solBtn.setAttribute('aria-expanded', 'false');
+      solBtn.setAttribute('aria-label', 'Lösung zu Frage ' + (qi + 1) + ' anzeigen');
+      solBtn.addEventListener('click', function () {
+        const open = sol.hidden;
+        sol.hidden = !open;
+        solBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+        solBtn.textContent = open ? 'Lösung ausblenden' : 'Lösung';
+      });
+      card.appendChild(solBtn);
+      card.appendChild(sol);
+
       quizEl.appendChild(card);
     });
-  }
-
-  /* "Abgeben" unlocks only once every question has been answered. */
-  function updateSubmitState() {
-    if (!submitBtn) return;
-    if (TEST_MODE) { submitBtn.disabled = false; return; }
-    const open = answers.filter(function (a) { return a < 0; }).length;
-    submitBtn.disabled = open > 0;
-    if (hintEl) {
-      hintEl.textContent = open === 0 ? ''
-        : 'Noch ' + open + (open === 1 ? ' Frage offen.' : ' Fragen offen.');
-    }
   }
 
   /* Single choice: picking an option always clears the previous one. */
@@ -405,13 +562,14 @@
     card.querySelectorAll('.opt').forEach(function (b) {
       b.classList.toggle('sel', Number(b.dataset.o) === oi);
     });
-    updateSubmitState();
+    if (hintEl) hintEl.textContent = '';
   }
 
+  /* Unanswered questions are allowed and simply score no point. */
   function submit() {
     if (locked) return;
     locked = true;
-    submitBtn.disabled = true;
+    if (submitBtn) submitBtn.disabled = true;
 
     let score = 0;
     document.querySelectorAll('.opt').forEach(function (b) {
@@ -422,7 +580,8 @@
     });
     QUESTIONS.forEach(function (item, qi) { if (answers[qi] === item.solution) score++; });
 
-    document.getElementById('submitBox').style.display = 'none';
+    const box = document.getElementById('submitBox');
+    if (box) box.style.display = 'none';
     const resEl = document.getElementById('result');
     resEl.style.display = 'block';
     const pctOwn = Math.round(score / QUESTIONS.length * 100);
@@ -530,8 +689,9 @@
   /* --- Teacher dashboard (?auswertung): anonymous individual scores counting
      up live while students submit, plus group performance per question. --- */
   function initDashboard() {
-    document.getElementById('submitBox').style.display = 'none';
-    document.querySelector('.sub').textContent = 'Oberschule · Klasse 9 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Frage';
+    const box = document.getElementById('submitBox');
+    if (box) box.style.display = 'none';
+    document.querySelector('.sub').textContent = 'BGY · Klasse 11 · Abschlusstest · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Frage';
     document.getElementById('dash').style.display = 'block';
     refreshDashboard();
     setInterval(refreshDashboard, 5000);
@@ -582,6 +742,7 @@
 
   function renderQuestionStats(rows) {
     const el = document.getElementById('dashquestions');
+    const frag = document.createDocumentFragment();
     let html = '';
     rows.forEach(function (row) {
       if (row.q < 0 || row.q >= QUESTIONS.length) return;
@@ -593,12 +754,23 @@
       const correct = counts[item.solution] || 0;
       const wrong = total - correct;
       const pct = total ? Math.round(correct / total * 100) : 0;
-      html += '<div class="barlabel"><b>Frage ' + (row.q + 1) + '</b> (' + correct + ' richtig · ' +
-              wrong + ' falsch = ' + pct + ' %): ' + item.q + '</div>' +
-              '<div class="bar"><div style="width:' + pct + '%;background:' +
-              barColor(pct) + '"></div></div>';
+      const label = document.createElement('div');
+      label.className = 'barlabel';
+      const b = document.createElement('b');
+      b.textContent = 'Frage ' + (row.q + 1);
+      label.appendChild(b);
+      const rest = document.createElement('span');
+      renderMath(rest, ' (' + correct + ' richtig · ' + wrong + ' falsch = ' + pct + ' %): ' + item.q);
+      label.appendChild(rest);
+      frag.appendChild(label);
+      const bar = document.createElement('div');
+      bar.className = 'bar';
+      bar.innerHTML = '<div style="width:' + pct + '%;background:' + barColor(pct) + '"></div>';
+      frag.appendChild(bar);
+      html = '1';
     });
-    el.innerHTML = html || 'Noch keine Daten.';
+    el.textContent = '';
+    if (html) el.appendChild(frag); else el.textContent = 'Noch keine Daten.';
   }
 
   /* make the active pool visible in the sub line */
@@ -608,13 +780,21 @@
     else if (KLASSE) sub.textContent += ' · Klasse ' + KLASSE;
   }
 
+  /* KaTeX is deferred: if it arrives after the first paint, redraw the math.
+     Every element rendered by renderMath() keeps its source in data-src. */
+  window.addEventListener('load', function () {
+    if (!window.katex) return;
+    document.querySelectorAll('[data-src]').forEach(function (el) {
+      renderMath(el, el.dataset.src);
+    });
+  });
+
   if (PARAMS.has('auswertung')) {
     initDashboard();
     tagSubline();
   } else {
-    submitBtn.addEventListener('click', submit);
+    if (submitBtn) submitBtn.addEventListener('click', submit);
     render();
-    updateSubmitState();
     tagSubline();
     /* Demo helper (?test): key r fills a random answer set, ~95% correct. */
     if (TEST_MODE) {
