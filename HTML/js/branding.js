@@ -180,6 +180,30 @@ const CyberBranding = {
     /// MRA ///
     DEV_MODE: true, // Master Switch for Auto-Reload
     FORCE_INTERNAL_STYLES: false, // Ultimate extraction test: keep false to rely on external CSS only
+
+    // Labs that have a YouTube demo video — key: lab filename (lowercase). The button is a
+    // standalone fixed element on <body> (NOT inside .canvas-branding) so lab auto-hide
+    // modes that fade the masthead leave it visible.
+    LAB_VIDEOS: {
+        'worldclock.html': 'https://youtu.be/Yj0seCcLCW0',
+    },
+
+    injectLabVideo() {
+        if (document.querySelector('.lab-video-btn')) return;
+        const file = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
+        const url = this.LAB_VIDEOS[file];
+        if (!url) return;
+        const a = document.createElement('a');
+        a.className = 'lab-video-btn';
+        a.href = url;
+        a.target = '_blank';
+        a.rel = 'noopener';
+        a.title = 'Video-Demo auf YouTube';
+        a.setAttribute('aria-label', 'Video-Demo auf YouTube');
+        a.innerHTML = '<svg viewBox="0 0 28 20" aria-hidden="true"><path d="M27.4 3.1A3.5 3.5 0 0 0 25 .7C22.8.1 14 .1 14 .1S5.2.1 3 .7A3.5 3.5 0 0 0 .6 3.1 36.6 36.6 0 0 0 0 10a36.6 36.6 0 0 0 .6 6.9A3.5 3.5 0 0 0 3 19.3c2.2.6 11 .6 11 .6s8.8 0 11-.6a3.5 3.5 0 0 0 2.4-2.4A36.6 36.6 0 0 0 28 10a36.6 36.6 0 0 0-.6-6.9z" fill="#FF0000"/><path d="M11.2 14.3V5.7L18.5 10z" fill="#fff"/></svg>';
+        a.addEventListener('click', (e) => e.stopPropagation());
+        document.body.appendChild(a);
+    },
     _coreLoadRequested: false,
     _navLoadRequested: false,
     _overlaysLoadRequested: false,
@@ -282,6 +306,7 @@ const CyberBranding = {
         const brandingCore = getBrandingCore();
         if (brandingCore && typeof brandingCore.init === "function") {
             brandingCore.init.call(this, config);
+            this.injectLabVideo();
             scheduleNavigationConsistencyCheck();
             return;
         }
@@ -332,6 +357,7 @@ const CyberBranding = {
         this.setupActiveScaling();
         this.updateScale();
         if (!this.briefingContent) this.briefingContent = "";
+        this.injectLabVideo();
 
         // --- DEV-MODE: SYSTEM SYNC --- (deaktiviert)
         // if (this.DEV_MODE) { ... }
