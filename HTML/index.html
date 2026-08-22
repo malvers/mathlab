@@ -1196,6 +1196,52 @@
             outline-offset: 3px;
         }
 
+        /* Solita welcome: small round avatar in the search row + big circular video modal */
+        .solita-hello-btn {
+            box-sizing: border-box;
+            flex: 0 0 auto;
+            width: clamp(42px, 7.5vw, 68px);
+            height: 56px;
+            align-self: center;
+            border-radius: 12px;
+            border: 1px solid rgba(0, 210, 255, 0.55);
+            box-shadow: 0 8px 26px rgba(0, 0, 0, 0.38), 0 0 18px rgba(0, 210, 255, 0.14);
+            transition: box-shadow 0.22s ease, border-color 0.22s ease, transform 0.22s ease;
+            padding: 0; background: #070d18; cursor: pointer; overflow: hidden; line-height: 0;
+        }
+        .solita-hello-btn:hover {
+            border-color: rgba(0, 210, 255, 0.9);
+            transform: scale(1.06);
+            box-shadow: 0 0 28px rgba(0, 210, 255, 0.35), 0 10px 32px rgba(0, 0, 0, 0.45);
+        }
+        .solita-hello-btn:focus-visible { outline: 2px solid var(--neon-blue); outline-offset: 3px; }
+        .solita-hello-btn img { width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none; }
+
+        #solita-hello-overlay {
+            position: fixed; inset: 0; z-index: 100000;
+            display: none; align-items: center; justify-content: center;
+            background: rgba(4, 8, 20, 0.78); backdrop-filter: blur(10px);
+        }
+        #solita-hello-overlay.open { display: flex; animation: solita-hello-fade 0.35s ease-out; }
+        @keyframes solita-hello-fade { from { opacity: 0; } to { opacity: 1; } }
+        .solita-hello-window {
+            position: relative;
+            width: min(76vmin, 640px); height: min(76vmin, 640px);
+            border-radius: 50%; overflow: hidden;
+            border: 2px solid rgba(0, 210, 255, 0.65);
+            box-shadow: 0 0 60px rgba(0, 210, 255, 0.35), 0 30px 80px rgba(0, 0, 0, 0.6);
+            animation: solita-hello-pop 0.45s cubic-bezier(0.2, 0.8, 0.3, 1.15);
+        }
+        @keyframes solita-hello-pop { from { transform: scale(0.4); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .solita-hello-window video { width: 100%; height: 100%; object-fit: cover; display: block; background: #070d18; }
+        .solita-hello-close {
+            position: fixed; top: max(18px, env(safe-area-inset-top)); right: max(22px, env(safe-area-inset-right));
+            width: 44px; height: 44px; border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, 0.35); background: rgba(10, 16, 32, 0.7);
+            color: #fff; font-size: 22px; cursor: pointer; line-height: 1;
+        }
+        .solita-hello-close:hover { border-color: var(--neon-blue); color: var(--neon-blue); }
+
         .universe-galaxy-btn img {
             position: absolute;
             inset: 0;
@@ -1796,6 +1842,10 @@
     <!-- Lab scan + universe (galaxy) -->
     <div class="search-scan-row">
         <div id="search-mount"></div>
+        <button type="button" class="solita-hello-btn" id="btn-solita-hello" title="Solita begrüßt dich"
+            aria-label="Willkommens-Video von Solita abspielen">
+            <img src="resources/solita-avatar.png" alt="" width="160" height="160" loading="lazy" decoding="async">
+        </button>
         <a href="universe.html" class="universe-galaxy-btn" id="btn-universe" title="Universe · Labor-Galerie im Weltraum"
             aria-label="Universe · Labor-Galerie öffnen">
             <img src="https://images.unsplash.com/photo-1462331940025-496dfbfc7564?q=80&amp;w=600&amp;auto=format&amp;fit=crop"
@@ -2129,6 +2179,7 @@
 
         (function syncUniverseGalaxyBtnHeight() {
             const btn = document.querySelector('.search-scan-row .universe-galaxy-btn');
+            const solita = document.querySelector('.search-scan-row .solita-hello-btn');
             function sync() {
                 const inp = document.querySelector('#search-mount .search-input');
                 const wrap = document.querySelector('#search-mount .search-container');
@@ -2137,7 +2188,9 @@
                 const hWrap = wrap ? wrap.getBoundingClientRect().height : 0;
                 const base = Math.max(hInp, hWrap);
                 const px = Math.ceil(base) + 2;
-                btn.style.height = Math.max(36, px) + 'px';
+                const h = Math.max(36, px) + 'px';
+                btn.style.height = h;
+                if (solita) solita.style.height = h;   // Solita matches the universe button exactly
             }
             sync();
             requestAnimationFrame(sync);
@@ -2693,6 +2746,31 @@
         if (document.getElementById('admin-exit')) document.getElementById('admin-exit').innerHTML = CyberI18n.get('index.admin.exit');
     });
     </script>
+<!-- Solita welcome modal (round video window; video loads only on demand) -->
+<div id="solita-hello-overlay" role="dialog" aria-modal="true" aria-label="Willkommens-Video von Solita">
+    <div class="solita-hello-window">
+        <video id="solita-hello-video" preload="none" playsinline></video>
+    </div>
+    <button type="button" class="solita-hello-close" id="solita-hello-close" aria-label="Video schließen">✕</button>
+</div>
+<script>
+    (function () {
+        const overlay = document.getElementById('solita-hello-overlay');
+        const video = document.getElementById('solita-hello-video');
+        const open = () => {
+            if (!video.src) video.src = 'resources/solita-welcome.mp4';
+            overlay.classList.add('open');
+            video.currentTime = 0;
+            video.play().catch(() => {});
+        };
+        const close = () => { overlay.classList.remove('open'); video.pause(); };
+        document.getElementById('btn-solita-hello').addEventListener('click', open);
+        document.getElementById('solita-hello-close').addEventListener('click', close);
+        overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && overlay.classList.contains('open')) close(); });
+        video.addEventListener('ended', () => setTimeout(close, 900));
+    })();
+</script>
 </body>
 
 </html>

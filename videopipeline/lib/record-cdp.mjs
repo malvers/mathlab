@@ -5,7 +5,32 @@ import { chromium } from 'playwright';
 import fs from 'fs';
 import { execFileSync } from 'child_process';
 
-export async function runScenes(scenes, { outDir, viewport = { width: 1280, height: 720 }, upscale = 2 }) {
+// Visible mouse cursor + click ripple (YouTuber style), injected into the page so the
+// CDP screencast records it. Follows real input events dispatched by Playwright.
+const CURSOR_JS = () => {
+  if (window.__vpCursor) return;
+  window.__vpCursor = true;
+  const cur = document.createElement('div');
+  cur.id = '__vp_cursor';
+  cur.style.cssText = 'position:fixed;left:0;top:0;z-index:2147483647;pointer-events:none;width:26px;height:38px;transform:translate(-4px,-2px);transition:none;';
+  cur.innerHTML = '<svg viewBox="0 0 26 38" width="26" height="38"><path d="M2 2 L2 30 L9.5 23.5 L14 34 L18.5 32 L14 21.5 L24 21 Z" fill="#fff" stroke="#000" stroke-width="2.2" stroke-linejoin="round"/></svg>';
+  const style = document.createElement('style');
+  style.textContent = '@keyframes __vp_rip { from { transform: translate(-50%,-50%) scale(0.25); opacity: 0.85; } to { transform: translate(-50%,-50%) scale(1.9); opacity: 0; } }';
+  const attach = () => { document.body.appendChild(cur); document.head.appendChild(style); };
+  if (document.body) attach(); else document.addEventListener('DOMContentLoaded', attach);
+  document.addEventListener('mousemove', (e) => { cur.style.left = e.clientX + 'px'; cur.style.top = e.clientY + 'px'; }, { capture: true, passive: true });
+  document.addEventListener('mousedown', (e) => {
+    cur.style.left = e.clientX + 'px'; cur.style.top = e.clientY + 'px';
+    const r = document.createElement('div');
+    r.style.cssText = 'position:fixed;z-index:2147483646;pointer-events:none;width:64px;height:64px;border-radius:50%;' +
+      'border:4px solid #ffd93d;box-shadow:0 0 18px rgba(255,217,61,0.8);left:' + e.clientX + 'px;top:' + e.clientY + 'px;' +
+      'transform:translate(-50%,-50%);animation:__vp_rip 0.55s ease-out forwards;';
+    document.body.appendChild(r);
+    setTimeout(() => r.remove(), 600);
+  }, { capture: true, passive: true });
+};
+
+export async function runScenes(scenes, { outDir, viewport = { width: 1280, height: 720 }, upscale = 2, showCursor = false }) {
   const browser = await chromium.launch({ channel: 'chromium' });
   const results = {};
   for (const sc of scenes) {
@@ -32,8 +57,10 @@ export async function runScenes(scenes, { outDir, viewport = { width: 1280, heig
     });
     await cdp.send('Page.startScreencast', { format: 'jpeg', quality: 95, maxWidth: viewport.width, maxHeight: viewport.height });
 
+    if (showCursor) await page.addInitScript(CURSOR_JS);
     await page.goto(sc.url, { waitUntil: 'load' });
     mark('loaded');
+    if (showCursor) await page.evaluate(CURSOR_JS).catch(() => {});
     try { await sc.run(page, { mark, jiggle }); }
     catch (e) { log.push({ label: 'ERROR ' + e.message.slice(0, 120), t: (Date.now() - t0) / 1000 }); }
     const endT = (Date.now() - t0) / 1000;   // wall-clock scene end — the last (static) frame lasts until here
