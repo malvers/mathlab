@@ -232,6 +232,10 @@ const CyberBranding = {
         wrap.remove();                 /* removing the iframe stops playback */
         document.removeEventListener('keydown', this._labVideoKey, true);
         this._labVideoKey = null;
+        /* back to the button that opened the player, so keyboard users do not land at page top */
+        const back = this._labVideoReturn;
+        this._labVideoReturn = null;
+        if (back && back.focus) back.focus();
     },
 
     openLabVideo(url) {
@@ -239,8 +243,12 @@ const CyberBranding = {
         if (!id) { window.open(url, '_blank', 'noopener'); return; }
         this.closeLabVideo();
 
+        this._labVideoReturn = document.activeElement;
         const wrap = document.createElement('div');
         wrap.className = 'lab-video-wrap';
+        wrap.setAttribute('role', 'dialog');
+        wrap.setAttribute('aria-modal', 'true');
+        wrap.setAttribute('aria-label', 'Video-Demo');
 
         const box = document.createElement('div');
         box.className = 'lab-video-box';
@@ -289,6 +297,7 @@ const CyberBranding = {
             this.closeLabVideo();
         };
         document.addEventListener('keydown', this._labVideoKey, true);
+        close.focus();                 /* Esc and Tab start inside the dialog, not in the lab */
     },
     _coreLoadRequested: false,
     _navLoadRequested: false,
