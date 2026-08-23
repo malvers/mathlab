@@ -1,0 +1,164 @@
+/* Shared look of the online tests (mathetest11/12/13, infotest9, ...).
+   Extracted from mathetest11 so all quiz pages share one stylesheet.
+   The fold-away behaviour of the answer choices lives in js/quiz-collapse.js. */
+:root {
+    --blue: rgb(14, 36, 78);
+    --blue-soft: rgba(8, 20, 42, 0.08);
+    --green: rgb(121, 158, 49);
+    --green-dark: rgb(96, 128, 36);
+    --orange: rgb(245, 194, 66);
+    --red: rgb(176, 36, 24);
+    --bg: #f6f7fb;
+    --card: #ffffff;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--blue);
+    font-family: Arial, Helvetica, sans-serif;
+    min-height: 100vh;
+    padding: 16px;
+  }
+  .wrap { max-width: 680px; margin: 0 auto; }
+  h1 {
+    font-family: 'Orbitron', sans-serif;
+    font-size: clamp(1.15rem, 4.5vw, 1.6rem);
+    margin: 8px 0 2px;
+  }
+  .sub { color: rgba(14, 36, 78, 0.65); font-size: 0.9rem; margin-bottom: 18px; }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--blue-soft);
+    border-radius: 14px;
+    box-shadow: 0 2px 10px rgba(8, 20, 42, 0.06);
+    padding: 18px;
+    margin-bottom: 14px;
+  }
+  .qnum {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.75rem;
+    color: var(--orange);
+    letter-spacing: 0.08em;
+    margin-bottom: 6px;
+  }
+  /* solution toggle sits below the answer options */
+  .solbtn {
+    margin-top: 4px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.68rem;
+    letter-spacing: 0.06em;
+    background: transparent;
+    color: var(--green-dark);
+    border: 1px solid rgba(121, 158, 49, 0.6);
+    border-radius: 999px;
+    padding: 3px 11px;
+    cursor: pointer;
+  }
+  .solbtn:hover:not(:disabled) { background: rgba(121, 158, 49, 0.14); }
+  .solbtn:disabled {
+    color: rgba(14, 36, 78, 0.35);
+    border-color: rgba(14, 36, 78, 0.18);
+    cursor: default;
+  }
+  .solbtn[aria-expanded="true"] { background: var(--green); border-color: var(--green); color: #fff; }
+  .solution {
+    background: rgba(121, 158, 49, 0.08);
+    border-left: 3px solid var(--green);
+    border-radius: 0 10px 10px 0;
+    padding: 12px 14px;
+    margin: 10px 0 2px;
+    font-size: 0.95rem;
+    line-height: 1.55;
+    overflow-x: auto;
+  }
+  .solution .soltitle {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.06em;
+    color: var(--green-dark);
+    margin-bottom: 8px;
+  }
+  .solution ol { margin: 0 0 8px 20px; }
+  .solution li { margin-bottom: 5px; }
+  .solution .solanswer { font-weight: bold; color: var(--green-dark); }
+  .qtext { font-size: 1.02rem; font-weight: bold; margin-bottom: 12px; }
+  .opt {
+    display: block;
+    width: 100%;
+    text-align: left;
+    background: var(--bg);
+    border: 2px solid var(--blue-soft);
+    border-radius: 10px;
+    padding: 11px 12px;
+    margin-bottom: 8px;
+    font-size: 0.98rem;
+    color: var(--blue);
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .opt:hover { border-color: rgba(121, 158, 49, 0.5); }
+  /* single choice: exactly one option per question carries .sel */
+  .opt.sel { border-color: var(--green); background: rgba(121, 158, 49, 0.12); }
+  .opt.correct { border-color: var(--green); background: rgba(121, 158, 49, 0.18); }
+  .opt.wrong { border-color: var(--red); background: rgba(176, 36, 24, 0.1); }
+  .opt:disabled { cursor: default; opacity: 1; }
+  .letter { font-family: 'Orbitron', sans-serif; font-size: 0.8rem; margin-right: 8px; }
+  .actions { text-align: center; margin: 20px 0; }
+  .btn {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1rem;
+    background: var(--green);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    padding: 13px 34px;
+    cursor: pointer;
+  }
+  .btn:hover { background: var(--green-dark); }
+  .btn:disabled { opacity: 0.45; cursor: default; }
+  .hint { color: var(--red); font-size: 0.9rem; margin-top: 10px; min-height: 1.2em; }
+  #result h2 { font-family: 'Orbitron', sans-serif; font-size: 1.1rem; margin-bottom: 10px; }
+  .score { font-family: 'Orbitron', sans-serif; font-size: 2rem; margin: 6px 0 14px; }
+  .avg { font-size: 0.95rem; margin-top: 4px; }
+  .avg b { color: var(--green-dark); }
+  .bar {
+    background: var(--blue-soft);
+    border-radius: 6px;
+    height: 10px;
+    overflow: hidden;
+    margin: 4px 0 10px;
+  }
+  .bar > div { background: var(--green); height: 100%; border-radius: 6px; }
+  .barlabel { font-size: 0.82rem; color: rgba(14, 36, 78, 0.7); }
+  footer { text-align: center; font-size: 0.78rem; color: rgba(14, 36, 78, 0.5); margin: 24px 0 8px; }
+  /* teacher dashboard (?auswertung) */
+  .dashhead { font-family: 'Orbitron', sans-serif; font-size: 1.05rem; margin-bottom: 10px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0 4px; }
+  .chip {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.9rem;
+    background: rgba(121, 158, 49, 0.14);
+    border: 1px solid rgba(121, 158, 49, 0.45);
+    border-radius: 8px;
+    padding: 6px 10px;
+  }
+  .chip.low { background: rgba(176, 36, 24, 0.08); border-color: rgba(176, 36, 24, 0.4); }
+  .live { color: rgba(14, 36, 78, 0.55); font-size: 0.8rem; }
+  /* result table */
+  .revtable { width: 100%; border-collapse: collapse; font-size: 0.92rem; margin-bottom: 12px; }
+  .revtable th {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.72rem;
+    letter-spacing: 0.05em;
+    text-align: left;
+    padding: 6px 8px;
+    border-bottom: 2px solid var(--blue-soft);
+  }
+  .revtable td { padding: 5px 8px; border-bottom: 1px solid var(--blue-soft); }
+  .revtable td.num { text-align: right; white-space: nowrap; }
+  .revtable td.pct { width: 45%; min-width: 110px; }
+  .revtable td.pct .bar { margin: 0; }
+  .katex { font-size: 1.05em; }
+  .qtext .katex, .opt .katex { white-space: nowrap; }
+  .ok { color: var(--green-dark); font-weight: bold; }
+  .nok { color: var(--red); font-weight: bold; }

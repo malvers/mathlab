@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Anonymer Eingangstest Informatik 13 — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'infotest13-eingang',
+  title: 'Anonymer Eingangstest Informatik · Klasse 13',
+  subtitle: 'Berufliches Gymnasium · Jahrgangsstufe 13 · Stand Ende Jahrgangsstufe 12 · 20 Fachfragen + 10 zum Schmunzeln · genau eine Antwort pro Frage',
+  dashSub: 'BGY · Klasse 13 · Eingangstest Informatik · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Frage',
+  /* Questions: entry test for BGY class 11 Informatik — everything is
+     Oberschule level (up to the Mittlerer Schulabschluss): hardware, files,
+     number systems, networks, spreadsheets, first algorithmic ideas.
+     Pattern: two subject questions, then one general-knowledge question,
+     repeated ten times. Exactly one correct option per question. */
+  /* Questions: entry test for BGY class 13 Informatik — content of class 12
+     (LB 1 Informatische Modellierung, LB 2 Modellierung von Datenbanken,
+     LB 3 Algorithmen und Programme, WB Kuenstliche Intelligenz).
+     Pattern: two subject questions, then one general-knowledge question,
+     repeated ten times. Exactly one correct option per question. */
+  questions: [
+    {
+      q: 'Was macht eine Beschreibung zu einem Modell?',
+      opts: [
+        'Sie bildet ein Original verkürzt und für einen bestimmten Zweck ab.',
+        'Sie gibt das Original vollständig wieder.',
+        'Sie ist immer eine Zeichnung.',
+        'Sie ist unabhängig davon, wofür sie gebraucht wird.'
+      ],
+      steps: [
+        'Nach Stachowiak gelten drei Merkmale: Abbildung, Verkürzung und Pragmatik.',
+        'Verkürzung heißt: es bleibt weg, was für den Zweck unwichtig ist — eine U-Bahn-Karte zeigt keine Entfernungen.',
+        'Pragmatik heißt: das Modell ist für jemanden, für etwas und für eine bestimmte Zeit gemacht.',
+        'Deshalb gibt es kein „richtiges“ Modell, nur ein für den Zweck brauchbares.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Was steht in einem UML-Klassendiagramm im mittleren Feld einer Klasse?',
+      opts: [
+        'der Klassenname',
+        'die Objekte',
+        'die Attribute',
+        'die Methoden'
+      ],
+      steps: [
+        'Die drei Felder von oben nach unten: Name, Attribute, Methoden.',
+        'Attribute sind die Eigenschaften (etwa $name$, $geburtsjahr$), Methoden das Verhalten.',
+        'Die Zeichen davor regeln die Sichtbarkeit: $+$ öffentlich, $-$ privat, $\\#$ geschützt.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Worum geht es beim Turing-Test?',
+      opts: [
+        'Ob eine Maschine schneller rechnet als ein Mensch.',
+        'Ob ein Programm fehlerfrei läuft.',
+        'Ob ein Computer eine Verschlüsselung knacken kann.',
+        'Ob ein Mensch im Gespräch Maschine und Mensch unterscheiden kann.'
+      ],
+      steps: [
+        'Alan Turing schlug 1950 dieses „Imitationsspiel“ vor, um die Frage „Können Maschinen denken?“ prüfbar zu machen.',
+        'Getestet wird nicht Verstehen, sondern Ununterscheidbarkeit im Verhalten.',
+        'Genau das ist der Hauptkritikpunkt: gutes Nachahmen ist noch kein Denken.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Was ist im ER-Modell eine Entität?',
+      opts: [
+        'Ein unterscheidbares Objekt der realen Welt, über das Daten gespeichert werden.',
+        'Eine einzelne Eigenschaft wie das Geburtsdatum.',
+        'Die Verbindung zwischen zwei Tabellen.',
+        'Ein Befehl der Datenbanksprache.'
+      ],
+      steps: [
+        'Entitäten sind zum Beispiel Schüler, Kurs oder Buch — im Diagramm ein Rechteck.',
+        'Ihre Eigenschaften heißen Attribute und stehen in Ovalen.',
+        'Beziehungen zwischen Entitäten werden als Raute gezeichnet.',
+        'Aus jedem Entitätstyp wird später in der Regel eine Tabelle.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welche Beziehung ist typisch 1:n?',
+      opts: [
+        'Ein Mensch hat einen Personalausweis, ein Ausweis gehört einem Menschen.',
+        'Viele Autoren schreiben viele Bücher.',
+        'Eine Klasse hat viele Schüler, jeder Schüler gehört zu einer Klasse.',
+        'Ein Schüler belegt viele Kurse, ein Kurs hat viele Schüler.'
+      ],
+      steps: [
+        'Auf der einen Seite genau einer, auf der anderen beliebig viele — das ist 1:n.',
+        'Umgesetzt wird das mit einem Fremdschlüssel auf der n-Seite: die Schülertabelle bekommt die Klassennummer.',
+        'Kurse und Schüler wären n:m und brauchen eine eigene Zwischentabelle.',
+        'Der Ausweis wäre 1:1.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Was war ELIZA?',
+      opts: [
+        'Ein früher Computervirus.',
+        'Ein Programm von 1966, das eine Psychotherapeutin nachahmte.',
+        'Der erste Schachcomputer.',
+        'Die erste Datenbanksprache.'
+      ],
+      steps: [
+        'Joseph Weizenbaum baute ELIZA aus simplen Mustern: Aussagen wurden zu Rückfragen umgeformt.',
+        'Zu seinem Entsetzen vertrauten sich Menschen dem Programm an, obwohl sie wussten, wie schlicht es arbeitet.',
+        'Der ELIZA-Effekt beschreibt seitdem, wie leicht wir Maschinen Verstehen unterstellen — heute aktueller denn je.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Welche Aufgabe hat ein Primärschlüssel?',
+      opts: [
+        'Er verschlüsselt die Tabelle.',
+        'Er sortiert die Tabelle alphabetisch.',
+        'Er verweist auf eine andere Tabelle.',
+        'Er identifiziert jeden Datensatz einer Tabelle eindeutig.'
+      ],
+      steps: [
+        'Der Wert muss eindeutig und darf nie leer sein.',
+        'Namen taugen selten dafür — es gibt mehrere „Müller, Anna“; deshalb nimmt man meist eine laufende Nummer.',
+        'Der Verweis auf eine andere Tabelle ist dagegen die Aufgabe des Fremdschlüssels.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Was ist ein Fremdschlüssel?',
+      opts: [
+        'Ein Schlüssel aus einer fremden Datenbank.',
+        'Ein Attribut ohne Bedeutung.',
+        'Ein Attribut, das auf den Primärschlüssel einer anderen Tabelle verweist.',
+        'Ein Passwort für den Datenbankzugriff.'
+      ],
+      steps: [
+        'Damit werden Tabellen verknüpft: die Spalte $klasse\\_id$ in der Schülertabelle zeigt auf die Klassentabelle.',
+        'Die referenzielle Integrität sorgt dafür, dass nur existierende Werte eingetragen werden können.',
+        'Sie verhindert außerdem, dass eine Klasse gelöscht wird, in der noch Schüler stehen.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Was geschah 1997 zwischen Deep Blue und Garri Kasparow?',
+      opts: [
+        'Beide Seiten einigten sich auf Remis.',
+        'Ein Computer gewann erstmals ein Match gegen den amtierenden Schachweltmeister.',
+        'Ein Computer verlor haushoch.',
+        'Ein Computer spielte erstmals Go.'
+      ],
+      steps: [
+        'Deep Blue gewann den Wettkampf mit 3,5 zu 2,5 — vor allem durch schiere Rechenleistung.',
+        'Die Maschine prüfte rund 200 Millionen Stellungen je Sekunde, verstand aber kein Schach im menschlichen Sinn.',
+        '1997 war das eine Zäsur; heute ist jedes Handy-Schachprogramm stärker als jeder Mensch.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Was verlangt die erste Normalform?',
+      opts: [
+        'Jede Tabelle hat einen Fremdschlüssel.',
+        'Alle Tabellen sind gleich groß.',
+        'Es gibt keine doppelten Tabellen.',
+        'Jedes Attribut enthält nur einen einzigen, unteilbaren Wert.'
+      ],
+      steps: [
+        'Eine Spalte „Telefonnummern“ mit drei Nummern in einer Zelle verletzt die erste Normalform.',
+        'Man löst das mit einer eigenen Zeile oder einer eigenen Tabelle je Nummer.',
+        'Normalisieren beseitigt Redundanz und damit Anomalien beim Einfügen, Ändern und Löschen.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Was liefert $SELECT\\ name\\ FROM\\ schueler\\ WHERE\\ klasse = 11$?',
+      opts: [
+        'die Namen aller Schüler der Klasse 11',
+        'alle Spalten der Tabelle schueler',
+        'die Anzahl der Schüler in Klasse 11',
+        'die Klasse des Schülers mit der Nummer 11'
+      ],
+      steps: [
+        'SELECT wählt die Spalten, FROM die Tabelle, WHERE filtert die Zeilen.',
+        'Alle Spalten bekäme man mit $SELECT\\ *$, die Anzahl mit $COUNT(*)$.',
+        'Sortieren ließe sich das Ergebnis noch mit $ORDER\\ BY\\ name$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Was besagt das Halteproblem?',
+      opts: [
+        'Programme mit Endlosschleifen sind verboten.',
+        'Jeder Rechner muss nach einer Weile abkühlen.',
+        'Ein Programm hält an, sobald der Speicher voll ist.',
+        'Es kann kein Programm geben, das für jedes Programm entscheidet, ob es je anhält.'
+      ],
+      steps: [
+        'Alan Turing bewies 1936: dieses Problem ist grundsätzlich unentscheidbar.',
+        'Der Beweis führt die Annahme über einen Widerspruch ad absurdum — ein Programm, das genau das Gegenteil dessen tut, was vorhergesagt wird.',
+        'Praktische Folge: kein Werkzeug kann alle Endlosschleifen im Voraus finden. Testen bleibt Handarbeit.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wozu dient ein JOIN in SQL?',
+      opts: [
+        'Er verbindet mehrere Nutzer mit der Datenbank.',
+        'Er verknüpft Zeilen mehrerer Tabellen über passende Schlüsselwerte.',
+        'Er hängt zwei Datenbanken aneinander.',
+        'Er fügt eine neue Zeile ein.'
+      ],
+      steps: [
+        'Beispiel: $\\ldots\\ FROM\\ schueler\\ JOIN\\ klasse\\ ON\\ schueler.klasse\\_id = klasse.id$',
+        'So stehen Angaben aus beiden Tabellen in einer gemeinsamen Ergebniszeile.',
+        'Genau dafür wurde vorher normalisiert: getrennt speichern, beim Abfragen zusammenführen.',
+        'Neue Zeilen fügt dagegen $INSERT$ ein.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Was ist eine Änderungsanomalie in einer Datenbank?',
+      opts: [
+        'Ein mehrfach gespeicherter Wert wird nur an einer Stelle geändert — die Daten widersprechen sich.',
+        'Die Datenbank stürzt beim Speichern ab.',
+        'Ein Datensatz lässt sich nicht löschen.',
+        'Die Tabelle ist zu groß für den Speicher.'
+      ],
+      steps: [
+        'Steht die Adresse einer Schule in jeder Schülerzeile, muss ein Umzug in allen Zeilen nachgezogen werden.',
+        'Wird eine Zeile vergessen, gibt es zwei Wahrheiten — und keine Möglichkeit zu wissen, welche stimmt.',
+        'Ursache ist immer Redundanz; die Normalisierung beseitigt sie.',
+        'Daneben gibt es Einfüge- und Löschanomalien.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Was besagt das Mooresche Gesetz?',
+      opts: [
+        'Jedes Programm wird mit der Zeit langsamer.',
+        'Speicher ist immer knapp.',
+        'Die Zahl der Transistoren je Chip verdoppelt sich etwa alle zwei Jahre.',
+        'Computer werden jedes Jahr halb so teuer.'
+      ],
+      steps: [
+        'Gordon Moore, Mitgründer von Intel, formulierte die Beobachtung 1965.',
+        'Es ist kein Naturgesetz, sondern eine erstaunlich lange gültige Faustregel — und der Motor der Digitalisierung.',
+        'Inzwischen stößt sie an physikalische Grenzen; Zuwachs kommt heute eher aus mehr Kernen und Spezialchips.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wozu dient in einem Programm der Datentyp einer Variablen?',
+      opts: [
+        'Er verschlüsselt den Inhalt.',
+        'Er legt fest, welche Werte möglich sind und welche Operationen erlaubt sind.',
+        'Er bestimmt den Namen der Variablen.',
+        'Er sorgt dafür, dass die Variable schneller ist.'
+      ],
+      steps: [
+        'Eine Ganzzahl belegt anderen Speicher als eine Zeichenkette — und $5 + 5$ ist etwas anderes als $"5" + "5"$.',
+        'Typische Typen: integer, float, boolean, string.',
+        'Deshalb muss eine Eingabe aus einem Textfeld erst umgewandelt werden, bevor man mit ihr rechnet.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie oft wird der Rumpf bei „für i von 1 bis 5“ durchlaufen?',
+      opts: [
+        'viermal',
+        'sechsmal',
+        'einmal',
+        'fünfmal'
+      ],
+      steps: [
+        'Die Zählschleife läuft über $1, 2, 3, 4, 5$ — also fünf Durchläufe.',
+        'Achtung bei Sprachen, die bei $0$ beginnen: $for\\ i\\ in\\ range(5)$ zählt $0$ bis $4$, ebenfalls fünfmal.',
+        'Der klassische Fehler heißt Zaunpfahlfehler: ein Durchlauf zu viel oder zu wenig.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Warum ist das erste Programm traditionell „Hello, World!“?',
+      opts: [
+        'Es ist gesetzlich als Testprogramm festgelegt.',
+        'Es stammt aus einem Buch zur Sprache C von 1978 und wurde zur Tradition.',
+        'Es ist der kürzeste mögliche Befehl jeder Sprache.',
+        'Es prüft die Internetverbindung.'
+      ],
+      steps: [
+        'Brian Kernighan verwendete es in „The C Programming Language“ von Kernighan und Ritchie.',
+        'Es zeigt in einer Zeile, dass Übersetzer, Umgebung und Ausgabe funktionieren.',
+        'Bis heute ist es der erste Test, ob eine neue Sprache oder ein neues System überhaupt läuft.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wann ist die Bedingung $(a > 5)\\ \\text{UND}\\ (b < 3)$ wahr?',
+      opts: [
+        'wenn mindestens eine wahr ist',
+        'wenn genau eine wahr ist',
+        'immer',
+        'nur wenn beide Teilbedingungen wahr sind'
+      ],
+      steps: [
+        'Die UND-Verknüpfung liefert nur bei wahr und wahr das Ergebnis wahr.',
+        'Mindestens eine reicht beim ODER, genau eine beim exklusiven ODER.',
+        'Viele Sprachen werten dabei verkürzt aus: ist der linke Teil falsch, wird der rechte gar nicht mehr geprüft.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Was stellt ein Struktogramm nach Nassi-Shneiderman dar?',
+      opts: [
+        'Den Ablauf eines Algorithmus als ineinander geschachtelte Blöcke.',
+        'Den Aufbau einer Datenbank.',
+        'Die Verkabelung eines Netzwerks.',
+        'Die Klassen eines Programms.'
+      ],
+      steps: [
+        'Sequenz, Verzweigung und Schleife werden als Rechtecke gezeichnet, die ineinander liegen.',
+        'Sprünge sind gar nicht darstellbar — das erzwingt strukturierte Programme.',
+        'Der Programmablaufplan ist die ältere Alternative mit Pfeilen und Rauten.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wogegen wetterte Edsger Dijkstra 1968 in einem berühmten Aufsatz?',
+      opts: [
+        'Gegen grafische Benutzeroberflächen.',
+        'Gegen die Sprache C.',
+        'Gegen den GOTO-Befehl, der zu unlesbarem Sprungcode führt.',
+        'Gegen die Verwendung von Schleifen.'
+      ],
+      steps: [
+        'Der Aufsatz heißt „Go To Statement Considered Harmful“.',
+        'Sein Argument: wilde Sprünge machen es unmöglich, den Zustand eines Programms beim Lesen nachzuvollziehen.',
+        'Daraus wurde die strukturierte Programmierung — alles lässt sich mit Sequenz, Verzweigung und Schleife bauen.',
+        'Der Ausdruck „Spaghetticode“ stammt aus derselben Debatte.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wozu dient in einem Programm eine Funktion mit Parametern und Rückgabewert?',
+      opts: [
+        'Sie speichert Daten dauerhaft.',
+        'Sie kapselt eine Teilaufgabe, die mit verschiedenen Werten wiederverwendet werden kann.',
+        'Sie macht das Programm schneller.',
+        'Sie ersetzt die Schleife.'
+      ],
+      steps: [
+        'Parameter sind die Eingaben, der Rückgabewert ist das Ergebnis — wie bei einer mathematischen Funktion.',
+        'Statt denselben Code dreimal zu schreiben, ruft man ihn dreimal mit anderen Werten auf.',
+        'Das ist derselbe Gedanke, aus dem wir gerade die Quiz-Engine ausgelagert haben: einmal schreiben, überall nutzen.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Warum ist die binäre Suche schneller als die lineare?',
+      opts: [
+        'Sie halbiert den Suchbereich bei jedem Schritt — braucht dafür aber sortierte Daten.',
+        'Sie prüft zwei Elemente gleichzeitig.',
+        'Sie benutzt zwei Prozessorkerne.',
+        'Sie ist nur bei kleinen Listen schneller.'
+      ],
+      steps: [
+        'Vergleich in der Mitte, dann weiter in der passenden Hälfte — wie im Telefonbuch.',
+        'Bei einer Million Einträgen genügen rund 20 Schritte statt bis zu einer Million.',
+        'Der Aufwand wächst logarithmisch: $O(\\log n)$ statt $O(n)$.',
+        'Der Preis: die Daten müssen sortiert vorliegen.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Was war das Jahr-2000-Problem?',
+      opts: [
+        'Computer hatten zu wenig Speicher für das neue Jahrtausend.',
+        'Das Internet drohte zusammenzubrechen.',
+        'Eine Virenwelle zum Jahreswechsel.',
+        'Jahreszahlen waren zweistellig gespeichert — nach 99 drohte das Jahr 00.'
+      ],
+      steps: [
+        'Um teuren Speicher zu sparen, hatte man jahrzehntelang nur zwei Ziffern für das Jahr abgelegt.',
+        'Weltweit wurden Milliarden investiert, um Programme rechtzeitig zu korrigieren.',
+        'Weil wenig passierte, gilt es manchen als Panikmache — tatsächlich war es teure, erfolgreiche Vorsorge.',
+        'Der nächste Termin steht schon fest: 2038 läuft die klassische 32-Bit-Unixzeit über.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie arbeitet Bubblesort?',
+      opts: [
+        'Das kleinste Element wird gesucht und nach vorn geholt.',
+        'Die Elemente werden nach ihrer Länge einsortiert.',
+        'Benachbarte Elemente werden verglichen und bei Bedarf vertauscht, bis nichts mehr zu tauschen ist.',
+        'Die Liste wird halbiert und rekursiv sortiert.'
+      ],
+      steps: [
+        'Große Werte steigen dabei wie Blasen nach oben — daher der Name.',
+        'Der Aufwand liegt bei $O(n^2)$: für große Listen völlig unbrauchbar.',
+        'Das Suchen des Kleinsten wäre Selectionsort, das Halbieren Mergesort.',
+        'Bubblesort ist als Lehrbeispiel beliebt, in der Praxis aber kaum im Einsatz.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein Algorithmus braucht bei 1000 Elementen 1 Sekunde. Wie lange braucht er bei 2000, wenn sein Aufwand $O(n^2)$ ist?',
+      opts: [
+        'rund 4 Sekunden',
+        'rund 2 Sekunden',
+        'rund 1 Sekunde',
+        'rund 8 Sekunden'
+      ],
+      steps: [
+        'Doppelte Datenmenge bedeutet bei quadratischem Aufwand den vierfachen Zeitbedarf: $2^2 = 4$.',
+        'Bei $O(n)$ wären es 2 Sekunden, bei $O(n \\log n)$ etwas mehr als 2.',
+        'Genau deshalb entscheidet die Wahl des Algorithmus mehr über die Laufzeit als schnellere Hardware.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Was besagt John Searles Gedankenexperiment vom Chinesischen Zimmer?',
+      opts: [
+        'Maschinen denken genauso wie Menschen.',
+        'Wer nur Symbole nach Regeln umformt, versteht deren Bedeutung deshalb noch nicht.',
+        'Computer können jede Sprache übersetzen.',
+        'Chinesisch ist für Maschinen besonders schwer.'
+      ],
+      steps: [
+        'Ein Mensch im Zimmer beantwortet chinesische Zettel nach einem Regelbuch — von außen wirkt es perfekt.',
+        'Verstanden hat er trotzdem kein Wort; Searle folgert: Syntax allein erzeugt keine Semantik.',
+        'Das Argument wird bis heute diskutiert — gerade bei heutigen Sprachmodellen ist es aktueller denn je.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Was passiert beim Training eines künstlichen neuronalen Netzes?',
+      opts: [
+        'Ein Mensch programmiert jede Regel von Hand.',
+        'Die Anzahl der Neuronen wird laufend verdoppelt.',
+        'Die Gewichte der Verbindungen werden schrittweise angepasst, bis der Fehler klein wird.',
+        'Das Netz speichert alle Trainingsbeispiele ab.'
+      ],
+      steps: [
+        'Zu Beginn sind die Gewichte zufällig; die Ausgabe ist entsprechend unbrauchbar.',
+        'Der Fehler zur gewünschten Ausgabe wird zurückgerechnet (Backpropagation) und die Gewichte werden minimal in die bessere Richtung geschoben.',
+        'Nach vielen Durchläufen steckt das Gelernte in den Gewichten — nicht in gespeicherten Beispielen.',
+        'Genau deshalb kann ein Netz auch Neues verarbeiten, das es nie gesehen hat.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Eine KI zur Bewerberauswahl bevorzugt Männer. Was ist die wahrscheinlichste Ursache?',
+      opts: [
+        'Der Computer rechnet fehlerhaft.',
+        'Die Programmiererin hat eine Regel dafür geschrieben.',
+        'Der Zufallsgenerator ist defekt.',
+        'Die Trainingsdaten spiegeln frühere, ungleiche Entscheidungen wider.'
+      ],
+      steps: [
+        'Ein Modell lernt die Muster seiner Daten — auch die unerwünschten.',
+        'Wurden früher überwiegend Männer eingestellt, lernt das Netz genau diese Regel, ohne dass sie jemand formuliert.',
+        'Amazon hat ein solches Werkzeug 2018 aus genau diesem Grund abgeschaltet.',
+        'Gegenmittel: Datenbestand prüfen, Ergebnisse auf Gruppen hin messen, Entscheidungen erklärbar halten.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Was war 2016 das Besondere am 37. Zug von AlphaGo gegen Lee Sedol?',
+      opts: [
+        'Der erste Zug einer Maschine im Go überhaupt.',
+        'Ein Zug, den kein Mensch gespielt hätte — und der sich als brillant erwies.',
+        'Ein klarer Programmfehler.',
+        'Der Zug, mit dem AlphaGo die Partie verlor.'
+      ],
+      steps: [
+        'Kommentatoren hielten den Zug zunächst für einen Fehler; Lee Sedol verließ den Raum, um nachzudenken.',
+        'Erst viel später wurde klar, dass er die Partie entschied.',
+        'Go galt wegen der riesigen Zugmöglichkeiten lange als für Maschinen unerreichbar.',
+        'Der Moment gilt als Beispiel dafür, dass lernende Systeme Lösungen finden, die außerhalb menschlicher Konvention liegen.'
+      ],
+      solution: 1
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

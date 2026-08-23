@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Anonymer Eingangstest Informatik 12 — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'infotest12-eingang',
+  title: 'Anonymer Eingangstest Informatik · Klasse 12',
+  subtitle: 'Berufliches Gymnasium · Jahrgangsstufe 12 · Stand Ende Jahrgangsstufe 11 · 20 Fachfragen + 10 zum Schmunzeln · genau eine Antwort pro Frage',
+  dashSub: 'BGY · Klasse 12 · Eingangstest Informatik · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Frage',
+  /* Questions: entry test for BGY class 11 Informatik — everything is
+     Oberschule level (up to the Mittlerer Schulabschluss): hardware, files,
+     number systems, networks, spreadsheets, first algorithmic ideas.
+     Pattern: two subject questions, then one general-knowledge question,
+     repeated ten times. Exactly one correct option per question. */
+  /* Questions: entry test for BGY class 12 Informatik — content of class 11
+     (LB 1 Informatik als Wissenschaft, LB 2 Persoenliches Informationsmanagement,
+     LB 3 IT-Sicherheit und Oekologie, LB 4 Projekt, WB Datenkomprimierung und
+     Fehlererkennung). Pattern: two subject questions, then one general-knowledge
+     question, repeated ten times. Exactly one correct option per question. */
+  questions: [
+    {
+      q: 'Womit beschäftigt sich die theoretische Informatik?',
+      opts: [
+        'Mit der Installation von Betriebssystemen.',
+        'Mit der Gestaltung von Webseiten.',
+        'Mit Berechenbarkeit, Automaten, formalen Sprachen und Komplexität.',
+        'Mit dem Aufbau von Prozessoren und Speichern.'
+      ],
+      steps: [
+        'Die klassischen Teilgebiete: theoretische, technische, praktische und angewandte Informatik.',
+        'Die theoretische fragt grundsätzlich: Was ist überhaupt berechenbar — und mit welchem Aufwand?',
+        'Prozessoren gehören zur technischen, Compiler und Software zur praktischen Informatik.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Worin unterscheiden sich Daten und Information?',
+      opts: [
+        'Daten sind die Zeichen, Information entsteht erst durch ihre Bedeutung im Kontext.',
+        'Das ist dasselbe.',
+        'Information ist immer digital, Daten sind analog.',
+        'Daten sind wahr, Informationen können falsch sein.'
+      ],
+      steps: [
+        'Die Zeichenfolge $071125$ ist zunächst nur ein Datum im Sinne von Rohmaterial.',
+        'Erst der Kontext macht daraus Information: Geburtsdatum, Postleitzahl oder Messwert.',
+        'Syntax beschreibt die Form, Semantik die Bedeutung, Pragmatik die Wirkung.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Was gelang Konrad Zuse 1941 in Berlin?',
+      opts: [
+        'Der erste Mikroprozessor.',
+        'Die Z3 — der erste funktionsfähige programmgesteuerte Rechner der Welt.',
+        'Der erste Personal Computer.',
+        'Die Erfindung des Internets.'
+      ],
+      steps: [
+        'Die Z3 arbeitete mit Relais, im Binärsystem und mit Gleitkommazahlen — für die Zeit hochmodern.',
+        'Sie las ihr Programm von einem Lochstreifen; das Original wurde 1943 bei einem Bombenangriff zerstört.',
+        'Zuse entwarf mit dem Plankalkül außerdem eine der ersten Programmiersprachen.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Was sind Metadaten?',
+      opts: [
+        'Gelöschte Daten im Papierkorb.',
+        'Verschlüsselte Daten.',
+        'Daten über Daten — zum Beispiel Aufnahmedatum, Autor oder Dateigröße.',
+        'Besonders große Dateien.'
+      ],
+      steps: [
+        'Ein Foto enthält neben dem Bild auch EXIF-Daten: Kameramodell, Zeitpunkt, oft sogar GPS-Koordinaten.',
+        'Metadaten machen Suchen und Sortieren erst möglich — sie sind das Rückgrat des Informationsmanagements.',
+        'Zugleich verraten sie mehr, als vielen bewusst ist: vor dem Veröffentlichen eines Fotos lohnt ein Blick darauf.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welche Dateibenennung sortiert sich von selbst chronologisch?',
+      opts: [
+        '23.08.2026_protokoll.pdf',
+        'protokoll_neu_final.pdf',
+        'Protokoll (2).pdf',
+        '2026-08-23_protokoll.pdf'
+      ],
+      steps: [
+        'Das ISO-Format Jahr-Monat-Tag sortiert alphabetisch automatisch auch zeitlich richtig.',
+        'Bei $23.08.2026$ stünde der 23. Januar vor dem 3. Februar — die alphabetische Ordnung passt nicht zur Zeit.',
+        'Kein „final“, „final2“, „wirklich_final“: dafür gibt es Versionsnummern oder gleich eine Versionsverwaltung.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Woher kommt das Wort „digital“?',
+      opts: [
+        'Vom griechischen Wort für Zahl.',
+        'Vom lateinischen digitus — der Finger, mit dem man abzählt.',
+        'Vom englischen „to dig“ — graben.',
+        'Von der Firma Digital Equipment.'
+      ],
+      steps: [
+        'Digital heißt: in abzählbaren Stufen dargestellt — im Gegensatz zu stufenlos analog.',
+        'Der Zeiger einer Uhr läuft analog, die Ziffernanzeige springt digital.',
+        'Beim Digitalisieren werden analoge Signale abgetastet und quantisiert.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Was bewirken Anführungszeichen in einer Suchanfrage, etwa "Kompression von Bildern"?',
+      opts: [
+        'Die Wortfolge wird genau so gesucht.',
+        'Die Suche wird auf deutsche Seiten begrenzt.',
+        'Die Wörter werden mit ODER verknüpft.',
+        'Groß- und Kleinschreibung wird beachtet.'
+      ],
+      steps: [
+        'Ohne Anführungszeichen sucht die Maschine die Wörter irgendwo auf der Seite.',
+        'In Anführungszeichen zählt die exakte Phrase — ideal für Zitate und Fehlermeldungen.',
+        'Weitere Werkzeuge: das Minus schließt Begriffe aus, $site{:}$ begrenzt auf eine Domain.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Was ist typisch für die asymmetrische Verschlüsselung?',
+      opts: [
+        'Sie kommt ganz ohne Schlüssel aus.',
+        'Sie ist schneller als jede symmetrische Methode.',
+        'Es gibt ein Schlüsselpaar: öffentlich zum Verschlüsseln, privat zum Entschlüsseln.',
+        'Beide Seiten benutzen denselben geheimen Schlüssel.'
+      ],
+      steps: [
+        'Der öffentliche Schlüssel darf jeder kennen; nur der private kann die Nachricht wieder öffnen.',
+        'Damit löst sie das Grundproblem der symmetrischen Verfahren: den sicheren Schlüsselaustausch.',
+        'Sie ist allerdings langsam — in der Praxis tauscht man asymmetrisch nur einen symmetrischen Sitzungsschlüssel aus (so arbeitet HTTPS).'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Was war die Enigma?',
+      opts: [
+        'Der erste Computervirus.',
+        'Ein frühes Betriebssystem.',
+        'Eine Rechenmaschine von Charles Babbage.',
+        'Eine deutsche Verschlüsselungsmaschine des Zweiten Weltkriegs.'
+      ],
+      steps: [
+        'Die Enigma verschlüsselte mit Walzen, die sich bei jedem Tastendruck weiterdrehten.',
+        'Polnische Mathematiker um Marian Rejewski legten die Grundlagen, Alan Turing baute in Bletchley Park die Entschlüsselungsmaschine „Bombe“.',
+        'Ein Konstruktionsdetail half entscheidend: kein Buchstabe wurde je auf sich selbst abgebildet.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wozu dient ein Hashwert?',
+      opts: [
+        'Als kurzer Fingerabdruck, mit dem sich Daten auf Unverändertheit prüfen lassen.',
+        'Zum Wiederherstellen verlorener Daten.',
+        'Zum Komprimieren großer Dateien für den Versand.',
+        'Als Passwort für den Zugriff auf eine Datei.'
+      ],
+      steps: [
+        'Eine Hashfunktion bildet beliebig lange Daten auf eine feste Länge ab, etwa 256 Bit bei SHA-256.',
+        'Schon ein geändertes Bit ergibt einen völlig anderen Wert — daher die Prüfsummen bei Downloads.',
+        'Der Weg zurück ist nicht vorgesehen: aus dem Hash lässt sich das Original nicht rekonstruieren.',
+        'Deshalb speichert man Passwörter als Hash — gesalzen, damit gleiche Passwörter nicht gleich aussehen.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welche Kombination ist echte Zwei-Faktor-Authentifizierung?',
+      opts: [
+        'Zwei verschiedene Passwörter',
+        'Benutzername und Passwort',
+        'Passwort und Einmalcode aus einer App',
+        'Passwort und Sicherheitsfrage'
+      ],
+      steps: [
+        'Die Faktoren müssen aus verschiedenen Kategorien stammen: Wissen, Besitz, Sein.',
+        'Passwort ist Wissen, das Handy mit der Authenticator-App ist Besitz — zwei Kategorien, also zwei Faktoren.',
+        'Eine Sicherheitsfrage ist wieder nur Wissen und damit kein zweiter Faktor.',
+        'Der Fingerabdruck wäre die dritte Kategorie: Sein.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Was ist Social Engineering?',
+      opts: [
+        'Die Auswertung von Nutzerdaten für Werbung.',
+        'Der Angriff auf den Menschen statt auf die Technik.',
+        'Der Aufbau sozialer Netzwerke.',
+        'Ein Verfahren zur Softwareentwicklung im Team.'
+      ],
+      steps: [
+        'Angerufen wird der „IT-Support“, der dringend das Passwort braucht — Autorität und Zeitdruck sind die Hebel.',
+        'Keine Firewall hilft, wenn jemand die Tür freiwillig öffnet.',
+        'Gegenmittel sind feste Abläufe: Rückruf über die offizielle Nummer, niemals Passwörter am Telefon.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Worin unterscheidet sich ein Wurm von einem Trojaner?',
+      opts: [
+        'Der Wurm ist harmlos, der Trojaner löscht Daten.',
+        'Der Wurm befällt nur Handys.',
+        'Ein Trojaner verbreitet sich selbst, ein Wurm nicht.',
+        'Der Wurm verbreitet sich selbstständig, der Trojaner tarnt sich als nützliches Programm.'
+      ],
+      steps: [
+        'Würmer nutzen Sicherheitslücken und Netzwerke, um sich ohne Zutun weiterzuverbreiten.',
+        'Trojaner brauchen die Nutzerin oder den Nutzer: erst der Doppelklick auf das scheinbar nützliche Programm startet sie.',
+        'Ein Virus hängt sich dagegen an vorhandene Dateien an.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie reagiert man richtig auf einen Ransomware-Befall?',
+      opts: [
+        'Den Rechner einfach neu starten und weiterarbeiten.',
+        'Die Dateien selbst umbenennen, dann sind sie wieder lesbar.',
+        'Gerät vom Netz trennen, nicht zahlen, Vorfall melden, aus dem Backup wiederherstellen.',
+        'Sofort zahlen, damit die Daten schnell wieder da sind.'
+      ],
+      steps: [
+        'Trennen stoppt die weitere Verschlüsselung im Netzwerk.',
+        'Zahlen finanziert das Geschäftsmodell und gibt keine Garantie auf den Schlüssel.',
+        'Ohne aktuelles, getrenntes Backup steht man hier fast immer mit leeren Händen da.',
+        'Unternehmen und Behörden trifft zusätzlich eine Meldepflicht.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Was meint „Green IT“?',
+      opts: [
+        'Der Verzicht auf Computer.',
+        'Informationstechnik über den ganzen Lebenszyklus möglichst ressourcenschonend gestalten.',
+        'Computer in grünen Gehäusen.',
+        'Nur noch Ökostrom im Serverraum.'
+      ],
+      steps: [
+        'Betrachtet wird alles: Rohstoffe, Herstellung, Betrieb, Nutzungsdauer und Entsorgung.',
+        'Oft steckt der größte Anteil in der Herstellung — ein Gerät länger zu nutzen wirkt daher stärker als Stromsparen.',
+        'Digitalisierung hilft der Umwelt an manchen Stellen und schadet ihr an anderen: der Rebound-Effekt gehört dazu.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Was sagt der PUE-Wert eines Rechenzentrums aus?',
+      opts: [
+        'Wie viele Server aufgestellt sind.',
+        'Wie schnell die Internetanbindung ist.',
+        'Wie hoch der Anteil an Ökostrom ist.',
+        'Wie viel Gesamtenergie je Einheit reiner IT-Energie gebraucht wird.'
+      ],
+      steps: [
+        'PUE steht für Power Usage Effectiveness: Gesamtverbrauch geteilt durch IT-Verbrauch.',
+        'Der Idealwert wäre $1{,}0$; gute Rechenzentren liegen heute bei etwa $1{,}1$ bis $1{,}3$.',
+        'Der Rest geht vor allem in die Kühlung — deshalb baut man dort, wo es kalt ist, und nutzt die Abwärme.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Die Zeichenfolge AAAAABBBCC wird als 5A3B2C gespeichert. Wie heißt dieses Verfahren?',
+      opts: [
+        'Lauflängencodierung — verlustfrei',
+        'Huffman-Codierung — verlustbehaftet',
+        'JPEG-Kompression — verlustfrei',
+        'Verschlüsselung'
+      ],
+      steps: [
+        'Die Lauflängencodierung (RLE) ersetzt Wiederholungen durch Anzahl plus Zeichen.',
+        'Das Original lässt sich vollständig zurückgewinnen — also verlustfrei.',
+        'Sie wirkt nur bei vielen Wiederholungen; bei ABABAB wird das Ergebnis sogar länger.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Warum bekommen bei der Huffman-Codierung häufige Zeichen kurze Codes?',
+      opts: [
+        'Weil kurze Codes schneller zu tippen sind.',
+        'Weil seltene Zeichen gar nicht gespeichert werden.',
+        'Weil alle Codes gleich lang sein müssen.',
+        'Weil so die mittlere Codelänge der gesamten Nachricht sinkt.'
+      ],
+      steps: [
+        'Kommt E sehr oft vor und Q fast nie, spart ein kurzer Code für E in der Summe am meisten.',
+        'Der Huffman-Baum entsteht, indem man stets die beiden seltensten Zeichen zusammenfasst.',
+        'Damit kein Code der Anfang eines anderen ist, stehen alle Zeichen an den Blättern — ein Präfixcode.',
+        'Dasselbe Prinzip nutzt das Morsealphabet: E ist ein einzelner Punkt.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Warum lässt sich ein QR-Code auch dann noch lesen, wenn ein Stück fehlt?',
+      opts: [
+        'Er enthält nur sehr wenig Information.',
+        'Er enthält Fehlerkorrekturdaten nach Reed-Solomon.',
+        'Er speichert alles dreimal nebeneinander.',
+        'Die Kamera ergänzt Fehlendes durch KI.'
+      ],
+      steps: [
+        'Je nach Stufe lassen sich rund 7 bis 30 Prozent des Codes zerstören, ohne dass der Inhalt verloren geht.',
+        'Möglich macht das eine Fehlerkorrektur, die zusätzliche Prüfsymbole mitspeichert.',
+        'Die drei Quadrate in den Ecken dienen der Ausrichtung — deshalb funktioniert auch ein schräger Blick.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Das Byte $1011001$ soll mit gerader Parität gesichert werden. Welches Paritätsbit kommt dazu?',
+      opts: [
+        '$0$',
+        '$1$',
+        'gar keines',
+        'zwei Bit'
+      ],
+      steps: [
+        'Einsen zählen: $1+0+1+1+0+0+1 = 4$ Einsen.',
+        'Vier ist bereits gerade, das Paritätsbit ist also $0$.',
+        'Ein einzelnes gekipptes Bit fällt so auf — welches es war, verrät die Parität aber nicht.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Was leistet ein Code mit Hamming-Abstand 3?',
+      opts: [
+        'Er erkennt gar keine Fehler.',
+        'Er verdreifacht die Datenmenge.',
+        'Er erkennt zwei Bitfehler und kann einen davon korrigieren.',
+        'Er erkennt genau drei Fehler und korrigiert sie alle.'
+      ],
+      steps: [
+        'Der Hamming-Abstand ist die Zahl der Stellen, in denen sich zwei gültige Codewörter mindestens unterscheiden.',
+        'Erkennen lassen sich $d-1$ Fehler, korrigieren $\\lfloor (d-1)/2 \\rfloor$ — bei $d = 3$ also 2 erkennen, 1 korrigieren.',
+        'Das Prinzip: liegt ein Wort dicht an genau einem gültigen Codewort, ist dieses der wahrscheinliche Absender.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wozu dient die Prüfziffer am Ende einer IBAN?',
+      opts: [
+        'Sie zählt die Überweisungen.',
+        'Sie erkennt Tippfehler und Zahlendreher sofort.',
+        'Sie verschlüsselt die Kontonummer.',
+        'Sie gibt die Bank an.'
+      ],
+      steps: [
+        'Die Prüfziffer wird aus allen übrigen Stellen nach einem festen Verfahren berechnet (Modulo 97).',
+        'Ein vertauschtes Ziffernpaar führt fast immer zu einem anderen Ergebnis — der Fehler fällt vor dem Absenden auf.',
+        'Dasselbe Prinzip steckt im EAN-Strichcode, in der ISBN und in der Steuernummer.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Was erlaubt die Lizenz CC BY?',
+      opts: [
+        'Jede Nutzung ohne jede Bedingung.',
+        'Nur das Betrachten, keine Weitergabe.',
+        'Nur die Nutzung in Schulen.',
+        'Weiterverwenden und bearbeiten, solange die Urheberin genannt wird.'
+      ],
+      steps: [
+        'BY steht für die Namensnennung — die Grundbedingung aller Creative-Commons-Lizenzen außer CC0.',
+        'Zusätze verschärfen: NC verbietet kommerzielle Nutzung, ND Bearbeitungen, SA erzwingt dieselbe Lizenz.',
+        '„Im Internet gefunden“ ist keine Lizenz: ohne Angabe gilt das volle Urheberrecht.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Welche Angabe ist ein personenbezogenes Datum im Sinne der DSGVO?',
+      opts: [
+        'Die Öffnungszeiten eines Geschäfts',
+        'Die IP-Adresse eines Anschlusses',
+        'Die Einwohnerzahl von Dresden',
+        'Der Preis eines Produkts'
+      ],
+      steps: [
+        'Personenbezogen ist alles, was sich auf eine bestimmte oder bestimmbare Person bezieht.',
+        'Die IP-Adresse lässt sich über den Anbieter einer Person zuordnen — der Europäische Gerichtshof hat das bestätigt.',
+        'Auch Kfz-Kennzeichen, Cookie-Kennungen und Standortdaten gehören dazu.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Was ist das Tor-Netzwerk?',
+      opts: [
+        'Ein besonders schneller Internetzugang.',
+        'Ein illegales Netzwerk, dessen Nutzung verboten ist.',
+        'Ein Virenscanner.',
+        'Ein Netz, das den Datenverkehr über mehrere Zwischenstationen anonymisiert.'
+      ],
+      steps: [
+        'Die Daten laufen verschlüsselt über mehrere Knoten — jeder kennt nur Vorgänger und Nachfolger, daher „Zwiebelrouting“.',
+        'Genutzt wird es von Journalistinnen, Whistleblowern und Menschen in Zensurstaaten; die Nutzung ist legal.',
+        'Das Darknet ist der Teil, der nur über solche Netze erreichbar ist — Werkzeug und Missbrauch sind zweierlei.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Was sichert ein inkrementelles Backup?',
+      opts: [
+        'Nur die seit der letzten Sicherung geänderten Daten.',
+        'Jedes Mal den kompletten Datenbestand.',
+        'Nur die Systemeinstellungen.',
+        'Ausschließlich gelöschte Dateien.'
+      ],
+      steps: [
+        'Es ist schnell und platzsparend, weil nur Änderungen dazukommen.',
+        'Der Preis: zum Wiederherstellen braucht man die Vollsicherung und lückenlos alle folgenden Teile.',
+        'Das differenzielle Backup sichert dagegen immer alles seit der letzten Vollsicherung — größer, aber einfacher zurückzuspielen.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Woraus ist das Wort „Bit“ zusammengezogen?',
+      opts: [
+        'byte unit',
+        'binary term',
+        'binary digit',
+        'basic item'
+      ],
+      steps: [
+        'Den Begriff prägte 1948 Claude Shannon in seiner Informationstheorie; vorgeschlagen hatte ihn John Tukey.',
+        'Ein Bit ist die Antwort auf genau eine Ja-Nein-Frage.',
+        'Shannon zeigte damit, wie sich Information überhaupt messen lässt — die Geburtsstunde des Fachs.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Was leistet PGP beziehungsweise GPG bei E-Mails?',
+      opts: [
+        'Es speichert Mails automatisch in der Cloud.',
+        'Ende-zu-Ende-Verschlüsselung und digitale Signatur.',
+        'Es sortiert Werbung aus.',
+        'Es beschleunigt den Versand großer Anhänge.'
+      ],
+      steps: [
+        'Verschlüsselt wird mit dem öffentlichen Schlüssel der Empfängerin — nur ihr privater Schlüssel öffnet die Nachricht.',
+        'Die Signatur mit dem eigenen privaten Schlüssel belegt Absender und Unverfälschtheit.',
+        'Ohne solche Verschlüsselung ist eine E-Mail technisch eine Postkarte.',
+        'Nicht verschlüsselt werden die Metadaten: wer wann an wen geschrieben hat, bleibt sichtbar.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Das Schloss-Symbol im Browser ist zu sehen. Was ist damit sicher?',
+      opts: [
+        'Die Verbindung ist verschlüsselt — über die Seriosität der Seite sagt es nichts.',
+        'Die Seite ist geprüft und vertrauenswürdig.',
+        'Es liegen keine Schadprogramme auf der Seite.',
+        'Die Daten werden nicht gespeichert.'
+      ],
+      steps: [
+        'Das Zertifikat bestätigt, dass die Verbindung zu genau dieser Domain verschlüsselt läuft.',
+        'Zertifikate sind kostenlos zu bekommen — auch Betrugsseiten haben längst HTTPS.',
+        'Deshalb immer den Domainnamen selbst lesen: $sparkasse{-}sicherheit{.}de$ ist nicht die Sparkasse.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Was versteht man unter Open Data?',
+      opts: [
+        'Daten, die versehentlich öffentlich wurden.',
+        'Alle Daten im Internet.',
+        'Daten ohne Urheber.',
+        'Frei zugängliche Daten, die jeder nutzen und weiterverbreiten darf.'
+      ],
+      steps: [
+        'Typisch sind Verwaltungsdaten: Fahrpläne, Wetter, Haushalt, Geodaten.',
+        'Offen heißt: maschinenlesbar, vollständig, kostenfrei und mit klarer Lizenz.',
+        'Personenbezogene Daten gehören ausdrücklich nicht dazu — Open Data und Datenschutz widersprechen sich nicht.'
+      ],
+      solution: 3
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

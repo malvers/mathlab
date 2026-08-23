@@ -10,7 +10,7 @@
     // [href relative to svp root, short label (pill row), badge color class,
     //  spelled-out label for the edit panel]
     const LINKS = [
-        ['index.html', 'Start', 'b-grey', 'Startseite'],
+        ['index.html', 'Home', 'b-grey', 'Startseite'],
         ['mathe/mathe11.html', 'MA 11', 'b-orange', 'Mathematik Klasse 11'],
         ['mathe/mathe12.html', 'MA 12', 'b-orange', 'Mathematik Klasse 12'],
         ['mathe/mathe13.html', 'MA 13', 'b-orange', 'Mathematik Klasse 13'],
@@ -32,6 +32,33 @@
 
     // These open in a new tab so the current plan stays put.
     const NEW_TAB = new Set(['notes.html', 'konzepte.html', 'operatoren.html']);
+
+    // The pill row only carries Home, Notizen and one dropdown per Schulart —
+    // everything else lives inside those. [pill label, [[caption|null, hrefs]],
+    // column?] — a caption groups a subject inside the panel.
+    const DROPS = [
+        ['Oberschule', [
+            ['Informatik', ['informatik/informatik9.html']]
+        ]],
+        ['Berufliches Gymnasium', [
+            ['Mathematik', ['mathe/mathe11.html', 'mathe/mathe12.html', 'mathe/mathe13.html']],
+            ['Informatik', ['informatik/inf11.html', 'informatik/inf12.html', 'informatik/inf13.html']],
+            ['Informatiksysteme', ['informatik/informatik11.html', 'informatik/informatik12.html',
+                                   'informatik/informatik13.html']],
+            ['Wirtschaft/Recht', ['wr/wr11.html']]
+        ]],
+        ['Fachoberschule', [
+            ['Informatik', ['informatik/fos11.html', 'informatik/fos12.html']]
+        ]],
+        /* "Mehr" is not a Schulart — it stays at the far right, next to the gear */
+        ['Mehr', [
+            [null, ['notes.html', 'mathe/uebung.html', 'konzepte.html', 'operatoren.html']]
+        ], true, true]
+    ];
+
+    // every href that moved into a dropdown leaves the plain row
+    const IN_DROP = new Set();
+    DROPS.forEach(([, rows]) => rows.forEach(([, hrefs]) => hrefs.forEach(h => IN_DROP.add(h))));
 
     // '/svp/' and '/svp/index.html' are the same page.
     function norm(path) { return path.replace(/index\.html$/, ''); }
@@ -61,8 +88,89 @@
         // Hidden pills stay hidden — except the one for the current page.
         if (hidden.has(href) && !a.classList.contains('active')) a.classList.add('nav-hidden');
         pills[href] = a;
-        nav.appendChild(a);
+        if (!IN_DROP.has(href)) nav.appendChild(a);
     }
+
+    // Rows of every dropdown, so a subject without visible pills can fold away.
+    const dropRows = [];
+    const dropWraps = [];
+    function syncDropRows() {
+        dropRows.forEach(function (r) {
+            const leer = r.items.every(a => a.classList.contains('nav-hidden'));
+            r.line.classList.toggle('nd-empty', leer);
+            if (r.title) r.title.classList.toggle('nd-empty', leer);
+        });
+        /* nothing left inside? then the pill itself has nothing to offer */
+        dropWraps.forEach(function (w) {
+            const leer = [...w.querySelectorAll('.nd-row')]
+                .every(l => l.classList.contains('nd-empty'));
+            w.classList.toggle('nav-hidden', leer);
+            if (leer) w.classList.remove('open');
+        });
+    }
+
+    // One dropdown per Schulart (plus "Mehr"), built from the same recipe.
+    function makeDrop(label, rows, column, atEnd) {
+        const wrap = document.createElement('div');
+        wrap.className = 'nav-drop-wrap' + (atEnd ? ' nd-right' : '');
+        const pill = document.createElement('a');
+        pill.className = 'badge b-grey nav-drop';
+        pill.href = '#';
+        pill.textContent = label + ' ▾';
+        wrap.appendChild(pill);
+
+        const panel = document.createElement('div');
+        panel.className = 'nav-drop-panel' + (column ? ' nd-column' : '');
+        const names = [];
+        let active = false;
+        rows.forEach(function (row) {
+            const items = row[1].map(h => pills[h]).filter(Boolean);
+            if (!items.length) return;
+            if (row[0]) {
+                const cap = document.createElement('div');
+                cap.className = 'nd-title';
+                cap.textContent = row[0];
+                panel.appendChild(cap);
+            }
+            const line = document.createElement('div');
+            line.className = 'nd-row';
+            items.forEach(function (a) {
+                names.push(a.textContent);
+                if (a.classList.contains('active')) active = true;
+                line.appendChild(a);
+            });
+            panel.appendChild(line);
+            dropRows.push({ title: row[0] ? panel.lastElementChild.previousElementSibling : null,
+                            line: line, items: items });
+        });
+        /* current page inside the dropdown: mark the pill, nothing gets lost */
+        if (active) pill.classList.add('active');
+        pill.title = names.join(' · ');
+        wrap.appendChild(panel);
+
+        pill.addEventListener('click', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const wasOpen = wrap.classList.contains('open');
+            document.querySelectorAll('.nav-drop-wrap.open')
+                .forEach(w => w.classList.remove('open'));
+            wrap.classList.toggle('open', !wasOpen);
+        });
+        /* Schularten sit left of Notizen, "Mehr" at the end (the gear and the
+           login pill are appended after this script block) */
+        dropWraps.push(wrap);
+        const before = atEnd ? null : pills['notes.html'];
+        nav.insertBefore(wrap, before && before.parentNode === nav ? before : null);
+    }
+
+    DROPS.forEach(d => makeDrop(d[0], d[1], d[2], d[3]));
+    syncDropRows();
+
+    function closeDrops() {
+        document.querySelectorAll('.nav-drop-wrap.open').forEach(w => w.classList.remove('open'));
+    }
+    document.addEventListener('click', closeDrops);
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeDrops(); });
 
     // Pencil at the right end of the pill row: opens a panel to choose which
     // pills are visible (stored in localStorage, per browser).
@@ -107,6 +215,7 @@
             const pill = pills[href];
             pill.classList.toggle('nav-hidden',
                 hidden.has(href) && !pill.classList.contains('active'));
+            syncDropRows();
             applyCardVisibility();
             saveHidden();
         });
@@ -240,6 +349,10 @@
     for (const [href] of LINKS) pathToHref[norm(new URL(base + href).pathname)] = href;
 
     function cardHidden(card) {
+        /* A card may name the pills it stands for: data-nav="a.html b.html".
+           Only when every one of them is switched off does the card go. */
+        const named = (card.dataset.nav || '').split(/\s+/).filter(Boolean);
+        if (named.length) return named.every(h => hidden.has(h));
         const path = norm(card.pathname);
         const href = pathToHref[path];
         if (href) return hidden.has(href);
@@ -253,6 +366,12 @@
     function applyCardVisibility() {
         for (const card of document.querySelectorAll('a.link-card')) {
             card.classList.toggle('nav-hidden', cardHidden(card));
+        }
+        /* a Schulart without a single visible card needs no heading either */
+        for (const sec of document.querySelectorAll('.svp-section')) {
+            const cards = [...sec.querySelectorAll('a.link-card')];
+            sec.classList.toggle('nav-hidden',
+                cards.length > 0 && cards.every(c => c.classList.contains('nav-hidden')));
         }
     }
     if (document.readyState === 'loading') {
