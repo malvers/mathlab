@@ -1,5 +1,6 @@
+import { workDir } from '../lib/paths.mjs';
 // Grundrechenarten combined demo — 4 labs, 4 recordings, 6 narration scenes cut at marks.
-export const OUT = '/private/tmp/claude-501/-Users-malvers-IdeaProjects-forloop/9bba6ce1-dbf3-407e-a2f2-fce1f718abcc/scratchpad/gra';
+export const OUT = workDir('gra');
 const BASE = 'https://docalvers.de/';
 
 export const NARRATION = {

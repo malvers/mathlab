@@ -2,20 +2,40 @@
 // circular talking-head bubbles with alpha fades and a final fade-out.
 import { execFileSync } from 'child_process';
 import { mkdirSync as fsMkdir } from 'fs';
+import { VIDEO_LIB } from './paths.mjs';
 
 const ENC = ['-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-crf', '18', '-r', '25', '-c:a', 'aac', '-b:a', '128k', '-ar', '44100'];
 const ff = (args) => execFileSync('ffmpeg', ['-nostdin', '-y', '-v', 'error', ...args], { stdio: 'inherit' });
 const dur = (f) => parseFloat(execFileSync('ffprobe', ['-v', 'error', '-show_entries', 'format=duration', '-of', 'csv=p=0', f]).toString());
 
-// scenes: [{name, src, segments: [[start,end],...], len, audio}]  — segments are raw-webm times.
+// scenes: [{name, src, segments: [[start,end],...], len, audio, pad?}] — segments are raw-webm times.
+// `pad` freezes the last frame for that many seconds when the narration outlasts the footage (the
+// 500 ms audio delay below is the same head start mixNarration gives the voice).
 export function buildScenes(scenes, { outDir }) {
   for (const s of scenes) {
     const segs = s.segments.map((x, i) => `[0:v]trim=start=${x[0]}:end=${x[1]},setpts=PTS-STARTPTS,fps=25[v${i}]`).join(';');
-    const cat = s.segments.map((_, i) => `[v${i}]`).join('') + `concat=n=${s.segments.length}:v=1[v]`;
+    const freeze = s.pad > 0.05 ? `,tpad=stop_mode=clone:stop_duration=${s.pad.toFixed(2)}` : '';
+    const cat = s.segments.map((_, i) => `[v${i}]`).join('') + `concat=n=${s.segments.length}:v=1${freeze}[v]`;
     ff(['-i', s.src, '-i', s.audio, '-filter_complex', `${segs};${cat};[1:a]adelay=500|500,apad[a]`,
       '-map', '[v]', '-map', '[a]', '-t', String(s.len), ...ENC, `${outDir}/${s.name}.mp4`]);
     console.log(s.name, 'ok');
   }
+}
+
+// One MP3 carrying every scene's narration at its position in the finished cut. The talking-head
+// bubble is generated from this single file, so Solita's mouth stays in sync over the whole video
+// instead of restarting per scene. scenes: [{audio, len}] in playback order; `lead` is the same
+// head start the scene cuts give the voice (buildScenes uses 0.5 s).
+export function mixNarration(scenes, { outDir, lead = 0.5, name = 'fullnarration' }) {
+  let at = 0;
+  const parts = scenes.map((s) => { const d = { audio: s.audio, at: at + lead }; at += s.len; return d; });
+  const ins = parts.map((d) => ['-i', d.audio]).flat();
+  const chains = parts.map((d, i) => `[${i}:a]adelay=${Math.round(d.at * 1000)}|${Math.round(d.at * 1000)}[a${i}]`);
+  const mix = parts.map((_, i) => `[a${i}]`).join('') + `amix=inputs=${parts.length}:normalize=0,apad[a]`;
+  ff([...ins, '-filter_complex', [...chains, mix].join(';'),
+    '-map', '[a]', '-t', String(at), '-c:a', 'libmp3lame', '-b:a', '128k', `${outDir}/${name}.mp3`]);
+  console.log('narration', at.toFixed(1) + 's', `${outDir}/${name}.mp3`);
+  return { file: `${outDir}/${name}.mp3`, len: at };
 }
 
 // bubbles: [{talk, at}] — talk video overlaid bottom-right as a circle, fading in/out.
@@ -54,7 +74,7 @@ export function compose(sceneNames, bubbles, { outDir, out, crop = '760:760:132:
     '-map', '[v]', '-map', '[a]', '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-crf', '18', '-preset', 'medium',
     '-c:a', 'aac', '-b:a', '160k', out]);
   // central video library — every final lands here as well (Desktop alias points at it)
-  const lib = new URL('../videos/', import.meta.url).pathname;
+  const lib = VIDEO_LIB;
   try {
     fsMkdir(lib, { recursive: true });
     execFileSync('cp', [out, lib + out.split('/').pop()]);

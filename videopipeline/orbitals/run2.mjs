@@ -1,12 +1,11 @@
 import fs from 'fs';
 import { execFileSync } from 'child_process';
-import { buildScenes, compose } from '../lib/assemble.mjs';
+import { compose, mixNarration } from '../lib/assemble.mjs';
 import { makeTalks } from '../lib/did.mjs';
 import { recordOutros } from '../lib/outro.mjs';
+import { MUSIC, PORTRAIT, workDir } from '../lib/paths.mjs';
 
-const OUT = '/private/tmp/claude-501/-Users-malvers-IdeaProjects-forloop/9bba6ce1-dbf3-407e-a2f2-fce1f718abcc/scratchpad/orb';
-const PORTRAIT = '/Users/malvers/IdeaProjects/forloop/HTML/resources/team/team_02.png';
-const MUSIC = '/Users/malvers/IdeaProjects/forloop/HTML/resources/Infinity_6min.m4a';
+const OUT = workDir('orb');
 const durs = JSON.parse(fs.readFileSync(`${OUT}/durs.json`));
 const marks = Object.fromEntries(JSON.parse(fs.readFileSync(`${OUT}/main.json`)).map((m) => [m.label, m.t]));
 const vdur = parseFloat(execFileSync('ffprobe', ['-v','error','-show_entries','format=duration','-of','csv=p=0',`${OUT}/main.mp4`]).toString());
@@ -41,13 +40,7 @@ for (const s of scenes) {
   console.log(s.name, 'ok');
 }
 
-let o2 = 0; const delays = [];
-for (const s of scenes) { delays.push({ audio: s.audio, at: o2 + 0.5 }); o2 += s.len; }
-const ins = delays.map((d) => ['-i', d.audio]).flat();
-const chains = delays.map((d, i) => `[${i}:a]adelay=${Math.round(d.at * 1000)}|${Math.round(d.at * 1000)}[a${i}]`);
-const mix = delays.map((_, i) => `[a${i}]`).join('') + `amix=inputs=${delays.length}:normalize=0,apad[a]`;
-execFileSync('ffmpeg', ['-nostdin','-y','-v','error',...ins,'-filter_complex',[...chains, mix].join(';'),
-  '-map','[a]','-t',String(o2),'-c:a','libmp3lame','-b:a','128k',`${OUT}/fullnarration.mp3`], { stdio: 'inherit' });
+mixNarration(scenes, { outDir: OUT });
 
 await makeTalks(PORTRAIT, [`${OUT}/fullnarration.mp3`], { outDir: OUT });
 const outros = await recordOutros({ outDir: OUT, qrUrl: 'https://docalvers.de/orbitals.html' });

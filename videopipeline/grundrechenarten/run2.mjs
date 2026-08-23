@@ -1,12 +1,12 @@
 import fs from 'fs';
 import { execFileSync } from 'child_process';
-import { buildScenes, compose } from '../lib/assemble.mjs';
+import { buildScenes, compose, mixNarration } from '../lib/assemble.mjs';
 import { makeTalks } from '../lib/did.mjs';
 import { recordOutros } from '../lib/outro.mjs';
+import { MUSIC, workDir } from '../lib/paths.mjs';
 
-const OUT = '/private/tmp/claude-501/-Users-malvers-IdeaProjects-forloop/9bba6ce1-dbf3-407e-a2f2-fce1f718abcc/scratchpad/gra';
+const OUT = workDir('gra');
 const PORTRAIT = new URL('../../HTML/resources/team/team_02.png', import.meta.url).pathname;
-const MUSIC = '/Users/malvers/IdeaProjects/forloop/HTML/resources/Infinity_6min.m4a';
 const mk = (f) => Object.fromEntries(JSON.parse(fs.readFileSync(`${OUT}/${f}.json`)).map((m) => [m.label, m.t]));
 const A = mk('add'), S = mk('sub'), M = mk('mult'), D = mk('div');
 
@@ -23,14 +23,7 @@ const scenes = SPEC.map(([name, src, t0, len, aud]) => ({
 }));
 buildScenes(scenes, { outDir: OUT });
 
-let off = 0; const delays = [];
-for (const s of scenes) { delays.push({ audio: s.audio, at: off + 0.5 }); off += s.len; }
-const ins = delays.map((d) => ['-i', d.audio]).flat();
-const chains = delays.map((d, i) => `[${i}:a]adelay=${Math.round(d.at * 1000)}|${Math.round(d.at * 1000)}[a${i}]`);
-const mix = delays.map((_, i) => `[a${i}]`).join('') + `amix=inputs=${delays.length}:normalize=0,apad[a]`;
-execFileSync('ffmpeg', ['-nostdin', '-y', '-v', 'error', ...ins, '-filter_complex', [...chains, mix].join(';'),
-  '-map', '[a]', '-t', String(off), '-c:a', 'libmp3lame', '-b:a', '128k', `${OUT}/fullnarration.mp3`], { stdio: 'inherit' });
-console.log('narration', off, 's');
+mixNarration(scenes, { outDir: OUT });
 
 await makeTalks(PORTRAIT, [`${OUT}/fullnarration.mp3`], { outDir: OUT });
 const outros = await recordOutros({ outDir: OUT, qrUrl: 'https://docalvers.de' });

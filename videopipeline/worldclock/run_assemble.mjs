@@ -2,10 +2,11 @@
 // D-ID talk over the whole video, compose at 2560x1440.
 import fs from 'fs';
 import { execFileSync } from 'child_process';
-import { buildScenes, compose } from '../lib/assemble.mjs';
+import { buildScenes, compose, mixNarration } from '../lib/assemble.mjs';
 import { makeTalks } from '../lib/did.mjs';
+import { workDir } from '../lib/paths.mjs';
 
-const OUT = '/private/tmp/claude-501/-Users-malvers-IdeaProjects-forloop/9bba6ce1-dbf3-407e-a2f2-fce1f718abcc/scratchpad/wc1440';
+const OUT = workDir('wc1440');
 const PORTRAIT = new URL('../../HTML/resources/team/team_02.png', import.meta.url).pathname;
 const marks = (n) => Object.fromEntries(JSON.parse(fs.readFileSync(`${OUT}/s${n}.json`)).map((m) => [m.label.split(' ')[0], m.t]));
 
@@ -43,14 +44,7 @@ console.log('cuts', JSON.stringify(scenes.map(s => s.segments)));
 buildScenes(scenes, { outDir: OUT });
 
 // full narration track (each scene audio at its offset + 0.5 s) → one D-ID talk for an always-on Solita
-let off = 0; const delays = [];
-for (const s of scenes) { delays.push({ audio: s.audio, at: off + 0.5 }); off += s.len; }
-const ins = delays.map((d) => ['-i', d.audio]).flat();
-const chains = delays.map((d, i) => `[${i}:a]adelay=${Math.round(d.at * 1000)}|${Math.round(d.at * 1000)}[a${i}]`);
-const mix = delays.map((_, i) => `[a${i}]`).join('') + `amix=inputs=${delays.length}:normalize=0,apad[a]`;
-execFileSync('ffmpeg', ['-nostdin', '-y', '-v', 'error', ...ins, '-filter_complex', [...chains, mix].join(';'),
-  '-map', '[a]', '-t', String(off), '-c:a', 'libmp3lame', '-b:a', '128k', `${OUT}/fullnarration.mp3`], { stdio: 'inherit' });
-console.log('full narration', off, 's');
+mixNarration(scenes, { outDir: OUT });
 
 await makeTalks(PORTRAIT, [`${OUT}/fullnarration.mp3`], { outDir: OUT });
 

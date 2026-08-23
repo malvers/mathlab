@@ -1,8 +1,9 @@
 // "1+1=2" lab demo — narration + choreography (pipeline reference: ../worldclock/demo.mjs)
 import { synthScenes } from '../lib/tts.mjs';
 import { runScenes } from '../lib/record-cdp.mjs';
+import { workDir } from '../lib/paths.mjs';
 
-const OUT = '/private/tmp/claude-501/-Users-malvers-IdeaProjects-forloop/9bba6ce1-dbf3-407e-a2f2-fce1f718abcc/scratchpad/e1';
+const OUT = workDir('e1');
 const URL_ = 'https://docalvers.de/einsundeinsgleichzwei.html';
 
 export const NARRATION = {

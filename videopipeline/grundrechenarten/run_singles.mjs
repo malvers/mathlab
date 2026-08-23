@@ -5,10 +5,10 @@ import { synthScenes } from '../lib/tts.mjs';
 import { buildScenes, compose } from '../lib/assemble.mjs';
 import { makeTalks } from '../lib/did.mjs';
 import { recordOutros } from '../lib/outro.mjs';
+import { MUSIC, workDir } from '../lib/paths.mjs';
 
-const OUT = '/private/tmp/claude-501/-Users-malvers-IdeaProjects-forloop/9bba6ce1-dbf3-407e-a2f2-fce1f718abcc/scratchpad/gra';
+const OUT = workDir('gra');
 const PORTRAIT = new URL('../../HTML/resources/team/team_02.png', import.meta.url).pathname;
-const MUSIC = '/Users/malvers/IdeaProjects/forloop/HTML/resources/Infinity_6min.m4a';
 const mk = (f) => Object.fromEntries(JSON.parse(fs.readFileSync(`${OUT}/${f}.json`)).map((m) => [m.label, m.t]));
 const A = mk('add'), S = mk('sub'), M = mk('mult');
 
