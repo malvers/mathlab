@@ -185,7 +185,14 @@ const CyberBranding = {
     // standalone fixed element on <body> (NOT inside .canvas-branding) so lab auto-hide
     // modes that fade the masthead leave it visible.
     LAB_VIDEOS: {
-        'worldclock.html': 'https://youtu.be/Yj0seCcLCW0',
+        'worldclock.html': 'https://youtu.be/VErOFQy4J4E',
+        'einsundeinsgleichzwei.html': 'https://youtu.be/-uDqf_o7eGQ',
+        'neuroaddierer.html': 'https://youtu.be/yAadb4BT4Tg',
+        'addition.html': 'https://youtu.be/soXILuDLA0A',
+        'subtraktion.html': 'https://youtu.be/ANnQtgcLOXw',
+        'multiplikation.html': 'https://youtu.be/ODTYHxOghsE',
+        'dividieren.html': 'https://youtu.be/5bdpqUNNq-w',
+        'orbitals.html': 'https://youtu.be/Kknrs_lzcyU',
     },
 
     injectLabVideo() {

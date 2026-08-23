@@ -1,6 +1,7 @@
 // Cut scene clips (video segments + narration at +0.5 s), concat them, then overlay the
 // circular talking-head bubbles with alpha fades and a final fade-out.
 import { execFileSync } from 'child_process';
+import { mkdirSync as fsMkdir } from 'fs';
 
 const ENC = ['-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-crf', '18', '-r', '25', '-c:a', 'aac', '-b:a', '128k', '-ar', '44100'];
 const ff = (args) => execFileSync('ffmpeg', ['-nostdin', '-y', '-v', 'error', ...args], { stdio: 'inherit' });
@@ -52,5 +53,12 @@ export function compose(sceneNames, bubbles, { outDir, out, crop = '760:760:132:
   ff([...ins, '-filter_complex', parts.join(';'),
     '-map', '[v]', '-map', '[a]', '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-crf', '18', '-preset', 'medium',
     '-c:a', 'aac', '-b:a', '160k', out]);
+  // central video library — every final lands here as well (Desktop alias points at it)
+  const lib = new URL('../videos/', import.meta.url).pathname;
+  try {
+    fsMkdir(lib, { recursive: true });
+    execFileSync('cp', [out, lib + out.split('/').pop()]);
+    console.log('→ Bibliothek:', lib + out.split('/').pop());
+  } catch (e) { console.log('Bibliothek-Kopie fehlgeschlagen:', e.message); }
   console.log('FINAL', out, dur(out).toFixed(1) + 's', '(main', mainLen.toFixed(1) + 's + outro)');
 }
