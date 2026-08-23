@@ -647,3 +647,71 @@
             @media (max-width: 768px) {
                 .lab-video-btn { width: 30px; top: max(56px, calc(env(safe-area-inset-top, 0px) + 48px)); }
             }
+
+            /* Lightbox for the lab demo video — the player opens over the lab
+               instead of pulling the visitor away into a new tab. */
+            .lab-video-wrap {
+                position: fixed;
+                inset: 0;
+                z-index: 100000;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 4vmin;
+                background: rgba(8, 20, 42, 0.86);
+                backdrop-filter: blur(3px);
+            }
+            .lab-video-box {
+                position: relative;
+                width: min(1100px, 92vw);
+                max-height: 92vh;
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+            }
+            .lab-video-frame {
+                position: relative;
+                width: 100%;
+                aspect-ratio: 16 / 9;
+                max-height: 82vh;
+                border-radius: 12px;
+                overflow: hidden;
+                background: #000;
+                box-shadow: 0 18px 60px rgba(0, 0, 0, 0.6);
+            }
+            .lab-video-frame iframe {
+                position: absolute;
+                inset: 0;
+                width: 100%;
+                height: 100%;
+                border: 0;
+            }
+            .lab-video-close {
+                position: absolute;
+                top: -14px;
+                right: -10px;
+                z-index: 2;
+                width: 34px;
+                height: 34px;
+                border-radius: 999px;
+                border: 1px solid rgba(255, 255, 255, 0.35);
+                background: rgb(14, 36, 78);
+                color: #fff;
+                font-size: 15px;
+                line-height: 1;
+                cursor: pointer;
+            }
+            .lab-video-close:hover { background: rgb(176, 36, 24); border-color: rgb(176, 36, 24); }
+            .lab-video-out {
+                align-self: flex-end;
+                font-family: 'Orbitron', sans-serif;
+                font-size: 0.68rem;
+                letter-spacing: 0.06em;
+                color: rgba(255, 255, 255, 0.72);
+                text-decoration: none;
+            }
+            .lab-video-out:hover { color: #fff; }
+            @media (max-width: 768px) {
+                .lab-video-box { width: 96vw; }
+                .lab-video-close { top: -12px; right: -4px; }
+            }
