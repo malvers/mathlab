@@ -41,7 +41,12 @@
     /* PostgREST call with fresh token; one retry after a 401. */
     async function api(path, opts, retry) {
         await ensureFreshToken();
-        const res = await fetch(DB_URL + '/rest/v1/' + path, Object.assign({}, opts, {
+        /* svp-plan saves on beforeunload — a normal fetch is killed with the page and the last edit
+           would only ever reach localStorage. keepalive lets the browser finish it, but caps the body
+           at 64 kB, so oversized payloads keep the plain path. */
+        const body = opts && opts.body;
+        const keepalive = typeof body !== 'string' || body.length < 60000;
+        const res = await fetch(DB_URL + '/rest/v1/' + path, Object.assign({ keepalive: keepalive }, opts, {
             headers: Object.assign({
                 apikey: DB_KEY,
                 Authorization: 'Bearer ' + session.access_token,

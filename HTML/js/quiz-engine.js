@@ -367,7 +367,18 @@
       (CFG.title + ' · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Frage');
     document.getElementById('dash').style.display = 'block';
     refreshDashboard();
-    setInterval(refreshDashboard, 5000);
+    /* Left open on the beamer all day this would poll for hours; a hidden tab tells us nobody is
+       looking, so we stop and catch up on return. */
+    let timer = setInterval(refreshDashboard, 5000);
+    document.addEventListener('visibilitychange', function () {
+      if (document.hidden) {
+        clearInterval(timer);
+        timer = null;
+      } else if (!timer) {
+        refreshDashboard();
+        timer = setInterval(refreshDashboard, 5000);
+      }
+    });
   }
 
   function refreshDashboard() {

@@ -158,8 +158,8 @@ function toggleSidebar() {
             <input type="password" id="g-api-key" class="api-input" placeholder="API key" autocomplete="off" style="display:none;">
             <select id="g-model" class="api-input" onchange="updateGeminiTitle()">
                 <option value="gemini-2.5-flash">2.5-flash</option>
-                <option value="gemini-2.5-flash-lite">2.5-flash-lite</option>
-                <option value="gemini-2.5-pro">2.5-pro</option>
+                <option value="gemini-3.5-flash">3.5-flash</option>
+                <option value="gemini-3.5-flash-lite">3.5-flash-lite</option>
             </select>
             <div id="g-price-info" style="font-family:'Orbitron',sans-serif;font-size:10px;color:rgba(0,210,255,0.65);text-align:right;margin-top:4px;letter-spacing:0.04em;">
                 — per Mio. Token
@@ -196,8 +196,10 @@ function toggleSidebar() {
             }
             const priceEl = document.getElementById('g-price-info');
             const price = (typeof GEMINI_PRICING !== 'undefined') ? GEMINI_PRICING[model] : null;
-            if (priceEl && price) {
-                priceEl.textContent = `$${price.in} in / $${price.out} out — per Mio. Token`;
+            if (priceEl) {
+                priceEl.textContent = price
+                    ? `$${price.in} in / $${price.out} out — per Mio. Token`
+                    : 'Tarif nicht hinterlegt — Kosten nur geschätzt';
             }
         }
 
@@ -1697,10 +1699,10 @@ function toggleSidebar() {
         }
         // ── Cost control ────────────────────────────────────────────────────────
         // USD per 1M tokens. Verify against ai.google.dev/pricing if rates change.
+        // Only rates we actually checked live in here. A model that is missing is NOT priced with a
+        // made-up number: the cost line says so and the estimate is marked with ~ (Rule: never fake).
         const GEMINI_PRICING = {
-            'gemini-2.5-flash':      { in: 0.30, out: 2.50  },
-            'gemini-2.5-flash-lite': { in: 0.10, out: 0.40  },
-            'gemini-2.5-pro':        { in: 1.25, out: 10.00 }
+            'gemini-2.5-flash':      { in: 0.30, out: 2.50  }
         };
 
         // Session counters (reset on reload). All-time counters in localStorage.
@@ -1788,14 +1790,15 @@ function toggleSidebar() {
             const candidates  = +usage.candidatesTokenCount || 0;
             const thoughts    = +usage.thoughtsTokenCount   || 0;
             const outTok      = candidates + thoughts;
-            const p = GEMINI_PRICING[model] || GEMINI_PRICING['gemini-2.5-flash'];
+            const known = GEMINI_PRICING[model];
+            const p = known || GEMINI_PRICING['gemini-2.5-flash'];   // fallback rate, flagged below
             const usd = (inTok * p.in + outTok * p.out) / 1_000_000;
             costLastUSD = usd;
             costLastTok = inTok + outTok;
             costSession.calls++;  costSession.inTok += inTok;  costSession.outTok += outTok;  costSession.usd += usd;
             costAllTime.calls++;  costAllTime.inTok += inTok;  costAllTime.outTok += outTok;  costAllTime.usd += usd;
             try { localStorage.setItem('eocr-cost-alltime', JSON.stringify(costAllTime)); } catch (_) {}
-            DebugWindow.log(`  💰 ${inTok} in + ${candidates} out${thoughts > 0 ? ' + ' + thoughts + ' think' : ''} = ${fmtUSD(usd)} (all-time: ${fmtUSD(costAllTime.usd)})`);
+            DebugWindow.log(`  💰 ${inTok} in + ${candidates} out${thoughts > 0 ? ' + ' + thoughts + ' think' : ''} = ${known ? '' : '~'}${fmtUSD(usd)}${known ? '' : ' (Tarif geschätzt)'} (all-time: ${fmtUSD(costAllTime.usd)})`);
             updateCostUI();
             maybeShowCostWarning();
             // Warn if all-time crosses the limit on THIS call
