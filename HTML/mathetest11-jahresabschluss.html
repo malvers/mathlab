@@ -20,8 +20,8 @@ window.QUIZ = {
   title: 'Abschlusstest Mathematik · Klasse 11',
   subtitle: 'Berufliches Gymnasium · Jahrgangsstufe 11 · Stoff des Schuljahres (LB 1–4) · 20 Fragen · genau eine Antwort pro Frage · anonym',
   dashSub: 'BGY · Klasse 11 · Abschlusstest · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Frage',
-  submit: false,          /* Uebungsmodus: kein Abgeben */
-  solutions: 'always',    /* Loesungen jederzeit lesbar */
+  /* Abgeben aktiv, damit Ergebnis, Klassenschnitt und ?auswertung greifen;
+     Loesungen wie bei den Eingangstests erst nach der Abgabe. */
   /* Questions: Lehrplan Mathematik, Berufliches Gymnasium Sachsen (2021),
      Jahrgangsstufe 11. Order follows the Stoffverteilungsplan:
      LB 2 (Gleichungen/Figuren) -> LB 3 (Funktionen) -> LB 4 (LGS/Matrizen)
@@ -40,13 +40,13 @@ window.QUIZ = {
     },
     {
       q: 'Wie lautet $(3x-2)^2$ ausmultipliziert?',
-      opts: ['$9x^2 - 4$', '$9x^2 - 12x + 4$', '$9x^2 + 12x + 4$', '$3x^2 - 12x + 4$'],
+      opts: ['$9x^2 + 12x + 4$', '$3x^2 - 12x + 4$', '$9x^2 - 4$', '$9x^2 - 12x + 4$'],
       steps: [
         '2. binomische Formel: $(a-b)^2 = a^2 - 2ab + b^2$, hier $a = 3x$, $b = 2$',
         '$a^2 = (3x)^2 = 9x^2$  ·  $2ab = 2\\cdot 3x\\cdot 2 = 12x$  ·  $b^2 = 4$',
         'Zusammensetzen: $(3x-2)^2 = 9x^2 - 12x + 4$'
       ],
-      solution: 1
+      solution: 3
     },
     {
       q: 'Ein Preis wird zuerst um 20 % gesenkt und danach wieder um 20 % erhöht. Wie verhält sich der Endpreis zum Ausgangspreis?',
@@ -61,85 +61,85 @@ window.QUIZ = {
     },
     {
       q: 'Ein Zylinder hat den Radius $r = 2$ cm und die Höhe $h = 3$ cm. Wie groß ist seine Oberfläche $A = 2\\pi r(r+h)$?',
-      opts: ['$12\\pi\\ \\mathrm{cm^2}$', '$20\\pi\\ \\mathrm{cm^2}$', '$10\\pi\\ \\mathrm{cm^2}$', '$24\\pi\\ \\mathrm{cm^2}$'],
+      opts: ['$20\\pi\\ \\mathrm{cm^2}$', '$10\\pi\\ \\mathrm{cm^2}$', '$24\\pi\\ \\mathrm{cm^2}$', '$12\\pi\\ \\mathrm{cm^2}$'],
       steps: [
         'Formel notieren: $A = 2\\pi r (r+h)$',
         'Einsetzen: $A = 2\\pi \\cdot 2\\,(2+3)$',
         'Ausrechnen: $A = 2\\pi \\cdot 2 \\cdot 5 = 20\\pi\\ \\mathrm{cm^2} \\approx 62{,}8\\ \\mathrm{cm^2}$'
       ],
-      solution: 1
+      solution: 0
     },
     {
       q: 'Welchen größtmöglichen Definitionsbereich hat $f(x) = \\dfrac{1}{x-3}$?',
-      opts: ['$\\mathbb{R}$', '$\\mathbb{R}\\setminus\\{0\\}$', '$x > 3$', '$\\mathbb{R}\\setminus\\{3\\}$'],
+      opts: ['$x > 3$', '$\\mathbb{R}\\setminus\\{3\\}$', '$\\mathbb{R}$', '$\\mathbb{R}\\setminus\\{0\\}$'],
       steps: [
         'Ein Bruch ist nur definiert, wenn der Nenner nicht null ist: $x - 3 \\neq 0$',
         'Auflösen: $x \\neq 3$',
         'Also $D = \\mathbb{R}\\setminus\\{3\\}$ — bei $x=3$ liegt eine Polstelle.'
       ],
-      solution: 3
+      solution: 1
     },
     {
       q: 'Welche Symmetrie besitzt der Graph von $f(x) = x^4 - 3x^2$?',
-      opts: ['Achsensymmetrisch zur $y$-Achse', 'Punktsymmetrisch zum Ursprung', 'Achsensymmetrisch zur $x$-Achse', 'Keine Symmetrie'],
+      opts: ['Achsensymmetrisch zur $x$-Achse', 'Keine Symmetrie', 'Achsensymmetrisch zur $y$-Achse', 'Punktsymmetrisch zum Ursprung'],
       steps: [
         'Symmetrie prüft man mit $f(-x)$: $f(-x) = (-x)^4 - 3(-x)^2$',
         'Gerade Exponenten schlucken das Minus: $f(-x) = x^4 - 3x^2$',
         'Es gilt $f(-x) = f(x)$ ⇒ achsensymmetrisch zur $y$-Achse (nur gerade Exponenten ⇒ gerade Funktion).'
       ],
-      solution: 0
+      solution: 2
     },
     {
       q: 'Eine Gerade verläuft durch die Punkte $P(1|5)$ und $Q(3|11)$. Wie lautet ihre Gleichung?',
-      opts: ['$y = 3x + 2$', '$y = 2x + 3$', '$y = 3x - 2$', '$y = 6x - 1$'],
+      opts: ['$y = 2x + 3$', '$y = 3x - 2$', '$y = 6x - 1$', '$y = 3x + 2$'],
       steps: [
         'Anstieg aus zwei Punkten: $m = \\dfrac{y_2-y_1}{x_2-x_1} = \\dfrac{11-5}{3-1} = \\dfrac{6}{2} = 3$',
         '$P(1|5)$ in $y = 3x + n$ einsetzen: $5 = 3\\cdot 1 + n \\Rightarrow n = 2$',
         'Gleichung: $y = 3x + 2$; Probe mit $Q$: $3\\cdot 3 + 2 = 11$ ✓'
       ],
-      solution: 0
+      solution: 3
     },
     {
       q: 'Ein Kapital von 1000 € wird 5 Jahre lang mit 3 % pro Jahr verzinst (Zinseszins). Welcher Ansatz ist richtig?',
-      opts: ['$1000 \\cdot 0{,}03 \\cdot 5$', '$1000 \\cdot 1{,}03 \\cdot 5$', '$1000 \\cdot 1{,}03^{5}$', '$1000 + 1{,}03^{5}$'],
+      opts: ['$1000 \\cdot 1{,}03 \\cdot 5$', '$1000 \\cdot 1{,}03^{5}$', '$1000 + 1{,}03^{5}$', '$1000 \\cdot 0{,}03 \\cdot 5$'],
       steps: [
         '3 % Zinsen bedeuten pro Jahr den Wachstumsfaktor $q = 1{,}03$',
         'Bei Zinseszins wirkt der Faktor jedes Jahr erneut: $K_n = K_0 \\cdot q^{\\,n}$',
         'Einsetzen: $K_5 = 1000 \\cdot 1{,}03^{5} \\approx 1159{,}27$ €',
         '$1000\\cdot 0{,}03\\cdot 5 = 150$ € wären nur einfache Zinsen — ohne Zins auf die Zinsen.'
       ],
-      solution: 2
+      solution: 1
     },
     {
       q: 'Wie viel Prozent eines radioaktiven Stoffes sind nach drei Halbwertszeiten noch vorhanden?',
-      opts: ['50 %', '25 %', '12,5 %', '0 %'],
+      opts: ['12,5 %', '0 %', '50 %', '25 %'],
       steps: [
         'Jede Halbwertszeit halbiert den Bestand: Faktor $\\tfrac{1}{2}$',
         'Drei Halbwertszeiten: $\\left(\\tfrac{1}{2}\\right)^3 = \\tfrac{1}{8}$',
         '$\\tfrac{1}{8} = 0{,}125 = 12{,}5\\,\\%$ — exponentieller Zerfall erreicht nie exakt null.'
       ],
-      solution: 2
+      solution: 0
     },
     {
       q: 'Welche Lösungen hat die Gleichung $x^2 - 5x + 6 = 0$?',
-      opts: ['$x_1 = -2$, $x_2 = -3$', '$x_1 = 2$, $x_2 = 3$', '$x_1 = 1$, $x_2 = 6$', '$x_1 = 5$, $x_2 = 6$'],
+      opts: ['$x_1 = 5$, $x_2 = 6$', '$x_1 = -2$, $x_2 = -3$', '$x_1 = 2$, $x_2 = 3$', '$x_1 = 1$, $x_2 = 6$'],
       steps: [
         'Normalform ablesen: $p = -5$, $q = 6$',
         '$p$-$q$-Formel: $x_{1,2} = -\\dfrac{p}{2} \\pm \\sqrt{\\left(\\dfrac{p}{2}\\right)^2 - q} = 2{,}5 \\pm \\sqrt{6{,}25 - 6}$',
         '$x_{1,2} = 2{,}5 \\pm 0{,}5$, also $x_1 = 2$ und $x_2 = 3$',
         'Probe mit Vieta: $x_1 + x_2 = 5 = -p$  und  $x_1 \\cdot x_2 = 6 = q$ ✓'
       ],
-      solution: 1
+      solution: 2
     },
     {
       q: 'Wo liegt der Scheitelpunkt der Parabel $f(x) = (x-3)^2 - 4$?',
-      opts: ['$S(-3|-4)$', '$S(3|4)$', '$S(3|-4)$', '$S(-3|4)$'],
+      opts: ['$S(-3|4)$', '$S(-3|-4)$', '$S(3|4)$', '$S(3|-4)$'],
       steps: [
         'Scheitelpunktform: $f(x) = a\\,(x-d)^2 + e$ mit Scheitel $S(d|e)$',
         'Vergleich mit $f(x) = (x-3)^2 - 4$: $d = 3$, $e = -4$',
         '$S(3|-4)$ — Vorsicht: das Minus in der Klammer dreht das Vorzeichen von $d$ um.'
       ],
-      solution: 2
+      solution: 3
     },
     {
       q: 'Welche Periode hat die Funktion $f(x) = \\sin(2x)$?',
@@ -153,13 +153,13 @@ window.QUIZ = {
     },
     {
       q: 'Wie erhält man den Graphen der Umkehrfunktion aus dem Graphen von $f$?',
-      opts: ['Durch Spiegelung an der $x$-Achse', 'Durch Spiegelung an der Geraden $y = x$', 'Durch Spiegelung an der $y$-Achse', 'Durch Verschiebung um 1 nach oben'],
+      opts: ['Durch Verschiebung um 1 nach oben', 'Durch Spiegelung an der $x$-Achse', 'Durch Spiegelung an der Geraden $y = x$', 'Durch Spiegelung an der $y$-Achse'],
       steps: [
         'Umkehren heißt: $x$ und $y$ tauschen die Rollen',
         'Vertauschte Koordinaten $(a|b) \\rightarrow (b|a)$ entsprechen geometrisch der Spiegelung an der Winkelhalbierenden $y = x$',
         'Beispiel: $f(x) = x^2$ für $x \\ge 0$ hat $(2|4)$, die Umkehrung $f^{-1}(x) = \\sqrt{x}$ hat $(4|2)$'
       ],
-      solution: 1
+      solution: 2
     },
     {
       q: 'Welchen Wert hat $x$ in der Gleichung $2^x = 0{,}25$?',
@@ -173,14 +173,14 @@ window.QUIZ = {
     },
     {
       q: 'Ein Guthaben wächst jährlich um 5 %. Nach welcher Zeit hat es sich verdoppelt, d. h. $1{,}05^{\\,t} = 2$?',
-      opts: ['$t = \\dfrac{\\ln 2}{\\ln 1{,}05} \\approx 14{,}2$ Jahre', '$t = \\dfrac{2}{1{,}05} \\approx 1{,}9$ Jahre', '$t = \\ln 2 \\cdot \\ln 1{,}05 \\approx 0{,}03$ Jahre', '$t = 20$ Jahre'],
+      opts: ['$t = \\dfrac{2}{1{,}05} \\approx 1{,}9$ Jahre', '$t = \\ln 2 \\cdot \\ln 1{,}05 \\approx 0{,}03$ Jahre', '$t = 20$ Jahre', '$t = \\dfrac{\\ln 2}{\\ln 1{,}05} \\approx 14{,}2$ Jahre'],
       steps: [
         'Ansatz: $1{,}05^{\\,t} = 2$',
         'Beide Seiten logarithmieren: $\\ln\\left(1{,}05^{\\,t}\\right) = \\ln 2$',
         'Logarithmusgesetz $\\ln(a^t) = t\\cdot\\ln a$: $t \\cdot \\ln 1{,}05 = \\ln 2$',
         '$t = \\dfrac{\\ln 2}{\\ln 1{,}05} \\approx \\dfrac{0{,}693}{0{,}0488} \\approx 14{,}2$ Jahre'
       ],
-      solution: 0
+      solution: 3
     },
     {
       q: 'Wie entsteht der Graph von $g(x) = f(x+2)$ aus dem Graphen von $f$?',
@@ -195,24 +195,24 @@ window.QUIZ = {
     },
     {
       q: 'Wie heißt die Matrix $\\begin{pmatrix} 1 & 0 \\\\ 0 & 1 \\end{pmatrix}$?',
-      opts: ['Nullmatrix', 'Diagonalmatrix ohne besonderen Namen', 'Einheitsmatrix', 'Dreiecksmatrix'],
+      opts: ['Diagonalmatrix ohne besonderen Namen', 'Einheitsmatrix', 'Dreiecksmatrix', 'Nullmatrix'],
       steps: [
         'Die Matrix ist quadratisch ($2\\times 2$)',
         'Auf der Hauptdiagonale stehen nur Einsen, sonst nur Nullen',
         'Das ist die Einheitsmatrix $E$ (auch $I$) — das neutrale Element: $E \\cdot \\vec{x} = \\vec{x}$'
       ],
-      solution: 2
+      solution: 1
     },
     {
       q: 'Beim Gauß-Verfahren entsteht in der letzten Zeile die Aussage $0 = 5$. Was folgt daraus für das lineare Gleichungssystem?',
-      opts: ['Es hat genau eine Lösung.', 'Es hat unendlich viele Lösungen.', 'Es hat keine Lösung.', 'Es muss neu aufgestellt werden — so etwas kann nicht auftreten.'],
+      opts: ['Es muss neu aufgestellt werden — so etwas kann nicht auftreten.', 'Es hat genau eine Lösung.', 'Es hat unendlich viele Lösungen.', 'Es hat keine Lösung.'],
       steps: [
         'Die Zeile ausgeschrieben lautet $0\\cdot x + 0\\cdot y + 0\\cdot z = 5$',
         'Die linke Seite ist für jede Belegung $0$ — die Aussage $0 = 5$ ist ein Widerspruch',
         'Also $L = \\{\\,\\}$: keine Lösung. Geometrisch haben die drei Ebenen keinen gemeinsamen Punkt.',
         'Zum Vergleich: Ergäbe sich $0 = 0$, gäbe es unendlich viele Lösungen (freier Parameter).'
       ],
-      solution: 2
+      solution: 3
     },
     {
       q: 'Ein Würfel wird zweimal geworfen. Wie groß ist die Wahrscheinlichkeit, zweimal eine Sechs zu würfeln (Pfadmultiplikation)?',
@@ -227,14 +227,14 @@ window.QUIZ = {
     },
     {
       q: 'Von 100 befragten Personen tragen 40 eine Brille; 25 dieser Brillenträger sind Frauen. Eine zufällig ausgewählte Person trägt eine Brille. Mit welcher Wahrscheinlichkeit ist es eine Frau?',
-      opts: ['25 %', '40 %', '62,5 %', '65 %'],
+      opts: ['65 %', '25 %', '40 %', '62,5 %'],
       steps: [
         'Gesucht ist die bedingte Wahrscheinlichkeit $P(\\text{Frau} \\mid \\text{Brille})$',
         'Vierfeldertafel: Brillenträger gesamt $= 40$, davon Frauen $= 25$',
         '$P(\\text{Frau} \\mid \\text{Brille}) = \\dfrac{25}{40} = 0{,}625 = 62{,}5\\,\\%$',
         'Nicht $\\tfrac{25}{100}$: die Bedingung „trägt Brille“ verkleinert die Grundmenge von 100 auf 40.'
       ],
-      solution: 2
+      solution: 3
     }
   ]
 };
