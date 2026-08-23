@@ -171,6 +171,20 @@ header.page-head { max-width: 1200px; margin: 0 auto 22px; position: relative; }
     flex-wrap: wrap;
 }
 
+/* YouTube-Icon am rechten Ende der Kopfzeile (Video zum Schuljahr) —
+   nackt, ohne Pille: das Logo trägt sich selbst. */
+.page-head .head-video {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    line-height: 0;
+    opacity: 0.92;
+    transition: opacity 0.15s ease, transform 0.15s ease;
+}
+.page-head .head-video:hover { opacity: 1; transform: scale(1.06); }
+.page-head .head-video svg { width: 42px; height: 30px; display: block; }
+@media print { .page-head .head-video { display: none; } }
+
 /* No action buttons on paper - the toolbar has its own print rule. */
 @media print { .page-head button.action { display: none; } }
 
@@ -716,6 +730,13 @@ h1 {
 .subtitle {
     font-size: clamp(0.85rem, 2vw, 1rem);
     color: var(--muted);
+}
+
+/* Start page: the line under the headline is a label, not a sentence */
+.subtitle.caps {
+    font-family: 'Orbitron', sans-serif;
+    font-size: clamp(0.62rem, 1.3vw, 0.75rem);
+    letter-spacing: 0.14em;
 }
 
 .subtitle a { color: var(--cyan); text-decoration: none; }
