@@ -362,6 +362,27 @@ body.editing #plan-table td.mat .mat-act[hidden] { display: none; }
 }
 #plan-table td.mat.drop { outline: 2px dashed rgb(121, 158, 49); outline-offset: -2px; }
 
+/* "Zurücksetzen" wirft alles weg — es gehört zum Bearbeiten und ist
+   ausserhalb dieses Modus gar nicht erst zu sehen. */
+.toolbar button.action.plan-reset { display: none; }
+body.editing .toolbar button.action.plan-reset { display: inline-block; }
+
+/* Loud variant of the modal for the two reset warnings */
+.mat-modal.mm-danger { border: 2px solid var(--ypsilon, rgb(176, 36, 24)); }
+.mat-modal .mm-title.mm-warn {
+    color: rgb(235, 120, 105);
+    font-size: 0.95rem;
+    letter-spacing: 0.04em;
+}
+html.svp-light .mat-modal .mm-title.mm-warn { color: rgb(176, 36, 24); }
+.mm-btn.danger {
+    background: rgb(176, 36, 24);
+    border-color: rgb(176, 36, 24);
+    color: #fff;
+}
+.mm-btn.danger:hover:not(:disabled) { filter: brightness(1.12); }
+.mm-btn.danger:disabled { opacity: 0.45; cursor: not-allowed; filter: none; }
+
 /* Material modal (pretty dialog, no native prompts) */
 .mat-modal-wrap {
     position: fixed;
