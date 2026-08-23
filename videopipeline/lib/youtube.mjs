@@ -21,11 +21,14 @@ export function authUrl(redirect = 'http://127.0.0.1:8901') {
 
 export async function authorize() {          // one-time: opens browser, catches the code locally
   const redirect = 'http://127.0.0.1:8901';
-  const code = await new Promise((resolve) => {
+  const code = await new Promise((resolve, reject) => {
     const srv = http.createServer((req, res) => {
-      const c = new URL(req.url, redirect).searchParams.get('code');
-      res.end('OK — Fenster kann geschlossen werden.');
+      const q = new URL(req.url, redirect).searchParams;
+      const c = q.get('code'), err = q.get('error');
+      res.end(c ? 'OK — Fenster kann geschlossen werden.' : (err ? 'Abgelehnt: ' + err : 'warte …'));
+      /* the browser also asks for /favicon.ico — only a request that carries code or error counts */
       if (c) { srv.close(); resolve(c); }
+      else if (err) { srv.close(); reject(new Error('OAuth abgelehnt: ' + err)); }
     });
     srv.listen(8901, '127.0.0.1', () => execFileSync('open', [authUrl(redirect)]));
   });
@@ -45,6 +48,10 @@ async function accessToken() {
     body: new URLSearchParams({ refresh_token: tok.refresh_token, client_id: installed.client_id,
       client_secret: installed.client_secret, grant_type: 'refresh_token' }),
   })).json();
+  if (!r.access_token) {
+    throw new Error('Kein Access-Token — Refresh-Token abgelaufen oder zurückgezogen. Einmal authorize() laufen lassen. ' +
+      JSON.stringify(r).slice(0, 200));
+  }
   return r.access_token;
 }
 
@@ -63,8 +70,16 @@ export async function uploadVideo(file, { title, description = '', tags = [], pr
     body: JSON.stringify(meta),
   });
   const session = init.headers.get('location');
+  if (!init.ok || !session) {
+    throw new Error('Upload-Session abgelehnt (HTTP ' + init.status + '): ' + (await init.text()).slice(0, 300));
+  }
+  /* whole file in memory — fine for the few hundred MB a demo has, and it keeps the PUT a single
+     retryable request */
   const put = await fetch(session, { method: 'PUT', headers: { 'Content-Length': size, 'Content-Type': 'video/mp4' }, body: fs.readFileSync(file) });
-  const j = await put.json();
+  const j = await put.json().catch(() => ({}));
+  if (!put.ok || !j.id) {
+    throw new Error('Upload fehlgeschlagen (HTTP ' + put.status + '): ' + JSON.stringify(j).slice(0, 300));
+  }
   console.log(`  ✓ hochgeladen: https://youtu.be/${j.id}`);
   return j.id;
 }

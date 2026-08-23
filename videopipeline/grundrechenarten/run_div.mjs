@@ -6,10 +6,9 @@ import { runScenes } from '../lib/record-cdp.mjs';
 import { buildScenes, compose } from '../lib/assemble.mjs';
 import { makeTalks } from '../lib/did.mjs';
 import { recordOutros } from '../lib/outro.mjs';
+import { MUSIC, PORTRAIT, workDir } from '../lib/paths.mjs';
 
-const OUT = '/private/tmp/claude-501/-Users-malvers-IdeaProjects-forloop/9bba6ce1-dbf3-407e-a2f2-fce1f718abcc/scratchpad/gra';
-const PORTRAIT = '/Users/malvers/IdeaProjects/forloop/HTML/resources/team/team_02.png';
-const MUSIC = '/Users/malvers/IdeaProjects/forloop/HTML/resources/Infinity_6min.m4a';
+const OUT = workDir('gra');
 
 const NARR = {
   dividieren_a1: 'Schriftliche Division: achttausendfünfhundertsechsundvierzig geteilt durch sieben. Wie oft passt die Sieben? Die goldene Klammer zeigt es — Ziffer für Ziffer.',

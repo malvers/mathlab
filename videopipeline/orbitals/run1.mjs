@@ -2,8 +2,9 @@
 import { synthScenes } from '../lib/tts.mjs';
 import { runScenes } from '../lib/record-cdp.mjs';
 import fs from 'fs';
+import { workDir } from '../lib/paths.mjs';
 
-const OUT = '/private/tmp/claude-501/-Users-malvers-IdeaProjects-forloop/9bba6ce1-dbf3-407e-a2f2-fce1f718abcc/scratchpad/orb';
+const OUT = workDir('orb');
 
 export const NARRATION = {
   s1: 'Wie sieht ein Atom wirklich aus? Vergiss das Bild von kleinen Kugeln, die wie Planeten ihre Bahnen ziehen — das hier kommt der Wahrheit viel näher. Du schaust auf ein Atomorbital: die Form des Raums, in dem sich ein Elektron aufhält. Das Labor dreht die Form automatisch für dich, damit du sie von allen Seiten sehen kannst.',
