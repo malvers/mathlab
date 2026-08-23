@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DOC ALVERS MATHE-LABORE | Solita Live</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet">
+    <link rel="icon" type="image/png" href="resources/favicon.png">
+    <link rel="stylesheet" href="js/cyber-layout.css">
+    <link rel="stylesheet" href="js/buttons-ultra.css">
+    <link rel="stylesheet" href="js/cyber-lab-overrides.css">
+    <link rel="stylesheet" href="js/branding.styles.extracted.css">
+    <link rel="stylesheet" href="js/lab-shell-minimal.css">
+    <style>
+        /* Layout is the shared lab shell; only the demo's own stage is styled here. */
+        /* The canvas takes whatever height is left over, so the controls below it can
+           never be pushed off-screen; overflow-y is the safety net on very short viewports. */
+        #stage {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: clamp(8px, 1.6vh, 18px);
+            padding: clamp(8px, 1.6vh, 18px);
+            box-sizing: border-box;
+            overflow-y: auto;
+        }
+
+        #canvas-wrap {
+            flex: 1 1 auto;
+            min-height: 120px;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #canvas {
+            height: 100%;
+            width: auto;
+            max-width: 100%;
+            aspect-ratio: 1 / 1;
+            border-radius: 14px;
+            background: rgb(8, 20, 42);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, .45);
+        }
+
+        #panel {
+            flex: 0 0 auto;
+            width: min(100%, 560px);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .row .cyber-btn {
+            flex: 1 1 auto;
+            min-width: 130px;
+        }
+
+        #ask {
+            flex: 1 1 220px;
+            min-width: 0;
+            font-family: 'Outfit', sans-serif;
+            font-size: 15px;
+            padding: 11px 14px;
+            border-radius: 10px;
+            border: 1px solid rgba(245, 194, 66, .35);
+            background: rgb(14, 36, 78);
+            color: #eaf0ff;
+        }
+
+        #ask::placeholder {
+            color: rgba(234, 240, 255, .45);
+        }
+
+        #meter {
+            height: 6px;
+            border-radius: 3px;
+            background: rgba(255, 255, 255, .09);
+            overflow: hidden;
+        }
+
+        #meterfill {
+            height: 100%;
+            width: 0;
+            background: rgb(121, 158, 49);
+            transition: width .05s linear;
+        }
+
+        #hint {
+            font-family: 'Outfit', sans-serif;
+            font-size: 13px;
+            line-height: 1.5;
+            color: rgba(234, 240, 255, .62);
+        }
+
+        #hint b {
+            color: rgb(245, 194, 66);
+            font-weight: 600;
+        }
+
+        @media (max-width: 720px) {
+            #hint { font-size: 12px; }
+            .row .cyber-btn { min-width: 110px; }
+        }
+
+        /* Landscape phones: the hint is the first thing worth losing. */
+        @media (max-height: 520px) {
+            #hint { display: none; }
+        }
+    </style>
+</head>
+
+<body>
+    <nav id="mini-rail">
+        <div class="nav-btn" onclick="toggleSidebar()" title="Toggle Menu">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </div>
+    </nav>
+
+    <aside id="side-panel">
+        <header id="sidebar-header"></header>
+        <div id="ui-container"></div>
+    </aside>
+
+    <main id="main-content">
+        <div id="canvas-container">
+            <div class="cyber-grid"></div>
+            <div id="stage">
+                <div id="canvas-wrap"><canvas id="canvas" width="720" height="720"></canvas></div>
+                <div id="panel">
+                    <div id="meter"><div id="meterfill"></div></div>
+                    <div class="row">
+                        <button class="cyber-btn" id="btn-voice">Echte Stimme</button>
+                        <button class="cyber-btn" id="btn-overlay">Mund aus</button>
+                    </div>
+                    <div class="row">
+                        <label for="ask" class="sr-only" style="position:absolute;left:-9999px">Frage an Solita</label>
+                        <input id="ask" type="text" placeholder="Frag Solita etwas …"
+                            value="Eine Parabel ist der Graph einer quadratischen Funktion.">
+                        <button class="cyber-btn" id="btn-ask">Antworten</button>
+                    </div>
+                    <div id="hint">
+                        <b>Echte Stimme</b> treibt den Mund aus echtem Audio — so klingt und sieht Solita in den Videos.
+                        <b>Antworten</b> nutzt die Stimme deines Browsers und steuert den Mund aus dem Text: das ist der
+                        Live-Fall, ganz ohne Server.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <audio id="voice" src="resources/solita-live/voice-sample.mp3" preload="auto" crossorigin="anonymous"></audio>
+
+    <script src="js/cyber-left-chrome.js"></script>
+    <script src="js/branding/briefings.js"></script>
+    <script src="js/branding/overlays.js"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/i18n-de.js"></script>
+    <script src="js/i18n-en.js"></script>
+    <script src="js/i18n-es.js"></script>
+    <script src="js/i18n-fr.js"></script>
+    <script src="js/i18n-it.js"></script>
+    <script src="js/i18n-pt.js"></script>
+    <script src="js/i18n-sw.js"></script>
+    <script src="js/i18n-tr.js"></script>
+    <script src="js/i18n-nl.js"></script>
+    <script src="js/branding/nav.js"></script>
+    <script src="js/branding.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/solita-visemes.js"></script>
+    <script>
+        function toggleSidebar() {
+            const panel = document.getElementById('side-panel');
+            panel.classList.toggle('collapsed');
+            if (window.CyberLeftChrome && typeof CyberLeftChrome.publishResolvedScale === 'function') {
+                CyberLeftChrome.publishResolvedScale();
+            }
+            setTimeout(() => {
+                window.dispatchEvent(new Event('resize'));
+                if (window.CyberLeftChrome && typeof CyberLeftChrome.publishResolvedScale === 'function') {
+                    CyberLeftChrome.publishResolvedScale();
+                }
+            }, 400);
+        }
+
+        CyberBranding.init({
+            useExternalStyles: true,
+            title: CyberI18n.get('ui.coach_title'),
+            subtitle: 'Solita Live',
+        });
+        CyberUI.init();
+
+        if (window.CyberLeftChrome && typeof CyberLeftChrome.configure === 'function') {
+            CyberLeftChrome.configure({ viewportOnlyZoom: true });
+        }
+
+        const solita = SolitaVisemes.create({ canvas: document.getElementById('canvas') });
+        const voice = document.getElementById('voice');
+        const fill = document.getElementById('meterfill');
+
+        solita.load().then(() => {
+            solita.start();
+            // Keep the level meter honest: it shows what actually drives the mouth.
+            (function tick() {
+                fill.style.width = Math.round(solita.openness * 100) + '%';
+                requestAnimationFrame(tick);
+            })();
+        }).catch(err => {
+            document.getElementById('hint').textContent = 'Konnte die Solita-Daten nicht laden: ' + err;
+        });
+
+        document.getElementById('btn-voice').addEventListener('click', () => {
+            if (!voice.paused) { voice.pause(); voice.currentTime = 0; solita.rest(); return; }
+            solita.attachAudio(voice);
+            voice.play();
+        });
+        voice.addEventListener('ended', () => solita.rest());
+
+        document.getElementById('btn-overlay').addEventListener('click', (e) => {
+            solita.overlay = !solita.overlay;
+            e.target.textContent = solita.overlay ? 'Mund aus' : 'Mund an';
+        });
+
+        document.getElementById('btn-ask').addEventListener('click', () => {
+            const t = document.getElementById('ask').value.trim();
+            if (t) solita.speak(t);
+        });
+        document.getElementById('ask').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') document.getElementById('btn-ask').click();
+        });
+    </script>
+</body>
+
+</html>

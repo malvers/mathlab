@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DOC ALVERS MATHE-LABORE | Solita Avatar</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet">
+    <link rel="icon" type="image/png" href="resources/favicon.png">
+    <link rel="stylesheet" href="js/cyber-layout.css">
+    <link rel="stylesheet" href="js/buttons-ultra.css">
+    <link rel="stylesheet" href="js/cyber-lab-overrides.css">
+    <link rel="stylesheet" href="js/branding.styles.extracted.css">
+    <link rel="stylesheet" href="js/lab-shell-minimal.css">
+    <style>
+        /* The stage gives the avatar the leftover height, so the controls always fit. */
+        #stage {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: clamp(8px, 1.6vh, 18px);
+            padding: clamp(8px, 1.6vh, 18px);
+            box-sizing: border-box;
+            overflow-y: auto;
+        }
+
+        #avatar {
+            flex: 1 1 auto;
+            min-height: 160px;
+            width: min(100%, 560px);
+            border-radius: 14px;
+            background: radial-gradient(circle at 50% 32%, rgb(20, 46, 96) 0%, rgb(8, 20, 42) 72%);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, .45);
+            overflow: hidden;
+            position: relative;
+        }
+
+        #avatar canvas { display: block; }
+
+        #loading {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 13px;
+            letter-spacing: .12em;
+            color: rgb(245, 194, 66);
+            text-align: center;
+            padding: 20px;
+        }
+
+        #panel {
+            flex: 0 0 auto;
+            width: min(100%, 560px);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .row .cyber-btn { flex: 1 1 auto; min-width: 120px; }
+
+        #ask {
+            flex: 1 1 220px;
+            min-width: 0;
+            font-family: 'Outfit', sans-serif;
+            font-size: 15px;
+            padding: 11px 14px;
+            border-radius: 10px;
+            border: 1px solid rgba(245, 194, 66, .35);
+            background: rgb(14, 36, 78);
+            color: #eaf0ff;
+        }
+
+        #ask::placeholder { color: rgba(234, 240, 255, .45); }
+
+        #hint {
+            font-family: 'Outfit', sans-serif;
+            font-size: 13px;
+            line-height: 1.5;
+            color: rgba(234, 240, 255, .62);
+        }
+
+        #hint b { color: rgb(245, 194, 66); font-weight: 600; }
+
+        @media (max-height: 560px) { #hint { display: none; } }
+    </style>
+</head>
+
+<body>
+    <nav id="mini-rail">
+        <div class="nav-btn" onclick="toggleSidebar()" title="Toggle Menu">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </div>
+    </nav>
+
+    <aside id="side-panel">
+        <header id="sidebar-header"></header>
+        <div id="ui-container"></div>
+    </aside>
+
+    <main id="main-content">
+        <div id="canvas-container">
+            <div class="cyber-grid"></div>
+            <div id="stage">
+                <div id="avatar"><div id="loading">AVATAR WIRD GELADEN …</div></div>
+                <div id="panel">
+                    <div class="row">
+                        <label for="ask" class="sr-only" style="position:absolute;left:-9999px">Frage an Solita</label>
+                        <input id="ask" type="text" placeholder="Frag Solita etwas …"
+                            value="Eine Parabel ist der Graph einer quadratischen Funktion.">
+                        <button class="cyber-btn" id="btn-ask">Sprechen</button>
+                    </div>
+                    <div class="row">
+                        <button class="cyber-btn" id="btn-mood">Stimmung: neutral</button>
+                        <button class="cyber-btn" id="btn-view">Ansicht: Kopf</button>
+                        <button class="cyber-btn" id="btn-stop">Stopp</button>
+                    </div>
+                    <div id="hint">
+                        Die Mundstellungen werden hier <b>interpoliert</b>, nicht getauscht — deshalb kein Ruckeln.
+                        Die Stimme kommt vom Browser, die Lippen laufen pro Wort nach, sobald es tatsächlich
+                        gesprochen wird. Alles lokal, kein Server.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/",
+        "talkinghead": "https://cdn.jsdelivr.net/gh/met4citizen/TalkingHead@1.7/modules/talkinghead.mjs"
+      }
+    }
+    </script>
+
+    <script src="js/cyber-left-chrome.js"></script>
+    <script src="js/branding/briefings.js"></script>
+    <script src="js/branding/overlays.js"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/i18n-de.js"></script>
+    <script src="js/i18n-en.js"></script>
+    <script src="js/i18n-es.js"></script>
+    <script src="js/i18n-fr.js"></script>
+    <script src="js/i18n-it.js"></script>
+    <script src="js/i18n-pt.js"></script>
+    <script src="js/i18n-sw.js"></script>
+    <script src="js/i18n-tr.js"></script>
+    <script src="js/i18n-nl.js"></script>
+    <script src="js/branding/nav.js"></script>
+    <script src="js/branding.js"></script>
+    <script src="js/ui.js"></script>
+    <script>
+        function toggleSidebar() {
+            const panel = document.getElementById('side-panel');
+            panel.classList.toggle('collapsed');
+            if (window.CyberLeftChrome && typeof CyberLeftChrome.publishResolvedScale === 'function') {
+                CyberLeftChrome.publishResolvedScale();
+            }
+            setTimeout(() => window.dispatchEvent(new Event('resize')), 400);
+        }
+
+        CyberBranding.init({
+            useExternalStyles: true,
+            title: CyberI18n.get('ui.coach_title'),
+            subtitle: 'Solita Avatar',
+        });
+        CyberUI.init();
+
+        if (window.CyberLeftChrome && typeof CyberLeftChrome.configure === 'function') {
+            CyberLeftChrome.configure({ viewportOnlyZoom: true });
+        }
+    </script>
+
+    <script type="module">
+        import { TalkingHead } from 'talkinghead';
+
+        const node = document.getElementById('avatar');
+        const loading = document.getElementById('loading');
+        const hint = document.getElementById('hint');
+
+        const head = new TalkingHead(node, {
+            ttsEndpoint: '',                 // unused: we never call speakText
+            lipsyncModules: ['de'],          // default is fi/en/lt — German must be asked for
+            lipsyncLang: 'de',
+            cameraView: 'head',
+            modelPixelRatio: 1,
+            avatarMood: 'neutral'
+        });
+
+        try {
+            await head.showAvatar({
+                url: 'resources/solita-live/avatar-brunette.glb',
+                body: 'F',
+                lipsyncLang: 'de',
+                avatarMood: 'neutral'
+            }, (ev) => {
+                if (ev.lengthComputable) {
+                    loading.textContent = 'AVATAR WIRD GELADEN … ' +
+                        Math.round((ev.loaded / ev.total) * 100) + '%';
+                }
+            });
+            loading.remove();
+        } catch (e) {
+            loading.textContent = 'Avatar konnte nicht geladen werden: ' + e.message;
+            throw e;
+        }
+
+        /* ---- speaking -------------------------------------------------------
+           The browser's synthesized audio cannot be routed through an analyser,
+           so the lips are driven from the text. Rather than estimating the whole
+           sentence up front (which drifts), each word is queued at the moment the
+           synthesizer reports it has started — that keeps lips and voice together
+           without ever measuring the voice itself.                              */
+
+        let speaking = false;
+
+        function germanVoice() {
+            const vs = speechSynthesis.getVoices().filter(v => /^de/.test(v.lang));
+            // Prefer a female voice, since that is what Solita sounds like.
+            return vs.find(v => /anna|petra|marlene|katja|female|frau/i.test(v.name)) || vs[0] || null;
+        }
+
+        function speak(text) {
+            speechSynthesis.cancel();
+            head.stopSpeaking();
+
+            const u = new SpeechSynthesisUtterance(text);
+            u.lang = 'de-DE';
+            const v = germanVoice();
+            if (v) u.voice = v;
+
+            u.onboundary = (e) => {
+                if (e.name && e.name !== 'word') return;
+                const word = (text.slice(e.charIndex).match(/^\S+/) || [''])[0];
+                if (!word) return;
+                // Rough per-word duration; only its length matters, not its absolute
+                // position, because the word is queued exactly when it starts.
+                const ms = Math.max(180, word.length * 85);
+                head.speakAudio({ words: [word], wtimes: [0], wdurations: [ms] });
+            };
+
+            u.onend = u.onerror = () => { speaking = false; head.stopSpeaking(); };
+            speaking = true;
+            speechSynthesis.speak(u);
+        }
+
+        document.getElementById('btn-ask').addEventListener('click', () => {
+            const t = document.getElementById('ask').value.trim();
+            if (t) speak(t);
+        });
+        document.getElementById('ask').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') document.getElementById('btn-ask').click();
+        });
+
+        document.getElementById('btn-stop').addEventListener('click', () => {
+            speechSynthesis.cancel();
+            head.stopSpeaking();
+            speaking = false;
+        });
+
+        const moods = head.getMoodNames();
+        let mi = Math.max(0, moods.indexOf('neutral'));
+        document.getElementById('btn-mood').addEventListener('click', (e) => {
+            mi = (mi + 1) % moods.length;
+            head.setMood(moods[mi]);
+            e.target.textContent = 'Stimmung: ' + moods[mi];
+        });
+
+        const views = ['head', 'upper', 'mid', 'full'];
+        const viewNames = { head: 'Kopf', upper: 'Oberkörper', mid: 'Halbtotale', full: 'Ganz' };
+        let vi = 0;
+        document.getElementById('btn-view').addEventListener('click', (e) => {
+            vi = (vi + 1) % views.length;
+            head.setView(views[vi]);
+            e.target.textContent = 'Ansicht: ' + viewNames[views[vi]];
+        });
+
+        // Voice list is populated asynchronously in some browsers.
+        speechSynthesis.onvoiceschanged = () => {
+            const v = germanVoice();
+            if (!v) hint.innerHTML = '<b>Hinweis:</b> Dein Browser hat keine deutsche Stimme installiert — ' +
+                'der Avatar bewegt die Lippen, spricht aber englisch oder gar nicht.';
+        };
+
+        head.start();
+        window.addEventListener('resize', () => head.onResize());
+        window.solitaHead = head;   // handy for poking around in the console
+    </script>
+</body>
+
+</html>
