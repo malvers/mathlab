@@ -8,6 +8,8 @@
 // Secret: GOOGLE_API_KEY (Dashboard → Edge Functions → Secrets) — a Google API key with the
 // Cloud Text-to-Speech API enabled.
 
+import { guard, budgetExceeded } from '../_shared/guard.ts';
+
 const GOOGLE_TTS = 'https://texttospeech.googleapis.com/v1/text:synthesize';
 
 const CORS = {
@@ -26,11 +28,23 @@ function json(obj: unknown, status = 200): Response {
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS });
 
+  /* Public endpoint with a server-side key behind it — see ../_shared/guard.ts
+     (own pages / our key, burst limit, payload cap). */
+  const blocked = guard(req, { maxBytes: 64_000, limit: 200 });
+  if (blocked) return blocked;
+
   const key = Deno.env.get('GOOGLE_API_KEY');
   if (!key) return json({ error: 'GOOGLE_API_KEY fehlt — als Edge-Function-Secret setzen.' }, 500);
 
   const b = await req.json().catch(() => ({}));
   if (!b.ssml && !b.text) return json({ error: 'kein Text/ssml übergeben' }, 400);
+
+  /* Google caps one request at 5000 bytes anyway; the per-IP character budget is what stops a copied
+     client from burning the TTS bill in a loop (Studio voices ≈ 160 $ per 1 Mio. characters). */
+  const chars = String(b.ssml || b.text || '').length;
+  if (chars > 5000) return json({ error: 'Text zu lang (max. 5000 Zeichen pro Anfrage)' }, 413);
+  const spent = budgetExceeded(req, chars, 150_000);
+  if (spent) return spent;
 
   // Chirp3-HD voices reject pitch/speakingRate ("This voice does not support pitch parameters") → omit
   // them for Chirp; everything else (Neural2/Wavenet/Studio, incl. glocken) keeps the same audioConfig.

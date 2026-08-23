@@ -10,6 +10,8 @@
 // Deploy (no JWT needed — it only calls an external API and touches no user data):
 //   supabase functions deploy fuel-prices --no-verify-jwt
 
+import { guard } from '../_shared/guard.ts';
+
 const LIST_URL = 'https://creativecommons.tankerkoenig.de/json/list.php';
 const MAX_RAD = 25; // Tankerkönig hard limit (km)
 
@@ -28,6 +30,11 @@ function json(obj: unknown, status = 200): Response {
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS });
+
+  /* Public endpoint with a server-side key behind it — see ../_shared/guard.ts
+     (own pages / our key, burst limit, payload cap). */
+  const blocked = guard(req, { maxBytes: 8_000, limit: 240 });
+  if (blocked) return blocked;
 
   try {
     const key = Deno.env.get('TANKERKOENIG_KEY');

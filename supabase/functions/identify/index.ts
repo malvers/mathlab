@@ -15,6 +15,8 @@
 // Deploy (no JWT needed — it only calls external APIs, touches no user data):
 //   supabase functions deploy identify --no-verify-jwt
 
+import { guard } from '../_shared/guard.ts';
+
 const MODEL = 'gemini-2.5-flash';
 const PLANTNET_URL = 'https://my-api.plantnet.org/v2/identify/all';
 const PLANTNET_MIN_SCORE = 0.30; // below this, treat the plant guess as too weak → let Gemini decide
@@ -279,6 +281,11 @@ async function geoContext(lat: number, lng: number, heading: number | null): Pro
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS });
+
+  /* Public endpoint with a server-side key behind it — see ../_shared/guard.ts
+     (own pages / our key, burst limit, payload cap). */
+  const blocked = guard(req, { maxBytes: 12_000_000, limit: 120 });
+  if (blocked) return blocked;
 
   try {
     const key = Deno.env.get('GEMINI_API_KEY');

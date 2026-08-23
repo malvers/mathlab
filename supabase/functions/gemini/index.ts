@@ -9,6 +9,8 @@
 // Secret: GEMINI_API_KEY (Dashboard → Edge Functions → Secrets) — a Google API key with the
 // Generative Language API enabled. (Same secret the "identify" function uses.)
 
+import { guard } from '../_shared/guard.ts';
+
 const GLA = 'https://generativelanguage.googleapis.com/v1beta/models/';
 
 const CORS = {
@@ -50,6 +52,11 @@ async function logGeminiCost(model: string, label: string, um: Record<string, nu
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS });
+
+  /* Public endpoint with a server-side key behind it — see ../_shared/guard.ts
+     (own pages / our key, burst limit, payload cap). */
+  const blocked = guard(req, { maxBytes: 12_000_000, limit: 120 });
+  if (blocked) return blocked;
 
   const key = Deno.env.get('GEMINI_API_KEY');
   if (!key) return json({ error: 'GEMINI_API_KEY fehlt — als Edge-Function-Secret setzen.' }, 500);

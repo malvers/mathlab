@@ -25,6 +25,8 @@
 // deployed proxy still lacked the working ones → a flood of 502s, the "Geschwindigkeits-Disaster").
 // openstreetmap.fr (~0.4 s) and maps.mail.ru (~0.4 s) are the fastest reliable worldwide instances;
 // the rest stay in the race as spares (a dead one is simply ignored).
+import { guard } from '../_shared/guard.ts';
+
 const MIRRORS = [
   'https://overpass.openstreetmap.fr/api/interpreter',
   'https://maps.mail.ru/osm/tools/overpass/api/interpreter',
@@ -104,6 +106,11 @@ async function tryMirror(url: string, body: string, timeoutMs: number): Promise<
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS });
+
+  /* Public endpoint with a server-side key behind it — see ../_shared/guard.ts
+     (own pages / our key, burst limit, payload cap). */
+  const blocked = guard(req, { maxBytes: 256_000, limit: 240 });
+  if (blocked) return blocked;
   if (req.method !== 'POST') return json({ error: 'POST only' }, 405);
 
   const { ql, timeout } = await readBody(req);
