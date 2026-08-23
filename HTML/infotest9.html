@@ -15,168 +15,324 @@
 <script>
 window.QUIZ = {
   id: 'infotest9',
-  version: 'v9',          /* data pool of the current question set */
+  /* v10 since 23.08.2026: the answer options were re-ordered (balanced
+     A/B/C/D), which would misread the per-option counters of v9. */
+  version: 'v10',
   title: 'Online-Test Informatik · Klasse 9',
   subtitle: 'Oberschule · Eingangstest Klasse 9 · 31 Fragen · genau eine Antwort pro Frage · anonym',
   dashSub: 'Oberschule · Klasse 9 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Frage',
-  solutions: 'none',      /* these questions carry no step-by-step solution */
   /* Questions: Lehrplan OS Sachsen, Informatik Kl. 7-9 (incl. TC basics).
      Order: grade 7 -> 8 -> 9. Exactly one correct option per question. */
   questions: [
     /* Lehrplan OS Sachsen Kl. 7/8; acronym questions mixed in every third slot */
     {
       q: 'Was ist ein Bit?',
-      opts: ['Ein kleines Computerprogramm.', 'Die kleinste Informationseinheit: 0 oder 1.', 'Ein Speicherstick.', 'Die Geschwindigkeit des Internets.'],
-      solution: 1
+      opts: ['Die Geschwindigkeit des Internets.', 'Ein kleines Computerprogramm.', 'Die kleinste Informationseinheit: 0 oder 1.', 'Ein Speicherstick.'],
+      steps: [
+        'Bit steht für „binary digit“ — eine Ziffer im Zweiersystem.',
+        'Mehr als zwei Zustände kann ein einzelnes Bit nicht: an oder aus, wahr oder falsch, 0 oder 1.',
+        'Ein Bit ist damit die Antwort auf genau eine Ja-Nein-Frage.'
+      ],
+      solution: 2
     },
     {
       q: 'Wofür steht das EVA-Prinzip?',
       opts: ['Ausgabe – Verarbeitung – Eingabe', 'Eingabe – Verarbeitung – Ausgabe', 'Eingabe – Verwaltung – Anzeige', 'Erfassen – Verändern – Archivieren'],
+      steps: [
+        'Jede Datenverarbeitung folgt diesem Dreischritt: etwas kommt herein, wird verarbeitet, geht hinaus.',
+        'Taschenrechner: Tasten (Eingabe) → Rechenwerk (Verarbeitung) → Display (Ausgabe).',
+        'Oft ergänzt man ein S für Speicherung: EVAS.'
+      ],
       solution: 1
     },
     {
       q: 'Wie viele Bit sind 1 Byte?',
-      opts: ['4 Bit', '10 Bit', '8 Bit', '1024 Bit'],
-      solution: 2
-    },
-    {
-      q: 'LAN heißt?',
-      opts: ['Local Area Network', 'Lautes Antennen-Netz', 'Lange Arbeits-Nacht', 'Licht Aus, Nachtruhe'],
+      opts: ['8 Bit', '1024 Bit', '4 Bit', '10 Bit'],
+      steps: [
+        'Acht Bit werden zu einem Byte zusammengefasst.',
+        'Damit lassen sich $2^8 = 256$ Zustände unterscheiden — genug für ein Zeichen im ASCII-Code.',
+        'Größere Einheiten bauen darauf auf: 1 KiB = 1024 Byte.'
+      ],
       solution: 0
     },
     {
-      q: 'Welcher Speicher verliert seinen Inhalt, wenn der Computer ausgeschaltet wird?',
-      opts: ['Festplatte', 'USB-Stick', 'ROM', 'RAM'],
+      q: 'LAN heißt?',
+      opts: ['Lautes Antennen-Netz', 'Lange Arbeits-Nacht', 'Licht Aus, Nachtruhe', 'Local Area Network'],
+      steps: [
+        'LAN = Local Area Network, ein örtlich begrenztes Netz.',
+        'Typisch für ein Haus, eine Etage oder ein Schulgebäude.',
+        'Das Gegenstück ist das WAN (Wide Area Network) — das Internet ist das größte davon.'
+      ],
       solution: 3
+    },
+    {
+      q: 'Welcher Speicher verliert seinen Inhalt, wenn der Computer ausgeschaltet wird?',
+      opts: ['USB-Stick', 'ROM', 'RAM', 'Festplatte'],
+      steps: [
+        'Der Arbeitsspeicher (RAM) hält nur, was gerade in Bearbeitung ist.',
+        'Ohne Strom verliert er alles — man nennt ihn deshalb flüchtig.',
+        'Festplatte, SSD und USB-Stick behalten die Daten dagegen auch ausgeschaltet.'
+      ],
+      solution: 2
     },
     {
       q: 'Welche Dateiendung gehört typischerweise zu einem Bild?',
       opts: ['.png', '.docx', '.mp3', '.exe'],
+      steps: [
+        '$.png$ steht für Portable Network Graphics, ein verlustfreies Bildformat.',
+        'Weitere Bildformate: $.jpg$, $.gif$, $.bmp$, $.svg$.',
+        '$.docx$ ist ein Text, $.mp3$ Musik, $.exe$ ein Programm.'
+      ],
       solution: 0
     },
     {
       q: 'WLAN heißt?',
-      opts: ['Weites Licht-Antennen-Netz', 'Wackelige Leitung Am Nachmittag', 'Wireless Local Area Network', 'Wilde Lamas Ackern Nie'],
-      solution: 2
+      opts: ['Wackelige Leitung Am Nachmittag', 'Wireless Local Area Network', 'Wilde Lamas Ackern Nie', 'Weites Licht-Antennen-Netz'],
+      steps: [
+        'Das W steht für wireless — kabellos.',
+        'Ein WLAN ist also ein LAN, das über Funk statt über Kabel verbindet.',
+        'International sagt man meist Wi-Fi dazu.'
+      ],
+      solution: 1
     },
     {
       q: 'Was passiert, wenn man eine Pixelgrafik stark vergrößert?',
-      opts: ['Sie bleibt beliebig scharf.', 'Sie wird automatisch zur Vektorgrafik.', 'Die Farben kehren sich um.', 'Sie wird unscharf und „pixelig“.'],
-      solution: 3
+      opts: ['Sie wird automatisch zur Vektorgrafik.', 'Die Farben kehren sich um.', 'Sie wird unscharf und „pixelig“.', 'Sie bleibt beliebig scharf.'],
+      steps: [
+        'Eine Pixelgrafik besteht aus einem festen Raster einzelner Bildpunkte.',
+        'Beim Vergrößern werden die Punkte selbst größer — es kommt keine Information hinzu.',
+        'Vektorgrafiken ($.svg$) speichern stattdessen Formen und bleiben bei jeder Größe scharf.'
+      ],
+      solution: 2
     },
     {
       q: 'Ein Textabsatz hat die Schriftfarbe Rot. Was ist „Rot“ im Sinne der Objektorientierung?',
-      opts: ['Eine Klasse', 'Eine Methode', 'Ein Attributwert', 'Ein Objekt'],
-      solution: 2
+      opts: ['Ein Objekt', 'Eine Klasse', 'Eine Methode', 'Ein Attributwert'],
+      steps: [
+        'Objekt ist der Absatz, „Schriftfarbe“ ist sein Attribut.',
+        '„Rot“ ist der Wert, den dieses Attribut gerade hat — der Attributwert.',
+        'Ändert man ihn auf Blau, bleibt es dasselbe Objekt mit demselben Attribut.'
+      ],
+      solution: 3
     },
     {
       q: 'USB heißt?',
       opts: ['Unter-Strom-Buchse', 'Universal Serial Bus', 'Uralte Speicher-Box', 'Unsichtbare Super-Bytes'],
+      steps: [
+        'USB = Universal Serial Bus.',
+        '„Universal“, weil ein Anschluss für Maus, Stick, Drucker und Ladekabel genügt.',
+        '„Seriell“, weil die Bits nacheinander über die Leitung gehen.'
+      ],
       solution: 1
     },
     {
       q: 'Du möchtest ein fremdes Foto aus dem Internet in deiner Präsentation verwenden. Was gilt?',
       opts: ['Ich brauche eine Erlaubnis (Lizenz) und gebe die Quelle an.', 'Alles aus dem Internet darf frei verwendet werden.', 'Erlaubt, wenn ich das Bild vorher leicht verändere.', 'Erlaubt, solange ich es nur in der Schule zeige.'],
+      steps: [
+        'Fremde Fotos sind urheberrechtlich geschützt — auch wenn sie frei im Netz stehen.',
+        'Erlaubt ist die Nutzung mit Lizenz (etwa Creative Commons) und mit Quellenangabe.',
+        '„Nur für die Schule“ ist kein Freibrief; sicher sind eigene Bilder oder freie Bilddatenbanken.'
+      ],
       solution: 0
     },
     {
       q: 'Was ist ein Algorithmus?',
-      opts: ['Eine beliebige Sammlung von Ideen.', 'Eine eindeutige, endliche Handlungsvorschrift zur Lösung eines Problems.', 'Eine Fehlermeldung des Betriebssystems.', 'Ein Gerät zur Datenübertragung.'],
-      solution: 1
+      opts: ['Ein Gerät zur Datenübertragung.', 'Eine beliebige Sammlung von Ideen.', 'Eine eindeutige, endliche Handlungsvorschrift zur Lösung eines Problems.', 'Eine Fehlermeldung des Betriebssystems.'],
+      steps: [
+        'Wichtig sind drei Eigenschaften: eindeutig, endlich, allgemein für eine ganze Aufgabenklasse.',
+        'Ein Kochrezept ist das klassische Alltagsbeispiel.',
+        'Der Name geht auf den Gelehrten al-Chwarizmi zurück.'
+      ],
+      solution: 2
     },
     {
       q: 'CPU heißt?',
       opts: ['Computer Power Ufo', 'Coole Pixel-Union', 'Chip-Prüf-Uhr', 'Central Processing Unit'],
+      steps: [
+        'CPU = Central Processing Unit, der Hauptprozessor.',
+        'Sie holt Befehle, entschlüsselt sie und führt sie aus.',
+        'Ihre Taktfrequenz in GHz sagt, wie viele Takte sie pro Sekunde schafft.'
+      ],
       solution: 3
     },
     {
       q: '„Rühre den Teig, bis er glatt ist.“ — Welche algorithmische Grundstruktur ist das?',
-      opts: ['Sequenz', 'Verzweigung', 'Wiederholung', 'Variable'],
-      solution: 2
+      opts: ['Wiederholung', 'Variable', 'Sequenz', 'Verzweigung'],
+      steps: [
+        '„Bis er glatt ist“ nennt eine Abbruchbedingung — es wird so lange wiederholt.',
+        'Das ist eine Wiederholung (Schleife), genauer eine kopfgesteuerte mit Bedingung.',
+        'Eine Folge wäre stures Nacheinander, eine Verzweigung ein Entweder-oder.'
+      ],
+      solution: 0
     },
     {
       q: '„WENN es regnet, DANN nimm den Schirm, SONST die Sonnenbrille.“ — Welche Grundstruktur ist das?',
-      opts: ['Verzweigung', 'Wiederholung', 'Sequenz', 'Endlosschleife'],
-      solution: 0
+      opts: ['Sequenz', 'Endlosschleife', 'Verzweigung', 'Wiederholung'],
+      steps: [
+        'WENN … DANN … SONST prüft eine Bedingung und wählt genau einen von zwei Wegen.',
+        'Das ist die Verzweigung (Selektion).',
+        'Im Struktogramm zeichnet man sie als Dreieck mit zwei Ästen.'
+      ],
+      solution: 2
     },
     {
       q: 'RAM heißt?',
-      opts: ['Random Access Memory', 'Rechner-Alarm-Modus', 'Riesige Antennen-Maschine', 'Rasend Aktive Mäuse'],
-      solution: 0
+      opts: ['Rasend Aktive Mäuse', 'Random Access Memory', 'Rechner-Alarm-Modus', 'Riesige Antennen-Maschine'],
+      steps: [
+        'RAM = Random Access Memory, Speicher mit wahlfreiem Zugriff.',
+        '„Wahlfrei“ heißt: jede Stelle ist gleich schnell erreichbar, ohne Vorspulen.',
+        'Er ist schnell, aber flüchtig — beim Ausschalten ist der Inhalt weg.'
+      ],
+      solution: 1
     },
     {
       q: 'Was ist ein Struktogramm?',
       opts: ['Eine Tabelle mit Messwerten.', 'Ein Netzwerkplan.', 'Ein Diagramm des Speicherverbrauchs.', 'Eine grafische Darstellung eines Algorithmus.'],
+      steps: [
+        'Ein Struktogramm (nach Nassi-Shneiderman) zeigt einen Algorithmus als ineinander liegende Blöcke.',
+        'Folge, Verzweigung und Wiederholung bekommen dabei je eine eigene Form.',
+        'Sprünge kann man darin gar nicht zeichnen — das erzwingt sauberen Aufbau.'
+      ],
       solution: 3
     },
     {
       q: 'Welches Gerät verbindet dein Heimnetzwerk mit dem Internet?',
-      opts: ['Switch', 'Monitor', 'Sensor', 'Router'],
-      solution: 3
+      opts: ['Monitor', 'Sensor', 'Router', 'Switch'],
+      steps: [
+        'Der Router verbindet zwei Netze miteinander: dein Heimnetz und das Internet.',
+        'Er vergibt außerdem die lokalen Adressen und arbeitet als Firewall.',
+        'Ein Switch verteilt dagegen nur innerhalb eines Netzes.'
+      ],
+      solution: 2
     },
     {
       q: 'ROM heißt?',
-      opts: ['Rechner Ohne Maus', 'Rote Online-Meldung', 'Read Only Memory', 'Runde Oberflächen-Maschine'],
-      solution: 2
+      opts: ['Rote Online-Meldung', 'Read Only Memory', 'Runde Oberflächen-Maschine', 'Rechner Ohne Maus'],
+      steps: [
+        'ROM = Read Only Memory, Nur-Lese-Speicher.',
+        'Sein Inhalt bleibt auch ohne Strom erhalten und wird im Betrieb nicht verändert.',
+        'Darin steckt zum Beispiel die Startroutine des Rechners.'
+      ],
+      solution: 1
     },
     {
       q: 'Was ist eine IP-Adresse?',
       opts: ['Das Passwort für das WLAN.', 'Der Name einer Webseite.', 'Eine E-Mail-Adresse.', 'Die eindeutige Adresse eines Geräts im Netzwerk.'],
+      steps: [
+        'Ohne eindeutige Adresse wüssten die Datenpakete nicht, wohin — wie eine Hausnummer im Netz.',
+        'IPv4 sieht so aus: $192.168.0.1$; weil die Adressen knapp wurden, gibt es zusätzlich IPv6.',
+        'Der Name der Seite wird per DNS erst in so eine Adresse übersetzt.'
+      ],
       solution: 3
     },
     {
       q: 'Wozu dient das DNS (Domain Name System)?',
       opts: ['Es übersetzt Namen wie www.schule.de in IP-Adressen.', 'Es verschlüsselt E-Mails.', 'Es misst die Übertragungsgeschwindigkeit.', 'Es speichert Passwörter.'],
+      steps: [
+        'Menschen merken sich Namen, Maschinen brauchen Zahlen.',
+        'Das DNS ist das Telefonbuch des Internets: Name rein, IP-Adresse raus.',
+        'Fällt es aus, ist alles noch erreichbar — aber nur über die nackte IP-Adresse.'
+      ],
       solution: 0
     },
     {
       q: 'WWW heißt?',
-      opts: ['Wilde Weite Wüste', 'World Wide Web', 'Wir Wollen Wissen', 'Warme Winter-Wolken'],
-      solution: 1
+      opts: ['Wir Wollen Wissen', 'Warme Winter-Wolken', 'Wilde Weite Wüste', 'World Wide Web'],
+      steps: [
+        'WWW = World Wide Web, der bekannteste Dienst im Internet.',
+        'Erfunden 1989 von Tim Berners-Lee am CERN, zusammen mit HTML, HTTP und URL.',
+        'Das Internet ist das Netz darunter; E-Mail nutzt es ebenfalls, gehört aber nicht zum Web.'
+      ],
+      solution: 3
     },
     {
       q: 'Caesar-Verschlüsselung mit Verschiebung 3: Was wird aus dem Klartext-Buchstaben A?',
       opts: ['C', 'D', 'Z', 'B'],
+      steps: [
+        'Bei der Cäsar-Verschlüsselung wandert jeder Buchstabe eine feste Zahl von Stellen weiter.',
+        'Verschiebung 3 bedeutet: $A \rightarrow D$, $B \rightarrow E$, $C \rightarrow F$.',
+        'Am Ende des Alphabets wird umgebrochen: aus $Z$ wird wieder $C$.'
+      ],
       solution: 1
     },
     {
       q: 'Was ist beim Verschlüsseln der „Schlüssel“?',
-      opts: ['Der Geheimtext.', 'Das Passwort des Betriebssystems.', 'Die geheime Information zum Ver- und Entschlüsseln.', 'Das Übertragungskabel.'],
-      solution: 2
+      opts: ['Die geheime Information zum Ver- und Entschlüsseln.', 'Das Übertragungskabel.', 'Der Geheimtext.', 'Das Passwort des Betriebssystems.'],
+      steps: [
+        'Das Verfahren darf jeder kennen — geheim ist nur der Schlüssel.',
+        'Bei Cäsar ist der Schlüssel die Zahl der Stellen, um die verschoben wird.',
+        'Diesen Grundsatz nennt man das Kerckhoffs-Prinzip: Sicherheit steckt im Schlüssel, nicht im Geheimhalten der Methode.'
+      ],
+      solution: 0
     },
     {
       q: 'URL heißt?',
-      opts: ['Unser Rechner Lädt', 'Ultra-Rasante Leitung', 'Universelle Router-Lampe', 'Uniform Resource Locator'],
-      solution: 3
+      opts: ['Ultra-Rasante Leitung', 'Universelle Router-Lampe', 'Uniform Resource Locator', 'Unser Rechner Lädt'],
+      steps: [
+        'URL = Uniform Resource Locator, die vollständige Adresse einer Ressource.',
+        'Sie besteht aus Protokoll, Domainname, Pfad und Dateiname.',
+        'Beispiel: $https{:}//docalvers.de/svp/index.html$'
+      ],
+      solution: 2
     },
     {
       q: 'Welches der folgenden Programme ist ein Betriebssystem?',
       opts: ['Word', 'Windows', 'Firefox', 'Intel Core i5'],
+      steps: [
+        'Ein Betriebssystem verwaltet die Hardware und stellt Programmen Dienste bereit.',
+        'Windows gehört dazu, ebenso macOS, Linux, Android und iOS.',
+        'Word, Firefox und VLC sind dagegen Anwendungsprogramme, die darauf laufen.'
+      ],
       solution: 1
     },
     {
       q: 'Was bedeutet „Open-Source-Software“?',
-      opts: ['Kostenlose Software mit geheimem Quellcode.', 'Software, deren Quellcode offen einsehbar und veränderbar ist.', 'Software, die nur online läuft.', 'Eine Testversion, die nach 30 Tagen abläuft.'],
-      solution: 1
+      opts: ['Software, die nur online läuft.', 'Eine Testversion, die nach 30 Tagen abläuft.', 'Kostenlose Software mit geheimem Quellcode.', 'Software, deren Quellcode offen einsehbar und veränderbar ist.'],
+      steps: [
+        'Entscheidend ist der offene Quelltext plus eine Lizenz, die Weitergabe und Änderung erlaubt.',
+        'Kostenlos ist solche Software meist, aber das ist nicht der Kern.',
+        'Bekannte Beispiele: Linux, Firefox, LibreOffice, VLC.'
+      ],
+      solution: 3
     },
     {
       q: 'PDF heißt?',
-      opts: ['Portable Document Format', 'Praktisch-Digitales Foto', 'Papier-Drucker-Fehler', 'Perfekt Dokumentierter Frosch'],
-      solution: 0
+      opts: ['Perfekt Dokumentierter Frosch', 'Portable Document Format', 'Praktisch-Digitales Foto', 'Papier-Drucker-Fehler'],
+      steps: [
+        'PDF = Portable Document Format.',
+        '„Portabel“ heißt: die Datei sieht überall gleich aus, weil Schriften und Layout mitgespeichert werden.',
+        'Deshalb verschickt man Zeugnisse, Formulare und Handbücher als PDF.'
+      ],
+      solution: 1
     },
     {
       q: 'Was beschreibt ein Pfad wie C:\\Bilder\\urlaub\\strand.jpg?',
-      opts: ['Die Größe der Datei.', 'Den Dateityp.', 'Den Speicherort der Datei im Ordnersystem.', 'Das Erstellungsdatum.'],
-      solution: 2
+      opts: ['Das Erstellungsdatum.', 'Die Größe der Datei.', 'Den Dateityp.', 'Den Speicherort der Datei im Ordnersystem.'],
+      steps: [
+        'Ein Pfad beschreibt, wo eine Datei im Ordnersystem liegt.',
+        'Hier: Laufwerk $C{:}$, darin der Ordner $Bilder$, darin $urlaub$, darin die Datei $strand.jpg$.',
+        'Beginnt die Angabe ganz oben beim Laufwerk, spricht man von einem absoluten Pfad.'
+      ],
+      solution: 3
     },
     {
       q: 'Was ist der Unterschied zwischen LAN und WLAN?',
       opts: ['LAN nutzt Kabel, WLAN funkt kabellos.', 'WLAN ist immer schneller als LAN.', 'LAN funktioniert nur ohne Internet.', 'WLAN nutzt Kabel, LAN funkt kabellos.'],
+      steps: [
+        'LAN überträgt über Kabel, WLAN über Funk.',
+        'Kabel sind schneller und störungsärmer, Funk ist bequemer und braucht keine Löcher in der Wand.',
+        'Beide sind lokale Netze — das WLAN ist nur die drahtlose Variante.'
+      ],
       solution: 0
     },
     {
       q: 'HTTP heißt?',
       opts: ['Heißes Turbo-Tastatur-Programm', 'Hardware-Test-Tool-Paket', 'Hypertext Transfer Protocol', 'Hüpfende Tasten Tanzen Polka'],
+      steps: [
+        'HTTP = Hypertext Transfer Protocol, die Sprache zwischen Browser und Webserver.',
+        'Der Browser fragt eine Seite an, der Server antwortet mit Inhalt und einem Statuscode wie 200 oder 404.',
+        'HTTPS ist dasselbe, nur verschlüsselt.'
+      ],
       solution: 2
     }
   ]
