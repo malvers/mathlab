@@ -240,6 +240,7 @@ nav.quick-nav a.badge.nav-hidden { display: none; }
 /* Material: compact 📎 marker in the week row, link pills down in the
    expanded sub-row where there is room */
 #plan-table td.mat { white-space: nowrap; }
+}
 #plan-table td.mat .mat-flag { cursor: pointer; font-size: 0.9em; }
 .mat-block { margin: 8px 0 2px; text-align: right; }
 .mat-block a.mat-pill {
@@ -253,6 +254,44 @@ nav.quick-nav a.badge.nav-hidden { display: none; }
     cursor: pointer;
 }
 .mat-block .mat-note { font-size: 0.85em; color: var(--muted); }
+
+/* Per-pill delete: the ✕ sits INSIDE the pill at its right edge and only
+   shows up while the plan is in edit mode. */
+.mat-pill-wrap { position: relative; display: inline-block; vertical-align: middle; }
+.mat-pill-wrap .mat-x {
+    position: absolute;
+    right: 5px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: none;
+    width: 16px;
+    height: 16px;
+    line-height: 14px;
+    padding: 0;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    background: transparent;
+    color: currentColor;
+    opacity: 0.65;
+    font-size: 10px;
+    cursor: pointer;
+}
+body.editing .mat-pill-wrap .mat-x { display: block; }
+/* room for the ✕ so it never sits on the label */
+body.editing .mat-pill-wrap .mat-pill { padding-right: 24px; }
+.mat-pill-wrap .mat-x:hover,
+.mat-pill-wrap .mat-x:focus-visible {
+    opacity: 1;
+    color: rgb(176, 36, 24);
+    border-color: rgb(176, 36, 24);
+    background: #fff;
+}
+/* touch: bigger target */
+@media (hover: none) {
+    body.editing .mat-pill-wrap .mat-x { width: 22px; height: 22px; line-height: 20px; font-size: 12px; }
+    body.editing .mat-pill-wrap .mat-pill { padding-right: 30px; }
+}
+@media print { .mat-pill-wrap .mat-x { display: none; } }
 
 /* Sub-row side zone (under Bemerkungen/Material) + section label */
 #plan-table .detail-row td.sub-side { vertical-align: top; }
@@ -285,6 +324,42 @@ nav.quick-nav a.badge.nav-hidden { display: none; }
     user-select: none;
 }
 #plan-table td.mat .mat-add:hover { color: inherit; border-color: currentColor; }
+
+/* Material clipboard: copy a week, paste it into another Jahrgangsstufe.
+   Same look as the + button, so the cell stays calm. */
+#plan-table td.mat .mat-act {
+    display: none;              /* only while editing — see below */
+    width: 24px;
+    height: 24px;
+    line-height: 22px;
+    text-align: center;
+    border: 1px dashed var(--line);
+    border-radius: 999px;
+    color: var(--muted);
+    font-size: 13px;
+    margin: 2px 0 2px 6px;
+    vertical-align: middle;
+    cursor: pointer;
+    user-select: none;
+}
+/* Copy and paste belong to editing, like the ✕ inside the pills. */
+body.editing #plan-table td.mat .mat-act { display: inline-block; }
+/* nothing to copy / empty clipboard: the JS hides them even while editing */
+body.editing #plan-table td.mat .mat-act[hidden] { display: none; }
+#plan-table td.mat .mat-act:hover { color: inherit; border-color: currentColor; }
+#plan-table td.mat .mat-act.done {
+    color: rgb(121, 158, 49);
+    border-color: rgb(121, 158, 49);
+    border-style: solid;
+}
+
+/* short explanation line above the pill list in the paste dialog */
+.mat-modal .mm-info {
+    font-size: 0.85rem;
+    color: var(--muted);
+    margin-bottom: 10px;
+    line-height: 1.45;
+}
 #plan-table td.mat.drop { outline: 2px dashed rgb(121, 158, 49); outline-offset: -2px; }
 
 /* Material modal (pretty dialog, no native prompts) */
@@ -384,7 +459,8 @@ nav.quick-nav a.badge.nav-hidden { display: none; }
     border-radius: 6px;
     padding: 3px 6px;
 }
-@media print { #plan-table td.mat .mat-add, #plan-table td.mat .mat-input { display: none; } }
+@media print { #plan-table td.mat .mat-add, #plan-table td.mat .mat-act,
+               #plan-table td.mat .mat-input { display: none; } }
 
 /* Separated Login/Logout pill at the right end of the pill row: extra gap
    plus a thin divider line set it apart from the nav pills */
@@ -449,6 +525,42 @@ a.link-card.nav-hidden { display: none; }
 /* inline-flex kills the wrapper's own 16px text strut, which made the div
    taller than the pill inside (pill looked flatter than its neighbors) */
 .nav-edit-wrap { position: relative; display: inline-flex; }
+
+/* One dropdown per Schulart (plus "Mehr"): the pill row stays short, the
+   plans live one click below it. */
+.nav-drop-wrap { position: relative; display: inline-flex; }
+nav.quick-nav a.nav-drop { cursor: pointer; }
+.nav-drop-panel {
+    display: none;
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    z-index: 80;
+    padding: 10px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    box-shadow: 0 8px 22px var(--shadow);
+    white-space: nowrap;
+}
+.nav-drop-wrap.open .nav-drop-panel { display: block; }
+.nav-drop-panel .nd-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.6rem;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 10px 0 5px;
+}
+.nav-drop-panel .nd-title:first-child { margin-top: 0; }
+/* one entry per line, like the Einstellungen panel */
+.nav-drop-panel .nd-row { display: flex; flex-direction: column; align-items: stretch; gap: 6px; }
+.nav-drop-panel .nd-row .badge { text-align: center; }
+/* a subject whose pills are all switched off in ⚙ hides its caption too */
+.nav-drop-panel .nd-title.nd-empty, .nav-drop-panel .nd-row.nd-empty { display: none; }
+/* the rightmost dropdown would overflow the window, so it opens leftwards */
+.nav-drop-wrap.nd-right .nav-drop-panel { left: auto; right: 0; }
+@media print { .nav-drop-wrap { display: none; } }
 
 nav.quick-nav a.nav-edit { cursor: pointer; font-size: 19px; line-height: 14px; }
 
@@ -946,6 +1058,27 @@ html.svp-light a.link-card.c-red .card-title { color: var(--ypsilon); }
 /* Forces a card into column 1 → starts a new grid row (separates the
    Fach cards from the personal cards, works with any responsive column count) */
 a.link-card.row-break { grid-column: 1; }
+
+/* Start page grouped by Schulart: one section per Schulart, its cards below.
+   A section whose cards are all switched off in ⚙ hides its heading too. */
+.svp-section { margin-bottom: 26px; }
+.svp-section.nav-hidden { display: none; }
+.svp-section .section-title {
+    max-width: 1200px;
+    margin: 0 auto 10px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 400;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+}
+.svp-section .section-title::after {
+    content: '';
+    display: block;
+    margin-top: 6px;
+    border-bottom: 1px solid var(--line);
+}
 
 .card-grid {
     max-width: 1200px;

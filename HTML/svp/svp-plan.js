@@ -61,7 +61,7 @@
         return 'Link';
     }
 
-    function renderMaterial(el, text) {
+    function renderMaterial(el, text, ref) {
         text = text == null ? '' : String(text).trim();
         el.dataset.src = text;
         el.textContent = '';
@@ -76,6 +76,29 @@
             a.rel = 'noopener';
             a.textContent = matIcon(parts[k], label) + (label || matDefaultLabel(parts[k]));
             a.title = parts[k];
+            /* Owner: every pill carries its own ✕. Deliberately NOT tied to
+               the edit mode — there the cell holds the raw text, and hunting
+               a single URL in that string is no fun. */
+            if (ref && CAN_EDIT_MAT) {
+                const wrap = document.createElement('span');
+                wrap.className = 'mat-pill-wrap';
+                const url = parts[k];
+                const x = document.createElement('button');
+                x.type = 'button';
+                x.className = 'mat-x';
+                x.textContent = '✕';
+                x.title = 'Link entfernen';
+                x.setAttribute('aria-label', 'Link entfernen: ' + (label || url));
+                x.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    removeMatEntry(ref, url);
+                });
+                wrap.appendChild(a);
+                wrap.appendChild(x);
+                el.appendChild(wrap);
+                continue;
+            }
             el.appendChild(a);
         }
         const tail = parts[parts.length - 1].trim();
@@ -98,7 +121,7 @@
     function updateMaterial(ref, text) {
         text = text == null ? '' : String(text).trim();
         ref.matTd.dataset.src = text;
-        renderMaterial(ref.matBlock, text);
+        renderMaterial(ref.matBlock, text, ref);
         ref.matTd.textContent = '';
         if (text) {
             const n = (text.match(/https?:\/\//g) || []).length;
@@ -112,6 +135,12 @@
             ref.matBlock.remove();
         }
         decorateMatCell(ref);
+    }
+
+    // Drop a single link from a week (the ✕ inside its pill).
+    function removeMatEntry(ref, url) {
+        saveMaterial(ref, matToSrc(parseMat(ref.matTd.dataset.src || '')
+            .filter(en => en.url !== url)));
     }
 
     function saveMaterial(ref, src) {
@@ -168,7 +197,7 @@
         labIn.setAttribute('aria-label', 'Label für den Link');
         const urlIn = document.createElement('input');
         urlIn.type = 'url';
-        urlIn.placeholder = 'https://… Link hier einfügen';
+        urlIn.placeholder = 'https://… Link oder kopierte Woche einfügen';
         urlIn.setAttribute('aria-label', 'Link-Adresse');
 
         // Clicking a pill loads its attributes into the fields for editing
@@ -225,6 +254,21 @@
         ok.className = 'mm-btn primary';
         ok.textContent = 'Hinzufügen';
         function add() {
+            /* A whole copied week can be dropped in here at once — that is the
+               way across browsers/devices, where localStorage does not reach:
+               "Label https://a Label2 https://b" */
+            const multi = parseMat(urlIn.value);
+            if (multi.length > 1 && editIdx == null) {
+                const seen = new Set(entries.map(en => en.url));
+                multi.forEach(function (en) {
+                    if (seen.has(en.url)) return;
+                    seen.add(en.url);
+                    entries.push(en);
+                });
+                persist();
+                closeMatModal();
+                return;
+            }
             let url = urlIn.value.trim();
             // Bare domains ("docalvers.de/…") get https:// prepended — the
             // stored format needs the scheme (entries are split on it).
@@ -259,17 +303,215 @@
         urlIn.focus();
     }
 
-    function decorateMatCell(ref) {
-        if (!CAN_EDIT_MAT || !ref.matTd || ref.matTd.querySelector('.mat-add')) return;
-        const btn = document.createElement('span');
-        btn.className = 'mat-add';
-        btn.textContent = '+';
-        btn.title = 'Link einfügen (oder Link hierher ziehen)';
-        btn.addEventListener('click', function (e) {
-            e.stopPropagation();
-            openMatModal(ref);
+    // --- Material clipboard (per week, across plans) ---------------------
+    // Copy takes the whole material of one week; paste puts it into another
+    // week — also in a different Jahrgangsstufe, because the clipboard lives
+    // in localStorage and every plan page shares the same origin.
+    const CLIP_KEY = 'svp-mat-clip';
+    const matRefs = [];
+
+    function planLabel() {
+        const h1 = document.querySelector('h1');
+        return (h1 ? h1.textContent : document.title).replace(/\s+/g, ' ').trim();
+    }
+
+    // "Label https://a Label2 https://b" <-> [{label, url}, ...]
+    function parseMat(src) {
+        const out = [];
+        const parts = (src || '').split(/(https?:\/\/[^\s]+)/);
+        for (let k = 1; k < parts.length; k += 2) {
+            out.push({
+                label: parts[k - 1].replace(/[\s|:,;·–-]+$/, '').trim(),
+                url: parts[k]
+            });
+        }
+        return out;
+    }
+
+    function matToSrc(entries) {
+        return entries.map(en => (en.label ? en.label + ' ' : '') + en.url).join(' ');
+    }
+
+    function readClip() {
+        try {
+            const clip = JSON.parse(localStorage.getItem(CLIP_KEY) || 'null');
+            return clip && clip.src ? clip : null;
+        } catch (e) { return null; }
+    }
+
+    // short visual confirmation right on the button
+    function flashBtn(btn, text) {
+        const old = btn.textContent;
+        btn.textContent = text;
+        btn.classList.add('done');
+        setTimeout(function () {
+            btn.textContent = old;
+            btn.classList.remove('done');
+        }, 900);
+    }
+
+    function copyMaterial(ref, btn) {
+        const src = (ref.matTd.dataset.src || '').trim();
+        if (!src) return;
+        const planRow = window.PLAN[ref.i] || {};
+        localStorage.setItem(CLIP_KEY, JSON.stringify({
+            src: src,
+            from: planLabel() + ' · Woche ' + (planRow.nr || (ref.i + 1)),
+            n: parseMat(src).length,
+            ts: new Date().toISOString()
+        }));
+        /* second copy into the system clipboard: from there it can go into a
+           mail, a note or — via the + dialog — into another browser */
+        if (navigator.clipboard) navigator.clipboard.writeText(src).catch(function () {});
+        flashBtn(btn, '✓');
+        refreshMatButtons();
+    }
+
+    function applyPaste(ref, clip, mode) {
+        const incoming = parseMat(clip.src);
+        let entries;
+        if (mode === 'replace') {
+            entries = incoming;
+        } else {
+            entries = parseMat(ref.matTd.dataset.src || '');
+            const seen = new Set(entries.map(en => en.url));
+            incoming.forEach(function (en) {
+                if (seen.has(en.url)) return;   /* same link twice makes no sense */
+                seen.add(en.url);
+                entries.push(en);
+            });
+        }
+        saveMaterial(ref, matToSrc(entries));
+        refreshMatButtons();
+    }
+
+    // Pretty dialog (no native confirm): only asked when the target week
+    // already carries material — otherwise pasting is unambiguous.
+    function askPaste(ref, clip) {
+        closeMatModal();
+        const have = parseMat(ref.matTd.dataset.src || '').length;
+        const planRow = window.PLAN[ref.i] || {};
+        const wrap = document.createElement('div');
+        wrap.className = 'mat-modal-wrap';
+        const box = document.createElement('div');
+        box.className = 'mat-modal';
+
+        const title = document.createElement('div');
+        title.className = 'mm-title';
+        title.textContent = 'Material einfügen · Woche ' + (planRow.nr || '') + ' · ' +
+            ref.dateTd.textContent.trim();
+        box.appendChild(title);
+
+        const info = document.createElement('div');
+        info.className = 'mm-info';
+        info.textContent = clip.n + (clip.n === 1 ? ' Link' : ' Links') + ' aus „' + clip.from +
+            '“ — diese Woche hat schon ' + have + (have === 1 ? ' Link.' : ' Links.');
+        box.appendChild(info);
+
+        const list = document.createElement('div');
+        list.className = 'mm-list';
+        parseMat(clip.src).forEach(function (en) {
+            const pill = document.createElement('span');
+            pill.className = 'badge b-green mat-pill';
+            pill.title = en.url;
+            pill.textContent = matIcon(en.url, en.label) + (en.label || matDefaultLabel(en.url));
+            list.appendChild(pill);
         });
-        ref.matTd.appendChild(btn);
+        box.appendChild(list);
+
+        const btns = document.createElement('div');
+        btns.className = 'mm-btns';
+        [['Abbrechen', null, ''],
+         ['Ersetzen', 'replace', ''],
+         ['Anhängen', 'append', ' primary']].forEach(function (def) {
+            const b = document.createElement('button');
+            b.type = 'button';
+            b.className = 'mm-btn' + def[2];
+            b.textContent = def[0];
+            b.addEventListener('click', function () {
+                if (def[1]) applyPaste(ref, clip, def[1]);
+                closeMatModal();
+            });
+            btns.appendChild(b);
+        });
+        box.appendChild(btns);
+
+        wrap.addEventListener('click', function (e) {
+            if (e.target === wrap) closeMatModal();
+        });
+        wrap.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') closeMatModal();
+        });
+        wrap.appendChild(box);
+        document.body.appendChild(wrap);
+        matModal = wrap;
+        wrap.querySelector('.mm-btn.primary').focus();
+    }
+
+    function pasteMaterial(ref) {
+        const clip = readClip();
+        if (!clip) return;
+        if (!parseMat(ref.matTd.dataset.src || '').length) applyPaste(ref, clip, 'append');
+        else askPaste(ref, clip);
+    }
+
+    // Copy only where there is something to copy, paste only while the
+    // clipboard holds something — so an untouched plan looks as before.
+    function updateMatButtons(ref) {
+        const clip = readClip();
+        const copy = ref.matTd.querySelector('.mat-copy');
+        const paste = ref.matTd.querySelector('.mat-paste');
+        if (copy) copy.hidden = !(ref.matTd.dataset.src || '').trim();
+        if (paste) {
+            paste.hidden = !clip;
+            if (clip) paste.title = 'Material aus „' + clip.from + '“ einfügen (' +
+                clip.n + (clip.n === 1 ? ' Link' : ' Links') + ')';
+        }
+    }
+
+    function refreshMatButtons() {
+        matRefs.forEach(updateMatButtons);
+    }
+
+    /* a second tab may fill the clipboard — keep the buttons in sync */
+    window.addEventListener('storage', function (e) {
+        if (e.key === CLIP_KEY) refreshMatButtons();
+    });
+
+    function decorateMatCell(ref) {
+        if (!CAN_EDIT_MAT || !ref.matTd) return;
+        if (matRefs.indexOf(ref) < 0) matRefs.push(ref);
+        if (!ref.matTd.querySelector('.mat-add')) {
+            const copy = document.createElement('span');
+            copy.className = 'mat-act mat-copy';
+            copy.textContent = '⧉';
+            copy.title = 'Materialien dieser Woche kopieren';
+            copy.addEventListener('click', function (e) {
+                e.stopPropagation();
+                copyMaterial(ref, copy);
+            });
+            ref.matTd.appendChild(copy);
+
+            const paste = document.createElement('span');
+            paste.className = 'mat-act mat-paste';
+            paste.textContent = '⇩';
+            paste.addEventListener('click', function (e) {
+                e.stopPropagation();
+                pasteMaterial(ref);
+            });
+            ref.matTd.appendChild(paste);
+
+            const btn = document.createElement('span');
+            btn.className = 'mat-add';
+            btn.textContent = '+';
+            btn.title = 'Link einfügen (oder Link hierher ziehen)';
+            btn.addEventListener('click', function (e) {
+                e.stopPropagation();
+                openMatModal(ref);
+            });
+            ref.matTd.appendChild(btn);
+        }
+        updateMatButtons(ref);
     }
 
     // --- Drag&drop tracing via the central DebugWindow (?debug) ----------
@@ -1262,14 +1504,12 @@
     function setEditable(on) {
         const flag = on ? 'true' : 'false';
         for (const r of rendered) {
-            for (const el of [r.ferienTd, r.dateTd, r.uTd, r.topicSpan, r.remarkTd, r.matTd, r.ul]) {
+            // Material is deliberately NOT edited as raw text here: the pills
+            // in the sub-row have their own ✕ while editing, and new links go
+            // through the + dialog. A long SharePoint URL in this cell used to
+            // blow the table far past the window.
+            for (const el of [r.ferienTd, r.dateTd, r.uTd, r.topicSpan, r.remarkTd, r.ul]) {
                 if (el) el.setAttribute('contenteditable', flag);
-            }
-            // Material: edit the raw "Label URL" source in the week row cell,
-            // pills re-render into the sub-row on exit.
-            if (r.matTd) {
-                if (on) r.matTd.textContent = r.matTd.dataset.src || '';
-                else updateMaterial(r, r.matTd.textContent);
             }
         }
         // While editing show the raw $...$ source; on exit re-render from the
@@ -1295,10 +1535,11 @@
                     topic: r.topicSpan.textContent.trim(),
                     remark: r.remarkTd.textContent.trim()
                 };
-                /* while editing the cell holds the raw source text; an empty
-                   cell is NOT saved so baked-in row.material keeps showing */
-                if (r.matTd && r.matTd.textContent.trim()) {
-                    entry.material = r.matTd.textContent.trim();
+                /* material is maintained by the pills/+ dialog, not by this
+                   form; keep whatever is currently attached to the row so a
+                   plain save does not drop it */
+                if (r.matTd && (r.matTd.dataset.src || '').trim()) {
+                    entry.material = r.matTd.dataset.src.trim();
                 }
                 if (r.ul) {
                     entry.details = Array.from(r.ul.querySelectorAll('li'))
@@ -1424,18 +1665,10 @@
             cloudEl.textContent = '☁ lokal';
             cloudEl.title = 'Edits nur in diesem Browser — für Cloud-Sync über die Notizen-Seite anmelden';
         }
-        // Sits next to the Login/Logout pill in the quick-nav. svp-nav.js
-        // runs after this script, so the nav only exists at DOMContentLoaded;
-        // pages without a quick-nav fall back to the toolbar as before.
-        function place() {
-            const nav = document.querySelector('nav.quick-nav');
-            const bar = document.querySelector('.toolbar');
-            if (nav) nav.insertBefore(cloudEl, nav.querySelector('.nav-qr')); /* before the QR pill */
-            else if (bar) bar.appendChild(cloudEl);
-        }
-        if (document.readyState === 'loading')
-            document.addEventListener('DOMContentLoaded', place);
-        else place();
+        // Deliberately NOT placed in the quick-nav any more (Doc, 23.08.2026):
+        // the status pill said little that the Login/Logout pill does not
+        // already tell. The element stays alive so setCloud() keeps working —
+        // appending it somewhere is all it takes to bring the display back.
     })();
 
     function setCloud(text, ok) {
