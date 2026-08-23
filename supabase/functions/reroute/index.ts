@@ -14,6 +14,8 @@
 // Deploy (no JWT needed — only calls an external API, touches no user data):
 //   supabase functions deploy reroute --no-verify-jwt
 
+import { guard } from '../_shared/guard.ts';
+
 const ORS_BASE = 'https://api.openrouteservice.org/v2/directions';
 const HEADING_TOLERANCE = 60; // ± degrees around the travel heading (Valhalla's sensible default)
 
@@ -50,6 +52,11 @@ function orsTypeToOsrm(t: number): { type: string; modifier?: string } {
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS });
+
+  /* Public endpoint with a server-side key behind it — see ../_shared/guard.ts
+     (own pages / our key, burst limit, payload cap). */
+  const blocked = guard(req, { maxBytes: 64_000, limit: 240 });
+  if (blocked) return blocked;
 
   try {
     const key = Deno.env.get('ORS_API_KEY');
