@@ -1627,17 +1627,11 @@
     };
 
     // Two-click confirm (no native dialogs): first click arms the button, second click resets.
-    window.resetPlanEdits = function (btn) {
-        if (btn && !btn.dataset.armed) {
-            btn.dataset.armed = '1';
-            const original = btn.textContent;
-            btn.textContent = 'Wirklich? Nochmal klicken';
-            setTimeout(() => {
-                delete btn.dataset.armed;
-                btn.textContent = original;
-            }, 3000);
-            return;
-        }
+    // Reset throws away every edit of this page — dates, topics, remarks,
+    // bullets AND the material links, locally and (when logged in) in the
+    // cloud, without any way back. So: only reachable in edit mode, and
+    // guarded by two dialogs, the second one asking to type the word out.
+    function doReset() {
         localStorage.removeItem(KEY);
         localStorage.removeItem(TS_KEY);
         const done = () => location.reload();
@@ -1645,7 +1639,124 @@
             svpAuth.api('svp_plan_edits?page=eq.' + encodeURIComponent(location.pathname), { method: 'DELETE' })
                 .catch(() => {}).then(done, done);
         } else done();
+    }
+
+    // What exactly is at stake? Counted from the stored edits object.
+    function resetScope() {
+        let wochen = 0, links = 0, felder = 0;
+        for (const k in saved) {
+            const e = saved[k] || {};
+            const keys = Object.keys(e);
+            if (!keys.length) continue;
+            wochen++;
+            felder += keys.length;
+            links += ((e.material || '').match(/https?:\/\//g) || []).length;
+        }
+        return { wochen, links, felder };
+    }
+
+    // Shared shell for both warning dialogs (same look as the material modal).
+    function dangerDialog(titel, bauInhalt) {
+        closeMatModal();
+        const wrap = document.createElement('div');
+        wrap.className = 'mat-modal-wrap';
+        const box = document.createElement('div');
+        box.className = 'mat-modal mm-danger';
+        const h = document.createElement('div');
+        h.className = 'mm-title mm-warn';
+        h.textContent = titel;
+        box.appendChild(h);
+        bauInhalt(box, function close() { closeMatModal(); });
+        wrap.addEventListener('click', e => { if (e.target === wrap) closeMatModal(); });
+        wrap.addEventListener('keydown', e => { if (e.key === 'Escape') closeMatModal(); });
+        wrap.appendChild(box);
+        document.body.appendChild(wrap);
+        matModal = wrap;
+        return box;
+    }
+
+    function resetSchritt2() {
+        const WORT = 'LÖSCHEN';
+        dangerDialog('⚠ Letzte Warnung', function (box) {
+            const info = document.createElement('div');
+            info.className = 'mm-info';
+            info.innerHTML = 'Das lässt sich <b>nicht</b> rückgängig machen — es gibt keine ältere Version.' +
+                (window.svpAuth && svpAuth.hasSession()
+                    ? '<br>Du bist angemeldet: die Löschung wirkt auch auf deinen anderen Geräten.'
+                    : '<br>Du bist abgemeldet: gelöscht wird nur dieser Browser.');
+            box.appendChild(info);
+
+            const frage = document.createElement('div');
+            frage.className = 'mm-info';
+            frage.innerHTML = 'Tippe <b>' + WORT + '</b>, um es wirklich zu tun.';
+            box.appendChild(frage);
+
+            const eingabe = document.createElement('input');
+            eingabe.type = 'text';
+            eingabe.setAttribute('aria-label', 'Zum Bestätigen ' + WORT + ' eintippen');
+            eingabe.placeholder = WORT;
+            box.appendChild(eingabe);
+
+            const btns = document.createElement('div');
+            btns.className = 'mm-btns';
+            const ab = document.createElement('button');
+            ab.type = 'button';
+            ab.className = 'mm-btn';
+            ab.textContent = 'Abbrechen';
+            ab.addEventListener('click', closeMatModal);
+            const ok = document.createElement('button');
+            ok.type = 'button';
+            ok.className = 'mm-btn danger';
+            ok.textContent = 'Endgültig löschen';
+            ok.disabled = true;
+            const pruefe = () => { ok.disabled = eingabe.value.trim().toUpperCase() !== WORT; };
+            eingabe.addEventListener('input', pruefe);
+            eingabe.addEventListener('keydown', e => { if (e.key === 'Enter' && !ok.disabled) doReset(); });
+            ok.addEventListener('click', doReset);
+            btns.appendChild(ab);
+            btns.appendChild(ok);
+            box.appendChild(btns);
+            setTimeout(() => eingabe.focus(), 0);
+        });
+    }
+
+    window.resetPlanEdits = function () {
+        const s = resetScope();
+        dangerDialog('⚠ Alle Änderungen dieser Seite verwerfen?', function (box) {
+            const info = document.createElement('div');
+            info.className = 'mm-info';
+            info.innerHTML = s.wochen
+                ? 'Betroffen: <b>' + s.wochen + (s.wochen === 1 ? ' geänderte Woche' : ' geänderte Wochen') +
+                  '</b> mit ' + s.felder + ' bearbeiteten Feldern' +
+                  (s.links ? ' und <b>' + s.links + (s.links === 1 ? ' Material-Link' : ' Material-Links') + '</b>' : '') +
+                  '.<br>Danach steht der Plan wieder auf dem einprogrammierten Stand.'
+                : 'Auf dieser Seite ist nichts gespeichert — es gibt nichts zu verwerfen.';
+            box.appendChild(info);
+
+            const btns = document.createElement('div');
+            btns.className = 'mm-btns';
+            const ab = document.createElement('button');
+            ab.type = 'button';
+            ab.className = 'mm-btn';
+            ab.textContent = 'Abbrechen';
+            ab.addEventListener('click', closeMatModal);
+            btns.appendChild(ab);
+            if (s.wochen) {
+                const weiter = document.createElement('button');
+                weiter.type = 'button';
+                weiter.className = 'mm-btn danger';
+                weiter.textContent = 'Weiter …';
+                weiter.addEventListener('click', resetSchritt2);
+                btns.appendChild(weiter);
+            }
+            box.appendChild(btns);
+        });
     };
+
+    /* The button lives in each page's toolbar; tagging it here keeps the
+       pages untouched. CSS shows it only while editing. */
+    document.querySelectorAll('button[onclick*="resetPlanEdits"]')
+        .forEach(b => b.classList.add('plan-reset'));
 
     // Safety net: persist pending edits when the tab closes mid-edit.
     window.addEventListener('beforeunload', () => {
