@@ -29,11 +29,33 @@
 
     // Material column (links to OneDrive slides etc.) is injected centrally
     // so the per-page table headers stay untouched.
+    /* Die Werkzeugleiste gehoert direkt unter den Kopf, nicht zwischen die
+       Lernbereich-Karten und die Tabelle — zentral umgehaengt, damit keine
+       Plan-Seite angefasst werden muss. */
+    (function liftToolbar() {
+        const bar = document.querySelector('.toolbar');
+        const cards = document.querySelector('.meta-cards');
+        if (bar && cards && cards.parentNode) cards.parentNode.insertBefore(bar, cards);
+    })();
+
     const headRow = document.querySelector('#plan-table thead tr');
     if (headRow) {
         const matTh = document.createElement('th');
         matTh.textContent = 'Material';
         headRow.appendChild(matTh);
+        /* Leading column for the shift arrows — empty header, only visible
+           while the shift mode is on (see setShiftMode). */
+        const shTh = document.createElement('th');
+        shTh.className = 'shift-col';
+        headRow.insertBefore(shTh, headRow.firstChild);
+        /* tag the Woche header so its column can shrink with its cells */
+        [...headRow.children].forEach(function (th) {
+            const t = th.textContent.trim();
+            if (t === 'Woche') th.classList.add('date-col');
+            if (t === 'Bemerkungen') th.classList.add('remark-col');
+            if (/^Ustd/.test(t)) th.classList.add('ustd-col');
+            if (/^Thema/.test(t)) th.classList.add('topic-col');
+        });
     }
 
     // Renders the raw material text ("Label https://... Label2 https://...")
@@ -94,6 +116,10 @@
                     e.stopPropagation();
                     removeMatEntry(ref, url);
                 });
+                /* Single pill actions live in a context menu: right-click on
+                   the desktop, long press on a tablet. Only while editing, so a
+                   normal right-click still gets the browser's own menu. */
+                wirePillMenu(a, ref, url, label);
                 wrap.appendChild(a);
                 wrap.appendChild(x);
                 el.appendChild(wrap);
@@ -117,19 +143,14 @@
     const CAN_EDIT_MAT = !!(window.svpAuth && svpAuth.hasSession());
 
     // Renders a ref's material state: pills into the sub-row block, a compact
-    // 📎 marker (with link count) into the week row cell.
+    // Material lives in the expandable sub-row; the week row itself stays
+    // clean (the ▸ chevron already shows there is something to unfold).
     function updateMaterial(ref, text) {
         text = text == null ? '' : String(text).trim();
         ref.matTd.dataset.src = text;
         renderMaterial(ref.matBlock, text, ref);
         ref.matTd.textContent = '';
         if (text) {
-            const n = (text.match(/https?:\/\//g) || []).length;
-            const flag = document.createElement('span');
-            flag.className = 'mat-flag';
-            flag.textContent = '📎' + (n > 1 ? ' ' + n : '');
-            flag.title = 'Material — Zeile aufklappen';
-            ref.matTd.appendChild(flag);
             if (!ref.matBlock.parentNode) ref.ensureSubRow().side.appendChild(ref.matBlock);
         } else if (ref.matBlock.parentNode) {
             ref.matBlock.remove();
@@ -164,7 +185,7 @@
 
     function openMatModal(ref) {
         closeMatModal();
-        const planRow = window.PLAN[ref.i] || {};
+        const planRow = planRows[ref.i] || {};
         const wrap = document.createElement('div');
         wrap.className = 'mat-modal-wrap';
         const box = document.createElement('div');
@@ -353,7 +374,7 @@
     function copyMaterial(ref, btn) {
         const src = (ref.matTd.dataset.src || '').trim();
         if (!src) return;
-        const planRow = window.PLAN[ref.i] || {};
+        const planRow = planRows[ref.i] || {};
         localStorage.setItem(CLIP_KEY, JSON.stringify({
             src: src,
             from: planLabel() + ' · Woche ' + (planRow.nr || (ref.i + 1)),
@@ -365,6 +386,99 @@
         if (navigator.clipboard) navigator.clipboard.writeText(src).catch(function () {});
         flashBtn(btn, '✓');
         refreshMatButtons();
+    }
+
+    // --- Per-pill menu ---------------------------------------------------
+    // The week-level 📋 copies everything at once; this copies one link, so it
+    // can travel into another week (or another plan) on its own.
+    function copyOneMat(ref, url, label) {
+        const src = (label ? label + ' ' : '') + url;
+        const planRow = planRows[ref.i] || {};
+        localStorage.setItem(CLIP_KEY, JSON.stringify({
+            src: src,
+            from: planLabel() + ' · Woche ' + (planRow.nr || (ref.i + 1)),
+            n: 1,
+            ts: new Date().toISOString()
+        }));
+        if (navigator.clipboard) navigator.clipboard.writeText(url).catch(function () {});
+        refreshMatButtons();
+    }
+
+    let pillMenu = null;
+    function closePillMenu() {
+        if (pillMenu && pillMenu.parentNode) pillMenu.parentNode.removeChild(pillMenu);
+        pillMenu = null;
+    }
+
+    function openPillMenu(x, y, ref, url, label) {
+        closePillMenu();
+        const menu = document.createElement('div');
+        menu.className = 'mat-ctx';
+        const titel = document.createElement('div');
+        titel.className = 'mat-ctx-title';
+        titel.textContent = label || matDefaultLabel(url);
+        menu.appendChild(titel);
+        [['⧉', 'Kopieren', function () { copyOneMat(ref, url, label); }, 'ctx-ico-gross'],
+         ['↗', 'Öffnen', function () { window.open(url, '_blank', 'noopener'); }, ''],
+         ['✕', 'Entfernen', function () { removeMatEntry(ref, url); }, '']
+        ].forEach(function (def) {
+            const b = document.createElement('button');
+            b.type = 'button';
+            b.className = 'mat-ctx-item';
+            const ico = document.createElement('span');
+            ico.className = 'ctx-ico ' + (def[3] || '');
+            ico.textContent = def[0];      /* same glyphs as the row toolbar */
+            b.appendChild(ico);
+            b.appendChild(document.createTextNode(def[1]));
+            b.addEventListener('click', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                closePillMenu();
+                def[2]();
+            });
+            menu.appendChild(b);
+        });
+        document.body.appendChild(menu);
+        /* keep it inside the window */
+        const r = menu.getBoundingClientRect();
+        const left = Math.min(x, window.innerWidth - r.width - 8);
+        const top = Math.min(y, window.innerHeight - r.height - 8);
+        menu.style.left = Math.max(8, left) + 'px';
+        menu.style.top = Math.max(8, top) + 'px';
+        pillMenu = menu;
+    }
+
+    document.addEventListener('click', function (e) {
+        if (pillMenu && !pillMenu.contains(e.target)) closePillMenu();
+    });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closePillMenu(); });
+    window.addEventListener('scroll', closePillMenu, true);
+
+    function wirePillMenu(a, ref, url, label) {
+        a.addEventListener('contextmenu', function (e) {
+            if (!document.body.classList.contains('editing')) return; /* native menu */
+            e.preventDefault();
+            e.stopPropagation();
+            openPillMenu(e.clientX, e.clientY, ref, url, label);
+        });
+        /* touch: long press, cancelled by moving or lifting early */
+        let timer = null, moved = false;
+        a.addEventListener('touchstart', function (e) {
+            if (!document.body.classList.contains('editing')) return;
+            moved = false;
+            const t = e.touches[0];
+            timer = setTimeout(function () {
+                timer = null;
+                if (!moved) openPillMenu(t.clientX, t.clientY, ref, url, label);
+            }, 500);
+        }, { passive: true });
+        a.addEventListener('touchmove', function () { moved = true; }, { passive: true });
+        ['touchend', 'touchcancel'].forEach(function (ev) {
+            a.addEventListener(ev, function (e) {
+                if (timer) { clearTimeout(timer); timer = null; }
+                else if (!moved) e.preventDefault(); /* menu opened: no navigation */
+            });
+        });
     }
 
     function applyPaste(ref, clip, mode) {
@@ -390,7 +504,7 @@
     function askPaste(ref, clip) {
         closeMatModal();
         const have = parseMat(ref.matTd.dataset.src || '').length;
-        const planRow = window.PLAN[ref.i] || {};
+        const planRow = planRows[ref.i] || {};
         const wrap = document.createElement('div');
         wrap.className = 'mat-modal-wrap';
         const box = document.createElement('div');
@@ -593,11 +707,28 @@
     }
 
     const KEY = 'svp-edits:' + location.pathname;
+    let skipUnloadSave = false; /* set by doReset()/applyShift(), see the beforeunload handler */
     let saved = {};
     try { saved = JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) { saved = {}; }
 
     // Per-row references for edit mode and persistence.
     const rendered = [];
+
+    // The table is not always as long as the page's PLAN: shiftPlan() can push
+    // content past the last week, and those extra weeks live only in the edits
+    // object. planRows is PLAN padded out to cover them, so index i means the
+    // same row everywhere (render, edits, shift).
+    const planRows = window.PLAN.slice();
+    Object.keys(saved).forEach(function (k) {
+        const i = Number(k);
+        if (!Number.isInteger(i) || i < 0) return;
+        while (planRows.length <= i) planRows.push(null);
+    });
+    for (let j = 0; j < planRows.length; j++) {
+        if (!planRows[j]) {
+            planRows[j] = { nr: 0, kw: '', date: '', type: 'org', u: '', topic: '', remark: '', details: [] };
+        }
+    }
 
     // --- LaTeX support ---------------------------------------------------
     // Formulas in PLAN strings use $...$ (KaTeX inline math). KaTeX is loaded
@@ -645,6 +776,21 @@
     let building = false;
 
     // Sets text that may contain $...$ math; keeps the raw source in data-src.
+    /* The Woche column reads better (and much narrower) on two lines:
+       "17.–21." / "08.26", and for a range across months "31.08.–" / "04.09.26".
+       The break is a <br>, so textContent still yields the original string and
+       saving the cell is unaffected. */
+    function setDateText(el, text) {
+        const t = String(text == null ? '' : text).trim();
+        el.textContent = '';
+        const m = t.match(/^(\d{1,2}\.[–-]\d{1,2}\.)(\d{1,2}\.\d{2})$/)
+            || t.match(/^(\d{1,2}\.\d{1,2}\.[–-])(\d{1,2}\.\d{1,2}\.\d{2})$/);
+        if (!m) { el.textContent = t; return; }
+        el.appendChild(document.createTextNode(m[1]));
+        el.appendChild(document.createElement('br'));
+        el.appendChild(document.createTextNode(m[2]));
+    }
+
     function setMathText(el, text) {
         text = text == null ? '' : String(text);
         el.dataset.src = text;
@@ -718,7 +864,7 @@
 
         // Ziele column (Vorlage: Inhalte | Ziele | Bemerkungen) — only when
         // the page's PLAN rows carry ziel fields (derived from the Lerninhalte).
-        const hasZiele = window.PLAN.some(r => r.ziel);
+        const hasZiele = planRows.some(function (r, i) { return r.ziel || (saved[i] || {}).ziel; });
         const cols = hasZiele ? 6 : 5;
 
         const table = document.createElement('table');
@@ -729,9 +875,11 @@
         const xbody = document.createElement('tbody');
         const seenLb = new Set();
 
-        window.PLAN.forEach((row, i) => {
+        /* planRows, not window.PLAN: a shift can push content into weeks that
+           exist only in the edits — those must reach the paper too. */
+        planRows.forEach((row, i) => {
             const ov = saved[i] || {};
-            if (row.ferien) {
+            if (ov.ferien || row.ferien) {
                 const tr = document.createElement('tr');
                 tr.className = 'x-fer';
                 const td = document.createElement('td');
@@ -741,12 +889,13 @@
                 xbody.appendChild(tr);
                 return;
             }
-            const [badgeClass] = window.BADGE[row.type];
+            const rowType = ov.type || row.type || 'org';
+            const [badgeClass] = window.BADGE[rowType] || window.BADGE.org;
 
             // First week of a Lernbereich: banner row with name + Ustd.
-            if (metaByType[row.type] && !seenLb.has(row.type)) {
-                seenLb.add(row.type);
-                const m = metaByType[row.type];
+            if (metaByType[rowType] && !seenLb.has(rowType)) {
+                seenLb.add(rowType);
+                const m = metaByType[rowType];
                 const tr = document.createElement('tr');
                 tr.className = 'x-lb ' + badgeClass;
                 const td = document.createElement('td');
@@ -760,7 +909,7 @@
             tr.className = 'x-week ' + badgeClass;
             const kw = document.createElement('td');
             kw.className = 'x-kw';
-            kw.textContent = row.kw;
+            kw.textContent = ov.kw != null ? ov.kw : row.kw;
             const date = document.createElement('td');
             date.className = 'x-date';
             // Drop the trailing year (17.–21.08.26 → 17.–21.08.; the school year
@@ -953,9 +1102,9 @@
     // block (that is what the form calls a Modul), holidays stay single rows.
     function mapBlocks() {
         const blocks = [];
-        window.PLAN.forEach(function (row, i) {
+        planRows.forEach(function (row, i) {
             const ov = saved[i] || {};
-            if (row.ferien) {
+            if (ov.ferien || row.ferien) {
                 const text = ov.ferien || row.ferien;
                 blocks.push({ ferien: text.split('·')[0].trim(), dates: mapDates(text) });
                 return;
@@ -964,7 +1113,7 @@
             const dates = mapDates(date) || [date, ''];
             const topic = ov.topic != null ? ov.topic : row.topic;
             const prev = blocks[blocks.length - 1];
-            if (prev && !prev.ferien && prev.type === row.type && prev.topic === topic) {
+            if (prev && !prev.ferien && prev.type === (ov.type || row.type) && prev.topic === topic) {
                 prev.d1 = dates[1];
                 prev.ue += mapUE(ov.u != null ? ov.u : row.u);
                 (ov.details || row.details || []).forEach(function (d) {
@@ -973,7 +1122,7 @@
                 return;
             }
             blocks.push({
-                type: row.type,
+                type: ov.type || row.type,
                 d0: dates[0],
                 d1: dates[1],
                 topic: topic,
@@ -981,9 +1130,9 @@
                 details: (ov.details || row.details || []).slice(),
                 remark: ov.remark != null ? ov.remark : (row.remark || ''),
                 material: ov.material != null ? ov.material : (row.material || ''),
-                mth: row.mth,
-                med: row.med,
-                lnw: row.lnw
+                mth: ov.mth != null ? ov.mth : row.mth,
+                med: ov.med != null ? ov.med : row.med,
+                lnw: ov.lnw != null ? ov.lnw : row.lnw
             });
         });
         return blocks;
@@ -1224,6 +1373,59 @@
         });
     })();
 
+    // Both output actions live in one "Export" dropdown instead of two loose
+    // buttons. The existing buttons are moved into the menu, so their handlers
+    // (and the edit gate on them) stay exactly as they are.
+    (function buildExportMenu() {
+        const bar = document.querySelector('.toolbar');
+        if (!bar) return;
+        const items = [...bar.querySelectorAll('button')].filter(function (b) {
+            const t = b.textContent.trim();
+            return t === 'Drucken' || t === 'Modulablaufplan';
+        });
+        if (!items.length) return;
+
+        const drop = document.createElement('div');
+        drop.className = 'export-drop';
+        const toggle = document.createElement('button');
+        toggle.type = 'button';
+        toggle.className = 'action export-toggle';
+        toggle.setAttribute('aria-haspopup', 'true');
+        toggle.setAttribute('aria-expanded', 'false');
+        toggle.innerHTML = 'Export <span class="export-caret">▾</span>';
+        const menu = document.createElement('div');
+        menu.className = 'export-menu';
+        menu.hidden = true;
+
+        bar.insertBefore(drop, items[0]);
+        items.forEach(function (b) {
+            b.classList.add('export-item');
+            /* the print dialog is also the way to a PDF — say so, the pages
+               themselves keep their plain "Drucken" markup */
+            if (b.textContent.trim() === 'Drucken') b.textContent = 'Drucken / PDF';
+            menu.appendChild(b);
+        });
+        drop.appendChild(toggle);
+        drop.appendChild(menu);
+
+        function open(on) {
+            menu.hidden = !on;
+            toggle.setAttribute('aria-expanded', on ? 'true' : 'false');
+            toggle.classList.toggle('on', !!on);
+        }
+        toggle.addEventListener('click', function (e) {
+            e.stopPropagation();
+            open(menu.hidden);
+        });
+        menu.addEventListener('click', function () { open(false); });
+        document.addEventListener('click', function (e) {
+            if (!drop.contains(e.target)) open(false);
+        });
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') open(false);
+        });
+    })();
+
     // ?map — on-screen preview of the form (also what headless print uses).
     if (/[?&]map\b/.test(location.search)) {
         buildMap(true);
@@ -1298,7 +1500,7 @@
     // the DOM, which is still incomplete while the table is being built.
     const initialOpen = new Set(openWeeks);
 
-    window.PLAN.forEach((row, i) => {
+    planRows.forEach((row, i) => {
         const ov = saved[i] || {};
         const tr = document.createElement('tr');
         tr.dataset.i = i;
@@ -1314,11 +1516,38 @@
             return;
         }
 
-        const [badgeClass, badgeLabel] = window.BADGE[row.type];
+        /* Shift arrows, first cell of the row. Built for every week, shown
+           only in shift mode; the ▲ additionally only when the week above is
+           free (setShiftMode decides, it needs helpers defined further down). */
+        const shiftTd = document.createElement('td');
+        shiftTd.className = 'shift-col';
+        const upBtn = document.createElement('button');
+        upBtn.type = 'button';
+        upBtn.className = 'shift-btn';
+        upBtn.textContent = '▲';
+        upBtn.title = 'Diese Woche auf die freie Woche davor ziehen';
+        upBtn.setAttribute('aria-label', 'Woche eine Woche früher');
+        upBtn.hidden = true;
+        const downBtn = document.createElement('button');
+        downBtn.type = 'button';
+        downBtn.className = 'shift-btn';
+        downBtn.textContent = '▼';
+        downBtn.title = 'Diese Woche und alles danach eine Woche nach hinten schieben';
+        downBtn.setAttribute('aria-label', 'Woche eine Woche später');
+        upBtn.addEventListener('click', function (e) { e.stopPropagation(); runShift(i, -1); });
+        downBtn.addEventListener('click', function (e) { e.stopPropagation(); runShift(i, 1); });
+        shiftTd.appendChild(upBtn);
+        shiftTd.appendChild(downBtn);
+        tr.appendChild(shiftTd);
+
+        /* type belongs to the edits too — a shift moves the Bereich along with
+           the topic, otherwise the badges stay behind on the old week. */
+        const rowType = ov.type || row.type || 'org';
+        const [badgeClass, badgeLabel] = window.BADGE[rowType] || window.BADGE.org;
         const tds = [];
         const values = [
-            ['num', String(row.nr)],
-            ['num', String(row.kw)],
+            ['num', String(ov.nr != null ? ov.nr : row.nr)],
+            ['num', String(ov.kw != null ? ov.kw : row.kw)],
             ['date', ov.date != null ? ov.date : row.date],
             ['', null],
             ['num', ov.u != null ? ov.u : row.u],
@@ -1332,8 +1561,13 @@
                 const span = document.createElement('span');
                 span.className = 'badge ' + badgeClass;
                 span.textContent = badgeLabel;
-                linkBadge(span, row.type);
+                linkBadge(span, rowType);
                 td.appendChild(span);
+            } else if (idx === 2) {
+                setDateText(td, text);
+            } else if (idx === 4) {
+                td.classList.add('ustd');
+                td.textContent = text;
             } else if (idx !== 5 && idx !== 6) {
                 td.textContent = text;
             }
@@ -1355,7 +1589,13 @@
         tds[5].appendChild(topicSpan);
         tbody.appendChild(tr);
 
-        const ref = { i, dateTd: tds[2], uTd: tds[4], topicSpan, remarkTd: tds[6], matTd, ul: null };
+        const ref = {
+            i, dateTd: tds[2], uTd: tds[4], topicSpan, remarkTd: tds[6], matTd, ul: null,
+            /* structural fields: never edited by hand, but carried through every
+               save so a shifted plan keeps its Bereich, Nummer and KW */
+            type: rowType, nr: ov.nr != null ? ov.nr : row.nr, kw: ov.kw != null ? ov.kw : row.kw,
+            upBtn: upBtn
+        };
 
         // Expandable sub-row, created on demand: bullets under the topic
         // column, materials in the free area under Bemerkungen/Material.
@@ -1530,22 +1770,30 @@
                 out[r.i] = { ferien: r.ferienTd.textContent.trim() };
             } else {
                 const entry = {
+                    nr: r.nr,
+                    kw: r.kw,
+                    type: r.type,
                     date: r.dateTd.textContent.trim(),
                     u: r.uTd.textContent.trim(),
                     topic: r.topicSpan.textContent.trim(),
                     remark: r.remarkTd.textContent.trim()
                 };
-                /* material is maintained by the pills/+ dialog, not by this
-                   form; keep whatever is currently attached to the row so a
-                   plain save does not drop it */
-                if (r.matTd && (r.matTd.dataset.src || '').trim()) {
-                    entry.material = r.matTd.dataset.src.trim();
-                }
-                if (r.ul) {
-                    entry.details = Array.from(r.ul.querySelectorAll('li'))
+                /* Material and Bullets are always written, even when empty:
+                   a missing key means "not overridden", and the renderer would
+                   fall back to the page's PLAN — so an emptied week would get
+                   the original row's bullets back (that is what hid the ▲). */
+                entry.material = r.matTd ? (r.matTd.dataset.src || '').trim() : '';
+                /* same for the MAP-only fields: no form owns them, so carry
+                   over whatever a shift last put there */
+                const vorher = saved[r.i] || {};
+                ['ziel', 'mth', 'med', 'lnw'].forEach(function (k) {
+                    if (vorher[k] != null) entry[k] = vorher[k];
+                });
+                entry.details = r.ul
+                    ? Array.from(r.ul.querySelectorAll('li'))
                         .map(li => li.textContent.trim())
-                        .filter(t => t.length);
-                }
+                        .filter(t => t.length)
+                    : [];  /* no sub-row rendered = no bullets on screen */
                 out[r.i] = entry;
             }
         }
@@ -1623,8 +1871,34 @@
             saveEdits();
         }
         setEditable(editing);
-        if (btn) btn.textContent = editing ? '✔ Fertig' : '✎ Bearbeiten';
+        if (!editing) setShiftMode(false); /* the arrows belong to edit mode */
+        if (btn) btn.textContent = editing ? '✔ Speichern' : '✎ Bearbeiten';
+        if (cancelBtn) cancelBtn.hidden = !editing;
     };
+
+    /* "Abbrechen": leave edit mode WITHOUT saving. Nothing was written yet —
+       saveEdits only runs on "Speichern" — so a reload restores the last saved
+       state. The unload guard has to stay quiet, otherwise the safety net would
+       persist exactly the changes we are throwing away. */
+    let cancelBtn = null;
+    (function () {
+        const bar = document.querySelector('.toolbar');
+        if (!bar) return;
+        const editBtn = [...bar.querySelectorAll('button')]
+            .find(function (b) { return /Bearbeiten/.test(b.textContent); });
+        cancelBtn = document.createElement('button');
+        cancelBtn.type = 'button';
+        cancelBtn.className = 'action secondary plan-cancel';
+        cancelBtn.textContent = 'Abbrechen';
+        cancelBtn.title = 'Bearbeiten beenden und Änderungen verwerfen';
+        cancelBtn.hidden = true;
+        cancelBtn.addEventListener('click', function () {
+            skipUnloadSave = true;
+            location.reload();
+        });
+        if (editBtn) bar.insertBefore(cancelBtn, editBtn.nextSibling);
+        else bar.appendChild(cancelBtn);
+    })();
 
     // Two-click confirm (no native dialogs): first click arms the button, second click resets.
     // Reset throws away every edit of this page — dates, topics, remarks,
@@ -1632,6 +1906,7 @@
     // cloud, without any way back. So: only reachable in edit mode, and
     // guarded by two dialogs, the second one asking to type the word out.
     function doReset() {
+        skipUnloadSave = true; /* mute the beforeunload safety net, see below */
         localStorage.removeItem(KEY);
         localStorage.removeItem(TS_KEY);
         const done = () => location.reload();
@@ -1758,8 +2033,235 @@
     document.querySelectorAll('button[onclick*="resetPlanEdits"]')
         .forEach(b => b.classList.add('plan-reset'));
 
+    // --- Verschieben: move the plan's contents by whole weeks --------------
+    // Klassenfahrt, Praktikum, Ausfall: the calendar stays where it is — KW,
+    // Datum and the date-bound remarks belong to the week, not to the subject
+    // matter. Only the content travels. Whatever is pushed past the last week
+    // is appended as extra weeks; that stuff lands in the next school year,
+    // and saying so out loud beats dropping it silently.
+
+    /* Remarks are a mixed bag: some describe the calendar ("Mi 18.11. Buß- und
+       Bettag", "nur Mo/Di", "Fr 09.07. letzter Schultag"), others the content
+       ("LB 2 abgeschlossen", "Termin nach Klausurplan"). Calendar ones stay on
+       their week, the rest travels with the topic. Split first: a remark that
+       carries both halves ("nur Mi–Fr; Termin nach Klausurplan") is classified
+       per part, otherwise the calendar half would pin the content half down and
+       shifting back would not restore the original. */
+    const CAL_REMARK = /\d{1,2}\.\d{1,2}\.|ferien|unterrichtsfrei|feiertag|zeugnis|schultag|^nur\s/i;
+    const NEXT_YEAR = '→ nächstes Schuljahr';
+
+    function effVal(i, key) {
+        const ov = saved[i] || {}, row = planRows[i] || {};
+        return ov[key] != null ? ov[key] : row[key];
+    }
+    function isFerienRow(i) { return !!effVal(i, 'ferien'); }
+
+    function weekSlots() {
+        const out = [];
+        for (let i = 0; i < planRows.length; i++) if (!isFerienRow(i)) out.push(i);
+        return out;
+    }
+
+    function splitRemark(text) {
+        const teile = String(text || '').split(/\s*[·;]\s*/).map(function (t) { return t.trim(); });
+        const bleibt = [], wandert = [];
+        teile.forEach(function (t) { if (t) (CAL_REMARK.test(t) ? bleibt : wandert).push(t); });
+        return { bleibt: bleibt.join(' · '), wandert: wandert.join(' · ') };
+    }
+
+    function contentOf(i) {
+        const ov = saved[i] || {}, row = planRows[i] || {};
+        return {
+            type: effVal(i, 'type') || 'org',
+            u: effVal(i, 'u') || '',
+            topic: effVal(i, 'topic') || '',
+            remark: effVal(i, 'remark') || '',
+            details: (ov.details || row.details || []).slice(),
+            material: (ov.material != null ? ov.material : row.material) || '',
+            /* MAP-only fields (Modulablaufplan): not shown in the table, but
+               they describe the content, so they travel with it */
+            ziel: effVal(i, 'ziel'),
+            mth: effVal(i, 'mth'),
+            med: effVal(i, 'med'),
+            lnw: effVal(i, 'lnw')
+        };
+    }
+    /* A freed week is really empty: every field is cleared, nothing of the
+       old content stays visible and nothing can creep back from the page's
+       PLAN (a missing key would mean "not overridden"). */
+    function emptyContent() {
+        return {
+            type: 'org', u: '', topic: '', remark: '', details: [], material: '',
+            ziel: '', mth: '', med: '', lnw: ''
+        };
+    }
+    function isEmptyContent(c) {
+        if (!c) return true;
+        return !(c.details || []).length && !c.material && !c.u && !c.remark &&
+            (!c.topic || c.topic === '—' || c.topic === '-');
+    }
+
+    // Fired by the dialog. Either way the *selected* week is the one that
+    // moves: delta > 0 pushes it (and everything after it) to a later week and
+    // frees its slot, delta < 0 pulls it back onto the free week(s) in front of
+    // it. Returns null on success, else a reason to show in the dialog.
+    function applyShift(fromIndex, delta) {
+        const slots = weekSlots();
+        const pos = slots.indexOf(fromIndex);
+        if (pos < 0 || !delta) return 'Woche nicht gefunden.';
+
+        const teile = slots.map(function (i) { return splitRemark(contentOf(i).remark); });
+        const stay = teile.map(function (t) { return t.bleibt; });
+        const moving = slots.map(function (i, k) {
+            const c = contentOf(i);
+            c.remark = teile[k].wandert;
+            return c;
+        });
+
+        let next;
+        if (delta > 0) {
+            next = moving.slice(0, pos);
+            for (let d = 0; d < delta; d++) next.push(emptyContent());
+            next = next.concat(moving.slice(pos));
+        } else {
+            /* Pulling up swallows the weeks in front of the cursor — only
+               allowed when they are empty, otherwise a topic would quietly
+               disappear. */
+            const raus = -delta;
+            if (pos - raus < 0) return 'Davor liegen nicht genug Wochen.';
+            for (let d = 1; d <= raus; d++) {
+                if (!isEmptyContent(moving[pos - d])) {
+                    return 'Die Woche davor ist nicht leer — dorthin l\u00e4sst sich nichts hochziehen.';
+                }
+            }
+            next = moving.slice(0, pos - raus).concat(moving.slice(pos));
+            while (next.length < moving.length) next.push(emptyContent());
+        }
+
+        /* Content ran past the last week: grow the table. Those rows exist only
+           in the edits object, planRows covers them on the next load. */
+        let angehaengt = 0;
+        while (next.length > slots.length) {
+            const idx = planRows.length;
+            planRows.push({ nr: 0, kw: '', date: NEXT_YEAR, type: 'org', u: '', topic: '', remark: '', details: [] });
+            slots.push(idx);
+            angehaengt++;
+        }
+
+        let nr = 0;
+        slots.forEach(function (i, k) {
+            const c = next[k] || emptyContent();
+            const remark = [stay[k] || '', c.remark || ''].filter(Boolean).join(' · ');
+            const entry = {
+                nr: ++nr,
+                kw: effVal(i, 'kw') != null ? effVal(i, 'kw') : '',
+                date: effVal(i, 'date') != null ? effVal(i, 'date') : '',
+                type: c.type,
+                u: c.u,
+                topic: c.topic,
+                remark: remark,
+                details: c.details
+            };
+            entry.material = c.material || '';
+            /* always written, even empty — see emptyContent() */
+            ['ziel', 'mth', 'med', 'lnw'].forEach(function (k) {
+                entry[k] = c[k] != null ? c[k] : '';
+            });
+            saved[i] = entry;
+        });
+
+        /* Undo case: trailing extra weeks that ended up empty go away again. */
+        for (let i = planRows.length - 1; i >= window.PLAN.length; i--) {
+            if (isEmptyContent(saved[i])) delete saved[i]; else break;
+        }
+
+        localStorage.setItem(KEY, JSON.stringify(saved));
+        localStorage.setItem(TS_KEY, new Date().toISOString());
+        skipUnloadSave = true; /* the reload must not resurrect the old table */
+        const done = function () { location.reload(); };
+        const p = pushRemote();
+        if (p && p.then) p.then(done, done); else done();
+        return null;
+    }
+
+    /* Is the week before this one free? Only then may a week be pulled up. */
+    function freeSlotBefore(i) {
+        const slots = weekSlots();
+        const pos = slots.indexOf(i);
+        return pos > 0 && isEmptyContent(contentOf(slots[pos - 1]));
+    }
+
+    let shiftMode = false;
+
+    /* The arrows live in an extra leading column. It is part of the table all
+       the time (simpler than rebuilding rows), so switching the mode only
+       toggles visibility — plus the colSpans of the rows that span everything:
+       holiday rows and the spacer of the detail rows. */
+    function setShiftMode(on) {
+        shiftMode = !!on;
+        document.body.classList.toggle('shifting', shiftMode);
+        document.querySelectorAll('#plan-table tr.ferien > td')
+            .forEach(function (td) { td.colSpan = shiftMode ? 9 : 8; });
+        document.querySelectorAll('#plan-table tr.detail-row > td:first-child')
+            .forEach(function (td) { td.colSpan = shiftMode ? 6 : 5; });
+        rendered.forEach(function (r) {
+            if (r.upBtn) r.upBtn.hidden = !(shiftMode && freeSlotBefore(r.i));
+        });
+        if (shiftBtn) shiftBtn.classList.toggle('on', shiftMode);
+        if (!shiftMode) setShiftMsg('');
+    }
+
+    let shiftMsgEl = null;
+    function setShiftMsg(text) {
+        if (!shiftMsgEl) return;
+        shiftMsgEl.textContent = text || '';
+        shiftMsgEl.hidden = !text;
+    }
+
+    function runShift(i, delta) {
+        const grund = applyShift(i, delta);
+        if (grund) setShiftMsg(grund); /* applyShift reloads on success */
+    }
+
+    /* Same deal as the reset button: only reachable in edit mode, and built
+       here so the plan pages themselves stay untouched. */
+    let shiftBtn = null;
+    (function () {
+        const bar = document.querySelector('.toolbar');
+        if (!bar) return;
+        shiftBtn = document.createElement('button');
+        shiftBtn.type = 'button';
+        shiftBtn.className = 'action plan-shift';
+        /* tiny stacked ▲▼ instead of an arrow glyph — same symbols as the
+           column, so the button shows what it switches on */
+        shiftBtn.innerHTML = '<span class="shift-ico"><i>▲</i><i>▼</i></span>Verschieben';
+        shiftBtn.title = 'Wochen verschieben: Pfeile vor der Nr.';
+        shiftBtn.addEventListener('click', function () { setShiftMode(!shiftMode); });
+        shiftMsgEl = document.createElement('span');
+        shiftMsgEl.className = 'shift-msg';
+        shiftMsgEl.hidden = true;
+        const reset = bar.querySelector('button.plan-reset');
+        if (reset) { bar.insertBefore(shiftBtn, reset); bar.insertBefore(shiftMsgEl, reset); }
+        else { bar.appendChild(shiftBtn); bar.appendChild(shiftMsgEl); }
+    })();
+
+    function structurallyDiffers(map) {
+        for (const k in map) if (Number(k) >= planRows.length) return true;
+        for (const r of rendered) {
+            if (r.ferienTd) continue;
+            const ov = map[r.i] || {};
+            if (ov.type && ov.type !== r.type) return true;
+            if (ov.nr != null && String(ov.nr) !== String(r.nr)) return true;
+        }
+        return false;
+    }
+
     // Safety net: persist pending edits when the tab closes mid-edit.
+    // Skipped while resetting/shifting: those reload out of edit mode, and
+    // saving there would write the old table straight back (locally and to the
+    // cloud) — which is what made "Zurücksetzen" a no-op.
     window.addEventListener('beforeunload', () => {
+        if (skipUnloadSave) return;
         if (document.body.classList.contains('editing')) saveEdits();
     });
 
@@ -1790,14 +2292,18 @@
 
     // Re-applies an edits object to the already rendered table (remote wins).
     function applyEdits(map) {
+        /* Badges, numbers and the row count are baked into the DOM at render
+           time, so a structurally different state — someone shifted the plan on
+           another device — needs a real reload, not a text update. */
+        if (structurallyDiffers(map)) { skipUnloadSave = true; location.reload(); return; }
         for (const r of rendered) {
             const ov = map[r.i] || {};
-            const row = window.PLAN[r.i];
+            const row = planRows[r.i] || {};
             if (r.ferienTd) {
                 r.ferienTd.textContent = ov.ferien || row.ferien;
                 continue;
             }
-            r.dateTd.textContent = ov.date != null ? ov.date : row.date;
+            setDateText(r.dateTd, ov.date != null ? ov.date : row.date);
             r.uTd.textContent = ov.u != null ? ov.u : row.u;
             setMathText(r.topicSpan, ov.topic != null ? ov.topic : row.topic);
             setMathText(r.remarkTd, ov.remark != null ? ov.remark : row.remark);
@@ -1807,9 +2313,9 @@
     }
 
     function pushRemote() {
-        if (!window.svpAuth || !svpAuth.hasSession()) return;
+        if (!window.svpAuth || !svpAuth.hasSession()) return null;
         const ts = localStorage.getItem(TS_KEY) || new Date().toISOString();
-        svpAuth.api('svp_plan_edits', {
+        return svpAuth.api('svp_plan_edits', {
             method: 'POST',
             headers: { Prefer: 'resolution=merge-duplicates,return=minimal' },
             body: JSON.stringify([{

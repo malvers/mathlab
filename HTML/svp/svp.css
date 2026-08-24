@@ -323,21 +323,20 @@ body.editing .mat-pill-wrap .mat-pill { padding-right: 24px; }
 /* Material quick-add: per-week + button, inline input and drop highlight */
 #plan-table td.mat { text-align: right; }
 #plan-table td.mat .mat-add {
-    display: inline-block;
+    display: none;              /* wie ⧉ und ⇩: nur im Bearbeiten-Modus */
     width: 24px;
     height: 24px;
-    line-height: 22px;
+    line-height: 24px;
     text-align: center;
-    border: 1px dashed var(--line);
-    border-radius: 999px;
+    border: none;
     color: var(--muted);
-    font-size: 16px;
+    font-size: 21px;
     margin: 2px 0 2px 6px;
     vertical-align: middle;
     cursor: pointer;
     user-select: none;
 }
-#plan-table td.mat .mat-add:hover { color: inherit; border-color: currentColor; }
+#plan-table td.mat .mat-add:hover { color: inherit; }
 
 /* Material clipboard: copy a week, paste it into another Jahrgangsstufe.
    Same look as the + button, so the cell stays calm. */
@@ -345,27 +344,24 @@ body.editing .mat-pill-wrap .mat-pill { padding-right: 24px; }
     display: none;              /* only while editing — see below */
     width: 24px;
     height: 24px;
-    line-height: 22px;
+    line-height: 24px;
     text-align: center;
-    border: 1px dashed var(--line);
-    border-radius: 999px;
+    border: none;
     color: var(--muted);
-    font-size: 13px;
+    font-size: 18px;
     margin: 2px 0 2px 6px;
     vertical-align: middle;
     cursor: pointer;
     user-select: none;
 }
 /* Copy and paste belong to editing, like the ✕ inside the pills. */
-body.editing #plan-table td.mat .mat-act { display: inline-block; }
+body.editing #plan-table td.mat .mat-act,
+body.editing #plan-table td.mat .mat-add { display: inline-block; }
 /* nothing to copy / empty clipboard: the JS hides them even while editing */
 body.editing #plan-table td.mat .mat-act[hidden] { display: none; }
-#plan-table td.mat .mat-act:hover { color: inherit; border-color: currentColor; }
-#plan-table td.mat .mat-act.done {
-    color: rgb(121, 158, 49);
-    border-color: rgb(121, 158, 49);
-    border-style: solid;
-}
+#plan-table td.mat .mat-act.mat-copy { font-size: 22px; }
+#plan-table td.mat .mat-act:hover { color: inherit; }
+#plan-table td.mat .mat-act.done { color: rgb(121, 158, 49); }
 
 /* short explanation line above the pill list in the paste dialog */
 .mat-modal .mm-info {
@@ -376,10 +372,140 @@ body.editing #plan-table td.mat .mat-act[hidden] { display: none; }
 }
 #plan-table td.mat.drop { outline: 2px dashed rgb(121, 158, 49); outline-offset: -2px; }
 
+/* Verschiebe-Modus: schmale Pfeilspalte vor der Nr. Sie steckt immer in der
+   Tabelle und wird nur ein-/ausgeblendet — die colSpans der Ferien- und
+   Detailzeilen zieht setShiftMode() nach. */
+#plan-table .shift-col { display: none; width: 1%; white-space: nowrap; }
+body.shifting #plan-table .shift-col { display: table-cell; }
+#plan-table td.shift-col {
+    /* 9px wie jede Zelle + 2.2px, damit die Dreiecksmitte auf der Mitte der
+       Ziffern sitzt: die Pfeil-Zeilenbox ist niedriger als die der Nr.
+       (gemessen: 15.17px gegen 19.5px, Versatz 2.16px). */
+    padding-top: 11.2px;
+    padding-right: 2px;
+    text-align: center;
+    vertical-align: top; /* wie der Rest der Zeile */
+}
+.shift-btn {
+    display: block;
+    margin: 0 auto;
+    background: none;
+    border: none;
+    color: inherit;
+    opacity: 0.5;
+    cursor: pointer;
+    font: inherit;
+    font-size: 0.8em;
+    line-height: 1.05;
+    padding: 1px 2px;
+}
+.shift-btn:hover { opacity: 1; color: var(--phi); }
+/* Button-Icon: dieselben Dreiecke, klein und gestapelt */
+.shift-ico {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.55em;
+    line-height: 0.95;
+    margin-right: 7px;
+    vertical-align: middle;
+}
+.shift-ico i { font-style: normal; }
+.shift-btn[hidden] { display: none; }
+.toolbar button.action.plan-shift.on {
+    border-color: var(--phi);
+    color: var(--phi);
+}
+.shift-msg {
+    color: var(--ypsilon);
+    font-size: 0.85em;
+    align-self: center;
+}
+.shift-msg[hidden] { display: none; }
+
+/* Kontextmenü einer einzelnen Material-Pill (Rechtsklick / langes Drücken
+   im Bearbeiten-Modus) — Optik wie die Nav-Dropdowns. */
+.mat-ctx {
+    position: fixed;
+    z-index: 120;
+    min-width: 210px;
+    padding: 8px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    box-shadow: 0 8px 22px var(--shadow);
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+.mat-ctx-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.6rem;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 2px 4px 6px;
+    max-width: 240px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+/* ⧉ wirkt bei gleicher Schriftgröße kleiner als ↗ und ✕ — daher extra */
+.mat-ctx-item .ctx-ico.ctx-ico-gross { font-size: 22px; }
+.mat-ctx-item .ctx-ico {
+    display: inline-block;
+    width: 22px;
+    font-size: 18px;
+    line-height: 1;
+    text-align: center;
+    vertical-align: -2px;
+}
+.mat-ctx-item {
+    background: none;
+    border: 1px solid transparent;
+    border-radius: 7px;
+    color: inherit;
+    font: inherit;
+    font-size: 0.9rem;
+    text-align: left;
+    padding: 6px 8px;
+    cursor: pointer;
+}
+.mat-ctx-item:hover {
+    border-color: var(--phi);
+    background: rgba(121, 158, 49, 0.16);
+}
+
+/* Export-Menü: dieselbe Optik wie die Dropdowns der Quick-Nav
+   (.nav-drop-panel), damit die Seite eine Sprache spricht. */
+.export-drop { position: relative; display: inline-flex; }
+.export-caret { margin-left: 4px; font-size: 0.85em; }
+.export-menu {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    z-index: 80;
+    padding: 10px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    box-shadow: 0 8px 22px var(--shadow);
+    white-space: nowrap;
+}
+.export-menu[hidden] { display: none; }
+.export-menu button.action.export-item { width: 100%; text-align: center; }
+
 /* "Zurücksetzen" wirft alles weg — es gehört zum Bearbeiten und ist
    ausserhalb dieses Modus gar nicht erst zu sehen. */
-.toolbar button.action.plan-reset { display: none; }
-body.editing .toolbar button.action.plan-reset { display: inline-block; }
+.toolbar button.action.plan-reset,
+.toolbar button.action.plan-shift { display: none; }
+body.editing .toolbar button.action.plan-reset,
+body.editing .toolbar button.action.plan-shift { display: inline-block; }
 
 /* Loud variant of the modal for the two reset warnings */
 .mat-modal.mm-danger { border: 2px solid var(--ypsilon, rgb(176, 36, 24)); }
@@ -452,6 +578,7 @@ html.svp-light .mat-modal .mm-title.mm-warn { color: rgb(176, 36, 24); }
     margin-left: auto;
 }
 .mm-item.sel .mat-pill { outline: 2px solid rgb(121, 158, 49); }
+.mat-modal select,
 .mat-modal input {
     display: block;
     width: 100%;
@@ -784,26 +911,44 @@ h1 {
     gap: 10px;
     flex-wrap: wrap;
     align-items: center;
+    /* dezente Trennlinie darueber, die nach links und rechts ausblendet —
+       als Hintergrundbild statt Rahmen, sonst liefe sie hart bis zum Rand */
+    padding-top: 16px;
+    background-image: linear-gradient(90deg, transparent, var(--line), transparent);
+    background-size: 100% 1px;
+    background-repeat: no-repeat;
+    background-position: top center;
 }
 
+/* Aktionsfarbe bleibt Grün, aber dezent: flach statt Verlauf, Text in der
+   normalen Schriftfarbe. Kräftig wird erst der Hover. */
 button.action {
     font-family: 'Orbitron', sans-serif;
     font-size: 0.72rem;
     letter-spacing: 0.06em;
-    color: rgb(240, 248, 235);
-    background: linear-gradient(180deg, rgba(121, 158, 49, 0.95), rgba(96, 128, 38, 0.95));
-    border: 1px solid rgba(160, 200, 80, 0.5);
+    color: var(--text);
+    background: rgba(121, 158, 49, 0.16);
+    border: 1px solid rgba(121, 158, 49, 0.5);
     border-radius: 8px;
     padding: 9px 16px;
     cursor: pointer;
 }
 
-button.action:hover { filter: brightness(1.12); }
+button.action:hover {
+    background: rgba(121, 158, 49, 0.3);
+    border-color: rgb(121, 158, 49);
+    filter: none;
+}
 
+/* wie button.action, nur in λ-Orange statt Grün */
 button.action.orange {
-    color: rgb(20, 34, 60);
-    background: linear-gradient(180deg, rgba(245, 194, 66, 0.95), rgba(212, 158, 38, 0.95));
+    color: var(--text);
+    background: rgba(245, 194, 66, 0.16);
     border-color: rgba(245, 194, 66, 0.55);
+}
+button.action.orange:hover {
+    background: rgba(245, 194, 66, 0.3);
+    border-color: rgb(245, 194, 66);
 }
 
 button.action.secondary {
@@ -989,7 +1134,25 @@ tbody td {
 tbody tr:last-child td { border-bottom: none; }
 
 td.num { color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+/* zweizeilig (siehe setDateText) und so schmal wie ihr Inhalt —
+   der gewonnene Platz geht an die Thema-Spalte */
 td.date { white-space: nowrap; color: var(--muted); font-variant-numeric: tabular-nums; }
+#plan-table td.date, #plan-table th.date-col { width: 1%; }
+/* Bemerkungen sind Randnotizen — sie dürfen umbrechen, damit die
+   Thema-Spalte den Platz bekommt */
+#plan-table td.remark, #plan-table th.remark-col { width: 200px; }
+/* Thema/Inhalte hat Vorrang: es nimmt den gesamten Rest, alle anderen
+   Spalten bleiben bei ihrer Inhaltsbreite */
+#plan-table td.topic, #plan-table th.topic-col { width: 100%; }
+#plan-table td.num, #plan-table th.num-col { width: 1%; }
+/* Ustd. trägt nur "1/13" bzw. "KA 1" — enger setzen, den Rest kriegt Thema */
+#plan-table td.ustd, #plan-table th.ustd-col {
+    width: 1%;
+    padding-left: 4px;
+    padding-right: 4px;
+}
+/* die Kopfzeile ist hier der Engpass, nicht der Inhalt ("1/13") */
+#plan-table th.ustd-col { letter-spacing: 0; }
 td.topic { font-weight: 400; min-width: 220px; }
 td.remark { color: var(--muted); font-size: 0.88rem; min-width: 160px; }
 
