@@ -200,6 +200,7 @@ const CyberBranding = {
         const file = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
         const url = this.LAB_VIDEOS[file];
         if (!url) return;
+        this.ensureVideoLightboxLoaded();
         const a = document.createElement('a');
         a.className = 'lab-video-btn';
         a.href = url;
@@ -220,85 +221,46 @@ const CyberBranding = {
     },
 
     // --- Lab video lightbox ------------------------------------------------
-    // youtube-nocookie keeps the player from setting cookies before playback.
-    _videoId(url) {
-        const m = String(url).match(/(?:youtu\.be\/|[?&]v=|\/embed\/)([\w-]{6,})/);
-        return m ? m[1] : null;
+    // The player itself lives in js/video-lightbox.js — the same module the SVP pages load, so
+    // there is exactly one implementation and one set of styles for both.
+    ensureVideoLightboxLoaded() {
+        if (window.VideoLightbox || this._videoLightboxRequested) return;
+
+        const script = document.createElement("script");
+        script.src = resolveCyberHtmlAsset("js/video-lightbox.js");
+        script.async = true;
+        script.dataset.cyberVideoLightbox = "1";
+        script.onerror = () => {
+            this._videoLightboxRequested = false;
+            console.warn("CyberBranding: failed to load js/video-lightbox.js, falling back to a new tab.");
+        };
+
+        this._videoLightboxRequested = true;
+        document.head.appendChild(script);
     },
 
     closeLabVideo() {
-        const wrap = document.querySelector('.lab-video-wrap');
-        if (!wrap) return;
-        wrap.remove();                 /* removing the iframe stops playback */
-        document.removeEventListener('keydown', this._labVideoKey, true);
-        this._labVideoKey = null;
-        /* back to the button that opened the player, so keyboard users do not land at page top */
-        const back = this._labVideoReturn;
-        this._labVideoReturn = null;
-        if (back && back.focus) back.focus();
+        if (window.VideoLightbox) window.VideoLightbox.close();
     },
 
     openLabVideo(url) {
-        const id = this._videoId(url);
-        if (!id) { window.open(url, '_blank', 'noopener'); return; }
-        this.closeLabVideo();
-
-        this._labVideoReturn = document.activeElement;
-        const wrap = document.createElement('div');
-        wrap.className = 'lab-video-wrap';
-        wrap.setAttribute('role', 'dialog');
-        wrap.setAttribute('aria-modal', 'true');
-        wrap.setAttribute('aria-label', 'Video-Demo');
-
-        const box = document.createElement('div');
-        box.className = 'lab-video-box';
-
-        const close = document.createElement('button');
-        close.type = 'button';
-        close.className = 'lab-video-close';
-        close.textContent = '✕';
-        close.title = 'Schließen (Esc)';
-        close.setAttribute('aria-label', 'Video schließen');
-        close.addEventListener('click', () => this.closeLabVideo());
-        box.appendChild(close);
-
-        const frame = document.createElement('div');
-        frame.className = 'lab-video-frame';
-        const iframe = document.createElement('iframe');
-        /* Laeuft sofort und ohne Bedienleiste; ein Klick ins Bild haelt an
-           und startet wieder, Esc schliesst. */
-        iframe.src = 'https://www.youtube-nocookie.com/embed/' + id +
-                     '?autoplay=1&controls=0&rel=0&modestbranding=1&playsinline=1&iv_load_policy=3';
-        iframe.title = 'Video-Demo';
-        iframe.allow = 'autoplay; encrypted-media; picture-in-picture; fullscreen';
-        iframe.setAttribute('allowfullscreen', '');
-        iframe.setAttribute('referrerpolicy', 'strict-origin-when-cross-origin');
-        frame.appendChild(iframe);
-        box.appendChild(frame);
-
-        const out = document.createElement('a');
-        out.className = 'lab-video-out';
-        out.href = url;
-        out.target = '_blank';
-        out.rel = 'noopener';
-        out.textContent = 'Auf YouTube öffnen ↗';
-        box.appendChild(out);
-
-        wrap.appendChild(box);
-        /* the lab underneath must not react to clicks meant for the player */
-        ['click', 'mousedown', 'mouseup', 'pointerdown', 'wheel', 'touchstart']
-            .forEach(ev => wrap.addEventListener(ev, e => e.stopPropagation()));
-        wrap.addEventListener('click', (e) => { if (e.target === wrap) this.closeLabVideo(); });
-        document.body.appendChild(wrap);
-
-        this._labVideoKey = (e) => {
-            if (e.key !== 'Escape') return;
-            e.stopPropagation();       /* labs often listen for Escape themselves */
-            this.closeLabVideo();
-        };
-        document.addEventListener('keydown', this._labVideoKey, true);
-        close.focus();                 /* Esc and Tab start inside the dialog, not in the lab */
+        if (window.VideoLightbox) { window.VideoLightbox.open(url, { title: "Video-Demo" }); return; }
+        /* clicked before the module arrived (slow line): load it now, play as soon as it is there,
+           and never leave the click dead — after 3 s the video opens in a tab instead. */
+        this.ensureVideoLightboxLoaded();
+        const t0 = Date.now();
+        const wait = setInterval(() => {
+            if (window.VideoLightbox) {
+                clearInterval(wait);
+                window.VideoLightbox.open(url, { title: "Video-Demo" });
+            } else if (Date.now() - t0 > 3000) {
+                clearInterval(wait);
+                window.open(url, "_blank", "noopener");
+            }
+        }, 60);
     },
+
+    _videoLightboxRequested: false,
     _coreLoadRequested: false,
     _navLoadRequested: false,
     _overlaysLoadRequested: false,
