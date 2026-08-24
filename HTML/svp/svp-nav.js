@@ -404,3 +404,23 @@
     band.appendChild(nav);
     document.body.insertBefore(band, document.body.firstChild);
 })();
+
+
+/* The ▶ icon in the page header plays the video right here in a frame instead of sending the class
+   off into a new tab — same shared player the labs use (js/video-lightbox.js, one folder up from
+   the svp root). Loading fails? The plain link stays and simply opens a tab. */
+(function () {
+    const script = document.currentScript;
+    const link = document.querySelector('.head-video');
+    if (!script || !link) return;
+
+    const wire = () => {
+        if (window.VideoLightbox) window.VideoLightbox.wireLink(link, { title: 'Video zum Schuljahr' });
+    };
+    if (window.VideoLightbox) { wire(); return; }
+
+    const sc = document.createElement('script');
+    sc.src = new URL('../js/video-lightbox.js', script.src).href;
+    sc.onload = wire;
+    document.head.appendChild(sc);
+})();
