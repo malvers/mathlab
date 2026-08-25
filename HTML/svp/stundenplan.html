@@ -39,11 +39,12 @@
             <span class="tt-ab" id="abweek" title="A/B-Woche — Anker: 24.08.2026 = A (Doc)"></span>
             <button class="action secondary" id="today" type="button">Heute</button>
             <div class="tt-depts" id="depts">
-                <button type="button" data-dept="GS" title="Grundschule 1–4">GS</button>
-                <button type="button" data-dept="OS" title="Oberschule 5–10">OS</button>
-                <button type="button" data-dept="GYM" title="Gymnasiale Oberstufe 11/12">GYM</button>
-                <button type="button" data-dept="FOS" title="Fachoberschule (FOG, FOS, FOW)">FOS</button>
-                <button type="button" data-dept="BGY" title="Berufliches Gymnasium">BGY</button>
+                <button type="button" class="on" data-dept="GS" title="Grundschule 1–4">GS</button>
+                <button type="button" class="on" data-dept="OS" title="Oberschule 5–10">OS</button>
+                <button type="button" class="on" data-dept="GYM" title="Gymnasiale Oberstufe 11/12">GYM</button>
+                <button type="button" class="on" data-dept="FOS" title="Fachoberschule (FOG, FOS, FOW)">FOS</button>
+                <button type="button" class="on" data-dept="BGY" title="Berufliches Gymnasium">BGY</button>
+                <button type="button" class="on" data-dept="BS" title="Berufsfachschule / Fachschule (BSW, FSE, POD, SAR)">BS</button>
                 <button type="button" class="tt-conf" id="conf"
                     title="Nur Konflikte: schulweit eine Person gleichzeitig in zwei Räumen, bei gewählter Person jede Überschneidung">&#9888; Konflikte anzeigen</button>
             </div>
@@ -54,38 +55,34 @@
 
         <section class="tt-opt" id="opt" hidden>
             <div class="tt-opt-row">
-                <label class="tt-opt-field">
-                    <span>Bewegen darf</span>
-                    <select id="opt-scope">
+                <label class="tt-opt-field" title="Was der Optimierer bewegen darf">
+                    <select id="opt-scope" aria-label="Was der Optimierer bewegen darf">
                         <option value="all">ganze Schule</option>
-                        <option value="me">nur die gewählte Person</option>
+                        <option value="me">gewählte Person</option>
                     </select>
                 </label>
-                <label class="tt-opt-field">
-                    <span>Generationen</span>
-                    <select id="opt-iters">
-                        <option value="300000">schnell (≈ 5 s)</option>
-                        <option value="1000000">normal (≈ 15 s)</option>
+                <label class="tt-opt-field" title="Generationen (Rechentiefe)">
+                    <select id="opt-iters" aria-label="Generationen (Rechentiefe)">
                         <option value="3000000">gründlich (≈ 1 min)</option>
                         <option value="9000000" selected>supergründlich (≈ 2–3 min)</option>
                         <option value="18000000">extrem (≈ 5 min)</option>
                     </select>
                 </label>
                 <button class="action" id="opt-run" type="button">Start</button>
-                <button class="action secondary" id="opt-diff" type="button" hidden>Vorschlagsplan</button>
-                <button class="action secondary" id="opt-show" type="button" hidden>Vorschlag im Plan zeigen</button>
-                <button class="action secondary" id="opt-clear" type="button" hidden>Verwerfen</button>
-                <span class="tt-savebox" id="savebox" hidden>
+                <button class="action secondary" id="opt-diff" type="button" disabled>Vorschlagsplan</button>
+                <button class="action secondary" id="opt-show" type="button" disabled>Vorschlag im Plan zeigen</button>
+                <button class="action secondary" id="opt-clear" type="button" disabled>Verwerfen</button>
+                <button class="action secondary" id="opt-undo" type="button" disabled title="Letzte Hand-Verschiebung zurücknehmen">Rückgängig</button>
+                <span class="tt-savebox" id="savebox">
                     <input type="text" id="opt-name" class="tt-search" placeholder="Name der Version …" maxlength="60" aria-label="Name der Version">
-                    <button class="action" id="opt-save" type="button">Version speichern</button>
+                    <button class="action" id="opt-save" type="button" disabled>Speichern</button>
                 </span>
-                <select id="opt-pick" class="tt-pick" aria-label="Gespeicherte Version laden" hidden>
-                    <option value="">Version laden …</option>
-                </select>
-                <button class="action secondary" id="opt-csv" type="button" hidden title="Änderungsliste als CSV (Excel/Numbers)">Liste CSV</button>
-                <button class="action secondary" id="opt-print" type="button" hidden title="Änderungsliste als Druckansicht">Liste drucken</button>
+
+                <button class="action secondary" id="opt-csv" type="button" disabled title="Änderungsliste als CSV (Excel/Numbers)">Liste CSV</button>
+                <button class="action secondary" id="opt-print" type="button" disabled title="Änderungsliste als Druckansicht">Liste drucken</button>
                 <button class="tt-opt-close" id="opt-close" type="button" aria-label="Schließen">&times;</button>
             </div>
+            <div class="tt-opt-status" id="opt-status"></div>
             <div class="tt-opt-progress" id="opt-progress" hidden>
                 <div class="tt-opt-bar"><div class="tt-opt-fill" id="opt-fill"></div></div>
                 <div class="tt-opt-live" id="opt-live"></div>
@@ -180,11 +177,16 @@
                     const a = lessons[i], b = lessons[j];
                     if (a.date !== b.date || !overlaps(a, b)) continue;
                     if (a.code === 'cancelled' || b.code === 'cancelled') continue;
+                    // Same rule as the engine's sitesDiffer(): two rooms -> different rooms;
+                    // a roomless lesson counts by the site of its class (FO -> Schumannstr.),
+                    // so "9a in A102" vs "FOG25-1 without room" is a conflict too.
+                    const placesDiffer = (a.rooms.length && b.rooms.length)
+                        ? !a.rooms.some(r => b.rooms.includes(r))
+                        : (() => { const sa = TimetableOptimizer.siteOf(a), sb = TimetableOptimizer.siteOf(b); return !!(sa && sb && sa !== sb); })();
                     const shared = scope === 'me'
                         ? true
                         : realShare(a.teachers, b.teachers)
-                          && a.rooms.length && b.rooms.length
-                          && !a.rooms.some(r => b.rooms.includes(r))
+                          && placesDiffer
                           // same subject + shared class in two rooms = Kopplung (same rule as the optimizer)
                           && !(a.subject && a.subject === b.subject && a.classes.some(c => b.classes.includes(c)));
                     if (shared) { clash.add(i); clash.add(j); }
@@ -212,6 +214,24 @@
             return sorted;
         }
 
+        // Conflict counts of a plan, page-side (hard = one person in two rooms; site = change too tight)
+        function planCounts(lessons, moved) {
+            const isBanner = l => toMin(l.endTime) - toMin(l.startTime) > 600;
+            const L = lessons.filter(l => !isBanner(l) && l.code !== 'cancelled');
+            const hard = findClashes(L, 'all').size;
+            const byTD = {};
+            for (const l of L) for (const t of l.teachers) if (!VIRTUAL.has(t)) (byTD[t + '|' + l.date] ??= []).push(l);
+            let site = 0;
+            for (const k in byTD) {
+                const list = byTD[k].sort((a, b) => a.startTime - b.startTime);
+                for (let i = 1; i < list.length; i++) {
+                    const p = list[i - 1], q = list[i], sp = TimetableOptimizer.siteOf(p), sq = TimetableOptimizer.siteOf(q);
+                    if (sp && sq && sp !== sq && toMin(q.startTime) - toMin(p.endTime) < TimetableOptimizer.travel(sp, sq)) site++;
+                }
+            }
+            return { hard, site, newOverlap: 0, moved };
+        }
+
         // The conflict chip next to "Optimieren" - fed by render() and live by the optimizer run
         function setConfChip(n) {
             const cc = document.getElementById('confcount');
@@ -230,11 +250,16 @@
         let DATA = null;       // the week currently on screen
         let CURRENT = null;    // its Monday, as YYYYMMDD
         let SELECTED = null;   // teacher short name, or null for "everybody"
-        let DEPT = null;       // "GS" | "OS" | "GYM" | "FOS" | "BGY" | null = no filter
+        let DEPT_OFF = new Set();   // branches switched off (all on by default, click = Abwahl); all off = empty plan
+        // a lesson is visible unless every one of its classes belongs to a switched-off branch
+        const deptVisible = l => !l.classes.length || l.classes.some(c => !DEPT_OFF.has(deptOf(c)));
+        const deptLabel = () => DEPT_OFF.size ? 'ohne ' + [...DEPT_OFF].join(', ') : '';
         let CONF = false;      // true = show only lessons involved in a clash
         let PROPOSAL = null;   // { week, moves, lessons (applied), counts0, counts1 } from the optimizer
         let VIRTUAL = new Set(); // placeholder "teachers" of the week on screen
         let PROPOSAL_MODE = null; // null = original, 'full' = plan with proposal applied, 'diff' = only the moves (alt/neu)
+        let PLAN = null;          // { lessons, mode } - what the grid currently shows
+        let LAYOUT = null;        // time axis of the current grid (for drop zones)
 
         // School branch from the class name prefix. Measured against the real
         // WebUntis departments: GS = dep 3 (1a-4b), OS = dep 1 (5a-12),
@@ -242,6 +267,7 @@
         function deptOf(className) {
             if (/^BGY/.test(className)) return 'BGY';
             if (/^FO[GSW]/.test(className)) return 'FOS';
+            if (/^(BSW|FSE|POD|SAR)/.test(className)) return 'BS';
             const n = parseInt(className, 10);
             if (n >= 1 && n <= 4) return 'GS';
             if (n >= 5 && n <= 10) return 'OS';
@@ -277,9 +303,11 @@
             if (!CONF) {
                 // normal mode: lessons in THIS week (Doc, 25.08.); the year total lives in the tooltip
                 for (const el of rows) {
-                    el.classList.remove('conf-hidden');
                     const name = el.dataset.name || null;
-                    el.querySelector('.tt-pcount').textContent = name ? (byTeacher[name] || []).length : pool.length;
+                    const n = name ? (byTeacher[name] || []).length : pool.length;
+                    // branch filter active: hide people without lessons in the remaining branches
+                    el.classList.toggle('conf-hidden', !!name && DEPT_OFF.size > 0 && n === 0 && name !== SELECTED);
+                    el.querySelector('.tt-pcount').textContent = n;
                     if (name) el.title = 'Schuljahr: ' + el.dataset.count + ' Stunden' + (VIRTUAL.has(name) ? ' – Platzhalter-Account, zählt nicht als Person' : '');
                 }
                 return;
@@ -304,8 +332,10 @@
             syncSide();
             const mode = PROPOSAL && PROPOSAL.week === CURRENT ? PROPOSAL_MODE : null;
             const all = mode === 'full' ? PROPOSAL.lessons : mode === 'diff' ? PROPOSAL.diff : (data.lessons || []);
+            all.forEach((l, i) => { l._i = i; });          // tile -> plan index, for manual drag
+            PLAN = { lessons: all, mode };
             let lessons = selected ? all.filter(l => l.teachers.includes(selected)) : all;
-            if (DEPT) lessons = lessons.filter(l => l.classes.some(c => deptOf(c) === DEPT));
+            if (DEPT_OFF.size) lessons = lessons.filter(deptVisible);
             // With one person picked, the interesting column is the class, not
             // the teacher - same view you get from the personal timetable.
             const scope = selected ? 'me' : (data.scope || 'me');
@@ -320,16 +350,24 @@
                 : 'Gesamte Schule';
             const ageH = data.generatedAt ? (Date.now() - new Date(data.generatedAt)) / 36e5 : 0;
             document.getElementById('meta').innerHTML =
-                who + (DEPT ? ' · ' + DEPT : '') + ' · ' + lessons.length + ' Stunden'
+                who + (DEPT_OFF.size ? ' · ' + deptLabel() : '') + ' · ' + lessons.length + ' Stunden'
                 + (mode === 'full' ? ' · <span class="tt-meta-prop">mit Vorschlag</span>' : mode === 'diff' ? ' · <span class="tt-meta-prop">Vorschlagsplan</span>' : '')
-                + '<br>' + (ageH > 26 ? '<span class="tt-stale" title="Der LaunchAgent holt täglich 06:00 – lief er nicht?">Stand: ' + stamp + ' (älter als 1 Tag)</span>' : 'Stand: ' + stamp);
+                + '<br>' + (ageH > 26 ? '<span class="tt-stale" title="Der LaunchAgent holt täglich 06:00 – lief er nicht?">Stand: ' + stamp + ' (älter als 1 Tag)</span>' : 'Stand: ' + stamp)
+                + '<br><span class="tt-meta-hint" id="meta-hint">&nbsp;</span>';
 
             const grid = document.getElementById('grid');
             grid.innerHTML = '';
+
+            // staff box and conflict chip count over the plan, independent of the person filter
+            const isBannerL = l => toMin(l.endTime) - toMin(l.startTime) > 600;
+            const planForBox = mode === 'diff' ? PROPOSAL.lessons : all;   // ghosts are not lessons
+            syncPeopleToConflicts(planForBox.filter(l => !isBannerL(l) && (!DEPT_OFF.size || deptVisible(l))));
+            setConfChip(findClashes(planForBox.filter(l => !isBannerL(l)), 'all').size);
+
             if (!lessons.length) {
                 const parts = [];
                 if (selected) parts.push(selected === data.teacher ? 'du' : NAME(selected));
-                if (DEPT) parts.push(DEPT);
+                if (DEPT_OFF.size) parts.push(deptLabel());
                 grid.innerHTML = '<div class="tt-empty">'
                     + (parts.length
                         ? 'Keine Stunden für <strong>' + parts.join(' + ') + '</strong> in dieser Woche.'
@@ -356,11 +394,6 @@
             // slim banners at the top of the day instead, and neither define
             // the time axis nor count as clashes.
             const isBanner = l => toMin(l.endTime) - toMin(l.startTime) > 600;
-            const planForBox = mode === 'diff' ? PROPOSAL.lessons : all;   // ghosts are not lessons
-            syncPeopleToConflicts(planForBox.filter(l => !isBanner(l) && (!DEPT || l.classes.some(c => deptOf(c) === DEPT))));
-            // hard conflicts of the whole week on screen, next to "Optimieren"
-            const weekHard = findClashes(planForBox.filter(l => !isBanner(l)), 'all').size;
-            setConfChip(weekHard);
             let gridLessons = lessons.filter(l => !isBanner(l));
             let banners = lessons.filter(isBanner);
 
@@ -373,7 +406,7 @@
                 clash = findClashes(gridLessons, scope);
                 if (!gridLessons.length) {
                     grid.innerHTML = '<div class="tt-empty">Keine Konflikte in dieser Woche'
-                        + (selected || DEPT ? ' für <strong>' + [selected, DEPT].filter(Boolean).join(' + ') + '</strong>' : '')
+                        + (selected || DEPT_OFF.size ? ' für <strong>' + [selected, deptLabel()].filter(Boolean).join(' + ') + '</strong>' : '')
                         + '. &#10003;</div>';
                     document.getElementById('note').innerHTML = '';
                     return;
@@ -396,6 +429,7 @@
             const scale = pxPerMin(endMin - startMin);
             const height = laneH + (endMin - startMin) * scale;
             const y = m => laneH + (m - startMin) * scale;
+            LAYOUT = { startMin, endMin, scale, laneH, y };
 
             // header row
             grid.appendChild(document.createElement('div'));
@@ -429,6 +463,7 @@
                 col.className = 'tt-col';
                 col.style.height = height + 'px';
                 col.dataset.day = DAY_NAMES[parseYmd(d).getDay()] + ', ' + fmtDate(d);
+                col.dataset.date = d;
 
                 // faint band per period of the timegrid
                 for (const u of units) {
@@ -466,6 +501,7 @@
                         + (l.moved ? ' moved' : '')
                         + (l.ghost ? ' ghost' : '');
                     el.style.setProperty('--hue', 'var(' + hueOf(l.subject) + ')');
+                    if (!l.ghost) el.dataset.idx = l._i;
                     el.style.top = y(a) + 'px';
                     el.style.height = Math.max(16, (b - a) * scale - 3) + 'px';
                     el.style.left = 'calc(' + (it.col * 100 / it.of) + '% + 3px)';
@@ -475,6 +511,7 @@
                     const parts = ['<div class="tt-subject">' + (l.subject || '—') + '</div>'];
                     if (who) parts.push('<div class="tt-who">' + who + '</div>');
                     if (l.rooms.length) parts.push('<div class="tt-where">' + l.rooms.join(', ') + '</div>');
+                    else { const site = TimetableOptimizer.siteOf(l); if (site) parts.push('<div class="tt-where tt-site">(' + site + ')</div>'); }
                     parts.push('<div class="tt-time">' + hhmm(l.startTime) + '–' + hhmm(l.endTime) + '</div>');
                     if (l.ghost) parts.push('<div class="tt-tag">alt</div>');
                     else if (l.moved) parts.push('<div class="tt-tag">neu</div>');
@@ -527,15 +564,28 @@
             try {
                 const it = localStorage.getItem('svp-opt-iters');
                 if (it && $('opt-iters').querySelector('[value="' + it + '"]')) $('opt-iters').value = it;
+                else $('opt-iters').value = '9000000';
             } catch (e) { }
             $('opt-iters').addEventListener('change', () => { try { localStorage.setItem('svp-opt-iters', $('opt-iters').value); } catch (e) { } });
 
-            $('optbtn').addEventListener('click', () => {
-                panel.hidden = !panel.hidden;
-                $('opt-scope').querySelector('[value=me]').disabled = !SELECTED;
-                if (!SELECTED) $('opt-scope').value = 'all';
-            });
-            $('opt-close').addEventListener('click', () => { panel.hidden = true; });
+            // buttons are always present (constant panel height) - just enabled/disabled
+            function setButtons(has) {
+                for (const id of ['opt-show', 'opt-diff', 'opt-clear', 'opt-csv', 'opt-print', 'opt-save', 'opt-name']) $(id).disabled = !has;
+                const hand = has && PROPOSAL ? PROPOSAL.moves.some(m => m.reason.startsWith('von Hand')) : false;
+                $('opt-undo').disabled = !hand;
+            }
+
+            // Opti-Modus (panel open) is remembered like theme and box width
+            const setOpt = open => {
+                panel.hidden = !open;
+                document.body.classList.toggle('opt-mode', open);
+                try { localStorage.setItem('svp-opt-open', open ? '1' : '0'); } catch (e) { }
+                if (DATA) render(DATA, SELECTED);   // grid height depends on the panel
+            };
+            try { if (localStorage.getItem('svp-opt-open') === '1') setOpt(true); } catch (e) { }
+
+            $('optbtn').addEventListener('click', () => setOpt(panel.hidden));
+            $('opt-close').addEventListener('click', () => setOpt(false));
 
             const hh = t => String(t).padStart(4, '0').replace(/(\d{2})(\d{2})/, '$1:$2');
             const fmtCounts = c => c.hard + ' harte Konflikte · ' + c.site + ' Standort-Verstöße · ' + c.newOverlap + ' neue Überlappungen';
@@ -601,9 +651,9 @@
                         + ' <span class="tt-opt-cls">' + groups.get(g).length + ' Änderung' + (groups.get(g).length > 1 ? 'en' : '') + '</span>'
                         + (solves(g) ? ' <span class="tt-opt-why solves">löst Konflikt</span>' : ' <span class="tt-opt-why">Helfer</span>') + '</summary>'
                         + '<ul>' + groups.get(g).map(row).join('') + '</ul></details>').join('');
+                    showStatus();
                     $('opt-result').innerHTML =
-                        '<p><span class="tt-opt-before">vorher: ' + fmtCounts(m.counts0) + '</span><br>'
-                        + '<span class="tt-opt-after">nachher: ' + fmtCounts(m.counts1) + ' · <strong>' + m.moves.length + ' Verschiebungen</strong> <span class="tt-opt-cls">· Seed ' + RUN_SEED + '</span></span>'
+                        '<p><span class="tt-opt-cls">Seed ' + RUN_SEED + '</span>'
                         + (m.moves.length ? ' &nbsp;<a href="#" class="tt-opt-fold" data-open="0">alle zuklappen</a>' : '') + '</p>'
                         + (m.moves.length
                             ? '<details class="tt-tree tt-tree-root" open><summary><span class="tt-opt-who">Vorschläge</span> '
@@ -618,12 +668,8 @@
                         fold.dataset.open = open ? '0' : '1';
                         fold.textContent = open ? 'alle zuklappen' : 'alle aufklappen';
                     });
-                    $('opt-show').hidden = !m.moves.length;
-                    $('opt-diff').hidden = !m.moves.length;
-                    $('opt-clear').hidden = !m.moves.length;
-                    $('savebox').hidden = !m.moves.length;
-                    $('opt-name').value = suggestName(m);
-                    $('opt-csv').hidden = !m.moves.length; $('opt-print').hidden = !m.moves.length;
+                    setButtons(!!m.moves.length);
+                    $('opt-name').value = m.moves.length ? suggestName(m) : '';
                     PROPOSAL.iters = m.iters; PROPOSAL.seed = RUN_SEED;
                     if (keepBest()) $('opt-live').innerHTML += ' · <span class="tt-opt-why solves">★ neue Beste – automatisch gespeichert</span>';
                     setMode(m.moves.length ? 'diff' : null);
@@ -649,8 +695,7 @@
             $('opt-clear').addEventListener('click', () => {
                 PROPOSAL = null;
                 $('opt-result').innerHTML = ''; $('opt-progress').hidden = true;
-                $('opt-show').hidden = true; $('opt-diff').hidden = true; $('opt-clear').hidden = true; $('savebox').hidden = true;
-                $('opt-csv').hidden = true; $('opt-print').hidden = true;
+                setButtons(false); $('opt-name').value = '';
                 setMode(null);
             });
 
@@ -785,7 +830,7 @@
                 renderVersions();
                 $('opt-name').value = '';
                 $('opt-save').textContent = 'Gespeichert ✓';
-                setTimeout(() => { $('opt-save').textContent = 'Version speichern'; }, 1500);
+                setTimeout(() => { $('opt-save').textContent = 'Speichern'; }, 1500);
             });
 
             function applyVersion(v) {
@@ -804,8 +849,7 @@
                 $('opt-result').innerHTML = '<p><span class="tt-opt-after">Version ' + (v.label ? '„' + v.label + '" ' : '') + 'vom ' + new Date(v.savedAt).toLocaleString('de-DE')
                     + ' geladen · <strong>' + moves.length + ' Verschiebungen</strong>'
                     + (missing ? ' · <span class="tt-stale">' + missing + ' Stunde(n) nicht mehr im Plan gefunden</span>' : '') + '</span></p>';
-                $('opt-show').hidden = false; $('opt-diff').hidden = false; $('opt-clear').hidden = false; $('savebox').hidden = true;
-                $('opt-csv').hidden = false; $('opt-print').hidden = false;
+                setButtons(true); $('opt-save').disabled = true; $('opt-name').disabled = true;   // a loaded version is already saved
                 setMode('diff');
             }
 
@@ -825,13 +869,6 @@
                 const box = $('versions');
                 // older auto records carried the star in their label - strip it, the star is computed now
                 const title = x => (starred.has(x.id) ? '★ ' : '') + ((x.label || '').replace(/^★ Beste · /, 'Auto · ') || (x.moves.length + ' verschoben'));
-                // dropdown next to the name box: one line per saved version
-                const pick = $('opt-pick');
-                pick.innerHTML = '<option value="">Version laden …</option>' + v.map(x => {
-                    const t = title(x) + ' — Woche ' + fmtDate(String(x.week)) + ' · ' + x.counts1.hard + ' Konfl.';
-                    return '<option value="' + x.id + '">' + t.replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c])) + '</option>';
-                }).join('');
-                pick.hidden = !v.length;
                 if (!v.length) { box.innerHTML = ''; return; }
                 const fmtW = w => fmtDate(w) + ' ' + w.slice(0, 4);
                 box.innerHTML = '<details class="tt-tree tt-tree-root"><summary><span class="tt-opt-who">Gespeicherte Versionen</span> '
@@ -863,11 +900,239 @@
                     }
                 }));
             }
-            $('opt-pick').addEventListener('change', function () {
-                if (this.value) loadById(+this.value);
-                this.value = '';
-            });
             renderVersions();
+
+            // "vorher / jetzt" - always two lines, so nothing jumps (Doc, 25.08.)
+            function showStatus() {
+                if (!DATA) return;
+                const before = planCounts(DATA.lessons, 0);
+                const has = !!(PROPOSAL && PROPOSAL.week === CURRENT && PROPOSAL.moves.length);
+                const now = has ? PROPOSAL.counts1 : before;
+                const hand = has ? PROPOSAL.moves.filter(m => m.reason.startsWith('von Hand')).length : 0;
+                $('opt-status').innerHTML =
+                    '<span class="tt-opt-before">jetzt: ' + fmtCounts(before) + '</span><br>'
+                    + '<span class="tt-opt-after">nach Optimierung: ' + (has
+                        ? fmtCounts(now) + ' · <strong>' + PROPOSAL.moves.length + ' Verschiebungen</strong>' + (hand ? ' · ' + hand + ' von Hand' : '')
+                        : '–') + '</span>';
+            }
+            window.addEventListener('svp-week-painted', showStatus);
+
+            // --- hooks for manual planning (drag & drop in the grid) -----------
+            function refreshAfterManual() {
+                const has = !!(PROPOSAL && PROPOSAL.moves.length);
+                const hand = has ? PROPOSAL.moves.filter(m => m.reason === 'von Hand').length : 0;
+                setButtons(has);
+                $('opt-progress').hidden = true;
+                if (has) {
+                    if (panel.hidden) setOpt(true);
+                    $('opt-name').value = suggestName({ moves: PROPOSAL.moves, counts1: PROPOSAL.counts1 });
+                } else { $('opt-result').innerHTML = ''; }
+                showStatus();
+            }
+            $('opt-undo').addEventListener('click', () => {
+                if (!PROPOSAL) return;
+                let k = -1;
+                for (let i = PROPOSAL.moves.length - 1; i >= 0; i--) if (PROPOSAL.moves[i].reason === 'von Hand') { k = i; break; }
+                if (k < 0) return;
+                PROPOSAL.moves.splice(k, 1);
+                rebuildProposal();
+                refreshAfterManual();
+                if (!PROPOSAL.moves.length) { PROPOSAL = null; setMode(null); } else setMode('full');
+            });
+            window.svpProposal = { setMode, refreshAfterManual };
+        })();
+
+        // Recompute applied plan, diff view and counts from the move list.
+        function rebuildProposal() {
+            const applied = TimetableOptimizer.applyMoves(DATA.lessons, PROPOSAL.moves);
+            PROPOSAL.lessons = applied;
+            PROPOSAL.diff = [...PROPOSAL.moves.flatMap(mv => mv.idx.map(i => ({ ...DATA.lessons[i], ghost: true }))), ...applied.filter(l => l.moved)];
+            PROPOSAL.counts1 = planCounts(applied, PROPOSAL.moves.length);
+        }
+
+        // --- manual planning: drag a lesson, slots light up green/red, drop moves it
+        (function () {
+            const grid = document.getElementById('grid');
+            let drag = null;
+            const hh2 = m => String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0');
+
+            grid.addEventListener('pointerdown', e => {
+                const tile = e.target.closest('.tt-lesson');
+                if (!tile || tile.classList.contains('ghost') || tile.dataset.idx === undefined || e.button !== 0) return;
+                if (!document.body.classList.contains('opt-mode')) return;   // planning only in Opti-Modus (Doc)
+                if (!PLAN || PLAN.mode === 'diff' || window.innerWidth <= 900) return;
+                drag = { tile, idx: +tile.dataset.idx, x0: e.clientX, y0: e.clientY, active: false, pid: e.pointerId };
+            });
+
+            function start(e) {
+                const f = TimetableOptimizer.feasibility(PLAN.lessons, String(CURRENT), drag.idx);
+                if (!f) { drag = null; return; }
+                drag.f = f; drag.active = true;
+                document.body.classList.add('is-dragging');
+                // ghost follows the pointer
+                const g = drag.tile.cloneNode(true);
+                g.className = 'tt-lesson tt-drag-ghost';
+                g.style.width = drag.tile.offsetWidth + 'px'; g.style.height = drag.tile.offsetHeight + 'px';
+                g.style.left = g.style.top = '0';
+                document.body.appendChild(g); drag.ghost = g;
+                drag.tile.classList.add('is-source');
+                // drop zones, one per candidate slot
+                const cols = {}; for (const c of grid.querySelectorAll('.tt-col')) cols[c.dataset.date] = c;
+                let ok = 0;
+                for (const c of f.candidates) {
+                    const col = cols[c.date]; if (!col) continue;
+                    const z = document.createElement('div');
+                    z.className = 'tt-drop ' + (c.ok ? 'ok' : 'bad');
+                    z.style.top = LAYOUT.y(c.start) + 'px';
+                    z.style.height = Math.max(10, f.dur * LAYOUT.scale - 2) + 'px';
+                    z.dataset.date = c.date; z.dataset.start = c.start;
+                    const where = f.rooms.length ? f.rooms.join(', ') : (TimetableOptimizer.siteOf(PLAN.lessons[f.idx[0]]) || '');
+                    z.title = hh2(c.start) + (where ? ' · ' + where : '') + (c.ok ? ' – passt' : ' – ' + c.reasons.join(' · '));
+                    const covered = [...col.querySelectorAll('.tt-lesson')].some(t => {
+                        const top = parseFloat(t.style.top), h = parseFloat(t.style.height);
+                        return top < LAYOUT.y(c.start) + f.dur * LAYOUT.scale && LAYOUT.y(c.start) < top + h;
+                    });
+                    if (where && !covered && f.dur * LAYOUT.scale >= 22) z.innerHTML = '<span class="tt-drop-label">' + hh2(c.start) + ' · ' + where + '</span>';
+                    col.appendChild(z);
+                    if (c.ok) ok++;
+                }
+                // swap partners: their tiles get a blue (ok) or red (bad) frame
+                drag.swaps = TimetableOptimizer.swapOptions(PLAN.lessons, String(CURRENT), drag.idx);
+                let swapOk = 0;
+                for (const sw of drag.swaps) {
+                    for (const i of sw.idx) {
+                        const t = grid.querySelector('.tt-lesson[data-idx="' + i + '"]');
+                        if (!t) continue;
+                        t.classList.add(sw.ok ? 'tt-swap-ok' : 'tt-swap-bad');
+                        t.dataset.swap = drag.swaps.indexOf(sw);
+                        t.title = (sw.ok ? 'Tauschen: passt' : 'Tauschen: ' + sw.reasons.join(' · '));
+                    }
+                    if (sw.ok) swapOk++;
+                }
+                document.getElementById('meta-hint').textContent = 'Ziehen: ' + ok + ' freie Plätze (grün), ' + swapOk + ' Tauschpartner (blau)';
+                move(e);
+            }
+
+            function move(e) {
+                if (!drag || !drag.active) return;
+                drag.ghost.style.transform = 'translate(' + (e.clientX + 8) + 'px,' + (e.clientY + 8) + 'px)';
+                const stack = document.elementsFromPoint(e.clientX, e.clientY);
+                const under = stack.find(x => x.classList && x.classList.contains('tt-drop'));
+                const tile = stack.find(x => x.classList && (x.classList.contains('tt-swap-ok') || x.classList.contains('tt-swap-bad')));
+                for (const z of grid.querySelectorAll('.tt-drop.hover, .tt-lesson.hover')) z.classList.remove('hover');
+                if (under) under.classList.add('hover'); else if (tile) tile.classList.add('hover');
+                drag.over = under || null;
+                drag.overTile = !under && tile ? tile : null;
+            }
+
+            function finish(e) {
+                if (!drag) return;
+                const d = drag; drag = null;
+                if (!d.active) return;
+                document.body.classList.remove('is-dragging');
+                d.ghost.remove();
+                d.tile.classList.remove('is-source');
+                const zone = d.over, tile = d.overTile;
+                for (const z of grid.querySelectorAll('.tt-drop')) z.remove();
+                if (tile) {                                       // dropped on a partner: swap
+                    const sw = d.swaps[+tile.dataset.swap];
+                    if (!sw || !sw.ok) { tile.classList.add('shake'); setTimeout(() => render(DATA, SELECTED), 350); return; }
+                    applySwap(d.f, sw);
+                    return;
+                }
+                if (!zone) { render(DATA, SELECTED); return; }
+                if (!zone.classList.contains('ok')) {           // red: refuse, show why
+                    d.tile.classList.add('shake');
+                    setTimeout(() => render(DATA, SELECTED), 350);
+                    return;
+                }
+                applyManual(d.f, { date: +zone.dataset.date, start: +zone.dataset.start });
+            }
+
+            // Every manual move is expressed against the ORIGINAL week (DATA.lessons),
+            // so it composes with optimizer moves and can be saved/exported like them.
+            // u = { idx, start, subject, classes, teachers, rooms }, c = { date, start } (unit start)
+            function buildMove(u, c, reason) {
+                const base = DATA.lessons;
+                const first = u.idx[0];
+                const planStart0 = toMin(PLAN.lessons[first].startTime);   // where the first lesson sits now
+                const offset0 = planStart0 - u.start;                          // its offset inside the unit
+                const baseStart0 = toMin(base[first].startTime), baseEnd0 = toMin(base[first].endTime);
+                const toStart0 = c.start + offset0;
+                return {
+                    idx: u.idx, subject: u.subject, classes: u.classes, teachers: u.teachers, rooms: u.rooms, reason,
+                    from: { date: base[first].date, start: TimetableOptimizer.toHHMM(baseStart0), end: TimetableOptimizer.toHHMM(baseEnd0) },
+                    to: { date: c.date, start: TimetableOptimizer.toHHMM(toStart0), end: TimetableOptimizer.toHHMM(toStart0 + (baseEnd0 - baseStart0)) },
+                };
+            }
+            function commit(moves) {
+                if (!PROPOSAL || PROPOSAL.week !== CURRENT) PROPOSAL = { week: CURRENT, moves: [], counts0: planCounts(DATA.lessons, 0) };
+                const touched = new Set(moves.flatMap(m => m.idx));
+                // earlier moves of the same lessons are superseded; back at the origin = no move at all
+                PROPOSAL.moves = PROPOSAL.moves.filter(m => !m.idx.some(i => touched.has(i)));
+                for (const mv of moves) if (!(mv.to.date === mv.from.date && mv.to.start === mv.from.start)) PROPOSAL.moves.push(mv);
+                rebuildProposal();
+                window.svpProposal.refreshAfterManual();
+                if (!PROPOSAL.moves.length) { PROPOSAL = null; window.svpProposal.setMode(null); }
+                else window.svpProposal.setMode('full');
+            }
+            function applyManual(f, c) { commit([buildMove(f, c, 'von Hand')]); }
+            function applySwap(f, sw) {
+                commit([
+                    buildMove(f, { date: sw.date, start: sw.start }, 'von Hand (Tausch mit ' + sw.teachers.map(NAME).join(', ') + ' ' + (sw.subject || '') + ')'),
+                    buildMove(sw, { date: f.date, start: f.start }, 'von Hand (Tauschpartner für ' + f.teachers.map(NAME).join(', ') + ' ' + (f.subject || '') + ')'),
+                ]);
+            }
+
+            // --- right-click: Tauschvorschläge - free slots and swap partners ----
+            const menu = document.createElement('div');
+            menu.className = 'tt-menu'; menu.hidden = true;
+            document.body.appendChild(menu);
+            const closeMenu = () => { menu.hidden = true; menu.innerHTML = ''; };
+            document.addEventListener('pointerdown', e => { if (!menu.contains(e.target)) closeMenu(); });
+            document.addEventListener('keydown', e => { if (e.key === 'Escape') closeMenu(); });
+
+            grid.addEventListener('contextmenu', e => {
+                const tile = e.target.closest('.tt-lesson');
+                if (!tile || tile.classList.contains('ghost') || tile.dataset.idx === undefined) return;
+                if (!document.body.classList.contains('opt-mode')) return;
+                if (!PLAN || PLAN.mode === 'diff') return;
+                e.preventDefault();
+                const idx = +tile.dataset.idx;
+                const f = TimetableOptimizer.feasibility(PLAN.lessons, String(CURRENT), idx);
+                if (!f) return;
+                const swaps = TimetableOptimizer.swapOptions(PLAN.lessons, String(CURRENT), idx);
+                const D = ['Mo', 'Di', 'Mi', 'Do', 'Fr'];
+                const free = f.candidates.filter(c => c.ok).sort((a, b) => a.day - b.day || a.start - b.start);
+                const okSw = swaps.filter(x => x.ok);
+                const esc = v => String(v).replace(/[&<>]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[ch]));
+                menu.innerHTML = '<div class="tt-menu-head">' + esc(f.subject || '?') + ' ' + esc(f.classes.join(', ')) + ' · '
+                    + D[f.day] + ' ' + hh2(f.start) + '–' + hh2(f.start + f.dur)
+                    + (f.rooms.length ? ' · ' + esc(f.rooms.join(', ')) : '') + '</div>'
+                    + '<div class="tt-menu-sec">Freie Plätze <span>' + free.length + '</span></div>'
+                    + (free.length ? free.map((c, i) => '<button type="button" data-free="' + i + '">' + D[c.day] + ' ' + hh2(c.start) + '–' + hh2(c.start + f.dur)
+                        + ' <span class="tt-menu-room">' + esc(f.rooms.length ? f.rooms.join(', ') : (TimetableOptimizer.siteOf(PLAN.lessons[f.idx[0]]) || '')) + '</span></button>').join('')
+                        : '<div class="tt-menu-none">keine – alle ' + f.candidates.length + ' Plätze kollidieren</div>')
+                    + '<div class="tt-menu-sec">Tauschen mit <span>' + okSw.length + '</span></div>'
+                    + (okSw.length ? okSw.map((x, i) => '<button type="button" data-swap="' + i + '">' + D[x.day] + ' ' + hh2(x.start) + ' · ' + esc(x.subject || '?') + ' ' + esc(x.teachers.map(NAME).join(', ')) + (x.rooms.length ? ' · ' + esc(x.rooms.join(',')) : '') + '</button>').join('')
+                        : '<div class="tt-menu-none">kein kollisionsfreier Tausch</div>');
+                menu.hidden = false;
+                const mw = 320, mh = Math.min(420, window.innerHeight - 20);
+                menu.style.left = Math.min(e.clientX + 4, window.innerWidth - mw - 8) + 'px';
+                menu.style.top = Math.min(e.clientY + 4, window.innerHeight - mh - 8) + 'px';
+                menu.querySelectorAll('button[data-free]').forEach(b => b.addEventListener('click', () => { const c = free[+b.dataset.free]; closeMenu(); applyManual(f, { date: c.date, start: c.start }); }));
+                menu.querySelectorAll('button[data-swap]').forEach(b => b.addEventListener('click', () => { const x = okSw[+b.dataset.swap]; closeMenu(); applySwap(f, x); }));
+            });
+
+            window.addEventListener('pointermove', e => {
+                if (!drag) return;
+                if (!drag.active) {
+                    if (Math.hypot(e.clientX - drag.x0, e.clientY - drag.y0) < 6) return;
+                    start(e);
+                } else move(e);
+            });
+            window.addEventListener('pointerup', finish);
+            window.addEventListener('pointercancel', finish);
         })();
 
         // Staff box width: drag the right edge, remembered per browser.
@@ -941,11 +1206,22 @@
             });
         }
 
+        // optimizer scope option names the selected person and is preselected for them
+        function syncScopeOption() {
+            const sel = document.getElementById('opt-scope'), me = sel && sel.querySelector('[value=me]');
+            if (!me) return;
+            me.textContent = SELECTED ? NAME(SELECTED) : 'gewählte Person';
+            me.disabled = !SELECTED;
+            // default stays "ganze Schule" (Doc); the person is a choice, not the preselection
+            if (!SELECTED) sel.value = 'all';
+        }
+
         function select(name) {
             SELECTED = name;
             for (const el of document.querySelectorAll('.tt-person')) {
                 el.classList.toggle('on', (el.dataset.name || null) === name);
             }
+            syncScopeOption();
             if (DATA) render(DATA, name);
         }
 
@@ -1017,14 +1293,21 @@
             if (DATA) render(DATA, SELECTED);
         });
 
-        // Branch filter buttons: one active at a time, second click clears.
+        function syncDeptButtons() {
+            for (const b of document.querySelectorAll('#depts button[data-dept]')) b.classList.toggle('on', !DEPT_OFF.has(b.dataset.dept));
+        }
+        // remembered branch selection (Doc: persist)
+        try { DEPT_OFF = new Set(JSON.parse(localStorage.getItem('svp-depts-off') || '[]')); } catch (e) { DEPT_OFF = new Set(); }
+        syncDeptButtons();
+
+        // Branch filter buttons: all on by default, click toggles one off/on.
         document.getElementById('depts').addEventListener('click', e => {
             const btn = e.target.closest('button[data-dept]');
             if (!btn) return;
-            DEPT = DEPT === btn.dataset.dept ? null : btn.dataset.dept;
-            for (const b of document.querySelectorAll('#depts button[data-dept]')) {
-                b.classList.toggle('on', b.dataset.dept === DEPT);
-            }
+            const d = btn.dataset.dept;
+            if (DEPT_OFF.has(d)) DEPT_OFF.delete(d); else DEPT_OFF.add(d);
+            syncDeptButtons();
+            try { localStorage.setItem('svp-depts-off', JSON.stringify([...DEPT_OFF])); } catch (e) { }
             // Person and branch combine as AND (Doc, 25.08.): BarLil + GS =
             // BarLil's Grundschul-Stunden. An empty result explains itself.
             if (DATA) render(DATA, SELECTED);
@@ -1057,6 +1340,7 @@
                 for (const el of document.querySelectorAll('.tt-person')) {
                     el.classList.toggle('on', (el.dataset.name || null) === SELECTED);
                 }
+                syncScopeOption();
                 showWeek(startWeek());
             })
             .catch(e => {
