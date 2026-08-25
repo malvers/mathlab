@@ -65,6 +65,12 @@ Deno.serve(async (req) => {
   const model = typeof b.model === 'string' ? b.model : '';
   const label = typeof b.label === 'string' ? b.label : 'gemini';   // caller tag for the cost log (e.g. 'photo'|'search')
   if (!model) return json({ error: 'kein model übergeben' }, 400);
+  /* Nur die guenstige Flash-Familie. Der Proxy ist oeffentlich erreichbar (Origin/Key, siehe guard),
+     und ohne diese Liste koennte jeder ein Pro-Modell auf unsere Rechnung fahren — Faktor 20 im Preis.
+     Alle echten Aufrufer (aiboard, glocken, morpheus/equationocr, vgp) nutzen Flash. */
+  if (!/^gemini-[\d.]+-flash(-lite)?$/.test(model) && model !== 'gemini-flash-latest') {
+    return json({ error: 'Modell nicht freigegeben: ' + model + ' (erlaubt: gemini-*-flash, -flash-lite)' }, 403);
+  }
   if (!b.body || typeof b.body !== 'object') return json({ error: 'kein body übergeben' }, 400);
 
   const url = GLA + encodeURIComponent(model) + ':generateContent?key=' + key;
