@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DOC ALVERS MATHE-LABORE | Fuzzy Search</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet">
+    <link rel="icon" type="image/png" href="../resources/favicon.png">
+    <!-- Colour scheme like the svp pages: the stored choice is applied before first paint
+         so a reload never flashes the wrong scheme. -->
+    <script>
+        try { if (localStorage.getItem('fuzzy-theme') === 'light') document.documentElement.classList.add('svp-light'); } catch { /* private mode */ }
+    </script>
+    <style>
+        /* Standalone page (no lab template on purpose) in the svp design language: same
+           colour tokens, nav band, pills and buttons as HTML/svp/svp.css, dark + light scheme.
+           Trigram fuzzy search with a per-character heat-map, re-created from Doc Alvers'
+           2003 "Fuzzy Search Test" (see fuzzy-engine.js). */
+        :root {
+            --bg: rgb(8, 20, 42);
+            --card: rgb(14, 36, 78);
+            --card-soft: rgba(14, 36, 78, 0.55);
+            --line: rgba(120, 160, 220, 0.22);
+            --text: rgba(225, 235, 250, 0.92);
+            --muted: rgba(170, 190, 220, 0.65);
+            --lambda: rgb(245, 194, 66);
+            --ypsilon: rgb(176, 36, 24);
+            --phi: rgb(121, 158, 49);
+            --cyan: rgb(90, 190, 230);
+            --panel: rgb(12, 30, 64);
+            --sunken: rgba(8, 20, 42, 0.45);
+            --input-bg: rgba(8, 20, 42, 0.7);
+            --trough: rgba(8, 20, 42, 0.9);
+            --thumb: rgba(120, 160, 220, 0.35);
+            --shadow: rgba(0, 0, 0, 0.45);
+            --row-line: rgba(120, 160, 220, 0.12);
+            --heat-text: rgb(8, 20, 42);
+            /* hit cards: plain surface with a grey frame — the selected one only gets a darker frame */
+            --hit-bg: var(--card);
+            --hit-line: rgba(170, 190, 220, 0.28);
+            --hit-line-active: rgba(170, 190, 220, 0.75);
+            /* score run: the bright palette colours in BOTH schemes (the darkened light-scheme
+               accents looked muddy on the white cards) */
+            --run-red: rgb(176, 36, 24);
+            --run-yellow: rgb(245, 194, 66);
+            --run-green: rgb(121, 158, 49);
+        }
+
+        /* Light scheme — same tokens as svp.css, accent hues darkened for contrast on white */
+        html.svp-light {
+            --bg: rgb(246, 248, 252);
+            --card: rgb(255, 255, 255);
+            --card-soft: rgba(255, 255, 255, 0.85);
+            --line: rgba(40, 70, 120, 0.22);
+            --text: rgb(24, 34, 52);
+            --muted: rgb(96, 112, 140);
+            --lambda: rgb(176, 128, 12);
+            --ypsilon: rgb(176, 36, 24);
+            --phi: rgb(92, 122, 32);
+            --cyan: rgb(28, 118, 158);
+            --panel: rgb(232, 238, 248);
+            --sunken: rgba(232, 238, 248, 0.75);
+            --input-bg: rgb(255, 255, 255);
+            --trough: rgba(220, 228, 240, 0.9);
+            --thumb: rgba(60, 100, 160, 0.35);
+            --shadow: rgba(30, 50, 90, 0.18);
+            --row-line: rgba(40, 70, 120, 0.14);
+            --heat-text: rgb(24, 34, 52);
+            --hit-bg: rgb(255, 255, 255);
+            --hit-line: rgb(205, 210, 220);
+            --hit-line-active: rgb(140, 148, 165);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html, body { height: 100%; }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Outfit', sans-serif;
+            font-weight: 300;
+            display: flex;
+            flex-direction: column;
+            height: 100dvh;
+            overflow: hidden;
+        }
+
+        ::selection { background: rgba(245, 194, 66, 0.35); }
+
+        /* ---- header band (svp nav-band): title · query · controls -------------------- */
+        .nav-band {
+            background: var(--panel);
+            border-bottom: 1px solid var(--line);
+            padding: 12px clamp(12px, 2vw, 24px);
+        }
+
+        .head-row {
+            display: flex;
+            align-items: center;
+            gap: 14px 18px;
+            flex-wrap: wrap;
+        }
+
+        .title-group { display: flex; align-items: flex-end; gap: 12px; flex-wrap: wrap; }
+
+        h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(1.05rem, 2.6vw, 1.5rem);
+            color: var(--lambda);
+            letter-spacing: 0.04em;
+            white-space: nowrap;
+        }
+
+        .subtitle { font-size: clamp(0.85rem, 2vw, 1rem); color: var(--muted); }
+
+        .subtitle.caps {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(0.62rem, 1.3vw, 0.75rem);
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+        }
+
+        .title-group .subtitle.caps { padding-bottom: 3px; }
+
+        .query-wrap { flex: 1 1 280px; }
+
+        #q {
+            width: 100%;
+            background: var(--input-bg);
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            color: var(--text);
+            font-family: 'Outfit', sans-serif;
+            font-size: 1rem;
+            padding: 9px 12px;
+        }
+
+        #q:focus { outline: 1px solid var(--cyan); }
+
+        #q::placeholder { color: var(--muted); }
+
+        .controls { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+        select {
+            background: var(--input-bg);
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            color: var(--text);
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.9rem;
+            padding: 8px 10px;
+            max-width: 240px;
+        }
+
+        select:focus { outline: 1px solid var(--cyan); }
+
+        button.action {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.72rem;
+            letter-spacing: 0.06em;
+            color: var(--text);
+            background: rgba(121, 158, 49, 0.16);
+            border: 1px solid rgba(121, 158, 49, 0.5);
+            border-radius: 8px;
+            padding: 9px 16px;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        button.action:hover { background: rgba(121, 158, 49, 0.3); border-color: var(--phi); }
+
+        /* pills (svp badges): IDF toggle and the colour-scheme switch */
+        .badge {
+            display: inline-block;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.6rem;
+            letter-spacing: 0.05em;
+            padding: 5px 9px;
+            border-radius: 6px;
+            border: 1px solid;
+            white-space: nowrap;
+            background: none;
+            cursor: pointer;
+            user-select: none;
+            opacity: 0.55;
+            line-height: 14px;
+        }
+
+        .b-grey { color: var(--muted); border-color: rgba(170, 190, 220, 0.35); background: rgba(170, 190, 220, 0.06); }
+
+        html.svp-light .b-grey { border-color: rgba(40, 70, 120, 0.3); background: rgba(40, 70, 120, 0.05); }
+
+        .badge:hover { opacity: 0.85; }
+
+        .badge.on, .toggle:has(input:checked) { opacity: 1; outline: 1px solid currentColor; }
+
+        .toggle { position: relative; }
+
+        .toggle input { position: absolute; opacity: 0; width: 1px; height: 1px; pointer-events: none; }
+
+        .toggle:has(input:focus-visible) { outline: 2px solid var(--cyan); }
+
+        .theme-pills { display: inline-flex; gap: 6px; margin-left: 6px; }
+
+        /* ---- stats line + heat legend ------------------------------------------------ */
+        .stats {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex-wrap: wrap;
+            padding: 8px clamp(12px, 2vw, 24px) 0;
+            min-height: 26px;
+        }
+
+        .legend { display: inline-flex; gap: 2px; align-items: center; }
+
+        .legend span { width: 12px; height: 10px; border-radius: 2px; display: inline-block; }
+
+        /* ---- the two panes (svp cards) ------------------------------------------------ */
+        .panes {
+            display: grid;
+            grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+            gap: 12px;
+            flex: 1 1 auto;
+            min-height: 0;
+            padding: 10px clamp(12px, 2vw, 24px) 14px;
+        }
+
+        .pane {
+            position: relative;
+            background: var(--card-soft);
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            min-height: 0;
+            overflow: hidden;
+        }
+
+        .doc-pane.drop { border-color: var(--phi); box-shadow: inset 0 0 0 2px rgba(121, 158, 49, 0.5); }
+
+        .doc {
+            position: absolute;
+            inset: 0;
+            overflow-y: auto;
+            padding: 14px 30px 14px 18px;
+            font-size: 1rem;
+            line-height: 1.6;
+            outline: none;
+        }
+
+        .doc p { margin: 0 0 1em; white-space: pre-wrap; overflow-wrap: anywhere; }
+
+        /* hit ruler (like an editor's overview strip), sits left of the scrollbar */
+        .ruler { position: absolute; top: 10px; right: 12px; bottom: 10px; width: 7px; pointer-events: none; }
+
+        .ruler .mark {
+            position: absolute;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            border-radius: 2px;
+            background: var(--lambda);
+            pointer-events: auto;
+            cursor: pointer;
+        }
+
+        .hits {
+            position: absolute;
+            inset: 0;
+            overflow-y: auto;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .hit {
+            appearance: none;
+            display: block;
+            width: 100%;
+            text-align: left;
+            background: var(--hit-bg);
+            border: 1px solid var(--hit-line);
+            border-radius: 10px;
+            padding: 8px 10px 10px;
+            color: var(--text);
+            font-family: inherit;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            font-weight: 300;
+            cursor: pointer;
+            transition: border-color 0.12s;
+        }
+
+        .hit:hover { border-color: var(--hit-line-active); }
+
+        /* selected: same surface, only the grey frame gets darker (no colour, no focus ring on click) */
+        .hit.active { border-color: var(--hit-line-active); box-shadow: 0 0 0 1px var(--hit-line-active); }
+
+        .hit:focus { outline: none; }
+
+        .hit:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
+
+        .hit-head {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 4px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.6rem;
+            letter-spacing: 0.06em;
+            color: var(--muted);
+        }
+
+        .hit-head .bar { flex: 1; height: 3px; background: var(--row-line); border-radius: 2px; overflow: hidden; }
+
+        /* score bar: the usual red → orange → green run (Υ → λ → φ) laid over the FULL track,
+           the fill just reveals it up to the score (background-size is set per card in JS) */
+        .hit-head .bar i {
+            display: block;
+            height: 100%;
+            background: linear-gradient(90deg, var(--run-red), var(--run-yellow) 50%, var(--run-green));
+            background-repeat: no-repeat;
+            background-position: left;
+        }
+
+        /* percentage in the colour the run has at that point (set in JS via color-mix; yellow as fallback) */
+        .hit-head .score { color: var(--run-yellow); min-width: 40px; text-align: right; }
+
+        .hit-text { color: var(--text); opacity: 0.85; }
+
+        .hw { border-radius: 2px; }
+
+        /* the found phrase "breathes": its heat colours slowly saturate and relax (no frame, no underline) */
+        @keyframes waber-phrase {
+            0%, 100% { filter: saturate(1) brightness(1); }
+            50% { filter: saturate(1.45) brightness(1.04); }
+        }
+
+        .hit-phrase { animation: waber-phrase 3s ease-in-out infinite; }
+
+        /* in the document: soft pulsing halos around the line fragments of every hit, drawn as an
+           overlay that scrolls with the text (the Highlight API cannot animate) */
+        @keyframes waber-halo {
+            0%, 100% { box-shadow: 0 0 4px 0 rgba(236, 64, 40, 0.1); }
+            50% { box-shadow: 0 0 12px 3px rgba(236, 64, 40, 0.32); }
+        }
+
+        @keyframes waber-halo-active {
+            0%, 100% { box-shadow: 0 0 6px 1px rgba(236, 64, 40, 0.25); }
+            50% { box-shadow: 0 0 18px 6px rgba(236, 64, 40, 0.55); }
+        }
+
+        .halos { position: absolute; top: 0; left: 0; width: 0; height: 0; pointer-events: none; }
+
+        .halos .halo { position: absolute; border-radius: 4px; animation: waber-halo 3s ease-in-out infinite; }
+
+        .halos .halo.active { animation-name: waber-halo-active; }
+
+        @media (prefers-reduced-motion: reduce) {
+            .hit-phrase, .halos .halo { animation: none; }
+            .halos .halo.active { box-shadow: 0 0 12px 3px rgba(236, 64, 40, 0.4); }
+        }
+
+        .empty {
+            color: var(--muted);
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.65rem;
+            letter-spacing: 0.1em;
+            padding: 14px;
+            line-height: 1.9;
+        }
+
+        /* document heat colours (CSS Custom Highlight API rules) are injected by JS */
+
+        /* Scrollbars — WebKit rules on the element (Chrome/Safari); Firefox separately below. */
+        .doc::-webkit-scrollbar, .hits::-webkit-scrollbar { width: 8px; }
+        .doc::-webkit-scrollbar-track, .hits::-webkit-scrollbar-track { background: var(--trough); border-radius: 999px; margin: 6px 0; }
+        .doc::-webkit-scrollbar-thumb, .hits::-webkit-scrollbar-thumb { background: var(--thumb); border-radius: 999px; }
+        .doc::-webkit-scrollbar-thumb:hover, .hits::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
+        @supports (-moz-appearance: none) {
+            .doc, .hits { scrollbar-width: thin; scrollbar-color: var(--thumb) var(--trough); }
+        }
+
+        @media (max-width: 860px) {
+            .panes { grid-template-columns: 1fr; grid-template-rows: minmax(0, 1fr) minmax(0, 1fr); }
+            .hits-pane { order: -1; }
+            .doc { font-size: 0.95rem; }
+        }
+    </style>
+</head>
+
+<body>
+    <header class="nav-band">
+        <div class="head-row">
+            <div class="title-group">
+                <h1>Fuzzy Search</h1>
+                <div class="subtitle caps">Trigramme · Heatmap · 2003 → 2026</div>
+            </div>
+            <div class="query-wrap">
+                <input id="q" type="text" placeholder="Suchbegriff … (Tippfehler erlaubt)" autocomplete="off"
+                    spellcheck="false" enterkeyhint="search" aria-label="Suchanfrage">
+            </div>
+            <div class="controls">
+                <select id="corpus" aria-label="Text wählen"></select>
+                <button id="open" class="action" type="button">Datei öffnen</button>
+                <input id="file" type="file" hidden accept=".txt,.md,.csv,.log,.json,.html,.js,text/*" aria-label="Textdatei">
+                <label class="badge b-grey toggle"
+                    title="Trigramme nach Seltenheit gewichten (ln N/df): häufige Fragmente wie „tha“, „as “ zählen weniger">
+                    <input id="idf" type="checkbox">IDF
+                </label>
+                <span class="theme-pills" role="group" aria-label="Farbschema">
+                    <button type="button" class="badge b-grey" data-theme="dark">Dunkel</button>
+                    <button type="button" class="badge b-grey" data-theme="light">Hell</button>
+                </span>
+            </div>
+        </div>
+    </header>
+    <div id="stats" class="stats subtitle caps"></div>
+    <main class="panes">
+        <section class="pane doc-pane">
+            <div id="doc" class="doc" tabindex="0" aria-label="Dokument"></div>
+            <div id="ruler" class="ruler" aria-hidden="true"></div>
+        </section>
+        <section class="pane hits-pane">
+            <div id="hits" class="hits" aria-live="polite" aria-label="Treffer"></div>
+        </section>
+    </main>
+
+    <script src="fuzzy-engine.js"></script>
+    <script>
+        (function () {
+            'use strict';
+
+            const $ = (id) => document.getElementById(id);
+            const qEl = $('q'), docEl = $('doc'), hitsEl = $('hits'), rulerEl = $('ruler'), statsEl = $('stats');
+            const corpusEl = $('corpus'), idfEl = $('idf'), fileEl = $('file'), openEl = $('open');
+            const docPane = document.querySelector('.doc-pane');
+
+            const HAS_HL = typeof CSS !== 'undefined' && 'highlights' in CSS && typeof Highlight !== 'undefined';
+            const LEVELS = 10;          // heat levels (colour steps)
+            const MIN_HEAT = 0.1;       // below this a character does not glow
+            const MAX_RANGES = 40000;   // safety cap per highlight window
+            const MAX_HITS = 60;
+            const CTX = 110;            // snippet context (chars on each side)
+            const CHUNK = 2000;         // text chunk size (chars) — the unit for viewport-local highlighting
+            const THEME_KEY = 'fuzzy-theme';
+
+            const TEXTS = [
+                { key: 'carol', label: 'Dickens · A Christmas Carol (EN)', file: 'texts/christmas-carol.txt', q: 'Marley was dead' },
+                { key: 'kafka', label: 'Kafka · Die Verwandlung (DE)', file: 'texts/die-verwandlung.txt', q: 'ungeheueren Ungeziefer' },
+                { key: 'dombey', label: 'Dickens · Dombey and Son (EN, 2 MB)', file: 'texts/dombey-and-son.txt', q: 'Cousin Feenix' },
+            ];
+
+            let eng = null;         // FuzzyEngine instance for the current text
+            let chunkStart = null;  // Int32Array: char offset where each text chunk starts
+            let chunkNode = [];     // text node of each chunk
+            let chunkEl = [];       // <span> of each chunk (for offsetTop)
+            let charLevel = null;   // Uint8Array over the text: quantised heat level per character
+            let hlWin = null;       // { top, bottom } pixel range (doc scroll coordinates) that is highlighted
+            let lastRes = null;     // last search result
+            let active = -1;        // selected hit index
+            let corpusLabel = '';
+            const fmt = new Intl.NumberFormat('de-DE');
+            const halosEl = document.createElement('div'); // overlay layer inside the scroll container
+            halosEl.className = 'halos';
+            halosEl.setAttribute('aria-hidden', 'true');
+
+            // ---- colour scheme (svp pattern): class on <html>, stored per browser ----
+            const themeBtns = Array.from(document.querySelectorAll('.theme-pills .badge'));
+            function applyTheme(next, store) {
+                document.documentElement.classList.toggle('svp-light', next === 'light');
+                for (const b of themeBtns) b.classList.toggle('on', b.dataset.theme === next);
+                if (store) { try { localStorage.setItem(THEME_KEY, next); } catch { /* private mode */ } }
+            }
+            for (const b of themeBtns) b.addEventListener('click', () => applyTheme(b.dataset.theme, true));
+            applyTheme(document.documentElement.classList.contains('svp-light') ? 'light' : 'dark', false);
+
+            // ---- heat colours: one rule per level, shared by ::highlight() and snippet spans ----
+            // Like 2003: the highlight runs from white (faint) to red (full), with dark text on it —
+            // so a match fades red → pink → white towards its edges.
+            (function injectHeatStyles() {
+                const css = [];
+                for (let L = 1; L <= LEVELS; L++) {
+                    const t = L / LEVELS;
+                    const r = Math.round(255 - (255 - 236) * t);
+                    const g = Math.round(255 - (255 - 52) * t);
+                    const b = Math.round(255 - (255 - 40) * t);
+                    const a = (0.75 + 0.25 * t).toFixed(2);
+                    css.push('::highlight(fz-h' + L + '), .h' + L + ' { background-color: rgba(' + r + ', ' + g + ', ' + b + ', ' + a + '); color: rgb(8, 20, 42); }');
+                }
+                const st = document.createElement('style');
+                st.textContent = css.join('\n');
+                document.head.appendChild(st);
+            })();
+
+            const levelOf = (heat) => (heat < MIN_HEAT ? 0 : Math.min(LEVELS, Math.ceil(heat * LEVELS)));
+
+            // ---- document rendering: <p> per paragraph, inline <span> chunks; offsets map 1:1 to the text ----
+            function renderDoc(text) {
+                docEl.textContent = '';
+                chunkNode = [];
+                chunkEl = [];
+                const starts = [];
+                const frag = document.createDocumentFragment();
+                const addPara = (s, e) => {
+                    const p = document.createElement('p');
+                    let a = s;
+                    do {
+                        let b = Math.min(e, a + CHUNK);
+                        if (b < e) { // cut at whitespace so no word is split across chunks
+                            const ws = text.lastIndexOf(' ', b);
+                            if (ws > a) b = ws + 1;
+                        }
+                        const span = document.createElement('span');
+                        const node = document.createTextNode(text.slice(a, b));
+                        span.appendChild(node);
+                        p.appendChild(span);
+                        chunkNode.push(node);
+                        chunkEl.push(span);
+                        starts.push(a);
+                        a = b;
+                    } while (a < e);
+                    frag.appendChild(p);
+                };
+                const re = /\n{2,}/g;
+                let pos = 0, m;
+                while ((m = re.exec(text)) !== null) { addPara(pos, m.index); pos = m.index + m[0].length; }
+                addPara(pos, text.length);
+                chunkStart = Int32Array.from(starts);
+                halosEl.textContent = '';
+                docEl.appendChild(halosEl);
+                docEl.appendChild(frag);
+                docEl.scrollTop = 0;
+            }
+
+            // index of the chunk containing char offset pos
+            function chunkAt(pos) {
+                let lo = 0, hi = chunkStart.length - 1;
+                while (lo < hi) {
+                    const mid = (lo + hi + 1) >> 1;
+                    if (chunkStart[mid] <= pos) lo = mid; else hi = mid - 1;
+                }
+                return lo;
+            }
+
+            // index of the last chunk starting at or above pixel y (doc scroll coordinates)
+            function chunkAtY(y) {
+                let lo = 0, hi = chunkEl.length - 1;
+                while (lo < hi) {
+                    const mid = (lo + hi + 1) >> 1;
+                    if (chunkEl[mid].offsetTop <= y) lo = mid; else hi = mid - 1;
+                }
+                return lo;
+            }
+
+            function posToNode(pos) {
+                const c = chunkAt(pos);
+                const node = chunkNode[c];
+                return [node, Math.max(0, Math.min(node.length, pos - chunkStart[c]))];
+            }
+
+            function makeRange(s, e) {
+                const r = document.createRange();
+                const a = posToNode(s), b = posToNode(e);
+                r.setStart(a[0], a[1]);
+                r.setEnd(b[0], b[1]);
+                return r;
+            }
+
+            // StaticRange (not live → cheap) for highlights where the browser accepts it, else Range.
+            const useStatic = (function () {
+                if (!HAS_HL || typeof StaticRange === 'undefined') return false;
+                try {
+                    const sr = new StaticRange({ startContainer: document.body, startOffset: 0, endContainer: document.body, endOffset: 0 });
+                    new Highlight(sr);
+                    return true;
+                } catch { return false; }
+            })();
+
+            function hlRange(s, e) {
+                if (!useStatic) return makeRange(s, e);
+                const a = posToNode(s), b = posToNode(e);
+                return new StaticRange({ startContainer: a[0], startOffset: a[1], endContainer: b[0], endOffset: b[1] });
+            }
+
+            // ---- heat-map: quantise per character; highlight only the chunks around the viewport ----
+            function quantize(res) {
+                const h = res.charHeat;
+                if (!h) { charLevel = null; return; }
+                if (!charLevel || charLevel.length !== h.length) charLevel = new Uint8Array(h.length);
+                for (let p = 0; p < h.length; p++) charLevel[p] = levelOf(h[p]);
+            }
+
+            function buildHighlights() {
+                if (!HAS_HL) return;
+                CSS.highlights.clear();
+                hlWin = null;
+                if (!lastRes || !lastRes.qTokens.length || !charLevel || !chunkEl.length) return;
+                const H = docEl.clientHeight, st = docEl.scrollTop;
+                const c0 = chunkAtY(Math.max(0, st - 1.5 * H));
+                const c1 = chunkAtY(st + 2.5 * H);
+                const from = chunkStart[c0];
+                const to = c1 + 1 < chunkStart.length ? chunkStart[c1 + 1] : eng.text.length;
+                hlWin = { top: chunkEl[c0].offsetTop, bottom: c1 + 1 < chunkEl.length ? chunkEl[c1 + 1].offsetTop : docEl.scrollHeight };
+                const lv = charLevel;
+                const hls = [];
+                for (let x = 0; x <= LEVELS; x++) hls.push(new Highlight());
+                let prev = 0, start = from, count = 0;
+                for (let p = from; p <= to; p++) {
+                    const v = p < to ? lv[p] : 0;
+                    if (v === prev) continue;
+                    if (prev && count < MAX_RANGES) { hls[prev].add(hlRange(start, p)); count++; }
+                    start = p;
+                    prev = v;
+                }
+                for (let x = 1; x <= LEVELS; x++) { hls[x].priority = 1; CSS.highlights.set('fz-h' + x, hls[x]); }
+            }
+
+            // Re-build when the viewport leaves the highlighted window (rAF-throttled).
+            let scrollPending = false;
+            docEl.addEventListener('scroll', () => {
+                if (scrollPending || !hlWin) return;
+                scrollPending = true;
+                requestAnimationFrame(() => {
+                    scrollPending = false;
+                    if (!hlWin) return;
+                    const st = docEl.scrollTop, H = docEl.clientHeight;
+                    const above = st < hlWin.top + 0.5 * H && hlWin.top > 0;
+                    const below = st + H > hlWin.bottom - 0.5 * H && hlWin.bottom < docEl.scrollHeight;
+                    if (above || below) buildHighlights();
+                });
+            }, { passive: true });
+
+            // ---- ranked snippets ----
+            const clean = (s) => s.replace(/\s+/g, ' ');
+
+            // Snippet = runs of (heat level, inside hit window) → plain text or a coloured span;
+            // the runs inside the hit window are wrapped in one breathing .hit-phrase.
+            function buildSnippet(h) {
+                const sr = eng.snippetRange(h, CTX);
+                const text = eng.text;
+                const frag = document.createDocumentFragment();
+                if (sr.cutLeft) frag.append('… ');
+                let box = null;
+                const keyAt = (p) => (charLevel ? charLevel[p] : 0) * 2 + (p >= h.start && p < h.end ? 1 : 0);
+                const emit = (a, b, k) => {
+                    const s = clean(text.slice(a, b));
+                    const L = k >> 1, inHit = k & 1;
+                    let target = frag;
+                    if (inHit) {
+                        if (!box) { box = document.createElement('span'); box.className = 'hit-phrase'; frag.append(box); }
+                        target = box;
+                    }
+                    if (!L) { target.append(s); return; }
+                    const span = document.createElement('span');
+                    span.className = 'hw h' + L;
+                    span.textContent = s;
+                    target.append(span);
+                };
+                let start = sr.from, key = keyAt(sr.from);
+                for (let p = sr.from + 1; p <= sr.to; p++) {
+                    const k = p < sr.to ? keyAt(p) : -1;
+                    if (k !== key) { emit(start, p, key); start = p; key = k; }
+                }
+                if (sr.cutRight) frag.append(' …');
+                return frag;
+            }
+
+            function renderHits(res) {
+                hitsEl.textContent = '';
+                active = -1;
+                if (!res.hits.length) {
+                    const e = document.createElement('div');
+                    e.className = 'empty';
+                    e.textContent = res.qTokens.length
+                        ? 'Kein Treffer über 20 % — anders schreiben, Tippfehler sind ok.'
+                        : 'Tippe etwas — jedes Zeichen glüht, so oft es von passenden Trigrammen überdeckt wird. ↑ ↓ springen durch die Treffer.';
+                    hitsEl.appendChild(e);
+                    return;
+                }
+                const frag = document.createDocumentFragment();
+                res.hits.forEach((h, i) => {
+                    const card = document.createElement('button');
+                    card.type = 'button';
+                    card.className = 'hit';
+                    card.dataset.i = i;
+                    const head = document.createElement('div');
+                    head.className = 'hit-head';
+                    const num = document.createElement('span');
+                    num.textContent = (i + 1) + '.';
+                    const bar = document.createElement('span');
+                    bar.className = 'bar';
+                    const pct = Math.round(h.score * 100);
+                    const fill = document.createElement('i');
+                    fill.style.width = pct + '%';
+                    fill.style.backgroundSize = (pct > 0 ? (10000 / pct).toFixed(1) : '100') + '% 100%';
+                    bar.appendChild(fill);
+                    const score = document.createElement('span');
+                    score.className = 'score';
+                    score.textContent = pct + ' %';
+                    score.style.color = h.score >= 0.5
+                        ? 'color-mix(in srgb, var(--run-green) ' + Math.round((h.score - 0.5) * 200) + '%, var(--run-yellow))'
+                        : 'color-mix(in srgb, var(--run-yellow) ' + Math.round(h.score * 200) + '%, var(--run-red))';
+                    head.append(num, bar, score);
+                    const body = document.createElement('div');
+                    body.className = 'hit-text';
+                    body.appendChild(buildSnippet(h));
+                    card.append(head, body);
+                    card.addEventListener('click', () => selectHit(i));
+                    frag.appendChild(card);
+                });
+                hitsEl.appendChild(frag);
+            }
+
+            function selectHit(i) {
+                if (!lastRes || !lastRes.hits[i]) return;
+                active = i;
+                for (const c of hitsEl.querySelectorAll('.hit')) c.classList.toggle('active', +c.dataset.i === i);
+                const card = hitsEl.querySelector('.hit[data-i="' + i + '"]');
+                if (card) card.scrollIntoView({ block: 'nearest' });
+                for (const b of halosEl.children) b.classList.toggle('active', +b.dataset.i === i);
+                const h = lastRes.hits[i];
+                const rect = makeRange(h.start, h.end).getBoundingClientRect(), dr = docEl.getBoundingClientRect();
+                // Bring the hit to the same height as the highlighted phrase in its card (panes side by
+                // side); otherwise centre it. Near the text's start/end the scroll range clamps anyway.
+                let target = docEl.clientHeight / 2 - rect.height / 2;
+                const hr = hitsEl.getBoundingClientRect();
+                const phrase = card && card.querySelector('.hit-phrase');
+                const sideBySide = Math.abs(hr.top - dr.top) < 2 && hr.height > 0 && Math.abs(hr.height - dr.height) < 2;
+                if (phrase && sideBySide) {
+                    const pr = phrase.getBoundingClientRect();
+                    if (pr.height > 0) target = pr.top - dr.top;
+                }
+                docEl.scrollTo({ top: docEl.scrollTop + (rect.top - dr.top) - target, behavior: 'smooth' });
+            }
+
+            // ---- per hit: a pulsing halo around each line fragment in the document + a mark on the ruler ----
+            function renderMarks(res) {
+                rulerEl.textContent = '';
+                halosEl.textContent = '';
+                if (!res || !res.hits.length) return;
+                const dr = docEl.getBoundingClientRect();
+                const H = docEl.scrollHeight, st = docEl.scrollTop, sl = docEl.scrollLeft;
+                res.hits.forEach((h, i) => {
+                    const range = makeRange(h.start, h.end);
+                    const rects = range.getClientRects ? Array.from(range.getClientRects()) : [range.getBoundingClientRect()];
+                    let first = null;
+                    for (const r of rects) {
+                        if (r.width <= 0 || r.height <= 0) continue;
+                        if (!first) first = r;
+                        const b = document.createElement('div');
+                        b.className = 'halo' + (i === active ? ' active' : '');
+                        b.dataset.i = i;
+                        b.style.left = (r.left - dr.left + sl - 1) + 'px';
+                        b.style.top = (r.top - dr.top + st) + 'px';
+                        b.style.width = (r.width + 2) + 'px';
+                        b.style.height = r.height + 'px';
+                        // spread the rhythm so a page of hits does not pulse in lockstep
+                        b.style.animationDelay = (-(i % 7) * 0.4) + 's';
+                        halosEl.appendChild(b);
+                    }
+                    const y = ((first || rects[0] || { top: dr.top }).top - dr.top + st) / H;
+                    const m = document.createElement('div');
+                    m.className = 'mark';
+                    m.style.top = (y * 100).toFixed(2) + '%';
+                    m.style.opacity = (0.35 + 0.65 * h.score).toFixed(2);
+                    m.title = (i + 1) + '. ' + Math.round(h.score * 100) + ' %';
+                    m.addEventListener('click', () => selectHit(i));
+                    rulerEl.appendChild(m);
+                });
+            }
+
+            // ---- stats line ----
+            function legend() {
+                const l = document.createElement('span');
+                l.className = 'legend';
+                l.title = 'Heat pro Zeichen: Überdeckung durch passende Trigramme (0–3), geglättet über ±4 Zeichen — Weiß → Rot wie 2003';
+                for (let L = 1; L <= LEVELS; L++) { const s = document.createElement('span'); s.className = 'h' + L; l.appendChild(s); }
+                return l;
+            }
+
+            function setStatus(msg) {
+                statsEl.textContent = '';
+                const s = document.createElement('span');
+                s.textContent = msg;
+                statsEl.appendChild(s);
+            }
+
+            function showStats(res, renderMs) {
+                statsEl.textContent = '';
+                const parts = [
+                    corpusLabel,
+                    fmt.format(eng.N) + ' Wörter',
+                    fmt.format(eng.T) + ' Wortformen',
+                    'Index ' + Math.round(eng.buildMs) + ' ms',
+                ];
+                if (res.qTokens.length) {
+                    parts.push('Suche ' + Math.round(res.ms) + ' ms', 'Render ' + Math.round(renderMs) + ' ms', res.hits.length + ' Treffer');
+                }
+                if (!HAS_HL) parts.push('Browser ohne CSS Highlight API — Heatmap nur in den Treffern');
+                for (const p of parts) { const s = document.createElement('span'); s.textContent = p; statsEl.appendChild(s); }
+                statsEl.appendChild(legend());
+            }
+
+            // ---- search ----
+            function runSearch() {
+                if (!eng) return;
+                const res = eng.search(qEl.value, { idf: idfEl.checked, maxHits: MAX_HITS });
+                lastRes = res;
+                active = -1;
+                const t0 = performance.now();
+                quantize(res);
+                buildHighlights();
+                renderHits(res);
+                renderMarks(res);
+                showStats(res, performance.now() - t0);
+                updateUrl();
+            }
+
+            const debounce = (fn, ms) => {
+                let timer = null;
+                return () => { clearTimeout(timer); timer = setTimeout(fn, ms); };
+            };
+
+            function updateUrl() {
+                const u = new URL(location.href);
+                if (qEl.value) u.searchParams.set('q', qEl.value); else u.searchParams.delete('q');
+                if (corpusEl.value && corpusEl.value !== 'file') u.searchParams.set('t', corpusEl.value); else u.searchParams.delete('t');
+                history.replaceState(null, '', u);
+            }
+
+            // ---- loading text ----
+            function setText(text, name) {
+                corpusLabel = name;
+                if (HAS_HL) CSS.highlights.clear();
+                hlWin = null;
+                charLevel = null;
+                renderDoc(text);
+                eng = FuzzyEngine.build(text);
+                lastRes = null;
+                rulerEl.textContent = '';
+                halosEl.textContent = '';
+            }
+
+            async function loadCorpus(key) {
+                const t = TEXTS.find((x) => x.key === key) || TEXTS[0];
+                setStatus('Lädt ' + t.label + ' …');
+                try {
+                    const r = await fetch(t.file);
+                    if (!r.ok) throw new Error('HTTP ' + r.status);
+                    setText(await r.text(), t.label);
+                    if (!qEl.value) qEl.value = t.q;
+                    runSearch();
+                } catch (e) {
+                    setStatus('Konnte ' + t.file + ' nicht laden (' + e.message + ') — Datei öffnen oder per Drag & Drop.');
+                }
+            }
+
+            function loadFile(f) {
+                if (!f) return;
+                setStatus('Lese ' + f.name + ' …');
+                f.text().then((text) => {
+                    let opt = corpusEl.querySelector('option[value="file"]');
+                    if (!opt) { opt = document.createElement('option'); opt.value = 'file'; corpusEl.appendChild(opt); }
+                    opt.textContent = '📄 ' + f.name;
+                    corpusEl.value = 'file';
+                    setText(text, f.name);
+                    runSearch();
+                }).catch((e) => setStatus('Fehler beim Lesen: ' + e.message));
+            }
+
+            // ---- wiring ----
+            for (const t of TEXTS) {
+                const o = document.createElement('option');
+                o.value = t.key;
+                o.textContent = t.label;
+                corpusEl.appendChild(o);
+            }
+            const params = new URLSearchParams(location.search);
+            if (params.get('q')) qEl.value = params.get('q');
+            if (TEXTS.some((t) => t.key === params.get('t'))) corpusEl.value = params.get('t');
+
+            qEl.addEventListener('input', debounce(runSearch, 70));
+            qEl.addEventListener('keydown', (e) => {
+                if (!lastRes || !lastRes.hits.length) return;
+                const n = lastRes.hits.length;
+                if (e.key === 'ArrowDown') { e.preventDefault(); selectHit(Math.min(n - 1, active + 1)); }
+                else if (e.key === 'ArrowUp') { e.preventDefault(); selectHit(Math.max(0, active - 1)); }
+                else if (e.key === 'Enter') { e.preventDefault(); selectHit(active < 0 ? 0 : active); }
+            });
+            idfEl.addEventListener('change', runSearch);
+            corpusEl.addEventListener('change', () => { if (corpusEl.value !== 'file') loadCorpus(corpusEl.value); });
+            openEl.addEventListener('click', () => fileEl.click());
+            fileEl.addEventListener('change', () => { loadFile(fileEl.files[0]); fileEl.value = ''; });
+            for (const ev of ['dragenter', 'dragover']) docPane.addEventListener(ev, (e) => { e.preventDefault(); docPane.classList.add('drop'); });
+            for (const ev of ['dragleave', 'drop']) docPane.addEventListener(ev, (e) => { e.preventDefault(); docPane.classList.remove('drop'); });
+            docPane.addEventListener('drop', (e) => loadFile(e.dataTransfer.files && e.dataTransfer.files[0]));
+            // Layout changes (resize, web fonts arriving) move the text → re-anchor highlights and ruler.
+            const relayout = debounce(() => { buildHighlights(); renderMarks(lastRes); }, 150);
+            window.addEventListener('resize', relayout);
+            if (document.fonts && document.fonts.ready) document.fonts.ready.then(relayout);
+
+            loadCorpus(corpusEl.value);
+            qEl.focus();
+        })();
+    </script>
+</body>
+
+</html>
