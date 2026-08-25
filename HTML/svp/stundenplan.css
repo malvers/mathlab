@@ -651,6 +651,13 @@ header.page-head h1 {
     margin-bottom: 2px;
 }
 
+/* School + school year sit right behind the heading (Doc: more room there) */
+header.page-head .title-group .subtitle {
+    margin: 0 0 0 8px;
+    padding-bottom: 5px;        /* optical baseline with the larger h1 */
+    white-space: nowrap;
+}
+
 .tt-bar {
     margin-bottom: 12px;
 }
@@ -694,8 +701,24 @@ header.page-head h1 {
 .tt-opt-row {
     display: flex;
     flex-wrap: wrap;
-    align-items: center;
+    align-items: flex-end;      /* controls sit on one baseline; a caption may rise above */
     gap: 12px;
+}
+
+/* a small caption above a control (e.g. "Aufwand" above the effort select) */
+.tt-opt-stack {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 3px;
+}
+
+.tt-opt-cap {
+    font-size: 0.62rem;
+    line-height: 1;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding-left: 2px;
 }
 
 .tt-opt-field {
@@ -714,6 +737,73 @@ header.page-head h1 {
     padding: 6px 8px;
     font-family: Outfit, sans-serif;
     font-size: 0.8rem;
+}
+
+/* --- dropdown picker in the page's own look ------------------------------
+   Customizable <select> (Chrome/Edge 135+). Browsers without it keep the
+   native popup; the @supports guard keeps their options untouched. */
+@supports (appearance: base-select) {
+    .tt-opt-field select,
+    .tt-opt-field select::picker(select) {
+        appearance: base-select;
+    }
+
+    .tt-opt-field select {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        cursor: pointer;
+    }
+
+    .tt-opt-field select:open,
+    .tt-opt-field select:focus-visible {
+        outline: none;
+        border-color: rgba(120, 160, 220, 0.45);
+    }
+
+    .tt-opt-field select::picker-icon {
+        color: var(--muted);
+        font-size: 0.7rem;
+    }
+
+    .tt-opt-field select::picker(select) {
+        background: var(--panel);
+        color: var(--text);
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        box-shadow: 0 10px 30px var(--shadow);
+        padding: 6px;
+        margin-top: 4px;
+        font-family: Outfit, sans-serif;
+        font-size: 0.8rem;
+    }
+
+    .tt-opt-field option {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 12px 6px 8px;
+        border-radius: 7px;
+        cursor: pointer;
+        white-space: nowrap;
+    }
+
+    /* own checkmark column, so all labels stay aligned */
+    .tt-opt-field option::checkmark { display: none; }
+    .tt-opt-field option::before {
+        content: '';
+        flex: 0 0 12px;
+        text-align: center;
+        font-size: 0.75rem;
+        color: var(--phi);
+    }
+    .tt-opt-field option:checked::before { content: '\2713'; }
+    .tt-opt-field option:checked { color: var(--lambda); }
+    .tt-opt-field option:hover,
+    .tt-opt-field option:focus-visible {
+        background: var(--panel-soft);
+        outline: none;
+    }
 }
 
 .tt-opt { position: relative; }
