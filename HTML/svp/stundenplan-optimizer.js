@@ -496,6 +496,106 @@
         return { moves, E0, E1, counts0: c0, counts1: c1, iters: it, stopped, blocks: blocks.length, movable: movable.length, units: units.length, accepted, swaps };
     }
 
+    // ---- manual planning (Planungsdialog) ------------------------------------
+    // For one lesson: its unit (what moves with it) and every candidate slot,
+    // each marked ok / not ok with human-readable reasons - the green/red
+    // feasibility colouring Untis shows while you drag.
+    function feasibility(lessons, monday, lessonIndex) {
+        VIRTUAL = virtualTeachers(lessons);
+        const blocks = buildBlocks(lessons, monday);
+        const cand = buildCandidates(blocks);
+        const st = makeState(blocks);
+        const baseline = new Set();
+        for (const b of blocks) for (const id of neighbours(b, blocks, st)) baseline.add(pairKey(b, blocks[id]));
+        buildUnits(blocks, st);
+        const b0 = blocks.find(x => x.idx.includes(lessonIndex));
+        if (!b0) return null;
+        const u = b0.unit;
+        const starts = new Set(); let maxEnd = 0;
+        for (const m of u.members) { const c = cand.get(m.classKey); if (c) { c.starts.forEach(x => starts.add(x)); maxEnd = Math.max(maxEnd, c.maxEnd); } }
+        const place = (day, start) => {
+            u.day = day; u.start = start; u.end = start + u.dur;
+            for (const m of u.members) { st.del(m); m.day = day; m.start = start + m.off; m.end = m.start + m.dur; st.add(m); }
+        };
+        const who = (m, o) => {
+            const t = m.teachers.find(x => !VIRTUAL.has(x) && o.teachers.includes(x));
+            if (t && sitesDiffer(m, o)) return t + ' ist dann in ' + (o.rooms.join(',') || 'einem anderen Raum') + ': ' + (o.subject || '') + ' ' + o.classes.join(',');
+            if (t) return t + ' hat dann schon ' + (o.subject || '') + ' ' + o.classes.join(',');
+            const c = m.classes.find(x => o.classes.includes(x));
+            if (c) return 'Klasse ' + c + ' hat dann ' + (o.subject || '') + (o.teachers.length ? ' bei ' + o.teachers.join(',') : '');
+            const r = m.rooms.find(x => o.rooms.includes(x));
+            if (r) return 'Raum ' + r + ' ist belegt: ' + (o.subject || '') + ' ' + o.classes.join(',');
+            return null;
+        };
+        const od = u.day, os = u.start;
+        const mon = parseYmd(monday);
+        const out = [];
+        for (let day = 0; day < 5; day++) for (const start of starts) {
+            if (day === od && start === os) continue;
+            if (u.dayLocked && day !== u.day0) continue;
+            if (start + u.dur > maxEnd + 45) continue;
+            place(day, start);
+            const reasons = new Set(); let bad = false;
+            for (const m of u.members) for (const id of neighbours(m, blocks, st)) {
+                if (pairPen(m, blocks[id], baseline) > 0) { bad = true; const r = who(m, blocks[id]); if (r) reasons.add(r); }
+            }
+            for (const t of u.teachers) if (teacherDayParts(t, day, blocks, st).site > 0) { bad = true; reasons.add(t + ': Standortwechsel zu knapp'); }
+            place(od, os);
+            const d = new Date(mon); d.setDate(mon.getDate() + day);
+            out.push({ day, start, date: ymd(d), ok: !bad, reasons: [...reasons] });
+        }
+        return {
+            idx: u.members.flatMap(m => m.idx), dur: u.dur, day: od, start: os, date: b0.date,
+            subject: b0.subject, classes: u.classes, teachers: u.teachers, rooms: [...new Set(u.members.flatMap(m => m.rooms))],
+            candidates: out,
+        };
+    }
+
+    // Swap partners for one lesson's unit: units of the same class family and
+    // length; each checked as a full exchange of slots (both directions).
+    function swapOptions(lessons, monday, lessonIndex) {
+        VIRTUAL = virtualTeachers(lessons);
+        const blocks = buildBlocks(lessons, monday);
+        const st = makeState(blocks);
+        const baseline = new Set();
+        for (const b of blocks) for (const id of neighbours(b, blocks, st)) baseline.add(pairKey(b, blocks[id]));
+        const units = buildUnits(blocks, st);
+        const b0 = blocks.find(x => x.idx.includes(lessonIndex));
+        if (!b0) return [];
+        const u = b0.unit;
+        const place = (x, day, start) => {
+            x.day = day; x.start = start; x.end = start + x.dur;
+            for (const m of x.members) { st.del(m); m.day = day; m.start = start + m.off; m.end = m.start + m.dur; st.add(m); }
+        };
+        const mon = parseYmd(monday);
+        const out = [];
+        for (const v of units) {
+            if (v === u || v.family !== u.family || v.dur !== u.dur) continue;
+            if ((u.dayLocked && v.day !== u.day0) || (v.dayLocked && u.day !== v.day0)) continue;
+            const ud = u.day, us = u.start, vd = v.day, vs = v.start;
+            place(u, vd, vs); place(v, ud, us);
+            const reasons = new Set(); let bad = false;
+            for (const x of [u, v]) {
+                for (const m of x.members) for (const id of neighbours(m, blocks, st)) {
+                    const o = blocks[id];
+                    if (pairPen(m, o, baseline) > 0) {
+                        bad = true;
+                        const t = m.teachers.find(y => !VIRTUAL.has(y) && o.teachers.includes(y));
+                        reasons.add(t ? t + ' kollidiert mit ' + (o.subject || '') + ' ' + o.classes.join(',') : 'Raum/Klasse belegt: ' + (o.subject || '') + ' ' + o.classes.join(','));
+                    }
+                }
+                for (const t of x.teachers) if (teacherDayParts(t, x.day, blocks, st).site > 0) { bad = true; reasons.add(t + ': Standortwechsel zu knapp'); }
+            }
+            place(u, ud, us); place(v, vd, vs);
+            const d = new Date(mon); d.setDate(mon.getDate() + v.day);
+            const lead = v.members[0];
+            out.push({ idx: v.members.flatMap(m => m.idx), day: v.day, start: v.start, date: ymd(d), dur: v.dur,
+                subject: lead.subject, teachers: v.teachers, classes: v.classes, rooms: [...new Set(v.members.flatMap(m => m.rooms))],
+                ok: !bad, reasons: [...reasons] });
+        }
+        return out.sort((a, b) => (b.ok ? 1 : 0) - (a.ok ? 1 : 0) || a.day - b.day || a.start - b.start);
+    }
+
     // Apply a move list to a lesson array (returns a new array).
     function applyMoves(lessons, moves) {
         const out = lessons.map(l => ({ ...l }));
@@ -512,7 +612,7 @@
         return out;
     }
 
-    const api = { optimize, applyMoves, siteOf, travel, virtualTeachers, _internals: { buildBlocks, buildCandidates, makeState, neighbours, overlaps, sitesDiffer, share, setVirtual: v => { VIRTUAL = v; } } };
+    const api = { optimize, applyMoves, siteOf, travel, virtualTeachers, feasibility, swapOptions, toHHMM, _internals: { buildBlocks, buildCandidates, makeState, neighbours, overlaps, sitesDiffer, share, setVirtual: v => { VIRTUAL = v; } } };
 
     if (typeof module !== 'undefined' && module.exports) module.exports = api;
     // Only inside a real Worker - on the page this file just exposes the API

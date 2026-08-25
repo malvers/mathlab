@@ -110,7 +110,7 @@ final class App: NSObject, NSApplicationDelegate {
         if code == 0 {
             bar.doubleValue = 80
             title.stringValue = "WebUntis geholt."
-            status.stringValue = (summary.map { $0.components(separatedBy: " -> ").first ?? $0 }.joined(separator: " · ")) + "  —  im Browser Cmd-Shift-R."
+            status.stringValue = summary.map { $0.components(separatedBy: " -> ").first ?? $0 }.joined(separator: " · ")
         } else {
             title.stringValue = "Fehlgeschlagen (Code \(code))"
             status.textColor = .systemRed

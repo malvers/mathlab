@@ -716,8 +716,12 @@ header.page-head h1 {
     font-size: 0.8rem;
 }
 
+.tt-opt { position: relative; }
+.tt-opt-row { padding-right: 40px; }   /* room for the close button */
 .tt-opt-close {
-    margin-left: auto;
+    position: absolute;
+    top: 12px;
+    right: 12px;
     width: 30px;
     height: 30px;
     border-radius: 7px;
@@ -1093,4 +1097,167 @@ body.is-resizing {
     padding: 0 8px;
     font-family: Outfit, sans-serif;
     font-size: 0.8rem;
+}
+
+/* --- manual planning: drag & drop with Untis-style feasibility colours ---- */
+
+body.opt-mode .tt-lesson[data-idx] { cursor: grab; }
+body.is-dragging { cursor: grabbing; user-select: none; }
+body.is-dragging .tt-lesson { cursor: grabbing; }
+
+.tt-lesson.is-source { opacity: 0.35; }
+
+.tt-drag-ghost {
+    position: fixed;
+    left: 0; top: 0;
+    pointer-events: none;
+    z-index: 50;
+    opacity: 0.9;
+    box-shadow: 0 6px 18px var(--shadow);
+}
+
+.tt-drop {
+    position: absolute;
+    left: 3px;
+    right: 3px;
+    border-radius: 6px;
+    z-index: 1;                 /* below the tiles - nothing is painted over a lesson */
+    border: 1px dashed transparent;
+}
+
+.tt-lesson { z-index: 2; }
+.tt-lesson.tt-swap-ok, .tt-lesson.tt-swap-bad { z-index: 3; }
+
+.tt-drop.ok {
+    background: rgba(121, 158, 49, 0.28);
+    border-color: rgba(121, 158, 49, 0.7);
+}
+
+.tt-drop.bad {
+    background: rgba(176, 36, 24, 0.16);
+    border-color: rgba(176, 36, 24, 0.45);
+}
+
+.tt-drop.hover.ok { background: rgba(121, 158, 49, 0.55); }
+.tt-drop.hover.bad { background: rgba(176, 36, 24, 0.35); }
+
+@keyframes tt-shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-4px); }
+    75% { transform: translateX(4px); }
+}
+.tt-lesson.shake { animation: tt-shake 0.3s ease; outline: 2px solid var(--ypsilon); }
+
+/* --- swap partners while dragging, and the right-click menu --------------- */
+
+.tt-lesson.tt-swap-ok { outline: 2px solid var(--cyan); outline-offset: -2px; }
+.tt-lesson.tt-swap-bad { outline: 2px dashed rgba(176, 36, 24, 0.5); outline-offset: -2px; opacity: 0.6; }
+.tt-lesson.tt-swap-ok.hover { background: color-mix(in srgb, var(--cyan) 45%, var(--card)); }
+
+.tt-menu {
+    position: fixed;
+    z-index: 60;
+    width: 320px;
+    max-height: 420px;
+    overflow-y: auto;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    box-shadow: 0 10px 30px var(--shadow);
+    padding: 8px;
+    font-size: 0.8rem;
+}
+
+.tt-menu::-webkit-scrollbar { width: 5px; }
+.tt-menu::-webkit-scrollbar-thumb { background: var(--thumb); border-radius: 3px; }
+
+.tt-menu-head {
+    font-family: Orbitron, sans-serif;
+    font-size: 0.74rem;
+    color: var(--lambda);
+    padding: 4px 6px 8px;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 4px;
+}
+
+.tt-menu-sec {
+    font-family: Orbitron, sans-serif;
+    font-size: 0.62rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 8px 6px 4px;
+}
+
+.tt-menu-sec span { color: var(--phi); margin-left: 4px; }
+
+.tt-menu button {
+    display: block;
+    width: 100%;
+    text-align: left;
+    background: transparent;
+    border: 0;
+    border-radius: 6px;
+    padding: 5px 8px;
+    color: var(--text);
+    font-family: Outfit, sans-serif;
+    font-size: 0.8rem;
+    cursor: pointer;
+}
+
+.tt-menu button:hover { background: rgba(121, 158, 49, 0.18); color: var(--phi); }
+.tt-menu-none { color: var(--muted); padding: 4px 8px; font-size: 0.76rem; }
+
+.tt-where.tt-site { opacity: 0.6; font-style: italic; }
+.tt-drop-label {
+    position: absolute;
+    left: 6px;
+    top: 3px;
+    font-size: 0.66rem;
+    color: var(--text);
+    opacity: 0.85;
+    white-space: nowrap;
+    pointer-events: none;
+}
+.tt-menu-room { color: var(--muted); margin-left: 6px; }
+
+/* --- nothing jumps: status always two lines, progress keeps its space ----- */
+
+.tt-opt-status {
+    margin-top: 10px;
+    font-size: 0.82rem;
+    line-height: 1.6;
+    min-height: 2.7em;
+}
+
+/* progress only takes space while a run is on (Doc: too much air otherwise);
+   the status block above keeps its two lines, so drops never jump */
+.tt-opt-progress[hidden] { display: none; }
+.tt-versions { margin-top: 4px; }
+.tt-opt-result:empty { display: none; }
+
+.tt-bar .tt-meta { min-height: 3.9em; }
+.tt-meta-hint { color: var(--lambda); }
+
+/* disabled controls stay in place, just quiet */
+.tt-opt-row .action:disabled,
+.tt-opt-row .tt-search:disabled,
+.tt-opt-row .tt-pick:disabled {
+    opacity: 0.35;
+    cursor: default;
+    filter: none;
+}
+
+/* --- fixed width for the meta block: its text changes (mode, hint) must not
+   push the centred branch buttons sideways ----------------------------------- */
+.tt-bar .tt-meta {
+    flex: 0 0 360px;
+    width: 360px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+@media (max-width: 1100px) {
+    .tt-bar .tt-meta { flex: 1 1 100%; width: auto; text-align: left; white-space: normal; }
 }
