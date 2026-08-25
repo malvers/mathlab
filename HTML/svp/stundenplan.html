@@ -33,6 +33,8 @@
                 <h1>Stundenplan</h1>
                 <div class="subtitle caps" id="sub">&nbsp;</div>
             </div>
+            <!-- opened in a new tab from the svp menu, so browser-back has nowhere to go -->
+            <button class="action secondary" id="back" type="button" title="Zur SVP-Übersicht">Zur Übersicht</button>
         </div>
     </header>
 
@@ -1328,6 +1330,7 @@
         document.getElementById('prev').addEventListener('click', () => step(-1));
         document.getElementById('next').addEventListener('click', () => step(1));
         document.getElementById('today').addEventListener('click', () => showWeek(weekForToday()));
+        document.getElementById('back').addEventListener('click', () => { location.href = './'; });
         document.addEventListener('keydown', e => {
             if (e.target.tagName === 'INPUT') return;
             if (e.key === 'ArrowLeft') step(-1);
