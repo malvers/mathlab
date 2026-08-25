@@ -25,10 +25,10 @@ export async function authorize() {          // one-time: opens browser, catches
     const srv = http.createServer((req, res) => {
       const q = new URL(req.url, redirect).searchParams;
       const c = q.get('code'), err = q.get('error');
-      res.end(c ? 'OK — Fenster kann geschlossen werden.' : (err ? 'Abgelehnt: ' + err : 'warte …'));
+      res.end(c ? 'OK — you can close this window.' : (err ? 'Denied: ' + err : 'waiting …'));
       /* the browser also asks for /favicon.ico — only a request that carries code or error counts */
       if (c) { srv.close(); resolve(c); }
-      else if (err) { srv.close(); reject(new Error('OAuth abgelehnt: ' + err)); }
+      else if (err) { srv.close(); reject(new Error('OAuth denied: ' + err)); }
     });
     srv.listen(8901, '127.0.0.1', () => execFileSync('open', [authUrl(redirect)]));
   });
@@ -49,7 +49,7 @@ async function accessToken() {
       client_secret: installed.client_secret, grant_type: 'refresh_token' }),
   })).json();
   if (!r.access_token) {
-    throw new Error('Kein Access-Token — Refresh-Token abgelaufen oder zurückgezogen. Einmal authorize() laufen lassen. ' +
+    throw new Error('No access token — the refresh token expired or was revoked. Run authorize() once. ' +
       JSON.stringify(r).slice(0, 200));
   }
   return r.access_token;
@@ -57,11 +57,11 @@ async function accessToken() {
 
 export async function uploadVideo(file, { title, description = '', tags = [], privacy = 'private', dryRun = false }) {
   const size = fs.statSync(file).size;
-  console.log(`→ Upload: ${file}`);
-  console.log(`  Titel:  ${title}`);
-  console.log(`  Tags:   ${tags.join(', ')}`);
-  console.log(`  Größe:  ${(size / 1e6).toFixed(1)} MB · Sichtbarkeit: ${privacy}`);
-  if (dryRun) { console.log('  [dry-run] nichts gesendet.'); return null; }
+  console.log(`→ Uploading: ${file}`);
+  console.log(`  Title:      ${title}`);
+  console.log(`  Tags:       ${tags.join(', ')}`);
+  console.log(`  Size:       ${(size / 1e6).toFixed(1)} MB · visibility: ${privacy}`);
+  if (dryRun) { console.log('  [dry run] nothing was sent.'); return null; }
   const at = await accessToken();
   const meta = { snippet: { title, description, tags, categoryId: '27' }, status: { privacyStatus: privacy } };
   const init = await fetch('https://www.googleapis.com/upload/youtube/v3/videos?uploadType=resumable&part=snippet,status', {
@@ -71,15 +71,15 @@ export async function uploadVideo(file, { title, description = '', tags = [], pr
   });
   const session = init.headers.get('location');
   if (!init.ok || !session) {
-    throw new Error('Upload-Session abgelehnt (HTTP ' + init.status + '): ' + (await init.text()).slice(0, 300));
+    throw new Error('Upload session refused (HTTP ' + init.status + '): ' + (await init.text()).slice(0, 300));
   }
   /* whole file in memory — fine for the few hundred MB a demo has, and it keeps the PUT a single
      retryable request */
   const put = await fetch(session, { method: 'PUT', headers: { 'Content-Length': size, 'Content-Type': 'video/mp4' }, body: fs.readFileSync(file) });
   const j = await put.json().catch(() => ({}));
   if (!put.ok || !j.id) {
-    throw new Error('Upload fehlgeschlagen (HTTP ' + put.status + '): ' + JSON.stringify(j).slice(0, 300));
+    throw new Error('Upload failed (HTTP ' + put.status + '): ' + JSON.stringify(j).slice(0, 300));
   }
-  console.log(`  ✓ hochgeladen: https://youtu.be/${j.id}`);
+  console.log(`  ✓ uploaded: https://youtu.be/${j.id}`);
   return j.id;
 }
