@@ -1,0 +1,1070 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stundenplan</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript>
+        <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+            rel="stylesheet">
+    </noscript>
+    <link rel="icon" type="image/png" href="../resources/favicon.png">
+    <link rel="stylesheet" href="svp.css">
+    <link rel="stylesheet" href="stundenplan.css">
+    <!-- Applies the shared colour scheme (localStorage "svp-theme") before first
+         paint, same as every other svp page. -->
+    <script src="svp-gate.js"></script>
+</head>
+
+<body>
+    <header class="page-head">
+        <div class="head-row">
+            <div class="title-group">
+                <h1>Stundenplan</h1>
+            </div>
+        </div>
+        <div class="subtitle caps" id="sub">&nbsp;</div>
+    </header>
+
+    <main class="svp-section">
+        <div class="tt-bar">
+            <button class="tt-nav" id="prev" type="button" aria-label="Vorige Woche">&lsaquo;</button>
+            <div class="tt-week" id="week">&nbsp;</div>
+            <button class="tt-nav" id="next" type="button" aria-label="Nächste Woche">&rsaquo;</button>
+            <span class="tt-ab" id="abweek" title="A/B-Woche — Anker: 24.08.2026 = A (Doc)"></span>
+            <button class="action secondary" id="today" type="button">Heute</button>
+            <div class="tt-depts" id="depts">
+                <button type="button" data-dept="GS" title="Grundschule 1–4">GS</button>
+                <button type="button" data-dept="OS" title="Oberschule 5–10">OS</button>
+                <button type="button" data-dept="GYM" title="Gymnasiale Oberstufe 11/12">GYM</button>
+                <button type="button" data-dept="FOS" title="Fachoberschule (FOG, FOS, FOW)">FOS</button>
+                <button type="button" data-dept="BGY" title="Berufliches Gymnasium">BGY</button>
+                <button type="button" class="tt-conf" id="conf"
+                    title="Nur Konflikte: schulweit eine Person gleichzeitig in zwei Räumen, bei gewählter Person jede Überschneidung">&#9888; Konflikte anzeigen</button>
+            </div>
+            <span class="tt-confcount" id="confcount" title="Harte Konflikte in dieser Woche (Person in zwei Räumen), ganze Schule"></span>
+            <button class="action" id="optbtn" type="button" title="Stundenplan optimieren (Simulated Annealing)">Optimieren</button>
+            <div class="tt-meta" id="meta"></div>
+        </div>
+
+        <section class="tt-opt" id="opt" hidden>
+            <div class="tt-opt-row">
+                <label class="tt-opt-field">
+                    <span>Bewegen darf</span>
+                    <select id="opt-scope">
+                        <option value="all">ganze Schule</option>
+                        <option value="me">nur die gewählte Person</option>
+                    </select>
+                </label>
+                <label class="tt-opt-field">
+                    <span>Generationen</span>
+                    <select id="opt-iters">
+                        <option value="300000">schnell (≈ 5 s)</option>
+                        <option value="1000000">normal (≈ 15 s)</option>
+                        <option value="3000000">gründlich (≈ 1 min)</option>
+                        <option value="9000000" selected>supergründlich (≈ 2–3 min)</option>
+                        <option value="18000000">extrem (≈ 5 min)</option>
+                    </select>
+                </label>
+                <button class="action" id="opt-run" type="button">Start</button>
+                <button class="action secondary" id="opt-diff" type="button" hidden>Vorschlagsplan</button>
+                <button class="action secondary" id="opt-show" type="button" hidden>Vorschlag im Plan zeigen</button>
+                <button class="action secondary" id="opt-clear" type="button" hidden>Verwerfen</button>
+                <span class="tt-savebox" id="savebox" hidden>
+                    <input type="text" id="opt-name" class="tt-search" placeholder="Name der Version …" maxlength="60" aria-label="Name der Version">
+                    <button class="action" id="opt-save" type="button">Version speichern</button>
+                </span>
+                <select id="opt-pick" class="tt-pick" aria-label="Gespeicherte Version laden" hidden>
+                    <option value="">Version laden …</option>
+                </select>
+                <button class="action secondary" id="opt-csv" type="button" hidden title="Änderungsliste als CSV (Excel/Numbers)">Liste CSV</button>
+                <button class="action secondary" id="opt-print" type="button" hidden title="Änderungsliste als Druckansicht">Liste drucken</button>
+                <button class="tt-opt-close" id="opt-close" type="button" aria-label="Schließen">&times;</button>
+            </div>
+            <div class="tt-opt-progress" id="opt-progress" hidden>
+                <div class="tt-opt-bar"><div class="tt-opt-fill" id="opt-fill"></div></div>
+                <div class="tt-opt-live" id="opt-live"></div>
+            </div>
+            <div class="tt-opt-result" id="opt-result"></div>
+            <div class="tt-versions" id="versions"></div>
+        </section>
+
+        <div class="tt-layout">
+            <aside class="tt-side" id="side">
+                <label class="tt-search-wrap">
+                    <span class="tt-sr">Kollegin oder Kollegen suchen</span>
+                    <input type="search" id="search" class="tt-search" placeholder="Suchen &hellip;"
+                        autocomplete="off">
+                </label>
+                <div class="tt-people-caption" id="people-caption" hidden>&#9888; Konflikte</div>
+                <div class="tt-people" id="people"></div>
+                <div class="tt-resize" id="resize" title="Breite ziehen"></div>
+            </aside>
+
+            <div class="tt-mainarea">
+                <div class="tt-wrap">
+                    <div class="tt-grid" id="grid">
+                        <div class="tt-empty">Daten werden geladen&hellip;</div>
+                    </div>
+                </div>
+                <div class="tt-note" id="note"></div>
+            </div>
+        </div>
+    </main>
+
+    <button class="tt-theme" id="theme" type="button" aria-label="Hell oder dunkel umschalten"
+        title="Hell / dunkel"></button>
+
+    <script src="stundenplan-optimizer.js"></script>
+    <script>
+        // Local rebuild of the WebUntis timetable. Data comes from
+        //   node tools/webuntis.js dump me|all <VON> <BIS>
+        // which writes stundenplan-data.json next to this page (gitignored:
+        // the plan carries real staff names).
+        //
+        // No fixed period rows: the school runs two different timegrids at once
+        // (FOS starts 08:00, the Oberschule classes 9a/9b sit at 11:35/13:20),
+        // so lessons are placed on a real time axis by minute. That also makes
+        // overlaps visible instead of hiding them behind a slot number.
+
+        const DAY_NAMES = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
+        const HUES = ['--cyan', '--violet', '--teal', '--pink', '--phi', '--lambda'];
+        // Scale the day to the window instead of a fixed pixel-per-minute:
+        // a long teaching day used to grow the grid far past the screen.
+        // Clamped so lessons stay readable on small screens and do not balloon
+        // on tall ones.
+        function pxPerMin(span) {
+            const grid = document.getElementById('grid');
+            const avail = window.innerHeight - grid.getBoundingClientRect().top - 70;
+            // Upper clamp: short days stretch towards the window, but gently -
+            // 2.0 felt too tall (Doc), 1.5 keeps text readable without towering.
+            return Math.max(0.55, Math.min(1.5, avail / span));
+        }
+
+        const toMin = t => Math.floor(t / 100) * 60 + (t % 100);
+        const hhmm = t => String(t).padStart(4, '0').replace(/(\d{2})(\d{2})/, '$1:$2');
+        const parseYmd = d => new Date(+String(d).slice(0, 4), +String(d).slice(4, 6) - 1, +String(d).slice(6, 8));
+        const fmtDate = d => parseYmd(d).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' });
+
+        // Stable colour per subject, so a subject keeps its hue across weeks.
+        function hueOf(subject) {
+            if (!subject) return HUES[0];
+            let h = 0;
+            for (const c of subject) h = (h * 31 + c.charCodeAt(0)) >>> 0;
+            return HUES[h % HUES.length];
+        }
+
+        function overlaps(a, b) {
+            return toMin(a.startTime) < toMin(b.endTime) && toMin(b.startTime) < toMin(a.endTime);
+        }
+
+        // Clash rules, measured against the real data (25.08.):
+        // - person view ("me"): any time overlap of that person is a conflict
+        //   (their second entry is often roomless, e.g. FO courses).
+        // - school view: HARD conflicts only - one teacher in two different
+        //   rooms at once. The soft rule (any shared-teacher overlap) fires
+        //   338x/week, almost all BSW supervision entries, pure noise.
+        function findClashes(lessons, scope) {
+            // Placeholder accounts (>35 lessons/week) and GTA providers are not
+            // people - same rule as the optimizer (TimetableOptimizer.virtualTeachers).
+            const virtual = scope === 'me' ? new Set() : VIRTUAL;
+            const realShare = (a, b) => a.some(t => !virtual.has(t) && b.includes(t));
+            const clash = new Set();
+            for (let i = 0; i < lessons.length; i++) {
+                for (let j = i + 1; j < lessons.length; j++) {
+                    const a = lessons[i], b = lessons[j];
+                    if (a.date !== b.date || !overlaps(a, b)) continue;
+                    if (a.code === 'cancelled' || b.code === 'cancelled') continue;
+                    const shared = scope === 'me'
+                        ? true
+                        : realShare(a.teachers, b.teachers)
+                          && a.rooms.length && b.rooms.length
+                          && !a.rooms.some(r => b.rooms.includes(r))
+                          // same subject + shared class in two rooms = Kopplung (same rule as the optimizer)
+                          && !(a.subject && a.subject === b.subject && a.classes.some(c => b.classes.includes(c)));
+                    if (shared) { clash.add(i); clash.add(j); }
+                }
+            }
+            return clash;
+        }
+
+        // Side-by-side placement for overlapping lessons within one day.
+        function layoutColumns(items) {
+            const sorted = [...items].sort((x, y) => toMin(x.l.startTime) - toMin(y.l.startTime));
+            const cols = [];
+            for (const it of sorted) {
+                let c = cols.findIndex(col => col.every(o => !overlaps(o.l, it.l)));
+                if (c < 0) { cols.push([]); c = cols.length - 1; }
+                cols[c].push(it);
+                it.col = c;
+            }
+            // Width is decided per overlap group, not per day, so a single clash
+            // does not shrink every other lesson of that day.
+            for (const it of sorted) {
+                const group = sorted.filter(o => overlaps(o.l, it.l) || o === it);
+                it.of = Math.max(...group.map(o => o.col)) + 1;
+            }
+            return sorted;
+        }
+
+        // The conflict chip next to "Optimieren" - fed by render() and live by the optimizer run
+        function setConfChip(n) {
+            const cc = document.getElementById('confcount');
+            cc.textContent = n + ' Konflikt' + (n === 1 ? '' : 'e');
+            cc.className = 'tt-confcount ' + (n ? 'bad' : 'good');
+        }
+
+        // Kürzel -> "Nachname, Vorname" from the index (app master data); falls back to the Kürzel
+        const NAME = k => (INDEX && INDEX.names && INDEX.names[k]) || k;
+        // replace every known Kürzel inside a free-text string (optimizer reasons)
+        const nameText = txt => INDEX && INDEX.names
+            ? txt.replace(/[A-Za-zÄÖÜäöüß][\wÄÖÜäöüß-]{4,}/g, m => INDEX.names[m] ? INDEX.names[m] : m) : txt;
+
+        // --- state ---------------------------------------------------------
+        let INDEX = null;      // plandaten/index.json: weeks, staff, school year
+        let DATA = null;       // the week currently on screen
+        let CURRENT = null;    // its Monday, as YYYYMMDD
+        let SELECTED = null;   // teacher short name, or null for "everybody"
+        let DEPT = null;       // "GS" | "OS" | "GYM" | "FOS" | "BGY" | null = no filter
+        let CONF = false;      // true = show only lessons involved in a clash
+        let PROPOSAL = null;   // { week, moves, lessons (applied), counts0, counts1 } from the optimizer
+        let VIRTUAL = new Set(); // placeholder "teachers" of the week on screen
+        let PROPOSAL_MODE = null; // null = original, 'full' = plan with proposal applied, 'diff' = only the moves (alt/neu)
+
+        // School branch from the class name prefix. Measured against the real
+        // WebUntis departments: GS = dep 3 (1a-4b), OS = dep 1 (5a-12),
+        // FO/BGY split dep 2 (Berufsbildung); BSW/FSE/POD/SAR stay unfiltered.
+        function deptOf(className) {
+            if (/^BGY/.test(className)) return 'BGY';
+            if (/^FO[GSW]/.test(className)) return 'FOS';
+            const n = parseInt(className, 10);
+            if (n >= 1 && n <= 4) return 'GS';
+            if (n >= 5 && n <= 10) return 'OS';
+            // Plain "11"/"12" sit in the Schulbildung department after the
+            // Oberschule ends - the gymnasiale Oberstufe.
+            if (n === 11 || n === 12) return 'GYM';
+            return null;
+        }
+
+        // The staff box always reaches (almost) the bottom of the window,
+        // whatever the timetable's height (Doc, 25.08.). It is sticky, so its
+        // top is stable; the list scrolls inside. Desktop only - on narrow
+        // screens the box is a horizontal strip with its own rules.
+        function syncSide() {
+            const side = document.getElementById('side');
+            if (window.innerWidth > 900) {
+                side.style.height = (window.innerHeight - side.getBoundingClientRect().top - 16) + 'px';
+            } else {
+                side.style.height = '';
+            }
+        }
+
+        // With the conflicts filter on, the staff box lists only people who
+        // have a clash this week (same rule as their person view: any overlap),
+        // with the number of clashing lessons instead of the year total.
+        // "Alle" shows the school-wide hard conflicts. Off: everything back.
+        function syncPeopleToConflicts(pool) {
+            const rows = document.querySelectorAll('.tt-person');
+            document.getElementById('side').classList.toggle('conf-mode', CONF);
+            document.getElementById('people-caption').hidden = !CONF;
+            const byTeacher = {};
+            for (const l of pool) for (const t of l.teachers) (byTeacher[t] ??= []).push(l);
+            if (!CONF) {
+                // normal mode: lessons in THIS week (Doc, 25.08.); the year total lives in the tooltip
+                for (const el of rows) {
+                    el.classList.remove('conf-hidden');
+                    const name = el.dataset.name || null;
+                    el.querySelector('.tt-pcount').textContent = name ? (byTeacher[name] || []).length : pool.length;
+                    if (name) el.title = 'Schuljahr: ' + el.dataset.count + ' Stunden' + (VIRTUAL.has(name) ? ' – Platzhalter-Account, zählt nicht als Person' : '');
+                }
+                return;
+            }
+            const conf = {};
+            for (const t in byTeacher) {
+                if (VIRTUAL.has(t)) continue;
+                const n = findClashes(byTeacher[t], 'me').size;
+                if (n) conf[t] = n;
+            }
+            const allHard = findClashes(pool, 'all').size;
+            for (const el of rows) {
+                const name = el.dataset.name || null;
+                const n = name ? (conf[name] || 0) : allHard;
+                // keep the selected person visible even at zero, so the choice stays explainable
+                el.classList.toggle('conf-hidden', !!name && !n && name !== SELECTED);
+                el.querySelector('.tt-pcount').textContent = n;
+            }
+        }
+
+        function render(data, selected) {
+            syncSide();
+            const mode = PROPOSAL && PROPOSAL.week === CURRENT ? PROPOSAL_MODE : null;
+            const all = mode === 'full' ? PROPOSAL.lessons : mode === 'diff' ? PROPOSAL.diff : (data.lessons || []);
+            let lessons = selected ? all.filter(l => l.teachers.includes(selected)) : all;
+            if (DEPT) lessons = lessons.filter(l => l.classes.some(c => deptOf(c) === DEPT));
+            // With one person picked, the interesting column is the class, not
+            // the teacher - same view you get from the personal timetable.
+            const scope = selected ? 'me' : (data.scope || 'me');
+            // (subtitle is set once from the index - school plus school year)
+            // fmtDate already ends in a dot ("31.08.") - append nothing but spaces
+            document.getElementById('week').textContent =
+                fmtDate(data.week.from) + ' – ' + fmtDate(data.week.to) + ' ' + parseYmd(data.week.to).getFullYear();
+
+            const stamp = data.generatedAt ? new Date(data.generatedAt).toLocaleString('de-DE') : '';
+            const who = selected
+                ? NAME(selected)
+                : 'Gesamte Schule';
+            const ageH = data.generatedAt ? (Date.now() - new Date(data.generatedAt)) / 36e5 : 0;
+            document.getElementById('meta').innerHTML =
+                who + (DEPT ? ' · ' + DEPT : '') + ' · ' + lessons.length + ' Stunden'
+                + (mode === 'full' ? ' · <span class="tt-meta-prop">mit Vorschlag</span>' : mode === 'diff' ? ' · <span class="tt-meta-prop">Vorschlagsplan</span>' : '')
+                + '<br>' + (ageH > 26 ? '<span class="tt-stale" title="Der LaunchAgent holt täglich 06:00 – lief er nicht?">Stand: ' + stamp + ' (älter als 1 Tag)</span>' : 'Stand: ' + stamp);
+
+            const grid = document.getElementById('grid');
+            grid.innerHTML = '';
+            if (!lessons.length) {
+                const parts = [];
+                if (selected) parts.push(selected === data.teacher ? 'du' : NAME(selected));
+                if (DEPT) parts.push(DEPT);
+                grid.innerHTML = '<div class="tt-empty">'
+                    + (parts.length
+                        ? 'Keine Stunden für <strong>' + parts.join(' + ') + '</strong> in dieser Woche.'
+                            + '<br><span class="tt-empty-hint">Ein Klick auf den aktiven Filter hebt ihn wieder auf.</span>'
+                        : 'Keine Stunden in diesem Zeitraum.')
+                    + '</div>';
+                return;
+            }
+
+            // Every day of the exported range gets a column - a week plan shows
+            // Mon..Fri even where nothing is scheduled. Weekend days only appear
+            // when they actually carry lessons.
+            const withLessons = new Set(lessons.map(l => l.date));
+            const dates = [];
+            for (let d = parseYmd(data.week.from); d <= parseYmd(data.week.to); d.setDate(d.getDate() + 1)) {
+                const n = Number(d.getFullYear() + String(d.getMonth() + 1).padStart(2, '0') + String(d.getDate()).padStart(2, '0'));
+                const weekend = d.getDay() === 0 || d.getDay() === 6;
+                if (!weekend || withLessons.has(n)) dates.push(n);
+            }
+            grid.style.setProperty('--days', dates.length);
+
+            // All-day entries (Einführungswoche etc., e.g. 00:00-23:59) would
+            // stretch the axis to 24h and drown the real lessons. They become
+            // slim banners at the top of the day instead, and neither define
+            // the time axis nor count as clashes.
+            const isBanner = l => toMin(l.endTime) - toMin(l.startTime) > 600;
+            const planForBox = mode === 'diff' ? PROPOSAL.lessons : all;   // ghosts are not lessons
+            syncPeopleToConflicts(planForBox.filter(l => !isBanner(l) && (!DEPT || l.classes.some(c => deptOf(c) === DEPT))));
+            // hard conflicts of the whole week on screen, next to "Optimieren"
+            const weekHard = findClashes(planForBox.filter(l => !isBanner(l)), 'all').size;
+            setConfChip(weekHard);
+            let gridLessons = lessons.filter(l => !isBanner(l));
+            let banners = lessons.filter(isBanner);
+
+            // Conflicts filter: keep only the lessons that take part in a clash
+            // (banners never do), then re-index the clash set on the reduced list.
+            let clash = mode === 'diff' ? new Set() : findClashes(gridLessons, scope);
+            if (CONF && mode !== 'diff') {
+                gridLessons = gridLessons.filter((l, i) => clash.has(i));
+                banners = [];
+                clash = findClashes(gridLessons, scope);
+                if (!gridLessons.length) {
+                    grid.innerHTML = '<div class="tt-empty">Keine Konflikte in dieser Woche'
+                        + (selected || DEPT ? ' für <strong>' + [selected, DEPT].filter(Boolean).join(' + ') + '</strong>' : '')
+                        + '. &#10003;</div>';
+                    document.getElementById('note').innerHTML = '';
+                    return;
+                }
+            }
+
+            // Time axis spans the real lessons, rounded to full half hours;
+            // with nothing but banners it falls back to the school timegrid.
+            const gridUnits = (data.timegrid && data.timegrid[0] && data.timegrid[0].timeUnits) || [];
+            const spanSrc = gridLessons.length ? gridLessons
+                : gridUnits.map(u => ({ startTime: u.startTime, endTime: u.endTime }));
+            const startMin = Math.floor(Math.min(...spanSrc.map(l => toMin(l.startTime))) / 30) * 30;
+            const endMin = Math.ceil(Math.max(...spanSrc.map(l => toMin(l.endTime))) / 30) * 30;
+
+            // Banner lane height is the same for every day so the axis lines up.
+            const BANNER_H = 30;
+            const laneRows = Math.max(0, ...dates.map(d => banners.filter(b => b.date === d).length));
+            const laneH = laneRows * BANNER_H + (laneRows ? 6 : 0);
+
+            const scale = pxPerMin(endMin - startMin);
+            const height = laneH + (endMin - startMin) * scale;
+            const y = m => laneH + (m - startMin) * scale;
+
+            // header row
+            grid.appendChild(document.createElement('div'));
+            const todayYmd = Number(new Date().toISOString().slice(0, 10).replace(/-/g, ''));
+            for (const d of dates) {
+                const h = document.createElement('div');
+                h.className = 'tt-head' + (d === todayYmd ? ' today' : '');
+                h.innerHTML = DAY_NAMES[parseYmd(d).getDay()] + '<span>' + fmtDate(d) + '</span>';
+                grid.appendChild(h);
+            }
+
+            // time axis
+            const axis = document.createElement('div');
+            axis.className = 'tt-axis';
+            axis.style.height = height + 'px';
+            const units = gridUnits;
+            const marks = units.length
+                ? [...new Set(units.flatMap(u => [toMin(u.startTime), toMin(u.endTime)]))]
+                : Array.from({ length: (endMin - startMin) / 60 + 1 }, (_, i) => startMin + i * 60);
+            for (const m of marks.filter(m => m >= startMin && m <= endMin)) {
+                const t = document.createElement('div');
+                t.className = 'tt-tick';
+                t.style.top = y(m) + 'px';
+                t.textContent = String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0');
+                axis.appendChild(t);
+            }
+            grid.appendChild(axis);
+
+            for (const d of dates) {
+                const col = document.createElement('div');
+                col.className = 'tt-col';
+                col.style.height = height + 'px';
+                col.dataset.day = DAY_NAMES[parseYmd(d).getDay()] + ', ' + fmtDate(d);
+
+                // faint band per period of the timegrid
+                for (const u of units) {
+                    const a = toMin(u.startTime), b = toMin(u.endTime);
+                    if (b <= startMin || a >= endMin) continue;
+                    const band = document.createElement('div');
+                    band.className = 'tt-band';
+                    band.style.top = y(a) + 'px';
+                    band.style.height = (b - a) * scale + 'px';
+                    col.appendChild(band);
+                }
+
+                // banners first: slim rows pinned above the time axis
+                banners.filter(b => b.date === d).forEach((b, bi) => {
+                    const el = document.createElement('div');
+                    el.className = 'tt-banner' + (b.code ? ' code-' + b.code : '');
+                    el.style.top = (bi * BANNER_H) + 'px';
+                    el.style.height = (BANNER_H - 4) + 'px';
+                    const label = b.lstext || b.subject || 'Termin';
+                    el.innerHTML = '<span class="tt-bl">' + label + '</span>'
+                        + '<span class="tt-br">' + [b.classes.join(','), b.rooms.join(',')].filter(Boolean).join(' · ') + '</span>';
+                    el.title = [label, b.classes.join(', '), b.teachers.join(', '), b.rooms.join(', '),
+                        hhmm(b.startTime) + '-' + hhmm(b.endTime), b.info, b.substText].filter(Boolean).join(' · ');
+                    col.appendChild(el);
+                });
+
+                const items = gridLessons.map((l, i) => ({ l, i })).filter(o => o.l.date === d);
+                for (const it of layoutColumns(items)) {
+                    const l = it.l;
+                    const a = toMin(l.startTime), b = toMin(l.endTime);
+                    const el = document.createElement('div');
+                    el.className = 'tt-lesson'
+                        + (l.code ? ' code-' + l.code : '')
+                        + (clash.has(it.i) ? ' clash' : '')
+                        + (l.moved ? ' moved' : '')
+                        + (l.ghost ? ' ghost' : '');
+                    el.style.setProperty('--hue', 'var(' + hueOf(l.subject) + ')');
+                    el.style.top = y(a) + 'px';
+                    el.style.height = Math.max(16, (b - a) * scale - 3) + 'px';
+                    el.style.left = 'calc(' + (it.col * 100 / it.of) + '% + 3px)';
+                    el.style.width = 'calc(' + (100 / it.of) + '% - 6px)';
+
+                    const who = scope === 'me' ? l.classes.join(', ') : l.teachers.join(', ');
+                    const parts = ['<div class="tt-subject">' + (l.subject || '—') + '</div>'];
+                    if (who) parts.push('<div class="tt-who">' + who + '</div>');
+                    if (l.rooms.length) parts.push('<div class="tt-where">' + l.rooms.join(', ') + '</div>');
+                    parts.push('<div class="tt-time">' + hhmm(l.startTime) + '–' + hhmm(l.endTime) + '</div>');
+                    if (l.ghost) parts.push('<div class="tt-tag">alt</div>');
+                    else if (l.moved) parts.push('<div class="tt-tag">neu</div>');
+                    el.innerHTML = parts.join('');
+                    if (clash.has(it.i)) {
+                        const flag = document.createElement('div');
+                        // big warning sign when the tile has room for it, small on slim tiles
+                        const h = Math.max(16, (b - a) * scale - 3);
+                        flag.className = 'tt-clash-flag' + (h >= 60 ? ' big' : h >= 38 ? ' mid' : '');
+                        flag.textContent = '⚠';
+                        el.appendChild(flag);
+                    }
+                    el.title = [l.subject, l.classes.join(', '), l.teachers.map(NAME).join(' · '), l.rooms.join(', '),
+                        hhmm(l.startTime) + '-' + hhmm(l.endTime), l.code, l.lstext, l.info, l.substText]
+                        .filter(Boolean).join(' · ');
+                    col.appendChild(el);
+                }
+                grid.appendChild(col);
+            }
+
+            // notes below the grid
+            const notes = [];
+            const nClash = new Set([...clash].map(i => gridLessons[i].date)).size;
+            if (clash.size) {
+                const list = [...clash].map(i => gridLessons[i])
+                    .sort((a, b) => a.date - b.date || a.startTime - b.startTime)
+                    .map(l => fmtDate(l.date) + ' ' + hhmm(l.startTime) + '–' + hhmm(l.endTime)
+                        + ' ' + (l.subject || '?') + ' ' + (l.classes.join('/') || ''));
+                notes.push('<p class="tt-warn"><strong>' + clash.size + ' Stunden überschneiden sich</strong> an '
+                    + nClash + ' Tag(en):<br>' + list.join('<br>') + '</p>');
+            }
+            const noRoom = gridLessons.filter(l => !l.rooms.length).length;
+            if (noRoom) notes.push('<p>' + noRoom + ' von ' + gridLessons.length + ' Stunden ohne Raumangabe.</p>');
+            notes.push('<p>Woche wechseln mit &lsaquo; &rsaquo; oder den Pfeiltasten. '
+                + 'Daten neu holen: <code>node tools/webuntis.js year</code></p>');
+            document.getElementById('note').innerHTML = notes.join('');
+
+        }
+
+        // --- optimizer ------------------------------------------------------
+        // Runs stundenplan-optimizer.js in a Web Worker on the week on screen.
+        // The proposal never touches WebUntis (read-only access anyway) - it is a
+        // diff you can look at, switch on in the grid, and discard.
+        (function () {
+            const panel = document.getElementById('opt');
+            const $ = id => document.getElementById(id);
+            let worker = null, RUN_SEED = 0;
+
+            // Doc's choices survive reloads (Doc, 25.08.: default supergründlich)
+            try {
+                const it = localStorage.getItem('svp-opt-iters');
+                if (it && $('opt-iters').querySelector('[value="' + it + '"]')) $('opt-iters').value = it;
+            } catch (e) { }
+            $('opt-iters').addEventListener('change', () => { try { localStorage.setItem('svp-opt-iters', $('opt-iters').value); } catch (e) { } });
+
+            $('optbtn').addEventListener('click', () => {
+                panel.hidden = !panel.hidden;
+                $('opt-scope').querySelector('[value=me]').disabled = !SELECTED;
+                if (!SELECTED) $('opt-scope').value = 'all';
+            });
+            $('opt-close').addEventListener('click', () => { panel.hidden = true; });
+
+            const hh = t => String(t).padStart(4, '0').replace(/(\d{2})(\d{2})/, '$1:$2');
+            const fmtCounts = c => c.hard + ' harte Konflikte · ' + c.site + ' Standort-Verstöße · ' + c.newOverlap + ' neue Überlappungen';
+
+            $('opt-run').addEventListener('click', () => {
+                if (!DATA) return;
+                if (worker) return;   // one run at a time - no STOP (Doc: a stopped run is worthless)
+                const scope = $('opt-scope').value;
+                const iters = +$('opt-iters').value;
+                worker = new Worker('stundenplan-optimizer.js');
+                $('opt-progress').hidden = false;
+                $('opt-fill').style.width = '0%';
+                $('opt-live').textContent = 'Blöcke bauen …';
+                $('opt-result').innerHTML = '';
+                $('opt-run').textContent = 'Läuft …';
+                $('opt-run').disabled = true;
+                const t0 = performance.now();
+                let lastCounts = null;
+                worker.onmessage = e => {
+                    const m = e.data;
+                    if (m.type === 'progress') {
+                        $('opt-fill').style.width = (100 * m.iter / iters).toFixed(1) + '%';
+                        if (m.counts) { lastCounts = m.counts; setConfChip(m.counts.hard); }
+                        const elapsed = (performance.now() - t0) / 1000;
+                        const eta = m.iter > 0 ? elapsed * (iters - m.iter) / m.iter : null;
+                        $('opt-live').innerHTML = (m.label === 'Abkühlen' ? '<strong>Abkühlen …</strong> ' : '') + m.iter.toLocaleString('de-DE') + ' Generationen · '
+                            + (eta != null ? 'noch ≈ ' + (eta >= 60 ? Math.floor(eta / 60) + ' min ' + Math.round(eta % 60) + ' s' : Math.round(eta) + ' s') + ' · ' : '')
+                            + 'Energie ' + Math.round(m.E)
+                            + ' (beste ' + Math.round(m.best) + ') · T = ' + m.T.toFixed(1)
+                            + (lastCounts ? ' · ' + lastCounts.site + ' Standort · ' + lastCounts.moved + ' verschoben' : '');
+                        return;
+                    }
+                    if (m.type !== 'done') return;
+                    $('opt-fill').style.width = '100%';
+                    $('opt-run').disabled = false;
+                    $('opt-run').textContent = 'Start';
+                    const secs = ((performance.now() - t0) / 1000).toFixed(1);
+                    $('opt-live').textContent = (m.stopped ? 'Gestoppt nach ' : '') + m.iters.toLocaleString('de-DE') + ' Generationen in ' + secs + ' s · '
+                        + m.blocks + ' Blöcke, ' + m.movable + ' beweglich' + (m.stopped ? ' · bester Stand bis dahin' : '');
+                    const applied = TimetableOptimizer.applyMoves(DATA.lessons, m.moves);
+                    PROPOSAL = { week: CURRENT, moves: m.moves, counts0: m.counts0, counts1: m.counts1, lessons: applied,
+                        // the Vorschlagsplan: every moved lesson twice - faded at the old slot, marked at the new one
+                        diff: [...m.moves.flatMap(mv => mv.idx.map(i => ({ ...DATA.lessons[i], ghost: true }))),
+                               ...applied.filter(l => l.moved)] };
+                    const row = mv =>
+                        '<li>' + (mv.subject || '?') + ' <span class="tt-opt-cls">' + mv.classes.join(', ') + '</span>'
+                        + (mv.rooms.length ? ' <span class="tt-opt-cls">' + mv.rooms.join(', ') + '</span>' : '')
+                        + ': ' + DAY_NAMES[parseYmd(mv.from.date).getDay()].slice(0, 2) + ' ' + hh(mv.from.start) + '–' + hh(mv.from.end)
+                        + ' → <strong>' + DAY_NAMES[parseYmd(mv.to.date).getDay()].slice(0, 2) + ' ' + hh(mv.to.start) + '–' + hh(mv.to.end) + '</strong>'
+                        + ' <span class="tt-opt-why' + (mv.reason.startsWith('löst') ? ' solves' : '') + '">'
+                        + nameText(mv.reason.startsWith('Tauschpartner') ? mv.reason.replace(/^Tauschpartner/, mv.teachers.join(', ') + ' · Tauschpartner') : mv.reason) + '</span></li>';
+                    // Tree: one node per person whose plan changes; swap partners hang
+                    // under the person they make room for.
+                    const groups = new Map();
+                    const groupOf = mv => {
+                        const t = mv.reason.match(/^Tauschpartner für (\S+)/);
+                        return t && m.moves.some(o => o.teachers.join(',') === t[1]) ? t[1] : mv.teachers.join(', ');
+                    };
+                    for (const mv of m.moves) { const g = groupOf(mv); if (!groups.has(g)) groups.set(g, []); groups.get(g).push(mv); }
+                    const solves = g => groups.get(g).some(mv => mv.reason.startsWith('löst'));
+                    const tree = [...groups.keys()].sort((a, b) => (solves(a) ? 0 : 1) - (solves(b) ? 0 : 1) || a.localeCompare(b, 'de')).map(g =>
+                        '<details class="tt-tree" open><summary><span class="tt-opt-who">' + g.split(', ').map(NAME).join(', ') + '</span>'
+                        + ' <span class="tt-opt-cls">' + groups.get(g).length + ' Änderung' + (groups.get(g).length > 1 ? 'en' : '') + '</span>'
+                        + (solves(g) ? ' <span class="tt-opt-why solves">löst Konflikt</span>' : ' <span class="tt-opt-why">Helfer</span>') + '</summary>'
+                        + '<ul>' + groups.get(g).map(row).join('') + '</ul></details>').join('');
+                    $('opt-result').innerHTML =
+                        '<p><span class="tt-opt-before">vorher: ' + fmtCounts(m.counts0) + '</span><br>'
+                        + '<span class="tt-opt-after">nachher: ' + fmtCounts(m.counts1) + ' · <strong>' + m.moves.length + ' Verschiebungen</strong> <span class="tt-opt-cls">· Seed ' + RUN_SEED + '</span></span>'
+                        + (m.moves.length ? ' &nbsp;<a href="#" class="tt-opt-fold" data-open="0">alle zuklappen</a>' : '') + '</p>'
+                        + (m.moves.length
+                            ? '<details class="tt-tree tt-tree-root" open><summary><span class="tt-opt-who">Vorschläge</span> '
+                              + '<span class="tt-opt-cls">' + groups.size + ' Personen · ' + m.moves.length + ' Verschiebungen</span></summary>'
+                              + '<div class="tt-opt-moves">' + tree + '</div></details>'
+                            : '<p>Nichts zu verschieben – der Plan ist unter diesen Regeln bereits optimal.</p>');
+                    const fold = $('opt-result').querySelector('.tt-opt-fold');
+                    if (fold) fold.addEventListener('click', e => {
+                        e.preventDefault();
+                        const open = fold.dataset.open === '1';
+                        for (const d of $('opt-result').querySelectorAll('details:not(.tt-tree-root)')) d.open = open;
+                        fold.dataset.open = open ? '0' : '1';
+                        fold.textContent = open ? 'alle zuklappen' : 'alle aufklappen';
+                    });
+                    $('opt-show').hidden = !m.moves.length;
+                    $('opt-diff').hidden = !m.moves.length;
+                    $('opt-clear').hidden = !m.moves.length;
+                    $('savebox').hidden = !m.moves.length;
+                    $('opt-name').value = suggestName(m);
+                    $('opt-csv').hidden = !m.moves.length; $('opt-print').hidden = !m.moves.length;
+                    PROPOSAL.iters = m.iters; PROPOSAL.seed = RUN_SEED;
+                    if (keepBest()) $('opt-live').innerHTML += ' · <span class="tt-opt-why solves">★ neue Beste – automatisch gespeichert</span>';
+                    setMode(m.moves.length ? 'diff' : null);
+                    worker.terminate(); worker = null;
+                };
+                // a new seed every run, so saved versions are genuinely different proposals
+                RUN_SEED = Math.floor(Math.random() * 1e9);
+                worker.postMessage({ lessons: DATA.lessons, monday: String(CURRENT),
+                    movableTeachers: scope === 'me' && SELECTED ? [SELECTED] : null, iters, seed: RUN_SEED });
+            });
+
+            // one mode at a time; clicking the active button returns to the original
+            function setMode(mode) {
+                PROPOSAL_MODE = mode;
+                $('opt-diff').classList.toggle('on', mode === 'diff');
+                $('opt-show').classList.toggle('on', mode === 'full');
+                $('opt-diff').textContent = mode === 'diff' ? 'Zurück zum Original' : 'Vorschlagsplan';
+                $('opt-show').textContent = mode === 'full' ? 'Zurück zum Original' : 'Vorschlag im Plan zeigen';
+                if (DATA) render(DATA, SELECTED);
+            }
+            $('opt-diff').addEventListener('click', () => setMode(PROPOSAL_MODE === 'diff' ? null : 'diff'));
+            $('opt-show').addEventListener('click', () => setMode(PROPOSAL_MODE === 'full' ? null : 'full'));
+            $('opt-clear').addEventListener('click', () => {
+                PROPOSAL = null;
+                $('opt-result').innerHTML = ''; $('opt-progress').hidden = true;
+                $('opt-show').hidden = true; $('opt-diff').hidden = true; $('opt-clear').hidden = true; $('savebox').hidden = true;
+                $('opt-csv').hidden = true; $('opt-print').hidden = true;
+                setMode(null);
+            });
+
+            // --- Änderungsliste for the Stundenplaner (CSV + print view) ---------
+            // One row per moved block, grouped by person. Deliberately plain:
+            // this is what a human enters into Untis by hand.
+            const DAYS_LONG = DAY_NAMES;
+            const fmtLong = d => parseYmd(d).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
+            function listRows() {
+                if (!PROPOSAL) return [];
+                return PROPOSAL.moves.map(mv => ({
+                    name: mv.teachers.map(NAME).join(' / ') || '—', short: mv.teachers.join('/'),
+                    subject: mv.subject || '', classes: mv.classes.join(', '), rooms: mv.rooms.join(', '),
+                    fromDay: DAYS_LONG[parseYmd(mv.from.date).getDay()], fromDate: fmtLong(mv.from.date), fromTime: hh(mv.from.start) + '–' + hh(mv.from.end),
+                    toDay: DAYS_LONG[parseYmd(mv.to.date).getDay()], toDate: fmtLong(mv.to.date), toTime: hh(mv.to.start) + '–' + hh(mv.to.end),
+                    reason: nameText(mv.reason),
+                })).sort((a, b) => a.name.localeCompare(b.name, 'de') || a.fromDate.localeCompare(b.fromDate) || a.fromTime.localeCompare(b.fromTime));
+            }
+            const listHeader = () => {
+                const ab = abLabel(String(PROPOSAL.week));
+                return { school: INDEX.school, week: fmtDate(String(PROPOSAL.week)) + ' – ' + fmtDate(String(Number(PROPOSAL.week) + 4)) + ' ' + String(PROPOSAL.week).slice(0, 4),
+                    ab, before: PROPOSAL.counts0, after: PROPOSAL.counts1, stand: INDEX.generatedAt ? new Date(INDEX.generatedAt).toLocaleString('de-DE') : '',
+                    now: new Date().toLocaleString('de-DE') };
+            };
+            const ASSUMPTIONS = [
+                'Accounts mit mehr als 35 Stunden/Woche (Sammel-/Betreuungs-Accounts) und GTA-Anbieter gelten nicht als Personen.',
+                'Gleiches Fach für eine gemeinsame Klasse in zwei Räumen zugleich gilt als Kopplung, nicht als Konflikt.',
+                'Standortwechsel brauchen mindestens 20 Minuten (Schumannstr. ↔ Wittenberger Str.) bzw. 30 Minuten (mit Könneritzstr.).',
+            ];
+
+            $('opt-csv').addEventListener('click', () => {
+                const rows = listRows(); if (!rows.length) return;
+                const h = listHeader();
+                const esc = v => '"' + String(v).replace(/"/g, '""') + '"';
+                const head = ['Lehrkraft', 'Kürzel', 'Fach', 'Klasse(n)', 'Raum', 'Von Tag', 'Von Datum', 'Von Zeit', 'Nach Tag', 'Nach Datum', 'Nach Zeit', 'Grund'];
+                // "sep=;" is Excel's own hint - without it a UTF-8 CSV lands in one column
+                // (measured 25.08.); the notes go last so the header row is row 2.
+                const lines = [
+                    'sep=;',
+                    head.join(';'),
+                    ...rows.map(r => [r.name, r.short, r.subject, r.classes, r.rooms, r.fromDay, r.fromDate, r.fromTime, r.toDay, r.toDate, r.toTime, r.reason].map(esc).join(';')),
+                    '',
+                    esc('Änderungsliste Stundenplan – ' + h.school + ' – Woche ' + h.week + ' (' + h.ab + '-Woche) – Vorschlag, automatisch erzeugt am ' + h.now + ' – Datenstand ' + h.stand),
+                    esc('vorher: ' + h.before.hard + ' harte Konflikte, ' + h.before.site + ' Standort-Verstöße; nachher: ' + h.after.hard + ' / ' + h.after.site + ' – ' + rows.length + ' Änderungen'),
+                    ...ASSUMPTIONS.map(x => esc('Annahme: ' + x)),
+                ];
+                const blob = new Blob(['\ufeff' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' });
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = 'aenderungsliste-' + PROPOSAL.week + '.csv';
+                a.click();
+                setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+            });
+
+            $('opt-print').addEventListener('click', () => {
+                const rows = listRows(); if (!rows.length) return;
+                const h = listHeader();
+                const e = v => String(v).replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+                let body = '', last = null;
+                for (const r of rows) {
+                    if (r.name !== last) { body += '<tr class="who"><td colspan="6">' + e(r.name) + ' <span class="k">' + e(r.short) + '</span></td></tr>'; last = r.name; }
+                    body += '<tr><td>' + e(r.subject) + '</td><td>' + e(r.classes) + '</td><td>' + e(r.rooms) + '</td>'
+                        + '<td>' + e(r.fromDay) + ' ' + e(r.fromDate) + '<br><span class="t">' + e(r.fromTime) + '</span></td>'
+                        + '<td class="arrow">→</td>'
+                        + '<td><strong>' + e(r.toDay) + ' ' + e(r.toDate) + '</strong><br><span class="t">' + e(r.toTime) + '</span><br><span class="why">' + e(r.reason) + '</span></td></tr>';
+                }
+                const html = '<!DOCTYPE html><html lang="de"><head><meta charset="utf-8"><title>Änderungsliste ' + e(h.week) + '</title>'
+                    + '<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">'
+                    + '<style>body{font-family:Outfit,sans-serif;font-weight:300;color:#18222f;margin:28px 36px;background:#fff}'
+                    + 'h1{font-family:Orbitron,sans-serif;font-size:1.3rem;color:#b0800c;margin:0 0 4px}.sub{color:#607080;font-size:.85rem;margin-bottom:18px;line-height:1.5}'
+                    + 'table{border-collapse:collapse;width:100%;font-size:.86rem}td{padding:6px 8px;border-bottom:1px solid #e2e8f0;vertical-align:top}'
+                    + 'tr.who td{background:#eef2f8;font-family:Orbitron,sans-serif;font-size:.78rem;color:#5c7a20;padding-top:10px}.k{font-family:Outfit;color:#607080;font-weight:300;margin-left:8px}'
+                    + '.t{color:#607080}.arrow{color:#b0800c;font-size:1.1rem;text-align:center}.why{color:#5c7a20;font-size:.76rem}'
+                    + '.foot{margin-top:22px;font-size:.76rem;color:#607080;line-height:1.55}.foot li{margin:2px 0}'
+                    + '@media print{body{margin:12mm}tr{page-break-inside:avoid}}</style></head><body>'
+                    + '<h1>Änderungsliste Stundenplan</h1>'
+                    + '<div class="sub">' + e(h.school) + ' · Woche ' + e(h.week) + ' (' + e(h.ab) + '-Woche) · ' + rows.length + ' Änderungen<br>'
+                    + 'vorher: ' + h.before.hard + ' harte Konflikte, ' + h.before.site + ' Standort-Verstöße &nbsp;→&nbsp; nachher: ' + h.after.hard + ' / ' + h.after.site + '<br>'
+                    + 'Vorschlag, automatisch erzeugt am ' + e(h.now) + ' · Datenstand WebUntis ' + e(h.stand) + '</div>'
+                    + '<table><tr class="hd"><td>Fach</td><td>Klasse(n)</td><td>Raum</td><td>bisher</td><td></td><td>Vorschlag</td></tr>' + body + '</table>'
+                    + '<div class="foot">Annahmen dieser Liste – bitte prüfen:<ul>' + ASSUMPTIONS.map(x => '<li>' + e(x) + '</li>').join('') + '</ul>'
+                    + 'Harter Konflikt = eine Lehrkraft gleichzeitig in zwei Räumen. Bestehende Kopplungen und Gruppenteilungen wurden nicht verändert; Doppelstunden bleiben zusammen.</div>'
+                    + '</body></html>';
+                const url = URL.createObjectURL(new Blob([html], { type: 'text/html;charset=utf-8' }));
+                window.open(url, '_blank');
+                setTimeout(() => URL.revokeObjectURL(url), 60000);
+            });
+
+            // --- saved versions (localStorage) ---------------------------------
+            // A move is stored by content, not by row number, so it survives a
+            // fresh WebUntis pull; moves that no longer match are reported.
+            const VKEY = 'svp-plan-versions';
+            const lessonKey = l => [l.date, l.startTime, l.subject, l.classes.join(','), l.teachers.join(',')].join('|');
+            const loadVersions = () => { try { return JSON.parse(localStorage.getItem(VKEY) || '[]'); } catch (e) { return []; } };
+            const storeVersions = v => { try { localStorage.setItem(VKEY, JSON.stringify(v)); } catch (e) { } };
+
+            // name suggestion: "22 verschoben · 25.08. 15:12" (conflicts only when there are any)
+            const suggestName = m => m.moves.length + ' verschoben'
+                + (m.counts1.hard + m.counts1.site ? ' · ' + (m.counts1.hard + m.counts1.site) + ' Konflikte' : '')
+                + ' · ' + new Date().toLocaleString('de-DE', { day: '2-digit', month: '2-digit' }) + ' '
+                + new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+
+            const versionRecord = (label, extra) => ({
+                id: Date.now(), week: PROPOSAL.week, savedAt: new Date().toISOString(), iters: PROPOSAL.iters || 0, seed: PROPOSAL.seed || 0,
+                label, counts0: PROPOSAL.counts0, counts1: PROPOSAL.counts1,
+                moves: PROPOSAL.moves.map(mv => ({ ...mv, keys: mv.idx.map(i => lessonKey(DATA.lessons[i])) })),
+                ...extra,
+            });
+
+            // "Beste" across runs: fewest conflicts + site violations first, then
+            // fewest moves. One auto-kept version per week, replaced when beaten.
+            const score = x => [x.counts1.hard + x.counts1.site, x.moves.length];
+            const beats = (a, b) => score(a)[0] < score(b)[0] || (score(a)[0] === score(b)[0] && score(a)[1] < score(b)[1]);
+            // the best saved version of a week - manual or automatic - gets the star at display time
+            const bestOfWeek = (v, week) => v.filter(x => x.week === week).reduce((b, x) => (!b || beats(x, b) ? x : b), null);
+            function keepBest() {
+                if (!PROPOSAL || !PROPOSAL.moves.length) return false;
+                const v = loadVersions();
+                const cur = versionRecord('Auto · ' + suggestName({ moves: PROPOSAL.moves, counts1: PROPOSAL.counts1 }), { auto: true });
+                const best = bestOfWeek(v, PROPOSAL.week);
+                if (best && !beats(cur, best)) return false;      // something saved is already as good or better
+                storeVersions([cur, ...v.filter(x => !(x.auto && x.week === PROPOSAL.week))]);
+                renderVersions();
+                return true;
+            }
+
+            $('opt-save').addEventListener('click', () => {
+                if (!PROPOSAL || !DATA) return;
+                const v = loadVersions();
+                v.unshift(versionRecord($('opt-name').value.trim(), {}));
+                storeVersions(v);
+                renderVersions();
+                $('opt-name').value = '';
+                $('opt-save').textContent = 'Gespeichert ✓';
+                setTimeout(() => { $('opt-save').textContent = 'Version speichern'; }, 1500);
+            });
+
+            function applyVersion(v) {
+                // re-resolve every stored lesson against the week on screen
+                const byKey = new Map(DATA.lessons.map((l, i) => [lessonKey(l), i]));
+                let missing = 0;
+                const moves = v.moves.map(mv => {
+                    const idx = mv.keys.map(k => byKey.get(k)).filter(i => i !== undefined);
+                    if (idx.length !== mv.keys.length) missing += mv.keys.length - idx.length;
+                    return idx.length ? { ...mv, idx } : null;
+                }).filter(Boolean);
+                const applied = TimetableOptimizer.applyMoves(DATA.lessons, moves);
+                PROPOSAL = { week: CURRENT, moves, counts0: v.counts0, counts1: v.counts1, iters: v.iters, lessons: applied,
+                    diff: [...moves.flatMap(mv => mv.idx.map(i => ({ ...DATA.lessons[i], ghost: true }))), ...applied.filter(l => l.moved)] };
+                $('opt-progress').hidden = true;
+                $('opt-result').innerHTML = '<p><span class="tt-opt-after">Version ' + (v.label ? '„' + v.label + '" ' : '') + 'vom ' + new Date(v.savedAt).toLocaleString('de-DE')
+                    + ' geladen · <strong>' + moves.length + ' Verschiebungen</strong>'
+                    + (missing ? ' · <span class="tt-stale">' + missing + ' Stunde(n) nicht mehr im Plan gefunden</span>' : '') + '</span></p>';
+                $('opt-show').hidden = false; $('opt-diff').hidden = false; $('opt-clear').hidden = false; $('savebox').hidden = true;
+                $('opt-csv').hidden = false; $('opt-print').hidden = false;
+                setMode('diff');
+            }
+
+            let pendingVersion = null;
+            window.addEventListener('svp-week-painted', () => { if (pendingVersion) { const v = pendingVersion; pendingVersion = null; applyVersion(v); } });
+
+            function loadById(id) {
+                const x = loadVersions().find(y => y.id === id);
+                if (!x) return;
+                if (CURRENT === x.week && DATA) applyVersion(x); else { pendingVersion = x; showWeek(x.week); }
+            }
+
+            function renderVersions() {
+                const all = loadVersions();
+                const starred = new Set([...new Set(all.map(x => x.week))].map(w => bestOfWeek(all, w)).filter(Boolean).map(x => x.id));
+                const v = all.sort((a, b) => (starred.has(b.id) ? 1 : 0) - (starred.has(a.id) ? 1 : 0) || b.id - a.id);
+                const box = $('versions');
+                // older auto records carried the star in their label - strip it, the star is computed now
+                const title = x => (starred.has(x.id) ? '★ ' : '') + ((x.label || '').replace(/^★ Beste · /, 'Auto · ') || (x.moves.length + ' verschoben'));
+                // dropdown next to the name box: one line per saved version
+                const pick = $('opt-pick');
+                pick.innerHTML = '<option value="">Version laden …</option>' + v.map(x => {
+                    const t = title(x) + ' — Woche ' + fmtDate(String(x.week)) + ' · ' + x.counts1.hard + ' Konfl.';
+                    return '<option value="' + x.id + '">' + t.replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c])) + '</option>';
+                }).join('');
+                pick.hidden = !v.length;
+                if (!v.length) { box.innerHTML = ''; return; }
+                const fmtW = w => fmtDate(w) + ' ' + w.slice(0, 4);
+                box.innerHTML = '<details class="tt-tree tt-tree-root"><summary><span class="tt-opt-who">Gespeicherte Versionen</span> '
+                    + '<span class="tt-opt-cls">' + v.length + '</span></summary><ul>'
+                    + v.map(x => '<li class="tt-version" data-id="' + x.id + '">'
+                        + '<strong>' + title(x).replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c])) + '</strong> · '
+                        + '<span class="tt-ver-when">' + new Date(x.savedAt).toLocaleString('de-DE', { dateStyle: 'short', timeStyle: 'short' }) + '</span> '
+                        + 'Woche ' + fmtW(String(x.week)) + ' · ' + x.moves.length + ' Verschiebungen · '
+                        + '<span class="' + (x.counts1.hard ? 'tt-stale' : 'tt-opt-why solves') + '">' + x.counts1.hard + ' Konflikte</span>'
+                        + ' <button type="button" class="tt-ver-btn" data-act="load">Laden</button>'
+                        + ' <button type="button" class="tt-ver-btn" data-act="export">Export</button>'
+                        + ' <button type="button" class="tt-ver-btn danger" data-act="del">Löschen</button></li>').join('')
+                    + '</ul></details>';
+                box.querySelectorAll('.tt-ver-btn').forEach(b => b.addEventListener('click', e => {
+                    const li = e.target.closest('.tt-version'), id = +li.dataset.id, x = loadVersions().find(y => y.id === id);
+                    if (!x) return;
+                    if (b.dataset.act === 'load') {
+                        loadById(id);
+                    } else if (b.dataset.act === 'export') {
+                        const a = document.createElement('a');
+                        a.href = URL.createObjectURL(new Blob([JSON.stringify(x, null, 1)], { type: 'application/json' }));
+                        a.download = 'stundenplan-version-' + x.week + '-' + x.id + '.json';
+                        a.click();
+                        setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+                    } else if (b.dataset.act === 'del') {
+                        // no native confirm: second click within 3 s deletes
+                        if (b.dataset.armed) { storeVersions(loadVersions().filter(y => y.id !== id)); renderVersions(); }
+                        else { b.dataset.armed = '1'; b.textContent = 'Sicher?'; setTimeout(() => { delete b.dataset.armed; b.textContent = 'Löschen'; }, 3000); }
+                    }
+                }));
+            }
+            $('opt-pick').addEventListener('change', function () {
+                if (this.value) loadById(+this.value);
+                this.value = '';
+            });
+            renderVersions();
+        })();
+
+        // Staff box width: drag the right edge, remembered per browser.
+        (function () {
+            const side = document.getElementById('side');
+            const grip = document.getElementById('resize');
+            const apply = w => { w = Math.max(150, Math.min(520, w)); side.style.flexBasis = w + 'px'; side.style.width = w + 'px'; return w; };
+            try { const w = +localStorage.getItem('svp-box-width'); if (w) apply(w); } catch (e) { }
+            grip.addEventListener('pointerdown', e => {
+                e.preventDefault();
+                grip.setPointerCapture(e.pointerId);
+                const x0 = e.clientX, w0 = side.getBoundingClientRect().width;
+                document.body.classList.add('is-resizing');
+                const move = ev => apply(w0 + ev.clientX - x0);
+                const up = () => {
+                    grip.removeEventListener('pointermove', move);
+                    document.body.classList.remove('is-resizing');
+                    try { localStorage.setItem('svp-box-width', Math.round(side.getBoundingClientRect().width)); } catch (err) { }
+                };
+                grip.addEventListener('pointermove', move);
+                grip.addEventListener('pointerup', up, { once: true });
+                grip.addEventListener('pointercancel', up, { once: true });
+            });
+        })();
+
+        // Colour scheme: same localStorage key as the rest of svp, so switching
+        // here also switches the Stoffverteilungsplan pages and vice versa.
+        (function () {
+            const btn = document.getElementById('theme');
+            const sync = () => {
+                const light = document.documentElement.classList.contains('svp-light');
+                btn.textContent = light ? '☾' : '☀'; // moon when light, sun when dark
+            };
+            btn.addEventListener('click', function () {
+                const light = document.documentElement.classList.toggle('svp-light');
+                try { localStorage.setItem('svp-theme', light ? 'light' : 'dark'); } catch (e) { }
+                sync();
+            });
+            sync();
+        })();
+
+        // --- left navigation: the staff -------------------------------------
+        // Counts come from the index and cover the whole school year, so a
+        // colleague keeps the same number while you page through weeks.
+        function buildPeople() {
+            const box = document.getElementById('people');
+            const rows = [];
+            const add = (name, label, count, cls) => {
+                const el = document.createElement('button');
+                el.type = 'button';
+                el.className = 'tt-person' + (cls ? ' ' + cls : '');
+                el.dataset.name = name || '';
+                el.dataset.search = (label + ' ' + (name || '')).toLowerCase();
+                el.dataset.count = count;   // year total, restored when the conflicts filter goes off
+                el.innerHTML = '<span class="tt-pname">' + label + '</span>'
+                    + '<span class="tt-pcount">' + count + '</span>';
+                el.addEventListener('click', () => select(name || null));
+                box.appendChild(el);
+                rows.push(el);
+            };
+
+            add(null, 'Alle', INDEX.totalLessons, 'is-all');
+            const me = INDEX.teachers.find(t => t.name === INDEX.teacher);
+            if (me) add(me.name, NAME(me.name), me.lessons, 'is-me');
+            const byName = [...INDEX.teachers].sort((a, b) => NAME(a.name).localeCompare(NAME(b.name), 'de'));
+            for (const t of byName) { if (t.name !== INDEX.teacher) add(t.name, NAME(t.name), t.lessons); }
+
+            document.getElementById('search').addEventListener('input', function () {
+                const q = this.value.trim().toLowerCase();
+                for (const el of rows) el.classList.toggle('hidden', q && !el.dataset.search.includes(q));
+            });
+        }
+
+        function select(name) {
+            SELECTED = name;
+            for (const el of document.querySelectorAll('.tt-person')) {
+                el.classList.toggle('on', (el.dataset.name || null) === name);
+            }
+            if (DATA) render(DATA, name);
+        }
+
+        // --- weeks -----------------------------------------------------------
+        const weekCache = new Map();
+
+        // A/B week by whole-week distance from the anchor 24.08.2026 = "A"
+        // (Doc, 25.08.2026). Deliberately NOT calendar-week parity: ISO years
+        // with 53 weeks would flip the label at New Year, pure alternation
+        // does not. Verified against the FOG26-1 fortnight pattern for every
+        // week that carries data; the school has not entered the FO courses
+        // beyond 18.12. yet, so re-check after the next `year` pull.
+        function abLabel(wk) {
+            const anchor = parseYmd('20260824');
+            const weeksApart = Math.round((parseYmd(wk) - anchor) / 6048e5);
+            return ((weeksApart % 2) + 2) % 2 === 0 ? 'A' : 'B';
+        }
+
+        function showWeek(wk) {
+            if (!INDEX.weeks.includes(wk)) return;
+            CURRENT = wk;
+            const ab = document.getElementById('abweek');
+            ab.textContent = abLabel(wk);
+            ab.className = 'tt-ab is-' + abLabel(wk).toLowerCase();
+            const i = INDEX.weeks.indexOf(wk);
+            document.getElementById('prev').disabled = i <= 0;
+            document.getElementById('next').disabled = i >= INDEX.weeks.length - 1;
+
+            const paint = d => { DATA = d; VIRTUAL = TimetableOptimizer.virtualTeachers(d.lessons); render(d, SELECTED); window.dispatchEvent(new Event('svp-week-painted')); };
+            if (weekCache.has(wk)) { paint(weekCache.get(wk)); return; }
+            fetch('plandaten/w' + wk + '.json')
+                .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+                .then(d => {
+                    d.school = INDEX.school; d.teacher = INDEX.teacher;
+                    d.generatedAt = INDEX.generatedAt;
+                    weekCache.set(wk, d);
+                    paint(d);
+                })
+                .catch(e => {
+                    document.getElementById('grid').innerHTML =
+                        '<div class="tt-empty">Woche ' + wk + ' nicht gefunden (' + e.message + ').</div>';
+                });
+        }
+
+        function step(delta) {
+            const i = INDEX.weeks.indexOf(CURRENT);
+            if (i >= 0 && INDEX.weeks[i + delta]) showWeek(INDEX.weeks[i + delta]);
+        }
+
+        // Opening view: always the week AFTER the current one - the plan you
+        // prepare for. The "Heute" button still jumps to the running week.
+        function startWeek() {
+            const cur = weekForToday();
+            const i = INDEX.weeks.indexOf(cur);
+            return INDEX.weeks[i + 1] || cur;
+        }
+
+        // The week containing today, or the next one the school year has.
+        function weekForToday() {
+            const now = new Date();
+            now.setDate(now.getDate() - ((now.getDay() + 6) % 7));
+            const wk = now.getFullYear() + String(now.getMonth() + 1).padStart(2, '0') + String(now.getDate()).padStart(2, '0');
+            return INDEX.weeks.includes(wk) ? wk : (INDEX.weeks.find(w => w >= wk) || INDEX.weeks[0]);
+        }
+
+        document.getElementById('conf').addEventListener('click', function () {
+            CONF = !CONF;
+            this.classList.toggle('on', CONF);
+            if (DATA) render(DATA, SELECTED);
+        });
+
+        // Branch filter buttons: one active at a time, second click clears.
+        document.getElementById('depts').addEventListener('click', e => {
+            const btn = e.target.closest('button[data-dept]');
+            if (!btn) return;
+            DEPT = DEPT === btn.dataset.dept ? null : btn.dataset.dept;
+            for (const b of document.querySelectorAll('#depts button[data-dept]')) {
+                b.classList.toggle('on', b.dataset.dept === DEPT);
+            }
+            // Person and branch combine as AND (Doc, 25.08.): BarLil + GS =
+            // BarLil's Grundschul-Stunden. An empty result explains itself.
+            if (DATA) render(DATA, SELECTED);
+        });
+
+        document.getElementById('prev').addEventListener('click', () => step(-1));
+        document.getElementById('next').addEventListener('click', () => step(1));
+        document.getElementById('today').addEventListener('click', () => showWeek(weekForToday()));
+        document.addEventListener('keydown', e => {
+            if (e.target.tagName === 'INPUT') return;
+            if (e.key === 'ArrowLeft') step(-1);
+            if (e.key === 'ArrowRight') step(1);
+        });
+
+        // Rescale when the window changes size.
+        let resizeTimer = null;
+        window.addEventListener('resize', function () {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(function () { if (DATA) render(DATA, SELECTED); }, 150);
+        });
+
+        fetch('plandaten/index.json?v=' + Date.now())
+            .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+            .then(idx => {
+                INDEX = idx;
+                document.getElementById('sub').textContent =
+                    idx.school + ' · Schuljahr ' + idx.schoolyear.name;
+                buildPeople();
+                SELECTED = idx.teachers.some(t => t.name === idx.teacher) ? idx.teacher : null;
+                for (const el of document.querySelectorAll('.tt-person')) {
+                    el.classList.toggle('on', (el.dataset.name || null) === SELECTED);
+                }
+                showWeek(startWeek());
+            })
+            .catch(e => {
+                document.getElementById('grid').innerHTML =
+                    '<div class="tt-empty">Keine Daten gefunden (' + e.message + ').<br><br>'
+                    + 'Erst das Schuljahr holen:<br><code>node tools/webuntis.js year</code></div>';
+            });
+    </script>
+</body>
+
+</html>

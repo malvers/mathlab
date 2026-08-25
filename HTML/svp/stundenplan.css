@@ -1,0 +1,1096 @@
+/* Timetable view - builds on the shared svp.css variables (never redefine colours here). */
+
+.tt-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    margin: 0 0 20px;
+}
+
+.tt-bar .tt-meta {
+    color: var(--muted);
+    font-size: 0.85rem;
+    margin-left: auto;
+    text-align: right;
+    line-height: 1.5;
+}
+
+.tt-week {
+    font-family: Orbitron, sans-serif;
+    font-size: 1.05rem;
+    color: var(--lambda);
+    letter-spacing: 0.04em;
+}
+
+/* --- the grid ------------------------------------------------------------ */
+
+.tt-wrap {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    /* generous bottom padding: the last axis label hangs half below its tick */
+    padding: 16px 16px 26px;
+    overflow-x: auto;
+}
+
+.tt-grid {
+    display: grid;
+    grid-template-columns: 62px repeat(var(--days, 5), minmax(150px, 1fr));
+    min-width: 700px;
+}
+
+.tt-head {
+    font-family: Orbitron, sans-serif;
+    font-size: 0.8rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-align: center;
+    padding: 6px 4px 10px;
+    border-bottom: 1px solid var(--line);
+    position: sticky;
+    top: 0;
+    background: var(--card);
+    z-index: 3;
+}
+
+.tt-head.today {
+    color: var(--lambda);
+}
+
+.tt-head span {
+    display: block;
+    font-family: Outfit, sans-serif;
+    font-size: 0.72rem;
+    letter-spacing: 0;
+    text-transform: none;
+    opacity: 0.7;
+}
+
+/* Time axis: one absolutely positioned label per period boundary. */
+.tt-axis {
+    position: relative;
+    border-right: 1px solid var(--line);
+}
+
+.tt-axis .tt-tick {
+    position: absolute;
+    right: 6px;
+    transform: translateY(-50%);
+    font-size: 0.68rem;
+    color: var(--muted);
+    white-space: nowrap;
+}
+
+.tt-col {
+    position: relative;
+    border-right: 1px solid var(--row-line);
+}
+
+.tt-col:last-child {
+    border-right: 0;
+}
+
+/* Faint band per timegrid period, so the day still reads as "lessons". */
+.tt-band {
+    position: absolute;
+    left: 0;
+    right: 0;
+    background: var(--sunken);
+    border-top: 1px solid var(--row-line);
+    pointer-events: none;
+}
+
+/* --- a lesson ------------------------------------------------------------ */
+
+.tt-lesson {
+    position: absolute;
+    border-radius: 7px;
+    padding: 5px 7px;
+    overflow: hidden;
+    border-left: 3px solid var(--hue, var(--cyan));
+    background: color-mix(in srgb, var(--hue, var(--cyan)) 18%, var(--card));
+    color: var(--text);
+    font-size: 0.78rem;
+    line-height: 1.25;
+    cursor: default;
+    transition: filter 0.12s ease, transform 0.12s ease;
+}
+
+.tt-lesson:hover {
+    filter: brightness(1.25);
+    transform: translateY(-1px);
+    z-index: 4;
+}
+
+.tt-lesson .tt-subject {
+    font-family: Orbitron, sans-serif;
+    font-weight: 700;
+    font-size: 0.8rem;
+    color: var(--hue, var(--cyan));
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.tt-lesson .tt-who,
+.tt-lesson .tt-where {
+    color: var(--muted);
+    font-size: 0.72rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.tt-lesson .tt-time {
+    font-size: 0.66rem;
+    color: var(--muted);
+    opacity: 0.75;
+}
+
+/* Cancelled / substituted, straight from the WebUntis code field. */
+.tt-lesson.code-cancelled {
+    opacity: 0.55;
+    border-left-style: dashed;
+}
+
+.tt-lesson.code-cancelled .tt-subject {
+    text-decoration: line-through;
+}
+
+.tt-lesson.code-irregular {
+    border-left-style: double;
+    border-left-width: 5px;
+}
+
+/* Two lessons at the same time for the same person - a real planning clash. */
+.tt-lesson.clash {
+    outline: 2px solid var(--ypsilon);
+    outline-offset: -2px;
+}
+
+.tt-clash-flag {
+    position: absolute;
+    top: 3px;
+    right: 4px;
+    font-size: 0.7rem;
+    color: var(--ypsilon);
+    font-weight: 700;
+}
+
+/* --- notes --------------------------------------------------------------- */
+
+.tt-note {
+    margin: 22px 2px 56px;
+    color: var(--muted);
+    font-size: 0.82rem;
+    line-height: 1.6;
+}
+
+.tt-note code {
+    background: var(--sunken);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 1px 5px;
+    font-size: 0.85em;
+}
+
+.tt-warn {
+    border-left: 3px solid var(--ypsilon);
+    padding-left: 10px;
+    color: var(--text);
+}
+
+.tt-empty {
+    /* Span the whole grid - in the 62px axis column the message wraps
+       one word per line. */
+    grid-column: 1 / -1;
+    padding: 40px 20px;
+    text-align: center;
+    color: var(--muted);
+}
+
+/* --- phones: one day after another instead of a squeezed grid ------------ */
+
+@media (max-width: 720px) {
+    .tt-wrap {
+        overflow-x: visible;
+        padding: 8px;
+    }
+
+    .tt-grid {
+        display: block;
+        min-width: 0;
+    }
+
+    .tt-axis,
+    .tt-head {
+        display: none;
+    }
+
+    .tt-col {
+        position: static;
+        border-right: 0;
+        margin-bottom: 18px;
+    }
+
+    .tt-col::before {
+        content: attr(data-day);
+        display: block;
+        font-family: Orbitron, sans-serif;
+        font-size: 0.8rem;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--lambda);
+        padding: 4px 0 8px;
+        border-bottom: 1px solid var(--line);
+        margin-bottom: 8px;
+    }
+
+    .tt-band {
+        display: none;
+    }
+
+    .tt-lesson {
+        position: static;
+        margin-bottom: 6px;
+        height: auto !important;
+        width: auto !important;
+        left: auto !important;
+        top: auto !important;
+    }
+}
+
+/* --- light scheme ---------------------------------------------------------
+   Only the few rules where a dark-scheme assumption breaks on white: hover
+   brightens (invisible on light), and an 18% tint on white washes out. The
+   accent hues themselves are already darkened by svp.css. */
+
+html.svp-light .tt-lesson {
+    background: color-mix(in srgb, var(--hue, var(--cyan)) 12%, var(--card));
+    border: 1px solid color-mix(in srgb, var(--hue, var(--cyan)) 35%, var(--card));
+    border-left-width: 3px;
+    border-left-color: var(--hue, var(--cyan));
+}
+
+html.svp-light .tt-lesson:hover {
+    filter: brightness(0.95);
+    box-shadow: 0 2px 6px var(--shadow);
+}
+
+html.svp-light .tt-band {
+    background: rgba(40, 70, 120, 0.045);
+}
+
+html.svp-light .tt-lesson.code-cancelled {
+    opacity: 0.6;
+}
+
+/* --- discreet light/dark switch, bottom right -----------------------------
+   Choice is stored in localStorage under the shared "svp-theme" key, so it
+   survives reloads and matches the other svp pages. */
+
+.tt-theme {
+    position: fixed;
+    right: clamp(12px, 3vw, 28px);
+    bottom: clamp(12px, 3vw, 28px);
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    border: 1px solid var(--line);
+    background: var(--panel);
+    color: var(--muted);
+    font-size: 1rem;
+    line-height: 1;
+    cursor: pointer;
+    opacity: 0.45;
+    box-shadow: 0 2px 8px var(--shadow);
+    transition: opacity 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+    z-index: 20;
+}
+
+.tt-theme:hover {
+    opacity: 1;
+    color: var(--text);
+    border-color: var(--phi);
+}
+
+/* --- layout: staff list left, timetable right ----------------------------- */
+
+.tt-layout {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+}
+
+.tt-mainarea {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.tt-side {
+    flex: 0 0 176px;
+    width: 176px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 10px;
+    position: sticky;
+    top: 12px;
+    /* Full window height minus a margin; the list scrolls inside (min-height:0
+       below is what allows that) instead of running past the bottom. */
+    max-height: calc(100vh - 16px);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.tt-sr {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+}
+
+.tt-search-wrap {
+    display: block;
+    position: relative;
+}
+
+.tt-search {
+    width: 100%;
+    box-sizing: border-box;
+    background: var(--input-bg);
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    padding: 7px 9px;
+    color: var(--text);
+    font-family: Outfit, sans-serif;
+    font-size: 0.8rem;
+}
+
+.tt-search:focus {
+    outline: none;
+    border-color: var(--phi);
+}
+
+.tt-people {
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    /* min-height:0 is what makes it scroll: as a flex child the default
+       min-height:auto refuses to shrink below the content, so the list would
+       run past the bottom of the screen instead of scrolling inside the box. */
+    flex: 1 1 auto;
+    min-height: 0;
+}
+
+/* Slim scrollbar - webkit on the scroll container, Firefox via @supports guard */
+.tt-people::-webkit-scrollbar { width: 5px; }
+.tt-people::-webkit-scrollbar-track { background: transparent; }
+.tt-people::-webkit-scrollbar-thumb { background: var(--thumb); border-radius: 3px; }
+.tt-people::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+@supports (-moz-appearance: none) {
+    .tt-people { scrollbar-width: thin; scrollbar-color: var(--thumb) var(--trough); }
+}
+
+.tt-person {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 6px;
+    width: 100%;
+    text-align: left;
+    background: transparent;
+    border: 0;
+    border-radius: 6px;
+    padding: 5px 8px;
+    color: var(--text);
+    font-family: Outfit, sans-serif;
+    font-size: 0.8rem;
+    cursor: pointer;
+}
+
+.tt-person:hover {
+    background: var(--sunken);
+}
+
+.tt-person.on {
+    background: rgba(121, 158, 49, 0.18);
+    color: var(--text);
+}
+
+.tt-person.on .tt-pname {
+    color: var(--phi);
+    font-weight: 600;
+}
+
+.tt-person.is-me .tt-pname {
+    color: var(--lambda);
+}
+
+.tt-person.is-all {
+    border-bottom: 1px solid var(--line);
+    border-radius: 6px 6px 0 0;
+    margin-bottom: 3px;
+    padding-bottom: 7px;
+}
+
+.tt-pcount {
+    color: var(--muted);
+    font-size: 0.7rem;
+    font-variant-numeric: tabular-nums;
+}
+
+.tt-person.hidden {
+    display: none;
+}
+
+/* --- narrow screens: list on top, horizontally scrollable ---------------- */
+
+@media (max-width: 900px) {
+    .tt-layout {
+        flex-direction: column;
+    }
+
+    .tt-side {
+        position: static;
+        width: 100%;
+        flex: 0 0 auto;
+        max-height: none;
+    }
+
+    .tt-people {
+        flex-direction: row;
+        overflow-x: auto;
+        overflow-y: hidden;
+        gap: 4px;
+        padding-bottom: 4px;
+    }
+
+    .tt-people::-webkit-scrollbar { height: 8px; width: auto; }
+
+    .tt-person {
+        width: auto;
+        flex: 0 0 auto;
+        white-space: nowrap;
+    }
+
+    .tt-person.is-all {
+        border-bottom: 0;
+        border-right: 1px solid var(--line);
+        border-radius: 6px;
+        margin-bottom: 0;
+        padding-bottom: 5px;
+    }
+}
+
+/* --- week navigation ------------------------------------------------------ */
+
+.tt-nav {
+    width: 30px;
+    height: 30px;
+    border-radius: 7px;
+    border: 1px solid var(--line);
+    background: var(--panel);
+    color: var(--text);
+    font-size: 1.1rem;
+    line-height: 1;
+    cursor: pointer;
+    transition: border-color 0.12s ease, color 0.12s ease;
+}
+
+.tt-nav:hover:not(:disabled) {
+    border-color: var(--phi);
+    color: var(--phi);
+}
+
+.tt-nav:disabled {
+    opacity: 0.3;
+    cursor: default;
+}
+
+/* Header flush left with the grid below it. svp.css centres .page-head in a
+   1200px column, which reads as an indent next to the full-width timetable.
+   Overridden here only - the other svp pages keep their centred column. */
+
+header.page-head {
+    max-width: none;
+    margin-left: 0;
+    margin-right: 0;
+}
+
+/* --- all-day banners (Einführungswoche etc.) ------------------------------
+   Slim rows pinned above the time axis; deliberately muted so they do not
+   compete with the real lessons. */
+
+.tt-banner {
+    position: absolute;
+    left: 3px;
+    right: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 0 8px;
+    border-radius: 6px;
+    border: 1px dashed var(--line);
+    background: var(--panel-soft);
+    color: var(--muted);
+    font-size: 0.7rem;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.tt-banner .tt-bl {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.tt-banner .tt-br {
+    flex: 0 0 auto;
+    opacity: 0.75;
+    font-size: 0.66rem;
+}
+
+@media (max-width: 720px) {
+    .tt-banner {
+        position: static;
+        margin-bottom: 6px;
+        height: auto !important;
+        padding: 4px 8px;
+    }
+}
+
+/* --- A/B week chip next to the arrows ------------------------------------ */
+
+.tt-ab {
+    font-family: Orbitron, sans-serif;
+    font-size: 0.78rem;
+    font-weight: 700;
+    width: 30px;
+    height: 30px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 7px;
+    border: 1px solid var(--line);
+    cursor: help;
+}
+
+.tt-ab.is-a {
+    color: var(--phi);
+    border-color: rgba(121, 158, 49, 0.5);
+    background: rgba(121, 158, 49, 0.12);
+}
+
+.tt-ab.is-b {
+    color: var(--cyan);
+    border-color: rgba(90, 190, 230, 0.45);
+    background: rgba(90, 190, 230, 0.10);
+}
+
+/* --- school-branch filter, centred in the top bar ------------------------- */
+
+.tt-depts {
+    display: flex;
+    gap: 6px;
+    margin: 0 auto;
+}
+
+.tt-depts button {
+    font-family: Orbitron, sans-serif;
+    font-size: 0.68rem;
+    letter-spacing: 0.05em;
+    padding: 7px 12px;
+    border-radius: 7px;
+    border: 1px solid var(--line);
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    transition: border-color 0.12s ease, color 0.12s ease, background 0.12s ease;
+}
+
+.tt-depts button:hover {
+    border-color: rgba(121, 158, 49, 0.5);
+    color: var(--text);
+}
+
+.tt-depts button.on {
+    background: rgba(121, 158, 49, 0.16);
+    border-color: rgb(121, 158, 49);
+    color: var(--phi);
+}
+
+@media (max-width: 900px) {
+    .tt-depts {
+        order: 5;
+        width: 100%;
+        justify-content: center;
+        margin: 4px 0 0;
+    }
+}
+
+/* Tighter vertical rhythm at the top - the plan should sit high, not below a
+   stately header (Doc: "alles Stück hoch"). Page-local overrides. */
+
+body {
+    padding-top: 14px;
+}
+
+header.page-head {
+    margin-bottom: 10px;
+}
+
+header.page-head h1 {
+    font-size: clamp(1.05rem, 2.4vw, 1.45rem);
+    margin-bottom: 2px;
+}
+
+.tt-bar {
+    margin-bottom: 12px;
+}
+
+.tt-empty-hint {
+    font-size: 0.78rem;
+    opacity: 0.7;
+}
+
+/* --- conflicts toggle: sits with the branch buttons, but in Υ-red --------- */
+
+.tt-depts .tt-conf {
+    margin-left: 10px;
+}
+
+.tt-depts .tt-conf:hover {
+    border-color: rgba(176, 36, 24, 0.55);
+}
+
+.tt-depts .tt-conf.on {
+    background: rgba(176, 36, 24, 0.14);
+    border-color: var(--ypsilon);
+    color: var(--ypsilon);
+}
+
+/* rows filtered out by the conflicts toggle (separate from the search's .hidden) */
+.tt-person.conf-hidden {
+    display: none;
+}
+
+/* --- optimizer panel ------------------------------------------------------ */
+
+.tt-opt {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 12px 14px;
+    margin: 0 0 14px;
+}
+
+.tt-opt-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+}
+
+.tt-opt-field {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.8rem;
+    color: var(--muted);
+}
+
+.tt-opt-field select {
+    background: var(--input-bg);
+    color: var(--text);
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    padding: 6px 8px;
+    font-family: Outfit, sans-serif;
+    font-size: 0.8rem;
+}
+
+.tt-opt-close {
+    margin-left: auto;
+    width: 30px;
+    height: 30px;
+    border-radius: 7px;
+    border: 1px solid var(--line);
+    background: transparent;
+    color: var(--muted);
+    font-size: 1.1rem;
+    cursor: pointer;
+}
+
+.tt-opt-close:hover { color: var(--text); border-color: var(--phi); }
+
+.tt-opt-progress { margin-top: 12px; }
+
+.tt-opt-bar {
+    height: 6px;
+    border-radius: 3px;
+    background: var(--sunken);
+    overflow: hidden;
+}
+
+.tt-opt-fill {
+    height: 100%;
+    width: 0;
+    background: var(--phi);
+    transition: width 0.15s linear;
+}
+
+.tt-opt-live {
+    margin-top: 8px;
+    font-size: 0.95rem;
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+}
+
+.tt-opt-live strong {
+    color: var(--ypsilon);
+    font-size: 1.05rem;
+}
+
+.tt-opt-result { margin-top: 10px; font-size: 0.82rem; line-height: 1.6; }
+.tt-opt-before { color: var(--muted); }
+.tt-opt-after { color: var(--text); }
+.tt-opt-after strong { color: var(--phi); }
+
+.tt-opt-moves {
+    margin: 8px 0 0 18px;
+    max-height: 220px;
+    overflow-y: auto;
+    padding-right: 6px;
+}
+
+.tt-opt-moves::-webkit-scrollbar { width: 5px; }
+.tt-opt-moves::-webkit-scrollbar-track { background: transparent; }
+.tt-opt-moves::-webkit-scrollbar-thumb { background: var(--thumb); border-radius: 3px; }
+@supports (-moz-appearance: none) {
+    .tt-opt-moves { scrollbar-width: thin; scrollbar-color: var(--thumb) transparent; }
+}
+
+.tt-opt-moves li { margin: 2px 0; }
+.tt-opt-who { font-family: Orbitron, sans-serif; font-size: 0.72rem; color: var(--lambda); }
+.tt-opt-cls { color: var(--muted); }
+
+/* a lesson the proposal moved: dashed λ-orange frame, so it stands out from clashes (red) */
+.tt-lesson.moved {
+    outline: 2px dashed var(--lambda);
+    outline-offset: -2px;
+}
+
+/* --- staff box in conflicts mode: red caption, red numbers ---------------- */
+
+.tt-people-caption {
+    font-family: Orbitron, sans-serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.06em;
+    color: var(--ypsilon);
+    padding: 2px 8px 0;
+}
+
+.tt-side.conf-mode .tt-pcount {
+    color: var(--ypsilon);
+    font-weight: 600;
+}
+
+.tt-opt-why { color: var(--muted); font-size: 0.74rem; }
+.tt-opt-why.solves { color: var(--phi); }
+
+/* --- Vorschlagsplan: old slot faded ("alt"), new slot marked ("neu") ------ */
+
+.tt-lesson.ghost {
+    opacity: 0.45;
+    border-left-style: dashed;
+    background: transparent;
+    border: 1px dashed var(--line);
+    border-left: 3px dashed var(--hue, var(--cyan));
+}
+
+.tt-lesson.ghost .tt-subject {
+    text-decoration: line-through;
+}
+
+.tt-tag {
+    position: absolute;
+    top: 4px;
+    right: 6px;
+    font-family: Orbitron, sans-serif;
+    font-size: 0.58rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--lambda);
+}
+
+.tt-lesson.ghost .tt-tag {
+    color: var(--muted);
+}
+
+.tt-meta-prop {
+    color: var(--lambda);
+}
+
+.action.secondary.on {
+    border-color: var(--phi);
+    color: var(--phi);
+}
+
+/* --- proposal tree ----------------------------------------------------------- */
+
+.tt-opt-moves {
+    margin-left: 0;
+}
+
+.tt-tree {
+    margin: 4px 0;
+    border-left: 2px solid var(--line);
+    padding-left: 10px;
+}
+
+.tt-tree summary {
+    cursor: pointer;
+    list-style: none;
+    padding: 2px 0;
+}
+
+.tt-tree summary::-webkit-details-marker { display: none; }
+
+.tt-tree summary::before {
+    content: '▸';
+    display: inline-block;
+    width: 14px;
+    color: var(--muted);
+    transition: transform 0.12s ease;
+}
+
+.tt-tree[open] summary::before {
+    transform: rotate(90deg);
+}
+
+.tt-tree ul {
+    list-style: none;
+    margin: 2px 0 4px 14px;
+    padding: 0;
+}
+
+.tt-tree li { margin: 2px 0; }
+
+.tt-opt-fold {
+    color: var(--muted);
+    font-size: 0.76rem;
+    text-decoration: none;
+    border-bottom: 1px dotted var(--muted);
+}
+
+.tt-opt-fold:hover { color: var(--phi); border-color: var(--phi); }
+
+.tt-tree-root {
+    border-left: 0;
+    padding-left: 0;
+    margin-top: 6px;
+}
+
+.tt-tree-root > summary {
+    padding: 4px 0;
+}
+
+.tt-tree-root > .tt-opt-moves {
+    margin-left: 14px;
+}
+
+/* --- page scrollbar: slim, like the staff box ----------------------------- */
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar { width: 6px; height: 6px; }
+html::-webkit-scrollbar-track,
+body::-webkit-scrollbar-track { background: transparent; }
+html::-webkit-scrollbar-thumb,
+body::-webkit-scrollbar-thumb { background: var(--thumb); border-radius: 3px; }
+html::-webkit-scrollbar-thumb:hover,
+body::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+/* svp.css sets the standard scrollbar-color on html - and once that is set,
+   Chrome (121+) ignores every ::-webkit-scrollbar rule for the element. So
+   the slim look has to come from the standard properties, unguarded. */
+html {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(120, 160, 220, 0.18) transparent;
+}
+
+html.svp-light {
+    scrollbar-color: rgba(60, 100, 160, 0.16) transparent;
+}
+
+/* --- draggable width of the staff box ------------------------------------- */
+
+.tt-resize {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: -5px;
+    width: 10px;
+    cursor: col-resize;
+    border-radius: 5px;
+}
+
+.tt-resize:hover,
+body.is-resizing .tt-resize {
+    background: rgba(121, 158, 49, 0.25);
+}
+
+body.is-resizing {
+    cursor: col-resize;
+    user-select: none;
+}
+
+@media (max-width: 900px) {
+    .tt-resize { display: none; }
+}
+
+/* "Heute" sits in the same 30px row as the arrows and the A/B chip */
+.tt-bar #today {
+    height: 30px;
+    padding: 0 14px;
+    line-height: 28px;
+}
+
+/* --- one height for every control in the top bar and the optimizer row ---- */
+
+.tt-bar .action,
+.tt-bar .tt-nav,
+.tt-bar .tt-ab,
+.tt-depts button,
+.tt-opt-row .action,
+.tt-opt-row select,
+.tt-opt-row .tt-opt-close {
+    box-sizing: border-box;
+    height: 30px;
+    padding-top: 0;
+    padding-bottom: 0;
+    line-height: 28px;
+}
+
+.tt-depts button {
+    padding-left: 12px;
+    padding-right: 12px;
+}
+
+/* --- conflict counter next to "Optimieren" -------------------------------- */
+
+.tt-confcount {
+    font-family: Orbitron, sans-serif;
+    font-size: 0.8rem;
+    font-weight: 700;
+    height: 30px;
+    line-height: 28px;
+    padding: 0 10px;
+    border-radius: 7px;
+    border: 1px solid var(--line);
+    cursor: help;
+}
+
+.tt-confcount.bad {
+    color: var(--ypsilon);
+    border-color: rgba(176, 36, 24, 0.5);
+    background: rgba(176, 36, 24, 0.10);
+}
+
+.tt-confcount.good {
+    color: var(--phi);
+    border-color: rgba(121, 158, 49, 0.5);
+    background: rgba(121, 158, 49, 0.12);
+}
+
+/* --- Fetch button + status next to the heading ---------------------------- */
+
+.page-head .title-group #fetchbtn {
+    height: 30px;
+    padding: 0 14px;
+    line-height: 28px;
+    margin-bottom: 8px;
+}
+
+.tt-fetch-status {
+    font-size: 0.78rem;
+    color: var(--muted);
+    margin-bottom: 10px;
+    font-variant-numeric: tabular-nums;
+}
+
+.tt-fetch-status.busy { color: var(--lambda); }
+.tt-fetch-status.good { color: var(--phi); }
+.tt-fetch-status.bad { color: var(--ypsilon); }
+
+/* --- warning sign scales with the tile --------------------------------- */
+
+.tt-clash-flag.mid {
+    font-size: 1.15rem;
+    top: 2px;
+    right: 6px;
+}
+
+.tt-clash-flag.big {
+    font-size: 1.9rem;
+    top: 4px;
+    right: 8px;
+    line-height: 1;
+    opacity: 0.9;
+}
+
+.tt-stale { color: var(--lambda); }
+
+/* --- saved versions -------------------------------------------------------- */
+
+.tt-versions { margin-top: 10px; font-size: 0.82rem; }
+.tt-version { margin: 3px 0; }
+.tt-ver-when { color: var(--muted); font-variant-numeric: tabular-nums; }
+
+.tt-ver-btn {
+    font-family: Orbitron, sans-serif;
+    font-size: 0.62rem;
+    letter-spacing: 0.05em;
+    padding: 2px 8px;
+    margin-left: 4px;
+    border-radius: 6px;
+    border: 1px solid rgba(121, 158, 49, 0.5);
+    background: rgba(121, 158, 49, 0.12);
+    color: var(--text);
+    cursor: pointer;
+}
+
+.tt-ver-btn:hover { background: rgba(121, 158, 49, 0.28); }
+
+.tt-ver-btn.danger {
+    border-color: rgba(176, 36, 24, 0.45);
+    background: rgba(176, 36, 24, 0.08);
+}
+
+.tt-ver-btn.danger:hover { background: rgba(176, 36, 24, 0.2); }
+
+/* Start turns into Stop while the optimizer runs */
+#opt-run.running {
+    background: rgba(176, 36, 24, 0.14);
+    border-color: rgba(176, 36, 24, 0.6);
+}
+
+.tt-savebox { display: inline-flex; gap: 6px; align-items: center; }
+.tt-savebox .tt-search { width: 180px; height: 30px; padding: 0 9px; box-sizing: border-box; }
+
+.tt-pick {
+    max-width: 260px;
+    height: 30px;
+    background: var(--input-bg);
+    color: var(--text);
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    padding: 0 8px;
+    font-family: Outfit, sans-serif;
+    font-size: 0.8rem;
+}
