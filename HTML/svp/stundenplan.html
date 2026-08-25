@@ -17,8 +17,13 @@
     <link rel="stylesheet" href="svp.css">
     <link rel="stylesheet" href="stundenplan.css">
     <!-- Applies the shared colour scheme (localStorage "svp-theme") before first
-         paint, same as every other svp page. -->
-    <script src="svp-gate.js"></script>
+         paint, same as every other svp page - and gates THIS page with its own
+         passphrase (Doc, 25.08.2026): data-gate is a PBKDF2-SHA256 hash, the
+         passphrase itself is not in the repo (see svp-gate.js header). -->
+    <script src="svp-gate.js"
+        data-gate="329a42ea1901a1761c6263a987133a982c7c518abd996d3eda61f8d9db068c23"
+        data-gate-key="svp-gate-sp"
+        data-gate-title="Stundenplan &middot; IBB Dresden"></script>
 </head>
 
 <body>
@@ -26,9 +31,9 @@
         <div class="head-row">
             <div class="title-group">
                 <h1>Stundenplan</h1>
+                <div class="subtitle caps" id="sub">&nbsp;</div>
             </div>
         </div>
-        <div class="subtitle caps" id="sub">&nbsp;</div>
     </header>
 
     <main class="svp-section">
@@ -61,11 +66,14 @@
                         <option value="me">gewählte Person</option>
                     </select>
                 </label>
-                <label class="tt-opt-field" title="Generationen (Rechentiefe)">
-                    <select id="opt-iters" aria-label="Generationen (Rechentiefe)">
-                        <option value="3000000">gründlich (≈ 1 min)</option>
-                        <option value="9000000" selected>supergründlich (≈ 2–3 min)</option>
-                        <option value="18000000">extrem (≈ 5 min)</option>
+                <label class="tt-opt-field tt-opt-stack" title="Rechenaufwand (Generationen)">
+                    <span class="tt-opt-cap">Aufwand</span>
+                    <select id="opt-iters" aria-label="Aufwand (Rechentiefe)">
+                        <option value="3500000">≈ 1 min</option>
+                        <option value="7000000">≈ 2 min</option>
+                        <option value="10500000" selected>≈ 3 min</option>
+                        <option value="14000000">≈ 4 min</option>
+                        <option value="17500000">≈ 5 min</option>
                     </select>
                 </label>
                 <button class="action" id="opt-run" type="button">Start</button>
@@ -413,10 +421,14 @@
                 }
             }
 
-            // Time axis spans the real lessons, rounded to full half hours;
-            // with nothing but banners it falls back to the school timegrid.
+            // Time axis always spans the whole school day of this week (Doc:
+            // "zeig immer alle Stunden") - a person with two lessons gets the
+            // same axis as the full plan, and switching filters never rescales.
+            // Rounded to full half hours; with nothing but banners it falls
+            // back to the school timegrid.
             const gridUnits = (data.timegrid && data.timegrid[0] && data.timegrid[0].timeUnits) || [];
-            const spanSrc = gridLessons.length ? gridLessons
+            const schoolDay = planForBox.filter(l => !isBanner(l));   // whole plan, also in the proposal view
+            const spanSrc = schoolDay.length ? schoolDay
                 : gridUnits.map(u => ({ startTime: u.startTime, endTime: u.endTime }));
             const startMin = Math.floor(Math.min(...spanSrc.map(l => toMin(l.startTime))) / 30) * 30;
             const endMin = Math.ceil(Math.max(...spanSrc.map(l => toMin(l.endTime))) / 30) * 30;
@@ -560,11 +572,11 @@
             const $ = id => document.getElementById(id);
             let worker = null, RUN_SEED = 0;
 
-            // Doc's choices survive reloads (Doc, 25.08.: default supergründlich)
+            // Doc's choices survive reloads (Doc, 25.08.: default ≈ 3 min, ~3.5 Mio generations per minute)
             try {
                 const it = localStorage.getItem('svp-opt-iters');
                 if (it && $('opt-iters').querySelector('[value="' + it + '"]')) $('opt-iters').value = it;
-                else $('opt-iters').value = '9000000';
+                else $('opt-iters').value = '10500000';
             } catch (e) { }
             $('opt-iters').addEventListener('change', () => { try { localStorage.setItem('svp-opt-iters', $('opt-iters').value); } catch (e) { } });
 
