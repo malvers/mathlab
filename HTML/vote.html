@@ -1,0 +1,1243 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vote</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet">
+    <link rel="icon" type="image/png" href="resources/favicon.png">
+    <script src="js/vendor/supabase.min.js"></script>
+    <script src="svp/qrcode.min.js"></script>
+    <style>
+        /* --- plain standalone page (like placemat.html), deliberately no lab shell CSS --- */
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+        }
+
+        body {
+            background: rgb(8, 20, 42);
+            color: rgba(214, 232, 255, 0.92);
+            font-family: 'Orbitron', 'Outfit', sans-serif;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* ---------- host ---------- */
+        .host {
+            flex: 1 1 auto;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ---------- host: setup bar ---------- */
+        .setup {
+            flex: 0 0 auto;
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 18px;
+            border-bottom: 1px solid rgba(214, 232, 255, 0.12);
+            background: rgb(8, 20, 42);
+            transition: transform 0.35s ease;
+        }
+
+        /* Presenting (Show): bar slides up out of view; a mouse move brings it back for a moment. */
+        .host.presenting .setup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 10;
+            transform: translateY(-100%);
+        }
+
+        .host.presenting.bar-visible .setup {
+            transform: none;
+        }
+
+        .setup-left,
+        .setup-mid,
+        .setup-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .setup-right {
+            justify-content: flex-end;
+        }
+
+        .setup-mid .btn {
+            width: 200px;
+            white-space: nowrap;
+        }
+
+        .dice {
+            background: none;
+            border: none;
+            padding: 0;
+            font-size: 26px;
+            line-height: 1;
+            cursor: pointer;
+            transition: transform 0.15s;
+        }
+
+        .dice:hover {
+            transform: rotate(-20deg) scale(1.1);
+        }
+
+        .tri {
+            background: none;
+            border: none;
+            padding: 6px;
+            color: rgba(214, 232, 255, 0.7);
+            cursor: pointer;
+            display: inline-flex;
+            transition: transform 0.15s, color 0.15s;
+        }
+
+        .tri:hover:not(:disabled) {
+            color: rgba(214, 232, 255, 1);
+            transform: scale(1.15);
+        }
+
+        .tri:disabled {
+            opacity: 0.2;
+            cursor: default;
+        }
+
+        .setup label {
+            font-size: 12px;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            opacity: 0.6;
+        }
+
+        .setup input {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 18px;
+            color: rgba(214, 232, 255, 0.95);
+            background: rgb(14, 36, 78);
+            border: 1px solid rgba(214, 232, 255, 0.25);
+            border-radius: 8px;
+            padding: 8px 12px;
+            outline: none;
+        }
+
+        .setup input:focus {
+            border-color: rgb(245, 194, 66);
+        }
+
+        #code-in {
+            width: 7ch;
+            text-align: center;
+            letter-spacing: 0.25em;
+        }
+
+        .btn {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 15px;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            color: rgb(8, 20, 42);
+            background: rgb(121, 158, 49);
+            border: none;
+            border-radius: 10px;
+            padding: 10px 20px;
+            cursor: pointer;
+            transition: transform 0.08s, filter 0.15s;
+        }
+
+        .btn:hover {
+            filter: brightness(1.1);
+        }
+
+        .btn:active {
+            transform: scale(0.96);
+        }
+
+        .btn.ghost {
+            background: transparent;
+            color: rgba(214, 232, 255, 0.85);
+            border: 1px solid rgba(214, 232, 255, 0.3);
+        }
+
+        .btn.icon {
+            display: inline-flex;
+            align-items: center;
+            padding: 9px 12px;
+        }
+
+        .btn.help {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 22px;
+            font-weight: 700;
+            line-height: 18px;
+            padding: 9px 14px;
+        }
+
+        .btn:disabled {
+            opacity: 0.4;
+            cursor: default;
+        }
+
+        /* ---------- host: stage ---------- */
+        .stage {
+            flex: 1 1 auto;
+            min-height: 0;
+            display: grid;
+            grid-template-columns: 1fr;
+            grid-template-rows: auto 1fr;
+            padding: 16px 24px 24px;
+        }
+
+        .stage-title {
+            grid-column: 1 / -1;
+            margin-top: 8vh;
+            font-size: clamp(20px, 4vmin, 44px);
+            color: rgb(245, 194, 66);
+            text-align: center;
+            line-height: 1.2;
+            outline: none;
+            cursor: text;
+            -webkit-user-select: text;
+            user-select: text;
+            min-height: 1.2em;
+        }
+
+        .stage-title:empty::before {
+            content: 'Titel hier tippen …';
+            opacity: 0.35;
+        }
+
+        .qr-code {
+            font-size: clamp(22px, 5vmin, 56px);
+            letter-spacing: 0.25em;
+            color: rgba(214, 232, 255, 0.95);
+        }
+
+        .big-col {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-width: 0;
+        }
+
+        #big {
+            font-family: 'Outfit', sans-serif;   /* Orbitron's slashed zero reads odd at this size */
+            font-size: min(40vw, 48vh);
+            font-weight: 600;
+            line-height: 1;
+            color: rgba(214, 232, 255, 0.95);
+            transition: color 0.3s;
+        }
+
+        #big.mean {
+            color: rgb(245, 194, 66);
+        }
+
+        .big-sub {
+            font-family: 'Outfit', sans-serif;
+            font-size: clamp(14px, 2.4vmin, 24px);
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            opacity: 0.55;
+            margin-top: 6vh;
+        }
+
+        @media (max-width: 700px) {
+            #big {
+                font-size: min(36vw, 32vh);
+            }
+        }
+
+        /* ---------- kids: vote screen ---------- */
+        .kid {
+            position: relative;
+            flex: 1 1 auto;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 96px 16px 16px;
+            gap: 3vh;
+        }
+
+        .kid-codebar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            padding: 14px;
+        }
+
+        .kid-codebar label {
+            font-size: 12px;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            opacity: 0.6;
+        }
+
+        #kid-code {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 22px;
+            width: 6.5ch;
+            text-align: center;
+            letter-spacing: 0.3em;
+            color: rgba(214, 232, 255, 0.95);
+            background: rgb(14, 36, 78);
+            border: 1px solid rgba(214, 232, 255, 0.25);
+            border-radius: 10px;
+            padding: 8px 6px 8px 12px;
+            outline: none;
+        }
+
+        #kid-code:focus {
+            border-color: rgb(245, 194, 66);
+        }
+
+        .kid-title {
+            flex: 0 0 auto;
+            font-size: clamp(26px, 7vw, 44px);
+            color: rgb(245, 194, 66);
+            text-align: center;
+            line-height: 1.25;
+        }
+
+        .grid10 {
+            flex: 0 1 auto;
+            width: 100%;
+            max-width: 570px;
+            height: min(78vh, 780px);
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            grid-template-rows: repeat(5, 1fr);
+            gap: 8px;
+        }
+
+        .vbtn {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(33px, 9vmin, 60px);
+            font-weight: 700;
+            color: rgb(8, 20, 42);
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            touch-action: manipulation;
+            transition: background 0.1s, transform 0.08s;
+        }
+
+        .vbtn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.35em;
+        }
+
+        .vface {
+            font-size: 1.15em;
+            line-height: 1;
+        }
+
+        .vbtn:active {
+            filter: brightness(1.2);
+            transform: scale(0.96);
+        }
+
+        .vbtn:disabled {
+            opacity: 0.5;
+        }
+
+        .done {
+            flex: 0 1 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .done-val {
+            font-size: min(40vw, 32vh);
+            font-weight: 700;
+            line-height: 1;
+            color: rgb(121, 158, 49);
+        }
+
+        .done-txt {
+            font-size: clamp(18px, 5vw, 32px);
+            letter-spacing: 0.1em;
+        }
+
+        /* ---------- host: big QR overlay ---------- */
+        .qr-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 20;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 3vmin;
+            background: rgb(8, 20, 42);
+            cursor: pointer;
+        }
+
+        .qr-overlay.open {
+            display: flex;
+        }
+
+        #qr-big {
+            width: 72vmin;
+            height: 72vmin;
+            background: #fff;
+            border-radius: 2vmin;
+            padding: 3vmin;
+        }
+
+        #qr-big svg {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .qr-overlay .qr-code {
+            font-size: clamp(28px, 8vmin, 90px);
+        }
+
+        .chart-btn {
+            margin-top: 3vh;
+            background: none;
+            border: none;
+            padding: 6px;
+            cursor: pointer;
+            opacity: 0.55;
+            transition: opacity 0.15s, transform 0.15s;
+        }
+
+        .chart-btn:hover {
+            opacity: 1;
+            transform: scale(1.1);
+        }
+
+        .chart-btn svg {
+            width: 34px;
+            height: 34px;
+            display: block;
+        }
+
+        /* ---------- host: distribution chart overlay ---------- */
+        .chart-overlay {
+            padding: 4vmin 6vmin;
+        }
+
+        .chart-title {
+            font-size: clamp(18px, 3.5vmin, 36px);
+            color: rgb(245, 194, 66);
+            text-align: center;
+        }
+
+        .chart {
+            width: 100%;
+            max-width: 1200px;
+            height: 58vh;
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            gap: 1.2vmin;
+            align-items: end;
+        }
+
+        .bar-col {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 0.6vmin;
+        }
+
+        .bar-n {
+            font-family: 'Outfit', sans-serif;
+            font-size: clamp(14px, 2.6vmin, 28px);
+            font-weight: 600;
+            color: rgba(214, 232, 255, 0.9);
+        }
+
+        .bar {
+            width: 100%;
+            border-radius: 1vmin 1vmin 0 0;
+            min-height: 3px;
+            transition: height 0.4s ease;
+        }
+
+        .bar-x {
+            font-family: 'Outfit', sans-serif;
+            font-size: clamp(13px, 2.4vmin, 26px);
+            color: rgba(214, 232, 255, 0.75);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            line-height: 1.2;
+        }
+
+        .bar-x .vface {
+            font-size: 1.3em;
+        }
+
+        .chart-overlay .big-sub {
+            margin-top: 0;
+        }
+
+        /* ---------- host: help overlay ---------- */
+        .help-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 20;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 4vmin;
+            background: rgba(8, 20, 42, 0.92);
+            cursor: pointer;
+        }
+
+        .help-overlay.open {
+            display: flex;
+        }
+
+        .help-card {
+            max-width: 720px;
+            max-height: 90vh;
+            overflow-y: auto;
+            background: rgb(14, 36, 78);
+            border: 1px solid rgba(214, 232, 255, 0.18);
+            border-radius: 16px;
+            padding: 28px 32px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 17px;
+            line-height: 1.5;
+            cursor: default;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(214, 232, 255, 0.25) transparent;
+        }
+
+        .help-card h2 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 22px;
+            color: rgb(245, 194, 66);
+            margin: 0 0 14px;
+        }
+
+        .help-card ol {
+            margin: 0;
+            padding-left: 1.4em;
+        }
+
+        .help-card li {
+            margin-bottom: 8px;
+        }
+
+        .help-card b {
+            color: rgb(245, 194, 66);
+            font-weight: 600;
+        }
+
+        .help-card .mono {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.85em;
+            letter-spacing: 0.04em;
+        }
+
+        .help-card.dlg {
+            min-width: min(440px, 90vw);
+        }
+
+        .dlg-text {
+            margin: 0 0 20px;
+            color: rgb(245, 194, 66);
+        }
+
+        .dlg-btns {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+
+        .btn.danger {
+            background: rgb(176, 36, 24);
+            color: #fff;
+        }
+
+        .toast {
+            position: fixed;
+            left: 50%;
+            bottom: 24px;
+            transform: translateX(-50%);
+            background: rgb(176, 36, 24);
+            color: #fff;
+            font-family: 'Outfit', sans-serif;
+            font-size: 15px;
+            padding: 10px 18px;
+            border-radius: 10px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s;
+            max-width: 90vw;
+            text-align: center;
+        }
+
+        .toast.show {
+            opacity: 1;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- ===================== HOST ===================== -->
+    <div id="host" class="host hidden">
+        <div class="setup">
+            <div class="setup-left">
+                <button id="btn-dice" class="dice" type="button" title="Schöner Zufallscode" aria-label="Schöner Zufallscode">🎲</button>
+                <input id="code-in" type="text" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" placeholder="1234"
+                    autocomplete="off" aria-label="Code">
+            </div>
+            <div class="setup-mid">
+                <button id="btn-prev" class="tri" type="button" title="Vorherige Frage" aria-label="Vorherige Frage" disabled>
+                    <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><polygon points="17,3 5,12 17,21" fill="currentColor"/></svg>
+                </button>
+                <button id="btn-publish" class="btn" type="button">Publish</button>
+                <button id="btn-show" class="btn" type="button" disabled>Show</button>
+                <button id="btn-next" class="tri" type="button" title="Nächste Frage" aria-label="Nächste Frage" disabled>
+                    <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><polygon points="7,3 19,12 7,21" fill="currentColor"/></svg>
+                </button>
+            </div>
+            <div class="setup-right">
+                <button id="btn-help" class="btn ghost icon help" type="button" title="Anleitung" aria-label="Anleitung">?</button>
+                <button id="btn-qr" class="btn ghost icon" type="button" title="QR groß zeigen" aria-label="QR groß zeigen"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 3.75 9.375v-4.5ZM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 0 1-1.125-1.125v-4.5ZM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 13.5 9.375v-4.5Z"></path><path d="M6.75 6.75h.75v.75h-.75v-.75ZM6.75 16.5h.75v.75h-.75v-.75ZM16.5 6.75h.75v.75h-.75v-.75ZM13.5 13.5h.75v.75h-.75v-.75ZM13.5 19.5h.75v.75h-.75v-.75ZM19.5 13.5h.75v.75h-.75v-.75ZM19.5 19.5h.75v.75h-.75v-.75ZM16.5 16.5h.75v.75h-.75v-.75Z"></path></svg></button>
+                <button id="btn-fs" class="btn ghost icon" type="button" title="Vollbild" aria-label="Vollbild"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3M21 8V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3M16 21h3a2 2 0 0 0 2-2v-3"/></svg></button>
+            </div>
+        </div>
+        <div class="stage">
+            <div id="stage-title" class="stage-title" contenteditable="plaintext-only" role="textbox"
+                aria-label="Titel" spellcheck="false"></div>
+            <div class="big-col">
+                <div id="big">0</div>
+                <div id="big-sub" class="big-sub">Votes</div>
+                <button id="btn-chart" class="chart-btn" type="button" title="Verteilung 1 … 10" aria-label="Verteilung 1 … 10">
+                    <svg viewBox="0 0 30 30" aria-hidden="true">
+                        <rect x="2" y="17" width="7" height="11" rx="1.5" fill="rgb(176,36,24)"/>
+                        <rect x="11.5" y="10" width="7" height="18" rx="1.5" fill="rgb(245,194,66)"/>
+                        <rect x="21" y="2" width="7" height="26" rx="1.5" fill="rgb(121,158,49)"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================== KIDS ===================== -->
+    <div id="kid" class="kid hidden">
+        <div class="kid-codebar">
+            <input id="kid-code" type="text" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" placeholder="····"
+                autocomplete="off" aria-label="Code">
+            <label for="kid-code">Code</label>
+        </div>
+        <div id="kid-title" class="kid-title">…</div>
+        <div id="grid" class="grid10 hidden"></div>
+        <div id="wait" class="done">
+            <div id="wait-txt" class="done-txt">Warte auf Start …</div>
+        </div>
+        <div id="done" class="done hidden">
+            <div id="done-val" class="done-val">7</div>
+            <div class="done-txt">Danke!</div>
+        </div>
+    </div>
+
+    <div id="help-overlay" class="help-overlay">
+        <div class="help-card" role="dialog" aria-label="Anleitung">
+            <h2>So geht's</h2>
+            <ol>
+                <li><b>Frage tippen</b> — direkt in die orange Zeile.</li>
+                <li><b>Publish</b> — die Frage geht live, die Bühne zeigt <b>0</b>.</li>
+                <li><b>QR</b> zeigen (Button oben rechts) — alle scannen oder tippen
+                    <span class="mono">docalvers.de/vote.html</span> und den 4-stelligen Code.</li>
+                <li>Jede:r tippt <b>einmal</b> 1 … 10. Der Zähler läuft live hoch.</li>
+                <li><b>Show</b> — statt des Zählers erscheint der Mittelwert, z. B. <b>8,4</b>. Die Leiste fährt weg;
+                    ein Klick auf die Bühne holt sie zurück. <b>Count</b> = zurück zum Zähler.</li>
+                <li><b>Neue Frage</b> — Text ändern, drücken: gleicher Code, alle springen automatisch mit
+                    und dürfen wieder einmal voten.</li>
+                <li><b>◀ ▶</b> — durch alle bisherigen Fragen blättern (mit Datum · Zeit, n und Mittelwert).</li>
+                <li><b>🎲</b> — neuer Code für eine neue Klasse; die alte Frage wird geleert.</li>
+            </ol>
+        </div>
+    </div>
+
+    <div id="chart-overlay" class="qr-overlay chart-overlay">
+        <div id="chart-title" class="chart-title"></div>
+        <div id="chart" class="chart"></div>
+        <div id="chart-sub" class="big-sub"></div>
+    </div>
+
+    <div id="qr-overlay" class="qr-overlay">
+        <div id="qr-big"></div>
+        <div id="qr-big-code" class="qr-code"></div>
+    </div>
+
+    <div id="dlg-overlay" class="help-overlay">
+        <div class="help-card dlg" role="dialog" aria-labelledby="dlg-title">
+            <h2 id="dlg-title">?</h2>
+            <p id="dlg-text" class="dlg-text"></p>
+            <div class="dlg-btns">
+                <button id="dlg-cancel" class="btn ghost" type="button">Abbrechen</button>
+                <button id="dlg-ok" class="btn danger" type="button">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script>
+        'use strict';
+        // Mini-Mentimeter: one page, two faces. Without ?c= it is the HOST (title + code → QR, live counter,
+        // "Show" reveals the mean). With ?c=1234 it is the KIDS' page (tap 1..10 once). Every "Publish" makes a
+        // NEW poll row = a new round; kids get switched to the new round by realtime without reloading.
+        const SUPABASE_URL = 'https://fyfhxzyymmurlaenmzse.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_ubQDiMD-X3N0vZvPVi229Q_-5Zootfk';   // publishable (public by design)
+        const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { persistSession: false } });
+
+        const $ = (id) => document.getElementById(id);
+        const params = new URLSearchParams(location.search);
+        const codeParam = (params.get('c') || '').trim();
+
+        let toastTimer = null;
+        function toast(msg) {
+            const t = $('toast');
+            t.textContent = msg;
+            t.classList.add('show');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => t.classList.remove('show'), 2600);
+        }
+
+        function fmtMean(x) {
+            return x.toLocaleString('de-DE', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+        }
+
+        // 1 → 10: monkey → grinning; native emoji (Apple on Mac/iOS, Noto on Android).
+        const FACES = ['\u{1F648}', '\u{1F620}', '\u{1F61F}', '\u{1F615}', '\u{1F610}',
+            '\u{1F642}', '\u{1F60A}', '\u{1F600}', '\u{1F601}', '\u{1F929}'];
+        // Palette ramp 1 → 10: red → orange → green (Doc's λ/Υ/φ colours).
+        const RED = [176, 36, 24], ORANGE = [245, 194, 66], GREEN = [121, 158, 49];
+        function ramp(t) {
+            const [a, b, u] = t < 0.5 ? [RED, ORANGE, t * 2] : [ORANGE, GREEN, (t - 0.5) * 2];
+            return 'rgb(' + a.map((c, k) => Math.round(c + (b[k] - c) * u)).join(',') + ')';
+        }
+
+        // Pretty modal (never native confirm): resolves true on the action button, false otherwise.
+        function askDialog(title, text, actionLabel) {
+            return new Promise((resolve) => {
+                const ov = $('dlg-overlay');
+                $('dlg-title').textContent = title;
+                $('dlg-text').textContent = text || '';
+                $('dlg-ok').textContent = actionLabel || 'OK';
+                ov.classList.add('open');
+                const done = (v) => { ov.classList.remove('open'); cleanup(); resolve(v); };
+                const onOk = () => done(true), onCancel = () => done(false);
+                const onKey = (e) => { if (e.key === 'Escape') done(false); if (e.key === 'Enter') done(true); };
+                const onBg = (e) => { if (e.target === ov) done(false); };
+                function cleanup() {
+                    $('dlg-ok').removeEventListener('click', onOk);
+                    $('dlg-cancel').removeEventListener('click', onCancel);
+                    ov.removeEventListener('click', onBg);
+                    document.removeEventListener('keydown', onKey, true);
+                }
+                $('dlg-ok').addEventListener('click', onOk);
+                $('dlg-cancel').addEventListener('click', onCancel);
+                ov.addEventListener('click', onBg);
+                document.addEventListener('keydown', onKey, true);
+                $('dlg-cancel').focus();
+            });
+        }
+
+        // =============================== HOST ===============================
+        function initHost() {
+            $('host').classList.remove('hidden');
+            const titleEl = $('stage-title'), codeIn = $('code-in');
+            const btnPublish = $('btn-publish'), btnShow = $('btn-show');
+            let poll = null;          // currently viewed poll { id, code, title, created_at } (latest = live)
+            let history = [];         // all polls this host published (own ids kept in localStorage), oldest first
+            let values = [];          // vote values of the current round (derived from `votes`)
+            let votes = new Map();    // vote id → value; realtime pushes and resyncs merge here, so nothing counts twice
+            let showing = false;      // false = counter, true = mean
+            let channel = null;
+            let pollTimer = null;
+
+            // Remember the last session so a reload keeps the running round.
+            try {
+                const saved = JSON.parse(localStorage.getItem('vote-host') || 'null');
+                if (saved) {
+                    titleEl.textContent = saved.title || '';
+                    codeIn.value = saved.code || '';
+                    if (saved.poll) { poll = saved.poll; }
+                }
+            } catch (_) { /* ignore */ }
+            // "Pretty" random codes: 1212, 4321, 7777, 1221, 2468 … easy to say and to type.
+            function prettyCode() {
+                const d = () => 1 + Math.floor(Math.random() * 9);
+                const other = (a) => { let b; do { b = d(); } while (b === a); return b; };
+                const pick = Math.floor(Math.random() * 7);
+                const a = d(), b = other(a);
+                switch (pick) {
+                    case 0: return '' + a + b + a + b;                     // ABAB
+                    case 1: return '' + a + a + b + b;                     // AABB
+                    case 2: return '' + a + b + b + a;                     // ABBA
+                    case 3: return '' + a + a + a + a;                     // AAAA
+                    case 4: { const s0 = 1 + Math.floor(Math.random() * 6);   // 1234 … 6789
+                        return '' + s0 + (s0 + 1) + (s0 + 2) + (s0 + 3); }
+                    case 5: { const s0 = 4 + Math.floor(Math.random() * 6);   // 4321 … 9876
+                        return '' + s0 + (s0 - 1) + (s0 - 2) + (s0 - 3); }
+                    default: { const s0 = 1 + Math.floor(Math.random() * 3);  // 1357 / 2468 / 3579
+                        return '' + s0 + (s0 + 2) + (s0 + 4) + (s0 + 6); }
+                }
+            }
+            if (!codeIn.value) codeIn.value = prettyCode();
+
+            // Owner token: only this browser can delete its own questions (row stores just the SHA-256).
+            let owner = null;
+            try {
+                owner = localStorage.getItem('vote-host-owner');
+                if (!owner) {
+                    owner = Array.from(crypto.getRandomValues(new Uint8Array(16)), b => b.toString(16).padStart(2, '0')).join('');
+                    localStorage.setItem('vote-host-owner', owner);
+                }
+            } catch (_) { owner = 'nostorage'; }
+            async function sha256hex(str) {
+                const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+                return Array.from(new Uint8Array(buf), b => b.toString(16).padStart(2, '0')).join('');
+            }
+
+            function save() {
+                try {
+                    localStorage.setItem('vote-host', JSON.stringify({ title: titleEl.textContent, code: codeIn.value, poll }));
+                    localStorage.setItem('vote-host-hist', JSON.stringify(history.map(p => p.id)));
+                } catch (_) { /* ignore */ }
+            }
+
+            function fmtWhen(iso) {
+                const d = new Date(iso);
+                return d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' }) + ' · '
+                    + d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+            }
+
+            // Load this host's past questions (ids from localStorage) with their timestamps.
+            async function loadHistory() {
+                let ids = [];
+                try { ids = JSON.parse(localStorage.getItem('vote-host-hist') || '[]'); } catch (_) { /* ignore */ }
+                if (poll && !ids.includes(poll.id)) ids.push(poll.id);
+                if (!ids.length) return;
+                const { data, error } = await sb.from('vote_polls').select('id,code,title,created_at')
+                    .in('id', ids).order('created_at', { ascending: true });
+                if (error) { toast('Supabase: ' + error.message); return; }
+                history = data || [];
+                if (poll) { const cur = history.find(p => p.id === poll.id); if (cur) poll = cur; }
+                updateNav();
+                renderBig();
+            }
+
+            function idx() { return poll ? history.findIndex(p => p.id === poll.id) : -1; }
+
+            function updateNav() {
+                const i = idx();
+                $('btn-prev').disabled = i < 0 ? history.length === 0 : i === 0;
+                $('btn-next').disabled = i < 0 || i >= history.length - 1;
+            }
+
+            function goTo(i) {
+                if (i < 0 || i >= history.length) return;
+                poll = history[i];
+                values = []; votes = new Map();
+                showing = i < history.length - 1;   // past questions open with their mean, the live one with the counter
+                titleEl.textContent = poll.title;
+                codeIn.value = poll.code;
+                save();
+                mount();
+            }
+
+            function kidUrl(code) {
+                const u = new URL(location.pathname, location.href);
+                u.search = '?c=' + code;   // kids page: no ?host
+                return u.href;
+            }
+
+            let qrUrl = '', qrCodeStr = '';
+            function renderQr(code) {
+                const url = kidUrl(code);
+                qrUrl = url;
+                qrCodeStr = code;
+            }
+
+            function renderChart() {
+                if (!$('chart-overlay').classList.contains('open')) return;
+                const counts = Array(10).fill(0);
+                values.forEach(v => { if (v >= 1 && v <= 10) counts[v - 1]++; });
+                const max = Math.max(1, ...counts);
+                const chart = $('chart');
+                if (!chart.children.length) {
+                    for (let i = 1; i <= 10; i++) {
+                        const col = document.createElement('div');
+                        col.className = 'bar-col';
+                        col.innerHTML = '<div class="bar-n"></div><div class="bar" style="background:' + ramp((i - 1) / 9) + '"></div>'
+                            + '<div class="bar-x"><span>' + i + '</span><span class="vface">' + FACES[i - 1] + '</span></div>';
+                        chart.appendChild(col);
+                    }
+                }
+                Array.from(chart.children).forEach((col, i) => {
+                    col.querySelector('.bar-n').textContent = counts[i] ? counts[i] : '';
+                    col.querySelector('.bar').style.height = (counts[i] / max * 100 * 0.78) + '%';   // leave room for labels
+                });
+                $('chart-title').textContent = poll ? poll.title : '';
+                $('chart-sub').textContent = $('big-sub').textContent;
+            }
+
+            function renderBig() {
+                const big = $('big');
+                const when = (poll && poll.created_at) ? fmtWhen(poll.created_at) + ' · ' : '';
+                if (showing) {
+                    const n = values.length;
+                    const mean = n ? values.reduce((a, b) => a + b, 0) / n : 0;
+                    big.textContent = n ? fmtMean(mean) : '–';
+                    big.classList.add('mean');
+                    $('big-sub').textContent = when + (n ? 'Mittelwert · ' + n + (n === 1 ? ' Vote' : ' Votes') : 'Noch keine Votes');
+                } else {
+                    big.textContent = String(values.length);
+                    big.classList.remove('mean');
+                    $('big-sub').textContent = when + values.length + (values.length === 1 ? ' Vote' : ' Votes');
+                }
+                renderChart();
+            }
+
+            async function refetch() {
+                if (!poll) return;
+                const { data, error } = await sb.from('vote_votes').select('id,value').eq('poll_id', poll.id);
+                if (error) { toast('Supabase: ' + error.message); return; }
+                votes = new Map(data.map(r => [r.id, r.value]));
+                values = Array.from(votes.values());
+                renderBig();
+            }
+
+            function listen() {
+                if (channel) { sb.removeChannel(channel); channel = null; }
+                clearInterval(pollTimer);
+                if (!poll) return;
+                channel = sb.channel('vote-host:' + poll.id)
+                    .on('postgres_changes',
+                        { event: 'INSERT', schema: 'public', table: 'vote_votes', filter: 'poll_id=eq.' + poll.id },
+                        (payload) => { votes.set(payload.new.id, payload.new.value); values = Array.from(votes.values()); renderBig(); })
+                    .subscribe();
+                // Safety net: realtime can drop on flaky Wi-Fi; a light resync every 5 s keeps the number honest.
+                pollTimer = setInterval(refetch, 5000);
+            }
+
+            async function publish() {
+                const title = titleEl.textContent.trim();
+                const code = codeIn.value.trim();
+                if (!title) { toast('Titel fehlt'); titleEl.focus(); return; }
+                if (!/^[0-9]{4}$/.test(code)) { toast('Code: genau 4 Ziffern'); codeIn.focus(); return; }
+                btnPublish.disabled = true;
+                const owner_hash = await sha256hex(owner);
+                const { data, error } = await sb.from('vote_polls').insert({ code, title, owner_hash }).select('id,created_at').single();
+                btnPublish.disabled = false;
+                if (error) { toast('Supabase: ' + error.message); return; }
+                poll = { id: data.id, code, title, created_at: data.created_at };
+                history.push(poll);
+                values = []; votes = new Map();
+                showing = false;
+                save();
+                mount();
+            }
+
+            function mount() {
+                renderQr(poll ? poll.code : codeIn.value.trim() || '0000');
+                btnShow.disabled = !poll;
+                btnShow.textContent = showing ? 'Count' : 'Show';
+                btnPublish.textContent = poll ? 'Neue Frage' : 'Publish';
+                updateNav();
+                renderBig();
+                listen();                 // also tears down the old channel when there is no poll
+                if (poll) refetch();
+            }
+
+            // ⌫ (outside text fields): delete the question on stage — pretty dialog, then RPC, then step to a neighbour.
+            async function deleteCurrent() {
+                if (!poll) return;
+                const ok = await askDialog('Frage löschen?', poll.title, 'Löschen');
+                if (!ok) return;
+                const { data, error } = await sb.rpc('vote_delete_poll', { p_id: poll.id, p_owner: owner });
+                if (error) { toast('Supabase: ' + error.message); return; }
+                if (!data) { toast('Nicht deine Frage — nicht gelöscht'); return; }
+                const i = idx();
+                history = history.filter(p => p.id !== poll.id);
+                poll = null;
+                values = []; votes = new Map();
+                showing = false;
+                setPresenting(false);
+                if (history.length) goTo(Math.min(Math.max(i, 0), history.length - 1));
+                else { titleEl.textContent = ''; save(); mount(); }
+                toast('Gelöscht');
+            }
+            document.addEventListener('keydown', (e) => {
+                if (e.key !== 'Backspace' || e.metaKey || e.ctrlKey || e.altKey) return;
+                const t = e.target;
+                if (t.isContentEditable || t.tagName === 'INPUT' || t.tagName === 'TEXTAREA') return;   // normal editing
+                if ($('dlg-overlay').classList.contains('open')) return;
+                e.preventDefault();
+                deleteCurrent();
+            });
+
+            $('btn-prev').addEventListener('click', () => goTo(idx() < 0 ? history.length - 1 : idx() - 1));
+            $('btn-next').addEventListener('click', () => goTo(idx() + 1));
+
+            btnPublish.addEventListener('click', publish);
+            btnShow.addEventListener('click', () => {
+                showing = !showing;
+                btnShow.textContent = showing ? 'Count' : 'Show';
+                renderBig();
+                setPresenting(showing);
+            });
+
+            // Hidden bar while presenting; a click on the stage toggles it.
+            const host = $('host');
+            function setPresenting(on) {
+                host.classList.toggle('presenting', on);
+                host.classList.remove('bar-visible');
+            }
+            host.querySelector('.stage').addEventListener('click', (e) => {
+                if (!host.classList.contains('presenting')) return;
+                if (e.target === titleEl) return;   // editing the title, not toggling
+                host.classList.toggle('bar-visible');
+            });
+            codeIn.addEventListener('input', () => {
+                codeIn.value = codeIn.value.replace(/\D/g, '').slice(0, 4);
+                if (!poll && codeIn.value.length === 4) renderQr(codeIn.value);
+            });
+            $('btn-dice').addEventListener('click', () => {
+                // New code = new class/session: drop the old question, back to a clean stage.
+                codeIn.value = prettyCode();
+                titleEl.textContent = '';
+                poll = null;
+                values = []; votes = new Map();
+                showing = false;
+                setPresenting(false);
+                save();
+                mount();
+                titleEl.focus();
+            });
+            titleEl.addEventListener('input', () => {
+                save();
+                // A running round keeps its title; a changed title only goes live with the next round.
+                if (poll && titleEl.textContent.trim() !== poll.title) btnPublish.textContent = 'Neue Frage';
+            });
+            titleEl.addEventListener('keydown', (e) => {   // Enter = done typing (no line breaks)
+                if (e.key === 'Enter') { e.preventDefault(); titleEl.blur(); }
+            });
+            titleEl.addEventListener('paste', (e) => {      // plain text only, even where plaintext-only is unsupported
+                e.preventDefault();
+                document.execCommand('insertText', false, (e.clipboardData || window.clipboardData).getData('text').replace(/\s+/g, ' '));
+            });
+            codeIn.addEventListener('input', save);
+            $('btn-qr').addEventListener('click', () => {
+                if (typeof qrcode === 'undefined' || !qrUrl) return;
+                const qr = qrcode(0, 'M');
+                qr.addData(qrUrl);
+                qr.make();
+                $('qr-big').innerHTML = qr.createSvgTag({ scalable: true, margin: 0 });
+                $('qr-big-code').textContent = qrCodeStr.split('').join(' ');
+                $('qr-overlay').classList.add('open');
+            });
+            $('qr-overlay').addEventListener('click', () => $('qr-overlay').classList.remove('open'));
+            $('btn-chart').addEventListener('click', (e) => {
+                e.stopPropagation();
+                $('chart-overlay').classList.add('open');
+                renderChart();
+            });
+            $('chart-overlay').addEventListener('click', () => $('chart-overlay').classList.remove('open'));
+            $('btn-help').addEventListener('click', () => $('help-overlay').classList.add('open'));
+            $('help-overlay').addEventListener('click', () => $('help-overlay').classList.remove('open'));
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') { ['qr-overlay', 'help-overlay', 'chart-overlay'].forEach(id => $(id).classList.remove('open')); }
+            });
+            $('btn-fs').addEventListener('click', () => {
+                if (document.fullscreenElement) document.exitFullscreen();
+                else document.documentElement.requestFullscreen().catch(() => { });
+            });
+
+            mount();
+            loadHistory();
+
+            // ?host&test → one test question with 20 simulated votes (random devices, roughly bell-shaped around 7).
+            if (params.has('test')) {
+                window.history.replaceState(null, '', location.pathname + '?host');   // don't repeat on reload
+                (async () => {
+                    titleEl.textContent = 'Wie war die Stunde?';
+                    await publish();
+                    if (!poll) return;
+                    const rows = [];
+                    for (let i = 0; i < 20; i++) {
+                        const v = i === 0 ? 10 :   // at least one 10 (Doc's wish)
+                            Math.min(10, Math.max(1, Math.round(7 + (Math.random() + Math.random() + Math.random() - 1.5) * 2.4)));
+                        rows.push({ poll_id: poll.id, device: 'test-' + Math.random().toString(36).slice(2, 10), value: v });
+                    }
+                    const { error } = await sb.from('vote_votes').insert(rows);
+                    if (error) toast('Supabase: ' + error.message);
+                    else { toast('20 Test-Votes drin'); refetch(); }
+                })();
+            }
+        }
+
+        // =============================== KIDS ===============================
+        function initKid() {
+            $('kid').classList.remove('hidden');
+            const codeIn = $('kid-code');
+            let code = '';
+            let poll = null;
+            let channel = null;
+            let device = null;
+            try {
+                device = localStorage.getItem('vote-dev');
+                if (!device) {
+                    device = Math.random().toString(36).slice(2) + Date.now().toString(36);
+                    localStorage.setItem('vote-dev', device);
+                }
+            } catch (_) {
+                device = Math.random().toString(36).slice(2) + Date.now().toString(36);
+            }
+
+            function votedKey() { return 'vote-done:' + poll.id; }
+
+            function show(state) {   // 'wait' | 'grid' | 'done'
+                $('wait').classList.toggle('hidden', state !== 'wait');
+                $('grid').classList.toggle('hidden', state !== 'grid');
+                $('done').classList.toggle('hidden', state !== 'done');
+            }
+
+            function buildGrid() {
+                const g = $('grid');
+                g.innerHTML = '';
+                // Column-wise reading order 1..5 left, 6..10 right.
+                for (let i = 1; i <= 10; i++) {
+                    const b = document.createElement('button');
+                    b.type = 'button';
+                    b.className = 'vbtn';
+                    b.innerHTML = '<span class="vnum">' + i + '</span><span class="vface">' + FACES[i - 1] + '</span>';
+                    b.style.background = ramp((i - 1) / 9);
+                    b.style.gridColumn = i <= 5 ? '1' : '2';
+                    b.style.gridRow = String(((i - 1) % 5) + 1);
+                    b.addEventListener('click', () => vote(i));
+                    g.appendChild(b);
+                }
+            }
+
+            async function vote(v) {
+                if (!poll) return;
+                const btns = $('grid').querySelectorAll('button');
+                btns.forEach(b => b.disabled = true);
+                const { error } = await sb.from('vote_votes').insert({ poll_id: poll.id, device, value: v });
+                if (error && error.code !== '23505') {   // 23505 = already voted this round → treat as done
+                    btns.forEach(b => b.disabled = false);
+                    toast('Fehler: ' + error.message);
+                    return;
+                }
+                try { localStorage.setItem(votedKey(), String(v)); } catch (_) { /* ignore */ }
+                $('done-val').textContent = String(v);
+                show('done');
+            }
+
+            function mountPoll(p) {
+                poll = p;
+                $('kid-title').textContent = p.title || 'Bewertung';
+                let done = null;
+                try { done = localStorage.getItem(votedKey()); } catch (_) { /* ignore */ }
+                if (done) {
+                    $('done-val').textContent = done;
+                    show('done');
+                } else {
+                    $('grid').querySelectorAll('button').forEach(b => b.disabled = false);
+                    show('grid');
+                }
+            }
+
+            async function fetchLatest() {
+                const { data, error } = await sb.from('vote_polls').select('id,title,created_at')
+                    .eq('code', code).order('created_at', { ascending: false }).limit(1);
+                if (error) { toast('Supabase: ' + error.message); return null; }
+                return (data && data.length) ? data[0] : null;
+            }
+
+            async function loadLatest() {
+                const p = await fetchLatest();
+                if (p) mountPoll(p);
+                else { poll = null; $('kid-title').textContent = 'Code ' + code; $('wait-txt').textContent = 'Warte auf Start …'; show('wait'); }
+            }
+
+            // Switch to a (new) code: URL, poll lookup, realtime channel for "new round" pushes.
+            function setCode(c) {
+                code = c;
+                window.history.replaceState(null, '', location.pathname + '?c=' + c);
+                if (channel) { sb.removeChannel(channel); channel = null; }
+                channel = sb.channel('vote-kid:' + c)
+                    .on('postgres_changes',
+                        { event: 'INSERT', schema: 'public', table: 'vote_polls', filter: 'code=eq.' + c },
+                        (payload) => mountPoll(payload.new))
+                    .subscribe();
+                loadLatest();
+            }
+
+            codeIn.addEventListener('input', () => {
+                codeIn.value = codeIn.value.replace(/\D/g, '').slice(0, 4);
+                if (codeIn.value.length === 4) { setCode(codeIn.value); codeIn.blur(); }
+                else { poll = null; $('kid-title').textContent = ' '; $('wait-txt').textContent = 'Code eingeben'; show('wait'); }
+            });
+
+            buildGrid();
+            show('wait');
+            if (/^[0-9]{4}$/.test(codeParam)) { codeIn.value = codeParam; setCode(codeParam); }
+            else { $('kid-title').textContent = ' '; $('wait-txt').textContent = 'Code eingeben'; codeIn.focus(); }
+
+            // Safety net if realtime is blocked (school Wi-Fi): re-check the latest round every 8 s.
+            setInterval(async () => {
+                if (!/^[0-9]{4}$/.test(code)) return;
+                const p = await fetchLatest();
+                if (p && (!poll || p.id !== poll.id)) mountPoll(p);
+            }, 8000);
+        }
+
+        // vote.html = kids (code typed or via ?c=1234); vote.html?host = Doc's host screen.
+        if (params.has('host')) initHost();
+        else initKid();
+    </script>
+</body>
+
+</html>
