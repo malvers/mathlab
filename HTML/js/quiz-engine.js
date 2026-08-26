@@ -9,6 +9,8 @@
        title: 'Anonymer Eingangstest Mathematik · Klasse 12',
        subtitle: 'Berufliches Gymnasium · ...',
        dashSub: '...',              // optional: sub line of the ?auswertung view
+       back: 'svp/',                // optional: "Zur Übersicht" button (href) top left above the
+                                    //   title — for tests opened in a new tab from an svp plan
        submit: false,               // optional: hide "Abgeben" (Uebungsmodus)
        version: 'v9',               // optional: data pool version, default 'v1'
        solutions: 'always',         // optional: readable without submitting; 'none' = no panel
@@ -32,6 +34,7 @@
     const wrap = document.createElement('div');
     wrap.className = 'wrap';
     wrap.innerHTML =
+      (CFG.back ? '<div class="backrow"><button class="backbtn" id="backBtn" type="button" title="Zur Übersicht">Zur Übersicht</button></div>' : '') +
       '<h1></h1>' +
       '<div class="sub"></div>' +
       '<div id="quiz"></div>' +
@@ -60,6 +63,8 @@
       'nur anonyme Gesamt-Zähler.</footer>';
     wrap.querySelector('h1').textContent = CFG.title || '';
     wrap.querySelector('.sub').textContent = CFG.subtitle || '';
+    const back = wrap.querySelector('#backBtn');
+    if (back) back.addEventListener('click', function () { location.href = CFG.back; });
     document.body.appendChild(wrap);
   }
   buildPage();
