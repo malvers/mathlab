@@ -69,7 +69,10 @@
     let hidden;
     try { hidden = new Set(JSON.parse(localStorage.getItem(STORE_KEY) || '[]')); }
     catch (e) { hidden = new Set(); }
-    hidden.delete('index.html'); // Start can never be hidden (cleans up old stored state)
+    // Start and the Stundenplan are always visible and not toggleable (Doc, 26.08.2026:
+    // Stundenplan out of the panel); deleting cleans up old stored state.
+    const ALWAYS_ON = ['index.html', 'stundenplan.html'];
+    for (const h of ALWAYS_ON) hidden.delete(h);
     function saveHidden() {
         try { localStorage.setItem(STORE_KEY, JSON.stringify([...hidden])); } catch (e) { }
     }
@@ -194,7 +197,7 @@
     const grid = document.createElement('div');
     grid.className = 'ep-grid ep-list';
     for (const [href, label, cls, longLabel] of LINKS) {
-        if (href === 'index.html') continue; // Start is always visible, not toggleable
+        if (ALWAYS_ON.includes(href)) continue; // Start + Stundenplan: always visible, not toggleable
         // The colour class rides on the row too — the checkbox picks it up via
         // accent-color: currentColor, so each box matches its subject.
         const row = document.createElement('label');
@@ -227,15 +230,13 @@
     }
     panel.appendChild(grid);
 
-    // Colour scheme switch below the pill toggles. svp-gate.js applies the
-    // stored choice in <head>, so a reload never flashes the wrong scheme.
-    const themeTitle = document.createElement('div');
-    themeTitle.className = 'ep-title ep-title-2';
-    themeTitle.textContent = 'Farbschema';
-    panel.appendChild(themeTitle);
-
-    const themeRow = document.createElement('div');
-    themeRow.className = 'ep-grid';
+    // Colour scheme switch: two pills in the nav row, left of the QR pill (Doc, 26.08.2026 —
+    // moved out of this panel). svp-gate.js applies the stored choice in <head>, so a
+    // reload never flashes the wrong scheme.
+    const themeWrap = document.createElement('span');
+    themeWrap.className = 'nav-theme-wrap';
+    themeWrap.setAttribute('role', 'group');
+    themeWrap.setAttribute('aria-label', 'Farbschema');
     const THEMES = [['dark', 'Dunkel'], ['light', 'Hell']];
     let theme = 'dark';
     try { if (localStorage.getItem('svp-theme') === 'light') theme = 'light'; } catch (e) { }
@@ -250,15 +251,16 @@
         try { localStorage.setItem('svp-theme', next); } catch (e) { }
     }
     for (const [key, label] of THEMES) {
-        const t = document.createElement('span');
-        t.className = 'badge b-grey';
+        const t = document.createElement('a');
+        t.className = 'badge b-grey nav-theme';
+        t.href = '#';
         t.textContent = label;
-        t.addEventListener('click', function () { applyTheme(key); });
+        t.title = 'Farbschema: ' + label;
+        t.addEventListener('click', function (e) { e.preventDefault(); applyTheme(key); });
         themeBtns[key] = t;
-        themeRow.appendChild(t);
+        themeWrap.appendChild(t);
     }
     themeBtns[theme].classList.add('on');
-    panel.appendChild(themeRow);
 
     editWrap.appendChild(panel);
     nav.appendChild(editWrap);
@@ -304,6 +306,7 @@
         + '<path d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 3.75 9.375v-4.5ZM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 0 1-1.125-1.125v-4.5ZM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 13.5 9.375v-4.5Z"></path>'
         + '<path d="M6.75 6.75h.75v.75h-.75v-.75ZM6.75 16.5h.75v.75h-.75v-.75ZM16.5 6.75h.75v.75h-.75v-.75ZM13.5 13.5h.75v.75h-.75v-.75ZM13.5 19.5h.75v.75h-.75v-.75ZM19.5 13.5h.75v.75h-.75v-.75ZM19.5 19.5h.75v.75h-.75v-.75ZM16.5 16.5h.75v.75h-.75v-.75Z"></path></svg>';
     qrPill.addEventListener('click', function (e) { e.preventDefault(); showQr(); });
+    nav.appendChild(themeWrap); // Dunkel | Hell, directly left of the QR pill
     nav.appendChild(qrPill);
 
     let qrOverlay = null;
