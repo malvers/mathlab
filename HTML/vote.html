@@ -930,10 +930,12 @@
                     const mean = n ? values.reduce((a, b) => a + b, 0) / n : 0;
                     big.textContent = n ? fmtMean(mean) : '–';
                     big.classList.add('mean');
+                    big.style.color = n ? ramp((mean - 1) / 9) : '';   // 1 red → 5.5 yellow → 10 green
                     $('big-sub').textContent = when + (n ? 'Mittelwert · ' + n + (n === 1 ? ' Vote' : ' Votes') : 'Noch keine Votes');
                 } else {
                     big.textContent = String(values.length);
                     big.classList.remove('mean');
+                    big.style.color = '';
                     $('big-sub').textContent = when + values.length + (values.length === 1 ? ' Vote' : ' Votes');
                 }
                 renderChart();
