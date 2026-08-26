@@ -430,6 +430,22 @@ body.shifting #plan-table .shift-col { display: table-cell; }
 
 /* Kontextmenü einer einzelnen Material-Pill (Rechtsklick / langes Drücken
    im Bearbeiten-Modus) — Optik wie die Nav-Dropdowns. */
+.mat-tip {
+    position: fixed;
+    z-index: 121;
+    max-width: min(420px, calc(100vw - 16px));
+    padding: 10px 14px;
+    font-size: 1rem;
+    line-height: 1.4;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    box-shadow: 0 8px 22px var(--shadow);
+    pointer-events: none;
+    white-space: pre-wrap;
+}
+@media print { .mat-tip { display: none; } }
+
 .mat-ctx {
     position: fixed;
     z-index: 120;
@@ -596,6 +612,30 @@ html.svp-light .mat-modal .mm-title.mm-warn { color: rgb(176, 36, 24); }
     color: inherit;
 }
 .mat-modal input.bad { border-color: rgb(176, 36, 24); }
+/* Description: two lines high, wraps, slim scrollbar when it overflows */
+.mat-modal textarea {
+    display: block;
+    width: 100%;
+    margin-bottom: 10px;
+    font: inherit;
+    font-size: 0.9rem;
+    line-height: 1.4;
+    padding: 8px 10px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: transparent;
+    color: inherit;
+    resize: none;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+.mat-modal textarea::-webkit-scrollbar { width: 8px; }
+.mat-modal textarea::-webkit-scrollbar-track { background: var(--trough); border-radius: 4px; }
+.mat-modal textarea::-webkit-scrollbar-thumb { background: var(--thumb); border-radius: 4px; }
+@supports (-moz-appearance: none) {
+    .mat-modal textarea { scrollbar-width: thin; scrollbar-color: var(--thumb) var(--trough); }
+}
 .mm-btns {
     display: flex;
     justify-content: flex-end;

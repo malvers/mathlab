@@ -87,24 +87,25 @@
         text = text == null ? '' : String(text).trim();
         el.dataset.src = text;
         el.textContent = '';
-        const parts = text.split(/(https?:\/\/[^\s]+)/);
-        if (parts.length === 1) { el.textContent = text; return; }
-        for (let k = 1; k < parts.length; k += 2) {
-            const label = parts[k - 1].replace(/[\s|:,;·–-]+$/, '').trim();
+        const entries = parseMat(text);
+        if (!entries.length) { el.textContent = text; return; }
+        entries.forEach(function (en) {
+            const label = en.label;
             const a = document.createElement('a');
             a.className = 'badge b-green mat-pill';
-            a.href = parts[k];
+            a.href = en.url;
             a.target = '_blank';
             a.rel = 'noopener';
-            a.textContent = matIcon(parts[k], label) + (label || matDefaultLabel(parts[k]));
-            a.title = parts[k];
+            a.textContent = matIcon(en.url, label) + (label || matDefaultLabel(en.url));
+            if (en.desc) wireMatTip(a, en.desc); /* pretty tooltip, no raw URL */
+            else a.title = en.url;
             /* Owner: every pill carries its own ✕. Deliberately NOT tied to
                the edit mode — there the cell holds the raw text, and hunting
                a single URL in that string is no fun. */
             if (ref && CAN_EDIT_MAT) {
                 const wrap = document.createElement('span');
                 wrap.className = 'mat-pill-wrap';
-                const url = parts[k];
+                const url = en.url;
                 const x = document.createElement('button');
                 x.type = 'button';
                 x.className = 'mat-x';
@@ -120,14 +121,16 @@
                    the desktop, long press on a tablet. Only while editing, so a
                    normal right-click still gets the browser's own menu. */
                 wirePillMenu(a, ref, url, label);
+                wirePillTouch(a, ref, en, true);
                 wrap.appendChild(a);
                 wrap.appendChild(x);
                 el.appendChild(wrap);
-                continue;
+                return;
             }
+            wirePillTouch(a, null, en, false);
             el.appendChild(a);
-        }
-        const tail = parts[parts.length - 1].trim();
+        });
+        const tail = matTail(text);
         if (tail) {
             const note = document.createElement('span');
             note.className = 'mat-note';
@@ -135,6 +138,41 @@
             el.appendChild(note);
         }
     }
+
+    // --- Description tooltip -------------------------------------------
+    // The native title is tiny and would show the URL as well; this one shows
+    // only the description, larger, in the panel look of the context menu.
+    let matTip = null;
+    function hideMatTip() {
+        if (matTip) { matTip.remove(); matTip = null; }
+    }
+    function showMatTip(anchor, text, key) {
+        hideMatTip();
+        const tip = document.createElement('div');
+        tip.className = 'mat-tip';
+        tip.dataset.for = key || '';
+        tip.textContent = text;
+        document.body.appendChild(tip);
+        const r = anchor.getBoundingClientRect();
+        const t = tip.getBoundingClientRect();
+        let left = r.left + r.width / 2 - t.width / 2;
+        left = Math.max(8, Math.min(left, window.innerWidth - t.width - 8));
+        let top = r.bottom + 8;
+        if (top + t.height > window.innerHeight - 8) top = r.top - t.height - 8;
+        tip.style.left = left + 'px';
+        tip.style.top = top + 'px';
+        matTip = tip;
+    }
+    function wireMatTip(a, text) {
+        a.addEventListener('mouseenter', function () { showMatTip(a, text); });
+        a.addEventListener('mouseleave', hideMatTip);
+        a.addEventListener('focus', function () { showMatTip(a, text); });
+        a.addEventListener('blur', hideMatTip);
+    }
+    window.addEventListener('scroll', hideMatTip, true);
+    document.addEventListener('touchstart', function (e) {
+        if (matTip && !(e.target.closest && e.target.closest('.mat-pill'))) hideMatTip();
+    }, { passive: true });
 
     // --- Material quick-add (per week row, owner only) -------------------
     // A small + button in each material cell opens an inline input to paste
@@ -183,7 +221,8 @@
         if (matModal) { matModal.remove(); matModal = null; }
     }
 
-    function openMatModal(ref) {
+    // editUrl (optional): preselect that entry for editing right away.
+    function openMatModal(ref, editUrl) {
         closeMatModal();
         const planRow = planRows[ref.i] || {};
         const wrap = document.createElement('div');
@@ -198,24 +237,18 @@
         box.appendChild(title);
 
         // Current entries, parsed from the raw source.
-        const entries = [];
-        const parts = (ref.matTd.dataset.src || '').split(/(https?:\/\/[^\s]+)/);
-        for (let k = 1; k < parts.length; k += 2) {
-            entries.push({
-                label: parts[k - 1].replace(/[\s|:,;·–-]+$/, '').trim(),
-                url: parts[k]
-            });
-        }
-        function persist() {
-            saveMaterial(ref, entries
-                .map(en => (en.label ? en.label + ' ' : '') + en.url).join(' '));
-        }
+        const entries = parseMat(ref.matTd.dataset.src || '');
+        function persist() { saveMaterial(ref, matToSrc(entries)); }
 
         // Input fields (created first — the pill list below writes into them).
         const labIn = document.createElement('input');
         labIn.type = 'text';
         labIn.placeholder = 'Label (optional, z. B. „Einstieg KI“)';
         labIn.setAttribute('aria-label', 'Label für den Link');
+        const descIn = document.createElement('textarea');
+        descIn.rows = 2;
+        descIn.placeholder = 'Beschreibung (optional, erscheint als Tooltip)';
+        descIn.setAttribute('aria-label', 'Beschreibung des Links');
         const urlIn = document.createElement('input');
         urlIn.type = 'url';
         urlIn.placeholder = 'https://… Link oder kopierte Woche einfügen';
@@ -234,15 +267,18 @@
                 pill.className = 'badge b-green mat-pill';
                 pill.title = en.url;
                 pill.textContent = matIcon(en.url, en.label) + (en.label || matDefaultLabel(en.url));
-                pill.addEventListener('click', function () {
+                function selectForEdit() {
                     editIdx = idx;
                     labIn.value = en.label;
+                    descIn.value = en.desc || '';
                     urlIn.value = en.url;
                     ok.textContent = 'Speichern';
                     list.querySelectorAll('.mm-item').forEach(el => el.classList.remove('sel'));
                     item.classList.add('sel');
                     labIn.focus();
-                });
+                }
+                pill.addEventListener('click', selectForEdit);
+                if (editUrl && en.url === editUrl) item.dataset.preselect = '1';
                 const del = document.createElement('button');
                 del.type = 'button';
                 del.className = 'mm-del';
@@ -261,6 +297,7 @@
             box.appendChild(list);
         }
         box.appendChild(labIn);
+        box.appendChild(descIn);
         box.appendChild(urlIn);
 
         const btns = document.createElement('div');
@@ -300,7 +337,7 @@
                 urlIn.focus();
                 return;
             }
-            const en = { label: labIn.value.trim(), url: url };
+            const en = { label: labIn.value.trim(), url: url, desc: descIn.value.trim() };
             if (editIdx != null) entries[editIdx] = en; /* update selected */
             else entries.push(en);
             persist();
@@ -316,12 +353,14 @@
         });
         wrap.addEventListener('keydown', function (e) {
             if (e.key === 'Escape') closeMatModal();
-            if (e.key === 'Enter') add();
+            if (e.key === 'Enter' && e.target !== descIn) add(); /* textarea keeps Enter */
         });
         wrap.appendChild(box);
         document.body.appendChild(wrap);
         matModal = wrap;
         urlIn.focus();
+        const pre = wrap.querySelector('.mm-item[data-preselect] .mat-pill');
+        if (pre) pre.click(); /* after mount, so focus() lands in the DOM */
     }
 
     // --- Material clipboard (per week, across plans) ---------------------
@@ -336,21 +375,38 @@
         return (h1 ? h1.textContent : document.title).replace(/\s+/g, ' ').trim();
     }
 
-    // "Label https://a Label2 https://b" <-> [{label, url}, ...]
+    // "Label https://a «Beschreibung» Label2 https://b" <-> [{label, url, desc}, ...]
+    // The description follows its URL in guillemets, so old plans without
+    // one still parse and the raw text stays readable in mails and notes.
+    const DESC_RE = /^\s*«([^»]*)»\s*/;
     function parseMat(src) {
         const out = [];
         const parts = (src || '').split(/(https?:\/\/[^\s]+)/);
         for (let k = 1; k < parts.length; k += 2) {
+            let pre = parts[k - 1];
+            const m = pre.match(DESC_RE);
+            if (m && out.length) { out[out.length - 1].desc = m[1].trim(); pre = pre.slice(m[0].length); }
             out.push({
-                label: parts[k - 1].replace(/[\s|:,;·–-]+$/, '').trim(),
-                url: parts[k]
+                label: pre.replace(/[\s|:,;·–-]+$/, '').trim(),
+                url: parts[k],
+                desc: ''
             });
         }
+        const tail = parts.length > 1 ? parts[parts.length - 1].match(DESC_RE) : null;
+        if (tail && out.length) out[out.length - 1].desc = tail[1].trim();
         return out;
     }
 
+    // Free text after the last link (kept as a muted note behind the pills).
+    function matTail(src) {
+        const parts = (src || '').split(/(https?:\/\/[^\s]+)/);
+        if (parts.length === 1) return '';
+        return parts[parts.length - 1].replace(DESC_RE, '').trim();
+    }
+
     function matToSrc(entries) {
-        return entries.map(en => (en.label ? en.label + ' ' : '') + en.url).join(' ');
+        return entries.map(en => (en.label ? en.label + ' ' : '') + en.url +
+            (en.desc ? ' «' + en.desc.replace(/[«»]/g, '') + '»' : '')).join(' ');
     }
 
     function readClip() {
@@ -392,7 +448,9 @@
     // The week-level 📋 copies everything at once; this copies one link, so it
     // can travel into another week (or another plan) on its own.
     function copyOneMat(ref, url, label) {
-        const src = (label ? label + ' ' : '') + url;
+        const en = parseMat(ref.matTd.dataset.src || '').find(e => e.url === url)
+            || { label: label, url: url, desc: '' };
+        const src = matToSrc([en]);
         const planRow = planRows[ref.i] || {};
         localStorage.setItem(CLIP_KEY, JSON.stringify({
             src: src,
@@ -420,6 +478,7 @@
         menu.appendChild(titel);
         [['⧉', 'Kopieren', function () { copyOneMat(ref, url, label); }, 'ctx-ico-gross'],
          ['↗', 'Öffnen', function () { window.open(url, '_blank', 'noopener'); }, ''],
+         ['✎', 'Bearbeiten', function () { openMatModal(ref, url); }, ''],
          ['✕', 'Entfernen', function () { removeMatEntry(ref, url); }, '']
         ].forEach(function (def) {
             const b = document.createElement('button');
@@ -461,22 +520,37 @@
             e.stopPropagation();
             openPillMenu(e.clientX, e.clientY, ref, url, label);
         });
-        /* touch: long press, cancelled by moving or lifting early */
-        let timer = null, moved = false;
+    }
+
+    // Touch gestures on a pill (Doc's rule for the pad):
+    //   short tap  -> description tooltip (if the link has one, else navigate)
+    //   long press -> open the link; while editing: the pill context menu
+    // The timer is cancelled by moving the finger or lifting early.
+    function wirePillTouch(a, ref, en, editable) {
+        let timer = null, moved = false, fired = false;
         a.addEventListener('touchstart', function (e) {
-            if (!document.body.classList.contains('editing')) return;
-            moved = false;
+            moved = false; fired = false;
             const t = e.touches[0];
             timer = setTimeout(function () {
                 timer = null;
-                if (!moved) openPillMenu(t.clientX, t.clientY, ref, url, label);
+                if (moved) return;
+                fired = true;
+                hideMatTip();
+                if (editable && document.body.classList.contains('editing'))
+                    openPillMenu(t.clientX, t.clientY, ref, en.url, en.label);
+                else window.open(en.url, '_blank', 'noopener');
             }, 500);
         }, { passive: true });
         a.addEventListener('touchmove', function () { moved = true; }, { passive: true });
         ['touchend', 'touchcancel'].forEach(function (ev) {
             a.addEventListener(ev, function (e) {
                 if (timer) { clearTimeout(timer); timer = null; }
-                else if (!moved) e.preventDefault(); /* menu opened: no navigation */
+                if (moved) return;
+                if (fired) { e.preventDefault(); return; }       /* long press handled */
+                if (!en.desc) return;                            /* short tap: navigate */
+                e.preventDefault();                              /* short tap: tooltip */
+                if (matTip && matTip.dataset.for === en.url) hideMatTip();
+                else showMatTip(a, en.desc, en.url);
             });
         });
     }
@@ -499,74 +573,12 @@
         refreshMatButtons();
     }
 
-    // Pretty dialog (no native confirm): only asked when the target week
-    // already carries material — otherwise pasting is unambiguous.
-    function askPaste(ref, clip) {
-        closeMatModal();
-        const have = parseMat(ref.matTd.dataset.src || '').length;
-        const planRow = planRows[ref.i] || {};
-        const wrap = document.createElement('div');
-        wrap.className = 'mat-modal-wrap';
-        const box = document.createElement('div');
-        box.className = 'mat-modal';
-
-        const title = document.createElement('div');
-        title.className = 'mm-title';
-        title.textContent = 'Material einfügen · Woche ' + (planRow.nr || '') + ' · ' +
-            ref.dateTd.textContent.trim();
-        box.appendChild(title);
-
-        const info = document.createElement('div');
-        info.className = 'mm-info';
-        info.textContent = clip.n + (clip.n === 1 ? ' Link' : ' Links') + ' aus „' + clip.from +
-            '“ — diese Woche hat schon ' + have + (have === 1 ? ' Link.' : ' Links.');
-        box.appendChild(info);
-
-        const list = document.createElement('div');
-        list.className = 'mm-list';
-        parseMat(clip.src).forEach(function (en) {
-            const pill = document.createElement('span');
-            pill.className = 'badge b-green mat-pill';
-            pill.title = en.url;
-            pill.textContent = matIcon(en.url, en.label) + (en.label || matDefaultLabel(en.url));
-            list.appendChild(pill);
-        });
-        box.appendChild(list);
-
-        const btns = document.createElement('div');
-        btns.className = 'mm-btns';
-        [['Abbrechen', null, ''],
-         ['Ersetzen', 'replace', ''],
-         ['Anhängen', 'append', ' primary']].forEach(function (def) {
-            const b = document.createElement('button');
-            b.type = 'button';
-            b.className = 'mm-btn' + def[2];
-            b.textContent = def[0];
-            b.addEventListener('click', function () {
-                if (def[1]) applyPaste(ref, clip, def[1]);
-                closeMatModal();
-            });
-            btns.appendChild(b);
-        });
-        box.appendChild(btns);
-
-        wrap.addEventListener('click', function (e) {
-            if (e.target === wrap) closeMatModal();
-        });
-        wrap.addEventListener('keydown', function (e) {
-            if (e.key === 'Escape') closeMatModal();
-        });
-        wrap.appendChild(box);
-        document.body.appendChild(wrap);
-        matModal = wrap;
-        wrap.querySelector('.mm-btn.primary').focus();
-    }
-
+    // Paste always appends silently: nothing is lost, duplicates are
+    // filtered in applyPaste, and single links can be removed via their x.
     function pasteMaterial(ref) {
         const clip = readClip();
         if (!clip) return;
-        if (!parseMat(ref.matTd.dataset.src || '').length) applyPaste(ref, clip, 'append');
-        else askPaste(ref, clip);
+        applyPaste(ref, clip, 'append');
     }
 
     // Copy only where there is something to copy, paste only while the
