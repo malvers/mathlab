@@ -1785,14 +1785,15 @@
 
     <!-- Top Action Buttons -->
     <div class="index-fixed-corner index-fixed-corner--right">
-        <!-- Fullscreen toggle -->
-        <div class="contact-btn" onclick="toggleFullscreen()" title="Vollbildmodus (F)"
+        <!-- World clock (lab link) -->
+        <a href="worldclock/worldclock.html" id="btn-worldclock" class="contact-btn" title="Weltuhr" aria-label="Weltuhr"
             style="position: static; padding: 0; width: 38px; justify-content: center;">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <path d="M15 3h6v6M9 21H3v-6M21 9V3h-6M3 15v6h6"/>
+                <!-- hands only: the round button itself is the dial -->
+                <path d="M12 2v10l6 4"/>
             </svg>
-        </div>
+        </a>
         <!-- QR code for this page -->
         <div class="contact-btn" id="btn-qr" onclick="openIndexQrOverlay()" title="QR-Code dieser Seite"
             style="position: static; padding: 0; width: 38px; justify-content: center;">
@@ -1808,6 +1809,14 @@
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin: 0;">
                 <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
                 <polyline points="22,6 12,13 2,6" />
+            </svg>
+        </div>
+        <!-- Fullscreen toggle -->
+        <div class="contact-btn" onclick="toggleFullscreen()" title="Vollbildmodus (F)"
+            style="position: static; padding: 0; width: 38px; justify-content: center;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M15 3h6v6M9 21H3v-6M21 9V3h-6M3 15v6h6"/>
             </svg>
         </div>
     </div>
@@ -2731,6 +2740,7 @@
                 CyberI18n.getOr('index.ui.impressum', 'IMPRESSUM');
         }
         if (document.getElementById('btn-qr')) document.getElementById('btn-qr').title = CyberI18n.get('index.ui.qr_title');
+        if (document.getElementById('btn-worldclock')) { const t = CyberI18n.getOr('index.labs.worldclock.title', 'Weltuhr'); document.getElementById('btn-worldclock').title = t; document.getElementById('btn-worldclock').setAttribute('aria-label', t); }
         // Modals
         if (document.getElementById('contact-title')) document.getElementById('contact-title').innerHTML = CyberI18n.get('index.contact.title');
         if (document.getElementById('contact-desc')) document.getElementById('contact-desc').innerHTML = CyberI18n.get('index.contact.desc');
