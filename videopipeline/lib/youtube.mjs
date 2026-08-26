@@ -63,7 +63,8 @@ export async function uploadVideo(file, { title, description = '', tags = [], pr
   console.log(`  Size:       ${(size / 1e6).toFixed(1)} MB · visibility: ${privacy}`);
   if (dryRun) { console.log('  [dry run] nothing was sent.'); return null; }
   const at = await accessToken();
-  const meta = { snippet: { title, description, tags, categoryId: '27' }, status: { privacyStatus: privacy } };
+  // Explicit video language: without it YouTube auto-shows ASR captions / auto-translation for many viewers.
+  const meta = { snippet: { title, description, tags, categoryId: '27', defaultLanguage: 'de', defaultAudioLanguage: 'de' }, status: { privacyStatus: privacy } };
   const init = await fetch('https://www.googleapis.com/upload/youtube/v3/videos?uploadType=resumable&part=snippet,status', {
     method: 'POST',
     headers: { Authorization: `Bearer ${at}`, 'Content-Type': 'application/json', 'X-Upload-Content-Length': size, 'X-Upload-Content-Type': 'video/mp4' },
