@@ -1174,10 +1174,8 @@
             align-self: center;
             height: 56px;
             border-radius: 12px;
-            border: 1px solid rgba(0, 210, 255, 0.55);
-            box-shadow:
-                0 8px 26px rgba(0, 0, 0, 0.38),
-                0 0 18px rgba(0, 210, 255, 0.14);
+            border: var(--hub-tile-border); /* grey like the topic tiles (Doc, 26.08.2026) */
+            box-shadow: 0 8px 26px rgba(0, 0, 0, 0.38);
             transition: box-shadow 0.22s ease, border-color 0.22s ease;
             padding: 0;
             background: #070d18;
@@ -1188,10 +1186,8 @@
         }
 
         .universe-galaxy-btn:hover {
-            border-color: rgba(0, 210, 255, 0.9);
-            box-shadow:
-                0 0 28px rgba(0, 210, 255, 0.35),
-                0 10px 32px rgba(0, 0, 0, 0.45);
+            border: var(--hub-tile-border-hover);
+            box-shadow: 0 10px 32px rgba(0, 0, 0, 0.45);
         }
 
         .universe-galaxy-btn:focus-visible {
@@ -1207,15 +1203,15 @@
             height: 56px;
             align-self: center;
             border-radius: 12px;
-            border: 1px solid rgba(0, 210, 255, 0.55);
-            box-shadow: 0 8px 26px rgba(0, 0, 0, 0.38), 0 0 18px rgba(0, 210, 255, 0.14);
+            border: var(--hub-tile-border); /* grey like the topic tiles (Doc, 26.08.2026) */
+            box-shadow: 0 8px 26px rgba(0, 0, 0, 0.38);
             transition: box-shadow 0.22s ease, border-color 0.22s ease, transform 0.22s ease;
             padding: 0; background: #070d18; cursor: pointer; overflow: hidden; line-height: 0;
         }
         .solita-hello-btn:hover {
-            border-color: rgba(0, 210, 255, 0.9);
+            border: var(--hub-tile-border-hover);
             transform: scale(1.06);
-            box-shadow: 0 0 28px rgba(0, 210, 255, 0.35), 0 10px 32px rgba(0, 0, 0, 0.45);
+            box-shadow: 0 10px 32px rgba(0, 0, 0, 0.45);
         }
         .solita-hello-btn:focus-visible { outline: 2px solid var(--neon-blue); outline-offset: 3px; }
         .solita-hello-btn img { width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none; }
@@ -1251,6 +1247,41 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
+            display: block;
+            pointer-events: none;
+        }
+
+        /* YouTube tile right of Universe: same frame, the play logo centred on the dark ground */
+        .universe-galaxy-btn.yt-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-color: transparent; /* the frame is drawn ONCE, by the ::after overlay — same 1px as Universe */
+        }
+
+        .universe-galaxy-btn.yt-btn:hover { border: 1px solid transparent; }
+
+        /* paint order: logo first, frame on top — the frame is repeated as an overlay */
+        .universe-galaxy-btn.yt-btn::after {
+            content: '';
+            position: absolute;
+            inset: -1px; /* on the tile's outer edge — exactly where the Universe border sits */
+            border-radius: inherit;
+            border: var(--hub-tile-border);
+            pointer-events: none;
+            transition: border-color 0.22s ease;
+        }
+
+        .universe-galaxy-btn.yt-btn:hover::after { border: var(--hub-tile-border-hover); }
+
+        .universe-galaxy-btn.yt-btn svg {
+            /* full-bleed: 2px larger than the tile on every side (clipped by overflow:hidden) */
+            width: calc(100% + 4px);
+            height: calc(100% + 4px);
+            margin: -2px;
+            padding: 0;
+            box-sizing: border-box;
+            flex: none;
             display: block;
             pointer-events: none;
         }
@@ -1492,8 +1523,10 @@
             gap: clamp(2px, 1vw, 9px);
             max-width: calc(100vw - 16px);
             min-height: clamp(48px, 13vmin, 62px);
-            padding: clamp(8px, 2vmin, 14px) max(8px, env(safe-area-inset-right, 0px))
-                clamp(12px, 2.8vmin, 22px) max(8px, env(safe-area-inset-left, 0px));
+            /* 44px sideways so the active flag's glow (up to 40px drop-shadow) is not cut off at the
+               left/right edge of this overflow container — it looked chopped on the left (Doc, 26.08.) */
+            padding: clamp(8px, 2vmin, 14px) max(44px, env(safe-area-inset-right, 0px))
+                clamp(12px, 2.8vmin, 22px) max(44px, env(safe-area-inset-left, 0px));
             box-sizing: border-box;
             z-index: 1002;
             overflow-x: auto;
@@ -1501,6 +1534,16 @@
             scrollbar-width: thin;
             scrollbar-color: rgba(255, 255, 255, 0.35) transparent;
             -webkit-overflow-scrolling: touch;
+        }
+
+        /* Wide screens: all flags fit, so no scroll container — the active flag's glow may spill
+           over the edges instead of being cut off hard (Doc, 26.08.2026). Narrow screens keep
+           the horizontal scrolling. */
+        @media (min-width: 720px) {
+            .index-lang-switcher {
+                overflow: visible;
+                padding-top: 18px;
+            }
         }
 
         .index-lang-switcher::-webkit-scrollbar {
@@ -1854,6 +1897,11 @@
             <img src="https://images.unsplash.com/photo-1462331940025-496dfbfc7564?q=80&amp;w=600&amp;auto=format&amp;fit=crop"
                 alt="" width="400" height="400" loading="lazy" decoding="async">
         </a>
+        <a href="https://www.youtube.com/channel/UCBPAyyZs5otrErFEAhmSy3w" target="_blank" rel="noopener"
+            class="universe-galaxy-btn yt-btn" id="btn-youtube" title="YouTube-Kanal Doc Alvers Mathe-Labor"
+            aria-label="YouTube-Kanal öffnen">
+            <svg viewBox="0 0 28 20" preserveAspectRatio="none" aria-hidden="true"><path d="M27.4 3.1A3.5 3.5 0 0 0 25 .7C22.8.1 14 .1 14 .1S5.2.1 3 .7A3.5 3.5 0 0 0 .6 3.1 36.6 36.6 0 0 0 0 10a36.6 36.6 0 0 0 .6 6.9A3.5 3.5 0 0 0 3 19.3c2.2.6 11 .6 11 .6s8.8 0 11-.6a3.5 3.5 0 0 0 2.4-2.4A36.6 36.6 0 0 0 28 10a36.6 36.6 0 0 0-.6-6.9z" fill="#FF0000"/><path d="M11.2 14.3V5.7L18.5 10z" fill="#fff"/></svg>
+        </a>
     </div>
 
     <div id="grade-view">
@@ -2193,7 +2241,7 @@
                 const base = Math.max(hInp, hWrap);
                 const px = Math.ceil(base) + 2;
                 const h = Math.max(36, px) + 'px';
-                btn.style.height = h;
+                document.querySelectorAll('.search-scan-row .universe-galaxy-btn').forEach(function (b) { b.style.height = h; }); // Universe + YouTube
                 if (solita) solita.style.height = h;   // Solita matches the universe button exactly
             }
             sync();
@@ -2336,7 +2384,7 @@
                 typeof CyberI18n !== 'undefined' && typeof CyberI18n.get === 'function'
                     ? CyberI18n.getOr('index.header.subtitle', 'INTERAKTIVE MATHEMATIK')
                     : 'INTERAKTIVE MATHEMATIK';
-            subtitle.textContent = `${count} · ${tagline}`;
+            subtitle.textContent = tagline; /* lab count dropped from the tagline (Doc, 26.08.2026) */
         }
 
         function updateThemesCount() {
