@@ -1859,7 +1859,18 @@
         if (editUnlocked()) fn(); else askEditPwd(fn);
     }
 
+    /* After a login from the edit button the page reloads (material tools and cloud
+       save are wired at load time) and continues straight into edit mode. */
+    const EDIT_AFTER_LOGIN = 'svp-edit-after-login';
+
     window.togglePlanEdit = function (btn) {
+        if (!document.body.classList.contains('editing') && window.svpAuth && !svpAuth.hasSession()) {
+            svpAuth.loginDialog(function () {
+                try { sessionStorage.setItem(EDIT_AFTER_LOGIN, '1'); } catch (e) { }
+                location.reload();
+            });
+            return;
+        }
         if (!document.body.classList.contains('editing') && !editUnlocked()) {
             askEditPwd(() => window.togglePlanEdit(btn));
             return;
@@ -1898,6 +1909,10 @@
         });
         if (editBtn) bar.insertBefore(cancelBtn, editBtn.nextSibling);
         else bar.appendChild(cancelBtn);
+        /* came back from the login dialog → continue into edit mode */
+        let resume = false;
+        try { resume = sessionStorage.getItem(EDIT_AFTER_LOGIN) === '1'; sessionStorage.removeItem(EDIT_AFTER_LOGIN); } catch (e) { }
+        if (resume && editBtn && window.svpAuth && svpAuth.hasSession()) window.togglePlanEdit(editBtn);
     })();
 
     // Two-click confirm (no native dialogs): first click arms the button, second click resets.
