@@ -56,7 +56,7 @@
                     title="Nur Konflikte: schulweit eine Person gleichzeitig in zwei Räumen, bei gewählter Person jede Überschneidung">&#9888; Konflikte anzeigen</button>
             </div>
             <span class="tt-confcount" id="confcount" title="Harte Konflikte in dieser Woche (Person in zwei Räumen), ganze Schule"></span>
-            <button class="action" id="optbtn" type="button" title="Stundenplan optimieren (Simulated Annealing)">Optimieren</button>
+            <button class="action" id="optbtn" type="button" title="Stundenplan optimieren (Simulated Annealing)">Editieren</button>
             <div class="tt-meta" id="meta"></div>
         </div>
 
@@ -64,32 +64,31 @@
             <div class="tt-opt-row">
                 <label class="tt-opt-field" title="Was der Optimierer bewegen darf">
                     <select id="opt-scope" aria-label="Was der Optimierer bewegen darf">
-                        <option value="all">ganze Schule</option>
+                        <option value="all">Schule</option>
                         <option value="me">gewählte Person</option>
                     </select>
                 </label>
                 <label class="tt-opt-field tt-opt-stack" title="Rechenaufwand (Generationen)">
-                    <span class="tt-opt-cap">Aufwand</span>
                     <select id="opt-iters" aria-label="Aufwand (Rechentiefe)">
-                        <option value="3500000">≈ 1 min</option>
-                        <option value="7000000">≈ 2 min</option>
-                        <option value="10500000" selected>≈ 3 min</option>
-                        <option value="14000000">≈ 4 min</option>
-                        <option value="17500000">≈ 5 min</option>
+                        <option value="3500000">1 min</option>
+                        <option value="7000000">2 min</option>
+                        <option value="10500000" selected>3 min</option>
+                        <option value="14000000">4 min</option>
+                        <option value="17500000">5 min</option>
                     </select>
                 </label>
-                <button class="action" id="opt-run" type="button">Start</button>
-                <button class="action secondary" id="opt-diff" type="button" disabled>Vorschlagsplan</button>
-                <button class="action secondary" id="opt-show" type="button" disabled>Vorschlag im Plan zeigen</button>
-                <button class="action secondary" id="opt-clear" type="button" disabled>Verwerfen</button>
-                <button class="action secondary" id="opt-undo" type="button" disabled title="Letzte Hand-Verschiebung zurücknehmen">Rückgängig</button>
-                <span class="tt-savebox" id="savebox">
+                <button class="action" id="opt-run" type="button">Optimieren</button>
+                <button class="action secondary" id="opt-diff" type="button" disabled hidden>Vorschlagsplan</button>
+                <button class="action secondary" id="opt-show" type="button" disabled hidden>Vorschlag im Plan zeigen</button>
+                <button class="action secondary" id="opt-clear" type="button" disabled hidden>Verwerfen</button>
+                <button class="action secondary" id="opt-undo" type="button" disabled hidden title="Letzte Hand-Verschiebung zurücknehmen">Rückgängig</button>
+                <span class="tt-savebox" id="savebox" hidden>
                     <input type="text" id="opt-name" class="tt-search" placeholder="Name der Version …" maxlength="60" aria-label="Name der Version">
                     <button class="action" id="opt-save" type="button" disabled>Speichern</button>
                 </span>
 
-                <button class="action secondary" id="opt-csv" type="button" disabled title="Änderungsliste als CSV (Excel/Numbers)">Liste CSV</button>
-                <button class="action secondary" id="opt-print" type="button" disabled title="Änderungsliste als Druckansicht">Liste drucken</button>
+                <button class="action secondary" id="opt-csv" type="button" disabled hidden title="Änderungsliste als CSV (Excel/Numbers)">CSV</button>
+                <button class="action secondary" id="opt-print" type="button" disabled hidden title="Änderungsliste als Druckansicht">Drucken</button>
                 <button class="tt-opt-close" id="opt-close" type="button" aria-label="Schließen">&times;</button>
             </div>
             <div class="tt-opt-status" id="opt-status"></div>
@@ -268,6 +267,7 @@
         let PROPOSAL = null;   // { week, moves, lessons (applied), counts0, counts1 } from the optimizer
         let VIRTUAL = new Set(); // placeholder "teachers" of the week on screen
         let PROPOSAL_MODE = null; // null = original, 'full' = plan with proposal applied, 'diff' = only the moves (alt/neu)
+        let RUNNING = false;   // an optimizer run is on - hide the previous result
         let PLAN = null;          // { lessons, mode } - what the grid currently shows
         let LAYOUT = null;        // time axis of the current grid (for drop zones)
 
@@ -304,6 +304,16 @@
         // have a clash this week (same rule as their person view: any overlap),
         // with the number of clashing lessons instead of the year total.
         // "Alle" shows the school-wide hard conflicts. Off: everything back.
+        // The "Alle" row names how many people the list currently offers. The
+        // branch filter takes people out, so the number has to follow it.
+        function syncAllLabel(rows) {
+            const cap = document.querySelector('.tt-person.is-all .tt-pname');
+            if (!cap) return;
+            let n = 0;
+            for (const el of rows) if (el.dataset.name && !el.classList.contains('conf-hidden')) n++;
+            cap.textContent = 'Alle ' + n + ' Lehrkräfte';
+        }
+
         function syncPeopleToConflicts(pool) {
             const rows = document.querySelectorAll('.tt-person');
             document.getElementById('side').classList.toggle('conf-mode', CONF);
@@ -315,11 +325,15 @@
                 for (const el of rows) {
                     const name = el.dataset.name || null;
                     const n = name ? (byTeacher[name] || []).length : pool.length;
-                    // branch filter active: hide people without lessons in the remaining branches
-                    el.classList.toggle('conf-hidden', !!name && DEPT_OFF.size > 0 && n === 0 && name !== SELECTED);
-                    el.querySelector('.tt-pcount').textContent = n;
+                    // branch filter active: hide people without lessons in the remaining
+                    // branches - the selected person included (Doc: hide me too when
+                    // I am not relevant), so the count above tells the truth
+                    el.classList.toggle('conf-hidden', !!name && DEPT_OFF.size > 0 && n === 0);
+                    // "Alle" carries its people count in the label, so it stays without a number
+                    el.querySelector('.tt-pcount').textContent = name ? n : '';
                     if (name) el.title = 'Schuljahr: ' + el.dataset.count + ' Stunden' + (VIRTUAL.has(name) ? ' – Platzhalter-Account, zählt nicht als Person' : '');
                 }
+                syncAllLabel(rows);
                 return;
             }
             const conf = {};
@@ -336,6 +350,7 @@
                 el.classList.toggle('conf-hidden', !!name && !n && name !== SELECTED);
                 el.querySelector('.tt-pcount').textContent = n;
             }
+            syncAllLabel(rows);
         }
 
         function render(data, selected) {
@@ -354,16 +369,15 @@
             document.getElementById('week').textContent =
                 fmtDate(data.week.from) + ' – ' + fmtDate(data.week.to) + ' ' + parseYmd(data.week.to).getFullYear();
 
-            const stamp = data.generatedAt ? new Date(data.generatedAt).toLocaleString('de-DE') : '';
-            const who = selected
-                ? NAME(selected)
-                : 'Gesamte Schule';
-            const ageH = data.generatedAt ? (Date.now() - new Date(data.generatedAt)) / 36e5 : 0;
+            // Name, lesson count and data stamp used to live here; the stamp now
+            // sits in the subtitle next to the school year, the rest is gone.
+            // the branch filter shows its state on the buttons themselves - no "ohne ..." here (Doc)
+            const bits = [];
+            if (mode === 'full') bits.push('<span class="tt-meta-prop">mit Vorschlag</span>');
+            else if (mode === 'diff') bits.push('<span class="tt-meta-prop">Vorschlagsplan</span>');
             document.getElementById('meta').innerHTML =
-                who + (DEPT_OFF.size ? ' · ' + deptLabel() : '') + ' · ' + lessons.length + ' Stunden'
-                + (mode === 'full' ? ' · <span class="tt-meta-prop">mit Vorschlag</span>' : mode === 'diff' ? ' · <span class="tt-meta-prop">Vorschlagsplan</span>' : '')
-                + '<br>' + (ageH > 26 ? '<span class="tt-stale" title="Der LaunchAgent holt täglich 06:00 – lief er nicht?">Stand: ' + stamp + ' (älter als 1 Tag)</span>' : 'Stand: ' + stamp)
-                + '<br><span class="tt-meta-hint" id="meta-hint">&nbsp;</span>';
+                (bits.length ? bits.join(' · ') + '<br>' : '')
+                + '<span class="tt-meta-hint" id="meta-hint"></span>';
 
             const grid = document.getElementById('grid');
             grid.innerHTML = '';
@@ -583,10 +597,15 @@
             $('opt-iters').addEventListener('change', () => { try { localStorage.setItem('svp-opt-iters', $('opt-iters').value); } catch (e) { } });
 
             // buttons are always present (constant panel height) - just enabled/disabled
+            // Without a proposal these controls do nothing, so they stay out of the row
+            // entirely (Doc) instead of sitting there greyed out.
             function setButtons(has) {
                 for (const id of ['opt-show', 'opt-diff', 'opt-clear', 'opt-csv', 'opt-print', 'opt-save', 'opt-name']) $(id).disabled = !has;
                 const hand = has && PROPOSAL ? PROPOSAL.moves.some(m => m.reason.startsWith('von Hand')) : false;
                 $('opt-undo').disabled = !hand;
+                for (const id of ['opt-show', 'opt-diff', 'opt-clear', 'opt-csv', 'opt-print']) $(id).hidden = !has;
+                $('savebox').hidden = !has;
+                $('opt-undo').hidden = !hand;
             }
 
             // Opti-Modus (panel open) is remembered like theme and box width
@@ -602,7 +621,16 @@
             $('opt-close').addEventListener('click', () => setOpt(false));
 
             const hh = t => String(t).padStart(4, '0').replace(/(\d{2})(\d{2})/, '$1:$2');
-            const fmtCounts = c => c.hard + ' harte Konflikte · ' + c.site + ' Standort-Verstöße · ' + c.newOverlap + ' neue Überlappungen';
+            // a count of zero is the good case and says so in φ-green (Doc)
+            const cnt = (n, label) => '<span class="tt-cnt' + (n ? '' : ' zero') + '">' + n + ' ' + label + '</span>';
+            // "neue Überlappungen" is gone from the line (Doc): it only ever counted what
+            // the optimizer newly created, so it read as 0 next to visibly clashing tiles.
+            // The engine still penalises them - this is display only.
+            const fmtCounts = c => cnt(c.hard, 'Konflikte') + ' · ' + cnt(c.site, 'Standort-Verstöße');
+            // from a million on, generations read better as "1,5 Mio" than as "1.500.000" (Doc)
+            const fmtGen = n => n >= 1e6
+                ? (n / 1e6).toLocaleString('de-DE', { maximumFractionDigits: 1 }) + ' Mio'
+                : n.toLocaleString('de-DE');
 
             $('opt-run').addEventListener('click', () => {
                 if (!DATA) return;
@@ -610,6 +638,7 @@
                 const scope = $('opt-scope').value;
                 const iters = +$('opt-iters').value;
                 worker = new Worker('stundenplan-optimizer.js');
+                RUNNING = true; showStatus();   // the previous result must not linger (Doc)
                 $('opt-progress').hidden = false;
                 $('opt-fill').style.width = '0%';
                 $('opt-live').textContent = 'Blöcke bauen …';
@@ -625,7 +654,7 @@
                         if (m.counts) { lastCounts = m.counts; setConfChip(m.counts.hard); }
                         const elapsed = (performance.now() - t0) / 1000;
                         const eta = m.iter > 0 ? elapsed * (iters - m.iter) / m.iter : null;
-                        $('opt-live').innerHTML = (m.label === 'Abkühlen' ? '<strong>Abkühlen …</strong> ' : '') + m.iter.toLocaleString('de-DE') + ' Generationen · '
+                        $('opt-live').innerHTML = (m.label === 'Abkühlen' ? '<strong>Abkühlen …</strong> ' : '') + fmtGen(m.iter) + ' Generationen · '
                             + (eta != null ? 'noch ≈ ' + (eta >= 60 ? Math.floor(eta / 60) + ' min ' + Math.round(eta % 60) + ' s' : Math.round(eta) + ' s') + ' · ' : '')
                             + 'Energie ' + Math.round(m.E)
                             + ' (beste ' + Math.round(m.best) + ') · T = ' + m.T.toFixed(1)
@@ -633,11 +662,12 @@
                         return;
                     }
                     if (m.type !== 'done') return;
+                    RUNNING = false;   // before the showStatus() below, or the result half stays hidden
                     $('opt-fill').style.width = '100%';
                     $('opt-run').disabled = false;
-                    $('opt-run').textContent = 'Start';
+                    $('opt-run').textContent = 'Optimieren';
                     const secs = ((performance.now() - t0) / 1000).toFixed(1);
-                    $('opt-live').textContent = (m.stopped ? 'Gestoppt nach ' : '') + m.iters.toLocaleString('de-DE') + ' Generationen in ' + secs + ' s · '
+                    $('opt-live').textContent = (m.stopped ? 'Gestoppt nach ' : '') + fmtGen(m.iters) + ' Generationen in ' + secs + ' s · '
                         + m.blocks + ' Blöcke, ' + m.movable + ' beweglich' + (m.stopped ? ' · bester Stand bis dahin' : '');
                     const applied = TimetableOptimizer.applyMoves(DATA.lessons, m.moves);
                     PROPOSAL = { week: CURRENT, moves: m.moves, counts0: m.counts0, counts1: m.counts1, lessons: applied,
@@ -667,8 +697,7 @@
                         + '<ul>' + groups.get(g).map(row).join('') + '</ul></details>').join('');
                     showStatus();
                     $('opt-result').innerHTML =
-                        '<p><span class="tt-opt-cls">Seed ' + RUN_SEED + '</span>'
-                        + (m.moves.length ? ' &nbsp;<a href="#" class="tt-opt-fold" data-open="0">alle zuklappen</a>' : '') + '</p>'
+                        (m.moves.length ? '<p><a href="#" class="tt-opt-fold" data-open="0">alle zuklappen</a></p>' : '')
                         + (m.moves.length
                             ? '<details class="tt-tree tt-tree-root" open><summary><span class="tt-opt-who">Vorschläge</span> '
                               + '<span class="tt-opt-cls">' + groups.size + ' Personen · ' + m.moves.length + ' Verschiebungen</span></summary>'
@@ -916,18 +945,23 @@
             }
             renderVersions();
 
-            // "vorher / jetzt" - always two lines, so nothing jumps (Doc, 25.08.)
+            // "vorher -> nachher" on one line (Doc, 27.08.)
             function showStatus() {
                 if (!DATA) return;
                 const before = planCounts(DATA.lessons, 0);
-                const has = !!(PROPOSAL && PROPOSAL.week === CURRENT && PROPOSAL.moves.length);
+                const has = !RUNNING && !!(PROPOSAL && PROPOSAL.week === CURRENT && PROPOSAL.moves.length);
                 const now = has ? PROPOSAL.counts1 : before;
                 const hand = has ? PROPOSAL.moves.filter(m => m.reason.startsWith('von Hand')).length : 0;
+                // the second half only appears once a proposal exists and no run is on
+                // (Doc: no dash placeholder, and the old result goes on a fresh run)
                 $('opt-status').innerHTML =
-                    '<span class="tt-opt-before">jetzt: ' + fmtCounts(before) + '</span><br>'
-                    + '<span class="tt-opt-after">nach Optimierung: ' + (has
-                        ? fmtCounts(now) + ' · <strong>' + PROPOSAL.moves.length + ' Verschiebungen</strong>' + (hand ? ' · ' + hand + ' von Hand' : '')
-                        : '–') + '</span>';
+                    '<span class="tt-opt-before">' + fmtCounts(before) + '</span>'
+                    + (has
+                        ? ' &rarr; <span class="tt-opt-after">nach Optimierung: ' + fmtCounts(now)
+                          + ' · <strong>' + (PROPOSAL.moves.length === 1
+                              ? 'Eine Verschiebung' : PROPOSAL.moves.length + ' Verschiebungen') + '</strong> nötig'
+                          + (hand ? ' · ' + hand + ' von Hand' : '') + '</span>'
+                        : '');
             }
             window.addEventListener('svp-week-painted', showStatus);
 
@@ -1208,7 +1242,8 @@
                 rows.push(el);
             };
 
-            add(null, 'Alle', INDEX.totalLessons, 'is-all');
+            // the row names how many people the list below holds - no lesson count
+            add(null, 'Alle ' + INDEX.teachers.length + ' Lehrkräfte', INDEX.totalLessons, 'is-all');
             const me = INDEX.teachers.find(t => t.name === INDEX.teacher);
             if (me) add(me.name, NAME(me.name), me.lessons, 'is-me');
             const byName = [...INDEX.teachers].sort((a, b) => NAME(a.name).localeCompare(NAME(b.name), 'de'));
@@ -1226,7 +1261,7 @@
             if (!me) return;
             me.textContent = SELECTED ? NAME(SELECTED) : 'gewählte Person';
             me.disabled = !SELECTED;
-            // default stays "ganze Schule" (Doc); the person is a choice, not the preselection
+            // default stays "Schule" (Doc); the person is a choice, not the preselection
             if (!SELECTED) sel.value = 'all';
         }
 
@@ -1348,8 +1383,15 @@
             .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
             .then(idx => {
                 INDEX = idx;
-                document.getElementById('sub').textContent =
-                    idx.school + ' · Schuljahr ' + idx.schoolyear.name;
+                const stamp = idx.generatedAt ? new Date(idx.generatedAt).toLocaleString('de-DE') : '';
+                const ageH = idx.generatedAt ? (Date.now() - new Date(idx.generatedAt)) / 36e5 : 0;
+                document.getElementById('sub').innerHTML =
+                    idx.school + ' · Schuljahr ' + idx.schoolyear.name
+                    + (stamp
+                        ? ' · ' + (ageH > 26
+                            ? '<span class="tt-stale" title="Der LaunchAgent holt täglich 06:00 – lief er nicht?">Stand: ' + stamp + ' (älter als 1 Tag)</span>'
+                            : 'Stand: ' + stamp)
+                        : '');
                 buildPeople();
                 SELECTED = idx.teachers.some(t => t.name === idx.teacher) ? idx.teacher : null;
                 for (const el of document.querySelectorAll('.tt-person')) {
