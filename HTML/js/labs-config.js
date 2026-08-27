@@ -556,6 +556,17 @@ const LABS_DATA = [
         "color": "purple"
     },
     {
+        "id": "conuslab",
+        "href": "conuslab.html",
+        "title": "Conus",
+        "description": "Warum tr\u00e4gt eine Kegelschnecke Zickzack und Zelte? Die Schale w\u00e4chst nur an der M\u00fcndungskante \u2014 eine einzige Zellreihe entscheidet \u201ePigment ja/nein\u201c, und jede Wachstumslinie bleibt f\u00fcr immer stehen. Das Muster ist also ein Raum-Zeit-Diagramm. Hier l\u00e4uft es live: wandernde Pigmentwellen, die beim Zusammensto\u00df ausl\u00f6schen und dabei die Zelte schneiden \u2014 daneben derselbe Effekt als zellul\u00e4rer Automat (Regel 30).",
+        "tagline": "Musterbildung / Meinhardt",
+        "icon": LAB_ICONS["conuslab"],
+        "category": "fun physik informatik neu uni grade11 grade12",
+        "keywords": "conus kegelschnecke muschel schale muster pigment meinhardt aktivator substrat reaction diffusion wellen zelte zickzack zellulaerer automat regel 30 wolfram biologie",
+        "color": "gold"
+    },
+    {
         "id": "gravitation",
         "href": "gravitation.html",
         "title": "Gravitation",

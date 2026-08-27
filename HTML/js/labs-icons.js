@@ -402,6 +402,12 @@ const LAB_ICONS = {
             <path d="M 24 50 Q 38 62 50 50 T 76 50" fill="none" stroke="#ba55ff" stroke-width="4" stroke-linecap="round" />
             <path d="M 24 66 Q 38 54 50 66 T 76 66" fill="none" stroke="rgba(186, 85, 255, 0.45)" stroke-width="4" stroke-linecap="round" />
         </svg>`,
+    "conuslab": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <rect x="14" y="14" width="72" height="72" rx="10" fill="rgba(245, 194, 66, 0.08)" stroke="#f5c242" stroke-width="2" />
+            <path d="M 24 32 L 34 44 L 44 32 L 54 44 L 64 32 L 74 44" fill="none" stroke="#f5c242" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M 34 52 L 44 68 L 24 68 Z" fill="#f5c242" opacity="0.75" />
+            <path d="M 64 52 L 74 68 L 54 68 Z" fill="#f5c242" opacity="0.45" />
+        </svg>`,
     "gravitation": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
             <rect x="14" y="14" width="72" height="72" rx="10" fill="rgba(0, 210, 255, 0.08)" stroke="#00d2ff" stroke-width="2" />
             <ellipse cx="50" cy="50" rx="28" ry="14" fill="none" stroke="rgba(0, 210, 255, 0.5)" stroke-width="1.6" transform="rotate(-18 50 50)" />
