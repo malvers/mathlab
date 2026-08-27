@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>PinkerFinder — der Finder, der findet</title>
+    <meta name="description"
+        content="PinkerFinder: der macOS-Finder 1:1 nachgebaut — plus Ontologie. Ordnergrößen, Dubletten, Facetten-Suche, Live-Update. Kostenlos, kein Konto.">
+    <link rel="icon" type="image/png" href="icon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg: rgb(8, 20, 42);
+            --bg2: rgb(14, 36, 78);
+            --orange: rgb(245, 194, 66);
+            --orange-rgb: 245, 194, 66;
+            --red: rgb(176, 36, 24);
+            --green: rgb(121, 158, 49);
+            --ink: #f4f4f4;
+            --muted: rgba(244, 244, 244, 0.6);
+            --line: rgba(244, 244, 244, 0.12);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            min-height: 100dvh;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: clamp(28px, 6vw, 48px) 24px;
+            background:
+                radial-gradient(1200px 600px at 50% -10%, rgba(var(--orange-rgb), 0.08), transparent 60%),
+                linear-gradient(180deg, var(--bg) 0%, rgb(5, 13, 30) 100%);
+            color: var(--ink);
+            font-family: 'Orbitron', system-ui, -apple-system, sans-serif;
+            font-weight: 400;
+            line-height: 1.55;
+            -webkit-font-smoothing: antialiased;
+            -webkit-text-size-adjust: 100%;
+        }
+
+        /* ---- Shared brand header on top ---- */
+        .hero {
+            text-align: center;
+            max-width: 560px;
+            margin: 0 auto clamp(28px, 6vw, 44px);
+        }
+
+        .hero-icon {
+            width: clamp(76px, 20vw, 100px);
+            height: auto;
+            display: block;
+            margin: 0 auto 16px;
+            filter: drop-shadow(0 10px 24px rgba(0, 0, 0, 0.45));
+        }
+
+        h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            font-size: clamp(2rem, 8vw, 3rem);
+            letter-spacing: 1px;
+            line-height: 1.05;
+            margin-bottom: 10px;
+        }
+
+        .sub {
+            color: var(--orange);
+            font-size: clamp(0.95rem, 3.4vw, 1.05rem);
+            font-weight: 600;
+            letter-spacing: 2.5px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .quip {
+            color: var(--muted);
+            font-size: clamp(0.8rem, 3vw, 0.95rem);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 6px;
+        }
+
+        .smiley {
+            font-size: clamp(1.8rem, 7vw, 2.4rem);
+            line-height: 1;
+            margin-bottom: 16px;
+        }
+
+        .kiss {
+            font-size: clamp(0.78rem, 2.8vw, 0.92rem);
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .kiss b {
+            color: var(--orange);
+            font-weight: 600;
+        }
+
+        /* ---- Two action tiles: side by side on desktop, stacked on mobile ---- */
+        .tiles {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: stretch;
+            gap: clamp(16px, 3vw, 24px);
+            width: 100%;
+            max-width: 760px;
+        }
+
+        .card {
+            flex: 1 1 300px;
+            max-width: 360px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: rgba(14, 36, 78, 0.45);
+            border: 1px solid rgba(var(--orange-rgb), 0.3);
+            border-radius: 20px;
+            box-shadow: 0 0 28px rgba(var(--orange-rgb), 0.12);
+            padding: clamp(26px, 5vw, 34px) clamp(22px, 5vw, 30px);
+            text-align: center;
+        }
+
+        .tile-icon {
+            width: clamp(50px, 14vw, 62px);
+            height: auto;
+            display: block;
+            margin: 0 auto 14px;
+        }
+
+        .card h2 {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            font-size: clamp(1.05rem, 4vw, 1.25rem);
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+
+        .card .line {
+            color: var(--muted);
+            font-size: 0.96rem;
+            margin-bottom: 22px;
+            max-width: 26ch;
+        }
+
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            background: var(--orange);
+            color: #14110a;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 400;
+            letter-spacing: 1.5px;
+            font-size: clamp(0.95rem, 3vw, 1.05rem);
+            text-decoration: none;
+            cursor: pointer;
+            /* push the CTA (and note below it) to the bottom so both tiles align */
+            margin-top: auto;
+            /* dark-on-light reads sharper with subpixel AA than the page-wide grayscale smoothing */
+            -webkit-font-smoothing: subpixel-antialiased;
+            -moz-osx-font-smoothing: auto;
+            transition: transform 0.12s ease, box-shadow 0.2s ease;
+            box-shadow: 0 12px 34px rgba(var(--orange-rgb), 0.28);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 16px 40px rgba(var(--orange-rgb), 0.38);
+        }
+
+        .note {
+            margin-top: 12px;
+            font-size: 0.8rem;
+            color: var(--muted);
+        }
+
+        /* ---- Info dialog (shown when the user picks the browser version) ---- */
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            background: rgba(5, 13, 30, 0.72);
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-backdrop[hidden] {
+            display: none;
+        }
+
+        .modal {
+            position: relative;
+            width: 100%;
+            max-width: 460px;
+            background: linear-gradient(180deg, rgba(14, 36, 78, 0.96), rgba(8, 20, 42, 0.98));
+            border: 1px solid rgba(var(--orange-rgb), 0.35);
+            border-radius: 20px;
+            box-shadow: 0 24px 70px rgba(0, 0, 0, 0.55);
+            padding: clamp(26px, 5vw, 36px);
+            text-align: left;
+        }
+
+        .modal h3 {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            font-size: clamp(1.1rem, 4vw, 1.35rem);
+            letter-spacing: 1px;
+            color: var(--orange);
+            margin-bottom: 14px;
+        }
+
+        .modal p {
+            color: var(--ink);
+            font-size: 0.96rem;
+            line-height: 1.6;
+            margin-bottom: 14px;
+        }
+
+        .modal p b {
+            color: #fff;
+            font-weight: 600;
+        }
+
+        .wm-link {
+            color: var(--orange);
+            font-weight: 600;
+            text-decoration: none;
+            border-bottom: 1px solid rgba(var(--orange-rgb), 0.5);
+        }
+
+        .wm-link:hover {
+            color: #fff;
+        }
+
+        .wm-vibe {
+            color: var(--muted);
+        }
+
+        .modal .btn {
+            margin-top: 6px;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 12px;
+            right: 14px;
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            border: 1px solid var(--line);
+            background: transparent;
+            color: var(--ink);
+            font-size: 1.6rem;
+            line-height: 1;
+            cursor: pointer;
+        }
+
+        .modal-close:hover {
+            color: var(--orange);
+            border-color: rgba(var(--orange-rgb), 0.5);
+        }
+
+        /* ---- Samsung Auto Blocker hint ---- */
+        .sg-hint {
+            margin-top: 10px;
+            font-size: 0.78rem;
+            color: var(--muted);
+            background: none;
+            border: none;
+            font-family: inherit;
+            letter-spacing: 0.5px;
+            text-decoration: underline;
+            text-underline-offset: 3px;
+            cursor: pointer;
+        }
+
+        .sg-hint:hover {
+            color: var(--orange);
+        }
+
+        .steps {
+            margin: 4px 0 18px;
+            padding-left: 22px;
+            color: var(--ink);
+            font-size: 0.94rem;
+            line-height: 1.6;
+        }
+
+        .steps li {
+            margin-bottom: 10px;
+        }
+
+        .steps b {
+            color: #fff;
+            font-weight: 600;
+        }
+
+        .steps .path {
+            color: var(--orange);
+            font-weight: 600;
+        }
+    </style>
+</head>
+
+<body>
+    <header class="hero">
+        <img class="hero-icon" src="icon.png" alt="PinkerFinder">
+        <h1>PinkerFinder</h1>
+        <div class="sub">Der Finder, der findet.</div>
+        <p class="quip">Finden statt suchen</p>
+        <div class="smiley">🙂</div>
+        <p class="kiss">Design-Philosophie<br><b>1:1 Finder + Ontologie</b></p>
+    </header>
+
+    <div class="tiles">
+        <!-- One tile — the Mac app as a DMG -->
+        <div class="card">
+            <svg class="tile-icon" viewBox="0 0 64 64" role="img" aria-label="Mac-App herunterladen">
+                <rect width="64" height="64" rx="14" fill="#08142a" />
+                <path d="M32,16 V37" fill="none" stroke="#f5c242" stroke-width="2.5" stroke-linecap="round" />
+                <path d="M22,29 L32,40 L42,29" fill="none" stroke="#f5c242" stroke-width="2.5" stroke-linecap="round"
+                    stroke-linejoin="round" />
+                <path d="M20,48 H44" fill="none" stroke="#f5c242" stroke-width="2.5" stroke-linecap="round" />
+            </svg>
+            <h2>Mac-App</h2>
+            <p class="line">Laden. In „Programme" ziehen. Finden.</p>
+            <a class="btn" href="doc-alvers-pinkerfinder.dmg" download="PinkerFinder.dmg" id="dmg-download">HERUNTERLADEN</a>
+            <p class="note">macOS 13+ · Apple Silicon · 1,6 MB</p>
+            <button type="button" class="sg-hint" id="gk-open">Apple meckert beim Start? So geht's</button>
+        </div>
+    </div>
+
+    <!-- Gatekeeper: step-by-step guide (the app is signed by its author, not notarized by Apple) -->
+    <div id="gk-modal" class="modal-backdrop" hidden>
+        <div class="modal" role="dialog" aria-modal="true" aria-labelledby="gk-title">
+            <button class="modal-close" id="gk-close" aria-label="Schließen">&times;</button>
+            <h3 id="gk-title">macOS: App zum ersten Mal öffnen</h3>
+            <p>PinkerFinder ist vom Autor signiert, aber <b>nicht von Apple notarisiert</b>. Beim ersten Start sagt macOS
+                deshalb <b>„… kann nicht überprüft werden"</b> — das ist kein Fehler, so geht es weiter:</p>
+            <ol class="steps">
+                <li>Das DMG öffnen und <b>PinkerFinder</b> auf <span class="path">Programme</span> ziehen.</li>
+                <li>PinkerFinder aus <span class="path">Programme</span> starten — die Meldung mit <b>„Fertig"</b> schließen.</li>
+                <li><span class="path">Systemeinstellungen → Datenschutz &amp; Sicherheit</span> öffnen
+                    (englisch: <span class="path">System Settings → Privacy &amp; Security</span>).</li>
+                <li>Nach unten scrollen, bei PinkerFinder auf <b>„Trotzdem öffnen"</b> (<b>Open Anyway</b>) klicken und bestätigen.</li>
+            </ol>
+            <p class="wm-vibe">Das ist einmalig. Danach startet die App wie jede andere.</p>
+            <a class="btn" href="doc-alvers-pinkerfinder.dmg" download="PinkerFinder.dmg" id="gk-go">DMG jetzt herunterladen</a>
+        </div>
+    </div>
+
+    <script>
+        // Gatekeeper guide: opened from the hint under the button; Esc / backdrop close it.
+        const gkModal = document.getElementById('gk-modal');
+        const showGk = () => { gkModal.hidden = false; };
+        const hideGk = () => { gkModal.hidden = true; };
+        document.getElementById('gk-open').addEventListener('click', showGk);
+        document.getElementById('gk-close').addEventListener('click', hideGk);
+        document.getElementById('gk-go').addEventListener('click', hideGk); // let the download proceed, close box
+        gkModal.addEventListener('click', (e) => { if (e.target === gkModal) hideGk(); });
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !gkModal.hidden) hideGk(); });
+    </script>
+</body>
+
+</html>

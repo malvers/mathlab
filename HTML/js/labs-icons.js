@@ -491,5 +491,9 @@ const LAB_ICONS = {
             <rect x="26" y="24" width="48" height="52" rx="6" fill="rgba(0, 210, 255, 0.1)" stroke="#00d2ff" stroke-width="1.8" />
             <text x="50" y="45" text-anchor="middle" font-family="Orbitron, sans-serif" font-weight="700" font-size="16" fill="#00d2ff">+×</text>
             <path d="M 36 60 l 7 7 l 14 -14" fill="none" stroke="#799E31" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>`,
+    "pinkerfinder": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <!-- the real app icon (Doc: "das richtige Logo!"), not a redrawn one; hubs sit at the site root -->
+            <image href="pinkerfinder/icon.png" x="12" y="12" width="76" height="76" />
         </svg>`
 };
