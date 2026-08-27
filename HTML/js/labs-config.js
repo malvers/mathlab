@@ -24,6 +24,17 @@
 
 const LABS_DATA = [
     {
+        "id": "pinkerfinder",
+        "href": "pinkerfinder/index.html",
+        "title": "PinkerFinder",
+        "description": "Der macOS-Finder 1:1 nachgebaut — plus Such-Facetten: Ordnergrößen in der Liste, Dubletten nach Inhalt, Facetten-Suche über den ganzen Mac, Live-Update. Native Mac-App zum Download.",
+        "tagline": "macOS / Finder + Such-Facetten",
+        "icon": LAB_ICONS["pinkerfinder"],
+        "category": "apps neu",
+        "keywords": "pinkerfinder pinker finder mac macos dateien ordner suche facetten dubletten größe explorer app",
+        "color": "orange"
+    },
+    {
         "id": "cinematic-intro",
         "href": "intro.html",
         "title": "Cinematic Intro",
@@ -675,17 +686,6 @@ const LABS_DATA = [
         "category": "apps",
         "keywords": "mathtrainer schooltrainer mathe training üben aufgaben serien kopfrechnen schule app",
         "color": "blue"
-    },
-    {
-        "id": "pinkerfinder",
-        "href": "pinkerfinder/index.html",
-        "title": "PinkerFinder",
-        "description": "Der macOS-Finder 1:1 nachgebaut — plus Such-Facetten: Ordnergrößen in der Liste, Dubletten nach Inhalt, Facetten-Suche über den ganzen Mac, Live-Update. Native Mac-App zum Download.",
-        "tagline": "macOS / Finder + Such-Facetten",
-        "icon": LAB_ICONS["pinkerfinder"],
-        "category": "apps",
-        "keywords": "pinkerfinder pinker finder mac macos dateien ordner suche facetten dubletten größe explorer app",
-        "color": "orange"
     },
     {
         "id": "costablanca",
