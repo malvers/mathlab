@@ -146,6 +146,73 @@
             letter-spacing: 0.25em;
         }
 
+        /* Fach/Klasse: own dropdown - the OS one cannot be styled and looked foreign */
+        .pick { position: relative; }
+
+        .pick-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 14px;
+            color: rgba(214, 232, 255, 0.95);
+            background: rgb(14, 36, 78);
+            border: 1px solid rgba(214, 232, 255, 0.25);
+            border-radius: 8px;
+            padding: 10px 12px;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .pick-btn:hover,
+        .pick-btn:focus-visible,
+        .pick.open .pick-btn { border-color: rgb(245, 194, 66); }
+
+        .pick-btn:focus { outline: none; }
+
+        .pick-btn svg { opacity: 0.6; transition: transform 0.15s; }
+        .pick.open .pick-btn svg { transform: rotate(180deg); }
+
+        #subject-label.dim { color: rgba(214, 232, 255, 0.55); }
+
+        .pick-menu {
+            display: none;
+            position: absolute;
+            top: calc(100% + 6px);
+            left: 0;
+            z-index: 30;
+            min-width: 100%;
+            padding: 6px;
+            background: rgb(8, 20, 42);
+            border: 1px solid rgba(214, 232, 255, 0.25);
+            border-radius: 10px;
+            box-shadow: 0 14px 30px rgba(0, 0, 0, 0.45);
+        }
+
+        .pick.open .pick-menu { display: block; }
+
+        .pick-opt {
+            display: block;
+            width: 100%;
+            text-align: left;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 14px;
+            color: rgba(214, 232, 255, 0.9);
+            background: none;
+            border: none;
+            border-radius: 7px;
+            padding: 9px 12px;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .pick-opt:hover {
+            background: rgba(245, 194, 66, 0.14);
+            color: rgb(245, 194, 66);
+        }
+
+        .pick-opt.sel { color: rgb(245, 194, 66); }
+
         .btn {
             font-family: 'Orbitron', sans-serif;
             font-size: 15px;
@@ -166,6 +233,18 @@
 
         .btn:active {
             transform: scale(0.96);
+        }
+
+        /* Show/Count is the second, different act - cyan tells it apart from the green publish (Doc) */
+        #btn-show.btn {
+            background: rgb(90, 190, 230);
+        }
+
+        /* "Neuer Survey" carries the lambda orange - it starts a round, it may show it (Doc) */
+        #btn-new.btn.ghost {
+            background: rgb(245, 194, 66);
+            border-color: rgb(245, 194, 66);
+            color: rgb(8, 20, 42);
         }
 
         .btn.ghost {
@@ -628,6 +707,14 @@
             <div class="setup-left">
                 <input id="code-in" type="text" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" placeholder="1234"
                     autocomplete="off" aria-label="Code">
+                <div class="pick" id="subject-pick">
+                    <button class="pick-btn" id="subject-btn" type="button" aria-haspopup="listbox"
+                        aria-expanded="false" aria-label="Fach und Klasse" title="Fach und Klasse dieser Runde">
+                        <span id="subject-label">Fach / Klasse …</span>
+                        <svg width="12" height="12" viewBox="0 0 24 24" aria-hidden="true"><polygon points="4,8 20,8 12,18" fill="currentColor"/></svg>
+                    </button>
+                    <div class="pick-menu" id="subject-menu" role="listbox" aria-label="Fach und Klasse"></div>
+                </div>
             </div>
             <div class="setup-mid">
                 <button id="btn-prev" class="tri" type="button" title="Vorherige Frage" aria-label="Vorherige Frage" disabled>
@@ -809,6 +896,52 @@
                     if (saved.poll) { poll = saved.poll; }
                 }
             } catch (_) { /* ignore */ }
+            // Doc's courses this school year, in his own naming (27.08.).
+            const COURSES = [
+                'OS 9',
+                'FOS 11', 'FOS 12',
+                'MA BGY 11',
+                'INFO BGY 11', 'INFO BGY 12', 'INFO BGY 13',
+            ];
+            const subjIn = (function () {
+                const wrap = $('subject-pick'), btn = $('subject-btn'), menu = $('subject-menu'), label = $('subject-label');
+                let value = '';
+                const paint = () => {
+                    label.textContent = value || 'Fach / Klasse …';
+                    label.classList.toggle('dim', !value);
+                    [...menu.children].forEach(b => b.classList.toggle('sel', b.dataset.v === value));
+                };
+                const close = () => { wrap.classList.remove('open'); btn.setAttribute('aria-expanded', 'false'); };
+                const set = (v, remember) => {
+                    value = COURSES.includes(v) ? v : '';
+                    if (remember) { try { localStorage.setItem('vote-host-subject', value); } catch (_) { /* ignore */ } }
+                    paint();
+                };
+                const opt = (text, v, cls) => {
+                    const b = document.createElement('button');
+                    b.type = 'button';
+                    b.className = 'pick-opt' + (cls ? ' ' + cls : '');
+                    b.setAttribute('role', 'option');
+                    b.dataset.v = v;
+                    b.textContent = text;
+                    b.addEventListener('click', () => { set(v, true); close(); });
+                    menu.appendChild(b);
+                };
+                COURSES.forEach(c => opt(c, c));
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const open = !wrap.classList.contains('open');
+                    wrap.classList.toggle('open', open);
+                    btn.setAttribute('aria-expanded', String(open));
+                });
+                document.addEventListener('click', (e) => { if (!wrap.contains(e.target)) close(); });
+                document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
+                let stored = '';
+                try { stored = localStorage.getItem('vote-host-subject') || ''; } catch (_) { /* ignore */ }
+                set(stored, false);
+                return { get value() { return value; }, set value(v) { set(v, false); } };
+            })();
+
             // "Pretty" random codes: 1212, 4321, 7777, 1221, 2468 … easy to say and to type.
             function prettyCode() {
                 const d = () => 1 + Math.floor(Math.random() * 9);
@@ -862,8 +995,13 @@
             // on localhost (Doc, 27.08.). The arrows walk through all of them, oldest first; the
             // code field follows along, since each round carries its own code.
             async function loadHistory() {
-                const { data, error } = await sb.from('vote_polls').select('id,code,title,created_at')
+                let { data, error } = await sb.from('vote_polls').select('id,code,title,subject,created_at')
                     .order('created_at', { ascending: false }).limit(300);
+                if (error && /subject/i.test(error.message || '')) {
+                    // older table without the subject column - everything else still works
+                    ({ data, error } = await sb.from('vote_polls').select('id,code,title,created_at')
+                        .order('created_at', { ascending: false }).limit(300));
+                }
                 if (error) { toast('Supabase: ' + error.message); return; }
                 history = (data || []).reverse();          // newest last = the live end of the walk
                 if (poll) { const cur = history.find(p => p.id === poll.id); if (cur) poll = cur; }
@@ -902,6 +1040,7 @@
             function goTo(i) {
                 if (i < 0 || i >= history.length) return;
                 poll = history[i];
+                subjIn.value = COURSES.includes(poll.subject) ? poll.subject : '';
                 values = []; votes = new Map();
                 showing = i < history.length - 1;   // past questions open with their mean, the live one with the counter
                 titleEl.textContent = poll.title;
@@ -994,10 +1133,16 @@
                 if (!/^[0-9]{4}$/.test(code)) { toast('Code: genau 4 Ziffern'); codeIn.focus(); return; }
                 btnPublish.disabled = true;
                 const owner_hash = await sha256hex(owner);
-                const { data, error } = await sb.from('vote_polls').insert({ code, title, owner_hash }).select('id,created_at').single();
+                const subject = subjIn.value || null;
+                let { data, error } = await sb.from('vote_polls').insert({ code, title, owner_hash, subject }).select('id,created_at').single();
+                if (error && /subject/i.test(error.message || '')) {
+                    // table without the subject column yet - publish anyway, say it once
+                    toast('Ohne Fach gespeichert (Spalte subject fehlt)');
+                    ({ data, error } = await sb.from('vote_polls').insert({ code, title, owner_hash }).select('id,created_at').single());
+                }
                 btnPublish.disabled = false;
                 if (error) { toast('Supabase: ' + error.message); return; }
-                poll = { id: data.id, code, title, created_at: data.created_at };
+                poll = { id: data.id, code, title, subject, created_at: data.created_at };
                 history.push(poll);
                 values = []; votes = new Map();
                 showing = false;
