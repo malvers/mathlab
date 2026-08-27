@@ -86,23 +86,16 @@
             justify-content: flex-end;
         }
 
+        /* three buttons in the middle now - they wrap instead of squeezing the sides */
+        .setup-mid {
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
         .setup-mid .btn {
             width: 200px;
+            max-width: 100%;
             white-space: nowrap;
-        }
-
-        .dice {
-            background: none;
-            border: none;
-            padding: 0;
-            font-size: 26px;
-            line-height: 1;
-            cursor: pointer;
-            transition: transform 0.15s;
-        }
-
-        .dice:hover {
-            transform: rotate(-20deg) scale(1.1);
         }
 
         .tri {
@@ -185,6 +178,17 @@
             display: inline-flex;
             align-items: center;
             padding: 9px 12px;
+        }
+
+        /* C = delete the round on stage; it turns red only on hover, so it never shouts */
+        .btn.clear {
+            font-family: 'Orbitron', sans-serif;
+            padding: 9px 14px;
+        }
+
+        .btn.clear:hover:not(:disabled) {
+            border-color: rgb(176, 36, 24);
+            color: rgb(176, 36, 24);
         }
 
         .btn.help {
@@ -622,7 +626,6 @@
     <div id="host" class="host hidden">
         <div class="setup">
             <div class="setup-left">
-                <button id="btn-dice" class="dice" type="button" title="Schöner Zufallscode" aria-label="Schöner Zufallscode">🎲</button>
                 <input id="code-in" type="text" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" placeholder="1234"
                     autocomplete="off" aria-label="Code">
             </div>
@@ -630,6 +633,7 @@
                 <button id="btn-prev" class="tri" type="button" title="Vorherige Frage" aria-label="Vorherige Frage" disabled>
                     <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><polygon points="17,3 5,12 17,21" fill="currentColor"/></svg>
                 </button>
+                <button id="btn-new" class="btn ghost" type="button" title="Neuer Code, leere Frage - frische Runde">Neuer Survey</button>
                 <button id="btn-publish" class="btn" type="button">Publish</button>
                 <button id="btn-show" class="btn" type="button" disabled>Show</button>
                 <button id="btn-next" class="tri" type="button" title="Nächste Frage" aria-label="Nächste Frage" disabled>
@@ -637,6 +641,7 @@
                 </button>
             </div>
             <div class="setup-right">
+                <button id="btn-clear" class="btn ghost icon clear" type="button" title="Sichtbare Frage löschen" aria-label="Sichtbare Frage löschen">C</button>
                 <button id="btn-help" class="btn ghost icon help" type="button" title="Anleitung" aria-label="Anleitung">?</button>
                 <button id="btn-qr" class="btn ghost icon" type="button" title="QR groß zeigen" aria-label="QR groß zeigen"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 3.75 9.375v-4.5ZM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 0 1-1.125-1.125v-4.5ZM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 13.5 9.375v-4.5Z"></path><path d="M6.75 6.75h.75v.75h-.75v-.75ZM6.75 16.5h.75v.75h-.75v-.75ZM16.5 6.75h.75v.75h-.75v-.75ZM13.5 13.5h.75v.75h-.75v-.75ZM13.5 19.5h.75v.75h-.75v-.75ZM19.5 13.5h.75v.75h-.75v-.75ZM19.5 19.5h.75v.75h-.75v-.75ZM16.5 16.5h.75v.75h-.75v-.75Z"></path></svg></button>
                 <button id="btn-fs" class="btn ghost icon" type="button" title="Vollbild" aria-label="Vollbild"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3M21 8V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3M16 21h3a2 2 0 0 0 2-2v-3"/></svg></button>
@@ -691,7 +696,7 @@
                 <li><b>Neue Frage</b> — Text ändern, drücken: gleicher Code, alle springen automatisch mit
                     und dürfen wieder einmal voten.</li>
                 <li><b>◀ ▶</b> — durch alle bisherigen Fragen blättern (mit Datum · Zeit, n und Mittelwert).</li>
-                <li><b>🎲</b> — neuer Code für eine neue Klasse; die alte Frage wird geleert.</li>
+                <li><b>Neuer Survey</b> — neuer Code für eine neue Klasse; die alte Frage wird geleert.</li>
             </ol>
         </div>
     </div>
@@ -823,6 +828,7 @@
                         return '' + s0 + (s0 + 2) + (s0 + 4) + (s0 + 6); }
                 }
             }
+            const restoredCode = !!codeIn.value;   // a freshly rolled code has no session to pick up
             if (!codeIn.value) codeIn.value = prettyCode();
 
             // Owner token: only this browser can delete its own questions (row stores just the SHA-256).
@@ -842,7 +848,6 @@
             function save() {
                 try {
                     localStorage.setItem('vote-host', JSON.stringify({ title: titleEl.textContent, code: codeIn.value, poll }));
-                    localStorage.setItem('vote-host-hist', JSON.stringify(history.map(p => p.id)));
                 } catch (_) { /* ignore */ }
             }
 
@@ -852,19 +857,38 @@
                     + d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
             }
 
-            // Load this host's past questions (ids from localStorage) with their timestamps.
+            // Every round ever published, read from Supabase - the list used to live in
+            // localStorage, which is per origin, so a survey made on docalvers.de was invisible
+            // on localhost (Doc, 27.08.). The arrows walk through all of them, oldest first; the
+            // code field follows along, since each round carries its own code.
             async function loadHistory() {
-                let ids = [];
-                try { ids = JSON.parse(localStorage.getItem('vote-host-hist') || '[]'); } catch (_) { /* ignore */ }
-                if (poll && !ids.includes(poll.id)) ids.push(poll.id);
-                if (!ids.length) return;
                 const { data, error } = await sb.from('vote_polls').select('id,code,title,created_at')
-                    .in('id', ids).order('created_at', { ascending: true });
+                    .order('created_at', { ascending: false }).limit(300);
                 if (error) { toast('Supabase: ' + error.message); return; }
-                history = data || [];
+                history = (data || []).reverse();          // newest last = the live end of the walk
                 if (poll) { const cur = history.find(p => p.id === poll.id); if (cur) poll = cur; }
                 updateNav();
                 renderBig();
+            }
+
+            // Typing a known code picks that session up wherever it was left - any machine,
+            // any origin. It also switches away from a round of another code, and it says out
+            // loud what it found, so a silent nothing can't be mistaken for a broken lookup.
+            async function pickUpCode(code, quiet) {
+                const c = (code || '').trim();
+                if (!/^[0-9]{4}$/.test(c)) return;
+                if (poll && poll.code === c) { await loadHistory(); return; }
+                await loadHistory();
+                /* the latest round carrying this code - that is the session behind the number */
+                let i = -1;
+                for (let k = history.length - 1; k >= 0; k--) if (history[k].code === c) { i = k; break; }
+                if (i >= 0) {
+                    poll = null; values = []; votes = new Map();
+                    goTo(i);
+                    if (!quiet) toast('Survey geladen');
+                } else if (!quiet) {
+                    toast('Kein Survey zu ' + c);
+                }
             }
 
             function idx() { return poll ? history.findIndex(p => p.id === poll.id) : -1; }
@@ -979,11 +1003,13 @@
                 showing = false;
                 save();
                 mount();
+                loadHistory();
             }
 
             function mount() {
                 renderQr(poll ? poll.code : codeIn.value.trim() || '0000');
                 btnShow.disabled = !poll;
+                $('btn-clear').disabled = !poll;
                 btnShow.textContent = showing ? 'Count' : 'Show';
                 btnPublish.textContent = poll ? 'Neue Frage' : 'Publish';
                 updateNav();
@@ -1010,6 +1036,7 @@
                 else { titleEl.textContent = ''; save(); mount(); }
                 toast('Gelöscht');
             }
+            $('btn-clear').addEventListener('click', deleteCurrent);
             document.addEventListener('keydown', (e) => {
                 if (e.key !== 'Backspace' || e.metaKey || e.ctrlKey || e.altKey) return;
                 const t = e.target;
@@ -1043,9 +1070,9 @@
             });
             codeIn.addEventListener('input', () => {
                 codeIn.value = codeIn.value.replace(/\D/g, '').slice(0, 4);
-                if (!poll && codeIn.value.length === 4) renderQr(codeIn.value);
+                if (codeIn.value.length === 4) { renderQr(codeIn.value); pickUpCode(codeIn.value); }
             });
-            $('btn-dice').addEventListener('click', () => {
+            $('btn-new').addEventListener('click', () => {
                 // New code = new class/session: drop the old question, back to a clean stage.
                 codeIn.value = prettyCode();
                 titleEl.textContent = '';
@@ -1097,7 +1124,10 @@
             });
 
             mount();
-            loadHistory();
+            const wanted = (params.get('code') || '').trim();
+            if (/^[0-9]{4}$/.test(wanted)) { codeIn.value = wanted; pickUpCode(wanted); }
+            else if (poll || restoredCode) pickUpCode(poll ? poll.code : codeIn.value, true);
+            else loadHistory();
 
             // ?host&test → one test question with 20 simulated votes (random devices, roughly bell-shaped around 7).
             if (params.has('test')) {
