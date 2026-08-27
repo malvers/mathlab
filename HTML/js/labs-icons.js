@@ -494,6 +494,8 @@ const LAB_ICONS = {
         </svg>`,
     "pinkerfinder": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
             <!-- the real app icon (Doc: "das richtige Logo!"), not a redrawn one; hubs sit at the site root -->
-            <image href="pinkerfinder/icon.png" x="12" y="12" width="76" height="76" />
+            <!-- the PNG carries its own margin inside the rounded square, so it needs more of the
+                 box than the drawn icons to look the same size (Doc: "'n tick größer") -->
+            <image href="pinkerfinder/icon.png" x="4" y="4" width="92" height="92" />
         </svg>`
 };
