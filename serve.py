@@ -4,6 +4,7 @@
 Every HTML page served from here gets a small fixed "LOCAL" pill top right,
 so a local tab can never be mistaken for docalvers.de again. Nothing in the
 repo is touched: the badge is injected on the way out, only by this server.
+Other local servers (pinker2) import inject() from here, so the badge lives once.
 
     python3 serve.py            # 127.0.0.1:8765, serves the HTML/ folder
     python3 serve.py 8080       # other port
@@ -14,7 +15,7 @@ import re
 import sys
 
 HTML_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'HTML')
-PORT = int(sys.argv[1]) if len(sys.argv) > 1 else 8765
+PORT = 8765
 BIND = '127.0.0.1'
 
 # Arial on purpose: debug overlays never wear Orbitron. Upsilon red tag, click-through, above everything, not on paper.
@@ -62,6 +63,8 @@ class Handler(http.server.SimpleHTTPRequestHandler):
 
 
 if __name__ == '__main__':
+    if len(sys.argv) > 1:
+        PORT = int(sys.argv[1])
     if not os.path.isdir(HTML_DIR):
         sys.exit('HTML/ not found next to serve.py: ' + HTML_DIR)
     server = http.server.ThreadingHTTPServer((BIND, PORT), Handler)
