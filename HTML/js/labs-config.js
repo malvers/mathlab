@@ -680,11 +680,11 @@ const LABS_DATA = [
         "id": "pinkerfinder",
         "href": "pinkerfinder/index.html",
         "title": "PinkerFinder",
-        "description": "Der macOS-Finder 1:1 nachgebaut — plus Ontologie: Ordnergrößen in der Liste, Dubletten nach Inhalt, Facetten-Suche über den ganzen Mac, Live-Update. Native Mac-App zum Download.",
-        "tagline": "macOS / Finder + Ontologie",
+        "description": "Der macOS-Finder 1:1 nachgebaut — plus Such-Facetten: Ordnergrößen in der Liste, Dubletten nach Inhalt, Facetten-Suche über den ganzen Mac, Live-Update. Native Mac-App zum Download.",
+        "tagline": "macOS / Finder + Such-Facetten",
         "icon": LAB_ICONS["pinkerfinder"],
         "category": "apps",
-        "keywords": "pinkerfinder pinker finder mac macos dateien ordner suche ontologie dubletten größe explorer app",
+        "keywords": "pinkerfinder pinker finder mac macos dateien ordner suche facetten dubletten größe explorer app",
         "color": "orange"
     },
     {

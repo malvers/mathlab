@@ -142,7 +142,7 @@
                 "pagode": { title: "Pagode (230 SL)", description: "Ein Mercedes 230 SL von 1964 trifft Bluetooth: Motor per Funk starten, Kanäle testen, interaktiver Schaltplan — und Solita lernt fahren. Oldtimer-Elektrik mit KI-Fernsteuerung." },
                 "voicerecorder": { title: "Voice Recorder", description: "Aufnehmen und live transkribieren: Sprich — er hört zu, schreibt mit und speichert. Im Browser per Web Speech API, als Android-App mit nativer Spracherkennung." },
                 "mathtrainer": { title: "MathTrainer", description: "Mathe trainieren mit Aufgaben-Serien: Kopfrechnen und Schulaufgaben üben, Serien auswählen, Tempo steigern — School is cool. Der SchoolTrainer als Web-App." },
-                "pinkerfinder": { title: "PinkerFinder", description: "Der macOS-Finder 1:1 nachgebaut — plus Ontologie: Ordnergrößen in der Liste, Dubletten nach Inhalt, Facetten-Suche über den ganzen Mac, Live-Update. Native Mac-App zum Download." },
+                "pinkerfinder": { title: "PinkerFinder", description: "Der macOS-Finder 1:1 nachgebaut — plus Such-Facetten: Ordnergrößen in der Liste, Dubletten nach Inhalt, Facetten-Suche über den ganzen Mac, Live-Update. Native Mac-App zum Download." },
             }
         },
         en: {
@@ -277,7 +277,7 @@
                 "pagode": { title: "Pagoda (230 SL)", description: "A 1964 Mercedes 230 SL meets Bluetooth: start the engine by radio, test channels, explore an interactive wiring diagram — and Solita learns to drive. Classic-car electrics with AI remote control." },
                 "voicerecorder": { title: "Voice Recorder", description: "Record and transcribe live: speak — it listens, writes along and saves. In the browser via the Web Speech API, as an Android app with native speech recognition." },
                 "mathtrainer": { title: "MathTrainer", description: "Practise maths with task series: train mental arithmetic and school exercises, pick a series, pick up the pace — school is cool. The SchoolTrainer as a web app." },
-                "pinkerfinder": { title: "PinkerFinder", description: "The macOS Finder rebuilt 1:1 — plus an ontology: folder sizes in the list, duplicates by content, faceted search across the whole Mac, live updates. Native Mac app, free download." },
+                "pinkerfinder": { title: "PinkerFinder", description: "The macOS Finder rebuilt 1:1 — plus search facets: folder sizes in the list, duplicates by content, faceted search across the whole Mac, live updates. Native Mac app, free download." },
                 "imaginarynumbers": { title: "Imaginary numbers", description: "Complex numbers in the Gaussian plane: real part, imaginary part and the imaginary unit — explore them interactively." }
             }
         },
@@ -413,7 +413,7 @@
                 "pagode": { title: "Pagoda (230 SL)", description: "Un Mercedes 230 SL de 1964 se encuentra con Bluetooth: arranca el motor por radio, prueba canales, explora un esquema eléctrico interactivo, y Solita aprende a conducir. Electricidad clásica con mando a distancia por IA." },
                 "voicerecorder": { title: "Grabadora de voz", description: "Grabar y transcribir en vivo: habla y el programa escucha, escribe y guarda. En el navegador con la Web Speech API, como aplicación Android con reconocimiento de voz nativo." },
                 "mathtrainer": { title: "MathTrainer", description: "Practicar matemáticas con series de tareas: entrena el cálculo mental y los ejercicios escolares, elige una serie y aumenta el ritmo. School is cool: el SchoolTrainer como aplicación web." },
-                "pinkerfinder": { title: "PinkerFinder", description: "El Finder de macOS recreado 1:1 — más una ontología: tamaños de carpeta en la lista, duplicados por contenido, búsqueda por facetas en todo el Mac, actualización en vivo. App nativa para Mac, descarga gratuita." },
+                "pinkerfinder": { title: "PinkerFinder", description: "El Finder de macOS recreado 1:1 — más facetas de búsqueda: tamaños de carpeta en la lista, duplicados por contenido, búsqueda por facetas en todo el Mac, actualización en vivo. App nativa para Mac, descarga gratuita." },
                 "imaginarynumbers": { title: "Números imaginarios", description: "Números complejos en el plano de Gauss: parte real, parte imaginaria y la unidad imaginaria, para explorar de forma interactiva." }
             }
         },
@@ -549,7 +549,7 @@
                 "pagode": { title: "Pagode (230 SL)", description: "Une Mercedes 230 SL de 1964 rencontre le Bluetooth : démarrer le moteur par radio, tester les canaux, explorer un schéma électrique interactif, et Solita apprend à conduire. Électricité de collection avec télécommande par IA." },
                 "voicerecorder": { title: "Dictaphone", description: "Enregistrer et transcrire en direct : parle, il écoute, écrit et enregistre. Dans le navigateur via la Web Speech API, en application Android avec reconnaissance vocale native." },
                 "mathtrainer": { title: "MathTrainer", description: "S'entraîner en maths avec des séries d'exercices : calcul mental et exercices scolaires, choisir une série, accélérer le rythme. School is cool : le SchoolTrainer en application web." },
-                "pinkerfinder": { title: "PinkerFinder", description: "Le Finder de macOS reconstruit à l'identique — plus une ontologie : tailles des dossiers dans la liste, doublons par contenu, recherche à facettes sur tout le Mac, mise à jour en direct. Application Mac native, téléchargement gratuit." },
+                "pinkerfinder": { title: "PinkerFinder", description: "Le Finder de macOS reconstruit à l'identique — plus des facettes de recherche : tailles des dossiers dans la liste, doublons par contenu, recherche à facettes sur tout le Mac, mise à jour en direct. Application Mac native, téléchargement gratuit." },
                 "imaginarynumbers": { title: "Nombres imaginaires", description: "Les nombres complexes dans le plan de Gauss : partie réelle, partie imaginaire et unité imaginaire, à explorer de façon interactive." }
             }
         },
@@ -685,7 +685,7 @@
                 "pagode": { title: "Pagoda (230 SL)", description: "Una Mercedes 230 SL del 1964 incontra il Bluetooth: avviare il motore via radio, provare i canali, esplorare uno schema elettrico interattivo, e Solita impara a guidare. Elettrica d'epoca con telecomando a IA." },
                 "voicerecorder": { title: "Registratore vocale", description: "Registrare e trascrivere in diretta: parla e lui ascolta, scrive e salva. Nel browser con la Web Speech API, come app Android con riconoscimento vocale nativo." },
                 "mathtrainer": { title: "MathTrainer", description: "Allenarsi in matematica con serie di esercizi: calcolo mentale ed esercizi scolastici, scegli una serie, aumenta il ritmo. School is cool: lo SchoolTrainer come applicazione web." },
-                "pinkerfinder": { title: "PinkerFinder", description: "Il Finder di macOS ricostruito 1:1 — più un'ontologia: dimensioni delle cartelle in lista, duplicati per contenuto, ricerca a faccette su tutto il Mac, aggiornamento live. App nativa per Mac, download gratuito." },
+                "pinkerfinder": { title: "PinkerFinder", description: "Il Finder di macOS ricostruito 1:1 — più faccette di ricerca: dimensioni delle cartelle in lista, duplicati per contenuto, ricerca a faccette su tutto il Mac, aggiornamento live. App nativa per Mac, download gratuito." },
                 "imaginarynumbers": { title: "Numeri immaginari", description: "I numeri complessi nel piano di Gauss: parte reale, parte immaginaria e unità immaginaria, da esplorare in modo interattivo." }
             }
         },
@@ -821,7 +821,7 @@
                 "pagode": { title: "Pagode (230 SL)", description: "Een Mercedes 230 SL uit 1964 ontmoet bluetooth: de motor via radio starten, kanalen testen, een interactief schakelschema verkennen, en Solita leert rijden. Oldtimerelektriciteit met AI-afstandsbesturing." },
                 "voicerecorder": { title: "Voice Recorder", description: "Opnemen en live transcriberen: spreek, hij luistert, schrijft mee en bewaart. In de browser via de Web Speech API, als Android-app met native spraakherkenning." },
                 "mathtrainer": { title: "MathTrainer", description: "Wiskunde trainen met opgavenreeksen: hoofdrekenen en schoolopgaven oefenen, een reeks kiezen, het tempo opvoeren. School is cool: de SchoolTrainer als webapp." },
-                "pinkerfinder": { title: "PinkerFinder", description: "De macOS Finder 1:1 nagebouwd — plus een ontologie: mapgroottes in de lijst, duplicaten op inhoud, facetzoeken over de hele Mac, live bijwerken. Native Mac-app, gratis download." },
+                "pinkerfinder": { title: "PinkerFinder", description: "De macOS Finder 1:1 nagebouwd — plus zoekfacetten: mapgroottes in de lijst, duplicaten op inhoud, facetzoeken over de hele Mac, live bijwerken. Native Mac-app, gratis download." },
                 "imaginarynumbers": { title: "Imaginaire getallen", description: "Complexe getallen in het complexe vlak van Gauss: reëel deel, imaginair deel en de imaginaire eenheid, interactief te verkennen." }
             }
         },
@@ -957,7 +957,7 @@ pt: {
                 "pagode": { title: "Pagode (230 SL)", description: "Um Mercedes 230 SL de 1964 encontra o Bluetooth: arrancar o motor por rádio, testar canais, explorar um esquema elétrico interativo, e a Solita aprende a conduzir. Eletricidade clássica com comando à distância por IA." },
                 "voicerecorder": { title: "Gravador de voz", description: "Gravar e transcrever ao vivo: fala e ele ouve, escreve e guarda. No navegador através da Web Speech API, como aplicação Android com reconhecimento de voz nativo." },
                 "mathtrainer": { title: "MathTrainer", description: "Treinar matemática com séries de exercícios: cálculo mental e exercícios escolares, escolher uma série, aumentar o ritmo. School is cool: o SchoolTrainer como aplicação web." },
-                "pinkerfinder": { title: "PinkerFinder", description: "O Finder do macOS recriado 1:1 — mais uma ontologia: tamanhos de pastas na lista, duplicados por conteúdo, pesquisa por facetas em todo o Mac, atualização ao vivo. App nativa para Mac, download gratuito." },
+                "pinkerfinder": { title: "PinkerFinder", description: "O Finder do macOS recriado 1:1 — mais facetas de pesquisa: tamanhos de pastas na lista, duplicados por conteúdo, pesquisa por facetas em todo o Mac, atualização ao vivo. App nativa para Mac, download gratuito." },
                 "imaginarynumbers": { title: "Números imaginários", description: "Números complexos no plano de Gauss: parte real, parte imaginária e a unidade imaginária, para explorar de forma interativa." }
             }
         },
@@ -1093,7 +1093,7 @@ pt: {
                 "pagode": { title: "Pagode (230 SL)", description: "Mercedes 230 SL ya 1964 inakutana na Bluetooth: washa injini kwa redio, jaribu njia, chunguza mchoro wa waya unaoshirikisha, na Solita anajifunza kuendesha. Umeme wa gari la kale na udhibiti wa mbali wa AI." },
                 "voicerecorder": { title: "Kirekodi sauti", description: "Rekodi na andika moja kwa moja: sema, kinasikiliza, kinaandika na kinahifadhi. Kwenye kivinjari kwa Web Speech API, kama programu ya Android kwa utambuzi wa sauti wa asili." },
                 "mathtrainer": { title: "MathTrainer", description: "Fanya mazoezi ya hisabati kwa mfululizo wa kazi: hesabu za kichwa na mazoezi ya shule, chagua mfululizo, ongeza kasi. School is cool: SchoolTrainer kama programu ya wavuti." },
-                "pinkerfinder": { title: "PinkerFinder", description: "Finder ya macOS imejengwa upya 1:1 — pamoja na ontolojia: ukubwa wa folda kwenye orodha, nakala zinazofanana kwa maudhui, utafutaji wa vipengele kwenye Mac nzima, usasishaji wa moja kwa moja. Programu asilia ya Mac, upakuaji wa bure." },
+                "pinkerfinder": { title: "PinkerFinder", description: "Finder ya macOS imejengwa upya 1:1 — pamoja na vipengele vya utafutaji: ukubwa wa folda kwenye orodha, nakala zinazofanana kwa maudhui, utafutaji wa vipengele kwenye Mac nzima, usasishaji wa moja kwa moja. Programu asilia ya Mac, upakuaji wa bure." },
                 "imaginarynumbers": { title: "Namba za kuwazia", description: "Namba changamano katika uwanda wa Gauss: sehemu halisi, sehemu ya kuwazia na kipimo cha kuwazia — gundua kwa kushirikiana." }
             }
         },
@@ -1229,7 +1229,7 @@ pt: {
                 "pagode": { title: "Pagode (230 SL)", description: "1964 model bir Mercedes 230 SL Bluetooth ile buluşuyor: motoru telsizle çalıştır, kanalları dene, etkileşimli devre şemasını incele ve Solita araba sürmeyi öğrensin. Yapay zekâ kumandalı klasik otomobil elektriği." },
                 "voicerecorder": { title: "Ses kaydedici", description: "Kaydet ve anında yazıya çevir: sen konuş, o dinler, yazar ve saklar. Tarayıcıda Web Speech API ile, Android uygulamasında yerel konuşma tanımayla." },
                 "mathtrainer": { title: "MathTrainer", description: "Alıştırma serileriyle matematik çalış: zihinden hesap ve okul alıştırmaları, bir seri seç, hızını artır. School is cool: web uygulaması olarak SchoolTrainer." },
-                "pinkerfinder": { title: "PinkerFinder", description: "macOS Finder'ın birebir yeniden yapımı — artı bir ontoloji: listede klasör boyutları, içeriğe göre kopyalar, tüm Mac'te yönlü arama, canlı güncelleme. Yerel Mac uygulaması, ücretsiz indirme." },
+                "pinkerfinder": { title: "PinkerFinder", description: "macOS Finder'ın birebir yeniden yapımı — artı arama yönleri: listede klasör boyutları, içeriğe göre kopyalar, tüm Mac'te yönlü arama, canlı güncelleme. Yerel Mac uygulaması, ücretsiz indirme." },
                 "imaginarynumbers": { title: "Sanal sayılar", description: "Gauss düzleminde karmaşık sayılar: gerçek kısım, sanal kısım ve sanal birim — etkileşimli olarak keşfet." }
             }
         }
