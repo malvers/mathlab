@@ -1,0 +1,1030 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DOC ALVERS MATHE-LABORE | ASCII-Art</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet">
+    <link rel="icon" type="image/png" href="resources/favicon.png">
+    <link rel="stylesheet" href="js/cyber-layout.css">
+    <link rel="stylesheet" href="js/buttons-ultra.css">
+    <link rel="stylesheet" href="js/cyber-lab-overrides.css">
+    <link rel="stylesheet" href="js/branding.styles.extracted.css">
+    <link rel="stylesheet" href="js/lab-shell-minimal.css">
+    <style>
+        /* --- tool-specific only; shared chrome stays in js/cyber-*.css --- */
+        #canvas-container {
+            overflow: hidden;
+        }
+
+        #canvas {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            display: block;
+            cursor: crosshair;
+            touch-action: manipulation;
+        }
+
+        /* small live view of the source, top-right; the selected cell is marked in it */
+        #thumb {
+            position: absolute;
+            right: 14px;
+            top: 14px;
+            width: 170px;
+            max-width: 30%;
+            border: 1px solid rgba(120, 150, 200, 0.35);
+            border-radius: 8px;
+            background: rgba(8, 20, 42, 0.75);
+            overflow: hidden;
+            pointer-events: none;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+        }
+
+        #thumb canvas {
+            display: block;
+            width: 100%;
+            height: auto;
+        }
+
+        /* drop hint: covers the stage while nothing is loaded or while a file is dragged over it */
+        #drop {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 10px;
+            text-align: center;
+            color: rgba(190, 214, 246, 0.7);
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.95rem;
+            padding: 20px;
+            pointer-events: none;
+        }
+
+        #drop.hot {
+            background: rgba(121, 158, 49, 0.14);
+            outline: 2px dashed rgba(121, 158, 49, 0.75);
+            outline-offset: -10px;
+        }
+
+        /* the coach box carries the per-cell calculation ("Bilder sind Zahlen") */
+        #math-coach-box {
+            left: 18px;
+            bottom: 18px;
+            top: auto;
+            width: min(400px, calc(100% - 36px));
+        }
+
+        .asc-formula {
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.84rem;
+            line-height: 1.65;
+            color: rgba(230, 240, 255, 0.92);
+        }
+
+        .asc-formula b {
+            color: rgb(245, 194, 66);
+            font-weight: 600;
+        }
+
+        .asc-head {
+            display: flex;
+            gap: 14px;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        #patch {
+            width: 64px;
+            height: 64px;
+            image-rendering: pixelated;
+            border-radius: 6px;
+            border: 1px solid rgba(245, 194, 66, 0.7);
+            flex: 0 0 auto;
+        }
+
+        .asc-ramp {
+            font-family: 'Menlo', 'Consolas', 'DejaVu Sans Mono', monospace;
+            font-size: 0.8rem;
+            letter-spacing: 2px;
+            word-break: break-all;
+            color: rgba(190, 214, 246, 0.85);
+        }
+
+        .asc-ramp b {
+            color: rgb(245, 194, 66);
+            background: rgba(245, 194, 66, 0.18);
+            border-radius: 3px;
+        }
+
+        .asc-hint {
+            margin-top: 10px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.72rem;
+            color: rgba(190, 214, 246, 0.62);
+            line-height: 1.5;
+        }
+
+        .asc-info {
+            margin-top: 12px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.62rem;
+            line-height: 1.7;
+            color: rgba(190, 214, 246, 0.8);
+        }
+
+        .asc-info b {
+            color: rgb(121, 158, 49);
+            font-weight: 400;
+        }
+
+        #ramp-custom {
+            width: 100%;
+            box-sizing: border-box;
+            margin-top: 8px;
+            padding: 10px 12px;
+            font-family: 'Menlo', 'Consolas', monospace;
+            font-size: 0.9rem;
+            color: #eaf2ff;
+            background: rgba(8, 20, 42, 0.9);
+            border: 1px solid rgba(120, 150, 200, 0.35);
+            border-radius: 8px;
+            outline: none;
+        }
+
+        #code {
+            width: 100%;
+            box-sizing: border-box;
+            height: 150px;
+            resize: vertical;
+            padding: 10px;
+            font-family: 'Menlo', 'Consolas', monospace;
+            font-size: 0.72rem;
+            line-height: 1.45;
+            color: #eaf2ff;
+            background: rgba(8, 20, 42, 0.9);
+            border: 1px solid rgba(120, 150, 200, 0.35);
+            border-radius: 8px;
+            outline: none;
+            white-space: pre;
+            tab-size: 2;
+        }
+
+        #dbg {
+            font-family: 'Menlo', 'Consolas', monospace;
+            font-size: 0.65rem;
+            line-height: 1.5;
+            color: rgba(190, 214, 246, 0.78);
+            background: rgba(8, 20, 42, 0.9);
+            border: 1px solid rgba(120, 150, 200, 0.25);
+            border-radius: 6px;
+            padding: 8px;
+            max-height: 150px;
+            overflow: auto;
+            white-space: pre-wrap;
+            margin-top: 8px;
+        }
+
+        /* slim scrollbars, same look as index.html (FF props and webkit rules kept apart) */
+        #dbg,
+        #code {
+            scrollbar-width: thin;
+            scrollbar-color: rgba(72, 88, 112, 0.95) rgba(38, 46, 64, 0.88);
+        }
+
+        #dbg::-webkit-scrollbar,
+        #code::-webkit-scrollbar {
+            width: 11px;
+            height: 11px;
+        }
+
+        #dbg::-webkit-scrollbar-track,
+        #code::-webkit-scrollbar-track {
+            background: rgba(40, 48, 68, 0.72);
+            border-radius: 999px;
+            margin: 6px 0;
+        }
+
+        #dbg::-webkit-scrollbar-thumb,
+        #code::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, rgba(78, 92, 118, 0.95) 0%, rgba(52, 64, 86, 0.92) 100%);
+            border-radius: 999px;
+            border: 2px solid rgba(34, 42, 58, 0.85);
+            box-shadow: 0 0 8px rgba(0, 0, 0, 0.35);
+        }
+
+        /* camera element must stay rendered (not display:none) or Safari delivers no frames */
+        #cam {
+            position: absolute;
+            left: -20px;
+            top: -20px;
+            width: 2px;
+            height: 2px;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .asc-busy {
+            color: rgb(245, 194, 66);
+        }
+
+        .asc-ok {
+            color: rgb(121, 158, 49);
+        }
+
+        .asc-err {
+            color: rgb(214, 92, 82);
+        }
+    </style>
+</head>
+
+<body>
+    <nav id="mini-rail">
+        <div class="nav-btn" onclick="toggleSidebar()" title="Toggle Menu">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </div>
+    </nav>
+
+    <aside id="side-panel">
+        <header id="sidebar-header"></header>
+        <div id="ui-container"></div>
+    </aside>
+
+    <main id="main-content">
+        <div id="canvas-container">
+            <div class="cyber-grid"></div>
+            <canvas id="canvas"></canvas>
+            <div id="thumb"><canvas id="thumbc" width="170" height="120"></canvas></div>
+            <div id="drop">
+                <div style="font-size:2rem">🖼️</div>
+                <div>Bild hierher ziehen, einfügen (Cmd-V)<br>oder in der Seitenleiste wählen</div>
+            </div>
+            <div id="math-coach-box">
+                <div class="coach-title" id="coach-title-slot"></div>
+                <div id="coach-content" class="coach-message"></div>
+            </div>
+        </div>
+    </main>
+
+    <input type="file" id="file" accept="image/*" hidden aria-label="Bilddatei wählen">
+    <video id="cam" playsinline muted></video>
+    <a id="dl" hidden aria-hidden="true"></a>
+
+    <script src="js/cyber-left-chrome.js"></script>
+    <script src="js/branding/briefings.js"></script>
+    <script src="js/branding/overlays.js"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/i18n-de.js"></script>
+    <script src="js/i18n-en.js"></script>
+    <script src="js/i18n-es.js"></script>
+    <script src="js/i18n-fr.js"></script>
+    <script src="js/i18n-it.js"></script>
+    <script src="js/i18n-pt.js"></script>
+    <script src="js/i18n-sw.js"></script>
+    <script src="js/i18n-tr.js"></script>
+    <script src="js/i18n-nl.js"></script>
+    <script src="js/branding/nav.js"></script>
+    <script src="js/branding.js"></script>
+    <script src="js/ui.js"></script>
+    <script>
+        function toggleSidebar() {
+            const panel = document.getElementById('side-panel');
+            panel.classList.toggle('collapsed');
+            if (window.CyberLeftChrome && typeof CyberLeftChrome.publishResolvedScale === 'function') {
+                CyberLeftChrome.publishResolvedScale();
+            }
+            setTimeout(() => {
+                window.dispatchEvent(new Event('resize'));
+                if (typeof init === 'function') init();
+                if (window.CyberLeftChrome && typeof CyberLeftChrome.publishResolvedScale === 'function') {
+                    CyberLeftChrome.publishResolvedScale();
+                }
+            }, 400);
+        }
+
+        CyberBranding.init({
+            useExternalStyles: true,
+            title: 'ASCII-Art',
+            subtitle: 'Bilder sind Zahlen',
+        });
+        CyberUI.init();
+
+        if (window.CyberLeftChrome && typeof CyberLeftChrome.configure === 'function') {
+            CyberLeftChrome.configure({ viewportOnlyZoom: true });
+        }
+
+        /* ---------- helpers ---------- */
+        const $ = (id) => document.getElementById(id);
+        const dbg = (msg, cls) => {
+            const el = $('dbg');
+            if (!el) return;
+            const t = new Date().toLocaleTimeString('de-DE');
+            el.insertAdjacentHTML('beforeend',
+                '<div class="' + (cls || '') + '">' + t + '  ' + String(msg).replace(/</g, '&lt;') + '</div>');
+            el.scrollTop = el.scrollHeight;
+        };
+        const setStatus = (msg, cls) => {
+            const el = $('status');
+            if (el) { el.textContent = msg; el.className = cls || ''; }
+        };
+        const de = (x, d) => Number(x).toFixed(d).replace('.', ',');     // German decimal comma
+        const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        const glyph = (ch) => (ch === ' ' ? '␣' : ch);                     // make the space visible
+
+        /* ---------- character ramps (sparse -> dense) ---------- */
+        const RAMPS = [
+            { id: 'classic', label: 'Klassisch (11) · wie im Java-Original', chars: ' .:-=+*#%@M' },
+            { id: 'fine', label: 'Fein (70)', chars: ' .\'`^",:;Il!i><~+_-?][}{1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$' },
+            { id: 'blocks', label: 'Blöcke (5)', chars: ' ░▒▓█' },
+            { id: 'binary', label: 'Schwelle (2)', chars: ' #' },
+            { id: 'custom', label: 'Eigene …', chars: '' }
+        ];
+
+        const MONO = "'Menlo', 'Consolas', 'DejaVu Sans Mono', monospace";
+        const LINE = 1.2;                       // line height in em
+        let ADV = 0.6;                          // advance width of one glyph in em (measured below)
+        let ASPECT = ADV / LINE;                // cell width / cell height
+
+        /* ---------- state ---------- */
+        const state = {
+            cols: 110,
+            rampId: 'classic',
+            customRamp: '',
+            mode: 'chars',          // chars | color | dots | braille
+            lightOnDark: true,      // bright pixel -> dense glyph (screen); off = paper look
+            dither: true,           // Floyd-Steinberg error diffusion
+            showThumb: true,
+            contrast: 1,
+            brightness: 0,
+            customFn: null          // student-written mapping, see the "Eigene Abbildung" card
+        };
+        let source = null;          // { el, w, h, kind: 'image' | 'video', name }
+        let last = null;            // last computed grid (see computeGrid)
+        let sel = null;             // selected cell { c, r }
+        let camStream = null;
+        let camTimer = null;
+
+        const canvas = $('canvas');
+        const ctx = canvas.getContext('2d');
+        const container = $('canvas-container');
+        const samp = document.createElement('canvas');   // sampling target (cols x rows pixels)
+
+        /* ---------- sidebar ---------- */
+        function setupUI() {
+            CyberUI.createCard('ui-container', 'Quelle', `
+                <button class="cyber-btn" id="btn-file" style="width:100%">Bild wählen</button>
+                <button class="cyber-btn" id="btn-cam" style="width:100%; margin-top:8px; border-color:rgb(121,158,49); color:rgb(160,200,90)">Kamera starten</button>
+                <div class="cyber-control-group" style="margin-top:12px">
+                    <label class="cyber-label" for="demo">Beispielbild</label>
+                    <select id="demo" class="cyber-select"></select>
+                </div>
+                <div class="asc-hint">
+                    Auch: Bild auf die Bühne ziehen oder einfügen (Cmd-V).
+                    Bilder und Kamera bleiben im Browser — nichts wird gespeichert oder gesendet.
+                </div>
+            `, '#00d2ff');
+
+            CyberUI.createCard('ui-container', 'Umwandlung', `
+                <div id="sl-cols"></div>
+                <div class="cyber-control-group" style="margin-top:12px">
+                    <label class="cyber-label" for="ramp">Zeichenrampe (dünn → dicht)</label>
+                    <select id="ramp" class="cyber-select"></select>
+                    <input id="ramp-custom" type="text" placeholder="eigene Rampe, dünn → dicht, z. B.  .oO@"
+                        aria-label="Eigene Zeichenrampe" autocomplete="off" spellcheck="false" hidden>
+                </div>
+                <div id="mode-box" style="margin-top:12px"></div>
+                <div id="chk-box" style="margin-top:6px; display:flex; flex-direction:column; gap:4px"></div>
+                <div id="sl-contrast" style="margin-top:6px"></div>
+                <div id="sl-bright"></div>
+                <div id="info" class="asc-info"></div>
+            `, 'rgb(121,158,49)');
+
+            CyberUI.createCard('ui-container', 'Ergebnis', `
+                <button class="cyber-btn" id="btn-copy" style="width:100%">Text kopieren</button>
+                <button class="cyber-btn" id="btn-png" style="width:100%; margin-top:8px">Als PNG sichern</button>
+                <button class="cyber-btn" id="btn-txt" style="width:100%; margin-top:8px">Als .txt sichern</button>
+            `, '#00d2ff');
+
+            CyberUI.createCard('ui-container', 'Eigene Abbildung', `
+                <div class="asc-hint" style="margin-top:0">
+                    Stufe 2: Schreib die Zuordnung Grauwert → Zeichen selbst.
+                    Verfügbar: <code>g</code> (0 = schwarz … 255 = weiß),
+                    <code>d</code> (Dichte 0…1, berücksichtigt „Hell auf dunkel"),
+                    <code>ramp</code> (Zeichenkette), <code>r, gr, b</code> (Farbe).
+                    Die Funktion gibt genau ein Zeichen zurück.
+                </div>
+                <textarea id="code" spellcheck="false" aria-label="Eigene Abbildungsfunktion" style="margin-top:8px"></textarea>
+                <button class="cyber-btn" id="btn-apply" style="width:100%; margin-top:8px; border-color:rgb(121,158,49); color:rgb(160,200,90)">Anwenden</button>
+                <button class="cyber-btn" id="btn-reset-code" style="width:100%; margin-top:8px">Zurücksetzen</button>
+            `, 'rgb(245,194,66)', { collapsible: true, collapsed: true });
+
+            CyberUI.createCard('ui-container', 'Status', `
+                <div id="status" style="font-family:'Orbitron'; font-size:0.68rem; min-height:18px"></div>
+                <div id="dbg"></div>
+            `, 'rgb(245,194,66)', { collapsible: true });
+
+            /* controls built by the shared UI helpers */
+            CyberUI.createSlider('sl-cols', 'Spalten', 20, 240, state.cols, 2, (v) => {
+                state.cols = Math.round(v);
+                update();
+            }, 'var(--neon-blue)');
+            CyberUI.createSlider('sl-contrast', 'Kontrast', 0.5, 3, state.contrast, 0.1, (v) => {
+                state.contrast = v;
+                update();
+            }, 'var(--neon-blue)', (v) => de(v, 1) + '×');
+            CyberUI.createSlider('sl-bright', 'Helligkeit', -100, 100, state.brightness, 5, (v) => {
+                state.brightness = v;
+                update();
+            }, 'var(--neon-blue)', (v) => (v > 0 ? '+' : '') + Math.round(v));
+
+            const rampSel = $('ramp');
+            rampSel.innerHTML = RAMPS.map(r => '<option value="' + r.id + '">' + esc(r.label) + '</option>').join('');
+            rampSel.value = state.rampId;
+            rampSel.addEventListener('change', () => {
+                state.rampId = rampSel.value;
+                $('ramp-custom').hidden = state.rampId !== 'custom';
+                if (state.rampId === 'custom') $('ramp-custom').focus();
+                update();
+            });
+            $('ramp-custom').addEventListener('input', (e) => {
+                state.customRamp = e.target.value;
+                update();
+            });
+
+            CyberUI.createRadioGroup('mode-box', 'Modus', [
+                { label: 'Zeichen', value: 'chars' },
+                { label: 'Farbig', value: 'color' },
+                { label: 'Halbton', value: 'dots' },
+                { label: 'Braille', value: 'braille' }
+            ], state.mode, (v) => { state.mode = v; update(); });
+
+            CyberUI.createCheckbox('chk-box', 'Hell auf dunkel', state.lightOnDark, (on) => {
+                state.lightOnDark = on;
+                update();
+            });
+            CyberUI.createCheckbox('chk-box', 'Dithering (Fehlerverteilung)', state.dither, (on) => {
+                state.dither = on;
+                update();
+            });
+            CyberUI.createCheckbox('chk-box', 'Quelle einblenden', state.showThumb, (on) => {
+                state.showThumb = on;
+                $('thumb').style.display = on && source ? '' : 'none';
+            });
+
+            $('btn-file').addEventListener('click', () => $('file').click());
+            $('btn-cam').addEventListener('click', toggleCam);
+            const demoSel = $('demo');
+            demoSel.innerHTML = DEMOS.map(d => '<option value="' + d.id + '">' + esc(d.label) + '</option>').join('');
+            demoSel.addEventListener('change', () => loadDemo(demoSel.value));
+            $('btn-copy').addEventListener('click', copyText);
+            $('btn-png').addEventListener('click', savePng);
+            $('btn-txt').addEventListener('click', saveTxt);
+            $('btn-apply').addEventListener('click', applyCode);
+            $('btn-reset-code').addEventListener('click', () => {
+                $('code').value = DEFAULT_CODE;
+                state.customFn = null;
+                dbg('Eigene Abbildung aus — Standard-Rampe aktiv');
+                update();
+            });
+            $('code').value = DEFAULT_CODE;
+        }
+
+        /* ---------- student-written mapping ---------- */
+        const DEFAULT_CODE = [
+            '// g: Grauwert 0..255, d: Dichte 0..1, ramp: Zeichen duenn -> dicht',
+            'const n = ramp.length;',
+            'const k = Math.round(d * (n - 1));',
+            'return ramp[k];'
+        ].join('\n');
+
+        function applyCode() {
+            const src = $('code').value;
+            try {
+                const fn = new Function('g', 'd', 'ramp', 'r', 'gr', 'b', src);
+                const test = fn(128, 0.5, rampChars(), 128, 128, 128);
+                if (typeof test !== 'string' || test.length !== 1) {
+                    throw new Error('muss genau ein Zeichen zurückgeben, bekam: ' + JSON.stringify(test));
+                }
+                state.customFn = fn;
+                setStatus('Eigene Abbildung aktiv', 'asc-ok');
+                dbg('Eigene Abbildung übernommen', 'asc-ok');
+                update();
+            } catch (e) {
+                state.customFn = null;
+                setStatus('Fehler in der Abbildung', 'asc-err');
+                dbg('Abbildung: ' + e.message, 'asc-err');
+            }
+        }
+
+        /* ---------- source handling ---------- */
+        function setSource(s) {
+            source = s;
+            sel = null;
+            $('drop').style.display = 'none';
+            $('thumb').style.display = state.showThumb ? '' : 'none';
+            $('math-coach-box').classList.remove('visible');
+            update();
+        }
+
+        function loadFile(f) {
+            if (!f || !f.type.startsWith('image/')) { dbg('Keine Bilddatei: ' + (f && f.type), 'asc-err'); return; }
+            const url = URL.createObjectURL(f);
+            const im = new Image();
+            im.onload = () => {
+                if (camStream) stopCam(false);
+                setSource({ el: im, w: im.naturalWidth, h: im.naturalHeight, kind: 'image', name: f.name });
+                dbg('Geladen: ' + f.name + ' (' + im.naturalWidth + '×' + im.naturalHeight + ')', 'asc-ok');
+                setStatus('Bereit', 'asc-ok');
+            };
+            im.onerror = () => dbg('Bild nicht lesbar', 'asc-err');
+            im.src = url;
+        }
+
+        /* bundled examples: a hard-lit portrait (classic ASCII material), a transparent
+           emoji that turns into a bold silhouette, and the moon */
+        const DEMOS = [
+            { id: 'doc', label: 'Porträt (Doc)', src: 'resources/mra.jpg' },
+            { id: 'monkey', label: 'Affe (transparent)', src: 'resources/team/monkey.png' },
+            { id: 'moon', label: 'Mond', src: 'resources/moon.png' }
+        ];
+
+        function loadDemo(id) {
+            const d = DEMOS.find(x => x.id === id) || DEMOS[0];
+            const im = new Image();
+            im.onload = () => {
+                if (camStream) stopCam(false);
+                setSource({ el: im, w: im.naturalWidth, h: im.naturalHeight, kind: 'image', name: d.src });
+                dbg('Beispiel geladen: ' + d.label + ' (' + im.naturalWidth + '×' + im.naturalHeight + ')', 'asc-ok');
+                setStatus('Bereit', 'asc-ok');
+            };
+            im.onerror = () => dbg('Beispielbild nicht gefunden: ' + d.src, 'asc-err');
+            im.src = d.src;
+        }
+
+        async function toggleCam() {
+            if (camStream) { stopCam(true); return; }
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                setStatus('Kamera nicht verfügbar', 'asc-err');
+                dbg('getUserMedia fehlt (kein https / alter Browser)', 'asc-err');
+                return;
+            }
+            try {
+                setStatus('Kamera wird gestartet …', 'asc-busy');
+                camStream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } },
+                    audio: false
+                });
+                const v = $('cam');
+                v.srcObject = camStream;
+                await v.play();
+                $('btn-cam').textContent = 'Kamera stoppen';
+                setSource({ el: v, w: v.videoWidth || 640, h: v.videoHeight || 480, kind: 'video', name: 'Kamera' });
+                dbg('Kamera läuft: ' + v.videoWidth + '×' + v.videoHeight + ' (gespiegelt)', 'asc-ok');
+                setStatus('Live', 'asc-ok');
+                camLoop();
+            } catch (e) {
+                camStream = null;
+                setStatus('Kamera abgelehnt', 'asc-err');
+                dbg('Kamera: ' + e.message, 'asc-err');
+            }
+        }
+
+        function camLoop() {
+            if (!camStream) return;
+            const v = $('cam');
+            if (v.readyState >= 2 && v.videoWidth) {
+                source.w = v.videoWidth;
+                source.h = v.videoHeight;
+                update();
+            }
+            camTimer = setTimeout(camLoop, 80);     // ~12 fps is plenty for ASCII
+        }
+
+        /* Stops the camera; with `freeze` the last frame stays on stage as a still image. */
+        function stopCam(freeze) {
+            clearTimeout(camTimer);
+            const v = $('cam');
+            if (freeze && source && source.kind === 'video' && v.videoWidth) {
+                const still = document.createElement('canvas');
+                still.width = v.videoWidth;
+                still.height = v.videoHeight;
+                const g = still.getContext('2d');
+                g.translate(still.width, 0);
+                g.scale(-1, 1);                          // keep the mirrored selfie orientation
+                g.drawImage(v, 0, 0);
+                source = { el: still, w: still.width, h: still.height, kind: 'image', name: 'Kamerabild' };
+            }
+            camStream.getTracks().forEach(t => t.stop());
+            camStream = null;
+            v.srcObject = null;
+            $('btn-cam').textContent = 'Kamera starten';
+            dbg('Kamera gestoppt' + (freeze ? ' — letztes Bild bleibt' : ''));
+            setStatus('Bereit', 'asc-ok');
+            if (freeze) update();
+        }
+
+        $('file').addEventListener('change', (e) => { loadFile(e.target.files[0]); e.target.value = ''; });
+
+        ['dragenter', 'dragover'].forEach(ev => container.addEventListener(ev, (e) => {
+            e.preventDefault();
+            $('drop').style.display = '';
+            $('drop').classList.add('hot');
+        }));
+        ['dragleave', 'drop'].forEach(ev => container.addEventListener(ev, (e) => {
+            e.preventDefault();
+            $('drop').classList.remove('hot');
+            if (source) $('drop').style.display = 'none';
+        }));
+        container.addEventListener('drop', (e) => {
+            if (e.dataTransfer.files && e.dataTransfer.files[0]) loadFile(e.dataTransfer.files[0]);
+        });
+        window.addEventListener('paste', (e) => {
+            for (const it of (e.clipboardData || {}).items || []) {
+                if (it.type.startsWith('image/')) { loadFile(it.getAsFile()); break; }
+            }
+        });
+
+        /* ---------- the conversion ---------- */
+        function rampChars() {
+            if (state.rampId === 'custom') return state.customRamp.length >= 2 ? state.customRamp : ' #';
+            return RAMPS.find(r => r.id === state.rampId).chars;
+        }
+
+        /* Floyd-Steinberg: quantize `d` (0..1) in place to `levels` steps, pushing the
+           rounding error to the neighbours that are not yet processed. */
+        function ditherFS(d, w, h, levels) {
+            const q = levels - 1;
+            for (let y = 0; y < h; y++) {
+                for (let x = 0; x < w; x++) {
+                    const i = y * w + x;
+                    const old = d[i];
+                    const cl = old < 0 ? 0 : old > 1 ? 1 : old;
+                    const nw = Math.round(cl * q) / q;
+                    d[i] = nw;
+                    const err = old - nw;
+                    if (x + 1 < w) d[i + 1] += err * 7 / 16;
+                    if (y + 1 < h) {
+                        if (x > 0) d[i + w - 1] += err * 3 / 16;
+                        d[i + w] += err * 5 / 16;
+                        if (x + 1 < w) d[i + w + 1] += err * 1 / 16;
+                    }
+                }
+            }
+        }
+
+        // Braille dot bits: column 0 rows 0-3 and column 1 rows 0-3 (Unicode U+2800 layout)
+        const BRAILLE_BITS = [[0x01, 0x02, 0x04, 0x40], [0x08, 0x10, 0x20, 0x80]];
+
+        function computeGrid() {
+            if (!source || !source.w || !source.h) return null;
+            const mode = state.mode;
+            const cols = state.cols;
+            const cellAspect = mode === 'dots' ? 1 : ASPECT;
+            const rows = Math.max(1, Math.round(cols * (source.h / source.w) * cellAspect));
+            const sx = mode === 'braille' ? 2 : 1;      // sub-samples per cell
+            const sy = mode === 'braille' ? 4 : 1;
+            const sw = cols * sx, sh = rows * sy;
+
+            /* 1. shrink the picture to one pixel per (sub-)cell = averaging the colours */
+            samp.width = sw;
+            samp.height = sh;
+            const g = samp.getContext('2d', { willReadFrequently: true });
+            g.imageSmoothingEnabled = true;
+            g.imageSmoothingQuality = 'high';
+            g.fillStyle = colors().bg;          // transparent PNGs land on the stage background
+            g.fillRect(0, 0, sw, sh);
+            g.save();
+            if (source.kind === 'video') { g.translate(sw, 0); g.scale(-1, 1); }   // selfie mirror
+            g.drawImage(source.el, 0, 0, sw, sh);
+            g.restore();
+            const px = g.getImageData(0, 0, sw, sh).data;
+
+            /* 2. luminance + tone mapping per sub-sample */
+            const n = sw * sh;
+            const dens = new Float32Array(n);
+            for (let i = 0; i < n; i++) {
+                const y = 0.299 * px[i * 4] + 0.587 * px[i * 4 + 1] + 0.114 * px[i * 4 + 2];
+                let v = (y - 128) * state.contrast + 128 + state.brightness;
+                v = v < 0 ? 0 : v > 255 ? 255 : v;
+                dens[i] = state.lightOnDark ? v / 255 : 1 - v / 255;
+            }
+            const plain = Float32Array.from(dens);          // kept for the magnifier
+            const ramp = rampChars();
+            const m = ramp.length;
+            const useDither = state.dither && mode !== 'dots' && !state.customFn;
+            if (useDither) ditherFS(dens, sw, sh, mode === 'braille' ? 2 : m);
+
+            /* 3. per cell: aggregate colour, pick the glyph */
+            const N = cols * rows;
+            const cR = new Uint8ClampedArray(N), cG = new Uint8ClampedArray(N), cB = new Uint8ClampedArray(N);
+            const cGray = new Float32Array(N), cV = new Float32Array(N), cD = new Float32Array(N), cDu = new Float32Array(N);
+            const kPlain = new Int16Array(N), kUsed = new Int16Array(N), dots = new Uint8Array(N);
+            const chars = new Array(rows);
+            let fnError = null;
+            for (let r = 0; r < rows; r++) {
+                const row = new Array(cols);
+                for (let c = 0; c < cols; c++) {
+                    const ci = r * cols + c;
+                    let sr = 0, sg = 0, sb = 0, sd = 0, sdu = 0, bits = 0, on = 0;
+                    for (let dy = 0; dy < sy; dy++) {
+                        for (let dx = 0; dx < sx; dx++) {
+                            const i = (r * sy + dy) * sw + (c * sx + dx);
+                            sr += px[i * 4]; sg += px[i * 4 + 1]; sb += px[i * 4 + 2];
+                            sd += plain[i]; sdu += dens[i];
+                            if (mode === 'braille' && dens[i] >= 0.5) { bits |= BRAILLE_BITS[dx][dy]; on++; }
+                        }
+                    }
+                    const cnt = sx * sy;
+                    cR[ci] = sr / cnt; cG[ci] = sg / cnt; cB[ci] = sb / cnt;
+                    const gray = 0.299 * cR[ci] + 0.587 * cG[ci] + 0.114 * cB[ci];
+                    let v = (gray - 128) * state.contrast + 128 + state.brightness;
+                    v = v < 0 ? 0 : v > 255 ? 255 : v;
+                    cGray[ci] = gray; cV[ci] = v;
+                    cD[ci] = sd / cnt; cDu[ci] = sdu / cnt;
+                    dots[ci] = on;
+                    kPlain[ci] = Math.round(cD[ci] * (m - 1));
+                    kUsed[ci] = Math.round(Math.min(1, Math.max(0, cDu[ci])) * (m - 1));
+                    let ch;
+                    if (mode === 'braille') {
+                        ch = String.fromCharCode(0x2800 + bits);
+                    } else if (state.customFn && !fnError) {
+                        try {
+                            ch = state.customFn(Math.round(v), cD[ci], ramp, cR[ci], cG[ci], cB[ci]);
+                            if (typeof ch !== 'string' || ch.length !== 1) throw new Error('kein einzelnes Zeichen');
+                        } catch (e) { fnError = e; ch = ramp[kUsed[ci]]; }
+                    } else {
+                        ch = ramp[kUsed[ci]];
+                    }
+                    row[c] = ch;
+                }
+                chars[r] = row;
+            }
+            if (fnError) {
+                state.customFn = null;
+                setStatus('Fehler in der Abbildung', 'asc-err');
+                dbg('Abbildung abgeschaltet: ' + fnError.message, 'asc-err');
+            }
+            return { cols, rows, mode, ramp, chars, cR, cG, cB, cGray, cV, cD, cDu, kPlain, kUsed, dots, dithered: useDither, geo: null };
+        }
+
+        /* ---------- drawing ---------- */
+        function colors() {
+            return state.lightOnDark
+                ? { bg: 'rgb(8, 20, 42)', ink: 'rgb(230, 240, 255)' }
+                : { bg: 'rgb(238, 242, 250)', ink: 'rgb(14, 36, 78)' };
+        }
+
+        function render() {
+            const dpr = window.devicePixelRatio || 1;
+            const rect = container.getBoundingClientRect();
+            const W = Math.max(1, rect.width), H = Math.max(1, rect.height);
+            canvas.width = Math.floor(W * dpr);
+            canvas.height = Math.floor(H * dpr);
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            const col = colors();
+            ctx.fillStyle = col.bg;
+            ctx.fillRect(0, 0, W, H);
+            if (!last) return;
+
+            const { cols, rows, mode, chars } = last;
+            let cw, chh, fontSize = 0;
+            if (mode === 'dots') {
+                cw = chh = Math.min(W / cols, H / rows);
+            } else {
+                fontSize = Math.min(W / (cols * ADV), H / (rows * LINE));
+                cw = fontSize * ADV;
+                chh = fontSize * LINE;
+            }
+            const x0 = (W - cols * cw) / 2, y0 = (H - rows * chh) / 2;
+            last.geo = { x0, y0, cw, chh, fontSize };
+
+            ctx.fillStyle = col.ink;
+            if (mode === 'dots') {
+                const rmax = cw * 0.5;
+                for (let r = 0; r < rows; r++) {
+                    for (let c = 0; c < cols; c++) {
+                        const d = last.cD[r * cols + c];
+                        if (d <= 0.002) continue;
+                        const rad = Math.sqrt(d) * rmax;       // dot area is proportional to the tone
+                        ctx.beginPath();
+                        ctx.arc(x0 + (c + 0.5) * cw, y0 + (r + 0.5) * chh, rad, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                }
+            } else {
+                ctx.font = fontSize + 'px ' + MONO;
+                ctx.textBaseline = 'top';
+                ctx.textAlign = 'left';
+                const yPad = fontSize * (LINE - 1) / 2;
+                for (let r = 0; r < rows; r++) {
+                    const row = chars[r];
+                    const y = y0 + r * chh + yPad;
+                    for (let c = 0; c < cols; c++) {
+                        const ch = row[c];
+                        if (ch === ' ' || ch === '⠀') continue;
+                        if (mode === 'color') {
+                            const i = r * cols + c;
+                            ctx.fillStyle = 'rgb(' + last.cR[i] + ',' + last.cG[i] + ',' + last.cB[i] + ')';
+                        }
+                        ctx.fillText(ch, x0 + c * cw, y);
+                    }
+                }
+            }
+
+            if (sel) {
+                ctx.strokeStyle = 'rgb(245, 194, 66)';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(x0 + sel.c * cw - 1, y0 + sel.r * chh - 1, cw + 2, chh + 2);
+            }
+        }
+
+        function drawThumb() {
+            if (!source || !state.showThumb) return;
+            const tc = $('thumbc');
+            const tw = 170, th = Math.max(1, Math.round(tw * source.h / source.w));
+            if (tc.width !== tw || tc.height !== th) { tc.width = tw; tc.height = th; }
+            const g = tc.getContext('2d');
+            g.fillStyle = colors().bg;
+            g.fillRect(0, 0, tw, th);
+            g.save();
+            if (source.kind === 'video') { g.translate(tw, 0); g.scale(-1, 1); }
+            g.drawImage(source.el, 0, 0, tw, th);
+            g.restore();
+            if (sel && last) {
+                g.strokeStyle = 'rgb(245, 194, 66)';
+                g.lineWidth = 1.5;
+                g.strokeRect(sel.c / last.cols * tw, sel.r / last.rows * th,
+                    Math.max(2, tw / last.cols), Math.max(2, th / last.rows));
+            }
+        }
+
+        function updateInfo() {
+            const el = $('info');
+            if (!el || !last || !source) { if (el) el.textContent = ''; return; }
+            const N = last.cols * last.rows;
+            const raw = source.w * source.h * 3;
+            el.innerHTML =
+                'Raster <b>' + last.cols + ' × ' + last.rows + '</b> = <b>' + N.toLocaleString('de-DE') + '</b> Zeichen<br>' +
+                'Quelle ' + source.w + ' × ' + source.h + ' px × 3 Byte = ' + de(raw / 1048576, 1) + ' MB<br>' +
+                'Text ≈ ' + de(N / 1024, 1) + ' kB · Faktor <b>' + Math.round(raw / N).toLocaleString('de-DE') + '</b> kleiner';
+        }
+
+        function update() {
+            last = computeGrid();
+            render();
+            updateInfo();
+            drawThumb();
+            if (sel) showLupe();
+        }
+
+        /* ---------- the magnifier: the calculation for one cell ---------- */
+        function cellAt(x, y) {
+            if (!last || !last.geo) return null;
+            const { x0, y0, cw, chh } = last.geo;
+            const c = Math.floor((x - x0) / cw), r = Math.floor((y - y0) / chh);
+            if (c < 0 || r < 0 || c >= last.cols || r >= last.rows) return null;
+            return { c, r };
+        }
+
+        function showLupe() {
+            const box = $('math-coach-box');
+            if (!sel || !last || !source) { box.classList.remove('visible'); return; }
+            const { cols, rows, ramp } = last;
+            const i = sel.r * cols + sel.c;
+            const R = last.cR[i], G = last.cG[i], B = last.cB[i];
+            const gray = last.cGray[i], v = last.cV[i], d = last.cD[i];
+            const m = ramp.length;
+            const kP = last.kPlain[i], kU = last.kUsed[i];
+            const ch = last.chars[sel.r][sel.c];
+            const adjusted = state.contrast !== 1 || state.brightness !== 0;
+
+            let html = '<div class="asc-formula">' +
+                '<div class="asc-head"><canvas id="patch" width="16" height="16"></canvas>' +
+                '<div>Zelle Spalte <b>' + (sel.c + 1) + '</b>, Zeile <b>' + (sel.r + 1) + '</b> von ' + cols + ' × ' + rows +
+                '<br>Mittlere Farbe RGB = (<b>' + R + '</b>, <b>' + G + '</b>, <b>' + B + '</b>)</div></div>' +
+                'Grau = 0,299·R + 0,587·G + 0,114·B<br>' +
+                '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= 0,299·' + R + ' + 0,587·' + G + ' + 0,114·' + B + ' = <b>' + de(gray, 1) + '</b><br>';
+            if (adjusted) {
+                html += 'Kontrast/Helligkeit: v = (' + de(gray, 1) + ' − 128)·' + de(state.contrast, 1) + ' + 128 ' +
+                    (state.brightness >= 0 ? '+ ' : '− ') + Math.abs(state.brightness) + ' = <b>' + de(v, 1) + '</b><br>';
+            }
+            html += 'Dichte d = ' + (state.lightOnDark ? 'v / 255' : '1 − v / 255') + ' = <b>' + de(d, 2) + '</b>' +
+                ' <span style="opacity:.6">(' + (state.lightOnDark ? 'hell → dicht' : 'dunkel → dicht') + ')</span><br>';
+
+            if (last.mode === 'braille') {
+                html += 'Braille: 2 × 4 Teilpunkte, Punkt an wenn d ≥ 0,5' + (last.dithered ? ' (mit Dithering)' : '') +
+                    ' → <b>' + last.dots[i] + '</b> von 8 an → Zeichen <b>' + esc(ch) + '</b>' +
+                    ' <span style="opacity:.6">(U+' + ch.charCodeAt(0).toString(16).toUpperCase() + ')</span>';
+            } else if (last.mode === 'dots') {
+                html += 'Halbton: Punktfläche ∝ d, Radius = √d · R = ' + de(Math.sqrt(d), 2) + ' · R';
+            } else if (state.customFn) {
+                html += 'Eigene Abbildung → Zeichen <b>' + esc(glyph(ch)) + '</b>';
+            } else {
+                html += 'Index k = round(d · (n − 1)) = round(' + de(d, 2) + ' · ' + (m - 1) + ') = <b>' + kP + '</b>';
+                if (last.dithered && kU !== kP) {
+                    html += ' → mit Dithering <b>' + kU + '</b> <span style="opacity:.6">(Rundungsfehler der Nachbarn verteilt)</span>';
+                }
+                html += '<br>Zeichen ramp[' + kU + '] = <b>' + esc(glyph(ch)) + '</b>';
+            }
+            if (last.mode !== 'braille') {
+                html += '<div class="asc-ramp" style="margin-top:8px">' +
+                    Array.from(ramp).map((x, j) => j === kU && last.mode !== 'dots' ? '<b>' + esc(glyph(x)) + '</b>' : esc(glyph(x))).join('') +
+                    '</div>';
+            }
+            html += '</div>';
+            $('coach-content').innerHTML = html;
+            box.classList.add('visible');
+
+            /* the source pixels behind this cell, magnified */
+            const p = $('patch');
+            const g = p.getContext('2d');
+            g.imageSmoothingEnabled = false;
+            const sx = sel.c / cols, sy = sel.r / rows;
+            let srcX = sx * source.w;
+            if (source.kind === 'video') srcX = source.w - (sx + 1 / cols) * source.w;   // undo the mirror
+            g.clearRect(0, 0, 16, 16);
+            g.drawImage(source.el, srcX, sy * source.h, source.w / cols, source.h / rows, 0, 0, 16, 16);
+        }
+
+        function pick(clientX, clientY) {
+            const rect = canvas.getBoundingClientRect();
+            const cell = cellAt(clientX - rect.left, clientY - rect.top);
+            sel = cell;
+            render();
+            drawThumb();
+            showLupe();
+        }
+        canvas.addEventListener('click', (e) => pick(e.clientX, e.clientY));
+
+        /* ---------- export ---------- */
+        function asText() {
+            return last ? last.chars.map(r => r.join('')).join('\n') : '';
+        }
+
+        function copyText() {
+            if (!last) { setStatus('Erst ein Bild laden', 'asc-busy'); return; }
+            navigator.clipboard.writeText(asText())
+                .then(() => { setStatus('Text kopiert', 'asc-ok'); dbg(asText().length + ' Zeichen kopiert', 'asc-ok'); })
+                .catch(() => setStatus('Kopieren blockiert', 'asc-err'));
+        }
+
+        function download(blob, name) {
+            const a = $('dl');
+            a.href = URL.createObjectURL(blob);
+            a.download = name;
+            a.click();
+            setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+        }
+
+        function savePng() {
+            if (!last) { setStatus('Erst ein Bild laden', 'asc-busy'); return; }
+            canvas.toBlob((b) => { download(b, 'ascii-art.png'); setStatus('PNG gesichert', 'asc-ok'); }, 'image/png');
+        }
+
+        function saveTxt() {
+            if (!last) { setStatus('Erst ein Bild laden', 'asc-busy'); return; }
+            download(new Blob([asText()], { type: 'text/plain;charset=utf-8' }), 'ascii-art.txt');
+            setStatus('.txt gesichert', 'asc-ok');
+        }
+
+        /* ---------- init ---------- */
+        function measureFont() {
+            const g = document.createElement('canvas').getContext('2d');
+            g.font = '100px ' + MONO;
+            ADV = g.measureText('M').width / 100;
+            ASPECT = ADV / LINE;
+        }
+
+        function init() {
+            render();
+        }
+
+        $('coach-title-slot').textContent = 'Bilder sind Zahlen';
+        $('coach-content').innerHTML =
+            '<div class="asc-formula">Jedes Bild ist ein Zahlenraster. Das Lab teilt es in Zellen, ' +
+            'mittelt die Farbe jeder Zelle, rechnet daraus einen Grauwert und wählt dafür ein Zeichen ' +
+            'aus der Rampe.<br><b>Klick auf ein Zeichen</b> → die Rechnung für genau diese Zelle.</div>';
+
+        setupUI();
+        measureFont();
+        window.addEventListener('resize', init);
+        document.fonts.ready.then(() => { measureFont(); update(); });
+        $('thumb').style.display = 'none';
+        dbg('Bereit. Alles läuft lokal im Browser.');
+        loadDemo('doc');
+        $('math-coach-box').classList.add('visible');
+    </script>
+</body>
+
+</html>
