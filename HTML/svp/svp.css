@@ -1208,7 +1208,10 @@ thead th {
     border-bottom: 1px solid var(--line);
     white-space: nowrap;
     position: sticky;
-    top: var(--sticky-h, 0px);   /* below the pinned head bar */
+    /* 0, not the head-bar height: .table-wrap is its own scroll container
+       (overflow-x: auto), so this top counts from the wrap, not the window -
+       anything else pushes the header down into the rows (Doc, 27.08.) */
+    top: 0;
     background: var(--panel);
 }
 
