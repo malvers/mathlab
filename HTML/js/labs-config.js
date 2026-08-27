@@ -24,6 +24,17 @@
 
 const LABS_DATA = [
     {
+        "id": "ascii",
+        "href": "ascii.html",
+        "title": "ASCII-Art",
+        "description": "Bilder sind Zahlen: Foto, Kamera-Livebild oder Beispiel in Zellen rastern, Grauwert rechnen, Zeichen wählen — als Zeichen, farbig, Halbton oder Braille, mit Dithering. Ein Klick auf ein Zeichen zeigt die komplette Rechnung für genau diese Zelle; in Stufe 2 schreiben Schüler die Abbildung Grauwert → Zeichen selbst.",
+        "tagline": "Informatik / Bilddaten / Pixel → Zeichen",
+        "icon": LAB_ICONS["ascii"],
+        "category": "informatik neu sonst",
+        "keywords": "ascii art asciiart text bild zeichen pixel grauwert luminanz rampe braille halbton dithering floyd steinberg kamera webcam informatik bilddaten rgb",
+        "color": "green"
+    },
+    {
         "id": "pinkerfinder",
         "href": "pinkerfinder/index.html",
         "title": "PinkerFinder",

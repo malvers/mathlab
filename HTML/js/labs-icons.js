@@ -4,6 +4,14 @@
  */
 
 const LAB_ICONS = {
+    "ascii": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <rect x="14" y="14" width="72" height="72" rx="12" fill="rgba(121, 158, 49, 0.08)" stroke="#799E31" stroke-width="2" />
+            <g font-family="Menlo, Consolas, monospace" font-size="17" font-weight="bold" text-anchor="middle">
+                <text x="26" y="41" fill="#799E31">@</text><text x="42" y="41" fill="#799E31">@</text><text x="58" y="41" fill="#799E31">#</text><text x="74" y="41" fill="#F5C242">+</text>
+                <text x="26" y="59" fill="#799E31">@</text><text x="42" y="59" fill="#799E31">#</text><text x="58" y="59" fill="#F5C242">+</text><text x="74" y="59" fill="rgba(255,255,255,0.5)">.</text>
+                <text x="26" y="77" fill="#799E31">#</text><text x="42" y="77" fill="#F5C242">+</text><text x="58" y="77" fill="rgba(255,255,255,0.5)">.</text><text x="74" y="77" fill="rgba(255,255,255,0.3)">·</text>
+            </g>
+        </svg>`,
     "cinematic-intro": `<svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="var(--neon-blue)" stroke-width="1.2">
             <circle cx="12" cy="12" r="10" stroke-dasharray="2 4" opacity="0.5"></circle>
             <path d="M10 8l6 4-6 4V8z" fill="var(--neon-blue)"></path>
