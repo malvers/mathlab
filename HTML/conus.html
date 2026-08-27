@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DOC ALVERS MATHE-LABORE | Conus</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet">
+    <link rel="icon" type="image/png" href="resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+    <style>
+        :root {
+            --bg: rgb(8, 20, 42);
+            --panel: rgb(14, 36, 78);
+            --lambda: rgb(245, 194, 66);
+            --ypsilon: rgb(176, 36, 24);
+            --phi: rgb(121, 158, 49);
+            --ink: #e8eefc;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            padding: clamp(16px, 4vw, 48px);
+            background: var(--bg);
+            color: var(--ink);
+            font-family: 'Outfit', system-ui, sans-serif;
+            font-weight: 300;
+            line-height: 1.6;
+        }
+
+        .wrap { max-width: 900px; margin: 0 auto; }
+
+        h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            font-size: clamp(1.2rem, 4vw, 2rem);
+            letter-spacing: .06em;
+            color: var(--lambda);
+            margin: 0 0 .2em;
+        }
+
+        h2 {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 400;
+            font-size: clamp(.85rem, 2.4vw, 1.05rem);
+            letter-spacing: .12em;
+            text-transform: uppercase;
+            color: var(--phi);
+            margin: 2.2em 0 .6em;
+        }
+
+        .sub { color: #9db0d4; margin: 0 0 2em; }
+
+        /* equation cards - each formula gets its own panel */
+        .eq {
+            background: var(--panel);
+            border-left: 4px solid var(--lambda);
+            border-radius: 6px;
+            padding: clamp(12px, 3vw, 22px);
+            margin: 1em 0;
+            overflow-x: auto;      /* wide math scrolls inside the card */
+        }
+
+        .eq .label {
+            font-family: 'Orbitron', sans-serif;
+            font-size: .72rem;
+            letter-spacing: .14em;
+            text-transform: uppercase;
+            color: #9db0d4;
+            margin-bottom: .8em;
+        }
+
+        .eq.inhib { border-left-color: var(--ypsilon); }
+        .eq.cond { border-left-color: var(--phi); }
+
+        .katex { color: var(--ink); font-size: clamp(1rem, 2.6vw, 1.35rem); }
+
+        ul { padding-left: 1.2em; }
+        li { margin: .5em 0; }
+        b { font-weight: 600; color: var(--lambda); }
+        code { font-family: ui-monospace, Menlo, monospace; color: var(--phi); }
+    </style>
+</head>
+
+<body>
+    <div class="wrap">
+        <h1>Conus &mdash; wie das Zeltmuster entsteht</h1>
+        <p class="sub">Die Schale wächst nur an der Mündungskante. Eine 1D-Zellreihe entscheidet
+            lokal &bdquo;Pigment ja/nein&ldquo;, jede Wachstumszeile bleibt für immer stehen.
+            Das Muster ist ein Raum-Zeit-Diagramm: x = Kantenposition, y = Zeit.</p>
+
+        <h2>Aktivator&ndash;Inhibitor (Meinhardt)</h2>
+
+        <div class="eq">
+            <div class="label">Aktivator &mdash; kurzreichweitige Selbstverstärkung</div>
+            <div class="tex">\[ \frac{\partial a}{\partial t} \;=\; D_a\,\frac{\partial^2 a}{\partial x^2}
+                \;+\; \rho\,\frac{a^{2}}{b} \;-\; \mu\,a \]</div>
+        </div>
+
+        <div class="eq inhib">
+            <div class="label">Inhibitor &mdash; langreichweitige Hemmung</div>
+            <div class="tex">\[ \frac{\partial b}{\partial t} \;=\; D_b\,\frac{\partial^2 b}{\partial x^2}
+                \;+\; \rho\,a^{2} \;-\; \nu\,b \]</div>
+        </div>
+
+        <div class="eq cond">
+            <div class="label">Die eine Bedingung, die alles macht</div>
+            <div class="tex">\[ D_b \;\gg\; D_a \]</div>
+        </div>
+
+        <p style="margin:1.6em 0 0"><a href="conuslab.html"
+            style="font-family:'Orbitron',sans-serif;font-size:.8rem;letter-spacing:.1em;color:var(--lambda);
+                   text-decoration:none;border:1px solid var(--lambda);border-radius:6px;padding:10px 16px;
+                   display:inline-block;">ZUM LAB &rarr;</a></p>
+
+        <h2>Was daraus wird</h2>
+        <ul>
+            <li><b>Zickzack-Linien</b> &mdash; wandernde Pigmentwellen entlang der Kante.</li>
+            <li><b>Dreiecke / Zelte</b> &mdash; zwei Wellen laufen aufeinander zu und löschen sich aus;
+                die Spitze ist der Kollisionspunkt.</li>
+            <li><b>Querstreifen</b> &mdash; globale Oszillation, alles gleichzeitig an.</li>
+        </ul>
+        <p>Diskretisiert ist das ein 1D-zellulärer Automat &mdash; bei <i>Conus textile</i> passt
+            Wolframs <code>Rule 30</code> verblüffend gut.</p>
+    </div>
+
+    <script>
+        // render all display math once KaTeX is loaded
+        window.addEventListener('DOMContentLoaded', function () {
+            if (typeof renderMathInElement === 'undefined') return;
+            renderMathInElement(document.body, {
+                delimiters: [
+                    { left: '\\[', right: '\\]', display: true },
+                    { left: '$$', right: '$$', display: true },
+                    { left: '\\(', right: '\\)', display: false }
+                ],
+                throwOnError: false
+            });
+        });
+    </script>
+</body>
+
+</html>
