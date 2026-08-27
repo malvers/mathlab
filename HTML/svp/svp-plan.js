@@ -38,6 +38,32 @@
         if (bar && cards && cards.parentNode) cards.parentNode.insertBefore(bar, cards);
     })();
 
+    /* Kopf und Werkzeugleiste bleiben beim Scrollen stehen, der Plan (Karten
+       plus Tabelle) zieht darunter weg. Zentral verpackt — keine Plan-Seite
+       muss dafuer angefasst werden. */
+    (function stickHead() {
+        const head = document.querySelector('header.page-head');
+        if (!head || !head.parentNode) return;
+        const bar2 = document.querySelector('.toolbar');
+        const box = document.createElement('div');
+        box.className = 'plan-sticky';
+        head.parentNode.insertBefore(box, head);
+        box.appendChild(head);
+        if (bar2) box.appendChild(bar2);
+
+        /* The table head sticks right below the bar, so it needs its height. */
+        const sync = function () {
+            document.documentElement.style.setProperty('--sticky-h', box.offsetHeight + 'px');
+        };
+        const mark = function () {
+            box.classList.toggle('stuck', box.getBoundingClientRect().top <= 1);
+        };
+        sync(); mark();
+        if (window.ResizeObserver) new ResizeObserver(sync).observe(box);
+        window.addEventListener('resize', function () { sync(); mark(); });
+        window.addEventListener('scroll', mark, { passive: true });
+    })();
+
     const headRow = document.querySelector('#plan-table thead tr');
     if (headRow) {
         const matTh = document.createElement('th');

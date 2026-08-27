@@ -968,6 +968,30 @@ h1 {
 .meta-card .k.c-green { color: var(--phi); }
 .meta-card .k.c-bright { color: var(--text); }
 
+/* Kopf + Werkzeugleiste bleiben beim Scrollen oben stehen, der Plan zieht
+   darunter durch. Full-bleed ueber die Body-Polsterung wie die Nav-Leiste,
+   damit nichts seitlich daneben durchscheint. --sticky-h wird von
+   svp-plan.js gesetzt (Hoehe der Leiste) und richtet den Tabellenkopf aus. */
+.plan-sticky {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    background: var(--bg);
+    margin: -10px calc(-1 * clamp(12px, 3vw, 40px)) 0;
+    padding: 10px clamp(12px, 3vw, 40px) 14px;
+    transition: box-shadow 0.15s ease;
+}
+
+.plan-sticky.stuck { box-shadow: 0 12px 18px -14px var(--shadow); }
+
+/* Die Eigenabstaende der beiden Bloecke wandern in die Polsterung der Huelle */
+.plan-sticky header.page-head { margin-bottom: 16px; }
+.plan-sticky .toolbar { margin-bottom: 0; }
+
+@media print {
+    .plan-sticky { position: static; margin: 0; padding: 0; box-shadow: none; }
+}
+
 .toolbar {
     max-width: 1200px;
     margin: 0 auto 14px;
@@ -1184,7 +1208,7 @@ thead th {
     border-bottom: 1px solid var(--line);
     white-space: nowrap;
     position: sticky;
-    top: 0;
+    top: var(--sticky-h, 0px);   /* below the pinned head bar */
     background: var(--panel);
 }
 
