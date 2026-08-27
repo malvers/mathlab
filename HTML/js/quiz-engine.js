@@ -425,7 +425,8 @@
     const avg = sum / subs.length;
     el.innerHTML = html +
       '<div class="avg">Ø <b>' + (Math.round(avg * 10) / 10) + ' / ' + QUESTIONS.length +
-      '</b> (' + Math.round(avg / QUESTIONS.length * 100) + ' %)</div>';
+      '</b> (' + Math.round(avg / QUESTIONS.length * 100) + ' %)</div>' +
+      '<div class="avgsub">' + subs.length + (subs.length === 1 ? ' Abgabe' : ' Abgaben') + '</div>';
     info.textContent = '(' + subs.length + ' Abgaben · live, aktualisiert alle 5 s)';
   }
 
