@@ -604,9 +604,9 @@ header.page-head {
 
 .tt-depts button {
     font-family: Orbitron, sans-serif;
-    font-size: 0.68rem;
+    font-size: 0.82rem;
     letter-spacing: 0.05em;
-    padding: 7px 12px;
+    padding: 8px 13px;
     border-radius: 7px;
     border: 1px solid var(--line);
     background: transparent;
@@ -640,6 +640,10 @@ header.page-head {
 
 body {
     padding-top: 14px;
+    /* narrower side margins than the shared clamp(12px, 3vw, 40px) - the grid
+       wants the width (Doc) */
+    padding-left: clamp(8px, 1vw, 16px);
+    padding-right: clamp(8px, 1vw, 16px);
 }
 
 header.page-head {
@@ -668,7 +672,7 @@ header.page-head .title-group .subtitle {
 }
 
 .tt-bar {
-    margin-bottom: 12px;
+    margin-bottom: 8px;
 }
 
 .tt-empty-hint {
@@ -711,7 +715,7 @@ header.page-head .title-group .subtitle {
     display: flex;
     flex-wrap: wrap;
     align-items: flex-end;      /* controls sit on one baseline; a caption may rise above */
-    gap: 12px;
+    gap: 6px;                   /* Doc: the row reads as one group, not as scattered buttons */
 }
 
 /* a small caption above a control (e.g. "Aufwand" above the effort select) */
@@ -1099,16 +1103,17 @@ body.is-resizing {
     cursor: help;
 }
 
+/* Doc: conflicts read as an alarm - solid Υ-red with white type, not a tint */
 .tt-confcount.bad {
-    color: var(--ypsilon);
-    border-color: rgba(176, 36, 24, 0.5);
-    background: rgba(176, 36, 24, 0.10);
+    color: #fff;
+    border-color: var(--ypsilon);
+    background: var(--ypsilon);
 }
 
 .tt-confcount.good {
-    color: var(--phi);
-    border-color: rgba(121, 158, 49, 0.5);
-    background: rgba(121, 158, 49, 0.12);
+    color: #fff;
+    border-color: var(--phi);
+    background: var(--phi);
 }
 
 /* --- Fetch button + status next to the heading ---------------------------- */
@@ -1184,6 +1189,7 @@ body.is-resizing {
 }
 
 .tt-savebox { display: inline-flex; gap: 6px; align-items: center; }
+.tt-savebox[hidden] { display: none; }   /* the inline-flex above would beat [hidden] */
 .tt-savebox .tt-search { width: 180px; height: 30px; padding: 0 9px; box-sizing: border-box; }
 
 .tt-pick {
@@ -1322,11 +1328,14 @@ body.is-dragging .tt-lesson { cursor: grabbing; }
 
 /* --- nothing jumps: status always two lines, progress keeps its space ----- */
 
+/* zero conflicts is the good case - green, whatever the line's base colour is */
+.tt-opt-status .tt-cnt.zero { color: var(--phi); }
+
 .tt-opt-status {
     margin-top: 10px;
-    font-size: 0.82rem;
+    font-size: 1.08rem;
     line-height: 1.6;
-    min-height: 2.7em;
+    min-height: 1.6em;   /* one line since the two halves were joined */
 }
 
 /* progress only takes space while a run is on (Doc: too much air otherwise);
@@ -1335,7 +1344,9 @@ body.is-dragging .tt-lesson { cursor: grabbing; }
 .tt-versions { margin-top: 4px; }
 .tt-opt-result:empty { display: none; }
 
-.tt-bar .tt-meta { min-height: 3.9em; }
+/* the block used to reserve two lines for name/count plus the data stamp; both
+   moved to the subtitle, so it now collapses whenever it holds nothing */
+.tt-bar .tt-meta { min-height: 0; }
 .tt-meta-hint { color: var(--lambda); }
 
 /* disabled controls stay in place, just quiet */
