@@ -65,6 +65,7 @@
     wrap.querySelector('.sub').textContent = CFG.subtitle || '';
     const back = wrap.querySelector('#backBtn');
     if (back) back.addEventListener('click', function () { location.href = CFG.back; });
+
     document.body.appendChild(wrap);
   }
   buildPage();
@@ -363,6 +364,56 @@
       ' % richtig</b> bei ' + submissions + ' Abgaben.</div>';
   }
 
+  /* Der Auswerte-Knopf gehoert in die Spalte, nicht an den Fensterrand: er
+     zieht in die Leiste ueber den Fragen, in der auch "Alle einklappen"
+     sitzt. Gibt es die nicht (Quiz ohne einklappbare Karten), baut er sich
+     eine eigene Zeile im selben Stil. */
+  function placeEvalButton() {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'btn-eval';
+    btn.id = 'evalBtn';
+    btn.textContent = 'Auswertung';
+    btn.title = 'Live-Auswertung - nur mit Passwort';
+    btn.addEventListener('click', function () {
+      /* Vorhandene Parameter bleiben stehen: ?klasse gehoert zur Quiz-Id,
+         sonst zeigt das Dashboard die Zahlen einer anderen Gruppe. */
+      const params = new URLSearchParams(location.search);
+      params.set('auswertung', '');
+      location.href = location.pathname + '?' + params.toString().replace(/=(?=&|$)/g, '');
+    });
+    let bar = document.querySelector('.qbar');
+    if (!bar) {
+      bar = document.createElement('div');
+      bar.className = 'qbar';
+      const q = document.getElementById('quiz');
+      q.parentNode.insertBefore(bar, q);
+    }
+    bar.insertBefore(btn, bar.firstChild);
+  }
+
+  /* The teacher view sits behind the usual password. The gate lives in
+     svp/svp-gate.js, so one unlock covers the plan pages and the tests alike;
+     the script is pulled in on demand, which keeps all quiz pages untouched.
+     This is a view shield, not a vault - the numbers themselves stay readable
+     for anyone who knows the Supabase endpoint. */
+  function withGate(fn) {
+    if (window.svpGate) { window.svpGate.run(fn); return; }
+    const el = document.createElement('script');
+    el.src = 'svp/svp-gate.js';
+    el.onload = function () {
+      if (window.svpGate) window.svpGate.run(fn);
+      else gateFailed();
+    };
+    el.onerror = gateFailed;
+    document.head.appendChild(el);
+  }
+
+  function gateFailed() {
+    const sub = document.querySelector('.sub');
+    if (sub) sub.textContent = 'Auswertung nicht moeglich: die Passwortpruefung konnte nicht geladen werden.';
+  }
+
   /* --- Teacher dashboard (?auswertung): anonymous individual scores counting
      up live while students submit, plus group performance per question. --- */
   function initDashboard() {
@@ -480,12 +531,17 @@
   });
 
   if (PARAMS.has('auswertung')) {
-    initDashboard();
-    tagSubline();
+    /* Auch der direkt getippte Link muss durchs Passwort - sonst waere der
+       Knopf nur Zierde. */
+    withGate(function () {
+      initDashboard();
+      tagSubline();
+    });
   } else {
     if (submitBtn) submitBtn.addEventListener('click', submit);
     render();
     QuizCollapse.init(quizEl);
+    placeEvalButton();   /* nach init, damit die .qbar schon steht */
     updateSubmitState();
     tagSubline();
     /* Demo helper (?test): key r fills a random answer set, ~95% correct. */

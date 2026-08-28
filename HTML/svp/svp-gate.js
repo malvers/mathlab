@@ -36,7 +36,43 @@
     const BTN_KEY = 'svp-edit-gate';
     const toHex = buf => Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
 
+    /* Das Overlay wird in svp.css gestylt. Seiten ausserhalb der Plaene (die
+       Online-Tests) laden die nicht - dann bringen wir die paar Regeln selbst
+       mit, statt sie dort ein zweites Mal zu pflegen. Erkannt wird das an
+       einer Probe: ohne svp.css ist die Position nicht fixed. */
+    function ensureGateStyles() {
+        if (document.getElementById('svp-gate-style')) return;
+        const probe = document.createElement('div');
+        probe.className = 'svp-gate-overlay';
+        document.body.appendChild(probe);
+        const styled = getComputedStyle(probe).position === 'fixed';
+        probe.remove();
+        if (styled) return;
+        const st = document.createElement('style');
+        st.id = 'svp-gate-style';
+        st.textContent = [
+            '.svp-gate-overlay{position:fixed;inset:0;z-index:2000;display:flex;',
+            'align-items:center;justify-content:center;background:rgba(8,20,42,0.55);}',
+            '.svp-gate-card{background:#fff;border:1px solid rgba(40,70,120,0.3);border-radius:14px;',
+            'padding:30px 34px;text-align:center;width:min(90vw,360px);',
+            'box-shadow:0 8px 30px rgba(8,20,42,0.25);}',
+            '.svp-gate-title{font-family:Orbitron,sans-serif;font-size:1.05rem;letter-spacing:0.06em;',
+            'color:rgb(14,36,78);margin-bottom:6px;}',
+            '.svp-gate-sub{font-size:0.85rem;color:rgb(96,112,140);margin-bottom:18px;}',
+            '.svp-gate-card input{width:100%;background:#fff;border:1px solid rgba(40,70,120,0.3);',
+            'border-radius:8px;color:rgb(14,36,78);font-size:1rem;padding:10px 12px;',
+            'margin-bottom:12px;text-align:center;}',
+            '.svp-gate-card input:focus{outline:1px solid rgb(28,118,158);}',
+            '.svp-gate-card button{width:100%;font-family:Orbitron,sans-serif;font-size:0.72rem;',
+            'letter-spacing:0.06em;color:rgb(14,36,78);background:linear-gradient(180deg,#fff,rgb(232,238,248));',
+            'border:1px solid rgba(40,70,120,0.3);border-radius:10px;padding:10px 14px;cursor:pointer;}',
+            '.svp-gate-err{margin-top:10px;font-size:0.8rem;color:rgb(176,36,24);min-height:1em;}'
+        ].join('');
+        document.head.appendChild(st);
+    }
+
     function askButtonPwd(onOk) {
+        ensureGateStyles();
         const overlay = document.createElement('div');
         overlay.className = 'svp-gate-overlay';
         overlay.innerHTML =
