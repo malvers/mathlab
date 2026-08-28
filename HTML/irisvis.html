@@ -28,6 +28,9 @@
             top: 18px;
             bottom: auto;
             width: min(470px, calc(100% - 36px));
+            /* same top and left in both states, otherwise the title jumps when the box
+               is unfolded (the shared box pads 25px all round) */
+            padding: 9px 18px 16px;
         }
 
         /* the title bar is the only clickable part — clicks on the text still reach
@@ -55,7 +58,7 @@
         #math-coach-box.folded #coach-caret { transform: rotate(-90deg); }
 
         /* folded: only a slim title bar is left (the shared box pads 25px all round) */
-        #math-coach-box.folded { padding: 9px 18px; }
+        #math-coach-box.folded { padding: 9px 18px; }   /* only the bottom differs */
         #math-coach-box.folded .coach-title { margin-bottom: 0 !important; }
         #math-coach-box.folded #coach-content { display: none; }
 
@@ -126,6 +129,28 @@
             margin-top: 10px;
         }
 
+        /* Messwerte: label left, value right — flat rows, no tiles */
+        #mw { width: 100%; border-collapse: collapse; }
+
+        #mw td {
+            padding: 5px 0;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.98rem;
+            letter-spacing: 0.02em;
+            color: rgba(200, 220, 248, 0.88);
+            border-top: 1px solid rgba(120, 160, 220, 0.12);
+        }
+
+        #mw tr:first-child td { border-top: none; }
+
+        #mw td.v {
+            text-align: right;
+            font-size: 0.98rem;
+            color: #eaf2ff;
+            font-variant-numeric: tabular-nums;
+            white-space: nowrap;
+        }
+
         .iris-keys {
             font-family: 'Orbitron', sans-serif;
             font-size: 0.62rem;
@@ -136,6 +161,47 @@
         .iris-keys b { color: rgb(245, 194, 66); font-weight: 400; }
 
         /* help overlay (H) — same dark-blue card language as the rest */
+        /* A floating window, NOT modal: the lab stays usable while it is open, and it
+           can be dragged by its title bar. */
+        #grad-win {
+            position: fixed;
+            z-index: 60;
+            display: none;
+            width: min(760px, calc(100vw - 40px));
+            background: rgb(14, 36, 78);
+            border: 1px solid rgba(120, 160, 220, 0.35);
+            border-radius: 14px;
+            padding: 8px 20px 12px;
+            box-shadow: 0 24px 70px rgba(0, 0, 0, 0.55);
+        }
+
+        #grad-win.on { display: block; }
+
+        /* invisible grab strip along the top edge — nothing to see, just to hold */
+        .grad-grip {
+            height: 16px;
+            margin: -4px -12px 4px;
+            cursor: move;
+        }
+
+        /* a quiet little word in the bottom right corner instead of a shouting × */
+        #grad-close {
+            position: absolute;
+            right: 14px;
+            bottom: 7px;
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            padding: 0;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.52rem;
+            letter-spacing: 0.14em;
+            text-transform: lowercase;
+            color: rgba(190, 214, 246, 0.38);
+        }
+
+        #grad-close:hover { color: #00d2ff; }
+
         #help-overlay {
             position: fixed;
             inset: 0;
@@ -162,7 +228,7 @@
 
         .help-card h2 {
             font-family: 'Orbitron', sans-serif;
-            font-size: 1rem;
+            font-size: 1.1rem;
             color: #00d2ff;
             margin-bottom: 14px;
             letter-spacing: 1.5px;
@@ -171,9 +237,9 @@
         .help-card table { width: 100%; border-collapse: collapse; }
 
         .help-card td {
-            padding: 6px 10px 6px 0;
+            padding: 7px 12px 7px 0;
             font-family: 'Outfit', sans-serif;
-            font-size: 0.86rem;
+            font-size: 0.98rem;
             color: rgba(230, 240, 255, 0.9);
             border-top: 1px solid rgba(120, 160, 220, 0.14);
             vertical-align: top;
@@ -181,7 +247,7 @@
 
         .help-card td:first-child {
             font-family: 'Orbitron', sans-serif;
-            font-size: 0.72rem;
+            font-size: 0.82rem;
             color: rgb(245, 194, 66);
             white-space: nowrap;
             width: 1%;
@@ -190,8 +256,8 @@
         .help-card p {
             margin-top: 14px;
             font-family: 'Outfit', sans-serif;
-            font-size: 0.78rem;
-            line-height: 1.55;
+            font-size: 0.98rem;
+            line-height: 1.6;
             color: rgba(190, 214, 246, 0.7);
         }
 
@@ -251,6 +317,7 @@
     <script src="js/branding.js"></script>
     <script src="js/ui.js"></script>
     <script src="js/cmaes-logic.js"></script>
+    <script src="js/color-gradient.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
     <script>
         function toggleSidebar() {
@@ -293,6 +360,9 @@
             b: 'rgb(121, 158, 49)',     // side b = CA   (φ green)
             c: 'rgb(245, 194, 66)',     // side c = AB   (λ orange)
             circle: '#00d2ff',
+            /* the square had the circle's cyan — violet is the only free hue left:
+               red/green/orange mark the copied lengths, orange is the wiper, red the path */
+            square: 'rgb(150, 112, 232)',
             ink: 'rgba(230, 240, 255, 0.92)',
             dim: 'rgba(160, 190, 230, 0.45)'
         };
@@ -322,6 +392,7 @@
             wiperFill: true,
             box: false,          // the rotating square the curve fits into
             angle: 0,            // its rotation in degrees
+            absScale: false,     // colour scale fixed to the width instead of min…max
             autoRot: false,      // let it turn by itself
             rotSpeed: 12,        // degrees per second
             path: false,         // the path the square's centre traces over 360°
@@ -339,7 +410,7 @@
         const SAVE_KEY = 'irisvis-state';
         const SAVE_FIELDS = ['showTriangle', 'extA', 'extB', 'extC', 'showCircle', 'showIncircle',
             'showProof', 'showChords', 'showLabels', 'light', 'wiper', 'wiperFill',
-            'box', 'path', 'heat', 'angle', 'd', 'autoRot', 'rotSpeed'];
+            'box', 'path', 'heat', 'angle', 'd', 'autoRot', 'rotSpeed', 'absScale'];
 
         let savedView = null, savedScroll = 0, saveTimer = null;
 
@@ -644,13 +715,13 @@
             if (sweepRun.deg > 90) sweepRun = null;      // a quarter turn is the whole story
         }
 
-        /* green = fits (0), yellow = middling, red = far out */
+        /* The ramp comes from the gradient editor (js/color-gradient.js, Docs Java
+           ColorGradient). A 256-entry lookup keeps the per-pixel cost down. */
+        let heatGrad = null, heatLut = null;
         function heatColor(t) {
-            const stops = [[121, 158, 49], [245, 194, 66], [176, 36, 24]];
-            const x = Math.max(0, Math.min(1, t)) * 2;
-            const i = Math.min(1, Math.floor(x)), f = x - i;
-            const a = stops[i], b = stops[i + 1];
-            return [a[0] + f * (b[0] - a[0]), a[1] + f * (b[1] - a[1]), a[2] + f * (b[2] - a[2])];
+            if (!heatLut) return [121, 158, 49];
+            const i = Math.max(0, Math.min(255, Math.round(t * 255))) * 3;
+            return [heatLut[i], heatLut[i + 1], heatLut[i + 2]];
         }
 
         /* The quality landscape. `fast` uses a coarser grid so it can be rebuilt on every
@@ -659,7 +730,10 @@
             const g = geometry(state.d);
             const pts = curvePoints(g, fast ? 6 : 10);
             const h = boxSide(g) / 2, th = state.angle * Math.PI / 180;
-            const N = fast ? 48 : 90;
+            /* Measured on this machine: 96² with 36 curve points ≈ 3.4 ms (fine enough
+               while the square turns), 200² with 60 points ≈ 30 ms for the still image
+               — that is 5 px per cell instead of 21. */
+            const N = fast ? 96 : 200;         /* coarse while it moves, fine when it stands */
             /* Centre the grid on the placement that is actually being searched — the
                optimum for this angle — not on the incentre. The two are different points,
                which pushed the valley out of the picture. A tight span shows the funnel. */
@@ -688,10 +762,18 @@
                     if (q > hi) hi = q;
                 }
             }
+            /* Fixed scale: the cost is an overhang summed over the sampled curve points,
+               so cost / (points · w) is the average overhang in units of the width — the
+               same colour then means the same overhang for ANY triangle. Full saturation
+               at half a width. Without it the scale stretches over min…max of this picture,
+               which always uses the full contrast but is not comparable. */
+            const ref = 0.5 * boxSide(g) * pts.length;
             for (let k = 0; k < N * N; k++) {
                 /* cube root: the cost rises steeply, so a linear ramp would paint the whole
-                   neighbourhood of the valley in one green. This spreads the small values. */
-                const lin = hi > lo ? (vals[k] - lo) / (hi - lo) : 0;
+                   neighbourhood of the valley in one colour. This spreads the small values. */
+                const lin = state.absScale
+                    ? Math.min(1, vals[k] / ref)
+                    : (hi > lo ? (vals[k] - lo) / (hi - lo) : 0);
                 const t = Math.cbrt(lin);
                 const c = heatColor(t);
                 im.data[k * 4] = Math.round(c[0]);
@@ -893,7 +975,11 @@
                 return { arc: arc, w: w, L: Math.abs(w.dA) * arc.r };
             });
             const total = segs.reduce((s0, x) => s0 + x.L, 0);
-            let budget = total * Math.max(0, Math.min(1, buildT));
+            /* Only a RUNNING build draws a partial curve. If the animation was cut short
+               (tab in the background, reset in between) the curve must be complete again,
+               otherwise a stray wiper arm stays on screen for ever. */
+            const t = building ? Math.max(0, Math.min(1, buildT)) : 1;
+            let budget = total * t;
 
             /* soft fill so the shape reads as one body */
             if (state.wiperFill && buildT >= 1) {
@@ -923,7 +1009,7 @@
                 ctx.stroke();
                 ctx.restore();
                 /* the wiper arm itself, at the moving end */
-                if (frac < 1 && !armDrawn) {
+                if (building && frac < 1 && !armDrawn) {
                     armDrawn = true;
                     const t = sg.w.a1 + sg.w.dA * frac;
                     const tip = { x: sg.w.O.x + Math.cos(t) * sg.arc.r, y: sg.w.O.y + Math.sin(t) * sg.arc.r };
@@ -962,8 +1048,8 @@
 
             /* the exact optimum as a faint reference, the found one solid */
             if (sweepRun) square(opt.c, th, h, 'rgba(160, 190, 230, 0.35)', 1, [5, 5]);
-            square(c, th, h, COL.circle, 2, null);
-            mark(c, COL.circle, 4);
+            square(c, th, h, COL.square, 2, null);
+            mark(c, COL.square, 4);
         }
 
         function square(c, th, h, col, w, dash) {
@@ -1090,8 +1176,32 @@
             }
         }
 
+        /* the rows are built once; afterwards only the numbers are written */
+        const STATS = [
+            ['a = |BC|', COL.a], ['b = |CA|', COL.b], ['c = |AB|', COL.c],
+            ['s · halber Umfang', null], ['r · Inkreis', null],
+            ['R · Conway-Kreis', COL.circle], ['Breite der Kurve', null], ['d · Verlängerung', null]
+        ];
+        let statCells = null;
+
+        function buildStats() {
+            const t = document.getElementById('mw');
+            if (!t) return;
+            t.innerHTML = STATS.map(([lab, col]) =>
+                '<tr><td' + (col ? ' style="color:' + col + '"' : '') + '>' + lab + '</td>' +
+                '<td class="v">—</td></tr>').join('');
+            statCells = Array.from(t.querySelectorAll('td.v'));
+        }
+
+        function updateStats(g) {
+            if (!statCells) return;
+            const v = [g.a, g.b, g.c, g.s, g.r, g.R, widthRange(g).min, g.d];
+            for (let i = 0; i < statCells.length; i++) statCells[i].textContent = de(v[i], 1);
+        }
+
         /* ---------- readouts ---------- */
         function updateReadout(g) {
+            updateStats(g);
             if (!$('fx')) return;
             if ($('math-coach-box').classList.contains('folded')) return;   // nothing to update
 
@@ -1128,7 +1238,7 @@
                 const opt = boxOptimal(pts, th);
                 const off = boxC ? Math.hypot(boxC.x - opt.c.x, boxC.y - opt.c.y) : 0;
                 info.innerHTML =
-                    'Seite w = <b style="color:#00d2ff">' + de(boxSide(g), 1) + '</b><br>' +
+                    'Seite w = <b style="color:' + COL.square + '">' + de(boxSide(g), 1) + '</b><br>' +
                     'Breite quer/längs: ' + de(opt.wu, 1) + ' / ' + de(opt.wv, 1) + '<br>' +
                     (evals ? 'Auswertungen: <b>' + evals + '</b> &middot; Qualität: <b>' +
                         (Number.isFinite(lastQ) ? lastQ.toFixed(2).replace('.', ',') : '—') + '</b><br>' +
@@ -1283,8 +1393,9 @@
             const k = e.key.toLowerCase();
             const shift = e.shiftKey;
 
-            if (meta) {                                  // ⌘B = bright stage, like Docs black mode
+            if (meta) {
                 if (k === 'b') { state.light = !state.light; sync(); e.preventDefault(); }
+                else if (k === 'c') { showGradient(); e.preventDefault(); }   // the gradient editor
                 return;                                  // every other ⌘ shortcut stays the browser's
             }
 
@@ -1317,6 +1428,7 @@
             else if (k === 's') { CyberUI.captureAppScreenshot(); }
             else if (k === 'd') { buildUp(); }                       // "draw": build the curve up
             else if (k === 'h') { toggleHelp(); }
+            else if (k === 'escape') { hideGradient(); }
             else if (k === '0') { reset(); }
             else if (k === '2') { view.s *= 1.4; view.auto = false; render(); }
             else if (k === '+' || k === ']') { bumpD(+8); }
@@ -1376,28 +1488,93 @@
             sync();
         }
 
+        /* The gradient editor lives in its own window — big strip, big handles. It is
+           built once (hidden) so the heatmap always has its ramp. */
+        const GRAD_POS = 'irisvis-grad-pos';
+
+        function buildGradientWindow() {
+            const win = document.createElement('div');
+            win.id = 'grad-win';
+            /* no title — a gradient explains itself. The slim bar on top is the grip. */
+            win.innerHTML =
+                '<div class="grad-grip"></div>' +
+                '<div id="grad"></div>' +
+                '<button type="button" id="grad-close" title="⌘C">schließen</button>';
+            document.body.appendChild(win);
+
+            /* remembered position, else top left of the stage */
+            let pos = null;
+            try { pos = JSON.parse(localStorage.getItem(GRAD_POS) || 'null'); } catch (e) { }
+            win.style.left = (pos && Number.isFinite(pos.x) ? pos.x : 360) + 'px';
+            win.style.top = (pos && Number.isFinite(pos.y) ? pos.y : 120) + 'px';
+
+            /* drag by the title bar */
+            let off = null;
+            /* drag from the grip or from any empty spot of the window */
+            win.addEventListener('mousedown', (e) => {
+                if (e.target !== win && !e.target.classList.contains('grad-grip')) return;
+                const r = win.getBoundingClientRect();
+                off = { x: e.clientX - r.left, y: e.clientY - r.top };
+                e.preventDefault();
+            });
+            window.addEventListener('mousemove', (e) => {
+                if (!off) return;
+                const r = win.getBoundingClientRect();
+                const x = Math.max(8, Math.min(window.innerWidth - r.width - 8, e.clientX - off.x));
+                const y = Math.max(8, Math.min(window.innerHeight - 40, e.clientY - off.y));
+                win.style.left = x + 'px';
+                win.style.top = y + 'px';
+            });
+            window.addEventListener('mouseup', () => {
+                if (!off) return;
+                off = null;
+                try {
+                    localStorage.setItem(GRAD_POS, JSON.stringify(
+                        { x: parseFloat(win.style.left), y: parseFloat(win.style.top) }));
+                } catch (e) { }
+            });
+            win.querySelector('#grad-close').addEventListener('click', hideGradient);
+
+            heatGrad = CyberGradient.create(document.getElementById('grad'), {
+                key: 'irisvis-heat-gradient',
+                stripHeight: 62,
+                pinSize: 22,
+                stops: [
+                    { v: 0, left: '#799e31', right: '#799e31' },
+                    { v: 0.5, left: '#f5c242', right: '#f5c242' },
+                    { v: 1, left: '#b02418', right: '#b02418' }
+                ],
+                onChange: (g) => {
+                    heatLut = g.lut(256);
+                    if (state.heat) { buildHeat(); render(); }
+                }
+            });
+            heatLut = heatGrad.lut(256);
+        }
+
+        function showGradient() {
+            const win = document.getElementById('grad-win');
+            if (!win) return;
+            if (win.classList.contains('on')) { hideGradient(); return; }
+            win.classList.add('on');
+            if (heatGrad) heatGrad.repaint();
+            const wrap = win.querySelector('.cg-wrap');
+            if (wrap) wrap.focus();
+        }
+
+        function hideGradient() {
+            const win = document.getElementById('grad-win');
+            if (win) win.classList.remove('on');
+        }
+
         /* ---------- help overlay (Docs H) ---------- */
         function toggleHelp() {
             let el = $('help-overlay');
             if (el) { el.remove(); return; }
             el = document.createElement('div');
             el.id = 'help-overlay';
-            const g = geometry(state.d);
-            const val = (lab, v, col) =>
-                '<tr><td style="color:' + col + '">' + lab + '</td><td>' + v + '</td></tr>';
             el.innerHTML =
-                '<div class="help-card"><h2>Messwerte</h2>' +
-                '<table>' +
-                val('a = |BC|', de(g.a, 1), COL.a) +
-                val('b = |CA|', de(g.b, 1), COL.b) +
-                val('c = |AB|', de(g.c, 1), COL.c) +
-                val('s · halber Umfang', de(g.s, 1), '#9de8ff') +
-                val('r · Inkreis', de(g.r, 1), '#9de8ff') +
-                val('R · Conway-Kreis', de(g.R, 1), COL.circle) +
-                val('Breite der Wischerkurve', de(widthRange(g).min, 1), '#9de8ff') +
-                val('d · Verlängerung', de(g.d, 1), 'rgba(190,214,246,0.75)') +
-                '</table>' +
-                '<h2 style="margin-top:18px">Warum ein Kreis?</h2>' +
+                '<div class="help-card"><h2>Warum ein Kreis?</h2>' +
                 '<p>Jede der drei Geraden schneidet aus dem Kreis eine Sehne der Länge <b>2·(s+d)</b> ' +
                 'heraus und hat vom Mittelpunkt den Abstand <b>r</b>. Gleich lange Sehnen sind gleich ' +
                 'weit vom Mittelpunkt entfernt — deshalb liegen alle sechs Punkte auf <i>einem</i> Kreis, ' +
@@ -1417,6 +1594,8 @@
                 '<tr><td>R &middot; ⇧R &middot; Leertaste</td><td>Quadrat 1° drehen &middot; zurück &middot; 2° drehen + CMA-ES</td></tr>' +
                 '<tr><td>+ / −</td><td>Verlängerung d größer / kleiner</td></tr>' +
                 '<tr><td>D &middot; S &middot; ⌘B</td><td>Kurve aufbauen &middot; Screenshot &middot; helle Bühne</td></tr>' +
+                '<tr><td>⌘C</td><td>Farbverlauf-Fenster: Trenner ziehen, Doppelklick setzt einen, ' +
+                'links und rechts getrennt färbbar (harte Kante), rechte Maustaste oder ⌫ löscht, S blendet die Trenner aus</td></tr>' +
                 '<tr><td>0 &middot; 2 &middot; Pfeile</td><td>zurücksetzen &middot; hineinzoomen &middot; verschieben</td></tr>' +
                 '</table>' +
                 '<p>Aus dem Original übernommen. Abweichend: <b>G</b> statt B für das Lot (B ist wie bei ' +
@@ -1534,7 +1713,6 @@
                         <button class="cyber-btn" id="btn-rnd">Zufällig</button>
                         <button class="cyber-btn" id="btn-eq">Gleichseitig</button>
                     </div>
-                    <button class="cyber-btn" id="btn-reuleaux">Reuleaux-Dreieck</button>
                     <div class="row">
                         <button class="cyber-btn" id="btn-fit">Einpassen</button>
                         <button class="cyber-btn" id="btn-help">Hilfe</button>
@@ -1567,6 +1745,11 @@
                 </div>
             `, 'rgb(121,158,49)');
 
+            buildGradientWindow();
+
+            CyberUI.createCard('ui-container', 'Messwerte', '<table id="mw"></table>', '#00d2ff');
+            buildStats();
+
             CyberUI.createCard('ui-container', 'Tasten', `
                 <div class="iris-keys">
                     <b>T</b> Dreieck &middot; <b>E</b> alle Verlängerungen<br>
@@ -1577,7 +1760,7 @@
                     <b>X</b> / <b>⇧X</b> / <b>Y</b> Bahn suchen, sofort exakt, Heatmap<br>
                     <b>R</b> / <b>⇧R</b> Quadrat drehen &middot; <b>Leertaste</b> 2° + CMA-ES<br>
                     <b>+ −</b> Verlängerung &middot; <b>D</b> Aufbauen &middot; <b>S</b> Screenshot<br>
-                    <b>⌘B</b> helle Bühne &middot; <b>H</b> Hilfe<br>
+                    <b>⌘B</b> helle Bühne &middot; <b>⌘C</b> Farbverlauf &middot; <b>H</b> Hilfe<br>
                     <b>0</b> zurücksetzen &middot; <b>2</b> zoomen &middot; <b>Pfeile</b> verschieben
                 </div>
             `, 'rgb(155,130,225)', { collapsible: true, collapsed: true });
@@ -1606,7 +1789,8 @@
                 ['chk-box2', 'Quadrat zeigen', 'box'],
                 ['chk-rot', 'Auto-Rotation', 'autoRot'],
                 ['chk-box2', 'Rotationsbahn', 'path'],
-                ['chk-box2', 'Heatmap', 'heat']
+                ['chk-box2', 'Heatmap', 'heat'],
+                ['chk-box2', 'Skala fest (vergleichbar)', 'absScale']
             ];
             boxes.forEach(([box, label, key, col, html]) => {
                 const w = CyberUI.createCheckbox(box, label, state[key], (on) => {
@@ -1618,6 +1802,7 @@
                     }
                     /* the heatmap has to be computed before it can be shown */
                     if (key === 'heat' && on) { buildHeat(); render(); saveState(); return; }
+                    if (key === 'absScale' && state.heat) buildHeat();
                     if (key === 'autoRot' && on) { state.box = true; loop(); }
                     sync();
                 }, col || null);
@@ -1644,16 +1829,6 @@
             $('btn-help').addEventListener('click', toggleHelp);
             $('btn-rnd').addEventListener('click', randomTriangle);
             $('btn-eq').addEventListener('click', equilateral);
-            /* equilateral + d = -a: the six arcs collapse to the three of Reuleaux */
-            $('btn-reuleaux').addEventListener('click', () => {
-                equilateral();
-                const g = geometry(0);
-                state.d = -Math.min(g.a, g.b, g.c);
-                state.wiper = true;
-                state.showTriangle = true;
-                showD();
-                shapeChanged();
-            });
             $('btn-reset').addEventListener('click', reset);
         }
 
@@ -1673,7 +1848,9 @@
         /* probe for the headless test bench (and the console): live view + state */
         window.irisvis = { view: view, state: state, get boxC() { return boxC; },
             get rotPath() { return rotPath; }, get sweepRun() { return sweepRun; },
-            get A() { return toScreen(A); }, get B() { return toScreen(B); } };
+            get A() { return toScreen(A); }, get B() { return toScreen(B); },
+            get buildT() { return buildT; }, get building() { return building; },
+            stopBuild: function () { building = false; render(); } };
         $('math-coach-box').classList.add('visible');
     </script>
 </body>
