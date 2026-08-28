@@ -11,6 +11,7 @@
     //  spelled-out label for the edit panel]
     const LINKS = [
         ['index.html', 'Home', 'b-grey', 'Startseite'],
+        ['mathe/mathe5.html', 'MA 5', 'b-orange', 'Mathematik Klasse 5'],
         ['mathe/mathe11.html', 'MA 11', 'b-orange', 'Mathematik Klasse 11'],
         ['mathe/mathe12.html', 'MA 12', 'b-orange', 'Mathematik Klasse 12'],
         ['mathe/mathe13.html', 'MA 13', 'b-orange', 'Mathematik Klasse 13'],
@@ -39,6 +40,7 @@
     // column?] — a caption groups a subject inside the panel.
     const DROPS = [
         ['Oberschule', [
+            ['Mathematik', ['mathe/mathe5.html']],
             ['Informatik', ['informatik/informatik9.html']]
         ]],
         ['Berufliches Gymnasium', [
