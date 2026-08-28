@@ -27,6 +27,65 @@
     const HASH = '517ac27fb0b499ddd50da49532cc40d47d4d36a9a49a43e1558f16eec5cbeda4';   // plain SHA-256 (legacy)
     const ROUNDS = 200000;
 
+    // --- Shared BUTTON gate ------------------------------------------------
+    // Any svp page can put an action behind the SVP password with
+    //   svpGate.run(function () { ...  });
+    // Same hash and unlock key as the plan pages' edit button, so one unlock
+    // covers both. Only the SHA-256 hash lives here, never the passphrase.
+    // Exported before the early returns below, which only concern the page gate.
+    const BTN_KEY = 'svp-edit-gate';
+    const toHex = buf => Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+
+    function askButtonPwd(onOk) {
+        const overlay = document.createElement('div');
+        overlay.className = 'svp-gate-overlay';
+        overlay.innerHTML =
+            '<div class="svp-gate-card">' +
+            '  <div class="svp-gate-title">Doc Alvers &middot; SVP</div>' +
+            '  <div class="svp-gate-sub">Bitte Passwort eingeben</div>' +
+            '  <input type="password" id="svp-btn-pwd" aria-label="Passwort" autocomplete="current-password">' +
+            '  <button type="button" class="action" id="svp-btn-go">Freischalten</button>' +
+            '  <div class="svp-gate-err" id="svp-btn-err">&nbsp;</div>' +
+            '</div>';
+        document.body.appendChild(overlay);
+
+        const input = overlay.querySelector('#svp-btn-pwd');
+        const err = overlay.querySelector('#svp-btn-err');
+
+        async function tryUnlock() {
+            try {
+                const hexed = toHex(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(input.value)));
+                if (hexed === HASH) {
+                    try { localStorage.setItem(BTN_KEY, HASH); } catch (e) { }
+                    overlay.remove();
+                    onOk();
+                    return;
+                }
+                err.textContent = 'Leider nein — nochmal probieren.';
+            } catch (e) {
+                err.textContent = 'Passwortprüfung nicht möglich (braucht https oder localhost).';
+            }
+            input.value = '';
+            input.focus();
+        }
+
+        overlay.querySelector('#svp-btn-go').addEventListener('click', tryUnlock);
+        input.addEventListener('keydown', e => { if (e.key === 'Enter') tryUnlock(); });
+        /* click on the dark backdrop (not the card) cancels */
+        overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+        input.focus();
+    }
+
+    window.svpGate = {
+        unlocked: function () {
+            try { return localStorage.getItem(BTN_KEY) === HASH; } catch (e) { return false; }
+        },
+        /* run fn straight away when unlocked, otherwise after a correct password */
+        run: function (fn) {
+            if (window.svpGate.unlocked()) fn(); else askButtonPwd(fn);
+        }
+    };
+
     // per-page gate from the script tag's data attributes (see header comment)
     const me = document.currentScript;
     const ds = (me && me.dataset) || {};
