@@ -1277,6 +1277,104 @@ td.remark { color: var(--muted); font-size: 0.88rem; min-width: 160px; }
     white-space: nowrap;
 }
 
+/* Bereich-Spalte: Pille und WebUntis-Chip untereinander, linksbuendig.
+   inline-grid ist so breit wie sein breitestes Kind, justify-items: stretch
+   zieht beide Kinder auf genau diese Breite - deshalb sind Pille und Chip
+   immer gleich breit, ohne feste Masse. */
+#plan-table td.lb { text-align: left; }
+
+.lb-cell {
+    display: inline-grid;
+    justify-items: stretch;
+    gap: 8px;
+}
+
+.lb-cell .badge {
+    /* gleiche Hoehe wie der Chip darunter, Inhalt mittig */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 22px;
+    width: 100%;
+}
+
+/* WebUntis-Status: zeigt, ob der Stundeninhalt der Woche im Klassenbuch steht.
+   Ein Punkt je Stunde der Woche (also je Klasse). Gespeist aus
+   <plan>.untis.json, erzeugt von tools/webuntis.js status.
+   Immer sichtbar - nur der Klick (WebUntis oeffnen) haengt am Bearbeiten-Modus.
+   Alle Grundregeln bewusst einklassig, damit .is-full/.is-part die Farbe
+   sicher ueberschreiben. */
+.untis-chip {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    width: 100%;
+    min-height: 22px;
+    padding: 2px 7px;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    background: transparent;
+    color: var(--muted);
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.48rem;
+    letter-spacing: 0.14em;
+    line-height: 1;
+    white-space: nowrap;
+    cursor: default;
+    opacity: 0.75;
+    transition: opacity 0.15s ease, border-color 0.15s ease;
+}
+
+.untis-chip:hover { opacity: 1; }
+.untis-chip .u-mark { font-weight: 600; }
+
+/* Anfassbar ist der Chip nur beim Bearbeiten; der Tooltip bleibt immer da. */
+body.editing .untis-chip { cursor: pointer; }
+
+.untis-chip .u-dots {
+    display: inline-flex;
+    gap: 3px;
+    /* Der Punkt-Block gehoert zum Kuerzel, nicht daneben - eine feine
+       Trennung statt einer zweiten Pille. */
+    padding-left: 5px;
+    border-left: 1px solid var(--line);
+}
+
+.untis-chip .u-dots i {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    border: 1px solid currentColor;
+    background: transparent;
+    opacity: 0.6;
+}
+
+.untis-chip .u-dots i.on { background: currentColor; opacity: 1; }
+
+/* Alles eingetragen / nur teilweise: gefuellt, damit der Zustand aus dem
+   Augenwinkel lesbar ist. Schrift und Punkte nehmen die Seitenfarbe, das
+   traegt in beiden Themes - Weiss waere im Light-Theme zu hart. */
+.untis-chip.is-full {
+    color: var(--bg);
+    background: var(--phi);
+    border-color: var(--phi);
+    opacity: 1;
+}
+
+.untis-chip.is-full .u-dots { border-left-color: var(--bg); }
+
+.untis-chip.is-part {
+    color: var(--bg);
+    background: var(--lambda);
+    border-color: var(--lambda);
+    opacity: 1;
+}
+
+.untis-chip.is-part .u-dots { border-left-color: var(--bg); }
+
+@media print { .untis-chip { display: none; } }
+
 /* Badges that deep-link into the Lehrplan PDF (set by svp-plan.js) */
 .badge-link { cursor: pointer; }
 .badge-link:hover { filter: brightness(1.4); }

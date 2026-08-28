@@ -1,5 +1,9 @@
 #!/usr/bin/env node
-// Read-only WebUntis client for "Private Schule IBB gGmbH" (Dresden).
+// WebUntis client for "Private Schule IBB gGmbH" (Dresden).
+// Reading uses the public JSON-RPC API; writing the classbook lesson topic
+// goes through the mobile API (jsonrpc_intern.do), which is the only one that
+// has write methods at all. Writes never overwrite an existing topic unless
+// --force is given, so a correction made by hand in WebUntis always wins.
 // Credentials are NEVER stored here - they are read at runtime from ~/.webuntis-cred (chmod 600).
 // Supports two login methods:
 //   A) password  -> classic JSON-RPC authenticate
@@ -61,7 +65,7 @@ function totp(secret, timeMs) {
 
 let cookies = '';
 
-async function post(url, body) {
+async function post(url, body, raw) {
   const res = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...(cookies ? { Cookie: cookies } : {}) },
@@ -73,12 +77,51 @@ async function post(url, body) {
     if (/^(JSESSIONID|schoolname|traceId)=/.test(kv)) cookies = cookies ? `${cookies}; ${kv}` : kv;
   }
   const json = await res.json();
+  if (raw) return json;                 // caller inspects error/result itself
   if (json.error) throw new Error(`${json.error.message} (code ${json.error.code})`);
   return json.result;
 }
 
 async function rpc(method, params) {
   return post(`${BASE}/WebUntis/jsonrpc.do?school=${SCHOOL}`, { id: 'r', method, params: params ?? {}, jsonrpc: '2.0' });
+}
+
+// ---------- mobile API (jsonrpc_intern.do) - the only one that can write ----------
+// Every intern call carries its own fresh TOTP; the server rejects a clientTime
+// that drifts, so we keep the offset measured at login.
+let drift = 0, secret = '', user = '';
+
+function internAuth() {
+  const now = Date.now() + drift;
+  return { clientTime: now, user, otp: totp(secret, now) };
+}
+
+async function intern(method, params) {
+  if (!secret) { console.error(`${method} braucht den App-Schluessel-Login (WEBUNTIS_SECRET).`); process.exit(1); }
+  const json = await post(`${BASE}/WebUntis/jsonrpc_intern.do?m=${method}&school=${SCHOOL}&v=i2.2`,
+    { id: 'i', method, params: [{ auth: internAuth(), ...params }], jsonrpc: '2.0' }, true);
+  return json;
+}
+
+// Write the classbook lesson topic of one period.
+// The id field is called ttId here (periodId gives "period 0 not found") and
+// lessonTopic is a flat string - a nested object trips the server's parser.
+async function writeTopic(ttId, text) {
+  const r = await intern('submitLessonTopic', { ttId, lessonTopic: text });
+  if (r.error) throw new Error(`${r.error.message} (code ${r.error.code})`);
+  return r.result;
+}
+
+// Read back what is actually stored. getLessonTopic2017 only returns previous
+// topics as suggestions, so the real state comes from getPeriodData2017.
+async function readTopics(ttIds) {
+  const out = {};
+  for (let i = 0; i < ttIds.length; i += 50) {
+    const r = await intern('getPeriodData2017', { ttIds: ttIds.slice(i, i + 50) });
+    if (r.error) throw new Error(`${r.error.message} (code ${r.error.code})`);
+    for (const [id, d] of Object.entries(r.result?.dataByTTId || {})) out[id] = (d.topic?.text || '');
+  }
+  return out;
 }
 
 // ---------- login ----------
@@ -98,6 +141,9 @@ async function login(cred) {
     });
     const sn = `schoolname="${Buffer.from('_' + SCHOOL).toString('base64')}"`;
     cookies = cookies ? `${cookies}; ${sn}` : sn;
+    drift = now - Date.now();
+    secret = cred.WEBUNTIS_SECRET;
+    user = cred.WEBUNTIS_USER;
     return { mode: 'secret', user: result.userData, masterData: result.masterData };
   }
   if (!cred.WEBUNTIS_PASS) { console.error('Neither WEBUNTIS_PASS nor WEBUNTIS_SECRET set.'); process.exit(2); }
@@ -111,6 +157,144 @@ async function login(cred) {
 function ymd(d) { return `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}`; }
 function parseYmd(s) { const t = String(s); return new Date(+t.slice(0, 4), +t.slice(4, 6) - 1, +t.slice(6, 8)); }
 function hhmm(t) { return String(t).padStart(4, '0').replace(/(\d{2})(\d{2})/, '$1:$2'); }
+
+// ---------- Stoffverteilungsplan (SVP) ----------
+// Which WebUntis class maps to which plan page. Kept in a file so a new course
+// only needs an entry there, not a code change.
+const MAP_FILE = path.join(__dirname, 'webuntis-svp-map.json');
+const REPO = path.join(__dirname, '..');
+
+function loadMap() {
+  if (!fs.existsSync(MAP_FILE)) return {};
+  const raw = JSON.parse(fs.readFileSync(MAP_FILE, 'utf8'));
+  const out = {};
+  for (const [k, v] of Object.entries(raw)) if (!k.startsWith('_')) out[k] = v;
+  return out;
+}
+
+// ISO week number - the plan rows are keyed by kw, which is far more robust
+// than parsing "24.-28.08.26" date strings.
+function isoWeek(d) {
+  const t = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+  t.setUTCDate(t.getUTCDate() + 4 - (t.getUTCDay() || 7));
+  const jan1 = new Date(Date.UTC(t.getUTCFullYear(), 0, 1));
+  return Math.ceil(((t - jan1) / 86400000 + 1) / 7);
+}
+
+// Pull "window.PLAN = [ ... ];" and "window.BADGE = { ... };" out of a plan
+// page by bracket counting, then evaluate just that literal.
+function extractLiteral(src, name, open, close) {
+  const at = src.indexOf('window.' + name);
+  if (at < 0) return null;
+  const start = src.indexOf(open, at);
+  if (start < 0) return null;
+  let depth = 0, inStr = null, esc = false;
+  for (let i = start; i < src.length; i++) {
+    const c = src[i];
+    if (inStr) {
+      if (esc) esc = false;
+      else if (c === '\\') esc = true;
+      else if (c === inStr) inStr = null;
+      continue;
+    }
+    if (c === '"' || c === "'" || c === '`') { inStr = c; continue; }
+    if (c === open) depth++;
+    else if (c === close && --depth === 0) {
+      return new Function('return ' + src.slice(start, i + 1))();
+    }
+  }
+  return null;
+}
+
+// The published plan state: the HTML is only the base - once a page has been
+// edited, a complete copy of every row lives in Supabase and masks it.
+async function loadPlan(pageRel) {
+  const file = path.join(REPO, pageRel);
+  const src = fs.readFileSync(file, 'utf8');
+  const rows = extractLiteral(src, 'PLAN', '[', ']') || [];
+  const badge = extractLiteral(src, 'BADGE', '{', '}') || {};
+  const pagePath = '/' + pageRel.replace(/^HTML\//, '');
+  let overrides = {}, ts = null;
+  try {
+    const authSrc = fs.readFileSync(path.join(REPO, 'HTML/svp/svp-auth.js'), 'utf8');
+    const key = (authSrc.match(/'(sb_publishable_[^']+)'/) || [])[1];
+    const url = (authSrc.match(/DB_URL\s*=\s*'([^']+)'/) || [])[1];
+    if (key && url) {
+      const res = await fetch(`${url}/rest/v1/svp_plan_edits?page=eq.${encodeURIComponent(pagePath)}&select=edits,ts`,
+        { headers: { apikey: key, Authorization: 'Bearer ' + key } });
+      if (res.ok) { const j = await res.json(); if (j.length) { overrides = j[0].edits || {}; ts = j[0].ts; } }
+    }
+  } catch (e) { console.error('  (Overrides nicht erreichbar: ' + e.message + ')'); }
+  const merged = rows.map((r, i) => ({ ...r, ...(overrides[String(i)] || {}) }));
+  return { rows: merged, badge, overrideTs: ts, pagePath };
+}
+
+// One line for the classbook: topic, Lernbereich, Ustd. and the planned steps.
+function topicText(row, badge) {
+  const lb = (badge[row.type] || [])[1];
+  const head = [lb, row.u].filter(Boolean).join(', ');
+  let t = row.topic || '';
+  if (head) t += ` (${head})`;
+  const details = (row.details || []).filter(Boolean);
+  if (details.length) t += ': ' + details.join(' \u00b7 ');
+  t = t.replace(/\s+/g, ' ').trim();
+  return t.length > 250 ? t.slice(0, 249) + '\u2026' : t;
+}
+
+// My lessons on a day / in a range, with the ttId needed for writing.
+async function myLessons(from, to, session) {
+  const ELEM_TYPE = { CLASS: 1, KLASSE: 1, TEACHER: 2, SUBJECT: 3, ROOM: 4, STUDENT: 5 };
+  const id = session.user?.elemId ?? session.user?.personId;
+  const rawType = session.user?.elemType ?? session.user?.personType ?? 2;
+  const type = typeof rawType === 'string' ? (ELEM_TYPE[rawType.toUpperCase()] ?? 2) : rawType;
+  const tt = await rpc('getTimetable', { options: {
+    element: { id, type }, startDate: Number(from), endDate: Number(to),
+    klasseFields: ['id', 'name'], subjectFields: ['id', 'name'], roomFields: ['id', 'name'],
+  } });
+  return (tt || [])
+    .filter(l => (l.kl || []).length && l.su?.[0])
+    .map(l => ({ ttId: l.id, date: String(l.date), start: hhmm(l.startTime),
+                 subject: l.su[0].name, klassen: l.kl.map(k => k.name), code: l.code || '' }))
+    .sort((a, b) => a.date - b.date || a.start.localeCompare(b.start));
+}
+
+// Regenerate the <plan>.untis.json files the SVP badges read. Runs as its own
+// command and automatically after 'plan' wrote something, so the badges never
+// show a state older than the last write.
+async function runStatus(session) {
+  const klasseToPage = loadMap();
+  const years = await rpc('getSchoolyears');
+  const today = Number(ymd(new Date()));
+  const year = years.find(y => Number(y.startDate) <= today && Number(y.endDate) >= today) || years[years.length - 1];
+  console.log(`Schuljahr ${year.name}: ${year.startDate}..${year.endDate}`);
+  const lessons = (await myLessons(year.startDate, year.endDate, session))
+    .filter(l => l.klassen.some(k => klasseToPage[k]));
+  const topics = await readTopics(lessons.map(l => l.ttId));
+  const byPage = {};
+  for (const l of lessons) {
+    const page = l.klassen.map(k => klasseToPage[k]).find(Boolean);
+    const kw = String(isoWeek(parseYmd(l.date)));
+    const b = (byPage[page] ||= { weeks: {} });
+    (b.weeks[kw] ||= []).push({
+      date: l.date, start: l.start, klasse: l.klassen.join(','),
+      written: !!(topics[String(l.ttId)] || '').trim(),
+      text: topics[String(l.ttId)] || '',
+    });
+  }
+  for (const [page, data] of Object.entries(byPage)) {
+    const out = path.join(REPO, page.replace(/\.html$/, '.untis.json'));
+    const classes = [...new Set(Object.values(data.weeks).flat().map(e => e.klasse))].sort();
+    const n = Object.values(data.weeks).flat().length;
+    const done = Object.values(data.weeks).flat().filter(e => e.written).length;
+    fs.writeFileSync(out, JSON.stringify({
+      generated: new Date().toISOString(), page: '/' + page.replace(/^HTML\//, ''),
+      webuntis: `${BASE}/WebUntis/?school=${SCHOOL}#/basic/mytimetable`,
+      classes, weeks: data.weeks,
+    }, null, 1));
+    console.log(`${path.relative(REPO, out)}: ${done}/${n} Stunden eingetragen, ${Object.keys(data.weeks).length} Wochen`);
+  }
+  if (!Object.keys(byPage).length) console.log('Keine Stunde passt zu einer Planseite - webuntis-svp-map.json pruefen.');
+}
 
 async function main() {
   const cmd = process.argv[2] || 'whoami';
@@ -309,9 +493,70 @@ async function main() {
     }
     return;
   }
+  if (cmd === 'read') {
+    const ids = process.argv.slice(3).map(Number).filter(Boolean);
+    console.log(JSON.stringify(await readTopics(ids), null, 1));
+    return;
+  }
+
+  if (cmd === 'topic') {
+    // Raw write: webuntis.js topic <ttId> "<Text>"
+    const ttId = Number(process.argv[3]);
+    const text = process.argv[4];
+    if (!ttId || text == null) { console.error('Aufruf: webuntis.js topic <ttId> "<Text>"'); process.exit(2); }
+    await writeTopic(ttId, text);
+    const back = await readTopics([ttId]);
+    console.log(`${ttId}: ${JSON.stringify(back[String(ttId)])}`);
+    return;
+  }
+
+  if (cmd === 'plan') {
+    // Carry the SVP over into the classbook: webuntis.js plan [YYYYMMDD] [--dry] [--force]
+    const args = process.argv.slice(3);
+    const dry = args.includes('--dry');
+    const force = args.includes('--force');
+    const day = args.find(a => /^\d{8}$/.test(a)) || ymd(new Date());
+    const klasseToPage = loadMap();
+    const lessons = await myLessons(day, day, session);
+    if (!lessons.length) { console.log(`Keine Stunden am ${day}.`); return; }
+    const plans = {};   // page -> loaded plan, one fetch per page
+    const unmapped = new Set();
+    let written = 0;
+    for (const l of lessons) {
+      const page = l.klassen.map(k => klasseToPage[k]).find(Boolean);
+      if (!page) { l.klassen.forEach(k => unmapped.add(k)); continue; }
+      if (!plans[page]) plans[page] = await loadPlan(page);
+      const { rows, badge } = plans[page];
+      const kw = isoWeek(parseYmd(l.date));
+      const row = rows.find(r => !r.ferien && Number(r.kw) === kw);
+      const label = `${l.date} ${l.start} ${l.subject} ${l.klassen.join(',')}`;
+      if (!row) { console.log(`${label}: keine Planzeile fuer KW ${kw} in ${page}`); continue; }
+      const text = topicText(row, badge);
+      if (!text) { console.log(`${label}: Planzeile KW ${kw} hat kein Thema`); continue; }
+      const current = (await readTopics([l.ttId]))[String(l.ttId)] || '';
+      if (current && current !== text && !force) {
+        console.log(`${label}: STEHT SCHON ANDERS DRIN, nicht angefasst (--force ueberschreibt)`);
+        console.log(`    ist:  ${current}`);
+        console.log(`    waer: ${text}`);
+        continue;
+      }
+      if (current === text) { console.log(`${label}: schon eingetragen`); continue; }
+      if (dry) { console.log(`${label}: WUERDE schreiben -> ${text}`); continue; }
+      await writeTopic(l.ttId, text);
+      const back = (await readTopics([l.ttId]))[String(l.ttId)] || '';
+      if (back === text) written++;
+      console.log(`${label}: ${back === text ? 'eingetragen' : 'FEHLER, Rueckgelesenes weicht ab'} -> ${back}`);
+    }
+    if (unmapped.size) console.log(`Ohne Planseite (in ${path.basename(MAP_FILE)} nachtragen): ${[...unmapped].join(', ')}`);
+    if (written) { console.log('Badge-Daten aktualisieren:'); await runStatus(session); }
+    return;
+  }
+
+  if (cmd === 'status') { await runStatus(session); return; }
+
   const map = { klassen: 'getKlassen', subjects: 'getSubjects', teachers: 'getTeachers', rooms: 'getRooms', timegrid: 'getTimegridUnits', holidays: 'getHolidays', years: 'getSchoolyears' };
   if (map[cmd]) { console.log(JSON.stringify(await rpc(map[cmd]), null, 2)); return; }
-  console.error(`Unknown command "${cmd}". Try: whoami | timetable [YYYYMMDD] [YYYYMMDD] | ${Object.keys(map).join(' | ')}`);
+  console.error(`Unknown command "${cmd}". Try: whoami | timetable [VON] [BIS] | topic <ttId> "<Text>" | plan [YYYYMMDD] [--dry] [--force] | status | ${Object.keys(map).join(' | ')}`);
   process.exit(1);
 }
 
