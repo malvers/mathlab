@@ -317,11 +317,10 @@
             angle: 0,            // its rotation in degrees
             path: false,         // the path the square's centre traces over 360°
             heat: false,         // quality landscape of the search
-            searching: false     // CMA-ES running
         };
 
         let boxC = null;         // current square centre (what CMA-ES searches for)
-        let es = null, pop = [], evals = 0, lastQ = 0;
+        let pop = [], evals = 0, lastQ = 0;
         let rotPath = [], sweepRun = null;
         let heatImg = null, heatBox = null;
 
@@ -333,10 +332,23 @@
             'showProof', 'showChords', 'showLabels', 'light', 'wiper', 'wiperFill',
             'box', 'angle', 'd'];
 
+        let savedView = null, savedScroll = 0, saveTimer = null;
+
         function saveState() {
             const o = {};
             SAVE_FIELDS.forEach((k) => { o[k] = state[k]; });
+            /* the stage view (zoom + position) and how far the sidebar is scrolled */
+            o._view = { s: view.s, ox: view.ox, oy: view.oy, auto: view.auto };
+            const ui = document.getElementById('ui-container');
+            const sp = document.getElementById('side-panel');
+            o._scroll = Math.max(ui ? ui.scrollTop : 0, sp ? sp.scrollTop : 0);
             try { localStorage.setItem(SAVE_KEY, JSON.stringify(o)); } catch (e) { }
+        }
+
+        /* wheel, pan and scrolling fire in bursts — write at most every 300 ms */
+        function scheduleSave() {
+            if (saveTimer) return;
+            saveTimer = setTimeout(() => { saveTimer = null; saveState(); }, 300);
         }
 
         function loadState() {
@@ -346,6 +358,23 @@
             SAVE_FIELDS.forEach((k) => {
                 if (typeof o[k] === typeof state[k]) state[k] = o[k];
             });
+            if (o._view && Number.isFinite(o._view.s)) savedView = o._view;
+            if (Number.isFinite(o._scroll)) savedScroll = o._scroll;
+        }
+
+        /* put the remembered view and scroll position back (after the UI exists) */
+        function restoreViewAndScroll() {
+            const ui = document.getElementById('ui-container');
+            const sp = document.getElementById('side-panel');
+            if (savedScroll) {
+                if (ui) ui.scrollTop = savedScroll;
+                if (sp) sp.scrollTop = savedScroll;
+            }
+            [ui, sp].forEach((el) => { if (el) el.addEventListener('scroll', scheduleSave, { passive: true }); });
+            if (savedView && savedView.auto === false) {
+                view.s = savedView.s; view.ox = savedView.ox; view.oy = savedView.oy; view.auto = false;
+                render();
+            }
         }
 
         let buildT = 1;          // 0 … 1: how much of the wiper curve is drawn
@@ -524,36 +553,6 @@
             return { c: { x: mu * u.x + mv * v.x, y: mu * u.y + mv * v.y }, wu: uhi - ulo, wv: vhi - vlo };
         }
 
-        /* one CMA-ES generation with the central implementation (js/cmaes-logic.js) */
-        function stepCMAES(g) {
-            if (!es) return;
-            const pts = curvePoints(g, 24);
-            const h = boxSide(g) / 2, th = state.angle * Math.PI / 180;
-            const X = es.ask();
-            const F = X.map((x) => boxQuality(pts, { x: x[0], y: x[1] }, th, h));
-            es.tell(X, F);
-            pop = X.map((x) => ({ x: x[0], y: x[1] }));
-            evals = es.counteval;
-            lastQ = es.best.f;
-            boxC = { x: es.best.x[0], y: es.best.x[1] };
-            if (es.best.f < 1e-9 || es.stop()) state.searching = false;
-        }
-
-        /* Like the Java original: the search does NOT start from scratch. Doc sets
-           setInitialX(1) and sigma 5 on a box of ~1000 px — i.e. the box is already
-           roughly right and CMA-ES only corrects the small offset the rotation caused.
-           The found placement is kept (setOptimizedBoundingBox), so the next angle
-           starts from it. */
-        function startCMAES() {
-            const g = geometry(state.d);
-            state.box = true;
-            if (!boxC) boxC = boxOptimal(curvePoints(g, 24), 0).c;   // Docs axis-aligned start
-            es = new CMAES([boxC.x, boxC.y], Math.max(1, boxSide(g) / 200));
-            pop = []; evals = 0; lastQ = Infinity;
-            state.searching = true;
-            loop();
-        }
-
         /* Docs calculateBoundingBoxRotationPath360: turn the square in 2° steps from
            0° to 90°, run a full CMA-ES at every step (warm started at the previous
            placement) and record the centre. One step per frame, so you can watch it. */
@@ -568,18 +567,47 @@
             loop();
         }
 
+        /* The whole 0…90° sweep in one go. Measured on this machine: (24, 2, 200)
+           takes ~70 ms and lands within 0.1 px of the exact optimum, (12, 2, 60) takes
+           ~19 ms at 0.36 px — the fast one is used while a vertex is being dragged,
+           the exact one when the mouse is released. */
+        function computePath(g, per, step, itMax) {
+            const pts = curvePoints(g, per);
+            const h = boxSide(g) / 2;
+            const sig = Math.max(1, boxSide(g) / 200);
+            let c = boxOptimal(pts, 0).c;
+            const out = [];
+            for (let deg = 0; deg <= 90; deg += step) {
+                const th = deg * Math.PI / 180;
+                const run = new CMAES([c.x, c.y], sig);
+                let it = 0;
+                while (it < itMax && run.best.f > 1e-9 && !run.stop()) {
+                    const X = run.ask();
+                    run.tell(X, X.map((x) => boxQuality(pts, { x: x[0], y: x[1] }, th, h)));
+                    it++;
+                }
+                c = { x: run.best.x[0], y: run.best.x[1] };
+                out.push(c);
+            }
+            return out;
+        }
+
         function stepSweep() {
             const g = geometry(state.d);
             const pts = curvePoints(g, 24);
             const h = boxSide(g) / 2;
             const th = sweepRun.deg * Math.PI / 180;
+            /* Like the Java original: warm start at the previous placement, tiny sigma
+               (Doc: setInitialX(1), sigma 5 on a ~1000 px box), stop as soon as nothing
+               sticks out any more (stopFitness = 0). */
             const run = new CMAES([boxC.x, boxC.y], Math.max(1, boxSide(g) / 200));
-            let it = 0;
+            let it = 0, X = [];
             while (it < 200 && run.best.f > 1e-9 && !run.stop()) {
-                const X = run.ask();
+                X = run.ask();
                 run.tell(X, X.map((x) => boxQuality(pts, { x: x[0], y: x[1] }, th, h)));
                 it++;
             }
+            pop = X.map((x) => ({ x: x[0], y: x[1] }));       // show the last generation
             boxC = { x: run.best.x[0], y: run.best.x[1] };
             lastQ = run.best.f;
             evals += run.counteval;
@@ -871,12 +899,12 @@
             }
 
             /* the population — every dot is one candidate placement */
-            if (state.searching && pop.length) {
+            if (sweepRun && pop.length) {
                 pop.forEach((q) => dot(q, 'rgba(245, 194, 66, 0.75)', 3));
             }
 
             /* the exact optimum as a faint reference, the found one solid */
-            if (state.searching) square(opt.c, th, h, 'rgba(160, 190, 230, 0.35)', 1, [5, 5]);
+            if (sweepRun) square(opt.c, th, h, 'rgba(160, 190, 230, 0.35)', 1, [5, 5]);
             square(c, th, h, COL.circle, 2, null);
             dot(c, COL.circle, 4);
         }
@@ -1114,7 +1142,12 @@
                 const w = toWorld(pos);
                 if (drag === 'A') A = w; else if (drag === 'B') B = w; else C = w;
                 view.auto = false;              /* the user is in charge of the view now */
-                rotPath = [];                   /* the old path belongs to the old triangle */
+                /* Docs moveHandlesOrWhipers: with the path switched on, CMA-ES recomputes
+                   it live while the vertex is being dragged — coarse enough to keep up.
+                   The square has to be re-placed too (Doc: setOptimizedBoundingBox runs on
+                   every drag); a kept centre would leave the curve sticking out. */
+                boxC = null;
+                if (state.path) rotPath = computePath(geometry(state.d), 12, 2, 60);
             } else if (drag === 'wiper') {
                 wiperDrag.pos = tipOnArc(wiperDrag.key, toWorld(pos), geometry(state.d));
             } else if (drag === 'zoom') {
@@ -1132,10 +1165,15 @@
 
         function onUp() {
             if (!drag) return;
+            /* mouse released: redo the path at full quality */
+            if (state.path && (drag === 'A' || drag === 'B' || drag === 'C')) {
+                rotPath = computePath(geometry(state.d), 24, 2, 200);
+            }
             drag = null;
             wiperDrag = null;                   /* the tip snaps back onto its arc */
             canvas.classList.remove('dragging');
             render();
+            saveState();                        /* keep the new view / placement */
         }
 
         /* zoom by `k` keeping the world point under `pos` in place */
@@ -1151,6 +1189,7 @@
             e.preventDefault();
             zoomAround(localPos(e), Math.exp(-e.deltaY * 0.0015));
             render();
+            scheduleSave();
         }, { passive: false });
 
         canvas.addEventListener('mousedown', onDown);
@@ -1193,7 +1232,11 @@
                 if (shift) state.box = !state.box; else state.path = !state.path;
                 sync();
             }
-            else if (k === 'x') { if (shift) sweepRotation(); else startCMAES(); }
+            else if (k === 'x') {
+                if (shift) rotPath = computePath(geometry(state.d), 24, 2, 200);   // exact, at once
+                else sweepRotation();                                              // watch it run
+                state.path = true; state.box = true; sync();
+            }
             else if (k === 'y') { buildHeat(); }
             else if (k === 'r') { rotateBox(shift ? -1 : 1); }
             else if (k === 's') { CyberUI.captureAppScreenshot(); }
@@ -1211,11 +1254,11 @@
                 else view.ox -= step;
                 view.auto = false;
                 render();
+                scheduleSave();
                 e.preventDefault();
             }
             else if (k === ' ') {                                    // Docs space: turn 2° + search
                 rotateBox(2);
-                startCMAES();
                 e.preventDefault();
             }
         });
@@ -1249,7 +1292,7 @@
                 '<tr><td>W &middot; ⇧W</td><td>Wischerkurve &middot; Fläche füllen</td></tr>' +
                 '<tr><td>L &middot; G</td><td>Sehnen + Mittelsenkrechte &middot; Lot vom Mittelpunkt (Abstand r)</td></tr>' +
                 '<tr><td>B &middot; ⇧B</td><td>Rotationsbahn &middot; Quadrat</td></tr>' +
-                '<tr><td>X &middot; ⇧X &middot; Y</td><td>CMA-ES starten &middot; Rotationsbahn 360° &middot; Heatmap</td></tr>' +
+                '<tr><td>X &middot; ⇧X &middot; Y</td><td>Rotationsbahn (sichtbar suchen) &middot; sofort exakt &middot; Heatmap</td></tr>' +
                 '<tr><td>R &middot; ⇧R &middot; Leertaste</td><td>Quadrat 1° drehen &middot; zurück &middot; 2° drehen + CMA-ES</td></tr>' +
                 '<tr><td>+ / −</td><td>Verlängerung d größer / kleiner</td></tr>' +
                 '<tr><td>D &middot; S &middot; ⌘B</td><td>Kurve aufbauen &middot; Screenshot &middot; helle Bühne</td></tr>' +
@@ -1263,7 +1306,13 @@
         }
 
         /* every toggle runs through here: remember it, then redraw */
-        function sync() { saveState(); fitAndRender(); }
+        function sync() {
+            saveState();
+            boxC = null;                 /* the placement belongs to the current shape */
+            /* the path belongs to the current triangle and d — keep it in step */
+            if (state.path && !sweepRun) rotPath = computePath(geometry(state.d), 12, 2, 60);
+            fitAndRender();
+        }
 
         function fitAndRender() {
             if (view.auto) fit(geometry(state.d));
@@ -1280,7 +1329,6 @@
             state.d = 0;
             state.angle = 0;
             state.animate = false;
-            state.searching = false;
             boxC = null;
             rotPath = [];
             heatImg = null;
@@ -1321,14 +1369,13 @@
                 if (buildT >= 1) { buildT = 1; building = false; }
             }
             if (sweepRun) stepSweep();
-            if (state.searching) stepCMAES(geometry(state.d));
             if (state.animate) fitAndRender(); else render();
-            raf = (state.animate || building || state.searching || sweepRun) ? requestAnimationFrame(tick) : null;
+            raf = (state.animate || building || sweepRun) ? requestAnimationFrame(tick) : null;
         }
 
         function loop() {
             if (raf) return;
-            if (state.animate || building || state.searching || sweepRun) raf = requestAnimationFrame(tick);
+            if (state.animate || building || sweepRun) raf = requestAnimationFrame(tick);
         }
 
         /* let the curve draw itself, like the wiper sweeping across the screen */
@@ -1375,16 +1422,7 @@
                 <div class="stack">
                     <div id="chk-box2" style="display:flex; flex-direction:column; gap:2px"></div>
                     <div id="sl-angle"></div>
-                    <button class="cyber-btn" id="btn-cma" style="border-color:rgb(121,158,49); color:rgb(160,200,90)">CMA-ES suchen</button>
-                    <div class="row">
-                        <button class="cyber-btn" id="btn-path">Rotationsbahn</button>
-                        <button class="cyber-btn" id="btn-heat">Heatmap</button>
-                    </div>
                     <div id="cma-info" style="font-family:'Orbitron'; font-size:0.6rem; line-height:1.8; color:rgba(190,214,246,0.8)"></div>
-                    <div class="note">
-                        Gesucht wird die Lage des Quadrats (2 Zahlen): Summe der Abstände aller
-                        Kurvenpunkte, die herausragen. 0 = passt.
-                    </div>
                 </div>
             `, 'rgb(121,158,49)');
 
@@ -1406,7 +1444,7 @@
                     <b>W</b> / <b>⇧W</b> Wischerkurve / Fläche füllen<br>
                     <b>L</b> Sehnen + Mittelsenkrechte &middot; <b>G</b> Lot (Abstand r)<br>
                     <b>B</b> / <b>⇧B</b> Rotationsbahn / Quadrat<br>
-                    <b>X</b> / <b>⇧X</b> / <b>Y</b> CMA-ES, Bahn 360°, Heatmap<br>
+                    <b>X</b> / <b>⇧X</b> / <b>Y</b> Bahn suchen, sofort exakt, Heatmap<br>
                     <b>R</b> / <b>⇧R</b> Quadrat drehen &middot; <b>Leertaste</b> 2° + CMA-ES<br>
                     <b>+ −</b> Verlängerung &middot; <b>D</b> Aufbauen &middot; <b>S</b> Screenshot<br>
                     <b>⌘B</b> helle Bühne &middot; <b>H</b> Hilfe<br>
@@ -1442,6 +1480,13 @@
             boxes.forEach(([box, label, key, col, html]) => {
                 const w = CyberUI.createCheckbox(box, label, state[key], (on) => {
                     state[key] = on;
+                    /* switching the path on starts the visible CMA-ES run */
+                    if (key === 'path') {
+                        if (on) { sweepRotation(); return; }
+                        sweepRun = null;
+                    }
+                    /* the heatmap has to be computed before it can be shown */
+                    if (key === 'heat' && on) { buildHeat(); return; }
                     sync();
                 }, col || null);
                 /* the shared helper only takes plain text — colour one word afterwards */
@@ -1457,14 +1502,8 @@
                 sync();
             }, 'rgb(121,158,49)', (v) => Math.round(v) + '°');
 
-            $('btn-cma').addEventListener('click', () => {
-                if (state.searching) { state.searching = false; $('btn-cma').textContent = 'CMA-ES suchen'; }
-                else { startCMAES(); $('btn-cma').textContent = 'Anhalten'; }
-            });
-            $('btn-path').addEventListener('click', sweepRotation);
-            $('btn-heat').addEventListener('click', buildHeat);
             $('btn-build').addEventListener('click', buildUp);
-            $('btn-fit').addEventListener('click', () => { view.auto = true; fitAndRender(); });
+            $('btn-fit').addEventListener('click', () => { view.auto = true; fitAndRender(); saveState(); });
             $('btn-help').addEventListener('click', toggleHelp);
             $('btn-rnd').addEventListener('click', randomTriangle);
             $('btn-eq').addEventListener('click', equilateral);
@@ -1484,6 +1523,7 @@
         window.addEventListener('resize', init);
         document.fonts.ready.then(init);
         init();
+        restoreViewAndScroll();
         $('math-coach-box').classList.add('visible');
     </script>
 </body>
