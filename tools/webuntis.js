@@ -159,17 +159,28 @@ function parseYmd(s) { const t = String(s); return new Date(+t.slice(0, 4), +t.s
 function hhmm(t) { return String(t).padStart(4, '0').replace(/(\d{2})(\d{2})/, '$1:$2'); }
 
 // ---------- Stoffverteilungsplan (SVP) ----------
-// Which WebUntis class maps to which plan page. Kept in a file so a new course
-// only needs an entry there, not a code change.
+// Which lessons belong to which plan page. Kept in a file so a new course only
+// needs an entry there, not a code change. Subject AND class have to match:
+// Doc teaches several subjects in the same class, and a Literatur lesson must
+// not be filled with the Informatik plan.
 const MAP_FILE = path.join(__dirname, 'webuntis-svp-map.json');
 const REPO = path.join(__dirname, '..');
 
 function loadMap() {
-  if (!fs.existsSync(MAP_FILE)) return {};
+  if (!fs.existsSync(MAP_FILE)) return [];
   const raw = JSON.parse(fs.readFileSync(MAP_FILE, 'utf8'));
-  const out = {};
-  for (const [k, v] of Object.entries(raw)) if (!k.startsWith('_')) out[k] = v;
-  return out;
+  return (raw.pages || []).map(e => ({
+    page: e.page,
+    subject: String(e.subject || '').toLowerCase(),
+    classes: new Set(e.classes || []),
+  }));
+}
+
+// The plan page for one lesson, or null when nothing is mapped for it.
+function pageFor(lesson, pages) {
+  const subject = String(lesson.subject || '').toLowerCase();
+  const hit = pages.find(p => p.subject === subject && lesson.klassen.some(k => p.classes.has(k)));
+  return hit ? hit.page : null;
 }
 
 // ISO week number - the plan rows are keyed by kw, which is far more robust
@@ -516,15 +527,15 @@ async function main() {
     const dry = args.includes('--dry');
     const force = args.includes('--force');
     const day = args.find(a => /^\d{8}$/.test(a)) || ymd(new Date());
-    const klasseToPage = loadMap();
+    const pages = loadMap();
     const lessons = await myLessons(day, day, session);
     if (!lessons.length) { console.log(`Keine Stunden am ${day}.`); return; }
     const plans = {};   // page -> loaded plan, one fetch per page
     const unmapped = new Set();
     let written = 0;
     for (const l of lessons) {
-      const page = l.klassen.map(k => klasseToPage[k]).find(Boolean);
-      if (!page) { l.klassen.forEach(k => unmapped.add(k)); continue; }
+      const page = pageFor(l, pages);
+      if (!page) { unmapped.add(`${l.subject} ${l.klassen.join(',')}`); continue; }
       if (!plans[page]) plans[page] = await loadPlan(page);
       const { rows, badge } = plans[page];
       const kw = isoWeek(parseYmd(l.date));
