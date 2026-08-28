@@ -17,12 +17,23 @@
  * JG 10–12: cmaes, opti-lens
  * JG 11–12: integralreaktor, fourier, mandelbrot-deep, atomorbitale, differentiallabor
  * uni (zusätzlich): stanford-portal (externer Link), lissajous, atomorbitale, mandelbrot-deep, fourier, integralreaktor, differentiallabor, cmaes, opti-lens
- * top5 (Hub-Kachel): fourier, mandelbrot-deep (Fraktale), atomorbitale, galtonboard, opti-lens (Linsenoptimierung)
+ * top5 (Hub-Kachel): irisvis (Conway's Iris), fourier, mandelbrot-deep (Fraktale), atomorbitale, galtonboard, opti-lens (Linsenoptimierung)
  * Keine Jahrgangs-Tags: cinematic-intro, happy-birthday-ulf (Show / Spaß).
  * ————————————————————————————————————————————————————————————————
  */
 
 const LABS_DATA = [
+    {
+        "id": "irisvis",
+        "href": "irisvis.html",
+        "title": "Conway's Iris",
+        "description": "Verlängere an jeder Ecke beide Seiten um die gegenüberliegende Seite — die sechs Endpunkte liegen auf einem Kreis um den Inkreismittelpunkt, R = \u221a(r²+(s+d)²). Sechs Scheibenwischer-Bögen bilden daraus eine Kurve konstanter Breite; ein Quadrat umschließt sie in jeder Drehlage, und CMA-ES sucht seine Lage live. Mit Beweis-Ansichten, Heatmap der Suchlandschaft und dem Reuleaux-Dreieck auf Knopfdruck.",
+        "tagline": "Geometrie / Konstante Breite / CMA-ES",
+        "icon": LAB_ICONS["irisvis"],
+        "category": "geometrie dreiecke neu top5 highlight hot uni grade10 grade11 grade12",
+        "keywords": "conway kreis satz circle theorem dreieck inkreis reuleaux konstante breite wischer wiper mathologer cmaes evolutionsstrategie optimierung stuetzfunktion quadrat rotation",
+        "color": "gold"
+    },
     {
         "id": "ascii",
         "href": "ascii.html",

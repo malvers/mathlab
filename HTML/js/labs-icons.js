@@ -4,6 +4,23 @@
  */
 
 const LAB_ICONS = {
+    "irisvis": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="50" cy="50" r="34" fill="none" stroke="#F5C242" stroke-width="2.4" />
+            <path d="M35 62 L65 62 L50 36 Z" fill="none" stroke="rgba(255,255,255,0.75)" stroke-width="2" stroke-linejoin="round" />
+            <g stroke-width="2.2" stroke-linecap="round">
+                <line x1="35" y1="62" x2="19" y2="62" stroke="#B02418" />
+                <line x1="65" y1="62" x2="81" y2="62" stroke="#799E31" />
+                <line x1="50" y1="36" x2="41" y2="20" stroke="#F5C242" />
+                <line x1="50" y1="36" x2="59" y2="20" stroke="#F5C242" />
+                <line x1="35" y1="62" x2="27" y2="76" stroke="#B02418" />
+                <line x1="65" y1="62" x2="73" y2="76" stroke="#799E31" />
+            </g>
+            <g fill="#00d2ff">
+                <circle cx="19" cy="62" r="2.6" /><circle cx="81" cy="62" r="2.6" />
+                <circle cx="41" cy="20" r="2.6" /><circle cx="59" cy="20" r="2.6" />
+                <circle cx="27" cy="76" r="2.6" /><circle cx="73" cy="76" r="2.6" />
+            </g>
+        </svg>`,
     "ascii": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
             <rect x="14" y="14" width="72" height="72" rx="12" fill="rgba(121, 158, 49, 0.08)" stroke="#799E31" stroke-width="2" />
             <g font-family="Menlo, Consolas, monospace" font-size="17" font-weight="bold" text-anchor="middle">

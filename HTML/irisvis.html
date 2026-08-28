@@ -25,9 +25,9 @@
         /* the coach box carries the theorem and the live formula */
         #math-coach-box {
             left: 18px;
-            bottom: 18px;
-            top: auto;
-            width: min(430px, calc(100% - 36px));
+            top: 18px;
+            bottom: auto;
+            width: min(470px, calc(100% - 36px));
         }
 
         /* the title bar is the only clickable part — clicks on the text still reach
@@ -54,9 +54,9 @@
 
         #math-coach-box.folded #coach-caret { transform: rotate(-90deg); }
 
-        /* folded: everything below the title disappears downwards */
-        #math-coach-box.folded { padding-bottom: 16px; }
-        #math-coach-box.folded .coach-title { margin-bottom: 0; }
+        /* folded: only a slim title bar is left (the shared box pads 25px all round) */
+        #math-coach-box.folded { padding: 9px 18px; }
+        #math-coach-box.folded .coach-title { margin-bottom: 0 !important; }
         #math-coach-box.folded #coach-content { display: none; }
 
         .katex { font-size: 1.05em; }
@@ -95,25 +95,32 @@
 
         .iris-text {
             font-family: 'Outfit', sans-serif;
-            font-size: 0.85rem;
-            line-height: 1.6;
+            font-size: 0.95rem;
+            line-height: 1.62;
             color: rgba(230, 240, 255, 0.92);
         }
 
         .iris-text b { color: rgb(245, 194, 66); font-weight: 600; }
         .iris-text .ok { color: rgb(150, 200, 80); }
 
+        /* the formula always stays on ONE line: if it is wider than the box it is
+           scaled down as a whole (see fitFormula), never wrapped */
         .iris-formula {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 0.95rem;
+            font-size: 1.1rem;
             color: #9de8ff;
-            margin: 8px 0 4px;
-            letter-spacing: 0.02em;
+            margin: 10px 0 6px;
+            white-space: nowrap;
+            overflow: visible;
+        }
+
+        .iris-formula > span {
+            display: inline-block;
+            transform-origin: left center;
         }
 
         .iris-hint {
             font-family: 'Outfit', sans-serif;
-            font-size: 0.72rem;
+            font-size: 0.8rem;
             color: rgba(190, 214, 246, 0.62);
             line-height: 1.5;
             margin-top: 10px;
@@ -315,6 +322,8 @@
             wiperFill: true,
             box: false,          // the rotating square the curve fits into
             angle: 0,            // its rotation in degrees
+            autoRot: false,      // let it turn by itself
+            rotSpeed: 12,        // degrees per second
             path: false,         // the path the square's centre traces over 360°
             heat: false,         // quality landscape of the search
         };
@@ -322,7 +331,7 @@
         let boxC = null;         // current square centre (what CMA-ES searches for)
         let pop = [], evals = 0, lastQ = 0;
         let rotPath = [], sweepRun = null;
-        let heatImg = null, heatBox = null;
+        let heatImg = null, heatBox = null, heatCanvas = null;
 
         /* What the browser remembers between visits: every switch plus the three
            numbers. Deliberately NOT stored: the running animations, and the heatmap /
@@ -330,7 +339,7 @@
         const SAVE_KEY = 'irisvis-state';
         const SAVE_FIELDS = ['showTriangle', 'extA', 'extB', 'extC', 'showCircle', 'showIncircle',
             'showProof', 'showChords', 'showLabels', 'light', 'wiper', 'wiperFill',
-            'box', 'angle', 'd'];
+            'box', 'path', 'heat', 'angle', 'd', 'autoRot', 'rotSpeed'];
 
         let savedView = null, savedScroll = 0, saveTimer = null;
 
@@ -362,15 +371,29 @@
             if (Number.isFinite(o._scroll)) savedScroll = o._scroll;
         }
 
-        /* put the remembered view and scroll position back (after the UI exists) */
+        /* Put the remembered view and scroll position back. The scroll value has to be
+           applied more than once: right after the cards are inserted the panel has not
+           been laid out yet (and the web font is still loading), so an early scrollTop is
+           silently clamped to 0. */
         function restoreViewAndScroll() {
             const ui = document.getElementById('ui-container');
             const sp = document.getElementById('side-panel');
-            if (savedScroll) {
+
+            const applyScroll = () => {
+                if (!savedScroll) return;
                 if (ui) ui.scrollTop = savedScroll;
                 if (sp) sp.scrollTop = savedScroll;
-            }
+            };
+            applyScroll();
+            requestAnimationFrame(applyScroll);
+            setTimeout(applyScroll, 250);
+            if (document.fonts && document.fonts.ready) document.fonts.ready.then(applyScroll);
+
             [ui, sp].forEach((el) => { if (el) el.addEventListener('scroll', scheduleSave, { passive: true }); });
+            /* a reload can swallow the pending debounce — write on the way out */
+            window.addEventListener('pagehide', saveState);
+            window.addEventListener('beforeunload', saveState);
+
             if (savedView && savedView.auto === false) {
                 view.s = savedView.s; view.ox = savedView.ox; view.oy = savedView.oy; view.auto = false;
                 render();
@@ -406,6 +429,10 @@
         /* ---------- the construction ---------- */
         function geometry(d) {
             const a = dist(B, C), b = dist(C, A), c = dist(A, B);
+            /* d = -a makes the small arcs shrink to points: what is left are three arcs
+               of radius = side length — the classical Reuleaux triangle. Further down the
+               radii would go negative, so that is the floor. */
+            d = Math.max(d, -Math.min(a, b, c));
             const per = a + b + c;
             const s = per / 2;
             const area = Math.abs((B.x - A.x) * (C.y - A.y) - (C.x - A.x) * (B.y - A.y)) / 2;
@@ -617,40 +644,65 @@
             if (sweepRun.deg > 90) sweepRun = null;      // a quarter turn is the whole story
         }
 
-        /* the quality landscape, computed once on a world-space grid */
-        function buildHeat() {
+        /* green = fits (0), yellow = middling, red = far out */
+        function heatColor(t) {
+            const stops = [[121, 158, 49], [245, 194, 66], [176, 36, 24]];
+            const x = Math.max(0, Math.min(1, t)) * 2;
+            const i = Math.min(1, Math.floor(x)), f = x - i;
+            const a = stops[i], b = stops[i + 1];
+            return [a[0] + f * (b[0] - a[0]), a[1] + f * (b[1] - a[1]), a[2] + f * (b[2] - a[2])];
+        }
+
+        /* The quality landscape. `fast` uses a coarser grid so it can be rebuilt on every
+           mouse move while a vertex is dragged; the exact one follows on release. */
+        function buildHeat(fast) {
             const g = geometry(state.d);
-            const pts = curvePoints(g, 10);
+            const pts = curvePoints(g, fast ? 6 : 10);
             const h = boxSide(g) / 2, th = state.angle * Math.PI / 180;
-            const N = 90;
-            const span = boxSide(g) * 0.55;
-            const x0 = g.I.x - span, y0 = g.I.y - span, cell = 2 * span / N;
-            const off = document.createElement('canvas');
-            off.width = N; off.height = N;
+            const N = fast ? 48 : 90;
+            /* Centre the grid on the placement that is actually being searched — the
+               optimum for this angle — not on the incentre. The two are different points,
+               which pushed the valley out of the picture. A tight span shows the funnel. */
+            const centre = boxOptimal(pts, th).c;
+            const span = boxSide(g) * 0.5;      /* the field fills the square exactly */
+            const cell = 2 * span / N;
+            /* sampled in the SQUARE's frame, so the patch turns with it */
+            const ux = Math.cos(th), uy = Math.sin(th);
+            /* one offscreen canvas for good: while the square rotates this runs on every
+               frame, and allocating a new canvas each time would only feed the GC */
+            if (!heatCanvas || heatCanvas.width !== N) {
+                heatCanvas = document.createElement('canvas');
+                heatCanvas.width = N; heatCanvas.height = N;
+            }
+            const off = heatCanvas;
             const im = off.getContext('2d').createImageData(N, N);
             const vals = new Float64Array(N * N);
             let lo = Infinity, hi = 0;
             for (let j = 0; j < N; j++) {
                 for (let i = 0; i < N; i++) {
-                    const q = boxQuality(pts, { x: x0 + i * cell, y: y0 + j * cell }, th, h);
+                    const u = -span + i * cell, v = -span + j * cell;
+                    const q = boxQuality(pts,
+                        { x: centre.x + u * ux - v * uy, y: centre.y + u * uy + v * ux }, th, h);
                     vals[j * N + i] = q;
                     if (q < lo) lo = q;
                     if (q > hi) hi = q;
                 }
             }
             for (let k = 0; k < N * N; k++) {
-                const t = hi > lo ? (vals[k] - lo) / (hi - lo) : 0;
-                /* blue (good) -> orange (bad), like Docs ColorSpectrum */
-                im.data[k * 4] = Math.round(0 + t * 245);
-                im.data[k * 4 + 1] = Math.round(210 + t * (194 - 210));
-                im.data[k * 4 + 2] = Math.round(255 + t * (66 - 255));
-                im.data[k * 4 + 3] = 90;
+                /* cube root: the cost rises steeply, so a linear ramp would paint the whole
+                   neighbourhood of the valley in one green. This spreads the small values. */
+                const lin = hi > lo ? (vals[k] - lo) / (hi - lo) : 0;
+                const t = Math.cbrt(lin);
+                const c = heatColor(t);
+                im.data[k * 4] = Math.round(c[0]);
+                im.data[k * 4 + 1] = Math.round(c[1]);
+                im.data[k * 4 + 2] = Math.round(c[2]);
+                im.data[k * 4 + 3] = 179;      /* 70 % Deckkraft */
             }
             off.getContext('2d').putImageData(im, 0, 0);
             heatImg = off;
-            heatBox = { x0: x0, y0: y0, w: 2 * span, h: 2 * span };
+            heatBox = { cx: centre.x, cy: centre.y, size: 2 * span, th: th };
             state.heat = true;
-            render();
         }
 
         /* ---------- view: fit everything on screen ---------- */
@@ -701,7 +753,9 @@
             ctx.restore();
         }
 
-        function dot(p, col, rPix, label) {
+        /* NOT called dot(): cmaes-logic.js owns the global dot()/plus()/minus()/eye() — a
+           lab-level function of the same name would shadow it and crash the optimiser. */
+        function mark(p, col, rPix, label) {
             const S = toScreen(p);
             ctx.save();
             ctx.fillStyle = col;
@@ -752,10 +806,13 @@
 
             /* the quality landscape of the search, behind everything */
             if (state.heat && heatImg && heatBox) {
-                const O = toScreen({ x: heatBox.x0, y: heatBox.y0 });
+                const O = toScreen({ x: heatBox.cx, y: heatBox.cy });
+                const px = heatBox.size * view.s;
                 ctx.save();
                 ctx.imageSmoothingEnabled = true;
-                ctx.drawImage(heatImg, O.x, O.y, heatBox.w * view.s, heatBox.h * view.s);
+                ctx.translate(O.x, O.y);
+                ctx.rotate(heatBox.th);          /* the field belongs to the square, so it turns with it */
+                ctx.drawImage(heatImg, -px / 2, -px / 2, px, px);
                 ctx.restore();
             }
 
@@ -780,7 +837,7 @@
 
             if (state.showIncircle) {
                 circle(g.I, g.r, COL.dim, 1.4, [5, 5]);
-                dot(g.I, '#9de8ff', 4);
+                mark(g.I, '#9de8ff', 4);
                 if (state.showLabels) label(g.I, 'I', { x: 0.7, y: 0.7 }, '#9de8ff');
             }
 
@@ -794,7 +851,7 @@
 
             /* the tip currently being swept is drawn at its swept position further down */
             const held = wiperDrag ? wiperDrag.key : '';
-            const tip = (k, col) => { if (k !== held) dot(g.P[k], col, 5); };
+            const tip = (k, col) => { if (k !== held) mark(g.P[k], col, 5); };
             if (state.extA) { tip('cA', COL.a); tip('bA', COL.a); }
             if (state.extB) { tip('cB', COL.b); tip('aB', COL.b); }
             if (state.extC) { tip('aC', COL.c); tip('bC', COL.c); }
@@ -804,7 +861,7 @@
                 const arc = arcsOf(g)[TIP_ARC[wiperDrag.key]];
                 const O = vertexOf(arc.k);
                 line(O, wiperDrag.pos, WIPER, 2);
-                dot(wiperDrag.pos, WIPER, 7);
+                mark(wiperDrag.pos, WIPER, 7);
             }
 
             if (state.box) drawBox(g);
@@ -812,9 +869,9 @@
             /* the draggable vertices last, so they stay on top — they belong to the
                triangle, so with everything off the stage really is empty */
             if (state.showTriangle) {
-                dot(A, inkCol(), 7);
-                dot(B, inkCol(), 7);
-                dot(C, inkCol(), 7);
+                mark(A, inkCol(), 7);
+                mark(B, inkCol(), 7);
+                mark(C, inkCol(), 7);
                 if (state.showLabels) {
                     const M = { x: (A.x + B.x + C.x) / 3, y: (A.y + B.y + C.y) / 3 };
                     label(A, 'A', norm(sub(A, M)), inkCol());
@@ -871,7 +928,7 @@
                     const t = sg.w.a1 + sg.w.dA * frac;
                     const tip = { x: sg.w.O.x + Math.cos(t) * sg.arc.r, y: sg.w.O.y + Math.sin(t) * sg.arc.r };
                     line(sg.w.O, tip, WIPER, 1.6, [6, 4]);
-                    dot(tip, WIPER, 5);
+                    mark(tip, WIPER, 5);
                 }
             }
         }
@@ -900,13 +957,13 @@
 
             /* the population — every dot is one candidate placement */
             if (sweepRun && pop.length) {
-                pop.forEach((q) => dot(q, 'rgba(245, 194, 66, 0.75)', 3));
+                pop.forEach((q) => mark(q, 'rgba(245, 194, 66, 0.75)', 3));
             }
 
             /* the exact optimum as a faint reference, the found one solid */
             if (sweepRun) square(opt.c, th, h, 'rgba(160, 190, 230, 0.35)', 1, [5, 5]);
             square(c, th, h, COL.circle, 2, null);
-            dot(c, COL.circle, 4);
+            mark(c, COL.circle, 4);
         }
 
         function square(c, th, h, col, w, dash) {
@@ -934,7 +991,7 @@
             pairs.forEach(([P1, P2, col]) => {
                 line(P1, P2, 'rgba(190, 214, 246, 0.5)', 1.2);
                 const M = { x: (P1.x + P2.x) / 2, y: (P1.y + P2.y) / 2 };
-                dot(M, col, 4);
+                mark(M, col, 4);
                 /* perpendicular bisector, drawn out to the centre and a bit beyond */
                 const u = norm(sub(P2, P1));
                 const n = { x: -u.y, y: u.x };
@@ -985,9 +1042,6 @@
                 'Abstand der sechs Punkte vom Kreis: <span id="fx-err"></span>' +
                 '<div id="fx-width" style="margin-top:6px"></div>' +
                 '<div class="iris-hint" id="fx-start"></div>' +
-                '<div class="iris-hint">Ecken ziehen. Jede der drei Geraden schneidet aus dem Kreis eine ' +
-                'Sehne der Länge 2·(s+d) heraus und hat vom Mittelpunkt den Abstand r — gleich lange Sehnen ' +
-                'sind gleich weit vom Mittelpunkt entfernt, deshalb <i>ein</i> Kreis.</div>' +
                 '</div>';
 
             let folded = false;
@@ -1008,22 +1062,36 @@
         /* KaTeX, re-rendered only when the formula text actually changed */
         function tex(el, src, last) {
             if (!el || src === last) return last;
-            if (window.katex) {
-                try { katex.render(src, el, { throwOnError: false, displayMode: false }); }
-                catch (e) { el.textContent = src; }
-            } else {
-                el.textContent = src;
+            /* KaTeX goes into an inner span so the whole formula can be scaled at once */
+            let inner = el.firstElementChild;
+            if (!inner || inner.tagName !== 'SPAN' || !inner.dataset.fx) {
+                el.innerHTML = '';
+                inner = document.createElement('span');
+                inner.dataset.fx = '1';
+                el.appendChild(inner);
             }
+            if (window.katex) {
+                try { katex.render(src, inner, { throwOnError: false, displayMode: false }); }
+                catch (e) { inner.textContent = src; }
+            } else {
+                inner.textContent = src;
+            }
+            fitFormula(el, inner);
             return src;
+        }
+
+        /* shrink the formula until it fits the box width — one line, never wrapped */
+        function fitFormula(el, inner) {
+            inner.style.transform = 'none';
+            const avail = el.clientWidth;
+            const need = inner.getBoundingClientRect().width;
+            if (avail > 0 && need > avail) {
+                inner.style.transform = 'scale(' + (avail / need).toFixed(4) + ')';
+            }
         }
 
         /* ---------- readouts ---------- */
         function updateReadout(g) {
-            CyberUI.updateStatsGrid('stats', [
-                { value: de(g.a, 1) }, { value: de(g.b, 1) }, { value: de(g.c, 1) },
-                { value: de(g.s, 1) }, { value: de(g.r, 1) }, { value: de(g.R, 1) },
-                { value: state.wiper ? de(widthRange(g).min, 1) : '—' }
-            ]);
             if (!$('fx')) return;
             if ($('math-coach-box').classList.contains('folded')) return;   // nothing to update
 
@@ -1062,7 +1130,7 @@
                 info.innerHTML =
                     'Seite w = <b style="color:#00d2ff">' + de(boxSide(g), 1) + '</b><br>' +
                     'Breite quer/längs: ' + de(opt.wu, 1) + ' / ' + de(opt.wv, 1) + '<br>' +
-                    (es ? 'Auswertungen: <b>' + evals + '</b> &middot; Qualität: <b>' +
+                    (evals ? 'Auswertungen: <b>' + evals + '</b> &middot; Qualität: <b>' +
                         (Number.isFinite(lastQ) ? lastQ.toFixed(2).replace('.', ',') : '—') + '</b><br>' +
                         'Abstand zum exakten Optimum: <b>' + de(off, 2) + '</b>' : '');
             } else if (info) {
@@ -1148,6 +1216,7 @@
                    every drag); a kept centre would leave the curve sticking out. */
                 boxC = null;
                 if (state.path) rotPath = computePath(geometry(state.d), 12, 2, 60);
+                if (state.heat) buildHeat(true);            /* coarse grid, keeps up */
             } else if (drag === 'wiper') {
                 wiperDrag.pos = tipOnArc(wiperDrag.key, toWorld(pos), geometry(state.d));
             } else if (drag === 'zoom') {
@@ -1166,9 +1235,11 @@
         function onUp() {
             if (!drag) return;
             /* mouse released: redo the path at full quality */
-            if (state.path && (drag === 'A' || drag === 'B' || drag === 'C')) {
-                rotPath = computePath(geometry(state.d), 24, 2, 200);
+            if (drag === 'A' || drag === 'B' || drag === 'C') {
+                if (state.path) rotPath = computePath(geometry(state.d), 24, 2, 200);
+                if (state.heat) buildHeat();
             }
+
             drag = null;
             wiperDrag = null;                   /* the tip snaps back onto its arc */
             canvas.classList.remove('dragging');
@@ -1189,7 +1260,7 @@
             e.preventDefault();
             zoomAround(localPos(e), Math.exp(-e.deltaY * 0.0015));
             render();
-            scheduleSave();
+            saveState();
         }, { passive: false });
 
         canvas.addEventListener('mousedown', onDown);
@@ -1202,7 +1273,11 @@
         /* Key map taken over from the Java original (IrisVis.java, keyPressed).
            Differences are listed in the help overlay. */
         window.addEventListener('keydown', (e) => {
-            if (e.target && /input|textarea/i.test(e.target.tagName)) return;
+            /* Only text fields swallow the shortcuts. A slider or checkbox keeps the
+               focus after a click, and that must not disable the whole keyboard. */
+            const t = e.target;
+            if (t && (t.tagName === 'TEXTAREA' ||
+                (t.tagName === 'INPUT' && !/^(checkbox|radio|range)$/i.test(t.type)))) return;
             if (e.ctrlKey || e.altKey) return;
             const meta = e.metaKey;
             const k = e.key.toLowerCase();
@@ -1254,7 +1329,7 @@
                 else view.ox -= step;
                 view.auto = false;
                 render();
-                scheduleSave();
+                saveState();
                 e.preventDefault();
             }
             else if (k === ' ') {                                    // Docs space: turn 2° + search
@@ -1263,15 +1338,41 @@
             }
         });
 
+        /* the angle slider is driven by the animation too, so it always shows the truth */
+        let angleInput = null, angleLabel = null;
+        function showAngle() {
+            if (!angleInput) {
+                const host = document.getElementById('sl-angle');
+                if (!host) return;
+                angleInput = host.querySelector('input[type="range"]');
+                angleLabel = host.querySelector('.val-display');
+            }
+            if (angleInput) angleInput.value = state.angle;
+            if (angleLabel) angleLabel.innerText = Math.round(state.angle) + '°';
+        }
+
+        let dInput = null, dLabel = null;
+        function showD() {
+            if (!dInput) {
+                const host = document.getElementById('sl-d');
+                if (!host) return;
+                dInput = host.querySelector('input[type="range"]');
+                dLabel = host.querySelector('.val-display');
+            }
+            if (dInput) dInput.value = state.d;
+            if (dLabel) dLabel.innerText = de(state.d, 0);
+        }
+
         function rotateBox(deg) {
             state.box = true;
-            state.angle = (state.angle + deg + 360) % 360;
+            state.angle = (state.angle + deg + 90) % 90;
             boxC = null;
+            showAngle();
             sync();
         }
 
         function bumpD(delta) {
-            state.d = Math.max(-40, Math.min(400, state.d + delta));
+            state.d = Math.max(-600, Math.min(600, state.d + delta));
             sync();
         }
 
@@ -1281,8 +1382,28 @@
             if (el) { el.remove(); return; }
             el = document.createElement('div');
             el.id = 'help-overlay';
+            const g = geometry(state.d);
+            const val = (lab, v, col) =>
+                '<tr><td style="color:' + col + '">' + lab + '</td><td>' + v + '</td></tr>';
             el.innerHTML =
-                '<div class="help-card"><h2>Tastatur &amp; Maus</h2>' +
+                '<div class="help-card"><h2>Messwerte</h2>' +
+                '<table>' +
+                val('a = |BC|', de(g.a, 1), COL.a) +
+                val('b = |CA|', de(g.b, 1), COL.b) +
+                val('c = |AB|', de(g.c, 1), COL.c) +
+                val('s · halber Umfang', de(g.s, 1), '#9de8ff') +
+                val('r · Inkreis', de(g.r, 1), '#9de8ff') +
+                val('R · Conway-Kreis', de(g.R, 1), COL.circle) +
+                val('Breite der Wischerkurve', de(widthRange(g).min, 1), '#9de8ff') +
+                val('d · Verlängerung', de(g.d, 1), 'rgba(190,214,246,0.75)') +
+                '</table>' +
+                '<h2 style="margin-top:18px">Warum ein Kreis?</h2>' +
+                '<p>Jede der drei Geraden schneidet aus dem Kreis eine Sehne der Länge <b>2·(s+d)</b> ' +
+                'heraus und hat vom Mittelpunkt den Abstand <b>r</b>. Gleich lange Sehnen sind gleich ' +
+                'weit vom Mittelpunkt entfernt — deshalb liegen alle sechs Punkte auf <i>einem</i> Kreis, ' +
+                'mit R² = r² + (s+d)². Taste <b>G</b> zeigt die drei Lote, <b>L</b> die Sehnen mit ihren ' +
+                'Mittelsenkrechten.</p>' +
+                '<h2 style="margin-top:18px">Tastatur &amp; Maus</h2>' +
                 '<table>' +
                 '<tr><td>Ecke ziehen</td><td>Dreieck ändern</td></tr>' +
                 '<tr><td>Wischerspitze ziehen</td><td>Arm um die Ecke schwenken (bleibt auf dem Bogen)</td></tr>' +
@@ -1311,6 +1432,7 @@
             boxC = null;                 /* the placement belongs to the current shape */
             /* the path belongs to the current triangle and d — keep it in step */
             if (state.path && !sweepRun) rotPath = computePath(geometry(state.d), 12, 2, 60);
+            if (state.heat) buildHeat(true);      /* the landscape belongs to this angle */
             fitAndRender();
         }
 
@@ -1319,22 +1441,34 @@
             render();
         }
 
-        /* back to the empty stage — and forget what was stored */
+        /* Docs theGreatReset: geometry, view and rotation back to the start — the
+           switches stay as they are, nothing disappears. */
         function reset() {
             A = { x: -170, y: 110 }; B = { x: 190, y: 140 }; C = { x: -20, y: -160 };
-            SAVE_FIELDS.forEach((k) => {
-                if (typeof state[k] === 'boolean') state[k] = false;
-            });
-            state.wiperFill = true;
             state.d = 0;
             state.angle = 0;
             state.animate = false;
             boxC = null;
             rotPath = [];
             heatImg = null;
+            sweepRun = null;
             view.auto = true;
-            try { localStorage.removeItem(SAVE_KEY); } catch (e) { }
-            location.reload();          // rebuild the sidebar so the switches match
+            showD();
+            showAngle();
+            if (state.path) rotPath = computePath(geometry(0), 24, 2, 200);
+            if (state.heat) buildHeat();
+            sync();
+        }
+
+        /* Every change of the triangle goes through here: the placement, the rotation
+           path and the landscape all belong to the shape and have to follow it. */
+        function shapeChanged() {
+            boxC = null;
+            sweepRun = null;
+            /* the zoom stays as the user set it — only "Einpassen" and 0 refit */
+            if (state.path) rotPath = computePath(geometry(state.d), 24, 2, 200);
+            if (state.heat) buildHeat();
+            sync();
         }
 
         function randomTriangle() {
@@ -1343,9 +1477,7 @@
             const ang = [rnd(0, 2), rnd(2, 4), rnd(4, 6)];
             const pts = ang.map((t) => ({ x: Math.cos(t) * rnd(R0 * 0.6, R0), y: Math.sin(t) * rnd(R0 * 0.6, R0) }));
             A = pts[0]; B = pts[1]; C = pts[2];
-            rotPath = [];
-            view.auto = true;
-            fitAndRender();
+            shapeChanged();
         }
 
         function equilateral() {
@@ -1353,7 +1485,7 @@
             A = { x: Math.cos(-Math.PI / 2) * R0, y: Math.sin(-Math.PI / 2) * R0 };
             B = { x: Math.cos(Math.PI / 6) * R0, y: Math.sin(Math.PI / 6) * R0 };
             C = { x: Math.cos(5 * Math.PI / 6) * R0, y: Math.sin(5 * Math.PI / 6) * R0 };
-            fitAndRender();
+            shapeChanged();
         }
 
         /* One driver for both animations: the breathing pupil (d) and the build-up
@@ -1368,14 +1500,21 @@
                 buildT += 0.008;
                 if (buildT >= 1) { buildT = 1; building = false; }
             }
+            if (state.autoRot) {
+                /* a quarter turn is a full period — the square looks the same again */
+                state.angle = (state.angle + state.rotSpeed / 60) % 90;
+                boxC = null;                       /* re-place it for the new angle */
+                if (state.heat) buildHeat(true);   /* the landscape turns with it */
+                showAngle();
+            }
             if (sweepRun) stepSweep();
             if (state.animate) fitAndRender(); else render();
-            raf = (state.animate || building || sweepRun) ? requestAnimationFrame(tick) : null;
+            raf = (state.animate || building || sweepRun || state.autoRot) ? requestAnimationFrame(tick) : null;
         }
 
         function loop() {
             if (raf) return;
-            if (state.animate || building || sweepRun) raf = requestAnimationFrame(tick);
+            if (state.animate || building || sweepRun || state.autoRot) raf = requestAnimationFrame(tick);
         }
 
         /* let the curve draw itself, like the wiper sweeping across the screen */
@@ -1383,7 +1522,7 @@
             state.wiper = true;
             buildT = 0;
             building = true;
-            fit(geometry(state.d));
+            if (view.auto) fit(geometry(state.d));   /* never override a zoom set by hand */
             loop();
         }
 
@@ -1395,6 +1534,7 @@
                         <button class="cyber-btn" id="btn-rnd">Zufällig</button>
                         <button class="cyber-btn" id="btn-eq">Gleichseitig</button>
                     </div>
+                    <button class="cyber-btn" id="btn-reuleaux">Reuleaux-Dreieck</button>
                     <div class="row">
                         <button class="cyber-btn" id="btn-fit">Einpassen</button>
                         <button class="cyber-btn" id="btn-help">Hilfe</button>
@@ -1406,7 +1546,6 @@
             CyberUI.createCard('ui-container', 'Konstruktion', `
                 <div class="stack">
                     <div id="sl-d"></div>
-                    <button class="cyber-btn" id="btn-anim" style="border-color:rgb(121,158,49); color:rgb(160,200,90)">Pupille atmen lassen</button>
                     <div id="chk-box" style="display:flex; flex-direction:column; gap:2px"></div>
                 </div>
             `, 'rgb(121,158,49)');
@@ -1422,20 +1561,11 @@
                 <div class="stack">
                     <div id="chk-box2" style="display:flex; flex-direction:column; gap:2px"></div>
                     <div id="sl-angle"></div>
+                    <div id="chk-rot" style="display:flex; flex-direction:column; gap:2px"></div>
+                    <div id="sl-speed"></div>
                     <div id="cma-info" style="font-family:'Orbitron'; font-size:0.6rem; line-height:1.8; color:rgba(190,214,246,0.8)"></div>
                 </div>
             `, 'rgb(121,158,49)');
-
-            CyberUI.createCard('ui-container', 'Messwerte', '<div id="stats"></div>', '#00d2ff');
-            CyberUI.createStatsGrid('stats', [
-                { label: 'a = |BC|', value: '—', color: COL.a },
-                { label: 'b = |CA|', value: '—', color: COL.b },
-                { label: 'c = |AB|', value: '—', color: COL.c },
-                { label: 's (halber Umfang)', value: '—', color: '#9de8ff' },
-                { label: 'r (Inkreis)', value: '—', color: '#9de8ff' },
-                { label: 'R (Conway)', value: '—', color: COL.circle },
-                { label: 'Breite der Kurve', value: '—', color: '#9de8ff' }
-            ]);
 
             CyberUI.createCard('ui-container', 'Tasten', `
                 <div class="iris-keys">
@@ -1452,7 +1582,7 @@
                 </div>
             `, 'rgb(155,130,225)', { collapsible: true, collapsed: true });
 
-            CyberUI.createSlider('sl-d', 'Verlängerung d', -40, 400, state.d, 1, (v) => {
+            CyberUI.createSlider('sl-d', 'Verlängerung d', -600, 600, state.d, 1, (v) => {
                 state.d = v;
                 sync();
             }, 'var(--neon-blue)', (v) => de(v, 0));
@@ -1474,6 +1604,7 @@
                 ['chk-wiper', 'Wischerkurve', 'wiper'],
                 ['chk-wiper', 'Fläche füllen', 'wiperFill'],
                 ['chk-box2', 'Quadrat zeigen', 'box'],
+                ['chk-rot', 'Auto-Rotation', 'autoRot'],
                 ['chk-box2', 'Rotationsbahn', 'path'],
                 ['chk-box2', 'Heatmap', 'heat']
             ];
@@ -1486,7 +1617,8 @@
                         sweepRun = null;
                     }
                     /* the heatmap has to be computed before it can be shown */
-                    if (key === 'heat' && on) { buildHeat(); return; }
+                    if (key === 'heat' && on) { buildHeat(); render(); saveState(); return; }
+                    if (key === 'autoRot' && on) { state.box = true; loop(); }
                     sync();
                 }, col || null);
                 /* the shared helper only takes plain text — colour one word afterwards */
@@ -1495,6 +1627,11 @@
                     if (sp) sp.innerHTML = html;
                 }
             });
+
+            CyberUI.createSlider('sl-speed', 'Tempo', 1, 90, state.rotSpeed, 1, (v) => {
+                state.rotSpeed = v;
+                sync();
+            }, 'rgb(121,158,49)', (v) => Math.round(v) + '°/s');
 
             CyberUI.createSlider('sl-angle', 'Drehwinkel', 0, 90, state.angle, 1, (v) => {
                 state.angle = v;
@@ -1507,12 +1644,17 @@
             $('btn-help').addEventListener('click', toggleHelp);
             $('btn-rnd').addEventListener('click', randomTriangle);
             $('btn-eq').addEventListener('click', equilateral);
-            $('btn-reset').addEventListener('click', reset);
-            $('btn-anim').addEventListener('click', () => {
-                state.animate = !state.animate;
-                $('btn-anim').textContent = state.animate ? 'Anhalten' : 'Pupille atmen lassen';
-                loop();
+            /* equilateral + d = -a: the six arcs collapse to the three of Reuleaux */
+            $('btn-reuleaux').addEventListener('click', () => {
+                equilateral();
+                const g = geometry(0);
+                state.d = -Math.min(g.a, g.b, g.c);
+                state.wiper = true;
+                state.showTriangle = true;
+                showD();
+                shapeChanged();
             });
+            $('btn-reset').addEventListener('click', reset);
         }
 
         function init() { fitAndRender(); }
@@ -1521,9 +1663,17 @@
         buildCoach();
         setupUI();
         window.addEventListener('resize', init);
-        document.fonts.ready.then(init);
+        (document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve()).then(init);
         init();
         restoreViewAndScroll();
+        /* path and heatmap are switches too, so they come back — but their data does not
+           survive a reload, so it is rebuilt here (path without animation) */
+        if (state.path) { rotPath = computePath(geometry(state.d), 24, 2, 200); render(); }
+        if (state.heat) { buildHeat(); render(); }
+        /* probe for the headless test bench (and the console): live view + state */
+        window.irisvis = { view: view, state: state, get boxC() { return boxC; },
+            get rotPath() { return rotPath; }, get sweepRun() { return sweepRun; },
+            get A() { return toScreen(A); }, get B() { return toScreen(B); } };
         $('math-coach-box').classList.add('visible');
     </script>
 </body>
