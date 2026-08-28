@@ -1298,9 +1298,12 @@ td.remark { color: var(--muted); font-size: 0.88rem; min-width: 160px; }
     width: 100%;
 }
 
+/* Untis-Orange, aus dem Logo abgegriffen - nicht die Laborfarbe --lambda,
+   das Zeichen soll seine eigene Marke behalten. */
+:root { --untis: rgb(246, 93, 49); }
+
 /* WebUntis-Status: zeigt, ob der Stundeninhalt der Woche im Klassenbuch steht.
-   Ein Punkt je Stunde der Woche (also je Klasse). Gespeist aus
-   <plan>.untis.json, erzeugt von tools/webuntis.js status.
+   Gespeist aus <plan>.untis.json, erzeugt von tools/webuntis.js status.
    Immer sichtbar - nur der Klick (WebUntis oeffnen) haengt am Bearbeiten-Modus.
    Alle Grundregeln bewusst einklassig, damit .is-full/.is-part die Farbe
    sicher ueberschreiben. */
@@ -1310,9 +1313,11 @@ td.remark { color: var(--muted); font-size: 0.88rem; min-width: 160px; }
     justify-content: center;
     gap: 5px;
     width: 100%;
-    min-height: 22px;
-    padding: 2px 7px;
-    border-radius: 999px;
+    min-height: 18px;
+    padding: 0 7px;
+    /* gleiche Ecke wie die Bereich-Pille darueber - beide sollen als ein
+       Block gelesen werden, nicht als Pille plus Kapsel. */
+    border-radius: 6px;
     border: 1px solid var(--line);
     background: transparent;
     color: var(--muted);
@@ -1327,51 +1332,33 @@ td.remark { color: var(--muted); font-size: 0.88rem; min-width: 160px; }
 }
 
 .untis-chip:hover { opacity: 1; }
-.untis-chip .u-mark { font-weight: 600; }
+/* Untis-Logo (SVG, per svp-plan.js): U und Strahlen in currentColor, die
+   orange Kachel ist der Chip. Die Strichstaerken stehen in viewBox-Einheiten
+   (Original-Raster, Rahmen 272x114) und sind am Original gemessen. */
+.untis-chip .u-mark {
+    width: 43px;
+    height: 18px;
+    flex: none;
+    display: block;
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: butt;
+}
+
+.untis-chip .u-mark .u-rays-major { stroke-width: 7.8; }
+.untis-chip .u-mark .u-rays-minor { stroke-width: 5; }
+.untis-chip .u-mark .u-letter { stroke-width: 19.5; }
 
 /* Anfassbar ist der Chip nur beim Bearbeiten; der Tooltip bleibt immer da. */
 body.editing .untis-chip { cursor: pointer; }
 
-.untis-chip .u-dots {
-    display: inline-flex;
-    gap: 3px;
-    /* Der Punkt-Block gehoert zum Kuerzel, nicht daneben - eine feine
-       Trennung statt einer zweiten Pille. */
-    padding-left: 5px;
-    border-left: 1px solid var(--line);
-}
-
-.untis-chip .u-dots i {
-    width: 5px;
-    height: 5px;
-    border-radius: 50%;
-    border: 1px solid currentColor;
-    background: transparent;
-    opacity: 0.6;
-}
-
-.untis-chip .u-dots i.on { background: currentColor; opacity: 1; }
-
-/* Alles eingetragen / nur teilweise: gefuellt, damit der Zustand aus dem
-   Augenwinkel lesbar ist. Schrift und Punkte nehmen die Seitenfarbe, das
-   traegt in beiden Themes - Weiss waere im Light-Theme zu hart. */
-.untis-chip.is-full {
-    color: var(--bg);
-    background: var(--phi);
-    border-color: var(--phi);
-    opacity: 1;
-}
-
-.untis-chip.is-full .u-dots { border-left-color: var(--bg); }
-
+.untis-chip.is-full,
 .untis-chip.is-part {
-    color: var(--bg);
-    background: var(--lambda);
-    border-color: var(--lambda);
+    color: #fff;
+    background: var(--untis);
+    border-color: var(--untis);
     opacity: 1;
 }
-
-.untis-chip.is-part .u-dots { border-left-color: var(--bg); }
 
 @media print { .untis-chip { display: none; } }
 

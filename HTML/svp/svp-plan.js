@@ -67,7 +67,7 @@
     const headRow = document.querySelector('#plan-table thead tr');
     if (headRow) {
         const matTh = document.createElement('th');
-        matTh.textContent = 'Material';
+        matTh.textContent = 'Zusatzmaterial';
         headRow.appendChild(matTh);
         /* Leading column for the shift arrows — empty header, only visible
            while the shift mode is on (see setShiftMode). */
@@ -1703,6 +1703,27 @@
         rendered.push(ref);
     });
 
+    /* Alle Bereich-Pillen gleich breit. Ohne das misst jede Zeile ihre eigene
+       Breite aus - "LB 1" schmal, "LEISTUNG" breit - und die Spalte springt.
+       Mass ist die breiteste Zelle: schmaler ginge nur, indem man den laengsten
+       Text abschneidet. Erst nach dem Laden von Orbitron messen, vorher steht
+       dort die Ersatzschrift mit anderen Breiten. */
+    function equalizeLbCells() {
+        const cells = Object.keys(lbCells).map(k => lbCells[k]);
+        if (!cells.length) return;
+        cells.forEach(c => { c.style.width = ''; });
+        let w = 0;
+        cells.forEach(c => { w = Math.max(w, c.getBoundingClientRect().width); });
+        if (w) cells.forEach(c => { c.style.width = w + 'px'; });
+    }
+
+    if (document.fonts && document.fonts.ready) {
+        document.fonts.ready.then(equalizeLbCells);
+    } else {
+        equalizeLbCells();
+    }
+    window.addEventListener('resize', equalizeLbCells);
+
     /* WebUntis-Status unter der Bereich-Pille.
        WebUntis hat kein CORS, der Browser kommt also nie selbst dran. Die
        Daten liefert tools/webuntis.js status als <plan>.untis.json neben der
@@ -1724,6 +1745,37 @@
         return lines.join('\n');
     }
 
+    /* Untis-Logo statt des Kuerzels "WU": weisses U mit Strahlenkranz, die
+       orange Kachel ist der Chip selbst. Geometrie am Original abgemessen
+       (Strahlen im 22,5-Grad-Raster, aussen alle auf gleichem Radius, die
+       waagerechten laenger und dicker). Der Ausschnitt ist flacher als das
+       Original - die oberen und unteren Strahlen fallen dabei weg, genau wie
+       im Logo selbst schon oben und unten abgeschnitten wird. */
+    function untisMark() {
+        const NS = 'http://www.w3.org/2000/svg';
+        const svg = document.createElementNS(NS, 'svg');
+        svg.setAttribute('class', 'u-mark');
+        /* Der Ausschnitt sitzt eng um das U - flacher wird das Zeichen nur
+           durch Beschneiden oben/unten, nie durch Stauchen. Der Rahmen ist
+           gegenueber dem Zeichen um knapp ein Viertel aufgeweitet: das laesst
+           U und Strahlen im gleich grossen Chip kleiner erscheinen, ohne sie
+           zu verzerren. */
+        svg.setAttribute('viewBox', '-25.8 0.2 271.6 113.6');
+        svg.setAttribute('aria-hidden', 'true');
+        function path(cls, d) {
+            const el = document.createElementNS(NS, 'path');
+            el.setAttribute('class', cls);
+            el.setAttribute('d', d);
+            svg.appendChild(el);
+        }
+        path('u-rays-major', 'M190.5 55L216 55M29.5 55L4 55');
+        path('u-rays-minor',
+            'M191.3 21.3L207.9 14.4M28.7 21.3L12.1 14.4' +
+            'M28.7 88.7L12.1 95.6M191.3 88.7L207.9 95.6');
+        path('u-letter', 'M85 15.5V64a25.5 25.5 0 0 0 51 0V15.5');
+        return svg;
+    }
+
     function decorateUntis(data) {
         const weeks = (data && data.weeks) || {};
         const url = data && data.webuntis;
@@ -1735,18 +1787,7 @@
             const chip = document.createElement('span');
             chip.className = 'untis-chip ' +
                 (done === entries.length ? 'is-full' : done ? 'is-part' : 'is-none');
-            const mark = document.createElement('span');
-            mark.className = 'u-mark';
-            mark.textContent = 'WU';
-            chip.appendChild(mark);
-            const dots = document.createElement('span');
-            dots.className = 'u-dots';
-            for (const e of entries) {
-                const dot = document.createElement('i');
-                if (e.written) dot.className = 'on';
-                dots.appendChild(dot);
-            }
-            chip.appendChild(dots);
+            chip.appendChild(untisMark());
             chip.title = untisTitle(entries, data.generated);
             chip.addEventListener('click', function (ev) {
                 ev.stopPropagation(); /* not the row's detail toggle */
@@ -1756,6 +1797,9 @@
             });
             (r.lbCell || r.lbTd).appendChild(chip);
         }
+        /* Die Chips kommen erst nach dem Rendern dazu und koennen eine Zelle
+           breiter machen - also nochmal ausgleichen. */
+        equalizeLbCells();
     }
 
     (function loadUntis() {
