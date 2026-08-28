@@ -33,7 +33,7 @@
     '.qbar .btn-fold {',
     '  font-family: "Orbitron", sans-serif; font-size: 0.68rem; letter-spacing: 0.06em;',
     '  background: transparent; color: rgb(96, 128, 36);',
-    '  border: 1px solid rgba(121, 158, 49, 0.6); border-radius: 999px;',
+    '  border: 1px solid rgba(121, 158, 49, 0.6); border-radius: 6px;',
     '  padding: 4px 12px; cursor: pointer;',
     '}',
     '.qbar .btn-fold:hover { background: rgba(121, 158, 49, 0.14); }'

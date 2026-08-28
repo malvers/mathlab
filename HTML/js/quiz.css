@@ -19,7 +19,7 @@
     min-height: 100vh;
     padding: 16px;
   }
-  .wrap { max-width: 680px; margin: 0 auto; }
+  .wrap { max-width: 680px; margin: 0 auto; position: relative; }
   h1 {
     font-family: 'Orbitron', sans-serif;
     font-size: clamp(1.15rem, 4.5vw, 1.6rem);
@@ -32,9 +32,9 @@
   .backrow { position: fixed; top: 16px; left: 16px; z-index: 10; }
   @media (max-width: 760px) { .backrow { position: static; margin: 4px 0 10px; } }
   /* Auswerte-Knopf in der Leiste ueber den Fragen (.qbar aus quiz-collapse.js).
-     Gleiche Pillenform wie "Alle einklappen", nur in Blau statt Gruen, und
+     Gleiche Form wie "Alle einklappen", nur in Blau statt Gruen, und
      direkt links daneben. */
-  .qbar .btn-eval {
+  .btn-eval {
     margin-right: 10px;
     font-family: 'Orbitron', sans-serif;
     font-size: 0.68rem;
@@ -42,16 +42,27 @@
     background: transparent;
     color: var(--blue);
     border: 1px solid rgba(40, 70, 120, 0.45);
-    border-radius: 999px;
+    border-radius: 6px;
     padding: 4px 12px;
     cursor: pointer;
   }
-  .qbar .btn-eval:hover { background: rgba(40, 70, 120, 0.1); }
-  /* In der Auswertung steht der Knopf allein rechts - dort waere der Abstand
-     zum Rand nur Schieflage. */
-  .qbar #toTestBtn { margin-right: 0; }
+  .btn-eval:hover { background: rgba(40, 70, 120, 0.1); }
+  /* Ueberschrift und "Zum Test" in einer Zeile, an der Schriftlinie
+     ausgerichtet (align-items: baseline). Wird es zu eng, rutscht der Knopf
+     unter den Titel statt ihn zu quetschen. */
+  .titlerow {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 4px 12px;
+  }
+  /* Optische Korrektur: die Flexbox richtet die Schriftlinien rechnerisch aus,
+     Orbitron sitzt im kleinen Knopf-Grad aber sichtbar zu tief. 4px hoch (von
+     Doc am Bild abgenommen), ohne das Layout zu verschieben. */
+  .titlerow .btn-eval { margin-right: 0; position: relative; top: -4px; }
   /* with the pinned button the centre block starts at the same height as the button */
-  .backrow + h1 { margin-top: 0; }
+  .backrow + h1, .backrow + .titlerow h1 { margin-top: 0; }
   .backbtn {
     font-family: 'Orbitron', sans-serif;
     font-size: 0.72rem;

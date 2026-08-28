@@ -408,9 +408,18 @@
       function () { switchTo(true); }), bar.firstChild);
   }
 
+  /* Der Rueckweg aus der Auswertung steht rechts neben der Ueberschrift, auf
+     deren Schriftlinie. Dafuer wandert die <h1> in eine gemeinsame Zeile
+     (.titlerow) - nur so richtet der Flexbox-Baseline-Modus beide wirklich
+     aneinander aus; ein fester Abstand von oben trifft die Linie nie, weil
+     die Titelgroesse mit dem Fenster waechst. */
   function placeBackToTestButton() {
-    const bar = toolbar(document.getElementById('dash'));
-    bar.appendChild(pillButton('toTestBtn', 'Zum Test', 'Zurueck zur Testansicht',
+    const h1 = document.querySelector('.wrap h1');
+    const row = document.createElement('div');
+    row.className = 'titlerow';
+    h1.parentNode.insertBefore(row, h1);
+    row.appendChild(h1);
+    row.appendChild(pillButton('toTestBtn', 'Zum Test', 'Zurueck zur Testansicht',
       function () { switchTo(false); }));
   }
 
