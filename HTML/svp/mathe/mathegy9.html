@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stoffverteilungsplan Mathematik 9 (Gymnasium) | SJ 2026/27</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript>
+        <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    </noscript>
+    <link rel="icon" type="image/png" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="../svp.css">
+    <script src="../svp-gate.js"></script>
+</head>
+
+<body>
+    <header class="page-head">
+        <a class="back-link" href="./">&larr; &Uuml;bersicht Mathematik</a>
+        <div class="head-row">
+            <div class="title-group">
+                <h1>Mathematik &middot; Gymnasium &middot; Klasse 9</h1>
+            </div>
+            <button class="action orange" onclick="window.open('../lehrplaene/lehrplan_gy_mathematik.pdf', '_blank')">Lehrplan (PDF)</button>
+        </div>
+        <div class="subtitle">
+            Stoffverteilungsplan &middot; 4 Ustd./Woche &middot;
+            Lehrplan: <a href="https://www.schulportal.sachsen.de/lplandb/lehrplan/461" target="_blank"
+                rel="noopener">Lehrplan Gymnasium Mathematik (2019/2021)</a>
+        </div>
+    </header>
+
+    <div class="meta-cards">
+        <div class="meta-card" data-lb="lb1">
+            <div class="k c-orange">Lernbereich 1</div>
+            <div class="v">Funktionen und Potenzen</div>
+            <div class="vu">48 Ustd.</div>
+        </div>
+        <div class="meta-card" data-lb="lb2">
+            <div class="k c-cyan">Lernbereich 2</div>
+            <div class="v">Kreise, Kreiszylinder und Kugeln</div>
+            <div class="vu">8 Ustd.</div>
+        </div>
+        <div class="meta-card" data-lb="lb3">
+            <div class="k c-violet">Lernbereich 3</div>
+            <div class="v">Rechtwinklige Dreiecke</div>
+            <div class="vu">32 Ustd.</div>
+        </div>
+        <div class="meta-card" data-lb="lb4">
+            <div class="k c-teal">Lernbereich 4</div>
+            <div class="v">Auswerten von Daten</div>
+            <div class="vu">12 Ustd.</div>
+        </div>
+        <div class="meta-card" data-lb="lb5">
+            <div class="k c-pink">Lernbereich 5</div>
+            <div class="v">Vernetzung: Mathematik und moderne Rechentechnik</div>
+            <div class="vu">4 Ustd.</div>
+        </div>
+        <div class="meta-card" data-lb="wb">
+            <div class="k c-green">Wahlbereich</div>
+            <div class="v">Der goldene Schnitt</div>
+            <div class="vu">8 Ustd.</div>
+        </div>
+    </div>
+
+    <div class="toolbar">
+        <button class="action" onclick="window.print()">Drucken</button>
+        <button class="action" onclick="togglePlanDetails()">Alle auf/zu</button>
+        <button class="action" onclick="togglePlanEdit(this)">&#9998; Bearbeiten</button>
+        <button class="action secondary" onclick="resetPlanEdits(this)">Zur&uuml;cksetzen</button>
+        <div class="legend"></div>
+    </div>
+
+    <div class="table-wrap">
+        <table id="plan-table">
+            <thead>
+                <tr>
+                    <th>Nr.</th>
+                    <th>KW</th>
+                    <th>Woche</th>
+                    <th>Bereich</th>
+                    <th>Ustd.</th>
+                    <th>Thema / Inhalte</th>
+                    <th>Bemerkungen</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <footer class="page-foot">
+        Wochenzeile anklicken &rarr; Stundenskizze ausklappen. Beim Drucken werden alle Details ausgeklappt.
+        &bdquo;Bearbeiten&ldquo; macht Themen, Bemerkungen und Bullets editierbar &mdash; gespeichert wird beim
+        Klick auf &bdquo;Fertig&ldquo;, lokal in diesem Browser (localStorage); &bdquo;Zur&uuml;cksetzen&ldquo;
+        l&auml;dt das Original.
+        Ferientermine Sachsen 2026/27 (SMK): Herbst 12.&ndash;24.10.26 &middot; Weihnachten 23.12.26&ndash;02.01.27
+        &middot; Winter 08.&ndash;19.02.27 &middot; Ostern 26.03.&ndash;02.04.27 &middot; Pfingsten 07.05. + 15.&ndash;18.05.27
+        &middot; Sommer ab 10.07.27 &middot; Bu&szlig;- und Bettag Mi 18.11.26 unterrichtsfrei.
+        Die Zeitrichtwerte des Lehrplans (104 Ustd. Pflicht + 8 Ustd. Wahlbereich) sind vollst&auml;ndig abgebildet;
+        die &uuml;brigen Wochen des Schuljahres stehen als &Uuml;bung, Klassenarbeit oder Puffer in eigenen Zeilen.
+    </footer>
+
+    <script>
+        // Data-driven plan: one entry per school week (or holiday block).
+        // details: bullet list shown in the expandable sub-row (lesson sketch).
+        // type: lb1 | lb2 | lb3 | lb4 | lb5 | wb | lk | ue | org | ferien
+        window.PLAN = [
+            { nr: 1, kw: 34, date: '17.–21.08.26', type: 'org', u: '', topic: 'Schuljahresauftakt', remark: 'Erster Schultag Mo 17.08.', details: [
+                'Organisatorisches, Material, Arbeitsweise im Fach',
+                'Wiederholung Klasse 8: Terme, Gleichungen, lineare Funktionen',
+                'Überblick über das Schuljahr'
+            ] },
+            { nr: 2, kw: 35, date: '24.–28.08.26', type: 'lb1', u: '1–4/48', topic: 'Potenzieren und Radizieren', ziel: 'Kennen des Potenzierens und Radizierens', remark: 'Potenz- und Wurzelschreibweise, Ausblick auf reelle Zahlen', details: [
+                'Quadratwurzel wiederholen, Wurzel als Umkehrung des Potenzierens',
+                'Potenz- und Wurzelschreibweise ineinander überführen',
+                'Ausblick auf die reellen Zahlen: $\\mathbb{R}$, $\\mathbb{R}^+$'
+            ] },
+            { nr: 3, kw: 36, date: '31.08.–04.09.26', type: 'lb1', u: '5–8/48', topic: 'Potenzgesetze', ziel: 'Kennen der Potenzgesetze für natürliche und rationale Exponenten', remark: 'Permanenzprinzip', details: [
+                'Potenzgesetze an Beispielen wiederentdecken und begründen',
+                'Erweiterung auf negative und rationale Exponenten (Permanenzprinzip)',
+                'Wurzelgesetze nur so weit, wie sie gebraucht werden'
+            ] },
+            { nr: 4, kw: 37, date: '07.–11.09.26', type: 'lb1', u: '9–12/48', topic: 'Wurzelgleichungen', ziel: 'Lösen einfacher Wurzelgleichungen', remark: 'Probe nicht vergessen: Scheinlösungen', details: [
+                'Einfache Wurzelgleichungen durch Potenzieren lösen',
+                'Warum die Probe hier Pflicht ist — Scheinlösungen',
+                'Probleme beim Radizieren mit CAS'
+            ] },
+            { nr: 5, kw: 38, date: '14.–18.09.26', type: 'lb1', u: '13–16/48', topic: 'Potenzfunktionen mit ganzzahligen Exponenten', ziel: 'Kennen der Eigenschaften von Potenzfunktionen', remark: 'Definitionsbereich, Wertebereich', details: [
+                'Graphen für $n = 1, 2, 3, \\dots$ vergleichen',
+                'Definitions- und Wertebereich bestimmen',
+                'Symmetrie: gerade und ungerade Exponenten'
+            ] },
+            { nr: 6, kw: 39, date: '21.–25.09.26', type: 'lb1', u: '17–20/48', topic: 'Potenzfunktionen mit rationalen Exponenten', ziel: 'Kennen der Eigenschaften von Potenzfunktionen', remark: 'Vermutungen am Graphen mit CAS gewinnen', details: [
+                'Graphen mit negativen und rationalen Exponenten untersuchen',
+                'Vermutungen experimentell gewinnen und am Funktionsterm begründen',
+                'Begriff Polynom einordnen'
+            ] },
+            { nr: 7, kw: 40, date: '28.09.–02.10.26', type: 'lb1', u: '21–24/48', topic: 'Nullstellen, Polstellen, Asymptoten', ziel: 'Kennen charakteristischer Eigenschaften der Graphen', remark: 'achsenparallele Asymptoten', details: [
+                'Nullstellen und Schnittpunkte mit den Koordinatenachsen',
+                'Polstellen und achsenparallele Asymptoten erkennen',
+                'Lokale Extrema am Graphen ablesen'
+            ] },
+            { nr: 8, kw: 41, date: '05.–09.10.26', type: 'lb1', u: '25–28/48', topic: 'Einfluss von Parametern', ziel: 'Kennen des Einflusses von Parametern auf Graph und Eigenschaften', remark: 'Strecken, Stauchen, Verschieben, Spiegeln', details: [
+                'Parameter systematisch verändern (CAS oder Geometriesoftware)',
+                'Wirkung auf Verlauf, Nullstellen und Symmetrie beschreiben',
+                'Von der Beobachtung zur Begründung am Funktionsterm'
+            ] },
+            { ferien: 'Herbstferien · 12.–24.10.2026 (KW 42–43)' },
+            { nr: 9, kw: 44, date: '26.–30.10.26', type: 'lb1', u: '29–32/48', topic: 'Quadratische Funktionen', ziel: 'Kennen der Eigenschaften quadratischer Funktionen', remark: 'Normalform und Scheitelpunktform', details: [
+                'Normalform und Scheitelpunktform ineinander überführen',
+                'Scheitelpunkt bestimmen, quadratische Ergänzung',
+                'Graph aus der Scheitelpunktform zeichnen'
+            ] },
+            { nr: 10, kw: 45, date: '02.–06.11.26', type: 'lb1', u: '33–36/48', topic: 'Nullstellen quadratischer Funktionen', ziel: 'Beherrschen des Ermittelns von Nullstellen quadratischer Funktionen', remark: 'grafisch und mit CAS', details: [
+                'Nullstellen grafisch bestimmen und deuten',
+                'Quadratische Gleichungen mit CAS lösen',
+                'Zusammenhang Nullstelle — Lösung der Gleichung'
+            ] },
+            { nr: 11, kw: 46, date: '09.–13.11.26', type: 'lb1', u: '37–40/48', topic: 'Lösungsformel und Fallunterscheidung', ziel: 'Beherrschen des Lösens quadratischer Gleichungen', remark: 'vollständige Fallunterscheidung über die Diskriminante', details: [
+                'Lösungsformel aus der allgemeinen Form gewinnen',
+                'Diskriminante: keine, genau eine oder zwei Lösungen',
+                'Sprachlich sauber: „ein“ und „genau ein“ unterscheiden'
+            ] },
+            { nr: 12, kw: 47, date: '16.–20.11.26', type: 'lb1', u: '41–44/48', topic: 'Ohne Hilfsmittel rechnen', ziel: 'Beherrschen des Lösens quadratischer Gleichungen ohne Hilfsmittel', remark: 'überschaubares Zahlenmaterial', details: [
+                'Satz von Vieta als Kontrolle nutzen',
+                'Quadratische Gleichungen im Kopf und schriftlich lösen',
+                'Vermischte Übungen ohne Taschenrechner'
+            ] },
+            { nr: 13, kw: 48, date: '23.–27.11.26', type: 'lb1', u: '45–48/48', topic: 'Extremwertaufgaben', ziel: 'Lösen von Extremwertaufgaben mit elementaren Mitteln', remark: 'Anwendungen aus Alltag und Physik', details: [
+                'Zielgröße und Nebenbedingung aufstellen',
+                'Maximum bzw. Minimum über den Scheitelpunkt bestimmen',
+                'Ergebnis am Sachverhalt prüfen'
+            ] },
+            { nr: 14, kw: 49, date: '30.11.–04.12.26', type: 'ue', u: '', topic: 'Übung: Potenzen und quadratische Funktionen', remark: 'Übung, Vertiefung und Rückgabe', details: [
+                'Vermischte Übungen zu Potenzgesetzen und Wurzeln',
+                'Quadratische Gleichungen sicher lösen',
+                'Fragestunde vor der Klassenarbeit'
+            ] },
+            { nr: 15, kw: 50, date: '07.–11.12.26', type: 'lk', u: '', topic: 'Klassenarbeit 1: Funktionen und Potenzen', remark: 'mit Vorbereitung und Auswertung', details: [
+                'Vorbereitung und Fragen',
+                'Klassenarbeit 1',
+                'Rückgabe und Auswertung'
+            ] },
+            { nr: 16, kw: 51, date: '14.–18.12.26', type: 'lb2', u: '1–4/8', topic: 'Kreis und Kreisteile', ziel: 'Anwenden von Berechnungsverfahren für Umfang und Flächeninhalt von Kreisen', remark: 'Kreisausschnitt und Kreisbogen', details: [
+                'Umfang und Flächeninhalt des Kreises wiederholen',
+                'Kreisbogen und Kreisausschnitt berechnen',
+                'Zusammengesetzte Flächen zerlegen'
+            ] },
+            { nr: 17, kw: 52, date: '21.–22.12.26', type: 'lb2', u: '5–8/8', topic: 'Kreiszylinder und Kugel', ziel: 'Anwenden der Verfahren für Oberflächeninhalt, Volumen und Masse', remark: 'Würdigung Archimedes', details: [
+                'Oberfläche und Volumen des Kreiszylinders',
+                'Oberfläche und Volumen der Kugel, Masse über die Dichte',
+                'Archimedes und sein Grabmal: Kugel und Zylinder'
+            ] },
+            { ferien: 'Weihnachtsferien · 23.12.2026–02.01.2027' },
+            { nr: 18, kw: 1, date: '04.–08.01.27', type: 'ue', u: '', topic: 'Übung: Kreis, Zylinder, Kugel', remark: 'Übung, Vertiefung und Rückgabe', details: [
+                'Vermischte Berechnungen an Kreis und Körpern',
+                'Sachaufgaben mit Skizze',
+                'Kopfrechnen und Überschlag'
+            ] },
+            { nr: 19, kw: 2, date: '11.–15.01.27', type: 'lb3', u: '1–4/32', topic: 'Satz des Pythagoras', ziel: 'Kennen des Satzes des Pythagoras und eines Beweises', remark: 'Würdigung der Pythagoreer', details: [
+                'Satz am Kathetenquadrat entdecken',
+                'Einen Beweis vollständig nachvollziehen und aufschreiben',
+                'Historische Einordnung: Pythagoras und die Pythagoreer'
+            ] },
+            { nr: 20, kw: 3, date: '18.–22.01.27', type: 'lb3', u: '5–8/32', topic: 'Anwenden des Satzes des Pythagoras', ziel: 'Anwenden des Satzes beim Berechnen von Streckenlängen', remark: 'in der Ebene und im Raum', details: [
+                'Streckenlängen in Figuren berechnen',
+                'Raumdiagonale in Quader und Würfel',
+                'Sachaufgaben mit Skizze und Lösungsplan'
+            ] },
+            { nr: 21, kw: 4, date: '25.–29.01.27', type: 'lb3', u: '9–12/32', topic: 'Höhensatz und Kathetensatz', ziel: 'Kennen von Höhensatz und Kathetensatz', remark: 'geometrische Veranschaulichung', details: [
+                'Höhensatz und Kathetensatz am Höhenfußpunkt herleiten',
+                'Flächenverwandlung veranschaulichen',
+                'Aufgaben zur Satzgruppe des Pythagoras'
+            ] },
+            { nr: 22, kw: 5, date: '01.–05.02.27', type: 'lb3', u: '13–16/32', topic: 'Umkehrungen und indirekter Beweis', ziel: 'Kennen der Umkehrung der Sätze der Satzgruppe', remark: 'Formulierung „genau dann, wenn“', details: [
+                'Umkehrung formulieren und prüfen',
+                'Verfahren des indirekten Beweises kennenlernen',
+                'Einen Beweis einer Umkehrung führen'
+            ] },
+            { ferien: 'Winterferien · 08.–19.02.2027 (KW 6–7)' },
+            { nr: 23, kw: 8, date: '22.–26.02.27', type: 'lb3', u: '17–20/32', topic: 'Sinus, Kosinus, Tangens', ziel: 'Kennen der trigonometrischen Beziehungen im rechtwinkligen Dreieck', remark: 'Beschränkung auf Gradmaß', details: [
+                'Seitenverhältnisse am rechtwinkligen Dreieck definieren',
+                'Werte mit dem Taschenrechner bestimmen, Umkehrfunktionen',
+                'Zusammenhang zwischen den drei Verhältnissen'
+            ] },
+            { nr: 24, kw: 9, date: '01.–05.03.27', type: 'lb3', u: '21–24/32', topic: 'Streckenlängen und Winkelgrößen berechnen', ziel: 'Anwenden der trigonometrischen Beziehungen', remark: 'passendes Verhältnis auswählen', details: [
+                'Fehlende Seiten berechnen',
+                'Fehlende Winkel berechnen',
+                'Vermischte Aufgaben: erst Skizze, dann Ansatz'
+            ] },
+            { nr: 25, kw: 10, date: '08.–12.03.27', type: 'lb3', u: '25–28/32', topic: 'Flächeninhalte und regelmäßige Vielecke', ziel: 'Anwenden der Beziehungen beim Berechnen von Flächeninhalten', remark: 'näherungsweise Berechnung von $\\pi$', details: [
+                'Flächeninhalt über Höhe und Grundseite mit Trigonometrie',
+                'Berechnungen im regelmäßigen $n$-Eck',
+                'Näherung für $\\pi$ — erster Blick auf den Grenzwertbegriff'
+            ] },
+            { nr: 26, kw: 11, date: '15.–19.03.27', type: 'lb3', u: '29–32/32', topic: 'Pyramide und Kreiskegel', ziel: 'Anwenden der Kenntnisse auf Oberflächeninhalt und Volumen', remark: 'Projekt „Landvermessung“', details: [
+                'Oberflächeninhalt und Volumen der Pyramide',
+                'Oberflächeninhalt und Volumen des Kreiskegels',
+                'Projekt „Landvermessung“: draußen messen, drinnen rechnen'
+            ] },
+            { nr: 27, kw: 12, date: '22.–25.03.27', type: 'ue', u: '', topic: 'Übung: Satzgruppe des Pythagoras und Trigonometrie', remark: 'Übung, Vertiefung und Rückgabe', details: [
+                'Vermischte Aufgaben zu Pythagoras und Trigonometrie',
+                'Aufgaben mit Lösungsplan bearbeiten',
+                'Fragestunde vor der Klassenarbeit'
+            ] },
+            { ferien: 'Osterferien · 26.03.–02.04.2027' },
+            { nr: 28, kw: 14, date: '05.–09.04.27', type: 'lk', u: '', topic: 'Klassenarbeit 2: Rechtwinklige Dreiecke', remark: 'mit Vorbereitung und Auswertung', details: [
+                'Vorbereitung und Fragen',
+                'Klassenarbeit 2',
+                'Rückgabe und Auswertung'
+            ] },
+            { nr: 29, kw: 15, date: '12.–16.04.27', type: 'lb4', u: '1–4/12', topic: 'Mittelwerte', ziel: 'Beherrschen des Ermittelns von Modalwert, Median und arithmetischem Mittel', remark: 'Nominal-, Ordinal-, metrische Skala', details: [
+                'Modalwert, Median und arithmetisches Mittel an eigenen Daten',
+                'Welcher Mittelwert passt zu welcher Skala?',
+                'Ausreißer und ihre Wirkung auf den Mittelwert'
+            ] },
+            { nr: 30, kw: 16, date: '19.–23.04.27', type: 'lb4', u: '5–8/12', topic: 'Streuungsmaße', ziel: 'Kennen des Berechnens von Spannweite, Varianz und Standardabweichung', remark: 'CAS oder Tabellenkalkulation', details: [
+                'Spannweite, Varianz und Standardabweichung berechnen',
+                'Berechnung mit Tabellenkalkulation',
+                'Aussagekraft von Mittelwert und Streuung beurteilen'
+            ] },
+            { nr: 31, kw: 17, date: '26.–30.04.27', type: 'lb4', u: '9–12/12', topic: 'Histogramme und Manipulation', ziel: 'Kennen von Klassenbildung, Histogrammen und typischen Fehlern in der Statistik', remark: 'Projekt „Statistische Manipulationen“', details: [
+                'Klassen bilden, Histogramm zeichnen, Klasseneinteilung variieren',
+                'Typische Manipulationen: gestauchte Achsen, falsche Bezugsbasis, Trends',
+                'Projekt: eine Statistik aus den Medien auseinandernehmen und präsentieren'
+            ] },
+            { nr: 32, kw: 18, date: '03.–05.05.27', type: 'ue', u: '', topic: 'Übung: Daten auswerten', remark: 'Übung, Vertiefung und Rückgabe', details: [
+                'Kenngrößen an eigenen Datensätzen bestimmen',
+                'Diagramme lesen und kritisch bewerten',
+                'Projektergebnisse vorstellen'
+            ] },
+            { nr: 33, kw: 19, date: '10.–14.05.27', type: 'lk', u: '', topic: 'Klassenarbeit 3: Auswerten von Daten', remark: 'mit Vorbereitung und Auswertung', details: [
+                'Vorbereitung und Fragen',
+                'Klassenarbeit 3',
+                'Rückgabe und Auswertung'
+            ] },
+            { ferien: 'Pfingsten · Mo 17.05. Pfingstmontag + Di 18.05.2027 Ferientag' },
+            { nr: 34, kw: 20, date: '19.–21.05.27', type: 'lb5', u: '1–4/4', topic: 'Mathematik und moderne Rechentechnik', ziel: 'Kennen des Nutzens von Rechentechnik im Problemlöseprozess', remark: 'Kosten- und Wohnungsmarktentwicklung', details: [
+                'Ein Sachproblem sammeln und Informationen recherchieren',
+                'Sachverhalt veranschaulichen (Tabellenkalkulation, Geometriesoftware, CAS)',
+                'Lösungsverfahren wählen und das Ergebnis kritisch werten'
+            ] },
+            { nr: 35, kw: 21, date: '24.–28.05.27', type: 'wb', u: '1–4/8', topic: 'Der goldene Schnitt', ziel: 'Kennen des goldenen Schnittes', remark: 'Hinweis auf „Die Elemente“ des Euklid', details: [
+                'Definition und Herleitung des Streckenverhältnisses',
+                'Konstruktion des goldenen Schnittes',
+                'Zusammenhang mit der quadratischen Gleichung aus LB 1'
+            ] },
+            { nr: 36, kw: 22, date: '31.05.–04.06.27', type: 'wb', u: '5–8/8', topic: 'Goldener Schnitt in Kunst und Architektur', ziel: 'Anwenden der Kenntnisse auf Beispiele aus der Umwelt', remark: 'Pentagramm, Fotogestaltung, Rathaus Leipzig', details: [
+                'Pentagramm und reguläres Fünfeck untersuchen',
+                'Beispiele aus Kunst und Architektur nachmessen',
+                'Recherche im Heimatort, kurze Präsentation'
+            ] },
+            { nr: 37, kw: 23, date: '07.–11.06.27', type: 'ue', u: '', topic: 'Wiederholung: Funktionen und Geometrie', remark: 'Übung, Vertiefung und Rückgabe', details: [
+                'Jahresstoff systematisch wiederholen',
+                'Gemischte Aufgaben in Gruppen',
+                'Fragestunde'
+            ] },
+            { nr: 38, kw: 24, date: '14.–18.06.27', type: 'lk', u: '', topic: 'Klassenarbeit 4: Jahresstoff', remark: 'mit Vorbereitung und Auswertung', details: [
+                'Vorbereitung und Fragen',
+                'Klassenarbeit 4',
+                'Rückgabe und Auswertung'
+            ] },
+            { nr: 39, kw: 25, date: '21.–25.06.27', type: 'ue', u: '', topic: 'Vertiefung nach Bedarf', remark: 'Übung, Vertiefung und Rückgabe', details: [
+                'Schwerpunkte aus der Auswertung der Klassenarbeit',
+                'Differenzierte Übung',
+                'Knobelaufgaben'
+            ] },
+            { nr: 40, kw: 26, date: '28.06.–02.07.27', type: 'ue', u: '', topic: 'Projektwoche Mathematik', remark: 'Übung, Vertiefung und Rückgabe', details: [
+                'Kleines Projekt oder Wettbewerbsaufgaben',
+                'Präsentation der Ergebnisse',
+                'Ausblick auf Klasse 10'
+            ] },
+            { nr: 41, kw: 27, date: '05.–09.07.27', type: 'org', u: '', topic: 'Schuljahresabschluss', remark: 'letzte Schulwoche', details: [
+                'Rückblick auf das Schuljahr',
+                'Mathematische Spiele',
+                'Ausblick auf Klasse 10: Wachstum, Zufallsgrößen, Trigonometrie'
+            ] },
+            { ferien: 'Sommerferien · ab 10.07.2027' },
+        ];
+
+        // Lernbereich summaries for the clickable meta cards (see svp-plan.js).
+        // page = page in lehrplan_gy_mathematik.pdf where that Lernbereich starts.
+        window.LB_INFO = {
+            pdf: '../lehrplaene/lehrplan_gy_mathematik.pdf',
+            lb1: {
+                page: 36,
+                bullets: [
+                    'Potenzieren und Radizieren, Potenz- und Wurzelschreibweise',
+                    'Potenzgesetze für natürliche und rationale Exponenten',
+                    'Potenzfunktionen: Definitions- und Wertebereich, Nullstellen, Polstellen, Asymptoten',
+                    'Einfluss von Parametern auf Graph und Eigenschaften',
+                    'Quadratische Funktionen: Nullstellen, Lösungsformel, Fallunterscheidung',
+                ]
+            },
+            lb2: {
+                page: 37,
+                bullets: [
+                    'Umfang und Flächeninhalt von Kreisen und Kreisteilen',
+                    'Oberflächeninhalt, Volumen und Masse von Kreiszylinder und Kugel',
+                ]
+            },
+            lb3: {
+                page: 37,
+                bullets: [
+                    'Satz des Pythagoras und ein Beweis',
+                    'Höhensatz, Kathetensatz und die Umkehrungen, indirekter Beweis',
+                    'Sinus, Kosinus und Tangens im rechtwinkligen Dreieck',
+                    'Berechnungen im regelmäßigen n-Eck, Näherung für Pi',
+                    'Oberflächeninhalt und Volumen von Pyramide und Kreiskegel',
+                ]
+            },
+            lb4: {
+                page: 38,
+                bullets: [
+                    'Modalwert, Median und arithmetisches Mittel, Skalenniveaus',
+                    'Spannweite, Varianz und Standardabweichung',
+                    'Klassenbildung und Histogramme',
+                    'Typische Fehler und Manipulationen in der Statistik',
+                ]
+            },
+            lb5: {
+                page: 38,
+                bullets: [
+                    'Rechentechnik als Hilfsmittel im Problemlöseprozess',
+                    'Sachverhalt veranschaulichen, Verfahren wählen, Ergebnis kritisch werten',
+                ]
+            },
+            wb: {
+                page: 39,
+                bullets: [
+                    'Wahlbereich 1: Der goldene Schnitt (gewählt)',
+                    'Wahlbereich 2: Rund um den Pythagoras',
+                    'Wahlbereich 3: Baupläne und Bauzeichnungen',
+                ]
+            },
+        };
+
+        window.BADGE = {
+            lb1: ['b-orange', 'LB 1'],
+            lb2: ['b-cyan', 'LB 2'],
+            lb3: ['b-violet', 'LB 3'],
+            lb4: ['b-teal', 'LB 4'],
+            lb5: ['b-pink', 'LB 5'],
+            wb: ['b-green', 'WB 1'],
+            lk: ['b-red', 'LEISTUNG'],
+            ue: ['b-grey', '\u00dcBUNG'],
+            org: ['b-grey', 'ORGA']
+        };
+    </script>
+    <script src="../svp-auth.js"></script>
+    <script src="../svp-plan.js"></script>
+    <script src="../svp-nav.js"></script>
+</body>
+
+</html>

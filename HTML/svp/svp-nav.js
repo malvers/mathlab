@@ -12,6 +12,8 @@
     const LINKS = [
         ['index.html', 'Home', 'b-grey', 'Startseite'],
         ['mathe/mathe5.html', 'MA 5', 'b-orange', 'Mathematik Klasse 5'],
+        ['mathe/mathegy9.html', 'MA 9', 'b-orange', 'Mathematik Klasse 9 (Gymnasium)'],
+        ['mathe/mathegy10.html', 'MA 10', 'b-orange', 'Mathematik Klasse 10 (Gymnasium)'],
         ['mathe/mathe11.html', 'MA 11', 'b-orange', 'Mathematik Klasse 11'],
         ['mathe/mathe12.html', 'MA 12', 'b-orange', 'Mathematik Klasse 12'],
         ['mathe/mathe13.html', 'MA 13', 'b-orange', 'Mathematik Klasse 13'],
@@ -42,6 +44,9 @@
         ['Oberschule', [
             ['Mathematik', ['mathe/mathe5.html']],
             ['Informatik', ['informatik/informatik9.html']]
+        ]],
+        ['Gymnasium', [
+            ['Mathematik', ['mathe/mathegy9.html', 'mathe/mathegy10.html']]
         ]],
         ['Berufliches Gymnasium', [
             ['Mathematik', ['mathe/mathe11.html', 'mathe/mathe12.html', 'mathe/mathe13.html']],
