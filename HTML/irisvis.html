@@ -14,6 +14,7 @@
     <link rel="stylesheet" href="js/cyber-lab-overrides.css">
     <link rel="stylesheet" href="js/branding.styles.extracted.css">
     <link rel="stylesheet" href="js/lab-shell-minimal.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
     <style>
         /* --- stage-specific only; shared chrome stays in js/cyber-*.css --- */
         #canvas-container { overflow: hidden; }
@@ -27,6 +28,69 @@
             bottom: 18px;
             top: auto;
             width: min(430px, calc(100% - 36px));
+        }
+
+        /* the title bar is the only clickable part — clicks on the text still reach
+           the canvas underneath, so dragging a vertex behind the box keeps working */
+        #math-coach-box .coach-title {
+            pointer-events: auto;
+            cursor: pointer;
+            user-select: none;
+            justify-content: space-between;
+            font-size: 0.95rem;
+            letter-spacing: 1.5px;
+        }
+
+        /* the shared coach box carries a glowing dot — not wanted here (page-local
+           override, the central rule stays untouched for the other labs) */
+        #math-coach-box .coach-title::before { content: none; }
+
+        #coach-caret { font-size: 0.95rem; }
+
+        #coach-caret {
+            transition: transform 0.25s ease;
+            color: #00d2ff;
+        }
+
+        #math-coach-box.folded #coach-caret { transform: rotate(-90deg); }
+
+        /* folded: everything below the title disappears downwards */
+        #math-coach-box.folded { padding-bottom: 16px; }
+        #math-coach-box.folded .coach-title { margin-bottom: 0; }
+        #math-coach-box.folded #coach-content { display: none; }
+
+        .katex { font-size: 1.05em; }
+
+        /* Flatter, uniform buttons — page-local, so the other labs keep the tall
+           "ultra" default. The shared rules use !important, hence these do too. */
+        #ui-container .cyber-btn {
+            min-height: 40px !important;
+            padding: 10px 14px !important;
+            font-size: 0.7rem !important;
+            letter-spacing: 1.6px !important;
+            white-space: nowrap;
+        }
+
+        /* Tighter vertically — the shared sliders are built for big touch targets;
+           this lab has many of them, so the sidebar needs the room (page-local). */
+        #ui-container .cyber-control-group { margin-top: 8px !important; }
+        #ui-container .control-header { margin-bottom: 0 !important; }
+        #ui-container input[type="range"] { padding: 2px 0 !important; min-height: 16px !important; }
+        #ui-container .instrument-card { padding-bottom: 8px !important; margin-bottom: 4px !important; }
+        #ui-container .cyber-checkbox-wrapper { padding: 0 !important; }
+        #ui-container .instrument-title { margin-bottom: 4px !important; }
+
+        /* every card body is one column with ONE gap — no per-element margins,
+           so the vertical rhythm cannot drift apart */
+        #ui-container .stack { display: flex; flex-direction: column; gap: 4px; }
+        #ui-container .stack > .row { display: flex; gap: 4px; }
+        #ui-container .stack > .row > .cyber-btn { flex: 1; }
+        #ui-container .stack .cyber-control-group { margin-top: 0 !important; }
+        #ui-container .stack > .note {
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.72rem;
+            color: rgba(190, 214, 246, 0.62);
+            line-height: 1.5;
         }
 
         .iris-text {
@@ -63,6 +127,76 @@
         }
 
         .iris-keys b { color: rgb(245, 194, 66); font-weight: 400; }
+
+        /* help overlay (H) — same dark-blue card language as the rest */
+        #help-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 60;
+            background: rgba(4, 10, 24, 0.75);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            cursor: pointer;
+        }
+
+        .help-card {
+            background: rgb(14, 36, 78);
+            border: 1px solid rgba(120, 160, 220, 0.35);
+            border-radius: 16px;
+            padding: 22px 26px;
+            max-width: 720px;
+            width: 100%;
+            max-height: 86vh;
+            overflow: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .help-card h2 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1rem;
+            color: #00d2ff;
+            margin-bottom: 14px;
+            letter-spacing: 1.5px;
+        }
+
+        .help-card table { width: 100%; border-collapse: collapse; }
+
+        .help-card td {
+            padding: 6px 10px 6px 0;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.86rem;
+            color: rgba(230, 240, 255, 0.9);
+            border-top: 1px solid rgba(120, 160, 220, 0.14);
+            vertical-align: top;
+        }
+
+        .help-card td:first-child {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.72rem;
+            color: rgb(245, 194, 66);
+            white-space: nowrap;
+            width: 1%;
+        }
+
+        .help-card p {
+            margin-top: 14px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.78rem;
+            line-height: 1.55;
+            color: rgba(190, 214, 246, 0.7);
+        }
+
+        .help-card p b { color: rgb(245, 194, 66); font-weight: 600; }
+
+        .help-close {
+            margin-top: 12px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.6rem;
+            color: rgba(190, 214, 246, 0.5);
+            text-align: right;
+        }
     </style>
 </head>
 
@@ -109,6 +243,8 @@
     <script src="js/branding/nav.js"></script>
     <script src="js/branding.js"></script>
     <script src="js/ui.js"></script>
+    <script src="js/cmaes-logic.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
     <script>
         function toggleSidebar() {
             const panel = document.getElementById('side-panel');
@@ -153,33 +289,74 @@
             ink: 'rgba(230, 240, 255, 0.92)',
             dim: 'rgba(160, 190, 230, 0.45)'
         };
+        const inkCol = () => (state.light ? 'rgb(14, 36, 78)' : COL.ink);
 
-        /* the wiper arcs are named after the vertex they pivot around */
-        const VCOL = { A: 'rgb(245, 194, 66)', B: 'rgb(176, 36, 24)', C: 'rgb(121, 158, 49)' };
+        /* The wiper is drawn in ONE colour, orange, exactly as in the Java original.
+           Red / green / orange stay reserved for "which length is copied" — two colour
+           rules at once were confusing (Doc). */
+        const WIPER = 'rgb(245, 194, 66)';
 
+        /* Everything starts switched OFF and nothing animates by itself — the figure
+           is meant to be built up live, one key at a time (Doc). */
         const state = {
             d: 0,               // extra extension length (world units)
-            showTriangle: true,
-            showLines: true,     // the extended side lines ("whiskers")
-            showPoints: true,
-            showCircle: true,
-            showIncircle: true,
+            showTriangle: false,
+            extA: false,         // the two extensions at A (length a), with their points
+            extB: false,         // … at B (length b)
+            extC: false,         // … at C (length c)
+            showCircle: false,
+            showIncircle: false,
             showProof: false,    // perpendiculars from I to the three lines
-            showLabels: true,
-            iris: true,          // family of circles for d in [dMin … dMax]
-            rings: 26,
+            showChords: false,   // chords + midpoints + perpendicular bisectors (Docs "L")
+            light: false,        // bright stage for the beamer (Docs black/white mode)
+            showLabels: false,
             animate: false,
-            wiper: true,         // the six wiper arcs (the closed "iris" curve)
-            wiperFill: true
+            wiper: false,        // the six wiper arcs (the closed "iris" curve)
+            wiperFill: true,
+            box: false,          // the rotating square the curve fits into
+            angle: 0,            // its rotation in degrees
+            path: false,         // the path the square's centre traces over 360°
+            heat: false,         // quality landscape of the search
+            searching: false     // CMA-ES running
         };
+
+        let boxC = null;         // current square centre (what CMA-ES searches for)
+        let es = null, pop = [], evals = 0, lastQ = 0;
+        let rotPath = [], sweepRun = null;
+        let heatImg = null, heatBox = null;
+
+        /* What the browser remembers between visits: every switch plus the three
+           numbers. Deliberately NOT stored: the running animations, and the heatmap /
+           rotation path, whose data would be gone after a reload. */
+        const SAVE_KEY = 'irisvis-state';
+        const SAVE_FIELDS = ['showTriangle', 'extA', 'extB', 'extC', 'showCircle', 'showIncircle',
+            'showProof', 'showChords', 'showLabels', 'light', 'wiper', 'wiperFill',
+            'box', 'angle', 'd'];
+
+        function saveState() {
+            const o = {};
+            SAVE_FIELDS.forEach((k) => { o[k] = state[k]; });
+            try { localStorage.setItem(SAVE_KEY, JSON.stringify(o)); } catch (e) { }
+        }
+
+        function loadState() {
+            let o = null;
+            try { o = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null'); } catch (e) { }
+            if (!o) return;
+            SAVE_FIELDS.forEach((k) => {
+                if (typeof o[k] === typeof state[k]) state[k] = o[k];
+            });
+        }
 
         let buildT = 1;          // 0 … 1: how much of the wiper curve is drawn
         let building = false;
 
         /* triangle vertices in world coordinates */
         let A = { x: -170, y: 110 }, B = { x: 190, y: 140 }, C = { x: -20, y: -160 };
-        let view = { s: 1, ox: 0, oy: 0 };     // world -> screen
-        let drag = null;                        // 'A' | 'B' | 'C' | 'pan'
+        let view = { s: 1, ox: 0, oy: 0, auto: true };   // world -> screen; auto = keep fitting
+        let drag = null;                        // 'A' | 'B' | 'C' | 'pan' | 'zoom' | 'wiper'
+        let wiperDrag = null;                   // { key, pos } while a wiper tip is swept
+        let dragFrom = null;                    // screen position where the drag started
         let animPhase = 0;
         let raf = null;
 
@@ -257,6 +434,14 @@
 
         const vertexOf = (k) => (k === 'A' ? A : k === 'B' ? B : C);
 
+        /* Which arc does each of the six tips ride on? Exactly as in the Java original
+           (moveHandlesOrWhipers): three tips sweep along a BIG arc, three along a SMALL
+           one — every tip has its own hinge.
+              aB → big arc around C   ·  bA → small arc around A
+              cA → big arc around B   ·  aC → small arc around C
+              bC → big arc around A   ·  cB → small arc around B          */
+        const TIP_ARC = { aB: 0, bA: 1, cA: 2, aC: 3, bC: 4, cB: 5 };
+
         /* signed minor-arc sweep from `from` to `to` around the pivot */
         function sweep(arc) {
             const O = vertexOf(arc.k);
@@ -303,19 +488,155 @@
             return { min: lo, max: hi };
         }
 
+        /* ================================================================
+           The square. The wiper curve has constant width w = 2(s+d), so a square
+           of side w contains it at EVERY rotation angle — that is the point of
+           Doc's CMA-ES part: search the placement, watch it fit.
+           ================================================================ */
+        function boxSide(g) { return 2 * (g.s + g.d); }
+
+        /* distance of a point to the outside of the rotated square (0 = inside) */
+        function outsideDist(p, c, th, h) {
+            const co = Math.cos(-th), si = Math.sin(-th);
+            const dx0 = p.x - c.x, dy0 = p.y - c.y;
+            const x = Math.abs(dx0 * co - dy0 * si) - h;
+            const y = Math.abs(dx0 * si + dy0 * co) - h;
+            return Math.hypot(Math.max(x, 0), Math.max(y, 0));
+        }
+
+        /* Docs Qualitätsfunktion: sum of the distances of all points that stick out */
+        function boxQuality(pts, c, th, h) {
+            let sum = 0;
+            for (let i = 0; i < pts.length; i++) sum += outsideDist(pts[i], c, th, h);
+            return sum;
+        }
+
+        /* the exact optimum: the midpoint of the projections onto the two square axes */
+        function boxOptimal(pts, th) {
+            const u = { x: Math.cos(th), y: Math.sin(th) }, v = { x: -Math.sin(th), y: Math.cos(th) };
+            let ulo = Infinity, uhi = -Infinity, vlo = Infinity, vhi = -Infinity;
+            for (const p of pts) {
+                const a = p.x * u.x + p.y * u.y, b = p.x * v.x + p.y * v.y;
+                if (a < ulo) ulo = a; if (a > uhi) uhi = a;
+                if (b < vlo) vlo = b; if (b > vhi) vhi = b;
+            }
+            const mu = (ulo + uhi) / 2, mv = (vlo + vhi) / 2;
+            return { c: { x: mu * u.x + mv * v.x, y: mu * u.y + mv * v.y }, wu: uhi - ulo, wv: vhi - vlo };
+        }
+
+        /* one CMA-ES generation with the central implementation (js/cmaes-logic.js) */
+        function stepCMAES(g) {
+            if (!es) return;
+            const pts = curvePoints(g, 24);
+            const h = boxSide(g) / 2, th = state.angle * Math.PI / 180;
+            const X = es.ask();
+            const F = X.map((x) => boxQuality(pts, { x: x[0], y: x[1] }, th, h));
+            es.tell(X, F);
+            pop = X.map((x) => ({ x: x[0], y: x[1] }));
+            evals = es.counteval;
+            lastQ = es.best.f;
+            boxC = { x: es.best.x[0], y: es.best.x[1] };
+            if (es.best.f < 1e-9 || es.stop()) state.searching = false;
+        }
+
+        /* Like the Java original: the search does NOT start from scratch. Doc sets
+           setInitialX(1) and sigma 5 on a box of ~1000 px — i.e. the box is already
+           roughly right and CMA-ES only corrects the small offset the rotation caused.
+           The found placement is kept (setOptimizedBoundingBox), so the next angle
+           starts from it. */
+        function startCMAES() {
+            const g = geometry(state.d);
+            state.box = true;
+            if (!boxC) boxC = boxOptimal(curvePoints(g, 24), 0).c;   // Docs axis-aligned start
+            es = new CMAES([boxC.x, boxC.y], Math.max(1, boxSide(g) / 200));
+            pop = []; evals = 0; lastQ = Infinity;
+            state.searching = true;
+            loop();
+        }
+
+        /* Docs calculateBoundingBoxRotationPath360: turn the square in 2° steps from
+           0° to 90°, run a full CMA-ES at every step (warm started at the previous
+           placement) and record the centre. One step per frame, so you can watch it. */
+        function sweepRotation() {
+            const g = geometry(state.d);
+            state.box = true;
+            state.path = true;
+            rotPath = [];
+            evals = 0;
+            boxC = boxOptimal(curvePoints(g, 24), 0).c;
+            sweepRun = { deg: 0 };
+            loop();
+        }
+
+        function stepSweep() {
+            const g = geometry(state.d);
+            const pts = curvePoints(g, 24);
+            const h = boxSide(g) / 2;
+            const th = sweepRun.deg * Math.PI / 180;
+            const run = new CMAES([boxC.x, boxC.y], Math.max(1, boxSide(g) / 200));
+            let it = 0;
+            while (it < 200 && run.best.f > 1e-9 && !run.stop()) {
+                const X = run.ask();
+                run.tell(X, X.map((x) => boxQuality(pts, { x: x[0], y: x[1] }, th, h)));
+                it++;
+            }
+            boxC = { x: run.best.x[0], y: run.best.x[1] };
+            lastQ = run.best.f;
+            evals += run.counteval;
+            rotPath.push({ x: boxC.x, y: boxC.y });
+            state.angle = sweepRun.deg;
+            sweepRun.deg += 2;
+            if (sweepRun.deg > 90) sweepRun = null;      // a quarter turn is the whole story
+        }
+
+        /* the quality landscape, computed once on a world-space grid */
+        function buildHeat() {
+            const g = geometry(state.d);
+            const pts = curvePoints(g, 10);
+            const h = boxSide(g) / 2, th = state.angle * Math.PI / 180;
+            const N = 90;
+            const span = boxSide(g) * 0.55;
+            const x0 = g.I.x - span, y0 = g.I.y - span, cell = 2 * span / N;
+            const off = document.createElement('canvas');
+            off.width = N; off.height = N;
+            const im = off.getContext('2d').createImageData(N, N);
+            const vals = new Float64Array(N * N);
+            let lo = Infinity, hi = 0;
+            for (let j = 0; j < N; j++) {
+                for (let i = 0; i < N; i++) {
+                    const q = boxQuality(pts, { x: x0 + i * cell, y: y0 + j * cell }, th, h);
+                    vals[j * N + i] = q;
+                    if (q < lo) lo = q;
+                    if (q > hi) hi = q;
+                }
+            }
+            for (let k = 0; k < N * N; k++) {
+                const t = hi > lo ? (vals[k] - lo) / (hi - lo) : 0;
+                /* blue (good) -> orange (bad), like Docs ColorSpectrum */
+                im.data[k * 4] = Math.round(0 + t * 245);
+                im.data[k * 4 + 1] = Math.round(210 + t * (194 - 210));
+                im.data[k * 4 + 2] = Math.round(255 + t * (66 - 255));
+                im.data[k * 4 + 3] = 90;
+            }
+            off.getContext('2d').putImageData(im, 0, 0);
+            heatImg = off;
+            heatBox = { x0: x0, y0: y0, w: 2 * span, h: 2 * span };
+            state.heat = true;
+            render();
+        }
+
         /* ---------- view: fit everything on screen ---------- */
         function fit(g) {
             const rect = container.getBoundingClientRect();
             const W = Math.max(1, rect.width), H = Math.max(1, rect.height);
-            const dMax = state.iris ? Math.max(state.d, irisMax()) : state.d;
-            let Rmax = Math.hypot(g.r, g.s + Math.max(0, dMax));
-            if (state.wiper) {
-                /* the wiper curve reaches further than the circle through the six points */
-                arcsOf(g).forEach((arc) => {
-                    if (arc.r <= 0) return;
-                    Rmax = Math.max(Rmax, dist(vertexOf(arc.k), g.I) + arc.r);
-                });
-            }
+            /* Always measure against EVERY element, shown or not — otherwise switching
+               something on or off would rescale the whole figure. */
+            let Rmax = Math.hypot(g.r, g.s + Math.max(0, state.d));
+            Rmax = Math.max(Rmax, boxSide(g) * 0.75);
+            arcsOf(g).forEach((arc) => {
+                if (arc.r <= 0) return;
+                Rmax = Math.max(Rmax, dist(vertexOf(arc.k), g.I) + arc.r);
+            });
             const pad = 48;
             const s = Math.min((W - 2 * pad) / (2 * Rmax), (H - 2 * pad) / (2 * Rmax));
             view.s = Math.max(0.02, s);
@@ -325,12 +646,6 @@
 
         const toScreen = (p) => ({ x: p.x * view.s + view.ox, y: p.y * view.s + view.oy });
         const toWorld = (p) => ({ x: (p.x - view.ox) / view.s, y: (p.y - view.oy) / view.s });
-
-        /* largest extension shown by the iris fan */
-        function irisMax() {
-            const g0 = geometry(0);
-            return g0.s * 1.1;
-        }
 
         /* ---------- drawing ---------- */
         function line(p, q, col, w, dash) {
@@ -366,20 +681,30 @@
             ctx.arc(S.x, S.y, rPix, 0, Math.PI * 2);
             ctx.fill();
             if (label && state.showLabels) {
-                ctx.fillStyle = COL.ink;
+                ctx.fillStyle = inkCol();
                 ctx.font = '13px Orbitron, sans-serif';
                 ctx.fillText(label, S.x + rPix + 5, S.y - rPix - 3);
             }
             ctx.restore();
         }
 
-        /* blue -> red like the Java ColorSpectrum, but on our palette */
-        function spectrum(t) {
-            const c1 = [0, 210, 255], c2 = [245, 194, 66];
-            const v = Math.max(0, Math.min(1, t));
-            return 'rgba(' + Math.round(c1[0] + v * (c2[0] - c1[0])) + ',' +
-                Math.round(c1[1] + v * (c2[1] - c1[1])) + ',' +
-                Math.round(c1[2] + v * (c2[2] - c1[2])) + ',0.5)';
+        /* Labels sit outside the figure: `out` is the direction pointing away from the
+           triangle's centre, so nothing is ever written onto a line. */
+        function label(p, text, out, col) {
+            const S = toScreen(p);
+            const off = 17;
+            const X = S.x + out.x * off, Y = S.y + out.y * off;
+            ctx.save();
+            ctx.font = '15px Orbitron, sans-serif';
+            ctx.textAlign = out.x > 0.35 ? 'left' : out.x < -0.35 ? 'right' : 'center';
+            ctx.textBaseline = out.y > 0.35 ? 'top' : out.y < -0.35 ? 'bottom' : 'middle';
+            ctx.lineJoin = 'round';
+            ctx.lineWidth = 4;
+            ctx.strokeStyle = state.light ? 'rgba(238, 242, 250, 0.9)' : 'rgba(8, 20, 42, 0.85)';
+            ctx.strokeText(text, X, Y);
+            ctx.fillStyle = col;
+            ctx.fillText(text, X, Y);
+            ctx.restore();
         }
 
         function render() {
@@ -390,31 +715,35 @@
             canvas.height = Math.floor(H * dpr);
             ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
             ctx.clearRect(0, 0, W, H);
+            if (state.light) {                 // bright stage (Docs black/white mode)
+                ctx.fillStyle = 'rgb(238, 242, 250)';
+                ctx.fillRect(0, 0, W, H);
+            }
 
             const g = geometry(state.d);
 
-            /* the iris: one circle per extension step, all centred at I */
-            if (state.iris) {
-                const dMax = irisMax();
-                for (let i = 0; i < state.rings; i++) {
-                    const t = i / (state.rings - 1);
-                    const dd = t * dMax;
-                    circle(g.I, Math.hypot(g.r, g.s + dd), spectrum(t), 1);
-                }
+            /* the quality landscape of the search, behind everything */
+            if (state.heat && heatImg && heatBox) {
+                const O = toScreen({ x: heatBox.x0, y: heatBox.y0 });
+                ctx.save();
+                ctx.imageSmoothingEnabled = true;
+                ctx.drawImage(heatImg, O.x, O.y, heatBox.w * view.s, heatBox.h * view.s);
+                ctx.restore();
             }
 
             /* the wiper curve: six arcs, drawn up to buildT so it can build itself up */
             if (state.wiper) drawWiper(g);
 
-            /* the three extended side lines — each carries two of the six points */
-            if (state.showLines) {
-                line(g.P.cA, g.P.cB, COL.c, 1.6);
-                line(g.P.aB, g.P.aC, COL.a, 1.6);
-                line(g.P.bC, g.P.bA, COL.b, 1.6);
-            }
+            /* The six extension stubs, one pair per vertex. Each is drawn in the colour
+               of the side whose length it copies, so a pair always shares one colour. */
+            if (state.extA) { line(A, g.P.cA, COL.a, 2.2); line(A, g.P.bA, COL.a, 2.2); }
+            if (state.extB) { line(B, g.P.cB, COL.b, 2.2); line(B, g.P.aB, COL.b, 2.2); }
+            if (state.extC) { line(C, g.P.aC, COL.c, 2.2); line(C, g.P.bC, COL.c, 2.2); }
 
             /* proof: the distance from I to each line is the inradius r, and each
                line is cut by the circle in a chord of half-length s + d */
+            if (state.showChords) drawChords(g);
+
             if (state.showProof) {
                 foot(g, A, B, COL.c);
                 foot(g, B, C, COL.a);
@@ -423,7 +752,8 @@
 
             if (state.showIncircle) {
                 circle(g.I, g.r, COL.dim, 1.4, [5, 5]);
-                dot(g.I, '#9de8ff', 4, state.showLabels ? 'I' : '');
+                dot(g.I, '#9de8ff', 4);
+                if (state.showLabels) label(g.I, 'I', { x: 0.7, y: 0.7 }, '#9de8ff');
             }
 
             if (state.showCircle) circle(g.I, g.R, COL.circle, 2.2);
@@ -434,16 +764,36 @@
                 line(C, A, COL.b, 2.4);
             }
 
-            if (state.showPoints) {
-                dot(g.P.cA, COL.c, 5); dot(g.P.cB, COL.c, 5);
-                dot(g.P.aB, COL.a, 5); dot(g.P.aC, COL.a, 5);
-                dot(g.P.bC, COL.b, 5); dot(g.P.bA, COL.b, 5);
+            /* the tip currently being swept is drawn at its swept position further down */
+            const held = wiperDrag ? wiperDrag.key : '';
+            const tip = (k, col) => { if (k !== held) dot(g.P[k], col, 5); };
+            if (state.extA) { tip('cA', COL.a); tip('bA', COL.a); }
+            if (state.extB) { tip('cB', COL.b); tip('aB', COL.b); }
+            if (state.extC) { tip('aC', COL.c); tip('bC', COL.c); }
+
+            /* a tip being swept by hand: the wiper arm from its pivot */
+            if (wiperDrag) {
+                const arc = arcsOf(g)[TIP_ARC[wiperDrag.key]];
+                const O = vertexOf(arc.k);
+                line(O, wiperDrag.pos, WIPER, 2);
+                dot(wiperDrag.pos, WIPER, 7);
             }
 
-            /* the draggable vertices last, so they stay on top */
-            dot(A, COL.ink, 7, 'A');
-            dot(B, COL.ink, 7, 'B');
-            dot(C, COL.ink, 7, 'C');
+            if (state.box) drawBox(g);
+
+            /* the draggable vertices last, so they stay on top — they belong to the
+               triangle, so with everything off the stage really is empty */
+            if (state.showTriangle) {
+                dot(A, inkCol(), 7);
+                dot(B, inkCol(), 7);
+                dot(C, inkCol(), 7);
+                if (state.showLabels) {
+                    const M = { x: (A.x + B.x + C.x) / 3, y: (A.y + B.y + C.y) / 3 };
+                    label(A, 'A', norm(sub(A, M)), inkCol());
+                    label(B, 'B', norm(sub(B, M)), inkCol());
+                    label(C, 'C', norm(sub(C, M)), inkCol());
+                }
+            }
 
             updateReadout(g);
         }
@@ -469,7 +819,7 @@
                     ctx.arc(S.x, S.y, sg.arc.r * view.s, sg.w.a1, sg.w.a1 + sg.w.dA, sg.w.dA < 0);
                 });
                 ctx.closePath();
-                ctx.fillStyle = 'rgba(0, 210, 255, 0.07)';
+                ctx.fillStyle = 'rgba(245, 194, 66, 0.07)';
                 ctx.fill();
                 ctx.restore();
             }
@@ -481,7 +831,7 @@
                 budget -= sg.L;
                 const S = toScreen(sg.w.O);
                 ctx.save();
-                ctx.strokeStyle = VCOL[sg.arc.k];
+                ctx.strokeStyle = WIPER;
                 ctx.lineWidth = sg.arc.big ? 2.6 : 2.6;
                 ctx.beginPath();
                 ctx.arc(S.x, S.y, sg.arc.r * view.s, sg.w.a1, sg.w.a1 + sg.w.dA * frac, sg.w.dA < 0);
@@ -492,10 +842,77 @@
                     armDrawn = true;
                     const t = sg.w.a1 + sg.w.dA * frac;
                     const tip = { x: sg.w.O.x + Math.cos(t) * sg.arc.r, y: sg.w.O.y + Math.sin(t) * sg.arc.r };
-                    line(sg.w.O, tip, VCOL[sg.arc.k], 1.6, [6, 4]);
-                    dot(tip, VCOL[sg.arc.k], 5);
+                    line(sg.w.O, tip, WIPER, 1.6, [6, 4]);
+                    dot(tip, WIPER, 5);
                 }
             }
+        }
+
+        /* The square of side w = 2(s+d), the path of its centre over a full turn,
+           and the CMA-ES population while it searches. */
+        function drawBox(g) {
+            const th = state.angle * Math.PI / 180;
+            const h = boxSide(g) / 2;
+            const pts = curvePoints(g, 24);
+            const opt = boxOptimal(pts, th);
+            const c = boxC || opt.c;
+
+            if (state.path && rotPath.length) {
+                ctx.save();
+                ctx.strokeStyle = 'rgba(176, 36, 24, 0.85)';
+                ctx.lineWidth = 1.4;
+                ctx.beginPath();
+                rotPath.forEach((q, i) => {
+                    const S = toScreen(q);
+                    if (i === 0) ctx.moveTo(S.x, S.y); else ctx.lineTo(S.x, S.y);
+                });
+                ctx.stroke();
+                ctx.restore();
+            }
+
+            /* the population — every dot is one candidate placement */
+            if (state.searching && pop.length) {
+                pop.forEach((q) => dot(q, 'rgba(245, 194, 66, 0.75)', 3));
+            }
+
+            /* the exact optimum as a faint reference, the found one solid */
+            if (state.searching) square(opt.c, th, h, 'rgba(160, 190, 230, 0.35)', 1, [5, 5]);
+            square(c, th, h, COL.circle, 2, null);
+            dot(c, COL.circle, 4);
+        }
+
+        function square(c, th, h, col, w, dash) {
+            const co = Math.cos(th), si = Math.sin(th);
+            const pts = [[-h, -h], [h, -h], [h, h], [-h, h]].map(([x, y]) =>
+                toScreen({ x: c.x + x * co - y * si, y: c.y + x * si + y * co }));
+            ctx.save();
+            ctx.strokeStyle = col;
+            ctx.lineWidth = w;
+            if (dash) ctx.setLineDash(dash);
+            ctx.beginPath();
+            pts.forEach((P, i) => { if (i === 0) ctx.moveTo(P.x, P.y); else ctx.lineTo(P.x, P.y); });
+            ctx.closePath();
+            ctx.stroke();
+            ctx.restore();
+        }
+
+        /* Docs "L": the three chords between the pairs of extension points, their
+           midpoints and the perpendicular bisectors — they all meet in I. That is the
+           second proof of the theorem. */
+        function drawChords(g) {
+            const pairs = [
+                [g.P.bA, g.P.cA, COL.c], [g.P.aB, g.P.cB, COL.a], [g.P.aC, g.P.bC, COL.b]
+            ];
+            pairs.forEach(([P1, P2, col]) => {
+                line(P1, P2, 'rgba(190, 214, 246, 0.5)', 1.2);
+                const M = { x: (P1.x + P2.x) / 2, y: (P1.y + P2.y) / 2 };
+                dot(M, col, 4);
+                /* perpendicular bisector, drawn out to the centre and a bit beyond */
+                const u = norm(sub(P2, P1));
+                const n = { x: -u.y, y: u.x };
+                const t = (g.I.x - M.x) * n.x + (g.I.y - M.y) * n.y;
+                line(add(M, mul(n, -0.15 * t)), add(M, mul(n, t * 1.2)), col, 1.1, [5, 4]);
+            });
         }
 
         /* perpendicular from the incentre to a side line + the right-angle mark */
@@ -511,6 +928,67 @@
             line(p2, p3, col, 1);
         }
 
+        /* ---------- the explanation box ---------- */
+        const COACH_KEY = 'irisvis-coach-folded';
+        let lastTex = '', lastTexW = '';
+
+        function buildCoach() {
+            const title = $('coach-title-slot');
+            title.textContent = "Conway's Circle Theorem";
+            const caret = document.createElement('span');
+            caret.id = 'coach-caret';
+            caret.textContent = '▾';
+            title.appendChild(caret);
+            title.addEventListener('click', () => setFolded(!$('math-coach-box').classList.contains('folded')));
+
+            $('coach-content').innerHTML =
+                '<div class="iris-text">' +
+                'Verlängere an jeder Ecke <b>beide</b> Seiten über die Ecke hinaus um die Länge der ' +
+                '<b>gegenüberliegenden</b> Seite. Die sechs Endpunkte liegen auf <b>einem</b> Kreis — ' +
+                'sein Mittelpunkt ist der Inkreismittelpunkt <b>I</b>.<br>' +
+                '<span style="color:rgb(176,36,24)">Rot</span>, ' +
+                '<span style="color:rgb(121,158,49)">Grün</span> und ' +
+                '<span style="color:rgb(245,194,66)">Orange</span> zeigen, welche Länge kopiert wird: ' +
+                'an <b>A</b> ist die Verlängerung so lang wie <span style="color:rgb(176,36,24)">a = BC</span>, ' +
+                'an <b>B</b> wie <span style="color:rgb(121,158,49)">b = CA</span>, ' +
+                'an <b>C</b> wie <span style="color:rgb(245,194,66)">c = AB</span>.' +
+                '<div class="iris-formula" id="fx"></div>' +
+                '<span id="fx-vals"></span><br>' +
+                'Abstand der sechs Punkte vom Kreis: <span id="fx-err"></span>' +
+                '<div id="fx-width" style="margin-top:6px"></div>' +
+                '<div class="iris-hint" id="fx-start"></div>' +
+                '<div class="iris-hint">Ecken ziehen. Jede der drei Geraden schneidet aus dem Kreis eine ' +
+                'Sehne der Länge 2·(s+d) heraus und hat vom Mittelpunkt den Abstand r — gleich lange Sehnen ' +
+                'sind gleich weit vom Mittelpunkt entfernt, deshalb <i>ein</i> Kreis.</div>' +
+                '</div>';
+
+            let folded = false;
+            try { folded = localStorage.getItem(COACH_KEY) === '1'; } catch (e) { }
+            setFolded(folded);
+        }
+
+        function setFolded(on) {
+            $('math-coach-box').classList.toggle('folded', on);
+            const caret = $('coach-caret');
+            if (caret) caret.textContent = on ? '▸' : '▾';
+            try { localStorage.setItem(COACH_KEY, on ? '1' : '0'); } catch (e) { }
+            /* unfolding shows stale numbers otherwise — refresh on the next frame,
+               by which time the first init() has run */
+            if (!on) requestAnimationFrame(() => render());
+        }
+
+        /* KaTeX, re-rendered only when the formula text actually changed */
+        function tex(el, src, last) {
+            if (!el || src === last) return last;
+            if (window.katex) {
+                try { katex.render(src, el, { throwOnError: false, displayMode: false }); }
+                catch (e) { el.textContent = src; }
+            } else {
+                el.textContent = src;
+            }
+            return src;
+        }
+
         /* ---------- readouts ---------- */
         function updateReadout(g) {
             CyberUI.updateStatsGrid('stats', [
@@ -518,26 +996,59 @@
                 { value: de(g.s, 1) }, { value: de(g.r, 1) }, { value: de(g.R, 1) },
                 { value: state.wiper ? de(widthRange(g).min, 1) : '—' }
             ]);
-            const coach = $('coach-content');
-            if (!coach) return;
+            if (!$('fx')) return;
+            if ($('math-coach-box').classList.contains('folded')) return;   // nothing to update
+
+            const num = (x, n) => de(x, n).replace(',', '{,}');             // German comma in KaTeX
+            lastTex = tex($('fx'),
+                'R=\\sqrt{r^{2}+(s+d)^{2}}=\\sqrt{' + num(g.r, 1) + '^{2}+' + num(g.s + g.d, 1) +
+                '^{2}}=' + num(g.R, 1), lastTex);
+
+            $('fx-vals').innerHTML =
+                'mit s = <b>' + de(g.s, 1) + '</b> (halber Umfang), r = <b>' + de(g.r, 1) +
+                '</b> (Inkreisradius), d = <b>' + de(g.d, 1) + '</b> (zusätzliche Verlängerung).';
+
             const exact = g.err < 1e-6;
-            coach.innerHTML =
-                '<div class="iris-text">' +
-                'Verlängere an jeder Ecke <b>beide</b> Seiten über die Ecke hinaus um die Länge der ' +
-                '<b>gegenüberliegenden</b> Seite. Die sechs Endpunkte liegen auf <b>einem</b> Kreis — ' +
-                'sein Mittelpunkt ist der Inkreismittelpunkt <b>I</b>.' +
-                '<div class="iris-formula">R = &radic;(r² + (s + d)²) = &radic;(' + de(g.r, 1) + '² + ' +
-                de(g.s + g.d, 1) + '²) = ' + de(g.R, 1) + '</div>' +
-                'mit s = ' + de(g.s, 1) + ' (halber Umfang), r = ' + de(g.r, 1) + ' (Inkreisradius), ' +
-                'd = ' + de(g.d, 1) + ' (zusätzliche Verlängerung).<br>' +
-                'Abstand der sechs Punkte vom Kreis: <span class="' + (exact ? 'ok' : '') + '">' +
-                g.err.toExponential(1).replace('.', ',') + '</span>' + (exact ? ' — also exakt.' : '') +
-                (state.wiper ? '<br>Die Wischerkurve aus den sechs Bögen hat die konstante Breite <b>' +
-                    de(widthRange(g).min, 1) + '</b> = 2·(s+d).' : '') +
-                '<div class="iris-hint">Ecken ziehen. Jede der drei Geraden schneidet aus dem Kreis eine ' +
-                'Sehne der Länge 2·(s+d) heraus und hat vom Mittelpunkt den Abstand r — gleich lange Sehnen ' +
-                'sind gleich weit vom Mittelpunkt entfernt, deshalb <i>ein</i> Kreis.</div>' +
-                '</div>';
+            const err = $('fx-err');
+            err.textContent = g.err.toExponential(1).replace('.', ',') + (exact ? ' — also exakt.' : '');
+            err.className = exact ? 'ok' : '';
+
+            const nothing = !(state.showTriangle || state.extA || state.extB || state.extC ||
+                state.showCircle || state.showIncircle || state.wiper ||
+                state.box || state.showChords || state.showProof);
+            const start = $('fx-start');
+            if (start) {
+                start.innerHTML = nothing
+                    ? '<b style="color:rgb(245,194,66)">Die Bühne ist leer.</b> Mit <b>T</b> das Dreieck ' +
+                      'einschalten, dann <b>E</b>, <b>W</b>, <b>C</b> … — <b>H</b> zeigt alle Tasten.'
+                    : '';
+                start.style.display = nothing ? '' : 'none';
+            }
+
+            const info = $('cma-info');
+            if (info && state.box) {
+                const th = state.angle * Math.PI / 180;
+                const pts = curvePoints(g, 24);
+                const opt = boxOptimal(pts, th);
+                const off = boxC ? Math.hypot(boxC.x - opt.c.x, boxC.y - opt.c.y) : 0;
+                info.innerHTML =
+                    'Seite w = <b style="color:#00d2ff">' + de(boxSide(g), 1) + '</b><br>' +
+                    'Breite quer/längs: ' + de(opt.wu, 1) + ' / ' + de(opt.wv, 1) + '<br>' +
+                    (es ? 'Auswertungen: <b>' + evals + '</b> &middot; Qualität: <b>' +
+                        (Number.isFinite(lastQ) ? lastQ.toFixed(2).replace('.', ',') : '—') + '</b><br>' +
+                        'Abstand zum exakten Optimum: <b>' + de(off, 2) + '</b>' : '');
+            } else if (info) {
+                info.innerHTML = '';
+            }
+
+            const wBox = $('fx-width');
+            if (state.wiper) {
+                wBox.style.display = '';
+                lastTexW = tex(wBox, '\\text{konstante Breite } b=2(s+d)=' +
+                    num(widthRange(g).min, 1), lastTexW);
+            } else {
+                wBox.style.display = 'none';
+            }
         }
 
         /* ---------- interaction ---------- */
@@ -550,6 +1061,30 @@
             return null;
         }
 
+        /* one of the six wiper tips? */
+        function hitTip(pos, g) {
+            if (!(state.extA || state.extB || state.extC) && !state.wiper) return null;
+            for (const k in TIP_ARC) {
+                const S = toScreen(g.P[k]);
+                if (Math.hypot(S.x - pos.x, S.y - pos.y) < 16) return k;
+            }
+            return null;
+        }
+
+        /* keep a swept tip on its arc: same radius, angle clamped to the arc */
+        function tipOnArc(k, world, g) {
+            const arc = arcsOf(g)[TIP_ARC[k]];
+            if (arc.r <= 0) return g.P[k];
+            const w = sweep(arc);
+            let t = Math.atan2(world.y - w.O.y, world.x - w.O.x);
+            let rel = t - w.a1;
+            while (rel > Math.PI) rel -= 2 * Math.PI;
+            while (rel < -Math.PI) rel += 2 * Math.PI;
+            const lo = Math.min(0, w.dA), hi = Math.max(0, w.dA);
+            rel = Math.max(lo, Math.min(hi, rel));
+            return { x: w.O.x + Math.cos(w.a1 + rel) * arc.r, y: w.O.y + Math.sin(w.a1 + rel) * arc.r };
+        }
+
         function localPos(e) {
             const rect = canvas.getBoundingClientRect();
             const t = e.touches ? e.touches[0] : e;
@@ -558,18 +1093,39 @@
 
         function onDown(e) {
             const pos = localPos(e);
+            dragFrom = { x: pos.x, y: pos.y, ox: view.ox, oy: view.oy, s: view.s };
+            const g = geometry(state.d);
             const k = hit(pos);
-            if (k) {
-                drag = k;
-                canvas.classList.add('dragging');
-                e.preventDefault();
+            if (k) { drag = k; }
+            else {
+                const t = hitTip(pos, g);
+                if (t) { drag = 'wiper'; wiperDrag = { key: t, pos: g.P[t] }; }
+                else if (e.shiftKey) { drag = 'zoom'; }
+                else { drag = 'pan'; }
             }
+            canvas.classList.add('dragging');
+            e.preventDefault();
         }
 
         function onMove(e) {
             if (!drag) return;
-            const w = toWorld(localPos(e));
-            if (drag === 'A') A = w; else if (drag === 'B') B = w; else C = w;
+            const pos = localPos(e);
+            if (drag === 'A' || drag === 'B' || drag === 'C') {
+                const w = toWorld(pos);
+                if (drag === 'A') A = w; else if (drag === 'B') B = w; else C = w;
+                view.auto = false;              /* the user is in charge of the view now */
+                rotPath = [];                   /* the old path belongs to the old triangle */
+            } else if (drag === 'wiper') {
+                wiperDrag.pos = tipOnArc(wiperDrag.key, toWorld(pos), geometry(state.d));
+            } else if (drag === 'zoom') {
+                /* Shift + drag up = zoom in, exactly like the Java original */
+                const k = Math.exp((dragFrom.y - pos.y) / 220);
+                zoomAround({ x: dragFrom.x, y: dragFrom.y }, dragFrom.s * k / view.s);
+            } else {
+                view.ox = dragFrom.ox + (pos.x - dragFrom.x);
+                view.oy = dragFrom.oy + (pos.y - dragFrom.y);
+                view.auto = false;
+            }
             e.preventDefault();
             render();
         }
@@ -577,9 +1133,25 @@
         function onUp() {
             if (!drag) return;
             drag = null;
+            wiperDrag = null;                   /* the tip snaps back onto its arc */
             canvas.classList.remove('dragging');
             render();
         }
+
+        /* zoom by `k` keeping the world point under `pos` in place */
+        function zoomAround(pos, k) {
+            const w = toWorld(pos);
+            view.s = Math.max(0.005, Math.min(200, view.s * k));
+            view.ox = pos.x - w.x * view.s;
+            view.oy = pos.y - w.y * view.s;
+            view.auto = false;
+        }
+
+        canvas.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            zoomAround(localPos(e), Math.exp(-e.deltaY * 0.0015));
+            render();
+        }, { passive: false });
 
         canvas.addEventListener('mousedown', onDown);
         window.addEventListener('mousemove', onMove);
@@ -588,36 +1160,133 @@
         canvas.addEventListener('touchmove', onMove, { passive: false });
         window.addEventListener('touchend', onUp);
 
-        /* keys taken over from the Java original */
+        /* Key map taken over from the Java original (IrisVis.java, keyPressed).
+           Differences are listed in the help overlay. */
         window.addEventListener('keydown', (e) => {
             if (e.target && /input|textarea/i.test(e.target.tagName)) return;
-            if (e.metaKey || e.ctrlKey || e.altKey) return;      // leave Cmd-C & Co. alone
+            if (e.ctrlKey || e.altKey) return;
+            const meta = e.metaKey;
             const k = e.key.toLowerCase();
+            const shift = e.shiftKey;
+
+            if (meta) {                                  // ⌘B = bright stage, like Docs black mode
+                if (k === 'b') { state.light = !state.light; sync(); e.preventDefault(); }
+                return;                                  // every other ⌘ shortcut stays the browser's
+            }
+
             if (k === 't') { state.showTriangle = !state.showTriangle; sync(); }
-            else if (k === 'e') { state.showLines = !state.showLines; sync(); }
+            else if (k === 'e') {                       // E switches all three at once
+                const on = !(state.extA && state.extB && state.extC);
+                state.extA = state.extB = state.extC = on;
+                sync();
+            }
             else if (k === 'c') { state.showCircle = !state.showCircle; sync(); }
             else if (k === 'i') { state.showIncircle = !state.showIncircle; sync(); }
             else if (k === 'a') { state.showLabels = !state.showLabels; sync(); }
-            else if (k === 'b') { state.showProof = !state.showProof; sync(); }
-            else if (k === 'p') { state.iris = !state.iris; sync(); }
-            else if (k === 'w') { state.wiper = !state.wiper; sync(); }
-            else if (k === 's') { buildUp(); }
+            else if (k === 'l') { state.showChords = !state.showChords; sync(); }
+            else if (k === 'g') { state.showProof = !state.showProof; sync(); }
+            else if (k === 'w') {
+                if (shift) state.wiperFill = !state.wiperFill; else state.wiper = !state.wiper;
+                sync();
+            }
+            else if (k === 'b') {
+                if (shift) state.box = !state.box; else state.path = !state.path;
+                sync();
+            }
+            else if (k === 'x') { if (shift) sweepRotation(); else startCMAES(); }
+            else if (k === 'y') { buildHeat(); }
+            else if (k === 'r') { rotateBox(shift ? -1 : 1); }
+            else if (k === 's') { CyberUI.captureAppScreenshot(); }
+            else if (k === 'd') { buildUp(); }                       // "draw": build the curve up
+            else if (k === 'h') { toggleHelp(); }
             else if (k === '0') { reset(); }
-            else if (k === ' ') { state.animate = !state.animate; loop(); e.preventDefault(); }
+            else if (k === '2') { view.s *= 1.4; view.auto = false; render(); }
+            else if (k === '+' || k === ']') { bumpD(+8); }
+            else if (k === '-' || k === '/') { bumpD(-8); }
+            else if (k.startsWith('arrow')) {
+                const step = 24;
+                if (k === 'arrowup') view.oy += step;
+                else if (k === 'arrowdown') view.oy -= step;
+                else if (k === 'arrowleft') view.ox += step;
+                else view.ox -= step;
+                view.auto = false;
+                render();
+                e.preventDefault();
+            }
+            else if (k === ' ') {                                    // Docs space: turn 2° + search
+                rotateBox(2);
+                startCMAES();
+                e.preventDefault();
+            }
         });
 
-        /* checkboxes are built by CyberUI, so re-render and keep them in step */
-        function sync() { fitAndRender(); }
+        function rotateBox(deg) {
+            state.box = true;
+            state.angle = (state.angle + deg + 360) % 360;
+            boxC = null;
+            sync();
+        }
+
+        function bumpD(delta) {
+            state.d = Math.max(-40, Math.min(400, state.d + delta));
+            sync();
+        }
+
+        /* ---------- help overlay (Docs H) ---------- */
+        function toggleHelp() {
+            let el = $('help-overlay');
+            if (el) { el.remove(); return; }
+            el = document.createElement('div');
+            el.id = 'help-overlay';
+            el.innerHTML =
+                '<div class="help-card"><h2>Tastatur &amp; Maus</h2>' +
+                '<table>' +
+                '<tr><td>Ecke ziehen</td><td>Dreieck ändern</td></tr>' +
+                '<tr><td>Wischerspitze ziehen</td><td>Arm um die Ecke schwenken (bleibt auf dem Bogen)</td></tr>' +
+                '<tr><td>Ziehen / Mausrad</td><td>verschieben / zoomen &middot; ⇧+Ziehen zoomt auch</td></tr>' +
+                '<tr><td>T &middot; E</td><td>Dreieck &middot; alle drei Verlängerungspaare (einzeln in der Seitenleiste)</td></tr>' +
+                '<tr><td>C &middot; I &middot; A</td><td>Conway-Kreis &middot; Inkreis &middot; Beschriftung</td></tr>' +
+                '<tr><td>W &middot; ⇧W</td><td>Wischerkurve &middot; Fläche füllen</td></tr>' +
+                '<tr><td>L &middot; G</td><td>Sehnen + Mittelsenkrechte &middot; Lot vom Mittelpunkt (Abstand r)</td></tr>' +
+                '<tr><td>B &middot; ⇧B</td><td>Rotationsbahn &middot; Quadrat</td></tr>' +
+                '<tr><td>X &middot; ⇧X &middot; Y</td><td>CMA-ES starten &middot; Rotationsbahn 360° &middot; Heatmap</td></tr>' +
+                '<tr><td>R &middot; ⇧R &middot; Leertaste</td><td>Quadrat 1° drehen &middot; zurück &middot; 2° drehen + CMA-ES</td></tr>' +
+                '<tr><td>+ / −</td><td>Verlängerung d größer / kleiner</td></tr>' +
+                '<tr><td>D &middot; S &middot; ⌘B</td><td>Kurve aufbauen &middot; Screenshot &middot; helle Bühne</td></tr>' +
+                '<tr><td>0 &middot; 2 &middot; Pfeile</td><td>zurücksetzen &middot; hineinzoomen &middot; verschieben</td></tr>' +
+                '</table>' +
+                '<p>Aus dem Original übernommen. Abweichend: <b>G</b> statt B für das Lot (B ist wie bei ' +
+                'dir die Rotationsbahn) und <b>D</b> baut die Kurve auf (statt Debug-Fenster).</p>' +
+                '<div class="help-close">H oder Klick schließt</div></div>';
+            el.addEventListener('click', () => el.remove());
+            document.body.appendChild(el);
+        }
+
+        /* every toggle runs through here: remember it, then redraw */
+        function sync() { saveState(); fitAndRender(); }
 
         function fitAndRender() {
-            fit(geometry(state.d));
+            if (view.auto) fit(geometry(state.d));
             render();
         }
 
+        /* back to the empty stage — and forget what was stored */
         function reset() {
             A = { x: -170, y: 110 }; B = { x: 190, y: 140 }; C = { x: -20, y: -160 };
+            SAVE_FIELDS.forEach((k) => {
+                if (typeof state[k] === 'boolean') state[k] = false;
+            });
+            state.wiperFill = true;
             state.d = 0;
-            fitAndRender();
+            state.angle = 0;
+            state.animate = false;
+            state.searching = false;
+            boxC = null;
+            rotPath = [];
+            heatImg = null;
+            view.auto = true;
+            try { localStorage.removeItem(SAVE_KEY); } catch (e) { }
+            location.reload();          // rebuild the sidebar so the switches match
         }
 
         function randomTriangle() {
@@ -626,6 +1295,8 @@
             const ang = [rnd(0, 2), rnd(2, 4), rnd(4, 6)];
             const pts = ang.map((t) => ({ x: Math.cos(t) * rnd(R0 * 0.6, R0), y: Math.sin(t) * rnd(R0 * 0.6, R0) }));
             A = pts[0]; B = pts[1]; C = pts[2];
+            rotPath = [];
+            view.auto = true;
             fitAndRender();
         }
 
@@ -649,13 +1320,15 @@
                 buildT += 0.008;
                 if (buildT >= 1) { buildT = 1; building = false; }
             }
+            if (sweepRun) stepSweep();
+            if (state.searching) stepCMAES(geometry(state.d));
             if (state.animate) fitAndRender(); else render();
-            raf = (state.animate || building) ? requestAnimationFrame(tick) : null;
+            raf = (state.animate || building || state.searching || sweepRun) ? requestAnimationFrame(tick) : null;
         }
 
         function loop() {
             if (raf) return;
-            if (state.animate || building) raf = requestAnimationFrame(tick);
+            if (state.animate || building || state.searching || sweepRun) raf = requestAnimationFrame(tick);
         }
 
         /* let the curve draw itself, like the wiper sweeping across the screen */
@@ -670,36 +1343,50 @@
         /* ---------- sidebar ---------- */
         function setupUI() {
             CyberUI.createCard('ui-container', 'Dreieck', `
-                <div style="display:flex; gap:8px; flex-wrap:wrap">
-                    <button class="cyber-btn" id="btn-rnd" style="flex:1">Zufällig</button>
-                    <button class="cyber-btn" id="btn-eq" style="flex:1">Gleichseitig</button>
-                </div>
-                <button class="cyber-btn" id="btn-reset" style="width:100%; margin-top:8px; border-color:#ffcc00; color:#ffcc00">Zurücksetzen</button>
-                <div style="margin-top:10px; font-family:'Outfit'; font-size:0.72rem; color:rgba(190,214,246,0.62); line-height:1.5">
-                    Die Ecken A, B, C lassen sich direkt auf der Bühne ziehen.
+                <div class="stack">
+                    <div class="row">
+                        <button class="cyber-btn" id="btn-rnd">Zufällig</button>
+                        <button class="cyber-btn" id="btn-eq">Gleichseitig</button>
+                    </div>
+                    <div class="row">
+                        <button class="cyber-btn" id="btn-fit">Einpassen</button>
+                        <button class="cyber-btn" id="btn-help">Hilfe</button>
+                    </div>
+                    <button class="cyber-btn" id="btn-reset" style="border-color:#ffcc00; color:#ffcc00">Zurücksetzen</button>
                 </div>
             `, '#00d2ff');
 
             CyberUI.createCard('ui-container', 'Konstruktion', `
-                <div id="sl-d"></div>
-                <div id="chk-box" style="display:flex; flex-direction:column; gap:4px; margin-top:6px"></div>
+                <div class="stack">
+                    <div id="sl-d"></div>
+                    <button class="cyber-btn" id="btn-anim" style="border-color:rgb(121,158,49); color:rgb(160,200,90)">Pupille atmen lassen</button>
+                    <div id="chk-box" style="display:flex; flex-direction:column; gap:2px"></div>
+                </div>
             `, 'rgb(121,158,49)');
 
             CyberUI.createCard('ui-container', 'Wischerkurve', `
-                <div id="chk-wiper" style="display:flex; flex-direction:column; gap:4px"></div>
-                <button class="cyber-btn" id="btn-build" style="width:100%; margin-top:8px">Aufbauen</button>
-                <div style="margin-top:10px; font-family:'Outfit'; font-size:0.72rem; color:rgba(190,214,246,0.62); line-height:1.5">
-                    Sechs Bögen, je um eine Ecke gedreht wie ein Scheibenwischer: großer Bogen +
-                    kleiner Bogen um dieselbe Ecke ergeben immer 2·(s+d) — die Kurve hat
-                    <b style="color:rgb(245,194,66)">konstante Breite</b>.
+                <div class="stack">
+                    <div id="chk-wiper" style="display:flex; flex-direction:column; gap:2px"></div>
+                    <button class="cyber-btn" id="btn-build">Aufbauen</button>
                 </div>
             `, 'rgb(155,130,225)');
 
-            CyberUI.createCard('ui-container', 'Iris', `
-                <div id="chk-iris" style="display:flex; flex-direction:column; gap:4px"></div>
-                <div id="sl-rings" style="margin-top:6px"></div>
-                <button class="cyber-btn" id="btn-anim" style="width:100%; margin-top:8px; border-color:rgb(121,158,49); color:rgb(160,200,90)">Pupille atmen lassen</button>
-            `, 'rgb(245,194,66)');
+            CyberUI.createCard('ui-container', 'Quadrat &amp; CMA-ES', `
+                <div class="stack">
+                    <div id="chk-box2" style="display:flex; flex-direction:column; gap:2px"></div>
+                    <div id="sl-angle"></div>
+                    <button class="cyber-btn" id="btn-cma" style="border-color:rgb(121,158,49); color:rgb(160,200,90)">CMA-ES suchen</button>
+                    <div class="row">
+                        <button class="cyber-btn" id="btn-path">Rotationsbahn</button>
+                        <button class="cyber-btn" id="btn-heat">Heatmap</button>
+                    </div>
+                    <div id="cma-info" style="font-family:'Orbitron'; font-size:0.6rem; line-height:1.8; color:rgba(190,214,246,0.8)"></div>
+                    <div class="note">
+                        Gesucht wird die Lage des Quadrats (2 Zahlen): Summe der Abstände aller
+                        Kurvenpunkte, die herausragen. 0 = passt.
+                    </div>
+                </div>
+            `, 'rgb(121,158,49)');
 
             CyberUI.createCard('ui-container', 'Messwerte', '<div id="stats"></div>', '#00d2ff');
             CyberUI.createStatsGrid('stats', [
@@ -714,43 +1401,71 @@
 
             CyberUI.createCard('ui-container', 'Tasten', `
                 <div class="iris-keys">
-                    <b>T</b> Dreieck &middot; <b>E</b> Verlängerungen &middot; <b>C</b> Conway-Kreis<br>
-                    <b>I</b> Inkreis &middot; <b>B</b> Beweis &middot; <b>A</b> Beschriftung<br>
-                    <b>W</b> Wischerkurve &middot; <b>S</b> Aufbauen<br>
-                    <b>P</b> Iris &middot; <b>Leertaste</b> Animation &middot; <b>0</b> Zurücksetzen
+                    <b>T</b> Dreieck &middot; <b>E</b> alle Verlängerungen<br>
+                    <b>C I A</b> Kreis, Inkreis, Beschriftung<br>
+                    <b>W</b> / <b>⇧W</b> Wischerkurve / Fläche füllen<br>
+                    <b>L</b> Sehnen + Mittelsenkrechte &middot; <b>G</b> Lot (Abstand r)<br>
+                    <b>B</b> / <b>⇧B</b> Rotationsbahn / Quadrat<br>
+                    <b>X</b> / <b>⇧X</b> / <b>Y</b> CMA-ES, Bahn 360°, Heatmap<br>
+                    <b>R</b> / <b>⇧R</b> Quadrat drehen &middot; <b>Leertaste</b> 2° + CMA-ES<br>
+                    <b>+ −</b> Verlängerung &middot; <b>D</b> Aufbauen &middot; <b>S</b> Screenshot<br>
+                    <b>⌘B</b> helle Bühne &middot; <b>H</b> Hilfe<br>
+                    <b>0</b> zurücksetzen &middot; <b>2</b> zoomen &middot; <b>Pfeile</b> verschieben
                 </div>
             `, 'rgb(155,130,225)', { collapsible: true, collapsed: true });
 
             CyberUI.createSlider('sl-d', 'Verlängerung d', -40, 400, state.d, 1, (v) => {
                 state.d = v;
-                fitAndRender();
+                sync();
             }, 'var(--neon-blue)', (v) => de(v, 0));
-
-            CyberUI.createSlider('sl-rings', 'Ringe', 4, 60, state.rings, 1, (v) => {
-                state.rings = Math.round(v);
-                render();
-            }, 'rgb(245,194,66)', (v) => String(Math.round(v)));
 
             const boxes = [
                 ['chk-box', 'Dreieck', 'showTriangle'],
-                ['chk-box', 'Verlängerungen', 'showLines'],
-                ['chk-box', 'Sechs Punkte', 'showPoints'],
+                ['chk-box', 'Beschriftung', 'showLabels'],
+                /* label in white, only the copied side in its colour (5th field = HTML) */
+                ['chk-box', 'Verlängerung A → BC', 'extA', null,
+                    'Verlängerung A → <b style="color:rgb(214,92,82)">BC</b>'],
+                ['chk-box', 'Verlängerung B → CA', 'extB', null,
+                    'Verlängerung B → <b style="color:rgb(150,200,80)">CA</b>'],
+                ['chk-box', 'Verlängerung C → AB', 'extC', null,
+                    'Verlängerung C → <b style="color:rgb(245,194,66)">AB</b>'],
                 ['chk-box', 'Conway-Kreis', 'showCircle'],
                 ['chk-box', 'Inkreis + I', 'showIncircle'],
-                ['chk-box', 'Beweis: Abstand r', 'showProof'],
-                ['chk-box', 'Beschriftung', 'showLabels'],
+                ['chk-box', 'Sehnen + Mittelsenkrechte (L)', 'showChords'],
+                ['chk-box', 'Lot vom Mittelpunkt (G)', 'showProof'],
                 ['chk-wiper', 'Wischerkurve', 'wiper'],
                 ['chk-wiper', 'Fläche füllen', 'wiperFill'],
-                ['chk-iris', 'Kreisschar zeigen', 'iris']
+                ['chk-box2', 'Quadrat zeigen', 'box'],
+                ['chk-box2', 'Rotationsbahn', 'path'],
+                ['chk-box2', 'Heatmap', 'heat']
             ];
-            boxes.forEach(([box, label, key]) => {
-                CyberUI.createCheckbox(box, label, state[key], (on) => {
+            boxes.forEach(([box, label, key, col, html]) => {
+                const w = CyberUI.createCheckbox(box, label, state[key], (on) => {
                     state[key] = on;
-                    fitAndRender();
-                });
+                    sync();
+                }, col || null);
+                /* the shared helper only takes plain text — colour one word afterwards */
+                if (html && w) {
+                    const sp = w.querySelector('.cyber-label');
+                    if (sp) sp.innerHTML = html;
+                }
             });
 
+            CyberUI.createSlider('sl-angle', 'Drehwinkel', 0, 90, state.angle, 1, (v) => {
+                state.angle = v;
+                boxC = null;            // the exact placement follows the angle
+                sync();
+            }, 'rgb(121,158,49)', (v) => Math.round(v) + '°');
+
+            $('btn-cma').addEventListener('click', () => {
+                if (state.searching) { state.searching = false; $('btn-cma').textContent = 'CMA-ES suchen'; }
+                else { startCMAES(); $('btn-cma').textContent = 'Anhalten'; }
+            });
+            $('btn-path').addEventListener('click', sweepRotation);
+            $('btn-heat').addEventListener('click', buildHeat);
             $('btn-build').addEventListener('click', buildUp);
+            $('btn-fit').addEventListener('click', () => { view.auto = true; fitAndRender(); });
+            $('btn-help').addEventListener('click', toggleHelp);
             $('btn-rnd').addEventListener('click', randomTriangle);
             $('btn-eq').addEventListener('click', equilateral);
             $('btn-reset').addEventListener('click', reset);
@@ -763,13 +1478,13 @@
 
         function init() { fitAndRender(); }
 
-        $('coach-title-slot').textContent = "Conway's Circle Theorem";
+        loadState();
+        buildCoach();
         setupUI();
         window.addEventListener('resize', init);
         document.fonts.ready.then(init);
         init();
         $('math-coach-box').classList.add('visible');
-        buildUp();      // draw itself once on arrival
     </script>
 </body>
 
