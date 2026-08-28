@@ -751,6 +751,7 @@
 
     // Per-row references for edit mode and persistence.
     const rendered = [];
+    const lbCells = {};   /* row index -> Bereich cell wrapper (pill + WU chip) */
 
     // The table is not always as long as the page's PLAN: shiftPlan() can push
     // content past the last week, and those extra weeks live only in the edits
@@ -1596,11 +1597,19 @@
             const td = document.createElement('td');
             if (cls) td.className = cls;
             if (idx === 3) {
+                td.classList.add('lb');
                 const span = document.createElement('span');
                 span.className = 'badge ' + badgeClass;
                 span.textContent = badgeLabel;
                 linkBadge(span, rowType);
-                td.appendChild(span);
+                /* Pille und WebUntis-Chip stecken in einem inline-grid, damit
+                   beide exakt gleich breit sind - das Grid ist so breit wie
+                   sein breitestes Kind, und beide Kinder fuellen es aus. */
+                const cell = document.createElement('div');
+                cell.className = 'lb-cell';
+                cell.appendChild(span);
+                td.appendChild(cell);
+                lbCells[i] = cell;
             } else if (idx === 2) {
                 setDateText(td, text);
             } else if (idx === 4) {
@@ -1629,6 +1638,7 @@
 
         const ref = {
             i, dateTd: tds[2], uTd: tds[4], topicSpan, remarkTd: tds[6], matTd, ul: null,
+            lbTd: tds[3], lbCell: lbCells[i],
             /* structural fields: never edited by hand, but carried through every
                save so a shifted plan keeps its Bereich, Nummer and KW */
             type: rowType, nr: ov.nr != null ? ov.nr : row.nr, kw: ov.kw != null ? ov.kw : row.kw,
@@ -1692,6 +1702,70 @@
         if (initialOpen.has(i)) ref.openSubRow(); /* restore remembered state */
         rendered.push(ref);
     });
+
+    /* WebUntis-Status unter der Bereich-Pille.
+       WebUntis hat kein CORS, der Browser kommt also nie selbst dran. Die
+       Daten liefert tools/webuntis.js status als <plan>.untis.json neben der
+       Seite - ein Eintrag je Kalenderwoche, ein Punkt je Stunde. Fehlt die
+       Datei (jede Seite ohne Kurs-Zuordnung), bleibt alles wie vorher. */
+    function untisTitle(entries, generated) {
+        const lines = entries.map(e => {
+            const d = String(e.date);
+            const day = d.slice(6, 8) + '.' + d.slice(4, 6) + '.';
+            return (e.klasse || '') + ' ' + day + ' ' + e.start + ' — ' +
+                (e.written ? 'eingetragen: ' + e.text : 'noch nichts im Klassenbuch');
+        });
+        if (generated) {
+            const g = new Date(generated);
+            lines.push('Stand ' + g.toLocaleDateString('de-DE') + ' ' +
+                g.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }) +
+                ' — im Bearbeiten-Modus klicken öffnet WebUntis');
+        }
+        return lines.join('\n');
+    }
+
+    function decorateUntis(data) {
+        const weeks = (data && data.weeks) || {};
+        const url = data && data.webuntis;
+        for (const r of rendered) {
+            if (!r.lbTd) continue;
+            const entries = weeks[String(r.kw)];
+            if (!entries || !entries.length) continue;
+            const done = entries.filter(e => e.written).length;
+            const chip = document.createElement('span');
+            chip.className = 'untis-chip ' +
+                (done === entries.length ? 'is-full' : done ? 'is-part' : 'is-none');
+            const mark = document.createElement('span');
+            mark.className = 'u-mark';
+            mark.textContent = 'WU';
+            chip.appendChild(mark);
+            const dots = document.createElement('span');
+            dots.className = 'u-dots';
+            for (const e of entries) {
+                const dot = document.createElement('i');
+                if (e.written) dot.className = 'on';
+                dots.appendChild(dot);
+            }
+            chip.appendChild(dots);
+            chip.title = untisTitle(entries, data.generated);
+            chip.addEventListener('click', function (ev) {
+                ev.stopPropagation(); /* not the row's detail toggle */
+                /* Der Chip zeigt immer an, handelt aber nur im Bearbeiten. */
+                if (!document.body.classList.contains('editing')) return;
+                if (url) window.open(url, '_blank');
+            });
+            (r.lbCell || r.lbTd).appendChild(chip);
+        }
+    }
+
+    (function loadUntis() {
+        const src = location.pathname.replace(/\.html$/, '.untis.json');
+        if (src === location.pathname) return;
+        fetch(src, { cache: 'no-store' })
+            .then(res => (res.ok ? res.json() : null))
+            .then(data => { if (data) decorateUntis(data); })
+            .catch(() => { /* keine Statusdatei: Plan bleibt unverändert */ });
+    })();
 
     // Legend: replace the static dot list with the same pills as the
     // Bereich column, generated from the page's BADGE definition.
