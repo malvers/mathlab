@@ -41,7 +41,7 @@ Kituruki 🇹🇷
 
 # 
 60pt
-Lugha 8 za programu
+Lugha 14 za programu
 40pt
 hypertext markup language
 cascading styles sheets
@@ -51,6 +51,12 @@ python
 Latex
 JSON
 JAVA
+kotlin
+swift
+GLSL
+SQL
+bash
+apple script
 
 #notranslate 
 60pt

@@ -1513,9 +1513,11 @@
             if (stack.classList.contains('cw-stack-align-left')) {
                 stack.style.removeProperty('--cw-stack-pad-top');
             } else {
+                /* Center in the full band (controls → play bottom padding); the 16 % bottom reserve
+                   only limits the fit scale, otherwise the stack sits visibly too high. */
                 const padTopMin = bandTopGlobal - innerPlayTopGlobal;
-                const padTopMax = effectiveBandBottomGlobal - scaledH - innerPlayTopGlobal;
-                const bandMid = (bandTopGlobal + effectiveBandBottomGlobal) / 2;
+                const padTopMax = bandBottomGlobal - scaledH - innerPlayTopGlobal;
+                const bandMid = (bandTopGlobal + bandBottomGlobal) / 2;
                 let padTop = bandMid - scaledH / 2 - innerPlayTopGlobal;
                 if (padTopMax >= padTopMin) {
                     padTop = Math.max(padTopMin, Math.min(padTop, padTopMax));
