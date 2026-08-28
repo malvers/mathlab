@@ -41,7 +41,7 @@ turc 🇹🇷
 
 # 
 60pt
-8 langages de programmation
+14 langages de programmation
 40pt
 hypertext markup language
 cascading styles sheets
@@ -51,6 +51,12 @@ python
 Latex
 JSON
 JAVA
+kotlin
+swift
+GLSL
+SQL
+bash
+apple script
 
 #notranslate 
 60pt
