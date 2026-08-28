@@ -368,28 +368,50 @@
      zieht in die Leiste ueber den Fragen, in der auch "Alle einklappen"
      sitzt. Gibt es die nicht (Quiz ohne einklappbare Karten), baut er sich
      eine eigene Zeile im selben Stil. */
-  function placeEvalButton() {
+  /* Wechsel zwischen Test und Auswertung. Vorhandene Parameter bleiben stehen:
+     ?klasse gehoert zur Quiz-Id, sonst zeigt das Dashboard die Zahlen einer
+     anderen Gruppe. */
+  function switchTo(dashboard) {
+    const params = new URLSearchParams(location.search);
+    if (dashboard) params.set('auswertung', '');
+    else params.delete('auswertung');
+    const q = params.toString().replace(/=(?=&|$)/g, '');
+    location.href = location.pathname + (q ? '?' + q : '');
+  }
+
+  function pillButton(id, label, title, onClick) {
     const btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'btn-eval';
-    btn.id = 'evalBtn';
-    btn.textContent = 'Auswertung';
-    btn.title = 'Live-Auswertung - nur mit Passwort';
-    btn.addEventListener('click', function () {
-      /* Vorhandene Parameter bleiben stehen: ?klasse gehoert zur Quiz-Id,
-         sonst zeigt das Dashboard die Zahlen einer anderen Gruppe. */
-      const params = new URLSearchParams(location.search);
-      params.set('auswertung', '');
-      location.href = location.pathname + '?' + params.toString().replace(/=(?=&|$)/g, '');
-    });
+    btn.id = id;
+    btn.textContent = label;
+    btn.title = title;
+    btn.addEventListener('click', onClick);
+    return btn;
+  }
+
+  /* Die Leiste ueber dem Inhalt - im Test die von quiz-collapse.js mit
+     "Alle einklappen", in der Auswertung eine eigene. */
+  function toolbar(before) {
     let bar = document.querySelector('.qbar');
     if (!bar) {
       bar = document.createElement('div');
       bar.className = 'qbar';
-      const q = document.getElementById('quiz');
-      q.parentNode.insertBefore(bar, q);
+      before.parentNode.insertBefore(bar, before);
     }
-    bar.insertBefore(btn, bar.firstChild);
+    return bar;
+  }
+
+  function placeEvalButton() {
+    const bar = toolbar(document.getElementById('quiz'));
+    bar.insertBefore(pillButton('evalBtn', 'Auswertung', 'Live-Auswertung - nur mit Passwort',
+      function () { switchTo(true); }), bar.firstChild);
+  }
+
+  function placeBackToTestButton() {
+    const bar = toolbar(document.getElementById('dash'));
+    bar.appendChild(pillButton('toTestBtn', 'Zum Test', 'Zurueck zur Testansicht',
+      function () { switchTo(false); }));
   }
 
   /* The teacher view sits behind the usual password. The gate lives in
@@ -508,6 +530,13 @@
       bar.className = 'bar';
       bar.innerHTML = '<div style="width:' + pct + '%;background:' + barColor(pct) + '"></div>';
       frag.appendChild(bar);
+      /* Unter den Balken die richtige Antwort - mit demselben Buchstaben, den
+         die Schueler im Test sehen, damit man beim Besprechen nicht sucht. */
+      const ans = document.createElement('div');
+      ans.className = 'baranswer';
+      renderMath(ans, 'Richtig: ' + (LETTERS[item.solution] || '?') + ' — ' +
+        (item.opts[item.solution] || ''));
+      frag.appendChild(ans);
       html = '1';
     });
     el.textContent = '';
@@ -535,6 +564,7 @@
        Knopf nur Zierde. */
     withGate(function () {
       initDashboard();
+      placeBackToTestButton();
       tagSubline();
     });
   } else {
