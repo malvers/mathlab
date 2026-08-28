@@ -175,6 +175,25 @@ header.page-head { max-width: 1200px; margin: 0 auto 22px; position: relative; }
     flex-wrap: wrap;
 }
 
+/* Middle group of the head row: with space-between and a group on the left
+   (title) and right (primary action), this one sits in the centre. */
+.page-head .head-row .head-mid {
+    display: flex;
+    align-items: flex-end;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+@media print { .page-head .head-row .head-mid { display: none; } }
+
+/* Group of buttons at the right end of a head row (e.g. "Zurück" + "Drucken") */
+.page-head .head-row .head-btns {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
 /* YouTube-Icon am rechten Ende der Kopfzeile (Video zum Schuljahr) —
    nackt, ohne Pille: das Logo trägt sich selbst. */
 .page-head .head-video {
@@ -1719,5 +1738,168 @@ body.map-preview #svp-map {
         margin: 0 auto;
         padding: 6mm 20mm 6mm 25mm;
         background: #fff;
+    }
+}
+
+/* ============================================================
+   Vortragsthemen-Seiten (informatik/informatik9a-vortraege.html, …b…):
+   one row per talk — number, editable topic, two name fields.
+   Logic lives in informatik/vortraege.js.
+   ============================================================ */
+.vt-list {
+    max-width: 1180px;
+    margin: 0 auto;
+    display: grid;
+    gap: 10px;
+}
+
+.vt-row {
+    display: grid;
+    grid-template-columns: 52px 1fr minmax(150px, 220px) minmax(150px, 220px);
+    gap: 12px 14px;
+    align-items: center;
+    background: var(--card-soft);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 12px 16px;
+    transition: border-color 0.15s, background 0.15s;
+}
+
+/* a claimed topic gets the φ-green tint */
+.vt-row.taken {
+    border-color: rgba(121, 158, 49, 0.55);
+    background: rgba(121, 158, 49, 0.08);
+}
+
+.vt-nr {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.15rem;
+    color: var(--lambda);
+    text-align: center;
+}
+
+.vt-row.taken .vt-nr { color: var(--phi); }
+
+.vt-topic { min-width: 0; }
+
+.vt-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.92rem;
+    letter-spacing: 0.02em;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.vt-title-text { min-width: 4ch; }
+
+.vt-sub {
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.86rem;
+    color: var(--muted);
+    margin-top: 4px;
+    line-height: 1.45;
+    min-height: 1.2em;
+}
+
+/* edit mode: dashed outlines come from .editing [contenteditable] above */
+.vt-list.editing [contenteditable="true"] { padding: 1px 4px; border-radius: 4px; }
+
+.vt-name input {
+    width: 100%;
+    box-sizing: border-box;
+    font-family: 'Outfit', sans-serif;
+    font-size: 1rem;
+    color: var(--text);
+    background: var(--input-bg);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 9px 12px;
+    outline: none;
+}
+
+.vt-name input::placeholder { color: var(--muted); }
+
+.vt-name input:focus {
+    border-color: var(--phi);
+    box-shadow: 0 0 0 3px rgba(121, 158, 49, 0.18);
+}
+
+/* toolbar under the header: counter left, buttons right */
+.vt-bar {
+    max-width: 1180px;
+    margin: 0 auto 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.vt-count {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.72rem;
+    letter-spacing: 0.05em;
+    color: var(--muted);
+}
+
+.vt-count b { color: var(--phi); font-weight: 400; }
+
+.vt-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+
+/* inline two-step reset instead of a native confirm() */
+.vt-confirm {
+    display: none;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.7rem;
+    color: var(--lambda);
+}
+
+.vt-confirm.open { display: flex; }
+
+/* class switch (9a | 9b) next to the title — the title group aligns its
+   children to the bottom edge, so this one centres itself against the h1 */
+.vt-switch {
+    display: inline-flex;
+    align-items: center;
+    align-self: center;
+    gap: 6px;
+    margin-left: 6px;
+}
+.vt-switch .badge { text-decoration: none; opacity: 0.55; }
+.vt-switch .badge.on { opacity: 1; box-shadow: 0 0 0 1px currentColor inset; }
+
+.vt-hint {
+    max-width: 1180px;
+    margin: 16px auto 0;
+    font-size: 0.82rem;
+    color: var(--muted);
+    line-height: 1.5;
+}
+
+/* narrow screens: both name fields drop under the topic */
+@media (max-width: 760px) {
+    .vt-row { grid-template-columns: 40px 1fr 1fr; }
+    .vt-topic { grid-column: 2 / 4; }
+    .vt-name.n1 { grid-column: 2; }
+    .vt-name.n2 { grid-column: 3; }
+}
+
+@media print {
+    .vt-actions, .vt-hint, .vt-confirm, .vt-switch { display: none !important; }
+
+    .vt-row {
+        break-inside: avoid;
+        border-color: rgba(14, 36, 78, 0.35);
+        background: transparent;
+    }
+
+    .vt-name input {
+        border: 1px solid rgba(14, 36, 78, 0.45);
+        background: transparent;
+        color: rgb(14, 36, 78);
     }
 }
