@@ -90,13 +90,73 @@
     // File-type icon for a material pill; SharePoint share links carry the
     // app in the path (/:p:/ = PowerPoint, /:w:/ = Word, /:x:/ = Excel,
     // /:b:/ = PDF), otherwise the label/extension decides.
-    function matIcon(url, label) {
-        const l = (label + ' ' + url).toLowerCase();
-        if (url.indexOf('/:p:/') >= 0 || l.indexOf('ppt') >= 0) return '📽 ';
-        if (url.indexOf('/:w:/') >= 0 || l.indexOf('.doc') >= 0) return '📄 ';
-        if (url.indexOf('/:x:/') >= 0 || l.indexOf('.xls') >= 0) return '📊 ';
-        if (url.indexOf('/:b:/') >= 0 || l.indexOf('pdf') >= 0) return '📕 ';
-        return '🔗 ';
+    function matKind(url, label) {
+        const l = ((label || '') + ' ' + url).toLowerCase();
+        if (url.indexOf('/:p:/') >= 0 || l.indexOf('ppt') >= 0) return 'ppt';
+        if (url.indexOf('/:w:/') >= 0 || l.indexOf('.doc') >= 0) return 'doc';
+        if (url.indexOf('/:x:/') >= 0 || l.indexOf('.xls') >= 0) return 'xls';
+        if (url.indexOf('/:b:/') >= 0 || l.indexOf('pdf') >= 0) return 'pdf';
+        if (/youtu\.be\/|youtube\.com\//i.test(url)) return 'yt';
+        return 'link';
+    }
+
+    // App icons instead of emoji: emoji look different on every device and
+    // grey out inside the pill. These are the macOS app icons the kids see on
+    // their own machines — extracted from the installed apps into svp/icons/,
+    // referenced only, never altered. The base is derived from this script's
+    // own URL, so sub-folders (mathe/, informatik/, …) work too.
+    const ICON_BASE = (function () {
+        const src = (document.currentScript && document.currentScript.src) ||
+            (function () {
+                const list = document.getElementsByTagName('script');
+                for (let i = list.length - 1; i >= 0; i--)
+                    if (/svp-plan\.js/.test(list[i].src)) return list[i].src;
+                return '';
+            })();
+        return src ? new URL('icons/', src).href : 'icons/';
+    })();
+
+    const YT_PATH = 'M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 ' +
+        '3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 ' +
+        '5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 ' +
+        '3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 ' +
+        '12l-6.273 3.568z';
+
+    // Plain link: drawn, not typed — the \u2197 character sits too high in its
+    // line in most fonts, an SVG is centred by construction.
+    const LINK_PATH = 'M14 3h7v7h-2V6.41l-9.29 9.3-1.42-1.42 9.3-9.29H14V3zM5 5h5v2H7v10h10v-3h2v5H5V5z';
+
+    function drawnIcon(cls, d, fill) {
+        const ns = 'http://www.w3.org/2000/svg';
+        const svg = document.createElementNS(ns, 'svg');
+        svg.setAttribute('class', 'mat-ico ' + cls);
+        svg.setAttribute('viewBox', '0 0 24 24');
+        svg.setAttribute('aria-hidden', 'true');
+        const path = document.createElementNS(ns, 'path');
+        path.setAttribute('d', d);
+        path.setAttribute('fill', fill);
+        svg.appendChild(path);
+        return svg;
+    }
+
+    function matLabelEl(text) {
+        const span = document.createElement('span');
+        span.className = 'mat-label';
+        span.textContent = text;
+        return span;
+    }
+
+    function matIconEl(url, label) {
+        const kind = matKind(url, label);
+        /* no Mac app to take these from — brand/plain glyphs instead */
+        if (kind === 'yt') return drawnIcon('mat-ico-drawn', YT_PATH, 'rgb(255, 0, 0)');
+        if (kind === 'link') return drawnIcon('mat-ico-drawn', LINK_PATH, 'rgb(120, 160, 220)');
+        const img = document.createElement('img');
+        img.className = 'mat-ico';
+        img.src = ICON_BASE + kind + '.png';
+        img.alt = '';
+        img.setAttribute('aria-hidden', 'true');
+        return img;
     }
 
     // Default pill label when none was typed: derived from the link type.
@@ -106,7 +166,120 @@
         if (url.indexOf('/:w:/') >= 0 || l.indexOf('.doc') >= 0) return 'Doc';
         if (url.indexOf('/:x:/') >= 0 || l.indexOf('.xls') >= 0) return 'Excel';
         if (url.indexOf('/:b:/') >= 0 || l.indexOf('pdf') >= 0) return 'PDF';
+        if (matKind(url, '') === 'yt') return 'Video';
         return 'Link';
+    }
+
+    // PowerPoint share links open as slideshow, not in the edit view:
+    // Office for the web starts the deck (with animations) on &action=embedview.
+    function matHref(url) {
+        const isPpt = url.indexOf('/:p:/') >= 0 || /\.pptx?(\?|#|$)/i.test(url);
+        if (!isPpt || /[?&]action=/.test(url)) return url;
+        return url + (url.indexOf('?') >= 0 ? '&' : '?') + 'action=embedview';
+    }
+
+    // A browser popup always keeps its address bar (anti-phishing, cannot be
+    // switched off), so Office material is shown in an in-page viewer instead
+    // — no window chrome at all. Kept as the fallback for everything the
+    // viewer cannot frame, and behind the ↗ button of the viewer itself.
+    function openMatWindow(url) {
+        const w = Math.min(1280, Math.round(screen.availWidth * 0.8));
+        const h = Math.min(820, Math.round(screen.availHeight * 0.85));
+        const left = Math.max(0, Math.round(window.screenX + (window.outerWidth - w) / 2));
+        const top = Math.max(0, Math.round(window.screenY + (window.outerHeight - h) / 2));
+        const feat = 'popup=yes,width=' + w + ',height=' + h + ',left=' + left + ',top=' + top +
+            ',resizable=yes,scrollbars=yes';
+        const win = window.open(matHref(url), 'svp-material', feat);
+        if (win) { try { win.opener = null; } catch (e) { /* cross-origin: fine */ } win.focus(); }
+    }
+
+    // Only SharePoint/Office links are framed: they are made for it
+    // (action=embedview is OneDrive's own embed code). Foreign links — YouTube
+    // and friends — refuse to be framed, so they keep their own window.
+    function matEmbeddable(url) {
+        return /\/:[pwxbf]:\//.test(url) || /sharepoint\.com|officeapps\.live\.com/i.test(url);
+    }
+
+    let matView = null;
+    function closeMatView() {
+        if (!matView) return;
+        matView.remove();
+        matView = null;
+        document.removeEventListener('keydown', matViewKey, true);
+    }
+    function matViewKey(e) { if (e.key === 'Escape') closeMatView(); }
+
+    function openMatView(url, label) {
+        closeMatView();
+        const wrap = document.createElement('div');
+        wrap.className = 'mat-view-wrap';
+        const box = document.createElement('div');
+        box.className = 'mat-view';
+
+        const head = document.createElement('div');
+        head.className = 'mv-head';
+        const title = document.createElement('span');
+        title.className = 'mv-title';
+        title.appendChild(matIconEl(url, label || ''));
+        title.appendChild(matLabelEl(label || matDefaultLabel(url)));
+        head.appendChild(title);
+
+        const tools = document.createElement('span');
+        tools.className = 'mv-tools';
+        [['\u2197', 'In eigenem Fenster öffnen', function () { closeMatView(); openMatWindow(url); }],
+         ['\u2715', 'Schließen (Esc)', closeMatView]
+        ].forEach(function (def) {
+            const b = document.createElement('button');
+            b.type = 'button';
+            b.className = 'mv-btn';
+            b.textContent = def[0];
+            b.title = def[1];
+            b.setAttribute('aria-label', def[1]);
+            b.addEventListener('click', def[2]);
+            tools.appendChild(b);
+        });
+        head.appendChild(tools);
+        box.appendChild(head);
+
+        const frame = document.createElement('iframe');
+        frame.className = 'mv-frame';
+        frame.src = matHref(url);
+        frame.title = label || matDefaultLabel(url);
+        frame.setAttribute('allowfullscreen', '');   /* the viewer's own \u26f6 */
+        frame.setAttribute('allow', 'fullscreen');
+        box.appendChild(frame);
+
+        wrap.appendChild(box);
+        /* Click on the backdrop closes, click inside does not. */
+        wrap.addEventListener('click', function (e) { if (e.target === wrap) closeMatView(); });
+        document.body.appendChild(wrap);
+        document.addEventListener('keydown', matViewKey, true);
+        matView = wrap;
+    }
+
+    // YouTube runs in the shared player the labs use — same frame-over-the-page
+    // feeling as the material viewer, loaded on demand (js/video-lightbox.js,
+    // one folder up from the svp root).
+    function openVideo(url, label) {
+        const play = function () {
+            if (window.VideoLightbox) window.VideoLightbox.open(url, { title: label || 'Video' });
+            else openMatWindow(url);                 /* loading failed: plain window */
+        };
+        if (window.VideoLightbox) { play(); return; }
+        const me = document.currentScript ||
+            Array.prototype.slice.call(document.getElementsByTagName('script'))
+                .filter(function (t) { return /svp-plan\.js/.test(t.src); }).pop();
+        const sc = document.createElement('script');
+        sc.src = new URL('../js/video-lightbox.js', (me && me.src) || location.href).href;
+        sc.onload = play;
+        sc.onerror = function () { openMatWindow(url); };
+        document.head.appendChild(sc);
+    }
+
+    function openMat(url, label) {
+        if (matKind(url, label) === 'yt') openVideo(url, label);
+        else if (matEmbeddable(url)) openMatView(url, label);
+        else openMatWindow(url);
     }
 
     function renderMaterial(el, text, ref) {
@@ -122,7 +295,15 @@
             a.href = en.url;
             a.target = '_blank';
             a.rel = 'noopener';
-            a.textContent = matIcon(en.url, label) + (label || matDefaultLabel(en.url));
+            a.appendChild(matIconEl(en.url, label));
+            a.appendChild(matLabelEl(label || matDefaultLabel(en.url)));
+            /* Plain left click: own window. Cmd-/middle click keeps the
+               browser's own behaviour (new tab with the untouched URL). */
+            a.addEventListener('click', function (e) {
+                if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+                e.preventDefault();
+                openMat(en.url, label);
+            });
             if (en.desc) wireMatTip(a, en.desc); /* pretty tooltip, no raw URL */
             else a.title = en.url;
             /* Owner: every pill carries its own ✕. Deliberately NOT tied to
@@ -292,7 +473,8 @@
                 const pill = document.createElement('span');
                 pill.className = 'badge b-green mat-pill';
                 pill.title = en.url;
-                pill.textContent = matIcon(en.url, en.label) + (en.label || matDefaultLabel(en.url));
+                pill.appendChild(matIconEl(en.url, en.label));
+                pill.appendChild(matLabelEl(en.label || matDefaultLabel(en.url)));
                 function selectForEdit() {
                     editIdx = idx;
                     labIn.value = en.label;
@@ -503,7 +685,7 @@
         titel.textContent = label || matDefaultLabel(url);
         menu.appendChild(titel);
         [['⧉', 'Kopieren', function () { copyOneMat(ref, url, label); }, 'ctx-ico-gross'],
-         ['↗', 'Öffnen', function () { window.open(url, '_blank', 'noopener'); }, ''],
+         ['↗', 'Öffnen', function () { openMat(url, label); }, ''],
          ['✎', 'Bearbeiten', function () { openMatModal(ref, url); }, ''],
          ['✕', 'Entfernen', function () { removeMatEntry(ref, url); }, '']
         ].forEach(function (def) {
@@ -564,7 +746,7 @@
                 hideMatTip();
                 if (editable && document.body.classList.contains('editing'))
                     openPillMenu(t.clientX, t.clientY, ref, en.url, en.label);
-                else window.open(en.url, '_blank', 'noopener');
+                else openMat(en.url, en.label);
             }, 500);
         }, { passive: true });
         a.addEventListener('touchmove', function () { moved = true; }, { passive: true });

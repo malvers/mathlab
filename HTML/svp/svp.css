@@ -1988,3 +1988,109 @@ body.map-preview #svp-map {
         color: rgb(14, 36, 78);
     }
 }
+
+/* ------------------------------------------------------------------
+   Material viewer: Office/SharePoint links open framed inside the page.
+   A browser popup always keeps its address bar, so this is the only way
+   to a clean, sanely sized presentation window.
+   ------------------------------------------------------------------ */
+.mat-view-wrap {
+    position: fixed;
+    inset: 0;
+    z-index: 1200;
+    background: rgba(8, 20, 42, 0.72);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+}
+.mat-view {
+    /* 16:9 without letterboxing: the box follows the deck, not the other way
+       round. --mv-bar is the viewer's own toolbar (inside the frame), --mv-head
+       our title row — both sit on top of the 16:9 slide area. */
+    --mv-head: 46px;
+    --mv-bar: 34px;
+    --mv-w: min(1280px, 96vw, calc((88vh - var(--mv-head) - var(--mv-bar)) * 16 / 9));
+    display: flex;
+    flex-direction: column;
+    width: var(--mv-w);
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    box-shadow: 0 18px 60px rgba(8, 20, 42, 0.55);
+    overflow: hidden;
+}
+.mat-view .mv-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 8px 10px 8px 14px;
+    border-bottom: 1px solid var(--line);
+}
+.mat-view .mv-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.8rem;
+    letter-spacing: 0.06em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.mat-view .mv-tools { display: flex; gap: 6px; flex: none; }
+.mat-view .mv-btn {
+    font: inherit;
+    font-size: 0.95rem;
+    line-height: 1;
+    padding: 6px 10px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+}
+.mat-view .mv-btn:hover { background: rgba(121, 158, 49, 0.18); }
+.mat-view .mv-frame {
+    flex: none;
+    width: 100%;
+    height: calc(var(--mv-w) * 9 / 16 + var(--mv-bar));
+    border: 0;
+    background: rgb(14, 36, 78);
+}
+
+/* phones: use the whole screen, the deck needs the room */
+@media (max-width: 760px) {
+    .mat-view-wrap { padding: 0; }
+    .mat-view { width: 100vw; height: 100dvh; border-radius: 0; border: 0; }
+    .mat-view .mv-frame { flex: 1; height: auto; }
+}
+
+@media print { .mat-view-wrap { display: none !important; } }
+
+/* Material pills: the macOS app icons instead of emoji — the kids recognise
+   them from their own Dock. They carry their own transparent margin, so they
+   are set a touch larger than a drawn glyph would be. */
+.mat-ico {
+    /* deliberately bigger than the label: the icon is what the kids aim at */
+    width: 2.53em;
+    height: 2.53em;
+    margin-left: -2px;   /* optical: a hair to the left sits better in the pill */
+    flex: none;
+}
+/* Drawn glyphs (YouTube, plain link) need the transparent frame the macOS app
+   icons bring along, otherwise they tower over them. */
+.mat-ico-drawn { padding: 0.42em; box-sizing: border-box; }
+/* A flex row instead of a text line: every material pill is then exactly as
+   high as its icon plus the padding — an app icon and a drawn one give the
+   same height, and both sit centred next to the label. The padding is for the
+   text; the icon may sit close to the left edge. */
+.badge:has(> .mat-ico),
+.mat-block a.mat-pill:has(> .mat-ico) {   /* beats the inline-block set above */
+    display: inline-flex;
+    align-items: center;
+    gap: 0.2em;
+    padding: 2px 8px 2px 4px;
+    vertical-align: middle;
+}
+.mat-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mat-view .mv-title { display: inline-flex; align-items: center; gap: 0.3em; }
+.mat-view .mv-title .mat-ico { width: 2.31em; height: 2.31em; }
