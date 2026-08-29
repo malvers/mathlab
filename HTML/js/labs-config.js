@@ -35,6 +35,17 @@ const LABS_DATA = [
         "color": "gold"
     },
     {
+        "id": "bb84",
+        "href": "bb84.html",
+        "title": "BB84",
+        "description": "Quantenschlüsselaustausch nach Bennett und Brassard: Alice schickt einzelne Photonen, jedes in einer von zwei Basen — + mit den Zuständen — und |, oder × mit / und \\. Bob wählt seine Basis zufällig: gleiche Basis heißt sicheres Ergebnis, andere Basis heißt reiner Zufall. Über jede Spalte fahren erklärt genau dieses Photon. Mit der Lauscherin Eve steigt die Fehlerquote im öffentlich verglichenen Teil auf ein Viertel — die Entdeckungswahrscheinlichkeit ist 1 − (3/4)^m, und tausend Läufe auf Knopfdruck zeigen, dass es wirklich so ist. Dazu ein Lehrmodus, der alle Fälle einmal durchgeht.",
+        "tagline": "Kryptografie / Quantenphysik / Zufall",
+        "icon": LAB_ICONS["bb84"],
+        "category": "informatik physik neu highlight hot uni grade11 grade12",
+        "keywords": "bb84 quantenkryptografie quantenkryptographie quantum cryptography schluesselaustausch key distribution qkd bennett brassard alice bob eve lauscher polarisation photon basis sifting qber fehlerrate abhoeren kryptografie verschluesselung one time pad zufall messung kollaps",
+        "color": "purple"
+    },
+    {
         "id": "kovarianz",
         "href": "kovarianz.html",
         "title": "Kovarianz",

@@ -281,6 +281,14 @@ ol.picks li:first-child { border-top: 0; padding-top: 0; }
   font-variant-numeric: tabular-nums; line-height: 1.3;
 }
 .pick-name { font-family: "Orbitron", sans-serif; font-weight: 500; font-size: .95rem; }
+/* a pick that has since become a lab keeps its rank but says so */
+.done {
+  font-family: "Orbitron", sans-serif; font-weight: 700;
+  font-size: .58rem; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--phi); border: 1px solid var(--phi);
+  border-radius: 2px; padding: 2px 6px; margin-left: 9px;
+  white-space: nowrap;
+}
 .pick-why { grid-column: 2; font-size: .93rem; color: var(--ink-dim); }
 
 footer {
@@ -340,9 +348,9 @@ footer {
   <h2>Was ich als N&auml;chstes bauen w&uuml;rde</h2>
   <p>Gereiht nach Wirkung im Unterricht mal Machbarkeit im Browser &mdash; alles Canvas- oder WebAudio-Stoff, nichts davon braucht eine neue Bibliothek.</p>
   <ol class="picks">
-    <li><span class="rank">1</span><span class="pick-name">Kovarianz-Labor &mdash; CovarianceDemo</span>
+    <li><span class="rank">1</span><span class="pick-name">Kovarianz-Labor &mdash; CovarianceDemo<span class="done">gebaut</span></span>
       <span class="pick-why">Handles ziehen, 5000 Punkte verzerren sich mit, Einheitskreis wird zur Ellipse, Eigenvektoren drehen mit. Das erkl&auml;rt Hauptachsen in zehn Sekunden, und im Lab gibt es dazu bisher gar nichts.</span></li>
-    <li><span class="rank">2</span><span class="pick-name">BB84 &mdash; QuantumCryptography</span>
+    <li><span class="rank">2</span><span class="pick-name">BB84 &mdash; QuantumCryptography<span class="done">gebaut</span></span>
       <span class="pick-why">Alice, Bob und die Lauscherin Eve als Zeilen aus Bits und Basen. Br&uuml;cke zwischen Physik und Informatik, und ein Alleinstellungsmerkmal, das sonst niemand als Lab hat.</span></li>
     <li><span class="rank">3</span><span class="pick-name">Kreisteilung &mdash; CutCircle aus Mrautilities</span>
       <span class="pick-why">1, 2, 4, 8, 16 &hellip; und dann 31. Der sch&ouml;nste Vermutungs-Reinfall der Mathematik, fertig implementiert samt Sehnen- und Schnittpunktverwaltung.</span></li>
@@ -356,7 +364,7 @@ footer {
 </section>
 
 <footer>
-  <span>Stand 28.08.2026</span>
+  <span>Stand 29.08.2026</span>
   <span>Quelle: <code>~/IdeaProjects</code>, 51 Projekte mit Java-Quelltext, hier 64 Eintr&auml;ge</span>
   <span>Abgleich gegen <code>HTML/js/labs-config.js</code>, 64 registrierte Labs</span>
 </footer>
@@ -403,12 +411,12 @@ const DATA = [
   { n: "Mrautilities / cmaes", y: 2022, s: "lab", d: "Portierte CMA-ES-Bibliothek samt Tester — die Grundlage unter Lens, ConwaysIris und GaussianTrapetz.", t: "cmaes.html" },
   { n: "NeuralNetwork", y: 2022, s: "lab", d: "Netz aus Input-, Bias- und Output-Neuronen als Graph; Gewichte per CMA-ES statt Backpropagation. AND, XOR, ADD, NAND, XNOR — und MNIST.", t: "ann.html, neuroaddierer.html" },
   { n: "NeuralNetworkGradle", y: 2020, s: "tool", d: "Gradle-Portierung desselben Simulators mit einkopierter CMA-ES-Quelle statt JAR. Historisch, kein eigener Inhalt.", t: "Duplikat" },
-  { n: "CovarianceDemo", y: 2022, s: "gap", star: 1, d: "Transformationsmatrix ueber ziehbare Handles; 5000 gauss- oder gleichverteilte Punkte, Einheitskreis und Parallelenscharen verzerren live mit, Eigen- und Kovarianzstruktur sichtbar.", t: "Neu: kovarianz.html" },
+  { n: "CovarianceDemo", y: 2022, s: "lab", d: "Transformationsmatrix ueber ziehbare Handles; 5000 gauss- oder gleichverteilte Punkte, Einheitskreis und Parallelenscharen verzerren live mit, Eigen- und Kovarianzstruktur sichtbar.", t: "kovarianz.html" },
   { n: "ParticleSwarmOptimization", y: 2022, s: "gap", star: 1, d: "Partikelschwarm auf einer Landschaft aus Gauss-Huegeln: Partikel, besuchte Positionen, globales Optimum, Zaehler der Funktionsaufrufe.", t: "Neu: pso.html" }
  ]},
  { g: "Physik und Kryptografie", items: [
   { n: "orbitals2.0", y: 2025, s: "lab", d: "Atomorbitale als 3D-Meshes mit Perspektivkamera, Phong-Material, Trackball und Orbital-Auswahlkarte.", t: "orbitals.html" },
-  { n: "QuantumCryptography", y: 2024, s: "gap", star: 1, d: "BB84-Schluesselaustausch nach Bennett und Brassard: 42 Bits, Zufallsbasen von Alice und Bob, wahlweise mit Lauscherin Eve. Mit Demo-Modus und Erklaerungstexten.", t: "Neu: bb84.html" },
+  { n: "QuantumCryptography", y: 2024, s: "lab", d: "BB84-Schluesselaustausch nach Bennett und Brassard: 42 Bits, Zufallsbasen von Alice und Bob, wahlweise mit Lauscherin Eve. Mit Demo-Modus und Erklaerungstexten.", t: "bb84.html" },
   { n: "RandomInfectionSimulation", y: 2022, s: "gap", d: "Agentenbasierte Epidemie: Zufallsbewegung, Infektionsradius, Ansteckungswahrscheinlichkeit, Genesungszeit, Quarantaene — mit Kurvenplot und Multithread-Parametervariation.", t: "Neu: epidemie.html" },
   { n: "vector", y: 2025, s: "gap", d: "Magnetkraefte: ein Punkt zwischen zwei Magneten wird gezogen, die Kraftvektoren folgen. Dazu die Induktionsspannung einer Spule mit 2000 Windungen.", t: "Neu: magnetfeld.html" }
  ]},

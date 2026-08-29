@@ -1,0 +1,619 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>BB84 — Einspieler</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&family=Outfit:wght@300;400;500&display=swap">
+<style>
+  html, body { margin: 0; padding: 0; background: #08142a; overflow: hidden; }
+  canvas { display: block; }
+</style>
+</head>
+<body>
+<canvas id="c" width="1280" height="720"></canvas>
+<script>
+/* BB84 — the six scenes the lab itself cannot show.
+   One page, one scene per ?scene=sN, paced to ?dur=<seconds> so the beats always fit the
+   narration that runs over them. Everything is really computed (Malus, XOR, the product of
+   two primes) — nothing is painted to look like a result. */
+const P = new URLSearchParams(location.search);
+const SCENE = P.get('scene') || 's1';
+const DUR = parseFloat(P.get('dur') || '18');
+
+const c = document.getElementById('c');
+const g = c.getContext('2d');
+const W = c.width, H = c.height;
+
+/* ---- the lab's palette, so an insert never looks like a foreign body ---- */
+const COL = {
+  ground: '#08142a', panel: '#0e244e', panel2: '#102a5c', edge: '#1c3a72', edgeSoft: '#16305f',
+  ink: '#e2ebf8', dim: '#9db3d4', faint: '#6f88ae',
+  cyan: '#00d2ff', gold: '#f5c242', green: '#799e31', red: '#d4463a', steel: '#5d78a4',
+};
+
+/* ---- small helpers ---- */
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+const ease = (u) => u < 0.5 ? 2 * u * u : 1 - Math.pow(-2 * u + 2, 2) / 2;
+/* progress inside a beat given as fractions of the whole scene */
+const seg = (u, a, b) => clamp((u - a) / (b - a), 0, 1);
+const lerp = (a, b, u) => a + (b - a) * u;
+const hexA = (hex, a) => {
+  const n = parseInt(hex.slice(1), 16);
+  return 'rgba(' + (n >> 16 & 255) + ',' + (n >> 8 & 255) + ',' + (n & 255) + ',' + a + ')';
+};
+function orb(size, weight) { g.font = (weight || 500) + ' ' + size + 'px Orbitron, sans-serif'; }
+function out(size, weight) { g.font = (weight || 300) + ' ' + size + 'px Outfit, sans-serif'; }
+function mono(size) { g.font = '500 ' + size + 'px ui-monospace, "SF Mono", Menlo, monospace'; }
+function txt(s, x, y, col, align, base) {
+  g.fillStyle = col; g.textAlign = align || 'left'; g.textBaseline = base || 'alphabetic';
+  g.fillText(s, x, y);
+}
+function roundRect(x, y, w, h, r) {
+  g.beginPath();
+  if (g.roundRect) g.roundRect(x, y, w, h, r); else g.rect(x, y, w, h);
+}
+/* the eyebrow every insert carries, so the cards read as one series */
+function eyebrow(s, alpha) {
+  g.globalAlpha = alpha === undefined ? 1 : alpha;
+  orb(19, 500);
+  g.letterSpacing = '5px';
+  txt(s, 64, 74, COL.cyan);
+  g.letterSpacing = '0px';
+  g.globalAlpha = 1;
+}
+/* a line of body copy, fading in — used for the closing thought of a card */
+function lede(s, x, y, size, col, alpha, align) {
+  g.globalAlpha = alpha;
+  out(size, 300);
+  txt(s, x, y, col, align || 'left');
+  g.globalAlpha = 1;
+}
+function backdrop() {
+  g.fillStyle = COL.ground;
+  g.fillRect(0, 0, W, H);
+  /* the faint grid of the lab stage */
+  g.strokeStyle = 'rgba(28,58,114,.35)';
+  g.lineWidth = 1;
+  for (let x = 0; x <= W; x += 40) { g.beginPath(); g.moveTo(x + .5, 0); g.lineTo(x + .5, H); g.stroke(); }
+  for (let y = 0; y <= H; y += 40) { g.beginPath(); g.moveTo(0, y + .5); g.lineTo(W, y + .5); g.stroke(); }
+}
+
+/* deterministic noise, so every take of a scene looks identical */
+let seed = 12345;
+const rnd = () => (seed = (seed * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff;
+const HEX = '0123456789ABCDEF';
+
+/* =====================================================================
+   s1 — harvest now, decrypt later
+   Traffic streams into a store; a clock crawls twenty years; the store opens.
+   ===================================================================== */
+const BLOCKS = ['ÜBERWEISUNG', 'MAIL', 'KRANKENAKTE', 'VERTRAG', 'PASSWORT', 'CHAT'];
+function s1(u) {
+  backdrop();
+  eyebrow('HEUTE MITGESCHNITTEN', 1);
+
+  const vx = 880, vy = 150, vw = 330, vh = 350;
+
+  /* the wire: traffic keeps flowing for the whole scene — it does not stop being recorded */
+  const flow = (u * DUR) / 6;
+  g.strokeStyle = hexA(COL.edge, .9); g.lineWidth = 2;
+  g.beginPath(); g.moveTo(70, vy + vh / 2); g.lineTo(vx, vy + vh / 2); g.stroke();
+  for (let i = 0; i < 12; i++) {
+    const phase = (flow + i / 12) % 1;
+    const x = lerp(70, vx - 30, phase);
+    g.globalAlpha = Math.min(1, phase * 8) * Math.min(1, (1 - phase) * 8) * .9;
+    mono(19);
+    let str = '';
+    seed = 900 + i * 37;
+    for (let k = 0; k < 4; k++) str += HEX[Math.floor(rnd() * 16)];
+    txt(str, x, vy + vh / 2 + 7, COL.cyan);
+    g.globalAlpha = 1;
+  }
+
+  /* the store — a plain box, filling bar by bar */
+  const opened = seg(u, 0.58, 0.74);
+  g.fillStyle = hexA(COL.panel, .85);
+  roundRect(vx, vy, vw, vh, 8); g.fill();
+  g.strokeStyle = opened > 0 ? hexA(COL.red, .9) : hexA(COL.edge, 1); g.lineWidth = 2;
+  roundRect(vx, vy, vw, vh, 8); g.stroke();
+  orb(16, 500); g.letterSpacing = '4px';
+  txt('SPEICHER', vx + vw / 2, vy - 20, opened > 0 ? COL.red : COL.steel, 'center');
+  g.letterSpacing = '0px';
+
+  for (let i = 0; i < BLOCKS.length; i++) {
+    const shown = seg(u, 0.05 + i * 0.062, 0.13 + i * 0.062);
+    if (shown <= 0) continue;
+    const by = vy + 24 + i * 52;
+    g.globalAlpha = shown;
+    g.fillStyle = opened > 0 ? hexA(COL.red, .22) : hexA(COL.cyan, .13);
+    roundRect(vx + 18, by, vw - 36, 40, 4); g.fill();
+    if (opened > 0.4) {
+      out(19, 400);
+      txt(BLOCKS[i], vx + 34, by + 27, COL.red);
+    } else {
+      mono(17);
+      let str = '';
+      seed = 4000 + i * 91;
+      for (let k = 0; k < 13; k++) str += HEX[Math.floor(rnd() * 16)];
+      txt(str, vx + 34, by + 27, hexA(COL.cyan, .75));
+    }
+    g.globalAlpha = 1;
+  }
+
+  /* twenty years on one line — the whole point of the scene */
+  const tl = seg(u, 0.30, 0.66);
+  const ax = 90, aw = 700, ay = 600;
+  g.strokeStyle = hexA(COL.edge, 1); g.lineWidth = 3;
+  g.beginPath(); g.moveTo(ax, ay); g.lineTo(ax + aw, ay); g.stroke();
+  for (let y = 2026; y <= 2046; y += 5) {
+    const x = ax + aw * (y - 2026) / 20;
+    g.strokeStyle = hexA(COL.edge, 1); g.lineWidth = 2;
+    g.beginPath(); g.moveTo(x, ay - 9); g.lineTo(x, ay + 9); g.stroke();
+    orb(18, 500); txt(String(y), x, ay + 38, COL.faint, 'center');
+  }
+  const mx = ax + aw * ease(tl);
+  g.strokeStyle = tl >= 1 ? COL.red : COL.gold; g.lineWidth = 4;
+  g.beginPath(); g.moveTo(mx, ay - 34); g.lineTo(mx, ay + 14); g.stroke();
+  g.fillStyle = tl >= 1 ? COL.red : COL.gold;
+  g.beginPath(); g.arc(mx, ay - 38, 8, 0, 7); g.fill();
+
+  lede('Nicht geknackt. Abgewartet.', 90, 470, 40, COL.ink, seg(u, 0.70, 0.82));
+  lede('Was heute gespeichert wird, wird irgendwann gelesen.', 90, 516, 25, COL.dim, seg(u, 0.76, 0.90));
+}
+
+/* =====================================================================
+   s2 — the bet: multiplying is easy, factoring is not, and 1994 changed the odds
+   ===================================================================== */
+const PRIME_P = 67867967n, PRIME_Q = 86028121n;
+const PRODUCT = (PRIME_P * PRIME_Q).toString();
+function s2(u) {
+  backdrop();
+  eyebrow('UNSERE VERSCHLÜSSELUNG IST EINE WETTE', 1);
+
+  const cy = 185;
+  /* forward: two primes meet, the product is simply there */
+  const fwd = seg(u, 0.03, 0.22);
+  const px = lerp(180, 350, ease(fwd)), qx = lerp(1100, 930, ease(fwd));
+  orb(44, 700);
+  g.globalAlpha = Math.min(1, fwd * 4);
+  txt(PRIME_P.toString(), px, cy, COL.cyan, 'center');
+  txt(PRIME_Q.toString(), qx, cy, COL.cyan, 'center');
+  orb(34, 400);
+  if (fwd > 0.55) txt('×', (px + qx) / 2, cy, COL.dim, 'center');
+  g.globalAlpha = 1;
+
+  const shown = seg(u, 0.20, 0.30);
+  if (shown > 0) {
+    g.globalAlpha = shown;
+    orb(17, 500); g.letterSpacing = '4px';
+    txt('ERGIBT', 640, cy + 60, COL.green, 'center');
+    g.letterSpacing = '0px';
+    orb(58, 700);
+    txt(PRODUCT, 640, cy + 128, COL.ink, 'center');
+    out(24, 300);
+    txt('in einer Zehntelsekunde', 640, cy + 168, COL.green, 'center');
+    g.globalAlpha = 1;
+  }
+
+  /* backward: the same line, read from right to left, and it stalls */
+  const back = seg(u, 0.33, 0.62);
+  if (back > 0) {
+    g.globalAlpha = Math.min(1, back * 5);
+    orb(17, 500); g.letterSpacing = '4px';
+    txt('UND ZURÜCK?', 640, 452, COL.red, 'center');
+    g.letterSpacing = '0px';
+    const bx = 260, bw = 760, by = 480;
+    g.fillStyle = hexA(COL.panel, .9); roundRect(bx, by, bw, 30, 5); g.fill();
+    g.strokeStyle = hexA(COL.edge, 1); g.lineWidth = 1; roundRect(bx, by, bw, 30, 5); g.stroke();
+    /* the classical attempt barely moves — that is the picture */
+    const shorU = seg(u, 0.68, 0.86);
+    const fill = shorU > 0 ? lerp(0.035, 1, ease(shorU)) : 0.035 * back;
+    g.fillStyle = shorU > 0 ? hexA(COL.green, .85) : hexA(COL.red, .8);
+    roundRect(bx + 3, by + 3, (bw - 6) * fill, 24, 3); g.fill();
+    out(26, 400);
+    txt(shorU > 0 ? 'Stunden' : 'Milliarden Jahre', 640, by + 68, shorU > 0 ? COL.green : COL.red, 'center');
+    g.globalAlpha = 1;
+  }
+
+  /* the stamp that changes the odds */
+  const shor = seg(u, 0.64, 0.74);
+  if (shor > 0) {
+    g.save();
+    g.globalAlpha = Math.min(1, shor * 3);
+    g.translate(640, 400);
+    const k = lerp(1.5, 1, ease(shor));
+    g.scale(k, k);
+    g.fillStyle = hexA(COL.gold, .16);
+    roundRect(-210, -30, 420, 60, 6); g.fill();
+    g.strokeStyle = COL.gold; g.lineWidth = 2;
+    roundRect(-210, -30, 420, 60, 6); g.stroke();
+    orb(27, 700); g.letterSpacing = '3px';
+    txt('1994 · SHOR', 0, 10, COL.gold, 'center');
+    g.letterSpacing = '0px';
+    g.restore();
+  }
+
+  lede('Kein Naturgesetz — eine Annahme über Rechenzeit.', 640, 660, 28, COL.ink, seg(u, 0.86, 0.96), 'center');
+}
+
+/* =====================================================================
+   s3 — reading a bit copies it; reading a photon changes it
+   ===================================================================== */
+function s3(u) {
+  backdrop();
+  eyebrow('LESEN HEISST KOPIEREN — AUSSER HIER', 1);
+
+  const panels = [
+    { x: 60, label: 'KLASSISCHE LEITUNG', col: COL.steel },
+    { x: 660, label: 'QUANTENKANAL', col: COL.cyan },
+  ];
+  const pw = 560, py = 120, ph = 400;
+  for (const p of panels) {
+    g.fillStyle = hexA(COL.panel, .5);
+    roundRect(p.x, py, pw, ph, 8); g.fill();
+    g.strokeStyle = hexA(p.col, .5); g.lineWidth = 1;
+    roundRect(p.x, py, pw, ph, 8); g.stroke();
+    orb(17, 500); g.letterSpacing = '4px';
+    txt(p.label, p.x + pw / 2, py + 44, p.col, 'center');
+    g.letterSpacing = '0px';
+  }
+
+  const run = seg(u, 0.08, 0.55);
+  const tapU = 0.55;                       /* where along the wire the tap sits */
+
+  /* --- left: a bit travels, the tap drops a perfect copy, the original is untouched --- */
+  {
+    const p = panels[0], wy = py + 150;
+    g.strokeStyle = hexA(COL.edge, 1); g.lineWidth = 2;
+    g.beginPath(); g.moveTo(p.x + 40, wy); g.lineTo(p.x + pw - 40, wy); g.stroke();
+    const x = lerp(p.x + 40, p.x + pw - 40, run);
+    mono(30);
+    txt('1011', x, wy - 18, COL.ink, 'center');
+    const tx = lerp(p.x + 40, p.x + pw - 40, tapU);
+    g.fillStyle = hexA(COL.steel, .3);
+    roundRect(tx - 42, wy + 14, 84, 34, 4); g.fill();
+    g.strokeStyle = COL.steel; g.lineWidth = 1; roundRect(tx - 42, wy + 14, 84, 34, 4); g.stroke();
+    out(17, 400); txt('Abgriff', tx, wy + 37, COL.dim, 'center');
+    if (run > tapU) {
+      const drop = seg(run, tapU, 1);
+      g.globalAlpha = Math.min(1, drop * 4);
+      const cy = wy + 110 + 30 * ease(drop);
+      g.fillStyle = hexA(COL.steel, .16);
+      roundRect(tx - 90, cy - 34, 180, 62, 5); g.fill();
+      g.strokeStyle = hexA(COL.steel, .8); roundRect(tx - 90, cy - 34, 180, 62, 5); g.stroke();
+      mono(30); txt('1011', tx, cy + 2, hexA(COL.ink, .95), 'center');
+      out(15, 400); txt('Mitschnitt', tx, cy + 22, COL.dim, 'center');
+      g.globalAlpha = 1;
+    }
+    lede('Das Original läuft unverändert weiter.', p.x + pw / 2, py + ph + 52, 24, COL.green,
+      seg(u, 0.5, 0.62), 'center');
+  }
+
+  /* --- right: the same journey, but the measurement rewrites the photon --- */
+  {
+    const p = panels[1], wy = py + 150;
+    g.strokeStyle = hexA(COL.edge, 1); g.lineWidth = 2;
+    g.beginPath(); g.moveTo(p.x + 40, wy); g.lineTo(p.x + pw - 40, wy); g.stroke();
+    const x = lerp(p.x + 40, p.x + pw - 40, run);
+    /* diagonal before the tap, snapped to the tap's own axis afterwards */
+    const ang = run < tapU ? -Math.PI / 4 : 0;
+    g.save();
+    g.translate(x, wy - 34);
+    g.rotate(ang);
+    g.fillStyle = run < tapU ? COL.gold : COL.red;
+    roundRect(-6, -30, 12, 60, 6); g.fill();
+    g.restore();
+    const tx = lerp(p.x + 40, p.x + pw - 40, tapU);
+    g.fillStyle = hexA(COL.cyan, .18);
+    roundRect(tx - 42, wy + 14, 84, 34, 4); g.fill();
+    g.strokeStyle = COL.cyan; g.lineWidth = 1; roundRect(tx - 42, wy + 14, 84, 34, 4); g.stroke();
+    out(17, 400); txt('Messung', tx, wy + 37, COL.dim, 'center');
+    if (run > tapU) {
+      g.globalAlpha = Math.min(1, seg(run, tapU, tapU + 0.12));
+      out(24, 400);
+      txt('die alte Richtung ist weg', p.x + pw / 2, wy + 130, COL.red, 'center');
+      g.globalAlpha = 1;
+    }
+    lede('Das Photon kommt anders an, als es losflog.', p.x + pw / 2, py + ph + 52, 24, COL.red,
+      seg(u, 0.5, 0.62), 'center');
+  }
+
+  const q = seg(u, 0.78, 0.9);
+  if (q > 0) {
+    g.globalAlpha = q;
+    orb(40, 700); g.letterSpacing = '3px';
+    txt('WAS VERSCHICKEN WIR DA?', 640, 660, COL.ink, 'center');
+    g.letterSpacing = '0px';
+    g.globalAlpha = 1;
+  }
+}
+
+/* =====================================================================
+   s6 — three polarisers. The star of the film, so it is really Malus, not a drawing.
+   Unpolarised light loses half at the first filter; every further filter keeps
+   cos^2 of the angle between it and the one before.
+   ===================================================================== */
+const FILTERS = [
+  { at: 0.28, ang: 0, name: 'A · waagerecht', show: [0.14, 0.30] },
+  { at: 0.50, ang: 45, name: 'B · schräg', show: [0.56, 0.70] },
+  { at: 0.72, ang: 90, name: 'C · senkrecht', show: [0.33, 0.48] },
+];
+function intensityAt(active) {
+  /* active: the filters currently in the beam, in beam order */
+  if (!active.length) return 1;
+  let I = 0.5;                                    /* unpolarised → first filter */
+  for (let i = 1; i < active.length; i++) {
+    const d = (active[i].ang - active[i - 1].ang) * Math.PI / 180;
+    I *= Math.cos(d) * Math.cos(d);
+  }
+  return I;
+}
+function s6(u) {
+  backdrop();
+  eyebrow('DREI POLARISATIONSFILTER', 1);
+
+  const bx = 130, bw = 880, by = 330;
+  /* which filters are in the beam right now, and how far they have slid in */
+  const slide = FILTERS.map((f) => seg(u, f.show[0], f.show[1]));
+  const active = FILTERS.filter((f, i) => slide[i] > 0.5);
+  const I = intensityAt(active);
+
+  /* the lamp */
+  g.fillStyle = hexA(COL.gold, .9);
+  g.beginPath(); g.arc(bx - 34, by, 20, 0, 7); g.fill();
+  g.fillStyle = hexA(COL.gold, .16);
+  g.beginPath(); g.arc(bx - 34, by, 40, 0, 7); g.fill();
+  out(14, 400); txt('Licht', bx - 34, by + 62, COL.dim, 'center');
+
+  /* the beam, in as many bright segments as there are gaps between filters */
+  const stops = [0, ...FILTERS.map((f, i) => slide[i] > 0.5 ? f.at : null).filter((x) => x !== null), 1];
+  let carry = 1;
+  const seq = [];
+  for (let i = 0; i < stops.length - 1; i++) {
+    seq.push({ a: stops[i], b: stops[i + 1], I: carry });
+    if (i < active.length) {
+      carry = intensityAt(active.slice(0, i + 1));
+    }
+  }
+  for (const s of seq) {
+    const x0 = bx + bw * s.a, x1 = bx + bw * s.b;
+    const h = 54;
+    const grd = g.createLinearGradient(0, by - h / 2, 0, by + h / 2);
+    grd.addColorStop(0, 'rgba(255,246,214,0)');
+    grd.addColorStop(0.5, 'rgba(255,246,214,' + (0.10 + 0.75 * s.I).toFixed(3) + ')');
+    grd.addColorStop(1, 'rgba(255,246,214,0)');
+    g.fillStyle = grd;
+    g.fillRect(x0, by - h / 2, x1 - x0, h);
+  }
+
+  /* the filters themselves: a disc with hatching along its transmission axis */
+  FILTERS.forEach((f, i) => {
+    const s = slide[i];
+    if (s <= 0.01) return;
+    const x = bx + bw * f.at;
+    const y = by - lerp(300, 0, ease(s));
+    const rx = 34, ry = 92;
+    g.save();
+    g.translate(x, y);
+    g.globalAlpha = Math.min(1, s * 3);
+    g.fillStyle = hexA(COL.panel2, .8);
+    g.beginPath(); g.ellipse(0, 0, rx, ry, 0, 0, 7); g.fill();
+    g.strokeStyle = hexA(COL.cyan, .8); g.lineWidth = 2;
+    g.beginPath(); g.ellipse(0, 0, rx, ry, 0, 0, 7); g.stroke();
+    /* hatching: the axis the filter lets through */
+    g.save();
+    g.beginPath(); g.ellipse(0, 0, rx - 2, ry - 2, 0, 0, 7); g.clip();
+    g.strokeStyle = hexA(COL.cyan, .55); g.lineWidth = 3;
+    const a = f.ang * Math.PI / 180;
+    for (let k = -8; k <= 8; k++) {
+      const off = k * 16;
+      g.beginPath();
+      g.moveTo(Math.cos(a) * -200 - Math.sin(a) * off, Math.sin(a) * -200 + Math.cos(a) * off);
+      g.lineTo(Math.cos(a) * 200 - Math.sin(a) * off, Math.sin(a) * 200 + Math.cos(a) * off);
+      g.stroke();
+    }
+    g.restore();
+    orb(17, 500);
+    txt(f.name, 0, ry + 34, COL.dim, 'center');
+    g.restore();
+  });
+
+  /* the screen at the end, and the number */
+  const sx = bx + bw + 24;
+  g.fillStyle = 'rgba(255,246,214,' + (0.06 + 0.9 * I).toFixed(3) + ')';
+  roundRect(sx, by - 92, 66, 184, 6); g.fill();
+  g.strokeStyle = hexA(COL.edge, 1); g.lineWidth = 2;
+  roundRect(sx, by - 92, 66, 184, 6); g.stroke();
+
+  orb(54, 700);
+  /* cos(90 deg) is not exactly zero in floating point — say 0 %, not 0,0 % */
+  const Ir = I < 1e-9 ? 0 : I;
+  const pctTxt = (Ir * 100).toFixed(Ir > 0 && Ir < 0.2 ? 1 : 0).replace('.', ',') + ' %';
+  txt(pctTxt, 640, 566, Ir > 0.001 ? COL.gold : COL.red, 'center');
+  orb(17, 500); g.letterSpacing = '4px';
+  txt('WAS ANKOMMT', 640, 598, COL.faint, 'center');
+  g.letterSpacing = '0px';
+
+  /* the running commentary — one short line per beat */
+  const say = [
+    [0.30, 0.36, 'Ein Filter: die Hälfte bleibt.', COL.dim],
+    [0.48, 0.56, 'Zwei gekreuzte Filter: dunkel.', COL.red],
+    [0.70, 0.80, 'Und mit dem dritten dazwischen wird es heller.', COL.green],
+  ];
+  for (const [a, b, s, col] of say) {
+    const alpha = clamp(seg(u, a, b) - seg(u, b + 0.10, b + 0.16), 0, 1);
+    if (alpha > 0) lede(s, 640, 654, 30, col, alpha, 'center');
+  }
+  const f = seg(u, 0.84, 0.94);
+  if (f > 0) {
+    g.globalAlpha = f;
+    out(30, 400);
+    txt('½ · cos²45° · cos²45°  =  12,5 %', 640, 654, COL.ink, 'center');
+    g.globalAlpha = 1;
+  }
+}
+
+/* =====================================================================
+   s16 — the one-time pad: the key is not a message, it is a second message
+   ===================================================================== */
+const OTP_TEXT = 'GEHEIM';
+function bitsOf(s) {
+  const out = [];
+  for (const ch of s) {
+    const v = ch.charCodeAt(0);
+    for (let i = 6; i >= 0; i--) out.push((v >> i) & 1);   /* 7 bit ASCII */
+  }
+  return out;
+}
+const OTP_MSG = bitsOf(OTP_TEXT);
+const OTP_KEY = (() => { seed = 777; return OTP_MSG.map(() => (rnd() < 0.5 ? 0 : 1)); })();
+const OTP_CIP = OTP_MSG.map((b, i) => b ^ OTP_KEY[i]);
+function s16(u) {
+  backdrop();
+  eyebrow('WAS MAN MIT DEN GOLDENEN BITS MACHT', 1);
+
+  const n = OTP_MSG.length;
+  const cw = Math.floor(840 / n), x0 = 700 - (cw * n) / 2, ch = 44;
+  const rows = [
+    { y: 175, bits: OTP_MSG, lab: 'NACHRICHT', col: COL.cyan },
+    { y: 250, bits: OTP_KEY, lab: 'SCHLÜSSEL', col: COL.gold },
+    { y: 340, bits: OTP_CIP, lab: 'GEHEIMTEXT', col: COL.steel },
+  ];
+  const sweep = seg(u, 0.10, 0.52) * n;
+
+  rows.forEach((r, ri) => {
+    orb(18, 500); g.letterSpacing = '2px';
+    txt(r.lab, x0 - 26, r.y + 30, r.col, 'right');
+    g.letterSpacing = '0px';
+    for (let i = 0; i < n; i++) {
+      /* the cipher row only exists where the sweep has already been */
+      const on = ri < 2 ? (i < seg(u, 0.02, 0.10) * n + 1) : (i < sweep);
+      if (!on) continue;
+      const x = x0 + i * cw;
+      g.fillStyle = hexA(r.col, ri === 2 ? .18 : .22);
+      roundRect(x + 1, r.y, cw - 2, ch, 3); g.fill();
+      mono(Math.min(22, cw - 3));
+      txt(String(r.bits[i]), x + cw / 2, r.y + 30, ri === 2 ? COL.ink : r.col, 'center');
+    }
+  });
+
+  /* the sweep head, with the operation spelled out once */
+  if (sweep > 0 && sweep < n) {
+    const x = x0 + Math.floor(sweep) * cw + cw / 2;
+    g.strokeStyle = hexA(COL.ink, .5); g.lineWidth = 2;
+    g.beginPath(); g.moveTo(x, 165); g.lineTo(x, 396); g.stroke();
+  }
+  orb(28, 500);
+  g.globalAlpha = clamp(seg(u, 0.12, 0.2) - seg(u, 0.5, 0.58), 0, 1);
+  txt('⊕', x0 - 26, 316, COL.ink, 'right');
+  g.globalAlpha = 1;
+
+  /* decoding at the far end gives the word back */
+  const dec = seg(u, 0.55, 0.72);
+  if (dec > 0) {
+    const k = Math.floor(dec * OTP_TEXT.length + 0.001);
+    g.globalAlpha = Math.min(1, dec * 5);
+    orb(17, 500); g.letterSpacing = '4px';
+    txt('BOB RECHNET DEN SCHLÜSSEL WIEDER HERAUS', 640, 462, COL.faint, 'center');
+    g.letterSpacing = '0px';
+    orb(64, 700); g.letterSpacing = '12px';
+    txt(OTP_TEXT.slice(0, k) + '·'.repeat(Math.max(0, OTP_TEXT.length - k)), 640, 534, COL.green, 'center');
+    g.letterSpacing = '0px';
+    g.globalAlpha = 1;
+  }
+
+  lede('Shannon hat bewiesen: so lang wie die Nachricht — und es ist unknackbar.',
+    640, 616, 27, COL.ink, seg(u, 0.74, 0.84), 'center');
+  lede('Das einzige Problem war immer: Wie kommen beide an denselben Schlüssel?',
+    640, 660, 27, COL.gold, seg(u, 0.84, 0.94), 'center');
+}
+
+/* =====================================================================
+   s17 — where this stands today, and where it stops
+   ===================================================================== */
+const FACTS = [
+  { km: 25, lab: 'Wien 2004', sub: 'eine Bank überweist quantengesichert', col: COL.cyan, at: 0.10, lift: 70 },
+  { km: 400, lab: 'Glasfaser', sub: 'heute regulär im Betrieb', col: COL.green, at: 0.26, lift: 150 },
+  { km: 1200, lab: 'Micius 2017', sub: 'Schlüssel vom Satelliten', col: COL.gold, at: 0.52, lift: 70 },
+];
+function s17(u) {
+  backdrop();
+  eyebrow('KEIN GEDANKENSPIEL', 1);
+
+  /* a square-root axis: 0 … 1400 km, so the short hops stay readable next to the satellite */
+  const ax = 110, aw = 1060, ay = 560;
+  const px = (km) => ax + aw * Math.sqrt(km / 1400);
+  g.strokeStyle = hexA(COL.edge, 1); g.lineWidth = 3;
+  g.beginPath(); g.moveTo(ax, ay); g.lineTo(ax + aw, ay); g.stroke();
+  for (const km of [0, 100, 400, 900, 1400]) {
+    const x = px(km);
+    g.strokeStyle = hexA(COL.edge, 1); g.lineWidth = 2;
+    g.beginPath(); g.moveTo(x, ay - 9); g.lineTo(x, ay + 9); g.stroke();
+    orb(17, 500); txt(km + (km === 1400 ? ' km' : ''), x, ay + 38, COL.faint, 'center');
+  }
+
+  /* the honest wall: a photon cannot be amplified */
+  const wall = seg(u, 0.36, 0.5);
+  if (wall > 0) {
+    const x = px(500);
+    g.globalAlpha = wall;
+    g.fillStyle = hexA(COL.red, .09);
+    g.fillRect(x, 430, ax + aw - x, ay - 430);
+    g.strokeStyle = hexA(COL.red, .85); g.lineWidth = 3;
+    g.setLineDash([9, 9]);
+    g.beginPath(); g.moveTo(x, 430); g.lineTo(x, ay); g.stroke();
+    g.setLineDash([]);
+    out(22, 400);
+    txt('kein Verstärker möglich', x + 18, 532, COL.red);
+    g.globalAlpha = 1;
+  }
+
+  FACTS.forEach((f) => {
+    const a = seg(u, f.at, f.at + 0.10);
+    if (a <= 0) return;
+    const x = px(f.km);
+    g.globalAlpha = a;
+    /* the satellite hops over the wall instead of walking through it */
+    if (f.km > 900) {
+      g.strokeStyle = hexA(f.col, .85); g.lineWidth = 3;
+      g.beginPath();
+      g.moveTo(px(0), ay);
+      g.quadraticCurveTo((px(0) + x) / 2, 40, x, ay);
+      g.stroke();
+      g.fillStyle = f.col;
+      g.beginPath(); g.arc((px(0) + x) / 2, 305, 10, 0, 7); g.fill();
+    }
+    g.fillStyle = f.col;
+    g.beginPath(); g.arc(x, ay, 9, 0, 7); g.fill();
+    g.strokeStyle = hexA(f.col, .6); g.lineWidth = 2;
+    g.beginPath(); g.moveTo(x, ay - 10); g.lineTo(x, ay - f.lift); g.stroke();
+    orb(23, 500);
+    txt(f.lab, x, ay - f.lift - 34, f.col, 'center');
+    out(20, 300);
+    txt(f.sub, x, ay - f.lift - 8, COL.dim, 'center');
+    g.globalAlpha = 1;
+  });
+
+  lede('Und beide müssen sich vorher sicher erkennen —', 640, 640, 28, COL.ink, seg(u, 0.72, 0.82), 'center');
+  lede('sonst redet Eve einfach mit jedem einzeln.', 640, 680, 28, COL.red, seg(u, 0.80, 0.9), 'center');
+}
+
+/* ---- the loop ---- */
+const SCENES = { s1, s2, s3, s6, s16, s17 };
+const draw = SCENES[SCENE] || s1;
+let t0 = null;
+function frame(now) {
+  if (t0 === null) t0 = now;
+  const u = clamp((now - t0) / 1000 / DUR, 0, 1);
+  draw(u);
+  requestAnimationFrame(frame);
+}
+document.fonts.ready.then(() => {
+  window.__vpReady = true;
+  requestAnimationFrame(frame);
+});
+</script>
+</body>
+</html>
