@@ -96,7 +96,7 @@
         const n = points.length;
         const planes = [];          // { n, d, key }
         const planeKeys = new Set();
-        const tol = 1e-6 * maxAbs(points);
+        const tol = 1e-5 * maxAbs(points);   // netlib numeric data is planar only to ~1e-6
 
         for (let i = 0; i < n; i++) {
             for (let j = i + 1; j < n; j++) {
@@ -374,22 +374,42 @@
         return pts;
     }
 
-    /** Build a fully analysed polyhedron from a catalogue key. */
-    function build(key) {
-        let P;
-        if (PLATONIC[key]) P = hull(generate(PLATONIC[key].specs));
-        else if (ARCHIMEDEAN[key]) P = hull(generate(ARCHIMEDEAN[key].specs));
-        else if (CATALAN[key]) {
-            const base = hull(generate(ARCHIMEDEAN[CATALAN[key].dualOf].specs));
-            P = hull(dualPoints(base));
-        } else throw new Error('unknown solid ' + key);
+    /** Johnson solids J1–J92 (keys 'j1' … 'j92'); data from js/koerper-johnson.js when loaded. */
+    const JOHNSON = {};
+    const jsrc = root.KOERPER_JOHNSON || (typeof require === 'function' ? (() => { try { return require('./koerper-johnson.js'); } catch (e) { return null; } })() : null);
+    if (jsrc) for (const j of jsrc) JOHNSON['j' + j.j] = { name: 'J' + j.j + ' · ' + j.name, en: j.en, points: j.v };
+
+    /** Shift points so their centroid sits at the origin (inside any convex body). */
+    function centre(points) {
+        const c = points.reduce((a, p) => add(a, p), [0, 0, 0]).map(x => x / points.length);
+        return points.map(p => sub(p, c));
+    }
+
+    function isChiral(key) {
+        const s = PLATONIC[key] || ARCHIMEDEAN[key] || CATALAN[key];
+        return !!(s && s.chiral);
+    }
+
+    /**
+     * Build a fully analysed polyhedron from a catalogue key.
+     * opts.mirror: reflect x → −x (only meaningful for the chiral snub solids and their duals).
+     */
+    function build(key, opts = {}) {
+        let pts;
+        if (PLATONIC[key]) pts = generate(PLATONIC[key].specs);
+        else if (ARCHIMEDEAN[key]) pts = generate(ARCHIMEDEAN[key].specs);
+        else if (CATALAN[key]) pts = dualPoints(hull(generate(ARCHIMEDEAN[CATALAN[key].dualOf].specs)));
+        else if (JOHNSON[key]) pts = centre(JOHNSON[key].points);
+        else throw new Error('unknown solid ' + key);
+        if (opts.mirror) pts = pts.map(p => [-p[0], p[1], p[2]]);
+        const P = hull(pts);
         normalizeEdge(P, 1);
         return P;
     }
 
     const api = {
         PHI, generate, hull, normalizeEdge, dualPoints, metrics, build, distinct,
-        PLATONIC, ARCHIMEDEAN, CATALAN,
+        PLATONIC, ARCHIMEDEAN, CATALAN, JOHNSON, isChiral, centre,
         prismPoints, antiprismPoints, uniformAntiprismHeight, pyramidPoints, bipyramidPoints,
         vec: { sub, add, scale, dot, cross, len, norm },
     };

@@ -10,6 +10,20 @@
     flex-direction: column;
 }
 
+/* Optional wrapper: put controls that open a panel (dropdowns) here, NOT inside
+   #tab-bar — its overflow-x clips anything that opens downwards. */
+#tab-strip {
+    display: flex;
+    align-items: stretch;
+    background: #07111f;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    flex-shrink: 0;
+    /* the strip must paint above the stage: a panel opening downwards would
+       otherwise end up behind the canvas, which then swallows the clicks */
+    position: relative;
+    z-index: 20;
+}
+
 #tab-bar {
     display: flex;
     gap: 0;
@@ -20,6 +34,12 @@
     flex-shrink: 0;
     overflow-x: auto;
     scrollbar-width: none;
+}
+
+#tab-strip #tab-bar {
+    flex: 1 1 auto;
+    min-width: 0;
+    border-bottom: none;
 }
 #tab-bar::-webkit-scrollbar { display: none; }
 
