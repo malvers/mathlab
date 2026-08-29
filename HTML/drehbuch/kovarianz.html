@@ -1,0 +1,912 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+
+<style>
+/* minimal reset - the artifact host used to provide this */
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; min-height: 100vh; }
+img, canvas, svg { display: block; max-width: 100%; }
+button, input { font: inherit; }
+:focus-visible { outline: 2px solid #00d2ff; outline-offset: 2px; }
+</style>
+<title>Vier Zahlen, eine Form</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&family=Outfit:wght@200;300;400;600&display=swap">
+
+<style>
+/* Palette and faces are the lab's own (kovarianz.html): Orbitron + Outfit,
+   deep blue ground, cyan = the image under A, orange/green = the two
+   principal axes. Single-theme on purpose - this is the lab's world. */
+:root {
+    --ground:      #081428;
+    --ground-deep: #050e1c;
+    --surface:     #0c1c3a;
+    --surface-2:   #0e244e;
+    --line:        #1c3565;
+    --line-soft:   #16294d;
+
+    --ink:         #e6eefa;
+    --ink-dim:     #b3c5de;
+    --ink-faint:   #8ba1c0;
+
+    --cyan:        #00d2ff;
+    --lambda:      #f5c242;
+    --phi:         #799e31;
+    --violet:      #c07fe8;
+    --red:         #b02418;
+
+    --step: clamp(0.9rem, 0.55rem + 1.1vw, 1.5rem);
+}
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    background: var(--ground);
+    background-image:
+        radial-gradient(1100px 620px at 12% -8%, #0f2a55 0%, transparent 62%),
+        radial-gradient(900px 520px at 92% 4%, #10203f 0%, transparent 58%);
+    background-attachment: fixed;
+    color: var(--ink);
+    font-family: 'Outfit', system-ui, sans-serif;
+    font-weight: 300;
+    font-size: 1.1rem;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+}
+
+.wrap {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: clamp(1.6rem, 4vw, 4rem) clamp(1.1rem, 4vw, 2.6rem) 6rem;
+}
+
+/* ---------- shared type ---------- */
+.eyebrow {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+}
+
+h1, h2, h3 { font-family: 'Orbitron', sans-serif; text-wrap: balance; margin: 0; }
+
+h1 {
+    font-size: clamp(2rem, 1.2rem + 3.4vw, 3.4rem);
+    font-weight: 700;
+    line-height: 1.08;
+    letter-spacing: -0.01em;
+    margin: 0.5rem 0 0;
+}
+
+h2 {
+    font-size: clamp(1.05rem, 0.9rem + 0.6vw, 1.32rem);
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    color: var(--ink);
+}
+
+p { margin: 0; }
+
+em { font-style: italic; color: #eaf2fd; }
+strong { font-weight: 600; color: #f2f7ff; }
+
+/* mathematical symbols, set apart without a formula engine */
+.m {
+    font-family: 'Outfit', system-ui, sans-serif;
+    font-style: italic;
+    font-weight: 400;
+    color: var(--cyan);
+    white-space: nowrap;
+}
+.m.l { color: var(--lambda); }
+.m.g { color: var(--phi); }
+
+/* ---------- header ---------- */
+header { margin-bottom: clamp(1.8rem, 4vw, 3rem); }
+
+.status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.74rem;
+    font-weight: 500;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--lambda);
+    border: 1px solid #4a3a15;
+    background: #1b1607;
+    border-radius: 2px;
+    padding: 0.34rem 0.7rem;
+    margin-top: 1.1rem;
+}
+.status::before {
+    content: "";
+    width: 5px; height: 5px;
+    background: var(--lambda);
+    border-radius: 50%;
+}
+
+.lede {
+    margin-top: 1.1rem;
+    max-width: 60ch;
+    color: var(--ink-dim);
+    font-size: 1.18rem;
+}
+
+.meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 2rem;
+    margin-top: 1.6rem;
+    padding-top: 1.2rem;
+    border-top: 1px solid var(--line-soft);
+}
+.meta div { display: flex; flex-direction: column; gap: 0.15rem; padding: 0.4rem 0; }
+.meta dt {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.74rem;
+    font-weight: 500;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+}
+.meta dd { margin: 0; font-size: 1.02rem; color: var(--ink); }
+.meta a { color: var(--cyan); text-decoration: none; border-bottom: 1px solid #05506b; }
+.meta a:hover, .meta a:focus-visible { border-bottom-color: var(--cyan); }
+
+/* ---------- hero canvas + thesis ---------- */
+.thesis {
+    display: grid;
+    grid-template-columns: minmax(0, 300px) minmax(0, 1fr);
+    gap: clamp(1.2rem, 3vw, 2.6rem);
+    align-items: center;
+    margin: clamp(1.6rem, 4vw, 2.6rem) 0 clamp(2.4rem, 6vw, 4rem);
+    padding: clamp(1.2rem, 3vw, 2rem);
+    background: linear-gradient(160deg, var(--surface) 0%, var(--ground-deep) 100%);
+    border: 1px solid var(--line);
+    border-radius: 3px;
+}
+@media (max-width: 700px) { .thesis { grid-template-columns: 1fr; } }
+
+#stage {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    display: block;
+    border-radius: 2px;
+    background: #04101f;
+}
+
+.thesis blockquote {
+    margin: 0;
+    font-size: clamp(1.15rem, 0.95rem + 1vw, 1.6rem);
+    line-height: 1.42;
+    font-weight: 200;
+    color: #eef4fd;
+    text-wrap: balance;
+}
+.thesis blockquote strong { font-weight: 600; }
+.thesis .after {
+    margin-top: 1.1rem;
+    color: var(--ink-dim);
+    font-size: 1.06rem;
+    max-width: 54ch;
+}
+
+/* ---------- section frame ---------- */
+section { margin-top: clamp(2.6rem, 6vw, 4.4rem); }
+
+.head {
+    display: flex;
+    align-items: baseline;
+    gap: 0.9rem;
+    padding-bottom: 0.7rem;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 1.5rem;
+}
+.head .n {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.84rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: var(--cyan);
+}
+.head .note { margin-left: auto; font-size: 0.9rem; color: var(--ink-faint); }
+
+.prose { max-width: 66ch; color: var(--ink-dim); display: grid; gap: 0.85rem; }
+.prose strong { color: #eaf2fd; }
+
+/* ---------- the arc ---------- */
+.arc {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    align-items: stretch;
+    margin-bottom: 1.5rem;
+}
+.arc span {
+    flex: 1 1 auto;
+    min-width: 92px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.76rem;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    text-align: center;
+    padding: 0.85rem 0.5rem;
+    background: var(--surface);
+    border: 1px solid var(--line-soft);
+    border-top: 2px solid var(--stop, var(--line));
+    color: var(--ink-dim);
+    text-wrap: balance;
+    line-height: 1.4;
+}
+.arc span.key { color: #eef4fd; background: var(--surface-2); }
+
+/* ---------- timeline ---------- */
+.timeline {
+    display: flex;
+    width: 100%;
+    height: 54px;
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-bottom: 0.7rem;
+}
+.timeline i {
+    position: relative;
+    display: block;
+    border-right: 1px solid var(--ground-deep);
+    background: var(--lambda);
+    font-style: normal;
+    transition: background 0.15s;
+}
+.timeline i:last-child { border-right: 0; }
+.timeline i.core { background: var(--phi); }
+.timeline i.cut  { background: var(--red); }
+.timeline i::after {
+    content: attr(data-n);
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.74rem;
+    font-weight: 700;
+    color: #1a1305;
+}
+.timeline i.core::after { color: #0d1a06; }
+.timeline i.cut::after  { color: #ffdcd7; font-weight: 700; }
+
+.legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.4rem;
+    font-size: 0.87rem;
+    color: var(--ink-faint);
+}
+.legend b { font-weight: 400; color: var(--ink-dim); }
+.legend span { display: inline-flex; align-items: center; gap: 0.42rem; }
+.legend s { width: 11px; height: 11px; border-radius: 2px; text-decoration: none; display: inline-block; }
+
+/* ---------- scenes ---------- */
+.scenes { display: grid; gap: 0.7rem; }
+
+.scene {
+    display: grid;
+    grid-template-columns: 3.6rem minmax(0, 1fr);
+    gap: 0 1.1rem;
+    padding: 1.4rem 1.55rem 1.5rem;
+    background: var(--surface);
+    border: 1px solid var(--line-soft);
+    border-left: 2px solid var(--lambda);
+    border-radius: 2px;
+}
+.scene.core { border-left-color: var(--phi); background: linear-gradient(90deg, #16240f 0%, var(--surface) 34%); }
+.scene.cut  { border-left-color: var(--red); }
+
+.scene .idx {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--lambda);
+    font-variant-numeric: tabular-nums;
+    padding-top: 0.1rem;
+}
+.scene.core .idx { color: var(--phi); }
+.scene.cut .idx  { color: #c9503f; }
+
+.scene .top {
+    display: flex;
+    align-items: baseline;
+    gap: 0.8rem;
+    flex-wrap: wrap;
+    margin-bottom: 0.7rem;
+}
+.scene h3 { font-size: 1.16rem; font-weight: 700; letter-spacing: 0.01em; color: #f0f6ff; }
+
+.tag {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.68rem;
+    font-weight: 500;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    padding: 0.2rem 0.45rem;
+    border-radius: 2px;
+    border: 1px solid;
+}
+.tag.core { color: #0d1a06; border-color: var(--phi); background: var(--phi); }
+.tag.cut  { color: #ffdcd7; border-color: var(--red); background: var(--red); }
+
+.secs {
+    margin-left: auto;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: var(--ink-faint);
+    font-variant-numeric: tabular-nums;
+}
+
+.body {
+    display: grid;
+    grid-template-columns: minmax(0, 1.08fr) minmax(0, 1fr);
+    gap: 0.6rem 1.6rem;
+}
+@media (max-width: 720px) { .body { grid-template-columns: 1fr; gap: 1rem; } }
+
+.body > div { display: grid; gap: 0.34rem; align-content: start; }
+.body h4 {
+    margin: 0;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.84rem;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+}
+.body p { font-size: 1.06rem; line-height: 1.66; color: var(--ink-dim); }
+.body .aha { border-left: 1px solid var(--line); padding-left: 1.6rem; }
+@media (max-width: 720px) { .body .aha { border-left: 0; padding-left: 0; border-top: 1px solid var(--line); padding-top: 0.9rem; } }
+.body .aha p { color: var(--ink); }
+
+/* what Solita actually says - generated from narration.mjs, never hand-edited */
+.say {
+    margin-top: 1.1rem;
+    padding: 0.95rem 1.2rem;
+    background: #0a1830;
+    border: 1px solid var(--line-soft);
+    border-left: 2px solid var(--cyan);
+    border-radius: 2px;
+}
+.say h4 {
+    margin: 0 0 0.45rem;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.64rem;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--cyan);
+}
+.say p {
+    margin: 0;
+    font-size: 1.06rem;
+    line-height: 1.62;
+    color: var(--ink);
+}
+.say .pause {
+    display: inline-block;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.66rem;
+    font-weight: 500;
+    color: var(--lambda);
+    background: #241c07;
+    border: 1px solid #4a3a15;
+    border-radius: 2px;
+    padding: 0.05rem 0.4rem;
+    margin: 0 0.22rem;
+    vertical-align: 0.08em;
+    white-space: nowrap;
+}
+.say .beat {
+    display: inline-block;
+    width: 0.5em;
+    height: 0.5em;
+    margin: 0 0.1em;
+    background: radial-gradient(circle, var(--cyan) 1.6px, transparent 1.8px);
+    vertical-align: 0.05em;
+    opacity: 0.55;
+}
+.say .spell {
+    border-bottom: 1px dotted var(--ink-faint);
+    letter-spacing: 0.12em;
+}
+
+/* ---------- rules / lists ---------- */
+.rules { display: grid; gap: 0.6rem; counter-reset: r; max-width: 74ch; }
+/* the number is positioned, not a grid cell - as a grid item the bare text
+   after the bold lead-in became its own item and fell into the 1.8rem column */
+.rules li {
+    list-style: none;
+    position: relative;
+    padding-left: 2.8rem;
+    font-size: 1.05rem;
+    color: var(--ink-dim);
+}
+.rules li::before {
+    counter-increment: r;
+    content: counter(r, decimal-leading-zero);
+    position: absolute;
+    left: 0;
+    top: 0.28rem;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.84rem;
+    font-weight: 500;
+    color: var(--violet);
+}
+.rules { padding: 0; margin: 0; }
+
+.notes { display: grid; gap: 0.75rem; max-width: 74ch; padding: 0; margin: 0; }
+.notes li {
+    list-style: none;
+    font-size: 1.05rem;
+    color: var(--ink-dim);
+    padding-left: 1.1rem;
+    border-left: 1px solid var(--line);
+}
+.notes strong { color: #eaf2fd; }
+
+code {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 0.85em;
+    color: var(--cyan);
+    background: #0a1a33;
+    border: 1px solid var(--line-soft);
+    border-radius: 2px;
+    padding: 0.06em 0.34em;
+}
+
+/* ---------- budget ---------- */
+.budget {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1px;
+    background: var(--line-soft);
+    border: 1px solid var(--line-soft);
+    border-radius: 2px;
+    margin-bottom: 1.5rem;
+}
+.budget div { background: var(--surface); padding: 1rem 1.1rem; display: grid; gap: 0.28rem; }
+.budget dt {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.74rem;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+}
+.budget dd {
+    margin: 0;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--cyan);
+    font-variant-numeric: tabular-nums;
+}
+.budget dd small { display: block; font-family: 'Outfit', sans-serif; font-size: 0.78rem; font-weight: 300; color: var(--ink-faint); letter-spacing: 0; margin-top: 0.2rem; }
+
+.solved { color: var(--phi); }
+
+/* ---------- footer ---------- */
+footer {
+    margin-top: clamp(2.6rem, 6vw, 4.4rem);
+    padding-top: 1.6rem;
+    border-top: 1px solid var(--line);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem 2rem;
+    align-items: baseline;
+}
+footer p { font-size: 1.05rem; color: var(--ink-dim); max-width: 58ch; }
+footer .sig { margin-left: auto; }
+
+@media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+    <p class="eyebrow">Doc Alvers Mathe-Labor · Videopipeline</p>
+    <h1>Vier Zahlen, eine Form</h1>
+    <p class="lede">Der Plot für das Kovarianz-Demovideo: was passiert, in welcher
+        Reihenfolge — und warum genau dort der Groschen fällt.</p>
+    <p class="status">Plot freigegeben · Sprechertext geschrieben</p>
+
+    <dl class="meta">
+        <div><dt>Lab</dt><dd><a href="https://docalvers.de/kovarianz.html">kovarianz.html</a></dd></div>
+        <div><dt>Sprecherin</dt><dd>Solita · de-DE-Studio</dd></div>
+        <div><dt>Aufnahme</dt><dd>1440p · Playwright</dd></div>
+        <div><dt>Szenen</dt><dd>14</dd></div>
+        <div><dt>Laufzeit</dt><dd>~6:30</dd></div>
+    </dl>
+</header>
+
+<div class="thesis">
+    <canvas id="stage" width="600" height="600" role="img"
+            aria-label="Eine Punktwolke, die zwischen Kreis und schräger Ellipse
+                        wechselt, mit ihren beiden Hauptachsen"></canvas>
+    <div>
+        <blockquote>Der Mittelwert sagt, <em>wo</em> eine Wolke ist.
+            Die Kovarianz sagt, welche <strong>Form</strong> sie hat — und diese
+            Form ist eine Ellipse, die man anfassen kann.</blockquote>
+        <p class="after">Der ganze Film ist die Antwort auf eine einzige Frage:
+            <em>Was sind diese vier Zahlen eigentlich?</em> Sie sind kein
+            Zahlenkasten. Sie sind eine Ellipse.</p>
+    </div>
+</div>
+
+<section>
+    <div class="head"><span class="n">A</span><h2>Der dramaturgische Bogen</h2></div>
+    <div class="arc" id="arc"></div>
+    <div class="prose">
+        <p>Erst bauen wir die Ellipse auf (Szene 2–6), dann drehen wir sie um und
+           lesen sie zurück (7–8), dann brechen wir sie absichtlich (9–13).
+           <strong>Kaputtmachen ist der lehrreichste Teil</strong> — und der ehrlichste.</p>
+    </div>
+</section>
+
+<section>
+    <div class="head"><span class="n">B</span><h2>Die 14 Szenen</h2>
+        <span class="note" id="tl-note">Breite = Sprechzeit</span></div>
+    <div class="timeline" id="timeline"></div>
+    <div class="legend">
+        <span><s style="background:#799e31"></s><b>Kernszene — wird nicht gekürzt</b></span>
+        <span><s style="background:#b02418"></s><b>Notbremse, falls der Schnitt zäh wirkt</b></span>
+        <span><s style="background:#f5c242"></s><b>Regelszene</b></span>
+    </div>
+    <div class="scenes" id="scenes" style="margin-top:1.5rem"></div>
+</section>
+
+<section>
+    <div class="head"><span class="n">C</span><h2>Didaktische Leitplanken</h2>
+        <span class="note">bindend für den Sprechertext</span></div>
+    <ol class="rules">
+        <li><strong>Nie eine Formel ohne vorher gezeigtes Bild.</strong> Erst sieht
+            man es, dann heißt es so.</li>
+        <li><strong>Ein neuer Begriff pro Szene.</strong> Maximal. Lieber eine Szene mehr.</li>
+        <li>Verboten ohne Anschauung: <em>Erwartungswert, Zufallsvektor, positiv
+            semidefinit, Spektralsatz</em>. Erlaubt, weil im Bild verankert:
+            <em>Varianz, Eigenvektor, singulär</em>.</li>
+        <li><strong>Zahlen vorlesen, wenn sie springen.</strong> Das Panel rechts ist
+            der zweite Hauptdarsteller — jede Behauptung wird dort sofort belegt.</li>
+        <li><strong>Nichts behaupten, was das Bild nicht hergibt.</strong> Szene 11 und
+            13 sind genau dafür da.</li>
+    </ol>
+</section>
+
+<section>
+    <div class="head"><span class="n">D</span><h2>Zeitbudget</h2>
+        <span class="note solved">gelöst</span></div>
+    <dl class="budget" id="budget"></dl>
+    <div class="prose">
+        <p>Gegen ein 360-Sekunden-Musikbett war das ein Problem — ist es nicht mehr.
+           Teil 1 von <code>Infinity_6min.m4a</code> ist <strong>nahtlos loopbar</strong>:
+           loopStart 21,220 s, loopEnd 163,998 s, 50 ms Crossfade. Der Sprung an der
+           Naht liegt damit im 96. Perzentil der normalen Sample-Schritte — also
+           innerhalb dessen, was das Signal ohnehin dauernd tut. Das Bett lässt sich
+           auf jede Länge rendern.</p>
+        <p><strong>Konsequenz: keine Szene wird gekürzt.</strong> Die beiden roten
+           Marken bleiben nur als Notbremse stehen.</p>
+        <p>Bett für die Vertonung: Intro 0–21,220 s einmal, dann den Body so oft wie
+           nötig, am Schluss über die letzten ~8 s ausblenden.</p>
+    </div>
+</section>
+
+<section>
+    <div class="head"><span class="n">E</span><h2>Choreografie-Notizen</h2>
+        <span class="note">für die Aufnahme</span></div>
+    <ul class="notes">
+        <li><strong>Startzustand fixieren:</strong> <code>resetAll()</code>,
+            <code>dist = gauss</code>, <code>n = 4000</code>, Kreis, Achsen und
+            Basisvektoren an, Parallelen und Warp aus, Zoom 1. Das Lab merkt sich
+            seinen Zustand in <code>localStorage</code> unter
+            <code>kovarianz-state</code> — <strong>vor jeder Aufnahme löschen</strong>.</li>
+        <li>Jeder Zahlenwechsel braucht <strong>0,6 s Nachlauf</strong>, sonst liest
+            Solita gegen ein Panel an, das noch den alten Wert zeigt.</li>
+        <li>Szene 6 (an der Ellipse ziehen) und Szene 8 (Rotation) sind maus- und
+            timing-kritisch — <strong>als erstes proben</strong>.</li>
+        <li>Szene 13: Warp erst <strong>nach</strong> dem Einblenden der Parallelen
+            einschalten. Sonst sieht man die Wellen nicht entstehen, sondern nur da sein.</li>
+    </ul>
+</section>
+
+<section>
+    <div class="head"><span class="n">F</span><h2>Bewusst weggelassen</h2>
+        <span class="note">Kandidaten für Teil 2</span></div>
+    <div class="prose">
+        <p>Basisvektoren (V) als eigene Szene · Shift- und Alt-Schrittweiten ·
+           der Punktzahl-Regler von 200 bis 20 000 als Rauschen-Demo · Zoom und
+           Bühnen-Verschieben · die dritte Zeile der homogenen Matrix als
+           projektive Abbildung.</p>
+    </div>
+</section>
+
+<footer>
+    <p><strong>Nächster Schritt:</strong> Solitas Worte stehen in
+       <code>videopipeline/kovarianz/narration.mjs</code> — 14 Szenen, alle als SSML,
+       mit Pausen genau dort, wo die Aktion im Bild läuft. Danach
+       <code>run1</code> zum Vertonen, dann Aufnahme und Schnitt.</p>
+    <p class="eyebrow sig">Doc Alvers Mathe-Labor</p>
+</footer>
+
+</div>
+
+<script>
+/* ---------------------------------------------------------------
+   One source of truth: the scene list feeds both the timeline and
+   the cards below it.
+   --------------------------------------------------------------- */
+const SCENES = [
+    { n: 1, s: 30, t: 'Motivation: die Wolke hat eine Form',
+      img: 'Kalter Start: 4000 normalverteilte Punkte, <span class="m">A</span> = Einheit, Kreis und Ellipse deckungsgleich. Die Kamera steht still.',
+      aha: 'Für das <em>Wo</em> haben wir ein Wort — Mittelwert. Für das <em>Wie geformt</em> auch: Kovarianz. Vier Zahlen. Und diese vier Zahlen sind eine Ellipse.' },
+
+    { n: 2, s: 25, t: 'Der langweilige Fall',
+      img: 'Das <span class="m">Σ</span>-Panel blendet auf: <span class="m">σxx</span> ≈ <span class="m">σyy</span>, <strong><span class="m">σxy</span> ≈ 0</strong>, <span class="m">ρ</span> ≈ 0, <span class="m">φ</span> = 0°. Die Live-Notiz sagt selbst „unkorreliert".',
+      aha: 'Solange nichts passiert, ist <span class="m">Σ</span> eine Diagonale — und die Ellipse ein Kreis. Das ist der Nullpunkt, gegen den wir alles messen.' },
+
+    { n: 3, s: 30, t: 'Dehnen — und die Überraschung',
+      img: 'Zelle <span class="m">a₁₁</span> von 1,00 auf 2,00 ziehen. Die Wolke wird breit. <strong><span class="m">σxx</span> springt auf das Vierfache</strong>, <span class="m">σyy</span> rührt sich nicht.',
+      aha: 'Länge mal zwei → Varianz mal <strong>vier</strong>. Weil Varianz ein <em>Quadrat</em> ist. Die erste echte Einsicht, und sie kostet nichts.' },
+
+    { n: 4, s: 35, t: 'Kippen — die Nebendiagonale wacht auf',
+      img: 'Ctrl + drücken: nur die Nebendiagonale wächst. Die Wolke legt sich schräg. <strong><span class="m">σxy</span> verlässt die Null</strong>, <span class="m">ρ</span> läuft mit. Die Notiz wechselt auf „die Wolke ist gekippt".',
+      aha: '<span class="m">σxy</span> ist kein viertes exotisches Ding. <span class="m">σxy</span> <strong>ist</strong> die Schräglage. Das Vorzeichen ist die Richtung.' },
+
+    { n: 5, s: 30, t: 'ρ: die Schräglage ohne Einheiten', cut: true,
+      img: 'Weiter kippen bis <span class="m">ρ</span> → 0,9…, dann zurück auf 0. Nur der <span class="m">ρ</span>-Wert im Fokus.',
+      aha: '<span class="m">σxy</span> hängt an Metern und Kilos, <span class="m">ρ</span> nicht — <span class="m">ρ</span> liegt immer zwischen −1 und +1. Und <span class="m">ρ</span> = ±1 heißt: die Wolke ist zur Linie geworden.' },
+
+    { n: 6, s: 40, t: 'Die Ellipse <em>ist</em> die Matrix', core: true,
+      img: 'Kreis (C) klar sichtbar: weiß = die Wolke, <strong>bevor</strong> <span class="m">A</span> sie anfasst, cyan = ihr Bild. Dann mit der Maus <strong>an der Ellipse ziehen</strong> — <span class="m">A</span> wird direkt geformt, die Matrixzellen laufen mit. Oben blendet <span class="m">Σ = A Σ₀ Aᵀ</span> ein.',
+      aha: 'Man kann eine Matrix anfassen. Und das <span class="m">Aᵀ</span> ist kein Zierrat: <span class="m">A</span> wirkt <strong>zweimal</strong>, weil Varianz das Produkt zweier Abweichungen ist. Daher das Sandwich.' },
+
+    { n: 7, s: 40, t: 'Die Ellipse hat eigene Achsen — das ist PCA', core: true,
+      img: 'K einschalten: zwei Achsen erscheinen, <span class="m l">√λ₁</span> orange und <span class="m g">√λ₂</span> grün. Sie liegen <strong>nicht</strong> auf x und y, sondern <em>in</em> der Wolke. <span class="m">φ</span> zeigt den Winkel.',
+      aha: 'Die Wolke bringt ihr eigenes Koordinatensystem mit. Das sind die Eigenvektoren von <span class="m">Σ</span> — und genau das ist die Hauptkomponentenanalyse, mit der die halbe Datenanalyse anfängt.' },
+
+    { n: 8, s: 30, t: 'Drehen: die Zahlen lügen, die Achsen nicht', core: true,
+      img: 'T mehrfach, langsame Rotation. <span class="m">σxx</span>, <span class="m">σyy</span>, <span class="m">σxy</span> <strong>tanzen</strong>. <span class="m l">√λ₁</span> und <span class="m g">√λ₂</span> stehen <strong>still</strong>, nur <span class="m">φ</span> läuft mit. Auch <span class="m">σxx + σyy</span> bleibt konstant.',
+      aha: 'Der stärkste Moment des Films: <span class="m">σxx</span> und <span class="m">σyy</span> hängen davon ab, <strong>wie ich mein Lineal halte</strong>. Die Eigenwerte nicht. Die Einträge sind der Blickwinkel — <span class="m l">λ</span> ist die Wahrheit.' },
+
+    { n: 9, s: 35, t: 'det A = 0 — die Wolke stirbt',
+      img: 'Eine Zeile proportional zur anderen ziehen, <span class="m">det A</span> → 0,00. Die Ellipse kollabiert zur <strong>Strecke</strong>, <span class="m g">√λ₂</span> → 0, <span class="m">ρ</span> → ±1. Notiz: „<span class="m">Σ</span> wird singulär".',
+      aha: 'Zwei Zahlen, aber nur eine Information. Das ist, was <em>singulär</em> heißt — und warum Kollinearität in echten Daten gefürchtet ist.' },
+
+    { n: 10, s: 25, t: 'Verschieben ändert Σ nicht',
+      img: 'H drücken (homogene Koordinaten, 3×3), dann die Translationsspalte bewegen. Die ganze Wolke wandert über die Bühne — <strong>das <span class="m">Σ</span>-Panel steht Ziffer für Ziffer still</strong>.',
+      aha: 'Kovarianz interessiert sich ausschließlich für Abweichungen <em>vom Mittelwert</em>. Wo die Wolke steht, ist ihr egal. Das <span class="m">(x − x̄)</span> in der Formel wird hier zum Bild.' },
+
+    { n: 11, s: 25, t: 'Ehrlichkeitsszene: dieselbe Ellipse, andere Wolke',
+      img: 'E drücken: Gauß → Gleichverteilung. Aus der Wolke wird ein Parallelogramm. <span class="m">Σ</span> und die Hauptachsen bleiben praktisch stehen.',
+      aha: '<span class="m">Σ</span> ist eine <strong>Zusammenfassung, kein Foto</strong>. Zwei völlig verschiedene Wolken können dieselbe Kovarianz haben. Wird meistens verschwiegen — hier nicht.' },
+
+    { n: 12, s: 25, t: 'Warum „linear" das entscheidende Wort ist', cut: true,
+      img: 'P einschalten: vier Geraden <span class="m">x = ±100</span>, <span class="m">y = ±100</span>. <span class="m">A</span> beliebig verbiegen — <strong>gerade bleibt gerade, parallel bleibt parallel</strong>.',
+      aha: 'Die Definition von <em>linear</em>, zum Anfassen. Und die stillschweigende Voraussetzung für alles bisher Gesagte.' },
+
+    { n: 13, s: 35, t: 'Raum verbiegen — wo Σ aufhört zu gelten', core: true,
+      img: 'W einschalten. Die Parallelen werden <strong>Wellen</strong>, die Wolke bekommt eine Beule, die Ellipse passt sichtbar nicht mehr — sie ist immer noch die beste Ellipse, und sie ist trotzdem falsch.',
+      aha: 'Die Kovarianz ist eine <strong>lineare Brille</strong>. In einer krummen Welt sieht sie zuverlässig das Falsche. Sie ist nicht kaputt — sie ist ein Ellipsen-Modell. Genau deshalb gibt es nichtlineare Verfahren.' },
+
+    { n: 14, s: 20, t: 'Finale',
+      img: 'Warp aus, R für zurück, dann drei-, viermal Leertaste: die Ellipse tanzt durch Zufallsmatrizen, die Zahlen fliegen mit. Standbild, Branding, Fade.',
+      aha: 'Rückruf auf Szene 1: vier Zahlen — eine Form. Und die kann man selbst in die Hand nehmen.' }
+];
+
+/* SAY:START - generated by videopipeline/kovarianz/sync-drehbuch.mjs, do not edit */
+const SAY = {
+    s1: 'Das hier sind viertausend Messungen. Irgendetwas gegen irgendetwas — Größe und Gewicht, Temperatur und Druck, such dir etwas aus. Wo diese Wolke liegt, dafür haben wir ein Wort: Mittelwert. Aber sieh sie dir an.<span class="beat"></span> Sie liegt nicht nur irgendwo. Sie hat eine Form. Und für diese Form gibt es auch ein Wort. Es heißt Kovarianz, es klingt nach Formelsammlung, und am Ende sind es vier Zahlen. Vier Zahlen, die eine Ellipse sind.',
+    s2: 'Da stehen sie, rechts. Sigma x x und Sigma y y sind fast gleich groß. Sigma x y ist null. Und das Labor schreibt selbst dazu, was das bedeutet: unkorreliert. Genau das heißt rund. Der weiße Kreis und die blaue Ellipse liegen exakt aufeinander, weil noch nichts passiert ist. Das ist unser Nullpunkt. Von hier aus messen wir alles Weitere.',
+    s3: 'Ich fasse eine einzige Zahl an: die linke obere. Von eins auf zwei. Nur x, nur breiter. <span class="pause">1,3 s</span> Und jetzt pass auf, was rechts passiert. <span class="pause">0,9 s</span> Sigma x x wird nicht doppelt so groß. Es wird <span class="beat"></span>viermal so groß. Sigma y y rührt sich nicht. Doppelte Länge, vierfache Varianz — weil Varianz ein Quadrat ist. Das ist die erste Einsicht, und sie kostet nichts.',
+    s4: 'Jetzt die andere Ecke der Matrix, die Nebendiagonale. Die Wolke legt sich schräg. <span class="pause">1,1 s</span> Und Sigma x y, das die ganze Zeit auf null stand, wird lebendig.<span class="beat"></span> Hier steigen die meisten aus: Was soll dieses vierte Ding? Die Antwort ist: Es ist gar kein viertes Ding. Sigma x y<span class="beat"></span> ist die Schräglage. Sonst nichts. Kippt die Wolke nach rechts oben, ist es positiv. Nach links oben, negativ. Steht sie gerade, ist es null.',
+    s5: 'Ein Problem hat Sigma x y noch: Es hängt an den Einheiten. Messe ich in Metern statt in Zentimetern, ändert sich die Zahl — obwohl die Wolke genauso aussieht wie vorher. Deshalb steht Rho darunter. Rho ist dieselbe Schräglage, nur sauber normiert: Es liegt immer zwischen minus eins und plus eins. Ich kippe weiter. <span class="pause">0,9 s</span> Null Komma neun. Und zurück auf null. Merk dir den Fall Rho gleich eins. Darauf kommen wir zurück.',
+    s6: 'Und jetzt der wichtigste Moment. Der weiße Kreis ist die Wolke,<span class="beat"></span> bevor A sie anfasst. Die blaue Ellipse ist ihr Bild danach. Und ich kann diese Ellipse direkt anfassen — ich ziehe an ihr, und die Matrix rechnet sich selbst dazu aus. <span class="pause">2,6 s</span> Oben steht, was dabei passiert: Sigma gleich A mal Sigma null mal A transponiert. Das A steht zweimal da, und das ist kein Schönheitsfehler. Varianz ist immer ein Produkt aus zwei Abweichungen. Zweimal Abweichung, also zweimal A.',
+    s7: 'Ich schalte noch etwas ein. Zwei Achsen erscheinen, eine orange und eine grüne. <span class="pause">0,9 s</span> Und sieh, wo sie liegen: nicht auf x und nicht auf y. Sie liegen in der Wolke drin, entlang ihrer eigenen Richtungen. Die orange zeigt dorthin, wo die Wolke am weitesten streut. Die grüne steht senkrecht darauf. Diese beiden Richtungen heißen Eigenvektoren, und ihre Längen stehen rechts: Wurzel Lambda eins und Wurzel Lambda zwei.<span class="beat"></span> Wer schon einmal von Hauptkomponentenanalyse gehört hat, von <span class="spell">PCA</span>: Das ist sie. Genau das. Mehr ist es nicht.',
+    s8: 'Und jetzt wird es schön. Ich drehe die Wolke, sonst ändere ich nichts. Sieh dir die Zahlen an: <span class="pause">0,8 s</span> Sigma x x, Sigma y y und Sigma x y tanzen wild durcheinander. Und zwei Zeilen darunter, Wurzel Lambda eins und Wurzel Lambda zwei: <span class="beat"></span>unbewegt.<span class="beat"></span> Die oberen drei Zahlen hängen davon ab, wie ich mein Lineal halte. Die unteren beiden nicht. Deshalb sind die Eigenwerte die Wahrheit über die Form. Die Einträge sind nur der Blickwinkel.',
+    s9: 'Ab hier machen wir etwas kaputt. Ich mache die zweite Zeile der Matrix zu einem Vielfachen der ersten. Die Determinante geht gegen null. Und die Ellipse<span class="beat"></span> stirbt. Sie fällt auf eine Strecke zusammen. Die kleine Achse ist weg, Wurzel Lambda zwei ist null — und Rho ist plus eins, wie angekündigt. Die Wolke hat noch zwei Koordinaten, aber nur noch eine Information. Genau das meint das Wort singulär. In echten Daten heißt derselbe Effekt Kollinearität, und er ist gefürchtet.',
+    s10: 'Etwas Beruhigendes zwischendurch. Ich schiebe die ganze Wolke über die Bühne, weit weg vom Ursprung. Und das Panel rechts? <span class="pause">1,2 s</span> Steht still. Ziffer für Ziffer. Der Kovarianz ist völlig gleichgültig, wo die Wolke liegt. Sie schaut nur auf die Abweichungen vom Mittelwert. Genau deshalb steht in der Formel x minus x quer.',
+    s11: 'Und jetzt etwas, das meistens verschwiegen wird. Ich tausche die Verteilung aus: Aus der Gauß-Wolke wird eine gleichmäßig gefüllte Fläche. Ein Parallelogramm statt einer Wolke — ein völlig anderes Bild. Und Sigma?<span class="beat"></span> Bleibt fast stehen. Die Kovarianz ist eine Zusammenfassung, kein Foto. Zwei ganz verschiedene Daten können dieselben vier Zahlen haben.',
+    s12: 'Ein Wort fehlt noch, und es ist das entscheidende. Ich blende vier Geraden ein und verbiege A, wie ich will. <span class="pause">2,0 s</span> Die Geraden bleiben Geraden. Parallelen bleiben parallel. Das — und nichts anderes — heißt linear. Es ist die stille Voraussetzung unter allem, was wir bisher gemacht haben.',
+    s13: 'Und deshalb zum Schluss die ehrlichste Szene von allen. Ich verbiege den Raum selbst. <span class="pause">1,2 s</span> Die Geraden werden Wellen, die Wolke bekommt eine Beule. Und die Ellipse? <span class="pause">0,7 s</span> Sie ist immer noch da. Sie ist sogar immer noch die bestmögliche Ellipse. Sie ist trotzdem falsch. Die Kovarianz ist eine lineare Brille. In einer krummen Welt sieht sie zuverlässig das Falsche — nicht weil sie kaputt wäre, sondern weil sie auf jede Frage eine Ellipse antwortet. Und genau dafür gibt es die nichtlinearen Verfahren.',
+    s14: 'Zurück auf Anfang.<span class="beat"></span> Zufallsmatrix. <span class="pause">0,9 s</span> Noch eine. <span class="pause">0,9 s</span> Und noch eine. <span class="pause">0,9 s</span> Die Ellipse tanzt, die Zahlen fliegen mit. <span class="pause">0,9 s</span> Vier Zahlen, eine Form. Jetzt nimm sie selbst in die Hand.'
+};
+const SPOKEN = {"s1":23.928,"s2":19.92,"s3":22.008,"s4":24.216,"s5":23.64,"s6":28.776,"s7":31.368,"s8":27.456,"s9":28.56,"s10":18.888,"s11":20.544,"s12":17.952,"s13":30.648,"s14":13.704};
+/* SAY:END */
+
+const ARC = [
+    { t: 'rund',                  c: '#93a8c6' },
+    { t: 'gedehnt',               c: '#93a8c6' },
+    { t: 'gekippt',               c: '#93a8c6' },
+    { t: 'die Ellipse<br>IST die Matrix', c: '#00d2ff', key: true },
+    { t: 'ihre eigenen<br>Achsen · PCA',  c: '#f5c242', key: true },
+    { t: 'Grenzfälle',            c: '#c07fe8' },
+    { t: 'wo sie versagt',        c: '#b02418', key: true }
+];
+
+/* --- the arc --- */
+document.getElementById('arc').innerHTML = ARC.map(a =>
+    `<span class="${a.key ? 'key' : ''}" style="--stop:${a.c}">${a.t}</span>`).join('');
+
+/* --- timeline: each scene as wide as it is long --- */
+const secs = (x) => SPOKEN['s' + x.n] ?? x.s;
+const total = SCENES.reduce((s, x) => s + secs(x), 0);
+document.getElementById('timeline').innerHTML = SCENES.map(x =>
+    `<i class="${x.core ? 'core' : x.cut ? 'cut' : ''}" data-n="${x.n}"
+        style="flex:0 0 ${(secs(x) / total * 100).toFixed(3)}%"
+        title="Szene ${x.n} · ${secs(x).toFixed(1)} s"></i>`).join('');
+
+/* --- budget, from the measured durations when they exist --- */
+(function () {
+    const spoken = Object.values(SPOKEN).reduce((a, b) => a + b, 0);
+    const planned = SCENES.reduce((a, x) => a + x.s, 0);
+    const air = SCENES.length * 1.6;
+    const film = (spoken || planned) + air;
+    const mmss = (t) => Math.floor(t / 60) + ':' + String(Math.round(t % 60)).padStart(2, '0');
+    const cell = (dt, dd, sub) => `<div><dt>${dt}</dt><dd>${dd}<small>${sub}</small></dd></div>`;
+    document.getElementById('budget').innerHTML =
+        cell('Sprache', (spoken || planned).toFixed(0) + ' s',
+             spoken ? 'gemessen · 14 Szenen' : 'geplant · 14 Szenen') +
+        cell('Luft', '~' + air.toFixed(0) + ' s', '1,6 s je Szene') +
+        cell('Film', mmss(film), spoken ? 'nach der Vertonung' : 'geschätzt') +
+        cell('Bett-Loop', '142,778 s', '64 Takte · 107,58 BPM');
+    if (spoken) {
+        const n = document.getElementById('tl-note');
+        if (n) n.textContent = 'Breite = gemessene Sprechzeit';
+    }
+})();
+
+/* --- scene cards --- */
+document.getElementById('scenes').innerHTML = SCENES.map(x => `
+    <article class="scene ${x.core ? 'core' : x.cut ? 'cut' : ''}">
+        <div class="idx">${String(x.n).padStart(2, '0')}</div>
+        <div>
+            <div class="top">
+                <h3>${x.t}</h3>
+                ${x.core ? '<span class="tag core">Kernszene</span>' : ''}
+                ${x.cut ? '<span class="tag cut">Notbremse</span>' : ''}
+                <span class="secs">${secs(x).toFixed(1)} s</span>
+            </div>
+            <div class="body">
+                <div><h4>Was im Bild passiert</h4><p>${x.img}</p></div>
+                <div class="aha"><h4>Der Aha</h4><p>${x.aha}</p></div>
+            </div>
+            ${SAY['s' + x.n] ? `<div class="say"><h4>Solita sagt</h4><p>${SAY['s' + x.n]}</p></div>` : ''}
+        </div>
+    </article>`).join('');
+
+/* ---------------------------------------------------------------
+   Hero: the film's own subject. A gaussian cloud under a slowly
+   morphing map A - circle, image ellipse, and the two principal
+   axes read straight off the covariance of the drawn points.
+   --------------------------------------------------------------- */
+(function () {
+    const cv = document.getElementById('stage');
+    if (!cv) return;
+    const ctx = cv.getContext('2d');
+    const N = 1400;
+
+    // Box-Muller, same as the lab
+    function gauss() {
+        let u = 0, v = 0;
+        while (u === 0) u = Math.random();
+        while (v === 0) v = Math.random();
+        return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+    }
+    // unit circle, and a cloud whose sigma is that same radius - as in the lab
+    const pts = Array.from({ length: N }, () => [gauss(), gauss()]);
+    const circle = Array.from({ length: 220 }, (_, i) => {
+        const p = 2 * Math.PI * i / 220;
+        return [Math.cos(p), Math.sin(p)];
+    });
+
+    const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let t0 = null;
+
+    // keep the drawing crisp on retina
+    function fit() {
+        const r = cv.getBoundingClientRect();
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        cv.width = Math.max(1, Math.round(r.width * dpr));
+        cv.height = Math.max(1, Math.round(r.height * dpr));
+    }
+    fit();
+    addEventListener('resize', fit, { passive: true });
+
+    function frame(ts) {
+        if (t0 === null) t0 = ts;
+        // one slow breath: identity -> stretched and sheared -> back
+        const u = still ? 0.62 : (1 - Math.cos((ts - t0) / 7000)) / 2;
+        const a = [[1 + 1.15 * u, 0.62 * u], [0.30 * u, 1 - 0.42 * u]];
+
+        const W = cv.width, H = cv.height;
+        const SC = Math.min(W, H) * 0.15;   // unit circle at 15 % of the stage
+        const px = SC / 90;                 // line weights scale with the stage
+        const cx = W / 2, cy = H / 2;
+        const map = p => [a[0][0] * p[0] + a[0][1] * p[1], a[1][0] * p[0] + a[1][1] * p[1]];
+        const scr = p => [cx + p[0] * SC, cy - p[1] * SC];
+
+        ctx.clearRect(0, 0, W, H);
+        ctx.fillStyle = '#04101f';
+        ctx.fillRect(0, 0, W, H);
+
+        // axes
+        ctx.strokeStyle = 'rgba(255,255,255,0.10)';
+        ctx.lineWidth = 1.5 * px;
+        ctx.beginPath();
+        ctx.moveTo(0, cy); ctx.lineTo(W, cy);
+        ctx.moveTo(cx, 0); ctx.lineTo(cx, H);
+        ctx.stroke();
+
+        // the source circle - the cloud before A touches it
+        ctx.strokeStyle = 'rgba(255,255,255,0.26)';
+        ctx.lineWidth = 2 * px;
+        ctx.beginPath();
+        circle.forEach((p, i) => { const s = scr(p); i ? ctx.lineTo(s[0], s[1]) : ctx.moveTo(s[0], s[1]); });
+        ctx.closePath(); ctx.stroke();
+
+        // the cloud under A
+        ctx.fillStyle = 'rgba(150,178,220,0.55)';
+        const d = 2.2 * px;
+        for (const p of pts) { const s = scr(map(p)); ctx.fillRect(s[0], s[1], d, d); }
+
+        // its image ellipse
+        ctx.strokeStyle = '#00d2ff';
+        ctx.lineWidth = 3 * px;
+        ctx.beginPath();
+        circle.forEach((p, i) => { const s = scr(map(p)); i ? ctx.lineTo(s[0], s[1]) : ctx.moveTo(s[0], s[1]); });
+        ctx.closePath(); ctx.stroke();
+
+        // covariance of what is actually drawn -> principal axes
+        let mx = 0, my = 0;
+        const q = pts.map(p => map(p));
+        for (const p of q) { mx += p[0]; my += p[1]; }
+        mx /= N; my /= N;
+        let sxx = 0, syy = 0, sxy = 0;
+        for (const p of q) {
+            const dx = p[0] - mx, dy = p[1] - my;
+            sxx += dx * dx; syy += dy * dy; sxy += dx * dy;
+        }
+        sxx /= N; syy /= N; sxy /= N;
+        const tr = sxx + syy, det = sxx * syy - sxy * sxy;
+        const disc = Math.max(0, tr * tr / 4 - det);
+        const l1 = tr / 2 + Math.sqrt(disc), l2 = tr / 2 - Math.sqrt(disc);
+        const ang = 0.5 * Math.atan2(2 * sxy, sxx - syy);
+
+        [[l1, ang, '#f5c242'], [l2, ang + Math.PI / 2, '#799e31']].forEach(([l, th, col]) => {
+            const r = Math.sqrt(Math.max(l, 0));
+            const v = [Math.cos(th) * r, Math.sin(th) * r];
+            const p0 = scr([mx - v[0], my - v[1]]), p1 = scr([mx + v[0], my + v[1]]);
+            ctx.strokeStyle = col;
+            ctx.lineWidth = 3.5 * px;
+            ctx.beginPath(); ctx.moveTo(p0[0], p0[1]); ctx.lineTo(p1[0], p1[1]); ctx.stroke();
+        });
+
+        if (!still) requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

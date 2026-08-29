@@ -6,7 +6,10 @@ import { execFileSync } from 'child_process';
 const SB = 'sb_publishable_ubQDiMD-X3N0vZvPVi229Q_-5Zootfk'; // publishable anon key — client-safe
 const URL = 'https://fyfhxzyymmurlaenmzse.supabase.co/functions/v1/tts';
 
-export async function synthScenes(items, { outDir, voice = 'de-DE-Studio-C', lang = 'de-DE', rate = 1.0 }) {
+// onScene(name, seconds) fires after every finished scene. Callers use it to persist
+// durations incrementally - the Studio voice has a hard quota, so a scene that was
+// already paid for must never be re-synthesised because a later one threw.
+export async function synthScenes(items, { outDir, voice = 'de-DE-Studio-C', lang = 'de-DE', rate = 1.0, onScene }) {
   const durs = {};
   for (const [name, text] of Object.entries(items)) {
     const isSsml = /^\s*<speak>/.test(text);
@@ -21,6 +24,7 @@ export async function synthScenes(items, { outDir, voice = 'de-DE-Studio-C', lan
     fs.writeFileSync(f, Buffer.from(j.audioContent, 'base64'));
     durs[name] = parseFloat(execFileSync('ffprobe', ['-v', 'error', '-show_entries', 'format=duration', '-of', 'csv=p=0', f]).toString());
     console.log(name, durs[name].toFixed(1) + 's');
+    if (onScene) onScene(name, durs[name]);
   }
   return durs;
 }

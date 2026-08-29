@@ -13,6 +13,21 @@ const LAB_ICONS = {
             </g>
         </svg>`,
 
+    "bb84": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <g stroke="#C07FE8" stroke-width="4" stroke-linecap="round">
+                <line x1="11" y1="30" x2="33" y2="30" /><line x1="22" y1="19" x2="22" y2="41" />
+            </g>
+            <g stroke="#F5C242" stroke-width="4" stroke-linecap="round">
+                <line x1="67" y1="19" x2="89" y2="41" /><line x1="89" y1="19" x2="67" y2="41" />
+            </g>
+            <circle cx="50" cy="30" r="12" fill="rgba(0, 210, 255, 0.10)" stroke="#00D2FF" stroke-width="2.2" />
+            <line x1="44" y1="36" x2="56" y2="24" stroke="#00D2FF" stroke-width="3.2" stroke-linecap="round" />
+            <g font-family="Orbitron, sans-serif" font-size="16" font-weight="bold" fill="#FFD700"
+               text-anchor="middle">
+                <text x="26" y="77">1</text><text x="50" y="77">0</text><text x="74" y="77">1</text>
+            </g>
+            <line x1="16" y1="88" x2="84" y2="88" stroke="rgba(255, 215, 0, 0.45)" stroke-width="2" />
+        </svg>`,
     "irisvis": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
             <circle cx="50" cy="50" r="34" fill="none" stroke="#F5C242" stroke-width="2.4" />
             <path d="M35 62 L65 62 L50 36 Z" fill="none" stroke="rgba(255,255,255,0.75)" stroke-width="2" stroke-linejoin="round" />

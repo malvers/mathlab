@@ -30,13 +30,18 @@ const CURSOR_JS = () => {
   }, { capture: true, passive: true });
 };
 
-export async function runScenes(scenes, { outDir, viewport = { width: 1280, height: 720 }, upscale = 2, showCursor = false }) {
+// record:false walks the same choreography without capturing anything - a preflight
+// that catches broken selectors, wrong timings and off-stage framing in seconds
+// instead of after a full take. Everything else behaves identically.
+export async function runScenes(scenes, { outDir, viewport = { width: 1280, height: 720 }, upscale = 2, showCursor = false, record = true }) {
   const browser = await chromium.launch({ channel: 'chromium' });
   const results = {};
   for (const sc of scenes) {
     const frameDir = `${outDir}/${sc.name}_frames`;
-    fs.rmSync(frameDir, { recursive: true, force: true });
-    fs.mkdirSync(frameDir, { recursive: true });
+    if (record) {
+      fs.rmSync(frameDir, { recursive: true, force: true });
+      fs.mkdirSync(frameDir, { recursive: true });
+    }
     const ctx = await browser.newContext({ viewport });
     const page = await ctx.newPage();
     const t0 = Date.now();
@@ -55,7 +60,7 @@ export async function runScenes(scenes, { outDir, viewport = { width: 1280, heig
         .finally(() => pending--);
       cdp.send('Page.screencastFrameAck', { sessionId: f.sessionId }).catch(() => {});
     });
-    await cdp.send('Page.startScreencast', { format: 'jpeg', quality: 95, maxWidth: viewport.width, maxHeight: viewport.height });
+    if (record) await cdp.send('Page.startScreencast', { format: 'jpeg', quality: 95, maxWidth: viewport.width, maxHeight: viewport.height });
 
     if (showCursor) await page.addInitScript(CURSOR_JS);
     await page.goto(sc.url, { waitUntil: 'load' });
@@ -64,9 +69,18 @@ export async function runScenes(scenes, { outDir, viewport = { width: 1280, heig
     try { await sc.run(page, { mark, jiggle }); }
     catch (e) { log.push({ label: 'ERROR ' + e.message.slice(0, 120), t: (Date.now() - t0) / 1000 }); }
     const endT = (Date.now() - t0) / 1000;   // wall-clock scene end — the last (static) frame lasts until here
-    await cdp.send('Page.stopScreencast').catch(() => {});
-    while (pending > 0) await new Promise((r) => setTimeout(r, 50));
+    if (record) {
+      await cdp.send('Page.stopScreencast').catch(() => {});
+      while (pending > 0) await new Promise((r) => setTimeout(r, 50));
+    }
     await ctx.close();
+
+    if (!record) {
+      fs.writeFileSync(`${outDir}/${sc.name}.check.json`, JSON.stringify(log, null, 1));
+      console.log(sc.name, '(Probelauf, keine Aufnahme)', JSON.stringify(log));
+      results[sc.name] = log;
+      continue;
+    }
 
     // frames (VFR, wall-clock stamps) → CFR 25fps mp4, upscaled in the same single encode
     const rel = stamps.map((t) => t / 1000);

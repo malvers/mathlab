@@ -1,0 +1,1418 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DOC ALVERS MATHE-LABORE | BB84</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet">
+    <link rel="icon" type="image/png" href="resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="js/cyber-layout.css">
+    <link rel="stylesheet" href="js/buttons-ultra.css">
+    <link rel="stylesheet" href="js/cyber-lab-overrides.css">
+    <link rel="stylesheet" href="js/branding.styles.extracted.css">
+    <link rel="stylesheet" href="js/lab-shell-minimal.css">
+    <style>
+        /* ---- the sidebar carries many small controls, so it is dense ---- */
+        #ui-container .instrument-card { padding-bottom: 10px !important; margin-bottom: 6px !important; }
+        #ui-container .instrument-title { margin-bottom: 6px !important; }
+        #ui-container .cyber-checkbox-wrapper { padding: 0 !important; }
+        #ui-container .cyber-control-group { margin-top: 6px !important; }
+        #ui-container .label-row { margin-bottom: 1px !important; }
+
+        /* two thirds of the shell's default button height — this lab has many of them */
+        #ui-container .cyber-btn {
+            min-height: 38px !important;
+            padding: 10px 12px !important;
+        }
+
+        /* the shell's slider reserves 52 px for a track a few pixels thick */
+        #ui-container input[type="range"].cyber-slider {
+            height: 22px !important;
+            min-height: 0 !important;
+            padding: 3px 0 !important;
+            margin: 0 !important;
+        }
+
+        /* ---- read-outs ---- */
+        .kv-table { width: 100%; border-collapse: collapse; font-size: 15px; }
+
+        .kv-table td {
+            padding: 4px 0;
+            color: #9db3d4;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .kv-table td.v {
+            text-align: right;
+            color: #e2ebf8;
+            white-space: nowrap;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .kv-table tr.sep td { border-top: 1px solid rgba(255, 255, 255, .10); padding-top: 8px; }
+
+        /* a reserved box, so a re-rendered formula cannot shift the card */
+        .fx {
+            margin: 4px 0 2px;
+            text-align: center;
+            overflow: hidden;
+            min-height: 46px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* the detection probability is the punchline of the whole card — it is
+           allowed to be read from across the room */
+        .fx .katex { font-size: 1.35em; }
+
+        .hint {
+            font-size: 11px;
+            line-height: 1.5;
+            color: #7f97bb;
+            font-family: 'Outfit', sans-serif;
+            margin-top: 6px;
+        }
+
+        .hint.warn { color: #e08a80; }
+        .hint.good { color: #a6c96a; }
+
+        .stack { display: flex; flex-direction: column; gap: 5px; }
+        .stack > .row { display: flex; gap: 5px; }
+        .stack > .row > .cyber-btn { flex: 1; }
+
+        /* the raw key, shown as the bit string it is */
+        .keybits {
+            font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+            font-size: 11px;
+            line-height: 1.5;
+            color: #ffd700;
+            word-break: break-all;
+            margin-top: 6px;
+            max-height: 74px;
+            overflow: auto;
+        }
+
+        /* ---- the result strip, counterpart to the explanation bar on top ----
+           Same insets and the same tint as the canvas bar, so the stage sits
+           between two rails instead of floating. */
+        #verdict-bar {
+            position: absolute;
+            left: 12px;
+            right: 12px;
+            /* set from BAR_TOP at boot: the strip keeps the same distance from the
+               bottom edge that the explanation bar keeps from the top */
+            bottom: var(--stage-inset, 54px);
+            z-index: 12;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: 12px;
+            padding: 16px 20px;
+            border-radius: 6px;
+            background: rgba(245, 194, 66, .10);
+            border: 1px solid rgba(245, 194, 66, .45);
+            pointer-events: none;
+        }
+
+        /* the formula is the punchline — it gets the room it deserves */
+        #verdict-bar #fx-p {
+            flex: 0 0 auto;
+            margin: 0;
+            min-height: 0;
+            overflow: visible;
+        }
+
+        #verdict-bar #fx-p .katex { font-size: 2.1em; }
+
+        #verdict-bar #verdict {
+            flex: 0 0 auto;
+            margin: 0;
+            font-size: 15px;
+            line-height: 1.5;
+        }
+
+        /* the raw key is the thing the whole protocol is about — set it big
+           enough to be read from the back row */
+        #verdict-bar #keybits {
+            flex: 0 0 auto;
+            margin: 0;
+            font-size: 20px;
+            line-height: 1.35;
+            letter-spacing: .06em;
+            max-height: 3.2em;
+            pointer-events: auto;
+        }
+
+        @media (max-width: 900px) {
+            #verdict-bar { gap: 8px; padding: 12px 14px; }
+            #verdict-bar #fx-p .katex { font-size: 1.5em; }
+            #verdict-bar #keybits { font-size: 15px; }
+        }
+
+        /* ---- legend ---- */
+        .leg { display: flex; flex-direction: column; gap: 6px; }
+
+        .leg-row {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 11.5px;
+            color: #9db3d4;
+        }
+
+        .leg-row svg { flex: 0 0 auto; }
+
+        #canvas { cursor: crosshair; touch-action: none; }
+
+        /* ---- help overlay, the keyboard reference of the Java original ---- */
+        #help-box {
+            position: absolute;
+            inset: 0;
+            display: none;
+            place-items: center;
+            background: rgba(8, 20, 42, .93);
+            z-index: 40;
+            padding: 20px;
+        }
+
+        #help-box.on { display: grid; }
+
+        #help-inner {
+            max-width: 560px;
+            width: 100%;
+            max-height: 100%;
+            overflow: auto;
+            font-family: 'Outfit', sans-serif;
+            color: #cfe3ff;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        #help-inner h3 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 13px;
+            letter-spacing: .16em;
+            color: #00d2ff;
+            margin: 0 0 12px;
+        }
+
+        #help-inner table { width: 100%; border-collapse: collapse; }
+        #help-inner td { padding: 2px 0; vertical-align: top; }
+
+        #help-inner td.k {
+            font-family: 'Orbitron', sans-serif;
+            color: #ffd700;
+            white-space: nowrap;
+            padding-right: 14px;
+            width: 1%;
+        }
+    </style>
+</head>
+
+<body>
+    <nav id="mini-rail">
+        <div class="nav-btn" onclick="toggleSidebar()" title="Toggle Menu">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </div>
+    </nav>
+
+    <aside id="side-panel">
+        <header id="sidebar-header"></header>
+        <div id="ui-container"></div>
+    </aside>
+
+    <main id="main-content">
+        <div id="canvas-container">
+            <div class="cyber-grid"></div>
+            <div id="math-coach-box">
+                <div class="coach-title" id="coach-title-slot"></div>
+                <div id="coach-content" class="coach-message"></div>
+            </div>
+            <canvas id="canvas"></canvas>
+            <div id="verdict-bar">
+                <div class="fx" id="fx-p"></div>
+                <div class="hint" id="verdict"></div>
+                <div class="keybits" id="keybits"></div>
+            </div>
+            <div id="help-box">
+                <div id="help-inner">
+                    <h3>TASTATUR</h3>
+                    <table>
+                        <tr><td class="k">Leertaste</td><td>neuer Durchlauf</td></tr>
+                        <tr><td class="k">← / →</td><td>Spalte wählen</td></tr>
+                        <tr><td class="k">↑ / ↓</td><td>zwei Bits mehr oder weniger</td></tr>
+                        <tr><td class="k">M / Shift M</td><td>12 Bits / 256 Bits</td></tr>
+                        <tr><td class="k">4</td><td>zurück auf 42 Bits</td></tr>
+                        <tr><td class="k">E</td><td>Lauscherin Eve an und aus</td></tr>
+                        <tr><td class="k">L</td><td>Lehrmodus mit festen Fällen</td></tr>
+                        <tr><td class="k">P</td><td>Photonenzeile</td></tr>
+                        <tr><td class="k">T</td><td>Basentreffer einfärben</td></tr>
+                        <tr><td class="k">Z</td><td>Zufallsausgang zeigen oder „0|1“</td></tr>
+                        <tr><td class="k">K</td><td>Schlüsselzeile</td></tr>
+                        <tr><td class="k">N</td><td>Spaltennummern</td></tr>
+                        <tr><td class="k">R</td><td>alles zurücksetzen</td></tr>
+                        <tr><td class="k">I</td><td>diese Hilfe</td></tr>
+                        <tr><td class="k">Esc</td><td>Hilfe schließen</td></tr>
+                        <tr><td class="k">Maus</td><td>über eine Spalte fahren erklärt sie</td></tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="js/cyber-left-chrome.js"></script>
+    <script src="js/branding/briefings.js"></script>
+    <script src="js/branding/overlays.js"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/branding/nav.js"></script>
+    <script src="js/branding.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script>
+        function toggleSidebar() {
+            const panel = document.getElementById('side-panel');
+            panel.classList.toggle('collapsed');
+            if (window.CyberLeftChrome && typeof CyberLeftChrome.publishResolvedScale === 'function') {
+                CyberLeftChrome.publishResolvedScale();
+            }
+            setTimeout(() => {
+                window.dispatchEvent(new Event('resize'));
+                if (typeof init === 'function') init();
+                if (window.CyberLeftChrome && typeof CyberLeftChrome.publishResolvedScale === 'function') {
+                    CyberLeftChrome.publishResolvedScale();
+                }
+            }, 400);
+        }
+
+        CyberBranding.init({
+            useExternalStyles: true,
+            title: CyberI18n.get('ui.coach_title'),
+            subtitle: 'BB84',
+        });
+        CyberUI.init();
+
+        if (window.CyberLeftChrome && typeof CyberLeftChrome.configure === 'function') {
+            CyberLeftChrome.configure({ viewportOnlyZoom: true });
+        }
+
+        /* ================================================================
+           BB84 — Quantenschlüsselaustausch nach Bennett und Brassard, 1984.
+           Ported from Doc's Java QuantumCryptography (2024).
+
+           The Java original drew the undetermined case as a box saying
+           "0 or 1". Here the measurement really collapses: a photon met with
+           the wrong basis yields a coin flip, and the run is carried through
+           to the end of the protocol — sifting, a public test sample, the
+           error rate, and the resulting key. That is what turns the picture
+           into an experiment: with an eavesdropper the error rate in the
+           test sample sits at 1/4, and the chance of catching her after m
+           compared bits is 1 - (3/4)^m.
+           ================================================================ */
+
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const container = document.getElementById('canvas-container');
+
+        function dbg(m) {
+            try { if (window.DebugWindow) DebugWindow.log('BB84 ' + m); } catch (e) { }
+        }
+
+        /* ---- palette ---------------------------------------------------
+           Two channels are kept apart on purpose: the actor owns the row
+           (left-hand gutter), the basis owns the symbol colour. Violet is
+           the '+' basis, orange the 'x' basis — for the filters as well as
+           for the photons they produce, so both speak one language. */
+        const COL = {
+            alice: '#00d2ff',
+            eve: '#b02418',
+            bob: '#799e31',
+            key: '#ffd700',
+            plus: '#00d2ff',      /* + basis: '-' and '|' */
+            cross: '#f5c242',     /* x basis: '/' and '\' */
+            frame: 'rgba(255,255,255,.18)',
+            ink: '#dbe8fa',
+            /* the filled "1" box: a damped ice blue instead of near-white, which
+               glared against the dark stage */
+            bitOn: '#a9c4e2',
+            dark: '#0b1c3c',
+            label: '#9db3d4',
+            faint: '#6f88ae',
+            ok: '#799e31',
+            bad: '#b02418',
+            drop: '#5d78a4'
+        };
+
+        const ACTOR = { alice: COL.alice, eve: COL.eve, bob: COL.bob, key: COL.key };
+        const ACTOR_NAME = { alice: 'ALICE', eve: 'EVE', bob: 'BOB', key: '' };
+
+        /* polarization index: 0 '-', 1 '|', 2 '/', 3 '\' */
+        const POL_ANG = [0, -Math.PI / 2, -Math.PI / 4, Math.PI / 4];
+        const POL_TEXT = ['waagerecht —', 'senkrecht |', 'schräg /', 'schräg \\'];
+        /* the bar is one line and must be readable from the back row, so the
+           explanation names a state by its symbol, not by a word */
+        const POL_SYM = ['—', '|', '/', '\\'];
+        const STORE = 'bb84-state';
+
+        /* ---- state ------------------------------------------------------ */
+        const S = {
+            n: 42,                 /* the 42 bits of the original */
+            eve: false,
+            demo: false,
+            share: 0.30,           /* share of the sifted bits compared in public */
+            showPhotons: true,
+            tintBase: true,
+            showCollapse: true,    /* true: the measured bit, false: the original's "0|1" */
+            showKey: true,
+            showIdx: false,
+            sel: 0
+        };
+
+        let cols = [];             /* the columns of one protocol run */
+        let stats = null;
+        let rows = [];             /* the rows currently drawn */
+
+        function eveOn() { return S.demo ? true : S.eve; }
+
+        /* ---- persistence ------------------------------------------------ */
+        function save() {
+            try {
+                localStorage.setItem(STORE, JSON.stringify({
+                    n: S.n, eve: S.eve, demo: S.demo, share: S.share,
+                    showPhotons: S.showPhotons, tintBase: S.tintBase,
+                    showCollapse: S.showCollapse, showKey: S.showKey, showIdx: S.showIdx
+                }));
+            } catch (e) { }
+        }
+
+        function load() {
+            try {
+                const raw = localStorage.getItem(STORE);
+                if (!raw) return;
+                const o = JSON.parse(raw);
+                if (typeof o.n === 'number') S.n = Math.min(256, Math.max(8, o.n));
+                if (typeof o.share === 'number') S.share = Math.min(0.8, Math.max(0, o.share));
+                ['eve', 'demo', 'showPhotons', 'tintBase', 'showCollapse', 'showKey', 'showIdx']
+                    .forEach(k => { if (typeof o[k] === 'boolean') S[k] = o[k]; });
+            } catch (e) { }
+        }
+
+        /* ---- the protocol ----------------------------------------------
+           One column is one photon. Alice picks a bit and a basis, that
+           fixes the polarization. Eve, if present, measures and has to send
+           something on — she can only send what her own basis can express.
+           Bob measures. Whoever meets a photon in the wrong basis gets a
+           coin flip; that single rule carries the whole protocol. */
+        function ri(k) { return Math.floor(Math.random() * k); }
+
+        function polOf(bit, base) { return base === 0 ? bit : 2 + bit; }
+
+        function simulate(n, eve) {
+            const out = new Array(n);
+            for (let i = 0; i < n; i++) {
+                const aBit = ri(2), aBase = ri(2);
+                const c = { aBit, aBase, aPol: polOf(aBit, aBase), noEve: !eve, gap: false };
+                let inBit = aBit, inBase = aBase;
+                if (eve) {
+                    c.eBase = ri(2);
+                    c.eRnd = c.eBase !== aBase;
+                    c.eBit = c.eRnd ? ri(2) : aBit;
+                    c.ePol = polOf(c.eBit, c.eBase);
+                    inBit = c.eBit;
+                    inBase = c.eBase;
+                }
+                c.inBase = inBase;
+                c.bBase = ri(2);
+                c.bRnd = c.bBase !== inBase;
+                c.bBit = c.bRnd ? ri(2) : inBit;
+                c.rank = Math.random();     /* fixes which bits are spent on the public test */
+                out[i] = c;
+            }
+            return out;
+        }
+
+        /* ---- sifting, test sample, error rate ---------------------------
+           Public discussion: Alice and Bob compare bases (not bits) and keep
+           the positions where they agree. Of those, a share is compared bit
+           for bit in the open — those bits are burnt, but they measure the
+           channel. Without Eve every one of them matches. */
+        function analyze(list, share) {
+            const sift = [];
+            for (const c of list) {
+                c.sift = c.aBase === c.bBase;
+                c.err = c.sift && c.aBit !== c.bBit;
+                c.test = false;
+                if (c.sift) sift.push(c);
+            }
+            const order = sift.slice().sort((a, b) => a.rank - b.rank);
+            const m = Math.min(order.length, Math.round(share * order.length));
+            for (let i = 0; i < m; i++) order[i].test = true;
+
+            let errAll = 0, errTest = 0;
+            for (const c of sift) { if (c.err) { errAll++; if (c.test) errTest++; } }
+
+            const k = sift.length;
+            return {
+                n: list.length, k, m, errAll, errTest,
+                qber: m ? errTest / m : NaN,
+                qberAll: k ? errAll / k : NaN,
+                keyLen: k - m,
+                pDetect: 1 - Math.pow(0.75, m),
+                bits: list.filter(c => c.sift && !c.test).map(c => c.bBit).join('')
+            };
+        }
+
+        /* ---- the teaching mode -----------------------------------------
+           The Java original held twenty hand-picked columns with a written
+           explanation each. Same idea, five blocks: Bob right, Bob wrong,
+           Eve right, Eve wrong, and the columns that are discarded anyway. */
+        function demoCols() {
+            const raw = [
+                /* aBit aBase | eBase eBit | bBase bBit | gap | why */
+                [0, 0, null, null, 0, 0, 0, 'Gleiche Basis: Bob misst mit Sicherheit richtig. Die 0 kommt in den Schlüssel.'],
+                [1, 0, null, null, 0, 1, 0, 'Gleiche Basis: das senkrechte Photon liefert Bob sicher die 1.'],
+                [0, 1, null, null, 1, 0, 1, 'Auch in der ×-Basis gilt: gleiche Basis, sicheres Ergebnis. Die 0 zählt.'],
+                [1, 1, null, null, 1, 1, 0, 'Gleiche Basis, das Photon „\\“ wird zur 1 — brauchbares Schlüsselbit.'],
+
+                [0, 0, null, null, 1, 0, 1, 'Bob misst das waagerechte Photon in der ×-Basis. Reiner Zufall — hier fällt die 0. Das Bit wird verworfen.'],
+                [0, 0, null, null, 1, 1, 0, 'Dasselbe Photon, dieselbe falsche Basis, diesmal fällt die 1. Genau das meint „unbestimmt“ — verworfen.'],
+                [1, 1, null, null, 0, 0, 1, 'Das schräge Photon in der +-Basis: Zufall, hier 0. Verworfen.'],
+                [1, 1, null, null, 0, 1, 0, 'Dasselbe schräge Photon, diesmal 1. Verworfen — Alice und Bob merken das beim Basenvergleich.'],
+
+                [0, 0, 0, 0, 0, 0, 1, 'Eve trifft die Basis zufällig richtig. Sie liest die 0 mit und schickt dasselbe Photon weiter — sie hinterlässt keine Spur.'],
+                [1, 1, 1, 1, 1, 1, 0, 'Auch hier trifft Eve die Basis. Der Lauschangriff bleibt unsichtbar; nur die Hälfte ihrer Versuche geht so aus.'],
+
+                [0, 0, 1, 0, 0, 0, 1, 'Eve misst falsch, bekommt zufällig 0 und sendet „/“ weiter. Bob misst wieder zufällig — und bekommt zufällig die richtige 0. Eve schlüpft durch.'],
+                [0, 0, 1, 0, 0, 1, 0, 'Gleiche Lage, aber Bobs Zufall fällt anders: er misst 1, obwohl Alice 0 gesendet hat. Widerspruch — Eve ist aufgeflogen.'],
+                [1, 1, 0, 1, 1, 1, 1, 'Eve misst das schräge Photon in der +-Basis, bekommt 1 und sendet „|“. Bobs Zufall liefert die richtige 1 — unentdeckt.'],
+                [1, 1, 0, 0, 1, 0, 0, 'Dieselbe Störung, anderer Ausgang: Bob misst 0 statt 1. Widerspruch — so verrät sich Eve.'],
+
+                [0, 0, 1, 1, 1, 1, 1, 'Bobs Basis passt schon nicht zu Alice — das Bit fliegt beim Sifting heraus, egal was Eve getan hat.'],
+                [1, 0, 0, 1, 1, 0, 0, 'Eve hat sogar richtig gemessen, aber Bob misst in der falschen Basis. Verworfen.']
+            ];
+            return raw.map(r => {
+                const c = {
+                    aBit: r[0], aBase: r[1], aPol: polOf(r[0], r[1]),
+                    bBase: r[4], bBit: r[5], gap: !!r[6], why: r[7],
+                    noEve: r[2] === null, rank: 1
+                };
+                if (r[2] !== null) {
+                    c.eBase = r[2]; c.eBit = r[3];
+                    c.eRnd = c.eBase !== c.aBase;
+                    c.ePol = polOf(c.eBit, c.eBase);
+                    c.inBase = c.eBase;
+                } else {
+                    c.inBase = c.aBase;
+                }
+                c.bRnd = c.bBase !== c.inBase;
+                return c;
+            });
+        }
+
+        /* ---- a run ------------------------------------------------------ */
+        function newRun() {
+            cols = S.demo ? demoCols() : simulate(S.n, S.eve);
+            runId++;
+            if (S.sel >= cols.length) S.sel = cols.length - 1;
+            recompute();
+            dbg('neuer Lauf: ' + cols.length + ' Bits, Eve ' + (eveOn() ? 'an' : 'aus'));
+        }
+
+        function recompute() {
+            stats = analyze(cols, S.demo ? 0 : S.share);
+        }
+
+        /* ---- the explanation of one column ------------------------------ */
+        function baseName(b) { return b ? '×' : '+'; }
+
+        function explain(i) {
+            const c = cols[i];
+            if (!c) return '';
+            if (S.demo && c.why) return c.why;
+
+            /* with the collapse hidden the wording follows the display: the
+               measurement stays undetermined instead of naming an outcome */
+            const val = (bit, rnd) => (rnd && !S.showCollapse) ? '0 oder 1' : String(bit);
+
+            let s = 'Alice: ' + c.aBit + ' in ' + baseName(c.aBase) + ', Photon ' + POL_SYM[c.aPol] + '. ';
+
+            if (eveOn() && !c.noEve) {
+                s += c.eRnd
+                    ? 'Eve rät ' + baseName(c.eBase) + ' — falsch, ihre ' + val(c.eBit, true)
+                      + ' ist Zufall, sie sendet ' + POL_SYM[c.ePol] + '. '
+                    : 'Eve rät ' + baseName(c.eBase) + ' — richtig, liest ' + c.eBit
+                      + ' mit und sendet ' + POL_SYM[c.ePol] + '. ';
+            }
+
+            s += 'Bob misst ' + baseName(c.bBase) + ' und bekommt ' + val(c.bBit, c.bRnd);
+            if (c.bRnd) s += ' — Zufall, das Photon steckt in ' + baseName(c.inBase);
+            s += '. ';
+
+            if (!c.sift) s += 'Basen verschieden, Bit verworfen.';
+            else if (c.err) s += 'Widerspruch: gleiche Basis, andere Bits — Eve ist aufgeflogen.';
+            else if (c.test) s += 'Basen gleich — dieses Bit wird öffentlich verglichen.';
+            else s += 'Basen gleich, Bits gleich — das Bit kommt in den Schlüssel.';
+
+            return s;
+        }
+
+        function statusOf(c) {
+            if (!c) return COL.drop;
+            if (c.err) return COL.bad;
+            if (!c.sift) return COL.drop;
+            return COL.ok;
+        }
+
+        /* ---- layout -----------------------------------------------------
+           Everything is derived from the stage: the boxes shrink until all
+           bits and all rows fit, so 12 bits on a phone and 256 bits on the
+           beamer use the same code. */
+        let VW = 0, VH = 0, GUT = 0, box = 0, pitch = 0, y0 = 0;
+        let xs = [];
+
+        /* The bar sits below the branding strip and is set in the largest type
+           that still fits the LONGEST explanation of this run — not of the
+           hovered column, otherwise the text would jump size on every move. */
+        /* BAR_TOP is a floor, not a position: the branding strip floats over the
+           top right of the stage and must never be covered. */
+        const BAR_TOP = 54, BAR_GAP = 10, BAR_MIN = 12, BAR_MAX = 22;
+        let barSize = 16, barH = 38, barY = BAR_TOP, barKey = '', runId = 0;
+
+        function updateBar() {
+            const key = Math.round(VW) + '|' + cols.length + '|' + runId
+                + '|' + (S.showCollapse ? 1 : 0) + '|' + (eveOn() ? 1 : 0)
+                + '|' + S.share;
+            if (key !== barKey) {
+                barKey = key;
+                const inner = VW - 24 - 26;          /* box width minus its padding */
+                const probe = 20;
+                ctx.font = '300 ' + probe + 'px Outfit, sans-serif';
+                let widest = 1;
+                for (let i = 0; i < cols.length; i++) {
+                    const w = ctx.measureText((i + 1) + '.  ' + explain(i)).width;
+                    if (w > widest) widest = w;
+                }
+                barSize = Math.max(BAR_MIN, Math.min(BAR_MAX, probe * inner / widest));
+            }
+            barH = Math.round(barSize * 1.9);
+        }
+
+        function buildRows() {
+            rows = [];
+            rows.push({ k: 'aBit', kind: 'bit', who: 'alice', lab: 'Bit', sh: 'B' });
+            rows.push({ k: 'aBase', kind: 'base', who: 'alice', lab: 'Basis', sh: 'Ba' });
+            if (S.showPhotons) rows.push({ k: 'aPol', kind: 'pol', who: 'alice', lab: 'Photon', sh: 'Ph' });
+            if (eveOn()) {
+                rows.push({ k: 'eBase', kind: 'base', who: 'eve', lab: 'Basis', sh: 'Ba' });
+                rows.push({ k: 'eBit', kind: 'bit', who: 'eve', lab: 'Bit', sh: 'B' });
+                if (S.showPhotons) rows.push({ k: 'ePol', kind: 'pol', who: 'eve', lab: 'Photon', sh: 'Ph' });
+            }
+            rows.push({ k: 'bBase', kind: 'base', who: 'bob', lab: 'Basis', sh: 'Ba' });
+            rows.push({ k: 'bBit', kind: 'bit', who: 'bob', lab: 'Bit', sh: 'B' });
+            if (S.showKey) rows.push({ k: 'key', kind: 'key', who: 'key', lab: 'Schlüssel', sh: 'K' });
+        }
+
+        function layout() {
+            const rect = container.getBoundingClientRect();
+            VW = Math.max(1, rect.width);
+            VH = Math.max(1, rect.height);
+            /* only as wide as the row labels really need — 22 px for the rotated
+               actor name plus the widest label ("Schlüssel"), not a fixed twelfth */
+            GUT = Math.max(58, Math.min(100, VW * 0.09));
+
+            updateBar();
+
+            const aw = VW - GUT - 16;
+            /* the result strip is a real element at the bottom of the stage, so the
+               drawing area ends above it — measured, not assumed, because the strip
+               grows a line when the key wraps */
+            const vb = document.getElementById('verdict-bar');
+            const fh = vb ? vb.offsetHeight : 0;
+            /* the explanation bar keeps its own height as clearance to the stage,
+               and the result strip below gets exactly the same air */
+            const gap = barH;
+            /* worst case: the bar sits on its floor. Sizing the boxes against that
+               keeps them steady while the block gets centred afterwards. */
+            const ah = Math.max(40, VH - BAR_TOP - barH - gap - gap - fh - 22);
+
+            let gaps = 0;
+            for (const c of cols) if (c.gap) gaps++;
+            const units = cols.length + gaps * 0.6;
+
+            box = Math.max(3, Math.min(aw / units, ah / (rows.length * 1.34), 42));
+            pitch = Math.min(box * 1.34, ah / rows.length);
+            /* caption, stage and result strip are one block, centred together */
+            const stageH = rows.length * pitch;
+            const total = barH + gap + stageH + gap + fh;
+            barY = Math.max(BAR_TOP, (VH - total) / 2);
+            y0 = barY + barH + gap;
+            /* the strip rides with the stage instead of sticking to the bottom */
+            if (vb) {
+                vb.style.bottom = 'auto';
+                vb.style.top = Math.round(y0 + stageH + gap) + 'px';
+            }
+
+            xs = new Array(cols.length);
+            let x = GUT + 6;
+            for (let i = 0; i < cols.length; i++) {
+                if (cols[i].gap) x += box * 0.6;
+                xs[i] = x;
+                x += box;
+            }
+        }
+
+        function rowY(r) { return y0 + r * pitch; }
+
+        /* ---- drawing primitives ----------------------------------------- */
+        function bar(cx, cy, len, thick, ang, color) {
+            ctx.save();
+            ctx.translate(cx, cy);
+            ctx.rotate(ang);
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            const r = Math.min(thick / 2, 2);
+            if (ctx.roundRect) ctx.roundRect(-len / 2, -thick / 2, len, thick, r);
+            else ctx.rect(-len / 2, -thick / 2, len, thick);
+            ctx.fill();
+            ctx.restore();
+        }
+
+        function cell(x, y, s, fill) {
+            ctx.fillStyle = fill;
+            ctx.fillRect(x, y, s, s);
+            ctx.strokeStyle = COL.frame;
+            ctx.lineWidth = 1;
+            ctx.strokeRect(x + .5, y + .5, s - 1, s - 1);
+        }
+
+        function digit(x, y, s, txt, color) {
+            if (s < 9) return;
+            ctx.fillStyle = color;
+            ctx.font = '700 ' + Math.round(s * 0.5) + 'px Orbitron, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(txt, x + s / 2, y + s / 2 + s * 0.03);
+        }
+
+        function drawBit(x, y, s, bit, rnd) {
+            /* The original showed an undetermined measurement as a split box
+               saying "1 or 0". Kept as an option — but by default the photon
+               really collapses and the outcome is shown, marked by a red
+               foot bar so the coin flip stays visible. */
+            if (!S.showCollapse && rnd) {
+                cell(x, y, s, 'rgba(120,132,156,.30)');
+                ctx.strokeStyle = 'rgba(226,235,248,.55)';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(x + 1, y + s - 1);
+                ctx.lineTo(x + s - 1, y + 1);
+                ctx.stroke();
+                if (s >= 16) {
+                    ctx.fillStyle = 'rgba(226,235,248,.75)';
+                    ctx.font = '700 ' + Math.round(s * 0.34) + 'px Orbitron, sans-serif';
+                    ctx.textAlign = 'left';
+                    ctx.textBaseline = 'top';
+                    ctx.fillText('1', x + s * 0.12, y + s * 0.10);
+                    ctx.textAlign = 'right';
+                    ctx.textBaseline = 'bottom';
+                    ctx.fillText('0', x + s * 0.90, y + s * 0.92);
+                }
+                return;
+            }
+            cell(x, y, s, bit ? COL.bitOn : COL.dark);
+            digit(x, y, s, String(bit), bit ? COL.dark : COL.ink);
+            if (rnd) {
+                ctx.fillStyle = COL.bad;
+                ctx.fillRect(x + 1, y + s - Math.max(2, s * 0.14), s - 2, Math.max(2, s * 0.14) - 1);
+            }
+        }
+
+        function drawBase(x, y, s, base, tint) {
+            cell(x, y, s, tint === 'ok' ? 'rgba(121,158,49,.17)'
+                : tint === 'bad' ? 'rgba(176,36,24,.18)'
+                    : 'rgba(255,255,255,.035)');
+            const c = base ? COL.cross : COL.plus;
+            const len = s * 0.62;
+            const th = Math.max(1.6, s * 0.13);
+            const cx = x + s / 2, cy = y + s / 2;
+            if (base === 0) {
+                bar(cx, cy, len, th, 0, c);
+                bar(cx, cy, len, th, Math.PI / 2, c);
+            } else {
+                bar(cx, cy, len, th, Math.PI / 4, c);
+                bar(cx, cy, len, th, -Math.PI / 4, c);
+            }
+        }
+
+        function drawPol(x, y, s, pol) {
+            cell(x, y, s, 'rgba(255,255,255,.03)');
+            const c = pol < 2 ? COL.plus : COL.cross;
+            bar(x + s / 2, y + s / 2, s * 0.72, Math.max(1.8, s * 0.16), POL_ANG[pol], c);
+        }
+
+        function drawKeyCell(x, y, s, c) {
+            /* with the collapse hidden, a bit that came out of a coin flip has
+               no value to show yet — the original's reading, kept consistent */
+            if (c.sift && !S.showCollapse && c.bRnd) {
+                digit(x, y, s, '?', 'rgba(255,215,0,.45)');
+                return;
+            }
+            if (!c.sift) {
+                /* discarded: only a hint of a line, so the eye counts the survivors */
+                ctx.strokeStyle = 'rgba(93,120,164,.55)';
+                ctx.lineWidth = Math.max(1, s * 0.07);
+                ctx.beginPath();
+                ctx.moveTo(x + s * 0.30, y + s / 2);
+                ctx.lineTo(x + s * 0.70, y + s / 2);
+                ctx.stroke();
+                return;
+            }
+            if (c.test) {
+                ctx.setLineDash([2, 2]);
+                ctx.strokeStyle = c.err ? COL.bad : 'rgba(226,235,248,.45)';
+                ctx.lineWidth = 1;
+                ctx.strokeRect(x + .5, y + .5, s - 1, s - 1);
+                ctx.setLineDash([]);
+                digit(x, y, s, String(c.bBit), c.err ? COL.bad : 'rgba(226,235,248,.45)');
+                return;
+            }
+            if (c.err) {
+                cell(x, y, s, 'rgba(176,36,24,.25)');
+                digit(x, y, s, String(c.bBit), '#e88b82');
+            } else {
+                digit(x, y, s, String(c.bBit), COL.key);
+            }
+        }
+
+        /* ---- the gutter -------------------------------------------------
+           Actor names run vertically alongside their block, row labels sit
+           right-aligned next to the boxes. */
+        function drawGutter() {
+            const groups = [];
+            let cur = null;
+            rows.forEach((r, i) => {
+                if (!cur || cur.who !== r.who) { cur = { who: r.who, from: i, to: i }; groups.push(cur); }
+                else cur.to = i;
+            });
+
+            for (const g of groups) {
+                const top = rowY(g.from);
+                const bot = rowY(g.to) + box;
+                const color = ACTOR[g.who];
+                ctx.fillStyle = color;
+                ctx.globalAlpha = 0.55;
+                ctx.fillRect(24, top, 2, bot - top);
+                ctx.globalAlpha = 1;
+
+                const name = ACTOR_NAME[g.who];
+                if (name && bot - top > 74) {
+                    ctx.save();
+                    ctx.translate(12, (top + bot) / 2);
+                    ctx.rotate(-Math.PI / 2);
+                    ctx.fillStyle = color;
+                    ctx.font = '700 14px Orbitron, sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    if ('letterSpacing' in ctx) ctx.letterSpacing = '2.5px';
+                    ctx.fillText(name, 0, 0);
+                    if ('letterSpacing' in ctx) ctx.letterSpacing = '0px';
+                    ctx.restore();
+                }
+            }
+
+            /* row labels */
+            const avail = GUT - 32;
+            ctx.font = '400 14px Outfit, sans-serif';
+            ctx.textAlign = 'right';
+            ctx.textBaseline = 'middle';
+            rows.forEach((r, i) => {
+                if (avail < 16) return;
+                const txt = ctx.measureText(r.lab).width <= avail ? r.lab : r.sh;
+                ctx.fillStyle = r.who === 'key' ? COL.key : COL.faint;
+                ctx.fillText(txt, GUT, rowY(i) + box / 2);
+            });
+        }
+
+        /* ---- the bar above the stage ------------------------------------ */
+        function drawTooltip() {
+            const c = cols[S.sel];
+            if (!c) return;
+            const color = statusOf(c);
+            /* below the branding strip, which floats over the top right of the stage */
+            const x = 12, y = barY, w = VW - 24, h = barH;
+
+            ctx.beginPath();
+            if (ctx.roundRect) ctx.roundRect(x, y, w, h, 6); else ctx.rect(x, y, w, h);
+            ctx.fillStyle = hexA(color, .13);
+            ctx.fill();
+            ctx.strokeStyle = hexA(color, .65);
+            ctx.lineWidth = 1;
+            ctx.stroke();
+
+            const txt = (S.sel + 1) + '.  ' + explain(S.sel);
+            ctx.fillStyle = '#dbe8fa';
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'middle';
+            ctx.font = '300 ' + barSize.toFixed(1) + 'px Outfit, sans-serif';
+            let out = txt;
+            /* the size was measured against the longest line of the run, so this
+               only ever bites if a browser metric drifts */
+            if (ctx.measureText(out).width > w - 24) {
+                while (out.length > 4 && ctx.measureText(out + ' …').width > w - 24) out = out.slice(0, -1);
+                out += ' …';
+            }
+            ctx.fillText(out, x + 13, y + h / 2 + 1);
+        }
+
+        /* '#rrggbb' plus an alpha, so one palette entry serves fill and stroke */
+        function hexA(hex, a) {
+            const n = parseInt(hex.slice(1), 16);
+            return 'rgba(' + ((n >> 16) & 255) + ',' + ((n >> 8) & 255) + ',' + (n & 255) + ',' + a + ')';
+        }
+
+        function drawHighlight() {
+            const c = cols[S.sel];
+            if (!c) return;
+            /* flush with the boxes: exactly one column wide, from the top edge of
+               the first row to the bottom edge of the last. The status colour now
+               lives only in the bar above — the column marker stays phi green. */
+            const x = xs[S.sel], w = box;
+            const top = barY + barH, bot = rowY(rows.length - 1) + box;
+            ctx.fillStyle = hexA(COL.ok, .14);
+            ctx.fillRect(x, top, w, bot - top);
+            ctx.strokeStyle = hexA(COL.ok, .85);
+            ctx.lineWidth = 1;
+            ctx.strokeRect(x + .5, top + .5, w - 1, bot - top - 1);
+        }
+
+        function drawIndices() {
+            if (!S.showIdx || box < 8) return;
+            ctx.fillStyle = COL.faint;
+            ctx.font = '400 ' + Math.max(8, Math.min(11, box * 0.42)) + 'px Outfit, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'bottom';
+            const every = box < 14 ? 10 : 5;
+            for (let i = 0; i < cols.length; i++) {
+                if ((i + 1) % every !== 0 && i !== 0) continue;
+                ctx.fillText(String(i + 1), xs[i] + box / 2, rowY(0) - 8);
+            }
+        }
+
+        function render() {
+            buildRows();
+            /* the strip is filled first: layout() measures its height to keep the
+               stage clear of it, so it must already show this run's text */
+            updateReadout();
+            layout();
+            ctx.clearRect(0, 0, VW, VH);
+
+            drawHighlight();
+            drawIndices();
+            drawGutter();
+
+            for (let i = 0; i < cols.length; i++) {
+                const c = cols[i];
+                const x = xs[i];
+                for (let r = 0; r < rows.length; r++) {
+                    const row = rows[r];
+                    const y = rowY(r);
+                    if (row.who === 'eve' && c.noEve) continue;
+
+                    switch (row.kind) {
+                        case 'bit': {
+                            const bit = row.k === 'aBit' ? c.aBit : (row.k === 'eBit' ? c.eBit : c.bBit);
+                            const rnd = row.k === 'aBit' ? false : (row.k === 'eBit' ? c.eRnd : c.bRnd);
+                            drawBit(x, y, box, bit, rnd);
+                            break;
+                        }
+                        case 'base': {
+                            const b = row.k === 'aBase' ? c.aBase : (row.k === 'eBase' ? c.eBase : c.bBase);
+                            let tint = null;
+                            if (S.tintBase && row.k !== 'aBase') tint = (b === c.aBase) ? 'ok' : 'bad';
+                            drawBase(x, y, box, b, tint);
+                            break;
+                        }
+                        case 'pol':
+                            drawPol(x, y, box, row.k === 'aPol' ? c.aPol : c.ePol);
+                            break;
+                        case 'key':
+                            drawKeyCell(x, y, box, c);
+                            break;
+                    }
+                }
+            }
+
+            drawTooltip();
+        }
+
+        /* ---- sidebar ----------------------------------------------------- */
+        function pct(x, d) { return isFinite(x) ? (100 * x).toFixed(d === undefined ? 1 : d).replace('.', ',') + ' %' : '—'; }
+
+        function setupUI() {
+            CyberUI.createCard('ui-container', 'PROTOKOLL', `
+                <div class="stack">
+                    <div class="row">
+                        <button class="cyber-btn" onclick="actNew()"
+                                style="border-color:#00d2ff;color:#00d2ff">NEUER LAUF</button>
+                        <button class="cyber-btn" id="btn-eve" onclick="toggleEve()">LAUSCHERIN</button>
+                    </div>
+                    <div class="row">
+                        <button class="cyber-btn" id="btn-demo" onclick="toggleDemo()">LEHRMODUS</button>
+                        <button class="cyber-btn" onclick="toggleHelp()"
+                                style="border-color:#9db3d4;color:#9db3d4">TASTEN</button>
+                    </div>
+                </div>
+                <div class="cyber-control-group">
+                    <div class="label-row">
+                        <label for="nbits">Photonen</label>
+                        <span id="nbits-value" class="range-value">42</span>
+                    </div>
+                    <input id="nbits" class="cyber-slider" type="range" min="8" max="256" value="42"
+                           step="2" style="--accent: #00d2ff" aria-label="Anzahl der gesendeten Photonen" />
+                </div>
+                <div class="hint">Mit der Maus über eine Spalte fahren erklärt genau dieses Photon.
+                    Der Lehrmodus zeigt statt eines Zufallslaufs alle Fälle einmal durch.</div>
+            `, '#00d2ff');
+
+            CyberUI.createCard('ui-container', 'SIFTING UND TEST', `
+                <div class="cyber-control-group">
+                    <div class="label-row">
+                        <label for="share">Öffentlich verglichen</label>
+                        <span id="share-value" class="range-value">30 %</span>
+                    </div>
+                    <input id="share" class="cyber-slider" type="range" min="0" max="80" value="30"
+                           step="5" style="--accent: #f5c242" aria-label="Anteil der öffentlich verglichenen Bits" />
+                </div>
+                <table class="kv-table">
+                    <tr><td>gesendet</td><td class="v" id="v-n">—</td></tr>
+                    <tr><td>Basen gleich</td><td class="v" id="v-k">—</td></tr>
+                    <tr><td>Testbits <i>m</i></td><td class="v" id="v-m">—</td></tr>
+                    <tr class="sep"><td>Fehler im Test</td><td class="v" id="v-e">—</td></tr>
+                    <tr><td>QBER</td><td class="v" id="v-q">—</td></tr>
+                    <tr><td>Erwartung mit Eve</td><td class="v">25,0 %</td></tr>
+                    <tr class="sep"><td>Schlüssel</td><td class="v" id="v-key">—</td></tr>
+                    <tr><td>davon falsch</td><td class="v" id="v-krest">—</td></tr>
+                </table>
+            `, '#f5c242');
+
+            CyberUI.createCard('ui-container', 'VIELE LÄUFE', `
+                <div class="stack">
+                    <div class="row">
+                        <button class="cyber-btn" onclick="longRun(1000)"
+                                style="border-color:#799e31;color:#799e31">1000 LÄUFE</button>
+                    </div>
+                </div>
+                <table class="kv-table">
+                    <tr><td>mittlere QBER</td><td class="v" id="v-mq">—</td></tr>
+                    <tr><td>Eve entdeckt</td><td class="v" id="v-md">—</td></tr>
+                    <tr><td>Schlüssel im Mittel</td><td class="v" id="v-mk">—</td></tr>
+                </table>
+                <div class="hint" id="mc-note">Derselbe Aufbau, tausendmal wiederholt — damit wird aus
+                    der Anschauung eine Zahl.</div>
+            `, '#799e31');
+
+            CyberUI.createCard('ui-container', 'ANZEIGE', `
+                <label class="cyber-checkbox-wrapper">
+                    <input type="checkbox" id="c-pho" class="cyber-checkbox" checked />
+                    <span class="cyber-label">Photonenzeile</span></label>
+                <label class="cyber-checkbox-wrapper">
+                    <input type="checkbox" id="c-tint" class="cyber-checkbox" checked />
+                    <span class="cyber-label">Basentreffer einfärben</span></label>
+                <label class="cyber-checkbox-wrapper">
+                    <input type="checkbox" id="c-col" class="cyber-checkbox" checked />
+                    <span class="cyber-label">Zufallsausgang zeigen</span></label>
+                <label class="cyber-checkbox-wrapper">
+                    <input type="checkbox" id="c-key" class="cyber-checkbox" checked />
+                    <span class="cyber-label">Schlüsselzeile</span></label>
+                <label class="cyber-checkbox-wrapper">
+                    <input type="checkbox" id="c-idx" class="cyber-checkbox" />
+                    <span class="cyber-label">Spaltennummern</span></label>
+                <div class="hint">Ohne „Zufallsausgang zeigen“ steht in unbestimmten Messungen das
+                    „0|1“ des Java-Originals. Gerechnet wird trotzdem mit dem tatsächlichen Ausgang —
+                    ein Photon entscheidet sich beim Messen, auch wenn niemand hinsieht.</div>
+            `, '#c07fe8');
+
+            CyberUI.createCard('ui-container', 'LEGENDE', `
+                <div class="leg">
+                    <div class="leg-row">
+                        <svg width="46" height="18" viewBox="0 0 46 18" aria-hidden="true">
+                            <rect x="1" y="1" width="16" height="16" fill="#0b1c3c" stroke="rgba(255,255,255,.25)"/>
+                            <text x="9" y="13" fill="#dbe8fa" font-family="Orbitron" font-size="10"
+                                  text-anchor="middle">0</text>
+                            <rect x="22" y="1" width="16" height="16" fill="#a9c4e2" stroke="rgba(255,255,255,.25)"/>
+                            <text x="30" y="13" fill="#0b1c3c" font-family="Orbitron" font-size="10"
+                                  text-anchor="middle">1</text>
+                        </svg><span>Bit</span>
+                    </div>
+                    <div class="leg-row">
+                        <svg width="46" height="18" viewBox="0 0 46 18" aria-hidden="true">
+                            <g stroke="#00d2ff" stroke-width="2.4">
+                                <line x1="4" y1="9" x2="14" y2="9"/><line x1="9" y1="4" x2="9" y2="14"/>
+                            </g>
+                            <g stroke="#f5c242" stroke-width="2.4">
+                                <line x1="26" y1="4" x2="34" y2="14"/><line x1="34" y1="4" x2="26" y2="14"/>
+                            </g>
+                        </svg><span>Basis + (cyan) und × (orange)</span>
+                    </div>
+                    <div class="leg-row">
+                        <svg width="46" height="18" viewBox="0 0 46 18" aria-hidden="true">
+                            <g stroke-width="2.6" stroke-linecap="round">
+                                <line x1="2" y1="9" x2="12" y2="9" stroke="#00d2ff"/>
+                                <line x1="18" y1="3" x2="18" y2="15" stroke="#00d2ff"/>
+                                <line x1="28" y1="15" x2="34" y2="3" stroke="#f5c242"/>
+                                <line x1="38" y1="3" x2="44" y2="15" stroke="#f5c242"/>
+                            </g>
+                        </svg><span>Photon: —, |, /, \\</span>
+                    </div>
+                    <div class="leg-row">
+                        <svg width="46" height="18" viewBox="0 0 46 18" aria-hidden="true">
+                            <rect x="1" y="1" width="16" height="16" fill="#0b1c3c" stroke="rgba(255,255,255,.25)"/>
+                            <rect x="2" y="13" width="14" height="3" fill="#b02418"/>
+                            <rect x="22" y="1" width="16" height="16" fill="rgba(121,158,49,.25)"
+                                  stroke="rgba(255,255,255,.25)"/>
+                        </svg><span>roter Fuß: Ergebnis war Zufall · grün: Basen passen</span>
+                    </div>
+                    <div class="leg-row">
+                        <svg width="46" height="18" viewBox="0 0 46 18" aria-hidden="true">
+                            <text x="8" y="13" fill="#ffd700" font-family="Orbitron" font-size="11"
+                                  text-anchor="middle">1</text>
+                            <rect x="18" y="1" width="16" height="16" fill="none" stroke="rgba(226,235,248,.45)"
+                                  stroke-dasharray="2 2"/>
+                            <text x="26" y="13" fill="rgba(226,235,248,.45)" font-family="Orbitron" font-size="11"
+                                  text-anchor="middle">0</text>
+                            <line x1="38" y1="9" x2="45" y2="9" stroke="rgba(93,120,164,.7)" stroke-width="2"/>
+                        </svg><span>Schlüsselbit · Testbit · verworfen</span>
+                    </div>
+                </div>
+            `, '#5d78a4');
+        }
+
+        let lastFx = '';
+
+        function updateReadout() {
+            const st = stats;
+            if (!st) return;
+            const set = (id, v) => { const e = document.getElementById(id); if (e) e.textContent = v; };
+
+            set('v-n', st.n);
+            set('v-k', st.k + '  (' + pct(st.n ? st.k / st.n : NaN, 0) + ')');
+            set('v-m', st.m);
+            set('v-e', st.errTest);
+            set('v-q', st.m ? pct(st.qber) : '—');
+            set('v-key', st.keyLen + ' Bit');
+            set('v-krest', st.errAll - st.errTest);
+
+            /* the detection probability only means something once bits are compared */
+            const fx = document.getElementById('fx-p');
+            const src = st.m
+                ? 'P_{\\text{Fund}}=1-\\left(\\tfrac34\\right)^{' + st.m + '}='
+                + (100 * st.pDetect).toFixed(st.pDetect > 0.999 ? 3 : 1).replace('.', '{,}') + '\\,\\%'
+                : 'P_{\\text{Fund}}=1-\\left(\\tfrac34\\right)^{m}';
+            if (fx && src !== lastFx) {
+                lastFx = src;
+                if (window.katex) {
+                    try { katex.render(src, fx, { throwOnError: false, displayMode: false }); }
+                    catch (e) { fx.textContent = src; }
+                } else fx.textContent = src;
+            }
+
+            const v = document.getElementById('verdict');
+            if (v) {
+                v.className = 'hint';
+                if (S.demo) {
+                    v.textContent = 'Lehrmodus: feste Beispielspalten statt eines Zufallslaufs — '
+                        + 'jede Spalte ist ein eigener Fall.';
+                } else if (st.m === 0) {
+                    v.textContent = 'Ohne öffentlichen Vergleich merken Alice und Bob nichts. '
+                        + 'Den Regler aufziehen, dann wird geprüft.';
+                } else if (st.errTest > 0) {
+                    v.className = 'hint warn';
+                    v.textContent = 'Fehler im Test — jemand hat gemessen. Der Schlüssel wird verworfen '
+                        + 'und der Austausch beginnt von vorn.';
+                } else if (S.eve) {
+                    v.className = 'hint warn';
+                    v.textContent = 'Kein Fehler im Test — Eve ist diesmal durchgeschlüpft. '
+                        + 'Ihre Chance dafür ist (3/4)^m, also '
+                        + pct(Math.pow(0.75, st.m)) + '.';
+                } else {
+                    v.className = 'hint good';
+                    v.textContent = 'Kein Fehler im Test — nichts deutet auf einen Lauscher hin. '
+                        + 'Die restlichen ' + st.keyLen + ' Bits sind der gemeinsame Schlüssel.';
+                }
+            }
+
+            const kb = document.getElementById('keybits');
+            if (kb) kb.textContent = st.bits.length > 512 ? st.bits.slice(0, 512) + ' …' : st.bits;
+        }
+
+        /* ---- the long run ------------------------------------------------
+           The picture shows one throw of the dice. This shows the law behind
+           it: with Eve the mean error rate in the test sample goes to 1/4,
+           and the detection rate to 1 - (3/4)^m. */
+        function longRun(runs) {
+            const t0 = performance.now();
+            let sumQ = 0, valid = 0, det = 0, sumK = 0;
+            for (let r = 0; r < runs; r++) {
+                const c = simulate(S.n, S.eve);
+                const st = analyze(c, S.share);
+                if (st.m > 0) { sumQ += st.errTest / st.m; valid++; if (st.errTest > 0) det++; }
+                sumK += st.keyLen;
+            }
+            const set = (id, v) => { const e = document.getElementById(id); if (e) e.textContent = v; };
+            set('v-mq', valid ? pct(sumQ / valid) : '—');
+            set('v-md', valid ? pct(det / valid) : '—');
+            set('v-mk', (sumK / runs).toFixed(1).replace('.', ',') + ' Bit');
+
+            const note = document.getElementById('mc-note');
+            if (note) {
+                const m = Math.round(S.share * S.n / 2);
+                note.textContent = S.eve
+                    ? runs + ' Läufe mit Lauscherin: die QBER läuft gegen 25 %, die Entdeckungsrate '
+                    + 'gegen 1 − (3/4)^' + m + ' = ' + pct(1 - Math.pow(0.75, m)) + '.'
+                    : runs + ' Läufe ohne Lauscherin: kein einziger Fehler — der Kanal ist sauber, '
+                    + 'jeder Fehler wäre also ein Alarm.';
+            }
+            dbg(runs + ' Läufe in ' + (performance.now() - t0).toFixed(0) + ' ms');
+        }
+
+        /* ---- actions ------------------------------------------------------ */
+        function actNew() { newRun(); render(); }
+
+        function toggleEve() {
+            S.eve = !S.eve;
+            if (S.demo) { S.demo = false; syncDemo(); }
+            syncEve();
+            newRun(); render(); save();
+        }
+
+        function toggleDemo() {
+            S.demo = !S.demo;
+            S.sel = 0;
+            syncDemo();
+            newRun(); render(); save();
+        }
+
+        function toggleHelp() {
+            document.getElementById('help-box').classList.toggle('on');
+        }
+
+        function resetAll() {
+            S.n = 42; S.eve = false; S.demo = false; S.share = 0.30;
+            S.showPhotons = true; S.tintBase = true; S.showCollapse = true;
+            S.showKey = true; S.showIdx = false; S.sel = 0;
+            syncAll();
+            newRun(); render(); save();
+        }
+
+        function syncEve() {
+            const b = document.getElementById('btn-eve');
+            if (!b) return;
+            b.style.cssText = S.eve
+                ? 'border-color:#b02418;color:#e88b82;background:rgba(176,36,24,.16)'
+                : 'border-color:rgba(255,255,255,.2);color:#9db3d4';
+        }
+
+        function syncDemo() {
+            const b = document.getElementById('btn-demo');
+            if (b) {
+                b.style.cssText = S.demo
+                    ? 'border-color:#c07fe8;color:#c07fe8;background:rgba(192,127,232,.14)'
+                    : 'border-color:rgba(255,255,255,.2);color:#9db3d4';
+            }
+            const n = document.getElementById('nbits');
+            const sh = document.getElementById('share');
+            if (n) n.disabled = S.demo;
+            if (sh) sh.disabled = S.demo;
+        }
+
+        function syncAll() {
+            const n = document.getElementById('nbits');
+            if (n) { n.value = S.n; document.getElementById('nbits-value').textContent = S.n; }
+            const sh = document.getElementById('share');
+            if (sh) {
+                sh.value = Math.round(S.share * 100);
+                document.getElementById('share-value').textContent = Math.round(S.share * 100) + ' %';
+            }
+            [['c-pho', 'showPhotons'], ['c-tint', 'tintBase'], ['c-col', 'showCollapse'],
+            ['c-key', 'showKey'], ['c-idx', 'showIdx']].forEach(([id, k]) => {
+                const b = document.getElementById(id);
+                if (b) b.checked = S[k];
+            });
+            syncEve();
+            syncDemo();
+        }
+
+        /* ---- pointer ------------------------------------------------------ */
+        function columnAt(sx) {
+            if (!xs.length) return 0;
+            let best = 0, bestD = Infinity;
+            for (let i = 0; i < xs.length; i++) {
+                const d = Math.abs(sx - (xs[i] + box / 2));
+                if (d < bestD) { bestD = d; best = i; }
+            }
+            return best;
+        }
+
+        canvas.addEventListener('pointermove', (ev) => {
+            const r = canvas.getBoundingClientRect();
+            const i = columnAt(ev.clientX - r.left);
+            if (i !== S.sel) { S.sel = i; render(); }
+        });
+
+        canvas.addEventListener('pointerdown', (ev) => {
+            const r = canvas.getBoundingClientRect();
+            S.sel = columnAt(ev.clientX - r.left);
+            render();
+        });
+
+        /* ---- keyboard ------------------------------------------------------
+           Only real text entry is exempt, and Cmd always belongs to the
+           browser — Cmd-Shift-R has to stay a hard reload. */
+        function isTextField(el) {
+            if (!el) return false;
+            const t = el.tagName;
+            return el.isContentEditable
+                || (t === 'INPUT' && /^(text|search|email|number|password|url|tel)$/i.test(el.type))
+                || t === 'TEXTAREA';
+        }
+
+        function setBits(n) {
+            if (S.demo) return;
+            S.n = Math.min(256, Math.max(8, n));
+            syncAll();
+            newRun();
+        }
+
+        function flip(key, boxId) {
+            S[key] = !S[key];
+            const b = document.getElementById(boxId);
+            if (b) b.checked = S[key];
+        }
+
+        window.addEventListener('keydown', (e) => {
+            if (isTextField(e.target)) return;
+            if (e.metaKey || e.ctrlKey) return;
+            const k = e.key.toLowerCase();
+            let used = true;
+            switch (k) {
+                case ' ': newRun(); break;
+                case 'arrowleft': S.sel = Math.max(0, S.sel - 1); break;
+                case 'arrowright': S.sel = Math.min(cols.length - 1, S.sel + 1); break;
+                case 'arrowup': setBits(S.n + 2); break;
+                case 'arrowdown': setBits(S.n - 2); break;
+                case 'm': setBits(e.shiftKey ? 256 : 12); break;
+                case '4': setBits(42); break;
+                case 'e': toggleEve(); break;
+                case 'l': toggleDemo(); break;
+                case 'p': flip('showPhotons', 'c-pho'); break;
+                case 't': flip('tintBase', 'c-tint'); break;
+                case 'z': flip('showCollapse', 'c-col'); break;
+                case 'k': flip('showKey', 'c-key'); break;
+                case 'n': flip('showIdx', 'c-idx'); break;
+                case 'r': resetAll(); break;
+                case 'i': toggleHelp(); break;
+                case 'escape': document.getElementById('help-box').classList.remove('on'); break;
+                default: used = false;
+            }
+            if (used) { e.preventDefault(); render(); save(); }
+        });
+
+        /* ---- wiring --------------------------------------------------------- */
+        function wire() {
+            const n = document.getElementById('nbits');
+            if (n) n.addEventListener('input', () => {
+                S.n = parseInt(n.value, 10);
+                document.getElementById('nbits-value').textContent = S.n;
+                newRun(); render(); save();
+            });
+
+            const sh = document.getElementById('share');
+            if (sh) sh.addEventListener('input', () => {
+                S.share = parseInt(sh.value, 10) / 100;
+                document.getElementById('share-value').textContent = sh.value + ' %';
+                recompute(); render(); save();
+            });
+
+            [['c-pho', 'showPhotons'], ['c-tint', 'tintBase'], ['c-col', 'showCollapse'],
+            ['c-key', 'showKey'], ['c-idx', 'showIdx']].forEach(([id, key]) => {
+                const b = document.getElementById(id);
+                if (!b) return;
+                b.addEventListener('change', () => { S[key] = b.checked; render(); save(); });
+            });
+        }
+
+        /* ---- coach ----------------------------------------------------------- */
+        function setCoach() {
+            const el = document.getElementById('coach-content');
+            if (el) {
+                const body = 'Alice schickt einzelne Photonen, jedes in einer von zwei Basen: '
+                    + '+ mit den Zuständen — und |, oder × mit / und \\. '
+                    + 'Bob misst mit einer zufällig gewählten Basis. Trifft er dieselbe, misst er sicher '
+                    + 'richtig; trifft er die andere, fällt sein Ergebnis rein zufällig aus. '
+                    + 'Danach vergleichen beide öffentlich nur die Basen und behalten die Hälfte der Bits. '
+                    + 'Wer dazwischen misst, muss neu präparieren und hinterlässt in genau einem Viertel '
+                    + 'dieser Bits einen Widerspruch — das ist der ganze Trick.';
+                el.innerHTML = '<div id="coach-fx" class="fx"></div><div>' + body + '</div>';
+                const fx = document.getElementById('coach-fx');
+                if (fx && window.katex) {
+                    try {
+                        katex.render('\\text{QBER}_{\\text{Eve}}=\\tfrac14\\qquad '
+                            + 'P_{\\text{Fund}}=1-\\left(\\tfrac34\\right)^{m}',
+                            fx, { throwOnError: false, displayMode: false });
+                    } catch (e) { }
+                }
+            }
+            const t = document.getElementById('coach-title-slot');
+            if (t) t.textContent = 'BB84';
+        }
+
+        /* ---- boot ------------------------------------------------------------ */
+        function resizeCanvasToContainer() {
+            const dpr = window.devicePixelRatio || 1;
+            const rect = container.getBoundingClientRect();
+            const w = Math.max(1, rect.width);
+            const h = Math.max(1, rect.height);
+            canvas.width = Math.floor(w * dpr);
+            canvas.height = Math.floor(h * dpr);
+            canvas.style.width = w + 'px';
+            canvas.style.height = h + 'px';
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.scale(dpr, dpr);
+        }
+
+        function init() {
+            resizeCanvasToContainer();
+            render();
+        }
+
+        /* one source for both insets: the explanation bar's floor also becomes the
+           result strip's distance from the bottom edge */
+        document.documentElement.style.setProperty('--stage-inset', BAR_TOP + 'px');
+
+        load();
+        setupUI();
+        wire();
+        syncAll();
+        setCoach();
+        newRun();
+        window.addEventListener('resize', init);
+        document.fonts.ready.then(init);
+        init();
+        dbg('BB84-Lab bereit');
+
+        /* probe for the browser test bench */
+        window.bb84 = { S, cols: () => cols, stats: () => stats, simulate, analyze, render, newRun };
+    </script>
+</body>
+
+</html>
