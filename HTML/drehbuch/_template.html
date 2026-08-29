@@ -1,0 +1,836 @@
+<!doctype html>
+<!-- =====================================================================
+     DREHBUCH-TEMPLATE  —  so entsteht jede Drehbuchseite
+
+     Verbindlich seit dem Kovarianz-Film (29.08.2026). NICHT von vorn bauen:
+     diese Datei kopieren, ausraeumen, fuellen.
+
+         cp HTML/drehbuch/_template.html HTML/drehbuch/<lab>.html
+
+     Warum in HTML/drehbuch/ und nicht als Markdown: serve.py liefert nur HTML/
+     aus. Nur so ist das Drehbuch unter
+     http://localhost:8765/drehbuch/<lab>.html erreichbar und wird wie jedes Lab
+     hart neu geladen.
+
+     WAS ZU ERSETZEN IST, in dieser Reihenfolge — alles ist mit TODO markiert:
+
+      1  <title> und <h1>    kurzer, poetischer Titel; kein Untertitel
+      2  .lede + .status     ein Satz, was das ist; Stand der Produktion
+      3  <dl class="meta">   Lab · Sprecherin · Aufnahme · Szenen · Laufzeit
+      4  .thesis             DER HERO. Ein kleiner, ruhiger Canvas, der das Sujet
+                             des Films zeigt — echt gerechnet, nicht gemalt.
+                             Daneben das Blockquote: die Leitidee in EINEM Satz,
+                             darunter die eine Frage, die der Film beantwortet.
+      5  ARC (im Script)     der dramaturgische Bogen als Kette von Stationen:
+                             aufbauen -> umdrehen -> brechen. Kaputtmachen gehoert
+                             ans Ende und ist der lehrreichste Teil.
+                             key: true = die tragenden Stationen.
+      6  SCENES (im Script)  EINE Datenquelle fuer Zeitleiste, Karten und
+                             Sprechertext. Pro Szene: n, s (geplante Sekunden),
+                             t (Titel), img (was im Bild passiert), aha (der
+                             Gedanke, der fallen soll — noch nicht der Wortlaut).
+                             core: true = Kernszene, wird nicht gekuerzt.
+                             cut:  true = Notbremse, Kuerzungskandidat.
+                             card: true = laeuft nicht im Lab, sondern auf einer
+                             eigenen Karte.
+      7  <ol class="rules">  didaktische Leitplanken, bindend fuer den
+                             Sprechertext. Immer dabei: nie eine Formel ohne
+                             vorher gezeigtes Bild; ein neuer Begriff pro Szene;
+                             verbotene Vokabeln beim Namen nennen; nichts
+                             behaupten, was das Bild nicht hergibt.
+      8  Zeitbudget-Prosa    ehrlich rechnen und das Musikbett dagegenhalten.
+      9  <ul class="notes">  Choreografie: Startzustand, localStorage loeschen,
+                             Nachlaufzeiten, welche Szene maus- oder
+                             timing-kritisch ist.
+     10  Abschnitt F         bewusst weggelassen — was ein Teil 2 koennte.
+     11  Hero-Canvas         das Sujet zeichnen. Klick = neuer Wurf.
+     12  SAY:START/SAY:END   NICHT von Hand fuellen. Der Wortlaut kommt aus
+                             videopipeline/<lab>/narration.mjs ueber
+                             videopipeline/<lab>/sync-drehbuch.mjs — dort den Pfad
+                             auf die eigene Seite setzen und nach JEDER
+                             Textaenderung neu laufen lassen. Damit bleibt
+                             narration.mjs die einzige Quelle fuer den Wortlaut,
+                             und die gemessenen Sekunden aus durs.json
+                             ueberschreiben die geplanten in der Zeitleiste.
+
+     REGELN, die man beim Fuellen leicht vergisst:
+     - Schriften und Farben aus dem LAB uebernehmen, nicht aus einem Fremddesign.
+       Die Akzentfarben muessen dieselbe Bedeutung tragen wie im Lab.
+     - Szenen als Karten mit zwei Spalten (Bild | Aha), nie als Tabelle.
+     - In der Zeitleiste ist jede Szene so breit, wie sie lang ist.
+     - Schrift eher zu gross als zu klein. Auch die Orbitron-Kleinlabels.
+     - Statusfarben satt, nicht als gedaempfter Wash.
+     - Runde 1 ist der Plot allein. Doc liest und gibt frei. Erst DANACH entstehen
+       Solitas Saetze. Nie beides auf einmal liefern.
+     ===================================================================== -->
+
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+
+<style>
+/* minimal reset - the artifact host used to provide this */
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; min-height: 100vh; }
+img, canvas, svg { display: block; max-width: 100%; }
+button, input { font: inherit; }
+:focus-visible { outline: 2px solid #00d2ff; outline-offset: 2px; }
+</style>
+<title>TODO Titel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&family=Outfit:wght@200;300;400;600&display=swap">
+
+<style>
+/* Palette and faces are the lab's own (bb84.html): Orbitron + Outfit,
+   deep blue ground, cyan = the image under A, orange/green = the two
+   principal axes. Single-theme on purpose - this is the lab's world. */
+:root {
+    --ground:      #081428;
+    --ground-deep: #050e1c;
+    --surface:     #0c1c3a;
+    --surface-2:   #0e244e;
+    --line:        #1c3565;
+    --line-soft:   #16294d;
+
+    --ink:         #e6eefa;
+    --ink-dim:     #b3c5de;
+    --ink-faint:   #8ba1c0;
+
+    --cyan:        #00d2ff;
+    --lambda:      #f5c242;
+    --phi:         #799e31;
+    --violet:      #c07fe8;
+    --red:         #b02418;
+
+    --step: clamp(0.9rem, 0.55rem + 1.1vw, 1.5rem);
+}
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    background: var(--ground);
+    background-image:
+        radial-gradient(1100px 620px at 12% -8%, #0f2a55 0%, transparent 62%),
+        radial-gradient(900px 520px at 92% 4%, #10203f 0%, transparent 58%);
+    background-attachment: fixed;
+    color: var(--ink);
+    font-family: 'Outfit', system-ui, sans-serif;
+    font-weight: 300;
+    font-size: 1.1rem;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+}
+
+.wrap {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: clamp(1.6rem, 4vw, 4rem) clamp(1.1rem, 4vw, 2.6rem) 6rem;
+}
+
+/* ---------- shared type ---------- */
+.eyebrow {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+}
+
+h1, h2, h3 { font-family: 'Orbitron', sans-serif; text-wrap: balance; margin: 0; }
+
+h1 {
+    font-size: clamp(2rem, 1.2rem + 3.4vw, 3.4rem);
+    font-weight: 700;
+    line-height: 1.08;
+    letter-spacing: -0.01em;
+    margin: 0.5rem 0 0;
+}
+
+h2 {
+    font-size: clamp(1.05rem, 0.9rem + 0.6vw, 1.32rem);
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    color: var(--ink);
+}
+
+p { margin: 0; }
+
+em { font-style: italic; color: #eaf2fd; }
+strong { font-weight: 600; color: #f2f7ff; }
+
+/* mathematical symbols, set apart without a formula engine */
+.m {
+    font-family: 'Outfit', system-ui, sans-serif;
+    font-style: italic;
+    font-weight: 400;
+    color: var(--cyan);
+    white-space: nowrap;
+}
+.m.l { color: var(--lambda); }
+.m.g { color: var(--phi); }
+
+/* ---------- header ---------- */
+header { margin-bottom: clamp(1.8rem, 4vw, 3rem); }
+
+.status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.74rem;
+    font-weight: 500;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--lambda);
+    border: 1px solid #4a3a15;
+    background: #1b1607;
+    border-radius: 2px;
+    padding: 0.34rem 0.7rem;
+    margin-top: 1.1rem;
+}
+.status::before {
+    content: "";
+    width: 5px; height: 5px;
+    background: var(--lambda);
+    border-radius: 50%;
+}
+
+.lede {
+    margin-top: 1.1rem;
+    max-width: 60ch;
+    color: var(--ink-dim);
+    font-size: 1.18rem;
+}
+
+.meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 2rem;
+    margin-top: 1.6rem;
+    padding-top: 1.2rem;
+    border-top: 1px solid var(--line-soft);
+}
+.meta div { display: flex; flex-direction: column; gap: 0.15rem; padding: 0.4rem 0; }
+.meta dt {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.74rem;
+    font-weight: 500;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+}
+.meta dd { margin: 0; font-size: 1.02rem; color: var(--ink); }
+.meta a { color: var(--cyan); text-decoration: none; border-bottom: 1px solid #05506b; }
+.meta a:hover, .meta a:focus-visible { border-bottom-color: var(--cyan); }
+
+/* ---------- hero canvas + thesis ---------- */
+.thesis {
+    display: grid;
+    grid-template-columns: minmax(0, 300px) minmax(0, 1fr);
+    gap: clamp(1.2rem, 3vw, 2.6rem);
+    align-items: center;
+    margin: clamp(1.6rem, 4vw, 2.6rem) 0 clamp(2.4rem, 6vw, 4rem);
+    padding: clamp(1.2rem, 3vw, 2rem);
+    background: linear-gradient(160deg, var(--surface) 0%, var(--ground-deep) 100%);
+    border: 1px solid var(--line);
+    border-radius: 3px;
+}
+@media (max-width: 700px) { .thesis { grid-template-columns: 1fr; } }
+
+#stage {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    display: block;
+    border-radius: 2px;
+    background: #04101f;
+}
+
+.thesis blockquote {
+    margin: 0;
+    font-size: clamp(1.15rem, 0.95rem + 1vw, 1.6rem);
+    line-height: 1.42;
+    font-weight: 200;
+    color: #eef4fd;
+    text-wrap: balance;
+}
+.thesis blockquote strong { font-weight: 600; }
+.thesis .after {
+    margin-top: 1.1rem;
+    color: var(--ink-dim);
+    font-size: 1.06rem;
+    max-width: 54ch;
+}
+
+/* ---------- section frame ---------- */
+section { margin-top: clamp(2.6rem, 6vw, 4.4rem); }
+
+.head {
+    display: flex;
+    align-items: baseline;
+    gap: 0.9rem;
+    padding-bottom: 0.7rem;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 1.5rem;
+}
+.head .n {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.84rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: var(--cyan);
+}
+.head .note { margin-left: auto; font-size: 0.9rem; color: var(--ink-faint); }
+
+.prose { max-width: 66ch; color: var(--ink-dim); display: grid; gap: 0.85rem; }
+.prose strong { color: #eaf2fd; }
+
+/* ---------- the arc ---------- */
+.arc {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    align-items: stretch;
+    margin-bottom: 1.5rem;
+}
+.arc span {
+    flex: 1 1 auto;
+    min-width: 92px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.76rem;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    text-align: center;
+    padding: 0.85rem 0.5rem;
+    background: var(--surface);
+    border: 1px solid var(--line-soft);
+    border-top: 2px solid var(--stop, var(--line));
+    color: var(--ink-dim);
+    text-wrap: balance;
+    line-height: 1.4;
+}
+.arc span.key { color: #eef4fd; background: var(--surface-2); }
+
+/* ---------- timeline ---------- */
+.timeline {
+    display: flex;
+    width: 100%;
+    height: 54px;
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-bottom: 0.7rem;
+}
+.timeline i {
+    position: relative;
+    display: block;
+    border-right: 1px solid var(--ground-deep);
+    background: var(--lambda);
+    font-style: normal;
+    transition: background 0.15s;
+}
+.timeline i:last-child { border-right: 0; }
+.timeline i.core { background: var(--phi); }
+.timeline i.cut  { background: var(--red); }
+.timeline i::after {
+    content: attr(data-n);
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.74rem;
+    font-weight: 700;
+    color: #1a1305;
+}
+.timeline i.core::after { color: #0d1a06; }
+.timeline i.cut::after  { color: #ffdcd7; font-weight: 700; }
+
+.legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.4rem;
+    font-size: 0.87rem;
+    color: var(--ink-faint);
+}
+.legend b { font-weight: 400; color: var(--ink-dim); }
+.legend span { display: inline-flex; align-items: center; gap: 0.42rem; }
+.legend s { width: 11px; height: 11px; border-radius: 2px; text-decoration: none; display: inline-block; }
+
+/* ---------- scenes ---------- */
+.scenes { display: grid; gap: 0.7rem; }
+
+.scene {
+    display: grid;
+    grid-template-columns: 3.6rem minmax(0, 1fr);
+    gap: 0 1.1rem;
+    padding: 1.4rem 1.55rem 1.5rem;
+    background: var(--surface);
+    border: 1px solid var(--line-soft);
+    border-left: 2px solid var(--lambda);
+    border-radius: 2px;
+}
+.scene.core { border-left-color: var(--phi); background: linear-gradient(90deg, #16240f 0%, var(--surface) 34%); }
+.scene.cut  { border-left-color: var(--red); }
+
+.scene .idx {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--lambda);
+    font-variant-numeric: tabular-nums;
+    padding-top: 0.1rem;
+}
+.scene.core .idx { color: var(--phi); }
+.scene.cut .idx  { color: #c9503f; }
+
+.scene .top {
+    display: flex;
+    align-items: baseline;
+    gap: 0.8rem;
+    flex-wrap: wrap;
+    margin-bottom: 0.7rem;
+}
+.scene h3 { font-size: 1.16rem; font-weight: 700; letter-spacing: 0.01em; color: #f0f6ff; }
+
+.tag {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.68rem;
+    font-weight: 500;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    padding: 0.2rem 0.45rem;
+    border-radius: 2px;
+    border: 1px solid;
+}
+.tag.core { color: #0d1a06; border-color: var(--phi); background: var(--phi); }
+.tag.cut  { color: #ffdcd7; border-color: var(--red); background: var(--red); }
+
+.secs {
+    margin-left: auto;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: var(--ink-faint);
+    font-variant-numeric: tabular-nums;
+}
+
+.body {
+    display: grid;
+    grid-template-columns: minmax(0, 1.08fr) minmax(0, 1fr);
+    gap: 0.6rem 1.6rem;
+}
+@media (max-width: 720px) { .body { grid-template-columns: 1fr; gap: 1rem; } }
+
+.body > div { display: grid; gap: 0.34rem; align-content: start; }
+.body h4 {
+    margin: 0;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.84rem;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+}
+.body p { font-size: 1.06rem; line-height: 1.66; color: var(--ink-dim); }
+.body .aha { border-left: 1px solid var(--line); padding-left: 1.6rem; }
+@media (max-width: 720px) { .body .aha { border-left: 0; padding-left: 0; border-top: 1px solid var(--line); padding-top: 0.9rem; } }
+.body .aha p { color: var(--ink); }
+
+/* what Solita actually says - generated from narration.mjs, never hand-edited */
+.say {
+    margin-top: 1.1rem;
+    padding: 0.95rem 1.2rem;
+    background: #0a1830;
+    border: 1px solid var(--line-soft);
+    border-left: 2px solid var(--cyan);
+    border-radius: 2px;
+}
+.say h4 {
+    margin: 0 0 0.45rem;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.64rem;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--cyan);
+}
+.say p {
+    margin: 0;
+    font-size: 1.06rem;
+    line-height: 1.62;
+    color: var(--ink);
+}
+.say .pause {
+    display: inline-block;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.66rem;
+    font-weight: 500;
+    color: var(--lambda);
+    background: #241c07;
+    border: 1px solid #4a3a15;
+    border-radius: 2px;
+    padding: 0.05rem 0.4rem;
+    margin: 0 0.22rem;
+    vertical-align: 0.08em;
+    white-space: nowrap;
+}
+.say .beat {
+    display: inline-block;
+    width: 0.5em;
+    height: 0.5em;
+    margin: 0 0.1em;
+    background: radial-gradient(circle, var(--cyan) 1.6px, transparent 1.8px);
+    vertical-align: 0.05em;
+    opacity: 0.55;
+}
+.say .spell {
+    border-bottom: 1px dotted var(--ink-faint);
+    letter-spacing: 0.12em;
+}
+
+/* ---------- rules / lists ---------- */
+.rules { display: grid; gap: 0.6rem; counter-reset: r; max-width: 74ch; }
+/* the number is positioned, not a grid cell - as a grid item the bare text
+   after the bold lead-in became its own item and fell into the 1.8rem column */
+.rules li {
+    list-style: none;
+    position: relative;
+    padding-left: 2.8rem;
+    font-size: 1.05rem;
+    color: var(--ink-dim);
+}
+.rules li::before {
+    counter-increment: r;
+    content: counter(r, decimal-leading-zero);
+    position: absolute;
+    left: 0;
+    top: 0.28rem;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.84rem;
+    font-weight: 500;
+    color: var(--violet);
+}
+.rules { padding: 0; margin: 0; }
+
+.notes { display: grid; gap: 0.75rem; max-width: 74ch; padding: 0; margin: 0; }
+.notes li {
+    list-style: none;
+    font-size: 1.05rem;
+    color: var(--ink-dim);
+    padding-left: 1.1rem;
+    border-left: 1px solid var(--line);
+}
+.notes strong { color: #eaf2fd; }
+
+code {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 0.85em;
+    color: var(--cyan);
+    background: #0a1a33;
+    border: 1px solid var(--line-soft);
+    border-radius: 2px;
+    padding: 0.06em 0.34em;
+}
+
+/* ---------- budget ---------- */
+.budget {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1px;
+    background: var(--line-soft);
+    border: 1px solid var(--line-soft);
+    border-radius: 2px;
+    margin-bottom: 1.5rem;
+}
+.budget div { background: var(--surface); padding: 1rem 1.1rem; display: grid; gap: 0.28rem; }
+.budget dt {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.74rem;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+}
+.budget dd {
+    margin: 0;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--cyan);
+    font-variant-numeric: tabular-nums;
+}
+.budget dd small { display: block; font-family: 'Outfit', sans-serif; font-size: 0.78rem; font-weight: 300; color: var(--ink-faint); letter-spacing: 0; margin-top: 0.2rem; }
+
+.solved { color: var(--phi); }
+
+/* ---------- footer ---------- */
+footer {
+    margin-top: clamp(2.6rem, 6vw, 4.4rem);
+    padding-top: 1.6rem;
+    border-top: 1px solid var(--line);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem 2rem;
+    align-items: baseline;
+}
+footer p { font-size: 1.05rem; color: var(--ink-dim); max-width: 58ch; }
+footer .sig { margin-left: auto; }
+
+@media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+    <p class="eyebrow">Doc Alvers Mathe-Labor · Videopipeline</p>
+    <h1>TODO — kurzer, poetischer Titel</h1>
+    <p class="lede">TODO: Der Plot für das Demovideo — was passiert, in welcher
+        Reihenfolge, und warum genau dort der Groschen fällt.</p>
+    <p class="status">TODO: Plot im Entwurf</p>
+
+    <dl class="meta">
+        <div><dt>Lab</dt><dd><a href="https://docalvers.de/TODO.html">TODO.html</a></dd></div>
+        <div><dt>Sprecherin</dt><dd>Solita · de-DE-Studio</dd></div>
+        <div><dt>Aufnahme</dt><dd>1440p · Playwright</dd></div>
+        <div><dt>Szenen</dt><dd>TODO</dd></div>
+        <div><dt>Laufzeit</dt><dd>TODO</dd></div>
+    </dl>
+</header>
+
+<div class="thesis">
+    <canvas id="stage" width="600" height="600" role="img"
+            aria-label="TODO: beschreiben, was der Canvas zeigt"></canvas>
+    <div>
+        <blockquote>TODO: die Leitidee in <strong>einem</strong> Satz.</blockquote>
+        <p class="after">Der ganze Film ist die Antwort auf eine einzige Frage:
+            <em>TODO?</em></p>
+    </div>
+</div>
+
+<section>
+    <div class="head"><span class="n">A</span><h2>Der dramaturgische Bogen</h2></div>
+    <div class="arc" id="arc"></div>
+    <div class="prose">
+        <p>TODO: den Bogen in zwei, drei Sätzen erzählen — welche Szenen bauen auf,
+           welche drehen um, welche machen kaputt. <strong>Kaputtmachen ist der
+           lehrreichste Teil.</strong></p>
+    </div>
+</section>
+
+<section>
+    <div class="head"><span class="n">B</span><h2>Die TODO Szenen</h2>
+        <span class="note" id="tl-note">Breite = Sprechzeit</span></div>
+    <div class="timeline" id="timeline"></div>
+    <div class="legend">
+        <span><s style="background:#799e31"></s><b>Kernszene — wird nicht gekürzt</b></span>
+        <span><s style="background:#b02418"></s><b>Notbremse, falls der Schnitt zäh wirkt</b></span>
+        <span><s style="background:#f5c242"></s><b>Regelszene</b></span>
+    </div>
+    <div class="scenes" id="scenes" style="margin-top:1.5rem"></div>
+</section>
+
+<section>
+    <div class="head"><span class="n">C</span><h2>Didaktische Leitplanken</h2>
+        <span class="note">bindend für den Sprechertext</span></div>
+    <ol class="rules">
+        <li><strong>Nie eine Formel ohne vorher gezeigtes Bild.</strong> Erst sieht
+            man es, dann heißt es so.</li>
+        <li><strong>Ein neuer Begriff pro Szene.</strong> Maximal. Lieber eine Szene mehr.</li>
+        <li>TODO: verbotene Vokabeln beim Namen nennen — und schreiben, warum.</li>
+        <li>TODO: wie mit Zahlen umgegangen wird (vorlesen, wenn sie springen).</li>
+        <li><strong>Nichts behaupten, was das Bild nicht hergibt.</strong> TODO: welche
+            Szene ist dafür da?</li>
+    </ol>
+</section>
+
+<section>
+    <div class="head"><span class="n">D</span><h2>Zeitbudget</h2>
+        <span class="note solved">gelöst</span></div>
+    <dl class="budget" id="budget"></dl>
+    <div class="prose">
+        <p>TODO: Zeitbudget ehrlich gegen das Musikbett rechnen. Teil 1 von
+           <code>Infinity_6min.m4a</code> ist <strong>nahtlos loopbar</strong>
+           (loopStart 21,220 s, loopEnd 163,998 s) — das Bett lässt sich auf jede
+           Länge rendern, die 360 s der Datei sind keine Obergrenze.</p>
+    </div>
+</section>
+
+<section>
+    <div class="head"><span class="n">E</span><h2>Choreografie-Notizen</h2>
+        <span class="note">für die Aufnahme</span></div>
+    <ul class="notes">
+        <li><strong>Startzustand fixieren:</strong> TODO. Das Lab merkt sich seinen
+            Zustand in <code>localStorage</code> — vor jeder Aufnahme löschen (ein
+            frischer Browser-Context tut das von selbst).</li>
+        <li>TODO: Nachlaufzeiten — wo läuft noch etwas, wenn Solita schon schweigt?</li>
+        <li>TODO: welche Szene ist maus- oder timing-kritisch? <strong>Als erstes
+            proben.</strong></li>
+        <li>Der lokale Server klebt ein rotes <strong>LOCAL</strong>-Schild in die Seite.
+            Die Aufnahme muss <code>#local-badge</code> vor dem ersten Bild entfernen.</li>
+    </ul>
+</section>
+
+<section>
+    <div class="head"><span class="n">F</span><h2>Bewusst weggelassen</h2>
+        <span class="note">Kandidaten für Teil 2</span></div>
+    <div class="prose">
+        <p>TODO: was bewusst draußen bleibt — und warum es den Film schlechter
+           gemacht hätte.</p>
+    </div>
+</section>
+
+<footer>
+    <p><strong>Nächster Schritt:</strong> TODO.</p>
+    <p class="eyebrow sig">Doc Alvers Mathe-Labor</p>
+</footer>
+
+</div>
+
+<script>
+/* ---------------------------------------------------------------
+   One source of truth: the scene list feeds both the timeline and
+   the cards below it.
+   --------------------------------------------------------------- */
+const SCENES = [
+    /* n = Nummer · s = geplante Sekunden (nach der Vertonung von SPOKEN ueberschrieben)
+       t = Titel · img = was im Bild passiert · aha = der Gedanke, der fallen soll
+       core: true = Kernszene · cut: true = Notbremse · card: true = eigene Karte */
+    { n: 1, s: 20, t: 'TODO Titel der Szene',
+      img: 'TODO: was im Bild passiert.',
+      aha: 'TODO: der Gedanke, der an dieser Stelle fallen soll.' },
+
+    { n: 2, s: 20, t: 'TODO', core: true,
+      img: 'TODO',
+      aha: 'TODO' }
+];
+
+/* SAY:START - generated by videopipeline/<lab>/sync-drehbuch.mjs, do not edit */
+const SAY = {
+    s1: 'Alles, was du heute verschlüsselt verschickst — eine Überweisung, eine Mail, eine Krankenakte — kann jemand mitschneiden. Lesen kann er es nicht. Aber aufheben. Zwanzig Jahre lang, wenn es sein muss. Er muss deinen Schlüssel gar nicht knacken. Er muss nur warten, bis das Knacken leicht wird.',
+    s2: 'Unsere Verschlüsselung ist nämlich eine Wette. Zwei große Primzahlen malzunehmen ist leicht; sie zurückzurechnen, schafft kein Computer der Welt. Nur ist das kein Naturgesetz, sondern eine Annahme über Rechenzeit — und 1994 zeigte ein Mathematiker, wie eine ganz andere Sorte Rechner sie gewinnt. Den Rechner gibt es noch nicht. Die Mitschnitte gibt es schon.',
+    s3: 'Das Problem sitzt nicht in der Mathematik, es sitzt in der Leitung. Eine normale Nachricht liest man, ohne sie anzufassen — lesen heißt kopieren, und Kopieren hinterlässt keine Spur. Jede Leitung der Welt lässt sich lautlos anzapfen. Es gibt aber eine Sorte Post, bei der das Hinschauen verändert, was man anschaut. Dann verschlüsseln wir nicht besser — wir merken, dass jemand zuhört. Aber was verschicken wir da?',
+    s4: 'Ein Photon. Die kleinste Portion Licht, die es gibt. Kein Kügelchen, keine Welle — eine Portion, und halbieren kann man sie nicht: Entweder eines kommt an, oder keines. Dieses Photon schwingt in eine Richtung, waagerecht, senkrecht oder schräg. Die Richtung heißt Polarisation, und in ihr steckt unser Bit.',
+    s5: 'Alice hat zwei Sorten Filter. Der blaue kennt waagerecht und senkrecht, der orange die beiden Schrägen. Mit jedem kann sie Null und Eins schreiben: vier Zustände, zwei Alphabete für dieselbe Nachricht. Die Fachleute sagen Basis dazu — ich bleibe bei Alphabet.',
+    s6: 'Und jetzt der Versuch, für den du nur zwei polarisierte Sonnenbrillen brauchst. Zwei Gläser übereinander, eines um neunzig Grad gedreht: Es wird dunkel. Jetzt schiebe ein drittes Glas dazwischen, schräg. Man sollte meinen, erst recht nichts kommt durch — es wird heller. Ein Achtel des Lichts geht wieder hindurch. Der Filter liest also nicht ab, was da war. Er entscheidet, was danach ist.',
+    s7: 'Genau das spielen Alice und Bob. Das Verfahren heißt <span class="spell">BB</span> 84, nach Bennett und Brassard, 1984. Alice würfelt ein Bit und ein Alphabet dazu und schickt das Photon los. Bob weiß nicht, welches Alphabet sie genommen hat — also würfelt er auch.',
+    s8: 'Hat er zufällig denselben Filter, misst er sicher richtig. Hat er den anderen, passiert das aus dem Sonnenbrillen-Versuch: Das Photon entscheidet sich neu, rein zufällig. Bob bekommt Null oder Eins, und keine von beiden hat mit Alices Bit zu tun. Das ist kein Nichtwissen, das ist Unbestimmtheit — der rote Balken zeigt sie an.',
+    s9: 'Taste L schaltet den Lehrmodus ein: Statt eines Zufallslaufs steht jeder mögliche Fall genau einmal da. Die ersten vier Spalten — gleiche Filter, alles sauber. Die nächsten vier — verschiedene Filter, zweimal dasselbe Photon, einmal wird eine Null daraus und einmal eine Eins.',
+    s10: 'Jetzt kommt der Teil, der die meisten überrascht: Danach reden die beiden völlig offen, über eine Leitung, die jeder mithören darf. Sie verraten nur, welchen Filter sie benutzt haben — nie das Bit. Wo beide denselben hatten, bleibt das Bit stehen, der Rest fliegt weg. Ungefähr die Hälfte. Kein Verlust, sondern der Preis.',
+    s11: 'Und was macht eine Lauscherin? Nennen wir sie Eve. Sie kann das Photon nicht heimlich anschauen und weiterreichen, und abschreiben kann sie es auch nicht — dass sich ein Quantenzustand nicht kopieren lässt, ist bewiesen. Ihr bleibt nur eines: messen und ein neues Photon losschicken. Und dafür muss sie raten.',
+    s12: 'Rechnen wir mit. In der Hälfte der Fälle rät Eve richtig — dann merkt niemand etwas. In der anderen Hälfte rät sie falsch und schickt ein Photon in die falsche Richtung weiter. Bob, der alles richtig gemacht hat, bekommt trotzdem Zufall: in der Hälfte davon das falsche Bit. Halbe mal halbe — jedes vierte gemeinsame Bit ist kaputt. Eve kann das nicht vermeiden. Es ist ihr nicht erlaubt.',
+    s13: 'Also stellen Alice und Bob eine Falle: Sie opfern ein paar Bits und rufen sie sich laut zu. Ohne Lauscherin stimmen alle, mit Lauscherin ist jedes vierte falsch. Eves Chance durchzukommen sinkt mit jedem geprüften Bit auf drei Viertel — nach zwanzig Bits steht sie bei drei von tausend. Und weil ein Durchlauf nichts beweist, machen wir es tausendmal.',
+    s14: 'Ein Knopf, tausend komplette Schlüsselaustausche. Die mittlere Fehlerquote landet bei fünfundzwanzig Komma null Prozent, genau auf dem Viertel, und die Entdeckungsrate genau auf der Kurve daneben. Nichts in diesem Labor ist behauptet. Es steht gemessen daneben.',
+    s15: 'Wie viele Photonen braucht man? Mit zwölf ist es noch ein Würfelspiel: mal bleiben acht Bits übrig, mal vier. Zieh den Regler auf zweihundertsechsundfünfzig, und aus der Hälfte wird Verlässlichkeit. Der Zufall wird brav, wenn man ihn oft genug fragt.',
+    s16: 'Und was macht man mit diesen goldenen Bits? Sie sind keine Nachricht, sie sind ein Schlüssel: eine Zufallsfolge, die genau zwei Menschen kennen. Ist sie so lang wie die Nachricht, verrechnet man beide Zeichen für Zeichen — beweisbar unknackbar, das hat Claude Shannon gezeigt. Sein einziges Problem war immer: Wie bekommen die beiden den Schlüssel? Genau das haben wir eben gelöst.',
+    s17: 'Und das ist kein Gedankenspiel. Über Glasfasern läuft es seit Jahren, eine Wiener Bank hat 2004 eine Überweisung so abgesichert, von einem Satelliten aus gingen Schlüssel über tausende Kilometer. Die Grenzen sind ehrlich: Ein Photon kann man nicht verstärken, nach ein paar hundert Kilometern ist Schluss. Und die beiden müssen sich vorher sicher erkennen — sonst redet Eve mit jedem einzeln.',
+    s18: 'Dieser Schlüssel ist nicht sicher, weil er schwer zu knacken wäre. Er ist sicher, weil das Universum petzt. Eine Frage bleibt offen: Warum entscheidet sich das Photon erst beim Messen? Daran hat sich der größte Streit der Physik entzündet, mit Einstein mittendrin — das wird ein eigenes Labor. Bis dahin: Probier dieses hier aus, im Doc Alvers Mathe-Labor auf doc alvers punkt <span class="spell">de</span>.'
+};
+const SPOKEN = {"s1":15.576,"s2":21.96,"s3":22.944,"s4":16.944,"s5":14.784,"s6":20.064,"s7":15.024,"s8":18.336,"s9":15.24,"s10":17.184,"s11":16.272,"s12":21.264,"s13":18.552,"s14":15.048,"s15":12.672,"s16":20.472,"s17":22.728,"s18":20.64};
+/* SAY:END */
+
+const ARC = [
+    { t: 'TODO',            c: '#93a8c6' },
+    { t: 'TODO',            c: '#00d2ff', key: true },
+    { t: 'TODO<br>brechen', c: '#b02418', key: true }
+];
+
+/* --- the arc --- */
+document.getElementById('arc').innerHTML = ARC.map(a =>
+    `<span class="${a.key ? 'key' : ''}" style="--stop:${a.c}">${a.t}</span>`).join('');
+
+/* --- timeline: each scene as wide as it is long --- */
+const secs = (x) => SPOKEN['s' + x.n] ?? x.s;
+const total = SCENES.reduce((s, x) => s + secs(x), 0);
+document.getElementById('timeline').innerHTML = SCENES.map(x =>
+    `<i class="${x.core ? 'core' : x.cut ? 'cut' : ''}" data-n="${x.n}"
+        style="flex:0 0 ${(secs(x) / total * 100).toFixed(3)}%"
+        title="Szene ${x.n} · ${secs(x).toFixed(1)} s"></i>`).join('');
+
+/* --- budget, from the measured durations when they exist --- */
+(function () {
+    const spoken = Object.values(SPOKEN).reduce((a, b) => a + b, 0);
+    const planned = SCENES.reduce((a, x) => a + x.s, 0);
+    const air = SCENES.length * 1.6;
+    const film = (spoken || planned) + air;
+    const mmss = (t) => Math.floor(t / 60) + ':' + String(Math.round(t % 60)).padStart(2, '0');
+    const cell = (dt, dd, sub) => `<div><dt>${dt}</dt><dd>${dd}<small>${sub}</small></dd></div>`;
+    document.getElementById('budget').innerHTML =
+        cell('Sprache', (spoken || planned).toFixed(0) + ' s',
+             spoken ? 'gemessen' : 'geplant') +
+        cell('Luft', '~' + air.toFixed(0) + ' s', '1,6 s je Szene') +
+        cell('Film', mmss(film), spoken ? 'nach der Vertonung' : 'geschätzt') +
+        cell('Bett-Loop', '142,778 s', '64 Takte · 107,58 BPM');
+    if (spoken) {
+        const n = document.getElementById('tl-note');
+        if (n) n.textContent = 'Breite = gemessene Sprechzeit';
+    }
+})();
+
+/* --- scene cards --- */
+document.getElementById('scenes').innerHTML = SCENES.map(x => `
+    <article class="scene ${x.core ? 'core' : x.cut ? 'cut' : ''}">
+        <div class="idx">${String(x.n).padStart(2, '0')}</div>
+        <div>
+            <div class="top">
+                <h3>${x.t}</h3>
+                ${x.core ? '<span class="tag core">Kernszene</span>' : ''}
+                ${x.cut ? '<span class="tag cut">Notbremse</span>' : ''}
+                <span class="secs">${secs(x).toFixed(1)} s</span>
+            </div>
+            <div class="body">
+                <div><h4>Was im Bild passiert</h4><p>${x.img}</p></div>
+                <div class="aha"><h4>Der Aha</h4><p>${x.aha}</p></div>
+            </div>
+            ${SAY['s' + x.n] ? `<div class="say"><h4>Solita sagt</h4><p>${SAY['s' + x.n]}</p></div>` : ''}
+        </div>
+    </article>`).join('');
+
+/* ---------------------------------------------------------------
+   Hero: TODO - the film's own subject, really computed, not painted.
+   A small, quiet canvas showing the thing the film is about; a click
+   gives a fresh draw. Keep it calm: it sits next to the thesis, it is
+   not the show.
+   --------------------------------------------------------------- */
+(function () {
+    const cv = document.getElementById('stage');
+    if (!cv) return;
+    const ctx = cv.getContext('2d');
+
+    function fit() {
+        const r = cv.getBoundingClientRect();
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        cv.width = Math.max(1, Math.round(r.width * dpr));
+        cv.height = Math.max(1, Math.round(r.height * dpr));
+    }
+
+    function draw() {
+        fit();
+        const W = cv.width, H = cv.height, px = W / 600;
+        ctx.clearRect(0, 0, W, H);
+        ctx.fillStyle = '#04101f';
+        ctx.fillRect(0, 0, W, H);
+        ctx.fillStyle = '#8ba1c0';
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.font = 300 + ' ' + (16 * px) + 'px Outfit, system-ui, sans-serif';
+        ctx.fillText('TODO: das Sujet des Films zeichnen', W / 2, H / 2);
+    }
+
+    draw();
+    addEventListener('resize', draw, { passive: true });
+    cv.style.cursor = 'pointer';
+    cv.addEventListener('click', draw);
+    document.fonts.ready.then(draw);
+})();
+</script>
+</body>
+</html>
