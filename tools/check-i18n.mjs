@@ -28,6 +28,8 @@ ctx.document = {
     querySelector: () => null,
     createElement: () => ({ setAttribute() {} }),
     head: { insertBefore() {} },
+    write() {}, // i18n.js / i18n-index.js are loaders now — ignore their document.write here
+    currentScript: null,
 };
 ctx.addEventListener = () => {};
 ctx.localStorage = { getItem: () => null, setItem() {} };
@@ -43,7 +45,7 @@ const labs = run('labs-config.js', '\nLABS_DATA;');
 // top-level `const CyberI18n` stays script-local under vm — capture it into the shared context
 ctx.CyberI18n = run('i18n.js', '\nCyberI18n;');
 for (const l of LANGS) run(`i18n-${l}.js`);
-run('i18n-index.js');
+for (const l of LANGS) run(`i18n-index-${l}.js`); // per-language files; i18n-index.js is just the loader
 
 const T = ctx.CyberI18n.translations;
 const ids = labs.map((l) => l.id);

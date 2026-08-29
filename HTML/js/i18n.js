@@ -1,11 +1,12 @@
 /**
  * CYBER-LABOR GLOBAL i18n DICTIONARY — CORE
  * Languages: DE, EN, ES, FR, IT, PT, NL, SW, TR
- * Translations are in separate files loaded after this one:
- *   i18n-de.js  i18n-en.js  i18n-es.js  i18n-fr.js  i18n-it.js
- *   i18n-pt.js  i18n-sw.js  i18n-tr.js  i18n-nl.js
- * Language bootstrap (resolveLanguageFromEnvironment + translate-prompt suppression +
- * bfcache re-sync) runs at the end of THIS file — it needs no dictionaries, only URL/localStorage.
+ * The bootstrap at the end of THIS file resolves the language (URL/localStorage,
+ * no dictionaries needed) and then document.writes ONLY the active language's
+ * dictionary (i18n-<lang>.js) — pages do NOT list dictionary <script> tags anymore.
+ * Language switching always reloads the page (CyberUI.cycleCyberLabLang /
+ * index.html setLanguage), so one language per page load is sufficient.
+ * Index/tools card texts load the same way via the i18n-index.js loader.
  */
 
 const CyberI18n = {
@@ -161,4 +162,18 @@ const CyberI18n = {
         },
         false
     );
+})();
+
+// Load ONLY the active language's dictionary. document.write on purpose: it blocks the
+// parser like a static <script> tag, so inline scripts further down the page can rely on
+// the dictionary being present (dynamic insertion would race with DOMContentLoaded).
+(function () {
+    try {
+        // Derive the path prefix from this script's own src so subdirectory pages work too.
+        var src = document.currentScript && document.currentScript.src;
+        var base = src ? src.replace(/i18n\.js.*$/, '') : 'js/';
+        document.write('<script src="' + base + 'i18n-' + (CyberI18n.current || 'de') + '.js"><\/script>');
+    } catch (e) {
+        console.warn('i18n dictionary load failed:', e);
+    }
 })();
