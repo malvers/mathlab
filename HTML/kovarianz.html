@@ -1,0 +1,1196 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DOC ALVERS MATHE-LABORE | Kovarianz</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet">
+    <link rel="icon" type="image/png" href="resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="js/cyber-layout.css">
+    <link rel="stylesheet" href="js/buttons-ultra.css">
+    <link rel="stylesheet" href="js/cyber-lab-overrides.css">
+    <link rel="stylesheet" href="js/branding.styles.extracted.css">
+    <link rel="stylesheet" href="js/lab-shell-minimal.css">
+    <style>
+        /* ---- sidebar is dense: this lab has many small controls ---- */
+        #ui-container .cyber-control-group { margin-top: 8px !important; }
+        #ui-container .instrument-card { padding-bottom: 10px !important; margin-bottom: 6px !important; }
+        #ui-container .cyber-checkbox-wrapper { padding: 0 !important; }
+        #ui-container .instrument-title { margin-bottom: 6px !important; }
+
+        /* two thirds of the shell's default button height — this lab has many
+           of them and they crowded the panel */
+        #ui-container .cyber-btn {
+            min-height: 38px !important;
+            padding: 10px 14px !important;
+        }
+
+        /* the shell's slider reserves 52 px for a track a few pixels thick;
+           in a panel this dense that is mostly empty room */
+        #ui-container input[type="range"].cyber-slider {
+            height: 22px !important;
+            min-height: 0 !important;
+            padding: 3px 0 !important;
+            margin: 0 !important;
+        }
+
+        #ui-container .label-row { margin-bottom: 1px !important; }
+        #ui-container .cyber-control-group { margin-top: 4px !important; }
+
+        /* ---- the editable matrix ---- */
+        .mx-wrap {
+            display: flex;
+            align-items: stretch;
+            gap: 6px;
+            justify-content: center;
+            margin: 2px 0 6px;
+        }
+
+        .mx-bracket {
+            width: 10px;
+            border: 2px solid rgba(0, 210, 255, .55);
+            border-right: none;
+            border-radius: 2px 0 0 2px;
+        }
+
+        .mx-bracket.right {
+            border: 2px solid rgba(0, 210, 255, .55);
+            border-left: none;
+            border-radius: 0 2px 2px 0;
+        }
+
+        .mx-grid {
+            display: grid;
+            gap: 3px;
+            flex: 1;
+        }
+
+        .mx-cell {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 12px;
+            text-align: center;
+            padding: 6px 2px;
+            border: 1px solid rgba(255, 255, 255, .12);
+            border-radius: 3px;
+            background: rgba(255, 255, 255, .03);
+            color: #cfe3ff;
+            cursor: pointer;
+            font-variant-numeric: tabular-nums;
+            transition: border-color .12s, color .12s, background .12s;
+            user-select: none;
+        }
+
+        .mx-cell:hover { border-color: rgba(0, 210, 255, .5); }
+
+        .mx-cell.sel {
+            border-color: #ffd700;
+            color: #ffd700;
+            background: rgba(255, 215, 0, .10);
+        }
+
+        /* the bottom row of the homogeneous matrix is not meant to be edited here */
+        .mx-cell.locked {
+            opacity: .45;
+            cursor: default;
+            background: transparent;
+        }
+
+        .mx-cell.locked:hover { border-color: rgba(255, 255, 255, .12); }
+
+        /* ---- read-outs ---- */
+        .kv-table { width: 100%; border-collapse: collapse; font-size: 16px; }
+
+        .kv-table td {
+            padding: 5px 0;
+            color: #9db3d4;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .kv-table td.v {
+            text-align: right;
+            color: #e2ebf8;
+            white-space: nowrap;
+        }
+
+        /* same cap height as the labels opposite — one typeface for the whole
+           read-out now that the numbers are set as maths too */
+        .kv-table td.v .katex { font-size: 1.055em; }
+
+        /* KaTeX symbol in the label column: inherits the row colour, and is
+           lifted to the cap height of the Orbitron numbers opposite it */
+        .kv-table td i[data-tex] { font-style: normal; }
+        /* both sized by measurement, not by eye: at these values the cap height
+           of the symbol and of the word equals the 11.5 px of the Orbitron
+           numbers in the right-hand column */
+        .kv-table td .katex { font-size: 1.055em; }
+        .kv-table td .w { font-size: 1.031em; margin-left: 3px; }
+
+        /* a reserved box, so a re-rendered formula cannot shift the card */
+        .fx {
+            margin: 6px 0 2px;
+            text-align: center;
+            overflow: hidden;
+            min-height: 46px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .fx .katex { font-size: 1em; }
+
+        .hint {
+            font-size: 11px;
+            line-height: 1.45;
+            color: #7f97bb;
+            font-family: 'Outfit', sans-serif;
+            margin-top: 6px;
+        }
+
+        .stack { display: flex; flex-direction: column; gap: 5px; }
+        .stack > .row { display: flex; gap: 5px; }
+        .stack > .row > .cyber-btn { flex: 1; }
+
+        #canvas { cursor: crosshair; touch-action: none; }
+        #canvas.grabbing { cursor: grabbing; }
+        #canvas.handle { cursor: pointer; }
+
+        /* ---- help overlay, keyboard reference of the Java original ---- */
+        #help-box {
+            position: absolute;
+            inset: 0;
+            display: none;
+            place-items: center;
+            background: rgba(8, 20, 42, .93);
+            z-index: 40;
+            padding: 20px;
+        }
+
+        #help-box.on { display: grid; }
+
+        #help-inner {
+            max-width: 560px;
+            width: 100%;
+            max-height: 100%;
+            overflow: auto;
+            font-family: 'Outfit', sans-serif;
+            color: #cfe3ff;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        #help-inner h3 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 13px;
+            letter-spacing: .16em;
+            color: #00d2ff;
+            margin: 0 0 12px;
+        }
+
+        #help-inner table { width: 100%; border-collapse: collapse; }
+        #help-inner td { padding: 2px 0; vertical-align: top; }
+
+        #help-inner td.k {
+            font-family: 'Orbitron', sans-serif;
+            color: #ffd700;
+            white-space: nowrap;
+            padding-right: 14px;
+            width: 1%;
+        }
+
+        @media (max-width: 720px) {
+            .mx-cell { font-size: 11px; padding: 5px 1px; }
+        }
+    </style>
+</head>
+
+<body>
+    <nav id="mini-rail">
+        <div class="nav-btn" onclick="toggleSidebar()" title="Toggle Menu">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </div>
+    </nav>
+
+    <aside id="side-panel">
+        <header id="sidebar-header"></header>
+        <div id="ui-container"></div>
+    </aside>
+
+    <main id="main-content">
+        <div id="canvas-container">
+            <div class="cyber-grid"></div>
+            <div id="math-coach-box">
+                <div class="coach-title" id="coach-title-slot"></div>
+                <div id="coach-content" class="coach-message"></div>
+            </div>
+            <canvas id="canvas"></canvas>
+            <div id="help-box">
+                <div id="help-inner">
+                    <h3>TASTATUR</h3>
+                    <table>
+                        <tr><td class="k">Leertaste</td><td>zufällige Matrix</td></tr>
+                        <tr><td class="k">Pfeiltasten</td><td>Matrixelement auswählen</td></tr>
+                        <tr><td class="k">+ / −</td><td>ausgewähltes Element ändern</td></tr>
+                        <tr><td class="k">Shift + / −</td><td>zwanzigfacher Schritt</td></tr>
+                        <tr><td class="k">Alt + / −</td><td>alle vier Elemente von A zugleich</td></tr>
+                        <tr><td class="k">Ctrl + / −</td><td>nur die Nebendiagonale</td></tr>
+                        <tr><td class="k">C</td><td>Kreis und Bildellipse</td></tr>
+                        <tr><td class="k">D</td><td>Punktwolke</td></tr>
+                        <tr><td class="k">E</td><td>Gleichverteilung</td></tr>
+                        <tr><td class="k">G</td><td>Normalverteilung</td></tr>
+                        <tr><td class="k">H</td><td>homogene Koordinaten (3×3 statt 2×2)</td></tr>
+                        <tr><td class="k">K</td><td>Kovarianz-Achsen</td></tr>
+                        <tr><td class="k">P</td><td>Parallelen</td></tr>
+                        <tr><td class="k">V</td><td>Basisvektoren</td></tr>
+                        <tr><td class="k">W</td><td>Raum verbiegen</td></tr>
+                        <tr><td class="k">T</td><td>um 5° weiterdrehen</td></tr>
+                        <tr><td class="k">R</td><td>alles zurücksetzen</td></tr>
+                        <tr><td class="k">I</td><td>diese Hilfe</td></tr>
+                        <tr><td class="k">Maus ziehen</td><td>verschiebt die Ebene</td></tr>
+                        <tr><td class="k">Ellipse ziehen</td><td>formt A direkt: zwei gegenüberliegende
+                            Punkte werden auf die neue Lage abgebildet, daraus wird A ausgerechnet</td></tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="js/cyber-left-chrome.js"></script>
+    <script src="js/branding/briefings.js"></script>
+    <script src="js/branding/overlays.js"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/i18n-de.js"></script>
+    <script src="js/i18n-en.js"></script>
+    <script src="js/i18n-es.js"></script>
+    <script src="js/i18n-fr.js"></script>
+    <script src="js/i18n-it.js"></script>
+    <script src="js/i18n-pt.js"></script>
+    <script src="js/i18n-sw.js"></script>
+    <script src="js/i18n-tr.js"></script>
+    <script src="js/i18n-nl.js"></script>
+    <script src="js/branding/nav.js"></script>
+    <script src="js/branding.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script>
+        function toggleSidebar() {
+            const panel = document.getElementById('side-panel');
+            panel.classList.toggle('collapsed');
+            if (window.CyberLeftChrome && typeof CyberLeftChrome.publishResolvedScale === 'function') {
+                CyberLeftChrome.publishResolvedScale();
+            }
+            setTimeout(() => {
+                window.dispatchEvent(new Event('resize'));
+                if (typeof init === 'function') init();
+                if (window.CyberLeftChrome && typeof CyberLeftChrome.publishResolvedScale === 'function') {
+                    CyberLeftChrome.publishResolvedScale();
+                }
+            }, 400);
+        }
+
+        CyberBranding.init({
+            useExternalStyles: true,
+            title: CyberI18n.get('ui.coach_title'),
+            subtitle: 'Kovarianz',
+        });
+        CyberUI.init();
+
+        if (window.CyberLeftChrome && typeof CyberLeftChrome.configure === 'function') {
+            CyberLeftChrome.configure({ viewportOnlyZoom: true });
+        }
+
+        /* ================================================================
+           Kovarianz — a linear map A acts on a point cloud.
+           Ported from Doc's Java CovarianceMatrixDemo (2020/2022), extended
+           by the covariance matrix the cloud actually has, with its
+           eigenvectors: Sigma = A * Sigma0 * A^T.
+           ================================================================ */
+
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const container = document.getElementById('canvas-container');
+
+        function dbg(m) {
+            try { if (window.DebugWindow) DebugWindow.log('Σ ' + m); } catch (e) { }
+        }
+
+        const COL = {
+            dots: 'rgba(150, 178, 220, 0.55)',
+            circle: 'rgba(255, 255, 255, 0.30)',   /* a guide like the axes, not a term of its own */
+            ellipse: '#00d2ff',     /* its image under A */
+            handle: '#ffffff',      /* the grab points belong to the ellipse, not to the statistics — gold read as the big principal axis */
+            parallels: 'rgba(198, 92, 138, 0.55)',   /* own hue: the x vector already owns the palette red */
+            axis: 'rgba(255, 255, 255, 0.16)',
+            ev1: 'rgba(245, 194, 66, 1)',   /* lambda orange */
+            ev2: 'rgba(121, 158, 49, 1)',   /* phi green */
+            /* the basis vectors must not borrow the colours of the covariance
+               axes — y used to be the same green as the small principal axis,
+               which put two unrelated meanings on one colour */
+            vx: '#b02418',
+            vy: '#4aa3e0',
+            vd: '#c07fe8'
+        };
+
+        const R0 = 50;              /* radius of the source circle, world units */
+        const NCIRC = 500;          /* handles on the circle, as in the original */
+        const STORE = 'kovarianz-state';
+
+        /* ---- state ---------------------------------------------------- */
+        const S = {
+            /* homogeneous 3x3, row major; m[2] stays (0,0,1) unless warped */
+            m: [[1, 0, 0], [0, 1, 0], [0, 0, 1]],
+            selRow: 0, selCol: 0,
+            n: 4000,
+            dist: 'gauss',          /* 'gauss' | 'equal' */
+            step: 0.1,
+            theta: 0,
+            showDots: true,
+            showCircle: true,
+            showParallels: false,
+            showVectors: true,
+            showCov: true,
+            homogen: true,
+            warp: false,
+            zoom: 1
+        };
+
+        let pts = [];               /* source cloud, world units */
+        let circle = [];            /* source circle, world units */
+        let dragMode = null;        /* 'shift' | 'handle' */
+        let dragFrom = null;
+        let handleId = 0;       /* always a valid point: the pair is permanent */
+        let mBeforeDrag = null;
+        let stats = null;
+
+        /* ---- persistence ---------------------------------------------- */
+        function save() {
+            try {
+                localStorage.setItem(STORE, JSON.stringify({
+                    m: S.m, n: S.n, dist: S.dist, showDots: S.showDots,
+                    showCircle: S.showCircle, showParallels: S.showParallels,
+                    showVectors: S.showVectors, showCov: S.showCov,
+                    homogen: S.homogen, warp: S.warp, theta: S.theta
+                }));
+            } catch (e) { }
+        }
+
+        function load() {
+            try {
+                const raw = localStorage.getItem(STORE);
+                if (!raw) return;
+                const o = JSON.parse(raw);
+                if (Array.isArray(o.m) && o.m.length === 3) S.m = o.m;
+                if (typeof o.n === 'number') S.n = o.n;
+                if (o.dist === 'equal' || o.dist === 'gauss') S.dist = o.dist;
+                ['showDots', 'showCircle', 'showParallels', 'showVectors', 'showCov',
+                    'homogen', 'warp'].forEach(k => { if (typeof o[k] === 'boolean') S[k] = o[k]; });
+                if (typeof o.theta === 'number') S.theta = o.theta;
+            } catch (e) { }
+        }
+
+        /* ---- the cloud ------------------------------------------------ */
+        /* Box-Muller: the Java original used Random.nextGaussian() */
+        function gauss() {
+            let u = 0, v = 0;
+            while (u === 0) u = Math.random();
+            while (v === 0) v = Math.random();
+            return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+        }
+
+        function buildCloud() {
+            pts = new Array(S.n);
+            for (let i = 0; i < S.n; i++) {
+                pts[i] = S.dist === 'gauss'
+                    ? [gauss() * R0, gauss() * R0]
+                    : [(Math.random() - 0.5) * 4 * R0, (Math.random() - 0.5) * 4 * R0];
+            }
+            dbg('Wolke neu: ' + S.n + ' Punkte, ' + S.dist);
+        }
+
+        function buildCircle() {
+            circle = new Array(NCIRC);
+            for (let i = 0; i < NCIRC; i++) {
+                const phi = 2 * Math.PI * i / NCIRC;
+                circle[i] = [Math.sin(phi) * R0, Math.cos(phi) * R0];
+            }
+        }
+
+        /* ---- the map --------------------------------------------------- */
+        /* Applies the homogeneous matrix to a world point. The warp is the
+           original's "warp space": the translation column becomes a function
+           of the point itself, so straight lines stop being straight. */
+        function apply(p) {
+            const m = S.m;
+            let m02 = m[0][2], m12 = m[1][2];
+            if (S.warp) {
+                m02 += Math.sin(p[0] / 12) * 18;
+                m12 += Math.sin(p[1] / 12) * 18;
+            }
+            const z = S.homogen ? 1 : 0;
+            return [
+                m[0][0] * p[0] + m[0][1] * p[1] + m02 * z,
+                m[1][0] * p[0] + m[1][1] * p[1] + m12 * z
+            ];
+        }
+
+        /* ---- view ------------------------------------------------------ */
+        let VW = 0, VH = 0, CX = 0, CY = 0, SC = 1;
+
+        function layout() {
+            const rect = container.getBoundingClientRect();
+            VW = Math.max(1, rect.width);
+            VH = Math.max(1, rect.height);
+            CX = VW / 2;
+            CY = VH / 2;
+            /* keep the unit circle a sensible fraction of the stage on any screen */
+            SC = Math.min(VW, VH) / (7 * R0) * S.zoom;
+        }
+
+        function toScreen(p) { return [CX + p[0] * SC, CY - p[1] * SC]; }
+        function toWorld(sx, sy) { return [(sx - CX) / SC, -(sy - CY) / SC]; }
+
+        /* ---- covariance ------------------------------------------------ */
+        /* Sigma of the transformed cloud, its eigenvalues and eigenvectors.
+           For a symmetric 2x2 the eigenproblem is closed form. */
+        function covariance() {
+            const n = pts.length;
+            if (!n) return null;
+            let mx = 0, my = 0;
+            const q = new Array(n);
+            for (let i = 0; i < n; i++) {
+                const p = apply(pts[i]);
+                q[i] = p; mx += p[0]; my += p[1];
+            }
+            mx /= n; my /= n;
+            let sxx = 0, syy = 0, sxy = 0;
+            for (let i = 0; i < n; i++) {
+                const dx = q[i][0] - mx, dy = q[i][1] - my;
+                sxx += dx * dx; syy += dy * dy; sxy += dx * dy;
+            }
+            sxx /= n; syy /= n; sxy /= n;
+
+            const tr = sxx + syy;
+            const det = sxx * syy - sxy * sxy;
+            const disc = Math.max(0, tr * tr / 4 - det);
+            const root = Math.sqrt(disc);
+            const l1 = tr / 2 + root;
+            const l2 = tr / 2 - root;
+
+            /* eigenvector of l1; the fallback covers the isotropic case */
+            let e1;
+            if (Math.abs(sxy) > 1e-12) e1 = [l1 - syy, sxy];
+            else e1 = sxx >= syy ? [1, 0] : [0, 1];
+            const len = Math.hypot(e1[0], e1[1]) || 1;
+            e1 = [e1[0] / len, e1[1] / len];
+            const e2 = [-e1[1], e1[0]];
+
+            const rho = (sxx > 0 && syy > 0) ? sxy / Math.sqrt(sxx * syy) : 0;
+
+            return {
+                mx, my, sxx, syy, sxy, l1, l2, e1, e2, rho,
+                s1: Math.sqrt(Math.max(0, l1)),
+                s2: Math.sqrt(Math.max(0, l2)),
+                angle: Math.atan2(e1[1], e1[0]) * 180 / Math.PI,
+                det: S.m[0][0] * S.m[1][1] - S.m[0][1] * S.m[1][0]
+            };
+        }
+
+        /* ---- drawing --------------------------------------------------- */
+        function drawAxes() {
+            ctx.strokeStyle = COL.axis;
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(0, CY); ctx.lineTo(VW, CY);
+            ctx.moveTo(CX, 0); ctx.lineTo(CX, VH);
+            ctx.stroke();
+        }
+
+        /* The four lines x = +-100 and y = +-100 of the original, sampled
+           point by point so a warped or projective map visibly bends them. */
+        function drawParallels() {
+            if (!S.showParallels) return;
+            const N = 900;
+            const span = 6 * R0;
+            ctx.fillStyle = COL.parallels;
+            for (const off of [-2 * R0, 2 * R0]) {
+                for (let i = 0; i < N; i++) {
+                    const t = -span + 2 * span * i / (N - 1);
+                    let s = toScreen(apply([t, off]));
+                    ctx.fillRect(s[0], s[1], 1.2, 1.2);
+                    s = toScreen(apply([off, t]));
+                    ctx.fillRect(s[0], s[1], 1.2, 1.2);
+                }
+            }
+        }
+
+        function drawDots() {
+            if (!S.showDots) return;
+            ctx.fillStyle = COL.dots;
+            for (let i = 0; i < pts.length; i++) {
+                const s = toScreen(apply(pts[i]));
+                ctx.fillRect(s[0], s[1], 1.4, 1.4);
+            }
+        }
+
+        function drawCircle() {
+            if (!S.showCircle) return;
+            /* the source circle, for comparison */
+            ctx.strokeStyle = COL.circle;
+            ctx.lineWidth = 1;
+            ctx.setLineDash([3, 4]);
+            ctx.beginPath();
+            ctx.arc(CX, CY, R0 * SC, 0, 2 * Math.PI);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            /* its image under A */
+            ctx.strokeStyle = COL.ellipse;
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            for (let i = 0; i < NCIRC; i++) {
+                const s = toScreen(apply(circle[i]));
+                if (i === 0) ctx.moveTo(s[0], s[1]); else ctx.lineTo(s[0], s[1]);
+            }
+            ctx.closePath();
+            ctx.stroke();
+
+            /* Exactly two grab points, always on: the one the pointer last
+               chose and its antipode. Grabbing still works anywhere on the
+               ellipse — these two just show where the gesture starts. */
+            ctx.fillStyle = COL.handle;
+            const opo = (handleId + NCIRC / 2) % NCIRC;
+            for (const id of [handleId, opo]) {
+                const s = toScreen(apply(circle[id]));
+                ctx.beginPath();
+                ctx.arc(s[0], s[1], 6, 0, 2 * Math.PI);
+                ctx.fill();
+                ctx.strokeStyle = 'rgba(8,20,42,.9)';
+                ctx.lineWidth = 1.5;
+                ctx.stroke();
+            }
+        }
+
+        function arrow(from, to, color, width) {
+            ctx.strokeStyle = color;
+            ctx.fillStyle = color;
+            ctx.lineWidth = width;
+            ctx.beginPath();
+            ctx.moveTo(from[0], from[1]);
+            ctx.lineTo(to[0], to[1]);
+            ctx.stroke();
+            const a = Math.atan2(to[1] - from[1], to[0] - from[0]);
+            const h = 9;
+            ctx.beginPath();
+            ctx.moveTo(to[0], to[1]);
+            ctx.lineTo(to[0] - h * Math.cos(a - 0.4), to[1] - h * Math.sin(a - 0.4));
+            ctx.lineTo(to[0] - h * Math.cos(a + 0.4), to[1] - h * Math.sin(a + 0.4));
+            ctx.closePath();
+            ctx.fill();
+        }
+
+        /* Where the basis vectors land: the columns of A, drawn from the origin. */
+        function drawVectors() {
+            if (!S.showVectors) return;
+            const o = toScreen(apply([0, 0]));
+            arrow(o, toScreen(apply([2 * R0, 0])), COL.vx, 2);
+            arrow(o, toScreen(apply([0, 2 * R0])), COL.vy, 2);
+            arrow(o, toScreen(apply([2 * R0, 2 * R0])), COL.vd, 1.5);
+        }
+
+        /* The principal axes: eigenvectors of Sigma, scaled to one sigma. */
+        function drawCov(st) {
+            if (!S.showCov || !st) return;
+            const c = toScreen([st.mx, st.my]);
+
+            ctx.strokeStyle = 'rgba(255,255,255,.35)';
+            ctx.lineWidth = 1;
+            ctx.setLineDash([2, 3]);
+            ctx.beginPath();
+            for (let i = 0; i <= 120; i++) {
+                const t = 2 * Math.PI * i / 120;
+                const wx = st.mx + 2 * (st.s1 * Math.cos(t) * st.e1[0] + st.s2 * Math.sin(t) * st.e2[0]);
+                const wy = st.my + 2 * (st.s1 * Math.cos(t) * st.e1[1] + st.s2 * Math.sin(t) * st.e2[1]);
+                const s = toScreen([wx, wy]);
+                if (i === 0) ctx.moveTo(s[0], s[1]); else ctx.lineTo(s[0], s[1]);
+            }
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            arrow(c, toScreen([st.mx + st.s1 * st.e1[0], st.my + st.s1 * st.e1[1]]), COL.ev1, 2.5);
+            arrow(c, toScreen([st.mx + st.s2 * st.e2[0], st.my + st.s2 * st.e2[1]]), COL.ev2, 2.5);
+        }
+
+        function render() {
+            layout();
+            ctx.clearRect(0, 0, VW, VH);
+            drawAxes();
+            drawParallels();
+            drawDots();
+            stats = covariance();
+            drawCircle();
+            drawVectors();
+            drawCov(stats);
+            updateReadout(stats);
+            paintMatrix();
+        }
+
+        /* ---- sidebar --------------------------------------------------- */
+        function fmt(x, d) {
+            if (!isFinite(x)) return '—';
+            return x.toFixed(d === undefined ? 2 : d).replace('.', ',');
+        }
+
+        /* A number as TeX. The German decimal comma needs braces, otherwise TeX
+           sets it as a list separator and adds a space after it. */
+        function texNum(x, d) {
+            if (!isFinite(x)) return '\\text{--}';
+            return x.toFixed(d === undefined ? 2 : d).replace('.', '{,}');
+        }
+
+        /* Renders TeX into a cell, but only when the content really changed —
+           the read-out is redrawn on every frame while dragging. */
+        function texCell(id, src) {
+            const e = document.getElementById(id);
+            if (!e || e.dataset.src === src) return;
+            e.dataset.src = src;
+            if (window.katex) {
+                try { katex.render(src, e, { throwOnError: false, displayMode: false }); return; }
+                catch (err) { }
+            }
+            e.textContent = src;
+        }
+
+        function setupUI() {
+            CyberUI.createCard('ui-container', 'ABBILDUNG A', `
+                <div class="mx-wrap">
+                    <div class="mx-bracket"></div>
+                    <div class="mx-grid" id="mx-grid"></div>
+                    <div class="mx-bracket right"></div>
+                </div>
+                <div class="cyber-control-group">
+                    <div class="label-row">
+                        <label for="cell">Ausgewählter Wert</label>
+                        <span id="cell-value" class="range-value">1,00</span>
+                    </div>
+                    <input id="cell" class="cyber-slider" type="range" min="-3" max="3" value="1"
+                           step="0.01" style="--accent: #ffd700" aria-label="Ausgewählter Matrixwert" />
+                </div>
+                <div class="stack">
+                    <div class="row">
+                        <button class="cyber-btn" onclick="randomMatrix()"
+                                style="border-color:#00d2ff;color:#00d2ff">ZUFALL</button>
+                        <button class="cyber-btn" onclick="rotate()"
+                                style="border-color:#c07fe8;color:#c07fe8">DREHEN</button>
+                    </div>
+                    <div class="row">
+                        <button class="cyber-btn" onclick="resetAll()"
+                                style="border-color:#adff2f;color:#adff2f">ZURÜCK</button>
+                        <button class="cyber-btn" onclick="toggleHelp()"
+                                style="border-color:#9db3d4;color:#9db3d4">TASTEN</button>
+                    </div>
+                </div>
+                <div class="hint">Zelle anklicken oder mit den Pfeiltasten wählen, dann Regler
+                    oder + / − benutzen. Auf der Bühne: ziehen verschiebt, an der Ellipse ziehen
+                    formt A direkt.</div>
+            `, '#00d2ff');
+
+            CyberUI.createCard('ui-container', 'KOVARIANZ Σ', `
+                <div class="fx" id="fx-sigma"></div>
+                <table class="kv-table">
+                    <tr><td><i data-tex="\\sigma_{xx}"></i></td><td class="v" id="v-sxx">—</td></tr>
+                    <tr><td><i data-tex="\\sigma_{yy}"></i></td><td class="v" id="v-syy">—</td></tr>
+                    <tr><td><i data-tex="\\sigma_{xy}"></i></td><td class="v" id="v-sxy">—</td></tr>
+                    <tr><td><i data-tex="\\rho"></i> <span class="w">Korrelation</span></td>
+                        <td class="v" id="v-rho">—</td></tr>
+                    <tr><td style="color:${COL.ev1}"><i data-tex="\\sqrt{\\lambda_1}"></i>
+                        <span class="w">große Achse</span></td><td class="v" id="v-s1">—</td></tr>
+                    <tr><td style="color:${COL.ev2}"><i data-tex="\\sqrt{\\lambda_2}"></i>
+                        <span class="w">kleine Achse</span></td><td class="v" id="v-s2">—</td></tr>
+                    <tr><td><i data-tex="\\varphi"></i> <span class="w">Hauptachsenwinkel</span></td>
+                        <td class="v" id="v-ang">—</td></tr>
+                    <tr><td><i data-tex="\\det A"></i></td><td class="v" id="v-det">—</td></tr>
+                </table>
+                <div class="hint" id="cov-note"></div>
+            `, '#f5c242');
+
+            CyberUI.createCard('ui-container', 'VERTEILUNGSWOLKE', `
+                <div class="stack">
+                    <div class="row">
+                        <button class="cyber-btn" id="btn-gauss" onclick="setDist('gauss')">NORMAL</button>
+                        <button class="cyber-btn" id="btn-equal" onclick="setDist('equal')">GLEICH</button>
+                    </div>
+                </div>
+                <div class="cyber-control-group">
+                    <div class="label-row">
+                        <label for="npts">Punkte</label>
+                        <span id="npts-value" class="range-value">4000</span>
+                    </div>
+                    <input id="npts" class="cyber-slider" type="range" min="200" max="20000" value="4000"
+                           step="100" style="--accent: #00d2ff" aria-label="Anzahl der Punkte" />
+                </div>
+            `, '#799e31');
+
+            CyberUI.createCard('ui-container', 'ANZEIGE', `
+                <label class="cyber-checkbox-wrapper">
+                    <input type="checkbox" id="c-dots" class="cyber-checkbox" checked />
+                    <span class="cyber-label">Punktwolke</span></label>
+                <label class="cyber-checkbox-wrapper">
+                    <input type="checkbox" id="c-circle" class="cyber-checkbox" checked />
+                    <span class="cyber-label">Kreis und Bildellipse</span></label>
+                <label class="cyber-checkbox-wrapper">
+                    <input type="checkbox" id="c-cov" class="cyber-checkbox" checked />
+                    <span class="cyber-label">Kovarianz-Achsen</span></label>
+                <label class="cyber-checkbox-wrapper">
+                    <input type="checkbox" id="c-vec" class="cyber-checkbox" checked />
+                    <span class="cyber-label">Basisvektoren</span></label>
+                <label class="cyber-checkbox-wrapper">
+                    <input type="checkbox" id="c-par" class="cyber-checkbox" />
+                    <span class="cyber-label">Parallelen</span></label>
+                <label class="cyber-checkbox-wrapper">
+                    <input type="checkbox" id="c-hom" class="cyber-checkbox" checked />
+                    <span class="cyber-label">homogene Koordinaten</span></label>
+                <label class="cyber-checkbox-wrapper">
+                    <input type="checkbox" id="c-warp" class="cyber-checkbox" />
+                    <span class="cyber-label">Raum verbiegen</span></label>
+            `, '#c07fe8');
+        }
+
+        /* ---- the matrix grid ------------------------------------------- */
+        function buildMatrix() {
+            const g = document.getElementById('mx-grid');
+            if (!g) return;
+            g.innerHTML = '';
+            const n = S.homogen ? 3 : 2;
+            g.style.gridTemplateColumns = 'repeat(' + n + ', 1fr)';
+            for (let r = 0; r < n; r++) {
+                for (let c = 0; c < n; c++) {
+                    const d = document.createElement('div');
+                    d.className = 'mx-cell';
+                    d.dataset.r = r;
+                    d.dataset.c = c;
+                    /* the last row of a homogeneous matrix is structural, not a knob */
+                    if (S.homogen && r === 2) d.classList.add('locked');
+                    else d.addEventListener('click', () => { S.selRow = r; S.selCol = c; render(); });
+                    g.appendChild(d);
+                }
+            }
+            paintMatrix();
+        }
+
+        function paintMatrix() {
+            const g = document.getElementById('mx-grid');
+            if (!g) return;
+            const cells = g.children;
+            for (let i = 0; i < cells.length; i++) {
+                const d = cells[i];
+                const r = +d.dataset.r, c = +d.dataset.c;
+                d.textContent = fmt(S.m[r][c], 2);
+                d.classList.toggle('sel', r === S.selRow && c === S.selCol && !d.classList.contains('locked'));
+            }
+            const sl = document.getElementById('cell');
+            const sv = document.getElementById('cell-value');
+            if (sl && sv) {
+                const v = S.m[S.selRow][S.selCol];
+                /* the translation column lives on a much bigger scale than the 2x2 part */
+                const isT = S.selCol === 2;
+                sl.min = isT ? -200 : -3;
+                sl.max = isT ? 200 : 3;
+                sl.step = isT ? 1 : 0.01;
+                sl.value = v;
+                sv.textContent = fmt(v, isT ? 0 : 2);
+            }
+        }
+
+        /* ---- read-out --------------------------------------------------- */
+        let lastFx = null;
+
+        function updateReadout(st) {
+            if (!st) return;
+            const set = (id, src) => texCell(id, src);
+            set('v-sxx', texNum(st.sxx, 0));
+            set('v-syy', texNum(st.syy, 0));
+            set('v-sxy', texNum(st.sxy, 0));
+            set('v-rho', texNum(st.rho, 3));
+            set('v-s1', texNum(st.s1, 1));
+            set('v-s2', texNum(st.s2, 1));
+            set('v-ang', texNum(st.angle, 1) + '^{\\circ}');
+            set('v-det', texNum(st.det, 3));
+
+            const note = document.getElementById('cov-note');
+            if (note) {
+                if (Math.abs(st.det) < 0.02) {
+                    note.textContent = 'det A ≈ 0 — A drückt die Ebene auf eine Gerade. '
+                        + 'Die kleine Achse verschwindet, Σ wird singulär.';
+                } else if (Math.abs(st.rho) < 0.05) {
+                    note.textContent = 'ρ ≈ 0 — x und y sind unkorreliert, die Hauptachsen '
+                        + 'liegen auf den Koordinatenachsen.';
+                } else {
+                    note.textContent = 'ρ = ' + fmt(st.rho, 2) + ' — die Wolke ist gekippt. '
+                        + 'Die Hauptachsen sind die Eigenvektoren von Σ.';
+                }
+            }
+
+            const fx = document.getElementById('fx-sigma');
+            /* Every entry is padded to the same character count, so the matrix
+               keeps one width while the numbers run. Without this the centred
+               formula jumps sideways on every change. KaTeX digits all have the
+               same advance width, so equal character counts mean equal boxes. */
+            const vals = [st.sxx, st.sxy, st.syy];
+            const digits = vals.map(v => Math.abs(v).toFixed(0));
+            const w = Math.max(6, ...digits.map(s => s.length));
+            /* the minus sign is wider than a digit, so a positive entry gets a
+               phantom minus of its own — otherwise the columns still breathe */
+            const pad = (v, s) => (v < 0 ? '-' : '\\hphantom{-}')
+                + (w > s.length ? '\\hphantom{' + '0'.repeat(w - s.length) + '}' : '') + s;
+            const [pxx, pxy, pyy] = vals.map((v, i) => pad(v, digits[i]));
+            const src = '\\Sigma=\\begin{pmatrix}' + pxx + ' & ' + pxy
+                + '\\\\ ' + pxy + ' & ' + pyy + '\\end{pmatrix}';
+            if (fx && src !== lastFx) {
+                lastFx = src;
+                if (window.katex) {
+                    try { katex.render(src, fx, { throwOnError: false, displayMode: false }); }
+                    catch (e) { fx.textContent = src; }
+                } else fx.textContent = src;
+            }
+        }
+
+        function setCoach() {
+            const el = document.getElementById('coach-content');
+            if (!el) return;
+            const body = 'Eine lineare Abbildung A zieht, dreht und schert die Ebene. '
+                + 'Wendet man sie auf eine runde Punktwolke an, wird daraus eine Ellipse — '
+                + 'und deren Form steht in der Kovarianzmatrix. '
+                + 'Aus Σ₀ = σ²·E wird Σ = A Σ₀ Aᵀ. '
+                + 'Die orangefarbene und die grüne Achse sind die Eigenvektoren von Σ; '
+                + 'ihre Längen sind √λ₁ und √λ₂. '
+                + 'Genau deshalb ist die Bildellipse des Einheitskreises dieselbe Figur '
+                + 'wie die Streuungsellipse der Wolke.';
+            el.innerHTML = '<div id="coach-fx" class="fx"></div><div>' + body + '</div>';
+            const fx = document.getElementById('coach-fx');
+            if (fx && window.katex) {
+                try {
+                    katex.render('\\Sigma=\\tfrac1n\\sum_i(x_i-\\bar x)(x_i-\\bar x)^{\\!\\top}'
+                        + '\\qquad \\Sigma=A\\,\\Sigma_0 A^{\\!\\top}',
+                        fx, { throwOnError: false, displayMode: false });
+                } catch (e) { }
+            }
+            const t = document.getElementById('coach-title-slot');
+            if (t) t.textContent = 'KOVARIANZ';
+        }
+
+        /* ---- actions ---------------------------------------------------- */
+        function randomMatrix() {
+            const m = 4, mh = m / 2;
+            S.m[0][0] = m * Math.random() - mh;
+            S.m[0][1] = m * Math.random() - mh;
+            S.m[1][0] = m * Math.random() - mh;
+            S.m[1][1] = m * Math.random() - mh;
+            dbg('Zufallsmatrix, det = ' + (S.m[0][0] * S.m[1][1] - S.m[0][1] * S.m[1][0]).toFixed(3));
+            render(); save();
+        }
+
+        function rotate() {
+            S.theta += Math.PI / 36;   /* 5 degrees, as in the original */
+            S.m[0][0] = Math.cos(S.theta);
+            S.m[0][1] = Math.sin(S.theta);
+            S.m[1][0] = -Math.sin(S.theta);
+            S.m[1][1] = Math.cos(S.theta);
+            render(); save();
+        }
+
+        function resetAll() {
+            S.m = [[1, 0, 0], [0, 1, 0], [0, 0, 1]];
+            S.theta = 0;
+            S.selRow = 0; S.selCol = 0;
+            handleId = 0;
+            render(); save();
+        }
+
+        function setDist(d) {
+            S.dist = d;
+            buildCloud();
+            syncButtons();
+            render(); save();
+        }
+
+        function toggleHelp() {
+            document.getElementById('help-box').classList.toggle('on');
+        }
+
+        function syncButtons() {
+            const g = document.getElementById('btn-gauss');
+            const e = document.getElementById('btn-equal');
+            if (!g || !e) return;
+            const on = 'border-color:#799e31;color:#799e31';
+            const off = 'border-color:rgba(255,255,255,.2);color:#9db3d4';
+            g.style.cssText = S.dist === 'gauss' ? on : off;
+            e.style.cssText = S.dist === 'equal' ? on : off;
+        }
+
+        function nudge(sign, e) {
+            const s = S.step;
+            if (e && e.shiftKey) {
+                S.m[S.selRow][S.selCol] += sign * 20 * s;
+            } else if (e && e.altKey) {
+                S.m[0][0] += sign * s; S.m[0][1] += sign * s;
+                S.m[1][0] += sign * s; S.m[1][1] += sign * s;
+            } else if (e && e.ctrlKey) {
+                S.m[0][1] += sign * s; S.m[1][0] += sign * s;
+            } else {
+                S.m[S.selRow][S.selCol] += sign * (S.selCol === 2 ? 10 * s : s);
+            }
+            render(); save();
+        }
+
+        function moveSel(dr, dc) {
+            const n = S.homogen ? 3 : 2;
+            /* the structural bottom row is skipped */
+            const rows = S.homogen ? 2 : n;
+            S.selRow = (S.selRow + dr + rows) % rows;
+            S.selCol = (S.selCol + dc + n) % n;
+            render();
+        }
+
+        /* ---- pointer ---------------------------------------------------- */
+        /* Which handle of the image ellipse is under the pointer? */
+        function hitHandle(sx, sy) {
+            let best = -1, bestD = 10;
+            for (let i = 0; i < NCIRC; i++) {
+                const s = toScreen(apply(circle[i]));
+                const d = Math.hypot(s[0] - sx, s[1] - sy);
+                if (d < bestD) { bestD = d; best = i; }
+            }
+            return best;
+        }
+
+        /* Dragging one handle to a target point.
+
+           The Java original set up a 4x4 system from the grabbed handle and
+           its antipode. That system is singular by construction: two opposite
+           points of a circle satisfy s2 = -s1, so the second pair repeats the
+           first and the matrix has rank 2, not 4. One point pair simply cannot
+           pin down all four numbers of A.
+
+           So we take the well-posed reading of the same gesture: change A as
+           little as possible while sending the grabbed point exactly to the
+           mouse. Minimising the Frobenius norm of A' - A subject to A's = t
+           gives the rank-one update below. The antipode still mirrors the
+           motion on its own, because A'(-s) = -A's. */
+        function solveFromHandles(id, target) {
+            const s = circle[id];
+            const ss = s[0] * s[0] + s[1] * s[1];
+            if (ss < 1e-9) return;
+            const cur = apply(s);
+            const rx = target[0] - cur[0];
+            const ry = target[1] - cur[1];
+            const a = S.m[0][0] + rx * s[0] / ss;
+            const b = S.m[0][1] + rx * s[1] / ss;
+            const c = S.m[1][0] + ry * s[0] / ss;
+            const d = S.m[1][1] + ry * s[1] / ss;
+            if (![a, b, c, d].every(isFinite)) return;
+            S.m[0][0] = a; S.m[0][1] = b;
+            S.m[1][0] = c; S.m[1][1] = d;
+        }
+
+        function pointerPos(ev) {
+            const r = canvas.getBoundingClientRect();
+            return [ev.clientX - r.left, ev.clientY - r.top];
+        }
+
+        canvas.addEventListener('pointermove', (ev) => {
+            if (dragMode === 'handle') {
+                const p = pointerPos(ev);
+                solveFromHandles(handleId, toWorld(p[0], p[1]));
+                render();
+                return;
+            }
+            if (dragMode === 'shift') {
+                const p = pointerPos(ev);
+                const w = toWorld(p[0], p[1]);
+                S.m[0][2] = mBeforeDrag[0] + (w[0] - dragFrom[0]);
+                S.m[1][2] = mBeforeDrag[1] + (w[1] - dragFrom[1]);
+                render();
+                return;
+            }
+            if (!S.showCircle) return;
+            const p = pointerPos(ev);
+            const h = hitHandle(p[0], p[1]);
+            canvas.classList.toggle('handle', h >= 0);
+            /* leaving the ellipse keeps the last pair rather than hiding it */
+            if (h >= 0 && h !== handleId) { handleId = h; render(); }
+        });
+
+        canvas.addEventListener('pointerdown', (ev) => {
+            /* capture is a convenience, never a precondition — if it throws,
+               the drag must still start */
+            try { canvas.setPointerCapture(ev.pointerId); } catch (e) { }
+            const p = pointerPos(ev);
+            const h = S.showCircle ? hitHandle(p[0], p[1]) : -1;
+            if (h >= 0) {
+                handleId = h;
+                dragMode = 'handle';
+                dbg('Ellipse gepackt bei Punkt ' + h);
+            } else if (S.homogen) {
+                dragMode = 'shift';
+                dragFrom = toWorld(p[0], p[1]);
+                mBeforeDrag = [S.m[0][2], S.m[1][2]];
+                canvas.classList.add('grabbing');
+            }
+        });
+
+        function endDrag(ev) {
+            if (!dragMode) return;
+            dragMode = null;
+            canvas.classList.remove('grabbing');
+            try { canvas.releasePointerCapture(ev.pointerId); } catch (e) { }
+            render(); save();
+        }
+
+        canvas.addEventListener('pointerup', endDrag);
+        canvas.addEventListener('pointercancel', endDrag);
+
+        /* ---- keyboard ---------------------------------------------------- */
+        /* Only real text entry is exempt — a focused slider must not swallow
+           the whole keyboard (a lesson from the irisvis lab). */
+        function isTextField(el) {
+            if (!el) return false;
+            const t = el.tagName;
+            return el.isContentEditable
+                || (t === 'INPUT' && /^(text|search|email|number|password|url|tel)$/i.test(el.type))
+                || t === 'TEXTAREA';
+        }
+
+        window.addEventListener('keydown', (e) => {
+            if (isTextField(e.target)) return;
+            const k = e.key.toLowerCase();
+            /* Cmd belongs to the browser, never to the lab: Cmd-Shift-R has to
+               stay a hard reload. Ctrl is only ours on + and -, where the
+               original used it to drive the off-diagonal. */
+            if (e.metaKey) return;
+            const isNudge = (k === '+' || k === '-' || k === '=');
+            if (e.ctrlKey && !isNudge) return;
+            let used = true;
+            switch (k) {
+                case ' ': randomMatrix(); break;
+                case 'arrowup': moveSel(-1, 0); break;
+                case 'arrowdown': moveSel(1, 0); break;
+                case 'arrowleft': moveSel(0, -1); break;
+                case 'arrowright': moveSel(0, 1); break;
+                case '+': case '=': nudge(1, e); break;
+                case '-': nudge(-1, e); break;
+                case 'c': setFlag('showCircle', 'c-circle'); break;
+                case 'd': setFlag('showDots', 'c-dots'); break;
+                case 'k': setFlag('showCov', 'c-cov'); break;
+                case 'p': setFlag('showParallels', 'c-par'); break;
+                case 'v': setFlag('showVectors', 'c-vec'); break;
+                case 'w': setFlag('warp', 'c-warp'); break;
+                case 'h': setFlag('homogen', 'c-hom'); buildMatrix(); break;
+                case 'e': setDist('equal'); break;
+                case 'g': setDist('gauss'); break;
+                case 't': rotate(); break;
+                case 'r': resetAll(); break;
+                case 'i': toggleHelp(); break;
+                case 'escape':
+                    document.getElementById('help-box').classList.remove('on');
+                    break;
+                default: used = false;
+            }
+            if (used) { e.preventDefault(); render(); save(); }
+        });
+
+        function setFlag(key, boxId) {
+            S[key] = !S[key];
+            const b = document.getElementById(boxId);
+            if (b) b.checked = S[key];
+        }
+
+        /* ---- wiring ------------------------------------------------------ */
+        function wire() {
+            const cell = document.getElementById('cell');
+            if (cell) cell.addEventListener('input', () => {
+                S.m[S.selRow][S.selCol] = parseFloat(cell.value);
+                render(); save();
+            });
+
+            const np = document.getElementById('npts');
+            if (np) {
+                np.value = S.n;
+                document.getElementById('npts-value').textContent = S.n;
+                np.addEventListener('input', () => {
+                    S.n = parseInt(np.value, 10);
+                    document.getElementById('npts-value').textContent = S.n;
+                    buildCloud(); render(); save();
+                });
+            }
+
+            [['c-dots', 'showDots'], ['c-circle', 'showCircle'], ['c-cov', 'showCov'],
+            ['c-vec', 'showVectors'], ['c-par', 'showParallels'], ['c-hom', 'homogen'],
+            ['c-warp', 'warp']].forEach(([id, key]) => {
+                const b = document.getElementById(id);
+                if (!b) return;
+                b.checked = S[key];
+                b.addEventListener('change', () => {
+                    S[key] = b.checked;
+                    if (key === 'homogen') buildMatrix();
+                    render(); save();
+                });
+            });
+        }
+
+        /* ---- boot --------------------------------------------------------- */
+        function resizeCanvasToContainer() {
+            const dpr = window.devicePixelRatio || 1;
+            const rect = container.getBoundingClientRect();
+            const w = Math.max(1, rect.width);
+            const h = Math.max(1, rect.height);
+            canvas.width = Math.floor(w * dpr);
+            canvas.height = Math.floor(h * dpr);
+            canvas.style.width = w + 'px';
+            canvas.style.height = h + 'px';
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.scale(dpr, dpr);
+        }
+
+        function init() {
+            resizeCanvasToContainer();
+            render();
+        }
+
+        /* the read-out labels are static maths — rendered once, not per frame */
+        function renderLabels() {
+            if (!window.katex) return;
+            document.querySelectorAll('#ui-container i[data-tex]').forEach(el => {
+                if (el.dataset.done) return;
+                try {
+                    katex.render(el.dataset.tex, el, { throwOnError: false, displayMode: false });
+                    el.dataset.done = '1';
+                } catch (e) { }
+            });
+        }
+
+        load();
+        setupUI();
+        renderLabels();
+        buildMatrix();
+        wire();
+        syncButtons();
+        buildCloud();
+        buildCircle();
+        setCoach();
+        window.addEventListener('resize', init);
+        document.fonts.ready.then(init);
+        init();
+        dbg('Kovarianz-Lab bereit');
+
+        /* probe for the browser test bench */
+        window.kovarianz = { S, stats: () => stats, render, covariance, apply, resetAll };
+    </script>
+</body>
+
+</html>

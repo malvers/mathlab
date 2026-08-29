@@ -17,12 +17,23 @@
  * JG 10–12: cmaes, opti-lens
  * JG 11–12: integralreaktor, fourier, mandelbrot-deep, atomorbitale, differentiallabor
  * uni (zusätzlich): stanford-portal (externer Link), lissajous, atomorbitale, mandelbrot-deep, fourier, integralreaktor, differentiallabor, cmaes, opti-lens
- * top5 (Hub-Kachel): irisvis (Conway's Iris), fourier, mandelbrot-deep (Fraktale), atomorbitale, galtonboard, opti-lens (Linsenoptimierung)
+ * top5 (Hub-Kachel "TOP LABS"): kovarianz, irisvis (Conway's Iris), fourier, mandelbrot-deep (Fraktale), atomorbitale, galtonboard, opti-lens (Linsenoptimierung)
  * Keine Jahrgangs-Tags: cinematic-intro, happy-birthday-ulf (Show / Spaß).
  * ————————————————————————————————————————————————————————————————
  */
 
 const LABS_DATA = [
+    {
+        "id": "kovarianz",
+        "href": "kovarianz.html",
+        "title": "Kovarianz",
+        "description": "Eine lineare Abbildung A zieht, dreht und schert die Ebene. Auf eine runde Punktwolke angewandt wird daraus eine Ellipse \u2014 und genau deren Form steht in der Kovarianzmatrix: aus \u03a3\u2080 = \u03c3\u00b2E wird \u03a3 = A \u03a3\u2080 A\u1d40. Matrix zellenweise einstellen oder die Bildellipse direkt am Griff ziehen; Σ, Korrelation und die Eigenvektoren als Hauptachsen werden live aus den gezeichneten Punkten gerechnet. Mit Normal- und Gleichverteilung, homogenen Koordinaten und Parallelen, die zeigen, was die Abbildung mit Geraden macht.",
+        "tagline": "Stochastik / Lineare Abbildung / Eigenvektoren",
+        "icon": LAB_ICONS["kovarianz"],
+        "category": "stochastik funktionen neu top5 highlight hot uni grade11 grade12",
+        "keywords": "kovarianz kovarianzmatrix korrelation streuung varianz eigenvektor eigenwert hauptachse hauptachsentransformation pca lineare abbildung matrix scherung drehung determinante ellipse punktwolke normalverteilung gauss homogene koordinaten affine abbildung",
+        "color": "cyan"
+    },
     {
         "id": "irisvis",
         "href": "irisvis.html",
