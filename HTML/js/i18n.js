@@ -4,7 +4,8 @@
  * Translations are in separate files loaded after this one:
  *   i18n-de.js  i18n-en.js  i18n-es.js  i18n-fr.js  i18n-it.js
  *   i18n-pt.js  i18n-sw.js  i18n-tr.js  i18n-nl.js
- * i18n-nl.js calls resolveLanguageFromEnvironment() at the end.
+ * Language bootstrap (resolveLanguageFromEnvironment + translate-prompt suppression +
+ * bfcache re-sync) runs at the end of THIS file — it needs no dictionaries, only URL/localStorage.
  */
 
 const CyberI18n = {
@@ -131,3 +132,33 @@ const CyberI18n = {
         return path + (qs ? '?' + qs : '') + hash;
     }
 };
+
+// Language bootstrap: URL ?lang= → localStorage cyber-lab-lang → default DE (user choice persists on flag toggle).
+// Lives here — not in a dictionary file — so every page gets it regardless of which dicts it loads;
+// it reads only URL/localStorage, no dictionaries. (Moved from the tail of i18n-nl.js, 2026-08-29.)
+(function () {
+    try {
+        CyberI18n.resolveLanguageFromEnvironment();
+        CyberI18n.suppressBrowserTranslatePrompt();
+    } catch (e) {
+        console.warn("Language auto-detect failed:", e);
+    }
+    window.addEventListener(
+        'pageshow',
+        function (ev) {
+            if (!ev.persisted) return;
+            requestAnimationFrame(function () {
+                try {
+                    CyberI18n.resolveLanguageFromEnvironment();
+                    CyberI18n.suppressBrowserTranslatePrompt();
+                    if (typeof CyberUI !== 'undefined' && typeof CyberUI.syncCyberLangDisplayButtons === 'function') {
+                        CyberUI.syncCyberLangDisplayButtons();
+                    }
+                } catch (e2) {
+                    console.warn('Language re-sync after bfcache failed:', e2);
+                }
+            });
+        },
+        false
+    );
+})();
