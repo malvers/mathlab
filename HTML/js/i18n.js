@@ -172,7 +172,13 @@ const CyberI18n = {
         // Derive the path prefix from this script's own src so subdirectory pages work too.
         var src = document.currentScript && document.currentScript.src;
         var base = src ? src.replace(/i18n\.js.*$/, '') : 'js/';
-        document.write('<script src="' + base + 'i18n-' + (CyberI18n.current || 'de') + '.js"><\/script>');
+        var lang = CyberI18n.current || 'de';
+        // i18n-nl.js builds on a structuredClone of the EN dictionary (see its header) —
+        // for nl the EN file must therefore load first.
+        var files = lang === 'nl' ? ['i18n-en.js', 'i18n-nl.js'] : ['i18n-' + lang + '.js'];
+        for (var i = 0; i < files.length; i++) {
+            document.write('<script src="' + base + files[i] + '"><\/script>');
+        }
     } catch (e) {
         console.warn('i18n dictionary load failed:', e);
     }
