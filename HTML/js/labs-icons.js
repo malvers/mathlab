@@ -21,6 +21,19 @@ const LAB_ICONS = {
                 <circle cx="27" cy="76" r="2.6" /><circle cx="73" cy="76" r="2.6" />
             </g>
         </svg>`,
+    "kovarianz": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <ellipse cx="50" cy="50" rx="38" ry="22" fill="rgba(0, 210, 255, 0.07)" stroke="#00D2FF"
+                     stroke-width="2.2" transform="rotate(-28 50 50)" />
+            <g stroke-width="2.6" stroke-linecap="round">
+                <line x1="50" y1="50" x2="83" y2="32" stroke="#F5C242" />
+                <line x1="50" y1="50" x2="61" y2="70" stroke="#799E31" />
+            </g>
+            <g fill="rgba(226, 235, 248, 0.55)">
+                <circle cx="34" cy="58" r="1.8" /><circle cx="63" cy="41" r="1.8" />
+                <circle cx="45" cy="45" r="1.8" /><circle cx="70" cy="52" r="1.8" />
+                <circle cx="28" cy="47" r="1.8" /><circle cx="55" cy="60" r="1.8" />
+            </g>
+        </svg>`,
     "ascii": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
             <rect x="14" y="14" width="72" height="72" rx="12" fill="rgba(121, 158, 49, 0.08)" stroke="#799E31" stroke-width="2" />
             <g font-family="Menlo, Consolas, monospace" font-size="17" font-weight="bold" text-anchor="middle">

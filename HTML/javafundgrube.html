@@ -1,0 +1,558 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Java-Fundgrube</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&family=Outfit:wght@300;400;500;600&display=swap">
+</head>
+<body>
+
+<style>
+/* ---- Dark-first token set: the Cyber-Labor world ---- */
+:root {
+  --ground:      #08142a;
+  --panel:       #0e244e;
+  --panel-2:     #102a5c;
+  --edge:        #1c3a72;
+  --edge-soft:   #16305f;
+  --ink:         #e2ebf8;
+  --ink-dim:     #9db3d4;
+  --ink-faint:   #6f88ae;
+  --lambda:      #f5c242;   /* gap / actionable */
+  --phi:         #8fbb3c;   /* already in the lab */
+  --ypsilon:     #d4463a;   /* top candidate marker */
+  --steel:       #5d78a4;   /* tool, not lab material */
+  --chip-bg:     #102a5c;
+  --shadow:      0 1px 0 rgba(255,255,255,.04), 0 10px 30px rgba(0,0,0,.35);
+}
+/* light, for viewers on system-light (no stamp) */
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --ground:    #eef2f9;
+    --panel:     #ffffff;
+    --panel-2:   #f4f7fc;
+    --edge:      #c6d4e8;
+    --edge-soft: #dde6f3;
+    --ink:       #0e244e;
+    --ink-dim:   #4c6389;
+    --ink-faint: #7a8fb0;
+    --lambda:    #9a7000;
+    --phi:       #4f7016;
+    --ypsilon:   #b02418;
+    --steel:     #536b91;
+    --chip-bg:   #eaf0f9;
+    --shadow:    0 1px 2px rgba(14,36,78,.06), 0 8px 24px rgba(14,36,78,.08);
+  }
+}
+/* light, explicitly chosen */
+:root[data-theme="light"] {
+  --ground:    #eef2f9;
+  --panel:     #ffffff;
+  --panel-2:   #f4f7fc;
+  --edge:      #c6d4e8;
+  --edge-soft: #dde6f3;
+  --ink:       #0e244e;
+  --ink-dim:   #4c6389;
+  --ink-faint: #7a8fb0;
+  --lambda:    #9a7000;
+  --phi:       #4f7016;
+  --ypsilon:   #b02418;
+  --steel:     #536b91;
+  --chip-bg:   #eaf0f9;
+  --shadow:    0 1px 2px rgba(14,36,78,.06), 0 8px 24px rgba(14,36,78,.08);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  background: var(--ground);
+  color: var(--ink);
+  font-family: "Outfit", system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-weight: 300;
+  line-height: 1.55;
+  margin: 0;
+  padding: 0 20px 90px;
+  -webkit-font-smoothing: antialiased;
+}
+
+.wrap { max-width: 1080px; margin: 0 auto; }
+
+/* ---------- header ---------- */
+header {
+  padding: 56px 0 30px;
+  display: flex; flex-direction: column; gap: 14px;
+}
+.eyebrow {
+  font-family: "Orbitron", sans-serif;
+  font-size: .68rem; font-weight: 500;
+  letter-spacing: .22em; text-transform: uppercase;
+  color: var(--lambda);
+}
+h1 {
+  font-family: "Orbitron", sans-serif;
+  font-weight: 700;
+  font-size: clamp(1.9rem, 5vw, 3rem);
+  line-height: 1.08;
+  letter-spacing: -.01em;
+  text-wrap: balance;
+  margin: 0;
+}
+.lede {
+  font-size: 1.06rem;
+  color: var(--ink-dim);
+  max-width: 62ch;
+  margin: 0;
+}
+
+/* ---------- scoreboard ---------- */
+/* Tiles hug the left edge at their natural width instead of stretching the row. */
+.score {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  gap: 14px;
+  margin: 26px 0 6px;
+}
+.score-cell {
+  flex: 0 1 auto;
+  min-width: 210px;
+  background: var(--panel);
+  border: 1px solid var(--edge-soft);
+  border-radius: 4px;
+  padding: 18px 18px 15px;
+  display: flex; flex-direction: column; gap: 3px;
+  position: relative; overflow: hidden;
+}
+.score-cell::before {
+  content: ""; position: absolute; inset: 0 auto 0 0; width: 3px;
+  background: var(--tint, var(--steel));
+}
+.score-num {
+  font-family: "Orbitron", sans-serif; font-weight: 700;
+  font-size: 2.1rem; line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--tint, var(--ink));
+}
+.score-lab {
+  font-size: .78rem; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--ink-faint); font-weight: 500;
+}
+.score-note { font-size: .84rem; color: var(--ink-dim); }
+
+/* ---------- controls ---------- */
+.controls {
+  display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
+  margin: 34px 0 8px;
+  padding-top: 22px;
+  border-top: 1px solid var(--edge-soft);
+}
+.chip {
+  font-family: "Orbitron", sans-serif;
+  font-size: .68rem; font-weight: 500;
+  letter-spacing: .1em; text-transform: uppercase;
+  background: var(--chip-bg);
+  color: var(--tint, var(--ink-dim));
+  border: 1px solid var(--edge-soft);
+  border-radius: 3px;
+  padding: 8px 13px;
+  cursor: pointer;
+  transition: color .15s, border-color .15s, background .15s;
+}
+/* Each filter carries the colour of the tile it belongs to. */
+.chip[data-f="gap"]  { --tint: var(--lambda); }
+.chip[data-f="lab"]  { --tint: var(--phi); }
+.chip[data-f="tool"] { --tint: var(--steel); }
+.chip:hover { border-color: var(--tint, var(--edge)); }
+.chip[aria-pressed="true"] {
+  color: var(--ground);
+  background: var(--tint, var(--ink));
+  border-color: var(--tint, var(--ink));
+}
+.chip:focus-visible, #q:focus-visible { outline: 2px solid var(--lambda); outline-offset: 2px; }
+#q {
+  flex: 1 1 190px; min-width: 150px;
+  background: var(--panel); color: var(--ink);
+  border: 1px solid var(--edge-soft); border-radius: 3px;
+  padding: 8px 12px; font-family: inherit; font-size: .92rem; font-weight: 300;
+}
+#q::placeholder { color: var(--ink-faint); }
+.count-live {
+  font-size: .8rem; color: var(--ink-faint);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- groups & rows ---------- */
+.group { margin-top: 40px; }
+.group[hidden] { display: none; }
+.group-head {
+  display: flex; align-items: baseline; gap: 12px;
+  padding-bottom: 10px; margin-bottom: 2px;
+  border-bottom: 1px solid var(--edge);
+}
+.group-head h2 {
+  font-family: "Orbitron", sans-serif; font-weight: 500;
+  font-size: .82rem; letter-spacing: .16em; text-transform: uppercase;
+  margin: 0; color: var(--ink);
+}
+.group-head .g-count {
+  font-size: .76rem; color: var(--ink-faint);
+  font-variant-numeric: tabular-nums;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1fr minmax(200px, 300px);
+  gap: 6px 26px;
+  padding: 16px 16px 16px 18px;
+  border-bottom: 1px solid var(--edge-soft);
+  position: relative;
+}
+.row[hidden] { display: none; }
+.row::before {
+  content: ""; position: absolute; left: 0; top: 14px; bottom: 14px; width: 3px;
+  background: var(--tint);
+  border-radius: 2px;
+}
+.row.s-lab  { --tint: var(--phi); }
+.row.s-gap  { --tint: var(--lambda); }
+.row.s-tool { --tint: var(--steel); }
+
+.r-main { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.r-title {
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: 9px;
+}
+.r-name {
+  font-family: "Orbitron", sans-serif; font-weight: 500;
+  font-size: .96rem; color: var(--ink);
+}
+.r-year {
+  font-size: .74rem; color: var(--ink-faint);
+  font-variant-numeric: tabular-nums; letter-spacing: .04em;
+}
+.star {
+  font-family: "Orbitron", sans-serif; font-weight: 700;
+  font-size: .6rem; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--ypsilon);
+  border: 1px solid var(--ypsilon);
+  border-radius: 2px; padding: 2px 6px;
+}
+.r-desc { font-size: 1.04rem; line-height: 1.55; color: var(--ink-dim); }
+
+.r-side { display: flex; flex-direction: column; gap: 3px; padding-top: 2px; }
+.r-status {
+  font-family: "Orbitron", sans-serif; font-weight: 500;
+  font-size: .6rem; letter-spacing: .13em; text-transform: uppercase;
+  color: var(--tint);
+}
+.r-target { font-size: .89rem; color: var(--ink); }
+.r-target code {
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: .84em; color: var(--ink-dim);
+  background: var(--panel-2); border: 1px solid var(--edge-soft);
+  border-radius: 2px; padding: 1px 5px;
+}
+
+/* ---------- shortlist ---------- */
+.shortlist {
+  margin-top: 46px;
+  background: var(--panel);
+  border: 1px solid var(--edge);
+  border-radius: 4px;
+  padding: 26px 26px 8px;
+  box-shadow: var(--shadow);
+}
+.shortlist h2 {
+  font-family: "Orbitron", sans-serif; font-weight: 700;
+  font-size: 1.05rem; letter-spacing: .02em; margin: 0 0 4px;
+}
+.shortlist > p { margin: 0 0 20px; color: var(--ink-dim); font-size: .95rem; max-width: 62ch; }
+ol.picks { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+ol.picks li {
+  display: grid; grid-template-columns: 34px 1fr; gap: 4px 14px;
+  padding: 14px 0; border-top: 1px solid var(--edge-soft);
+}
+ol.picks li:first-child { border-top: 0; padding-top: 0; }
+.rank {
+  font-family: "Orbitron", sans-serif; font-weight: 700;
+  font-size: 1.1rem; color: var(--lambda);
+  font-variant-numeric: tabular-nums; line-height: 1.3;
+}
+.pick-name { font-family: "Orbitron", sans-serif; font-weight: 500; font-size: .95rem; }
+.pick-why { grid-column: 2; font-size: .93rem; color: var(--ink-dim); }
+
+footer {
+  margin-top: 50px; padding-top: 20px;
+  border-top: 1px solid var(--edge-soft);
+  font-size: .82rem; color: var(--ink-faint);
+  display: flex; flex-wrap: wrap; gap: 6px 18px;
+}
+
+@media (max-width: 680px) {
+  .row { grid-template-columns: 1fr; gap: 8px; }
+  .r-side { flex-direction: row; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+}
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}
+</style>
+
+<div class="wrap">
+
+<header>
+  <div class="eyebrow">Doc Alvers Mathe-Labor &middot; Bestandsaufnahme</div>
+  <h1>Java-Fundgrube</h1>
+  <p class="lede">51 Java-Projekte in <code>~/IdeaProjects</code>, gelesen und gegen die Lab-Registry abgeglichen. Sammelordner wie DemoPrograms, Haus und Mrautilities sind aufgeschl&uuml;sselt, deshalb stehen unten mehr Eintr&auml;ge als Projekte. Gr&uuml;n hei&szlig;t: l&auml;uft schon im Browser. Orange hei&szlig;t: liegt noch als Swing-Fenster herum.</p>
+
+  <div class="score">
+    <div class="score-cell" style="--tint: var(--lambda);">
+      <span class="score-num" id="n-gap">0</span>
+      <span class="score-lab">Offene L&uuml;cke</span>
+      <span class="score-note">Fachlich stark, im Lab nicht vorhanden</span>
+    </div>
+    <div class="score-cell" style="--tint: var(--phi);">
+      <span class="score-num" id="n-lab">0</span>
+      <span class="score-lab">Schon portiert</span>
+      <span class="score-note">Java-Idee lebt als Lab weiter</span>
+    </div>
+    <div class="score-cell" style="--tint: var(--steel);">
+      <span class="score-num" id="n-tool">0</span>
+      <span class="score-lab">Werkzeug</span>
+      <span class="score-note">Hilfsprogramm, kein Lab-Stoff</span>
+    </div>
+  </div>
+</header>
+
+<div class="controls">
+  <button class="chip" data-f="gap" aria-pressed="false">L&uuml;cken</button>
+  <button class="chip" data-f="lab" aria-pressed="false">Schon im Lab</button>
+  <button class="chip" data-f="tool" aria-pressed="false">Werkzeuge</button>
+  <button class="chip" data-f="all" aria-pressed="true">Alle</button>
+  <input id="q" type="search" placeholder="Suchen: collatz, cma-es, monte carlo &hellip;" aria-label="Projekte durchsuchen">
+  <span class="count-live" id="live"></span>
+</div>
+
+<main id="list"></main>
+
+<section class="shortlist">
+  <h2>Was ich als N&auml;chstes bauen w&uuml;rde</h2>
+  <p>Gereiht nach Wirkung im Unterricht mal Machbarkeit im Browser &mdash; alles Canvas- oder WebAudio-Stoff, nichts davon braucht eine neue Bibliothek.</p>
+  <ol class="picks">
+    <li><span class="rank">1</span><span class="pick-name">Kovarianz-Labor &mdash; CovarianceDemo</span>
+      <span class="pick-why">Handles ziehen, 5000 Punkte verzerren sich mit, Einheitskreis wird zur Ellipse, Eigenvektoren drehen mit. Das erkl&auml;rt Hauptachsen in zehn Sekunden, und im Lab gibt es dazu bisher gar nichts.</span></li>
+    <li><span class="rank">2</span><span class="pick-name">BB84 &mdash; QuantumCryptography</span>
+      <span class="pick-why">Alice, Bob und die Lauscherin Eve als Zeilen aus Bits und Basen. Br&uuml;cke zwischen Physik und Informatik, und ein Alleinstellungsmerkmal, das sonst niemand als Lab hat.</span></li>
+    <li><span class="rank">3</span><span class="pick-name">Kreisteilung &mdash; CutCircle aus Mrautilities</span>
+      <span class="pick-why">1, 2, 4, 8, 16 &hellip; und dann 31. Der sch&ouml;nste Vermutungs-Reinfall der Mathematik, fertig implementiert samt Sehnen- und Schnittpunktverwaltung.</span></li>
+    <li><span class="rank">4</span><span class="pick-name">Buffonsche Nadel &mdash; fallingpi</span>
+      <span class="pick-why">St&auml;bchen fallen auf Linien, daraus f&auml;llt &pi;. Steht direkt neben dem Galton Board und schlie&szlig;t die Monte-Carlo-Ecke, die im Lab noch fehlt.</span></li>
+    <li><span class="rank">5</span><span class="pick-name">Partikelschwarm &mdash; ParticleSwarmOptimization</span>
+      <span class="pick-why">Macht aus CMA-ES und Linsenoptimierung eine Trilogie: dieselbe Fitnesslandschaft, ein v&ouml;llig anderes Suchverhalten. Nebeneinander gezeigt wird der Unterschied erst sichtbar.</span></li>
+    <li><span class="rank">6</span><span class="pick-name">Morse-Labor &mdash; MorseListener</span>
+      <span class="pick-why">Text zu T&ouml;nen und Aufnahme zur&uuml;ck zu Text. Die Amplitudenanalyse ist im Browser mit WebAudio eher leichter als in Java &mdash; und das Mikrofon ist schon da.</span></li>
+  </ol>
+</section>
+
+<footer>
+  <span>Stand 28.08.2026</span>
+  <span>Quelle: <code>~/IdeaProjects</code>, 51 Projekte mit Java-Quelltext, hier 64 Eintr&auml;ge</span>
+  <span>Abgleich gegen <code>HTML/js/labs-config.js</code>, 64 registrierte Labs</span>
+</footer>
+
+</div>
+
+<script>
+const DATA = [
+ { g: "Geometrie und Beweise", items: [
+  { n: "ConwaysIris", y: 2025, s: "lab", d: "Satz vom Conway-Kreis: Dreieck mit ziehbaren Ecken, verlaengerte Seiten, gemeinsamer Umkreis — plus CMA-ES-Optimierer.", t: "irisvis.html" },
+  { n: "GaussianTrapetz", y: 2025, s: "lab", d: "Polygonflaeche nach der Gaussschen Trapezformel, Punkte per Drag, CMA-ES sucht generationenweise die optimale Form.", t: "cmaes.html" },
+  { n: "Haus / CoolSquares", y: 2024, s: "lab", d: "Geschachtelte Quadrate mit geschweiften Klammern als Annotation.", t: "coolsquares.html" },
+  { n: "DemoPrograms / cavalieri", y: 2025, s: "gap", d: "Prinzip von Cavalieri: Dreieck in horizontale Streifen zerlegt und geschert, die Flaeche bleibt gleich. Balkenzahl per Taste.", t: "Neu: cavalieri.html" },
+  { n: "DemoPrograms / SemiCircleGeometry", y: 2025, s: "gap", d: "Halbkreis mit vier ziehbaren Punkten, zwei auf dem Durchmesser und zwei auf dem Bogen — Thales und Sehnensatz live.", t: "Neu: thales.html" },
+  { n: "DemoPrograms / CircleThrough3Points", y: 2025, s: "gap", d: "Drei Punkte anklicken, dann schrittweise Mittelsenkrechte, Mittelpunkt und Umkreis. Zoom- und verschiebbar.", t: "Neu: umkreis.html" },
+  { n: "Mrautilities / CutCircle", y: 2022, s: "gap", star: 1, d: "Kreisteilungsproblem: n Punkte auf dem Kreis, alle Sehnen, alle Schnittpunkte, maximale Flaechenzahl — 1, 2, 4, 8, 16, 31.", t: "Neu: kreisteilung.html" },
+  { n: "Triangetoparallelogram", y: 2023, s: "gap", d: "Dreieck auf halber Hoehe schneiden, obere Haelfte umklappen, Parallelogramm gleicher Flaeche — der Beweis fuer A = g·h/2.", t: "Neu: dreieckflaeche.html" },
+  { n: "pyramid", y: 2024, s: "gap", d: "Pyramide in der Draufsicht, Spitze verschiebbar; Teilflaechen, Hoehen, Teilvolumina und der Vergleich zum Prisma.", t: "Neu: pyramide.html" },
+  { n: "Fulleren", y: 2024, s: "gap", d: "Abgestumpftes Ikosaeder aus 20 Sechsecken und 12 Fuenfecken: Oberflaeche und Volumen ueber Pyramidenzerlegung.", t: "Neu, 3D neben heart3d" },
+  { n: "GaussianTrapetz / Spiegel", y: 2025, s: "gap", d: "Rechtwinkliges Dreieck mit Kreissegmenten — die Moendchen des Hippokrates, Katheten per Pfeiltaste.", t: "Neu: moendchen.html" }
+ ]},
+ { g: "Stochastik, π und Zahlen", items: [
+  { n: "Galton", y: 2025, s: "lab", d: "Galton-Brett mit 30 Ebenen, Kugeln entscheiden sich zufaellig, Histogramm waechst live zur Normalverteilung.", t: "galtonboard.html" },
+  { n: "fibonacci / Spiral", y: 2024, s: "lab", d: "Fibonacci-Quadratspirale mit Viertelkreisbogen; dazu die Kettenwurzel gegen den Goldenen Schnitt.", t: "fibonacci.html" },
+  { n: "fallingpi", y: 2025, s: "gap", star: 1, d: "Buffonsches Nadelproblem: Staebchen fallen auf acht parallele Linien, aus den Kreuzungen faellt π. Dazu ThrowingDarts als Kreisflaechen-Variante.", t: "Neu: buffon.html" },
+  { n: "Haus / PiApproximation", y: 2024, s: "gap", d: "Monte-Carlo-π mit 100 Millionen Zufallstropfen im Viertelkreis.", t: "Neu, zusammen mit buffon.html" },
+  { n: "Haus / CalculatingPi", y: 2024, s: "gap", d: "Leibniz-, Basel- und Wallis-Reihe im direkten Konvergenzvergleich — wer naehert sich schneller an π an.", t: "Neu: pireihen.html" },
+  { n: "series", y: 2025, s: "gap", d: "Teleskopreihe 6/(n(n+1)) bis n = 10 Millionen, mit BigDecimal auf 100 Stellen, Abweichung vom Grenzwert 2.", t: "Neu, zu reihen.html" },
+  { n: "NumberDisplayApp", y: 2025, s: "gap", d: "Dreieckszahlen Tₙ mit laufender Summe; auf Tastendruck die Kehrwerte, deren Summe gegen 2 konvergiert.", t: "Neu: dreieckszahlen.html" },
+  { n: "DemoPrograms / CollazConjecture", y: 2025, s: "gap", d: "Collatz-Vermutung 3n+1 mit BigInteger-Startzahl, komplette Folge und erreichtes Maximum. Steckt gleich dreimal im Bestand.", t: "Neu: collatz.html" },
+  { n: "MathGTA / Divider", y: 2023, s: "gap", d: "Sucht bis 10.000 die Zahl mit den meisten Teilern — hochzusammengesetzte Zahlen.", t: "Neu, zu collatz.html" },
+  { n: "BigNumber", y: 2025, s: "gap", d: "BigInteger-Zaehler als GIF-Animation; dazu Konsolen-Experimente zu Dezimalperioden von Bruechen und Wurzeln.", t: "Neu: periodenlaenge.html" },
+  { n: "DemoPrograms / PowerTable", y: 2025, s: "gap", d: "2¹ bis 2⁶⁴ exakt, wissenschaftlich und als laufende Summe — die Reiskorn-Schachbrett-Legende. Potenzen gibt es im Lab, die Legende nicht.", t: "Ergaenzung zu potenzlabor.html" },
+  { n: "ComputerAG01", y: 2023, s: "gap", d: "100.000 Wuerfe mit sechs Wuerfeln, Augensummen als Konsolen-Histogramm.", t: "Ergaenzung zu galtonboard.html" }
+ ]},
+ { g: "Rechenverfahren", items: [
+  { n: "MultiplicationVisualization", y: 2025, s: "lab", d: "Animierte schriftliche Multiplikation: jede Teilrechnung und jeder Uebertrag wandert an seine Position, dann schriftliche Addition.", t: "multiplikation.html" },
+  { n: "RandomInfectionSim / MatheTrainer", y: 2022, s: "lab", d: "Kopfrechen-Uebungsprogramm mit rund 1450 Zeilen, eingebettet im Epidemie-Projekt.", t: "mathtrainer/" },
+  { n: "AsianMultiplication", y: 2025, s: "gap", d: "Japanische Strichmultiplikation: zwei Faktoren als gekreuzte Linienscharen, Schnittpunkte zu Zonen geclustert und aufsummiert.", t: "Neu: strichmultiplikation.html" },
+  { n: "Multiplication", y: 2022, s: "gap", d: "Schulmethode gegen Binaerverfahren: zaehlt Einzelmultiplikationen und -additionen und stellt den Aufwand grafisch gegenueber.", t: "Neu, zum Multiplikations-Bereich" }
+ ]},
+ { g: "Optimierung und KI", items: [
+  { n: "Lens", y: 2025, s: "lab", d: "Formbare Linse, parallele Strahlen, geometrische Brechung — CMA-ES, eigene Evolutionsstrategie und Simplex optimieren auf minimale Fokus-Streuung.", t: "opti-lens" },
+  { n: "Mrautilities / cmaes", y: 2022, s: "lab", d: "Portierte CMA-ES-Bibliothek samt Tester — die Grundlage unter Lens, ConwaysIris und GaussianTrapetz.", t: "cmaes.html" },
+  { n: "NeuralNetwork", y: 2022, s: "lab", d: "Netz aus Input-, Bias- und Output-Neuronen als Graph; Gewichte per CMA-ES statt Backpropagation. AND, XOR, ADD, NAND, XNOR — und MNIST.", t: "ann.html, neuroaddierer.html" },
+  { n: "NeuralNetworkGradle", y: 2020, s: "tool", d: "Gradle-Portierung desselben Simulators mit einkopierter CMA-ES-Quelle statt JAR. Historisch, kein eigener Inhalt.", t: "Duplikat" },
+  { n: "CovarianceDemo", y: 2022, s: "gap", star: 1, d: "Transformationsmatrix ueber ziehbare Handles; 5000 gauss- oder gleichverteilte Punkte, Einheitskreis und Parallelenscharen verzerren live mit, Eigen- und Kovarianzstruktur sichtbar.", t: "Neu: kovarianz.html" },
+  { n: "ParticleSwarmOptimization", y: 2022, s: "gap", star: 1, d: "Partikelschwarm auf einer Landschaft aus Gauss-Huegeln: Partikel, besuchte Positionen, globales Optimum, Zaehler der Funktionsaufrufe.", t: "Neu: pso.html" }
+ ]},
+ { g: "Physik und Kryptografie", items: [
+  { n: "orbitals2.0", y: 2025, s: "lab", d: "Atomorbitale als 3D-Meshes mit Perspektivkamera, Phong-Material, Trackball und Orbital-Auswahlkarte.", t: "orbitals.html" },
+  { n: "QuantumCryptography", y: 2024, s: "gap", star: 1, d: "BB84-Schluesselaustausch nach Bennett und Brassard: 42 Bits, Zufallsbasen von Alice und Bob, wahlweise mit Lauscherin Eve. Mit Demo-Modus und Erklaerungstexten.", t: "Neu: bb84.html" },
+  { n: "RandomInfectionSimulation", y: 2022, s: "gap", d: "Agentenbasierte Epidemie: Zufallsbewegung, Infektionsradius, Ansteckungswahrscheinlichkeit, Genesungszeit, Quarantaene — mit Kurvenplot und Multithread-Parametervariation.", t: "Neu: epidemie.html" },
+  { n: "vector", y: 2025, s: "gap", d: "Magnetkraefte: ein Punkt zwischen zwei Magneten wird gezogen, die Kraftvektoren folgen. Dazu die Induktionsspannung einer Spule mit 2000 Windungen.", t: "Neu: magnetfeld.html" }
+ ]},
+ { g: "Wahrnehmung, Bild und Ton", items: [
+  { n: "DemoPrograms / asciiart", y: 2025, s: "lab", d: "Bild per Drag-and-drop in ASCII-Art, ueber eine Helligkeits-Zeichenrampe.", t: "ascii.html" },
+  { n: "Colorizer", y: 2025, s: "lab", d: "Bild ueber einen editierbaren Farbverlauf mit verschiebbaren Separatoren neu einfaerben — die Vorlage fuer CyberGradient.", t: "irisvis.html" },
+  { n: "Hermanngitter", y: 2022, s: "gap", d: "Hermann-Gitter-Taeuschung samt verzerrter Variante: Raster mit wellenfoermig gebogenen Linien, Breite und Wellenzahl regelbar.", t: "Neu: hermanngitter.html" },
+  { n: "MorseListener", y: 2025, s: "gap", star: 1, d: "Text zu Morse-Piepstoenen; und rueckwaerts: WAV einlesen, ueber Amplituden- und Laengenanalyse Punkte, Striche und Pausen erkennen, in Klartext dekodieren.", t: "Neu: morse.html" },
+  { n: "DemoPrograms / TextInkCalculator", y: 2025, s: "gap", d: "Derselbe Satz in chinesischer und arabischer Schrift bei optimaler Groesse gerendert, dann der Anteil geschwaerzter Pixel gemessen — Schrifteffizienz.", t: "Neu: tintenverbrauch.html" },
+  { n: "Dimenticarti", y: 2025, s: "gap", d: "Karaoke-Recorder und -Player: Liedzeilen gross auf Canvas, im Aufnahmemodus schreibt ein Tastendruck den Zeitstempel jeder Zeile weg.", t: "Neu, zum Recorder-Bereich" },
+  { n: "PSO / worddisplayer", y: 2022, s: "gap", d: "Schnelllese-Wortanzeige: ein Wort nach dem anderen an fester Position.", t: "Neu, kleines Tool-Lab" }
+ ]},
+ { g: "Spiele und Unterricht", items: [
+  { n: "KaimboStudio", y: 2020, s: "lab", d: "Autorenwerkzeug der Sprachlern-App: mehrsprachige Aufgaben, Themen-Ontologie, Google Translate, TTS, Firebase-Upload und Handy-Simulator.", t: "kaimbo/" },
+  { n: "MathTrainer", y: 2025, s: "lab", d: "Klassenraum-Trainer: Aufgabentypen und Serien, Teams mit Punktestand, Countdown, Bildermatrix, TTS, LaTeX, WolframAlpha- und OpenAI-Anbindung.", t: "mathtrainer/" },
+  { n: "PSO / triangulate", y: 2022, s: "lab", d: "Delaunay-Triangulation mit Federmodell.", t: "triangulierer.html" },
+  { n: "MonkeGamesProject", y: 2025, s: "gap", d: "Ayumu-Schimpansen-Gedaechtnistest: nummerierte Kacheln blitzen kurz auf, werden verdeckt und muessen in aufsteigender Reihenfolge geklickt werden.", t: "Neu: ayumu.html" },
+  { n: "Jeopardy", y: 2023, s: "gap", d: "Vollstaendiges Jeopardy fuer den Unterricht: Kategorienspalten, Punktekacheln, Edit-Modus fuer eigene Fragen, Team-Panel, Sound.", t: "Neu: jeopardy.html" }
+ ]},
+ { g: "Werkzeuge — kein Lab-Stoff", items: [
+  { n: "symja", y: 2025, s: "tool", d: "Formeln ueber das CAS Symja parsen und rekursiv in gesprochenen englischen Text umwandeln. Vorstufe zum Vorlesen von Formeln.", t: "Baustein, kein Lab" },
+  { n: "mathocr", y: 2025, s: "tool", d: "Tesseract mit mathematischer Zeichen-Whitelist auf ein Bild, Rohergebnis dann nach LaTeX.", t: "vgl. morpheus/equationocr.html" },
+  { n: "latexer", y: 2025, s: "tool", d: "JLaTeXMath-Machbarkeitstest: eine Formel als TeXIcon im JFrame.", t: "im Web: KaTeX" },
+  { n: "testtospeech", y: 2025, s: "tool", d: "TTS-Clients gegen Google Cloud, ElevenLabs und UnrealSpeech, dazu FFmpeg-Konvertierung und Kontingentzaehler.", t: "vgl. Solita" },
+  { n: "keylistener2.0", y: 2025, s: "tool", d: "Systemweiter Tastatur-Hook ueber JNativeHook: Taste 9 zieht einen Zufallsnamen aus der Klassenliste.", t: "Unterrichtshelfer" },
+  { n: "notentabellen", y: 2025, s: "tool", d: "Notentabellen zu erreichbaren Punkten, Massenexport als PNG; dazu ParametricPlot fuer animierte Parameterkurven.", t: "ParametricPlot waere Lab-faehig" },
+  { n: "nameextractoresz", y: 2023, s: "tool", d: "PDFBox zieht Text aus Schuelerlisten, zerlegt ihn in Nachname und Vorname und schreibt CSV.", t: "Batch-Tool" },
+  { n: "powerpointslideserver", y: 2025, s: "tool", d: "PPT Slide Splitter: PowerPoint-Datei waehlen, Folien per Automation in hochaufloesende Einzelbilder zerlegen.", t: "vgl. ppts.html" },
+  { n: "ContextSearch", y: 2020, s: "tool", d: "Randloses Dock-Fenster: Kontext plus Suchbegriff werden kombiniert und im Browser geoeffnet.", t: "macOS-Utility" },
+  { n: "DemoPrograms / Diverse", y: 2025, s: "tool", d: "YouTubeDownloaderGUI als Frontend fuer yt-dlp und IconsConverter fuer PNG nach ICNS.", t: "Desktop-Utilities" },
+  { n: "TTIVisualisation", y: 2025, s: "tool", d: "Vollbild-Slideshow fuer Text-to-Image-Bilder im 10-Sekunden-Takt, Alpha-Fader noch als TODO.", t: "Bildbetrachter" },
+  { n: "Mrautilities / mratools", y: 2022, s: "tool", d: "Eigenes UI-Framework: randlose MFrame-Fenster mit selbstgebauter Titelleiste, MTabbedPane, Geometrie-Helfer und eine Bildschirmlupe via Robot.", t: "Hausbibliothek" },
+  { n: "JavaPackagerTextArea", y: 2020, s: "tool", d: "Zeigt alle System-Properties und Umgebungsvariablen — Testkandidat fuer jpackage unter macOS.", t: "Packaging-Test" },
+  { n: "opengl, opengltest, opengltestmaven, untitled", y: 2024, s: "tool", d: "LWJGL- und JOGL-Gehversuche: leeres Geruest, GLFW-Smoke-Test, 800x600-Fenster und eine transparente Kugel mit rotierendem Wuerfel.", t: "im Web: Three.js" },
+  { n: "zufall, MathGTA / Collatz", y: 2023, s: "tool", d: "Unterrichtsschnipsel: fuenf Zufallszahlen mit Minimum und Maximum, Collatz auf der Konsole.", t: "Codeschnipsel" }
+ ]}
+];
+
+const LABELS = { lab: "Schon im Lab", gap: "Luecke", tool: "Werkzeug" };
+const list = document.getElementById("list");
+const live = document.getElementById("live");
+
+let counts = { lab: 0, gap: 0, tool: 0 };
+
+DATA.forEach(function (grp) {
+  const sec = document.createElement("section");
+  sec.className = "group";
+  const head = document.createElement("div");
+  head.className = "group-head";
+  const h2 = document.createElement("h2");
+  h2.textContent = grp.g;
+  const gc = document.createElement("span");
+  gc.className = "g-count";
+  head.appendChild(h2); head.appendChild(gc);
+  sec.appendChild(head);
+
+  grp.items.forEach(function (it) {
+    counts[it.s]++;
+    const row = document.createElement("article");
+    row.className = "row s-" + it.s;
+    row.dataset.s = it.s;
+    row.dataset.q = (it.n + " " + it.d + " " + it.t + " " + LABELS[it.s]).toLowerCase();
+
+    const main = document.createElement("div");
+    main.className = "r-main";
+    const tl = document.createElement("div");
+    tl.className = "r-title";
+    const nm = document.createElement("span");
+    nm.className = "r-name"; nm.textContent = it.n;
+    const yr = document.createElement("span");
+    yr.className = "r-year"; yr.textContent = it.y;
+    tl.appendChild(nm); tl.appendChild(yr);
+    if (it.star) {
+      const st = document.createElement("span");
+      st.className = "star"; st.textContent = "Favorit";
+      tl.appendChild(st);
+    }
+    const ds = document.createElement("p");
+    ds.className = "r-desc"; ds.textContent = it.d;
+    main.appendChild(tl); main.appendChild(ds);
+
+    const side = document.createElement("div");
+    side.className = "r-side";
+    const stt = document.createElement("span");
+    stt.className = "r-status"; stt.textContent = LABELS[it.s];
+    const tgt = document.createElement("span");
+    tgt.className = "r-target";
+    if (it.s !== "lab") {
+      tgt.textContent = it.t;
+    } else {
+      const c = document.createElement("code");
+      c.textContent = it.t;
+      tgt.appendChild(c);
+    }
+    side.appendChild(stt); side.appendChild(tgt);
+
+    row.appendChild(main); row.appendChild(side);
+    sec.appendChild(row);
+  });
+
+  list.appendChild(sec);
+});
+
+document.getElementById("n-lab").textContent = counts.lab;
+document.getElementById("n-gap").textContent = counts.gap;
+document.getElementById("n-tool").textContent = counts.tool;
+
+let filter = "all";
+let query = "";
+
+function apply() {
+  let shown = 0;
+  document.querySelectorAll(".group").forEach(function (sec) {
+    let n = 0;
+    sec.querySelectorAll(".row").forEach(function (row) {
+      const okF = filter === "all" || row.dataset.s === filter;
+      const okQ = !query || row.dataset.q.indexOf(query) !== -1;
+      const vis = okF && okQ;
+      row.hidden = !vis;
+      if (vis) n++;
+    });
+    sec.hidden = n === 0;
+    sec.querySelector(".g-count").textContent = n === 1 ? "1 Projekt" : n + " Projekte";
+    shown += n;
+  });
+  live.textContent = shown === 1 ? "1 Treffer" : shown + " Treffer";
+}
+
+document.querySelectorAll(".chip").forEach(function (btn) {
+  btn.addEventListener("click", function () {
+    document.querySelectorAll(".chip").forEach(function (b) {
+      b.setAttribute("aria-pressed", String(b === btn));
+    });
+    filter = btn.dataset.f;
+    apply();
+  });
+});
+
+document.getElementById("q").addEventListener("input", function (e) {
+  query = e.target.value.trim().toLowerCase();
+  apply();
+});
+
+apply();
+</script>
+
+</body></html>
