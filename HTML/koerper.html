@@ -24,7 +24,8 @@
         .k-row { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; flex-wrap: wrap; }
         .k-legend { display: flex; flex-wrap: wrap; gap: 6px 12px; font-family: 'Orbitron', sans-serif; font-size: 0.6rem; color: #bbb; margin-top: 6px; }
         .k-legend span::before { content: ''; display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 5px; vertical-align: -1px; background: var(--c); }
-        .k-note { font-size: 0.7rem; color: #888; margin-top: 6px; line-height: 1.35; }
+        .k-note { font-size: 0.92rem; color: #a9b4c6; margin-top: 10px; line-height: 1.4; font-family: Arial, Helvetica, sans-serif;
+            width: 0; min-width: 100%; box-sizing: border-box; }
         /* values in Arial (Doc's wish), labels stay Orbitron; flatter cards */
         /* !important needed: buttons-ultra.css forces 20px padding / 90px min-height / 1.6rem on every stats card */
         .k-tab .stats-grid { gap: 5px !important; margin-top: 5px !important; }
@@ -54,14 +55,41 @@
         .k-tight .control-header { margin-bottom: 0; }
         .k-prec { margin-top: 8px; }
         #k-formpanel {
-            position: absolute; bottom: 12px; right: 12px; width: 400px; z-index: 5;
+            position: absolute; bottom: 12px; right: 12px; width: max-content; min-width: 260px; max-width: min(46vw, 560px); z-index: 5;
             max-height: 48%; overflow-y: auto; scrollbar-width: none;
         }
         #k-formpanel::-webkit-scrollbar { display: none; }
+        /* dimension switch: outside #tab-bar, whose overflow-x would clip the open panel */
+        #dim-dd { width: 64px; flex: 0 0 auto; align-self: center; margin: 0 10px 0 8px; transform: translateY(4px); }
+        #dim-dd .dropdown-trigger { padding: 6px 8px !important; border-width: 0.5px !important; border-color: rgb(2, 100, 123) !important; background: rgb(7, 14, 31) !important; border-radius: 6px !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 0.8rem !important; line-height: 1.1 !important; }
+        #dim-dd .selected-val { font-family: Arial, Helvetica, sans-serif !important; font-weight: 600; }
+        #dim-dd .arrow { font-size: 0.6rem; }
+        #dim-dd .dropdown-panel { top: calc(100% + 2px) !important; min-width: 64px; border-width: 0.5px !important; border-color: rgb(2, 100, 123) !important; background: rgb(7, 14, 31) !important; }
+        #dim-dd .dropdown-option { padding: 6px 10px !important; font-size: 0.8rem !important; font-family: Arial, Helvetica, sans-serif !important; }
+        #dim-dd .dropdown-option.k-active { color: rgb(121, 158, 49) !important; font-weight: 700; }
+        #tab-bar .tab-btn[hidden] { display: none; }
+        /* search at the right end of the strip, clear of the branding overlay (measured ~363px wide) */
+        #k-search { position: relative; flex: 0 0 auto; align-self: center; margin: 0 24px 0 12px; transform: translateY(1.5px); }
+        #k-search input {
+            width: 180px; padding: 6px 9px; border-radius: 6px; line-height: 1.1; box-sizing: content-box;
+            border: 0.5px solid rgb(2, 100, 123); background: rgb(7, 14, 31); color: #fff;
+            font-family: Arial, Helvetica, sans-serif; font-size: 0.78rem; outline: none;
+        }
+        #k-search input::placeholder { color: rgba(255, 255, 255, 0.35); }
+        #k-search input:focus { border-color: rgb(3, 145, 178); }
+        #k-search-res {
+            display: none; position: absolute; top: calc(100% + 2px); right: 0; min-width: 260px; max-height: 320px; overflow-y: auto;
+            background: rgb(7, 14, 31); border: 0.5px solid rgb(2, 100, 123); border-radius: 6px; z-index: 30;
+            font-family: Arial, Helvetica, sans-serif; font-size: 0.78rem;
+        }
+        #k-search-res div { padding: 6px 10px; cursor: pointer; color: rgba(255, 255, 255, 0.85); white-space: nowrap; }
+        #k-search-res div:hover { background: rgba(255, 255, 255, 0.08); color: #fff; }
+        #k-search-res .k-cat { color: rgba(255, 255, 255, 0.35); font-size: 0.68rem; margin-left: 6px; }
+        @media (max-width: 1100px) { #k-search { display: none; } }
         #k-formpanel .instrument-card { margin-bottom: 0; }
         @media (max-width: 768px) {
             #k-right { width: 170px; top: 8px; right: 8px; }
-            #k-formpanel { width: 220px; bottom: 8px; right: 8px; max-height: 40%; }
+            #k-formpanel { max-width: 60vw; bottom: 8px; right: 8px; max-height: 40%; }
         }
     </style>
 </head>
@@ -80,21 +108,40 @@
     <aside id="side-panel">
         <header id="sidebar-header"></header>
         <div id="ui-container">
+            <div id="sb-kurven" class="k-tab"></div>
+            <div id="sb-polygone" class="k-tab"></div>
+            <div id="sb-dreieck" class="k-tab"></div>
+            <div id="sb-vierecke" class="k-tab"></div>
+            <div id="sb-kreisformen" class="k-tab"></div>
             <div id="sb-platonisch" class="k-tab active"></div>
             <div id="sb-archimedisch" class="k-tab"></div>
             <div id="sb-catalanisch" class="k-tab"></div>
+            <div id="sb-johnson" class="k-tab"></div>
             <div id="sb-prismen" class="k-tab"></div>
             <div id="sb-rund" class="k-tab"></div>
         </div>
     </aside>
 
     <main id="main-content" class="has-tabbar">
-        <div id="tab-bar">
-            <button class="tab-btn active" data-tab="platonisch">PLATONISCH</button>
-            <button class="tab-btn" data-tab="archimedisch">ARCHIMEDISCH</button>
-            <button class="tab-btn" data-tab="catalanisch">CATALANISCH</button>
-            <button class="tab-btn" data-tab="prismen">PRISMEN</button>
-            <button class="tab-btn" data-tab="rund">RUNDFORMEN</button>
+        <div id="tab-strip">
+            <div id="dim-dd"></div>
+            <div id="tab-bar">
+            <button class="tab-btn" data-dim="1" data-tab="kurven">KURVEN</button>
+            <button class="tab-btn" data-dim="2" data-tab="polygone">POLYGONE</button>
+            <button class="tab-btn" data-dim="2" data-tab="dreieck">DREIECK</button>
+            <button class="tab-btn" data-dim="2" data-tab="vierecke">VIERECKE</button>
+            <button class="tab-btn" data-dim="2" data-tab="kreisformen">KREISFORMEN</button>
+            <button class="tab-btn active" data-dim="3" data-tab="platonisch">PLATONISCH</button>
+            <button class="tab-btn" data-dim="3" data-tab="archimedisch">ARCHIMEDISCH</button>
+            <button class="tab-btn" data-dim="3" data-tab="catalanisch">CATALANISCH</button>
+            <button class="tab-btn" data-dim="3" data-tab="johnson">JOHNSON</button>
+            <button class="tab-btn" data-dim="3" data-tab="prismen">PRISMEN</button>
+            <button class="tab-btn" data-dim="3" data-tab="rund">RUNDFORMEN</button>
+            </div>
+            <div id="k-search">
+                <input id="k-search-input" type="text" placeholder="suchen …" aria-label="Form oder Körper suchen" autocomplete="off">
+                <div id="k-search-res"></div>
+            </div>
         </div>
         <div id="tab-stage">
             <div id="canvas-container">
@@ -127,6 +174,7 @@
     <script src="js/branding/nav.js"></script>
     <script src="js/branding.js"></script>
     <script src="js/ui.js"></script>
+    <script src="js/koerper-johnson.js"></script>
     <script src="js/koerper-geom.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
     <script>
@@ -171,6 +219,9 @@
         const G = KoerperGeom;
         const S = {
             tab: 'platonisch',
+            dim: '3',                 // 1 | 2 | 3 — which tab family is visible
+            lastTab: { 1: 'kurven', 2: 'polygone', 3: 'platonisch' },
+            shape: {},                // per generic tab: { kind, params: { kind: {...} } }
             prec: 3,
             unit: 'cm',               // length unit for every input; areas get ², volumes ³
             a: 1,                     // edge length (polyhedra) — pure number, unit free
@@ -178,7 +229,8 @@
             showFaces: true, showEdges: true, showVerts: true,
             sphere: 'none',           // none | in | mid | circ
             autoRotate: true,
-            solid: { platonisch: 'ikosaeder', archimedisch: 'ikosaederstumpf', catalanisch: 'rhombentriakontaeder' },
+            solid: { platonisch: 'ikosaeder', archimedisch: 'ikosaederstumpf', catalanisch: 'rhombentriakontaeder', johnson: 'j17' },
+            mirror: false,            // mirror image for the chiral snub solids
             prism: { kind: 'prisma', n: 6, h: 1.2, uniform: true },
             round: { kind: 'kugel', r: 1, R: 2, h: 1.5, r2: 0.5, ea: 1.5, eb: 1, ec: 0.7 },
         };
@@ -186,12 +238,14 @@
         // Deep links: ?tab=archimedisch&solid=ikosaederstumpf&unfold=60&form=torus&prisma=antiprisma
         (function applyUrlParams() {
             const q = new URLSearchParams(location.search);
-            if (q.get('tab') && ['platonisch', 'archimedisch', 'catalanisch', 'prismen', 'rund'].includes(q.get('tab'))) S.tab = q.get('tab');
+            if (q.get('tab') && document.querySelector(`#tab-bar .tab-btn[data-tab="${q.get('tab')}"]`)) S.tab = q.get('tab');
+            if (q.get('form2d')) { S.tab = q.get('form2d'); if (q.get('kind')) S.shape[S.tab] = { kind: q.get('kind') }; }
             const solid = q.get('solid');
             if (solid) {
                 if (KoerperGeom.PLATONIC[solid]) { S.tab = 'platonisch'; S.solid.platonisch = solid; }
                 else if (KoerperGeom.ARCHIMEDEAN[solid]) { S.tab = 'archimedisch'; S.solid.archimedisch = solid; }
                 else if (KoerperGeom.CATALAN[solid]) { S.tab = 'catalanisch'; S.solid.catalanisch = solid; }
+                else if (KoerperGeom.JOHNSON[solid]) { S.tab = 'johnson'; S.solid.johnson = solid; }
             }
             if (q.get('form')) { S.tab = 'rund'; S.round.kind = q.get('form'); }
             if (q.get('prisma')) { S.tab = 'prismen'; S.prism.kind = q.get('prisma'); }
@@ -200,7 +254,7 @@
         })();
         function persist() { try { localStorage.setItem('koerper_state', JSON.stringify(S)); } catch (e) { /* ignore */ } }
 
-        const fmt = x => Number(x).toLocaleString('de-DE', { minimumFractionDigits: S.prec, maximumFractionDigits: S.prec });
+        const fmt = x => !isFinite(x) ? '∞' : Number(x).toLocaleString('de-DE', { minimumFractionDigits: S.prec, maximumFractionDigits: S.prec });
         const fmtDeg = x => (x * 180 / Math.PI).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + '°';
         const tex = (el, s) => { if (window.katex) katex.render(s, el, { throwOnError: false, displayMode: false }); else el.textContent = s; };
 
@@ -208,13 +262,83 @@
         // Tab bar (sidebar + stage swap)
         // ------------------------------------------------------------------
         function switchTab(name) {
-            S.tab = name; persist();
-            document.querySelectorAll('#tab-bar .tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
+            S.tab = name;
+            const btn = document.querySelector(`#tab-bar .tab-btn[data-tab="${name}"]`);
+            if (btn) { S.dim = btn.dataset.dim; S.lastTab[S.dim] = name; }
+            persist();
+            document.querySelectorAll('#tab-bar .tab-btn').forEach(b => { b.classList.toggle('active', b.dataset.tab === name); b.hidden = b.dataset.dim !== S.dim; });
+            const dd = document.querySelector('#dim-dd .selected-val'); if (dd) dd.textContent = S.dim + 'D';
+            document.querySelectorAll('#dim-dd .dropdown-option').forEach(o => o.classList.toggle('k-active', o.dataset.id === S.dim));
             document.querySelectorAll('#ui-container .k-tab').forEach(d => d.classList.toggle('active', d.id === 'sb-' + name));
             updateRightPanel();
+            updateMirrorBoxes();
             rebuild();
         }
         document.querySelectorAll('#tab-bar .tab-btn').forEach(b => b.addEventListener('click', () => switchTab(b.dataset.tab)));
+        CyberUI.createDropdown('dim-dd', [{ id: '1', label: '1D' }, { id: '2', label: '2D' }, { id: '3', label: '3D' }], id => {
+            if (id !== S.dim) { switchTab(S.lastTab[id] || document.querySelector(`#tab-bar .tab-btn[data-dim="${id}"]`).dataset.tab); resetView(); }
+        }, S.dim);
+
+        // ---- search over every figure in the lab -------------------------
+        const SEARCH = [];
+        const TAB_LABEL = { platonisch: 'Platonisch', archimedisch: 'Archimedisch', catalanisch: 'Catalanisch', johnson: 'Johnson', prismen: 'Prismen', rund: 'Rundformen', kurven: 'Kurven', polygone: 'Polygone', dreieck: 'Dreieck', vierecke: 'Vierecke', kreisformen: 'Kreisformen' };
+        function syncTabDropdown(tab, label) {
+            const el = document.querySelector(`#sb-${tab} .dropdown-trigger .selected-val`);
+            if (el) el.textContent = label;
+        }
+        function indexLab() {
+            for (const [tab, cat] of [['platonisch', G.PLATONIC], ['archimedisch', G.ARCHIMEDEAN], ['catalanisch', G.CATALAN], ['johnson', G.JOHNSON]])
+                for (const id of Object.keys(cat)) SEARCH.push({ label: cat[id].name, tab, run: () => { S.solid[tab] = id; syncTabDropdown(tab, cat[id].name); } });
+            for (const [id, label] of [['prisma', 'Prisma'], ['antiprisma', 'Antiprisma'], ['pyramide', 'Pyramide'], ['doppelpyramide', 'Doppelpyramide']])
+                SEARCH.push({ label, tab: 'prismen', run: () => { S.prism.kind = id; syncTabDropdown('prismen', label); } });
+            for (const [id, label] of [['kugel', 'Kugel'], ['halbkugel', 'Halbkugel'], ['zylinder', 'Zylinder'], ['kegel', 'Kegel'], ['kegelstumpf', 'Kegelstumpf'], ['torus', 'Torus'], ['ellipsoid', 'Ellipsoid']])
+                SEARCH.push({ label, tab: 'rund', run: () => { S.round.kind = id; syncTabDropdown('rund', label); showRoundParams(); } });
+            for (const tab of Object.keys(GENERIC)) for (const id of Object.keys(GENERIC[tab].shapes)) {
+                const label = GENERIC[tab].shapes[id].name;
+                SEARCH.push({ label, tab, run: () => { S.shape[tab].kind = id; shapeState(tab); syncTabDropdown(tab, label); buildGenericParams(tab); } });
+            }
+            SEARCH.forEach(e => e.key = (e.label + ' ' + TAB_LABEL[e.tab]).toLowerCase());
+        }
+        /** Keep the search box clear of the branding overlay — its width is not fixed. */
+        function layoutSearch() {
+            const box = document.getElementById('k-search'), strip = document.getElementById('tab-strip');
+            if (!box || !strip) return;
+            const brand = document.getElementById('branding-master-title') || document.querySelector('[id^="branding"]');
+            const sr = strip.getBoundingClientRect();
+            let gap = 24;
+            if (brand) { const br = brand.getBoundingClientRect(); if (br.width) gap = Math.max(24, Math.round(sr.right - br.left + 14)); }
+            box.style.marginRight = gap + 'px';
+            box.style.display = (sr.width - gap < 240) ? 'none' : '';
+        }
+        function wireSearch() {
+            indexLab();
+            const inp = document.getElementById('k-search-input'), res = document.getElementById('k-search-res');
+            const close = () => { res.style.display = 'none'; };
+            inp.addEventListener('input', () => {
+                const q = inp.value.trim().toLowerCase();
+                if (q.length < 2) return close();
+                const words = q.split(/\s+/);
+                const hits = SEARCH.filter(e => words.every(w => e.key.includes(w))).slice(0, 14);
+                if (!hits.length) { res.innerHTML = '<div style="color:rgba(255,255,255,0.4)">nichts gefunden</div>'; res.style.display = 'block'; return; }
+                res.innerHTML = hits.map((h, i) => `<div data-i="${i}">${h.label}<span class="k-cat">${TAB_LABEL[h.tab]}</span></div>`).join('');
+                res.style.display = 'block';
+                res.querySelectorAll('div[data-i]').forEach(el => el.addEventListener('click', () => {
+                    const h = hits[+el.dataset.i]; h.run(); persist(); switchTab(h.tab); resetView(); inp.value = ''; close(); inp.blur();
+                }));
+            });
+            inp.addEventListener('keydown', e => {
+                e.stopPropagation();
+                if (e.key === 'Escape') { inp.value = ''; close(); inp.blur(); }
+                if (e.key === 'Enter') { const first = res.querySelector('div[data-i]'); if (first) first.click(); }
+            });
+            document.addEventListener('click', e => { if (!e.target.closest('#k-search')) close(); });
+            layoutSearch();
+            window.addEventListener('resize', layoutSearch);
+            document.fonts.ready.then(layoutSearch);
+            setTimeout(layoutSearch, 1200);
+            const brand = document.getElementById('branding-master-title');
+            if (brand && window.ResizeObserver) new ResizeObserver(layoutSearch).observe(brand);
+        }
 
         // ------------------------------------------------------------------
         // Sidebar cards — one set per tab
@@ -268,15 +392,311 @@
 
         buildCommonCards('platonisch', {
             title: 'Platonischer Körper', options: solidOptions(G.PLATONIC), selected: S.solid.platonisch,
-            onSelect: id => { S.solid.platonisch = id; persist(); rebuild(); }, params: cid => { edgeParams(cid); unitDropdown(cid); }, net: true, spheres: true,
+            onSelect: id => { S.solid.platonisch = id; persist(); rebuild(); }, params: cid => { edgeParams(cid); unitDropdown(cid); mirrorBox(cid); }, net: true, spheres: true,
         });
         buildCommonCards('archimedisch', {
             title: 'Archimedischer Körper', options: solidOptions(G.ARCHIMEDEAN), selected: S.solid.archimedisch,
-            onSelect: id => { S.solid.archimedisch = id; persist(); rebuild(); }, params: cid => { edgeParams(cid); unitDropdown(cid); }, net: true, spheres: true,
+            onSelect: id => { S.solid.archimedisch = id; persist(); rebuild(); }, params: cid => { edgeParams(cid); unitDropdown(cid); mirrorBox(cid); }, net: true, spheres: true,
         });
+        // ------------------------------------------------------------------
+        // 1D curves and 2D figures — data driven: params → calc() → stats/tex/geometry
+        // stats unit codes: 1 length, 2 area, 0 none, 'deg' angle
+        // ------------------------------------------------------------------
+        const PI = Math.PI, D2R = PI / 180;
+        const ngon = (n, R, rot = 0) => Array.from({ length: n }, (_, k) => [R * Math.cos(rot + 2 * PI * k / n), R * Math.sin(rot + 2 * PI * k / n)]);
+        const arcPts = (r, a0, a1, m = 96) => Array.from({ length: m + 1 }, (_, k) => [r * Math.cos(a0 + (a1 - a0) * k / m), r * Math.sin(a0 + (a1 - a0) * k / m)]);
+        const GENERIC = {
+            polygone: { title: 'Regelmäßiges Vieleck', shapes: {
+                regelmaessig: { name: 'Regelmäßiges n-Eck', params: [['n', 'Ecken n', 3, 20, 6, 1, 0], ['a', 'Seite a', 0.2, 10, 2, 0.1, 1]],
+                    calc: ({ n, a }) => { const ri = a / (2 * Math.tan(PI / n)), ru = a / (2 * Math.sin(PI / n)), A = n * a * ri / 2;
+                        return { name: { 3: 'Gleichseitiges Dreieck', 4: 'Quadrat', 5: 'Regelmäßiges Fünfeck', 6: 'Regelmäßiges Sechseck', 8: 'Regelmäßiges Achteck' }[n] || `Regelmäßiges ${n}-Eck`,
+                            stats: [['Fläche A', A, 2], ['Umfang U', n * a, 1], ['Inkreisradius r_i', ri, 1], ['Umkreisradius r_u', ru, 1], ['Innenwinkel', (n - 2) * 180 / n, 'deg'], ['Winkelsumme', (n - 2) * 180, 'deg'], ['Diagonalen', n * (n - 3) / 2, 0]],
+                            tex: ['A = \\tfrac{n\\,a^2}{4\\tan(\\pi/n)}', 'U = n\\,a', 'r_i = \\tfrac{a}{2\\tan(\\pi/n)}', 'r_u = \\tfrac{a}{2\\sin(\\pi/n)}', '\\alpha = \\tfrac{(n-2)\\cdot 180^\\circ}{n}', 'D = \\tfrac{n(n-3)}{2}'],
+                            contours: [ngon(n, ru, -PI / 2 + PI / n)] }; } } } },
+            dreieck: { title: 'Dreieck', shapes: {
+                sss: { name: 'Dreieck aus drei Seiten', params: [['a', 'Seite a', 0.2, 10, 3, 0.1, 1], ['b', 'Seite b', 0.2, 10, 4, 0.1, 1], ['c', 'Seite c', 0.2, 10, 5, 0.1, 1]],
+                    calc: ({ a, b, c }) => { if (a + b <= c || a + c <= b || b + c <= a) return { name: 'Dreieck — Dreiecksungleichung verletzt', stats: [], tex: ['a + b > c,\; a + c > b,\; b + c > a'], contours: [] };
+                        const s = (a + b + c) / 2, A = Math.sqrt(s * (s - a) * (s - b) * (s - c)); const al = Math.acos((b * b + c * c - a * a) / (2 * b * c)), be = Math.acos((a * a + c * c - b * b) / (2 * a * c)), ga = PI - al - be;
+                        const Cx = (b * b + c * c - a * a) / (2 * c), Cy = Math.sqrt(Math.max(0, b * b - Cx * Cx));
+                        return { name: 'Dreieck', stats: [['Fläche A', A, 2], ['Umfang U', a + b + c, 1], ['Winkel α, β, γ', [al, be, ga].map(x => x / D2R), 'deglist'], ['Höhen h_a, h_b, h_c', [2 * A / a, 2 * A / b, 2 * A / c], 'list1'], ['Inkreisradius r_i', A / s, 1], ['Umkreisradius r_u', a * b * c / (4 * A), 1]],
+                            tex: ['s = \\tfrac{a+b+c}{2}', 'A = \\sqrt{s(s-a)(s-b)(s-c)}', '\\cos\\alpha = \\tfrac{b^2+c^2-a^2}{2bc}', 'h_a = \\tfrac{2A}{a}', 'r_i = \\tfrac{A}{s}', 'r_u = \\tfrac{abc}{4A}'],
+                            contours: [[[0, 0], [c, 0], [Cx, Cy]]] }; } } } },
+            vierecke: { title: 'Viereck', shapes: {
+                rechteck: { name: 'Rechteck', params: [['a', 'Seite a', 0.2, 10, 4, 0.1, 1], ['b', 'Seite b', 0.2, 10, 2.5, 0.1, 1]],
+                    calc: ({ a, b }) => ({ stats: [['Fläche A', a * b, 2], ['Umfang U', 2 * (a + b), 1], ['Diagonale d', Math.hypot(a, b), 1]], tex: ['A = a\\,b', 'U = 2(a+b)', 'd = \\sqrt{a^2+b^2}'], contours: [[[0, 0], [a, 0], [a, b], [0, b]]] }) },
+                raute: { name: 'Raute', params: [['a', 'Seite a', 0.2, 10, 3, 0.1, 1], ['al', 'Winkel α', 10, 170, 60, 1, 'deg']],
+                    calc: ({ a, al }) => { const r = al * D2R; return { stats: [['Fläche A', a * a * Math.sin(r), 2], ['Umfang U', 4 * a, 1], ['Diagonale d₁', 2 * a * Math.cos(r / 2), 1], ['Diagonale d₂', 2 * a * Math.sin(r / 2), 1], ['Höhe h', a * Math.sin(r), 1]], tex: ['A = a^2\\sin\\alpha', 'U = 4a', 'd_1 = 2a\\cos\\tfrac{\\alpha}{2},\; d_2 = 2a\\sin\\tfrac{\\alpha}{2}', 'h = a\\sin\\alpha'], contours: [[[0, 0], [a, 0], [a + a * Math.cos(r), a * Math.sin(r)], [a * Math.cos(r), a * Math.sin(r)]]] }; } },
+                parallelogramm: { name: 'Parallelogramm', params: [['a', 'Seite a', 0.2, 10, 4, 0.1, 1], ['b', 'Seite b', 0.2, 10, 2.5, 0.1, 1], ['al', 'Winkel α', 10, 170, 70, 1, 'deg']],
+                    calc: ({ a, b, al }) => { const r = al * D2R; return { stats: [['Fläche A', a * b * Math.sin(r), 2], ['Umfang U', 2 * (a + b), 1], ['Diagonale d₁', Math.sqrt(a * a + b * b + 2 * a * b * Math.cos(r)), 1], ['Diagonale d₂', Math.sqrt(a * a + b * b - 2 * a * b * Math.cos(r)), 1], ['Höhe h_a', b * Math.sin(r), 1]], tex: ['A = a\\,b\\sin\\alpha', 'U = 2(a+b)', 'd_{1,2} = \\sqrt{a^2+b^2\\pm 2ab\\cos\\alpha}', 'h_a = b\\sin\\alpha'], contours: [[[0, 0], [a, 0], [a + b * Math.cos(r), b * Math.sin(r)], [b * Math.cos(r), b * Math.sin(r)]]] }; } },
+                trapez: { name: 'Gleichschenkliges Trapez', params: [['a', 'Grundseite a', 0.2, 10, 5, 0.1, 1], ['c', 'Oberseite c', 0.2, 10, 3, 0.1, 1], ['h', 'Höhe h', 0.2, 10, 2, 0.1, 1]],
+                    calc: ({ a, c, h }) => { const b = Math.hypot(h, (a - c) / 2); return { stats: [['Fläche A', (a + c) * h / 2, 2], ['Umfang U', a + c + 2 * b, 1], ['Schenkel b', b, 1], ['Mittellinie m', (a + c) / 2, 1], ['Diagonale d', Math.sqrt(h * h + ((a + c) / 2) ** 2), 1]], tex: ['A = \\tfrac{(a+c)\\,h}{2}', 'b = \\sqrt{h^2+\\left(\\tfrac{a-c}{2}\\right)^2}', 'U = a+c+2b', 'd = \\sqrt{h^2+\\left(\\tfrac{a+c}{2}\\right)^2}'], contours: [[[0, 0], [a, 0], [(a + c) / 2, h], [(a - c) / 2, h]]] }; } } } },
+            kreisformen: { title: 'Kreisform', shapes: {
+                kreis: { name: 'Kreis', params: [['r', 'Radius r', 0.2, 10, 2, 0.1, 1]],
+                    calc: ({ r }) => ({ stats: [['Fläche A', PI * r * r, 2], ['Umfang U', 2 * PI * r, 1], ['Durchmesser d', 2 * r, 1]], tex: ['A = \\pi r^2', 'U = 2\\pi r'], contours: [arcPts(r, 0, 2 * PI, 128)] }) },
+                kreisring: { name: 'Kreisring', params: [['R', 'Außenradius R', 0.3, 10, 3, 0.1, 1], ['r', 'Innenradius r', 0.1, 9.9, 1.5, 0.1, 1]],
+                    calc: ({ R, r }) => { if (r >= R) r = R * 0.99; return { stats: [['Fläche A', PI * (R * R - r * r), 2], ['Umfang U (außen + innen)', 2 * PI * (R + r), 1], ['Ringbreite b', R - r, 1]], tex: ['A = \\pi\\,(R^2 - r^2)', 'U = 2\\pi\\,(R + r)'], contours: [arcPts(R, 0, 2 * PI, 128)], holes: [arcPts(r, 0, 2 * PI, 96)] }; } },
+                sektor: { name: 'Kreissektor', params: [['r', 'Radius r', 0.2, 10, 2.5, 0.1, 1], ['al', 'Mittelpunktswinkel α', 1, 360, 110, 1, 'deg']],
+                    calc: ({ r, al }) => { const t = al * D2R, b = r * t; return { stats: [['Fläche A', r * r * t / 2, 2], ['Bogenlänge b', b, 1], ['Umfang U', b + 2 * r, 1], ['Sehne s', 2 * r * Math.sin(t / 2), 1]], tex: ['A = \\tfrac{\\alpha}{360^\\circ}\\,\\pi r^2 = \\tfrac{r^2\\alpha_{rad}}{2}', 'b = r\\,\\alpha_{rad}', 'U = b + 2r', 's = 2r\\sin\\tfrac{\\alpha}{2}'], contours: [[[0, 0]].concat(arcPts(r, -t / 2, t / 2))] }; } },
+                segment: { name: 'Kreissegment (Kreisabschnitt)', params: [['r', 'Radius r', 0.2, 10, 2.5, 0.1, 1], ['al', 'Mittelpunktswinkel α', 1, 359, 120, 1, 'deg']],
+                    calc: ({ r, al }) => { const t = al * D2R; return { stats: [['Fläche A', r * r / 2 * (t - Math.sin(t)), 2], ['Bogenlänge b', r * t, 1], ['Sehne s', 2 * r * Math.sin(t / 2), 1], ['Höhe h', r * (1 - Math.cos(t / 2)), 1]], tex: ['A = \\tfrac{r^2}{2}\\,(\\alpha_{rad} - \\sin\\alpha)', 'b = r\\,\\alpha_{rad}', 's = 2r\\sin\\tfrac{\\alpha}{2}', 'h = r\\,(1-\\cos\\tfrac{\\alpha}{2})'], contours: [arcPts(r, -t / 2, t / 2)] }; } },
+                ellipse: { name: 'Ellipse', params: [['a', 'Halbachse a', 0.2, 10, 3, 0.1, 1], ['b', 'Halbachse b', 0.2, 10, 1.8, 0.1, 1]],
+                    calc: ({ a, b }) => { const h = ((a - b) / (a + b)) ** 2, U = PI * (a + b) * (1 + 3 * h / (10 + Math.sqrt(4 - 3 * h))); const big = Math.max(a, b), sm = Math.min(a, b); return { stats: [['Fläche A', PI * a * b, 2], ['Umfang U (Näherung)', U, 1], ['Exzentrizität e', Math.sqrt(big * big - sm * sm) / big, 0], ['Brennweite c', Math.sqrt(big * big - sm * sm), 1]], tex: ['A = \\pi\\,a\\,b', 'U \\approx \\pi(a+b)\\left(1+\\tfrac{3h}{10+\\sqrt{4-3h}}\\right),\; h = \\left(\\tfrac{a-b}{a+b}\\right)^2', 'e = \\tfrac{\\sqrt{a^2-b^2}}{a}'], note: 'Umfang nach Ramanujan II (Fehler < 10⁻⁵ relativ).', contours: [Array.from({ length: 129 }, (_, k) => [a * Math.cos(2 * PI * k / 128), b * Math.sin(2 * PI * k / 128)])] }; } } } },
+            kurven: { title: 'Kurve', shapes: {
+                kreisbogen: { name: 'Kreisbogen', params: [['r', 'Radius r', 0.2, 10, 3, 0.1, 1], ['al', 'Winkel α', 1, 360, 120, 1, 'deg']],
+                    calc: ({ r, al }) => { const t = al * D2R; return { stats: [['Bogenlänge L', r * t, 1], ['Sehne s', 2 * r * Math.sin(t / 2), 1], ['Pfeilhöhe h', r * (1 - Math.cos(t / 2)), 1]], tex: ['L = r\\,\\alpha_{rad} = \\tfrac{\\alpha}{360^\\circ}\\,2\\pi r', 's = 2r\\sin\\tfrac{\\alpha}{2}', 'h = r\\,(1-\\cos\\tfrac{\\alpha}{2})'], curve: arcPts(r, PI / 2 - t / 2, PI / 2 + t / 2).map(p => [p[0], p[1], 0]) }; } },
+                parabel: { name: 'Parabelbogen', params: [['w', 'Spannweite w', 0.2, 10, 4, 0.1, 1], ['H', 'Höhe H', 0.1, 10, 2, 0.1, 1]],
+                    calc: ({ w, H }) => { const a = 4 * H / (w * w), x = w / 2, q = Math.sqrt(1 + 4 * a * a * x * x); const L = x * q + Math.asinh(2 * a * x) / (2 * a); return { stats: [['Bogenlänge L', L, 1], ['Fläche unter dem Bogen', 2 * w * H / 3, 2], ['Brennweite f', 1 / (4 * a), 1]], tex: ['y = a\\,x^2,\\quad a = \\tfrac{4H}{w^2}', 'L = x\\sqrt{1+4a^2x^2} + \\tfrac{\\operatorname{arsinh}(2ax)}{2a},\; x = \\tfrac{w}{2}', 'A = \\tfrac{2}{3}\\,w\\,H'], curve: Array.from({ length: 97 }, (_, k) => { const xx = -x + w * k / 96; return [xx, H - a * xx * xx, 0]; }) }; } },
+                zykloide: { name: 'Zykloide (ein Bogen)', params: [['r', 'Rollkreis-Radius r', 0.2, 5, 1, 0.1, 1]],
+                    calc: ({ r }) => ({ stats: [['Bogenlänge L', 8 * r, 1], ['Breite 2πr', 2 * PI * r, 1], ['Höhe 2r', 2 * r, 1], ['Fläche unter dem Bogen', 3 * PI * r * r, 2]], tex: ['x = r(t-\\sin t),\; y = r(1-\\cos t)', 'L = 8r', 'A = 3\\pi r^2'], curve: Array.from({ length: 129 }, (_, k) => { const t = 2 * PI * k / 128; return [r * (t - Math.sin(t)) - PI * r, r * (1 - Math.cos(t)), 0]; }) }) },
+                kettenlinie: { name: 'Kettenlinie', params: [['w', 'Spannweite w', 0.2, 10, 4, 0.1, 1], ['a', 'Parameter a', 0.2, 10, 1.5, 0.1, 1]],
+                    calc: ({ w, a }) => { const L = 2 * a * Math.sinh(w / (2 * a)), f = a * (Math.cosh(w / (2 * a)) - 1); return { stats: [['Bogenlänge L', L, 1], ['Durchhang f', f, 1]], tex: ['y = a\\cosh\\tfrac{x}{a}', 'L = 2a\\sinh\\tfrac{w}{2a}', 'f = a\\left(\\cosh\\tfrac{w}{2a}-1\\right)'], curve: Array.from({ length: 97 }, (_, k) => { const x = -w / 2 + w * k / 96; return [x, a * Math.cosh(x / a) - a, 0]; }) }; } },
+                spirale: { name: 'Archimedische Spirale', params: [['d', 'Windungsabstand d', 0.1, 3, 0.6, 0.05, 1], ['N', 'Windungen N', 0.5, 8, 3, 0.5, 0]],
+                    calc: ({ d, N }) => { const b = d / (2 * PI), th = 2 * PI * N, q = Math.sqrt(1 + th * th); return { stats: [['Bogenlänge L', b / 2 * (th * q + Math.asinh(th)), 1], ['Endradius r', b * th, 1]], tex: ['r = b\\,\\theta,\\quad b = \\tfrac{d}{2\\pi}', 'L = \\tfrac{b}{2}\\left(\\theta\\sqrt{1+\\theta^2} + \\operatorname{arsinh}\\theta\\right)'], curve: Array.from({ length: Math.round(64 * N) + 1 }, (_, k) => { const t = th * k / Math.round(64 * N); return [b * t * Math.cos(t), b * t * Math.sin(t), 0]; }) }; } },
+                helix: { name: 'Schraubenlinie (Helix)', params: [['r', 'Radius r', 0.2, 5, 1.5, 0.1, 1], ['h', 'Ganghöhe h', 0.1, 5, 1, 0.1, 1], ['N', 'Windungen N', 0.5, 10, 4, 0.5, 0]], is3d: true,
+                    calc: ({ r, h, N }) => ({ stats: [['Bogenlänge L', N * Math.hypot(2 * PI * r, h), 1], ['Gesamthöhe', N * h, 1], ['Steigungswinkel', Math.atan(h / (2 * PI * r)) / D2R, 'deg']], tex: ['L = N\\sqrt{(2\\pi r)^2 + h^2}', '\\tan\\varphi = \\tfrac{h}{2\\pi r}'], curve: Array.from({ length: Math.round(48 * N) + 1 }, (_, k) => { const t = 2 * PI * N * k / Math.round(48 * N); return [r * Math.cos(t), h * t / (2 * PI) - N * h / 2, r * Math.sin(t)]; }) }) } } },
+        };
+        // --- more figures, in the spirit of rechneronline's catalogue ---
+        const off = (pts, cx, cy) => pts.map(q => [q[0] + cx, q[1] + cy]);
+        Object.assign(GENERIC.dreieck.shapes, {
+            gleichseitig: { name: 'Gleichseitiges Dreieck', params: [['a', 'Seite a', 0.2, 10, 3, 0.1, 1]],
+                calc: ({ a }) => { const h = Math.sqrt(3) / 2 * a; return { stats: [['Fläche A', Math.sqrt(3) / 4 * a * a, 2], ['Umfang U', 3 * a, 1], ['Höhe h', h, 1], ['Inkreisradius r_i', a / (2 * Math.sqrt(3)), 1], ['Umkreisradius r_u', a / Math.sqrt(3), 1]],
+                    tex: ['A = \\tfrac{\\sqrt{3}}{4}\\,a^2', 'h = \\tfrac{\\sqrt{3}}{2}\\,a', 'r_i = \\tfrac{a}{2\\sqrt{3}},\\quad r_u = \\tfrac{a}{\\sqrt{3}}'],
+                    contours: [[[-a / 2, -h / 3], [a / 2, -h / 3], [0, 2 * h / 3]]] }; } },
+            gleichschenklig: { name: 'Gleichschenkliges Dreieck', params: [['a', 'Schenkel a', 0.3, 10, 4, 0.1, 1], ['c', 'Basis c', 0.2, 10, 3, 0.1, 1]],
+                calc: ({ a, c }) => { if (c >= 2 * a) return { name: 'Gleichschenkliges Dreieck — c muss kleiner als 2a sein', stats: [], tex: ['c < 2a'], contours: [] };
+                    const h = Math.sqrt(a * a - c * c / 4), A = c * h / 2, s = a + c / 2;
+                    return { stats: [['Fläche A', A, 2], ['Umfang U', 2 * a + c, 1], ['Höhe h', h, 1], ['Basiswinkel', Math.acos(c / (2 * a)) / D2R, 'deg'], ['Spitzenwinkel', 180 - 2 * Math.acos(c / (2 * a)) / D2R, 'deg'], ['Inkreisradius r_i', A / s, 1], ['Umkreisradius r_u', a * a * c / (4 * A), 1]],
+                        tex: ['h = \\sqrt{a^2 - \\tfrac{c^2}{4}}', 'A = \\tfrac{c\\,h}{2}', '\\beta = \\arccos\\tfrac{c}{2a}', 'r_u = \\tfrac{a^2 c}{4A}'],
+                        contours: [[[-c / 2, -h / 3], [c / 2, -h / 3], [0, 2 * h / 3]]] }; } },
+            rechtwinklig: { name: 'Rechtwinkliges Dreieck', params: [['a', 'Kathete a', 0.2, 10, 3, 0.1, 1], ['b', 'Kathete b', 0.2, 10, 4, 0.1, 1]],
+                calc: ({ a, b }) => { const c = Math.hypot(a, b), A = a * b / 2; return { stats: [['Fläche A', A, 2], ['Hypotenuse c', c, 1], ['Umfang U', a + b + c, 1], ['Höhe h_c', a * b / c, 1], ['Winkel α, β', [Math.atan(a / b) / D2R, Math.atan(b / a) / D2R], 'deglist'], ['Hypotenusenabschnitte p, q', [b * b / c, a * a / c], 'list1'], ['Inkreisradius r_i', (a + b - c) / 2, 1], ['Umkreisradius r_u', c / 2, 1]],
+                    tex: ['c = \\sqrt{a^2+b^2}', 'A = \\tfrac{a\\,b}{2}', 'h_c = \\tfrac{a\\,b}{c}', 'p = \\tfrac{b^2}{c},\\quad q = \\tfrac{a^2}{c}', 'r_i = \\tfrac{a+b-c}{2},\\quad r_u = \\tfrac{c}{2}'],
+                    contours: [[[0, 0], [b, 0], [0, a]]] }; } },
+            sws: { name: 'Dreieck aus zwei Seiten und Winkel', params: [['a', 'Seite a', 0.2, 10, 4, 0.1, 1], ['b', 'Seite b', 0.2, 10, 3, 0.1, 1], ['ga', 'Zwischenwinkel γ', 1, 179, 70, 1, 'deg']],
+                calc: ({ a, b, ga }) => { const g = ga * D2R, c = Math.sqrt(a * a + b * b - 2 * a * b * Math.cos(g)), A = a * b * Math.sin(g) / 2;
+                    return { stats: [['Fläche A', A, 2], ['Seite c', c, 1], ['Umfang U', a + b + c, 1], ['Winkel α, β', [Math.asin(a * Math.sin(g) / c) / D2R, Math.asin(b * Math.sin(g) / c) / D2R], 'deglist'], ['Umkreisradius r_u', c / (2 * Math.sin(g)), 1]],
+                        tex: ['c^2 = a^2 + b^2 - 2ab\\cos\\gamma', 'A = \\tfrac{1}{2}ab\\sin\\gamma', '\\tfrac{c}{\\sin\\gamma} = 2r_u'],
+                        contours: [[[0, 0], [b, 0], [a * Math.cos(g), a * Math.sin(g)]]] }; } },
+            golden: { name: 'Goldenes Dreieck', params: [['a', 'Schenkel a', 0.2, 10, 4, 0.1, 1]],
+                calc: ({ a }) => { const phi = (1 + Math.sqrt(5)) / 2, c = a / phi, h = Math.sqrt(a * a - c * c / 4);
+                    return { stats: [['Fläche A', c * h / 2, 2], ['Basis c', c, 1], ['Umfang U', 2 * a + c, 1], ['Winkel', [36, 72, 72], 'deglist']],
+                        tex: ['\\tfrac{a}{c} = \\varphi = \\tfrac{1+\\sqrt{5}}{2}', '\\text{Winkel } 36^\\circ,\\,72^\\circ,\\,72^\\circ', 'A = \\tfrac{c\\,h}{2}'],
+                        note: 'Das goldene Dreieck ist das gleichschenklige Dreieck, dessen Schenkel zur Basis im goldenen Schnitt stehen.',
+                        contours: [[[-c / 2, -h / 3], [c / 2, -h / 3], [0, 2 * h / 3]]] }; } },
+            reuleaux: { name: 'Reuleaux-Dreieck', params: [['b', 'Breite b', 0.2, 10, 4, 0.1, 1]],
+                calc: ({ b }) => { const V = ngon(3, b / Math.sqrt(3), PI / 2), c = [];
+                    for (let k = 0; k < 3; k++) { const A0 = V[k], B0 = V[(k + 1) % 3], C0 = V[(k + 2) % 3];
+                        const a0 = Math.atan2(A0[1] - C0[1], A0[0] - C0[0]); let a1 = Math.atan2(B0[1] - C0[1], B0[0] - C0[0]);
+                        while (a1 - a0 > PI) a1 -= 2 * PI; while (a0 - a1 > PI) a1 += 2 * PI;
+                        c.push(...off(arcPts(b, a0, a1, 40), C0[0], C0[1])); }
+                    return { stats: [['Fläche A', (PI - Math.sqrt(3)) / 2 * b * b, 2], ['Umfang U', PI * b, 1], ['Breite (jede Richtung)', b, 1]],
+                        tex: ['A = \\tfrac{\\pi - \\sqrt{3}}{2}\\,b^2', 'U = \\pi\\,b'],
+                        note: 'Kurve konstanter Breite: der Umfang ist πb wie beim Kreis gleicher Breite (Satz von Barbier).',
+                        contours: [c] }; } },
+        });
+        Object.assign(GENERIC.vierecke.shapes, {
+            quadrat: { name: 'Quadrat', params: [['a', 'Seite a', 0.2, 10, 3, 0.1, 1]],
+                calc: ({ a }) => ({ stats: [['Fläche A', a * a, 2], ['Umfang U', 4 * a, 1], ['Diagonale d', a * Math.SQRT2, 1], ['Inkreisradius r_i', a / 2, 1], ['Umkreisradius r_u', a * Math.SQRT2 / 2, 1]],
+                    tex: ['A = a^2', 'U = 4a', 'd = a\\sqrt{2}'], contours: [[[0, 0], [a, 0], [a, a], [0, a]]] }) },
+            drachen: { name: 'Drachenviereck (Deltoid)', params: [['a', 'Seite a', 0.2, 10, 2, 0.1, 1], ['b', 'Seite b', 0.2, 10, 4, 0.1, 1], ['ga', 'Winkel zwischen a und b', 1, 179, 100, 1, 'deg']],
+                calc: ({ a, b, ga }) => { const g = ga * D2R, A = a * b * Math.sin(g);
+                    const e = Math.sqrt(a * a + b * b - 2 * a * b * Math.cos(g)), f = 2 * A / e;
+                    return { stats: [['Fläche A', A, 2], ['Umfang U', 2 * (a + b), 1], ['Diagonale e', e, 1], ['Diagonale f', f, 1]],
+                        tex: ['A = a\\,b\\,\\sin\\gamma = \\tfrac{e\\,f}{2}', 'U = 2(a+b)', 'e^2 = a^2+b^2-2ab\\cos\\gamma'],
+                        contours: [[[0, 0], [a * Math.sin(g / 2), a * Math.cos(g / 2)], [0, a * Math.cos(g / 2) + Math.sqrt(Math.max(0, b * b - a * a * Math.sin(g / 2) ** 2))], [-a * Math.sin(g / 2), a * Math.cos(g / 2)]]] }; } },
+            rechttrapez: { name: 'Rechtwinkliges Trapez', params: [['a', 'Grundseite a', 0.2, 10, 5, 0.1, 1], ['c', 'Oberseite c', 0.2, 10, 3, 0.1, 1], ['h', 'Höhe h', 0.2, 10, 2, 0.1, 1]],
+                calc: ({ a, c, h }) => { const b = Math.hypot(h, a - c); return { stats: [['Fläche A', (a + c) * h / 2, 2], ['Umfang U', a + c + h + b, 1], ['Schenkel b', b, 1], ['Mittellinie m', (a + c) / 2, 1]],
+                    tex: ['A = \\tfrac{(a+c)\\,h}{2}', 'b = \\sqrt{h^2+(a-c)^2}'], contours: [[[0, 0], [a, 0], [c, h], [0, h]]] }; } },
+            sehnenviereck: { name: 'Sehnenviereck', params: [['a', 'Seite a', 0.2, 10, 4, 0.1, 1], ['b', 'Seite b', 0.2, 10, 3, 0.1, 1], ['c', 'Seite c', 0.2, 10, 2, 0.1, 1], ['d', 'Seite d', 0.2, 10, 3, 0.1, 1]],
+                calc: ({ a, b, c, d }) => { const m = Math.max(a, b, c, d); if (2 * m >= a + b + c + d) return { name: 'Sehnenviereck — keine Seite darf so lang wie die anderen drei sein', stats: [], tex: [], contours: [] };
+                    const s = (a + b + c + d) / 2, A = Math.sqrt((s - a) * (s - b) * (s - c) * (s - d));
+                    const ru = Math.sqrt((a * b + c * d) * (a * c + b * d) * (a * d + b * c)) / (4 * A);
+                    const pts = [], sides = [a, b, c, d]; let ang = 0, x = 0, y = 0;
+                    sides.forEach(L => { const half = Math.asin(Math.min(1, L / (2 * ru))); pts.push([x, y]); ang += 2 * half; x += L * Math.cos(ang - half + PI / 2); y += L * Math.sin(ang - half + PI / 2); });
+                    return { stats: [['Fläche A', A, 2], ['Umfang U', 2 * s, 1], ['Umkreisradius r_u', ru, 1]],
+                        tex: ['s = \\tfrac{a+b+c+d}{2}', 'A = \\sqrt{(s-a)(s-b)(s-c)(s-d)}', 'r_u = \\tfrac{\\sqrt{(ab+cd)(ac+bd)(ad+bc)}}{4A}'],
+                        note: 'Formel von Brahmagupta — sie gilt nur für Vierecke mit Umkreis.', contours: [pts] }; } },
+        });
+        Object.assign(GENERIC.kreisformen.shapes, {
+            halbkreis: { name: 'Halbkreis', params: [['r', 'Radius r', 0.2, 10, 2.5, 0.1, 1]],
+                calc: ({ r }) => ({ stats: [['Fläche A', PI * r * r / 2, 2], ['Umfang U', PI * r + 2 * r, 1], ['Bogenlänge b', PI * r, 1], ['Schwerpunktabstand', 4 * r / (3 * PI), 1]],
+                    tex: ['A = \\tfrac{\\pi r^2}{2}', 'U = \\pi r + 2r', 'y_s = \\tfrac{4r}{3\\pi}'], contours: [arcPts(r, 0, PI, 96).concat([[-r, 0]])] }) },
+            ringsektor: { name: 'Kreisringsektor', params: [['R', 'Außenradius R', 0.3, 10, 3, 0.1, 1], ['r', 'Innenradius r', 0.1, 9.9, 1.5, 0.1, 1], ['al', 'Winkel α', 1, 360, 90, 1, 'deg']],
+                calc: ({ R, r, al }) => { if (r >= R) r = R * 0.99; const t = al * D2R;
+                    return { stats: [['Fläche A', t / 2 * (R * R - r * r), 2], ['Umfang U', t * (R + r) + 2 * (R - r), 1], ['Bogen außen', R * t, 1], ['Bogen innen', r * t, 1]],
+                        tex: ['A = \\tfrac{\\alpha_{rad}}{2}\\,(R^2-r^2)', 'U = \\alpha_{rad}(R+r) + 2(R-r)'],
+                        contours: [arcPts(R, -t / 2, t / 2, 64).concat(arcPts(r, t / 2, -t / 2, 64))] }; } },
+            linse: { name: 'Linse (zwei gleiche Kreisbögen)', params: [['r', 'Radius r', 0.2, 10, 3, 0.1, 1], ['al', 'Bogenwinkel α', 5, 355, 120, 1, 'deg']],
+                calc: ({ r, al }) => { const t = al * D2R, s = 2 * r * Math.sin(t / 2), h = 2 * r * (1 - Math.cos(t / 2));
+                    const c1 = arcPts(r, PI / 2 - t / 2, PI / 2 + t / 2, 64).map(q => [q[0], q[1] - r * Math.cos(t / 2)]);
+                    return { stats: [['Fläche A', r * r * (t - Math.sin(t)), 2], ['Umfang U', 2 * r * t, 1], ['Breite s', s, 1], ['Höhe h', h, 1]],
+                        tex: ['A = r^2\\,(\\alpha_{rad} - \\sin\\alpha)', 'U = 2\\,r\\,\\alpha_{rad}', 's = 2r\\sin\\tfrac{\\alpha}{2}'],
+                        contours: [c1.concat(c1.map(q => [q[0], -q[1]]).reverse())] }; } },
+            stadion: { name: 'Stadion', params: [['r', 'Radius r', 0.2, 5, 1.5, 0.1, 1], ['a', 'Gerade a', 0.2, 10, 4, 0.1, 1]],
+                calc: ({ r, a }) => ({ stats: [['Fläche A', PI * r * r + 2 * r * a, 2], ['Umfang U', 2 * PI * r + 2 * a, 1], ['Länge gesamt', a + 2 * r, 1], ['Breite', 2 * r, 1]],
+                    tex: ['A = \\pi r^2 + 2\\,r\\,a', 'U = 2\\pi r + 2a'],
+                    contours: [off(arcPts(r, -PI / 2, PI / 2, 48), a / 2, 0).concat(off(arcPts(r, PI / 2, 3 * PI / 2, 48), -a / 2, 0))] }) },
+            arbelos: { name: 'Arbelos (Schustermesser)', params: [['r1', 'Radius r₁', 0.2, 5, 2, 0.1, 1], ['r2', 'Radius r₂', 0.2, 5, 1, 0.1, 1]],
+                calc: ({ r1, r2 }) => { const R = r1 + r2;
+                    return { stats: [['Fläche A', PI * r1 * r2, 2], ['Umfang U', 2 * PI * R, 1], ['Höhe h', 2 * Math.sqrt(r1 * r2), 1]],
+                        tex: ['A = \\pi\\,r_1\\,r_2', 'U = 2\\pi\\,(r_1+r_2)', 'h = 2\\sqrt{r_1 r_2}'],
+                        note: 'Die Arbelos-Fläche gleicht dem Kreis über der Höhe h; der Umfang ist so groß wie der des großen Kreises.',
+                        // outline: big arc (R,0)→(−R,0), then back along the two small arcs in left-to-right order
+                        contours: [arcPts(R, 0, PI, 96).concat(off(arcPts(r1, PI, 0, 64), -r2, 0)).concat(off(arcPts(r2, PI, 0, 64), r1, 0))] }; } },
+            ellipsensektor: { name: 'Ellipsensektor', params: [['a', 'Halbachse a', 0.2, 10, 3, 0.1, 1], ['b', 'Halbachse b', 0.2, 10, 2, 0.1, 1], ['al', 'Winkel α', 1, 360, 120, 1, 'deg']],
+                calc: ({ a, b, al }) => { const t = al * D2R;
+                    return { stats: [['Fläche A', a * b * t / 2, 2], ['Anteil an der Ellipse', 100 * t / (2 * PI), 0]],
+                        tex: ['A = \\tfrac{a\\,b}{2}\\,\\alpha_{rad}', '\\text{Anteil} = \\tfrac{\\alpha}{360^\\circ}'],
+                        note: 'α ist der Parameterwinkel (exzentrische Anomalie), nicht der geometrische Polarwinkel.',
+                        contours: [[[0, 0]].concat(Array.from({ length: 65 }, (_, k) => { const u = -t / 2 + t * k / 64; return [a * Math.cos(u), b * Math.sin(u)]; }))] }; } },
+        });
+        Object.assign(GENERIC.polygone.shapes, {
+            stern: { name: 'Regelmäßiger Stern', params: [['n', 'Zacken n', 3, 16, 5, 1, 0], ['R', 'Außenradius R', 0.3, 10, 3, 0.1, 1], ['ri', 'Innenradius r', 0.1, 9.9, 1.2, 0.1, 1]],
+                calc: ({ n, R, ri }) => { if (ri >= R) ri = R * 0.9; const pts = [];
+                    for (let k = 0; k < n; k++) { const t = -PI / 2 + 2 * PI * k / n; pts.push([R * Math.cos(t), R * Math.sin(t)], [ri * Math.cos(t + PI / n), ri * Math.sin(t + PI / n)]); }
+                    const side = Math.sqrt(R * R + ri * ri - 2 * R * ri * Math.cos(PI / n));
+                    return { name: { 5: 'Pentagramm-Stern', 6: 'Hexagramm (Davidstern)', 8: 'Oktagramm' }[n] || `${n}-zackiger Stern`,
+                        stats: [['Fläche A', n * R * ri * Math.sin(PI / n), 2], ['Umfang U', 2 * n * side, 1], ['Zackenlänge', side, 1], ['Spitzenwinkel', 2 * Math.atan(ri * Math.sin(PI / n) / (R - ri * Math.cos(PI / n))) / D2R, 'deg']],
+                        tex: ['A = n\\,R\\,r\\,\\sin\\tfrac{\\pi}{n}', 'U = 2n\\sqrt{R^2+r^2-2Rr\\cos\\tfrac{\\pi}{n}}'], contours: [pts] }; } },
+            haus: { name: 'Hausform-Fünfeck', params: [['a', 'Breite a', 0.2, 10, 4, 0.1, 1], ['b', 'Wandhöhe b', 0.2, 10, 3, 0.1, 1], ['h', 'Dachhöhe h', 0.1, 10, 2, 0.1, 1]],
+                calc: ({ a, b, h }) => { const d = Math.hypot(a / 2, h);
+                    return { stats: [['Fläche A', a * b + a * h / 2, 2], ['Umfang U', a + 2 * b + 2 * d, 1], ['Dachseite d', d, 1], ['Gesamthöhe', b + h, 1]],
+                        tex: ['A = a\\,b + \\tfrac{a\\,h}{2}', 'd = \\sqrt{\\left(\\tfrac{a}{2}\\right)^2 + h^2}', 'U = a + 2b + 2d'],
+                        contours: [[[0, 0], [a, 0], [a, b], [a / 2, b + h], [0, b]]] }; } },
+            kreuz: { name: 'Kreuz', params: [['a', 'Breite a', 0.2, 10, 5, 0.1, 1], ['b', 'Höhe b', 0.2, 10, 6, 0.1, 1], ['w', 'Balkenbreite w', 0.1, 5, 1.5, 0.1, 1]],
+                calc: ({ a, b, w }) => { const wa = Math.min(w, a * 0.98), wb = Math.min(w, b * 0.98), x = (a - wa) / 2, y = (b - wb) / 2;
+                    return { stats: [['Fläche A', a * wb + b * wa - wa * wb, 2], ['Umfang U', 2 * (a + b), 1], ['Ecken', 12, 0]],
+                        tex: ['A = a\\,w + b\\,w - w^2', 'U = 2(a+b)'],
+                        contours: [[[x, 0], [x + wa, 0], [x + wa, y], [a, y], [a, y + wb], [x + wa, y + wb], [x + wa, b], [x, b], [x, y + wb], [0, y + wb], [0, y], [x, y]]] }; } },
+        });
+        Object.assign(GENERIC.kurven.shapes, {
+            kardioide: { name: 'Kardioide (Herzkurve)', params: [['a', 'Parameter a', 0.2, 5, 1.5, 0.1, 1]],
+                calc: ({ a }) => ({ stats: [['Bogenlänge L', 8 * a, 1], ['Eingeschlossene Fläche', 1.5 * PI * a * a, 2], ['Größte Breite', 2.598076 * a, 1], ['Länge', 2 * a, 1]],
+                    tex: ['r = a\\,(1+\\cos\\theta)', 'L = 8a', 'A = \\tfrac{3}{2}\\pi a^2'],
+                    curve: Array.from({ length: 201 }, (_, k) => { const t = 2 * PI * k / 200, r = a * (1 + Math.cos(t)); return [r * Math.cos(t) - a, r * Math.sin(t), 0]; }) }) },
+            astroide: { name: 'Astroide (Sternkurve)', params: [['a', 'Radius a', 0.2, 5, 2, 0.1, 1]],
+                calc: ({ a }) => ({ stats: [['Bogenlänge L', 6 * a, 1], ['Eingeschlossene Fläche', 3 * PI * a * a / 8, 2], ['Spitzenabstand', 2 * a, 1]],
+                    tex: ['x = a\\cos^3 t,\\quad y = a\\sin^3 t', 'x^{2/3} + y^{2/3} = a^{2/3}', 'L = 6a,\\quad A = \\tfrac{3\\pi a^2}{8}'],
+                    curve: Array.from({ length: 201 }, (_, k) => { const t = 2 * PI * k / 200; return [a * Math.cos(t) ** 3, a * Math.sin(t) ** 3, 0]; }) }) },
+            lemniskate: { name: 'Lemniskate von Bernoulli', params: [['a', 'Parameter a', 0.2, 5, 2, 0.1, 1]],
+                calc: ({ a }) => ({ stats: [['Bogenlänge L', 5.2441151 * a, 1], ['Eingeschlossene Fläche', a * a, 2], ['Gesamtbreite', 2 * a, 1]],
+                    tex: ['(x^2+y^2)^2 = a^2\\,(x^2-y^2)', 'A = a^2', 'L = 2\\varpi\\,a \\approx 5{,}2441\\,a'],
+                    note: 'ϖ ist die lemniskatische Konstante — das Gegenstück zu π für diese Kurve.',
+                    curve: Array.from({ length: 401 }, (_, k) => { const t = 2 * PI * k / 400, c = Math.cos(2 * t); const r = c > 0 ? a * Math.sqrt(c) : 0; return [r * Math.cos(t), r * Math.sin(t), 0]; }) }) },
+            logspirale: { name: 'Logarithmische Spirale', params: [['b', 'Steigung b', 0.05, 1, 0.2, 0.01, 0], ['N', 'Windungen N', 0.5, 8, 3, 0.5, 0], ['r0', 'Startradius r₀', 0.05, 3, 0.3, 0.05, 1]],
+                calc: ({ b, N, r0 }) => { const th = 2 * PI * N, rE = r0 * Math.exp(b * th);
+                    return { stats: [['Bogenlänge L', Math.sqrt(1 + b * b) / b * (rE - r0), 1], ['Endradius r', rE, 1], ['Wachstum pro Windung', Math.exp(2 * PI * b), 0]],
+                        tex: ['r = r_0\\,e^{b\\theta}', 'L = \\tfrac{\\sqrt{1+b^2}}{b}\\,(r_1 - r_0)'],
+                        note: 'Die Kurve schneidet jeden Strahl aus dem Ursprung unter demselben Winkel — daher auch Spira mirabilis.',
+                        curve: Array.from({ length: 401 }, (_, k) => { const t = th * k / 400, r = r0 * Math.exp(b * t); return [r * Math.cos(t), r * Math.sin(t), 0]; }) }; } },
+            koch: { name: 'Kochsche Schneeflocke', params: [['s', 'Startseite s', 0.2, 10, 4, 0.1, 1], ['n', 'Iterationen n', 0, 5, 3, 1, 0]],
+                calc: ({ s, n }) => { const A0 = Math.sqrt(3) / 4 * s * s;
+                    let pts = ngon(3, s / Math.sqrt(3), PI / 2);
+                    for (let it = 0; it < n; it++) { const next = [];
+                        for (let k = 0; k < pts.length; k++) { const P0 = pts[k], P1 = pts[(k + 1) % pts.length];
+                            const dx = (P1[0] - P0[0]) / 3, dy = (P1[1] - P0[1]) / 3;
+                            const A1 = [P0[0] + dx, P0[1] + dy], B1 = [P0[0] + 2 * dx, P0[1] + 2 * dy];
+                            const cx = Math.cos(-PI / 3), sn = Math.sin(-PI / 3);
+                            const peak = [A1[0] + dx * cx - dy * sn, A1[1] + dx * sn + dy * cx];
+                            next.push(P0, A1, peak, B1); }
+                        pts = next; }
+                    return { stats: [['Umfang U', 3 * s * Math.pow(4 / 3, n), 1], ['Fläche A', A0 * (1 + 0.6 * (1 - Math.pow(4 / 9, n))), 2], ['Strecken', 3 * Math.pow(4, n), 0], ['Grenzumfang', Infinity, 0], ['Grenzfläche', 1.6 * A0, 2]],
+                        tex: ['U_n = 3s\\left(\\tfrac{4}{3}\\right)^n \\to \\infty', 'A_n = A_0\\left(1 + \\tfrac{3}{5}\\left(1-\\left(\\tfrac{4}{9}\\right)^n\\right)\\right)', 'A_\\infty = \\tfrac{8}{5}\\,A_0,\\quad A_0 = \\tfrac{\\sqrt{3}}{4}s^2'],
+                        note: 'Endlicher Flächeninhalt, unendlicher Umfang — Hausdorff-Dimension log 4 / log 3 ≈ 1,262.',
+                        contours: [pts] }; } },
+        });
+        function shapeState(tab) {
+            const T = GENERIC[tab]; const st = S.shape[tab] = S.shape[tab] || {};
+            if (!T.shapes[st.kind]) st.kind = Object.keys(T.shapes)[0];
+            st.params = st.params || {}; const P = st.params[st.kind] = st.params[st.kind] || {};
+            T.shapes[st.kind].params.forEach(([key, , , , def]) => { if (P[key] == null) P[key] = def; });
+            return st;
+        }
+        function buildGenericParams(tab) {
+            const cid = 'par-' + tab, el = document.getElementById(cid); el.innerHTML = '';
+            const st = shapeState(tab), shp = GENERIC[tab].shapes[st.kind], P = st.params[st.kind];
+            shp.params.forEach(([key, label, min, max, , step, unit], i) => {
+                const col = [COL.blue, COL.orange, COL.green][i % 3];
+                CyberUI.createSlider(cid, label, min, max, P[key], step, x => { P[key] = x; persist(); rebuild(); }, col,
+                    unit === 1 ? (x => fmtShort(x) + U()) : unit === 'deg' ? (x => fmtShort(x) + '°') : (x => fmtShort(x)));
+                if (unit === 1) tagUnit(cid);
+            });
+            unitDropdown(cid);
+        }
+        Object.keys(GENERIC).forEach(tab => {
+            const T = GENERIC[tab]; shapeState(tab);
+            buildCommonCards(tab, {
+                title: T.title, options: Object.keys(T.shapes).map(id => ({ id, label: T.shapes[id].name })), selected: S.shape[tab].kind,
+                onSelect: id => { S.shape[tab].kind = id; shapeState(tab); persist(); buildGenericParams(tab); rebuild(); },
+                params: () => buildGenericParams(tab), net: false, spheres: false,
+            });
+        });
+        // Flat figure (filled contour + outline + vertex dots) or space curve (tube) on the shared stage
+        function buildFlatMesh(res) {
+            clearRoot();
+            const all = (res.contours || []).flat().concat((res.holes || []).flat());
+            if (!all.length) return;
+            const xs = all.map(p => p[0]), ys = all.map(p => p[1]);
+            const cx = (Math.min(...xs) + Math.max(...xs)) / 2, cy = (Math.min(...ys) + Math.max(...ys)) / 2;
+            const ext = Math.max(Math.max(...xs) - Math.min(...xs), Math.max(...ys) - Math.min(...ys)) / 2 || 1;
+            const sc = 1.25 / ext;
+            res.contours.forEach(c => {
+                const shape = new THREE.Shape(c.map(p => new THREE.Vector2((p[0] - cx) * sc, (p[1] - cy) * sc)));
+                (res.holes || []).forEach(hh => shape.holes.push(new THREE.Path(hh.map(p => new THREE.Vector2((p[0] - cx) * sc, (p[1] - cy) * sc)))));
+                const mesh = new THREE.Mesh(new THREE.ShapeGeometry(shape), new THREE.MeshBasicMaterial({ color: new THREE.Color(COL.orange), side: THREE.DoubleSide, transparent: true, opacity: 0.75 }));
+                mesh.name = 'face'; root.add(mesh);
+                const outline = c.concat((res.holes || []).length ? [] : []);
+                const line = new THREE.LineLoop(new THREE.BufferGeometry().setFromPoints(outline.map(p => new THREE.Vector3((p[0] - cx) * sc, (p[1] - cy) * sc, 0.001))), new THREE.LineBasicMaterial({ color: 0xffffff }));
+                line.name = 'edge'; root.add(line);
+                (res.holes || []).forEach(hh => { const hl = new THREE.LineLoop(new THREE.BufferGeometry().setFromPoints(hh.map(p => new THREE.Vector3((p[0] - cx) * sc, (p[1] - cy) * sc, 0.001))), new THREE.LineBasicMaterial({ color: 0xffffff })); hl.name = 'edge'; root.add(hl); });
+                // a corner is a real kink in the outline — that also finds the tips of arcs,
+                // while a finely sampled circle stays free of markers
+                const KINK = Math.cos(18 * PI / 180), n = c.length;
+                c.forEach((p, i) => {
+                    const a = c[(i - 1 + n) % n], b = c[(i + 1) % n];
+                    const v1 = [p[0] - a[0], p[1] - a[1]], v2 = [b[0] - p[0], b[1] - p[1]];
+                    const l1 = Math.hypot(v1[0], v1[1]), l2 = Math.hypot(v2[0], v2[1]);
+                    if (!l1 || !l2 || (v1[0] * v2[0] + v1[1] * v2[1]) / (l1 * l2) >= KINK) return;
+                    const d = new THREE.Mesh(new THREE.SphereGeometry(0.022, 12, 10), new THREE.MeshBasicMaterial({ color: 0xffffff }));
+                    d.position.set((p[0] - cx) * sc, (p[1] - cy) * sc, 0.01); d.name = 'vert'; root.add(d);
+                });
+            });
+            applyVisibility();
+        }
+        function buildCurveMesh(res) {
+            clearRoot();
+            const pts = res.curve; if (!pts || pts.length < 2) return;
+            const mins = [0, 1, 2].map(i => Math.min(...pts.map(p => p[i]))), maxs = [0, 1, 2].map(i => Math.max(...pts.map(p => p[i])));
+            const cen = mins.map((m, i) => (m + maxs[i]) / 2), ext = Math.max(...maxs.map((m, i) => m - mins[i])) / 2 || 1, sc = 1.25 / ext;
+            const v3 = pts.map(p => new THREE.Vector3((p[0] - cen[0]) * sc, (p[1] - cen[1]) * sc, (p[2] - cen[2]) * sc));
+            const tube = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(v3), Math.min(600, v3.length * 3), 0.018, 8, false), new THREE.MeshPhongMaterial({ color: new THREE.Color(COL.orange), shininess: 40 }));
+            tube.name = 'curve'; root.add(tube);
+            applyVisibility();
+        }
+        function resetView() {
+            if (!camera) return;
+            if (S.dim === '3') camera.position.set(3.2, 2.4, 4.2); else camera.position.set(0, 0, 4.2);
+            camera.up.set(0, 1, 0); camera.lookAt(0, 0, 0); root.rotation.set(0, 0, 0);
+            if (controls) { controls.target.set(0, 0, 0); }
+        }
+
+        // mirror-image checkbox, only shown for chiral solids (snub cube/dodecahedron and their duals)
+        function mirrorBox(cid) {
+            const d = document.createElement('div'); d.id = 'mirror-' + cid;
+            document.getElementById(cid).appendChild(d);
+            CyberUI.createCheckbox(d.id, 'Spiegelbild (chiral)', S.mirror, c => { S.mirror = c; persist(); rebuild(); });
+        }
+        function updateMirrorBoxes() {
+            const chiral = ['platonisch', 'archimedisch', 'catalanisch'].includes(S.tab) && G.isChiral(S.solid[S.tab]);
+            document.querySelectorAll('[id^="mirror-"]').forEach(d => { d.style.display = chiral ? '' : 'none'; });
+        }
         buildCommonCards('catalanisch', {
             title: 'Catalanischer Körper', options: solidOptions(G.CATALAN), selected: S.solid.catalanisch,
-            onSelect: id => { S.solid.catalanisch = id; persist(); rebuild(); }, params: cid => { edgeParams(cid); unitDropdown(cid); }, net: true, spheres: true,
+            onSelect: id => { S.solid.catalanisch = id; persist(); rebuild(); }, params: cid => { edgeParams(cid); unitDropdown(cid); mirrorBox(cid); }, net: true, spheres: true,
+        });
+        buildCommonCards('johnson', {
+            title: 'Johnson-Körper (J1–J92)', options: Object.keys(G.JOHNSON).map(id => ({ id, label: G.JOHNSON[id].name })), selected: S.solid.johnson,
+            onSelect: id => { S.solid.johnson = id; persist(); rebuild(); }, params: cid => { edgeParams(cid); unitDropdown(cid); }, net: true, spheres: false,
         });
         buildCommonCards('prismen', {
             title: 'Prismen & Pyramiden',
@@ -337,11 +757,17 @@
         })();
         CyberUI.createCard('k-formpanel', 'Formeln', `<div id="k-form" class="k-formulas"></div>`, COL.blue);
         function updateRightPanel() {
-            const poly = S.tab !== 'rund';
+            const poly = S.dim === '3' && S.tab !== 'rund';
             const spheres = ['platonisch', 'archimedisch', 'catalanisch'].includes(S.tab);
+            const curve = S.dim === '1';              // a curve has no faces, edges or corners to toggle
+            const rot = S.dim === '3' || (current && current.is3d);
+            document.getElementById('k-rot').style.display = rot ? '' : 'none';
             document.getElementById('k-net').style.display = poly ? '' : 'none';
-            document.getElementById('k-verts').style.display = poly ? '' : 'none';
+            document.getElementById('k-cb').style.display = curve ? 'none' : '';
+            document.getElementById('k-verts').style.display = (!curve && (poly || S.dim !== '3')) ? '' : 'none';
             document.getElementById('k-sphere').style.display = spheres ? '' : 'none';
+            const panel = document.getElementById('k-formpanel') && document.querySelector('#k-right .instrument-card');
+            if (panel) panel.style.display = (rot || poly || spheres || !curve) ? '' : 'none';
         }
 
         function syncUniform() {
@@ -550,9 +976,13 @@
         }
 
         function applyVisibility() {
+            // flat figures stay flat: no trackball rotation in 1D/2D (the helix is the exception)
+            if (controls) controls.noRotate = S.dim !== '3' && !(current && current.is3d);
             root.traverse(o => {
                 if (o.name === 'face') o.visible = S.showFaces;
                 if (o.name === 'edge') o.visible = S.showEdges;
+                if (o.name === 'vert') o.visible = S.showVerts;
+                if (o.name === 'curve') o.visible = true;
             });
             if (vertMesh) vertMesh.visible = S.showVerts && S.unfold < 0.01;
             for (const k of ['in', 'mid', 'circ']) {
@@ -608,7 +1038,16 @@
         // ------------------------------------------------------------------
         function rebuild() {
             if (!window.THREE || !scene) return;
+            updateMirrorBoxes();
             const tab = S.tab;
+            if (GENERIC[tab]) {
+                const st = shapeState(tab), shp = GENERIC[tab].shapes[st.kind];
+                const res = shp.calc({ ...st.params[st.kind] });
+                current = { kind: 'generic', res, name: res.name || shp.name, is3d: !!shp.is3d };
+                if (res.curve) buildCurveMesh(res); else buildFlatMesh(res);
+                refreshNumbers();
+                return;
+            }
             if (tab === 'rund') {
                 current = { kind: 'round' };
                 buildRoundMesh(S.round.kind, S.round);
@@ -624,8 +1063,8 @@
                     name = { prisma: 'Prisma', antiprisma: 'Antiprisma', pyramide: 'Pyramide', doppelpyramide: 'Doppelpyramide' }[pr.kind] + ' (n = ' + pr.n + ')';
                 } else {
                     const key = S.solid[tab];
-                    P = G.build(key);
-                    name = (G.PLATONIC[key] || G.ARCHIMEDEAN[key] || G.CATALAN[key]).name;
+                    P = G.build(key, { mirror: S.mirror && G.isChiral(key) });
+                    name = (G.PLATONIC[key] || G.ARCHIMEDEAN[key] || G.CATALAN[key] || G.JOHNSON[key]).name + (S.mirror && G.isChiral(key) ? ' — Spiegelbild' : '');
                 }
                 const m = G.metrics(P);
                 const rU = Math.max(...m.rU);
@@ -660,14 +1099,36 @@
             const legend = document.getElementById(legendId);
             const form = document.getElementById(formId);
             form.innerHTML = '';
-            const addTex = (s, num) => {
+            let texBuf = [];
+            const addTex = t => texBuf.push(t);
+            const flushTex = () => {
+                if (!texBuf.length) return;
+                // align on the first '=' of each line; lines without one are left-aligned
+                const body = texBuf.map(t => { const i = t.indexOf('='); return i > 0 ? t.slice(0, i) + '&=' + t.slice(i + 1) : '&' + t; }).join(' \\\\ ');
                 const row = document.createElement('div'); row.className = 'k-row';
-                const t = document.createElement('span'); tex(t, s); row.appendChild(t);
-                // numeric results live in the 'Werte' card — the formula panel stays pure (Doc: no yellow numbers here)
-                form.appendChild(row);
+                tex(row, '\\begin{aligned}' + body + '\\end{aligned}');
+                form.appendChild(row); texBuf = [];
             };
-            const note = txt => { const d = document.createElement('div'); d.className = 'k-note'; d.textContent = txt; form.appendChild(d); };
+            const note = txt => { flushTex(); const d = document.createElement('div'); d.className = 'k-note'; d.textContent = txt; form.appendChild(d); };
 
+            if (current && current.kind === 'generic') {
+                const { res, name } = current;
+                const unitOf = u => u === 1 ? U() : u === 2 ? U2() : u === 'deg' ? '°' : '';
+                const stats = res.stats.map(([label, v, u], i) => ({
+                    label, color: [COL.blue, COL.green, COL.orange, COL.grey][i % 4],
+                    // plain counts (unit code 0) stay integers; everything else follows the precision setting
+                    value: u === 'deglist' ? v.map(x => fmt(x) + '°').join(' / ') : u === 'list1' ? v.map(fmt).join(' / ') + U()
+                        : (u === 0 && isFinite(v) && Number.isInteger(v)) ? v.toLocaleString('de-DE') : fmt(v) + unitOf(u),
+                }));
+                statsGrid(statsId, stats);
+                legend.innerHTML = '';
+                (res.tex || []).forEach(t => addTex(t));
+                if (res.note) note(res.note);
+                flushTex();
+                document.getElementById('k-hud-name').textContent = name;
+                document.getElementById('k-hud-sub').textContent = '';
+                return;
+            }
             if (current && current.kind === 'poly') {
                 const { P, m, name } = current;
                 const a = S.a;
@@ -705,8 +1166,10 @@
                 }
                 if (tab === 'catalanisch') note('a = längste Kante. Catalanische Körper sind flächen-, aber nicht eckentransitiv; deshalb mehrere Umkugel- und Kantenkugel-Abstände.');
                 if (tab === 'archimedisch') note('Archimedische Körper haben Um- und Kantenkugel, aber keine Inkugel — die Flächen liegen auf verschiedenen Abständen.');
+                if (tab === 'johnson') note('Johnson-Körper: konvex, alle Flächen regelmäßig, aber nicht eckentransitiv — Radien deshalb als Bereiche. Koordinaten: netlib polyhedra database.');
                 if (tab === 'prismen') note('h ist als Vielfaches von a angegeben (einheitenfrei). Werte werden aus der konvexen Hülle berechnet (kein Sonderfall).');
 
+                flushTex();
                 document.getElementById('k-hud-name').textContent = name;
                 document.getElementById('k-hud-sub').textContent = `${m.F} FLÄCHEN · ${m.E} KANTEN · ${m.V} ECKEN`;
             } else if (current && current.kind === 'round') {
@@ -733,6 +1196,7 @@
                 ROUND_TEX[k].forEach(s => addTex(s));
                 if (k === 'ellipsoid') note('Die Oberfläche des allgemeinen Ellipsoids hat keine elementare Formel; Näherung nach Knud Thomsen (Fehler < 1,1 %).');
                 const nm = { kugel: 'Kugel', halbkugel: 'Halbkugel', zylinder: 'Zylinder', kegel: 'Kegel', kegelstumpf: 'Kegelstumpf', torus: 'Torus', ellipsoid: 'Ellipsoid' }[k];
+                flushTex();
                 document.getElementById('k-hud-name').textContent = nm;
                 document.getElementById('k-hud-sub').textContent = '';
             }
@@ -752,7 +1216,7 @@
         function animate() {
             requestAnimationFrame(animate);
             controls.update();
-            if (S.autoRotate) root.rotation.y += 0.004;
+            if (S.autoRotate && (S.dim === '3' || (current && current.is3d))) root.rotation.y += 0.004;
             if (current && current.kind === 'poly' && S.unfold !== lastT) {
                 applyUnfold(S.unfold); lastT = S.unfold;
                 const rU = Math.max(...current.m.rU);
@@ -768,7 +1232,9 @@
         function boot() {
             initThree();
             switchTab(S.tab);
+            resetView();
             showRoundParams();
+            wireSearch();
         }
         if (window.THREE) boot(); else window.addEventListener('three-ready', boot, { once: true });
     </script>
