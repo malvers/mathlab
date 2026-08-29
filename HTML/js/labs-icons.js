@@ -4,6 +4,15 @@
  */
 
 const LAB_ICONS = {
+    "koerper": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <polygon points="50,8 81,20 92,52 74,84 40,90 14,68 12,34" fill="none" stroke="#F5C242" stroke-width="2.4" stroke-linejoin="round" />
+            <polygon points="50,30 70,44 62,68 38,68 30,44" fill="rgba(176,36,24,0.35)" stroke="rgba(255,255,255,0.8)" stroke-width="2" stroke-linejoin="round" />
+            <g stroke="rgba(255,255,255,0.55)" stroke-width="1.6" stroke-linecap="round">
+                <line x1="50" y1="8" x2="50" y2="30" /><line x1="81" y1="20" x2="70" y2="44" /><line x1="92" y1="52" x2="70" y2="44" />
+                <line x1="74" y1="84" x2="62" y2="68" /><line x1="40" y1="90" x2="38" y2="68" /><line x1="14" y1="68" x2="30" y2="44" /><line x1="12" y1="34" x2="30" y2="44" />
+            </g>
+        </svg>`,
+
     "irisvis": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
             <circle cx="50" cy="50" r="34" fill="none" stroke="#F5C242" stroke-width="2.4" />
             <path d="M35 62 L65 62 L50 36 Z" fill="none" stroke="rgba(255,255,255,0.75)" stroke-width="2" stroke-linejoin="round" />

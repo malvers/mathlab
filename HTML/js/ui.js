@@ -1173,9 +1173,28 @@ class CyberUI {
                 box-shadow: 0 0 20px var(--accent, var(--neon-blue));
             }
             .val-display {
-                font-family: 'Orbitron', sans-serif;
-                font-size: 0.8rem;
-                font-weight: bold;
+                font-family: Arial, Helvetica, sans-serif;
+                font-size: 1.05rem;
+                font-weight: 600;
+                /* looks like a small input field: the value can be clicked and typed */
+                padding: 1px 8px;
+                border-radius: 5px;
+                border: 1px solid color-mix(in srgb, currentColor 45%, transparent);
+                background: rgba(255, 255, 255, 0.04);
+                cursor: text;
+                min-width: 2.2em;
+                text-align: right;
+                transition: border-color 0.2s, box-shadow 0.2s;
+            }
+            .val-display:hover {
+                border-color: currentColor;
+                background: rgba(255, 255, 255, 0.08);
+            }
+            .val-display[contenteditable="true"] {
+                outline: none;
+                border-color: currentColor;
+                box-shadow: 0 0 8px color-mix(in srgb, currentColor 60%, transparent);
+                background: rgba(0, 0, 0, 0.35);
             }
 
             /* Lab scan (.search-container … under #search-mount): js/labor-scan-search.css (index + tools) */
@@ -1536,6 +1555,44 @@ class CyberUI {
             display.innerText = fmt(val);
             oninput(val);
         };
+
+        // Click the value to type a number: Enter/blur commits, Esc cancels.
+        // Comma is accepted as decimal separator; values outside the slider
+        // range pass through (the thumb just pins at min/max).
+        display.title = 'Klicken und Zahl eintippen';
+        display.style.cursor = 'text';
+        display.addEventListener('click', () => {
+            if (display.isContentEditable) return;
+            const original = display.innerText;
+            display.contentEditable = 'true';
+            display.innerText = String(input.value);
+            display.focus();
+            const range = document.createRange();
+            range.selectNodeContents(display);
+            const sel = window.getSelection();
+            sel.removeAllRanges();
+            sel.addRange(range);
+
+            const finish = (commit) => {
+                display.removeEventListener('blur', onBlur);
+                display.removeEventListener('keydown', onKey);
+                display.contentEditable = 'false';
+                if (!commit) { display.innerText = original; return; }
+                const val = parseFloat(display.innerText.trim().replace(',', '.'));
+                if (!isFinite(val)) { display.innerText = original; return; }
+                input.value = val;
+                display.innerText = fmt(val);
+                oninput(val);
+            };
+            const onBlur = () => finish(true);
+            const onKey = (e) => {
+                e.stopPropagation(); // keep lab-wide hotkeys out of the edit
+                if (e.key === 'Enter') { e.preventDefault(); finish(true); }
+                else if (e.key === 'Escape') { e.preventDefault(); finish(false); }
+            };
+            display.addEventListener('blur', onBlur);
+            display.addEventListener('keydown', onKey);
+        });
     }
 
     /**

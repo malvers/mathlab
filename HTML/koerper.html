@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DOC ALVERS MATHE-LABORE | Körper</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet">
+    <link rel="icon" type="image/png" href="resources/favicon.png">
+    <link rel="stylesheet" href="js/cyber-layout.css">
+    <link rel="stylesheet" href="js/buttons-ultra.css">
+    <link rel="stylesheet" href="js/cyber-lab-overrides.css">
+    <link rel="stylesheet" href="js/branding.styles.extracted.css">
+    <link rel="stylesheet" href="js/lab-shell-minimal.css">
+    <link rel="stylesheet" href="js/cyber-tabbar.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <style>
+        /* Lab-local: formula list + face-type legend inside the cards */
+        .k-formulas { display: flex; flex-direction: column; gap: 9px; font-size: 1.15rem; color: #eee; }
+        .k-formulas .katex { font-size: 1.15em; }
+        .k-formulas .k-num { color: rgb(245, 194, 66); font-family: Arial, Helvetica, sans-serif; font-size: 0.95rem; font-weight: 600; }
+        .k-row { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+        .k-legend { display: flex; flex-wrap: wrap; gap: 6px 12px; font-family: 'Orbitron', sans-serif; font-size: 0.6rem; color: #bbb; margin-top: 6px; }
+        .k-legend span::before { content: ''; display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 5px; vertical-align: -1px; background: var(--c); }
+        .k-note { font-size: 0.7rem; color: #888; margin-top: 6px; line-height: 1.35; }
+        /* values in Arial (Doc's wish), labels stay Orbitron; flatter cards */
+        /* !important needed: buttons-ultra.css forces 20px padding / 90px min-height / 1.6rem on every stats card */
+        .k-tab .stats-grid { gap: 5px !important; margin-top: 5px !important; }
+        .k-tab .stats-card { padding: 7px 8px 8px !important; min-height: 0 !important; border-radius: 9px; }
+        .k-tab .stats-label { margin-bottom: 3px !important; line-height: 1.15; font-size: 0.55rem !important; }
+        .k-tab .stats-val { font-family: Arial, Helvetica, sans-serif; font-size: 1.05rem !important; font-weight: 600; letter-spacing: 0; line-height: 1.15 !important; display: block; }
+        .k-tab .stats-card.k-wide { grid-column: 1 / -1; }
+        .k-tab { display: none; }
+        .k-tab.active { display: block; }
+        #canvas-container { width: 100%; height: 100%; position: relative; }
+        #k-hud {
+            position: absolute; top: 12px; left: 12px; pointer-events: none;
+            font-family: 'Orbitron', sans-serif; font-size: 0.85rem; letter-spacing: 1.5px; color: #bbb;
+        }
+        #k-hud b { display: block; font-size: 1.5rem; color: #fff; margin-bottom: 4px; }
+        /* View controls live in a floating panel on the right of the stage — the sidebar keeps the numbers */
+        #k-right {
+            position: absolute; top: 12px; right: 12px; width: 220px; z-index: 5;
+            max-height: calc(100% - 24px); overflow-y: auto; scrollbar-width: none;
+        }
+        #k-right::-webkit-scrollbar { display: none; }
+        #k-right .instrument-card { margin-bottom: 0; }
+        /* compact slider groups (cards with many parameters) */
+        /* buttons-ultra.css forces margin-top:15px on groups and 52px/16px on range inputs — override with higher specificity */
+        .k-tight.k-tight .cyber-control-group { margin-top: 4px !important; margin-bottom: 0 !important; }
+        .k-tight.k-tight .cyber-control-group input[type="range"] { min-height: 18px !important; padding: 3px 0 !important; margin: 0 !important; }
+        .k-tight .control-header { margin-bottom: 0; }
+        .k-prec { margin-top: 8px; }
+        #k-formpanel {
+            position: absolute; bottom: 12px; right: 12px; width: 400px; z-index: 5;
+            max-height: 48%; overflow-y: auto; scrollbar-width: none;
+        }
+        #k-formpanel::-webkit-scrollbar { display: none; }
+        #k-formpanel .instrument-card { margin-bottom: 0; }
+        @media (max-width: 768px) {
+            #k-right { width: 170px; top: 8px; right: 8px; }
+            #k-formpanel { width: 220px; bottom: 8px; right: 8px; max-height: 40%; }
+        }
+    </style>
+</head>
+
+<body>
+    <nav id="mini-rail">
+        <div class="nav-btn" onclick="toggleSidebar()" title="Toggle Menu">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </div>
+    </nav>
+
+    <aside id="side-panel">
+        <header id="sidebar-header"></header>
+        <div id="ui-container">
+            <div id="sb-platonisch" class="k-tab active"></div>
+            <div id="sb-archimedisch" class="k-tab"></div>
+            <div id="sb-catalanisch" class="k-tab"></div>
+            <div id="sb-prismen" class="k-tab"></div>
+            <div id="sb-rund" class="k-tab"></div>
+        </div>
+    </aside>
+
+    <main id="main-content" class="has-tabbar">
+        <div id="tab-bar">
+            <button class="tab-btn active" data-tab="platonisch">PLATONISCH</button>
+            <button class="tab-btn" data-tab="archimedisch">ARCHIMEDISCH</button>
+            <button class="tab-btn" data-tab="catalanisch">CATALANISCH</button>
+            <button class="tab-btn" data-tab="prismen">PRISMEN</button>
+            <button class="tab-btn" data-tab="rund">RUNDFORMEN</button>
+        </div>
+        <div id="tab-stage">
+            <div id="canvas-container">
+                <div class="cyber-grid"></div>
+                <div id="k-hud"><b id="k-hud-name"></b><span id="k-hud-sub"></span></div>
+            </div>
+            <div id="k-right"></div>
+            <div id="k-formpanel"></div>
+        </div>
+    </main>
+
+    <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+      }
+    }
+    </script>
+    <script type="module">
+        import * as THREE_MOD from "three";
+        import { TrackballControls } from "three/addons/controls/TrackballControls.js";
+        window.THREE = { ...THREE_MOD, TrackballControls };
+        window.dispatchEvent(new Event('three-ready'));
+    </script>
+    <script src="js/cyber-left-chrome.js"></script>
+    <script src="js/branding/briefings.js"></script>
+    <script src="js/branding/overlays.js"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/branding/nav.js"></script>
+    <script src="js/branding.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/koerper-geom.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script>
+        function toggleSidebar() {
+            const panel = document.getElementById('side-panel');
+            panel.classList.toggle('collapsed');
+            if (window.CyberLeftChrome && typeof CyberLeftChrome.publishResolvedScale === 'function') {
+                CyberLeftChrome.publishResolvedScale();
+            }
+            setTimeout(() => {
+                window.dispatchEvent(new Event('resize'));
+                if (window.CyberLeftChrome && typeof CyberLeftChrome.publishResolvedScale === 'function') {
+                    CyberLeftChrome.publishResolvedScale();
+                }
+            }, 400);
+        }
+
+        CyberBranding.init({
+            useExternalStyles: true,
+            title: CyberI18n.get('ui.coach_title'),
+            subtitle: 'Körper',
+        });
+        CyberUI.init();
+        if (window.CyberLeftChrome && typeof CyberLeftChrome.configure === 'function') {
+            CyberLeftChrome.configure({ viewportOnlyZoom: true });
+        }
+
+        // ------------------------------------------------------------------
+        // Palette (project colours) + face colour by polygon size
+        // ------------------------------------------------------------------
+        const COL = {
+            orange: 'rgb(245, 194, 66)', red: 'rgb(176, 36, 24)', green: 'rgb(121, 158, 49)',
+            blue: '#00d2ff', purple: '#a86cff', pink: '#ff4fa3', grey: '#8a97ad',
+        };
+        const FACE_COL = { 3: COL.green, 4: COL.orange, 5: COL.red, 6: COL.blue, 8: COL.purple, 10: COL.pink };
+        const FACE_NAME = { 3: 'Dreieck', 4: 'Viereck', 5: 'Fünfeck', 6: 'Sechseck', 8: 'Achteck', 10: 'Zehneck' };
+        const faceColor = n => FACE_COL[n] || COL.grey;
+
+        // ------------------------------------------------------------------
+        // State
+        // ------------------------------------------------------------------
+        const G = KoerperGeom;
+        const S = {
+            tab: 'platonisch',
+            prec: 3,
+            unit: 'cm',               // length unit for every input; areas get ², volumes ³
+            a: 1,                     // edge length (polyhedra) — pure number, unit free
+            unfold: 0,                // 0 folded … 1 flat net
+            showFaces: true, showEdges: true, showVerts: true,
+            sphere: 'none',           // none | in | mid | circ
+            autoRotate: true,
+            solid: { platonisch: 'ikosaeder', archimedisch: 'ikosaederstumpf', catalanisch: 'rhombentriakontaeder' },
+            prism: { kind: 'prisma', n: 6, h: 1.2, uniform: true },
+            round: { kind: 'kugel', r: 1, R: 2, h: 1.5, r2: 0.5, ea: 1.5, eb: 1, ec: 0.7 },
+        };
+        try { Object.assign(S, JSON.parse(localStorage.getItem('koerper_state') || '{}')); } catch (e) { /* ignore */ }
+        // Deep links: ?tab=archimedisch&solid=ikosaederstumpf&unfold=60&form=torus&prisma=antiprisma
+        (function applyUrlParams() {
+            const q = new URLSearchParams(location.search);
+            if (q.get('tab') && ['platonisch', 'archimedisch', 'catalanisch', 'prismen', 'rund'].includes(q.get('tab'))) S.tab = q.get('tab');
+            const solid = q.get('solid');
+            if (solid) {
+                if (KoerperGeom.PLATONIC[solid]) { S.tab = 'platonisch'; S.solid.platonisch = solid; }
+                else if (KoerperGeom.ARCHIMEDEAN[solid]) { S.tab = 'archimedisch'; S.solid.archimedisch = solid; }
+                else if (KoerperGeom.CATALAN[solid]) { S.tab = 'catalanisch'; S.solid.catalanisch = solid; }
+            }
+            if (q.get('form')) { S.tab = 'rund'; S.round.kind = q.get('form'); }
+            if (q.get('prisma')) { S.tab = 'prismen'; S.prism.kind = q.get('prisma'); }
+            if (q.get('a') != null && parseFloat(q.get('a')) > 0) S.a = parseFloat(q.get('a'));
+            if (q.get('unfold') != null) S.unfold = Math.max(0, Math.min(1, parseFloat(q.get('unfold')) / 100));
+        })();
+        function persist() { try { localStorage.setItem('koerper_state', JSON.stringify(S)); } catch (e) { /* ignore */ } }
+
+        const fmt = x => Number(x).toLocaleString('de-DE', { minimumFractionDigits: S.prec, maximumFractionDigits: S.prec });
+        const fmtDeg = x => (x * 180 / Math.PI).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + '°';
+        const tex = (el, s) => { if (window.katex) katex.render(s, el, { throwOnError: false, displayMode: false }); else el.textContent = s; };
+
+        // ------------------------------------------------------------------
+        // Tab bar (sidebar + stage swap)
+        // ------------------------------------------------------------------
+        function switchTab(name) {
+            S.tab = name; persist();
+            document.querySelectorAll('#tab-bar .tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
+            document.querySelectorAll('#ui-container .k-tab').forEach(d => d.classList.toggle('active', d.id === 'sb-' + name));
+            updateRightPanel();
+            rebuild();
+        }
+        document.querySelectorAll('#tab-bar .tab-btn').forEach(b => b.addEventListener('click', () => switchTab(b.dataset.tab)));
+
+        // ------------------------------------------------------------------
+        // Sidebar cards — one set per tab
+        // ------------------------------------------------------------------
+        function solidOptions(cat) {
+            return Object.keys(cat).map(id => ({ id, label: cat[id].name.replace(/\s*\(.*\)$/, '') }));
+        }
+
+        function buildCommonCards(tab, opts) {
+            const sb = 'sb-' + tab;
+            CyberUI.createCard(sb, opts.title, `<div id="dd-${tab}"></div>`, COL.orange);
+            CyberUI.createDropdown(`dd-${tab}`, opts.options, id => { opts.onSelect(id); }, opts.selected);
+
+            CyberUI.createCard(sb, 'Parameter', `<div id="par-${tab}" class="k-tight"></div>`, COL.blue);
+            opts.params(`par-${tab}`);
+
+            CyberUI.createCard(sb, 'Werte', `<div id="stats-${tab}"></div><div id="legend-${tab}" class="k-legend"></div><div id="prec-${tab}" class="k-prec"></div>`, COL.orange);
+            const precOpts = Array.from({ length: 11 }, (_, i) => ({ id: String(i), label: i + ' Nachkommastellen' }));
+            CyberUI.createDropdown(`prec-${tab}`, precOpts, id => { S.prec = +id; persist(); refreshNumbers(); }, String(S.prec));
+        }
+
+        // Edge-length slider shared by the three polyhedron tabs
+        function edgeParams(cid) {
+            CyberUI.createSlider(cid, 'Kantenlänge a', 0.5, 20, S.a, 0.1, x => { S.a = x; persist(); refreshNumbers(); }, COL.blue, x => fmtShort(x) + U());
+            tagUnit(cid);
+        }
+        const fmtShort = x => Number(x).toLocaleString('de-DE', { maximumFractionDigits: 2 });
+        const U = () => S.unit ? ' ' + S.unit : '';
+        const U2 = () => S.unit ? ' ' + S.unit + '²' : '';
+        const U3 = () => S.unit ? ' ' + S.unit + '³' : '';
+        const Uinv = () => S.unit ? ' ' + S.unit + '⁻¹' : '';
+        const UNIT_OPTS = [{ id: 'mm', label: 'mm' }, { id: 'cm', label: 'cm' }, { id: 'dm', label: 'dm' }, { id: 'm', label: 'm' }, { id: 'km', label: 'km' }, { id: 'none', label: 'ohne Einheit' }];
+        /** Tag the most recently created slider group as unit-bearing (its display is re-rendered on unit change). */
+        function tagUnit(cid) {
+            const g = document.getElementById(cid).querySelectorAll('.cyber-control-group');
+            if (g.length) g[g.length - 1].classList.add('k-unit');
+        }
+        function unitDropdown(cid) {
+            const d = document.createElement('div'); d.id = 'unit-' + cid; d.className = 'k-prec';
+            document.getElementById(cid).appendChild(d);
+            CyberUI.createDropdown(d.id, UNIT_OPTS, id => {
+                S.unit = id === 'none' ? '' : id; persist();
+                document.querySelectorAll('[id^="unit-"] .selected-val').forEach(el => { el.textContent = S.unit || 'ohne Einheit'; });
+                document.querySelectorAll('.cyber-control-group.k-unit').forEach(g => {
+                    const inp = g.querySelector('input[type="range"]'), disp = g.querySelector('.val-display');
+                    if (inp && disp) disp.innerText = fmtShort(inp.value) + U();
+                });
+                refreshNumbers();
+            }, S.unit || 'none');
+        }
+
+        buildCommonCards('platonisch', {
+            title: 'Platonischer Körper', options: solidOptions(G.PLATONIC), selected: S.solid.platonisch,
+            onSelect: id => { S.solid.platonisch = id; persist(); rebuild(); }, params: cid => { edgeParams(cid); unitDropdown(cid); }, net: true, spheres: true,
+        });
+        buildCommonCards('archimedisch', {
+            title: 'Archimedischer Körper', options: solidOptions(G.ARCHIMEDEAN), selected: S.solid.archimedisch,
+            onSelect: id => { S.solid.archimedisch = id; persist(); rebuild(); }, params: cid => { edgeParams(cid); unitDropdown(cid); }, net: true, spheres: true,
+        });
+        buildCommonCards('catalanisch', {
+            title: 'Catalanischer Körper', options: solidOptions(G.CATALAN), selected: S.solid.catalanisch,
+            onSelect: id => { S.solid.catalanisch = id; persist(); rebuild(); }, params: cid => { edgeParams(cid); unitDropdown(cid); }, net: true, spheres: true,
+        });
+        buildCommonCards('prismen', {
+            title: 'Prismen & Pyramiden',
+            options: [{ id: 'prisma', label: 'Prisma' }, { id: 'antiprisma', label: 'Antiprisma' }, { id: 'pyramide', label: 'Pyramide' }, { id: 'doppelpyramide', label: 'Doppelpyramide' }],
+            selected: S.prism.kind,
+            onSelect: id => { S.prism.kind = id; persist(); rebuild(); },
+            params: cid => {
+                edgeParams(cid);
+                CyberUI.createSlider(cid, 'Ecken n', 3, 12, S.prism.n, 1, x => { S.prism.n = x; persist(); rebuild(); }, COL.orange);
+                CyberUI.createSlider(cid, 'Höhe h / a', 0.2, 3, S.prism.h, 0.05, x => { S.prism.h = x; S.prism.uniform = false; syncUniform(); persist(); rebuild(); }, COL.green, x => fmtShort(x));
+                CyberUI.createCheckbox(cid, 'gleichkantig (h automatisch)', S.prism.uniform, c => { S.prism.uniform = c; persist(); rebuild(); });
+                unitDropdown(cid);
+            },
+            net: true, spheres: false,
+        });
+        buildCommonCards('rund', {
+            title: 'Rundform',
+            options: [
+                { id: 'kugel', label: 'Kugel' }, { id: 'halbkugel', label: 'Halbkugel' }, { id: 'zylinder', label: 'Zylinder' },
+                { id: 'kegel', label: 'Kegel' }, { id: 'kegelstumpf', label: 'Kegelstumpf' }, { id: 'torus', label: 'Torus' }, { id: 'ellipsoid', label: 'Ellipsoid' },
+            ],
+            selected: S.round.kind,
+            onSelect: id => { S.round.kind = id; persist(); rebuild(); },
+            params: cid => {
+                const R = S.round;
+                const mk = (label, key, min, max, step, col) =>
+                    { CyberUI.createSlider(cid, label, min, max, R[key], step, x => { R[key] = x; persist(); rebuild(); }, col, x => fmtShort(x) + U()); tagUnit(cid); }
+                mk('Radius r', 'r', 0.2, 5, 0.1, COL.blue);
+                mk('Radius R (Torus / Stumpf)', 'R', 0.2, 5, 0.1, COL.orange);
+                mk('Höhe h', 'h', 0.2, 6, 0.1, COL.green);
+                mk('Halbachse a', 'ea', 0.2, 5, 0.1, COL.blue);
+                mk('Halbachse b', 'eb', 0.2, 5, 0.1, COL.orange);
+                mk('Halbachse c', 'ec', 0.2, 5, 0.1, COL.green);
+                unitDropdown(cid);
+            },
+            net: false, spheres: false,
+        });
+        // Floating 'Ansicht' panel (one instance for all tabs; parts hide per tab)
+        (function buildRightPanel() {
+            CyberUI.createCard('k-right', 'Ansicht', `
+                <div id="k-view" class="k-tight">
+                    <div id="k-net"></div>
+                    <div id="k-cb"></div>
+                    <div id="k-verts"></div>
+                    <div id="k-rot"></div>
+                    <div id="k-sphere"></div>
+                </div>`, COL.green);
+            CyberUI.createSlider('k-net', 'Netz auffalten', 0, 100, Math.round(S.unfold * 100), 1,
+                x => { S.unfold = x / 100; persist(); }, COL.orange, x => x + ' %');
+            CyberUI.createCheckbox('k-cb', 'Flächen', S.showFaces, c => { S.showFaces = c; persist(); applyVisibility(); });
+            CyberUI.createCheckbox('k-cb', 'Kanten', S.showEdges, c => { S.showEdges = c; persist(); applyVisibility(); });
+            CyberUI.createCheckbox('k-verts', 'Ecken', S.showVerts, c => { S.showVerts = c; persist(); applyVisibility(); });
+            CyberUI.createCheckbox('k-rot', 'Auto-Rotation', S.autoRotate, c => { S.autoRotate = c; persist(); });
+            CyberUI.createRadioGroup('k-sphere', 'Kugel', [
+                { label: 'keine', value: 'none' }, { label: 'Inkugel', value: 'in' },
+                { label: 'Kantenkugel', value: 'mid' }, { label: 'Umkugel', value: 'circ' },
+            ], S.sphere, val => { S.sphere = val; persist(); applyVisibility(); });
+        })();
+        CyberUI.createCard('k-formpanel', 'Formeln', `<div id="k-form" class="k-formulas"></div>`, COL.blue);
+        function updateRightPanel() {
+            const poly = S.tab !== 'rund';
+            const spheres = ['platonisch', 'archimedisch', 'catalanisch'].includes(S.tab);
+            document.getElementById('k-net').style.display = poly ? '' : 'none';
+            document.getElementById('k-verts').style.display = poly ? '' : 'none';
+            document.getElementById('k-sphere').style.display = spheres ? '' : 'none';
+        }
+
+        function syncUniform() {
+            const cb = document.querySelector('#par-prismen .cyber-checkbox');
+            if (cb) cb.checked = S.prism.uniform;
+        }
+
+        // ------------------------------------------------------------------
+        // Exact formulas (KaTeX) — Platonic solids, prisms, round shapes
+        // ------------------------------------------------------------------
+        const EXACT = {
+            tetraeder: ['A = \\sqrt{3}\\,a^2', 'V = \\tfrac{\\sqrt{2}}{12}\\,a^3', 'r_U = \\tfrac{\\sqrt{6}}{4}\\,a', 'r_K = \\tfrac{\\sqrt{2}}{4}\\,a', 'r_I = \\tfrac{\\sqrt{6}}{12}\\,a'],
+            wuerfel: ['A = 6\\,a^2', 'V = a^3', 'r_U = \\tfrac{\\sqrt{3}}{2}\\,a', 'r_K = \\tfrac{\\sqrt{2}}{2}\\,a', 'r_I = \\tfrac{a}{2}'],
+            oktaeder: ['A = 2\\sqrt{3}\\,a^2', 'V = \\tfrac{\\sqrt{2}}{3}\\,a^3', 'r_U = \\tfrac{\\sqrt{2}}{2}\\,a', 'r_K = \\tfrac{a}{2}', 'r_I = \\tfrac{\\sqrt{6}}{6}\\,a'],
+            dodekaeder: ['A = 3\\sqrt{25+10\\sqrt{5}}\\,a^2', 'V = \\tfrac{15+7\\sqrt{5}}{4}\\,a^3', 'r_U = \\tfrac{\\sqrt{3}\\,(1+\\sqrt{5})}{4}\\,a', 'r_K = \\tfrac{3+\\sqrt{5}}{4}\\,a', 'r_I = \\tfrac{a}{2}\\sqrt{\\tfrac{25+11\\sqrt{5}}{10}}'],
+            ikosaeder: ['A = 5\\sqrt{3}\\,a^2', 'V = \\tfrac{5\\,(3+\\sqrt{5})}{12}\\,a^3', 'r_U = \\tfrac{a}{4}\\sqrt{10+2\\sqrt{5}}', 'r_K = \\tfrac{1+\\sqrt{5}}{4}\\,a', 'r_I = \\tfrac{\\sqrt{3}\\,(3+\\sqrt{5})}{12}\\,a'],
+        };
+        const PRISM_TEX = {
+            prisma: ['G = \\tfrac{n\\,a^2}{4\\tan(\\pi/n)}', 'A = 2G + n\\,a\\,h', 'V = G\\,h'],
+            antiprisma: ['G = \\tfrac{n\\,a^2}{4\\tan(\\pi/n)}', 'A = 2G + 2n\\cdot\\tfrac{a\\,h_\\triangle}{2}', 'V = \\tfrac{h}{3}\\left(2G + \\tfrac{n a^2}{4 \\sin(\\pi/n)\\tan(\\pi/2n)}\\right)', 'h_{gleichk.} = a\\sqrt{1-\\tfrac{1}{4\\cos^2(\\pi/2n)}}'],
+            pyramide: ['G = \\tfrac{n\\,a^2}{4\\tan(\\pi/n)}', 's = \\sqrt{h^2 + \\tfrac{a^2}{4\\tan^2(\\pi/n)}}', 'A = G + \\tfrac{n\\,a\\,s}{2}', 'V = \\tfrac{1}{3}\\,G\\,h'],
+            doppelpyramide: ['G = \\tfrac{n\\,a^2}{4\\tan(\\pi/n)}', 's = \\sqrt{h^2 + \\tfrac{a^2}{4\\tan^2(\\pi/n)}}', 'A = n\\,a\\,s', 'V = \\tfrac{2}{3}\\,G\\,h'],
+        };
+        const ROUND_TEX = {
+            kugel: ['A = 4\\pi r^2', 'V = \\tfrac{4}{3}\\pi r^3'],
+            halbkugel: ['A = 3\\pi r^2', 'V = \\tfrac{2}{3}\\pi r^3'],
+            zylinder: ['M = 2\\pi r h', 'A = 2\\pi r\\,(r+h)', 'V = \\pi r^2 h'],
+            kegel: ['s = \\sqrt{r^2+h^2}', 'M = \\pi r s', 'A = \\pi r\\,(r+s)', 'V = \\tfrac{1}{3}\\pi r^2 h'],
+            kegelstumpf: ['s = \\sqrt{(R-r)^2+h^2}', 'M = \\pi (R+r)\\,s', 'A = \\pi\\left(r^2+R^2+(R+r)s\\right)', 'V = \\tfrac{\\pi h}{3}\\left(R^2+Rr+r^2\\right)'],
+            torus: ['A = 4\\pi^2 R r', 'V = 2\\pi^2 R r^2'],
+            ellipsoid: ['V = \\tfrac{4}{3}\\pi\\,abc', 'A \\approx 4\\pi\\left(\\tfrac{a^pb^p+a^pc^p+b^pc^p}{3}\\right)^{1/p},\\; p=1{,}6075'],
+        };
+
+        // ------------------------------------------------------------------
+        // Three.js scene
+        // ------------------------------------------------------------------
+        let scene, camera, renderer, controls, root, sphereMeshes = {};
+        let faceObjs = [];          // { obj, parent, hinge:{a,b,axis,sign,angle} } for net unfolding
+        let vertMesh = null;
+        let current = null;         // { P, m, kind }
+
+        function initThree() {
+            const container = document.getElementById('canvas-container');
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(40, container.clientWidth / container.clientHeight, 0.05, 200);
+            camera.position.set(3.2, 2.4, 4.2);
+            camera.lookAt(0, 0, 0);
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            container.appendChild(renderer.domElement);
+
+            controls = new THREE.TrackballControls(camera, renderer.domElement);
+            controls.rotateSpeed = 1.3; controls.zoomSpeed = 1.05; controls.panSpeed = 0.32;
+            controls.staticMoving = false; controls.dynamicDampingFactor = 0.14;
+            controls.minDistance = 1.2; controls.maxDistance = 40;
+            controls.handleResize();
+            controls.addEventListener('start', () => { S.autoRotate = false; syncAutoRotateCheckbox(); });
+
+            scene.add(new THREE.AmbientLight(0xffffff, 0.55));
+            const key = new THREE.DirectionalLight(0xfff4e0, 1.4); key.position.set(3, 5, 4); scene.add(key);
+            const fill = new THREE.DirectionalLight(0x4466ff, 0.5); fill.position.set(-3, -2, -4); scene.add(fill);
+            const rim = new THREE.DirectionalLight(0xffffff, 0.35); rim.position.set(0, -5, 2); scene.add(rim);
+
+            root = new THREE.Group();
+            scene.add(root);
+
+            // reference spheres (in / mid / circ) as translucent shells
+            for (const k of ['in', 'mid', 'circ']) {
+                const mesh = new THREE.Mesh(new THREE.SphereGeometry(1, 64, 48), new THREE.MeshPhongMaterial({
+                    color: k === 'in' ? 0x00d2ff : k === 'mid' ? 0xf5c242 : 0xff4fa3,
+                    transparent: true, opacity: 0.18, depthWrite: false, side: THREE.DoubleSide, shininess: 10,
+                }));
+                mesh.visible = false;
+                scene.add(mesh);
+                sphereMeshes[k] = mesh;
+            }
+
+            window.addEventListener('resize', onResize);
+            animate();
+        }
+        function onResize() {
+            const c = document.getElementById('canvas-container');
+            if (!c || !renderer) return;
+            camera.aspect = c.clientWidth / c.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(c.clientWidth, c.clientHeight);
+            controls.handleResize();
+        }
+        function syncAutoRotateCheckbox() {
+            document.querySelectorAll('#k-rot .cyber-checkbox-wrapper').forEach(w => {
+                if (w.textContent.trim() === 'Auto-Rotation') w.querySelector('input').checked = S.autoRotate;
+            });
+        }
+
+        function clearRoot() {
+            while (root.children.length) {
+                const o = root.children.pop();
+                o.traverse(ch => { if (ch.geometry) ch.geometry.dispose(); if (ch.material) ch.material.dispose(); });
+            }
+            faceObjs = []; vertMesh = null;
+        }
+
+        // Build one Object3D per face (fan triangulation + outline) so the net can hinge
+        function buildPolyhedronMeshes(P) {
+            clearRoot();
+            const tv = P.verts.map(v => new THREE.Vector3(v[0], v[1], v[2]));
+            P.faces.forEach((loop, fi) => {
+                const g = new THREE.BufferGeometry();
+                const pos = [];
+                for (let k = 1; k < loop.length - 1; k++) {
+                    for (const i of [loop[0], loop[k], loop[k + 1]]) pos.push(tv[i].x, tv[i].y, tv[i].z);
+                }
+                g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+                g.computeVertexNormals();
+                const mat = new THREE.MeshPhongMaterial({
+                    color: new THREE.Color(faceColor(loop.length)), side: THREE.DoubleSide, flatShading: true,
+                    shininess: 35, specular: new THREE.Color(0x333333), polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 1,
+                });
+                const mesh = new THREE.Mesh(g, mat);
+                mesh.name = 'face';
+                const lg = new THREE.BufferGeometry().setFromPoints(loop.map(i => tv[i]));
+                const line = new THREE.LineLoop(lg, new THREE.LineBasicMaterial({ color: 0xeef2ff, transparent: true, opacity: 0.85 }));
+                line.name = 'edge';
+                const obj = new THREE.Group();
+                obj.add(mesh); obj.add(line);
+                obj.matrixAutoUpdate = false;
+                root.add(obj);
+                faceObjs.push({ obj, parent: -1, hinge: null, loop });
+            });
+
+            // vertices as small spheres (only meaningful when folded)
+            const vg = new THREE.SphereGeometry(0.022, 12, 10);
+            vertMesh = new THREE.InstancedMesh(vg, new THREE.MeshPhongMaterial({ color: 0xffffff }), tv.length);
+            const m4 = new THREE.Matrix4();
+            tv.forEach((v, i) => { m4.makeTranslation(v.x, v.y, v.z); vertMesh.setMatrixAt(i, m4); });
+            root.add(vertMesh);
+
+            buildSpanningTree(P);
+            applyVisibility();
+        }
+
+        // Spanning tree over faces (BFS from the largest face) with hinge data for unfolding
+        function buildSpanningTree(P) {
+            const edgeOf = new Map();
+            P.edges.forEach(e => { if (e.faces.length === 2) edgeOf.set(e.faces[0] + '_' + e.faces[1], e); });
+            const adj = P.faces.map(() => []);
+            P.edges.forEach(e => {
+                if (e.faces.length !== 2) return;
+                adj[e.faces[0]].push({ f: e.faces[1], e }); adj[e.faces[1]].push({ f: e.faces[0], e });
+            });
+            let start = 0, best = -1;
+            P.faces.forEach((loop, i) => { if (loop.length > best) { best = loop.length; start = i; } });
+            const seen = new Set([start]);
+            const queue = [start];
+            while (queue.length) {
+                const f = queue.shift();
+                for (const { f: g, e } of adj[f]) {
+                    if (seen.has(g)) continue;
+                    seen.add(g); queue.push(g);
+                    const A = new THREE.Vector3(...P.verts[e.a]), B = new THREE.Vector3(...P.verts[e.b]);
+                    const axis = B.clone().sub(A).normalize();
+                    const np = new THREE.Vector3(...P.normals[f]), nc = new THREE.Vector3(...P.normals[g]);
+                    const angle = Math.acos(Math.max(-1, Math.min(1, np.dot(nc))));
+                    // rotation sign: the one that maps the child normal onto the parent normal
+                    const test = nc.clone().applyAxisAngle(axis, angle);
+                    const sign = test.distanceTo(np) < 1e-4 ? 1 : -1;
+                    faceObjs[g].parent = f;
+                    faceObjs[g].hinge = { A, axis, angle, sign };
+                }
+            }
+            // order so parents come before children when composing matrices
+            const order = [];
+            const visit = f => { order.push(f); faceObjs.forEach((fo, i) => { if (fo.parent === f) visit(i); }); };
+            visit(start);
+            faceObjs.order = order;
+
+            // extent of the fully flattened net (drives the view scale while unfolding)
+            applyUnfold(1);
+            let ext = 0;
+            const tmp = new THREE.Vector3();
+            faceObjs.forEach(fo => fo.loop.forEach(i => {
+                tmp.set(...P.verts[i]).applyMatrix4(fo.obj.matrix);
+                ext = Math.max(ext, tmp.length());
+            }));
+            netExtent = ext;
+            lastT = -1;
+        }
+        let netExtent = 1;
+
+        let _tmpM, _tmpT;   // scratch matrices, created once THREE is loaded
+        function applyUnfold(t) {
+            if (!faceObjs.length || !faceObjs.order) return;
+            if (!_tmpM) { _tmpM = new THREE.Matrix4(); _tmpT = new THREE.Matrix4(); }
+            for (const i of faceObjs.order) {
+                const fo = faceObjs[i];
+                if (fo.parent < 0) { fo.obj.matrix.identity(); continue; }
+                const h = fo.hinge;
+                _tmpM.makeRotationAxis(h.axis, h.sign * h.angle * t);
+                _tmpT.makeTranslation(h.A.x, h.A.y, h.A.z);
+                _tmpM.premultiply(_tmpT);
+                _tmpT.makeTranslation(-h.A.x, -h.A.y, -h.A.z);
+                _tmpM.multiply(_tmpT);
+                fo.obj.matrix.copy(faceObjs[fo.parent].obj.matrix).multiply(_tmpM);
+            }
+        }
+
+        function applyVisibility() {
+            root.traverse(o => {
+                if (o.name === 'face') o.visible = S.showFaces;
+                if (o.name === 'edge') o.visible = S.showEdges;
+            });
+            if (vertMesh) vertMesh.visible = S.showVerts && S.unfold < 0.01;
+            for (const k of ['in', 'mid', 'circ']) {
+                const on = S.sphere === k && current && current.kind === 'poly' && current.radii && current.radii[k] != null && S.unfold < 0.01;
+                sphereMeshes[k].visible = !!on;
+                if (on) sphereMeshes[k].scale.setScalar(current.radii[k] * current.viewScale);
+            }
+        }
+
+        // ------------------------------------------------------------------
+        // Round shapes (built-in geometries, normalised to fit the view)
+        // ------------------------------------------------------------------
+        function buildRoundMesh(kind, R) {
+            clearRoot();
+            let geo, extent;
+            switch (kind) {
+                case 'kugel': geo = new THREE.SphereGeometry(R.r, 64, 48); extent = R.r; break;
+                case 'halbkugel': {
+                    const dome = new THREE.SphereGeometry(R.r, 64, 32, 0, Math.PI * 2, 0, Math.PI / 2);
+                    const cap = new THREE.CircleGeometry(R.r, 64); cap.rotateX(Math.PI / 2);
+                    geo = [dome, cap]; extent = R.r; break;
+                }
+                case 'zylinder': geo = new THREE.CylinderGeometry(R.r, R.r, R.h, 64); extent = Math.max(R.r, R.h / 2); break;
+                case 'kegel': geo = new THREE.CylinderGeometry(0, R.r, R.h, 64); extent = Math.max(R.r, R.h / 2); break;
+                case 'kegelstumpf': geo = new THREE.CylinderGeometry(R.r, R.R, R.h, 64); extent = Math.max(R.r, R.R, R.h / 2); break;
+                case 'torus': geo = new THREE.TorusGeometry(R.R, R.r, 32, 96); geo.rotateX(Math.PI / 2); extent = R.R + R.r; break;
+                case 'ellipsoid': geo = new THREE.SphereGeometry(1, 64, 48); geo.scale(R.ea, R.eb, R.ec); extent = Math.max(R.ea, R.eb, R.ec); break;
+            }
+            const s = 1.15 / extent;
+            const mat = new THREE.MeshPhongMaterial({ color: new THREE.Color(COL.orange), side: THREE.DoubleSide, shininess: 45, specular: new THREE.Color(0x444444), transparent: true, opacity: 0.92 });
+            const geos = Array.isArray(geo) ? geo : [geo];
+            geos.forEach(g => {
+                const mesh = new THREE.Mesh(g, mat.clone()); mesh.name = 'face'; mesh.scale.setScalar(s); root.add(mesh);
+                const wire = new THREE.LineSegments(new THREE.WireframeGeometry(lowPolyOf(kind, R)), new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.22 }));
+                wire.name = 'edge'; wire.scale.setScalar(s); root.add(wire);
+            });
+            applyVisibility();
+        }
+        function lowPolyOf(kind, R) {
+            switch (kind) {
+                case 'kugel': return new THREE.SphereGeometry(R.r, 24, 16);
+                case 'halbkugel': return new THREE.SphereGeometry(R.r, 24, 8, 0, Math.PI * 2, 0, Math.PI / 2);
+                case 'zylinder': return new THREE.CylinderGeometry(R.r, R.r, R.h, 24, 4);
+                case 'kegel': return new THREE.CylinderGeometry(0, R.r, R.h, 24, 4);
+                case 'kegelstumpf': return new THREE.CylinderGeometry(R.r, R.R, R.h, 24, 4);
+                case 'torus': { const g = new THREE.TorusGeometry(R.R, R.r, 12, 36); g.rotateX(Math.PI / 2); return g; }
+                case 'ellipsoid': { const g = new THREE.SphereGeometry(1, 24, 16); g.scale(R.ea, R.eb, R.ec); return g; }
+            }
+        }
+
+        // ------------------------------------------------------------------
+        // Rebuild for the current tab / selection
+        // ------------------------------------------------------------------
+        function rebuild() {
+            if (!window.THREE || !scene) return;
+            const tab = S.tab;
+            if (tab === 'rund') {
+                current = { kind: 'round' };
+                buildRoundMesh(S.round.kind, S.round);
+                showRoundParams();
+            } else {
+                let P, name;
+                if (tab === 'prismen') {
+                    const pr = S.prism;
+                    if (pr.kind === 'antiprisma' && pr.uniform) { pr.h = G.uniformAntiprismHeight(pr.n); syncHSlider(); }
+                    const gen = { prisma: G.prismPoints, antiprisma: G.antiprismPoints, pyramide: G.pyramidPoints, doppelpyramide: G.bipyramidPoints }[pr.kind];
+                    P = G.hull(gen(pr.n, pr.h));
+                    // keep the base edge = 1 (the hull normalises nothing here)
+                    name = { prisma: 'Prisma', antiprisma: 'Antiprisma', pyramide: 'Pyramide', doppelpyramide: 'Doppelpyramide' }[pr.kind] + ' (n = ' + pr.n + ')';
+                } else {
+                    const key = S.solid[tab];
+                    P = G.build(key);
+                    name = (G.PLATONIC[key] || G.ARCHIMEDEAN[key] || G.CATALAN[key]).name;
+                }
+                const m = G.metrics(P);
+                const rU = Math.max(...m.rU);
+                const viewScale = 1.25 / rU;
+                current = {
+                    kind: 'poly', P, m, name, viewScale,
+                    radii: { in: m.rI.length === 1 ? m.rI[0] : null, mid: m.rK.length === 1 ? m.rK[0] : null, circ: m.rU.length === 1 ? m.rU[0] : null },
+                };
+                buildPolyhedronMeshes(P);
+            }
+            refreshNumbers();
+        }
+        function syncHSlider() {
+            const sl = document.querySelectorAll('#par-prismen .cyber-slider')[2];
+            if (sl) { sl.value = S.prism.h; sl.previousElementSibling.querySelector('.val-display').innerText = fmtShort(S.prism.h); }
+        }
+        function showRoundParams() {
+            // show only the sliders the chosen shape uses
+            const groups = document.querySelectorAll('#par-rund .cyber-control-group');
+            const need = {
+                kugel: [0], halbkugel: [0], zylinder: [0, 2], kegel: [0, 2], kegelstumpf: [0, 1, 2], torus: [0, 1], ellipsoid: [3, 4, 5],
+            }[S.round.kind];
+            groups.forEach((g, i) => { g.style.display = need.includes(i) ? '' : 'none'; });
+        }
+
+        // ------------------------------------------------------------------
+        // Numbers, formulas, HUD
+        // ------------------------------------------------------------------
+        function refreshNumbers() {
+            const tab = S.tab;
+            const statsId = 'stats-' + tab, formId = 'k-form', legendId = 'legend-' + tab;
+            const legend = document.getElementById(legendId);
+            const form = document.getElementById(formId);
+            form.innerHTML = '';
+            const addTex = (s, num) => {
+                const row = document.createElement('div'); row.className = 'k-row';
+                const t = document.createElement('span'); tex(t, s); row.appendChild(t);
+                // numeric results live in the 'Werte' card — the formula panel stays pure (Doc: no yellow numbers here)
+                form.appendChild(row);
+            };
+            const note = txt => { const d = document.createElement('div'); d.className = 'k-note'; d.textContent = txt; form.appendChild(d); };
+
+            if (current && current.kind === 'poly') {
+                const { P, m, name } = current;
+                const a = S.a;
+                const stats = [
+                    { label: 'Flächen · Kanten · Ecken', value: `${m.F} · ${m.E} · ${m.V}`, color: COL.orange },
+                    { label: 'Oberfläche A', value: fmt(m.area * a * a) + U2(), color: COL.blue },
+                    { label: 'Volumen V', value: fmt(m.volume * a ** 3) + U3(), color: COL.green },
+                    { label: 'A / V', value: fmt(m.area / m.volume / a) + Uinv(), color: COL.grey },
+                ];
+                const radiusRow = (label, arr) => {
+                    if (tab === 'prismen') return null;
+                    if (arr.length === 1) return { label, value: fmt(arr[0] * a) + U(), color: COL.green };
+                    return { label: label + ' min … max', value: fmt(arr[0] * a) + ' … ' + fmt(arr[arr.length - 1] * a) + U(), color: COL.green, wide: true };
+                };
+                for (const r of [radiusRow('r_U Umkugel', m.rU), radiusRow('r_K Kantenkugel', m.rK), radiusRow('r_I Inkugel', m.rI)]) if (r) stats.push(r);
+                if (m.edgeLengths.length > 1) {
+                    stats.push({ label: 'Kantenlängen', value: m.edgeLengths.slice().reverse().map(e => fmt(e * a)).join(' / ') + U(), color: COL.orange, wide: true });
+                }
+                stats.push({ label: 'Flächenwinkel', value: m.dihedrals.map(fmtDeg).join(' / '), color: COL.grey, wide: true });
+                statsGrid(statsId, stats);
+
+                legend.innerHTML = Object.keys(m.faceTypes).map(n =>
+                    `<span style="--c:${faceColor(+n)}">${m.faceTypes[n]} × ${FACE_NAME[n] || n + '-Eck'}</span>`).join('');
+
+                // formulas: exact where known, numeric coefficients always
+                const key = tab === 'prismen' ? S.prism.kind : S.solid[tab];
+                if (EXACT[key]) { EXACT[key].forEach(s => addTex(s)); note('exakt — darunter die numerischen Koeffizienten:'); }
+                if (PRISM_TEX[key]) PRISM_TEX[key].forEach(s => addTex(s));
+                addTex('A = ' + texNum(m.area) + '\\,a^2', fmt(m.area * a * a) + U2());
+                addTex('V = ' + texNum(m.volume) + '\\,a^3', fmt(m.volume * a ** 3) + U3());
+                if (tab !== 'prismen') {
+                    if (m.rU.length === 1) addTex('r_U = ' + texNum(m.rU[0]) + '\\,a', fmt(m.rU[0] * a) + U());
+                    if (m.rK.length === 1) addTex('r_K = ' + texNum(m.rK[0]) + '\\,a', fmt(m.rK[0] * a) + U());
+                    if (m.rI.length === 1) addTex('r_I = ' + texNum(m.rI[0]) + '\\,a', fmt(m.rI[0] * a) + U());
+                }
+                if (tab === 'catalanisch') note('a = längste Kante. Catalanische Körper sind flächen-, aber nicht eckentransitiv; deshalb mehrere Umkugel- und Kantenkugel-Abstände.');
+                if (tab === 'archimedisch') note('Archimedische Körper haben Um- und Kantenkugel, aber keine Inkugel — die Flächen liegen auf verschiedenen Abständen.');
+                if (tab === 'prismen') note('h ist als Vielfaches von a angegeben (einheitenfrei). Werte werden aus der konvexen Hülle berechnet (kein Sonderfall).');
+
+                document.getElementById('k-hud-name').textContent = name;
+                document.getElementById('k-hud-sub').textContent = `${m.F} FLÄCHEN · ${m.E} KANTEN · ${m.V} ECKEN`;
+            } else if (current && current.kind === 'round') {
+                const R = S.round, k = S.round.kind;
+                let A, V, M = null, extra = [];
+                const pi = Math.PI;
+                switch (k) {
+                    case 'kugel': A = 4 * pi * R.r ** 2; V = 4 / 3 * pi * R.r ** 3; break;
+                    case 'halbkugel': A = 3 * pi * R.r ** 2; V = 2 / 3 * pi * R.r ** 3; break;
+                    case 'zylinder': M = 2 * pi * R.r * R.h; A = 2 * pi * R.r * (R.r + R.h); V = pi * R.r ** 2 * R.h; break;
+                    case 'kegel': { const s = Math.hypot(R.r, R.h); M = pi * R.r * s; A = pi * R.r * (R.r + s); V = pi * R.r ** 2 * R.h / 3; extra.push(['Mantellinie s', s]); break; }
+                    case 'kegelstumpf': { const s = Math.hypot(R.R - R.r, R.h); M = pi * (R.R + R.r) * s; A = pi * (R.r ** 2 + R.R ** 2 + (R.R + R.r) * s); V = pi * R.h / 3 * (R.R ** 2 + R.R * R.r + R.r ** 2); extra.push(['Mantellinie s', s]); break; }
+                    case 'torus': A = 4 * pi * pi * R.R * R.r; V = 2 * pi * pi * R.R * R.r ** 2; break;
+                    case 'ellipsoid': { const p = 1.6075, ap = R.ea ** p, bp = R.eb ** p, cp = R.ec ** p; A = 4 * pi * ((ap * bp + ap * cp + bp * cp) / 3) ** (1 / p); V = 4 / 3 * pi * R.ea * R.eb * R.ec; break; }
+                }
+                const stats = [];
+                if (M != null) stats.push({ label: 'Mantelfläche M', value: fmt(M) + U2(), color: COL.green });
+                stats.push({ label: k === 'ellipsoid' ? 'Oberfläche A (Näherung)' : 'Oberfläche A', value: fmt(A) + U2(), color: COL.blue });
+                stats.push({ label: 'Volumen V', value: fmt(V) + U3(), color: COL.green });
+                stats.push({ label: 'A / V', value: fmt(A / V) + Uinv(), color: COL.grey });
+                extra.forEach(([l, v]) => stats.push({ label: l, value: fmt(v) + U(), color: COL.orange }));
+                statsGrid(statsId, stats);
+                legend.innerHTML = '';
+                ROUND_TEX[k].forEach(s => addTex(s));
+                if (k === 'ellipsoid') note('Die Oberfläche des allgemeinen Ellipsoids hat keine elementare Formel; Näherung nach Knud Thomsen (Fehler < 1,1 %).');
+                const nm = { kugel: 'Kugel', halbkugel: 'Halbkugel', zylinder: 'Zylinder', kegel: 'Kegel', kegelstumpf: 'Kegelstumpf', torus: 'Torus', ellipsoid: 'Ellipsoid' }[k];
+                document.getElementById('k-hud-name').textContent = nm;
+                document.getElementById('k-hud-sub').textContent = '';
+            }
+        }
+        function texNum(x) { return fmt(x).replace(',', '{,}'); }
+        /** Multi-value cells (ranges, lists) span both grid columns. */
+        function statsGrid(id, stats) {
+            CyberUI.createStatsGrid(id, stats);
+            // every value gets the full row (Doc: "alle breit")
+            stats.forEach((st, i) => document.getElementById(`stats-card-${id}-${i}`).classList.add('k-wide'));
+        }
+
+        // ------------------------------------------------------------------
+        // Loop
+        // ------------------------------------------------------------------
+        let lastT = -1;
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            if (S.autoRotate) root.rotation.y += 0.004;
+            if (current && current.kind === 'poly' && S.unfold !== lastT) {
+                applyUnfold(S.unfold); lastT = S.unfold;
+                const rU = Math.max(...current.m.rU);
+                root.scale.setScalar(1.25 / (rU + (netExtent - rU) * S.unfold));
+                applyVisibility();
+            }
+            renderer.render(scene, camera);
+        }
+
+        // ------------------------------------------------------------------
+        // Boot
+        // ------------------------------------------------------------------
+        function boot() {
+            initThree();
+            switchTab(S.tab);
+            showRoundParams();
+        }
+        if (window.THREE) boot(); else window.addEventListener('three-ready', boot, { once: true });
+    </script>
+</body>
+
+</html>

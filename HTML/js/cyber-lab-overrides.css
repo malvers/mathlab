@@ -313,10 +313,32 @@ body {
     opacity: 0.8 !important;
 }
 
+/* --- STATS GRID: never wider than the sidebar ---
+   1fr columns size to min-content, so a long Orbitron number widens the
+   card past the panel and produces a horizontal scrollbar. minmax(0, 1fr)
+   lets the columns shrink; values may then wrap instead of overflowing. */
+.stats-grid {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
+}
+.stats-card {
+    min-width: 0;
+}
+.stats-val, .stats-label {
+    overflow-wrap: anywhere;
+}
+
 /* --- DROPDOWN UI (ULTRA STABLE) --- */
 .instrument-card, .card-content { 
     overflow: visible !important; 
 } 
+
+/* A card whose dropdown is open must paint above its later siblings:
+   backdrop-filter turns every card into its own stacking context, so the
+   panel's z-index alone cannot escape the card. ui.js opens the panel via
+   inline display:block, which :has() can match. */
+.instrument-card:has(.dropdown-panel[style*="display: block"]) {
+    z-index: 50;
+}
 
 /* WebKit: slider-runnable-track often fails to composite over backdrop-filter; isolate promotes a stable paint layer */
 #side-panel input[type="range"] {
