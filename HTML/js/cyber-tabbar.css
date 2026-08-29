@@ -1,0 +1,58 @@
+/* cyber-tabbar.css — shared horizontal tab strip on top of #main-content.
+   Markup:
+     <main id="main-content" class="has-tabbar">
+       <div id="tab-bar"><button class="tab-btn active">…</button>…</div>
+       <div id="tab-stage">…</div>
+     </main>
+*/
+#main-content.has-tabbar {
+    display: flex;
+    flex-direction: column;
+}
+
+#tab-bar {
+    display: flex;
+    gap: 0;
+    padding: 0 8px;
+    align-items: stretch;
+    background: #07111f;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    flex-shrink: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+#tab-bar::-webkit-scrollbar { display: none; }
+
+#tab-bar .tab-btn {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.66rem;
+    letter-spacing: 1.2px;
+    padding: 11px 20px;
+    border: none;
+    border-radius: 0;
+    cursor: pointer;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.62);
+    border-top: 2px solid transparent;
+    white-space: nowrap;
+    transition: color 0.2s, border-color 0.2s;
+}
+#tab-bar .tab-btn:hover { color: rgba(255, 255, 255, 0.9); }
+#tab-bar .tab-btn.active {
+    color: #fff;
+    text-shadow: 0 0 8px rgba(245, 194, 66, 0.35);
+    border-top-color: rgb(245, 194, 66);
+}
+
+#tab-stage {
+    flex: 1;
+    position: relative;
+    min-height: 0;
+}
+
+@media (max-width: 768px) {
+    #tab-bar .tab-btn { padding: 8px 12px; font-size: 0.55rem; }
+}
+@media (max-width: 480px) {
+    #tab-bar .tab-btn { padding: 6px 8px; font-size: 0.5rem; letter-spacing: 0.5px; }
+}

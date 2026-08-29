@@ -24,6 +24,17 @@
 
 const LABS_DATA = [
     {
+        "id": "koerper",
+        "href": "koerper.html",
+        "title": "Körper",
+        "description": "Platonische, Archimedische und Catalanische Körper, Prismen, Antiprismen, Pyramiden und Rundformen — drehbar in 3D, mit Oberfläche, Volumen, Um-, Kanten- und Inkugelradius, Flächenwinkeln und Formeln live zur Kantenlänge. Jeder Körper lässt sich per Schieber zum Netz auffalten; Catalanische Körper entstehen als Duale der Archimedischen durch Polarität an der Kantenkugel.",
+        "tagline": "Geometrie / Polyeder / Netze",
+        "icon": LAB_ICONS["koerper"],
+        "category": "geometrie neu highlight hot grade8 grade9 grade10 uni",
+        "keywords": "koerper körper polyeder platonisch archimedisch catalanisch tetraeder wuerfel oktaeder dodekaeder ikosaeder fussball kuboktaeder rhombendodekaeder netz abwicklung oberflaeche volumen umkugel inkugel kantenkugel prisma antiprisma pyramide zylinder kegel kegelstumpf torus ellipsoid kugel geometrierechner",
+        "color": "gold"
+    },
+    {
         "id": "kovarianz",
         "href": "kovarianz.html",
         "title": "Kovarianz",
