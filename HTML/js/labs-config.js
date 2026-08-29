@@ -239,7 +239,7 @@ const LABS_DATA = [
         "description": "Elite-Forschungsuni im Silicon Valley: Spitzenforschung, offene Ideen und eine Campus-Kultur, die Tech und Wissenschaft weltweit prägt. Ergänzend zu den Uni-Labs hier im Portal.",
         "tagline": "Stanford · Kalifornien · Forschung & Lehre",
         "icon": LAB_ICONS["stanford-portal"],
-        "category": "uni highlight",
+        "category": "uni",
         "keywords": "stanford university kalifornien silicon valley forschung campus stanford.edu",
         "color": "blue"
     },
