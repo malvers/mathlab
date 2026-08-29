@@ -71,7 +71,7 @@
             },
             header: {
                 title: "Doc Alvers Mathe-Labor",
-                subtitle: "INTERAKTIVE MATHEMATIK",
+                subtitle: "DAS INTERAKTIVE MATHEMATIK-UNIVERSUM",
                 author: "von Dr. Michael R. Alvers"
             },
             view: {
@@ -143,6 +143,13 @@
                 "voicerecorder": { title: "Voice Recorder", description: "Aufnehmen und live transkribieren: Sprich — er hört zu, schreibt mit und speichert. Im Browser per Web Speech API, als Android-App mit nativer Spracherkennung." },
                 "mathtrainer": { title: "MathTrainer", description: "Mathe trainieren mit Aufgaben-Serien: Kopfrechnen und Schulaufgaben üben, Serien auswählen, Tempo steigern — School is cool. Der SchoolTrainer als Web-App." },
                 "pinkerfinder": { title: "PinkerFinder", description: "Der macOS-Finder 1:1 nachgebaut — plus Such-Facetten: Ordnergrößen in der Liste, Dubletten nach Inhalt, Facetten-Suche über den ganzen Mac, Live-Update. Native Mac-App zum Download." },
+                "kovarianz": { title: "Kovarianz", description: "Eine lineare Abbildung A zieht, dreht und schert die Ebene. Auf eine runde Punktwolke angewandt wird daraus eine Ellipse — und genau deren Form steht in der Kovarianzmatrix: aus Σ₀ = σ²E wird Σ = A Σ₀ Aᵀ. Matrix zellenweise einstellen oder die Bildellipse direkt am Griff ziehen; Σ, Korrelation und die Eigenvektoren als Hauptachsen werden live aus den gezeichneten Punkten gerechnet. Mit Normal- und Gleichverteilung, homogenen Koordinaten und Parallelen, die zeigen, was die Abbildung mit Geraden macht." },
+                "irisvis": { title: "Conway's Iris", description: "Verlängere an jeder Ecke beide Seiten um die gegenüberliegende Seite — die sechs Endpunkte liegen auf einem Kreis um den Inkreismittelpunkt, R = √(r²+(s+d)²). Sechs Scheibenwischer-Bögen bilden daraus eine Kurve konstanter Breite; ein Quadrat umschließt sie in jeder Drehlage, und CMA-ES sucht seine Lage live. Mit Beweis-Ansichten, Heatmap der Suchlandschaft und dem Reuleaux-Dreieck auf Knopfdruck." },
+                "ascii": { title: "ASCII-Art", description: "Bilder sind Zahlen: Foto, Kamera-Livebild oder Beispiel in Zellen rastern, Grauwert rechnen, Zeichen wählen — als Zeichen, farbig, Halbton oder Braille, mit Dithering. Ein Klick auf ein Zeichen zeigt die komplette Rechnung für genau diese Zelle; in Stufe 2 schreiben Schüler die Abbildung Grauwert → Zeichen selbst." },
+                "neuroaddierer": { title: "Der gelernte Addierer", description: "Im Lab 1 + 1 = 2 sind die Volladdierer fest verdrahtet — hier ist keiner verdrahtet. Ein winziges neuronales Netz aus 32 Zahlen bekommt nur die acht Zeilen der Wahrheitstabelle zu sehen und soll das Addieren selbst finden: durch Evolution (CMA-ES), ganz ohne Ableitung. Danach rechnen acht Kopien des gelernten Netzes in Reihe jede Summe bis 255 — und man sieht, dass seine Ausgänge nie exakt 0 oder 1 sind, sondern 0,03 und 0,97." },
+                "conuslab": { title: "Conus", description: "Warum trägt eine Kegelschnecke Zickzack und Zelte? Die Schale wächst nur an der Mündungskante — eine einzige Zellreihe entscheidet „Pigment ja/nein“, und jede Wachstumslinie bleibt für immer stehen. Das Muster ist also ein Raum-Zeit-Diagramm. Hier läuft es live: wandernde Pigmentwellen, die beim Zusammenstoß auslöschen und dabei die Zelte schneiden — daneben derselbe Effekt als zellulärer Automat (Regel 30)." },
+                "costablanca": { title: "Highlights Costa Blanca", description: "Costa-Blanca-Ausflüge zum Abhaken: 22 recherchierte Ziele von Altea bis Valencia mit Fotos, Insider-Tipps und Fortschrittsbalken — in vier Sprachen (DE/EN/ES/IT)." },
+                "bb84": { title: "BB84", description: "Quantenschlüsselaustausch nach Bennett und Brassard: Alice schickt einzelne Photonen, jedes in einer von zwei Basen — + mit den Zuständen — und |, oder × mit / und \\. Bob wählt seine Basis zufällig: gleiche Basis heißt sicheres Ergebnis, andere Basis heißt reiner Zufall. Über jede Spalte fahren erklärt genau dieses Photon. Mit der Lauscherin Eve steigt die Fehlerquote im öffentlich verglichenen Teil auf ein Viertel — die Entdeckungswahrscheinlichkeit ist 1 − (3/4)^m, und tausend Läufe auf Knopfdruck zeigen, dass es wirklich so ist. Dazu ein Lehrmodus, der alle Fälle einmal durchgeht." }
             }
         },
         en: {
@@ -207,7 +214,7 @@
             },
             header: {
                 title: "Doc Alvers Mathe-Labor",
-                subtitle: "INTERACTIVE MATHEMATICS",
+                subtitle: "THE INTERACTIVE MATHEMATICS UNIVERSE",
                 author: "by Dr. Michael R. Alvers"
             },
             view: {
@@ -278,7 +285,14 @@
                 "voicerecorder": { title: "Voice Recorder", description: "Record and transcribe live: speak — it listens, writes along and saves. In the browser via the Web Speech API, as an Android app with native speech recognition." },
                 "mathtrainer": { title: "MathTrainer", description: "Practise maths with task series: train mental arithmetic and school exercises, pick a series, pick up the pace — school is cool. The SchoolTrainer as a web app." },
                 "pinkerfinder": { title: "PinkerFinder", description: "The macOS Finder rebuilt 1:1 — plus search facets: folder sizes in the list, duplicates by content, faceted search across the whole Mac, live updates. Native Mac app, free download." },
-                "imaginarynumbers": { title: "Imaginary numbers", description: "Complex numbers in the Gaussian plane: real part, imaginary part and the imaginary unit — explore them interactively." }
+                "imaginarynumbers": { title: "Imaginary numbers", description: "Complex numbers in the Gaussian plane: real part, imaginary part and the imaginary unit — explore them interactively." },
+                "kovarianz": { title: "Covariance", description: "A linear map A stretches, rotates and shears the plane. Applied to a round cloud of points it turns into an ellipse — and exactly its shape is written in the covariance matrix: Σ₀ = σ²E becomes Σ = A Σ₀ Aᵀ. Set the matrix cell by cell or drag the image ellipse directly by its handle; Σ, the correlation and the eigenvectors as principal axes are computed live from the drawn points. With normal and uniform distribution, homogeneous coordinates and parallels that show what the map does to straight lines." },
+                "irisvis": { title: "Conway's Iris", description: "At every corner extend both sides by the length of the opposite side — the six endpoints lie on a circle around the incenter, R = √(r²+(s+d)²). Six windscreen-wiper arcs form a curve of constant width from them; a square encloses it in every rotation, and CMA-ES searches for its position live. With proof views, a heatmap of the search landscape and the Reuleaux triangle at the push of a button." },
+                "ascii": { title: "ASCII Art", description: "Images are numbers: raster a photo, the live camera image or an example into cells, compute the grey value, pick the character — as characters, in colour, as halftone or Braille, with dithering. Clicking a character shows the complete calculation for exactly that cell; at level 2 students write the mapping grey value → character themselves." },
+                "neuroaddierer": { title: "The Learned Adder", description: "In the lab 1 + 1 = 2 the full adders are hard-wired — here nothing is wired at all. A tiny neural network of 32 numbers only gets to see the eight rows of the truth table and is meant to discover addition by itself: through evolution (CMA-ES), entirely without derivatives. Afterwards eight copies of the learned network compute every sum up to 255 in series — and you can see that its outputs are never exactly 0 or 1, but 0.03 and 0.97." },
+                "conuslab": { title: "Conus", description: "Why does a cone snail wear zigzags and tents? The shell only grows at the lip of the aperture — a single row of cells decides ‘pigment yes/no’, and every growth line stays put forever. So the pattern is a space-time diagram. Here it runs live: travelling pigment waves that annihilate on collision and cut the tents in doing so — next to it the same effect as a cellular automaton (rule 30)." },
+                "costablanca": { title: "Costa Blanca Highlights", description: "Costa Blanca outings to tick off: 22 researched destinations from Altea to Valencia with photos, insider tips and a progress bar — in four languages (DE/EN/ES/IT)." },
+                "bb84": { title: "BB84", description: "Quantum key exchange after Bennett and Brassard: Alice sends single photons, each in one of two bases — + with the states — and |, or × with / and \\. Bob picks his basis at random: the same basis means a reliable result, a different basis means pure chance. Hovering over a column explains exactly that photon. With the eavesdropper Eve the error rate in the publicly compared part rises to a quarter — the probability of detection is 1 − (3/4)^m, and a thousand runs at the push of a button show that it really is so. Plus a teaching mode that walks through every case once." }
             }
         },
         es: {
@@ -343,7 +357,7 @@
             },
             header: {
                 title: "Doc Alvers Mathe-Labor",
-                subtitle: "MATEMÁTICAS INTERACTIVAS",
+                subtitle: "EL UNIVERSO INTERACTIVO DE LAS MATEMÁTICAS",
                 author: "por Dr. Michael R. Alvers"
             },
             view: {
@@ -414,7 +428,14 @@
                 "voicerecorder": { title: "Grabadora de voz", description: "Grabar y transcribir en vivo: habla y el programa escucha, escribe y guarda. En el navegador con la Web Speech API, como aplicación Android con reconocimiento de voz nativo." },
                 "mathtrainer": { title: "MathTrainer", description: "Practicar matemáticas con series de tareas: entrena el cálculo mental y los ejercicios escolares, elige una serie y aumenta el ritmo. School is cool: el SchoolTrainer como aplicación web." },
                 "pinkerfinder": { title: "PinkerFinder", description: "El Finder de macOS recreado 1:1 — más facetas de búsqueda: tamaños de carpeta en la lista, duplicados por contenido, búsqueda por facetas en todo el Mac, actualización en vivo. App nativa para Mac, descarga gratuita." },
-                "imaginarynumbers": { title: "Números imaginarios", description: "Números complejos en el plano de Gauss: parte real, parte imaginaria y la unidad imaginaria, para explorar de forma interactiva." }
+                "imaginarynumbers": { title: "Números imaginarios", description: "Números complejos en el plano de Gauss: parte real, parte imaginaria y la unidad imaginaria, para explorar de forma interactiva." },
+                "kovarianz": { title: "Covarianza", description: "Una aplicación lineal A estira, gira y cizalla el plano. Aplicada a una nube de puntos redonda se convierte en una elipse — y justo su forma está en la matriz de covarianza: de Σ₀ = σ²E surge Σ = A Σ₀ Aᵀ. Ajusta la matriz celda a celda o arrastra la elipse imagen por su manilla; Σ, la correlación y los vectores propios como ejes principales se calculan en vivo a partir de los puntos dibujados. Con distribución normal y uniforme, coordenadas homogéneas y paralelas que muestran qué hace la aplicación con las rectas." },
+                "irisvis": { title: "Conway's Iris", description: "Prolonga en cada vértice ambos lados por la longitud del lado opuesto: los seis extremos están sobre una circunferencia centrada en el incentro, R = √(r²+(s+d)²). Seis arcos tipo limpiaparabrisas forman con ellos una curva de anchura constante; un cuadrado la encierra en cualquier giro y CMA-ES busca su posición en vivo. Con vistas de demostración, mapa de calor del paisaje de búsqueda y el triángulo de Reuleaux con solo pulsar un botón." },
+                "ascii": { title: "Arte ASCII", description: "Las imágenes son números: divide en celdas una foto, la imagen en vivo de la cámara o un ejemplo, calcula el valor de gris y elige el carácter — como caracteres, en color, en semitono o en braille, con dithering. Al hacer clic en un carácter se muestra el cálculo completo de esa celda; en el nivel 2 el alumnado escribe por sí mismo la asignación valor de gris → carácter." },
+                "neuroaddierer": { title: "El sumador aprendido", description: "En el laboratorio 1 + 1 = 2 los sumadores completos están cableados; aquí no hay ningún cable. Una diminuta red neuronal de 32 números solo ve las ocho filas de la tabla de verdad y debe descubrir por sí misma cómo sumar: por evolución (CMA-ES), sin derivadas. Después ocho copias de la red aprendida calculan en serie cualquier suma hasta 255 — y se ve que sus salidas nunca son exactamente 0 o 1, sino 0,03 y 0,97." },
+                "conuslab": { title: "Conus", description: "¿Por qué lleva un cono zigzags y tiendas? La concha solo crece en el borde de la abertura: una única fila de células decide «pigmento sí/no», y cada línea de crecimiento queda fijada para siempre. El patrón es, por tanto, un diagrama espacio-tiempo. Aquí ocurre en vivo: ondas de pigmento que viajan, se aniquilan al chocar y recortan así las tiendas — al lado, el mismo efecto como autómata celular (regla 30)." },
+                "costablanca": { title: "Lo mejor de la Costa Blanca", description: "Excursiones por la Costa Blanca para ir tachando: 22 destinos documentados de Altea a Valencia con fotos, consejos de quien vive allí y barra de progreso — en cuatro idiomas (DE/EN/ES/IT)." },
+                "bb84": { title: "BB84", description: "Intercambio cuántico de claves según Bennett y Brassard: Alice envía fotones individuales, cada uno en una de dos bases — + con los estados — y |, o × con / y \\. Bob elige su base al azar: la misma base da un resultado seguro, otra base da puro azar. Al pasar por encima de una columna se explica justo ese fotón. Con la espía Eve la tasa de error en la parte comparada públicamente sube a un cuarto — la probabilidad de detección es 1 − (3/4)^m, y mil rondas con un botón muestran que es realmente así. Además, un modo de enseñanza que recorre todos los casos una vez." }
             }
         },
         fr: {
@@ -479,7 +500,7 @@
             },
             header: {
                 title: "Doc Alvers Mathe-Labor",
-                subtitle: "MATHÉMATIQUES INTERACTIVES",
+                subtitle: "L’UNIVERS INTERACTIF DES MATHÉMATIQUES",
                 author: "par Dr. Michael R. Alvers"
             },
             view: {
@@ -550,7 +571,14 @@
                 "voicerecorder": { title: "Dictaphone", description: "Enregistrer et transcrire en direct : parle, il écoute, écrit et enregistre. Dans le navigateur via la Web Speech API, en application Android avec reconnaissance vocale native." },
                 "mathtrainer": { title: "MathTrainer", description: "S'entraîner en maths avec des séries d'exercices : calcul mental et exercices scolaires, choisir une série, accélérer le rythme. School is cool : le SchoolTrainer en application web." },
                 "pinkerfinder": { title: "PinkerFinder", description: "Le Finder de macOS reconstruit à l'identique — plus des facettes de recherche : tailles des dossiers dans la liste, doublons par contenu, recherche à facettes sur tout le Mac, mise à jour en direct. Application Mac native, téléchargement gratuit." },
-                "imaginarynumbers": { title: "Nombres imaginaires", description: "Les nombres complexes dans le plan de Gauss : partie réelle, partie imaginaire et unité imaginaire, à explorer de façon interactive." }
+                "imaginarynumbers": { title: "Nombres imaginaires", description: "Les nombres complexes dans le plan de Gauss : partie réelle, partie imaginaire et unité imaginaire, à explorer de façon interactive." },
+                "kovarianz": { title: "Covariance", description: "Une application linéaire A étire, tourne et cisaille le plan. Appliquée à un nuage de points rond, elle en fait une ellipse — et c’est précisément sa forme qu’exprime la matrice de covariance : de Σ₀ = σ²E on passe à Σ = A Σ₀ Aᵀ. Réglez la matrice cellule par cellule ou tirez directement l’ellipse image par sa poignée ; Σ, la corrélation et les vecteurs propres comme axes principaux sont calculés en direct à partir des points dessinés. Avec loi normale et loi uniforme, coordonnées homogènes et parallèles qui montrent ce que l’application fait aux droites." },
+                "irisvis": { title: "Conway's Iris", description: "Prolongez à chaque sommet les deux côtés de la longueur du côté opposé : les six extrémités se trouvent sur un cercle centré au centre du cercle inscrit, R = √(r²+(s+d)²). Six arcs en essuie-glace en forment une courbe de largeur constante ; un carré l’enferme dans toutes les rotations et CMA-ES cherche sa position en direct. Avec vues de démonstration, carte de chaleur du paysage de recherche et le triangle de Reuleaux d’un simple clic." },
+                "ascii": { title: "Art ASCII", description: "Les images sont des nombres : découpez en cellules une photo, l’image live de la caméra ou un exemple, calculez la valeur de gris, choisissez le caractère — en caractères, en couleur, en demi-teinte ou en braille, avec tramage. Un clic sur un caractère affiche tout le calcul de cette cellule ; au niveau 2, les élèves écrivent eux-mêmes la correspondance valeur de gris → caractère." },
+                "neuroaddierer": { title: "L’additionneur appris", description: "Dans le labo 1 + 1 = 2, les additionneurs complets sont câblés en dur — ici rien n’est câblé. Un minuscule réseau de neurones de 32 nombres ne voit que les huit lignes de la table de vérité et doit trouver seul l’addition : par évolution (CMA-ES), sans aucune dérivée. Ensuite huit copies du réseau appris calculent en série toutes les sommes jusqu’à 255 — et l’on voit que ses sorties ne valent jamais exactement 0 ou 1, mais 0,03 et 0,97." },
+                "conuslab": { title: "Conus", description: "Pourquoi un cône porte-t-il des zigzags et des tentes ? La coquille ne croît qu’au bord de l’ouverture : une seule rangée de cellules décide « pigment oui/non », et chaque ligne de croissance reste inscrite pour toujours. Le motif est donc un diagramme espace-temps. Ici, il se déroule en direct : des ondes de pigment qui se déplacent, s’annihilent en se rencontrant et découpent ainsi les tentes — à côté, le même effet en automate cellulaire (règle 30)." },
+                "costablanca": { title: "Les incontournables de la Costa Blanca", description: "Des excursions sur la Costa Blanca à cocher : 22 destinations documentées d’Altea à Valence, avec photos, conseils d’initiés et barre de progression — en quatre langues (DE/EN/ES/IT)." },
+                "bb84": { title: "BB84", description: "Échange quantique de clés selon Bennett et Brassard : Alice envoie des photons uniques, chacun dans l’une de deux bases — + avec les états — et |, ou × avec / et \\. Bob choisit sa base au hasard : même base signifie résultat sûr, base différente signifie pur hasard. Survoler une colonne explique précisément ce photon. Avec l’espionne Eve, le taux d’erreur dans la partie comparée publiquement monte à un quart — la probabilité de détection vaut 1 − (3/4)^m, et mille tirages d’un clic montrent qu’il en est bien ainsi. Avec en plus un mode pédagogique qui parcourt tous les cas une fois." }
             }
         },
         it: {
@@ -615,7 +643,7 @@
             },
             header: {
                 title: "Doc Alvers Mathe-Labor",
-                subtitle: "MATEMATICA INTERATTIVA",
+                subtitle: "L’UNIVERSO INTERATTIVO DELLA MATEMATICA",
                 author: "di Dr. Michael R. Alvers"
             },
             view: {
@@ -686,7 +714,14 @@
                 "voicerecorder": { title: "Registratore vocale", description: "Registrare e trascrivere in diretta: parla e lui ascolta, scrive e salva. Nel browser con la Web Speech API, come app Android con riconoscimento vocale nativo." },
                 "mathtrainer": { title: "MathTrainer", description: "Allenarsi in matematica con serie di esercizi: calcolo mentale ed esercizi scolastici, scegli una serie, aumenta il ritmo. School is cool: lo SchoolTrainer come applicazione web." },
                 "pinkerfinder": { title: "PinkerFinder", description: "Il Finder di macOS ricostruito 1:1 — più faccette di ricerca: dimensioni delle cartelle in lista, duplicati per contenuto, ricerca a faccette su tutto il Mac, aggiornamento live. App nativa per Mac, download gratuito." },
-                "imaginarynumbers": { title: "Numeri immaginari", description: "I numeri complessi nel piano di Gauss: parte reale, parte immaginaria e unità immaginaria, da esplorare in modo interattivo." }
+                "imaginarynumbers": { title: "Numeri immaginari", description: "I numeri complessi nel piano di Gauss: parte reale, parte immaginaria e unità immaginaria, da esplorare in modo interattivo." },
+                "kovarianz": { title: "Covarianza", description: "Un’applicazione lineare A stira, ruota e taglia il piano. Applicata a una nuvola di punti rotonda diventa un’ellisse — e proprio la sua forma sta nella matrice di covarianza: da Σ₀ = σ²E si ottiene Σ = A Σ₀ Aᵀ. Imposta la matrice cella per cella oppure trascina l’ellisse immagine dalla sua maniglia; Σ, la correlazione e gli autovettori come assi principali vengono calcolati dal vivo dai punti disegnati. Con distribuzione normale e uniforme, coordinate omogenee e parallele che mostrano che cosa fa l’applicazione alle rette." },
+                "irisvis": { title: "Conway's Iris", description: "Prolunga in ogni vertice entrambi i lati della lunghezza del lato opposto: i sei estremi giacciono su una circonferenza centrata nell’incentro, R = √(r²+(s+d)²). Sei archi a tergicristallo ne formano una curva di larghezza costante; un quadrato la racchiude in ogni rotazione e CMA-ES ne cerca la posizione dal vivo. Con viste di dimostrazione, mappa di calore del paesaggio di ricerca e il triangolo di Reuleaux con un clic." },
+                "ascii": { title: "Arte ASCII", description: "Le immagini sono numeri: suddividi in celle una foto, l’immagine dal vivo della fotocamera o un esempio, calcola il valore di grigio, scegli il carattere — come caratteri, a colori, in mezzatinta o in braille, con dithering. Un clic su un carattere mostra l’intero calcolo di quella cella; al livello 2 gli studenti scrivono da sé la corrispondenza valore di grigio → carattere." },
+                "neuroaddierer": { title: "Il sommatore appreso", description: "Nel lab 1 + 1 = 2 i sommatori completi sono cablati — qui non c’è alcun cablaggio. Una minuscola rete neurale di 32 numeri vede solo le otto righe della tabella di verità e deve scoprire da sé come si somma: per evoluzione (CMA-ES), del tutto senza derivate. Poi otto copie della rete appresa calcolano in serie ogni somma fino a 255 — e si vede che le sue uscite non valgono mai esattamente 0 o 1, ma 0,03 e 0,97." },
+                "conuslab": { title: "Conus", description: "Perché una conchiglia del genere Conus porta zigzag e tende? La conchiglia cresce solo sul bordo dell’apertura: una sola fila di cellule decide «pigmento sì/no» e ogni linea di crescita resta per sempre. Il motivo è dunque un diagramma spazio-tempo. Qui scorre dal vivo: onde di pigmento che viaggiano, si annullano allo scontro e così ritagliano le tende — accanto, lo stesso effetto come automa cellulare (regola 30)." },
+                "costablanca": { title: "Il meglio della Costa Blanca", description: "Gite sulla Costa Blanca da spuntare: 22 mete documentate da Altea a Valencia con foto, consigli di chi ci vive e barra di avanzamento — in quattro lingue (DE/EN/ES/IT)." },
+                "bb84": { title: "BB84", description: "Scambio quantistico di chiavi secondo Bennett e Brassard: Alice invia singoli fotoni, ciascuno in una di due basi — + con gli stati — e |, oppure × con / e \\. Bob sceglie la sua base a caso: stessa base significa risultato sicuro, base diversa significa puro caso. Passando sopra una colonna si spiega proprio quel fotone. Con la spia Eve il tasso di errore nella parte confrontata pubblicamente sale a un quarto — la probabilità di scoperta è 1 − (3/4)^m, e mille prove con un clic mostrano che è davvero così. In più una modalità didattica che percorre una volta tutti i casi." }
             }
         },
         nl: {
@@ -751,7 +786,7 @@
             },
             header: {
                 title: "Doc Alvers Mathe-Labor",
-                subtitle: "INTERACTIEVE WISKUNDE",
+                subtitle: "HET INTERACTIEVE WISKUNDE-UNIVERSUM",
                 author: "door Dr. Michael R. Alvers"
             },
             view: {
@@ -822,7 +857,14 @@
                 "voicerecorder": { title: "Voice Recorder", description: "Opnemen en live transcriberen: spreek, hij luistert, schrijft mee en bewaart. In de browser via de Web Speech API, als Android-app met native spraakherkenning." },
                 "mathtrainer": { title: "MathTrainer", description: "Wiskunde trainen met opgavenreeksen: hoofdrekenen en schoolopgaven oefenen, een reeks kiezen, het tempo opvoeren. School is cool: de SchoolTrainer als webapp." },
                 "pinkerfinder": { title: "PinkerFinder", description: "De macOS Finder 1:1 nagebouwd — plus zoekfacetten: mapgroottes in de lijst, duplicaten op inhoud, facetzoeken over de hele Mac, live bijwerken. Native Mac-app, gratis download." },
-                "imaginarynumbers": { title: "Imaginaire getallen", description: "Complexe getallen in het complexe vlak van Gauss: reëel deel, imaginair deel en de imaginaire eenheid, interactief te verkennen." }
+                "imaginarynumbers": { title: "Imaginaire getallen", description: "Complexe getallen in het complexe vlak van Gauss: reëel deel, imaginair deel en de imaginaire eenheid, interactief te verkennen." },
+                "kovarianz": { title: "Covariantie", description: "Een lineaire afbeelding A rekt, draait en scheert het vlak. Toegepast op een ronde puntenwolk wordt die een ellips — en precies die vorm staat in de covariantiematrix: uit Σ₀ = σ²E volgt Σ = A Σ₀ Aᵀ. Stel de matrix cel voor cel in of sleep de beeldellips direct aan de greep; Σ, de correlatie en de eigenvectoren als hoofdassen worden live uit de getekende punten berekend. Met normale en uniforme verdeling, homogene coördinaten en evenwijdige lijnen die laten zien wat de afbeelding met rechte lijnen doet." },
+                "irisvis": { title: "Conway's Iris", description: "Verleng in elk hoekpunt beide zijden met de lengte van de overstaande zijde — de zes eindpunten liggen op een cirkel om het middelpunt van de ingeschreven cirkel, R = √(r²+(s+d)²). Zes ruitenwisserbogen vormen daaruit een kromme van constante breedte; een vierkant omsluit haar in elke draaistand en CMA-ES zoekt live naar zijn ligging. Met bewijsweergaven, een heatmap van het zoeklandschap en de Reuleaux-driehoek op één knop." },
+                "ascii": { title: "ASCII-kunst", description: "Beelden zijn getallen: raster een foto, het live camerabeeld of een voorbeeld in cellen, bereken de grijswaarde, kies het teken — als tekens, in kleur, als halftoon of braille, met dithering. Klik op een teken en de volledige berekening van precies die cel verschijnt; in niveau 2 schrijven leerlingen de afbeelding grijswaarde → teken zelf." },
+                "neuroaddierer": { title: "De geleerde opteller", description: "In het lab 1 + 1 = 2 zijn de volle optellers vast bedraad — hier is niets bedraad. Een piepklein neuraal netwerk van 32 getallen krijgt alleen de acht rijen van de waarheidstabel te zien en moet het optellen zelf vinden: door evolutie (CMA-ES), volledig zonder afgeleide. Daarna rekenen acht kopieën van het geleerde netwerk in serie elke som tot 255 — en je ziet dat de uitgangen nooit precies 0 of 1 zijn, maar 0,03 en 0,97." },
+                "conuslab": { title: "Conus", description: "Waarom draagt een kegelslak zigzags en tenten? De schelp groeit alleen aan de mondrand — één enkele rij cellen beslist ‘pigment ja/nee’, en elke groeilijn blijft voor altijd staan. Het patroon is dus een ruimte-tijddiagram. Hier loopt het live: reizende pigmentgolven die bij botsing uitdoven en daarbij de tenten uitsnijden — daarnaast hetzelfde effect als cellulaire automaat (regel 30)." },
+                "costablanca": { title: "Hoogtepunten Costa Blanca", description: "Uitstapjes aan de Costa Blanca om af te vinken: 22 uitgezochte bestemmingen van Altea tot Valencia met foto’s, insidertips en voortgangsbalk — in vier talen (DE/EN/ES/IT)." },
+                "bb84": { title: "BB84", description: "Quantum-sleuteluitwisseling volgens Bennett en Brassard: Alice stuurt losse fotonen, elk in een van twee bases — + met de toestanden — en |, of × met / en \\. Bob kiest zijn basis willekeurig: dezelfde basis betekent een zeker resultaat, een andere basis betekent puur toeval. Ga je over een kolom, dan wordt precies dat foton uitgelegd. Met afluisteraarster Eve stijgt het foutpercentage in het publiek vergeleken deel tot een kwart — de ontdekkingskans is 1 − (3/4)^m, en duizend runs op één knop laten zien dat het echt zo is. Plus een lesmodus die alle gevallen één keer doorloopt." }
             }
         },
 pt: {
@@ -887,7 +929,7 @@ pt: {
             },
             header: {
                 title: "Doc Alvers Mathe-Labor",
-                subtitle: "MATEMÁTICA INTERATIVA",
+                subtitle: "O UNIVERSO INTERATIVO DA MATEMÁTICA",
                 author: "por Dr. Michael R. Alvers"
             },
             view: {
@@ -958,7 +1000,14 @@ pt: {
                 "voicerecorder": { title: "Gravador de voz", description: "Gravar e transcrever ao vivo: fala e ele ouve, escreve e guarda. No navegador através da Web Speech API, como aplicação Android com reconhecimento de voz nativo." },
                 "mathtrainer": { title: "MathTrainer", description: "Treinar matemática com séries de exercícios: cálculo mental e exercícios escolares, escolher uma série, aumentar o ritmo. School is cool: o SchoolTrainer como aplicação web." },
                 "pinkerfinder": { title: "PinkerFinder", description: "O Finder do macOS recriado 1:1 — mais facetas de pesquisa: tamanhos de pastas na lista, duplicados por conteúdo, pesquisa por facetas em todo o Mac, atualização ao vivo. App nativa para Mac, download gratuito." },
-                "imaginarynumbers": { title: "Números imaginários", description: "Números complexos no plano de Gauss: parte real, parte imaginária e a unidade imaginária, para explorar de forma interativa." }
+                "imaginarynumbers": { title: "Números imaginários", description: "Números complexos no plano de Gauss: parte real, parte imaginária e a unidade imaginária, para explorar de forma interativa." },
+                "kovarianz": { title: "Covariância", description: "Uma aplicação linear A estica, roda e distorce o plano. Aplicada a uma nuvem de pontos redonda, transforma-a numa elipse — e é justamente a sua forma que está na matriz de covariância: de Σ₀ = σ²E resulta Σ = A Σ₀ Aᵀ. Ajusta a matriz célula a célula ou arrasta a elipse imagem pela pega; Σ, a correlação e os vetores próprios como eixos principais são calculados ao vivo a partir dos pontos desenhados. Com distribuição normal e uniforme, coordenadas homogéneas e paralelas que mostram o que a aplicação faz às retas." },
+                "irisvis": { title: "Conway's Iris", description: "Prolonga em cada vértice os dois lados pelo comprimento do lado oposto — os seis extremos ficam sobre uma circunferência centrada no incentro, R = √(r²+(s+d)²). Seis arcos tipo limpa-para-brisas formam com eles uma curva de largura constante; um quadrado envolve-a em qualquer rotação e o CMA-ES procura a sua posição ao vivo. Com vistas de demonstração, mapa de calor da paisagem de busca e o triângulo de Reuleaux à distância de um botão." },
+                "ascii": { title: "Arte ASCII", description: "Imagens são números: divide em células uma foto, a imagem ao vivo da câmara ou um exemplo, calcula o valor de cinzento e escolhe o caractere — como caracteres, a cores, em meio-tom ou em braille, com dithering. Um clique num caractere mostra todo o cálculo dessa célula; no nível 2 os alunos escrevem eles próprios a correspondência valor de cinzento → caractere." },
+                "neuroaddierer": { title: "O somador aprendido", description: "No lab 1 + 1 = 2 os somadores completos estão cablados — aqui não há cablagem nenhuma. Uma minúscula rede neuronal de 32 números só vê as oito linhas da tabela de verdade e tem de descobrir sozinha como somar: por evolução (CMA-ES), sem qualquer derivada. Depois oito cópias da rede aprendida calculam em série todas as somas até 255 — e vê-se que as suas saídas nunca são exatamente 0 ou 1, mas 0,03 e 0,97." },
+                "conuslab": { title: "Conus", description: "Porque é que um cone traz ziguezagues e tendas? A concha só cresce no bordo da abertura — uma única fila de células decide «pigmento sim/não», e cada linha de crescimento fica para sempre. O padrão é, portanto, um diagrama espaço-tempo. Aqui corre ao vivo: ondas de pigmento que viajam, se anulam ao colidir e assim recortam as tendas — ao lado, o mesmo efeito como autómato celular (regra 30)." },
+                "costablanca": { title: "Destaques da Costa Blanca", description: "Passeios pela Costa Blanca para ir riscando: 22 destinos pesquisados de Altea a Valência com fotos, dicas de quem lá vive e barra de progresso — em quatro línguas (DE/EN/ES/IT)." },
+                "bb84": { title: "BB84", description: "Troca quântica de chaves segundo Bennett e Brassard: a Alice envia fotões individuais, cada um numa de duas bases — + com os estados — e |, ou × com / e \\. O Bob escolhe a sua base ao acaso: a mesma base dá um resultado seguro, outra base dá puro acaso. Passar sobre uma coluna explica exatamente esse fotão. Com a espia Eve a taxa de erro na parte comparada publicamente sobe para um quarto — a probabilidade de deteção é 1 − (3/4)^m, e mil execuções à distância de um botão mostram que é mesmo assim. E ainda um modo de ensino que percorre todos os casos uma vez." }
             }
         },
         sw: {
@@ -1023,7 +1072,7 @@ pt: {
             },
             header: {
                 title: "Doc Alvers Mathe-Labor",
-                subtitle: "HISABATI INGILIANO",
+                subtitle: "ULIMWENGU SHIRIKISHI WA HISABATI",
                 author: "na Dk. Michael R. Alvers"
             },
             view: {
@@ -1094,7 +1143,14 @@ pt: {
                 "voicerecorder": { title: "Kirekodi sauti", description: "Rekodi na andika moja kwa moja: sema, kinasikiliza, kinaandika na kinahifadhi. Kwenye kivinjari kwa Web Speech API, kama programu ya Android kwa utambuzi wa sauti wa asili." },
                 "mathtrainer": { title: "MathTrainer", description: "Fanya mazoezi ya hisabati kwa mfululizo wa kazi: hesabu za kichwa na mazoezi ya shule, chagua mfululizo, ongeza kasi. School is cool: SchoolTrainer kama programu ya wavuti." },
                 "pinkerfinder": { title: "PinkerFinder", description: "Finder ya macOS imejengwa upya 1:1 — pamoja na vipengele vya utafutaji: ukubwa wa folda kwenye orodha, nakala zinazofanana kwa maudhui, utafutaji wa vipengele kwenye Mac nzima, usasishaji wa moja kwa moja. Programu asilia ya Mac, upakuaji wa bure." },
-                "imaginarynumbers": { title: "Namba za kuwazia", description: "Namba changamano katika uwanda wa Gauss: sehemu halisi, sehemu ya kuwazia na kipimo cha kuwazia — gundua kwa kushirikiana." }
+                "imaginarynumbers": { title: "Namba za kuwazia", description: "Namba changamano katika uwanda wa Gauss: sehemu halisi, sehemu ya kuwazia na kipimo cha kuwazia — gundua kwa kushirikiana." },
+                "kovarianz": { title: "Kovarianti", description: "Ramani ya mstari A hunyoosha, huzungusha na kupinda uwanda. Ikitumika kwa wingu la nukta duara, hugeuka kuwa duaradufu — na umbo lake hasa ndilo lililoandikwa katika matriki ya kovarianti: kutoka Σ₀ = σ²E hupatikana Σ = A Σ₀ Aᵀ. Weka matriki seli kwa seli au buruta duaradufu ya picha moja kwa moja kwa kishikio; Σ, uhusiano na vekta maalum kama shoka kuu hukokotolewa papo hapo kutoka nukta zilizochorwa. Ikiwa na mtawanyo wa kawaida na sare, viwianishi sare na mistari sambamba inayoonyesha ramani inavyotenda kwa mistari nyoofu." },
+                "irisvis": { title: "Conway's Iris", description: "Katika kila pembe, ongeza pande zote mbili kwa urefu wa upande unaokabili — ncha sita hukaa kwenye duara linalozunguka kitovu cha duara la ndani, R = √(r²+(s+d)²). Tao sita kama vifuta-kioo hutengeneza kwazo mkunjo wa upana thabiti; mraba huufunika katika kila mzunguko, na CMA-ES hutafuta nafasi yake papo hapo. Pamoja na mionekano ya uthibitisho, ramani-joto ya eneo la utafutaji na pembetatu ya Reuleaux kwa kubonyeza kitufe." },
+                "ascii": { title: "Sanaa ya ASCII", description: "Picha ni namba: gawa picha, mtiririko wa moja kwa moja wa kamera au mfano katika seli, kokotoa thamani ya kijivu, chagua herufi — kama herufi, kwa rangi, nusu-toni au breli, pamoja na dithering. Kubofya herufi kunaonyesha hesabu kamili ya seli hiyo hasa; katika ngazi ya 2 wanafunzi wenyewe huandika ramani thamani ya kijivu → herufi." },
+                "neuroaddierer": { title: "Kijumlishi kilichojifunza", description: "Katika lab 1 + 1 = 2 vijumlishi kamili vimeunganishwa kwa waya — hapa hakuna waya hata mmoja. Mtandao mdogo sana wa neva wenye namba 32 huonyeshwa safu nane tu za jedwali la ukweli, na unapaswa kugundua kujumlisha wenyewe: kwa mageuko (CMA-ES), bila kutumia derivative. Kisha nakala nane za mtandao uliojifunza hukokotoa mfululizo kila jumla hadi 255 — na huona kwamba matokeo yake si 0 wala 1 kamili, bali 0,03 na 0,97." },
+                "conuslab": { title: "Conus", description: "Kwa nini konokono wa Conus huvaa zigizagi na mahema? Gamba hukua tu kwenye ukingo wa mdomo — safu moja tu ya seli huamua ‘rangi ndiyo/hapana’, na kila mstari wa ukuaji hubaki milele. Kwa hivyo muundo ni chati ya nafasi na wakati. Hapa unaendeshwa papo hapo: mawimbi ya rangi yanayosafiri, yanayofutana yanapogongana na hivyo kukata mahema — kando yake athari ile ile kama otomatiki ya seli (kanuni 30)." },
+                "costablanca": { title: "Vivutio vya Costa Blanca", description: "Safari za Costa Blanca za kuweka alama: maeneo 22 yaliyochunguzwa kutoka Altea hadi Valencia yakiwa na picha, vidokezo vya wenyeji na upau wa maendeleo — kwa lugha nne (DE/EN/ES/IT)." },
+                "bb84": { title: "BB84", description: "Ubadilishanaji wa funguo kwa kanuni ya kwanta ya Bennett na Brassard: Alice hutuma fotoni moja moja, kila moja katika mojawapo ya besi mbili — + yenye hali — na |, au × yenye / na \\. Bob huchagua besi yake kwa nasibu: besi ile ile humaanisha jibu la uhakika, besi tofauti humaanisha bahati tupu. Kupitisha kishale juu ya safu hueleza fotoni hiyo hasa. Akiwepo msikilizaji Eve, kiwango cha makosa katika sehemu inayolinganishwa hadharani hupanda hadi robo — uwezekano wa kugunduliwa ni 1 − (3/4)^m, na mizunguko elfu kwa kubonyeza kitufe huonyesha kuwa ni kweli hivyo. Pamoja na hali ya kufundishia inayopitia kila kisa mara moja." }
             }
         },
         tr: {
@@ -1159,7 +1215,7 @@ pt: {
             },
             header: {
                 title: "Doc Alvers Mathe-Labor",
-                subtitle: "İNTERAKTİF MATEMATİK",
+                subtitle: "ETKİLEŞİMLİ MATEMATİK EVRENİ",
                 author: "Dr. Michael R. Alvers"
             },
             view: {
@@ -1230,7 +1286,14 @@ pt: {
                 "voicerecorder": { title: "Ses kaydedici", description: "Kaydet ve anında yazıya çevir: sen konuş, o dinler, yazar ve saklar. Tarayıcıda Web Speech API ile, Android uygulamasında yerel konuşma tanımayla." },
                 "mathtrainer": { title: "MathTrainer", description: "Alıştırma serileriyle matematik çalış: zihinden hesap ve okul alıştırmaları, bir seri seç, hızını artır. School is cool: web uygulaması olarak SchoolTrainer." },
                 "pinkerfinder": { title: "PinkerFinder", description: "macOS Finder'ın birebir yeniden yapımı — artı arama yönleri: listede klasör boyutları, içeriğe göre kopyalar, tüm Mac'te yönlü arama, canlı güncelleme. Yerel Mac uygulaması, ücretsiz indirme." },
-                "imaginarynumbers": { title: "Sanal sayılar", description: "Gauss düzleminde karmaşık sayılar: gerçek kısım, sanal kısım ve sanal birim — etkileşimli olarak keşfet." }
+                "imaginarynumbers": { title: "Sanal sayılar", description: "Gauss düzleminde karmaşık sayılar: gerçek kısım, sanal kısım ve sanal birim — etkileşimli olarak keşfet." },
+                "kovarianz": { title: "Kovaryans", description: "Doğrusal bir dönüşüm A düzlemi gerer, döndürür ve keser. Yuvarlak bir nokta bulutuna uygulandığında bir elipse dönüşür — ve tam da bu şeklin bilgisi kovaryans matrisindedir: Σ₀ = σ²E’den Σ = A Σ₀ Aᵀ olur. Matrisi hücre hücre ayarla ya da görüntü elipsini doğrudan tutamağından sürükle; Σ, korelasyon ve ana eksenler olarak özvektörler çizilen noktalardan canlı hesaplanır. Normal ve düzgün dağılım, homojen koordinatlar ve dönüşümün doğrulara ne yaptığını gösteren paralellerle." },
+                "irisvis": { title: "Conway's Iris", description: "Her köşede iki kenarı da karşı kenarın uzunluğu kadar uzat — altı uç nokta, iç teğet çemberin merkezi etrafındaki bir çember üzerindedir: R = √(r²+(s+d)²). Altı silecek yayı bunlardan sabit genişlikte bir eğri oluşturur; bir kare onu her dönme konumunda çevreler ve CMA-ES konumunu canlı arar. Kanıt görünümleri, arama alanının ısı haritası ve tek tuşla Reuleaux üçgeni ile." },
+                "ascii": { title: "ASCII sanatı", description: "Görüntüler sayıdır: fotoğrafı, canlı kamera görüntüsünü ya da bir örneği hücrelere böl, gri değeri hesapla, karakteri seç — karakter olarak, renkli, yarım ton ya da Braille, dithering ile. Bir karaktere tıklamak tam o hücrenin bütün hesabını gösterir; 2. düzeyde öğrenciler gri değer → karakter eşlemesini kendileri yazar." },
+                "neuroaddierer": { title: "Öğrenilmiş toplayıcı", description: "1 + 1 = 2 laboratuvarında tam toplayıcılar sabit kablolanmıştır — burada hiçbir şey kablolu değil. 32 sayıdan oluşan minik bir yapay sinir ağı yalnızca doğruluk tablosunun sekiz satırını görür ve toplamayı kendi bulmalıdır: evrimle (CMA-ES), hiç türev kullanmadan. Ardından öğrenilmiş ağın sekiz kopyası seri hâlde 255’e kadar her toplamı hesaplar — ve çıkışlarının hiçbir zaman tam 0 ya da 1 olmadığı, 0,03 ve 0,97 olduğu görülür." },
+                "conuslab": { title: "Conus", description: "Bir koni salyangozu neden zikzaklar ve çadırlar taşır? Kabuk yalnızca ağız kenarında büyür — tek bir hücre sırası ‘pigment var/yok’ kararını verir ve her büyüme çizgisi sonsuza dek yerinde kalır. Yani desen bir uzay-zaman diyagramıdır. Burada canlı işler: ilerleyen pigment dalgaları çarpıştıklarında birbirini yok eder ve böylece çadırları keser — yanında aynı etki hücresel otomat olarak (kural 30)." },
+                "costablanca": { title: "Costa Blanca’nın öne çıkanları", description: "İşaretlenecek Costa Blanca gezileri: Altea’dan Valencia’ya 22 araştırılmış rota; fotoğraflar, yerel ipuçları ve ilerleme çubuğu ile — dört dilde (DE/EN/ES/IT)." },
+                "bb84": { title: "BB84", description: "Bennett ve Brassard’a göre kuantum anahtar değişimi: Alice tek tek fotonlar gönderir, her biri iki tabandan birinde — + tabanında — ve | durumlarıyla, ya da × tabanında / ve \\ ile. Bob tabanını rastgele seçer: aynı taban güvenilir sonuç, farklı taban saf rastlantı demektir. Bir sütunun üzerine gelmek tam o fotonu açıklar. Dinleyici Eve varken açıkça karşılaştırılan kısımdaki hata oranı dörtte bire çıkar — yakalanma olasılığı 1 − (3/4)^m’dir ve tek tuşla bin deneme bunun gerçekten böyle olduğunu gösterir. Ayrıca bütün durumları bir kez gezen bir öğretim modu." }
             }
         }
     };

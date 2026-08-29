@@ -573,32 +573,3 @@ Object.assign(CyberI18n.translations.nl.fractal, {
         orbit_hud_stopwatch_latched: "Stopwatch:\n{t}\n(pauze / klaar)"
     });
 })();
-
-// Sprache: URL ?lang= → localStorage cyber-lab-lang → Standard DE (Nutzerwahl persistiert beim Flag-Toggle)
-(function () {
-    try {
-        CyberI18n.resolveLanguageFromEnvironment();
-        CyberI18n.suppressBrowserTranslatePrompt();
-    } catch (e) {
-        console.warn("Language auto-detect failed:", e);
-    }
-    window.addEventListener(
-        'pageshow',
-        function (ev) {
-            if (!ev.persisted) return;
-            requestAnimationFrame(function () {
-                try {
-                    CyberI18n.resolveLanguageFromEnvironment();
-                    CyberI18n.suppressBrowserTranslatePrompt();
-                    if (typeof CyberUI !== 'undefined' && typeof CyberUI.syncCyberLangDisplayButtons === 'function') {
-                        CyberUI.syncCyberLangDisplayButtons();
-                    }
-                } catch (e2) {
-                    console.warn('Language re-sync after bfcache failed:', e2);
-                }
-            });
-        },
-        false
-    );
-})();
-
