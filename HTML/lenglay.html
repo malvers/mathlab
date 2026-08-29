@@ -281,83 +281,83 @@
         CyberBranding.init({
             useExternalStyles: true,
             title: "Doc Alvers Mathe-Labor",
-            subtitle: "Langley - Geometrie & Trigonometrie"
+            subtitle: "Langley - " + CyberI18n.get('langley.subtitle')
         });
 
         function setupUI() {
-            CyberUI.createCard('ui-container', 'Variante', `
+            CyberUI.createCard('ui-container', CyberI18n.get('langley.card_variant'), `
                 <select id="variant-select" class="cyber-select">
-                    <option value="0">1. Klassisch (BAC=70°, ABD=60°)</option>
-                    <option value="1">2. Variante (BAC=60°, ABD=50°)</option>
-                    <option value="2">3. Variante (BAC=50°, ABD=60°)</option>
+                    <option value="0">${CyberI18n.get('langley.variant_classic')}</option>
+                    <option value="1">${CyberI18n.get('langley.variant_v2')}</option>
+                    <option value="2">${CyberI18n.get('langley.variant_v3')}</option>
                 </select>
             `, '#00d2ff');
 
-            CyberUI.createCard('ui-container', 'Steuerung', `
+            CyberUI.createCard('ui-container', CyberI18n.get('langley.card_control'), `
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                     <label class="cyber-checkbox-wrapper" style="margin-bottom: 0;">
                         <input type="checkbox" id="cb_all" class="cyber-checkbox" checked>
-                        <span class="cyber-label" style="font-weight: 600;">ALLE AN/AUS</span>
+                        <span class="cyber-label" style="font-weight: 600;">${CyberI18n.get('langley.all_on_off')}</span>
                     </label>
                     <span id="step-counter" style="font-family: 'Orbitron'; font-size: 0.9rem; color: var(--neon-blue);">0/18</span>
                 </div>
                 <div class="stats-grid">
                     <div class="stats-card" id="btn_prev" onclick="prevPhase()" style="cursor:pointer; text-align:center;">
-                        <span class="stats-label">ZURÜCK</span>
+                        <span class="stats-label">${CyberI18n.get('langley.prev')}</span>
                         <span class="stats-val" style="font-size:1.4rem;">◀</span>
                     </div>
                     <div class="stats-card" id="btn_next" onclick="nextPhase()" style="cursor:pointer; text-align:center;">
-                        <span class="stats-label">WEITER</span>
+                        <span class="stats-label">${CyberI18n.get('langley.next')}</span>
                         <span class="stats-val" style="font-size:1.4rem;">▶</span>
                     </div>
                 </div>
             `, '#00d2ff');
 
-            CyberUI.createCard('ui-container', 'Phase 1: Rechtes Dreieck', `
+            CyberUI.createCard('ui-container', CyberI18n.get('langley.phase1'), `
                 <div style="display: flex; flex-direction: column; gap: 8px;">
-                    <label class="cyber-checkbox-wrapper"><input type="checkbox" id="cb_AB" class="cyber-checkbox"><span class="cyber-label"><span style="color: rgba(255,255,255,0.4); width: 20px; display: inline-block; font-family: 'Orbitron'; font-size: 0.65rem;">1.</span> Basis AB</span></label>
+                    <label class="cyber-checkbox-wrapper"><input type="checkbox" id="cb_AB" class="cyber-checkbox"><span class="cyber-label"><span style="color: rgba(255,255,255,0.4); width: 20px; display: inline-block; font-family: 'Orbitron'; font-size: 0.65rem;">1.</span> ${CyberI18n.get('langley.base_ab')}</span></label>
                     <label class="cyber-checkbox-wrapper"><input type="checkbox" id="cb_BAC" class="cyber-checkbox"><span class="cyber-label"><span style="color: rgba(255,255,255,0.4); width: 20px; display: inline-block; font-family: 'Orbitron'; font-size: 0.65rem;">2.</span> ∠BAC = <span id="txt_BAC" style="color: #00f2ff;">70°</span></span></label>
-                    <label class="cyber-checkbox-wrapper"><input type="checkbox" id="cb_AC" class="cyber-checkbox"><span class="cyber-label"><span style="color: rgba(255,255,255,0.4); width: 20px; display: inline-block; font-family: 'Orbitron'; font-size: 0.65rem;">3.</span> Diagonale AC</span></label>
+                    <label class="cyber-checkbox-wrapper"><input type="checkbox" id="cb_AC" class="cyber-checkbox"><span class="cyber-label"><span style="color: rgba(255,255,255,0.4); width: 20px; display: inline-block; font-family: 'Orbitron'; font-size: 0.65rem;">3.</span> ${CyberI18n.get('langley.diag_ac')}</span></label>
                     <label class="cyber-checkbox-wrapper"><input type="checkbox" id="cb_ACB" class="cyber-checkbox"><span class="cyber-label"><span style="color: rgba(255,255,255,0.4); width: 20px; display: inline-block; font-family: 'Orbitron'; font-size: 0.65rem;">4.</span> ∠ACB = <span id="txt_ACB" style="color: #a855f7;">30°</span></span></label>
                     <label class="cyber-checkbox-wrapper"><input type="checkbox" id="cb_ABC" class="cyber-checkbox"><span class="cyber-label"><span style="color: rgba(255,255,255,0.4); width: 20px; display: inline-block; font-family: 'Orbitron'; font-size: 0.65rem;">5.</span> ∠ABC = <span id="txt_ABC">80°</span></span></label>
                 </div>
             `, '#00f2ff');
 
-            CyberUI.createCard('ui-container', 'Phase 2: Linkes Dreieck', `
+            CyberUI.createCard('ui-container', CyberI18n.get('langley.phase2'), `
                 <div style="display: flex; flex-direction: column; gap: 8px;">
-                    <label class="cyber-checkbox-wrapper"><input type="checkbox" id="cb_AD" class="cyber-checkbox"><span class="cyber-label"><span style="color: rgba(255,255,255,0.4); width: 20px; display: inline-block; font-family: 'Orbitron'; font-size: 0.65rem;">6.</span> Schenkel AD</span></label>
+                    <label class="cyber-checkbox-wrapper"><input type="checkbox" id="cb_AD" class="cyber-checkbox"><span class="cyber-label"><span style="color: rgba(255,255,255,0.4); width: 20px; display: inline-block; font-family: 'Orbitron'; font-size: 0.65rem;">6.</span> ${CyberI18n.get('langley.leg_ad')}</span></label>
                     <label class="cyber-checkbox-wrapper"><input type="checkbox" id="cb_ABD" class="cyber-checkbox"><span class="cyber-label"><span style="color: rgba(255,255,255,0.4); width: 20px; display: inline-block; font-family: 'Orbitron'; font-size: 0.65rem;">7.</span> ∠ABD = <span id="txt_ABD" style="color: #22c55e;">60°</span></span></label>
-                    <label class="cyber-checkbox-wrapper"><input type="checkbox" id="cb_BD" class="cyber-checkbox"><span class="cyber-label"><span style="color: rgba(255,255,255,0.4); width: 20px; display: inline-block; font-family: 'Orbitron'; font-size: 0.65rem;">8.</span> Diagonale BD</span></label>
+                    <label class="cyber-checkbox-wrapper"><input type="checkbox" id="cb_BD" class="cyber-checkbox"><span class="cyber-label"><span style="color: rgba(255,255,255,0.4); width: 20px; display: inline-block; font-family: 'Orbitron'; font-size: 0.65rem;">8.</span> ${CyberI18n.get('langley.diag_bd')}</span></label>
                 </div>
             `, '#22c55e');
 
-            CyberUI.createCard('ui-container', 'Phase 3: Innere Winkel', `
+            CyberUI.createCard('ui-container', CyberI18n.get('langley.phase3'), `
                 <div style="display: flex; flex-direction: column; gap: 8px;">
                     <label class="cyber-checkbox-wrapper"><input type="checkbox" id="cb_DBC" class="cyber-checkbox"><span class="cyber-label"><span style="color: rgba(255,255,255,0.4); width: 20px; display: inline-block; font-family: 'Orbitron'; font-size: 0.65rem;">9.</span> ∠DBC = <span id="txt_DBC">20°</span></span></label>
                     <label class="cyber-checkbox-wrapper"><input type="checkbox" id="cb_ADB" class="cyber-checkbox"><span class="cyber-label"><span style="color: rgba(255,255,255,0.4); width: 20px; display: inline-block; font-family: 'Orbitron'; font-size: 0.65rem;">10.</span> ∠ADB = <span id="txt_ADB">40°</span></span></label>
                 </div>
             `, '#ffffff');
 
-            CyberUI.createCard('ui-container', 'Phase 4: Das Rätsel', `
+            CyberUI.createCard('ui-container', CyberI18n.get('langley.phase4'), `
                 <div style="display: flex; flex-direction: column; gap: 8px;">
-                    <label class="cyber-checkbox-wrapper"><input type="checkbox" id="cb_CD" class="cyber-checkbox"><span class="cyber-label"><span style="color: rgba(255,255,255,0.4); width: 20px; display: inline-block; font-family: 'Orbitron'; font-size: 0.65rem;">11.</span> Linie CD</span></label>
+                    <label class="cyber-checkbox-wrapper"><input type="checkbox" id="cb_CD" class="cyber-checkbox"><span class="cyber-label"><span style="color: rgba(255,255,255,0.4); width: 20px; display: inline-block; font-family: 'Orbitron'; font-size: 0.65rem;">11.</span> ${CyberI18n.get('langley.line_cd')}</span></label>
                     <label class="cyber-checkbox-wrapper"><input type="checkbox" id="cb_DCA" class="cyber-checkbox"><span class="cyber-label"><span style="color: rgba(255,255,255,0.4); width: 20px; display: inline-block; font-family: 'Orbitron'; font-size: 0.65rem;">12.</span> ∠DCA = <span style="color: #ef4444;">?</span></span></label>
                 </div>
             `, '#ef4444');
 
-            CyberUI.createCard('ui-container', 'Phase 5: Lösung', `
+            CyberUI.createCard('ui-container', CyberI18n.get('langley.phase5'), `
                 <div id="phase5-geo" style="display: flex; flex-direction: column; gap: 8px;">
-                    <label class="cyber-checkbox-wrapper"><input type="checkbox" id="cb_DE" class="cyber-checkbox"><span class="cyber-label"><span style="color: rgba(255,255,255,0.4); width: 20px; display: inline-block; font-family: 'Orbitron'; font-size: 0.65rem;">13.</span> Verlängerung zu E</span></label>
+                    <label class="cyber-checkbox-wrapper"><input type="checkbox" id="cb_DE" class="cyber-checkbox"><span class="cyber-label"><span style="color: rgba(255,255,255,0.4); width: 20px; display: inline-block; font-family: 'Orbitron'; font-size: 0.65rem;">13.</span> ${CyberI18n.get('langley.ext_e')}</span></label>
                     <label class="cyber-checkbox-wrapper"><input type="checkbox" id="cb_AEB" class="cyber-checkbox"><span class="cyber-label"><span style="color: rgba(255,255,255,0.4); width: 20px; display: inline-block; font-family: 'Orbitron'; font-size: 0.65rem;">14.</span> ∠AEB = 20°</span></label>
-                    <label class="cyber-checkbox-wrapper"><input type="checkbox" id="cb_EP" class="cyber-checkbox"><span class="cyber-label"><span style="color: rgba(255,255,255,0.4); width: 20px; display: inline-block; font-family: 'Orbitron'; font-size: 0.65rem;">15.</span> Symmetrieachse EP</span></label>
-                    <label class="cyber-checkbox-wrapper"><input type="checkbox" id="cb_P" class="cyber-checkbox"><span class="cyber-label"><span style="color: rgba(255,255,255,0.4); width: 20px; display: inline-block; font-family: 'Orbitron'; font-size: 0.65rem;">16.</span> Punkt P</span></label>
+                    <label class="cyber-checkbox-wrapper"><input type="checkbox" id="cb_EP" class="cyber-checkbox"><span class="cyber-label"><span style="color: rgba(255,255,255,0.4); width: 20px; display: inline-block; font-family: 'Orbitron'; font-size: 0.65rem;">15.</span> ${CyberI18n.get('langley.axis_ep')}</span></label>
+                    <label class="cyber-checkbox-wrapper"><input type="checkbox" id="cb_P" class="cyber-checkbox"><span class="cyber-label"><span style="color: rgba(255,255,255,0.4); width: 20px; display: inline-block; font-family: 'Orbitron'; font-size: 0.65rem;">16.</span> ${CyberI18n.get('langley.point_p')}</span></label>
                     <label class="cyber-checkbox-wrapper"><input type="checkbox" id="cb_AEP" class="cyber-checkbox"><span class="cyber-label"><span style="color: rgba(255,255,255,0.4); width: 20px; display: inline-block; font-family: 'Orbitron'; font-size: 0.65rem;">17.</span> ∠AEP = 10°</span></label>
                     <label class="cyber-checkbox-wrapper"><input type="checkbox" id="cb_BEP" class="cyber-checkbox"><span class="cyber-label"><span style="color: rgba(255,255,255,0.4); width: 20px; display: inline-block; font-family: 'Orbitron'; font-size: 0.65rem;">18.</span> ∠BEP = 10°</span></label>
                 </div>
                 <div id="phase5-tri" style="display: none; flex-direction: column; gap: 8px;">
-                    <label class="cyber-checkbox-wrapper"><input type="checkbox" id="cb_tri_ABD" class="cyber-checkbox"><span class="cyber-label"><span style="color: rgba(255,255,255,0.4); width: 20px; display: inline-block; font-family: 'Orbitron'; font-size: 0.65rem;">13.</span> ΔABD (Sinussatz)</span></label>
-                    <label class="cyber-checkbox-wrapper"><input type="checkbox" id="cb_tri_ABC" class="cyber-checkbox"><span class="cyber-label"><span style="color: rgba(255,255,255,0.4); width: 20px; display: inline-block; font-family: 'Orbitron'; font-size: 0.65rem;">14.</span> ΔABC (Sinussatz)</span></label>
-                    <label class="cyber-checkbox-wrapper"><input type="checkbox" id="cb_tri_BCD" class="cyber-checkbox"><span class="cyber-label"><span style="color: rgba(255,255,255,0.4); width: 20px; display: inline-block; font-family: 'Orbitron'; font-size: 0.65rem;">15.</span> ΔBCD & Lösung</span></label>
+                    <label class="cyber-checkbox-wrapper"><input type="checkbox" id="cb_tri_ABD" class="cyber-checkbox"><span class="cyber-label"><span style="color: rgba(255,255,255,0.4); width: 20px; display: inline-block; font-family: 'Orbitron'; font-size: 0.65rem;">13.</span> ${CyberI18n.get('langley.tri_abd')}</span></label>
+                    <label class="cyber-checkbox-wrapper"><input type="checkbox" id="cb_tri_ABC" class="cyber-checkbox"><span class="cyber-label"><span style="color: rgba(255,255,255,0.4); width: 20px; display: inline-block; font-family: 'Orbitron'; font-size: 0.65rem;">14.</span> ${CyberI18n.get('langley.tri_abc')}</span></label>
+                    <label class="cyber-checkbox-wrapper"><input type="checkbox" id="cb_tri_BCD" class="cyber-checkbox"><span class="cyber-label"><span style="color: rgba(255,255,255,0.4); width: 20px; display: inline-block; font-family: 'Orbitron'; font-size: 0.65rem;">15.</span> ${CyberI18n.get('langley.tri_bcd')}</span></label>
                 </div>
             `, '#eab308');
             

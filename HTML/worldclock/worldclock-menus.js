@@ -39,13 +39,13 @@
             if (to.length >= 2) {
                 if (debugDayOffset === 0) {           // already on today → show the date, active (cyan)
                     const d = getDisplayTime();
-                    to[0].textContent = 'HEUTE';
+                    to[0].textContent = CyberI18n.get('worldclock.today');
                     to[1].textContent = String(d.getDate()).padStart(2, '0') + '.' +
                                         String(d.getMonth() + 1).padStart(2, '0') + '.' + d.getFullYear();
                     bToday.classList.remove('action');
                 } else {                              // stepped away → offer the reset (orange action)
-                    to[0].textContent = 'ZURÜCK AUF';
-                    to[1].textContent = 'JETZT';
+                    to[0].textContent = CyberI18n.get('worldclock.back_to');
+                    to[1].textContent = CyberI18n.get('worldclock.now');
                     bToday.classList.add('action');
                 }
             }
@@ -83,6 +83,8 @@
     // actions — mirror the keyboard handlers exactly
     if (bSky)   bSky.addEventListener('click',   () => { skyTarget = skyTarget ? 0 : 1; refreshLabels(); });
     if (bLang)  bLang.addEventListener('click',  () => { starLangDE = !starLangDE;       refreshLabels(); });
+    // German constellation names exist only for DE — other languages show Latin, so hide the toggle
+    if (bLang && typeof CyberI18n !== 'undefined' && CyberI18n.current !== 'de') bLang.style.display = 'none';
     if (bGlobe) bGlobe.addEventListener('click', () => { window.toggleGlobe();            refreshLabels(); });
     if (bDir)   bDir.addEventListener('click',   () => { setDirection(!CW);               refreshLabels(); });
     if (bToday) bToday.addEventListener('click', () => { debugDayOffset = 0; lapseActive = false; refreshLabels(); });   // back to NOW + stop the time-lapse

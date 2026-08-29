@@ -27,6 +27,8 @@
     <script src="https://unpkg.com/satellite.js@5.0.0/dist/satellite.min.js"></script>
     <link rel="stylesheet" href="../js/cyber-clock.css">
     <link rel="stylesheet" href="worldclock.css">
+    <!-- i18n core in <head>: markup below uses document.write(CyberI18n.get(...)) -->
+    <script src="../js/i18n.js"></script>
     <script>
         (function () {
             try {
@@ -72,7 +74,7 @@
                                 const host = document.getElementById('opening-hours');
                                 if (!host) return;
                                 const todayKey = ['SO','MO','DI','MI','DO','FR','SA'][new Date().getDay()];
-                                const parts = ['<div class="oh-title">Öffnungszeiten</div>'];
+                                const parts = ['<div class="oh-title">' + CyberI18n.get('worldclock.opening_hours') + '</div>'];
                                 const todayRanges = [];
                                 lines.forEach(line => {
                                     const m = line.match(/^(\S+)\s+(.+)$/);
@@ -139,11 +141,11 @@
                 </div>
             </div>
         </div>
-        <a id="city-info-source" target="_blank" rel="noopener" style="display: none; padding: 0.3vmin 1.2vmin; font-size: clamp(0.6rem, 0.85vmin, 0.8rem); color: rgba(0, 210, 255, 0.7); text-decoration: none; font-family: 'Outfit', sans-serif; border-bottom: 1px solid rgba(0, 210, 255, 0.15);">Quelle: Wikipedia →</a>
+        <a id="city-info-source" target="_blank" rel="noopener" style="display: none; padding: 0.3vmin 1.2vmin; font-size: clamp(0.6rem, 0.85vmin, 0.8rem); color: rgba(0, 210, 255, 0.7); text-decoration: none; font-family: 'Outfit', sans-serif; border-bottom: 1px solid rgba(0, 210, 255, 0.15);"><script>document.write(CyberI18n.get('worldclock.source_wiki'))</script></a>
         <div style="padding: 1vmin 1.2vmin;">
             <div id="city-info-title" style="font-family: 'Orbitron', sans-serif; font-weight: 700; color: #00d2ff; font-size: clamp(0.8rem, 1.3vmin, 1.1rem); margin-bottom: 0.4vmin; letter-spacing: 1px;"></div>
             <div id="city-info-pop" style="font-family: 'Orbitron', sans-serif; font-weight: 400; color: #ffaa00; font-size: clamp(0.65rem, 1vmin, 0.85rem); margin-bottom: 0.6vmin; letter-spacing: 1px; display: none;"></div>
-            <div id="city-info-loading" style="font-size: clamp(0.7rem, 1vmin, 0.9rem); color: rgba(0, 210, 255, 0.6); font-style: italic; display: none;">Lade Info…</div>
+            <div id="city-info-loading" style="font-size: clamp(0.7rem, 1vmin, 0.9rem); color: rgba(0, 210, 255, 0.6); font-style: italic; display: none;"><script>document.write(CyberI18n.get('worldclock.loading_info'))</script></div>
             <div id="city-info-extract" style="font-family: 'Raleway', sans-serif; font-size: clamp(0.72rem, 1.05vmin, 0.95rem); line-height: 1.45; color: rgba(230, 237, 243, 0.85); max-height: 45vh; overflow-y: auto;"></div>
         </div>
     </div>
@@ -192,26 +194,26 @@
     </main>
 
     <!-- Left-edge hamburger → right-facing half-circle touch menu (sky & date controls) -->
-    <button id="wc-menu-btn" type="button" aria-label="Menü"><span></span><span></span><span></span></button>
+    <button id="wc-menu-btn" type="button" aria-label="Menü" data-i18n-aria="worldclock.menu_aria"><span></span><span></span><span></span></button>
     <div id="mini-stack" class="mini-stack">
-        <button class="mini-btn two-line" id="wc-mb-lang"><span class="opt">DEUTSCH</span><span class="opt">LATEIN</span></button>
-        <button class="mini-btn two-line" id="wc-mb-sky"><span class="opt">PLANETARIUM</span><span class="opt">UHR</span></button>
-        <button class="mini-btn two-line" id="wc-mb-today"><span class="opt">HEUTE</span><span class="opt"></span></button>
-        <button class="mini-btn toggle" id="wc-mb-moon">MOND</button>
-        <button class="mini-btn toggle" id="wc-mb-nebula">NEBEL</button>
-        <button class="mini-btn two-line" id="wc-mb-globe"><span class="opt">GLOBUS</span><span class="opt">UHR</span></button>
-        <button class="mini-btn two-line" id="wc-mb-dir"><span class="opt">SÜD-VIEW</span><span class="opt">NORD-VIEW</span></button>
+        <button class="mini-btn two-line" id="wc-mb-lang"><span class="opt"><script>document.write(CyberI18n.get('worldclock.lang_de'))</script></span><span class="opt"><script>document.write(CyberI18n.get('worldclock.lang_latin'))</script></span></button>
+        <button class="mini-btn two-line" id="wc-mb-sky"><span class="opt"><script>document.write(CyberI18n.get('worldclock.planetarium'))</script></span><span class="opt"><script>document.write(CyberI18n.get('worldclock.clock'))</script></span></button>
+        <button class="mini-btn two-line" id="wc-mb-today"><span class="opt"><script>document.write(CyberI18n.get('worldclock.today'))</script></span><span class="opt"></span></button>
+        <button class="mini-btn toggle" id="wc-mb-moon"><script>document.write(CyberI18n.get('worldclock.moon'))</script></button>
+        <button class="mini-btn toggle" id="wc-mb-nebula"><script>document.write(CyberI18n.get('worldclock.nebula'))</script></button>
+        <button class="mini-btn two-line" id="wc-mb-globe"><span class="opt"><script>document.write(CyberI18n.get('worldclock.globe'))</script></span><span class="opt"><script>document.write(CyberI18n.get('worldclock.clock'))</script></span></button>
+        <button class="mini-btn two-line" id="wc-mb-dir"><span class="opt"><script>document.write(CyberI18n.get('worldclock.south_view'))</script></span><span class="opt"><script>document.write(CyberI18n.get('worldclock.north_view'))</script></span></button>
     </div>
 
     <!-- Right-edge hamburger → left-facing half-circle: on/off toggles for the sky overlays -->
-    <button id="wc-menu-btn-r" type="button" aria-label="Ebenen"><span></span><span></span><span></span></button>
+    <button id="wc-menu-btn-r" type="button" aria-label="Ebenen" data-i18n-aria="worldclock.layers_aria"><span></span><span></span><span></span></button>
     <div id="mini-stack-r" class="mini-stack">
-        <button class="mini-btn toggle" id="wc-tg-conlines">STERNBILDER</button>
-        <button class="mini-btn toggle" id="wc-tg-art">CELESTIALS</button>
-        <button class="mini-btn toggle" id="wc-tg-ecliptic">EKLIPTIK</button>
-        <button class="mini-btn toggle" id="wc-tg-planets">PLANETEN</button>
-        <button class="mini-btn toggle" id="wc-tg-zodiac">TIERKREIS</button>
-        <button class="mini-btn toggle" id="wc-tg-sats">SATELLITEN</button>
+        <button class="mini-btn toggle" id="wc-tg-conlines"><script>document.write(CyberI18n.get('worldclock.conlines'))</script></button>
+        <button class="mini-btn toggle" id="wc-tg-art"><script>document.write(CyberI18n.get('worldclock.art'))</script></button>
+        <button class="mini-btn toggle" id="wc-tg-ecliptic"><script>document.write(CyberI18n.get('worldclock.ecliptic'))</script></button>
+        <button class="mini-btn toggle" id="wc-tg-planets"><script>document.write(CyberI18n.get('worldclock.planets'))</script></button>
+        <button class="mini-btn toggle" id="wc-tg-zodiac"><script>document.write(CyberI18n.get('worldclock.zodiac'))</script></button>
+        <button class="mini-btn toggle" id="wc-tg-sats"><script>document.write(CyberI18n.get('worldclock.sats'))</script></button>
     </div>
 
     <!-- Planetarium: click/tap a star → small identification tooltip -->
@@ -219,7 +221,7 @@
 
     <!-- Planetarium: constellation search (top-right). Filters DE+Latin names; on pick → rotate sky so it culminates + select plate. -->
     <div id="sky-search">
-        <input id="sky-search-input" type="text" placeholder="Sternbild suchen…" aria-label="Sternbild suchen" autocomplete="off" spellcheck="false">
+        <input id="sky-search-input" type="text" placeholder="Sternbild suchen…" aria-label="Sternbild suchen" data-i18n-placeholder="worldclock.search_placeholder" data-i18n-aria="worldclock.search_aria" autocomplete="off" spellcheck="false">
         <ul id="sky-search-list"></ul>
     </div>
 
@@ -239,12 +241,11 @@
     </button>
 
     <!-- Planetarium: live tally of currently-visible stars · constellations + Milky Way points (bottom-left) -->
-    <div id="sky-count"><span class="sc-n" id="sc-stars">0</span> Sterne · <span class="sc-n" id="sc-cons">0</span>/88 Sternbilder · Milchstraße <span class="sc-n" id="sc-mw">0</span>/100–400 Mrd.</div>
+    <div id="sky-count"><span class="sc-n" id="sc-stars">0</span> <script>document.write(CyberI18n.get('worldclock.stars'))</script> · <span class="sc-n" id="sc-cons">0</span>/88 <script>document.write(CyberI18n.get('worldclock.constellations'))</script> · <script>document.write(CyberI18n.get('worldclock.milkyway'))</script> <span class="sc-n" id="sc-mw">0</span>/100–400 <script>document.write(CyberI18n.get('worldclock.billion'))</script></div>
 
     <script src="../js/cyber-left-chrome.js"></script>
     <script src="../js/branding/briefings.js"></script>
     <script src="../js/branding/overlays.js"></script>
-    <script src="../js/i18n.js"></script>
     <script src="../js/branding/nav.js"></script>
     <script src="../js/branding.js"></script>
     <script src="../js/ui.js"></script>
@@ -263,6 +264,11 @@
     <script src="worldclock-menus.js"></script>
     <script src="worldclock-ui.js"></script>
     <script src="../js/cyber-recorder-key.js"></script>
+    <script>
+    // Localised attributes (placeholder / aria-label cannot be written by document.write)
+    document.querySelectorAll('[data-i18n-aria]').forEach(el => el.setAttribute('aria-label', CyberI18n.get(el.dataset.i18nAria)));
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(el => el.placeholder = CyberI18n.get(el.dataset.i18nPlaceholder));
+    </script>
     <script>
     // Local-vs-live indicator (top right): red badge + ring ONLY when served locally. No red = you are on the LIVE site.
     (function () {

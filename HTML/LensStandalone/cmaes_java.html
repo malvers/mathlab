@@ -11,6 +11,7 @@
         href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="style.css?v=43">
+    <script src="../js/i18n.js"></script>
 </head>
 
 <body>
@@ -30,7 +31,7 @@
             <!-- Branding Header (top-right) -->
             <div class="canvas-branding">
                 <h1>DOC ALVERS MATHE-LABOR</h1>
-                <div class="canvas-subtitle">Optimierung einer Linse · CMA-ES</div>
+                <div class="canvas-subtitle"><script>document.write(CyberI18n.get('lens.subtitle'))</script></div>
             </div>
 
             <!-- Bottom HUD: Telemetrie + Steuerung, gemeinsam skaliert -->
@@ -147,6 +148,13 @@
     <script src="../js/ui.js?v=4"></script>
     <script>
         CyberUI.init();
+        // Localised attribute texts (static markup cannot call CyberI18n)
+        (function () {
+            const dock = document.getElementById('btn-dock-toggle');
+            if (dock) { dock.title = CyberI18n.get('lens.hide_panel'); dock.setAttribute('aria-label', CyberI18n.get('lens.hide_panel')); }
+            const rv = document.getElementById('btn-reset-view');
+            if (rv) rv.setAttribute('aria-label', CyberI18n.get('lens.reset_view'));
+        })();
     </script>
     <script src="cmaes_java.js?v=32"></script>
 </body>

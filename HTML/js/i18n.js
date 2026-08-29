@@ -90,10 +90,11 @@ const CyberI18n = {
             }
         }
 
-        // Replace placeholders
+        // Replace placeholders — every occurrence, not just the first
+        // (step texts such as Langley's use the same angle twice in one sentence).
         if (typeof result === 'string') {
             Object.keys(replacements).forEach(placeholder => {
-                result = result.replace(`{${placeholder}}`, replacements[placeholder]);
+                result = result.split(`{${placeholder}}`).join(replacements[placeholder]);
             });
         }
 

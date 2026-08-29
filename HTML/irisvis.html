@@ -329,7 +329,7 @@
         CyberBranding.init({
             useExternalStyles: true,
             title: "Conway's Iris",
-            subtitle: 'Der Kreis mit den sechs Punkten',
+            subtitle: CyberI18n.get('irisvis.subtitle'),
         });
         CyberUI.init();
 
@@ -478,7 +478,8 @@
         const ctx = canvas.getContext('2d');
         const container = document.getElementById('canvas-container');
         const $ = (id) => document.getElementById(id);
-        const de = (x, n) => (Number.isFinite(x) ? Number(x).toFixed(n).replace('.', ',') : '—');
+        const DEC = ['en', 'sw'].includes(CyberI18n.current) ? '.' : ',';   // decimal separator per UI language
+        const de = (x, n) => (Number.isFinite(x) ? Number(x).toFixed(n).replace('.', DEC) : '—');
 
         /* ---------- vector helpers ---------- */
         const sub = (p, q) => ({ x: p.x - q.x, y: p.y - q.y });
@@ -1104,19 +1105,10 @@
             title.addEventListener('click', () => setFolded(!$('math-coach-box').classList.contains('folded')));
 
             $('coach-content').innerHTML =
-                '<div class="iris-text">' +
-                'Verlängere an jeder Ecke <b>beide</b> Seiten über die Ecke hinaus um die Länge der ' +
-                '<b>gegenüberliegenden</b> Seite. Die sechs Endpunkte liegen auf <b>einem</b> Kreis — ' +
-                'sein Mittelpunkt ist der Inkreismittelpunkt <b>I</b>.<br>' +
-                '<span style="color:rgb(176,36,24)">Rot</span>, ' +
-                '<span style="color:rgb(121,158,49)">Grün</span> und ' +
-                '<span style="color:rgb(245,194,66)">Orange</span> zeigen, welche Länge kopiert wird: ' +
-                'an <b>A</b> ist die Verlängerung so lang wie <span style="color:rgb(176,36,24)">a = BC</span>, ' +
-                'an <b>B</b> wie <span style="color:rgb(121,158,49)">b = CA</span>, ' +
-                'an <b>C</b> wie <span style="color:rgb(245,194,66)">c = AB</span>.' +
+                '<div class="iris-text">' + CyberI18n.get('irisvis.theorem') +
                 '<div class="iris-formula" id="fx"></div>' +
                 '<span id="fx-vals"></span><br>' +
-                'Abstand der sechs Punkte vom Kreis: <span id="fx-err"></span>' +
+                CyberI18n.get('irisvis.dist_label') + '<span id="fx-err"></span>' +
                 '<div id="fx-width" style="margin-top:6px"></div>' +
                 '<div class="iris-hint" id="fx-start"></div>' +
                 '</div>';
@@ -1170,8 +1162,8 @@
         /* the rows are built once; afterwards only the numbers are written */
         const STATS = [
             ['a = |BC|', COL.a], ['b = |CA|', COL.b], ['c = |AB|', COL.c],
-            ['s · halber Umfang', null], ['r · Inkreis', null],
-            ['R · Conway-Kreis', COL.circle], ['Breite der Kurve', null], ['d · Verlängerung', null]
+            [CyberI18n.get('irisvis.st_s'), null], [CyberI18n.get('irisvis.st_r'), null],
+            [CyberI18n.get('irisvis.st_R'), COL.circle], [CyberI18n.get('irisvis.st_width'), null], [CyberI18n.get('irisvis.st_d'), null]
         ];
         let statCells = null;
 
@@ -1201,13 +1193,11 @@
                 'R=\\sqrt{r^{2}+(s+d)^{2}}=\\sqrt{' + num(g.r, 1) + '^{2}+' + num(g.s + g.d, 1) +
                 '^{2}}=' + num(g.R, 1), lastTex);
 
-            $('fx-vals').innerHTML =
-                'mit s = <b>' + de(g.s, 1) + '</b> (halber Umfang), r = <b>' + de(g.r, 1) +
-                '</b> (Inkreisradius), d = <b>' + de(g.d, 1) + '</b> (zusätzliche Verlängerung).';
+            $('fx-vals').innerHTML = CyberI18n.get('irisvis.vals', { s: de(g.s, 1), r: de(g.r, 1), d: de(g.d, 1) });
 
             const exact = g.err < 1e-6;
             const err = $('fx-err');
-            err.textContent = g.err.toExponential(1).replace('.', ',') + (exact ? ' — also exakt.' : '');
+            err.textContent = g.err.toExponential(1).replace('.', DEC) + (exact ? CyberI18n.get('irisvis.exact') : '');
             err.className = exact ? 'ok' : '';
 
             const nothing = !(state.showTriangle || state.extA || state.extB || state.extC ||
@@ -1216,8 +1206,7 @@
             const start = $('fx-start');
             if (start) {
                 start.innerHTML = nothing
-                    ? '<b style="color:rgb(245,194,66)">Die Bühne ist leer.</b> Mit <b>T</b> das Dreieck ' +
-                      'einschalten, dann <b>E</b>, <b>W</b>, <b>C</b> … — <b>H</b> zeigt alle Tasten.'
+                    ? CyberI18n.get('irisvis.empty_stage')
                     : '';
                 start.style.display = nothing ? '' : 'none';
             }
@@ -1229,11 +1218,11 @@
                 const opt = boxOptimal(pts, th);
                 const off = boxC ? Math.hypot(boxC.x - opt.c.x, boxC.y - opt.c.y) : 0;
                 info.innerHTML =
-                    'Seite w = <b style="color:' + COL.square + '">' + de(boxSide(g), 1) + '</b><br>' +
-                    'Breite quer/längs: ' + de(opt.wu, 1) + ' / ' + de(opt.wv, 1) + '<br>' +
-                    (evals ? 'Auswertungen: <b>' + evals + '</b> &middot; Qualität: <b>' +
-                        (Number.isFinite(lastQ) ? lastQ.toFixed(2).replace('.', ',') : '—') + '</b><br>' +
-                        'Abstand zum exakten Optimum: <b>' + de(off, 2) + '</b>' : '');
+                    CyberI18n.get('irisvis.cma_side') + '<b style="color:' + COL.square + '">' + de(boxSide(g), 1) + '</b><br>' +
+                    CyberI18n.get('irisvis.cma_width') + de(opt.wu, 1) + ' / ' + de(opt.wv, 1) + '<br>' +
+                    (evals ? CyberI18n.get('irisvis.cma_evals') + '<b>' + evals + '</b> &middot; ' + CyberI18n.get('irisvis.cma_quality') + '<b>' +
+                        (Number.isFinite(lastQ) ? lastQ.toFixed(2).replace('.', DEC) : '—') + '</b><br>' +
+                        CyberI18n.get('irisvis.cma_dist') + '<b>' + de(off, 2) + '</b>' : '');
             } else if (info) {
                 info.innerHTML = '';
             }
@@ -1241,7 +1230,7 @@
             const wBox = $('fx-width');
             if (state.wiper) {
                 wBox.style.display = '';
-                lastTexW = tex(wBox, '\\text{konstante Breite } b=2(s+d)=' +
+                lastTexW = tex(wBox, '\\text{' + CyberI18n.get('irisvis.const_width') + ' } b=2(s+d)=' +
                     num(widthRange(g).min, 1), lastTexW);
             } else {
                 wBox.style.display = 'none';
@@ -1490,7 +1479,7 @@
             win.innerHTML =
                 '<div class="grad-grip"></div>' +
                 '<div id="grad"></div>' +
-                '<button type="button" id="grad-close" title="⌘C">schließen</button>';
+                '<button type="button" id="grad-close" title="⌘C">' + CyberI18n.get('irisvis.close') + '</button>';
             document.body.appendChild(win);
 
             /* remembered position, else top left of the stage */
@@ -1564,34 +1553,22 @@
             if (el) { el.remove(); return; }
             el = document.createElement('div');
             el.id = 'help-overlay';
+            const T = (k) => CyberI18n.get('irisvis.' + k);
+            const row = (a, b) => '<tr><td>' + a + '</td><td>' + b + '</td></tr>';
             el.innerHTML =
-                '<div class="help-card"><h2>Warum ein Kreis?</h2>' +
-                '<p>Jede der drei Geraden schneidet aus dem Kreis eine Sehne der Länge <b>2·(s+d)</b> ' +
-                'heraus und hat vom Mittelpunkt den Abstand <b>r</b>. Gleich lange Sehnen sind gleich ' +
-                'weit vom Mittelpunkt entfernt — deshalb liegen alle sechs Punkte auf <i>einem</i> Kreis, ' +
-                'mit R² = r² + (s+d)². Taste <b>G</b> zeigt die drei Lote, <b>L</b> die Sehnen mit ihren ' +
-                'Mittelsenkrechten.</p>' +
-                '<h2 style="margin-top:18px">Tastatur &amp; Maus</h2>' +
+                '<div class="help-card"><h2>' + T('help_why_title') + '</h2>' +
+                '<p>' + T('help_why_text') + '</p>' +
+                '<h2 style="margin-top:18px">' + T('help_keys_title') + '</h2>' +
                 '<table>' +
-                '<tr><td>Ecke ziehen</td><td>Dreieck ändern</td></tr>' +
-                '<tr><td>Wischerspitze ziehen</td><td>Arm um die Ecke schwenken (bleibt auf dem Bogen)</td></tr>' +
-                '<tr><td>Ziehen / Mausrad</td><td>verschieben / zoomen &middot; ⇧+Ziehen zoomt auch</td></tr>' +
-                '<tr><td>T &middot; E</td><td>Dreieck &middot; alle drei Verlängerungspaare (einzeln in der Seitenleiste)</td></tr>' +
-                '<tr><td>C &middot; I &middot; A</td><td>Conway-Kreis &middot; Inkreis &middot; Beschriftung</td></tr>' +
-                '<tr><td>W &middot; ⇧W</td><td>Wischerkurve &middot; Fläche füllen</td></tr>' +
-                '<tr><td>L &middot; G</td><td>Sehnen + Mittelsenkrechte &middot; Lot vom Mittelpunkt (Abstand r)</td></tr>' +
-                '<tr><td>B &middot; ⇧B</td><td>Rotationsbahn &middot; Quadrat</td></tr>' +
-                '<tr><td>X &middot; ⇧X &middot; Y</td><td>Rotationsbahn (sichtbar suchen) &middot; sofort exakt &middot; Heatmap</td></tr>' +
-                '<tr><td>R &middot; ⇧R &middot; Leertaste</td><td>Quadrat 1° drehen &middot; zurück &middot; 2° drehen + CMA-ES</td></tr>' +
-                '<tr><td>+ / −</td><td>Verlängerung d größer / kleiner</td></tr>' +
-                '<tr><td>D &middot; S &middot; ⌘B</td><td>Kurve aufbauen &middot; Screenshot &middot; helle Bühne</td></tr>' +
-                '<tr><td>⌘C</td><td>Farbverlauf-Fenster: Trenner ziehen, Doppelklick setzt einen, ' +
-                'links und rechts getrennt färbbar (harte Kante), rechte Maustaste oder ⌫ löscht, S blendet die Trenner aus</td></tr>' +
-                '<tr><td>0 &middot; 2 &middot; Pfeile</td><td>zurücksetzen &middot; hineinzoomen &middot; verschieben</td></tr>' +
+                row(T('k_corner'), T('k_corner_d')) + row(T('k_tip'), T('k_tip_d')) + row(T('k_drag'), T('k_drag_d')) +
+                row('T &middot; E', T('k_te_d')) + row('C &middot; I &middot; A', T('k_cia_d')) + row('W &middot; ⇧W', T('k_w_d')) +
+                row('L &middot; G', T('k_lg_d')) + row('B &middot; ⇧B', T('k_b_d')) + row('X &middot; ⇧X &middot; Y', T('k_x_d')) +
+                row('R &middot; ⇧R &middot; ' + T('k_space'), T('k_r_d')) + row('+ / −', T('k_pm_d')) +
+                row('D &middot; S &middot; ⌘B', T('k_ds_d')) + row('⌘C', T('k_cmdc_d')) +
+                row('0 &middot; 2 &middot; ' + T('k_arrows'), T('k_0_d')) +
                 '</table>' +
-                '<p>Aus dem Original übernommen. Abweichend: <b>G</b> statt B für das Lot (B ist wie bei ' +
-                'dir die Rotationsbahn) und <b>D</b> baut die Kurve auf (statt Debug-Fenster).</p>' +
-                '<div class="help-close">H oder Klick schließt</div></div>';
+                '<p>' + T('help_note') + '</p>' +
+                '<div class="help-close">' + T('help_close') + '</div></div>';
             el.addEventListener('click', () => el.remove());
             document.body.appendChild(el);
         }
@@ -1698,35 +1675,35 @@
 
         /* ---------- sidebar ---------- */
         function setupUI() {
-            CyberUI.createCard('ui-container', 'Dreieck', `
+            CyberUI.createCard('ui-container', CyberI18n.get('irisvis.card_triangle'), `
                 <div class="stack">
                     <div class="row">
-                        <button class="cyber-btn" id="btn-rnd">Zufällig</button>
-                        <button class="cyber-btn" id="btn-eq">Gleichseitig</button>
+                        <button class="cyber-btn" id="btn-rnd">${CyberI18n.get('irisvis.btn_random')}</button>
+                        <button class="cyber-btn" id="btn-eq">${CyberI18n.get('irisvis.btn_eq')}</button>
                     </div>
                     <div class="row">
-                        <button class="cyber-btn" id="btn-fit">Einpassen</button>
-                        <button class="cyber-btn" id="btn-help">Hilfe</button>
+                        <button class="cyber-btn" id="btn-fit">${CyberI18n.get('irisvis.btn_fit')}</button>
+                        <button class="cyber-btn" id="btn-help">${CyberI18n.get('irisvis.btn_help')}</button>
                     </div>
-                    <button class="cyber-btn" id="btn-reset" style="border-color:#ffcc00; color:#ffcc00">Zurücksetzen</button>
+                    <button class="cyber-btn" id="btn-reset" style="border-color:#ffcc00; color:#ffcc00">${CyberI18n.get('irisvis.btn_reset')}</button>
                 </div>
             `, '#00d2ff');
 
-            CyberUI.createCard('ui-container', 'Konstruktion', `
+            CyberUI.createCard('ui-container', CyberI18n.get('irisvis.card_construction'), `
                 <div class="stack">
                     <div id="sl-d"></div>
                     <div id="chk-box" style="display:flex; flex-direction:column; gap:2px"></div>
                 </div>
             `, 'rgb(121,158,49)');
 
-            CyberUI.createCard('ui-container', 'Wischerkurve', `
+            CyberUI.createCard('ui-container', CyberI18n.get('irisvis.card_wiper'), `
                 <div class="stack">
                     <div id="chk-wiper" style="display:flex; flex-direction:column; gap:2px"></div>
-                    <button class="cyber-btn" id="btn-build">Aufbauen</button>
+                    <button class="cyber-btn" id="btn-build">${CyberI18n.get('irisvis.btn_build')}</button>
                 </div>
             `, 'rgb(155,130,225)');
 
-            CyberUI.createCard('ui-container', 'Quadrat &amp; CMA-ES', `
+            CyberUI.createCard('ui-container', CyberI18n.get('irisvis.card_square'), `
                 <div class="stack">
                     <div id="chk-box2" style="display:flex; flex-direction:column; gap:2px"></div>
                     <div id="sl-angle"></div>
@@ -1738,50 +1715,43 @@
 
             buildGradientWindow();
 
-            CyberUI.createCard('ui-container', 'Messwerte', '<table id="mw"></table>', '#00d2ff');
+            CyberUI.createCard('ui-container', CyberI18n.get('irisvis.card_stats'), '<table id="mw"></table>', '#00d2ff');
             buildStats();
 
-            CyberUI.createCard('ui-container', 'Tasten', `
+            CyberUI.createCard('ui-container', CyberI18n.get('irisvis.card_keys'), `
                 <div class="iris-keys">
-                    <b>T</b> Dreieck &middot; <b>E</b> alle Verlängerungen<br>
-                    <b>C I A</b> Kreis, Inkreis, Beschriftung<br>
-                    <b>W</b> / <b>⇧W</b> Wischerkurve / Fläche füllen<br>
-                    <b>L</b> Sehnen + Mittelsenkrechte &middot; <b>G</b> Lot (Abstand r)<br>
-                    <b>B</b> / <b>⇧B</b> Rotationsbahn / Quadrat<br>
-                    <b>X</b> / <b>⇧X</b> / <b>Y</b> Bahn suchen, sofort exakt, Heatmap<br>
-                    <b>R</b> / <b>⇧R</b> Quadrat drehen &middot; <b>Leertaste</b> 2° + CMA-ES<br>
-                    <b>+ −</b> Verlängerung &middot; <b>D</b> Aufbauen &middot; <b>S</b> Screenshot<br>
-                    <b>⌘B</b> helle Bühne &middot; <b>⌘C</b> Farbverlauf &middot; <b>H</b> Hilfe<br>
-                    <b>0</b> zurücksetzen &middot; <b>2</b> zoomen &middot; <b>Pfeile</b> verschieben
+                    ${CyberI18n.get('irisvis.keys_html')}
                 </div>
             `, 'rgb(155,130,225)', { collapsible: true, collapsed: true });
 
-            CyberUI.createSlider('sl-d', 'Verlängerung d', -600, 600, state.d, 1, (v) => {
+            CyberUI.createSlider('sl-d', CyberI18n.get('irisvis.sl_d'), -600, 600, state.d, 1, (v) => {
                 state.d = v;
                 sync();
             }, 'var(--neon-blue)', (v) => de(v, 0));
 
+            const T = (k, r) => CyberI18n.get('irisvis.' + k, r);
+            const ext = (v, side, col) => [T('cb_ext', { v, side }), T('cb_ext', { v, side: '<b style="color:' + col + '">' + side + '</b>' })];
+            const [extA, extAh] = ext('A', 'BC', 'rgb(214,92,82)');
+            const [extB, extBh] = ext('B', 'CA', 'rgb(150,200,80)');
+            const [extC, extCh] = ext('C', 'AB', 'rgb(245,194,66)');
             const boxes = [
-                ['chk-box', 'Dreieck', 'showTriangle'],
-                ['chk-box', 'Beschriftung', 'showLabels'],
+                ['chk-box', T('cb_triangle'), 'showTriangle'],
+                ['chk-box', T('cb_labels'), 'showLabels'],
                 /* label in white, only the copied side in its colour (5th field = HTML) */
-                ['chk-box', 'Verlängerung A → BC', 'extA', null,
-                    'Verlängerung A → <b style="color:rgb(214,92,82)">BC</b>'],
-                ['chk-box', 'Verlängerung B → CA', 'extB', null,
-                    'Verlängerung B → <b style="color:rgb(150,200,80)">CA</b>'],
-                ['chk-box', 'Verlängerung C → AB', 'extC', null,
-                    'Verlängerung C → <b style="color:rgb(245,194,66)">AB</b>'],
-                ['chk-box', 'Conway-Kreis', 'showCircle'],
-                ['chk-box', 'Inkreis + I', 'showIncircle'],
-                ['chk-box', 'Sehnen + Mittelsenkrechte (L)', 'showChords'],
-                ['chk-box', 'Lot vom Mittelpunkt (G)', 'showProof'],
-                ['chk-wiper', 'Wischerkurve', 'wiper'],
-                ['chk-wiper', 'Fläche füllen', 'wiperFill'],
-                ['chk-box2', 'Quadrat zeigen', 'box'],
-                ['chk-rot', 'Auto-Rotation', 'autoRot'],
-                ['chk-box2', 'Rotationsbahn', 'path'],
-                ['chk-box2', 'Heatmap', 'heat'],
-                ['chk-box2', 'Skala fest (vergleichbar)', 'absScale']
+                ['chk-box', extA, 'extA', null, extAh],
+                ['chk-box', extB, 'extB', null, extBh],
+                ['chk-box', extC, 'extC', null, extCh],
+                ['chk-box', T('cb_circle'), 'showCircle'],
+                ['chk-box', T('cb_incircle'), 'showIncircle'],
+                ['chk-box', T('cb_chords'), 'showChords'],
+                ['chk-box', T('cb_proof'), 'showProof'],
+                ['chk-wiper', T('cb_wiper'), 'wiper'],
+                ['chk-wiper', T('cb_fill'), 'wiperFill'],
+                ['chk-box2', T('cb_square'), 'box'],
+                ['chk-rot', T('cb_autorot'), 'autoRot'],
+                ['chk-box2', T('cb_path'), 'path'],
+                ['chk-box2', T('cb_heat'), 'heat'],
+                ['chk-box2', T('cb_abs'), 'absScale']
             ];
             boxes.forEach(([box, label, key, col, html]) => {
                 const w = CyberUI.createCheckbox(box, label, state[key], (on) => {
@@ -1804,12 +1774,12 @@
                 }
             });
 
-            CyberUI.createSlider('sl-speed', 'Tempo', 1, 90, state.rotSpeed, 1, (v) => {
+            CyberUI.createSlider('sl-speed', CyberI18n.get('irisvis.sl_speed'), 1, 90, state.rotSpeed, 1, (v) => {
                 state.rotSpeed = v;
                 sync();
             }, 'rgb(121,158,49)', (v) => Math.round(v) + '°/s');
 
-            CyberUI.createSlider('sl-angle', 'Drehwinkel', 0, 90, state.angle, 1, (v) => {
+            CyberUI.createSlider('sl-angle', CyberI18n.get('irisvis.sl_angle'), 0, 90, state.angle, 1, (v) => {
                 state.angle = v;
                 boxC = null;            // the exact placement follows the angle
                 sync();

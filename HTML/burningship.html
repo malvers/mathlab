@@ -154,7 +154,7 @@
         CyberBranding.init({
             useExternalStyles: true,
             title: 'Burning Ship',
-            subtitle: 'Fraktal-Explorer',
+            subtitle: CyberI18n.get('burningship.subtitle'),
         });
         CyberUI.init();
 
@@ -333,31 +333,31 @@
         })();
 
         // --- Sidebar ---
-        CyberUI.createCard('ui-container', 'NAVIGATION', `
+        CyberUI.createCard('ui-container', CyberI18n.get('burningship.navigation'), `
             <div class="bs-seg-row">
-                <button type="button" id="btn-reset" class="bs-seg-btn">Zurücksetzen</button>
+                <button type="button" id="btn-reset" class="bs-seg-btn">${CyberI18n.get('burningship.reset')}</button>
             </div>
             <div class="bs-readouts">
                 <div class="stats-card">
-                    <span class="stats-label">Zoom</span>
+                    <span class="stats-label">${CyberI18n.get('burningship.zoom')}</span>
                     <span id="readout-zoom" class="stats-val">1×</span>
                 </div>
                 <div class="stats-card">
-                    <span class="stats-label">Detail</span>
+                    <span class="stats-label">${CyberI18n.get('burningship.detail')}</span>
                     <span id="readout-iter" class="stats-val">${DEF_ITER}</span>
                 </div>
                 <div class="stats-card" style="grid-column: span 2;">
-                    <span class="stats-label">Re / Im</span>
+                    <span class="stats-label">${CyberI18n.get('burningship.re_im')}</span>
                     <span id="readout-pos" class="stats-val" style="font-size:0.68rem;">−0.500 / −0.500</span>
                 </div>
             </div>
         `, 'var(--neon-orange, #ff8c3c)');
 
-        CyberUI.createCard('ui-container', 'PARAMETER', `
+        CyberUI.createCard('ui-container', CyberI18n.get('burningship.parameter'), `
             <div id="iter-mount"></div>
         `, 'var(--neon-orange, #ff8c3c)');
 
-        CyberUI.createSlider('iter-mount', 'Iterationen',
+        CyberUI.createSlider('iter-mount', CyberI18n.get('burningship.iterations'),
             ITER_MIN, ITER_MAX, maxIter, 1,
             (v) => { maxIter = parseInt(v, 10); smoothIter = maxIter; scheduleSave(); },
             'var(--neon-orange, #ff8c3c)'

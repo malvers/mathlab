@@ -60,6 +60,15 @@
             { id: 'M104',ra: 189.99, dec: -11.62, name: 'Sombrero-Galaxie', type: 'Galaxie',              rad: 8,  r: 205, g: 213, b: 238, img: 'M104_ngc4594_sombrero_galaxy_hi-res.jpg' },
             { id: 'h+χ', ra: 34.70,  dec: 57.10,  name: 'Doppelhaufen Perseus', type: 'Offener Sternhaufen', rad: 11, r: 175, g: 205, b: 255 }
         ];
+        // Localised names / types for the deep-sky objects (dictionary keys worldclock.dso_<id> / worldclock.t_*)
+        (function () {
+            const T = { 'Galaxie': 't_galaxy', 'Emissionsnebel': 't_emission', 'Offener Sternhaufen': 't_open',
+                        'Kugelsternhaufen': 't_globular', 'Planetarischer Nebel': 't_planetary' };
+            DEEPSKY.forEach(d => {
+                d.name = CyberI18n.getOr('worldclock.dso_' + (d.id === 'h+χ' ? 'hchi' : d.id), d.name);
+                if (T[d.type]) d.type = CyberI18n.getOr('worldclock.' + T[d.type], d.type);
+            });
+        })();
         let dsoPhotos = loadSkyToggle('photos', true);   // real photos (additive) vs stylised glow; key 'b'. Persisted.
         // Load each photo once, pre-mask it to a soft round vignette (so no hard rectangle edge), store on the entry.
         function loadNebulaImages() {
@@ -233,12 +242,12 @@
             el.innerHTML = s.replace(/./g, c => '<span class="scd">' + c + '</span>');
         }
         function bvSpectral(bv) {
-            if (bv < -0.05) return 'blau (B)';
-            if (bv < 0.20)  return 'blau-weiß (A)';
-            if (bv < 0.45)  return 'weiß (F)';
-            if (bv < 0.75)  return 'gelb (G)';
-            if (bv < 1.35)  return 'orange (K)';
-            return 'rot (M)';
+            if (bv < -0.05) return CyberI18n.get('worldclock.sp_b');
+            if (bv < 0.20)  return CyberI18n.get('worldclock.sp_a');
+            if (bv < 0.45)  return CyberI18n.get('worldclock.sp_f');
+            if (bv < 0.75)  return CyberI18n.get('worldclock.sp_g');
+            if (bv < 1.35)  return CyberI18n.get('worldclock.sp_k');
+            return CyberI18n.get('worldclock.sp_m');
         }
         function showInfoBox(name, sub, clientX, clientY) {   // shared tooltip renderer (stars + zodiac)
             const box = document.getElementById('star-info');
@@ -260,7 +269,8 @@
             if (info) {
                 if (info.name) label = info.name;                                  // proper name (e.g. Wega)
                 else if (info.desig) label = info.desig + (info.c ? ' ' + info.c : '');  // else Bayer/Flamsteed (e.g. τ Phe)
-                if (info.c) conName = (typeof CONSTELLATION_NAMES_DE !== 'undefined' && CONSTELLATION_NAMES_DE[info.c]) || info.c;
+                if (info.c) conName = (starLangDE && typeof CONSTELLATION_NAMES_DE !== 'undefined' && CONSTELLATION_NAMES_DE[info.c])
+                    || (typeof CONSTELLATION_NAMES !== 'undefined' && CONSTELLATION_NAMES[info.c]) || info.c;
             }
             showInfoBox(label, 'Mag ' + star.mag.toFixed(2) + ' · ' + bvSpectral(star.bv) + (conName ? ' · ' + conName : ''), clientX, clientY);
         }
