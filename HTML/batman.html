@@ -251,12 +251,12 @@
                 <div class="bounds"><span id="x-bound-lo"></span><span id="x-bound-hi"></span></div>
             </div>
             <div id="sb-toggles">
-                <label class="tg"><input type="checkbox" id="tg-color" checked> <span>orange/grün</span></label>
-                <label class="tg"><input type="checkbox" id="tg-nan" checked> <span>NaN rot</span></label>
+                <label class="tg"><input type="checkbox" id="tg-color" checked> <span><script>document.write(CyberI18n.get('batman.tg_color'))</script></span></label>
+                <label class="tg"><input type="checkbox" id="tg-nan" checked> <span><script>document.write(CyberI18n.get('batman.tg_nan'))</script></span></label>
                 <label class="tg"><input type="checkbox" id="tg-eqy" checked> <span>y = …</span></label>
-                <label class="tg"><input type="checkbox" id="tg-braces" checked> <span>Klammern</span></label>
-                <label class="tg"><input type="checkbox" id="tg-dash" checked> <span>dashed bar</span></label>
-                <label class="tg"><input type="checkbox" id="tg-bm" checked> <span>BM</span></label>
+                <label class="tg"><input type="checkbox" id="tg-braces" checked> <span><script>document.write(CyberI18n.get('batman.tg_braces'))</script></span></label>
+                <label class="tg"><input type="checkbox" id="tg-dash" checked> <span><script>document.write(CyberI18n.get('batman.tg_dash'))</script></span></label>
+                <label class="tg"><input type="checkbox" id="tg-bm" checked> <span><script>document.write(CyberI18n.get('batman.tg_bm'))</script></span></label>
             </div>
             <div id="term-list"></div>
         </div>
@@ -796,9 +796,9 @@
                 if (r.active) {
                     const yStr = r.y.toFixed(2);
                     const sign = r.note === '±' ? '\\pm ' : '';
-                    tex(c.val, `\\text{bei } x = ${x.toFixed(2)} \\;\\to\\; y = \\mathbf{${sign}${yStr}}`);
+                    tex(c.val, `\\text{${CyberI18n.get('batman.at')} } x = ${x.toFixed(2)} \\;\\to\\; y = \\mathbf{${sign}${yStr}}`);
                 } else {
-                    tex(c.val, '\\text{nicht definiert } \\htmlClass{nan-suffix}{(\\mathrm{NaN})}');
+                    tex(c.val, '\\text{' + CyberI18n.get('batman.undefined') + ' } \\htmlClass{nan-suffix}{(\\mathrm{NaN})}');
                 }
                 // Mirror the active/inactive colour on the top-strip factor lozenge.
                 const ff = document.getElementById('ff-' + c.meta.id);

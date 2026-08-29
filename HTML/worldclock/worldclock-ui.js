@@ -125,7 +125,7 @@
                     // On the fly: Overpass — Städte im 300km Umkreis
                     const lat = city.globeLat ?? city.lat;
                     const lon = city.globeLon ?? city.lon;
-                    renderDrop(drop, input, [{ label: '⏳ Lade Nachbarstädte…' }]);
+                    renderDrop(drop, input, [{ label: CyberI18n.get('worldclock.loading_neighbors') }]);
                     try {
                         const q = `[out:json][timeout:10];(node(around:300000,${lat},${lon})[place=city];node(around:300000,${lat},${lon})[place=town];);out 6;`;
                         const res = await fetch('https://overpass-api.de/api/interpreter', {
@@ -161,7 +161,7 @@
                         .filter(c => c.name.replace(/\n/g, ' ').toLowerCase().includes(ql))
                         .map(c => ({ label: c.name.replace(/\n/g, ' '), city: c }));
 
-                    renderDrop(drop, input, local.length ? local : [{ label: '⏳ Suche…' }]);
+                    renderDrop(drop, input, local.length ? local : [{ label: CyberI18n.get('worldclock.searching') }]);
 
                     // Nominatim nach 400ms Pause
                     clearTimeout(nominatimTimer);

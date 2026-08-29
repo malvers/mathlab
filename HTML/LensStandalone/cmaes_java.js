@@ -295,7 +295,9 @@ const App = {
             dockBtn.addEventListener('click', () => {
                 const collapsed = dock.classList.toggle('collapsed');
                 dockBtn.setAttribute('aria-expanded', String(!collapsed));
-                const lbl = collapsed ? 'Bedienfeld einblenden' : 'Bedienfeld ausblenden';
+                const lbl = (typeof CyberI18n !== 'undefined')
+                    ? CyberI18n.get(collapsed ? 'lens.show_panel' : 'lens.hide_panel')
+                    : (collapsed ? 'Bedienfeld einblenden' : 'Bedienfeld ausblenden');
                 dockBtn.setAttribute('aria-label', lbl);
                 dockBtn.setAttribute('title', lbl);
                 requestAnimationFrame(() => this.resize());

@@ -195,7 +195,7 @@
         let skyLon = (localCity && (localCity.globeLon ?? localCity.lon)) || 0;  // eases toward the selected city; starts on the local-timezone city (Dresden)
         let skyLat = (localCity && (localCity.globeLat ?? localCity.lat)) || 0;  // for the city-dome (alt-az) view
         let skyView = 1;        // 0 = pol-wheel (pole-centred), 1 = city dome (alt-az horizon); toggled by 'v'. Default: dome.
-        let starLangDE = true;  // constellation labels: true = German, false = Latin (toggled by 'n')
+        let starLangDE = (typeof CyberI18n === 'undefined' || CyberI18n.current === 'de');  // constellation labels: German only for DE, else Latin (toggled by 'n')
         let starHover = { x: 0, y: 0, on: false };  // pointer pos (canvas px) for the constellation hover-highlight (planetarium mode)
         let skyZoom = 1;  // planetarium zoom factor (mouse wheel / two-finger pinch); >1 = zoomed in
         let skyPanX = 0, skyPanY = 0;  // dome centre offset (px) so zoom homes in on the cursor; ESC resets
@@ -492,7 +492,7 @@
             autoRotationEnabled = false;
             const btn = document.getElementById('rotation-btn');
             if (btn) {
-                btn.innerText = 'ROTATION START';
+                btn.innerText = CyberI18n.get('worldclock.rotation_start');
                 btn.style.borderColor = 'var(--neon-blue)';
                 btn.style.color = 'var(--neon-blue)';
                 btn.style.boxShadow = 'none';
@@ -895,7 +895,7 @@
                 const el = document.createElement('input');
                 el.id = 'wc-search';
                 el.type = 'text';
-                el.placeholder = 'Suchen…';
+                el.placeholder = CyberI18n.get('worldclock.search');
                 el.autocomplete = 'off';
                 el.style.cssText = 'position:fixed;background:rgba(0,10,30,0.92);color:#00d2ff;border:1px solid rgba(0,210,255,0.55);border-radius:4px;font-family:Orbitron,sans-serif;letter-spacing:0.05em;outline:none;padding:3px 8px;pointer-events:auto;z-index:1000;box-sizing:border-box;';
                 document.body.appendChild(el);
@@ -918,7 +918,7 @@
             const _lnk = document.getElementById('wc-link-icon') || (() => {
                 const el = document.createElement('div');
                 el.id = 'wc-link-icon';
-                el.title = 'Personalisierten Link erstellen';
+                el.title = CyberI18n.get('worldclock.link_title');
                 el.style.cssText = 'position:fixed;cursor:pointer;z-index:1000;opacity:0.65;pointer-events:auto;color:#00d2ff;line-height:1;display:flex;align-items:center;gap:6px;';
                 el.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg><span style="font-family:Orbitron,sans-serif;font-size:10px;letter-spacing:0.05em;color:#00d2ff;">Personalisieren</span>';
                 el.addEventListener('mouseenter', () => el.style.opacity = '1');
@@ -938,14 +938,14 @@
                     ].join('');
                     pop.innerHTML = [
                         '<div style="display:flex;justify-content:space-between;align-items:center;">',
-                        '  <span style="font-size:11px;letter-spacing:1.5px;opacity:0.9;">PERSONALISIERTE UHR MIT NACHRICHT</span>',
-                        '  <span id="wc-pop-close" style="cursor:pointer;opacity:0.55;line-height:1;display:flex;align-items:center;" title="Schließen">',
+                        '  <span style="font-size:11px;letter-spacing:1.5px;opacity:0.9;">' + CyberI18n.get('worldclock.pop_title') + '</span>',
+                        '  <span id="wc-pop-close" style="cursor:pointer;opacity:0.55;line-height:1;display:flex;align-items:center;" title="' + CyberI18n.get('worldclock.close') + '">',
                         '    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">',
                         '      <line x1="2" y1="2" x2="12" y2="12"/><line x1="12" y1="2" x2="2" y2="12"/>',
                         '    </svg>',
                         '  </span>',
                         '</div>',
-                        '<textarea id="wc-pop-input" placeholder="Deine Nachricht…" rows="4" maxlength="260"',
+                        '<textarea id="wc-pop-input" placeholder="' + CyberI18n.get('worldclock.pop_placeholder') + '" rows="4" maxlength="260"',
                         '  style="background:rgba(0,10,30,0.9);color:#00d2ff;border:1px solid rgba(0,210,255,0.4);',
                         '         border-radius:4px;padding:6px 8px;font-family:Orbitron,sans-serif;font-size:11px;',
                         '         letter-spacing:0.05em;outline:none;width:100%;box-sizing:border-box;resize:vertical;',
@@ -954,7 +954,7 @@
                         '<div id="wc-pop-emojis" style="display:flex;flex-wrap:wrap;gap:4px;padding:8px 4px;border-top:1px solid rgba(0,210,255,0.15);border-bottom:1px solid rgba(0,210,255,0.15);"></div>',
                         '<button id="wc-pop-copy" style="font-family:Orbitron,sans-serif;font-size:11px;letter-spacing:1.2px;',
                         '  padding:6px 12px;cursor:pointer;background:rgba(0,210,255,0.08);color:rgba(0,210,255,0.85);',
-                        '  border:1px solid rgba(0,210,255,0.3);border-radius:4px;transition:background 0.15s;">LINK MIT NACHRICHT KOPIEREN</button>',
+                        '  border:1px solid rgba(0,210,255,0.3);border-radius:4px;transition:background 0.15s;">' + CyberI18n.get('worldclock.pop_copy') + '</button>',
                     ].join('');
                     document.body.appendChild(pop);
 
@@ -982,11 +982,11 @@
                         const qs = params.toString();
                         const link = window.location.origin + '/worldclock/worldclock.html' + (qs ? '?' + qs : '');
                         navigator.clipboard.writeText(link).then(() => {
-                            copyBtn.textContent = 'KOPIERT!';
-                            setTimeout(() => { copyBtn.textContent = 'LINK MIT NACHRICHT KOPIEREN'; }, 1800);
+                            copyBtn.textContent = CyberI18n.get('worldclock.pop_copied');
+                            setTimeout(() => { copyBtn.textContent = CyberI18n.get('worldclock.pop_copy'); }, 1800);
                         }).catch(() => {
                             copyBtn.textContent = 'FEHLER';
-                            setTimeout(() => { copyBtn.textContent = 'LINK MIT NACHRICHT KOPIEREN'; }, 1800);
+                            setTimeout(() => { copyBtn.textContent = CyberI18n.get('worldclock.pop_copy'); }, 1800);
                         });
                     });
 
@@ -1877,7 +1877,7 @@
             autoRotationEnabled = !autoRotationEnabled;
             const btn = document.getElementById('rotation-btn');
             if (btn) {
-                btn.innerText = autoRotationEnabled ? 'ROTATION STOP' : 'ROTATION START';
+                btn.innerText = autoRotationEnabled ? CyberI18n.get('worldclock.rotation_stop') : CyberI18n.get('worldclock.rotation_start');
                 btn.style.borderColor = autoRotationEnabled ? '#adff2f' : 'var(--neon-blue)';
                 btn.style.color = autoRotationEnabled ? '#adff2f' : 'var(--neon-blue)';
                 btn.style.boxShadow = autoRotationEnabled ? '0 0 15px rgba(173, 255, 47, 0.4)' : 'none';
@@ -1890,7 +1890,7 @@
             autoRotationEnabled = false;
             const btn = document.getElementById('rotation-btn');
             if (btn) {
-                btn.innerText = 'ROTATION START';
+                btn.innerText = CyberI18n.get('worldclock.rotation_start');
                 btn.style.borderColor = 'var(--neon-blue)';
                 btn.style.color = 'var(--neon-blue)';
                 btn.style.boxShadow = 'none';

@@ -162,11 +162,11 @@ function showCityInfo(cityName) {
         const en = results[1].status === 'fulfilled' ? results[1].value : null;
         const primary = de || en;
         if (!primary) {
-            extractEl.textContent = 'Info nicht verfügbar (Wikipedia).';
+            extractEl.textContent = CyberI18n.get('worldclock.info_na');
             return;
         }
         if (primary.title) titleEl.textContent = primary.title.toUpperCase();
-        extractEl.textContent = primary.extract ? trimToDresdenLength(primary.extract) : 'Keine Beschreibung verfügbar.';
+        extractEl.textContent = primary.extract ? trimToDresdenLength(primary.extract) : CyberI18n.get('worldclock.no_desc');
 
         // Prefer EN image (often skyline/landmark), fallback to DE
         let imgSrc = null;
@@ -200,7 +200,7 @@ function showCityInfo(cityName) {
             fetchWikidataPopulation(qid).then(pop => {
                 if (token !== cityInfoFetchToken) return;
                 if (pop) {
-                    popEl.textContent = `EINWOHNER: ${formatPopulation(pop)}`;
+                    popEl.textContent = `${CyberI18n.get('worldclock.population')}: ${formatPopulation(pop)}`;
                     popEl.style.display = 'block';
                 }
             });

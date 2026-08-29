@@ -8,6 +8,9 @@
  *   2. Orphaned card translations (lab id no longer in LABS_DATA) are reported.
  *   3. Suspect copies: a non-DE card whose description is byte-identical to DE.
  *   4. Base dictionaries i18n-<lang>.js have the exact same key set as DE.
+ *   5. Loader simulation: for every ?lang= the i18n.js / i18n-index.js loaders are run
+ *      like a parser would (document.write executes the file at once) and the result
+ *      must yield a usable dictionary — catches load-order bugs such as nl needing en.
  *
  * Usage:  node tools/check-i18n.mjs        (exit 1 on findings, one line per finding)
  */
@@ -78,9 +81,53 @@ for (const lang of LANGS.slice(1)) {
     for (const k of cur) if (!base.has(k)) findings.push(`${lang}: Basis-Key zu viel (nicht in DE): ${k}`);
 }
 
+// --- 5: loader simulation per language (parser-like: document.write runs the file immediately) ---
+for (const lang of LANGS) {
+    const c = { console: { warn() {}, error() {}, log() {} } };
+    c.window = c;
+    c.location = { search: `?lang=${lang}` };
+    c.URLSearchParams = URLSearchParams;
+    c.localStorage = { getItem: () => null, setItem() {} };
+    c.addEventListener = () => {};
+    c.requestAnimationFrame = () => {};
+    c.structuredClone = structuredClone;
+    const loaded = [];
+    c.document = {
+        documentElement: { getAttribute: () => null, setAttribute() {}, classList: { add() {} } },
+        querySelector: () => null,
+        createElement: () => ({ setAttribute() {} }),
+        head: { insertBefore() {} },
+        currentScript: { src: 'http://x/js/i18n.js' },
+        write(html) {
+            const m = html.match(/src="([^"]+)"/);
+            const file = m[1].replace('http://x/js/', '');
+            loaded.push(file);
+            try { vm.runInContext(read(file), c, { filename: file }); }
+            catch (e) { findings.push(`${lang}: Loader-Simulation CRASH in ${file}: ${e.message}`); }
+        },
+    };
+    vm.createContext(c);
+    let I;
+    try {
+        I = vm.runInContext(read('i18n.js') + '\nCyberI18n;', c, { filename: 'i18n.js' });
+        c.CyberI18n = I;
+        c.document.currentScript = { src: 'http://x/js/i18n-index.js' };
+        vm.runInContext(read('i18n-index.js'), c, { filename: 'i18n-index.js' });
+    } catch (e) {
+        findings.push(`${lang}: Loader-Simulation CRASH: ${e.message}`);
+        continue;
+    }
+    if (I.current !== lang) findings.push(`${lang}: Loader waehlt ${I.current} statt ${lang}`);
+    if (!I.translations[lang]) findings.push(`${lang}: nach Laden von [${loaded.join(', ')}] kein Woerterbuch`);
+    else {
+        if (I.get('ui.next') === 'ui.next') findings.push(`${lang}: Basis-Dict unbrauchbar (ui.next fehlt) nach [${loaded.join(', ')}]`);
+        if (I.get('index.header.subtitle') === 'index.header.subtitle') findings.push(`${lang}: Index-Dict unbrauchbar nach [${loaded.join(', ')}]`);
+    }
+}
+
 if (findings.length) {
     for (const f of findings) console.log('✗ ' + f);
     console.log(`\n${findings.length} Befund(e) — ${ids.length} aktive Labs, ${LANGS.length} Sprachen.`);
     process.exit(1);
 }
-console.log(`✓ i18n vollstaendig: ${ids.length} Labs x ${LANGS.length} Sprachen, Basis-Woerterbuecher deckungsgleich (${base.size} Keys).`);
+console.log(`✓ i18n vollstaendig: ${ids.length} Labs x ${LANGS.length} Sprachen, Basis-Woerterbuecher deckungsgleich (${base.size} Keys), Loader-Simulation fuer alle Sprachen ok.`);
