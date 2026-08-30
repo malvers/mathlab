@@ -2484,7 +2484,7 @@
     // --- Edit gate: "✎ Bearbeiten" asks for the SVP passphrase once per ---
     // browser. Same rule as svp-gate.js: only the SHA-256 hash lives in the
     // code (public repo), never the passphrase itself.
-    const EDIT_HASH = '517ac27fb0b499ddd50da49532cc40d47d4d36a9a49a43e1558f16eec5cbeda4';
+    const EDIT_HASH = 'e5dc8c8b884948b1986c832d5e5b2955b11c8e1a60ef06f820ce81680a07c44c';
     const EDIT_KEY = 'svp-edit-gate';
 
     function editUnlocked() {
