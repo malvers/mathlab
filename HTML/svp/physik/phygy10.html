@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stoffverteilungsplan Physik 10 (Gymnasium) | SJ 2026/27</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript>
+        <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    </noscript>
+    <link rel="icon" type="image/png" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="../svp.css">
+    <script src="../svp-gate.js"></script>
+</head>
+
+<body>
+    <header class="page-head">
+        <a class="back-link" href="./">&larr; &Uuml;bersicht Physik</a>
+        <div class="head-row">
+            <div class="title-group">
+                <h1>Physik &middot; Gymnasium &middot; Klasse 10</h1>
+            </div>
+            <button class="action orange" onclick="window.open('../lehrplaene/lehrplan_gy_physik.pdf', '_blank')">Lehrplan (PDF)</button>
+        </div>
+        <div class="subtitle">
+            Stoffverteilungsplan &middot; 2 Ustd./Woche &middot;
+            Lehrplan: <a href="https://www.schulportal.sachsen.de/lplandb/lehrplan/523" target="_blank"
+                rel="noopener">Lehrplan Gymnasium Physik (2004/…/2025/2026)</a>
+        </div>
+    </header>
+
+    <div class="meta-cards">
+        <div class="meta-card" data-lb="lb1">
+            <div class="k c-orange">Lernbereich 1</div>
+            <div class="v">Newton&rsquo;sche Gesetze und deren Anwendung</div>
+            <div class="vu">7 Ustd.</div>
+        </div>
+        <div class="meta-card" data-lb="lb2">
+            <div class="k c-cyan">Lernbereich 2</div>
+            <div class="v">Mechanische Schwingungen und Wellen</div>
+            <div class="vu">10 Ustd.</div>
+        </div>
+        <div class="meta-card" data-lb="lb3">
+            <div class="k c-violet">Lernbereich 3</div>
+            <div class="v">Kosmos, Erde und Mensch</div>
+            <div class="vu">18 Ustd.</div>
+        </div>
+        <div class="meta-card" data-lb="lb4">
+            <div class="k c-teal">Lernbereich 4</div>
+            <div class="v">Licht als Strahl und Welle</div>
+            <div class="vu">9 Ustd.</div>
+        </div>
+        <div class="meta-card" data-lb="lb5">
+            <div class="k c-pink">Lernbereich 5</div>
+            <div class="v">Physikalisches Praktikum</div>
+            <div class="vu">6 Ustd.</div>
+        </div>
+        <div class="meta-card" data-lb="wb">
+            <div class="k c-green">Wahlbereich</div>
+            <div class="v">Fernrohre</div>
+            <div class="vu">2 Wochen</div>
+        </div>
+    </div>
+
+    <div class="toolbar">
+        <button class="action" onclick="window.print()">Drucken</button>
+        <button class="action" onclick="togglePlanDetails()">Alle auf/zu</button>
+        <button class="action" onclick="togglePlanEdit(this)">&#9998; Bearbeiten</button>
+        <button class="action secondary" onclick="resetPlanEdits(this)">Zur&uuml;cksetzen</button>
+        <div class="legend"></div>
+    </div>
+
+    <div class="table-wrap">
+        <table id="plan-table">
+            <thead>
+                <tr>
+                    <th>Nr.</th>
+                    <th>KW</th>
+                    <th>Woche</th>
+                    <th>Bereich</th>
+                    <th>Ustd.</th>
+                    <th>Thema / Inhalte</th>
+                    <th>Bemerkungen</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <footer class="page-foot">
+        Wochenzeile anklicken &rarr; Stundenskizze ausklappen. Beim Drucken werden alle Details ausgeklappt.
+        &bdquo;Bearbeiten&ldquo; macht Themen, Bemerkungen und Bullets editierbar &mdash; gespeichert wird beim
+        Klick auf &bdquo;Fertig&ldquo;, lokal in diesem Browser (localStorage); &bdquo;Zur&uuml;cksetzen&ldquo;
+        l&auml;dt das Original.
+        Ferientermine Sachsen 2026/27 (SMK): Herbst 12.&ndash;24.10.26 &middot; Weihnachten 23.12.26&ndash;02.01.27
+        &middot; Winter 08.&ndash;19.02.27 &middot; Ostern 26.03.&ndash;02.04.27 &middot; Pfingsten 07.05. + 15.&ndash;18.05.27
+        &middot; Sommer ab 10.07.27 &middot; Bu&szlig;- und Bettag Mi 18.11.26 unterrichtsfrei.
+        Der Lehrplan schreibt 25 Wochen mit Pflichtcharakter fest (50 Ustd. bei 2 Ustd./Woche) und l&auml;sst
+        zus&auml;tzlich einen Lernbereich mit Wahlcharakter im Umfang von zwei Wochen zu; beides ist hier
+        vollst&auml;ndig abgebildet. Die &uuml;brigen Wochen des Schuljahres stehen als &Uuml;bung,
+        Leistungsermittlung oder Puffer in eigenen Zeilen.
+    </footer>
+
+    <script>
+        // Data-driven plan: one entry per school week (or holiday block).
+        // details: bullet list shown in the expandable sub-row (lesson sketch).
+        // type: lb1 | lb2 | lb3 | lb4 | lb5 | wb | lk | ue | org | ferien
+        window.PLAN = [
+            { nr: 1, kw: 34, date: '17.–21.08.26', type: 'org', u: '', topic: 'Schuljahresauftakt', ziel: 'Organisatorisches und Anknüpfen an Klasse 9', remark: 'Erster Schultag Mo 17.08.', details: [
+                'Organisatorisches, Material, Heftführung, Sicherheit im Fachraum',
+                'Wiederholung Klasse 9: Kraft, Energie, Bewegungsgesetze',
+                'Überblick über das Schuljahr: Mechanik, Astronomie, Optik, Praktikum'
+            ] },
+            { nr: 2, kw: 35, date: '24.–28.08.26', type: 'lb1', u: '1–2/7', topic: 'Die Newton’schen Gesetze', ziel: 'Kennen der Newton’schen Gesetze', remark: 'Trägheit und Schwere als Eigenschaften der Masse', details: [
+                'Eigenschaft der Masse: Trägheit und Schwere',
+                'Schwerelosigkeit — Astronaut im Raumschiff',
+                'F = m · a; Würdigung Isaac Newtons'
+            ] },
+            { nr: 3, kw: 36, date: '31.08.–04.09.26', type: 'lb1', u: '3–4/7', topic: 'Trägheits- und Wechselwirkungsgesetz', ziel: 'Kennen der Newton’schen Gesetze', remark: 'Rückstoßantrieb; Anschluss Kl. 7, LB 1', details: [
+                'Trägheitsgesetz und Wechselwirkungsgesetz am Rückstoßantrieb',
+                'Superposition von Kräften, lex quarta',
+                'Kräfte an der geneigten Ebene'
+            ] },
+            { nr: 4, kw: 37, date: '07.–11.09.26', type: 'lb1', u: '5–6/7', topic: 'Beschleunigung im Experiment', ziel: 'Kennen der Newton’schen Gesetze', remark: 'SE: Fallmaschine nach Atwood, Mobiltelefon als Messgerät', details: [
+                'SE: Ermitteln von Beschleunigungen mit der Fallmaschine nach Atwood',
+                'Beschleunigungsmessung mit dem Mobiltelefon',
+                'Auswertung: F = m · a am Messwertesatz prüfen'
+            ] },
+            { nr: 5, kw: 38, date: '14.–18.09.26', type: 'lb1', u: '7/7', topic: 'Bremsvorgänge im Straßenverkehr', ziel: 'Beurteilen von Gefahren im Straßenverkehr bei Bremsvorgängen', remark: 'Bestimmen der Reaktionszeit im Experiment; 1 Ustd. Puffer', details: [
+                'Bremsverzögerung, Bremsweg, Bremskraft',
+                'Reaktionszeit messen, Faustregeln der Fahrschule prüfen',
+                'Sturzhelm, Sicherheitsgurt, Knautschzone, Crashtest',
+                'Computersimulation: Einfluss der Reibung'
+            ] },
+            { nr: 6, kw: 39, date: '21.–25.09.26', type: 'lb2', u: '1–2/10', topic: 'Entstehen einer Schwingung', ziel: 'Beherrschen des Arbeitens mit physikalischen Größen zur Beschreibung mechanischer Schwingungen', remark: 'Recherche: Entwicklung der Zeitmessung, Pendeluhr', details: [
+                'Entstehen einer Schwingung an Beispielen aus Natur und Technik',
+                'Auslenkung, Amplitude, Periodendauer, Frequenz',
+                'Recherche zur Pendeluhr — Medienbildung'
+            ] },
+            { nr: 7, kw: 40, date: '28.09.–02.10.26', type: 'lb2', u: '3–4/10', topic: 'Gedämpfte und ungedämpfte Schwingungen', ziel: 'Beherrschen des Arbeitens mit physikalischen Größen zur Beschreibung mechanischer Schwingungen', remark: 'Schwingungsdämpfer, Federgabel beim Fahrrad', details: [
+                'Gedämpfte und ungedämpfte Schwingungen unterscheiden',
+                'Energieumwandlungen und Energiebilanzen',
+                'y(t)-Diagramm — Anschluss MA, Kl. 10, LB 1'
+            ] },
+            { nr: 8, kw: 41, date: '05.–09.10.26', type: 'lb2', u: '5–6/10', topic: 'Fadenpendel und Federschwinger', ziel: 'Anwenden der Gleichung zur Berechnung der Periodendauer bei Fadenpendel und Federschwinger', remark: 'SE mit digitaler Messwerterfassung; Gültigkeitsbedingungen', details: [
+                'SE: Erarbeiten des Zusammenhangs mit digitaler Messwerterfassung',
+                'T = 2π · √(l/g) und T = 2π · √(m/D)',
+                'F = D · s; Gültigkeitsbedingungen der Formeln'
+            ] },
+            { ferien: 'Herbstferien · 12.–24.10.2026 (KW 42–43)' },
+            { nr: 9, kw: 44, date: '26.–30.10.26', type: 'lb2', u: '7–8/10', topic: 'Resonanz und mechanische Wellen', ziel: 'Kennen der Merkmale von Eigenschwingungen und erzwungenen Schwingungen sowie der Resonanz', remark: 'SE: Resonanzkurve; Gefahren durch Resonanz', details: [
+                'Eigenschwingung, erzwungene Schwingung, Resonanz',
+                'SE: Resonanzkurve aufnehmen; Computersimulationen',
+                'Kopplung als Voraussetzung mechanischer Wellen; v = λ · f, y(s)-Diagramm'
+            ] },
+            { nr: 10, kw: 45, date: '02.–06.11.26', type: 'lb2', u: '9–10/10', topic: 'Akustik und Interferenz', ziel: 'Einblick gewinnen in die Akustik und die Ausbreitungseigenschaften; Kennen der Interferenz mechanischer Wellen', remark: 'Schallgeschwindigkeit mit digitalen Endgeräten bestimmen', details: [
+                'Tonhöhe – Frequenz, Lautstärke – Amplitude; Ultraschall und Infraschall',
+                'Reflexion, Beugung und Brechung: Echolot, Ultraschall in der Medizin, Flüstergewölbe',
+                'Einfluss von Lärm auf Menschen und Tiere — Bildung für nachhaltige Entwicklung',
+                'Interferenz zweier Kreiswellen, grafisches Ermitteln der resultierenden Welle'
+            ] },
+            { nr: 11, kw: 46, date: '09.–13.11.26', type: 'ue', u: '', topic: 'Übung: Newton, Schwingungen und Wellen', ziel: 'Festigen und Systematisieren', remark: 'Übung, Vertiefung und Vorbereitung', details: [
+                'Rechenübungen zu F = m · a, Bremsweg und Periodendauer',
+                'Diagramme lesen und zeichnen: y(t) und y(s)',
+                'Systematisierung: Übersicht Schwingung – Welle'
+            ] },
+            { nr: 12, kw: 47, date: '16.–20.11.26', type: 'lk', u: '', topic: 'Klassenarbeit 1: Mechanik, Schwingungen und Wellen', ziel: 'Leistungsermittlung', remark: 'Mi 18.11. Buß- und Bettag unterrichtsfrei; mit Auswertung', details: [
+                'Klassenarbeit über LB 1 und LB 2',
+                'Rückgabe und Auswertung, individuelle Nacharbeit'
+            ] },
+            { nr: 13, kw: 48, date: '23.–27.11.26', type: 'lb3', u: '1–2/18', topic: 'Die Sonne', ziel: 'Kennen wesentlicher Eigenschaften ausgewählter Körper des Sonnensystems', remark: 'Begriff Leuchtkraft', details: [
+                'Aufbau der Sonne',
+                'Strahlungsleistung und Leuchtkraft',
+                'Energiefreisetzung durch Kernfusion'
+            ] },
+            { nr: 14, kw: 49, date: '30.11.–04.12.26', type: 'lb3', u: '3–4/18', topic: 'Planeten und Erdmond', ziel: 'Kennen wesentlicher Eigenschaften ausgewählter Körper des Sonnensystems', remark: 'Vergleich der Planeten an ausgewählten Beispielen', details: [
+                'Eigenschaften der Planeten im Vergleich',
+                'Der Erdmond',
+                'Ausblick auf Monde und Kleinkörper'
+            ] },
+            { nr: 15, kw: 50, date: '07.–11.12.26', type: 'lb3', u: '5–6/18', topic: 'Orientierung am Himmel', ziel: 'Kennen grundlegender Methoden zur Orientierung am Himmel', remark: 'Horizont, Himmelsrichtungen, Zenit', details: [
+                'Scheinbare Himmelshalbkugel: Horizont, Himmelsrichtungen, Zenit',
+                'Vergleich von Orientierungshilfen: Kompass, analoge Uhr, Apps',
+                'Übung mit der drehbaren Sternkarte'
+            ] },
+            { nr: 16, kw: 51, date: '14.–18.12.26', type: 'lb3', u: '7–8/18', topic: 'Sternbilder und scheinbare Bahnen', ziel: 'Kennen grundlegender Methoden zur Orientierung am Himmel', remark: 'Beobachtungshausaufgabe über die Ferien', details: [
+                'Sternbilder, Orientierung mit dem Polarstern',
+                'Scheinbare Bahnen der Gestirne, Auf- und Untergang durch Erdrotation',
+                'Beobachtungshausaufgabe: Wintersternbilder erkennen'
+            ] },
+            { nr: 17, kw: 52, date: '21.–22.12.26', type: 'lb3', u: '9–10/18', topic: 'Vom geozentrischen zum heliozentrischen Weltbild', ziel: 'Einblick gewinnen in die Wandlung unserer Weltsicht vom Altertum bis zur Gegenwart', remark: 'Ptolemäus, Kopernikus, Galilei — Werteorientierung', details: [
+                'Geozentrisches und heliozentrisches Weltbild im Vergleich',
+                'Ptolemäus, Kopernikus, Galilei',
+                'Anschluss ETH, Kl. 10, LB 1 und RE/e, Gk 11, LB 1'
+            ] },
+            { ferien: 'Weihnachtsferien · 23.12.2026–02.01.2027' },
+            { nr: 18, kw: 1, date: '04.–08.01.27', type: 'lb3', u: '11–12/18', topic: 'Kepler’sche Gesetze und Gravitation', ziel: 'Einblick gewinnen in die Wandlung unserer Weltsicht vom Altertum bis zur Gegenwart', remark: 'qualitative Betrachtungen; Anschluss MA, Gk 11, LBW 1', details: [
+                'Die drei Kepler’schen Gesetze — qualitativ',
+                'Gravitationsgesetz F ~ m₁ · m₂ / r²',
+                'Bewegung und Strukturbildung durch die Gravitation; moderne Weltsicht'
+            ] },
+            { nr: 19, kw: 2, date: '11.–15.01.27', type: 'lb3', u: '13–14/18', topic: 'Beobachtung und Beobachtungstechnik', ziel: 'Kennen wichtiger Methoden der Erkenntnisgewinnung in der Astronomie', remark: 'Besuch einer Sternwarte oder eines Planetariums', details: [
+                'Beobachtung: Mondoberfläche, Planeten, Sonne, Sonnenspektrum',
+                'Beobachtungstechnik: Schulfernrohr, Großteleskope, Weltraumteleskope, Raumsonden',
+                'Beobachtungsabend planen'
+            ] },
+            { nr: 20, kw: 3, date: '18.–22.01.27', type: 'lb3', u: '15–16/18', topic: 'Licht als Informationsquelle', ziel: 'Kennen wichtiger Methoden der Erkenntnisgewinnung in der Astronomie', remark: 'Arten von Sternspektren', details: [
+                'Prinzip der trigonometrischen Entfernungsbestimmung',
+                'Spektralanalyse, Photosphärentemperatur, Strahlungsleistung',
+                'Chemische Zusammensetzung der Sternphotosphäre'
+            ] },
+            { nr: 21, kw: 4, date: '25.–29.01.27', type: 'lb3', u: '17–18/18', topic: 'Hertzsprung-Russell-Diagramm und Sternentwicklung', ziel: 'Kennen wichtiger Methoden der Erkenntnisgewinnung; Problemlösen bei einer astronomiebezogenen Fragestellung', remark: 'Hauptreihensterne, rote Riesen, weiße Zwerge', details: [
+                'Interpretation des Hertzsprung-Russell-Diagramms, Vergleich von Sternradien',
+                'Vergleich der Sonne mit anderen Sternen; Sternentwicklung',
+                'Problemlösen: eigene astronomiebezogene Fragestellung bearbeiten'
+            ] },
+            { nr: 22, kw: 5, date: '01.–05.02.27', type: 'ue', u: '', topic: 'Übung: Kosmos, Erde und Mensch', ziel: 'Festigen und Systematisieren', remark: 'Übung, Vertiefung und Vorbereitung', details: [
+                'Größenordnungen: Raum und Zeit im Kosmos',
+                'Diagrammarbeit am HRD',
+                'Systematisierung: Hierarchie kosmischer Systeme'
+            ] },
+            { ferien: 'Winterferien · 08.–19.02.2027 (KW 6–7)' },
+            { nr: 23, kw: 8, date: '22.–26.02.27', type: 'lk', u: '', topic: 'Klassenarbeit 2: Kosmos, Erde und Mensch', ziel: 'Leistungsermittlung', remark: 'mit Vorbereitung und Auswertung', details: [
+                'Klassenarbeit über LB 3',
+                'Rückgabe und Auswertung, individuelle Nacharbeit'
+            ] },
+            { nr: 24, kw: 9, date: '01.–05.03.27', type: 'lb4', u: '1–2/9', topic: 'Das Brechungsgesetz', ziel: 'Anwenden der Gesetze der Lichtausbreitung auf optische Phänomene', remark: 'Modell Lichtstrahl; Anschluss MA, Kl. 10, LB 1', details: [
+                'Modell Lichtstrahl und seine Reichweite',
+                'Brechungsgesetz sin α / sin β = c₁ / c₂',
+                'SE: Brechung am Halbzylinder'
+            ] },
+            { nr: 25, kw: 10, date: '08.–12.03.27', type: 'lb4', u: '3–4/9', topic: 'Totalreflexion und Dispersion', ziel: 'Anwenden der Gesetze der Lichtausbreitung auf optische Phänomene', remark: 'Lichtleitkabel; Grenzen des Modells Lichtstrahl', details: [
+                'Grenzwinkel der Totalreflexion, Lichtleitkabel',
+                'Dispersion',
+                'Farbzerlegung des weißen Lichts, Spektrum des Sonnenlichts'
+            ] },
+            { nr: 26, kw: 11, date: '15.–19.03.27', type: 'lb4', u: '5–6/9', topic: 'Licht als Welle', ziel: 'Übertragen der Kenntnisse mechanischer Wellen auf Licht', remark: 'Reflexion, Brechung, Beugung, Interferenz', details: [
+                'Gleichförmige Ausbreitung des Lichts, c = λ · f',
+                'Analogie zur Interferenz zweier kreisförmiger Wasserwellen',
+                'Grenzen des Strahlenmodells'
+            ] },
+            { nr: 27, kw: 12, date: '22.–25.03.27', type: 'lb4', u: '7–8/9', topic: 'Interferenz am Doppelspalt und am Gitter', ziel: 'Übertragen der Kenntnisse mechanischer Wellen auf Licht', remark: 'Bestimmen der Wellenlänge mit dem Laserpointer', details: [
+                'SE: Beugung am Doppelspalt und am Gitter',
+                'tan αₖ = sₖ / e und sin αₖ = k · λ / b',
+                'Bestimmen der Wellenlänge einfarbigen Lichts'
+            ] },
+            { ferien: 'Osterferien · 26.03.–02.04.2027' },
+            { nr: 28, kw: 14, date: '05.–09.04.27', type: 'lb4', u: '9/9', topic: 'Das elektromagnetische Spektrum', ziel: 'Einblick gewinnen in das elektromagnetische Spektrum', remark: 'Grenzen der Wahrnehmung, Erfassung durch Sensoren; 1 Ustd. Puffer', details: [
+                'Mobilfunkstrahlung, Wärmestrahlung, optische Strahlung, Röntgenstrahlung',
+                'Licht und Wärmestrahlung: Grenzen der Wahrnehmung durch Lebewesen',
+                'Erfassung durch Sensoren — Medienbildung, informatische Bildung'
+            ] },
+            { nr: 29, kw: 15, date: '12.–16.04.27', type: 'ue', u: '', topic: 'Übung: Licht als Strahl und Welle', ziel: 'Festigen und Systematisieren', remark: 'Übung, Vertiefung und Vorbereitung des Praktikums', details: [
+                'Rechenübungen zu Brechung, Gitter und Doppelspalt',
+                'Strahlengänge sauber zeichnen',
+                'Protokollform und Fehlerbetrachtung wiederholen'
+            ] },
+            { nr: 30, kw: 16, date: '19.–23.04.27', type: 'lb5', u: '1–2/6', topic: 'Praktikum: Linsengleichung', ziel: 'Anwenden der Kenntnisse über die experimentelle Methode in der Physik beim selbstständigen Erarbeiten neuen Wissens', remark: 'selbstständiges Arbeiten, Protokoll', details: [
+                '1/f = 1/g + 1/b und G/B = g/b experimentell prüfen',
+                'Messreihe aufnehmen und grafisch auswerten',
+                'Protokoll mit Fehlerbetrachtung'
+            ] },
+            { nr: 31, kw: 17, date: '26.–30.04.27', type: 'lb5', u: '3–4/6', topic: 'Praktikum: Fallbeschleunigung und gekoppelte Pendel', ziel: 'Anwenden der Kenntnisse über die experimentelle Methode in der Physik', remark: 'digitale Werkzeuge zur Erfassung und Auswertung', details: [
+                'Bestimmen der Fallbeschleunigung mittels Fadenpendel',
+                'Untersuchen der Resonanz an gekoppelten Pendeln',
+                'Digitale Messwerterfassung und Auswertung'
+            ] },
+            { nr: 32, kw: 18, date: '03.–05.05.27', type: 'lb5', u: '5–6/6', topic: 'Praktikum: komplexe Anforderungen', ziel: 'Problemlösen bei komplexen experimentellen Anforderungen', remark: 'Entwickeln eigener Experimentieranordnungen', details: [
+                'Gültigkeit des Hooke’schen Gesetzes für Textilbandgummi',
+                'Schwingungsdauer eines Hemmungspendels; Brennweite eines Linsensystems',
+                'Wellenlänge von Schallwellen; Bearbeiten von Erklärungsproblemen'
+            ] },
+            { nr: 33, kw: 19, date: '10.–14.05.27', type: 'lk', u: '', topic: 'Komplexe Leistung: Praktikumsprotokoll', ziel: 'Leistungsermittlung', remark: 'bewertet wird das Protokoll samt Fehlerbetrachtung', details: [
+                'Abgabe und Bewertung der Praktikumsprotokolle',
+                'Auswertung: typische Fehlerquellen im Plenum',
+                'Rückmeldung zur experimentellen Arbeitsweise'
+            ] },
+            { ferien: 'Pfingsten · Mo 17.05. Pfingstmontag + Di 18.05.2027 Ferientag' },
+            { nr: 34, kw: 20, date: '19.–21.05.27', type: 'wb', u: '1–2/4', topic: 'Wahlbereich: Aufbau von Fernrohren', ziel: 'Anwenden der Kenntnisse zur Reflexion und Brechung des Lichts auf die Wirkungsweise von Fernrohren', remark: 'Wilhelm Herschel, Joseph von Fraunhofer, Johannes Kepler', details: [
+                'Historische und gegenwärtige Möglichkeiten der Himmelsbeobachtung',
+                'Aufbau, Strahlengang und Bildentstehung bei Linsen- und Spiegelfernrohren',
+                'Kepler- und Newtonfernrohr im Vergleich'
+            ] },
+            { nr: 35, kw: 21, date: '24.–28.05.27', type: 'wb', u: '3–4/4', topic: 'Wahlbereich: Leistung eines Fernrohrs', ziel: 'Anwenden der Kenntnisse zur Reflexion und Brechung des Lichts auf die Wirkungsweise von Fernrohren', remark: 'SE: Aufbau eines Linsenfernrohrs', details: [
+                'Vergrößerung V = f_ob / f_ok, Vergrößerung des Sehwinkels',
+                'Lichtsammelvermögen und Auflösungsvermögen — qualitativ',
+                'SE: Aufbau eines Linsenfernrohrs'
+            ] },
+            { nr: 36, kw: 22, date: '31.05.–04.06.27', type: 'ue', u: '', topic: 'Vertiefung: Physik im Alltag', ziel: 'Anwenden und Übertragen', remark: 'Übung, Vertiefung und Rückgabe', details: [
+                'Anwendungsaufgaben quer durch das Schuljahr',
+                'Schätzen und Überschlagen physikalischer Größen',
+                'Freie Wahl: Kurzvorträge zu Alltagsphänomenen'
+            ] },
+            { nr: 37, kw: 23, date: '07.–11.06.27', type: 'ue', u: '', topic: 'Wiederholung: Jahresstoff', ziel: 'Systematisieren des Jahresstoffs', remark: 'Übung, Vertiefung und Rückgabe', details: [
+                'Systematisierung: Mechanik – Wellen – Astronomie – Optik',
+                'Formelübersicht anlegen',
+                'Gemischte Aufgaben'
+            ] },
+            { nr: 38, kw: 24, date: '14.–18.06.27', type: 'ue', u: '', topic: 'Vertiefung nach Bedarf', ziel: 'Schließen individueller Lücken', remark: 'Themen nach Rückmeldung der Klasse', details: [
+                'Individuelle Nacharbeit nach Selbsteinschätzung',
+                'Aufgabenzirkel in Gruppen',
+                'Beratung zu Physik in Jahrgangsstufe 11'
+            ] },
+            { nr: 39, kw: 25, date: '21.–25.06.27', type: 'ue', u: '', topic: 'Astronomische Beobachtung im Sommer', ziel: 'Anwenden der Beobachtungsmethoden', remark: 'wetterabhängig; Ausweichthema Sternwarte', details: [
+                'Sommersternbilder und ihre Auffindung',
+                'Beobachtung mit und ohne Hilfsmittel',
+                'Auswertung der Beobachtungshausaufgaben des Jahres'
+            ] },
+            { nr: 40, kw: 26, date: '28.06.–02.07.27', type: 'ue', u: '', topic: 'Brücke in die Jahrgangsstufe 11', ziel: 'Vorbereiten auf die Oberstufe', remark: 'Ausblick: Erhaltungssätze, Kräfte, elektrisches Feld', details: [
+                'Was in Jahrgangsstufe 11 erwartet wird',
+                'Mathematische Werkzeuge auffrischen: Trigonometrie, Vektoren',
+                'Arbeitsweisen der Oberstufe: Protokoll, Modellbildung'
+            ] },
+            { nr: 41, kw: 27, date: '05.–09.07.27', type: 'org', u: '', topic: 'Schuljahresabschluss', ziel: 'Auswertung des Schuljahres', remark: 'letzte Schulwoche', details: [
+                'Rückblick auf das Schuljahr, Jahresnoten',
+                'Rückgabe von Material, Ordnung im Fachraum',
+                'Ausblick und Verabschiedung'
+            ] },
+            { ferien: 'Sommerferien · ab 10.07.2027' },
+        ];
+
+        // Lernbereich summaries for the clickable meta cards (see svp-plan.js).
+        // page = page in lehrplan_gy_physik.pdf where that Lernbereich starts.
+        window.LB_INFO = {
+            pdf: '../lehrplaene/lehrplan_gy_physik.pdf',
+            lb1: {
+                page: 42,
+                bullets: [
+                    'Kennen der Newton’schen Gesetze: Trägheit und Schwere, F = m · a',
+                    'Trägheits- und Wechselwirkungsgesetz, Superposition von Kräften, lex quarta',
+                    'SE: Ermitteln von Beschleunigungen',
+                    'Beurteilen von Gefahren im Straßenverkehr bei Bremsvorgängen',
+                ]
+            },
+            lb2: {
+                page: 42,
+                bullets: [
+                    'Größen zur Beschreibung mechanischer Schwingungen, y(t)-Diagramm',
+                    'Periodendauer bei Fadenpendel und Federschwinger',
+                    'Eigenschwingung, erzwungene Schwingung und Resonanz',
+                    'Mechanische Wellen, v = λ · f; Einblick in die Akustik',
+                    'Interferenz mechanischer Wellen',
+                ]
+            },
+            lb3: {
+                page: 43,
+                bullets: [
+                    'Eigenschaften ausgewählter Körper des Sonnensystems',
+                    'Methoden zur Orientierung am Himmel',
+                    'Wandlung der Weltsicht, Kepler’sche Gesetze, Gravitationsgesetz',
+                    'Methoden der Erkenntnisgewinnung in der Astronomie',
+                    'Hertzsprung-Russell-Diagramm und Sternentwicklung',
+                ]
+            },
+            lb4: {
+                page: 44,
+                bullets: [
+                    'Brechungsgesetz, Totalreflexion, Dispersion',
+                    'Übertragen der Kenntnisse mechanischer Wellen auf Licht',
+                    'Interferenz am Doppelspalt und am Gitter',
+                    'Einblick in das elektromagnetische Spektrum',
+                ]
+            },
+            lb5: {
+                page: 46,
+                bullets: [
+                    'Experimentelle Methode beim selbstständigen Erarbeiten neuen Wissens',
+                    'Linsengleichung, Fallbeschleunigung, gekoppelte Pendel',
+                    'Problemlösen bei komplexen experimentellen Anforderungen',
+                ]
+            },
+            wb: {
+                page: 46,
+                bullets: [
+                    'Wahlbereich 1: Fernrohre (gewählt)',
+                    'Wahlbereich 2: Kommunikation mit elektronischen Medien',
+                    'Wahlbereich 3: Fernsehbildtechnik',
+                ]
+            },
+        };
+
+        window.BADGE = {
+            lb1: ['b-orange', 'LB 1'],
+            lb2: ['b-cyan', 'LB 2'],
+            lb3: ['b-violet', 'LB 3'],
+            lb4: ['b-teal', 'LB 4'],
+            lb5: ['b-pink', 'LB 5'],
+            wb: ['b-green', 'WB 1'],
+            lk: ['b-red', 'LEISTUNG'],
+            ue: ['b-grey', '\u00dcBUNG'],
+            org: ['b-grey', 'ORGA']
+        };
+    </script>
+    <script src="../svp-auth.js"></script>
+    <script src="../svp-plan.js"></script>
+    <script src="../svp-nav.js"></script>
+</body>
+
+</html>
