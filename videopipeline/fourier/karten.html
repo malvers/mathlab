@@ -1,0 +1,518 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Fourier — Einspieler</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&family=Outfit:wght@300;400;500&display=swap">
+<style>
+  html, body { margin: 0; padding: 0; background: rgb(0,0,20); overflow: hidden; }
+  canvas { display: block; }
+</style>
+</head>
+<body>
+<canvas id="c" width="1280" height="720"></canvas>
+<script>
+/* Fourier — the three scenes the lab itself cannot show.
+   One page, one scene per ?scene=sN, paced to ?dur=<seconds> so the beats always fit
+   the narration running over them.
+
+   Everything here is really computed: the note and the square are sampled with the
+   lab's own sampler, transformed with the lab's own dft(), and every number on screen
+   (radius, start angle, deviation in pixels) is read off that result. Nothing is
+   painted to look like a result. */
+const P = new URLSearchParams(location.search);
+const SCENE = P.get('scene') || 's5';
+const DUR = parseFloat(P.get('dur') || '18');
+
+const c = document.getElementById('c');
+const g = c.getContext('2d');
+const W = c.width, H = c.height;
+
+/* ---- the lab's palette, so an insert never looks like a foreign body ---- */
+const COL = {
+  ground: 'rgb(0,0,20)',
+  panel: '#0b1836', panel2: '#0e244e', edge: '#1c3a72', edgeSoft: '#15294f',
+  ink: '#e2ebf8', dim: '#9db3d4', faint: '#6f88ae',
+  cyan: '#00d2ff', gold: '#ffd700', goldSoft: '#fff970',
+  pink: '#ff7eb9', aqua: '#7afbff', lime: '#adff2f', red: '#d4463a',
+};
+
+/* ---- small helpers ---- */
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+const ease = (u) => u < 0.5 ? 2 * u * u : 1 - Math.pow(-2 * u + 2, 2) / 2;
+const seg = (u, a, b) => clamp((u - a) / (b - a), 0, 1);
+const lerp = (a, b, u) => a + (b - a) * u;
+const hexA = (hex, a) => {
+  const n = parseInt(hex.slice(1), 16);
+  return 'rgba(' + (n >> 16 & 255) + ',' + (n >> 8 & 255) + ',' + (n & 255) + ',' + a + ')';
+};
+function orb(size, weight) { g.font = (weight || 500) + ' ' + size + 'px Orbitron, sans-serif'; }
+function out(size, weight) { g.font = (weight || 300) + ' ' + size + 'px Outfit, sans-serif'; }
+function mono(size) { g.font = '500 ' + size + 'px ui-monospace, "SF Mono", Menlo, monospace'; }
+function txt(s, x, y, col, align, base) {
+  g.fillStyle = col; g.textAlign = align || 'left'; g.textBaseline = base || 'alphabetic';
+  g.fillText(s, x, y);
+}
+function roundRect(x, y, w, h, r) {
+  g.beginPath();
+  if (g.roundRect) g.roundRect(x, y, w, h, r); else g.rect(x, y, w, h);
+}
+/* the eyebrow every insert carries, so the cards read as one series */
+function eyebrow(s, alpha) {
+  g.globalAlpha = alpha === undefined ? 1 : alpha;
+  orb(19, 500);
+  g.letterSpacing = '5px';
+  txt(s, 64, 74, COL.cyan);
+  g.letterSpacing = '0px';
+  g.globalAlpha = 1;
+}
+function lede(s, x, y, size, col, alpha, align) {
+  g.globalAlpha = alpha;
+  out(size, 300);
+  txt(s, x, y, col, align || 'left');
+  g.globalAlpha = 1;
+}
+/* the lab stage: near-black navy with the same faint cyan vignette */
+function backdrop() {
+  g.fillStyle = COL.ground;
+  g.fillRect(0, 0, W, H);
+  const grad = g.createRadialGradient(W / 2, H / 2, 0, W / 2, H / 2, W / 1.2);
+  grad.addColorStop(0, 'rgba(5,11,24,0)');
+  grad.addColorStop(1, 'rgba(0,210,255,0.05)');
+  g.fillStyle = grad;
+  g.fillRect(0, 0, W, H);
+}
+/* the gold trace of the lab, glow then bright core */
+function goldPath(pts, width, alpha) {
+  if (pts.length < 2) return;
+  g.save();
+  g.lineJoin = 'round'; g.lineCap = 'round';
+  g.beginPath();
+  pts.forEach((p, i) => { const fn = i ? 'lineTo' : 'moveTo'; g[fn](p.x, p.y); });
+  g.strokeStyle = COL.gold;
+  g.globalAlpha = 0.55 * (alpha === undefined ? 1 : alpha);
+  g.lineWidth = (width || 3) * 2.2;
+  g.shadowBlur = 16; g.shadowColor = COL.gold;
+  g.stroke();
+  g.globalAlpha = (alpha === undefined ? 1 : alpha);
+  g.shadowBlur = 4;
+  g.lineWidth = width || 3;
+  g.strokeStyle = COL.goldSoft;
+  g.stroke();
+  g.restore();
+}
+
+/* =====================================================================
+   The lab's own maths — sampler and DFT, copied in behaviour from
+   HTML/fourier.html and HTML/js/fourier-logic.js so the inserts and the
+   lab cannot drift apart.
+   ===================================================================== */
+const NOTE_SVG = "M31.68,6.16c-1.92-3.3-10.6-4-11.58-4.09L19,2V22.29a5.88,5.88,0,0,0-.81-.55,8.33,8.33,0,0,0-6.53-.41c-4.12,1.33-6.77,5.13-5.91,8.47a5.33,5.33,0,0,0,2.66,3.32,7.48,7.48,0,0,0,3.61.88A9.54,9.54,0,0,0,15,33.52c3.7-1.19,6.2-4.37,6.06-7.42,0,0,0,0,0,0V8.49c1,.12,2.37.33,3.82.64a11.17,11.17,0,0,1,4.06,1.46c1,.66.38,1.9.33,2a11.8,11.8,0,0,1-1.66,2,1,1,0,0,0,1.33,1.49C29.15,15.85,34.5,11,31.68,6.16Z";
+
+function sampleSVGPath(d, density) {
+  const ns = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(ns, 'svg');
+  const el = document.createElementNS(ns, 'path');
+  el.setAttribute('d', d);
+  svg.appendChild(el);
+  svg.setAttribute('width', '0'); svg.setAttribute('height', '0');
+  svg.style.cssText = 'position:absolute;opacity:0;pointer-events:none';
+  document.body.appendChild(svg);
+  const len = el.getTotalLength();
+  const raw = [];
+  for (let i = 0; i < density; i++) {
+    const p = el.getPointAtLength((i / density) * len);
+    raw.push({ x: p.x, y: -p.y });          // flip Y, the lab draws maths-up
+  }
+  svg.remove();
+  return raw;
+}
+function generateSquare(size, density) {
+  const p = [];
+  for (let i = 0; i < density; i++) p.push({ x: -size + (2 * size * i) / density, y: size });
+  for (let i = 0; i < density; i++) p.push({ x: size, y: size - (2 * size * i) / density });
+  for (let i = 0; i < density; i++) p.push({ x: size - (2 * size * i) / density, y: -size });
+  for (let i = 0; i < density; i++) p.push({ x: -size, y: -size + (2 * size * i) / density });
+  return p;
+}
+/* the lab normalises every shape to a 550 px footprint around its bounding-box centre */
+function normalise(path) {
+  let a = Infinity, b = -Infinity, cc = Infinity, d = -Infinity;
+  path.forEach((p) => { a = Math.min(a, p.x); b = Math.max(b, p.x); cc = Math.min(cc, p.y); d = Math.max(d, p.y); });
+  const ax = (a + b) / 2, ay = (cc + d) / 2;
+  const s = 550 / Math.max(b - a, d - cc, 1);
+  return path.map((p) => ({ re: (p.x - ax) * s, im: (p.y - ay) * s }));
+}
+function dft(x) {
+  const X = [], N = x.length;
+  for (let k = 0; k < N; k++) {
+    let re = 0, im = 0;
+    for (let n = 0; n < N; n++) {
+      const phi = (Math.PI * 2 * k * n) / N;
+      re += x[n].re * Math.cos(phi) + x[n].im * Math.sin(phi);
+      im += -x[n].re * Math.sin(phi) + x[n].im * Math.cos(phi);
+    }
+    re /= N; im /= N;
+    let freq = k; if (freq > N / 2) freq -= N;
+    X.push({ re, im, freq, amp: Math.hypot(re, im), phase: Math.atan2(im, re) });
+  }
+  X.sort((a, b) => Math.abs(a.freq) - Math.abs(b.freq));
+  return X;
+}
+/* the curve the first N circles actually draw, sampled at the shape's own times */
+function partial(F, N, M) {
+  const pts = [];
+  for (let n = 0; n < M; n++) {
+    const t = 2 * Math.PI * n / M;
+    let x = 0, y = 0;
+    for (let i = 0; i < N; i++) {
+      const cc = F[i], a = cc.freq * t + cc.phase;
+      x += cc.amp * Math.cos(a); y += cc.amp * Math.sin(a);
+    }
+    pts.push({ x, y });
+  }
+  return pts;
+}
+function deviation(pts, z) {
+  let max = 0, sse = 0;
+  for (let i = 0; i < z.length; i++) {
+    const d = Math.hypot(pts[i].x - z[i].re, pts[i].y - z[i].im);
+    if (d > max) max = d; sse += d * d;
+  }
+  return { max, rms: Math.sqrt(sse / z.length) };
+}
+
+/* ---- what each scene needs, computed once before the recorder starts ---- */
+const M = 1000;
+let NOTE = null, NOTE_F = null, SQ = null, SQ_F = null;
+let CORNER = null, COMPRESS = null;
+
+function prepare() {
+  if (SCENE === 's5' || SCENE === 's12') {
+    NOTE = normalise(sampleSVGPath(NOTE_SVG, M));
+    NOTE_F = dft(NOTE);
+  }
+  if (SCENE === 's9') {
+    SQ = normalise(generateSquare(150, 250));
+    SQ_F = dft(SQ);
+    CORNER = [3, 6, 12, 20, 50, 100, 400].map((N) => {
+      const pts = partial(SQ_F, N, M);
+      return { N, pts, ...deviation(pts, SQ) };
+    });
+  }
+  if (SCENE === 's12') {
+    const pts = partial(NOTE_F, 20, M);
+    COMPRESS = { pts, ...deviation(pts, NOTE) };
+  }
+}
+
+/* =====================================================================
+   s5 — nobody guesses the circles
+   The note becomes a thousand points; one sum runs over all of them and
+   drops two numbers per frequency. Those numbers are the real ones.
+   ===================================================================== */
+function s5(u) {
+  backdrop();
+  eyebrow('EIN DURCHGANG, KEIN PROBIEREN', 1);
+
+  const cx = 330, cy = 380, k = 0.46;
+  const mx = (v) => cx + v * k, my = (v) => cy - v * k;
+
+  /* the thousand points, appearing */
+  const shown = Math.round(NOTE.length * ease(seg(u, 0.02, 0.24)));
+  for (let i = 0; i < shown; i++) {
+    const p = NOTE[i];
+    g.fillStyle = hexA(COL.cyan, 0.75);
+    g.fillRect(mx(p.re) - 1, my(p.im) - 1, 2.4, 2.4);
+  }
+  if (shown > 0) {
+    orb(21, 500);
+    txt(shown === NOTE.length ? '1000 PUNKTE' : shown + ' PUNKTE', cx, 630, COL.cyan, 'center');
+  }
+
+  /* the sum sweeping over them */
+  const sw = seg(u, 0.24, 0.52);
+  if (sw > 0 && sw < 1) {
+    const yy = my(300) + (my(-300) - my(300)) * sw;
+    g.strokeStyle = hexA(COL.gold, 0.85); g.lineWidth = 2;
+    g.beginPath(); g.moveTo(cx - 190, yy); g.lineTo(cx + 190, yy); g.stroke();
+  }
+
+  /* the formula, drawn as type - one term at a time */
+  const fx = 700, fy = 205;
+  const fa = seg(u, 0.26, 0.40);
+  if (fa > 0) {
+    g.globalAlpha = fa;
+    out(46, 400);
+    txt('c', fx, fy, COL.pink);
+    out(30, 400); txt('n', fx + 26, fy + 12, COL.aqua);
+    out(46, 300); txt('=', fx + 58, fy, COL.dim);
+    out(40, 300); txt('1', fx + 104, fy - 16, COL.dim);
+    g.strokeStyle = COL.dim; g.lineWidth = 1.5;
+    g.beginPath(); g.moveTo(fx + 100, fy - 6); g.lineTo(fx + 142, fy - 6); g.stroke();
+    out(40, 300); txt('N', fx + 104, fy + 26, COL.dim);
+    out(56, 300); txt('∑', fx + 158, fy + 6, COL.gold);
+    out(46, 400); txt('z', fx + 214, fy, COL.cyan);
+    out(30, 400); txt('k', fx + 240, fy + 12, COL.aqua);
+    out(46, 300); txt('· e', fx + 266, fy, COL.aqua);
+    // the exponent runs over the SAME index the sum does - t sub k, not a free t
+    out(28, 300); txt('− i n ω t', fx + 330, fy - 22, COL.aqua);
+    out(19, 300); txt('k', fx + 424, fy - 14, COL.aqua);
+    g.globalAlpha = 1;
+  }
+
+  /* the table: the lab's real radii and start angles */
+  const rows = NOTE_F.slice(0, 6);
+  const ty = 290, rowH = 46;
+  const ta = seg(u, 0.40, 0.46);
+  if (ta > 0) {
+    g.globalAlpha = ta;
+    orb(15, 500); g.letterSpacing = '2px';
+    txt('DREHZAHL', fx, ty - 16, COL.faint);
+    txt('RADIUS', fx + 210, ty - 16, COL.faint);
+    txt('STARTWINKEL', fx + 350, ty - 16, COL.faint);
+    g.letterSpacing = '0px';
+    g.strokeStyle = hexA(COL.edge, 0.9); g.lineWidth = 1;
+    g.beginPath(); g.moveTo(fx, ty - 4); g.lineTo(fx + 500, ty - 4); g.stroke();
+    g.globalAlpha = 1;
+  }
+  rows.forEach((r, i) => {
+    const a = seg(u, 0.46 + i * 0.055, 0.52 + i * 0.055);
+    if (a <= 0) return;
+    g.globalAlpha = a;
+    const y = ty + 28 + i * rowH;
+    mono(28);
+    txt((r.freq > 0 ? '+' : '') + r.freq, fx + 40, y, i === 0 ? COL.dim : COL.ink, 'right');
+    txt(r.amp.toFixed(1), fx + 320, y, COL.gold, 'right');
+    txt((r.phase * 180 / Math.PI).toFixed(0) + '°', fx + 470, y, COL.pink, 'right');
+    g.globalAlpha = 1;
+  });
+
+  /* the closing thought */
+  const ca = seg(u, 0.84, 0.94);
+  if (ca > 0) {
+    const bx = 660, bw = 560;
+    g.fillStyle = hexA('#0b1836', 0.92 * ca);
+    roundRect(bx, 590, bw, 76, 6); g.fill();
+    g.strokeStyle = hexA(COL.gold, 0.5 * ca); g.lineWidth = 1;
+    roundRect(bx, 590, bw, 76, 6); g.stroke();
+    lede('1000 Punkte → 1000 Kreise. Ein Durchgang.', bx + bw / 2, 637, 28, COL.ink, ca, 'center');
+  }
+}
+
+/* =====================================================================
+   s9 — the corner that never becomes one
+   One corner of the square, magnified, with the curve the first N circles
+   really draw. The deviation next to it is measured, not asserted.
+   ===================================================================== */
+function s9(u) {
+  backdrop();
+  eyebrow('DIE ECKE, DIE KEINE WIRD', 1);
+
+  /* left: the magnified top-right corner of the square (half-side 275).
+     Placed so the corner sits at roughly (390, 330) with both flat edges in
+     frame - the first framing put the corner off the left edge. */
+  const cx = 270, cy = 450, k = 1.6;               // 1 px of the figure -> 1.6 px on screen
+  const mx = (v) => cx + (v - 200) * k, my = (v) => cy - (v - 200) * k;
+
+  /* the wanted corner */
+  g.strokeStyle = hexA('#ffffff', 0.22); g.lineWidth = 2;
+  g.setLineDash([7, 7]);
+  g.beginPath();
+  g.moveTo(mx(120), my(275)); g.lineTo(mx(275), my(275)); g.lineTo(mx(275), my(120));
+  g.stroke();
+  g.setLineDash([]);
+  out(22, 300);
+  txt('gewollt', mx(150), my(292), COL.faint);
+
+  /* the curves, one after another */
+  const per = 0.80 / CORNER.length;
+  let active = -1;
+  CORNER.forEach((cur, i) => {
+    const a0 = 0.06 + i * per;
+    const fade = seg(u, a0, a0 + per * 0.45);
+    if (fade <= 0) return;
+    active = i;
+    const isLast = u < a0 + per;
+    const pts = cur.pts.map((p) => ({ x: mx(p.x), y: my(p.y) }));
+    if (isLast) goldPath(pts, 3.2, fade);
+    else {
+      g.strokeStyle = hexA(COL.gold, 0.22); g.lineWidth = 1.2;
+      g.beginPath();
+      pts.forEach((p, j) => { const fn = j ? 'lineTo' : 'moveTo'; g[fn](p.x, p.y); });
+      g.stroke();
+    }
+  });
+
+  /* what the current step is and how far off it is */
+  if (active >= 0) {
+    const cur = CORNER[active];
+    g.fillStyle = hexA('#0b1836', 0.9);
+    roundRect(64, 560, 664, 108, 6); g.fill();
+    g.strokeStyle = hexA(COL.edge, 1); g.lineWidth = 1;
+    roundRect(64, 560, 664, 108, 6); g.stroke();
+    orb(15, 500); g.letterSpacing = '2px';
+    txt('KREISE', 92, 592, COL.faint);
+    txt('IN DER ECKE DANEBEN', 244, 592, COL.faint);
+    txt('N × ABWEICHUNG', 508, 592, COL.faint);
+    g.letterSpacing = '0px';
+    orb(40, 700);
+    txt(String(cur.N), 92, 646, COL.cyan);
+    txt(cur.max.toFixed(1) + ' px', 244, 646, COL.gold);
+    orb(30, 500);
+    txt((cur.N * cur.max).toFixed(0), 508, 644, COL.lime);
+  }
+
+  /* right: the same numbers as a log-log plot, so 1/N is visible as a straight line */
+  const px0 = 760, py0 = 180, pw = 456, ph = 330;
+  g.fillStyle = hexA('#0b1836', 0.55);
+  roundRect(px0, py0, pw, ph, 6); g.fill();
+  g.strokeStyle = hexA(COL.edgeSoft, 1); g.lineWidth = 1;
+  roundRect(px0, py0, pw, ph, 6); g.stroke();
+  const lx0 = Math.log10(3), lx1 = Math.log10(400);
+  const ly0 = Math.log10(0.5), ly1 = Math.log10(120);
+  const PX = (n) => px0 + 56 + (Math.log10(n) - lx0) / (lx1 - lx0) * (pw - 86);
+  const PY = (e) => py0 + ph - 52 - (Math.log10(e) - ly0) / (ly1 - ly0) * (ph - 84);
+  g.strokeStyle = hexA(COL.edge, 0.8);
+  out(17, 300);
+  [1, 10, 100].forEach((v) => {
+    g.beginPath(); g.moveTo(px0 + 56, PY(v)); g.lineTo(px0 + pw - 24, PY(v)); g.stroke();
+    txt(v + ' px', px0 + 48, PY(v) + 6, COL.faint, 'right');
+  });
+  [3, 10, 100, 400].forEach((v) => {
+    txt(String(v), PX(v), py0 + ph - 22, COL.faint, 'center');
+  });
+  txt('Kreise', px0 + pw / 2, py0 + ph + 4, COL.faint, 'center');
+  /* the 1/N reference through the measured constant */
+  const K = CORNER[3].N * CORNER[3].max;
+  g.strokeStyle = hexA(COL.lime, 0.55); g.lineWidth = 1.6;
+  g.setLineDash([6, 6]);
+  g.beginPath(); g.moveTo(PX(3), PY(K / 3)); g.lineTo(PX(400), PY(K / 400)); g.stroke();
+  g.setLineDash([]);
+  out(19, 400);
+  txt('1 / N', PX(30) + 12, PY(K / 30) - 14, COL.lime);
+  /* the measured points, in step with the curves on the left */
+  g.strokeStyle = COL.gold; g.lineWidth = 2.4;
+  g.beginPath();
+  let started = false;
+  CORNER.forEach((cur, i) => {
+    if (u < 0.06 + i * per) return;
+    const x = PX(cur.N), y = PY(cur.max);
+    if (!started) { g.moveTo(x, y); started = true; } else g.lineTo(x, y);
+  });
+  if (started) g.stroke();
+  CORNER.forEach((cur, i) => {
+    if (u < 0.06 + i * per) return;
+    g.fillStyle = COL.gold;
+    g.beginPath(); g.arc(PX(cur.N), PY(cur.max), 4.5, 0, Math.PI * 2); g.fill();
+  });
+
+  /* the closing thought */
+  const ca = seg(u, 0.86, 0.96);
+  if (ca > 0) {
+    lede('Halb so rund kostet', px0, 588, 30, COL.ink, ca);
+    lede('doppelt so viele Kreise.', px0, 626, 30, COL.ink, ca);
+  }
+}
+
+/* =====================================================================
+   s12 — leaving things out is the trick
+   The same note from a thousand points and from twenty circles. The
+   difference between them is measured on screen, not claimed.
+   ===================================================================== */
+function s12(u) {
+  backdrop();
+  eyebrow('WEGLASSEN IST DER TRICK', 1);
+
+  const k = 0.40;
+  const draw = (ox, oy, pts, style, frac) => {
+    const n = Math.max(2, Math.round(pts.length * frac));
+    const mapped = [];
+    for (let i = 0; i < n; i++) mapped.push({ x: ox + pts[i].x * k, y: oy - pts[i].y * k });
+    if (style === 'dots') {
+      g.fillStyle = hexA(COL.cyan, 0.8);
+      mapped.forEach((p) => g.fillRect(p.x - 1, p.y - 1, 2.4, 2.4));
+    } else {
+      goldPath(mapped, 3, 1);
+    }
+  };
+
+  const LX = 330, RX = 950, CY = 350;
+
+  /* left: the original, a thousand points */
+  const la = seg(u, 0.02, 0.22);
+  if (la > 0) {
+    draw(LX, CY, NOTE.map((p) => ({ x: p.re, y: p.im })), 'dots', la);
+    orb(22, 500); txt('1000 PUNKTE', LX, 560, COL.cyan, 'center');
+    out(26, 300); txt('2000 Zahlen', LX, 596, COL.dim, 'center');
+  }
+
+  /* right: twenty circles */
+  const ra = seg(u, 0.24, 0.46);
+  if (ra > 0) {
+    draw(RX, CY, COMPRESS.pts, 'gold', ra);
+    orb(22, 500); txt('20 KREISE', RX, 560, COL.gold, 'center');
+    out(26, 300); txt('40 Zahlen', RX, 596, COL.dim, 'center');
+  }
+
+  /* the measured difference between the two */
+  const da = seg(u, 0.50, 0.62);
+  if (da > 0) {
+    g.globalAlpha = da;
+    g.fillStyle = hexA('#0b1836', 0.92);
+    roundRect(470, 236, 340, 112, 6); g.fill();
+    g.strokeStyle = hexA(COL.edge, 1); g.lineWidth = 1;
+    roundRect(470, 236, 340, 112, 6); g.stroke();
+    orb(15, 500); g.letterSpacing = '2px';
+    txt('UNTERSCHIED IM BILD', 496, 270, COL.faint);
+    g.letterSpacing = '0px';
+    out(30, 300);
+    txt('im Mittel', 496, 312, COL.dim);
+    orb(30, 700);
+    txt(COMPRESS.rms.toFixed(1) + ' px', 784, 312, COL.gold, 'right');
+    out(22, 300);
+    txt('bei 550 px Figur', 496, 338, COL.faint);
+    g.globalAlpha = 1;
+  }
+
+  /* the ratio lands, between the two notes */
+  const sa = seg(u, 0.64, 0.76);
+  if (sa > 0) {
+    g.globalAlpha = sa;
+    orb(Math.round(lerp(66, 92, ease(sa))), 700);
+    txt('50 : 1', 640, 462, COL.lime, 'center');
+    g.globalAlpha = 1;
+  }
+
+  /* what actually does this */
+  const ja = seg(u, 0.80, 0.92);
+  if (ja > 0) {
+    orb(24, 500); g.letterSpacing = '6px';
+    g.globalAlpha = ja;
+    txt('JPEG · MP3 · H.264', 64, 690, COL.cyan);
+    g.letterSpacing = '0px';
+    g.globalAlpha = 1;
+  }
+}
+
+/* --------------------------------------------------------------------- driver */
+const SCENES = { s5, s9, s12 };
+let t0 = null;
+function frame(now) {
+  if (t0 === null) t0 = now;
+  const u = clamp((now - t0) / (DUR * 1000), 0, 1);
+  (SCENES[SCENE] || s5)(u);
+  if (u < 1) requestAnimationFrame(frame);
+}
+
+document.fonts.ready.then(() => {
+  prepare();
+  // the recorder waits for this before it starts the clock
+  window.__vpReady = true;
+  requestAnimationFrame(frame);
+});
+</script>
+</body>
+</html>
