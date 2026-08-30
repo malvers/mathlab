@@ -18,6 +18,7 @@
         ['mathe/mathe12.html', 'MA 12', 'b-orange', 'Mathematik Klasse 12'],
         ['mathe/mathe13.html', 'MA 13', 'b-orange', 'Mathematik Klasse 13'],
         ['mathe/uebung.html', 'Üben', 'b-orange', 'Übung macht den Meister'],
+        ['physik/phygy10.html', 'PH 10', 'b-violet', 'Physik Klasse 10 (Gymnasium)'],
         ['wr/wr11.html', 'W/R 11', 'b-teal', 'Wirtschaftslehre/Recht Klasse 11'],
         ['informatik/informatik9.html', 'INF 9', 'b-green', 'Informatik Klasse 9'],
         ['informatik/inf11.html', 'INF 11', 'b-green', 'Informatik Klasse 11'],
@@ -46,7 +47,8 @@
             ['Informatik', ['informatik/informatik9.html']]
         ]],
         ['Gymnasium', [
-            ['Mathematik', ['mathe/mathegy9.html', 'mathe/mathegy10.html']]
+            ['Mathematik', ['mathe/mathegy9.html', 'mathe/mathegy10.html']],
+            ['Physik', ['physik/phygy10.html']]
         ]],
         ['Berufliches Gymnasium', [
             ['Mathematik', ['mathe/mathe11.html', 'mathe/mathe12.html', 'mathe/mathe13.html']],
