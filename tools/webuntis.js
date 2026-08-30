@@ -240,16 +240,68 @@ async function loadPlan(pageRel) {
   return { rows: merged, badge, overrideTs: ts, pagePath };
 }
 
-// One line for the classbook: topic, Lernbereich, Ustd. and the planned steps.
+// One line for the classbook: topic, Lernbereich, Ustd. and the planned steps,
+// capped at 250 chars WITHOUT mutilating anything. Three stages, each only when
+// the previous one did not fit, so as little as possible is lost:
+//   1. the full text, spelled out
+//   2. abbreviations (Wiederholung -> Wdh.) - costs readability, not content
+//   3. drop WHOLE steps from the end, a trailing " ..." says more would follow
+// A plain slice(250) used to cut mid-word.
+// Must stay character-identical to untisTopicText()/untisFit() in
+// HTML/svp/svp-plan.js - otherwise each side thinks the other's text is a hand
+// correction and the overwrite protection fires for nothing. That is also why
+// the abbreviation table is NOT duplicated here but read out of svp-plan.js:
+// one list, one behaviour.
+const TOPIC_MAX = 250;
+const ABBREV_SRC = path.join(REPO, 'HTML/svp/svp-plan.js');
+
+let abbrevRules = null;
+function abbrevate(t) {
+  if (!abbrevRules) {
+    const table = extractLiteral(fs.readFileSync(ABBREV_SRC, 'utf8'), 'SVP_ABBREV', '[', ']') || [];
+    abbrevRules = table
+      .slice()
+      .sort((a, b) => b[0].length - a[0].length)
+      .map(([long, short]) => [
+        // whole words only - \b knows ASCII only and "Ueberblick" starts with a non-word char
+        new RegExp('(?<!\\p{L})' + long.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '(?!\\p{L})', 'gu'),
+        short,
+      ]);
+  }
+  for (const [re, short] of abbrevRules) t = t.replace(re, short);
+  return t;
+}
+
+function fitTopic(base, details) {
+  const build = (b, d, n) => (n ? `${b}: ${d.slice(0, n).join(' \u00b7 ')}` : b);
+
+  const full = build(base, details, details.length);
+  if (full.length <= TOPIC_MAX) return full;                    // 1
+
+  const aBase = abbrevate(base), aDet = details.map(abbrevate);
+  const aFull = build(aBase, aDet, aDet.length);
+  if (aFull.length <= TOPIC_MAX) return aFull;                  // 2
+
+  let t = aBase, used = 0;                                      // 3
+  for (let k = 0; k < aDet.length; k++) {
+    const cand = build(aBase, aDet, k + 1);
+    if (cand.length > TOPIC_MAX) break;
+    t = cand; used = k + 1;
+  }
+  if (used < aDet.length) t += ' \u2026';
+  if (t.length > TOPIC_MAX) {                 // safety net: the topic alone is too long
+    t = t.slice(0, TOPIC_MAX - 2);
+    t = t.slice(0, Math.max(t.lastIndexOf(' '), 1)).trim() + ' \u2026';
+  }
+  return t;
+}
+
 function topicText(row, badge) {
   const lb = (badge[row.type] || [])[1];
   const head = [lb, row.u].filter(Boolean).join(', ');
-  let t = row.topic || '';
-  if (head) t += ` (${head})`;
-  const details = (row.details || []).filter(Boolean);
-  if (details.length) t += ': ' + details.join(' \u00b7 ');
-  t = t.replace(/\s+/g, ' ').trim();
-  return t.length > 250 ? t.slice(0, 249) + '\u2026' : t;
+  const base = `${row.topic || ''}${head ? ` (${head})` : ''}`.replace(/\s+/g, ' ').trim();
+  const details = (row.details || []).filter(Boolean).map(d => String(d).replace(/\s+/g, ' ').trim());
+  return fitTopic(base, details);
 }
 
 // My lessons on a day / in a range, with the ttId needed for writing.
@@ -273,17 +325,17 @@ async function myLessons(from, to, session) {
 // command and automatically after 'plan' wrote something, so the badges never
 // show a state older than the last write.
 async function runStatus(session) {
-  const klasseToPage = loadMap();
+  const pages = loadMap();
   const years = await rpc('getSchoolyears');
   const today = Number(ymd(new Date()));
   const year = years.find(y => Number(y.startDate) <= today && Number(y.endDate) >= today) || years[years.length - 1];
   console.log(`Schuljahr ${year.name}: ${year.startDate}..${year.endDate}`);
   const lessons = (await myLessons(year.startDate, year.endDate, session))
-    .filter(l => l.klassen.some(k => klasseToPage[k]));
+    .filter(l => pageFor(l, pages));
   const topics = await readTopics(lessons.map(l => l.ttId));
   const byPage = {};
   for (const l of lessons) {
-    const page = l.klassen.map(k => klasseToPage[k]).find(Boolean);
+    const page = pageFor(l, pages);
     const kw = String(isoWeek(parseYmd(l.date)));
     const b = (byPage[page] ||= { weeks: {} });
     (b.weeks[kw] ||= []).push({
