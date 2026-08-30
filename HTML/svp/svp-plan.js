@@ -1922,7 +1922,7 @@
             const g = new Date(generated);
             lines.push('Stand ' + g.toLocaleDateString('de-DE') + ' ' +
                 g.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }) +
-                ' — im Bearbeiten-Modus klicken öffnet WebUntis');
+                ' — im Bearbeiten-Modus klicken: Stundeninhalt eintragen');
         }
         return lines.join('\n');
     }
@@ -1958,7 +1958,348 @@
         return svg;
     }
 
+    /* ---- WebUntis schreiben -----------------------------------------------
+       Bis 29.08.2026 hat der Chip WebUntis nur geoeffnet und Doc hat den
+       Stundeninhalt von Hand hinuebergetippt. Jetzt traegt der Klick ihn direkt
+       ein. Der Browser kommt an WebUntis nie selbst heran - kein CORS, und der
+       Untis-App-Schluessel darf nicht in eine oeffentliche Seite (Regel 18).
+       Dazwischen steht die Edge Function 'webuntis', die serverseitig genau das
+       tut, was tools/webuntis.js lokal tut. */
+
+    const UNTIS_MAX = 250;          /* WebUntis kappt laengere Texte ohnehin */
+
+    async function untisCall(body) {
+        if (!window.svpAuth || !svpAuth.hasSession()) throw new Error('Nicht angemeldet — bitte neu einloggen.');
+        await svpAuth.ensureFreshToken();
+        const res = await fetch(svpAuth.DB_URL + '/functions/v1/webuntis', {
+            method: 'POST',
+            headers: {
+                apikey: svpAuth.DB_KEY,
+                Authorization: 'Bearer ' + svpAuth.session.access_token,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(body)
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) { const e = new Error(data.error || ('HTTP ' + res.status)); e.data = data; throw e; }
+        return data;
+    }
+
+    /* Eine Klassenbuch-Zeile aus der Planzeile: Thema (Lernbereich, Ustd.): Schritte.
+       Muss Zeichen fuer Zeichen dieselbe Regel sein wie topicText() in
+       tools/webuntis.js - sonst haelt der eine Weg fuer eine Aenderung, was der
+       andere geschrieben hat, und der Ueberschreibschutz schlaegt grundlos an. */
+    /* Abkuerzungen fuer das WebUntis-Klassenbuch. Nur 250 Zeichen passen dort
+       hinein, und die Schritte einer Woche sind schnell laenger - lieber
+       "Wdh." schreiben als einen ganzen Schritt weglassen.
+       WICHTIG: sie greifen NUR, wenn der volle Text nicht passt. Was hineinpasst,
+       bleibt ausgeschrieben - ein Klassenbuch im Telegrammstil will niemand lesen.
+       Die Liste ist die EINZIGE Quelle: tools/webuntis.js liest sie aus dieser
+       Datei heraus, damit beide Wege zeichengleich schreiben.
+       Reihenfolge egal - es wird nach Laenge sortiert angewandt, damit
+       "Datenbankmanagementsystem" vor "Datenbank" drankommt. */
+    window.SVP_ABBREV = [
+        /* Mehrwortiges zuerst gedacht, sortiert wird ohnehin */
+        ['Künstliche Intelligenz', 'KI'], ['Künstlicher Intelligenz', 'KI'],
+        ['Schülerinnen und Schüler', 'SuS'],
+        ['zum Beispiel', 'z. B.'], ['unter anderem', 'u. a.'],
+        ['beziehungsweise', 'bzw.'], ['und so weiter', 'usw.'],
+        /* Informatik-Fachwoerter */
+        ['Datenbankmanagementsystem', 'DBMS'], ['Datenbankmanagementsysteme', 'DBMS'],
+        ['Datenbanksystem', 'DBS'], ['Datenbanksysteme', 'DBS'],
+        ['Datenbankanbindung', 'DB-Anbindung'],
+        ['Datenbanken', 'DBs'], ['Datenbank', 'DB'],
+        ['Informationssystem', 'IS'], ['Informationssysteme', 'IS'],
+        ['Informationsmanagement', 'Info-Mgmt.'],
+        ['Betriebssystem', 'BS'], ['Betriebssysteme', 'BS'],
+        ['Tabellenkalkulation', 'TK'],
+        ['Datensicherheit', 'Datensich.'], ['Datenschutz', 'DS'],
+        ['Algorithmus', 'Alg.'], ['Algorithmen', 'Alg.'],
+        ['Implementierung', 'Impl.'], ['implementieren', 'impl.'],
+        ['Modellierung', 'Modell.'], ['Programmierung', 'Progr.'],
+        ['Dokumentation', 'Doku'], ['Präsentation', 'Präs.'], ['Präsentationen', 'Präs.'],
+        ['Verarbeitung', 'Verarb.'], ['Automatisierung', 'Autom.'],
+        ['Automatisierte', 'Autom.'], ['Automatisierten', 'Autom.'],
+        ['Automatisiertes', 'Autom.'], ['automatisierte', 'autom.'],
+        /* Schul- und Planwoerter */
+        ['Klassenarbeit', 'KA'], ['Klassenarbeiten', 'KAs'],
+        ['Wiederholung', 'Wdh.'], ['Wiederholungen', 'Wdh.'],
+        ['Lernbereich', 'LB'], ['Wahlbereich', 'WB'],
+        ['Leistungsnachweis', 'LNW'], ['Leistungsnachweise', 'LNW'],
+        ['Abiturvorbereitung', 'Abi-Vorb.'],
+        ['Schuljahresplanung', 'SJ-Planung'], ['Schuljahresauftakt', 'SJ-Auftakt'],
+        ['Organisatorisches', 'Orga'], ['Organisation', 'Orga'],
+        ['Konsultationen', 'Konsult.'], ['Konsultation', 'Konsult.'],
+        ['Hilfsmittel', 'Hilfsm.'], ['Vermischte', 'Verm.'],
+        ['Auswertung', 'Ausw.'], ['Bewertung', 'Bew.'],
+        ['Vertiefung', 'Vertief.'], ['Einführung', 'Einf.'],
+        ['Grundlagen', 'Grdl.'], ['Überblick', 'Überbl.'], ['Ausblick', 'Ausbl.'],
+        ['Abschluss', 'Abschl.'], ['Jahresrückblick', 'Jahresrückbl.'],
+        /* Allgemeines */
+        ['Eigenschaften', 'Eig.'], ['Anwendungen', 'Anw.'], ['Anwendung', 'Anw.'],
+        ['Beispielen', 'Bsp.'], ['Beispiele', 'Bsp.'], ['Beispiel', 'Bsp.'],
+        ['Aufgaben', 'Aufg.'], ['Aufgabe', 'Aufg.'],
+        ['Funktionen', 'Fkt.'], ['Funktion', 'Fkt.'],
+        ['Gleichungen', 'Gl.'], ['Gleichung', 'Gl.'],
+        ['Informationen', 'Infos'], ['Information', 'Info'],
+        ['vergleichen', 'vgl.'], ['Vergleich', 'Vgl.']
+    ];
+
+    /* Ein Wort nur als GANZES Wort ersetzen - sonst wuerde "Datenbank" mitten
+       in "Datenbankanbindung" zuschlagen. \b hilft hier nicht: es kennt nur
+       ASCII, und "Überblick" faengt mit einem Nicht-Wort-Zeichen an. */
+    let abbrevRules = null;
+    function untisAbbrev(t) {
+        if (!abbrevRules) {
+            abbrevRules = window.SVP_ABBREV
+                .slice()
+                .sort((a, b) => b[0].length - a[0].length)
+                .map(([long, short]) => [
+                    new RegExp('(?<!\\p{L})' + long.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '(?!\\p{L})', 'gu'),
+                    short
+                ]);
+        }
+        for (const [re, short] of abbrevRules) t = t.replace(re, short);
+        return t;
+    }
+
+    function untisTopicText(i) {
+        const c = contentOf(i);
+        const lb = (window.BADGE[c.type] || [])[1];
+        const head = [lb, c.u].filter(Boolean).join(', ');
+        const base = ((c.topic || '') + (head ? ' (' + head + ')' : '')).replace(/\s+/g, ' ').trim();
+        const details = (c.details || []).filter(Boolean)
+            .map(d => String(d).replace(/\s+/g, ' ').trim());
+        return untisFit(base, details);
+    }
+
+    /* Auf 250 Zeichen bringen, in drei Stufen - jede greift erst, wenn die
+       vorige nicht gereicht hat, damit so wenig wie moeglich verlorengeht:
+         1. voller Text, ausgeschrieben
+         2. Abkuerzungen (Wiederholung -> Wdh.) - kostet Lesbarkeit, kein Inhalt
+         3. ganze Schritte vom Ende weglassen, " …" sagt, dass noch etwas kommt
+       Frueher schnitt ein hartes slice(250) mitten im Wort ab.
+       Muss zeichengleich zu topicText() in tools/webuntis.js bleiben. */
+    function untisFit(base, details) {
+        const build = (b, d, n) => n ? b + ': ' + d.slice(0, n).join(' · ') : b;
+
+        const full = build(base, details, details.length);
+        if (full.length <= UNTIS_MAX) return full;                 /* 1 */
+
+        const aBase = untisAbbrev(base), aDet = details.map(untisAbbrev);
+        const aFull = build(aBase, aDet, aDet.length);
+        if (aFull.length <= UNTIS_MAX) return aFull;               /* 2 */
+
+        let t = aBase, used = 0;                                   /* 3 */
+        for (let k = 0; k < aDet.length; k++) {
+            const cand = build(aBase, aDet, k + 1);
+            if (cand.length > UNTIS_MAX) break;
+            t = cand; used = k + 1;
+        }
+        if (used < aDet.length) t += ' …';
+        /* Notnagel: schon das Thema allein ist zu lang - an der letzten
+           Wortgrenze kappen, nicht im Wort. */
+        if (t.length > UNTIS_MAX) {
+            t = t.slice(0, UNTIS_MAX - 2);
+            t = t.slice(0, Math.max(t.lastIndexOf(' '), 1)).trim() + ' …';
+        }
+        return t;
+    }
+
+    const WDAY = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
+    function untisDay(ymd) {
+        const d = new Date(+ymd.slice(0, 4), +ymd.slice(4, 6) - 1, +ymd.slice(6, 8));
+        return WDAY[d.getDay()] + ' ' + ymd.slice(6, 8) + '.' + ymd.slice(4, 6) + '.';
+    }
+
+    /* Dialog fuer eine Kalenderwoche: Text links, die Stunden dieser Woche
+       rechts. Der Stand kommt LIVE aus WebUntis, nicht aus der .untis.json -
+       die ist nur der Aufhaenger (Datumsbereich + Klassen der Seite) und kann
+       Tage alt sein. */
+    /* Dialog fuer eine Kalenderwoche: eine Editbox und "Send now". Mehr soll
+       da nicht stehen (Doc, 30.08.2026) - der Stundeninhalt wird eingetippt
+       oder liegt schon fertig da, und dann geht er raus. Die Stunden, in die
+       geschrieben wird, stehen als eine Zeile darunter; angekreuzt wird nur
+       dort, wo schon etwas ANDERES drinsteht - eine Handkorrektur in WebUntis
+       darf nie stillschweigend sterben. Der Stand kommt live aus WebUntis,
+       nicht aus der .untis.json - die ist nur der Aufhaenger (Datumsbereich +
+       Klassen der Seite) und kann Tage alt sein. */
+    function untisDialog(ref, entries, chip, data, url) {
+        const dates = entries.map(e => e.date).sort();
+        const from = dates[0], to = dates[dates.length - 1];
+        const classes = (data && data.classes) || [];
+
+        const overlay = document.createElement('div');
+        overlay.className = 'svp-gate-overlay';
+        overlay.innerHTML =
+            '<div class="svp-gate-card untis-card">' +
+            '  <div class="svp-gate-title">WebUntis &middot; Klassenbuch</div>' +
+            '  <div class="svp-gate-sub">KW ' + ref.kw + ' &middot; ' + untisDay(from) +
+            (from !== to ? '&ndash;' + untisDay(to) : '') + '</div>' +
+            '  <textarea id="untis-text" class="untis-text" rows="4" aria-label="Stundeninhalt"' +
+            '            maxlength="' + UNTIS_MAX + '"></textarea>' +
+            '  <div class="untis-count"><span id="untis-n">0</span>/' + UNTIS_MAX + '</div>' +
+            '  <div class="untis-targets" id="untis-targets">Stunden werden geladen &hellip;</div>' +
+            '  <div class="svp-gate-row">' +
+            '    <button type="button" class="action secondary" id="untis-cancel">Abbrechen</button>' +
+            '    <button type="button" class="action" id="untis-go" disabled>Send now</button>' +
+            '  </div>' +
+            '  <div class="svp-gate-err" id="untis-err">&nbsp;</div>' +
+            '</div>';
+        document.body.appendChild(overlay);
+
+        const ta = overlay.querySelector('#untis-text');
+        const counter = overlay.querySelector('#untis-n');
+        const targets = overlay.querySelector('#untis-targets');
+        const err = overlay.querySelector('#untis-err');
+        const go = overlay.querySelector('#untis-go');
+
+        ta.value = untisTopicText(ref.i);
+        const countUp = () => { counter.textContent = String(ta.value.length); };
+        countUp();
+        ta.addEventListener('input', countUp);
+
+        function close() {
+            document.removeEventListener('keydown', onKey, true);
+            overlay.remove();
+        }
+        function onKey(ev) {
+            if (ev.key === 'Escape') { ev.preventDefault(); close(); }
+            /* Cmd/Ctrl+Enter schickt los - Enter allein gehoert der Textarea. */
+            else if (ev.key === 'Enter' && (ev.metaKey || ev.ctrlKey) && !go.disabled) { ev.preventDefault(); send(); }
+        }
+        document.addEventListener('keydown', onKey, true);
+        overlay.querySelector('#untis-cancel').addEventListener('click', close);
+        overlay.addEventListener('click', ev => { if (ev.target === overlay) close(); });
+
+        function label(l) { return l.klassen.join(',') + ' ' + untisDay(l.date) + ' ' + l.start; }
+
+        /* Eine Zeile je Stunde nur dort, wo es etwas zu entscheiden gibt.
+           Freie Stunden zaehlt eine einzige Zeile zusammen. */
+        let free = [], busy = [], locked = [];
+        untisCall({ action: 'lessons', from: from, to: to }).then(res => {
+            const mine = (res.lessons || []).filter(l =>
+                !classes.length || l.klassen.some(k => classes.indexOf(k) >= 0));
+            if (!mine.length) { targets.textContent = 'Keine passende Stunde in dieser Woche.'; return; }
+            locked = mine.filter(l => !l.writable);
+            free = mine.filter(l => l.writable && !l.topic.trim());
+            busy = mine.filter(l => l.writable && l.topic.trim());
+            targets.textContent = '';
+
+            if (free.length) {
+                const line = document.createElement('div');
+                line.className = 'untis-go-line';
+                line.textContent = '→ ' + free.map(label).join('  ·  ');
+                targets.appendChild(line);
+            }
+            /* Belegte Stunden: nur mit ausdruecklichem Haken ueberschreiben. */
+            busy.forEach(l => {
+                const row = document.createElement('label');
+                row.className = 'untis-row';
+                const cb = document.createElement('input');
+                cb.type = 'checkbox';
+                const txt = document.createElement('span');
+                txt.className = 'untis-state is-set';
+                txt.textContent = label(l) + ' — steht: ' + l.topic;
+                row.appendChild(cb); row.appendChild(txt);
+                targets.appendChild(row);
+                l._cb = cb; l._state = txt;
+            });
+            locked.forEach(l => {
+                const row = document.createElement('div');
+                row.className = 'untis-row is-locked';
+                row.textContent = label(l) + ' — kein Schreibrecht';
+                targets.appendChild(row);
+            });
+            if (!free.length && !busy.length) targets.appendChild(document.createTextNode('Nichts zu schreiben.'));
+            go.disabled = false;
+        }).catch(e => { targets.textContent = ''; err.textContent = e.message; });
+
+        async function send() {
+            const text = ta.value.replace(/\s+/g, ' ').trim();
+            if (!text) { err.textContent = 'Text ist leer.'; return; }
+            const picked = free.concat(busy.filter(l => l._cb && l._cb.checked));
+            if (!picked.length) {
+                err.textContent = busy.length
+                    ? 'Alle Stunden sind belegt — zum Überschreiben ankreuzen.'
+                    : 'Keine Stunde zum Schreiben.';
+                return;
+            }
+            go.disabled = true;
+            err.textContent = 'Schicke …';
+            let done = 0, failed = [];
+            for (const l of picked) {
+                try {
+                    /* force nur, wo Doc den Haken gesetzt hat. */
+                    const res = await untisCall({
+                        action: 'write', ttId: l.ttId, topic: text, force: !!l.topic.trim()
+                    });
+                    l.topic = res.stored || text;
+                    if (l._state) { l._state.textContent = label(l) + ' — eingetragen ✓'; l._state.className = 'untis-state is-ok'; }
+                    if (l._cb) { l._cb.checked = false; l._cb.disabled = true; }
+                    /* Chip-Stand mitziehen, damit er nicht bis zum naechsten
+                       tools/webuntis.js status veraltet dasteht. */
+                    const hit = entries.find(e => e.date === l.date && e.start === l.start);
+                    if (hit) { hit.written = true; hit.text = l.topic; }
+                    untisEchoPut(l.date, l.start, l.topic);   /* ueberlebt den Reload */
+                    done++;
+                } catch (e) {
+                    failed.push(label(l) + ': ' + e.message);
+                }
+            }
+            free = free.filter(l => !l.topic.trim());
+            const anyWritten = entries.some(e => e.written);
+            chip.className = 'untis-chip ' +
+                (entries.every(e => e.written) ? 'is-full' : anyWritten ? 'is-part' : 'is-none');
+            chip.title = untisTitle(entries, data.generated);
+            if (failed.length) { err.textContent = failed.join(' | '); go.disabled = false; return; }
+            err.textContent = done + ' Stunde' + (done === 1 ? '' : 'n') + ' eingetragen ✓';
+            setTimeout(close, 900);   /* Erfolg kurz zeigen, dann aus dem Weg */
+        }
+        go.addEventListener('click', send);
+        ta.focus();
+        ta.setSelectionRange(ta.value.length, ta.value.length);
+    }
+
+    /* ---- Lokales Echo des Chip-Stands ------------------------------------
+       Der Chip liest <plan>.untis.json - eine Datei, die nur
+       "tools/webuntis.js status" auf Docs Rechner erzeugt. Was der Dialog
+       gerade nach WebUntis geschrieben hat, steht dort noch nicht drin: der
+       Chip wurde im Moment des Sendens orange und war nach dem naechsten
+       Reload wieder weiss (Doc, 30.08.2026 - der Text stand da laengst drin).
+       Der Browser kann die Datei nicht schreiben, also merkt sich die Seite
+       ihre eigenen Schreibvorgaenge lokal und legt sie darueber.
+       Aufraeum-Regel: sobald die Datei JUENGER ist als das Echo, gewinnt die
+       Datei und das Echo fliegt raus. Sonst wuerde eine Stunde, die Doc in
+       WebUntis wieder geleert hat, hier ewig als eingetragen leuchten. */
+    const UNTIS_ECHO_KEY = 'svp-untis-echo:' + location.pathname;
+
+    function untisEchoLoad() {
+        try { return JSON.parse(localStorage.getItem(UNTIS_ECHO_KEY)) || {}; } catch (e) { return {}; }
+    }
+    function untisEchoPut(date, start, text) {
+        const map = untisEchoLoad();
+        map[date + ' ' + start] = { text: text, ts: Date.now() };
+        try { localStorage.setItem(UNTIS_ECHO_KEY, JSON.stringify(map)); } catch (e) { }
+    }
+    function untisEchoMerge(data) {
+        const map = untisEchoLoad();
+        const fileTs = data.generated ? Date.parse(data.generated) : 0;
+        let dirty = false;
+        for (const kw of Object.keys(data.weeks || {})) {
+            for (const e of data.weeks[kw]) {
+                const key = e.date + ' ' + e.start, rec = map[key];
+                if (!rec) continue;
+                if (fileTs && fileTs > rec.ts) { delete map[key]; dirty = true; continue; }
+                e.written = true;
+                e.text = rec.text;
+            }
+        }
+        if (dirty) { try { localStorage.setItem(UNTIS_ECHO_KEY, JSON.stringify(map)); } catch (e) { } }
+    }
+
     function decorateUntis(data) {
+        untisEchoMerge(data);
         const weeks = (data && data.weeks) || {};
         const url = data && data.webuntis;
         for (const r of rendered) {
@@ -1975,7 +2316,7 @@
                 ev.stopPropagation(); /* not the row's detail toggle */
                 /* Der Chip zeigt immer an, handelt aber nur im Bearbeiten. */
                 if (!document.body.classList.contains('editing')) return;
-                if (url) window.open(url, '_blank');
+                untisDialog(r, entries, chip, data, url);
             });
             (r.lbCell || r.lbTd).appendChild(chip);
         }

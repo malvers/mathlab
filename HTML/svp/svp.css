@@ -1304,7 +1304,7 @@ td.remark { color: var(--muted); font-size: 0.88rem; min-width: 160px; }
 
 /* WebUntis-Status: zeigt, ob der Stundeninhalt der Woche im Klassenbuch steht.
    Gespeist aus <plan>.untis.json, erzeugt von tools/webuntis.js status.
-   Immer sichtbar - nur der Klick (WebUntis oeffnen) haengt am Bearbeiten-Modus.
+   Immer sichtbar - nur der Klick (Schreibdialog) haengt am Bearbeiten-Modus.
    Alle Grundregeln bewusst einklassig, damit .is-full/.is-part die Farbe
    sicher ueberschreiben. */
 .untis-chip {
@@ -1361,6 +1361,88 @@ body.editing .untis-chip { cursor: pointer; }
 }
 
 @media print { .untis-chip { display: none; } }
+
+/* WebUntis-Schreibdialog (svp-plan.js untisDialog). Breiter als die
+   Login-Karte, weil links der Stundeninhalt und darunter die Stunden der
+   Woche stehen; sonst dieselbe Karte wie ueberall im SVP. */
+.svp-gate-card.untis-card {
+    width: min(94vw, 620px);
+    text-align: left;
+    max-height: 88vh;
+    overflow-y: auto;
+}
+
+.untis-card .svp-gate-title,
+.untis-card .svp-gate-sub { text-align: center; }
+
+.untis-text {
+    width: 100%;
+    background: var(--input-bg);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.92rem;
+    line-height: 1.45;
+    padding: 10px 12px;
+    resize: vertical;
+}
+
+.untis-text:focus { outline: 1px solid var(--cyan); }
+
+.untis-count {
+    font-size: 0.7rem;
+    color: var(--muted);
+    text-align: right;
+    margin: 4px 0 12px;
+}
+
+/* Darunter steht nur, wohin es geht - und Ankreuzbares nur dort, wo schon
+   etwas anderes im Klassenbuch steht. */
+.untis-targets {
+    font-size: 0.82rem;
+    color: var(--muted);
+    border-top: 1px solid var(--line);
+    padding-top: 10px;
+    margin-bottom: 16px;
+}
+
+.untis-go-line {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.72rem;
+    letter-spacing: 0.04em;
+    color: var(--phi);
+    padding: 2px 0;
+}
+
+.untis-row {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: baseline;
+    gap: 10px;
+    padding: 5px 0;
+    cursor: pointer;
+}
+
+.untis-row.is-locked { cursor: default; opacity: 0.5; }
+.untis-row input { width: auto; margin: 0; }
+
+/* Der vorhandene Text kann lang sein - abschneiden statt die Karte sprengen. */
+.untis-state {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
+}
+
+.untis-state.is-set { color: var(--lambda); }
+.untis-state.is-ok { color: var(--phi); }
+.untis-state.is-bad { color: rgb(235, 120, 105); }
+
+/* Abbrechen bleibt klein, "Send now" ist der Knopf des Dialogs. */
+.untis-card .svp-gate-row { gap: 12px; }
+.untis-card #untis-cancel { flex: 0 0 auto; }
+.untis-card #untis-go { flex: 1; }
 
 /* Badges that deep-link into the Lehrplan PDF (set by svp-plan.js) */
 .badge-link { cursor: pointer; }
