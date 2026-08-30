@@ -1,0 +1,1288 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+
+<style>
+/* minimal reset - the artifact host used to provide this */
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; min-height: 100vh; }
+img, canvas, svg { display: block; max-width: 100%; }
+button, input { font: inherit; }
+:focus-visible { outline: 2px solid #00d2ff; outline-offset: 2px; }
+</style>
+<title>Wie viele Kreise ist ein Quadrat</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&family=Outfit:wght@200;300;400;600&display=swap">
+
+<style>
+/* Palette and faces are the lab's own (fourier.html): Orbitron + Outfit,
+   deep blue ground, gold = the drawn trace, pink/aqua/yellow = the rotating
+   vectors, lime = the AUTO-EVOLVE button. Single-theme on purpose - this is
+   the lab's world. */
+:root {
+    --ground:      #081428;
+    --ground-deep: #050e1c;
+    --surface:     #0c1c3a;
+    --surface-2:   #0e244e;
+    --line:        #1c3565;
+    --line-soft:   #16294d;
+
+    --ink:         #e6eefa;
+    --ink-dim:     #b3c5de;
+    --ink-faint:   #8ba1c0;
+
+    --cyan:        #00d2ff;
+    --gold:        #ffd700;
+    --pink:        #ff7eb9;
+    --aqua:        #7afbff;
+    --lime:        #adff2f;
+    --violet:      #c07fe8;
+    --red:         #b02418;
+
+    --step: clamp(0.9rem, 0.55rem + 1.1vw, 1.5rem);
+}
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    background: var(--ground);
+    background-image:
+        radial-gradient(1100px 620px at 12% -8%, #0f2a55 0%, transparent 62%),
+        radial-gradient(900px 520px at 92% 4%, #10203f 0%, transparent 58%);
+    background-attachment: fixed;
+    color: var(--ink);
+    font-family: 'Outfit', system-ui, sans-serif;
+    font-weight: 300;
+    font-size: 1.1rem;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+}
+
+.wrap {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: clamp(1.6rem, 4vw, 4rem) clamp(1.1rem, 4vw, 2.6rem) 6rem;
+}
+
+/* ---------- shared type ---------- */
+.eyebrow {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+}
+
+h1, h2, h3 { font-family: 'Orbitron', sans-serif; text-wrap: balance; margin: 0; }
+
+h1 {
+    font-size: clamp(2rem, 1.2rem + 3.4vw, 3.4rem);
+    font-weight: 700;
+    line-height: 1.08;
+    letter-spacing: -0.01em;
+    margin: 0.5rem 0 0;
+}
+
+h2 {
+    font-size: clamp(1.05rem, 0.9rem + 0.6vw, 1.32rem);
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    color: var(--ink);
+}
+
+p { margin: 0; }
+
+em { font-style: italic; color: #eaf2fd; }
+strong { font-weight: 600; color: #f2f7ff; }
+
+/* mathematical symbols, set apart without a formula engine */
+.m {
+    font-family: 'Outfit', system-ui, sans-serif;
+    font-style: italic;
+    font-weight: 400;
+    color: var(--aqua);
+    white-space: nowrap;
+}
+.m.g { color: var(--gold); }
+.m.p { color: var(--pink); }
+
+/* ---------- header ---------- */
+header { margin-bottom: clamp(1.8rem, 4vw, 3rem); }
+
+.status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.74rem;
+    font-weight: 500;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--gold);
+    border: 1px solid #4a3a15;
+    background: #1b1607;
+    border-radius: 2px;
+    padding: 0.34rem 0.7rem;
+    margin-top: 1.1rem;
+}
+.status::before {
+    content: "";
+    width: 5px; height: 5px;
+    background: var(--gold);
+    border-radius: 50%;
+}
+
+.lede {
+    margin-top: 1.1rem;
+    max-width: 60ch;
+    color: var(--ink-dim);
+    font-size: 1.18rem;
+}
+
+.meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 2rem;
+    margin-top: 1.6rem;
+    padding-top: 1.2rem;
+    border-top: 1px solid var(--line-soft);
+}
+.meta div { display: flex; flex-direction: column; gap: 0.15rem; padding: 0.4rem 0; }
+.meta dt {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.74rem;
+    font-weight: 500;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+}
+.meta dd { margin: 0; font-size: 1.02rem; color: var(--ink); }
+.meta a { color: var(--cyan); text-decoration: none; border-bottom: 1px solid #05506b; }
+.meta a:hover, .meta a:focus-visible { border-bottom-color: var(--cyan); }
+
+/* ---------- hero canvas + thesis ---------- */
+.thesis {
+    display: grid;
+    grid-template-columns: minmax(0, 300px) minmax(0, 1fr);
+    gap: clamp(1.2rem, 3vw, 2.6rem);
+    align-items: center;
+    margin: clamp(1.6rem, 4vw, 2.6rem) 0 clamp(2.4rem, 6vw, 4rem);
+    padding: clamp(1.2rem, 3vw, 2rem);
+    background: linear-gradient(160deg, var(--surface) 0%, var(--ground-deep) 100%);
+    border: 1px solid var(--line);
+    border-radius: 3px;
+}
+@media (max-width: 700px) { .thesis { grid-template-columns: 1fr; } }
+
+#stage {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    display: block;
+    border-radius: 2px;
+    background: #04101f;
+}
+
+.thesis blockquote {
+    margin: 0;
+    font-size: clamp(1.15rem, 0.95rem + 1vw, 1.6rem);
+    line-height: 1.42;
+    font-weight: 200;
+    color: #eef4fd;
+    text-wrap: balance;
+}
+.thesis blockquote strong { font-weight: 600; }
+.thesis .after {
+    margin-top: 1.1rem;
+    color: var(--ink-dim);
+    font-size: 1.06rem;
+    max-width: 54ch;
+}
+
+/* ---------- section frame ---------- */
+section { margin-top: clamp(2.6rem, 6vw, 4.4rem); }
+
+.head {
+    display: flex;
+    align-items: baseline;
+    gap: 0.9rem;
+    padding-bottom: 0.7rem;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 1.5rem;
+}
+.head .n {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.84rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: var(--cyan);
+}
+.head .note { margin-left: auto; font-size: 0.9rem; color: var(--ink-faint); }
+
+.prose { max-width: 66ch; color: var(--ink-dim); display: grid; gap: 0.85rem; }
+.prose strong { color: #eaf2fd; }
+
+/* ---------- the arc ---------- */
+.arc {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    align-items: stretch;
+    margin-bottom: 1.5rem;
+}
+.arc span {
+    flex: 1 1 auto;
+    min-width: 92px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.76rem;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    text-align: center;
+    padding: 0.85rem 0.5rem;
+    background: var(--surface);
+    border: 1px solid var(--line-soft);
+    border-top: 2px solid var(--stop, var(--line));
+    color: var(--ink-dim);
+    text-wrap: balance;
+    line-height: 1.4;
+}
+.arc span.key { color: #eef4fd; background: var(--surface-2); }
+
+/* ---------- timeline ---------- */
+.timeline {
+    display: flex;
+    width: 100%;
+    height: 54px;
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-bottom: 0.7rem;
+}
+.timeline i {
+    position: relative;
+    display: block;
+    border-right: 1px solid var(--ground-deep);
+    background: var(--gold);
+    font-style: normal;
+    transition: background 0.15s;
+}
+.timeline i:last-child { border-right: 0; }
+.timeline i.core { background: var(--lime); }
+.timeline i.cut  { background: var(--red); }
+.timeline i::after {
+    content: attr(data-n);
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.74rem;
+    font-weight: 700;
+    color: #1a1305;
+}
+.timeline i.core::after { color: #10200a; }
+.timeline i.cut::after  { color: #ffdcd7; font-weight: 700; }
+
+.legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.4rem;
+    font-size: 0.87rem;
+    color: var(--ink-faint);
+}
+.legend b { font-weight: 400; color: var(--ink-dim); }
+.legend span { display: inline-flex; align-items: center; gap: 0.42rem; }
+.legend s { width: 11px; height: 11px; border-radius: 2px; text-decoration: none; display: inline-block; }
+
+/* ---------- scenes ---------- */
+.scenes { display: grid; gap: 0.7rem; }
+
+.scene {
+    display: grid;
+    grid-template-columns: 3.6rem minmax(0, 1fr);
+    gap: 0 1.1rem;
+    padding: 1.4rem 1.55rem 1.5rem;
+    background: var(--surface);
+    border: 1px solid var(--line-soft);
+    border-left: 2px solid var(--gold);
+    border-radius: 2px;
+}
+.scene.core { border-left-color: var(--lime); background: linear-gradient(90deg, #1a2a0d 0%, var(--surface) 34%); }
+.scene.cut  { border-left-color: var(--red); }
+
+.scene .idx {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--gold);
+    font-variant-numeric: tabular-nums;
+    padding-top: 0.1rem;
+}
+.scene.core .idx { color: var(--lime); }
+.scene.cut .idx  { color: #c9503f; }
+
+.scene .top {
+    display: flex;
+    align-items: baseline;
+    gap: 0.8rem;
+    flex-wrap: wrap;
+    margin-bottom: 0.7rem;
+}
+.scene h3 { font-size: 1.16rem; font-weight: 700; letter-spacing: 0.01em; color: #f0f6ff; }
+
+.tag {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.68rem;
+    font-weight: 500;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    padding: 0.2rem 0.45rem;
+    border-radius: 2px;
+    border: 1px solid;
+}
+.tag.core { color: #10200a; border-color: var(--lime); background: var(--lime); }
+.tag.cut  { color: #ffdcd7; border-color: var(--red); background: var(--red); }
+.tag.card { color: #1a1305; border-color: var(--gold); background: var(--gold); }
+
+.secs {
+    margin-left: auto;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: var(--ink-faint);
+    font-variant-numeric: tabular-nums;
+}
+
+.body {
+    display: grid;
+    grid-template-columns: minmax(0, 1.08fr) minmax(0, 1fr);
+    gap: 0.6rem 1.6rem;
+}
+@media (max-width: 720px) { .body { grid-template-columns: 1fr; gap: 1rem; } }
+
+.body > div { display: grid; gap: 0.34rem; align-content: start; }
+.body h4 {
+    margin: 0;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.84rem;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+}
+.body p { font-size: 1.06rem; line-height: 1.66; color: var(--ink-dim); }
+.body .aha { border-left: 1px solid var(--line); padding-left: 1.6rem; }
+@media (max-width: 720px) { .body .aha { border-left: 0; padding-left: 0; border-top: 1px solid var(--line); padding-top: 0.9rem; } }
+.body .aha p { color: var(--ink); }
+
+/* what Solita actually says - generated from narration.mjs, never hand-edited */
+.say {
+    margin-top: 1.1rem;
+    padding: 0.95rem 1.2rem;
+    background: #0a1830;
+    border: 1px solid var(--line-soft);
+    border-left: 2px solid var(--cyan);
+    border-radius: 2px;
+}
+.say h4 {
+    margin: 0 0 0.45rem;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.64rem;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--cyan);
+}
+.say p {
+    margin: 0;
+    font-size: 1.06rem;
+    line-height: 1.62;
+    color: var(--ink);
+}
+.say .pause {
+    display: inline-block;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.66rem;
+    font-weight: 500;
+    color: var(--gold);
+    background: #241c07;
+    border: 1px solid #4a3a15;
+    border-radius: 2px;
+    padding: 0.05rem 0.4rem;
+    margin: 0 0.22rem;
+    vertical-align: 0.08em;
+    white-space: nowrap;
+}
+
+/* ---------- rules / lists ---------- */
+.rules { display: grid; gap: 0.6rem; counter-reset: r; max-width: 74ch; }
+/* the number is positioned, not a grid cell - as a grid item the bare text
+   after the bold lead-in became its own item and fell into the 1.8rem column */
+.rules li {
+    list-style: none;
+    position: relative;
+    padding-left: 2.8rem;
+    font-size: 1.05rem;
+    color: var(--ink-dim);
+}
+.rules li::before {
+    counter-increment: r;
+    content: counter(r, decimal-leading-zero);
+    position: absolute;
+    left: 0;
+    top: 0.28rem;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.84rem;
+    font-weight: 500;
+    color: var(--violet);
+}
+.rules { padding: 0; margin: 0; }
+
+.notes { display: grid; gap: 0.75rem; max-width: 74ch; padding: 0; margin: 0; }
+.notes li {
+    list-style: none;
+    font-size: 1.05rem;
+    color: var(--ink-dim);
+    padding-left: 1.1rem;
+    border-left: 1px solid var(--line);
+}
+.notes strong { color: #eaf2fd; }
+
+code {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 0.85em;
+    color: var(--cyan);
+    background: #0a1a33;
+    border: 1px solid var(--line-soft);
+    border-radius: 2px;
+    padding: 0.06em 0.34em;
+}
+
+/* ---------- measured data ---------- */
+.measure {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 360px);
+    gap: clamp(1.2rem, 3vw, 2.2rem);
+    align-items: start;
+}
+@media (max-width: 860px) { .measure { grid-template-columns: 1fr; } }
+
+/* wide table scrolls inside its own box - the page itself never scrolls sideways */
+.tblwrap { overflow-x: auto; scrollbar-width: thin; scrollbar-color: #24406f transparent; }
+.tblwrap::-webkit-scrollbar { height: 7px; }
+.tblwrap::-webkit-scrollbar-thumb { background: #24406f; border-radius: 4px; }
+.tblwrap::-webkit-scrollbar-track { background: transparent; }
+
+.tbl { width: 100%; min-width: 520px; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+
+kbd {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.76em;
+    font-weight: 500;
+    color: var(--gold);
+    background: #241c07;
+    border: 1px solid #4a3a15;
+    border-radius: 2px;
+    padding: 0.08em 0.4em;
+    white-space: nowrap;
+}
+.tbl caption {
+    text-align: left;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    padding-bottom: 0.6rem;
+}
+.tbl th, .tbl td {
+    text-align: right;
+    padding: 0.42rem 0.6rem;
+    border-bottom: 1px solid var(--line-soft);
+    font-size: 0.99rem;
+    color: var(--ink-dim);
+}
+.tbl th {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    border-bottom-color: var(--line);
+}
+.tbl th:first-child, .tbl td:first-child { text-align: left; }
+.tbl td.n { font-family: 'Orbitron', sans-serif; font-weight: 500; color: var(--ink); }
+.tbl tr.mark td { color: var(--gold); }
+.tbl tr.flat td { color: var(--ink-faint); }
+
+#errplot {
+    width: 100%;
+    aspect-ratio: 1 / 0.82;
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    background: #04101f;
+}
+.plotcap { margin-top: 0.6rem; font-size: 0.92rem; color: var(--ink-faint); }
+
+/* ---------- budget ---------- */
+.budget {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1px;
+    background: var(--line-soft);
+    border: 1px solid var(--line-soft);
+    border-radius: 2px;
+    margin-bottom: 1.5rem;
+}
+.budget div { background: var(--surface); padding: 1rem 1.1rem; display: grid; gap: 0.28rem; }
+.budget dt {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.74rem;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+}
+.budget dd {
+    margin: 0;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--cyan);
+    font-variant-numeric: tabular-nums;
+}
+.budget dd small { display: block; font-family: 'Outfit', sans-serif; font-size: 0.78rem; font-weight: 300; color: var(--ink-faint); letter-spacing: 0; margin-top: 0.2rem; }
+
+.solved { color: var(--lime); }
+
+/* ---------- footer ---------- */
+footer {
+    margin-top: clamp(2.6rem, 6vw, 4.4rem);
+    padding-top: 1.6rem;
+    border-top: 1px solid var(--line);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem 2rem;
+    align-items: baseline;
+}
+footer p { font-size: 1.05rem; color: var(--ink-dim); max-width: 58ch; }
+footer .sig { margin-left: auto; }
+
+@media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+    <p class="eyebrow">Doc Alvers Mathe-Labor · Videopipeline</p>
+    <h1>Wie viele Kreise ist ein Quadrat?</h1>
+    <p class="lede">Der Plot für das Fourier-Demovideo: was passiert, in welcher
+        Reihenfolge — und warum genau dort der Groschen fällt.</p>
+    <p class="status">Plot freigegeben · vertont · gedreht · geschnitten</p>
+
+    <dl class="meta">
+        <div><dt>Lab</dt><dd><a href="https://docalvers.de/fourier.html">fourier.html</a></dd></div>
+        <div><dt>Sprecherin</dt><dd>Solita · de-DE-Studio</dd></div>
+        <div><dt>Aufnahme</dt><dd>1440p · Playwright</dd></div>
+        <div><dt>Szenen</dt><dd>12 · davon 3 auf eigenen Karten</dd></div>
+        <div><dt>Laufzeit</dt><dd>3:38 · 1440p</dd></div>
+    </dl>
+</header>
+
+<div class="thesis">
+    <canvas id="stage" width="600" height="600" role="img"
+            aria-label="Eine Kette rotierender Kreise zeichnet eine Musiknote:
+                        an der Spitze des letzten Zeigers hängt ein Stift, der eine
+                        goldene Spur zieht"></canvas>
+    <div>
+        <blockquote>Jede geschlossene Zeichnung ist eine Summe von Kreisen. Die Frage
+            ist nie <em>ob</em> — die Frage ist immer: <strong>wie viele?</strong></blockquote>
+        <p class="after">Der ganze Film ist die Antwort auf eine einzige Frage:
+            <em>Woran merkt man, dass es genug Kreise sind?</em> Nicht: wie schön
+            Fourier ist. Sondern: was die letzten Kreise eigentlich noch tun — und was
+            passiert, wenn man sie wegwirft.</p>
+    </div>
+</div>
+
+<section>
+    <div class="head"><span class="n">A</span><h2>Der dramaturgische Bogen</h2></div>
+    <div class="arc" id="arc"></div>
+    <div class="prose">
+        <p>Kein langer Anlauf: der Film zeigt zuerst das <em>Ergebnis</em> und nimmt es
+           dann auseinander (1–2), baut die Note aus Kreisen wieder auf (3–4) und dreht
+           die Blickrichtung um — die Kreise werden nicht geraten, sie werden
+           <em>abgelesen</em> (5). Dann kommt das Quadrat und <strong>macht alles
+           kaputt</strong> (6–9): zwei Kreise, die nichts tun, neunundneunzig Prozent,
+           die trotzdem ein Kreis sind, vier Kreise, die nichts ändern, und eine Ecke,
+           die keine wird. <strong>Kaputtmachen ist der lehrreichste Teil</strong> — erst
+           daran sieht man, was die Prozentzahlen wirklich bedeuten.</p>
+        <p>Das Herz macht es dann noch einmal <em>anders</em> kaputt (10): dort liegt
+           alles im rückwärts laufenden Kreis, die Reihenfolge ist nicht die Rangfolge.
+           Szene 11 stellt alle drei Formen bei denselben zwei Kreisen nebeneinander —
+           62,6 %, 0 %, 0,8 % — und macht damit die Titelfrage endgültig zu einer Frage
+           <em>pro Bild</em>. Der Schluss löst ein (12): das ist JPEG.</p>
+    </div>
+</section>
+
+<section>
+    <div class="head"><span class="n">B</span><h2>Die 12 Szenen</h2>
+        <span class="note" id="tl-note">Breite = geplante Sprechzeit</span></div>
+    <div class="timeline" id="timeline"></div>
+    <div class="legend">
+        <span><s style="background:#adff2f"></s><b>Kernszene — wird nicht gekürzt</b></span>
+        <span><s style="background:#b02418"></s><b>Notbremse, falls der Schnitt zäh wirkt</b></span>
+        <span><s style="background:#ffd700"></s><b>Regelszene</b></span>
+    </div>
+    <div class="scenes" id="scenes" style="margin-top:1.5rem"></div>
+</section>
+
+<section>
+    <div class="head"><span class="n">C</span><h2>Didaktische Leitplanken</h2>
+        <span class="note">bindend für den Sprechertext</span></div>
+    <ol class="rules">
+        <li><strong>Nie eine Formel ohne vorher gezeigtes Bild.</strong> Die Summenformel
+            steht zwar von Anfang an unten im Labor, aber sie wird erst in Szene 5
+            <em>gelesen</em> — nach vier Szenen, in denen man den Zeigern beim Zeichnen
+            zugesehen hat.</li>
+        <li><strong>Ein Gedanke pro Szene, und zwar zu Ende.</strong> Lieber acht
+            Beobachtungen, die sitzen, als sechzehn, die vorbeirauschen. Was nicht in den
+            Bogen passt, wird nicht schneller gesprochen, sondern gestrichen — siehe
+            Abschnitt G.</li>
+        <li><strong>Ein neuer Begriff pro Szene.</strong> „Epizykel" kommt nicht vor; im
+            Film heißen sie durchgehend <em>Kreise</em>. Aus „Koeffizient" werden
+            <em>Radius und Startwinkel</em>, aus „Frequenz" wird <em>Umdrehungen pro
+            Runde</em>.</li>
+        <li>Verboten, weil dieses Labor sie nicht braucht: <em>Hilbertraum,
+            Orthogonalität, Basisfunktion, Faltung, Parseval</em>. Wer sie hier
+            einführt, klingt gebildet und erklärt nichts.</li>
+        <li><strong>Verboten, weil es hier schlicht nicht passiert:
+            <em>Gibbs-Phänomen</em>, „Überschwingen", „Ringing".</strong> Dafür bräuchte
+            es einen Sprung; diese Kurven springen nicht. Die Radien fallen beim Quadrat
+            gemessen wie <span class="m">1/k²</span> — die Ecke wird <em>rund</em>, nicht
+            wellig. Der Satz gehört in den Ton-Film, nicht hierher.</li>
+        <li><strong>Prozent und Ähnlichkeit nie gleichsetzen.</strong> Jede Prozentzahl
+            im Film kommt zusammen mit der größten Abweichung in Pixeln. Genau daran
+            hängt die halbe Dramaturgie (Szenen 7, 9, 10 und 11).</li>
+        <li><strong>Zahlen werden gesprochen, nicht gelesen.</strong> „Neun von zehn"
+            statt „null Komma neun"; „fünfzig zu eins" statt „ein Kompressionsfaktor von
+            50".</li>
+        <li><strong>Nichts behaupten, was das Bild nicht hergibt.</strong> Alle Zahlen
+            in diesem Drehbuch stammen aus Abschnitt D — gerechnet mit dem
+            <em>Sampler und der DFT des Labors selbst</em>, 1000 Punkte je Form, nicht
+            aus dem Lehrbuch.</li>
+    </ol>
+</section>
+
+<section>
+    <div class="head"><span class="n">D</span><h2>Gemessen, nicht geschätzt</h2>
+        <span class="note solved">Grundlage aller Zahlen im Film</span></div>
+    <div class="measure">
+        <div class="tblwrap">
+            <table class="tbl" id="tbl"></table>
+        </div>
+        <div>
+            <canvas id="errplot" width="720" height="590" role="img"
+                    aria-label="Doppelt logarithmisch: größte Abweichung in Pixeln über
+                                der Zahl der Kreise, für Note, Quadrat und Herz. Alle drei
+                                Kurven fallen ab etwa zwölf Kreisen parallel zur
+                                Eins-durch-N-Geraden."></canvas>
+            <p class="plotcap">Größte Abweichung über der Zahl der Kreise, doppelt
+               logarithmisch. Die graue Gerade ist <span class="m">1/N</span>. Ab etwa
+               zwölf Kreisen laufen alle drei Formen parallel dazu.</p>
+        </div>
+    </div>
+    <div class="prose" style="margin-top:1.6rem">
+        <p><strong>Bezugsgröße:</strong> jede Form wird vom Labor auf 550 Pixel Breite
+           normiert (<code>targetSize = 550</code>), abgetastet mit 1000 Punkten.
+           <strong>Energie</strong> ist der Anteil der <em>Radien-Quadrate</em>, den die
+           ersten <span class="m">N</span> Kreise abdecken — das, was ein Lehrbuch als
+           Konvergenz verkauft. Die <strong>größte Abweichung</strong> ist der wirkliche
+           Abstand zwischen gezeichneter und gewollter Kurve.</p>
+        <p><strong>Nicht verwechseln — daran bin ich beim ersten Durchrechnen selbst
+           hängengeblieben:</strong> die <em>Wurzel</em> daraus, die Amplituden-Norm,
+           sieht deutlich freundlicher aus und ist eine andere Größe. Beim Herz stehen
+           bei zwei Kreisen <strong>0,8 % Energie</strong> — aber 9 % Amplitude. Der Film
+           spricht durchgehend die <strong>Energie</strong>; die Tabelle unten ebenso.</p>
+        <p><strong>Die drei Befunde, die den Film tragen:</strong> Beim Quadrat sind alle
+           Radien null außer bei den Frequenzen <span class="m">−1, +3, −5, +7 …</span>,
+           und sie fallen exakt wie <span class="m">1/k²</span> (gemessen 315,2 · 35,0 ·
+           12,6 — mal 1, mal 9, mal 25 ergibt jedes Mal 315). Beim Herz steckt
+           <strong>ein einziger Kreis mit 98 % der Energie</strong> da, der rückwärts
+           laufende, weil das Herz rechtsherum gezeichnet wird. Und bei allen dreien
+           fällt die Abweichung ab etwa zwölf Kreisen wie <span class="m">1/N</span>:
+           <span class="m">N</span> mal Abweichung bleibt bei rund 300 Pixeln stehen.</p>
+        <p>Die drei Zeilen bei <span class="m">N</span> = 2 — <strong>62,6 %, 0 %,
+           0,8 %</strong> — sind Szene 11. Sie stehen in der Tabelle golden, weil sie die
+           Titelfrage beantworten: „wie viele Kreise?" hat keine allgemeine Antwort, nur
+           eine pro Bild.</p>
+    </div>
+</section>
+
+<section>
+    <div class="head"><span class="n">E</span><h2>Zeitbudget</h2>
+        <span class="note solved">gelöst</span></div>
+    <dl class="budget" id="budget"></dl>
+    <div class="prose">
+        <p>Teil 1 von <code>Infinity_6min.m4a</code> ist nahtlos loopbar: loopStart
+           21,220 s, loopEnd 163,998 s. Intro plus ein Durchlauf trägt nur 164,0 s — der
+           Film rendert <strong>Intro plus zwei Durchläufe</strong> und schneidet das Bett
+           bei 217,8 s ab, also lange vor der zweiten Naht.</p>
+        <p><strong>Gesprochen 3:08, fertig 3:38.</strong> Die Differenz ist kein Verschnitt:
+           jede Szene läuft etwas über den Text hinaus (1,6 s Luft, dazu Zuschläge für
+           4, 7, 10 und 11, wo eine Runde noch zu Ende läuft), und die Abbinder-Karte
+           kommt oben drauf. <strong>Keine Szene wurde gekürzt.</strong> Die rote Marke
+           steht nur als Notbremse: ohne Szene 8 blieben 3:23. Herz (10) und der
+           Dreier-Vergleich (11) sind Kernszenen und werden nicht angetastet.</p>
+    </div>
+</section>
+
+<section>
+    <div class="head"><span class="n">F</span><h2>Choreografie-Notizen</h2>
+        <span class="note">für die Aufnahme</span></div>
+    <ul class="notes">
+        <li><strong>Startzustand:</strong> frischer Browser-Context, leeres
+            <code>localStorage</code> — Form <em>Note</em>, <span class="m">N</span> = 2,
+            Geschwindigkeit 100, Kreise an, Tracking aus.</li>
+        <li><strong>Das Labor hält von selbst an.</strong> Bei <span class="m">t</span> =
+            2π setzt es <code>paused = true</code>. Jede Lab-Szene muss deshalb selbst
+            neu anwerfen (<code>time = 0; path = []; paused = false</code>) — sich auf
+            eine weiterlaufende Animation zu verlassen, geht schief.</li>
+        <li><strong>Szene 4 braucht Geschwindigkeit 500 — und ist damit die härteste
+            Zeitrechnung im Film.</strong> Bei 100 dauert ein Umlauf 251 Frames ≈ 4,2 s,
+            mal 23 Stufen sind das <em>96 Sekunden</em>. Bei 500 sind es 50 Frames ≈
+            0,84 s, macht 19,3 s. Die Szene hat 18 s Sprache — der Durchlauf läuft also
+            gut eine Sekunde in die Luft hinein, das ist gewollt.</li>
+        <li><span class="m">N</span> <strong>ist kein freier Regler.</strong> Der Slider
+            rastet auf 23 Stufen ein (2, 3, …, 20, 30, 40, 50, 100 … 1000); „+1" springt
+            eine Stufe, „+10" springt <em>fünf</em>. Die Szenen 6–8 und 10 zählen
+            einzeln — dafür <code>adjustNTo(n)</code> per <code>page.evaluate</code>
+            statt Klicks.</li>
+        <li><strong>Szene 11 wechselt nur die Form, nie</strong> <span class="m">N</span>.
+            Der Haken: <code>updateParams()</code> ruft <code>init(shape)</code>, und das
+            setzt <code>time = 0</code> und leert den Pfad — jede der drei Formen braucht
+            also ihre eigene volle Runde, bevor das Standbild steht. Bei Geschwindigkeit
+            500 sind das 3 × 0,84 s; die Standbilder danach nebeneinander im Schnitt,
+            nicht im Labor.</li>
+        <li><strong>Mausrad schaltet Tracking automatisch an</strong>
+            (<code>wheel</code>-Listener im Lab). Wer zoomt, wandert danach mit der
+            Ansicht mit — beim Ecken-Zoom für Szene 9 also entweder bewusst nutzen oder
+            hinterher <code>isTracking = false</code> setzen.</li>
+        <li>Die große <span class="m">N</span>-Zahl rechts und die Formel unten sind
+            <strong>DOM, kein Canvas</strong>. Sie überleben jeden Zoom, dürfen aber von
+            der Solita-Bubble nicht verdeckt werden — Bubble in diesem Film nach unten
+            <em>links</em>.</li>
+        <li><strong>Szene 1 ist der einzige Sonderstart:</strong> das Labor auf
+            <span class="m">N</span> = 1000 fahren, eine volle Runde zeichnen lassen,
+            <code>showEpicycles = false</code> — und <em>dann</em> erst die Aufnahme
+            beginnen. Der Rest des Films läuft in Filmreihenfolge aus diesem
+            Zustand.</li>
+        <li>Der lokale Server klebt ein rotes <strong>LOCAL</strong>-Schild in die Seite.
+            Die Aufnahme entfernt <code>#local-badge</code> vor dem ersten Bild.</li>
+        <li>1,6 s Luft nach jeder Szene, dazu Zuschläge für 4, 7 und 10 — dort läuft noch
+            eine Runde zu Ende, wenn Solita schon schweigt.</li>
+        <li>Die drei Karten kommen aus <code>videopipeline/fourier/karten.html</code> und
+            bekommen ihre <strong>gemessene Sprechdauer als Parameter</strong>
+            (<code>?scene=sN&amp;dur=…</code>) — wird der Text länger, verschiebt sich die
+            Animation mit.</li>
+    </ul>
+</section>
+
+<section>
+    <div class="head"><span class="n">G</span><h2>Bewusst weggelassen</h2>
+        <span class="note">Kandidaten für Teil 2</span></div>
+    <div class="prose">
+        <p><strong>Das Spektrum</strong> aus dem Rechtsklick-Menü — die sieben kleinen
+           Kreise für die Frequenzen −3 bis +3. Schön, aber es erklärt nichts, was der
+           Film nicht schon gezeigt hat, und kostet 18 Sekunden.</p>
+        <p><strong>Rad wird Welle</strong> — die Sinuskurve, die ein rollendes Rad auf
+           einen Papierstreifen schreibt. Der klassische Einstieg. Bei drei Minuten
+           beginnt der Film stattdessen beim Ergebnis; die Welle gehört an den Anfang des
+           Ton-Films.</p>
+        <p>Und die <strong>FFT</strong> selbst — der Cliffhanger steht am Ende von Szene 12. Das Labor rechnet die naive DFT — 1000 mal
+           1000 Multiplikationen bei jedem Formwechsel, und man <em>merkt</em> es. Dass
+           dieselbe Rechnung mit <span class="m">N</span> <span class="m">log</span>
+           <span class="m">N</span> statt <span class="m">N²</span> geht, ist die
+           schönste Pointe, die hier zu holen wäre — und ein eigener Film.</p>
+        <p>Außerdem draußen: die reelle Reihe mit Sinus und Kosinus (hier nur
+           Buchhaltung, die Kreise erklären es besser) · Konvergenzsätze von Dirichlet ·
+           das Abtasttheorem, also warum 1000 Punkte genau 1000 Kreise ergeben und keinen
+           mehr · und das <strong>Gibbs-Phänomen</strong>, das zum Rechteck<em>signal</em>
+           gehört, nicht zum Quadrat als Kurve — richtig im Ton-Film, falsch in diesem.</p>
+    </div>
+</section>
+
+<footer>
+    <p><strong>Stand:</strong> Film gerendert —
+       <code>videopipeline/videos/fourier-demo-1440p.mp4</code>, 3:38, 2560×1440,
+       12 Kapitel. Wortlaut in <code>videopipeline/fourier/narration.mjs</code>, Karten in
+       <code>karten.html</code>, alle Zahlen aus <code>measure.mjs</code>, Pipeline
+       <code>run1</code> bis <code>run3</code>. Das Energie-Feld unten links im Film wird
+       während der Aufnahme eingeblendet und rechnet aus <code>fourierZ</code> des Labors —
+       es zeigt also dieselbe Zahl, die dieses Drehbuch behauptet.</p>
+    <p class="eyebrow sig">Doc Alvers Mathe-Labor</p>
+</footer>
+
+</div>
+
+<script>
+/* ---------------------------------------------------------------
+   One source of truth: the scene list feeds both the timeline and
+   the cards below it.
+   --------------------------------------------------------------- */
+const SCENES = [
+    { n: 1, s: 14, t: 'Erst das Ende',
+      img: 'Kalter Einstieg: die fertige Note steht golden im Bild, keine Kreise, nichts bewegt sich. Dann werden die Kreise eingeblendet — <span class="m">N</span> = 1000, ein Gewimmel — und der Regler fährt in einem Zug zurück auf 2.',
+      aha: 'Diese Zeichnung ist nicht <em>gezeichnet</em>. Sie ist <strong>gedreht</strong>. Und alles, was jetzt kommt, ist die Frage: wie viele Drehungen braucht sie?' },
+
+    { n: 2, s: 15, t: 'Zwei Kreise, ein Stift',
+      img: 'Das Labor. Die Note liegt als blasse Punktlinie im Hintergrund, <span class="m">N</span> steht auf 2: ein winziger Kreis in der Mitte, der sich <em>nicht</em> dreht, und ein großer, der sich einmal pro Runde dreht. Am Ende des Zeigers hängt der Stift und zieht eine goldene Spur.',
+      aha: 'Der erste Kreis hat Frequenz null — er dreht nicht, er <em>verschiebt</em>: der Schwerpunkt der Zeichnung. Der zweite dreht einmal pro Runde. Zusammen können sie genau eines: einen Kreis.' },
+
+    { n: 3, s: 16, t: 'Der Gegenläufer',
+      img: 'Ein Klick auf <kbd>+1</kbd>. Der dritte Kreis kommt dazu — und er läuft <strong>rückwärts</strong>. Aus dem Kreis wird in einer Runde eine schräg liegende Ellipse.',
+      aha: 'Ein Kreis vorwärts plus ein Kreis rückwärts ergibt eine <strong>Ellipse</strong>: jede Streckung, jede Schräglage steckt schon in zwei gegenläufigen Kreisen. Deshalb zählt das Labor 0, +1, −1, +2, −2 und nicht 1, 2, 3.' },
+
+    { n: 4, s: 18, t: 'Alles auf einmal', core: true,
+      img: 'Der grüne Knopf <em>Auto-Evolve</em>, Geschwindigkeit auf 500. Das Labor läuft alle 23 Stufen von 2 bis 1000 durch; jede fertige Runde bleibt als blasse goldene Linie stehen. Am Ende blendet es die Kreise selbst aus — übrig bleibt die Note.',
+      aha: 'Die blassen Linien zeigen den ganzen Weg gleichzeitig: von der Kreisbahn über die Ellipse zur Note. Es <em>wächst</em> nichts an, es wird <strong>schärfer</strong> — jeder neue Kreis ist kleiner und dreht schneller. <strong>Konvergenz ist kein Wort, sondern ein Bild.</strong>' },
+
+    { n: 5, s: 18, t: 'Niemand rät die Kreise', core: true, card: true,
+      img: 'Die Note zerfällt in 1000 Punkte. Darunter läuft eine Summe über alle Punkte durch und wirft für jede Frequenz zwei Zahlen aus: Radius und Startwinkel. Aus 1000 Punkten werden 1000 Kreise.',
+      aha: 'Das ist die eigentliche Fourier-Transformation: nicht Probieren, sondern <strong>Ablesen</strong>. Jede geschlossene Kurve legt ihre Kreise eindeutig fest — und man bekommt sie mit einer Formel, in einem Durchgang. Genau die steht die ganze Zeit unten im Bild.' },
+
+    { n: 6, s: 14, t: 'Zwei Kreise, die nichts tun',
+      img: 'Formwechsel auf <em>Quadrat</em>, <span class="m">N</span> zurück auf 2. Die Punktlinie zeigt das Quadrat — und der goldene Stift <strong>bewegt sich nicht</strong>. Kein Kreis, keine Spur, ein Punkt in der Mitte.',
+      aha: 'Beide Radien sind <strong>exakt null</strong>. Das Quadrat liegt symmetrisch um den Ursprung und hat keinen vorwärts laufenden Grundkreis. Mehr Kreise heißt nicht automatisch mehr Bild.' },
+
+    { n: 7, s: 19, t: 'Neunundneunzig Prozent — und ein Kreis', core: true,
+      img: 'Ein Klick auf <kbd>+1</kbd>. Der dritte Kreis, der rückwärts laufende, springt auf vollen Radius, und in einer Runde steht ein <strong>perfekter Kreis</strong> da. Eingeblendet: 98,6 % der Energie.',
+      aha: 'Fast neunundneunzig Prozent — und auf dem Schirm ein Kreis. <strong>Energie zählt die Fläche, nicht die Ecke.</strong> Der Kreis ist an den Flanken 15 % zu weit draußen und in den Ecken 74 Pixel zu kurz. Wer nur auf die Prozentzahl schaut, hält das für fertig.' },
+
+    { n: 8, s: 15, t: 'Vier Kreise, die nichts ändern', cut: true,
+      img: '<kbd>+1</kbd>, <kbd>+1</kbd> — vier Kreise, fünf Kreise. Die goldene Kurve rührt sich <em>nicht</em>. Erst der sechste beult die Flanken ein und macht aus dem Kreis ein Quadrat mit sehr runden Ecken.',
+      aha: 'Die Symmetrie der Form schlägt <strong>Löcher ins Spektrum</strong>. Das Quadrat ist viermal dasselbe — und benutzt deshalb nur jeden vierten Kreis: −1, +3, −5, +7. Alle anderen haben Radius null, und ihre Radien fallen wie <span class="m">1/k²</span>.' },
+
+    { n: 9, s: 19, t: 'Die Ecke, die keine wird', core: true, card: true,
+      img: 'Eine einzige Ecke des Quadrats, stark vergrößert, darüber die goldene Kurve für 3, 6, 12, 20, 50, 100 und 400 Kreise. Daneben die gemessene größte Abweichung: 74 · 39 · 26 · 16 · 6,6 · 3,1 · 0,7 Pixel bei 550 Pixel Figurgröße.',
+      aha: 'Die Abweichung fällt wie <span class="m">1/N</span>: <strong>halb so rund kostet doppelt so viele Kreise.</strong> Eine echte Ecke bekommt man nie — Kreise sind glatt, und eine endliche Summe glatter Dinge bleibt glatt.' },
+
+    { n: 10, s: 22, t: 'Das Herz und der Drehsinn', core: true,
+      img: 'Formwechsel auf <em>Herz</em>, <span class="m">N</span> = 2 — und wieder passiert fast nichts: ein Kreis von 23 Pixeln. Ein Klick auf <kbd>+1</kbd>, die Energie springt von <strong>0,8 auf 99,1 Prozent</strong>. Auf dem Schirm: eine Ellipse. Erst der neunte Kreis kerbt das Herz oben ein.',
+      aha: 'Der Sprung kommt vom <strong>Drehsinn</strong>: das Herz wird rechtsherum gezeichnet, also steckt fast alles im <em>rückwärts</em> laufenden Kreis — <strong>98 Prozent in einem einzigen</strong>. Die Reihenfolge im Labor ist nicht die Rangfolge; der wichtigste Kreis kann der dritte sein. Und wieder gilt: 99,1 Prozent sind eine Ellipse. Die Kerbe wohnt in den letzten Promille.' },
+
+    { n: 11, s: 16, t: 'Dieselben zwei Kreise, drei Antworten', core: true,
+      img: '<span class="m">N</span> wird auf 2 festgenagelt, dann geht nur noch das Formmenü: <em>Note</em> — <em>Quadrat</em> — <em>Herz</em>, drei Klicks, drei Standbilder nebeneinander stehengelassen. Darunter die gemessene Energie: <strong>62,6 % · 0 % · 0,8 %</strong>.',
+      aha: 'Zwei Kreise sind nicht zwei Kreise. Bei der Note tragen sie den größten Teil, beim Quadrat <em>nichts</em>, beim Herz fast nichts. <strong>Wie viel ein Kreis leistet, entscheidet nicht seine Nummer, sondern die Form.</strong> Deshalb kann man die Frage „wie viele Kreise?" nicht ein für alle Mal beantworten — nur pro Bild.' },
+
+    { n: 12, s: 18, t: 'Weglassen ist der Trick', core: true, card: true,
+      img: 'Die Note zweimal nebeneinander: links aus 1000 Punkten, rechts aus 20 Kreisen. Darunter die Rechnung — 2000 Zahlen gegen 40 Zahlen. Der Unterschied im Bild: im Mittel 5 Pixel, im schlimmsten Fall 18, bei 550 Pixel Figurgröße. Zum Schluss steht die fertige Note wieder still da, wie in Szene 1.',
+      aha: '<strong>Fünfzig zu eins.</strong> Genau das machen JPEG, MP3 und jeder Video-Codec: in Kreise zerlegen, die kleinen wegwerfen, den Rest behalten. Fourier ist keine Deko — er ist der Grund, warum ein Foto in eine Nachricht passt. <em>Letzter Satz als Cliffhanger:</em> dieselbe Rechnung zerlegt auch einen Ton.' }
+];
+
+/* SAY:START - generated by videopipeline/fourier/sync-drehbuch.mjs, do not edit */
+const SAY = {
+    s1: 'Diese Note wurde nicht gezeichnet. Sie wurde gedreht. Das hier sind die Kreise, die sie gemacht haben — tausend Stück, einer am anderen, und ganz vorne ein Stift. Und die Frage des ganzen Films lautet: Wie viele davon braucht man wirklich?',
+    s2: 'Fangen wir ganz unten an, bei zwei Kreisen. Der erste dreht sich gar nicht. Er verschiebt nur — er ist der Schwerpunkt der Zeichnung. Der zweite dreht sich einmal pro Runde. Zusammen können die beiden genau eines: einen Kreis.',
+    s3: 'Jetzt der dritte. Achte darauf, wohin er sich dreht: rückwärts. Und sofort wird aus dem Kreis eine schräge Ellipse. Ein Kreis vorwärts, einer rückwärts — darin steckt schon jede Streckung und jede Schräglage. Deshalb zählt das Labor nicht eins, zwei, drei, sondern null, plus eins, minus eins.',
+    s4: 'Und jetzt alle auf einmal. Das Labor zählt hoch, von zwei Kreisen bis tausend, und lässt jede fertige Runde stehen. Sieh genau hin: Es wächst nichts an. Es wird schärfer. Jeder neue Kreis ist kleiner und dreht schneller — er bringt nicht die Form, er bringt das Detail. Bleibt eine Frage: Woher weiß das Labor, wie groß jeder einzelne Kreis sein muss?',
+    s5: 'Es rät nicht. Es rechnet. Man legt tausend Punkte auf die Kurve und summiert einmal über alle. Heraus fallen für jede Drehzahl zwei Zahlen: wie groß der Kreis ist, und wo er startet. Das ist die Fourier-Transformation. Kein Probieren, ein Ablesen — und sie ist in einem Durchgang fertig.',
+    s6: 'Jetzt ein Quadrat. Wieder zwei Kreise — und jetzt schau auf den Stift. Er bewegt sich nicht. Beide Radien sind exakt null. Mehr Kreise heißt also nicht automatisch mehr Bild.',
+    s7: 'Ein Kreis mehr. Und jetzt der Moment, um den es in diesem Film geht: Fast neunundneunzig Prozent der Energie stecken schon in diesen drei Kreisen. Und auf dem Schirm steht — ein Kreis. An den Flanken zu weit draußen, in den Ecken vierundsiebzig Pixel zu kurz. Prozente zählen die Fläche. Die Ecke zählen sie nicht.',
+    s8: 'Vier Kreise. Fünf. Es passiert nichts. Erst der sechste beult die Flanken ein. Der Grund: Das Quadrat ist viermal dasselbe, und diese Symmetrie schlägt Löcher ins Spektrum. Es benutzt nur jeden vierten Kreis. Alle anderen haben Radius null.',
+    s9: 'Und die Ecke? Die wird nie eine. Die Figur ist fünfhundertfünfzig Pixel groß. Bei drei Kreisen fehlen in der Ecke vierundsiebzig davon, bei zwölf sechsundzwanzig, bei hundert drei, bei vierhundert nicht einmal einer. Das fällt wie eins durch N: halb so rund kostet doppelt so viele Kreise. Kreise sind glatt — und eine endliche Summe glatter Dinge bleibt glatt.',
+    s10: 'Ein Herz. Zwei Kreise — und wieder fast nichts: nicht einmal ein Prozent. Ein Klick, und es springt auf neunundneunzig. Ein einziger Kreis trägt achtundneunzig Prozent, und zwar der rückwärts laufende: Das Herz wird rechtsherum gezeichnet. Die Reihenfolge im Labor ist nicht die Rangfolge. Und wieder gilt — neunundneunzig Prozent, und es ist eine Ellipse. Die Kerbe kommt erst mit dem neunten Kreis.',
+    s11: 'Halten wir die Zahl bei zwei fest und wechseln nur die Form. Note: zweiundsechzig Prozent. Quadrat: null. Herz: nicht einmal ein Prozent. Dieselben zwei Kreise, drei völlig verschiedene Antworten. Wie viel ein Kreis leistet, entscheidet nicht seine Nummer, sondern die Form.',
+    s12: 'Und wozu das Ganze? Die Note besteht aus tausend Punkten — das sind zweitausend Zahlen. Zwanzig Kreise sind vierzig Zahlen, und der Unterschied im Bild sind im Mittel fünf Pixel. Fünfzig zu eins. Genau das macht JPEG, genau das macht MP3: in Kreise zerlegen und die kleinen wegwerfen. Dieselbe Rechnung zerlegt übrigens auch einen Ton. Aber das ist der nächste Film.'
+};
+const SPOKEN = {"s1":12.768,"s2":11.664,"s3":15.336,"s4":18.072,"s5":15.912,"s6":9.312,"s7":16.272,"s8":13.032,"s9":19.464,"s10":20.52,"s11":14.4,"s12":21.264};
+/* SAY:END */
+
+/* --- the arc --- */
+const ARC = [
+    { t: 'Erst das Ende', c: '#7afbff' },
+    { t: 'Kette und Stift', c: '#7afbff' },
+    { t: 'Die Form entsteht', c: '#ffd700', key: true },
+    { t: 'Die Umkehrung', c: '#ffd700', key: true },
+    { t: 'Das Quadrat bricht es', c: '#b02418', key: true },
+    { t: 'Die Ecke', c: '#b02418', key: true },
+    { t: 'Herz und Drehsinn', c: '#ff7eb9', key: true },
+    { t: 'Drei Antworten', c: '#ff7eb9' },
+    { t: 'Eingelöst: JPEG', c: '#adff2f', key: true }
+];
+document.getElementById('arc').innerHTML = ARC.map(a =>
+    '<span class="' + (a.key ? 'key' : '') + '" style="--stop:' + a.c + '">' + a.t + '</span>').join('');
+
+/* --- timeline: each scene as wide as it is long --- */
+const secs = (x) => SPOKEN['s' + x.n] ?? x.s;
+const total = SCENES.reduce((s, x) => s + secs(x), 0);
+document.getElementById('timeline').innerHTML = SCENES.map(x =>
+    '<i class="' + (x.core ? 'core' : x.cut ? 'cut' : '') + '" data-n="' + x.n + '"' +
+    ' style="flex:0 0 ' + (secs(x) / total * 100).toFixed(3) + '%"' +
+    ' title="Szene ' + x.n + ' · ' + secs(x).toFixed(1) + ' s"></i>').join('');
+
+/* --- budget, from the measured durations once they exist --- */
+(function () {
+    const spoken = Object.values(SPOKEN).reduce((a, b) => a + b, 0);
+    const planned = SCENES.reduce((a, x) => a + x.s, 0);
+    const air = SCENES.length * 1.6;
+    // Once the film exists, its real length beats any sum of parts: the scene clips run
+    // a little past the voice, and the end card comes on top.
+    const FILM_ACTUAL = 217.9;
+    const film = FILM_ACTUAL || (spoken || planned) + air;
+    const mmss = (t) => Math.floor(t / 60) + ':' + String(Math.round(t % 60)).padStart(2, '0');
+    const cell = (dt, dd, sub) => '<div><dt>' + dt + '</dt><dd>' + dd + '<small>' + sub + '</small></dd></div>';
+    document.getElementById('budget').innerHTML =
+        cell('Sprache', (spoken || planned).toFixed(0) + ' s',
+             spoken ? 'gemessen · 12 Szenen' : 'geplant · 12 Szenen') +
+        cell('Luft', '~' + air.toFixed(0) + ' s', '1,6 s je Szene') +
+        cell('Film', mmss(film), FILM_ACTUAL ? 'fertig geschnitten' : spoken ? 'nach der Vertonung' : 'geschätzt') +
+        cell('Bett-Loop', '142,778 s', '64 Takte · 107,58 BPM');
+    if (spoken) {
+        const n = document.getElementById('tl-note');
+        if (n) n.textContent = 'Breite = gemessene Sprechzeit';
+    }
+})();
+
+/* --- scene cards --- */
+document.getElementById('scenes').innerHTML = SCENES.map(x =>
+    '<article class="scene ' + (x.core ? 'core' : x.cut ? 'cut' : '') + '">' +
+        '<div class="idx">' + String(x.n).padStart(2, '0') + '</div>' +
+        '<div>' +
+            '<div class="top">' +
+                '<h3>' + x.t + '</h3>' +
+                (x.core ? '<span class="tag core">Kernszene</span>' : '') +
+                (x.cut ? '<span class="tag cut">Notbremse</span>' : '') +
+                (x.card ? '<span class="tag card">Karte</span>' : '') +
+                '<span class="secs">' + secs(x).toFixed(1) + ' s</span>' +
+            '</div>' +
+            '<div class="body">' +
+                '<div><h4>Was im Bild passiert</h4><p>' + x.img + '</p></div>' +
+                '<div class="aha"><h4>Der Aha</h4><p>' + x.aha + '</p></div>' +
+            '</div>' +
+            (SAY['s' + x.n] ? '<div class="say"><h4>Solita sagt</h4><p>' + SAY['s' + x.n] + '</p></div>' : '') +
+        '</div>' +
+    '</article>').join('');
+
+/* ---------------------------------------------------------------
+   Measured convergence. Produced with the lab's own SVG sampler and
+   its dft() from js/fourier-logic.js, 1000 sample points per shape,
+   every shape normalised to 550 px like the lab does. energy = share
+   of the summed squared radii covered by the first N circles;
+   err = largest distance between drawn and wanted curve, in px.
+   --------------------------------------------------------------- */
+const DATA = {
+    NOTE:    [[2,62.61,244],[3,84.204,156.8],[4,86.953,137.6],[5,88.271,124.4],[6,96.348,82.8],[7,98.427,67.7],
+              [8,99.098,58.5],[9,99.174,53.8],[10,99.27,48.6],[12,99.653,35.2],[14,99.747,30.6],[16,99.862,23.9],
+              [18,99.917,21.2],[20,99.94,18.1],[30,99.981,12.6],[40,99.994,9.3],[50,99.997,7.5],[100,100,3.5],
+              [200,100,1.6],[300,100,1],[400,100,0.6],[500,100,0.5],[1000,100,0]],
+    QUADRAT: [[2,0,388.9],[3,98.553,73.7],[4,98.553,73.7],[5,98.553,73.7],[6,99.77,38.6],[7,99.77,38.6],
+              [8,99.77,38.6],[9,99.77,38.6],[10,99.77,38.6],[12,99.928,26],[14,99.969,19.6],[16,99.969,19.6],
+              [18,99.969,19.6],[20,99.984,15.7],[30,99.996,9.8],[40,99.998,7.9],[50,99.999,6.6],[100,100,3.1],
+              [200,100,1.5],[300,100,1],[400,100,0.7],[500,100,0.5],[1000,100,0]],
+    HERZ:    [[2,0.807,290.2],[3,99.091,89.9],[4,99.325,76.9],[5,99.544,64.3],[6,99.603,57.8],[7,99.732,48.1],
+              [8,99.759,43.7],[9,99.907,33.4],[10,99.915,30.9],[12,99.966,23.4],[14,99.987,18.5],[16,99.993,15.7],
+              [18,99.995,13.9],[20,99.996,12.6],[30,99.999,8.5],[40,100,6.3],[50,100,5],[100,100,2.5],
+              [200,100,1.2],[300,100,0.8],[400,100,0.5],[500,100,0.4],[1000,100,0]]
+};
+
+/* the rows worth showing - the plateaus and the scene beats */
+(function () {
+    const SHOW = [2, 3, 6, 10, 12, 20, 50, 100, 400];
+    const MARK = { 2: 1, 3: 1, 20: 1 };            /* scenes 6+11, 7+10, 12 */
+    const FLAT = { 4: 1, 5: 1 };
+    const at = (key, n) => DATA[key].find(r => r[0] === n);
+    const pct = (v) => (v === 100 ? '100' : v.toFixed(1).replace('.', ','));
+    const px = (v) => (v === 0 ? '0' : v.toFixed(1).replace('.', ','));
+    let html =
+        '<caption>Note · Quadrat · Herz — Energie in Prozent, größte Abweichung in Pixeln</caption>' +
+        '<thead><tr><th>Kreise</th>' +
+        '<th>Note %</th><th>Note px</th>' +
+        '<th>Quadrat %</th><th>Quadrat px</th>' +
+        '<th>Herz %</th><th>Herz px</th></tr></thead><tbody>';
+    SHOW.forEach(n => {
+        const a = at('NOTE', n), b = at('QUADRAT', n), c = at('HERZ', n);
+        html += '<tr class="' + (MARK[n] ? 'mark' : FLAT[n] ? 'flat' : '') + '">' +
+            '<td class="n">' + n + '</td>' +
+            '<td>' + pct(a[1]) + '</td><td>' + px(a[2]) + '</td>' +
+            '<td>' + pct(b[1]) + '</td><td>' + px(b[2]) + '</td>' +
+            '<td>' + pct(c[1]) + '</td><td>' + px(c[2]) + '</td></tr>';
+    });
+    html += '</tbody>';
+    document.getElementById('tbl').innerHTML = html;
+})();
+
+/* --- log-log error plot: the 1/N law, drawn from the same numbers --- */
+(function () {
+    const cv = document.getElementById('errplot');
+    if (!cv) return;
+    const ctx = cv.getContext('2d');
+    const SERIES = [
+        { key: 'NOTE', lab: 'Note', c: '#ffd700' },
+        { key: 'QUADRAT', lab: 'Quadrat', c: '#7afbff' },
+        { key: 'HERZ', lab: 'Herz', c: '#ff7eb9' }
+    ];
+
+    function draw() {
+        const r = cv.getBoundingClientRect();
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        cv.width = Math.max(1, Math.round(r.width * dpr));
+        cv.height = Math.max(1, Math.round(r.height * dpr));
+        const W = cv.width, H = cv.height, px = W / 720;
+
+        ctx.fillStyle = '#04101f';
+        ctx.fillRect(0, 0, W, H);
+
+        const L = 66 * px, R = W - 16 * px, T = 20 * px, B = H - 52 * px;
+        const x0 = Math.log10(2), x1 = Math.log10(500);
+        const y0 = Math.log10(0.4), y1 = Math.log10(400);
+        const X = (n) => L + (Math.log10(n) - x0) / (x1 - x0) * (R - L);
+        const Y = (e) => B - (Math.log10(e) - y0) / (y1 - y0) * (B - T);
+
+        /* decade grid */
+        ctx.strokeStyle = '#16294d';
+        ctx.lineWidth = 1 * px;
+        ctx.fillStyle = '#8ba1c0';
+        ctx.font = 400 + ' ' + (12 * px) + 'px Outfit, system-ui, sans-serif';
+        ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+        [1, 10, 100].forEach(v => {
+            ctx.beginPath(); ctx.moveTo(L, Y(v)); ctx.lineTo(R, Y(v)); ctx.stroke();
+            ctx.fillText(v + ' px', L - 8 * px, Y(v));
+        });
+        ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+        [2, 10, 100, 500].forEach(v => {
+            ctx.beginPath(); ctx.moveTo(X(v), T); ctx.lineTo(X(v), B); ctx.stroke();
+            ctx.fillText(String(v), X(v), B + 8 * px);
+        });
+        ctx.textAlign = 'center';
+        ctx.fillText('Kreise', (L + R) / 2, B + 30 * px);
+
+        /* the 1/N reference: N * err = 300 px */
+        ctx.strokeStyle = '#41598c';
+        ctx.setLineDash([5 * px, 5 * px]);
+        ctx.beginPath();
+        ctx.moveTo(X(3), Y(300 / 3));
+        ctx.lineTo(X(500), Y(300 / 500));
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.save();
+        ctx.translate(X(60), Y(300 / 60));
+        ctx.rotate(Math.atan2(Y(300 / 500) - Y(300 / 3), X(500) - X(3)));
+        ctx.fillStyle = '#7d93bd';
+        ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+        ctx.font = 400 + ' ' + (12 * px) + 'px Outfit, system-ui, sans-serif';
+        ctx.fillText('1 / N', 0, -5 * px);
+        ctx.restore();
+
+        /* the three measured curves */
+        SERIES.forEach(s => {
+            const pts = DATA[s.key].filter(d => d[0] <= 500 && d[2] > 0);
+            ctx.strokeStyle = s.c;
+            ctx.lineWidth = 2 * px;
+            ctx.lineJoin = 'round';
+            ctx.beginPath();
+            pts.forEach((d, i) => { const fn = i ? 'lineTo' : 'moveTo'; ctx[fn](X(d[0]), Y(d[2])); });
+            ctx.stroke();
+            ctx.fillStyle = s.c;
+            pts.forEach(d => {
+                ctx.beginPath();
+                ctx.arc(X(d[0]), Y(d[2]), 2.6 * px, 0, Math.PI * 2);
+                ctx.fill();
+            });
+        });
+
+        /* legend */
+        ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+        ctx.font = 400 + ' ' + (13 * px) + 'px Outfit, system-ui, sans-serif';
+        SERIES.forEach((s, i) => {
+            const x = L + 14 * px, y = T + 14 * px + i * 20 * px;
+            ctx.fillStyle = s.c;
+            ctx.fillRect(x, y - 5 * px, 10 * px, 10 * px);
+            ctx.fillStyle = '#b3c5de';
+            ctx.fillText(s.lab, x + 17 * px, y);
+        });
+    }
+
+    draw();
+    addEventListener('resize', draw, { passive: true });
+    document.fonts.ready.then(draw);
+})();
+
+/* ---------------------------------------------------------------
+   Hero: the film's own subject, really computed. The lab's note path
+   is sampled and transformed with the same dft() the lab uses; ten
+   circles draw it, the pen at the tip leaves the gold trace.
+   --------------------------------------------------------------- */
+(function () {
+    const cv = document.getElementById('stage');
+    if (!cv) return;
+    const ctx = cv.getContext('2d');
+
+    const NOTE_SVG = "M31.68,6.16c-1.92-3.3-10.6-4-11.58-4.09L19,2V22.29a5.88,5.88,0,0,0-.81-.55,8.33,8.33,0,0,0-6.53-.41c-4.12,1.33-6.77,5.13-5.91,8.47a5.33,5.33,0,0,0,2.66,3.32,7.48,7.48,0,0,0,3.61.88A9.54,9.54,0,0,0,15,33.52c3.7-1.19,6.2-4.37,6.06-7.42,0,0,0,0,0,0V8.49c1,.12,2.37.33,3.82.64a11.17,11.17,0,0,1,4.06,1.46c1,.66.38,1.9.33,2a11.8,11.8,0,0,1-1.66,2,1,1,0,0,0,1.33,1.49C29.15,15.85,34.5,11,31.68,6.16Z";
+    const M = 220;                 /* sample points - enough, and O(M^2) stays cheap */
+    const N = 10;                  /* circles drawn in the hero */
+    const COLORS = ['#ff7eb9', '#7afbff', '#fff970'];
+
+    /* same sampler as the lab: flip Y, centre, then normalise to 550 */
+    function sample() {
+        const ns = 'http://www.w3.org/2000/svg';
+        const svg = document.createElementNS(ns, 'svg');
+        const p = document.createElementNS(ns, 'path');
+        p.setAttribute('d', NOTE_SVG);
+        svg.appendChild(p);
+        svg.setAttribute('width', '0'); svg.setAttribute('height', '0');
+        svg.style.position = 'absolute'; svg.style.opacity = '0';
+        document.body.appendChild(svg);
+        const len = p.getTotalLength();
+        const raw = [];
+        for (let i = 0; i < M; i++) {
+            const q = p.getPointAtLength((i / M) * len);
+            raw.push({ x: q.x, y: -q.y });
+        }
+        svg.remove();
+        let a = Infinity, b = -Infinity, c = Infinity, d = -Infinity;
+        raw.forEach(q => { a = Math.min(a, q.x); b = Math.max(b, q.x); c = Math.min(c, q.y); d = Math.max(d, q.y); });
+        const cx = (a + b) / 2, cy = (c + d) / 2;
+        const s = 550 / Math.max(b - a, d - c, 1);
+        return raw.map(q => ({ re: (q.x - cx) * s, im: (q.y - cy) * s }));
+    }
+
+    /* the lab's dft(), verbatim in spirit: sorted by |freq| */
+    function dft(z) {
+        const X = [], n = z.length;
+        for (let k = 0; k < n; k++) {
+            let re = 0, im = 0;
+            for (let j = 0; j < n; j++) {
+                const phi = (Math.PI * 2 * k * j) / n;
+                re += z[j].re * Math.cos(phi) + z[j].im * Math.sin(phi);
+                im += -z[j].re * Math.sin(phi) + z[j].im * Math.cos(phi);
+            }
+            re /= n; im /= n;
+            let freq = k; if (freq > n / 2) freq -= n;
+            X.push({ freq, amp: Math.hypot(re, im), phase: Math.atan2(im, re) });
+        }
+        X.sort((p, q) => Math.abs(p.freq) - Math.abs(q.freq));
+        return X;
+    }
+
+    const shape = sample();
+    const F = dft(shape).slice(0, N);
+
+    let t = 0;
+    const trace = [];
+    let raf = 0;
+
+    function fit() {
+        const r = cv.getBoundingClientRect();
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        cv.width = Math.max(1, Math.round(r.width * dpr));
+        cv.height = Math.max(1, Math.round(r.height * dpr));
+    }
+
+    function frame() {
+        fit();
+        const W = cv.width, H = cv.height;
+        const px = W / 600;
+        const k = Math.min(W, H) / 780;        /* 550 px figure with air around it */
+        const ox = W / 2, oy = H / 2;
+        const mx = (v) => ox + v * k, my = (v) => oy - v * k;
+
+        ctx.fillStyle = '#04101f';
+        ctx.fillRect(0, 0, W, H);
+
+        /* the wanted shape, faint */
+        ctx.strokeStyle = 'rgba(255,255,255,0.10)';
+        ctx.lineWidth = 1 * px;
+        ctx.setLineDash([4 * px, 5 * px]);
+        ctx.beginPath();
+        shape.forEach((p, i) => { const fn = i ? 'lineTo' : 'moveTo'; ctx[fn](mx(p.re), my(p.im)); });
+        ctx.closePath();
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        /* the chain */
+        let x = 0, y = 0;
+        F.forEach((c, i) => {
+            const px0 = mx(x), py0 = my(y);
+            const ang = c.freq * t + c.phase;
+            x += c.amp * Math.cos(ang);
+            y += c.amp * Math.sin(ang);
+            const col = COLORS[i % COLORS.length];
+            ctx.strokeStyle = col;
+            ctx.globalAlpha = 0.5;
+            ctx.lineWidth = 1 * px;
+            ctx.beginPath();
+            ctx.arc(px0, py0, c.amp * k, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.globalAlpha = 0.95;
+            ctx.lineWidth = 1.4 * px;
+            ctx.beginPath();
+            ctx.moveTo(px0, py0);
+            ctx.lineTo(mx(x), my(y));
+            ctx.stroke();
+            ctx.globalAlpha = 1;
+        });
+
+        trace.unshift({ x, y });
+        if (trace.length > 900) trace.pop();
+
+        /* the gold trace, glow then core - the lab's own look */
+        if (trace.length > 1) {
+            ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+            ctx.beginPath();
+            trace.forEach((p, i) => { const fn = i ? 'lineTo' : 'moveTo'; ctx[fn](mx(p.x), my(p.y)); });
+            ctx.strokeStyle = '#ffd700';
+            ctx.globalAlpha = 0.55;
+            ctx.lineWidth = 5 * px;
+            ctx.shadowBlur = 14 * px;
+            ctx.shadowColor = '#ffd700';
+            ctx.stroke();
+            ctx.globalAlpha = 1;
+            ctx.shadowBlur = 3 * px;
+            ctx.lineWidth = 2 * px;
+            ctx.strokeStyle = '#fff970';
+            ctx.stroke();
+            ctx.shadowBlur = 0;
+        }
+
+        /* the pen */
+        ctx.fillStyle = '#fff970';
+        ctx.beginPath();
+        ctx.arc(mx(x), my(y), 3 * px, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = '#8ba1c0';
+        ctx.font = 400 + ' ' + (13 * px) + 'px Outfit, system-ui, sans-serif';
+        ctx.textAlign = 'left'; ctx.textBaseline = 'bottom';
+        ctx.fillText(N + ' Kreise · echt gerechnet', 14 * px, H - 12 * px);
+
+        t += 0.012;
+        if (t >= Math.PI * 2) { t = 0; trace.length = 0; }
+        raf = requestAnimationFrame(frame);
+    }
+
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduce) {
+        /* draw the finished curve once, no motion */
+        for (let i = 0; i < 900; i++) { t += Math.PI * 2 / 900; }
+        t = 0;
+        frame();
+        cancelAnimationFrame(raf);
+    } else {
+        frame();
+    }
+})();
+</script>
+</body>
+</html>
