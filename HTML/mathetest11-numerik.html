@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Numerische Verfahren — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  "id": "mathe11-w36-numerik",
+  "version": "v1",
+  "title": "Aufgaben · Numerische Verfahren",
+  "subtitle": "Berufliches Gymnasium · Klasse 11 · Woche 36, KW 22 (Wahlbereich) · 20 Aufgaben: Bisektion, numerische Flächenberechnung, Genauigkeit · genau eine Antwort pro Aufgabe",
+  "dashSub": "BGY · Klasse 11 · KW 22 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe",
+  "back": "svp/mathe/mathe11.html",
+  "questions": [
+    {
+      "q": "Was ist ein numerisches Verfahren?",
+      "opts": [
+        "ein Verfahren, das die Lösung schrittweise annähert",
+        "ein Verfahren mit exaktem Ergebnis",
+        "eine Formel",
+        "eine Zeichnung"
+      ],
+      "steps": [
+        "Statt einer geschlossenen Formel wird die Lösung in Schritten eingegrenzt.",
+        "Man rechnet so lange, bis die gewünschte Genauigkeit erreicht ist."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Worauf beruht die Bisektion (Intervallhalbierung)?",
+      "opts": [
+        "auf dem Anstieg",
+        "auf dem Scheitelpunkt",
+        "auf dem Logarithmus",
+        "auf einem Vorzeichenwechsel der Funktion zwischen zwei Stellen"
+      ],
+      "steps": [
+        "Ist $f(a) < 0 < f(b)$, muss dazwischen eine Nullstelle liegen.",
+        "Das Intervall wird halbiert und die Hälfte mit Vorzeichenwechsel behalten."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "$f(x) = x^2 - 2$ mit $f(1) = -1$ und $f(2) = 2$. Welche Stelle prüft die Bisektion zuerst?",
+      "opts": [
+        "$x = 1{,}25$",
+        "$x = 2$",
+        "$x = 0$",
+        "$x = 1{,}5$"
+      ],
+      "steps": [
+        "Die Mitte des Intervalls ist der erste Prüfpunkt.",
+        "$\\dfrac{1+2}{2} = 1{,}5$"
+      ],
+      "solution": 3
+    },
+    {
+      "q": "$f(1{,}5) = 0{,}25 > 0$. Mit welchem Intervall geht es weiter?",
+      "opts": [
+        "$[0; 1]$",
+        "$[1{,}5; 1{,}75]$",
+        "$[1; 1{,}5]$",
+        "$[1{,}5; 2]$"
+      ],
+      "steps": [
+        "Der Vorzeichenwechsel liegt zwischen $f(1) < 0$ und $f(1{,}5) > 0$.",
+        "Also weiter mit $[1; 1{,}5]$."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Wie verkleinert sich die Intervalllänge bei der Bisektion pro Schritt?",
+      "opts": [
+        "sie wächst",
+        "sie halbiert sich",
+        "sie viertelt sich",
+        "sie bleibt gleich"
+      ],
+      "steps": [
+        "Jeder Schritt teilt das Intervall in zwei Hälften.",
+        "Nach $n$ Schritten ist die Länge $\\dfrac{b-a}{2^n}$."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Wie viele Bisektionsschritte braucht man etwa, um ein Intervall der Länge $1$ auf $0{,}001$ zu verkleinern?",
+      "opts": [
+        "etwa $10$",
+        "etwa $3$",
+        "etwa $100$",
+        "etwa $1000$"
+      ],
+      "steps": [
+        "$2^{10} = 1024 > 1000$",
+        "Zehn Halbierungen reichen also."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Welchen Wert nähert die Bisektion bei $f(x) = x^2 - 2$ auf $[1;2]$ an?",
+      "opts": [
+        "$0$",
+        "$\\sqrt{2} \\approx 1{,}414$",
+        "$2$",
+        "$1{,}5$"
+      ],
+      "steps": [
+        "Nullstelle von $x^2 - 2$ ist $\\sqrt{2}$.",
+        "Damit berechnet das Verfahren eine Wurzel ganz ohne Wurzeltaste."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Warum funktioniert die Bisektion bei $f(x) = x^2$ auf $[-1; 1]$ nicht?",
+      "opts": [
+        "sie funktioniert doch",
+        "es gibt keinen Vorzeichenwechsel",
+        "die Funktion ist nicht stetig",
+        "das Intervall ist zu klein"
+      ],
+      "steps": [
+        "$f(-1) = f(1) = 1$ — beide positiv.",
+        "Ohne Vorzeichenwechsel greift das Kriterium nicht, obwohl bei $0$ eine Nullstelle liegt."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Wie nähert man einen Flächeninhalt unter einer Kurve numerisch an?",
+      "opts": [
+        "durch Ableiten",
+        "durch Runden",
+        "durch schmale Rechtecke oder Trapeze",
+        "durch einen einzigen Kreis"
+      ],
+      "steps": [
+        "Die Fläche wird in schmale Streifen zerlegt.",
+        "Je schmaler die Streifen, desto besser die Näherung — die Idee hinter dem Integral."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Was passiert bei der Streifenmethode, wenn man die Streifenzahl verdoppelt?",
+      "opts": [
+        "sie bleibt gleich",
+        "die Fläche verdoppelt sich",
+        "die Näherung wird in der Regel genauer",
+        "sie wird schlechter"
+      ],
+      "steps": [
+        "Schmalere Streifen schmiegen sich besser an die Kurve.",
+        "Der Rechenaufwand steigt dabei linear mit der Streifenzahl."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Fläche unter $f(x) = x$ von $0$ bis $2$: welcher exakte Wert kommt heraus?",
+      "opts": [
+        "$1$",
+        "$0$",
+        "$2$",
+        "$4$"
+      ],
+      "steps": [
+        "Es entsteht ein Dreieck mit Grundseite $2$ und Höhe $2$.",
+        "$A = \\dfrac{1}{2} \\cdot 2 \\cdot 2 = 2$"
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Warum sind numerische Verfahren für Rechner so geeignet?",
+      "opts": [
+        "weil sie exakt sind",
+        "weil sie keine Zahlen brauchen",
+        "weil sie kurz sind",
+        "sie bestehen aus wenigen, ständig wiederholten Schritten"
+      ],
+      "steps": [
+        "Eine Schleife mit Abbruchbedingung genügt.",
+        "Genau so arbeiten die Solver in CAS, Tabellenkalkulation und Simulationssoftware."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Was ist ein sinnvolles Abbruchkriterium?",
+      "opts": [
+        "wenn die Intervalllänge unter eine gewählte Schranke fällt",
+        "wenn die Zahl schön aussieht",
+        "nach genau zehn Schritten immer",
+        "wenn der Rechner heiß wird"
+      ],
+      "steps": [
+        "Man legt vorab fest, wie genau das Ergebnis sein soll.",
+        "Alternativ bricht man ab, wenn sich der Wert kaum noch ändert."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Welche Gleichung lässt sich nur numerisch lösen?",
+      "opts": [
+        "$x + 3 = 7$",
+        "$x = \\cos x$",
+        "$2x = 8$",
+        "$x^2 = 9$"
+      ],
+      "steps": [
+        "Die Unbekannte steht innerhalb und außerhalb einer Funktion.",
+        "Kein Umformen trennt sie — die Lösung $x \\approx 0{,}739$ liefert ein Näherungsverfahren."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Was bedeutet „Konvergenz“ eines Verfahrens?",
+      "opts": [
+        "die Rechnung bricht ab",
+        "die Werte werden immer größer",
+        "das Ergebnis ist exakt",
+        "die Näherungen streben gegen den gesuchten Wert"
+      ],
+      "steps": [
+        "Mit jedem Schritt kommt man näher heran.",
+        "Verfahren, die das nicht tun, sind unbrauchbar — sie divergieren."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Warum ist die Bisektion langsam, aber beliebt?",
+      "opts": [
+        "sie ist die schnellste Methode",
+        "sie braucht keine Funktionswerte",
+        "sie ist exakt",
+        "sie ist einfach und findet die Nullstelle garantiert, wenn ein Vorzeichenwechsel vorliegt"
+      ],
+      "steps": [
+        "Andere Verfahren konvergieren schneller, können aber auch versagen.",
+        "Die Bisektion halbiert stur weiter und kommt sicher ans Ziel."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Ein numerisches Ergebnis lautet $1{,}4142135$. Wie sollte man es angeben?",
+      "opts": [
+        "immer auf zwei Stellen gerundet",
+        "als Bruch",
+        "mit der Genauigkeit, die das Abbruchkriterium hergibt",
+        "mit allen angezeigten Ziffern"
+      ],
+      "steps": [
+        "Mehr Ziffern anzugeben als das Verfahren sichert, ist irreführend.",
+        "Die Angabe der Genauigkeit gehört zum Ergebnis dazu."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Wozu dient eine Wertetabelle vor dem numerischen Lösen?",
+      "opts": [
+        "um das Ergebnis zu erraten",
+        "um die Funktion zu ändern",
+        "sie ist überflüssig",
+        "um ein Intervall mit Vorzeichenwechsel zu finden"
+      ],
+      "steps": [
+        "Erst muss man wissen, wo eine Nullstelle ungefähr liegt.",
+        "Eine grobe Tabelle oder ein Graph liefert das Startintervall."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Was unterscheidet ein numerisches vom exakten Ergebnis?",
+      "opts": [
+        "das numerische ist eine Näherung mit bekannter Fehlerschranke",
+        "es ist immer falsch",
+        "es ist immer kleiner",
+        "es gibt keinen Unterschied"
+      ],
+      "steps": [
+        "$\\sqrt{2}$ exakt gegen $1{,}414$ als Näherung.",
+        "Mit Fehlerschranke ist die Näherung eine ehrliche und brauchbare Aussage."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Welche Rolle spielen numerische Verfahren in der Praxis?",
+      "opts": [
+        "nur in der Schule",
+        "nur bei Wurzeln",
+        "sie stecken in Simulation, Grafik, Statistik und Steuerungstechnik",
+        "sie werden kaum verwendet"
+      ],
+      "steps": [
+        "Wetter, Crashtests, Bildbearbeitung und Navigation rechnen numerisch.",
+        "Exakte Formeln gibt es für die wenigsten realen Probleme."
+      ],
+      "solution": 2
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

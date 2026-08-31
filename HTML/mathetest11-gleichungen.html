@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Gleichungen &amp; Formeln umstellen — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathe11-w4-gleichungen',
+  version: 'v1',
+  title: 'Aufgaben · Gleichungen ohne Hilfsmittel',
+  subtitle: 'Berufliches Gymnasium · Klasse 11 · Woche 4 (LB 2) · 20 Aufgaben: lineare Gleichungen, Formeln umstellen, Klammern und Potenzen · genau eine Antwort pro Aufgabe',
+  dashSub: 'BGY · Klasse 11 · Woche 4 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathe11.html', /* opened from the Mathe-11 plan */
+  /* Questions for week 4 of the Mathe-11 plan: everything is meant to be
+     solved without CAS/GTR. Blocks: linear equations (1-10), rearranging
+     formulas (11-15), brackets and powers (16-20).
+     Exactly one correct option per question, formulas as $...$ (KaTeX). */
+  questions: [
+    {
+      q: 'Löse die Gleichung $7x - 4 = 3x + 12$.',
+      opts: ['$x = 2$', '$x = 4$', '$x = 8$', '$x = -4$'],
+      steps: [
+        '$3x$ auf beiden Seiten abziehen: $4x - 4 = 12$',
+        '$+4$ auf beiden Seiten: $4x = 16$',
+        'Durch $4$ teilen: $x = 4$',
+        'Probe: $7 \\cdot 4 - 4 = 24$ und $3 \\cdot 4 + 12 = 24$ — stimmt.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Löse die Gleichung $5(x - 3) = 2x + 9$.',
+      opts: ['$x = 6$', '$x = 2$', '$x = 8$', '$x = 24$'],
+      steps: [
+        'Klammer ausmultiplizieren: $5x - 15 = 2x + 9$',
+        '$2x$ abziehen: $3x - 15 = 9$',
+        '$+15$: $3x = 24$, also $x = 8$',
+        'Probe: $5 \\cdot (8-3) = 25$ und $2 \\cdot 8 + 9 = 25$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Löse die Gleichung $\\dfrac{x}{3} + 2 = 7$.',
+      opts: ['$x = 5$', '$x = 21$', '$x = 15$', '$x = 27$'],
+      steps: [
+        'Zuerst $-2$: $\\dfrac{x}{3} = 5$',
+        'Dann mit $3$ multiplizieren: $x = 15$',
+        'Die häufigste Falle: erst mal $3$ nehmen, ohne die $2$ mitzunehmen — dann käme $21$ heraus.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Löse die Gleichung $\\dfrac{2x - 1}{4} = 3$.',
+      opts: ['$x = 6{,}5$', '$x = 5{,}5$', '$x = 13$', '$x = 7$'],
+      steps: [
+        'Mit $4$ multiplizieren — der ganze Zähler wird mal $4$: $2x - 1 = 12$',
+        '$+1$: $2x = 13$',
+        'Durch $2$: $x = 6{,}5$'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Löse die Gleichung $3(2x + 1) - 4(x - 2) = 15$.',
+      opts: ['$x = 1$', '$x = 4$', '$x = -2$', '$x = 2$'],
+      steps: [
+        'Beide Klammern ausmultiplizieren — Vorzeichen beachten: $6x + 3 - 4x + 8 = 15$',
+        'Zusammenfassen: $2x + 11 = 15$',
+        '$-11$ und durch $2$: $2x = 4$, also $x = 2$',
+        'Klassischer Fehler: $-4(x-2) = -4x - 8$. Das Minus gilt für beide Summanden.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie viele Lösungen hat die Gleichung $2(x + 3) = 2x + 6$?',
+      opts: ['genau eine', 'keine', 'unendlich viele', 'genau zwei'],
+      steps: [
+        'Links ausmultiplizieren: $2x + 6 = 2x + 6$',
+        'Beide Seiten sind für jedes $x$ gleich — die Gleichung ist eine Identität.',
+        'Sie hat also unendlich viele Lösungen: jede reelle Zahl passt.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie viele Lösungen hat die Gleichung $4x + 5 = 4x - 3$?',
+      opts: ['keine', 'genau eine', 'unendlich viele', 'genau zwei'],
+      steps: [
+        '$4x$ auf beiden Seiten abziehen: $5 = -3$',
+        'Das ist eine falsche Aussage — sie hängt gar nicht mehr von $x$ ab.',
+        'Also gibt es kein $x$, das passt: die Lösungsmenge ist leer.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Löse die Gleichung $\\dfrac{x}{2} - \\dfrac{x}{5} = 3$.',
+      opts: ['$x = 6$', '$x = 10$', '$x = 15$', '$x = 30$'],
+      steps: [
+        'Auf den Hauptnenner $10$ bringen: $\\dfrac{5x}{10} - \\dfrac{2x}{10} = 3$',
+        'Zusammenfassen: $\\dfrac{3x}{10} = 3$',
+        'Mit $10$ multiplizieren und durch $3$ teilen: $3x = 30$, also $x = 10$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Verdreifacht man eine Zahl und addiert $7$, so erhält man $25$. Wie heißt die Zahl?',
+      opts: ['$9$', '$6$', '$8$', '$32$'],
+      steps: [
+        'Gleichung aufstellen: $3x + 7 = 25$',
+        '$-7$: $3x = 18$',
+        'Durch $3$: $x = 6$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Welche Umformung ist bei einer Gleichung NICHT immer erlaubt?',
+      opts: [
+        'Auf beiden Seiten dieselbe Zahl addieren',
+        'Beide Seiten durch einen Term teilen, der null sein kann',
+        'Beide Seiten mit $-1$ multiplizieren',
+        'Beide Seiten vertauschen'
+      ],
+      steps: [
+        'Addieren, Subtrahieren und das Vertauschen der Seiten sind immer Äquivalenzumformungen.',
+        'Multiplizieren und Dividieren nur mit einer Zahl bzw. einem Term, der sicher nicht null ist.',
+        'Beispiel: aus $x^2 = x$ darf man nicht einfach durch $x$ teilen — sonst verliert man die Lösung $x = 0$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Stelle $s = \\dfrac{a}{2}\\,t^2$ nach $t$ um (mit $a > 0$, $t > 0$).',
+      opts: [
+        '$t = \\dfrac{2s}{a}$',
+        '$t = \\sqrt{\\dfrac{s}{2a}}$',
+        '$t = \\sqrt{\\dfrac{2s}{a}}$',
+        '$t = \\dfrac{\\sqrt{2s}}{a}$'
+      ],
+      steps: [
+        'Mit $2$ multiplizieren: $2s = a\\,t^2$',
+        'Durch $a$ teilen: $t^2 = \\dfrac{2s}{a}$',
+        'Wurzel ziehen (nur die positive Lösung ist als Zeit sinnvoll): $t = \\sqrt{\\dfrac{2s}{a}}$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Stelle den Kreisumfang $U = 2\\pi r$ nach $r$ um.',
+      opts: ['$r = \\dfrac{U}{2\\pi}$', '$r = \\dfrac{2\\pi}{U}$', '$r = U - 2\\pi$', '$r = 2\\pi U$'],
+      steps: [
+        '$r$ steht im Produkt mit $2\\pi$ — also durch $2\\pi$ teilen.',
+        '$r = \\dfrac{U}{2\\pi}$',
+        'Kontrolle mit Einheiten: $U$ in cm geteilt durch eine reine Zahl bleibt cm — passt zu einer Länge.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Stelle das Pyramidenvolumen $V = \\dfrac{1}{3}\\,G\\,h$ nach $h$ um.',
+      opts: ['$h = \\dfrac{V}{3G}$', '$h = \\dfrac{3V}{G}$', '$h = \\dfrac{G}{3V}$', '$h = 3VG$'],
+      steps: [
+        'Mit $3$ multiplizieren: $3V = G\\,h$',
+        'Durch $G$ teilen: $h = \\dfrac{3V}{G}$',
+        'Probe im Kopf: doppelt so hoch bei gleicher Grundfläche $\\Rightarrow$ doppeltes Volumen. Passt.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Stelle die Trapezfläche $A = \\dfrac{a + c}{2}\\cdot h$ nach $c$ um.',
+      opts: [
+        '$c = \\dfrac{2A}{h} + a$',
+        '$c = \\dfrac{A}{2h} - a$',
+        '$c = \\dfrac{2A - a}{h}$',
+        '$c = \\dfrac{2A}{h} - a$'
+      ],
+      steps: [
+        'Mit $2$ multiplizieren: $2A = (a + c)\\,h$',
+        'Durch $h$ teilen: $\\dfrac{2A}{h} = a + c$',
+        '$a$ abziehen: $c = \\dfrac{2A}{h} - a$'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Stelle die Linsengleichung $\\dfrac{1}{f} = \\dfrac{1}{g} + \\dfrac{1}{b}$ nach $b$ um.',
+      opts: [
+        '$b = \\dfrac{fg}{g - f}$',
+        '$b = \\dfrac{g - f}{fg}$',
+        '$b = f + g$',
+        '$b = \\dfrac{fg}{f - g}$'
+      ],
+      steps: [
+        'Nach $\\dfrac{1}{b}$ auflösen: $\\dfrac{1}{b} = \\dfrac{1}{f} - \\dfrac{1}{g}$',
+        'Rechts auf den Hauptnenner $fg$: $\\dfrac{1}{b} = \\dfrac{g - f}{fg}$',
+        'Kehrwert bilden: $b = \\dfrac{fg}{g - f}$',
+        'Der Kehrwert einer Summe ist nicht die Summe der Kehrwerte — deshalb erst zusammenfassen, dann stürzen.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Multipliziere aus: $(3x - 4)^2$',
+      opts: [
+        '$9x^2 + 16$',
+        '$9x^2 - 24x + 16$',
+        '$9x^2 - 12x + 16$',
+        '$3x^2 - 24x + 16$'
+      ],
+      steps: [
+        'Zweite binomische Formel: $(a - b)^2 = a^2 - 2ab + b^2$',
+        'Mit $a = 3x$ und $b = 4$: $a^2 = 9x^2$, $2ab = 2 \\cdot 3x \\cdot 4 = 24x$, $b^2 = 16$',
+        'Also $(3x-4)^2 = 9x^2 - 24x + 16$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Fasse zusammen: $2a(3a - 5) - 3(a^2 - 2a)$',
+      opts: ['$3a^2 - 16a$', '$9a^2 - 4a$', '$3a^2 - 4a$', '$3a^2 + 4a$'],
+      steps: [
+        'Erste Klammer: $2a \\cdot 3a - 2a \\cdot 5 = 6a^2 - 10a$',
+        'Zweite Klammer mit dem Minus davor: $-3a^2 + 6a$',
+        'Zusammenfassen: $6a^2 - 3a^2 = 3a^2$ und $-10a + 6a = -4a$',
+        'Ergebnis: $3a^2 - 4a$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Vereinfache $\\dfrac{x^5 \\cdot x^3}{x^4}$ (für $x \\neq 0$).',
+      opts: ['$x^2$', '$x^{15}$', '$x^6$', '$x^4$'],
+      steps: [
+        'Im Zähler gleiche Basis multiplizieren ⇒ Exponenten addieren: $x^5 \\cdot x^3 = x^8$',
+        'Beim Dividieren Exponenten subtrahieren: $x^8 : x^4 = x^{8-4}$',
+        'Also $x^4$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Vereinfache $(2x^3)^4$.',
+      opts: ['$16x^{12}$', '$8x^{12}$', '$2x^{12}$', '$16x^7$'],
+      steps: [
+        'Die äußere Potenz trifft jeden Faktor: $(2x^3)^4 = 2^4 \\cdot (x^3)^4$',
+        '$2^4 = 16$ und $(x^3)^4 = x^{3 \\cdot 4} = x^{12}$',
+        'Also $16x^{12}$. Die Falle ist, die $2$ unangetastet zu lassen.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Schreibe $3x^{-2}$ ohne negativen Exponenten (für $x \\neq 0$).',
+      opts: ['$\\dfrac{1}{3x^2}$', '$-3x^2$', '$\\dfrac{3}{x^2}$', '$\\dfrac{1}{(3x)^2}$'],
+      steps: [
+        'Der negative Exponent gehört nur zum $x$, nicht zur $3$: $x^{-2} = \\dfrac{1}{x^2}$',
+        'Also $3x^{-2} = 3 \\cdot \\dfrac{1}{x^2} = \\dfrac{3}{x^2}$',
+        'Ein negativer Exponent macht die Zahl nicht negativ — er bedeutet Kehrwert.'
+      ],
+      solution: 2
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

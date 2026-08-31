@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Wachstum und Zerfall II: Exponentialfunktionen — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  "id": "mathe11-w10-exponential",
+  "version": "v1",
+  "title": "Aufgaben · Wachstum und Zerfall II: Exponentialfunktionen",
+  "subtitle": "Berufliches Gymnasium · Klasse 11 · Woche 10, KW 45 (LB 3) · 20 Aufgaben: Wachstumsfaktor, Zinseszins, Halbwertszeit · genau eine Antwort pro Aufgabe",
+  "dashSub": "BGY · Klasse 11 · KW 45 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe",
+  "back": "svp/mathe/mathe11.html",
+  "questions": [
+    {
+      "q": "Welcher Wachstumsfaktor gehört zu einer Zunahme um $3\\,\\%$?",
+      "opts": [
+        "$0{,}03$",
+        "$1{,}3$",
+        "$1{,}03$",
+        "$3$"
+      ],
+      "steps": [
+        "$100\\,\\% + 3\\,\\% = 103\\,\\%$",
+        "Als Faktor: $1{,}03$",
+        "$1{,}3$ wären $30\\,\\%$ Zuwachs."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Welcher Faktor gehört zu einer Abnahme um $12\\,\\%$?",
+      "opts": [
+        "$1{,}12$",
+        "$-0{,}12$",
+        "$0{,}88$",
+        "$0{,}12$"
+      ],
+      "steps": [
+        "Es bleiben $100\\,\\% - 12\\,\\% = 88\\,\\%$ übrig.",
+        "Als Faktor: $0{,}88$",
+        "Ein Faktor kleiner als $1$ bedeutet Abnahme, größer als $1$ Zunahme."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "$1000$ € werden mit $3\\,\\%$ pro Jahr verzinst. Wie viel sind es nach $2$ Jahren?",
+      "opts": [
+        "$1060$ €",
+        "$1060{,}90$ €",
+        "$1030$ €",
+        "$1090$ €"
+      ],
+      "steps": [
+        "$K(t) = 1000 \\cdot 1{,}03^{\\,t}$",
+        "$K(2) = 1000 \\cdot 1{,}0609 = 1060{,}90$ €",
+        "Die $0{,}90$ € Unterschied zu $1060$ € sind der Zins auf den Zins des ersten Jahres."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Für $f(x) = 100 \\cdot 2^x$: wie groß ist $f(3)$?",
+      "opts": [
+        "$800$",
+        "$1000$",
+        "$106$",
+        "$600$"
+      ],
+      "steps": [
+        "$2^3 = 8$",
+        "$f(3) = 100 \\cdot 8 = 800$",
+        "Erst potenzieren, dann multiplizieren — nicht $(100 \\cdot 2)^3$."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Wie viel eines radioaktiven Stoffes ist nach drei Halbwertszeiten noch da?",
+      "opts": [
+        "nichts mehr",
+        "$\\dfrac{1}{6}$",
+        "$\\dfrac{1}{8}$",
+        "$\\dfrac{1}{3}$"
+      ],
+      "steps": [
+        "Jede Halbwertszeit halbiert den Bestand.",
+        "$\\dfrac12 \\cdot \\dfrac12 \\cdot \\dfrac12 = \\dfrac18 = 12{,}5\\,\\%$",
+        "Nach drei Halbwertszeiten ist also noch ein Achtel übrig — nie exakt null."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Bakterien verdoppeln sich alle $20$ Minuten. Um welchen Faktor wächst die Kultur in $2$ Stunden?",
+      "opts": [
+        "$12$",
+        "$64$",
+        "$32$",
+        "$6$"
+      ],
+      "steps": [
+        "$2$ Stunden $= 120$ Minuten $= 6$ Zeitschritte à $20$ Minuten.",
+        "Jeder Schritt verdoppelt: $2^6 = 64$",
+        "Der Bestand ist also 64-mal so groß — nicht 6-mal."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Woran erkennt man exponentielles Wachstum in einer Wertetabelle?",
+      "opts": [
+        "daran, dass alle Werte gerade sind",
+        "an einer konstanten Summe",
+        "an konstanten Differenzen",
+        "an konstanten Quotienten"
+      ],
+      "steps": [
+        "Exponentiell heißt: pro Schritt wird mit demselben Faktor multipliziert.",
+        "Also ist der Quotient $\\dfrac{f(x+1)}{f(x)}$ konstant.",
+        "Beispiel: $3,\\ 6,\\ 12,\\ 24$ — Quotient immer $2$."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Wo schneidet $f(x) = 5 \\cdot 3^x$ die $y$-Achse?",
+      "opts": [
+        "bei $y = 0$",
+        "bei $y = 15$",
+        "bei $y = 3$",
+        "bei $y = 5$"
+      ],
+      "steps": [
+        "Auf der $y$-Achse ist $x = 0$.",
+        "$f(0) = 5 \\cdot 3^0 = 5 \\cdot 1 = 5$",
+        "Der Vorfaktor ist immer der Startwert, denn $a^0 = 1$."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Wie viele Nullstellen hat $f(x) = 2^x$?",
+      "opts": [
+        "eine bei $x = 1$",
+        "eine bei $x = 0$",
+        "keine",
+        "unendlich viele"
+      ],
+      "steps": [
+        "Potenzen mit positiver Basis sind immer positiv: $2^x > 0$ für alle $x$.",
+        "Der Graph nähert sich der $x$-Achse beliebig an, berührt sie aber nie.",
+        "Die $x$-Achse ist eine Asymptote — es gibt keine Nullstelle."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Ein Auto verliert jährlich $5\\,\\%$ seines Wertes. Welcher Term beschreibt den Wert nach $t$ Jahren?",
+      "opts": [
+        "$A \\cdot 0{,}05^{\\,t}$",
+        "$A - 0{,}05t$",
+        "$A \\cdot 1{,}05^{\\,t}$",
+        "$A \\cdot 0{,}95^{\\,t}$"
+      ],
+      "steps": [
+        "Pro Jahr bleiben $95\\,\\%$ übrig, das ist der Faktor $0{,}95$.",
+        "Nach $t$ Jahren: $A \\cdot 0{,}95^{\\,t}$",
+        "$A - 0{,}05t$ wäre linearer Verlust — der Wertverlust bezieht sich aber immer auf den aktuellen Wert."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Wie groß ist $2^{10}$?",
+      "opts": [
+        "$512$",
+        "$1024$",
+        "$2048$",
+        "$100$"
+      ],
+      "steps": [
+        "$2^5 = 32$, also $2^{10} = 32 \\cdot 32$",
+        "$32 \\cdot 32 = 1024$",
+        "Diese Zahl kennt man aus der Informatik: $1$ KiB $= 1024$ Byte."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Was ist nach $10$ Jahren mehr wert: $1000$ € mit $7\\,\\%$ Zinseszins oder $1000$ € mit $70$ € Zinsen pro Jahr?",
+      "opts": [
+        "beides gleich",
+        "der Zinseszins",
+        "die feste Zinszahlung",
+        "das hängt vom Startkapital ab"
+      ],
+      "steps": [
+        "Feste Zinsen: $1000 + 10 \\cdot 70 = 1700$ €",
+        "Zinseszins: $1000 \\cdot 1{,}07^{10} \\approx 1967$ €",
+        "Weil die Zinsen mitverzinst werden, wächst das Kapital schneller als linear."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Wie verläuft der Graph von $f(x) = \\left(\\dfrac{1}{2}\\right)^x$?",
+      "opts": [
+        "streng monoton fallend",
+        "konstant",
+        "erst fallend, dann steigend",
+        "streng monoton steigend"
+      ],
+      "steps": [
+        "Die Basis liegt zwischen $0$ und $1$.",
+        "Jeder Schritt nach rechts halbiert den Wert — der Graph fällt.",
+        "Er bleibt dabei immer positiv und nähert sich der $x$-Achse."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "$400$ mg eines Stoffes zerfallen mit der Halbwertszeit $5$ Tage. Wie viel ist nach $15$ Tagen übrig?",
+      "opts": [
+        "$100$ mg",
+        "$50$ mg",
+        "$80$ mg",
+        "$0$ mg"
+      ],
+      "steps": [
+        "$15$ Tage sind drei Halbwertszeiten.",
+        "$400 \\to 200 \\to 100 \\to 50$",
+        "Es bleiben $50$ mg."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Ein Bestand verdreifacht sich alle $4$ Stunden. Welcher Term beschreibt ihn?",
+      "opts": [
+        "$N_0 \\cdot 3^{\\,t/4}$",
+        "$N_0 \\cdot 3^{\\,4t}$",
+        "$N_0 \\cdot 4^{\\,t/3}$",
+        "$N_0 \\cdot 3t$"
+      ],
+      "steps": [
+        "Nach $4$ Stunden soll der Faktor $3$ erreicht sein.",
+        "Der Exponent zählt die Zeitschritte: $\\dfrac{t}{4}$",
+        "Probe mit $t = 4$: $3^{4/4} = 3$ — passt."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Ein Faktor von $1{,}25$ pro Schritt entspricht welcher prozentualen Änderung?",
+      "opts": [
+        "$+25\\,\\%$",
+        "$+125\\,\\%$",
+        "$-25\\,\\%$",
+        "$+2{,}5\\,\\%$"
+      ],
+      "steps": [
+        "$1{,}25 = 1 + 0{,}25$",
+        "$0{,}25$ entspricht $25\\,\\%$ Zuwachs.",
+        "Faustregel: Nachkommaanteil mal $100$ ergibt die Prozentzahl."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Für eine Exponentialfunktion gilt $f(0) = 200$ und $f(1) = 240$. Wie groß ist $f(2)$?",
+      "opts": [
+        "$280$",
+        "$288$",
+        "$300$",
+        "$480$"
+      ],
+      "steps": [
+        "Wachstumsfaktor: $q = \\dfrac{240}{200} = 1{,}2$",
+        "$f(2) = 240 \\cdot 1{,}2 = 288$",
+        "$280$ käme heraus, wenn man wie bei linearem Wachstum immer $40$ addieren würde."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Die Sage vom Schachbrett: auf jedes Feld doppelt so viele Reiskörner wie auf das vorige. Was zeigt sie?",
+      "opts": [
+        "dass Reis knapp ist",
+        "dass Verdopplung dasselbe wie Verdopplung der Summe ist",
+        "dass lineares Wachstum unterschätzt wird",
+        "dass exponentielles Wachstum jede Vorstellung sprengt"
+      ],
+      "steps": [
+        "Auf Feld $n$ liegen $2^{\\,n-1}$ Körner.",
+        "Insgesamt $2^{64} - 1 \\approx 1{,}8 \\cdot 10^{19}$ Körner — mehr als die Welternte vieler Jahre.",
+        "Exponentielles Wachstum sieht am Anfang harmlos aus und läuft dann davon."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Welche Funktion wächst auf lange Sicht am schnellsten?",
+      "opts": [
+        "$f(x) = x^2$",
+        "$f(x) = 1{,}05^{\\,x}$",
+        "$f(x) = 50x + 1000$",
+        "$f(x) = 100x$"
+      ],
+      "steps": [
+        "Für kleine $x$ sind $100x$ und $x^2$ weit vorn — $1{,}05^{\\,x}$ kriecht.",
+        "Aber jede Exponentialfunktion mit Basis größer als $1$ überholt jede Potenzfunktion irgendwann.",
+        "Bei $x = 500$ ist $1{,}05^{500}$ bereits astronomisch groß."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Ein Guthaben wächst mit $q = 1{,}07$ pro Jahr. Wann hat es sich ungefähr verdoppelt?",
+      "opts": [
+        "nach etwa $100$ Jahren",
+        "nach etwa $2$ Jahren",
+        "nach etwa $10$ Jahren",
+        "nach etwa $50$ Jahren"
+      ],
+      "steps": [
+        "$1{,}07^{10} \\approx 1{,}97$ — knapp das Doppelte.",
+        "Faustregel: Verdopplungszeit $\\approx \\dfrac{70}{p}$ mit $p$ in Prozent, hier $\\dfrac{70}{7} = 10$ Jahre.",
+        "Exakt liefert der Logarithmus den Wert — das kommt in KW 3."
+      ],
+      "solution": 2
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Funktionsbegriff — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathe11-w8-funktionen',
+  version: 'v1',
+  title: 'Aufgaben · Funktionsbegriff',
+  subtitle: 'Berufliches Gymnasium · Klasse 11 · Woche 8, KW 41 (LB 3, Start) · 20 Aufgaben: Definitions- und Wertebereich, Nullstellen, Monotonie, Symmetrie · genau eine Antwort pro Aufgabe',
+  dashSub: 'BGY · Klasse 11 · KW 41 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathe11.html', /* opened from the Mathe-11 plan */
+  /* Week 8 opens Lernbereich 3: the function concept itself. Nothing here
+     needs a calculator — it is about reading, deciding and naming. */
+  questions: [
+    {
+      q: 'Wann ist eine Zuordnung eine Funktion?',
+      opts: [
+        'Wenn jedem $x$ genau ein $y$ zugeordnet wird.',
+        'Wenn jedem $y$ genau ein $x$ zugeordnet wird.',
+        'Wenn der Graph eine Gerade ist.',
+        'Wenn zu jedem $x$ mindestens ein $y$ gehört.'
+      ],
+      steps: [
+        'Eindeutigkeit ist der Kern des Funktionsbegriffs: eine Eingabe, ein Ergebnis.',
+        'Umgekehrt darf derselbe $y$-Wert ruhig mehrfach vorkommen — $f(x) = x^2$ liefert für $2$ und $-2$ beide Male $4$.',
+        'Am Graphen erkennt man es mit der senkrechten Linie: sie darf ihn höchstens einmal treffen.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welche der folgenden Zuordnungen ist KEINE Funktion?',
+      opts: [
+        '$y = x^2$',
+        '$x^2 + y^2 = 25$',
+        '$y = 3x - 1$',
+        '$y = \\dfrac{1}{x}$ für $x \\neq 0$'
+      ],
+      steps: [
+        '$x^2 + y^2 = 25$ ist ein Kreis um den Ursprung.',
+        'Zu $x = 3$ gehören dort zwei Werte: $y = 4$ und $y = -4$.',
+        'Damit ist die Eindeutigkeit verletzt — der Kreis ist keine Funktion, auch wenn er ein hübscher Graph ist.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie lautet der größtmögliche Definitionsbereich von $f(x) = \\dfrac{1}{x - 4}$?',
+      opts: [
+        'alle reellen Zahlen',
+        'alle $x$ mit $x > 4$',
+        'alle reellen Zahlen außer $x = 4$',
+        'alle reellen Zahlen außer $x = 0$'
+      ],
+      steps: [
+        'Durch null darf nicht geteilt werden: $x - 4 \\neq 0$',
+        'Also ist $x = 4$ ausgeschlossen.',
+        '$D = \\mathbb{R} \\setminus \\{4\\}$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie lautet der größtmögliche Definitionsbereich von $f(x) = \\sqrt{x - 3}$?',
+      opts: ['$x \\ge 3$', '$x > 3$', '$x \\ge 0$', 'alle reellen Zahlen'],
+      steps: [
+        'Unter der Wurzel darf nichts Negatives stehen: $x - 3 \\ge 0$',
+        'Also $x \\ge 3$.',
+        'Die $3$ selbst ist erlaubt: $\\sqrt{0} = 0$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie lautet der Wertebereich von $f(x) = x^2$ mit $D = \\mathbb{R}$?',
+      opts: ['alle reellen Zahlen', '$y \\ge 0$', '$y > 0$', '$y \\le 0$'],
+      steps: [
+        'Ein Quadrat ist nie negativ.',
+        'Der kleinste Wert ist $f(0) = 0$, nach oben gibt es keine Grenze.',
+        'Also $W = \\{y \\mid y \\ge 0\\}$ — die Null gehört dazu.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wo liegt die Nullstelle von $f(x) = 2x - 6$?',
+      opts: ['$x = -3$', '$x = 6$', '$x = 3$', '$x = 0$'],
+      steps: [
+        'Nullstelle heißt $f(x) = 0$: $2x - 6 = 0$',
+        '$2x = 6$, also $x = 3$.',
+        'Der Graph schneidet dort die $x$-Achse.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welche Nullstellen hat $f(x) = x^2 - 4$?',
+      opts: ['$x = 2$', '$x = \\pm 2$', '$x = \\pm 4$', 'keine'],
+      steps: [
+        '$x^2 - 4 = 0$ führt auf $x^2 = 4$.',
+        'Beide Vorzeichen erfüllen das: $x = 2$ und $x = -2$.',
+        'Auch faktorisiert sichtbar: $x^2 - 4 = (x-2)(x+2)$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wo schneidet der Graph von $f(x) = 3x - 5$ die $y$-Achse?',
+      opts: ['bei $y = 3$', 'bei $y = 5$', 'bei $y = \\tfrac{5}{3}$', 'bei $y = -5$'],
+      steps: [
+        'Auf der $y$-Achse ist $x = 0$.',
+        '$f(0) = 3 \\cdot 0 - 5 = -5$',
+        'Der Schnittpunkt ist $(0 \\mid -5)$. Bei $y = \\tfrac53$ läge die Nullstelle.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie verläuft $f(x) = -2x + 1$?',
+      opts: [
+        'streng monoton steigend',
+        'streng monoton fallend',
+        'erst fallend, dann steigend',
+        'konstant'
+      ],
+      steps: [
+        'Der Anstieg ist $m = -2$, also negativ.',
+        'Bei jedem Schritt nach rechts geht es um $2$ nach unten.',
+        'Eine Gerade mit negativem Anstieg fällt überall — streng monoton fallend.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Auf welchem Bereich ist $f(x) = x^2$ streng monoton steigend?',
+      opts: ['überall', 'für $x \\le 0$', 'für $x \\ge 0$', 'nirgends'],
+      steps: [
+        'Links vom Scheitel fällt die Parabel, rechts davon steigt sie.',
+        'Der Scheitel liegt bei $x = 0$.',
+        'Also steigt sie für $x \\ge 0$ — Monotonie ist immer eine Aussage über ein Intervall.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welche Symmetrie hat $f(x) = x^4 - x^2$?',
+      opts: [
+        'achsensymmetrisch zur $y$-Achse',
+        'punktsymmetrisch zum Ursprung',
+        'keine Symmetrie',
+        'achsensymmetrisch zur $x$-Achse'
+      ],
+      steps: [
+        'Test: $f(-x) = (-x)^4 - (-x)^2 = x^4 - x^2 = f(x)$',
+        '$f(-x) = f(x)$ bedeutet Achsensymmetrie zur $y$-Achse.',
+        'Merkhilfe: nur gerade Exponenten — gerade Funktion.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welche Symmetrie hat $f(x) = x^3$?',
+      opts: [
+        'achsensymmetrisch zur $y$-Achse',
+        'keine Symmetrie',
+        'punktsymmetrisch zum Ursprung',
+        'symmetrisch zur Geraden $y = x$'
+      ],
+      steps: [
+        'Test: $f(-x) = (-x)^3 = -x^3 = -f(x)$',
+        '$f(-x) = -f(x)$ bedeutet Punktsymmetrie zum Ursprung.',
+        'Merkhilfe: nur ungerade Exponenten — ungerade Funktion.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welche Symmetrie hat $f(x) = x^2 + x$?',
+      opts: [
+        'achsensymmetrisch zur $y$-Achse',
+        'punktsymmetrisch zum Ursprung',
+        'keine der beiden',
+        'beide zugleich'
+      ],
+      steps: [
+        '$f(-x) = x^2 - x$',
+        'Das ist weder $f(x) = x^2 + x$ noch $-f(x) = -x^2 - x$.',
+        'Gerade und ungerade Exponenten gemischt: keine Symmetrie zur $y$-Achse und keine zum Ursprung.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welche Periode hat die Sinusfunktion $f(x) = \\sin x$?',
+      opts: ['$\\pi$', '$2\\pi$', '$1$', '$360$'],
+      steps: [
+        'Nach einem vollen Umlauf am Einheitskreis wiederholen sich die Werte.',
+        'Im Bogenmaß ist ein voller Umlauf $2\\pi$.',
+        'In Grad wären es $360^\\circ$ — dieselbe Aussage, andere Einheit; gefragt war das Bogenmaß.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Welcher Punkt liegt auf dem Graphen von $f(x) = x^2 - 1$?',
+      opts: ['$(2 \\mid 3)$', '$(2 \\mid 5)$', '$(3 \\mid 2)$', '$(2 \\mid -3)$'],
+      steps: [
+        'Einsetzen: $f(2) = 2^2 - 1 = 3$',
+        'Also liegt $(2 \\mid 3)$ auf dem Graphen.',
+        'Bei einem Punkt $(x \\mid y)$ steht immer die Stelle vorn und der Funktionswert hinten.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Was bedeutet die Schreibweise $f(-2) = 5$?',
+      opts: [
+        'Der Graph schneidet die $x$-Achse bei $-2$.',
+        'An der Stelle $-2$ hat die Funktion den Wert $5$.',
+        'Die Funktion hat bei $5$ eine Nullstelle.',
+        '$-2$ und $5$ sind beide Nullstellen.'
+      ],
+      steps: [
+        'In der Klammer steht die Stelle, hinter dem Gleichheitszeichen der Funktionswert.',
+        'Der Punkt $(-2 \\mid 5)$ liegt also auf dem Graphen.',
+        'Eine Nullstelle wäre etwas anderes: dort ist der Funktionswert $0$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Eine Gerade geht durch $P(0 \\mid 1)$ und $Q(2 \\mid 7)$. Wie lautet ihre Gleichung?',
+      opts: ['$y = 3x + 1$', '$y = 2x + 1$', '$y = 6x + 1$', '$y = 3x - 1$'],
+      steps: [
+        'Anstieg: $m = \\dfrac{7 - 1}{2 - 0} = \\dfrac{6}{2} = 3$',
+        '$P$ liegt auf der $y$-Achse, also ist $n = 1$.',
+        '$y = 3x + 1$; Probe mit $Q$: $3 \\cdot 2 + 1 = 7$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie viele Lösungen hat $x^2 = 5$, anders gefragt: wie oft schneidet die Gerade $y = 5$ die Parabel $y = x^2$?',
+      opts: ['keine', 'eine', 'zwei', 'unendlich viele'],
+      steps: [
+        'Die Parabel $y = x^2$ nimmt jeden positiven Wert genau zweimal an — links und rechts vom Scheitel.',
+        'Rechnerisch: $x = \\pm\\sqrt{5}$',
+        'Also zwei Schnittpunkte. Bei $y = 0$ wäre es einer, bei $y < 0$ keiner.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Was sind die Nullstellen einer Funktion, am Graphen gesehen?',
+      opts: [
+        'die Schnittstellen mit der $x$-Achse',
+        'der Schnittpunkt mit der $y$-Achse',
+        'die höchsten Punkte des Graphen',
+        'die Stellen, an denen der Graph waagerecht verläuft'
+      ],
+      steps: [
+        'Nullstelle heißt: der Funktionswert ist null.',
+        'Punkte mit $y = 0$ liegen genau auf der $x$-Achse.',
+        'Der Schnittpunkt mit der $y$-Achse ist dagegen $f(0)$ — davon gibt es bei einer Funktion höchstens einen.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Eine Funktion ist durch die Wertetabelle $f(1) = 2$, $f(2) = 4$, $f(3) = 8$, $f(4) = 16$ gegeben. Welcher Term passt?',
+      opts: ['$f(x) = 2x$', '$f(x) = x^2$', '$f(x) = 2^x$', '$f(x) = 4x - 2$'],
+      steps: [
+        'Von Schritt zu Schritt verdoppeln sich die Werte — das ist kein konstanter Zuwachs, sondern ein konstanter Faktor.',
+        'Probe mit $f(x) = 2^x$: $2^1 = 2$, $2^2 = 4$, $2^3 = 8$, $2^4 = 16$.',
+        '$f(x) = 2x$ liefert dagegen $2, 4, 6, 8$ — passt nur für die ersten beiden Werte.'
+      ],
+      solution: 2
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Vierfeldertafeln und bedingte Wahrscheinlichkeit — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  "id": "mathe11-w31-vierfelder",
+  "version": "v1",
+  "title": "Aufgaben · Vierfeldertafeln und bedingte Wahrscheinlichkeit",
+  "subtitle": "Berufliches Gymnasium · Klasse 11 · Woche 31, KW 17 (LB 1) · 20 Aufgaben: Tafel aufstellen, auswerten, Abhängigkeit prüfen · genau eine Antwort pro Aufgabe",
+  "dashSub": "BGY · Klasse 11 · KW 17 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe",
+  "back": "svp/mathe/mathe11.html",
+  "questions": [
+    {
+      "q": "Was steht in den Randfeldern einer Vierfeldertafel?",
+      "opts": [
+        "nichts Wichtiges",
+        "die Summen der Zeilen und Spalten",
+        "die bedingten Wahrscheinlichkeiten",
+        "die Differenzen"
+      ],
+      "steps": [
+        "Innen stehen die vier Kombinationen, außen ihre Summen.",
+        "Unten rechts steht die Gesamtzahl bzw. $1$."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "In einer Klasse mit $30$ Personen tragen $18$ eine Brille, davon sind $8$ Mädchen. Insgesamt sind $14$ Mädchen dabei. Wie viele Jungen tragen Brille?",
+      "opts": [
+        "$6$",
+        "$12$",
+        "$4$",
+        "$10$"
+      ],
+      "steps": [
+        "Brillenträger insgesamt $18$, davon $8$ Mädchen.",
+        "$18 - 8 = 10$ Jungen mit Brille."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Dieselbe Klasse: wie viele Mädchen tragen keine Brille?",
+      "opts": [
+        "$10$",
+        "$4$",
+        "$6$",
+        "$8$"
+      ],
+      "steps": [
+        "$14$ Mädchen insgesamt, $8$ davon mit Brille.",
+        "$14 - 8 = 6$"
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Was bedeutet $P(B \\mid A)$?",
+      "opts": [
+        "$P(A) \\cdot P(B)$",
+        "die Wahrscheinlichkeit für $B$ unter der Bedingung, dass $A$ eingetreten ist",
+        "die Wahrscheinlichkeit für $A$ und $B$",
+        "die Wahrscheinlichkeit für $A$ oder $B$"
+      ],
+      "steps": [
+        "Der Strich trennt Ereignis und Bedingung.",
+        "Die Bedingung schrumpft den betrachteten Bereich auf die Fälle mit $A$."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Wie berechnet man $P(B \\mid A)$?",
+      "opts": [
+        "$P(A) + P(B)$",
+        "$\\dfrac{P(A \\cap B)}{P(A)}$",
+        "$\\dfrac{P(A)}{P(A \\cap B)}$",
+        "$P(A) \\cdot P(B)$"
+      ],
+      "steps": [
+        "Der gemeinsame Anteil wird auf die Bedingung bezogen.",
+        "Voraussetzung: $P(A) > 0$."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Von $100$ Personen sind $40$ sportlich, davon $30$ Nichtraucher. Wie groß ist $P(\\text{Nichtraucher} \\mid \\text{sportlich})$?",
+      "opts": [
+        "$0{,}40$",
+        "$0{,}70$",
+        "$0{,}75$",
+        "$0{,}30$"
+      ],
+      "steps": [
+        "$\\dfrac{30}{40}$",
+        "$= 0{,}75$"
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Wann sind zwei Ereignisse stochastisch unabhängig?",
+      "opts": [
+        "wenn $P(A \\cup B) = 1$",
+        "wenn $P(A \\cap B) = P(A) \\cdot P(B)$ gilt",
+        "wenn sie sich ausschließen",
+        "wenn $P(A) = P(B)$"
+      ],
+      "steps": [
+        "Dann ändert die Bedingung nichts an der Wahrscheinlichkeit.",
+        "Gleichwertig: $P(B \\mid A) = P(B)$."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "$P(A) = 0{,}5$, $P(B) = 0{,}4$, $P(A \\cap B) = 0{,}2$. Sind $A$ und $B$ unabhängig?",
+      "opts": [
+        "nein",
+        "das lässt sich nicht entscheiden",
+        "nur wenn sie sich ausschließen",
+        "ja"
+      ],
+      "steps": [
+        "$P(A) \\cdot P(B) = 0{,}5 \\cdot 0{,}4 = 0{,}2$",
+        "Der Wert stimmt mit dem Schnitt überein — unabhängig."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "$P(A) = 0{,}5$, $P(B) = 0{,}4$, $P(A \\cap B) = 0{,}3$. Was folgt?",
+      "opts": [
+        "sie schließen sich aus",
+        "die Angaben sind unmöglich",
+        "die Ereignisse sind abhängig",
+        "sie sind unabhängig"
+      ],
+      "steps": [
+        "$P(A) \\cdot P(B) = 0{,}2 \\neq 0{,}3$",
+        "Der Schnitt ist größer als bei Unabhängigkeit — die Ereignisse begünstigen einander."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Was ergibt $P(A) + P(\\overline{A})$?",
+      "opts": [
+        "$1$",
+        "$0$",
+        "$P(A)$",
+        "das hängt von $A$ ab"
+      ],
+      "steps": [
+        "Ein Ereignis und sein Gegenereignis decken alle Fälle ab.",
+        "Ihre Wahrscheinlichkeiten ergänzen sich zu $1$."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Eine Tafel zeigt: $P(A \\cap B) = 0{,}2$, $P(A \\cap \\overline{B}) = 0{,}3$. Wie groß ist $P(A)$?",
+      "opts": [
+        "$0{,}06$",
+        "$0{,}1$",
+        "$0{,}5$",
+        "$0{,}2$"
+      ],
+      "steps": [
+        "Die Zeile für $A$ setzt sich aus beiden Fällen zusammen.",
+        "$0{,}2 + 0{,}3 = 0{,}5$"
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Ein Test ist bei $1\\,\\%$ Kranken zu $99\\,\\%$ treffsicher und liefert $5\\,\\%$ falsch-positive. Wie groß ist etwa $P(\\text{krank} \\mid \\text{positiv})$?",
+      "opts": [
+        "etwa $50\\,\\%$",
+        "etwa $1\\,\\%$",
+        "etwa $17\\,\\%$",
+        "etwa $99\\,\\%$"
+      ],
+      "steps": [
+        "Positiv: $0{,}01 \\cdot 0{,}99 = 0{,}0099$ echte plus $0{,}99 \\cdot 0{,}05 = 0{,}0495$ falsche.",
+        "$\\dfrac{0{,}0099}{0{,}0594} \\approx 0{,}167$ — der berühmte Trugschluss bei seltenen Krankheiten."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Warum ist $P(A \\mid B)$ meist nicht dasselbe wie $P(B \\mid A)$?",
+      "opts": [
+        "weil man sich verrechnet",
+        "weil eines immer null ist",
+        "sie sind immer gleich",
+        "weil die Bezugsmenge eine andere ist"
+      ],
+      "steps": [
+        "Im ersten Fall wird auf $B$ bezogen, im zweiten auf $A$.",
+        "Beispiel: fast alle Regentage sind bewölkt, aber längst nicht alle bewölkten Tage sind Regentage."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Wie viele Felder hat eine Vierfeldertafel im Inneren?",
+      "opts": [
+        "zwei",
+        "sechs",
+        "neun",
+        "vier"
+      ],
+      "steps": [
+        "Zwei Ereignisse mit je zwei Ausprägungen: $2 \\cdot 2$",
+        "Dazu kommen die Randsummen."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Was gilt in einer Vierfeldertafel mit relativen Häufigkeiten für die Summe der vier inneren Felder?",
+      "opts": [
+        "sie ist beliebig",
+        "sie ist $1$",
+        "sie ist $0$",
+        "sie ist $4$"
+      ],
+      "steps": [
+        "Die vier Fälle schließen einander aus und decken alles ab.",
+        "Ihre Summe ist der Gesamtanteil, also $1$."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Von $200$ Fahrzeugen sind $120$ Diesel, davon $30$ älter als zehn Jahre. Wie groß ist $P(\\text{alt} \\mid \\text{Diesel})$?",
+      "opts": [
+        "$0{,}60$",
+        "$0{,}30$",
+        "$0{,}25$",
+        "$0{,}15$"
+      ],
+      "steps": [
+        "$\\dfrac{30}{120}$",
+        "$= 0{,}25$"
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Wie füllt man eine Vierfeldertafel am sichersten aus?",
+      "opts": [
+        "man braucht alle vier inneren Werte",
+        "zuerst die bekannten Werte, dann über die Randsummen ergänzen",
+        "von links oben nach rechts unten raten",
+        "nur mit Prozentwerten"
+      ],
+      "steps": [
+        "Jede Zeile und jede Spalte muss ihre Summe ergeben.",
+        "Aus drei geschickt gewählten Angaben lässt sich die ganze Tafel füllen."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "$60\\,\\%$ der Schüler lernen Spanisch, $30\\,\\%$ lernen Spanisch und Französisch. Wie groß ist $P(\\text{Franz} \\mid \\text{Span})$?",
+      "opts": [
+        "$0{,}3$",
+        "$0{,}18$",
+        "$0{,}9$",
+        "$0{,}5$"
+      ],
+      "steps": [
+        "$\\dfrac{0{,}30}{0{,}60}$",
+        "$= 0{,}5$"
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Was besagt der Satz von der totalen Wahrscheinlichkeit anschaulich?",
+      "opts": [
+        "Bedingungen sind unwichtig",
+        "man addiert die Pfade über alle Fälle der Bedingung",
+        "alle Wahrscheinlichkeiten sind gleich",
+        "die Summe ist immer null"
+      ],
+      "steps": [
+        "$P(B) = P(A) \\cdot P(B \\mid A) + P(\\overline{A}) \\cdot P(B \\mid \\overline{A})$",
+        "Im Baumdiagramm ist das genau die zweite Pfadregel."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Zwei Ereignisse schließen einander aus. Sind sie unabhängig?",
+      "opts": [
+        "Ja, immer.",
+        "Nur wenn sie gleich wahrscheinlich sind.",
+        "Das ist dasselbe.",
+        "Nein — tritt eines ein, ist das andere unmöglich."
+      ],
+      "steps": [
+        "$P(A \\cap B) = 0$, aber $P(A) \\cdot P(B) > 0$.",
+        "Ausschließen und Unabhängigkeit sind zwei völlig verschiedene Begriffe."
+      ],
+      "solution": 3
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

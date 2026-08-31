@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Nichtlineare Gleichungen, Prozent, Binome — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathe11-w5-nichtlinear',
+  version: 'v1',
+  title: 'Aufgaben · Nichtlineare Gleichungen, Prozent, Binome',
+  subtitle: 'Berufliches Gymnasium · Klasse 11 · Woche 5, KW 38 (LB 2) · 20 Aufgaben: inhaltliches Lösen, Proportionalität und Prozent, binomische Formeln · genau eine Antwort pro Aufgabe',
+  dashSub: 'BGY · Klasse 11 · KW 38 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathe11.html', /* opened from the Mathe-11 plan */
+  /* Week 5 of the Mathe-11 plan, still without CAS/GTR. Blocks: solving
+     simple nonlinear equations by thinking, not by calculus (1-8),
+     proportionality and percentages (9-14), binomial formulas (15-20). */
+  questions: [
+    {
+      q: 'Löse $a^3 = 8$ im Kopf.',
+      opts: ['$a = 2$', '$a = 4$', '$a = 2{,}67$', '$a = 24$'],
+      steps: [
+        'Gesucht ist die Zahl, die dreimal mit sich selbst multipliziert $8$ ergibt.',
+        '$2 \\cdot 2 \\cdot 2 = 8$, also $a = 2$.',
+        'Beim Kubieren wird nicht mal $3$ gerechnet — $8 : 3$ hat hier nichts zu suchen.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Löse $2^k = 16$.',
+      opts: ['$k = 8$', '$k = 32$', '$k = 4$', '$k = 2$'],
+      steps: [
+        'Zweierpotenzen durchgehen: $2,\\ 4,\\ 8,\\ 16$ — das sind $2^1$ bis $2^4$.',
+        'Also $k = 4$.',
+        'Die Unbekannte steht im Exponenten: das ist eine Exponentialgleichung, keine Multiplikation.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welche Lösungen hat $x^2 = 49$?',
+      opts: ['$x = 7$', '$x = \\pm 7$', '$x = 24{,}5$', 'keine reelle Lösung'],
+      steps: [
+        'Quadrieren macht aus jedem Vorzeichen ein Plus: $7^2 = 49$ und $(-7)^2 = 49$.',
+        'Also $x = 7$ oder $x = -7$, kurz $x = \\pm 7$.',
+        'Nur die positive Lösung anzugeben ist der häufigste Fehler bei quadratischen Gleichungen.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Welche Lösungen hat $x^2 = -9$ in den reellen Zahlen?',
+      opts: ['$x = -3$', '$x = \\pm 3$', 'keine', '$x = 3$'],
+      steps: [
+        'Ein Quadrat ist nie negativ: $x^2 \\ge 0$ für jede reelle Zahl.',
+        'Also kann $x^2 = -9$ von keiner reellen Zahl erfüllt werden.',
+        '$(-3)^2 = +9$, nicht $-9$ — das Minus verschwindet beim Quadrieren.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Löse $\\sqrt{x} = 6$.',
+      opts: ['$x = 3$', '$x = 12$', '$x = 6$', '$x = 36$'],
+      steps: [
+        'Beide Seiten quadrieren: $x = 6^2$',
+        'Also $x = 36$.',
+        'Probe: $\\sqrt{36} = 6$ — stimmt.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Löse $x^3 = -27$ in den reellen Zahlen.',
+      opts: ['$x = -3$', '$x = 3$', '$x = \\pm 3$', 'keine Lösung'],
+      steps: [
+        'Bei ungeraden Exponenten bleibt das Vorzeichen erhalten: $(-3)^3 = -27$.',
+        'Also gibt es genau eine reelle Lösung: $x = -3$.',
+        'Anders als beim Quadrieren gibt es hier keine zweite Lösung mit umgekehrtem Vorzeichen.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Löse $10^x = 1000$.',
+      opts: ['$x = 100$', '$x = 3$', '$x = 10$', '$x = 30$'],
+      steps: [
+        '$1000 = 10 \\cdot 10 \\cdot 10 = 10^3$',
+        'Gleiche Basis, also gleiche Exponenten: $x = 3$.',
+        'Merksatz: der Exponent zählt die Nullen bei Zehnerpotenzen.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Löse $5^x = 1$.',
+      opts: ['$x = 1$', '$x = 5$', '$x = 0$', 'keine Lösung'],
+      steps: [
+        'Jede Potenz mit Exponent $0$ ergibt $1$: $5^0 = 1$.',
+        'Also $x = 0$.',
+        '$5^1 = 5$ wäre zu groß — die $1$ kommt nur beim Exponenten $0$ heraus.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein Preis steigt von $80$ € auf $92$ €. Um wie viel Prozent?',
+      opts: ['$12\\,\\%$', '$15\\,\\%$', '$13\\,\\%$', '$8\\,\\%$'],
+      steps: [
+        'Absolute Änderung: $92 - 80 = 12$ €',
+        'Immer auf den alten Wert beziehen: $\\dfrac{12}{80} = 0{,}15$',
+        'Also $15\\,\\%$. Wer durch $92$ teilt, landet bei $13\\,\\%$ — das ist der falsche Grundwert.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Nach $20\\,\\%$ Rabatt kostet eine Jacke $68$ €. Was hat sie vorher gekostet?',
+      opts: ['$81{,}60$ €', '$88$ €', '$85$ €', '$136$ €'],
+      steps: [
+        'Nach dem Rabatt bleiben $80\\,\\%$ des alten Preises: $0{,}8 \\cdot x = 68$ €',
+        'Durch $0{,}8$ teilen: $x = 85$ €',
+        'Falle: $20\\,\\%$ auf $68$ € draufschlagen ergibt $81{,}60$ € — das ist zu wenig, weil sich die Prozente auf den alten Preis beziehen.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Drei gleiche Maschinen brauchen für einen Auftrag $12$ Stunden. Wie lange brauchen fünf davon?',
+      opts: ['$20$ Stunden', '$7{,}2$ Stunden', '$4$ Stunden', '$9$ Stunden'],
+      steps: [
+        'Mehr Maschinen — weniger Zeit: der Zusammenhang ist antiproportional.',
+        'Gesamtarbeit: $3 \\cdot 12 = 36$ Maschinenstunden.',
+        '$36 : 5 = 7{,}2$ Stunden.'
+      ],
+      solution: 1
+    },
+    {
+      q: '$4$ kg Äpfel kosten $6$ €. Was kosten $10$ kg zum gleichen Preis?',
+      opts: ['$15$ €', '$12$ €', '$24$ €', '$16{,}67$ €'],
+      steps: [
+        'Preis und Menge sind proportional.',
+        'Erst der Grundwert: $1$ kg kostet $6 : 4 = 1{,}50$ €.',
+        '$10 \\cdot 1{,}50 = 15$ €.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Ein Betrag wird erst um $10\\,\\%$ erhöht und danach um $10\\,\\%$ gesenkt. Wie steht er dann da?',
+      opts: [
+        'genau wie am Anfang',
+        '$1\\,\\%$ niedriger',
+        '$1\\,\\%$ höher',
+        '$10\\,\\%$ niedriger'
+      ],
+      steps: [
+        'Mit Faktoren rechnen: $1{,}1 \\cdot 0{,}9 = 0{,}99$',
+        'Es bleiben $99\\,\\%$ übrig, also $1\\,\\%$ weniger als am Anfang.',
+        'Grund: die Senkung bezieht sich auf den bereits erhöhten Wert — Prozente von verschiedenen Grundwerten darf man nicht verrechnen.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Welcher Faktor gehört zu einer Erhöhung um $15\\,\\%$?',
+      opts: ['$0{,}15$', '$1{,}015$', '$15$', '$1{,}15$'],
+      steps: [
+        'Der alte Wert sind $100\\,\\% = 1$.',
+        'Dazu kommen $15\\,\\% = 0{,}15$.',
+        'Zusammen: der Wachstumsfaktor ist $1{,}15$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Multipliziere aus: $(x + 7)^2$',
+      opts: ['$x^2 + 49$', '$x^2 + 7x + 49$', '$x^2 + 14x + 49$', '$x^2 + 14x + 14$'],
+      steps: [
+        'Erste binomische Formel: $(a+b)^2 = a^2 + 2ab + b^2$',
+        'Mit $a = x$, $b = 7$: $x^2 + 2 \\cdot x \\cdot 7 + 7^2$',
+        'Also $x^2 + 14x + 49$. Das mittlere Glied fällt nie weg.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Multipliziere aus: $(2a - 3b)^2$',
+      opts: [
+        '$4a^2 - 12ab + 9b^2$',
+        '$4a^2 - 6ab + 9b^2$',
+        '$2a^2 - 12ab + 3b^2$',
+        '$4a^2 - 12ab - 9b^2$'
+      ],
+      steps: [
+        'Zweite binomische Formel mit $a\' = 2a$ und $b\' = 3b$.',
+        '$(2a)^2 = 4a^2$, $2 \\cdot 2a \\cdot 3b = 12ab$, $(3b)^2 = 9b^2$',
+        'Das letzte Glied ist ein Quadrat und daher immer positiv: $4a^2 - 12ab + 9b^2$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Multipliziere aus: $(5 + y)(5 - y)$',
+      opts: ['$25 + y^2$', '$25 - 10y + y^2$', '$25 - y^2$', '$10 - y^2$'],
+      steps: [
+        'Dritte binomische Formel: $(a+b)(a-b) = a^2 - b^2$',
+        'Mit $a = 5$, $b = y$: $25 - y^2$',
+        'Die gemischten Glieder $+5y$ und $-5y$ heben sich gegenseitig auf.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Faktorisiere $x^2 - 81$.',
+      opts: ['$(x - 9)^2$', '$(x - 9)(x + 9)$', '$(x - 81)(x + 1)$', 'nicht faktorisierbar'],
+      steps: [
+        'Differenz zweier Quadrate: $x^2 - 81 = x^2 - 9^2$',
+        'Dritte binomische Formel rückwärts: $(x - 9)(x + 9)$',
+        'Probe durch Ausmultiplizieren: $x^2 + 9x - 9x - 81 = x^2 - 81$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Faktorisiere $x^2 + 10x + 25$.',
+      opts: ['$(x + 5)^2$', '$(x + 10)(x + 25)$', '$(x + 5)(x - 5)$', '$(x + 25)^2$'],
+      steps: [
+        'Das letzte Glied ist $5^2$, das mittlere $2 \\cdot x \\cdot 5$ — das Muster der ersten binomischen Formel.',
+        'Also $x^2 + 10x + 25 = (x+5)^2$.',
+        'Faustregel: die Hälfte des mittleren Koeffizienten, quadriert, muss das letzte Glied ergeben.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Faktorisiere $49x^2 - 16$.',
+      opts: ['$(7x - 4)^2$', '$(49x - 16)(x + 1)$', '$(7x - 4)(7x + 4)$', '$(7x - 16)(7x + 1)$'],
+      steps: [
+        'Beide Glieder sind Quadrate: $49x^2 = (7x)^2$ und $16 = 4^2$.',
+        'Dritte binomische Formel rückwärts: $(7x - 4)(7x + 4)$',
+        'Probe: $(7x)^2 - 4^2 = 49x^2 - 16$.'
+      ],
+      solution: 2
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>
