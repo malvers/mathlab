@@ -247,7 +247,14 @@
         frame.title = label || matDefaultLabel(url);
         frame.setAttribute('allowfullscreen', '');   /* the viewer's own \u26f6 */
         frame.setAttribute('allow', 'fullscreen');
-        box.appendChild(frame);
+        /* The OneDrive player paints a black stage and leaves a hairline of it
+           above and below the slide (its own rounding). The stage clips the
+           frame, which is a few pixels taller and pulled up by half of that —
+           so the deck starts right under our title row. */
+        const stage = document.createElement('div');
+        stage.className = 'mv-stage';
+        stage.appendChild(frame);
+        box.appendChild(stage);
 
         wrap.appendChild(box);
         /* Click on the backdrop closes, click inside does not. */
@@ -387,6 +394,37 @@
     // wired only when the owner session exists — visitors just see pills.
     const CAN_EDIT_MAT = !!(window.svpAuth && svpAuth.hasSession());
 
+    // --- Exercise button per week (global, data driven) ------------------
+    // A week row may carry quiz: { href, text, label } (or just a URL string).
+    // Every plan gets the button for free; it only shows up where the plan
+    // HTML names an exercise set, so untouched weeks look exactly as before.
+    function buildQuizBtn(row) {
+        const q = row && row.quiz;
+        if (!q) return null;
+        const href = typeof q === 'string' ? q : q.href;
+        if (!href) return null;
+        const note = typeof q === 'string' ? '' : (q.text || '');
+        const wrap = document.createElement('span');
+        wrap.className = 'quiz-cell';
+        const a = document.createElement('a');
+        a.className = 'quiz-btn';
+        a.href = href;
+        a.target = '_blank';
+        a.rel = 'noopener';
+        a.textContent = (typeof q === 'string' ? '' : q.label) || 'Aufgaben';
+        a.title = note || 'Aufgaben zum Thema dieser Woche';
+        /* the week row toggles on click - the button must not unfold it */
+        a.addEventListener('click', function (e) { e.stopPropagation(); });
+        wrap.appendChild(a);
+        if (note) {
+            const txt = document.createElement('span');
+            txt.className = 'quiz-note';
+            txt.textContent = note;
+            wrap.appendChild(txt);
+        }
+        return wrap;
+    }
+
     // Renders a ref's material state: pills into the sub-row block, a compact
     // Material lives in the expandable sub-row; the week row itself stays
     // clean (the ▸ chevron already shows there is something to unfold).
@@ -395,6 +433,7 @@
         ref.matTd.dataset.src = text;
         renderMaterial(ref.matBlock, text, ref);
         ref.matTd.textContent = '';
+        if (ref.quizBtn) ref.matTd.appendChild(ref.quizBtn);
         if (text) {
             if (!ref.matBlock.parentNode) ref.ensureSubRow().side.appendChild(ref.matBlock);
             /* A collapsed week hid its material completely and nothing in the
@@ -1891,6 +1930,7 @@
             ref.ul = ul;
         }
 
+        ref.quizBtn = buildQuizBtn(row);
         ref.matBlock = document.createElement('div');
         ref.matBlock.className = 'mat-block';
         updateMaterial(ref, ov.material != null ? ov.material : row.material);
@@ -2077,14 +2117,118 @@
         return t;
     }
 
-    function untisTopicText(i) {
+    /* WebUntis kann kein LaTeX - roh landet dort "$s = \\tfrac{a}{2}\\,t^2$".
+       Ersatzlos loeschen geht aber auch nicht, das zerbricht die Saetze
+       ("Spiegelung an" / "Graphen-Repertoire ohne Hilfsmittel:"), also wird die
+       Formel in lesbaren Klartext gewandelt (Doc, 31.08.2026). */
+    function untisPlain(t) {
+        return String(t || '').replace(/\$([^$]*)\$/g, function (_, f) {
+            return f
+                .replace(/\\t?frac\s*\{([^{}]*)\}\s*\{([^{}]*)\}/g, '$1/$2')
+                .replace(/\\sqrt\s*\{([^{}]*)\}/g, '\u221a$1')
+                .replace(/\\vec\s*\{([^{}]*)\}/g, '$1')
+                .replace(/\\mathrm\s*\{([^{}]*)\}/g, '$1')
+                .replace(/\\cdot/g, ' \u00b7 ').replace(/\\times/g, ' \u00d7 ')
+                .replace(/\\pi/g, '\u03c0').replace(/\\infty/g, '\u221e')
+                .replace(/\\le/g, '\u2264').replace(/\\ge/g, '\u2265')
+                .replace(/\\neq/g, '\u2260').replace(/\\approx/g, '\u2248')
+                .replace(/\\(sin|cos|tan|ln|log|exp)\b/g, '$1')
+                .replace(/\^\{?2\}?(?!\d)/g, '\u00b2').replace(/\^\{?3\}?(?!\d)/g, '\u00b3')
+                .replace(/\^\{([^{}]*)\}/g, '^$1')
+                .replace(/\{,\}/g, ',')
+                .replace(/\\,|\\;|\\!/g, ' ')
+                .replace(/[{}]/g, '')
+                .replace(/\\[a-zA-Z]+/g, '')
+                .replace(/\s{2,}/g, ' ').trim();
+        }).replace(/\s{2,}/g, ' ').trim();
+    }
+
+    /* Thema und Schritte getrennt - der Dialog verteilt die Schritte auf die
+       einzelnen Stunden und braucht sie deshalb nicht mehr als einen Klotz. */
+    function untisTopicParts(i) {
         const c = contentOf(i);
         const lb = (window.BADGE[c.type] || [])[1];
         const head = [lb, c.u].filter(Boolean).join(', ');
-        const base = ((c.topic || '') + (head ? ' (' + head + ')' : '')).replace(/\s+/g, ' ').trim();
-        const details = (c.details || []).filter(Boolean)
-            .map(d => String(d).replace(/\s+/g, ' ').trim());
-        return untisFit(base, details);
+        /* Platzhalter-Thema ("—") heisst: nichts vorschlagen. Eine leere Box
+           wird beim Senden uebersprungen - besser als "—" im Klassenbuch. */
+        const topic = (c.topic === '—' || c.topic === '-') ? '' : (c.topic || '');
+        return {
+            base: topic ? untisPlain(topic + (head ? ' (' + head + ')' : '')).replace(/\s+/g, ' ').trim() : '',
+            details: (c.details || []).filter(Boolean)
+                .map(d => untisPlain(d).replace(/\s+/g, ' ').trim()),
+        };
+    }
+
+    function untisTopicText(i) {
+        const p = untisTopicParts(i);
+        return untisFit(p.base, p.details);
+    }
+
+    /* Einen Schritt je Stunde statt fuenfmal denselben Klotz (Doc, 31.08.2026).
+       Verteilt wird je LERNGRUPPE, nicht je Woche: FOG25-1 und FOW25-1 sind
+       zwei verschiedene Klassen, jede braucht den ganzen Wochenstoff. Sind
+       mehr Stunden als Schritte da - der Normalfall, 2-3 Schritte auf 5
+       Stunden - bekommen die uebrigen "Festigung: <Schritt>" reihum. */
+    function untisSpread(base, details, lessons) {
+        const out = new Map();
+        const groups = new Map();
+        for (const l of lessons) {
+            const key = (l.klassen || []).slice().sort().join(',');
+            if (!groups.has(key)) groups.set(key, []);
+            groups.get(key).push(l);
+        }
+        /* "Festigung: Klassenarbeit 2 (90 min)" darf nie vorgeschlagen werden -
+           eine Arbeit ist ein Termin, kein Stoff. Direkt zugeteilt wird sie,
+           die Festigungsrunde laesst sie aus. */
+        const KA = /^(klassenarbeit|ka\s?\d)/i;
+        const fest = details.filter(d => !KA.test(d));
+        for (const list of groups.values()) {
+            list.sort((a, b) => (a.date + ' ' + a.start).localeCompare(b.date + ' ' + b.start));
+            list.forEach((l, i) => {
+                let step = null;
+                if (i < details.length) step = details[i];
+                else if (fest.length) step = 'Festigung: ' + fest[(i - details.length) % fest.length];
+                out.set(l, untisFit(base, step ? [step] : []));
+            });
+        }
+        return out;
+    }
+
+    /* Doppelstunde = EIN Klassenbucheintrag. Gemessen am 31.08.2026: der
+       Write auf Mo 12:00 stand sofort auch auf 12:45, der zweite Write lief
+       in den 409 - WebUntis spiegelt den Stundeninhalt auf lueckenlos
+       aufeinanderfolgende Perioden derselben Unterrichtseinheit. Also werden
+       solche Perioden zu EINEM Block mit EINER Box gefaltet; geschrieben wird
+       nur die erste Periode. Gefaltet wird streng: gleicher Tag, gleiche
+       lsnumber, gleiche Klassen, gleiches Fach, gleicher code, Ende = Start.
+       Liefert die Edge Function (noch) kein end/lsnumber, bleibt jede Periode
+       einzeln - das ist der alte Zustand, nur ohne die Faltung. */
+    function untisBlocks(lessons) {
+        const sorted = lessons.slice().sort((a, b) =>
+            (a.date + ' ' + a.start).localeCompare(b.date + ' ' + b.start));
+        const out = [];
+        for (const l of sorted) {
+            const prev = out[out.length - 1];
+            const key = [l.date, l.lsnumber, (l.klassen || []).slice().sort().join(','),
+                l.subject || '', l.code || ''].join('|');
+            if (prev && prev.key === key && l.lsnumber != null &&
+                prev.end && l.start === prev.end) {
+                prev.periods.push(l);
+                prev.end = l.end || null;
+                /* Ein Text irgendwo im Block heisst: der Block ist belegt -
+                   sonst wuerde ein Write ohne Haken ihn beim Spiegeln toeten. */
+                if (!prev.topic.trim() && (l.topic || '').trim()) prev.topic = l.topic;
+                prev.writable = prev.writable && !!l.writable;
+                continue;
+            }
+            out.push({
+                key: key, periods: [l], ttId: l.ttId,
+                date: l.date, start: l.start, end: l.end || null,
+                klassen: l.klassen, subject: l.subject, code: l.code || '',
+                topic: l.topic || '', writable: !!l.writable,
+            });
+        }
+        return out;
     }
 
     /* Auf 250 Zeichen bringen, in drei Stufen - jede greift erst, wenn die
@@ -2142,6 +2286,11 @@
         const dates = entries.map(e => e.date).sort();
         const from = dates[0], to = dates[dates.length - 1];
         const classes = (data && data.classes) || [];
+        /* Fach MUSS mitfiltern: Doc unterrichtet in BGY26-1/2 sowohl Mat als
+           auch Inf, die Mathe-Seite bot deshalb sieben Stunden an statt fuenf
+           (Doc, 31.08.2026). Fehlt subjects in einer aelteren .untis.json,
+           bleibt es beim reinen Klassenfilter wie bisher. */
+        const subjects = (data && data.subjects) || [];
 
         const overlay = document.createElement('div');
         overlay.className = 'svp-gate-overlay';
@@ -2150,9 +2299,6 @@
             '  <div class="svp-gate-title">WebUntis &middot; Klassenbuch</div>' +
             '  <div class="svp-gate-sub">KW ' + ref.kw + ' &middot; ' + untisDay(from) +
             (from !== to ? '&ndash;' + untisDay(to) : '') + '</div>' +
-            '  <textarea id="untis-text" class="untis-text" rows="4" aria-label="Stundeninhalt"' +
-            '            maxlength="' + UNTIS_MAX + '"></textarea>' +
-            '  <div class="untis-count"><span id="untis-n">0</span>/' + UNTIS_MAX + '</div>' +
             '  <div class="untis-targets" id="untis-targets">Stunden werden geladen &hellip;</div>' +
             '  <div class="svp-gate-row">' +
             '    <button type="button" class="action secondary" id="untis-cancel">Abbrechen</button>' +
@@ -2162,18 +2308,15 @@
             '</div>';
         document.body.appendChild(overlay);
 
-        const ta = overlay.querySelector('#untis-text');
-        const counter = overlay.querySelector('#untis-n');
         const targets = overlay.querySelector('#untis-targets');
         const err = overlay.querySelector('#untis-err');
         const go = overlay.querySelector('#untis-go');
 
-        ta.value = untisTopicText(ref.i);
-        const countUp = () => { counter.textContent = String(ta.value.length); };
-        countUp();
-        ta.addEventListener('input', countUp);
-
+        let sending = false;
         function close() {
+            /* Waehrend gesendet wird, gibt es kein "Abbrechen" - die Requests
+               laufen sonst unsichtbar weiter und Doc haelt sie fuer verworfen. */
+            if (sending) return;
             document.removeEventListener('keydown', onKey, true);
             overlay.remove();
         }
@@ -2186,82 +2329,174 @@
         overlay.querySelector('#untis-cancel').addEventListener('click', close);
         overlay.addEventListener('click', ev => { if (ev.target === overlay) close(); });
 
-        function label(l) { return l.klassen.join(',') + ' ' + untisDay(l.date) + ' ' + l.start; }
+        const parts = untisTopicParts(ref.i);
 
-        /* Eine Zeile je Stunde nur dort, wo es etwas zu entscheiden gibt.
-           Freie Stunden zaehlt eine einzige Zeile zusammen. */
-        let free = [], busy = [], locked = [];
+        function label(l) {
+            let t = l.klassen.join(',') + ' ' + untisDay(l.date) + ' ' + l.start;
+            if (l.end) t += '\u2013' + l.end;
+            if (l.periods && l.periods.length > 1)
+                t += ' \u00b7 ' + (l.periods.length === 2 ? 'Doppelstunde' : l.periods.length + ' Stunden');
+            return t;
+        }
+
+        /* Eine Box je Stunde, vorbelegt aus untisSpread. Was Doc darin aendert,
+           gilt - die Verteilung ist ein Vorschlag, kein Automatismus. */
+        let boxes = [];
         untisCall({ action: 'lessons', from: from, to: to }).then(res => {
             const mine = (res.lessons || []).filter(l =>
-                !classes.length || l.klassen.some(k => classes.indexOf(k) >= 0));
+                (!classes.length || l.klassen.some(k => classes.indexOf(k) >= 0)) &&
+                (!subjects.length || subjects.indexOf(l.subject) >= 0));
             if (!mine.length) { targets.textContent = 'Keine passende Stunde in dieser Woche.'; return; }
-            locked = mine.filter(l => !l.writable);
-            free = mine.filter(l => l.writable && !l.topic.trim());
-            busy = mine.filter(l => l.writable && l.topic.trim());
+
+            /* Erst falten, dann verteilen: Mathe 11 hat pro Woche DREI
+               Klassenbucheintraege (Mo-Doppel, Di, Do-Doppel), nicht fuenf. */
+            const rows = untisBlocks(mine);
+            const spread = untisSpread(parts.base, parts.details,
+                rows.filter(l => l.writable && l.code !== 'cancelled'));
             targets.textContent = '';
 
-            if (free.length) {
-                const line = document.createElement('div');
-                line.className = 'untis-go-line';
-                line.textContent = '→ ' + free.map(label).join('  ·  ');
-                targets.appendChild(line);
+            for (const l of rows) {
+                const slot = document.createElement('div');
+                slot.className = 'untis-slot' + (l.writable ? '' : ' is-locked');
+
+                const head = document.createElement('div');
+                head.className = 'untis-slot-head';
+                const who = document.createElement('span');
+                who.className = 'untis-slot-when';
+                who.textContent = label(l);
+                head.appendChild(who);
+
+                /* Ausgefallene Stunden fanden nicht statt - dort wird nicht
+                   geschrieben (177 cancelled in einer normalen Schulwoche,
+                   das ist kein Randfall). Vertretung bleibt beschreibbar,
+                   traegt aber einen Hinweis. */
+                if (l.code === 'cancelled') {
+                    const note = document.createElement('span');
+                    note.className = 'untis-slot-note';
+                    note.textContent = 'entfällt';
+                    head.appendChild(note);
+                    slot.classList.add('is-locked');
+                    slot.appendChild(head);
+                    targets.appendChild(slot);
+                    continue;
+                }
+                if (l.code === 'irregular') {
+                    const note = document.createElement('span');
+                    note.className = 'untis-slot-note';
+                    note.textContent = 'Vertretung';
+                    head.appendChild(note);
+                }
+
+                if (!l.writable) {
+                    const note = document.createElement('span');
+                    note.className = 'untis-slot-note';
+                    note.textContent = 'kein Schreibrecht';
+                    head.appendChild(note);
+                    slot.appendChild(head);
+                    targets.appendChild(slot);
+                    continue;
+                }
+
+                const count = document.createElement('span');
+                count.className = 'untis-slot-count';
+                head.appendChild(count);
+                slot.appendChild(head);
+
+                const box = document.createElement('textarea');
+                box.className = 'untis-text';
+                box.rows = 2;
+                box.maxLength = UNTIS_MAX;
+                box.setAttribute('aria-label', 'Stundeninhalt ' + label(l));
+                box.value = spread.get(l) || '';
+                const countUp = () => {
+                    count.textContent = box.value.length + '/' + UNTIS_MAX;
+                    count.classList.toggle('is-full', box.value.length >= UNTIS_MAX);
+                };
+                box.addEventListener('input', countUp);
+                countUp();
+                slot.appendChild(box);
+
+                /* Steht schon etwas ANDERES drin, wird nur mit Haken ueberschrieben -
+                   eine Handkorrektur in WebUntis darf nie stillschweigend sterben. */
+                let cb = null;
+                const state = document.createElement('div');
+                state.className = 'untis-state';
+                if (l.topic.trim()) {
+                    const row = document.createElement('label');
+                    row.className = 'untis-row';
+                    cb = document.createElement('input');
+                    cb.type = 'checkbox';
+                    const txt = document.createElement('span');
+                    txt.className = 'untis-state is-set';
+                    txt.textContent = 'steht schon: ' + l.topic;
+                    row.appendChild(cb); row.appendChild(txt);
+                    slot.appendChild(row);
+                    l._state = txt;
+                } else {
+                    slot.appendChild(state);
+                    l._state = state;
+                }
+                targets.appendChild(slot);
+                boxes.push({ l: l, box: box, cb: cb });
             }
-            /* Belegte Stunden: nur mit ausdruecklichem Haken ueberschreiben. */
-            busy.forEach(l => {
-                const row = document.createElement('label');
-                row.className = 'untis-row';
-                const cb = document.createElement('input');
-                cb.type = 'checkbox';
-                const txt = document.createElement('span');
-                txt.className = 'untis-state is-set';
-                txt.textContent = label(l) + ' — steht: ' + l.topic;
-                row.appendChild(cb); row.appendChild(txt);
-                targets.appendChild(row);
-                l._cb = cb; l._state = txt;
-            });
-            locked.forEach(l => {
-                const row = document.createElement('div');
-                row.className = 'untis-row is-locked';
-                row.textContent = label(l) + ' — kein Schreibrecht';
-                targets.appendChild(row);
-            });
-            if (!free.length && !busy.length) targets.appendChild(document.createTextNode('Nichts zu schreiben.'));
-            go.disabled = false;
+            if (!boxes.length) targets.appendChild(document.createTextNode('Nichts zu schreiben.'));
+            go.disabled = !boxes.length;
+            const first = boxes[0] && boxes[0].box;
+            if (first) { first.focus(); first.setSelectionRange(first.value.length, first.value.length); }
         }).catch(e => { targets.textContent = ''; err.textContent = e.message; });
 
         async function send() {
-            const text = ta.value.replace(/\s+/g, ' ').trim();
-            if (!text) { err.textContent = 'Text ist leer.'; return; }
-            const picked = free.concat(busy.filter(l => l._cb && l._cb.checked));
+            const picked = boxes.filter(b => {
+                const t = b.box.value.replace(/\s+/g, ' ').trim();
+                if (!t) return false;                       /* leer = diese Stunde auslassen */
+                return b.cb ? b.cb.checked : true;          /* belegt nur mit Haken */
+            });
             if (!picked.length) {
-                err.textContent = busy.length
-                    ? 'Alle Stunden sind belegt — zum Überschreiben ankreuzen.'
-                    : 'Keine Stunde zum Schreiben.';
+                err.textContent = boxes.some(b => b.cb)
+                    ? 'Belegte Stunden zum Überschreiben ankreuzen.'
+                    : 'Keine Stunde mit Text.';
                 return;
             }
+            sending = true;
             go.disabled = true;
+            const cancelBtn = overlay.querySelector('#untis-cancel');
+            cancelBtn.disabled = true;
             err.textContent = 'Schicke …';
-            let done = 0, failed = [];
-            for (const l of picked) {
+            let done = 0; const failed = [];
+            for (const b of picked) {
+                const l = b.l;
+                const text = b.box.value.replace(/\s+/g, ' ').trim();
                 try {
-                    /* force nur, wo Doc den Haken gesetzt hat. */
                     const res = await untisCall({
                         action: 'write', ttId: l.ttId, topic: text, force: !!l.topic.trim()
                     });
                     l.topic = res.stored || text;
-                    if (l._state) { l._state.textContent = label(l) + ' — eingetragen ✓'; l._state.className = 'untis-state is-ok'; }
-                    if (l._cb) { l._cb.checked = false; l._cb.disabled = true; }
-                    /* Chip-Stand mitziehen, damit er nicht bis zum naechsten
-                       tools/webuntis.js status veraltet dasteht. */
-                    const hit = entries.find(e => e.date === l.date && e.start === l.start);
-                    if (hit) { hit.written = true; hit.text = l.topic; }
-                    untisEchoPut(l.date, l.start, l.topic);   /* ueberlebt den Reload */
+                    if (l._state) {
+                        if (res.ok === false) {
+                            l._state.textContent = 'gespeichert, aber WebUntis hat daraus gemacht: ' + l.topic;
+                            l._state.className = 'untis-state is-set';
+                        } else {
+                            l._state.textContent = 'eingetragen ✓';
+                            l._state.className = 'untis-state is-ok';
+                        }
+                    }
+                    if (b.cb) { b.cb.checked = false; b.cb.disabled = true; }
+                    b.box.disabled = true;
+                    /* Chip-Stand mitziehen - fuer JEDE Periode des Blocks,
+                       WebUntis hat sie ja alle gefuellt. */
+                    for (const per of (l.periods || [l])) {
+                        const hit = entries.find(e => e.date === per.date && e.start === per.start);
+                        if (hit) { hit.written = true; hit.text = l.topic; }
+                        untisEchoPut(per.date, per.start, l.topic);
+                    }
                     done++;
                 } catch (e) {
                     failed.push(label(l) + ': ' + e.message);
                 }
             }
-            free = free.filter(l => !l.topic.trim());
+            sending = false;
+            cancelBtn.disabled = false;
+            boxes = boxes.filter(b => !b.box.disabled);
             const anyWritten = entries.some(e => e.written);
             chip.className = 'untis-chip ' +
                 (entries.every(e => e.written) ? 'is-full' : anyWritten ? 'is-part' : 'is-none');
@@ -2271,8 +2506,6 @@
             setTimeout(close, 900);   /* Erfolg kurz zeigen, dann aus dem Weg */
         }
         go.addEventListener('click', send);
-        ta.focus();
-        ta.setSelectionRange(ta.value.length, ta.value.length);
     }
 
     /* ---- Lokales Echo des Chip-Stands ------------------------------------
@@ -2763,9 +2996,22 @@
             ziel: '', mth: '', med: '', lnw: ''
         };
     }
+    /* A remark that only says "free" is not content - it is how an empty week
+       describes itself, and it must not block the up arrow that pulls a later
+       week onto this slot. Every part has to be such a word: "Schuljahresbeginn
+       Mo 17.08. · frei" carries a real date and stays occupied, and a topic like
+       "verlustfrei vs. verlustbehaftet" only contains "frei" as a syllable. */
+    const FREE_REMARK = /^(?:frei|schulfrei|unterrichtsfrei|ferien|ferientag)$/i;
+    function remarkIsFree(text) {
+        const parts = String(text || '').split(/\s*[·;]\s*/)
+            .map(function (t) { return t.trim(); })
+            .filter(Boolean);
+        return parts.every(function (t) { return FREE_REMARK.test(t); });
+    }
+
     function isEmptyContent(c) {
         if (!c) return true;
-        return !(c.details || []).length && !c.material && !c.u && !c.remark &&
+        return !(c.details || []).length && !c.material && !c.u && remarkIsFree(c.remark) &&
             (!c.topic || c.topic === '—' || c.topic === '-');
     }
 
