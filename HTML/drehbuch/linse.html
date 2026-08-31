@@ -1,0 +1,1187 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+
+<style>
+/* minimal reset - the artifact host used to provide this */
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; min-height: 100vh; }
+img, canvas, svg { display: block; max-width: 100%; }
+button, input { font: inherit; }
+:focus-visible { outline: 2px solid #00f2ff; outline-offset: 2px; }
+</style>
+<title>Der Klotz, der eine Linse wurde</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&family=Outfit:wght@200;300;400;600&display=swap">
+
+<style>
+/* Palette and faces are the lab's own (LensStandalone/cmaes_java.html): Orbitron +
+   Outfit, the deep radial blue of its stage, cyan = the glass, gold = the light and
+   the focus, red = the surface points the optimiser moves. Single-theme on purpose -
+   this is the lab's world. */
+:root {
+    --ground:      #050b18;
+    --ground-deep: #020a19;
+    --surface:     #0c1a33;
+    --surface-2:   #102a4d;
+    --line:        #1b3560;
+    --line-soft:   #14274a;
+
+    --ink:         #e4edfa;
+    --ink-dim:     #b0c3dd;
+    --ink-faint:   #8199bd;
+
+    --glass:       #00f2ff;
+    --light:       #ffcc00;
+    --point:       #ff3344;
+    --lime:        #adff2f;
+    --violet:      #c07fe8;
+    --red:         #b02418;
+}
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    background: var(--ground);
+    background-image:
+        radial-gradient(1200px 680px at 50% -10%, #0a2246 0%, transparent 60%),
+        radial-gradient(900px 520px at 90% 8%, #0d2140 0%, transparent 58%);
+    background-attachment: fixed;
+    color: var(--ink);
+    font-family: 'Outfit', system-ui, sans-serif;
+    font-weight: 300;
+    font-size: 1.1rem;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+}
+
+.wrap {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: clamp(1.6rem, 4vw, 4rem) clamp(1.1rem, 4vw, 2.6rem) 6rem;
+}
+
+/* ---------- shared type ---------- */
+.eyebrow {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+}
+
+h1, h2, h3 { font-family: 'Orbitron', sans-serif; text-wrap: balance; margin: 0; }
+
+h1 {
+    font-size: clamp(2rem, 1.2rem + 3.4vw, 3.4rem);
+    font-weight: 700;
+    line-height: 1.08;
+    letter-spacing: -0.01em;
+    margin: 0.5rem 0 0;
+}
+
+h2 {
+    font-size: clamp(1.05rem, 0.9rem + 0.6vw, 1.32rem);
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    color: var(--ink);
+}
+
+p { margin: 0; }
+
+em { font-style: italic; color: #eaf2fd; }
+strong { font-weight: 600; color: #f2f7ff; }
+
+/* mathematical symbols, set apart without a formula engine */
+.m {
+    font-family: 'Outfit', system-ui, sans-serif;
+    font-style: italic;
+    font-weight: 400;
+    color: var(--glass);
+    white-space: nowrap;
+}
+.m.l { color: var(--light); }
+
+kbd {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.76em;
+    font-weight: 500;
+    color: var(--light);
+    background: #241d05;
+    border: 1px solid #4a3c10;
+    border-radius: 2px;
+    padding: 0.08em 0.4em;
+    white-space: nowrap;
+}
+
+/* ---------- header ---------- */
+header { margin-bottom: clamp(1.8rem, 4vw, 3rem); }
+
+.status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.74rem;
+    font-weight: 500;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--light);
+    border: 1px solid #4a3c10;
+    border-radius: 2px;
+    background: #1b1505;
+    padding: 0.34rem 0.7rem;
+    margin-top: 1.1rem;
+}
+.status::before {
+    content: "";
+    width: 5px; height: 5px;
+    background: var(--light);
+    border-radius: 50%;
+}
+
+.lede {
+    margin-top: 1.1rem;
+    max-width: 60ch;
+    color: var(--ink-dim);
+    font-size: 1.18rem;
+}
+
+.meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 2rem;
+    margin-top: 1.6rem;
+    padding-top: 1.2rem;
+    border-top: 1px solid var(--line-soft);
+}
+.meta div { display: flex; flex-direction: column; gap: 0.15rem; padding: 0.4rem 0; }
+.meta dt {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.74rem;
+    font-weight: 500;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+}
+.meta dd { margin: 0; font-size: 1.02rem; color: var(--ink); }
+.meta a { color: var(--glass); text-decoration: none; border-bottom: 1px solid #06525c; }
+.meta a:hover, .meta a:focus-visible { border-bottom-color: var(--glass); }
+
+/* ---------- hero canvas + thesis ---------- */
+.thesis {
+    display: grid;
+    grid-template-columns: minmax(0, 340px) minmax(0, 1fr);
+    gap: clamp(1.2rem, 3vw, 2.6rem);
+    align-items: center;
+    margin: clamp(1.6rem, 4vw, 2.6rem) 0 clamp(2.4rem, 6vw, 4rem);
+    padding: clamp(1.2rem, 3vw, 2rem);
+    background: linear-gradient(160deg, var(--surface) 0%, var(--ground-deep) 100%);
+    border: 1px solid var(--line);
+    border-radius: 3px;
+}
+@media (max-width: 700px) { .thesis { grid-template-columns: 1fr; } }
+
+#stage {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    display: block;
+    border-radius: 2px;
+    background: #030c1c;
+}
+
+.thesis blockquote {
+    margin: 0;
+    font-size: clamp(1.15rem, 0.95rem + 1vw, 1.6rem);
+    line-height: 1.42;
+    font-weight: 200;
+    color: #eef4fd;
+    text-wrap: balance;
+}
+.thesis blockquote strong { font-weight: 600; }
+.thesis .after {
+    margin-top: 1.1rem;
+    color: var(--ink-dim);
+    font-size: 1.06rem;
+    max-width: 54ch;
+}
+
+/* ---------- section frame ---------- */
+section { margin-top: clamp(2.6rem, 6vw, 4.4rem); }
+
+.head {
+    display: flex;
+    align-items: baseline;
+    gap: 0.9rem;
+    padding-bottom: 0.7rem;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 1.5rem;
+}
+.head .n {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.84rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: var(--glass);
+}
+.head .note { margin-left: auto; font-size: 0.9rem; color: var(--ink-faint); }
+
+.prose { max-width: 66ch; color: var(--ink-dim); display: grid; gap: 0.85rem; }
+.prose strong { color: #eaf2fd; }
+
+/* ---------- the arc ---------- */
+.arc {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    align-items: stretch;
+    margin-bottom: 1.5rem;
+}
+.arc span {
+    flex: 1 1 auto;
+    min-width: 92px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.76rem;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    text-align: center;
+    padding: 0.85rem 0.5rem;
+    background: var(--surface);
+    border: 1px solid var(--line-soft);
+    border-top: 2px solid var(--stop, var(--line));
+    color: var(--ink-dim);
+    text-wrap: balance;
+    line-height: 1.4;
+}
+.arc span.key { color: #eef4fd; background: var(--surface-2); }
+
+/* ---------- timeline ---------- */
+.timeline {
+    display: flex;
+    width: 100%;
+    height: 54px;
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-bottom: 0.7rem;
+}
+.timeline i {
+    position: relative;
+    display: block;
+    border-right: 1px solid var(--ground-deep);
+    background: var(--light);
+    font-style: normal;
+}
+.timeline i:last-child { border-right: 0; }
+.timeline i.core { background: var(--lime); }
+.timeline i.cut  { background: var(--red); }
+.timeline i::after {
+    content: attr(data-n);
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.74rem;
+    font-weight: 700;
+    color: #1a1305;
+}
+.timeline i.core::after { color: #10200a; }
+.timeline i.cut::after  { color: #ffdcd7; }
+
+.legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.4rem;
+    font-size: 0.87rem;
+    color: var(--ink-faint);
+}
+.legend b { font-weight: 400; color: var(--ink-dim); }
+.legend span { display: inline-flex; align-items: center; gap: 0.42rem; }
+.legend s { width: 11px; height: 11px; border-radius: 2px; text-decoration: none; display: inline-block; }
+
+/* ---------- scenes ---------- */
+.scenes { display: grid; gap: 0.7rem; }
+
+.scene {
+    display: grid;
+    grid-template-columns: 3.6rem minmax(0, 1fr);
+    gap: 0 1.1rem;
+    padding: 1.4rem 1.55rem 1.5rem;
+    background: var(--surface);
+    border: 1px solid var(--line-soft);
+    border-left: 2px solid var(--light);
+    border-radius: 2px;
+}
+.scene.core { border-left-color: var(--lime); background: linear-gradient(90deg, #182a0c 0%, var(--surface) 34%); }
+.scene.cut  { border-left-color: var(--red); }
+
+.scene .idx {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--light);
+    font-variant-numeric: tabular-nums;
+    padding-top: 0.1rem;
+}
+.scene.core .idx { color: var(--lime); }
+.scene.cut .idx  { color: #c9503f; }
+
+.scene .top {
+    display: flex;
+    align-items: baseline;
+    gap: 0.8rem;
+    flex-wrap: wrap;
+    margin-bottom: 0.7rem;
+}
+.scene h3 { font-size: 1.16rem; font-weight: 700; letter-spacing: 0.01em; color: #f0f6ff; }
+
+.tag {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.68rem;
+    font-weight: 500;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    padding: 0.2rem 0.45rem;
+    border-radius: 2px;
+    border: 1px solid;
+}
+.tag.core { color: #10200a; border-color: var(--lime); background: var(--lime); }
+.tag.cut  { color: #ffdcd7; border-color: var(--red); background: var(--red); }
+.tag.card { color: #1a1305; border-color: var(--light); background: var(--light); }
+
+.secs {
+    margin-left: auto;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: var(--ink-faint);
+    font-variant-numeric: tabular-nums;
+}
+
+.body {
+    display: grid;
+    grid-template-columns: minmax(0, 1.08fr) minmax(0, 1fr);
+    gap: 0.6rem 1.6rem;
+}
+@media (max-width: 720px) { .body { grid-template-columns: 1fr; gap: 1rem; } }
+
+.body > div { display: grid; gap: 0.34rem; align-content: start; }
+.body h4 {
+    margin: 0;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.84rem;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+}
+.body p { font-size: 1.06rem; line-height: 1.66; color: var(--ink-dim); }
+.body .aha { border-left: 1px solid var(--line); padding-left: 1.6rem; }
+@media (max-width: 720px) { .body .aha { border-left: 0; padding-left: 0; border-top: 1px solid var(--line); padding-top: 0.9rem; } }
+.body .aha p { color: var(--ink); }
+
+/* what Solita actually says - generated from narration.mjs, never hand-edited */
+.say {
+    margin-top: 1.1rem;
+    padding: 0.95rem 1.2rem;
+    background: #08172f;
+    border: 1px solid var(--line-soft);
+    border-left: 2px solid var(--glass);
+    border-radius: 2px;
+}
+.say h4 {
+    margin: 0 0 0.45rem;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.64rem;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--glass);
+}
+.say p { margin: 0; font-size: 1.06rem; line-height: 1.62; color: var(--ink); }
+.say .pause {
+    display: inline-block;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.66rem;
+    font-weight: 500;
+    color: var(--light);
+    background: #241d05;
+    border: 1px solid #4a3c10;
+    border-radius: 2px;
+    padding: 0.05rem 0.4rem;
+    margin: 0 0.22rem;
+    vertical-align: 0.08em;
+    white-space: nowrap;
+}
+.say .spell { border-bottom: 1px dotted var(--ink-faint); letter-spacing: 0.12em; }
+
+/* ---------- rules / lists ---------- */
+.rules { display: grid; gap: 0.6rem; counter-reset: r; max-width: 74ch; padding: 0; margin: 0; }
+.rules li {
+    list-style: none;
+    position: relative;
+    padding-left: 2.8rem;
+    font-size: 1.05rem;
+    color: var(--ink-dim);
+}
+.rules li::before {
+    counter-increment: r;
+    content: counter(r, decimal-leading-zero);
+    position: absolute;
+    left: 0;
+    top: 0.28rem;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.84rem;
+    font-weight: 500;
+    color: var(--violet);
+}
+
+.notes { display: grid; gap: 0.75rem; max-width: 74ch; padding: 0; margin: 0; }
+.notes li {
+    list-style: none;
+    font-size: 1.05rem;
+    color: var(--ink-dim);
+    padding-left: 1.1rem;
+    border-left: 1px solid var(--line);
+}
+.notes strong { color: #eaf2fd; }
+
+code {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 0.85em;
+    color: var(--glass);
+    background: #08192f;
+    border: 1px solid var(--line-soft);
+    border-radius: 2px;
+    padding: 0.06em 0.34em;
+}
+
+/* ---------- measured data ---------- */
+.measure {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 400px);
+    gap: clamp(1.2rem, 3vw, 2.2rem);
+    align-items: start;
+}
+.measure > div { min-width: 0; }
+@media (max-width: 900px) { .measure { grid-template-columns: 1fr; } }
+
+.tblwrap { overflow-x: auto; scrollbar-width: thin; scrollbar-color: #23406d transparent; }
+.tblwrap::-webkit-scrollbar { height: 7px; }
+.tblwrap::-webkit-scrollbar-thumb { background: #23406d; border-radius: 4px; }
+.tblwrap::-webkit-scrollbar-track { background: transparent; }
+
+.tbl { width: 100%; min-width: 460px; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+.tbl caption {
+    text-align: left;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    padding-bottom: 0.6rem;
+}
+.tbl th, .tbl td {
+    text-align: right;
+    padding: 0.42rem 0.6rem;
+    border-bottom: 1px solid var(--line-soft);
+    font-size: 0.99rem;
+    color: var(--ink-dim);
+}
+.tbl th {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    border-bottom-color: var(--line);
+}
+.tbl th:first-child, .tbl td:first-child { text-align: left; }
+.tbl td.n { font-family: 'Orbitron', sans-serif; font-weight: 500; color: var(--ink); }
+.tbl tr.mark td { color: var(--light); }
+.tbl tr.jump td { color: var(--lime); }
+
+#convplot {
+    width: 100%;
+    aspect-ratio: 1 / 0.8;
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    background: #030c1c;
+}
+.plotcap { margin-top: 0.6rem; font-size: 0.92rem; color: var(--ink-faint); }
+
+/* ---------- budget ---------- */
+.budget {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1px;
+    background: var(--line-soft);
+    border: 1px solid var(--line-soft);
+    border-radius: 2px;
+    margin-bottom: 1.5rem;
+}
+.budget div { background: var(--surface); padding: 1rem 1.1rem; display: grid; gap: 0.28rem; }
+.budget dt {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.74rem;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+}
+.budget dd {
+    margin: 0;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--glass);
+    font-variant-numeric: tabular-nums;
+}
+.budget dd small { display: block; font-family: 'Outfit', sans-serif; font-size: 0.78rem; font-weight: 300; color: var(--ink-faint); letter-spacing: 0; margin-top: 0.2rem; }
+
+.solved { color: var(--lime); }
+
+/* ---------- footer ---------- */
+footer {
+    margin-top: clamp(2.6rem, 6vw, 4.4rem);
+    padding-top: 1.6rem;
+    border-top: 1px solid var(--line);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem 2rem;
+    align-items: baseline;
+}
+footer p { font-size: 1.05rem; color: var(--ink-dim); max-width: 58ch; }
+footer .sig { margin-left: auto; }
+
+@media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+    <p class="eyebrow">Doc Alvers Mathe-Labor · Videopipeline</p>
+    <h1>Der Klotz, der eine Linse wurde</h1>
+    <p class="lede">Der Plot für das Linsen-Demovideo: was passiert, in welcher
+        Reihenfolge — und warum genau dort der Groschen fällt.</p>
+    <p class="status">Plot ohne Freigabe · vertont · gedreht · geschnitten</p>
+
+    <dl class="meta">
+        <div><dt>Lab</dt><dd><a href="https://docalvers.de/LensStandalone/cmaes_java.html">cmaes_java.html</a></dd></div>
+        <div><dt>Sprecherin</dt><dd>Solita · de-DE-Studio</dd></div>
+        <div><dt>Aufnahme</dt><dd>1440p · Playwright</dd></div>
+        <div><dt>Szenen</dt><dd>10 · davon 4 auf eigenen Karten</dd></div>
+        <div><dt>Laufzeit</dt><dd>3:48 · 1440p</dd></div>
+    </dl>
+</header>
+
+<div class="thesis">
+    <canvas id="stage" width="800" height="600" role="img"
+            aria-label="Zwölf parallele Lichtstrahlen treffen auf einen Glaskörper,
+                        werden an beiden Flächen gebrochen und laufen dahinter in einem
+                        Punkt zusammen"></canvas>
+    <div>
+        <blockquote>Niemand hat diesem Programm gezeigt, wie eine Linse aussieht. Es
+            kennt nur einen Klotz Glas, zwölf Lichtstrahlen — und die Frage:
+            <strong>wie weit daneben?</strong></blockquote>
+        <p class="after">Der ganze Film ist die Antwort auf eine einzige Frage:
+            <em>Wie findet etwas eine Form, die es nicht kennt?</em> Nicht: wie eine
+            Linse funktioniert. Sondern: was passiert, wenn man nur sagen kann, wie
+            schlecht das Ergebnis gerade ist.</p>
+    </div>
+</div>
+
+<section>
+    <div class="head"><span class="n">A</span><h2>Der dramaturgische Bogen</h2></div>
+    <div class="arc" id="arc"></div>
+    <div class="prose">
+        <p>Der Film beginnt beim Rohmaterial: ein rechteckiger Glasklotz, zwölf
+           parallele Strahlen, ein Fadenkreuz — und die Strahlen gehen weit daneben
+           (1). Dann wird gebaut: was „gut" heißt, ist eine einzige Zahl (2), und
+           gesucht wird mit zwanzig Vorschlägen pro Runde (3). Dann läuft es: nach
+           hundert Generationen ist die Linse da (4–5).</p>
+        <p>Und dann kommt die Stelle, für die es sich lohnt: <strong>bei Generation
+           fünfhundert wirft die Evolution ihre fertige Linse weg</strong> und findet
+           eine bessere (6). Warum, erklärt Szene 7 — die Bewertung zählt nämlich zwei
+           Dinge. Danach wird gespielt: die Brechzahl (8) und, als Höhepunkt, ein
+           <strong>wandernder Brennpunkt</strong>, dem die Linse in Echtzeit folgt (9).
+           Szene 10 löst ein, was in Szene 1 behauptet wurde.</p>
+    </div>
+</section>
+
+<section>
+    <div class="head"><span class="n">B</span><h2>Die 10 Szenen</h2>
+        <span class="note" id="tl-note">Breite = geplante Sprechzeit</span></div>
+    <div class="timeline" id="timeline"></div>
+    <div class="legend">
+        <span><s style="background:#adff2f"></s><b>Kernszene — wird nicht gekürzt</b></span>
+        <span><s style="background:#b02418"></s><b>Notbremse, falls der Schnitt zäh wirkt</b></span>
+        <span><s style="background:#ffcc00"></s><b>Regelszene</b></span>
+    </div>
+    <div class="scenes" id="scenes" style="margin-top:1.5rem"></div>
+</section>
+
+<section>
+    <div class="head"><span class="n">C</span><h2>Didaktische Leitplanken</h2>
+        <span class="note">bindend für den Sprechertext</span></div>
+    <ol class="rules">
+        <li><strong>Nie eine Formel ohne vorher gezeigtes Bild.</strong> Die Bewertung
+            wird in Szene 2 erst <em>gezeigt</em> — zwölf Abstände, die man abmessen
+            kann — und dann erst als eine Zahl benannt.</li>
+        <li><strong>Ein neuer Begriff pro Szene.</strong> Aus „Fitness" wird die
+            <em>Bewertung</em>, aus „Generation" die <em>Runde</em>, aus „Population"
+            die <em>zwanzig Vorschläge</em>. <strong>„CMA-ES" fällt genau einmal</strong>,
+            in Szene 3, und wird sofort übersetzt.</li>
+        <li>Verboten, weil dieses Labor sie nicht braucht: <em>Kovarianzmatrix-Adaption,
+            Eigenwerte, Schrittweitensteuerung, Rang-μ-Update, Selektionsdruck</em>.
+            Wer sie hier einführt, klingt gebildet und erklärt nichts. Wer die Matrix
+            wirklich sehen will, bekommt das <a href="https://docalvers.de/kovarianz.html">Kovarianz-Lab</a>.</li>
+        <li><strong>Nicht „die Evolution will".</strong> Kein Wille, keine Absicht, kein
+            Lernen im menschlichen Sinn — sie <em>würfelt und behält, was besser
+            misst</em>. Die Formulierung muss das jedes Mal durchhalten.</li>
+        <li><strong>Kein „perfekt", kein „exakt null".</strong> Der Strahlfehler steht
+            gemessen bei <em>0,00 Pixel auf zwei Stellen</em> — das heißt: unter der
+            Anzeigegenauigkeit, nicht mathematisch null. Solita sagt „unter einem
+            Hundertstel Pixel".</li>
+        <li><strong>Jede Zahl mit Bezugsgröße.</strong> Pixel sind nur etwas wert, wenn
+            die Linsenhöhe (362 px) und die Brennweite (1173 px) danebenstehen.</li>
+        <li><strong>Nichts behaupten, was das Bild nicht hergibt.</strong> Alle Zahlen
+            in diesem Drehbuch stammen aus Abschnitt D — gemessen am laufenden Lab mit
+            dessen eigener Physik, nicht aus dem Lehrbuch.</li>
+    </ol>
+</section>
+
+<section>
+    <div class="head"><span class="n">D</span><h2>Gemessen, nicht geschätzt</h2>
+        <span class="note solved">Grundlage aller Zahlen im Film</span></div>
+    <div class="measure">
+        <div>
+            <div class="tblwrap"><table class="tbl" id="tbl"></table></div>
+        </div>
+        <div>
+            <canvas id="convplot" width="760" height="608" role="img"
+                    aria-label="Strahlfehler in Pixeln über der Generation, logarithmisch:
+                                von 104 Pixeln fällt er bis Generation 100 unter ein Pixel,
+                                springt bei Generation 500 kurz hoch, als die Evolution die
+                                Bauform wechselt, und fällt danach wieder unter die
+                                Anzeigegrenze."></canvas>
+            <p class="plotcap">Strahlfehler über der Runde, logarithmisch. Der Ausschlag
+               bei 500 ist kein Messfehler — dort <em>verlässt</em> die Evolution ihre
+               fertige Linse und baut eine andere.</p>
+        </div>
+    </div>
+    <div class="prose" style="margin-top:1.6rem">
+        <p><strong>Bezugsgrößen:</strong> Linsenhöhe 362 px, Brennweite 1173 px,
+           zwölf Strahlen, Startklotz 167 px dick. <strong>Strahlfehler</strong> ist der
+           quadratische Mittelwert der Abstände, in denen die zwölf austretenden Strahlen
+           die Brennpunkt-Höhe verfehlen — gerechnet mit der Brechungsroutine des Labors
+           selbst (<code>Physics.refractRayClosestSurface</code>), nicht nachgebaut.</p>
+        <p><strong>Die drei Befunde, die den Film tragen:</strong> Erstens fällt der
+           Fehler von <strong>104 auf unter ein Pixel in rund hundert Runden</strong>.
+           Zweitens ist die Sache dort <em>nicht</em> zu Ende: bei Runde 500 springt die
+           Bewertung von 12,4 auf 4,4, weil die Linse von 179 auf <strong>68 Pixel Dicke
+           schrumpft</strong> und sich dafür stark wölbt. Drittens folgt sie einem
+           <strong>wandernden Brennpunkt</strong>, der über die volle Linsenhöhe
+           schwingt, nach zwei Sekunden Einschwingen mit <strong>unter sechs Pixeln</strong>
+           Rückstand.</p>
+        <p><strong>Warum der zweite Sprung überhaupt passiert:</strong> die Bewertung
+           zählt nicht nur, wie weit die Strahlen danebengehen, sondern addiert ein
+           Viertel des Weges, den das Licht <em>im Glas</em> zurücklegt. Solange die
+           Bündelung noch schlecht ist, dominiert der erste Teil. Ist sie perfekt, bleibt
+           nur noch der zweite — und ab da optimiert sie <em>Glas weg</em>. Das ist keine
+           Anekdote, das ist in <code>calcPathAndQuality</code> nachlesbar.</p>
+        <p><strong>Was NICHT reproduzierbar ist — und warum der Sprechertext deshalb
+           anders klingt, als er zuerst klang:</strong> über fünf Läufe gemessen landet
+           Runde 20 irgendwo zwischen <strong>40 und 62 Pixeln</strong>, Runde 50
+           zwischen 4,5 und 10,2, Runde 100 zwischen 0,13 und 0,63 — erst ab Runde 200
+           steht in jedem Lauf 0,00. Und der Ausbruch aus Szene 6 kam bei 498, 512, 615,
+           869 — und <strong>in einem von fünf Läufen gar nicht</strong>, auch nicht nach
+           4000 Runden. Die frühen Runden werden im Film deshalb in Worten beschrieben
+           statt in Zahlen, Szene 6 sagt „irgendwann jenseits von Runde fünfhundert",
+           und Szene 7 spricht die Unsicherheit offen aus. Die Aufnahme wartet auf das
+           <em>Ereignis</em> statt auf eine Rundenzahl und setzt eine Marke; ein Take
+           ohne diese Marke wird von <code>run3</code> abgelehnt.</p>
+        <p><strong>Und was die Brechzahl macht</strong> (je zwei Läufe über 1500 Runden,
+           auf 0,1 px reproduzierbar): bei <span class="m">n</span> = 1,20 bleibt die
+           Linse <strong>114 px</strong> dick, bei 1,60 noch <strong>68</strong>, bei
+           2,00 nur noch <strong>59</strong>. Mehr Brechkraft, weniger Glas — und die
+           Wölbung läuft in allen drei Fällen in dieselbe Grenze von 61 px, das ist der
+           Anschlag des Labors, kein physikalisches Optimum.</p>
+    </div>
+</section>
+
+<section>
+    <div class="head"><span class="n">E</span><h2>Zeitbudget</h2>
+        <span class="note solved">gelöst</span></div>
+    <dl class="budget" id="budget"></dl>
+    <div class="prose">
+        <p>Teil 1 von <code>Infinity_6min.m4a</code> ist nahtlos loopbar: loopStart
+           21,220 s, loopEnd 163,998 s. Der Film rendert <strong>Intro plus zwei
+           Durchläufe</strong> und schneidet das Bett am Filmende ab, also lange vor der
+           zweiten Naht.</p>
+        <p><strong>Keine Szene muss gekürzt werden.</strong> Die rote Marke steht nur als
+           Notbremse: Szene 8 (die Brechzahl) ist die einzige, die man ohne Loch im
+           Argument herausnehmen kann. Szene 6 und 9 sind der Grund, warum es diesen Film
+           gibt, und werden nicht angetastet.</p>
+    </div>
+</section>
+
+<section>
+    <div class="head"><span class="n">F</span><h2>Choreografie-Notizen</h2>
+        <span class="note">für die Aufnahme</span></div>
+    <ul class="notes">
+        <li><strong>Lebensgefährlich: jeder Klick auf die Bühne versetzt den
+            Brennpunkt.</strong> <code>handleMouseDown</code> setzt
+            <code>focus</code> kommentarlos auf die Klickposition — es gibt keinen
+            Trefferradius. Die Aufnahme darf den Canvas <em>niemals</em> anklicken; alle
+            Bedienung läuft über die Knöpfe im Dock oder direkt über
+            <code>App</code>.</li>
+        <li><strong>Die Evolution ist zu schnell zum Zusehen.</strong> Gemessen läuft
+            eine Runde pro Bild, also 60 pro Sekunde — die ganze Konvergenz bis Runde 100
+            wäre nach <em>1,7 Sekunden</em> vorbei. Die Aufnahme bringt deshalb einen
+            eigenen Taktgeber mit, der <code>App.step()</code> in einstellbarem Tempo
+            aufruft: 3 Runden pro Sekunde in Szene 4, 10 in Szene 5, 40 in Szene 6 und
+            400 in Szene 8. Gerechnet wird dabei exakt dasselbe.</li>
+        <li><strong>Der Strahlfehler steht nirgends im Lab.</strong> Die Telemetrie zeigt
+            FITNESS — eine Summe aus Bündelung, Glasweg und drei Strafen. Der Film
+            spricht aber über die Bündelung allein, also blendet die Aufnahme ein Feld
+            ein, das sie live aus <code>App.points</code> mit der Physik des Labors
+            nachrechnet. Kein Wert von außen.</li>
+        <li><strong>Startzustand:</strong> frischer Context, Symmetrie an, SHOW POINTS
+            an, FOCUS OSCILLATE aus, <span class="m">n</span> = 1,60, Sigma 0,1 — also
+            genau der Auslieferungszustand.</li>
+        <li><strong>Szene 6 braucht Geduld im Schnitt.</strong> Der Ausbruch kommt
+            gemessen zwischen Runde 480 und 600 und ist von einem Bild aufs nächste da.
+            Bei 40 Runden pro Sekunde liegt er etwa neun Sekunden nach Szenenbeginn — der
+            Sprechertext muss dort <em>hinführen</em>, nicht daneben reden.</li>
+        <li>Szene 8 setzt die Brechzahl über den Slider <code>#slider-n</code> und muss
+            danach <code>App.reset()</code> aufrufen, sonst optimiert sie auf der schon
+            fertigen Linse weiter statt vom Klotz aus.</li>
+        <li>Der lokale Server klebt ein rotes <strong>LOCAL</strong>-Schild in die Seite.
+            Die Aufnahme entfernt <code>#local-badge</code> vor dem ersten Bild.</li>
+        <li>1,6 s Luft nach jeder Szene, dazu Zuschläge für 6 und 9 — dort läuft noch
+            etwas zu Ende, wenn Solita schon schweigt.</li>
+        <li>Die vier Karten kommen aus <code>videopipeline/linse/karten.html</code> und
+            bekommen ihre <strong>gemessene Sprechdauer als Parameter</strong>
+            (<code>?scene=sN&amp;dur=…</code>).</li>
+    </ul>
+</section>
+
+<section>
+    <div class="head"><span class="n">G</span><h2>Bewusst weggelassen</h2>
+        <span class="note">Kandidaten für Teil 2</span></div>
+    <div class="prose">
+        <p><strong>Wie CMA-ES wirklich funktioniert.</strong> Dass die Punktwolke ihre
+           eigene Form lernt — lang und schmal in die Richtung, die zuletzt etwas
+           gebracht hat — ist die eigentliche Erfindung und der Grund für den Namen. Der
+           Film sagt in Szene 3 nur, <em>dass</em> sie es tut. Das Kovarianz-Lab hat das
+           Bild dazu; das wäre der Anschlussfilm.</p>
+        <p><strong>Die andere Mission desselben Verfahrens:</strong> in
+           <code>cmaes.html</code> maximiert dasselbe Vorgehen die Fläche bei festem
+           Umfang und landet exakt beim Kreis. Schöne Pointe, eigener Film. <em>Nebenbei
+           aufgefallen und nicht Teil dieser Arbeit:</em> die Linsen-Mission in
+           <code>cmaes.html</code> ist über die Oberfläche gar nicht erreichbar — das
+           Kontextmenü bietet nur den Weg <em>zurück</em> zum Kreis.</p>
+        <p>Außerdem draußen: Abbildungsfehler und warum echte Objektive aus vielen Gläsern
+           bestehen · Dispersion, also dass <span class="m">n</span> von der Farbe abhängt
+           (hier rechnet alles einfarbig) · und der Vergleich mit dem Gradientenverfahren,
+           das hier scheitern würde, weil die Bewertung an den Strahlensprüngen
+           unstetig ist.</p>
+    </div>
+</section>
+
+<footer>
+    <p><strong>Stand:</strong> Film gerendert —
+       <code>videopipeline/videos/linse-demo-1440p.mp4</code>, 3:48, 2560×1440,
+       10 Kapitel. Wortlaut in <code>videopipeline/linse/narration.mjs</code>, Karten in
+       <code>karten.html</code> (mit den echten Linsenkonturen aus
+       <code>dump-shapes.mjs</code>), Zahlen aus <code>measure.mjs</code>,
+       <code>measure2.mjs</code> und <code>measure3.mjs</code>. Das Feld oben im Bild
+       rechnet den Strahlfehler während der Aufnahme live aus <code>App.points</code> —
+       es zeigt dieselbe Zahl, die dieses Drehbuch behauptet.</p>
+    <p class="eyebrow sig">Doc Alvers Mathe-Labor</p>
+</footer>
+
+</div>
+
+<script>
+/* ---------------------------------------------------------------
+   One source of truth: the scene list feeds both the timeline and
+   the cards below it.
+   --------------------------------------------------------------- */
+const SCENES = [
+    { n: 1, s: 16, t: 'Ein Klotz Glas',
+      img: 'Das Labor im Auslieferungszustand: ein rechteckiger Glasblock, 167 Pixel dick, zwölf waagerechte Lichtstrahlen von links, ein goldenes Fadenkreuz weit rechts. Die Strahlen gehen durch das Glas und laufen <em>an dem Fadenkreuz vorbei</em>, weit auseinander.',
+      aha: 'Das ist keine Linse, das ist ein Klotz. Und niemand im Programm weiß, wie eine Linse aussieht. Gemessen verfehlen die Strahlen den Brennpunkt um <strong>104 Pixel</strong> — bei einer Linsenhöhe von 362.' },
+
+    { n: 2, s: 18, t: 'Was heißt „gut"?', card: true,
+      img: 'Die zwölf austretenden Strahlen, dahinter die senkrechte Brennebene. An jedem Schnittpunkt wächst ein Maßstrich zum Brennpunkt: zwölf Abstände. Sie werden quadriert, gemittelt, gewurzelt — und schrumpfen zu einer einzigen Zahl zusammen.',
+      aha: 'Das ganze Verfahren braucht nur <strong>eine Zahl</strong>: wie weit daneben. Kein Modell einer Linse, keine Formel für Brechkraft — nur ein Maßband und die Bereitschaft, es oft zu benutzen.' },
+
+    { n: 3, s: 20, t: 'Zwanzig Vorschläge pro Runde', card: true,
+      img: 'Aus der aktuellen Form entsteht eine Wolke von zwanzig leicht abgewandelten Linsen, jede mit ihrer Zahl. Die schlechten verblassen, aus den guten wird ein neuer Mittelpunkt — und die Wolke selbst zieht sich in die Richtung lang, die etwas gebracht hat.',
+      aha: 'Das Verfahren heißt <span class="m">CMA-ES</span> — auf Deutsch: eine Evolution, die nicht nur ihre Kandidaten verbessert, sondern auch <strong>ihre eigene Suchrichtung</strong>. Sie will nichts. Sie würfelt und behält, was besser misst.' },
+
+    { n: 4, s: 16, t: 'Die ersten Runden',
+      img: 'Der Taktgeber läuft auf drei Runden pro Sekunde: man sieht jede einzelne. Die geraden Glaskanten beginnen sich zu beulen, die Strahlen schwenken erkennbar zum Fadenkreuz hin. Das Feld unten links zählt von 104 herunter.',
+      aha: 'Nach zwanzig Runden sind es noch <strong>39 Pixel</strong>. Nichts daran ist geplant — das ist zwanzigmal würfeln, messen, den Schwerpunkt der besseren Hälfte nehmen, und das zwanzigmal hintereinander.' },
+
+    { n: 5, s: 18, t: 'Bei hundert ist die Linse da', core: true,
+      img: 'Zehn Runden pro Sekunde. Aus dem Klotz ist eine erkennbare Linse geworden, die Strahlen schnüren sich zusammen. Bei Runde 50 steht 5 Pixel im Feld, bei Runde 100 <strong>0,5</strong> — die zwölf Strahlen laufen sichtbar durch <em>einen</em> Punkt.',
+      aha: 'Hundert Runden. Zweitausend geprüfte Linsen. Und heraus kommt eine Form, die Menschen erst im 13. Jahrhundert gefunden haben — <strong>ohne dass irgendwo im Programm das Wort Linse steht</strong>.' },
+
+    { n: 6, s: 20, t: 'Es hört nicht auf', core: true,
+      img: 'Vierzig Runden pro Sekunde, die Linse steht scheinbar still. Dann, etwa neun Sekunden in die Szene, verformt sie sich <strong>ruckartig</strong>: sie wird dünn und stark gewölbt. Die Bewertung fällt von 12,4 auf 4,4, der Strahlfehler ist kurz oben und dann wieder unten.',
+      aha: 'Sie <em>wirft die fertige Linse weg</em>. Die Strahlen trafen schon perfekt — und trotzdem war da noch etwas zu holen. Die Dicke fällt von 179 auf <strong>68 Pixel</strong>. Bloß: warum?' },
+
+    { n: 7, s: 18, t: 'Erst scharf, dann sparsam', core: true, card: true,
+      img: 'Die Bewertung wird aufgeklappt: ein großer Balken „wie weit daneben" und ein kleiner „wie weit durchs Glas". Der große schrumpft in den ersten hundert Runden auf nichts — und plötzlich ist der kleine, der die ganze Zeit danebenstand, der <em>einzige</em>, der noch zählt.',
+      aha: 'Man bekommt, was man misst. Wer den Glasweg mitbewertet, bekommt am Ende die <strong>sparsamste</strong> Linse, nicht nur eine scharfe. Und der Ausbruch in Szene 6 war kein Zufall, sondern der Moment, in dem der zweite Posten übernimmt.' },
+
+    { n: 8, s: 16, t: 'Mehr Brechkraft, weniger Glas', cut: true,
+      img: 'Dreimal von vorn, nur die Brechzahl wird verstellt — 1,20, dann 1,60, dann 2,00 — und jedes Mal 700 Runden im Schnelldurchlauf (500 Runden pro Sekunde). Nebeneinander stellen kann das Labor die drei nicht; sie kommen nacheinander, und die Dicke im eingeblendeten Feld ist das, was man vergleicht.',
+      aha: '114, 68, 59 Pixel dick. <strong>Je stärker das Glas bricht, desto weniger davon braucht man</strong> — genau das, was ein Optiker erwartet, hier aber niemandem gesagt und in zwei unabhängigen Läufen gleich herausgekommen.' },
+
+    { n: 9, s: 24, t: 'Der Brennpunkt wandert', core: true,
+      img: 'FOCUS OSCILLATE an. Das Fadenkreuz beginnt auf und ab zu wandern, über die ganze Linsenhöhe. Die Linse folgt: sie kippt und verformt sich weiter, während der Brennpunkt läuft, und das Strahlenbündel bleibt an ihm kleben.',
+      aha: 'Das ist der Unterschied zu einer Rechnung, die einmal ein Ergebnis ausspuckt. Hier <strong>läuft die Optimierung weiter</strong> — nach zwei Sekunden Einschwingen bleibt sie unter <strong>sechs Pixeln</strong> hinter einem Ziel, das über 362 Pixel schwingt.' },
+
+    { n: 10, s: 20, t: 'Niemand hat ihm die Linse gezeigt', core: true, card: true,
+      img: 'Zum Schluss die Bilanz nebeneinander: der Klotz vom Anfang, die scharfe Linse von Runde 100, die sparsame von Runde 600. Darunter läuft eine kurze Liste durch, was das Programm <em>nicht</em> enthält.',
+      aha: 'Keine Brennweitenformel, kein Linsenschliff, keine Optik-Tabelle. Nur: eine Form verändern dürfen, und messen können, wie weit man daneben ist. <strong>Alles, was eine gute Bewertung hat, kann so gefunden werden</strong> — Linsen sind nur das, was hier zufällig im Weg lag.' }
+];
+
+/* Solita's wording arrives later, generated from narration.mjs. */
+/* SAY:START - generated by videopipeline/linse/sync-drehbuch.mjs, do not edit */
+const SAY = {
+    s1: 'Das ist keine Linse. Das ist ein Klotz Glas, hundertsiebenundsechzig Pixel dick, mit zwei schnurgeraden Kanten. Von links kommen zwölf Lichtstrahlen, rechts steht ein Fadenkreuz — da sollen sie hin. Sie gehen weit daneben: im Schnitt um hundertvier Pixel, bei einer Linsenhöhe von dreihundertzweiundsechzig. Und niemand in diesem Programm weiß, wie eine Linse aussieht.',
+    s2: 'Damit sich etwas verbessern lässt, muss man erst sagen können, wie schlecht es ist. Also: zwölf Strahlen, zwölf Abstände zum Brennpunkt. Quadrieren, mitteln, Wurzel ziehen. Fertig ist eine einzige Zahl. Mehr braucht das ganze Verfahren nicht — kein Modell einer Linse, keine Formel für Brechkraft. Nur ein Maßband.',
+    s3: 'Und jetzt wird gewürfelt. Aus der aktuellen Form entstehen zwanzig leicht abgewandelte Linsen, jede bekommt ihre Zahl. Die schlechten fliegen raus, aus den guten wird die nächste Form. Das Verfahren heißt <span class="spell">CMA</span>-<span class="spell">ES</span>, und das Besondere daran ist: nicht nur die Linsen werden besser, sondern auch die Richtung, in die überhaupt gewürfelt wird. Es will nichts. Es behält, was besser misst.',
+    s4: 'Drei Runden pro Sekunde, damit man jede einzelne sieht. Die geraden Kanten fangen an sich zu beulen, die Strahlen schwenken zum Fadenkreuz. Nach zwanzig Runden ist der Fehler weniger als halb so groß. Geplant ist daran nichts. Das ist zwanzigmal würfeln, messen, das Beste behalten — und das zwanzigmal hintereinander.',
+    s5: 'Jetzt zehn Runden pro Sekunde. Nach fünfzig Runden sind es noch wenige Pixel, nach hundert unter einem — die zwölf Strahlen laufen sichtbar durch einen Punkt. Hundert Runden, zweitausend geprüfte Linsen. Herausgekommen ist eine Form, die Menschen erst im dreizehnten Jahrhundert gefunden haben. Und nirgends im Programm steht das Wort Linse.',
+    s6: 'Aber es hört nicht auf. Vierzig Runden pro Sekunde, die Linse steht scheinbar still — und dann, irgendwann jenseits von Runde fünfhundert, verformt sie sich mit einem Ruck. Sie wird dünn und stark gewölbt: von hundertneunundsiebzig auf achtundsechzig Pixel Dicke. Die Bewertung fällt von zwölf Komma vier auf vier Komma vier. Die Strahlen trafen doch längst perfekt. Warum wirft sie eine fertige Linse weg?',
+    s7: 'Weil die Bewertung zwei Dinge zählt. Das eine ist, wie weit die Strahlen danebengehen. Das andere ist, wie weit das Licht durch das Glas läuft. Solange die Bündelung schlecht ist, fällt der zweite Posten gar nicht auf. Ist sie perfekt, bleibt nur noch er übrig — und ab da wird Glas weggespart. Erst scharf, dann sparsam — man bekommt eben genau das, was man misst. Und weil hier gewürfelt wird, steht auch nicht fest, wann dieser Sprung kommt: in fünf Läufen einmal bei fünfhundert, einmal bei achthundertsiebzig — und einmal gar nicht.',
+    s8: 'Dreimal von vorn, nur die Brechzahl ist anders. Bei eins Komma zwei bleibt die Linse hundertvierzehn Pixel dick, bei eins Komma sechs achtundsechzig, bei zwei nur noch neunundfünfzig. Je stärker das Glas bricht, desto weniger davon braucht man. Das weiß jeder Optiker — hier hat es nur niemand gesagt.',
+    s9: 'Und jetzt das Beste. Der Brennpunkt fängt an zu wandern, über die ganze Höhe der Linse. Ein normales Rechenverfahren wäre hier fertig und ratlos: das Ergebnis stimmt nicht mehr. Dieses hier läuft einfach weiter. Es würfelt weiter, es misst weiter — und die Linse verformt sich mit. Nach zwei Sekunden Einschwingen bleibt sie unter sechs Pixeln hinter einem Ziel, das über dreihundertzweiundsechzig Pixel schwingt.',
+    s10: 'Halten wir fest, was in diesem Programm nicht steht: keine Brennweitenformel, kein Linsenschliff, keine Optik-Tabelle. Es darf eine Form verändern, und es kann messen, wie weit es daneben liegt. Das reicht. Und deshalb ist das hier eigentlich kein Film über Linsen — Linsen lagen nur zufällig im Weg. Alles, wofür man hinschreiben kann, was gut heißt, lässt sich so finden.'
+};
+const SPOKEN = {"s1":19.992,"s2":16.824,"s3":21.576,"s4":17.52,"s5":18.624,"s6":21.72,"s7":27.336,"s8":15.768,"s9":22.464,"s10":20.04};
+/* SAY:END */
+
+/* --- the arc --- */
+const ARC = [
+    { t: 'Ein Klotz Glas', c: '#00f2ff' },
+    { t: 'Was heißt gut', c: '#00f2ff' },
+    { t: 'Zwanzig pro Runde', c: '#00f2ff' },
+    { t: 'Die Linse entsteht', c: '#ffcc00', key: true },
+    { t: 'Sie wirft sie weg', c: '#ffcc00', key: true },
+    { t: 'Erst scharf, dann sparsam', c: '#ffcc00', key: true },
+    { t: 'Brechzahl', c: '#ff3344' },
+    { t: 'Der Punkt wandert', c: '#adff2f', key: true },
+    { t: 'Eingelöst', c: '#adff2f', key: true }
+];
+document.getElementById('arc').innerHTML = ARC.map(a =>
+    '<span class="' + (a.key ? 'key' : '') + '" style="--stop:' + a.c + '">' + a.t + '</span>').join('');
+
+/* --- timeline: each scene as wide as it is long --- */
+const secs = (x) => SPOKEN['s' + x.n] ?? x.s;
+const total = SCENES.reduce((s, x) => s + secs(x), 0);
+document.getElementById('timeline').innerHTML = SCENES.map(x =>
+    '<i class="' + (x.core ? 'core' : x.cut ? 'cut' : '') + '" data-n="' + x.n + '"' +
+    ' style="flex:0 0 ' + (secs(x) / total * 100).toFixed(3) + '%"' +
+    ' title="Szene ' + x.n + ' · ' + secs(x).toFixed(1) + ' s"></i>').join('');
+
+/* --- budget --- */
+(function () {
+    const spoken = Object.values(SPOKEN).reduce((a, b) => a + b, 0);
+    const planned = SCENES.reduce((a, x) => a + x.s, 0);
+    const air = SCENES.length * 1.6;
+    const FILM_ACTUAL = 227.5;  // the finished cut, not a sum of parts
+    const film = FILM_ACTUAL || (spoken || planned) + air;
+    const mmss = (t) => Math.floor(t / 60) + ':' + String(Math.round(t % 60)).padStart(2, '0');
+    const cell = (dt, dd, sub) => '<div><dt>' + dt + '</dt><dd>' + dd + '<small>' + sub + '</small></dd></div>';
+    document.getElementById('budget').innerHTML =
+        cell('Sprache', (spoken || planned).toFixed(0) + ' s',
+             spoken ? 'gemessen · 10 Szenen' : 'geplant · 10 Szenen') +
+        cell('Luft', '~' + air.toFixed(0) + ' s', '1,6 s je Szene') +
+        cell('Film', mmss(film), FILM_ACTUAL ? 'fertig geschnitten' : spoken ? 'nach der Vertonung' : 'geschätzt') +
+        cell('Bett-Loop', '142,778 s', '64 Takte · 107,58 BPM');
+    if (spoken) {
+        const n = document.getElementById('tl-note');
+        if (n) n.textContent = 'Breite = gemessene Sprechzeit';
+    }
+})();
+
+/* --- scene cards --- */
+document.getElementById('scenes').innerHTML = SCENES.map(x =>
+    '<article class="scene ' + (x.core ? 'core' : x.cut ? 'cut' : '') + '">' +
+        '<div class="idx">' + String(x.n).padStart(2, '0') + '</div>' +
+        '<div>' +
+            '<div class="top">' +
+                '<h3>' + x.t + '</h3>' +
+                (x.core ? '<span class="tag core">Kernszene</span>' : '') +
+                (x.cut ? '<span class="tag cut">Notbremse</span>' : '') +
+                (x.card ? '<span class="tag card">Karte</span>' : '') +
+                '<span class="secs">' + secs(x).toFixed(1) + ' s</span>' +
+            '</div>' +
+            '<div class="body">' +
+                '<div><h4>Was im Bild passiert</h4><p>' + x.img + '</p></div>' +
+                '<div class="aha"><h4>Der Aha</h4><p>' + x.aha + '</p></div>' +
+            '</div>' +
+            (SAY['s' + x.n] ? '<div class="say"><h4>Solita sagt</h4><p>' + SAY['s' + x.n] + '</p></div>' : '') +
+        '</div>' +
+    '</article>').join('');
+
+/* ---------------------------------------------------------------
+   Measured on the running lab (videopipeline/linse/measure.mjs and
+   measure2.mjs): the lab's own Physics traced its own points.
+   [generation, ray error px, fitness, thickness px, bulge px]
+   --------------------------------------------------------------- */
+const CONV = [
+    [0, 104.14, 42.11, 167.0, 0.0],
+    [3, 100.17, 41.70, 167.1, 0.4],
+    [7, 88.74, 40.27, 167.8, 1.3],
+    [11, 75.42, 43.48, 167.2, 3.0],
+    [20, 38.95, 53.99, 171.9, 7.0],
+    [51, 5.12, 14.59, 174.3, 8.4],
+    [100, 0.50, 12.68, 179.3, 6.1],
+    [302, 0.00, 12.40, 179.3, 6.1],
+    [502, 5.13, 12.75, 82.0, 54.3],
+    [600, 0.03, 4.41, 68.3, 61.0],
+    [702, 0.00, 4.39, 68.3, 61.0],
+    [1001, 0.00, 4.39, 68.3, 61.0],
+    [2001, 0.00, 4.39, 68.3, 61.0]
+];
+/* refractive index -> what the finished lens looks like (2 runs each, 1500 rounds) */
+const NTAB = [[1.20, 6.748, 114.3], [1.60, 4.394, 68.3], [2.00, 3.931, 59.0]];
+
+(function () {
+    const SHOW = new Set([0, 20, 51, 100, 302, 502, 600, 702, 2001]);
+    const MARK = new Set([0, 100]);
+    const JUMP = new Set([502, 600]);
+    const de = (v, d) => v.toFixed(d).replace('.', ',');
+    let html =
+        '<caption>Vom Glasklotz zur Linse — gemessen am laufenden Labor</caption>' +
+        '<thead><tr><th>Runde</th><th>Strahlfehler</th><th>Bewertung</th>' +
+        '<th>Dicke</th><th>Wölbung</th></tr></thead><tbody>';
+    CONV.filter((r) => SHOW.has(r[0])).forEach((r) => {
+        html += '<tr class="' + (JUMP.has(r[0]) ? 'jump' : MARK.has(r[0]) ? 'mark' : '') + '">' +
+            '<td class="n">' + r[0] + '</td>' +
+            '<td>' + de(r[1], 2) + ' px</td>' +
+            '<td>' + de(r[2], 2) + '</td>' +
+            '<td>' + de(r[3], 1) + ' px</td>' +
+            '<td>' + de(r[4], 1) + ' px</td></tr>';
+    });
+    html += '</tbody>';
+    document.getElementById('tbl').innerHTML = html;
+})();
+
+/* --- the convergence plot: log error over the rounds --- */
+(function () {
+    const cv = document.getElementById('convplot');
+    if (!cv) return;
+    const ctx = cv.getContext('2d');
+    function draw() {
+        const r = cv.getBoundingClientRect();
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        cv.width = Math.max(1, Math.round(r.width * dpr));
+        cv.height = Math.max(1, Math.round(r.height * dpr));
+        const W = cv.width, H = cv.height, px = W / 760;
+        ctx.fillStyle = '#030c1c';
+        ctx.fillRect(0, 0, W, H);
+        const L = 74 * px, R = W - 18 * px, T = 22 * px, B = H - 54 * px;
+        const x0 = Math.log10(1), x1 = Math.log10(2000);
+        const y0 = Math.log10(0.01), y1 = Math.log10(200);
+        const X = (g) => L + (Math.log10(Math.max(1, g)) - x0) / (x1 - x0) * (R - L);
+        const Y = (e) => B - (Math.log10(Math.max(0.01, e)) - y0) / (y1 - y0) * (B - T);
+
+        ctx.strokeStyle = '#15294c'; ctx.lineWidth = 1 * px;
+        ctx.fillStyle = '#8199bd';
+        ctx.font = 400 + ' ' + (12 * px) + 'px Outfit, system-ui, sans-serif';
+        ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+        [0.01, 0.1, 1, 10, 100].forEach((v) => {
+            ctx.beginPath(); ctx.moveTo(L, Y(v)); ctx.lineTo(R, Y(v)); ctx.stroke();
+            ctx.fillText((v >= 1 ? v : String(v).replace('.', ',')) + ' px', L - 8 * px, Y(v));
+        });
+        ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+        [1, 10, 100, 1000].forEach((v) => {
+            ctx.beginPath(); ctx.moveTo(X(v), T); ctx.lineTo(X(v), B); ctx.stroke();
+            ctx.fillText(String(v), X(v), B + 8 * px);
+        });
+        ctx.fillText('Runde', (L + R) / 2, B + 30 * px);
+
+        /* the moment the optimiser changes its mind */
+        ctx.strokeStyle = 'rgba(173,255,47,.55)';
+        ctx.setLineDash([5 * px, 5 * px]);
+        ctx.beginPath(); ctx.moveTo(X(500), T); ctx.lineTo(X(500), B); ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillStyle = '#adff2f';
+        ctx.textAlign = 'left';
+        ctx.font = 500 + ' ' + (12 * px) + 'px Outfit, system-ui, sans-serif';
+        ctx.fillText('neue Bauform', X(500) + 7 * px, T + 4 * px);
+
+        /* the measured curve */
+        ctx.strokeStyle = '#ffcc00'; ctx.lineWidth = 2.2 * px;
+        ctx.lineJoin = 'round';
+        ctx.beginPath();
+        CONV.forEach((d, i) => { const fn = i ? 'lineTo' : 'moveTo'; ctx[fn](X(d[0]), Y(d[1])); });
+        ctx.stroke();
+        CONV.forEach((d) => {
+            ctx.fillStyle = d[1] < 0.02 ? '#00f2ff' : '#ffcc00';
+            ctx.beginPath(); ctx.arc(X(d[0]), Y(d[1]), 3.4 * px, 0, Math.PI * 2); ctx.fill();
+        });
+        ctx.fillStyle = '#8199bd';
+        ctx.font = 400 + ' ' + (12 * px) + 'px Outfit, system-ui, sans-serif';
+        ctx.textAlign = 'left';
+        ctx.fillText('blau = unter der Anzeigegrenze', L + 6 * px, B - 8 * px);
+    }
+    draw();
+    addEventListener('resize', draw, { passive: true });
+    document.fonts.ready.then(draw);
+})();
+
+/* ---------------------------------------------------------------
+   Hero: the film's own subject, really computed. Twelve parallel rays
+   meet a lens body and are refracted at both surfaces with Snell's law
+   (n = 1.6), exactly as the lab does it. Nothing is drawn to look right.
+   --------------------------------------------------------------- */
+(function () {
+    const cv = document.getElementById('stage');
+    if (!cv) return;
+    const ctx = cv.getContext('2d');
+    const N_GLASS = 1.6;
+
+    /* a lens as two circular arcs of radius R, half-height h, centre thickness d */
+    function surfaces(R, h, d) {
+        const front = [], back = [];
+        for (let i = 0; i <= 60; i++) {
+            const y = -h + (2 * h) * i / 60;
+            const bulge = R - Math.sqrt(Math.max(0, R * R - y * y));
+            front.push({ x: -d / 2 + bulge, y });
+            back.push({ x: d / 2 - bulge, y });
+        }
+        return { front, back };
+    }
+    /* segment hit, returning point and unit normal */
+    function hit(px, py, dx, dy, poly) {
+        let best = null;
+        for (let i = 0; i < poly.length - 1; i++) {
+            const a = poly[i], b = poly[i + 1];
+            const ex = b.x - a.x, ey = b.y - a.y;
+            const den = dx * ey - dy * ex;
+            if (Math.abs(den) < 1e-12) continue;
+            const t = ((a.x - px) * ey - (a.y - py) * ex) / den;
+            const u = ((a.x - px) * dy - (a.y - py) * dx) / den;
+            if (t > 1e-6 && u >= 0 && u <= 1 && (!best || t < best.t)) {
+                const len = Math.hypot(ex, ey);
+                best = { t, x: px + dx * t, y: py + dy * t, nx: -ey / len, ny: ex / len };
+            }
+        }
+        return best;
+    }
+    /* Snell, vector form */
+    function refract(dx, dy, nx, ny, n1, n2) {
+        let c = -(nx * dx + ny * dy);
+        if (c < 0) { nx = -nx; ny = -ny; c = -(nx * dx + ny * dy); }
+        const r = n1 / n2;
+        const k = 1 - r * r * (1 - c * c);
+        if (k < 0) return null;                       // total internal reflection
+        const s = Math.sqrt(k);
+        return { dx: r * dx + (r * c - s) * nx, dy: r * dy + (r * c - s) * ny };
+    }
+
+    const H = 150, D = 60, R = 330;
+    const { front, back } = surfaces(R, H, D);
+    let t = 0;
+
+    function frame() {
+        const r = cv.getBoundingClientRect();
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        cv.width = Math.max(1, Math.round(r.width * dpr));
+        cv.height = Math.max(1, Math.round(r.height * dpr));
+        const W = cv.width, Hh = cv.height, px = W / 800;
+        const k = W / 620;
+        const ox = W * 0.30, oy = Hh / 2;
+        const mx = (v) => ox + v * k, my = (v) => oy - v * k;
+
+        ctx.fillStyle = '#030c1c';
+        ctx.fillRect(0, 0, W, Hh);
+
+        /* the glass body */
+        ctx.beginPath();
+        front.forEach((p, i) => { const fn = i ? 'lineTo' : 'moveTo'; ctx[fn](mx(p.x), my(p.y)); });
+        for (let i = back.length - 1; i >= 0; i--) ctx.lineTo(mx(back[i].x), my(back[i].y));
+        ctx.closePath();
+        ctx.fillStyle = 'rgba(0,242,255,0.15)';
+        ctx.fill();
+        ctx.strokeStyle = '#00f2ff';
+        ctx.lineWidth = 2 * px;
+        ctx.stroke();
+
+        /* twelve rays, traced for real */
+        const focus = [];
+        for (let i = 0; i < 12; i++) {
+            const y = -H * 0.92 + (2 * H * 0.92) * i / 11;
+            let dx = 1, dy = 0, cx = -400, cy = y;
+            const h1 = hit(cx, cy, dx, dy, front);
+            if (!h1) continue;
+            const r1 = refract(dx, dy, h1.nx, h1.ny, 1, N_GLASS);
+            if (!r1) continue;
+            const h2 = hit(h1.x, h1.y, r1.dx, r1.dy, back);
+            if (!h2) continue;
+            const r2 = refract(r1.dx, r1.dy, h2.nx, h2.ny, N_GLASS, 1);
+            if (!r2) continue;
+
+            ctx.strokeStyle = 'rgba(255,204,0,0.75)';
+            ctx.lineWidth = 1.5 * px;
+            ctx.beginPath(); ctx.moveTo(mx(cx), my(cy)); ctx.lineTo(mx(h1.x), my(h1.y)); ctx.stroke();
+            ctx.strokeStyle = 'rgba(0,242,255,0.9)';
+            ctx.beginPath(); ctx.moveTo(mx(h1.x), my(h1.y)); ctx.lineTo(mx(h2.x), my(h2.y)); ctx.stroke();
+            ctx.strokeStyle = 'rgba(255,204,0,0.85)';
+            ctx.beginPath();
+            ctx.moveTo(mx(h2.x), my(h2.y));
+            ctx.lineTo(mx(h2.x + r2.dx * 900), my(h2.y + r2.dy * 900));
+            ctx.stroke();
+
+            if (Math.abs(r2.dy) > 1e-9) focus.push(h2.x - h2.y * (r2.dx / r2.dy));
+        }
+
+        /* where the rays actually meet - measured from the traced rays, not assumed */
+        if (focus.length) {
+            const fx = focus.reduce((a, b) => a + b, 0) / focus.length;
+            ctx.strokeStyle = '#ffcc00';
+            ctx.lineWidth = 1.6 * px;
+            ctx.beginPath(); ctx.arc(mx(fx), my(0), 8 * px, 0, Math.PI * 2); ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(mx(fx) - 13 * px, my(0)); ctx.lineTo(mx(fx) + 13 * px, my(0));
+            ctx.moveTo(mx(fx), my(0) - 13 * px); ctx.lineTo(mx(fx), my(0) + 13 * px);
+            ctx.stroke();
+            const spread = Math.max(...focus) - Math.min(...focus);
+            ctx.fillStyle = '#8199bd';
+            ctx.font = 400 + ' ' + (13 * px) + 'px Outfit, system-ui, sans-serif';
+            ctx.textAlign = 'left'; ctx.textBaseline = 'bottom';
+            ctx.fillText('12 Strahlen · n = 1,6 · echt gebrochen', 14 * px, Hh - 12 * px);
+        }
+        t += 1;
+    }
+    frame();
+    addEventListener('resize', frame, { passive: true });
+    document.fonts.ready.then(frame);
+})();
+</script>
+</body>
+</html>

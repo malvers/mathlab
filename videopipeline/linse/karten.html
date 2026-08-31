@@ -1,0 +1,496 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Linse — Einspieler</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&family=Outfit:wght@300;400;500&display=swap">
+<style>
+  html, body { margin: 0; padding: 0; background: #030c1c; overflow: hidden; }
+  canvas { display: block; }
+</style>
+</head>
+<body>
+<canvas id="c" width="1280" height="720"></canvas>
+<script src="shapes.js"></script>
+<script>
+/* Linse — the four scenes the lab itself cannot show.
+   One page, one scene per ?scene=sN, paced to ?dur=<seconds>.
+
+   Everything here is really computed. The lens outlines in s2 and s10 are the
+   lab's OWN points, pulled out of a live run by dump-shapes.mjs, and the rays are
+   re-traced here with Snell's law. The cloud in s3 is a real (small) CMA-ES: it
+   samples, ranks, recombines and updates its covariance every frame. The two bars
+   in s7 are the exactly verified split of the lab's own fitness. */
+const P = new URLSearchParams(location.search);
+const SCENE = P.get('scene') || 's2';
+const DUR = parseFloat(P.get('dur') || '18');
+
+const c = document.getElementById('c');
+const g = c.getContext('2d');
+const W = c.width, H = c.height;
+
+/* ---- the lab's palette ---- */
+const COL = {
+  ground: '#030c1c', panel: '#0b1a34', panel2: '#102a4d', edge: '#1b3560', edgeSoft: '#14274a',
+  ink: '#e4edfa', dim: '#b0c3dd', faint: '#8199bd',
+  glass: '#00f2ff', light: '#ffcc00', point: '#ff3344', lime: '#adff2f', red: '#d4463a',
+};
+
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+const ease = (u) => u < 0.5 ? 2 * u * u : 1 - Math.pow(-2 * u + 2, 2) / 2;
+const seg = (u, a, b) => clamp((u - a) / (b - a), 0, 1);
+const lerp = (a, b, u) => a + (b - a) * u;
+const hexA = (hex, a) => {
+  const n = parseInt(hex.slice(1), 16);
+  return 'rgba(' + (n >> 16 & 255) + ',' + (n >> 8 & 255) + ',' + (n & 255) + ',' + a + ')';
+};
+function orb(size, weight) { g.font = (weight || 500) + ' ' + size + 'px Orbitron, sans-serif'; }
+function out(size, weight) { g.font = (weight || 300) + ' ' + size + 'px Outfit, sans-serif'; }
+function mono(size) { g.font = '500 ' + size + 'px ui-monospace, "SF Mono", Menlo, monospace'; }
+function txt(s, x, y, col, align, base) {
+  g.fillStyle = col; g.textAlign = align || 'left'; g.textBaseline = base || 'alphabetic';
+  g.fillText(s, x, y);
+}
+function roundRect(x, y, w, h, r) {
+  g.beginPath();
+  if (g.roundRect) g.roundRect(x, y, w, h, r); else g.rect(x, y, w, h);
+}
+function eyebrow(s) {
+  orb(19, 500);
+  g.letterSpacing = '5px';
+  txt(s, 64, 74, COL.glass);
+  g.letterSpacing = '0px';
+}
+function lede(s, x, y, size, col, alpha, align) {
+  g.globalAlpha = alpha;
+  out(size, 300);
+  txt(s, x, y, col, align || 'left');
+  g.globalAlpha = 1;
+}
+/* the lab stage: the same deep radial blue */
+function backdrop() {
+  const grad = g.createRadialGradient(W / 2, H / 2, 0, W / 2, H / 2, W * 0.75);
+  grad.addColorStop(0, 'rgb(5,25,55)');
+  grad.addColorStop(1, 'rgb(2,10,25)');
+  g.fillStyle = grad;
+  g.fillRect(0, 0, W, H);
+}
+
+/* =====================================================================
+   s2 — what does "good" mean?
+   The lab's own lens after twenty rounds, its own rays re-traced, and the
+   twelve distances that make up the one number.
+   ===================================================================== */
+function s2(u) {
+  backdrop();
+  eyebrow('EINE ZAHL, MEHR NICHT');
+
+  const S = SHAPES.g20;
+  /* fit the lab's pixel world into this card */
+  const k = 0.62, ox = 40, oy = 40;
+  const mx = (x) => ox + x * k, my = (y) => oy + y * k;
+  const fx = mx(S.focus.x), fy = my(S.focus.y);
+
+  /* the lens body */
+  g.beginPath();
+  S.points.forEach((p, i) => { const fn = i ? 'lineTo' : 'moveTo'; g[fn](mx(p.x), my(p.y)); });
+  g.closePath();
+  g.fillStyle = 'rgba(0,242,255,0.15)'; g.fill();
+  g.strokeStyle = COL.glass; g.lineWidth = 2; g.stroke();
+
+  /* the rays, and where each one crosses the focus plane */
+  const ys = [];
+  S.rays.forEach((r) => {
+    const t = (S.focus.x - r.exit.x) / r.dir.x;
+    ys.push(r.exit.y + t * r.dir.y);
+  });
+
+  const rayA = ease(seg(u, 0.02, 0.24));
+  S.rays.forEach((r, i) => {
+    if (i / S.rays.length > rayA * 1.15) return;
+    g.strokeStyle = hexA(COL.light, 0.75); g.lineWidth = 1.5;
+    g.beginPath(); g.moveTo(mx(0), my(r.y0)); g.lineTo(mx(r.entry.x), my(r.entry.y)); g.stroke();
+    g.strokeStyle = hexA(COL.glass, 0.9);
+    g.beginPath(); g.moveTo(mx(r.entry.x), my(r.entry.y)); g.lineTo(mx(r.exit.x), my(r.exit.y)); g.stroke();
+    g.strokeStyle = hexA(COL.light, 0.85);
+    g.beginPath();
+    g.moveTo(mx(r.exit.x), my(r.exit.y));
+    g.lineTo(fx, my(ys[i]));
+    g.stroke();
+  });
+
+  /* the focus plane */
+  const planeA = seg(u, 0.22, 0.32);
+  if (planeA > 0) {
+    g.globalAlpha = planeA;
+    g.strokeStyle = hexA('#ffffff', 0.25); g.lineWidth = 1.5;
+    g.setLineDash([6, 7]);
+    g.beginPath(); g.moveTo(fx, my(60)); g.lineTo(fx, my(660)); g.stroke();
+    g.setLineDash([]);
+    g.globalAlpha = 1;
+  }
+
+  /* the twelve distances, one after another */
+  const dA = seg(u, 0.30, 0.62);
+  const shown = Math.round(ys.length * dA);
+  for (let i = 0; i < shown; i++) {
+    const y = my(ys[i]);
+    g.strokeStyle = COL.point; g.lineWidth = 3;
+    g.beginPath(); g.moveTo(fx, fy); g.lineTo(fx, y); g.stroke();
+    g.fillStyle = COL.point;
+    g.beginPath(); g.arc(fx, y, 3.2, 0, Math.PI * 2); g.fill();
+  }
+
+  /* the focus cross */
+  g.strokeStyle = COL.light; g.lineWidth = 2;
+  g.beginPath(); g.arc(fx, fy, 8, 0, Math.PI * 2); g.stroke();
+  g.beginPath();
+  g.moveTo(fx - 13, fy); g.lineTo(fx + 13, fy);
+  g.moveTo(fx, fy - 13); g.lineTo(fx, fy + 13);
+  g.stroke();
+
+  /* and the arithmetic that turns twelve numbers into one */
+  const calcA = seg(u, 0.60, 0.74);
+  if (calcA > 0) {
+    g.globalAlpha = calcA;
+    const bx = 700, by = 470;
+    g.fillStyle = hexA(COL.panel, 0.94);
+    roundRect(bx, by, 520, 190, 6); g.fill();
+    g.strokeStyle = hexA(COL.edge, 1); g.lineWidth = 1;
+    roundRect(bx, by, 520, 190, 6); g.stroke();
+    orb(15, 500); g.letterSpacing = '2px';
+    txt('DIE BEWERTUNG', bx + 26, by + 34, COL.faint);
+    g.letterSpacing = '0px';
+    out(26, 300);
+    txt('zwölf Abstände · quadrieren · mitteln · Wurzel', bx + 26, by + 76, COL.dim);
+    g.globalAlpha = 1;
+
+    const numA = seg(u, 0.72, 0.84);
+    if (numA > 0) {
+      g.globalAlpha = numA;
+      const rms = Math.sqrt(ys.reduce((a, y) => a + (y - S.focus.y) * (y - S.focus.y), 0) / ys.length);
+      orb(Math.round(lerp(44, 58, ease(numA))), 700);
+      txt(rms.toFixed(1).replace('.', ',') + ' px', bx + 26, by + 148, COL.light);
+      out(22, 300);
+      txt('bei 362 px Linsenhöhe', bx + 300, by + 148, COL.faint);
+      g.globalAlpha = 1;
+    }
+  }
+
+  const endA = seg(u, 0.86, 0.96);
+  if (endA > 0) lede('Kein Modell einer Linse. Nur ein Maßband.', 64, 668, 30, COL.ink, endA);
+}
+
+/* =====================================================================
+   s3 — twenty proposals per round
+   A real CMA-ES in two dimensions: sample, rank, recombine, and update the
+   covariance. The ellipse is drawn from the actual matrix, not sketched.
+   ===================================================================== */
+const ES = (function () {
+  /* objective: a narrow bent valley - the classic reason a round cloud is a bad idea */
+  const f = (x, y) => {
+    const a = 1 - x, b = y - x * x;
+    return a * a + 18 * b * b;
+  };
+  const LAMBDA = 20, MU = 10;
+  const wts = [];
+  for (let i = 0; i < MU; i++) wts.push(Math.log(MU + 0.5) - Math.log(i + 1));
+  const wsum = wts.reduce((a, b) => a + b, 0);
+  for (let i = 0; i < MU; i++) wts[i] /= wsum;
+
+  let m, C, sigma, samples, gen;
+  function reset() {
+    m = [-1.1, 1.6];
+    C = [[1, 0], [0, 1]];
+    sigma = 0.7;
+    samples = [];
+    gen = 0;
+  }
+  /* Cholesky of a 2x2 SPD matrix */
+  function chol(M) {
+    const l11 = Math.sqrt(Math.max(1e-12, M[0][0]));
+    const l21 = M[1][0] / l11;
+    const l22 = Math.sqrt(Math.max(1e-12, M[1][1] - l21 * l21));
+    return [[l11, 0], [l21, l22]];
+  }
+  let spare = null;
+  function gauss() {
+    if (spare !== null) { const s = spare; spare = null; return s; }
+    let u1 = 0, u2 = 0;
+    while (u1 === 0) u1 = Math.random();
+    u2 = Math.random();
+    const r = Math.sqrt(-2 * Math.log(u1));
+    spare = r * Math.sin(2 * Math.PI * u2);
+    return r * Math.cos(2 * Math.PI * u2);
+  }
+  function step() {
+    const L = chol(C);
+    samples = [];
+    for (let i = 0; i < LAMBDA; i++) {
+      const z = [gauss(), gauss()];
+      const d = [L[0][0] * z[0], L[1][0] * z[0] + L[1][1] * z[1]];
+      const x = [m[0] + sigma * d[0], m[1] + sigma * d[1]];
+      samples.push({ x, d, f: f(x[0], x[1]) });
+    }
+    samples.sort((a, b) => a.f - b.f);
+    const best = samples.slice(0, MU);
+    const mNew = [0, 0], dMean = [0, 0];
+    best.forEach((s, i) => {
+      mNew[0] += wts[i] * s.x[0]; mNew[1] += wts[i] * s.x[1];
+      dMean[0] += wts[i] * s.d[0]; dMean[1] += wts[i] * s.d[1];
+    });
+    /* rank-mu update: pull the cloud into the directions that just paid off */
+    const cmu = 0.16;
+    const Cn = [[0, 0], [0, 0]];
+    best.forEach((s, i) => {
+      Cn[0][0] += wts[i] * s.d[0] * s.d[0];
+      Cn[0][1] += wts[i] * s.d[0] * s.d[1];
+      Cn[1][0] += wts[i] * s.d[1] * s.d[0];
+      Cn[1][1] += wts[i] * s.d[1] * s.d[1];
+    });
+    for (let i = 0; i < 2; i++) for (let j = 0; j < 2; j++) C[i][j] = (1 - cmu) * C[i][j] + cmu * Cn[i][j];
+    const step2 = Math.hypot(dMean[0], dMean[1]);
+    // deliberately slow: the point of the card is that the cloud is WATCHABLE
+    sigma *= Math.exp(0.10 * (step2 * Math.sqrt(MU) - 0.9));
+    sigma = clamp(sigma, 0.05, 1.4);
+    m = mNew;
+    gen++;
+  }
+  reset();
+  return {
+    reset, step, f,
+    get m() { return m; }, get C() { return C; }, get sigma() { return sigma; },
+    get samples() { return samples; }, get gen() { return gen; },
+  };
+})();
+
+let s3Last = -1;
+function s3(u) {
+  backdrop();
+  eyebrow('ZWANZIG VORSCHLÄGE PRO RUNDE');
+
+  /* one real generation every 0.42 s, so each one is readable */
+  const want = Math.floor(u * DUR / 0.60);
+  if (want !== s3Last) {
+    if (want < s3Last) ES.reset();
+    while (ES.gen < want) ES.step();
+    s3Last = want;
+  }
+
+  const ox = 470, oy = 400, k = 150;
+  const mx = (x) => ox + x * k, my = (y) => oy - y * k;
+
+  /* the landscape, drawn from the same f the optimiser is minimising */
+  for (let px = 0; px < 760; px += 8) {
+    for (let py = 0; py < 560; py += 8) {
+      const x = (px + 60 - ox) / k, y = -(py + 90 - oy) / k;
+      const v = Math.log10(1 + ES.f(x, y));
+      const a = clamp(0.30 - v * 0.075, 0, 0.30);
+      if (a <= 0.006) continue;
+      g.fillStyle = 'rgba(0,242,255,' + a.toFixed(3) + ')';
+      g.fillRect(px + 60, py + 90, 8, 8);
+    }
+  }
+
+  /* the cloud the covariance actually describes */
+  const C = ES.C, s = ES.sigma;
+  const tr = C[0][0] + C[1][1], det = C[0][0] * C[1][1] - C[0][1] * C[1][0];
+  const disc = Math.sqrt(Math.max(0, tr * tr / 4 - det));
+  const l1 = tr / 2 + disc, l2 = tr / 2 - disc;
+  let ang = 0.5 * Math.atan2(2 * C[0][1], C[0][0] - C[1][1]);
+  g.save();
+  g.translate(mx(ES.m[0]), my(ES.m[1]));
+  g.rotate(-ang);
+  g.strokeStyle = hexA(COL.lime, 0.8); g.lineWidth = 2;
+  g.beginPath();
+  g.ellipse(0, 0, Math.sqrt(Math.max(1e-9, l1)) * s * k, Math.sqrt(Math.max(1e-9, l2)) * s * k, 0, 0, Math.PI * 2);
+  g.stroke();
+  g.restore();
+
+  /* the twenty proposals: the ten kept ones bright, the rest faded */
+  ES.samples.forEach((sm, i) => {
+    const keep = i < 10;
+    g.fillStyle = keep ? COL.light : hexA(COL.point, 0.55);
+    g.beginPath(); g.arc(mx(sm.x[0]), my(sm.x[1]), keep ? 5 : 3.4, 0, Math.PI * 2); g.fill();
+  });
+  g.fillStyle = COL.glass;
+  g.beginPath(); g.arc(mx(ES.m[0]), my(ES.m[1]), 6.5, 0, Math.PI * 2); g.fill();
+
+  /* the target of this toy problem */
+  g.strokeStyle = hexA('#ffffff', 0.35); g.lineWidth = 1.5;
+  g.beginPath();
+  g.moveTo(mx(1) - 9, my(1)); g.lineTo(mx(1) + 9, my(1));
+  g.moveTo(mx(1), my(1) - 9); g.lineTo(mx(1), my(1) + 9);
+  g.stroke();
+
+  /* the readout */
+  g.fillStyle = hexA(COL.panel, 0.92);
+  roundRect(64, 452, 336, 200, 6); g.fill();
+  g.strokeStyle = hexA(COL.edge, 1); g.lineWidth = 1;
+  roundRect(64, 452, 336, 200, 6); g.stroke();
+  const row = (label, val, col, y) => {
+    orb(14, 500); g.letterSpacing = '2px';
+    txt(label, 90, y, COL.faint);
+    g.letterSpacing = '0px';
+    orb(28, 700);
+    txt(val, 376, y + 4, col, 'right');
+  };
+  row('RUNDE', String(ES.gen), COL.glass, 488);
+  row('BEWERTUNG', ES.samples.length ? ES.samples[0].f.toFixed(4).replace('.', ',') : '—', COL.light, 550);
+  row('SUCHWEITE', ES.sigma.toFixed(3).replace('.', ','), COL.lime, 612);
+
+  const endA = seg(u, 0.72, 0.86);
+  if (endA > 0) {
+    lede('Die Wolke lernt ihre eigene Form —', 64, 200, 30, COL.ink, endA);
+    lede('lang in die Richtung, die etwas gebracht hat.', 64, 240, 30, COL.ink, endA);
+  }
+}
+
+/* =====================================================================
+   s7 — first sharp, then thrifty
+   The lab's own fitness, split into its two parts. The split is exact: at
+   round 0 the focus term is 104.14/sqrt(12) = 30.06 and the glass term is
+   0.25 * 48.209 = 12.05, and 30.06 + 12.05 = 42.11 — the fitness the lab
+   printed. Nothing here is apportioned by eye.
+   ===================================================================== */
+const SPLIT = [
+  { gen: 0, focus: 30.06, glass: 12.05, label: 'Der Klotz' },
+  { gen: 300, focus: 0.00, glass: 12.40, label: 'Scharf' },
+  { gen: 700, focus: 0.00, glass: 4.39, label: 'Scharf und sparsam' },
+];
+function s7(u) {
+  backdrop();
+  eyebrow('MAN BEKOMMT, WAS MAN MISST');
+
+  const bx = 150, by = 612, bw = 200, gap = 160, scale = 9.0;
+  SPLIT.forEach((s, i) => {
+    const a = ease(seg(u, 0.06 + i * 0.20, 0.26 + i * 0.20));
+    if (a <= 0) return;
+    const x = bx + i * (bw + gap);
+    const hF = s.focus * scale * a, hG = s.glass * scale * a;
+
+    /* glass term at the bottom, focus term stacked on top */
+    g.fillStyle = hexA(COL.glass, 0.55);
+    g.fillRect(x, by - hG, bw, hG);
+    g.strokeStyle = COL.glass; g.lineWidth = 1.5;
+    g.strokeRect(x, by - hG, bw, hG);
+
+    g.fillStyle = hexA(COL.light, 0.5);
+    g.fillRect(x, by - hG - hF, bw, hF);
+    g.strokeStyle = COL.light;
+    g.strokeRect(x, by - hG - hF, bw, hF);
+
+    g.globalAlpha = a;
+    orb(17, 500); g.letterSpacing = '2px';
+    txt('RUNDE ' + s.gen, x, by + 32, COL.faint);
+    g.letterSpacing = '0px';
+    out(25, 300);
+    txt(s.label, x, by + 64, COL.dim);
+    orb(28, 700);
+    txt((s.focus + s.glass).toFixed(2).replace('.', ','), x + bw, by - hG - hF - 18, COL.ink, 'right');
+    g.globalAlpha = 1;
+  });
+
+  /* what the two colours mean */
+  const legA = seg(u, 0.10, 0.22);
+  if (legA > 0) {
+    g.globalAlpha = legA;
+    g.fillStyle = hexA(COL.light, 0.5); g.fillRect(64, 118, 24, 24);
+    g.strokeStyle = COL.light; g.lineWidth = 1.5; g.strokeRect(64, 118, 24, 24);
+    out(26, 300); txt('wie weit die Strahlen danebengehen', 100, 139, COL.ink);
+    g.fillStyle = hexA(COL.glass, 0.55); g.fillRect(64, 160, 24, 24);
+    g.strokeStyle = COL.glass; g.strokeRect(64, 160, 24, 24);
+    out(26, 300); txt('wie weit das Licht durchs Glas läuft', 100, 181, COL.ink);
+    g.globalAlpha = 1;
+  }
+
+  const endA = seg(u, 0.76, 0.90);
+  if (endA > 0) {
+    lede('Der gelbe Posten verschwindet.', 700, 300, 30, COL.ink, endA);
+    lede('Übrig bleibt der blaue, der die ganze', 700, 340, 30, COL.ink, endA);
+    lede('Zeit nur danebenstand.', 700, 380, 30, COL.ink, endA);
+  }
+}
+
+/* =====================================================================
+   s10 — nobody showed it a lens
+   The three real outlines from the run, and the list of what the program
+   does not contain.
+   ===================================================================== */
+const ABSENT = ['keine Brennweitenformel', 'kein Linsenschliff', 'keine Optik-Tabelle',
+                'kein Wissen über Glas', 'kein einziges Beispiel'];
+function s10(u) {
+  backdrop();
+  eyebrow('WAS NICHT IM PROGRAMM STEHT');
+
+  const shots = [
+    { S: SHAPES.g0, cap: 'Runde 0', sub: 'ein Klotz' },
+    { S: SHAPES.g100, cap: 'Runde 100', sub: 'scharf' },
+    { S: SHAPES.g600, cap: 'Runde 600', sub: 'scharf und sparsam' },
+  ];
+  shots.forEach((sh, i) => {
+    const a = ease(seg(u, 0.04 + i * 0.13, 0.24 + i * 0.13));
+    if (a <= 0) return;
+    const cx = 250 + i * 390, cy = 300;
+    const S = sh.S;
+    const k = 0.62;
+    /* centre each outline on its own body, so the three are comparable */
+    let minX = 1e9, maxX = -1e9;
+    S.points.forEach((p) => { minX = Math.min(minX, p.x); maxX = Math.max(maxX, p.x); });
+    const bcx = (minX + maxX) / 2, bcy = S.offsetY + S.perimeter / 2;
+    const mx = (x) => cx + (x - bcx) * k, my = (y) => cy + (y - bcy) * k;
+
+    g.globalAlpha = a;
+    g.beginPath();
+    S.points.forEach((p, j) => { const fn = j ? 'lineTo' : 'moveTo'; g[fn](mx(p.x), my(p.y)); });
+    g.closePath();
+    g.fillStyle = 'rgba(0,242,255,0.15)'; g.fill();
+    g.strokeStyle = COL.glass; g.lineWidth = 2; g.stroke();
+    S.points.forEach((p) => {
+      g.fillStyle = COL.point;
+      g.beginPath(); g.arc(mx(p.x), my(p.y), 2.6, 0, Math.PI * 2); g.fill();
+    });
+    orb(20, 500); g.letterSpacing = '2px';
+    txt(sh.cap, cx, 448, COL.light, 'center');
+    g.letterSpacing = '0px';
+    out(24, 300);
+    txt(sh.sub, cx, 482, COL.dim, 'center');
+    g.globalAlpha = 1;
+  });
+
+  ABSENT.forEach((s, i) => {
+    const a = seg(u, 0.46 + i * 0.075, 0.56 + i * 0.075);
+    if (a <= 0) return;
+    g.globalAlpha = a;
+    out(28, 300);
+    txt('—  ' + s, 150, 556 + i * 34, COL.dim);
+    g.globalAlpha = 1;
+  });
+
+  const endA = seg(u, 0.86, 0.96);
+  if (endA > 0) {
+    g.globalAlpha = endA;
+    orb(30, 700);
+    txt('EINE FORM ÄNDERN. MESSEN, WIE WEIT DANEBEN.', 1216, 690, COL.lime, 'right');
+    g.globalAlpha = 1;
+  }
+}
+
+/* --------------------------------------------------------------------- driver */
+const SCENES = { s2, s3, s7, s10 };
+let t0 = null;
+function frame(now) {
+  if (t0 === null) t0 = now;
+  const u = clamp((now - t0) / (DUR * 1000), 0, 1);
+  (SCENES[SCENE] || s2)(u);
+  if (u < 1) requestAnimationFrame(frame);
+}
+document.fonts.ready.then(() => {
+  window.__vpReady = true;
+  requestAnimationFrame(frame);
+});
+</script>
+</body>
+</html>
