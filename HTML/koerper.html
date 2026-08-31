@@ -54,6 +54,7 @@
         .k-tight.k-tight .cyber-control-group input[type="range"] { min-height: 18px !important; padding: 3px 0 !important; margin: 0 !important; }
         .k-tight .control-header { margin-bottom: 0; }
         .k-prec { margin-top: 8px; }
+        .k-prec-top { margin-top: 0; margin-bottom: 10px; }
         #k-formpanel {
             position: absolute; bottom: 12px; right: 12px; width: max-content; min-width: 260px; max-width: min(46vw, 560px); z-index: 5;
             max-height: 48%; overflow-y: auto; scrollbar-width: none;
@@ -355,7 +356,8 @@
             CyberUI.createCard(sb, 'Parameter', `<div id="par-${tab}" class="k-tight"></div>`, COL.blue);
             opts.params(`par-${tab}`);
 
-            CyberUI.createCard(sb, 'Werte', `<div id="stats-${tab}"></div><div id="legend-${tab}" class="k-legend"></div><div id="prec-${tab}" class="k-prec"></div>`, COL.orange);
+            // decimals dropdown sits at the top of the card, above the values (Doc, 31.08.2026)
+            CyberUI.createCard(sb, 'Werte', `<div id="prec-${tab}" class="k-prec k-prec-top"></div><div id="stats-${tab}"></div><div id="legend-${tab}" class="k-legend"></div>`, COL.orange);
             const precOpts = Array.from({ length: 11 }, (_, i) => ({ id: String(i), label: i + ' Nachkommastellen' }));
             CyberUI.createDropdown(`prec-${tab}`, precOpts, id => { S.prec = +id; persist(); refreshNumbers(); }, String(S.prec));
         }
