@@ -1,0 +1,703 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+
+<style>
+/* minimal reset - the artifact host used to provide this */
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; min-height: 100vh; }
+img, canvas, svg { display: block; max-width: 100%; }
+button, input { font: inherit; }
+:focus-visible { outline: 2px solid #00d2ff; outline-offset: 2px; }
+</style>
+<title>Die Zahl, die im Rand wohnt</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&family=Outfit:wght@200;300;400;600&display=swap">
+
+<style>
+/* Palette and faces are the lab's own (mandelbrot.html): Orbitron + Outfit on the
+   near-black stage, cyan for the interface, and the escape-time ramp of the fractal
+   itself - deep violet through orange to white at the boundary. Single-theme on
+   purpose: this is the lab's world. */
+:root {
+    --ground:      #04060f;
+    --ground-deep: #01030a;
+    --surface:     #0b1224;
+    --surface-2:   #131c38;
+    --line:        #22305c;
+    --line-soft:   #17203f;
+
+    --ink:         #e6ebfa;
+    --ink-dim:     #b2bdda;
+    --ink-faint:   #8290b6;
+
+    --cyan:        #00d2ff;
+    --violet:      #7b5cff;
+    --magenta:     #d94fd0;
+    --amber:       #ffab2e;
+    --white:       #fff4e2;
+    --lime:        #adff2f;
+    --red:         #b02418;
+}
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    background: var(--ground);
+    background-image:
+        radial-gradient(1100px 640px at 20% -10%, #171238 0%, transparent 62%),
+        radial-gradient(900px 520px at 88% 6%, #0b1c3a 0%, transparent 58%);
+    background-attachment: fixed;
+    color: var(--ink);
+    font-family: 'Outfit', system-ui, sans-serif;
+    font-weight: 300;
+    font-size: 1.1rem;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+}
+
+.wrap { max-width: 1120px; margin: 0 auto; padding: clamp(1.6rem, 4vw, 4rem) clamp(1.1rem, 4vw, 2.6rem) 6rem; }
+
+.eyebrow {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.8rem; font-weight: 500; letter-spacing: 0.2em;
+    text-transform: uppercase; color: var(--ink-faint);
+}
+h1, h2, h3 { font-family: 'Orbitron', sans-serif; text-wrap: balance; margin: 0; }
+h1 {
+    font-size: clamp(2rem, 1.2rem + 3.4vw, 3.4rem);
+    font-weight: 700; line-height: 1.08; letter-spacing: -0.01em; margin: 0.5rem 0 0;
+}
+h2 { font-size: clamp(1.05rem, 0.9rem + 0.6vw, 1.32rem); font-weight: 700; letter-spacing: 0.03em; color: var(--ink); }
+p { margin: 0; }
+em { font-style: italic; color: #eef2fd; }
+strong { font-weight: 600; color: #f4f7ff; }
+
+.m { font-family: 'Outfit', system-ui, sans-serif; font-style: italic; font-weight: 400; color: var(--amber); white-space: nowrap; }
+.m.c { color: var(--cyan); }
+
+kbd {
+    font-family: 'Orbitron', sans-serif; font-size: 0.76em; font-weight: 500;
+    color: var(--amber); background: #241a06; border: 1px solid #4a3712;
+    border-radius: 2px; padding: 0.08em 0.4em; white-space: nowrap;
+}
+
+header { margin-bottom: clamp(1.8rem, 4vw, 3rem); }
+.status {
+    display: inline-flex; align-items: center; gap: 0.55rem;
+    font-family: 'Orbitron', sans-serif; font-size: 0.74rem; font-weight: 500;
+    letter-spacing: 0.16em; text-transform: uppercase; color: var(--amber);
+    border: 1px solid #4a3712; background: #1c1406; border-radius: 2px;
+    padding: 0.34rem 0.7rem; margin-top: 1.1rem;
+}
+.status::before { content: ""; width: 5px; height: 5px; background: var(--amber); border-radius: 50%; }
+
+.lede { margin-top: 1.1rem; max-width: 60ch; color: var(--ink-dim); font-size: 1.18rem; }
+
+.meta { display: flex; flex-wrap: wrap; gap: 0 2rem; margin-top: 1.6rem; padding-top: 1.2rem; border-top: 1px solid var(--line-soft); }
+.meta div { display: flex; flex-direction: column; gap: 0.15rem; padding: 0.4rem 0; }
+.meta dt { font-family: 'Orbitron', sans-serif; font-size: 0.74rem; font-weight: 500; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-faint); }
+.meta dd { margin: 0; font-size: 1.02rem; color: var(--ink); }
+.meta a { color: var(--cyan); text-decoration: none; border-bottom: 1px solid #05506b; }
+.meta a:hover, .meta a:focus-visible { border-bottom-color: var(--cyan); }
+
+.thesis {
+    display: grid; grid-template-columns: minmax(0, 340px) minmax(0, 1fr);
+    gap: clamp(1.2rem, 3vw, 2.6rem); align-items: center;
+    margin: clamp(1.6rem, 4vw, 2.6rem) 0 clamp(2.4rem, 6vw, 4rem);
+    padding: clamp(1.2rem, 3vw, 2rem);
+    background: linear-gradient(160deg, var(--surface) 0%, var(--ground-deep) 100%);
+    border: 1px solid var(--line); border-radius: 3px;
+}
+@media (max-width: 700px) { .thesis { grid-template-columns: 1fr; } }
+#stage { width: 100%; aspect-ratio: 1 / 1; display: block; border-radius: 2px; background: #01030a; }
+
+.thesis blockquote { margin: 0; font-size: clamp(1.15rem, 0.95rem + 1vw, 1.6rem); line-height: 1.42; font-weight: 200; color: #eff3fd; text-wrap: balance; }
+.thesis blockquote strong { font-weight: 600; }
+.thesis .after { margin-top: 1.1rem; color: var(--ink-dim); font-size: 1.06rem; max-width: 54ch; }
+
+section { margin-top: clamp(2.6rem, 6vw, 4.4rem); }
+.head { display: flex; align-items: baseline; gap: 0.9rem; padding-bottom: 0.7rem; border-bottom: 1px solid var(--line); margin-bottom: 1.5rem; }
+.head .n { font-family: 'Orbitron', sans-serif; font-size: 0.84rem; font-weight: 700; letter-spacing: 0.12em; color: var(--cyan); }
+.head .note { margin-left: auto; font-size: 0.9rem; color: var(--ink-faint); }
+.prose { max-width: 66ch; color: var(--ink-dim); display: grid; gap: 0.85rem; }
+.prose strong { color: #eef2fd; }
+
+.arc { display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: stretch; margin-bottom: 1.5rem; }
+.arc span {
+    flex: 1 1 auto; min-width: 92px; font-family: 'Orbitron', sans-serif;
+    font-size: 0.76rem; font-weight: 500; letter-spacing: 0.05em; text-align: center;
+    padding: 0.85rem 0.5rem; background: var(--surface); border: 1px solid var(--line-soft);
+    border-top: 2px solid var(--stop, var(--line)); color: var(--ink-dim);
+    text-wrap: balance; line-height: 1.4;
+}
+.arc span.key { color: #eff3fd; background: var(--surface-2); }
+
+.timeline { display: flex; width: 100%; height: 54px; border: 1px solid var(--line); border-radius: 2px; overflow: hidden; margin-bottom: 0.7rem; }
+.timeline i { position: relative; display: block; border-right: 1px solid var(--ground-deep); background: var(--amber); font-style: normal; }
+.timeline i:last-child { border-right: 0; }
+.timeline i.core { background: var(--lime); }
+.timeline i.cut { background: var(--red); }
+.timeline i::after {
+    content: attr(data-n); position: absolute; inset: 0; display: grid; place-items: center;
+    font-family: 'Orbitron', sans-serif; font-size: 0.74rem; font-weight: 700; color: #1e1305;
+}
+.timeline i.core::after { color: #10200a; }
+.timeline i.cut::after { color: #ffdcd7; }
+
+.legend { display: flex; flex-wrap: wrap; gap: 0.5rem 1.4rem; font-size: 0.87rem; color: var(--ink-faint); }
+.legend b { font-weight: 400; color: var(--ink-dim); }
+.legend span { display: inline-flex; align-items: center; gap: 0.42rem; }
+.legend s { width: 11px; height: 11px; border-radius: 2px; text-decoration: none; display: inline-block; }
+
+.scenes { display: grid; gap: 0.7rem; }
+.scene {
+    display: grid; grid-template-columns: 3.6rem minmax(0, 1fr); gap: 0 1.1rem;
+    padding: 1.4rem 1.55rem 1.5rem; background: var(--surface);
+    border: 1px solid var(--line-soft); border-left: 2px solid var(--amber); border-radius: 2px;
+}
+.scene.core { border-left-color: var(--lime); background: linear-gradient(90deg, #16240f 0%, var(--surface) 34%); }
+.scene.cut { border-left-color: var(--red); }
+.scene .idx { font-family: 'Orbitron', sans-serif; font-size: 1.5rem; font-weight: 700; line-height: 1; color: var(--amber); font-variant-numeric: tabular-nums; padding-top: 0.1rem; }
+.scene.core .idx { color: var(--lime); }
+.scene.cut .idx { color: #c9503f; }
+.scene .top { display: flex; align-items: baseline; gap: 0.8rem; flex-wrap: wrap; margin-bottom: 0.7rem; }
+.scene h3 { font-size: 1.16rem; font-weight: 700; letter-spacing: 0.01em; color: #f2f5ff; }
+
+.tag { font-family: 'Orbitron', sans-serif; font-size: 0.68rem; font-weight: 500; letter-spacing: 0.13em; text-transform: uppercase; padding: 0.2rem 0.45rem; border-radius: 2px; border: 1px solid; }
+.tag.core { color: #10200a; border-color: var(--lime); background: var(--lime); }
+.tag.cut { color: #ffdcd7; border-color: var(--red); background: var(--red); }
+.tag.card { color: #1e1305; border-color: var(--amber); background: var(--amber); }
+
+.secs { margin-left: auto; font-family: 'Orbitron', sans-serif; font-size: 0.82rem; font-weight: 500; color: var(--ink-faint); font-variant-numeric: tabular-nums; }
+
+.body { display: grid; grid-template-columns: minmax(0, 1.08fr) minmax(0, 1fr); gap: 0.6rem 1.6rem; }
+@media (max-width: 720px) { .body { grid-template-columns: 1fr; gap: 1rem; } }
+.body > div { display: grid; gap: 0.34rem; align-content: start; }
+.body h4 { margin: 0; font-family: 'Orbitron', sans-serif; font-size: 0.84rem; font-weight: 500; letter-spacing: 0.15em; text-transform: uppercase; color: var(--ink-faint); }
+.body p { font-size: 1.06rem; line-height: 1.66; color: var(--ink-dim); }
+.body .aha { border-left: 1px solid var(--line); padding-left: 1.6rem; }
+@media (max-width: 720px) { .body .aha { border-left: 0; padding-left: 0; border-top: 1px solid var(--line); padding-top: 0.9rem; } }
+.body .aha p { color: var(--ink); }
+
+.rules { display: grid; gap: 0.6rem; counter-reset: r; max-width: 74ch; padding: 0; margin: 0; }
+.rules li { list-style: none; position: relative; padding-left: 2.8rem; font-size: 1.05rem; color: var(--ink-dim); }
+.rules li::before {
+    counter-increment: r; content: counter(r, decimal-leading-zero);
+    position: absolute; left: 0; top: 0.28rem; font-family: 'Orbitron', sans-serif;
+    font-size: 0.84rem; font-weight: 500; color: var(--magenta);
+}
+.notes { display: grid; gap: 0.75rem; max-width: 74ch; padding: 0; margin: 0; }
+.notes li { list-style: none; font-size: 1.05rem; color: var(--ink-dim); padding-left: 1.1rem; border-left: 1px solid var(--line); }
+.notes strong { color: #eef2fd; }
+
+code { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 0.85em; color: var(--cyan); background: #0a1226; border: 1px solid var(--line-soft); border-radius: 2px; padding: 0.06em 0.34em; }
+
+.measure { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 400px); gap: clamp(1.2rem, 3vw, 2.2rem); align-items: start; }
+.measure > div { min-width: 0; }
+@media (max-width: 900px) { .measure { grid-template-columns: 1fr; } }
+.tblwrap { overflow-x: auto; scrollbar-width: thin; scrollbar-color: #2a3a6b transparent; }
+.tblwrap::-webkit-scrollbar { height: 7px; }
+.tblwrap::-webkit-scrollbar-thumb { background: #2a3a6b; border-radius: 4px; }
+.tbl { width: 100%; min-width: 430px; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+.tbl caption { text-align: left; font-family: 'Orbitron', sans-serif; font-size: 0.78rem; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-faint); padding-bottom: 0.6rem; }
+.tbl th, .tbl td { text-align: right; padding: 0.42rem 0.6rem; border-bottom: 1px solid var(--line-soft); font-size: 0.99rem; color: var(--ink-dim); }
+.tbl th { font-family: 'Orbitron', sans-serif; font-size: 0.7rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-faint); border-bottom-color: var(--line); }
+.tbl th:first-child, .tbl td:first-child { text-align: left; }
+.tbl td.n { font-family: 'Orbitron', sans-serif; font-weight: 500; color: var(--ink); }
+.tbl tr.mark td { color: var(--amber); }
+.tbl tr.hit td { color: var(--lime); font-weight: 500; }
+
+#piplot { width: 100%; aspect-ratio: 1 / 0.82; border: 1px solid var(--line); border-radius: 2px; background: #01030a; }
+.plotcap { margin-top: 0.6rem; font-size: 0.92rem; color: var(--ink-faint); }
+
+.budget { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1px; background: var(--line-soft); border: 1px solid var(--line-soft); border-radius: 2px; margin-bottom: 1.5rem; }
+.budget div { background: var(--surface); padding: 1rem 1.1rem; display: grid; gap: 0.28rem; }
+.budget dt { font-family: 'Orbitron', sans-serif; font-size: 0.74rem; font-weight: 500; letter-spacing: 0.15em; text-transform: uppercase; color: var(--ink-faint); }
+.budget dd { margin: 0; font-family: 'Orbitron', sans-serif; font-size: 1.3rem; font-weight: 700; color: var(--cyan); font-variant-numeric: tabular-nums; }
+.budget dd small { display: block; font-family: 'Outfit', sans-serif; font-size: 0.78rem; font-weight: 300; color: var(--ink-faint); letter-spacing: 0; margin-top: 0.2rem; }
+.solved { color: var(--lime); }
+
+footer { margin-top: clamp(2.6rem, 6vw, 4.4rem); padding-top: 1.6rem; border-top: 1px solid var(--line); display: flex; flex-wrap: wrap; gap: 1rem 2rem; align-items: baseline; }
+footer p { font-size: 1.05rem; color: var(--ink-dim); max-width: 58ch; }
+footer .sig { margin-left: auto; }
+
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+    <p class="eyebrow">Doc Alvers Mathe-Labor · Videopipeline</p>
+    <h1>Die Zahl, die im Rand wohnt</h1>
+    <p class="lede">Der Plot für das Fraktal-Demovideo: was passiert, in welcher
+        Reihenfolge — und warum genau dort der Groschen fällt.</p>
+    <p class="status">Plot zur Freigabe · noch nicht vertont · nicht gedreht</p>
+
+    <dl class="meta">
+        <div><dt>Lab</dt><dd><a href="https://docalvers.de/mandelbrot.html">mandelbrot.html</a></dd></div>
+        <div><dt>Sprecherin</dt><dd>Solita · de-DE-Studio</dd></div>
+        <div><dt>Aufnahme</dt><dd>1440p · Playwright</dd></div>
+        <div><dt>Szenen</dt><dd>10 · davon 5 auf eigenen Karten</dd></div>
+        <div><dt>Laufzeit</dt><dd>~3:30 geplant</dd></div>
+    </dl>
+</header>
+
+<div class="thesis">
+    <canvas id="stage" width="640" height="640" role="img"
+            aria-label="Die Mandelbrot-Menge, aus der Fluchtzeit jedes Punktes gerechnet:
+                        schwarz, wo die Folge beschränkt bleibt, hell, wo sie schnell
+                        davonläuft"></canvas>
+    <div>
+        <blockquote>Dieses Bild ist nicht gezeichnet. Es ist eine <strong>Frage</strong>,
+            die man an jeden einzelnen Punkt gestellt hat — und die Farbe ist die
+            <em>Wartezeit auf die Antwort</em>.</blockquote>
+        <p class="after">Der ganze Film ist die Antwort auf eine einzige Frage:
+            <em>Warum hört der Rand nie auf?</em> Nicht: wie hübsch Fraktale sind.
+            Sondern: was da eigentlich gerechnet wird — und was am Ende
+            <strong>herausfällt</strong>, wenn man nah genug herangeht.</p>
+    </div>
+</div>
+
+<section>
+    <div class="head"><span class="n">A</span><h2>Der dramaturgische Bogen</h2></div>
+    <div class="arc" id="arc"></div>
+    <div class="prose">
+        <p>Erst wird das Bild <em>entzaubert</em>: es ist gar kein Bild, sondern eine
+           Frage an jeden Punkt (1), und die Orbit-Ansicht zeigt sie an einem Punkt
+           drinnen (2) und einem knapp draußen (3). Damit ist die Farbe erklärt (4).
+           Dann wird gestaunt: der Rand hört nicht auf (5), und jeder Punkt der Ebene
+           trägt seine eigene Julia-Menge (6).</p>
+        <p>Und dann kommt der Teil, für den es diesen Film gibt. Der Film geht an
+           <em>eine einzige Stelle</em> des Randes und zählt: 33 Schritte, 315, 3143,
+           31417 (8). Diese Zahlen sehen nach nichts aus — bis man sie mit dem Abstand
+           malnimmt. Dann steht dort <strong>3,1415927</strong> (9). <strong>π, aus
+           einer Iterationszählung.</strong> Szene 10 sagt, was das bedeutet und was es
+           nicht bedeutet.</p>
+    </div>
+</section>
+
+<section>
+    <div class="head"><span class="n">B</span><h2>Die 10 Szenen</h2>
+        <span class="note" id="tl-note">Breite = geplante Sprechzeit</span></div>
+    <div class="timeline" id="timeline"></div>
+    <div class="legend">
+        <span><s style="background:#adff2f"></s><b>Kernszene — wird nicht gekürzt</b></span>
+        <span><s style="background:#b02418"></s><b>Notbremse, falls der Schnitt zäh wirkt</b></span>
+        <span><s style="background:#ffab2e"></s><b>Regelszene</b></span>
+    </div>
+    <div class="scenes" id="scenes" style="margin-top:1.5rem"></div>
+</section>
+
+<section>
+    <div class="head"><span class="n">C</span><h2>Didaktische Leitplanken</h2>
+        <span class="note">bindend für den Sprechertext</span></div>
+    <ol class="rules">
+        <li><strong>Nie eine Formel ohne vorher gezeigtes Bild.</strong>
+            <span class="m">z → z² + c</span> steht zwar von Anfang an im Lab, wird aber
+            erst in Szene 2 <em>gelesen</em> — nachdem man die Kette einmal laufen
+            gesehen hat.</li>
+        <li><strong>Ein neuer Begriff pro Szene.</strong> Aus „Iteration" wird der
+            <em>Schritt</em>, aus „Orbit" die <em>Kette</em>, aus „divergiert" wird
+            <em>läuft davon</em>. „Komplexe Zahl" fällt einmal und wird sofort als
+            <em>Punkt in der Ebene</em> übersetzt.</li>
+        <li>Verboten, weil dieser Film sie nicht braucht: <em>Hausdorff-Dimension,
+            Selbstähnlichkeit im technischen Sinn, konforme Abbildung, Renormierung,
+            Feigenbaum-Konstante</em>.</li>
+        <li><strong>„Unendlich" nur, wo es stimmt.</strong> Der Rand ist unendlich fein
+            — der <em>Zoom im Lab</em> ist es nicht. Was der Film zeigt, ist bei
+            Standard-Genauigkeit bei etwa <span class="m">10<sup>−15</sup></span> zu
+            Ende; alles darunter ist die Störungsrechnung des Labors. Das gehört
+            gesagt, nicht verschwiegen (Szene 7).</li>
+        <li><strong>Beim π-Fund nichts behaupten, was nicht gemessen ist.</strong> Der
+            Film zeigt die Zahlenreihe und rechnet vor. Er behauptet <em>nicht</em>,
+            dass er erklärt, warum π herauskommt — das ist ein echter Beweis über den
+            parabolischen Punkt, und er passt nicht in zwanzig Sekunden. Szene 9 sagt
+            genau das, ehrlich und ohne Ausrede.</li>
+        <li><strong>Zahlen werden gesprochen, nicht gelesen:</strong> „dreitausend
+            Schritte" statt „3143".</li>
+        <li><strong>Nichts behaupten, was das Bild nicht hergibt.</strong> Alle Zahlen
+            stammen aus Abschnitt D, exakt nachgerechnet mit derselben Iteration, die
+            das Lab rechnet.</li>
+    </ol>
+</section>
+
+<section>
+    <div class="head"><span class="n">D</span><h2>Gemessen, nicht geschätzt</h2>
+        <span class="note solved">Grundlage aller Zahlen im Film</span></div>
+    <div class="measure">
+        <div><div class="tblwrap"><table class="tbl" id="tbl"></table></div></div>
+        <div>
+            <canvas id="piplot" width="760" height="620" role="img"
+                    aria-label="Die Fluchtzeit mal dem Abstand, über sieben Zehnerpotenzen:
+                                die Werte laufen von 3,3 auf 3,1415927 zu und liegen ab
+                                einem Millionstel exakt auf der Linie für π."></canvas>
+            <p class="plotcap">Schritte × Abstand, über sieben Zehnerpotenzen. Die
+               waagerechte Linie ist <span class="m">π</span>.</p>
+        </div>
+    </div>
+    <div class="prose" style="margin-top:1.6rem">
+        <p><strong>Die Iteration:</strong> <span class="m">z</span> beginnt bei null,
+           dann immer wieder <span class="m">z → z² + c</span>. Sobald der Betrag über 2
+           steigt, ist der Punkt draußen und kommt nie zurück — das ist die einzige
+           Abbruchbedingung, und sie ist beweisbar scharf. Die <em>Anzahl</em> der
+           Schritte bis dahin ist die Farbe im Bild.</p>
+        <p><strong>Der Befund, für den es diesen Film gibt:</strong> Man setzt
+           <span class="m">c</span> = −0,75 + <span class="m">i·ε</span> — also
+           senkrecht auf den Punkt zwischen Apfelkörper und Kopf zu — und zählt die
+           Schritte. Bei <span class="m">ε</span> = 0,1 sind es 33. Bei 0,01 sind es
+           315. Bei 0,000001 sind es 3 141 593. <strong>Schritte mal Abstand ergibt
+           π</strong>, auf sieben Stellen genau. Nachgerechnet mit exakt der Iteration
+           oben, ohne Näherung, ohne Bibliothek.</p>
+        <p><strong>Ehrlich dazu:</strong> das ist ein bekanntes Ergebnis (Dave Boll,
+           1991) und es hat einen richtigen Beweis, der mit dem <em>parabolischen
+           Punkt</em> bei −0,75 und dem engen Kanal zu tun hat, durch den die Folge
+           dort kriechen muss. <strong>Diesen Beweis führt der Film nicht.</strong> Er
+           zeigt die Messung und sagt dazu, dass sie kein Zufall ist. Alles andere wäre
+           geschummelt.</p>
+        <p><strong>Was das Lab einer Aufnahme erlaubt</strong> (gemessen, nicht
+           vermutet): <code>mode</code>, <code>zoom</code>, <code>maxIter</code>,
+           <code>juliaX/Y</code> und <code>centerX/Y</code> sind <strong>alle
+           unerreichbar</strong> — sie leben in einer Closure. Steuerbar ist die Seite
+           also nur über die DOM-Knöpfe (<code>btn-mode-m</code>,
+           <code>btn-mode-j</code>, <code>btn-plane-fractal</code>,
+           <code>btn-plane-orbit</code>, <code>btn-flight</code>, <code>btn-reset</code>),
+           die drei Regler und die Maus auf dem Canvas. Ablesbar sind
+           <code>readout-detail</code> (Start: 500) und <code>readout-zoom</code>
+           (Start: 1). <strong><code>btn-flight</code> ist beim Laden gesperrt</strong>
+           und wird erst durch einen Zoom freigeschaltet — die Choreografie muss das
+           einplanen.</p>
+    </div>
+</section>
+
+<section>
+    <div class="head"><span class="n">E</span><h2>Zeitbudget</h2>
+        <span class="note">nach der Vertonung neu zu rechnen</span></div>
+    <dl class="budget" id="budget"></dl>
+    <div class="prose">
+        <p>Teil 1 von <code>Infinity_6min.m4a</code> ist nahtlos loopbar: loopStart
+           21,220 s, loopEnd 163,998 s. Für gut drei Minuten reicht
+           <strong>Intro plus zwei Durchläufe</strong>.</p>
+        <p><strong>Die rote Marke ist Szene 7</strong> (Rechengenauigkeit). Sie ist die
+           einzige, die man ohne Loch im Argument herausnehmen kann — der Preis wäre,
+           dass der Film die Grenze des eigenen Werkzeugs verschweigt. Erst kürzen, wenn
+           es sonst nicht geht.</p>
+    </div>
+</section>
+
+<section>
+    <div class="head"><span class="n">F</span><h2>Choreografie-Notizen</h2>
+        <span class="note">für die Aufnahme</span></div>
+    <ul class="notes">
+        <li><strong>Alles läuft über DOM und Maus, nichts über Variablen.</strong> Siehe
+            Abschnitt D: der Zustand des Labors ist von außen nicht erreichbar. Wo der
+            Film einen bestimmten Punkt <span class="m">c</span> braucht, muss die
+            Aufnahme ihn <em>anfahren</em> — über die beiden Regler REAL und IMAGINÄR,
+            die in Tausendstel-Schritten laufen (−2000 … 2000, also −2,000 … 2,000).</li>
+        <li><strong>Die Orbit-Ansicht ist der Star, nicht das Fraktal.</strong> Szenen 2,
+            3 und 8 laufen auf <code>btn-plane-orbit</code>; der Haken
+            <code>orbit-show-worked-checkbox</code> blendet die durchgerechnete Kette
+            ein. Vor dem Dreh prüfen, wie viele Glieder sie zeigt — 33 Schritte passen,
+            3143 nicht, und Szene 8 muss das <em>bildlich</em> lösen (Zähler statt
+            Kette).</li>
+        <li><strong>Szene 8 rechnet die Zahlen nicht im Lab.</strong> Drei Millionen
+            Iterationen pro Punkt sind nichts für eine Live-Aufnahme; die Karte bringt
+            ihre eigene, exakt gleiche Iteration mit und zählt vor laufender Kamera.
+            Das ist dieselbe Rechnung, nur ohne Shader.</li>
+        <li><strong>Der Zoom ist Mausrad auf dem Canvas.</strong> Vorher messen, wieviel
+            ein Rad-Tick bewirkt, und den Zielausschnitt in Ticks ausdrücken — sonst
+            landet Szene 5 irgendwo.</li>
+        <li><code>btn-flight</code> ist <strong>beim Laden disabled</strong>. Wenn der
+            Autopilot in den Film soll, muss vorher gezoomt werden.</li>
+        <li>Der lokale Server klebt ein rotes <strong>LOCAL</strong>-Schild in die Seite.
+            Die Aufnahme entfernt <code>#local-badge</code> vor dem ersten Bild.</li>
+        <li>Die fünf Karten kommen aus <code>videopipeline/fraktal/karten.html</code> und
+            bekommen ihre gemessene Sprechdauer als Parameter
+            (<code>?scene=sN&amp;dur=…</code>).</li>
+    </ul>
+</section>
+
+<section>
+    <div class="head"><span class="n">G</span><h2>Bewusst weggelassen</h2>
+        <span class="note">Kandidaten für Teil 2</span></div>
+    <div class="prose">
+        <p><strong>Der Beweis für π.</strong> Der parabolische Punkt, der enge Kanal, die
+           Passagezeit — das ist ein eigener Film und ehrlicherweise auch ein
+           schwererer. Szene 9 setzt den Cliffhanger.</p>
+        <p><strong>Das Burning Ship</strong> und die anderen Varianten der Formel: eine
+           Zeile Unterschied, ein völlig anderes Bild. Schöne zwei Minuten, aber sie
+           tragen zum Thema dieses Films nichts bei.</p>
+        <p>Außerdem draußen: die Zusammenhangs-Frage (die Menge ist zusammenhängend, was
+           man ihr nicht ansieht) · Feigenbaum und der Weg ins Chaos · die
+           Färbealgorithmen selbst, also warum die Bänder glatt statt gestuft sind ·
+           und die Frage, ob der Rand eine Fläche hat.</p>
+    </div>
+</section>
+
+<footer>
+    <p><strong>Stand:</strong> Plot zur Freigabe. Noch kein Wortlaut, keine Vertonung,
+       keine Aufnahme. Die Zahlen in Abschnitt D stehen schon —
+       <code>videopipeline/fraktal/measure.mjs</code>.</p>
+    <p class="eyebrow sig">Doc Alvers Mathe-Labor</p>
+</footer>
+
+</div>
+
+<script>
+const SCENES = [
+    { n: 1, s: 18, t: 'Ein Bild, das keines ist',
+      img: 'Das Apfelmännchen steht ruhig im Bild, schwarz mit farbigen Bändern drumherum. Kein Zoom, keine Bewegung. Dann verschwindet die Farbe, und zurück bleibt ein Raster aus Punkten — jeder einzeln.',
+      aha: 'Niemand hat diese Form gezeichnet. Jeder Punkt der Ebene wurde <strong>gefragt</strong>, und die Antwort war ja oder nein. Das Bild ist eine Landkarte von Antworten.' },
+
+    { n: 2, s: 20, t: 'Die Frage an einen Punkt', core: true,
+      img: 'Umschalten auf die Orbit-Ansicht. Ein Punkt in der Mitte des Körpers, <span class="m">c</span> = −0,2. Die Kette <span class="m">z → z² + c</span> läuft los und bleibt: sie kriecht in einen Punkt hinein und rührt sich nicht mehr.',
+      aha: 'Die Regel ist lächerlich einfach: <strong>quadrieren, <span class="m">c</span> dazu, von vorn.</strong> Bleibt die Kette in der Nähe, ist der Punkt drin — im Bild schwarz. Mehr steckt in der Schwärze nicht.' },
+
+    { n: 3, s: 18, t: 'Einen Fingerbreit weiter', core: true,
+      img: 'Derselbe Bildschirm, nur <span class="m">c</span> = 0,3 statt −0,2. Die Kette macht ein paar Schritte, dann kippt sie: die Glieder werden größer, größer, und nach zwölf Schritten ist sie aus dem Bild.',
+      aha: 'Zwölf Schritte. Ein winziger Unterschied im <span class="m">c</span>, und die Folge <em>läuft davon</em>. Ab Betrag zwei gibt es kein Zurück — das ist keine Faustregel, das ist beweisbar.' },
+
+    { n: 4, s: 20, t: 'Die Farbe ist die Wartezeit', card: true,
+      img: 'Drei Punkte nebeneinander, jeder mit seiner Kette und seinem Zähler: 3 Schritte, 12 Schritte, 33 Schritte. Dann kippt die Karte um — aus den Zählerständen wird die Farbskala, und das ganze Bild färbt sich neu ein.',
+      aha: 'Die Farben sind keine Deko und keine Höhenlinien. <strong>Sie sind die Anzahl der Schritte bis zur Flucht.</strong> Wo die Bänder eng werden, ändert sich diese Zahl schnell — dort ist der Rand.' },
+
+    { n: 5, s: 18, t: 'Der Rand hört nicht auf',
+      img: 'Zurück ins Fraktal, dann Zoom auf das Seepferdchental. Bei jeder Stufe kommt neue Struktur, und der Detailgrad-Regler wird mitgezogen, weil sonst alles schwarz zuläuft.',
+      aha: 'Es wird nicht unschärfer, es wird <em>mehr</em>. Und mit jeder Stufe braucht man mehr Schritte, um überhaupt noch zu entscheiden, ob ein Punkt drin oder draußen ist — <strong>am Rand wird die Frage teuer</strong>.' },
+
+    { n: 6, s: 20, t: 'Jeder Punkt eine eigene Welt',
+      img: 'Umschalten auf JULIA. Die beiden Regler wandern über die Ebene, und zu jedem <span class="m">c</span> steht sofort eine andere Julia-Menge da: zusammenhängend im Inneren des Apfelmännchens, in Staub zerfallen außerhalb.',
+      aha: 'Das Apfelmännchen ist gar kein Objekt, es ist ein <strong>Inhaltsverzeichnis</strong>: es sagt für jedes <span class="m">c</span>, ob dessen Julia-Menge zusammenhängt oder in Staub zerfällt. Ein Bild, das über unendlich viele andere Bilder Buch führt.' },
+
+    { n: 7, s: 18, t: 'Wenn vierundsechzig Bit nicht reichen', cut: true,
+      img: 'Weiterzoomen, bis das Bild bei üblicher Rechengenauigkeit in Blöcke zerfällt — und daneben derselbe Ausschnitt, wie das Lab ihn mit Störungsrechnung tatsächlich zeichnet.',
+      aha: 'Ab etwa <span class="m">10<sup>−15</sup></span> sind zwei benachbarte Bildpunkte für den Rechner <em>dieselbe Zahl</em>. Der Rand ist dann nicht zu Ende — nur unser Zahlensystem. Das Lab rechnet ab da anders und kommt bis <span class="m">10<sup>−80</sup></span>.' },
+
+    { n: 8, s: 20, t: 'Immer näher an eine Stelle', core: true, card: true,
+      img: 'Eine einzige Stelle: die Einschnürung zwischen Körper und Kopf, <span class="m">c</span> = −0,75. Von dort geht es senkrecht nach oben, in immer kleineren Abständen — und daneben zählt ein Zähler mit, wie viele Schritte die Folge jeweils braucht: 33, 315, 3143, 31 417.',
+      aha: 'Die Zahlen wachsen brav um das Zehnfache, wenn der Abstand um das Zehnfache schrumpft. Schön, aber unauffällig. <strong>Bis man sie miteinander multipliziert.</strong>' },
+
+    { n: 9, s: 22, t: 'Da ist π', core: true, card: true,
+      img: 'Die vier Zahlenpaare werden malgenommen und untereinander gestellt: 3,3 — 3,15 — 3,143 — 3,1417. Dann kommen die nächsten drei Zeilen dazu, und die letzte lautet <strong>3,1415927</strong>. Darunter erscheint π.',
+      aha: 'Da ist keine Kreiszahl hineingesteckt worden. Es gibt hier keinen Kreis, keinen Winkel, keinen Umfang — nur „quadrieren und <span class="m">c</span> dazu", ein paar Millionen Mal. Und trotzdem: <strong>Schritte mal Abstand ergibt π.</strong>' },
+
+    { n: 10, s: 18, t: 'Was das heißt — und was nicht', card: true,
+      img: 'Ruhig zurück auf das ganze Apfelmännchen, ohne Farbe, nur die Kontur. Der Punkt −0,75 blinkt einmal auf. Darunter drei Zeilen: was gezeigt wurde, was nicht gezeigt wurde, was als Nächstes kommt.',
+      aha: 'Gezeigt ist eine <em>Messung</em>, kein Beweis — und den gibt es, er hat mit dem engen Kanal an dieser einen Stelle zu tun. Ich habe ihn hier nicht geführt. <strong>Was bleibt: eine Regel aus fünf Zeichen, und die Kreiszahl fällt hinten heraus.</strong>' }
+];
+
+/* Solita's wording arrives later, generated from narration.mjs. */
+/* SAY:START - generated by videopipeline/fraktal/sync-drehbuch.mjs, do not edit */
+const SAY = {};
+const SPOKEN = {};
+/* SAY:END */
+
+const ARC = [
+    { t: 'Kein Bild, eine Frage', c: '#00d2ff' },
+    { t: 'Die Kette bleibt', c: '#7b5cff', key: true },
+    { t: 'Die Kette flieht', c: '#7b5cff', key: true },
+    { t: 'Farbe = Wartezeit', c: '#d94fd0' },
+    { t: 'Der Rand wird teuer', c: '#ffab2e' },
+    { t: 'Julia-Welten', c: '#ffab2e' },
+    { t: 'Zaehlen am Rand', c: '#adff2f', key: true },
+    { t: 'Da ist Pi', c: '#adff2f', key: true }
+];
+document.getElementById('arc').innerHTML = ARC.map(a =>
+    '<span class="' + (a.key ? 'key' : '') + '" style="--stop:' + a.c + '">' + a.t + '</span>').join('');
+
+const secs = (x) => SPOKEN['s' + x.n] ?? x.s;
+const total = SCENES.reduce((s, x) => s + secs(x), 0);
+document.getElementById('timeline').innerHTML = SCENES.map(x =>
+    '<i class="' + (x.core ? 'core' : x.cut ? 'cut' : '') + '" data-n="' + x.n + '"' +
+    ' style="flex:0 0 ' + (secs(x) / total * 100).toFixed(3) + '%"' +
+    ' title="Szene ' + x.n + ' · ' + secs(x).toFixed(1) + ' s"></i>').join('');
+
+(function () {
+    const spoken = Object.values(SPOKEN).reduce((a, b) => a + b, 0);
+    const planned = SCENES.reduce((a, x) => a + x.s, 0);
+    const air = SCENES.length * 1.6;
+    const film = (spoken || planned) + air;
+    const mmss = (t) => Math.floor(t / 60) + ':' + String(Math.round(t % 60)).padStart(2, '0');
+    const cell = (dt, dd, sub) => '<div><dt>' + dt + '</dt><dd>' + dd + '<small>' + sub + '</small></dd></div>';
+    document.getElementById('budget').innerHTML =
+        cell('Sprache', (spoken || planned).toFixed(0) + ' s', spoken ? 'gemessen · 10 Szenen' : 'geplant · 10 Szenen') +
+        cell('Luft', '~' + air.toFixed(0) + ' s', '1,6 s je Szene') +
+        cell('Film', mmss(film), spoken ? 'nach der Vertonung' : 'geschätzt') +
+        cell('Bett-Loop', '142,778 s', '64 Takte · 107,58 BPM');
+})();
+
+document.getElementById('scenes').innerHTML = SCENES.map(x =>
+    '<article class="scene ' + (x.core ? 'core' : x.cut ? 'cut' : '') + '">' +
+        '<div class="idx">' + String(x.n).padStart(2, '0') + '</div>' +
+        '<div>' +
+            '<div class="top">' +
+                '<h3>' + x.t + '</h3>' +
+                (x.core ? '<span class="tag core">Kernszene</span>' : '') +
+                (x.cut ? '<span class="tag cut">Notbremse</span>' : '') +
+                (x.card ? '<span class="tag card">Karte</span>' : '') +
+                '<span class="secs">' + secs(x).toFixed(1) + ' s</span>' +
+            '</div>' +
+            '<div class="body">' +
+                '<div><h4>Was im Bild passiert</h4><p>' + x.img + '</p></div>' +
+                '<div class="aha"><h4>Der Aha</h4><p>' + x.aha + '</p></div>' +
+            '</div>' +
+            (SAY['s' + x.n] ? '<div class="say"><h4>Solita sagt</h4><p>' + SAY['s' + x.n] + '</p></div>' : '') +
+        '</div>' +
+    '</article>').join('');
+
+/* ---------------------------------------------------------------
+   Measured with the very iteration the lab runs, in exact arithmetic
+   (videopipeline/fraktal/measure.mjs): c = -0.75 + i*eps, count the
+   steps until |z| > 2.
+   --------------------------------------------------------------- */
+const PI_DATA = [
+    [1e-1, 33], [1e-2, 315], [1e-3, 3143], [1e-4, 31417],
+    [1e-5, 314160], [1e-6, 3141593], [1e-7, 31415927]
+];
+const ESCAPES = [
+    ['c = −0,2 (Mitte des Körpers)', 'bleibt beschränkt'],
+    ['c = −1,0 (Kopf)', 'bleibt beschränkt'],
+    ['c = −0,75 (genau am Rand)', 'bleibt beschränkt'],
+    ['c = 0,3', '12 Schritte'],
+    ['c = 1,0', '3 Schritte'],
+    ['c = −0,75 + 0,1 i', '33 Schritte'],
+    ['c = −0,101096 + 0,956287 i', '57 Schritte']
+];
+
+(function () {
+    let html = '<caption>c = −0,75 + i·ε — Schritte bis |z| &gt; 2, exakt gezählt</caption>' +
+        '<thead><tr><th>Abstand ε</th><th>Schritte N</th><th>N × ε</th></tr></thead><tbody>';
+    PI_DATA.forEach(([eps, n], i) => {
+        const prod = (n * eps).toFixed(7).replace('.', ',');
+        html += '<tr class="' + (i >= 5 ? 'hit' : i === 0 ? 'mark' : '') + '">' +
+            '<td class="n">' + eps.toExponential(0).replace('e-', ' · 10⁻').replace('1 ·', '') + '</td>' +
+            '<td>' + n.toLocaleString('de-DE') + '</td>' +
+            '<td>' + prod + '</td></tr>';
+    });
+    html += '<tr class="hit"><td class="n">π</td><td>—</td><td>3,1415927</td></tr></tbody>';
+    document.getElementById('tbl').innerHTML = html;
+})();
+
+/* --- the plot: N * eps against eps, converging on pi --- */
+(function () {
+    const cv = document.getElementById('piplot');
+    if (!cv) return;
+    const ctx = cv.getContext('2d');
+    function draw() {
+        const r = cv.getBoundingClientRect();
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        cv.width = Math.max(1, Math.round(r.width * dpr));
+        cv.height = Math.max(1, Math.round(r.height * dpr));
+        const W = cv.width, H = cv.height, px = W / 760;
+        ctx.fillStyle = '#01030a'; ctx.fillRect(0, 0, W, H);
+        const L = 66 * px, R = W - 20 * px, T = 26 * px, B = H - 54 * px;
+        const X = (i) => L + i / (PI_DATA.length - 1) * (R - L);
+        const y0 = 3.10, y1 = 3.34;
+        const Y = (v) => B - (v - y0) / (y1 - y0) * (B - T);
+
+        ctx.strokeStyle = '#17203f'; ctx.lineWidth = 1 * px;
+        ctx.fillStyle = '#8290b6';
+        ctx.font = 400 + ' ' + (12 * px) + 'px Outfit, system-ui, sans-serif';
+        ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+        [3.15, 3.20, 3.25, 3.30].forEach((v) => {
+            ctx.beginPath(); ctx.moveTo(L, Y(v)); ctx.lineTo(R, Y(v)); ctx.stroke();
+            ctx.fillText(v.toFixed(2).replace('.', ','), L - 8 * px, Y(v));
+        });
+        ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+        PI_DATA.forEach(([eps], i) => ctx.fillText('10' + '⁻¹²³⁴⁵⁶⁷'[i + 1], X(i), B + 9 * px));
+        ctx.fillText('Abstand ε', (L + R) / 2, B + 32 * px);
+
+        /* pi itself */
+        ctx.strokeStyle = '#adff2f'; ctx.lineWidth = 1.8 * px;
+        ctx.setLineDash([6 * px, 5 * px]);
+        ctx.beginPath(); ctx.moveTo(L, Y(Math.PI)); ctx.lineTo(R, Y(Math.PI)); ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillStyle = '#adff2f'; ctx.textAlign = 'left'; ctx.textBaseline = 'bottom';
+        ctx.font = 500 + ' ' + (15 * px) + 'px Outfit, system-ui, sans-serif';
+        ctx.fillText('π', L + 8 * px, Y(Math.PI) - 6 * px);
+
+        ctx.strokeStyle = '#ffab2e'; ctx.lineWidth = 2.4 * px; ctx.lineJoin = 'round';
+        ctx.beginPath();
+        PI_DATA.forEach(([eps, n], i) => { const fn = i ? 'lineTo' : 'moveTo'; ctx[fn](X(i), Y(n * eps)); });
+        ctx.stroke();
+        PI_DATA.forEach(([eps, n], i) => {
+            ctx.fillStyle = Math.abs(n * eps - Math.PI) < 1e-5 ? '#adff2f' : '#ffab2e';
+            ctx.beginPath(); ctx.arc(X(i), Y(n * eps), 4.4 * px, 0, Math.PI * 2); ctx.fill();
+        });
+    }
+    draw();
+    addEventListener('resize', draw, { passive: true });
+    document.fonts.ready.then(draw);
+})();
+
+/* ---------------------------------------------------------------
+   Hero: the set itself, computed here with the same iteration - escape
+   time per pixel, no image, no library.
+   --------------------------------------------------------------- */
+(function () {
+    const cv = document.getElementById('stage');
+    if (!cv) return;
+    const ctx = cv.getContext('2d');
+    /* the page's own accent colours as an escape-time ramp: violet -> magenta -> amber -> white */
+    const STOPS = [[0, 26, 18, 74], [0.30, 123, 92, 255], [0.58, 217, 79, 208],
+                   [0.82, 255, 171, 46], [1, 255, 244, 226]];
+    function ramp(t) {
+        for (let k = 1; k < STOPS.length; k++) {
+            if (t <= STOPS[k][0]) {
+                const a = STOPS[k - 1], b = STOPS[k];
+                const u = (t - a[0]) / (b[0] - a[0]);
+                return [a[1] + (b[1] - a[1]) * u, a[2] + (b[2] - a[2]) * u, a[3] + (b[3] - a[3]) * u];
+            }
+        }
+        return [255, 244, 226];
+    }
+    function draw() {
+        const r = cv.getBoundingClientRect();
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        const S = Math.max(1, Math.round(Math.min(r.width, 520) * dpr));
+        cv.width = S; cv.height = S;
+        const img = ctx.createImageData(S, S);
+        const MAX = 220;
+        for (let py = 0; py < S; py++) {
+            const cy = -1.25 + 2.5 * py / S;
+            for (let pxl = 0; pxl < S; pxl++) {
+                const cx = -2.1 + 3.0 * pxl / S;
+                let x = 0, y = 0, i = 0;
+                for (; i < MAX; i++) {
+                    const x2 = x * x, y2 = y * y;
+                    if (x2 + y2 > 4) break;
+                    const nx = x2 - y2 + cx;
+                    y = 2 * x * y + cy; x = nx;
+                }
+                const o = (py * S + pxl) * 4;
+                if (i === MAX) { img.data[o] = 4; img.data[o + 1] = 6; img.data[o + 2] = 15; }
+                else {
+                    // log scale: almost every outside pixel escapes in under ten steps,
+                    // so a linear ramp puts the whole picture in one colour
+                    const t = Math.log(1 + i) / Math.log(1 + MAX);
+                    const col = ramp(t);
+                    img.data[o] = col[0]; img.data[o + 1] = col[1]; img.data[o + 2] = col[2];
+                }
+                img.data[o + 3] = 255;
+            }
+        }
+        ctx.putImageData(img, 0, 0);
+        ctx.fillStyle = 'rgba(230,235,250,0.75)';
+        ctx.font = 400 + ' ' + Math.round(S / 42) + 'px Outfit, system-ui, sans-serif';
+        ctx.textAlign = 'left'; ctx.textBaseline = 'bottom';
+        ctx.fillText('z → z² + c · echt gerechnet', S * 0.03, S * 0.965);
+    }
+    draw();
+    addEventListener('resize', draw, { passive: true });
+    document.fonts.ready.then(draw);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,721 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+
+<style>
+/* minimal reset - the artifact host used to provide this */
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; min-height: 100vh; }
+img, canvas, svg { display: block; max-width: 100%; }
+button, input { font: inherit; }
+:focus-visible { outline: 2px solid #00d2ff; outline-offset: 2px; }
+</style>
+<title>Die Glocke, die niemand hinmalt</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&family=Outfit:wght@200;300;400;600&display=swap">
+
+<style>
+/* Palette and faces are the lab's own (galtonboard.html): Orbitron + Outfit on the
+   near-black blue of the cyber stage, the warm orange of the balls, cyan for the
+   board, gold for the counter. Single-theme on purpose - this is the lab's world. */
+:root {
+    --ground:      #030616;
+    --ground-deep: #01030d;
+    --surface:     #0b1430;
+    --surface-2:   #121e42;
+    --line:        #1f3060;
+    --line-soft:   #16224a;
+
+    --ink:         #e5ebfa;
+    --ink-dim:     #b1bfdb;
+    --ink-faint:   #8194b8;
+
+    --cyan:        #00d2ff;
+    --ball:        #ff9640;
+    --ball-hot:    #ffb866;
+    --gold:        #ffd36a;
+    --lime:        #adff2f;
+    --violet:      #c07fe8;
+    --red:         #b02418;
+}
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    background: var(--ground);
+    background-image:
+        radial-gradient(1100px 620px at 30% -8%, #101c44 0%, transparent 62%),
+        radial-gradient(900px 520px at 88% 6%, #2a1608 0%, transparent 58%);
+    background-attachment: fixed;
+    color: var(--ink);
+    font-family: 'Outfit', system-ui, sans-serif;
+    font-weight: 300; font-size: 1.1rem; line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+}
+
+.wrap { max-width: 1120px; margin: 0 auto; padding: clamp(1.6rem, 4vw, 4rem) clamp(1.1rem, 4vw, 2.6rem) 6rem; }
+
+.eyebrow { font-family: 'Orbitron', sans-serif; font-size: 0.8rem; font-weight: 500; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ink-faint); }
+h1, h2, h3 { font-family: 'Orbitron', sans-serif; text-wrap: balance; margin: 0; }
+h1 { font-size: clamp(2rem, 1.2rem + 3.4vw, 3.4rem); font-weight: 700; line-height: 1.08; letter-spacing: -0.01em; margin: 0.5rem 0 0; }
+h2 { font-size: clamp(1.05rem, 0.9rem + 0.6vw, 1.32rem); font-weight: 700; letter-spacing: 0.03em; color: var(--ink); }
+p { margin: 0; }
+em { font-style: italic; color: #eef2fd; }
+strong { font-weight: 600; color: #f4f7ff; }
+
+.m { font-family: 'Outfit', system-ui, sans-serif; font-style: italic; font-weight: 400; color: var(--gold); white-space: nowrap; }
+.m.c { color: var(--cyan); }
+
+kbd { font-family: 'Orbitron', sans-serif; font-size: 0.76em; font-weight: 500; color: var(--gold); background: #241d05; border: 1px solid #4a3c10; border-radius: 2px; padding: 0.08em 0.4em; white-space: nowrap; }
+
+header { margin-bottom: clamp(1.8rem, 4vw, 3rem); }
+.status { display: inline-flex; align-items: center; gap: 0.55rem; font-family: 'Orbitron', sans-serif; font-size: 0.74rem; font-weight: 500; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ball-hot); border: 1px solid #533418; background: #1e1006; border-radius: 2px; padding: 0.34rem 0.7rem; margin-top: 1.1rem; }
+.status::before { content: ""; width: 5px; height: 5px; background: var(--ball-hot); border-radius: 50%; }
+
+.lede { margin-top: 1.1rem; max-width: 60ch; color: var(--ink-dim); font-size: 1.18rem; }
+
+.meta { display: flex; flex-wrap: wrap; gap: 0 2rem; margin-top: 1.6rem; padding-top: 1.2rem; border-top: 1px solid var(--line-soft); }
+.meta div { display: flex; flex-direction: column; gap: 0.15rem; padding: 0.4rem 0; }
+.meta dt { font-family: 'Orbitron', sans-serif; font-size: 0.74rem; font-weight: 500; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-faint); }
+.meta dd { margin: 0; font-size: 1.02rem; color: var(--ink); }
+.meta a { color: var(--cyan); text-decoration: none; border-bottom: 1px solid #05506b; }
+.meta a:hover, .meta a:focus-visible { border-bottom-color: var(--cyan); }
+
+.thesis { display: grid; grid-template-columns: minmax(0, 360px) minmax(0, 1fr); gap: clamp(1.2rem, 3vw, 2.6rem); align-items: center; margin: clamp(1.6rem, 4vw, 2.6rem) 0 clamp(2.4rem, 6vw, 4rem); padding: clamp(1.2rem, 3vw, 2rem); background: linear-gradient(160deg, var(--surface) 0%, var(--ground-deep) 100%); border: 1px solid var(--line); border-radius: 3px; }
+@media (max-width: 700px) { .thesis { grid-template-columns: 1fr; } }
+#stage { width: 100%; aspect-ratio: 1 / 0.86; display: block; border-radius: 2px; background: #01030d; }
+
+.thesis blockquote { margin: 0; font-size: clamp(1.15rem, 0.95rem + 1vw, 1.6rem); line-height: 1.42; font-weight: 200; color: #eff3fd; text-wrap: balance; }
+.thesis blockquote strong { font-weight: 600; }
+.thesis .after { margin-top: 1.1rem; color: var(--ink-dim); font-size: 1.06rem; max-width: 54ch; }
+
+section { margin-top: clamp(2.6rem, 6vw, 4.4rem); }
+.head { display: flex; align-items: baseline; gap: 0.9rem; padding-bottom: 0.7rem; border-bottom: 1px solid var(--line); margin-bottom: 1.5rem; }
+.head .n { font-family: 'Orbitron', sans-serif; font-size: 0.84rem; font-weight: 700; letter-spacing: 0.12em; color: var(--cyan); }
+.head .note { margin-left: auto; font-size: 0.9rem; color: var(--ink-faint); }
+.prose { max-width: 66ch; color: var(--ink-dim); display: grid; gap: 0.85rem; }
+.prose strong { color: #eef2fd; }
+
+.arc { display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: stretch; margin-bottom: 1.5rem; }
+.arc span { flex: 1 1 auto; min-width: 92px; font-family: 'Orbitron', sans-serif; font-size: 0.76rem; font-weight: 500; letter-spacing: 0.05em; text-align: center; padding: 0.85rem 0.5rem; background: var(--surface); border: 1px solid var(--line-soft); border-top: 2px solid var(--stop, var(--line)); color: var(--ink-dim); text-wrap: balance; line-height: 1.4; }
+.arc span.key { color: #eff3fd; background: var(--surface-2); }
+
+.timeline { display: flex; width: 100%; height: 54px; border: 1px solid var(--line); border-radius: 2px; overflow: hidden; margin-bottom: 0.7rem; }
+.timeline i { position: relative; display: block; border-right: 1px solid var(--ground-deep); background: var(--ball); font-style: normal; }
+.timeline i:last-child { border-right: 0; }
+.timeline i.core { background: var(--lime); }
+.timeline i.cut { background: var(--red); }
+.timeline i::after { content: attr(data-n); position: absolute; inset: 0; display: grid; place-items: center; font-family: 'Orbitron', sans-serif; font-size: 0.74rem; font-weight: 700; color: #24130a; }
+.timeline i.core::after { color: #10200a; }
+.timeline i.cut::after { color: #ffdcd7; }
+
+.legend { display: flex; flex-wrap: wrap; gap: 0.5rem 1.4rem; font-size: 0.87rem; color: var(--ink-faint); }
+.legend b { font-weight: 400; color: var(--ink-dim); }
+.legend span { display: inline-flex; align-items: center; gap: 0.42rem; }
+.legend s { width: 11px; height: 11px; border-radius: 2px; text-decoration: none; display: inline-block; }
+
+.scenes { display: grid; gap: 0.7rem; }
+.scene { display: grid; grid-template-columns: 3.6rem minmax(0, 1fr); gap: 0 1.1rem; padding: 1.4rem 1.55rem 1.5rem; background: var(--surface); border: 1px solid var(--line-soft); border-left: 2px solid var(--ball); border-radius: 2px; }
+.scene.core { border-left-color: var(--lime); background: linear-gradient(90deg, #16240f 0%, var(--surface) 34%); }
+.scene.cut { border-left-color: var(--red); }
+.scene .idx { font-family: 'Orbitron', sans-serif; font-size: 1.5rem; font-weight: 700; line-height: 1; color: var(--ball); font-variant-numeric: tabular-nums; padding-top: 0.1rem; }
+.scene.core .idx { color: var(--lime); }
+.scene.cut .idx { color: #c9503f; }
+.scene .top { display: flex; align-items: baseline; gap: 0.8rem; flex-wrap: wrap; margin-bottom: 0.7rem; }
+.scene h3 { font-size: 1.16rem; font-weight: 700; letter-spacing: 0.01em; color: #f2f5ff; }
+
+.tag { font-family: 'Orbitron', sans-serif; font-size: 0.68rem; font-weight: 500; letter-spacing: 0.13em; text-transform: uppercase; padding: 0.2rem 0.45rem; border-radius: 2px; border: 1px solid; }
+.tag.core { color: #10200a; border-color: var(--lime); background: var(--lime); }
+.tag.cut { color: #ffdcd7; border-color: var(--red); background: var(--red); }
+.tag.card { color: #24130a; border-color: var(--ball); background: var(--ball); }
+
+.secs { margin-left: auto; font-family: 'Orbitron', sans-serif; font-size: 0.82rem; font-weight: 500; color: var(--ink-faint); font-variant-numeric: tabular-nums; }
+
+.body { display: grid; grid-template-columns: minmax(0, 1.08fr) minmax(0, 1fr); gap: 0.6rem 1.6rem; }
+@media (max-width: 720px) { .body { grid-template-columns: 1fr; gap: 1rem; } }
+.body > div { display: grid; gap: 0.34rem; align-content: start; }
+.body h4 { margin: 0; font-family: 'Orbitron', sans-serif; font-size: 0.84rem; font-weight: 500; letter-spacing: 0.15em; text-transform: uppercase; color: var(--ink-faint); }
+.body p { font-size: 1.06rem; line-height: 1.66; color: var(--ink-dim); }
+.body .aha { border-left: 1px solid var(--line); padding-left: 1.6rem; }
+@media (max-width: 720px) { .body .aha { border-left: 0; padding-left: 0; border-top: 1px solid var(--line); padding-top: 0.9rem; } }
+.body .aha p { color: var(--ink); }
+
+.rules { display: grid; gap: 0.6rem; counter-reset: r; max-width: 74ch; padding: 0; margin: 0; }
+.rules li { list-style: none; position: relative; padding-left: 2.8rem; font-size: 1.05rem; color: var(--ink-dim); }
+.rules li::before { counter-increment: r; content: counter(r, decimal-leading-zero); position: absolute; left: 0; top: 0.28rem; font-family: 'Orbitron', sans-serif; font-size: 0.84rem; font-weight: 500; color: var(--violet); }
+.notes { display: grid; gap: 0.75rem; max-width: 74ch; padding: 0; margin: 0; }
+.notes li { list-style: none; font-size: 1.05rem; color: var(--ink-dim); padding-left: 1.1rem; border-left: 1px solid var(--line); }
+.notes strong { color: #eef2fd; }
+
+code { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 0.85em; color: var(--cyan); background: #091430; border: 1px solid var(--line-soft); border-radius: 2px; padding: 0.06em 0.34em; }
+
+/* the blocker panel - this one is not decoration */
+.alert {
+    margin-top: 1.4rem;
+    padding: 1.2rem 1.4rem;
+    background: linear-gradient(100deg, #2a0f0a 0%, var(--surface) 60%);
+    border: 1px solid #6b2318;
+    border-left: 3px solid #d4463a;
+    border-radius: 3px;
+    display: grid;
+    gap: 0.7rem;
+    max-width: 76ch;
+}
+.alert h3 { font-size: 1.02rem; letter-spacing: 0.04em; color: #ffd9d3; }
+.alert p { font-size: 1.04rem; color: #e3cfcb; }
+.alert strong { color: #fff2ef; }
+.alert code { color: #ff9d8e; background: #2b100b; border-color: #5c1f16; }
+
+.measure { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 420px); gap: clamp(1.2rem, 3vw, 2.2rem); align-items: start; }
+.measure > div { min-width: 0; }
+@media (max-width: 900px) { .measure { grid-template-columns: 1fr; } }
+.tblwrap { overflow-x: auto; scrollbar-width: thin; scrollbar-color: #26386b transparent; }
+.tblwrap::-webkit-scrollbar { height: 7px; }
+.tblwrap::-webkit-scrollbar-thumb { background: #26386b; border-radius: 4px; }
+.tbl { width: 100%; min-width: 460px; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+.tbl caption { text-align: left; font-family: 'Orbitron', sans-serif; font-size: 0.78rem; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-faint); padding-bottom: 0.6rem; }
+.tbl th, .tbl td { text-align: right; padding: 0.42rem 0.6rem; border-bottom: 1px solid var(--line-soft); font-size: 0.99rem; color: var(--ink-dim); }
+.tbl th { font-family: 'Orbitron', sans-serif; font-size: 0.7rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-faint); border-bottom-color: var(--line); }
+.tbl th:first-child, .tbl td:first-child { text-align: left; }
+.tbl td.n { font-family: 'Orbitron', sans-serif; font-weight: 500; color: var(--ink); }
+.tbl tr.mid td { color: var(--gold); }
+.tbl tr.edge td { color: #ff8a70; }
+
+#binplot { width: 100%; aspect-ratio: 1 / 0.72; border: 1px solid var(--line); border-radius: 2px; background: #01030d; }
+.plotcap { margin-top: 0.6rem; font-size: 0.92rem; color: var(--ink-faint); }
+
+.budget { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1px; background: var(--line-soft); border: 1px solid var(--line-soft); border-radius: 2px; margin-bottom: 1.5rem; }
+.budget div { background: var(--surface); padding: 1rem 1.1rem; display: grid; gap: 0.28rem; }
+.budget dt { font-family: 'Orbitron', sans-serif; font-size: 0.74rem; font-weight: 500; letter-spacing: 0.15em; text-transform: uppercase; color: var(--ink-faint); }
+.budget dd { margin: 0; font-family: 'Orbitron', sans-serif; font-size: 1.3rem; font-weight: 700; color: var(--cyan); font-variant-numeric: tabular-nums; }
+.budget dd small { display: block; font-family: 'Outfit', sans-serif; font-size: 0.78rem; font-weight: 300; color: var(--ink-faint); letter-spacing: 0; margin-top: 0.2rem; }
+.solved { color: var(--lime); }
+
+footer { margin-top: clamp(2.6rem, 6vw, 4.4rem); padding-top: 1.6rem; border-top: 1px solid var(--line); display: flex; flex-wrap: wrap; gap: 1rem 2rem; align-items: baseline; }
+footer p { font-size: 1.05rem; color: var(--ink-dim); max-width: 58ch; }
+footer .sig { margin-left: auto; }
+
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+    <p class="eyebrow">Doc Alvers Mathe-Labor · Videopipeline</p>
+    <h1>Die Glocke, die niemand hinmalt</h1>
+    <p class="lede">Der Plot für das Galton-Demovideo: was passiert, in welcher
+        Reihenfolge — und warum genau dort der Groschen fällt.</p>
+    <p class="status">Plot zur Freigabe · eine Entscheidung offen (Abschnitt D)</p>
+
+    <dl class="meta">
+        <div><dt>Lab</dt><dd><a href="https://docalvers.de/galtonboard.html">galtonboard.html</a></dd></div>
+        <div><dt>Sprecherin</dt><dd>Solita · de-DE-Studio</dd></div>
+        <div><dt>Aufnahme</dt><dd>1440p · Playwright</dd></div>
+        <div><dt>Szenen</dt><dd>10 · davon 5 auf eigenen Karten</dd></div>
+        <div><dt>Laufzeit</dt><dd>~3:25 geplant</dd></div>
+    </dl>
+</header>
+
+<div class="thesis">
+    <canvas id="stage" width="720" height="620" role="img"
+            aria-label="Ein Galton-Brett mit achtzehn Reihen: die exakte Binomialverteilung
+                        als Säulen, darüber die Glockenkurve mit derselben Streuung —
+                        beide aus denselben Zahlen gerechnet"></canvas>
+    <div>
+        <blockquote>Die Glockenkurve wird hier nicht <em>hingelegt</em>. Sie
+            <strong>fällt heraus</strong> — aus nichts als achtzehn Münzwürfen pro
+            Kugel.</blockquote>
+        <p class="after">Der ganze Film ist die Antwort auf eine einzige Frage:
+            <em>Warum immer diese Form?</em> Nicht: wie ein Galton-Brett aussieht.
+            Sondern: warum ausgerechnet <strong>diese</strong> Kurve herauskommt, und
+            zwar egal, was man vorne hineinwirft.</p>
+    </div>
+</div>
+
+<section>
+    <div class="head"><span class="n">A</span><h2>Der dramaturgische Bogen</h2></div>
+    <div class="arc" id="arc"></div>
+    <div class="prose">
+        <p>Erst wird zugeschaut: eine Kugel ist eine Folge von achtzehn Münzwürfen (1),
+           zehn Kugeln ergeben nichts Erkennbares (2), und dann wächst aus tausend
+           Kugeln die Glocke (3). Dann wird erklärt, warum ausgerechnet diese Form:
+           es ist eine Wegezählung, 262 144 Wege durch das Brett (4), und die Mitte
+           gewinnt nicht durch Glück, sondern weil dorthin 48 620 Wege führen und zum
+           Rand genau <em>einer</em> (5).</p>
+        <p>Szene 6 macht daraus die unbequeme Rechnung: für <strong>eine einzige</strong>
+           Kugel im Außenfach bräuchte man im Mittel eine Viertelmillion Würfe — über
+           eine Stunde Laufzeit. Danach wird gespielt (7) und verallgemeinert (8): die
+           Glocke kommt nicht vom Brett, sondern vom Summieren. Szene 9 zeigt ehrlich,
+           wo das <em>nicht</em> gilt, Szene 10 löst ein.</p>
+    </div>
+</section>
+
+<section>
+    <div class="head"><span class="n">B</span><h2>Die 10 Szenen</h2>
+        <span class="note" id="tl-note">Breite = geplante Sprechzeit</span></div>
+    <div class="timeline" id="timeline"></div>
+    <div class="legend">
+        <span><s style="background:#adff2f"></s><b>Kernszene — wird nicht gekürzt</b></span>
+        <span><s style="background:#b02418"></s><b>Notbremse, falls der Schnitt zäh wirkt</b></span>
+        <span><s style="background:#ff9640"></s><b>Regelszene</b></span>
+    </div>
+    <div class="scenes" id="scenes" style="margin-top:1.5rem"></div>
+</section>
+
+<section>
+    <div class="head"><span class="n">C</span><h2>Didaktische Leitplanken</h2>
+        <span class="note">bindend für den Sprechertext</span></div>
+    <ol class="rules">
+        <li><strong>Nie eine Formel ohne vorher gezeigtes Bild.</strong> Die
+            Binomialkoeffizienten kommen in Szene 4 als <em>abgezählte Wege</em>, nicht
+            als <span class="m">n</span> über <span class="m">k</span>. Die Formel darf
+            danach erscheinen, nicht davor.</li>
+        <li><strong>Ein neuer Begriff pro Szene.</strong> Aus „Binomialverteilung" wird
+            die <em>Wegezählung</em>, aus „Standardabweichung" die <em>Breite</em>, aus
+            „Zentraler Grenzwertsatz" der Satz <em>„Summen sehen alle gleich aus"</em>.
+            Er wird einmal benannt, in Szene 8.</li>
+        <li>Verboten, weil dieser Film sie nicht braucht: <em>Momente,
+            charakteristische Funktion, Lindeberg-Bedingung, Stirling</em>.</li>
+        <li><strong>Nicht „die Kugel entscheidet sich".</strong> Kein Wille, keine
+            Absicht: an jedem Nagel fällt sie mit gleicher Wahrscheinlichkeit nach links
+            oder rechts, mehr ist es nicht.</li>
+        <li><strong>Die Glocke ist eine Näherung, kein Naturgesetz.</strong> Was
+            wirklich herauskommt, ist die Binomialverteilung; die Glockenkurve liegt bei
+            achtzehn Reihen um höchstens <strong>0,26 Prozentpunkte</strong> daneben
+            (gemessen, Abschnitt D). Solita sagt „fast genau", nicht „genau".</li>
+        <li><strong>Über die Ränder wird nicht geschwindelt.</strong> Siehe die rote
+            Notiz in Abschnitt D — das ist die einzige Stelle, an der dieser Film
+            unehrlich werden <em>könnte</em>, und deshalb die wichtigste.</li>
+        <li><strong>Nichts behaupten, was das Bild nicht hergibt.</strong> Alle Zahlen
+            stammen aus Abschnitt D: die Verteilung exakt ausgerechnet, der Durchsatz am
+            laufenden Lab gemessen.</li>
+    </ol>
+</section>
+
+<section>
+    <div class="head"><span class="n">D</span><h2>Gemessen, nicht geschätzt</h2>
+        <span class="note solved">Grundlage aller Zahlen im Film</span></div>
+    <div class="measure">
+        <div><div class="tblwrap"><table class="tbl" id="tbl"></table></div></div>
+        <div>
+            <canvas id="binplot" width="800" height="576" role="img"
+                    aria-label="Die exakte Binomialverteilung für achtzehn Reihen als
+                                Säulen, darüber die Glockenkurve mit gleicher Mitte und
+                                Breite — die beiden liegen fast übereinander."></canvas>
+            <p class="plotcap">Exakte Wegezählung (Säulen) gegen die Glockenkurve
+               (Linie), beide mit Mitte 9 und Breite 2,12 Fächer.</p>
+        </div>
+    </div>
+    <div class="prose" style="margin-top:1.6rem">
+        <p><strong>Der Aufbau:</strong> 18 Reihen, 19 Fächer, an jedem Nagel fifty-fifty.
+           Damit gibt es <strong>2<sup>18</sup> = 262 144</strong> verschiedene Wege
+           durch das Brett — jeder gleich wahrscheinlich. Ins mittlere Fach führen
+           <strong>48 620</strong> davon, ins äußerste genau <strong>einer</strong>.
+           Mitte 9, Breite 2,121 Fächer.</p>
+        <p><strong>Wie gut die Glocke passt:</strong> größter Abstand zwischen exakter
+           Wegezählung und Glockenkurve <strong>0,26 Prozentpunkte</strong>, und zwar in
+           der Mitte. Für einen Film heißt das: „so gut wie deckungsgleich" ist wahr,
+           „gleich" wäre falsch.</p>
+        <p><strong>Was das Lab einer Aufnahme erlaubt</strong> (gemessen): der ganze
+           Zustand <code>sim</code> ist <strong>unerreichbar</strong> — er lebt in einer
+           Closure im <code>load</code>-Handler. Steuerbar ist nur das DOM:
+           <code>slider-rows</code> (11–29, in Zweierschritten),
+           <code>slider-spawn</code> (10–1000 ms), <code>slider-speed</code>
+           (0,04–5,0), <code>slider-maxballs</code> (1–500), <code>btn-play-pause</code>
+           und <code>btn-reset</code>. Der Kugelzähler ist als Text ablesbar.</p>
+        <p><strong>Durchsatz, am laufenden Lab gestoppt:</strong> in der Auslieferung
+           <strong>17,8 Kugeln pro Sekunde</strong>, mit allen Reglern am Anschlag
+           <strong>60,1</strong>. Tausend Kugeln dauern damit knapp 17 Sekunden — das
+           passt in eine Szene. Zehntausend dauern schon zweieinhalb Minuten.</p>
+    </div>
+
+    <div class="alert">
+        <h3>⚠︎ Zwei Dinge, die vor dem Dreh entschieden werden müssen</h3>
+        <p><strong>1. Jede sechzigste Kugel ist nicht zufällig.</strong> In
+           <code>galtonboard.html</code> steht <code>explorerEvery: 60</code>: jede
+           sechzigste Kugel bekommt über <code>pickEmptyBinIndex()</code> ein
+           <em>Zielfach</em> zugewiesen — ein noch leeres — und wird an den Nägeln
+           gezielt dorthin gesteuert. Das ist selbstbegrenzend (sobald jedes Fach
+           getroffen ist, hört es auf), aber die <em>erste</em> Kugel in jedem Außenfach
+           ist <strong>gesetzt, nicht gewonnen</strong>. Genau darüber macht Szene 6
+           einen Punkt. Ein Film, der sagt „auch ganz außen landet mal eine — reiner
+           Zufall", während im Code eine Kugel dorthin gelenkt wird, wäre gelogen.
+           <br><strong>Mein Vorschlag:</strong> <code>explorerEvery</code> für den Dreh
+           auf 0 setzen (eine Zeile) und die leeren Außenfächer <em>zeigen</em> — sie
+           sind die Pointe von Szene 6, nicht ein Schönheitsfehler. Deine
+           Entscheidung.</p>
+        <p><strong>2. Die Glockenkurve wird gar nicht gezeichnet.</strong> Die
+           Feature-Beschreibung in
+           <code>resources/explanations/galtonboard.txt</code> verspricht ein
+           „Normalverteilungs-Overlay: Einblendung der theoretischen Glockenkurve" —
+           im Code gibt es das nicht, ich habe die ganze Datei danach durchsucht.
+           Entweder die Kurve kommt ins Lab (dann kann der Film sie einblenden), oder
+           sie bleibt eine Karte, oder die Beschreibung wird korrigiert. Der Plot geht
+           bis auf Weiteres davon aus, dass sie <strong>auf einer Karte</strong>
+           liegt.</p>
+    </div>
+</section>
+
+<section>
+    <div class="head"><span class="n">E</span><h2>Zeitbudget</h2>
+        <span class="note">nach der Vertonung neu zu rechnen</span></div>
+    <dl class="budget" id="budget"></dl>
+    <div class="prose">
+        <p>Teil 1 von <code>Infinity_6min.m4a</code> ist nahtlos loopbar: loopStart
+           21,220 s, loopEnd 163,998 s. <strong>Intro plus zwei Durchläufe</strong>
+           tragen die geplante Länge.</p>
+        <p><strong>Der Durchsatz bestimmt den Schnitt, nicht umgekehrt.</strong> Bei
+           60 Kugeln pro Sekunde ist Szene 3 (tausend Kugeln) nach 17 Sekunden fertig —
+           das passt. Alles, was mehr Kugeln bräuchte, muss auf eine Karte.</p>
+    </div>
+</section>
+
+<section>
+    <div class="head"><span class="n">F</span><h2>Choreografie-Notizen</h2>
+        <span class="note">für die Aufnahme</span></div>
+    <ul class="notes">
+        <li><strong>Alles läuft über die DOM-Regler.</strong> <code>sim</code> ist von
+            außen nicht erreichbar (Abschnitt D), also gibt es kein
+            <code>page.evaluate</code>-Steuern wie bei Fourier oder Linse. Jede
+            Zustandsänderung ist ein <code>input</code>-Ereignis auf einem Slider oder
+            ein Klick auf einen Knopf.</li>
+        <li><strong>Die Regler merken sich ihren Stand</strong>
+            (<code>galtonboard-slider-settings-v2</code> im <code>localStorage</code>).
+            Die Aufnahme braucht deshalb einen <em>frischen</em> Context, sonst startet
+            der Film mit den Einstellungen des letzten Versuchs.</li>
+        <li><strong>Szene 1 braucht eine einzelne Kugel.</strong>
+            <code>slider-maxballs</code> auf 1 und <code>slider-speed</code> ganz
+            langsam (0,04) — dann sieht man die achtzehn Entscheidungen einzeln. Das ist
+            der einzige Weg, den Kern des Films überhaupt zu zeigen.</li>
+        <li><strong>Der Reihen-Regler springt in Zweierschritten</strong> (11 … 29,
+            <code>step=2</code>), damit die Fächerzahl ungerade bleibt. Szene 7 kann
+            also nicht jede Zahl anfahren.</li>
+        <li>Ein Reihenwechsel baut das Brett neu und <strong>löscht die Statistik</strong>
+            (<code>rebuildBoard</code> / <code>resetStats</code>). Szene 7 muss also pro
+            Einstellung neu sammeln — bei 60 Kugeln pro Sekunde sind das je rund 17 s
+            für tausend Kugeln. Das ist der Grund, warum Szene 7 nur zwei Einstellungen
+            zeigt und nicht vier.</li>
+        <li>Der lokale Server klebt ein rotes <strong>LOCAL</strong>-Schild in die Seite.
+            Die Aufnahme entfernt <code>#local-badge</code> vor dem ersten Bild.</li>
+        <li>1,6 s Luft nach jeder Szene; Zuschlag für 3 und 7, wo noch Kugeln fallen,
+            wenn Solita schon schweigt.</li>
+        <li>Die fünf Karten kommen aus <code>videopipeline/galton/karten.html</code> und
+            bekommen ihre gemessene Sprechdauer als Parameter
+            (<code>?scene=sN&amp;dur=…</code>).</li>
+    </ul>
+</section>
+
+<section>
+    <div class="head"><span class="n">G</span><h2>Bewusst weggelassen</h2>
+        <span class="note">Kandidaten für Teil 2</span></div>
+    <div class="prose">
+        <p><strong>Der Beweis des Grenzwertsatzes.</strong> Warum <em>jede</em> Summe
+           vieler kleiner unabhängiger Beiträge auf dieselbe Kurve zuläuft, ist der
+           eigentliche Satz — und er braucht Werkzeug, das in drei Minuten nicht
+           unterzubringen ist. Szene 8 sagt, <em>dass</em> es so ist, und Szene 9 zeigt
+           die Grenze.</p>
+        <p><strong>Das schiefe Brett.</strong> Ein Nagel, der nicht fifty-fifty ist —
+           daraus wird eine schiefe Verteilung, und bei genug Reihen wieder eine Glocke,
+           nur verschoben. Sehr schön, aber das Lab kann es nicht, und dafür müsste es
+           umgebaut werden.</p>
+        <p>Außerdem draußen: Galtons eigene Geschichte und was er mit dem Brett zeigen
+           wollte · das Gesetz der großen Zahlen als eigener Satz · die
+           Log-Normalverteilung, die herauskommt, wenn man <em>multipliziert</em> statt
+           zu addieren · und die Frage, warum Messfehler so oft normalverteilt
+           sind.</p>
+    </div>
+</section>
+
+<footer>
+    <p><strong>Stand:</strong> Plot zur Freigabe. Noch kein Wortlaut, keine Vertonung,
+       keine Aufnahme — und <strong>zwei offene Entscheidungen</strong> in Abschnitt D,
+       die vor dem Dreh beantwortet sein müssen. Zahlen aus
+       <code>videopipeline/galton/measure.mjs</code>.</p>
+    <p class="eyebrow sig">Doc Alvers Mathe-Labor</p>
+</footer>
+
+</div>
+
+<script>
+const SCENES = [
+    { n: 1, s: 20, t: 'Eine Kugel, achtzehn Münzwürfe', core: true,
+      img: 'Eine <em>einzige</em> Kugel, ganz langsam. Sie trifft den ersten Nagel, rollt links herum. Nächster Nagel, rechts. Achtzehnmal. Bei jedem Nagel blitzt kurz auf, wie sie sich hätte anders entscheiden können.',
+      aha: 'Achtzehn Nägel, achtzehn Münzwürfe. <strong>Wo die Kugel landet, ist nichts als die Bilanz aus achtzehn Mal links-oder-rechts.</strong> Mehr Physik steckt in diesem Brett nicht.' },
+
+    { n: 2, s: 15, t: 'Zehn Kugeln: nichts',
+      img: 'Der Regler geht hoch, zehn Kugeln fallen. Die Fächer füllen sich unregelmäßig — mal zwei nebeneinander, mal eine Lücke. Kein Muster.',
+      aha: 'Zehnmal Zufall sieht aus wie — Zufall. Wer hier eine Glocke sieht, sieht sie hinein. <em>Noch</em> ist keine da.' },
+
+    { n: 3, s: 20, t: 'Tausend Kugeln: die Glocke', core: true,
+      img: 'Alle Regler hoch, der Zähler läuft. Bei hundert ahnt man etwas, bei dreihundert steht eine Form, bei tausend eine saubere Glocke. Der Zähler bleibt bei 1000 stehen, das Bild steht still.',
+      aha: 'Niemand hat diese Kurve hingelegt. Jede einzelne Kugel wusste nichts von ihr. <strong>Sie entsteht aus lauter Münzwürfen, die nichts voneinander wissen</strong> — und sie kommt jedes Mal.' },
+
+    { n: 4, s: 22, t: 'Warum ausgerechnet diese Form', core: true, card: true,
+      img: 'Das Brett wird zum Wegenetz: von oben zählt eine Zahl an jedem Nagel mit, auf wie vielen Wegen man ihn erreicht. 1, dann 1–1, dann 1–2–1 — das Pascalsche Dreieck wächst durch das Brett, bis unten 1, 18, 153, … 48 620, … 153, 18, 1 steht.',
+      aha: 'Die Höhe der Säule ist keine Wahrscheinlichkeit, die man glauben muss — sie ist eine <strong>abgezählte Anzahl von Wegen</strong>. Insgesamt gibt es 262 144, und jeder einzelne ist genauso wahrscheinlich wie jeder andere.' },
+
+    { n: 5, s: 20, t: 'Die Mitte ist kein Glück', core: true, card: true,
+      img: 'Zwei Fächer werden herausgegriffen. Ins mittlere: 48 620 Wege, angedeutet als dichtes Bündel. Ins äußerste: <em>ein</em> Weg, ein einzelner Faden, achtzehnmal dieselbe Richtung.',
+      aha: 'Das Außenfach ist nicht unwahrscheinlich, weil das Schicksal es nicht mag, sondern weil es dorthin <strong>nur einen einzigen Weg gibt</strong> — und in die Mitte achtundvierzigtausend. Wahrscheinlichkeit ist hier reine Buchhaltung.' },
+
+    { n: 6, s: 22, t: 'Was das Außenfach kostet', core: true, card: true,
+      img: 'Die Rechnung steht groß da: ein Weg von 262 144. Daneben läuft eine Uhr mit — bei sechzig Kugeln pro Sekunde, dem Anschlag des Labors, wären das im Mittel <strong>73 Minuten</strong> für eine einzige Kugel ganz außen.',
+      aha: 'Deshalb bleiben die Ränder in einem Film leer, und das ist keine Schlamperei, sondern das Ergebnis. <strong>Seltene Ereignisse sind nicht selten, weil sie schwierig wären — sie sind selten, weil so wenige Wege dorthin führen.</strong>' },
+
+    { n: 7, s: 18, t: 'Mehr Reihen, schmalere Glocke',
+      img: 'Der Reihen-Regler von 11 auf 29, danach wieder tausend Kugeln. Die Glocke wird sichtbar schmaler <em>im Verhältnis</em> zum Brett, obwohl sie in Fächern gerechnet breiter ist.',
+      aha: 'Die Breite wächst wie die <strong>Wurzel</strong> aus der Reihenzahl, nicht wie die Reihenzahl. Doppelt so viele Nägel heißt nur <em>ein-Komma-vier-mal</em> so breit — deshalb wird die Glocke relativ immer schlanker.' },
+
+    { n: 8, s: 20, t: 'Es liegt nicht am Brett', card: true,
+      img: 'Drei Kacheln nebeneinander: Würfelsummen, Körpergrößen, Messfehler. Alle drei Häufigkeitsbilder blenden ineinander — und darüber legt sich jedes Mal dieselbe Kurve.',
+      aha: 'Die Glocke kommt nicht vom Galton-Brett. Sie kommt vom <strong>Summieren</strong>. Wenn viele kleine Beiträge zusammenkommen, die nichts voneinander wissen, sieht das Ergebnis <em>immer</em> so aus — egal, was die einzelnen Beiträge waren.' },
+
+    { n: 9, s: 16, t: 'Und wo es nicht gilt', cut: true, card: true,
+      img: 'Dieselbe Kachel noch einmal, aber mit Vermögen statt Körpergrößen: kein Buckel in der Mitte, sondern ein langer Schwanz nach rechts, der nicht abreißen will.',
+      aha: 'Die Glocke braucht Beiträge, die alle ungefähr gleich viel wiegen. Wo <em>ein</em> Beitrag alle anderen erschlagen kann, kommt sie nicht — und dann liegt jeder falsch, der sie trotzdem annimmt.' },
+
+    { n: 10, s: 16, t: 'Achtzehn Münzwürfe',
+      img: 'Zurück auf das volle Brett mit der fertigen Glocke. Die Farbe geht heraus, bis nur noch die Kurve steht — und darunter der Satz vom Anfang: achtzehnmal links oder rechts.',
+      aha: 'Nichts an dieser Kurve wurde entworfen. Sie ist das, was <strong>übrig bleibt</strong>, wenn genug Zufall zusammenkommt — und genau deshalb findet man sie überall, wo viele kleine Dinge sich addieren.' }
+];
+
+/* Solita's wording arrives later, generated from narration.mjs. */
+/* SAY:START - generated by videopipeline/galton/sync-drehbuch.mjs, do not edit */
+const SAY = {};
+const SPOKEN = {};
+/* SAY:END */
+
+const ARC = [
+    { t: 'Eine Kugel', c: '#ff9640', key: true },
+    { t: 'Zehn: nichts', c: '#ff9640' },
+    { t: 'Tausend: die Glocke', c: '#ffd36a', key: true },
+    { t: 'Wege zaehlen', c: '#ffd36a', key: true },
+    { t: 'Die Mitte gewinnt', c: '#ffd36a', key: true },
+    { t: 'Was der Rand kostet', c: '#b02418', key: true },
+    { t: 'Breite ~ Wurzel', c: '#00d2ff' },
+    { t: 'Es liegt am Summieren', c: '#adff2f', key: true },
+    { t: 'Und wo nicht', c: '#adff2f' }
+];
+document.getElementById('arc').innerHTML = ARC.map(a =>
+    '<span class="' + (a.key ? 'key' : '') + '" style="--stop:' + a.c + '">' + a.t + '</span>').join('');
+
+const secs = (x) => SPOKEN['s' + x.n] ?? x.s;
+const total = SCENES.reduce((s, x) => s + secs(x), 0);
+document.getElementById('timeline').innerHTML = SCENES.map(x =>
+    '<i class="' + (x.core ? 'core' : x.cut ? 'cut' : '') + '" data-n="' + x.n + '"' +
+    ' style="flex:0 0 ' + (secs(x) / total * 100).toFixed(3) + '%"' +
+    ' title="Szene ' + x.n + ' · ' + secs(x).toFixed(1) + ' s"></i>').join('');
+
+(function () {
+    const spoken = Object.values(SPOKEN).reduce((a, b) => a + b, 0);
+    const planned = SCENES.reduce((a, x) => a + x.s, 0);
+    const air = SCENES.length * 1.6;
+    const film = (spoken || planned) + air;
+    const mmss = (t) => Math.floor(t / 60) + ':' + String(Math.round(t % 60)).padStart(2, '0');
+    const cell = (dt, dd, sub) => '<div><dt>' + dt + '</dt><dd>' + dd + '<small>' + sub + '</small></dd></div>';
+    document.getElementById('budget').innerHTML =
+        cell('Sprache', (spoken || planned).toFixed(0) + ' s', spoken ? 'gemessen · 10 Szenen' : 'geplant · 10 Szenen') +
+        cell('Luft', '~' + air.toFixed(0) + ' s', '1,6 s je Szene') +
+        cell('Film', mmss(film), spoken ? 'nach der Vertonung' : 'geschätzt') +
+        cell('Durchsatz', '60,1 /s', 'gemessen · alle Regler am Anschlag');
+})();
+
+document.getElementById('scenes').innerHTML = SCENES.map(x =>
+    '<article class="scene ' + (x.core ? 'core' : x.cut ? 'cut' : '') + '">' +
+        '<div class="idx">' + String(x.n).padStart(2, '0') + '</div>' +
+        '<div>' +
+            '<div class="top">' +
+                '<h3>' + x.t + '</h3>' +
+                (x.core ? '<span class="tag core">Kernszene</span>' : '') +
+                (x.cut ? '<span class="tag cut">Notbremse</span>' : '') +
+                (x.card ? '<span class="tag card">Karte</span>' : '') +
+                '<span class="secs">' + secs(x).toFixed(1) + ' s</span>' +
+            '</div>' +
+            '<div class="body">' +
+                '<div><h4>Was im Bild passiert</h4><p>' + x.img + '</p></div>' +
+                '<div class="aha"><h4>Der Aha</h4><p>' + x.aha + '</p></div>' +
+            '</div>' +
+            (SAY['s' + x.n] ? '<div class="say"><h4>Solita sagt</h4><p>' + SAY['s' + x.n] + '</p></div>' : '') +
+        '</div>' +
+    '</article>').join('');
+
+/* ---------------------------------------------------------------
+   The exact path counts for 18 rows - Pascal's triangle, computed here,
+   which is the same number the lab's balls are sampling.
+   --------------------------------------------------------------- */
+const ROWS = 18;
+const COEFF = (function () {
+    let p = [1];
+    for (let i = 0; i < ROWS; i++) {
+        const q = [1];
+        for (let k = 0; k < p.length - 1; k++) q.push(p[k] + p[k + 1]);
+        q.push(1);
+        p = q;
+    }
+    return p;
+})();
+const TOTAL = COEFF.reduce((a, b) => a + b, 0);       // 262144
+const MEAN = ROWS / 2, SD = Math.sqrt(ROWS / 4);
+
+(function () {
+    const SHOW = [0, 1, 2, 3, 6, 9, 12, 15, 16, 17, 18];
+    const de = (v, d) => v.toFixed(d).replace('.', ',');
+    let html = '<caption>18 Reihen · 19 Fächer · 262 144 Wege — exakt abgezählt</caption>' +
+        '<thead><tr><th>Fach</th><th>Wege</th><th>Anteil</th><th>bei 1000 Kugeln</th></tr></thead><tbody>';
+    SHOW.forEach((i) => {
+        const c = COEFF[i], pr = c / TOTAL;
+        const cls = i === 9 ? 'mid' : (i === 0 || i === 18) ? 'edge' : '';
+        html += '<tr class="' + cls + '"><td class="n">' + i + '</td>' +
+            '<td>' + c.toLocaleString('de-DE') + '</td>' +
+            '<td>' + de(100 * pr, pr < 0.001 ? 4 : 2) + ' %</td>' +
+            '<td>' + de(1000 * pr, 2) + '</td></tr>';
+    });
+    html += '</tbody>';
+    document.getElementById('tbl').innerHTML = html;
+})();
+
+/* --- the plot: exact bars against the bell curve with the same mean and width --- */
+(function () {
+    const cv = document.getElementById('binplot');
+    if (!cv) return;
+    const ctx = cv.getContext('2d');
+    function draw() {
+        const r = cv.getBoundingClientRect();
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        cv.width = Math.max(1, Math.round(r.width * dpr));
+        cv.height = Math.max(1, Math.round(r.height * dpr));
+        const W = cv.width, H = cv.height, px = W / 800;
+        ctx.fillStyle = '#01030d'; ctx.fillRect(0, 0, W, H);
+        const L = 56 * px, R = W - 20 * px, T = 26 * px, B = H - 46 * px;
+        const maxP = COEFF[9] / TOTAL;
+        const X = (i) => L + (i + 0.5) / (ROWS + 1) * (R - L);
+        const Y = (p) => B - p / (maxP * 1.08) * (B - T);
+        const bw = (R - L) / (ROWS + 1) * 0.76;
+
+        COEFF.forEach((c, i) => {
+            const p = c / TOTAL;
+            ctx.fillStyle = i === 0 || i === ROWS ? 'rgba(255,138,112,0.85)' : 'rgba(255,150,64,0.55)';
+            ctx.fillRect(X(i) - bw / 2, Y(p), bw, B - Y(p));
+            ctx.strokeStyle = i === 0 || i === ROWS ? '#ff8a70' : '#ff9640';
+            ctx.lineWidth = 1 * px;
+            ctx.strokeRect(X(i) - bw / 2, Y(p), bw, B - Y(p));
+        });
+
+        /* the bell curve with the same centre and width - no fitting, just the formula */
+        ctx.strokeStyle = '#00d2ff'; ctx.lineWidth = 2.4 * px;
+        ctx.beginPath();
+        for (let s = 0; s <= 400; s++) {
+            const x = s / 400 * ROWS;
+            const p = Math.exp(-((x - MEAN) ** 2) / (2 * SD * SD)) / (SD * Math.sqrt(2 * Math.PI));
+            const fn = s ? 'lineTo' : 'moveTo';
+            ctx[fn](X(x), Y(p));
+        }
+        ctx.stroke();
+
+        ctx.fillStyle = '#8194b8';
+        ctx.font = 400 + ' ' + (12 * px) + 'px Outfit, system-ui, sans-serif';
+        ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+        [0, 3, 6, 9, 12, 15, 18].forEach((i) => ctx.fillText(String(i), X(i), B + 8 * px));
+        ctx.fillText('Fach', (L + R) / 2, B + 28 * px);
+        ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+        ctx.fillText('18,55 %', L + 4 * px, Y(maxP) - 12 * px);
+        ctx.fillStyle = '#ff8a70';
+        ctx.fillText('1 von 262 144', X(0) + 6 * px, B - 26 * px);
+    }
+    draw();
+    addEventListener('resize', draw, { passive: true });
+    document.fonts.ready.then(draw);
+})();
+
+/* ---------------------------------------------------------------
+   Hero: a real board. Every ball really flips eighteen coins - no
+   distribution is sampled, the paths are walked.
+   --------------------------------------------------------------- */
+(function () {
+    const cv = document.getElementById('stage');
+    if (!cv) return;
+    const ctx = cv.getContext('2d');
+    const N = 4000;
+    const bins = new Array(ROWS + 1).fill(0);
+    for (let b = 0; b < N; b++) {
+        let right = 0;
+        for (let r = 0; r < ROWS; r++) if (Math.random() < 0.5) right++;
+        bins[right]++;
+    }
+    function draw() {
+        const r = cv.getBoundingClientRect();
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        cv.width = Math.max(1, Math.round(r.width * dpr));
+        cv.height = Math.max(1, Math.round(r.height * dpr));
+        const W = cv.width, H = cv.height, px = W / 720;
+        ctx.fillStyle = '#01030d'; ctx.fillRect(0, 0, W, H);
+
+        const pegTop = H * 0.10, pegBot = H * 0.56;
+        const spacing = W / (ROWS + 3);
+        /* the pegs, as the lab lays them out */
+        for (let row = 0; row < ROWS; row++) {
+            const y = pegTop + (pegBot - pegTop) * row / (ROWS - 1);
+            for (let k = 0; k <= row; k++) {
+                const x = W / 2 - row * spacing / 2 + k * spacing;
+                ctx.fillStyle = 'rgba(0,210,255,0.30)';
+                ctx.beginPath(); ctx.arc(x, y, 1.7 * px, 0, Math.PI * 2); ctx.fill();
+            }
+        }
+        /* one path, walked for real */
+        let rt = 0;
+        ctx.strokeStyle = 'rgba(255,184,102,0.85)';
+        ctx.lineWidth = 1.8 * px;
+        ctx.beginPath();
+        ctx.moveTo(W / 2, pegTop - 14 * px);
+        for (let row = 0; row < ROWS; row++) {
+            if (Math.random() < 0.5) rt++;
+            const y = pegTop + (pegBot - pegTop) * row / (ROWS - 1);
+            ctx.lineTo(W / 2 - row * spacing / 2 + rt * spacing, y);
+        }
+        ctx.stroke();
+
+        /* the bins */
+        const maxB = Math.max(...bins);
+        const base = H * 0.95, top = H * 0.60;
+        const bw = spacing * 0.74;
+        bins.forEach((c, i) => {
+            const x = W / 2 - ROWS * spacing / 2 + i * spacing;
+            const h = (base - top) * c / maxB;
+            ctx.fillStyle = c === 0 ? 'rgba(255,138,112,0.25)' : 'rgba(255,150,64,0.6)';
+            ctx.fillRect(x - bw / 2, base - h, bw, h);
+            ctx.strokeStyle = c === 0 ? '#ff8a70' : '#ff9640';
+            ctx.lineWidth = 1 * px;
+            ctx.strokeRect(x - bw / 2, base - h, bw, h);
+        });
+        /* and the curve those bins are drifting towards */
+        ctx.strokeStyle = 'rgba(0,210,255,0.9)'; ctx.lineWidth = 2 * px;
+        ctx.beginPath();
+        for (let s = 0; s <= 300; s++) {
+            const xi = s / 300 * ROWS;
+            const p = Math.exp(-((xi - MEAN) ** 2) / (2 * SD * SD)) / (SD * Math.sqrt(2 * Math.PI));
+            const x = W / 2 - ROWS * spacing / 2 + xi * spacing;
+            const h = (base - top) * (p * N) / maxB;
+            const fn = s ? 'lineTo' : 'moveTo';
+            ctx[fn](x, base - h);
+        }
+        ctx.stroke();
+
+        ctx.fillStyle = 'rgba(229,235,250,0.7)';
+        ctx.font = 400 + ' ' + (13 * px) + 'px Outfit, system-ui, sans-serif';
+        ctx.textAlign = 'left'; ctx.textBaseline = 'bottom';
+        ctx.fillText(N.toLocaleString('de-DE') + ' Kugeln · je 18 echte Münzwürfe', 14 * px, H - 8 * px);
+    }
+    draw();
+    addEventListener('resize', draw, { passive: true });
+    document.fonts.ready.then(draw);
+})();
+</script>
+</body>
+</html>
