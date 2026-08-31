@@ -1380,8 +1380,10 @@ td.remark { color: var(--muted); font-size: 0.88rem; min-width: 160px; }
    Immer sichtbar - nur der Klick (Schreibdialog) haengt am Bearbeiten-Modus.
    Alle Grundregeln bewusst einklassig, damit .is-full/.is-part die Farbe
    sicher ueberschreiben. */
+/* Nur im Bearbeiten-Modus sichtbar (Doc, 31.08.2026): der Chip ist ein
+   Werkzeug zum Eintragen, im Lesemodus ist er Rauschen. */
 .untis-chip {
-    display: flex;
+    display: none;
     align-items: center;
     justify-content: center;
     gap: 5px;
@@ -1422,8 +1424,7 @@ td.remark { color: var(--muted); font-size: 0.88rem; min-width: 160px; }
 .untis-chip .u-mark .u-rays-minor { stroke-width: 5; }
 .untis-chip .u-mark .u-letter { stroke-width: 19.5; }
 
-/* Anfassbar ist der Chip nur beim Bearbeiten; der Tooltip bleibt immer da. */
-body.editing .untis-chip { cursor: pointer; }
+body.editing .untis-chip { display: flex; cursor: pointer; }
 
 .untis-chip.is-full,
 .untis-chip.is-part {
@@ -1433,7 +1434,9 @@ body.editing .untis-chip { cursor: pointer; }
     opacity: 1;
 }
 
-@media print { .untis-chip { display: none; } }
+/* Auch aus dem Bearbeiten-Modus heraus gedruckt bleibt er weg - sonst
+   gewaenne body.editing die Spezifitaet gegen diese Regel. */
+@media print { .untis-chip, body.editing .untis-chip { display: none; } }
 
 /* WebUntis-Schreibdialog (svp-plan.js untisDialog). Breiter als die
    Login-Karte, weil links der Stundeninhalt und darunter die Stunden der
