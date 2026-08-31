@@ -1,0 +1,10 @@
+import { readFileSync, writeFileSync } from 'fs';
+const SRC = process.argv[2], OUT = process.argv[3];
+const src = readFileSync(SRC, 'utf8');
+const title = src.match(/<title>[\s\S]*?<\/title>/)[0];
+const fonts = src.match(/<link rel="preconnect"[\s\S]*?family=Orbitron[^>]*>/)[0];
+const style = src.slice(src.indexOf('<style>', src.indexOf('</title>')));
+const css   = style.slice(0, style.indexOf('</style>') + 8);
+const body  = src.slice(src.indexOf('<body>') + 6, src.lastIndexOf('</body>'));
+writeFileSync(OUT, [title, fonts, css, body.trim(), ''].join('\n'));
+console.log('written', readFileSync(OUT, 'utf8').length, 'bytes');

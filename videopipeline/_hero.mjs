@@ -1,0 +1,11 @@
+import { chromium } from 'playwright';
+const b = await chromium.launch(); const p = await b.newPage({ viewport: { width: 1200, height: 900 } });
+await p.goto('file://' + process.argv[2]);
+await p.waitForTimeout(1600);
+const sel = process.argv[3] || '.thesis';
+await p.locator(sel).screenshot({ path: process.argv[4] });
+const ink = await p.evaluate((id) => { const c=document.getElementById(id); if(!c) return null; const x=c.getContext('2d');
+  const d=x.getImageData(0,0,c.width,c.height).data; let n=0; for(let i=0;i<d.length;i+=4) if(d[i]+d[i+1]+d[i+2]>200) n++;
+  return +(100*n/(d.length/4)).toFixed(2); }, process.argv[5] || 'piplot');
+console.log('plot ink', ink);
+await b.close();
