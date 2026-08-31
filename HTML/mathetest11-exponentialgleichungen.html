@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Exponentialgleichungen — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  "id": "mathe11-w21-expgleichungen",
+  "version": "v1",
+  "title": "Aufgaben · Exponentialgleichungen",
+  "subtitle": "Berufliches Gymnasium · Klasse 11 · Woche 21, KW 4 (LB 3) · 20 Aufgaben: $a^x = b$ lösen, Halbwertszeit und Verdopplungszeit · genau eine Antwort pro Aufgabe",
+  "dashSub": "BGY · Klasse 11 · KW 4 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe",
+  "back": "svp/mathe/mathe11.html",
+  "questions": [
+    {
+      "q": "Löse $2^x = 32$.",
+      "opts": [
+        "$x = 6$",
+        "$x = 4$",
+        "$x = 5$",
+        "$x = 16$"
+      ],
+      "steps": [
+        "$32 = 2^5$",
+        "Gleiche Basis, also $x = 5$."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Löse $3^x = \\dfrac{1}{27}$.",
+      "opts": [
+        "$x = \\dfrac13$",
+        "$x = -9$",
+        "$x = -3$",
+        "$x = 3$"
+      ],
+      "steps": [
+        "$\\dfrac{1}{27} = 3^{-3}$",
+        "Also $x = -3$."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Wie lautet die allgemeine Lösung von $a^x = b$ (mit $a, b > 0$, $a \\neq 1$)?",
+      "opts": [
+        "$x = \\log_a b$",
+        "$x = \\dfrac{b}{a}$",
+        "$x = b^a$",
+        "$x = \\log_b a$"
+      ],
+      "steps": [
+        "Der Logarithmus ist die Umkehrung des Potenzierens.",
+        "$x = \\log_a b = \\dfrac{\\ln b}{\\ln a}$"
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Löse $5^x = 20$ (numerisch, zwei Nachkommastellen).",
+      "opts": [
+        "$x \\approx 4{,}00$",
+        "$x \\approx 2{,}30$",
+        "$x \\approx 0{,}54$",
+        "$x \\approx 1{,}86$"
+      ],
+      "steps": [
+        "$x = \\dfrac{\\ln 20}{\\ln 5} = \\dfrac{2{,}996}{1{,}609}$",
+        "$x \\approx 1{,}86$ — Probe: $5^{1{,}86} \\approx 20$"
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Löse $2 \\cdot 3^x = 54$.",
+      "opts": [
+        "$x = 2$",
+        "$x = 3$",
+        "$x = 27$",
+        "$x = 18$"
+      ],
+      "steps": [
+        "Erst durch $2$ teilen: $3^x = 27$",
+        "$27 = 3^3$, also $x = 3$"
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Ein Kapital wächst mit $5\\,\\%$ jährlich. Nach wie vielen Jahren hat es sich verdoppelt?",
+      "opts": [
+        "nach $20$ Jahren",
+        "nach $2$ Jahren",
+        "nach $50$ Jahren",
+        "nach etwa $14{,}2$ Jahren"
+      ],
+      "steps": [
+        "$1{,}05^{\\,t} = 2$",
+        "$t = \\dfrac{\\ln 2}{\\ln 1{,}05} \\approx \\dfrac{0{,}693}{0{,}0488} \\approx 14{,}2$"
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Ein Stoff zerfällt mit dem Faktor $0{,}9$ pro Tag. Wann ist die Hälfte übrig?",
+      "opts": [
+        "nach $0{,}5$ Tagen",
+        "nach etwa $6{,}6$ Tagen",
+        "nach $5$ Tagen",
+        "nach $10$ Tagen"
+      ],
+      "steps": [
+        "$0{,}9^{\\,t} = 0{,}5$",
+        "$t = \\dfrac{\\ln 0{,}5}{\\ln 0{,}9} = \\dfrac{-0{,}693}{-0{,}105} \\approx 6{,}6$"
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Warum darf man bei $0{,}9^{\\,t} = 0{,}5$ am Ende nicht das Ungleichheitszeichen umdrehen?",
+      "opts": [
+        "Weil beide Logarithmen negativ sind.",
+        "Weil man durch eine negative Zahl teilt.",
+        "Weil der Logarithmus immer positiv ist.",
+        "Hier steht eine Gleichung — die Frage stellt sich gar nicht."
+      ],
+      "steps": [
+        "Bei einer Gleichung gibt es kein Relationszeichen zu drehen.",
+        "Erst bei Ungleichungen wie $0{,}9^{\\,t} < 0{,}5$ kippt das Zeichen, weil $\\ln 0{,}9 < 0$ ist."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Löse $10^{\\,x} = 0{,}001$.",
+      "opts": [
+        "$x = 0{,}3$",
+        "$x = -3$",
+        "$x = 3$",
+        "$x = -0{,}001$"
+      ],
+      "steps": [
+        "$0{,}001 = 10^{-3}$",
+        "Also $x = -3$."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Löse $4^{\\,x} = 8$.",
+      "opts": [
+        "$x = \\dfrac23$",
+        "$x = \\dfrac32$",
+        "$x = 2$",
+        "$x = 32$"
+      ],
+      "steps": [
+        "Beide Seiten auf Basis $2$: $2^{2x} = 2^3$",
+        "$2x = 3$, also $x = 1{,}5$"
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Eine Bakterienkultur wächst gemäß $N(t) = 500 \\cdot 2^{\\,t}$ ($t$ in Stunden). Wann sind es $8000$?",
+      "opts": [
+        "nach $8$ Stunden",
+        "nach $4$ Stunden",
+        "nach $16$ Stunden",
+        "nach $3$ Stunden"
+      ],
+      "steps": [
+        "$2^{\\,t} = \\dfrac{8000}{500} = 16$",
+        "$16 = 2^4$, also $t = 4$"
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Wie lautet die Verdopplungszeit bei stetigem Wachstum mit Faktor $q$ pro Schritt?",
+      "opts": [
+        "$t = 2q$",
+        "$t = \\dfrac{2}{q}$",
+        "$t = \\dfrac{\\ln 2}{\\ln q}$",
+        "$t = \\dfrac{\\ln q}{\\ln 2}$"
+      ],
+      "steps": [
+        "Aus $q^{\\,t} = 2$ folgt $t \\ln q = \\ln 2$.",
+        "Also $t = \\dfrac{\\ln 2}{\\ln q}$"
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Löse $3^{\\,x+1} = 81$.",
+      "opts": [
+        "$x = 2$",
+        "$x = 3$",
+        "$x = 4$",
+        "$x = 27$"
+      ],
+      "steps": [
+        "$81 = 3^4$, also $x + 1 = 4$",
+        "$x = 3$"
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Löse $e^{\\,x} = 1$.",
+      "opts": [
+        "keine Lösung",
+        "$x = 0$",
+        "$x = 1$",
+        "$x = e$"
+      ],
+      "steps": [
+        "$e^0 = 1$ — jede Potenz mit Exponent $0$ ergibt $1$.",
+        "Also $x = 0$."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Welche Gleichung hat keine Lösung?",
+      "opts": [
+        "$2^{\\,x} = 0{,}5$",
+        "$2^{\\,x} = 1$",
+        "$2^{\\,x} = -8$",
+        "$2^{\\,x} = 8$"
+      ],
+      "steps": [
+        "$2^{\\,x}$ ist stets positiv.",
+        "Ein negativer Wert ist daher unerreichbar."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Ein Auto verliert jährlich $15\\,\\%$ an Wert. Wann ist es nur noch die Hälfte wert?",
+      "opts": [
+        "nach $15$ Jahren",
+        "nach etwa $4{,}3$ Jahren",
+        "nach $7{,}5$ Jahren",
+        "nach $2$ Jahren"
+      ],
+      "steps": [
+        "$0{,}85^{\\,t} = 0{,}5$",
+        "$t = \\dfrac{\\ln 0{,}5}{\\ln 0{,}85} \\approx \\dfrac{-0{,}693}{-0{,}1625} \\approx 4{,}3$"
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Warum hilft der Logarithmus beim Lösen von $a^x = b$?",
+      "opts": [
+        "weil er immer ganze Zahlen liefert",
+        "weil er den Exponenten nach vorn holt",
+        "weil er die Basis entfernt",
+        "weil er Summen in Produkte verwandelt"
+      ],
+      "steps": [
+        "$\\log(a^x) = x \\cdot \\log a$ — der gesuchte Exponent steht danach als Faktor da.",
+        "Aus der Exponentialgleichung wird so eine ganz gewöhnliche lineare Gleichung."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Löse $2^{\\,x} = 7$ und runde auf zwei Nachkommastellen.",
+      "opts": [
+        "$x \\approx 2{,}81$",
+        "$x \\approx 3{,}50$",
+        "$x \\approx 1{,}95$",
+        "$x \\approx 3{,}00$"
+      ],
+      "steps": [
+        "$x = \\dfrac{\\ln 7}{\\ln 2} = \\dfrac{1{,}946}{0{,}693}$",
+        "$x \\approx 2{,}81$ — plausibel, denn $7$ liegt zwischen $2^2$ und $2^3$."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Ein Waldbestand nimmt jährlich um $3\\,\\%$ ab. Nach wie vielen Jahren sind noch $80\\,\\%$ übrig?",
+      "opts": [
+        "nach etwa $7{,}3$ Jahren",
+        "nach $20$ Jahren",
+        "nach $3$ Jahren",
+        "nach $26{,}7$ Jahren"
+      ],
+      "steps": [
+        "$0{,}97^{\\,t} = 0{,}8$",
+        "$t = \\dfrac{\\ln 0{,}8}{\\ln 0{,}97} \\approx \\dfrac{-0{,}223}{-0{,}0305} \\approx 7{,}3$"
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Welche Probe ist bei einer Exponentialgleichung sinnvoll?",
+      "opts": [
+        "den gerundeten Wert einsetzen und prüfen, ob er ungefähr passt",
+        "keine, das Ergebnis stimmt immer",
+        "nur die Einheiten prüfen",
+        "das Ergebnis verdoppeln"
+      ],
+      "steps": [
+        "Der Logarithmus liefert meist einen Näherungswert.",
+        "Einsetzen zeigt sofort, ob Größenordnung und Vorzeichen stimmen — und ob das Ergebnis im Sachzusammenhang taugt."
+      ],
+      "solution": 0
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

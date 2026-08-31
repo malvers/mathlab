@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Matrizen: Begriff und Darstellung — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  "id": "mathe11-w26-matrizen",
+  "version": "v1",
+  "title": "Aufgaben · Matrizen: Begriff und Darstellung",
+  "subtitle": "Berufliches Gymnasium · Klasse 11 · Woche 26, KW 11 (LB 4) · 20 Aufgaben: spezielle Matrizen, LGS in Matrixform · genau eine Antwort pro Aufgabe",
+  "dashSub": "BGY · Klasse 11 · KW 11 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe",
+  "back": "svp/mathe/mathe11.html",
+  "questions": [
+    {
+      "q": "Was ist eine Matrix?",
+      "opts": [
+        "eine besondere Gleichung",
+        "eine Funktion mit zwei Variablen",
+        "ein Diagramm",
+        "ein rechteckiges Zahlenschema aus Zeilen und Spalten"
+      ],
+      "steps": [
+        "Eine Matrix ordnet Zahlen in Zeilen und Spalten an.",
+        "Sie speichert damit ganze Datentabellen oder Gleichungssysteme kompakt."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Welches Format hat eine Matrix mit $3$ Zeilen und $4$ Spalten?",
+      "opts": [
+        "$3 + 4$",
+        "$3 \\times 4$",
+        "$4 \\times 3$",
+        "$12$"
+      ],
+      "steps": [
+        "Zuerst die Zeilen, dann die Spalten.",
+        "Also eine $3 \\times 4$-Matrix mit $12$ Einträgen."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Was kennzeichnet eine quadratische Matrix?",
+      "opts": [
+        "gleich viele Zeilen wie Spalten",
+        "nur Quadratzahlen als Einträge",
+        "sie hat genau vier Einträge",
+        "alle Einträge sind gleich"
+      ],
+      "steps": [
+        "Eine $n \\times n$-Matrix heißt quadratisch.",
+        "Nur für sie sind Begriffe wie Determinante oder Inverse erklärt."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Was ist die Einheitsmatrix?",
+      "opts": [
+        "die Matrix mit dem Eintrag $1$",
+        "eine quadratische Matrix mit Einsen auf der Hauptdiagonale und sonst Nullen",
+        "eine Matrix aus lauter Einsen",
+        "eine Matrix mit einer Zeile"
+      ],
+      "steps": [
+        "Die Hauptdiagonale trägt Einsen, alle anderen Einträge sind null.",
+        "Sie spielt bei der Multiplikation dieselbe Rolle wie die Zahl $1$."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Was ist eine Diagonalmatrix?",
+      "opts": [
+        "alle Einträge sind gleich",
+        "sie ist nicht quadratisch",
+        "außerhalb der Hauptdiagonale stehen nur Nullen",
+        "sie hat nur eine Diagonale"
+      ],
+      "steps": [
+        "Nur auf der Hauptdiagonale dürfen von null verschiedene Zahlen stehen.",
+        "Die Einheitsmatrix ist ein Sonderfall davon."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Was ist eine obere Dreiecksmatrix?",
+      "opts": [
+        "unterhalb der Hauptdiagonale stehen nur Nullen",
+        "sie hat die Form eines Dreiecks",
+        "sie hat drei Zeilen",
+        "alle Einträge oben sind gleich"
+      ],
+      "steps": [
+        "Alle Einträge unter der Hauptdiagonale sind null.",
+        "Genau diese Form erzeugt das Gauß-Verfahren — deshalb ist sie so wichtig."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Was ist ein Spaltenvektor?",
+      "opts": [
+        "eine Matrix mit genau einer Zeile",
+        "eine quadratische Matrix",
+        "eine Matrix ohne Einträge",
+        "eine Matrix mit genau einer Spalte"
+      ],
+      "steps": [
+        "Er hat das Format $n \\times 1$.",
+        "In $A \\cdot \\vec{x} = \\vec{b}$ sind $\\vec{x}$ und $\\vec{b}$ Spaltenvektoren."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Welche Matrix gehört zum System $2x + 3y = 7$, $x - y = 1$?",
+      "opts": [
+        "$\\begin{pmatrix} 2 & 1 \\\\ 3 & -1 \\end{pmatrix}$",
+        "$\\begin{pmatrix} 7 \\\\ 1 \\end{pmatrix}$",
+        "$\\begin{pmatrix} 2 & 3 & 7 \\\\ 1 & -1 & 1 \\end{pmatrix}$",
+        "$\\begin{pmatrix} 2 & 3 \\\\ 1 & -1 \\end{pmatrix}$"
+      ],
+      "steps": [
+        "Die Koeffizientenmatrix enthält nur die Faktoren vor den Unbekannten.",
+        "Zeile für Zeile in der Reihenfolge der Gleichungen."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Was steht in der erweiterten Koeffizientenmatrix zusätzlich?",
+      "opts": [
+        "die rechte Seite des Gleichungssystems",
+        "die Lösungen",
+        "die Unbekannten",
+        "nichts"
+      ],
+      "steps": [
+        "An die Koeffizienten wird die Spalte der rechten Seiten angehängt.",
+        "Damit lässt sich das ganze System als ein Schema verrechnen."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Wofür steht $A \\cdot \\vec{x} = \\vec{b}$?",
+      "opts": [
+        "für eine quadratische Gleichung",
+        "für eine Funktion",
+        "für ein Produkt dreier Zahlen",
+        "für ein lineares Gleichungssystem in Kurzform"
+      ],
+      "steps": [
+        "$A$ enthält die Koeffizienten, $\\vec{x}$ die Unbekannten, $\\vec{b}$ die rechte Seite.",
+        "Die Schreibweise gilt für jede Größe des Systems."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Wie viele Einträge hat eine $4 \\times 5$-Matrix?",
+      "opts": [
+        "$45$",
+        "$16$",
+        "$20$",
+        "$9$"
+      ],
+      "steps": [
+        "$4 \\cdot 5 = 20$",
+        "Zeilenzahl mal Spaltenzahl."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Was bedeutet der Eintrag $a_{23}$?",
+      "opts": [
+        "zweite Zeile, dritte Spalte",
+        "zweite Spalte, dritte Zeile",
+        "der Wert $23$",
+        "die Summe von $2$ und $3$"
+      ],
+      "steps": [
+        "Der erste Index ist immer die Zeile.",
+        "Also Zeile $2$, Spalte $3$."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Was ist die Nullmatrix?",
+      "opts": [
+        "eine Matrix ohne Zeilen",
+        "eine Matrix mit einer Null",
+        "die Einheitsmatrix",
+        "eine Matrix, deren Einträge alle null sind"
+      ],
+      "steps": [
+        "Alle Einträge sind null.",
+        "Bei der Addition verhält sie sich wie die Zahl $0$."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Wozu dienen Matrizen in der Informatik?",
+      "opts": [
+        "zur Textverarbeitung",
+        "sie werden dort nicht verwendet",
+        "zum Speichern und Transformieren von Daten, etwa Bildern und Grafiken",
+        "nur zum Rechnen mit Brüchen"
+      ],
+      "steps": [
+        "Ein Graustufenbild ist nichts anderes als eine Matrix von Helligkeitswerten.",
+        "Drehungen, Skalierungen und Filter werden als Matrixoperationen ausgeführt."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Ein Betrieb notiert den Materialbedarf dreier Produkte für vier Rohstoffe. Welches Format hat die Matrix?",
+      "opts": [
+        "$12 \\times 1$",
+        "$1 \\times 12$",
+        "$3 \\times 4$ oder $4 \\times 3$, je nach Anordnung",
+        "immer $3 \\times 3$"
+      ],
+      "steps": [
+        "Produkte und Rohstoffe bilden Zeilen und Spalten.",
+        "Welche Größe wo steht, legt man fest — und muss es dann konsequent beibehalten."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Was ist die transponierte Matrix $A^\\mathsf{T}$?",
+      "opts": [
+        "Zeilen und Spalten werden vertauscht",
+        "alle Vorzeichen werden gedreht",
+        "die Matrix wird quadratisch",
+        "die Einträge werden sortiert"
+      ],
+      "steps": [
+        "Aus dem Eintrag $a_{ij}$ wird $a_{ji}$.",
+        "Eine $3\\times2$-Matrix wird dabei zu einer $2\\times3$-Matrix."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Welche Matrix ist zugleich Diagonal-, Dreiecks- und symmetrische Matrix?",
+      "opts": [
+        "die Nullmatrix mit einer Zeile",
+        "keine",
+        "die Einheitsmatrix",
+        "jede quadratische Matrix"
+      ],
+      "steps": [
+        "Sie hat nur Diagonaleinträge, also stehen ober- und unterhalb Nullen.",
+        "Und es gilt $E^\\mathsf{T} = E$."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Wie viele Unbekannte hat ein System mit der Koeffizientenmatrix im Format $3 \\times 3$?",
+      "opts": [
+        "drei",
+        "neun",
+        "sechs",
+        "eine"
+      ],
+      "steps": [
+        "Jede Spalte gehört zu einer Unbekannten.",
+        "Drei Spalten bedeuten drei Unbekannte, drei Zeilen drei Gleichungen."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Warum schreibt man Gleichungssysteme überhaupt als Matrix?",
+      "opts": [
+        "weil Rechner nur Matrizen kennen",
+        "weil es im Lehrplan steht",
+        "weil sich das Lösen dadurch zu einem schematischen Rechnen mit Zeilen vereinfacht",
+        "weil es kürzer aussieht"
+      ],
+      "steps": [
+        "Die Variablennamen werden zu Spaltenpositionen — man rechnet nur noch mit Zahlen.",
+        "Genau darauf setzt das Gauß-Verfahren auf."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Zwei Matrizen sind gleich, wenn …",
+      "opts": [
+        "sie dieselbe Summe haben",
+        "sie quadratisch sind",
+        "sie dieselbe Zeilenzahl haben",
+        "sie dasselbe Format haben und in allen Einträgen übereinstimmen"
+      ],
+      "steps": [
+        "Format und jeder einzelne Eintrag müssen übereinstimmen.",
+        "Andernfalls sind es verschiedene Matrizen."
+      ],
+      "solution": 3
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

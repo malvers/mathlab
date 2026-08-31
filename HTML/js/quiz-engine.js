@@ -148,7 +148,7 @@
     const ans = document.createElement('div');
     ans.className = 'solanswer';
     const head = document.createElement('span');
-    head.textContent = 'Richtige Antwort: ' + LETTERS[item.solution] + ' — ';
+    head.textContent = 'Richtige Antwort: ' + LETTERS[item.solution] + ' \u2192 ';
     ans.appendChild(head);
     const val = document.createElement('span');
     renderMath(val, item.opts[item.solution]);
@@ -364,13 +364,13 @@
       mine.className = 'ra ' + (ok ? 'ok' : 'nok');
       const chosen = answers[qi];
       renderMath(mine, 'Deine Antwort: ' + (chosen < 0 ? 'nicht beantwortet' :
-        (LETTERS[chosen] || '?') + ' \u2014 ' + (item.opts[chosen] || '')));
+        (LETTERS[chosen] || '?') + ' \u2192 ' + (item.opts[chosen] || '')));
       cell.appendChild(mine);
       /* the correct option only where the quiz shows solutions at all */
       if (!ok && !NO_SOLUTIONS) {
         const cor = document.createElement('div');
         cor.className = 'ra ok';
-        renderMath(cor, 'Richtig: ' + (LETTERS[item.solution] || '?') + ' \u2014 ' +
+        renderMath(cor, 'Richtig: ' + (LETTERS[item.solution] || '?') + ' \u2192 ' +
           (item.opts[item.solution] || ''));
         cell.appendChild(cor);
       }
@@ -579,7 +579,7 @@
          die Schueler im Test sehen, damit man beim Besprechen nicht sucht. */
       const ans = document.createElement('div');
       ans.className = 'baranswer';
-      renderMath(ans, 'Richtig: ' + (LETTERS[item.solution] || '?') + ' — ' +
+      renderMath(ans, 'Richtig: ' + (LETTERS[item.solution] || '?') + ' \u2192 ' +
         (item.opts[item.solution] || ''));
       frag.appendChild(ans);
       html = '1';

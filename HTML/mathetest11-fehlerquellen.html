@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Typische Fehlerquellen — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  "id": "mathe11-w35-fehler",
+  "version": "v1",
+  "title": "Aufgaben · Typische Fehlerquellen",
+  "subtitle": "Berufliches Gymnasium · Klasse 11 · Woche 35, KW 21 · 20 Aufgaben: die Klassiker unter den Rechenfehlern erkennen und vermeiden · genau eine Antwort pro Aufgabe",
+  "dashSub": "BGY · Klasse 11 · KW 21 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe",
+  "back": "svp/mathe/mathe11.html",
+  "questions": [
+    {
+      "q": "Wo steckt der Fehler in $(a + b)^2 = a^2 + b^2$?",
+      "opts": [
+        "es müsste $a^2 - b^2$ heißen",
+        "kein Fehler",
+        "die Klammer ist überflüssig",
+        "das mittlere Glied $2ab$ fehlt"
+      ],
+      "steps": [
+        "$(a+b)^2 = (a+b)(a+b) = a^2 + 2ab + b^2$",
+        "Probe mit $a = b = 1$: links $4$, rechts $2$."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Wo steckt der Fehler in $\\sqrt{a^2 + b^2} = a + b$?",
+      "opts": [
+        "die Wurzel ist immer negativ",
+        "es fehlt ein Faktor $2$",
+        "kein Fehler",
+        "die Wurzel lässt sich nicht gliedweise ziehen"
+      ],
+      "steps": [
+        "Probe mit $a = 3$, $b = 4$: links $\\sqrt{25} = 5$, rechts $7$.",
+        "Wurzeln zerlegen sich nur bei Produkten, nicht bei Summen."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Wo steckt der Fehler in $-3(x - 2) = -3x - 6$?",
+      "opts": [
+        "richtig wäre $-3x - 2$",
+        "kein Fehler",
+        "richtig wäre $-3x + 6$",
+        "die Klammer darf nicht aufgelöst werden"
+      ],
+      "steps": [
+        "$-3 \\cdot (-2) = +6$",
+        "Das Minus gilt für beide Summanden — mit korrektem Vorzeichenwechsel."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Warum ist es falsch, bei $x^2 = 5x$ beide Seiten durch $x$ zu teilen?",
+      "opts": [
+        "weil $x^2$ dann verschwindet",
+        "es ist nicht falsch",
+        "weil dabei die Lösung $x = 0$ verloren geht",
+        "weil man nur addieren darf"
+      ],
+      "steps": [
+        "Ausklammern statt teilen: $x(x - 5) = 0$",
+        "Lösungen $x = 0$ und $x = 5$ — beim Teilen bleibt nur die zweite."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Wo steckt der Fehler in $\\dfrac{a + b}{a} = b$?",
+      "opts": [
+        "richtig wäre $b + 1$ nur für $a = 1$",
+        "kein Fehler",
+        "nur gleiche Faktoren kürzen sich, nicht Summanden",
+        "man darf gar nicht kürzen"
+      ],
+      "steps": [
+        "$\\dfrac{a+b}{a} = 1 + \\dfrac{b}{a}$",
+        "Aus Summen kürzen ist der häufigste Bruchfehler überhaupt."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Wo steckt der Fehler in „$20\\,\\%$ Rabatt, dann $20\\,\\%$ Aufschlag ergibt den alten Preis“?",
+      "opts": [
+        "Rabatt und Aufschlag sind gleich",
+        "es fehlt die Mehrwertsteuer",
+        "kein Fehler",
+        "die Prozente beziehen sich auf verschiedene Grundwerte"
+      ],
+      "steps": [
+        "$0{,}8 \\cdot 1{,}2 = 0{,}96$",
+        "Es bleiben $96\\,\\%$ — vier Prozent unter dem Ausgangspreis."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Wo steckt der Fehler in $\\log(a + b) = \\log a + \\log b$?",
+      "opts": [
+        "kein Fehler",
+        "für Summen gibt es kein Logarithmengesetz",
+        "der Logarithmus ist nicht definiert",
+        "richtig wäre $\\log a \\cdot \\log b$"
+      ],
+      "steps": [
+        "Richtig ist $\\log(a \\cdot b) = \\log a + \\log b$.",
+        "Probe: $\\log_{10}(1+1) \\approx 0{,}30$, aber $0 + 0 = 0$."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Wo steckt der Fehler in $2^3 \\cdot 2^4 = 2^{12}$?",
+      "opts": [
+        "richtig wäre $4^7$",
+        "richtig wäre $2^{34}$",
+        "kein Fehler",
+        "Exponenten werden addiert: $2^7$"
+      ],
+      "steps": [
+        "$a^m \\cdot a^n = a^{m+n}$",
+        "$2^3 \\cdot 2^4 = 2^7 = 128$"
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Wo steckt der Fehler in $\\sqrt{x^2} = x$ für alle reellen $x$?",
+      "opts": [
+        "kein Fehler",
+        "für negative $x$ ergibt sich $|x|$",
+        "die Wurzel existiert nicht",
+        "richtig wäre $x^2$"
+      ],
+      "steps": [
+        "Für $x = -5$: $\\sqrt{25} = 5 \\neq -5$.",
+        "Korrekt ist $\\sqrt{x^2} = |x|$."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Wo steckt der Fehler, wenn man $\\sqrt{x} = -2$ durch Quadrieren zu $x = 4$ löst?",
+      "opts": [
+        "kein Fehler",
+        "die Probe scheitert — die Wurzel ist nie negativ",
+        "man darf nicht quadrieren",
+        "richtig wäre $x = -4$"
+      ],
+      "steps": [
+        "$\\sqrt{4} = 2 \\neq -2$",
+        "Quadrieren ist keine Äquivalenzumformung, deshalb ist die Probe Pflicht."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Wo steckt der Fehler in „$f(x) = \\dfrac{1}{x-3}$ ist überall definiert“?",
+      "opts": [
+        "kein Fehler",
+        "bei $x = 3$ wird der Nenner null",
+        "die Funktion ist nirgends definiert",
+        "nur negative $x$ sind erlaubt"
+      ],
+      "steps": [
+        "$x - 3 \\neq 0$, also $x \\neq 3$.",
+        "Der Definitionsbereich gehört zu jeder vollständigen Lösung."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Wo steckt der Fehler in „$x^2 = 16$, also $x = 4$“?",
+      "opts": [
+        "es gibt keine Lösung",
+        "kein Fehler",
+        "die zweite Lösung $x = -4$ fehlt",
+        "richtig wäre $x = 8$"
+      ],
+      "steps": [
+        "$(-4)^2 = 16$ ebenso.",
+        "Beim Wurzelziehen einer Gleichung immer $\\pm$ mitdenken."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Wo steckt der Fehler in „der Anstieg ist $\\dfrac{x_2 - x_1}{y_2 - y_1}$“?",
+      "opts": [
+        "man muss addieren",
+        "kein Fehler",
+        "Zähler und Nenner sind vertauscht",
+        "es fehlt ein Minus"
+      ],
+      "steps": [
+        "$m = \\dfrac{\\Delta y}{\\Delta x}$",
+        "Erst die Höhenänderung, dann der Schritt nach rechts."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Wo steckt der Fehler in „$(2x)^3 = 2x^3$“?",
+      "opts": [
+        "kein Fehler",
+        "auch die $2$ wird potenziert: $8x^3$",
+        "richtig wäre $6x^3$",
+        "richtig wäre $2x^9$"
+      ],
+      "steps": [
+        "$(2x)^3 = 2^3 \\cdot x^3$",
+        "$= 8x^3$"
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Wo steckt der Fehler in „bei $0{,}9^t < 0{,}5$ folgt $t < \\dfrac{\\ln 0{,}5}{\\ln 0{,}9}$“?",
+      "opts": [
+        "man darf nicht logarithmieren",
+        "kein Fehler",
+        "beim Teilen durch $\\ln 0{,}9 < 0$ dreht sich das Zeichen",
+        "der Logarithmus ist falsch"
+      ],
+      "steps": [
+        "$\\ln 0{,}9$ ist negativ.",
+        "Division durch eine negative Zahl kehrt das Ungleichheitszeichen um: $t > \\ldots$"
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Wo steckt der Fehler in „$P = 1{,}2$ für ein Ereignis“?",
+      "opts": [
+        "kein Fehler",
+        "Wahrscheinlichkeiten liegen zwischen $0$ und $1$",
+        "es fehlt die Einheit",
+        "man muss runden"
+      ],
+      "steps": [
+        "$P > 1$ ist unmöglich.",
+        "Meist wurden Pfade addiert, die sich nicht ausschließen, oder es wurde doppelt gezählt."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Wo steckt der Fehler in „Ergebnis: $3{,}47512$ Personen“?",
+      "opts": [
+        "kein Fehler",
+        "im Sachzusammenhang muss ganzzahlig gerundet werden",
+        "die Zahl ist zu klein",
+        "es fehlt eine Einheit"
+      ],
+      "steps": [
+        "Personen sind unteilbar.",
+        "Zudem täuschen fünf Nachkommastellen eine Genauigkeit vor, die die Daten nicht hergeben."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Wo steckt der Fehler in „$\\sin(2x) = 2\\sin x$“?",
+      "opts": [
+        "der Faktor darf nicht aus dem Argument gezogen werden",
+        "es fehlt ein Kosinus im Nenner",
+        "richtig wäre $\\sin x^2$",
+        "kein Fehler"
+      ],
+      "steps": [
+        "Probe mit $x = \\dfrac{\\pi}{2}$: links $\\sin \\pi = 0$, rechts $2$.",
+        "Funktionsargumente sind keine Faktoren — das gilt für Sinus, Wurzel und Logarithmus gleichermaßen."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Wie findet man solche Fehler am schnellsten?",
+      "opts": [
+        "mit einer Zahlenprobe an einem einfachen Beispiel",
+        "durch nochmaliges Abschreiben",
+        "gar nicht",
+        "durch Nachrechnen mit dem CAS ohne Probe"
+      ],
+      "steps": [
+        "Kleine Zahlen wie $a = b = 1$ entlarven falsche Regeln sofort.",
+        "Das dauert Sekunden und ist die wirksamste Selbstkontrolle überhaupt."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Was ist der beste Umgang mit einem Fehler in der Klassenarbeit?",
+      "opts": [
+        "die Lösung auswendig lernen",
+        "ihn verstehen und die Regel dahinter neu ableiten",
+        "ihn schnell vergessen",
+        "die Aufgabe künftig meiden"
+      ],
+      "steps": [
+        "Ein verstandener Fehler ist ein dauerhafter Gewinn.",
+        "Wer nur das Ergebnis korrigiert, macht denselben Fehler beim nächsten Mal wieder."
+      ],
+      "solution": 1
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

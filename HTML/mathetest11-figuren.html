@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Figuren und Körper — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathe11-w7-figuren',
+  version: 'v1',
+  title: 'Aufgaben · Stücke an Figuren und Körpern',
+  subtitle: 'Berufliches Gymnasium · Klasse 11 · Woche 7, KW 40 (LB 2, Abschluss) · 20 Aufgaben: ebene Figuren, Körper, Formeln umstellen · genau eine Antwort pro Aufgabe',
+  dashSub: 'BGY · Klasse 11 · KW 40 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathe11.html', /* opened from the Mathe-11 plan */
+  /* Week 7 closes Lernbereich 2: computing pieces of plane figures and solids.
+     Answers stay exact (multiples of pi) wherever that is the honest form —
+     the week is explicitly a no-calculator week. */
+  questions: [
+    {
+      q: 'Wie groß ist die Fläche eines Kreises mit Radius $r = 5$ cm?',
+      opts: ['$10\\pi\\ \\mathrm{cm^2}$', '$25\\pi\\ \\mathrm{cm^2}$', '$5\\pi\\ \\mathrm{cm^2}$', '$50\\pi\\ \\mathrm{cm^2}$'],
+      steps: [
+        'Kreisfläche: $A = \\pi r^2$',
+        '$A = \\pi \\cdot 5^2 = 25\\pi\\ \\mathrm{cm^2} \\approx 78{,}5\\ \\mathrm{cm^2}$',
+        '$2\\pi r = 10\\pi$ wäre der Umfang — Fläche und Umfang nicht verwechseln.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein Kreis hat die Fläche $A = 36\\pi\\ \\mathrm{cm^2}$. Wie groß ist sein Umfang?',
+      opts: ['$6\\pi$ cm', '$36\\pi$ cm', '$12\\pi$ cm', '$18\\pi$ cm'],
+      steps: [
+        'Aus $\\pi r^2 = 36\\pi$ folgt $r^2 = 36$, also $r = 6$ cm.',
+        'Umfang: $U = 2\\pi r = 12\\pi$ cm',
+        'Der Weg führt immer über den Radius — er ist das Bindeglied zwischen Fläche und Umfang.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein Rechteck hat den Umfang $24$ cm und die Länge $8$ cm. Wie breit ist es?',
+      opts: ['$4$ cm', '$16$ cm', '$3$ cm', '$8$ cm'],
+      steps: [
+        'Umfang: $U = 2(a + b)$, also $24 = 2(8 + b)$',
+        'Durch $2$ teilen: $12 = 8 + b$',
+        '$b = 4$ cm'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Ein Dreieck hat die Grundseite $g = 12$ cm und die zugehörige Höhe $h = 5$ cm. Wie groß ist seine Fläche?',
+      opts: ['$60\\ \\mathrm{cm^2}$', '$17\\ \\mathrm{cm^2}$', '$30\\ \\mathrm{cm^2}$', '$24\\ \\mathrm{cm^2}$'],
+      steps: [
+        'Dreiecksfläche: $A = \\dfrac{1}{2}\\,g\\,h$',
+        '$A = \\dfrac{1}{2} \\cdot 12 \\cdot 5 = 30\\ \\mathrm{cm^2}$',
+        'Die Hälfte gehört dazu — $g \\cdot h$ wäre das umschließende Rechteck.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein Trapez hat die Seiten $a = 8$ cm, $c = 4$ cm und die Höhe $h = 5$ cm. Wie groß ist seine Fläche?',
+      opts: ['$30\\ \\mathrm{cm^2}$', '$60\\ \\mathrm{cm^2}$', '$40\\ \\mathrm{cm^2}$', '$20\\ \\mathrm{cm^2}$'],
+      steps: [
+        'Trapezfläche: $A = \\dfrac{a + c}{2}\\cdot h$',
+        'Mittlere Länge: $\\dfrac{8 + 4}{2} = 6$ cm',
+        '$A = 6 \\cdot 5 = 30\\ \\mathrm{cm^2}$'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Die Oberfläche eines Zylinders lautet $A = 2\\pi r(r + h)$. Was steckt in der Klammer?',
+      opts: [
+        'Grundfläche und Mantelfläche: $2\\pi r^2 + 2\\pi r h$',
+        'nur die Mantelfläche',
+        'Grundfläche und Höhe addiert',
+        'Umfang plus Höhe'
+      ],
+      steps: [
+        'Ausmultiplizieren: $2\\pi r(r+h) = 2\\pi r^2 + 2\\pi r h$',
+        '$2\\pi r^2$ sind Boden und Deckel (zwei Kreise), $2\\pi r h$ ist der Mantel (Umfang mal Höhe).',
+        'Die Klammerform ist nur die zusammengefasste Schreibweise derselben Summe.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Ein Zylinder hat $r = 3$ cm und $h = 10$ cm. Wie groß ist sein Volumen?',
+      opts: ['$30\\pi\\ \\mathrm{cm^3}$', '$60\\pi\\ \\mathrm{cm^3}$', '$90\\pi\\ \\mathrm{cm^3}$', '$900\\pi\\ \\mathrm{cm^3}$'],
+      steps: [
+        'Volumen: $V = \\pi r^2 h$ (Grundfläche mal Höhe)',
+        '$V = \\pi \\cdot 9 \\cdot 10 = 90\\pi\\ \\mathrm{cm^3} \\approx 283\\ \\mathrm{cm^3}$',
+        'Der Radius wird quadriert, die Höhe nicht.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie groß ist das Volumen einer Kugel mit $r = 3$ cm?',
+      opts: ['$36\\pi\\ \\mathrm{cm^3}$', '$27\\pi\\ \\mathrm{cm^3}$', '$12\\pi\\ \\mathrm{cm^3}$', '$9\\pi\\ \\mathrm{cm^3}$'],
+      steps: [
+        'Kugelvolumen: $V = \\dfrac{4}{3}\\pi r^3$',
+        '$r^3 = 27$, also $V = \\dfrac{4}{3}\\pi \\cdot 27 = 36\\pi\\ \\mathrm{cm^3}$',
+        'Erst die dritte Potenz, dann der Faktor $\\tfrac43$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie groß ist die Oberfläche einer Kugel mit $r = 2$ cm?',
+      opts: ['$4\\pi\\ \\mathrm{cm^2}$', '$8\\pi\\ \\mathrm{cm^2}$', '$32\\pi\\ \\mathrm{cm^2}$', '$16\\pi\\ \\mathrm{cm^2}$'],
+      steps: [
+        'Kugeloberfläche: $A = 4\\pi r^2$',
+        '$A = 4\\pi \\cdot 4 = 16\\pi\\ \\mathrm{cm^2}$',
+        'Merkhilfe: die Kugeloberfläche ist so groß wie vier Kreise mit demselben Radius.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Eine Pyramide hat die Grundfläche $G = 24\\ \\mathrm{cm^2}$ und die Höhe $h = 5$ cm. Wie groß ist ihr Volumen?',
+      opts: ['$120\\ \\mathrm{cm^3}$', '$40\\ \\mathrm{cm^3}$', '$60\\ \\mathrm{cm^3}$', '$29\\ \\mathrm{cm^3}$'],
+      steps: [
+        'Pyramidenvolumen: $V = \\dfrac{1}{3}\\,G\\,h$',
+        '$V = \\dfrac{1}{3} \\cdot 24 \\cdot 5 = 40\\ \\mathrm{cm^3}$',
+        'Die Pyramide füllt genau ein Drittel des Prismas mit gleicher Grundfläche und Höhe.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein Kegel hat $r = 3$ cm und $h = 4$ cm. Wie groß ist sein Volumen?',
+      opts: ['$12\\pi\\ \\mathrm{cm^3}$', '$36\\pi\\ \\mathrm{cm^3}$', '$4\\pi\\ \\mathrm{cm^3}$', '$24\\pi\\ \\mathrm{cm^3}$'],
+      steps: [
+        'Kegelvolumen: $V = \\dfrac{1}{3}\\pi r^2 h$',
+        '$V = \\dfrac{1}{3}\\pi \\cdot 9 \\cdot 4 = 12\\pi\\ \\mathrm{cm^3}$',
+        'Wie bei der Pyramide: ein Drittel des Zylinders mit gleicher Grundfläche und Höhe.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Derselbe Kegel ($r = 3$ cm, $h = 4$ cm): wie lang ist seine Mantellinie $s$?',
+      opts: ['$7$ cm', '$6$ cm', '$5$ cm', '$\\sqrt{7}$ cm'],
+      steps: [
+        'Radius, Höhe und Mantellinie bilden ein rechtwinkliges Dreieck.',
+        'Pythagoras: $s^2 = r^2 + h^2 = 9 + 16 = 25$',
+        '$s = 5$ cm — das bekannte $3$-$4$-$5$-Dreieck.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein Würfel hat das Volumen $64\\ \\mathrm{cm^3}$. Wie groß ist seine Oberfläche?',
+      opts: ['$96\\ \\mathrm{cm^2}$', '$64\\ \\mathrm{cm^2}$', '$16\\ \\mathrm{cm^2}$', '$384\\ \\mathrm{cm^2}$'],
+      steps: [
+        'Aus $a^3 = 64$ folgt die Kantenlänge $a = 4$ cm.',
+        'Der Würfel hat $6$ quadratische Flächen: $A = 6a^2 = 6 \\cdot 16$',
+        '$A = 96\\ \\mathrm{cm^2}$'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Ein Quader misst $2$ cm $\\times$ $3$ cm $\\times$ $5$ cm. Wie groß ist seine Oberfläche?',
+      opts: ['$30\\ \\mathrm{cm^2}$', '$31\\ \\mathrm{cm^2}$', '$62\\ \\mathrm{cm^2}$', '$60\\ \\mathrm{cm^2}$'],
+      steps: [
+        'Oberfläche: $A = 2(ab + ac + bc)$',
+        '$ab = 6$, $ac = 10$, $bc = 15$, zusammen $31$',
+        '$A = 2 \\cdot 31 = 62\\ \\mathrm{cm^2}$. Die $30\\ \\mathrm{cm^3}$ wären das Volumen.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Der Radius eines Kreises wird verdoppelt. Was passiert mit seiner Fläche?',
+      opts: ['sie verdoppelt sich', 'sie vervierfacht sich', 'sie verdreifacht sich', 'sie bleibt gleich'],
+      steps: [
+        '$A = \\pi r^2$ — der Radius steckt im Quadrat.',
+        'Aus $r$ wird $2r$: $\\pi(2r)^2 = 4\\pi r^2$',
+        'Die Fläche wächst also auf das Vierfache.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Alle Kanten eines Würfels werden verdoppelt. Was passiert mit dem Volumen?',
+      opts: ['$\\times 2$', '$\\times 4$', '$\\times 6$', '$\\times 8$'],
+      steps: [
+        '$V = a^3$ — die Kante steckt in der dritten Potenz.',
+        '$(2a)^3 = 8a^3$',
+        'Das Volumen wird achtmal so groß, die Oberfläche „nur“ viermal.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie lang ist die Diagonale eines Rechtecks mit den Seiten $6$ cm und $8$ cm?',
+      opts: ['$14$ cm', '$10$ cm', '$\\sqrt{14}$ cm', '$48$ cm'],
+      steps: [
+        'Die Diagonale ist die Hypotenuse eines rechtwinkligen Dreiecks.',
+        '$d^2 = 6^2 + 8^2 = 36 + 64 = 100$',
+        '$d = 10$ cm'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie groß ist die Fläche eines Kreissektors mit $90^\\circ$ und $r = 4$ cm?',
+      opts: ['$16\\pi\\ \\mathrm{cm^2}$', '$8\\pi\\ \\mathrm{cm^2}$', '$4\\pi\\ \\mathrm{cm^2}$', '$2\\pi\\ \\mathrm{cm^2}$'],
+      steps: [
+        '$90^\\circ$ sind ein Viertel des Vollkreises.',
+        'Ganzer Kreis: $A = \\pi \\cdot 16 = 16\\pi\\ \\mathrm{cm^2}$',
+        'Ein Viertel davon: $4\\pi\\ \\mathrm{cm^2}$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Stelle $V = \\pi r^2 h$ nach $h$ um.',
+      opts: [
+        '$h = \\dfrac{V}{\\pi r^2}$',
+        '$h = \\dfrac{\\pi r^2}{V}$',
+        '$h = V - \\pi r^2$',
+        '$h = \\sqrt{\\dfrac{V}{\\pi}}$'
+      ],
+      steps: [
+        '$h$ steht im Produkt mit $\\pi r^2$ — also durch $\\pi r^2$ teilen.',
+        '$h = \\dfrac{V}{\\pi r^2}$',
+        'Der Radius bleibt dabei im Quadrat stehen; eine Wurzel entsteht nur, wenn man nach $r$ umstellt.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie viele Liter fasst ein würfelförmiger Behälter mit $20$ cm Kantenlänge?',
+      opts: ['$0{,}8$ Liter', '$80$ Liter', '$8$ Liter', '$8000$ Liter'],
+      steps: [
+        'Volumen: $V = 20^3 = 8000\\ \\mathrm{cm^3}$',
+        '$1$ Liter $= 1\\ \\mathrm{dm^3} = 1000\\ \\mathrm{cm^3}$',
+        '$8000 : 1000 = 8$ Liter'
+      ],
+      solution: 2
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

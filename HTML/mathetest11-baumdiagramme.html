@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Mehrstufige Zufallsversuche: Baumdiagramme — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  "id": "mathe11-w30-baum",
+  "version": "v1",
+  "title": "Aufgaben · Mehrstufige Zufallsversuche: Baumdiagramme",
+  "subtitle": "Berufliches Gymnasium · Klasse 11 · Woche 30, KW 16 (LB 1) · 20 Aufgaben: Pfadregeln, Urnenmodelle, mit und ohne Zurücklegen · genau eine Antwort pro Aufgabe",
+  "dashSub": "BGY · Klasse 11 · KW 16 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe",
+  "back": "svp/mathe/mathe11.html",
+  "questions": [
+    {
+      "q": "Wie berechnet man die Wahrscheinlichkeit entlang eines Pfades?",
+      "opts": [
+        "sie addieren",
+        "die größte nehmen",
+        "sie mitteln",
+        "die Wahrscheinlichkeiten längs des Pfades multiplizieren"
+      ],
+      "steps": [
+        "Erste Pfadregel: entlang eines Pfades wird multipliziert.",
+        "Jede Stufe schränkt die Möglichkeiten weiter ein."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Wie berechnet man die Wahrscheinlichkeit eines Ereignisses aus mehreren Pfaden?",
+      "opts": [
+        "sie multiplizieren",
+        "den Mittelwert bilden",
+        "die kleinste nehmen",
+        "die Pfadwahrscheinlichkeiten addieren"
+      ],
+      "steps": [
+        "Zweite Pfadregel: verschiedene günstige Pfade werden addiert.",
+        "Sie schließen einander aus, deshalb darf man summieren."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Wie groß ist die Wahrscheinlichkeit, mit einer fairen Münze zweimal Kopf zu werfen?",
+      "opts": [
+        "$\\dfrac13$",
+        "$1$",
+        "$\\dfrac14$",
+        "$\\dfrac12$"
+      ],
+      "steps": [
+        "$\\dfrac12 \\cdot \\dfrac12$",
+        "$= \\dfrac14$"
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Wie groß ist die Wahrscheinlichkeit, bei drei Münzwürfen mindestens einmal Kopf zu werfen?",
+      "opts": [
+        "$\\dfrac78$",
+        "$\\dfrac18$",
+        "$\\dfrac12$",
+        "$\\dfrac38$"
+      ],
+      "steps": [
+        "Gegenereignis „nie Kopf“: $\\left(\\dfrac12\\right)^3 = \\dfrac18$",
+        "$1 - \\dfrac18 = \\dfrac78$"
+      ],
+      "solution": 0
+    },
+    {
+      "q": "In einer Urne sind $3$ rote und $2$ blaue Kugeln. Wie groß ist $P(\\text{rot})$ beim ersten Zug?",
+      "opts": [
+        "$\\dfrac12$",
+        "$\\dfrac35$",
+        "$\\dfrac32$",
+        "$\\dfrac23$"
+      ],
+      "steps": [
+        "Günstige durch mögliche: $\\dfrac{3}{5}$",
+        "Insgesamt liegen fünf Kugeln in der Urne."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Dieselbe Urne, zweimal MIT Zurücklegen: wie groß ist $P(\\text{zweimal rot})$?",
+      "opts": [
+        "$\\dfrac{3}{10}$",
+        "$\\dfrac{6}{25}$",
+        "$\\dfrac{9}{25}$",
+        "$\\dfrac{6}{20}$"
+      ],
+      "steps": [
+        "Mit Zurücklegen bleibt die Wahrscheinlichkeit gleich: $\\dfrac35 \\cdot \\dfrac35$",
+        "$= \\dfrac{9}{25}$"
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Dieselbe Urne, zweimal OHNE Zurücklegen: wie groß ist $P(\\text{zweimal rot})$?",
+      "opts": [
+        "$\\dfrac{9}{25}$",
+        "$\\dfrac{2}{5}$",
+        "$\\dfrac{1}{2}$",
+        "$\\dfrac{3}{10}$"
+      ],
+      "steps": [
+        "Beim zweiten Zug sind nur noch $2$ rote von $4$ Kugeln da: $\\dfrac35 \\cdot \\dfrac24$",
+        "$= \\dfrac{6}{20} = \\dfrac{3}{10}$"
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Was ändert sich am Baumdiagramm beim Ziehen ohne Zurücklegen?",
+      "opts": [
+        "es gibt nur einen Pfad",
+        "die Summe der Pfade ist nicht mehr $1$",
+        "die Wahrscheinlichkeiten der zweiten Stufe hängen vom ersten Zug ab",
+        "nichts"
+      ],
+      "steps": [
+        "Die Urne verändert sich nach dem ersten Zug.",
+        "Jeder Ast der zweiten Stufe trägt eigene Wahrscheinlichkeiten."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Wie groß ist die Summe aller Pfadwahrscheinlichkeiten in einem vollständigen Baum?",
+      "opts": [
+        "das hängt vom Versuch ab",
+        "$1$",
+        "$0$",
+        "die Anzahl der Pfade"
+      ],
+      "steps": [
+        "Die Pfade decken alle möglichen Ausgänge ab und schließen einander aus.",
+        "Ihre Summe ist deshalb immer $1$."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Wie groß ist die Wahrscheinlichkeit, mit zwei Würfeln zweimal eine Sechs zu werfen?",
+      "opts": [
+        "$\\dfrac{1}{6}$",
+        "$\\dfrac{2}{6}$",
+        "$\\dfrac{1}{36}$",
+        "$\\dfrac{1}{12}$"
+      ],
+      "steps": [
+        "$\\dfrac16 \\cdot \\dfrac16$",
+        "$= \\dfrac{1}{36}$"
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Wie groß ist die Wahrscheinlichkeit, mit zwei Würfeln genau eine Sechs zu werfen?",
+      "opts": [
+        "$\\dfrac{1}{36}$",
+        "$\\dfrac{11}{36}$",
+        "$\\dfrac{2}{36}$",
+        "$\\dfrac{10}{36}$"
+      ],
+      "steps": [
+        "Zwei Pfade: Sechs zuerst oder Sechs zuletzt, je $\\dfrac16 \\cdot \\dfrac56$",
+        "$2 \\cdot \\dfrac{5}{36} = \\dfrac{10}{36}$"
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Ein Test erkennt eine Krankheit mit $99\\,\\%$. Was bedeutet das im Baumdiagramm?",
+      "opts": [
+        "$P(\\text{krank} \\mid \\text{positiv}) = 0{,}99$",
+        "$99\\,\\%$ der Getesteten sind krank",
+        "der Test irrt nie",
+        "$P(\\text{positiv} \\mid \\text{krank}) = 0{,}99$"
+      ],
+      "steps": [
+        "Die Angabe ist eine Wahrscheinlichkeit unter der Bedingung „krank“.",
+        "Die umgekehrte Frage — wie viele positiv Getestete wirklich krank sind — hat oft eine ganz andere Antwort."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Zwei Maschinen liefern $60\\,\\%$ und $40\\,\\%$ der Produktion mit $2\\,\\%$ bzw. $5\\,\\%$ Ausschuss. Wie groß ist der Gesamtausschuss?",
+      "opts": [
+        "$3{,}5\\,\\%$",
+        "$7\\,\\%$",
+        "$2{,}8\\,\\%$",
+        "$3{,}2\\,\\%$"
+      ],
+      "steps": [
+        "$0{,}6 \\cdot 0{,}02 = 0{,}012$ und $0{,}4 \\cdot 0{,}05 = 0{,}02$",
+        "Summe: $0{,}032 = 3{,}2\\,\\%$"
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Wie groß ist die Wahrscheinlichkeit, beim dreimaligen Würfeln nie eine Sechs zu werfen?",
+      "opts": [
+        "$\\dfrac{125}{216}$",
+        "$\\dfrac{1}{216}$",
+        "$\\dfrac{5}{6}$",
+        "$\\dfrac{91}{216}$"
+      ],
+      "steps": [
+        "$\\left(\\dfrac56\\right)^3$",
+        "$= \\dfrac{125}{216} \\approx 58\\,\\%$"
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Warum rechnet man oft über das Gegenereignis?",
+      "opts": [
+        "weil es genauer ist",
+        "weil das Gegenereignis wahrscheinlicher ist",
+        "weil es im Lehrplan steht",
+        "weil „mindestens einmal“ sonst viele Pfade bedeutet"
+      ],
+      "steps": [
+        "$P(\\text{mindestens einmal}) = 1 - P(\\text{nie})$",
+        "Ein Pfad statt vieler — deutlich weniger Rechenarbeit."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Was sind stochastisch unabhängige Ereignisse?",
+      "opts": [
+        "das Eintreten des einen ändert die Wahrscheinlichkeit des anderen nicht",
+        "sie können nicht zusammen eintreten",
+        "sie haben dieselbe Wahrscheinlichkeit",
+        "sie schließen einander aus"
+      ],
+      "steps": [
+        "Ziehen mit Zurücklegen liefert unabhängige Stufen.",
+        "Dann gilt $P(A \\cap B) = P(A) \\cdot P(B)$."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Eine Urne enthält $4$ weiße und $6$ schwarze Kugeln. Wie groß ist $P(\\text{erste weiß, zweite schwarz})$ ohne Zurücklegen?",
+      "opts": [
+        "$\\dfrac{6}{25}$",
+        "$\\dfrac{24}{100}$",
+        "$\\dfrac{2}{5}$",
+        "$\\dfrac{4}{15}$"
+      ],
+      "steps": [
+        "$\\dfrac{4}{10} \\cdot \\dfrac{6}{9} = \\dfrac{24}{90}$",
+        "$= \\dfrac{4}{15}$"
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Was beschreibt ein Pfad im Baumdiagramm?",
+      "opts": [
+        "einen vollständigen Ausgang des mehrstufigen Versuchs",
+        "eine einzelne Stufe",
+        "alle Möglichkeiten zusammen",
+        "die Summe der Wahrscheinlichkeiten"
+      ],
+      "steps": [
+        "Von der Wurzel bis zum Blatt steht jeder Pfad für genau ein Ergebnis.",
+        "Die Pfadwahrscheinlichkeit ist das Produkt entlang dieses Weges."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Ein Glücksrad mit $8$ gleichen Feldern wird zweimal gedreht. Wie viele Pfade hat der Baum?",
+      "opts": [
+        "$8$",
+        "$2$",
+        "$64$",
+        "$16$"
+      ],
+      "steps": [
+        "$8$ Möglichkeiten in der ersten Stufe, $8$ in der zweiten.",
+        "$8 \\cdot 8 = 64$ Pfade."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Wann darf man Wahrscheinlichkeiten addieren?",
+      "opts": [
+        "immer",
+        "nur bei unabhängigen Ereignissen",
+        "wenn sie gleich groß sind",
+        "wenn die Ereignisse einander ausschließen"
+      ],
+      "steps": [
+        "Bei sich ausschließenden Ereignissen zählt jeder Fall genau einmal.",
+        "Sonst würde die Schnittmenge doppelt gezählt und müsste abgezogen werden."
+      ],
+      "solution": 3
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

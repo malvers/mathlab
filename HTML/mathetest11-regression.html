@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Regression mit digitalen Hilfsmitteln — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  "id": "mathe11-w18-regression",
+  "version": "v1",
+  "title": "Aufgaben · Regression mit digitalen Hilfsmitteln",
+  "subtitle": "Berufliches Gymnasium · Klasse 11 · Woche 18, KW 1 (LB 3) · 20 Aufgaben: Messreihen, Modellwahl, Bestimmtheitsmaß, Modellkritik · genau eine Antwort pro Aufgabe",
+  "dashSub": "BGY · Klasse 11 · KW 1 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe",
+  "back": "svp/mathe/mathe11.html",
+  "questions": [
+    {
+      "q": "Was leistet eine Regression?",
+      "opts": [
+        "Sie entfernt falsche Messwerte.",
+        "Sie legt eine möglichst gut passende Funktion durch Messpunkte.",
+        "Sie verbindet die Messpunkte geradlinig.",
+        "Sie berechnet den Mittelwert aller Messwerte."
+      ],
+      "steps": [
+        "Gesucht ist eine Funktion, die den Verlauf der Daten insgesamt am besten beschreibt.",
+        "Sie muss durch keinen einzigen Messpunkt exakt hindurchgehen."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Welches Modell wählt man bei Messwerten mit annähernd konstanter Differenz?",
+      "opts": [
+        "lineare Regression",
+        "exponentielle Regression",
+        "quadratische Regression",
+        "keine"
+      ],
+      "steps": [
+        "Konstante Zunahme pro Schritt ist das Kennzeichen linearen Wachstums.",
+        "Ein Blick auf die Differenzen entscheidet die Modellwahl."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Welches Modell passt zu Messwerten mit annähernd konstantem Quotienten?",
+      "opts": [
+        "periodische Regression",
+        "exponentielle Regression",
+        "lineare Regression",
+        "quadratische Regression"
+      ],
+      "steps": [
+        "Konstanter Faktor pro Schritt heißt exponentielles Wachstum.",
+        "Im halblogarithmischen Diagramm liegen solche Punkte auf einer Geraden."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Was bedeutet ein Bestimmtheitsmaß von $R^2 = 0{,}99$?",
+      "opts": [
+        "Es gibt genau $99$ Messwerte.",
+        "Das Modell ist zwingend richtig.",
+        "Das Modell erklärt die Streuung der Daten sehr gut.",
+        "Die Messung war falsch."
+      ],
+      "steps": [
+        "$R^2$ liegt zwischen $0$ und $1$ und misst, wie gut das Modell die Daten erfasst.",
+        "Ein hoher Wert spricht für gute Anpassung — er beweist aber keinen Ursachenzusammenhang."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Darf man aus einem hohen $R^2$ auf eine Ursache schließen?",
+      "opts": [
+        "Nur bei linearen Modellen.",
+        "Nein, Zusammenhang ist nicht Ursache.",
+        "Ja, immer.",
+        "Ja, wenn $R^2 > 0{,}9$ ist."
+      ],
+      "steps": [
+        "Zwei Größen können gemeinsam von einer dritten abhängen oder rein zufällig zusammenpassen.",
+        "Korrelation belegt keine Kausalität — der Klassiker unter den Fehlschlüssen."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Eine lineare Regression liefert $y = 2{,}1x + 3{,}4$. Was sagt $2{,}1$?",
+      "opts": [
+        "Der Startwert ist $2{,}1$.",
+        "$21\\,\\%$ der Daten passen.",
+        "Die Messung hat $2{,}1$ Fehler.",
+        "Pro Einheit von $x$ wächst $y$ im Mittel um $2{,}1$."
+      ],
+      "steps": [
+        "Der Anstieg beschreibt die mittlere Änderung.",
+        "$3{,}4$ ist der Modellwert bei $x = 0$."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Was ist Extrapolation?",
+      "opts": [
+        "das Runden der Koeffizienten",
+        "die Verwendung des Modells außerhalb des Messbereichs",
+        "die Berechnung eines Zwischenwerts",
+        "das Löschen von Ausreißern"
+      ],
+      "steps": [
+        "Innerhalb der Messwerte spricht man von Interpolation, außerhalb von Extrapolation.",
+        "Extrapolation ist riskant: das Modell wurde dort nie geprüft."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Ein exponentielles Modell für Weltbevölkerung sagt für das Jahr $3000$ eine Billion Menschen voraus. Was folgt?",
+      "opts": [
+        "Exponentielle Modelle sind nutzlos.",
+        "Das Modell wird über seinen Gültigkeitsbereich hinaus benutzt.",
+        "Die Erde wird so voll sein.",
+        "Die Rechnung ist falsch."
+      ],
+      "steps": [
+        "Rechnerisch stimmt die Fortschreibung, aber Ressourcen begrenzen jedes reale Wachstum.",
+        "Realistischer sind Sättigungsmodelle — jedes Modell hat einen Gültigkeitsbereich."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Was ist ein Ausreißer?",
+      "opts": [
+        "ein fehlender Wert",
+        "ein Wert mit Nachkommastellen",
+        "ein Messwert, der weit vom Trend abweicht",
+        "der größte Messwert"
+      ],
+      "steps": [
+        "Ausreißer weichen stark vom Muster der übrigen Daten ab.",
+        "Sie können ein Messfehler sein — oder der interessanteste Punkt der Messreihe. Erst prüfen, dann entscheiden."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Warum sollte man Daten vor der Regression immer zuerst zeichnen?",
+      "opts": [
+        "weil das Streudiagramm den Modelltyp zeigt",
+        "weil das schneller geht",
+        "weil das Rechnen dann entfällt",
+        "weil ein Diagramm hübscher aussieht"
+      ],
+      "steps": [
+        "Aus der Punktwolke erkennt man Geradenform, Krümmung, Sättigung oder Periodizität.",
+        "Ohne Bild wählt man den Modelltyp blind — das Werkzeug rechnet auch Unsinn brav aus."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Eine Regression liefert $y = 0{,}0000031x + 2$. Was ist sinnvoll?",
+      "opts": [
+        "sofort auf $0$ runden",
+        "die Zahl streichen",
+        "das Modell verwerfen",
+        "die Koeffizienten so stehen lassen und erst das Ergebnis runden"
+      ],
+      "steps": [
+        "Zwischenrundungen verfälschen das Ergebnis, gerade bei kleinen Koeffizienten.",
+        "Erst am Ende auf die Genauigkeit der Messwerte runden."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Zwei Modelle passen ähnlich gut. Welches nimmt man?",
+      "opts": [
+        "das mit dem größeren Koeffizienten",
+        "das einfachere, wenn es fachlich begründbar ist",
+        "immer das mit mehr Parametern",
+        "immer das quadratische"
+      ],
+      "steps": [
+        "Mehr Parameter passen sich immer besser an — auch an das Rauschen.",
+        "Das einfachere, sachlich begründete Modell ist stabiler und leichter zu deuten."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Messwerte: $(1 \\mid 2)$, $(2 \\mid 4)$, $(3 \\mid 6)$, $(4 \\mid 8)$. Welches Modell passt exakt?",
+      "opts": [
+        "$y = 2^x$",
+        "$y = x^2$",
+        "$y = 2x$",
+        "$y = x + 1$"
+      ],
+      "steps": [
+        "Die Differenz ist konstant $2$, der Startwert bei $x = 0$ wäre $0$.",
+        "$y = 2x$ trifft alle vier Punkte."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Messwerte: $(0 \\mid 5)$, $(1 \\mid 10)$, $(2 \\mid 20)$, $(3 \\mid 40)$. Welches Modell passt?",
+      "opts": [
+        "$y = x^2 + 5$",
+        "$y = 2 \\cdot 5^x$",
+        "$y = 5 \\cdot 2^x$",
+        "$y = 5x + 5$"
+      ],
+      "steps": [
+        "Die Werte verdoppeln sich, Startwert $5$.",
+        "$y = 5 \\cdot 2^x$ — Probe bei $x = 3$: $5 \\cdot 8 = 40$"
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Was beschreibt die Methode der kleinsten Quadrate?",
+      "opts": [
+        "Die kleinsten Messwerte werden quadriert.",
+        "Alle Abweichungen werden null.",
+        "Die Quadratzahlen werden addiert.",
+        "Die Summe der quadrierten Abweichungen wird minimiert."
+      ],
+      "steps": [
+        "Für jeden Punkt wird der senkrechte Abstand zur Kurve genommen und quadriert.",
+        "Das Quadrat verhindert, dass sich positive und negative Abweichungen gegenseitig aufheben."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Warum werden die Abweichungen quadriert und nicht einfach addiert?",
+      "opts": [
+        "damit die Zahlen größer werden",
+        "weil Quadrieren schneller ist",
+        "weil das Ergebnis dann ganzzahlig wird",
+        "damit sich Plus und Minus nicht aufheben"
+      ],
+      "steps": [
+        "Bei einer guten Kurve liegen etwa gleich viele Punkte darüber wie darunter.",
+        "Die einfache Summe wäre dann fast null — unabhängig davon, wie weit die Punkte streuen."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Was tut ein Rechner bei „quadratische Regression“ mit drei Messpunkten?",
+      "opts": [
+        "Er rundet auf ganze Zahlen.",
+        "Er findet meist eine Parabel, die exakt durch alle drei geht.",
+        "Er verweigert die Rechnung.",
+        "Er nimmt automatisch eine Gerade."
+      ],
+      "steps": [
+        "Eine Parabel hat drei Parameter, drei Punkte legen sie in der Regel eindeutig fest.",
+        "Perfekte Anpassung ist hier also kein Qualitätsbeweis — nur eine Folge der Parameterzahl."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Eine Messreihe zur Abkühlung eines Getränks nähert sich der Raumtemperatur. Welches Modell ist geeignet?",
+      "opts": [
+        "ein lineares Modell",
+        "ein quadratisches Modell",
+        "ein periodisches Modell",
+        "ein exponentielles Modell mit Sättigung bei Raumtemperatur"
+      ],
+      "steps": [
+        "Die Temperaturdifferenz zur Umgebung nimmt exponentiell ab.",
+        "Ein lineares Modell würde die Temperatur unter die Raumtemperatur fallen lassen — physikalisch unmöglich."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Warum ist es sinnvoll, den Anstieg einer Regressionsgeraden mit einer Einheit zu versehen?",
+      "opts": [
+        "damit die Rechnung aufgeht",
+        "weil er eine Änderungsrate mit Bedeutung ist",
+        "weil das im Lehrplan steht",
+        "weil Zahlen ohne Einheit falsch sind"
+      ],
+      "steps": [
+        "Beispiel: $2{,}1\\ \\dfrac{\\text{cm}}{\\text{Tag}}$ sagt sofort, worum es geht.",
+        "Die Einheit ist zugleich die schnellste Kontrolle, ob das Modell sinnvoll aufgestellt wurde."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Was gehört zu einer ehrlichen Auswertung dazu?",
+      "opts": [
+        "die Wahl des Modells mit dem größten $R^2$",
+        "die Angabe, in welchem Bereich das Modell gilt",
+        "möglichst viele Nachkommastellen",
+        "das Weglassen unpassender Messwerte"
+      ],
+      "steps": [
+        "Ein Modell ohne Gültigkeitsbereich verleitet zu falschen Prognosen.",
+        "Messwerte darf man nicht streichen, weil sie stören — nur, wenn sie nachweislich fehlerhaft sind."
+      ],
+      "solution": 1
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

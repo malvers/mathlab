@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Gleichungen mit Hilfsmitteln — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathe11-w6-werkzeuge',
+  version: 'v1',
+  title: 'Aufgaben · Gleichungen mit Hilfsmitteln',
+  subtitle: 'Berufliches Gymnasium · Klasse 11 · Woche 6, KW 39 (LB 2) · 20 Aufgaben: Werkzeugebenen, exakt oder numerisch, Lösungswege bewerten · genau eine Antwort pro Aufgabe',
+  dashSub: 'BGY · Klasse 11 · KW 39 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathe11.html', /* opened from the Mathe-11 plan */
+  /* Week 6 of the Mathe-11 plan: the CAS enters the room. The questions ask
+     what the tool actually delivers (exact vs. numeric), where it needs a
+     human check (domain, apparent solutions, plausibility) and how to read
+     its output — plus equations that are worth solving by hand anyway. */
+  questions: [
+    {
+      q: 'Ein CAS soll $\\sqrt{2}$ ausgeben. Was liefert der exakte Modus?',
+      opts: ['$1{,}41$', '$\\sqrt{2}$', '$1{,}414213562$', '$2^{0{,}5} \\approx 1{,}4$'],
+      steps: [
+        'Exakt heißt: das Ergebnis bleibt als Term stehen, nichts wird gerundet.',
+        'Das CAS gibt also $\\sqrt{2}$ zurück — die Zahl ist irrational, jede Dezimaldarstellung wäre abgeschnitten.',
+        'Erst der numerische Modus macht daraus einen Näherungswert wie $1{,}414\\ldots$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Löse $x^2 = 2$ exakt.',
+      opts: ['$x = \\pm 1{,}41$', '$x = 2$', '$x = \\pm\\sqrt{2}$', '$x = \\sqrt{2}$'],
+      steps: [
+        'Wurzel ziehen, beide Vorzeichen: $x = \\pm\\sqrt{2}$',
+        'Das ist die exakte Lösung; $\\pm 1{,}41$ ist bereits gerundet.',
+        'Nur die positive Wurzel anzugeben unterschlägt eine der beiden Lösungen.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Was gilt für eine numerische Lösung?',
+      opts: [
+        'Sie ist ein Näherungswert und meist gerundet.',
+        'Sie ist immer exakt richtig.',
+        'Sie ist immer eine ganze Zahl.',
+        'Sie ist falsch und darf nicht verwendet werden.'
+      ],
+      steps: [
+        'Numerische Verfahren nähern sich der Lösung an und brechen bei genügender Genauigkeit ab.',
+        'Das Ergebnis ist damit ein Näherungswert — brauchbar, aber gerundet.',
+        'Für Sachaufgaben reicht das fast immer; in einem Beweis nicht.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Das CAS antwortet auf $\\texttt{solve}(x^2 - 5x + 6 = 0,\\ x)$ mit $x = 2$ oder $x = 3$. Wie ist das zu lesen?',
+      opts: [
+        'Die Gleichung hat zwei Lösungen: $2$ und $3$.',
+        'Das CAS ist sich nicht sicher.',
+        'Man muss sich für eine der beiden entscheiden.',
+        'Die Lösung ist $x = 2{,}5$.'
+      ],
+      steps: [
+        'Beide Werte erfüllen die Gleichung: $2^2 - 10 + 6 = 0$ und $3^2 - 15 + 6 = 0$.',
+        'Das „oder“ trennt die Elemente der Lösungsmenge $L = \\{2;\\ 3\\}$.',
+        'Erst der Sachzusammenhang entscheidet, ob am Ende beide Werte sinnvoll sind.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Warum lohnt sich eine Probe, obwohl das CAS gerechnet hat?',
+      opts: [
+        'Weil das CAS häufig falsch rechnet.',
+        'Weil die Probe die Rechnung schneller macht.',
+        'Weil man sich bei der Eingabe vertippen kann und der Definitionsbereich zu prüfen ist.',
+        'Weil eine Probe im Lehrplan vorgeschrieben ist.'
+      ],
+      steps: [
+        'Das CAS rechnet zuverlässig — aber nur das, was man eingegeben hat.',
+        'Klammerfehler, ein vergessenes Minus oder eine ausgeschlossene Zahl im Nenner fallen nur bei der Probe auf.',
+        'Die Verantwortung für Eingabe und Deutung bleibt beim Menschen.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Löse $\\dfrac{1}{x - 2} = 3$ und beachte den Definitionsbereich.',
+      opts: [
+        '$x = \\dfrac{7}{3}$, dabei muss $x \\neq 2$ sein',
+        '$x = 5$',
+        '$x = \\dfrac{1}{3} + 2 = 2{,}3$',
+        'keine Lösung, weil $x = 2$ verboten ist'
+      ],
+      steps: [
+        'Zuerst der Definitionsbereich: der Nenner darf nicht null werden, also $x \\neq 2$.',
+        'Mit $(x-2)$ multiplizieren: $1 = 3(x - 2) = 3x - 6$',
+        '$3x = 7$, also $x = \\dfrac{7}{3} \\approx 2{,}33$ — erlaubt, denn $\\tfrac{7}{3} \\neq 2$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Beim Lösen von $\\sqrt{x + 6} = x$ liefert das Quadrieren $x = 3$ und $x = -2$. Was stimmt?',
+      opts: [
+        'Beide Werte sind Lösungen.',
+        'Nur $x = 3$ ist Lösung, $x = -2$ ist eine Scheinlösung.',
+        'Nur $x = -2$ ist Lösung.',
+        'Die Gleichung hat keine Lösung.'
+      ],
+      steps: [
+        'Quadrieren ist keine Äquivalenzumformung — es kann Lösungen hinzuerfinden.',
+        'Probe mit $x = 3$: $\\sqrt{9} = 3$ — stimmt.',
+        'Probe mit $x = -2$: $\\sqrt{4} = 2 \\neq -2$ — die Wurzel ist nie negativ, also Scheinlösung.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie viele reelle Lösungen hat $x^3 - 4x = 0$?',
+      opts: ['eine', 'zwei', 'drei', 'keine'],
+      steps: [
+        'Ausklammern: $x(x^2 - 4) = 0$',
+        'Ein Produkt ist null, wenn ein Faktor null ist: $x = 0$ oder $x^2 = 4$.',
+        'Also $x = 0$, $x = 2$, $x = -2$ — drei Lösungen. Wer durch $x$ teilt, verliert die Lösung $x = 0$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie lautet die exakte Lösung von $2^x = 10$?',
+      opts: ['$x = 5$', '$x = \\log_2 10$', '$x = 3{,}32$', '$x = \\dfrac{10}{2}$'],
+      steps: [
+        'Die Unbekannte steht im Exponenten — sie wird mit dem Logarithmus geholt.',
+        'Exakt: $x = \\log_2 10$',
+        'Numerisch: $x \\approx 3{,}32$ — das ist bereits gerundet, also nicht die exakte Antwort.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein CAS gibt $\\dfrac{1}{3}$ als Ergebnis, ein Taschenrechner $0{,}3333333$. Was ist der Unterschied?',
+      opts: [
+        'Es sind zwei verschiedene Zahlen.',
+        'Der Taschenrechner rechnet richtiger.',
+        '$\\dfrac{1}{3}$ ist exakt, $0{,}3333333$ ist gerundet.',
+        'Der Bruch ist nur eine andere Schreibweise für $0{,}3333333$.'
+      ],
+      steps: [
+        '$\\tfrac{1}{3} = 0{,}\\overline{3}$ hat unendlich viele Dreien — kein Display zeigt sie alle.',
+        'Der Bruch ist die exakte Darstellung, die Dezimalzahl eine abgeschnittene Näherung.',
+        'In Rechnungen deshalb so lange wie möglich mit Brüchen weiterrechnen und erst am Schluss runden.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Was ist mit „Werkzeugebenen“ beim Lösen von Gleichungen gemeint?',
+      opts: [
+        'Die Menüebenen im CAS.',
+        'Kopfrechnen, schriftliches Rechnen und Rechnen mit Werkzeugkasten.',
+        'Die Stufen: von Hand, grafisch, numerisch und symbolisch mit CAS.',
+        'Die Reihenfolge der Rechenoperationen.'
+      ],
+      steps: [
+        'Dieselbe Gleichung lässt sich auf mehreren Ebenen angehen: von Hand, am Graphen, numerisch oder symbolisch mit dem CAS.',
+        'Jede Ebene hat ihren Preis: von Hand ist langsam, aber durchschaubar; das CAS ist schnell, verlangt aber Deutung.',
+        'Zur Kompetenz gehört, die passende Ebene zu wählen und die Wahl zu begründen.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Eine Sachaufgabe fragt nach einer Seitenlänge. Das CAS liefert $x = 4$ und $x = -7$. Was ist zu tun?',
+      opts: [
+        'Beide Werte angeben.',
+        'Nur $x = 4$ angeben, $-7$ passt nicht zum Sachzusammenhang.',
+        'Das Vorzeichen von $-7$ streichen und $7$ angeben.',
+        'Die Aufgabe hat keine Lösung.'
+      ],
+      steps: [
+        'Rechnerisch sind beide Werte richtig — die Gleichung kennt den Sachzusammenhang nicht.',
+        'Eine Länge kann nicht negativ sein, also fällt $x = -7$ heraus.',
+        'Antwortsatz: die Seite ist $4$ Einheiten lang. Diese Prüfung nimmt einem kein Werkzeug ab.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Löse $\\dfrac{x}{3} + \\dfrac{x - 1}{4} = 2$.',
+      opts: ['$x = \\dfrac{27}{7}$', '$x = 3$', '$x = \\dfrac{24}{7}$', '$x = 4{,}5$'],
+      steps: [
+        'Mit dem Hauptnenner $12$ multiplizieren: $4x + 3(x - 1) = 24$',
+        'Ausmultiplizieren und zusammenfassen: $7x - 3 = 24$, also $7x = 27$',
+        '$x = \\dfrac{27}{7} \\approx 3{,}86$ — exakt bleibt der Bruch stehen.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Löse $(x - 1)(x + 4) = 0$.',
+      opts: ['$x = 1$ und $x = 4$', '$x = -1$ und $x = 4$', '$x = 1$ und $x = -4$', '$x = -4$'],
+      steps: [
+        'Satz vom Nullprodukt: ein Produkt ist genau dann null, wenn ein Faktor null ist.',
+        '$x - 1 = 0 \\Rightarrow x = 1$',
+        '$x + 4 = 0 \\Rightarrow x = -4$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie viele verschiedene Lösungen hat $x^2 - 6x + 9 = 0$?',
+      opts: ['zwei', 'eine', 'keine', 'unendlich viele'],
+      steps: [
+        'Links steht ein Quadrat: $x^2 - 6x + 9 = (x - 3)^2$',
+        '$(x-3)^2 = 0$ nur für $x = 3$.',
+        'Man spricht von einer doppelten Lösung — das CAS meldet sie oft mit dem Zusatz „Vielfachheit 2“.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Für welche $x$ ist der Term $\\dfrac{x + 1}{x^2 - 9}$ nicht definiert?',
+      opts: ['$x = 9$', '$x = -1$', '$x = 3$ und $x = -3$', 'für alle $x$ definiert'],
+      steps: [
+        'Der Nenner darf nicht null werden: $x^2 - 9 = 0$',
+        '$x^2 = 9$, also $x = 3$ oder $x = -3$.',
+        'Diese beiden Zahlen sind aus dem Definitionsbereich ausgeschlossen — das CAS sagt es von sich aus meist nicht.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein Rechner zeigt für $0{,}1 + 0{,}2$ den Wert $0{,}30000000000000004$. Woran liegt das?',
+      opts: [
+        'Der Rechner ist defekt.',
+        'Dezimalbrüche werden binär gespeichert und dabei gerundet.',
+        '$0{,}1 + 0{,}2$ ist tatsächlich etwas mehr als $0{,}3$.',
+        'Das passiert nur bei sehr großen Zahlen.'
+      ],
+      steps: [
+        'Im Binärsystem sind $0{,}1$ und $0{,}2$ periodisch und müssen abgeschnitten werden.',
+        'Die winzigen Rundungsfehler summieren sich sichtbar auf.',
+        'Deshalb prüft man Gleichheit bei Kommazahlen nie exakt, sondern mit einer Toleranz — dieselbe Falle steckt in jedem Programm.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Die Gleichung $x = \\cos x$ soll gelöst werden. Was trifft zu?',
+      opts: [
+        'Sie hat keine Lösung.',
+        'Sie lässt sich mit den üblichen Umformungen exakt lösen.',
+        'Sie hat eine Lösung, die man nur numerisch bestimmen kann ($x \\approx 0{,}739$).',
+        'Sie hat unendlich viele Lösungen.'
+      ],
+      steps: [
+        'Die Unbekannte steht einmal frei und einmal im Kosinus — kein Umformen bringt sie zusammen.',
+        'Graphisch: die Gerade $y = x$ schneidet $y = \\cos x$ genau einmal.',
+        'Den Schnittpunkt liefert nur ein numerisches Verfahren: $x \\approx 0{,}739$. Genau dafür sind die Werkzeuge da.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Eine Rechnung mit gemessenen Längen (auf cm genau) ergibt im CAS $12{,}3456789$ m. Wie gibt man das an?',
+      opts: [
+        'genau so, mit allen Ziffern',
+        'gerundet auf $12{,}35$ m',
+        'gerundet auf $12$ m',
+        'als Bruch'
+      ],
+      steps: [
+        'Das Ergebnis kann nicht genauer sein als die Messwerte, aus denen es stammt.',
+        'Bei cm-genauen Messungen sind zwei Nachkommastellen sinnvoll: $12{,}35$ m.',
+        'Alle Ziffern des Displays abzuschreiben täuscht eine Genauigkeit vor, die es nicht gibt.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wann ist Rechnen von Hand dem CAS überlegen?',
+      opts: [
+        'nie, das CAS ist immer besser',
+        'immer, das CAS ist unzuverlässig',
+        'bei überschaubaren Zahlen und wenn der Weg zeigen soll, warum etwas gilt',
+        'nur bei Additionen'
+      ],
+      steps: [
+        'Bei kleinen, glatten Zahlen ist der Kopf schneller als jede Eingabe.',
+        'Und wer den Weg selbst geht, erkennt Strukturen — etwa dass $(x-3)^2$ hinter $x^2 - 6x + 9$ steckt.',
+        'Das CAS spielt seine Stärke bei umfangreichen Termen und großen Zahlen aus. Beides hat seinen Platz.'
+      ],
+      solution: 2
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

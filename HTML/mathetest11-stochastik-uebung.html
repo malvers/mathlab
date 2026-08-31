@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Übung Stochastik — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  "id": "mathe11-w33-stochuebung",
+  "version": "v1",
+  "title": "Aufgaben · Übung Stochastik",
+  "subtitle": "Berufliches Gymnasium · Klasse 11 · Woche 33, KW 19 · 20 vermischte Aufgaben zu Baumdiagrammen, Vierfeldertafeln und Simulation · genau eine Antwort pro Aufgabe",
+  "dashSub": "BGY · Klasse 11 · KW 19 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe",
+  "back": "svp/mathe/mathe11.html",
+  "questions": [
+    {
+      "q": "Wie groß ist die Wahrscheinlichkeit, mit einem fairen Würfel eine gerade Zahl zu werfen?",
+      "opts": [
+        "$\\dfrac16$",
+        "$\\dfrac12$",
+        "$\\dfrac13$",
+        "$\\dfrac23$"
+      ],
+      "steps": [
+        "Günstig sind $2$, $4$, $6$ — drei von sechs.",
+        "$\\dfrac36 = \\dfrac12$"
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Eine Münze wird viermal geworfen. Wie viele mögliche Ergebnisfolgen gibt es?",
+      "opts": [
+        "$16$",
+        "$8$",
+        "$4$",
+        "$24$"
+      ],
+      "steps": [
+        "Pro Wurf zwei Möglichkeiten: $2^4$",
+        "$= 16$ Pfade im Baumdiagramm."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Wie groß ist $P(\\text{genau zweimal Kopf})$ bei vier Münzwürfen?",
+      "opts": [
+        "$\\dfrac{1}{16}$",
+        "$\\dfrac12$",
+        "$\\dfrac{6}{16}$",
+        "$\\dfrac{4}{16}$"
+      ],
+      "steps": [
+        "Es gibt $6$ Anordnungen von zwei Kopf und zwei Zahl.",
+        "Jede hat die Wahrscheinlichkeit $\\dfrac{1}{16}$."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "In einer Urne sind $5$ rote und $5$ blaue Kugeln, es wird zweimal ohne Zurücklegen gezogen. $P(\\text{beide rot})$?",
+      "opts": [
+        "$\\dfrac{5}{18}$",
+        "$\\dfrac12$",
+        "$\\dfrac{2}{9}$",
+        "$\\dfrac14$"
+      ],
+      "steps": [
+        "$\\dfrac{5}{10} \\cdot \\dfrac{4}{9} = \\dfrac{20}{90}$",
+        "$= \\dfrac{2}{9}$"
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Ein Ereignis hat $P(A) = 0{,}35$. Wie groß ist $P(\\overline{A})$?",
+      "opts": [
+        "$0{,}65$",
+        "$0{,}35$",
+        "$1{,}35$",
+        "$0$"
+      ],
+      "steps": [
+        "$P(\\overline{A}) = 1 - P(A)$",
+        "$= 0{,}65$"
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Ein Glücksrad hat $3$ rote und $5$ weiße Felder gleicher Größe. Wie groß ist $P(\\text{rot})$?",
+      "opts": [
+        "$\\dfrac38$",
+        "$\\dfrac35$",
+        "$\\dfrac58$",
+        "$\\dfrac13$"
+      ],
+      "steps": [
+        "Drei von acht Feldern sind rot.",
+        "$P = \\dfrac38$"
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Bei einem Test antworten $70\\,\\%$ der Befragten mit Ja. In einer Stichprobe von $200$ sind es $154$. Wie groß ist die relative Häufigkeit?",
+      "opts": [
+        "$0{,}54$",
+        "$0{,}77$",
+        "$0{,}70$",
+        "$154$"
+      ],
+      "steps": [
+        "$\\dfrac{154}{200}$",
+        "$= 0{,}77$ — etwas über dem erwarteten Anteil."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Zwei Würfel werden geworfen. Wie groß ist $P(\\text{Augensumme } 7)$?",
+      "opts": [
+        "$\\dfrac{7}{36}$",
+        "$\\dfrac{5}{36}$",
+        "$\\dfrac{6}{36}$",
+        "$\\dfrac{1}{36}$"
+      ],
+      "steps": [
+        "Günstig: $(1,6), (2,5), (3,4), (4,3), (5,2), (6,1)$ — sechs Fälle.",
+        "$\\dfrac{6}{36} = \\dfrac16$ — die häufigste Augensumme."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Wie groß ist $P(\\text{Augensumme } 12)$ bei zwei Würfeln?",
+      "opts": [
+        "$\\dfrac{1}{12}$",
+        "$\\dfrac{1}{36}$",
+        "$\\dfrac{2}{36}$",
+        "$\\dfrac{6}{36}$"
+      ],
+      "steps": [
+        "Nur $(6,6)$ ist günstig.",
+        "$P = \\dfrac{1}{36}$"
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Ein Baumdiagramm hat drei Stufen mit je zwei Ästen. Wie viele Pfade?",
+      "opts": [
+        "$6$",
+        "$3$",
+        "$12$",
+        "$8$"
+      ],
+      "steps": [
+        "$2 \\cdot 2 \\cdot 2$",
+        "$= 8$"
+      ],
+      "solution": 3
+    },
+    {
+      "q": "$P(A) = 0{,}4$, $P(B) = 0{,}5$, unabhängig. Wie groß ist $P(A \\cap B)$?",
+      "opts": [
+        "$0{,}9$",
+        "$0{,}1$",
+        "$0{,}45$",
+        "$0{,}2$"
+      ],
+      "steps": [
+        "Bei Unabhängigkeit: $P(A) \\cdot P(B)$",
+        "$0{,}4 \\cdot 0{,}5 = 0{,}2$"
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Von $500$ Personen sind $200$ jünger als $30$ und davon $50$ Abonnenten. $P(\\text{Abo} \\mid \\text{jung})$?",
+      "opts": [
+        "$0{,}25$",
+        "$0{,}10$",
+        "$0{,}40$",
+        "$0{,}50$"
+      ],
+      "steps": [
+        "$\\dfrac{50}{200}$",
+        "$= 0{,}25$"
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Wie groß ist die Wahrscheinlichkeit, bei vier Würfen mindestens eine Sechs zu erhalten?",
+      "opts": [
+        "etwa $52\\,\\%$",
+        "etwa $67\\,\\%$",
+        "etwa $17\\,\\%$",
+        "genau $\\dfrac46$"
+      ],
+      "steps": [
+        "Gegenereignis: $\\left(\\dfrac56\\right)^4 \\approx 0{,}482$",
+        "$1 - 0{,}482 \\approx 0{,}518$"
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Ein Spiel kostet $2$ € Einsatz und zahlt mit $P = 0{,}25$ genau $6$ € aus. Wie groß ist der Erwartungswert des Gewinns?",
+      "opts": [
+        "$-0{,}50$ €",
+        "$+1{,}50$ €",
+        "$+4$ €",
+        "$0$ €"
+      ],
+      "steps": [
+        "$0{,}25 \\cdot 6 = 1{,}50$ € durchschnittliche Auszahlung.",
+        "Abzüglich $2$ € Einsatz: $-0{,}50$ € pro Spiel."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Was bedeutet „faires Spiel“?",
+      "opts": [
+        "man kann nicht verlieren",
+        "der Erwartungswert des Gewinns ist null",
+        "jeder gewinnt gleich oft",
+        "die Einsätze sind gleich"
+      ],
+      "steps": [
+        "Auf lange Sicht bleibt weder Spieler noch Betreiber etwas übrig.",
+        "Reale Glücksspiele sind nie fair — sonst gäbe es keinen Betreiber."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Die relative Häufigkeit weicht bei $20$ Versuchen stark vom theoretischen Wert ab. Was folgt?",
+      "opts": [
+        "die Rechnung stimmt nicht",
+        "gar nichts, die Stichprobe ist zu klein",
+        "das Modell ist falsch",
+        "der Zufall ist gestört"
+      ],
+      "steps": [
+        "Bei kleinen Stichproben sind große Abweichungen normal.",
+        "Erst viele Versuche erlauben eine Aussage über das Modell."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Aus einem Skatblatt ($32$ Karten) wird eine Karte gezogen. $P(\\text{Herz})$?",
+      "opts": [
+        "$\\dfrac14$",
+        "$\\dfrac18$",
+        "$\\dfrac{1}{32}$",
+        "$\\dfrac13$"
+      ],
+      "steps": [
+        "Acht Herzkarten von $32$.",
+        "$\\dfrac{8}{32} = \\dfrac14$"
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Zwei Karten werden ohne Zurücklegen gezogen. $P(\\text{beide Herz})$?",
+      "opts": [
+        "$\\dfrac{8}{32}$",
+        "$\\dfrac{1}{4}$",
+        "$\\dfrac{7}{124}$",
+        "$\\dfrac{1}{16}$"
+      ],
+      "steps": [
+        "$\\dfrac{8}{32} \\cdot \\dfrac{7}{31} = \\dfrac{56}{992}$",
+        "$= \\dfrac{7}{124} \\approx 0{,}056$"
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Welche Aussage über Wahrscheinlichkeiten ist immer richtig?",
+      "opts": [
+        "$P(A)$ ist immer ein Bruch",
+        "$0 \\le P(A) \\le 1$",
+        "$P(A) > 0$",
+        "$P(A) + P(B) = 1$"
+      ],
+      "steps": [
+        "Wahrscheinlichkeiten liegen zwischen null (unmöglich) und eins (sicher).",
+        "Alles andere gilt nur unter Zusatzbedingungen."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Warum lohnt sich das Gegenereignis bei „mindestens“-Aufgaben?",
+      "opts": [
+        "weil es genauer rechnet",
+        "weil man dann keinen Baum braucht",
+        "weil das Gegenereignis meist nur ein Pfad ist",
+        "weil es immer wahrscheinlicher ist"
+      ],
+      "steps": [
+        "„Mindestens einmal“ umfasst viele Pfade, „nie“ nur einen.",
+        "$P = 1 - P(\\text{nie})$ spart die ganze Summenrechnung."
+      ],
+      "solution": 2
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

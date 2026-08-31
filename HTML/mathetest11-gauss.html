@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Gauß-Verfahren — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  "id": "mathe11-w27-gauss",
+  "version": "v1",
+  "title": "Aufgaben · Gauß-Verfahren",
+  "subtitle": "Berufliches Gymnasium · Klasse 11 · Woche 27, KW 12 (LB 4) · 20 Aufgaben: Eliminieren, Stufenform, Rückwärtseinsetzen · genau eine Antwort pro Aufgabe",
+  "dashSub": "BGY · Klasse 11 · KW 12 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe",
+  "back": "svp/mathe/mathe11.html",
+  "questions": [
+    {
+      "q": "Was ist das Ziel des Gauß-Verfahrens?",
+      "opts": [
+        "die Determinante",
+        "die Umkehrmatrix",
+        "die Stufenform, aus der man rückwärts einsetzen kann",
+        "möglichst viele Nullen"
+      ],
+      "steps": [
+        "Durch Zeilenumformungen entsteht eine obere Dreiecksform.",
+        "Die letzte Zeile enthält dann nur noch eine Unbekannte."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Welche Zeilenumformung ist beim Gauß-Verfahren NICHT erlaubt?",
+      "opts": [
+        "eine Zeile mit null multiplizieren",
+        "zwei Zeilen vertauschen",
+        "eine Zeile mit $3$ multiplizieren",
+        "das Doppelte einer Zeile zu einer anderen addieren"
+      ],
+      "steps": [
+        "Multiplikation mit null löscht die Information dieser Gleichung.",
+        "Erlaubt sind nur Umformungen, die sich rückgängig machen lassen."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Löse: $x + y = 5$ und $x - y = 1$.",
+      "opts": [
+        "$x = 2$, $y = 3$",
+        "$x = 4$, $y = 1$",
+        "$x = 5$, $y = 0$",
+        "$x = 3$, $y = 2$"
+      ],
+      "steps": [
+        "Addieren: $2x = 6$, also $x = 3$",
+        "Einsetzen: $3 + y = 5$, also $y = 2$"
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Löse: $2x + y = 8$ und $x - y = 1$.",
+      "opts": [
+        "$x = 3$, $y = 2$",
+        "$x = 2$, $y = 4$",
+        "$x = 1$, $y = 6$",
+        "$x = 4$, $y = 0$"
+      ],
+      "steps": [
+        "Addieren: $3x = 9$, also $x = 3$",
+        "$3 - y = 1$, also $y = 2$"
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Die letzte Zeile lautet nach dem Eliminieren $0 = 5$. Was folgt?",
+      "opts": [
+        "Es hat genau eine Lösung.",
+        "Man hat sich verrechnet.",
+        "Das System hat keine Lösung.",
+        "Es hat unendlich viele Lösungen."
+      ],
+      "steps": [
+        "Eine falsche Aussage ohne Unbekannte kann durch nichts erfüllt werden.",
+        "Die Lösungsmenge ist leer — die Gleichungen widersprechen sich."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Die letzte Zeile lautet $0 = 0$. Was folgt?",
+      "opts": [
+        "Es gibt keine Lösung.",
+        "Es gibt genau eine.",
+        "Die Rechnung ist falsch.",
+        "Es gibt unendlich viele Lösungen."
+      ],
+      "steps": [
+        "Diese Zeile ist immer wahr und liefert keine neue Bedingung.",
+        "Eine Unbekannte bleibt frei wählbar — die Lösungsmenge ist eine Schar."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Wie viele Gleichungen braucht man in der Regel für drei Unbekannte?",
+      "opts": [
+        "vier",
+        "eine",
+        "drei unabhängige",
+        "zwei"
+      ],
+      "steps": [
+        "Jede unabhängige Gleichung legt eine Unbekannte fest.",
+        "Weniger Gleichungen lassen Freiheiten, mehr können sich widersprechen."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Was bedeutet „unabhängige Gleichungen“?",
+      "opts": [
+        "sie enthalten verschiedene Buchstaben",
+        "sie haben verschiedene rechte Seiten",
+        "sie stehen in verschiedenen Zeilen",
+        "keine ist ein Vielfaches oder eine Kombination der anderen"
+      ],
+      "steps": [
+        "$2x + 2y = 10$ ist nur die verdoppelte Gleichung $x + y = 5$ — sie bringt nichts Neues.",
+        "Das Gauß-Verfahren macht solche Zeilen zu $0 = 0$."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Aus der Stufenform folgt $2z = 6$. Wie geht es weiter?",
+      "opts": [
+        "$z = 3$ berechnen und in die Zeile darüber einsetzen",
+        "$z$ frei wählen",
+        "das System hat keine Lösung",
+        "die Zeilen erneut tauschen"
+      ],
+      "steps": [
+        "$z = 3$",
+        "Rückwärtseinsetzen: die vorletzte Zeile enthält nur noch $y$ und das bekannte $z$."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Löse: $x + y + z = 6$, $y + z = 5$, $z = 3$.",
+      "opts": [
+        "$x = 2$, $y = 1$, $z = 3$",
+        "$x = 3$, $y = 2$, $z = 1$",
+        "$x = 1$, $y = 3$, $z = 2$",
+        "$x = 1$, $y = 2$, $z = 3$"
+      ],
+      "steps": [
+        "$z = 3$, aus der zweiten Zeile $y = 5 - 3 = 2$",
+        "Erste Zeile: $x = 6 - 2 - 3 = 1$"
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Geometrisch: was bedeutet die Lösung eines Systems aus zwei Gleichungen mit zwei Unbekannten?",
+      "opts": [
+        "der Scheitel einer Parabel",
+        "die Nullstelle einer Funktion",
+        "der Mittelpunkt eines Kreises",
+        "der Schnittpunkt zweier Geraden"
+      ],
+      "steps": [
+        "Jede Gleichung beschreibt eine Gerade.",
+        "Die Lösung ist der Punkt, der auf beiden liegt."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Zwei Gleichungen beschreiben parallele Geraden. Was heißt das für das System?",
+      "opts": [
+        "unendlich viele Lösungen",
+        "zwei Lösungen",
+        "keine Lösung",
+        "genau eine Lösung"
+      ],
+      "steps": [
+        "Parallele Geraden ohne gemeinsamen Punkt schneiden sich nie.",
+        "Beim Rechnen zeigt sich das als Widerspruch $0 = c$ mit $c \\neq 0$."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Zwei Gleichungen beschreiben dieselbe Gerade. Was heißt das?",
+      "opts": [
+        "keine Lösung",
+        "genau eine Lösung",
+        "das System ist fehlerhaft",
+        "unendlich viele Lösungen"
+      ],
+      "steps": [
+        "Jeder Punkt der Geraden erfüllt beide Gleichungen.",
+        "Beim Rechnen erscheint eine Zeile $0 = 0$."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Geometrisch: was beschreibt eine Gleichung mit drei Unbekannten?",
+      "opts": [
+        "eine Kugel",
+        "eine Ebene im Raum",
+        "eine Gerade",
+        "einen Punkt"
+      ],
+      "steps": [
+        "$ax + by + cz = d$ ist die Gleichung einer Ebene.",
+        "Drei Ebenen schneiden sich im Normalfall in genau einem Punkt."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Löse: $3x + 2y = 12$ und $x = 2$.",
+      "opts": [
+        "$y = 6$",
+        "$y = 2$",
+        "$y = 4$",
+        "$y = 3$"
+      ],
+      "steps": [
+        "Einsetzen: $6 + 2y = 12$",
+        "$2y = 6$, also $y = 3$"
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Warum tauscht man beim Gauß-Verfahren manchmal Zeilen?",
+      "opts": [
+        "um Rechenzeit zu sparen",
+        "das ist nicht erlaubt",
+        "um an der Pivotstelle keine Null zu haben",
+        "um die Reihenfolge schöner zu machen"
+      ],
+      "steps": [
+        "Durch eine Null an der Pivotstelle lässt sich nicht eliminieren.",
+        "Ein Zeilentausch verändert die Lösungsmenge nicht."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Ein Betrieb mischt zwei Sorten: $x + y = 100$ und $3x + 5y = 380$. Wie viel ist $y$?",
+      "opts": [
+        "$20$",
+        "$40$",
+        "$60$",
+        "$80$"
+      ],
+      "steps": [
+        "Erste Gleichung mit $3$: $3x + 3y = 300$, subtrahieren: $2y = 80$",
+        "$y = 40$, also $x = 60$"
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Was ist der Vorteil des Gauß-Verfahrens gegenüber dem Einsetzungsverfahren?",
+      "opts": [
+        "es funktioniert schematisch auch bei vielen Unbekannten",
+        "es ist immer kürzer",
+        "es braucht keine Brüche",
+        "es liefert immer ganze Zahlen"
+      ],
+      "steps": [
+        "Das Verfahren läuft nach festem Schema — genau deshalb ist es programmierbar.",
+        "Bei drei und mehr Unbekannten wird Einsetzen schnell unübersichtlich."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Wie prüft man eine gefundene Lösung?",
+      "opts": [
+        "gar nicht, Gauß ist immer richtig",
+        "in alle ursprünglichen Gleichungen einsetzen",
+        "nur in die letzte Zeile einsetzen",
+        "die Determinante berechnen"
+      ],
+      "steps": [
+        "Die Probe muss mit dem Originalsystem gemacht werden, nicht mit den umgeformten Zeilen.",
+        "Nur so fallen Rechenfehler beim Umformen auf."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Löse: $x + 2y = 7$ und $2x + 4y = 14$.",
+      "opts": [
+        "$x = 1$, $y = 3$",
+        "unendlich viele Lösungen",
+        "keine Lösung",
+        "$x = 7$, $y = 0$"
+      ],
+      "steps": [
+        "Die zweite Gleichung ist das Doppelte der ersten.",
+        "Es bleibt nur eine Bedingung: jede Lösung von $x + 2y = 7$ passt."
+      ],
+      "solution": 1
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>
