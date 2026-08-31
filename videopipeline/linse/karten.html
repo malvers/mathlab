@@ -433,7 +433,7 @@ function s10(u) {
   shots.forEach((sh, i) => {
     const a = ease(seg(u, 0.04 + i * 0.13, 0.24 + i * 0.13));
     if (a <= 0) return;
-    const cx = 250 + i * 390, cy = 300;
+    const cx = 250 + i * 390, cy = 230;
     const S = sh.S;
     const k = 0.62;
     /* centre each outline on its own body, so the three are comparable */
@@ -453,10 +453,10 @@ function s10(u) {
       g.beginPath(); g.arc(mx(p.x), my(p.y), 2.6, 0, Math.PI * 2); g.fill();
     });
     orb(20, 500); g.letterSpacing = '2px';
-    txt(sh.cap, cx, 448, COL.light, 'center');
+    txt(sh.cap, cx, 376, COL.light, 'center');
     g.letterSpacing = '0px';
     out(24, 300);
-    txt(sh.sub, cx, 482, COL.dim, 'center');
+    txt(sh.sub, cx, 410, COL.dim, 'center');
     g.globalAlpha = 1;
   });
 
@@ -465,15 +465,22 @@ function s10(u) {
     if (a <= 0) return;
     g.globalAlpha = a;
     out(28, 300);
-    txt('—  ' + s, 150, 556 + i * 34, COL.dim);
+    txt('—  ' + s, 150, 452 + i * 34, COL.dim);
     g.globalAlpha = 1;
   });
 
-  const endA = seg(u, 0.86, 0.96);
+  const endA = seg(u, 0.82, 0.94);
   if (endA > 0) {
     g.globalAlpha = endA;
-    orb(30, 700);
-    txt('EINE FORM ÄNDERN. MESSEN, WIE WEIT DANEBEN.', 1216, 690, COL.lime, 'right');
+    const bx = 120, by = 630, bw = 900, bh = 62;
+    g.fillStyle = 'rgba(8,20,42,0.88)';
+    roundRect(bx, by, bw, bh, 5); g.fill();
+    g.strokeStyle = hexA(COL.lime, 0.45); g.lineWidth = 1;
+    roundRect(bx, by, bw, bh, 5); g.stroke();
+    orb(27, 700);
+    g.letterSpacing = '1px';
+    txt('EINE FORM ÄNDERN. MESSEN, WIE WEIT DANEBEN.', bx + 30, by + 42, COL.lime);
+    g.letterSpacing = '0px';
     g.globalAlpha = 1;
   }
 }

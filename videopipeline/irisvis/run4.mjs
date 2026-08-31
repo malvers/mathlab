@@ -22,7 +22,7 @@ const id = await uploadVideo(FILE, {
   tags: ['Conway', 'Satz von Conway', 'Geometrie', 'Dreieck', 'Inkreis', 'Reuleaux',
     'konstante Breite', 'CMA-ES', 'Evolutionsstrategie', 'Optimierung', 'Mathematik',
     'Informatik', 'Doc Alvers', 'interaktiv', 'Unterricht'],
-  privacy: process.env.PRIVACY || 'private',
+  privacy: process.env.PRIVACY || 'public',
   dryRun: !!process.env.DRY,
 });
 if (id) console.log('YouTube:', 'https://youtu.be/' + id);

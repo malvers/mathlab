@@ -1,6 +1,12 @@
 // YouTube upload for the video pipeline (installed-app OAuth, no npm deps).
 // Credentials: ~/.config/docalvers-videos/client_secret.json ; token cached alongside.
-// Note: until the Google API audit is passed, API uploads are locked to "private" by YouTube.
+// Uploads go out PUBLIC by default (Doc, 31.08.2026 — "setzt das immer gleich public").
+// The Google API audit was passed on 27.08.2026, so YouTube no longer forces new API
+// uploads to private. PRIVACY=private|unlisted still overrides per run.
+// One limitation worth knowing before promising anything: the cached token carries only
+// the youtube.upload scope, which covers videos.insert and nothing else. Privacy can be
+// SET at upload time but not CHANGED afterwards — videos.update needs the full youtube
+// scope and therefore a fresh consent round.
 import fs from 'fs';
 import os from 'os';
 import http from 'http';
@@ -55,7 +61,7 @@ async function accessToken() {
   return r.access_token;
 }
 
-export async function uploadVideo(file, { title, description = '', tags = [], privacy = 'private', dryRun = false }) {
+export async function uploadVideo(file, { title, description = '', tags = [], privacy = 'public', dryRun = false }) {
   const size = fs.statSync(file).size;
   console.log(`→ Uploading: ${file}`);
   console.log(`  Title:      ${title}`);

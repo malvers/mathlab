@@ -1,12 +1,14 @@
 // Linse demo — step 4: upload to YouTube.
 // DRY=1 prints what would be sent without touching the API.
-// Visibility defaults to private (PRIVACY=unlisted|public to override).
+// Visibility defaults to public (PRIVACY=private|unlisted to override).
 import fs from 'fs';
 import { uploadVideo } from '../lib/youtube.mjs';
 import { workDir } from '../lib/paths.mjs';
 
 const OUT = workDir('linse');
-const FILE = `${OUT}/linse-demo-1440p.mp4`;
+// FILE=... uploads a specific cut. Doc trimmed the tail by hand once because the
+// pipeline left a few black frames at the very end - see the note in run3.
+const FILE = process.env.FILE || `${OUT}/linse-demo-1440p.mp4`;
 const chapters = fs.existsSync(`${OUT}/chapters.txt`) ? fs.readFileSync(`${OUT}/chapters.txt`, 'utf8') : '';
 
 const id = await uploadVideo(FILE, {
@@ -29,7 +31,7 @@ const id = await uploadVideo(FILE, {
   tags: ['CMA-ES', 'Evolutionsstrategie', 'Optimierung', 'Linse', 'Optik', 'Brechung',
     'Snellius', 'Brennpunkt', 'Evolution', 'Algorithmus', 'Fitnessfunktion',
     'Mathematik', 'Physik', 'Informatik', 'Doc Alvers', 'interaktiv', 'Unterricht', 'Visualisierung'],
-  privacy: process.env.PRIVACY || 'private',
+  privacy: process.env.PRIVACY || 'public',
   dryRun: !!process.env.DRY,
 });
 if (id) console.log('YouTube:', 'https://youtu.be/' + id);

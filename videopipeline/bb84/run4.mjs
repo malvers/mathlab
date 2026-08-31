@@ -1,6 +1,6 @@
 // BB84 demo — step 4: upload to YouTube.
 // DRY=1 prints what would be sent without touching the API.
-// Visibility defaults to private (PRIVACY=unlisted|public to override).
+// Visibility defaults to public (PRIVACY=private|unlisted to override).
 import fs from 'fs';
 import { uploadVideo } from '../lib/youtube.mjs';
 import { workDir } from '../lib/paths.mjs';
@@ -21,7 +21,7 @@ const id = await uploadVideo(FILE, {
   tags: ['BB84', 'Quantenkryptografie', 'Quantum Key Distribution', 'QKD', 'Bennett', 'Brassard',
     'Photon', 'Polarisation', 'Verschlüsselung', 'One-Time-Pad', 'Shannon', 'Shor',
     'Physik', 'Informatik', 'Doc Alvers', 'interaktiv', 'Unterricht'],
-  privacy: process.env.PRIVACY || 'private',
+  privacy: process.env.PRIVACY || 'public',
   dryRun: !!process.env.DRY,
 });
 if (id) console.log('YouTube:', 'https://youtu.be/' + id);
