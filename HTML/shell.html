@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DOC ALVERS MATHE-LABORE | Shell</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet">
+    <link rel="icon" type="image/png" href="resources/favicon.png">
+    <link rel="stylesheet" href="js/cyber-layout.css">
+    <link rel="stylesheet" href="js/buttons-ultra.css">
+    <link rel="stylesheet" href="js/cyber-lab-overrides.css">
+    <link rel="stylesheet" href="js/branding.styles.extracted.css">
+    <link rel="stylesheet" href="js/lab-shell-minimal.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <style>
+        #canvas { cursor: crosshair; }
+        .cyber-grid { display: none; }
+
+        #math-coach-box {
+            left: 24px;
+            bottom: 24px;
+            width: 400px;
+            max-width: calc(100vw - 48px);
+        }
+
+        #math-coach-box .katex { color: #dfe9ff; font-size: 0.9rem; }
+
+        .coach-eq { margin: 8px 0; overflow-x: auto; }
+
+        .coach-note {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 300;
+            font-size: 13px;
+            line-height: 1.55;
+            color: rgba(223, 233, 255, 0.82);
+        }
+
+        .coach-ask {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 10px;
+            letter-spacing: 0.08em;
+            color: rgba(245, 194, 66, 0.9);
+            margin-top: 10px;
+        }
+
+        #step-readout {
+            position: absolute;
+            top: 12px;
+            right: 16px;
+            font-family: 'Orbitron', monospace;
+            font-size: 10px;
+            letter-spacing: 0.05em;
+            color: rgba(0, 210, 255, 0.45);
+            pointer-events: none;
+            z-index: 10;
+            text-align: right;
+            line-height: 1.6;
+        }
+
+        .lab-label {
+            color: var(--neon-blue, #00d2ff);
+            font-size: 12px;
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        .lab-select {
+            display: block;
+            width: 100%;
+            margin-top: 4px;
+            background: rgba(0, 10, 30, 0.92);
+            color: #00d2ff;
+            border: 1px solid rgba(0, 210, 255, 0.4);
+            border-radius: 4px;
+            padding: 5px 6px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 12px;
+            outline: none;
+        }
+
+        .lab-check {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--neon-blue, #00d2ff);
+            font-family: 'Orbitron', sans-serif;
+            font-size: 11px;
+        }
+    </style>
+</head>
+
+<body>
+    <nav id="mini-rail">
+        <div class="nav-btn" onclick="toggleSidebar()" title="Toggle Menu">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </div>
+    </nav>
+
+    <aside id="side-panel">
+        <header id="sidebar-header"></header>
+        <div id="ui-container"></div>
+    </aside>
+
+    <main id="main-content">
+        <div id="canvas-container">
+            <div class="cyber-grid"></div>
+            <div id="math-coach-box">
+                <div class="coach-title" id="coach-title-slot"></div>
+                <div id="coach-content" class="coach-message"></div>
+            </div>
+            <canvas id="canvas"></canvas>
+            <div id="step-readout"></div>
+        </div>
+    </main>
+
+    <script src="js/cyber-left-chrome.js"></script>
+    <script src="js/branding/briefings.js"></script>
+    <script src="js/branding/overlays.js"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/branding/nav.js"></script>
+    <script src="js/branding.js"></script>
+    <script src="js/ui.js"></script>
+    <script>
+        function toggleSidebar() {
+            const panel = document.getElementById('side-panel');
+            panel.classList.toggle('collapsed');
+            if (window.CyberLeftChrome && typeof CyberLeftChrome.publishResolvedScale === 'function') {
+                CyberLeftChrome.publishResolvedScale();
+            }
+            setTimeout(() => {
+                window.dispatchEvent(new Event('resize'));
+                if (typeof init === 'function') init();
+                if (window.CyberLeftChrome && typeof CyberLeftChrome.publishResolvedScale === 'function') {
+                    CyberLeftChrome.publishResolvedScale();
+                }
+            }, 400);
+        }
+
+        CyberBranding.init({
+            useExternalStyles: true,
+            title: CyberI18n.get('ui.coach_title'),
+            subtitle: 'Shell',
+        });
+        CyberUI.init();
+
+        if (window.CyberLeftChrome && typeof CyberLeftChrome.configure === 'function') {
+            CyberLeftChrome.configure({ viewportOnlyZoom: true });
+        }
+
+        // =================================================================
+        // Shell - how the pattern on a sea shell comes about, step by step.
+        //
+        // The shell grows only at the mantle edge: a single row of cells
+        // that decides "pigment yes / no". Whatever is laid down stays
+        // forever, so the finished shell is a space-time diagram - one
+        // horizontal line per growth step, the newest at the bottom.
+        //
+        // The upper panel is the LIVING edge (activator + substrate right
+        // now), the lower panel is the SHELL it has already written.
+        // =================================================================
+
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const container = document.getElementById('canvas-container');
+
+        const N = 320;          // cells along the mantle edge
+        const ROW_TIME = 0.5;   // model time per growth line
+        const DT_MAX = 0.02;    // largest stable explicit-Euler step
+
+        // --- model state: activator a, substrate s ---
+        const a = new Float64Array(N);
+        const s = new Float64Array(N);
+        const na = new Float64Array(N);
+        const ns = new Float64Array(N);
+
+        // --- palette (project colours) ---
+        const SHELL_BG = [242, 232, 214];       // cream shell ground
+        const SHELL_INK = [124, 62, 26];        // brown pigment
+        const C_ACT = 'rgb(176, 36, 24)';       // Y  activator
+        const C_SUB = 'rgb(121, 158, 49)';      // phi substrate
+        const SHADOW = [121, 158, 49];          // substrate shadow in the shell
+
+        // Parameter regimes found by a headless sweep (1400 lines, 3 seeds each) and
+        // checked for long-term stability. Above sigma ~= 0.018 the model falls into a
+        // homogeneous steady state (a = 0.17 everywhere) and the shell turns solid brown.
+        // Both regimes below keep a safe margin from that cliff.
+        const REGIMES = {
+            // teaching regime: a collision annihilates cleanly and the site stays dead,
+            // so a single V and a single tent stay readable
+            puls: { Da: 0.4, Ds: 0, rho: 3, mua: 0.10, kappa: 0.05, sigma: 0.004, mus: 0.004, nuc: 0 },
+            // mus sets the recovery time (1/mus), s_max = sigma/mus sets the density.
+            // Chapters 5 and 6 differ in sigma ONLY - that is the point they make.
+            zickzack: { Da: 0.4, Ds: 0, rho: 3, mua: 0.10, kappa: 0.20, sigma: 0.009, mus: 0.015, nuc: 0.0020 },
+            zelte: { Da: 0.4, Ds: 0, rho: 3, mua: 0.10, kappa: 0.20, sigma: 0.012, mus: 0.015, nuc: 0.0020 }
+        };
+
+        // Measured front speed of the pulse regime: 0.32 cells per growth line (measured in
+        // the running lab, over the whole collision run - a short-window fit reads too high).
+        // Used to place the two seeds so that they always collide on screen.
+        const FRONT_SPEED = 0.32;
+
+        // ---------------- the guided chapters ----------------
+        // Each chapter isolates exactly ONE mechanism.
+        const CHAPTERS = [
+            {
+                id: 'raumzeit', label: '1 - RAUM UND ZEIT', regime: 'puls',
+                rowPx: 7, lps: 3, seed: 'one', nuc: 0, fill: true, shadow: false,
+                title: 'DAS BILD IST EIN PROTOKOLL',
+                text: 'Oben lebt die M&uuml;ndungskante: eine einzige Reihe Zellen. Jede Zelle entscheidet nur ' +
+                    '&bdquo;Pigment ja oder nein&ldquo;. Ist die Zeile fertig, wandert sie nach unten und ist ' +
+                    'f&uuml;r immer Kalk. Quer &uuml;ber die Schale liegt also der <b>Ort</b>, nach unten die ' +
+                    '<b>Zeit</b>. Du siehst kein gemaltes Bild, du siehst ein Protokoll.',
+                ask: 'Klick in die Kante - du zündest Zellen von Hand.'
+            },
+            {
+                id: 'welle', label: '2 - EINE WELLE', regime: 'puls',
+                rowPx: 3, lps: 14, seed: 'one', nuc: 0, fill: true, shadow: false,
+                title: 'EINE ZELLE STECKT AN',
+                text: 'Ein einziger Z&uuml;ndpunkt. Der Aktivator verst&auml;rkt sich selbst und steckt die ' +
+                    'Nachbarn an, also l&auml;uft die Erregung nach links und nach rechts davon. Im Protokoll ' +
+                    'wird daraus <b>ein V</b>. Die Schr&auml;ge des V ist nichts anderes als die ' +
+                    'Ausbreitungs&shy;geschwindigkeit der Welle.',
+                ask: 'Steiler = langsamer. Dreh an D_a und sieh zu.'
+            },
+            {
+                id: 'stoss', label: '3 - AUSL&Ouml;SCHUNG', regime: 'puls',
+                rowPx: 3, lps: 14, seed: 'two', nuc: 0, fill: true, shadow: false,
+                title: 'ZWEI WELLEN L&Ouml;SCHEN SICH AUS',
+                text: 'Zwei Z&uuml;ndpunkte. Die inneren Schenkel laufen aufeinander zu und sind beim Treffen ' +
+                    '<b>beide weg</b> - keine Welle geht durch die andere hindurch. Genau dieser Zusammensto&szlig; ' +
+                    'ist die <b>Spitze eines Zelts</b>. Jede wei&szlig;e Dreiecksspitze auf der Schale ist eine ' +
+                    'Kollision, die vor Jahren stattgefunden hat.',
+                ask: 'Warum stirbt eine Welle beim Zusammenstoß? → Kapitel 4.'
+            },
+            {
+                id: 'schatten', label: '4 - DER SCHATTEN', regime: 'puls',
+                rowPx: 3, lps: 9, seed: 'two', nuc: 0, fill: true, shadow: true,
+                title: 'DAS SUBSTRAT IST DIE ERKL&Auml;RUNG',
+                text: 'Die gr&uuml;ne Kurve oben ist das <b>Substrat</b> - der Vorrat, den der Aktivator ' +
+                    'auffrisst. Hinter der Welle liegt verbrauchtes Land (im Protokoll gr&uuml;n unterlegt), ' +
+                    'deshalb kann sie nicht zur&uuml;ck und l&auml;uft immer geradeaus. Und deshalb sterben ' +
+                    'zwei Wellen beim Treffen: <b>vor beiden liegt nur noch der eigene Schatten</b>.',
+                ask: 'Der grüne Schleier erholt sich langsam - das ist die Uhr der Schale.'
+            },
+            {
+                id: 'zickzack', label: '5 - ZICKZACK', regime: 'zickzack',
+                rowPx: 2, lps: 34, seed: 'noise', fill: false, shadow: false,
+                title: 'WENIGE Z&Uuml;NDUNGEN - LINIEN',
+                text: 'Jetzt z&uuml;ndet ab und zu von selbst eine Zelle, wo sich das Substrat erholt hat. ' +
+                    'Der Substrat-Vorrat ist <b>knapp</b> (0.6), also findet kaum eine Z&uuml;ndung genug ' +
+                    'Futter - die wenigen Wellen, die es schaffen, ziehen daf&uuml;r weite Bahnen. Jeder Knick ' +
+                    'ist eine Kollision. Das sind die Zickzack-Linien im oberen Teil deiner Schnecke.',
+                ask: 'Zieh den VORRAT auf 0.8 — das ist Kapitel 6.'
+            },
+            {
+                id: 'zelte', label: '6 - ZELTE', regime: 'zelte',
+                rowPx: 2, lps: 34, seed: 'noise', fill: false, shadow: false,
+                title: 'VIELE Z&Uuml;NDUNGEN - ZELTE',
+                text: 'Ein Drittel mehr Vorrat (0.8), sonst <b>nichts</b> ge&auml;ndert - gleiche Z&uuml;ndrate, ' +
+                    'gleiche Erholzeit, gleiches Wellentempo. Jetzt ' +
+                    'findet fast jede Z&uuml;ndung Futter, die Wellen kommen kaum weit, bevor sie auf die ' +
+                    'n&auml;chste treffen. Aus den vielen kurzen V-St&uuml;cken werden die <b>Zeltreihen</b> - ' +
+                    'genau das Muster in der Mitte deiner Schale. Zickzack und Zelte sind nicht zwei Muster, ' +
+                    'sondern <b>ein</b> Mechanismus bei zwei Nachschubraten.',
+                ask: 'Der VORRAT-Slider fährt stufenlos von Kapitel 5 nach 6.'
+            }
+        ];
+
+        let chapter = CHAPTERS[0];
+        const P = Object.assign({ rho0: 0.001, gate: 0.6 }, REGIMES.zickzack);
+        let showShadow = false;
+        let rowPx = 7;
+        let linesPerSecond = 3;
+        let fillMode = true;
+        const A_AXIS = 0.6;      // fixed activator axis of the edge panel
+        let running = true;
+        let finished = false;
+        let lineCount = 0;
+
+        // ---------------- history buffer (the shell itself) ----------------
+        const off = document.createElement('canvas');
+        let offCtx = off.getContext('2d');
+        let rowImg = null;
+        let ROWS = 1;
+        let head = 0;
+        let filled = 0;
+
+        function allocHistory(rows) {
+            ROWS = Math.max(8, rows);
+            off.width = N;
+            off.height = ROWS;
+            offCtx = off.getContext('2d');
+            rowImg = offCtx.createImageData(N, 1);
+            head = 0;
+            filled = 0;
+            clearHistory();
+        }
+
+        function clearHistory() {
+            offCtx.fillStyle = 'rgb(' + SHELL_BG.join(',') + ')';
+            offCtx.fillRect(0, 0, N, ROWS);
+        }
+
+        function smax() { return P.sigma / P.mus; }
+
+        function resetModel() {
+            const sm = smax();
+            for (let i = 0; i < N; i++) { a[i] = 0; s[i] = sm; }
+            if (chapter.seed === 'one') {
+                ignite(N >> 1);
+            } else if (chapter.seed === 'two') {
+                // place the seeds so the collision lands at ~60% of the visible height,
+                // whatever the window size - otherwise the tent tip is cut off
+                const half = Math.max(18, Math.min(N * 0.3, 0.6 * ROWS * FRONT_SPEED));
+                ignite(Math.round(N / 2 - half));
+                ignite(Math.round(N / 2 + half));
+            } else {
+                for (let i = 0; i < N; i++) if (Math.random() < 0.03) a[i] = 1;
+            }
+            lineCount = 0;
+            finished = false;
+            head = 0;
+            filled = 0;
+            clearHistory();
+        }
+
+        function ignite(i) {
+            for (let k = -2; k <= 2; k++) {
+                const j = i + k;
+                if (j >= 0 && j < N) a[j] = 1.0;
+            }
+        }
+
+        // ---------------- one growth line ----------------
+        function stepModel() {
+            const Dmax = Math.max(P.Da, P.Ds, 1e-6);
+            const dt = Math.min(DT_MAX, 0.4 / Dmax);      // keep explicit diffusion stable
+            const steps = Math.max(1, Math.round(ROW_TIME / dt));
+            const sm = smax();
+
+            for (let k = 0; k < steps; k++) {
+                for (let i = 0; i < N; i++) {
+                    const im = i === 0 ? 0 : i - 1;        // zero-flux edge
+                    const ip = i === N - 1 ? N - 1 : i + 1;
+                    const ai = a[i];
+                    const act = (P.rho * ai * ai * s[i]) / (1 + P.kappa * ai * ai);
+                    na[i] = ai + dt * (P.Da * (a[im] - 2 * ai + a[ip]) + act - P.mua * ai + P.rho0);
+                    ns[i] = s[i] + dt * (P.Ds * (s[im] - 2 * s[i] + s[ip]) + P.sigma - act - P.mus * s[i]);
+                    if (na[i] < 0 || !isFinite(na[i])) na[i] = 0;
+                    if (ns[i] < 0 || !isFinite(ns[i])) ns[i] = 0;
+                }
+                a.set(na);
+                s.set(ns);
+            }
+
+            // spontaneous ignition wherever the substrate has recovered
+            if (P.nuc > 0) {
+                for (let i = 0; i < N; i++) {
+                    if (s[i] > P.gate * sm && a[i] < 0.05 && Math.random() < P.nuc) a[i] = 1.0;
+                }
+            }
+        }
+
+        // Fixed pigment mapping. The model rests at a0 = rho0/mua (about 0.01) and a
+        // travelling wave crests well above 0.3. An ADAPTIVE maximum would drop to its
+        // floor whenever the waves pause and then render the resting state as pigment -
+        // the whole shell turns brown. So the mapping stays fixed and physical.
+        const PIG_LO_FACTOR = 5;        // pigment starts clearly above the resting state
+        const PIG_HI = 0.35;            // a healthy wave crest
+
+        function pigmentLevel(v) {
+            const lo = PIG_LO_FACTOR * P.rho0 / P.mua;
+            let t = (v - lo) / (PIG_HI - lo);
+            return t <= 0 ? 0 : (t >= 1 ? 1 : t * t * (3 - 2 * t));       // smoothstep
+        }
+
+        function writeLine() {
+            const d = rowImg.data;
+            const sm = smax();
+            for (let i = 0; i < N; i++) {
+                const t = pigmentLevel(a[i]);
+                let r = SHELL_BG[0] + (SHELL_INK[0] - SHELL_BG[0]) * t;
+                let g = SHELL_BG[1] + (SHELL_INK[1] - SHELL_BG[1]) * t;
+                let b = SHELL_BG[2] + (SHELL_INK[2] - SHELL_BG[2]) * t;
+                if (showShadow) {
+                    // depleted substrate stays visible as a green haze behind the wave
+                    const u = Math.max(0, Math.min(1, 1 - s[i] / sm)) * 0.5 * (1 - t);
+                    r += (SHADOW[0] - r) * u;
+                    g += (SHADOW[1] - g) * u;
+                    b += (SHADOW[2] - b) * u;
+                }
+                const o = i << 2;
+                d[o] = r; d[o + 1] = g; d[o + 2] = b; d[o + 3] = 255;
+            }
+            offCtx.putImageData(rowImg, 0, head);
+            head = (head + 1) % ROWS;
+            if (filled < ROWS) filled++;
+            lineCount++;
+        }
+
+        function totalActivator() {
+            let sum = 0;
+            for (let i = 0; i < N; i++) sum += a[i];
+            return sum;
+        }
+
+        function stepOnce() {
+            stepModel();
+            writeLine();
+            if (fillMode) {
+                // a filling chapter stops when the page is full or the waves have died
+                if (filled >= ROWS) { finished = true; running = false; }
+                else if (P.nuc === 0 && lineCount > 12 && totalActivator() < 0.05) { finished = true; running = false; }
+            }
+        }
+
+        // ---------------- layout ----------------
+        let edgeH = 150;
+
+        function resizeCanvasToContainer() {
+            const dpr = window.devicePixelRatio || 1;
+            const rect = container.getBoundingClientRect();
+            const w = Math.max(1, rect.width);
+            const h = Math.max(1, rect.height);
+            canvas.width = Math.floor(w * dpr);
+            canvas.height = Math.floor(h * dpr);
+            canvas.style.width = w + 'px';
+            canvas.style.height = h + 'px';
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.scale(dpr, dpr);
+            ctx.imageSmoothingEnabled = true;             // shells are not pixel art
+            edgeH = Math.max(88, Math.min(170, h * 0.26));
+            const rows = Math.max(8, Math.floor((h - edgeH) / rowPx));
+            if (rows !== ROWS) allocHistory(rows);
+        }
+
+        // ---------------- drawing ----------------
+        function draw() {
+            const rect = container.getBoundingClientRect();
+            const w = rect.width, h = rect.height;
+            drawShell(w, h);
+            drawEdgePanel(w, edgeH);
+            drawReadout();
+        }
+
+        function drawShell(w, h) {
+            const top = edgeH, hh = h - edgeH;
+            ctx.fillStyle = 'rgb(' + SHELL_BG.join(',') + ')';
+            ctx.fillRect(0, top, w, hh);
+
+            if (fillMode) {
+                // grows downwards from the edge, nothing scrolls away
+                const used = filled * hh / ROWS;
+                if (filled > 0) ctx.drawImage(off, 0, 0, N, filled, 0, top, w, used);
+            } else {
+                // ring buffer: oldest line just under the edge, newest at the bottom
+                const tail = ROWS - head;
+                const hTail = hh * tail / ROWS;
+                ctx.drawImage(off, 0, head, N, tail, 0, top, w, hTail);
+                if (head > 0) ctx.drawImage(off, 0, 0, N, head, 0, top + hTail, w, hh - hTail);
+            }
+
+            // the boundary between what is alive and what is already calcified
+            ctx.save();
+            ctx.strokeStyle = 'rgba(0, 210, 255, 0.55)';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(0, top + 0.5);
+            ctx.lineTo(w, top + 0.5);
+            ctx.stroke();
+            ctx.font = '9px Orbitron, monospace';
+            ctx.fillStyle = 'rgba(0, 210, 255, 0.6)';
+            ctx.fillText('MÜNDUNGSKANTE - HIER WÄCHST DIE SCHALE', 10, top + 12);
+            ctx.restore();
+
+            drawTimeArrow(w, top, hh);
+        }
+
+        function drawTimeArrow(w, top, hh) {
+            if (hh < 90) return;
+            const x = w - 26, y0 = top + 26, y1 = top + Math.min(120, hh - 30);
+            ctx.save();
+            ctx.strokeStyle = 'rgba(124, 62, 26, 0.45)';
+            ctx.fillStyle = 'rgba(124, 62, 26, 0.6)';
+            ctx.lineWidth = 1.2;
+            ctx.beginPath();
+            ctx.moveTo(x, y1); ctx.lineTo(x, y0);
+            ctx.stroke();
+            ctx.beginPath();                                  // arrow head points UP into the past
+            ctx.moveTo(x, y0 - 5); ctx.lineTo(x - 4, y0 + 3); ctx.lineTo(x + 4, y0 + 3);
+            ctx.closePath(); ctx.fill();
+            ctx.font = '9px Orbitron, monospace';
+            ctx.save();
+            ctx.translate(x - 8, (y0 + y1) / 2);
+            ctx.rotate(-Math.PI / 2);
+            ctx.textAlign = 'center';
+            ctx.fillText('FRÜHER', 0, 0);
+            ctx.restore();
+            ctx.restore();
+        }
+
+        function drawEdgePanel(w, hEdge) {
+            ctx.save();
+            ctx.fillStyle = 'rgb(8, 20, 42)';                 // lab ground, never black
+            ctx.fillRect(0, 0, w, hEdge);
+
+            const cellH = Math.max(8, Math.min(16, hEdge * 0.11));
+            const cellY = hEdge - cellH - 2;
+            const plotTop = 20;
+            const plotH = Math.max(20, cellY - plotTop - 6);
+            const cw = w / N;
+
+            // --- substrate curve (the stock the activator eats) ---
+            const sm = smax();
+            ctx.beginPath();
+            for (let i = 0; i < N; i++) {
+                const x = (i + 0.5) * cw;
+                const y = plotTop + plotH - Math.max(0, Math.min(1, s[i] / sm)) * plotH;
+                if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+            }
+            ctx.strokeStyle = C_SUB;
+            ctx.lineWidth = 1.4;
+            ctx.stroke();
+
+            // --- activator curve, filled ---
+            ctx.beginPath();
+            ctx.moveTo(0, plotTop + plotH);
+            for (let i = 0; i < N; i++) {
+                const x = (i + 0.5) * cw;
+                const y = plotTop + plotH - Math.max(0, Math.min(1, a[i] / A_AXIS)) * plotH;
+                ctx.lineTo(x, y);
+            }
+            ctx.lineTo(w, plotTop + plotH);
+            ctx.closePath();
+            ctx.fillStyle = 'rgba(176, 36, 24, 0.35)';
+            ctx.fill();
+            ctx.strokeStyle = C_ACT;
+            ctx.lineWidth = 1.6;
+            ctx.stroke();
+
+            // --- the cell row: exactly what will be written next ---
+            for (let i = 0; i < N; i++) {
+                const t = pigmentLevel(a[i]);
+                const r = SHELL_BG[0] + (SHELL_INK[0] - SHELL_BG[0]) * t;
+                const g = SHELL_BG[1] + (SHELL_INK[1] - SHELL_BG[1]) * t;
+                const b = SHELL_BG[2] + (SHELL_INK[2] - SHELL_BG[2]) * t;
+                ctx.fillStyle = 'rgb(' + (r | 0) + ',' + (g | 0) + ',' + (b | 0) + ')';
+                const x = i * cw;
+                ctx.fillRect(x, cellY, cw > 3 ? cw - 1 : cw, cellH);
+            }
+
+            // legend
+            ctx.font = '9px Orbitron, monospace';
+            ctx.fillStyle = C_ACT;
+            ctx.fillText('AKTIVATOR a', 10, 13);
+            ctx.fillStyle = C_SUB;
+            ctx.fillText('SUBSTRAT s', 112, 13);
+            ctx.fillStyle = 'rgba(223, 233, 255, 0.45)';
+            ctx.fillText('LEBENDE ZELLREIHE', w - 122, 13);
+            ctx.restore();
+        }
+
+        function drawReadout() {
+            const ro = document.getElementById('step-readout');
+            if (!ro) return;
+            let txt = lineCount.toLocaleString() + ' Wachstumslinien';
+            if (finished) txt += '<br>FERTIG - RESET ODER NEUES KAPITEL';
+            else if (!running) txt += '<br>PAUSE';
+            ro.innerHTML = txt;
+        }
+
+        // ---------------- animation with a real line rate ----------------
+        let lastT = 0, carry = 0;
+
+        function loop(tNow) {
+            if (!lastT) lastT = tNow;
+            const dt = Math.min(0.25, (tNow - lastT) / 1000);
+            lastT = tNow;
+            if (running) {
+                carry += dt * linesPerSecond;
+                let budget = 40;                              // never freeze the tab
+                while (carry >= 1 && budget-- > 0 && running) { carry -= 1; stepOnce(); }
+                if (carry > 2) carry = 0;
+            } else {
+                carry = 0;
+            }
+            draw();
+            requestAnimationFrame(loop);
+        }
+
+        // ---------------- interaction ----------------
+        function igniteAtPixel(px, width) {
+            const i = Math.max(0, Math.min(N - 1, Math.floor(px / width * N)));
+            ignite(i);
+            if (finished) { finished = false; running = true; }
+        }
+
+        canvas.addEventListener('mousedown', (e) => {
+            const r = canvas.getBoundingClientRect();
+            igniteAtPixel(e.clientX - r.left, r.width);
+        });
+        canvas.addEventListener('mousemove', (e) => {
+            if (e.buttons !== 1) return;
+            const r = canvas.getBoundingClientRect();
+            igniteAtPixel(e.clientX - r.left, r.width);
+        });
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            const r = canvas.getBoundingClientRect();
+            igniteAtPixel(e.touches[0].clientX - r.left, r.width);
+        }, { passive: false });
+        canvas.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            if (!e.touches.length) return;
+            const r = canvas.getBoundingClientRect();
+            igniteAtPixel(e.touches[0].clientX - r.left, r.width);
+        }, { passive: false });
+
+        window.addEventListener('keydown', (e) => {
+            if (e.metaKey || e.ctrlKey || e.altKey) return;   // never swallow Cmd-Shift-R
+            const tag = (e.target && e.target.tagName) || '';
+            if (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA') return;
+            if (e.code === 'Space') { e.preventDefault(); toggleRun(); }
+            else if (e.key === 'ArrowRight') { e.preventDefault(); singleStep(); }
+        });
+
+        // ---------------- chapters ----------------
+        function applyChapter(id) {
+            const ch = CHAPTERS.find(c => c.id === id) || CHAPTERS[0];
+            chapter = ch;
+            Object.assign(P, REGIMES[ch.regime]);
+            if (typeof ch.nuc === 'number') P.nuc = ch.nuc;
+            showShadow = !!ch.shadow;
+            fillMode = !!ch.fill;
+            rowPx = ch.rowPx;
+            linesPerSecond = ch.lps;
+            running = true;
+            syncControls();
+            resizeCanvasToContainer();                        // rowPx changed -> new row count
+            resetModel();
+            setCoach(ch);
+        }
+
+        function setCoach(ch) {
+            const title = document.getElementById('coach-title-slot');
+            if (title) title.innerHTML = ch.title;
+            const box = document.getElementById('coach-content');
+            if (!box) return;
+            box.innerHTML = '<div class="coach-note">' + ch.text + '</div>' +
+                '<div class="coach-ask">' + ch.ask + '</div>' +
+                '<div class="coach-eq" id="eq-a"></div><div class="coach-eq" id="eq-s"></div>';
+            if (showEquations) renderEquations();
+        }
+
+        let showEquations = false;
+
+        function renderEquations() {
+            if (typeof katex === 'undefined') return;
+            const ea = document.getElementById('eq-a'), es = document.getElementById('eq-s');
+            if (!ea || !es) return;
+            if (!showEquations) { ea.innerHTML = ''; es.innerHTML = ''; return; }
+            katex.render('\\frac{\\partial a}{\\partial t} = D_a\\,\\frac{\\partial^2 a}{\\partial x^2} + \\frac{\\rho\\,a^2 s}{1+\\kappa a^2} - \\mu_a a + \\rho_0',
+                ea, { throwOnError: false, displayMode: true });
+            katex.render('\\frac{\\partial s}{\\partial t} = \\sigma - \\frac{\\rho\\,a^2 s}{1+\\kappa a^2} - \\mu_s s',
+                es, { throwOnError: false, displayMode: true });
+        }
+
+        function toggleRun() {
+            if (finished) { resetModel(); running = true; }
+            else running = !running;
+            const b = document.getElementById('btn-run');
+            if (b) b.textContent = running ? 'PAUSE' : 'PLAY';
+        }
+
+        function singleStep() {
+            running = false;
+            const b = document.getElementById('btn-run');
+            if (b) b.textContent = 'PLAY';
+            if (finished) { resetModel(); }
+            stepOnce();
+        }
+
+        // ---------------- sidebar ----------------
+        function slider(id, label, min, max, step, value, digits) {
+            return '<label class="lab-label">' + label + ': <span id="' + id + '-val">' +
+                (+value).toFixed(digits) + '</span>' +
+                '<input type="range" id="' + id + '" aria-label="' + label + '" min="' + min +
+                '" max="' + max + '" step="' + step + '" value="' + value + '"></label>';
+        }
+
+        function bindP(id, key, digits) {
+            const el = document.getElementById(id);
+            const out = document.getElementById(id + '-val');
+            if (!el) return;
+            el.addEventListener('input', function () {
+                P[key] = parseFloat(this.value);
+                out.textContent = P[key].toFixed(digits);
+            });
+        }
+
+        function syncControls() {
+            const pairs = [['sl-da', P.Da, 3], ['sl-nuc', P.nuc, 4], ['sl-smax', P.sigma / P.mus, 2], ['sl-lps', linesPerSecond, 0]];
+            pairs.forEach(([id, val, dg]) => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                el.value = val;
+                const out = document.getElementById(id + '-val');
+                if (out) out.textContent = (+val).toFixed(dg);
+            });
+            const sh = document.getElementById('chk-shadow');
+            if (sh) sh.checked = showShadow;
+            const sel = document.getElementById('sel-chapter');
+            if (sel) sel.value = chapter.id;
+            const b = document.getElementById('btn-run');
+            if (b) b.textContent = running ? 'PAUSE' : 'PLAY';
+        }
+
+        function setupUI() {
+            const host = document.getElementById('ui-container');
+            if (host) host.innerHTML = '';
+            const BRAND_BLUE = '#00d2ff';
+            const opts = CHAPTERS.map(c => '<option value="' + c.id + '">' + c.label + '</option>').join('');
+
+            CyberUI.createCard('ui-container', 'Kapitel', `
+                <div style="display:flex;flex-direction:column;gap:9px;align-items:stretch;padding:0;">
+                    <label class="lab-label">SCHRITT F&Uuml;R SCHRITT
+                        <select id="sel-chapter" class="lab-select" aria-label="Kapitel">${opts}</select>
+                    </label>
+                    <div style="display:flex;gap:6px;">
+                        <button class="cyber-btn" id="btn-prev" style="flex:1;border-color:#888;color:#888;padding:8px;">&larr;</button>
+                        <button class="cyber-btn" id="btn-next" style="flex:2;border-color:#00d2ff;color:#00d2ff;padding:8px;">WEITER &rarr;</button>
+                    </div>
+                </div>
+            `, BRAND_BLUE);
+
+            CyberUI.createCard('ui-container', 'Steuerung', `
+                <div style="display:flex;flex-direction:column;gap:9px;align-items:stretch;padding:0;">
+                    ${slider('sl-lps', 'LINIEN / SEKUNDE', 1, 60, 1, linesPerSecond, 0)}
+                    ${slider('sl-smax', 'SUBSTRAT-VORRAT', 0.3, 1.1, 0.02, P.sigma / P.mus, 2)}
+                    ${slider('sl-da', 'D<sub>a</sub> WELLENTEMPO', 0.05, 1.0, 0.005, P.Da, 3)}
+                    ${slider('sl-nuc', 'Z&Uuml;NDRATE', 0, 0.008, 0.0002, P.nuc, 4)}
+                    <label class="lab-check"><input type="checkbox" id="chk-shadow" aria-label="Substrat-Schatten zeigen"> SUBSTRAT-SCHATTEN</label>
+                    <div style="display:flex;gap:6px;margin-top:4px;">
+                        <button class="cyber-btn" id="btn-run" style="flex:1;border-color:#ffaa00;color:#ffaa00;padding:8px;">PAUSE</button>
+                        <button class="cyber-btn" id="btn-step" style="flex:1;border-color:#00d2ff;color:#00d2ff;padding:8px;">1 LINIE</button>
+                    </div>
+                    <div style="display:flex;gap:6px;">
+                        <button class="cyber-btn" id="btn-reset" style="flex:1;border-color:#ff3366;color:#ff3366;padding:8px;">RESET</button>
+                        <button class="cyber-btn" id="btn-eq" style="flex:1;border-color:#888;color:#888;padding:8px;">FORMELN</button>
+                    </div>
+                </div>
+            `, BRAND_BLUE);
+
+            document.getElementById('sel-chapter').addEventListener('change', function () {
+                applyChapter(this.value);
+            });
+            document.getElementById('btn-prev').addEventListener('click', () => hop(-1));
+            document.getElementById('btn-next').addEventListener('click', () => hop(1));
+            bindP('sl-da', 'Da', 3);
+            bindP('sl-nuc', 'nuc', 4);
+            // The slider moves the substrate stock s_max = sigma/mus, keeping the recovery
+            // time 1/mus untouched - so only ONE thing changes. It stops at 1.1: further up
+            // the model floods and the whole shell turns solid brown.
+            document.getElementById('sl-smax').addEventListener('input', function () {
+                const v = parseFloat(this.value);
+                P.sigma = v * P.mus;
+                document.getElementById('sl-smax-val').textContent = v.toFixed(2);
+            });
+            document.getElementById('sl-lps').addEventListener('input', function () {
+                linesPerSecond = parseInt(this.value, 10);
+                document.getElementById('sl-lps-val').textContent = linesPerSecond.toFixed(0);
+            });
+            document.getElementById('chk-shadow').addEventListener('change', function () {
+                showShadow = this.checked;
+            });
+            document.getElementById('btn-run').addEventListener('click', toggleRun);
+            document.getElementById('btn-step').addEventListener('click', singleStep);
+            document.getElementById('btn-reset').addEventListener('click', () => { resetModel(); running = true; syncControls(); });
+            document.getElementById('btn-eq').addEventListener('click', function () {
+                showEquations = !showEquations;
+                renderEquations();
+            });
+        }
+
+        function hop(d) {
+            const i = CHAPTERS.findIndex(c => c.id === chapter.id);
+            const j = Math.max(0, Math.min(CHAPTERS.length - 1, i + d));
+            applyChapter(CHAPTERS[j].id);
+        }
+
+        function init() {
+            resizeCanvasToContainer();
+            draw();
+        }
+
+        let resizeRaf = null;
+        window.addEventListener('resize', () => {
+            if (resizeRaf != null) return;
+            resizeRaf = requestAnimationFrame(() => { resizeRaf = null; init(); });
+        });
+
+        let booted = false;
+        function boot() {
+            if (booted) return;
+            booted = true;
+            try {
+                document.getElementById('math-coach-box').classList.add('visible');
+                setupUI();
+                applyChapter(CHAPTERS[0].id);
+            } catch (e) {
+                console.error('boot error:', e);
+            }
+            requestAnimationFrame(loop);
+        }
+
+        document.fonts.ready.then(boot);
+        setTimeout(boot, 1500);
+    </script>
+</body>
+
+</html>
