@@ -312,10 +312,13 @@ footer .sig { margin-left: auto; }
             Selbstähnlichkeit im technischen Sinn, konforme Abbildung, Renormierung,
             Feigenbaum-Konstante</em>.</li>
         <li><strong>„Unendlich" nur, wo es stimmt.</strong> Der Rand ist unendlich fein
-            — der <em>Zoom im Lab</em> ist es nicht. Was der Film zeigt, ist bei
-            Standard-Genauigkeit bei etwa <span class="m">10<sup>−15</sup></span> zu
-            Ende; alles darunter ist die Störungsrechnung des Labors. Das gehört
-            gesagt, nicht verschwiegen (Szene 7).</li>
+            — der <em>Zoom im Lab</em> ist es nicht. <strong>Korrigiert nach dem Blick in
+            den Code:</strong> es gibt <em>keine</em> Störungsrechnung und keine
+            <span class="m">10<sup>−80</sup></span>. Der Fragment-Shader rechnet
+            <code>precision highp float</code> — 32 Bit, gut sieben Stellen —, die
+            Iteration ist bei 512 gedeckelt, und <code>ZOOM_MAX</code> ist
+            <strong>200 000</strong>. Genau das sagt Szene 7, und nichts darüber
+            hinaus.</li>
         <li><strong>Beim π-Fund nichts behaupten, was nicht gemessen ist.</strong> Der
             Film zeigt die Zahlenreihe und rechnet vor. Er behauptet <em>nicht</em>,
             dass er erklärt, warum π herauskommt — das ist ein echter Beweis über den
@@ -374,6 +377,18 @@ footer .sig { margin-left: auto; }
            (Start: 1). <strong><code>btn-flight</code> ist beim Laden gesperrt</strong>
            und wird erst durch einen Zoom freigeschaltet — die Choreografie muss das
            einplanen.</p>
+        <p><strong>Drei weitere Messwerte, die den Dreh umgebaut haben:</strong>
+           Erstens startet das Lab bei leerem <code>localStorage</code> im Modus
+           <strong>JULIA</strong>, nicht Mandelbrot, und die Fraktal-Leinwand bekommt
+           ihre Größe erst, wenn ihre Ebene einmal sichtbar war. Zweitens zeichnet die
+           Orbit-Ansicht höchstens <strong>zehn Schenkel</strong>
+           (<code>ORBIT_LEG_MAX</code>) — deshalb Szene 3 mit
+           <span class="m">c</span> = 0,35 (Flucht nach acht) statt 0,3 (zwölf).
+           Drittens <strong>überlebt der Zoom den Moduswechsel</strong>: nach Szene 7
+           erbt die Julia-Ebene den Zoom 200 000 und ist stockschwarz, und
+           <code>btn-reset</code> hilft nicht (animiert, über 2,5 s, und klettert danach
+           von selbst wieder hoch). Szene 6 wird deshalb <em>vor</em> den Tiefzooms
+           gedreht; der Schnitt sortiert um.</p>
     </div>
 </section>
 
@@ -461,11 +476,11 @@ const SCENES = [
       aha: 'Die Regel ist lächerlich einfach: <strong>quadrieren, <span class="m">c</span> dazu, von vorn.</strong> Bleibt die Kette in der Nähe, ist der Punkt drin — im Bild schwarz. Mehr steckt in der Schwärze nicht.' },
 
     { n: 3, s: 18, t: 'Einen Fingerbreit weiter', core: true,
-      img: 'Derselbe Bildschirm, nur <span class="m">c</span> = 0,3 statt −0,2. Die Kette macht ein paar Schritte, dann kippt sie: die Glieder werden größer, größer, und nach zwölf Schritten ist sie aus dem Bild.',
-      aha: 'Zwölf Schritte. Ein winziger Unterschied im <span class="m">c</span>, und die Folge <em>läuft davon</em>. Ab Betrag zwei gibt es kein Zurück — das ist keine Faustregel, das ist beweisbar.' },
+      img: 'Derselbe Bildschirm, sechs Rad-Klicks herausgezoomt, nur <span class="m">c</span> = 0,35 statt −0,2. Die Kette macht ein paar Schritte, dann kippt sie: die Glieder werden größer, größer, und beim achten reißt sie den gestrichelten Kreis <span class="m">|z| = 2</span>.',
+      aha: 'Acht Schritte. Ein winziger Unterschied im <span class="m">c</span>, und die Folge <em>läuft davon</em>. Ab Betrag zwei gibt es kein Zurück — das ist keine Faustregel, das ist beweisbar. <strong>Nicht 0,3 wie geplant:</strong> das bräuchte zwölf Schritte, und die Orbit-Ansicht zeichnet höchstens zehn.' },
 
     { n: 4, s: 20, t: 'Die Farbe ist die Wartezeit', card: true,
-      img: 'Drei Punkte nebeneinander, jeder mit seiner Kette und seinem Zähler: 3 Schritte, 12 Schritte, 33 Schritte. Dann kippt die Karte um — aus den Zählerständen wird die Farbskala, und das ganze Bild färbt sich neu ein.',
+      img: 'Drei Punkte nebeneinander, jeder mit seiner Kette und seinem Zähler: 3 Schritte, 8 Schritte, 33 Schritte. Dann kippt die Karte um — aus den Zählerständen wird die Farbskala, und das ganze Bild färbt sich neu ein.',
       aha: 'Die Farben sind keine Deko und keine Höhenlinien. <strong>Sie sind die Anzahl der Schritte bis zur Flucht.</strong> Wo die Bänder eng werden, ändert sich diese Zahl schnell — dort ist der Rand.' },
 
     { n: 5, s: 18, t: 'Der Rand hört nicht auf',
@@ -473,12 +488,12 @@ const SCENES = [
       aha: 'Es wird nicht unschärfer, es wird <em>mehr</em>. Und mit jeder Stufe braucht man mehr Schritte, um überhaupt noch zu entscheiden, ob ein Punkt drin oder draußen ist — <strong>am Rand wird die Frage teuer</strong>.' },
 
     { n: 6, s: 20, t: 'Jeder Punkt eine eigene Welt',
-      img: 'Umschalten auf JULIA. Die beiden Regler wandern über die Ebene, und zu jedem <span class="m">c</span> steht sofort eine andere Julia-Menge da: zusammenhängend im Inneren des Apfelmännchens, in Staub zerfallen außerhalb.',
-      aha: 'Das Apfelmännchen ist gar kein Objekt, es ist ein <strong>Inhaltsverzeichnis</strong>: es sagt für jedes <span class="m">c</span>, ob dessen Julia-Menge zusammenhängt oder in Staub zerfällt. Ein Bild, das über unendlich viele andere Bilder Buch führt.' },
+      img: 'Umschalten auf JULIA. Die beiden Regler wandern über die Ebene: <span class="m">c</span> = −0,2 (dicker zusammenhängender Klumpen) → <span class="m">c</span> = −1 (die Basilika, noch zusammenhängend) → <span class="m">c</span> = 0,5 + 0,5 i (sichtbar getrennte Klumpen).',
+      aha: 'Das Apfelmännchen ist gar kein Objekt, es ist ein <strong>Inhaltsverzeichnis</strong>: es sagt für jedes <span class="m">c</span>, ob dessen Julia-Menge zusammenhängt oder in Staub zerfällt. Ein Bild, das über unendlich viele andere Bilder Buch führt. <strong>Achtung bei der Auswahl:</strong> die Vorgabe des Labs, <span class="m">c</span> = −0,7 + 0,27 i, liegt <em>außerhalb</em> (Flucht nach 96 Schritten) und taugt nicht als Beispiel für „zusammenhängend"; und <span class="m">c</span> = 0,4 + 0,4 i ist zwar draußen, sieht im Bild aber noch wie ein Stück aus.' },
 
-    { n: 7, s: 18, t: 'Wenn vierundsechzig Bit nicht reichen', cut: true,
-      img: 'Weiterzoomen, bis das Bild bei üblicher Rechengenauigkeit in Blöcke zerfällt — und daneben derselbe Ausschnitt, wie das Lab ihn mit Störungsrechnung tatsächlich zeichnet.',
-      aha: 'Ab etwa <span class="m">10<sup>−15</sup></span> sind zwei benachbarte Bildpunkte für den Rechner <em>dieselbe Zahl</em>. Der Rand ist dann nicht zu Ende — nur unser Zahlensystem. Das Lab rechnet ab da anders und kommt bis <span class="m">10<sup>−80</sup></span>.' },
+    { n: 7, s: 18, t: 'Wo das Werkzeug endet', cut: true,
+      img: 'Weiterzoomen aus Szene 5 heraus. Der Zoomfaktor im Panel klettert — 40 000, 90 000, 150 000 — und bleibt dann bei <strong>200.000</strong> stehen, während das Rad weiterdreht.',
+      aha: 'Der Anschlag ist echt: <code>ZOOM_MAX = 200000</code>, und der Shader rechnet <code>highp float</code>, also 32 Bit und gut sieben Stellen. <strong>Der Rand geht weiter, unser Zahlensystem nicht.</strong> Das ist keine Eigenschaft des Fraktals, sondern eine des Werkzeugs — und das gehört gesagt.' },
 
     { n: 8, s: 20, t: 'Immer näher an eine Stelle', core: true, card: true,
       img: 'Eine einzige Stelle: die Einschnürung zwischen Körper und Kopf, <span class="m">c</span> = −0,75. Von dort geht es senkrecht nach oben, in immer kleineren Abständen — und daneben zählt ein Zähler mit, wie viele Schritte die Folge jeweils braucht: 33, 315, 3143, 31 417.',
@@ -495,8 +510,19 @@ const SCENES = [
 
 /* Solita's wording arrives later, generated from narration.mjs. */
 /* SAY:START - generated by videopipeline/fraktal/sync-drehbuch.mjs, do not edit */
-const SAY = {};
-const SPOKEN = {};
+const SAY = {
+    s1: 'Das hat niemand gezeichnet. Es gibt keine Kurve, die diesen Rand beschreibt, und keine Formel für die Form. Jeder einzelne Punkt der Ebene wurde gefragt — und die Antwort war ja oder nein. Was du siehst, ist eine Landkarte aus Antworten.',
+    s2: 'Das ist die Frage. Nimm einen Punkt und nenn ihn c. Fang bei null an: quadrieren, c dazu, von vorn. <span class="pause">0,9 s</span> Hier liegt c mitten im Körper, bei minus zwei Zehnteln. Die Kette kriecht in einen Punkt hinein und rührt sich nicht mehr. <span class="pause">0,7 s</span> Sie bleibt — also ist c drin. Im Bild: schwarz.',
+    s3: 'Jetzt derselbe Bildschirm, nur ein anderes c: plus null Komma drei fünf. Dieselbe Regel, dieselben Schritte. <span class="pause">0,8 s</span> Und schau, was passiert. Die Glieder werden größer. Größer. Nach acht Schritten reißt die Kette den gestrichelten Kreis — Betrag zwei. Ab da gibt es kein Zurück. Das ist keine Faustregel, das ist bewiesen.',
+    s4: 'Drei Punkte, drei Ketten, drei Zähler. Ganz draußen: drei Schritte. Etwas näher: acht. Dicht am Rand: dreiunddreißig. Genau diese Zahl ist die Farbe. Die Bänder sind keine Höhenlinien und keine Deko, sie sind Wartezeiten. Und wo sie eng werden, springt die Zahl. Da ist der Rand.',
+    s5: 'Also gehen wir hin. Jede Stufe tiefer bringt nicht Unschärfe, sondern mehr: Spiralen, Seepferdchen, und in jedem Seepferdchen wieder eines. Aber es wird teuer. Je näher am Rand, desto mehr Schritte braucht die Kette, bis überhaupt feststeht, ob sie flieht.',
+    s6: 'Und jetzt dreh die Sache um. Halt c fest und lass stattdessen den Startpunkt wandern — dann gehört zu jedem c ein eigenes Bild, eine Julia-Menge. Nimm c aus dem Inneren: das Bild hängt zusammen. Nimm c von draußen: es zerfällt in Staub. Das Apfelmännchen ist gar kein Objekt. Es ist ein Inhaltsverzeichnis.',
+    s7: 'Nur: irgendwann ist Schluss. Nicht mit dem Rand — mit uns. Dieses Labor rechnet mit zweiunddreißig Bit, also gut sieben Stellen, und beim Zoomfaktor zweihunderttausend steht der Regler am Anschlag. Der Rand geht weiter, unser Zahlensystem nicht. Das ist keine Eigenschaft des Fraktals, das ist eine Eigenschaft des Werkzeugs.',
+    s8: 'Eine letzte Stelle. Die Einschnürung zwischen Körper und Kopf, c gleich minus drei Viertel. Von dort gehen wir senkrecht nach oben, in immer kleineren Abständen, und zählen mit. <span class="pause">0,8 s</span> Ein Zehntel daneben: dreiunddreißig Schritte. Ein Hundertstel: dreihundertfünfzehn. Ein Tausendstel: gut dreitausend. Zehnmal näher, zehnmal mehr Schritte. Ordentlich — aber unscheinbar.',
+    s9: 'Bis man beides malnimmt. Schritte mal Abstand. <span class="pause">0,9 s</span> Dreiunddreißig mal ein Zehntel: drei Komma drei. Dann drei Komma eins fünf. Dann drei Komma eins vier drei. <span class="pause">0,7 s</span> Und weiter unten, bei einem Millionstel: drei Komma eins vier eins fünf neun drei. <span class="pause">0,9 s</span> Hier ist kein Kreis. Kein Winkel, kein Umfang. Nur quadrieren und c dazu — und heraus fällt Pi.',
+    s10: 'Ehrlich dazu: das ist eine Messung, kein Beweis. Den Beweis gibt es, er hat mit dem engen Kanal an genau dieser Stelle zu tun, und ich habe ihn hier nicht geführt. Was bleibt, ist eine Regel aus fünf Zeichen — und die Kreiszahl fällt hinten heraus.'
+};
+const SPOKEN = {"s1":13.44,"s2":15.408,"s3":17.808,"s4":15.384,"s5":13.944,"s6":16.824,"s7":16.584,"s8":21.024,"s9":19.968,"s10":13.368};
 /* SAY:END */
 
 const ARC = [

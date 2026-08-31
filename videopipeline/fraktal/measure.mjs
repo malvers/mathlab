@@ -78,3 +78,22 @@ for (const eps of [1e-1, 1e-2, 1e-3, 1e-4, 1e-5, 1e-6, 1e-7]) {
   console.log('  ' + eps.toExponential(0).padEnd(9), String(N).padStart(11), '   ' + (N * eps).toFixed(6));
 }
 console.log('  pi         =              3.141593');
+
+/* --- which c can scene 3 actually use? -----------------------------------------
+   The orbit view draws at most ORBIT_LEG_MAX = 10 legs (mandelbrot.html:1198), so the
+   escape the film shows has to happen inside ten steps. c = 0.3 needs twelve and is
+   therefore unusable there, however nice the number sounded in the plot. Wanted: a c
+   just outside the set on the real axis whose chain grows visibly for a few steps and
+   then leaves - escaping at once (c = 1 does it in three) shows no build-up at all. */
+console.log('\n=== Szene 3: Kandidaten, die im 10-Schenkel-Budget fliehen ===');
+console.log('   c        Schritte   letzte |z| vor der Flucht');
+for (const c of [0.26, 0.27, 0.28, 0.29, 0.3, 0.32, 0.35, 0.4, 0.45, 0.5, 0.6, 0.8, 1.0]) {
+  let x = 0, y = 0, n = null, prev = 0;
+  for (let i = 0; i < 60; i++) {
+    if (x * x + y * y > 4) { n = i; break; }
+    prev = Math.sqrt(x * x + y * y);
+    const nx = x * x - y * y + c; y = 2 * x * y; x = nx;
+  }
+  console.log('  ' + String(c).padEnd(8), String(n === null ? '>60' : n).padStart(6),
+    '     ', prev.toFixed(3), n !== null && n <= 10 ? '  <- passt ins Budget' : '');
+}
