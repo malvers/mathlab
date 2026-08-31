@@ -167,14 +167,18 @@
 
         let running = true;
         let lineCount = 0;
-        let vmax = 1;
 
         // Parameter sets measured headless - each one is a verified regime.
+        // Parameter sets verified headless (1200 lines, fixed pigment mapping).
+        // s_max = sigma/mus drives the density; at s_max >= 1.0 the model falls into a
+        // homogeneous steady state and the whole shell turns solid brown - the old
+        // 'Zelte' and 'Flaechen' sets sat right on that cliff. pigHi is the measured
+        // 98th percentile of the activator and calibrates the colour mapping per regime.
         const PRESETS = {
-            'Zelte': { Da: 0.4, Ds: 0, rho: 3, mua: 0.10, kappa: 0.05, sigma: 0.02, mus: 0.02, nuc: 0.004 },
-            'Zickzack': { Da: 0.4, Ds: 0, rho: 3, mua: 0.10, kappa: 0.05, sigma: 0.005, mus: 0.005, nuc: 0.0008 },
-            'Laengsstreifen': { Da: 0.05, Ds: 2, rho: 1.5, mua: 0.10, kappa: 0.50, sigma: 0.10, mus: 0.10, nuc: 0.0 },
-            'Flaechen': { Da: 0.4, Ds: 5, rho: 3, mua: 0.10, kappa: 0.05, sigma: 0.05, mus: 0.05, nuc: 0.002 }
+            'Zelte': { Da: 0.4, Ds: 0, rho: 3, mua: 0.10, kappa: 0.20, sigma: 0.016, mus: 0.02, nuc: 0.002, pigLo: 0.05, pigHi: 0.40 },
+            'Zickzack': { Da: 0.4, Ds: 0, rho: 3, mua: 0.10, kappa: 0.05, sigma: 0.005, mus: 0.005, nuc: 0.0008, pigLo: 0.05, pigHi: 0.35 },
+            'Laengsstreifen': { Da: 0.05, Ds: 2, rho: 1.5, mua: 0.10, kappa: 0.50, sigma: 0.10, mus: 0.10, nuc: 0.0, pigLo: 0.915, pigHi: 1.30 },
+            'Flaechen': { Da: 0.4, Ds: 5, rho: 3, mua: 0.10, kappa: 0.05, sigma: 0.016, mus: 0.02, nuc: 0.002, pigLo: 0.05, pigHi: 0.32 }
         };
 
         const P = Object.assign({ rho0: 0.001, gate: 0.6, rule: 30, speed: 2 }, PRESETS['Zelte']);
@@ -218,7 +222,6 @@
             }
             ca[N >> 1] = 1;       // classic single-seed start for the automaton
             lineCount = 0;
-            vmax = 1;
             clearHistory();
         }
 
@@ -263,19 +266,26 @@
             ca.set(caNext);
         }
 
+        // Fixed pigment mapping. The model rests at a0 = rho0/mua (about 0.01); pigHi is the
+        // measured 98th percentile of the activator for the active regime. An ADAPTIVE maximum
+        // drops to its floor whenever the waves pause and then renders the RESTING state as
+        // pigment - the whole shell turns solid brown. So the mapping stays fixed and physical.
+        function pigmentLevel(v) {
+            // most regimes rest near rho0/mua; 'Laengsstreifen' rests on a high plateau
+            // and carries its own floor, so the stripes read as stripes and not as a slab.
+            const lo = (typeof P.pigLo === 'number') ? P.pigLo : 5 * P.rho0 / P.mua;
+            const t = (v - lo) / (P.pigHi - lo);
+            return t <= 0 ? 0 : (t >= 1 ? 1 : t);
+        }
+
         function pigmentAt(i) {
             if (mode === 'ca') return ca[i];
-            if (mode === 'pde') return Math.min(1, a[i] / (vmax * 0.45));
+            if (mode === 'pde') return pigmentLevel(a[i]);
             // split view: model left, automaton right
-            return i < (N >> 1) ? Math.min(1, a[i] / (vmax * 0.45)) : ca[i];
+            return i < (N >> 1) ? pigmentLevel(a[i]) : ca[i];
         }
 
         function writeLine() {
-            // track amplitude so the colour mapping follows the model
-            let mx = 0;
-            for (let i = 0; i < N; i++) if (a[i] > mx) mx = a[i];
-            vmax = Math.max(0.05, vmax * 0.98 + mx * 0.02);
-
             const d = rowImg.data;
             const bg = scheme.bg, ink = scheme.ink;
             for (let i = 0; i < N; i++) {
@@ -353,7 +363,7 @@
             ctx.beginPath();
             for (let i = 0; i < N; i++) {
                 const x = i / (N - 1) * w;
-                const y = h - 4 - Math.min(1, a[i] / (vmax * 1.1)) * band;
+                const y = h - 4 - Math.min(1, a[i] / (P.pigHi * 1.5)) * band;
                 if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
             }
             ctx.strokeStyle = scheme.ui;
@@ -437,8 +447,7 @@
         function applyPreset(name) {
             const p = PRESETS[name];
             if (!p) return;
-            Object.assign(P, p);
-            P.mus = p.mus;
+            Object.assign(P, p);      // carries mus and pigHi along
             syncSliders();
             resetModel();
         }
@@ -491,7 +500,7 @@
             bind('sl-ds', 'Ds', 2);
             bind('sl-rho', 'rho', 2);
             bind('sl-mua', 'mua', 3);
-            bind('sl-sigma', 'sigma', 3, () => { P.mus = P.sigma; });  // keep s_max = 1
+            bind('sl-sigma', 'sigma', 3);   // mus stays put: s_max = sigma/mus may vary
             bind('sl-nuc', 'nuc', 4);
             bind('sl-rule', 'rule', 0);
             bind('sl-speed', 'speed', 0);
