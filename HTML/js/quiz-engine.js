@@ -319,13 +319,19 @@
     return 'rgb(' + c.join(',') + ')';
   }
 
-  /* Per question: own answer as richtig/falsch plus the class percentage. */
+  /* Per question: own answer as richtig/falsch plus the class percentage.
+     Under each line the question itself, the own pick and - when it was wrong -
+     the correct option, so the result page can be read without scrolling back
+     up to the cards (Doc, 31.08.2026). */
   function renderReview(rows) {
     const byQ = {};
     (rows || []).forEach(function (r) { byQ[r.q] = r; });
-    let html = '<table class="revtable"><thead><tr>' +
-               '<th>Frage</th><th>Deine Antwort</th><th colspan="2">Klassendurchschnitt</th>' +
-               '</tr></thead><tbody>';
+    const table = document.createElement('table');
+    table.className = 'revtable';
+    table.innerHTML = '<thead><tr>' +
+      '<th>Frage</th><th>Deine Antwort</th><th colspan="2">Klassendurchschnitt</th>' +
+      '</tr></thead>';
+    const body = document.createElement('tbody');
     QUESTIONS.forEach(function (item, qi) {
       const ok = answers[qi] === item.solution;
       let pct = null;
@@ -336,15 +342,45 @@
         const correct = counts[item.solution] || 0;
         if (total) pct = Math.round(correct / total * 100);
       }
-      html += '<tr><td>' + (qi + 1) + '</td>' +
+      const tr = document.createElement('tr');
+      tr.className = 'revmain';
+      tr.innerHTML = '<td>' + (qi + 1) + '</td>' +
               '<td class="' + (ok ? 'ok' : 'nok') + '">' + (ok ? 'richtig' : 'falsch') + '</td>' +
               '<td class="pct">' + (pct === null ? '' :
                 '<div class="bar"><div style="width:' + pct + '%;background:' +
                 barColor(pct) + '"></div></div>') + '</td>' +
-              '<td class="num">' + (pct === null ? '–' : pct + ' %') + '</td></tr>';
+              '<td class="num">' + (pct === null ? '\u2013' : pct + ' %') + '</td>';
+      body.appendChild(tr);
+
+      const det = document.createElement('tr');
+      det.className = 'revq';
+      const cell = document.createElement('td');
+      cell.colSpan = 4;
+      const qt = document.createElement('div');
+      qt.className = 'rq';
+      renderMath(qt, item.q);
+      cell.appendChild(qt);
+      const mine = document.createElement('div');
+      mine.className = 'ra ' + (ok ? 'ok' : 'nok');
+      const chosen = answers[qi];
+      renderMath(mine, 'Deine Antwort: ' + (chosen < 0 ? 'nicht beantwortet' :
+        (LETTERS[chosen] || '?') + ' \u2014 ' + (item.opts[chosen] || '')));
+      cell.appendChild(mine);
+      /* the correct option only where the quiz shows solutions at all */
+      if (!ok && !NO_SOLUTIONS) {
+        const cor = document.createElement('div');
+        cor.className = 'ra ok';
+        renderMath(cor, 'Richtig: ' + (LETTERS[item.solution] || '?') + ' \u2014 ' +
+          (item.opts[item.solution] || ''));
+        cell.appendChild(cor);
+      }
+      det.appendChild(cell);
+      body.appendChild(det);
     });
-    html += '</tbody></table>';
-    document.getElementById('review').innerHTML = html;
+    table.appendChild(body);
+    const el = document.getElementById('review');
+    el.textContent = '';
+    el.appendChild(table);
   }
 
   function showAverage(rows, avgEl) {
