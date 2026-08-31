@@ -1,0 +1,491 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Fraktal — Einspieler</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&family=Outfit:wght@300;400;500&display=swap">
+<style>
+  html, body { margin: 0; padding: 0; background: #030c1c; overflow: hidden; }
+  canvas { display: block; }
+</style>
+</head>
+<body>
+<canvas id="c" width="1280" height="720"></canvas>
+<script>
+/* Fraktal — the four scenes the lab itself cannot show.
+   One page, one scene per ?scene=sN, paced to ?dur=<seconds>.
+
+   Nothing here is drawn by hand. Every escape count comes from the same iteration
+   the lab runs — z -> z² + c, stop when |z| > 2 — carried out in this page, and the
+   colours come from the lab's own shader formula (mandelbrot.html, fragment shader),
+   so a card and the lab side by side show the same picture.
+
+   Why these four are cards and not takes of the lab:
+     s4  three chains and three counters at once; the lab shows one c at a time.
+     s8  the counts run to 31 417, and the orbit view draws at most ten legs.
+     s9  a table of products — the lab has no such view, and should not.
+     s10 the closing frame, contour only, with the one point marked.
+   The numbers are cross-checked against fraktal/measure.mjs, which computes them
+   independently. If one ever disagrees, measure.mjs is right and this page is wrong. */
+const P = new URLSearchParams(location.search);
+const SCENE = P.get('scene') || 's4';
+const DUR = parseFloat(P.get('dur') || '18');
+
+const c = document.getElementById('c');
+const g = c.getContext('2d');
+const W = c.width, H = c.height;
+
+/* ---- the lab's palette, plus the arc colours from the drehbuch ---- */
+const COL = {
+  ground: '#030c1c', panel: '#0b1a34', panel2: '#102a4d', edge: '#1b3560',
+  ink: '#e4edfa', dim: '#b0c3dd', faint: '#8199bd',
+  cyan: '#00d2ff', violet: '#7b5cff', magenta: '#d94fd0', orange: '#ffab2e', lime: '#adff2f',
+};
+
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+const ease = (u) => u < 0.5 ? 2 * u * u : 1 - Math.pow(-2 * u + 2, 2) / 2;
+const seg = (u, a, b) => clamp((u - a) / (b - a), 0, 1);
+const lerp = (a, b, u) => a + (b - a) * u;
+const hexA = (hex, a) => {
+  const n = parseInt(hex.slice(1), 16);
+  return 'rgba(' + (n >> 16 & 255) + ',' + (n >> 8 & 255) + ',' + (n & 255) + ',' + a + ')';
+};
+function orb(size, weight) { g.font = (weight || 500) + ' ' + size + 'px Orbitron, sans-serif'; }
+function out(size, weight) { g.font = (weight || 300) + ' ' + size + 'px Outfit, sans-serif'; }
+function txt(s, x, y, col, align, base) {
+  g.fillStyle = col; g.textAlign = align || 'left'; g.textBaseline = base || 'alphabetic';
+  g.fillText(s, x, y);
+}
+function eyebrow(s) {
+  orb(19, 500); g.letterSpacing = '5px';
+  txt(s, 64, 74, COL.cyan);
+  g.letterSpacing = '0px';
+}
+function backdrop() {
+  const grad = g.createRadialGradient(W / 2, H / 2, 0, W / 2, H / 2, W * 0.75);
+  grad.addColorStop(0, 'rgb(5,25,55)');
+  grad.addColorStop(1, 'rgb(2,10,25)');
+  g.fillStyle = grad; g.fillRect(0, 0, W, H);
+}
+
+/* =====================================================================
+   The arithmetic. Identical to the lab's: z starts at 0, then z -> z² + c,
+   and the moment |z| > 2 the point is gone for good.
+   ===================================================================== */
+function escape(cx, cy, cap) {
+  let x = 0, y = 0;
+  for (let i = 0; i < (cap || 2000); i++) {
+    const x2 = x * x, y2 = y * y;
+    if (x2 + y2 > 4) return i;
+    const nx = x2 - y2 + cx;
+    y = 2 * x * y + cy;                           // the imaginary part of c belongs here
+    x = nx;
+  }
+  return null;                                    // bounded as far as we looked
+}
+/** The chain itself, for drawing. */
+function orbit(cx, cy, n) {
+  const pts = [{ x: 0, y: 0 }];
+  let x = 0, y = 0;
+  for (let i = 0; i < n; i++) {
+    const nx = x * x - y * y + cx;
+    y = 2 * x * y + cy;
+    x = nx;
+    if (!isFinite(x) || !isFinite(y)) break;
+    pts.push({ x, y });
+  }
+  return pts;
+}
+/** The lab's own colouring (fragment shader): smooth escape count -> cosine palette. */
+function bandColour(iter, z2) {
+  const sn = iter - Math.log2(Math.max(1, Math.log2(Math.sqrt(z2))));
+  const ch = (p) => Math.round(255 * (0.5 + 0.5 * Math.cos(p + sn * 0.15)));
+  return [ch(3), ch(2), ch(1)];
+}
+
+/* The whole set, escape-time coloured, rendered once and reused. The film shows it
+   twice (s4 in colour, s10 as a contour), and 300 000 pixels times a few hundred
+   steps is not something to redo every frame. */
+const VIEW = { x0: -2.25, x1: 0.85, y0: -1.25, y1: 1.25 };
+let setImg = null, contourImg = null;
+function renderSet() {
+  const w = 496, h = 400, cap = 260;
+  const a = document.createElement('canvas'); a.width = w; a.height = h;
+  const b = document.createElement('canvas'); b.width = w; b.height = h;
+  const ga = a.getContext('2d'), gb = b.getContext('2d');
+  const ia = ga.createImageData(w, h), ib = gb.createImageData(w, h);
+  for (let py = 0; py < h; py++) {
+    const cy = VIEW.y0 + (py + 0.5) / h * (VIEW.y1 - VIEW.y0);
+    for (let px = 0; px < w; px++) {
+      const cx = VIEW.x0 + (px + 0.5) / w * (VIEW.x1 - VIEW.x0);
+      let x = 0, y = 0, i = 0, x2 = 0, y2 = 0;
+      for (; i < cap; i++) {
+        x2 = x * x; y2 = y * y;
+        if (x2 + y2 > 4) break;
+        const nx = x2 - y2 + cx;
+        y = 2 * x * y + cy;
+        x = nx;
+      }
+      const o = (py * w + px) * 4;
+      if (i >= cap) {                                   // inside: black here, ink there
+        ia.data[o] = ia.data[o + 1] = ia.data[o + 2] = 0; ia.data[o + 3] = 255;
+        ib.data[o] = 228; ib.data[o + 1] = 237; ib.data[o + 2] = 250; ib.data[o + 3] = 255;
+      } else {
+        const [r, gg, bb] = bandColour(i, x2 + y2);
+        ia.data[o] = r; ia.data[o + 1] = gg; ia.data[o + 2] = bb; ia.data[o + 3] = 255;
+        ib.data[o + 3] = 0;
+      }
+    }
+  }
+  ga.putImageData(ia, 0, 0); gb.putImageData(ib, 0, 0);
+  setImg = a; contourImg = b;
+}
+
+/* =====================================================================
+   s4 — the colour IS the waiting time
+   Three points, three chains, three counters; then the counters turn into
+   the colour scale and the whole picture is painted with it.
+   ===================================================================== */
+const S4 = [
+  { label: 'ganz draußen',   cx: 1.0,   cy: 0.0, col: COL.orange },
+  { label: 'etwas näher',    cx: 0.35,  cy: 0.0, col: COL.magenta },
+  { label: 'dicht am Rand',  cx: -0.75, cy: 0.1, col: COL.lime },
+].map((p) => ({ ...p, n: escape(p.cx, p.cy) }));
+
+function miniPlane(x, y, r, cx, cy, shown, col) {
+  /* a little complex plane with the escape circle and the chain so far */
+  g.strokeStyle = hexA(COL.edge, 0.9); g.lineWidth = 1;
+  g.beginPath(); g.moveTo(x - r, y); g.lineTo(x + r, y); g.stroke();
+  g.beginPath(); g.moveTo(x, y - r); g.lineTo(x, y + r); g.stroke();
+  const k = r / 2.6;                                   // |z| = 2 sits at 2 units
+  g.strokeStyle = hexA(COL.cyan, 0.45); g.lineWidth = 1.5;
+  g.setLineDash([5, 6]);
+  g.beginPath(); g.arc(x, y, 2 * k, 0, 7); g.stroke();
+  g.setLineDash([]);
+
+  const pts = orbit(cx, cy, shown);
+  g.strokeStyle = hexA(col, 0.95); g.lineWidth = 2;
+  g.beginPath();
+  pts.forEach((p, i) => {
+    const px = clamp(x + p.x * k, x - r - 40, x + r + 40);
+    const py = clamp(y - p.y * k, y - r - 40, y + r + 40);
+    g[i ? 'lineTo' : 'moveTo'](px, py);
+  });
+  g.stroke();
+  pts.forEach((p) => {
+    const px = clamp(x + p.x * k, x - r - 40, x + r + 40);
+    const py = clamp(y - p.y * k, y - r - 40, y + r + 40);
+    g.fillStyle = col;
+    g.beginPath(); g.arc(px, py, 3.4, 0, 7); g.fill();
+  });
+}
+
+function s4(u) {
+  backdrop();
+  eyebrow('DIE FARBE IST DIE WARTEZEIT');
+
+  /* The card has two halves and they must not overlap: the counters fade out before
+     the map fades in. Painting the map over the still-visible rows put a fractal on
+     top of three chains and read as a mistake. */
+  const outA = 1 - seg(u, 0.60, 0.70);
+  const mapA = ease(seg(u, 0.66, 0.82));
+
+  /* the three chains run one after another, each finishing inside its own slot */
+  const rows = S4.length;
+  for (let i = 0; outA > 0 && i < rows; i++) {
+    const a = seg(u, 0.04 + i * 0.11, 0.16 + i * 0.11);
+    if (a <= 0) continue;
+    const y = 210 + i * 158;
+    g.globalAlpha = Math.min(1, a * 2) * outA;
+
+    const r = S4[i];
+    const shown = Math.round(lerp(0, r.n, ease(a)));
+    miniPlane(250, y, 92, r.cx, r.cy, shown, r.col);
+
+    out(30, 300); txt(r.label, 400, y - 16, COL.dim);
+    orb(17, 500); g.letterSpacing = '3px';
+    txt('c = ' + (r.cy ? r.cx + ' + ' + r.cy + ' i' : String(r.cx)), 400, y + 22, COL.faint);
+    g.letterSpacing = '0px';
+
+    orb(58, 700);
+    txt(String(shown), 900, y + 16, r.col, 'right');
+    out(26, 300); txt('Schritte', 920, y + 14, COL.dim);
+    g.globalAlpha = 1;
+  }
+
+  /* the turn: those numbers are the colour scale */
+  const sA = seg(u, 0.46, 0.58) * outA;
+  if (sA > 0) {
+    g.globalAlpha = sA;
+    const bx = 980, by = 150, bw = 74, bh = 420;
+    for (let py = 0; py < bh; py++) {
+      const it = 3 + (py / bh) * 45;
+      const [r, gg, bb] = bandColour(it, 4.2);
+      g.fillStyle = 'rgb(' + r + ',' + gg + ',' + bb + ')';
+      g.fillRect(bx, by + py, bw, 1);
+    }
+    g.strokeStyle = hexA(COL.edge, 1); g.lineWidth = 1; g.strokeRect(bx, by, bw, bh);
+    orb(15, 500); g.letterSpacing = '3px';
+    txt('SCHRITTE', bx + bw / 2, by - 18, COL.faint, 'center');
+    g.letterSpacing = '0px';
+    out(22, 300);
+    txt('3', bx + bw + 14, by + 14, COL.dim);
+    txt('48', bx + bw + 14, by + bh, COL.dim);
+    g.globalAlpha = 1;
+  }
+
+  /* and the whole map, painted with exactly that scale */
+  if (mapA > 0 && setImg) {
+    const iw = 620, ih = iw * (VIEW.y1 - VIEW.y0) / (VIEW.x1 - VIEW.x0);
+    const ix = (W - iw) / 2 - 20, iy = 112;
+    g.globalAlpha = mapA;
+    g.drawImage(setImg, ix, iy, iw, ih);
+    g.strokeStyle = hexA(COL.edge, 1); g.lineWidth = 1; g.strokeRect(ix, iy, iw, ih);
+
+    /* the scale travels with the map - it is the whole point of the card */
+    const bx = ix + iw + 26, bw = 30;
+    for (let py = 0; py < ih; py++) {
+      const [r, gg, bb] = bandColour(3 + (py / ih) * 45, 4.2);
+      g.fillStyle = 'rgb(' + r + ',' + gg + ',' + bb + ')';
+      g.fillRect(bx, iy + py, bw, 1);
+    }
+    g.strokeStyle = hexA(COL.edge, 1); g.strokeRect(bx, iy, bw, ih);
+    g.globalAlpha = 1;
+
+    const tA = seg(u, 0.82, 0.95);
+    if (tA > 0) {
+      g.globalAlpha = tA;
+      out(30, 300);
+      txt('Wo die Bänder eng werden, springt die Zahl.', W / 2, iy + ih + 54, COL.ink, 'center');
+      g.globalAlpha = 1;
+    }
+  }
+}
+
+/* =====================================================================
+   s8 — closer and closer to one place
+   c = -0.75 + i·eps, eps shrinking by a factor of ten each time, and the
+   counter running up in front of the camera. Not a lookup: the loop below
+   is the loop, run to the end for every row.
+   ===================================================================== */
+const S8 = [0.1, 0.01, 0.001, 0.0001].map((eps) => ({
+  eps, n: escape(-0.75, eps, 2000000),
+}));
+
+/** eps as words, the way Solita says it. */
+const EPSWORD = { 0.1: 'ein Zehntel', 0.01: 'ein Hundertstel', 0.001: 'ein Tausendstel', 0.0001: 'ein Zehntausendstel' };
+const EPSNUM = { 0.1: '0,1', 0.01: '0,01', 0.001: '0,001', 0.0001: '0,0001' };
+
+function s8(u) {
+  backdrop();
+  eyebrow('IMMER NÄHER AN EINE STELLE');
+
+  /* Left: one tick above the point, and the SCALE under it changes. Drawing four
+     evenly spaced ticks was a lie in picture form - each step is ten times closer,
+     so on a true scale the later ones sit on top of the point. Re-scaling instead
+     keeps the tick where it can be seen and says honestly what changed. */
+  const ax = 300, ay = 470;
+  const row = Math.min(S8.length - 1, Math.floor(seg(u, 0.05, 0.97) * S8.length));
+  g.strokeStyle = hexA(COL.edge, 1); g.lineWidth = 1;
+  g.beginPath(); g.moveTo(ax - 190, ay); g.lineTo(ax + 190, ay); g.stroke();
+  g.strokeStyle = hexA(COL.lime, 0.4); g.lineWidth = 1.5;
+  g.setLineDash([4, 6]);
+  g.beginPath(); g.moveTo(ax, ay); g.lineTo(ax, ay - 250); g.stroke();
+  g.setLineDash([]);
+  g.fillStyle = COL.cyan;
+  g.beginPath(); g.arc(ax, ay, 6, 0, 7); g.fill();
+  orb(19, 500); txt('c = −0,75', ax, ay + 36, COL.cyan, 'center');
+  out(23, 300); txt('zwischen Körper und Kopf', ax, ay + 68, COL.faint, 'center');
+
+  const yy = ay - 210;
+  g.strokeStyle = COL.lime; g.lineWidth = 2.5;
+  g.beginPath(); g.moveTo(ax - 30, yy); g.lineTo(ax + 30, yy); g.stroke();
+  g.fillStyle = COL.lime;
+  g.beginPath(); g.arc(ax, yy, 5, 0, 7); g.fill();
+  orb(26, 700); txt(EPSNUM[S8[row].eps], ax + 46, yy + 9, COL.lime);
+  orb(14, 500); g.letterSpacing = '3px';
+  txt('MASSSTAB', ax + 46, yy - 16, COL.faint);
+  g.letterSpacing = '0px';
+
+  /* right: the rows, each with its counter running up */
+  orb(15, 500); g.letterSpacing = '3px';
+  txt('ABSTAND', 620, 150, COL.faint);
+  txt('SCHRITTE', 1216, 150, COL.faint, 'right');
+  g.letterSpacing = '0px';
+  g.strokeStyle = hexA(COL.edge, 1); g.lineWidth = 1;
+  g.beginPath(); g.moveTo(620, 168); g.lineTo(1216, 168); g.stroke();
+
+  S8.forEach((r, i) => {
+    const a = seg(u, 0.06 + i * 0.20, 0.20 + i * 0.20);
+    if (a <= 0) return;
+    const y = 232 + i * 100;
+    g.globalAlpha = Math.min(1, a * 3);
+
+    out(28, 300); txt(EPSWORD[r.eps], 620, y, COL.dim);
+    const shown = Math.round(lerp(0, r.n, ease(a)));
+    orb(46, 700);
+    txt(shown.toLocaleString('de-DE'), 1216, y + 4, i === 3 ? COL.lime : COL.ink, 'right');
+    g.globalAlpha = 1;
+  });
+
+  /* the observation the next card turns over */
+  const cA = seg(u, 0.88, 0.98);
+  if (cA > 0) {
+    g.globalAlpha = cA;
+    out(29, 300);
+    txt('Zehnmal näher, zehnmal mehr Schritte.', 620, 664, COL.ink);
+    g.globalAlpha = 1;
+  }
+}
+
+/* =====================================================================
+   s9 — there is pi
+   The same rows, multiplied out. The products are computed here from the
+   counts above, not typed in.
+   ===================================================================== */
+const S9 = [0.1, 0.01, 0.001, 0.0001, 0.00001, 0.000001].map((eps) => {
+  const n = escape(-0.75, eps, 40000000);
+  return { eps, n, prod: n * eps };
+});
+
+/** n * eps has exactly as many decimals as eps; padding it out to seven zeros would
+ *  claim a precision the row does not have. */
+function fmt(v, digits) {
+  return v.toFixed(digits).replace(/0+$/, '').replace(/\.$/, '').replace('.', ',');
+}
+
+function s9(u) {
+  backdrop();
+  eyebrow('SCHRITTE MAL ABSTAND');
+
+  const x0 = 210, x1 = 560, x2 = 1010;
+  orb(16, 500); g.letterSpacing = '3px';
+  txt('ABSTAND', x0, 168, COL.faint);
+  txt('SCHRITTE', x1, 168, COL.faint, 'right');
+  txt('PRODUKT', x2, 168, COL.faint, 'right');
+  g.letterSpacing = '0px';
+  g.strokeStyle = hexA(COL.edge, 1); g.lineWidth = 1;
+  g.beginPath(); g.moveTo(x0, 186); g.lineTo(x2, 186); g.stroke();
+
+  S9.forEach((r, i) => {
+    const a = seg(u, 0.05 + i * 0.095, 0.13 + i * 0.095);
+    if (a <= 0) return;
+    const y = 240 + i * 62;
+    g.globalAlpha = Math.min(1, a * 3);
+    const digits = String(r.eps).includes('e') ? 6 : String(r.eps).split('.')[1].length;
+
+    out(30, 300);
+    txt('0,' + '0'.repeat(digits - 1) + '1', x0, y, COL.dim);
+    orb(28, 500);
+    txt(r.n.toLocaleString('de-DE'), x1, y, COL.dim, 'right');
+
+    /* the product is the point of the whole film - it gets the weight */
+    const pA = seg(u, 0.09 + i * 0.095, 0.17 + i * 0.095);
+    if (pA > 0) {
+      g.globalAlpha = Math.min(1, pA * 3);
+      orb(40, 700);
+      txt(fmt(r.prod, digits), x2, y + 4, i >= 4 ? COL.lime : COL.ink, 'right');
+    }
+    g.globalAlpha = 1;
+  });
+
+  /* and the number it has been walking towards all along */
+  const piA = seg(u, 0.72, 0.86);
+  if (piA > 0) {
+    g.globalAlpha = piA;
+    g.strokeStyle = hexA(COL.lime, 0.55); g.lineWidth = 1.5;
+    g.beginPath(); g.moveTo(x0, 632); g.lineTo(x2, 632); g.stroke();
+    orb(64, 700);
+    txt('π', x0 + 26, 700, COL.lime, 'left');
+    orb(40, 700);
+    txt(Math.PI.toFixed(7).replace('.', ','), x2, 700, COL.lime, 'right');
+    g.globalAlpha = 1;
+
+    const nA = seg(u, 0.86, 0.97);
+    if (nA > 0) {
+      g.globalAlpha = nA;
+      out(28, 300);
+      txt('Kein Kreis. Kein Winkel. Kein Umfang.', W - 64, 120, COL.magenta, 'right');
+      g.globalAlpha = 1;
+    }
+  }
+}
+
+/* =====================================================================
+   s10 — what that means, and what it does not
+   Contour only, the one point marked, and three honest lines.
+   ===================================================================== */
+const S10_LINES = [
+  ['Gezeigt', 'eine Messung, exakt nachgerechnet.', COL.lime],
+  ['Nicht gezeigt', 'der Beweis — ein eigener Film.', COL.orange],
+  ['Geblieben', 'eine Regel aus fünf Zeichen.', COL.cyan],
+];
+
+function s10(u) {
+  g.fillStyle = COL.ground; g.fillRect(0, 0, W, H);
+  eyebrow('WAS DAS HEISST — UND WAS NICHT');
+
+  if (contourImg) {
+    const iw = 470, ih = iw * (VIEW.y1 - VIEW.y0) / (VIEW.x1 - VIEW.x0);
+    const ix = 48, iy = (H - ih) / 2 + 14;
+    g.globalAlpha = 0.9 * ease(seg(u, 0.0, 0.14));
+    g.drawImage(contourImg, ix, iy, iw, ih);
+    g.globalAlpha = 1;
+
+    /* the one place the film went, blinking twice */
+    const mA = seg(u, 0.18, 0.26);
+    if (mA > 0) {
+      const px = ix + (-0.75 - VIEW.x0) / (VIEW.x1 - VIEW.x0) * iw;
+      const py = iy + (VIEW.y1 - 0) / (VIEW.y1 - VIEW.y0) * ih;
+      const blink = 0.45 + 0.55 * Math.abs(Math.sin(u * 15));
+      g.globalAlpha = mA * blink;
+      g.fillStyle = COL.lime;
+      g.beginPath(); g.arc(px, py, 7, 0, 7); g.fill();
+      g.strokeStyle = hexA(COL.lime, 0.7); g.lineWidth = 1.5;
+      g.beginPath(); g.arc(px, py, 16, 0, 7); g.stroke();
+      g.globalAlpha = 1;
+    }
+  }
+
+  S10_LINES.forEach((L, i) => {
+    const a = seg(u, 0.30 + i * 0.16, 0.42 + i * 0.16);
+    if (a <= 0) return;
+    const y = 250 + i * 118;
+    g.globalAlpha = Math.min(1, a * 2.4);
+    g.fillStyle = L[2];
+    g.fillRect(566, y - 26, 5, 34);
+    orb(18, 500); g.letterSpacing = '3px';
+    txt(L[0].toUpperCase(), 590, y - 2, L[2]);
+    g.letterSpacing = '0px';
+    out(27, 300); txt(L[1], 590, y + 40, COL.dim);
+    g.globalAlpha = 1;
+  });
+
+  const fA = seg(u, 0.82, 0.96);
+  if (fA > 0) {
+    g.globalAlpha = fA;
+    orb(34, 700);
+    txt('z → z² + c', 590, 660, COL.ink);
+    g.globalAlpha = 1;
+  }
+}
+
+/* --------------------------------------------------------------------- driver */
+const SCENES = { s4, s8, s9, s10 };
+let t0 = null;
+function frame(now) {
+  if (t0 === null) t0 = now;
+  const u = clamp((now - t0) / (DUR * 1000), 0, 1);
+  (SCENES[SCENE] || s4)(u);
+  if (u < 1) requestAnimationFrame(frame);
+}
+document.fonts.ready.then(() => {
+  renderSet();                       // once, before the first frame is timed
+  window.__vpReady = true;
+  requestAnimationFrame(frame);
+});
+</script>
+</body>
+</html>
