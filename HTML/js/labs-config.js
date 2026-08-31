@@ -622,6 +622,17 @@ const LABS_DATA = [
         "color": "purple"
     },
     {
+        "id": "shell",
+        "href": "shell.html",
+        "title": "Shell",
+        "description": "Wie entsteht das Muster auf einer Meeresschnecke? In sechs Kapiteln wird der Mechanismus einzeln aufgebaut: Das Bild ist ein Protokoll \u2014 eine Zelle steckt an und schreibt ein V \u2014 zwei Wellen l\u00f6schen sich aus und schneiden die Zeltspitze \u2014 das aufgezehrte Substrat erkl\u00e4rt, warum. Oben lebt die M\u00fcndungskante mit Aktivator und Substrat, darunter w\u00e4chst die Schale. Mit Einzelschritt-Taste.",
+        "tagline": "Musterbildung / Schritt f\u00fcr Schritt",
+        "icon": LAB_ICONS["shell"],
+        "category": "fun physik neu uni grade11 grade12",
+        "keywords": "shell muschel schnecke schale muster pigment mechanismus aktivator substrat meinhardt wellen zelte zickzack ausloeschung raum zeit diagramm wachstumslinie biologie kapitel",
+        "color": "green"
+    },
+    {
         "id": "conuslab",
         "href": "conuslab.html",
         "title": "Conus",

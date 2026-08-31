@@ -464,6 +464,14 @@ const LAB_ICONS = {
             <path d="M 24 50 Q 38 62 50 50 T 76 50" fill="none" stroke="#ba55ff" stroke-width="4" stroke-linecap="round" />
             <path d="M 24 66 Q 38 54 50 66 T 76 66" fill="none" stroke="rgba(186, 85, 255, 0.45)" stroke-width="4" stroke-linecap="round" />
         </svg>`,
+    "shell": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <rect x="14" y="14" width="72" height="72" rx="10" fill="rgba(121, 158, 49, 0.08)" stroke="#799e31" stroke-width="2" />
+            <path d="M 24 36 L 42 36 L 47 26 L 53 26 L 58 36 L 76 36" fill="none" stroke="#799e31" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" />
+            <line x1="22" y1="44" x2="78" y2="44" stroke="rgba(121, 158, 49, 0.55)" stroke-width="1.4" stroke-dasharray="3 3" />
+            <path d="M 50 48 L 28 76" fill="none" stroke="#799e31" stroke-width="3" stroke-linecap="round" />
+            <path d="M 50 48 L 72 76" fill="none" stroke="#799e31" stroke-width="3" stroke-linecap="round" />
+            <path d="M 50 52 L 62 76 L 38 76 Z" fill="#799e31" opacity="0.28" />
+        </svg>`,
     "conuslab": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
             <rect x="14" y="14" width="72" height="72" rx="10" fill="rgba(245, 194, 66, 0.08)" stroke="#f5c242" stroke-width="2" />
             <path d="M 24 32 L 34 44 L 44 32 L 54 44 L 64 32 L 74 44" fill="none" stroke="#f5c242" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
