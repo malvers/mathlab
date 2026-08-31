@@ -2968,7 +2968,9 @@
         const msg = document.createElement('span');
         msg.textContent = text + ' — ';
         const link = document.createElement('a');
-        link.href = (location.pathname.split('/').length > 4 ? '../' : '') + 'notes.html';
+        /* notes.html sits in the svp root, the plan pages one level below it */
+        const root = location.pathname.lastIndexOf('/svp/');
+        link.href = root >= 0 ? location.pathname.slice(0, root + 5) + 'notes.html' : 'notes.html';
         link.textContent = 'neu anmelden';
         box.appendChild(msg);
         box.appendChild(link);
