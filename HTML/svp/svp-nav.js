@@ -113,11 +113,12 @@
             r.line.classList.toggle('nd-empty', leer);
             if (r.title) r.title.classList.toggle('nd-empty', leer);
         });
-        /* nothing left inside? then the pill itself has nothing to offer */
+        /* nothing left inside? then the pill stays put but greys out (Doc, 31.08.2026 —
+           a dropdown that opens an empty panel looked broken) */
         dropWraps.forEach(function (w) {
             const leer = [...w.querySelectorAll('.nd-row')]
                 .every(l => l.classList.contains('nd-empty'));
-            w.classList.toggle('nav-hidden', leer);
+            w.classList.toggle('nd-off', leer);
             if (leer) w.classList.remove('open');
         });
     }
@@ -164,6 +165,7 @@
         pill.addEventListener('click', function (e) {
             e.preventDefault();
             e.stopPropagation();
+            if (wrap.classList.contains('nd-off')) return; // nothing inside to show
             const wasOpen = wrap.classList.contains('open');
             document.querySelectorAll('.nav-drop-wrap.open')
                 .forEach(w => w.classList.remove('open'));
