@@ -2199,10 +2199,13 @@
        in den 409 - WebUntis spiegelt den Stundeninhalt auf lueckenlos
        aufeinanderfolgende Perioden derselben Unterrichtseinheit. Also werden
        solche Perioden zu EINEM Block mit EINER Box gefaltet; geschrieben wird
-       nur die erste Periode. Gefaltet wird streng: gleicher Tag, gleiche
-       lsnumber, gleiche Klassen, gleiches Fach, gleicher code, Ende = Start.
-       Liefert die Edge Function (noch) kein end/lsnumber, bleibt jede Periode
-       einzeln - das ist der alte Zustand, nur ohne die Faltung. */
+       JEDE Periode des Blocks - derselbe Text. So stimmt es in beiden
+       Welten: spiegelt WebUntis selbst, meldet die zweite Periode nur
+       'unchanged'; spiegelt es nicht, fuellt unser Write sie. Gefaltet wird
+       nach: gleicher Tag, gleiche Klassen, gleiches Fach, gleicher code,
+       Ende = Start (lsnumber wuerde mit unterscheiden, kommt aus der
+       JSON-RPC-API aber schlicht als null - gemessen 31.08.2026). Ohne
+       end-Feld (alte Edge Function) bleibt jede Periode einzeln. */
     function untisBlocks(lessons) {
         const sorted = lessons.slice().sort((a, b) =>
             (a.date + ' ' + a.start).localeCompare(b.date + ' ' + b.start));
@@ -2211,8 +2214,7 @@
             const prev = out[out.length - 1];
             const key = [l.date, l.lsnumber, (l.klassen || []).slice().sort().join(','),
                 l.subject || '', l.code || ''].join('|');
-            if (prev && prev.key === key && l.lsnumber != null &&
-                prev.end && l.start === prev.end) {
+            if (prev && prev.key === key && prev.end && l.start === prev.end) {
                 prev.periods.push(l);
                 prev.end = l.end || null;
                 /* Ein Text irgendwo im Block heisst: der Block ist belegt -
@@ -2467,10 +2469,16 @@
                 const l = b.l;
                 const text = b.box.value.replace(/\s+/g, ' ').trim();
                 try {
-                    const res = await untisCall({
-                        action: 'write', ttId: l.ttId, topic: text, force: !!l.topic.trim()
-                    });
-                    l.topic = res.stored || text;
+                    /* Alle Perioden des Blocks, gleicher Text. Gespiegelte
+                       Partner antworten 'unchanged', ungespiegelte werden so
+                       ueberhaupt erst gefuellt - beides korrekt. */
+                    let res = null;
+                    for (const per of (l.periods || [l])) {
+                        res = await untisCall({
+                            action: 'write', ttId: per.ttId, topic: text, force: !!l.topic.trim()
+                        });
+                    }
+                    l.topic = (res && res.stored) || text;
                     if (l._state) {
                         if (res.ok === false) {
                             l._state.textContent = 'gespeichert, aber WebUntis hat daraus gemacht: ' + l.topic;
