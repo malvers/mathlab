@@ -397,6 +397,20 @@
         ref.matTd.textContent = '';
         if (text) {
             if (!ref.matBlock.parentNode) ref.ensureSubRow().side.appendChild(ref.matBlock);
+            /* A collapsed week hid its material completely and nothing in the
+               row said there was any - it looked like the material was gone
+               (Doc, 31.08.2026). A compact marker with the count now sits in
+               the Material column and unfolds the week when clicked. */
+            const n = parseMat(text).length;
+            const mark = document.createElement('span');
+            mark.className = 'mat-mark';
+            mark.textContent = n > 1 ? '\ud83d\udcce ' + n : '\ud83d\udcce';
+            mark.title = (n === 1 ? '1 Material' : n + ' Materialien') + ' — klicken zum Aufklappen';
+            mark.addEventListener('click', function (e) {
+                e.stopPropagation();
+                ref.openSubRow();
+            });
+            ref.matTd.appendChild(mark);
         } else if (ref.matBlock.parentNode) {
             ref.matBlock.remove();
         }
