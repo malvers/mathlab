@@ -2938,7 +2938,30 @@
         // appending it somewhere is all it takes to bring the display back.
     })();
 
+    /* A failed cloud read or write used to be invisible - the status pill is no
+       longer placed in the page, so an expired session swallowed edits without
+       a word (Doc, 31.08.2026). Errors now raise a small banner; success stays
+       as quiet as before. */
+    function showCloudError(text) {
+        let box = document.getElementById('svp-cloud-err');
+        if (!text) { if (box) box.remove(); return; }
+        if (!box) {
+            box = document.createElement('div');
+            box.id = 'svp-cloud-err';
+            document.body.appendChild(box);
+        }
+        box.textContent = '';
+        const msg = document.createElement('span');
+        msg.textContent = text + ' — ';
+        const link = document.createElement('a');
+        link.href = (location.pathname.split('/').length > 4 ? '../' : '') + 'notes.html';
+        link.textContent = 'neu anmelden';
+        box.appendChild(msg);
+        box.appendChild(link);
+    }
+
     function setCloud(text, ok) {
+        showCloudError(ok ? '' : text);
         if (cloudEl.tagName === 'A') return; /* logged out: keep the login hint */
         cloudEl.textContent = text;
         cloudEl.classList.toggle('on', !!ok);
@@ -3023,22 +3046,25 @@
         } catch (e) { setCloud('☁ ' + e.message, false); }
     }
 
-    if (window.svpAuth && svpAuth.hasSession()) {
-        syncFromRemote();
-    } else if (window.svpAuth) {
-        /* visitor without login: apply the published plan state read-only */
+    /* The published state is read anonymously in EVERY case, logged in or not:
+       a stale session used to make the authenticated read fail with 401 and the
+       page then showed the bare HTML - no edits, no shifts, no material
+       (Doc, 31.08.2026). The authenticated sync runs afterwards and wins. */
+    if (window.svpAuth) {
         (async function () {
             try {
                 const row = await fetchPublicEdits(location.pathname);
-                if (!row) return;
-                const localTs = Date.parse(localStorage.getItem(TS_KEY) || '') || 0;
-                if ((Date.parse(row.ts) || 0) > localTs) {
-                    saved = row.edits || {};
-                    localStorage.setItem(KEY, JSON.stringify(saved));
-                    localStorage.setItem(TS_KEY, row.ts);
-                    applyEdits(saved);
+                if (row) {
+                    const localTs = Date.parse(localStorage.getItem(TS_KEY) || '') || 0;
+                    if ((Date.parse(row.ts) || 0) > localTs) {
+                        saved = row.edits || {};
+                        localStorage.setItem(KEY, JSON.stringify(saved));
+                        localStorage.setItem(TS_KEY, row.ts);
+                        applyEdits(saved);
+                    }
                 }
             } catch (e) { /* offline: local state stays */ }
+            if (svpAuth.hasSession()) syncFromRemote();
         })();
     }
 
