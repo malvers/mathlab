@@ -21,7 +21,7 @@
 // unusable, and run3 says so.
 //
 // VP_CHECK=1 walks the choreography without recording. VP_SPEED=6 shortens waits.
-// ONLY=lab|karten records one half.
+// ONLY=lab|karten records one half, CARDS=s10 a single insert.
 import fs from 'fs';
 import http from 'http';
 import path from 'path';
@@ -42,7 +42,10 @@ const SHOTS = !!process.env.VP_SHOTS || CHECK;
 const ONLY = process.env.ONLY || '';
 
 const LAB_SCENES = ['s1', 's4', 's5', 's6', 's8', 's9'];
-const CARD_SCENES = ['s2', 's3', 's7', 's10'];
+const ALL_CARDS = ['s2', 's3', 's7', 's10'];
+// CARDS=s10 re-records a single insert. A fix in one card used to cost all four,
+// and every re-record is a minute that buys nothing.
+const CARD_SCENES = process.env.CARDS ? process.env.CARDS.split(',') : ALL_CARDS;
 
 /* ---------------------------------------------------------------- the metronome */
 const PACER = () => {

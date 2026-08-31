@@ -8,7 +8,7 @@
 <style>
   /* Video outro frames in the docalvers.de intro look: starfield + gradient Orbitron.
      Modes via URL params: ?text=DAS%20CRAZY!&emoji=😎  or  ?logo=1&qr=<url> */
-  html, body { margin: 0; height: 100%; overflow: hidden; background: #0a0a1a; }
+  html, body { margin: 0; height: 100%; overflow: hidden; background: radial-gradient(circle at 50% 45%, #0e244e 0%, #081428 70%); }
   #stars { position: fixed; inset: 0; }
   .wrap { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2.6vw; }
   .headline {
@@ -41,7 +41,12 @@
     r: 0.4 + Math.random() * 1.4, p: Math.random() * Math.PI * 2, s: 0.02 + Math.random() * 0.05,
   }));
   function draw(t) {
-    cx.fillStyle = '#0a0a1a'; cx.fillRect(0, 0, innerWidth, innerHeight);
+    // never black - Doc's standing rule, and it applies to the last frame of a film too
+    const bg = cx.createRadialGradient(innerWidth / 2, innerHeight * 0.45, 0,
+                                       innerWidth / 2, innerHeight * 0.45, innerWidth * 0.75);
+    bg.addColorStop(0, '#0e244e');
+    bg.addColorStop(1, '#081428');
+    cx.fillStyle = bg; cx.fillRect(0, 0, innerWidth, innerHeight);
     const g = cx.createLinearGradient(0, innerHeight * 0.7, innerWidth, innerHeight * 0.3);
     g.addColorStop(0, 'rgba(120,130,180,0)'); g.addColorStop(0.5, 'rgba(150,160,210,0.08)'); g.addColorStop(1, 'rgba(120,130,180,0)');
     cx.fillStyle = g; cx.fillRect(0, 0, innerWidth, innerHeight);

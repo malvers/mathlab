@@ -1,6 +1,6 @@
 // Fourier demo — step 4: upload to YouTube.
 // DRY=1 prints what would be sent without touching the API.
-// Visibility defaults to private (PRIVACY=unlisted|public to override).
+// Visibility defaults to public (PRIVACY=private|unlisted to override).
 import fs from 'fs';
 import { uploadVideo } from '../lib/youtube.mjs';
 import { workDir } from '../lib/paths.mjs';
@@ -27,7 +27,7 @@ const id = await uploadVideo(FILE, {
   tags: ['Fourier', 'Fourier-Transformation', 'Fourierreihe', 'DFT', 'FFT', 'Epizykel',
     'Kreise', 'Spektrum', 'Frequenz', 'JPEG', 'MP3', 'Datenkompression',
     'Mathematik', 'Physik', 'Doc Alvers', 'interaktiv', 'Unterricht', 'Visualisierung'],
-  privacy: process.env.PRIVACY || 'private',
+  privacy: process.env.PRIVACY || 'public',
   dryRun: !!process.env.DRY,
 });
 if (id) console.log('YouTube:', 'https://youtu.be/' + id);
