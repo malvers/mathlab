@@ -77,6 +77,7 @@
         /* tag the Woche header so its column can shrink with its cells */
         [...headRow.children].forEach(function (th) {
             const t = th.textContent.trim();
+            if (t === 'Nr.' || t === 'KW') th.classList.add('num-col');
             if (t === 'Woche') th.classList.add('date-col');
             if (t === 'Bemerkungen') th.classList.add('remark-col');
             if (/^Ustd/.test(t)) th.classList.add('ustd-col');
@@ -159,6 +160,15 @@
         return img;
     }
 
+    /* Abgabe-Knopf: ein Material-Eintrag, dessen Label mit "Upload" oder
+       "Abgabe" beginnt, wird nicht als Material-Pille gezeichnet, sondern als
+       Knopf zum Hochladen (Doc, 31.08.2026 - die Kids legen ihre PPTs in einen
+       geteilten OneDrive-Ordner). Erkennung am Label, nicht an der URL: die
+       Freigabe-Links von SharePoint sehen alle gleich aus, egal wofuer sie
+       gedacht sind. */
+    const UPLOAD_LABEL = /^\s*(upload|abgabe)\b/i;
+    function isUploadEntry(en) { return UPLOAD_LABEL.test(en.label || ''); }
+
     // Default pill label when none was typed: derived from the link type.
     function matDefaultLabel(url) {
         const l = url.toLowerCase();
@@ -193,11 +203,17 @@
         if (win) { try { win.opener = null; } catch (e) { /* cross-origin: fine */ } win.focus(); }
     }
 
-    // Only SharePoint/Office links are framed: they are made for it
+    // Only SharePoint/Office DOCUMENT links are framed: they are made for it
     // (action=embedview is OneDrive's own embed code). Foreign links — YouTube
     // and friends — refuse to be framed, so they keep their own window.
+    // Two SharePoint shapes refuse it as well and must not be framed either
+    // (Doc, 31.08.2026 — "refused to connect" on an upload folder):
+    //   _layouts/… is the interactive web UI, never an embed;
+    //   /:f:/ is a FOLDER share — it opens the same UI, and an upload needs
+    //   the full window anyway.
     function matEmbeddable(url) {
-        return /\/:[pwxbf]:\//.test(url) || /sharepoint\.com|officeapps\.live\.com/i.test(url);
+        if (/\/_layouts\//i.test(url) || /\/:f:\//.test(url)) return false;
+        return /\/:[pwxb]:\//.test(url) || /sharepoint\.com|officeapps\.live\.com/i.test(url);
     }
 
     let matView = null;
@@ -298,6 +314,47 @@
         entries.forEach(function (en) {
             const label = en.label;
             const a = document.createElement('a');
+            /* Der Abgabe-Knopf oeffnet IMMER einen echten Tab: der Upload
+               braucht das volle SharePoint-Fenster, das kleine Material-
+               Fenster (openMat) kann das nicht. */
+            if (isUploadEntry(en)) {
+                a.className = 'badge mat-upload';
+                a.href = en.url;
+                a.target = '_blank';
+                a.rel = 'noopener';
+                a.title = 'Dateien hochladen — oeffnet OneDrive';
+                const ico = document.createElement('span');
+                ico.className = 'mat-upload-ico';
+                ico.textContent = '\u2191';
+                ico.setAttribute('aria-hidden', 'true');
+                a.appendChild(ico);
+                a.appendChild(matLabelEl(label));
+                if (en.desc) wireMatTip(a, en.desc);
+                /* Dasselbe ✕ wie an jeder Pille - eigener Wrapper, damit der
+                   Knopf im Bearbeiten-Modus genauso entfernbar ist. */
+                if (ref && CAN_EDIT_MAT) {
+                    const wrapU = document.createElement('span');
+                    wrapU.className = 'mat-pill-wrap';
+                    const urlU = en.url;
+                    const xU = document.createElement('button');
+                    xU.type = 'button';
+                    xU.className = 'mat-x';
+                    xU.textContent = '✕';
+                    xU.title = 'Abgabe-Knopf entfernen';
+                    xU.setAttribute('aria-label', 'Abgabe-Knopf entfernen: ' + (label || urlU));
+                    xU.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        removeMatEntry(ref, urlU);
+                    });
+                    wrapU.appendChild(a);
+                    wrapU.appendChild(xU);
+                    el.appendChild(wrapU);
+                    return;
+                }
+                el.appendChild(a);
+                return;
+            }
             a.className = 'badge b-green mat-pill';
             a.href = en.url;
             a.target = '_blank';
@@ -1059,6 +1116,11 @@
         el.textContent = '';
         const m = t.match(/^(\d{1,2}\.[–-]\d{1,2}\.)(\d{1,2}\.\d{2})$/)
             || t.match(/^(\d{1,2}\.\d{1,2}\.[–-])(\d{1,2}\.\d{1,2}\.\d{2})$/);
+        /* Was kein Datum ist, darf umbrechen. Sonst zwingt ein einziger langer
+           Text die GANZE Spalte auf seine Breite - "→ nächstes Schuljahr" in
+           der verschobenen Zeile machte aus 77px gut das Doppelte, und jede
+           Woche darüber bekam die Lücke ab (Doc, 31.08.2026). */
+        el.classList.toggle('date-wrap', !m);
         if (!m) { el.textContent = t; return; }
         el.appendChild(document.createTextNode(m[1]));
         el.appendChild(document.createElement('br'));
