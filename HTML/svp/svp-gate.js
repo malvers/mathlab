@@ -24,7 +24,15 @@
 (function () {
     // TEMP (2026-08-19, Doc): global gate disabled — set GATE_OFF to false to re-enable.
     const GATE_OFF = true;
-    const HASH = '517ac27fb0b499ddd50da49532cc40d47d4d36a9a49a43e1558f16eec5cbeda4';   // plain SHA-256 (legacy)
+    // Two people unlock the edit button, each with their OWN passphrase — Doc
+    // and Liliana (Doc, 31.08.2026). Only the plain SHA-256 hashes live here,
+    // never the passphrases. A new one is added with:
+    //   node -e "console.log(require('crypto').createHash('sha256').update(process.argv[1]).digest('hex'))" 'PASSPHRASE'
+    const HASHES = [
+        '517ac27fb0b499ddd50da49532cc40d47d4d36a9a49a43e1558f16eec5cbeda4',  // Doc
+        'e5dc8c8b884948b1986c832d5e5b2955b11c8e1a60ef06f820ce81680a07c44c'   // Liliana
+    ];
+    const HASH = HASHES[0];   // legacy page gate below (currently switched off)
     const ROUNDS = 200000;
 
     // --- Shared BUTTON gate ------------------------------------------------
@@ -91,8 +99,8 @@
         async function tryUnlock() {
             try {
                 const hexed = toHex(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(input.value)));
-                if (hexed === HASH) {
-                    try { localStorage.setItem(BTN_KEY, HASH); } catch (e) { }
+                if (HASHES.indexOf(hexed) >= 0) {
+                    try { localStorage.setItem(BTN_KEY, hexed); } catch (e) { }
                     overlay.remove();
                     onOk();
                     return;
@@ -114,12 +122,14 @@
 
     window.svpGate = {
         unlocked: function () {
-            try { return localStorage.getItem(BTN_KEY) === HASH; } catch (e) { return false; }
+            try { return HASHES.indexOf(localStorage.getItem(BTN_KEY)) >= 0; } catch (e) { return false; }
         },
         /* run fn straight away when unlocked, otherwise after a correct password */
         run: function (fn) {
             if (window.svpGate.unlocked()) fn(); else askButtonPwd(fn);
-        }
+        },
+        /* always ask, even when already unlocked (svp-plan.js edit button) */
+        ask: askButtonPwd
     };
 
     // per-page gate from the script tag's data attributes (see header comment)
