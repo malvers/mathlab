@@ -339,20 +339,30 @@ async function runStatus(session) {
     const kw = String(isoWeek(parseYmd(l.date)));
     const b = (byPage[page] ||= { weeks: {} });
     (b.weeks[kw] ||= []).push({
-      date: l.date, start: l.start, klasse: l.klassen.join(','),
+      date: l.date, start: l.start, klasse: l.klassen.join(','), subject: l.subject || '',
       written: !!(topics[String(l.ttId)] || '').trim(),
       text: topics[String(l.ttId)] || '',
     });
   }
   for (const [page, data] of Object.entries(byPage)) {
     const out = path.join(REPO, page.replace(/\.html$/, '.untis.json'));
-    const classes = [...new Set(Object.values(data.weeks).flat().map(e => e.klasse))].sort();
+    /* e.klasse is the display name of a lesson and joins coupled classes
+       ("BGY26-1,BGY26-2"). The page matches this list against single class
+       names, so split it again - otherwise a course whose lessons are all
+       coupled matches nothing and the dialog says "Keine passende Stunde". */
+    const classes = [...new Set(Object.values(data.weeks).flat()
+      .flatMap(e => e.klasse.split(',')).map(s => s.trim()).filter(Boolean))].sort();
+    /* The dialog fetches the week LIVE and has to narrow it down itself. Class
+       alone is not enough: Doc teaches Mat and Inf in BGY26-1/2, so the Mathe
+       page was offering his Informatik lessons as well (Doc, 31.08.2026). */
+    const subjects = [...new Set(Object.values(data.weeks).flat()
+      .map(e => e.subject).filter(Boolean))].sort();
     const n = Object.values(data.weeks).flat().length;
     const done = Object.values(data.weeks).flat().filter(e => e.written).length;
     fs.writeFileSync(out, JSON.stringify({
       generated: new Date().toISOString(), page: '/' + page.replace(/^HTML\//, ''),
       webuntis: `${BASE}/WebUntis/?school=${SCHOOL}#/basic/mytimetable`,
-      classes, weeks: data.weeks,
+      classes, subjects, weeks: data.weeks,
     }, null, 1));
     console.log(`${path.relative(REPO, out)}: ${done}/${n} Stunden eingetragen, ${Object.keys(data.weeks).length} Wochen`);
   }
@@ -390,7 +400,11 @@ async function main() {
     return;
   }
   if (cmd === 'dump') {
-    // Export one week as JSON for the local timetable view.
+    // Ad-hoc one-week export. NOTE: this does NOT feed HTML/svp/stundenplan.html
+    // any more - that page reads plandaten/, which "year" writes. The default
+    // target below stays stundenplan-data.json on purpose: dumping into
+    // plandaten/ would replace a full week (every class) with whatever scope
+    // was asked for, so "dump me" would silently shrink the plan to 25 lessons.
     // "me" = own timetable, "all" = every class (that is how the full school plan
     // becomes visible - getTeachers is denied for teacher accounts, class
     // timetables are not and carry the teacher short names).
@@ -450,6 +464,8 @@ async function main() {
       week: { from, to }, timegrid, lessons, generatedAt: new Date().toISOString() };
     fs.writeFileSync(out, JSON.stringify(data, null, 1));
     console.log(`${lessons.length} Stunden -> ${out}`);
+    if (out.endsWith('stundenplan-data.json'))
+      console.log('Hinweis: stundenplan.html liest das NICHT. Fuer die Seite: node tools/webuntis.js year');
     return;
   }
   if (cmd === 'year') {

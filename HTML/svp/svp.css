@@ -419,6 +419,37 @@ body.editing #plan-table td.mat .mat-act[hidden] { display: none; }
 #plan-table tr.open td.mat .mat-mark { opacity: 0.45; }
 #plan-table td.mat .mat-act.done { color: rgb(121, 158, 49); }
 
+/* Exercise button in the material column (svp-plan.js builds it from
+   row.quiz). It sits left of the paperclip marker; the note behind it
+   names the exercise set. */
+#plan-table td.mat .quiz-cell {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-right: 8px;
+    vertical-align: middle;
+}
+
+#plan-table td.mat a.quiz-btn {
+    display: inline-block;
+    padding: 1px 10px;
+    border-radius: 999px;
+    border: 1px solid rgba(245, 194, 66, 0.55);
+    background: rgba(245, 194, 66, 0.16);
+    color: var(--lambda);
+    font-size: 0.72rem;
+    line-height: 1.5;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+#plan-table td.mat a.quiz-btn:hover { background: rgba(245, 194, 66, 0.3); }
+#plan-table td.mat .quiz-note { font-size: 0.72rem; color: var(--muted); white-space: nowrap; }
+
+/* narrow screens: the button stays, its caption would break the row */
+@media (max-width: 1100px) { #plan-table td.mat .quiz-note { display: none; } }
+@media print { #plan-table td.mat .quiz-cell { display: none; } }
+
 /* short explanation line above the pill list in the paste dialog */
 .mat-modal .mm-info {
     font-size: 0.85rem;
@@ -1481,6 +1512,54 @@ body.editing .untis-chip { cursor: pointer; }
 .untis-state.is-ok { color: var(--phi); }
 .untis-state.is-bad { color: rgb(235, 120, 105); }
 
+/* Eine Karte je Stunde: Kopfzeile mit Klasse/Tag/Zeit und Zaehler, darunter
+   die Box mit dem Schritt fuer genau diese Stunde (Doc, 31.08.2026 - vorher
+   ging ein einziger Text in alle fuenf Stunden der Woche). */
+.untis-slot {
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 8px 10px 10px;
+    margin-bottom: 8px;
+}
+
+.untis-slot.is-locked { opacity: 0.5; }
+
+.untis-slot-head {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin-bottom: 6px;
+}
+
+/* Arial, nicht Orbitron (Doc, 31.08.2026): in der Kopfzeile stehen Uhrzeiten,
+   und Orbitrons geschlitzte Null macht aus 08:00 ein schwer lesbares Ø8:ØØ. */
+.untis-slot-when {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 0.74rem;
+    letter-spacing: 0.02em;
+    color: var(--phi);
+    font-variant-numeric: tabular-nums;
+}
+
+.untis-slot-note {
+    font-size: 0.72rem;
+    color: var(--muted);
+}
+
+.untis-slot-count {
+    margin-left: auto;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 0.7rem;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+}
+
+.untis-slot-count.is-full { color: var(--lambda); }
+
+/* Die Boxen stehen dicht untereinander - der Abstand kommt von der Karte. */
+.untis-slot .untis-text { font-size: 0.86rem; padding: 7px 10px; }
+.untis-slot .untis-row { padding: 6px 0 0; font-size: 0.76rem; }
+
 /* Abbrechen bleibt klein, "Send now" ist der Knopf des Dialogs. */
 .untis-card .svp-gate-row { gap: 12px; }
 .untis-card #untis-cancel { flex: 0 0 auto; }
@@ -2133,7 +2212,8 @@ body.map-preview #svp-map {
        round. --mv-bar is the viewer's own toolbar (inside the frame), --mv-head
        our title row — both sit on top of the 16:9 slide area. */
     --mv-head: 46px;
-    --mv-bar: 34px;
+    --mv-bar: 30px;   /* measured: the player's own bottom bar, 31.08.2026 */
+    --mv-crop: 3px;
     --mv-w: min(1280px, 96vw, calc((88vh - var(--mv-head) - var(--mv-bar)) * 16 / 9));
     display: flex;
     flex-direction: column;
@@ -2173,10 +2253,25 @@ body.map-preview #svp-map {
     cursor: pointer;
 }
 .mat-view .mv-btn:hover { background: rgba(121, 158, 49, 0.18); }
-.mat-view .mv-frame {
+/* The player centres the slide in its own black stage, so every pixel our box
+   is taller than deck + bar comes back as a black band above AND below (that
+   was the 34px guess for the bar: 2px each). --mv-bar now carries the measured
+   height; --mv-crop only swallows sub-pixel rounding - it grows the frame and
+   hides the same amount again, so it costs no slide. */
+.mat-view .mv-stage {
     flex: none;
     width: 100%;
     height: calc(var(--mv-w) * 9 / 16 + var(--mv-bar));
+    overflow: hidden;
+    background: rgb(14, 36, 78);
+}
+.mat-view .mv-frame {
+    /* a real height, not insets: an absolutely positioned iframe is a replaced
+       element and would fall back to its 150px intrinsic height */
+    display: block;
+    width: 100%;
+    height: calc(100% + 2 * var(--mv-crop));
+    margin-top: calc(-1 * var(--mv-crop));
     border: 0;
     background: rgb(14, 36, 78);
 }
@@ -2185,7 +2280,7 @@ body.map-preview #svp-map {
 @media (max-width: 760px) {
     .mat-view-wrap { padding: 0; }
     .mat-view { width: 100vw; height: 100dvh; border-radius: 0; border: 0; }
-    .mat-view .mv-frame { flex: 1; height: auto; }
+    .mat-view .mv-stage { height: calc(100dvh - var(--mv-head)); }
 }
 
 @media print { .mat-view-wrap { display: none !important; } }
