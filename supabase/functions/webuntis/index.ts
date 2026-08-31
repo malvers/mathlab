@@ -159,9 +159,10 @@ async function myLessons(u: Untis, userData: any, from: string, to: string) {
     .map((l: any) => ({
       ttId: l.id, date: String(l.date), start: hhmm(l.startTime), end: hhmm(l.endTime),
       subject: l.su[0].name, klassen: l.kl.map((k: any) => k.name), code: l.code || '',
-      /* lsnumber + end let the page fold a Doppelstunde into ONE box: WebUntis
-         keeps one classbook entry for back-to-back periods of the same lesson
-         (measured 31.08.2026 - writing 12:00 instantly showed on 12:45). */
+      /* end lets the page fold a Doppelstunde into ONE box: WebUntis keeps one
+         classbook entry for back-to-back periods of the same lesson (measured
+         31.08.2026 - writing 12:00 instantly showed on 12:45). lsnumber would
+         sharpen the fold but this RPC returns it as null in practice. */
       lsnumber: l.lsnumber ?? null,
     }))
     .sort((a: any, b: any) => Number(a.date) - Number(b.date) || a.start.localeCompare(b.start));
