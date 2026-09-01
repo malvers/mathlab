@@ -1,0 +1,169 @@
+/* meinplan.html - the students' view of one teacher's week.
+   Tokens, header, buttons and both colour schemes come from svp.css; this file
+   only adds the week bar and the day cards. Mobile first: the cards are a grid
+   that folds to a single column on a phone. */
+
+.mp-bar {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    max-width: 1200px;
+    margin: 0 auto 16px;
+}
+
+/* Week arrows as real triangles, like the staff view: a glyph never sits
+   truly centred in a 30px box, a border triangle does. */
+.mp-nav {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    border-radius: 8px;
+    border: 1px solid var(--line);
+    background: var(--panel);
+    color: var(--muted);
+    cursor: pointer;
+    transition: border-color 0.12s ease, color 0.12s ease;
+}
+
+.mp-nav::before {
+    content: "";
+    width: 0;
+    height: 0;
+    border-top: 6px solid transparent;
+    border-bottom: 6px solid transparent;
+}
+
+/* 1px optical centring: a triangle's visual mass sits at a third of its width */
+#prev::before { border-right: 9px solid currentColor; margin-right: 1px; }
+#next::before { border-left: 9px solid currentColor; margin-left: 1px; }
+
+.mp-nav:hover:not(:disabled) { border-color: var(--phi); color: var(--phi); }
+.mp-nav:disabled { opacity: 0.3; cursor: default; }
+
+.mp-week {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.95rem;
+    letter-spacing: 0.04em;
+    color: var(--lambda);
+    min-width: 15ch;
+    text-align: center;
+}
+
+.mp-stamp {
+    margin-left: auto;
+    font-size: 0.75rem;
+    color: var(--muted);
+}
+
+.mp-days {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 12px;
+    max-width: 1200px;
+    margin: 0 auto;
+    align-items: start;
+}
+
+.mp-day {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 12px 12px 14px;
+}
+
+/* the running day gets the λ frame - the one card you look for first */
+.mp-day.is-today { border-color: var(--lambda); }
+
+.mp-day h2 {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 400;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.mp-day.is-today h2 { color: var(--lambda); }
+.mp-day h2 span { font-family: 'Outfit', sans-serif; letter-spacing: 0; }
+
+.mp-lesson {
+    display: flex;
+    gap: 10px;
+    padding: 8px 0;
+    border-top: 1px solid var(--row-line);
+}
+
+.mp-lesson:first-of-type { border-top: 0; }
+
+.mp-time {
+    flex: 0 0 auto;
+    font-variant-numeric: tabular-nums;
+    font-size: 0.82rem;
+    color: var(--muted);
+    line-height: 1.35;
+}
+
+.mp-time span { display: block; opacity: 0.65; }
+
+.mp-subject {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.85rem;
+    color: var(--text);
+}
+
+.mp-subject em { font-family: 'Outfit', sans-serif; font-style: normal; color: var(--ypsilon); }
+
+.mp-meta { font-size: 0.82rem; color: var(--muted); }
+.mp-note { font-size: 0.78rem; color: var(--lambda); margin-top: 2px; }
+
+/* a cancelled lesson stays visible - the free slot is the news */
+.mp-lesson.is-off .mp-subject,
+.mp-lesson.is-off .mp-meta { text-decoration: line-through; opacity: 0.6; }
+
+.mp-free {
+    font-size: 0.85rem;
+    color: var(--muted);
+    opacity: 0.6;
+    padding: 6px 0;
+}
+
+.mp-empty {
+    grid-column: 1 / -1;
+    text-align: center;
+    color: var(--muted);
+    padding: 40px 0;
+}
+
+/* Same discreet corner button as the staff view */
+.mp-theme {
+    position: fixed;
+    right: clamp(12px, 3vw, 28px);
+    bottom: clamp(12px, 3vw, 28px);
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    border: 1px solid var(--line);
+    background: var(--panel);
+    color: var(--muted);
+    font-size: 1rem;
+    line-height: 1;
+    cursor: pointer;
+    opacity: 0.45;
+    box-shadow: 0 2px 8px var(--shadow);
+    transition: opacity 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.mp-theme:hover { opacity: 1; color: var(--text); border-color: var(--phi); }
+
+@media print {
+    .mp-bar button, .mp-theme { display: none; }
+    .mp-days { grid-template-columns: repeat(5, 1fr); }
+}
