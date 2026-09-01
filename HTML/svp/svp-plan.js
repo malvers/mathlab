@@ -1992,7 +1992,9 @@
             ref.ul = ul;
         }
 
-        ref.quizBtn = buildQuizBtn(row);
+        /* an override may carry its own quiz (also null: "no exercises here") */
+        ref.quizBtn = buildQuizBtn(
+            Object.prototype.hasOwnProperty.call(ov, 'quiz') ? { quiz: ov.quiz } : row);
         ref.matBlock = document.createElement('div');
         ref.matBlock.className = 'mat-block';
         updateMaterial(ref, ov.material != null ? ov.material : row.material);
@@ -3076,6 +3078,10 @@
             remark: effVal(i, 'remark') || '',
             details: (ov.details || row.details || []).slice(),
             material: (ov.material != null ? ov.material : row.material) || '',
+            /* The exercise set belongs to the topic, not to the calendar week:
+               without this a shifted plan showed the tasks of the week before
+               (Doc, 01.09.2026 - Mathe 11 stood one week off). */
+            quiz: Object.prototype.hasOwnProperty.call(ov, 'quiz') ? ov.quiz : (row.quiz || null),
             /* MAP-only fields (Modulablaufplan): not shown in the table, but
                they describe the content, so they travel with it */
             ziel: effVal(i, 'ziel'),
@@ -3090,6 +3096,7 @@
     function emptyContent() {
         return {
             type: 'org', u: '', topic: '', remark: '', details: [], material: '',
+            quiz: null,
             ziel: '', mth: '', med: '', lnw: ''
         };
     }
@@ -3174,6 +3181,7 @@
                 details: c.details
             };
             entry.material = c.material || '';
+            entry.quiz = c.quiz || null;   /* null = this week has no exercises */
             /* always written, even empty — see emptyContent() */
             ['ziel', 'mth', 'med', 'lnw'].forEach(function (k) {
                 entry[k] = c[k] != null ? c[k] : '';
