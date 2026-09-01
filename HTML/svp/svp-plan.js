@@ -1768,6 +1768,73 @@
         });
     })();
 
+    /* Der Vortrags-Knopf als Dropdown, wenn ein Plan mehrere Lerngruppen hat.
+       FOS 12 laeuft in fuenf Gruppen durch denselben Stoff - die Themenliste ist
+       eine, die NAMEN haengen an der Gruppe. Statt fuenf Knoepfen also einer mit
+       Auswahl (Doc, 01.09.2026). Die Gruppen kommen aus <plan>.untis.json, damit
+       es keine zweite, von Hand gepflegte Liste gibt. Aussehen und Verhalten
+       teilt er sich mit dem Export-Menue. */
+    (function buildVortraegeMenu() {
+        const btn = document.querySelector('button[data-groups]');
+        if (!btn) return;
+        const src = btn.dataset.groups;
+        const target = btn.dataset.href;
+        if (!src || !target) return;
+        const slug = (v) => String(v).replace(/[^A-Za-z0-9-]+/g, '_');
+
+        fetch(src, { cache: 'no-store' })
+            .then(res => (res.ok ? res.json() : null))
+            .then(data => {
+                if (!data || !data.weeks) return;                 /* keine Datei: Knopf bleibt Knopf */
+                const seen = new Set();
+                for (const kw of Object.keys(data.weeks)) {
+                    for (const e of data.weeks[kw]) if (e.klasse) seen.add(e.klasse);
+                }
+                if (seen.size < 2) return;                        /* eine Gruppe braucht kein Menue */
+
+                const drop = document.createElement('div');
+                drop.className = 'export-drop';
+                const toggle = document.createElement('button');
+                toggle.type = 'button';
+                toggle.className = 'action export-toggle';
+                toggle.title = btn.title || '';
+                toggle.setAttribute('aria-haspopup', 'true');
+                toggle.setAttribute('aria-expanded', 'false');
+                toggle.innerHTML = 'Vortr&auml;ge <span class="export-caret">▾</span>';
+                const menu = document.createElement('div');
+                menu.className = 'export-menu';
+                menu.hidden = true;
+
+                for (const g of [...seen].sort()) {
+                    const item = document.createElement('button');
+                    item.type = 'button';
+                    item.className = 'action secondary export-item';
+                    item.textContent = g.replace(/,/g, ' + ');
+                    item.title = 'Vortragsthemen und Namen der Gruppe ' + g.replace(/,/g, ' + ');
+                    item.addEventListener('click', () => {
+                        location.href = target + '?g=' + encodeURIComponent(slug(g));
+                    });
+                    menu.appendChild(item);
+                }
+
+                btn.parentNode.insertBefore(drop, btn);
+                btn.remove();
+                drop.appendChild(toggle);
+                drop.appendChild(menu);
+
+                function open(on) {
+                    menu.hidden = !on;
+                    toggle.setAttribute('aria-expanded', on ? 'true' : 'false');
+                    toggle.classList.toggle('on', !!on);
+                }
+                toggle.addEventListener('click', (e) => { e.stopPropagation(); open(menu.hidden); });
+                menu.addEventListener('click', () => open(false));
+                document.addEventListener('click', (e) => { if (!drop.contains(e.target)) open(false); });
+                document.addEventListener('keydown', (e) => { if (e.key === 'Escape') open(false); });
+            })
+            .catch(() => { /* offline: der einfache Knopf bleibt stehen */ });
+    })();
+
     // ?map — on-screen preview of the form (also what headless print uses).
     if (/[?&]map\b/.test(location.search)) {
         buildMap(true);
@@ -2344,6 +2411,65 @@
         return WDAY[d.getDay()] + ' ' + ymd.slice(6, 8) + '.' + ymd.slice(4, 6) + '.';
     }
 
+    /* ---- Termin-Modus: Blockunterricht statt Wochenrhythmus ---------------
+       Die FOS-Gruppen haben keinen Wochenrhythmus. Sie kommen 14-taegig mit
+       VIER Stunden am Stueck, und jede Gruppe in ihrer eigenen Woche: FOG25-1,
+       FOS25-2 und FOW25-1 in den geraden KW, FOS25-1 und FOG25-2+FOW25-2 in den
+       ungeraden. Eine Planzeile an die KALENDERWOCHE zu binden gaebe deshalb den
+       einen Gruppen nur die geraden und den anderen nur die ungeraden Zeilen -
+       jede Gruppe bekaeme die Haelfte des Stoffes (gemessen 01.09.2026).
+       Im Termin-Modus zaehlt darum nicht der Kalender, sondern der wievielte
+       Termin es fuer DIESE Gruppe ist. Ein Termin = zwei Planzeilen zu je
+       2 Ustd.: die erste Doppelstunde traegt die eine, die zweite die andere
+       (Doc, 01.09.2026). Feiertage verschieben damit nur die betroffene Gruppe.
+       Eingeschaltet mit window.UNTIS_TERMIN = true auf der Planseite. */
+    const TERMIN_MODE = !!window.UNTIS_TERMIN;
+
+    /* je Klasse die geordnete Terminliste, je Termin die Stunden des Tages */
+    function untisTermine(data) {
+        const byClass = new Map();
+        for (const kw of Object.keys((data && data.weeks) || {})) {
+            for (const e of data.weeks[kw]) {
+                const k = e.klasse || '';
+                if (!byClass.has(k)) byClass.set(k, new Map());
+                const days = byClass.get(k);
+                if (!days.has(e.date)) days.set(e.date, []);
+                days.get(e.date).push(e);
+            }
+        }
+        const out = new Map();
+        for (const [k, days] of byClass) {
+            out.set(k, [...days.keys()].sort().map(d =>
+                days.get(d).slice().sort((a, b) => String(a.start).localeCompare(String(b.start)))));
+        }
+        return out;
+    }
+
+    /* Planzeile -> welcher Termin, welche Haelfte. Ferienzeilen zaehlen nicht. */
+    function untisSlotOf(i) {
+        let n = 0;
+        for (let k = 0; k < i && k < planRows.length; k++) if (!planRows[k].ferien) n++;
+        return { block: Math.floor(n / 2), half: n % 2 };
+    }
+
+    /* Die Stunden EINER Planzeile: je Klasse ihr Termin Nr. block, davon die
+       erste oder zweite Doppelstunde. Hat ein Tag weniger als vier Stunden
+       (Ausfall), bekommt die erste Haelfte alles und die zweite nichts - lieber
+       kein Vorschlag als ein falscher. */
+    function untisEntriesFor(termine, i) {
+        const s = untisSlotOf(i);
+        const out = [];
+        for (const list of termine.values()) {
+            const day = list[s.block];
+            if (!day) continue;
+            const half = day.length >= 4
+                ? (s.half ? day.slice(2) : day.slice(0, 2))
+                : (s.half ? [] : day);
+            out.push(...half);
+        }
+        return out;
+    }
+
     /* Dialog fuer eine Kalenderwoche: Text links, die Stunden dieser Woche
        rechts. Der Stand kommt LIVE aus WebUntis, nicht aus der .untis.json -
        die ist nur der Aufhaenger (Datumsbereich + Klassen der Seite) und kann
@@ -2357,6 +2483,18 @@
        nicht aus der .untis.json - die ist nur der Aufhaenger (Datumsbereich +
        Klassen der Seite) und kann Tage alt sein. */
     function untisDialog(ref, entries, chip, data, url) {
+        /* Im Termin-Modus sind die Stunden schon ausgewaehlt (Klasse + Tag +
+           Doppelstunde); der Live-Abruf darf dann nur genau diese zeigen. */
+        /* Klassen normalisiert vergleichen: die .untis.json haelt gekoppelte
+           Klassen als "FOG25-2,FOW25-2" in Untis-Reihenfolge, der Live-Abruf
+           liefert ein Array - auf gleiche Reihenfolge kann man sich nicht
+           verlassen, also beide sortiert. */
+        const classKey = (v) => (Array.isArray(v) ? v : String(v || '').split(','))
+            .map(x => x.trim()).filter(Boolean).sort().join(',');
+        const pick = TERMIN_MODE
+            ? new Set(entries.map(e => e.date + '|' + e.start + '|' + classKey(e.klasse)))
+            : null;
+        const slotInfo = TERMIN_MODE ? untisSlotOf(ref.i) : null;
         const dates = entries.map(e => e.date).sort();
         const from = dates[0], to = dates[dates.length - 1];
         const classes = (data && data.classes) || [];
@@ -2371,7 +2509,12 @@
         overlay.innerHTML =
             '<div class="svp-gate-card untis-card">' +
             '  <div class="svp-gate-title">WebUntis &middot; Klassenbuch</div>' +
-            '  <div class="svp-gate-sub">KW ' + ref.kw + ' &middot; ' + untisDay(from) +
+            '  <div class="svp-gate-sub">' +
+            (slotInfo
+                ? 'Termin ' + (slotInfo.block + 1) + ' &middot; ' +
+                  (slotInfo.half ? '2.' : '1.') + ' Doppelstunde'
+                : 'KW ' + ref.kw) +
+            ' &middot; ' + untisDay(from) +
             (from !== to ? '&ndash;' + untisDay(to) : '') + '</div>' +
             '  <div class="untis-targets" id="untis-targets">Stunden werden geladen &hellip;</div>' +
             '  <div class="svp-gate-row">' +
@@ -2419,8 +2562,14 @@
         untisCall({ action: 'lessons', from: from, to: to }).then(res => {
             const mine = (res.lessons || []).filter(l =>
                 (!classes.length || l.klassen.some(k => classes.indexOf(k) >= 0)) &&
-                (!subjects.length || subjects.indexOf(l.subject) >= 0));
-            if (!mine.length) { targets.textContent = 'Keine passende Stunde in dieser Woche.'; return; }
+                (!subjects.length || subjects.indexOf(l.subject) >= 0) &&
+                (!pick || pick.has(l.date + '|' + l.start + '|' + classKey(l.klassen))));
+            if (!mine.length) {
+                targets.textContent = pick
+                    ? 'Keine passende Stunde fuer diesen Termin.'
+                    : 'Keine passende Stunde in dieser Woche.';
+                return;
+            }
 
             /* Erst falten, dann verteilen: Mathe 11 hat pro Woche DREI
                Klassenbucheintraege (Mo-Doppel, Di, Do-Doppel), nicht fuenf. */
@@ -2481,7 +2630,9 @@
                 box.rows = 2;
                 box.maxLength = UNTIS_MAX;
                 box.setAttribute('aria-label', 'Stundeninhalt ' + label(l));
-                box.value = spread.get(l) || '';
+                /* Termin-Modus: die Doppelstunde traegt GENAU diese eine Planzeile,
+                   also den ganzen Zeilentext - nicht einen Schritt daraus. */
+                box.value = (TERMIN_MODE ? untisTopicText(ref.i) : spread.get(l)) || '';
                 const countUp = () => {
                     count.textContent = box.value.length + '/' + UNTIS_MAX;
                     count.classList.toggle('is-full', box.value.length >= UNTIS_MAX);
@@ -2629,9 +2780,10 @@
         untisEchoMerge(data);
         const weeks = (data && data.weeks) || {};
         const url = data && data.webuntis;
+        const termine = TERMIN_MODE ? untisTermine(data) : null;
         for (const r of rendered) {
             if (!r.lbTd) continue;
-            const entries = weeks[String(r.kw)];
+            const entries = termine ? untisEntriesFor(termine, r.i) : weeks[String(r.kw)];
             if (!entries || !entries.length) continue;
             const done = entries.filter(e => e.written).length;
             const chip = document.createElement('span');

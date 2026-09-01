@@ -9,7 +9,15 @@
 // <script src="vortraege.js" data-plan="fos11" data-klasse="a"></script>.
 (function () {
     const script = document.currentScript;
-    const KLASSE = (script && script.dataset.klasse) || 'a';
+    /* Lerngruppe: normalerweise aus dem Script-Tag (data-klasse="a"), bei Plaenen
+       mit vielen Gruppen aber aus der URL (?g=FOS25-1). Der Stoff ist fuer alle
+       Gruppen derselbe - nur die Namen haengen an der Gruppe, deshalb reicht EINE
+       Seite mit Auswahl statt einer Datei je Gruppe (Doc, 01.09.2026). */
+    const GROUPS_SRC = script && script.dataset.groups;   /* <plan>.untis.json */
+    const slug = (s) => String(s).replace(/[^A-Za-z0-9-]+/g, '_');
+    let urlG = '';
+    try { urlG = new URLSearchParams(location.search).get('g') || ''; } catch (e) { }
+    const KLASSE = urlG || (script && script.dataset.klasse) || 'a';
     const PLAN = (script && script.dataset.plan) || 'informatik9';
     const KEY_NAMES = 'svp-vortraege-namen:' + PLAN + KLASSE;
     const KEY_TOPICS = 'svp-vortraege-themen:' + PLAN;
@@ -120,7 +128,11 @@
        typo while somebody else's entry stays protected. Ids only, no names. */
     const MINE_KEY = 'svp-vortraege-mine:' + PLAN + KLASSE;
 
-    const slots = TOPICS.map(() => [{ taken: false, enc: null, name: null }, { taken: false, enc: null, name: null }]);
+    /* Two names per topic are the rule; a third pupil can join a talk, so every
+       topic has a third slot that stays hidden until it is needed (Doc, 01.09.2026). */
+    const blank = () => ({ taken: false, enc: null, name: null });
+    const slots = TOPICS.map(() => [blank(), blank(), blank()]);
+    const expanded = new Set();   /* rows whose third field was opened by hand */
     const mine = new Set(Object.keys(loadJSON(MINE_KEY)));
     const markMine = (i, j) => { mine.add(i + '-' + j); const o = {}; mine.forEach((k) => { o[k] = 1; }); saveJSON(MINE_KEY, o); };
 
@@ -153,7 +165,14 @@
             if (!res.ok) throw new Error('HTTP ' + res.status);
             rows = await res.json();
         }
-        slots.forEach((pair) => pair.forEach((s) => { s.taken = false; s.enc = null; s.name = null; }));
+        slots.forEach((row) => row.forEach((s) => { s.taken = false; s.enc = null; s.name = null; }));
+        /* Eintragen heisst UPDATE - anonyme Browser duerfen keine Zeilen anlegen.
+           Fehlen sie (neue Lerngruppe, noch nicht angelegt), ginge jeder Name
+           still ins Leere. Also laut sagen statt schweigen. */
+        if (!rows.length) {
+            setStatus('Für diese Lerngruppe sind in der Datenbank noch keine Plätze angelegt — Namen können nicht gespeichert werden.', true);
+            return;
+        }
         rows.forEach((r) => {
             const s = slots[r.idx] && slots[r.idx][r.slot];
             if (!s) return;
@@ -164,9 +183,9 @@
     }
 
     async function decryptAll() {
-        if (!unlocked()) { slots.forEach((p) => p.forEach((s) => { s.name = null; })); return; }
-        for (const pair of slots) {
-            for (const s of pair) {
+        if (!unlocked()) { slots.forEach((r) => r.forEach((s) => { s.name = null; })); return; }
+        for (const row of slots) {
+            for (const s of row) {
                 if (!s.enc) { s.name = null; continue; }
                 try { s.name = await svpCrypto.open(s.enc); } catch (e) { s.name = '??'; }
             }
@@ -211,7 +230,7 @@
         for (const k of keys) {
             const i = parseInt(k, 10);
             const v = Array.isArray(old[k]) ? old[k] : [];
-            for (let j = 0; j < 2; j++) {
+            for (let j = 0; j < 2; j++) {   /* the old local format never had a third name */
                 const name = (v[j] || '').trim();
                 if (!name || !slots[i]) continue;
                 try { await pushSlot(i, j, name); markMine(i, j); } catch (e) { setStatus('Übernahme fehlgeschlagen: ' + e.message, true); return false; }
@@ -247,7 +266,8 @@
         const list = $('list');
         list.innerHTML = topics().map((t, i) => {
             const lb = LB_LABEL[t.lb];
-            const taken = slots[i][0].taken || slots[i][1].taken;
+            const taken = rowTaken(i);
+            const third = slots[i][2].taken || expanded.has(i);
             const inp = (j) => {
                 const ro = editable(i, j) ? '' : ' readonly';
                 const ttl = editable(i, j) ? '' : (isMine(i, j)
@@ -257,19 +277,34 @@
                     '" value="' + esc(slotValue(i, j)) + '" placeholder="Name ' + (j + 1) + '"' + ro + ttl +
                     ' autocomplete="off" spellcheck="false" aria-label="Name ' + (j + 1) + ' für Thema ' + (i + 1) + '"></div>';
             };
-            return '<div class="vt-row' + (taken ? ' taken' : '') + '" id="row-' + i + '">' +
+            /* the toggle only ever ADDS a field; an occupied third slot cannot be
+               folded away, otherwise a name would vanish from the page */
+            const more = '<button type="button" class="vt-more" id="more-' + i + '"' +
+                (slots[i][2].taken ? ' hidden' : '') +
+                ' title="' + (third ? 'Drittes Namensfeld ausblenden' : 'Dritten Namen zulassen') + '"' +
+                ' aria-label="Drittes Namensfeld für Thema ' + (i + 1) + '">' + (third ? '−' : '+') + '</button>';
+            return '<div class="vt-row' + (taken ? ' taken' : '') + (third ? ' three' : '') + '" id="row-' + i + '">' +
                 '<div class="vt-nr">' + (i + 1) + '</div>' +
                 '<div class="vt-topic">' +
                     '<div class="vt-title"><span class="vt-title-text">' + esc(t.title) + '</span>' +
                         '<span class="badge ' + lb[1] + '">' + lb[0] + '</span></div>' +
                     '<div class="vt-sub">' + esc(t.sub) + '</div>' +
-                '</div>' + inp(0) + inp(1) +
+                '</div>' + inp(0) + inp(1) + (third ? inp(2) : '') + more +
                 '</div>';
         }).join('');
 
         TOPICS.forEach((_, i) => {
-            [0, 1].forEach((j) => {
+            const btn = $('more-' + i);
+            if (btn) btn.addEventListener('click', async () => {
+                /* folding the column away must not swallow a half-typed name */
+                if (expanded.has(i)) { await flushSave(i, 2); expanded.delete(i); } else expanded.add(i);
+                render();
+                const el = $('name-' + i + '-2');
+                if (el && !el.readOnly) el.focus();
+            });
+            [0, 1, 2].forEach((j) => {
                 const el = $('name-' + i + '-' + j);
+                if (!el) return;
                 el.classList.toggle('locked', !editable(i, j));
                 if (!editable(i, j)) {
                     if (isMine(i, j)) { el.classList.add('mine'); el.addEventListener('click', () => clearMine(i, j)); }
@@ -285,6 +320,7 @@
         });
         setEditing(editing);
         updateCount();
+        updateAllBtn();
         updateKeyBtn();
     }
 
@@ -333,7 +369,7 @@
             setStatus('speichere …');
             await pushSlot(i, j, text);
             if (text) markMine(i, j);
-            $('row-' + i).classList.toggle('taken', slots[i][0].taken || slots[i][1].taken);
+            $('row-' + i).classList.toggle('taken', rowTaken(i));
             updateCount();
             setStatus('☁ gespeichert (verschlüsselt)');
         } catch (e) {
@@ -341,9 +377,47 @@
         }
     }
 
+    const rowTaken = (i) => slots[i].some((s) => s.taken);
+
     function updateCount() {
-        const taken = slots.filter((p) => p[0].taken || p[1].taken).length;
+        const taken = slots.filter((row) => row.some((s) => s.taken)).length;
         $('count').innerHTML = '<b>' + taken + '</b> von ' + TOPICS.length + ' Themen vergeben';
+    }
+
+    /* ---------- toolbar: third column for ALL topics at once ---------- */
+    function allBtn() {
+        let b = $('btn-all3');
+        if (b) return b;
+        const bar = document.querySelector('.vt-actions');
+        if (!bar) return null;
+        b = document.createElement('button');
+        b.id = 'btn-all3';
+        b.className = 'action secondary';
+        b.addEventListener('click', toggleAllThird);
+        bar.insertBefore(b, bar.firstChild);
+        return b;
+    }
+
+    /* open on every topic, or fold every free one away again */
+    async function toggleAllThird() {
+        if (expanded.size >= TOPICS.length) {
+            for (let i = 0; i < TOPICS.length; i++) await flushSave(i, 2);
+            expanded.clear();
+        } else {
+            TOPICS.forEach((_, i) => expanded.add(i));
+        }
+        render();
+    }
+
+    function updateAllBtn() {
+        const b = allBtn();
+        if (!b) return;
+        const on = expanded.size >= TOPICS.length;
+        b.textContent = on ? '− Dritter Name' : '+ Dritter Name';
+        b.title = on
+            ? 'Das dritte Namensfeld überall wieder ausblenden (belegte bleiben)'
+            : 'Bei allen Themen ein drittes Namensfeld einblenden';
+        b.classList.toggle('orange', on);
     }
 
     /* ---------- key button: only ever visible to a logged-in user ---------- */
@@ -443,12 +517,96 @@
                 if (!res.ok) throw new Error('HTTP ' + res.status);
                 try { localStorage.removeItem(MINE_KEY); } catch (e) { }
                 mine.clear();
+                expanded.clear();
                 await refresh();
                 setStatus('Alle Namen dieser Klasse gelöscht.');
             } catch (e) { setStatus('Löschen fehlgeschlagen: ' + e.message, true); }
         };
         if (window.svpGate) svpGate.run(wipe); else wipe();
     };
+
+    /* Die Umschaltleiste aus den echten Lerngruppen des Plans: die .untis.json
+       fuehrt je Stunde die Klasse, gekoppelte Gruppen als "FOG25-2,FOW25-2".
+       Genau diese Zeichenkette ist der Schluessel in der Datenbank, damit die
+       Namen einer Gruppe nicht bei einer anderen auftauchen. Ohne die Datei
+       bleibt die Leiste, wie sie in der Seite steht. */
+    async function buildSwitch() {
+        if (!GROUPS_SRC) return;
+        const box = document.querySelector('.vt-switch');
+        if (!box) { setStatus('Umschaltleiste fehlt in der Seite (.vt-switch).', true); return; }
+        /* Scheitert das hier, blieb frueher der Kopf der Seite stehen und zeigte
+           eine FALSCHE Lerngruppe an, ohne ein Wort - der gefaehrlichste Fall
+           ueberhaupt (Doc, 01.09.2026: "da steht aber immer FOS"). Jeder Ausweg
+           sagt jetzt, was los ist. */
+        let data = null, why = '';
+        try {
+            const res = await fetch(GROUPS_SRC, { cache: 'no-store' });
+            if (res.ok) data = await res.json(); else why = 'HTTP ' + res.status;
+        } catch (e) { why = e.message; }
+        if (!data || !data.weeks) {
+            setStatus('Lerngruppen nicht ladbar (' + GROUPS_SRC + (why ? ': ' + why : '') + ') — der Kopf zeigt vielleicht die falsche Klasse.', true);
+            return;
+        }
+        const seen = new Set();
+        for (const kw of Object.keys(data.weeks)) {
+            for (const e of data.weeks[kw]) if (e.klasse) seen.add(e.klasse);
+        }
+        if (!seen.size) { setStatus('In ' + GROUPS_SRC + ' steht keine Lerngruppe.', true); return; }
+        /* Schluessel statt Klartext: ein Komma ("FOG25-2,FOW25-2") ist in einem
+           PostgREST-Filter ein Trennzeichen und wuerde die Abfrage zerlegen.
+           Der Schluessel steht in URL und Datenbank, der Klartext nur im Kopf. */
+        const groups = [...seen].sort().map(g => ({ key: slug(g), label: g.replace(/,/g, ' + ') }));
+        const here = groups.find(g => g.key === KLASSE);
+        /* Ohne ?g stuende die erste Gruppe im Kopf, gespeichert wuerde aber unter
+           data-klasse - ein stiller Fehlgriff. Also gleich umlenken. */
+        if (!here) { location.replace(location.pathname + '?g=' + encodeURIComponent(groups[0].key)); return; }
+
+        /* Eine Pille je Gruppe wurde zu breit, sobald gekoppelte Klassen dabei
+           sind ("FOG25-2 + FOW25-2"). Also dasselbe Dropdown wie auf der
+           Planseite - gleiche Klassen, gleiches Verhalten (Doc, 01.09.2026). */
+        box.textContent = '';
+        const drop = document.createElement('div');
+        drop.className = 'export-drop';
+        const toggle = document.createElement('button');
+        toggle.type = 'button';
+        toggle.className = 'action export-toggle';
+        toggle.title = 'Lerngruppe wechseln';
+        toggle.setAttribute('aria-haspopup', 'true');
+        toggle.setAttribute('aria-expanded', 'false');
+        toggle.textContent = here.label + ' ▾';
+        const menu = document.createElement('div');
+        menu.className = 'export-menu';
+        menu.hidden = true;
+        for (const g of groups) {
+            const item = document.createElement('button');
+            item.type = 'button';
+            item.className = 'action export-item' + (g.key === KLASSE ? '' : ' secondary');
+            item.textContent = g.label;
+            item.addEventListener('click', () => {
+                if (g.key === KLASSE) return;
+                location.href = location.pathname + '?g=' + encodeURIComponent(g.key);
+            });
+            menu.appendChild(item);
+        }
+        drop.appendChild(toggle);
+        drop.appendChild(menu);
+        box.appendChild(drop);
+        const open = (on) => {
+            menu.hidden = !on;
+            toggle.setAttribute('aria-expanded', on ? 'true' : 'false');
+            toggle.classList.toggle('on', !!on);
+        };
+        toggle.addEventListener('click', (e) => { e.stopPropagation(); open(menu.hidden); });
+        menu.addEventListener('click', () => open(false));
+        document.addEventListener('click', (e) => { if (!drop.contains(e.target)) open(false); });
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') open(false); });
+        const h1 = document.querySelector('.title-group h1');
+        if (h1) h1.textContent = h1.textContent.replace(/[^·]*$/, ' ' + here.label);
+        const confirmBox = document.getElementById('confirm');
+        if (confirmBox && confirmBox.firstChild) {
+            confirmBox.firstChild.textContent = 'Alle Namen von ' + here.label + ' löschen?';
+        }
+    }
 
     /* ---------- boot ---------- */
     function statusEl() {
@@ -469,6 +627,7 @@
 
     (async function boot() {
         statusEl();
+        await buildSwitch();
         render();                                   /* topics first, names follow */
         if (!window.svpCrypto || !svpCrypto.available) {
             setStatus('Verschlüsselung im Browser nicht verfügbar — Namen sind hier nicht bearbeitbar.', true);
