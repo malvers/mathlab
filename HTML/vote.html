@@ -586,24 +586,43 @@
         .chart-mean {
             position: absolute;
             left: 5%;
-            top: 6%;
+            top: 15%;
             font-family: 'Outfit', sans-serif;
             line-height: 1;
             text-align: left;
             pointer-events: none;
         }
 
+        /* The padding is the gap to the caption, and it is not decoration: measured in Outfit at
+           line-height 1 the baseline sits 0.870 em below the top of the box, and the comma of
+           "8,5" runs to 1.008 em - 0.008 em past the bottom edge the caption starts from. Without
+           this the word touches the comma. 0.12 em leaves a clean 0.11 em below the comma tip. */
         .chart-mean b {
+            display: block;           /* the number alone sets the width the caption centres on */
             font-size: clamp(36px, 18vmin, 220px);
             font-weight: 600;
+            padding-bottom: 0.12em;
             transition: color 0.3s;
         }
 
+        /* The caption sits centred under the number - taken out of the flow, so it centres on
+           the number's width and never widens the box. That matters at the small end of the
+           clamp: measured in Outfit, "MITTELWERT" is 156 px at 20 px type, "8,5" is 300 px at
+           220 px type (half) - but at 36 px type the number is only 70 px, so a caption in the
+           flow would take over the width and push the number off centre.
+           text-indent gives back the trailing letter-space, which would otherwise drag the word
+           half a gap to the left. */
         .chart-mean span {
-            display: block;
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 100%;
             font-size: clamp(12px, 2vmin, 20px);
             letter-spacing: 0.15em;
+            text-indent: 0.15em;
+            text-align: center;
             text-transform: uppercase;
+            white-space: nowrap;
             opacity: 0.55;
         }
 
@@ -1183,12 +1202,20 @@
                     meanEl.style.visibility = 'hidden';
                 }
                 renderClassLine();
-                $('chart-sub').textContent = $('big-sub').textContent;
+                // The word "Mittelwert" now stands under the number itself, so the foot line
+                // here only carries stamp and count - saying it twice reads like two figures.
+                $('chart-sub').textContent = whenPrefix() +
+                    (n ? n + (n === 1 ? ' Vote' : ' Votes') : 'Noch keine Votes');
+            }
+
+            /* "01.09.2026 · 14:25 · " — the stamp both foot lines start with */
+            function whenPrefix() {
+                return (poll && poll.created_at) ? fmtWhen(poll.created_at) + ' · ' : '';
             }
 
             function renderBig() {
                 const big = $('big');
-                const when = (poll && poll.created_at) ? fmtWhen(poll.created_at) + ' · ' : '';
+                const when = whenPrefix();
                 if (showing) {
                     const n = values.length;
                     const mean = n ? values.reduce((a, b) => a + b, 0) / n : 0;
