@@ -2,7 +2,7 @@
 // One session under localStorage 'svp-session': logging in on notes.html
 // logs every svp page in. Plain fetch, no supabase-js needed here.
 // Exposes window.svpAuth = { DB_URL, DB_KEY, session, hasSession,
-// storeSession, ensureFreshToken, api, login, loginDialog }.
+// storeSession, ensureFreshToken, api, login, loginDialog, whoami }.
 (function () {
     const DB_URL = 'https://fyfhxzyymmurlaenmzse.supabase.co';
     const DB_KEY = 'sb_publishable_ubQDiMD-X3N0vZvPVi229Q_-5Zootfk'; /* publishable key – public by design */
@@ -132,6 +132,19 @@
         email.focus();
     }
 
+    /* Wer ist gerade angemeldet? Steht im Access-Token (JWT, Payload base64url).
+       Gebraucht fuer verstaendliche Fehler: ein 403 auf einer Planseite heisst
+       immer "falsches Konto", und ohne den Namen ist das Raten (Doc, 01.09.2026). */
+    function whoami() {
+        if (!session || !session.access_token) return '';
+        try {
+            const part = session.access_token.split('.')[1];
+            const json = atob(part.replace(/-/g, '+').replace(/_/g, '/'));
+            const claims = JSON.parse(decodeURIComponent(escape(json)));
+            return claims.email || claims.sub || '';
+        } catch (e) { return ''; }
+    }
+
     window.svpAuth = {
         DB_URL: DB_URL,
         DB_KEY: DB_KEY,
@@ -141,6 +154,7 @@
         ensureFreshToken: ensureFreshToken,
         api: api,
         login: login,
-        loginDialog: loginDialog
+        loginDialog: loginDialog,
+        whoami: whoami
     };
 })();

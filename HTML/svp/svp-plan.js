@@ -1350,6 +1350,38 @@
         return s ? s.src.replace(/[^/]*$/, '') : '../';
     })();
 
+    /* Logos fuer die Druckformulare. buildMap()/buildForm() laufen erst in
+       beforeprint - ein dort frisch erzeugtes <img> laedt zu spaet und bleibt
+       im PDF leer (Doc, 01.09.2026). Darum die SVGs einmal beim Laden der
+       Seite holen und im Kopf INLINE einsetzen; solange das noch laeuft (oder
+       wenn es fehlschlaegt), bleibt es beim <img> wie bisher - der liegt dann
+       wenigstens im Bildcache. */
+    const LOGO_SVG = {};
+    ['ibb-logo.svg', 'ibb-gym-obs-logo.svg'].forEach(function (file) {
+        const pre = new Image();
+        pre.src = SVP_DIR + file;
+        fetch(SVP_DIR + file)
+            .then(function (r) { return r.ok ? r.text() : null; })
+            .then(function (t) { if (t) LOGO_SVG[file] = t; })
+            .catch(function () { /* offline: der <img>-Weg bleibt */ });
+    });
+
+    function logoNode(file, alt, cls) {
+        if (LOGO_SVG[file]) {
+            const box = document.createElement('span');
+            box.className = cls;
+            box.innerHTML = LOGO_SVG[file];
+            const svg = box.querySelector('svg');
+            if (svg) svg.setAttribute('aria-label', alt);
+            return box;
+        }
+        const img = document.createElement('img');
+        img.className = cls;
+        img.src = SVP_DIR + file;
+        img.alt = alt;
+        return img;
+    }
+
     // Media defaults per Fach, used when neither page nor row names any.
     const MAP_MEDIEN = {
         Mathematik: ['IQB-Formelsammlung', 'GTR mit CAS', 'GeoGebra', 'Erklärvideos', 'Alte Abiturprüfungen'],
@@ -1520,11 +1552,7 @@
         lr.className = 'm-runhead';
         const lt = document.createElement('td');
         lt.colSpan = 7;
-        const logo = document.createElement('img');
-        logo.className = 'm-logo';
-        logo.src = SVP_DIR + 'ibb-logo.svg';
-        logo.alt = 'IBB Berufliche Schulen';
-        lt.appendChild(logo);
+        lt.appendChild(logoNode('ibb-logo.svg', 'IBB Berufliche Schulen', 'm-logo'));
         lr.appendChild(lt);
         thead.appendChild(lr);
         table.appendChild(thead);
@@ -1681,6 +1709,207 @@
         return exportTitle().replace(/^SVP /, 'MAP ');
     }
 
+    /* --- Stoffverteilungsplan nach der Schul-Vorlage (FORM export) ---------
+       Dritter Export neben "Drucken / PDF" und "Modulablaufplan": das
+       Campus-Formular "Stoffverteilungsplan 2026/2027" (Word-Vorlage) —
+       A4 quer, sechs Spalten in den Breiten des Originals, EINE ZEILE JE
+       WOCHE (nicht je Modulblock, dafuer ist der MAP da). Gebaut aus
+       denselben PLAN-Zeilen + lokalen Edits, damit nichts auseinanderlaeuft.
+
+       Die Vorlage fuehrt in Spalte 1 zusaetzlich eine A/B-Woche. Die Plandaten
+       kennen keine A/B-Woche, deshalb steht dort nur KW/SW. */
+    function formLbShort(k) {
+        const m = String(k || '').match(/Lernbereich\s*(\d+)/);
+        if (m) return 'LB ' + m[1];
+        if (/Wahlbereich/.test(k || '')) return 'WB';
+        return k || '';
+    }
+
+    function buildForm(track) {
+        building = !track;              /* ?form preview may load KaTeX, print must not */
+        const old = document.getElementById('svp-form');
+        if (old) old.remove();
+
+        const doc = document.createElement('div');
+        doc.id = 'svp-form';
+
+        const table = document.createElement('table');
+        const cg = document.createElement('colgroup');
+        // Column widths of the Word template, as a share of the type area.
+        [5.29, 9.14, 11.47, 19.45, 27.79, 26.86].forEach(function (w) {
+            const col = document.createElement('col');
+            col.style.width = w + '%';
+            cg.appendChild(col);
+        });
+        table.appendChild(cg);
+
+        // Running head (title left, IBB logo right) — the Word page header,
+        // repeated on every printed page because it sits in the thead.
+        const thead = document.createElement('thead');
+        const rh = document.createElement('tr');
+        rh.className = 'f-runhead';
+        const rt = document.createElement('td');
+        rt.colSpan = 6;
+        const wrap = document.createElement('div');
+        const ttl = document.createElement('span');
+        ttl.textContent = 'Stoffverteilungsplan 2026/2027';
+        /* Das Logo der Vorlage: IBB Gymnasium & Oberschule. Es steckte als
+           Vektor-EMF im Word-Kopf und liegt jetzt als SVG daneben. */
+        wrap.appendChild(ttl);
+        wrap.appendChild(logoNode('ibb-gym-obs-logo.svg',
+            'IBB Gymnasium & Oberschule', 'f-logo'));
+        rt.appendChild(wrap);
+        rh.appendChild(rt);
+        thead.appendChild(rh);
+        table.appendChild(thead);
+
+        const tb = document.createElement('tbody');
+
+        // Head block — plain rows, so it stays on the first page.
+        function metaRow(cls, text) {
+            const tr = document.createElement('tr');
+            tr.className = 'f-meta ' + cls;
+            const td = document.createElement('td');
+            td.colSpan = 6;
+            td.textContent = text;
+            tr.appendChild(td);
+            tb.appendChild(tr);
+        }
+        metaRow('f-fach', 'Fach: ' + mapFach());
+        const klasse = mapKlasse();
+        metaRow('f-klasse', (klasse ? 'Klassenstufe: ' + klasse + ' · ' : '') +
+            'Lehrkraft: Dr. Michael R. Alvers');
+
+        // Column titles as a normal row — the template does not repeat them.
+        const hr = document.createElement('tr');
+        hr.className = 'f-head';
+        ['KW/ SW', 'Datum', 'Modul', 'Lernbereich',
+         'Ziele / Inhalte / Didaktischer Schwerpunkt', 'LNW / Bemerkungen']
+        .forEach(function (t) {
+            const th = document.createElement('td');
+            th.textContent = t;
+            hr.appendChild(th);
+        });
+        tb.appendChild(hr);
+
+        const meta = lbMeta();
+        let sw = 0;                     /* Schulwoche: Ferienzeilen zaehlen nicht mit */
+
+        /* planRows, not window.PLAN — a shift can push content into weeks that
+           exist only in the edits; those must reach the paper too. */
+        planRows.forEach(function (row, i) {
+            const ov = saved[i] || {};
+            const tr = document.createElement('tr');
+
+            const kw = document.createElement('td');
+            kw.className = 'f-kw';
+            const date = document.createElement('td');
+            date.className = 'f-date';
+            // Drop the trailing year (17.–21.08.26 -> 17.–21.08.), the school
+            // year is in the running head.
+            date.textContent = String(ov.date != null ? ov.date : row.date)
+                .replace(/\.\d{2}$/, '.');
+
+            const ferien = ov.ferien || row.ferien;
+            if (ferien) {
+                kw.textContent = (ov.kw != null ? ov.kw : (row.kw || '')) || '';
+                tr.appendChild(kw);
+                tr.appendChild(date);
+                const td = document.createElement('td');
+                td.className = 'f-fer';
+                td.colSpan = 4;
+                td.textContent = String(ferien).split('·')[0].trim();
+                tr.appendChild(td);
+                tb.appendChild(tr);
+                return;
+            }
+
+            sw += 1;
+            kw.textContent = (ov.kw != null ? ov.kw : row.kw) + '/' + sw;
+            tr.appendChild(kw);
+            tr.appendChild(date);
+
+            const type = ov.type || row.type || 'org';
+            const lb = meta[type];
+
+            const mod = document.createElement('td');
+            mod.className = 'f-mod';
+            mod.textContent = lb ? formLbShort(lb.k) : '';
+            tr.appendChild(mod);
+
+            const lbc = document.createElement('td');
+            lbc.className = 'f-lb';
+            if (lb) {
+                const n = document.createElement('div');
+                n.textContent = lb.v;
+                lbc.appendChild(n);
+            }
+            const utxt = String(ov.u != null ? ov.u : (row.u || ''));
+            if (utxt) {
+                const u = document.createElement('div');
+                u.className = 'f-u';
+                u.textContent = utxt + ' Ustd.';
+                lbc.appendChild(u);
+            }
+            tr.appendChild(lbc);
+
+            const inh = document.createElement('td');
+            inh.className = 'f-inh';
+            const b = document.createElement('b');
+            setMathText(b, ov.topic != null ? ov.topic : row.topic);
+            inh.appendChild(b);
+            const ziel = ov.ziel != null ? ov.ziel : (row.ziel || '');
+            if (ziel) {
+                const z = document.createElement('div');
+                z.className = 'f-ziel';
+                setMathText(z, ziel);
+                inh.appendChild(z);
+            }
+            const items = ov.details || row.details;
+            if (items && items.length) {
+                const ul = document.createElement('ul');
+                buildDetailList(ul, items);
+                inh.appendChild(ul);
+            }
+            tr.appendChild(inh);
+
+            // Remark column: Leistungsnachweise first (the clauses the MAP
+            // pulls out too), the rest of the remark underneath.
+            const rem = document.createElement('td');
+            rem.className = 'f-rem';
+            const rtext = String(ov.remark != null ? ov.remark : (row.remark || ''));
+            const lnw = [], note = [];
+            rtext.split(/\s*[·;]\s*/).forEach(function (part) {
+                if (!part.trim()) return;
+                (LNW_RE.test(part) ? lnw : note).push(part.trim());
+            });
+            const own = ov.lnw != null ? ov.lnw : row.lnw;
+            if (own) { lnw.length = 0; lnw.push(own); }
+            if (lnw.length) {
+                const l = document.createElement('div');
+                l.className = 'f-lnw';
+                setMathText(l, lnw.join(' · '));
+                rem.appendChild(l);
+            }
+            if (note.length) {
+                const n = document.createElement('div');
+                setMathText(n, note.join(' · '));
+                rem.appendChild(n);
+            }
+            tr.appendChild(rem);
+            tb.appendChild(tr);
+        });
+
+        table.appendChild(tb);
+        doc.appendChild(table);
+        document.body.appendChild(doc);
+        building = false;
+    }
+
+    function formTitle() {
+        return exportTitle().replace(/^SVP /, 'SVP Formular ');
+    }
+
     // Toolbar gets the second export button next to "Drucken" — centrally, so
     // no plan page has to be touched.
     var mapMode = false;
@@ -1699,6 +1928,27 @@
         });
         const first = bar.querySelector('button.action');
         if (first) bar.insertBefore(btn, first.nextSibling);
+        else bar.appendChild(btn);
+    })();
+
+    // Dritter Ausgabe-Knopf: der Stoffverteilungsplan im Campus-Formular.
+    var formMode = false;
+    (function addFormButton() {
+        const bar = document.querySelector('.toolbar');
+        if (!bar) return;
+        const btn = document.createElement('button');
+        btn.className = 'action';
+        btn.textContent = 'Stoffverteilungsplan';
+        btn.title = 'Campus-Formular "Stoffverteilungsplan" (Querformat) drucken / als PDF sichern';
+        btn.addEventListener('click', function () {
+            withEditGate(function () {
+                formMode = true;
+                window.print();
+            });
+        });
+        const items = [...bar.querySelectorAll('button.action')];
+        const map = items.find(function (x) { return x.textContent.trim() === 'Modulablaufplan'; });
+        if (map) bar.insertBefore(btn, map.nextSibling);
         else bar.appendChild(btn);
     })();
 
@@ -1723,7 +1973,8 @@
         if (!bar) return;
         const items = [...bar.querySelectorAll('button')].filter(function (b) {
             const t = b.textContent.trim();
-            return t === 'Drucken' || t === 'Modulablaufplan';
+            return t === 'Drucken' || t === 'Modulablaufplan' ||
+                   t === 'Stoffverteilungsplan';
         });
         if (!items.length) return;
 
@@ -1842,6 +2093,13 @@
         document.title = mapTitle(); /* also names the PDF in headless print */
     }
 
+    // ?form — on-screen preview of the campus form (same document as print).
+    if (/[?&]form\b/.test(location.search)) {
+        buildForm(true);
+        document.body.classList.add('form-print', 'form-preview');
+        document.title = formTitle();
+    }
+
     // The PDF file name comes from document.title, so swap in a clean one for
     // the duration of the print: "SVP Informatik OS Kl 9 SJ 2026-27".
     // Schulform abbreviations are the ones the Lehrpläne use (OS/BGY/FOS).
@@ -1870,6 +2128,10 @@
             buildMap();
             document.body.classList.add('map-print');
             document.title = mapTitle();
+        } else if (formMode) {
+            buildForm();
+            document.body.classList.add('form-print');
+            document.title = formTitle();
         } else {
             buildExport();
             document.title = exportTitle();
@@ -1884,7 +2146,13 @@
             const mp = document.getElementById('svp-map');
             if (mp) mp.remove();
         }
+        if (!document.body.classList.contains('form-preview')) {
+            document.body.classList.remove('form-print');
+            const fp = document.getElementById('svp-form');
+            if (fp) fp.remove();
+        }
         mapMode = false;
+        formMode = false;
         const ex = document.getElementById('svp-export');
         if (ex) ex.remove();
     });
@@ -3493,6 +3761,18 @@
         box.appendChild(link);
     }
 
+    /* Ein 403 auf svp_plan_edits heisst IMMER: die Zeile dieser Seite gehoert
+       einem anderen Konto. Der Primaerschluessel ist die Seite allein, es gibt
+       also je Plan genau einen Besitzer - Doc hat alle ausser mathe5, die
+       gehoert der Kollegin. Ohne Kontonamen ist die Meldung ein Raetsel
+       (Doc, 01.09.2026). */
+    function cloudErr(status) {
+        if (status !== 403) return '☁ Fehler: HTTP ' + status;
+        const who = window.svpAuth && svpAuth.whoami ? svpAuth.whoami() : '';
+        return '☁ Fehler: HTTP 403 — diese Seite gehört einem anderen Konto' +
+            (who ? ' (angemeldet als ' + who + ')' : '');
+    }
+
     function setCloud(text, ok) {
         showCloudError(ok ? '' : text);
         if (cloudEl.tagName === 'A') return; /* logged out: keep the login hint */
@@ -3544,7 +3824,7 @@
                 edits: JSON.parse(localStorage.getItem(KEY) || '{}'),
                 ts: ts
             }])
-        }).then(res => setCloud(res.ok ? '☁ synchron' : '☁ Fehler: HTTP ' + res.status, res.ok))
+        }).then(res => setCloud(res.ok ? '☁ synchron' : cloudErr(res.status), res.ok))
             .catch(e => setCloud('☁ ' + e.message, false));
     }
 
@@ -3566,7 +3846,7 @@
         try {
             const res = await svpAuth.api(
                 'svp_plan_edits?page=eq.' + encodeURIComponent(location.pathname) + '&select=edits,ts');
-            if (!res.ok) { setCloud('☁ Fehler: HTTP ' + res.status, false); return; }
+            if (!res.ok) { setCloud(cloudErr(res.status), false); return; }
             const rows = await res.json();
             const localTs = Date.parse(localStorage.getItem(TS_KEY) || '') || 0;
             if (!rows.length) {
@@ -3826,7 +4106,7 @@
                     edits: { html: localStorage.getItem(BKEY) || '' },
                     ts: localStorage.getItem(BTS) || new Date().toISOString()
                 }])
-            }).then(res => { foot.textContent = HINT + (res.ok ? ' · ☁ synchron' : ' · ☁ Fehler HTTP ' + res.status); })
+            }).then(res => { foot.textContent = HINT + (res.ok ? ' · ☁ synchron' : ' · ' + cloudErr(res.status)); })
                 .catch(() => {});
         }
 
