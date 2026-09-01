@@ -7,6 +7,17 @@
     if (!script || !script.src) return;
     const base = script.src.replace(/svp-nav\.js.*$/, '');
 
+    /* The full timetable reads plandaten/, and that folder is deliberately not
+       in the repo - on docalvers.de it simply is not there. The pill therefore
+       leads to the published view (meinplan.html) online and to the whole
+       school's plan on Docs own machine (Doc, 01.09.2026). */
+    const LOCAL = location.protocol === 'file:' ||
+        /^(localhost|127\.0\.0\.1|\[::1\]|.+\.local)$/i.test(location.hostname);
+    const PLAN_HREF = LOCAL ? 'stundenplan.html' : 'meinplan.html';
+    const PLAN_TITLE = LOCAL
+        ? 'Stundenplan der ganzen Schule (Konflikte, Optimierer)'
+        : 'Mein Stundenplan - die veroeffentlichte Wochenansicht';
+
     // [href relative to svp root, short label (pill row), badge color class,
     //  spelled-out label for the edit panel]
     const LINKS = [
@@ -32,11 +43,11 @@
         ['notes.html', 'Notizen', 'b-cyan', 'Notizen'],
         ['konzepte.html', 'Konzepte', 'b-violet', 'Konzepte'],
         ['operatoren.html', 'Operatoren', 'b-red', 'Operatoren'],
-        ['stundenplan.html', 'Stundenplan', 'b-teal', 'Stundenplan der ganzen Schule (Konflikte, Optimierer)'],
+        [PLAN_HREF, 'Stundenplan', 'b-teal', PLAN_TITLE],
     ];
 
     // These open in a new tab so the current plan stays put.
-    const NEW_TAB = new Set(['notes.html', 'konzepte.html', 'operatoren.html', 'stundenplan.html']);
+    const NEW_TAB = new Set(['notes.html', 'konzepte.html', 'operatoren.html', PLAN_HREF]);
 
     // The pill row only carries Home, Notizen and one dropdown per Schulart —
     // everything else lives inside those. [pill label, [[caption|null, hrefs]],
@@ -62,7 +73,7 @@
         ]],
         /* "Mehr" is not a Schulart — it stays at the far right, next to the gear */
         ['Mehr', [
-            [null, ['stundenplan.html', 'notes.html', 'mathe/uebung.html', 'konzepte.html', 'operatoren.html']]
+            [null, [PLAN_HREF, 'notes.html', 'mathe/uebung.html', 'konzepte.html', 'operatoren.html']]
         ], true, true]
     ];
 
@@ -80,7 +91,7 @@
     catch (e) { hidden = new Set(); }
     // Start and the Stundenplan are always visible and not toggleable (Doc, 26.08.2026:
     // Stundenplan out of the panel); deleting cleans up old stored state.
-    const ALWAYS_ON = ['index.html', 'stundenplan.html'];
+    const ALWAYS_ON = ['index.html', PLAN_HREF];
     for (const h of ALWAYS_ON) hidden.delete(h);
     function saveHidden() {
         try { localStorage.setItem(STORE_KEY, JSON.stringify([...hidden])); } catch (e) { }

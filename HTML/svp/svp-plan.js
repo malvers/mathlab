@@ -2712,6 +2712,16 @@
             legend.appendChild(pill);
         }
 
+        /* The Lehrplan (PDF) button belongs next to the Bereich pills, not up in
+           the heading: they all point into the same document (Doc, 01.09.2026).
+           It is moved, not rebuilt, so every page keeps its own PDF link - and
+           it goes in front of the pills, in a compact size. */
+        const lehrplan = document.querySelector('.page-head .head-row button.action.orange');
+        if (lehrplan && /Lehrplan/i.test(lehrplan.textContent)) {
+            lehrplan.classList.add('legend-lehrplan');
+            legend.insertBefore(lehrplan, legend.firstChild);
+        }
+
         // Any click outside closes open variant dropdowns.
         document.addEventListener('click', function () {
             document.querySelectorAll('.badge-drop.open')
