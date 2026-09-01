@@ -626,6 +626,29 @@
             opacity: 0.55;
         }
 
+        /* Paging without leaving the chart. The triangles sit in the overlay's own side
+           margins, outside the 1200 px plot, so they never cover a bar. .tri:hover scales,
+           and that transform would drop the vertical centring - so both are spelled out. */
+        .chart-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            padding: 2vmin;
+            z-index: 1;
+        }
+
+        .chart-nav:hover:not(:disabled) {
+            transform: translateY(-50%) scale(1.15);
+        }
+
+        .chart-nav.prev { left: 0.5vmin; }
+        .chart-nav.next { right: 0.5vmin; }
+
+        .chart-nav svg {
+            width: clamp(22px, 4vmin, 44px);
+            height: clamp(22px, 4vmin, 44px);
+        }
+
         /* Which group sat in front of the question — read off the published timetable. */
         .chart-class {
             font-family: 'Outfit', sans-serif;
@@ -828,6 +851,12 @@
     </div>
 
     <div id="chart-overlay" class="qr-overlay chart-overlay">
+        <button id="btn-prev2" class="tri chart-nav prev" type="button" title="Vorherige Frage" aria-label="Vorherige Frage" disabled>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><polygon points="17,3 5,12 17,21" fill="currentColor"/></svg>
+        </button>
+        <button id="btn-next2" class="tri chart-nav next" type="button" title="Nächste Frage" aria-label="Nächste Frage" disabled>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><polygon points="7,3 19,12 7,21" fill="currentColor"/></svg>
+        </button>
         <div id="chart-title" class="chart-title"></div>
         <div class="chart-wrap">
             <div id="chart-mean" class="chart-mean"></div>
@@ -1076,16 +1105,23 @@
 
             function updateNav() {
                 const i = idx();
-                $('btn-prev').disabled = i < 0 ? history.length === 0 : i === 0;
-                $('btn-next').disabled = i < 0 || i >= history.length - 1;
+                const noPrev = i < 0 ? history.length === 0 : i === 0;
+                const noNext = i < 0 || i >= history.length - 1;
+                // Two pairs of triangles - the setup bar's and the chart overlay's - one truth.
+                ['btn-prev', 'btn-prev2'].forEach(id => { $(id).disabled = noPrev; });
+                ['btn-next', 'btn-next2'].forEach(id => { $(id).disabled = noNext; });
             }
 
             function goTo(i) {
                 if (i < 0 || i >= history.length) return;
+                // Paging while the chart is up stays in the chart: stepping onto today's question
+                // used to drop back to the counter in the middle of presenting. Arriving from
+                // anywhere else, the live question still opens with its counter.
+                const inChart = $('chart-overlay').classList.contains('open');
                 poll = history[i];
                 subjIn.value = COURSES.includes(poll.subject) ? poll.subject : '';
                 values = []; votes = new Map();
-                showing = i < history.length - 1;   // past questions open with their mean, the live one with the counter
+                showing = inChart || i < history.length - 1;   // past questions open with their mean, the live one with the counter
                 titleEl.textContent = poll.title;
                 codeIn.value = poll.code;
                 save();
@@ -1146,13 +1182,18 @@
                 const now = when.getHours() * 60 + when.getMinutes();
                 const lessons = (await lessonsOfWeek(mondayKey(when)))
                     .filter(l => l.date === day && l.code !== 'cancelled');
-                const live = lessons.find(l => now >= toMin(l.startTime) && now <= toMin(l.endTime));
+                /* An all-day block (Einfuehrungswoche, 00:00-23:59) covers the moment exactly as a
+                   45-minute lesson does, and it stands first in the array - so "first match" named
+                   the week and its classes instead of the group actually sitting there. The
+                   shortest covering entry is the specific one. */
+                const live = lessons.filter(l => now >= toMin(l.startTime) && now <= toMin(l.endTime))
+                    .sort((a, b) => (toMin(a.endTime) - toMin(a.startTime)) - (toMin(b.endTime) - toMin(b.startTime)))[0];
                 const over = lessons.filter(l => toMin(l.endTime) <= now)
                     .sort((a, b) => b.endTime - a.endTime)[0];
                 const l = live || (over && now - toMin(over.endTime) <= 20 ? over : null);
                 if (!l) return '';
                 const who = (l.classes || []).join(', ');
-                return [who, l.subject].filter(Boolean).join(' · ');
+                return [who, l.subject || l.lstext].filter(Boolean).join(' · ');
             }
 
             function renderClassLine() {
@@ -1321,8 +1362,13 @@
                 deleteCurrent();
             });
 
-            $('btn-prev').addEventListener('click', () => goTo(idx() < 0 ? history.length - 1 : idx() - 1));
-            $('btn-next').addEventListener('click', () => goTo(idx() + 1));
+            function goPrev() { goTo(idx() < 0 ? history.length - 1 : idx() - 1); }
+            function goNext() { goTo(idx() + 1); }
+            $('btn-prev').addEventListener('click', goPrev);
+            $('btn-next').addEventListener('click', goNext);
+            // In the overlay a click anywhere closes the chart - the triangles must not.
+            $('btn-prev2').addEventListener('click', (e) => { e.stopPropagation(); goPrev(); });
+            $('btn-next2').addEventListener('click', (e) => { e.stopPropagation(); goNext(); });
 
             btnPublish.addEventListener('click', publish);
             /* "Show" is the whole presentation: mean and distribution together. The chart used
@@ -1395,7 +1441,17 @@
                 if (e.key === 'Escape') {
                     ['qr-overlay', 'help-overlay'].forEach(id => $(id).classList.remove('open'));
                     if ($('chart-overlay').classList.contains('open')) setShowing(false);
+                    return;
                 }
+                // Arrow keys page through the questions - the setup bar is hidden while
+                // presenting, so from the beamer this is the only way through the history.
+                if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+                if (e.metaKey || e.ctrlKey || e.altKey) return;
+                const t = e.target;
+                if (t.isContentEditable || t.tagName === 'INPUT' || t.tagName === 'TEXTAREA') return;   // normal editing
+                if ($('dlg-overlay').classList.contains('open') || $('help-overlay').classList.contains('open')) return;
+                e.preventDefault();
+                (e.key === 'ArrowLeft' ? goPrev : goNext)();
             });
             $('btn-fs').addEventListener('click', () => {
                 if (document.fullscreenElement) document.exitFullscreen();
