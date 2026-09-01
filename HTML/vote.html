@@ -513,27 +513,6 @@
             font-size: clamp(28px, 8vmin, 90px);
         }
 
-        .chart-btn {
-            margin-top: 3vh;
-            background: none;
-            border: none;
-            padding: 6px;
-            cursor: pointer;
-            opacity: 0.55;
-            transition: opacity 0.15s, transform 0.15s;
-        }
-
-        .chart-btn:hover {
-            opacity: 1;
-            transform: scale(1.1);
-        }
-
-        .chart-btn svg {
-            width: 34px;
-            height: 34px;
-            display: block;
-        }
-
         /* ---------- host: distribution chart overlay ---------- */
         .chart-overlay {
             padding: 4vmin 6vmin;
@@ -594,6 +573,47 @@
 
         .chart-overlay .big-sub {
             margin-top: 0;
+        }
+
+        .chart-wrap {
+            position: relative;
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        /* The mean stands inside the plot, upper left: on the beamer the chart has to answer
+           "wie wars?" by itself, without anyone reading the footer line. */
+        .chart-mean {
+            position: absolute;
+            left: 5%;
+            top: 6%;
+            font-family: 'Outfit', sans-serif;
+            line-height: 1;
+            text-align: left;
+            pointer-events: none;
+        }
+
+        .chart-mean b {
+            font-size: clamp(36px, 18vmin, 220px);
+            font-weight: 600;
+            transition: color 0.3s;
+        }
+
+        .chart-mean span {
+            display: block;
+            font-size: clamp(12px, 2vmin, 20px);
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            opacity: 0.55;
+        }
+
+        /* Which group sat in front of the question — read off the published timetable. */
+        .chart-class {
+            font-family: 'Outfit', sans-serif;
+            font-size: clamp(16px, 3vmin, 32px);
+            letter-spacing: 0.08em;
+            color: rgb(245, 194, 66);
+            min-height: 1em;
         }
 
         /* ---------- host: help overlay ---------- */
@@ -740,13 +760,6 @@
             <div class="big-col">
                 <div id="big">0</div>
                 <div id="big-sub" class="big-sub">Votes</div>
-                <button id="btn-chart" class="chart-btn" type="button" title="Verteilung 1 … 10" aria-label="Verteilung 1 … 10">
-                    <svg viewBox="0 0 30 30" aria-hidden="true">
-                        <rect x="2" y="17" width="7" height="11" rx="1.5" fill="rgb(176,36,24)"/>
-                        <rect x="11.5" y="10" width="7" height="18" rx="1.5" fill="rgb(245,194,66)"/>
-                        <rect x="21" y="2" width="7" height="26" rx="1.5" fill="rgb(121,158,49)"/>
-                    </svg>
-                </button>
             </div>
         </div>
     </div>
@@ -778,8 +791,9 @@
                 <li><b>QR</b> zeigen (Button oben rechts) — alle scannen oder tippen
                     <span class="mono">docalvers.de/vote.html</span> und den 4-stelligen Code.</li>
                 <li>Jede:r tippt <b>einmal</b> 1 … 10. Der Zähler läuft live hoch.</li>
-                <li><b>Show</b> — statt des Zählers erscheint der Mittelwert, z. B. <b>8,4</b>. Die Leiste fährt weg;
-                    ein Klick auf die Bühne holt sie zurück. <b>Count</b> = zurück zum Zähler.</li>
+                <li><b>Show</b> — die Auswertung: Verteilung 1 … 10 als Balken, der Mittelwert groß
+                    im Bild, darunter die Klasse aus dem Stundenplan. <b>Count</b>, Klick aufs Bild
+                    oder <b>Esc</b> = zurück zum Zähler.</li>
                 <li><b>Neue Frage</b> — Text ändern, drücken: gleicher Code, alle springen automatisch mit
                     und dürfen wieder einmal voten.</li>
                 <li><b>◀ ▶</b> — durch <em>alle</em> bisherigen Fragen blättern, quer über alle Codes
@@ -796,7 +810,11 @@
 
     <div id="chart-overlay" class="qr-overlay chart-overlay">
         <div id="chart-title" class="chart-title"></div>
-        <div id="chart" class="chart"></div>
+        <div class="chart-wrap">
+            <div id="chart-mean" class="chart-mean"></div>
+            <div id="chart" class="chart"></div>
+        </div>
+        <div id="chart-class" class="chart-class"></div>
         <div id="chart-sub" class="big-sub"></div>
     </div>
 
@@ -1068,6 +1086,68 @@
                 qrCodeStr = code;
             }
 
+            /* Which group sat in front of the question? The published timetable knows it - the
+               same svp_public_plan rows meinplan.html reads. The poll's own timestamp decides,
+               so a question from last Tuesday still names last Tuesday's class, not today's. */
+            const planWeeks = new Map();   // Monday key → lessons, fetched once per week
+            let classShown = null;         // the poll whose class is already on screen
+
+            function ymdOf(d) {
+                return +('' + d.getFullYear() + String(d.getMonth() + 1).padStart(2, '0')
+                    + String(d.getDate()).padStart(2, '0'));
+            }
+
+            /* Monday of that week, as the YYYYMMDD key the publisher uses */
+            function mondayKey(d) {
+                const m = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+                m.setDate(m.getDate() - ((m.getDay() + 6) % 7));
+                return String(ymdOf(m));
+            }
+
+            /* 1345 is not a number of minutes - never subtract two of these directly. */
+            function toMin(hhmm) {
+                return Math.floor(hhmm / 100) * 60 + (hhmm % 100);
+            }
+
+            async function lessonsOfWeek(key) {
+                if (planWeeks.has(key)) return planWeeks.get(key);
+                let lessons = [];
+                try {
+                    const { data } = await sb.from('svp_public_plan').select('payload').eq('week', key);
+                    if (data && data.length) lessons = data[0].payload.lessons || [];
+                } catch (e) { /* no plan published, no class line - not worth a toast */ }
+                planWeeks.set(key, lessons);
+                return lessons;
+            }
+
+            /* The lesson that was running - or, for a vote taken just after the bell, the one
+               that has only now ended: a "wie wars?" at the end of the hour still belongs to it. */
+            async function classAt(when) {
+                const day = ymdOf(when);
+                const now = when.getHours() * 60 + when.getMinutes();
+                const lessons = (await lessonsOfWeek(mondayKey(when)))
+                    .filter(l => l.date === day && l.code !== 'cancelled');
+                const live = lessons.find(l => now >= toMin(l.startTime) && now <= toMin(l.endTime));
+                const over = lessons.filter(l => toMin(l.endTime) <= now)
+                    .sort((a, b) => b.endTime - a.endTime)[0];
+                const l = live || (over && now - toMin(over.endTime) <= 20 ? over : null);
+                if (!l) return '';
+                const who = (l.classes || []).join(', ');
+                return [who, l.subject].filter(Boolean).join(' · ');
+            }
+
+            function renderClassLine() {
+                const el = $('chart-class');
+                if (!poll || !poll.created_at) { el.textContent = ''; classShown = null; return; }
+                if (classShown === poll.id) return;   // already asked for this one
+                classShown = poll.id;
+                el.textContent = '';
+                const asked = poll.id;
+                classAt(new Date(poll.created_at)).then(txt => {
+                    if (classShown === asked) el.textContent = txt;
+                });
+            }
+
             function renderChart() {
                 if (!$('chart-overlay').classList.contains('open')) return;
                 const counts = Array(10).fill(0);
@@ -1088,6 +1168,21 @@
                     col.querySelector('.bar').style.height = (counts[i] / max * 100 * 0.78) + '%';   // leave room for labels
                 });
                 $('chart-title').textContent = poll ? poll.title : '';
+                // Same rule as the big counter: the mean appears with "Show", not before. Hidden
+                // rather than removed, so switching Show/Count never makes the chart jump.
+                const meanEl = $('chart-mean');
+                if (!meanEl.children.length) meanEl.innerHTML = '<b></b><span>Mittelwert</span>';
+                const n = values.length;
+                if (showing && n) {
+                    const mean = values.reduce((a, b) => a + b, 0) / n;
+                    const num = meanEl.querySelector('b');
+                    num.textContent = fmtMean(mean);
+                    num.style.color = ramp((mean - 1) / 9);   // 1 red → 5.5 yellow → 10 green
+                    meanEl.style.visibility = 'visible';
+                } else {
+                    meanEl.style.visibility = 'hidden';
+                }
+                renderClassLine();
                 $('chart-sub').textContent = $('big-sub').textContent;
             }
 
@@ -1164,6 +1259,8 @@
                 btnShow.textContent = showing ? 'Count' : 'Show';
                 btnPublish.textContent = poll ? 'Neue Frage' : 'Publish';
                 updateNav();
+                // Paging back into an old question opens with its mean - so it opens the chart too.
+                $('chart-overlay').classList.toggle('open', !!(showing && poll));
                 renderBig();
                 listen();                 // also tears down the old channel when there is no poll
                 if (poll) refetch();
@@ -1201,12 +1298,16 @@
             $('btn-next').addEventListener('click', () => goTo(idx() + 1));
 
             btnPublish.addEventListener('click', publish);
-            btnShow.addEventListener('click', () => {
-                showing = !showing;
-                btnShow.textContent = showing ? 'Count' : 'Show';
+            /* "Show" is the whole presentation: mean and distribution together. The chart used
+               to hide behind its own button - now it is simply what Show shows. */
+            function setShowing(on) {
+                showing = on;
+                btnShow.textContent = on ? 'Count' : 'Show';
+                $('chart-overlay').classList.toggle('open', on);   // before renderBig: renderChart skips a closed overlay
                 renderBig();
-                setPresenting(showing);
-            });
+                setPresenting(on);
+            }
+            btnShow.addEventListener('click', () => setShowing(!showing));
 
             // Hidden bar while presenting; a click on the stage toggles it.
             const host = $('host');
@@ -1258,16 +1359,16 @@
                 $('qr-overlay').classList.add('open');
             });
             $('qr-overlay').addEventListener('click', () => $('qr-overlay').classList.remove('open'));
-            $('btn-chart').addEventListener('click', (e) => {
-                e.stopPropagation();
-                $('chart-overlay').classList.add('open');
-                renderChart();
-            });
-            $('chart-overlay').addEventListener('click', () => $('chart-overlay').classList.remove('open'));
+            // A click on the chart goes back to the counter - never into a dead end where the
+            // chart is gone but the button still says "Count".
+            $('chart-overlay').addEventListener('click', () => setShowing(false));
             $('btn-help').addEventListener('click', () => $('help-overlay').classList.add('open'));
             $('help-overlay').addEventListener('click', () => $('help-overlay').classList.remove('open'));
             document.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape') { ['qr-overlay', 'help-overlay', 'chart-overlay'].forEach(id => $(id).classList.remove('open')); }
+                if (e.key === 'Escape') {
+                    ['qr-overlay', 'help-overlay'].forEach(id => $(id).classList.remove('open'));
+                    if ($('chart-overlay').classList.contains('open')) setShowing(false);
+                }
             });
             $('btn-fs').addEventListener('click', () => {
                 if (document.fullscreenElement) document.exitFullscreen();
