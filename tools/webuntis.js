@@ -344,6 +344,7 @@ async function runStatus(session) {
       text: topics[String(l.ttId)] || '',
     });
   }
+  const mapIndex = [];
   for (const [page, data] of Object.entries(byPage)) {
     const out = path.join(REPO, page.replace(/\.html$/, '.untis.json'));
     /* e.klasse is the display name of a lesson and joins coupled classes
@@ -365,6 +366,20 @@ async function runStatus(session) {
       classes, subjects, weeks: data.weeks,
     }, null, 1));
     console.log(`${path.relative(REPO, out)}: ${done}/${n} Stunden eingetragen, ${Object.keys(data.weeks).length} Wochen`);
+    mapIndex.push({ page: '/' + page.replace(/^HTML\//, ''), classes, subjects });
+  }
+
+  /* Kleiner Index fuer stundenplan.html: welche Stunde gehoert zu welchem
+     Stoffverteilungsplan. Der Browser kommt an tools/webuntis-svp-map.json
+     nicht heran (liegt ausserhalb des Web-Roots), und plandaten/ ist
+     gitignored - deshalb hier, neben den Planseiten. Erzeugt, nicht gepflegt:
+     die eine Quelle bleibt webuntis-svp-map.json. */
+  if (mapIndex.length) {
+    const mapOut = path.join(REPO, 'HTML', 'svp', 'svp-map.json');
+    fs.writeFileSync(mapOut, JSON.stringify({
+      generated: new Date().toISOString(), pages: mapIndex.sort((a, b) => a.page.localeCompare(b.page)),
+    }, null, 1));
+    console.log(`${path.relative(REPO, mapOut)}: ${mapIndex.length} Planseiten`);
   }
   if (!Object.keys(byPage).length) console.log('Keine Stunde passt zu einer Planseite - webuntis-svp-map.json pruefen.');
 }

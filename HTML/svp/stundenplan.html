@@ -1377,6 +1377,43 @@
             return INDEX.weeks[i + 1] || cur;
         }
 
+        /* Welche Stunde gehoert zu welchem Stoffverteilungsplan? Erzeugt von
+           tools/webuntis.js status aus webuntis-svp-map.json - der Browser kommt
+           an die Quelle in tools/ nicht heran. Fehlt die Datei, passiert beim
+           Klick einfach nichts (wie vorher). */
+        let SVP_MAP = null;
+        fetch('svp-map.json?v=' + Date.now())
+            .then(r => r.ok ? r.json() : null)
+            .then(m => { SVP_MAP = m; })
+            .catch(() => { });
+
+        function svpPageFor(l) {
+            if (!SVP_MAP || !SVP_MAP.pages) return null;
+            const subject = String(l.subject || '');
+            const hit = SVP_MAP.pages.find(p =>
+                (!p.subjects || !p.subjects.length || p.subjects.includes(subject)) &&
+                (l.classes || []).some(c => (p.classes || []).includes(c)));
+            return hit ? hit.page : null;
+        }
+
+        /* Linksklick auf eine Stunde oeffnet ihren Plan bei der passenden Woche.
+           Nur im Lesemodus: beim Editieren gehoert der Klick dem Verschieben,
+           und im Optimierer-Modus dem Kontextmenue. */
+        document.addEventListener('click', e => {
+            if (document.body.classList.contains('editing')) return;
+            if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+            const tile = e.target.closest('.tt-lesson');
+            if (!tile || tile.classList.contains('ghost') || tile.dataset.idx === undefined) return;
+            const l = PLAN && PLAN.lessons[+tile.dataset.idx];
+            if (!l) return;
+            const page = svpPageFor(l);
+            if (!page) return;
+            const d = parseYmd(l.date);
+            const t = new Date(d); t.setDate(t.getDate() + 4 - (t.getDay() || 7));
+            const kw = Math.ceil(((t - new Date(t.getFullYear(), 0, 1)) / 86400000 + 1) / 7);
+            window.open(page + '?kw=' + kw, '_blank', 'noopener');
+        });
+
         // The week containing today, or the next one the school year has.
         function weekForToday() {
             const now = new Date();

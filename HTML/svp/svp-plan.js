@@ -2721,6 +2721,29 @@
         syncOpenWeeks();
     }
 
+    /* Aus dem Stundenplan kommend: ?kw=36 klappt diese Woche auf, scrollt sie
+       in die Mitte und laesst sie kurz aufleuchten (Doc, 01.09.2026 - Klick auf
+       eine Stunde soll beim richtigen Stoff landen, nicht am Seitenanfang). */
+    (function jumpToWeekFromUrl() {
+        let kw = null;
+        try { kw = new URLSearchParams(location.search).get('kw'); } catch (e) { return; }
+        if (!kw) return;
+        const want = String(Number(kw));
+        const go = () => {
+            const hit = rendered.find(r => String(r.kw) === want);
+            /* ref traegt kein tr - die Zeile haengt an der Datumszelle. */
+            const tr = hit && hit.dateTd && hit.dateTd.closest('tr');
+            if (!tr) return false;
+            if (hit.openSubRow) hit.openSubRow();
+            tr.scrollIntoView({ block: 'center', behavior: 'smooth' });
+            tr.classList.add('kw-jump');
+            setTimeout(() => tr.classList.remove('kw-jump'), 2600);
+            return true;
+        };
+        /* Die Zeilen entstehen erst beim Rendern - einmal jetzt, sonst nachfassen. */
+        if (!go()) setTimeout(go, 400);
+    })();
+
     // Toolbar helper: expand/collapse all detail rows at once.
     window.togglePlanDetails = function () {
         const rows = Array.from(document.querySelectorAll('tr.detail-row'));
