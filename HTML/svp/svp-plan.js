@@ -3438,6 +3438,23 @@
        (Doc, 31.08.2026). The authenticated sync runs afterwards and wins. */
     if (window.svpAuth) {
         (async function () {
+            /* ?cloud = Rettungsanker: verwirft den lokalen Stand DIESER Seite,
+               damit die Cloud wieder reinkommt. Noetig, wenn ein Browser einen
+               alten Stand mit NEUEREM Zeitstempel festhaelt - dann laesst die
+               ts-Regel die Cloud nie mehr rein, und ein Speichern wuerde sie
+               sogar ueberschreiben (Doc, 01.09.2026: die Kids sahen alle
+               Materialien, Doc selbst nicht). Der Parameter raeumt nur auf und
+               nimmt sich selbst aus der URL, damit ein Bookmark nicht bei
+               jedem Laden loescht. */
+            try {
+                if (new URLSearchParams(location.search).has('cloud')) {
+                    localStorage.removeItem(KEY);
+                    localStorage.removeItem(TS_KEY);
+                    const u = new URL(location.href);
+                    u.searchParams.delete('cloud');
+                    history.replaceState(null, '', u.pathname + (u.search || '') + u.hash);
+                }
+            } catch (e) { }
             try {
                 const row = await fetchPublicEdits(location.pathname);
                 if (row) {
