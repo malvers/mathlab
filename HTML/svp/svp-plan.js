@@ -3376,7 +3376,13 @@
     }
 
     function pushRemote() {
-        if (!window.svpAuth || !svpAuth.hasSession()) return null;
+        /* Frueher ein stilles return - Doc speicherte mit abgelaufener Session,
+           nichts ging in die Cloud, und niemand hat es ihm gesagt (01.09.2026:
+           die Kids sahen den alten Cloud-Stand, er seinen neuen lokalen). */
+        if (!window.svpAuth || !svpAuth.hasSession()) {
+            setCloud('☁ NICHT in der Cloud gespeichert — bitte neu anmelden!', false);
+            return null;
+        }
         const ts = localStorage.getItem(TS_KEY) || new Date().toISOString();
         return svpAuth.api('svp_plan_edits', {
             method: 'POST',
@@ -3425,7 +3431,30 @@
                 applyEdits(saved);
                 setCloud('☁ synchron', true);
             } else if (localTs > remoteTs) {
-                pushRemote(); /* offline edits from this browser win */
+                /* Bevor der Automatik-Push die Cloud ueberschreibt: hat der
+                   lokale Stand ueberhaupt so viel Substanz wie die Cloud?
+                   Ein Browser mit altem Inhalt aber neuerem Zeitstempel haette
+                   heute (01.09.2026) beim naechsten Laden alle Material-Links
+                   der Cloud plattgemacht. Weniger Zeilen oder weniger Links
+                   -> nicht pushen, laut sagen, Doc entscheidet (?cloud holt
+                   die Cloud, bewusstes Speichern pusht weiter normal). */
+                const weigh = o => {
+                    let rows = 0, links = 0;
+                    for (const k in (o || {})) {
+                        rows++;
+                        const m = (o[k] && o[k].material) || '';
+                        links += (String(m).match(/https?:\/\//g) || []).length;
+                    }
+                    return { rows, links };
+                };
+                const L = weigh(saved), R = weigh(rows[0].edits);
+                if (L.rows < R.rows || L.links < R.links) {
+                    setCloud('☁ Konflikt: lokal weniger Inhalt als die Cloud (' +
+                        L.links + ' statt ' + R.links + ' Links) — NICHT überschrieben. ' +
+                        '„?cloud" an der URL holt die Cloud.', false);
+                } else {
+                    pushRemote(); /* offline edits from this browser win */
+                }
             } else {
                 setCloud('☁ synchron', true);
             }
