@@ -98,10 +98,18 @@
     display: flex;
     gap: 10px;
     padding: 8px 0;
-    border-top: 1px solid var(--row-line);
+    color: inherit;
+    text-decoration: none;
 }
 
-.mp-lesson:first-of-type { border-top: 0; }
+/* separator between lessons, not above the first - and the rule has to work
+   for a mix of <a> (lesson with a plan) and <div>, so :first-of-type is out */
+.mp-lesson + .mp-lesson { border-top: 1px solid var(--row-line); }
+
+/* a lesson that has a Stoffverteilungsplan opens it - φ-green marks the way in */
+a.mp-lesson.has-plan { cursor: pointer; border-radius: 8px; margin: 0 -6px; padding: 8px 6px; }
+a.mp-lesson.has-plan:hover { background: rgba(121, 158, 49, 0.12); }
+a.mp-lesson.has-plan:hover .mp-subject { color: var(--phi); }
 
 .mp-time {
     flex: 0 0 auto;
