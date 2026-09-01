@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mein Stundenplan</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript>
+        <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+            rel="stylesheet">
+    </noscript>
+    <link rel="icon" type="image/png" href="../resources/favicon.png">
+    <link rel="stylesheet" href="svp.css">
+    <link rel="stylesheet" href="meinplan.css">
+    <!-- No gate here on purpose: this page is FOR the students. It shows only
+         the lessons of one teacher, published from stundenplan.html into the
+         table svp_public_plan (anon may read, only Doc's account may write). -->
+    <script>
+        try { if (localStorage.getItem('svp-theme') === 'light') document.documentElement.classList.add('svp-light'); } catch (e) { }
+    </script>
+</head>
+
+<body>
+    <header class="page-head">
+        <div class="head-row">
+            <div class="title-group">
+                <h1 id="who">Mein Stundenplan</h1>
+                <div class="subtitle caps" id="sub">&nbsp;</div>
+            </div>
+        </div>
+    </header>
+
+    <main class="svp-section">
+        <div class="mp-bar">
+            <button class="mp-nav" id="prev" type="button" aria-label="Vorige Woche"></button>
+            <div class="mp-week" id="week">&nbsp;</div>
+            <button class="mp-nav" id="next" type="button" aria-label="Nächste Woche"></button>
+            <button class="action secondary" id="today" type="button">Diese Woche</button>
+            <div class="mp-stamp" id="stamp"></div>
+        </div>
+
+        <div class="mp-days" id="days">
+            <div class="mp-empty">Plan wird geladen&hellip;</div>
+        </div>
+    </main>
+
+    <button class="mp-theme" id="theme" type="button" aria-label="Hell oder dunkel umschalten"
+        title="Hell / dunkel"></button>
+
+    <script>
+        'use strict';
+
+        const DB_URL = 'https://fyfhxzyymmurlaenmzse.supabase.co';
+        const DB_KEY = 'sb_publishable_ubQDiMD-X3N0vZvPVi229Q_-5Zootfk'; /* publishable key - public by design */
+
+        const $ = id => document.getElementById(id);
+        const DAYS = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag'];
+
+        let WEEKS = [];              // published week keys, ascending (YYYYMMDD of the Monday)
+        let CURRENT = null;
+        const cache = new Map();
+
+        const parseYmd = s => new Date(+String(s).slice(0, 4), +String(s).slice(4, 6) - 1, +String(s).slice(6, 8));
+        const dmy = d => String(d.getDate()).padStart(2, '0') + '.' + String(d.getMonth() + 1).padStart(2, '0') + '.';
+        const hhmm = t => String(t).padStart(4, '0').replace(/(\d{2})(\d{2})/, '$1:$2');
+        const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+        /* Anonymous read - no login, no key beyond the publishable one. */
+        function db(path) {
+            return fetch(DB_URL + '/rest/v1/' + path, { headers: { apikey: DB_KEY } })
+                .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); });
+        }
+
+        /* Monday of the current week, as the YYYYMMDD key the publisher uses */
+        function mondayKey(now) {
+            const d = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            d.setDate(d.getDate() - ((d.getDay() + 6) % 7));
+            return '' + d.getFullYear() + String(d.getMonth() + 1).padStart(2, '0') + String(d.getDate()).padStart(2, '0');
+        }
+
+        /* The running week if it was published, otherwise the next one after today */
+        function startWeek() {
+            const wk = mondayKey(new Date());
+            if (WEEKS.includes(wk)) return wk;
+            return WEEKS.find(w => w >= wk) || WEEKS[WEEKS.length - 1];
+        }
+
+        function render(payload) {
+            const box = $('days');
+            const lessons = (payload.lessons || []).slice()
+                .sort((a, b) => a.date - b.date || a.startTime - b.startTime);
+
+            $('who').textContent = payload.teacher || 'Mein Stundenplan';
+            $('sub').textContent = payload.school || '';
+
+            const byDay = new Map();
+            for (const l of lessons) {
+                if (!byDay.has(l.date)) byDay.set(l.date, []);
+                byDay.get(l.date).push(l);
+            }
+
+            /* Monday to Friday always, even when a day is free - an empty column
+               is information too ("da ist nichts"), a missing one is a puzzle. */
+            const mon = parseYmd(payload.week);
+            const cards = [];
+            for (let i = 0; i < 5; i++) {
+                const d = new Date(mon.getFullYear(), mon.getMonth(), mon.getDate() + i);
+                const key = +('' + d.getFullYear() + String(d.getMonth() + 1).padStart(2, '0') + String(d.getDate()).padStart(2, '0'));
+                const day = (byDay.get(key) || []);
+                const today = key === +ymdKey(new Date());
+                cards.push(
+                    '<section class="mp-day' + (today ? ' is-today' : '') + '">' +
+                    '<h2>' + DAYS[i] + ' <span>' + dmy(d) + '</span></h2>' +
+                    (day.length
+                        ? day.map(lessonRow).join('')
+                        : '<div class="mp-free">frei</div>') +
+                    '</section>');
+            }
+            box.innerHTML = cards.join('');
+        }
+
+        /* plain YYYYMMDD of a date - used to highlight today's column */
+        function ymdKey(now) {
+            return '' + now.getFullYear() + String(now.getMonth() + 1).padStart(2, '0') + String(now.getDate()).padStart(2, '0');
+        }
+
+        function lessonRow(l) {
+            const off = l.code === 'cancelled';
+            const note = l.substText || l.info || l.lstext || '';
+            return '<div class="mp-lesson' + (off ? ' is-off' : '') + '">' +
+                '<div class="mp-time">' + hhmm(l.startTime) + '<span>' + hhmm(l.endTime) + '</span></div>' +
+                '<div class="mp-what">' +
+                '<div class="mp-subject">' + esc(l.subject || '') + (off ? ' <em>fällt aus</em>' : '') + '</div>' +
+                '<div class="mp-meta">' + esc((l.classes || []).join(', ')) +
+                ((l.rooms || []).length ? ' &middot; Raum ' + esc(l.rooms.join(', ')) : '') + '</div>' +
+                (note ? '<div class="mp-note">' + esc(note) + '</div>' : '') +
+                '</div></div>';
+        }
+
+        function showWeek(wk) {
+            if (!WEEKS.includes(wk)) return;
+            CURRENT = wk;
+            const i = WEEKS.indexOf(wk);
+            $('prev').disabled = i <= 0;
+            $('next').disabled = i >= WEEKS.length - 1;
+            const mon = parseYmd(wk);
+            const fri = new Date(mon.getFullYear(), mon.getMonth(), mon.getDate() + 4);
+            $('week').textContent = dmy(mon) + ' – ' + dmy(fri) + ' ' + fri.getFullYear();
+            try { history.replaceState(null, '', '?w=' + wk); } catch (e) { }
+
+            if (cache.has(wk)) { render(cache.get(wk)); return; }
+            $('days').innerHTML = '<div class="mp-empty">Woche wird geladen&hellip;</div>';
+            db('svp_public_plan?week=eq.' + encodeURIComponent(wk) + '&select=payload,updated_at')
+                .then(rows => {
+                    if (!rows.length) throw new Error('nicht veröffentlicht');
+                    cache.set(wk, rows[0].payload);
+                    $('stamp').textContent = rows[0].updated_at
+                        ? 'Stand: ' + new Date(rows[0].updated_at).toLocaleString('de-DE') : '';
+                    if (CURRENT === wk) render(rows[0].payload);
+                })
+                .catch(e => {
+                    $('days').innerHTML = '<div class="mp-empty">Diese Woche steht noch nicht bereit (' + esc(e.message) + ').</div>';
+                });
+        }
+
+        function step(delta) {
+            const i = WEEKS.indexOf(CURRENT);
+            if (i >= 0 && WEEKS[i + delta]) showWeek(WEEKS[i + delta]);
+        }
+
+        $('prev').addEventListener('click', () => step(-1));
+        $('next').addEventListener('click', () => step(1));
+        $('today').addEventListener('click', () => showWeek(startWeek()));
+        document.addEventListener('keydown', e => {
+            if (e.metaKey || e.ctrlKey || e.altKey) return;   // never swallow Cmd-Shift-R
+            if (e.key === 'ArrowLeft') step(-1);
+            if (e.key === 'ArrowRight') step(1);
+        });
+
+        /* Same colour-scheme key as every other svp page */
+        (function () {
+            const btn = $('theme');
+            const sync = () => {
+                btn.textContent = document.documentElement.classList.contains('svp-light') ? '☾' : '☀';
+            };
+            btn.addEventListener('click', () => {
+                const light = document.documentElement.classList.toggle('svp-light');
+                try { localStorage.setItem('svp-theme', light ? 'light' : 'dark'); } catch (e) { }
+                sync();
+            });
+            sync();
+        })();
+
+        db('svp_public_plan?select=week&order=week.asc')
+            .then(rows => {
+                WEEKS = rows.map(r => r.week);
+                if (!WEEKS.length) {
+                    $('days').innerHTML = '<div class="mp-empty">Es ist noch kein Plan veröffentlicht.</div>';
+                    return;
+                }
+                const wanted = new URLSearchParams(location.search).get('w');
+                showWeek(WEEKS.includes(wanted) ? wanted : startWeek());
+            })
+            .catch(e => {
+                $('days').innerHTML = '<div class="mp-empty">Plan nicht erreichbar (' + esc(e.message) + ').</div>';
+            });
+    </script>
+
+</body>
+
+</html>

@@ -61,6 +61,8 @@
             <span class="tt-confcount" id="confcount" title="Harte Konflikte in dieser Woche (Person in zwei Räumen), ganze Schule"></span>
             <div class="tt-meta" id="meta"></div>
             <button class="action" id="optbtn" type="button" title="Stundenplan optimieren (Simulated Annealing)">Editieren</button>
+            <button class="action secondary" id="pubbtn" type="button"
+                title="Meine eigenen Stunden für die Schülerinnen und Schüler veröffentlichen (meinplan.html)">Veröffentlichen</button>
         </div>
 
         <section class="tt-opt" id="opt" hidden>
@@ -129,6 +131,7 @@
     <button class="tt-theme" id="theme" type="button" aria-label="Hell oder dunkel umschalten"
         title="Hell / dunkel"></button>
 
+    <script src="svp-auth.js"></script>
     <script src="stundenplan-optimizer.js"></script>
     <script>
         // Local rebuild of the WebUntis timetable. Data comes from
@@ -1474,6 +1477,82 @@
             clearTimeout(resizeTimer);
             resizeTimer = setTimeout(function () { if (DATA) render(DATA, SELECTED); }, 150);
         });
+
+        /* --- publish my own plan for the students ----------------------------
+           Only the lessons of INDEX.teacher leave this machine: they go week by
+           week into the Supabase table svp_public_plan (anon may read, only
+           Doc's account may write). meinplan.html shows exactly those rows, so
+           the kids never get near the whole school's data. plandaten/ itself is
+           never committed and never uploaded. */
+        (function () {
+            const btn = document.getElementById('pubbtn');
+            if (!btn) return;
+
+            const slim = l => ({
+                date: l.date, startTime: l.startTime, endTime: l.endTime,
+                subject: l.subject, classes: l.classes || [], rooms: l.rooms || [],
+                code: l.code || null, info: l.info || null,
+                substText: l.substText || null, lstext: l.lstext || null
+            });
+
+            async function weekData(wk) {
+                if (weekCache.has(wk)) return weekCache.get(wk);
+                const r = await fetch('plandaten/w' + wk + '.json');
+                if (!r.ok) throw new Error('Woche ' + wk + ': HTTP ' + r.status);
+                const d = await r.json();
+                d.school = INDEX.school; d.teacher = INDEX.teacher; d.generatedAt = INDEX.generatedAt;
+                weekCache.set(wk, d);
+                return d;
+            }
+
+            /* upsert in batches - one request per week would be 45 round trips */
+            async function send(rows) {
+                const res = await svpAuth.api('svp_public_plan', {
+                    method: 'POST',
+                    headers: { Prefer: 'resolution=merge-duplicates,return=minimal' },
+                    body: JSON.stringify(rows)
+                });
+                if (!res.ok) throw new Error('HTTP ' + res.status + ' ' + (await res.text()).slice(0, 200));
+            }
+
+            async function publish() {
+                const label = btn.textContent;
+                btn.disabled = true;
+                const weeks = INDEX.weeks.slice();
+                let rows = [], done = 0;
+                try {
+                    for (const wk of weeks) {
+                        const d = await weekData(wk);
+                        rows.push({
+                            week: wk,
+                            payload: {
+                                week: wk,
+                                teacher: NAME(INDEX.teacher),
+                                school: INDEX.school,
+                                generatedAt: INDEX.generatedAt,
+                                timegrid: d.timegrid,
+                                lessons: d.lessons.filter(l => (l.teachers || []).includes(INDEX.teacher)).map(slim)
+                            }
+                        });
+                        done++;
+                        btn.textContent = 'Woche ' + done + '/' + weeks.length + ' …';
+                        if (rows.length >= 6) { await send(rows); rows = []; }
+                    }
+                    if (rows.length) await send(rows);
+                    btn.textContent = weeks.length + ' Wochen online ✓';
+                } catch (e) {
+                    btn.textContent = 'Fehler: ' + e.message;
+                    console.error(e);
+                }
+                setTimeout(() => { btn.textContent = label; btn.disabled = false; }, 6000);
+            }
+
+            btn.addEventListener('click', () => {
+                if (!INDEX) return;
+                if (!window.svpAuth || !svpAuth.hasSession()) { svpAuth.loginDialog(publish); return; }
+                publish();
+            });
+        })();
 
         fetch('plandaten/index.json?v=' + Date.now())
             .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
