@@ -150,6 +150,18 @@
 
         const DAY_NAMES = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
         const HUES = ['--cyan', '--violet', '--teal', '--pink', '--phi', '--lambda'];
+        /* Doc's own subjects are pinned instead of hashed - he reads his week by colour, and
+           the hash had put Inf on pink. First match wins, so the Grundkurse (GKInf, GKInf 1,
+           GKInf2 - Untis spells them with and without the space) are green before plain Inf
+           can take orange. The pinned hues leave the hash pool, so no other subject can wear
+           them and imitate his lessons. */
+        const SUBJECT_HUE = [
+            [/^GK\s?Inf/i, '--phi'],       // Informatik-Grundkurse: gruen
+            [/^Inf$/i, '--lambda'],        // Informatik: orange
+            [/^Mat$/i, '--cyan'],          // Mathe: blau
+        ];
+        const PINNED = SUBJECT_HUE.map(r => r[1]);
+        const HASH_HUES = HUES.filter(h => !PINNED.includes(h));
         // Scale the day to the window instead of a fixed pixel-per-minute:
         // a long teaching day used to grow the grid far past the screen.
         // Clamped so lessons stay readable on small screens and do not balloon
@@ -172,11 +184,15 @@
         const fmtDate = d => parseYmd(d).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' });
 
         // Stable colour per subject, so a subject keeps its hue across weeks.
-        function hueOf(subject) {
-            if (!subject) return HUES[0];
+        function hueOf(subject, teachers) {
+            if (!subject) return HASH_HUES[0];
+            /* Only Doc's own lessons wear the pinned colours. A colleague's GKInf is not his
+               Grundkurs, and in the school view it would otherwise look like one. */
+            const mine = INDEX && INDEX.teacher && (teachers || []).includes(INDEX.teacher);
+            if (mine) for (const [re, hue] of SUBJECT_HUE) if (re.test(subject)) return hue;
             let h = 0;
             for (const c of subject) h = (h * 31 + c.charCodeAt(0)) >>> 0;
-            return HUES[h % HUES.length];
+            return HASH_HUES[h % HASH_HUES.length];
         }
 
         function overlaps(a, b) {
@@ -549,7 +565,7 @@
                         + (clash.has(it.i) ? ' clash' : '')
                         + (l.moved ? ' moved' : '')
                         + (l.ghost ? ' ghost' : '');
-                    el.style.setProperty('--hue', 'var(' + hueOf(l.subject) + ')');
+                    el.style.setProperty('--hue', 'var(' + hueOf(l.subject, l.teachers) + ')');
                     if (!l.ghost) el.dataset.idx = l._i;
                     el.style.top = y(a) + 'px';
                     el.style.height = Math.max(16, (b - a) * scale - 3) + 'px';
