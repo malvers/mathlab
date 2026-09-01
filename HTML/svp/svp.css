@@ -2200,6 +2200,34 @@ body.map-preview #svp-map {
 
 .vt-count b { color: var(--phi); font-weight: 400; }
 
+/* cloud/crypto status next to the counter: quiet on success, red on failure */
+.vt-status {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.68rem;
+    letter-spacing: 0.04em;
+    color: var(--muted);
+    flex: 1 1 100%;
+    order: 3;
+    min-height: 0.9em;
+}
+
+.vt-status.bad { color: var(--ypsilon); }
+
+/* a taken slot: shown as "vergeben", not editable and never a name */
+.vt-name input.locked {
+    color: var(--muted);
+    font-style: italic;
+    border-style: dashed;
+    cursor: not-allowed;
+}
+
+/* except the entry this browser made itself — a click takes it back */
+.vt-name input.locked.mine {
+    color: var(--phi);
+    border-color: var(--phi);
+    cursor: pointer;
+}
+
 .vt-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 
 /* inline two-step reset instead of a native confirm() */

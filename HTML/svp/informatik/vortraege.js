@@ -1,6 +1,11 @@
 // Talk-topic list for the SVP pages. Ten topics per plan, shared by every class page of that
-// plan (editable in place, stored ONCE so class A and B always show the same titles), two name
-// fields per topic stored PER class. Include with
+// plan (editable in place, stored ONCE in localStorage so class A and B always show the same
+// titles), two name fields per topic.
+//
+// The NAMES are personal data and are therefore no longer kept on the device: they live in
+// Supabase (svp_vortrag_namen), sealed with Doc's public key by svp-crypto.js. Every browser can
+// write a name and see WHETHER a slot is taken; reading a name back needs Doc's login plus his
+// key passphrase. Include with
 // <script src="vortraege.js" data-plan="fos11" data-klasse="a"></script>.
 (function () {
     const script = document.currentScript;
@@ -90,7 +95,8 @@
     const saveJSON = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { } };
     const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
-    /* topics with the shared overrides applied */
+    /* topics with the shared overrides applied (topics carry no personal data,
+       so they stay in localStorage exactly as before) */
     function topics() {
         const o = loadJSON(KEY_TOPICS);
         return TOPICS.map((t, i) => ({
@@ -100,45 +106,177 @@
         }));
     }
 
-    function namesOf(all, i) {
-        const v = all[i];
-        return Array.isArray(v) ? [v[0] || '', v[1] || ''] : ['', ''];
+    /* ------------------------------------------------------------------
+       Names — encrypted, in the cloud, never in plain text on any device.
+       Table svp_vortrag_namen holds one row per (plan, klasse, topic, slot).
+       Anybody may set a slot (the pupils sign up on their own phones), but
+       only the "taken" flag is readable without a key: the name itself is
+       sealed against Doc's public key (svp-crypto.js) and the database does
+       not even hand the ciphertext to an anonymous reader.
+       ------------------------------------------------------------------ */
+    const TABLE = 'svp_vortrag_namen';
+    const QS = 'plan=eq.' + encodeURIComponent(PLAN) + '&klasse=eq.' + encodeURIComponent(KLASSE);
+    /* slot ids this browser wrote itself — so a pupil can still correct his own
+       typo while somebody else's entry stays protected. Ids only, no names. */
+    const MINE_KEY = 'svp-vortraege-mine:' + PLAN + KLASSE;
+
+    const slots = TOPICS.map(() => [{ taken: false, enc: null, name: null }, { taken: false, enc: null, name: null }]);
+    const mine = new Set(Object.keys(loadJSON(MINE_KEY)));
+    const markMine = (i, j) => { mine.add(i + '-' + j); const o = {}; mine.forEach((k) => { o[k] = 1; }); saveJSON(MINE_KEY, o); };
+
+    const A = () => window.svpAuth;
+    const unlocked = () => !!(window.svpCrypto && svpCrypto.hasPrivate());
+
+    function setStatus(text, bad) {
+        const el = $('vt-status');
+        if (!el) return;
+        el.textContent = text || '';
+        el.classList.toggle('bad', !!bad);
+    }
+
+    /* Read the slot table. Logged in the ciphertext comes along, anonymously it
+       does not — PostgREST refuses the column, which is exactly the point. */
+    async function fetchSlots() {
+        const a = A();
+        if (!a) return;
+        let rows = null;
+        if (a.hasSession()) {
+            try {
+                const res = await a.api(TABLE + '?' + QS + '&select=idx,slot,taken,name_enc');
+                if (res.ok) rows = await res.json();
+            } catch (e) { /* stale session: fall through to the anonymous read */ }
+        }
+        if (!rows) {
+            const res = await fetch(a.DB_URL + '/rest/v1/' + TABLE + '?' + QS + '&select=idx,slot,taken', {
+                headers: { apikey: a.DB_KEY, Authorization: 'Bearer ' + a.DB_KEY }
+            });
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            rows = await res.json();
+        }
+        slots.forEach((pair) => pair.forEach((s) => { s.taken = false; s.enc = null; s.name = null; }));
+        rows.forEach((r) => {
+            const s = slots[r.idx] && slots[r.idx][r.slot];
+            if (!s) return;
+            s.taken = !!r.taken;
+            s.enc = r.name_enc || null;
+        });
+        await decryptAll();
+    }
+
+    async function decryptAll() {
+        if (!unlocked()) { slots.forEach((p) => p.forEach((s) => { s.name = null; })); return; }
+        for (const pair of slots) {
+            for (const s of pair) {
+                if (!s.enc) { s.name = null; continue; }
+                try { s.name = await svpCrypto.open(s.enc); } catch (e) { s.name = '??'; }
+            }
+        }
+    }
+
+    /* Write one slot. An empty text clears it. Works logged out (that is how a
+       pupil signs up); logged in it goes through the session for symmetry. */
+    async function pushSlot(i, j, text) {
+        const a = A();
+        if (!a) throw new Error('Kein Cloud-Zugang');
+        const enc = text ? await svpCrypto.seal(text) : null;
+        const body = { taken: !!text, name_enc: enc, ts: new Date().toISOString() };
+        const path = TABLE + '?' + QS + '&idx=eq.' + i + '&slot=eq.' + j;
+        let res;
+        if (a.hasSession()) {
+            res = await a.api(path, { method: 'PATCH', headers: { Prefer: 'return=minimal' }, body: JSON.stringify(body) });
+        } else {
+            res = await fetch(a.DB_URL + '/rest/v1/' + path, {
+                method: 'PATCH',
+                headers: {
+                    apikey: a.DB_KEY, Authorization: 'Bearer ' + a.DB_KEY,
+                    'Content-Type': 'application/json', Prefer: 'return=minimal'
+                },
+                body: JSON.stringify(body)
+            });
+        }
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        slots[i][j].taken = !!text;
+        slots[i][j].enc = enc;
+        slots[i][j].name = text || null;
+    }
+
+    /* One-off migration: names that an earlier version left in this browser's
+       localStorage are sealed, pushed up and then removed from the device. */
+    async function migrateLocalNames() {
+        const old = loadJSON(KEY_NAMES);
+        const keys = Object.keys(old);
+        if (!keys.length) return false;
+        if (!window.svpCrypto || !(await svpCrypto.hasPublic())) return false;
+        setStatus('Namen aus diesem Browser werden verschlüsselt übernommen …');
+        for (const k of keys) {
+            const i = parseInt(k, 10);
+            const v = Array.isArray(old[k]) ? old[k] : [];
+            for (let j = 0; j < 2; j++) {
+                const name = (v[j] || '').trim();
+                if (!name || !slots[i]) continue;
+                try { await pushSlot(i, j, name); markMine(i, j); } catch (e) { setStatus('Übernahme fehlgeschlagen: ' + e.message, true); return false; }
+            }
+        }
+        try { localStorage.removeItem(KEY_NAMES); } catch (e) { }
+        setStatus('Namen übernommen und aus diesem Browser gelöscht.');
+        return true;
     }
 
     let editing = false;
 
+    /* A taken slot is read-only for everybody but Doc: without the key the page
+       cannot show a name, and a writable field would only ever overwrite one.
+       A slot THIS browser wrote stays clearable with a click, so a pupil can
+       still fix his own typo without being able to touch anybody else's. */
+    function editable(i, j) {
+        return unlocked() || !slots[i][j].taken;
+    }
+
+    function isMine(i, j) {
+        return mine.has(i + '-' + j);
+    }
+
+    function slotValue(i, j) {
+        const s = slots[i][j];
+        if (!s.taken) return '';
+        if (unlocked()) return s.name != null ? s.name : '…';
+        return isMine(i, j) ? 'eingetragen' : 'vergeben';
+    }
+
     function render() {
         const list = $('list');
-        const names = loadJSON(KEY_NAMES);
         list.innerHTML = topics().map((t, i) => {
-            const n = namesOf(names, i);
-            const taken = n[0].trim() || n[1].trim();
             const lb = LB_LABEL[t.lb];
+            const taken = slots[i][0].taken || slots[i][1].taken;
+            const inp = (j) => {
+                const ro = editable(i, j) ? '' : ' readonly';
+                const ttl = editable(i, j) ? '' : (isMine(i, j)
+                    ? ' title="Dein Eintrag — anklicken, um ihn zu löschen"'
+                    : ' title="Dieser Platz ist vergeben"');
+                return '<div class="vt-name n' + (j + 1) + '"><input type="text" id="name-' + i + '-' + j +
+                    '" value="' + esc(slotValue(i, j)) + '" placeholder="Name ' + (j + 1) + '"' + ro + ttl +
+                    ' autocomplete="off" spellcheck="false" aria-label="Name ' + (j + 1) + ' für Thema ' + (i + 1) + '"></div>';
+            };
             return '<div class="vt-row' + (taken ? ' taken' : '') + '" id="row-' + i + '">' +
                 '<div class="vt-nr">' + (i + 1) + '</div>' +
                 '<div class="vt-topic">' +
                     '<div class="vt-title"><span class="vt-title-text">' + esc(t.title) + '</span>' +
                         '<span class="badge ' + lb[1] + '">' + lb[0] + '</span></div>' +
                     '<div class="vt-sub">' + esc(t.sub) + '</div>' +
-                '</div>' +
-                '<div class="vt-name n1"><input type="text" id="name-' + i + '-0" value="' + esc(n[0]) + '" placeholder="Name 1" ' +
-                    'autocomplete="off" spellcheck="false" aria-label="Name 1 für Thema ' + (i + 1) + '"></div>' +
-                '<div class="vt-name n2"><input type="text" id="name-' + i + '-1" value="' + esc(n[1]) + '" placeholder="Name 2" ' +
-                    'autocomplete="off" spellcheck="false" aria-label="Name 2 für Thema ' + (i + 1) + '"></div>' +
+                '</div>' + inp(0) + inp(1) +
                 '</div>';
         }).join('');
 
         TOPICS.forEach((_, i) => {
             [0, 1].forEach((j) => {
-                $('name-' + i + '-' + j).addEventListener('input', () => {
-                    const all = loadJSON(KEY_NAMES);
-                    const n = namesOf(all, i);
-                    n[j] = $('name-' + i + '-' + j).value;
-                    all[i] = n;
-                    saveJSON(KEY_NAMES, all);
-                    $('row-' + i).classList.toggle('taken', !!(n[0].trim() || n[1].trim()));
-                    updateCount();
-                });
+                const el = $('name-' + i + '-' + j);
+                el.classList.toggle('locked', !editable(i, j));
+                if (!editable(i, j)) {
+                    if (isMine(i, j)) { el.classList.add('mine'); el.addEventListener('click', () => clearMine(i, j)); }
+                    return;
+                }
+                el.addEventListener('input', () => queueSave(i, j));
+                el.addEventListener('blur', () => flushSave(i, j));
             });
         });
         /* Enter in a title ends the line instead of inserting a break */
@@ -147,12 +285,104 @@
         });
         setEditing(editing);
         updateCount();
+        updateKeyBtn();
+    }
+
+    /* the pupil takes his own entry back: the slot goes free and editable again */
+    async function clearMine(i, j) {
+        try {
+            setStatus('lösche …');
+            await pushSlot(i, j, '');
+            mine.delete(i + '-' + j);
+            const o = {}; mine.forEach((k) => { o[k] = 1; }); saveJSON(MINE_KEY, o);
+            render();
+            setStatus('Eintrag gelöscht.');
+            const el = $('name-' + i + '-' + j);
+            if (el) el.focus();
+        } catch (e) { setStatus('Löschen fehlgeschlagen: ' + e.message, true); }
+    }
+
+    /* typing is debounced, leaving the field saves at once */
+    const timers = {};
+    function queueSave(i, j) {
+        clearTimeout(timers[i + '-' + j]);
+        timers[i + '-' + j] = setTimeout(() => flushSave(i, j), 800);
+    }
+
+    /* commit everything still pending, e.g. before re-reading the list */
+    async function flushAll() {
+        const keys = Object.keys(timers);
+        for (const k of keys) {
+            const p = k.split('-');
+            await flushSave(+p[0], +p[1]);
+        }
+    }
+
+    async function flushSave(i, j) {
+        clearTimeout(timers[i + '-' + j]);
+        delete timers[i + '-' + j];
+        const el = $('name-' + i + '-' + j);
+        if (!el) return;
+        const text = el.value.trim();
+        if (text === (slots[i][j].name || '') && !!text === slots[i][j].taken) return;
+        try {
+            if (!window.svpCrypto || !(await svpCrypto.hasPublic())) {
+                setStatus('Kein Schlüssel eingerichtet — der Name wurde NICHT gespeichert.', true);
+                return;
+            }
+            setStatus('speichere …');
+            await pushSlot(i, j, text);
+            if (text) markMine(i, j);
+            $('row-' + i).classList.toggle('taken', slots[i][0].taken || slots[i][1].taken);
+            updateCount();
+            setStatus('☁ gespeichert (verschlüsselt)');
+        } catch (e) {
+            setStatus('☁ NICHT gespeichert: ' + e.message, true);
+        }
     }
 
     function updateCount() {
-        const names = loadJSON(KEY_NAMES);
-        const taken = TOPICS.filter((_, i) => { const n = namesOf(names, i); return n[0].trim() || n[1].trim(); }).length;
+        const taken = slots.filter((p) => p[0].taken || p[1].taken).length;
         $('count').innerHTML = '<b>' + taken + '</b> von ' + TOPICS.length + ' Themen vergeben';
+    }
+
+    /* ---------- key button: only ever visible to a logged-in user ---------- */
+    function keyBtn() {
+        let b = $('btn-key');
+        if (b) return b;
+        const bar = document.querySelector('.vt-actions');
+        if (!bar) return null;
+        b = document.createElement('button');
+        b.id = 'btn-key';
+        b.className = 'action secondary';
+        b.addEventListener('click', onKeyBtn);
+        bar.insertBefore(b, bar.firstChild);
+        return b;
+    }
+
+    let keyExists = false;
+    function updateKeyBtn() {
+        const b = keyBtn();
+        if (!b) return;
+        const logged = !!(A() && A().hasSession());
+        b.hidden = !logged || !window.svpCrypto || !svpCrypto.available;
+        if (b.hidden) return;
+        if (!keyExists) { b.textContent = '🔑 Schlüssel einrichten'; b.title = 'Einmalig: Schlüsselpaar für die Vortragsnamen anlegen'; }
+        else if (unlocked()) { b.textContent = '🔒 Namen verbergen'; b.title = 'Schlüssel wieder sperren'; }
+        else { b.textContent = '🔓 Namen anzeigen'; b.title = 'Schlüssel-Passwort eingeben, um die Namen zu entschlüsseln'; }
+    }
+
+    async function onKeyBtn() {
+        if (!keyExists) {
+            svpCrypto.passDialog('create', async () => {
+                keyExists = true;
+                setStatus('Schlüssel erzeugt — Passwort gut aufheben, es gibt keinen Ersatz.');
+                await refresh();
+            });
+            return;
+        }
+        if (unlocked()) { svpCrypto.lock(); await decryptAll(); render(); setStatus(''); return; }
+        svpCrypto.passDialog('unlock', async () => { await refresh(); setStatus('Namen entschlüsselt.'); });
     }
 
     /* ---------- edit mode for the topics (shared between the class pages) ---------- */
@@ -195,16 +425,65 @@
         $('btn-reset').hidden = open;
     };
 
-    /* names of THIS class page only — behind the SVP password (svp-gate.js),
-       so a pupil cannot wipe the list from the classroom machine */
+    /* Names of THIS class — behind the SVP password (svp-gate.js) AND a login,
+       so neither a pupil nor a classroom machine can wipe the list. Rows are
+       only cleared, never deleted; the history table keeps every old value. */
     window.vtResetNames = function () {
-        const wipe = function () {
-            saveJSON(KEY_NAMES, {});
+        const wipe = async function () {
             window.vtToggleConfirm(false);
-            render();
+            const a = A();
+            if (!a || !a.hasSession()) { setStatus('Zum Zurücksetzen bitte anmelden.', true); return; }
+            try {
+                setStatus('lösche …');
+                const res = await a.api(TABLE + '?' + QS, {
+                    method: 'PATCH',
+                    headers: { Prefer: 'return=minimal' },
+                    body: JSON.stringify({ taken: false, name_enc: null, ts: new Date().toISOString() })
+                });
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                try { localStorage.removeItem(MINE_KEY); } catch (e) { }
+                mine.clear();
+                await refresh();
+                setStatus('Alle Namen dieser Klasse gelöscht.');
+            } catch (e) { setStatus('Löschen fehlgeschlagen: ' + e.message, true); }
         };
         if (window.svpGate) svpGate.run(wipe); else wipe();
     };
 
-    render();
+    /* ---------- boot ---------- */
+    function statusEl() {
+        if ($('vt-status')) return;
+        const bar = document.querySelector('.vt-bar');
+        const count = $('count');
+        if (!bar || !count) return;
+        const el = document.createElement('div');
+        el.id = 'vt-status';
+        el.className = 'vt-status';
+        count.parentNode.insertBefore(el, count.nextSibling);
+    }
+
+    async function refresh() {
+        try { await fetchSlots(); } catch (e) { setStatus('☁ Liste nicht geladen: ' + e.message, true); }
+        render();
+    }
+
+    (async function boot() {
+        statusEl();
+        render();                                   /* topics first, names follow */
+        if (!window.svpCrypto || !svpCrypto.available) {
+            setStatus('Verschlüsselung im Browser nicht verfügbar — Namen sind hier nicht bearbeitbar.', true);
+            return;
+        }
+        await svpCrypto.ready;                      /* re-arm an unlocked key after a reload */
+        try { keyExists = await svpCrypto.hasPublic(); } catch (e) { keyExists = false; }
+        await refresh();
+        if (await migrateLocalNames()) render();
+        /* somebody else may have signed up meanwhile — but never discard a name
+           that is still sitting unsaved in a field on this page */
+        document.addEventListener('visibilitychange', async () => {
+            if (document.hidden) return;
+            await flushAll();
+            refresh();
+        });
+    })();
 })();
