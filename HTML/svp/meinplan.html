@@ -20,7 +20,14 @@
          the lessons of one teacher, published from stundenplan.html into the
          table svp_public_plan (anon may read, only Doc's account may write). -->
     <script>
-        try { if (localStorage.getItem('svp-theme') === 'light') document.documentElement.classList.add('svp-light'); } catch (e) { }
+        /* Stored choice wins; a first-time visitor (every kid) gets the scheme
+           their device asks for instead of always landing in the dark. */
+        (function () {
+            var t = null;
+            try { t = localStorage.getItem('svp-theme'); } catch (e) { }
+            if (!t) t = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+            if (t === 'light') document.documentElement.classList.add('svp-light');
+        })();
     </script>
 </head>
 
@@ -40,6 +47,8 @@
             <div class="mp-week" id="week">&nbsp;</div>
             <button class="mp-nav" id="next" type="button" aria-label="Nächste Woche"></button>
             <button class="action secondary" id="today" type="button">Diese Woche</button>
+            <button class="action secondary" id="theme" type="button"
+                title="Hell oder dunkel umschalten">Hell / Dunkel</button>
             <div class="mp-stamp" id="stamp"></div>
         </div>
 
@@ -47,9 +56,6 @@
             <div class="mp-empty">Plan wird geladen&hellip;</div>
         </div>
     </main>
-
-    <button class="mp-theme" id="theme" type="button" aria-label="Hell oder dunkel umschalten"
-        title="Hell / dunkel"></button>
 
     <script>
         'use strict';
@@ -185,7 +191,7 @@
         (function () {
             const btn = $('theme');
             const sync = () => {
-                btn.textContent = document.documentElement.classList.contains('svp-light') ? '☾' : '☀';
+                btn.textContent = document.documentElement.classList.contains('svp-light') ? 'Dunkel' : 'Hell';
             };
             btn.addEventListener('click', () => {
                 const light = document.documentElement.classList.toggle('svp-light');
