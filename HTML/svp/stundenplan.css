@@ -329,6 +329,37 @@ html.svp-light .tt-lesson.code-cancelled {
     min-width: 0;
 }
 
+/* Weggeklappte Namensliste: der Plan bekommt die volle Breite. Nur display:none
+   - die Buttons darin bleiben im DOM, damit eine gewählte Person und der
+   Konflikt-Filter beim Wiedereinblenden noch stehen. */
+body.side-hidden .tt-side { display: none; }
+
+/* Sieht aus wie die Wochen-Pfeile daneben (Doc, 01.09.2026) - gleiche Groesse,
+   gleicher Rahmen, gleiches Hover. Flex zentriert das Zeichen exakt; ohne das
+   sitzt ☰ durch seine eigene Zeilenhoehe leicht daneben. Der aktive Zustand
+   faerbt wie das Hover der Nachbarn, nicht orange. */
+.tt-side-toggle {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border-radius: 7px;
+    border: 1px solid var(--line);
+    background: var(--panel);
+    color: var(--text);
+    font-size: 1.1rem;
+    line-height: 1;
+    cursor: pointer;
+    transition: border-color 0.12s ease, color 0.12s ease;
+}
+
+.tt-side-toggle:hover { border-color: var(--phi); color: var(--phi); }
+.tt-side-toggle.off { border-color: var(--phi); color: var(--phi); }
+@media print { .tt-side-toggle { display: none; } }
+
 .tt-side {
     flex: 0 0 176px;
     width: 176px;
@@ -685,6 +716,10 @@ header.page-head .title-group .subtitle {
 .tt-depts .tt-conf {
     margin-left: 10px;
 }
+
+/* Doc: the conflict tools belong to the edit mode - hidden until "Editieren" is on */
+body:not(.opt-mode) .tt-depts .tt-conf,
+body:not(.opt-mode) .tt-confcount { display: none; }
 
 .tt-depts .tt-conf:hover {
     border-color: rgba(176, 36, 24, 0.55);

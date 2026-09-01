@@ -27,6 +27,24 @@
                 { lb: 'lb1', title: 'Industrie 4.0 und das Internet der Dinge', sub: 'Wenn Maschinen miteinander reden: Chancen und Risiken automatisierter Datenverarbeitung.' }
             ]
         },
+        /* BGY 11 (Einführungsphase) — lb1 "Informatik als Wissenschaft", lb2 "Persönliches
+           Informationsmanagement", lb3 "IT-Sicherheit und Ökologie", lb4 "Projekt
+           Informationsmanagement", wb "Datenkomprimierung und Fehlererkennung" */
+        inf11: {
+            labels: { lb1: ['LB 1', 'b-orange'], lb2: ['LB 2', 'b-cyan'], lb3: ['LB 3', 'b-violet'], lb4: ['LB 4', 'b-teal'], wb: ['Wahlbereich', 'b-green'] },
+            topics: [
+                { lb: 'lb1', title: 'Meilensteine der Rechentechnik', sub: 'Von Schickard und Zuse bis zum Rechenzentrum: Welche Idee war jeweils der eigentliche Sprung?' },
+                { lb: 'lb1', title: 'Informatik als Werkzeug anderer Wissenschaften', sub: 'Simulation, Bildgebung, Bioinformatik: Wo entscheidet der Rechner heute über eine Erkenntnis?' },
+                { lb: 'lb2', title: 'Vom Signal zur Information', sub: 'Digitalisierung von Ton oder Bild an einem konkreten Beispiel: Abtastung, Quantisierung, Datenmenge.' },
+                { lb: 'lb2', title: 'Quellenkritik im Netz', sub: 'Impressum, Autorschaft, Belege, Interessenlage — ein Kriterienraster an drei echten Webseiten vorgeführt.' },
+                { lb: 'lb2', title: 'Urheberrecht und Lizenzen im Schulalltag', sub: 'Bilder, Musik, KI-Ergebnisse: Was darf in eine Präsentation, und was sagen Creative Commons dazu?' },
+                { lb: 'lb3', title: 'Social Engineering', sub: 'Phishing, Pretexting, CEO-Fraud: Der Mensch als Sicherheitslücke — echte Fälle und die Gegenmaßnahmen.' },
+                { lb: 'lb3', title: 'Angriffe auf kritische Infrastrukturen', sub: 'Ransomware in Klinik, Stadtwerk oder Verwaltung: Ablauf eines Vorfalls und was danach passieren muss.' },
+                { lb: 'lb3', title: 'Klassische Chiffren und ihr Bruch', sub: 'Caesar und Vigenère selbst geknackt — und warum genau das bei heutiger Verschlüsselung nicht mehr geht.' },
+                { lb: 'lb3', title: 'Der ökologische Fußabdruck der Digitalisierung', sub: 'Streaming, Rechenzentren, Geräteproduktion, E-Schrott — Zahlen statt Bauchgefühl.' },
+                { lb: 'wb', title: 'Datenkomprimierung: wie Dateien schrumpfen', sub: 'Verlustfrei gegen verlustbehaftet, Huffman am eigenen Text — und woran man ein überkomprimiertes Bild erkennt.' }
+            ]
+        },
         /* FOS 11 — lb1 "Persönliches Informationsmanagement", lb2 "IT-Sicherheit und Ökologie",
            wb "Kryptografie in der Informatik" */
         fos11: {

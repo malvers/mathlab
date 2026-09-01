@@ -40,6 +40,9 @@
 
     <main class="svp-section">
         <div class="tt-bar">
+            <button class="tt-side-toggle" id="sidetoggle" type="button"
+                aria-controls="side" aria-expanded="true"
+                title="Liste der Lehrkräfte ein- oder ausblenden">&#9776;</button>
             <button class="tt-nav" id="prev" type="button" aria-label="Vorige Woche">&lsaquo;</button>
             <div class="tt-week" id="week">&nbsp;</div>
             <button class="tt-nav" id="next" type="button" aria-label="Nächste Woche">&rsaquo;</button>
@@ -56,8 +59,8 @@
                     title="Nur Konflikte: schulweit eine Person gleichzeitig in zwei Räumen, bei gewählter Person jede Überschneidung">&#9888; Konflikte anzeigen</button>
             </div>
             <span class="tt-confcount" id="confcount" title="Harte Konflikte in dieser Woche (Person in zwei Räumen), ganze Schule"></span>
-            <button class="action" id="optbtn" type="button" title="Stundenplan optimieren (Simulated Annealing)">Editieren</button>
             <div class="tt-meta" id="meta"></div>
+            <button class="action" id="optbtn" type="button" title="Stundenplan optimieren (Simulated Annealing)">Editieren</button>
         </div>
 
         <section class="tt-opt" id="opt" hidden>
@@ -148,12 +151,16 @@
         // a long teaching day used to grow the grid far past the screen.
         // Clamped so lessons stay readable on small screens and do not balloon
         // on tall ones.
-        function pxPerMin(span) {
-            const grid = document.getElementById('grid');
-            const avail = window.innerHeight - grid.getBoundingClientRect().top - 70;
-            // Upper clamp: short days stretch towards the window, but gently -
-            // 2.0 felt too tall (Doc), 1.5 keeps text readable without towering.
-            return Math.max(0.55, Math.min(1.5, avail / span));
+        /* Feste Kartenhoehe statt Fenster-Anpassung (Doc, 01.09.2026: "mach sie
+           immer so hoch"). Vorher rechnete die Funktion avail/span, die Karten
+           waren also je nach Fenstergroesse und Laenge des Schultags verschieden
+           hoch - mal las man die Uhrzeit, mal war sie abgeschnitten.
+           1.6 px/min heisst: eine 45-min-Stunde ist 72 px hoch, immer. Passt der
+           Tag nicht ins Fenster, scrollt der Plan - das ist der Preis dafuer,
+           dass eine Karte ueberall gleich aussieht. */
+        const PX_PER_MIN = 1.6;
+        function pxPerMin() {
+            return PX_PER_MIN;
         }
 
         const toMin = t => Math.floor(t / 100) * 60 + (t % 100);
@@ -441,14 +448,21 @@
                 }
             }
 
-            // Time axis always spans the whole school day of this week (Doc:
-            // "zeig immer alle Stunden") - a person with two lessons gets the
-            // same axis as the full plan, and switching filters never rescales.
-            // Rounded to full half hours; with nothing but banners it falls
-            // back to the school timegrid.
+            /* Achse: fuer die GANZE Schule immer der volle Schultag (Doc:
+               "zeig immer alle Stunden") - dann bekommt jede Spalte dieselbe
+               Achse und ein Filterwechsel skaliert nicht um.
+               Ist aber EINE Person gewaehlt, endet die Achse mit deren letzter
+               Stunde (Doc, 01.09.2026: "ich habe nur bis 15:15"). Die Schule
+               unterrichtet bis 17:00 - die leeren 105 Minuten stauchten Docs
+               Karten um rund ein Viertel, ohne je etwas zu zeigen. Die Achse
+               bleibt stabil, solange dieselbe Person gewaehlt ist.
+               Auf halbe Stunden gerundet; gibt es nur Banner, greift das
+               Zeitraster der Schule. */
             const gridUnits = (data.timegrid && data.timegrid[0] && data.timegrid[0].timeUnits) || [];
             const schoolDay = planForBox.filter(l => !isBanner(l));   // whole plan, also in the proposal view
-            const spanSrc = schoolDay.length ? schoolDay
+            const ownDay = selected ? lessons.filter(l => !isBanner(l)) : [];
+            const spanSrc = ownDay.length ? ownDay
+                : schoolDay.length ? schoolDay
                 : gridUnits.map(u => ({ startTime: u.startTime, endTime: u.endTime }));
             const startMin = Math.floor(Math.min(...spanSrc.map(l => toMin(l.startTime))) / 30) * 30;
             const endMin = Math.ceil(Math.max(...spanSrc.map(l => toMin(l.endTime))) / 30) * 30;
@@ -458,7 +472,7 @@
             const laneRows = Math.max(0, ...dates.map(d => banners.filter(b => b.date === d).length));
             const laneH = laneRows * BANNER_H + (laneRows ? 6 : 0);
 
-            const scale = pxPerMin(endMin - startMin);
+            const scale = pxPerMin();
             const height = laneH + (endMin - startMin) * scale;
             const y = m => laneH + (m - startMin) * scale;
             LAYOUT = { startMin, endMin, scale, laneH, y };
@@ -616,6 +630,10 @@
             const setOpt = open => {
                 panel.hidden = !open;
                 document.body.classList.toggle('opt-mode', open);
+                // the conflict toggle is hidden outside the edit mode - never leave it on unseen
+                if (!open && CONF) { CONF = false; document.getElementById('conf').classList.remove('on'); }
+                $('optbtn').textContent = open ? 'Zurück' : 'Editieren';
+                $('optbtn').title = open ? 'Editier-Modus verlassen' : 'Stundenplan optimieren (Simulated Annealing)';
                 try { localStorage.setItem('svp-opt-open', open ? '1' : '0'); } catch (e) { }
                 if (DATA) render(DATA, SELECTED);   // grid height depends on the panel
             };
@@ -1259,6 +1277,33 @@
             });
         }
 
+        /* Die Namensliste lässt sich wegklappen (Doc, 01.09.2026): sie trägt die
+           Namen aller Kolleginnen und Kollegen, und beim Zeigen des Plans - Beamer,
+           geteilter Bildschirm - haben die dort nichts zu suchen. Der Zustand
+           überlebt den Reload, sonst muss man ihn vor jeder Stunde neu wegklicken. */
+        const SIDE_KEY = 'svp-tt-side-hidden';
+        function applySideHidden(hidden) {
+            document.body.classList.toggle('side-hidden', hidden);
+            const b = document.getElementById('sidetoggle');
+            if (b) {
+                b.setAttribute('aria-expanded', hidden ? 'false' : 'true');
+                b.classList.toggle('off', hidden);
+                b.title = hidden ? 'Liste der Lehrkräfte einblenden' : 'Liste der Lehrkräfte ausblenden';
+            }
+        }
+        (function initSideToggle() {
+            let hidden = false;
+            try { hidden = localStorage.getItem(SIDE_KEY) === '1'; } catch (e) { }
+            applySideHidden(hidden);
+            const b = document.getElementById('sidetoggle');
+            if (!b) return;
+            b.addEventListener('click', () => {
+                const now = !document.body.classList.contains('side-hidden');
+                applySideHidden(now);
+                try { localStorage.setItem(SIDE_KEY, now ? '1' : '0'); } catch (e) { }
+            });
+        })();
+
         // optimizer scope option names the selected person and is preselected for them
         function syncScopeOption() {
             const sel = document.getElementById('opt-scope'), me = sel && sel.querySelector('[value=me]');
@@ -1410,6 +1455,7 @@
                     + 'Erst das Schuljahr holen:<br><code>node tools/webuntis.js year</code></div>';
             });
     </script>
+
 </body>
 
 </html>
