@@ -1488,9 +1488,28 @@
             const btn = document.getElementById('pubbtn');
             if (!btn) return;
 
+            /* WebUntis has no room for the Fachoberschule courses - the school
+               does not maintain them there. raeume.json fills that gap so the
+               students can actually find the lesson; Untis always wins when it
+               knows a room. */
+            let ROOMS = {};
+            fetch('raeume.json?v=' + Date.now())
+                .then(r => r.ok ? r.json() : null)
+                .then(m => { ROOMS = (m && m.byClass) || {}; })
+                .catch(() => { });
+
+            const fallbackRoom = l => {
+                for (const c of l.classes || []) {
+                    const hit = ROOMS[c + '|' + l.subject] || ROOMS[c];
+                    if (hit) return [hit];
+                }
+                return [];
+            };
+
             const slim = l => ({
                 date: l.date, startTime: l.startTime, endTime: l.endTime,
-                subject: l.subject, classes: l.classes || [], rooms: l.rooms || [],
+                subject: l.subject, classes: l.classes || [],
+                rooms: (l.rooms && l.rooms.length) ? l.rooms : fallbackRoom(l),
                 code: l.code || null, info: l.info || null,
                 substText: l.substText || null, lstext: l.lstext || null
             });

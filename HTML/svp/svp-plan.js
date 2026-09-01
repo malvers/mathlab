@@ -455,6 +455,12 @@
     // A week row may carry quiz: { href, text, label } (or just a URL string).
     // Every plan gets the button for free; it only shows up where the plan
     // HTML names an exercise set, so untouched weeks look exactly as before.
+    /* An override may carry its own quiz - also null, meaning "no exercises in
+       this week". Only a missing key falls back to the page's own PLAN. */
+    function quizSource(ov, row) {
+        return Object.prototype.hasOwnProperty.call(ov || {}, 'quiz') ? { quiz: ov.quiz } : row;
+    }
+
     function buildQuizBtn(row) {
         const q = row && row.quiz;
         if (!q) return null;
@@ -1992,9 +1998,7 @@
             ref.ul = ul;
         }
 
-        /* an override may carry its own quiz (also null: "no exercises here") */
-        ref.quizBtn = buildQuizBtn(
-            Object.prototype.hasOwnProperty.call(ov, 'quiz') ? { quiz: ov.quiz } : row);
+        ref.quizBtn = buildQuizBtn(quizSource(ov, row));
         ref.matBlock = document.createElement('div');
         ref.matBlock.className = 'mat-block';
         updateMaterial(ref, ov.material != null ? ov.material : row.material);
@@ -3361,7 +3365,12 @@
             r.uTd.textContent = ov.u != null ? ov.u : row.u;
             setMathText(r.topicSpan, ov.topic != null ? ov.topic : row.topic);
             setMathText(r.remarkTd, ov.remark != null ? ov.remark : row.remark);
-            if (r.matTd) updateMaterial(r, ov.material != null ? ov.material : row.material);
+            if (r.matTd) {
+                /* rebuilt first: updateMaterial re-appends whatever pill r holds,
+                   and the cloud state may carry a different one than the render */
+                r.quizBtn = buildQuizBtn(quizSource(ov, row));
+                updateMaterial(r, ov.material != null ? ov.material : row.material);
+            }
             if (r.ul) buildDetailList(r.ul, ov.details || row.details || []);
         }
     }
