@@ -7,6 +7,10 @@
     --line: rgba(120, 160, 220, 0.22);
     --text: rgba(225, 235, 250, 0.92);
     --muted: rgba(170, 190, 220, 0.65);
+    /* Ueberschriften: eigener Ton, damit sie sich aendern lassen, ohne den
+       Fliesstext mitzunehmen (Doc, 01.09.2026 - erst weg vom Orange, dann
+       zweimal heller). Auf dem dunklen Grund praktisch weiss. */
+    --head: rgb(248, 251, 255);
     --lambda: rgb(245, 194, 66);
     --ypsilon: rgb(176, 36, 24);
     --phi: rgb(121, 158, 49);
@@ -40,6 +44,12 @@ html.svp-light {
     --line: rgba(40, 70, 120, 0.22);
     --text: rgb(24, 34, 52);
     --muted: rgb(96, 112, 140);
+    /* So hell, wie es lesbar bleibt: 4.0:1 gegen den Seitengrund. Fuer eine
+       Ueberschrift dieser Groesse reichen 3:1, fuer Fliesstext waere das schon
+       zu wenig - deshalb ein eigenes Token und nicht --text. Weiter aufhellen
+       geht nicht mehr ohne echten Lesbarkeitsverlust (rgb(124,148,190) waere
+       2.7:1). */
+    --head: rgb(96, 120, 160);
     --lambda: rgb(176, 128, 12);
     --ypsilon: rgb(176, 36, 24);
     --phi: rgb(92, 122, 32);
@@ -102,7 +112,7 @@ html.svp-locked body > *:not(.svp-gate-overlay) { display: none !important; }
     font-family: 'Orbitron', sans-serif;
     font-size: 1.05rem;
     letter-spacing: 0.06em;
-    color: var(--lambda);
+    color: var(--head);
     margin-bottom: 6px;
 }
 
@@ -984,10 +994,13 @@ a.back-link:hover { text-decoration: underline; }
 
 @media print { a.back-link { display: none; } }
 
+/* Ruhiges Blauweiss statt Orange (Doc, 01.09.2026). Orbitron und die Groesse
+   tragen die Ueberschrift schon - das Orange bleibt den Dingen vorbehalten,
+   die etwas WOLLEN: Lernbereich-Pillen, Abgabe-Knopf, Untis-Chip. */
 h1 {
     font-family: 'Orbitron', sans-serif;
     font-size: clamp(1.15rem, 3.2vw, 1.9rem);
-    color: var(--lambda);
+    color: var(--head);
     letter-spacing: 0.04em;
     margin-bottom: 6px;
 }
@@ -1294,7 +1307,7 @@ thead th {
     font-size: 0.68rem;
     letter-spacing: 0.09em;
     text-transform: uppercase;
-    color: var(--lambda);
+    color: var(--head);
     text-align: left;
     padding: 12px 6px;
     border-bottom: 1px solid var(--line);
