@@ -2196,7 +2196,11 @@
                 .replace(/\\neq/g, '\u2260').replace(/\\approx/g, '\u2248')
                 .replace(/\\(sin|cos|tan|ln|log|exp)\b/g, '$1')
                 .replace(/\^\{?2\}?(?!\d)/g, '\u00b2').replace(/\^\{?3\}?(?!\d)/g, '\u00b3')
-                .replace(/\^\{([^{}]*)\}/g, '^$1')
+                /* Mehrzeichige Hoch-/Tiefstellungen brauchen Klammern, sonst
+                   wird aus F_{n+1}/F_n ein "F_n+1/F_n" - das liest sich wie
+                   F_n plus 1/F_n. Einzelne Zeichen bleiben klammerfrei. */
+                .replace(/\^\{([^{}]*)\}/g, (m, g) => g.length > 1 ? '^(' + g + ')' : '^' + g)
+                .replace(/_\{([^{}]*)\}/g, (m, g) => g.length > 1 ? '_(' + g + ')' : '_' + g)
                 .replace(/\{,\}/g, ',')
                 .replace(/\\,|\\;|\\!/g, ' ')
                 .replace(/[{}]/g, '')
