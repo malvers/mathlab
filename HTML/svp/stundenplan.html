@@ -1304,6 +1304,15 @@
             });
         })();
 
+        // The subtitle leads with the chosen teacher (Doc) - the school name is
+        // only the fallback while nobody is picked. SUB_TAIL holds the constant
+        // rest (school year, data timestamp) that index.json filled in once.
+        let SUB_TAIL = '';
+        function setSub() {
+            const who = SELECTED ? NAME(SELECTED) : (INDEX && INDEX.school) || '';
+            document.getElementById('sub').innerHTML = who + SUB_TAIL;
+        }
+
         // optimizer scope option names the selected person and is preselected for them
         function syncScopeOption() {
             const sel = document.getElementById('opt-scope'), me = sel && sel.querySelector('[value=me]');
@@ -1320,6 +1329,7 @@
                 el.classList.toggle('on', (el.dataset.name || null) === name);
             }
             syncScopeOption();
+            setSub();
             if (DATA) render(DATA, name);
         }
 
@@ -1471,15 +1481,16 @@
                 INDEX = idx;
                 const stamp = idx.generatedAt ? new Date(idx.generatedAt).toLocaleString('de-DE') : '';
                 const ageH = idx.generatedAt ? (Date.now() - new Date(idx.generatedAt)) / 36e5 : 0;
-                document.getElementById('sub').innerHTML =
-                    idx.school + ' · Schuljahr ' + idx.schoolyear.name
+                SUB_TAIL = '<span class="tt-sub-tail">Schuljahr ' + idx.schoolyear.name
                     + (stamp
-                        ? ' · ' + (ageH > 26
+                        ? '<span class="tt-sub-gap"></span>' + (ageH > 26
                             ? '<span class="tt-stale" title="Der LaunchAgent holt täglich 06:00 – lief er nicht?">Stand: ' + stamp + ' (älter als 1 Tag)</span>'
                             : 'Stand: ' + stamp)
-                        : '');
+                        : '')
+                    + '</span>';
                 buildPeople();
                 SELECTED = idx.teachers.some(t => t.name === idx.teacher) ? idx.teacher : null;
+                setSub();
                 for (const el of document.querySelectorAll('.tt-person')) {
                     el.classList.toggle('on', (el.dataset.name || null) === SELECTED);
                 }
