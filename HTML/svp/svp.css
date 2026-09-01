@@ -1100,6 +1100,9 @@ h1 {
 button.action {
     font-family: 'Orbitron', sans-serif;
     font-size: 0.72rem;
+    /* fixed line box: an emoji (🔒, 🔑) carries much taller font metrics than
+       Orbitron and would otherwise make its button higher than its neighbours */
+    line-height: 1.25;
     letter-spacing: 0.06em;
     color: var(--text);
     background: rgba(121, 158, 49, 0.16);
@@ -1269,11 +1272,26 @@ nav.quick-nav a.cloud:hover { color: var(--text); }
 
 .legend {
     display: flex;
+    align-items: center;
     gap: 12px;
     flex-wrap: wrap;
     font-size: 0.78rem;
     color: var(--muted);
     margin-left: auto;
+}
+
+/* One line box for the whole row: the PDF button, the plain pills and the
+   ▾ variant pills all carry different font metrics - without a fixed height
+   every one measures its own. Menu items inside .drop-menu stay untouched. */
+.legend > .badge,
+.legend .badge-drop > .badge,
+.legend button.action.legend-lehrplan {
+    display: inline-flex;
+    align-items: center;
+    box-sizing: border-box;
+    height: 24px;
+    padding-top: 0;
+    padding-bottom: 0;
 }
 
 /* Lehrplan (PDF), moved down into the legend row by svp-plan.js: compact, so
@@ -2109,7 +2127,8 @@ body.map-preview #svp-map {
 
 .vt-row {
     display: grid;
-    grid-template-columns: 52px 1fr minmax(150px, 220px) minmax(150px, 220px);
+    /* last column is the +/- toggle for the optional third name */
+    grid-template-columns: 52px 1fr minmax(150px, 220px) minmax(150px, 220px) 22px;
     gap: 12px 14px;
     align-items: center;
     background: var(--card-soft);
@@ -2118,6 +2137,26 @@ body.map-preview #svp-map {
     padding: 12px 16px;
     transition: border-color 0.15s, background 0.15s;
 }
+
+/* a third pupil joined this talk: three narrower name fields instead of two */
+.vt-row.three { grid-template-columns: 52px 1fr repeat(3, minmax(110px, 190px)) 22px; }
+
+/* the toggle itself: a quiet +/- at the right edge, never in print */
+.vt-more {
+    width: 22px;
+    height: 22px;
+    padding: 0;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.95rem;
+    line-height: 1;
+    color: var(--muted);
+    background: transparent;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.vt-more:hover { color: var(--phi); border-color: var(--phi); }
 
 /* a claimed topic gets the φ-green tint */
 .vt-row.taken {
@@ -2264,14 +2303,17 @@ body.map-preview #svp-map {
 
 /* narrow screens: both name fields drop under the topic */
 @media (max-width: 760px) {
-    .vt-row { grid-template-columns: 40px 1fr 1fr; }
-    .vt-topic { grid-column: 2 / 4; }
+    .vt-row, .vt-row.three { grid-template-columns: 40px 1fr 1fr 22px; }
+    .vt-topic { grid-column: 2 / 5; }
     .vt-name.n1 { grid-column: 2; }
     .vt-name.n2 { grid-column: 3; }
+    /* the third name gets its own line rather than a squeezed third column */
+    .vt-name.n3 { grid-column: 2 / 4; }
+    .vt-more { grid-column: 4; grid-row: 2; align-self: center; }
 }
 
 @media print {
-    .vt-actions, .vt-hint, .vt-confirm, .vt-switch { display: none !important; }
+    .vt-actions, .vt-hint, .vt-confirm, .vt-switch, .vt-more, .vt-status { display: none !important; }
 
     .vt-row {
         break-inside: avoid;

@@ -41,6 +41,19 @@ class Handler(http.server.SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=HTML_DIR, **kwargs)
 
+    def end_headers(self):
+        """Never let the browser keep anything from the dev server.
+
+        Without a Cache-Control header the browser GUESSES how long a file stays
+        fresh (a heuristic from Last-Modified), and it guessed wrong: an edited
+        .js kept being served from Chrome's cache while the file on disk was
+        already new - the page then shows old behaviour and even Cmd-Shift-R
+        does not always cure it (Doc, 01.09.2026, the group switch that "always
+        said FOS"). no-store means: ask every time. Costs nothing on localhost.
+        """
+        self.send_header('Cache-Control', 'no-store, max-age=0')
+        super().end_headers()
+
     def do_GET(self):
         path = self.translate_path(self.path)
         if os.path.isdir(path):

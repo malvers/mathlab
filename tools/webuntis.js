@@ -237,7 +237,11 @@ async function loadPlan(pageRel) {
     }
   } catch (e) { console.error('  (Overrides nicht erreichbar: ' + e.message + ')'); }
   const merged = rows.map((r, i) => ({ ...r, ...(overrides[String(i)] || {}) }));
-  return { rows: merged, badge, overrideTs: ts, pagePath };
+  /* Seiten im Termin-Modus (Blockunterricht) binden ihre Zeilen NICHT an die
+     Kalenderwoche - siehe svp-plan.js. Dieses Kommando kann das (noch) nicht,
+     also fasst es sie gar nicht erst an, statt die falsche Zeile zu schreiben. */
+  const termin = /window\.UNTIS_TERMIN\s*=\s*true/.test(src);
+  return { rows: merged, badge, overrideTs: ts, pagePath, termin };
 }
 
 // One line for the classbook: topic, Lernbereich, Ustd. and the planned steps,
@@ -620,7 +624,14 @@ async function main() {
       const page = pageFor(l, pages);
       if (!page) { unmapped.add(`${l.subject} ${l.klassen.join(',')}`); continue; }
       if (!plans[page]) plans[page] = await loadPlan(page);
-      const { rows, badge } = plans[page];
+      const { rows, badge, termin } = plans[page];
+      if (termin) {
+        if (!plans[page]._warned) {
+          console.log(`${page}: Termin-Modus (Blockunterricht) - hier bitte den WebUntis-Knopf auf der Planseite benutzen, die Kalenderwoche trifft die falsche Zeile.`);
+          plans[page]._warned = true;
+        }
+        continue;
+      }
       const kw = isoWeek(parseYmd(l.date));
       const row = rows.find(r => !r.ferien && Number(r.kw) === kw);
       const label = `${l.date} ${l.start} ${l.subject} ${l.klassen.join(',')}`;
