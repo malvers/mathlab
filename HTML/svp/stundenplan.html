@@ -1369,12 +1369,12 @@
             if (i >= 0 && INDEX.weeks[i + delta]) showWeek(INDEX.weeks[i + delta]);
         }
 
-        // Opening view: always the week AFTER the current one - the plan you
-        // prepare for. The "Heute" button still jumps to the running week.
+        /* Beim Oeffnen die LAUFENDE Woche (Doc, 01.09.2026). Vorher stand hier
+           die naechste - "der Plan, den du vorbereitest" - aber beim Reload
+           landete man staendig eine Woche zu weit. Die naechste Woche ist einen
+           Klick auf > entfernt, das Jetzt war es nicht. */
         function startWeek() {
-            const cur = weekForToday();
-            const i = INDEX.weeks.indexOf(cur);
-            return INDEX.weeks[i + 1] || cur;
+            return weekForToday();
         }
 
         /* Welche Stunde gehoert zu welchem Stoffverteilungsplan? Erzeugt von
