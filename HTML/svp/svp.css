@@ -1383,6 +1383,20 @@ td.remark { color: var(--muted); font-size: 0.88rem; min-width: 160px; }
    Immer sichtbar - nur der Klick (Schreibdialog) haengt am Bearbeiten-Modus.
    Alle Grundregeln bewusst einklassig, damit .is-full/.is-part die Farbe
    sicher ueberschreiben. */
+/* Kurzes Aufleuchten der Woche, die aus dem Stundenplan angesprungen wurde
+   (?kw=36). Nur ein weicher Rahmenpuls - die Zeile soll auffallen, nicht
+   blinken. */
+@keyframes kw-jump-pulse {
+    0%, 100% { background: transparent; }
+    18% { background: rgba(245, 194, 66, 0.22); }
+}
+
+tr.kw-jump > td { animation: kw-jump-pulse 1.3s ease-in-out 2; }
+
+@media (prefers-reduced-motion: reduce) {
+    tr.kw-jump > td { animation: none; background: rgba(245, 194, 66, 0.16); }
+}
+
 /* Abgabe-Knopf in der Wochenzeile: sieht bewusst nach Knopf aus, nicht nach
    Material-Pille - er fuehrt weg von der Seite in den Upload-Ordner. Orange,
    weil er zum Handeln auffordert (Doc, 31.08.2026). */
