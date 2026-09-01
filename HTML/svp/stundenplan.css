@@ -19,7 +19,7 @@
 .tt-week {
     font-family: Orbitron, sans-serif;
     font-size: 1.05rem;
-    color: var(--lambda);
+    color: var(--head);
     letter-spacing: 0.04em;
 }
 
@@ -522,18 +522,41 @@ body.side-hidden .tt-side { display: none; }
 
 /* --- week navigation ------------------------------------------------------ */
 
+/* The week arrows are drawn as real triangles instead of the font's chevrons:
+   a glyph never sits truly centred in a 30px box (it carries its own side
+   bearings and baseline), a border triangle does. The ‹ › in the markup is
+   hidden by font-size:0; the buttons keep their aria-label. */
 .tt-nav {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     width: 30px;
     height: 30px;
+    padding: 0;
     border-radius: 7px;
     border: 1px solid var(--line);
     background: var(--panel);
-    color: var(--text);
-    font-size: 1.1rem;
+    /* muted, not full text colour: a solid triangle carries more weight than
+       the chevron glyph it replaced */
+    color: var(--muted);
+    font-size: 0;
     line-height: 1;
     cursor: pointer;
     transition: border-color 0.12s ease, color 0.12s ease;
 }
+
+.tt-nav::before {
+    content: "";
+    width: 0;
+    height: 0;
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+}
+
+/* the 1px nudge is optical centring: a triangle's visual mass sits at a third
+   of its width, not at half */
+#prev::before { border-right: 8px solid currentColor; margin-right: 1px; }
+#next::before { border-left: 8px solid currentColor; margin-left: 1px; }
 
 .tt-nav:hover:not(:disabled) {
     border-color: var(--phi);
