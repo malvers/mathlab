@@ -112,8 +112,23 @@ async function writeTopic(ttId, text) {
   return r.result;
 }
 
-// Read back what is actually stored. getLessonTopic2017 only returns previous
-// topics as suggestions, so the real state comes from getPeriodData2017.
+// STILLGELEGT am 02.09.2026 auf Docs Ansage ("Schuelernamen? Neeee").
+// getPeriodData2017 ist die EINZIGE Stelle, die je Schuelerdaten zu Gesicht
+// bekommen hat: die Antwort enthaelt neben dem Stundeninhalt auch
+// `referencedStudents` mit Klarnamen und Geburtsdatum - auch bei fremden
+// Stunden. Gespeichert wurde davon nie etwas (die Funktion nahm nur
+// topic.text), aber die Daten kamen ueber die Leitung, und das reicht als
+// Grund, den Aufruf gar nicht erst zu machen.
+//
+// Es haengt daran: der Ueberschreibschutz beim Klassenbuch-Schreiben und die
+// `written`-Punkte des WU-Chips. Beides ist ohne diesen Aufruf blind - deshalb
+// wirft die Funktion, statt still leere Ergebnisse zu liefern.
+// Zum Reaktivieren: den Block unten wieder einkommentieren, diesen ersetzen.
+async function readTopics(ttIds) {
+  throw new Error('readTopics ist stillgelegt (Datenschutz, 02.09.2026): getPeriodData2017 '
+    + 'liefert Schuelernamen mit. Siehe Kommentar in tools/webuntis.js.');
+}
+/* ORIGINAL - nicht loeschen, nur stillgelegt:
 async function readTopics(ttIds) {
   const out = {};
   for (let i = 0; i < ttIds.length; i += 50) {
@@ -123,6 +138,7 @@ async function readTopics(ttIds) {
   }
   return out;
 }
+*/
 
 // ---------- login ----------
 
@@ -510,32 +526,57 @@ async function main() {
       code: l.code ?? null, lstext: l.lstext || null, info: l.info || null, substText: l.substText || null,
     });
 
-    const classes = await rpc('getKlassen');
     const timegrid = await rpc('getTimegridUnits');
     const holidays = await rpc('getHolidays');
-    const seen = new Set();
     const byWeek = new Map();
     let total = 0;
 
-    for (let i = 0; i < classes.length; i++) {
-      const k = classes[i];
-      process.stderr.write(`\r  ${i + 1}/${classes.length}  ${k.name.padEnd(12)}`);
-      try {
-        const tt = await rpc('getTimetable', { options: { element: { id: k.id, type: 1 }, startDate: sy.startDate, endDate: sy.endDate, ...fields } });
-        for (const l of tt) {
-          // A lesson attended by several classes comes back once per class.
-          const key = `${l.id ?? l.lsnumber}|${l.date}|${l.startTime}`;
-          if (seen.has(key)) continue;
-          seen.add(key);
-          const monday = parseYmd(l.date);
-          monday.setDate(monday.getDate() - ((monday.getDay() + 6) % 7));
-          const wk = ymd(monday);
-          if (!byWeek.has(wk)) byWeek.set(wk, []);
-          byWeek.get(wk).push(norm(l));
-          total++;
-        }
-      } catch (e) { process.stderr.write(`  [${k.name}: ${e.message}]\n`); }
-      await new Promise(r => setTimeout(r, 150)); // be gentle on the school server
+    // Standard seit 02.09.2026 (Doc: "eigentlich reicht mein plan"): NUR der
+    // eigene Stundenplan. Frueher lief hier immer die Schleife ueber alle 80
+    // Klassen - die holte rund 3100 Stunden je Woche und die Kuerzel von 140
+    // Kolleg:innen auf die private Platte. Der Weg ist nicht geloescht, er
+    // haengt an --alle: EIN Schalter zurueck, falls der Optimierer den ganzen
+    // Schulplan wieder braucht. Ohne den Schalter kommen nur Docs Stunden.
+    const ALLE = process.argv.includes('--alle');
+    if (ALLE) {
+      console.log('--alle: holt den GANZEN Schulplan inkl. fremder Lehrkraft-Kuerzel.');
+      const classes = await rpc('getKlassen');
+      const seen = new Set();
+      for (let i = 0; i < classes.length; i++) {
+        const k = classes[i];
+        process.stderr.write(`\r  ${i + 1}/${classes.length}  ${k.name.padEnd(12)}`);
+        try {
+          const tt = await rpc('getTimetable', { options: { element: { id: k.id, type: 1 }, startDate: sy.startDate, endDate: sy.endDate, ...fields } });
+          for (const l of tt) {
+            // A lesson attended by several classes comes back once per class.
+            const key = `${l.id ?? l.lsnumber}|${l.date}|${l.startTime}`;
+            if (seen.has(key)) continue;
+            seen.add(key);
+            const monday = parseYmd(l.date);
+            monday.setDate(monday.getDate() - ((monday.getDay() + 6) % 7));
+            const wk = ymd(monday);
+            if (!byWeek.has(wk)) byWeek.set(wk, []);
+            byWeek.get(wk).push(norm(l));
+            total++;
+          }
+        } catch (e) { process.stderr.write(`  [${k.name}: ${e.message}]\n`); }
+        await new Promise(r => setTimeout(r, 150)); // be gentle on the school server
+      }
+    } else {
+      const ELEM_TYPE = { CLASS: 1, KLASSE: 1, TEACHER: 2, SUBJECT: 3, ROOM: 4, STUDENT: 5 };
+      const myId = session.user?.elemId ?? session.user?.personId;
+      const rawType = session.user?.elemType ?? session.user?.personType ?? 2;
+      const myType = typeof rawType === 'string' ? (ELEM_TYPE[rawType.toUpperCase()] ?? 2) : rawType;
+      process.stderr.write('  eigener Plan wird geholt …');
+      const tt = await rpc('getTimetable', { options: { element: { id: myId, type: myType }, startDate: sy.startDate, endDate: sy.endDate, ...fields } });
+      for (const l of tt) {
+        const monday = parseYmd(l.date);
+        monday.setDate(monday.getDate() - ((monday.getDay() + 6) % 7));
+        const wk = ymd(monday);
+        if (!byWeek.has(wk)) byWeek.set(wk, []);
+        byWeek.get(wk).push(norm(l));
+        total++;
+      }
     }
     process.stderr.write('\r' + ' '.repeat(44) + '\r');
 
@@ -545,16 +586,19 @@ async function main() {
       const monday = parseYmd(wk);
       const friday = new Date(monday); friday.setDate(monday.getDate() + 4);
       fs.writeFileSync(path.join(outDir, `w${wk}.json`),
-        JSON.stringify({ scope: 'all', week: { from: Number(wk), to: Number(ymd(friday)) }, timegrid, lessons }));
+        JSON.stringify({ scope: ALLE ? 'all' : 'me', week: { from: Number(wk), to: Number(ymd(friday)) }, timegrid, lessons }));
     }
 
     const teachers = {};
     for (const list of byWeek.values()) for (const l of list) for (const n of l.teachers) teachers[n] = (teachers[n] || 0) + 1;
+    /* Klarnamen aller Kolleg:innen kommen nicht mehr mit (Doc, 02.09.2026):
     const names = {};
     for (const t of session.masterData?.teachers || []) {
       const full = [t.lastName, t.firstName].filter(Boolean).join(', ');
       if (t.name && full) names[t.name] = full;
     }
+    */
+    const names = {};
     fs.writeFileSync(path.join(outDir, 'index.json'), JSON.stringify({
       school: session.user?.schoolName ?? SCHOOL, teacher: session.user?.displayName ?? null, names,
       schoolyear: { name: sy.name, from: sy.startDate, to: sy.endDate },
@@ -568,6 +612,15 @@ async function main() {
     return;
   }
   if (cmd === 'names') {
+    // STILLGELEGT am 02.09.2026 (Doc): schrieb die Klarnamen ALLER ~173
+    // Kolleg:innen in index.json. Seit "nur mein Plan" braucht das niemand
+    // mehr. Kein Fehler-Exit, damit der taegliche LaunchAgent sauber
+    // durchlaeuft - er ruft `year && names` auf.
+    if (!process.argv.includes('--alle')) {
+      console.log('names ist stillgelegt (Datenschutz, 02.09.2026) — es werden keine Kolleg:innen-Namen mehr gespeichert.'
+        + ' Mit --alle wieder einschalten.');
+      return;
+    }
     // Full teacher names. getTeachers is denied for teacher accounts, but the
     // app master data (secret login) lists every teacher with first/last name.
     if (!session.masterData) { console.error('names braucht den App-Schlüssel-Login (WEBUNTIS_SECRET).'); process.exit(1); }
