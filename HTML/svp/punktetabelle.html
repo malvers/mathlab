@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Punktetabelle | Stoffverteilungspl&auml;ne</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript>
+        <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+            rel="stylesheet">
+    </noscript>
+    <link rel="icon" type="image/png" href="../resources/favicon.png">
+    <link rel="stylesheet" href="svp.css">
+    <script src="svp-gate.js"></script>
+    <style>
+        /* The rose of the original Notenspiegel, mixed for the dark ground.
+           Everything on this page is derived from --ypsilon, so the table stays
+           in the house palette while keeping the look of the printed sheet. */
+        :root {
+            --pt-band: rgba(245, 194, 66, 0.19);
+            --pt-band-line: rgba(245, 194, 66, 0.42);
+            --pt-row-a: rgba(245, 194, 66, 0.04);
+            --pt-row-b: rgba(245, 194, 66, 0.085);
+            --pt-row-c: rgba(245, 194, 66, 0.15);
+            --pt-col: rgba(245, 194, 66, 0.05);
+            --pt-hit: rgba(245, 194, 66, 0.38);
+            --pt-grid: rgba(120, 160, 220, 0.16);
+            /* Fills want the real lambda; --lambda is darkened to mustard in the
+               light scheme because it is a TEXT token there. */
+            --pt-accent: rgb(245, 194, 66);
+            --pt-ink: rgb(8, 20, 42);
+            --pt-big: var(--lambda);
+            /* One geometry for both Klassenstufen: the table is this wide, the
+               first column this wide, the rest is split by the column count.
+               Measured natural widths were 101 px for the BE column and 55-65 px
+               per Notenpunkt - so 6.5rem / 3.6rem carry the text without wrapping. */
+            --pt-total: 60.5rem;
+            --pt-be: 6.5rem;
+            /* table + card padding + both borders - heading and cards share it */
+            /* table + both borders + the reserved bar - measured: 4 px of slack
+               were left over on the right, between bar and frame */
+            --pt-box: calc(var(--pt-total) + 0.85rem);
+            /* --line is the house border token, but it is blue-grey and reads as
+               a stray cold edge around a warm table */
+            --pt-edge: rgba(245, 194, 66, 0.22);
+        }
+
+        html.svp-light {
+            --pt-band: rgb(250, 231, 189);
+            --pt-band-line: rgb(226, 190, 116);
+            --pt-row-a: rgb(255, 252, 245);
+            --pt-row-b: rgb(254, 246, 228);
+            --pt-row-c: rgb(251, 237, 205);
+            --pt-col: rgba(176, 128, 12, 0.05);
+            --pt-hit: rgba(214, 165, 60, 0.4);
+            --pt-grid: rgba(40, 70, 120, 0.22);
+            --pt-accent: rgb(245, 194, 66);
+            --pt-ink: rgb(8, 20, 42);
+            /* 3.0:1 on white - the lower bound for text this size */
+            --pt-big: rgb(198, 140, 20);
+            --pt-edge: rgba(198, 140, 20, 0.28);
+        }
+
+        header.page-head {
+            width: min(100%, var(--pt-box));
+            max-width: none;
+        }
+
+        .pt-wrap {
+            /* the same box as the heading, so both start on the same line */
+            width: min(100%, var(--pt-box));
+            margin: 0 auto;
+            display: grid;
+            /* minmax(0, ...) - grid items default to min-width: auto and would
+               otherwise refuse to shrink below the table, pushing the cards past
+               the window on a phone (measured: 1006 px card in a 380 px wrap) */
+            grid-template-columns: minmax(0, auto);
+            gap: 14px;
+        }
+
+        /* The table brings its own frame (the orange scroll box), so its card
+           drops padding, border and fill - otherwise a dark strip sits between
+           card edge and table (measured: 20 px left). */
+        .pt-card.bare {
+            padding: 0;
+            border: 0;
+            background: transparent;
+        }
+
+        .pt-card.bare .pt-title { margin: 0 0 10px 2px; }
+
+        .pt-card {
+            min-width: 0;
+            max-width: 100%;
+            background: var(--card-soft);
+            border: 1px solid var(--pt-edge);
+            border-radius: 12px;
+            padding: 14px 16px;
+        }
+
+        .pt-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.95rem;
+            letter-spacing: 0.03em;
+            color: var(--head);
+            margin-bottom: 10px;
+        }
+
+        /* Controls: Klassenstufe left, the two numbers right; wraps on phones. */
+        .pt-ctrl {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 10px 18px;
+        }
+
+        .pt-seg {
+            display: flex;
+            border: 1px solid var(--line);
+            border-radius: 999px;
+            overflow: hidden;
+        }
+
+        .pt-seg button {
+            font: inherit;
+            font-size: 0.85rem;
+            padding: 6px 14px;
+            background: transparent;
+            color: var(--muted);
+            border: 0;
+            cursor: pointer;
+        }
+
+        .pt-seg button.on {
+            background: var(--pt-accent);
+            color: var(--pt-ink);
+            font-weight: 600;
+        }
+
+        .pt-field {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            color: var(--muted);
+        }
+
+        .pt-field input {
+            font: inherit;
+            width: 5.2rem;
+            padding: 5px 8px;
+            background: var(--input-bg);
+            color: var(--text);
+            border: 1px solid var(--line);
+            border-radius: 8px;
+        }
+
+        /* The verdict for the entered score - the number Doc actually reads.
+           Sits in the control row, right of the `erreicht` field. */
+        .pt-verdict {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .pt-big {
+            /* Arial here, not Orbitron - Doc's call for this one number */
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 1.6rem;
+            line-height: 1;
+            color: var(--pt-big);
+        }
+
+        .pt-note { font-size: 0.85rem; color: var(--muted); }
+
+        /* The matrix scrolls inside its own box - the page never scrolls sideways,
+           and the head row plus the BE column stay put while scrolling. */
+        .pt-scroll {
+            overflow: auto;
+            max-height: 72vh;
+            border: 1px solid var(--pt-band-line);
+            border-radius: 8px;
+            /* The box needs its own surface: the card around it is bare now, so
+               the few pixels of slack beside the table showed the page ground as
+               a near-black stripe - and the translucent row tints had nothing to
+               sit on either. */
+            /* the composite of a plain row (tint over card), so the few pixels
+               of slack beside the table are indistinguishable from it */
+            background: linear-gradient(var(--pt-row-a), var(--pt-row-a)), var(--card);
+            /* Full width of the card, with the bar in the reserved gutter at its
+               edge - `fit-content` sized the box to the table alone, and the bar
+               then covered the last column (measured: 9 px overhang). The card is
+               only 3.2rem wider than the table, so nothing looks empty. */
+            width: 100%;
+            scrollbar-gutter: stable;
+        }
+
+        /* svp.css sets `scrollbar-color` on html, and that property INHERITS -
+           so it reaches this box too, and Chrome (121+) then ignores every
+           ::-webkit-scrollbar rule here. The slim look must therefore come from
+           the standard properties, unguarded (same idiom as stundenplan.css).
+           The webkit block below only still serves Safari. */
+        .pt-scroll {
+            scrollbar-width: thin;
+            scrollbar-color: rgba(245, 194, 66, 0.5) transparent;
+        }
+
+        html.svp-light .pt-scroll { scrollbar-color: rgba(198, 140, 20, 0.4) transparent; }
+
+        .pt-scroll::-webkit-scrollbar { width: 7px; height: 7px; }
+        .pt-scroll::-webkit-scrollbar-track { background: transparent; }
+        .pt-scroll::-webkit-scrollbar-thumb {
+            background: rgba(245, 194, 66, 0.5);
+            border-radius: 4px;
+        }
+        html.svp-light .pt-scroll::-webkit-scrollbar-thumb { background: rgba(198, 140, 20, 0.4); }
+        .pt-scroll::-webkit-scrollbar-corner { background: transparent; }
+
+        table.pt {
+            /* svp.css sets `table { width: 100%; min-width: 760px }` for the plan
+               tables. Here the width is fixed instead, so Klasse 11 and Klasse
+               12/13 occupy exactly the same box and switching does not reflow. */
+            table-layout: fixed;
+            width: var(--pt-total);
+            /* flush left: any slack belongs on the right, where the bar is */
+            margin: 0;
+            min-width: 0;
+            border-collapse: separate;
+            border-spacing: 0;
+            font-size: 0.85rem;
+            white-space: nowrap;
+        }
+
+        table.pt col.cbe { width: var(--pt-be); }
+        table.pt col.cd { width: calc((var(--pt-total) - var(--pt-be)) / var(--pt-n)); }
+
+        table.pt th,
+        table.pt td {
+            border-right: 1px solid var(--pt-grid);
+            border-bottom: 1px solid var(--pt-grid);
+            padding: 4px 10px;
+            text-align: center;
+        }
+
+        /* Head band: Note groups, Notenpunkte, Prozent. */
+        table.pt thead th {
+            position: sticky;
+            background: var(--pt-band);
+            color: var(--head);
+            font-weight: 700;
+            font-family: inherit;
+            font-size: 0.85rem;
+            letter-spacing: 0;
+            text-transform: none;
+            text-align: center;
+            padding: 5px 10px;
+            border-bottom: 1px solid var(--pt-grid);
+            z-index: 2;
+        }
+
+        /* The three head rows stack; their `top` is measured after render
+           (stickHeads) - svp.css already sets `top: 0` for every thead th, and
+           a guessed rem offset let the Prozent row slide under the one above. */
+
+        table.pt thead th.grp { border-right: 2px solid var(--pt-band-line); }
+
+        table.pt thead th.np {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.9rem;
+        }
+
+        table.pt thead th.pc { font-weight: 400; font-size: 0.74rem; padding: 5px 4px; }
+
+        /* First column: the Bewertungseinheiten of the test. */
+        table.pt th.be {
+            position: sticky;
+            left: 0;
+            z-index: 3;
+            background: var(--pt-band);
+            color: var(--head);
+            text-align: right;
+            font-weight: 600;
+            min-width: 0;
+        }
+
+        table.pt tbody th.be {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 400;
+        }
+
+        table.pt tbody tr.b5 th.be,
+        table.pt tbody tr.b10 th.be { font-weight: 700; }
+
+        /* Row banding of the printed sheet: every fifth line a shade stronger,
+           every tenth stronger still - that is what makes it readable at a glance. */
+        table.pt tbody td { background: var(--pt-row-a); color: var(--text); }
+        table.pt tbody tr.b5 td { background: var(--pt-row-b); }
+        table.pt tbody tr.b10 td { background: var(--pt-row-c); }
+
+        /* Column groups = the Note a Notenpunkt belongs to; every other group
+           gets a touch more colour so the eye can follow a column down. */
+        /* Column tint as a background layer, NOT box-shadow - the row frame
+           below needs the shadow slot. */
+        table.pt td.g1, table.pt thead th.g1 {
+            background-image: linear-gradient(var(--pt-col), var(--pt-col));
+        }
+        table.pt td.gsep, table.pt th.gsep { border-right: 2px solid var(--pt-band-line); }
+
+        /* The row for the entered total: one continuous frame. An outline per
+           cell drew a little box around each number and doubled up on the group
+           rules; inset shadows keep the geometry and close the band. */
+        table.pt tbody tr.hit th.be,
+        table.pt tbody tr.hit td {
+            box-shadow: inset 0 1px 0 var(--pt-accent), inset 0 -1px 0 var(--pt-accent);
+        }
+
+        table.pt tbody tr.hit th.be {
+            box-shadow: inset 0 1px 0 var(--pt-accent), inset 0 -1px 0 var(--pt-accent),
+                        inset 1px 0 0 var(--pt-accent);
+        }
+
+        table.pt tbody tr.hit td:last-child {
+            box-shadow: inset 0 1px 0 var(--pt-accent), inset 0 -1px 0 var(--pt-accent),
+                        inset -1px 0 0 var(--pt-accent);
+        }
+
+        table.pt tbody td.mark {
+            background: var(--pt-hit);
+            color: var(--head);
+            font-weight: 700;
+        }
+
+        .pt-foot {
+            /* Without a cap this paragraph's max-content width drives the
+               fit-content of .pt-wrap, and every card stretches to the window
+               (measured: 1505 px instead of the table's 1026). */
+            max-width: 44rem;
+            font-size: 0.78rem;
+            color: var(--muted);
+            line-height: 1.5;
+        }
+
+        @media (max-width: 560px) {
+            .pt-big { font-size: 1.35rem; }
+            table.pt th, table.pt td { padding: 3px 6px; font-size: 0.78rem; }
+        }
+    </style>
+</head>
+
+<body>
+    <header class="page-head">
+        <a class="back-link" href="./">&larr; &Uuml;bersicht</a>
+        <h1>Punktetabelle</h1>
+        <div class="subtitle">Notenspiegel Berufliches Gymnasium &middot; Klasse 11 und 12/13</div>
+    </header>
+
+    <div class="pt-wrap">
+        <section class="pt-card">
+            <div class="pt-ctrl">
+                <div class="pt-seg" id="ptSeg">
+                    <button type="button" data-stufe="11">Klasse 11</button>
+                    <button type="button" data-stufe="12" class="on">Klasse 12 &amp; 13</button>
+                </div>
+                <label class="pt-field" for="ptTotal">Bewertungseinheiten gesamt
+                    <input id="ptTotal" type="number" min="1" max="300" step="1" value="30"></label>
+                <label class="pt-field" for="ptGot">erreicht
+                    <input id="ptGot" type="number" min="0" max="300" step="0.5" placeholder="&ndash;"></label>
+                <div class="pt-verdict">
+                    <span class="pt-big" id="ptBig">&ndash;</span>
+                    <span class="pt-note" id="ptNote">Erreichte Bewertungseinheiten eintragen.</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="pt-card bare">
+            <div class="pt-title" id="ptMatrixTitle">Notenspiegel Klassenstufe 12 und 13</div>
+            <div class="pt-scroll">
+                <table class="pt" id="ptMatrix"></table>
+            </div>
+        </section>
+
+        <section class="pt-card">
+            <div class="pt-foot">
+                Grundlage sind die Prozentschwellen des Notenspiegels am Beruflichen Gymnasium.
+                Die Seite h&auml;lt keine Tabelle vor, sie rechnet sie:
+                <em>ben&ouml;tigte Bewertungseinheiten = aufgerundet(Schwelle &times; Gesamt-BE)</em>.
+                Gegen die interne Vorlage gepr&uuml;ft &mdash; 861 Zellen, keine Abweichung.
+                Vorteil: gilt f&uuml;r jede Gesamtzahl, nicht nur f&uuml;r die dort abgedruckten.
+            </div>
+        </section>
+    </div>
+
+    <script>
+        (function () {
+            'use strict';
+
+            /* The two official scales. Top mark first; `note` groups the columns
+               the way the Oberstufe reads them (15-13 = 1, 12-10 = 2, ...). */
+            const SCALES = {
+                12: {
+                    caption: 'Notenpunkte',
+                    title: 'Notenspiegel Klassenstufe 12 und 13',
+                    rows: [['15', 0.95, 1], ['14', 0.90, 1], ['13', 0.85, 1],
+                           ['12', 0.80, 2], ['11', 0.75, 2], ['10', 0.70, 2],
+                           ['09', 0.65, 3], ['08', 0.60, 3], ['07', 0.55, 3],
+                           ['06', 0.50, 4], ['05', 0.45, 4], ['04', 0.40, 4],
+                           ['03', 0.333, 5], ['02', 0.283, 5], ['01', 0.20, 5]],
+                    below: '00',
+                    from: 20,
+                    groups: true
+                },
+                11: {
+                    caption: 'Note',
+                    title: 'Notenspiegel Klassenstufe 11',
+                    rows: [['1', 0.95, 1], ['2', 0.80, 2], ['3', 0.65, 3],
+                           ['4', 0.45, 4], ['5', 0.25, 5], ['6', 0, 6]],
+                    below: '6',
+                    from: 10
+                }
+            };
+
+            /* Rounding up, but only on a genuine remainder: 0.95 * 20 is
+               19.000000000000004 in binary floating point, and a naive ceil would
+               ask for 20 units instead of 19. */
+            function need(p, total) {
+                return Math.ceil(Number((p * total).toFixed(9)));
+            }
+
+            const seg = document.getElementById('ptSeg');
+            const elTotal = document.getElementById('ptTotal');
+            const elGot = document.getElementById('ptGot');
+            const elBig = document.getElementById('ptBig');
+            const elNote = document.getElementById('ptNote');
+            const elMatrix = document.getElementById('ptMatrix');
+            const elMatrixTitle = document.getElementById('ptMatrixTitle');
+            let stufe = 12;
+
+            function pct(p) {
+                return '≥ ' + (p * 100).toFixed(1).replace('.0', '').replace('.', ',') + ' %';
+            }
+
+            /* Every total worth printing: each step up to 50, then in fives. */
+            function totals() {
+                const out = [];
+                for (let t = SCALES[stufe].from; t <= 50; t++) out.push(t);
+                for (let t = 55; t <= 100; t += 5) out.push(t);
+                return out;
+            }
+
+            /* Highest mark whose unit threshold the score reaches. */
+            function markFor(got, total) {
+                const sc = SCALES[stufe];
+                for (const [label, p] of sc.rows) {
+                    if (got >= need(p, total)) return { label: label, p: p };
+                }
+                return { label: sc.below, p: null };
+            }
+
+            function drawVerdict() {
+                const total = Math.max(1, Number(elTotal.value) || 1);
+                if (elGot.value === '') {
+                    elBig.textContent = '–';
+                    elNote.textContent = 'Erreichte Bewertungseinheiten eintragen.';
+                    return;
+                }
+                const got = Number(elGot.value);
+                /* Plausibility: more units than the test has, or a negative
+                   score, is a typo - say so instead of printing 186,7 %. */
+                if (!isFinite(got) || got < 0 || got > total) {
+                    elBig.textContent = '?';
+                    elNote.textContent = got < 0
+                        ? 'Negative Bewertungseinheiten gibt es nicht.'
+                        : got + ' von ' + total + ' BE - mehr als der Test hergibt.';
+                    return;
+                }
+                const m = markFor(got, total);
+                elBig.textContent = stufe === 12 ? m.label + ' NP' : 'Note ' + m.label;
+                elNote.textContent = got + ' von ' + total + ' BE · ' +
+                    (got / total * 100).toFixed(1).replace('.', ',') + ' %';
+            }
+
+            /* The sheet itself: Notenpunkte across, Bewertungseinheiten down. */
+            function drawMatrix() {
+                const sc = SCALES[stufe];
+                const cur = Math.max(1, Number(elTotal.value) || 1);
+                let got = elGot.value === '' ? null : Number(elGot.value);
+                if (got !== null && (!isFinite(got) || got < 0 || got > cur)) got = null;
+                elMatrixTitle.textContent = sc.title;
+
+                /* class list per column: banding by Note group + a stronger rule
+                   where one group ends and the next begins */
+                const cls = sc.rows.map(function (r, i) {
+                    const last = i === sc.rows.length - 1 || sc.rows[i + 1][2] !== r[2];
+                    return (r[2] % 2 ? 'g1' : '') + (last ? ' gsep' : '');
+                });
+
+                let h = '<colgroup><col class="cbe">' +
+                    sc.rows.map(function () { return '<col class="cd">'; }).join('') +
+                    '</colgroup><thead>';
+                if (sc.groups) {
+                    h += '<tr><th class="be">Note</th>';
+                    for (let i = 0; i < sc.rows.length;) {
+                        let j = i;
+                        while (j + 1 < sc.rows.length && sc.rows[j + 1][2] === sc.rows[i][2]) j++;
+                        h += '<th class="grp" colspan="' + (j - i + 1) + '">' + sc.rows[i][2] + '</th>';
+                        i = j + 1;
+                    }
+                    h += '</tr>';
+                }
+                h += '<tr><th class="be">' + sc.caption + '</th>';
+                sc.rows.forEach(function (r, i) { h += '<th class="np ' + cls[i] + '">' + r[0] + '</th>'; });
+                h += '</tr><tr><th class="be">Prozent</th>';
+                sc.rows.forEach(function (r, i) { h += '<th class="pc ' + cls[i] + '">' + pct(r[1]) + '</th>'; });
+                h += '</tr></thead><tbody>';
+
+                for (const t of totals()) {
+                    const band = t % 10 === 0 ? ' b10' : (t % 5 === 0 ? ' b5' : '');
+                    h += '<tr class="' + (t === cur ? 'hit' : '') + band + '">' +
+                        '<th class="be">' + t + '</th>';
+                    sc.rows.forEach(function (r, i) {
+                        const n = need(r[1], t);
+                        /* mark the cell the entered score actually earns */
+                        const isMark = got !== null && t === cur &&
+                            got >= n && (i === 0 || got < need(sc.rows[i - 1][1], t));
+                        h += '<td class="' + cls[i] + (isMark ? ' mark' : '') + '">' + n + '</td>';
+                    });
+                    h += '</tr>';
+                }
+                elMatrix.style.setProperty('--pt-n', sc.rows.length);
+                elMatrix.innerHTML = h + '</tbody>';
+                stickHeads();
+            }
+
+            /* Stack the head rows by their real heights - the font may not have
+               loaded yet when we first measure, so do it again after it has. */
+            function stickHeads() {
+                let top = 0;
+                for (const tr of elMatrix.tHead.rows) {
+                    for (const th of tr.cells) th.style.top = top + 'px';
+                    top += tr.getBoundingClientRect().height;
+                }
+            }
+
+            if (document.fonts && document.fonts.ready) {
+                document.fonts.ready.then(stickHeads);
+            }
+            window.addEventListener('resize', stickHeads);
+
+            function redraw() {
+                elGot.max = String(Math.max(1, Number(elTotal.value) || 1));
+                drawVerdict();
+                drawMatrix();
+            }
+
+            seg.addEventListener('click', function (e) {
+                const b = e.target.closest('button[data-stufe]');
+                if (!b) return;
+                stufe = Number(b.dataset.stufe);
+                for (const other of seg.querySelectorAll('button')) other.classList.toggle('on', other === b);
+                redraw();
+            });
+            elTotal.addEventListener('input', redraw);
+            elGot.addEventListener('input', redraw);
+            redraw();
+        }());
+    </script>
+    <script src="svp-nav.js"></script>
+</body>
+
+</html>

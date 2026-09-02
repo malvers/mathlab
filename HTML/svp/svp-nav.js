@@ -45,11 +45,13 @@
         ['notes.html', 'Notizen', 'b-cyan', 'Notizen'],
         ['konzepte.html', 'Konzepte', 'b-violet', 'Konzepte'],
         ['operatoren.html', 'Operatoren', 'b-red', 'Operatoren'],
+        ['punktetabelle.html', 'Punkte BGY', 'b-orange', 'Punktetabelle - Notenspiegel BGY'],
         [PLAN_HREF, 'Stundenplan', 'b-teal', PLAN_TITLE],
     ];
 
     // These open in a new tab so the current plan stays put.
-    const NEW_TAB = new Set(['notes.html', 'konzepte.html', 'operatoren.html', PLAN_HREF]);
+    const NEW_TAB = new Set(['notes.html', 'konzepte.html', 'operatoren.html',
+        'punktetabelle.html', PLAN_HREF]);
 
     // The pill row only carries Home, Notizen and one dropdown per Schulart —
     // everything else lives inside those. [pill label, [[caption|null, hrefs]],
@@ -75,7 +77,8 @@
         ]],
         /* "Mehr" is not a Schulart — it stays at the far right, next to the gear */
         ['Mehr', [
-            [null, [PLAN_HREF, 'notes.html', 'mathe/uebung.html', 'konzepte.html', 'operatoren.html']]
+            [null, [PLAN_HREF, 'notes.html', 'mathe/uebung.html', 'konzepte.html', 'operatoren.html',
+                    'punktetabelle.html']]
         ], true, true]
     ];
 
