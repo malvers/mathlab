@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leistungstest | Stoffverteilungspl&auml;ne</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript>
+        <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+            rel="stylesheet">
+    </noscript>
+    <link rel="icon" type="image/png" href="../resources/favicon.png">
+    <link rel="stylesheet" href="svp.css">
+    <script src="svp-gate.js"></script>
+    <script src="qrcode.min.js"></script>
+    <script src="svp-auth.js"></script>
+    <script src="svp-crypto.js"></script>
+    <script defer src="svp-select.js"></script>
+    <style>
+        .lt-wrap {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            gap: 14px;
+        }
+
+        .lt-card {
+            background: var(--card-soft);
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            padding: 16px 18px;
+        }
+
+        .lt-title {
+            font-family: Orbitron, system-ui, sans-serif;
+            font-size: 0.82rem;
+            letter-spacing: 0.09em;
+            text-transform: uppercase;
+            color: var(--lambda);
+            margin-bottom: 12px;
+        }
+
+        /* The warning is the whole point of the tool, so it gets the red band. */
+        .lt-warn {
+            border-left: 4px solid var(--ypsilon);
+            background: rgba(176, 36, 24, 0.09);
+            border-radius: 8px;
+            padding: 10px 14px;
+            font-size: 0.92rem;
+            line-height: 1.5;
+        }
+
+        /* The legal footing is folded away behind a paragraph sign: it has to be
+           there when someone asks, but it must not shout at the daily user. */
+        .lt-para {
+            font-family: Orbitron, system-ui, sans-serif;
+            font-size: 1rem;
+            line-height: 1;
+            margin-left: 6px;
+            padding: 3px 9px;
+            border-radius: 999px;
+            border: 1px solid var(--ypsilon);
+            background: transparent;
+            color: var(--ypsilon);
+            cursor: pointer;
+            vertical-align: baseline;
+        }
+
+        .lt-para:hover { background: rgba(176, 36, 24, 0.15); }
+        .lt-para[aria-expanded="true"] { background: var(--ypsilon); color: #fff; }
+
+        .lt-legal[hidden] { display: none; }
+
+        .lt-legal {
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid rgba(176, 36, 24, 0.28);
+            font-size: 0.82rem;
+            line-height: 1.55;
+            opacity: 0.85;
+        }
+
+        .lt-form {
+            display: grid;
+            gap: 12px;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        }
+
+        .lt-field {
+            display: grid;
+            gap: 5px;
+            font-size: 0.85rem;
+        }
+
+        .lt-field input,
+        .lt-field select,
+        .lt-names textarea {
+            font: inherit;
+            font-size: 0.95rem;
+            color: inherit;
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            padding: 8px 10px;
+        }
+
+        .lt-names {
+            display: grid;
+            gap: 5px;
+            font-size: 0.85rem;
+            margin-top: 12px;
+        }
+
+        .lt-names textarea {
+            min-height: 150px;
+            resize: vertical;
+            line-height: 1.5;
+        }
+
+        .lt-btns {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 14px;
+        }
+
+        .lt-btn {
+            font-family: Orbitron, system-ui, sans-serif;
+            font-size: 0.78rem;
+            letter-spacing: 0.06em;
+            padding: 9px 16px;
+            border-radius: 999px;
+            border: 1px solid var(--line);
+            background: transparent;
+            color: inherit;
+            cursor: pointer;
+        }
+
+        .lt-btn:hover { border-color: var(--phi); color: var(--phi); }
+        .lt-btn.primary { border-color: var(--lambda); color: var(--lambda); }
+        .lt-btn.primary:hover { background: rgba(245, 194, 66, 0.14); }
+        .lt-btn.on { border-color: var(--phi); color: var(--phi); background: rgba(121, 158, 49, 0.12); }
+        .lt-btn.danger:hover { border-color: var(--ypsilon); color: var(--ypsilon); }
+        .lt-btn[disabled] { opacity: 0.4; cursor: default; }
+
+        .lt-tab { width: 100%; border-collapse: collapse; font-size: 0.94rem; }
+        .lt-tab th, .lt-tab td { border: 1px solid var(--line); padding: 7px 10px; text-align: left; }
+        .lt-tab th { font-family: Orbitron, system-ui, sans-serif; font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; }
+        .lt-tab td.code { font-family: Orbitron, system-ui, sans-serif; letter-spacing: 0.08em; color: var(--lambda); white-space: nowrap; }
+        .lt-tab td.alias { font-family: Orbitron, system-ui, sans-serif; letter-spacing: 0.05em; white-space: nowrap; }
+        .lt-scroll { overflow-x: auto; }
+
+        .lt-hint { font-size: 0.86rem; opacity: 0.75; margin-top: 10px; line-height: 1.5; }
+
+        /* --- the slips ------------------------------------------------------
+           On screen a preview grid, on paper eight per A4 sheet. Every slip is
+           self-contained: alias, code, QR and what the pupil has to do. */
+        .lt-slips {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+            gap: 10px;
+        }
+
+        .lt-slip {
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            padding: 12px;
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 10px;
+            align-items: center;
+            background: var(--card);
+        }
+
+        .lt-slip .s-name { font-size: 0.9rem; opacity: 0.75; margin-bottom: 2px; }
+
+        .lt-slip .s-alias {
+            font-family: Orbitron, system-ui, sans-serif;
+            font-weight: 700;
+            font-size: 1.05rem;
+            letter-spacing: 0.04em;
+        }
+
+        .lt-slip .s-code {
+            font-family: Orbitron, system-ui, sans-serif;
+            font-size: 1.35rem;
+            letter-spacing: 0.14em;
+            color: var(--lambda);
+            margin-top: 2px;
+        }
+
+        .s-mark { display: none; }
+
+        @media print {
+            body.print-slips .s-mark {
+                display: block;
+                position: absolute;
+                width: 5mm;
+                height: 5mm;
+                border: 0 solid #111;
+            }
+
+            body.print-slips .s-mark.tl { top: 0; left: 0; border-top-width: 0.2mm; border-left-width: 0.2mm; }
+            body.print-slips .s-mark.tr { top: 0; right: 0; border-top-width: 0.2mm; border-right-width: 0.2mm; }
+            body.print-slips .s-mark.bl { bottom: 0; left: 0; border-bottom-width: 0.2mm; border-left-width: 0.2mm; }
+            body.print-slips .s-mark.br { bottom: 0; right: 0; border-bottom-width: 0.2mm; border-right-width: 0.2mm; }
+        }
+
+        .lt-slip .s-note { font-size: 0.72rem; opacity: 0.8; margin-top: 6px; line-height: 1.4; }
+        .lt-slip .s-qr { width: 88px; height: 88px; }
+        .lt-slip .s-qr svg { width: 100%; height: 100%; display: block; }
+
+        @media print {
+            /* Two print modes, chosen by a class on <body> before window.print().
+               Everything not part of the chosen mode is simply not there. */
+            @page { size: A4 portrait; margin: 10mm; }
+
+            .page-head, .lt-setup, .lt-hint, .lt-btns, .svp-nav, footer { display: none !important; }
+            /* the shared school-year band belongs on screen, not on a slip sheet */
+            .nav-band, .nav-year { display: none !important; }
+            body.print-slips .lt-slipcard .lt-title { display: block; margin-bottom: 6px; }
+            .lt-card { border: 0; padding: 0; background: none; }
+            body { background: #fff; color: #000; }
+
+            body.print-slips .lt-listcard { display: none !important; }
+            body.print-list .lt-slipcard { display: none !important; }
+            body.print-list .lt-warn { display: block; }
+
+            body.print-slips .lt-slips {
+                grid-template-columns: 1fr 1fr;
+                gap: 0;
+                border-top: 0.08mm solid #b8b8b8;
+                border-left: 0.08mm solid #b8b8b8;
+            }
+
+            body.print-slips .s-mark { display: none !important; }
+
+            body.print-slips .lt-slip {
+                /* A continuous grid, drawn once: every slip carries only its
+                   right and bottom line, the container the top and left one -
+                   so neighbouring lines cannot double up into a fat rule. */
+                border: 0;
+                border-right: 0.08mm solid #b8b8b8;
+                border-bottom: 0.08mm solid #b8b8b8;
+                border-radius: 0;
+                position: relative;
+                /* five rows per page: 277mm usable minus the heading */
+                height: 52mm;
+                padding: 8px 10px;
+                background: none;
+                break-inside: avoid;
+                page-break-inside: avoid;
+            }
+
+            body.print-slips .lt-slip .s-qr { width: 74px; height: 74px; }
+            body.print-slips .lt-slip .s-code { font-size: 1.2rem; }
+
+            body.print-slips .lt-slip .s-code { color: #000; }
+
+            .lt-tab th, .lt-tab td { border-color: #666; }
+            .lt-tab td.code, .lt-tab td.alias { color: #000; }
+        }
+    </style>
+</head>
+
+<body>
+    <header class="page-head">
+        <a class="back-link" href="./">&larr; &Uuml;bersicht</a>
+        <h1>Leistungstest</h1>
+        <div class="subtitle">Decknamen und Zettel f&uuml;r einen anonymen Test &middot; nach dem Muster der s&auml;chsischen Kompetenztests</div>
+    </header>
+
+    <div class="lt-wrap">
+        <section class="lt-card lt-setup">
+            <div class="lt-warn">
+                <b>Die Zuordnungsliste bleibt auf diesem Rechner.</b>
+                Klarnamen werden nirgends hochgeladen &mdash; weder zu Supabase noch sonstwohin.
+                Sie stehen nur im Speicher dieses Browsers und auf dem Blatt, das gedruckt werden muss.
+                Wer dieses Blatt und den Browser nicht hat, kann einen Code keinem Kind zuordnen.
+                <button type="button" class="lt-para" id="ltPara" aria-expanded="false"
+                    aria-controls="ltLegal" title="Rechtliche Einordnung zeigen">&sect;</button>
+                <div class="lt-legal" id="ltLegal" hidden>
+                    Das ist <b>Pseudonymisierung</b> nach Art.&nbsp;4 Nr.&nbsp;5 DSGVO und eine geeignete
+                    technische Ma&szlig;nahme nach Art.&nbsp;32 Abs.&nbsp;1 lit.&nbsp;a DSGVO, dazu
+                    Datenminimierung nach Art.&nbsp;5 Abs.&nbsp;1 lit.&nbsp;c DSGVO.
+                    Es ist <b>keine Anonymisierung</b>: solange die Liste existiert, bleiben die Daten
+                    personenbezogen (Erw&auml;gungsgrund&nbsp;26) &mdash; die DSGVO gilt weiter.
+                    Rechtsgrundlage der Leistungserhebung ist &sect;&nbsp;63a S&auml;chsSchulG
+                    i.&nbsp;V.&nbsp;m. der DSGVO und der VwV Schuldatenschutz.
+                </div>
+            </div>
+
+            <div class="lt-form" style="margin-top:14px">
+                <label class="lt-field" for="ltTest">Test und Lerngruppe
+                    <select id="ltTest">
+                        <option value="../infotestfos12.html?klasse=FOG25-1">Informatik &middot; FOG25-1</option>
+                        <option value="../infotestfos12.html?klasse=FOG25-2">Informatik &middot; FOG25-2 + FOW25-2</option>
+                        <option value="../infotestfos12.html?klasse=FOS25-1">Informatik &middot; FOS25-1</option>
+                        <option value="../infotestfos12.html?klasse=FOS25-2">Informatik &middot; FOS25-2</option>
+                        <option value="../infotestfos12.html?klasse=FOW25-1">Informatik &middot; FOW25-1</option>
+                        <option value="../infotestfos11.html?klasse=FOG26-1">Informatik &middot; FOS 11 &middot; FOG26-1</option>
+                        <option value="../infotest13.html?klasse=BGY24">Informatik &middot; Klasse 13 &middot; BGY24</option>
+                        <option value="../infotest12.html?klasse=BGY25">Informatik &middot; Klasse 12 &middot; BGY25</option>
+                        <option value="../infotest11.html?klasse=BGY26">Informatik &middot; Klasse 11 &middot; BGY26-1 + 2</option>
+                        <option value="../infotest9.html?klasse=9a">Informatik &middot; Klasse 9 &middot; 9a</option>
+                        <option value="../infotest9.html?klasse=9b">Informatik &middot; Klasse 9 &middot; 9b</option>
+                        <option value="../mathetest11.html?klasse=BGY26">Mathematik &middot; Klasse 11 &middot; BGY26-1 + 2</option>
+                    </select></label>
+            </div>
+
+            <label class="lt-names" for="ltNames">Namen
+                <textarea id="ltNames" spellcheck="false" autocomplete="off"></textarea></label>
+
+            <div class="lt-btns">
+                <button type="button" class="lt-btn primary" id="ltMake">Decknamen erzeugen</button>
+                <button type="button" class="lt-btn primary" id="ltUnlock">&#128274; Namen anzeigen</button>
+                <button type="button" class="lt-btn" id="ltAdd">Nur neue Namen erg&auml;nzen</button>
+                <button type="button" class="lt-btn on" id="ltName" aria-pressed="true">Klarname auf dem Zettel</button>
+                <button type="button" class="lt-btn danger" id="ltClear">Alles l&ouml;schen</button>
+            </div>
+            <div class="lt-hint" id="ltState">Noch keine Lerngruppe geladen.</div>
+        </section>
+
+        <section class="lt-card lt-listcard" id="ltListCard" hidden>
+            <div class="lt-title">Zuordnungsliste &mdash; nur f&uuml;r dich</div>
+            <div class="lt-scroll">
+                <table class="lt-tab" id="ltTable"></table>
+            </div>
+            <div class="lt-btns">
+                <button type="button" class="lt-btn" id="ltPrintList">Liste drucken</button>
+                <button type="button" class="lt-btn" id="ltCsv">Liste als CSV sichern</button>
+            </div>
+        </section>
+
+        <section class="lt-card lt-slipcard" id="ltSlipCard" hidden>
+            <div class="lt-title" id="ltSlipTitle">Zettel</div>
+            <div class="lt-slips" id="ltSlips"></div>
+            <div class="lt-btns">
+                <button type="button" class="lt-btn" id="ltPrintSlips">Zettel drucken</button>
+            </div>
+            <div class="lt-hint">
+                Zehn Zettel pro A4-Seite. Der Klarname steht nur darauf, solange der Schalter oben ihn zeigt
+                &mdash; sonst tr&auml;gt der Zettel allein Deckname, Code und den QR zum Test.
+                Nach dem Drucken durchschneiden und austeilen.
+            </div>
+        </section>
+    </div>
+
+    <script>
+        (function () {
+            'use strict';
+
+            /* Aliases come from a neutral word list: minerals carry no hint about
+               the child. The code is drawn from crypto, never derived from the
+               name - otherwise the pseudonym would leak what it is meant to hide. */
+            const WORDS = [
+                'ACHAT', 'AMBER', 'BASALT', 'BERYLL', 'CALCIT', 'CHROM', 'DIOPTAS', 'DOLOMIT',
+                'FLUORIT', 'GABBRO', 'GNEIS', 'GRANAT', 'HALIT', 'ILMENIT', 'JASPIS', 'KOBALT',
+                'KYANIT', 'LAZURIT', 'MAGNETIT', 'MALACHIT', 'NEPHRIT', 'OBSIDIAN', 'OLIVIN',
+                'ONYX', 'OPAL', 'PYRIT', 'QUARZ', 'RUTIL', 'SODALITH', 'SPINELL', 'TOPAS',
+                'TURMALIN', 'ZIRKON', 'ZOISIT'
+            ];
+            /* No I, O, 0, 1: nobody should have to guess on a printed slip. */
+            const ALPHABET = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
+            const STORE = 'svp-leistungstest-v1';
+
+            /* The group is not typed any more - it IS the chosen Lerngruppe,
+               and "Demo" when the page was opened with ?test. */
+            const DEMO_KEY = 'Demo';
+            /* ?test opens the demo drawer, but only until a real Lerngruppe is
+               picked - otherwise the dropdown would show FOS25-1 while everything
+               is still filed under "Demo". */
+            let demoMode = new URLSearchParams(location.search).has('test');
+            function groupKey() {
+                if (demoMode) return DEMO_KEY;
+                const q = elTest.value.split('?')[1] || '';
+                return new URLSearchParams(q).get('klasse') || 'Gruppe';
+            }
+            const elTest = document.getElementById('ltTest');
+            const elNames = document.getElementById('ltNames');
+            const elState = document.getElementById('ltState');
+            const elTable = document.getElementById('ltTable');
+            const elSlips = document.getElementById('ltSlips');
+            const listCard = document.getElementById('ltListCard');
+            const slipCard = document.getElementById('ltSlipCard');
+
+            let entries = [];   /* [{ name, alias, code }] */
+            let withNames = true;   /* print the real name on the slip (KT-style code card) */
+
+            function rnd(n) {
+                const a = new Uint32Array(1);
+                crypto.getRandomValues(a);
+                return a[0] % n;
+            }
+
+            function makeCode() {
+                let s = '';
+                for (let i = 0; i < 4; i++) s += ALPHABET[rnd(ALPHABET.length)];
+                return s;
+            }
+
+            /* Two children called ZIRKON, told apart only by the code, is a mix-up
+               waiting to happen on paper. So aliases are drawn WITHOUT
+               replacement as long as the list lasts; only a group larger than the
+               word list falls back to repeating one, and the code keeps the pair
+               apart. */
+            function makeIdentity(usedAliases, usedIds) {
+                const free = WORDS.filter(function (w) { return !usedAliases.has(w); });
+                const pool = free.length ? free : WORDS;
+                for (let i = 0; i < 400; i++) {
+                    const alias = pool[rnd(pool.length)];
+                    const id = alias + '-' + makeCode();
+                    if (!usedIds.has(id)) {
+                        usedIds.add(id);
+                        usedAliases.add(alias);
+                        return id;
+                    }
+                }
+                return 'CODE-' + Date.now().toString(36).toUpperCase();
+            }
+
+            function testUrl() {
+                return elTest.value.trim();
+            }
+
+            /* Live address even while testing locally, so the printed QR works
+               on the pupils' phones and not only on this machine. */
+            function absoluteUrl(rel, code) {
+                const here = location.pathname.replace(/[^/]*$/, '');
+                const u = new URL(rel, location.origin + here);
+                u.searchParams.set('code', code);
+                const q = u.searchParams.toString().replace(/=(?=&|$)/g, '');
+                return 'https://www.docalvers.de' + u.pathname.replace(/^\/HTML\//, '/') + '?' + q;
+            }
+
+            /* A line pasted from a class list can look like
+               "12\tMuster, Ben\tBGY26-1" or "3. Ben Muster". Running numbers and
+               class-code columns are dropped, the rest becomes the name, and
+               duplicates fall out - so a rough copy needs no cleaning by hand. */
+            const JUNK = [
+                /^\d+[.)]?$/,                    /* 12   3.  */
+                /^[A-Za-zÄÖÜ]{2,4}\d{2}([-/ ]?\d+)?$/,  /* BGY26-1, FOS25-2 */
+                /^\d{1,2}[a-z]$/                 /* 9a */
+            ];
+            function readNames() {
+                const seen = Object.create(null);
+                return elNames.value.split('\n').map(function (line) {
+                    const parts = line.split('\t').map(function (f) { return f.trim(); })
+                        .filter(function (f) {
+                            return f && !JUNK.some(function (re) { return re.test(f); });
+                        });
+                    let t = parts.slice(0, 2).join(' ');
+                    t = t.replace(/^\d+[.)]?\s+/, '').replace(/\s{2,}/g, ' ').trim();
+                    return t;
+                }).filter(Boolean);
+            }
+
+            /* The WebUntis classbook shows its pupils as cards, so a copy of that
+               block arrives as surname and first name on SEPARATE lines. When
+               almost every line is a single word, they are joined in pairs. */
+            function pairIfCards(list) {
+                if (list.length < 4) return list;
+                const single = list.filter(function (t) { return t.indexOf(' ') < 0; }).length;
+                if (single < list.length * 0.8) return list;
+                const out = [];
+                for (let i = 0; i < list.length; i += 2) {
+                    out.push(list[i + 1] ? list[i] + ' ' + list[i + 1] : list[i]);
+                }
+                return out;
+            }
+
+            function names() {
+                const seen = Object.create(null);
+                return pairIfCards(readNames()).filter(function (t) {
+                    if (!t || seen[t]) return false;
+                    seen[t] = 1;
+                    return true;
+                });
+            }
+
+            /* Aliases and codes are not secret - they go to disk as they are.
+               The Klarnamen are sealed with the same key pair the talk sign-up
+               uses (svp-crypto.js): the public key seals, only Doc's passphrase
+               opens. So a stolen laptop yields codes, never a mapping. */
+            function unlocked() { return !!(window.svpCrypto && svpCrypto.hasPrivate()); }
+
+            /* Decrypting is async, and in the meantime the user may have locked
+               again or switched to another Lerngruppe. Every such change bumps
+               `gen`; a late result whose generation is stale, or that arrives
+               after locking, is dropped instead of painting names onto the
+               screen (or onto the wrong group). */
+            let gen = 0;
+            function stale(myGen) { return myGen !== gen || !unlocked(); }
+
+            function writeRecord(rec) {
+                const all = load();
+                all[groupKey()] = rec;
+                try { localStorage.setItem(STORE, JSON.stringify(all)); } catch (e) { /* private mode */ }
+            }
+
+            function save() {
+                const rec = {
+                    test: testUrl(),
+                    ids: entries.map(function (e) { return { alias: e.alias, code: e.code }; })
+                };
+                const plain = JSON.stringify(entries.map(function (e) { return e.name || ''; }));
+
+                /* There is NO plaintext fallback. If sealing fails - offline, key
+                   unreachable - the codes are still written (printed slips must
+                   stay valid) but the names are not. Storing them readable "so
+                   they are not lost" would defeat the whole tool: one bad minute
+                   of network and a class list sits unencrypted on the disk. */
+                function sealFailed() {
+                    writeRecord(rec);          /* ids only - codes survive */
+                    elState.textContent = entries.length + ' SuS in ' + groupKey() +
+                        ' · Codes gespeichert, NAMEN NICHT — Schluessel nicht erreichbar. ' +
+                        'Namen stehen noch im Feld: nach erneuter Verbindung wieder auf ' +
+                        '"Decknamen erzeugen" klicken.';
+                }
+
+                if (!window.svpCrypto || !svpCrypto.available) { sealFailed(); return; }
+                const guard = new Promise(function (_, no) {
+                    window.setTimeout(function () { no(new Error('timeout')); }, 8000);
+                });
+                Promise.race([svpCrypto.seal(plain), guard]).then(function (blob) {
+                    rec.sealed = blob;
+                    writeRecord(rec);
+                }).catch(sealFailed);
+            }
+
+            function load() {
+                try { return JSON.parse(localStorage.getItem(STORE) || '{}'); } catch (e) { return {}; }
+            }
+
+            function build(keepExisting) {
+                const list = names();
+                if (!list.length) { elState.textContent = 'Keine Namen eingetragen.'; return; }
+                const url = testUrl();
+                if (!url) { elState.textContent = 'Kein Test gewaehlt.'; return; }
+
+                const old = keepExisting ? entries.slice() : [];
+                const byName = {};
+                old.forEach(function (e) { byName[e.name] = e; });
+                const takenIds = new Set(old.map(function (e) { return e.alias + '-' + e.code; }));
+                const takenAliases = new Set(old.map(function (e) { return e.alias; }));
+
+                entries = list.map(function (name) {
+                    if (byName[name]) return byName[name];
+                    const id = makeIdentity(takenAliases, takenIds);
+                    const cut = id.lastIndexOf('-');
+                    return { name: name, alias: id.slice(0, cut), code: id.slice(cut + 1) };
+                });
+                save();
+                render();
+            }
+
+            function applyNames(list) {
+                entries.forEach(function (e, i) { e.name = list[i] || null; });
+            }
+
+            const LOCKED = '\u2022\u2022\u2022 gesperrt';
+
+            function render() {
+                if (!entries.length) {
+                    listCard.hidden = slipCard.hidden = true;
+                    elState.textContent = 'Noch keine Decknamen erzeugt.';
+                    return;
+                }
+                listCard.hidden = slipCard.hidden = false;
+                document.getElementById('ltSlipTitle').textContent = groupKey();
+                elState.textContent = entries.length + ' SuS in ' + groupKey() + ' · gespeichert nur in diesem Browser.';
+
+                let html = '<tr><th>Klarname</th><th>Deckname</th><th>Code</th></tr>';
+                entries.forEach(function (e) {
+                    html += '<tr><td>' + (e.name ? esc(e.name) : LOCKED) + '</td><td class="alias">' + esc(e.alias) +
+                        '</td><td class="code">' + esc(e.code) + '</td></tr>';
+                });
+                elTable.innerHTML = html;
+
+                const url = testUrl();
+                elSlips.innerHTML = '';
+                entries.forEach(function (e) {
+                    const slip = document.createElement('div');
+                    slip.className = 'lt-slip';
+                    const left = document.createElement('div');
+                    /* Like the KT's online code cards: the name may be printed
+                       on the slip so it reaches the right child. It is put there
+                       by this browser and never transmitted. */
+                    left.innerHTML =
+                        (withNames && e.name ? '<div class="s-name">' + esc(e.name) + '</div>' : '') +
+                        '<div class="s-alias">' + esc(e.alias) + '</div>' +
+                        '<div class="s-code">' + esc(e.code) + '</div>' +
+                        '<div class="s-note">QR scannen, Code eintragen, Test bearbeiten. ' +
+                        'Deinen Namen nirgends eingeben.</div>';
+                    const box = document.createElement('div');
+                    box.className = 's-qr';
+                    box.innerHTML = qrSvg(absoluteUrl(url, e.code));
+                    slip.appendChild(left);
+                    slip.appendChild(box);
+                    ['tl', 'tr', 'bl', 'br'].forEach(function (c) {
+                        const m = document.createElement('span');
+                        m.className = 's-mark ' + c;
+                        slip.appendChild(m);
+                    });
+                    elSlips.appendChild(slip);
+                });
+            }
+
+            function qrSvg(text) {
+                if (typeof qrcode === 'undefined') return '<span style="font-size:0.6rem">QR fehlt</span>';
+                const qr = qrcode(0, 'M');
+                qr.addData(text);
+                qr.make();
+                return qr.createSvgTag({ scalable: true });
+            }
+
+            function esc(s) {
+                return String(s).replace(/[&<>"]/g, function (c) {
+                    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
+                });
+            }
+
+            function printAs(mode) {
+                document.body.classList.add(mode);
+                window.addEventListener('afterprint', function once() {
+                    document.body.classList.remove(mode);
+                    window.removeEventListener('afterprint', once);
+                });
+                window.print();
+            }
+
+            /* The list leaves the browser only as a file the user saves himself -
+               a local download, no network call. */
+            function csv() {
+                const rows = [['Klarname', 'Deckname', 'Code']].concat(
+                    entries.map(function (e) { return [e.name || LOCKED, e.alias, e.code]; }));
+                const text = rows.map(function (r) {
+                    return r.map(function (c) { return '"' + String(c).replace(/"/g, '""') + '"'; }).join(';');
+                }).join('\r\n');
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(new Blob(['﻿' + text], { type: 'text/csv' }));
+                a.download = 'zuordnung-' + groupKey() + '.csv';
+                a.click();
+                URL.revokeObjectURL(a.href);
+            }
+
+            /* Class lists live in klassen.local.json, which is gitignored and
+               exists only on this machine - names must never reach the public
+               site. Missing file (as on docalvers.de) simply means nothing is
+               prefilled. A list already stored in this browser always wins. */
+            let localLists = null;
+            function prefillFromLocal() {
+                const key = groupKey();
+                let list = localLists && localLists[key];
+                /* The file holds a sealed blob, not names - so it needs the
+                   passphrase like everything else. Locked means: say so, do not
+                   prefill. */
+                if (typeof list === 'string') {
+                    if (!unlocked()) {
+                        elNames.value = '';   /* defence in depth: never leave names standing */
+                        elState.textContent = 'Klassenliste liegt verschluesselt bereit — erst entsperren.';
+                        return;
+                    }
+                    const myGen = gen;
+                    svpCrypto.open(list).then(function (t) {
+                        if (stale(myGen) || groupKey() !== key) return;
+                        localLists[key] = JSON.parse(t);
+                        prefillFromLocal();
+                    }).catch(function () {
+                        elState.textContent = 'Klassenliste liess sich nicht entschluesseln.';
+                    });
+                    return;
+                }
+                if (!list || !list.length || elNames.value.trim()) return;
+                /* A group that already has codes is NEVER rebuilt - while the
+                   names are still sealed the text box is empty, and taking that
+                   for "nothing here" would hand every child a new code and make
+                   the printed slips worthless. */
+                if (entries.length) return;
+                elNames.value = list.join('\n');
+                /* Nothing to decide here - the group was picked, so the sheet is
+                   built at once. build(true) keeps anything already generated,
+                   so no existing code is ever thrown away. */
+                build(true);
+            }
+
+            /* Records written before the encryption existed still carry their
+               names in the clear (`names`, and the even older `entries`). Sealing
+               needs only the public key, so they are upgraded on sight - without
+               this, one afternoon of early testing leaves a readable class list
+               on the disk forever. */
+            function migratePlaintext() {
+                if (!window.svpCrypto || !svpCrypto.available) return;
+                const all = load();
+                Object.keys(all).forEach(function (k) {
+                    const rec = all[k];
+                    if (!rec || rec.sealed) return;
+                    let list = null;
+                    if (rec.entries) list = rec.entries.map(function (e) { return e.name || ''; });
+                    else if (rec.names) { try { list = JSON.parse(rec.names); } catch (e) { return; } }
+                    if (!list || !list.some(Boolean)) return;
+                    const ids = rec.ids || (rec.entries || []).map(function (e) {
+                        return { alias: e.alias, code: e.code };
+                    });
+                    svpCrypto.seal(JSON.stringify(list)).then(function (blob) {
+                        const now = load();
+                        if (!now[k] || now[k].sealed) return;
+                        now[k] = { test: rec.test, ids: ids, sealed: blob };
+                        try { localStorage.setItem(STORE, JSON.stringify(now)); } catch (e) { /* ignore */ }
+                        console.info('[leistungstest] Klartext-Altbestand nachtraeglich versiegelt:', k);
+                    }).catch(function () { /* offline: try again next visit */ });
+                });
+            }
+
+            function loadLocalLists() {
+                return fetch('klassen.local.json', { cache: 'no-store' })
+                    .then(function (r) { return r.ok ? r.json() : null; })
+                    .then(function (j) { localLists = j || {}; })
+                    .catch(function () { localLists = {}; });
+            }
+
+            function restore() {
+                gen++;
+                const myGen = gen;
+                const all = load();
+                const key = groupKey();
+                const rec = key && all[key];
+                if (!rec) { entries = []; elNames.value = ''; render(); return; }
+                /* v1 records kept the names in the clear - still readable */
+                if (rec.entries) { entries = rec.entries; }
+                else {
+                    entries = (rec.ids || []).map(function (id) {
+                        return { name: null, alias: id.alias, code: id.code };
+                    });
+                    if (rec.names) applyNames(JSON.parse(rec.names));
+                    else if (rec.sealed && !unlocked()) {
+                        /* Locked means locked. The browser restores text areas by
+                           itself on a reload, so the box has to be cleared on
+                           purpose - otherwise the names stand there in the clear
+                           while the table below says "gesperrt". */
+                        elNames.value = '';
+                    }
+                    else if (rec.sealed && unlocked()) {
+                        /* Decrypting is async - so the text box must be refilled
+                           HERE too, not only in the synchronous pass below, or it
+                           keeps the empty lines it was given a moment earlier. */
+                        svpCrypto.open(rec.sealed).then(function (t) {
+                            if (stale(myGen)) return;   /* locked again, or another group */
+                            applyNames(JSON.parse(t));
+                            paintNames();
+                            render();
+                        }).catch(function () { /* wrong key: names stay hidden */ });
+                    }
+                }
+                /* a stored group keeps its test only while that entry still exists */
+                if (rec.test) {
+                    Array.prototype.forEach.call(elTest.options, function (o) {
+                        if (o.value === rec.test) elTest.value = rec.test;
+                    });
+                }
+                paintNames();
+                render();
+            }
+
+            /* Only write the box when the names are actually known - a locked
+               group would otherwise get a column of empty lines. */
+            function paintNames() {
+                if (!entries.some(function (e) { return e.name; })) return;
+                elNames.value = entries.map(function (e) { return e.name || ''; }).join('\n');
+            }
+
+            /* A demo class for trying the tool out - real pupils' names have no
+               business in a test run. */
+            const DEMO = [
+                'Marie Curie', 'Albert Einstein', 'Emmy Noether', 'Carl Friedrich Gauß',
+                'Ada Lovelace', 'Alan Turing', 'Lise Meitner', 'Max Planck',
+                'Grace Hopper', 'Richard Feynman', 'Sofja Kowalewskaja', 'David Hilbert',
+                'Rosalind Franklin', 'Srinivasa Ramanujan', 'Hedy Lamarr', 'Werner Heisenberg',
+                'Katherine Johnson', 'Leonhard Euler', 'Barbara McClintock', 'Niels Bohr',
+                'Maryam Mirzakhani', 'Konrad Zuse', 'Vera Rubin', 'Alexander von Humboldt'
+            ];
+
+            /* ?test fills the demo class in, the same switch the quiz pages use
+               for their demo pool. Nothing is overwritten that is already there. */
+            function demoFromUrl() {
+                if (!demoMode) return;
+                if (elNames.value.trim()) return;
+                elNames.value = DEMO.join('\n');
+                elState.textContent = DEMO.length + ' Beispielnamen aus ?test — jetzt Decknamen erzeugen.';
+            }
+
+            /* "Decknamen erzeugen" throws the old identities away. On a group
+               that already has codes, printed slips would silently become
+               worthless - so the second press has to be deliberate, like the
+               delete button. Adding people uses "Nur neue Namen ergaenzen",
+               which keeps every existing code. */
+            const makeBtn = document.getElementById('ltMake');
+            let makeArmed = 0;
+            function disarmMake() {
+                window.clearTimeout(makeArmed);
+                makeArmed = 0;
+                makeBtn.textContent = 'Decknamen erzeugen';
+            }
+            makeBtn.addEventListener('click', function () {
+                if (entries.length && !makeArmed) {
+                    makeArmed = window.setTimeout(disarmMake, 5000);
+                    makeBtn.textContent = 'Alle Codes neu? Nochmal klicken';
+                    elState.textContent = 'Achtung: das wirft die bestehenden ' + entries.length +
+                        ' Codes weg — bereits gedruckte Zettel passen dann nicht mehr. ' +
+                        'Zum Ergaenzen "Nur neue Namen ergaenzen" nehmen.';
+                    return;
+                }
+                disarmMake();
+                build(false);
+            });
+            document.getElementById('ltAdd').addEventListener('click', function () { build(true); });
+            /* Deleting is irreversible - the codes cannot be recomputed. Instead
+               of a native confirm the button asks for a second click. */
+            const clearBtn = document.getElementById('ltClear');
+            let armed = 0;
+            clearBtn.addEventListener('click', function () {
+                if (!armed) {
+                    armed = window.setTimeout(function () {
+                        armed = 0;
+                        clearBtn.textContent = 'Alles löschen';
+                        clearBtn.classList.remove('primary');
+                    }, 4000);
+                    clearBtn.textContent = 'Wirklich? Nochmal klicken';
+                    clearBtn.classList.add('primary');
+                    return;
+                }
+                window.clearTimeout(armed);
+                armed = 0;
+                clearBtn.textContent = 'Alles löschen';
+                clearBtn.classList.remove('primary');
+                const all = load();
+                delete all[groupKey()];
+                try { localStorage.setItem(STORE, JSON.stringify(all)); } catch (e) { /* ignore */ }
+                entries = [];
+                elNames.value = '';
+                render();
+            });
+            const nameBtn = document.getElementById('ltName');
+            nameBtn.addEventListener('click', function () {
+                withNames = !withNames;
+                nameBtn.classList.toggle('on', withNames);
+                nameBtn.setAttribute('aria-pressed', withNames ? 'true' : 'false');
+                nameBtn.textContent = withNames ? 'Klarname auf dem Zettel' : 'Zettel ohne Klarname';
+                if (entries.length) render();
+            });
+
+            const unlockBtn = document.getElementById('ltUnlock');
+            function paintUnlock() {
+                const on = unlocked();
+                unlockBtn.textContent = on ? '\uD83D\uDD13 Namen verbergen' : '\uD83D\uDD12 Namen anzeigen';
+                unlockBtn.title = on ? 'Schluessel wieder sperren'
+                                     : 'Passwort eingeben, um die Klarnamen zu entschluesseln';
+                unlockBtn.classList.toggle('primary', !on);
+                /* The empty box must say WHY it is empty. Locked it reads
+                   "verborgen", open it explains how to fill it - example names in
+                   a placeholder only look like real data that got lost. */
+                elNames.placeholder = on
+                    ? 'ein Kind pro Zeile \u2014 oder aus der Klassenliste einf\u00fcgen'
+                    : '\u2022\u2022\u2022 Namen verborgen \u2014 gesperrt';
+            }
+            unlockBtn.addEventListener('click', function () {
+                if (!window.svpCrypto || !svpCrypto.available) { elState.textContent = 'Verschluesselung steht hier nicht zur Verfuegung.'; return; }
+                if (unlocked()) {
+                    /* Locking has to take the text box with it. Nulling the names
+                       in `entries` only blanks the TABLE - the box keeps whatever
+                       it was last given, and the plain names stay on screen next
+                       to a closed padlock. */
+                    svpCrypto.lock();
+                    entries.forEach(function (e) { e.name = null; });
+                    elNames.value = '';
+                    paintUnlock();
+                    render();
+                    return;
+                }
+                /* Unwrapping the private key reads it from Supabase, and THAT
+                   needs a login - which is per origin, so being signed in on
+                   docalvers.de does not help on localhost. Without this step the
+                   passphrase dialog fails silently. */
+                function ask() {
+                    svpCrypto.passDialog('unlock', function () { paintUnlock(); restore(); prefillFromLocal(); }, 'Klarnamen');
+                }
+                if (window.svpAuth && !svpAuth.hasSession()) {
+                    elState.textContent = 'Erst anmelden, dann die Passphrase.';
+                    svpAuth.loginDialog(ask);
+                    return;
+                }
+                ask();
+            });
+
+            const para = document.getElementById('ltPara');
+            const legal = document.getElementById('ltLegal');
+            para.addEventListener('click', function () {
+                const on = legal.hidden;
+                legal.hidden = !on;
+                para.setAttribute('aria-expanded', on ? 'true' : 'false');
+                para.title = on ? 'Rechtliche Einordnung ausblenden' : 'Rechtliche Einordnung zeigen';
+            });
+
+            document.getElementById('ltPrintList').addEventListener('click', function () { printAs('print-list'); });
+            document.getElementById('ltPrintSlips').addEventListener('click', function () { printAs('print-slips'); });
+            document.getElementById('ltCsv').addEventListener('click', csv);
+            /* Choosing a Lerngruppe names the group, so the stored list and the
+               printed sheet carry the Untis code instead of an empty field. */
+            /* Switching the Lerngruppe switches the whole sheet: its stored
+               names, its codes. */
+            elTest.addEventListener('change', function () {
+                demoMode = false;      /* the demo set never follows into a real group */
+                elNames.value = '';
+                restore();
+                prefillFromLocal();
+            });
+
+            /* The name box is dragged to the size of the class at hand; keep
+               that height so it does not snap back on every visit. */
+            (function keepBoxHeight() {
+                const KEY = 'svp-leistungstest-boxh';
+                let h = 0;
+                try { h = parseInt(localStorage.getItem(KEY) || '0', 10); } catch (e) { /* ignore */ }
+                if (h > 80 && h < 3000) elNames.style.height = h + 'px';
+                if (typeof ResizeObserver === 'undefined') return;
+                let timer = 0;
+                new ResizeObserver(function () {
+                    window.clearTimeout(timer);
+                    timer = window.setTimeout(function () {
+                        try { localStorage.setItem(KEY, String(Math.round(elNames.offsetHeight))); }
+                        catch (e) { /* private mode */ }
+                    }, 250);
+                }).observe(elNames);
+            }());
+
+            paintUnlock();
+            /* The browser restores text areas on its own after a reload, so the
+               box may already hold names before a single line of ours ran. Wipe
+               it, then let restore() decide what may be shown - restore() was
+               never called on load before, which is exactly how plain names
+               survived a reload while the page said "gesperrt". */
+            elNames.value = '';
+            restore();
+            demoFromUrl();
+            migratePlaintext();
+            loadLocalLists().then(prefillFromLocal);
+        }());
+    </script>
+    <script src="svp-nav.js"></script>
+</body>
+
+</html>

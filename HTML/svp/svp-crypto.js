@@ -177,13 +177,16 @@
 
     /* mode 'unlock' asks once, mode 'create' asks twice and warns that a lost
        passphrase means the names are gone for good. onOk() runs after success. */
-    function passDialog(mode, onOk) {
+    /* `title` is optional and only relabels the dialog - the talk pages call it
+       without one and keep "Vortragsnamen". Same key, same passphrase; only the
+       heading follows the page the user is standing on. */
+    function passDialog(mode, onOk, title) {
         const create = mode === 'create';
         const overlay = document.createElement('div');
         overlay.className = 'svp-gate-overlay';
         overlay.innerHTML =
             '<div class="svp-gate-card">' +
-            '  <div class="svp-gate-title">Vortragsnamen</div>' +
+            '  <div class="svp-gate-title">' + (title || 'Vortragsnamen') + '</div>' +
             '  <div class="svp-gate-sub">' +
             (create ? 'Neues Schl&uuml;ssel-Passwort vergeben &mdash; ohne dieses Passwort sind die Namen sp&auml;ter nicht mehr lesbar.'
                 : 'Schl&uuml;ssel-Passwort eingeben, um die Namen zu sehen') +
