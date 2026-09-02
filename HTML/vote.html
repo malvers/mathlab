@@ -348,6 +348,20 @@
             margin-top: 6vh;
         }
 
+        /* Below the stamp: the average over EVERY vote ever cast, across all polls
+           (Doc, 02.09.2026). Dimmer and smaller than the stamp - it is context, not
+           the result of this question. */
+        .chart-all {
+            font-family: 'Outfit', sans-serif;
+            font-size: clamp(13px, 2vmin, 21px);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            opacity: 0.6;
+            margin-top: 1.2vmin;
+            transition: color 0.3s;
+            min-height: 1em;
+        }
+
         @media (max-width: 700px) {
             #big {
                 font-size: min(36vw, 32vh);
@@ -864,6 +878,7 @@
         </div>
         <div id="chart-class" class="chart-class"></div>
         <div id="chart-sub" class="big-sub"></div>
+        <div id="chart-all" class="chart-all"></div>
     </div>
 
     <div id="qr-overlay" class="qr-overlay">
@@ -1247,6 +1262,8 @@
                 // here only carries stamp and count - saying it twice reads like two figures.
                 $('chart-sub').textContent = whenPrefix() +
                     (n ? n + (n === 1 ? ' Vote' : ' Votes') : 'Noch keine Votes');
+                renderAllTime();
+                refetchAll();
             }
 
             /* "01.09.2026 · 14:25 · " — the stamp both foot lines start with */
@@ -1271,6 +1288,32 @@
                     $('big-sub').textContent = when + values.length + (values.length === 1 ? ' Vote' : ' Votes');
                 }
                 renderChart();
+            }
+
+            /* The all-time line: every vote in the table, not just this poll. Cheap
+               today (dozens of rows) and capped to one fetch per 30 s, so the 5 s
+               resync of the current poll does not drag it along. */
+            const allTime = { mean: null, n: 0, ts: 0 };
+
+            async function refetchAll(force) {
+                if (!force && Date.now() - allTime.ts < 30000) return;
+                allTime.ts = Date.now();
+                const { data, error } = await sb.from('vote_votes').select('value');
+                if (error || !data) return;
+                allTime.n = data.length;
+                allTime.mean = allTime.n
+                    ? data.reduce((a, r) => a + r.value, 0) / allTime.n : null;
+                renderAllTime();
+            }
+
+            function renderAllTime() {
+                const el = $('chart-all');
+                if (!el) return;
+                el.textContent = allTime.n
+                    ? 'Alle Umfragen · ' + fmtMean(allTime.mean) + ' aus ' + allTime.n + ' Votes'
+                    : '';
+                // the line carries the colour its own average has on the ramp
+                el.style.color = allTime.n ? ramp((allTime.mean - 1) / 9) : '';
             }
 
             async function refetch() {
