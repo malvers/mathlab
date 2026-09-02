@@ -38,8 +38,10 @@
         ['informatik/informatik11.html', 'IS 11', 'b-pink', 'Informatiksysteme Klasse 11'],
         ['informatik/informatik12.html', 'IS 12', 'b-pink', 'Informatiksysteme Klasse 12'],
         ['informatik/informatik13.html', 'IS 13', 'b-pink', 'Informatiksysteme Klasse 13'],
-        ['informatik/fos11.html', 'FOS 11', 'b-cyan', 'Informatik FOS Klasse 11'],
-        ['informatik/fos12.html', 'FOS 12', 'b-cyan', 'Informatik FOS Klasse 12'],
+        /* FO, nicht FOS: die Lerngruppen heissen FOS25-1, FOG25-2 usw. - im
+           Menue stand die Schulform genauso, das war verwechselbar (Doc, 02.09.2026). */
+        ['informatik/fos11.html', 'FO 11', 'b-cyan', 'Informatik Fachoberschule Klasse 11'],
+        ['informatik/fos12.html', 'FO 12', 'b-cyan', 'Informatik Fachoberschule Klasse 12'],
         ['notes.html', 'Notizen', 'b-cyan', 'Notizen'],
         ['konzepte.html', 'Konzepte', 'b-violet', 'Konzepte'],
         ['operatoren.html', 'Operatoren', 'b-red', 'Operatoren'],

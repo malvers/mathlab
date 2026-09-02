@@ -60,7 +60,13 @@
             </div>
             <span class="tt-confcount" id="confcount" title="Harte Konflikte in dieser Woche (Person in zwei Räumen), ganze Schule"></span>
             <div class="tt-meta" id="meta"></div>
+            <!-- Optimierer-Knopf vorerst ausgeblendet (Doc, 02.09.2026): der
+                 Optimierer arbeitet auf dem GANZEN Schulplan, und den holen wir
+                 seit heute nicht mehr (nur noch Docs eigene Stunden). Nicht
+                 loeschen - zum Reaktivieren einkommentieren; die Datenbasis
+                 kommt mit `node tools/webuntis.js year --alle` zurueck.
             <button class="action" id="optbtn" type="button" title="Stundenplan optimieren (Simulated Annealing)">Editieren</button>
+            -->
             <button class="action secondary" id="pubbtn" type="button"
                 title="Meine eigenen Stunden für die Schülerinnen und Schüler veröffentlichen (meinplan.html)">Veröffentlichen</button>
         </div>
@@ -651,14 +657,21 @@
                 document.body.classList.toggle('opt-mode', open);
                 // the conflict toggle is hidden outside the edit mode - never leave it on unseen
                 if (!open && CONF) { CONF = false; document.getElementById('conf').classList.remove('on'); }
-                $('optbtn').textContent = open ? 'Zurück' : 'Editieren';
-                $('optbtn').title = open ? 'Editier-Modus verlassen' : 'Stundenplan optimieren (Simulated Annealing)';
+                /* der Knopf ist ausgeblendet - ohne ?. stirbt hier das ganze Skript */
+                if ($('optbtn')) {
+                    $('optbtn').textContent = open ? 'Zurück' : 'Editieren';
+                    $('optbtn').title = open ? 'Editier-Modus verlassen' : 'Stundenplan optimieren (Simulated Annealing)';
+                }
                 try { localStorage.setItem('svp-opt-open', open ? '1' : '0'); } catch (e) { }
                 if (DATA) render(DATA, SELECTED);   // grid height depends on the panel
             };
+            /* Ohne Knopf soll sich das Panel auch nicht von selbst aus dem
+               localStorage wieder oeffnen (Doc, 02.09.2026):
             try { if (localStorage.getItem('svp-opt-open') === '1') setOpt(true); } catch (e) { }
+            */
+            setOpt(false);
 
-            $('optbtn').addEventListener('click', () => setOpt(panel.hidden));
+            $('optbtn')?.addEventListener('click', () => setOpt(panel.hidden));
             $('opt-close').addEventListener('click', () => setOpt(false));
 
             const hh = t => String(t).padStart(4, '0').replace(/(\d{2})(\d{2})/, '$1:$2');
