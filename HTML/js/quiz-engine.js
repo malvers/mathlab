@@ -34,7 +34,6 @@
     const wrap = document.createElement('div');
     wrap.className = 'wrap';
     wrap.innerHTML =
-      (CFG.back ? '<div class="backrow"><button class="backbtn" id="backBtn" type="button" title="Zur Übersicht">Zur Übersicht</button></div>' : '') +
       '<h1></h1>' +
       '<div class="sub"></div>' +
       '<div id="quiz"></div>' +
@@ -63,8 +62,6 @@
       'nur anonyme Gesamt-Zähler.</footer>';
     wrap.querySelector('h1').textContent = CFG.title || '';
     wrap.querySelector('.sub').textContent = CFG.subtitle || '';
-    const back = wrap.querySelector('#backBtn');
-    if (back) back.addEventListener('click', function () { location.href = CFG.back; });
 
     document.body.appendChild(wrap);
   }
@@ -438,6 +435,22 @@
     return bar;
   }
 
+  /* Der Weg zurueck in den Stoffverteilungsplan steht links in derselben
+     Leiste wie "Auswertung" und "Alle einklappen" - nicht mehr frei am
+     Fensterrand. margin-right:auto haelt ihn links, der Rest bleibt rechts. */
+  function planButton() {
+    const btn = pillButton('backBtn', 'Zum Plan', 'Zurueck zum Stoffverteilungsplan',
+      function () { location.href = CFG.back; });
+    btn.className += ' btn-back';
+    return btn;
+  }
+
+  function placePlanButton() {
+    if (!CFG.back) return;
+    const bar = toolbar(document.getElementById('quiz'));
+    bar.insertBefore(planButton(), bar.firstChild);
+  }
+
   function placeEvalButton() {
     const bar = toolbar(document.getElementById('quiz'));
     bar.insertBefore(pillButton('evalBtn', 'Auswertung', 'Live-Auswertung - nur mit Passwort',
@@ -457,6 +470,7 @@
     row.appendChild(h1);
     row.appendChild(pillButton('toTestBtn', 'Zum Test', 'Zurueck zur Testansicht',
       function () { switchTo(false); }));
+    if (CFG.back) row.appendChild(planButton());
   }
 
   /* The teacher view sits behind the usual password. The gate lives in
@@ -617,6 +631,7 @@
     render();
     QuizCollapse.init(quizEl);
     placeEvalButton();   /* nach init, damit die .qbar schon steht */
+    placePlanButton();
     updateSubmitState();
     tagSubline();
     /* Demo helper (?test): key r fills a random answer set, ~95% correct. */
