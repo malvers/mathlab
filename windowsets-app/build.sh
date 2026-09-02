@@ -3,7 +3,11 @@
 set -e
 cd "$(dirname "$0")"
 
-APP="WindowSets.app"
+# The app is installed straight to /Applications: the login item and the
+# Accessibility approval both hang on the bundle path, so there must be exactly
+# one WindowSets.app on this machine — a second copy in the repo would be the
+# one that starts at login, silently outdated.
+APP="/Applications/WindowSets.app"
 rm -rf "$APP"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 
@@ -36,5 +40,5 @@ codesign --force --sign - "$APP" >/dev/null 2>&1 || true
 # the entry turns that silent failure back into an honest question.
 tccutil reset Accessibility de.docalvers.windowsets >/dev/null 2>&1 || true
 
-echo "built: $(pwd)/$APP"
+echo "built: $APP"
 echo "note:  Accessibility has to be granted again after every build."

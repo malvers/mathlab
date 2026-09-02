@@ -3,7 +3,10 @@
 Menu bar app that remembers where your windows are — separately for every monitor
 setup — and puts them back when you plug that setup in again.
 
-`./build.sh` builds `WindowSets.app` (command line tools are enough, no Xcode project).
+`./build.sh` builds and installs `/Applications/WindowSets.app` (command line tools are
+enough, no Xcode project). It installs there on purpose: the login item and the
+Accessibility approval both hang on the bundle path, so a second copy would be the one
+starting at login, silently outdated.
 
 ## How it works
 
@@ -26,7 +29,7 @@ Layouts live in `~/Library/Application Support/WindowSets/layouts.json`.
 
 ## Setup
 
-1. `./build.sh`, move `WindowSets.app` to `/Applications`, launch it.
+1. `./build.sh`, then launch `/Applications/WindowSets.app`.
 2. Grant **System Settings → Privacy & Security → Accessibility** — without it macOS lets
    nobody read or move other apps' windows.
 3. Menu → **Start at login**, so the recorder is always running.
