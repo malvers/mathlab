@@ -194,26 +194,64 @@
 
     /* Write one slot. An empty text clears it. Works logged out (that is how a
        pupil signs up); logged in it goes through the session for symmetry. */
+    /* Thrown when the slot was claimed by somebody else in the meantime. */
+    function SlotTakenError() { this.name = 'SlotTaken'; this.message = 'Platz war schon vergeben'; }
+    SlotTakenError.prototype = Object.create(Error.prototype);
+
+    /* Thrown when a slot is older than the ten-minute grace period and the
+       database therefore refuses to let an anonymous browser change it. */
+    function GraceOverError() { this.name = 'GraceOver'; this.message = 'Aenderungsfrist abgelaufen'; }
+    GraceOverError.prototype = Object.create(Error.prototype);
+
     async function pushSlot(i, j, text) {
         const a = A();
         if (!a) throw new Error('Kein Cloud-Zugang');
         const enc = text ? await svpCrypto.seal(text) : null;
         const body = { taken: !!text, name_enc: enc, ts: new Date().toISOString() };
-        const path = TABLE + '?' + QS + '&idx=eq.' + i + '&slot=eq.' + j;
+
+        /* CLAIMING a free slot must never overwrite somebody who was a second
+           faster. Two browsers that both loaded the page while the slot was free
+           would otherwise both PATCH the row, and the later write wins - which is
+           exactly how sign-ups got overwritten (Doc, 02.09.2026).
+           `taken=is.false` moves the decision into the database: the update
+           touches the row only while it is still free, so the loser changes
+           nothing and gets told. Doc, logged in, keeps the unconditional path -
+           he has to be able to correct things. */
+        /* Anonymous writes always ask for the changed rows back. Not just to
+           catch a lost race: since 02.09.2026 the database also refuses to touch
+           a slot that has been taken for more than ten minutes, so a late
+           CLEARING attempt changes nothing either - and without the returned
+           rows the page would cheerfully report "gespeichert".
+           Only idx/slot/taken are selected; name_enc is not readable without the
+           key, and asking for it would fail the whole request. */
+        const anon = !a.hasSession();
+        const guard = !!text && anon;          /* claiming: only while still free */
+        let path = TABLE + '?' + QS + '&idx=eq.' + i + '&slot=eq.' + j;
+        if (guard) path += '&taken=is.false';
+        if (anon) path += '&select=idx,slot,taken';
+        const prefer = anon ? 'return=representation' : 'return=minimal';
+
         let res;
         if (a.hasSession()) {
-            res = await a.api(path, { method: 'PATCH', headers: { Prefer: 'return=minimal' }, body: JSON.stringify(body) });
+            res = await a.api(path, { method: 'PATCH', headers: { Prefer: prefer }, body: JSON.stringify(body) });
         } else {
             res = await fetch(a.DB_URL + '/rest/v1/' + path, {
                 method: 'PATCH',
                 headers: {
                     apikey: a.DB_KEY, Authorization: 'Bearer ' + a.DB_KEY,
-                    'Content-Type': 'application/json', Prefer: 'return=minimal'
+                    'Content-Type': 'application/json', Prefer: prefer
                 },
                 body: JSON.stringify(body)
             });
         }
         if (!res.ok) throw new Error('HTTP ' + res.status);
+        if (anon) {
+            const rows = await res.json().catch(() => []);
+            if (!rows.length) {
+                if (text) throw new SlotTakenError();       /* somebody else was faster */
+                throw new GraceOverError();                 /* too late to clear it yourself */
+            }
+        }
         slots[i][j].taken = !!text;
         slots[i][j].enc = enc;
         slots[i][j].name = text || null;
@@ -373,6 +411,24 @@
             updateCount();
             setStatus('☁ gespeichert (verschlüsselt)');
         } catch (e) {
+            if (e.name === 'GraceOver') {
+                clearTimeout(timers[i + '-' + j]);
+                delete timers[i + '-' + j];
+                setStatus('Aendern ist nur in den ersten zehn Minuten moeglich — bitte Herrn Alvers ansprechen.', true);
+                await refresh();
+                return;
+            }
+            if (e.name === 'SlotTaken') {
+                /* Never write to the field here: assigning a value schedules the
+                   NEXT save, and that one carries an empty text - which would
+                   clear the winner's entry. Drop any pending save and let
+                   refresh() redraw the field from the truth in the database. */
+                clearTimeout(timers[i + '-' + j]);
+                delete timers[i + '-' + j];
+                setStatus('Dieser Platz wurde gerade von jemand anderem belegt — bitte einen freien waehlen.', true);
+                await refresh();
+                return;
+            }
             setStatus('☁ NICHT gespeichert: ' + e.message, true);
         }
     }
@@ -644,5 +700,19 @@
             await flushAll();
             refresh();
         });
+
+        /* A whole class signs up at the same minute, all sitting on the page.
+           Without polling a slot taken elsewhere stays writable here until the
+           tab is switched - so the field is only closed AFTER the overwrite was
+           attempted. Every 20 s is enough for that, and it never runs while
+           somebody is typing or a save is still pending. */
+        window.setInterval(function () {
+            if (document.hidden) return;
+            if (editing) return;
+            if (Object.keys(timers).length) return;
+            const act = document.activeElement;
+            if (act && act.tagName === 'INPUT' && act.id.indexOf('name-') === 0) return;
+            refresh();
+        }, 20000);
     })();
 })();
