@@ -20,33 +20,35 @@
 
     // [href relative to svp root, short label (pill row), badge color class,
     //  spelled-out label for the edit panel]
+    // All pills grey since 02.09.2026 (Doc): the colour-coded row read as too
+    // busy - the badge class column stays, so a colour can come back per entry.
     const LINKS = [
         ['index.html', 'Home', 'b-grey', 'Startseite'],
-        ['mathe/mathe5.html', 'MA 5', 'b-orange', 'Mathematik Klasse 5'],
-        ['mathe/mathegy9.html', 'MA 9', 'b-orange', 'Mathematik Klasse 9 (Gymnasium)'],
-        ['mathe/mathegy10.html', 'MA 10', 'b-orange', 'Mathematik Klasse 10 (Gymnasium)'],
-        ['mathe/mathe11.html', 'MA 11', 'b-orange', 'Mathematik Klasse 11'],
-        ['mathe/mathe12.html', 'MA 12', 'b-orange', 'Mathematik Klasse 12'],
-        ['mathe/mathe13.html', 'MA 13', 'b-orange', 'Mathematik Klasse 13'],
-        ['mathe/uebung.html', 'Üben', 'b-orange', 'Übung macht den Meister'],
-        ['physik/phygy10.html', 'PH 10', 'b-violet', 'Physik Klasse 10 (Gymnasium)'],
-        ['wr/wr11.html', 'W/R 11', 'b-teal', 'Wirtschaftslehre/Recht Klasse 11'],
-        ['informatik/informatik9.html', 'INF 9', 'b-green', 'Informatik Klasse 9'],
-        ['informatik/inf11.html', 'INF 11', 'b-green', 'Informatik Klasse 11'],
-        ['informatik/inf12.html', 'INF 12', 'b-green', 'Informatik Klasse 12'],
-        ['informatik/inf13.html', 'INF 13', 'b-green', 'Informatik Klasse 13'],
-        ['informatik/informatik11.html', 'IS 11', 'b-pink', 'Informatiksysteme Klasse 11'],
-        ['informatik/informatik12.html', 'IS 12', 'b-pink', 'Informatiksysteme Klasse 12'],
-        ['informatik/informatik13.html', 'IS 13', 'b-pink', 'Informatiksysteme Klasse 13'],
+        ['mathe/mathe5.html', 'MA 5', 'b-grey', 'Mathematik Klasse 5'],
+        ['mathe/mathegy9.html', 'MA 9', 'b-grey', 'Mathematik Klasse 9 (Gymnasium)'],
+        ['mathe/mathegy10.html', 'MA 10', 'b-grey', 'Mathematik Klasse 10 (Gymnasium)'],
+        ['mathe/mathe11.html', 'MA 11', 'b-grey', 'Mathematik Klasse 11'],
+        ['mathe/mathe12.html', 'MA 12', 'b-grey', 'Mathematik Klasse 12'],
+        ['mathe/mathe13.html', 'MA 13', 'b-grey', 'Mathematik Klasse 13'],
+        ['mathe/uebung.html', 'Üben', 'b-grey', 'Übung macht den Meister'],
+        ['physik/phygy10.html', 'PH 10', 'b-grey', 'Physik Klasse 10 (Gymnasium)'],
+        ['wr/wr11.html', 'W/R 11', 'b-grey', 'Wirtschaftslehre/Recht Klasse 11'],
+        ['informatik/informatik9.html', 'INF 9', 'b-grey', 'Informatik Klasse 9'],
+        ['informatik/inf11.html', 'INF 11', 'b-grey', 'Informatik Klasse 11'],
+        ['informatik/inf12.html', 'INF 12', 'b-grey', 'Informatik Klasse 12'],
+        ['informatik/inf13.html', 'INF 13', 'b-grey', 'Informatik Klasse 13'],
+        ['informatik/informatik11.html', 'IS 11', 'b-grey', 'Informatiksysteme Klasse 11'],
+        ['informatik/informatik12.html', 'IS 12', 'b-grey', 'Informatiksysteme Klasse 12'],
+        ['informatik/informatik13.html', 'IS 13', 'b-grey', 'Informatiksysteme Klasse 13'],
         /* FO, nicht FOS: die Lerngruppen heissen FOS25-1, FOG25-2 usw. - im
            Menue stand die Schulform genauso, das war verwechselbar (Doc, 02.09.2026). */
-        ['informatik/fos11.html', 'FO 11', 'b-cyan', 'Informatik Fachoberschule Klasse 11'],
-        ['informatik/fos12.html', 'FO 12', 'b-cyan', 'Informatik Fachoberschule Klasse 12'],
-        ['notes.html', 'Notizen', 'b-cyan', 'Notizen'],
-        ['konzepte.html', 'Konzepte', 'b-violet', 'Konzepte'],
-        ['operatoren.html', 'Operatoren', 'b-red', 'Operatoren'],
-        ['punktetabelle.html', 'Punkte BGY', 'b-orange', 'Punktetabelle - Notenspiegel BGY'],
-        [PLAN_HREF, 'Stundenplan', 'b-teal', PLAN_TITLE],
+        ['informatik/fos11.html', 'FO 11', 'b-grey', 'Informatik Fachoberschule Klasse 11'],
+        ['informatik/fos12.html', 'FO 12', 'b-grey', 'Informatik Fachoberschule Klasse 12'],
+        ['notes.html', 'Notizen', 'b-grey', 'Notizen'],
+        ['konzepte.html', 'Konzepte', 'b-grey', 'Konzepte'],
+        ['operatoren.html', 'Operatoren', 'b-grey', 'Operatoren'],
+        ['punktetabelle.html', 'Punkte BGY', 'b-grey', 'Punktetabelle - Notenspiegel BGY'],
+        [PLAN_HREF, 'Stundenplan', 'b-grey', PLAN_TITLE],
     ];
 
     // These open in a new tab so the current plan stays put.
