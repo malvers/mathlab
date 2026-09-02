@@ -238,13 +238,13 @@ Deno.serve(async (req) => {
       const to = /^\d{8}$/.test(String(b.to)) ? String(b.to) : from;
       if (!from) return json({ error: 'from/to als YYYYMMDD erwartet' }, 400);
       const lessons = await myLessons(u, userData, from, to);
-      const state = lessons.length ? await periodState(u, lessons.map((l: any) => l.ttId)) : {};
+      /* Ohne periodState (Datenschutz, 02.09.2026) kennen wir weder den schon
+         eingetragenen Text noch das `can` der Stunde. myLessons liefert
+         ohnehin nur DOCS EIGENE Stunden - in denen darf er schreiben, das ist
+         die Annahme statt der Rueckfrage. `topic` bleibt leer: der Dialog
+         zeigt dann seinen Textvorschlag, nicht den Stand aus WebUntis. */
       return json({
-        lessons: lessons.map((l: any) => ({
-          ...l,
-          topic: state[String(l.ttId)]?.topic || '',
-          writable: (state[String(l.ttId)]?.can || []).includes('WRITE_LESSONTOPIC'),
-        })),
+        lessons: lessons.map((l: any) => ({ ...l, topic: '', writable: true })),
       });
     }
 
@@ -256,22 +256,17 @@ Deno.serve(async (req) => {
       if (!Number.isInteger(ttId) || ttId <= 0) return json({ error: 'ttId fehlt' }, 400);
       if (!topic) return json({ error: 'Text ist leer' }, 400);
 
-      const state = (await periodState(u, [ttId]))[String(ttId)];
-      if (!state) return json({ error: 'Stunde nicht gefunden (ttId ' + ttId + ')' }, 404);
-      if (!state.can.includes('WRITE_LESSONTOPIC')) {
-        return json({ error: 'keine Schreibrechte für diese Stunde', previous: state.topic }, 403);
-      }
-      if (state.topic.trim() === topic) return json({ ok: true, ttId, topic, unchanged: true });
-      if (state.topic.trim() && !b.force) {
-        return json({ error: 'steht schon etwas anderes drin', previous: state.topic, conflict: true }, 409);
-      }
-
+      /* Direkt schreiben. Die Vorab-Pruefung (steht schon was drin? darf ich?)
+         und das Zurueckelesen liefen ueber periodState - und das brachte die
+         Schuelerdaten mit (Doc, 02.09.2026). Beides ist damit weg:
+         - kein Ueberschreibschutz mehr: was hier gesendet wird, gewinnt. Wer in
+           WebUntis von Hand korrigiert hat, muss die Stunde also auslassen.
+         - keine Rechtepruefung noetig: es sind Docs eigene Stunden. Fehlt das
+           Recht doch, antwortet WebUntis selbst mit einem Fehler.
+         - keine Lesebestaetigung: es gilt das {"success":true} des Servers. */
       const w = await u.intern('submitLessonTopic', { ttId, lessonTopic: topic });
       if (w.error) return json({ error: `${w.error.message} (code ${w.error.code})` }, 502);
-
-      /* Read back — a {"success":true} is not proof that the text arrived as sent. */
-      const after = (await periodState(u, [ttId]))[String(ttId)]?.topic || '';
-      return json({ ok: after.trim() === topic, ttId, topic, stored: after, previous: state.topic });
+      return json({ ok: w.result?.success !== false, ttId, topic, stored: topic, unverified: true });
     }
 
     return json({ error: 'unbekannte action' }, 400);
