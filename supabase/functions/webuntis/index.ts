@@ -170,6 +170,17 @@ async function myLessons(u: Untis, userData: any, from: string, to: string) {
 
 /* Stored topic + this lesson's own rights. `can` is the honest way to know whether a write is
    allowed (own lesson: WRITE_LESSONTOPIC; a colleague's: read only) instead of trying it out. */
+// STILLGELEGT am 02.09.2026 (Doc): getPeriodData2017 liefert neben Stundeninhalt
+// und Rechten auch `referencedStudents` — Klarnamen und Geburtsdaten, auch bei
+// fremden Stunden. Nichts davon wurde je gespeichert, aber der Aufruf holt es
+// ueber die Leitung; das genuegt als Grund, ihn zu lassen.
+// Folge: der Klassenbuch-Schreibweg dieser Function ist ohne ihn blind (kein
+// Ueberschreibschutz, keine `can`-Pruefung) und meldet das ehrlich, statt still
+// weiterzuschreiben. Zum Reaktivieren: Original unten einkommentieren.
+async function periodState(_u: Untis, _ttIds: number[]): Promise<Record<string, { topic: string; can: string[] }>> {
+  throw new Error('periodState ist stillgelegt (Datenschutz, 02.09.2026): getPeriodData2017 liefert Schuelerdaten mit.');
+}
+/* ORIGINAL - nicht loeschen, nur stillgelegt:
 async function periodState(u: Untis, ttIds: number[]) {
   const out: Record<string, { topic: string; can: string[] }> = {};
   for (let i = 0; i < ttIds.length; i += 50) {
@@ -181,6 +192,7 @@ async function periodState(u: Untis, ttIds: number[]) {
   }
   return out;
 }
+*/
 
 // ---------- handler ----------
 
