@@ -1908,12 +1908,24 @@ tr.detail-row li::marker { color: var(--lambda); }
     opacity: 0.45;
 }
 
-body.editing .notes-body {
+/* The field is live whenever Doc is logged in, so it always looks writable -
+   a quiet frame that only wakes up on hover and focus. */
+.notes-body[contenteditable="true"] {
     background: var(--card);
     border: 1px dashed var(--line);
     border-radius: 6px;
-    min-height: 4.2em;
+    min-height: 3.4em;
     color: var(--text);
+    cursor: text;
+    transition: border-color 0.15s, background 0.15s;
+}
+
+.notes-body[contenteditable="true"]:hover { border-color: var(--muted); }
+
+.notes-body[contenteditable="true"]:focus {
+    border-style: solid;
+    border-color: var(--lambda);
+    background: var(--sunken);
 }
 
 /* KaTeX inline math: tone the default 1.21em down so formulas sit flush with

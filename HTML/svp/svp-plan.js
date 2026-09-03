@@ -2355,6 +2355,28 @@
                 notesEl.className = 'notes-body';
                 notesEl.dataset.ph = 'Notizen …';
                 setNotesText(notesEl, noteOf(i));
+                /* Doc, 03.09.2026: "die Anforderung nur in Bearbeiten ist
+                   hinfaellig" - the field is live as soon as he is logged in,
+                   saving itself like the notes page does. The Bearbeiten mode
+                   stays what it always was: for the plan itself. */
+                notesEl.setAttribute('contenteditable', 'true');
+                let noteTimer = null;
+                const stashNote = function () {
+                    const t = notesTextOf(notesEl);
+                    if (t) planNotes[i] = t; else delete planNotes[i];
+                    persistNotes();
+                    pushNotes();
+                };
+                notesEl.addEventListener('input', function () {
+                    clearTimeout(noteTimer);
+                    noteTimer = setTimeout(stashNote, 700);
+                });
+                notesEl.addEventListener('blur', function () {
+                    clearTimeout(noteTimer);
+                    stashNote();
+                });
+                /* typing must not fold the week away under the cursor */
+                notesEl.addEventListener('keydown', function (ev) { ev.stopPropagation(); });
                 panes.notizen.pane.appendChild(notesEl);
                 ref.notesEl = notesEl;
                 ref.showPane = showPane;
@@ -2394,7 +2416,9 @@
             const has = ref.ul.querySelectorAll('li').length > 0
                 || (ref.notesEl && notesTextOf(ref.notesEl).length > 0)
                 || !!subSide.querySelector('.mat-pill, a, button');
-            const show = has || document.body.classList.contains('editing');
+            /* logged in every week stays openable - that is the only way to
+               reach the Notizen of a week that has no bullets */
+            const show = has || notesAllowed() || document.body.classList.contains('editing');
             tr.classList.toggle('expandable', show);
             if (chev) chev.hidden = !show;
             if (!show) { tr.classList.remove('open'); detailTr.classList.remove('open'); }
@@ -2414,7 +2438,7 @@
         });
 
         const detailItems = ov.details || row.details;
-        if ((detailItems && detailItems.length) || (notesAllowed() && noteOf(i))) {
+        if ((detailItems && detailItems.length) || notesAllowed()) {
             ensureSubRow();
             buildDetailList(ref.ul, detailItems || []);
         }
@@ -3299,7 +3323,7 @@
             // in the sub-row have their own ✕ while editing, and new links go
             // through the + dialog. A long SharePoint URL in this cell used to
             // blow the table far past the window.
-            for (const el of [r.ferienTd, r.dateTd, r.uTd, r.topicSpan, r.remarkTd, r.ul, r.notesEl]) {
+            for (const el of [r.ferienTd, r.dateTd, r.uTd, r.topicSpan, r.remarkTd, r.ul]) {
                 if (el) el.setAttribute('contenteditable', flag);
             }
         }
