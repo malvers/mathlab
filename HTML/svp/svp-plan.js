@@ -1043,6 +1043,17 @@
     }
 
     const KEY = 'svp-edits:' + location.pathname;
+    /* Notizen live in their OWN store, deliberately not in the edits object:
+       svp_plan_edits is readable by anon on purpose (every visitor has to see
+       the current plan), so a note in there would be public - Doc, 03.09.2026:
+       "die Kids sollen die Notizen nicht sehen". Own key, own table, and the
+       tab is not even built while nobody is logged in. */
+    const NOTES_KEY = 'svp-plan-notes:' + location.pathname;
+    let planNotes = {};
+    try { planNotes = JSON.parse(localStorage.getItem(NOTES_KEY) || '{}') || {}; } catch (e) { planNotes = {}; }
+    function notesAllowed() { return !!(window.svpAuth && svpAuth.hasSession()); }
+    function noteOf(i) { return planNotes[i] || ''; }
+    function persistNotes() { localStorage.setItem(NOTES_KEY, JSON.stringify(planNotes)); }
     let skipUnloadSave = false; /* set by doReset()/applyShift(), see the beforeunload handler */
     let saved = {};
     try { saved = JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) { saved = {}; }
@@ -1153,6 +1164,14 @@
             ul.appendChild(li);
         }
     }
+
+    /* Notes are plain multi-line text. Reading uses innerText so the line
+       breaks the browser put into the contenteditable div survive; writing
+       goes through textContent, the CSS keeps the whitespace. */
+    function notesTextOf(el) {
+        return String(el.innerText || '').replace(/\u00a0/g, ' ').replace(/\s+$/, '');
+    }
+    function setNotesText(el, text) { el.textContent = text || ''; }
 
     // --- Print export ------------------------------------------------------
     // Printing a plan page produces a clean, light SVP document (Raleway),
@@ -2285,9 +2304,10 @@
 
         // Expandable sub-row, created on demand: bullets under the topic
         // column, materials in the free area under Bemerkungen/Material.
-        let detailTr = null, subMain = null, subSide = null;
+        let detailTr = null, subMain = null, subSide = null, chev = null;
         function ensureSubRow() {
             if (detailTr) return { main: subMain, side: subSide };
+            /* ref.ul / ref.notesEl are created below, together with the tabs */
             detailTr = document.createElement('tr');
             detailTr.className = 'detail-row';
             // Empty spacer under columns 1-5 so the content sits under the topic column.
@@ -2296,6 +2316,49 @@
             detailTr.appendChild(spacer);
             subMain = document.createElement('td');
             subMain.colSpan = 1;
+            ref.ul = document.createElement('ul');
+            /* Two tabs in the sub-row (Doc, 03.09.2026): "Inhalt" holds the
+               bullet list as before, "Notizen" a free text field that Doc
+               fills in edit mode. Notes stay out of both exports and out of
+               the Untis text - they belong to the lesson, not to the plan.
+               Logged out there is no tab strip and no Notizen element at all,
+               so a visitor's DOM looks exactly as it did before. */
+            if (!notesAllowed()) {
+                subMain.appendChild(ref.ul);
+            } else {
+                const tabs = document.createElement('div');
+                tabs.className = 'sub-tabs';
+                subMain.appendChild(tabs);
+                const panes = {};
+                const showPane = function (name) {
+                    for (const k in panes) {
+                        panes[k].btn.classList.toggle('on', k === name);
+                        panes[k].pane.hidden = k !== name;
+                    }
+                };
+                [['inhalt', 'Inhalt'], ['notizen', 'Notizen']].forEach(function (t, k) {
+                    const b = document.createElement('button');
+                    b.type = 'button';
+                    b.className = 'sub-tab' + (k ? '' : ' on');
+                    b.textContent = t[1];
+                    b.addEventListener('click', function (ev) { ev.stopPropagation(); showPane(t[0]); });
+                    tabs.appendChild(b);
+                    const pane = document.createElement('div');
+                    pane.className = 'sub-pane';
+                    pane.dataset.pane = t[0];
+                    pane.hidden = !!k;
+                    subMain.appendChild(pane);
+                    panes[t[0]] = { btn: b, pane: pane };
+                });
+                panes.inhalt.pane.appendChild(ref.ul);
+                const notesEl = document.createElement('div');
+                notesEl.className = 'notes-body';
+                notesEl.dataset.ph = 'Notizen …';
+                setNotesText(notesEl, noteOf(i));
+                panes.notizen.pane.appendChild(notesEl);
+                ref.notesEl = notesEl;
+                ref.showPane = showPane;
+            }
             detailTr.appendChild(subMain);
             subSide = document.createElement('td');
             subSide.colSpan = 2;
@@ -2303,12 +2366,39 @@
             detailTr.appendChild(subSide);
             tr.after(detailTr);
             tr.classList.add('expandable');
-            const chev = document.createElement('span');
+            chev = document.createElement('span');
             chev.className = 'chev';
             chev.textContent = '▸';
+            /* While editing the row click is dead (the cells are contenteditable),
+               so the chevron itself has to open the sub-row - otherwise a week
+               that was closed when Doc hit "Bearbeiten" can never take a note. */
+            chev.addEventListener('click', function (ev) {
+                if (!document.body.classList.contains('editing')) return;
+                ev.stopPropagation();
+                toggleSubRow();
+            });
             tds[5].insertBefore(chev, topicSpan);
             return { main: subMain, side: subSide };
         }
+        function toggleSubRow() {
+            if (!detailTr) return;
+            tr.classList.toggle('open');
+            detailTr.classList.toggle('open');
+            syncOpenWeeks();
+        }
+        /* The chevron promises content. An empty sub-row only exists because
+           edit mode builds one for every week, so hide the promise again as
+           soon as editing ends and nothing was written. */
+        ref.refreshExpandable = function () {
+            if (!detailTr) return;
+            const has = ref.ul.querySelectorAll('li').length > 0
+                || (ref.notesEl && notesTextOf(ref.notesEl).length > 0)
+                || !!subSide.querySelector('.mat-pill, a, button');
+            const show = has || document.body.classList.contains('editing');
+            tr.classList.toggle('expandable', show);
+            if (chev) chev.hidden = !show;
+            if (!show) { tr.classList.remove('open'); detailTr.classList.remove('open'); }
+        };
         ref.ensureSubRow = ensureSubRow;
         ref.openSubRow = function () {
             if (!detailTr) return;
@@ -2319,18 +2409,14 @@
 
         tr.addEventListener('click', () => {
             if (document.body.classList.contains('editing')) return;
-            if (!detailTr) return;
-            tr.classList.toggle('open');
-            detailTr.classList.toggle('open');
-            syncOpenWeeks();
+            if (!detailTr || !tr.classList.contains('expandable')) return;
+            toggleSubRow();
         });
 
         const detailItems = ov.details || row.details;
-        if (detailItems && detailItems.length) {
-            const ul = document.createElement('ul');
-            buildDetailList(ul, detailItems);
-            ensureSubRow().main.appendChild(ul);
-            ref.ul = ul;
+        if ((detailItems && detailItems.length) || (notesAllowed() && noteOf(i))) {
+            ensureSubRow();
+            buildDetailList(ref.ul, detailItems || []);
         }
 
         ref.quizBtn = buildQuizBtn(quizSource(ov, row));
@@ -3203,13 +3289,27 @@
     function setEditable(on) {
         const flag = on ? 'true' : 'false';
         for (const r of rendered) {
+            /* Every week gets a sub-row while editing, so a note can be written
+               anywhere - refreshExpandable takes the empty ones back afterwards. */
+            if (on && !r.ferienTd && r.ensureSubRow) r.ensureSubRow();
+            /* An empty bullet list has nothing to type into; give it one blank
+               line to start from (empty lines are dropped again on save). */
+            if (on && r.ul && !r.ul.querySelector('li')) r.ul.appendChild(document.createElement('li'));
             // Material is deliberately NOT edited as raw text here: the pills
             // in the sub-row have their own ✕ while editing, and new links go
             // through the + dialog. A long SharePoint URL in this cell used to
             // blow the table far past the window.
-            for (const el of [r.ferienTd, r.dateTd, r.uTd, r.topicSpan, r.remarkTd, r.ul]) {
+            for (const el of [r.ferienTd, r.dateTd, r.uTd, r.topicSpan, r.remarkTd, r.ul, r.notesEl]) {
                 if (el) el.setAttribute('contenteditable', flag);
             }
+        }
+        if (!on) for (const r of rendered) {
+            /* drop the blank starter bullets again, else an untouched week keeps
+               an empty list item - and would still look like it had content */
+            if (r.ul) r.ul.querySelectorAll('li').forEach(function (li) {
+                if (!li.textContent.trim()) li.remove();
+            });
+            if (r.refreshExpandable) r.refreshExpandable();
         }
         // While editing show the raw $...$ source; on exit re-render from the
         // (possibly edited) text. saveEdits runs before this, so it saves raw.
@@ -3253,12 +3353,22 @@
                         .map(li => li.textContent.trim())
                         .filter(t => t.length)
                     : [];  /* no sub-row rendered = no bullets on screen */
+                /* Notizen deliberately NOT in `entry` - see NOTES_KEY above. */
                 out[r.i] = entry;
             }
         }
         localStorage.setItem(KEY, JSON.stringify(out));
         localStorage.setItem(TS_KEY, new Date().toISOString());
         pushRemote();
+        if (notesAllowed()) {
+            for (const r of rendered) {
+                if (!r.notesEl) continue;
+                const t = notesTextOf(r.notesEl);
+                if (t) planNotes[r.i] = t; else delete planNotes[r.i];
+            }
+            persistNotes();
+            pushNotes();
+        }
     }
 
     // --- Edit gate: "✎ Bearbeiten" asks for a passphrase once per browser. ---
@@ -3295,12 +3405,12 @@
             return;
         }
         const editing = document.body.classList.toggle('editing');
-        if (editing) {
-            setAllDetails(true);
-        } else {
-            saveEdits();
-        }
+        /* saveEdits has to run before setEditable(false) - that one re-renders
+           the math from the raw text. Opening all weeks runs *after*
+           setEditable(true), which is where the missing sub-rows are built. */
+        if (!editing) saveEdits();
         setEditable(editing);
+        if (editing) setAllDetails(true);
         if (!editing) setShiftMode(false); /* the arrows belong to edit mode */
         if (btn) btn.textContent = editing ? '✔ Speichern' : '✎ Bearbeiten';
         if (cancelBtn) cancelBtn.hidden = !editing;
@@ -3336,17 +3446,23 @@
 
     // Two-click confirm (no native dialogs): first click arms the button, second click resets.
     // Reset throws away every edit of this page — dates, topics, remarks,
-    // bullets AND the material links, locally and (when logged in) in the
+    // bullets, Notizen AND the material links, locally and (when logged in) in the
     // cloud, without any way back. So: only reachable in edit mode, and
     // guarded by two dialogs, the second one asking to type the word out.
     function doReset() {
         skipUnloadSave = true; /* mute the beforeunload safety net, see below */
         localStorage.removeItem(KEY);
         localStorage.removeItem(TS_KEY);
+        localStorage.removeItem(NOTES_KEY);
+        localStorage.removeItem(NOTES_TS_KEY);
+        planNotes = {};
         const done = () => location.reload();
         if (window.svpAuth && svpAuth.hasSession()) {
-            svpAuth.api('svp_plan_edits?page=eq.' + encodeURIComponent(location.pathname), { method: 'DELETE' })
-                .catch(() => {}).then(done, done);
+            const page = encodeURIComponent(location.pathname);
+            Promise.all([
+                svpAuth.api('svp_plan_edits?page=eq.' + page, { method: 'DELETE' }).catch(() => {}),
+                svpAuth.api('svp_plan_notes?page=eq.' + page, { method: 'DELETE' }).catch(() => {})
+            ]).then(done, done);
         } else done();
     }
 
@@ -3361,7 +3477,11 @@
             felder += keys.length;
             links += ((e.material || '').match(/https?:\/\//g) || []).length;
         }
-        return { wochen, links, felder };
+        /* Notizen sit in their own store, so they need their own count -
+           without it the dialog would understate what the reset takes. */
+        let notizen = 0;
+        for (const k in planNotes) if (planNotes[k]) notizen++;
+        return { wochen, links, felder, notizen };
     }
 
     // Shared shell for both warning dialogs (same look as the material modal).
@@ -3438,6 +3558,7 @@
                 ? 'Betroffen: <b>' + s.wochen + (s.wochen === 1 ? ' geänderte Woche' : ' geänderte Wochen') +
                   '</b> mit ' + s.felder + ' bearbeiteten Feldern' +
                   (s.links ? ' und <b>' + s.links + (s.links === 1 ? ' Material-Link' : ' Material-Links') + '</b>' : '') +
+                  (s.notizen ? ' sowie <b>' + s.notizen + (s.notizen === 1 ? ' Notiz' : ' Notizen') + '</b>' : '') +
                   '.<br>Danach steht der Plan wieder auf dem einprogrammierten Stand.'
                 : 'Auf dieser Seite ist nichts gespeichert — es gibt nichts zu verwerfen.';
             box.appendChild(info);
@@ -3511,6 +3632,7 @@
             topic: effVal(i, 'topic') || '',
             remark: effVal(i, 'remark') || '',
             details: (ov.details || row.details || []).slice(),
+            notes: noteOf(i),
             material: (ov.material != null ? ov.material : row.material) || '',
             /* The exercise set belongs to the topic, not to the calendar week:
                without this a shifted plan showed the tasks of the week before
@@ -3529,7 +3651,7 @@
        PLAN (a missing key would mean "not overridden"). */
     function emptyContent() {
         return {
-            type: 'org', u: '', topic: '', remark: '', details: [], material: '',
+            type: 'org', u: '', topic: '', remark: '', details: [], notes: '', material: '',
             quiz: null,
             ziel: '', mth: '', med: '', lnw: ''
         };
@@ -3549,7 +3671,7 @@
 
     function isEmptyContent(c) {
         if (!c) return true;
-        return !(c.details || []).length && !c.material && !c.u && remarkIsFree(c.remark) &&
+        return !(c.details || []).length && !c.notes && !c.material && !c.u && remarkIsFree(c.remark) &&
             (!c.topic || c.topic === '—' || c.topic === '-');
     }
 
@@ -3601,6 +3723,7 @@
         }
 
         let nr = 0;
+        const nextNotes = {};
         slots.forEach(function (i, k) {
             const c = next[k] || emptyContent();
             const remark = [stay[k] || '', c.remark || ''].filter(Boolean).join(' · ');
@@ -3614,6 +3737,7 @@
                 remark: remark,
                 details: c.details
             };
+            nextNotes[i] = c.notes || '';
             entry.material = c.material || '';
             entry.quiz = c.quiz || null;   /* null = this week has no exercises */
             /* always written, even empty — see emptyContent() */
@@ -3628,6 +3752,10 @@
             if (isEmptyContent(saved[i])) delete saved[i]; else break;
         }
 
+        planNotes = {};
+        for (const k in nextNotes) if (nextNotes[k]) planNotes[k] = nextNotes[k];
+        persistNotes();
+        if (notesAllowed()) pushNotes();
         localStorage.setItem(KEY, JSON.stringify(saved));
         localStorage.setItem(TS_KEY, new Date().toISOString());
         skipUnloadSave = true; /* the reload must not resurrect the old table */
@@ -3804,6 +3932,7 @@
                 updateMaterial(r, ov.material != null ? ov.material : row.material);
             }
             if (r.ul) buildDetailList(r.ul, ov.details || row.details || []);
+            if (r.refreshExpandable) r.refreshExpandable();
         }
     }
 
@@ -3826,6 +3955,58 @@
             }])
         }).then(res => setCloud(res.ok ? '☁ synchron' : cloudErr(res.status), res.ok))
             .catch(e => setCloud('☁ ' + e.message, false));
+    }
+
+    /* --- Notizen sync (own table svp_plan_notes, RLS owner-only) ---------
+       Deliberately a second table: svp_plan_edits has to stay anon-readable so
+       every visitor sees the current plan, and a note must not ride along in
+       it. One row per plan page, the notes as a { weekIndex: text } object.
+       As long as the table does not exist the notes simply stay local - the
+       feature degrades, nothing breaks and nothing leaks. */
+    const NOTES_TS_KEY = 'svp-plan-notes-ts:' + location.pathname;
+    let notesTableMissing = false;
+
+    function pushNotes() {
+        if (!notesAllowed() || notesTableMissing) return null;
+        const ts = new Date().toISOString();
+        localStorage.setItem(NOTES_TS_KEY, ts);
+        return svpAuth.api('svp_plan_notes', {
+            method: 'POST',
+            headers: { Prefer: 'resolution=merge-duplicates,return=minimal' },
+            body: JSON.stringify([{ page: location.pathname, notes: planNotes, ts: ts }])
+        }).then(function (res) {
+            if (res.status === 404) { notesTableMissing = true; return; }
+            if (!res.ok) setCloud('☁ Notizen nicht gespeichert — HTTP ' + res.status, false);
+        }).catch(function () { /* offline: the local copy stays */ });
+    }
+
+    async function pullNotes() {
+        if (!notesAllowed()) return;
+        try {
+            const res = await svpAuth.api('svp_plan_notes?page=eq.' +
+                encodeURIComponent(location.pathname) + '&select=notes,ts');
+            if (res.status === 404) { notesTableMissing = true; return; }
+            if (!res.ok) return;
+            const rows = await res.json();
+            const localTs = Date.parse(localStorage.getItem(NOTES_TS_KEY) || '') || 0;
+            if (!rows.length) { if (Object.keys(planNotes).length) pushNotes(); return; }
+            const remoteTs = Date.parse(rows[0].ts) || 0;
+            if (remoteTs <= localTs) { if (localTs > remoteTs) pushNotes(); return; }
+            planNotes = rows[0].notes || {};
+            persistNotes();
+            localStorage.setItem(NOTES_TS_KEY, rows[0].ts);
+            applyNotes();
+        } catch (e) { /* offline: the local copy stays */ }
+    }
+
+    /* Paint the current planNotes into the table (after a cloud pull). */
+    function applyNotes() {
+        for (const r of rendered) {
+            const t = noteOf(r.i);
+            if (!r.notesEl && t && r.ensureSubRow) r.ensureSubRow();
+            if (r.notesEl) setNotesText(r.notesEl, t);
+            if (r.refreshExpandable) r.refreshExpandable();
+        }
     }
 
     /* Read-only fetch without login: plan edits are public to READ
@@ -3928,7 +4109,7 @@
                     }
                 }
             } catch (e) { /* offline: local state stays */ }
-            if (svpAuth.hasSession()) syncFromRemote();
+            if (svpAuth.hasSession()) { syncFromRemote(); pullNotes(); }
         })();
     }
 
