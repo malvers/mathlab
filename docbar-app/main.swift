@@ -12,7 +12,8 @@ private enum Style {
     static let headerHeight: CGFloat = 46
     static let inset: CGFloat = 14
     static let pad: CGFloat = 8
-    static let icon = "d.circle.fill"   // D as in Doc
+    static let icon = "d.circle"        // D as in Doc: letter drawn, ring only an outline
+    static let iconAlert = "d.circle.fill"  // alert reverses it: white D punched out of a red disc
     static let font = NSFont.systemFont(ofSize: 13)
     static let nameFont = NSFont.systemFont(ofSize: 13, weight: .semibold)
     static let subFont = NSFont.systemFont(ofSize: 11)
@@ -95,6 +96,8 @@ final class PanelController: NSViewController {
             stack.leadingAnchor.constraint(equalTo: effect.leadingAnchor),
             stack.trailingAnchor.constraint(equalTo: effect.trailingAnchor),
             stack.topAnchor.constraint(equalTo: effect.topAnchor),
+            // Hard width: whatever the rows would like, the popover shows this much.
+            effect.widthAnchor.constraint(equalToConstant: Style.width),
         ])
         view = effect
     }
@@ -106,6 +109,9 @@ final class PanelController: NSViewController {
         t.font = font
         t.textColor = color
         t.lineBreakMode = .byTruncatingTail
+        // Without this a long subtitle — "LG ULTRAWIDE: 12 windows" — makes the whole
+        // panel wider than the popover shows, and everything on the right is cut off.
+        t.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
         t.translatesAutoresizingMaskIntoConstraints = false
         return t
     }
@@ -296,11 +302,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var statusItem: NSStatusItem!
     private let popover = NSPopover()
     private let panel = PanelController()
+    /// Where the panel was nudged to; a resize would otherwise recentre it under the icon.
+    private var panelOriginX: CGFloat?
 
     func applicationDidFinishLaunching(_ note: Notification) {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         if let button = statusItem.button {
-            button.image = NSImage(systemSymbolName: Style.icon, accessibilityDescription: "DocBar")
+            button.image = NSImage(systemSymbolName: Style.icon, accessibilityDescription: "DocBar")?
+                .withSymbolConfiguration(NSImage.SymbolConfiguration(pointSize: 20, weight: .light))
             button.image?.isTemplate = true
             button.action = #selector(toggle)
             button.target = self
@@ -356,9 +365,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private func refreshIcon(_ apps: [DocBarMenu]) {
         guard let button = statusItem.button else { return }
         let alerting = apps.contains { $0.alert == true && isRunning($0) }
-        let base = NSImage(systemSymbolName: Style.icon, accessibilityDescription: "DocBar")
+        let base = NSImage(systemSymbolName: alerting ? Style.iconAlert : Style.icon,
+                           accessibilityDescription: "DocBar")
         // Bigger than the system default: the D is the one icon of ours left up there.
-        let size = NSImage.SymbolConfiguration(pointSize: 20, weight: .semibold)
+        // The ring is drawn thin so it matches the fine frames of the neighbouring
+        // status items (measured: their frame is a single point, semibold is 2.5).
+        let size = NSImage.SymbolConfiguration(pointSize: 20, weight: alerting ? .semibold : .light)
         // Grown by a point at the top, which pushes the glyph that far down in the bar.
         func loweredByOne(_ image: NSImage?) -> NSImage? {
             guard let image = image else { return nil }
@@ -388,19 +400,21 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         panel.show(apps: apps, running: isRunning)
         // Explicit, so the popover never keeps a height from an earlier opening.
         popover.contentSize = NSSize(width: Style.width, height: panel.contentHeight)
+        // Folding a section resizes the popover, and NSPopover then recentres it under
+        // the icon — which would make the panel jump sideways. Put it back.
+        if let x = panelOriginX, let w = popover.contentViewController?.view.window {
+            DispatchQueue.main.async { w.setFrameOrigin(NSPoint(x: x, y: w.frame.origin.y)) }
+        }
     }
 
     @objc private func toggle() {
         if popover.isShown { popover.performClose(nil); return }
         guard let button = statusItem.button else { return }
         rebuildPanel()
-        // The anchor has to stay inside the button — a rect outside its bounds makes
-        // NSPopover refuse to open at all. So the panel is nudged afterwards instead:
-        // centred under the icon it would cover the window to its left, and DocBar is
-        // the leftmost status item.
+        // Centred under the icon, so the arrow points at the D itself.
         popover.show(relativeTo: button.bounds, of: button, preferredEdge: .maxY)
         if let w = popover.contentViewController?.view.window {
-            w.setFrameOrigin(NSPoint(x: w.frame.origin.x + 40, y: w.frame.origin.y))
+            panelOriginX = w.frame.origin.x
         }
         popover.contentViewController?.view.window?.makeKey()
     }
