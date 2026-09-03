@@ -186,6 +186,13 @@
             font-size: 0.95rem;
         }
 
+        /* Search hits inside a note body — painted by the CSS Custom Highlight API,
+           so nothing is written into the contenteditable itself. */
+        ::highlight(note-find) {
+            background: rgba(245, 194, 66, 0.42);
+            color: var(--text);
+        }
+
         /* Logged out → page is locked: no notes, no actions, only the login. */
         body.locked #notes-list,
         body.locked #empty-hint,
@@ -290,6 +297,9 @@
         <button class="action needs-auth" onclick="addNote()">+ Neue Notiz</button>
         <button class="action needs-auth" onclick="toggleAllNotes()">Alle auf/zu</button>
         <button class="action needs-auth" onclick="window.print()">Drucken</button>
+        <input type="search" id="note-search" class="svp-search needs-auth" placeholder="Suchen &hellip;"
+            aria-label="Notizen durchsuchen" autocomplete="off" style="width:220px">
+        <span class="svp-search-count needs-auth" id="search-count" hidden></span>
         <button class="action secondary" id="auth-btn" onclick="authClick()">☁ Anmelden</button>
     </div>
 
@@ -671,13 +681,77 @@
             render();
         }
 
+        /* ============================================================
+           Search: filters the list by title and body text. Plain
+           case-insensitive substring — no folding, so the offsets stay
+           valid for the highlighter below.
+           ============================================================ */
+        const searchInput = document.getElementById('note-search');
+        const searchCount = document.getElementById('search-count');
+        const EMPTY_TEXT = emptyHint.textContent;
+        let query = '';
+
+        /* Body may be rich text; compare against the rendered plain text. */
+        const stripper = document.createElement('div');
+        function plainBody(note) {
+            if (!note.fmt) return note.body || '';
+            stripper.innerHTML = note.body || '';
+            return stripper.textContent;
+        }
+        function matches(note) {
+            if (!query) return true;
+            return ((note.title || '') + ' ' + plainBody(note)).toLowerCase().includes(query);
+        }
+
+        /* Paint the hits with the CSS Custom Highlight API: it draws over the
+           text without touching the DOM, so a contenteditable note is never
+           modified (and nothing bogus gets synced to the cloud). */
+        function paintHits() {
+            if (typeof Highlight === 'undefined' || !CSS.highlights) return;
+            CSS.highlights.delete('note-find');
+            if (!query) return;
+            const ranges = [];
+            for (const body of list.querySelectorAll('.note-body')) {
+                const walk = document.createTreeWalker(body, NodeFilter.SHOW_TEXT);
+                for (let n = walk.nextNode(); n; n = walk.nextNode()) {
+                    const hay = n.data.toLowerCase();
+                    let i = hay.indexOf(query);
+                    while (i !== -1) {
+                        const r = document.createRange();
+                        r.setStart(n, i);
+                        r.setEnd(n, i + query.length);
+                        ranges.push(r);
+                        i = hay.indexOf(query, i + query.length);
+                    }
+                }
+            }
+            if (ranges.length) CSS.highlights.set('note-find', new Highlight(...ranges));
+        }
+
+        searchInput.addEventListener('input', () => {
+            query = searchInput.value.trim().toLowerCase();
+            render();
+        });
+        /* Escape clears the field and brings every note back. */
+        searchInput.addEventListener('keydown', e => {
+            if (e.key !== 'Escape') return;
+            searchInput.value = '';
+            query = '';
+            render();
+        });
+
         function render() {
             sortNotes();
             list.textContent = '';
-            emptyHint.hidden = notes.length > 0;
-            for (const note of notes) {
+            const shown = notes.filter(matches);
+            emptyHint.textContent = query ? 'Nichts gefunden.' : EMPTY_TEXT;
+            emptyHint.hidden = shown.length > 0;
+            searchCount.hidden = !query;
+            searchCount.textContent = shown.length + ' von ' + notes.length;
+            for (const note of shown) {
                 const card = document.createElement('div');
-                card.className = 'note-card' + (openSet.has(note.id) ? ' open' : '');
+                /* While searching every hit is open, otherwise the match would be invisible. */
+                card.className = 'note-card' + (query || openSet.has(note.id) ? ' open' : '');
                 card.dataset.id = note.id;
 
                 const head = document.createElement('div');
@@ -780,6 +854,7 @@
                     }
                 }).observe(body);
             }
+            paintHits();
         }
 
         // Formatting toolbar: bold/italic/underline/strike, page colors, marker, clear.
