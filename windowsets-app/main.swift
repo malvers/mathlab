@@ -276,7 +276,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private let store = Store()
     private let work = DispatchQueue(label: "de.docalvers.windowsets.ax", qos: .userInitiated)
 
-    private var statusItem: NSStatusItem!
+    private var bar: DocBarClient!
     private var autoSaveTimer: Timer?
     private var pendingChange: DispatchWorkItem?
 
@@ -298,11 +298,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func applicationDidFinishLaunching(_ note: Notification) {
-        statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
-        if let button = statusItem.button {
-            button.target = self
-            button.action = #selector(clicked(_:))
-            button.sendAction(on: [.leftMouseUp, .rightMouseUp])
+        bar = DocBarClient(id: "de.docalvers.windowsets", name: "WindowSets",
+                           symbol: "macwindow.on.rectangle", rank: 10) { [weak self] item in
+            self?.handle(item)
         }
         readConfiguration()
         refreshIcon()
@@ -381,31 +379,55 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     // MARK: menu bar
 
+    /// Publishes the current state and the actions into DocBar.
     private func refreshIcon() {
-        guard let button = statusItem.button else { return }
+        let entry = store.configs[currentKey]
         let known = store.newest(currentKey) != nil
-        let symbol = known ? "macwindow.on.rectangle" : "macwindow"
-        button.image = NSImage(systemSymbolName: symbol, accessibilityDescription: "WindowSets")
-        button.image?.isTemplate = true
         let count = (store.pinned(currentKey) ?? store.newest(currentKey))?.windows.count ?? 0
-        button.toolTip = known
-            ? "WindowSets — \(currentName): \(count) windows, click restores them"
-            : "WindowSets — \(currentName): nothing recorded yet"
+
+        var items: [DocBarItem] = []
+        items.append(DocBarItem("restore", known ? "Restore \(count) windows" : "Nothing recorded yet"))
+        items.append(DocBarItem("save", "Save this arrangement"))
+        if store.pinned(currentKey) != nil { items.append(DocBarItem("unpin", "Forget saved arrangement")) }
+
+        let fmt = DateFormatter()
+        fmt.timeStyle = .short
+        fmt.dateStyle = .none
+        for (n, snap) in (entry?.snapshots ?? []).prefix(4).enumerated() where n > 0 {
+            items.append(DocBarItem("snap\(n)", "Back to \(fmt.string(from: snap.saved)) — \(snap.windows.count) windows"))
+        }
+
+        items.append(DocBarItem("autorestore", "Restore automatically on display change", state: autoRestore))
+        items.append(DocBarItem("autorecord", "Keep recording", state: autoRecord))
+        items.append(DocBarItem("login", "Start at login", state: startsAtLogin))
+        if !AXIsProcessTrusted() { items.append(DocBarItem("ax", "Allow Accessibility access …")) }
+        if entry != nil { items.append(DocBarItem("forget", "Forget this configuration …")) }
+
+        bar.publish(status: known ? "\(currentName): \(count) windows"
+                                  : "\(currentName): nothing recorded yet",
+                    items: items, primary: known ? "restore" : nil)
     }
 
-    /// Shows the number of restored windows next to the icon for a moment.
-    private func flash(_ text: String) {
-        statusItem.button?.title = " \(text)"
-        DispatchQueue.main.asyncAfter(deadline: .now() + 4) { [weak self] in
-            self?.statusItem.button?.title = ""
+    private func handle(_ item: String) {
+        switch item {
+        case "restore": restoreNow()
+        case "save": saveNow()
+        case "unpin": forgetSaved()
+        case "autorestore": toggleAutoRestore()
+        case "autorecord": toggleAutoRecord()
+        case "login": toggleLogin()
+        case "ax": requestAccessibility()
+        case "forget": forgetConfiguration()
+        case "quit": NSApp.terminate(nil)
+        default:
+            guard item.hasPrefix("snap"), let n = Int(item.dropFirst(4)),
+                  let entry = store.configs[currentKey], n < entry.snapshots.count else { return }
+            restore(entry.snapshots[n], announce: true)
         }
     }
 
-    @objc private func clicked(_ sender: NSStatusBarButton) {
-        let isRight = NSApp.currentEvent?.type == .rightMouseUp
-            || NSApp.currentEvent?.modifierFlags.contains(.control) == true
-        if isRight { showMenu() } else { restoreNow() }
-    }
+    /// The restored count used to appear next to the icon; DocBar shows it in the status line.
+    private func flash(_ text: String) { refreshIcon() }
 
     @objc private func restoreNow() {
         // The saved layout is the anchor; without one, the last recorded state is all there is.
@@ -437,11 +459,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         refreshIcon()
     }
 
-    @objc private func restoreSnapshot(_ item: NSMenuItem) {
-        guard let entry = store.configs[currentKey], item.tag < entry.snapshots.count else { return }
-        restore(entry.snapshots[item.tag], announce: true)
-    }
-
     @objc private func forgetConfiguration() {
         let a = NSAlert()
         a.messageText = "Forget this configuration?"
@@ -453,7 +470,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         refreshIcon()
     }
 
+    func applicationWillTerminate(_ note: Notification) { bar.withdraw() }
+
     @objc private func toggleLogin() {
+        defer { refreshIcon() }
         do {
             if startsAtLogin { try SMAppService.mainApp.unregister() }
             else { try SMAppService.mainApp.register() }
@@ -462,123 +482,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
-    @objc private func toggleAutoRestore() { autoRestore = !autoRestore }
-    @objc private func toggleAutoRecord() { autoRecord = !autoRecord }
-
-    private func showMenu() {
-        let menu = NSMenu()
-        let entry = store.configs[currentKey]
-
-        let header = NSMenuItem(title: currentName, action: nil, keyEquivalent: "")
-        header.isEnabled = false
-        menu.addItem(header)
-
-        let recorded = entry?.snapshots.first?.windows.count ?? 0
-        let stateText: String
-        if entry == nil { stateText = "not recorded yet" }
-        else if let pinned = store.pinned(currentKey) { stateText = "\(pinned.windows.count) windows saved, \(recorded) recorded" }
-        else { stateText = "\(recorded) windows recorded" }
-        let state = NSMenuItem(title: stateText, action: nil, keyEquivalent: "")
-        state.isEnabled = false
-        menu.addItem(state)
-        menu.addItem(.separator())
-
-        let restoreItem = NSMenuItem(title: store.pinned(currentKey) != nil ? "Restore saved layout" : "Restore last layout",
-                                     action: #selector(restoreNow), keyEquivalent: "")
-        restoreItem.target = self
-        restoreItem.isEnabled = entry != nil
-        menu.addItem(restoreItem)
-
-        let saveItem = NSMenuItem(title: "Save layout now", action: #selector(saveNow), keyEquivalent: "")
-        saveItem.target = self
-        menu.addItem(saveItem)
-
-        if let pinned = store.pinned(currentKey) {
-            let fmt = DateFormatter()
-            fmt.dateStyle = .short
-            fmt.timeStyle = .short
-            let drop = NSMenuItem(title: "Drop saved layout (\(fmt.string(from: pinned.saved)))",
-                                  action: #selector(forgetSaved), keyEquivalent: "")
-            drop.target = self
-            menu.addItem(drop)
-        }
-
-        if let entry = entry, entry.snapshots.count > 1 {
-            let older = NSMenuItem(title: "Earlier snapshots", action: nil, keyEquivalent: "")
-            let sub = NSMenu()
-            let fmt = DateFormatter()
-            fmt.dateFormat = "EEE HH:mm"
-            for (i, snap) in entry.snapshots.enumerated().dropFirst() {
-                let it = NSMenuItem(title: "\(fmt.string(from: snap.saved)) — \(snap.windows.count) windows",
-                                    action: #selector(restoreSnapshot(_:)), keyEquivalent: "")
-                it.target = self
-                it.tag = i
-                sub.addItem(it)
-            }
-            older.submenu = sub
-            menu.addItem(older)
-        }
-
-        menu.addItem(.separator())
-
-        let ar = NSMenuItem(title: "Restore automatically on display change",
-                            action: #selector(toggleAutoRestore), keyEquivalent: "")
-        ar.target = self
-        ar.state = autoRestore ? .on : .off
-        menu.addItem(ar)
-
-        let rec = NSMenuItem(title: "Keep recording", action: #selector(toggleAutoRecord), keyEquivalent: "")
-        rec.target = self
-        rec.state = autoRecord ? .on : .off
-        menu.addItem(rec)
-
-        let login = NSMenuItem(title: "Start at login", action: #selector(toggleLogin), keyEquivalent: "")
-        login.target = self
-        login.state = startsAtLogin ? .on : .off
-        menu.addItem(login)
-
-        if !AXIsProcessTrusted() {
-            let ax = NSMenuItem(title: "Allow Accessibility access…", action: #selector(requestAccessibility),
-                                keyEquivalent: "")
-            ax.target = self
-            menu.addItem(.separator())
-            menu.addItem(ax)
-        }
-
-        if entry != nil {
-            let forget = NSMenuItem(title: "Forget this configuration…", action: #selector(forgetConfiguration),
-                                    keyEquivalent: "")
-            forget.target = self
-            menu.addItem(.separator())
-            menu.addItem(forget)
-        }
-
-        let others = store.configs.filter { $0.key != currentKey }
-        if !others.isEmpty {
-            let item = NSMenuItem(title: "Other configurations", action: nil, keyEquivalent: "")
-            let sub = NSMenu()
-            let fmt = DateFormatter()
-            fmt.dateStyle = .short
-            fmt.timeStyle = .short
-            for (_, e) in others.sorted(by: { $0.value.name < $1.value.name }) {
-                let count = e.snapshots.first?.windows.count ?? 0
-                let when = e.snapshots.first.map { fmt.string(from: $0.saved) } ?? ""
-                let it = NSMenuItem(title: "\(e.name) — \(count) windows, \(when)", action: nil, keyEquivalent: "")
-                it.isEnabled = false
-                sub.addItem(it)
-            }
-            item.submenu = sub
-            menu.addItem(.separator())
-            menu.addItem(item)
-        }
-
-        menu.addItem(.separator())
-        menu.addItem(NSMenuItem(title: "Quit", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"))
-
-        statusItem.menu = menu
-        statusItem.button?.performClick(nil)
-        statusItem.menu = nil
-    }
+    @objc private func toggleAutoRestore() { autoRestore = !autoRestore; refreshIcon() }
+    @objc private func toggleAutoRecord() { autoRecord = !autoRecord; refreshIcon() }
 
     @objc private func requestAccessibility() {
         let key = kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String

@@ -11,7 +11,7 @@ APP="/Applications/WindowSets.app"
 rm -rf "$APP"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 
-swiftc -O -o "$APP/Contents/MacOS/WindowSets" main.swift -framework Cocoa -framework ApplicationServices -framework ServiceManagement
+swiftc -O -o "$APP/Contents/MacOS/WindowSets" main.swift ../docbar-app/docbarclient.swift -framework Cocoa -framework ApplicationServices -framework ServiceManagement
 
 cat > "$APP/Contents/Info.plist" <<'PLIST'
 <?xml version="1.0" encoding="UTF-8"?>
