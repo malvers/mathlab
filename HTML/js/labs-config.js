@@ -17,12 +17,23 @@
  * JG 10–12: cmaes, opti-lens
  * JG 11–12: integralreaktor, fourier, mandelbrot-deep, atomorbitale, differentiallabor
  * uni (zusätzlich): stanford-portal (externer Link), lissajous, atomorbitale, mandelbrot-deep, fourier, integralreaktor, differentiallabor, cmaes, opti-lens
- * top5 (Hub-Kachel "TOP LABS"): kovarianz, irisvis (Conway's Iris), fourier, mandelbrot-deep (Fraktale), atomorbitale, galtonboard, opti-lens (Linsenoptimierung)
+ * top5 (Hub-Kachel "TOP LABS"): kovarianz, irisvis (Conway's Iris), fourier, mandelbrot-deep (Fraktale), atomorbitale, galtonboard, opti-lens (Linsenoptimierung), jacquard (Webstuhl / Lochkarte)
  * Keine Jahrgangs-Tags: cinematic-intro, happy-birthday-ulf (Show / Spaß).
  * ————————————————————————————————————————————————————————————————
  */
 
 const LABS_DATA = [
+    {
+        "id": "jacquard",
+        "href": "jacquard.html",
+        "title": "Jacquard",
+        "description": "Ein Webstuhl von 1805, in 3D — und die erste Maschine, die ein Bild nach einer Vorlage herstellt. Eine Lochkarte steuert jeden Kettfaden einzeln: Wo ein Loch ist, rutscht die Nadel hindurch, der Haken bleibt stehen und das Messer hebt den Faden; wo Papier ist, bleibt er unten und der blaue Schuss deckt ihn ab. Karte für Karte wächst das Bild aus der Maschine. Motiv und Maschine sind dabei zwei verschiedene Dinge: derselbe Kreis wird mit mehr Kettfäden runder, und wo die Zeichnung feiner ist als das Gewebe, webt der Webstuhl ein Muster, das es in der Vorlage gar nicht gibt.",
+        "tagline": "Informatik / Lochkarte / Weberei",
+        "icon": LAB_ICONS["jacquard"],
+        "category": "informatik neu top5 highlight hot grade9 grade10 grade11 grade12 uni",
+        "keywords": "jacquard webstuhl weben weberei lochkarte lochkarten kettfaden schussfaden litze platine harnisch fach schiffchen weblade riet gewebe muster stoff textil seide babbage hollerith programm bit binaer abtastung aufloesung moire 1805 industrialisierung informatikgeschichte",
+        "color": "gold"
+    },
     {
         "id": "koerper",
         "href": "koerper.html",
