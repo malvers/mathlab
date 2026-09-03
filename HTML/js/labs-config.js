@@ -24,6 +24,17 @@
 
 const LABS_DATA = [
     {
+        "id": "brahmagupta",
+        "href": "brahmagupta.html",
+        "title": "Satz von Brahmagupta",
+        "description": "Ein Sehnenviereck, dessen Diagonalen senkrecht aufeinander stehen — und zwei Aussagen daran, beide von Brahmagupta (7. Jh., Indien). Der Satz: F\u00e4llt man vom Diagonalenschnittpunkt P das Lot auf eine Seite und verl\u00e4ngert es \u00fcber P hinaus, so trifft es die Gegenseite genau in der Mitte — weil P mit den beiden Endpunkten ein rechtwinkliges Dreieck bildet und der Lotfu\u00dfpunkt dessen Umkreismittelpunkt ist. Die Formel: K = \u221a((s\u2212a)(s\u2212b)(s\u2212c)(s\u2212d)) misst die Fl\u00e4che, aber nur solange alle vier Ecken auf dem Kreis liegen. Nimmt man sie herunter, wird K zu gro\u00df — Heron f\u00fcr Vierecke, mit einer Bedingung.",
+        "tagline": "Geometrie / Sehnenviereck / Fl\u00e4che",
+        "icon": LAB_ICONS["brahmagupta"],
+        "category": "geometrie neu highlight hot grade9 grade10 grade11",
+        "keywords": "brahmagupta sehnenviereck kreisviereck zyklisch diagonalen senkrecht orthodiagonal lot lotfusspunkt mittelpunkt seitenmitte umkreis thales fl\u00e4che flaeche heron bretschneider halbumfang indien geometrie viereck",
+        "color": "gold"
+    },
+    {
         "id": "jacquard",
         "href": "jacquard.html",
         "title": "Jacquard",
