@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <title>OG card template</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet">
+    <style>
+        /* Central card template for all link previews (Open Graph).
+           Rendered head-less at exactly 1200x630 by make-og.mjs. */
+        :root {
+            --deep: rgb(8, 20, 42);
+            --deep2: rgb(14, 36, 78);
+            --gold: rgb(245, 194, 66);
+            --ink: #e8f0ff;
+            --muted: #8fa8cc;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html, body {
+            width: 1200px;
+            height: 630px;
+            overflow: hidden;
+            background: var(--deep);
+        }
+
+        .card {
+            position: relative;
+            width: 1200px;
+            height: 630px;
+            display: grid;
+            grid-template-columns: 500px 700px;
+            background: radial-gradient(120% 140% at 0% 0%, var(--deep2) 0%, var(--deep) 62%);
+            color: var(--ink);
+        }
+
+        /* ---- left: text panel ---- */
+        .panel {
+            position: relative;
+            z-index: 3;
+            padding: 54px 40px 46px 58px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .brand img {
+            width: 52px;
+            height: 52px;
+            border-radius: 12px;
+            flex: 0 0 auto;
+        }
+
+        .brand span {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            font-size: 17px;
+            letter-spacing: 0.09em;
+            line-height: 1.25;
+            color: var(--muted);
+            text-transform: uppercase;
+        }
+
+        .mid { padding-right: 6px; }
+
+        h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            font-size: 58px;
+            line-height: 1.06;
+            letter-spacing: 0.005em;
+            color: #fff;
+            text-wrap: balance;
+        }
+
+        .rule {
+            width: 108px;
+            height: 5px;
+            margin: 24px 0 20px;
+            border-radius: 3px;
+            background: linear-gradient(90deg, var(--gold), rgba(245, 194, 66, 0));
+        }
+
+        .tagline {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 300;
+            font-size: 25px;
+            line-height: 1.34;
+            color: var(--muted);
+        }
+
+        .foot {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 400;
+            font-size: 19px;
+            letter-spacing: 0.14em;
+            color: var(--gold);
+        }
+
+        .foot .dot {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            background: var(--gold);
+            box-shadow: 0 0 14px rgba(245, 194, 66, .9);
+        }
+
+        /* ---- right: lab screenshot ---- */
+        .shot {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .shot img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+        }
+
+        /* Soft fade from the panel into the screenshot, so any lab blends in. */
+        .shot::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background:
+                linear-gradient(90deg, var(--deep) 0%, rgba(8, 20, 42, .82) 12%, rgba(8, 20, 42, .10) 42%, rgba(8, 20, 42, 0) 68%),
+                linear-gradient(0deg, rgba(8, 20, 42, .55) 0%, rgba(8, 20, 42, 0) 38%);
+        }
+
+        /* Thin accent edge along the bottom of the whole card. */
+        .card::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            height: 6px;
+            background: linear-gradient(90deg, var(--gold) 0%, rgb(176, 36, 24) 48%, rgb(121, 158, 49) 100%);
+            z-index: 4;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="card">
+        <div class="panel">
+            <div class="brand">
+                <img id="og-logo" alt="">
+                <span>Doc Alvers<br>Mathe-Labore</span>
+            </div>
+            <div class="mid">
+                <h1 id="og-title">Titel</h1>
+                <div class="rule"></div>
+                <p class="tagline" id="og-tagline"></p>
+            </div>
+            <div class="foot"><span class="dot"></span><span>docalvers.de</span></div>
+        </div>
+        <div class="shot"><img id="og-shot" alt=""></div>
+    </div>
+
+    <script>
+        // Called by make-og.mjs with { title, tagline, shot, logo } (images as data URIs).
+        window.ogFill = function (data) {
+            document.getElementById('og-title').textContent = data.title || '';
+            document.getElementById('og-tagline').textContent = data.tagline || '';
+            if (data.shot) document.getElementById('og-shot').src = data.shot;
+            if (data.logo) document.getElementById('og-logo').src = data.logo;
+
+            // Shrink the headline until it fits its box (long lab names).
+            const h1 = document.getElementById('og-title');
+            const box = document.querySelector('.mid');
+            let size = 58;
+            h1.style.fontSize = size + 'px';
+            while (size > 30 && (h1.scrollHeight > 210 || box.scrollHeight > box.clientHeight)) {
+                size -= 2;
+                h1.style.fontSize = size + 'px';
+            }
+        };
+    </script>
+</body>
+
+</html>
