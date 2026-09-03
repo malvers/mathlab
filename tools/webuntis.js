@@ -714,6 +714,18 @@ async function main() {
 
   const map = { klassen: 'getKlassen', subjects: 'getSubjects', teachers: 'getTeachers', rooms: 'getRooms', timegrid: 'getTimegridUnits', holidays: 'getHolidays', years: 'getSchoolyears' };
   if (map[cmd]) { console.log(JSON.stringify(await rpc(map[cmd]), null, 2)); return; }
+
+  // Machine-local commands hook in here: tools/webuntis.local.js (gitignored)
+  // may export { commands: { name: async (toolbox) => {} } }. The public repo
+  // carries only this hook, never those commands.
+  const LOCAL_CMDS = path.join(__dirname, 'webuntis.local.js');
+  if (fs.existsSync(LOCAL_CMDS)) {
+    const local = require(LOCAL_CMDS);
+    if (local.commands && local.commands[cmd]) {
+      await local.commands[cmd]({ session, rpc, intern, post, ymd, parseYmd, REPO, args: process.argv.slice(3) });
+      return;
+    }
+  }
   console.error(`Unknown command "${cmd}". Try: whoami | timetable [VON] [BIS] | topic <ttId> "<Text>" | plan [YYYYMMDD] [--dry] [--force] | status | ${Object.keys(map).join(' | ')}`);
   process.exit(1);
 }
