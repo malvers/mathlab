@@ -112,10 +112,49 @@
     border-left: 3px solid var(--hue, var(--cyan));
     background: color-mix(in srgb, var(--hue, var(--cyan)) 18%, var(--card));
     color: var(--text);
-    font-size: 0.78rem;
+    font-size: 0.95rem;
     line-height: 1.25;
     cursor: default;
     transition: filter 0.12s ease, transform 0.12s ease;
+    /* two text columns + Jahrgang side by side (Doc, 03.09.2026) */
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    container-type: inline-size;
+}
+
+.tt-cols {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    gap: 8px;
+}
+
+.tt-col {
+    flex: 1 1 0;
+    min-width: 0;
+}
+
+/* Jahrgang, big and in Orbitron, as the third column */
+.tt-jg {
+    flex: 0 0 auto;
+    font-family: Orbitron, sans-serif;
+    font-weight: 700;
+    font-size: 1.9rem;
+    line-height: 1;
+    letter-spacing: 0.02em;
+    color: var(--hue, var(--cyan));
+    opacity: 0.4;                 /* Doc: JG darf nur mitlaufen, nicht rufen */
+}
+
+/* Narrow tile (two lessons sharing a day column): drop back to stacked lines. */
+@container (max-width: 190px) {
+    .tt-jg { font-size: 1.1rem; }
+    .tt-cols { display: block; }
+}
+
+@container (max-width: 120px) {
+    .tt-jg { display: none; }
 }
 
 .tt-lesson:hover {
@@ -127,7 +166,7 @@
 .tt-lesson .tt-subject {
     font-family: Orbitron, sans-serif;
     font-weight: 700;
-    font-size: 0.8rem;
+    font-size: 1.1rem;
     color: var(--hue, var(--cyan));
     white-space: nowrap;
     overflow: hidden;
@@ -137,14 +176,14 @@
 .tt-lesson .tt-who,
 .tt-lesson .tt-where {
     color: var(--muted);
-    font-size: 0.72rem;
+    font-size: 1rem;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
 .tt-lesson .tt-time {
-    font-size: 0.66rem;
+    font-size: 0.9rem;
     color: var(--muted);
     opacity: 0.75;
 }
