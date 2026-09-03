@@ -202,6 +202,28 @@
             return HASH_HUES[h % HASH_HUES.length];
         }
 
+        /* Jahrgang out of the IBB class code: "<Zweig><Eintrittsjahr>-<Gruppe>" in the
+           upper school (BGY26-1 = entered 2026), plain "9a"/"10b" at the Oberschule.
+           BGY/FOS/FOG/FOW all start in year 11, so the grade is 11 + the school years
+           since entry, counted from the school year the lesson itself falls in. */
+        function jahrgangOf(l) {
+            const ymd = String(l.date || '');
+            const y = +ymd.slice(0, 4), m = +ymd.slice(4, 6);
+            const syStart = m >= 8 ? y : y - 1;          // a school year starts in August
+            const out = [];
+            for (const c of (l.classes || [])) {
+                let g = null;
+                const os = c.match(/^(\d{1,2})\s*[a-zA-Z]?$/);      // Oberschule: 9a, 10b
+                if (os) g = +os[1];
+                else {
+                    const up = c.match(/^[^\d]+(\d{2})/);            // BGY26-1, FOS25-2
+                    if (up) g = 11 + (syStart - (2000 + +up[1]));
+                }
+                if (g >= 5 && g <= 13 && !out.includes(g)) out.push(g);
+            }
+            return out.sort((a, b) => a - b).join('/');
+        }
+
         function overlaps(a, b) {
             return toMin(a.startTime) < toMin(b.endTime) && toMin(b.startTime) < toMin(a.endTime);
         }
@@ -580,11 +602,22 @@
                     el.style.width = 'calc(' + (100 / it.of) + '% - 6px)';
 
                     const who = scope === 'me' ? l.classes.join(', ') : l.teachers.join(', ');
-                    const parts = ['<div class="tt-subject">' + (l.subject || '—') + '</div>'];
-                    if (who) parts.push('<div class="tt-who">' + who + '</div>');
-                    if (l.rooms.length) parts.push('<div class="tt-where">' + l.rooms.join(', ') + '</div>');
-                    else { const site = TimetableOptimizer.siteOf(l); if (site) parts.push('<div class="tt-where tt-site">(' + site + ')</div>'); }
-                    parts.push('<div class="tt-time">' + hhmm(l.startTime) + '–' + hhmm(l.endTime) + '</div>');
+                    const site = l.rooms.length ? '' : TimetableOptimizer.siteOf(l);
+                    /* Two text columns instead of four stacked lines - that buys the room
+                       for bigger type on a 45-min tile; the Jahrgang rides in a third. */
+                    const parts = ['<div class="tt-cols">'
+                        + '<div class="tt-col">'
+                        + '<div class="tt-subject">' + (l.subject || '—') + '</div>'
+                        + (who ? '<div class="tt-who">' + who + '</div>' : '')
+                        + '</div>'
+                        + '<div class="tt-col">'
+                        + (l.rooms.length ? '<div class="tt-where">' + l.rooms.join(', ') + '</div>'
+                            : site ? '<div class="tt-where tt-site">(' + site + ')</div>' : '')
+                        + '<div class="tt-time">' + hhmm(l.startTime) + '–' + hhmm(l.endTime) + '</div>'
+                        + '</div>'
+                        + '</div>'];
+                    const jg = jahrgangOf(l);
+                    if (jg) parts.push('<div class="tt-jg">' + jg + '</div>');
                     if (l.ghost) parts.push('<div class="tt-tag">alt</div>');
                     else if (l.moved) parts.push('<div class="tt-tag">neu</div>');
                     el.innerHTML = parts.join('');
