@@ -19,7 +19,9 @@
      };
 
    URL switches: ?test = demo pool + key r, ?klasse=11a = own pool,
-   ?auswertung = teacher dashboard. */
+   ?auswertung = teacher dashboard, ?code=7K3M = pupil's slip code
+   (leistungstest.html QR): submission is stored under that pseudonym,
+   one submission per code, result retrievable via rpc/quiz_result. */
 (function () {
   'use strict';
 
@@ -75,6 +77,17 @@
   /* ?klasse=9a = own data pool (and own submit lock) per class/run;
      a "reset" is simply a new value, e.g. ?klasse=9a-2 */
   const KLASSE = (PARAMS.get('klasse') || '').replace(/[^a-z0-9_-]/gi, '').slice(0, 20);
+  /* ?code = the slip code from leistungstest.html; sent with the submission
+     so the sealed local list can match results back to names. Server enforces
+     one submission per (quiz, code). */
+  const CODE = (PARAMS.get('code') || '').toUpperCase().replace(/[^A-Z0-9-]/g, '').slice(0, 20);
+  /* With a code the footer claim "anonymous" would be wrong: the submission is
+     pseudonymous (Art. 4 Nr. 5 DSGVO) - say so. */
+  if (CODE) {
+    const foot = document.querySelector('.wrap footer');
+    if (foot) foot.textContent = 'Doc Alvers Mathe-Labor · Abgabe pseudonym unter deinem Zettel-Code ' +
+      CODE + ' — ohne Namen. Die Zuordnung existiert nur auf dem Rechner der Lehrkraft.';
+  }
   const QUIZ_ID = TEST_MODE ? CFG.id + '-test'
                             : CFG.id + '-' + (CFG.version || 'v1') + (KLASSE ? '-' + KLASSE : '');
   /* soft lock against double submits per browser; tied to QUIZ_ID so a new
@@ -290,7 +303,8 @@
             p_quiz: QUIZ_ID,
             p_answers: answers,
             p_score: score,
-            p_total: QUESTIONS.length
+            p_total: QUESTIONS.length,
+            p_code: CODE || null
           })
         });
 
@@ -455,6 +469,26 @@
     const bar = toolbar(document.getElementById('quiz'));
     bar.insertBefore(pillButton('evalBtn', 'Auswertung', 'Live-Auswertung - nur mit Passwort',
       function () { switchTo(true); }), bar.firstChild);
+  }
+
+  /* "QR-Codes": jump into leistungstest.html with this very test and group
+     already chosen - the teacher never picks from the dropdown again. The
+     page shows a stranger nothing: names live only in the teacher's browser.
+     The pill floats centred between "Zum Plan" and "Auswertung" (btn-slip);
+     the plan button gives up its auto margin, or the centre would drift. */
+  function placeSlipButton() {
+    const bar = toolbar(document.getElementById('quiz'));
+    const ziel = location.pathname.replace(/^.*\//, '') + (KLASSE ? '?klasse=' + KLASSE : '');
+    const btn = pillButton('slipBtn', 'QR-Codes', 'Code-Zettel mit QR fuer diese Gruppe erzeugen',
+      function () { window.open('svp/leistungstest.html?ziel=' + encodeURIComponent(ziel), '_blank', 'noopener'); });
+    btn.className += ' btn-slip';
+    const back = bar.querySelector('.btn-back');
+    if (back) {
+      back.style.marginRight = '0';
+      bar.insertBefore(btn, back.nextSibling);
+    } else {
+      bar.insertBefore(btn, bar.firstChild);
+    }
   }
 
   /* Der Rueckweg aus der Auswertung steht rechts neben der Ueberschrift, auf
@@ -632,6 +666,7 @@
     QuizCollapse.init(quizEl);
     placeEvalButton();   /* nach init, damit die .qbar schon steht */
     placePlanButton();
+    placeSlipButton();   /* zuletzt: braucht den Plan-Knopf schon in der Leiste */
     updateSubmitState();
     tagSubline();
     /* Demo helper (?test): key r fills a random answer set, ~95% correct. */

@@ -74,6 +74,25 @@
         .lt-para:hover { background: rgba(176, 36, 24, 0.15); }
         .lt-para[aria-expanded="true"] { background: var(--ypsilon); color: #fff; }
 
+        /* The big paragraph sign sits in the title line, far right, as a circle. */
+        .lt-warn[hidden] { display: none; }
+        .lt-para-big {
+            width: 42px;
+            height: 42px;
+            /* Arial's § reads better at this size than Orbitron's. The 1px
+               bottom padding is eyeballed against measurement: ink centroid
+               says lower, Doc's eye said higher - the eye won. */
+            font-family: Arial, 'Helvetica Neue', sans-serif;
+            padding: 0 0 1px;
+            margin-left: 0;
+            border-radius: 50%;
+            border: 1px solid var(--ypsilon);   /* thin rim after all */
+            font-size: 1.4rem;
+            display: grid;
+            place-items: center;
+            align-self: center;     /* dead centre of the title line */
+        }
+
         .lt-legal[hidden] { display: none; }
 
         .lt-legal {
@@ -108,6 +127,9 @@
             border-radius: 8px;
             padding: 8px 10px;
         }
+
+        /* display:grid would beat the hidden attribute's UA rule */
+        .lt-names[hidden] { display: none; }
 
         .lt-names {
             display: grid;
@@ -148,12 +170,20 @@
         .lt-btn.danger:hover { border-color: var(--ypsilon); color: var(--ypsilon); }
         .lt-btn[disabled] { opacity: 0.4; cursor: default; }
 
-        .lt-tab { width: 100%; border-collapse: collapse; font-size: 0.94rem; }
-        .lt-tab th, .lt-tab td { border: 1px solid var(--line); padding: 7px 10px; text-align: left; }
+        /* separate borders, each cell drawing its own bottom/right line:
+           border-collapse loses random horizontal lines to rounding on
+           retina/zoom, separate borders never merge and never vanish */
+        .lt-tab { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 0.94rem; }
+        .lt-tab th, .lt-tab td { border: 0 solid var(--line); border-bottom-width: 1px; border-right-width: 1px; padding: 7px 10px; text-align: left; }
+        .lt-tab tr > :first-child { border-left-width: 1px; }
+        .lt-tab tr:first-child > * { border-top-width: 1px; }
         .lt-tab th { font-family: Orbitron, system-ui, sans-serif; font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; }
         .lt-tab td.code { font-family: Orbitron, system-ui, sans-serif; letter-spacing: 0.08em; color: var(--lambda); white-space: nowrap; }
         .lt-tab td.alias { font-family: Orbitron, system-ui, sans-serif; letter-spacing: 0.05em; white-space: nowrap; }
-        .lt-scroll { overflow-x: auto; }
+        /* the scroll box rounds its height and clips the table's own bottom
+           edge - so the last line is drawn by the box itself, always */
+        .lt-scroll { overflow-x: auto; border-bottom: 1px solid var(--line); }
+        .lt-tab tr:last-child > * { border-bottom-width: 0; }
 
         .lt-hint { font-size: 0.86rem; opacity: 0.75; margin-top: 10px; line-height: 1.5; }
 
@@ -229,7 +259,8 @@
 
             body.print-slips .lt-listcard { display: none !important; }
             body.print-list .lt-slipcard { display: none !important; }
-            body.print-list .lt-warn { display: block; }
+            /* the warning always prints on the list sheet, folded away or not */
+            body.print-list .lt-warn, body.print-list .lt-warn[hidden] { display: block; }
 
             body.print-slips .lt-slips {
                 grid-template-columns: 1fr 1fr;
@@ -271,20 +302,24 @@
 <body>
     <header class="page-head">
         <a class="back-link" href="./">&larr; &Uuml;bersicht</a>
-        <h1>Leistungstest</h1>
+        <div class="head-row">
+            <h1>Leistungstest</h1>
+            <!-- The data-protection note folds away behind this round paragraph
+                 sign: present on demand, silent in daily use. -->
+            <button type="button" class="lt-para lt-para-big" id="ltParaTop" aria-expanded="false"
+                aria-controls="ltWarn" title="Datenschutz-Hinweis zeigen">&sect;</button>
+        </div>
         <div class="subtitle">Decknamen und Zettel f&uuml;r einen anonymen Test &middot; nach dem Muster der s&auml;chsischen Kompetenztests</div>
     </header>
 
     <div class="lt-wrap">
         <section class="lt-card lt-setup">
-            <div class="lt-warn">
+            <div class="lt-warn" id="ltWarn" hidden>
                 <b>Die Zuordnungsliste bleibt auf diesem Rechner.</b>
                 Klarnamen werden nirgends hochgeladen &mdash; weder zu Supabase noch sonstwohin.
                 Sie stehen nur im Speicher dieses Browsers und auf dem Blatt, das gedruckt werden muss.
                 Wer dieses Blatt und den Browser nicht hat, kann einen Code keinem Kind zuordnen.
-                <button type="button" class="lt-para" id="ltPara" aria-expanded="false"
-                    aria-controls="ltLegal" title="Rechtliche Einordnung zeigen">&sect;</button>
-                <div class="lt-legal" id="ltLegal" hidden>
+                <div class="lt-legal" id="ltLegal">
                     Das ist <b>Pseudonymisierung</b> nach Art.&nbsp;4 Nr.&nbsp;5 DSGVO und eine geeignete
                     technische Ma&szlig;nahme nach Art.&nbsp;32 Abs.&nbsp;1 lit.&nbsp;a DSGVO, dazu
                     Datenminimierung nach Art.&nbsp;5 Abs.&nbsp;1 lit.&nbsp;c DSGVO.
@@ -303,23 +338,23 @@
                         <option value="../infotestfos12.html?klasse=FOS25-1">Informatik &middot; FOS25-1</option>
                         <option value="../infotestfos12.html?klasse=FOS25-2">Informatik &middot; FOS25-2</option>
                         <option value="../infotestfos12.html?klasse=FOW25-1">Informatik &middot; FOW25-1</option>
-                        <option value="../infotestfos11.html?klasse=FOG26-1">Informatik &middot; FOS 11 &middot; FOG26-1</option>
-                        <option value="../infotest13.html?klasse=BGY24">Informatik &middot; Klasse 13 &middot; BGY24</option>
-                        <option value="../infotest12.html?klasse=BGY25">Informatik &middot; Klasse 12 &middot; BGY25</option>
-                        <option value="../infotest11.html?klasse=BGY26">Informatik &middot; Klasse 11 &middot; BGY26-1 + 2</option>
-                        <option value="../infotest9.html?klasse=9a">Informatik &middot; Klasse 9 &middot; 9a</option>
-                        <option value="../infotest9.html?klasse=9b">Informatik &middot; Klasse 9 &middot; 9b</option>
-                        <option value="../mathetest11.html?klasse=BGY26">Mathematik &middot; Klasse 11 &middot; BGY26-1 + 2</option>
+                        <option value="../infotest13.html?klasse=BGY24">Informatik &middot; BGY24</option>
+                        <option value="../infotest12.html?klasse=BGY25">Informatik &middot; BGY25</option>
+                        <option value="../infotest11.html?klasse=BGY26">Informatik &middot; BGY26-1 + 2</option>
+                        <option value="../infotest9.html?klasse=9a">Informatik &middot; 9a</option>
+                        <option value="../infotest9.html?klasse=9b">Informatik &middot; 9b</option>
+                        <option value="../mathetest11.html?klasse=BGY26">Mathematik &middot; BGY26-1 + 2</option>
                     </select></label>
             </div>
 
-            <label class="lt-names" for="ltNames">Namen
+<!-- The box stays out of sight day to day: names flow through it (paste,
+                 klassen.local.json) but only "Namen bearbeiten" makes it visible. -->
+            <label class="lt-names" for="ltNames" hidden>Namen
                 <textarea id="ltNames" spellcheck="false" autocomplete="off"></textarea></label>
 
             <div class="lt-btns">
-                <button type="button" class="lt-btn primary" id="ltMake">Decknamen erzeugen</button>
                 <button type="button" class="lt-btn primary" id="ltUnlock">&#128274; Namen anzeigen</button>
-                <button type="button" class="lt-btn" id="ltAdd">Nur neue Namen erg&auml;nzen</button>
+                <button type="button" class="lt-btn" id="ltEdit">Namen bearbeiten</button>
                 <button type="button" class="lt-btn on" id="ltName" aria-pressed="true">Klarname auf dem Zettel</button>
                 <button type="button" class="lt-btn danger" id="ltClear">Alles l&ouml;schen</button>
             </div>
@@ -785,40 +820,57 @@
                 'Maryam Mirzakhani', 'Konrad Zuse', 'Vera Rubin', 'Alexander von Humboldt'
             ];
 
+            /* ?ziel=infotestfos12.html?klasse=FOG25-1 - the "Zettel" button on a
+               quiz page lands here with test and group already decided; the
+               dropdown simply follows. Unknown group: first entry of that test. */
+            function zielFromUrl() {
+                const ziel = new URLSearchParams(location.search).get('ziel');
+                if (!ziel) return;
+                const want = '../' + ziel.replace(/^\.\.\//, '');
+                const opts = Array.prototype.slice.call(elTest.options);
+                let hit = opts.find(function (o) { return o.value === want; });
+                if (!hit) {
+                    const file = want.split('?')[0];
+                    hit = opts.find(function (o) { return o.value.split('?')[0] === file; });
+                }
+                if (hit) { elTest.value = hit.value; demoMode = false; }
+            }
+
             /* ?test fills the demo class in, the same switch the quiz pages use
                for their demo pool. Nothing is overwritten that is already there. */
             function demoFromUrl() {
                 if (!demoMode) return;
                 if (elNames.value.trim()) return;
                 elNames.value = DEMO.join('\n');
-                elState.textContent = DEMO.length + ' Beispielnamen aus ?test — jetzt Decknamen erzeugen.';
+                build(true);
             }
 
-            /* "Decknamen erzeugen" throws the old identities away. On a group
-               that already has codes, printed slips would silently become
-               worthless - so the second press has to be deliberate, like the
-               delete button. Adding people uses "Nur neue Namen ergaenzen",
-               which keeps every existing code. */
-            const makeBtn = document.getElementById('ltMake');
-            let makeArmed = 0;
-            function disarmMake() {
-                window.clearTimeout(makeArmed);
-                makeArmed = 0;
-                makeBtn.textContent = 'Decknamen erzeugen';
-            }
-            makeBtn.addEventListener('click', function () {
-                if (entries.length && !makeArmed) {
-                    makeArmed = window.setTimeout(disarmMake, 5000);
-                    makeBtn.textContent = 'Alle Codes neu? Nochmal klicken';
-                    elState.textContent = 'Achtung: das wirft die bestehenden ' + entries.length +
-                        ' Codes weg — bereits gedruckte Zettel passen dann nicht mehr. ' +
-                        'Zum Ergaenzen "Nur neue Namen ergaenzen" nehmen.';
-                    return;
-                }
-                disarmMake();
-                build(false);
+            /* No button any more: typing or pasting into the box builds the
+               sheet by itself. build(true) never throws a code away - existing
+               names keep theirs, new names get one. Two guards: an empty box
+               builds nothing (a sealed group would lose its codes), and a
+               locked group is never re-keyed (every hidden name would look
+               "new" and silently get a fresh code). A deliberate re-roll is
+               "Alles loeschen", then paste again. */
+            let autoTimer = 0;
+            elNames.addEventListener('input', function () {
+                window.clearTimeout(autoTimer);
+                autoTimer = window.setTimeout(function () {
+                    if (!names().length) return;
+                    if (entries.length && !entries.some(function (e) { return e.name; })) {
+                        elState.textContent = 'Namen sind gesperrt — erst \u{1F512} Namen anzeigen, dann ergaenzen.';
+                        return;
+                    }
+                    build(true);
+                }, 600);
             });
-            document.getElementById('ltAdd').addEventListener('click', function () { build(true); });
+
+            /* "Namen bearbeiten" is the only thing that shows the name box. */
+            document.getElementById('ltEdit').addEventListener('click', function () {
+                const lab = elNames.closest('label');
+                lab.hidden = !lab.hidden;
+                if (!lab.hidden) elNames.focus();
+            });
             /* Deleting is irreversible - the codes cannot be recomputed. Instead
                of a native confirm the button asks for a second click. */
             const clearBtn = document.getElementById('ltClear');
@@ -897,13 +949,14 @@
                 ask();
             });
 
-            const para = document.getElementById('ltPara');
-            const legal = document.getElementById('ltLegal');
-            para.addEventListener('click', function () {
-                const on = legal.hidden;
-                legal.hidden = !on;
-                para.setAttribute('aria-expanded', on ? 'true' : 'false');
-                para.title = on ? 'Rechtliche Einordnung ausblenden' : 'Rechtliche Einordnung zeigen';
+            /* Big paragraph sign in the header shows/hides the whole note. */
+            const paraTop = document.getElementById('ltParaTop');
+            const warn = document.getElementById('ltWarn');
+            paraTop.addEventListener('click', function () {
+                const on = warn.hidden;
+                warn.hidden = !on;
+                paraTop.setAttribute('aria-expanded', on ? 'true' : 'false');
+                paraTop.title = on ? 'Datenschutz-Hinweis ausblenden' : 'Datenschutz-Hinweis zeigen';
             });
 
             document.getElementById('ltPrintList').addEventListener('click', function () { printAs('print-list'); });
@@ -945,6 +998,7 @@
                never called on load before, which is exactly how plain names
                survived a reload while the page said "gesperrt". */
             elNames.value = '';
+            zielFromUrl();
             restore();
             demoFromUrl();
             migratePlaintext();
