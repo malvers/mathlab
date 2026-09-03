@@ -1,0 +1,1724 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DOC ALVERS MATHE-LABORE | Jacquard-Webstuhl</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet">
+    <link rel="icon" type="image/png" href="resources/favicon.png">
+    <link rel="stylesheet" href="js/cyber-layout.css">
+    <link rel="stylesheet" href="js/buttons-ultra.css">
+    <link rel="stylesheet" href="js/cyber-lab-overrides.css">
+    <link rel="stylesheet" href="js/branding.styles.extracted.css">
+    <link rel="stylesheet" href="js/lab-shell-minimal.css">
+    <link rel="stylesheet" href="js/cyber-tabbar.css">
+    <style>
+        /* Pattern map: a small overview of the whole design with the woven window marked.
+           #canvas-container canvas is stretched to 100% by the shell, so pin the size here. */
+        #pattern-hud {
+            position: absolute;
+            right: 18px;
+            bottom: 18px;
+            padding: 8px;
+            border: 1px solid rgba(120, 170, 255, .35);
+            border-radius: 10px;
+            background: rgba(8, 20, 42, .72);
+            backdrop-filter: blur(4px);
+            z-index: 6;
+        }
+
+        /* 360 CSS px for a 180 px pattern: exactly 2 px per pattern pixel, so the
+           bands land on whole pixels and the map cannot moire. */
+        #pattern-hud canvas {
+            display: block !important;
+            border-radius: 4px;
+            cursor: crosshair !important;
+            touch-action: none;
+        }
+
+        #muster-pane {
+            position: absolute;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            background: radial-gradient(circle at 50% 50%, rgba(5, 25, 55, 1) 0%, rgba(8, 20, 42, 1) 100%);
+        }
+
+        #muster-pane.active {
+            display: flex;
+        }
+
+        #map-box-big {
+            padding: 10px;
+            border: 1px solid rgba(120, 170, 255, .35);
+            border-radius: 12px;
+            background: rgba(8, 20, 42, .72);
+        }
+
+        #overlay-switch {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            justify-content: center;
+            margin-top: 8px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: .58rem;
+            letter-spacing: .09em;
+            color: rgba(200, 225, 255, .8);
+            cursor: pointer;
+            user-select: none;
+        }
+
+        #overlay-switch input {
+            accent-color: rgb(245, 194, 66);
+            width: 14px;
+            height: 14px;
+            cursor: pointer;
+        }
+
+        #overlay-alpha {
+            margin: 10px 4px 2px;
+            transition: opacity .2s;
+        }
+
+        #overlay-alpha.off {
+            opacity: .3;
+            pointer-events: none;
+        }
+
+        #overlay-alpha .jq-ends {
+            font-size: .54rem;
+            margin-bottom: 6px;
+        }
+
+        #map-box-big canvas {
+            cursor: crosshair;
+            touch-action: none;
+            display: block;
+            border-radius: 4px;
+        }
+
+        .map-box .map-cap {
+            font-family: 'Orbitron', sans-serif;
+            font-size: .58rem;
+            letter-spacing: .08em;
+            color: rgba(180, 210, 255, .75);
+            margin-top: 6px;
+            text-align: center;
+        }
+
+        /* The explanation box is parked, not removed — its text and the collapse
+           handle still work. Drop this one rule to bring it back. */
+        #math-coach-box {
+            top: 22px;
+            left: 22px;
+            width: 340px;
+            font-size: .74rem;
+            line-height: 1.6;
+            display: none;
+        }
+
+        #card-readout {
+            position: absolute;
+            left: 22px;
+            top: 22px;
+            padding: 10px 14px;
+            border: 1px solid rgba(120, 170, 255, .35);
+            border-radius: 10px;
+            background: rgba(8, 20, 42, .72);
+            backdrop-filter: blur(4px);
+            font-family: 'Orbitron', sans-serif;
+            font-size: .68rem;
+            letter-spacing: .06em;
+            color: rgba(200, 225, 255, .9);
+            pointer-events: none;
+            z-index: 6;
+            line-height: 1.7;
+        }
+
+        #card-readout b {
+            color: rgb(245, 194, 66);
+        }
+
+        .jq-btn-row {
+            display: flex;
+            gap: 8px;
+            margin: 10px 0 4px;
+        }
+
+        .jq-btn-row .cyber-btn {
+            flex: 1 1 0;
+            min-width: 0;
+            padding: 8px 6px;
+            font-size: .68rem;
+        }
+
+        /* Tempo has no caption and no value chip — the two ends say what it does.
+           Same size and weight as the other control labels. */
+        .jq-ends {
+            display: flex;
+            justify-content: space-between;
+            font-family: 'Orbitron', sans-serif;
+            font-size: .7rem;
+            letter-spacing: .09em;
+            color: rgba(255, 255, 255, .7);
+            margin-bottom: 8px;
+        }
+
+        .jq-file {
+            margin: 10px 0 2px;
+        }
+
+        .jq-file label {
+            display: block;
+            font-family: 'Orbitron', sans-serif;
+            font-size: .62rem;
+            letter-spacing: .07em;
+            color: rgba(255, 255, 255, .7);
+            margin-bottom: 6px;
+        }
+
+        .jq-file input[type=file] {
+            width: 100%;
+            font-family: 'Outfit', sans-serif;
+            font-size: .72rem;
+            color: rgba(255, 255, 255, .65);
+        }
+    </style>
+</head>
+
+<body>
+    <nav id="mini-rail">
+        <div class="nav-btn" onclick="toggleSidebar()" title="Toggle Menu">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </div>
+    </nav>
+
+    <aside id="side-panel">
+        <header id="sidebar-header"></header>
+        <div id="ui-container"></div>
+    </aside>
+
+    <main id="main-content" class="has-tabbar">
+        <div id="tab-bar">
+            <button class="tab-btn active" data-tab="webstuhl">WEBSTUHL</button>
+            <button class="tab-btn" data-tab="muster">MUSTER</button>
+        </div>
+        <div id="tab-stage">
+            <div id="canvas-container">
+                <div class="cyber-grid"></div>
+                <div id="math-coach-box">
+                    <div class="coach-title" id="coach-title-slot"></div>
+                    <div id="coach-content" class="coach-message"></div>
+                </div>
+                <canvas id="canvas"></canvas>
+                <div id="pattern-hud" class="map-box">
+                    <canvas id="hud-canvas"></canvas>
+                    <div class="map-cap"></div>
+                </div>
+                <div id="card-readout"></div>
+            </div>
+            <div id="muster-pane">
+                <div id="map-box-big" class="map-box">
+                    <canvas id="map-canvas"></canvas>
+                    <div class="map-cap"></div>
+                    <label id="overlay-switch">
+                        <input type="checkbox" id="overlay-cb">
+                        <span>LOCHKARTEN AUF DEM MUSTER</span>
+                    </label>
+                    <div id="overlay-alpha">
+                        <div class="jq-ends"><span>DURCHSICHTIG</span><span>DECKEND</span></div>
+                        <input type="range" class="cyber-slider" id="overlay-alpha-in" min="10" max="100" step="1"
+                            style="--accent:rgb(198,166,116)" aria-label="Deckkraft der Lochkarten">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/",
+        "camera-controls": "https://unpkg.com/camera-controls@3.1.2/dist/camera-controls.module.js"
+      }
+    }
+    </script>
+    <script type="module">
+        import * as THREE_MOD from "three";
+        import { TrackballControls } from "three/addons/controls/TrackballControls.js";
+        import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+        import CameraControls from "camera-controls";
+        CameraControls.install({ THREE: THREE_MOD });   // must run before the first instance
+        window.THREE = { ...THREE_MOD, TrackballControls, OrbitControls, CameraControls };
+        window.dispatchEvent(new Event('three-ready'));
+    </script>
+
+    <script src="js/cyber-left-chrome.js"></script>
+    <script src="js/branding/briefings.js"></script>
+    <script src="js/branding/overlays.js"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/branding/nav.js"></script>
+    <script src="js/branding.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/coach-box.js"></script>
+    <script>
+        function toggleSidebar() {
+            const panel = document.getElementById('side-panel');
+            panel.classList.toggle('collapsed');
+            if (window.CyberLeftChrome && typeof CyberLeftChrome.publishResolvedScale === 'function') {
+                CyberLeftChrome.publishResolvedScale();
+            }
+            setTimeout(() => {
+                window.dispatchEvent(new Event('resize'));
+                if (window.CyberLeftChrome && typeof CyberLeftChrome.publishResolvedScale === 'function') {
+                    CyberLeftChrome.publishResolvedScale();
+                }
+            }, 400);
+        }
+
+        CyberBranding.init({
+            useExternalStyles: true,
+            title: CyberI18n.get('ui.coach_title'),
+            subtitle: 'Jacquard-Webstuhl',
+        });
+        CyberUI.init();
+
+        (function setCoachTitleFromI18n() {
+            const el = document.getElementById('coach-title-slot');
+            if (el) el.textContent = 'Lochkarte  →  Gewebe';
+        })();
+
+        if (window.CyberLeftChrome && typeof CyberLeftChrome.configure === 'function') {
+            CyberLeftChrome.configure({ viewportOnlyZoom: true });
+        }
+
+        // =================================================================
+        //  Jacquard loom — one punched card per weft row, one hole per
+        //  warp thread.  Hole = that warp is lifted = it stays on top of
+        //  the weft = a light pixel in the cloth.  That is the whole idea.
+        // =================================================================
+
+        // ---- the design -------------------------------------------------
+        // The design is a FUNCTION over the unit square, not a bitmap. The loom
+        // samples it with as many warp threads as it has. That is the whole point:
+        // more threads = a finer sample = a rounder circle. Design resolution and
+        // loom resolution are two different things.
+        const IMG_W = 640;                    // only a scan has a fixed grid
+        let IMG_H = 640;
+        let imgGray = null, imgAspect = 1;
+
+        const SPIRAL_CENTRES = [
+            { x: 0.30, y: 0.34, a: 2.0, b: 78 },
+            { x: 0.72, y: 0.26, a: -3.0, b: 61 },
+            { x: 0.58, y: 0.70, a: 2.0, b: 84 },
+            { x: 0.16, y: 0.78, a: -2.0, b: 52 },
+            { x: 0.88, y: 0.62, a: 3.0, b: 69 },
+        ];
+
+        // Doc's ink drawing, scanned. Sampled like any other design — the only one
+        // with a fixed grid of its own, and the only one that is not square.
+        const STOFF = { w: 0, h: 0, gray: null, aspect: 1600 / 987 };
+
+        function loadStoff() {
+            const img = new Image();
+            img.onload = () => {
+                const c = document.createElement('canvas');
+                c.width = STOFF.w = img.naturalWidth;
+                c.height = STOFF.h = img.naturalHeight;
+                STOFF.aspect = STOFF.w / STOFF.h;
+                const cx = c.getContext('2d');
+                cx.drawImage(img, 0, 0);
+                const d = cx.getImageData(0, 0, STOFF.w, STOFF.h).data;
+                STOFF.gray = new Uint8Array(STOFF.w * STOFF.h);
+                for (let k = 0; k < STOFF.gray.length; k++) {
+                    STOFF.gray[k] = (d[k * 4] * 0.299 + d[k * 4 + 1] * 0.587 + d[k * 4 + 2] * 0.114) | 0;
+                }
+                rebuildPattern();
+                if (S.design === 'stoff') reset();
+            };
+            img.src = 'resources/jacquard/musterstoff.jpg';
+        }
+
+        const DESIGNS = {
+            stoff: {
+                label: 'Doc-Muster',
+                aspect: () => STOFF.aspect,
+                bit(u, v) {
+                    if (!STOFF.gray) return 0;
+                    const x = Math.min(STOFF.w - 1, Math.max(0, Math.round(u * (STOFF.w - 1))));
+                    const y = Math.min(STOFF.h - 1, Math.max(0, Math.round(v * (STOFF.h - 1))));
+                    // light paper = warp up, blue ink = weft on top
+                    return STOFF.gray[y * STOFF.w + x] > 128 + S.threshold * 110 ? 1 : 0;
+                },
+            },
+            kreis: {
+                label: 'Kreis',
+                bit(u, v) {
+                    const r = 0.36 + S.threshold * 0.12;
+                    const dx = u - 0.5, dy = v - 0.5;
+                    return dx * dx + dy * dy < r * r ? 1 : 0;
+                },
+            },
+            ring: {
+                label: 'Ringe',
+                bit(u, v) {
+                    const dx = u - 0.5, dy = v - 0.5;
+                    return Math.sin(Math.sqrt(dx * dx + dy * dy) * 46) > S.threshold ? 1 : 0;
+                },
+            },
+            kringel: {
+                label: 'Kringel (Doc)',
+                bit(u, v) {
+                    // several spiral phase fields added up — a*theta + b*r per centre
+                    let s = 0;
+                    for (const c of SPIRAL_CENTRES) {
+                        const dx = u - c.x, dy = v - c.y;
+                        s += c.a * Math.atan2(dy, dx) + c.b * (Math.sqrt(dx * dx + dy * dy) + 0.004);
+                    }
+                    return Math.sin(s) > S.threshold ? 1 : 0;
+                },
+            },
+            bild: {
+                label: 'Eigenes Bild',
+                aspect: () => imgAspect,
+                bit(u, v) {
+                    if (!imgGray) return 0;
+                    const x = Math.min(IMG_W - 1, Math.max(0, Math.round(u * (IMG_W - 1))));
+                    const y = Math.min(IMG_H - 1, Math.max(0, Math.round(v * (IMG_H - 1))));
+                    return imgGray[y * IMG_W + x] > 128 + S.threshold * 110 ? 1 : 0;
+                },
+            },
+        };
+
+        /** The design at one point of the unit square. 1 = warp up = light. */
+        function designBit(u, v) {
+            return DESIGNS[S.design].bit(u, v);
+        }
+
+        /** Width : height of the design. Only the scanned ones are not square. */
+        function designAspect() {
+            const a = DESIGNS[S.design].aspect;
+            return (typeof a === 'function' ? a() : a) || 1;
+        }
+
+        function rebuildPattern() {
+            overlayCache = null;
+            for (const m of maps) m.invalidate();
+            layoutMaps();
+        }
+
+        function loadImageFile(file) {
+            const img = new Image();
+            img.onload = () => {
+                const c = document.createElement('canvas');
+                imgAspect = img.naturalWidth / img.naturalHeight;
+                c.width = IMG_W;
+                c.height = Math.max(1, Math.round(IMG_W / imgAspect));
+                const cx = c.getContext('2d');
+                cx.drawImage(img, 0, 0, c.width, c.height);
+                const d = cx.getImageData(0, 0, c.width, c.height).data;
+                imgGray = new Uint8Array(c.width * c.height);
+                IMG_H = c.height;
+                for (let k = 0; k < imgGray.length; k++) {
+                    imgGray[k] = (d[k * 4] * 0.299 + d[k * 4 + 1] * 0.587 + d[k * 4 + 2] * 0.114) | 0;
+                }
+                S.design = 'bild';
+                const dd = document.querySelector('#jq-design .dropdown-trigger .selected-val');
+                if (dd) dd.textContent = DESIGNS.bild.label;
+                savePrefs();
+                rebuildPattern();
+                reset();
+                URL.revokeObjectURL(img.src);
+            };
+            img.src = URL.createObjectURL(file);
+        }
+
+        // ---- lab state ---------------------------------------------------
+        const WIN_MIN = 0.04;                 // smallest window, as a fraction of the design
+        const THREADS_MIN = 8, THREADS_MAX = 1000;
+        const ROWS_MAX = 1400;
+
+        const S = {
+            ctrl: 'cam',        // 'cam' | 'orbit' | 'trackball'
+            tab: 'webstuhl',    // 'webstuhl' | 'muster'
+            overlay: false,     // punched cards drawn on top of the design
+            overlayAlpha: 0.94, // how opaque those cards are
+            view: null,         // remembered camera pose {p,t,u}
+            n: 28,              // warp threads = pattern columns being woven
+            rows: 28,           // weft rows to weave
+            design: 'stoff',    // which design is on the loom
+            winX: 0, winY: 0, winW: 1, winH: 1,   // the part of it being woven, in 0..1
+            threads: 40,        // warp threads — the loom's own resolution
+            threshold: 0.0,
+            speed: 1.0,
+            showCards: true,
+            showHeddles: true,
+            row: 0,             // next row to weave
+            phase: 'swap',      // swap -> card -> shed -> fly -> beat
+            sel: 0,             // how far the card has pressed the needles
+            shedT: 0,           // how high the knife stands
+            swapT: 0,           // how far the change of card has run
+            reedU: 0,           // 0 = reed back, 1 = reed against the cloth
+            stepping: false,    // running exactly one row, then stopping again
+            cardIdx: 0,         // which of the two cards sits in the machine
+            t: 0,
+            dir: 1,             // shuttle direction
+            lift: null,         // Float32Array, animated 0..1 per warp
+            bits: null,         // Uint8Array, current card
+        };
+
+        /**
+         * Column / row of the woven piece. The window is sampled with exactly as
+         * many points as the loom has threads — so doubling the threads halves the
+         * sample spacing and the motif comes out finer.
+         */
+        function patternBit(col, row) {
+            const r = S.rows - 1 - row;   // first woven row ends up farthest from the loom
+            const u = S.winX + (col + 0.5) / S.n * S.winW;
+            const v = S.winY + (r + 0.5) / S.rows * S.winH;
+            return designBit(u, v);
+        }
+
+        /** The part of the design that is on the loom, in 0..1 coordinates. */
+        function window0() {
+            return { x: S.winX, y: S.winY, w: S.winW, h: S.winH };
+        }
+
+        /** Rows follow from the thread count and the window shape, so nothing distorts. */
+        function rowsForWindow() {
+            return Math.round(Math.min(ROWS_MAX, Math.max(8, S.threads * (S.winH / S.winW) / designAspect())));
+        }
+
+        // ---- geometry constants -----------------------------------------
+        const W = 10;            // cloth width
+        const Z_FELL = 0;        // where the weft is beaten in
+        const Z_HEDDLE = -2.6;
+        const Z_BACK = -6.0;
+        const Z_REED = -2.15;    // where the reed waits while the shuttle crosses
+        const Z_SHED = -1.35;    // where the shuttle crosses: far enough back for the shed to be open
+        const Y_SHED = 0.26;     // fraction of the lift height — below the raised warps, above the rest
+        const CLOTH_LEN = 6.4;
+        // Hook row sits directly above the heddle row, so every cord hangs plumb —
+        // the way a real harness drops through the comber board.
+        const Z_HOOK = Z_HEDDLE;
+        const HOOK_Y0 = 2.9;     // foot of a hook at rest
+        const HOOK_H = 1.15;
+        const NEEDLE_LEN = 1.05;
+        const HOOK_DOWN = 0.5;   // how far a blocked needle is pressed down by the paper
+        const HOOK_LIFT = 0.65;  // travel of the knife — it stays clear of the card
+        const KNIFE_Y = 3.80;    // between a standing hook head and a pressed-down one
+        const CARD_Y = 4.75;     // pressed down: level with the middle of the needle tips
+        const CARD_TRAVEL = 3.6; // how far a card travels in and out on the chain
+
+        // The trackball rotates about controls.target, so the machine is shifted
+        // to sit centred on the origin — same arrangement as orbitals.html, which
+        // is what makes the drag feel predictable.
+        const MODEL_CY = 2.3, MODEL_CZ = 0.2;
+
+        const COL_WARP = 0xf2ead8;   // cream warp thread
+        const COL_WEFT = 0x1c3fa8;   // blue weft — the ink of the drawing
+        const COL_FRAME = 0x2c4b86;
+
+        let scene, camera, renderer, controls, root;
+        let warpMesh, warpPos, heddleMesh, cordGeo, cordPos, cordCol, cordLines;
+        let shuttle, weftBar, clothMesh, clothCtx, clothTex, clothRows;
+        let cards = [], hookMesh, needleMesh, knifeMesh, reed, reedTeeth;
+        let _v, _q, _sc, _col, _neutral;
+        let pitch = 1, threadR = 0.1, liftH = 1.2;
+
+        // ---- preferences: the lab opens the way it was left ----------------
+        const PREF_KEY = 'jacquard-prefs-3';
+        const PREF_KEYS = ['design', 'threads', 'winX', 'winY', 'winW', 'winH', 'speed', 'threshold', 'showCards', 'showHeddles', 'ctrl', 'view', 'tab', 'overlay', 'overlayAlpha'];
+        const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
+
+        const SPEED_MIN = 0.2, SPEED_MAX = 12;
+        // Position 0 is a hard stop — the tempo slider is the pause. 1..100 run
+        // geometrically from SPEED_MIN to SPEED_MAX.
+        const posToSpeed = p => p <= 0 ? 0 : SPEED_MIN * Math.pow(SPEED_MAX / SPEED_MIN, (clamp(p, 1, 100) - 1) / 99);
+        const speedToPos = sp => sp <= 0 ? 0
+            : 1 + Math.round(99 * Math.log(clamp(sp, SPEED_MIN, SPEED_MAX) / SPEED_MIN) / Math.log(SPEED_MAX / SPEED_MIN));
+        // Thread count spans 8 .. 500 — same problem as tempo, same geometric cure.
+        const posToThreads = p => Math.round(THREADS_MIN * Math.pow(THREADS_MAX / THREADS_MIN, clamp(p, 0, 100) / 100));
+        const threadsToPos = n => Math.round(100 * Math.log(clamp(n, THREADS_MIN, THREADS_MAX) / THREADS_MIN) / Math.log(THREADS_MAX / THREADS_MIN));
+
+        function loadPrefs() {
+            let p;
+            try { p = JSON.parse(localStorage.getItem(PREF_KEY) || 'null'); } catch (e) { return; }
+            if (!p || typeof p !== 'object') return;
+            for (const k of PREF_KEYS) if (p[k] !== undefined) S[k] = p[k];
+            // a stored value must still be one the UI can show
+            if (!DESIGNS[S.design] || S.design === 'bild') S.design = 'stoff';   // a photo is not stored
+            if (S.tab !== 'muster') S.tab = 'webstuhl';
+            const vec3 = a => Array.isArray(a) && a.length === 3 && a.every(n => Number.isFinite(n));
+            if (!(S.view && vec3(S.view.p) && vec3(S.view.t) && vec3(S.view.u))) S.view = null;
+            if (!['cam', 'orbit', 'trackball'].includes(S.ctrl)) S.ctrl = 'cam';
+            S.speed = +S.speed > 0 ? clamp(+S.speed, SPEED_MIN, SPEED_MAX) : (S.speed === 0 ? 0 : 1);
+            S.threshold = clamp(+S.threshold || 0, -0.8, 0.8);
+            S.threads = Math.round(clamp(+S.threads || 40, THREADS_MIN, THREADS_MAX));
+            S.winW = clamp(+S.winW || 1, WIN_MIN, 1);
+            S.winH = clamp(+S.winH || 1, WIN_MIN, 1);
+            S.winX = clamp(+S.winX || 0, 0, 1 - S.winW);
+            S.winY = clamp(+S.winY || 0, 0, 1 - S.winH);
+            S.showCards = !!S.showCards;
+            S.showHeddles = !!S.showHeddles;
+            S.overlay = !!S.overlay;
+            S.overlayAlpha = clamp(+S.overlayAlpha || 0.94, 0.1, 1);
+        }
+
+        let prefTimer = null;
+        function savePrefs() {
+            clearTimeout(prefTimer);   // sliders fire on every pixel — write once the drag rests
+            prefTimer = setTimeout(() => {
+                const p = {};
+                for (const k of PREF_KEYS) p[k] = S[k];
+                try { localStorage.setItem(PREF_KEY, JSON.stringify(p)); } catch (e) { /* private mode */ }
+            }, 250);
+        }
+
+        let speedInput = null;
+
+        function switchTab(name) {
+            S.tab = name;
+            document.querySelectorAll('#tab-bar .tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
+            document.getElementById('canvas-container').style.display = name === 'webstuhl' ? '' : 'none';
+            document.getElementById('muster-pane').classList.toggle('active', name === 'muster');
+            if (name === 'webstuhl') onResize();
+            layoutMaps();
+            savePrefs();
+        }
+
+        function boot() {
+            loadPrefs();
+            loadStoff();
+            const stage = document.getElementById('tab-stage');
+            makeMap(document.getElementById('hud-canvas'), () => 360, false, true);
+            makeMap(document.getElementById('map-canvas'),
+                () => Math.min(stage.clientWidth - 80, (stage.clientHeight - 130) * designAspect()), true);
+            const cb = document.getElementById('overlay-cb');
+            cb.checked = S.overlay;
+            const alphaBox = document.getElementById('overlay-alpha');
+            const alphaIn = document.getElementById('overlay-alpha-in');
+            alphaIn.value = Math.round(S.overlayAlpha * 100);
+            const syncAlphaBox = () => alphaBox.classList.toggle('off', !S.overlay);
+            syncAlphaBox();
+            cb.addEventListener('change', () => { S.overlay = cb.checked; syncAlphaBox(); savePrefs(); drawMaps(); });
+            alphaIn.addEventListener('input', () => { S.overlayAlpha = +alphaIn.value / 100; savePrefs(); drawMaps(); });
+            document.querySelectorAll('#tab-bar .tab-btn')
+                .forEach(b => b.addEventListener('click', () => switchTab(b.dataset.tab)));
+
+            _m = new THREE.Matrix4();
+            _v = new THREE.Vector3(); _q = new THREE.Quaternion(); _sc = new THREE.Vector3();
+            _col = new THREE.Color();
+            _neutral = new THREE.Color(0xcfd8e6);
+            initThree();
+            buildUI();
+            rebuildPattern();
+            reset();
+            switchTab(S.tab);
+            animate();
+        }
+
+        function initThree() {
+            const container = document.getElementById('canvas-container');
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(42, container.clientWidth / container.clientHeight, 0.1, 400);
+            renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('canvas'), antialias: true, alpha: true });
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.setSize(container.clientWidth, container.clientHeight, false);
+
+            scene.add(new THREE.AmbientLight(0xffffff, 0.62));
+            const key = new THREE.DirectionalLight(0xfff4e0, 1.15); key.position.set(4, 8, 6); scene.add(key);
+            const fill = new THREE.DirectionalLight(0x6688ff, 0.55); fill.position.set(-6, 3, -5); scene.add(fill);
+            const rim = new THREE.DirectionalLight(0xffffff, 0.35); rim.position.set(0, -4, 4); scene.add(rim);
+
+            root = new THREE.Group();
+            scene.add(root);
+            buildLoom();
+            makeControls(S.ctrl);
+            window.addEventListener('resize', onResize);
+            if (window.ResizeObserver) new ResizeObserver(onResize).observe(document.getElementById('tab-stage'));
+            onResize();
+        }
+
+        /**
+         * Three ways to fly the camera.
+         *
+         * 'cam'   — yomotsu/camera-controls. Spherical like Orbit, but its damping
+         *           uses SmoothDamp: it settles on a target instead of coasting.
+         *           Wheel zooms toward the cursor.
+         * 'orbit' — three's OrbitControls. World up stays up.
+         * 'trackball' — TrackballControls with the settings from orbitals.html. A real
+         *           trackball rolls: object.up is rotated by the same quaternion as the
+         *           eye vector, so every drag off the canvas centre tilts the horizon.
+         *           Invisible on a symmetric orbital, disorienting on a machine.
+         */
+        function makeControls(kind) {
+            const keep = controls ? currentView() : null;   // switching library keeps the view
+            if (controls) { controls.dispose(); controls = null; }
+            camera.up.set(0, 1, 0);
+            if (kind === 'trackball') {
+                controls = new THREE.TrackballControls(camera, renderer.domElement);
+                controls.rotateSpeed = 1.3;
+                controls.zoomSpeed = 1.05;
+                controls.panSpeed = 0.32;
+                controls.staticMoving = false;
+                controls.dynamicDampingFactor = 0.14;
+                controls.minDistance = 4;
+                controls.maxDistance = 140;
+                controls.handleResize();
+            } else if (kind === 'orbit') {
+                controls = new THREE.OrbitControls(camera, renderer.domElement);
+                controls.enableDamping = true;
+                controls.dampingFactor = 0.075;
+                controls.rotateSpeed = 0.55;
+                controls.zoomSpeed = 0.9;
+                controls.panSpeed = 0.8;
+                controls.screenSpacePanning = true;
+                controls.zoomToCursor = true;
+                controls.minDistance = 6;
+                controls.maxDistance = 90;
+                controls.minPolarAngle = 0.08;
+                controls.maxPolarAngle = Math.PI * 0.52;
+            } else {
+                controls = new THREE.CameraControls(camera, renderer.domElement);
+                // 0.55 is the same scale as OrbitControls: 2*PI * delta / clientHeight
+                controls.azimuthRotateSpeed = 0.55;
+                controls.polarRotateSpeed = 0.55;
+                controls.draggingSmoothTime = 0.09;   // settles in ~0.09 s, never free-spins
+                controls.smoothTime = 0.20;
+                controls.dollySpeed = 0.6;
+                controls.dollyToCursor = true;
+                controls.truckSpeed = 1.6;
+                controls.minDistance = 6;
+                controls.maxDistance = 90;
+                controls.minPolarAngle = 0.08;
+                controls.maxPolarAngle = Math.PI * 0.52;
+                controls.mouseButtons.left = THREE.CameraControls.ACTION.ROTATE;
+                controls.mouseButtons.middle = THREE.CameraControls.ACTION.DOLLY;
+                controls.mouseButtons.right = THREE.CameraControls.ACTION.TRUCK;
+                controls.touches.one = THREE.CameraControls.ACTION.TOUCH_ROTATE;
+                controls.touches.two = THREE.CameraControls.ACTION.TOUCH_DOLLY_TRUCK;
+            }
+            // save the view whenever it comes to rest — the names differ per library,
+            // listening for one that does not exist is harmless
+            for (const evt of ['control', 'controlend', 'rest', 'change', 'end']) {
+                controls.addEventListener(evt, saveView);
+            }
+            applyView(keep || S.view);
+        }
+
+        /** Where the camera stands right now, in a form both libraries can restore. */
+        function currentView() {
+            const t = new THREE.Vector3();
+            if (controls.getTarget) controls.getTarget(t); else t.copy(controls.target);
+            return { p: camera.position.toArray(), t: t.toArray(), u: camera.up.toArray() };
+        }
+
+        function applyView(v) {
+            if (!v) { setCamera(); return; }
+            camera.up.fromArray(v.u);
+            if (controls.setLookAt) {
+                controls.setLookAt(v.p[0], v.p[1], v.p[2], v.t[0], v.t[1], v.t[2], false);
+            } else {
+                camera.position.fromArray(v.p);
+                controls.target.fromArray(v.t);
+                camera.lookAt(controls.target);
+                if (controls.handleResize) controls.handleResize();
+                controls.update();
+            }
+        }
+
+        let viewTimer = null;
+        function saveView() {
+            clearTimeout(viewTimer);            // fires on every damped frame — write once it rests
+            viewTimer = setTimeout(() => {
+                if (!controls) return;
+                S.view = currentView();
+                savePrefs();
+            }, 400);
+        }
+
+        function onResize() {
+            const container = document.getElementById('canvas-container');
+            const w = container.clientWidth, h = container.clientHeight;
+            if (!w || !h) return;
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+            renderer.setSize(w, h, false);
+            if (controls.handleResize) controls.handleResize();
+            layoutMaps();
+        }
+
+        function setCamera() {
+            if (!controls) return;
+            const d = S.threads > 70 ? 22.0 : 21.0;
+            const px = 0, py = 0.50 * d, pz = 0.92 * d;
+            if (controls.setLookAt) {                       // camera-controls
+                controls.setLookAt(px, py, pz, 0, 0, 0, false);
+            } else {
+                camera.position.set(px, py, pz);
+                camera.up.set(0, 1, 0);
+                controls.target.set(0, 0, 0);
+                camera.lookAt(controls.target);
+                controls.update();
+            }
+        }
+
+        // ---- loom construction ------------------------------------------
+        function clearGroup(g) {
+            while (g.children.length) {
+                const c = g.children.pop();
+                if (c.geometry) c.geometry.dispose();
+                if (c.material) { if (c.material.map) c.material.map.dispose(); c.material.dispose(); }
+            }
+        }
+
+        function buildLoom() {
+            clearGroup(root);
+            const n = S.n;
+            pitch = W / n;
+            threadR = Math.min(0.09, pitch * 0.34);
+            liftH = Math.max(0.7, Math.min(1.5, pitch * 9));
+
+            // --- warp threads: a square tube through fell / heddle / back beam
+            const rings = 3;
+            const vertsPerWarp = rings * 4;
+            warpPos = new Float32Array(n * vertsPerWarp * 3);
+            const idx = [];
+            for (let i = 0; i < n; i++) {
+                const base = i * vertsPerWarp;
+                for (let s = 0; s < rings - 1; s++) {
+                    for (let k = 0; k < 4; k++) {
+                        const a = base + s * 4 + k, b = base + s * 4 + (k + 1) % 4;
+                        const c = a + 4, d = b + 4;
+                        idx.push(a, b, d, a, d, c);
+                    }
+                }
+            }
+            const wg = new THREE.BufferGeometry();
+            wg.setAttribute('position', new THREE.BufferAttribute(warpPos, 3));
+            wg.setIndex(idx);
+            warpMesh = new THREE.Mesh(wg, new THREE.MeshPhongMaterial({ color: COL_WARP, emissive: new THREE.Color(COL_WARP).multiplyScalar(0.34), shininess: 22, side: THREE.DoubleSide }));
+            warpMesh.frustumCulled = false;
+            root.add(warpMesh);
+
+            // --- heddles: one bar per warp, riding up and down with it
+            const hg = new THREE.BoxGeometry(Math.min(0.16, pitch * 0.5), 1.3, 0.05);
+            heddleMesh = new THREE.InstancedMesh(hg, new THREE.MeshPhongMaterial({ color: 0x8fa6c8, shininess: 60 }), n);
+            heddleMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+            root.add(heddleMesh);
+
+            // --- cords from the card band down to each heddle
+            cordPos = new Float32Array(n * 2 * 3);
+            cordCol = new Float32Array(n * 2 * 3);
+            cordGeo = new THREE.BufferGeometry();
+            cordGeo.setAttribute('position', new THREE.BufferAttribute(cordPos, 3));
+            cordGeo.setAttribute('color', new THREE.BufferAttribute(cordCol, 3));
+            cordLines = new THREE.LineSegments(cordGeo, new THREE.LineBasicMaterial({ vertexColors: true, transparent: true, opacity: 0.85 }));
+            cordLines.frustumCulled = false;
+            root.add(cordLines);
+
+            // --- shuttle and the weft it is trailing
+            shuttle = new THREE.Mesh(
+                new THREE.BoxGeometry(0.9, 0.22, 0.42),
+                new THREE.MeshPhongMaterial({ color: 0xf5c242, shininess: 80 }));
+            root.add(shuttle);
+            weftBar = new THREE.Mesh(
+                new THREE.BoxGeometry(1, threadR * 1.6, threadR * 1.6),
+                new THREE.MeshPhongMaterial({ color: COL_WEFT, emissive: new THREE.Color(COL_WEFT).multiplyScalar(0.34), shininess: 40 }));
+            root.add(weftBar);
+
+            // --- the cloth: a canvas texture that grows row by row
+            clothRows = Math.max(8, Math.round(CLOTH_LEN / pitch));
+            const cc = document.createElement('canvas');
+            cc.width = n; cc.height = clothRows;
+            clothCtx = cc.getContext('2d');
+            clothCtx.clearRect(0, 0, n, clothRows);
+            clothTex = new THREE.CanvasTexture(cc);
+            clothTex.colorSpace = THREE.SRGBColorSpace;
+            clothTex.magFilter = THREE.NearestFilter;
+            clothTex.minFilter = THREE.NearestFilter;
+            clothTex.generateMipmaps = false;
+            clothMesh = new THREE.Mesh(
+                new THREE.PlaneGeometry(W, CLOTH_LEN),
+                new THREE.MeshBasicMaterial({ map: clothTex, transparent: true, alphaTest: 0.5, side: THREE.DoubleSide }));
+            clothMesh.rotation.x = -Math.PI / 2;
+            clothMesh.position.set(0, 0, CLOTH_LEN / 2);
+            root.add(clothMesh);
+
+            // --- the selecting mechanism: needle, hook, knife
+            // One column per warp thread. Its needle points up at the card.
+            // Hole  -> the needle slides through, the hook stays over the knife.
+            // Paper -> the needle is blocked and shoves the hook off the knife.
+            const kg = new THREE.BoxGeometry(Math.min(0.09, pitch * 0.3), HOOK_H, Math.min(0.09, pitch * 0.3));
+            kg.translate(0, HOOK_H / 2, 0);          // pivot at the foot
+            hookMesh = new THREE.InstancedMesh(kg, new THREE.MeshPhongMaterial({ color: 0xd8e2f2, shininess: 70 }), n);
+            hookMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+            hookMesh.instanceColor = new THREE.InstancedBufferAttribute(new Float32Array(n * 3), 3);
+            root.add(hookMesh);
+
+            const ng = new THREE.BoxGeometry(Math.min(0.055, pitch * 0.2), 1, Math.min(0.055, pitch * 0.2));
+            ng.translate(0, 0.5, 0);                 // pivot at the lower end, y-scale = length
+            needleMesh = new THREE.InstancedMesh(ng, new THREE.MeshPhongMaterial({ color: 0xf5c242, shininess: 90 }), n);
+            needleMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+            root.add(needleMesh);
+
+            // the knife (griffe) — rises once per row and takes every hook still in its path
+            knifeMesh = new THREE.Mesh(
+                new THREE.BoxGeometry(W + 1.3, 0.26, 0.32),
+                new THREE.MeshPhongMaterial({ color: 0xd42a1c, shininess: 60 }));
+            root.add(knifeMesh);
+
+            // --- the punched cards. Two of them: the one in the machine and the
+            // next one on the chain, so the change of card is a visible move.
+            cards = [];
+            for (let k = 0; k < 2; k++) {
+                const pc = document.createElement('canvas');
+                pc.width = 2048; pc.height = 120;
+                const tex = new THREE.CanvasTexture(pc);
+                tex.colorSpace = THREE.SRGBColorSpace;
+                const mesh = new THREE.Mesh(
+                    new THREE.PlaneGeometry(W, 0.85),   // exactly the warp span: hole i sits over needle i
+                    new THREE.MeshBasicMaterial({ map: tex, side: THREE.DoubleSide, transparent: true }));
+                mesh.rotation.x = -Math.PI / 2;   // flat, like a card lying on the needle board
+                mesh.position.set(0, CARD_Y, Z_HOOK);
+                root.add(mesh);
+                cards.push({ mesh, ctx: pc.getContext('2d'), tex });
+            }
+
+            // --- the reed (Weblade): a comb the warps run through. It swings forward
+            // once per row and pushes the freshly laid weft up against the cloth.
+            reed = new THREE.Group();
+            const reedMat = new THREE.MeshPhongMaterial({ color: 0x3d5f9e, shininess: 70 });   // part of the frame, not of the harness
+            for (const y of [1.62, -0.16]) {
+                const bar = new THREE.Mesh(new THREE.BoxGeometry(W + 0.9, 0.2, 0.26), reedMat);
+                bar.position.y = y;
+                reed.add(bar);
+            }
+            // one dent between every two warp threads, so the threads pass through
+            reedTeeth = new THREE.InstancedMesh(
+                new THREE.BoxGeometry(Math.min(0.06, pitch * 0.18), 1.78, 0.08), reedMat, n + 1);
+            for (let i = 0; i <= n; i++) {
+                _m.makeTranslation(-W / 2 + pitch * i, 0.73, 0);
+                reedTeeth.setMatrixAt(i, _m);
+            }
+            reedTeeth.instanceMatrix.needsUpdate = true;
+            reed.add(reedTeeth);
+            reed.position.z = Z_REED;
+            root.add(reed);
+
+            // --- frame: warp beam, breast beam, uprights
+            const frameMat = new THREE.MeshPhongMaterial({ color: COL_FRAME, shininess: 30 });
+            const beam = (x, y, z, len, axis) => {
+                const g = axis === 'x' ? new THREE.CylinderGeometry(0.22, 0.22, len, 20) : new THREE.BoxGeometry(0.3, len, 0.3);
+                const m = new THREE.Mesh(g, frameMat);
+                if (axis === 'x') m.rotation.z = Math.PI / 2;
+                m.position.set(x, y, z);
+                root.add(m);
+            };
+            beam(0, -0.28, Z_BACK, W + 1.6, 'x');            // warp beam
+            beam(-W / 2 - 0.8, 2.1, Z_HEDDLE, 5.0, 'y');
+            beam(W / 2 + 0.8, 2.1, Z_HEDDLE, 5.0, 'y');
+
+            root.position.set(0, -MODEL_CY, -MODEL_CZ);
+
+            S.lift = new Float32Array(n);
+            S.bits = new Uint8Array(n);
+        }
+
+        // ---- per-frame geometry updates ----------------------------------
+        let _m = null;
+
+        function updateWarps() {
+            const n = S.n, r = threadR;
+            // ring z / y for fell, heddle, back
+            for (let i = 0; i < n; i++) {
+                const x = -W / 2 + pitch * (i + 0.5);
+                const yh = S.lift[i] * liftH;
+                const p = [
+                    [x, 0, Z_FELL],
+                    [x, yh, Z_HEDDLE],
+                    [x, 0, Z_BACK],
+                ];
+                let o = i * 12 * 3;
+                for (let s = 0; s < 3; s++) {
+                    const [px, py, pz] = p[s];
+                    // square cross-section in the x/y plane
+                    const q = [[-r, -r], [r, -r], [r, r], [-r, r]];
+                    for (let k = 0; k < 4; k++) {
+                        warpPos[o++] = px + q[k][0];
+                        warpPos[o++] = py + q[k][1];
+                        warpPos[o++] = pz;
+                    }
+                }
+                // heddle bar
+                _m.makeTranslation(x, yh + 0.45, Z_HEDDLE);
+                heddleMesh.setMatrixAt(i, _m);
+                // --- needle / hook column, and the cord it pulls.
+                // Needle and hook are one rod. The card presses from above: over a
+                // hole the rod stays up and its tip comes through, over paper the
+                // rod is pushed down — and the knife then rises past it.
+                const hole = S.bits[i];
+                const down = hole ? 0 : HOOK_DOWN * S.sel;
+                const rise = S.lift[i] * HOOK_LIFT;
+                const foot = HOOK_Y0 + rise - down;
+                _m.makeTranslation(x, foot, Z_HOOK);
+                hookMesh.setMatrixAt(i, _m);
+                // colour only tells hole from paper once the card has actually pressed
+                hookMesh.setColorAt(i, _col.setHex(hole ? 0xf2ead8 : 0x64789c).lerp(_neutral, 1 - S.sel));
+                _v.set(x, foot + HOOK_H, Z_HOOK);
+                _sc.set(1, NEEDLE_LEN, 1);
+                _m.compose(_v, _q, _sc);
+                needleMesh.setMatrixAt(i, _m);
+
+                // cord from the hook down to the heddle
+                const c0 = i * 6;
+                cordPos[c0] = x; cordPos[c0 + 1] = yh + 1.1; cordPos[c0 + 2] = Z_HEDDLE;
+                cordPos[c0 + 3] = x; cordPos[c0 + 4] = foot; cordPos[c0 + 5] = Z_HOOK;
+                const on = S.bits[i] ? 1 : 0;
+                for (let k = 0; k < 2; k++) {
+                    cordCol[c0 + k * 3] = on ? 0.96 : 0.28;
+                    cordCol[c0 + k * 3 + 1] = on ? 0.76 : 0.36;
+                    cordCol[c0 + k * 3 + 2] = on ? 0.26 : 0.52;
+                }
+            }
+            warpMesh.geometry.attributes.position.needsUpdate = true;
+            warpMesh.geometry.computeVertexNormals();
+            heddleMesh.instanceMatrix.needsUpdate = true;
+            heddleMesh.visible = S.showHeddles;
+            hookMesh.instanceMatrix.needsUpdate = true;
+            if (hookMesh.instanceColor) hookMesh.instanceColor.needsUpdate = true;
+            needleMesh.instanceMatrix.needsUpdate = true;
+            hookMesh.visible = needleMesh.visible = knifeMesh.visible = S.showCards;
+            // the knife rides up with the shed and carries the hooks it still reaches
+            knifeMesh.position.set(0, KNIFE_Y + S.shedT * HOOK_LIFT, Z_HOOK);
+            placeCards();
+            reed.position.z = Z_REED + (Z_FELL + 0.12 - Z_REED) * S.reedU;
+            cordGeo.attributes.position.needsUpdate = true;
+            cordGeo.attributes.color.needsUpdate = true;
+            cordLines.visible = S.showCards;
+        }
+
+        /**
+         * The card in the machine presses down while the row is selected; during a
+         * change it travels out over the front while the next one comes in from behind.
+         */
+        function placeCards() {
+            const cur = cards[S.cardIdx], nxt = cards[1 - S.cardIdx];
+            const t = S.swapT;
+            const restY = CARD_Y + 0.5 * (1 - S.sel);
+            // The chain advances: the used card travels straight out over the front,
+            // the next one comes in from behind at the same height. Moving only in z
+            // keeps the two apart on screen — a diagonal would make them overlap.
+            cur.mesh.position.set(0, restY, Z_HOOK + CARD_TRAVEL * t);
+            cur.mesh.material.opacity = 1 - t;          // gradual over the whole travel
+            cur.mesh.material.transparent = true;
+            nxt.mesh.position.set(0, CARD_Y + 0.5, Z_HOOK - CARD_TRAVEL * (1 - t));
+            nxt.mesh.material.opacity = Math.min(1, t / 0.35);
+            nxt.mesh.visible = S.showCards && t > 0.001;
+            cur.mesh.visible = S.showCards && t < 0.999;
+        }
+
+        /** Draw the punched card — the holes are cut out of the texture for real. */
+        function drawCard(card, bits) {
+            const w = 2048, h = 120, n = S.n;
+            const cardCtx = card.ctx;
+            cardCtx.clearRect(0, 0, w, h);
+            cardCtx.fillStyle = '#e8dfc6';
+            cardCtx.fillRect(0, 0, w, h);
+            cardCtx.strokeStyle = '#b9ad8c';
+            cardCtx.lineWidth = 3;
+            cardCtx.strokeRect(4, 4, w - 8, h - 8);
+
+            // punch: one hole per lifted warp, right over its needle
+            const step = w / n;
+            const rad = Math.max(0.6, Math.min(step * 0.32, 30));
+            cardCtx.globalCompositeOperation = 'destination-out';
+            for (let i = 0; i < n; i++) {
+                if (!bits[i]) continue;
+                cardCtx.beginPath();
+                cardCtx.arc(step * (i + 0.5), h / 2, rad, 0, Math.PI * 2);
+                cardCtx.fill();
+            }
+            cardCtx.globalCompositeOperation = 'source-over';
+            card.tex.needsUpdate = true;
+        }
+
+        /** Push one finished weft row into the cloth texture, oldest sliding forward. */
+        function pushClothRow(bits) {
+            const n = S.n;
+            const cv = clothCtx.canvas;
+            clothCtx.globalCompositeOperation = 'copy';
+            clothCtx.drawImage(cv, 0, 1);
+            clothCtx.globalCompositeOperation = 'source-over';
+            clothCtx.clearRect(0, 0, n, 1);
+            for (let i = 0; i < n; i++) {
+                clothCtx.fillStyle = bits[i] ? '#f2ead8' : '#1c3fa8';
+                clothCtx.fillRect(i, 0, 1, 1);
+            }
+            clothTex.needsUpdate = true;
+        }
+
+        // ---- weaving state machine ---------------------------------------
+        /** Put row `row` onto the card that is about to come in, and start the change. */
+        function loadCard(row, animate) {
+            for (let i = 0; i < S.n; i++) S.bits[i] = patternBit(i, row);
+            if (animate) {
+                drawCard(cards[1 - S.cardIdx], S.bits);
+                S.swapT = 0;
+            } else {
+                drawCard(cards[S.cardIdx], S.bits);
+                S.swapT = 0;
+            }
+        }
+
+        function reset() {
+            S.n = S.threads;
+            S.rows = rowsForWindow();
+            buildLoom();
+            S.row = 0; S.phase = 'card'; S.t = 0; S.dir = 1; S.sel = 0; S.shedT = 0;
+            S.swapT = 0; S.cardIdx = 0; S.reedU = 0;
+            loadCard(0, false);
+            updateWarps();
+            layoutMaps();
+        }
+
+        function stepPhase(dt) {
+            // a single step always runs slow enough to be watched
+            const sp = S.stepping ? Math.min(S.speed > 0 ? S.speed : 2, 2) : S.speed;
+            const dur = { swap: 0.85, card: 0.45, shed: 0.35, fly: 0.55, beat: 0.22 }[S.phase] / sp;
+            S.t += dt / dur;
+            if (S.phase === 'swap') {
+                // hold still: the old card travels out, the new one comes in
+                S.swapT = Math.min(1, S.t);
+                S.reedU = Math.max(0, 1 - S.t / 0.7);   // swings back while the card travels
+                if (S.t >= 1) {
+                    S.cardIdx = 1 - S.cardIdx;   // the new card is now the one in the machine
+                    S.swapT = 0;
+                    S.phase = 'card'; S.t = 0;
+                }
+            } else if (S.phase === 'card') {
+                // the card comes down: every needle that meets paper shoves its hook aside
+                S.sel = Math.min(1, S.t);
+                if (S.t >= 1) { S.phase = 'shed'; S.t = 0; }
+            } else if (S.phase === 'shed') {
+                const e = Math.min(1, S.t);
+                S.shedT = e;
+                for (let i = 0; i < S.n; i++) S.lift[i] = S.bits[i] ? e : 0;
+                if (S.t >= 1) { S.phase = 'fly'; S.t = 0; }
+            } else if (S.phase === 'fly') {
+                if (S.t >= 1) { S.phase = 'beat'; S.t = 0; }
+            } else {
+                const e = Math.max(0, 1 - S.t);
+                S.shedT = e;
+                S.sel = e;
+                S.reedU = Math.min(1, S.t / 0.85);      // the beat itself
+                for (let i = 0; i < S.n; i++) S.lift[i] = S.bits[i] ? e : 0;
+                if (S.t >= 1) {
+                    pushClothRow(S.bits);
+                    S.row++;
+                    S.dir *= -1;
+                    if (S.row >= S.rows) { S.row = 0; S.dir = 1; }
+                    loadCard(S.row, true);
+                    S.phase = 'swap'; S.t = 0; S.sel = 0; S.shedT = 0; S.reedU = 1;
+                    S.stepping = false;   // one step = one row, then stand still again
+                }
+            }
+        }
+
+        /** One full row without animation — used when the speed slider is pushed high. */
+        function weaveRowInstant() {
+            pushClothRow(S.bits);
+            S.row = (S.row + 1) % S.rows;
+            loadCard(S.row, false);
+            S.phase = 'card'; S.t = 0; S.sel = 1; S.shedT = 0; S.swapT = 0; S.reedU = 0;
+        }
+
+        function placeShuttle() {
+            const half = W / 2 + 1.0;
+            const u = S.phase === 'fly' ? Math.min(1, S.t) : (S.phase === 'beat' ? 1 : 0);
+            const from = S.dir > 0 ? -half : half;
+            const to = S.dir > 0 ? half : -half;
+            const x = from + (to - from) * u;
+            shuttle.position.set(x, liftH * Y_SHED, Z_SHED);
+            shuttle.visible = true;          // it rests at the side, it does not vanish
+
+            // The weft is laid while the shuttle crosses, then the reed pushes it to
+            // the cloth. It must not disappear the moment the shuttle is through —
+            // otherwise the reed visibly shoves nothing.
+            const reedZ = Z_REED + (Z_FELL + 0.12 - Z_REED) * S.reedU;
+            if (S.phase === 'fly') {
+                const len = Math.abs(x - from);
+                weftBar.visible = len > 0.02;
+                if (weftBar.visible) {
+                    weftBar.scale.set(len, 1, 1);
+                    weftBar.position.set((from + x) / 2, liftH * Y_SHED, Z_SHED);
+                }
+            } else if (S.phase === 'beat') {
+                // it lies still until the reed reaches it, then rides along to the fell
+                const zEnd = Z_FELL + 0.02;
+                const wz = Math.max(Z_SHED, Math.min(zEnd, reedZ));
+                const f = (wz - Z_SHED) / (zEnd - Z_SHED);
+                weftBar.visible = true;
+                weftBar.scale.set(W, 1, 1);
+                weftBar.position.set(0, liftH * Y_SHED * (1 - f) + threadR * f, wz);
+            } else {
+                weftBar.visible = false;
+            }
+        }
+
+        // ---- pattern map overlay -----------------------------------------
+        // ---- pattern maps -------------------------------------------------
+        // Each map renders the part of the design it is showing, at its own screen
+        // resolution — so zooming in gives real detail instead of a bigger bitmap.
+        const maps = [];
+
+        // Re-rendering a map costs 40-105 ms, far too much for every mouse move. While
+        // something is being dragged the maps render at quarter resolution (16x cheaper) and
+        // sharpen again a moment after the hand stops.
+        let coarse = false, coarseTimer = null;
+        function interacting() {
+            coarse = true;
+            clearTimeout(coarseTimer);
+            coarseTimer = setTimeout(() => { coarse = false; drawMaps(); }, 180);
+        }
+
+        /**
+         * The punched cards, lying on the design: a card sheet over the woven window
+         * with every hole really cut out of it. Through each hole you see the light
+         * part of the drawing — hole = warp up = light pixel.
+         * Cached, because at 500 threads it is 190 000 holes.
+         */
+        let overlayCache = null, overlayKey = '';
+
+        /**
+         * Build the card layer at screen resolution for the part of the frame that is
+         * actually visible. Rendering it at a fixed size and scaling it up is what made
+         * the holes blurry at high zoom; this way every hole is drawn as a circle at the
+         * pixel size it is shown, and only the cells on screen are touched at all.
+         */
+        function cardLayer(x, y, w, h, size, sizeH, dpr) {
+            const vx0 = Math.max(0, x), vy0 = Math.max(0, y);
+            const vx1 = Math.min(size, x + w), vy1 = Math.min(sizeH, y + h);
+            if (vx1 - vx0 < 1 || vy1 - vy0 < 1) return null;
+
+            const key = [S.design, S.threshold, S.n, S.rows, S.winX, S.winY, S.winW, S.winH,
+                x.toFixed(2), y.toFixed(2), w.toFixed(2), h.toFixed(2), vx0.toFixed(2), vy0.toFixed(2),
+                vx1.toFixed(2), vy1.toFixed(2), dpr].join('|');
+            if (overlayCache && overlayKey === key) return overlayCache;
+
+            const c = document.createElement('canvas');
+            c.width = Math.max(1, Math.round((vx1 - vx0) * dpr));
+            c.height = Math.max(1, Math.round((vy1 - vy0) * dpr));
+            const o = c.getContext('2d');
+            // draw in the map's own coordinates; the canvas covers only the visible slice
+            o.setTransform(dpr, 0, 0, dpr, -vx0 * dpr, -vy0 * dpr);
+
+            o.fillStyle = 'rgb(198,166,116)';
+            o.fillRect(x, y, w, h);
+
+            const cw = w / S.n, ch = h / S.rows;
+            const i0 = Math.max(0, Math.floor((vx0 - x) / cw)), i1 = Math.min(S.n - 1, Math.ceil((vx1 - x) / cw));
+            const j0 = Math.max(0, Math.floor((vy0 - y) / ch)), j1 = Math.min(S.rows - 1, Math.ceil((vy1 - y) / ch));
+
+            if (ch > 3) {                          // one line per card, if they fit
+                o.strokeStyle = 'rgba(120,96,58,.6)';
+                o.lineWidth = 1 / dpr;
+                o.beginPath();
+                for (let j = Math.max(1, j0); j <= j1; j++) { o.moveTo(x, y + j * ch); o.lineTo(x + w, y + j * ch); }
+                o.stroke();
+            }
+
+            o.globalCompositeOperation = 'destination-out';
+            o.fillStyle = '#000';
+            const rad = Math.min(cw, ch) * 0.34;
+            const round = rad * dpr > 1.4;         // below that a rectangle looks the same and is cheaper
+            for (let j = j0; j <= j1; j++) {
+                const v = S.winY + (j + 0.5) / S.rows * S.winH;
+                const py = y + (j + 0.5) * ch;
+                for (let i = i0; i <= i1; i++) {
+                    if (!designBit(S.winX + (i + 0.5) / S.n * S.winW, v)) continue;
+                    const px = x + (i + 0.5) * cw;
+                    if (round) { o.beginPath(); o.arc(px, py, rad, 0, Math.PI * 2); o.fill(); }
+                    else o.fillRect(px - rad, py - rad, rad * 2, rad * 2);
+                }
+            }
+            o.globalCompositeOperation = 'source-over';
+
+            c._x = vx0; c._y = vy0; c._w = vx1 - vx0; c._h = vy1 - vy0;
+            overlayCache = c; overlayKey = key;
+            return c;
+        }
+
+        /**
+         * Turn a canvas into a map of the design with a draggable frame.
+         * Both maps share the window; only the big one can be zoomed.
+         */
+        function makeMap(canvas, sizeFn, big, crop) {
+            const ctx = canvas.getContext('2d');
+            const cap = canvas.parentElement.querySelector('.map-cap');
+            let size = 0, sizeH = 0, drag = null, bmp = null, bmpKey = '', hover = null;
+            const view = { cx: 0.5, cy: 0.5, z: 1 };   // centre and zoom, in design units
+
+            function layout() {
+                const dpr = Math.min(window.devicePixelRatio || 1, 2);
+                size = Math.max(120, Math.round(sizeFn()));
+                // the crop map has the shape of the window, not of the whole design
+                const ratio = crop
+                    ? (S.winW * designAspect()) / S.winH
+                    : designAspect();
+                sizeH = Math.max(60, Math.round(size / ratio));
+                if (crop && sizeH > 300) { sizeH = 300; size = Math.round(sizeH * ratio); }
+                const w = Math.round(size * dpr), h = Math.round(sizeH * dpr);
+                if (canvas.width === w && canvas.height === h) return;   // nothing to do
+                canvas.style.width = size + 'px';
+                canvas.style.height = sizeH + 'px';
+                canvas.width = w;
+                canvas.height = h;
+                ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+                bmp = null;
+            }
+
+            /** The slice of the design on screen, in 0..1 design coordinates. */
+            function visible() {
+                if (crop) return { u0: S.winX, v0: S.winY, su: S.winW, sv: S.winH };
+                const span = 1 / view.z;
+                return {
+                    u0: Math.min(1 - span, Math.max(0, view.cx - span / 2)),
+                    v0: Math.min(1 - span, Math.max(0, view.cy - span / 2)),
+                    su: span, sv: span,
+                };
+            }
+
+            /** Render exactly what is on screen — zoom therefore sharpens. */
+            function bitmap(vis) {
+                const key = [S.design, S.threshold, vis.u0.toFixed(6), vis.v0.toFixed(6), vis.su.toFixed(6), vis.sv.toFixed(6), size, sizeH, coarse].join('|');
+                if (bmp && bmpKey === key) return bmp;
+                const W = Math.max(2, Math.min(1400, Math.round(size * (coarse ? 0.25 : 1))));
+                const H = Math.max(2, Math.round(W * sizeH / size));
+                const c = document.createElement('canvas');
+                c.width = W; c.height = H;
+                const cx = c.getContext('2d');
+                const img = cx.createImageData(W, H);
+                for (let j = 0; j < H; j++) {
+                    const v = vis.v0 + (j + 0.5) / H * vis.sv;
+                    for (let i = 0; i < W; i++) {
+                        const on = designBit(vis.u0 + (i + 0.5) / W * vis.su, v);
+                        const k = (j * W + i) * 4;
+                        img.data[k] = on ? 242 : 28;
+                        img.data[k + 1] = on ? 234 : 63;
+                        img.data[k + 2] = on ? 216 : 168;
+                        img.data[k + 3] = 255;
+                    }
+                }
+                cx.putImageData(img, 0, 0);
+                bmp = c; bmpKey = key;
+                return c;
+            }
+
+            function draw() {
+                if (!canvas.offsetParent) return;   // the map on the other tab costs nothing
+                if (!size) layout();
+                const vis = visible();
+                const toX = u => (u - vis.u0) / vis.su * size;
+                const toY = v => (v - vis.v0) / vis.sv * sizeH;
+
+                ctx.imageSmoothingEnabled = true;
+                ctx.imageSmoothingQuality = 'high';
+                ctx.clearRect(0, 0, size, sizeH);
+                ctx.drawImage(bitmap(vis), 0, 0, size, sizeH);
+
+                const r = drag && drag.rect ? drag.rect : window0();
+                const x = toX(r.x), y = toY(r.y), w = r.w / vis.su * size, h = r.h / vis.sv * sizeH;
+
+                if (crop) {
+                    const yr = (1 - S.row / S.rows) * sizeH;
+                    ctx.strokeStyle = 'rgba(255,90,70,.95)';
+                    ctx.lineWidth = 1.5;
+                    ctx.beginPath(); ctx.moveTo(0, yr); ctx.lineTo(size, yr); ctx.stroke();
+                    if (cap) cap.textContent = S.threads + ' × ' + S.rows + '  ·  AUSSCHNITT';
+                    return;
+                }
+
+                ctx.fillStyle = 'rgba(8,20,42,.55)';
+                ctx.fillRect(0, 0, size, Math.max(0, y));
+                ctx.fillRect(0, y + h, size, Math.max(0, sizeH - y - h));
+                ctx.fillRect(0, Math.max(0, y), Math.max(0, x), Math.min(h, sizeH));
+                ctx.fillRect(x + w, Math.max(0, y), Math.max(0, size - x - w), Math.min(h, sizeH));
+
+                if (S.overlay && big && w > 4 && h > 4) {
+                    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+                    const lay = cardLayer(x, y, w, h, size, sizeH, dpr);
+                    if (lay) {
+                        // globalAlpha scales the punched holes too, so they stay clear
+                        ctx.globalAlpha = S.overlayAlpha;
+                        ctx.drawImage(lay, lay._x, lay._y, lay._w, lay._h);
+                        ctx.globalAlpha = 1;
+                    }
+                }
+
+                ctx.strokeStyle = 'rgb(245,194,66)';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(x, y, w, h);
+
+                if (!drag) {                       // the row being woven right now
+                    const yr = y + (1 - S.row / S.rows) * h;
+                    ctx.strokeStyle = 'rgba(255,90,70,.95)';
+                    ctx.lineWidth = 1.5;
+                    ctx.beginPath(); ctx.moveTo(x, yr); ctx.lineTo(x + w, yr); ctx.stroke();
+                }
+
+                // the card under the pointer — one card is one weft row
+                let hoverCard = null;
+                if (big && hover && !drag && r.h > 0) {
+                    const j = Math.floor((hover.v - r.y) / r.h * S.rows);
+                    if (j >= 0 && j < S.rows && hover.u >= r.x && hover.u <= r.x + r.w) {
+                        hoverCard = j;
+                        const ry = y + j / S.rows * h, rh = h / S.rows;
+                        ctx.fillStyle = 'rgba(176,36,24,.15)';
+                        ctx.fillRect(x, ry, w, rh);
+                        ctx.strokeStyle = 'rgb(176,36,24)';
+                        ctx.lineWidth = 1.5;
+                        ctx.strokeRect(x, ry, w, Math.max(1.5, rh));
+                    }
+                }
+
+                ctx.fillStyle = 'rgb(245,194,66)';
+                for (const [hx, hy] of [[x, y], [x + w, y], [x, y + h], [x + w, y + h]]) {
+                    ctx.fillRect(hx - 5, hy - 5, 10, 10);
+                }
+
+                if (cap && hoverCard !== null) {
+                    // the card is read bottom-up: the first row woven ends up at the bottom
+                    const v = r.y + (hoverCard + 0.5) / S.rows * r.h;
+                    let holes = 0;
+                    for (let i = 0; i < S.n; i++) if (designBit(r.x + (i + 0.5) / S.n * r.w, v)) holes++;
+                    cap.textContent = 'KARTE ' + (S.rows - hoverCard) + ' / ' + S.rows
+                        + '  ·  ' + holes + ' LÖCHER von ' + S.n;
+                } else if (cap) {
+                    const rows = drag && drag.rect ? Math.round(S.threads * (r.h / r.w) / designAspect()) : S.rows;
+                    cap.textContent = S.threads + ' × ' + rows + '  ·  RAHMEN ZIEHEN'
+                        + (view.z > 1.01 ? '  ·  ZOOM ' + view.z.toFixed(1) + '×' : '');
+                }
+            }
+
+            /** Pointer position in design coordinates. */
+            function dpt(e) {
+                const b = canvas.getBoundingClientRect();
+                const vis = visible();
+                return {
+                    u: vis.u0 + (e.clientX - b.left) / b.width * vis.su,
+                    v: vis.v0 + (e.clientY - b.top) / b.height * vis.sv,
+                    px: (e.clientX - b.left) / b.width * size,
+                    py: (e.clientY - b.top) / b.height * sizeH,
+                };
+            }
+
+            function hit(u, v) {
+                const r = window0(), vis = visible();
+                const gx = 11 / size * vis.su, gy = 11 / sizeH * vis.sv;
+                const l = Math.abs(u - r.x) < gx, rr = Math.abs(u - (r.x + r.w)) < gx;
+                const t = Math.abs(v - r.y) < gy, bo = Math.abs(v - (r.y + r.h)) < gy;
+                if (l && t) return 'nw';
+                if (rr && t) return 'ne';
+                if (l && bo) return 'sw';
+                if (rr && bo) return 'se';
+                if (u > r.x && u < r.x + r.w && v > r.y && v < r.y + r.h) return 'move';
+                return null;
+            }
+
+            function clampView() {
+                view.z = Math.min(40, Math.max(1, view.z));
+                const span = 1 / view.z;
+                view.cx = Math.min(1 - span / 2, Math.max(span / 2, view.cx));
+                view.cy = Math.min(1 - span / 2, Math.max(span / 2, view.cy));
+            }
+
+            if (big) {
+                canvas.addEventListener('wheel', (e) => {
+                    e.preventDefault();
+                    const vis = visible();
+                    const b = canvas.getBoundingClientRect();
+                    const fx = (e.clientX - b.left) / b.width, fy = (e.clientY - b.top) / b.height;
+                    const u = vis.u0 + fx * vis.su, v = vis.v0 + fy * vis.sv;
+                    interacting();
+                    view.z = Math.min(40, Math.max(1, view.z * Math.pow(1.0015, -e.deltaY)));
+                    const span = 1 / view.z;          // keep the point under the cursor put
+                    view.cx = u - (fx - 0.5) * span;
+                    view.cy = v - (fy - 0.5) * span;
+                    clampView();
+                    draw();
+                }, { passive: false });
+            }
+
+            canvas.addEventListener('pointermove', (e) => {
+                if (crop || drag) return;
+                const { u, v } = dpt(e);
+                if (big) { hover = { u, v }; draw(); }
+                const k = hit(u, v);
+                canvas.style.cursor = k === 'move' ? 'move'
+                    : (k === 'nw' || k === 'se') ? 'nwse-resize'
+                        : (k === 'ne' || k === 'sw') ? 'nesw-resize'
+                            : (big && view.z > 1.01) ? 'grab' : 'crosshair';
+            });
+
+            canvas.addEventListener('pointerdown', (e) => {
+                if (crop) return;
+                const p = dpt(e);
+                const kind = hit(p.u, p.v);
+                if (!kind && !(big && view.z > 1.01)) return;
+                e.preventDefault();
+                e.stopPropagation();
+                canvas.setPointerCapture(e.pointerId);
+                drag = kind
+                    ? { kind, rect: window0(), start: window0(), u: p.u, v: p.v }
+                    : { kind: 'pan', u: p.u, v: p.v, cx: view.cx, cy: view.cy };
+                if (drag.kind === 'pan') canvas.style.cursor = 'grabbing';
+                drawMaps();
+            });
+
+            canvas.addEventListener('pointermove', (e) => {
+                if (!drag) return;
+                const p = dpt(e);
+                if (drag.kind === 'pan') {           // the design slides under the pointer
+                    interacting();
+                    const vis = visible();
+                    const b = canvas.getBoundingClientRect();
+                    view.cx = drag.cx - ((e.clientX - b.left) / b.width - (drag.u - vis.u0) / vis.su) * vis.su;
+                    view.cy = drag.cy - ((e.clientY - b.top) / b.height - (drag.v - vis.v0) / vis.sv) * vis.sv;
+                    clampView();
+                    draw();
+                    return;
+                }
+                const dx = p.u - drag.u, dy = p.v - drag.v;
+                const s0 = drag.start;
+                let { x, y, w, h } = s0;
+                const fit = () => {
+                    w = Math.min(1, Math.max(WIN_MIN, w));
+                    h = Math.min(1, Math.max(WIN_MIN, h));
+                };
+                if (drag.kind === 'move') {
+                    x = s0.x + dx; y = s0.y + dy;
+                } else {
+                    const right = s0.x + s0.w, bottom = s0.y + s0.h;
+                    if (drag.kind === 'nw') { x = s0.x + dx; y = s0.y + dy; w = right - x; h = bottom - y; fit(); x = right - w; y = bottom - h; }
+                    if (drag.kind === 'ne') { y = s0.y + dy; w = s0.w + dx; h = bottom - y; fit(); y = bottom - h; }
+                    if (drag.kind === 'sw') { x = s0.x + dx; w = right - x; h = s0.h + dy; fit(); x = right - w; }
+                    if (drag.kind === 'se') { w = s0.w + dx; h = s0.h + dy; fit(); }
+                }
+                fit();
+                x = Math.min(1 - w, Math.max(0, x));
+                y = Math.min(1 - h, Math.max(0, y));
+                drag.rect = { x, y, w, h };
+                // live: the loom is rebuilt on every move — 1.2 ms even at 500 threads
+                S.winX = x; S.winY = y; S.winW = w; S.winH = h;
+                reset();
+            });
+
+            function end() {
+                if (!drag) return;
+                const wasPan = drag.kind === 'pan';
+                const r = drag.rect;
+                drag = null;
+                canvas.style.cursor = 'crosshair';
+                if (wasPan || !r) { draw(); return; }
+                S.winX = r.x; S.winY = r.y; S.winW = r.w; S.winH = r.h;
+                savePrefs();
+                reset();
+            }
+            canvas.addEventListener('pointerleave', () => { if (hover) { hover = null; draw(); } });
+            canvas.addEventListener('pointerup', end);
+            canvas.addEventListener('pointercancel', end);
+
+            canvas.addEventListener('dblclick', (e) => {   // everything back on the loom
+                if (crop) return;
+                e.preventDefault();
+                view.cx = 0.5; view.cy = 0.5; view.z = 1;
+                S.winX = 0; S.winY = 0; S.winW = 1; S.winH = 1;
+                savePrefs();
+                reset();
+            });
+
+            const api = { draw, layout, invalidate: () => { bmp = null; } };
+            maps.push(api);
+            return api;
+        }
+
+        function drawMaps() { for (const m of maps) m.draw(); }
+        function layoutMaps() { for (const m of maps) m.layout(); drawMaps(); }
+
+        function updateReadout() {
+            let holes = 0;
+            for (let i = 0; i < S.n; i++) holes += S.bits[i];
+            document.getElementById('card-readout').innerHTML =
+                'KARTE <b>' + (S.row + 1) + '</b> / ' + S.rows + '<br>' +
+                'LÖCHER <b>' + holes + '</b> von ' + S.n + '<br>' +
+                'KETTFÄDEN OBEN <b>' + holes + '</b>';
+        }
+
+        // ---- sidebar -----------------------------------------------------
+        function buildUI() {
+            const box = document.getElementById('ui-container');
+            CyberUI.createCard('ui-container', 'Webstuhl', '<div id="jq-run"></div>', 'var(--neon-blue)');
+            const run = document.getElementById('jq-run');
+            run.insertAdjacentHTML('beforeend',
+                '<div class="jq-btn-row">' +
+                '<button class="cyber-btn" id="jq-step">SCHRITT</button>' +
+                '<button class="cyber-btn" id="jq-reset">NEU</button>' +
+                '</div>');
+            // SCHRITT: one whole row, animated, always beginning with the change of
+            // card. If the machine was paused mid-row, rewind to the start of that
+            // row's card — nothing is lost and nothing is woven twice.
+            document.getElementById('jq-step').onclick = () => {
+                if (S.stepping) return;
+                if (!(S.phase === 'swap' && S.t === 0)) {
+                    drawCard(cards[1 - S.cardIdx], S.bits);   // current row's card, coming back in
+                    S.phase = 'swap'; S.t = 0; S.sel = 0; S.shedT = 0; S.swapT = 0; S.reedU = 1;
+                    for (let i = 0; i < S.n; i++) S.lift[i] = 0;
+                }
+                setRunning(false);      // a step always leaves the loom standing
+                S.stepping = true;
+            };
+            document.getElementById('jq-reset').onclick = () => { S.view = null; reset(); setCamera(); savePrefs(); };
+
+            CyberUI.createSlider('jq-run', 'KETTFÄDEN', 0, 100, threadsToPos(S.threads), 1,
+                v => { S.threads = posToThreads(v); savePrefs(); reset(); },
+                'var(--neon-blue)', v => posToThreads(v) + ' Fäden');
+            // Tempo spans 0.2x .. 12x — a factor of 60. On a linear track 1x would sit
+            // at 7 % and the whole slow half would be unreachable, so the slider runs
+            // on a geometric scale: every step multiplies, 1x lands at 39 %.
+            document.getElementById('jq-run').insertAdjacentHTML('beforeend',
+                '<div class="cyber-control-group">' +
+                '<div class="jq-ends"><span>LANGSAM</span><span>SCHNELL</span></div>' +
+                '<input type="range" class="cyber-slider" id="jq-tempo" min="0" max="100" step="1"' +
+                ' value="' + speedToPos(S.speed) + '" style="--accent:rgb(245,194,66)" aria-label="Tempo">' +
+                '</div>');
+            speedInput = document.getElementById('jq-tempo');
+            speedInput.addEventListener('input', () => {
+                S.speed = posToSpeed(+speedInput.value);
+                if (S.speed > 0) S.lastSpeed = S.speed;
+                savePrefs();
+            });
+
+            CyberUI.createCard('ui-container', 'Muster', '<div id="jq-design"></div><div id="jq-pat"></div>', 'rgb(121,158,49)');
+            CyberUI.createDropdown('jq-design', Object.keys(DESIGNS).map(id => ({ id, label: DESIGNS[id].label })),
+                id => {
+                    if (id === 'bild' && !imgGray) { document.getElementById('jq-img').click(); return; }
+                    S.design = id; savePrefs(); rebuildPattern(); reset();
+                }, S.design);
+            CyberUI.createSlider('jq-pat', 'SCHWELLE', -0.8, 0.8, S.threshold, 0.02, v => { S.threshold = v; savePrefs(); interacting(); rebuildPattern(); reset(); }, 'rgb(121,158,49)', v => v.toFixed(2));
+            document.getElementById('jq-pat').insertAdjacentHTML('beforeend',
+                '<div class="jq-file"><label for="jq-img">EIGENES BILD WEBEN</label>' +
+                '<input type="file" id="jq-img" accept="image/*" aria-label="Musterbild wählen"></div>');
+            document.getElementById('jq-img').addEventListener('change', e => {
+                if (e.target.files && e.target.files[0]) loadImageFile(e.target.files[0]);
+            });
+
+            CyberUI.createCard('ui-container', 'Ansicht', '<div id="jq-view"></div>', 'rgb(176,36,24)');
+            CyberUI.createCheckbox('jq-view', 'Lochkarte & Schnüre', S.showCards, v => { S.showCards = v; savePrefs(); }, 'rgb(176,36,24)');
+            CyberUI.createCheckbox('jq-view', 'Litzen', S.showHeddles, v => { S.showHeddles = v; savePrefs(); }, 'rgb(176,36,24)');
+            document.getElementById('jq-view').insertAdjacentHTML('beforeend',
+                '<div style="margin-top:10px"><label style="display:block;font-family:Orbitron,sans-serif;' +
+                'font-size:.62rem;letter-spacing:.07em;color:rgba(255,255,255,.7);margin-bottom:6px">STEUERUNG</label>' +
+                '<div id="jq-ctrl"></div></div>');
+            CyberUI.createDropdown('jq-ctrl', [
+                { id: 'cam', label: 'Camera-Controls' },
+                { id: 'orbit', label: 'Orbit' },
+                { id: 'trackball', label: 'Trackball (rollt)' },
+            ], id => { S.ctrl = id; savePrefs(); makeControls(id); }, S.ctrl);
+
+            document.getElementById('math-coach-box').classList.add('visible');
+            document.getElementById('coach-content').innerHTML =
+                'Die Karte drückt von oben auf eine Reihe <b>Nadeln</b> — eine je Kettfaden. ' +
+                'Wo ein <b>Loch</b> ist, rutscht die Nadel hindurch und ihr Haken bleibt stehen; ' +
+                'wo Papier ist, wird die Nadel nach unten gedrückt und ihr Haken sackt unter die Messerbahn weg. ' +
+                'Dann fährt das rote <b>Messer</b> hoch und nimmt nur die stehen gebliebenen Haken mit — ' +
+                'genau die Kettfäden gehen hoch. Das Schiffchen fliegt darunter durch. ' +
+                'Eine Karte = eine Zeile Bild. Ein Programm auf Papier, 1805.';
+        }
+
+        /** Running or not is simply "is the tempo above zero". One source of truth. */
+        function isRunning() { return S.speed > 0; }
+
+        function setRunning(v) {
+            if (v === isRunning()) return;
+            if (v) S.speed = S.lastSpeed || 1;
+            else { S.lastSpeed = S.speed; S.speed = 0; }
+            syncSpeedSlider();
+            savePrefs();
+        }
+
+        /** Move the thumb when something other than the drag changed the tempo. */
+        function syncSpeedSlider() {
+            if (speedInput) speedInput.value = speedToPos(S.speed);
+        }
+
+        // camera-controls ships no modifier support at all — the word "shiftKey" does
+        // not occur in it. OrbitControls maps ctrl/meta/shift + left drag to panning,
+        // so mirror that here. Capture phase on window runs before the library's own
+        // handler on the canvas, so the button mapping is already swapped when it reads it.
+        window.addEventListener('pointerdown', (e) => {
+            if (S.ctrl !== 'cam' || !controls || !controls.mouseButtons) return;
+            if (e.target !== renderer.domElement) return;
+            const A = THREE.CameraControls.ACTION;
+            controls.mouseButtons.left = (e.ctrlKey || e.metaKey || e.shiftKey) ? A.TRUCK : A.ROTATE;
+        }, true);
+
+        // Space = stop / go. Ignore it while typing, and let the browser keep its
+        // own shortcuts (Cmd/Ctrl combinations) untouched.
+        window.addEventListener('keydown', (e) => {
+            if (e.code !== 'Space' && e.key !== ' ') return;
+            if (e.metaKey || e.ctrlKey || e.altKey) return;
+            const t = e.target;
+            if (t && (t.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT', 'BUTTON'].includes(t.tagName))) return;
+            e.preventDefault();
+            setRunning(!isRunning());
+        });
+
+        // ---- main loop ----------------------------------------------------
+        let last = performance.now();
+        function animate() {
+            requestAnimationFrame(animate);
+            const now = performance.now();
+            const dt = Math.min(0.05, (now - last) / 1000);
+            last = now;
+
+            if (S.stepping || isRunning()) {
+                if (S.speed > 8 && !S.stepping) {
+                    // fast mode: no shed animation, just fill the cloth
+                    const rows = Math.max(1, Math.round((S.speed - 7) * 2));
+                    for (let k = 0; k < rows; k++) weaveRowInstant();
+                    for (let i = 0; i < S.n; i++) S.lift[i] = S.bits[i];
+                    S.sel = 1; S.shedT = 1;
+                } else {
+                    stepPhase(dt);
+                }
+            }
+            updateWarps();
+            placeShuttle();
+            updateReadout();
+            if (S.stepping || isRunning()) drawHudRowMarker();
+            controls.update(dt);
+            renderer.render(scene, camera);
+        }
+
+        let hudTick = 0;
+        function drawHudRowMarker() {
+            if (++hudTick % 6 === 0) drawMaps();
+        }
+
+        if (window.THREE) boot(); else window.addEventListener('three-ready', boot, { once: true });
+    </script>
+</body>
+
+</html>
