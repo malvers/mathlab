@@ -108,7 +108,7 @@ enum Sleep {
 final class AppDelegate: NSObject, NSApplicationDelegate {
 
     private let touchIDKey = "requireTouchID"
-    private var statusItem: NSStatusItem!
+    private var bar: DocBarClient!
     private var timer: Timer?
     private var busy = false
 
@@ -118,11 +118,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func applicationDidFinishLaunching(_ note: Notification) {
-        statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
-        if let button = statusItem.button {
-            button.target = self
-            button.action = #selector(clicked(_:))
-            button.sendAction(on: [.leftMouseUp, .rightMouseUp])
+        bar = DocBarClient(id: "de.docalvers.sleepswitch", name: "SleepSwitch",
+                           symbol: "moon.zzz.fill", rank: 0) { [weak self] item in
+            self?.handle(item)
         }
         refresh()
         // Pick up changes made elsewhere (Terminal, other tools).
@@ -131,29 +129,39 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
+    /// Publishes the current state into DocBar. The alert flag turns the DocBar icon
+    /// red, which is what the coloured cup in the menu bar used to say at a glance.
     private func refresh() {
-        guard !busy, let button = statusItem.button else { return }
+        guard !busy else { return }
         let disabled = Sleep.isDisabled
-        let name = disabled ? "cup.and.saucer.fill" : "moon.zzz.fill"
-        let label = disabled ? "running with closed screen ON" : "running with closed screen OFF"
-        let image = NSImage(systemSymbolName: name, accessibilityDescription: label)
-        if disabled {
-            // Red = the machine stays awake with the lid closed. Leaving template
-            // mode is what allows a colour in the menu bar at all.
-            let red = NSImage.SymbolConfiguration(hierarchicalColor: .systemRed)
-            button.image = image?.withSymbolConfiguration(red)
-            button.image?.isTemplate = false
+        var items: [DocBarItem] = []
+
+        if Sudo.passwordless {
+            if !Biometrics.available {
+                items.append(DocBarItem("touchid", "Touch ID not available"))
+            } else if requireTouchID && !Biometrics.biometryReady {
+                items.append(DocBarItem("touchid", "Confirm with Touch ID (sensor closed — password)", state: true))
+            } else {
+                items.append(DocBarItem("touchid", "Confirm with Touch ID", state: requireTouchID))
+            }
         } else {
-            button.image = image
-            button.image?.isTemplate = true
+            items.append(DocBarItem("sudoers", "Set up Touch ID / passwordless …"))
         }
-        button.toolTip = "SleepSwitch — \(label)"
+
+        // The row itself is the switch, and the pill says which way it stands —
+        // so the state is not spelled out a second time as an action.
+        bar.publish(status: "keeps running with the lid closed",
+                    items: items, primary: "toggle", alert: disabled, toggle: disabled)
     }
 
-    @objc private func clicked(_ sender: NSStatusBarButton) {
-        let isRight = NSApp.currentEvent?.type == .rightMouseUp
-            || NSApp.currentEvent?.modifierFlags.contains(.control) == true
-        if isRight { showMenu() } else { toggle() }
+    private func handle(_ item: String) {
+        switch item {
+        case "toggle": toggle()
+        case "touchid": toggleTouchID()
+        case "sudoers": installSudoers()
+        case "quit": NSApp.terminate(nil)
+        default: break
+        }
     }
 
     @objc private func toggle() {
@@ -187,59 +195,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         refresh()
     }
 
-    private func showMenu() {
-        let disabled = Sleep.isDisabled
-        let passwordless = Sudo.passwordless
-        let menu = NSMenu()
-
-        let state = NSMenuItem(title: disabled ? "Running with closed screen: ON" : "Running with closed screen: OFF",
-                               action: nil, keyEquivalent: "")
-        state.isEnabled = false
-        menu.addItem(state)
-        menu.addItem(.separator())
-
-        let toggleItem = NSMenuItem(title: disabled ? "Switch OFF" : "Switch ON",
-                                    action: #selector(toggle), keyEquivalent: "")
-        toggleItem.target = self
-        menu.addItem(toggleItem)
-
-        menu.addItem(.separator())
-
-        if passwordless {
-            let tid = NSMenuItem(title: "Confirm with Touch ID",
-                                 action: #selector(toggleTouchID), keyEquivalent: "")
-            tid.target = self
-            tid.state = requireTouchID ? .on : .off
-            if !Biometrics.available {
-                tid.isEnabled = false
-                tid.title = "Touch ID not available"
-            } else if requireTouchID && !Biometrics.biometryReady {
-                tid.title = "Confirm with Touch ID (sensor closed — password)"
-            }
-            menu.addItem(tid)
-
-            let info = NSMenuItem(title: "Passwordless: enabled", action: nil, keyEquivalent: "")
-            info.isEnabled = false
-            menu.addItem(info)
-        } else {
-            let sudoItem = NSMenuItem(title: "Set up Touch ID / passwordless…",
-                                      action: #selector(installSudoers), keyEquivalent: "")
-            sudoItem.target = self
-            menu.addItem(sudoItem)
-        }
-
-        let quit = NSMenuItem(title: "Quit", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
-        menu.addItem(.separator())
-        menu.addItem(quit)
-
-        statusItem.menu = menu
-        statusItem.button?.performClick(nil)
-        statusItem.menu = nil
-    }
-
     @objc private func toggleTouchID() {
+        guard Biometrics.available else { return }
         requireTouchID = !requireTouchID
+        refresh()
     }
+
+    func applicationWillTerminate(_ note: Notification) { bar.withdraw() }
 
     /// Installs a tightly scoped sudoers rule so the toggle stops asking for a password.
     @objc private func installSudoers() {
