@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DOC ALVERS MATHE-LABORE | Satz von Brahmagupta</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+    <link rel="icon" type="image/png" href="resources/favicon.png">
+    <link rel="stylesheet" href="js/cyber-layout.css">
+    <link rel="stylesheet" href="js/buttons-ultra.css">
+    <link rel="stylesheet" href="js/cyber-lab-overrides.css">
+    <link rel="stylesheet" href="js/branding.styles.extracted.css">
+    <link rel="stylesheet" href="js/lab-shell-minimal.css">
+    <style>
+        #canvas-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            box-sizing: border-box;
+            padding: clamp(8px, 2vmin, 24px);
+        }
+
+        /* Square stage, centred — never stretched to the cell. */
+        #lab-canvas {
+            flex: 0 1 auto;
+            width: min(100%, 88vmin);
+            max-width: 820px;
+            aspect-ratio: 1 / 1;
+            height: auto;
+            max-height: min(820px, calc(100vh - 48px));
+            filter: drop-shadow(0 0 50px rgba(0, 210, 255, 0.10));
+            user-select: none;
+            overflow: visible;
+            display: block;
+            position: relative;
+            z-index: 1;
+        }
+
+        #math-coach-box {
+            left: 24px;
+            bottom: 24px;
+            width: 340px;
+            z-index: 12;
+        }
+
+        #coach-content {
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.82rem;
+            line-height: 1.5;
+            color: rgba(255, 255, 255, 0.82);
+        }
+
+        #coach-content b {
+            color: #00d2ff;
+            font-weight: 600;
+        }
+
+        .vertex {
+            fill: rgba(0, 210, 255, 0.20);
+            stroke: var(--neon-blue);
+            stroke-width: 2;
+            cursor: grab;
+            transition: fill .2s, stroke-width .2s;
+        }
+
+        .vertex:hover {
+            fill: rgba(0, 210, 255, 0.55);
+            stroke-width: 3;
+        }
+
+        .vertex.dragging {
+            cursor: grabbing;
+            fill: var(--neon-blue);
+            filter: drop-shadow(0 0 10px var(--neon-blue));
+        }
+
+        .circum {
+            fill: none;
+            stroke: rgba(0, 210, 255, 0.28);
+            stroke-width: 1.5;
+            stroke-dasharray: 5 6;
+        }
+
+        .circum.faded {
+            stroke: rgba(0, 210, 255, 0.10);
+        }
+
+        .quad {
+            fill: rgba(0, 210, 255, 0.05);
+            stroke: var(--neon-blue);
+            stroke-width: 3;
+            stroke-linejoin: round;
+        }
+
+        .quad-side-hot {
+            stroke: rgb(245, 194, 66);
+            stroke-width: 5;
+            fill: none;
+            stroke-linecap: round;
+        }
+
+        .quad-side-opp {
+            stroke: rgb(121, 158, 49);
+            stroke-width: 5;
+            fill: none;
+            stroke-linecap: round;
+        }
+
+        .diagonal {
+            stroke: rgba(255, 255, 255, 0.55);
+            stroke-width: 2;
+            stroke-dasharray: 7 5;
+        }
+
+        .perp {
+            stroke: var(--neon-purple);
+            stroke-width: 2;
+        }
+
+        .perp.dim {
+            stroke: rgba(190, 120, 255, 0.45);
+            stroke-width: 1.5;
+        }
+
+        .right-angle {
+            fill: none;
+            stroke: rgba(255, 255, 255, 0.6);
+            stroke-width: 1.5;
+        }
+
+        .mid-dot {
+            fill: rgb(121, 158, 49);
+            stroke: #fff;
+            stroke-width: 2;
+        }
+
+        .foot-dot {
+            fill: rgb(245, 194, 66);
+            stroke: rgba(0, 0, 0, 0.6);
+            stroke-width: 1;
+        }
+
+        .p-dot {
+            fill: var(--neon-purple);
+            stroke: #fff;
+            stroke-width: 2;
+            filter: drop-shadow(0 0 12px var(--neon-purple));
+        }
+
+        .node-label {
+            font-family: 'Orbitron';
+            font-size: 17px;
+            font-weight: bold;
+            fill: #fff;
+            pointer-events: none;
+            user-select: none;
+            text-shadow: 0 0 5px #000, 0 0 10px #000;
+        }
+
+        .side-label {
+            font-family: 'Orbitron';
+            font-size: 13px;
+            fill: rgba(255, 255, 255, 0.75);
+            pointer-events: none;
+            user-select: none;
+            text-shadow: 0 0 6px #000;
+        }
+
+        #data-container .stats-grid {
+            grid-template-columns: 1fr 1fr !important;
+        }
+
+        /* Labels are authored in caps already; text-transform would turn α γ into Α Γ. */
+        #data-container .stats-label {
+            text-transform: none;
+        }
+
+        .measure-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-family: 'Orbitron';
+            font-size: 0.68rem;
+        }
+
+        .measure-table td {
+            padding: 4px 2px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .measure-table td:last-child {
+            text-align: right;
+            color: #00d2ff;
+        }
+
+        .formula-box {
+            padding: 6px 2px;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.9);
+            overflow-x: auto;
+        }
+
+        .formula-box .katex {
+            font-size: 0.86em;
+        }
+
+        .formula-box .katex-display {
+            margin: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <nav id="mini-rail">
+        <div class="nav-btn" onclick="toggleSidebar()" title="Menü umschalten">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </div>
+    </nav>
+
+    <aside id="side-panel">
+        <header id="sidebar-header"></header>
+        <div id="data-container"></div>
+        <div id="ui-container"></div>
+    </aside>
+
+    <main id="main-content">
+        <div id="canvas-container">
+            <div class="cyber-grid"></div>
+            <div id="math-coach-box">
+                <div class="coach-title"><span id="coach-title-slot"></span></div>
+                <div id="coach-content" class="coach-message"></div>
+            </div>
+            <svg id="lab-canvas" viewBox="0 0 600 600" preserveAspectRatio="xMidYMid meet">
+                <g id="layer-back"></g>
+                <g id="layer-main"></g>
+                <g id="layer-hud"></g>
+                <g id="layer-nodes"></g>
+            </svg>
+        </div>
+    </main>
+
+    <script src="js/cyber-left-chrome.js"></script>
+    <script src="js/branding/briefings.js"></script>
+    <script src="js/branding/overlays.js"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/branding/nav.js"></script>
+    <script src="js/branding.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/coach-box.js"></script>
+    <script>
+        function toggleSidebar() {
+            const panel = document.getElementById('side-panel');
+            panel.classList.toggle('collapsed');
+            if (window.CyberLeftChrome && typeof CyberLeftChrome.publishResolvedScale === 'function') {
+                CyberLeftChrome.publishResolvedScale();
+            }
+            setTimeout(() => {
+                window.dispatchEvent(new Event('resize'));
+                if (window.CyberLeftChrome && typeof CyberLeftChrome.publishResolvedScale === 'function') {
+                    CyberLeftChrome.publishResolvedScale();
+                }
+            }, 400);
+        }
+
+        window.addEventListener('load', () => {
+            const T = (k, fb) => (typeof CyberI18n !== 'undefined' && CyberI18n.getOr)
+                ? CyberI18n.getOr('brahma.' + k, fb)
+                : fb;
+
+            CyberBranding.init({
+                useExternalStyles: true,
+                title: CyberI18n.get('ui.coach_title'),
+                subtitle: T('title', 'SATZ VON BRAHMAGUPTA')
+            });
+            CyberUI.init();
+
+            if (window.CyberLeftChrome && typeof CyberLeftChrome.configure === 'function') {
+                CyberLeftChrome.configure({ viewportOnlyZoom: true });
+            }
+
+            /* ————— Stage constants ————— */
+            const CX = 300, CY = 300, R = 230;
+            const UNIT = 5 / R;          // circle radius counts as 5 length units
+            const GAP = 14;              // minimum arc between two vertices, in degrees
+            const NAMES = ['A', 'B', 'C', 'D'];
+            const SIDE_NAMES = ['AB', 'BC', 'CD', 'DA'];
+
+            /* ————— Math helpers ————— */
+            const rad = d => d * Math.PI / 180;
+            const deg = r => r * 180 / Math.PI;
+            const n360 = a => ((a % 360) + 360) % 360;
+            const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+            const ptAt = a => ({ x: CX + R * Math.cos(rad(a)), y: CY + R * Math.sin(rad(a)) });
+            const dist = (p, q) => Math.hypot(p.x - q.x, p.y - q.y);
+            const mid = (p, q) => ({ x: (p.x + q.x) / 2, y: (p.y + q.y) / 2 });
+
+            function lineIntersect(p1, p2, p3, p4) {
+                const d = (p1.x - p2.x) * (p3.y - p4.y) - (p1.y - p2.y) * (p3.x - p4.x);
+                if (Math.abs(d) < 1e-9) return null;
+                const A = p1.x * p2.y - p1.y * p2.x;
+                const B = p3.x * p4.y - p3.y * p4.x;
+                return {
+                    x: (A * (p3.x - p4.x) - (p1.x - p2.x) * B) / d,
+                    y: (A * (p3.y - p4.y) - (p1.y - p2.y) * B) / d
+                };
+            }
+
+            function footOfPerp(P, S1, S2) {
+                const dx = S2.x - S1.x, dy = S2.y - S1.y;
+                const l2 = dx * dx + dy * dy || 1;
+                const t = ((P.x - S1.x) * dx + (P.y - S1.y) * dy) / l2;
+                return { x: S1.x + t * dx, y: S1.y + t * dy };
+            }
+
+            function polygonArea(p) {
+                let s = 0;
+                for (let i = 0; i < p.length; i++) {
+                    const q = p[(i + 1) % p.length];
+                    s += p[i].x * q.y - q.x * p[i].y;
+                }
+                return Math.abs(s) / 2;
+            }
+
+            /* Interior angle at vertex v between the arms v->a and v->b, in degrees. */
+            function vertexAngle(a, v, b) {
+                const u1 = { x: a.x - v.x, y: a.y - v.y };
+                const u2 = { x: b.x - v.x, y: b.y - v.y };
+                const c = (u1.x * u2.x + u1.y * u2.y) / ((Math.hypot(u1.x, u1.y) || 1) * (Math.hypot(u2.x, u2.y) || 1));
+                return deg(Math.acos(clamp(c, -1, 1)));
+            }
+
+            function isConvex(p) {
+                let sign = 0;
+                for (let i = 0; i < 4; i++) {
+                    const a = p[i], b = p[(i + 1) % 4], c = p[(i + 2) % 4];
+                    const cr = (b.x - a.x) * (c.y - b.y) - (b.y - a.y) * (c.x - b.x);
+                    if (Math.abs(cr) < 1e-6) return false;
+                    const s = Math.sign(cr);
+                    if (sign === 0) sign = s;
+                    else if (s !== sign) return false;
+                }
+                return true;
+            }
+
+            /* ————— State ————— */
+            let mode = 'satz';           // satz | formel
+            let showAll = false;         // theorem: draw all four perpendiculars
+            let hotSide = 1;             // theorem: highlighted side index (0..3)
+            let onCircle = true;         // formula: keep the vertices on the circle
+
+            /* Theorem mode is parametrised so that AC is always perpendicular to BD.
+               With A at a0 and arcs u = arc(A,B), v = arc(A,C), the fourth vertex is
+               forced to D = a0 + v - u + 180 — that is exactly arc(A,B) + arc(C,D) = 180. */
+            const S = { a0: -125, u: 70, v: 160 };
+            const DEFAULT_S = { ...S };
+
+            /* Formula mode: four free angles on the circle (or four free points). */
+            let ang = [-125, -40, 45, 150];
+            const DEFAULT_ANG = [...ang];
+            let free = null;
+
+            function satzAngles() {
+                return [S.a0, S.a0 + S.u, S.a0 + S.v, S.a0 + S.v - S.u + 180];
+            }
+
+            function currentPoints() {
+                if (mode === 'satz') return satzAngles().map(ptAt);
+                if (!onCircle && free) return free.map(p => ({ ...p }));
+                return ang.map(ptAt);
+            }
+
+            /* ————— SVG plumbing ————— */
+            const svg = document.getElementById('lab-canvas');
+            const layers = {
+                back: document.getElementById('layer-back'),
+                main: document.getElementById('layer-main'),
+                hud: document.getElementById('layer-hud'),
+                nodes: document.getElementById('layer-nodes')
+            };
+
+            function el(tag, attrs, text) {
+                const e = document.createElementNS('http://www.w3.org/2000/svg', tag);
+                for (const k in attrs) e.setAttribute(k, attrs[k]);
+                if (text !== undefined) e.textContent = text;
+                return e;
+            }
+
+            function line(parent, p, q, cls, style) {
+                const a = { x1: p.x, y1: p.y, x2: q.x, y2: q.y, class: cls };
+                if (style) a.style = style;
+                parent.appendChild(el('line', a));
+            }
+
+            /* ————— Drawing ————— */
+            function draw() {
+                layers.back.innerHTML = '';
+                layers.main.innerHTML = '';
+                layers.hud.innerHTML = '';
+                layers.nodes.innerHTML = '';
+
+                const P4 = currentPoints();
+                const [A, B, C, D] = P4;
+
+                /* Circumcircle */
+                layers.back.appendChild(el('circle', {
+                    cx: CX, cy: CY, r: R,
+                    class: 'circum' + ((mode === 'formel' && !onCircle) ? ' faded' : '')
+                }));
+
+                /* Quadrilateral */
+                layers.main.appendChild(el('polygon', {
+                    points: P4.map(p => p.x + ',' + p.y).join(' '),
+                    class: 'quad'
+                }));
+
+                /* Diagonals */
+                line(layers.main, A, C, 'diagonal');
+                line(layers.main, B, D, 'diagonal');
+
+                const Pi = lineIntersect(A, C, B, D);
+
+                if (mode === 'satz' && Pi) drawTheorem(P4, Pi);
+                if (mode === 'formel') drawFormula(P4);
+
+                /* Vertex handles + labels */
+                const cen = { x: (A.x + B.x + C.x + D.x) / 4, y: (A.y + B.y + C.y + D.y) / 4 };
+                P4.forEach((p, i) => {
+                    const node = el('circle', { cx: p.x, cy: p.y, r: 8, class: 'vertex', 'data-idx': i });
+                    layers.nodes.appendChild(node);
+                    const ref = (mode === 'formel' && !onCircle) ? cen : { x: CX, y: CY };
+                    const dx = p.x - ref.x, dy = p.y - ref.y;
+                    const l = Math.hypot(dx, dy) || 1;
+                    layers.hud.appendChild(el('text', {
+                        x: p.x + dx / l * 28, y: p.y + dy / l * 28 + 6,
+                        class: 'node-label', 'text-anchor': 'middle'
+                    }, NAMES[i]));
+                });
+
+                updateReadout(P4, Pi);
+            }
+
+            function drawTheorem(P4, Pi) {
+                const sides = showAll ? [0, 1, 2, 3] : [hotSide];
+
+                /* Highlight the chosen side and its opposite */
+                if (!showAll) {
+                    const s1 = P4[hotSide], s2 = P4[(hotSide + 1) % 4];
+                    const o1 = P4[(hotSide + 2) % 4], o2 = P4[(hotSide + 3) % 4];
+                    layers.main.appendChild(el('line', { x1: s1.x, y1: s1.y, x2: s2.x, y2: s2.y, class: 'quad-side-hot' }));
+                    layers.main.appendChild(el('line', { x1: o1.x, y1: o1.y, x2: o2.x, y2: o2.y, class: 'quad-side-opp' }));
+                }
+
+                sides.forEach(i => {
+                    const s1 = P4[i], s2 = P4[(i + 1) % 4];
+                    const o1 = P4[(i + 2) % 4], o2 = P4[(i + 3) % 4];
+                    const E = footOfPerp(Pi, s1, s2);
+                    const M = lineIntersect(Pi, E, o1, o2);
+                    if (!M) return;
+                    const dim = (showAll && i !== hotSide) ? ' dim' : '';
+                    line(layers.main, E, M, 'perp' + dim);
+                    layers.hud.appendChild(el('circle', { cx: E.x, cy: E.y, r: 4, class: 'foot-dot' }));
+                    layers.hud.appendChild(el('circle', { cx: M.x, cy: M.y, r: 6, class: 'mid-dot' }));
+                    if (!showAll) {
+                        layers.hud.appendChild(el('text', {
+                            x: M.x, y: M.y - 14, class: 'side-label', 'text-anchor': 'middle',
+                            style: 'fill: rgb(121,158,49);'
+                        }, 'M'));
+                    }
+                });
+
+                /* Right-angle marker at the diagonal crossing */
+                const u = { x: P4[2].x - P4[0].x, y: P4[2].y - P4[0].y };
+                const w = { x: P4[3].x - P4[1].x, y: P4[3].y - P4[1].y };
+                const lu = Math.hypot(u.x, u.y) || 1, lw = Math.hypot(w.x, w.y) || 1;
+                const k = 16;
+                const q1 = { x: Pi.x + u.x / lu * k, y: Pi.y + u.y / lu * k };
+                const q2 = { x: Pi.x + w.x / lw * k, y: Pi.y + w.y / lw * k };
+                const q3 = { x: q1.x + w.x / lw * k, y: q1.y + w.y / lw * k };
+                layers.hud.appendChild(el('polyline', {
+                    points: q1.x + ',' + q1.y + ' ' + q3.x + ',' + q3.y + ' ' + q2.x + ',' + q2.y,
+                    class: 'right-angle'
+                }));
+
+                layers.hud.appendChild(el('circle', { cx: Pi.x, cy: Pi.y, r: 6, class: 'p-dot' }));
+                layers.hud.appendChild(el('text', {
+                    x: Pi.x + 16, y: Pi.y - 12, class: 'node-label',
+                    style: 'fill: var(--neon-purple);'
+                }, 'P'));
+            }
+
+            function drawFormula(P4) {
+                const letters = ['a', 'b', 'c', 'd'];
+                const ref = onCircle
+                    ? { x: CX, y: CY }
+                    : { x: (P4[0].x + P4[1].x + P4[2].x + P4[3].x) / 4, y: (P4[0].y + P4[1].y + P4[2].y + P4[3].y) / 4 };
+                for (let i = 0; i < 4; i++) {
+                    const p = P4[i], q = P4[(i + 1) % 4];
+                    const m = mid(p, q);
+                    const dx = m.x - ref.x, dy = m.y - ref.y;
+                    const l = Math.hypot(dx, dy) || 1;
+                    layers.hud.appendChild(el('text', {
+                        x: m.x + dx / l * 18, y: m.y + dy / l * 18 + 5,
+                        class: 'side-label', 'text-anchor': 'middle'
+                    }, letters[i]));
+                }
+            }
+
+            /* ————— Numbers ————— */
+            function measures(P4) {
+                const s = [0, 1, 2, 3].map(i => dist(P4[i], P4[(i + 1) % 4]) * UNIT);
+                const per = s.reduce((x, y) => x + y, 0);
+                const half = per / 2;
+                const prod = s.reduce((x, y) => x * (half - y), 1);
+                const brahma = Math.sqrt(Math.max(0, prod));
+                const alpha = vertexAngle(P4[3], P4[0], P4[1]);
+                const gamma = vertexAngle(P4[1], P4[2], P4[3]);
+                const corr = s[0] * s[1] * s[2] * s[3] * Math.pow(Math.cos(rad((alpha + gamma) / 2)), 2);
+                const bret = Math.sqrt(Math.max(0, prod - corr));
+                return { s, per, half, brahma, bret, alpha, gamma, real: polygonArea(P4) * UNIT * UNIT };
+            }
+
+            function setStatLabel(i, text) {
+                const el = document.querySelector('#stats-card-data-container-' + i + ' .stats-label');
+                if (el) el.textContent = text;
+            }
+
+            function updateReadout(P4, Pi) {
+                const f2 = x => x.toFixed(2);
+                const f3 = x => x.toFixed(3);
+
+                if (mode === 'satz') {
+                    if (!Pi) return;
+                    const n1 = NAMES[(hotSide + 2) % 4], n2 = NAMES[(hotSide + 3) % 4];
+                    setStatLabel(2, '|M' + n1 + '|');
+                    setStatLabel(4, '|M' + n2 + '|');
+                    setStatLabel(5, '|' + n1 + n2 + '|');
+                    const o1 = P4[(hotSide + 2) % 4], o2 = P4[(hotSide + 3) % 4];
+                    const E = footOfPerp(Pi, P4[hotSide], P4[(hotSide + 1) % 4]);
+                    const M = lineIntersect(Pi, E, o1, o2) || mid(o1, o2);
+                    const target = mid(o1, o2);
+                    const dAC = { x: P4[2].x - P4[0].x, y: P4[2].y - P4[0].y };
+                    const dBD = { x: P4[3].x - P4[1].x, y: P4[3].y - P4[1].y };
+                    const cosang = (dAC.x * dBD.x + dAC.y * dBD.y) /
+                        ((Math.hypot(dAC.x, dAC.y) || 1) * (Math.hypot(dBD.x, dBD.y) || 1));
+                    const diagAngle = deg(Math.acos(clamp(Math.abs(cosang), -1, 1)));
+
+                    CyberUI.updateStatsGrid('data-container', [
+                        { value: (90 - diagAngle).toFixed(1) + '°' },
+                        { value: f3(dist(M, target) * UNIT) },
+                        { value: f2(dist(M, o1) * UNIT) },
+                        { value: f2(dist(M, Pi) * UNIT) },
+                        { value: f2(dist(M, o2) * UNIT) },
+                        { value: f2(dist(o1, o2) * UNIT) }
+                    ]);
+
+                    const rows = document.getElementById('measure-rows');
+                    if (rows) {
+                        const a = satzAngles();
+                        const arc = i => n360(a[(i + 1) % 4] - a[i]).toFixed(1) + '°';
+                        rows.innerHTML =
+                            '<tr><td>' + T('arc', 'Bogen') + ' AB</td><td>' + arc(0) + '</td></tr>' +
+                            '<tr><td>' + T('arc', 'Bogen') + ' CD</td><td>' + arc(2) + '</td></tr>' +
+                            '<tr><td>' + T('arc_sum', 'Summe') + '</td><td>' +
+                            (n360(a[1] - a[0]) + n360(a[3] - a[2])).toFixed(1) + '°</td></tr>';
+                    }
+                    return;
+                }
+
+                const m = measures(P4);
+                const gap = m.brahma - m.real;
+                CyberUI.updateStatsGrid('data-container', [
+                    { value: f3(m.brahma) },
+                    { value: f3(m.real) },
+                    {
+                        value: Math.abs(gap) < 5e-4 ? '0.000' : (gap > 0 ? '+' : '') + f3(gap),
+                        color: Math.abs(gap) < 0.005 ? 'rgb(121,158,49)' : 'rgb(176,36,24)'
+                    },
+                    { value: f3(m.bret) },
+                    { value: (m.alpha + m.gamma).toFixed(1) + '°' },
+                    { value: f2(m.half) }
+                ]);
+
+                const rows = document.getElementById('measure-rows');
+                if (rows) {
+                    rows.innerHTML = ['a = AB', 'b = BC', 'c = CD', 'd = DA']
+                        .map((lbl, i) => '<tr><td>' + lbl + '</td><td>' + f2(m.s[i]) + '</td></tr>').join('') +
+                        '<tr><td>' + T('perimeter', 'Umfang') + '</td><td>' + f2(m.per) + '</td></tr>';
+                }
+            }
+
+            /* ————— Dragging ————— */
+            let dragIdx = null;
+
+            function svgPoint(e) {
+                const pt = svg.createSVGPoint();
+                const src = (e.touches && e.touches.length) ? e.touches[0] : e;
+                pt.x = src.clientX;
+                pt.y = src.clientY;
+                return pt.matrixTransform(svg.getScreenCTM().inverse());
+            }
+
+            function applyDrag(idx, p) {
+                if (mode === 'formel' && !onCircle) {
+                    const cand = free.map(q => ({ ...q }));
+                    cand[idx] = { x: clamp(p.x, 30, 570), y: clamp(p.y, 30, 570) };
+                    if (!isConvex(cand)) return;
+                    free = cand;
+                    return;
+                }
+
+                const theta = deg(Math.atan2(p.y - CY, p.x - CX));
+
+                if (mode === 'formel') {
+                    const lo = ang[(idx + 3) % 4];
+                    const span = n360(ang[(idx + 1) % 4] - lo);
+                    let t = n360(theta - lo);
+                    t = clamp(t, GAP, Math.max(GAP, span - GAP));
+                    ang[idx] = n360(lo + t);
+                    return;
+                }
+
+                /* Theorem mode: keep the diagonals perpendicular. */
+                if (idx === 0) {                       // A rotates the whole figure
+                    S.a0 = theta;
+                } else if (idx === 1) {                // B moves the arc u
+                    let u = n360(theta - S.a0);
+                    const lo = Math.max(GAP, S.v - 180 + GAP);
+                    const hi = Math.min(180 - GAP, S.v - GAP);
+                    S.u = clamp(u, lo, Math.max(lo, hi));
+                } else if (idx === 2) {                // C moves the arc v
+                    S.v = clamp(n360(theta - S.a0), S.u + GAP, S.u + 180 - GAP);
+                } else {                               // D is bound to A, B, C
+                    S.v = clamp(n360(theta - S.a0 + S.u - 180), S.u + GAP, S.u + 180 - GAP);
+                }
+            }
+
+            svg.addEventListener('mousedown', e => {
+                const t = e.target;
+                if (!t.classList || !t.classList.contains('vertex')) return;
+                dragIdx = parseInt(t.getAttribute('data-idx'), 10);
+                t.classList.add('dragging');
+                e.preventDefault();
+            });
+            svg.addEventListener('touchstart', e => {
+                const t = e.target;
+                if (!t.classList || !t.classList.contains('vertex')) return;
+                dragIdx = parseInt(t.getAttribute('data-idx'), 10);
+                t.classList.add('dragging');
+                e.preventDefault();
+            }, { passive: false });
+
+            function onMove(e) {
+                if (dragIdx === null) return;
+                applyDrag(dragIdx, svgPoint(e));
+                draw();
+                const node = layers.nodes.querySelector('[data-idx="' + dragIdx + '"]');
+                if (node) node.classList.add('dragging');
+                e.preventDefault();
+            }
+
+            window.addEventListener('mousemove', onMove);
+            window.addEventListener('touchmove', onMove, { passive: false });
+            window.addEventListener('mouseup', () => { dragIdx = null; draw(); });
+            window.addEventListener('touchend', () => { dragIdx = null; draw(); });
+
+            /* ————— Sidebar ————— */
+            function statsForMode() {
+                if (mode === 'satz') {
+                    return [
+                        { label: T('stat_perp', 'ABWEICHUNG VON 90°'), value: '0.0°', color: 'rgb(121,158,49)' },
+                        { label: T('stat_dev', 'M ↔ MITTE'), value: '0.000', color: 'rgb(121,158,49)' },
+                        { label: '|M–|', value: '0.00', color: 'var(--neon-blue)' },
+                        { label: '|MP|', value: '0.00', color: 'var(--neon-purple)' },
+                        { label: '|M–|', value: '0.00', color: 'var(--neon-blue)' },
+                        { label: T('stat_opp', 'GEGENSEITE'), value: '0.00', color: 'rgb(121,158,49)' }
+                    ];
+                }
+                return [
+                    { label: T('stat_k', 'K (BRAHMAGUPTA)'), value: '0.000', color: 'rgb(245,194,66)' },
+                    { label: T('stat_area', 'FLÄCHE (GAUSS)'), value: '0.000', color: 'var(--neon-blue)' },
+                    { label: T('stat_diff', 'DIFFERENZ'), value: '0.000', color: 'rgb(121,158,49)' },
+                    { label: T('stat_bret', 'BRETSCHNEIDER'), value: '0.000', color: 'var(--neon-purple)' },
+                    { label: T('stat_angles', 'α + γ'), value: '180.0°', color: 'var(--neon-blue)' },
+                    { label: 's', value: '0.00', color: 'rgba(255,255,255,0.8)' }
+                ];
+            }
+
+            function renderFormula() {
+                const box = document.getElementById('formula-slot');
+                if (!box || typeof katex === 'undefined') return;
+                const s1 = NAMES[hotSide] + NAMES[(hotSide + 1) % 4];
+                const m1 = NAMES[(hotSide + 2) % 4], m2 = NAMES[(hotSide + 3) % 4];
+                const tex = (mode === 'satz')
+                    ? '\\begin{aligned} AC &\\perp BD \\\\ \\Longrightarrow\\; PM &\\perp ' + s1 +
+                      ' \\\\ |M' + m1 + '| &= |MP| = |M' + m2 + '| \\end{aligned}'
+                    : '\\begin{aligned} K &= \\sqrt{(s-a)(s-b)(s-c)(s-d)} \\\\ s &= \\tfrac{a+b+c+d}{2} \\end{aligned}';
+                try { katex.render(tex, box, { throwOnError: false, displayMode: true }); } catch (err) { box.textContent = tex; }
+            }
+
+            function renderCoach() {
+                const title = document.getElementById('coach-title-slot');
+                const body = document.getElementById('coach-content');
+                if (title) {
+                    title.textContent = (mode === 'satz')
+                        ? T('coach_title_satz', 'SATZ VON BRAHMAGUPTA')
+                        : T('coach_title_formel', 'FORMEL VON BRAHMAGUPTA');
+                }
+                if (body) {
+                    body.innerHTML = (mode === 'satz')
+                        ? T('coach_satz', 'Stehen die Diagonalen eines Sehnenvierecks <b>senkrecht</b> aufeinander, so trifft das Lot vom Diagonalenschnittpunkt <b>P</b> auf eine Seite die Gegenseite genau in ihrer <b>Mitte</b>. Grund: ∠APD ist rechtwinklig, also ist M der Umkreismittelpunkt von ΔAPD — daher |MA| = |MP| = |MD|.')
+                        : T('coach_formel', 'Für ein <b>Sehnenviereck</b> mit den Seiten a, b, c, d gilt K = √((s−a)(s−b)(s−c)(s−d)). Schaltest Du den Kreis ab, ist das Viereck nicht mehr sehnentreu — K wird dann <b>zu groß</b>, und erst Bretschneider trifft die Fläche wieder.');
+                }
+                const boxEl = document.getElementById('math-coach-box');
+                if (boxEl) boxEl.classList.add('visible');
+            }
+
+            function buildSidebar() {
+                document.getElementById('data-container').innerHTML = '';
+                document.getElementById('ui-container').innerHTML = '';
+
+                CyberUI.createStatsGrid('data-container', statsForMode());
+
+                CyberUI.createCard('ui-container', T('mode', 'MODUS'),
+                    '<div id="mode-slot"></div>', 'var(--neon-blue)');
+                CyberUI.createRadioGroup('mode-slot', null, [
+                    { label: T('mode_satz', 'SATZ (LOT & MITTE)'), value: 'satz' },
+                    { label: T('mode_formel', 'FORMEL (FLÄCHE)'), value: 'formel' }
+                ], mode, val => { mode = val; buildSidebar(); draw(); });
+
+                if (mode === 'satz') {
+                    CyberUI.createCard('ui-container', T('options', 'KONSTRUKTION'),
+                        '<div id="opt-slot"></div>', 'rgb(245,194,66)');
+                    CyberUI.createDropdown('opt-slot',
+                        SIDE_NAMES.map((s, i) => ({
+                            id: String(i),
+                            label: T('side', 'SEITE') + ' ' + s + ' → ' + SIDE_NAMES[(i + 2) % 4]
+                        })),
+                        id => { hotSide = parseInt(id, 10); renderFormula(); draw(); },
+                        String(hotSide));
+                    CyberUI.createCheckbox('opt-slot', T('all_sides', 'ALLE VIER LOTE'), showAll,
+                        v => { showAll = v; draw(); }, 'rgb(245,194,66)');
+                } else {
+                    CyberUI.createCard('ui-container', T('options', 'KONSTRUKTION'),
+                        '<div id="opt-slot"></div>', 'rgb(245,194,66)');
+                    CyberUI.createCheckbox('opt-slot', T('on_circle', 'ECKEN AUF DEM KREIS'), onCircle, v => {
+                        onCircle = v;
+                        if (!v) free = ang.map(ptAt);
+                        draw();
+                    }, 'rgb(245,194,66)');
+                }
+
+                CyberUI.createCard('ui-container', T('measures', 'MESSWERTE'),
+                    '<table class="measure-table"><tbody id="measure-rows"></tbody></table>', 'var(--neon-purple)');
+
+                CyberUI.createCard('ui-container', null,
+                    '<div class="formula-box" id="formula-slot"></div>', 'var(--neon-blue)');
+
+                CyberUI.createCard('ui-container', null,
+                    '<button class="cyber-btn" style="width:100%" id="reset-btn">' +
+                    T('reset', 'LABOR RESET') + '</button>', 'var(--neon-blue)');
+                document.getElementById('reset-btn').onclick = () => {
+                    Object.assign(S, DEFAULT_S);
+                    ang = [...DEFAULT_ANG];
+                    free = null;
+                    onCircle = true;
+                    showAll = false;
+                    hotSide = 1;
+                    buildSidebar();
+                    draw();
+                };
+
+                renderFormula();
+                renderCoach();
+            }
+
+            buildSidebar();
+            draw();
+            if (document.fonts && document.fonts.ready) document.fonts.ready.then(draw);
+            setTimeout(renderFormula, 600);
+        });
+    </script>
+</body>
+
+</html>
