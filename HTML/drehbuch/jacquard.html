@@ -1,0 +1,1212 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+
+<style>
+/* minimal reset - the artifact host used to provide this */
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; min-height: 100vh; }
+img, canvas, svg { display: block; max-width: 100%; }
+button, input { font: inherit; }
+:focus-visible { outline: 2px solid #00d2ff; outline-offset: 2px; }
+</style>
+<title>Ein Loch, ein Faden</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&family=Outfit:wght@200;300;400;600&display=swap">
+
+<style>
+/* Palette and faces are the lab's own (kovarianz.html): Orbitron + Outfit,
+   deep blue ground. The three colours that carry meaning in the loom:
+   cream = the warp thread and the paper of the drawing, ink blue = the weft,
+   manila = the punched card. Single-theme on purpose - this is the lab's world. */
+:root {
+    --ground:      #081428;
+    --ground-deep: #050e1c;
+    --surface:     #0c1c3a;
+    --surface-2:   #0e244e;
+    --line:        #1c3565;
+    --line-soft:   #16294d;
+
+    --ink:         #e6eefa;
+    --ink-dim:     #b3c5de;
+    --ink-faint:   #8ba1c0;
+
+    --cyan:        #00d2ff;
+    --lambda:      #f5c242;
+    --phi:         #799e31;
+    --violet:      #c07fe8;
+    --red:         #b02418;
+
+    --warp:        #f2ead8;   /* cream: warp thread, paper */
+    --weft:        #1c3fa8;   /* ink blue: weft thread */
+    --card:        #c6a674;   /* manila: the punched card */
+
+    --step: clamp(0.9rem, 0.55rem + 1.1vw, 1.5rem);
+}
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    background: var(--ground);
+    background-image:
+        radial-gradient(1100px 620px at 12% -8%, #0f2a55 0%, transparent 62%),
+        radial-gradient(900px 520px at 92% 4%, #10203f 0%, transparent 58%);
+    background-attachment: fixed;
+    color: var(--ink);
+    font-family: 'Outfit', system-ui, sans-serif;
+    font-weight: 300;
+    font-size: 1.1rem;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+}
+
+.wrap {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: clamp(1.6rem, 4vw, 4rem) clamp(1.1rem, 4vw, 2.6rem) 6rem;
+}
+
+/* ---------- shared type ---------- */
+.eyebrow {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+}
+
+h1, h2, h3 { font-family: 'Orbitron', sans-serif; text-wrap: balance; margin: 0; }
+
+h1 {
+    font-size: clamp(2rem, 1.2rem + 3.4vw, 3.4rem);
+    font-weight: 700;
+    line-height: 1.08;
+    letter-spacing: -0.01em;
+    margin: 0.5rem 0 0;
+}
+
+h2 {
+    font-size: clamp(1.05rem, 0.9rem + 0.6vw, 1.32rem);
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    color: var(--ink);
+}
+
+p { margin: 0; }
+
+em { font-style: italic; color: #eaf2fd; }
+strong { font-weight: 600; color: #f2f7ff; }
+
+/* mathematical symbols, set apart without a formula engine */
+.m {
+    font-family: 'Outfit', system-ui, sans-serif;
+    font-style: italic;
+    font-weight: 400;
+    color: var(--cyan);
+    white-space: nowrap;
+}
+.m.l { color: var(--lambda); }
+.m.g { color: var(--phi); }
+
+/* ---------- header ---------- */
+header { margin-bottom: clamp(1.8rem, 4vw, 3rem); }
+
+.status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.74rem;
+    font-weight: 500;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--lambda);
+    border: 1px solid #4a3a15;
+    background: #1b1607;
+    border-radius: 2px;
+    padding: 0.34rem 0.7rem;
+    margin-top: 1.1rem;
+}
+.status::before {
+    content: "";
+    width: 5px; height: 5px;
+    background: var(--lambda);
+    border-radius: 50%;
+}
+
+.lede {
+    margin-top: 1.1rem;
+    max-width: 60ch;
+    color: var(--ink-dim);
+    font-size: 1.18rem;
+}
+
+.meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 2rem;
+    margin-top: 1.6rem;
+    padding-top: 1.2rem;
+    border-top: 1px solid var(--line-soft);
+}
+.meta div { display: flex; flex-direction: column; gap: 0.15rem; padding: 0.4rem 0; }
+.meta dt {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.74rem;
+    font-weight: 500;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+}
+.meta dd { margin: 0; font-size: 1.02rem; color: var(--ink); }
+.meta a { color: var(--cyan); text-decoration: none; border-bottom: 1px solid #05506b; }
+.meta a:hover, .meta a:focus-visible { border-bottom-color: var(--cyan); }
+
+/* ---------- hero canvas + thesis ---------- */
+.thesis {
+    display: grid;
+    grid-template-columns: minmax(0, 300px) minmax(0, 1fr);
+    gap: clamp(1.2rem, 3vw, 2.6rem);
+    align-items: center;
+    margin: clamp(1.6rem, 4vw, 2.6rem) 0 clamp(2.4rem, 6vw, 4rem);
+    padding: clamp(1.2rem, 3vw, 2rem);
+    background: linear-gradient(160deg, var(--surface) 0%, var(--ground-deep) 100%);
+    border: 1px solid var(--line);
+    border-radius: 3px;
+}
+@media (max-width: 700px) { .thesis { grid-template-columns: 1fr; } }
+
+#stage {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    display: block;
+    border-radius: 2px;
+    background: #04101f;
+}
+
+.thesis blockquote {
+    margin: 0;
+    font-size: clamp(1.15rem, 0.95rem + 1vw, 1.6rem);
+    line-height: 1.42;
+    font-weight: 200;
+    color: #eef4fd;
+    text-wrap: balance;
+}
+.thesis blockquote strong { font-weight: 600; }
+.thesis .after {
+    margin-top: 1.1rem;
+    color: var(--ink-dim);
+    font-size: 1.06rem;
+    max-width: 54ch;
+}
+
+/* ---------- section frame ---------- */
+section { margin-top: clamp(2.6rem, 6vw, 4.4rem); }
+
+.head {
+    display: flex;
+    align-items: baseline;
+    gap: 0.9rem;
+    padding-bottom: 0.7rem;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 1.5rem;
+}
+.head .n {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.84rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: var(--cyan);
+}
+.head .note { margin-left: auto; font-size: 0.9rem; color: var(--ink-faint); }
+
+.prose { max-width: 66ch; color: var(--ink-dim); display: grid; gap: 0.85rem; }
+.prose strong { color: #eaf2fd; }
+
+/* ---------- the arc ---------- */
+.arc {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    align-items: stretch;
+    margin-bottom: 1.5rem;
+}
+.arc span {
+    flex: 1 1 auto;
+    min-width: 92px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.76rem;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    text-align: center;
+    padding: 0.85rem 0.5rem;
+    background: var(--surface);
+    border: 1px solid var(--line-soft);
+    border-top: 2px solid var(--stop, var(--line));
+    color: var(--ink-dim);
+    text-wrap: balance;
+    line-height: 1.4;
+}
+.arc span.key { color: #eef4fd; background: var(--surface-2); }
+
+/* ---------- timeline ---------- */
+.timeline {
+    display: flex;
+    width: 100%;
+    height: 54px;
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-bottom: 0.7rem;
+}
+.timeline i {
+    position: relative;
+    display: block;
+    border-right: 1px solid var(--ground-deep);
+    background: var(--lambda);
+    font-style: normal;
+    transition: background 0.15s;
+}
+.timeline i:last-child { border-right: 0; }
+.timeline i.core { background: var(--phi); }
+.timeline i.cut  { background: var(--red); }
+.timeline i::after {
+    content: attr(data-n);
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.74rem;
+    font-weight: 700;
+    color: #1a1305;
+}
+.timeline i.core::after { color: #0d1a06; }
+.timeline i.cut::after  { color: #ffdcd7; font-weight: 700; }
+
+.legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.4rem;
+    font-size: 0.87rem;
+    color: var(--ink-faint);
+}
+.legend b { font-weight: 400; color: var(--ink-dim); }
+.legend span { display: inline-flex; align-items: center; gap: 0.42rem; }
+.legend s { width: 11px; height: 11px; border-radius: 2px; text-decoration: none; display: inline-block; }
+
+/* ---------- scenes ---------- */
+.scenes { display: grid; gap: 0.7rem; }
+
+.scene {
+    display: grid;
+    grid-template-columns: 3.6rem minmax(0, 1fr);
+    gap: 0 1.1rem;
+    padding: 1.4rem 1.55rem 1.5rem;
+    background: var(--surface);
+    border: 1px solid var(--line-soft);
+    border-left: 2px solid var(--lambda);
+    border-radius: 2px;
+}
+.scene.core { border-left-color: var(--phi); background: linear-gradient(90deg, #16240f 0%, var(--surface) 34%); }
+.scene.cut  { border-left-color: var(--red); }
+
+.scene .idx {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--lambda);
+    font-variant-numeric: tabular-nums;
+    padding-top: 0.1rem;
+}
+.scene.core .idx { color: var(--phi); }
+.scene.cut .idx  { color: #c9503f; }
+
+.scene .top {
+    display: flex;
+    align-items: baseline;
+    gap: 0.8rem;
+    flex-wrap: wrap;
+    margin-bottom: 0.7rem;
+}
+.scene h3 { font-size: 1.16rem; font-weight: 700; letter-spacing: 0.01em; color: #f0f6ff; }
+
+.tag {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.68rem;
+    font-weight: 500;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    padding: 0.2rem 0.45rem;
+    border-radius: 2px;
+    border: 1px solid;
+}
+.tag.core { color: #0d1a06; border-color: var(--phi); background: var(--phi); }
+.tag.cut  { color: #ffdcd7; border-color: var(--red); background: var(--red); }
+
+.secs {
+    margin-left: auto;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: var(--ink-faint);
+    font-variant-numeric: tabular-nums;
+}
+
+.body {
+    display: grid;
+    grid-template-columns: minmax(0, 1.08fr) minmax(0, 1fr);
+    gap: 0.6rem 1.6rem;
+}
+@media (max-width: 720px) { .body { grid-template-columns: 1fr; gap: 1rem; } }
+
+.body > div { display: grid; gap: 0.34rem; align-content: start; }
+.body h4 {
+    margin: 0;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.84rem;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+}
+.body p { font-size: 1.06rem; line-height: 1.66; color: var(--ink-dim); }
+.body .aha { border-left: 1px solid var(--line); padding-left: 1.6rem; }
+@media (max-width: 720px) { .body .aha { border-left: 0; padding-left: 0; border-top: 1px solid var(--line); padding-top: 0.9rem; } }
+.body .aha p { color: var(--ink); }
+
+/* what Solita actually says - generated from narration.mjs, never hand-edited */
+.say {
+    margin-top: 1.1rem;
+    padding: 0.95rem 1.2rem;
+    background: #0a1830;
+    border: 1px solid var(--line-soft);
+    border-left: 2px solid var(--cyan);
+    border-radius: 2px;
+}
+.say h4 {
+    margin: 0 0 0.45rem;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.64rem;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--cyan);
+}
+.say p {
+    margin: 0;
+    font-size: 1.06rem;
+    line-height: 1.62;
+    color: var(--ink);
+}
+.say .pause {
+    display: inline-block;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.66rem;
+    font-weight: 500;
+    color: var(--lambda);
+    background: #241c07;
+    border: 1px solid #4a3a15;
+    border-radius: 2px;
+    padding: 0.05rem 0.4rem;
+    margin: 0 0.22rem;
+    vertical-align: 0.08em;
+    white-space: nowrap;
+}
+.say .beat {
+    display: inline-block;
+    width: 0.5em;
+    height: 0.5em;
+    margin: 0 0.1em;
+    background: radial-gradient(circle, var(--cyan) 1.6px, transparent 1.8px);
+    vertical-align: 0.05em;
+    opacity: 0.55;
+}
+.say .spell {
+    border-bottom: 1px dotted var(--ink-faint);
+    letter-spacing: 0.12em;
+}
+
+/* ---------- rules / lists ---------- */
+.rules { display: grid; gap: 0.6rem; counter-reset: r; max-width: 74ch; }
+/* the number is positioned, not a grid cell - as a grid item the bare text
+   after the bold lead-in became its own item and fell into the 1.8rem column */
+.rules li {
+    list-style: none;
+    position: relative;
+    padding-left: 2.8rem;
+    font-size: 1.05rem;
+    color: var(--ink-dim);
+}
+.rules li::before {
+    counter-increment: r;
+    content: counter(r, decimal-leading-zero);
+    position: absolute;
+    left: 0;
+    top: 0.28rem;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.84rem;
+    font-weight: 500;
+    color: var(--violet);
+}
+.rules { padding: 0; margin: 0; }
+
+.notes { display: grid; gap: 0.75rem; max-width: 74ch; padding: 0; margin: 0; }
+.notes li {
+    list-style: none;
+    font-size: 1.05rem;
+    color: var(--ink-dim);
+    padding-left: 1.1rem;
+    border-left: 1px solid var(--line);
+}
+.notes strong { color: #eaf2fd; }
+
+code {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 0.85em;
+    color: var(--cyan);
+    background: #0a1a33;
+    border: 1px solid var(--line-soft);
+    border-radius: 2px;
+    padding: 0.06em 0.34em;
+}
+
+/* ---------- budget ---------- */
+.budget {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1px;
+    background: var(--line-soft);
+    border: 1px solid var(--line-soft);
+    border-radius: 2px;
+    margin-bottom: 1.5rem;
+}
+.budget div { background: var(--surface); padding: 1rem 1.1rem; display: grid; gap: 0.28rem; }
+.budget dt {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.74rem;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+}
+.budget dd {
+    margin: 0;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--cyan);
+    font-variant-numeric: tabular-nums;
+}
+.budget dd small { display: block; font-family: 'Outfit', sans-serif; font-size: 0.78rem; font-weight: 300; color: var(--ink-faint); letter-spacing: 0; margin-top: 0.2rem; }
+
+.solved { color: var(--phi); }
+
+/* ---------- footer ---------- */
+footer {
+    margin-top: clamp(2.6rem, 6vw, 4.4rem);
+    padding-top: 1.6rem;
+    border-top: 1px solid var(--line);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem 2rem;
+    align-items: baseline;
+}
+footer p { font-size: 1.05rem; color: var(--ink-dim); max-width: 58ch; }
+footer .sig { margin-left: auto; }
+
+/* --- Docs Notizen: ein Feld je Szene, plus eines fuers Ganze --- */
+.note {
+    margin-top: 1.1rem;
+    padding-top: 1rem;
+    border-top: 1px dashed var(--line);
+}
+
+.note > label {
+    display: flex;
+    align-items: baseline;
+    gap: 0.7rem;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.66rem;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-bottom: 0.55rem;
+}
+
+.note .state {
+    margin-left: auto;
+    font-size: 0.62rem;
+    letter-spacing: 0.1em;
+    color: var(--ink-faint);
+    opacity: 0;
+    transition: opacity 0.25s;
+}
+
+.note .state.on { opacity: 1; }
+.note .state.warn { color: var(--lambda); }
+
+.note textarea {
+    width: 100%;
+    min-height: 3.2rem;
+    resize: vertical;
+    padding: 0.7rem 0.85rem;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: var(--ground-deep);
+    color: var(--ink);
+    font-family: 'Outfit', system-ui, sans-serif;
+    font-weight: 300;
+    font-size: 0.98rem;
+    line-height: 1.6;
+}
+
+.note textarea::placeholder { color: var(--ink-faint); opacity: 0.65; }
+.note textarea:focus { border-color: var(--card); outline: none; }
+
+/* a scene that carries a note is marked in the index badge */
+.scene.has-note .idx::after {
+    content: '';
+    display: block;
+    width: 7px;
+    height: 7px;
+    margin: 6px auto 0;
+    border-radius: 50%;
+    background: var(--card);
+}
+
+.note-all {
+    margin: 0 0 var(--step);
+    padding: 1.2rem 1.4rem;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: var(--surface);
+}
+
+.note-all .note { margin-top: 0; padding-top: 0; border-top: none; }
+
+.note-all .where {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.68rem;
+    letter-spacing: 0.11em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-bottom: 0.9rem;
+}
+
+.note-all .where::before {
+    content: "";
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--ink-faint);
+    flex: none;
+}
+
+.note-all .where.ok { color: var(--phi); }
+.note-all .where.ok::before { background: var(--phi); }
+.note-all .where.local { color: var(--lambda); }
+.note-all .where.local::before { background: var(--lambda); }
+
+.note-out {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-top: 0.9rem;
+}
+
+.note-out button {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.68rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 0.55rem 0.95rem;
+    border: 1px solid var(--card);
+    border-radius: 3px;
+    background: transparent;
+    color: var(--card);
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+}
+
+.note-out button:hover,
+.note-out button:focus-visible { background: var(--card); color: #12203a; }
+
+.note-out .done {
+    align-self: center;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.64rem;
+    letter-spacing: 0.1em;
+    color: var(--phi);
+}
+.note-all textarea { min-height: 5rem; }
+
+@media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+    <p class="eyebrow">Doc Alvers Mathe-Labor · Videopipeline</p>
+    <h1>Ein Loch, ein Faden</h1>
+    <p class="lede">Der Plot für das Jacquard-Demovideo: was passiert, in welcher
+        Reihenfolge — und warum genau dort der Groschen fällt.</p>
+    <p class="status">Runde 1 · Plot zur Freigabe · Sprechertext folgt getrennt</p>
+
+    <dl class="meta">
+        <div><dt>Lab</dt><dd><a href="https://docalvers.de/jacquard.html">jacquard.html</a></dd></div>
+        <div><dt>Sprecherin</dt><dd>Solita · de-DE-Studio</dd></div>
+        <div><dt>Aufnahme</dt><dd>1440p · Playwright</dd></div>
+        <div><dt>Szenen</dt><dd>13</dd></div>
+        <div><dt>Laufzeit</dt><dd>~6:00</dd></div>
+    </dl>
+</header>
+
+<div class="thesis">
+    <canvas id="stage" width="600" height="600" role="img"
+            aria-label="Eine Lochkarte, deren Löcher Zeile für Zeile zu einem
+                        gewebten Bild werden"></canvas>
+    <div>
+        <blockquote>Eine Lochkarte sagt nicht, <em>wie</em> gewebt wird. Sie sagt für
+            jeden einzelnen Kettfaden nur: oben oder unten. Ein Loch ist eine
+            <strong>Entscheidung</strong> — und ein Stapel Karten ist ein Bild.</blockquote>
+        <p class="after">Der ganze Film ist die Antwort auf eine einzige Frage:
+            <em>Wie kommt ein Bild in eine Maschine von 1805?</em> Nicht als Bild.
+            Als Reihe von Ja und Nein.</p>
+    </div>
+</div>
+
+<section>
+    <div class="head"><span class="n">A</span><h2>Der dramaturgische Bogen</h2></div>
+    <div class="arc" id="arc"></div>
+    <div class="prose">
+        <p>Erst bauen wir die Maschine auf, von einem einzigen Faden bis zum
+           wachsenden Tuch (Szene 2–6). Dann drehen wir die Richtung um und lesen
+           vom Bild zurück auf die Karten (7–9). Dann treiben wir es an die Grenze
+           (10–12). <strong>Kaputtmachen ist der lehrreichste Teil</strong> — hier ist
+           es die Szene, in der die Maschine etwas webt, das in der Zeichnung gar
+           nicht steht.</p>
+    </div>
+</section>
+
+<section>
+    <div class="head"><span class="n">B</span><h2>Die 13 Szenen</h2>
+        <span class="note" id="tl-note">Breite = Sprechzeit</span></div>
+    <div class="timeline" id="timeline"></div>
+    <div class="legend">
+        <span><s style="background:#799e31"></s><b>Kernszene — wird nicht gekürzt</b></span>
+        <span><s style="background:#b02418"></s><b>Notbremse, falls der Schnitt zäh wirkt</b></span>
+        <span><s style="background:#f5c242"></s><b>Regelszene</b></span>
+    </div>
+    <div class="note-all" id="note-all" style="margin-top:var(--step)">
+        <p class="where" id="note-where">Speicher wird geprüft …</p>
+    </div>
+    <div class="scenes" id="scenes" style="margin-top:1.5rem"></div>
+</section>
+
+<section>
+    <div class="head"><span class="n">C</span><h2>Didaktische Leitplanken</h2>
+        <span class="note">bindend für den Sprechertext</span></div>
+    <ol class="rules">
+        <li><strong>Erst das Loch, dann das Wort.</strong> „Bit" fällt frühestens, wenn
+            man gesehen hat, dass ein Loch genau eine Entscheidung trifft — nicht vorher.</li>
+        <li><strong>Ein neuer Begriff pro Szene.</strong> Kettfaden (2) · Nadel, Haken,
+            Messer (3) · Fach, Schuss, Weblade (4) · Karte (5). Danach kommt kein
+            Vokabular mehr dazu, nur noch Einsicht.</li>
+        <li>Verboten ohne Anschauung: <em>binär, digital, Algorithmus, Software,
+            Bitmap, Abtasttheorem</em>. Erlaubt, weil im Bild verankert:
+            <em>Loch, Faden, Fach, Karte, Auflösung</em>.</li>
+        <li><strong>Zahlen nur vorlesen, wenn sie im Bild stehen.</strong> Der Zähler
+            oben links und die Beschriftung unter der Musterkarte sind der zweite
+            Hauptdarsteller — jede Behauptung wird dort sofort belegt.</li>
+        <li><strong>Keine Erfindungslegende.</strong> Nie sagen, Jacquard habe den
+            Computer erfunden. Szene 13 nennt die Kette — Jacquard, Babbage,
+            Hollerith — und überlässt den Schluss dem Zuschauer.</li>
+        <li><strong>Nichts behaupten, was das Bild nicht hergibt.</strong> Szene 11 ist
+            genau dafür da: die Maschine liegt sichtbar falsch, und wir sagen warum.</li>
+    </ol>
+</section>
+
+<section>
+    <div class="head"><span class="n">D</span><h2>Zeitbudget</h2>
+        <span class="note solved">gelöst</span></div>
+    <dl class="budget" id="budget"></dl>
+    <div class="prose">
+        <p>Das Musikbett ist keine Schranke: Teil 1 von <code>Infinity_6min.m4a</code>
+           ist <strong>nahtlos loopbar</strong> — loopStart 21,220 s, loopEnd 163,998 s,
+           64 Takte bei 107,58 BPM, 50 ms Crossfade. Es lässt sich auf jede Filmlänge
+           rendern.</p>
+        <p><strong>Ein einziger Kürzungskandidat</strong> ist markiert. Fällt Szene 11,
+           fällt allerdings die ehrlichste Szene des Films — dann lieber Szene 6 straffen.</p>
+        <p>Die Sekunden unten sind <strong>geschätzt</strong>, nicht gemessen. Die echten
+           Werte trägt <code>sync-drehbuch.mjs</code> nach der Vertonung ein; die
+           Zeitleiste rechnet dann automatisch mit ihnen.</p>
+    </div>
+</section>
+
+<section>
+    <div class="head"><span class="n">E</span><h2>Choreografie-Notizen</h2>
+        <span class="note">für die Aufnahme</span></div>
+    <ul class="notes">
+        <li><strong>Startzustand fixieren:</strong> Das Lab merkt sich alles in
+            <code>localStorage</code> unter <code>jacquard-prefs-3</code> — inklusive
+            Kamerastellung, Tab, Motiv und Rahmen. <strong>Vor jeder Aufnahme löschen</strong>,
+            dazu <code>coach-collapsed:/jacquard.html</code>.</li>
+        <li><strong>Tempo ganz links heißt Stopp.</strong> Es gibt keinen Pause-Knopf mehr.
+            <em>SCHRITT</em> läuft immer mit höchstens 2×, eine Zeile dauert damit
+            planbar rund 1,2 s — Szene 2 bis 5 komplett über SCHRITT fahren.</li>
+        <li><strong>Der Fadenregler ist geometrisch.</strong> Die Werte für Szene 10
+            liegen bei <code>16 → 14 %</code>, <code>48 → 37 %</code>,
+            <code>140 → 59 %</code>, <code>1000 → 100 %</code>. Nicht nach Augenmaß ziehen.</li>
+        <li><strong>Szene 10 bis 12 mit demselben Fenster fahren.</strong> Wird zwischendurch
+            der Rahmen verschoben, vergleicht der Zuschauer zwei verschiedene Dinge und
+            die ganze Pointe ist weg.</li>
+        <li>Szene 8 (Transparenzregler) bei <strong>höchstens 140 Fäden</strong> aufnehmen.
+            Darüber baut sich die Kartenschicht bei jedem Reglerschritt neu auf.</li>
+        <li><strong>Kamera:</strong> Die Ansicht wird mitgespeichert, <em>NEU</em> setzt sie
+            zurück. Vor jeder Szene, in der die Kamera stimmen muss, einmal NEU.</li>
+        <li>Die <strong>Erklärbox ist geparkt</strong> (<code>display:none</code>). Wird sie
+            im Bild gebraucht, vorher die eine CSS-Zeile entfernen.</li>
+        <li>Der Kartenwechsel dauert 0,85 s durch das Tempo geteilt. Szene 5 bei
+            <strong>1×</strong> aufnehmen, sonst ist er vorbei, bevor Solita ihn benennt.</li>
+    </ul>
+</section>
+
+<section>
+    <div class="head"><span class="n">F</span><h2>Bewusst weggelassen</h2>
+        <span class="note">Kandidaten für Teil 2</span></div>
+    <div class="prose">
+        <p>Bindungen — Leinwand, Köper, Atlas — und warum ein Jacquard sie frei
+           mischen kann · mehrfarbige Schüsse · der Harnisch mit Rapport über die
+           Webbreite (mehr Kettfäden als Platinen) · die Weberaufstände und die
+           zerschlagenen Maschinen · Babbages Analytical Engine im Detail · das
+           eigene Foto weben über <em>Eigenes Bild</em> · der Zoom in der Musterkarte.</p>
+    </div>
+</section>
+
+<footer>
+    <p><strong>Nächster Schritt:</strong> Dieser Plot will erst gelesen und freigegeben
+       werden. Danach — und nicht vorher — entstehen Solitas Sätze in
+       <code>videopipeline/jacquard/narration.mjs</code>, als SSML mit Pausen genau
+       dort, wo die Aktion im Bild läuft, und wandern über
+       <code>sync-drehbuch.mjs</code> in diese Seite zurück.</p>
+    <p class="eyebrow sig">Doc Alvers Mathe-Labor</p>
+</footer>
+
+</div>
+
+<script>
+/* ---------------------------------------------------------------
+   One source of truth: the scene list feeds both the timeline and
+   the cards below it.
+   --------------------------------------------------------------- */
+const SCENES = [
+    { n: 1, s: 20, t: 'Kalter Start: eine Maschine, kein Rechner',
+      img: 'Nah am Webstuhl, alles steht still. Tempo ganz links. Man sieht Holz, Schnüre, ein Kartenband — und ein Stück Tuch, das schon fertig ist.',
+      aha: 'Das hier ist von 1805 und es ist <strong>voll mechanisch</strong>: Holz für das Gestell, Draht für Nadeln und Haken, Schnüre für den Harnisch — und <strong>Pappe für die Karten</strong>. Kein Strom, kein einziges Bauteil, das rechnet. Trotzdem stellt es ein Bild her, das vorher jemand aufgeschrieben hat. Die Frage des Films: <strong>wie schreibt man ein Bild auf, wenn die Maschine nur Fäden heben kann?</strong>' },
+
+    { n: 2, s: 25, t: 'Ein Faden, eine Nadel, ein Haken',
+      img: 'Hineinzoomen, bis einzelne <span class="m">Kettfäden</span> zählbar sind. Über jedem steht senkrecht ein Stab: unten der Haken, oben die goldene Nadel. SCHRITT drücken, damit sich nichts überstürzt.',
+      aha: 'Alles, was gleich passiert, passiert <strong>pro Faden</strong>. Der Webstuhl kennt keine Flächen und keine Formen — er kennt nur diese eine Frage, einmal für jeden Faden.' },
+
+    { n: 3, s: 35, t: 'Die Entscheidung', core: true,
+      img: 'Die Karte senkt sich auf die Nadelreihe. Wo ein <strong>Loch</strong> ist, rutscht die Nadel hindurch und ihr Stab bleibt oben stehen. Wo <strong>Papier</strong> ist, wird die Nadel nach unten gedrückt. Dann fährt das rote <span class="m">Messer</span> hoch und nimmt nur die stehen gebliebenen mit.',
+      aha: 'Das ist der ganze Trick, und er ist mechanisch: <strong>Loch = oben, kein Loch = unten.</strong> Zwei Zustände, kein dritter. Eine Entscheidung aus Pappe.' },
+
+    { n: 4, s: 25, t: 'Fach, Schiffchen, Anschlag',
+      img: 'Die gehobenen Fäden ziehen das <span class="m">Fach</span> auf. Das Schiffchen fliegt hindurch und zieht den blauen <span class="m">Schuss</span> hinter sich her. Die <span class="m">Weblade</span> schiebt ihn an das Tuch.',
+      aha: 'Jetzt wird die Entscheidung sichtbar. Wo der Faden oben war, bleibt er oben — ein <strong>heller Punkt</strong>. Wo er unten war, deckt der blaue Schuss ihn zu. Aus „oben" wird hell, aus „unten" wird blau.' },
+
+    { n: 5, s: 20, t: 'Eine Karte, eine Zeile',
+      img: 'Die verbrauchte Karte fährt nach vorn aus der Maschine und blendet weg, die nächste kommt von hinten auf ihren Platz. Der Zähler oben links springt von KARTE 7 auf KARTE 8.',
+      aha: 'Eine Karte ist genau <strong>eine Zeile</strong> des Bildes. Der Stapel ist die Reihenfolge. Das Wort dafür gab es schon: ein <strong>Programm</strong> — nur eben auf Papier.' },
+
+    { n: 6, s: 25, t: 'Das Tuch wächst', cut: true,
+      img: 'Zurückfahren, Tempo nach rechts. Karte um Karte, Zeile um Zeile schiebt sich Gewebe aus der Maschine. Kein einzelner Schritt ist mehr erkennbar.',
+      aha: 'Aus lauter Ja und Nein wird eine Fläche. Niemand hat je ein Bild in diese Maschine gegeben — nur eine sehr lange Liste von Entscheidungen.' },
+
+    { n: 7, s: 25, t: 'Umkehrung: die Zeichnung',
+      img: 'Umschalten auf den Reiter <strong>MUSTER</strong>. Die ganze Tuschezeichnung füllt den Schirm. Der gelbe Rahmen markiert den Teil, der eben auf dem Webstuhl lag.',
+      aha: 'Bis hier ging es vorwärts: Karten → Bild. Ab jetzt rückwärts. Nicht die Karten machen das Bild — <strong>das Bild macht die Karten</strong>.' },
+
+    { n: 8, s: 30, t: 'Die Karte ist die Zeichnung, in Löchern', core: true,
+      img: 'Schalter <em>Lochkarten auf dem Muster</em> an. Eine Karte in Manila legt sich über den Rahmen, die Löcher sind echt ausgestanzt. Den Regler langsam von <em>durchsichtig</em> auf <em>deckend</em> ziehen.',
+      aha: 'Die Zeichnung verschwindet, und was übrig bleibt, ist <strong>dieselbe Zeichnung in Löchern</strong>. Die Übersetzung ist keine Erfindung und keine Kunst — es ist Abtasten. Punkt für Punkt.' },
+
+    { n: 9, s: 20, t: 'Diese eine Pappe',
+      img: 'Mit der Maus über den Rahmen fahren. Unter dem Zeiger leuchtet eine einzelne Kartenzeile rot auf, darunter steht <code>KARTE 15 / 34 · 16 LÖCHER von 45</code>.',
+      aha: 'Man kann eine einzelne Karte anfassen und abzählen. 16 Löcher heißt: in dieser Zeile stehen 16 Fäden oben. Nicht ungefähr — genau.' },
+
+    { n: 10, s: 30, t: 'Motiv und Maschine sind zwei Dinge', core: true,
+      img: 'Motiv auf <strong>Kreis</strong>, Rahmen aufs ganze Bild. Fadenregler auf 16 — grobe Treppe. Auf 48 — erkennbar rund. Auf 140 — sauberer Kreis. Die Vorlage wird dabei nie angefasst.',
+      aha: 'Der Kreis war die ganze Zeit derselbe: eine Formel, beliebig fein. Was sich ändert, ist allein, <strong>wie eng die Maschine abtastet</strong>. Vorlage und Auflösung sind zwei getrennte Schrauben — das ist die Einsicht, an der die meisten vorbeilaufen.' },
+
+    { n: 11, s: 30, t: 'Wo die Maschine etwas erfindet', cut: true,
+      img: 'Zurück auf die Tuschezeichnung, derselbe Rahmen, 40 Fäden. Die feinen Punktreihen sind fort, in den engen Bändern stehen Streifen, die in der Zeichnung nirgends vorkommen. Danach der Lochkarten-Blick: Löcher liegen halb auf einer Linie.',
+      aha: 'Die Maschine <em>sieht</em> die Zeichnung nicht. Sie fragt pro Faden einen einzigen Punkt ab. Wo die Striche enger stehen als die Fäden, entscheidet sie zuverlässig — und liefert ein Muster, das es nicht gibt. Das ist kein Defekt. Das ist die <strong>Grenze der Auflösung</strong>, und sie sieht immer so aus.' },
+
+    { n: 12, s: 25, t: 'Tausend Fäden',
+      img: 'Derselbe Rahmen, Fadenregler bis ans rechte Ende: 1000 Fäden. Die Spiralen, die gepunkteten Linien, die feinen Kringel — alles ist da.',
+      aha: 'Zwischen Karikatur und Bild liegt nichts als Auflösung. Und zur Einordnung: eine heutige Jacquard-Maschine steuert typisch <strong>5120 Platinen</strong>, im Stoff stehen 4000 bis 8000 Kettfäden. Wir sind hier immer noch eine Größenordnung darunter.' },
+
+    { n: 13, s: 25, t: 'Finale: ein Loch, ein Faden',
+      img: 'Zurück auf einen einzelnen Faden, eine einzelne Karte, ein einzelnes Loch. Standbild, Branding, Fade.',
+      aha: 'Jacquard 1805. Babbage hat diese Karten gesehen. Hollerith hat mit ihnen eine Volkszählung gezählt. Was daraus wurde, weiß jeder — der Anfang war: ein Loch, ein Faden.' }
+];
+
+const SAY = {};
+const SPOKEN = {};
+
+const ARC = [
+    { t: 'ein Faden',                      c: '#93a8c6' },
+    { t: 'ein Loch<br>entscheidet',        c: '#f2ead8', key: true },
+    { t: 'eine Karte =<br>eine Zeile',     c: '#c6a674', key: true },
+    { t: 'der Stapel<br>IST das Bild',     c: '#00d2ff', key: true },
+    { t: 'Motiv ≠<br>Maschine',            c: '#f5c242', key: true },
+    { t: 'wo sie<br>etwas erfindet',       c: '#b02418', key: true },
+    { t: 'ein Loch,<br>ein Faden',         c: '#93a8c6' }
+];
+
+/* --- the arc --- */
+document.getElementById('arc').innerHTML = ARC.map(a =>
+    `<span class="${a.key ? 'key' : ''}" style="--stop:${a.c}">${a.t}</span>`).join('');
+
+/* --- timeline: each scene as wide as it is long --- */
+const secs = (x) => SPOKEN['s' + x.n] ?? x.s;
+const total = SCENES.reduce((s, x) => s + secs(x), 0);
+document.getElementById('timeline').innerHTML = SCENES.map(x =>
+    `<i class="${x.core ? 'core' : x.cut ? 'cut' : ''}" data-n="${x.n}"
+        style="flex:0 0 ${(secs(x) / total * 100).toFixed(3)}%"
+        title="Szene ${x.n} · ${secs(x).toFixed(1)} s"></i>`).join('');
+
+/* --- budget, from the measured durations when they exist --- */
+(function () {
+    const spoken = Object.values(SPOKEN).reduce((a, b) => a + b, 0);
+    const planned = SCENES.reduce((a, x) => a + x.s, 0);
+    const air = SCENES.length * 1.6;
+    const film = (spoken || planned) + air;
+    const mmss = (t) => Math.floor(t / 60) + ':' + String(Math.round(t % 60)).padStart(2, '0');
+    const cell = (dt, dd, sub) => `<div><dt>${dt}</dt><dd>${dd}<small>${sub}</small></dd></div>`;
+    document.getElementById('budget').innerHTML =
+        cell('Sprache', (spoken || planned).toFixed(0) + ' s',
+             spoken ? 'gemessen · 13 Szenen' : 'geschätzt · 13 Szenen') +
+        cell('Luft', '~' + air.toFixed(0) + ' s', '1,6 s je Szene') +
+        cell('Film', mmss(film), spoken ? 'nach der Vertonung' : 'geschätzt') +
+        cell('Bett-Loop', '142,778 s', '64 Takte · 107,58 BPM · beliebig oft');
+    if (spoken) {
+        const n = document.getElementById('tl-note');
+        if (n) n.textContent = 'Breite = gemessene Sprechzeit';
+    }
+})();
+
+/* --- scene cards --- */
+document.getElementById('scenes').innerHTML = SCENES.map(x => `
+    <article class="scene ${x.core ? 'core' : x.cut ? 'cut' : ''}">
+        <div class="idx">${String(x.n).padStart(2, '0')}</div>
+        <div>
+            <div class="top">
+                <h3>${x.t}</h3>
+                ${x.core ? '<span class="tag core">Kernszene</span>' : ''}
+                ${x.cut ? '<span class="tag cut">Notbremse</span>' : ''}
+                <span class="secs">${secs(x).toFixed(1)} s</span>
+            </div>
+            <div class="body">
+                <div><h4>Was im Bild passiert</h4><p>${x.img}</p></div>
+                <div class="aha"><h4>Der Aha</h4><p>${x.aha}</p></div>
+            </div>
+            ${SAY['s' + x.n] ? `<div class="say"><h4>Solita sagt</h4><p>${SAY['s' + x.n]}</p></div>` : ''}
+        </div>
+    </article>`).join('');
+
+/* ---------------------------------------------------------------
+   Docs Notizen. Ein Feld je Szene und eines fuer den ganzen Plot.
+   Sie liegen im Artifact-Speicher, damit ich sie hier auslesen kann;
+   ohne Laufzeit (localhost) fallen sie auf localStorage zurueck, dann
+   sagt die Statuszeile das auch.
+   --------------------------------------------------------------- */
+(function () {
+    const KEY = 'jacquard-drehbuch-notizen';
+    const boxes = new Map();          // id -> { ta, state }
+    const timers = new Map();
+    let db = null;
+    let cache = {};
+    try { cache = JSON.parse(localStorage.getItem(KEY) || '{}'); } catch (e) { cache = {}; }
+
+    const where = (text, cls) => {
+        const el = document.getElementById('note-where');
+        if (!el) return;
+        el.textContent = text;
+        el.className = 'where ' + (cls || '');
+    };
+
+    const say = (id, text, warn) => {
+        const b = boxes.get(id);
+        if (!b) return;
+        b.state.textContent = text;
+        b.state.classList.toggle('on', !!text);
+        b.state.classList.toggle('warn', !!warn);
+    };
+
+    function mark(id, text) {
+        const card = document.querySelector('.scene[data-note="' + id + '"]');
+        if (card) card.classList.toggle('has-note', !!(text || '').trim());
+    }
+
+    function show(id, text) {
+        const b = boxes.get(id);
+        if (b && document.activeElement !== b.ta) b.ta.value = text || '';
+        mark(id, text);
+    }
+
+    function store(id, text) {
+        cache[id] = text;
+        try { localStorage.setItem(KEY, JSON.stringify(cache)); } catch (e) { /* private mode */ }
+        mark(id, text);
+        clearTimeout(timers.get(id));
+        timers.set(id, setTimeout(async () => {
+            if (!db) { say(id, 'nur in diesem Browser', true); return; }
+            say(id, 'sichert …');
+            try {
+                await db.doc('comments/' + id).set({ text, at: new Date().toISOString() });
+                say(id, 'gesichert');
+                setTimeout(() => say(id, ''), 2200);
+            } catch (e) {
+                say(id, 'nicht gesichert', true);
+            }
+        }, 700));
+    }
+
+    function box(host, id, label, placeholder) {
+        const wrap = document.createElement('div');
+        wrap.className = 'note';
+        wrap.innerHTML =
+            '<label for="n-' + id + '"><span>' + label + '</span>' +
+            '<span class="state" id="st-' + id + '"></span></label>' +
+            '<textarea id="n-' + id + '" placeholder="' + placeholder + '"></textarea>';
+        host.appendChild(wrap);
+        const ta = wrap.querySelector('textarea');
+        boxes.set(id, { ta, state: wrap.querySelector('.state') });
+        ta.value = cache[id] || '';
+        mark(id, ta.value);
+        ta.addEventListener('input', () => store(id, ta.value));
+        ta.addEventListener('blur', () => store(id, ta.value));
+    }
+
+    // one box per scene card, one for the whole plot
+    document.querySelectorAll('.scene').forEach((card, i) => {
+        const id = 's' + SCENES[i].n;
+        card.dataset.note = id;
+        // the card's second child is the content column; the first is the number badge
+        box(card.querySelectorAll(':scope > div')[1], id, 'Docs Notiz zu Szene ' + SCENES[i].n,
+            'Was hier anders soll …');
+    });
+    box(document.getElementById('note-all'), 'plot', 'Docs Notiz zum ganzen Plot',
+        'Bogen, Reihenfolge, Länge, was fehlt …');
+
+    /* Lokal gibt es keinen Artifact-Speicher. Damit die Notizen trotzdem bei mir
+       ankommen: als Datei in den Download-Ordner legen oder in die Zwischenablage. */
+    function asText() {
+        const now = new Date().toLocaleString('de-DE');
+        const out = ['# Notizen zum Drehbuch „Ein Loch, ein Faden"', '', now, ''];
+        for (const sc of SCENES) {
+            const t = (boxes.get('s' + sc.n)?.ta.value || '').trim();
+            if (!t) continue;
+            out.push('## Szene ' + sc.n + ' — ' + sc.t, '', t, '');
+        }
+        const all = (boxes.get('plot')?.ta.value || '').trim();
+        if (all) out.push('## Zum ganzen Plot', '', all, '');
+        if (out.length === 4) out.push('_(keine Notizen)_', '');
+        return out.join('\n');
+    }
+
+    (function exportRow() {
+        const host = document.getElementById('note-all');
+        const row = document.createElement('div');
+        row.className = 'note-out';
+        row.innerHTML =
+            '<button type="button" id="n-save">Als Datei sichern</button>' +
+            '<button type="button" id="n-copy">In die Zwischenablage</button>' +
+            '<span class="done" id="n-done"></span>';
+        host.appendChild(row);
+
+        const done = (t) => {
+            const el = document.getElementById('n-done');
+            el.textContent = t;
+            setTimeout(() => { el.textContent = ''; }, 3000);
+        };
+
+        document.getElementById('n-save').addEventListener('click', () => {
+            const blob = new Blob([asText()], { type: 'text/markdown;charset=utf-8' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'drehbuch-notizen.md';
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+            done('in den Download-Ordner gelegt');
+        });
+
+        document.getElementById('n-copy').addEventListener('click', async () => {
+            try {
+                await navigator.clipboard.writeText(asText());
+                done('kopiert');
+            } catch (e) {
+                done('Zwischenablage verweigert');
+            }
+        });
+    })();
+
+    // the artifact store, if this page is running as an artifact
+    (async function connect() {
+        if (typeof window.claude?.use !== 'function') {
+            where('Lokal · Notizen bleiben in diesem Browser — mit „Als Datei sichern" an Claude geben', 'local');
+            return;
+        }
+        db = await window.claude.use('db');
+        if (!db) {
+            where('Speicher nicht erreichbar · Seite neu laden, dann noch einmal', 'local');
+            return;
+        }
+        where('Notizen gehen in den Artifact-Speicher · Claude kann sie lesen', 'ok');
+        try {
+            db.collection('comments').onSnapshot((docs) => {
+                for (const d of docs || []) {
+                    const id = (d.id || '').replace(/^.*\//, '');
+                    if (!boxes.has(id)) continue;
+                    const text = (d.data && d.data.text) || d.text || '';
+                    cache[id] = text;
+                    show(id, text);
+                }
+                try { localStorage.setItem(KEY, JSON.stringify(cache)); } catch (e) { /* ignore */ }
+            });
+        } catch (e) { /* no live updates - typing still saves */ }
+        // whatever is already typed here but not yet in the store goes up once
+        for (const [id, b] of boxes) if (b.ta.value.trim()) store(id, b.ta.value);
+    })();
+})();
+
+/* ---------------------------------------------------------------
+   Hero: the film's own subject, really computed. A design function is
+   sampled with 40 warp threads; the current row becomes a punched card
+   at the top, and the cloth grows below it, one weft row at a time.
+   --------------------------------------------------------------- */
+(function () {
+    const cv = document.getElementById('stage');
+    if (!cv) return;
+    const ctx = cv.getContext('2d');
+
+    const N = 40;             // warp threads
+    const ROWS = 26;          // weft rows on screen
+    const PERIOD = 380;       // ms per row
+
+    const WARP = '#f2ead8', WEFT = '#1c3fa8', CARD = '#c6a674', GROUND = '#04101f';
+
+    // the design: two spiral phase fields added up - the lab's own motif
+    const C = [
+        { x: 0.34, y: 0.40, a: 2.0, b: 26 },
+        { x: 0.72, y: 0.62, a: -3.0, b: 21 },
+    ];
+    function bit(u, v) {
+        let t = 0;
+        for (const c of C) {
+            const dx = u - c.x, dy = v - c.y;
+            t += c.a * Math.atan2(dy, dx) + c.b * Math.sqrt(dx * dx + dy * dy);
+        }
+        return Math.sin(t) > 0 ? 1 : 0;
+    }
+
+    const row = (j) => {
+        const v = ((j % 90) + 0.5) / 90;
+        const r = new Uint8Array(N);
+        for (let i = 0; i < N; i++) r[i] = bit((i + 0.5) / N, v);
+        return r;
+    };
+
+    const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let head = 0;
+    const cloth = [];
+    for (let k = 0; k < ROWS; k++) cloth.push(row(head - k));
+
+    function fit() {
+        const r = cv.getBoundingClientRect();
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        cv.width = Math.max(1, Math.round(r.width * dpr));
+        cv.height = Math.max(1, Math.round(r.height * dpr));
+    }
+    fit();
+    addEventListener('resize', fit, { passive: true });
+
+    let last = 0;
+    function frame(ts) {
+        if (!still && ts - last > PERIOD) {
+            last = ts;
+            head++;
+            cloth.unshift(row(head));
+            cloth.length = ROWS;
+        }
+
+        const W = cv.width, H = cv.height;
+        const pad = W * 0.07;
+        const cw = (W - 2 * pad) / N;          // one warp thread wide
+        const cardH = cw * 2.6;
+        const top = pad;
+
+        ctx.fillStyle = GROUND;
+        ctx.fillRect(0, 0, W, H);
+
+        // the card for the row that is about to be woven
+        const cur = cloth[0];
+        ctx.fillStyle = CARD;
+        ctx.fillRect(pad, top, W - 2 * pad, cardH);
+        ctx.fillStyle = GROUND;
+        const rad = Math.min(cw * 0.32, cardH * 0.3);
+        for (let i = 0; i < N; i++) {
+            if (!cur[i]) continue;
+            ctx.beginPath();
+            ctx.arc(pad + (i + 0.5) * cw, top + cardH / 2, rad, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        // the cloth: the rows already woven, newest directly under the card
+        const y0 = top + cardH + cw * 1.1;
+        const rh = (H - y0 - pad) / ROWS;
+        for (let j = 0; j < ROWS; j++) {
+            const r = cloth[j];
+            const y = y0 + j * rh;
+            for (let i = 0; i < N; i++) {
+                ctx.fillStyle = r[i] ? WARP : WEFT;
+                ctx.fillRect(pad + i * cw, y, cw + 0.6, rh + 0.6);
+            }
+        }
+
+        // the thread that is being laid right now
+        ctx.strokeStyle = 'rgba(255,90,70,.9)';
+        ctx.lineWidth = Math.max(1, cw * 0.14);
+        ctx.beginPath();
+        ctx.moveTo(pad, y0 - cw * 0.55);
+        ctx.lineTo(W - pad, y0 - cw * 0.55);
+        ctx.stroke();
+
+        requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
