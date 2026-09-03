@@ -4,6 +4,19 @@
  */
 
 const LAB_ICONS = {
+    "brahmagupta": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <!-- circumcircle -->
+            <circle cx="50" cy="50" r="36" fill="none" stroke="rgb(128, 128, 128)" stroke-width="1.2" opacity="0.7" />
+            <!-- cyclic quadrilateral ABCD, its diagonals meeting at right angles in P -->
+            <polygon points="18.8,32.0 50.0,86.0 73.1,77.6 85.5,43.7" fill="rgba(0, 210, 255, 0.12)" stroke="rgb(128, 128, 128)" stroke-width="1.5" stroke-linejoin="round" />
+            <line x1="18.8" y1="32.0" x2="73.1" y2="77.6" stroke="var(--neon-blue)" stroke-width="1.2" />
+            <line x1="50.0" y1="86.0" x2="85.5" y2="43.7" stroke="var(--neon-blue)" stroke-width="1.2" />
+            <!-- the lot from P onto BC, carried on to the midpoint M of the opposite side -->
+            <line x1="67.3" y1="79.7" x2="52.2" y2="37.9" stroke="rgb(245, 194, 66)" stroke-width="1.6" />
+            <!-- P, the foot, and the bisected side -->
+            <circle cx="63.7" cy="69.7" r="2.4" fill="white" />
+            <circle cx="52.2" cy="37.9" r="2.4" fill="rgb(245, 194, 66)" />
+        </svg>`,
     "jacquard": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
             <rect x="8" y="12" width="84" height="18" rx="2" fill="#C6A674" stroke="rgba(255,255,255,0.55)" stroke-width="1.6" />
             <g fill="#0B1A33">
