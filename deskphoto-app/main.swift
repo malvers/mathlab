@@ -78,7 +78,7 @@ final class PhotoView: NSView {
     private var startVector: Double = 0           // angle of centre → mouse at grab time
     private var startDistance: Double = 1
 
-    private var hovering = false
+    private var selected = false
 
     override init(frame: NSRect) {
         super.init(frame: frame)
@@ -139,14 +139,16 @@ final class PhotoView: NSView {
         CATransaction.commit()
     }
 
-    // MARK: hover
+    // MARK: selection
 
     /// Driven by the app's global mouse monitor rather than a tracking area: while another
     /// app owns the cursor — "show desktop" puts a catcher over the wallpaper — a tracking
     /// area on a desktop-level window stops firing, and the grips would never appear.
+    /// Grips show on the print that was clicked, not on the one under the pointer: a
+    /// desktop full of photos should stay quiet while the mouse only travels across it.
     func showHandles(_ on: Bool) {
-        guard on != hovering else { return }
-        hovering = on
+        guard on != selected else { return }
+        selected = on
         CATransaction.begin()
         CATransaction.setDisableActions(true)
         for h in handles { h.opacity = on ? 1 : 0 }
@@ -347,7 +349,7 @@ final class PhotoItem {
         commit()
     }
 
-    func hover(_ on: Bool) { view.showHandles(on) }
+    func select(_ on: Bool) { view.showHandles(on) }
 
     func covers(_ p: NSPoint) -> Bool { view.covers(screenPoint: p) }
 
@@ -400,13 +402,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         save()   // drops records whose file has gone
         publishMenu()
 
-        // One monitor for all prints; global sees the pointer while other apps are in front,
-        // local sees it while our own panel has it.
-        NSEvent.addGlobalMonitorForEvents(matching: [.mouseMoved, .leftMouseDragged]) { [weak self] _ in
-            self?.updateHover()
+        // One monitor for all prints; global sees the click while other apps are in front,
+        // local sees it while our own window has it. A click anywhere else clears the grips.
+        NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown]) { [weak self] _ in
+            self?.updateSelection()
         }
-        NSEvent.addLocalMonitorForEvents(matching: [.mouseMoved, .leftMouseDragged]) { [weak self] e in
-            self?.updateHover()
+        NSEvent.addLocalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown]) { [weak self] e in
+            self?.updateSelection()
             return e
         }
 
@@ -514,13 +516,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
-    /// Shows the grips on the print under the pointer and hides them everywhere else.
-    private func updateHover() {
+    /// Shows the grips on the print that was just clicked and hides them everywhere else.
+    private func updateSelection() {
         let p = NSEvent.mouseLocation
         var found = false
         for item in items.reversed() {       // topmost print wins
             let on = !found && item.covers(p)
-            item.hover(on)
+            item.select(on)
             if on { found = true }
         }
     }
