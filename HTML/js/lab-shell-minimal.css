@@ -70,6 +70,52 @@ body {
     gap: 10px;
 }
 
+/* Collapse handle — see js/coach-box.js. The box itself stays click-through,
+   only the title row takes the pointer. */
+#math-coach-box .coach-title {
+    pointer-events: auto;
+    cursor: pointer;
+    user-select: none;
+}
+
+.coach-toggle {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    padding: 0;
+    border: 1px solid rgba(0, 210, 255, 0.25);
+    border-radius: 7px;
+    background: rgba(0, 210, 255, 0.08);
+    color: #00d2ff;
+    cursor: pointer;
+    transition: background .2s ease, transform .3s ease;
+}
+
+.coach-toggle:hover {
+    background: rgba(0, 210, 255, 0.2);
+}
+
+#math-coach-box.collapsed .coach-toggle {
+    transform: rotate(-90deg);
+}
+
+#math-coach-box.collapsed {
+    width: auto;
+    max-width: 340px;
+    padding: 12px 16px;
+}
+
+#math-coach-box.collapsed .coach-title {
+    margin-bottom: 0;
+}
+
+#math-coach-box.collapsed #coach-content {
+    display: none;
+}
+
 .coach-title::before {
     content: '';
     width: 8px;
