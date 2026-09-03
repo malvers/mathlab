@@ -242,7 +242,13 @@ nav.quick-nav {
     flex-wrap: wrap;
     justify-content: center;
     gap: 6px;
-    margin-bottom: 12px;
+    /* Same track as .toolbar and header.page-head: the row must not reach past
+       the content below it. The nav is a flex ITEM of the full-bleed .nav-band,
+       so it needs width:100% first — on its own max-width would only cap a
+       shrink-to-fit box and the row would sit narrower than the content. */
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto 12px;
 }
 
 /* Bridge panel: the edit/save hint sits top right inside the box */
@@ -768,6 +774,33 @@ html.svp-light .mat-modal .mm-title.mm-warn { color: rgb(176, 36, 24); }
 
 /* Separated Login/Logout pill at the right end of the pill row: extra gap
    plus a thin divider line set it apart from the nav pills */
+/* Three groups in the pill row. Left and right both take flex:1, so the middle
+   group lands on the bar's true centre however wide the two sides are — the
+   Schularten stay centred even though the right side carries far more pills. */
+.nav-group { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+/* Every group keeps its natural width; the last three each take
+   margin-left:auto. Flex divides the free space equally among those margins,
+   so the gaps Home|Schularten|Stundenplan|Werkzeuge come out identical — and
+   equal gaps mean each block is centred between its two neighbours. Costs no
+   extra room, which the full row does not have anyway (3px slack, measured). */
+.nav-left { flex: 0 1 auto; }
+.nav-schul { flex: 0 1 auto; margin-left: auto; }
+.nav-mid { flex: 0 0 auto; margin-left: auto; }
+.nav-more { flex: 0 0 auto; margin-left: auto; }
+/* No auto margin here, so on a wide row the tools stay 6px behind "Mehr" and
+   read as one block with it. When the row fills up they wrap as a unit — the
+   second row therefore starts at the gear, never mid-group. */
+.nav-right { flex: 0 0 auto; flex-wrap: nowrap; }
+
+/* Wrapping order as asked: the tools leave first (second row starts at the
+   gear), then "Mehr", then Stundenplan. That holds down to 600px. At 580px and
+   below Home ends up alone on the first row — from there the groups are
+   dissolved instead and every pill becomes a direct child again, so the row
+   just wraps, centred and compact. Thresholds measured 03.09.2026. */
+@media (max-width: 599px) {
+    .nav-group { display: contents; }
+}
+
 nav.quick-nav a.nav-auth {
     margin-left: 18px;
     position: relative;
@@ -1831,6 +1864,58 @@ tr.detail-row li {
 
 tr.detail-row li::marker { color: var(--lambda); }
 
+/* --- sub-row tabs: "Inhalt" (bullets) and "Notizen" (free text) ----------
+   Same 34px indent as the bullet list, so tabs, bullets and the topic text
+   above all stand on one line. */
+.sub-tabs {
+    display: flex;
+    gap: 2px;
+    margin: 2px 0 4px 34px;
+    border-bottom: 1px solid var(--line);
+}
+
+.sub-tab {
+    background: none;
+    border: 0;
+    border-bottom: 2px solid transparent;
+    color: var(--muted);
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.6rem;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    cursor: pointer;
+}
+
+.sub-tab:hover { color: var(--text); }
+.sub-tab.on { color: var(--lambda); border-bottom-color: var(--lambda); }
+
+.notes-body {
+    margin-left: 34px;
+    padding: 4px 6px;
+    min-height: 1.6em;
+    font-size: 0.92rem;
+    line-height: 1.45;
+    color: var(--muted);
+    white-space: pre-wrap;
+    outline: none;
+}
+
+/* Placeholder while the field is empty - :empty only holds as long as the
+   browser has not put a stray <br> in, which is why editing gets a frame too. */
+.notes-body:empty::before {
+    content: attr(data-ph);
+    opacity: 0.45;
+}
+
+body.editing .notes-body {
+    background: var(--card);
+    border: 1px dashed var(--line);
+    border-radius: 6px;
+    min-height: 4.2em;
+    color: var(--text);
+}
+
 /* KaTeX inline math: tone the default 1.21em down so formulas sit flush with
    the surrounding cell text instead of blowing up the line height. */
 #plan-table .katex { font-size: 1.05em; }
@@ -1983,6 +2068,7 @@ footer.page-foot a:hover { text-decoration: underline; }
     tr.detail-row { display: table-row !important; }
     tr.detail-row td { background: #fff; }
     tr.detail-row li { color: #444; }
+    .sub-tabs, .sub-pane[data-pane="notizen"] { display: none !important; }
     .chev { display: none !important; }
     .meta-card.expandable { padding-left: 14px; }
     h1 { color: #8a6400; }
@@ -2561,6 +2647,21 @@ body.form-preview #svp-form {
 .mat-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .mat-view .mv-title { display: inline-flex; align-items: center; gap: 0.3em; }
 .mat-view .mv-title .mat-ico { width: 2.31em; height: 2.31em; }
+
+/* Zweig letter inside a class code: G = Gesundheit, S = Sozial, W = Wirtschaft.
+   Only the one letter that tells the branches apart is coloured, the rest of
+   the code stays in the heading colour. Tokens, so both themes are covered. */
+.zw { font-weight: inherit; }
+.zw-g { color: var(--phi); }
+/* --ypsilon only reaches 2.7:1 on the dark ground (measured) — same lighter
+   red the modal warnings already use; the light theme keeps the deep one. */
+.zw-s { color: rgb(235, 120, 105); }
+html.svp-light .zw-s { color: var(--ypsilon); }
+/* Light theme: --cyan (28,118,158) is only dE 14 from the heading blue, so the
+   W read as the same colour. This petrol sits dE 39 away and even gains
+   contrast (5.4:1 vs 4.8:1). Dark theme keeps the token, it separates fine. */
+.zw-w { color: var(--cyan); }
+html.svp-light .zw-w { color: rgb(0, 115, 105); }
 
 /* ---- Shared search field (toolbars, sidebars) --------------------------
    One look for every "Suchen ..." box on the svp pages. */

@@ -78,8 +78,10 @@
             ['Informatik', ['informatik/fos11.html', 'informatik/fos12.html']]
         ]],
         /* "Mehr" is not a Schulart — it stays at the far right, next to the gear */
+        /* Stundenplan is deliberately NOT in here — Doc wants it as its own
+           pill at the right end of the row, one click instead of two. */
         ['Mehr', [
-            [null, [PLAN_HREF, 'notes.html', 'mathe/uebung.html', 'konzepte.html', 'operatoren.html',
+            [null, ['notes.html', 'mathe/uebung.html', 'konzepte.html', 'operatoren.html',
                     'punktetabelle.html']]
         ], true, true]
     ];
@@ -108,6 +110,29 @@
     const nav = document.createElement('nav');
     nav.className = 'quick-nav';
 
+    /* Four groups: Home, the Schularten, Stundenplan, the tools. Each of the
+       last three carries margin-left:auto, so flex splits the free space into
+       three equal gaps — which makes every block sit centred between its two
+       neighbours, exactly what was asked for. */
+    const navLeft = document.createElement('div');
+    navLeft.className = 'nav-group nav-left';
+    const navSchul = document.createElement('div');
+    navSchul.className = 'nav-group nav-schul';
+    const navMid = document.createElement('div');
+    navMid.className = 'nav-group nav-mid';
+    /* "Mehr" and the tools are two groups on purpose: the tools then wrap to a
+       second row as one block when the first row runs out of space, starting
+       at the gear. They sit 6px apart, so on a wide row it reads as one. */
+    const navMore = document.createElement('div');
+    navMore.className = 'nav-group nav-more';
+    const navRight = document.createElement('div');
+    navRight.className = 'nav-group nav-right';
+    nav.appendChild(navLeft);
+    nav.appendChild(navSchul);
+    nav.appendChild(navMid);
+    nav.appendChild(navMore);
+    nav.appendChild(navRight);
+
     const pills = {}; // href -> nav pill element, for live show/hide from the panel
     for (const [href, label, cls] of LINKS) {
         const a = document.createElement('a');
@@ -119,7 +144,8 @@
         // Hidden pills stay hidden — except the one for the current page.
         if (hidden.has(href) && !a.classList.contains('active')) a.classList.add('nav-hidden');
         pills[href] = a;
-        if (!IN_DROP.has(href)) nav.appendChild(a);
+        /* PLAN_HREF goes into the right group by hand further down. */
+        if (!IN_DROP.has(href) && href !== PLAN_HREF) navLeft.appendChild(a);
     }
 
     // Rows of every dropdown, so a subject without visible pills can fold away.
@@ -145,6 +171,7 @@
     function makeDrop(label, rows, column, atEnd) {
         const wrap = document.createElement('div');
         wrap.className = 'nav-drop-wrap' + (atEnd ? ' nd-right' : '');
+        wrap.dataset.drop = label;
         const pill = document.createElement('a');
         pill.className = 'badge b-grey nav-drop';
         pill.href = '#';
@@ -192,12 +219,17 @@
         /* Schularten sit left of Notizen, "Mehr" at the end (the gear and the
            login pill are appended after this script block) */
         dropWraps.push(wrap);
-        const before = atEnd ? null : pills['notes.html'];
-        nav.insertBefore(wrap, before && before.parentNode === nav ? before : null);
+        navSchul.appendChild(wrap);
     }
 
     DROPS.forEach(d => makeDrop(d[0], d[1], d[2], d[3]));
     syncDropRows();
+
+    /* Stundenplan alone in the centred middle group; "Mehr" is not a Schulart,
+       so it leaves the left block and joins the tools next to the gear. */
+    navMid.appendChild(pills[PLAN_HREF]);
+    const moreWrap = navSchul.querySelector('.nav-drop-wrap[data-drop="Mehr"]');
+    if (moreWrap) navMore.appendChild(moreWrap);
 
     function closeDrops() {
         document.querySelectorAll('.nav-drop-wrap.open').forEach(w => w.classList.remove('open'));
@@ -292,7 +324,7 @@
     themeBtns[theme].classList.add('on');
 
     editWrap.appendChild(panel);
-    nav.appendChild(editWrap);
+    navRight.appendChild(editWrap);
 
     // Separated auth pill at the right end of the row: "Login" links to the
     // notes page (shared svp-session login for all svp pages), "Logout"
@@ -321,7 +353,7 @@
         location.reload();
     });
     renderAuthPill();
-    nav.appendChild(authPill);
+    navRight.appendChild(authPill);
 
     // QR pill next to Login/Logout: opens the usual white-card overlay with
     // a QR code deep-linking to this page's live URL. qrcode.min.js is only
@@ -335,8 +367,8 @@
         + '<path d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 3.75 9.375v-4.5ZM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 0 1-1.125-1.125v-4.5ZM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 13.5 9.375v-4.5Z"></path>'
         + '<path d="M6.75 6.75h.75v.75h-.75v-.75ZM6.75 16.5h.75v.75h-.75v-.75ZM16.5 6.75h.75v.75h-.75v-.75ZM13.5 13.5h.75v.75h-.75v-.75ZM13.5 19.5h.75v.75h-.75v-.75ZM19.5 13.5h.75v.75h-.75v-.75ZM19.5 19.5h.75v.75h-.75v-.75ZM16.5 16.5h.75v.75h-.75v-.75Z"></path></svg>';
     qrPill.addEventListener('click', function (e) { e.preventDefault(); showQr(); });
-    nav.appendChild(themeWrap); // Dunkel | Hell, directly left of the QR pill
-    nav.appendChild(qrPill);
+    navRight.appendChild(themeWrap); // Dunkel | Hell, directly left of the QR pill
+    navRight.appendChild(qrPill);
 
     let qrOverlay = null;
     function renderQr() {
