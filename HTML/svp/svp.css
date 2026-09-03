@@ -338,8 +338,12 @@ nav.quick-nav a.badge.nav-hidden { display: none; }
     cursor: pointer;
 }
 body.editing .mat-pill-wrap .mat-x { display: block; }
-/* room for the ✕ so it never sits on the label */
-body.editing .mat-pill-wrap .mat-pill { padding-right: 24px; }
+/* Room for the ✕ so it never sits on the label. Careful with the selector:
+   the icon-pill rule further down writes `padding` as a shorthand, which
+   resets padding-right at the SAME specificity and wins on source order —
+   so name .mat-block and the a here to outrank it. */
+body.editing .mat-pill-wrap .mat-pill,
+body.editing .mat-block a.mat-pill:has(> .mat-ico) { padding-right: 26px; }
 .mat-pill-wrap .mat-x:hover,
 .mat-pill-wrap .mat-x:focus-visible {
     opacity: 1;
@@ -350,7 +354,8 @@ body.editing .mat-pill-wrap .mat-pill { padding-right: 24px; }
 /* touch: bigger target */
 @media (hover: none) {
     body.editing .mat-pill-wrap .mat-x { width: 22px; height: 22px; line-height: 20px; font-size: 12px; }
-    body.editing .mat-pill-wrap .mat-pill { padding-right: 30px; }
+    body.editing .mat-pill-wrap .mat-pill,
+    body.editing .mat-block a.mat-pill:has(> .mat-ico) { padding-right: 32px; }
 }
 @media print { .mat-pill-wrap .mat-x { display: none; } }
 
