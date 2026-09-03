@@ -4,6 +4,29 @@
  */
 
 const LAB_ICONS = {
+    "jacquard": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <rect x="8" y="12" width="84" height="18" rx="2" fill="#C6A674" stroke="rgba(255,255,255,0.55)" stroke-width="1.6" />
+            <g fill="#0B1A33">
+                <circle cx="21" cy="21" r="3.4" /><circle cx="38" cy="21" r="3.4" />
+                <circle cx="62" cy="21" r="3.4" /><circle cx="79" cy="21" r="3.4" />
+            </g>
+            <g stroke="#F2EAD8" stroke-width="2.6" stroke-linecap="round">
+                <line x1="21" y1="32" x2="21" y2="56" /><line x1="38" y1="32" x2="38" y2="56" />
+                <line x1="50" y1="32" x2="50" y2="46" /><line x1="62" y1="32" x2="62" y2="56" />
+                <line x1="79" y1="32" x2="79" y2="56" />
+            </g>
+            <rect x="10" y="48" width="80" height="4.2" rx="1.4" fill="#B02418" />
+            <g fill="#1C3FA8">
+                <rect x="12" y="58" width="76" height="8" /><rect x="12" y="70" width="76" height="8" />
+                <rect x="12" y="82" width="76" height="8" />
+            </g>
+            <g fill="#F2EAD8">
+                <rect x="24" y="58" width="10" height="8" /><rect x="56" y="58" width="10" height="8" />
+                <rect x="16" y="70" width="10" height="8" /><rect x="40" y="70" width="10" height="8" />
+                <rect x="70" y="70" width="10" height="8" />
+                <rect x="30" y="82" width="10" height="8" /><rect x="62" y="82" width="10" height="8" />
+            </g>
+        </svg>`,
     "koerper": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
             <polygon points="50,8 81,20 92,52 74,84 40,90 14,68 12,34" fill="none" stroke="#F5C242" stroke-width="2.4" stroke-linejoin="round" />
             <polygon points="50,30 70,44 62,68 38,68 30,44" fill="rgba(176,36,24,0.35)" stroke="rgba(255,255,255,0.8)" stroke-width="2" stroke-linejoin="round" />
