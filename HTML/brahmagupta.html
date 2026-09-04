@@ -319,7 +319,9 @@
             const deg = r => r * 180 / Math.PI;
             const n360 = a => ((a % 360) + 360) % 360;
             const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
-            const ptAt = a => ({ x: CX + R * Math.cos(rad(a)), y: CY + R * Math.sin(rad(a)) });
+            /* Screen y grows downward, so the sine is negated: a rising angle then runs
+               counter-clockwise and A, B, C, D are named the way mathematics does it. */
+            const ptAt = a => ({ x: CX + R * Math.cos(rad(a)), y: CY - R * Math.sin(rad(a)) });
             const dist = (p, q) => Math.hypot(p.x - q.x, p.y - q.y);
             const mid = (p, q) => ({ x: (p.x + q.x) / 2, y: (p.y + q.y) / 2 });
 
@@ -637,7 +639,7 @@
                     return;
                 }
 
-                const theta = deg(Math.atan2(p.y - CY, p.x - CX));
+                const theta = deg(Math.atan2(CY - p.y, p.x - CX));   // inverse of ptAt
 
                 if (mode === 'formel') {
                     const lo = ang[(idx + 3) % 4];
