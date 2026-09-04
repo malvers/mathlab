@@ -322,16 +322,42 @@
                 ' title="' + (third ? 'Drittes Namensfeld ausblenden' : 'Dritten Namen zulassen') + '"' +
                 ' aria-label="Drittes Namensfeld für Thema ' + (i + 1) + '">' + (third ? '−' : '+') + '</button>';
             return '<div class="vt-row' + (taken ? ' taken' : '') + (third ? ' three' : '') + '" id="row-' + i + '">' +
-                '<div class="vt-nr">' + (i + 1) + '</div>' +
+                /* Direct child of the card, not of .vt-nr: the badge is pinned to
+                   the CARD's corner, and .vt-nr is itself positioned (it centres
+                   the number), which would otherwise become its anchor. */
+                '<span class="badge ' + lb[1] + '">' + lb[0] + '</span>' +
+                '<div class="vt-nr"><span class="vt-nr-num">' + (i + 1) + '</span></div>' +
                 '<div class="vt-topic">' +
-                    '<div class="vt-title"><span class="vt-title-text">' + esc(t.title) + '</span>' +
-                        '<span class="badge ' + lb[1] + '">' + lb[0] + '</span></div>' +
+                    '<div class="vt-title"><span class="vt-title-text">' + esc(t.title) + '</span></div>' +
                     '<div class="vt-sub">' + esc(t.sub) + '</div>' +
+                    '<div class="vt-grades"><span class="vt-grade-lbl">Bewerten</span>' +
+                        ROLES.map(function (r) {
+                            const done = graded(i, r[0]);
+                            const sent = !!(bewIn[i] && bewIn[i][r[0]]);
+                            return '<button type="button" class="vt-grade' + (done ? ' done' : '') +
+                                (sent ? ' full' : '') +
+                                '" id="grade-' + r[0] + '-' + i + '" title="' +
+                                (sent ? 'Bewertung ' + r[1] + ' ist abgegeben'
+                                      : 'Bewertungsbogen ' + r[1] + ' für diesen Vortrag') +
+                                '">' + r[1] + (sent ? ' ✓' : '') + '</button>';
+                        }).join('') + '</div>' +
                 '</div>' + inp(0) + inp(1) + (third ? inp(2) : '') + more +
                 '</div>';
         }).join('');
 
         TOPICS.forEach((_, i) => {
+            ROLES.forEach(function (r) {
+                const gb = $('grade-' + r[0] + '-' + i);
+                /* window.open has to run inside the click itself - awaiting the
+                   save first would cost the user gesture and the popup blocker
+                   would eat the tab. The handoff reads the names straight from
+                   the fields, so it does not need the save to have finished;
+                   flushAll only pushes them to the cloud and can run after. */
+                if (gb) gb.addEventListener('click', function () {
+                    openMatrix(i, r[0], r[1]);
+                    flushAll();
+                });
+            });
             const btn = $('more-' + i);
             if (btn) btn.addEventListener('click', async () => {
                 /* folding the column away must not swallow a half-typed name */
@@ -356,11 +382,32 @@
         list.querySelectorAll('.vt-title-text').forEach((el) => {
             el.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); el.blur(); } });
         });
+        sizeNrColumn();
         setEditing(editing);
         updateCount();
         updateAllBtn();
         updateKeyBtn();
     }
+
+    /* The tallest topic block sets the height of all of them, so the cards line
+       up without a gap above "Bewerten". Each .vt-row is its own grid, so this
+       cannot come from CSS alone. (The badge no longer needs measuring - it
+       sits in the card's corner, outside the flow.) */
+    function sizeNrColumn() {
+        const list = $('list');
+        if (!list) return;
+        list.style.removeProperty('--vt-topic-h');
+        let h = 0;
+        list.querySelectorAll('.vt-topic').forEach(function (t) {
+            h = Math.max(h, t.getBoundingClientRect().height);
+        });
+        if (h) list.style.setProperty('--vt-topic-h', Math.ceil(h) + 'px');
+    }
+
+    /* Orbitron may still be loading at first paint, and a badge measured in the
+       fallback font comes out too narrow. */
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(sizeNrColumn);
+    window.addEventListener('resize', sizeNrColumn);
 
     /* the pupil takes his own entry back: the slot goes free and editable again */
     async function clearMine(i, j) {
@@ -613,6 +660,7 @@
            Der Schluessel steht in URL und Datenbank, der Klartext nur im Kopf. */
         const groups = [...seen].sort().map(g => ({ key: slug(g), label: g.replace(/,/g, ' + ') }));
         const here = groups.find(g => g.key === KLASSE);
+        if (here) groupLabel = here.label;
         /* Ohne ?g stuende die erste Gruppe im Kopf, gespeichert wuerde aber unter
            data-klasse - ein stiller Fehlgriff. Also gleich umlenken. */
         if (!here) { location.replace(location.pathname + '?g=' + encodeURIComponent(groups[0].key)); return; }
@@ -664,6 +712,128 @@
         }
     }
 
+    /* ---------- Bewertungsmatrix, one sheet PER TALK ----------
+       Doc grades talk by talk, so a single shared sheet would have talk 2
+       overwrite talk 1 (Doc, 04.09.2026: "der muss pro Vortrag sein"). Each
+       row therefore carries its own id into bewertungsmatrix.html, which keys
+       its filled-in values by exactly that id.
+
+       Topic and names are handed over through storage, NOT in the URL: a query
+       string reaches the web server's log, and the names of pupils have no
+       business being there. The id itself is plan + Lerngruppe + row - a class
+       code, the same kind that is already in "?g=" today.
+
+       localStorage, not sessionStorage: the sheet opens in its own tab now
+       (Doc, 04.09.2026), and whether a new tab inherits sessionStorage differs
+       between browsers. The entry carries a timestamp and the matrix deletes it
+       the moment it has read it, so a name never lingers. */
+    const MATRIX = '../bewertungsmatrix.html';
+    const HANDOFF = 'svp-bm-handoff';
+    /* plain-text name of the current Lerngruppe, filled by buildSwitch */
+    let groupLabel = KLASSE;
+
+    /* Two sheets per talk: Doc's Coach sheet, and ONE Publikum sheet that
+       three pupils fill in together (Doc, 04.09.2026). Both live in
+       svp_vortrag_bewertung, one row per talk and role. */
+    const ROLES = [['coach', 'Coach'], ['publikum', 'Publikum']];
+    const TABLE_BEW = 'svp_vortrag_bewertung';
+    /* which sheets are in, per talk: { 3: { coach: true, publikum: false } }.
+       Read anonymously (the rows carry only ciphertext), so everybody sees at a
+       glance whether a talk has been graded yet. */
+    const bewIn = {};
+
+    function talkId(i, role) { return PLAN + '-' + slug(KLASSE) + '-' + (i + 1) + '-' + role; }
+
+    /* Does a filled sheet for this talk and role already exist on this device? */
+    function graded(i, role) {
+        try { return !!localStorage.getItem('svp-bewertungsmatrix:' + talkId(i, role)); } catch (e) { return false; }
+    }
+
+    /* The sheet lives in its own tab now, so the green "already graded" marks
+       cannot wait for a re-render of this page. Browsers fire `storage` in
+       every OTHER tab of the origin when localStorage changes - that is exactly
+       the signal, and it costs nothing. Only the marks are touched, never the
+       whole list: a re-render would throw away a half-typed name. */
+    function refreshGradeMarks() {
+        topics().forEach(function (_, i) {
+            ROLES.forEach(function (r) {
+                const gb = $('grade-' + r[0] + '-' + i);
+                if (!gb) return;
+                const done = graded(i, r[0]);
+                gb.classList.toggle('done', done);
+                gb.title = done
+                    ? 'Bogen ' + r[1] + ' für diesen Vortrag (bereits ausgefüllt)'
+                    : 'Bewertungsbogen ' + r[1] + ' für diesen Vortrag';
+                const sent = !!(bewIn[i] && bewIn[i][r[0]]);
+                gb.classList.toggle('full', sent);
+                gb.textContent = r[1] + (sent ? ' ✓' : '');
+                if (sent) gb.title = 'Bewertung ' + r[1] + ' ist abgegeben';
+            });
+        });
+    }
+
+    /* One anonymous read for the whole list: which sheets are already in. */
+    async function loadBewState() {
+        const a = A();
+        if (!a) return;
+        try {
+            const qs = 'plan=eq.' + encodeURIComponent(PLAN) +
+                '&klasse=eq.' + encodeURIComponent(KLASSE) + '&select=idx,rolle,taken';
+            const res = await fetch(a.DB_URL + '/rest/v1/' + TABLE_BEW + '?' + qs, {
+                headers: { apikey: a.DB_KEY, Authorization: 'Bearer ' + a.DB_KEY }
+            });
+            if (!res.ok) return;                      /* table missing: pills stay plain */
+            for (const k in bewIn) delete bewIn[k];
+            (await res.json()).forEach(function (r) {
+                if (!r.taken) return;
+                (bewIn[r.idx] = bewIn[r.idx] || {})[r.rolle] = true;
+            });
+            refreshGradeMarks();
+        } catch (e) { /* offline: the pills simply stay plain */ }
+    }
+
+    window.addEventListener('storage', function (e) {
+        if (!e.key) return;
+        /* a sheet was filled in the other tab */
+        if (e.key.indexOf('svp-bewertungsmatrix') === 0) refreshGradeMarks();
+        /* ... and this key appears the moment a grading was actually SENT, so
+           it is the cue to re-read how many of the three places are taken */
+        if (e.key.indexOf('svp-bm-sent:') === 0) loadBewState();
+    });
+
+    /* Coming back to this tab catches what the storage event may have missed
+       (another window, a cleared key) - and somebody else may have sent a
+       grading in the meantime, so the counts are re-read too. */
+    document.addEventListener('visibilitychange', function () {
+        if (document.hidden) return;
+        refreshGradeMarks();
+        loadBewState();
+    });
+
+    function openMatrix(i, role, roleLabel) {
+        const t = topics()[i] || {};
+        const names = [0, 1, 2]
+            .map(function (j) { const el = $('name-' + i + '-' + j); return el ? el.value.trim() : ''; })
+            .filter(function (v) { return v; });
+        try {
+            localStorage.setItem(HANDOFF, JSON.stringify({
+                v: talkId(i, role),
+                topic: t.title || '',
+                names: names.join(', '),
+                label: 'Vortrag ' + (i + 1) + ' · ' + groupLabel + ' · ' + roleLabel,
+                /* the three parts the database row is keyed by - the id string
+                   cannot be split again, a Lerngruppe carries dashes itself */
+                plan: PLAN, klasse: KLASSE, idx: i,
+                ts: Date.now()
+            }));
+        } catch (e) { /* private mode: the sheet simply opens empty */ }
+        const url = MATRIX + '?v=' + encodeURIComponent(talkId(i, role));
+        /* Own tab, so the list of talks stays open next to the sheet. If the
+           browser blocks the popup, go there in this tab rather than nowhere. */
+        const win = window.open(url, '_blank');
+        if (!win) location.href = url;
+    }
+
     /* ---------- boot ---------- */
     function statusEl() {
         if ($('vt-status')) return;
@@ -683,6 +853,7 @@
 
     (async function boot() {
         statusEl();
+        loadBewState();
         await buildSwitch();
         render();                                   /* topics first, names follow */
         if (!window.svpCrypto || !svpCrypto.available) {

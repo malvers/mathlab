@@ -903,8 +903,9 @@ nav.quick-nav a.nav-drop { cursor: pointer; }
 .nav-drop-panel .nd-title.nd-empty, .nav-drop-panel .nd-row.nd-empty { display: none; }
 /* every pill inside switched off in ⚙: the dropdown greys out instead of
    opening an empty panel (Doc, 31.08.2026) */
-.nav-drop-wrap.nd-off { opacity: 0.4; }
-nav.quick-nav .nav-drop-wrap.nd-off a.nav-drop { cursor: default; }
+/* Empty Schulart: hide the pill entirely (Doc, 03.09.2026 - was greyed out
+   before, but a pill with nothing behind it earns no space in the row). */
+.nav-drop-wrap.nd-off { display: none; }
 
 /* the rightmost dropdown would overflow the window, so it opens leftwards */
 .nav-drop-wrap.nd-right .nav-drop-panel { left: auto; right: 0; }
@@ -2335,9 +2336,13 @@ body.form-preview #svp-form {
 }
 
 .vt-row {
+    /* One height for the name fields and the +/- next to them - the toggle was
+       a 22px stub beside a 40px input (Doc, 04.09.2026). Both read it from
+       here, so they cannot drift apart again. */
+    --vt-field-h: 40px;
     display: grid;
     /* last column is the +/- toggle for the optional third name */
-    grid-template-columns: 52px 1fr minmax(150px, 220px) minmax(150px, 220px) 22px;
+    grid-template-columns: 52px 1fr minmax(150px, 220px) minmax(150px, 220px) var(--vt-field-h);
     gap: 12px 14px;
     align-items: center;
     background: var(--card-soft);
@@ -2345,23 +2350,26 @@ body.form-preview #svp-form {
     border-radius: 12px;
     padding: 12px 16px;
     transition: border-color 0.15s, background 0.15s;
+    /* anchor for the Lernbereich badge in the top left corner */
+    position: relative;
 }
 
 /* a third pupil joined this talk: three narrower name fields instead of two */
-.vt-row.three { grid-template-columns: 52px 1fr repeat(3, minmax(110px, 190px)) 22px; }
+.vt-row.three { grid-template-columns: 52px 1fr repeat(3, minmax(110px, 190px)) var(--vt-field-h); }
 
-/* the toggle itself: a quiet +/- at the right edge, never in print */
+/* the toggle itself: a quiet +/- at the right edge, never in print.
+   Same box as a name field, so the row ends on one line instead of a stub. */
 .vt-more {
-    width: 22px;
-    height: 22px;
+    width: var(--vt-field-h);
+    height: var(--vt-field-h);
     padding: 0;
     font-family: 'Orbitron', sans-serif;
-    font-size: 0.95rem;
+    font-size: 1.1rem;
     line-height: 1;
     color: var(--muted);
     background: transparent;
     border: 1px solid var(--line);
-    border-radius: 6px;
+    border-radius: 8px;
     cursor: pointer;
 }
 
@@ -2378,11 +2386,45 @@ body.form-preview #svp-form {
     font-size: 1.15rem;
     color: var(--lambda);
     text-align: center;
+    /* Lernbereich badge on top, the number under it (Doc, 04.09.2026).
+       The block hangs from the TOP of the row, not its middle, so the badge
+       rides on the same line as the heading next to it - centred, it floated
+       above the title whenever the topic ran to several lines. */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    align-self: stretch;
+    position: relative;
+}
+
+.vt-row > .badge {
+    font-size: 0.6rem;
+    position: absolute;
+    /* Corner tag: smaller than a normal badge, but still readable, and set off
+       the edge rather than jammed against it (Doc, 04.09.2026). */
+    top: 7px;
+    left: 9px;
+    transform: scale(0.72);
+    transform-origin: top left;
+}
+
+.vt-nr .vt-nr-num {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
 }
 
 .vt-row.taken .vt-nr { color: var(--phi); }
 
-.vt-topic { min-width: 0; }
+.vt-topic {
+    min-width: 0;
+    /* All cards the same height without a hole above the pills: vortraege.js
+       measures the tallest topic block once and parks it in --vt-topic-h.
+       Putting the reserve on the paragraph pushed "Bewerten" down instead. */
+    min-height: var(--vt-topic-h, auto);
+}
 
 .vt-title {
     font-family: 'Orbitron', sans-serif;
@@ -2405,6 +2447,52 @@ body.form-preview #svp-form {
     min-height: 1.2em;
 }
 
+/* Per-talk links to the Bewertungsmatrix - they sit in the title line next to
+   the Lernbereich badge, so they need no column of their own and follow the row
+   when it wraps on a phone (Doc, 04.09.2026: "der muss pro Vortrag sein").
+   Two of them: the Coach grades the talk, the audience grades it too. */
+/* Third block of the topic cell, under the description (Doc, 04.09.2026:
+   "Bewerten ganz unten"). Label and both pills travel together. */
+.vt-grades {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 8px;
+}
+
+.vt-grade-lbl {
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 300;
+    letter-spacing: 0.04em;
+    color: var(--muted);
+    white-space: nowrap;
+}
+
+.vt-grade {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.6rem;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    line-height: 14px;
+    padding: 3px 9px;
+    color: var(--muted);
+    background: transparent;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.vt-grade:hover { color: var(--lambda); border-color: var(--lambda); }
+
+/* a sheet already exists for this talk */
+.vt-grade.done { color: var(--phi); border-color: rgba(121, 158, 49, 0.6); }
+
+/* all three grading places for this talk are taken */
+.vt-grade.full { color: var(--phi); border-color: rgba(121, 158, 49, 0.6); }
+
 /* edit mode: dashed outlines come from .editing [contenteditable] above */
 .vt-list.editing [contenteditable="true"] { padding: 1px 4px; border-radius: 4px; }
 
@@ -2418,6 +2506,8 @@ body.form-preview #svp-form {
     border: 1px solid var(--line);
     border-radius: 8px;
     padding: 9px 12px;
+    /* min-, not height: the box may grow with the text, never clip it */
+    min-height: var(--vt-field-h);
     outline: none;
 }
 
@@ -2512,17 +2602,23 @@ body.form-preview #svp-form {
 
 /* narrow screens: both name fields drop under the topic */
 @media (max-width: 760px) {
-    .vt-row, .vt-row.three { grid-template-columns: 40px 1fr 1fr 22px; }
+    .vt-row, .vt-row.three { grid-template-columns: 40px 1fr 1fr var(--vt-field-h); }
     .vt-topic { grid-column: 2 / 5; }
     .vt-name.n1 { grid-column: 2; }
     .vt-name.n2 { grid-column: 3; }
     /* the third name gets its own line rather than a squeezed third column */
     .vt-name.n3 { grid-column: 2 / 4; }
     .vt-more { grid-column: 4; grid-row: 2; align-self: center; }
+
+    /* No reserved height down here: the cards sit one under the other, so
+       nothing has to line up - the reserve only left a hole under "Bewerten"
+       (measured 04.09.2026: up to 39 px). */
+    .vt-topic { min-height: 0; }
 }
 
 @media print {
-    .vt-actions, .vt-hint, .vt-confirm, .vt-switch, .vt-more, .vt-status { display: none !important; }
+    .vt-actions, .vt-hint, .vt-confirm, .vt-switch, .vt-more, .vt-status,
+    .vt-grade, .vt-grade-lbl, .vt-grades { display: none !important; }
 
     .vt-row {
         break-inside: avoid;
@@ -2663,16 +2759,12 @@ body.form-preview #svp-form {
    Only the one letter that tells the branches apart is coloured, the rest of
    the code stays in the heading colour. Tokens, so both themes are covered. */
 .zw { font-weight: inherit; }
-.zw-g { color: var(--phi); }
-/* --ypsilon only reaches 2.7:1 on the dark ground (measured) — same lighter
-   red the modal warnings already use; the light theme keeps the deep one. */
-.zw-s { color: rgb(235, 120, 105); }
-html.svp-light .zw-s { color: var(--ypsilon); }
-/* Light theme: --cyan (28,118,158) is only dE 14 from the heading blue, so the
-   W read as the same colour. This petrol sits dE 39 away and even gains
-   contrast (5.4:1 vs 4.8:1). Dark theme keeps the token, it separates fine. */
-.zw-w { color: var(--cyan); }
-html.svp-light .zw-w { color: rgb(0, 115, 105); }
+/* House palette straight from CLAUDE.md (Doc, 03.09.2026): G = lambda orange,
+   S = phi gruen, W = ypsilon rot. The tokens carry their own light/dark
+   shades, so no per-theme overrides here. */
+.zw-g { color: var(--lambda); }
+.zw-s { color: var(--phi); }
+.zw-w { color: var(--ypsilon); }
 
 /* ---- Shared search field (toolbars, sidebars) --------------------------
    One look for every "Suchen ..." box on the svp pages. */

@@ -559,15 +559,13 @@
                 col.dataset.day = DAY_NAMES[parseYmd(d).getDay()] + ', ' + fmtDate(d);
                 col.dataset.date = d;
 
-                // faint band per period of the timegrid
-                for (const u of units) {
-                    const a = toMin(u.startTime), b = toMin(u.endTime);
-                    if (b <= startMin || a >= endMin) continue;
-                    const band = document.createElement('div');
-                    band.className = 'tt-band';
-                    band.style.top = y(a) + 'px';
-                    band.style.height = (b - a) * scale + 'px';
-                    col.appendChild(band);
+                // a line at every full and half hour (Doc, 03.09.2026 -
+                // replaces the grey period bands of the timegrid)
+                for (let m = Math.ceil(startMin / 30) * 30; m <= endMin; m += 30) {
+                    const line = document.createElement('div');
+                    line.className = 'tt-hline' + (m % 60 ? ' half' : '');
+                    line.style.top = y(m) + 'px';
+                    col.appendChild(line);
                 }
 
                 // banners first: slim rows pinned above the time axis
