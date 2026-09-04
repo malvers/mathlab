@@ -26,6 +26,10 @@
     const PLANS = {
         /* Oberschule 9 — lb1 "Informationen und Daten", wb "Informatik und Automatisierung" */
         informatik9: {
+            page: 'informatik9.html', back: 'Informatik 9',
+            sub: 'Lernbereich 1 \u201eInformationen und Daten\u201c + Wahlbereich \u201eInformatik und Automatisierung\u201c',
+            switchLabel: 'Klasse wechseln', artikel: 'der', vor: 'Klasse ',
+            klassen: [['a', '9a'], ['b', '9b']],
             labels: { lb1: ['LB 1', 'b-green'], wb: ['Wahlbereich', 'b-teal'] },
             topics: [
                 { lb: 'lb1', title: 'Big Data im Alltag', sub: 'Welche Daten erzeugt dein Smartphone an einem einzigen Tag — und wer verdient damit Geld?' },
@@ -44,6 +48,10 @@
            Informationsmanagement", lb3 "IT-Sicherheit und Ökologie", lb4 "Projekt
            Informationsmanagement", wb "Datenkomprimierung und Fehlererkennung" */
         inf11: {
+            page: 'inf11.html', back: 'Informatik BGY 11',
+            sub: 'Lernbereich 1 \u201eInformatik als Wissenschaft\u201c, Lernbereich 2 \u201ePers\u00f6nliches Informationsmanagement\u201c, Lernbereich 3 \u201eIT-Sicherheit und \u00d6kologie\u201c + Wahlbereich \u201eDatenkomprimierung\u201c',
+            switchLabel: 'Kurs wechseln',
+            klassen: [['a', 'BGY26-1'], ['b', 'BGY26-2']],
             labels: { lb1: ['LB 1', 'b-orange'], lb2: ['LB 2', 'b-cyan'], lb3: ['LB 3', 'b-violet'], lb4: ['LB 4', 'b-teal'], wb: ['Wahlbereich', 'b-green'] },
             topics: [
                 { lb: 'lb1', title: 'Meilensteine der Rechentechnik', sub: 'Von Schickard und Zuse bis zum Rechenzentrum: Welche Idee war jeweils der eigentliche Sprung?' },
@@ -61,6 +69,10 @@
         /* FOS 11 — lb1 "Persönliches Informationsmanagement", lb2 "IT-Sicherheit und Ökologie",
            wb "Kryptografie in der Informatik" */
         fos11: {
+            page: 'fos11.html', back: 'Informatik FOS 11',
+            sub: 'Lernbereich 1 \u201ePers\u00f6nliches Informationsmanagement\u201c, Lernbereich 2 \u201eIT-Sicherheit und \u00d6kologie\u201c + Wahlbereich \u201eKryptografie\u201c',
+            switchLabel: 'Klasse wechseln',
+            klassen: [['a', 'FOS26-1'], ['b', 'FOS26-2']],
             labels: { lb1: ['LB 1', 'b-orange'], lb2: ['LB 2', 'b-cyan'], wb: ['Wahlbereich', 'b-green'] },
             topics: [
                 { lb: 'lb1', title: 'Recherchestrategien, die wirklich tragen', sub: 'Suchoperatoren, Fachdatenbanken, Bibliothekskataloge — wie kommt man an Quellen, die einer Prüfung standhalten?' },
@@ -78,6 +90,10 @@
         /* FOS 12 — lb1 "Modellierung von Datenbanken", lb2 "Algorithmen und Programme",
            lb3 "Projekt Webtechnologie", wb "Objektorientierte Programmierung" */
         fos12: {
+            page: 'fos12.html', back: 'Informatik FOS 12',
+            sub: 'Lernbereich 1 \u201eDatenbanken\u201c, Lernbereich 2 \u201eAlgorithmen und Programme\u201c, Lernbereich 3A \u201eWebtechnologie\u201c + Wahlbereich \u201eOOP\u201c',
+            switchLabel: 'Klasse wechseln',
+            klassen: [['a', 'FOS25-1'], ['b', 'FOS25-2']],
             labels: { lb1: ['LB 1', 'b-orange'], lb2: ['LB 2', 'b-cyan'], lb3: ['LB 3A', 'b-violet'], wb: ['Wahlbereich', 'b-green'] },
             topics: [
                 { lb: 'lb1', title: 'Datenbanken hinter den Kulissen', sub: 'Was passiert bei einer Bestellung, einer Fahrkarte, einem Arzttermin? Datenbasis und DBMS an einem echten System.' },
@@ -103,16 +119,48 @@
     const saveJSON = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { } };
     const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
-    /* topics with the shared overrides applied (topics carry no personal data,
-       so they stay in localStorage exactly as before) */
-    function topics() {
+    /* The talks are a LIST, not a fixed ten: Doc arranges the order himself and
+       duplicates a topic when two groups take the same subject (Doc,
+       04.09.2026). The order is a pure display matter - every entry carries its
+       own `id`, and that id IS the `idx` column in the database, so a card can
+       move without dragging a pupil's entry along with it.
+       Topics carry no personal data and therefore stay in localStorage, shared
+       by both class pages, as before. Stored shape:
+       { v: 2, list: [ { id, lb, title, sub } ] } - the older index-keyed
+       override object is lifted into that shape the first time it is read. */
+    function loadList() {
         const o = loadJSON(KEY_TOPICS);
+        if (Array.isArray(o.list) && o.list.length) {
+            const seen = new Set();
+            const out = [];
+            o.list.forEach((e) => {
+                const id = +e.id;
+                /* the same id twice would mean two cards sharing three places */
+                if (!Number.isFinite(id) || id < 0 || seen.has(id)) return;
+                seen.add(id);
+                const b = TOPICS[id] || {};
+                out.push({
+                    id: id,
+                    lb: e.lb || b.lb || Object.keys(LB_LABEL)[0],
+                    title: typeof e.title === 'string' ? e.title : (b.title || ''),
+                    sub: typeof e.sub === 'string' ? e.sub : (b.sub || '')
+                });
+            });
+            if (out.length) return out;
+        }
         return TOPICS.map((t, i) => ({
+            id: i,
             lb: t.lb,
             title: o[i] && typeof o[i].title === 'string' ? o[i].title : t.title,
             sub: o[i] && typeof o[i].sub === 'string' ? o[i].sub : t.sub
         }));
     }
+
+    /* the live list: render, the drag handle and the card menu all work on this
+       one array; localStorage is only written when something is committed */
+    let list = loadList();
+    const topics = () => list;
+    const posOf = (id) => list.findIndex((e) => e.id === id);
 
     /* ------------------------------------------------------------------
        Names — encrypted, in the cloud, never in plain text on any device.
@@ -131,7 +179,14 @@
     /* Two names per topic are the rule; a third pupil can join a talk, so every
        topic has a third slot that stays hidden until it is needed (Doc, 01.09.2026). */
     const blank = () => ({ taken: false, enc: null, name: null });
-    const slots = TOPICS.map(() => [blank(), blank(), blank()]);
+    /* One triple per topic ID, not per position: after a duplicate the ids are
+       no longer 0..9, and a card that is moved keeps its own three places. */
+    const slotMap = {};
+    const S = (id) => slotMap[id] || (slotMap[id] = [blank(), blank(), blank()]);
+    list.forEach((e) => S(e.id));
+    /* which ids the database really has rows for - a duplicated topic has none
+       until they are created, see ensureRows() */
+    const rowsIn = new Set();
     const expanded = new Set();   /* rows whose third field was opened by hand */
     const mine = new Set(Object.keys(loadJSON(MINE_KEY)));
     const markMine = (i, j) => { mine.add(i + '-' + j); const o = {}; mine.forEach((k) => { o[k] = 1; }); saveJSON(MINE_KEY, o); };
@@ -172,7 +227,8 @@
             if (!res.ok) throw new Error('HTTP ' + res.status);
             rows = await res.json();
         }
-        slots.forEach((row) => row.forEach((s) => { s.taken = false; s.enc = null; s.name = null; }));
+        Object.keys(slotMap).forEach((k) => slotMap[k].forEach((s) => { s.taken = false; s.enc = null; s.name = null; }));
+        rowsIn.clear();
         /* Eintragen heisst UPDATE - anonyme Browser duerfen keine Zeilen anlegen.
            Fehlen sie (neue Lerngruppe, noch nicht angelegt), ginge jeder Name
            still ins Leere. Also laut sagen statt schweigen. */
@@ -181,18 +237,20 @@
             return;
         }
         rows.forEach((r) => {
-            const s = slots[r.idx] && slots[r.idx][r.slot];
+            const s = S(r.idx)[r.slot];
             if (!s) return;
+            rowsIn.add(r.idx);
             s.taken = !!r.taken;
             s.enc = r.name_enc || null;
         });
         await decryptAll();
+        await ensureRows();
     }
 
     async function decryptAll() {
         if (!unlocked()) {
-            slots.forEach((row, i) => row.forEach((s, j) => {
-                const k = i + '-' + j;
+            Object.keys(slotMap).forEach((id) => slotMap[id].forEach((s, j) => {
+                const k = id + '-' + j;
                 if (!s.taken) myNames.delete(k);     /* freed: forget it */
                 /* Without the key no name is readable - except our own, which
                    this session still remembers. */
@@ -200,8 +258,8 @@
             }));
             return;
         }
-        for (const row of slots) {
-            for (const s of row) {
+        for (const id of Object.keys(slotMap)) {
+            for (const s of slotMap[id]) {
                 if (!s.enc) { s.name = null; continue; }
                 try { s.name = await svpCrypto.open(s.enc); } catch (e) { s.name = '??'; }
             }
@@ -281,9 +339,9 @@
                 throw new GraceOverError();
             }
         }
-        slots[i][j].taken = !!text;
-        slots[i][j].enc = enc;
-        slots[i][j].name = text || null;
+        S(i)[j].taken = !!text;
+        S(i)[j].enc = enc;
+        S(i)[j].name = text || null;
         if (text) myNames.set(i + '-' + j, text); else myNames.delete(i + '-' + j);
     }
 
@@ -300,10 +358,10 @@
             const v = Array.isArray(old[k]) ? old[k] : [];
             for (let j = 0; j < 2; j++) {   /* the old local format never had a third name */
                 const name = (v[j] || '').trim();
-                if (!name || !slots[i]) continue;
+                if (!name || !TOPICS[i]) continue;
                 /* somebody is sitting there now - an old local leftover must
                    never push a live entry out of the way */
-                if (slots[i][j].taken) continue;
+                if (S(i)[j].taken) continue;
                 try { await pushSlot(i, j, name); markMine(i, j); } catch (e) { setStatus('Übernahme fehlgeschlagen: ' + e.message, true); return false; }
             }
         }
@@ -319,7 +377,7 @@
        A slot THIS browser wrote stays clearable with a click, so a pupil can
        still fix his own typo without being able to touch anybody else's. */
     function editable(i, j) {
-        const s = slots[i][j];
+        const s = S(i)[j];
         if (!s.taken || myNames.has(i + '-' + j)) return true;
         /* Unlocked, but this name could not be read (session fell back to the
            anonymous read, or the blob would not open): the field shows "…" or
@@ -333,7 +391,7 @@
     }
 
     function slotValue(i, j) {
-        const s = slots[i][j];
+        const s = S(i)[j];
         if (!s.taken) return '';
         if (unlocked()) return s.name != null ? s.name : '…';
         const own = myNames.get(i + '-' + j);
@@ -354,19 +412,17 @@
             : (lastFocus && $(lastFocus)) || null;
         /* In edit mode the topic and its leitfrage exist ONLY in the DOM until
            "Fertig" is pressed - a redraw in between rebuilds them from the last
-           saved version and the change is gone (Doc, 04.09.2026). */
-        const tops = {};
+           saved version and the change is gone (Doc, 04.09.2026). readDom()
+           lifts them into the list, so the next render writes them straight
+           back out; only the caret has to be remembered by hand. */
         let editFocus = null;
         if (editing) {
-            const t = topics();
-            document.querySelectorAll('.vt-row').forEach((row, i) => {
-                const ti = row.querySelector('.vt-title-text');
-                const su = row.querySelector('.vt-sub');
-                if (!ti || !su || !t[i]) return;
-                if (act === ti) editFocus = { i: i, sel: '.vt-title-text' };
-                if (act === su) editFocus = { i: i, sel: '.vt-sub' };
-                if (ti.textContent.trim() === t[i].title && su.textContent.trim() === t[i].sub) return;
-                tops[i] = { title: ti.textContent, sub: su.textContent };
+            readDom();
+            list.forEach((e) => {
+                const row = $('row-' + e.id);
+                if (!row) return;
+                if (act === row.querySelector('.vt-title-text')) editFocus = { id: e.id, sel: '.vt-title-text' };
+                if (act === row.querySelector('.vt-sub')) editFocus = { id: e.id, sel: '.vt-sub' };
             });
         }
         const vals = {};
@@ -376,7 +432,6 @@
         });
         return {
             vals: vals,
-            tops: tops,
             editFocus: editFocus,
             focus: cur ? cur.id : null,
             start: cur ? cur.selectionStart : 0,
@@ -385,14 +440,8 @@
     }
 
     function putDrafts(d) {
-        Object.keys(d.tops).forEach((i) => {
-            const row = $('row-' + i);
-            if (!row) return;
-            row.querySelector('.vt-title-text').textContent = d.tops[i].title;
-            row.querySelector('.vt-sub').textContent = d.tops[i].sub;
-        });
         if (d.editFocus) {
-            const row = $('row-' + d.editFocus.i);
+            const row = $('row-' + d.editFocus.id);
             const el = row && row.querySelector(d.editFocus.sel);
             if (el) {
                 el.focus();
@@ -422,12 +471,15 @@
     }
 
     function render() {
-        const list = $('list');
+        const box = $('list');
         const draft = grabDrafts();
-        list.innerHTML = topics().map((t, i) => {
-            const lb = LB_LABEL[t.lb];
+        /* `i` is the topic's ID (its place in the database), `pos` its place on
+           the screen - the two part company as soon as a card is moved. */
+        box.innerHTML = list.map((t, pos) => {
+            const i = t.id;
+            const lb = LB_LABEL[t.lb] || LB_LABEL[Object.keys(LB_LABEL)[0]];
             const taken = rowTaken(i);
-            const third = slots[i][2].taken || expanded.has(i);
+            const third = S(i)[2].taken || expanded.has(i);
             const inp = (j) => {
                 const ro = editable(i, j) ? '' : ' readonly';
                 const ttl = editable(i, j) ? '' : (unlocked()
@@ -437,20 +489,21 @@
                         : ' title="Dieser Platz ist vergeben"');
                 return '<div class="vt-name n' + (j + 1) + '"><input type="text" id="name-' + i + '-' + j +
                     '" value="' + esc(slotValue(i, j)) + '" placeholder="Name ' + (j + 1) + '"' + ro + ttl +
-                    ' autocomplete="off" spellcheck="false" aria-label="Name ' + (j + 1) + ' für Thema ' + (i + 1) + '"></div>';
+                    ' autocomplete="off" spellcheck="false" aria-label="Name ' + (j + 1) + ' für Thema ' + (pos + 1) + '"></div>';
             };
             /* the toggle only ever ADDS a field; an occupied third slot cannot be
                folded away, otherwise a name would vanish from the page */
             const more = '<button type="button" class="vt-more" id="more-' + i + '"' +
-                (slots[i][2].taken ? ' hidden' : '') +
+                (S(i)[2].taken ? ' hidden' : '') +
                 ' title="' + (third ? 'Drittes Namensfeld ausblenden' : 'Dritten Namen zulassen') + '"' +
-                ' aria-label="Drittes Namensfeld für Thema ' + (i + 1) + '">' + (third ? '−' : '+') + '</button>';
+                ' aria-label="Drittes Namensfeld für Thema ' + (pos + 1) + '">' + (third ? '−' : '+') + '</button>';
             return '<div class="vt-row' + (taken ? ' taken' : '') + (third ? ' three' : '') + '" id="row-' + i + '">' +
                 /* Direct child of the card, not of .vt-nr: the badge is pinned to
                    the CARD's corner, and .vt-nr is itself positioned (it centres
                    the number), which would otherwise become its anchor. */
                 '<span class="badge ' + lb[1] + '">' + lb[0] + '</span>' +
-                '<div class="vt-nr"><span class="vt-nr-num">' + (i + 1) + '</span></div>' +
+                '<div class="vt-nr"' + (editing ? ' title="Ziehen, um die Reihenfolge zu ändern"' : '') +
+                    '><span class="vt-nr-num">' + (pos + 1) + '</span></div>' +
                 '<div class="vt-topic">' +
                     '<div class="vt-title"><span class="vt-title-text">' + esc(t.title) + '</span></div>' +
                     '<div class="vt-sub">' + esc(t.sub) + '</div>' +
@@ -469,7 +522,8 @@
                 '</div>';
         }).join('');
 
-        TOPICS.forEach((_, i) => {
+        list.forEach((t, pos) => {
+            const i = t.id;
             ROLES.forEach(function (r) {
                 const gb = $('grade-' + r[0] + '-' + i);
                 /* window.open has to run inside the click itself - awaiting the
@@ -478,7 +532,7 @@
                    the fields, so it does not need the save to have finished;
                    flushAll only pushes them to the cloud and can run after. */
                 if (gb) gb.addEventListener('click', function () {
-                    openMatrix(i, r[0], r[1]);
+                    openMatrix(i, pos, r[0], r[1]);
                     flushAll();
                 });
             });
@@ -506,9 +560,10 @@
                    itself until the pupil happens to click somewhere else */
                 el.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); el.blur(); } });
             });
+            wireCard(t, pos);                     /* drag handle and right-click menu */
         });
         /* Enter in a title ends the line instead of inserting a break */
-        list.querySelectorAll('.vt-title-text').forEach((el) => {
+        box.querySelectorAll('.vt-title-text').forEach((el) => {
             el.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); el.blur(); } });
         });
         putDrafts(draft);
@@ -524,14 +579,14 @@
        cannot come from CSS alone. (The badge no longer needs measuring - it
        sits in the card's corner, outside the flow.) */
     function sizeNrColumn() {
-        const list = $('list');
-        if (!list) return;
-        list.style.removeProperty('--vt-topic-h');
+        const box = $('list');
+        if (!box) return;
+        box.style.removeProperty('--vt-topic-h');
         let h = 0;
-        list.querySelectorAll('.vt-topic').forEach(function (t) {
+        box.querySelectorAll('.vt-topic').forEach(function (t) {
             h = Math.max(h, t.getBoundingClientRect().height);
         });
-        if (h) list.style.setProperty('--vt-topic-h', Math.ceil(h) + 'px');
+        if (h) box.style.setProperty('--vt-topic-h', Math.ceil(h) + 'px');
     }
 
     /* Orbitron may still be loading at first paint, and a badge measured in the
@@ -619,7 +674,7 @@
         if (!editable(i, j)) return;
         if (!dirty.has(i + '-' + j)) return;       /* nobody typed here: nothing to save */
         const text = el.value.trim();
-        if (text === (slots[i][j].name || '') && !!text === slots[i][j].taken) { dirty.delete(i + '-' + j); return; }
+        if (text === (S(i)[j].name || '') && !!text === S(i)[j].taken) { dirty.delete(i + '-' + j); return; }
         if (lastTried[i + '-' + j] === text) return;   /* refused before, unchanged since */
         try {
             if (!window.svpCrypto || !(await svpCrypto.hasPublic())) {
@@ -673,11 +728,11 @@
         }
     }
 
-    const rowTaken = (i) => slots[i].some((s) => s.taken);
+    const rowTaken = (i) => S(i).some((s) => s.taken);
 
     function updateCount() {
-        const taken = slots.filter((row) => row.some((s) => s.taken)).length;
-        $('count').innerHTML = '<b>' + taken + '</b> von ' + TOPICS.length + ' Themen vergeben';
+        const taken = list.filter((e) => rowTaken(e.id)).length;
+        $('count').innerHTML = '<b>' + taken + '</b> von ' + list.length + ' Themen vergeben';
     }
 
     /* ---------- toolbar: third column for ALL topics at once ---------- */
@@ -696,11 +751,11 @@
 
     /* open on every topic, or fold every free one away again */
     async function toggleAllThird() {
-        if (expanded.size >= TOPICS.length) {
-            for (let i = 0; i < TOPICS.length; i++) await flushSave(i, 2);
+        if (expanded.size >= list.length) {
+            for (const e of list) await flushSave(e.id, 2);
             expanded.clear();
         } else {
-            TOPICS.forEach((_, i) => expanded.add(i));
+            list.forEach((e) => expanded.add(e.id));
         }
         render();
     }
@@ -708,7 +763,7 @@
     function updateAllBtn() {
         const b = allBtn();
         if (!b) return;
-        const on = expanded.size >= TOPICS.length;
+        const on = expanded.size >= list.length;
         b.textContent = on ? '− Dritter Name' : '+ Dritter Name';
         b.title = on
             ? 'Das dritte Namensfeld überall wieder ausblenden (belegte bleiben)'
@@ -771,20 +826,33 @@
         document.querySelectorAll('.vt-title-text, .vt-sub').forEach((el) => {
             el.contentEditable = on ? 'true' : 'false';
         });
+        /* the number block is the grab handle - and only while editing, so a
+           pupil signing up cannot shuffle the talks */
+        document.querySelectorAll('.vt-list .vt-nr').forEach((el) => { el.draggable = !!on; });
+        if (!on) closeCardMenu();
         $('btn-edit').textContent = on ? '✔ Fertig' : '✎ Bearbeiten';
         $('btn-edit').classList.toggle('orange', on);
         $('btn-orig').hidden = !on;
     }
 
-    function saveTopics() {
-        const o = {};
-        document.querySelectorAll('.vt-row').forEach((row, i) => {
-            o[i] = {
-                title: row.querySelector('.vt-title-text').textContent.trim(),
-                sub: row.querySelector('.vt-sub').textContent.trim()
-            };
+    /* whatever stands in the editable cells right now, lifted into the list */
+    function readDom() {
+        list.forEach((e) => {
+            const row = $('row-' + e.id);
+            if (!row) return;
+            const ti = row.querySelector('.vt-title-text');
+            const su = row.querySelector('.vt-sub');
+            if (ti) e.title = ti.textContent.trim();
+            if (su) e.sub = su.textContent.trim();
         });
-        saveJSON(KEY_TOPICS, o);
+    }
+
+    function saveTopics() {
+        readDom();
+        saveJSON(KEY_TOPICS, {
+            v: 2,
+            list: list.map((e) => ({ id: e.id, lb: e.lb, title: e.title, sub: e.sub }))
+        });
     }
 
     window.vtToggleEdit = function () {
@@ -795,9 +863,236 @@
     /* topics back to the built-in list (names untouched) */
     window.vtOriginal = function () {
         try { localStorage.removeItem(KEY_TOPICS); } catch (e) { }
+        /* back to the built-in ten, in their built-in order - the names stay
+           where they are, they hang on the ids and those do not change */
+        list = loadList();
+        list.forEach((e) => S(e.id));
         editing = false;
         render();
     };
+
+    /* ---------- order and copies (edit mode only) ----------------------
+       Doc arranges the list himself: the number block is a grab handle, the
+       right mouse button opens a small menu on the card. Nothing in here ever
+       touches a name - every card carries its topic id, the names hang on that
+       id in the database, so a card that moves takes its own entries with it
+       and leaves everybody else's exactly where they are (Doc, 04.09.2026). */
+    let dragId = null;
+
+    /* drop the dragged card in front of (or behind) the card at `pos` */
+    function dropCard(id, pos, after) {
+        const from = posOf(id);
+        if (from < 0) return;
+        readDom();
+        const card = list.splice(from, 1)[0];
+        let to = pos + (after ? 1 : 0);
+        if (from < to) to--;                      /* the gap closed behind us */
+        to = Math.max(0, Math.min(list.length, to));
+        list.splice(to, 0, card);
+        if (to === from) return;                  /* dropped where it already was */
+        saveTopics();
+        render();
+    }
+
+    function stepCard(id, delta) {
+        const from = posOf(id);
+        const to = from + delta;
+        if (from < 0 || to < 0 || to >= list.length) return;
+        readDom();
+        list.splice(to, 0, list.splice(from, 1)[0]);
+        saveTopics();
+        render();
+    }
+
+    /* A copy gets a NEW id and therefore three empty places of its own - the
+       whole point is two groups on the same subject, not two cards fighting
+       over one set of names. */
+    function nextId() {
+        const used = new Set(list.map((e) => e.id));
+        let n = TOPICS.length;
+        while (used.has(n)) n++;
+        return n;
+    }
+
+    async function duplicateCard(id) {
+        const from = posOf(id);
+        if (from < 0) return;
+        readDom();
+        const src = list[from];
+        const copy = { id: nextId(), lb: src.lb, title: src.title, sub: src.sub };
+        list.splice(from + 1, 0, copy);
+        S(copy.id);
+        saveTopics();
+        render();
+        await ensureRows();
+    }
+
+    /* Only a copy can go again: a built-in topic stays in the list, and a topic
+       somebody has signed up for is never quietly dropped. */
+    function removable(id) { return id >= TOPICS.length && !rowTaken(id); }
+
+    function removeCard(id) {
+        const from = posOf(id);
+        if (from < 0 || !removable(id)) return;
+        readDom();
+        list.splice(from, 1);
+        expanded.delete(id);
+        saveTopics();
+        render();
+    }
+
+    /* A duplicated topic has no places in the database yet, and an anonymous
+       browser may not create any - it is granted UPDATE, not INSERT, and that
+       is exactly what keeps a pupil from inventing rows. So they are made here,
+       by the only one who can: Doc, logged in. Without a session the topic sits
+       on the page but cannot hold a name, and that is said out loud rather than
+       swallowed. */
+    let rowsWarned = false;
+    async function ensureRows() {
+        const a = A();
+        if (!a || !rowsIn.size) return;           /* nothing read back yet */
+        const missing = list.map((e) => e.id).filter((id) => !rowsIn.has(id));
+        if (!missing.length) return;
+        if (!a.hasSession()) {
+            if (rowsWarned) return;               /* say it once, not every 20 s */
+            rowsWarned = true;
+            setStatus('Für neue Themen fehlen in der Datenbank noch die Plätze — bitte anmelden, dann werden sie angelegt.', true);
+            return;
+        }
+        const body = [];
+        missing.forEach((id) => { for (let j = 0; j < 3; j++) body.push({ plan: PLAN, klasse: KLASSE, idx: id, slot: j }); });
+        try {
+            const res = await a.api(TABLE, {
+                method: 'POST',
+                headers: { Prefer: 'return=minimal,resolution=ignore-duplicates' },
+                body: JSON.stringify(body)
+            });
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            missing.forEach((id) => rowsIn.add(id));
+            rowsWarned = false;
+            setStatus(missing.length === 1
+                ? 'Plätze für das neue Thema angelegt.'
+                : 'Plätze für ' + missing.length + ' neue Themen angelegt.');
+        } catch (e) { setStatus('Plätze konnten nicht angelegt werden: ' + e.message, true); }
+    }
+
+    /* ---------- one card: grab handle and right-click menu ---------- */
+    function clearDropMarks() {
+        document.querySelectorAll('.vt-row.drop-before, .vt-row.drop-after')
+            .forEach((r) => r.classList.remove('drop-before', 'drop-after'));
+    }
+
+    function wireCard(t, pos) {
+        const row = $('row-' + t.id);
+        if (!row) return;
+        row.addEventListener('contextmenu', (ev) => {
+            if (!editing) return;                 /* outside edit mode the browser's own menu stays */
+            /* a name field keeps its paste menu */
+            if (ev.target.closest('.vt-name')) return;
+            ev.preventDefault();
+            openCardMenu(t.id, ev.clientX, ev.clientY);
+        });
+        const handle = row.querySelector('.vt-nr');
+        if (!handle) return;
+        handle.addEventListener('dragstart', (ev) => {
+            if (!editing) { ev.preventDefault(); return; }
+            dragId = t.id;
+            row.classList.add('vt-drag');
+            try {
+                ev.dataTransfer.effectAllowed = 'move';
+                /* Firefox starts no drag at all without a payload */
+                ev.dataTransfer.setData('text/plain', String(t.id));
+                ev.dataTransfer.setDragImage(row, 30, 20);
+            } catch (e) { }
+        });
+        handle.addEventListener('dragend', () => {
+            dragId = null;
+            row.classList.remove('vt-drag');
+            clearDropMarks();
+        });
+        row.addEventListener('dragover', (ev) => {
+            if (dragId === null || dragId === t.id) return;
+            ev.preventDefault();
+            try { ev.dataTransfer.dropEffect = 'move'; } catch (e) { }
+            const r = row.getBoundingClientRect();
+            const after = ev.clientY > r.top + r.height / 2;
+            clearDropMarks();
+            row.classList.add(after ? 'drop-after' : 'drop-before');
+        });
+        row.addEventListener('dragleave', (ev) => {
+            if (!row.contains(ev.relatedTarget)) row.classList.remove('drop-before', 'drop-after');
+        });
+        row.addEventListener('drop', (ev) => {
+            if (dragId === null) return;
+            ev.preventDefault();
+            const after = row.classList.contains('drop-after');
+            const id = dragId;
+            dragId = null;
+            clearDropMarks();
+            dropCard(id, pos, after);
+        });
+    }
+
+    /* Armed only while a menu is open, see openCardMenu() */
+    let menuScroll = null;
+
+    function closeCardMenu() {
+        if (menuScroll) { window.removeEventListener('scroll', menuScroll, true); menuScroll = null; }
+        const m = $('vt-menu');
+        if (m) m.remove();
+    }
+
+    /* Same look as the export dropdown, only at the mouse instead of under a
+       button. Move up/down is in here as well, so the order can also be set
+       without dragging - on a trackpad that is often the quicker way. */
+    function openCardMenu(id, x, y) {
+        closeCardMenu();
+        const pos = posOf(id);
+        if (pos < 0) return;
+        const menu = document.createElement('div');
+        menu.id = 'vt-menu';
+        menu.className = 'vt-menu';
+        const item = (label, title, on, fn) => {
+            const b = document.createElement('button');
+            b.type = 'button';
+            b.className = 'action secondary';
+            b.textContent = label;
+            b.title = title;
+            if (on) b.addEventListener('click', () => { closeCardMenu(); fn(); });
+            else b.disabled = true;
+            menu.appendChild(b);
+        };
+        item('⧉  Duplizieren', 'Eine Kopie darunter einfügen — mit eigenen, leeren Namensfeldern', true,
+            () => duplicateCard(id));
+        item('↑  Nach oben', 'Eine Position nach oben', pos > 0, () => stepCard(id, -1));
+        item('↓  Nach unten', 'Eine Position nach unten', pos < list.length - 1, () => stepCard(id, 1));
+        item('✕  Entfernen', removable(id)
+            ? 'Diese Kopie wieder aus der Liste nehmen'
+            : (id < TOPICS.length
+                ? 'Nur selbst angelegte Kopien lassen sich entfernen'
+                : 'Für dieses Thema ist schon ein Name eingetragen'),
+            removable(id), () => removeCard(id));
+        document.body.appendChild(menu);
+        /* keep the whole menu on screen, whichever corner it was opened in */
+        menu.style.left = Math.max(8, Math.min(x, window.innerWidth - menu.offsetWidth - 8)) + 'px';
+        menu.style.top = Math.max(8, Math.min(y, window.innerHeight - menu.offsetHeight - 8)) + 'px';
+        /* The menu hangs in the viewport, so a scroll would leave it standing
+           over a different card - it closes instead. Armed one frame later on
+           purpose: a right click on a card near the edge makes the browser
+           scroll it into view first, and that scroll must not shut the menu
+           before it was ever seen (caught by the test rig, 04.09.2026). */
+        requestAnimationFrame(() => {
+            if (!$('vt-menu')) return;
+            menuScroll = closeCardMenu;
+            window.addEventListener('scroll', menuScroll, true);
+        });
+    }
+
+    document.addEventListener('click', (e) => {
+        const m = $('vt-menu');
+        if (m && !m.contains(e.target)) closeCardMenu();
+    });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeCardMenu(); });
 
     window.vtToggleConfirm = function (open) {
         $('confirm').classList.toggle('open', open);
@@ -911,6 +1206,7 @@
         document.addEventListener('keydown', (e) => { if (e.key === 'Escape') open(false); });
         const h1 = document.querySelector('.title-group h1');
         if (h1) h1.textContent = h1.textContent.replace(/[^·]*$/, ' ' + here.label);
+        document.title = 'Vortragsthemen Informatik ' + here.label + ' | SJ 2026/27';
         const confirmBox = document.getElementById('confirm');
         if (confirmBox && confirmBox.firstChild) {
             confirmBox.firstChild.textContent = 'Alle Namen von ' + here.label + ' löschen?';
@@ -960,7 +1256,8 @@
        the signal, and it costs nothing. Only the marks are touched, never the
        whole list: a re-render would throw away a half-typed name. */
     function refreshGradeMarks() {
-        topics().forEach(function (_, i) {
+        list.forEach(function (t) {
+            const i = t.id;
             ROLES.forEach(function (r) {
                 const gb = $('grade-' + r[0] + '-' + i);
                 if (!gb) return;
@@ -1015,8 +1312,8 @@
         loadBewState();
     });
 
-    function openMatrix(i, role, roleLabel) {
-        const t = topics()[i] || {};
+    function openMatrix(i, pos, role, roleLabel) {
+        const t = list[pos] || {};
         /* A locked field shows "vergeben"/"eingetragen", not a name - that is a
            placeholder and has no business on a grading sheet. */
         const names = [0, 1, 2]
@@ -1030,7 +1327,7 @@
                 v: talkId(i, role),
                 topic: t.title || '',
                 names: names.join(', '),
-                label: 'Vortrag ' + (i + 1) + ' · ' + groupLabel + ' · ' + roleLabel,
+                label: 'Vortrag ' + (pos + 1) + ' · ' + groupLabel + ' · ' + roleLabel,
                 /* the three parts the database row is keyed by - the id string
                    cannot be split again, a Lerngruppe carries dashes itself */
                 plan: PLAN, klasse: KLASSE, idx: i,
@@ -1043,6 +1340,103 @@
         const win = window.open(url, '_blank');
         if (!win) location.href = url;
     }
+
+    /* ---------- the page around the list -------------------------------
+       Head, button bar and hint used to stand in each of the eight HTML files:
+       82 lines apiece, 63 of them identical, so every change of wording meant
+       eight edits (Doc, 04.09.2026). They are built from the plan entry now -
+       a page carries nothing but its <head> and the script tag that says WHICH
+       Lerngruppe it shows. A page that brings its own #list (the test rig) is
+       left untouched. */
+    const HINT = 'Klick auf <b>&#9998; Bearbeiten</b> macht Thema und Leitfrage editierbar &mdash; gespeichert wird beim Klick auf ' +
+        '&bdquo;Fertig&ldquo;, lokal in diesem Browser (localStorage), und gilt f&uuml;r beide Klassen gemeinsam. ' +
+        'Im Bearbeiten-Modus ist die <b>Nummer der Anfasser</b>: damit l&auml;sst sich die Reihenfolge ziehen. Die ' +
+        '<b>rechte Maustaste</b> auf einer Karte dupliziert ein Thema, schiebt es eine Position h&ouml;her oder ' +
+        'tiefer und nimmt eine Kopie wieder heraus. Eine Kopie bekommt <b>eigene, leere Namensfelder</b> &mdash; ' +
+        'angemeldet, denn nur dann lassen sich die Pl&auml;tze daf&uuml;r anlegen. Umsortieren r&uuml;hrt keinen ' +
+        'Namen an: die Namen h&auml;ngen am Thema, nicht an der Position. ' +
+        'Die <b>Namen</b> liegen dagegen verschl&uuml;sselt in der Cloud: eintragen kann sie jeder, lesen kann sie ' +
+        'nur Doc Alvers &mdash; angemeldet und mit dem Schl&uuml;ssel-Passwort. Ohne Schl&uuml;ssel zeigt die Liste ' +
+        'nur, welche Themen schon vergeben sind. Macht ein Thema ausnahmsweise ein Trio, blendet das <b>+</b> ' +
+        'am rechten Zeilenrand ein drittes Namensfeld ein &mdash; <b>+ Dritter Name</b> oben tut das f&uuml;r alle ' +
+        'Themen auf einmal. Beim Drucken erscheinen die Namen nur im entsperrten Zustand.';
+
+    /* What this page is called in prose. On a data-groups page the real name
+       only arrives with the .untis.json - until then the key stands in, with
+       the underscores of a coupled group read back as a plus, exactly as
+       buildSwitch will spell it. */
+    function klasseLabel() {
+        const hit = (PLAN_DEF.klassen || []).find((k) => k[0] === KLASSE);
+        return hit ? hit[1] : KLASSE.replace(/_/g, ' + ');
+    }
+
+    function buildPage() {
+        if ($('list')) return;                    /* the rig brings its own markup */
+        const label = klasseLabel();
+        document.title = 'Vortragsthemen Informatik ' + label + ' | SJ 2026/27';
+        /* Only the a/b pages get the two pills; where the Lerngruppen come from
+           the timetable, buildSwitch fills this span with the dropdown. */
+        const pills = GROUPS_SRC ? '' : (PLAN_DEF.klassen || []).map((k) =>
+            '<a class="badge b-green' + (k[0] === KLASSE ? ' on' : '') + '" href="' +
+            PLAN + k[0] + '-vortraege.html">' + esc(k[1]) + '</a>').join('');
+        const head = document.createElement('header');
+        head.className = 'page-head';
+        head.innerHTML =
+            '<a class="back-link" href="' + PLAN_DEF.page + '">&larr; Stoffverteilungsplan ' + esc(PLAN_DEF.back) + '</a>' +
+            '<div class="head-row">' +
+                '<div class="title-group">' +
+                    '<h1>Vortragsthemen &middot; Informatik &middot; ' + esc((PLAN_DEF.vor || '') + label) + '</h1>' +
+                    '<span class="vt-switch" aria-label="' +
+                        esc(GROUPS_SRC ? 'Lerngruppe wechseln' : (PLAN_DEF.switchLabel || 'Klasse wechseln')) +
+                        '">' + pills + '</span>' +
+                '</div>' +
+                '<div class="head-btns">' +
+                    '<button class="action secondary" id="btn-back" title="Zur&uuml;ck zum Stoffverteilungsplan">&larr; Zur&uuml;ck</button>' +
+                    '<button class="action orange" id="btn-print">Drucken</button>' +
+                '</div>' +
+            '</div>' +
+            '<div class="subtitle">' + PLAN_DEF.sub + ' &middot; zwei Namen pro Thema (dritter per + zuschaltbar)</div>';
+
+        const bar = document.createElement('div');
+        bar.className = 'vt-bar';
+        /* #confirm keeps a TEXT node as its first child - buildSwitch rewrites
+           exactly that when the Lerngruppe turns out to be called differently */
+        bar.innerHTML =
+            '<div class="vt-count" id="count"></div>' +
+            '<div class="vt-actions">' +
+                '<button class="action secondary" id="btn-orig" hidden ' +
+                    'title="Themen auf die eingebaute Liste zur&uuml;cksetzen (Namen bleiben)">Themen: Original</button>' +
+                '<button class="action" id="btn-edit">&#9998; Bearbeiten</button>' +
+                '<div class="vt-confirm" id="confirm">Alle Namen ' + (PLAN_DEF.artikel || 'von') + ' ' + esc(label) + ' l&ouml;schen? ' +
+                    '<button class="action" id="btn-wipe-yes">Ja</button>' +
+                    '<button class="action secondary" id="btn-wipe-no">Nein</button>' +
+                '</div>' +
+                '<button class="action secondary" id="btn-reset">Namen zur&uuml;cksetzen</button>' +
+            '</div>';
+
+        const box = document.createElement('div');
+        box.className = 'vt-list';
+        box.id = 'list';
+
+        const hint = document.createElement('div');
+        hint.className = 'vt-hint';
+        hint.innerHTML = HINT;
+
+        const frag = document.createDocumentFragment();
+        [head, bar, box, hint].forEach((el) => frag.appendChild(el));
+        document.body.insertBefore(frag, document.body.firstChild);
+
+        const go = (id, fn) => { const b = $(id); if (b) b.addEventListener('click', fn); };
+        go('btn-back', () => { location.href = PLAN_DEF.page; });
+        go('btn-print', () => window.print());
+        go('btn-edit', () => window.vtToggleEdit());
+        go('btn-orig', () => window.vtOriginal());
+        go('btn-reset', () => window.vtToggleConfirm(true));
+        go('btn-wipe-yes', () => window.vtResetNames());
+        go('btn-wipe-no', () => window.vtToggleConfirm(false));
+    }
+
+    buildPage();
 
     /* ---------- boot ---------- */
     function statusEl() {

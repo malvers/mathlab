@@ -2329,7 +2329,7 @@ body.form-preview #svp-form {
    Logic lives in informatik/vortraege.js.
    ============================================================ */
 .vt-list {
-    max-width: 1180px;
+    max-width: 1200px; /* same track as header.page-head (Doc, 04.09.2026) */
     margin: 0 auto;
     display: grid;
     gap: 10px;
@@ -2496,6 +2496,38 @@ body.form-preview #svp-form {
 /* edit mode: dashed outlines come from .editing [contenteditable] above */
 .vt-list.editing [contenteditable="true"] { padding: 1px 4px; border-radius: 4px; }
 
+/* Bearbeiten-Modus: die Nummer ist der Anfasser. Gezogen wird an ihr und nicht
+   an der Karte - sonst waere jede Textauswahl im Thema ein Umsortieren. */
+.vt-list.editing .vt-nr { cursor: grab; }
+.vt-list.editing .vt-nr:active { cursor: grabbing; }
+.vt-row.vt-drag { opacity: 0.4; }
+
+/* Wohin die Karte faellt: eine λ-Linie ueber oder unter der Zielkarte. Als
+   Schatten, damit die Zeile dabei nicht um eine Randbreite springt. */
+.vt-row.drop-before { box-shadow: 0 -3px 0 0 var(--lambda); }
+.vt-row.drop-after { box-shadow: 0 3px 0 0 var(--lambda); }
+
+/* Rechte Maustaste auf eine Karte: dieselbe Optik wie das Export-Menue, nur an
+   der Maus statt unter einem Knopf. */
+.vt-menu {
+    position: fixed;
+    z-index: 120;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+    padding: 10px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    box-shadow: 0 8px 22px var(--shadow);
+    white-space: nowrap;
+}
+
+.vt-menu button.action { width: 100%; text-align: left; }
+.vt-menu button.action[disabled] { opacity: 0.35; cursor: default; }
+.vt-menu button.action[disabled]:hover { color: inherit; border-color: var(--line); background: transparent; }
+
 .vt-name input {
     width: 100%;
     box-sizing: border-box;
@@ -2520,7 +2552,7 @@ body.form-preview #svp-form {
 
 /* toolbar under the header: counter left, buttons right */
 .vt-bar {
-    max-width: 1180px;
+    max-width: 1200px;
     margin: 0 auto 14px;
     display: flex;
     align-items: center;
@@ -2599,7 +2631,7 @@ body.form-preview #svp-form {
 .vt-switch .badge.on { opacity: 1; box-shadow: 0 0 0 1px currentColor inset; }
 
 .vt-hint {
-    max-width: 1180px;
+    max-width: 1200px;
     margin: 16px auto 0;
     font-size: 0.82rem;
     color: var(--muted);
@@ -2624,7 +2656,7 @@ body.form-preview #svp-form {
 
 @media print {
     .vt-actions, .vt-hint, .vt-confirm, .vt-switch, .vt-more, .vt-status,
-    .vt-grade, .vt-grade-lbl, .vt-grades { display: none !important; }
+    .vt-menu, .vt-grade, .vt-grade-lbl, .vt-grades { display: none !important; }
 
     .vt-row {
         break-inside: avoid;
