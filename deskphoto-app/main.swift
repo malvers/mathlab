@@ -2,6 +2,8 @@
 // level, so a picture sits above the wallpaper and below every ordinary window.
 // Each photo is drawn as a print (white margin, soft shadow, slight tilt) and can
 // be dragged, scaled and rotated with the mouse; position and size are remembered.
+// An image with transparent pixels is treated as a cut-out instead: no paper, the
+// wallpaper shows through, and the shadow follows the shape of the image.
 
 import Cocoa
 import ServiceManagement
@@ -50,6 +52,26 @@ private func margin(for width: Double) -> Double { min(18, max(6, width * 0.028)
 /// Padding that keeps the drop shadow inside the window even when the print is tilted.
 private let shadowPad: Double = 40
 
+/// True when the image has pixels that are not fully opaque. Probed on a small
+/// RGBA rendering: a real cut-out keeps translucent pixels even at 256 px, while an
+/// opaque photo that merely carries an alpha channel stays solid everywhere.
+private func hasTransparency(_ cg: CGImage) -> Bool {
+    switch cg.alphaInfo {
+    case .none, .noneSkipLast, .noneSkipFirst: return false
+    default: break
+    }
+    let n = 256
+    guard let ctx = CGContext(data: nil, width: n, height: n, bitsPerComponent: 8, bytesPerRow: n * 4,
+                              space: CGColorSpaceCreateDeviceRGB(),
+                              bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue),
+          let data = ctx.data else { return false }
+    ctx.clear(CGRect(x: 0, y: 0, width: n, height: n))
+    ctx.draw(cg, in: CGRect(x: 0, y: 0, width: n, height: n))
+    let px = data.bindMemory(to: UInt8.self, capacity: n * n * 4)
+    for i in stride(from: 3, to: n * n * 4, by: 4) where px[i] < 250 { return true }
+    return false
+}
+
 // MARK: - The view that draws one print
 
 final class PhotoView: NSView {
@@ -69,6 +91,7 @@ final class PhotoView: NSView {
 
     private enum Mode { case none, move, transform }
     private var mode: Mode = .none
+    private var dragged = false           // set as soon as the mouse really moves
 
     private var startMouse: NSPoint = .zero       // screen coordinates
     private var startOrigin: NSPoint = .zero
@@ -120,7 +143,13 @@ final class PhotoView: NSView {
 
     required init?(coder: NSCoder) { fatalError() }
 
-    func setImage(_ image: CGImage) { photo.contents = image }
+    /// A cut-out gets no paper: the layer stays clear, so its shadow is cast by the
+    /// image pixels themselves and traces the outline of the picture.
+    func setImage(_ image: CGImage, borderless: Bool) {
+        photo.contents = image
+        paper.backgroundColor = borderless ? nil : NSColor.white.cgColor
+        photo.cornerRadius = borderless ? 0 : 1
+    }
 
     /// Re-lays the print for the current window size; called after every scale or rotate.
     func relayout() {
@@ -154,6 +183,8 @@ final class PhotoView: NSView {
         for h in handles { h.opacity = on ? 1 : 0 }
         CATransaction.commit()
     }
+
+    func toggleHandles() { showHandles(!selected) }
 
     /// True when the point, in screen coordinates, lies on the print.
     func covers(screenPoint p: NSPoint) -> Bool {
@@ -198,6 +229,7 @@ final class PhotoView: NSView {
         if event.clickCount == 2 { item?.openOriginal(); return }
         guard let win = window else { return }
 
+        dragged = false
         startMouse = NSEvent.mouseLocation
         startOrigin = win.frame.origin
         startCenter = NSPoint(x: win.frame.midX, y: win.frame.midY)
@@ -219,6 +251,7 @@ final class PhotoView: NSView {
 
     override func mouseDragged(with event: NSEvent) {
         let now = NSEvent.mouseLocation
+        if hypot(now.x - startMouse.x, now.y - startMouse.y) > 2 { dragged = true }
         switch mode {
         case .move:
             window?.setFrameOrigin(NSPoint(x: startOrigin.x + (now.x - startMouse.x),
@@ -240,7 +273,11 @@ final class PhotoView: NSView {
     }
 
     override func mouseUp(with event: NSEvent) {
+        // A click that moved nothing toggles the grips, so the same print puts them
+        // away again — clicking the wallpaper instead would reveal the desktop.
+        if !dragged && event.clickCount == 1 { toggleHandles() }
         mode = .none
+        dragged = false
         NSCursor.arrow.set()
         item?.commit()
     }
@@ -265,6 +302,7 @@ final class PhotoItem {
     let window: NSPanel
     private let view: PhotoView
     private let aspect: Double            // width / height of the image
+    let borderless: Bool                  // cut-out without paper, see hasTransparency
     weak var owner: AppDelegate?
 
     init?(rec: PhotoRec, owner: AppDelegate) {
@@ -275,6 +313,7 @@ final class PhotoItem {
         self.rec = rec
         self.owner = owner
         self.aspect = Double(cg.width) / Double(cg.height)
+        self.borderless = hasTransparency(cg)
 
         let panel = NSPanel(contentRect: NSRect(x: 0, y: 0, width: 10, height: 10),
                             styleMask: [.borderless, .nonactivatingPanel],
@@ -293,7 +332,7 @@ final class PhotoItem {
         self.window = panel
 
         view = PhotoView(frame: .zero)
-        view.setImage(cg)
+        view.setImage(cg, borderless: borderless)
         panel.contentView = view
         view.item = self
 
@@ -305,7 +344,7 @@ final class PhotoItem {
     private func apply() {
         let w = rec.width
         let h = w / aspect
-        let m = margin(for: w)
+        let m = borderless ? 0 : margin(for: w)
         let paper = CGSize(width: w + 2 * m, height: h + 2 * m)
 
         let ca = abs(cos(rec.angle)), sa = abs(sin(rec.angle))
@@ -457,7 +496,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                                centerY: Double(screen.midY) - Double(n % 5) * 28,
                                width: 340,
                                angle: Double.random(in: -0.06 ... 0.06))
-            if let item = PhotoItem(rec: rec, owner: self) { items.append(item) }
+            if let item = PhotoItem(rec: rec, owner: self) {
+                // A cut-out mimics a widget, so it starts straight; only paper prints tilt.
+                if item.borderless { item.setTransform(width: rec.width, angle: 0) }
+                items.append(item)
+            }
         }
         save()
         publishMenu()
@@ -516,14 +559,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
-    /// Shows the grips on the print that was just clicked and hides them everywhere else.
+    /// Hides the grips everywhere but on the print that was just clicked; that one
+    /// toggles its own grips on mouse up, so a second click puts them away.
     private func updateSelection() {
         let p = NSEvent.mouseLocation
-        var found = false
+        var hitTopmost = false
         for item in items.reversed() {       // topmost print wins
-            let on = !found && item.covers(p)
-            item.select(on)
-            if on { found = true }
+            if !hitTopmost && item.covers(p) { hitTopmost = true } else { item.select(false) }
         }
     }
 
