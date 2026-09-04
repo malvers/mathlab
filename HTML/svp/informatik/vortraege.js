@@ -136,6 +136,13 @@
     const mine = new Set(Object.keys(loadJSON(MINE_KEY)));
     const markMine = (i, j) => { mine.add(i + '-' + j); const o = {}; mine.forEach((k) => { o[k] = 1; }); saveJSON(MINE_KEY, o); };
 
+    /* The names this browser wrote itself, in MEMORY only - never on the device,
+       that is the whole point of the sealed column. They are what lets a pupil
+       keep typing in his own field instead of running into the "eingetragen"
+       wall in the middle of a word, and they are gone on the next reload.
+       (Doc, 04.09.2026: single letters in the list.) */
+    const myNames = new Map();
+
     const A = () => window.svpAuth;
     const unlocked = () => !!(window.svpCrypto && svpCrypto.hasPrivate());
 
@@ -183,7 +190,16 @@
     }
 
     async function decryptAll() {
-        if (!unlocked()) { slots.forEach((r) => r.forEach((s) => { s.name = null; })); return; }
+        if (!unlocked()) {
+            slots.forEach((row, i) => row.forEach((s, j) => {
+                const k = i + '-' + j;
+                if (!s.taken) myNames.delete(k);     /* freed: forget it */
+                /* Without the key no name is readable - except our own, which
+                   this session still remembers. */
+                s.name = s.taken && myNames.has(k) ? myNames.get(k) : null;
+            }));
+            return;
+        }
         for (const row of slots) {
             for (const s of row) {
                 if (!s.enc) { s.name = null; continue; }
@@ -225,7 +241,15 @@
            Only idx/slot/taken are selected; name_enc is not readable without the
            key, and asking for it would fail the whole request. */
         const anon = !a.hasSession();
-        const guard = !!text && anon;          /* claiming: only while still free */
+        /* ... but only when CLAIMING somebody else's ground. Without the
+           isMine() exception the browser locked itself out: the debounce saves
+           the first letter, the slot is taken, and every further save of the
+           SAME field failed the guard and was reported as "somebody was faster"
+           - which is why single letters ended up in the list (Doc, 04.09.2026).
+           The exception hangs on myNames, not on the stored mine-flag: it holds
+           only for a slot this browser wrote in THIS session, so a flag left
+           over from a reset class can never wave an overwrite through. */
+        const guard = !!text && anon && !myNames.has(i + '-' + j);
         let path = TABLE + '?' + QS + '&idx=eq.' + i + '&slot=eq.' + j;
         if (guard) path += '&taken=is.false';
         if (anon) path += '&select=idx,slot,taken';
@@ -248,13 +272,19 @@
         if (anon) {
             const rows = await res.json().catch(() => []);
             if (!rows.length) {
-                if (text) throw new SlotTakenError();       /* somebody else was faster */
-                throw new GraceOverError();                 /* too late to clear it yourself */
+                /* Which of the two refused it is decided by the filter we sent,
+                   not by the text: with the guard the row was no longer free,
+                   without it the row is ours and the database's ten-minute rule
+                   turned it down. Deciding by `text` blamed a "faster
+                   classmate" for every late correction (Doc, 04.09.2026). */
+                if (guard) throw new SlotTakenError();
+                throw new GraceOverError();
             }
         }
         slots[i][j].taken = !!text;
         slots[i][j].enc = enc;
         slots[i][j].name = text || null;
+        if (text) myNames.set(i + '-' + j, text); else myNames.delete(i + '-' + j);
     }
 
     /* One-off migration: names that an earlier version left in this browser's
@@ -271,6 +301,9 @@
             for (let j = 0; j < 2; j++) {   /* the old local format never had a third name */
                 const name = (v[j] || '').trim();
                 if (!name || !slots[i]) continue;
+                /* somebody is sitting there now - an old local leftover must
+                   never push a live entry out of the way */
+                if (slots[i][j].taken) continue;
                 try { await pushSlot(i, j, name); markMine(i, j); } catch (e) { setStatus('Übernahme fehlgeschlagen: ' + e.message, true); return false; }
             }
         }
@@ -286,7 +319,13 @@
        A slot THIS browser wrote stays clearable with a click, so a pupil can
        still fix his own typo without being able to touch anybody else's. */
     function editable(i, j) {
-        return unlocked() || !slots[i][j].taken;
+        const s = slots[i][j];
+        if (!s.taken || myNames.has(i + '-' + j)) return true;
+        /* Unlocked, but this name could not be read (session fell back to the
+           anonymous read, or the blob would not open): the field shows "…" or
+           "??" - a placeholder, and a placeholder must never become writable,
+           or the next blur seals it over the real name. */
+        return unlocked() && s.name != null && s.name !== '??';
     }
 
     function isMine(i, j) {
@@ -297,20 +336,105 @@
         const s = slots[i][j];
         if (!s.taken) return '';
         if (unlocked()) return s.name != null ? s.name : '…';
+        const own = myNames.get(i + '-' + j);
+        if (own != null) return own;            /* our own entry, still known */
         return isMine(i, j) ? 'eingetragen' : 'vergeben';
+    }
+
+    /* Everything typed but not yet saved has to survive a redraw. render()
+       replaces the whole list, so without this a refresh in the wrong second
+       swallows a half-typed name and the rest is typed into nothing - which is
+       how fragments like "lene" reached the database (Doc, 04.09.2026). */
+    function grabDrafts() {
+        const act = document.activeElement;
+        /* Clicking a toolbar button moves the focus off the field, so remember
+           where the writing was: with an unsaved draft the caret goes back
+           there, otherwise the pupil types the rest into the void. */
+        const cur = act && act.id && act.id.indexOf('name-') === 0 ? act
+            : (lastFocus && $(lastFocus)) || null;
+        /* In edit mode the topic and its leitfrage exist ONLY in the DOM until
+           "Fertig" is pressed - a redraw in between rebuilds them from the last
+           saved version and the change is gone (Doc, 04.09.2026). */
+        const tops = {};
+        let editFocus = null;
+        if (editing) {
+            const t = topics();
+            document.querySelectorAll('.vt-row').forEach((row, i) => {
+                const ti = row.querySelector('.vt-title-text');
+                const su = row.querySelector('.vt-sub');
+                if (!ti || !su || !t[i]) return;
+                if (act === ti) editFocus = { i: i, sel: '.vt-title-text' };
+                if (act === su) editFocus = { i: i, sel: '.vt-sub' };
+                if (ti.textContent.trim() === t[i].title && su.textContent.trim() === t[i].sub) return;
+                tops[i] = { title: ti.textContent, sub: su.textContent };
+            });
+        }
+        const vals = {};
+        dirty.forEach((k) => {
+            const el = $('name-' + k);
+            if (el && !el.readOnly) vals[k] = el.value;
+        });
+        return {
+            vals: vals,
+            tops: tops,
+            editFocus: editFocus,
+            focus: cur ? cur.id : null,
+            start: cur ? cur.selectionStart : 0,
+            end: cur ? cur.selectionEnd : 0
+        };
+    }
+
+    function putDrafts(d) {
+        Object.keys(d.tops).forEach((i) => {
+            const row = $('row-' + i);
+            if (!row) return;
+            row.querySelector('.vt-title-text').textContent = d.tops[i].title;
+            row.querySelector('.vt-sub').textContent = d.tops[i].sub;
+        });
+        if (d.editFocus) {
+            const row = $('row-' + d.editFocus.i);
+            const el = row && row.querySelector(d.editFocus.sel);
+            if (el) {
+                el.focus();
+                try {   /* caret to the end, so typing simply carries on */
+                    const r = document.createRange();
+                    r.selectNodeContents(el);
+                    r.collapse(false);
+                    const sel = window.getSelection();
+                    sel.removeAllRanges();
+                    sel.addRange(r);
+                } catch (e) { }
+            }
+        }
+        /* the caret only returns to a field that really has unsaved text */
+        const keep = d.focus && d.vals[d.focus.slice(5)] !== undefined;
+        Object.keys(d.vals).forEach((k) => {
+            const el = $('name-' + k);
+            /* never back into a field that has meanwhile become somebody
+               else's - the draft is then genuinely obsolete */
+            if (el && !el.readOnly) el.value = d.vals[k];
+        });
+        if (!keep) return;
+        const el = $(d.focus);
+        if (!el || el.readOnly) return;
+        el.focus();
+        try { el.setSelectionRange(d.start, d.end); } catch (e) { }
     }
 
     function render() {
         const list = $('list');
+        const draft = grabDrafts();
         list.innerHTML = topics().map((t, i) => {
             const lb = LB_LABEL[t.lb];
             const taken = rowTaken(i);
             const third = slots[i][2].taken || expanded.has(i);
             const inp = (j) => {
                 const ro = editable(i, j) ? '' : ' readonly';
-                const ttl = editable(i, j) ? '' : (isMine(i, j)
-                    ? ' title="Dein Eintrag — anklicken, um ihn zu löschen"'
-                    : ' title="Dieser Platz ist vergeben"');
+                const ttl = editable(i, j) ? '' : (unlocked()
+                    ? ' title="Name nicht lesbar — Seite neu laden"'
+                    : isMine(i, j)
+                        ? ' title="Dein Eintrag — anklicken, um ihn zu löschen"'
+                        : ' title="Dieser Platz ist vergeben"');
                 return '<div class="vt-name n' + (j + 1) + '"><input type="text" id="name-' + i + '-' + j +
                     '" value="' + esc(slotValue(i, j)) + '" placeholder="Name ' + (j + 1) + '"' + ro + ttl +
                     ' autocomplete="off" spellcheck="false" aria-label="Name ' + (j + 1) + ' für Thema ' + (i + 1) + '"></div>';
@@ -371,17 +495,23 @@
                 if (!el) return;
                 el.classList.toggle('locked', !editable(i, j));
                 if (!editable(i, j)) {
-                    if (isMine(i, j)) { el.classList.add('mine'); el.addEventListener('click', () => clearMine(i, j)); }
+                    if (isMine(i, j) && !unlocked()) { el.classList.add('mine'); el.addEventListener('click', () => clearMine(i, j)); }
                     return;
                 }
-                el.addEventListener('input', () => queueSave(i, j));
+                el.classList.toggle('unsaved', failed.has(i + '-' + j));
+                el.addEventListener('focus', () => { lastFocus = el.id; });
+                el.addEventListener('input', () => { dirty.add(i + '-' + j); queueSave(i, j); });
                 el.addEventListener('blur', () => flushSave(i, j));
+                /* Enter means "done" - otherwise the field keeps the name to
+                   itself until the pupil happens to click somewhere else */
+                el.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); el.blur(); } });
             });
         });
         /* Enter in a title ends the line instead of inserting a break */
         list.querySelectorAll('.vt-title-text').forEach((el) => {
             el.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); el.blur(); } });
         });
+        putDrafts(draft);
         sizeNrColumn();
         setEditing(editing);
         updateCount();
@@ -415,7 +545,12 @@
             setStatus('lösche …');
             await pushSlot(i, j, '');
             mine.delete(i + '-' + j);
+            failed.delete(i + '-' + j);
+            dirty.delete(i + '-' + j);
             const o = {}; mine.forEach((k) => { o[k] = 1; }); saveJSON(MINE_KEY, o);
+            /* the third field was on screen because it was taken; keep it open,
+               otherwise it vanishes under the hand that just cleared it */
+            if (j === 2) expanded.add(i);
             render();
             setStatus('Eintrag gelöscht.');
             const el = $('name-' + i + '-' + j);
@@ -423,8 +558,33 @@
         } catch (e) { setStatus('Löschen fehlgeschlagen: ' + e.message, true); }
     }
 
+    /* Texts the database turned down for good (no key, grace period over). A
+       redraw fires blur on the old input, which would save again - the same
+       rejected text, forever. So it is tried once; one more keystroke, and it
+       goes again. A plain network hiccup is NOT remembered here: that one is
+       worth retrying on the next blur. */
+    const lastTried = {};
+
+    /* the name field the caret was in last - see grabDrafts() */
+    let lastFocus = null;
+
+    /* Fields a human has actually typed in since the last successful save.
+       ONLY these are drafts and only these may be saved. Comparing "field
+       differs from stored name" instead was a disaster: the first render runs
+       before the names arrive, so every empty field counted as a draft "" and
+       was written back over the freshly decrypted name - and a blur would then
+       have pushed that "" into the database (Doc, 04.09.2026: "alle Namen weg"). */
+    const dirty = new Set();
+
     /* typing is debounced, leaving the field saves at once */
     const timers = {};
+    /* Slots whose last save failed - the field stays marked until it works, so
+       an unsaved name never sits there looking finished. */
+    const failed = new Set();
+    /* Two saves of the same field must not overtake each other: the second
+       PATCH could land first and the older text would win. */
+    const chains = {};
+    let saving = 0;
     function queueSave(i, j) {
         clearTimeout(timers[i + '-' + j]);
         timers[i + '-' + j] = setTimeout(() => flushSave(i, j), 800);
@@ -440,14 +600,32 @@
     }
 
     async function flushSave(i, j) {
-        clearTimeout(timers[i + '-' + j]);
-        delete timers[i + '-' + j];
+        const key = i + '-' + j;
+        clearTimeout(timers[key]);
+        delete timers[key];
+        saving++;
+        const run = (chains[key] || Promise.resolve()).then(() => doSave(i, j));
+        chains[key] = run.catch(() => { });
+        try { await run; } finally { saving--; }
+    }
+
+    async function doSave(i, j) {
         const el = $('name-' + i + '-' + j);
         if (!el) return;
+        /* A locked slot does not show a name but the words "vergeben" or
+           "eingetragen". Saving THAT would seal the placeholder over the real
+           entry - which is what "- Dritter Name" did, because it flushes every
+           row, readonly or not (Doc, 04.09.2026). */
+        if (!editable(i, j)) return;
+        if (!dirty.has(i + '-' + j)) return;       /* nobody typed here: nothing to save */
         const text = el.value.trim();
-        if (text === (slots[i][j].name || '') && !!text === slots[i][j].taken) return;
+        if (text === (slots[i][j].name || '') && !!text === slots[i][j].taken) { dirty.delete(i + '-' + j); return; }
+        if (lastTried[i + '-' + j] === text) return;   /* refused before, unchanged since */
         try {
             if (!window.svpCrypto || !(await svpCrypto.hasPublic())) {
+                failed.add(i + '-' + j);
+                lastTried[i + '-' + j] = text;
+                el.classList.add('unsaved');
                 setStatus('Kein Schlüssel eingerichtet — der Name wurde NICHT gespeichert.', true);
                 return;
             }
@@ -456,13 +634,23 @@
             if (text) markMine(i, j);
             $('row-' + i).classList.toggle('taken', rowTaken(i));
             updateCount();
+            failed.delete(i + '-' + j);
+            dirty.delete(i + '-' + j);
+            delete lastTried[i + '-' + j];
+            el.classList.remove('unsaved');
             setStatus('☁ gespeichert (verschlüsselt)');
         } catch (e) {
             if (e.name === 'GraceOver') {
                 clearTimeout(timers[i + '-' + j]);
                 delete timers[i + '-' + j];
+                /* No refresh: the database did not change, and redrawing would
+                   only fire blur on this very field and try the same rejected
+                   text again. The text stays where it is, marked red, so it is
+                   plain that it did NOT go anywhere. */
+                failed.add(i + '-' + j);
+                lastTried[i + '-' + j] = text;
+                el.classList.add('unsaved');
                 setStatus('Aendern ist nur in den ersten zehn Minuten moeglich — bitte Herrn Alvers ansprechen.', true);
-                await refresh();
                 return;
             }
             if (e.name === 'SlotTaken') {
@@ -472,10 +660,15 @@
                    refresh() redraw the field from the truth in the database. */
                 clearTimeout(timers[i + '-' + j]);
                 delete timers[i + '-' + j];
+                /* the slot belongs to somebody else now, the draft is void */
+                failed.delete(i + '-' + j);
+                dirty.delete(i + '-' + j);
                 setStatus('Dieser Platz wurde gerade von jemand anderem belegt — bitte einen freien waehlen.', true);
                 await refresh();
                 return;
             }
+            failed.add(i + '-' + j);
+            el.classList.add('unsaved');
             setStatus('☁ NICHT gespeichert: ' + e.message, true);
         }
     }
@@ -551,6 +744,15 @@
 
     async function onKeyBtn() {
         if (!keyExists) {
+            /* keyExists came from a lookup at page load; had that failed for a
+               moment, this button would offer to CREATE a key - and a second
+               key pair makes every name sealed so far unreadable for good. So
+               ask again, right now, before the dialog even opens. */
+            try { keyExists = await svpCrypto.hasPublic(); } catch (e) {
+                setStatus('Schlüssel nicht prüfbar (' + e.message + ') — bitte neu laden.', true);
+                return;
+            }
+            if (keyExists) { updateKeyBtn(); setStatus('Es gibt bereits einen Schlüssel.'); return; }
             svpCrypto.passDialog('create', async () => {
                 keyExists = true;
                 setStatus('Schlüssel erzeugt — Passwort gut aufheben, es gibt keinen Ersatz.');
@@ -620,6 +822,9 @@
                 if (!res.ok) throw new Error('HTTP ' + res.status);
                 try { localStorage.removeItem(MINE_KEY); } catch (e) { }
                 mine.clear();
+                myNames.clear();
+                failed.clear();
+                dirty.clear();
                 expanded.clear();
                 await refresh();
                 setStatus('Alle Namen dieser Klasse gelöscht.');
@@ -812,8 +1017,13 @@
 
     function openMatrix(i, role, roleLabel) {
         const t = topics()[i] || {};
+        /* A locked field shows "vergeben"/"eingetragen", not a name - that is a
+           placeholder and has no business on a grading sheet. */
         const names = [0, 1, 2]
-            .map(function (j) { const el = $('name-' + i + '-' + j); return el ? el.value.trim() : ''; })
+            .map(function (j) {
+                const el = $('name-' + i + '-' + j);
+                return el && editable(i, j) ? el.value.trim() : '';
+            })
             .filter(function (v) { return v; });
         try {
             localStorage.setItem(HANDOFF, JSON.stringify({
@@ -847,7 +1057,17 @@
     }
 
     async function refresh() {
+        /* A write still on its way must land first. Otherwise the read comes
+           back with the slot still free, the page forgets that the name was
+           its own, and the next save is treated as a claim of a taken slot -
+           "jemand anderem belegt" for one's own name (audit, 04.09.2026). */
+        await Promise.all(Object.keys(chains).map((k) => chains[k]));
         try { await fetchSlots(); } catch (e) { setStatus('☁ Liste nicht geladen: ' + e.message, true); }
+        /* Only the 20 s poll used to respect the open edit mode; coming back to
+           the tab redrew regardless and swallowed the change that had not been
+           confirmed with "Fertig" yet (Doc, 04.09.2026). The fresh slot data is
+           in `slots` either way - the next render shows it. */
+        if (editing) return;
         render();
     }
 
@@ -864,13 +1084,18 @@
         try { keyExists = await svpCrypto.hasPublic(); } catch (e) { keyExists = false; }
         await refresh();
         if (await migrateLocalNames()) render();
-        /* somebody else may have signed up meanwhile — but never discard a name
-           that is still sitting unsaved in a field on this page */
+        /* Somebody else may have signed up meanwhile — but never discard a name
+           that is still sitting unsaved in a field on this page. And leaving is
+           where a phone loses a half-typed one: the tab is frozen long before
+           the 800 ms debounce fires, so save on the way OUT too, not only on
+           the way back (Doc, 04.09.2026). */
         document.addEventListener('visibilitychange', async () => {
-            if (document.hidden) return;
             await flushAll();
-            refresh();
+            if (!document.hidden) refresh();
         });
+        /* pagehide cannot be awaited, but starting the save still beats losing
+           it - iOS fires this and nothing else when the tab goes away */
+        window.addEventListener('pagehide', () => { flushAll(); });
 
         /* A whole class signs up at the same minute, all sitting on the page.
            Without polling a slot taken elsewhere stays writable here until the
@@ -881,6 +1106,7 @@
             if (document.hidden) return;
             if (editing) return;
             if (Object.keys(timers).length) return;
+            if (saving) return;                   /* a write is still on its way */
             const act = document.activeElement;
             if (act && act.tagName === 'INPUT' && act.id.indexOf('name-') === 0) return;
             refresh();
