@@ -51,6 +51,27 @@
         [PLAN_HREF, 'Stundenplan', 'b-grey', PLAN_TITLE],
     ];
 
+    /* The settings panel wears the Stundenplan's subject colours (Doc,
+       03.09.2026: "die Farben aus den SP") - the nav row itself stays grey
+       (02.09.). Pinned as in stundenplan.html: Mat = blue, Inf = orange,
+       GKInf = green. INF 12/13 are the Grundkurse, INF 11 / FO / OS 9 run as
+       plain "Inf". Pages without a Stundenplan subject stay grey. */
+    const SP_HUE = {
+        'mathe/mathe5.html': 'b-cyan',
+        'mathe/mathegy9.html': 'b-cyan',
+        'mathe/mathegy10.html': 'b-cyan',
+        'mathe/mathe11.html': 'b-cyan',
+        'mathe/mathe12.html': 'b-cyan',
+        'mathe/mathe13.html': 'b-cyan',
+        'mathe/uebung.html': 'b-cyan',
+        'informatik/informatik9.html': 'b-orange',
+        'informatik/inf11.html': 'b-orange',
+        'informatik/inf12.html': 'b-green',
+        'informatik/inf13.html': 'b-green',
+        'informatik/fos11.html': 'b-orange',
+        'informatik/fos12.html': 'b-orange',
+    };
+
     // These open in a new tab so the current plan stays put.
     const NEW_TAB = new Set(['notes.html', 'konzepte.html', 'operatoren.html',
         'punktetabelle.html', PLAN_HREF]);
@@ -261,15 +282,16 @@
         if (ALWAYS_ON.includes(href)) continue; // Start + Stundenplan: always visible, not toggleable
         // The colour class rides on the row too — the checkbox picks it up via
         // accent-color: currentColor, so each box matches its subject.
+        const hue = SP_HUE[href] || cls;
         const row = document.createElement('label');
-        row.className = 'ep-item ' + cls;
+        row.className = 'ep-item ' + hue;
 
         const box = document.createElement('input');
         box.type = 'checkbox';
         box.checked = !hidden.has(href);
 
         const t = document.createElement('span');
-        t.className = 'badge ' + cls + (hidden.has(href) ? '' : ' on');
+        t.className = 'badge ' + hue + (hidden.has(href) ? '' : ' on');
         // Mark the current page's pill so it can carry a fatter border.
         if (pills[href].classList.contains('active')) t.classList.add('active');
         t.textContent = longLabel || label;

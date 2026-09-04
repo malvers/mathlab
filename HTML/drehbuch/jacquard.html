@@ -668,7 +668,7 @@ footer .sig { margin-left: auto; }
     <h1>Ein Loch, ein Faden</h1>
     <p class="lede">Der Plot für das Jacquard-Demovideo: was passiert, in welcher
         Reihenfolge — und warum genau dort der Groschen fällt.</p>
-    <p class="status">Runde 1 · Plot zur Freigabe · Sprechertext folgt getrennt</p>
+    <p class="status">Runde 2 · Choreografie am Lab gemessen · Sprechertext steht</p>
 
     <dl class="meta">
         <div><dt>Lab</dt><dd><a href="https://docalvers.de/jacquard.html">jacquard.html</a></dd></div>
@@ -763,29 +763,81 @@ footer .sig { margin-left: auto; }
 
 <section>
     <div class="head"><span class="n">E</span><h2>Choreografie-Notizen</h2>
-        <span class="note">für die Aufnahme</span></div>
+        <span class="note solved">am Lab gemessen</span></div>
     <ul class="notes">
         <li><strong>Startzustand fixieren:</strong> Das Lab merkt sich alles in
             <code>localStorage</code> unter <code>jacquard-prefs-3</code> — inklusive
             Kamerastellung, Tab, Motiv und Rahmen. <strong>Vor jeder Aufnahme löschen</strong>,
-            dazu <code>coach-collapsed:/jacquard.html</code>.</li>
-        <li><strong>Tempo ganz links heißt Stopp.</strong> Es gibt keinen Pause-Knopf mehr.
-            <em>SCHRITT</em> läuft immer mit höchstens 2×, eine Zeile dauert damit
-            planbar rund 1,2 s — Szene 2 bis 5 komplett über SCHRITT fahren.</li>
-        <li><strong>Der Fadenregler ist geometrisch.</strong> Die Werte für Szene 10
-            liegen bei <code>16 → 14 %</code>, <code>48 → 37 %</code>,
-            <code>140 → 59 %</code>, <code>1000 → 100 %</code>. Nicht nach Augenmaß ziehen.</li>
-        <li><strong>Szene 10 bis 12 mit demselben Fenster fahren.</strong> Wird zwischendurch
-            der Rahmen verschoben, vergleicht der Zuschauer zwei verschiedene Dinge und
-            die ganze Pointe ist weg.</li>
-        <li>Szene 8 (Transparenzregler) bei <strong>höchstens 140 Fäden</strong> aufnehmen.
-            Darüber baut sich die Kartenschicht bei jedem Reglerschritt neu auf.</li>
+            dazu <code>coach-collapsed:/jacquard.html</code>. Ebenso weg muss
+            <code>#local-badge</code>: der rote LOCAL-Aufkleber sitzt sonst oben rechts
+            im Bild. Seitenleiste zu, Aufnahme 1280 × 720 mit <code>upscale: 2</code>
+            über <code>record-cdp</code> — nie <code>record</code>.</li>
+
+        <li><strong>Der Rahmen, einmal festgelegt:</strong> <code>winX 0,28 · winY 0,63 ·
+            winW 0,14 · winH 0,284</code>, bei 45 Fäden also <code>45 × 56</code> Karten.
+            <strong>Warum ausgerechnet der:</strong> Der Webstuhl fragt pro Zelle genau
+            <em>einen</em> Punkt ab (<code>patternBit</code>). Über die ganze Zeichnung sind
+            45 Fäden viel zu grob — die gemessene Zellenreinheit liegt bei <strong>0,25</strong>,
+            das Tuch wird Konfetti. Dieser Ausschnitt kommt auf <strong>0,81</strong>, das
+            gewebte Bild ist erkennbar. (Reinheit = Mittel über alle Zellen von
+            |2·Tintenanteil − 1| auf einem 6 × 6-Subraster; 1,0 hieße: jede Zelle einfarbig.)</li>
+
+        <li><strong>Szene 1 bis 6</strong> laufen auf WEBSTUHL mit Doc-Muster, 45 Fäden und
+            diesem Rahmen. Tempo ganz links heißt Stopp — es gibt keinen Pause-Knopf.
+            <em>SCHRITT</em> läuft mit höchstens 2×, eine Zeile dauert damit planbar rund
+            1,2 s: Szene 2 bis 5 komplett über SCHRITT. Der Kartenwechsel dauert 0,85 s
+            durch das Tempo geteilt — Szene 5 bei <strong>1×</strong> (Regler auf
+            <code>40 %</code>), sonst ist er vorbei, bevor Solita ihn benennt.</li>
+
+        <li><strong>Szene 7 ist der Reveal:</strong> auf MUSTER umschalten, und der Rahmen
+            liegt als kleines Rechteck in der ganzen Zeichnung. Alles außerhalb ist
+            abgedunkelt — man sieht sofort, wie wenig davon eben auf dem Webstuhl lag.</li>
+
+        <li><strong>Szene 8 braucht den Zoom in der Musterkarte.</strong> Ohne ihn ist die
+            Lochkarte im Rahmen nur rund 135 px breit und es sind <em>keine Löcher zu
+            erkennen</em>. Also: Mauszeiger auf die Rahmenmitte, <strong>9 Rasten Mausrad</strong>
+            à <code>−120</code> → <code>z ≈ 5×</code> (die Karte zoomt mit
+            <code>z · 1,0015<sup>−Δy</sup></code>, Deckel 40×). Bei 5× ist die Spanne 0,20 —
+            der 0,14 breite Rahmen füllt das Bild mit etwas Luft. Erst dann den Schalter
+            <em>Lochkarten auf dem Muster</em> an und den Regler von
+            <code>10</code> auf <code>100</code> ziehen.</li>
+
+        <li><strong>Die Karte unter dem Zeiger gibt es nur auf der großen Musterkarte</strong>
+            (Szene 9). Der Ausschnitt rechts unten kennt kein <code>hoverCard</code> —
+            <code>makeMap(…, big = false)</code>. Und solange der Zeiger auf der Karte liegt,
+            zeigt die Unterschrift die Karte statt des Zoomfaktors:
+            <code>KARTE 28 / 56 · 10 LÖCHER von 45</code>.</li>
+
+        <li><strong>Die Auflösung sieht man ausschließlich im gewebten Tuch.</strong> Beide
+            Musterkarten zeichnen das Motiv als Funktion in Bildschirmauflösung — der Kreis
+            ist dort auch bei 16 Fäden glatt. <strong>Szene 10 bis 12 laufen deshalb auf
+            WEBSTUHL</strong>, mit dem Tuch als Hauptdarsteller und dem Ausschnitt rechts als
+            Beleg. Der Fadenregler ist geometrisch: <code>16 → 14 %</code>,
+            <code>48 → 37 %</code>, <code>140 → 59 %</code>, <code>1000 → 100 %</code>.
+            Nicht nach Augenmaß ziehen.</li>
+
+        <li><strong>Szene 11 und 12 auf demselben Fenster</strong> — ganzes Bild, Doc-Muster.
+            Bei <code>40 Fäden</code> (<code>40 × 25</code>) ist das Tuch Konfetti, während
+            der Ausschnitt daneben die feine Zeichnung zeigt; genau dieser Nebeneinander-Blick
+            <em>ist</em> die Szene. Bei <code>1000 Fäden</code> (<code>1000 × 617</code>,
+            <code>LÖCHER 434 von 1000</code>) ist alles da. Wird zwischendurch der Rahmen
+            verschoben, vergleicht der Zuschauer zwei verschiedene Dinge und die Pointe ist weg.
+            Kein Performance-Problem: 617 Zeilen weben in 135 ms.</li>
+
+        <li><strong>Solitas Bubble liegt auf dem Ausschnitt.</strong> Sie sitzt fest auf
+            <code>x = W−w−24 : y = H−h−24</code> (380 px im 2560er Master = 190 px im
+            Aufnahmefenster), der Ausschnitt auf <code>right: 18px · bottom: 18px</code> und
+            misst 318 × 335 px — die Bubble deckt seine Ecke <em>und</em> die Unterschrift zu,
+            also in Szene 10 bis 12 genau die Pointe. Zwei Wege: <strong>(a)</strong> im Lab
+            <code>#pattern-hud</code> auf <code>top: 96px</code> — dann bleiben 48 px Luft zur
+            Bubble und 90 px zum Branding; <strong>(b)</strong> die Bubble in 10 bis 12
+            weglassen, <code>compose</code> nimmt beliebige Gruppen. (a) ist besser, (b) kostet
+            Solita anderthalb Minuten Bild.</li>
+
         <li><strong>Kamera:</strong> Die Ansicht wird mitgespeichert, <em>NEU</em> setzt sie
-            zurück. Vor jeder Szene, in der die Kamera stimmen muss, einmal NEU.</li>
-        <li>Die <strong>Erklärbox ist geparkt</strong> (<code>display:none</code>). Wird sie
-            im Bild gebraucht, vorher die eine CSS-Zeile entfernen.</li>
-        <li>Der Kartenwechsel dauert 0,85 s durch das Tempo geteilt. Szene 5 bei
-            <strong>1×</strong> aufnehmen, sonst ist er vorbei, bevor Solita ihn benennt.</li>
+            zurück. Vor jeder Szene, in der die Kamera stimmen muss, einmal NEU. Die
+            <strong>Erklärbox ist geparkt</strong> (<code>display:none</code>); wird sie im
+            Bild gebraucht, vorher die eine CSS-Zeile entfernen.</li>
     </ul>
 </section>
 
@@ -802,11 +854,16 @@ footer .sig { margin-left: auto; }
 </section>
 
 <footer>
-    <p><strong>Nächster Schritt:</strong> Dieser Plot will erst gelesen und freigegeben
-       werden. Danach — und nicht vorher — entstehen Solitas Sätze in
-       <code>videopipeline/jacquard/narration.mjs</code>, als SSML mit Pausen genau
-       dort, wo die Aktion im Bild läuft, und wandern über
-       <code>sync-drehbuch.mjs</code> in diese Seite zurück.</p>
+    <p><strong>Stand:</strong> Solitas Sätze stehen in
+       <code>videopipeline/jacquard/narration.mjs</code> — 653 Wörter, rund 275 s
+       Sprechzeit, als SSML mit Pausen genau dort, wo die Aktion im Bild läuft. Zwei
+       Zahlen bleiben ungesprochen: Kartenzähler und Lochzahl hängen am Rahmen und
+       stehen im Bild, während sie redet.</p>
+    <p><strong>Nächster Schritt:</strong> <code>run1</code> vertont (kostet nur
+       Studio-Kontingent, keine Credits), <code>run2</code> filmt nach der Choreografie
+       oben, <code>run3</code> schneidet und lässt Solita sprechen. Die gemessenen
+       Sekunden und ihr Wortlaut wandern über <code>sync-drehbuch.mjs</code> in diese
+       Seite zurück — bis dahin sind die Zeiten hier geschätzt.</p>
     <p class="eyebrow sig">Doc Alvers Mathe-Labor</p>
 </footer>
 

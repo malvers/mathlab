@@ -92,15 +92,17 @@
     border-right: 0;
 }
 
-/* Faint band per timegrid period, so the day still reads as "lessons". */
-.tt-band {
+/* Full/half-hour lines instead of grey period bands (Doc, 03.09.2026).
+   Solid both - Doc reads dashed as "provisional"; the half hour is fainter. */
+.tt-hline {
     position: absolute;
     left: 0;
     right: 0;
-    background: var(--sunken);
     border-top: 1px solid var(--row-line);
     pointer-events: none;
 }
+
+.tt-hline.half { opacity: 0.45; }
 
 /* --- a lesson ------------------------------------------------------------ */
 
@@ -290,7 +292,7 @@
         margin-bottom: 8px;
     }
 
-    .tt-band {
+    .tt-hline {
         display: none;
     }
 
@@ -319,10 +321,6 @@ html.svp-light .tt-lesson {
 html.svp-light .tt-lesson:hover {
     filter: brightness(0.95);
     box-shadow: 0 2px 6px var(--shadow);
-}
-
-html.svp-light .tt-band {
-    background: rgba(40, 70, 120, 0.045);
 }
 
 html.svp-light .tt-lesson.code-cancelled {

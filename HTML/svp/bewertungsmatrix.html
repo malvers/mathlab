@@ -1,0 +1,1354 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bewertungsmatrix | Stoffverteilungspl&auml;ne</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript>
+        <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+            rel="stylesheet">
+    </noscript>
+    <link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+    <link rel="stylesheet" href="svp.css">
+    <script src="svp-gate.js"></script>
+    <style>
+        /* Bewertungsmatrix Vortrag - the two sheets (Deutsch / English) of
+           MISC/PRE IBB/3.0/Bewertungsmatrix.pptx as one fillable page. The
+           criteria live in the script below; the totals are COMPUTED from the
+           single points, not copied from the sheet (the German slide summed to
+           34 + 3 = 37, the numbers on it give 37 + 3 = 40).
+           Doc edits the sheet IN PLACE (Bearbeiten): texts, points, headings,
+           rows. Those edits are overrides on top of the built-in sheet, kept in
+           localStorage and synced through the shared svp_plan_edits table like
+           the plan pages - so every device shows the same bogen. The filled-in
+           scores and names stay local only (personal data). */
+        :root {
+            --bm-accent: rgb(245, 194, 66);
+            --bm-ink: rgb(8, 20, 42);
+            --bm-band: rgba(245, 194, 66, 0.19);
+            --bm-band-line: rgba(245, 194, 66, 0.42);
+            --bm-edge: rgba(245, 194, 66, 0.22);
+            --bm-bonus: var(--phi);
+            --bm-big: var(--lambda);
+        }
+
+        html.svp-light {
+            --bm-band: rgb(250, 231, 189);
+            --bm-band-line: rgb(226, 190, 116);
+            --bm-edge: rgba(198, 140, 20, 0.28);
+            --bm-big: rgb(198, 140, 20);
+        }
+
+        .bm-wrap {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: minmax(0, 1fr);
+            gap: 14px;
+        }
+
+        .bm-card {
+            min-width: 0;
+            background: var(--card-soft);
+            border: 1px solid var(--bm-edge);
+            border-radius: 12px;
+            padding: 14px 16px;
+        }
+
+        /* Control row: language switch left, the verdict right. */
+        .bm-ctrl {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px 18px;
+        }
+
+        .bm-seg {
+            display: flex;
+            border: 1px solid var(--line);
+            border-radius: 999px;
+            overflow: hidden;
+        }
+
+        .bm-seg button {
+            font: inherit;
+            font-size: 0.85rem;
+            padding: 6px 14px;
+            background: transparent;
+            color: var(--muted);
+            border: 0;
+            cursor: pointer;
+        }
+
+        .bm-seg button.on {
+            background: var(--bm-accent);
+            color: var(--bm-ink);
+            font-weight: 600;
+        }
+
+        .bm-verdict {
+            display: flex;
+            align-items: baseline;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .bm-big {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            line-height: 1;
+            color: var(--bm-big);
+            font-variant-numeric: tabular-nums;
+        }
+
+        .bm-note { font-size: 0.85rem; color: var(--muted); }
+
+        /* Weighted result of both sheets - only once the other one exists. */
+        .bm-sum {
+            flex-basis: 100%;
+            font-size: 0.85rem;
+            color: var(--text);
+        }
+
+        .bm-sum b { font-weight: 600; color: var(--bm-big); }
+
+        /* Send row (Publikum) / unlock row (Coach) under the verdict. */
+        .bm-send {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px 14px;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--line);
+        }
+
+        .bm-status { font-size: 0.85rem; color: var(--muted); }
+        .bm-status.err { color: var(--ypsilon); }
+        .bm-status.ok { color: var(--phi); }
+        @media print { .bm-send { display: none !important; } }
+
+        /* Head fields: Vortragende, Thema, Team, Gutachter. */
+        .bm-fields {
+            display: grid;
+            /* Two columns that fill the row: the name needs the space, the
+               Gutachter is one short word. `full` takes the whole row. */
+            grid-template-columns: 2fr 1fr;
+            gap: 10px 18px;
+        }
+
+        .bm-fields label {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            font-size: 0.72rem;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: var(--muted);
+        }
+
+        /* `wide` takes a partner along on its row (Vortragende + Gutachter),
+           `full` keeps the whole row to itself (Thema). */
+        .bm-fields label.full { grid-column: 1 / -1; }
+
+        .bm-fields input,
+        table.bm input,
+        table.bm textarea {
+            font: inherit;
+            font-weight: 300;
+            padding: 6px 8px;
+            background: var(--input-bg);
+            color: var(--text);
+            border: 1px solid var(--line);
+            border-radius: 8px;
+        }
+
+        .bm-fields input { font-size: 0.95rem; }
+
+        .bm-fields input:focus,
+        table.bm input:focus,
+        table.bm textarea:focus {
+            outline: 1px solid var(--cyan);
+            border-color: var(--cyan);
+        }
+
+        .bm-card.bare {
+            padding: 0;
+            border: 0;
+            background: transparent;
+        }
+
+        .bm-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.95rem;
+            letter-spacing: 0.03em;
+            color: var(--head);
+            margin: 0 0 10px 2px;
+        }
+
+        /* The sheet itself. svp.css gives every table min-width: 760px for the
+           plan tables - this one stacks on phones instead. */
+        .bm-frame {
+            border: 1px solid var(--bm-band-line);
+            border-radius: 8px;
+            overflow: hidden;
+            background: var(--card);
+        }
+
+        table.bm {
+            width: 100%;
+            min-width: 0;
+            border-collapse: collapse;
+            font-size: 0.92rem;
+        }
+
+        table.bm thead th {
+            position: static;
+            background: var(--bm-band);
+            color: var(--head);
+            font-family: inherit;
+            font-weight: 700;
+            font-size: 0.82rem;
+            letter-spacing: 0;
+            text-transform: none;
+            padding: 8px 10px;
+            border-bottom: 1px solid var(--bm-band-line);
+            white-space: normal;
+        }
+
+        table.bm tbody td {
+            padding: 8px 10px;
+            border-bottom: 1px solid var(--row-line);
+            font-size: 0.92rem;
+            vertical-align: top;
+        }
+
+        table.bm tbody tr:last-child td { border-bottom: 0; }
+
+        table.bm th.nr, table.bm td.nr {
+            width: 2.4rem;
+            text-align: right;
+            color: var(--muted);
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.8rem;
+            padding-top: 11px;
+        }
+
+        table.bm td.txt { font-weight: 300; line-height: 1.45; padding-top: 10px; }
+
+        table.bm th.pts, table.bm td.pts {
+            width: 6.5rem;
+            text-align: center;
+            white-space: nowrap;
+            font-variant-numeric: tabular-nums;
+        }
+
+        table.bm td.pts { padding-top: 11px; font-weight: 400; }
+
+        table.bm td.pts .bonus {
+            display: block;
+            font-size: 0.68rem;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: var(--bm-bonus);
+        }
+
+        table.bm th.got, table.bm td.got { width: 6.5rem; text-align: center; }
+
+        table.bm td.got input {
+            width: 4.6rem;
+            text-align: center;
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* A value above the maximum is a slip - say so at the field. */
+        table.bm td.got input.over {
+            border-color: var(--ypsilon);
+            outline: 1px solid var(--ypsilon);
+        }
+
+        table.bm th.cmt, table.bm td.cmt { width: 30%; min-width: 12rem; }
+
+        table.bm td.cmt textarea {
+            width: 100%;
+            min-height: 2.2rem;
+            resize: none;
+            overflow: hidden;
+            line-height: 1.35;
+            display: block;
+        }
+
+        /* Print twin of the textarea: a textarea keeps its screen height on
+           paper and clips the second line, a div grows with its text. */
+        table.bm td.cmt .cmt-print { display: none; }
+
+        /* Name of the consulted student, under criterion 2. */
+        .bm-sos {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 6px;
+            font-size: 0.8rem;
+            color: var(--muted);
+        }
+
+        .bm-sos input { flex: 1 1 8rem; max-width: 18rem; font-size: 0.88rem; padding: 4px 8px; }
+
+        /* Totals row. */
+        table.bm tfoot td {
+            padding: 10px;
+            background: var(--bm-band);
+            border-top: 1px solid var(--bm-band-line);
+            font-weight: 600;
+            color: var(--head);
+        }
+
+        table.bm tfoot td.pts, table.bm tfoot td.got {
+            text-align: center;
+            font-variant-numeric: tabular-nums;
+            white-space: nowrap;
+        }
+
+        table.bm tfoot td .bonus {
+            display: block;
+            font-size: 0.68rem;
+            font-weight: 400;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: var(--bm-bonus);
+        }
+
+        /* Edit mode (body.editing): svp.css draws the dashed outline on every
+           contenteditable; here only the extra controls. */
+        body.editing .bm-seg button { opacity: 0.45; pointer-events: none; }
+
+        .bm-x {
+            display: block;
+            margin: 6px 0 0 auto;
+            width: 20px;
+            height: 20px;
+            line-height: 18px;
+            font: inherit;
+            font-size: 0.75rem;
+            text-align: center;
+            color: var(--text);
+            background: rgba(176, 36, 24, 0.25);
+            border: 1px solid rgba(176, 36, 24, 0.6);
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .bm-x:hover { background: rgba(176, 36, 24, 0.55); }
+
+        .bm-ptsedit {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            white-space: nowrap;
+        }
+
+        .bm-ptsedit input { width: 4.6rem; padding: 4px 2px 4px 6px; text-align: center; }
+        .bm-ptsedit .plus { color: var(--muted); }
+        .bm-ptsedit .bonus {
+            font-size: 0.62rem;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: var(--bm-bonus);
+        }
+
+        .bm-text { min-height: 1.2em; }
+
+        .bm-addrow { margin-top: 10px; }
+
+        /* Inline confirm for `Leeren` - the button turns into a question. */
+        #bmClear { display: inline-flex; }
+        .bm-confirm { display: inline-flex; gap: 8px; align-items: center; }
+        .bm-confirm span { font-size: 0.85rem; color: var(--muted); }
+
+        /* Phone: the table stacks - number and criterion on one line, the
+           three value cells below it with their own labels. */
+        @media (max-width: 640px) {
+            table.bm thead { display: none; }
+            table.bm, table.bm tbody, table.bm tfoot { display: block; }
+            table.bm tr {
+                display: grid;
+                grid-template-columns: 2rem minmax(0, 1fr);
+                gap: 6px 8px;
+                padding: 10px 8px;
+                border-bottom: 1px solid var(--row-line);
+            }
+            table.bm tbody tr:last-child { border-bottom: 0; }
+            table.bm td, table.bm th { display: block; width: auto; padding: 0 !important; border: 0 !important; }
+            table.bm td.nr { text-align: left; padding-top: 1px !important; }
+            table.bm td.txt { grid-column: 2; }
+            /* The desktop column widths (6.5rem / 30%) have the higher
+               specificity - they must be undone by name, `td` alone loses. */
+            table.bm td.pts, table.bm td.got, table.bm td.cmt {
+                grid-column: 2;
+                text-align: left;
+                width: auto;
+                min-width: 0;
+            }
+            table.bm td.pts::before, table.bm td.got::before, table.bm td.cmt::before {
+                content: attr(data-label);
+                display: inline-block;
+                margin-right: 10px;
+                white-space: nowrap;
+                font-size: 0.72rem;
+                letter-spacing: 0.06em;
+                text-transform: uppercase;
+                color: var(--muted);
+            }
+            table.bm td.pts .bonus { display: inline; margin-left: 6px; }
+            table.bm td.pts .bm-ptsedit { white-space: normal; }
+            table.bm td.cmt::before { display: block; margin-bottom: 4px; }
+            table.bm tfoot tr { background: var(--bm-band); }
+            table.bm tfoot td { background: transparent; border: 0 !important; }
+            table.bm tfoot td.pts, table.bm tfoot td.got { grid-column: 2; text-align: left; }
+            .bm-fields { grid-template-columns: 1fr; }
+            .bm-big { font-size: 1.25rem; }
+        }
+
+        /* Paper: one A4 sheet, black on white, the fields as lines to write on.
+           No cut lines, no controls. */
+        @media print {
+            @page { size: A4 portrait; margin: 12mm; }
+            body { padding: 0; }
+            .bm-seg, .bm-noprint, .bm-x { display: none !important; }
+            .bm-wrap { gap: 8px; }
+            .bm-card { background: #fff; border-color: #bbb; padding: 8px 10px; }
+            .bm-card.bare { border: 0; padding: 0; }
+            .bm-title { color: #333; }
+            .bm-fields { gap: 6px 18px; }
+            .bm-fields label { color: #555; }
+            .bm-fields input, table.bm input, table.bm textarea {
+                background: #fff;
+                color: #111;
+                border: 0;
+                border-bottom: 1px solid #999;
+                border-radius: 0;
+                padding: 2px 4px;
+            }
+            .bm-frame { border-color: #999; background: #fff; }
+            table.bm { font-size: 9pt; }
+            table.bm tr { break-inside: avoid; }
+            table.bm thead th, table.bm tfoot td { background: #eee; color: #222; border-color: #999; padding: 4px 6px; }
+            table.bm tbody td { color: #111; border-color: #ccc; padding: 3px 6px; font-size: 9pt; }
+            table.bm td.nr, .bm-sos, .bm-note { color: #555; }
+            table.bm td.nr { padding-top: 5px; }
+            table.bm td.txt, table.bm td.pts { padding-top: 5px; line-height: 1.3; }
+            table.bm th.pts, table.bm td.pts, table.bm th.got, table.bm td.got { width: 4.6rem; }
+            table.bm th.cmt, table.bm td.cmt { width: 27%; }
+            table.bm td.pts .bonus, table.bm tfoot td .bonus { color: #4a6a10; }
+            table.bm td.got input { width: 3.2rem; padding: 0 2px; }
+            table.bm td.cmt textarea { display: none; }
+            table.bm td.cmt .cmt-print {
+                display: block;
+                min-height: 1.7em;
+                padding: 2px 4px;
+                border-bottom: 1px solid #999;
+                white-space: pre-wrap;
+                line-height: 1.3;
+            }
+            .bm-sos { margin-top: 2px; }
+            .bm-sos input { padding: 0 4px; }
+            .bm-big { color: #8a6400; font-size: 1.2rem; }
+        }
+    </style>
+</head>
+
+<body>
+    <header class="page-head">
+        <div class="head-row">
+            <div class="title-group">
+                <h1>Bewertungsmatrix</h1>
+            </div>
+            <div class="head-btns bm-noprint">
+                <div id="bmClear"></div>
+                <button class="action secondary" type="button" id="bmCancel" hidden
+                    title="Bearbeiten beenden und &Auml;nderungen verwerfen">Abbrechen</button>
+                <button class="action secondary" type="button" id="bmOrig" hidden
+                    title="Diese Sprache auf den eingebauten Bogen zur&uuml;cksetzen">Original</button>
+                <button class="action" type="button" id="bmEdit"
+                    title="Kriterien, Punkte und &Uuml;berschriften direkt auf der Seite &auml;ndern">&#9998; Bearbeiten</button>
+                <button class="action orange" type="button" onclick="window.print()">Drucken</button>
+            </div>
+        </div>
+        <div class="subtitle" id="bmSubtitle">Bewertungskriterien Vortrag</div>
+    </header>
+
+    <div class="bm-wrap">
+        <section class="bm-card">
+            <div class="bm-ctrl">
+                <div class="bm-seg" id="bmSeg" role="group" aria-label="Sprache">
+                    <button type="button" data-lang="de" class="on">Deutsch</button>
+                    <button type="button" data-lang="en">English</button>
+                </div>
+                <div class="bm-verdict">
+                    <span class="bm-big" id="bmBig">&ndash;</span>
+                    <span class="bm-note" id="bmNote"></span>
+                    <span class="bm-sum" id="bmSummary" hidden></span>
+                </div>
+            </div>
+            <div class="bm-send" id="bmSend" hidden>
+                <button class="action" type="button" id="bmSendBtn">Bewertung senden</button>
+                <button class="action secondary" type="button" id="bmKeyBtn" hidden>Entschl&uuml;sseln</button>
+                <span class="bm-status" id="bmStatus"></span>
+            </div>
+        </section>
+
+        <section class="bm-card">
+            <div class="bm-fields" id="bmFields"></div>
+        </section>
+
+        <section class="bm-card bare">
+            <div class="bm-title" id="bmTitle">Bewertungskriterien Vortrag</div>
+            <div class="bm-frame">
+                <table class="bm" id="bmTable"></table>
+            </div>
+            <button class="action bm-addrow bm-noprint" type="button" id="bmAdd" hidden
+                title="Ein weiteres Kriterium anh&auml;ngen">+ Kriterium</button>
+        </section>
+
+    </div>
+
+    <script src="svp-auth.js"></script>
+    <script src="svp-crypto.js"></script>
+    <script>
+        (function () {
+            'use strict';
+
+            /* The two sheets. `max` = regular points, `bonus` = extra points on
+               top; `show` is the notation of the printed sheet where it differs
+               from the plain number. Criteria are 1:1 between the languages, so
+               entered values survive a language switch. */
+            const SHEETS = {
+                de: {
+                    title: 'Bewertungskriterien Vortrag',
+                    subtitle: 'Bewertungskriterien Vortrag · Deutsch',
+                    cols: { nr: '#', txt: 'Kriterium', pts: 'Mögliche Punkte', got: 'Erreichte Punkte', cmt: 'Kommentare' },
+                    fields: [
+                        ['presenter', 'Vortragende (Vor- und Nachname)', ''],
+                        ['reviewer', 'Gutachter', '', 'Namen der drei Bewertenden'],
+                        ['topic', 'Thema', 'full']
+                    ],
+                    sos: 'Name SoS',
+                    bonus: 'Bonus',
+                    total: 'Erreichbare Gesamtpunktzahl',
+                    of: 'von',
+                    empty: 'Noch keine Punkte eingetragen.',
+                    clear: 'Leeren',
+                    really: 'Alles löschen?',
+                    yes: 'Ja',
+                    no: 'Nein',
+                    rows: [
+                        { max: 2, bonus: 1, show: '2 + 1', text: 'Abstract erstellt (Inhalt des Vortrages kompakt zusammengefasst, written in English is a bonus)' },
+                        { max: 2, sos: true, text: 'Konsultation mit einer Schülerin oder einem Schüler (SoS) gehabt?' },
+                        { max: 4, show: '2 + 2', text: 'Konsultation mit dem Trainer / Gutachter abgehalten und Hinweise berücksichtigt?' },
+                        { max: 3, text: 'Motivation und Einführung für das Thema gegeben?' },
+                        { max: 2, text: 'Klare Gliederung des Vortrages vorhanden?' },
+                        { max: 4, text: 'Sachlich richtige Informationen in ausreichender Tiefe und Umfang?' },
+                        { max: 4, text: 'Inhalte wurden verständlich für das jeweilige Publikum aufgearbeitet und dargeboten?' },
+                        { max: 4, text: 'Vortragsstil gut? Frei und sicher vorgetragen? Körperhaltung gut?' },
+                        { max: 4, text: 'Optisch anspruchsvolle Darstellung der Folien, Seitenzahlen (bei PowerPoint) vorhanden?' },
+                        { max: 2, text: 'Quellen wissenschaftlich korrekt zitiert?' },
+                        { max: 2, text: 'Vereinbarte Zeit wurde eingehalten?' },
+                        { max: 4, text: 'Fragen wurden souverän beantwortet? (Trick von Doc Alvers und/oder ggf. abgesprochene Fragen)' },
+                        { max: 0, bonus: 1, text: 'Bonus: Talk was given in English.' },
+                        { max: 0, bonus: 1, text: 'Bonus: Video(s) wurde(n) erstellt.' }
+                    ]
+                },
+                en: {
+                    title: 'Evaluation Criteria',
+                    subtitle: 'Evaluation criteria for presentations · English',
+                    cols: { nr: '#', txt: 'Criterion', pts: 'Possible points', got: 'Reached points', cmt: 'Comments' },
+                    fields: [
+                        ['presenter', 'Presenter (first and last name)', ''],
+                        ['reviewer', 'Reviewer', '', 'Names of the three graders'],
+                        ['topic', 'Topic', 'full']
+                    ],
+                    sos: 'Name SoS',
+                    bonus: 'Bonus',
+                    total: 'Total points available',
+                    of: 'of',
+                    empty: 'No points entered yet.',
+                    clear: 'Clear',
+                    really: 'Delete everything?',
+                    yes: 'Yes',
+                    no: 'No',
+                    rows: [
+                        { max: 3, text: 'Abstract created (content of the presentation summarized concisely)?' },
+                        { max: 2, sos: true, text: 'Consultation with students (SoS) conducted?' },
+                        { max: 4, show: '2 + 2', text: 'Consultation with the coach held | Feedback considered?' },
+                        { max: 3, text: 'Motivation and introduction for the topic provided?' },
+                        { max: 2, text: 'Clear structure of the presentation present?' },
+                        { max: 4, text: 'Information is correct and presented with sufficient depth and scope?' },
+                        { max: 4, text: 'Content prepared and presented in a way understandable for the target audience?' },
+                        { max: 4, text: 'Presentation style good? Delivered freely and confidently? Good posture?' },
+                        { max: 4, text: 'Visually appealing slides, page numbers included (in PowerPoint)?' },
+                        { max: 2, text: 'Sources cited correctly in a scientific manner?' },
+                        { max: 2, text: 'Agreed time limit adhered to?' },
+                        { max: 4, text: 'Questions answered confidently? (Doc Alvers’ trick and/or previously agreed questions)' },
+                        { max: 4, text: 'English language' },
+                        { max: 0, bonus: 1, text: 'Bonus: Video(s) created.' }
+                    ]
+                }
+            };
+
+            /* Which talk is being graded? The Vortraege pages link here with
+               ?v=<plan>-<gruppe>-<nr>, and every talk keeps its OWN filled sheet
+               - one shared sheet would have talk 2 overwrite talk 1 (Doc,
+               04.09.2026). Without the parameter the page is a blank bogen. */
+            let talk = '';
+            try { talk = new URLSearchParams(location.search).get('v') || ''; } catch (e) { }
+
+            /* A talk is graded twice, and the two do not count the same: the
+               Coach carries three votes, the audience one (Doc, 04.09.2026).
+               The talk id ends in the role, so the sibling sheet is one string
+               replacement away. */
+            const WEIGHT = { coach: 3, publikum: 1 };
+            const ROLE_LABEL = { coach: 'Coach', publikum: 'Publikum' };
+            const role = (talk.match(/-(coach|publikum)$/) || [])[1] || '';
+            const otherRole = role === 'coach' ? 'publikum' : (role === 'publikum' ? 'coach' : '');
+
+            /* Filled-in sheet: local only, never pushed (names of students). */
+            const KEY = 'svp-bewertungsmatrix' + (talk ? ':' + talk : '');
+            /* Doc's edits of the sheet itself: same keys and cloud table as the
+               plan pages (svp-plan.js), one row per page path. */
+            const EDIT_KEY = 'svp-edits:' + location.pathname;
+            const EDIT_TS = 'svp-edits-ts:' + location.pathname;
+            const EDIT_AFTER_LOGIN = 'svp-edit-after-login';
+            const elSeg = document.getElementById('bmSeg');
+            const elFields = document.getElementById('bmFields');
+            const elTable = document.getElementById('bmTable');
+            const elTitle = document.getElementById('bmTitle');
+            const elSub = document.getElementById('bmSubtitle');
+            const elBig = document.getElementById('bmBig');
+            const elNote = document.getElementById('bmNote');
+            const elClear = document.getElementById('bmClear');
+            const elSummary = document.getElementById('bmSummary');
+            const elSend = document.getElementById('bmSend');
+            const elSendBtn = document.getElementById('bmSendBtn');
+            const elStatus = document.getElementById('bmStatus');
+            const elKeyBtn = document.getElementById('bmKeyBtn');
+            const elEdit = document.getElementById('bmEdit');
+            const elCancel = document.getElementById('bmCancel');
+            const elOrig = document.getElementById('bmOrig');
+            const elAdd = document.getElementById('bmAdd');
+
+            /* One state for both languages: lang, the four head fields, the
+               SoS name, and per criterion the points and the comment. */
+            let state = load();
+            /* { de: {title, cols, total, rows}, en: {...} } - a language is
+               either fully overridden or not at all. */
+            let overrides = loadJSON(EDIT_KEY);
+            let editing = false;
+
+            function loadJSON(k) {
+                try { return JSON.parse(localStorage.getItem(k) || 'null') || {}; } catch (e) { return {}; }
+            }
+
+            function load() {
+                try {
+                    const s = JSON.parse(localStorage.getItem(KEY) || 'null');
+                    if (s && SHEETS[s.lang]) return s;
+                } catch (e) { }
+                /* A fresh sheet keeps the language of the last one, so the switch
+                   is not made again for every talk. */
+                let lang = 'de';
+                try {
+                    const last = JSON.parse(localStorage.getItem('svp-bewertungsmatrix') || 'null');
+                    if (last && SHEETS[last.lang]) lang = last.lang;
+                } catch (e) { }
+                return { lang: lang, fields: {}, sos: '', rows: {} };
+            }
+
+            /* Thema and names come from the talk list through localStorage,
+               never through the URL - a query string ends up in the web
+               server's log, and pupils' names do not belong there. The entry is
+               deleted on sight, and anything older than a minute is ignored (a
+               blocked tab would otherwise leave a name lying around). Only EMPTY
+               fields are filled, so nothing typed here is ever overwritten. */
+            let talkLabel = '';
+            (function handoff() {
+                let h = null;
+                try {
+                    h = JSON.parse(localStorage.getItem('svp-bm-handoff') || 'null');
+                    localStorage.removeItem('svp-bm-handoff');
+                } catch (e) { return; }
+                if (!h || h.v !== talk) return;
+                if (h.ts && Date.now() - h.ts > 60000) return;
+                talkLabel = h.label || '';
+                /* plan / Lerngruppe / row number as separate values: the id
+                   cannot be split reliably, a Lerngruppe carries dashes of its
+                   own ("FOG26-1"). They are kept so a reload still knows which
+                   database row this sheet belongs to. */
+                if (h.plan && h.klasse && h.idx != null) {
+                    state.meta = { plan: h.plan, klasse: h.klasse, idx: h.idx };
+                }
+                let touched = false;
+                if (h.topic && !state.fields.topic) { state.fields.topic = h.topic; touched = true; }
+                if (h.names && !state.fields.presenter) { state.fields.presenter = h.names; touched = true; }
+                if (talkLabel !== (state.talkLabel || '')) { state.talkLabel = talkLabel; touched = true; }
+                if (touched) save();
+            }());
+            if (!talkLabel) talkLabel = state.talkLabel || '';
+            const meta = state.meta || null;
+
+            function save() {
+                try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { }
+            }
+
+            function esc(s) {
+                return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+            }
+
+            /* Effective sheet: the built-in one with Doc's edits laid over. */
+            function sheet() {
+                const base = SHEETS[state.lang];
+                const ov = overrides[state.lang];
+                return ov ? Object.assign({}, base, ov) : base;
+            }
+
+            function fmt(n) {
+                return String(Math.round(n * 10) / 10).replace('.', state.lang === 'de' ? ',' : '.');
+            }
+
+            /* Head fields. */
+            function drawFields() {
+                const sh = sheet();
+                elFields.innerHTML = sh.fields.map(function (f) {
+                    /* the audience grades in its own name, so the Gutachter box
+                       is labelled differently there (f[3]) */
+                    const label = (role === 'publikum' && f[3]) ? f[3] : f[1];
+                    return '<label class="' + (f[2] || '') + '">' + esc(label) +
+                        '<input type="text" data-field="' + f[0] + '" value="' + esc(state.fields[f[0]] || '') +
+                        '" autocomplete="off"></label>';
+                }).join('');
+            }
+
+            /* The sheet: head, one row per criterion, the totals row. */
+            function drawTable() {
+                const sh = sheet();
+                elTitle.textContent = sh.title;
+                elTitle.contentEditable = editing ? 'true' : 'false';
+                elSub.textContent = sh.subtitle + (talkLabel ? ' · ' + talkLabel : '');
+                document.documentElement.lang = state.lang;
+                const ce = editing ? ' contenteditable="true"' : '';
+
+                let h = '<thead><tr>' +
+                    '<th class="nr">' + esc(sh.cols.nr) + '</th>' +
+                    '<th class="txt" data-col="txt"' + ce + '>' + esc(sh.cols.txt) + '</th>' +
+                    '<th class="pts" data-col="pts"' + ce + '>' + esc(sh.cols.pts) + '</th>' +
+                    '<th class="got" data-col="got"' + ce + '>' + esc(sh.cols.got) + '</th>' +
+                    '<th class="cmt" data-col="cmt"' + ce + '>' + esc(sh.cols.cmt) + '</th>' +
+                    '</tr></thead><tbody>';
+
+                sh.rows.forEach(function (r, i) {
+                    const nr = i + 1;
+                    const st = state.rows[nr] || {};
+                    const top = r.max + (r.bonus || 0);
+                    const show = r.show || String(r.max || r.bonus || 0);
+                    const isBonus = r.bonus && !r.max;
+                    const got = st.pts === undefined || st.pts === null ? '' : st.pts;
+                    h += '<tr data-i="' + i + '">' +
+                        '<td class="nr">' + nr +
+                        (editing ? '<button type="button" class="bm-x" data-del="' + i + '" title="Kriterium entfernen">&#10005;</button>' : '') +
+                        '</td>' +
+                        '<td class="txt"><div class="bm-text"' + ce + '>' + esc(r.text) + '</div>' +
+                        (r.sos ? '<div class="bm-sos"><label for="bmSos">' + esc(sh.sos) + ':</label>' +
+                            '<input id="bmSos" type="text" data-sos value="' + esc(state.sos || '') + '" autocomplete="off"></div>' : '') +
+                        '</td>' +
+                        '<td class="pts" data-label="' + esc(sh.cols.pts) + '">' +
+                        (editing
+                            ? '<span class="bm-ptsedit">' +
+                              '<input type="number" min="0" step="1" data-max value="' + r.max + '" aria-label="' + esc(sh.cols.pts) + ' ' + nr + '">' +
+                              '<span class="plus">+</span>' +
+                              '<input type="number" min="0" step="1" data-bonus value="' + (r.bonus || 0) + '" aria-label="' + esc(sh.bonus) + ' ' + nr + '">' +
+                              '<span class="bonus">' + esc(sh.bonus) + '</span></span>'
+                            : esc(show) +
+                              (r.bonus && r.max ? '<span class="bonus">+ ' + r.bonus + ' ' + esc(sh.bonus) + '</span>' : '') +
+                              (isBonus ? '<span class="bonus">' + esc(sh.bonus) + '</span>' : '')) +
+                        '</td>' +
+                        '<td class="got" data-label="' + esc(sh.cols.got) + '">' +
+                        '<input type="number" inputmode="decimal" min="0" max="' + top + '" step="0.5" data-row="' + nr +
+                        '" value="' + esc(got) + '" aria-label="' + esc(sh.cols.got) + ' ' + nr + '"' +
+                        (got !== '' && Number(got) > top ? ' class="over"' : '') + '></td>' +
+                        '<td class="cmt" data-label="' + esc(sh.cols.cmt) + '">' +
+                        '<textarea rows="1" data-note="' + nr + '" aria-label="' + esc(sh.cols.cmt) + ' ' + nr + '">' +
+                        esc(st.note || '') + '</textarea>' +
+                        '<div class="cmt-print">' + esc(st.note || '') + '</div></td>' +
+                        '</tr>';
+                });
+
+                const t = totals();
+                h += '</tbody><tfoot><tr>' +
+                    '<td class="nr"></td>' +
+                    '<td class="txt"><span class="bm-total"' + ce + '>' + esc(sh.total) + '</span></td>' +
+                    '<td class="pts" data-label="' + esc(sh.cols.pts) + '">' + t.max +
+                    (t.bonus ? '<span class="bonus">+ ' + t.bonus + ' ' + esc(sh.bonus) + ' = ' + (t.max + t.bonus) + '</span>' : '') +
+                    '</td>' +
+                    '<td class="got" data-label="' + esc(sh.cols.got) + '" id="bmSum">' + (t.any ? fmt(t.got) : '–') + '</td>' +
+                    '<td class="cmt"></td>' +
+                    '</tr></tfoot>';
+                elTable.innerHTML = h;
+                for (const ta of elTable.querySelectorAll('textarea')) grow(ta);
+            }
+
+            /* Regular maximum, bonus maximum, and what was entered. */
+            function totals() {
+                const sh = sheet();
+                let max = 0, bonus = 0, got = 0, any = false;
+                sh.rows.forEach(function (r, i) {
+                    max += r.max;
+                    bonus += r.bonus || 0;
+                    const st = state.rows[i + 1];
+                    if (st && st.pts !== undefined && st.pts !== null && st.pts !== '') {
+                        const v = Number(st.pts);
+                        if (isFinite(v)) { got += v; any = true; }
+                    }
+                });
+                return { max: max, bonus: bonus, got: got, any: any };
+            }
+
+            /* Points of the sheet stored under `key`, or null when it holds none. */
+            function scoreOf(key) {
+                let st = null;
+                try { st = JSON.parse(localStorage.getItem(key) || 'null'); } catch (e) { return null; }
+                if (!st || !st.rows) return null;
+                let got = 0, any = false;
+                for (const nr in st.rows) {
+                    const v = Number(st.rows[nr] && st.rows[nr].pts);
+                    if (st.rows[nr] && st.rows[nr].pts !== null && st.rows[nr].pts !== '' && isFinite(v)) {
+                        got += v; any = true;
+                    }
+                }
+                return any ? got : null;
+            }
+
+            /* The audience score: the sheet the three pupils sent. Falls back
+               to a Publikum sheet in THIS browser - that is the case when Doc
+               fills both himself instead of letting the three send. */
+            function publikumScore() {
+                if (publikum && publikum.got !== null) return { got: publikum.got, cloud: true };
+                const local = scoreOf('svp-bewertungsmatrix:' + talk.replace(/-[a-z]+$/, '-publikum'));
+                return local === null ? null : { got: local, cloud: false };
+            }
+
+            /* Doc's sheet counts three votes, the audience one. Shown on the
+               Coach sheet only - that is where the mark is decided, and a pupil
+               must not see the other grades anyway. */
+            function drawSummary() {
+                if (role !== 'coach') { elSummary.hidden = true; return; }
+                const mine = totals();
+                const other = publikumScore();
+                if (!mine.any || !other) { elSummary.hidden = true; return; }
+                const total = (mine.got * WEIGHT.coach + other.got * WEIGHT.publikum) /
+                    (WEIGHT.coach + WEIGHT.publikum);
+                const sh = sheet();
+                elSummary.hidden = false;
+                elSummary.innerHTML = '';
+                const txt = document.createElement('span');
+                txt.textContent = ROLE_LABEL.coach + ' ' + fmt(mine.got) + ' (×' + WEIGHT.coach + ') · ' +
+                    ROLE_LABEL.publikum + ' ' + fmt(other.got) + ' (×' + WEIGHT.publikum + ') · ' +
+                    (state.lang === 'de' ? 'zusammen ' : 'together ');
+                const b = document.createElement('b');
+                b.textContent = fmt(total) + ' ' + sh.of + ' ' + mine.max +
+                    ' · ' + fmt(total / mine.max * 100) + ' %';
+                elSummary.appendChild(txt);
+                elSummary.appendChild(b);
+            }
+
+            function drawVerdict() {
+                const sh = sheet();
+                const t = totals();
+                const sum = document.getElementById('bmSum');
+                if (sum) sum.textContent = t.any ? fmt(t.got) : '–';
+                if (!t.any) {
+                    elBig.textContent = '–';
+                    elNote.textContent = sh.empty;
+                    drawSummary();
+                    return;
+                }
+                elBig.textContent = fmt(t.got) + ' / ' + t.max;
+                elNote.textContent = fmt(t.got) + ' ' + sh.of + ' ' + t.max +
+                    (t.bonus ? ' (+ ' + t.bonus + ' ' + sh.bonus + ')' : '') +
+                    ' · ' + fmt(t.got / t.max * 100) + ' %';
+                drawSummary();
+            }
+
+            function drawClear() {
+                const sh = sheet();
+                elClear.innerHTML = '<button class="action secondary" type="button" data-clear>' + esc(sh.clear) +
+                    '</button>';
+            }
+
+            /* Textareas grow with their text instead of scrolling. */
+            function grow(ta) {
+                ta.style.height = 'auto';
+                ta.style.height = ta.scrollHeight + 'px';
+            }
+
+            function drawAll() {
+                drawFields();
+                drawTable();
+                drawVerdict();
+                drawClear();
+            }
+
+            /* ---------- edit mode: the sheet itself ---------- */
+
+            /* Read the edited sheet back from the DOM. `show` (the printed
+               notation like 2 + 2) survives only while its numbers do. */
+            function collectSheet() {
+                const sh = sheet();
+                const rows = [];
+                elTable.querySelectorAll('tbody tr[data-i]').forEach(function (tr) {
+                    const orig = sh.rows[Number(tr.dataset.i)] || {};
+                    /* Whole points only (Doc, 04.09.2026) - `step` alone would
+                       still let a typed 2,5 through. */
+                    const max = Math.max(0, Math.round(Number(tr.querySelector('input[data-max]').value) || 0));
+                    const bonus = Math.max(0, Math.round(Number(tr.querySelector('input[data-bonus]').value) || 0));
+                    const r = { text: tr.querySelector('.bm-text').textContent.trim(), max: max };
+                    if (bonus) r.bonus = bonus;
+                    if (orig.sos) r.sos = true;
+                    if (orig.show && orig.max === max && (orig.bonus || 0) === bonus) r.show = orig.show;
+                    rows.push(r);
+                });
+                const cols = Object.assign({}, sh.cols);
+                elTable.querySelectorAll('thead th[data-col]').forEach(function (th) {
+                    cols[th.dataset.col] = th.textContent.trim();
+                });
+                const tot = elTable.querySelector('.bm-total');
+                return {
+                    title: elTitle.textContent.trim() || sh.title,
+                    cols: cols,
+                    total: tot ? tot.textContent.trim() : sh.total,
+                    rows: rows
+                };
+            }
+
+            function setEditing(on) {
+                editing = on;
+                document.body.classList.toggle('editing', on);
+                elEdit.textContent = on ? '✔ Speichern' : '✎ Bearbeiten';
+                elEdit.classList.toggle('orange', on);
+                elCancel.hidden = !on;
+                elOrig.hidden = !on;
+                elAdd.hidden = !on;
+                drawTable();
+                drawVerdict();
+            }
+
+            function saveSheet() {
+                overrides[state.lang] = collectSheet();
+                persistOverrides();
+            }
+
+            function persistOverrides() {
+                try {
+                    localStorage.setItem(EDIT_KEY, JSON.stringify(overrides));
+                    localStorage.setItem(EDIT_TS, new Date().toISOString());
+                } catch (e) { }
+                pushRemote();
+            }
+
+            /* Bearbeiten needs a login (edits go to the cloud, like the plans)
+               and the edit passphrase from svp-gate.js, asked once per browser. */
+            elEdit.addEventListener('click', function () {
+                if (editing) { saveSheet(); setEditing(false); return; }
+                if (window.svpAuth && !svpAuth.hasSession()) {
+                    svpAuth.loginDialog(function () {
+                        try { sessionStorage.setItem(EDIT_AFTER_LOGIN, '1'); } catch (e) { }
+                        location.reload();
+                    });
+                    return;
+                }
+                if (window.svpGate) svpGate.run(function () { setEditing(true); });
+                else setEditing(true);
+            });
+
+            /* Abbrechen: nothing was written yet, so the stored state comes back. */
+            elCancel.addEventListener('click', function () {
+                overrides = loadJSON(EDIT_KEY);
+                setEditing(false);
+            });
+
+            /* Original: this language back to the built-in sheet, everywhere. */
+            elOrig.addEventListener('click', function () {
+                delete overrides[state.lang];
+                persistOverrides();
+                setEditing(false);
+            });
+
+            /* + Kriterium / ✕: the DOM is the working copy while editing, so
+               collect first, change, redraw - still unsaved until Speichern. */
+            elAdd.addEventListener('click', function () {
+                const work = collectSheet();
+                work.rows.push({ text: '', max: 1 });
+                overrides[state.lang] = work;
+                drawTable();
+                const last = elTable.querySelector('tbody tr:last-child .bm-text');
+                if (last) last.focus();
+            });
+
+            elTable.addEventListener('click', function (e) {
+                const x = e.target.closest('button[data-del]');
+                if (!x || !editing) return;
+                const work = collectSheet();
+                work.rows.splice(Number(x.dataset.del), 1);
+                overrides[state.lang] = work;
+                drawTable();
+                drawVerdict();
+            });
+
+            /* ---------- cloud: shared table svp_plan_edits, one row per page ---------- */
+
+            function cloudNote(text) {
+                let box = document.getElementById('svp-cloud-err');
+                if (!text) { if (box) box.remove(); return; }
+                if (!box) {
+                    box = document.createElement('div');
+                    box.id = 'svp-cloud-err';
+                    document.body.appendChild(box);
+                }
+                box.textContent = '';
+                const msg = document.createElement('span');
+                msg.textContent = text + ' — ';
+                const link = document.createElement('a');
+                link.href = 'notes.html';
+                link.textContent = 'neu anmelden';
+                box.appendChild(msg);
+                box.appendChild(link);
+            }
+
+            function pushRemote() {
+                if (!window.svpAuth || !svpAuth.hasSession()) {
+                    cloudNote('☁ Nur lokal gespeichert, nicht in der Cloud');
+                    return null;
+                }
+                const ts = localStorage.getItem(EDIT_TS) || new Date().toISOString();
+                return svpAuth.api('svp_plan_edits', {
+                    method: 'POST',
+                    headers: { Prefer: 'resolution=merge-duplicates,return=minimal' },
+                    body: JSON.stringify([{ page: location.pathname, edits: overrides, ts: ts }])
+                }).then(function (res) {
+                    cloudNote(res.ok ? '' : '☁ Fehler: HTTP ' + res.status +
+                        (res.status === 403 ? ' — diese Seite gehört einem anderen Konto' : ''));
+                }).catch(function (e) { cloudNote('☁ ' + e.message); });
+            }
+
+            /* Published state is read anonymously (every visitor sees Doc's
+               sheet); the newer timestamp wins, a newer local state is pushed
+               when logged in. */
+            async function pullRemote() {
+                if (!window.svpAuth) return;
+                try {
+                    const res = await fetch(svpAuth.DB_URL + '/rest/v1/svp_plan_edits?page=eq.' +
+                        encodeURIComponent(location.pathname) + '&select=edits,ts', {
+                        headers: { apikey: svpAuth.DB_KEY, Authorization: 'Bearer ' + svpAuth.DB_KEY }
+                    });
+                    if (!res.ok) return;
+                    const rows = await res.json();
+                    const localTs = Date.parse(localStorage.getItem(EDIT_TS) || '') || 0;
+                    if (!rows.length) {
+                        if (svpAuth.hasSession() && localStorage.getItem(EDIT_KEY)) pushRemote();
+                        return;
+                    }
+                    const remoteTs = Date.parse(rows[0].ts) || 0;
+                    if (remoteTs > localTs) {
+                        overrides = rows[0].edits || {};
+                        try {
+                            localStorage.setItem(EDIT_KEY, JSON.stringify(overrides));
+                            localStorage.setItem(EDIT_TS, rows[0].ts);
+                        } catch (e) { }
+                        if (!editing) { drawTable(); drawVerdict(); }
+                    } else if (localTs > remoteTs && svpAuth.hasSession()) {
+                        pushRemote();
+                    }
+                } catch (e) { /* offline: the local state stays */ }
+            }
+
+            /* ---------- Cloud: one sheet per talk AND role ----------
+               Three pupils sit together and fill ONE Publikum sheet (Doc,
+               04.09.2026); Doc's Coach sheet is the second row of the same
+               talk. Table svp_vortrag_bewertung, key plan+klasse+idx+rolle.
+               Both are sealed with Doc's public key (svp-crypto.js): every
+               device can write, only Doc can read back. The database refuses
+               an anonymous write to a `coach` row, so a pupil cannot touch
+               Doc's grade even by hand. */
+            const TABLE_BEW = 'svp_vortrag_bewertung';
+            const sentKey = meta ? 'svp-bm-sent:' + meta.plan + '|' + meta.klasse + '|' + meta.idx + '|' + role : '';
+
+            function bewQuery(r) {
+                return 'plan=eq.' + encodeURIComponent(meta.plan) +
+                    '&klasse=eq.' + encodeURIComponent(meta.klasse) +
+                    '&idx=eq.' + meta.idx + '&rolle=eq.' + (r || role);
+            }
+
+            /* Anonymous REST call - the pupils are not logged in. */
+            function anonFetch(path, opts) {
+                return fetch(svpAuth.DB_URL + '/rest/v1/' + path, Object.assign({}, opts, {
+                    headers: Object.assign({
+                        apikey: svpAuth.DB_KEY,
+                        Authorization: 'Bearer ' + svpAuth.DB_KEY,
+                        'Content-Type': 'application/json'
+                    }, (opts && opts.headers) || {})
+                }));
+            }
+
+            /* Doc writes his own row through his session, the pupils anonymously. */
+            function bewFetch(path, opts) {
+                if (role === 'coach' && window.svpAuth && svpAuth.hasSession()) return svpAuth.api(path, opts);
+                return anonFetch(path, opts);
+            }
+
+            function status(text, cls) {
+                elStatus.textContent = text || '';
+                elStatus.className = 'bm-status' + (cls ? ' ' + cls : '');
+            }
+
+            /* Send this sheet. One row per talk and role, so a second send is a
+               correction of the same row rather than a new entry. */
+            async function sendSheet() {
+                if (!meta) { status('Diesen Bogen über die Vortragsliste öffnen, sonst weiß er nicht, wohin er gehört.', 'err'); return; }
+                const who = (state.fields.reviewer || '').trim();
+                if (!who) {
+                    status(role === 'publikum'
+                        ? 'Bitte zuerst eure drei Namen eintragen.'
+                        : 'Bitte zuerst den Namen im Gutachter-Feld eintragen.', 'err');
+                    return;
+                }
+                const t = totals();
+                if (!t.any) { status('Bitte zuerst Punkte vergeben.', 'err'); return; }
+                if (!window.svpCrypto || !svpCrypto.available) {
+                    status('Verschlüsselung im Browser nicht verfügbar - Senden nicht möglich.', 'err');
+                    return;
+                }
+                if (role === 'coach' && !(window.svpAuth && svpAuth.hasSession())) {
+                    status('Zum Speichern des Coach-Bogens bitte anmelden (Notizen-Seite).', 'err');
+                    return;
+                }
+                elSendBtn.disabled = true;
+                status('sende …');
+                try {
+                    const payload = JSON.stringify({
+                        lang: state.lang, rows: state.rows, sos: state.sos,
+                        got: t.got, max: t.max, bonus: t.bonus,
+                        topic: state.fields.topic || '', presenter: state.fields.presenter || ''
+                    });
+                    const body = {
+                        plan: meta.plan, klasse: meta.klasse, idx: meta.idx, rolle: role,
+                        taken: true,
+                        name_enc: await svpCrypto.seal(who),
+                        data_enc: await svpCrypto.seal(payload),
+                        ts: new Date().toISOString()
+                    };
+                    /* upsert: the first send inserts, every further one updates
+                       the same row (anonymously only inside the ten minutes the
+                       database allows) */
+                    const res = await bewFetch(TABLE_BEW, {
+                        method: 'POST',
+                        headers: { Prefer: 'resolution=merge-duplicates,return=representation' },
+                        body: JSON.stringify([body])
+                    });
+                    if (!res.ok) {
+                        if (res.status === 401 || res.status === 403) {
+                            status('Diese Bewertung wurde schon abgeschickt und lässt sich nicht mehr ändern.', 'err');
+                            return;
+                        }
+                        throw new Error('HTTP ' + res.status);
+                    }
+                    const rows = await res.json();
+                    if (!rows.length) {
+                        status('Nichts gespeichert - die Änderungsfrist ist abgelaufen.', 'err');
+                        return;
+                    }
+                    try { localStorage.setItem(sentKey, new Date().toISOString()); } catch (e) { }
+                    status(role === 'publikum'
+                        ? 'Bewertung des Publikums gesendet. Danke!'
+                        : 'Coach-Bogen gespeichert.', 'ok');
+                } catch (e) {
+                    status('Senden fehlgeschlagen: ' + e.message, 'err');
+                } finally {
+                    elSendBtn.disabled = false;
+                }
+            }
+
+            /* ---------- Coach: read the Publikum sheet back ----------
+               Needs Doc's private key, so nothing is shown until he unlocks. */
+            let publikum = null;   /* { got, names } once decrypted */
+
+            async function pullPublikum() {
+                if (!meta || role !== 'coach') return;
+                let rows = [];
+                try {
+                    const res = await anonFetch(TABLE_BEW + '?' + bewQuery('publikum') +
+                        '&select=taken,name_enc,data_enc');
+                    if (!res.ok) throw new Error('HTTP ' + res.status);
+                    rows = (await res.json()).filter(function (r) { return r.taken && r.data_enc; });
+                } catch (e) { status('Publikum nicht ladbar: ' + e.message, 'err'); return; }
+
+                if (!rows.length) { publikum = null; status('Noch keine Bewertung aus dem Publikum.'); drawVerdict(); return; }
+                if (!(window.svpCrypto && svpCrypto.hasPrivate())) {
+                    status('Die Bewertung des Publikums liegt vor - zum Anzeigen entschlüsseln.');
+                    drawVerdict();
+                    return;
+                }
+                publikum = { got: null, names: '' };
+                try {
+                    const d = JSON.parse(await svpCrypto.open(rows[0].data_enc));
+                    if (typeof d.got === 'number') publikum.got = d.got;
+                } catch (e) { status('Bewertung des Publikums nicht lesbar.', 'err'); }
+                try { publikum.names = await svpCrypto.open(rows[0].name_enc); } catch (e) { }
+                if (publikum.got !== null) {
+                    status('Publikum: ' + fmt(publikum.got) + ' Punkte' +
+                        (publikum.names ? ' (' + publikum.names + ')' : ''), 'ok');
+                }
+                drawVerdict();
+            }
+
+            /* Doc opens his own sheet on another machine: the local copy is
+               empty, so the stored one is offered instead of silently showing a
+               blank bogen. A filled local sheet is never overwritten. */
+            async function pullOwnCoach() {
+                if (!meta || role !== 'coach') return;
+                if (totals().any) return;                       /* something typed here already */
+                if (!(window.svpCrypto && svpCrypto.hasPrivate())) return;
+                try {
+                    const res = await anonFetch(TABLE_BEW + '?' + bewQuery('coach') + '&select=taken,name_enc,data_enc');
+                    if (!res.ok) return;
+                    const rows = (await res.json()).filter(function (r) { return r.taken && r.data_enc; });
+                    if (!rows.length) return;
+                    const d = JSON.parse(await svpCrypto.open(rows[0].data_enc));
+                    state.rows = d.rows || {};
+                    state.sos = d.sos || state.sos;
+                    if (d.presenter && !state.fields.presenter) state.fields.presenter = d.presenter;
+                    if (d.topic && !state.fields.topic) state.fields.topic = d.topic;
+                    try { state.fields.reviewer = state.fields.reviewer || await svpCrypto.open(rows[0].name_enc); } catch (e) { }
+                    save();
+                    drawAll();
+                    status('Gespeicherter Coach-Bogen geladen.', 'ok');
+                } catch (e) { /* nothing stored, or not readable: keep the blank sheet */ }
+            }
+
+            /* Language switch keeps every entered value. */
+            elSeg.addEventListener('click', function (e) {
+                const b = e.target.closest('button[data-lang]');
+                if (!b || !SHEETS[b.dataset.lang] || editing) return;
+                state.lang = b.dataset.lang;
+                for (const other of elSeg.querySelectorAll('button')) other.classList.toggle('on', other === b);
+                save();
+                drawAll();
+            });
+            for (const b of elSeg.querySelectorAll('button')) b.classList.toggle('on', b.dataset.lang === state.lang);
+
+            elFields.addEventListener('input', function (e) {
+                const inp = e.target.closest('input[data-field]');
+                if (!inp) return;
+                state.fields[inp.dataset.field] = inp.value;
+                save();
+            });
+
+            elTable.addEventListener('input', function (e) {
+                const t = e.target;
+                if (t.matches('input[data-row]')) {
+                    const nr = t.dataset.row;
+                    const row = state.rows[nr] || (state.rows[nr] = {});
+                    row.pts = t.value === '' ? null : t.value;
+                    t.classList.toggle('over', t.value !== '' && Number(t.value) > Number(t.max));
+                    save();
+                    drawVerdict();
+                } else if (t.matches('textarea[data-note]')) {
+                    const nr = t.dataset.note;
+                    const row = state.rows[nr] || (state.rows[nr] = {});
+                    row.note = t.value;
+                    grow(t);
+                    const twin = t.nextElementSibling;
+                    if (twin && twin.classList.contains('cmt-print')) twin.textContent = t.value;
+                    save();
+                } else if (t.matches('input[data-sos]')) {
+                    state.sos = t.value;
+                    save();
+                }
+            });
+
+            /* Clear: first click asks, second click wipes. */
+            elClear.addEventListener('click', function (e) {
+                const sh = sheet();
+                if (e.target.closest('button[data-clear]')) {
+                    elClear.innerHTML = '<span class="bm-confirm"><span>' + esc(sh.really) + '</span>' +
+                        '<button class="action" type="button" data-yes>' + esc(sh.yes) + '</button>' +
+                        '<button class="action secondary" type="button" data-no>' + esc(sh.no) + '</button></span>';
+                } else if (e.target.closest('button[data-yes]')) {
+                    state = { lang: state.lang, fields: {}, sos: '', rows: {},
+                              talkLabel: talkLabel, meta: state.meta };
+                    save();
+                    drawAll();
+                } else if (e.target.closest('button[data-no]')) {
+                    drawClear();
+                }
+            });
+
+            if (document.fonts && document.fonts.ready) {
+                document.fonts.ready.then(function () {
+                    for (const ta of elTable.querySelectorAll('textarea')) grow(ta);
+                });
+            }
+            window.addEventListener('resize', function () {
+                for (const ta of elTable.querySelectorAll('textarea')) grow(ta);
+            });
+
+            /* The row under the verdict: the audience sends, Doc unlocks. */
+            (function wireSend() {
+                if (!talk || !role) { elSend.hidden = true; return; }
+                elSend.hidden = false;
+                elSendBtn.addEventListener('click', sendSheet);
+                if (!meta) {
+                    status('Diesen Bogen über die Vortragsliste öffnen, sonst weiß er nicht, wohin er gehört.', 'err');
+                    return;
+                }
+                if (role === 'publikum') {
+                    elSendBtn.textContent = 'Bewertung senden';
+                    let sent = null;
+                    try { sent = localStorage.getItem(sentKey); } catch (e) { }
+                    if (sent) status('Von diesem Gerät wurde schon gesendet - erneutes Senden ändert die Bewertung (bis zu 10 Minuten nach dem ersten Senden).');
+                    return;
+                }
+                /* Doc: save his own sheet, and unlock to see the pupils' one */
+                elSendBtn.textContent = 'Bewertung speichern';
+                elKeyBtn.hidden = false;
+                elKeyBtn.addEventListener('click', function () {
+                    if (!window.svpCrypto || !svpCrypto.available) {
+                        status('Verschlüsselung im Browser nicht verfügbar.', 'err');
+                        return;
+                    }
+                    if (svpCrypto.hasPrivate()) { pullPublikum(); pullOwnCoach(); return; }
+                    svpCrypto.passDialog('unlock', function () { pullPublikum(); pullOwnCoach(); });
+                });
+            }());
+
+            drawAll();
+            pullRemote();
+            if (role === 'coach' && meta) { pullPublikum(); pullOwnCoach(); }
+
+            /* After the login from the edit button the page reloaded - go on. */
+            try {
+                if (sessionStorage.getItem(EDIT_AFTER_LOGIN)) {
+                    sessionStorage.removeItem(EDIT_AFTER_LOGIN);
+                    if (window.svpAuth && svpAuth.hasSession()) elEdit.click();
+                }
+            } catch (e) { }
+        }());
+    </script>
+    <script src="svp-nav.js"></script>
+</body>
+
+</html>
