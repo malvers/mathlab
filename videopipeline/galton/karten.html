@@ -1,0 +1,565 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Galton — Einspieler</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&family=Outfit:wght@300;400;500&display=swap">
+<style>
+  html, body { margin: 0; padding: 0; background: #030616; overflow: hidden; }
+  canvas { display: block; }
+</style>
+</head>
+<body>
+<canvas id="c" width="1280" height="720"></canvas>
+<script>
+/* Galton — the five scenes the lab itself cannot show.
+   One page, one scene per ?scene=sN, paced to ?dur=<seconds>.
+
+   Everything here is really computed, never drawn from memory:
+     s4  Pascal's triangle, built row by row with the same addition the film narrates
+     s5  the two path bundles - the single edge path is walked, the middle sheaf is a
+         real sample of random walks that end in bin 9
+     s6  262 144 = 2^18 counted out of the same triangle; the clock runs on the
+         measured throughput of 60.0 balls/s
+     s8  three histograms actually sampled at run time (dice sums, heights, measurement
+         errors), each with the normal curve of its OWN mean and standard deviation
+     s9  a log-normal sample - the one distribution where the bell does not turn up
+
+   Colours and faces are the lab's (galtonboard.html): Orbitron + Outfit on the
+   near-black blue, orange for the balls, cyan for the board, gold for numbers. */
+const P = new URLSearchParams(location.search);
+const SCENE = P.get('scene') || 's4';
+const DUR = parseFloat(P.get('dur') || '20');
+
+const c = document.getElementById('c');
+const g = c.getContext('2d');
+const W = c.width, H = c.height;
+
+const COL = {
+  ground: '#030616', panel: '#0b1430', panel2: '#121e42', edge: '#1f3060', edgeSoft: '#16224a',
+  ink: '#e5ebfa', dim: '#b1bfdb', faint: '#8194b8',
+  cyan: '#00d2ff', ball: '#ff9640', ballHot: '#ffb866', gold: '#ffd36a',
+  lime: '#adff2f', violet: '#c07fe8', red: '#b02418',
+};
+
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+const ease = (u) => u < 0.5 ? 2 * u * u : 1 - Math.pow(-2 * u + 2, 2) / 2;
+const seg = (u, a, b) => clamp((u - a) / (b - a), 0, 1);
+const lerp = (a, b, u) => a + (b - a) * u;
+const hexA = (hex, a) => {
+  const n = parseInt(hex.slice(1), 16);
+  return 'rgba(' + (n >> 16 & 255) + ',' + (n >> 8 & 255) + ',' + (n & 255) + ',' + a + ')';
+};
+function orb(size, weight) { g.font = (weight || 500) + ' ' + size + 'px Orbitron, sans-serif'; }
+function out(size, weight) { g.font = (weight || 300) + ' ' + size + 'px Outfit, sans-serif'; }
+function txt(s, x, y, col, align, base) {
+  g.fillStyle = col; g.textAlign = align || 'left'; g.textBaseline = base || 'alphabetic';
+  g.fillText(s, x, y);
+}
+function ground() {
+  g.fillStyle = COL.ground; g.fillRect(0, 0, W, H);
+  let r = g.createRadialGradient(W * 0.3, -H * 0.1, 0, W * 0.3, -H * 0.1, W * 0.75);
+  r.addColorStop(0, 'rgba(16,28,68,0.85)'); r.addColorStop(1, 'rgba(16,28,68,0)');
+  g.fillStyle = r; g.fillRect(0, 0, W, H);
+  r = g.createRadialGradient(W * 0.9, H * 0.08, 0, W * 0.9, H * 0.08, W * 0.6);
+  r.addColorStop(0, 'rgba(42,22,8,0.8)'); r.addColorStop(1, 'rgba(42,22,8,0)');
+  g.fillStyle = r; g.fillRect(0, 0, W, H);
+}
+function eyebrow(s) {
+  orb(15, 500); g.letterSpacing = '3px';
+  txt(s.toUpperCase(), 64, 62, COL.faint);
+  g.letterSpacing = '0px';
+}
+function headline(s, alpha) {
+  g.globalAlpha = alpha === undefined ? 1 : alpha;
+  orb(38, 700); txt(s, 64, 112, COL.ink);
+  g.globalAlpha = 1;
+}
+const de = (n) => n.toLocaleString('de-DE');
+
+/* ---------------------------------------------------------------- the arithmetic
+   One triangle, computed once, used by s4, s5 and s6 - the same numbers the film
+   speaks and the same ones the lab's balls are sampling. */
+const ROWS = 18;
+const TRI = [[1]];
+for (let r = 1; r <= ROWS; r++) {
+  const prev = TRI[r - 1], row = [1];
+  for (let k = 0; k < prev.length - 1; k++) row.push(prev[k] + prev[k + 1]);
+  row.push(1);
+  TRI.push(row);
+}
+const COEFF = TRI[ROWS];                       // 1, 18, 153, … 48 620, … 153, 18, 1
+const TOTAL = COEFF.reduce((a, b) => a + b, 0); // 262 144 = 2^18
+const MEAN = ROWS / 2, SD = Math.sqrt(ROWS / 4);
+
+/* a deterministic generator, so every take of a card looks the same */
+function rng(seed) {
+  let s = seed >>> 0;
+  return () => { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296; };
+}
+
+/* ============================================================== s4 · Wegezählung */
+function s4(u) {
+  ground();
+  eyebrow('Wege zählen');
+  headline('Jede Zahl ist die Summe der beiden über ihr', seg(u, 0, 0.06));
+
+  // the triangle grows row by row, in step with what Solita counts out
+  const shown = clamp(Math.floor(seg(u, 0.08, 0.82) * (ROWS + 1)), 0, ROWS + 1);
+  const top = 168, bottom = H - 118;
+  const dy = (bottom - top) / ROWS;
+  const dx = 46;
+
+  for (let r = 0; r <= ROWS; r++) {
+    if (r >= shown) break;
+    const row = TRI[r];
+    const y = top + r * dy;
+    const fade = clamp((shown - r) * 1.4, 0, 1);
+    // beyond row 8 the numbers no longer fit - the triangle keeps growing as dots
+    const asNumbers = r <= 7;
+    for (let k = 0; k < row.length; k++) {
+      const x = W / 2 - (row.length - 1) * dx / 2 + k * dx;
+      if (asNumbers) {
+        orb(Math.max(11, 20 - r), 500);
+        g.globalAlpha = fade;
+        txt(de(row[k]), x, y, r === 0 ? COL.gold : COL.dim, 'center', 'middle');
+        g.globalAlpha = 1;
+      } else {
+        const big = row[k] / Math.max(...row);
+        g.globalAlpha = fade * (0.25 + 0.75 * big);
+        g.fillStyle = COL.cyan;
+        g.beginPath(); g.arc(x, y, 2.6, 0, Math.PI * 2); g.fill();
+        g.globalAlpha = 1;
+      }
+    }
+  }
+
+  // the bottom row, spelled out, once the triangle has arrived
+  const uEnd = seg(u, 0.80, 0.96);
+  if (uEnd > 0) {
+    g.globalAlpha = uEnd;
+    const y = H - 62;
+    g.fillStyle = hexA(COL.panel, 0.92);
+    g.fillRect(0, y - 46, W, 92);
+    g.strokeStyle = hexA(COL.edge, 0.9); g.lineWidth = 1;
+    g.beginPath(); g.moveTo(0, y - 46); g.lineTo(W, y - 46); g.stroke();
+    const shownIdx = [0, 1, 2, 9, 16, 17, 18];
+    const labels = shownIdx.map((i) => i === 9 ? de(COEFF[i]) : de(COEFF[i]));
+    let total = 0;
+    labels.forEach((s) => { orb(s.length > 4 ? 30 : 26, 700); total += g.measureText(s).width + 40; });
+    let x = W / 2 - total / 2;
+    shownIdx.forEach((i, n) => {
+      const s = labels[n];
+      orb(s.length > 4 ? 30 : 26, 700);
+      const wdt = g.measureText(s).width;
+      txt(s, x + wdt / 2, y, i === 9 ? COL.gold : COL.ballHot, 'center', 'middle');
+      if (n === 2 || n === 3) {
+        out(24, 300);
+        txt('…', x + wdt + 20, y + 2, COL.faint, 'center', 'middle');
+      }
+      x += wdt + 40;
+    });
+    g.globalAlpha = 1;
+  }
+}
+
+/* ========================================================= s5 · Mitte gegen Rand */
+function s5(u) {
+  ground();
+  eyebrow('Die Mitte ist kein Glück');
+  headline('Wie viele Wege führen dorthin?', seg(u, 0, 0.06));
+
+  // Vertical budget on a 720 px canvas, counted from the bottom up so nothing falls
+  // off the frame: caption 616, number 584, bins 496..538, board 186..466.
+  const top = 186, bottom = 466;
+  const dy = (bottom - top) / (ROWS - 1);
+  const dx = 44;                                  // wide enough to fill the frame
+  const cx = W / 2;
+  const pegX = (r, k) => cx - r * dx / 2 + k * dx;
+  const binX = (i) => cx - ROWS * dx / 2 + i * dx;
+  const binTop = 496, binH = 42;
+
+  // the bins, all nineteen of them, so "Fach" is a place and not a word
+  for (let i = 0; i <= ROWS; i++) {
+    const hot = i === 9, edge = i === 0;
+    g.strokeStyle = hexA(hot ? COL.gold : edge ? COL.red : COL.edge, hot || edge ? 0.9 : 0.5);
+    g.lineWidth = hot || edge ? 1.6 : 1;
+    g.strokeRect(binX(i) - dx / 2 + 3, binTop, dx - 6, binH);
+  }
+
+  // the pegs
+  for (let r = 0; r < ROWS; r++) {
+    for (let k = 0; k <= r; k++) {
+      g.fillStyle = hexA(COL.cyan, 0.42);
+      g.beginPath(); g.arc(pegX(r, k), top + r * dy, 2.2, 0, Math.PI * 2); g.fill();
+    }
+  }
+
+  /* The middle sheaf. Drawing a few hundred SAMPLED paths does not work: they all run
+     on the same lattice of pegs, so the union saturates into a diamond grid that reads
+     as woven fabric, not as a crowd. Instead every edge is drawn once, as thick and as
+     bright as the number of bin-9 paths that use it - which is exact arithmetic:
+
+         paths through peg (r, j)                 = C(r, j) · C(18-r, 9-j)
+         paths along the edge (r,j) -> (r+1, j)   = C(r, j) · C(17-r, 9-j)
+         paths along the edge (r,j) -> (r+1, j+1) = C(r, j) · C(17-r, 8-j)
+
+     Summed over any row that is 48 620, the number Solita speaks. The result is a
+     lens: fat in the middle, nothing at all at the edges. */
+  const C = (n, k) => (k < 0 || k > n || n < 0) ? 0 : TRI[n][k];
+  const edges = [];
+  let maxE = 0;
+  for (let r = 0; r < ROWS - 1; r++) {
+    for (let j = 0; j <= r; j++) {
+      const reach = C(r, j);
+      if (!reach) continue;
+      for (const right of [0, 1]) {
+        const n = reach * C(ROWS - 1 - r, 9 - j - right);
+        if (n <= 0) continue;
+        edges.push({ r, j, j2: j + right, n });
+        if (n > maxE) maxE = n;
+      }
+    }
+  }
+  // the last hop lands in the bin itself
+  const lastRow = ROWS - 1;
+  for (const j of [8, 9]) {
+    const n = C(lastRow, j) * C(1, 9 - j);
+    if (n > 0) { edges.push({ r: lastRow, j, bin: true, n }); if (n > maxE) maxE = n; }
+  }
+
+  const uMid = seg(u, 0.10, 0.46);
+  edges.forEach((e) => {
+    // rows appear top to bottom, in step with the ball's own way down
+    const rowIn = clamp(uMid * (ROWS + 1) - e.r, 0, 1);
+    if (rowIn <= 0) return;
+    const w = e.n / maxE;
+    g.strokeStyle = hexA(COL.ballHot, rowIn * (0.10 + 0.55 * w));
+    g.lineWidth = 0.8 + 3.4 * w;
+    g.beginPath();
+    g.moveTo(pegX(e.r, e.j), top + e.r * dy);
+    if (e.bin) g.lineTo(binX(9), binTop + binH * 0.5);
+    else g.lineTo(pegX(e.r + 1, e.j2), top + (e.r + 1) * dy);
+    g.stroke();
+  });
+
+  /* the single edge path: eighteen times the same way */
+  const uEdge = seg(u, 0.52, 0.76);
+  if (uEdge > 0) {
+    const n = Math.min(Math.floor(uEdge * (ROWS + 1)) + 1, ROWS);
+    g.strokeStyle = COL.red;
+    g.lineWidth = 2.8;
+    g.shadowColor = hexA(COL.red, 0.75); g.shadowBlur = 12;
+    g.beginPath();
+    g.moveTo(cx, top - 20);
+    for (let r = 0; r < n; r++) g.lineTo(pegX(r, 0), top + r * dy);
+    if (n >= ROWS) g.lineTo(binX(0), binTop + binH * 0.5);
+    g.stroke();
+    g.shadowBlur = 0;
+  }
+
+  // the two numbers, each under its own bin
+  const uNum = seg(u, 0.28, 0.50);
+  if (uNum > 0) {
+    g.globalAlpha = uNum;
+    orb(46, 700);
+    txt(de(COEFF[9]), binX(9), 584, COL.gold, 'center', 'middle');
+    out(21, 300);
+    txt('Wege in die Mitte', binX(9), 618, COL.dim, 'center', 'middle');
+    g.globalAlpha = 1;
+  }
+  const uNum2 = seg(u, 0.64, 0.84);
+  if (uNum2 > 0) {
+    g.globalAlpha = uNum2;
+    orb(46, 700);
+    txt('1', binX(0) + 40, 584, COL.red, 'center', 'middle');
+    out(21, 300);
+    txt('Weg nach außen', binX(0) + 40, 618, COL.dim, 'center', 'middle');
+    g.globalAlpha = 1;
+  }
+
+  const uEnd = seg(u, 0.86, 0.98);
+  if (uEnd > 0) {
+    g.globalAlpha = uEnd;
+    orb(26, 700);
+    g.letterSpacing = '1px';
+    txt('WAHRSCHEINLICHKEIT IST HIER REINE BUCHHALTUNG.', W / 2, 676, COL.lime, 'center', 'middle');
+    g.letterSpacing = '0px';
+    g.globalAlpha = 1;
+  }
+}
+
+/* ============================================================ s6 · Was es kostet */
+function s6(u) {
+  ground();
+  eyebrow('Was das Außenfach kostet');
+  headline('Ein Weg von 262 144', seg(u, 0, 0.06));
+
+  /* the count, built from the triangle in front of the viewer */
+  const uCount = seg(u, 0.06, 0.34);
+  const upTo = Math.floor(uCount * (ROWS + 1));
+  let sum = 0;
+  for (let i = 0; i < Math.min(upTo, COEFF.length); i++) sum += COEFF[i];
+  if (uCount >= 1) sum = TOTAL;
+
+  const boxY = 196;
+  g.fillStyle = hexA(COL.panel, 0.9);
+  g.strokeStyle = hexA(COL.edge, 1); g.lineWidth = 1;
+  g.fillRect(78, boxY, W - 156, 128);
+  g.strokeRect(78, boxY, W - 156, 128);
+  out(19, 300);
+  txt('alle Wege zusammen', 108, boxY + 40, COL.faint);
+  orb(56, 700);
+  txt(de(sum), 108, boxY + 92, COL.gold);
+  out(19, 300);
+  txt('davon ganz nach außen', W - 108, boxY + 40, COL.faint, 'right');
+  orb(56, 700);
+  txt(uCount >= 1 ? '1' : '—', W - 108, boxY + 92, COL.red, 'right');
+
+  /* the clock: at the measured 60.0 balls per second, 262 144 balls take 73 min */
+  const uClock = seg(u, 0.38, 0.88);
+  const RATE = 60.0;                       // measured, videopipeline/galton/measure.mjs
+  const balls = Math.floor(ease(uClock) * TOTAL);
+  const secs = balls / RATE;
+  const mm = Math.floor(secs / 60), ss = Math.floor(secs % 60);
+
+  const cy = 470;
+  out(21, 300);
+  txt('bei ' + RATE.toFixed(0) + ' Kugeln pro Sekunde — dem Anschlag dieses Labors', W / 2, cy - 52, COL.dim, 'center');
+  orb(84, 700);
+  txt(String(mm).padStart(2, '0') + ':' + String(ss).padStart(2, '0'),
+      W / 2, cy + 26, uClock >= 1 ? COL.red : COL.ballHot, 'center', 'middle');
+  out(20, 300);
+  txt(de(balls) + ' Kugeln geworfen', W / 2, cy + 82, COL.faint, 'center');
+
+  // a slim progress rail, so the wait is visible rather than only counted
+  const railW = W - 340, railX = 170, railY = cy + 116;
+  g.fillStyle = hexA(COL.edgeSoft, 1);
+  g.fillRect(railX, railY, railW, 5);
+  g.fillStyle = COL.ballHot;
+  g.fillRect(railX, railY, railW * ease(uClock), 5);
+
+  const uEnd = seg(u, 0.90, 0.99);
+  if (uEnd > 0) {
+    g.globalAlpha = uEnd;
+    orb(25, 700);
+    g.letterSpacing = '1px';
+    txt('DIE RÄNDER BLEIBEN LEER. DAS IST DAS ERGEBNIS.', W / 2, H - 58, COL.lime, 'center', 'middle');
+    g.letterSpacing = '0px';
+    g.globalAlpha = 1;
+  }
+}
+
+/* ====================================================== s8 · Es liegt am Summieren */
+function s8(u) {
+  ground();
+  eyebrow('Es liegt nicht am Brett');
+  headline('Drei Summen, dieselbe Kurve', seg(u, 0, 0.06));
+
+  /* three genuinely sampled histograms - each is a SUM of many small contributions.
+     Dice sums are whole numbers, so they get ONE BIN PER VALUE: forcing 51 integers
+     into 26 bins made every second bar twice as tall and the panel looked like a comb,
+     which is a binning artefact, not something about the distribution. */
+  const N = 4000;
+  const rnd = rng(4711);
+  const sets = [
+    {
+      title: 'Würfelsummen', sub: 'zehn Würfel, immer wieder',
+      col: COL.ball, discrete: true,
+      draw: () => { let s = 0; for (let i = 0; i < 10; i++) s += 1 + Math.floor(rnd() * 6); return s; },
+    },
+    {
+      title: 'Körpergrößen', sub: 'viele kleine Erbanlagen',
+      col: COL.cyan, bins: 26,
+      draw: () => { let s = 0; for (let i = 0; i < 24; i++) s += rnd(); return 152 + (s - 12) * 6.4; },
+    },
+    {
+      title: 'Messfehler', sub: 'viele kleine Störungen',
+      col: COL.violet, bins: 26,
+      draw: () => { let s = 0; for (let i = 0; i < 16; i++) s += (rnd() - 0.5); return s * 2.2; },
+    },
+  ];
+
+  const boxW = 356, gap = 30;
+  const x0 = (W - (boxW * 3 + gap * 2)) / 2;
+  const boxY = 190, boxH = 380;
+
+  sets.forEach((set, i) => {
+    const appear = seg(u, 0.08 + i * 0.13, 0.30 + i * 0.13);
+    if (appear <= 0) return;
+    const x = x0 + i * (boxW + gap);
+    g.globalAlpha = appear;
+
+    // sample
+    const vals = [];
+    for (let n = 0; n < N; n++) vals.push(set.draw());
+    const lo = Math.min(...vals), hi = Math.max(...vals);
+    // one bin per integer for the dice, a fixed count for the continuous ones
+    const BINS = set.discrete ? Math.round(hi - lo) + 1 : set.bins;
+    const binW = set.discrete ? 1 : (hi - lo) / BINS;
+    const hist = new Array(BINS).fill(0);
+    vals.forEach((v) => hist[clamp(set.discrete ? Math.round(v - lo)
+      : Math.floor((v - lo) / (hi - lo + 1e-9) * BINS), 0, BINS - 1)]++);
+    const mean = vals.reduce((a, b) => a + b, 0) / N;
+    const sd = Math.sqrt(vals.reduce((a, b) => a + (b - mean) ** 2, 0) / N);
+    const maxH = Math.max(...hist);
+
+    g.fillStyle = hexA(COL.panel, 0.85);
+    g.strokeStyle = hexA(COL.edge, 1); g.lineWidth = 1;
+    g.fillRect(x, boxY, boxW, boxH);
+    g.strokeRect(x, boxY, boxW, boxH);
+
+    orb(17, 700); txt(set.title, x + 22, boxY + 38, COL.ink);
+    out(16, 300); txt(set.sub, x + 22, boxY + 62, COL.faint);
+
+    const plotY = boxY + boxH - 44, plotH = boxH - 130, plotX = x + 22, plotW = boxW - 44;
+    const bw = plotW / BINS;
+    hist.forEach((h, b) => {
+      const bh = (h / maxH) * plotH;
+      g.fillStyle = hexA(set.col, 0.55);
+      g.fillRect(plotX + b * bw + 1, plotY - bh, Math.max(1, bw - 2), bh);
+    });
+
+    // the normal curve of THIS sample's own mean and width - nothing borrowed
+    const curve = seg(u, 0.44 + i * 0.07, 0.62 + i * 0.07);
+    if (curve > 0) {
+      g.globalAlpha = appear * curve;
+      g.strokeStyle = COL.gold; g.lineWidth = 2.4;
+      g.beginPath();
+      for (let s = 0; s <= 160; s++) {
+        const v = lo + (s / 160) * (hi - lo);
+        const dens = Math.exp(-((v - mean) ** 2) / (2 * sd * sd)) / (sd * Math.sqrt(2 * Math.PI));
+        const expected = N * dens * binW;
+        const px = plotX + ((v - lo) / (hi - lo)) * plotW;
+        const py = plotY - (expected / maxH) * plotH;
+        s ? g.lineTo(px, py) : g.moveTo(px, py);
+      }
+      g.stroke();
+      g.globalAlpha = appear;
+    }
+    g.globalAlpha = 1;
+  });
+
+  const uEnd = seg(u, 0.80, 0.96);
+  if (uEnd > 0) {
+    g.globalAlpha = uEnd;
+    orb(27, 700);
+    g.letterSpacing = '1px';
+    txt('SUMMEN SEHEN AM ENDE ALLE GLEICH AUS.', W / 2, H - 56, COL.lime, 'center', 'middle');
+    g.letterSpacing = '0px';
+    g.globalAlpha = 1;
+  }
+}
+
+/* =========================================================== s9 · Und wo es bricht */
+function s9(u) {
+  ground();
+  eyebrow('Und wo es nicht gilt');
+  headline('Wenn ein Beitrag alle anderen erschlägt', seg(u, 0, 0.06));
+
+  /* A log-normal sample: the same "many small contributions", but MULTIPLIED instead
+     of added. Twelve growth factors around 1, so ln(value) is a sum and the value
+     itself is not - the bell moves to the logarithm and leaves a long tail behind.
+     sigma 0.95 puts the bulk left of 1 and lets the tail thin out to nothing well
+     inside the frame, so the tail ENDS on screen instead of being cut off by it. */
+  const N = 8000, BINS = 56;
+  const rnd = rng(90210);
+  const norm = () => {                                  // Box-Muller, from the same rng
+    const a = Math.max(1e-9, rnd()), b = rnd();
+    return Math.sqrt(-2 * Math.log(a)) * Math.cos(2 * Math.PI * b);
+  };
+  const vals = [];
+  for (let n = 0; n < N; n++) {
+    let lg = 0;
+    for (let i = 0; i < 12; i++) lg += norm() * (0.95 / Math.sqrt(12));   // ln grows by a sum
+    vals.push(Math.exp(lg));
+  }
+  const lo = 0, hi = 7;
+  const binW = (hi - lo) / BINS;
+  const hist = new Array(BINS).fill(0);
+  let over = 0;
+  vals.forEach((v) => { const b = Math.floor((v - lo) / binW); if (b >= 0 && b < BINS) hist[b]++; else over++; });
+  const maxH = Math.max(...hist);
+
+  const plotX = 160, plotW = W - 320, plotY = H - 168, plotH = 330;
+  const bw = plotW / BINS;
+
+  const grow = seg(u, 0.10, 0.58);
+  const shown = Math.floor(grow * BINS);
+  const TAIL_AT = 14;                                   // where the bulk ends, ~1.75
+  for (let b = 0; b < Math.min(shown, BINS); b++) {
+    const bh = (hist[b] / maxH) * plotH;
+    const tail = b >= TAIL_AT;
+    g.fillStyle = hexA(tail ? COL.red : COL.ball, tail ? 0.8 : 0.55);
+    g.fillRect(plotX + b * bw + 0.5, plotY - bh, Math.max(1.5, bw - 1), bh);
+  }
+
+  // the bell someone might reach for here: same mean, same width - and it is plainly
+  // the wrong shape. It peaks where almost nobody is and it wants to go below zero.
+  const uBell = seg(u, 0.50, 0.76);
+  if (uBell > 0) {
+    const mean = vals.reduce((a, b) => a + b, 0) / N;
+    const sd = Math.sqrt(vals.reduce((a, b) => a + (b - mean) ** 2, 0) / N);
+    g.save();
+    g.beginPath(); g.rect(plotX, plotY - plotH - 30, plotW, plotH + 31); g.clip();
+    g.globalAlpha = uBell;
+    g.strokeStyle = COL.cyan; g.lineWidth = 2.4; g.setLineDash([8, 6]);
+    g.beginPath();
+    for (let s = 0; s <= 240; s++) {
+      const v = lo + (s / 240) * (hi - lo);
+      const dens = Math.exp(-((v - mean) ** 2) / (2 * sd * sd)) / (sd * Math.sqrt(2 * Math.PI));
+      const px = plotX + ((v - lo) / (hi - lo)) * plotW;
+      const py = plotY - (N * dens * binW / maxH) * plotH;
+      s ? g.lineTo(px, py) : g.moveTo(px, py);
+    }
+    g.stroke();
+    g.setLineDash([]);
+    g.restore();
+    g.globalAlpha = uBell;
+    out(19, 400);
+    const mx = plotX + ((mean - lo) / (hi - lo)) * plotW;
+    txt('eine Glocke mit demselben Mittelwert und derselben Breite', mx + 26, plotY - plotH * 0.52, COL.cyan);
+    txt('— sie sitzt dort, wo fast niemand ist', mx + 26, plotY - plotH * 0.52 + 26, COL.cyan);
+    g.globalAlpha = 1;
+  }
+
+  g.strokeStyle = hexA(COL.edge, 1); g.lineWidth = 1;
+  g.beginPath(); g.moveTo(plotX, plotY + 1); g.lineTo(plotX + plotW, plotY + 1); g.stroke();
+  out(18, 300);
+  txt('Vermögen', plotX, plotY + 34, COL.faint);
+  const uTail = seg(u, 0.60, 0.74);
+  if (uTail > 0) {
+    g.globalAlpha = uTail;
+    txt('der Schwanz reißt nicht ab', plotX + plotW, plotY + 34, COL.red, 'right');
+    g.globalAlpha = 1;
+  }
+
+  const uEnd = seg(u, 0.82, 0.97);
+  if (uEnd > 0) {
+    g.globalAlpha = uEnd;
+    orb(25, 700);
+    g.letterSpacing = '1px';
+    txt('DIE GLOCKE BRAUCHT BEITRÄGE, DIE ÄHNLICH VIEL WIEGEN.', W / 2, 158, COL.lime, 'center', 'middle');
+    g.letterSpacing = '0px';
+    g.globalAlpha = 1;
+  }
+}
+
+/* --------------------------------------------------------------------- driver */
+const SCENES = { s4, s5, s6, s8, s9 };
+let t0 = null;
+function frame(now) {
+  if (t0 === null) t0 = now;
+  const u = clamp((now - t0) / (DUR * 1000), 0, 1);
+  (SCENES[SCENE] || s4)(u);
+  if (u < 1) requestAnimationFrame(frame);
+}
+document.fonts.ready.then(() => {
+  window.__vpReady = true;
+  requestAnimationFrame(frame);
+});
+</script>
+</body>
+</html>

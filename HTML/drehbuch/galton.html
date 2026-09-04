@@ -155,6 +155,15 @@ section { margin-top: clamp(2.6rem, 6vw, 4.4rem); }
 
 code { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 0.85em; color: var(--cyan); background: #091430; border: 1px solid var(--line-soft); border-radius: 2px; padding: 0.06em 0.34em; }
 
+/* what Solita actually says - generated from narration.mjs, never hand-edited.
+   Taken from _template.html; --lambda there is this lab's --gold. */
+.say { margin-top: 1.1rem; padding: 0.95rem 1.2rem; background: #0a1830; border: 1px solid var(--line-soft); border-left: 2px solid var(--cyan); border-radius: 2px; }
+.say h4 { margin: 0 0 0.45rem; font-family: 'Orbitron', sans-serif; font-size: 0.64rem; font-weight: 500; letter-spacing: 0.15em; text-transform: uppercase; color: var(--cyan); }
+.say p { margin: 0; font-size: 1.06rem; line-height: 1.62; color: var(--ink); }
+.say .pause { display: inline-block; font-family: 'Orbitron', sans-serif; font-size: 0.66rem; font-weight: 500; color: var(--gold); background: #241c07; border: 1px solid #4a3a15; border-radius: 2px; padding: 0.05rem 0.4rem; margin: 0 0.22rem; vertical-align: 0.08em; white-space: nowrap; }
+.say .beat { display: inline-block; width: 0.5em; height: 0.5em; margin: 0 0.1em; background: radial-gradient(circle, var(--cyan) 1.6px, transparent 1.8px); vertical-align: 0.05em; opacity: 0.55; }
+.say .spell { border-bottom: 1px dotted var(--ink-faint); letter-spacing: 0.12em; }
+
 /* the blocker panel - this one is not decoration */
 .alert {
     margin-top: 1.4rem;
@@ -171,6 +180,13 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 0.85em
 .alert p { font-size: 1.04rem; color: #e3cfcb; }
 .alert strong { color: #fff2ef; }
 .alert code { color: #ff9d8e; background: #2b100b; border-color: #5c1f16; }
+
+/* the same panel once the decision has been made and the lab changed */
+.alert.done { background: linear-gradient(100deg, #152608 0%, var(--surface) 60%); border-color: #3d6b18; border-left-color: var(--lime); }
+.alert.done h3 { color: #ddf5c4; }
+.alert.done p { color: #d3e2c4; }
+.alert.done strong { color: #f0fbe6; }
+.alert.done code { color: #c8f08a; background: #16240c; border-color: #33501a; }
 
 .measure { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 420px); gap: clamp(1.2rem, 3vw, 2.2rem); align-items: start; }
 .measure > div { min-width: 0; }
@@ -214,7 +230,7 @@ footer .sig { margin-left: auto; }
     <h1>Die Glocke, die niemand hinmalt</h1>
     <p class="lede">Der Plot für das Galton-Demovideo: was passiert, in welcher
         Reihenfolge — und warum genau dort der Groschen fällt.</p>
-    <p class="status">Plot zur Freigabe · eine Entscheidung offen (Abschnitt D)</p>
+    <p class="status">Gedreht am 04.09.2026 · 3:50 in 1440p · Upload offen</p>
 
     <dl class="meta">
         <div><dt>Lab</dt><dd><a href="https://docalvers.de/galtonboard.html">galtonboard.html</a></dd></div>
@@ -246,14 +262,15 @@ footer .sig { margin-left: auto; }
     <div class="arc" id="arc"></div>
     <div class="prose">
         <p>Erst wird zugeschaut: eine Kugel ist eine Folge von achtzehn Münzwürfen (1),
-           zehn Kugeln ergeben nichts Erkennbares (2), und dann wächst aus tausend
+           ein Dutzend Kugeln ergibt nichts Erkennbares (2), und dann wächst aus tausend
            Kugeln die Glocke (3). Dann wird erklärt, warum ausgerechnet diese Form:
            es ist eine Wegezählung, 262 144 Wege durch das Brett (4), und die Mitte
            gewinnt nicht durch Glück, sondern weil dorthin 48 620 Wege führen und zum
            Rand genau <em>einer</em> (5).</p>
         <p>Szene 6 macht daraus die unbequeme Rechnung: für <strong>eine einzige</strong>
-           Kugel im Außenfach bräuchte man im Mittel eine Viertelmillion Würfe — über
-           eine Stunde Laufzeit. Danach wird gespielt (7) und verallgemeinert (8): die
+           Kugel in einem bestimmten Außenfach bräuchte man im Mittel eine
+           Viertelmillion Würfe — 73 Minuten, selbst wenn das Labor am Anschlag läuft.
+           Danach wird gespielt (7) und verallgemeinert (8): die
            Glocke kommt nicht vom Brett, sondern vom Summieren. Szene 9 zeigt ehrlich,
            wo das <em>nicht</em> gilt, Szene 10 löst ein.</p>
     </div>
@@ -292,9 +309,16 @@ footer .sig { margin-left: auto; }
             wirklich herauskommt, ist die Binomialverteilung; die Glockenkurve liegt bei
             achtzehn Reihen um höchstens <strong>0,26 Prozentpunkte</strong> daneben
             (gemessen, Abschnitt D). Solita sagt „fast genau", nicht „genau".</li>
-        <li><strong>Über die Ränder wird nicht geschwindelt.</strong> Siehe die rote
-            Notiz in Abschnitt D — das ist die einzige Stelle, an der dieser Film
-            unehrlich werden <em>könnte</em>, und deshalb die wichtigste.</li>
+        <li><strong>Nicht „sauber", nicht „symmetrisch".</strong> Bei tausend Kugeln
+            steht die höchste Säule in jedem vierten Lauf <em>neben</em> der Mitte, und
+            Nachbarfächer links und rechts weichen im Mittel um ein Fünftel voneinander
+            ab (gerechnet, Abschnitt D). Was dasteht, ist eine Glocke mit Zacken — und
+            genau so wird sie genannt.</li>
+        <li><strong>Über die Ränder wird nicht geschwindelt.</strong> Das Lab lenkte
+            früher jede sechzigste Kugel in ein leeres Fach; genau das ist jetzt
+            abgeschaltet (Abschnitt D). Die leeren Außenfächer sind das Ergebnis, nicht
+            ein Schönheitsfehler — und die einzige Stelle, an der dieser Film unehrlich
+            werden <em>könnte</em>.</li>
         <li><strong>Nichts behaupten, was das Bild nicht hergibt.</strong> Alle Zahlen
             stammen aus Abschnitt D: die Verteilung exakt ausgerechnet, der Durchsatz am
             laufenden Lab gemessen.</li>
@@ -328,40 +352,70 @@ footer .sig { margin-left: auto; }
         <p><strong>Was das Lab einer Aufnahme erlaubt</strong> (gemessen): der ganze
            Zustand <code>sim</code> ist <strong>unerreichbar</strong> — er lebt in einer
            Closure im <code>load</code>-Handler. Steuerbar ist nur das DOM:
-           <code>slider-rows</code> (11–29, in Zweierschritten),
+           <code>slider-rows</code> — trotz des Namens ein <em>Fächer</em>-Regler:
+           11–29 Fächer, immer ungerade, also 10–28 Reihen —,
            <code>slider-spawn</code> (10–1000 ms), <code>slider-speed</code>
-           (0,04–5,0), <code>slider-maxballs</code> (1–500), <code>btn-play-pause</code>
-           und <code>btn-reset</code>. Der Kugelzähler ist als Text ablesbar.</p>
+           (0,04–5,0), <code>slider-maxballs</code> (1–500: Kugeln <em>gleichzeitig in
+           der Luft</em>, keine Obergrenze für den Zähler), <code>btn-play-pause</code>,
+           <code>btn-reset</code> und seit dem 04.09. <code>btn-curve</code> für die
+           Glockenkurve. Der Kugelzähler ist als Text ablesbar.</p>
         <p><strong>Durchsatz, am laufenden Lab gestoppt:</strong> in der Auslieferung
-           <strong>17,8 Kugeln pro Sekunde</strong>, mit allen Reglern am Anschlag
-           <strong>60,1</strong>. Tausend Kugeln dauern damit knapp 17 Sekunden — das
-           passt in eine Szene. Zehntausend dauern schon zweieinhalb Minuten.</p>
+           <strong>17,5 Kugeln pro Sekunde</strong>, mit allen Reglern am Anschlag
+           <strong>60,0</strong> — auch bei 2560 × 1440, dem Format der Aufnahme (es
+           kommt höchstens eine Kugel pro Frame, mehr als sechzig pro Sekunde gibt es
+           nicht). Tausend Kugeln dauern damit knapp 17 Sekunden — das passt in eine
+           Szene. Zehntausend dauern schon fast drei Minuten.</p>
+        <p><strong>Flugzeit einer Kugel</strong>, vom Einwurf bis ins Fach, jede Stufe
+           einzeln gestoppt: Tempo 5 → <strong>2,0 s</strong> · Tempo 2 → 4,2 s ·
+           Tempo 1 → 7,5 s · Tempo 0,5 → <strong>14,1 s</strong> · Tempo 0,32 → 22,7 s ·
+           Tempo 0,2 → 35,9 s · Tempo 0,12 → 59,4 s · Tempo 0,04 → <strong>2:40</strong>
+           für <em>eine</em> Kugel. Am langsamen Ende wächst die Zeit stärker als
+           eins durch Tempo, weil der Einfallweg vor der ersten Reihe quadratisch
+           langsamer wird. <strong>Szene 1 fährt Tempo 0,5</strong> — 0,78 s je Nagel,
+           die ganze Kugel in 14 s, das passt unter zwanzig Sekunden Sprechzeit. Wird
+           die Szene länger, ist 0,32 die nächste Stufe (1,26 s je Nagel, 22,7 s).</p>
+        <p><strong>Was eine Pause einfriert:</strong> bei Vollgas sind 60 Kugeln pro
+           Sekunde mal 2,0 s Flugzeit — rund <strong>120 Kugeln gleichzeitig in der
+           Luft</strong>. Wer da auf Pause drückt, hat sie alle im Bild stehen; das
+           Rezept dagegen steht in Abschnitt F.</p>
+        <p><strong>Wie zackig tausend Kugeln sind</strong> (je 2000 Läufe gerechnet):
+           bei 1000 Kugeln steht die höchste Säule in <strong>26 %</strong> der Läufe
+           nicht in der Mitte, und die Fächer links und rechts der Mitte weichen im
+           Mittel um <strong>19 %</strong> voneinander ab. Bei 2000 Kugeln (33 s) sind
+           es 14 % und 13 %, bei 4000 (67 s) 5 % und 9 %. Der Plot bleibt bei tausend
+           und nennt die Zacken beim Namen; wer eine glattere Glocke will, zahlt mit
+           einer Szene 3 von über dreißig Sekunden.</p>
     </div>
 
-    <div class="alert">
-        <h3>⚠︎ Zwei Dinge, die vor dem Dreh entschieden werden müssen</h3>
-        <p><strong>1. Jede sechzigste Kugel ist nicht zufällig.</strong> In
-           <code>galtonboard.html</code> steht <code>explorerEvery: 60</code>: jede
-           sechzigste Kugel bekommt über <code>pickEmptyBinIndex()</code> ein
-           <em>Zielfach</em> zugewiesen — ein noch leeres — und wird an den Nägeln
-           gezielt dorthin gesteuert. Das ist selbstbegrenzend (sobald jedes Fach
-           getroffen ist, hört es auf), aber die <em>erste</em> Kugel in jedem Außenfach
-           ist <strong>gesetzt, nicht gewonnen</strong>. Genau darüber macht Szene 6
-           einen Punkt. Ein Film, der sagt „auch ganz außen landet mal eine — reiner
-           Zufall", während im Code eine Kugel dorthin gelenkt wird, wäre gelogen.
-           <br><strong>Mein Vorschlag:</strong> <code>explorerEvery</code> für den Dreh
-           auf 0 setzen (eine Zeile) und die leeren Außenfächer <em>zeigen</em> — sie
-           sind die Pointe von Szene 6, nicht ein Schönheitsfehler. Deine
-           Entscheidung.</p>
-        <p><strong>2. Die Glockenkurve wird gar nicht gezeichnet.</strong> Die
+    <div class="alert done">
+        <h3>✓ Beide offenen Entscheidungen sind gefallen — das Lab ist geändert</h3>
+        <p><strong>1. Jede sechzigste Kugel wurde gelenkt. Jetzt nicht mehr.</strong> In
+           <code>galtonboard.html</code> stand <code>explorerEvery: 60</code>: jede
+           sechzigste Kugel bekam über <code>pickEmptyBinIndex()</code> ein noch leeres
+           <em>Zielfach</em> zugewiesen und wurde an den Nägeln dorthin gesteuert. Bei
+           tausend Kugeln waren das sechzehn — und die füllten <em>genau</em> die sechs
+           Fächer, deren Leere die Pointe von Szene 6 ist. Ein Film, der „auch ganz
+           außen landet mal eine, reiner Zufall" sagt, während im Code eine Kugel
+           dorthin gelenkt wird, wäre gelogen gewesen. <strong>Der Wert steht jetzt auf
+           0</strong>, der Code bleibt stehen (60 zurückschreiben stellt das alte
+           Verhalten her). Gegengemessen an zwei Läufen zu tausend Kugeln: leer bleiben
+           die äußersten Fächer auf jeder Seite — <strong>0 und 18 praktisch immer</strong>
+           (rechnerisch zu 99,6 %), 1 und 17 zu 93 %, 2 und 16 nur noch zu 56 %, und
+           genau so schwankte es auch zwischen den beiden Läufen. Für den Film heißt
+           das: <em>welche</em> Ränder leer bleiben, ist nicht planbar — <em>dass</em>
+           die äußersten leer bleiben, schon. In Fach 1 fällt ehrlich alle
+           vierzehntausend Kugeln eine, in Fach 0 alle 262 144.</p>
+        <p><strong>2. Die Glockenkurve gibt es jetzt wirklich.</strong> Die
            Feature-Beschreibung in
-           <code>resources/explanations/galtonboard.txt</code> verspricht ein
-           „Normalverteilungs-Overlay: Einblendung der theoretischen Glockenkurve" —
-           im Code gibt es das nicht, ich habe die ganze Datei danach durchsucht.
-           Entweder die Kurve kommt ins Lab (dann kann der Film sie einblenden), oder
-           sie bleibt eine Karte, oder die Beschreibung wird korrigiert. Der Plot geht
-           bis auf Weiteres davon aus, dass sie <strong>auf einer Karte</strong>
-           liegt.</p>
+           <code>resources/explanations/galtonboard.txt</code> versprach ein
+           „Normalverteilungs-Overlay" — im Code gab es das nicht. Es ist eingebaut:
+           ein Knopf <kbd>GLOCKENKURVE</kbd> unter STOP/RESET blendet sie ein, in allen
+           neun Sprachen beschriftet. Nichts wird gefittet — die Kurve ist die
+           Normalverteilung mit Mitte <span class="m">n</span>/2 und Breite
+           <span class="m">√(n/4)</span>, skaliert auf die Zahl der <em>gelandeten</em>
+           Kugeln, und wächst deshalb mit den Balken mit. Sie startet
+           <strong>ausgeschaltet</strong>: der Film blendet sie in Szene 10 ein, und bis
+           dahin malt sie niemand hin.</p>
     </div>
 </section>
 
@@ -371,11 +425,21 @@ footer .sig { margin-left: auto; }
     <dl class="budget" id="budget"></dl>
     <div class="prose">
         <p>Teil 1 von <code>Infinity_6min.m4a</code> ist nahtlos loopbar: loopStart
-           21,220 s, loopEnd 163,998 s. <strong>Intro plus zwei Durchläufe</strong>
-           tragen die geplante Länge.</p>
+           21,220 s, loopEnd 163,998 s. <code>buildBed()</code> setzt den Anfang
+           <em>einmal</em> davor (wegen der Einblendung) und hängt so viele
+           Schleifen an, wie die Länge braucht — für 3:25 ist das <strong>ein
+           Durchgang plus eine Schleife</strong>, das trägt bis 5:07.</p>
         <p><strong>Der Durchsatz bestimmt den Schnitt, nicht umgekehrt.</strong> Bei
            60 Kugeln pro Sekunde ist Szene 3 (tausend Kugeln) nach 17 Sekunden fertig —
-           das passt. Alles, was mehr Kugeln bräuchte, muss auf eine Karte.</p>
+           das passt. Szene 7 braucht zweimal tausend, deshalb laufen ihre beiden
+           Bretter als getrennte Takes <em>nebeneinander</em> statt nacheinander.
+           Alles, was mehr Kugeln bräuchte, muss auf eine Karte.</p>
+        <p><strong>Wenn gekürzt werden muss, fällt Szene 7.</strong> Sie kostet zwei
+           eigene Takes und zweimal siebzehn Sekunden Kugelfallen für einen Punkt, den
+           Szene 5 schon angelegt hat. Szene 9 — wo die Glocke <em>nicht</em> gilt —
+           bleibt stehen: das Kaputtmachen am Ende ist der lehrreichste Teil, es ist
+           die einzige Szene, die vor falscher Anwendung schützt, und ohne sie endet
+           der Film auf „das ist immer so".</p>
     </div>
 </section>
 
@@ -392,25 +456,71 @@ footer .sig { margin-left: auto; }
             (<code>galtonboard-slider-settings-v2</code> im <code>localStorage</code>).
             Die Aufnahme braucht deshalb einen <em>frischen</em> Context, sonst startet
             der Film mit den Einstellungen des letzten Versuchs.</li>
-        <li><strong>Szene 1 braucht eine einzelne Kugel.</strong>
-            <code>slider-maxballs</code> auf 1 und <code>slider-speed</code> ganz
-            langsam (0,04) — dann sieht man die achtzehn Entscheidungen einzeln. Das ist
-            der einzige Weg, den Kern des Films überhaupt zu zeigen.</li>
-        <li><strong>Der Reihen-Regler springt in Zweierschritten</strong> (11 … 29,
-            <code>step=2</code>), damit die Fächerzahl ungerade bleibt. Szene 7 kann
-            also nicht jede Zahl anfahren.</li>
+        <li><strong>Das Lab legt sofort los.</strong> Die erste Kugel fällt im ersten
+            Frame nach dem Laden, mit Tempo 1. Also erst die Regler setzen, dann
+            <code>btn-reset</code>, dann Aufnahme an — sonst beginnt Szene 1 mit einer
+            Kugel, die niemand bestellt hat.</li>
+        <li><strong>Szene 1 braucht eine einzelne Kugel — und Tempo 0,5, nicht 0,04.</strong>
+            <code>slider-maxballs</code> auf 1; bei Tempo 0,5 braucht die Kugel 14,1 s
+            für achtzehn Nägel, das sind 0,78 s je Entscheidung. Der Anschlag 0,04 wäre
+            2:40 für eine einzige Kugel (gemessen, Abschnitt D).</li>
+        <li><strong>Der Zähler hält nie von selbst an</strong>, und Pause friert ein,
+            was gerade in der Luft ist. Rezept für „tausend": beim Zählerstand 1000
+            <code>slider-maxballs</code> auf 1 — die letzten Kugeln landen, und es kommt
+            keine neue, bis das Brett leer ist —, dann beim Stand 1001 auf Pause. Die
+            neue Kugel steht in dem Moment noch unsichtbar über dem Brett, der Zähler
+            zeigt 1001, die Glocke steht ohne eine Kugel in der Luft.
+            <strong>Nur mit <code>page.waitForFunction(…, {polling: 'raf'})</code></strong>:
+            gemessen trifft das den Stand auf die Kugel genau, während ein
+            <code>waitForTimeout</code>-Polling im 120-ms-Takt bei 1004 landet — bei
+            sechzig Kugeln pro Sekunde vergehen in einem Polling-Schritt sieben
+            Kugeln.</li>
+        <li><strong>Szene 2:</strong> Tempo 2, <code>slider-spawn</code> auf 1000 ms —
+            eine Kugel je Sekunde, bei 4,2 s Flugzeit also höchstens vier gleichzeitig
+            im Bild. Für genau ein Dutzend im Fach dasselbe Rezept wie in Szene 3: beim
+            Zählerstand 12 <code>maxballs</code> auf 1, ausrollen lassen, bei 13
+            pausieren. <em>Kein</em> Regler zählt Kugeln mit —
+            <code>slider-maxballs</code> begrenzt nur, wie viele gleichzeitig fliegen.</li>
+        <li><strong>Der Reihen-Regler zählt Fächer</strong> (11 … 29, immer ungerade,
+            <code>step=2</code>). Szene 7 fährt <strong>15 und 29 Fächer</strong> — das
+            sind 14 und 28 Reihen, genau das Doppelte, damit „doppelt so viele Nägel"
+            im Bild auch stimmt.</li>
         <li>Ein Reihenwechsel baut das Brett neu und <strong>löscht die Statistik</strong>
-            (<code>rebuildBoard</code> / <code>resetStats</code>). Szene 7 muss also pro
-            Einstellung neu sammeln — bei 60 Kugeln pro Sekunde sind das je rund 17 s
-            für tausend Kugeln. Das ist der Grund, warum Szene 7 nur zwei Einstellungen
-            zeigt und nicht vier.</li>
+            (<code>rebuildBoard</code> / <code>resetStats</code>). Szene 7 kann also
+            nicht umschalten und weitersammeln: beide Bretter sind eigene Takes zu je
+            tausend Kugeln (17 s) und werden im Schnitt nebeneinandergestellt.</li>
         <li>Der lokale Server klebt ein rotes <strong>LOCAL</strong>-Schild in die Seite.
             Die Aufnahme entfernt <code>#local-badge</code> vor dem ersten Bild.</li>
         <li>1,6 s Luft nach jeder Szene; Zuschlag für 3 und 7, wo noch Kugeln fallen,
             wenn Solita schon schweigt.</li>
+        <li><strong>Der Recorder dehnte die Zeitachse</strong> (gefunden am 04.09.2026 an
+            diesem Film): <code>lib/record-cdp.mjs</code> gab ffmpeg die gemessenen
+            Bildabstände als <code>duration</code>, und der concat-Demuxer machte daraus
+            3,5 % mehr Laufzeit beim Lab-Take und bis zu 19 % bei einer Karte. Jeder
+            Schnitt lag damit hinter seiner eigenen Marke — Szene 10 begann drei Sekunden
+            vor ihrem Anfang. Das Ausgaberaster wird jetzt selbst auf 25 fps gerechnet.
+            <strong>Betrifft alle Filme aus dieser Pipeline</strong>, nicht nur
+            Galton.</li>
+        <li><strong>Die Aktionen hängen an Solitas Pausen, nicht an geschätzten
+            Sekunden.</strong> <code>run2.mjs</code> lässt <code>silencedetect</code>
+            über ihre eigene MP3 laufen und nimmt die Pausen als Regieanweisung: in
+            Szene 7 wird am <em>Ende</em> der ersten Pause umgeschaltet (da sagt sie
+            „und jetzt achtundzwanzig"), in Szene 10 am <em>Anfang</em> der Pause die
+            Kurve eingeblendet (da endet „…die Kurve dazu"). Geschätzte Wortraten lagen
+            in beiden Fällen um mehr als einen ganzen Satz daneben.</li>
+        <li><strong>Szene 10 beginnt auf einem schon vollen Brett.</strong> Die tausend
+            Kugeln werden <em>vor</em> der Szenenmarke gesammelt, sonst kündigt Solita
+            die Kurve fünfzehn Sekunden zu früh an. Die Marke <code>s7ende</code>
+            trennt: alles danach bis <code>s10</code> ist Füllmaterial und fällt im
+            Schnitt heraus.</li>
+        <li><strong>Szene 10 drückt <code>btn-curve</code></strong> und lässt das Bild
+            danach stehen. Der Knopf startet aus und merkt sich seinen Zustand
+            <em>nicht</em> — jede Aufnahme fängt also verlässlich ohne Kurve an, auch
+            wenn jemand vorher damit gespielt hat.</li>
         <li>Die fünf Karten kommen aus <code>videopipeline/galton/karten.html</code> und
             bekommen ihre gemessene Sprechdauer als Parameter
-            (<code>?scene=sN&amp;dur=…</code>).</li>
+            (<code>?scene=sN&amp;dur=…</code>). Sie enden auf dem Dunkelblau des
+            Labors, nie auf Schwarz.</li>
     </ul>
 </section>
 
@@ -436,10 +546,16 @@ footer .sig { margin-left: auto; }
 </section>
 
 <footer>
-    <p><strong>Stand:</strong> Plot zur Freigabe. Noch kein Wortlaut, keine Vertonung,
-       keine Aufnahme — und <strong>zwei offene Entscheidungen</strong> in Abschnitt D,
-       die vor dem Dreh beantwortet sein müssen. Zahlen aus
-       <code>videopipeline/galton/measure.mjs</code>.</p>
+    <p><strong>Stand:</strong> <strong>Gedreht.</strong> Der Film liegt als
+       <code>galton-demo-1440p.mp4</code> fertig auf der Platte — 3:50, 2560 × 1440,
+       Solitas Spur 220,9 s, Abspann auf dem Dunkelblau des Labors (letzte Sekunden bei
+       YAVG 46,7, kein Schwarz). Beide Entscheidungen aus Abschnitt D sind im Lab
+       umgesetzt: keine gelenkten Kugeln mehr, und die Glockenkurve gibt es als
+       Einblendung. <strong>Offen ist nur der YouTube-Upload.</strong></p>
+    <p>Zahlen aus <code>videopipeline/galton/measure.mjs</code>; die Flugzeiten, der
+       Durchsatz bei 1440p und die Zackenrechnung kamen aus einem zweiten Messlauf, der
+       noch im Scratchpad liegt — er gehört als <code>measure2.mjs</code> neben den
+       ersten.</p>
     <p class="eyebrow sig">Doc Alvers Mathe-Labor</p>
 </footer>
 
@@ -448,15 +564,15 @@ footer .sig { margin-left: auto; }
 <script>
 const SCENES = [
     { n: 1, s: 20, t: 'Eine Kugel, achtzehn Münzwürfe', core: true,
-      img: 'Eine <em>einzige</em> Kugel, ganz langsam. Sie trifft den ersten Nagel, rollt links herum. Nächster Nagel, rechts. Achtzehnmal. Bei jedem Nagel blitzt kurz auf, wie sie sich hätte anders entscheiden können.',
+      img: 'Eine <em>einzige</em> Kugel, langsam — Tempo 0,5, vierzehn Sekunden für achtzehn Nägel. Sie trifft den ersten Nagel, rollt links herum. Nächster Nagel, rechts. Achtzehnmal ein kleiner Bogen nach links oder rechts, mehr zeigt das Bild nicht — und mehr braucht es nicht.',
       aha: 'Achtzehn Nägel, achtzehn Münzwürfe. <strong>Wo die Kugel landet, ist nichts als die Bilanz aus achtzehn Mal links-oder-rechts.</strong> Mehr Physik steckt in diesem Brett nicht.' },
 
-    { n: 2, s: 15, t: 'Zehn Kugeln: nichts',
-      img: 'Der Regler geht hoch, zehn Kugeln fallen. Die Fächer füllen sich unregelmäßig — mal zwei nebeneinander, mal eine Lücke. Kein Muster.',
-      aha: 'Zehnmal Zufall sieht aus wie — Zufall. Wer hier eine Glocke sieht, sieht sie hinein. <em>Noch</em> ist keine da.' },
+    { n: 2, s: 15, t: 'Ein Dutzend Kugeln: nichts',
+      img: 'Tempo 3, alle 0,8 Sekunden eine Kugel. Ein Dutzend fällt, die Fächer füllen sich unregelmäßig — mal zwei nebeneinander, mal eine Lücke. Kein Muster.',
+      aha: 'Zwölfmal Zufall sieht aus wie — Zufall. Wer hier eine Glocke sieht, sieht sie hinein. <em>Noch</em> ist keine da.' },
 
     { n: 3, s: 20, t: 'Tausend Kugeln: die Glocke', core: true,
-      img: 'Alle Regler hoch, der Zähler läuft. Bei hundert ahnt man etwas, bei dreihundert steht eine Form, bei tausend eine saubere Glocke. Der Zähler bleibt bei 1000 stehen, das Bild steht still.',
+      img: 'Alle Regler auf Anschlag, der Zähler rast. Erst ein Haufen, dann schiebt sich eine Form heraus, nach knapp siebzehn Sekunden steht eine Glocke — zackig, in jedem vierten Lauf mit der Spitze neben der Mitte, aber unverkennbar. Die letzten Kugeln landen, das Bild steht still, der Zähler zeigt 1001.',
       aha: 'Niemand hat diese Kurve hingelegt. Jede einzelne Kugel wusste nichts von ihr. <strong>Sie entsteht aus lauter Münzwürfen, die nichts voneinander wissen</strong> — und sie kommt jedes Mal.' },
 
     { n: 4, s: 22, t: 'Warum ausgerechnet diese Form', core: true, card: true,
@@ -468,42 +584,54 @@ const SCENES = [
       aha: 'Das Außenfach ist nicht unwahrscheinlich, weil das Schicksal es nicht mag, sondern weil es dorthin <strong>nur einen einzigen Weg gibt</strong> — und in die Mitte achtundvierzigtausend. Wahrscheinlichkeit ist hier reine Buchhaltung.' },
 
     { n: 6, s: 22, t: 'Was das Außenfach kostet', core: true, card: true,
-      img: 'Die Rechnung steht groß da: ein Weg von 262 144. Daneben läuft eine Uhr mit — bei sechzig Kugeln pro Sekunde, dem Anschlag des Labors, wären das im Mittel <strong>73 Minuten</strong> für eine einzige Kugel ganz außen.',
+      img: 'Die Rechnung steht groß da: ein Weg von 262 144. Daneben läuft eine Uhr mit — bei sechzig Kugeln pro Sekunde, dem Anschlag des Labors, wären das im Mittel <strong>73 Minuten</strong> für eine einzige Kugel im linken Außenfach. Wem die Seite egal ist, wartet halb so lang: 36 Minuten, immer noch zehn Filme wie dieser.',
       aha: 'Deshalb bleiben die Ränder in einem Film leer, und das ist keine Schlamperei, sondern das Ergebnis. <strong>Seltene Ereignisse sind nicht selten, weil sie schwierig wären — sie sind selten, weil so wenige Wege dorthin führen.</strong>' },
 
-    { n: 7, s: 18, t: 'Mehr Reihen, schmalere Glocke',
-      img: 'Der Reihen-Regler von 11 auf 29, danach wieder tausend Kugeln. Die Glocke wird sichtbar schmaler <em>im Verhältnis</em> zum Brett, obwohl sie in Fächern gerechnet breiter ist.',
+    { n: 7, s: 18, t: 'Doppelt so viele Nägel, schlankere Glocke', cut: true,
+      img: 'Zwei Bretter nacheinander, je fünfhundert Kugeln: erst 14 Reihen (15 Fächer), dann 28 Reihen (29 Fächer). Umgeschaltet wird genau auf Solitas Ansage. Beim zweiten wird die Glocke sichtbar schmaler <em>im Verhältnis</em> zum Brett, obwohl sie in Fächern gerechnet breiter ist — 1,9 gegen 2,6 Fächer.',
       aha: 'Die Breite wächst wie die <strong>Wurzel</strong> aus der Reihenzahl, nicht wie die Reihenzahl. Doppelt so viele Nägel heißt nur <em>ein-Komma-vier-mal</em> so breit — deshalb wird die Glocke relativ immer schlanker.' },
 
     { n: 8, s: 20, t: 'Es liegt nicht am Brett', card: true,
       img: 'Drei Kacheln nebeneinander: Würfelsummen, Körpergrößen, Messfehler. Alle drei Häufigkeitsbilder blenden ineinander — und darüber legt sich jedes Mal dieselbe Kurve.',
       aha: 'Die Glocke kommt nicht vom Galton-Brett. Sie kommt vom <strong>Summieren</strong>. Wenn viele kleine Beiträge zusammenkommen, die nichts voneinander wissen, sieht das Ergebnis <em>immer</em> so aus — egal, was die einzelnen Beiträge waren.' },
 
-    { n: 9, s: 16, t: 'Und wo es nicht gilt', cut: true, card: true,
+    { n: 9, s: 16, t: 'Und wo es nicht gilt', core: true, card: true,
       img: 'Dieselbe Kachel noch einmal, aber mit Vermögen statt Körpergrößen: kein Buckel in der Mitte, sondern ein langer Schwanz nach rechts, der nicht abreißen will.',
       aha: 'Die Glocke braucht Beiträge, die alle ungefähr gleich viel wiegen. Wo <em>ein</em> Beitrag alle anderen erschlagen kann, kommt sie nicht — und dann liegt jeder falsch, der sie trotzdem annimmt.' },
 
     { n: 10, s: 16, t: 'Achtzehn Münzwürfe',
-      img: 'Zurück auf das volle Brett mit der fertigen Glocke. Die Farbe geht heraus, bis nur noch die Kurve steht — und darunter der Satz vom Anfang: achtzehnmal links oder rechts.',
-      aha: 'Nichts an dieser Kurve wurde entworfen. Sie ist das, was <strong>übrig bleibt</strong>, wenn genug Zufall zusammenkommt — und genau deshalb findet man sie überall, wo viele kleine Dinge sich addieren.' }
+      img: 'Zurück auf dem echten Brett mit der fertigen Glocke aus tausend Kugeln. Ein Druck auf <kbd>GLOCKENKURVE</kbd> — und die Kurve legt sich über die Säulen, ohne dass etwas angepasst wird. Sie lag die ganze Zeit dort. Das Bild bleibt auf dem Dunkelblau des Labors stehen, nicht auf Schwarz.',
+      aha: 'Niemand hat diese Kurve hingemalt — sie wird nur noch <em>nachgezeichnet</em>. Sie ist das, was <strong>übrig bleibt</strong>, wenn genug Zufall zusammenkommt, und genau deshalb findet man sie überall, wo viele kleine Dinge sich addieren.' }
 ];
 
 /* Solita's wording arrives later, generated from narration.mjs. */
 /* SAY:START - generated by videopipeline/galton/sync-drehbuch.mjs, do not edit */
-const SAY = {};
-const SPOKEN = {};
+const SAY = {
+    s1: 'Eine einzige Kugel. Achtzehn Reihen Nägel. <span class="pause">0,7 s</span> An jedem Nagel geht es nach links oder nach rechts. Fifty-fifty. Ohne Vorliebe, ohne Gedächtnis. <span class="pause">0,9 s</span> Links. Rechts. Rechts. Links. <span class="pause">0,8 s</span> Achtzehnmal. Und wo sie unten liegen bleibt, ist nichts anderes als die Bilanz aus achtzehn Münzwürfen.',
+    s2: 'Ein Dutzend Kugeln. <span class="pause">0,8 s</span> Und? Nichts. Hier zwei nebeneinander, da eine Lücke, daneben wieder nichts. <span class="pause">0,7 s</span> Zwölfmal Zufall sieht aus wie Zufall. Wer hier schon eine Glocke sieht, sieht sie hinein.',
+    s3: 'Jetzt alle Regler auf Anschlag — tausend Kugeln. <span class="pause">2,5 s</span> Erst ist das nur ein Haufen. <span class="pause">3,0 s</span> Dann schiebt sich langsam eine Form heraus. <span class="pause">6,0 s</span> Und da steht sie: eine Glocke. Zackig, ein bisschen schief — aber unverkennbar. <span class="pause">0,7 s</span> Niemand hat sie hingelegt. Keine einzige dieser Kugeln wusste von ihr.',
+    s4: 'Warum ausgerechnet diese Form? <span class="pause">0,8 s</span> Zählen wir nach. An jeden Nagel schreiben wir, auf wie vielen Wegen man ihn überhaupt erreicht. <span class="pause">0,7 s</span> Oben eine Eins. Dann eins, eins. Dann eins, zwei, eins. Jede Zahl ist die Summe der beiden über ihr. <span class="pause">0,9 s</span> So wächst es durch das ganze Brett — und unten steht: eins, achtzehn, hundertdreiundfünfzig, und in der Mitte achtundvierzigtausendsechshundertzwanzig.',
+    s5: 'Zwei Fächer nebeneinandergelegt. <span class="pause">0,8 s</span> In die Mitte führen achtundvierzigtausendsechshundertzwanzig Wege. <span class="pause">0,7 s</span> Ganz nach außen führt genau einer: achtzehnmal dieselbe Richtung. <span class="pause">0,9 s</span> Das Außenfach ist nicht unwahrscheinlich, weil das Schicksal es nicht mag. Sondern weil dorthin nur ein einziger Weg führt. Wahrscheinlichkeit ist hier reine Buchhaltung.',
+    s6: 'Was kostet dieser eine Weg? <span class="pause">0,7 s</span> Insgesamt gibt es zweihundertzweiundsechzigtausend Wege durch das Brett, und genau einer endet ganz außen. <span class="pause">0,9 s</span> Bei sechzig Kugeln pro Sekunde — dem Anschlag dieses Labors — wären das im Mittel dreiundsiebzig Minuten. Für eine einzige Kugel. <span class="pause">1,0 s</span> Deshalb bleiben die Ränder leer. Das ist keine Schlamperei. Das ist das Ergebnis.',
+    s7: 'Vierzehn Reihen, fünfhundert Kugeln. <span class="pause">6,5 s</span> Und jetzt achtundzwanzig Reihen — doppelt so viele Nägel. <span class="pause">7,0 s</span> Die Glocke wird breiter, klar. Aber nicht doppelt so breit: nur um das Eins-Komma-Vier-Fache. <span class="beat"></span> Die Breite wächst mit der Wurzel. Deshalb wirkt sie auf dem größeren Brett schlanker.',
+    s8: 'Würfelsummen. Körpergrößen. Messfehler. <span class="pause">0,9 s</span> Drei Dinge, die nichts miteinander zu tun haben — und jedes Mal dieselbe Kurve. <span class="pause">0,8 s</span> Die Glocke kommt nicht vom Galton-Brett. Sie kommt vom Summieren. Wenn viele kleine Beiträge zusammenkommen, die nichts voneinander wissen, sehen Summen am Ende alle gleich aus.',
+    s9: 'Und wo gilt das nicht? <span class="pause">0,8 s</span> Beim Vermögen zum Beispiel. Kein Buckel in der Mitte, sondern ein Schwanz, der nicht abreißen will. <span class="pause">0,9 s</span> Die Glocke braucht Beiträge, die ungefähr gleich viel wiegen. Wo ein einziger alle anderen erschlagen kann, kommt sie nicht.',
+    s10: 'Zurück auf das Brett. Und jetzt die Kurve dazu. <span class="pause">1,2 s</span> Nichts wird angepasst. Mitte neun, Breite gut zwei Fächer — das stand fest, bevor die erste Kugel gefallen ist. <span class="pause">0,7 s</span> Ganz genau trifft sie nicht; in der Mitte fehlt ein Viertel Prozentpunkt. <span class="pause">0,9 s</span> Achtzehnmal links oder rechts. Mehr war es nie.'
+};
+const SPOKEN = {"s1":17.448,"s2":11.304,"s3":26.928,"s4":22.92,"s5":20.568,"s6":22.536,"s7":28.344,"s8":18.528,"s9":14.688,"s10":17.184};
 /* SAY:END */
 
 const ARC = [
     { t: 'Eine Kugel', c: '#ff9640', key: true },
-    { t: 'Zehn: nichts', c: '#ff9640' },
+    { t: 'Ein Dutzend: nichts', c: '#ff9640' },
     { t: 'Tausend: die Glocke', c: '#ffd36a', key: true },
     { t: 'Wege zaehlen', c: '#ffd36a', key: true },
     { t: 'Die Mitte gewinnt', c: '#ffd36a', key: true },
     { t: 'Was der Rand kostet', c: '#b02418', key: true },
     { t: 'Breite ~ Wurzel', c: '#00d2ff' },
     { t: 'Es liegt am Summieren', c: '#adff2f', key: true },
-    { t: 'Und wo nicht', c: '#adff2f' }
+    { t: 'Und wo nicht', c: '#adff2f', key: true },
+    { t: 'Achtzehn Münzwürfe', c: '#ff9640', key: true }
 ];
 document.getElementById('arc').innerHTML = ARC.map(a =>
     '<span class="' + (a.key ? 'key' : '') + '" style="--stop:' + a.c + '">' + a.t + '</span>').join('');
@@ -526,7 +654,7 @@ document.getElementById('timeline').innerHTML = SCENES.map(x =>
         cell('Sprache', (spoken || planned).toFixed(0) + ' s', spoken ? 'gemessen · 10 Szenen' : 'geplant · 10 Szenen') +
         cell('Luft', '~' + air.toFixed(0) + ' s', '1,6 s je Szene') +
         cell('Film', mmss(film), spoken ? 'nach der Vertonung' : 'geschätzt') +
-        cell('Durchsatz', '60,1 /s', 'gemessen · alle Regler am Anschlag');
+        cell('Durchsatz', '60,0 /s', 'gemessen · alle Regler am Anschlag');
 })();
 
 document.getElementById('scenes').innerHTML = SCENES.map(x =>

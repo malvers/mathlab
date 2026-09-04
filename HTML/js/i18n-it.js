@@ -154,7 +154,8 @@ CyberI18n.translations.it = {
                 reset: "RESET",
                 rows: "Righe",
                 balls_active: "Palline attive",
-                spawn_ms: "Spawn (ms)"
+                spawn_ms: "Spawn (ms)",
+                curve: "CURVA A CAMPANA"
             },
             lissajous: {
                 title: "LISSAJOUS · CURVE PARAMETRICHE",

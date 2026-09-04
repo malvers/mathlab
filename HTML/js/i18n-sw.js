@@ -155,7 +155,8 @@ CyberI18n.translations.sw = {
                 reset: "WEKA UPYA",
                 rows: "Safu",
                 balls_active: "Mipira Inayotumika",
-                spawn_ms: "Spawn (ms)"
+                spawn_ms: "Spawn (ms)",
+                curve: "CURVE YA KENGELE"
             },
             lissajous: {
                 title: "LISSAJOUS · PARAMETRIC CURVES",

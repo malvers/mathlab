@@ -193,7 +193,12 @@ const CyberBranding = {
         'multiplikation.html': 'https://youtu.be/ODTYHxOghsE',
         'dividieren.html': 'https://youtu.be/5bdpqUNNq-w',
         'orbitals.html': 'https://youtu.be/Kknrs_lzcyU',
-        'jacquard.html': 'https://youtu.be/ssH4qYuJ-G0',
+        'jacquard.html': 'https://youtu.be/wS3L5EwwOYE',
+        'mandelbrot.html': 'https://youtu.be/TS1vt7hEc7o',
+        'fourier.html': 'https://youtu.be/HB6cDhemJ84',
+        'bb84.html': 'https://youtu.be/fAkbF8RsaRM',
+        'irisvis.html': 'https://youtu.be/XFCK0uRRUU4',
+        'galtonboard.html': 'https://youtu.be/L8XKYIEx8Ig',
     },
 
     injectLabVideo() {

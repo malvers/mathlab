@@ -154,7 +154,8 @@ CyberI18n.translations.fr = {
                 reset: "RÉINITIALISER",
                 rows: "Lignes",
                 balls_active: "Billes actives",
-                spawn_ms: "Spawn (ms)"
+                spawn_ms: "Spawn (ms)",
+                curve: "COURBE EN CLOCHE"
             },
             lissajous: {
                 title: "LISSAJOUS · COURBES PARAMÉTRICAS",

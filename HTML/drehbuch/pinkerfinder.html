@@ -1,0 +1,936 @@
+<!doctype html>
+<!-- =====================================================================
+     DREHBUCH-TEMPLATE  —  so entsteht jede Drehbuchseite
+
+     Verbindlich seit dem Kovarianz-Film (29.08.2026). NICHT von vorn bauen:
+     diese Datei kopieren, ausraeumen, fuellen.
+
+         cp HTML/drehbuch/_template.html HTML/drehbuch/<lab>.html
+
+     Warum in HTML/drehbuch/ und nicht als Markdown: serve.py liefert nur HTML/
+     aus. Nur so ist das Drehbuch unter
+     http://localhost:8765/drehbuch/<lab>.html erreichbar und wird wie jedes Lab
+     hart neu geladen.
+
+     WAS ZU ERSETZEN IST, in dieser Reihenfolge — alles ist mit TODO markiert:
+
+      1  <title> und <h1>    kurzer, poetischer Titel; kein Untertitel
+      2  .lede + .status     ein Satz, was das ist; Stand der Produktion
+      3  <dl class="meta">   Lab · Sprecherin · Aufnahme · Szenen · Laufzeit
+      4  .thesis             DER HERO. Ein kleiner, ruhiger Canvas, der das Sujet
+                             des Films zeigt — echt gerechnet, nicht gemalt.
+                             Daneben das Blockquote: die Leitidee in EINEM Satz,
+                             darunter die eine Frage, die der Film beantwortet.
+      5  ARC (im Script)     der dramaturgische Bogen als Kette von Stationen:
+                             aufbauen -> umdrehen -> brechen. Kaputtmachen gehoert
+                             ans Ende und ist der lehrreichste Teil.
+                             key: true = die tragenden Stationen.
+      6  SCENES (im Script)  EINE Datenquelle fuer Zeitleiste, Karten und
+                             Sprechertext. Pro Szene: n, s (geplante Sekunden),
+                             t (Titel), img (was im Bild passiert), aha (der
+                             Gedanke, der fallen soll — noch nicht der Wortlaut).
+                             core: true = Kernszene, wird nicht gekuerzt.
+                             cut:  true = Notbremse, Kuerzungskandidat.
+                             card: true = laeuft nicht im Lab, sondern auf einer
+                             eigenen Karte.
+      7  <ol class="rules">  didaktische Leitplanken, bindend fuer den
+                             Sprechertext. Immer dabei: nie eine Formel ohne
+                             vorher gezeigtes Bild; ein neuer Begriff pro Szene;
+                             verbotene Vokabeln beim Namen nennen; nichts
+                             behaupten, was das Bild nicht hergibt.
+      8  Zeitbudget-Prosa    ehrlich rechnen und das Musikbett dagegenhalten.
+      9  <ul class="notes">  Choreografie: Startzustand, localStorage loeschen,
+                             Nachlaufzeiten, welche Szene maus- oder
+                             timing-kritisch ist.
+     10  Abschnitt F         bewusst weggelassen — was ein Teil 2 koennte.
+     11  Hero-Canvas         das Sujet zeichnen. Klick = neuer Wurf.
+     12  SAY:START/SAY:END   NICHT von Hand fuellen. Der Wortlaut kommt aus
+                             videopipeline/<lab>/narration.mjs ueber
+                             videopipeline/<lab>/sync-drehbuch.mjs — dort den Pfad
+                             auf die eigene Seite setzen und nach JEDER
+                             Textaenderung neu laufen lassen. Damit bleibt
+                             narration.mjs die einzige Quelle fuer den Wortlaut,
+                             und die gemessenen Sekunden aus durs.json
+                             ueberschreiben die geplanten in der Zeitleiste.
+
+     REGELN, die man beim Fuellen leicht vergisst:
+     - Schriften und Farben aus dem LAB uebernehmen, nicht aus einem Fremddesign.
+       Die Akzentfarben muessen dieselbe Bedeutung tragen wie im Lab.
+     - Szenen als Karten mit zwei Spalten (Bild | Aha), nie als Tabelle.
+     - In der Zeitleiste ist jede Szene so breit, wie sie lang ist.
+     - Schrift eher zu gross als zu klein. Auch die Orbitron-Kleinlabels.
+     - Statusfarben satt, nicht als gedaempfter Wash.
+     - Runde 1 ist der Plot allein. Doc liest und gibt frei. Erst DANACH entstehen
+       Solitas Saetze. Nie beides auf einmal liefern.
+     ===================================================================== -->
+
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+
+<style>
+/* minimal reset - the artifact host used to provide this */
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; min-height: 100vh; }
+img, canvas, svg { display: block; max-width: 100%; }
+button, input { font: inherit; }
+:focus-visible { outline: 2px solid #00d2ff; outline-offset: 2px; }
+</style>
+<title>Ordner oder Ordnung</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&family=Outfit:wght@200;300;400;600&display=swap">
+
+<style>
+/* Palette and faces are the lab's own (bb84.html): Orbitron + Outfit,
+   deep blue ground, cyan = the image under A, orange/green = the two
+   principal axes. Single-theme on purpose - this is the lab's world. */
+:root {
+    --ground:      #081428;
+    --ground-deep: #050e1c;
+    --surface:     #0c1c3a;
+    --surface-2:   #0e244e;
+    --line:        #1c3565;
+    --line-soft:   #16294d;
+
+    --ink:         #e6eefa;
+    --ink-dim:     #b3c5de;
+    --ink-faint:   #8ba1c0;
+
+    --cyan:        #00d2ff;
+    --lambda:      #f5c242;
+    --phi:         #799e31;
+    --violet:      #c07fe8;
+    --red:         #b02418;
+
+    --step: clamp(0.9rem, 0.55rem + 1.1vw, 1.5rem);
+}
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    background: var(--ground);
+    background-image:
+        radial-gradient(1100px 620px at 12% -8%, #0f2a55 0%, transparent 62%),
+        radial-gradient(900px 520px at 92% 4%, #10203f 0%, transparent 58%);
+    background-attachment: fixed;
+    color: var(--ink);
+    font-family: 'Outfit', system-ui, sans-serif;
+    font-weight: 300;
+    font-size: 1.1rem;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+}
+
+.wrap {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: clamp(1.6rem, 4vw, 4rem) clamp(1.1rem, 4vw, 2.6rem) 6rem;
+}
+
+/* ---------- shared type ---------- */
+.eyebrow {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+}
+
+h1, h2, h3 { font-family: 'Orbitron', sans-serif; text-wrap: balance; margin: 0; }
+
+h1 {
+    font-size: clamp(2rem, 1.2rem + 3.4vw, 3.4rem);
+    font-weight: 700;
+    line-height: 1.08;
+    letter-spacing: -0.01em;
+    margin: 0.5rem 0 0;
+}
+
+h2 {
+    font-size: clamp(1.05rem, 0.9rem + 0.6vw, 1.32rem);
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    color: var(--ink);
+}
+
+p { margin: 0; }
+
+em { font-style: italic; color: #eaf2fd; }
+strong { font-weight: 600; color: #f2f7ff; }
+
+/* mathematical symbols, set apart without a formula engine */
+.m {
+    font-family: 'Outfit', system-ui, sans-serif;
+    font-style: italic;
+    font-weight: 400;
+    color: var(--cyan);
+    white-space: nowrap;
+}
+.m.l { color: var(--lambda); }
+.m.g { color: var(--phi); }
+
+/* ---------- header ---------- */
+header { margin-bottom: clamp(1.8rem, 4vw, 3rem); }
+
+.status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.74rem;
+    font-weight: 500;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--lambda);
+    border: 1px solid #4a3a15;
+    background: #1b1607;
+    border-radius: 2px;
+    padding: 0.34rem 0.7rem;
+    margin-top: 1.1rem;
+}
+.status::before {
+    content: "";
+    width: 5px; height: 5px;
+    background: var(--lambda);
+    border-radius: 50%;
+}
+
+.lede {
+    margin-top: 1.1rem;
+    max-width: 60ch;
+    color: var(--ink-dim);
+    font-size: 1.18rem;
+}
+
+.meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 2rem;
+    margin-top: 1.6rem;
+    padding-top: 1.2rem;
+    border-top: 1px solid var(--line-soft);
+}
+.meta div { display: flex; flex-direction: column; gap: 0.15rem; padding: 0.4rem 0; }
+.meta dt {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.74rem;
+    font-weight: 500;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+}
+.meta dd { margin: 0; font-size: 1.02rem; color: var(--ink); }
+.meta a { color: var(--cyan); text-decoration: none; border-bottom: 1px solid #05506b; }
+.meta a:hover, .meta a:focus-visible { border-bottom-color: var(--cyan); }
+
+/* ---------- hero canvas + thesis ---------- */
+.thesis {
+    display: grid;
+    grid-template-columns: minmax(0, 300px) minmax(0, 1fr);
+    gap: clamp(1.2rem, 3vw, 2.6rem);
+    align-items: center;
+    margin: clamp(1.6rem, 4vw, 2.6rem) 0 clamp(2.4rem, 6vw, 4rem);
+    padding: clamp(1.2rem, 3vw, 2rem);
+    background: linear-gradient(160deg, var(--surface) 0%, var(--ground-deep) 100%);
+    border: 1px solid var(--line);
+    border-radius: 3px;
+}
+@media (max-width: 700px) { .thesis { grid-template-columns: 1fr; } }
+
+#stage {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    display: block;
+    border-radius: 2px;
+    background: #04101f;
+}
+
+.thesis blockquote {
+    margin: 0;
+    font-size: clamp(1.15rem, 0.95rem + 1vw, 1.6rem);
+    line-height: 1.42;
+    font-weight: 200;
+    color: #eef4fd;
+    text-wrap: balance;
+}
+.thesis blockquote strong { font-weight: 600; }
+.thesis .after {
+    margin-top: 1.1rem;
+    color: var(--ink-dim);
+    font-size: 1.06rem;
+    max-width: 54ch;
+}
+
+/* ---------- section frame ---------- */
+section { margin-top: clamp(2.6rem, 6vw, 4.4rem); }
+
+.head {
+    display: flex;
+    align-items: baseline;
+    gap: 0.9rem;
+    padding-bottom: 0.7rem;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 1.5rem;
+}
+.head .n {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.84rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: var(--cyan);
+}
+.head .note { margin-left: auto; font-size: 0.9rem; color: var(--ink-faint); }
+
+.prose { max-width: 66ch; color: var(--ink-dim); display: grid; gap: 0.85rem; }
+.prose strong { color: #eaf2fd; }
+
+/* ---------- the arc ---------- */
+.arc {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    align-items: stretch;
+    margin-bottom: 1.5rem;
+}
+.arc span {
+    flex: 1 1 auto;
+    min-width: 92px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.76rem;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    text-align: center;
+    padding: 0.85rem 0.5rem;
+    background: var(--surface);
+    border: 1px solid var(--line-soft);
+    border-top: 2px solid var(--stop, var(--line));
+    color: var(--ink-dim);
+    text-wrap: balance;
+    line-height: 1.4;
+}
+.arc span.key { color: #eef4fd; background: var(--surface-2); }
+
+/* ---------- timeline ---------- */
+.timeline {
+    display: flex;
+    width: 100%;
+    height: 54px;
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-bottom: 0.7rem;
+}
+.timeline i {
+    position: relative;
+    display: block;
+    border-right: 1px solid var(--ground-deep);
+    background: var(--lambda);
+    font-style: normal;
+    transition: background 0.15s;
+}
+.timeline i:last-child { border-right: 0; }
+.timeline i.core { background: var(--phi); }
+.timeline i.cut  { background: var(--red); }
+.timeline i::after {
+    content: attr(data-n);
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.74rem;
+    font-weight: 700;
+    color: #1a1305;
+}
+.timeline i.core::after { color: #0d1a06; }
+.timeline i.cut::after  { color: #ffdcd7; font-weight: 700; }
+
+.legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.4rem;
+    font-size: 0.87rem;
+    color: var(--ink-faint);
+}
+.legend b { font-weight: 400; color: var(--ink-dim); }
+.legend span { display: inline-flex; align-items: center; gap: 0.42rem; }
+.legend s { width: 11px; height: 11px; border-radius: 2px; text-decoration: none; display: inline-block; }
+
+/* ---------- scenes ---------- */
+.scenes { display: grid; gap: 0.7rem; }
+
+.scene {
+    display: grid;
+    grid-template-columns: 3.6rem minmax(0, 1fr);
+    gap: 0 1.1rem;
+    padding: 1.4rem 1.55rem 1.5rem;
+    background: var(--surface);
+    border: 1px solid var(--line-soft);
+    border-left: 2px solid var(--lambda);
+    border-radius: 2px;
+}
+.scene.core { border-left-color: var(--phi); background: linear-gradient(90deg, #16240f 0%, var(--surface) 34%); }
+.scene.cut  { border-left-color: var(--red); }
+
+.scene .idx {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--lambda);
+    font-variant-numeric: tabular-nums;
+    padding-top: 0.1rem;
+}
+.scene.core .idx { color: var(--phi); }
+.scene.cut .idx  { color: #c9503f; }
+
+.scene .top {
+    display: flex;
+    align-items: baseline;
+    gap: 0.8rem;
+    flex-wrap: wrap;
+    margin-bottom: 0.7rem;
+}
+.scene h3 { font-size: 1.16rem; font-weight: 700; letter-spacing: 0.01em; color: #f0f6ff; }
+
+.tag {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.68rem;
+    font-weight: 500;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    padding: 0.2rem 0.45rem;
+    border-radius: 2px;
+    border: 1px solid;
+}
+.tag.core { color: #0d1a06; border-color: var(--phi); background: var(--phi); }
+.tag.cut  { color: #ffdcd7; border-color: var(--red); background: var(--red); }
+
+.secs {
+    margin-left: auto;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: var(--ink-faint);
+    font-variant-numeric: tabular-nums;
+}
+
+.body {
+    display: grid;
+    grid-template-columns: minmax(0, 1.08fr) minmax(0, 1fr);
+    gap: 0.6rem 1.6rem;
+}
+@media (max-width: 720px) { .body { grid-template-columns: 1fr; gap: 1rem; } }
+
+.body > div { display: grid; gap: 0.34rem; align-content: start; }
+.body h4 {
+    margin: 0;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.84rem;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+}
+.body p { font-size: 1.06rem; line-height: 1.66; color: var(--ink-dim); }
+.body .aha { border-left: 1px solid var(--line); padding-left: 1.6rem; }
+@media (max-width: 720px) { .body .aha { border-left: 0; padding-left: 0; border-top: 1px solid var(--line); padding-top: 0.9rem; } }
+.body .aha p { color: var(--ink); }
+
+/* what Solita actually says - generated from narration.mjs, never hand-edited */
+.say {
+    margin-top: 1.1rem;
+    padding: 0.95rem 1.2rem;
+    background: #0a1830;
+    border: 1px solid var(--line-soft);
+    border-left: 2px solid var(--cyan);
+    border-radius: 2px;
+}
+.say h4 {
+    margin: 0 0 0.45rem;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.64rem;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--cyan);
+}
+.say p {
+    margin: 0;
+    font-size: 1.06rem;
+    line-height: 1.62;
+    color: var(--ink);
+}
+.say .pause {
+    display: inline-block;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.66rem;
+    font-weight: 500;
+    color: var(--lambda);
+    background: #241c07;
+    border: 1px solid #4a3a15;
+    border-radius: 2px;
+    padding: 0.05rem 0.4rem;
+    margin: 0 0.22rem;
+    vertical-align: 0.08em;
+    white-space: nowrap;
+}
+.say .beat {
+    display: inline-block;
+    width: 0.5em;
+    height: 0.5em;
+    margin: 0 0.1em;
+    background: radial-gradient(circle, var(--cyan) 1.6px, transparent 1.8px);
+    vertical-align: 0.05em;
+    opacity: 0.55;
+}
+.say .spell {
+    border-bottom: 1px dotted var(--ink-faint);
+    letter-spacing: 0.12em;
+}
+
+/* ---------- rules / lists ---------- */
+.rules { display: grid; gap: 0.6rem; counter-reset: r; max-width: 74ch; }
+/* the number is positioned, not a grid cell - as a grid item the bare text
+   after the bold lead-in became its own item and fell into the 1.8rem column */
+.rules li {
+    list-style: none;
+    position: relative;
+    padding-left: 2.8rem;
+    font-size: 1.05rem;
+    color: var(--ink-dim);
+}
+.rules li::before {
+    counter-increment: r;
+    content: counter(r, decimal-leading-zero);
+    position: absolute;
+    left: 0;
+    top: 0.28rem;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.84rem;
+    font-weight: 500;
+    color: var(--violet);
+}
+.rules { padding: 0; margin: 0; }
+
+.notes { display: grid; gap: 0.75rem; max-width: 74ch; padding: 0; margin: 0; }
+.notes li {
+    list-style: none;
+    font-size: 1.05rem;
+    color: var(--ink-dim);
+    padding-left: 1.1rem;
+    border-left: 1px solid var(--line);
+}
+.notes strong { color: #eaf2fd; }
+
+code {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 0.85em;
+    color: var(--cyan);
+    background: #0a1a33;
+    border: 1px solid var(--line-soft);
+    border-radius: 2px;
+    padding: 0.06em 0.34em;
+}
+
+/* ---------- budget ---------- */
+.budget {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1px;
+    background: var(--line-soft);
+    border: 1px solid var(--line-soft);
+    border-radius: 2px;
+    margin-bottom: 1.5rem;
+}
+.budget div { background: var(--surface); padding: 1rem 1.1rem; display: grid; gap: 0.28rem; }
+.budget dt {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.74rem;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+}
+.budget dd {
+    margin: 0;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--cyan);
+    font-variant-numeric: tabular-nums;
+}
+.budget dd small { display: block; font-family: 'Outfit', sans-serif; font-size: 0.78rem; font-weight: 300; color: var(--ink-faint); letter-spacing: 0; margin-top: 0.2rem; }
+
+.solved { color: var(--phi); }
+
+/* ---------- footer ---------- */
+footer {
+    margin-top: clamp(2.6rem, 6vw, 4.4rem);
+    padding-top: 1.6rem;
+    border-top: 1px solid var(--line);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem 2rem;
+    align-items: baseline;
+}
+footer p { font-size: 1.05rem; color: var(--ink-dim); max-width: 58ch; }
+footer .sig { margin-left: auto; }
+
+@media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+}
+</style>
+    <link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+</head>
+<body>
+<div class="wrap">
+
+<header>
+    <p class="eyebrow">Doc Alvers Mathe-Labor · Videopipeline</p>
+    <h1>Ordner oder Ordnung</h1>
+    <p class="lede">Der Plot für den Pinker-Finder-Film: ein Fenster, das aussieht wie
+        der Finder und sich anfühlt wie der Finder — bis man den zweiten Reiter drückt.</p>
+    <p class="status">Plot, Runde 1 · Dreh am 04.09.2026 um 19:00</p>
+
+    <dl class="meta">
+        <div><dt>App</dt><dd>Pinker-Finder (nativ, macOS 26)</dd></div>
+        <div><dt>Sprecherin</dt><dd>Solita · de-DE-Studio · D-ID</dd></div>
+        <div><dt>Aufnahme</dt><dd>1440p · ScreenCaptureKit, nur das Fenster</dd></div>
+        <div><dt>Szenen</dt><dd>9 + Abspann</dd></div>
+        <div><dt>Laufzeit</dt><dd>≈ 3:30</dd></div>
+    </dl>
+</header>
+
+<div class="thesis">
+    <canvas id="stage" width="600" height="600" role="img"
+            aria-label="Der Walk-Index als Balken: was auf diesem Mac liegt, nach Art gezählt"></canvas>
+    <div>
+        <blockquote>Der Finder sagt, <strong>wo</strong> eine Datei liegt — der zweite Reiter
+            sagt, <strong>was</strong> auf dem Mac ist.</blockquote>
+        <p class="after">Der ganze Film ist die Antwort auf eine einzige Frage:
+            <em>Was weiß mein Mac über meine Dateien, wenn ich ihn nicht nach Ordnern frage?</em></p>
+    </div>
+</div>
+
+<section>
+    <div class="head"><span class="n">A</span><h2>Der dramaturgische Bogen</h2></div>
+    <div class="arc" id="arc"></div>
+    <div class="prose">
+        <p>Erst das Vertraute: Szene 1 bis 3 zeigen ein Fenster, das der Finder sein
+           könnte — nachgemessen bis auf den Zeilenabstand, mit denselben Griffen. Dann
+           die Umkehrung: Szene 4 drückt den zweiten Reiter, und aus dem Ordnerbaum wird
+           eine Zahl je Art, je Jahr, je Größe, je Ort. Szene 5 bis 8 lassen die Zahlen
+           arbeiten — jede Facette ist ein Schnitt durch alle Ordner, und zwei Schnitte
+           schneiden sich. <strong>Der Bruch sitzt in Szene 9:</strong> eine Datei, gefunden
+           ohne Ordner, wird mit einem Klick wieder zu ihrem Ordner. Ordnung und Ordner
+           sind zwei Wege zur selben Datei. Szene 10 blendet zurück ins Jahr 2016: derselbe
+           Reiter, in einem Mockup, zehn Jahre alt.</p>
+    </div>
+</section>
+
+<section>
+    <div class="head"><span class="n">B</span><h2>Die 9 Szenen</h2>
+        <span class="note" id="tl-note">Breite = Sprechzeit</span></div>
+    <div class="timeline" id="timeline"></div>
+    <div class="legend">
+        <span><s style="background:#799e31"></s><b>Kernszene — wird nicht gekürzt</b></span>
+        <span><s style="background:#b02418"></s><b>Notbremse, falls der Schnitt zäh wirkt</b></span>
+        <span><s style="background:#f5c242"></s><b>Regelszene</b></span>
+    </div>
+    <div class="scenes" id="scenes" style="margin-top:1.5rem"></div>
+</section>
+
+<section>
+    <div class="head"><span class="n">C</span><h2>Didaktische Leitplanken</h2>
+        <span class="note">bindend für den Sprechertext</span></div>
+    <ol class="rules">
+        <li><strong>Nie eine Formel ohne vorher gezeigtes Bild.</strong> Erst sieht
+            man es, dann heißt es so.</li>
+        <li><strong>Ein neuer Begriff pro Szene.</strong> Maximal. Lieber eine Szene mehr.</li>
+        <li><strong>Verboten:</strong> KI, künstliche Intelligenz, Algorithmus, Datenbank,
+            Cloud-Service, smart. Der Film zeigt Zahlen und Klicks; jedes dieser Wörter
+            würde etwas versprechen, das nicht im Bild ist. <strong>Erlaubt und benutzt,
+            weil sichtbar:</strong> Reiter, Ordner, Facette, Schnitt, Zahl, Ort, Größe,
+            Jahr.</li>
+        <li><strong>Zahlen nur vorlesen, wenn sie im Bild stehen</strong> — und dann
+            genau so, wie sie dort stehen (die Facettenzahlen, die Objektzahl in der
+            Statuszeile, „4 Dateien über ein Gigabyte"). Nichts aus dem Kopf; alles wird
+            im Probelauf vom Bildschirm abgelesen.</li>
+        <li><strong>Nichts behaupten, was das Bild nicht hergibt.</strong> Szene 9 ist
+            dafür da: dass Ordnung und Ordner dieselbe Datei meinen, wird nicht gesagt,
+            sondern geklickt — die Datei aus der Facettenliste landet in ihrem Ordner.</li>
+        <li><strong>Kein Bild, das nicht geprüft ist.</strong> Keine Icon- oder
+            Galerieansicht auf unbekannten Ordnern, keine Vorschau, kein „Find a picture":
+            der Film zeigt Namen und Zahlen, keine Bildinhalte. Die Sperrliste
+            (<code>~/pinkerfinder/exclude.txt</code>) nimmt vorher ganze Bäume aus dem
+            Index.</li>
+    </ol>
+</section>
+
+<section>
+    <div class="head"><span class="n">D</span><h2>Zeitbudget</h2>
+        <span class="note solved">gelöst</span></div>
+    <dl class="budget" id="budget"></dl>
+    <div class="prose">
+        <p>Zehn Szenen à 15 bis 22 Sekunden Sprechzeit ergeben rund 185 s Sprache, mit
+           Luft und Abspann etwa 3:30. Das ist ein Loop-Durchlauf plus Intro: Teil 1 von
+           <code>Infinity_6min.m4a</code> ist <strong>nahtlos loopbar</strong>
+           (loopStart 21,220 s, loopEnd 163,998 s), das Bett wird auf die Filmlänge
+           gerendert. D-ID: ~13 Credits für einen Talk, 178 sind bis 21.09. übrig.</p>
+    </div>
+</section>
+
+<section>
+    <div class="head"><span class="n">E</span><h2>Choreografie-Notizen</h2>
+        <span class="note">für die Aufnahme</span></div>
+    <ul class="notes">
+        <li><strong>Startzustand fixieren:</strong> Reiter Folders, Ordner Home,
+            Listenansicht, keine Facette an, Suchfeld leer, Vorschau zu, Fenster
+            1280 × 720 pt auf dem Retina-Display (= 2560 × 1440 px, kein Hochrechnen).
+            Pinker-Finder merkt sich den letzten Ordner in <code>UserDefaults</code>
+            (<code>lastPath</code>) — der Dreh setzt ihn per Knopf „Home" zurück.</li>
+        <li><strong>Sperrliste vor dem Start:</strong> <code>~/pinkerfinder/exclude.txt</code>
+            (derzeit <code>~/PRIVAT MRA</code>, 120k Einträge) wird beim App-Start gelesen;
+            danach die Objektzahl in der Statuszeile prüfen — sie muss bei ~157k liegen,
+            nicht bei 277k.</li>
+        <li><strong>Steuerung ohne Docs Maus:</strong> Toolbar-Knöpfe und die beiden Reiter
+            per AX-Action; Zeilen, Facetten und Spaltenköpfe per synthetischem Klick auf die
+            AX-Mitte des Elements. Dafür muss Pinker-Finder vorn liegen — der Dreh
+            aktiviert die App und hält das Display mit <code>caffeinate</code> wach.</li>
+        <li><strong>Nachlaufzeiten:</strong> Der Walk-Index braucht nach dem Start ~10 s,
+            die Facettenzahlen laufen dann noch ein (die Zahlen „springen"). Vor Szene 4
+            mindestens 15 s nach dem Start warten. Die Größen-Facette rechnet Ordnergrößen
+            im Hintergrund — Szene 6 erst, wenn „≥ 1 GB" steht.</li>
+        <li><strong>Timing-kritisch:</strong> Szene 9 (Doppelklick auf die Ordner-Spalte
+            bzw. „Show in Finder" → Sprung in den Ordner) — <strong>als erstes proben.</strong>
+            Szene 10 ist eine Karte (das 2016er-Mockup als Bild), kein App-Bild.</li>
+        <li>Die Solita-Bubble sitzt unten rechts über der Statuszeile; die Objektzahl
+            steht deshalb in Szene 4 links unten in der Seitenleiste-Statuszeile und wird
+            <em>vor</em> Solitas Einsatz gezeigt.</li>
+    </ul>
+</section>
+
+<section>
+    <div class="head"><span class="n">F</span><h2>Bewusst weggelassen</h2>
+        <span class="note">Kandidaten für Teil 2</span></div>
+    <div class="prose">
+        <p><strong>Szene 8, „Der Mac hat hingesehen" (Image content)</strong> — beim Probelauf am
+           Drehtag war der Bildinhalt-Index leer (die Gruppe öffnet ohne Zeilen); die Szene
+           entfällt, Szene 9 folgt direkt auf die vier großen Dateien. Auch die Jahres-Facette
+           war leer, darum in Szene 6 „30 days" statt eines Jahres.</p>
+        <p><strong>„Find a picture" (⌘⇧L)</strong> — Docs Bildsemantik ist ein eigener Film
+           und zeigt fremde Bildinhalte im Raster; hier ausdrücklich draußen.
+           <strong>Dubletten</strong> (⌘⇧D) und die <strong>Größen-Hitliste</strong> sind
+           Aufräumthemen für Teil 2. <strong>Drag &amp; Drop, Tags, Icon- und
+           Galerieansicht</strong> sind Finder-Parität, aber keine Geschichte — und
+           Thumbnails zeigen Inhalte, die niemand vorher geprüft hat.</p>
+    </div>
+</section>
+
+<footer>
+    <p><strong>Nächster Schritt:</strong> Solitas Sätze in <code>videopipeline/pinkerfinder/narration.mjs</code>, Vertonung (run1), Probelauf ohne Aufnahme, Dreh um 19:00.</p>
+    <p class="eyebrow sig">Doc Alvers Mathe-Labor</p>
+</footer>
+
+</div>
+
+<script>
+/* ---------------------------------------------------------------
+   One source of truth: the scene list feeds both the timeline and
+   the cards below it.
+   --------------------------------------------------------------- */
+const SCENES = [
+    /* n = Nummer · s = geplante Sekunden (nach der Vertonung von SPOKEN ueberschrieben)
+       t = Titel · img = was im Bild passiert · aha = der Gedanke, der fallen soll
+       core: true = Kernszene · cut: true = Notbremse · card: true = eigene Karte */
+    { n: 1, s: 16, t: 'Ist das der Finder?',
+      img: 'Ein Fenster: Ampel, Seitenleiste mit Favoriten, Toolbar mit ‹ › Home Up View, Liste von Home. Nichts bewegt sich, nur der Blick.',
+      aha: 'Es sieht aus wie der Finder, weil es am Finder gemessen wurde: 21 Pixel je Zeile, 14 Punkt Schrift, dieselbe Toolbar-Linie. Nur zwei Reiter oben links sind neu.' },
+    { n: 2, s: 18, t: 'Die gleichen Griffe',
+      img: 'Home → Projektordner pinkerfinder (Doppelklick), ‹ zurück, › vor, Klick auf „Date Modified" sortiert um, Pfadleiste unten läuft mit. (Nicht Desktop › Schule: dort stehen Rechtsdokumente mit Namen.)',
+      aha: 'Wer den Finder kann, kann das hier. Nichts Neues zu lernen — das ist die Bedingung, nicht die Pointe.' },
+    { n: 3, s: 14, t: 'Die Wolke ist ein Ort', cut: true,
+      img: 'Ein OneDrive-Ordner der Schule: Sync-Abzeichen neben den Namen (Wolke, Haken), die Spalte „Size" rechnet Ordner mit.',
+      aha: 'Ein Ordner in der Wolke sieht aus wie jeder andere. Merken für später: der Ort ist eine Eigenschaft der Datei, kein anderes Programm.' },
+    { n: 4, s: 20, t: 'Der zweite Reiter', core: true,
+      img: 'Klick auf „Semantics". Die Seitenleiste wird zur Zahlentafel: Semantics · Media · File types (Images, Audio, Code, Text documents, …) mit Zahlen, darunter Size, Jahr, Ort. Unten links die Objektzahl.',
+      aha: 'Kein Ordner mehr, nur noch Zahlen: was auf diesem Mac ist, nach Art gezählt — der ganze Mac, nicht der Ordner, in dem man gerade steht.' },
+    { n: 5, s: 18, t: 'Ein Schnitt durch alle Ordner', core: true,
+      img: 'Klick auf „Images". Die Liste rechts füllt sich mit Bildern aus allen Ordnern, die Spalte „Folder" zeigt, woher jedes kommt. Die Statuszeile nennt die Zahl.',
+      aha: 'Eine Facette ist ein Schnitt quer durch den Baum. Die Frage „alle Bilder?" hat im Finder keinen Ort — hier ist sie ein Klick.' },
+    { n: 6, s: 18, t: 'Zwei Schnitte schneiden sich',
+      img: 'Zusätzlich Klick auf „30 days" (Period). Die Liste schrumpft, und ALLE anderen Zahlen in der Seitenleiste schrumpfen mit. Zwei Pillen oben, ein zweiter Klick auf die Facette nimmt sie wieder weg.',
+      aha: 'Die Zahlen sind keine Deko: Jede Facette zählt neu, was nach den anderen übrig bleibt. Man sieht die Antwort, bevor man klickt.' },
+    { n: 7, s: 16, t: 'Die vier Großen',
+      img: 'Facetten löschen, dann Size → „≥ 1 GB": vier Zeilen. Ein Installer, ein 21-GB-Archiv, zwei Filme.',
+      aha: 'Aufräumen fängt bei der größten Datei an, und die steht nie da, wo man sucht. Vier Dateien, vier Ordner, ein Klick.' },
+    { n: 9, s: 18, t: 'Zurück in den Ordner', core: true,
+      img: 'Der Film aus der Vierer-Liste: Klick markiert ihn, die Pfadleiste zeigt seinen Weg; Klick auf seinen Ordner springt hinein, Pille weg, Reiter auf Folders, die Datei ist markiert.',
+      aha: 'Ordnung und Ordner sind zwei Wege zur selben Datei. Man findet über die Zahl und landet im Baum — nichts wurde verschoben, nur anders gefragt.' },
+    { n: 10, s: 16, t: 'Zehn Jahre, ein Reiter', card: true,
+      img: 'Karte: „Semantic Mac Finder.png" von 2016 — ein Finder-Mockup mit den Reitern „Semantics | Mac". Daneben das heutige Fenster.',
+      aha: 'Der zweite Reiter ist keine neue Idee, er ist zehn Jahre alt. Damals gezeichnet, heute gebaut — und der Finder ist derselbe geblieben.' }
+];
+
+/* SAY:START - generated by videopipeline/pinkerfinder/sync-drehbuch.mjs, do not edit */
+const SAY = {
+    s1: 'Das ist nicht der Finder.<span class="beat"></span> Aber er wurde am Finder gemessen: einundzwanzig Pixel je Zeile, vierzehn Punkt Schrift, dieselbe Toolbar auf derselben Linie.<span class="beat"></span> Neu sind nur die zwei Reiter oben links — Folders und Semantics.<span class="beat"></span> Den ersten kennst du schon.',
+    s2: 'Home. <span class="pause">1,4 s</span> Ein Projektordner. <span class="pause">1,5 s</span> Zurück, <span class="pause">1,1 s</span> und wieder vor. <span class="pause">1,1 s</span> Ein Klick auf „Date Modified", und die Liste sortiert um; die Pfadleiste unten läuft mit.<span class="beat"></span> Nichts davon musst du lernen — das ist die Bedingung, nicht die Pointe.',
+    s3: 'Ein Ordner, der in OneDrive liegt. <span class="pause">1,5 s</span> Er sieht aus wie jeder andere.<span class="beat"></span> Nur die kleinen Abzeichen neben den Namen verraten, was schon auf der Platte ist und was noch in der Wolke.<span class="beat"></span> Merk dir das: Der Ort ist eine Eigenschaft der Datei.',
+    s4: 'Und jetzt der zweite Reiter. <span class="pause">0,9 s</span> Semantics. <span class="pause">1,2 s</span> Die Seitenleiste ist kein Baum mehr, sie ist eine Zahlentafel: Bilder, Audio, Code, Textdokumente — jede Art mit ihrer Zahl.<span class="beat"></span> Nicht für den Ordner, in dem du stehst.<span class="beat"></span> Für den ganzen Mac.',
+    s5: 'Dreiundzwanzigtausendfünfhundertneunzehn Bilder. <span class="pause">0,7 s</span> Ein Klick, <span class="pause">1,2 s</span> und sie stehen rechts in einer Liste — aus allen Ordnern zugleich; die Spalte „Folder" sagt, woher jedes kommt.<span class="beat"></span> So ein Klick heißt Facette.<span class="beat"></span> Die Frage „alle Bilder?" hat im Finder keinen Ort.<span class="beat"></span> Hier ist sie einer.',
+    s6: 'Eine zweite Facette dazu:<span class="beat"></span> die letzten dreißig Tage. <span class="pause">1,5 s</span> Die Liste schrumpft — und schau auf die Seitenleiste: alle anderen Zahlen schrumpfen mit.<span class="beat"></span> Jede Facette zählt neu, was nach den anderen übrig bleibt.<span class="beat"></span> Zwei Schnitte durch denselben Mac, und du siehst die Antwort, bevor du klickst.',
+    s7: 'Alles wieder weg. <span class="pause">1,2 s</span> Dann Größe:<span class="beat"></span> ab einem Gigabyte. <span class="pause">1,5 s</span> Vier Dateien. Ein Installer, ein Archiv von einundzwanzig Gigabyte, zwei Filme.<span class="beat"></span> Aufräumen fängt bei der größten Datei an, und die liegt nie da, wo man sucht.',
+    s8: 'Und das hier ist nicht der Dateiname.<span class="beat"></span> Das ist der Inhalt. <span class="pause">0,8 s</span> Der Mac hat jedes Bild angesehen — hier, auf der Platte, ohne Netz — und sagt, was darauf ist. <span class="pause">0,7 s</span> Ein Klick auf „document", <span class="pause">1,3 s</span> und die Scans aus allen Ordnern stehen da. Als Namen.<span class="beat"></span> Die Bilder bleiben, wo sie sind.',
+    s9: 'Eine davon. <span class="pause">1,2 s</span> Ein Klick auf ihren Ordner, <span class="pause">1,4 s</span> und der Reiter springt zurück auf Folders: <span class="pause">1,0 s</span> derselbe Baum wie am Anfang, die Datei markiert.<span class="beat"></span> Nichts wurde verschoben.<span class="beat"></span> Ordnung und Ordner sind zwei Wege zur selben Datei — man fragt nur anders.',
+    s10: 'Der zweite Reiter ist keine neue Idee.<span class="beat"></span> Das hier ist ein Entwurf von zweitausendsechzehn: ein Finder-Fenster, zwei Reiter — „Semantics" und „Mac".<span class="beat"></span> Zehn Jahre später ist er gebaut, und der Finder daneben ist derselbe geblieben. <span class="pause">0,7 s</span> Pinker-Finder.<span class="beat"></span> Im Doc Alvers Mathe-Labor.'
+};
+const SPOKEN = {"s1":15.192,"s2":17.064,"s3":15.576,"s4":15.96,"s5":18.36,"s6":18.096,"s7":15.6,"s8":17.952,"s9":17.52,"s10":17.568};
+/* SAY:END */
+
+const ARC = [
+    { t: 'Der Finder,<br>nachgemessen',   c: '#93a8c6' },
+    { t: 'Die gleichen<br>Griffe',        c: '#93a8c6' },
+    { t: 'Der zweite<br>Reiter',          c: '#f5c242', key: true },
+    { t: 'Schnitte durch<br>alle Ordner', c: '#f5c242', key: true },
+    { t: 'Zurück in<br>den Ordner',       c: '#799e31', key: true },
+    { t: 'Zehn Jahre,<br>ein Reiter',     c: '#00d2ff' }
+];
+
+/* --- the arc --- */
+document.getElementById('arc').innerHTML = ARC.map(a =>
+    `<span class="${a.key ? 'key' : ''}" style="--stop:${a.c}">${a.t}</span>`).join('');
+
+/* --- timeline: each scene as wide as it is long --- */
+const secs = (x) => SPOKEN['s' + x.n] ?? x.s;
+const total = SCENES.reduce((s, x) => s + secs(x), 0);
+document.getElementById('timeline').innerHTML = SCENES.map(x =>
+    `<i class="${x.core ? 'core' : x.cut ? 'cut' : ''}" data-n="${x.n}"
+        style="flex:0 0 ${(secs(x) / total * 100).toFixed(3)}%"
+        title="Szene ${x.n} · ${secs(x).toFixed(1)} s"></i>`).join('');
+
+/* --- budget, from the measured durations when they exist --- */
+(function () {
+    const spoken = Object.values(SPOKEN).reduce((a, b) => a + b, 0);
+    const planned = SCENES.reduce((a, x) => a + x.s, 0);
+    const air = SCENES.length * 1.6;
+    const film = (spoken || planned) + air;
+    const mmss = (t) => Math.floor(t / 60) + ':' + String(Math.round(t % 60)).padStart(2, '0');
+    const cell = (dt, dd, sub) => `<div><dt>${dt}</dt><dd>${dd}<small>${sub}</small></dd></div>`;
+    document.getElementById('budget').innerHTML =
+        cell('Sprache', (spoken || planned).toFixed(0) + ' s',
+             spoken ? 'gemessen' : 'geplant') +
+        cell('Luft', '~' + air.toFixed(0) + ' s', '1,6 s je Szene') +
+        cell('Film', mmss(film), spoken ? 'nach der Vertonung' : 'geschätzt') +
+        cell('Bett-Loop', '142,778 s', '64 Takte · 107,58 BPM');
+    if (spoken) {
+        const n = document.getElementById('tl-note');
+        if (n) n.textContent = 'Breite = gemessene Sprechzeit';
+    }
+})();
+
+/* --- scene cards --- */
+document.getElementById('scenes').innerHTML = SCENES.map(x => `
+    <article class="scene ${x.core ? 'core' : x.cut ? 'cut' : ''}">
+        <div class="idx">${String(x.n).padStart(2, '0')}</div>
+        <div>
+            <div class="top">
+                <h3>${x.t}</h3>
+                ${x.core ? '<span class="tag core">Kernszene</span>' : ''}
+                ${x.cut ? '<span class="tag cut">Notbremse</span>' : ''}
+                <span class="secs">${secs(x).toFixed(1)} s</span>
+            </div>
+            <div class="body">
+                <div><h4>Was im Bild passiert</h4><p>${x.img}</p></div>
+                <div class="aha"><h4>Der Aha</h4><p>${x.aha}</p></div>
+            </div>
+            ${SAY['s' + x.n] ? `<div class="say"><h4>Solita sagt</h4><p>${SAY['s' + x.n]}</p></div>` : ''}
+        </div>
+    </article>`).join('');
+
+/* ---------------------------------------------------------------
+   Hero: TODO - the film's own subject, really computed, not painted.
+   A small, quiet canvas showing the thing the film is about; a click
+   gives a fresh draw. Keep it calm: it sits next to the thesis, it is
+   not the show.
+   --------------------------------------------------------------- */
+(function () {
+    const cv = document.getElementById('stage');
+    if (!cv) return;
+    const ctx = cv.getContext('2d');
+
+    function fit() {
+        const r = cv.getBoundingClientRect();
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        cv.width = Math.max(1, Math.round(r.width * dpr));
+        cv.height = Math.max(1, Math.round(r.height * dpr));
+    }
+
+    // Real numbers: the walk index of 04.09.2026 (walk.tsv), minus the exclude list, by
+    // extension class — 140,518 files. A click shuffles the bar order, nothing else.
+    const KINDS = [
+        { t: 'Sonstiges', n: 55458, c: '#8ba1c0' },
+        { t: 'Audio',     n: 25954, c: '#c07fe8' },
+        { t: 'Code',      n: 25418, c: '#00d2ff' },
+        { t: 'Bilder',    n: 23518, c: '#f5c242' },
+        { t: 'Dokumente', n:  9601, c: '#799e31' },
+        { t: 'Video',     n:   569, c: '#b02418' }
+    ];
+    let order = KINDS.slice();
+
+    function draw() {
+        fit();
+        const W = cv.width, H = cv.height, px = W / 600;
+        ctx.clearRect(0, 0, W, H);
+        ctx.fillStyle = '#04101f';
+        ctx.fillRect(0, 0, W, H);
+        // the two tabs, as in the app: Folders (phi) off, Semantics (lambda) on
+        const tabY = 40 * px, tabH = 34 * px, tabW = 200 * px, x0 = (W - 2 * tabW) / 2;
+        ctx.font = 600 + ' ' + (16 * px) + 'px Orbitron, Outfit, system-ui, sans-serif';
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        const pill = (x, y, w, h, fill) => {
+            ctx.beginPath(); ctx.roundRect(x, y, w, h, h / 2); ctx.fillStyle = fill; ctx.fill();
+        };
+        pill(x0 - 4 * px, tabY - 4 * px, 2 * tabW + 8 * px, tabH + 8 * px, '#0c1c3a');
+        pill(x0 + tabW, tabY, tabW, tabH, '#f5c242');
+        ctx.fillStyle = '#b3c5de'; ctx.fillText('Folders', x0 + tabW / 2, tabY + tabH / 2);
+        ctx.fillStyle = '#04101f'; ctx.fillText('Semantics', x0 + tabW * 1.5, tabY + tabH / 2);
+        // the facet bars
+        const top = 110 * px, gap = 12 * px, rowH = (H - top - 30 * px - gap * (order.length - 1)) / order.length;
+        const max = Math.max(...KINDS.map((k) => k.n));
+        const labelW = 140 * px, numW = 90 * px, barMax = W - labelW - numW - 60 * px;
+        ctx.textBaseline = 'middle';
+        order.forEach((k, i) => {
+            const y = top + i * (rowH + gap);
+            ctx.textAlign = 'right'; ctx.fillStyle = '#e6eefa';
+            ctx.font = 400 + ' ' + (18 * px) + 'px Outfit, system-ui, sans-serif';
+            ctx.fillText(k.t, 30 * px + labelW, y + rowH / 2);
+            const w = Math.max(3 * px, barMax * k.n / max);
+            ctx.fillStyle = k.c; ctx.fillRect(40 * px + labelW, y + rowH * 0.2, w, rowH * 0.6);
+            ctx.textAlign = 'left'; ctx.fillStyle = '#b3c5de';
+            ctx.font = 500 + ' ' + (15 * px) + 'px Orbitron, Outfit, system-ui, sans-serif';
+            ctx.fillText(k.n.toLocaleString('de-DE'), 48 * px + labelW + w, y + rowH / 2);
+        });
+        ctx.textAlign = 'center'; ctx.fillStyle = '#8ba1c0';
+        ctx.font = 300 + ' ' + (13 * px) + 'px Outfit, system-ui, sans-serif';
+        ctx.fillText('Walk-Index vom 04.09.2026 · 140.518 Dateien · ohne Sperrliste', W / 2, H - 14 * px);
+    }
+    const shuffle = () => { order = KINDS.slice().sort(() => Math.random() - 0.5); draw(); };
+
+    draw();
+    addEventListener('resize', draw, { passive: true });
+    cv.style.cursor = 'pointer';
+    cv.addEventListener('click', shuffle);
+    document.fonts.ready.then(draw);
+})();
+</script>
+</body>
+</html>

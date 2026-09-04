@@ -154,7 +154,8 @@ CyberI18n.translations.en = {
                 reset: "RESET",
                 rows: "Rows",
                 balls_active: "Active Balls",
-                spawn_ms: "Spawn (ms)"
+                spawn_ms: "Spawn (ms)",
+                curve: "BELL CURVE"
             },
             lissajous: {
                 title: "LISSAJOUS · PARAMETRIC CURVES",

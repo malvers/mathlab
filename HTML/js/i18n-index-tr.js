@@ -73,7 +73,7 @@
             header: {
                 title: "Doc Alvers Mathe-Labor",
                 subtitle: "ETKİLEŞİMLİ MATEMATİK EVRENİ",
-                author: "Dr. Michael R. Alvers"
+                author: "GOOD VIBES Dr. Michael R. Alvers"
             },
             view: {
                 back_title: "Geri",
