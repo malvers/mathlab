@@ -305,6 +305,21 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     /// Where the panel was nudged to; a resize would otherwise recentre it under the icon.
     private var panelOriginX: CGFloat?
 
+    /// Companion tools that belong to the toolbox: bring them up with the bar,
+    /// so a single login item (DocBar) restores the whole set after a reboot.
+    /// openApplication is a no-op for apps that already run, so always safe.
+    private func launchCompanionTools() {
+        for path in ["/Applications/WindowSets.app",
+                     "/Applications/DeskPhoto.app",
+                     "/Applications/SleepSwitch.app"]
+        where FileManager.default.fileExists(atPath: path) {
+            let cfg = NSWorkspace.OpenConfiguration()
+            cfg.activates = false
+            NSWorkspace.shared.openApplication(at: URL(fileURLWithPath: path),
+                                               configuration: cfg)
+        }
+    }
+
     func applicationDidFinishLaunching(_ note: Notification) {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         if let button = statusItem.button {
@@ -336,6 +351,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             forName: Notification.Name("de.docalvers.docbar.open"), object: nil, queue: .main
         ) { [weak self] _ in self?.toggle() }
 
+        launchCompanionTools()
         refreshIcon(loadApps())
         Timer.scheduledTimer(withTimeInterval: 4, repeats: true) { [weak self] _ in
             guard let self = self, !self.popover.isShown else { return }
