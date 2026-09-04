@@ -193,6 +193,7 @@ const CyberBranding = {
         'multiplikation.html': 'https://youtu.be/ODTYHxOghsE',
         'dividieren.html': 'https://youtu.be/5bdpqUNNq-w',
         'orbitals.html': 'https://youtu.be/Kknrs_lzcyU',
+        'jacquard.html': 'https://youtu.be/ssH4qYuJ-G0',
     },
 
     injectLabVideo() {
