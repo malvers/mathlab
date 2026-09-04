@@ -154,7 +154,8 @@ CyberI18n.translations.pt = {
                 reset: "REINICIAR",
                 rows: "Linhas",
                 balls_active: "Active Balls",
-                spawn_ms: "Saída (ms)"
+                spawn_ms: "Saída (ms)",
+                curve: "CURVA DE SINO"
             },
             lissajous: {
                 title: "LISSAJOUS · CURVAS PARAMÉTRICAS",

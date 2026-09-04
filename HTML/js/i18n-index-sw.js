@@ -73,7 +73,7 @@
             header: {
                 title: "Doc Alvers Mathe-Labor",
                 subtitle: "ULIMWENGU SHIRIKISHI WA HISABATI",
-                author: "na Dk. Michael R. Alvers"
+                author: "GOOD VIBES na Dk. Michael R. Alvers"
             },
             view: {
                 back_title: "Nyuma",

@@ -32,8 +32,25 @@ export async function makeTalks(image, audios, { outDir }) {
   }
   const out = {};
   for (const [a, id] of Object.entries(ids)) {
+    console.log('polling', id, '- falls hier das Netz reisst, ist der Talk trotzdem bezahlt');
+    let netErrors = 0;
     for (let i = 0; i < 80; i++) {
-      const r = await api('/talks/' + id);
+      // A dropped connection while polling must NOT throw: at this point the talk is
+      // already created and charged, and an uncaught fetch error orphans it - the ID
+      // is gone from the log and the credits are spent. Ride out transient failures
+      // and, if it really is over, say which ID to fetch by hand.
+      let r;
+      try {
+        r = await api('/talks/' + id);
+        netErrors = 0;
+      } catch (err) {
+        if (++netErrors > 12) throw new Error(
+          `Netz weg beim Abholen von ${id} (bezahlt!). Von Hand holen: ` +
+          `GET /talks/${id} -> result_url, dann curl -C -. Ursache: ${err.message}`);
+        console.log(`  Netzfehler ${netErrors}/12 (${err.message.slice(0, 60)}) - weiter in 10 s`);
+        await new Promise((r2) => setTimeout(r2, 10000));
+        continue;
+      }
       if (r.status === 'done') {
         const f = `${outDir}/talk_${a.split('/').pop().replace('.mp3', '')}.mp4`;
         fs.writeFileSync(f, Buffer.from(await (await fetch(r.result_url)).arrayBuffer()));

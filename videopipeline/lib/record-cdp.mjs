@@ -89,19 +89,38 @@ export async function runScenes(scenes, { outDir, viewport = { width: 1280, heig
       continue;
     }
 
-    // frames (VFR, wall-clock stamps) → CFR 25fps mp4, upscaled in the same single encode
+    // frames (VFR, wall-clock stamps) → CFR 25fps mp4, upscaled in the same single encode.
+    //
+    // The output grid is built HERE rather than left to `fps=25`: for every output frame
+    // time n/25 we name the newest source frame at or before it, and give every entry the
+    // same 1/25 duration. That makes video time equal wall-clock time exactly, which is
+    // what run3 assumes when it cuts on the marks.
+    //
+    // Handing ffmpeg the raw inter-frame gaps as `duration` did NOT: the concat demuxer
+    // stretched the timeline by 3.5 % on a 141 s lab take and by up to 19 % on a 27 s card
+    // (measured 2026-09-04 against the board reset in the Galton take, which sat at 108.4 s
+    // in the file and at 104.7 s on the clock). Every cut then drifted later and later into
+    // the film — scene 10 opened three seconds before its own mark.
+    const FPS = 25;
     const rel = stamps.map((t) => t / 1000);
     const lines = [];
-    for (let i = 0; i < rel.length; i++) {
-      lines.push(`file 'f_${String(i).padStart(6, '0')}.jpg'`);
-      lines.push(`duration ${(i + 1 < rel.length ? Math.max(0.001, rel[i + 1] - rel[i]) : Math.max(0.04, endT - rel[i])).toFixed(4)}`);
+    if (rel.length) {
+      const total = Math.max(endT, rel[rel.length - 1] + 1 / FPS);
+      let j = 0;
+      for (let n = 0; n < Math.round(total * FPS); n++) {
+        const t = n / FPS;
+        while (j + 1 < rel.length && rel[j + 1] <= t) j++;
+        lines.push(`file 'f_${String(j).padStart(6, '0')}.jpg'`);
+        lines.push(`duration ${(1 / FPS).toFixed(6)}`);
+      }
+      // ffmpeg concat demuxer quirk: the final 'duration' only applies if the last file is listed again
+      lines.push(`file 'f_${String(j).padStart(6, '0')}.jpg'`);
     }
-    // ffmpeg concat demuxer quirk: the final 'duration' only applies if the last file is listed again
-    if (rel.length) lines.push(`file 'f_${String(rel.length - 1).padStart(6, '0')}.jpg'`);
     fs.writeFileSync(`${frameDir}/list.txt`, lines.join('\n') + '\n');
     const W = viewport.width * dsf * upscale, H = viewport.height * dsf * upscale;
     execFileSync('ffmpeg', ['-nostdin', '-y', '-v', 'error', '-f', 'concat', '-safe', '0', '-i', `${frameDir}/list.txt`,
-      '-vf', `fps=25,scale=${W}:${H}:flags=lanczos`, '-c:v', 'libx264', '-crf', '16', '-preset', 'medium',
+      '-vf', `fps=${FPS},scale=${W}:${H}:flags=lanczos`, '-r', String(FPS),
+      '-c:v', 'libx264', '-crf', '16', '-preset', 'medium',
       '-pix_fmt', 'yuv420p', `${outDir}/${sc.name}.mp4`], { stdio: 'inherit' });
     fs.rmSync(frameDir, { recursive: true, force: true });
     fs.writeFileSync(`${outDir}/${sc.name}.json`, JSON.stringify(log, null, 1));

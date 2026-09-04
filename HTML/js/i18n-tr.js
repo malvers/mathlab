@@ -154,7 +154,8 @@ CyberI18n.translations.tr = {
                 reset: "SIFIRLAMA",
                 rows: "Satırlar",
                 balls_active: "Aktif Toplar",
-                spawn_ms: "Ortaya çıkma (ms)"
+                spawn_ms: "Ortaya çıkma (ms)",
+                curve: "ÇAN EĞRİSİ"
             },
             lissajous: {
                 title: "LISSAJOUS · PARAMETRİK EĞRİLER",

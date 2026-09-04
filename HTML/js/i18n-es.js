@@ -154,7 +154,8 @@ CyberI18n.translations.es = {
                 reset: "REINICIAR",
                 rows: "Filas",
                 balls_active: "Bolas activas",
-                spawn_ms: "Spawn (ms)"
+                spawn_ms: "Spawn (ms)",
+                curve: "CAMPANA DE GAUSS"
             },
             lissajous: {
                 title: "LISSAJOUS · CURVAS PARAMÉTRICAS",

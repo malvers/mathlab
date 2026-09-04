@@ -224,7 +224,13 @@
                 bins: [],
                 lastSpawn: 0,
                 droppedCount: 0,
-                explorerEvery: 60,
+                // Every nth ball used to be steered into a still-empty bin
+                // (see pickEmptyBinIndex). That filled the outer bins quickly,
+                // but those balls were placed, not won - which contradicts the
+                // 50/50 the board is built to demonstrate. 0 disables it; set
+                // it back to 60 to get the old behaviour.
+                explorerEvery: 0,
+                showCurve: false,
                 binColumns: 4,
                 rowY: [],
                 spacingX: 42,
@@ -235,6 +241,12 @@
                 pegBottomY: 0
             };
             const SETTINGS_KEY = "galtonboard-slider-settings-v2";
+
+            // CyberI18n.get() returns the key itself when a translation is missing,
+            // so a plain `|| fallback` would never fire - getOr() is the one to use.
+            const T = (key, fallback) => (typeof CyberI18n !== "undefined" && CyberI18n.getOr)
+                ? CyberI18n.getOr("galton." + key, fallback)
+                : fallback;
 
             function clamp(value, min, max) {
                 return Math.min(max, Math.max(min, value));
@@ -605,6 +617,46 @@
                     ctx.fillText(labelText, b.x + b.w * 0.5, sim.binBaseY + binLabelFontPx + 5);
                 }
 
+                // Theoretical bell curve over the histogram, on the bars' own scale.
+                // Nothing is fitted: with rows fair 50/50 decisions the landing bin is
+                // binomial, so the curve is the normal distribution with mean rows/2
+                // and standard deviation sqrt(rows/4), scaled by however many balls
+                // have actually landed. It therefore rises with the bars.
+                if (sim.showCurve && sim.bins.length) {
+                    const landed = sim.bins.reduce((sum, b) => sum + b.count, 0);
+                    if (landed > 0) {
+                        const mean = sim.rows / 2;
+                        const sd = Math.sqrt(sim.rows / 4);
+                        const first = sim.bins[0];
+                        const binW = first.w;
+                        // Bin i is centred here; u runs continuously over bin indices.
+                        const xAt = (u) => first.x + binW * (u + 0.5);
+                        const yAt = (u) => {
+                            const density = Math.exp(-((u - mean) ** 2) / (2 * sd * sd)) / (sd * Math.sqrt(2 * Math.PI));
+                            const expected = landed * density;
+                            return sim.binBaseY - (expected / maxCount) * (binHeightPx - 12);
+                        };
+                        ctx.save();
+                        // Stay inside the bin area - at few balls the peak overshoots it.
+                        ctx.beginPath();
+                        ctx.rect(binLeft, sim.binTopY, binWidth, binHeightPx);
+                        ctx.clip();
+                        ctx.beginPath();
+                        const steps = 240;
+                        for (let s = 0; s <= steps; s++) {
+                            const u = -0.5 + (s / steps) * (sim.bins.length);
+                            const fn = s === 0 ? "moveTo" : "lineTo";
+                            ctx[fn](xAt(u), yAt(u));
+                        }
+                        ctx.strokeStyle = "rgba(0, 210, 255, 0.95)";
+                        ctx.lineWidth = 2.2;
+                        ctx.shadowColor = "rgba(0, 210, 255, 0.6)";
+                        ctx.shadowBlur = 8;
+                        ctx.stroke();
+                        ctx.restore();
+                    }
+                }
+
                 // Balls.
                 for (let i = 0; i < sim.balls.length; i++) {
                     const b = sim.balls[i];
@@ -647,7 +699,7 @@
                 if (sim.running && sim.balls.length < sim.maxBalls && ts - sim.lastSpawn >= sim.spawnIntervalMs) {
                     sim.lastSpawn = ts;
                     let targetTurns = null;
-                    if (sim.droppedCount > 0 && sim.droppedCount % sim.explorerEvery === 0) {
+                    if (sim.explorerEvery > 0 && sim.droppedCount > 0 && sim.droppedCount % sim.explorerEvery === 0) {
                         targetTurns = pickEmptyBinIndex();
                     }
                     spawnBall(targetTurns);
@@ -727,6 +779,7 @@
                         <button id="btn-play-pause" class="cyber-btn" style="flex:1;">STOP</button>
                         <button id="btn-reset" class="cyber-btn" style="flex:1; border-color:#ffcc00; color:#ffcc00;">RESET</button>
                     </div>
+                    <button id="btn-curve" class="cyber-btn" style="width:100%;">${T('curve', 'GLOCKENKURVE')}</button>
                 </div>
             `, "var(--neon-blue)");
 
@@ -776,6 +829,18 @@
                 updatePlayPauseButton();
             });
             document.getElementById("btn-reset").addEventListener("click", () => resetStats());
+
+            const btnCurve = document.getElementById("btn-curve");
+            function updateCurveButton() {
+                btnCurve.classList.toggle("running", sim.showCurve);
+                btnCurve.style.borderColor = sim.showCurve ? "#00d2ff" : "";
+                btnCurve.style.color = sim.showCurve ? "#00d2ff" : "";
+            }
+            updateCurveButton();
+            btnCurve.addEventListener("click", () => {
+                sim.showCurve = !sim.showCurve;
+                updateCurveButton();
+            });
 
             window.addEventListener("resize", resizeCanvas);
             resizeCanvas();

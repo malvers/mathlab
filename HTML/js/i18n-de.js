@@ -154,7 +154,8 @@ CyberI18n.translations.de = {
                 reset: "RESET",
                 rows: "Reihen",
                 balls_active: "Kugeln aktiv",
-                spawn_ms: "Spawn (ms)"
+                spawn_ms: "Spawn (ms)",
+                curve: "GLOCKENKURVE"
             },
             lissajous: {
                 title: "LISSAJOUS · PARAMETRISCHE KURVEN",

@@ -36,7 +36,12 @@ export async function recordOutros({ outDir, qrUrl = null, crazyText = 'DAS CRAZ
   try {
     await runScenes(wanted.map((c) => ({
       name: c.name, url: c.url, run: async (p) => { await p.waitForTimeout(c.hold * 1000); },
-    })), { outDir, viewport: { width: 2560, height: 1440 }, upscale: 1 });
+      // dsf 1 EXPLICITLY: the outro page is laid out for a 2560 x 1440 CSS viewport, so
+      // one device pixel per CSS pixel already is the 1440p master. Leaving dsf at the
+      // recorder's default of 2 rendered 5120 x 2880 cards, and the concat in compose()
+      // then refused them against the 2560 x 1440 scenes (ffmpeg exit 234). That default
+      // changed on 2026-09-04; this call still assumed the old one.
+    })), { outDir, viewport: { width: 2560, height: 1440 }, upscale: 1, dsf: 1 });
   } finally {
     server.close();
   }

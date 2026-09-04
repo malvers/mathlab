@@ -74,7 +74,7 @@
             header: {
                 title: "Doc Alvers Mathe-Labor",
                 subtitle: "DAS INTERAKTIVE MATHEMATIK-UNIVERSUM",
-                author: "von Dr. Michael R. Alvers"
+                author: "GOOD VIBES von Dr. Michael R. Alvers"
             },
             view: {
                 back_title: "Zurück",

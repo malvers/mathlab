@@ -188,7 +188,8 @@ Object.assign(CyberI18n.translations.nl.fractal, {
             reset: "RESET",
             rows: "Rijen",
             balls_active: "Actieve ballen",
-            spawn_ms: "Spawn (ms)"
+            spawn_ms: "Spawn (ms)",
+            curve: "KLOKCURVE"
         },
         lissajous: {
             title: "LISSAJOUS · PARAMETRISCHE KROMMEN",

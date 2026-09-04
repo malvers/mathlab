@@ -73,7 +73,7 @@
             header: {
                 title: "Doc Alvers Mathe-Labor",
                 subtitle: "HET INTERACTIEVE WISKUNDE-UNIVERSUM",
-                author: "door Dr. Michael R. Alvers"
+                author: "GOOD VIBES door Dr. Michael R. Alvers"
             },
             view: {
                 back_title: "Terug",
