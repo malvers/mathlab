@@ -36,8 +36,11 @@ const CURSOR_JS = () => {
 // dsf = deviceScaleFactor: the page renders at dsf x the CSS viewport, so the screencast
 // delivers REAL pixels instead of an upscale. dsf 2 with upscale 1 gives a true 2560x1440
 // master from a 1280x720 layout - same choreography coordinates, four times the detail.
-// Default stays 1 so every older run script keeps the picture it was cut for.
-export async function runScenes(scenes, { outDir, viewport = { width: 1280, height: 720 }, upscale = 2, dsf = 1, showCursor = false, record = true }) {
+// This is the DEFAULT since 04.09.2026: a new film is sharp without anyone remembering the
+// option. The old default (upscale 2, dsf 1) shot 720p and blew it up to 1440p - the file
+// still reported 2560x1440, so ffprobe never gave the blur away. It slipped through twice.
+// To re-cut an older film exactly as it was shot, pass { upscale: 2, dsf: 1 } explicitly.
+export async function runScenes(scenes, { outDir, viewport = { width: 1280, height: 720 }, upscale = 1, dsf = 2, showCursor = false, record = true }) {
   const browser = await chromium.launch({ channel: 'chromium' });
   const results = {};
   for (const sc of scenes) {
