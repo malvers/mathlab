@@ -2,8 +2,8 @@
 // level, so a picture sits above the wallpaper and below every ordinary window.
 // Each photo is drawn as a print (white margin, soft shadow, slight tilt) and can
 // be dragged, scaled and rotated with the mouse; position and size are remembered.
-// An image with transparent pixels is treated as a cut-out instead: no paper, the
-// wallpaper shows through, and the shadow follows the shape of the image.
+// An image with transparent pixels is treated as a cut-out instead: no paper, no
+// shadow, the wallpaper shows through and only the picture itself is visible.
 
 import Cocoa
 import ServiceManagement
@@ -143,12 +143,13 @@ final class PhotoView: NSView {
 
     required init?(coder: NSCoder) { fatalError() }
 
-    /// A cut-out gets no paper: the layer stays clear, so its shadow is cast by the
-    /// image pixels themselves and traces the outline of the picture.
+    /// A cut-out gets no paper and no shadow: the layer stays clear and nothing is
+    /// drawn around the picture, so it sits on the wallpaper as its bare outline.
     func setImage(_ image: CGImage, borderless: Bool) {
         photo.contents = image
         paper.backgroundColor = borderless ? nil : NSColor.white.cgColor
         photo.cornerRadius = borderless ? 0 : 1
+        paper.shadowOpacity = borderless ? 0 : 0.45
     }
 
     /// Re-lays the print for the current window size; called after every scale or rotate.
