@@ -27,6 +27,7 @@
                 tools_subtitle_word: "Tools",
                 tools_filter_hits: "TREFFERS",
                 tools_no_results: "Geen resultaten voor \"{query}\"",
+                search_no_terms: "niets gevonden",
                 tools_close_aria: "Tooloverzicht sluiten en terug naar labkeuze",
                 tools_footer_aria: "Voettekst",
                 tools_universe_aria: "Open Universe · laboratoriumgalerij in de ruimte",

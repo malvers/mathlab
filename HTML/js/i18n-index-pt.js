@@ -27,6 +27,7 @@
                 tools_subtitle_word: "Ferramentas",
                 tools_filter_hits: "RESULTADOS",
                 tools_no_results: "Nenhum resultado para «{query}»",
+                search_no_terms: "nada encontrado",
                 tools_close_aria: "Fechar a visão de ferramentas e voltar à seleção de laboratórios",
                 tools_footer_aria: "Rodapé",
                 tools_universe_aria: "Abrir Universe · galeria de laboratórios no espaço",

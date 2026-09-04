@@ -27,6 +27,7 @@
                 tools_subtitle_word: "Tools",
                 tools_filter_hits: "MATCHES FOUND",
                 tools_no_results: "No matches for \"{query}\"",
+                search_no_terms: "nothing found",
                 tools_close_aria: "Close tools overview and return to lab selection",
                 tools_footer_aria: "Footer",
                 tools_universe_aria: "Open Universe · laboratory gallery in space",
