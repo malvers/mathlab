@@ -27,6 +27,7 @@
                 tools_subtitle_word: "Strumenti",
                 tools_filter_hits: "RISULTATI",
                 tools_no_results: "Nessun risultato per «{query}»",
+                search_no_terms: "nessun risultato",
                 tools_close_aria: "Chiudi la panoramica strumenti e torna alla scelta del laboratorio",
                 tools_footer_aria: "Piè di pagina",
                 tools_universe_aria: "Apri Universe · galleria laboratori nello spazio",

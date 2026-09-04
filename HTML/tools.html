@@ -690,6 +690,8 @@
     <!-- Configuration Load -->
     <script src="js/labs-icons.js"></script>
     <script src="js/labs-config.js"></script>
+    <script src="js/labs-terms.js"></script>
+    <script src="js/labs-search.js"></script>
 
     <script>
         // Language: follows CyberI18n.current from i18n.js (incl. browser language). Only ?lang= in URL overrides.
@@ -722,15 +724,9 @@
             const grid = document.getElementById('launcher-grid');
             if (!grid) return;
 
-            const searchLower = filterText.toLowerCase().trim();
-            const filteredData = LABS_DATA.filter(lab => {
-                const title = (lab.title || "").toLowerCase();
-                const tagline = (lab.tagline || "").toLowerCase();
-                const keywords = (lab.keywords || "").toLowerCase();
-                return title.includes(searchLower) || 
-                       tagline.includes(searchLower) || 
-                       keywords.includes(searchLower);
-            });
+            // Matching lives in js/labs-search.js — umlaut-blind and over the
+            // terms inside every lab (js/labs-terms.js).
+            const filteredData = LABS_DATA.filter(lab => LabSearch.matchesLab(lab, filterText));
 
             const count = filteredData.length;
             const subtitle = document.getElementById('dynamic-subtitle');
@@ -792,7 +788,7 @@
         CyberUI.init();
         
         const searchHint = CyberI18n.getOr('index.ui.search_placeholder', 'START LAB SCAN…');
-        CyberUI.createSearch('search-mount', searchHint, (val) => {
+        LabSearch.attach('search-mount', searchHint, (val) => {
             renderLauncher(val);
         });
 

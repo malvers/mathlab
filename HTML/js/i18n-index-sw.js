@@ -27,6 +27,7 @@
                 tools_subtitle_word: "Zana",
                 tools_filter_hits: "MATOKEO YAMEPATIKANA",
                 tools_no_results: "Hakuna matokeo ya \"{query}\"",
+                search_no_terms: "hakuna kilichopatikana",
                 tools_close_aria: "Funga muhtasari wa zana na urudi kwenye uchaguzi wa maabara",
                 tools_footer_aria: "Sehemu ya chini",
                 tools_universe_aria: "Fungua Universe · matunzio ya maabara angani",

@@ -96,3 +96,131 @@
     border-color: #ff0000;
     box-shadow: 0 0 15px rgba(255, 0, 0, 0.3);
 }
+
+/* ------------------------------------------------------------------ *
+ * Hit list under the search line (js/labs-search.js) — the terms that
+ * contain the query, each with the lab it lives in.
+ * ------------------------------------------------------------------ */
+#search-mount .search-drop {
+    display: none;
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    right: 0;
+    z-index: 60;
+    max-height: min(52vh, 420px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    border-radius: 10px;
+    border: var(--hub-tile-border, 1px solid #33333b);
+    background: rgba(8, 18, 40, 0.985);
+    backdrop-filter: blur(24px);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55);
+    padding: 4px;
+    box-sizing: border-box;
+}
+
+#search-mount .search-drop.open {
+    display: block;
+}
+
+/* The hub sections all sit at z-index 2 — while the hit list is open its row
+   has to win against the tiles that follow it in the document. */
+.search-scan-row.search-drop-open,
+body.cyber-hub > .search-scan-row.search-drop-open {
+    z-index: 60;
+}
+
+#search-mount .search-drop-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 8px 12px;
+    border-radius: 7px;
+    text-decoration: none;
+    color: rgba(255, 255, 255, 0.9);
+    font-family: 'Outfit', 'Inter', system-ui, sans-serif;
+    font-size: 0.98rem;
+    line-height: 1.25;
+    cursor: pointer;
+}
+
+#search-mount .search-drop-row:hover,
+#search-mount .search-drop-row.active {
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+}
+
+#search-mount .search-drop-term {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+#search-mount .search-drop-term mark {
+    background: transparent;
+    color: var(--neon-blue, #00d2ff);
+    font-weight: 600;
+}
+
+#search-mount .search-drop-lab {
+    flex: 0 0 auto;
+    color: rgba(185, 226, 255, 0.55);
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.68rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+#search-mount .search-drop-empty {
+    padding: 10px 12px;
+    color: rgba(255, 255, 255, 0.45);
+    font-family: 'Outfit', 'Inter', system-ui, sans-serif;
+    font-size: 0.95rem;
+}
+
+/* Scrollbar in the same grammar as the hub (see feedback: scrollbar like index) */
+#search-mount .search-drop {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0, 210, 255, 0.35) transparent;
+}
+
+#search-mount .search-drop::-webkit-scrollbar {
+    width: 8px;
+}
+
+#search-mount .search-drop::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+#search-mount .search-drop::-webkit-scrollbar-thumb {
+    background: rgba(0, 210, 255, 0.35);
+    border-radius: 4px;
+}
+
+#search-mount .search-drop::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 210, 255, 0.55);
+}
+
+@media (max-width: 640px) {
+    /* The input only takes part of the row on a phone — the hit list may use
+       the full width so the terms stay readable. */
+    #search-mount .search-drop {
+        left: 0;
+        right: auto;
+        width: calc(100vw - 24px);
+        max-width: calc(100vw - 24px);
+    }
+
+    #search-mount .search-drop-row {
+        flex-direction: column;
+        gap: 2px;
+    }
+
+    #search-mount .search-drop-term {
+        white-space: normal;
+    }
+}

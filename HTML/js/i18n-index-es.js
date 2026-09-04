@@ -27,6 +27,7 @@
                 tools_subtitle_word: "Herramientas",
                 tools_filter_hits: "RESULTADOS",
                 tools_no_results: "Sin resultados para «{query}»",
+                search_no_terms: "sin resultados",
                 tools_close_aria: "Cerrar la vista de herramientas y volver a la selección de laboratorios",
                 tools_footer_aria: "Pie de página",
                 tools_universe_aria: "Abrir Universe · galería de laboratorios en el espacio",

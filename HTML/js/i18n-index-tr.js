@@ -27,6 +27,7 @@
                 tools_subtitle_word: "Araçlar",
                 tools_filter_hits: "EŞLEŞMELER BULUNDU",
                 tools_no_results: "\"{query}\" için eşleşme yok",
+                search_no_terms: "bir şey bulunamadı",
                 tools_close_aria: "Araçlara genel bakışı kapatın ve laboratuvar seçimine dönün",
                 tools_footer_aria: "Altbilgi",
                 tools_universe_aria: "Açık Evren · uzaydaki laboratuvar galerisi",

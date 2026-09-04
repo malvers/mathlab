@@ -2131,6 +2131,8 @@
     <!-- Configuration Load -->
     <script src="js/labs-icons.js"></script>
     <script src="js/labs-config.js"></script>
+    <script src="js/labs-terms.js"></script>
+    <script src="js/labs-search.js"></script>
 
     <!-- Sound toggle + Ambient (JS Audio wie intro — zuverlässiger bei großer m4a) -->
     <script>
@@ -2223,25 +2225,15 @@
         }
 
         // --- SEARCH LOGIC (ULTRA-SCAN INTEGRATED) ---
+        // Matching lives in js/labs-search.js: umlaut-blind and over the terms
+        // inside every lab (js/labs-terms.js), so "Würfel" finds Körper.
         function filterLabs(val) {
             const tools = document.querySelectorAll('#tool-container .card');
-            const q = val.toLowerCase().trim();
+            const q = val.trim();
+            const hits = LabSearch.matchingIds(q);
 
             tools.forEach(tool => {
-                const title = tool.querySelector('h3').innerText.toLowerCase();
-                const desc = tool.querySelector('.card-desc') ? tool.querySelector('.card-desc').innerText.toLowerCase() : "";
-                const keywords = tool.getAttribute('data-keywords') ? tool.getAttribute('data-keywords').toLowerCase() : "";
-                
-                // Also search in keywords and categories
-                const categories = tool.getAttribute('data-category').toLowerCase();
-                const catParts = categories.split(/\s+/).filter(Boolean);
-                const catHit = categories.includes(q) || (q === 'university' && catParts.includes('uni'));
-
-                if (title.includes(q) || desc.includes(q) || keywords.includes(q) || catHit) {
-                    tool.style.display = 'flex';
-                } else {
-                    tool.style.display = 'none';
-                }
+                tool.style.display = hits.has(tool.getAttribute('data-lab-id')) ? 'flex' : 'none';
             });
 
             if (q.length > 0) {
@@ -2252,10 +2244,10 @@
             }
         }
 
-        // Centralized Search Engine Hook
+        // Centralized Search Engine Hook (input + hit drop-down)
         CyberUI.init();
         const searchHint = CyberI18n.getOr('index.ui.search_placeholder', "LABOR-SCAN STARTEN...");
-        CyberUI.createSearch('search-mount', searchHint, (val) => {
+        LabSearch.attach('search-mount', searchHint, (val) => {
             filterLabs(val);
         });
 

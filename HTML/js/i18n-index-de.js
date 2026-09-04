@@ -28,6 +28,7 @@
                 tools_subtitle_word: "Werkzeuge",
                 tools_filter_hits: "TREFFER GEFUNDEN",
                 tools_no_results: "Keine Treffer für „{query}“",
+                search_no_terms: "nichts gefunden",
                 tools_close_aria: "Werkzeug-Übersicht schließen und zur Labor-Auswahl",
                 tools_footer_aria: "Fußzeile",
                 tools_universe_aria: "Universe · Labor-Galerie im Weltraum öffnen",
