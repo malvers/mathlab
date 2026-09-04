@@ -128,15 +128,24 @@
     async function createKeypair(pass) {
         const a = auth();
         if (!a.hasSession()) throw new Error('Bitte zuerst anmelden');
+        /* There is exactly one key pair, ever. Replacing it would leave every
+           name sealed so far unreadable for good, so look again - fresh, not
+           from the cache - and refuse if a key is already there. */
+        pubKey = null;
+        pubMissing = false;
+        if (await publicKey()) throw new Error('Es gibt bereits einen Schlüssel — er wird nicht ersetzt');
         const pair = await subtle.generateKey({ name: 'ECDH', namedCurve: 'P-256' }, true, ['deriveKey']);
         const pubJwk = await subtle.exportKey('jwk', pair.publicKey);
         const privJwk = await subtle.exportKey('jwk', pair.privateKey);
         const wrapped = await wrapPrivate(privJwk, pass);
+        /* plain INSERT, no merge-duplicates: should a row have appeared in the
+           meantime, the database answers 409 instead of overwriting it */
         const res = await a.api(TABLE, {
             method: 'POST',
-            headers: { Prefer: 'resolution=merge-duplicates,return=minimal' },
+            headers: { Prefer: 'return=minimal' },
             body: JSON.stringify([{ id: KEY_ID, pub: pubJwk, wrapped_priv: wrapped, ts: new Date().toISOString() }])
         });
+        if (res.status === 409) throw new Error('Es gibt bereits einen Schlüssel — er wird nicht ersetzt');
         if (!res.ok) throw new Error('Schlüssel konnte nicht gespeichert werden (HTTP ' + res.status + ')');
         pubKey = null;
         pubMissing = false;
