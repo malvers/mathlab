@@ -33,7 +33,11 @@ const CURSOR_JS = () => {
 // record:false walks the same choreography without capturing anything - a preflight
 // that catches broken selectors, wrong timings and off-stage framing in seconds
 // instead of after a full take. Everything else behaves identically.
-export async function runScenes(scenes, { outDir, viewport = { width: 1280, height: 720 }, upscale = 2, showCursor = false, record = true }) {
+// dsf = deviceScaleFactor: the page renders at dsf x the CSS viewport, so the screencast
+// delivers REAL pixels instead of an upscale. dsf 2 with upscale 1 gives a true 2560x1440
+// master from a 1280x720 layout - same choreography coordinates, four times the detail.
+// Default stays 1 so every older run script keeps the picture it was cut for.
+export async function runScenes(scenes, { outDir, viewport = { width: 1280, height: 720 }, upscale = 2, dsf = 1, showCursor = false, record = true }) {
   const browser = await chromium.launch({ channel: 'chromium' });
   const results = {};
   for (const sc of scenes) {
@@ -42,7 +46,7 @@ export async function runScenes(scenes, { outDir, viewport = { width: 1280, heig
       fs.rmSync(frameDir, { recursive: true, force: true });
       fs.mkdirSync(frameDir, { recursive: true });
     }
-    const ctx = await browser.newContext({ viewport });
+    const ctx = await browser.newContext({ viewport, deviceScaleFactor: dsf });
     const page = await ctx.newPage();
     const t0 = Date.now();
     const log = [];
@@ -60,7 +64,7 @@ export async function runScenes(scenes, { outDir, viewport = { width: 1280, heig
         .finally(() => pending--);
       cdp.send('Page.screencastFrameAck', { sessionId: f.sessionId }).catch(() => {});
     });
-    if (record) await cdp.send('Page.startScreencast', { format: 'jpeg', quality: 95, maxWidth: viewport.width, maxHeight: viewport.height });
+    if (record) await cdp.send('Page.startScreencast', { format: 'jpeg', quality: 95, maxWidth: viewport.width * dsf, maxHeight: viewport.height * dsf });
 
     if (showCursor) await page.addInitScript(CURSOR_JS);
     await page.goto(sc.url, { waitUntil: 'load' });
@@ -92,7 +96,7 @@ export async function runScenes(scenes, { outDir, viewport = { width: 1280, heig
     // ffmpeg concat demuxer quirk: the final 'duration' only applies if the last file is listed again
     if (rel.length) lines.push(`file 'f_${String(rel.length - 1).padStart(6, '0')}.jpg'`);
     fs.writeFileSync(`${frameDir}/list.txt`, lines.join('\n') + '\n');
-    const W = viewport.width * upscale, H = viewport.height * upscale;
+    const W = viewport.width * dsf * upscale, H = viewport.height * dsf * upscale;
     execFileSync('ffmpeg', ['-nostdin', '-y', '-v', 'error', '-f', 'concat', '-safe', '0', '-i', `${frameDir}/list.txt`,
       '-vf', `fps=25,scale=${W}:${H}:flags=lanczos`, '-c:v', 'libx264', '-crf', '16', '-preset', 'medium',
       '-pix_fmt', 'yuv420p', `${outDir}/${sc.name}.mp4`], { stdio: 'inherit' });
