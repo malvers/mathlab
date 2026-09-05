@@ -41,7 +41,14 @@ enum Sudo {
     static let rulePath = "/etc/sudoers.d/pmset-disablesleep"
 
     /// True when the sudoers rule is in place, i.e. pmset runs without a password.
-    static var passwordless: Bool {
+    /// Cached on purpose: asking sudo launches a privileged process that lands in the
+    /// system log every single time. Probed once at start and again only after the
+    /// rule may have changed (`recheck`), never from the refresh timer.
+    static private(set) var passwordless = probe()
+
+    static func recheck() { passwordless = probe() }
+
+    private static func probe() -> Bool {
         run("/usr/bin/sudo", ["-n", "-l", "/usr/bin/pmset", "-a", "disablesleep", "0"]).status == 0
     }
 }
@@ -216,6 +223,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
         let cmd = "/usr/sbin/visudo -c -f \(tmp) && /bin/cp \(tmp) \(Sudo.rulePath) && /bin/chmod 440 \(Sudo.rulePath)"
         let result = runWithAuthDialog(cmd)
+        Sudo.recheck()
+        refresh()
         if result.ok {
             alert("Done — SleepSwitch now switches without a password, "
                   + "confirmed by Touch ID.\n\nRule in \(Sudo.rulePath):\n\(rule)")
