@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Konzept: kamerabasierte Notfallerkennung (Sturz / Reglosigkeit) für die Wohnung in Spanien – Doc Alvers.">
+<title>Notfall-Erkennung per Kamera – Konzept</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!-- Non-blocking font load: page renders instantly, Orbitron swaps in when available -->
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
+<style>
+  /* Monochrome document theme, accent colours from the Forloop palette */
+  :root {
+    --bg: #141518;
+    --text: #e8eaed;
+    --muted: #979da6;
+    --hair: rgba(255, 255, 255, 0.10);
+    --lambda: rgb(245, 194, 66);   /* orange */
+    --ypsilon: rgb(176, 36, 24);   /* red */
+    --phi: rgb(121, 158, 49);      /* green */
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.6; padding: 28px 16px 52px;
+  }
+  .wrap { max-width: 900px; margin: 0 auto; }
+
+  h1 {
+    font-family: "Orbitron", sans-serif; font-weight: 900;
+    font-size: 1.7rem; letter-spacing: 0.05em; line-height: 1.25;
+  }
+  .subtitle { color: var(--muted); font-size: 0.95rem; margin-top: 8px; }
+  .meta {
+    color: var(--muted); font-size: 0.8rem; letter-spacing: 0.12em;
+    text-transform: uppercase; margin-top: 14px;
+    border-top: 1px solid var(--hair); padding-top: 10px;
+  }
+  h2 {
+    font-family: "Orbitron", sans-serif; font-weight: 700;
+    font-size: 1.02rem; letter-spacing: 0.13em; text-transform: uppercase;
+    margin: 34px 0 12px; padding-bottom: 6px; border-bottom: 1px solid var(--hair);
+  }
+  h3 {
+    font-family: "Orbitron", sans-serif; font-weight: 500;
+    font-size: 0.88rem; letter-spacing: 0.08em;
+    margin: 20px 0 6px; color: var(--muted);
+  }
+  p { margin: 9px 0; }
+  ul, ol { margin: 9px 0 9px 22px; }
+  li { margin: 5px 0; }
+  strong { color: #fff; }
+  code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.88em; background: rgba(255,255,255,0.06);
+    padding: 1px 5px; border-radius: 4px;
+  }
+
+  table { border-collapse: collapse; width: 100%; margin: 14px 0; font-size: 0.94rem; }
+  th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--hair); }
+  th {
+    font-family: "Orbitron", sans-serif; font-weight: 500;
+    font-size: 0.76rem; letter-spacing: 0.11em; text-transform: uppercase;
+    color: var(--muted);
+  }
+  td.num { text-align: right; white-space: nowrap; }
+  tr.sum td { font-weight: 700; border-top: 1.5px solid var(--hair); border-bottom: none; }
+
+  /* Escalation levels use the palette: green -> orange -> red */
+  .lvl { border-left: 3px solid var(--hair); padding: 2px 0 2px 13px; margin: 12px 0; }
+  .lvl-1 { border-left-color: var(--phi); }
+  .lvl-2 { border-left-color: var(--lambda); }
+  .lvl-3 { border-left-color: var(--ypsilon); }
+  .lvl b { display: block; font-family: "Orbitron", sans-serif; font-weight: 500;
+           font-size: 0.8rem; letter-spacing: 0.1em; text-transform: uppercase; }
+
+  .note {
+    border: 1px solid var(--hair); border-left: 3px solid var(--lambda);
+    padding: 11px 14px; margin: 16px 0; background: rgba(255,255,255,0.03);
+  }
+  .note b { font-family: "Orbitron", sans-serif; font-weight: 500;
+            letter-spacing: 0.08em; font-size: 0.8rem; text-transform: uppercase; }
+
+  .print-footer { display: none; }
+
+  @media print {
+    @page { size: A4; margin: 15mm 16mm 16mm; }
+    body { background: #fff; color: #1c1e21; padding: 0; font-size: 10.5pt; line-height: 1.45; }
+    .wrap { max-width: none; }
+    :root { --hair: #d5d8dc; --muted: #55595f; }
+    h1 { color: #111; font-size: 19pt; }
+    h2 { color: #111; font-size: 10.5pt; border-bottom: 1px solid #111; margin-top: 9mm; }
+    h3 { color: #333; font-size: 9.5pt; }
+    strong { color: #000; }
+    .subtitle, .meta, th { color: #55595f; }
+    th, td { border-bottom: 1px solid #d5d8dc; }
+    tr.sum td { border-top: 1.2pt solid #111; }
+    code { background: #eef0f2; }
+    .note { background: #f7f8f9; border-color: #d5d8dc; border-left-color: rgb(245,194,66); }
+    h1, h2, h3 { break-after: avoid; }
+    table, .note, .lvl { break-inside: avoid; }
+    /* One footer at the end of the flow; the generated PDF carries the real
+       per-page footer in the page margin (Chrome footerTemplate) */
+    .print-footer {
+      display: block; text-align: center;
+      border-top: 0.5pt solid #d5d8dc; padding-top: 2mm; margin-top: 8mm;
+      font-family: "Orbitron", sans-serif; font-weight: 500;
+      font-size: 7.5pt; letter-spacing: 0.16em; color: #9aa0a8;
+    }
+    html.pdfmode .print-footer { display: none !important; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>Notfall-Erkennung per Kamera</h1>
+<p class="subtitle">Sturz- und Reglosigkeitserkennung für die Wohnung in Spanien –
+Konzept, Technik, Kosten.</p>
+<p class="meta">Doc Alvers Mathe-Labor &nbsp;&middot;&nbsp; Konzeptpapier &nbsp;&middot;&nbsp; 05.09.2026</p>
+
+<h2>1 &nbsp; Ausgangslage und Ziel</h2>
+<p>In der Wohnung in Spanien lebst du zeitweise allein. Das Risiko, um das es geht:
+ein Sturz oder ein medizinischer Zwischenfall (z.&nbsp;B. Herzinfarkt), nach dem du
+bewusstlos oder bewegungsunfähig liegen bleibst und <strong>selbst keinen Alarm mehr
+auslösen kannst</strong>. Genau diese Lücke schließt kein Handy und kein Notrufknopf,
+den man drücken muss.</p>
+<p>Das System soll deshalb <strong>ohne Zutun der betroffenen Person</strong> erkennen,
+dass etwas nicht stimmt, und den vor Ort verfügbaren Wachdienst der Urbanisation
+alarmieren – inklusive einer Möglichkeit, im bestätigten Notfall in die Wohnung
+zu kommen.</p>
+
+<h3>Was das System ausdrücklich nicht ist</h3>
+<ul>
+  <li>Kein medizinisches Diagnosegerät. Es stellt keinen Herzinfarkt fest.</li>
+  <li>Kein Überwachungssystem gegen Einbruch (das könnte man ergänzen, ist aber
+      ein anderer Anwendungsfall mit anderen Anforderungen).</li>
+  <li>Kein System, das eigenständig Rettungsdienst oder Polizei ruft – siehe
+      Abschnitt&nbsp;4.</li>
+</ul>
+
+<h2>2 &nbsp; Erkennungslogik</h2>
+<p>Der Kern ist bewusst simpel gehalten, weil einfache Regeln robuster und
+nachvollziehbarer sind als ein trainiertes Blackbox-Modell:</p>
+<ol>
+  <li><strong>Pose-Erkennung pro Bild.</strong> Ein Modell (YOLO-Pose, MediaPipe oder
+      vergleichbar) liefert für jede erkannte Person ein Skelett aus Gelenkpunkten.</li>
+  <li><strong>Lage-Klassifikation.</strong> Aus dem Skelett zwei Merkmale ableiten:
+      Ist die Körperachse (Schulter&ndash;Hüfte) eher horizontal? Ist der Schwerpunkt
+      nah an der als Boden kalibrierten Fläche? Beides zusammen ergibt „liegt“.</li>
+  <li><strong>Bewegungsmaß.</strong> Über ein Zeitfenster die Verschiebung der
+      Gelenkpunkte aufsummieren. Wenig Bewegung + „liegt“ ist die kritische
+      Kombination.</li>
+  <li><strong>Timer und Eskalation.</strong> Erst wenn dieser Zustand über eine
+      definierte Dauer anhält, beginnt die Alarmkette.</li>
+</ol>
+<p>Bildrate: <strong>2&ndash;3 Bilder pro Sekunde reichen</strong>. Wir suchen keinen
+schnellen Bewegungsablauf, sondern das Ausbleiben von Bewegung über Minuten. Das
+senkt die Anforderung an die Rechenleistung erheblich.</p>
+
+<h3>Fehlalarm-Quellen, die eingeplant werden müssen</h3>
+<ul>
+  <li>Sofa, Bett, Yogamatte, Sonnenliege – geplantes Liegen.</li>
+  <li>Ungünstige Kamerawinkel: von schräg oben sieht Sitzen aus wie Liegen.</li>
+  <li>Haustiere und Besuch.</li>
+  <li>Teilverdeckung (halb hinter dem Tisch, halb im Bild).</li>
+</ul>
+<p>Gegenmaßnahme: pro Kamera <strong>Ruhezonen</strong> einzeichnen (Bett, Sofa), in
+denen längeres Liegen normal ist und der Timer nicht oder deutlich später greift.
+Außerdem: eine harte Vorbedingung „Person liegt <em>und</em> es gab vorher einen
+schnellen Übergang von stehend nach liegend“ unterscheidet einen Sturz vom
+Hinlegen.</p>
+
+<h2>3 &nbsp; Eskalationskette</h2>
+<p>Nie direkt vom Modell zum Notruf. Zwischen Erkennung und Alarm gehören
+Widerspruchsmöglichkeiten für dich:</p>
+
+<div class="lvl lvl-1">
+  <b>Stufe 1 &ndash; lokale Rückfrage</b>
+  Nach der ersten erkannten Dauer (Vorschlag: 60&nbsp;Sekunden reglos am Boden)
+  gibt das System in der Wohnung einen deutlich hörbaren Ton aus und fragt per
+  Sprachausgabe nach. Jede erkannte Bewegung bricht ab.
+</div>
+<div class="lvl lvl-2">
+  <b>Stufe 2 &ndash; Benachrichtigung an dich und Angehörige</b>
+  Keine Reaktion nach weiteren Minuten: Push und Anruf aufs Handy, parallel an
+  eine hinterlegte Vertrauensperson. Ein Tastendruck („alles gut“) bricht ab.
+</div>
+<div class="lvl lvl-3">
+  <b>Stufe 3 &ndash; Wachdienst der Urbanisation</b>
+  Weiterhin keine Reaktion: Alarm an den Wachdienst, der ohnehin vor Ort ist und
+  eine Nummer hat. Ein Mensch bewertet die Lage und geht hoch. Erst dieser Mensch
+  entscheidet über 112.
+</div>
+
+<div class="note">
+  <b>Der entscheidende Designpunkt</b>
+  <p>Empfänger des Alarms ist ein <strong>Mensch vor Ort</strong>, kein Notruf-Automat.
+  Damit ist ein Fehlalarm kein Drama, sondern ein kurzer Kontrollgang – und die
+  Anforderung an die Trefferquote des Modells wird realistisch erfüllbar. Ein
+  System, das automatisch die Guardia&nbsp;Civil losschickt, müsste nahezu
+  fehlerfrei sein; das ist es nicht.</p>
+</div>
+
+<h2>4 &nbsp; Zutritt im Notfall</h2>
+<p>Wenn der Wachdienst hochkommt, steht er vor einer verschlossenen Tür. Zwei
+Varianten, klar in dieser Reihenfolge empfohlen:</p>
+<ol>
+  <li><strong>Schlüsseltresor am Eingang (empfohlen).</strong> Ein Schlüssel liegt
+      dauerhaft in einem Codeschloss-Tresor. Der Code wird <em>erst im bestätigten
+      Alarmfall</em> an das Diensthandy des Wachdienstes übermittelt. Rein
+      mechanisch, nicht hackbar, funktioniert auch bei Internetausfall.</li>
+  <li><strong>Smartes Türschloss (z.&nbsp;B. Nuki).</strong> Komfortabler, aber die
+      Wohnungstür hängt dann an Software und Netzwerk.</li>
+</ol>
+<p><strong>In keinem Fall darf der Erkennungs-Algorithmus die Tür selbst öffnen.</strong>
+Ein Fehlalarm um drei Uhr nachts würde sonst wörtlich die Haustür aufmachen. Die
+Freigabe erfolgt immer durch den Menschen am anderen Ende der Alarmkette.</p>
+
+<h2>5 &nbsp; Kameras und Verkabelung</h2>
+
+<h3>Warum keine Akku-Kameras</h3>
+<p>Akkubetriebene WLAN-Kameras (Reolink Argus, Eufy, Ring) halten nur deshalb
+monatelang, weil sie <strong>schlafen und erst bei Bewegung aufwachen</strong>. Für
+diesen Anwendungsfall ist das genau falsch herum: Unser Alarmkriterium ist
+Bewegungs<em>losigkeit</em>. Die Kamera würde einschlafen, exakt wenn es ernst
+wird. Im Dauerbetrieb ist so ein Akku nach wenigen Stunden leer.</p>
+
+<h3>Warum PoE statt WLAN</h3>
+<ul>
+  <li>Ein einziges Netzwerkkabel liefert <strong>Strom und Bild</strong> – kein
+      Netzteil und keine Steckdose in Kamerahöhe nötig.</li>
+  <li>Kein WLAN-Störabstand, keine Aussetzer, keine Kanalprobleme bei 10 parallelen
+      Streams.</li>
+  <li>PoE-Kameras liefern einen offenen <code>RTSP</code>-Stream. Das Bild bleibt im
+      eigenen Netz, statt über einen Herstellerserver zu laufen.</li>
+</ul>
+<p>Alle Kabel laufen sternförmig zu einem zentralen Punkt zurück. Dort stehen
+PoE-Switch, Auswerte-Rechner und USV. Diese <strong>Technik-Ecke muss vor dem ersten
+Bohrloch festgelegt sein</strong> (Abstellraum, Schrank, Nähe Sicherungskasten).</p>
+
+<h3>Kameraplan</h3>
+<table>
+  <tr><th>Bereich</th><th class="num">Kameras</th><th>Anmerkung</th></tr>
+  <tr><td>Untergeschoss: 3 Zimmer</td><td class="num">3</td><td>kleine Räume, je eine reicht</td></tr>
+  <tr><td>Untergeschoss: 2 Bäder</td><td class="num">2</td><td>höchstes Sturzrisiko, siehe Abschnitt 6</td></tr>
+  <tr><td>Obergeschoss: Wohnbereich + offene Küche</td><td class="num">2</td><td>große, zusammenhängende Fläche</td></tr>
+  <tr><td>Flur</td><td class="num">1</td><td></td></tr>
+  <tr><td>Treppe: gerader Lauf</td><td class="num">1</td><td rowspan="2">der 90°-Knick verdeckt beide Läufe gegenseitig – eine Kamera sieht den Knickbereich nicht</td></tr>
+  <tr><td>Treppe: Lauf nach dem 90°-Knick</td><td class="num">1</td></tr>
+  <tr class="sum"><td>Summe</td><td class="num">10</td><td></td></tr>
+</table>
+<p>Für 10 Kameras plus Uplink einen <strong>16-Port-PoE-Switch</strong> nehmen, nicht
+den 8-Port. Der wäre sofort voll und müsste beim ersten Nachrüsten ersetzt werden.
+Leistungsbedarf ist unkritisch: rund 60&nbsp;W für alle zehn zusammen.</p>
+<p>Es geht nicht darum, jeden Winkel zu sehen, sondern <strong>jede Bodenfläche</strong>,
+auf der ein Mensch liegen bleiben kann. Das reduziert die Zahl der nötigen Kameras
+und vereinfacht die Ausrichtung: leicht erhöht, in den Raum hinein, Boden im Bild.</p>
+
+<h2>6 &nbsp; Datenschutz und Bäder</h2>
+<p>Die meisten schweren Stürze passieren im Bad: nasse Fliesen, harte Kanten,
+Wannenrand. Die Bäder auszulassen würde das System dort blind machen, wo es am
+meisten gebraucht wird. Deshalb bleiben sie drin – aber mit strengerer Regel:</p>
+<ul>
+  <li>Das Videobild <strong>verlässt den lokalen Rechner nie</strong>. Keine Cloud,
+      kein Hersteller-Server, keine Aufzeichnung auf Vorrat.</li>
+  <li>Aus dem Bild wird nur das <strong>Skelettmodell</strong> abgeleitet; ausgewertet
+      werden Koordinaten, nicht Pixel.</li>
+  <li>Im Alarmfall geht <strong>kein Bild</strong> nach draußen, sondern nur eine
+      Textmeldung: „Person liegt reglos – Bad 2, seit 6 Minuten“.</li>
+  <li>Gäste sind vorab zu informieren; für Gästezimmer und Gästebad sollte sich das
+      System abschalten lassen.</li>
+</ul>
+<p>Da es sich um die eigene Wohnung und rein private Nutzung handelt, ist das
+datenschutzrechtlich unproblematisch, solange keine öffentlichen Flächen erfasst
+werden und die Daten das Haus nicht verlassen. Die Vereinbarung mit dem Wachdienst
+(wer darf wann rein, wer haftet) sollte trotzdem schriftlich sein.</p>
+
+<h2>7 &nbsp; Zweiter Layer: Apple Watch</h2>
+<p>Kameras decken nur ab, was im Bild ist. Eine am Körper getragene Uhr geht überall
+mit. Beide Systeme ergänzen sich, sie ersetzen einander nicht.</p>
+<table>
+  <tr><th>Kann die Uhr</th><th>Kann sie nicht</th></tr>
+  <tr>
+    <td>Sturzerkennung mit automatischem SOS-Anruf nach ca. 60&nbsp;s ohne Reaktion</td>
+    <td><strong>Herzinfarkt erkennen.</strong> Dafür bräuchte es ein 12-Kanal-EKG mit
+        ST-Hebung; die Uhr hat einen Kanal.</td>
+  </tr>
+  <tr>
+    <td>Warnung bei auffällig hohem oder niedrigem Puls</td>
+    <td>Helfen, wenn sie auf dem Nachttisch liegt oder der Akku leer ist</td>
+  </tr>
+  <tr>
+    <td>1-Kanal-EKG, Erkennung von Vorhofflimmern</td>
+    <td>Zuverlässig zwischen Schlaf und Bewusstlosigkeit unterscheiden</td>
+  </tr>
+</table>
+<p>Praktisch relevant ist das kaum ein Nachteil: Das Ereignis, auf das reagiert wird,
+ist ohnehin nicht die Diagnose, sondern <strong>„liegt und reagiert nicht“</strong>.
+Die Uhr deckt Dusche, Terrasse und Außenbereich ab, die Kameras decken ab, wenn die
+Uhr nicht am Handgelenk ist.</p>
+
+<h2>8 &nbsp; Kosten</h2>
+<p>Einmalige Hardwarekosten, grobe Hausnummern:</p>
+<table>
+  <tr><th>Posten</th><th class="num">ca. EUR</th></tr>
+  <tr><td>10 × PoE-Kamera mit RTSP (Reolink o.&nbsp;ä., ~70&nbsp;€/Stück)</td><td class="num">700</td></tr>
+  <tr><td>16-Port-PoE-Switch</td><td class="num">180</td></tr>
+  <tr><td>Auswerte-Rechner (Mini-PC + GPU, alternativ Jetson Orin Nano)</td><td class="num">800</td></tr>
+  <tr><td>Cat-6-Kabel, Kabelkanäle, Stecker, Kleinmaterial</td><td class="num">200</td></tr>
+  <tr><td>USV (Netz ist stabil, schützt gegen Spannungsspitzen)</td><td class="num">150</td></tr>
+  <tr><td>Schlüsseltresor (60&nbsp;€) bzw. Nuki-Schloss (250&nbsp;€)</td><td class="num">60–250</td></tr>
+  <tr class="sum"><td>Summe</td><td class="num">2.100–2.300</td></tr>
+</table>
+<p><strong>Laufende Kosten: praktisch null</strong>, weil alles lokal läuft. Optional
+ein LTE-Backup fürs Internet für rund 10&nbsp;€/Monat, damit die Alarmmeldung auch
+bei Ausfall der Leitung rausgeht.</p>
+<p>Größter Einzelposten ist der Rechner, und genau dort ist Spielraum: Bei 2&ndash;3
+Bildern pro Sekunde und 10 Streams genügt eine gebrauchte RTX&nbsp;3060 oder ein
+Jetson Orin Nano. Das drückt die Position von 800 auf 300&ndash;400&nbsp;€.</p>
+<p>Der Stromverbrauch ist gering: 10 Kameras rund 60&nbsp;W, der Rechner im
+Dauerbetrieb je nach Bestückung 30&ndash;80&nbsp;W. Über die geplante
+Solaranlage mit Batterie ist das komplett gedeckt.</p>
+
+<h2>9 &nbsp; Vorgehen</h2>
+<p>Nicht alles auf einmal kaufen und am Ende feststellen, dass die Erkennung nicht
+trägt. Stattdessen in dieser Reihenfolge:</p>
+<ol>
+  <li><strong>Eine einzige Kamera kaufen</strong> (~70&nbsp;€) und im Wohnzimmer
+      aufstellen. Erkennungs-Pipeline bauen: Stream, Pose, Lage, Timer.</li>
+  <li><strong>Gegen die Realität testen.</strong> Hinlegen, hinsetzen, aufs Sofa,
+      im Dunkeln, mit Decke. Erst wenn „liegt / liegt nicht“ zuverlässig stimmt,
+      geht es weiter.</li>
+  <li><strong>Restliche neun Kameras</strong> beschaffen, Kabel ziehen, Technik-Ecke
+      einrichten.</li>
+  <li><strong>Alarmkette aufbauen</strong> – zunächst nur Stufe 1 und 2 (Ton, Push
+      an dich). Wochenlang mitlaufen lassen und Fehlalarme zählen.</li>
+  <li><strong>Wachdienst einbinden</strong>, wenn die Fehlalarmrate erwiesenermaßen
+      niedrig ist. Vorher nicht – ein Wachdienst, der dreimal umsonst hochläuft,
+      nimmt den vierten Alarm nicht mehr ernst.</li>
+</ol>
+
+<h2>10 &nbsp; Offene Punkte</h2>
+<ul>
+  <li>Ist der Wachdienst bereit, diese Rolle zu übernehmen? Schriftliche
+      Vereinbarung nötig, inkl. Umgang mit dem Schlüsseltresor-Code.</li>
+  <li>Nachtsicht: Bei Dunkelheit schalten die Kameras auf Infrarot. Funktioniert die
+      Pose-Erkennung dort ebenso gut? Muss im Prototyp mitgetestet werden.</li>
+  <li>Was passiert bei Ausfall des Auswerte-Rechners? Es braucht einen
+      <em>Watchdog</em>, der meldet, wenn das System selbst still ist – sonst
+      schützt ein abgestürzter Dienst monatelang niemanden.</li>
+  <li>Wie wird das System bei Abwesenheit oder Besuch scharf/unscharf geschaltet?</li>
+  <li>Umgang mit mehreren Personen im Bild – dann ist ja Hilfe da.</li>
+</ul>
+
+<p class="print-footer">Doc Alvers Mathe-Labor &nbsp;&middot;&nbsp; Notfall-Erkennung per Kamera &nbsp;&middot;&nbsp; Konzept 05.09.2026</p>
+
+</div>
+</body>
+</html>
