@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="Konzept: kamerabasierte Notfallerkennung (Sturz / Reglosigkeit) für die Wohnung in Spanien – Doc Alvers.">
-<title>Notfall-Erkennung per Kamera – Konzept</title>
+<meta name="description" content="Konzept: Notfallerkennung (Sturz / Reglosigkeit) per Kamera und mmWave-Radar für die Wohnung in Spanien – Doc Alvers.">
+<title>Notfall-Erkennung in der Wohnung – Konzept</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <!-- Non-blocking font load: page renders instantly, Orbitron swaps in when available -->
@@ -82,6 +82,8 @@
   }
   .note b { font-family: "Orbitron", sans-serif; font-weight: 500;
             letter-spacing: 0.08em; font-size: 0.8rem; text-transform: uppercase; }
+  .note.warn { border-left-color: var(--ypsilon); }
+  .note.good { border-left-color: var(--phi); }
 
   .print-footer { display: none; }
 
@@ -99,6 +101,8 @@
     tr.sum td { border-top: 1.2pt solid #111; }
     code { background: #eef0f2; }
     .note { background: #f7f8f9; border-color: #d5d8dc; border-left-color: rgb(245,194,66); }
+    .note.warn { border-left-color: rgb(176,36,24); }
+    .note.good { border-left-color: rgb(121,158,49); }
     h1, h2, h3 { break-after: avoid; }
     table, .note, .lvl { break-inside: avoid; }
     /* One footer at the end of the flow; the generated PDF carries the real
@@ -116,9 +120,9 @@
 <body>
 <div class="wrap">
 
-<h1>Notfall-Erkennung per Kamera</h1>
+<h1>Notfall-Erkennung in der Wohnung</h1>
 <p class="subtitle">Sturz- und Reglosigkeitserkennung für die Wohnung in Spanien –
-Konzept, Technik, Kosten.</p>
+Kameras und Radar, Eskalation zum Wachdienst, Kosten.</p>
 <p class="meta">Doc Alvers Mathe-Labor &nbsp;&middot;&nbsp; Konzeptpapier &nbsp;&middot;&nbsp; 05.09.2026</p>
 
 <h2>1 &nbsp; Ausgangslage und Ziel</h2>
@@ -141,9 +145,68 @@ zu kommen.</p>
       Abschnitt&nbsp;4.</li>
 </ul>
 
-<h2>2 &nbsp; Erkennungslogik</h2>
+<h2>2 &nbsp; Gibt es das schon?</h2>
+<p>Ja, und zwar reichlich. Sturzerkennung ist ein etabliertes Feld – unter dem
+Stichwort <em>Ambient Assisted Living</em> seit über einem Jahrzehnt beforscht und
+gefördert. Der Überblick, geordnet nach Nähe zu diesem Projekt:</p>
+<table>
+  <tr><th>Ansatz</th><th>Beispiel</th><th>Für uns relevant, weil</th></tr>
+  <tr>
+    <td>Kameras + KI, institutionell</td>
+    <td>SafelyYou – Kameras in US-Pflegeheimen, Sturzclips werden zusätzlich von
+        Menschen geprüft</td>
+    <td>zeigt, dass der Ansatz trägt – aber als betreuter Dienst, nicht als
+        Selbstbau</td>
+  </tr>
+  <tr>
+    <td>Radar, kommerziell betreut</td>
+    <td>Vayyar Care – 4D-Bildgebungsradar an der Wand, arbeitet laut Hersteller
+        in völliger Dunkelheit und dichtem Dampf; u.&nbsp;a. bei einer
+        englischen Kommune (Essex County Council) im Einsatz</td>
+    <td>das direkte Vorbild für die Radar-Variante; Consumer-Version wird
+        allerdings nur in den USA verkauft</td>
+  </tr>
+  <tr>
+    <td>Radar als Einzelsensor</td>
+    <td>Milesight VS373 – 60-GHz-Radar, LoRaWAN, Herstellerangabe „bis 99&nbsp;%
+        Genauigkeit“</td>
+    <td>kaufbares Bauteil ohne Abo, aber braucht ein LoRaWAN-Gateway</td>
+  </tr>
+  <tr>
+    <td>Radar zum Selbstbauen</td>
+    <td>Seeed MR60FDA2 – 60-GHz-Modul mit ESP32-C6, ESPHome-Firmware ab Werk,
+        rund 25&nbsp;$</td>
+    <td>rein lokal, Home-Assistant-fertig, spottbillig – das ist unser Baustein</td>
+  </tr>
+  <tr>
+    <td>Forschung</td>
+    <td>mehrere Arbeiten aus 2026 speziell zu <em>Sturzerkennung im Badezimmer</em>,
+        durchweg radar- oder multimodal-basiert</td>
+    <td>bestätigt: gerade im Bad geht man bewusst weg von der Kamera</td>
+  </tr>
+</table>
+
+<div class="note">
+  <b>Was daran trotzdem eigen ist</b>
+  <p>Die Erkennung selbst ist nichts Neues. Was es <strong>nicht zu kaufen gibt</strong>,
+  ist die Kombination: vollständig lokal, ohne Abo und ohne Herstellercloud, mit einer
+  <strong>eigenen Eskalationskette zum Wachdienst der Urbanisation</strong> und
+  eigenem Zutrittsverfahren. Kein Produkt bildet das ab, weil kein Hersteller die
+  lokalen Gegebenheiten kennt.</p>
+</div>
+
+<div class="note warn">
+  <b>Und der unbequeme Teil</b>
+  <p>Ein selbstgebautes System, das dich retten soll, während du bewusstlos bist,
+  ist eine Verantwortung, die man nicht wegprogrammiert. Kommerzielle Anbieter haben
+  eine besetzte Leitstelle rund um die Uhr; ein Eigenbau hat einen Watchdog, den man
+  selbst wartet. <strong>Empfehlung: als Ergänzung bauen, nicht als Ersatz</strong> –
+  und die Apple Watch (Abschnitt&nbsp;9) als unabhängige zweite Schiene ernst nehmen.</p>
+</div>
+
+<h2>3 &nbsp; Erkennungslogik</h2>
 <p>Der Kern ist bewusst simpel gehalten, weil einfache Regeln robuster und
-nachvollziehbarer sind als ein trainiertes Blackbox-Modell:</p>
+nachvollziehbarer sind als ein trainiertes Blackbox-Modell. Für die Kameras:</p>
 <ol>
   <li><strong>Pose-Erkennung pro Bild.</strong> Ein Modell (YOLO-Pose, MediaPipe oder
       vergleichbar) liefert für jede erkannte Person ein Skelett aus Gelenkpunkten.</li>
@@ -159,6 +222,9 @@ nachvollziehbarer sind als ein trainiertes Blackbox-Modell:</p>
 <p>Bildrate: <strong>2&ndash;3 Bilder pro Sekunde reichen</strong>. Wir suchen keinen
 schnellen Bewegungsablauf, sondern das Ausbleiben von Bewegung über Minuten. Das
 senkt die Anforderung an die Rechenleistung erheblich.</p>
+<p>Die Radarsensoren liefern diese Kette fertig: Sie melden direkt „Sturz“ bzw.
+„Person anwesend“, die Auswertung steckt schon im Modul. Für sie entfällt Schritt
+1 bis 3 – wir konsumieren nur das Ergebnis und hängen unsere eigene Eskalation dran.</p>
 
 <h3>Fehlalarm-Quellen, die eingeplant werden müssen</h3>
 <ul>
@@ -173,7 +239,7 @@ Außerdem: eine harte Vorbedingung „Person liegt <em>und</em> es gab vorher ei
 schnellen Übergang von stehend nach liegend“ unterscheidet einen Sturz vom
 Hinlegen.</p>
 
-<h2>3 &nbsp; Eskalationskette</h2>
+<h2>4 &nbsp; Eskalationskette</h2>
 <p>Nie direkt vom Modell zum Notruf. Zwischen Erkennung und Alarm gehören
 Widerspruchsmöglichkeiten für dich:</p>
 
@@ -204,7 +270,7 @@ Widerspruchsmöglichkeiten für dich:</p>
   fehlerfrei sein; das ist es nicht.</p>
 </div>
 
-<h2>4 &nbsp; Zutritt im Notfall</h2>
+<h2>5 &nbsp; Zutritt im Notfall</h2>
 <p>Wenn der Wachdienst hochkommt, steht er vor einer verschlossenen Tür. Zwei
 Varianten, klar in dieser Reihenfolge empfohlen:</p>
 <ol>
@@ -219,68 +285,106 @@ Varianten, klar in dieser Reihenfolge empfohlen:</p>
 Ein Fehlalarm um drei Uhr nachts würde sonst wörtlich die Haustür aufmachen. Die
 Freigabe erfolgt immer durch den Menschen am anderen Ende der Alarmkette.</p>
 
-<h2>5 &nbsp; Kameras und Verkabelung</h2>
+<h2>6 &nbsp; Kamera oder Radar?</h2>
+<p>Die wichtigste Korrektur gegenüber dem ersten Entwurf dieses Papiers: <strong>Die
+Kamera ist nicht für jeden Raum die richtige Wahl.</strong> 60-GHz-Radar
+(mmWave) erkennt Stürze ohne jedes Bild – es misst nur, wo sich Masse im Raum
+bewegt und in welcher Höhe sie liegen bleibt.</p>
+<table>
+  <tr><th></th><th>Kamera (PoE)</th><th>Radar (60&nbsp;GHz)</th></tr>
+  <tr><td>Privatsphäre</td><td>erzeugt echtes Video</td><td>kein Bild, nur Punktwolke – im Bad der entscheidende Punkt</td></tr>
+  <tr><td>Dunkelheit</td><td>braucht Infrarot; Pose-Erkennung muss dafür getestet werden</td><td>völlig egal</td></tr>
+  <tr><td>Dampf, Dusche</td><td>Linse beschlägt</td><td>funktioniert laut Herstellern durch dichten Dampf</td></tr>
+  <tr><td>Decke, Bademantel, Verdeckung</td><td>verdeckt das Skelett</td><td>egal</td></tr>
+  <tr><td>Abdeckung je Gerät</td><td>ganzer Raum, je nach Winkel</td><td>nur ca. 3&nbsp;×&nbsp;3&nbsp;m, Deckenmontage 2,4&ndash;3,0&nbsp;m</td></tr>
+  <tr><td>Aussagekraft</td><td>zeigt, <em>was</em> passiert ist; Bildbeleg möglich</td><td>meldet nur „Sturz“ – keine Lagebeurteilung</td></tr>
+  <tr><td>Montage</td><td>Wand/Ecke, ein PoE-Kabel</td><td>Decke, Strom + WLAN</td></tr>
+  <tr><td>Preis je Gerät</td><td>ca. 70&nbsp;€</td><td>ca. 25&nbsp;€ (Bastelmodul) bis 200&nbsp;€ (kommerziell)</td></tr>
+</table>
 
-<h3>Warum keine Akku-Kameras</h3>
-<p>Akkubetriebene WLAN-Kameras (Reolink Argus, Eufy, Ring) halten nur deshalb
-monatelang, weil sie <strong>schlafen und erst bei Bewegung aufwachen</strong>. Für
-diesen Anwendungsfall ist das genau falsch herum: Unser Alarmkriterium ist
-Bewegungs<em>losigkeit</em>. Die Kamera würde einschlafen, exakt wenn es ernst
-wird. Im Dauerbetrieb ist so ein Akku nach wenigen Stunden leer.</p>
+<div class="note good">
+  <b>Empfehlung: Hybrid</b>
+  <p><strong>Radar in Bädern und Schlafräumen</strong> – dort will man keine Kamera,
+  dort ist der Dampf, und dort sind die Räume klein genug für das 3-×-3-Meter-Raster.
+  <strong>Kameras in Wohnbereich, Flur und Treppe</strong> – große oder verwinkelte
+  Flächen, wo Radar zu viele Geräte bräuchte und wo die Zusatzinformation „was ist
+  eigentlich passiert“ etwas wert ist.</p>
+</div>
 
-<h3>Warum PoE statt WLAN</h3>
+<h3>Grenzen des Radars, die man kennen muss</h3>
+<ul>
+  <li><strong>Kleiner Erfassungsbereich.</strong> Rund 2&nbsp;m Radius bei
+      2,4&ndash;3,0&nbsp;m Montagehöhe. Für die kleinen Räume unten ideal, für den
+      offenen Wohnbereich oben bräuchte man mehrere Geräte – dort ist die Kamera
+      günstiger.</li>
+  <li><strong>Deckenmontage nötig.</strong> Also Kabel in die Decke, nicht in die
+      Ecke. Bei einem Neubezug kein Problem, im Bestand der aufwendigere Teil.</li>
+  <li><strong>Sieht nicht durch Glas oder dünnes Holz.</strong> Duschkabinen aus Glas
+      also mit in den Erfassungsbereich einplanen, nicht dahinter.</li>
+  <li><strong>Fließendes Wasser steht in den Herstellerunterlagen als Störquelle.</strong>
+      Gleichzeitig wirbt Vayyar mit Funktion im Dampf. Diese Aussagen widersprechen
+      sich nicht zwingend – aber sie sind Werbung. <strong>Im eigenen Bad selbst
+      testen, mit laufender Dusche.</strong></li>
+  <li><strong>Treppe: eher Kamera.</strong> Radar arbeitet mit einem Höhenraster über
+      dem Boden; eine Treppe hat keinen definierten Boden. Der 90°-Knick macht es
+      nicht besser.</li>
+</ul>
+
+<h2>7 &nbsp; Sensorplan und Verkabelung</h2>
+<table>
+  <tr><th>Bereich</th><th>Sensor</th><th class="num">Anzahl</th><th>Begründung</th></tr>
+  <tr><td>Untergeschoss: 2 Bäder</td><td>Radar</td><td class="num">2</td><td>höchstes Sturzrisiko, keine Kamera erwünscht, Dampf</td></tr>
+  <tr><td>Untergeschoss: 3 Zimmer</td><td>Radar</td><td class="num">3</td><td>kleine Räume, passen ins 3-×-3-m-Raster; Rückzugsräume</td></tr>
+  <tr><td>Obergeschoss: Wohnbereich + offene Küche</td><td>Kamera</td><td class="num">2</td><td>große zusammenhängende Fläche</td></tr>
+  <tr><td>Flur</td><td>Kamera</td><td class="num">1</td><td></td></tr>
+  <tr><td>Treppe: gerader Lauf</td><td>Kamera</td><td class="num">1</td><td rowspan="2">der 90°-Knick verdeckt beide Läufe gegenseitig; Radar hat auf Treppen keinen definierten Bodenbezug</td></tr>
+  <tr><td>Treppe: Lauf nach dem Knick</td><td>Kamera</td><td class="num">1</td></tr>
+  <tr class="sum"><td>Summe</td><td>5 Radar + 5 Kameras</td><td class="num">10</td><td></td></tr>
+</table>
+
+<h3>Warum PoE für die Kameras</h3>
 <ul>
   <li>Ein einziges Netzwerkkabel liefert <strong>Strom und Bild</strong> – kein
       Netzteil und keine Steckdose in Kamerahöhe nötig.</li>
-  <li>Kein WLAN-Störabstand, keine Aussetzer, keine Kanalprobleme bei 10 parallelen
-      Streams.</li>
+  <li>Kein WLAN-Störabstand, keine Aussetzer bei parallelen Streams.</li>
   <li>PoE-Kameras liefern einen offenen <code>RTSP</code>-Stream. Das Bild bleibt im
       eigenen Netz, statt über einen Herstellerserver zu laufen.</li>
 </ul>
+<p>Und ausdrücklich <strong>keine Akku-Kameras</strong>: Die halten nur deshalb
+monatelang, weil sie schlafen und erst bei Bewegung aufwachen. Unser Alarmkriterium
+ist Bewegungs<em>losigkeit</em> – die Kamera würde einschlafen, exakt wenn es ernst
+wird. Im Dauerbetrieb ist so ein Akku nach wenigen Stunden leer.</p>
 <p>Alle Kabel laufen sternförmig zu einem zentralen Punkt zurück. Dort stehen
 PoE-Switch, Auswerte-Rechner und USV. Diese <strong>Technik-Ecke muss vor dem ersten
-Bohrloch festgelegt sein</strong> (Abstellraum, Schrank, Nähe Sicherungskasten).</p>
+Bohrloch festgelegt sein</strong> (Abstellraum, Schrank, Nähe Sicherungskasten).
+Für fünf Kameras genügt ein 8-Port-Switch; mit Blick auf spätere Erweiterung ist ein
+16-Port-Gerät die ruhigere Wahl.</p>
 
-<h3>Kameraplan</h3>
-<table>
-  <tr><th>Bereich</th><th class="num">Kameras</th><th>Anmerkung</th></tr>
-  <tr><td>Untergeschoss: 3 Zimmer</td><td class="num">3</td><td>kleine Räume, je eine reicht</td></tr>
-  <tr><td>Untergeschoss: 2 Bäder</td><td class="num">2</td><td>höchstes Sturzrisiko, siehe Abschnitt 6</td></tr>
-  <tr><td>Obergeschoss: Wohnbereich + offene Küche</td><td class="num">2</td><td>große, zusammenhängende Fläche</td></tr>
-  <tr><td>Flur</td><td class="num">1</td><td></td></tr>
-  <tr><td>Treppe: gerader Lauf</td><td class="num">1</td><td rowspan="2">der 90°-Knick verdeckt beide Läufe gegenseitig – eine Kamera sieht den Knickbereich nicht</td></tr>
-  <tr><td>Treppe: Lauf nach dem 90°-Knick</td><td class="num">1</td></tr>
-  <tr class="sum"><td>Summe</td><td class="num">10</td><td></td></tr>
-</table>
-<p>Für 10 Kameras plus Uplink einen <strong>16-Port-PoE-Switch</strong> nehmen, nicht
-den 8-Port. Der wäre sofort voll und müsste beim ersten Nachrüsten ersetzt werden.
-Leistungsbedarf ist unkritisch: rund 60&nbsp;W für alle zehn zusammen.</p>
-<p>Es geht nicht darum, jeden Winkel zu sehen, sondern <strong>jede Bodenfläche</strong>,
-auf der ein Mensch liegen bleiben kann. Das reduziert die Zahl der nötigen Kameras
-und vereinfacht die Ausrichtung: leicht erhöht, in den Raum hinein, Boden im Bild.</p>
-
-<h2>6 &nbsp; Datenschutz und Bäder</h2>
-<p>Die meisten schweren Stürze passieren im Bad: nasse Fliesen, harte Kanten,
-Wannenrand. Die Bäder auszulassen würde das System dort blind machen, wo es am
-meisten gebraucht wird. Deshalb bleiben sie drin – aber mit strengerer Regel:</p>
+<h2>8 &nbsp; Datenschutz</h2>
+<p>Die Hybrid-Lösung entschärft das Thema an der Wurzel statt es zu mildern:
+<strong>In den Bädern und Schlafräumen hängt schlicht keine Kamera.</strong> Dort
+entsteht gar kein Bild, das geschützt werden müsste – das Radar liefert nur eine
+Punktwolke.</p>
+<p>Für die verbleibenden fünf Kameras gilt:</p>
 <ul>
   <li>Das Videobild <strong>verlässt den lokalen Rechner nie</strong>. Keine Cloud,
       kein Hersteller-Server, keine Aufzeichnung auf Vorrat.</li>
-  <li>Aus dem Bild wird nur das <strong>Skelettmodell</strong> abgeleitet; ausgewertet
-      werden Koordinaten, nicht Pixel.</li>
-  <li>Im Alarmfall geht <strong>kein Bild</strong> nach draußen, sondern nur eine
-      Textmeldung: „Person liegt reglos – Bad 2, seit 6 Minuten“.</li>
-  <li>Gäste sind vorab zu informieren; für Gästezimmer und Gästebad sollte sich das
-      System abschalten lassen.</li>
+  <li>Ausgewertet wird das <strong>Skelettmodell</strong>, also Koordinaten, nicht
+      Pixel.</li>
+  <li>Im Alarmfall geht <strong>kein Bild</strong> nach draußen, sondern eine
+      Textmeldung: „Person liegt reglos – Flur, seit 6 Minuten“.</li>
+  <li>Für Gästezimmer und Besuch muss sich das System abschalten lassen; Gäste sind
+      vorab zu informieren.</li>
 </ul>
 <p>Da es sich um die eigene Wohnung und rein private Nutzung handelt, ist das
 datenschutzrechtlich unproblematisch, solange keine öffentlichen Flächen erfasst
 werden und die Daten das Haus nicht verlassen. Die Vereinbarung mit dem Wachdienst
 (wer darf wann rein, wer haftet) sollte trotzdem schriftlich sein.</p>
 
-<h2>7 &nbsp; Zweiter Layer: Apple Watch</h2>
-<p>Kameras decken nur ab, was im Bild ist. Eine am Körper getragene Uhr geht überall
-mit. Beide Systeme ergänzen sich, sie ersetzen einander nicht.</p>
+<h2>9 &nbsp; Zweiter Layer: Apple Watch</h2>
+<p>Kameras und Radar decken nur ab, was in der Wohnung ist. Eine am Körper getragene
+Uhr geht überall mit – auf die Terrasse, ins Auto, zum Strand. Beide Systeme ergänzen
+sich, sie ersetzen einander nicht.</p>
 <table>
   <tr><th>Kann die Uhr</th><th>Kann sie nicht</th></tr>
   <tr>
@@ -297,43 +401,45 @@ mit. Beide Systeme ergänzen sich, sie ersetzen einander nicht.</p>
     <td>Zuverlässig zwischen Schlaf und Bewusstlosigkeit unterscheiden</td>
   </tr>
 </table>
-<p>Praktisch relevant ist das kaum ein Nachteil: Das Ereignis, auf das reagiert wird,
-ist ohnehin nicht die Diagnose, sondern <strong>„liegt und reagiert nicht“</strong>.
-Die Uhr deckt Dusche, Terrasse und Außenbereich ab, die Kameras decken ab, wenn die
-Uhr nicht am Handgelenk ist.</p>
+<p>Praktisch ist das kaum ein Nachteil: Das Ereignis, auf das reagiert wird, ist
+ohnehin nicht die Diagnose, sondern <strong>„liegt und reagiert nicht“</strong>.
+Weil die Uhr über einen fremden, betreuten Dienst alarmiert, ist sie zugleich die
+Rückfallebene, falls der Eigenbau ausfällt – siehe den Warnkasten in Abschnitt&nbsp;2.</p>
 
-<h2>8 &nbsp; Kosten</h2>
+<h2>10 &nbsp; Kosten</h2>
 <p>Einmalige Hardwarekosten, grobe Hausnummern:</p>
 <table>
   <tr><th>Posten</th><th class="num">ca. EUR</th></tr>
-  <tr><td>10 × PoE-Kamera mit RTSP (Reolink o.&nbsp;ä., ~70&nbsp;€/Stück)</td><td class="num">700</td></tr>
-  <tr><td>16-Port-PoE-Switch</td><td class="num">180</td></tr>
-  <tr><td>Auswerte-Rechner (Mini-PC + GPU, alternativ Jetson Orin Nano)</td><td class="num">800</td></tr>
+  <tr><td>5 × PoE-Kamera mit RTSP (~70&nbsp;€/Stück)</td><td class="num">350</td></tr>
+  <tr><td>5 × Radarsensor (25&nbsp;€ Bastelmodul … 150&nbsp;€ kommerziell)</td><td class="num">125–750</td></tr>
+  <tr><td>PoE-Switch (8 Ports genügen, 16 für Reserve)</td><td class="num">90–180</td></tr>
+  <tr><td>Auswerte-Rechner (nur noch 5 Streams → kleiner möglich)</td><td class="num">400–800</td></tr>
   <tr><td>Cat-6-Kabel, Kabelkanäle, Stecker, Kleinmaterial</td><td class="num">200</td></tr>
   <tr><td>USV (Netz ist stabil, schützt gegen Spannungsspitzen)</td><td class="num">150</td></tr>
   <tr><td>Schlüsseltresor (60&nbsp;€) bzw. Nuki-Schloss (250&nbsp;€)</td><td class="num">60–250</td></tr>
-  <tr class="sum"><td>Summe</td><td class="num">2.100–2.300</td></tr>
+  <tr class="sum"><td>Summe</td><td class="num">1.400–2.700</td></tr>
 </table>
+<p>Die Hybrid-Variante ist an der Untergrenze <strong>günstiger als die reine
+Kameralösung</strong> und in den privaten Räumen zugleich die bessere Technik – ein
+seltener Fall, in dem beides zusammenfällt.</p>
 <p><strong>Laufende Kosten: praktisch null</strong>, weil alles lokal läuft. Optional
 ein LTE-Backup fürs Internet für rund 10&nbsp;€/Monat, damit die Alarmmeldung auch
 bei Ausfall der Leitung rausgeht.</p>
-<p>Größter Einzelposten ist der Rechner, und genau dort ist Spielraum: Bei 2&ndash;3
-Bildern pro Sekunde und 10 Streams genügt eine gebrauchte RTX&nbsp;3060 oder ein
-Jetson Orin Nano. Das drückt die Position von 800 auf 300&ndash;400&nbsp;€.</p>
-<p>Der Stromverbrauch ist gering: 10 Kameras rund 60&nbsp;W, der Rechner im
-Dauerbetrieb je nach Bestückung 30&ndash;80&nbsp;W. Über die geplante
-Solaranlage mit Batterie ist das komplett gedeckt.</p>
+<p>Der Stromverbrauch ist gering: fünf Kameras rund 30&nbsp;W, die Radarsensoren
+vernachlässigbar, der Rechner im Dauerbetrieb 30&ndash;80&nbsp;W. Über die geplante
+Solaranlage mit Batterie komplett gedeckt.</p>
 
-<h2>9 &nbsp; Vorgehen</h2>
+<h2>11 &nbsp; Vorgehen</h2>
 <p>Nicht alles auf einmal kaufen und am Ende feststellen, dass die Erkennung nicht
 trägt. Stattdessen in dieser Reihenfolge:</p>
 <ol>
-  <li><strong>Eine einzige Kamera kaufen</strong> (~70&nbsp;€) und im Wohnzimmer
-      aufstellen. Erkennungs-Pipeline bauen: Stream, Pose, Lage, Timer.</li>
-  <li><strong>Gegen die Realität testen.</strong> Hinlegen, hinsetzen, aufs Sofa,
-      im Dunkeln, mit Decke. Erst wenn „liegt / liegt nicht“ zuverlässig stimmt,
-      geht es weiter.</li>
-  <li><strong>Restliche neun Kameras</strong> beschaffen, Kabel ziehen, Technik-Ecke
+  <li><strong>Für unter 100&nbsp;€ beide Techniken ausprobieren:</strong> eine
+      PoE-Kamera (~70&nbsp;€) und ein Radarmodul (~25&nbsp;€). Das ist billiger als
+      jede Fehlentscheidung.</li>
+  <li><strong>Gegen die Realität testen.</strong> Hinlegen, hinsetzen, aufs Sofa, im
+      Dunkeln, mit Decke – und das Radar mit laufender Dusche. Erst wenn beides
+      zuverlässig meldet, geht es weiter.</li>
+  <li><strong>Restliche Sensorik</strong> beschaffen, Kabel ziehen, Technik-Ecke
       einrichten.</li>
   <li><strong>Alarmkette aufbauen</strong> – zunächst nur Stufe 1 und 2 (Ton, Push
       an dich). Wochenlang mitlaufen lassen und Fehlalarme zählen.</li>
@@ -342,21 +448,28 @@ trägt. Stattdessen in dieser Reihenfolge:</p>
       nimmt den vierten Alarm nicht mehr ernst.</li>
 </ol>
 
-<h2>10 &nbsp; Offene Punkte</h2>
+<h2>12 &nbsp; Offene Punkte</h2>
 <ul>
+  <li>Wie hoch sind die Decken? Das Radar braucht 2,4&ndash;3,0&nbsp;m Montagehöhe –
+      darunter oder darüber wird es unzuverlässig.</li>
+  <li>Verträgt sich das Radar mit der laufenden Dusche? Muss im eigenen Bad getestet
+      werden, Herstelleraussagen widersprechen sich hier scheinbar.</li>
+  <li>Stören sich benachbarte Radarsensoren gegenseitig? Bei zwei Bädern nebeneinander
+      relevant.</li>
   <li>Ist der Wachdienst bereit, diese Rolle zu übernehmen? Schriftliche
       Vereinbarung nötig, inkl. Umgang mit dem Schlüsseltresor-Code.</li>
-  <li>Nachtsicht: Bei Dunkelheit schalten die Kameras auf Infrarot. Funktioniert die
-      Pose-Erkennung dort ebenso gut? Muss im Prototyp mitgetestet werden.</li>
+  <li>Nachtsicht der Kameras: Funktioniert die Pose-Erkennung auch im
+      Infrarot-Modus? Muss im Prototyp mitgetestet werden.</li>
   <li>Was passiert bei Ausfall des Auswerte-Rechners? Es braucht einen
       <em>Watchdog</em>, der meldet, wenn das System selbst still ist – sonst
       schützt ein abgestürzter Dienst monatelang niemanden.</li>
   <li>Wie wird das System bei Abwesenheit oder Besuch scharf/unscharf geschaltet?</li>
-  <li>Umgang mit mehreren Personen im Bild – dann ist ja Hilfe da.</li>
+  <li>Umgang mit mehreren Personen im Raum – dann ist ja Hilfe da.</li>
 </ul>
 
-<p class="print-footer">Doc Alvers Mathe-Labor &nbsp;&middot;&nbsp; Notfall-Erkennung per Kamera &nbsp;&middot;&nbsp; Konzept 05.09.2026</p>
+<p class="print-footer">Doc Alvers Mathe-Labor &nbsp;&middot;&nbsp; Notfall-Erkennung in der Wohnung &nbsp;&middot;&nbsp; Konzept 05.09.2026</p>
 
 </div>
+
 </body>
 </html>
