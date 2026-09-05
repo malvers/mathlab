@@ -182,11 +182,17 @@
 
     // PowerPoint share links open as slideshow, not in the edit view:
     // Office for the web starts the deck (with animations) on &action=embedview.
+    // action=embedview is OneDrive's own embed switch and only bites on a SHARE
+    // link (/:p:/…), which carries its own token. A plain PATH link has none.
     function matHref(url) {
         const isPpt = url.indexOf('/:p:/') >= 0 || /\.pptx?(\?|#|$)/i.test(url);
-        if (!isPpt || /[?&]action=/.test(url)) return url;
+        if (!isPpt || !isShareLink(url) || /[?&]action=/.test(url)) return url;
         return url + (url.indexOf('?') >= 0 ? '&' : '?') + 'action=embedview';
     }
+
+    // A SharePoint share link carries its permission in the path: /:p:/, /:w:/,
+    // /:x:/, /:b:/, /:f:/ … A link without one is a plain path into the drive.
+    function isShareLink(url) { return /\/:[a-z]:\//i.test(url); }
 
     // A browser popup always keeps its address bar (anti-phishing, cannot be
     // switched off), so Office material is shown in an in-page viewer instead
@@ -211,8 +217,13 @@
     //   _layouts/… is the interactive web UI, never an embed;
     //   /:f:/ is a FOLDER share — it opens the same UI, and an upload needs
     //   the full window anyway.
+    //   a PATH link (/personal/…/Documents/…/x.pptx) carries no share token, so
+    //   SharePoint sends it through an interactive sign-in first — and
+    //   login.microsoftonline.com refuses to be framed (Doc, 05.09.2026:
+    //   "refused to connect"). It needs its own window.
     function matEmbeddable(url) {
         if (/\/_layouts\//i.test(url) || /\/:f:\//.test(url)) return false;
+        if (/sharepoint\.com/i.test(url) && !isShareLink(url)) return false;
         return /\/:[pwxb]:\//.test(url) || /sharepoint\.com|officeapps\.live\.com/i.test(url);
     }
 

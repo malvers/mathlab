@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Helpers for building a deck on top of the Informatik design template."""
-import os, sys, itertools
+import os, re, sys, itertools
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from design_lib import emu, NS, TEMPLATE_ID, TEMPLATE_VERSION
 from stamp import write_stamp
@@ -11,15 +11,31 @@ from PIL import Image
 
 
 def fill_ph(slide, idx, lines):
-    """lines: [(text, level), ...] - level 0 is a click, deeper levels ride along."""
+    """lines: [(text, level), ...] - level 0 is a click, deeper levels ride along.
+    **word** inside text renders bold."""
     ph = slide.placeholders[idx]
     tf = ph.text_frame
     tf.word_wrap = True
     for i, (text, level) in enumerate(lines):
         p = tf.paragraphs[0] if i == 0 else tf.add_paragraph()
-        p.text = text
+        set_runs(p, text)
         p.level = level
     return ph
+
+
+def set_runs(p, text):
+    """Replace the runs of paragraph p by `text`; **word** becomes a bold run."""
+    for r in list(p.runs):
+        p._p.remove(r._r)
+    for part in re.split(r"(\*\*[^*]+\*\*)", text):
+        if not part:
+            continue
+        r = p.add_run()
+        if part.startswith("**") and part.endswith("**"):
+            r.text = part[2:-2]
+            r.font.bold = True
+        else:
+            r.text = part
 
 
 def drop_ph(slide, idx):
