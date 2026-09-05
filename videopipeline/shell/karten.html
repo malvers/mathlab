@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Shell — Einspieler</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&family=Outfit:wght@300;400;500&display=swap">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<style>
+  /* Shell - the one scene the lab cannot show big enough: the two equations.
+     One page, paced to ?dur=<seconds>. Colours and faces are the lab's
+     (shell.html): Orbitron + Outfit on the edge panel's blue, activator red,
+     substrate green, pigment brown. Never black. */
+  html, body { margin: 0; padding: 0; width: 1280px; height: 720px; overflow: hidden;
+    background: #08142a;
+    background-image:
+      radial-gradient(900px 520px at 22% -10%, rgba(20,44,96,0.9) 0%, rgba(20,44,96,0) 62%),
+      radial-gradient(760px 460px at 92% 8%, rgba(70,36,18,0.7) 0%, rgba(70,36,18,0) 60%);
+    color: #e6eefa; font-family: 'Outfit', sans-serif; }
+  .eyebrow { position: absolute; left: 64px; top: 46px; font-family: 'Orbitron', sans-serif; font-size: 15px;
+    font-weight: 500; letter-spacing: 3px; color: #8ba1c0; text-transform: uppercase; }
+  .head { position: absolute; left: 64px; top: 78px; font-family: 'Orbitron', sans-serif; font-size: 38px;
+    font-weight: 700; color: #e6eefa; opacity: 0; transition: opacity 0.7s; }
+  .eq { position: absolute; left: 64px; right: 64px; display: flex; align-items: flex-start; gap: 0;
+    opacity: 0; transition: opacity 0.8s; }
+  #eqa { top: 176px; } #eqs { top: 396px; }
+  .term { display: flex; flex-direction: column; align-items: center; margin-right: 34px; opacity: 0.3;
+    transition: opacity 0.6s; }
+  .term.lhs { margin-right: 26px; }
+  .term .k { font-size: 44px; color: #e6eefa; white-space: nowrap; }
+  .term.on { opacity: 1; }
+  .term .cap { margin-top: 14px; font-family: 'Outfit', sans-serif; font-weight: 400; font-size: 21px;
+    color: #ffd36a; opacity: 0; transition: opacity 0.6s; white-space: nowrap; text-align: center; }
+  .term.on .cap { opacity: 1; }
+  .a .k { color: #ff6b5a; }         /* activator, the lab's red, lifted for the dark ground */
+  .s .k { color: #b9e45a; }         /* substrate, the lab's green, lifted for the dark ground */
+  .lhs .k { color: #e6eefa; }
+  .label { position: absolute; left: 64px; font-family: 'Orbitron', sans-serif; font-size: 13px;
+    letter-spacing: 2px; text-transform: uppercase; color: #8ba1c0; }
+  #la { top: 150px; } #ls { top: 370px; }
+  .foot { position: absolute; left: 64px; bottom: 54px; font-size: 24px; font-weight: 300; color: #b3c5de;
+    opacity: 0; transition: opacity 0.8s; }
+  .foot b { font-weight: 500; color: #e6eefa; }
+  .punch { position: absolute; right: 64px; bottom: 54px; font-family: 'Orbitron', sans-serif; font-size: 24px;
+    font-weight: 700; letter-spacing: 1px; color: #b9e45a; opacity: 0; transition: opacity 0.8s; }
+</style>
+</head>
+<body>
+<div class="eyebrow">Zwei Gleichungen</div>
+<div class="head" id="head">Mehr steht da nicht</div>
+<div class="label" id="la">Aktivator a — die Welle</div>
+<div class="eq" id="eqa"></div>
+<div class="label" id="ls">Substrat s — der Vorrat</div>
+<div class="eq" id="eqs"></div>
+<div class="foot" id="foot"><b>Hans Meinhardt</b> · Tübingen · 1987</div>
+<div class="punch" id="punch">MEHR STEHT DA NICHT.</div>
+<script>
+/* Every term is its own KaTeX render, so it can light up when Solita names it.
+   The order follows her sentence: self-amplification, decay, neighbours - then
+   supply, consumption, decay. Fractions of ?dur, like the Galton cards. */
+const P = new URLSearchParams(location.search);
+const DUR = parseFloat(P.get('dur') || '24');
+
+const A = [
+  { cls: 'lhs', tex: '\\frac{\\partial a}{\\partial t} \\;=' , cap: '' },
+  { cls: 'a', tex: '\\frac{\\rho\\, a^{2}\\, s}{1 + \\kappa a^{2}}', cap: 'verstärkt sich selbst — mit Vorrat', at: 0.16 },
+  { cls: 'a', tex: '-\\;\\mu_a\\, a', cap: 'zerfällt', at: 0.27 },
+  { cls: 'a', tex: '+\\;D_a\\,\\frac{\\partial^{2} a}{\\partial x^{2}}', cap: 'wandert zu den Nachbarn', at: 0.35 },
+  { cls: 'a', tex: '+\\;\\rho_0', cap: 'ein Hauch, immer', at: 0.35 },
+];
+const S = [
+  { cls: 'lhs', tex: '\\frac{\\partial s}{\\partial t} \\;=', cap: '' },
+  { cls: 's', tex: '\\sigma', cap: 'kommt stetig nach', at: 0.52 },
+  { cls: 's', tex: '-\\;\\frac{\\rho\\, a^{2}\\, s}{1 + \\kappa a^{2}}', cap: 'wird von der Welle gefressen', at: 0.61 },
+  { cls: 's', tex: '-\\;\\mu_s\\, s', cap: 'zerfällt ebenfalls', at: 0.69 },
+];
+function build(host, terms) {
+  const el = document.getElementById(host);
+  terms.forEach((t) => {
+    const d = document.createElement('div');
+    d.className = 'term ' + t.cls + (t.cls === 'lhs' ? ' on' : '');
+    d.dataset.at = t.at ?? -1;
+    const k = document.createElement('div'); k.className = 'k';
+    katex.render(t.tex, k, { throwOnError: false, displayMode: false });
+    const c = document.createElement('div'); c.className = 'cap'; c.textContent = t.cap;
+    d.appendChild(k); d.appendChild(c); el.appendChild(d);
+  });
+}
+build('eqa', A); build('eqs', S);
+
+let t0 = null;
+function frame(now) {
+  if (t0 === null) t0 = now;
+  const u = Math.min(1, (now - t0) / (DUR * 1000));
+  if (u >= 0.03) document.getElementById('head').style.opacity = 1;
+  if (u >= 0.08) document.getElementById('eqa').style.opacity = 1;
+  if (u >= 0.46) document.getElementById('eqs').style.opacity = 1;
+  document.querySelectorAll('.term').forEach((d) => { const at = +d.dataset.at; if (at >= 0 && u >= at) d.classList.add('on'); });
+  if (u >= 0.80) document.getElementById('punch').style.opacity = 1;
+  if (u >= 0.86) document.getElementById('foot').style.opacity = 1;
+  if (u < 1) requestAnimationFrame(frame);
+}
+document.fonts.ready.then(() => { window.__vpReady = true; requestAnimationFrame(frame); });
+</script>
+</body>
+</html>

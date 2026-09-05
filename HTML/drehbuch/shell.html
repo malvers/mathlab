@@ -1,0 +1,737 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+
+<style>
+/* minimal reset - the artifact host used to provide this */
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; min-height: 100vh; }
+img, canvas, svg { display: block; max-width: 100%; }
+button, input { font: inherit; }
+:focus-visible { outline: 2px solid #00d2ff; outline-offset: 2px; }
+</style>
+<title>Die Schnecke schreibt Protokoll</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&family=Outfit:wght@200;300;400;600&display=swap">
+
+<style>
+/* Palette and faces are the lab's own (shell.html): Orbitron + Outfit on the blue of
+   the edge panel (rgb 8,20,42 - "lab ground, never black"), the activator red and the
+   substrate green of the living edge, cream and pigment brown of the shell itself.
+   Single-theme on purpose - this is the lab's world. */
+:root {
+    --ground:      #08142a;
+    --ground-deep: #050e1c;
+    --surface:     #0c1c3a;
+    --surface-2:   #0e244e;
+    --line:        #1c3565;
+    --line-soft:   #16294d;
+
+    --ink:         #e6eefa;
+    --ink-dim:     #b3c5de;
+    --ink-faint:   #8ba1c0;
+
+    --cyan:        #00d2ff;
+    --lambda:      #f5c242;
+    --phi:         #799e31;
+    --violet:      #c07fe8;
+    --red:         #b02418;
+
+    --act:         #ff6b5a;   /* activator, lifted from rgb(176,36,24) for the dark ground */
+    --sub:         #b9e45a;   /* substrate, lifted from rgb(121,158,49) */
+    --shell:       #f2e8d6;   /* the shell's cream */
+    --pigment:     #7c3e1a;   /* the shell's brown */
+}
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    background: var(--ground);
+    background-image:
+        radial-gradient(1100px 620px at 12% -8%, #12305e 0%, transparent 62%),
+        radial-gradient(900px 520px at 92% 4%, #3a2010 0%, transparent 58%);
+    background-attachment: fixed;
+    color: var(--ink);
+    font-family: 'Outfit', system-ui, sans-serif;
+    font-weight: 300; font-size: 1.1rem; line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+}
+
+.wrap { max-width: 1120px; margin: 0 auto; padding: clamp(1.6rem, 4vw, 4rem) clamp(1.1rem, 4vw, 2.6rem) 6rem; }
+
+.eyebrow { font-family: 'Orbitron', sans-serif; font-size: 0.8rem; font-weight: 500; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ink-faint); }
+h1, h2, h3 { font-family: 'Orbitron', sans-serif; text-wrap: balance; margin: 0; }
+h1 { font-size: clamp(2rem, 1.2rem + 3.4vw, 3.4rem); font-weight: 700; line-height: 1.08; letter-spacing: -0.01em; margin: 0.5rem 0 0; }
+h2 { font-size: clamp(1.05rem, 0.9rem + 0.6vw, 1.32rem); font-weight: 700; letter-spacing: 0.03em; color: var(--ink); }
+p { margin: 0; }
+em { font-style: italic; color: #eaf2fd; }
+strong { font-weight: 600; color: #f2f7ff; }
+
+.m { font-family: 'Outfit', system-ui, sans-serif; font-style: italic; font-weight: 400; color: var(--cyan); white-space: nowrap; }
+.m.a { color: var(--act); }
+.m.s { color: var(--sub); }
+kbd { font-family: 'Orbitron', sans-serif; font-size: 0.76em; font-weight: 500; color: var(--lambda); background: #241d05; border: 1px solid #4a3c10; border-radius: 2px; padding: 0.08em 0.4em; white-space: nowrap; }
+
+header { margin-bottom: clamp(1.8rem, 4vw, 3rem); }
+.status { display: inline-flex; align-items: center; gap: 0.55rem; font-family: 'Orbitron', sans-serif; font-size: 0.74rem; font-weight: 500; letter-spacing: 0.16em; text-transform: uppercase; color: var(--lambda); border: 1px solid #4a3a15; background: #1b1607; border-radius: 2px; padding: 0.34rem 0.7rem; margin-top: 1.1rem; }
+.status::before { content: ""; width: 5px; height: 5px; background: var(--lambda); border-radius: 50%; }
+.lede { margin-top: 1.1rem; max-width: 60ch; color: var(--ink-dim); font-size: 1.18rem; }
+
+.meta { display: flex; flex-wrap: wrap; gap: 0 2rem; margin-top: 1.6rem; padding-top: 1.2rem; border-top: 1px solid var(--line-soft); }
+.meta div { display: flex; flex-direction: column; gap: 0.15rem; padding: 0.4rem 0; }
+.meta dt { font-family: 'Orbitron', sans-serif; font-size: 0.74rem; font-weight: 500; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-faint); }
+.meta dd { margin: 0; font-size: 1.02rem; color: var(--ink); }
+.meta a { color: var(--cyan); text-decoration: none; border-bottom: 1px solid #05506b; }
+.meta a:hover, .meta a:focus-visible { border-bottom-color: var(--cyan); }
+
+.thesis { display: grid; grid-template-columns: minmax(0, 360px) minmax(0, 1fr); gap: clamp(1.2rem, 3vw, 2.6rem); align-items: center; margin: clamp(1.6rem, 4vw, 2.6rem) 0 clamp(2.4rem, 6vw, 4rem); padding: clamp(1.2rem, 3vw, 2rem); background: linear-gradient(160deg, var(--surface) 0%, var(--ground-deep) 100%); border: 1px solid var(--line); border-radius: 3px; }
+@media (max-width: 700px) { .thesis { grid-template-columns: 1fr; } }
+#stage { width: 100%; aspect-ratio: 1 / 0.86; display: block; border-radius: 2px; background: var(--ground-deep); }
+.thesis blockquote { margin: 0; font-size: clamp(1.15rem, 0.95rem + 1vw, 1.6rem); line-height: 1.42; font-weight: 200; color: #eef4fd; text-wrap: balance; }
+.thesis blockquote strong { font-weight: 600; }
+.thesis .after { margin-top: 1.1rem; color: var(--ink-dim); font-size: 1.06rem; max-width: 54ch; }
+.thesis .hint { margin-top: 0.8rem; font-size: 0.9rem; color: var(--ink-faint); }
+
+section { margin-top: clamp(2.6rem, 6vw, 4.4rem); }
+.head { display: flex; align-items: baseline; gap: 0.9rem; padding-bottom: 0.7rem; border-bottom: 1px solid var(--line); margin-bottom: 1.5rem; }
+.head .n { font-family: 'Orbitron', sans-serif; font-size: 0.84rem; font-weight: 700; letter-spacing: 0.12em; color: var(--cyan); }
+.head .note { margin-left: auto; font-size: 0.9rem; color: var(--ink-faint); }
+.prose { max-width: 66ch; color: var(--ink-dim); display: grid; gap: 0.85rem; }
+.prose strong { color: #eaf2fd; }
+
+.arc { display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: stretch; margin-bottom: 1.5rem; }
+.arc span { flex: 1 1 auto; min-width: 92px; font-family: 'Orbitron', sans-serif; font-size: 0.76rem; font-weight: 500; letter-spacing: 0.05em; text-align: center; padding: 0.85rem 0.5rem; background: var(--surface); border: 1px solid var(--line-soft); border-top: 2px solid var(--stop, var(--line)); color: var(--ink-dim); text-wrap: balance; line-height: 1.4; }
+.arc span.key { color: #eef4fd; background: var(--surface-2); }
+
+.timeline { display: flex; width: 100%; height: 54px; border: 1px solid var(--line); border-radius: 2px; overflow: hidden; margin-bottom: 0.7rem; }
+.timeline i { position: relative; display: block; border-right: 1px solid var(--ground-deep); background: var(--lambda); font-style: normal; }
+.timeline i:last-child { border-right: 0; }
+.timeline i.core { background: var(--phi); }
+.timeline i.cut { background: var(--red); }
+.timeline i::after { content: attr(data-n); position: absolute; inset: 0; display: grid; place-items: center; font-family: 'Orbitron', sans-serif; font-size: 0.74rem; font-weight: 700; color: #1a1305; }
+.timeline i.core::after { color: #0d1a06; }
+.timeline i.cut::after { color: #ffdcd7; }
+
+.legend { display: flex; flex-wrap: wrap; gap: 0.5rem 1.4rem; font-size: 0.87rem; color: var(--ink-faint); }
+.legend b { font-weight: 400; color: var(--ink-dim); }
+.legend span { display: inline-flex; align-items: center; gap: 0.42rem; }
+.legend s { width: 11px; height: 11px; border-radius: 2px; text-decoration: none; display: inline-block; }
+
+.scenes { display: grid; gap: 0.7rem; }
+.scene { display: grid; grid-template-columns: 3.6rem minmax(0, 1fr); gap: 0 1.1rem; padding: 1.4rem 1.55rem 1.5rem; background: var(--surface); border: 1px solid var(--line-soft); border-left: 2px solid var(--lambda); border-radius: 2px; }
+.scene.core { border-left-color: var(--phi); background: linear-gradient(90deg, #16240f 0%, var(--surface) 34%); }
+.scene.cut { border-left-color: var(--red); }
+.scene .idx { font-family: 'Orbitron', sans-serif; font-size: 1.5rem; font-weight: 700; line-height: 1; color: var(--lambda); font-variant-numeric: tabular-nums; padding-top: 0.1rem; }
+.scene.core .idx { color: var(--phi); }
+.scene.cut .idx { color: #c9503f; }
+.scene .top { display: flex; align-items: baseline; gap: 0.8rem; flex-wrap: wrap; margin-bottom: 0.7rem; }
+.scene h3 { font-size: 1.16rem; font-weight: 700; letter-spacing: 0.01em; color: #f0f6ff; }
+.tag { font-family: 'Orbitron', sans-serif; font-size: 0.68rem; font-weight: 500; letter-spacing: 0.13em; text-transform: uppercase; padding: 0.2rem 0.45rem; border-radius: 2px; border: 1px solid; }
+.tag.core { color: #0d1a06; border-color: var(--phi); background: var(--phi); }
+.tag.cut { color: #ffdcd7; border-color: var(--red); background: var(--red); }
+.tag.card { color: #1a1305; border-color: var(--lambda); background: var(--lambda); }
+.secs { margin-left: auto; font-family: 'Orbitron', sans-serif; font-size: 0.82rem; font-weight: 500; color: var(--ink-faint); font-variant-numeric: tabular-nums; }
+.body { display: grid; grid-template-columns: minmax(0, 1.08fr) minmax(0, 1fr); gap: 0.6rem 1.6rem; }
+@media (max-width: 720px) { .body { grid-template-columns: 1fr; gap: 1rem; } }
+.body > div { display: grid; gap: 0.34rem; align-content: start; }
+.body h4 { margin: 0; font-family: 'Orbitron', sans-serif; font-size: 0.84rem; font-weight: 500; letter-spacing: 0.15em; text-transform: uppercase; color: var(--ink-faint); }
+.body p { font-size: 1.06rem; line-height: 1.66; color: var(--ink-dim); }
+.body .aha { border-left: 1px solid var(--line); padding-left: 1.6rem; }
+@media (max-width: 720px) { .body .aha { border-left: 0; padding-left: 0; border-top: 1px solid var(--line); padding-top: 0.9rem; } }
+.body .aha p { color: var(--ink); }
+
+/* what Solita actually says - generated from narration.mjs, never hand-edited */
+.say { margin-top: 1.1rem; padding: 0.95rem 1.2rem; background: #0a1830; border: 1px solid var(--line-soft); border-left: 2px solid var(--cyan); border-radius: 2px; }
+.say h4 { margin: 0 0 0.45rem; font-family: 'Orbitron', sans-serif; font-size: 0.64rem; font-weight: 500; letter-spacing: 0.15em; text-transform: uppercase; color: var(--cyan); }
+.say p { margin: 0; font-size: 1.06rem; line-height: 1.62; color: var(--ink); }
+.say .pause { display: inline-block; font-family: 'Orbitron', sans-serif; font-size: 0.66rem; font-weight: 500; color: var(--lambda); background: #241c07; border: 1px solid #4a3a15; border-radius: 2px; padding: 0.05rem 0.4rem; margin: 0 0.22rem; vertical-align: 0.08em; white-space: nowrap; }
+.say .beat { display: inline-block; width: 0.5em; height: 0.5em; margin: 0 0.1em; background: radial-gradient(circle, var(--cyan) 1.6px, transparent 1.8px); vertical-align: 0.05em; opacity: 0.55; }
+.say .spell { border-bottom: 1px dotted var(--ink-faint); letter-spacing: 0.12em; }
+
+.rules { display: grid; gap: 0.6rem; counter-reset: r; max-width: 74ch; padding: 0; margin: 0; }
+.rules li { list-style: none; position: relative; padding-left: 2.8rem; font-size: 1.05rem; color: var(--ink-dim); }
+.rules li::before { counter-increment: r; content: counter(r, decimal-leading-zero); position: absolute; left: 0; top: 0.28rem; font-family: 'Orbitron', sans-serif; font-size: 0.84rem; font-weight: 500; color: var(--violet); }
+.notes { display: grid; gap: 0.75rem; max-width: 74ch; padding: 0; margin: 0; }
+.notes li { list-style: none; font-size: 1.05rem; color: var(--ink-dim); padding-left: 1.1rem; border-left: 1px solid var(--line); }
+.notes strong { color: #eaf2fd; }
+code { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 0.85em; color: var(--cyan); background: #0a1a33; border: 1px solid var(--line-soft); border-radius: 2px; padding: 0.06em 0.34em; }
+
+.measure { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(1.2rem, 3vw, 2.2rem); align-items: start; }
+.measure > div { min-width: 0; }
+@media (max-width: 900px) { .measure { grid-template-columns: 1fr; } }
+.tblwrap { overflow-x: auto; scrollbar-width: thin; scrollbar-color: #26386b transparent; }
+.tblwrap::-webkit-scrollbar { height: 7px; }
+.tblwrap::-webkit-scrollbar-thumb { background: #26386b; border-radius: 4px; }
+.tbl { width: 100%; min-width: 420px; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+.tbl caption { text-align: left; font-family: 'Orbitron', sans-serif; font-size: 0.78rem; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-faint); padding-bottom: 0.6rem; }
+.tbl th, .tbl td { text-align: right; padding: 0.42rem 0.6rem; border-bottom: 1px solid var(--line-soft); font-size: 0.99rem; color: var(--ink-dim); }
+.tbl th { font-family: 'Orbitron', sans-serif; font-size: 0.7rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-faint); border-bottom-color: var(--line); }
+.tbl th:first-child, .tbl td:first-child { text-align: left; }
+.tbl td.n { font-family: 'Orbitron', sans-serif; font-weight: 500; color: var(--ink); }
+.tbl tr.hot td { color: var(--lambda); }
+.tbl tr.bad td { color: #ff8a70; }
+
+.budget { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1px; background: var(--line-soft); border: 1px solid var(--line-soft); border-radius: 2px; margin-bottom: 1.5rem; }
+.budget div { background: var(--surface); padding: 1rem 1.1rem; display: grid; gap: 0.28rem; }
+.budget dt { font-family: 'Orbitron', sans-serif; font-size: 0.74rem; font-weight: 500; letter-spacing: 0.15em; text-transform: uppercase; color: var(--ink-faint); }
+.budget dd { margin: 0; font-family: 'Orbitron', sans-serif; font-size: 1.3rem; font-weight: 700; color: var(--cyan); font-variant-numeric: tabular-nums; }
+.budget dd small { display: block; font-family: 'Outfit', sans-serif; font-size: 0.78rem; font-weight: 300; color: var(--ink-faint); letter-spacing: 0; margin-top: 0.2rem; }
+.solved { color: var(--phi); }
+
+footer { margin-top: clamp(2.6rem, 6vw, 4.4rem); padding-top: 1.6rem; border-top: 1px solid var(--line); display: flex; flex-wrap: wrap; gap: 1rem 2rem; align-items: baseline; }
+footer p { font-size: 1.05rem; color: var(--ink-dim); max-width: 58ch; }
+footer .sig { margin-left: auto; }
+
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+</style>
+    <link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+</head>
+<body>
+<div class="wrap">
+
+<header>
+    <p class="eyebrow">Doc Alvers Mathe-Labor · Videopipeline</p>
+    <h1>Die Schnecke schreibt Protokoll</h1>
+    <p class="lede">Der Plot für das Shell-Demovideo: was passiert, in welcher
+        Reihenfolge — und warum genau dort der Groschen fällt.</p>
+    <p class="status">Gedreht am 04.09.2026 · 4:06 in 1440p · auf YouTube</p>
+
+    <dl class="meta">
+        <div><dt>Lab</dt><dd><a href="https://docalvers.de/shell.html">shell.html</a></dd></div>
+        <div><dt>Sprecherin</dt><dd>Solita · de-DE-Studio</dd></div>
+        <div><dt>Aufnahme</dt><dd>1440p · Playwright</dd></div>
+        <div><dt>Szenen</dt><dd>11 · davon 1 auf einer Karte</dd></div>
+        <div><dt>Laufzeit</dt><dd>4:06 mit Abspann</dd></div>
+        <div><dt>Video</dt><dd><a href="https://youtu.be/3g11GkJQA7s">youtu.be/3g11GkJQA7s</a></dd></div>
+    </dl>
+</header>
+
+<div class="thesis">
+    <canvas id="stage" width="720" height="620" role="img"
+            aria-label="Eine gerechnete Schale: oben die lebende Mündungskante mit
+                        Aktivator (rot) und Substrat (grün), darunter das Protokoll
+                        aus Zeltreihen — dasselbe Modell wie im Lab, Zeile für Zeile"></canvas>
+    <div>
+        <blockquote>Das Muster ist kein Bild. Es ist ein <strong>Protokoll</strong>:
+            eine einzige Reihe Zellen, die Zeit läuft nach unten — und zwei Stoffe
+            streiten um denselben Vorrat.</blockquote>
+        <p class="after">Der ganze Film ist die Antwort auf eine einzige Frage:
+            <em>Wer malt das Muster, wenn niemand malt?</em> Nicht: wie das Lab
+            aussieht. Sondern: warum aus zwei Regeln Keile, Zelte und Streifen
+            werden — und aus <strong>einer</strong> Zahl der Unterschied.</p>
+        <p class="hint">Der Canvas rechnet das Lab-Modell selbst (Kapitel 6, Vorrat 0,8).
+            Klick = neue Schale.</p>
+    </div>
+</div>
+
+<section>
+    <div class="head"><span class="n">A</span><h2>Der dramaturgische Bogen</h2></div>
+    <div class="arc" id="arc"></div>
+    <div class="prose">
+        <p>Erst wird zugeschaut: fertige Zelte, die niemand gemalt hat (1). Dann wird
+           das Bild als <em>Protokoll</em> gelesen — Ort quer, Zeit nach unten, zwei
+           Klicks in die Zellreihe beweisen es (2). Ein Zündpunkt wird zur Welle und
+           die Welle zum V (3), zwei Wellen löschen sich beim Treffen aus — die
+           Zeltspitze (4) — und das Substrat erklärt, warum: hinter jeder Welle liegt
+           leergefressenes Land (5).</p>
+        <p>Erst jetzt, nach drei Bildern, kommen die zwei Gleichungen (6). Dann wird
+           gespielt: von selbst zündende Zellen bei knappem Vorrat ergeben verstreute
+           Keile (7), ein Drittel mehr Vorrat ergibt Zeltreihen — und das Protokoll
+           zeigt beide Regime untereinander (8). Zum Schluss wird es <strong>absichtlich
+           kaputt gemacht</strong>: Hunger (0,3) und Überfluss (1,1) an einem Regler (9),
+           dann jenseits des Reglers die Querstreifen, wenn die ganze Kante auf einmal
+           zündet (10). Szene 11 löst ein und sagt ehrlich, was das Modell nicht kann.</p>
+    </div>
+</section>
+
+<section>
+    <div class="head"><span class="n">B</span><h2>Die 11 Szenen</h2>
+        <span class="note" id="tl-note">Breite = geplante Sprechzeit</span></div>
+    <div class="timeline" id="timeline"></div>
+    <div class="legend">
+        <span><s style="background:#799e31"></s><b>Kernszene — wird nicht gekürzt</b></span>
+        <span><s style="background:#b02418"></s><b>Notbremse, falls der Schnitt zäh wirkt</b></span>
+        <span><s style="background:#f5c242"></s><b>Regelszene</b></span>
+    </div>
+    <div class="scenes" id="scenes" style="margin-top:1.5rem"></div>
+</section>
+
+<section>
+    <div class="head"><span class="n">C</span><h2>Didaktische Leitplanken</h2>
+        <span class="note">bindend für den Sprechertext</span></div>
+    <ol class="rules">
+        <li><strong>Nie eine Formel ohne vorher gezeigtes Bild.</strong> Die zwei
+            Gleichungen kommen in Szene 6 — nachdem V, Zelt und Schatten <em>gesehen</em>
+            wurden. Auf der Karte leuchtet jeder Term erst, wenn Solita ihn benennt.</li>
+        <li><strong>Ein neuer Begriff pro Szene.</strong> <em>Protokoll</em> (2),
+            <em>Aktivator</em> (3), <em>Substrat</em> (5). „Vorrat" ist das Wort für
+            <span class="m s">s</span>, „Welle" das Wort für die laufende Erregung.</li>
+        <li>Verboten, weil dieser Film sie nicht braucht:
+            <em>Reaktions-Diffusions-System, Turing-Instabilität, Autokatalyse, Morphogen,
+            Bifurkation</em>. Es gibt Vorrat, Welle, Zelt und Protokoll.</li>
+        <li><strong>Die Zellen wollen nichts.</strong> Sie zünden, fressen und erholen
+            sich. Kein Plan, keine Absicht — das ist die Pointe von Szene 1 und darf
+            später nicht durch die Hintertür zurückkommen.</li>
+        <li><strong>Kapitel 5 heißt im Film nicht „Zickzack-Linien".</strong> Was das
+            Bild bei Vorrat 0,6 zeigt, sind kurze, weit verstreute Keile (gemessen,
+            Abschnitt D). Solita sagt, was zu sehen ist: <em>kleine Keile, weit
+            verstreut</em>. Das Lab-Kapitel heißt trotzdem so — im Seitenmenü steht
+            es, das ist in Ordnung.</li>
+        <li><strong>„Sonst nichts geändert" muss wörtlich stimmen.</strong> Die
+            Regime von Kapitel 5 und 6 unterscheiden sich <em>nur</em> in
+            <span class="m s">σ</span>; Erholzeit 1/<span class="m s">μ<sub>s</sub></span>,
+            Zündrate und <span class="m a">D<sub>a</sub></span> bleiben. Der Regler
+            setzt <span class="m s">σ = s<sub>max</sub> · μ<sub>s</sub></span> — also
+            genau eine Zahl.</li>
+        <li><strong>Über den Regler wird nicht geschwindelt.</strong> Der Vorrat-Regler
+            endet im Lab bei 1,1. Die Querstreifen kommen bei 1,3 — Solita sagt, dass
+            das jenseits des Reglers liegt, und die Aufnahme zeigt den Wert 1,30 im
+            Seitenmenü, weil sie den Anschlag hochsetzt.</li>
+        <li><strong>Was das Modell nicht kann, wird gesagt.</strong> Die großen
+            Flächen mancher Schalen liefert kein Parametersatz (ein Sweep über
+            <span class="m">D<sub>s</sub></span>, ρ, κ, s<sub>max</sub> und die
+            Zündrate fand keinen). Szene 11 nennt das und deutet auf einen dritten
+            Stoff — <em>vermutlich</em>, nicht sicher.</li>
+        <li><strong>Nichts behaupten, was das Bild nicht hergibt.</strong> Jede
+            Zeitangabe stammt aus Abschnitt D, jeder Regler-Effekt wurde am laufenden
+            Lab ausgemessen.</li>
+    </ol>
+</section>
+
+<section>
+    <div class="head"><span class="n">D</span><h2>Gemessen, nicht geschätzt</h2>
+        <span class="note solved">Grundlage aller Zahlen im Film</span></div>
+    <div class="measure">
+        <div><div class="tblwrap"><table class="tbl" id="tbl-ch"></table></div></div>
+        <div><div class="tblwrap"><table class="tbl" id="tbl-v"></table></div></div>
+    </div>
+    <div class="prose" style="margin-top:1.6rem">
+        <p><strong>Das Modell</strong> ist Meinhardts Aktivator-Substrat-System in
+           einer Zellreihe (<span class="m">N</span> = 320 Zellen, eine Wachstumslinie
+           je 0,5 Modellzeit, expliziter Euler mit Δt = 0,02):
+           <span class="m a">∂a/∂t = D<sub>a</sub> a″ + ρa²s/(1+κa²) − μ<sub>a</sub>a + ρ<sub>0</sub></span>
+           und <span class="m s">∂s/∂t = σ − ρa²s/(1+κa²) − μ<sub>s</sub>s</span>.
+           Das Substrat diffundiert nicht (<span class="m">D<sub>s</sub></span> = 0).
+           Ruhewert <span class="m a">a</span> = ρ<sub>0</sub>/μ<sub>a</sub> = 0,01,
+           Pigment ab dem Fünffachen davon bis 0,35 — fest, nicht mitlaufend.</p>
+        <p><strong>Die drei Regime</strong> (aus dem Lab): <em>puls</em> für Kapitel 1–4
+           (κ 0,05, σ 0,004, μ<sub>s</sub> 0,004, keine Zündungen — eine Kollision
+           löscht sauber aus und bleibt tot), <em>zickzack</em> und <em>zelte</em> für
+           Kapitel 5/6 (κ 0,20, μ<sub>s</sub> 0,015, Zündrate 0,002). Die beiden
+           letzten unterscheiden sich in <strong>σ allein</strong>: 0,009 gegen 0,012,
+           also <span class="m s">s<sub>max</sub></span> 0,60 gegen 0,80 — ein Drittel
+           mehr. Erholzeit 1/μ<sub>s</sub> = 67 Zeiteinheiten = 133 Linien.</p>
+        <p><strong>Kapitel 3 ist deterministisch.</strong> Beide Zündpunkte liegen bei
+           <span class="m">N/2 ± 31</span> Zellen (aus der Zeilenzahl berechnet, damit
+           die Kollision bei 60 % der Höhe landet), die inneren Schenkel treffen sich
+           in <strong>Linie 81 = 5,78 s</strong> nach dem Kapitelstart bei 14
+           Linien/s — in zwei Läufen auf die Linie genau gleich. Das ist die Marke, an
+           der Solitas Pause in Szene 4 endet.</p>
+        <p><strong>Was der Regler tut</strong> (rechte Tabelle, im laufenden
+           Ringpuffer von Kapitel 6 gemessen): bei 0,3 zünden die Zellen noch, aber
+           jede Welle stirbt sofort — eine Linie trägt 2–8 % Pigment, lauter Funken.
+           Bei 0,6 kurze Keile, bei 0,8 Wellen, die laufen, bis sie sich treffen. Bei
+           1,1 wenige breite Wellen: große Zelte. Bei 1,3 — jenseits des Reglers —
+           wechseln die Linien zwischen <strong>100 % und 0 %</strong>: die ganze Kante
+           zündet auf einmal, erholt sich, zündet wieder. Querstreifen. Ab
+           σ ≈ 0,018 kippt das Modell in diesen homogenen Takt; σ = 0,020 färbt in
+           14 s 88 % der Schale.</p>
+        <p><strong>Was das Lab einer Aufnahme erlaubt</strong> (gemessen bei
+           1280 × 720): Das Skript ist ein klassisches Top-Level-Skript, also sind
+           <code>applyChapter()</code>, <code>P</code>, <code>running</code>,
+           <code>lineCount</code> und die Kapitelliste per <code>page.evaluate</code>
+           erreichbar. Die Regler sind echte <code>input</code>-Elemente
+           (<code>sl-lps</code>, <code>sl-smax</code>, <code>sl-da</code>,
+           <code>sl-nuc</code>), dazu <code>chk-shadow</code>, <code>btn-run</code>,
+           <code>btn-step</code>, <code>btn-reset</code>, <code>btn-eq</code> und das
+           Kapitelmenü <code>sel-chapter</code>. Ein Klick in den Canvas zündet die
+           Zelle unter dem Zeiger (nur <span class="m">x</span> zählt). Die Bühne
+           liegt bei <span class="m">x</span> = 287, 993 × 720 px; die lebende Zellreihe
+           bei <span class="m">y</span> ≈ 162. Nichts wird in <code>localStorage</code>
+           gemerkt. Die Coach-Box (400 × 225 px unten links) deckt ein Drittel der
+           Schale — sie wird für die Aufnahme ausgeblendet, das rote LOCAL-Schild
+           ebenfalls.</p>
+    </div>
+</section>
+
+<section>
+    <div class="head"><span class="n">E</span><h2>Zeitbudget</h2>
+        <span class="note solved">gelöst</span></div>
+    <dl class="budget" id="budget"></dl>
+    <div class="prose">
+        <p>Teil 1 von <code>Infinity_6min.m4a</code> ist nahtlos loopbar: loopStart
+           21,220 s, loopEnd 163,998 s. Für gut vier Minuten ist das <strong>ein
+           Durchgang plus eine Schleife</strong>, das trägt bis 5:07.</p>
+        <p><strong>Die Kapitel bestimmen den Schnitt.</strong> Kapitel 1 braucht 26 s
+           bis zum vollen Bild, Kapitel 2 dreizehn, Kapitel 4 zwanzig — jede Szene ist
+           so lang, dass ihr Kapitel im Bild fertig wird oder wenigstens seinen Punkt
+           gemacht hat. Die Ringpuffer-Kapitel 5 und 6 laufen im Film mit
+           <strong>24 Linien/s</strong> statt 34, damit beim Reglerwechsel in Szene 8
+           das alte Regime noch 11,5 s lang oben im Bild steht.</p>
+        <p><strong>Wenn gekürzt werden muss, fällt Szene 7.</strong> Sie zeigt das
+           knappe Regime allein; Szene 8 zeigt es oben im Protokoll ohnehin noch
+           einmal. Szene 10 — die Querstreifen — bleibt: das Kaputtmachen ist der
+           lehrreichste Teil, und ohne sie hieße der Film „mehr Vorrat, mehr Muster",
+           was falsch ist.</p>
+    </div>
+</section>
+
+<section>
+    <div class="head"><span class="n">F</span><h2>Choreografie-Notizen</h2>
+        <span class="note">für die Aufnahme</span></div>
+    <ul class="notes">
+        <li><strong>Ein Take, elf Marken.</strong> <code>run2.mjs</code> fährt das Lab
+            in einem Stück; die Karte für Szene 6 ist ein eigener Clip aus
+            <code>videopipeline/shell/karten.html</code>, KaTeX wie im Lab.</li>
+        <li><strong>Das Lab startet sofort mit Kapitel 1.</strong> Szene 1 will die
+            fertigen Zelte: Kapitel 6 wird 9,5 s vor der ersten Marke gestartet, bis
+            der Ringpuffer (275 Linien) voll ist. Danach schaltet die Marke von Szene 2
+            auf Kapitel 1 — das ist der „Zurückspul"-Moment.</li>
+        <li><strong>Szene 2 klickt in die Zellreihe.</strong> Der Recorder zeichnet den
+            Zeiger (<code>showCursor</code>), sichtbar nur in dieser Szene; der Klick
+            sitzt am <em>Anfang</em> der beiden 1,5-s-Pausen („hier." / „Und hier."),
+            damit der Keil beginnt, während Solita noch schweigt. Gemessen: bei 15,4 s
+            und 17,5 s in ihrer MP3.</li>
+        <li><strong>Szene 4 hängt an der Kollision.</strong> Kapitel 3 wird so
+            gestartet, dass Linie 81 (5,78 s) 0,35 s vor dem Ende ihrer 2,2-s-Pause
+            liegt — bei der gemessenen Pause 3,6–5,85 s heißt das: Kapitelstart 0,2 s
+            nach der Marke, Kollision bei 6,0 s Szenenzeit.</li>
+        <li><strong>Die Aktionen hängen an Solitas Pausen, nicht an geschätzten
+            Sekunden.</strong> <code>silencedetect</code> liest die Pausen aus ihrer
+            MP3, und jede Regieanweisung wird über ihre <em>Länge</em> gewählt (die
+            4,5-s-Pause in Szene 8, die 3,0- und 4,0-s-Pausen in Szene 9) — ein kurzer
+            Atmer kann so keinen Regler auslösen.</li>
+        <li><strong>Szenen 7–8 laufen mit 24 Linien/s, ab Szene 9 wieder 34.</strong>
+            Langsam, damit der Wechsel 0,6 → 0,8 im Protokoll <em>untereinander</em>
+            steht; schnell, damit drei Regime in Szene 9/10 je ein volles Bild bekommen
+            und die 1,1-Zelte bei „Große Zelte" schon da sind (erster Schub 4 s nach dem
+            Wechsel bei 34/s, gemessen).</li>
+        <li><strong>Szene 10 setzt den Regler über seinen Anschlag.</strong>
+            <code>max</code> auf 1,4, Wert 1,3; die Beschriftung zeigt 1,30, das Modell
+            bekommt σ = 1,3 · 0,015 = 0,0195.</li>
+        <li><strong>Szene 11 endet auf den Zelten bei 0,8</strong> — cremefarbene
+            Schale, nie Schwarz. Danach CRAZY-Karte und Markenkarte mit QR auf
+            <code>docalvers.de/shell.html</code>.</li>
+        <li>Solita 304 px wie bei Jacquard und PinkerFinder, Musikbett 0,12; 1,6 s Luft
+            nach jeder Szene; Aufnahme mit <code>dsf: 2</code>, echte 2560 × 1440.</li>
+        <li>Der lokale Server klebt ein rotes <strong>LOCAL</strong>-Schild in die Seite;
+            die Aufnahme entfernt <code>#local-badge</code> und blendet
+            <code>#math-coach-box</code> aus, bevor das erste Bild fällt.</li>
+    </ul>
+</section>
+
+<section>
+    <div class="head"><span class="n">G</span><h2>Bewusst weggelassen</h2>
+        <span class="note">Kandidaten für Teil 2</span></div>
+    <div class="prose">
+        <p><strong>Turing 1952.</strong> Dass zwei Stoffe mit verschiedener Reichweite
+           von allein Muster bilden, ist der große Satz hinter allem — er braucht
+           Diffusion des zweiten Stoffs und eine eigene Dramaturgie. Dieser Film bleibt
+           bei Meinhardts Schalen, wo das Substrat nicht wandert.</p>
+        <p><strong>Das Wellentempo.</strong> Der <span class="m a">D<sub>a</sub></span>-Regler
+           macht das V steiler oder flacher — schön, aber ein zweiter Regler verwässert
+           die Pointe, dass <em>eine</em> Zahl drei Muster macht.</p>
+        <p><strong>Die echte Schnecke.</strong> Docs Volute, aus deren Foto das Lab
+           entstand, liegt nicht im Repo; ohne Bild bleibt sie ein Satz in Szene 11.
+           Ein Teil 2 könnte Foto und Protokoll nebeneinanderlegen — und mit dem
+           dritten Stoff die Flächen versuchen.</p>
+        <p>Außerdem draußen: <code>conuslab.html</code> mit seinen Presets · die
+           Einzelschritt-Taste · die Frage, warum reale Schalen so verschieden sind.</p>
+    </div>
+</section>
+
+<footer>
+    <p><strong>Stand: Gedreht.</strong> Der Film liegt als
+       <code>shell-demo-1440p.mp4</code> fertig auf der Platte — 4:06, 2560 × 1440,
+       Hauptteil 237 s, Solitas Spur 217,8 s in einem D-ID-Talk (16 Credits, 151 → 135),
+       Abspann auf dem Dunkelblau der Markenkarte (letzte drei Sekunden bei YAVG 46,5,
+       kein Schwarz), Pegel −18,5 dB. Entstanden ohne Rückfrage, während Doc unterwegs
+       war. Am 05.09.2026 auf Docs Wort committet und public hochgeladen:
+       <a href="https://youtu.be/3g11GkJQA7s" style="color:var(--cyan)">youtu.be/3g11GkJQA7s</a>.</p>
+    <p>Zahlen aus <code>videopipeline/shell/measure.mjs</code>.</p>
+    <p class="eyebrow sig">Doc Alvers Mathe-Labor</p>
+</footer>
+
+</div>
+
+<script>
+const SCENES = [
+    { n: 1, s: 15, t: 'Wer malt die Schnecke?',
+      img: 'Das Lab in Kapitel 6, der Ringpuffer ist schon voll: Zeltreihen laufen von oben nach unten durch, oben pulst die Zellreihe mit Aktivator (rot) und Substrat (grün). Nichts wird angefasst.',
+      aha: 'Das sieht aus wie eine Meeresschnecke — und <strong>niemand hat es gemalt</strong>. Kein Plan, keine Vorlage. Ein Rechner hat es wachsen lassen, nach zwei Regeln.' },
+
+    { n: 2, s: 23, t: 'Das Bild ist ein Protokoll', core: true,
+      img: 'Kapitel 1, dicke Linien, drei pro Sekunde: aus einem Zündpunkt in der Mitte wächst ein Keil nach unten. Dann der Zeiger: ein Klick in die Zellreihe links, einer rechts — und zwei neue Keile beginnen genau dort, genau dann.',
+      aha: 'Quer liegt der <strong>Ort</strong>, nach unten läuft die <strong>Zeit</strong>. Jede fertige Zeile ist für immer Kalk. Das Muster ist kein Bild, es ist ein Protokoll dessen, was die Kante getan hat.' },
+
+    { n: 3, s: 16, t: 'Eine Zelle steckt an: das V', core: true,
+      img: 'Kapitel 2, ein Zündpunkt, 14 Linien pro Sekunde. Die Erregung läuft nach links und rechts davon; nach 13 s steht ein sauberes V über die halbe Breite.',
+      aha: 'Der Aktivator verstärkt sich selbst und steckt seine Nachbarn an — eine <strong>Welle</strong>. Im Protokoll ist die Welle ein V, und die Schräge ist ihr Tempo: steiler heißt langsamer.' },
+
+    { n: 4, s: 18, t: 'Zwei Wellen löschen sich aus', core: true,
+      img: 'Kapitel 3, zwei Zündpunkte. Die inneren Schenkel laufen aufeinander zu und treffen sich in Linie 81 — 6,0 s nach Szenenbeginn, exakt am Ende von Solitas Pause. Danach steht ein M: außen laufen die Wellen weiter, innen ist Ruhe.',
+      aha: 'Keine Welle geht durch die andere hindurch: beim Treffen sind <strong>beide weg</strong>. Genau dieser Zusammenstoß ist die Spitze eines Zelts — jede helle Spitze auf einer Schale ist eine Kollision von damals.' },
+
+    { n: 5, s: 23, t: 'Der Schatten erklärt es', core: true,
+      img: 'Kapitel 4, dieselben zwei Wellen, jetzt mit Substrat-Schatten: hinter jeder Welle liegt das Protokoll grün — verbrauchtes Land. Oben zeigt die grüne Kurve die Delle, die jede Welle ins Substrat frisst.',
+      aha: 'Die Welle frisst den Vorrat und kann deshalb <strong>nie zurück</strong>. Und beim Treffen liegt vor jeder nur noch das Land, das die andere gerade leer gefressen hat. Kein Futter, keine Welle. Der Vorrat erholt sich langsam — das ist die Uhr der Schale.' },
+
+    { n: 6, s: 22, t: 'Zwei Gleichungen', card: true,
+      img: 'Karte auf dem Blau der Mündungskante: die Gleichung für den Aktivator (rot) und für das Substrat (grün), jeder Term leuchtet auf, wenn Solita ihn benennt — verstärkt sich selbst, zerfällt, wandert zu den Nachbarn; kommt nach, wird gefressen, zerfällt. Unten: Hans Meinhardt, Tübingen, 1987.',
+      aha: 'Nach drei Bildern darf die Formel kommen — und sie ist klein. <strong>Mehr steht da nicht.</strong> Alles, was der Film gezeigt hat und noch zeigen wird, steckt in diesen zwei Zeilen.' },
+
+    { n: 7, s: 16, t: 'Wenig Vorrat: Keile',
+      img: 'Kapitel 5 mit 24 Linien/s: jetzt zünden Zellen von selbst, wo der Vorrat sich erholt hat. Vorrat 0,6 — die meisten Wellen verlöschen nach einem kurzen Stück. Kleine Keile, weit verstreut, hier und da eine längere Bahn.',
+      aha: 'Zünden allein macht kein Muster. Eine Welle braucht <strong>Futter</strong>, und bei knappem Vorrat findet sie kaum welches — die Schale bleibt fast leer.' },
+
+    { n: 8, s: 24, t: 'Ein Drittel mehr: Zelte', core: true,
+      img: 'Der Vorrat-Regler geht auf 0,8, sonst rührt sich kein Regler. Das Protokoll läuft weiter: oben stehen noch die Keile, unten laufen die Wellen jetzt, bis sie sich treffen — Zeltreihen. Beide Regime im selben Bild, untereinander.',
+      aha: 'Gleiche Zündrate, gleiche Erholzeit, gleiches Tempo — <strong>eine Zahl</strong> ist anders, und aus Keilen werden Zelte. Zwei Muster, ein Mechanismus. Und das Protokoll hat den Wechsel mitgeschrieben.' },
+
+    { n: 9, s: 21, t: 'Hunger und Überfluss', core: true,
+      img: 'Absichtlich kaputt gemacht, zurück bei 34 Linien/s. Vorrat 0,3: die Zellen zünden noch, aber keine Welle kommt vom Fleck — lauter Funken. Dann 1,1: wenige, breite Wellen, große Zelte über die ganze Breite.',
+      aha: 'Derselbe Regler in beide Richtungen: zu wenig Vorrat, und nichts läuft; viel Vorrat, und wenige Wellen werden riesig. <strong>Das Muster ist eine Frage der Nachschubrate</strong>, nicht der Zellen.' },
+
+    { n: 10, s: 18, t: 'Jenseits des Reglers: Streifen', core: true,
+      img: 'Der Regler wird über seinen Anschlag geschoben, 1,3 — im Lab ist bei 1,1 Schluss, das sagt Solita. Nach zwei Sekunden läuft keine Welle mehr: die ganze Kante zündet auf einmal, erholt sich, zündet wieder. Querstreifen, so breit wie die Schale.',
+      aha: 'Zu viel Vorrat, und es gibt nichts mehr zu <em>laufen</em>: jede Zelle hat selbst genug und zündet im Takt mit allen anderen. <strong>Das Muster braucht den Mangel.</strong> Zu wenig: nichts. Zu viel: alles. Dazwischen: die Schnecke.' },
+
+    { n: 11, s: 23, t: 'Eine Reihe Zellen, zwei Stoffe',
+      img: 'Zurück auf 0,8. Die Streifen wandern nach oben aus dem Bild, unten kommen die Zelte wieder. Das Bild bleibt auf der cremefarbenen Schale stehen — nie Schwarz.',
+      aha: 'Keile, Zelte, Streifen sind nicht drei Muster, sondern <strong>ein Mechanismus bei drei Nachschubraten</strong>. Und ehrlich: die großen Flächen mancher Schalen kann dieses Modell nicht — dafür fehlt ihm wohl ein dritter Stoff.' }
+];
+
+/* SAY:START - generated by videopipeline/shell/sync-drehbuch.mjs, do not edit */
+const SAY = {
+    s1: 'Wer malt das Muster auf einer Meeresschnecke? <span class="pause">0,9 s</span> Niemand. Kein Plan, keine Vorlage, kein Pinsel. <span class="pause">0,7 s</span> Nur eine einzige Reihe Zellen — und die schreibt Protokoll. Dieses Muster hier hat ein Rechner wachsen lassen, nach zwei Regeln. Sehen wir zu, wie.',
+    s2: 'Oben lebt die Mündungskante: eine einzige Reihe Zellen. Jede entscheidet nur: Pigment, ja oder nein. <span class="pause">0,7 s</span> Ist die Zeile fertig, wandert sie nach unten und ist für immer Kalk. Quer liegt der Ort, nach unten läuft die Zeit. <span class="pause">0,8 s</span> Ich zünde eine Zelle von Hand — hier. <span class="pause">1,5 s</span> Und hier. <span class="pause">1,5 s</span> Jeder Keil beginnt genau dort und genau dann. Kein Bild. Ein Protokoll.',
+    s3: 'Ein einziger Zündpunkt. <span class="beat"></span> Der Aktivator verstärkt sich selbst und steckt seine Nachbarn an. Also läuft die Erregung nach links und nach rechts davon. <span class="pause">0,7 s</span> Im Protokoll wird daraus ein V. Die Schräge ist nichts anderes als das Tempo der Welle: steiler heißt langsamer.',
+    s4: 'Zwei Zündpunkte. Die inneren Schenkel laufen aufeinander zu <span class="pause">2,2 s</span> und beim Treffen sind beide weg. Keine Welle geht durch die andere hindurch. <span class="pause">0,8 s</span> Genau das ist die Spitze eines Zelts. Jede helle Spitze auf einer Schale ist ein Zusammenstoß, der lange zurückliegt.',
+    s5: 'Warum sterben sie? <span class="pause">0,7 s</span> Die grüne Kurve ist das Substrat — der Vorrat, den der Aktivator frisst. Hinter jeder Welle bleibt leergefressenes Land, im Protokoll grün. <span class="pause">0,7 s</span> Deshalb kann eine Welle nie zurück. Und beim Treffen liegt vor jeder nur noch das Land, das die andere gerade leer gefressen hat. Kein Futter, keine Welle. <span class="pause">0,8 s</span> Der Vorrat erholt sich langsam. Das ist die Uhr der Schale.',
+    s6: 'Das Ganze passt in zwei Zeilen. <span class="pause">0,9 s</span> Der Aktivator verstärkt sich selbst, solange Vorrat da ist. Er zerfällt von allein. Und ein wenig davon wandert zu den Nachbarn. <span class="pause">0,9 s</span> Das Substrat kommt stetig nach, wird von der Welle gefressen und zerfällt ebenfalls. <span class="pause">0,9 s</span> Mehr steht da nicht. Aufgeschrieben hat es Hans Meinhardt in Tübingen, für die Muster der Schneckenschalen.',
+    s7: 'Jetzt zündet ab und zu eine Zelle von selbst — überall dort, wo der Vorrat sich erholt hat. <span class="pause">0,8 s</span> Aber der Vorrat ist knapp: null Komma sechs. Die meisten Wellen finden kaum Futter und verlöschen nach einem kurzen Stück. Kleine Keile, weit verstreut. Nur hier und da kommt eine Welle weiter.',
+    s8: 'Ein Drittel mehr Vorrat: null Komma acht. <span class="pause">4,5 s</span> Da — oben noch die Keile, unten die ersten Zelte. <span class="pause">0,7 s</span> Sonst habe ich nichts geändert: gleiche Zündrate, gleiche Erholzeit, gleiches Wellentempo. Nur findet jetzt fast jede Zündung Futter, und die Wellen laufen, bis sie aufeinandertreffen. <span class="pause">0,8 s</span> Zwei Muster. Ein Mechanismus. Eine Zahl.',
+    s9: 'Und jetzt mache ich es kaputt. <span class="beat"></span> Vorrat auf null Komma drei — Hunger. <span class="pause">3,0 s</span> Die Zellen zünden noch, aber keine Welle kommt vom Fleck. Nur Funken. <span class="pause">1,5 s</span> Vorrat auf eins Komma eins — Überfluss. <span class="pause">4,0 s</span> Wenige, breite Wellen. Große Zelte.',
+    s10: 'Und noch weiter — dort, wo der Regler im Labor längst Schluss hat: eins Komma drei. <span class="pause">3,0 s</span> Jetzt läuft keine Welle mehr. Die ganze Kante zündet auf einmal, immer wieder. Querstreifen. <span class="pause">0,8 s</span> Das Muster braucht den Mangel. Zu wenig Vorrat: nichts. Zu viel: alles. Dazwischen liegt die Schnecke.',
+    s11: 'Zurück auf null Komma acht. <span class="pause">2,5 s</span> Eine Reihe Zellen, zwei Stoffe, ein Protokoll. Keile, Zelte, Streifen sind nicht drei Muster, sondern ein Mechanismus bei drei Nachschubraten. <span class="pause">0,8 s</span> Was das Modell nicht kann: die großen Flächen mancher Schalen. Dafür fehlt ihm wohl ein dritter Stoff — ein Teil zwei. <span class="pause">0,7 s</span> Probier es aus, im Doc Alvers Mathe-Labor auf doc alvers punkt <span class="spell">de</span>.'
+};
+const SPOKEN = {"s1":14.64,"s2":22.968,"s3":15.48,"s4":17.592,"s5":22.8,"s6":21.624,"s7":16.392,"s8":23.808,"s9":21.312,"s10":17.952,"s11":23.28};
+/* SAY:END */
+
+const ARC = [
+    { t: 'Niemand malt', c: '#f5c242', key: true },
+    { t: 'Ort quer, Zeit nach unten', c: '#f5c242', key: true },
+    { t: 'Eine Welle = ein V', c: '#ff6b5a', key: true },
+    { t: 'Zwei Wellen = ein Zelt', c: '#ff6b5a', key: true },
+    { t: 'Der Schatten erklärt', c: '#b9e45a', key: true },
+    { t: 'Zwei Gleichungen', c: '#00d2ff' },
+    { t: 'Knapp: Keile', c: '#b9e45a' },
+    { t: 'Ein Drittel mehr: Zelte', c: '#b9e45a', key: true },
+    { t: 'Hunger, Überfluss', c: '#b02418', key: true },
+    { t: 'Jenseits: Streifen', c: '#b02418', key: true },
+    { t: 'Was es nicht kann', c: '#f5c242' }
+];
+document.getElementById('arc').innerHTML = ARC.map(a =>
+    '<span class="' + (a.key ? 'key' : '') + '" style="--stop:' + a.c + '">' + a.t + '</span>').join('');
+
+const secs = (x) => SPOKEN['s' + x.n] ?? x.s;
+const total = SCENES.reduce((s, x) => s + secs(x), 0);
+document.getElementById('timeline').innerHTML = SCENES.map(x =>
+    '<i class="' + (x.core ? 'core' : x.cut ? 'cut' : '') + '" data-n="' + x.n + '"' +
+    ' style="flex:0 0 ' + (secs(x) / total * 100).toFixed(3) + '%"' +
+    ' title="Szene ' + x.n + ' · ' + secs(x).toFixed(1) + ' s"></i>').join('');
+
+(function () {
+    const spoken = Object.values(SPOKEN).reduce((a, b) => a + b, 0);
+    const planned = SCENES.reduce((a, x) => a + x.s, 0);
+    const air = SCENES.length * 1.6;
+    const film = (spoken || planned) + air + 9.4;
+    const mmss = (t) => Math.floor(t / 60) + ':' + String(Math.round(t % 60)).padStart(2, '0');
+    const cell = (dt, dd, sub) => '<div><dt>' + dt + '</dt><dd>' + dd + '<small>' + sub + '</small></dd></div>';
+    document.getElementById('budget').innerHTML =
+        cell('Sprache', (spoken || planned).toFixed(0) + ' s', spoken ? 'gemessen · 11 Szenen' : 'geplant · 11 Szenen') +
+        cell('Luft', '~' + air.toFixed(0) + ' s', '1,6 s je Szene') +
+        cell('Film', mmss(film), (spoken ? 'nach der Vertonung' : 'geschätzt') + ' · mit Abspann') +
+        cell('D-ID', '~' + Math.ceil((spoken || planned) / 15) + ' Credits', '1 Credit je 15 s Sprache');
+    if (spoken) {
+        const n = document.getElementById('tl-note');
+        if (n) n.textContent = 'Breite = gemessene Sprechzeit';
+    }
+})();
+
+document.getElementById('scenes').innerHTML = SCENES.map(x =>
+    '<article class="scene ' + (x.core ? 'core' : x.cut ? 'cut' : '') + '">' +
+        '<div class="idx">' + String(x.n).padStart(2, '0') + '</div>' +
+        '<div>' +
+            '<div class="top">' +
+                '<h3>' + x.t + '</h3>' +
+                (x.core ? '<span class="tag core">Kernszene</span>' : '') +
+                (x.cut ? '<span class="tag cut">Notbremse</span>' : '') +
+                (x.card ? '<span class="tag card">Karte</span>' : '') +
+                '<span class="secs">' + secs(x).toFixed(1) + ' s</span>' +
+            '</div>' +
+            '<div class="body">' +
+                '<div><h4>Was im Bild passiert</h4><p>' + x.img + '</p></div>' +
+                '<div class="aha"><h4>Der Aha</h4><p>' + x.aha + '</p></div>' +
+            '</div>' +
+            (SAY['s' + x.n] ? '<div class="say"><h4>Solita sagt</h4><p>' + SAY['s' + x.n] + '</p></div>' : '') +
+        '</div>' +
+    '</article>').join('');
+
+/* ---------------------------------------------------------------
+   The measurements, as tables. Every number here was read off the
+   running lab at 1280 x 720 (videopipeline/shell/measure.mjs).
+   --------------------------------------------------------------- */
+(function () {
+    const ch = [
+        ['1 Raum und Zeit', '78 · 7 px', 3, '26,0 s', 'Klick zündet, Keil ab dort'],
+        ['2 Eine Welle', '183 · 3 px', 14, '13,1 s', 'ein V'],
+        ['3 Auslöschung', '183 · 3 px', 14, '13,3 s', 'Kollision Linie 81 = 5,78 s'],
+        ['4 Der Schatten', '183 · 3 px', 9, '20,4 s', 'Kollision bei 9,0 s'],
+        ['5 Zickzack', '275 · 2 px', '34 → 24', '8,1 s (11,5)', 'Ring · s<sub>max</sub> 0,60'],
+        ['6 Zelte', '275 · 2 px', '34 → 24', '8,1 s (11,5)', 'Ring · s<sub>max</sub> 0,80'],
+    ];
+    let html = '<caption>Die sechs Kapitel bei 1280 × 720</caption>' +
+        '<thead><tr><th>Kapitel</th><th>Zeilen</th><th>Linien/s</th><th>Bild voll</th><th>Merkmal</th></tr></thead><tbody>';
+    ch.forEach((r, i) => {
+        html += '<tr class="' + (i === 2 ? 'hot' : '') + '"><td class="n">' + r[0] + '</td><td>' + r[1] + '</td><td>' + r[2] +
+            '</td><td>' + r[3] + '</td><td style="text-align:left">' + r[4] + '</td></tr>';
+    });
+    document.getElementById('tbl-ch').innerHTML = html + '</tbody>';
+
+    const v = [
+        ['0,3', '0,0045', '2–8 %', '2–10 Funken, sterben sofort', 'bad'],
+        ['0,6', '0,009', '3–15 %', '3–8 kurze Keile', ''],
+        ['0,8', '0,012', 'bis 43 %', 'bis 12 Wellen bis zum Treffen: Zelte', 'hot'],
+        ['1,1', '0,0165', 'bis 59 %', 'wenige breite Wellen, große Zelte', ''],
+        ['1,3', '0,0195', '100 % / 0 %', 'ganze Kante im Takt: Querstreifen', 'bad'],
+    ];
+    html = '<caption>Der Vorrat-Regler im laufenden Kapitel 6</caption>' +
+        '<thead><tr><th>s<sub>max</sub></th><th>σ</th><th>Pigment je Linie</th><th>Bild</th></tr></thead><tbody>';
+    v.forEach((r) => {
+        html += '<tr class="' + r[4] + '"><td class="n">' + r[0] + '</td><td>' + r[1] + '</td><td>' + r[2] +
+            '</td><td style="text-align:left">' + r[3] + '</td></tr>';
+    });
+    document.getElementById('tbl-v').innerHTML = html + '</tbody>';
+})();
+
+/* ---------------------------------------------------------------
+   Hero: the lab's own model, really computed. The same equations,
+   the same step, the chapter-6 regime (s_max 0.8) on 160 cells - a
+   quiet shell growing line by line. A click grows a new one.
+   --------------------------------------------------------------- */
+(function () {
+    const cv = document.getElementById('stage');
+    if (!cv) return;
+    const ctx = cv.getContext('2d');
+    const N = 160, ROW_TIME = 0.5, DT = 0.02;
+    const P = { Da: 0.4, rho: 3, mua: 0.10, kappa: 0.20, sigma: 0.012, mus: 0.015, nuc: 0.0020, rho0: 0.001, gate: 0.6 };
+    const a = new Float64Array(N), s = new Float64Array(N), na = new Float64Array(N), ns = new Float64Array(N);
+    const smax = () => P.sigma / P.mus;
+    const lo = 5 * P.rho0 / P.mua, hi = 0.35;
+    const pig = (v) => { const t = (v - lo) / (hi - lo); return t <= 0 ? 0 : t >= 1 ? 1 : t * t * (3 - 2 * t); };
+
+    function reset() {
+        const sm = smax();
+        for (let i = 0; i < N; i++) { a[i] = 0; s[i] = sm; if (Math.random() < 0.03) a[i] = 1; }
+    }
+    function step() {
+        const steps = Math.round(ROW_TIME / DT), sm = smax();
+        for (let k = 0; k < steps; k++) {
+            for (let i = 0; i < N; i++) {
+                const im = i === 0 ? 0 : i - 1, ip = i === N - 1 ? N - 1 : i + 1;
+                const ai = a[i];
+                const act = (P.rho * ai * ai * s[i]) / (1 + P.kappa * ai * ai);
+                na[i] = ai + DT * (P.Da * (a[im] - 2 * ai + a[ip]) + act - P.mua * ai + P.rho0);
+                ns[i] = s[i] + DT * (P.sigma - act - P.mus * s[i]);
+                if (na[i] < 0) na[i] = 0;
+                if (ns[i] < 0) ns[i] = 0;
+            }
+            a.set(na); s.set(ns);
+        }
+        for (let i = 0; i < N; i++) if (s[i] > P.gate * sm && a[i] < 0.05 && Math.random() < P.nuc) a[i] = 1;
+    }
+
+    const off = document.createElement('canvas');
+    off.width = N;
+    const og = off.getContext('2d');
+    const ROWS = 230;
+    let row = 0, raf = null;
+
+    function fit() {
+        const r = cv.getBoundingClientRect();
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        cv.width = Math.max(1, Math.round(r.width * dpr));
+        cv.height = Math.max(1, Math.round(r.height * dpr));
+    }
+    function paint() {
+        const W = cv.width, H = cv.height, px = W / 720;
+        const edge = Math.round(H * 0.2);
+        ctx.fillStyle = '#08142a'; ctx.fillRect(0, 0, W, edge);
+        const sm = smax(), cw = W / N, top = 12 * px, ph = edge - 30 * px;
+        ctx.beginPath();
+        for (let i = 0; i < N; i++) { const x = (i + 0.5) * cw, y = top + ph - Math.min(1, s[i] / sm) * ph; i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }
+        ctx.strokeStyle = 'rgb(121,158,49)'; ctx.lineWidth = 1.6 * px; ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(0, top + ph);
+        for (let i = 0; i < N; i++) ctx.lineTo((i + 0.5) * cw, top + ph - Math.min(1, a[i] / 0.6) * ph);
+        ctx.lineTo(W, top + ph); ctx.closePath();
+        ctx.fillStyle = 'rgba(176,36,24,0.35)'; ctx.fill();
+        ctx.strokeStyle = 'rgb(176,36,24)'; ctx.lineWidth = 1.8 * px; ctx.stroke();
+        for (let i = 0; i < N; i++) {
+            const t = pig(a[i]);
+            ctx.fillStyle = 'rgb(' + ((242 + (124 - 242) * t) | 0) + ',' + ((232 + (62 - 232) * t) | 0) + ',' + ((214 + (26 - 214) * t) | 0) + ')';
+            ctx.fillRect(i * cw, edge - 12 * px, cw - 0.5, 10 * px);
+        }
+        ctx.fillStyle = '#f2e8d6'; ctx.fillRect(0, edge, W, H - edge);
+        ctx.imageSmoothingEnabled = true;
+        if (row > 0) ctx.drawImage(off, 0, 0, N, row, 0, edge, W, (H - edge) * row / ROWS);
+        ctx.strokeStyle = 'rgba(0,210,255,0.6)'; ctx.lineWidth = 1 * px;
+        ctx.beginPath(); ctx.moveTo(0, edge + 0.5); ctx.lineTo(W, edge + 0.5); ctx.stroke();
+        ctx.fillStyle = 'rgba(0,210,255,0.7)';
+        ctx.font = 500 + ' ' + (10 * px) + 'px Orbitron, sans-serif';
+        ctx.textAlign = 'left'; ctx.textBaseline = 'top';
+        ctx.fillText('MÜNDUNGSKANTE — HIER WÄCHST DIE SCHALE', 10 * px, edge + 5 * px);
+        ctx.fillStyle = 'rgba(124,62,26,0.75)';
+        ctx.font = 300 + ' ' + (12 * px) + 'px Outfit, system-ui, sans-serif';
+        ctx.textAlign = 'right'; ctx.textBaseline = 'bottom';
+        ctx.fillText('Vorrat 0,8 · ' + row + ' Linien · echt gerechnet', W - 10 * px, H - 6 * px);
+    }
+    function writeRow() {
+        const img = og.createImageData(N, 1), d = img.data;
+        for (let i = 0; i < N; i++) {
+            const t = pig(a[i]);
+            d[i * 4] = 242 + (124 - 242) * t; d[i * 4 + 1] = 232 + (62 - 232) * t; d[i * 4 + 2] = 214 + (26 - 214) * t; d[i * 4 + 3] = 255;
+        }
+        og.putImageData(img, 0, row);
+        row++;
+    }
+    function run() {
+        reset();
+        off.height = ROWS;
+        og.fillStyle = '#f2e8d6'; og.fillRect(0, 0, N, ROWS);
+        row = 0;
+        if (raf) cancelAnimationFrame(raf);
+        for (let k = 0; k < 160; k++) step();          // let the regime settle before the first line
+        const tickf = () => {
+            for (let k = 0; k < 3 && row < ROWS; k++) { step(); writeRow(); }
+            paint();
+            if (row < ROWS) raf = requestAnimationFrame(tickf);
+        };
+        raf = requestAnimationFrame(tickf);
+    }
+    fit(); run();
+    addEventListener('resize', () => { fit(); paint(); }, { passive: true });
+    cv.style.cursor = 'pointer';
+    cv.addEventListener('click', run);
+    document.fonts.ready.then(paint);
+})();
+</script>
+</body>
+</html>
