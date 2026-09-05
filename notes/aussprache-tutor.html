@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Konzept: Aussprache-Erkennung für einen Sprachtutor (Kaimbo) – warum Spracherkennung dafür das falsche Werkzeug ist und was stattdessen funktioniert.">
+<title>Aussprache-Tutor – Konzept</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!-- Non-blocking font load: page renders instantly, Orbitron swaps in when available -->
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
+<style>
+  /* Monochrome document theme, accent colours from the Forloop palette */
+  :root {
+    --bg: #141518;
+    --text: #e8eaed;
+    --muted: #979da6;
+    --hair: rgba(255, 255, 255, 0.10);
+    --lambda: rgb(245, 194, 66);   /* orange */
+    --ypsilon: rgb(176, 36, 24);   /* red */
+    --phi: rgb(121, 158, 49);      /* green */
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.6; padding: 28px 16px 52px;
+  }
+  .wrap { max-width: 900px; margin: 0 auto; }
+
+  h1 {
+    font-family: "Orbitron", sans-serif; font-weight: 900;
+    font-size: 1.7rem; letter-spacing: 0.05em; line-height: 1.25;
+  }
+  .subtitle { color: var(--muted); font-size: 0.95rem; margin-top: 8px; }
+  .meta {
+    color: var(--muted); font-size: 0.8rem; letter-spacing: 0.12em;
+    text-transform: uppercase; margin-top: 14px;
+    border-top: 1px solid var(--hair); padding-top: 10px;
+  }
+  h2 {
+    font-family: "Orbitron", sans-serif; font-weight: 700;
+    font-size: 1.02rem; letter-spacing: 0.13em; text-transform: uppercase;
+    margin: 34px 0 12px; padding-bottom: 6px; border-bottom: 1px solid var(--hair);
+  }
+  h3 {
+    font-family: "Orbitron", sans-serif; font-weight: 500;
+    font-size: 0.88rem; letter-spacing: 0.08em;
+    margin: 20px 0 6px; color: var(--muted);
+  }
+  p { margin: 9px 0; }
+  ul, ol { margin: 9px 0 9px 22px; }
+  li { margin: 5px 0; }
+  strong { color: #fff; }
+  code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.88em; background: rgba(255,255,255,0.06);
+    padding: 1px 5px; border-radius: 4px;
+  }
+  .ipa { font-family: "Doulos SIL", "Charis SIL", "Gentium Plus", serif; }
+
+  table { border-collapse: collapse; width: 100%; margin: 14px 0; font-size: 0.94rem; }
+  th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--hair); vertical-align: top; }
+  th {
+    font-family: "Orbitron", sans-serif; font-weight: 500;
+    font-size: 0.76rem; letter-spacing: 0.11em; text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .note {
+    border: 1px solid var(--hair); border-left: 3px solid var(--lambda);
+    padding: 11px 14px; margin: 16px 0; background: rgba(255,255,255,0.03);
+  }
+  .note b { font-family: "Orbitron", sans-serif; font-weight: 500;
+            letter-spacing: 0.08em; font-size: 0.8rem; text-transform: uppercase; }
+  .note.warn { border-left-color: var(--ypsilon); }
+  .note.good { border-left-color: var(--phi); }
+
+  .print-footer { display: none; }
+
+  @media print {
+    @page { size: A4; margin: 15mm 16mm 16mm; }
+    body { background: #fff; color: #1c1e21; padding: 0; font-size: 10.5pt; line-height: 1.45; }
+    .wrap { max-width: none; }
+    :root { --hair: #d5d8dc; --muted: #55595f; }
+    h1 { color: #111; font-size: 19pt; }
+    h2 { color: #111; font-size: 10.5pt; border-bottom: 1px solid #111; margin-top: 9mm; }
+    h3 { color: #333; font-size: 9.5pt; }
+    strong { color: #000; }
+    .subtitle, .meta, th { color: #55595f; }
+    th, td { border-bottom: 1px solid #d5d8dc; }
+    code { background: #eef0f2; }
+    .note { background: #f7f8f9; border-color: #d5d8dc; border-left-color: rgb(245,194,66); }
+    .note.warn { border-left-color: rgb(176,36,24); }
+    .note.good { border-left-color: rgb(121,158,49); }
+    h1, h2, h3 { break-after: avoid; }
+    table, .note { break-inside: avoid; }
+    /* One footer at the end of the flow; the generated PDF carries the real
+       per-page footer in the page margin (Chrome footerTemplate) */
+    .print-footer {
+      display: block; text-align: center;
+      border-top: 0.5pt solid #d5d8dc; padding-top: 2mm; margin-top: 8mm;
+      font-family: "Orbitron", sans-serif; font-weight: 500;
+      font-size: 7.5pt; letter-spacing: 0.16em; color: #9aa0a8;
+    }
+    html.pdfmode .print-footer { display: none !important; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>Aussprache-Erkennung im Sprachtutor</h1>
+<p class="subtitle">Warum Spracherkennung dafür das falsche Werkzeug ist – und was
+stattdessen funktioniert. Anwendungsfall: Chinesisch in Kaimbo.</p>
+<p class="meta">Doc Alvers Mathe-Labor &nbsp;&middot;&nbsp; Konzeptpapier &nbsp;&middot;&nbsp; 05.09.2026</p>
+
+<h2>1 &nbsp; Die Beobachtung, um die es geht</h2>
+<p>Beim Diktieren interpretiert das System mit. Nuschelt man ein Wort, ergänzt es
+aus dem Kontext das Wahrscheinliche. Für Diktat ist das ein Segen – für einen
+Sprachtutor ist es <strong>genau der Fehler</strong>.</p>
+<p>Denn beim Chinesischlernen hängt die Bedeutung an der Aussprache selbst. Wer
+<code>ch</code> retroflex statt palatal spricht oder den dritten Ton nicht absenkt,
+sagt etwas anderes. Ein Tutor, der freundlich miträt, was gemeint war, meldet
+dann „richtig“ – und der Lernende übt seinen Fehler ein.</p>
+
+<div class="note warn">
+  <b>Kernproblem</b>
+  <p>Whisper und verwandte Modelle enthalten ein Sprachmodell, das Aussprachefehler
+  <strong>repariert</strong>. Sie sind darauf optimiert zu erkennen, was gemeint war,
+  nicht was gesagt wurde. Ein Aussprachetrainer, der auf Whisper-Transkripten
+  aufsetzt, ist deshalb systematisch blind für exakt die Fehler, die er finden soll.</p>
+</div>
+
+<h2>2 &nbsp; Der Perspektivwechsel</h2>
+<p>Die Lösung ist kein besseres Erkennungsmodell, sondern eine andere Fragestellung.
+Im Tutor ist der Zielsatz <strong>bekannt</strong> – der Lernende soll ja etwas
+Bestimmtes nachsprechen. Damit ist das Problem kein Erkennungs-, sondern ein
+<strong>Abgleichproblem</strong>, und das ist deutlich einfacher und robuster.</p>
+<p>Das Standardverfahren dafür heißt <strong>Forced Alignment + GOP</strong>
+(„Goodness of Pronunciation“, Witt &amp; Young 1999) und ist in der computergestützten
+Aussprachebewertung seit Jahrzehnten etabliert:</p>
+<ol>
+  <li><strong>Forced Alignment.</strong> Die bekannte Ziel-Lautfolge wird auf das
+      Audio gelegt: Welcher Zeitabschnitt der Aufnahme gehört zu welchem Laut?</li>
+  <li><strong>Scoring pro Laut.</strong> Für jeden Abschnitt bewertet ein
+      akustisches Modell, wie gut der tatsächliche Klang zum erwarteten Laut passt.
+      Ein niedriger Wert markiert genau die Stelle, an der es hakt.</li>
+</ol>
+<p>Der entscheidende Unterschied: Das Ergebnis ist nicht „richtiges Wort / falsches
+Wort“, sondern eine <strong>Karte über den Satz</strong>, auf der die schwachen
+Stellen eingezeichnet sind.</p>
+
+<h2>3 &nbsp; Gibt es einen sprecherübergreifenden Fingerprint?</h2>
+<p>Das ist die eigentliche Frage: Lässt sich „korrekt ausgesprochen“ so beschreiben,
+dass es unabhängig von der konkreten Stimme gilt? Antwort: <strong>ja</strong> – aber
+in zwei getrennten Baustellen mit unterschiedlichen Verfahren.</p>
+
+<h3>Baustelle A: Töne</h3>
+<p>Der einfachere und für Chinesisch wichtigste Teil. Absolute Tonhöhen sind wertlos:
+Eine tiefe Männerstimme liegt in ganz anderen Hertz-Bereichen als eine helle
+Frauenstimme. Aber:</p>
+<ul>
+  <li>Grundfrequenz (F0) über die Silbe messen – Standardverfahren wie YIN, pYIN
+      oder CREPE, im Browser mit Web Audio machbar.</li>
+  <li><strong>Sprechernormierung:</strong> Umrechnen in Halbtöne relativ zum eigenen
+      Median über die Äußerung. Damit fällt die individuelle Stimmlage vollständig
+      heraus.</li>
+  <li>Übrig bleibt die <strong>Form der Kontur</strong> – und die ist tatsächlich
+      sprecherunabhängig: Ton 1 hoch und flach, Ton 2 steigend, Ton 3 fallend und
+      wieder steigend, Ton 4 kurz und scharf fallend.</li>
+</ul>
+<p>Das ist der gesuchte generische Fingerprint, und er ist erstaunlich robust. Der
+Vergleich läuft dann als Kurvenabgleich gegen die Zielkontur, wobei unterschiedliche
+Sprechgeschwindigkeit über eine Zeitverzerrung (DTW) ausgeglichen wird.</p>
+
+<div class="note warn">
+  <b>Falle: Ton-Sandhi</b>
+  <p>Töne ändern sich im Satz. Treffen zwei dritte Töne aufeinander, wird der erste
+  zum zweiten Ton. Ausgerechnet <strong>nǐ hǎo</strong> ist so ein Fall: korrekt
+  gesprochen klingt es <em>ní hǎo</em>. Ein Tutor, der stur gegen die
+  Wörterbuchtöne prüft, würde die richtige Aussprache als Fehler anstreichen. Die
+  Sandhi-Regeln müssen also vor dem Vergleich auf die Zielkontur angewandt werden –
+  das ist überschaubar, aber man muss es wissen.</p>
+</div>
+
+<h3>Baustelle B: Konsonanten und Vokale</h3>
+<p>Aufwendiger, aber ebenfalls machbar. Hier hilft, dass die typischen Fehler
+deutscher Muttersprachler im Chinesischen bekannt und begrenzt sind:</p>
+<table>
+  <tr><th>Zielaut</th><th>Typischer Fehler</th><th>Messbares Merkmal</th></tr>
+  <tr>
+    <td>Pinyin <code>ch</code>, <code>zh</code>, <code>sh</code> (retroflex,
+        Zunge zurückgerollt)</td>
+    <td>ersetzt durch deutschen bzw. englischen <em>tsch</em>-/<em>sch</em>-Laut</td>
+    <td>Spektraler Schwerpunkt des Reibegeräuschs – retroflex klingt messbar
+        dunkler</td>
+  </tr>
+  <tr>
+    <td>Pinyin <code>q</code>, <code>j</code>, <code>x</code> (palatal)</td>
+    <td>Verwechslung mit der retroflexen Reihe</td>
+    <td>Dasselbe Merkmal, andere Richtung – die beiden Reihen trennen sich sauber</td>
+  </tr>
+  <tr>
+    <td>Pinyin <code>ü</code></td>
+    <td>als <em>u</em> gesprochen</td>
+    <td>Formantlage (F2), nach Sprecher normiert</td>
+  </tr>
+  <tr>
+    <td>Aspirierte vs. unaspirierte Paare (<code>p/b</code>, <code>t/d</code>,
+        <code>k/g</code>)</td>
+    <td>deutsche Stimmhaftigkeit statt Behauchung</td>
+    <td>Voice Onset Time – direkt aus dem Signal messbar</td>
+  </tr>
+</table>
+<p>Für die allgemeine Variante liefert ein Phonem-CTC-Modell (etwa wav2vec&nbsp;2.0
+mit IPA-Ausgabe) die <em>tatsächlich</em> gesprochene Lautfolge – im Gegensatz zu
+Whisper ohne korrigierendes Sprachmodell. Der Vergleich mit der Ziel-Lautfolge zeigt
+dann direkt, welcher Laut durch welchen ersetzt wurde.</p>
+
+<h2>4 &nbsp; Der wirklich harte Teil: Kalibrierung</h2>
+<p>Weder Tonkurve noch Lautvergleich sind das eigentliche Risiko. Das Risiko ist die
+Schwelle: <strong>Ab wann ist „anders“ auch „falsch“?</strong></p>
+<ul>
+  <li>Muttersprachler streuen erheblich – Dialekt, Tempo, Stimmung, Erkältung.</li>
+  <li>Eine einzelne Referenzaufnahme als Maßstab ist deshalb untauglich. Es braucht
+      eine <strong>Verteilung</strong> und daraus eine Schwelle.</li>
+  <li>Ein Tutor, der bei jedem zweiten korrekten Satz nörgelt, wird nach drei Tagen
+      abgeschaltet. Im Zweifel lieber <strong>zu nachsichtig</strong>: ein
+      übersehener Fehler kostet weniger als ein System, dem man nicht mehr glaubt.</li>
+</ul>
+<p>Praktischer Ausweg für den Anfang: gar keine Bewertung ausgeben, sondern nur
+<strong>darstellen</strong>. Wer seine eigene Tonkurve neben der Zielkontur sieht,
+braucht kein Urteil – er sieht selbst, dass der dritte Ton nicht absinkt.</p>
+
+<h2>5 &nbsp; Erster Schritt: die Tonkurve sichtbar machen</h2>
+<div class="note good">
+  <b>Kleinster sinnvoller Prototyp</b>
+  <p>Ein Wort aufnehmen, F0-Kurve extrahieren, sprechernormieren und zusammen mit
+  der Zielkontur in ein gemeinsames Diagramm zeichnen. Kein Score, keine Blackbox,
+  kein Modell-Download – reines Web Audio plus Canvas. Sofort nützlich und
+  vollständig im Browser lauffähig.</p>
+</div>
+<p>Danach in dieser Reihenfolge weiter:</p>
+<ol>
+  <li>Tonkurven-Darstellung, rein visuell.</li>
+  <li>Ähnlichkeitsmaß gegen die Zielkontur (DTW), zunächst nur als Zahl zum
+      Beobachten – nicht als Urteil an den Lernenden.</li>
+  <li>Schwelle kalibrieren an eigenen Aufnahmen: absichtlich richtig und absichtlich
+      falsch sprechen, Verteilungen ansehen.</li>
+  <li>Erst dann segmentale Bewertung (Konsonanten) über ein Phonemmodell.</li>
+</ol>
+
+<h2>6 &nbsp; Anbindung an Kaimbo</h2>
+<p>Kaimbo bringt die nötigen Teile bereits mit:</p>
+<ul>
+  <li><code>js/kaimbo-audio.js</code> enthält schon einen Recorder (Mikrofon → WAV)
+      samt Wiedergabe – die Aufnahmestrecke muss nicht neu gebaut werden.</li>
+  <li>Der Zielsatz steht ohnehin in der Karte. Genau das ist die Voraussetzung für
+      Forced Alignment.</li>
+  <li>Die Spaced-Repetition-Leiter (0-1-2-4-7-14-60-180) ist der interessanteste
+      Andockpunkt: Ein Wort, das inhaltlich sitzt, aber <strong>lautlich</strong>
+      wackelt, könnte gezielt als Aussprache-Wiederholung wieder hochkommen –
+      statt als bekannt abgehakt zu werden.</li>
+</ul>
+<p>Alles läuft lokal im Browser; Aufnahmen müssen das Gerät nicht verlassen.</p>
+
+<h2>7 &nbsp; Offene Punkte</h2>
+<ul>
+  <li>Reicht ein reines Pitch-Tracking im Browser, oder braucht es für stimmlose
+      Abschnitte und Knarrstimme ein robusteres Modell (CREPE)?</li>
+  <li>Wie kommt die Zielkontur zustande – aus Muttersprachler-Aufnahmen oder aus
+      den idealisierten Tonschemata? Aufnahmen sind realistischer, Schemata sind
+      sofort verfügbar.</li>
+  <li>Läuft ein Phonem-CTC-Modell in vertretbarer Größe im Browser
+      (transformers.js), oder braucht Baustelle B einen kleinen Server?</li>
+  <li>Wie werden Sandhi-Regeln gepflegt – fest verdrahtet oder pro Karte
+      hinterlegbar?</li>
+  <li>Übertragbarkeit: Die Tonlogik ist chinesischspezifisch, die segmentale
+      Bewertung wäre auch für Italienisch und Spanisch nutzbar, die in Kaimbo
+      bereits gepflegt sind.</li>
+</ul>
+
+<p class="print-footer">Doc Alvers Mathe-Labor &nbsp;&middot;&nbsp; Aussprache-Tutor &nbsp;&middot;&nbsp; Konzept 05.09.2026</p>
+
+</div>
+</body>
+</html>
