@@ -132,7 +132,63 @@ dann „richtig“ – und der Lernende übt seinen Fehler ein.</p>
   aufsetzt, ist deshalb systematisch blind für exakt die Fehler, die er finden soll.</p>
 </div>
 
-<h2>2 &nbsp; Der Perspektivwechsel</h2>
+<h2>2 &nbsp; Gibt es das schon?</h2>
+<p>Ja – und zwar deutlich gründlicher als bei der Notfallerkennung. Automatische
+Aussprachebewertung ist ein reifer kommerzieller Markt und ein aktives
+Forschungsfeld.</p>
+<table>
+  <tr><th>Wo</th><th>Was</th><th>Bedeutung für uns</th></tr>
+  <tr>
+    <td>Fertige API</td>
+    <td>Azure Pronunciation Assessment – liefert Genauigkeits-, Flüssigkeits- und
+        Vollständigkeitswerte bis auf Phonem-Ebene, per SDK und (für kurze Audios)
+        per REST; Mandarin wird unterstützt</td>
+    <td><strong>Die Abkürzung.</strong> Ein großer Teil von Baustelle B wäre damit
+        ein API-Aufruf statt eines Projekts.</td>
+  </tr>
+  <tr>
+    <td>Weitere Anbieter</td>
+    <td>SpeechAce (Bewertungs-API), ELSA Speak (Endkunden-App, Schwerpunkt
+        Englisch), iFlytek (fährt damit chinesische Schulprüfungen)</td>
+    <td>zeigt die Marktreife – und dass der Schwerpunkt fast überall auf Englisch
+        als Zielsprache liegt</td>
+  </tr>
+  <tr>
+    <td>Mandarin-Töne speziell</td>
+    <td>Es gibt Apps, die genau das beschriebene Verfahren fahren: F0 extrahieren,
+        Tonkurve über die Zeit auftragen, mit der Sollkontur vergleichen</td>
+    <td>der in Abschnitt&nbsp;6 vorgeschlagene Prototyp erfindet nichts Neues –
+        er ist erprobt</td>
+  </tr>
+  <tr>
+    <td>Forschung 2026</td>
+    <td>Eine Arbeit vom Juni 2026 modelliert segmentale <em>und</em> tonale
+        Merkmale gemeinsam in einer wav2vec2-CTC-Architektur für chinesische
+        Aussprachefehler – gegenüber einem rein phonembasierten System sinkt die
+        Rate übersehener Fehler um gut 10&nbsp;%, die Fehldiagnoserate um knapp
+        24&nbsp;%</td>
+    <td>bestätigt die Aufteilung in zwei Baustellen: Töne getrennt mitzumodellieren
+        bringt <strong>messbar</strong> etwas</td>
+  </tr>
+  <tr>
+    <td>Offene Bausteine</td>
+    <td>speechocean762 (offener Korpus für Aussprachebewertung),
+        wav2vec2-Phonemmodelle mit IPA-Ausgabe</td>
+    <td>ausreichend, um ohne Anbieterbindung anzufangen</td>
+  </tr>
+</table>
+
+<div class="note">
+  <b>Was daran trotzdem eigen ist</b>
+  <p>Technisch nichts. Der Wert liegt vollständig in der <strong>Integration in
+  Kaimbo</strong>: dein Vokabular, deine Wiederholungsleiter, dein Fehlerverlauf über
+  Jahre. Genau diese Verzahnung verkauft niemand – ein Zukauf-Tool weiß nicht,
+  welche 2879 Vokabeln du gerade lernst, und deine Vokabel-App weiß nicht, dass du
+  den dritten Ton systematisch verschluckst. Beides zusammen ist der eigentliche
+  Gewinn.</p>
+</div>
+
+<h2>3 &nbsp; Der Perspektivwechsel</h2>
 <p>Die Lösung ist kein besseres Erkennungsmodell, sondern eine andere Fragestellung.
 Im Tutor ist der Zielsatz <strong>bekannt</strong> – der Lernende soll ja etwas
 Bestimmtes nachsprechen. Damit ist das Problem kein Erkennungs-, sondern ein
@@ -151,7 +207,7 @@ Aussprachebewertung seit Jahrzehnten etabliert:</p>
 Wort“, sondern eine <strong>Karte über den Satz</strong>, auf der die schwachen
 Stellen eingezeichnet sind.</p>
 
-<h2>3 &nbsp; Gibt es einen sprecherübergreifenden Fingerprint?</h2>
+<h2>4 &nbsp; Gibt es einen sprecherübergreifenden Fingerprint?</h2>
 <p>Das ist die eigentliche Frage: Lässt sich „korrekt ausgesprochen“ so beschreiben,
 dass es unabhängig von der konkreten Stimme gilt? Antwort: <strong>ja</strong> – aber
 in zwei getrennten Baustellen mit unterschiedlichen Verfahren.</p>
@@ -218,7 +274,7 @@ mit IPA-Ausgabe) die <em>tatsächlich</em> gesprochene Lautfolge – im Gegensat
 Whisper ohne korrigierendes Sprachmodell. Der Vergleich mit der Ziel-Lautfolge zeigt
 dann direkt, welcher Laut durch welchen ersetzt wurde.</p>
 
-<h2>4 &nbsp; Der wirklich harte Teil: Kalibrierung</h2>
+<h2>5 &nbsp; Der wirklich harte Teil: Kalibrierung</h2>
 <p>Weder Tonkurve noch Lautvergleich sind das eigentliche Risiko. Das Risiko ist die
 Schwelle: <strong>Ab wann ist „anders“ auch „falsch“?</strong></p>
 <ul>
@@ -233,7 +289,7 @@ Schwelle: <strong>Ab wann ist „anders“ auch „falsch“?</strong></p>
 <strong>darstellen</strong>. Wer seine eigene Tonkurve neben der Zielkontur sieht,
 braucht kein Urteil – er sieht selbst, dass der dritte Ton nicht absinkt.</p>
 
-<h2>5 &nbsp; Erster Schritt: die Tonkurve sichtbar machen</h2>
+<h2>6 &nbsp; Erster Schritt: die Tonkurve sichtbar machen</h2>
 <div class="note good">
   <b>Kleinster sinnvoller Prototyp</b>
   <p>Ein Wort aufnehmen, F0-Kurve extrahieren, sprechernormieren und zusammen mit
@@ -251,7 +307,7 @@ braucht kein Urteil – er sieht selbst, dass der dritte Ton nicht absinkt.</p>
   <li>Erst dann segmentale Bewertung (Konsonanten) über ein Phonemmodell.</li>
 </ol>
 
-<h2>6 &nbsp; Anbindung an Kaimbo</h2>
+<h2>7 &nbsp; Anbindung an Kaimbo</h2>
 <p>Kaimbo bringt die nötigen Teile bereits mit:</p>
 <ul>
   <li><code>js/kaimbo-audio.js</code> enthält schon einen Recorder (Mikrofon → WAV)
@@ -265,7 +321,7 @@ braucht kein Urteil – er sieht selbst, dass der dritte Ton nicht absinkt.</p>
 </ul>
 <p>Alles läuft lokal im Browser; Aufnahmen müssen das Gerät nicht verlassen.</p>
 
-<h2>7 &nbsp; Offene Punkte</h2>
+<h2>8 &nbsp; Offene Punkte</h2>
 <ul>
   <li>Reicht ein reines Pitch-Tracking im Browser, oder braucht es für stimmlose
       Abschnitte und Knarrstimme ein robusteres Modell (CREPE)?</li>
