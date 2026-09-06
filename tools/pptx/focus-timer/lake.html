@@ -1,0 +1,181 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>calm lake loop</title>
+<style>html,body{margin:0;background:#0d1b33;overflow:hidden}canvas{display:block}</style>
+<canvas id="c" width="1920" height="1080"></canvas>
+<script>
+// Deterministic calm-lake renderer. Every motion is periodic with LOOP seconds, so the
+// exported frame sequence closes seamlessly when PowerPoint loops the clip.
+const W = 1920, H = 1080, HORIZON = Math.round(H * 0.42);   // 454
+const LOOP = 12;                                            // seconds per full cycle
+window.LOOP = LOOP;
+
+const c = document.getElementById('c'), ctx = c.getContext('2d');
+const sky = document.createElement('canvas'); sky.width = W; sky.height = HORIZON;
+const sctx = sky.getContext('2d');
+
+// Hash-based noise so the scene is identical on every run and every machine.
+function rnd(i) { let x = Math.sin(i * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); }
+
+const SUN_X = W * 0.63;          // sun sits right of centre; its glitter path anchors the water
+const SUN_Y = HORIZON - 196;     // clearly above the ridge line, not swallowed by it
+
+// --- ridge silhouettes: sums of sines, so they are smooth and reproducible ---
+function ridge(x, seed, amp, base) {
+  let y = base;
+  for (let k = 1; k <= 7; k++) {
+    y += (amp / k) * Math.sin(x * (0.0016 * k * k) + rnd(seed * 10 + k) * 6.283);
+  }
+  return y;
+}
+
+function drawRidge(g, seed, amp, base, fill) {
+  g.beginPath(); g.moveTo(0, HORIZON);
+  for (let x = 0; x <= W; x += 4) g.lineTo(x, ridge(x, seed, amp, base));
+  g.lineTo(W, HORIZON); g.closePath(); g.fillStyle = fill; g.fill();
+}
+
+// --- everything above the waterline, drawn once per frame into the offscreen canvas ---
+function drawSky(t) {
+  const g = sctx;
+  const grd = g.createLinearGradient(0, 0, 0, HORIZON);
+  grd.addColorStop(0.00, '#0a1630');   // deep indigo overhead
+  grd.addColorStop(0.24, '#1c3160');
+  grd.addColorStop(0.46, '#4c5080');
+  grd.addColorStop(0.64, '#8d6178');   // dusk rose
+  grd.addColorStop(0.80, '#d08a52');
+  grd.addColorStop(0.93, '#f5c242');   // lambda orange from the lab palette
+  grd.addColorStop(1.00, '#ffdc92');
+  g.fillStyle = grd; g.fillRect(0, 0, W, HORIZON);
+
+  // sun: a soft halo plus a hard disc, high enough to clear the mountains
+  const sg = g.createRadialGradient(SUN_X, SUN_Y, 0, SUN_X, SUN_Y, 430);
+  sg.addColorStop(0, 'rgba(255,240,201,0.98)');
+  sg.addColorStop(0.10, 'rgba(255,214,133,0.70)');
+  sg.addColorStop(0.34, 'rgba(240,160,84,0.26)');
+  sg.addColorStop(1, 'rgba(240,150,80,0)');
+  g.fillStyle = sg; g.fillRect(0, 0, W, HORIZON);
+
+  // slow cloud bands, wrapped so they re-enter exactly where they left
+  g.save(); g.globalCompositeOperation = 'lighter';
+  for (let i = 0; i < 11; i++) {
+    const speed = 10 + rnd(i) * 14;
+    const span = W + 900;
+    const cx = (rnd(i + 40) * span + speed * t) % span - 450;
+    const cy = HORIZON * 0.22 + rnd(i + 80) * HORIZON * 0.58;
+    const rw = 220 + rnd(i + 120) * 420, rh = 10 + rnd(i + 160) * 24;
+    const warm = cy / HORIZON;
+    const a = 0.05 + 0.11 * warm;
+    const cg2 = g.createRadialGradient(cx, cy, 0, cx, cy, rw);
+    cg2.addColorStop(0, 'rgba(255,' + Math.round(196 + 40 * warm) + ',' + Math.round(150 + 30 * (1 - warm)) + ',' + a.toFixed(3) + ')');
+    cg2.addColorStop(1, 'rgba(255,200,160,0)');
+    g.fillStyle = cg2;
+    g.save(); g.translate(cx, cy); g.scale(1, rh / rw); g.translate(-cx, -cy);
+    g.beginPath(); g.arc(cx, cy, rw, 0, 6.2832); g.fill(); g.restore();
+  }
+  g.restore();
+
+  // three ridges, jagged enough to read as mountains and dark enough to sit against the sky
+  drawRidge(g, 3, 46, HORIZON - 104, 'rgba(72,86,124,0.92)');
+  drawRidge(g, 7, 34, HORIZON - 62, 'rgba(40,55,88,0.96)');
+  drawRidge(g, 11, 22, HORIZON - 26, '#14223c');
+
+  // warm haze pooling at the foot of the ridges, right on the waterline
+  const hz = g.createLinearGradient(0, HORIZON - 96, 0, HORIZON);
+  hz.addColorStop(0, 'rgba(250,206,142,0)');
+  hz.addColorStop(0.62, 'rgba(250,206,142,0.20)');
+  hz.addColorStop(1, 'rgba(255,222,166,0.50)');
+  g.fillStyle = hz; g.fillRect(0, HORIZON - 96, W, 96);
+}
+
+// --- the water is the sky mirrored, one scanline at a time, each shifted by the ripple ---
+function drawWater(t) {
+  const depthPx = H - HORIZON;
+  const squash = HORIZON / depthPx;                 // perspective: reflection is compressed
+  const w1 = 6.2832 * 1 / LOOP, w2 = 6.2832 * 2 / LOOP, w3 = 6.2832 * 3 / LOOP;
+  for (let y = HORIZON; y < H; y++) {
+    const d = (y - HORIZON) / depthPx;               // 0 at horizon, 1 at the near edge
+    const sy = Math.max(0, HORIZON - 1 - (y - HORIZON) * squash);
+    const amp = 1.2 + 26 * d * d;
+    const lam = 9 + 95 * d;
+    const dx = amp * (0.62 * Math.sin(y / lam + w1 * t)
+                    + 0.28 * Math.sin(y / (lam * 0.47) - w2 * t + 1.7)
+                    + 0.10 * Math.sin(y / (lam * 2.3) + w3 * t + 4.1));
+    ctx.drawImage(sky, 0, sy, W, 1, dx - 40, y, W + 80, 1);
+  }
+  // water sits darker and cooler than the sky it mirrors
+  const wg = ctx.createLinearGradient(0, HORIZON, 0, H);
+  wg.addColorStop(0, 'rgba(16,34,58,0.10)');
+  wg.addColorStop(0.5, 'rgba(14,30,54,0.34)');
+  wg.addColorStop(1, 'rgba(11,24,44,0.62)');
+  ctx.fillStyle = wg; ctx.fillRect(0, HORIZON, W, H - HORIZON);
+
+  // glitter along the sun's column
+  ctx.save(); ctx.globalCompositeOperation = 'lighter';
+  for (let i = 0; i < 260; i++) {
+    const d = Math.pow(rnd(i + 200), 0.7);
+    const y = HORIZON + 4 + d * (H - HORIZON - 8);
+    const spread = 20 + 300 * d;
+    const x = SUN_X + (rnd(i + 600) - 0.5) * 2 * spread;
+    const ph = rnd(i + 900) * 6.2832;
+    const k = 1 + Math.floor(rnd(i + 1300) * 3);           // integer cycles -> loops cleanly
+    const tw = 0.5 + 0.5 * Math.sin(6.2832 * k * t / LOOP + ph);
+    const a = (0.10 + 0.42 * tw) * (1 - 0.55 * d);
+    const rw = 5 + 34 * d, rh = 0.8 + 2.4 * d;
+    ctx.fillStyle = 'rgba(255,231,178,' + a.toFixed(3) + ')';
+    ctx.beginPath(); ctx.ellipse(x, y, rw, rh, 0, 0, 6.2832); ctx.fill();
+  }
+  ctx.restore();
+
+  // a couple of wide, lazy swells to keep the surface from looking like a print
+  ctx.save(); ctx.globalCompositeOperation = 'lighter';
+  for (let i = 0; i < 26; i++) {
+    const d = Math.pow(rnd(i + 30), 0.8);
+    const baseY = HORIZON + 10 + d * (H - HORIZON - 20);
+    const drift = 9 + rnd(i + 70) * 14;
+    const span = W + 700;
+    const x = (rnd(i + 110) * span + drift * t) % span - 350;
+    const rw = 130 + rnd(i + 150) * 300;
+    ctx.fillStyle = 'rgba(198,222,240,' + (0.030 + 0.045 * (1 - d)).toFixed(3) + ')';
+    ctx.beginPath();
+    ctx.ellipse(x, baseY + 3 * Math.sin(6.2832 * t / LOOP + i), rw, 1.1 + 2.2 * d, 0, 0, 6.2832);
+    ctx.fill();
+  }
+  ctx.restore();
+}
+
+// Stars and the sun's disc belong to the sky alone: a real lake smears the disc into the
+// glitter path, and only the halo survives as a reflection.
+function drawOverlay(t) {
+  const g = ctx;
+  for (let i = 0; i < 90; i++) {
+    const x = rnd(i + 2000) * W, y = rnd(i + 2400) * HORIZON * 0.42;
+    const k = 1 + Math.floor(rnd(i + 2800) * 3);
+    const tw = 0.5 + 0.5 * Math.sin(6.2832 * k * t / LOOP + rnd(i + 3200) * 6.2832);
+    const a = (0.12 + 0.55 * tw) * (1 - y / (HORIZON * 0.5));
+    g.fillStyle = 'rgba(226,236,255,' + Math.max(0, a).toFixed(3) + ')';
+    g.beginPath(); g.arc(x, y, 0.8 + rnd(i + 3600) * 1.0, 0, 6.2832); g.fill();
+  }
+  g.beginPath(); g.arc(SUN_X, SUN_Y, 42, 0, 6.2832);
+  g.fillStyle = 'rgba(255,249,228,0.96)'; g.fill();
+}
+
+function renderFrame(t) {
+  drawSky(t);
+  ctx.drawImage(sky, 0, 0);
+  drawWater(t);
+  drawOverlay(t);
+
+  // vignette + a gentle wash behind slide centre, so a light timer ring stays readable
+  const vg = ctx.createRadialGradient(W / 2, H / 2, H * 0.30, W / 2, H / 2, H * 1.02);
+  vg.addColorStop(0, 'rgba(8,18,36,0)');
+  vg.addColorStop(1, 'rgba(8,18,36,0.62)');
+  ctx.fillStyle = vg; ctx.fillRect(0, 0, W, H);
+  const cg = ctx.createRadialGradient(W / 2, H / 2, 0, W / 2, H / 2, 430);
+  cg.addColorStop(0, 'rgba(8,18,36,0.30)');
+  cg.addColorStop(1, 'rgba(8,18,36,0)');
+  ctx.fillStyle = cg; ctx.fillRect(0, 0, W, H);
+}
+window.renderFrame = renderFrame;
+renderFrame(0);
+</script>
