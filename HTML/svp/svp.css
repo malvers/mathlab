@@ -1945,6 +1945,63 @@ tr.detail-row li::marker { color: var(--lambda); }
 .sub-tab:hover { color: var(--text); }
 .sub-tab.on { color: var(--lambda); border-bottom-color: var(--lambda); }
 
+/* --- Hervorhebungen in den Inhalt-Stichpunkten ---------------------------
+   Set with the little strip right of the tabs; stored as <b>/<i>/<c1..3> in
+   the bullet source, so they survive a save and reach the exports. The hues
+   are the theme tokens, so they follow light/dark like everything else. */
+.hl-l { color: var(--lambda); }
+.hl-y { color: var(--ypsilon); }
+.hl-p { color: var(--phi); }
+
+/* Only in edit mode, and only while the Inhalt tab is open — the Notizen are
+   plain text and would drop the markup again on the next save. */
+.sub-tools {
+    display: none;
+    align-items: center;
+    gap: 1px;
+    margin-left: 8px;
+    padding-left: 8px;
+    border-left: 1px solid var(--line);
+}
+
+body.editing .sub-tabs:not(.on-notizen) .sub-tools { display: inline-flex; }
+
+.sub-tool {
+    background: none;
+    border: 0;
+    border-radius: 4px;
+    color: var(--muted);
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.62rem;
+    line-height: 1;
+    padding: 3px 6px;
+    cursor: pointer;
+    opacity: 0.75;
+    transition: opacity 0.12s, background 0.12s;
+}
+
+.sub-tool:hover { opacity: 1; background: var(--sunken); }
+.sub-tool:active { transform: translateY(1px); }
+.sub-tool.tool-b { font-weight: 800; }
+.sub-tool.tool-i { font-style: italic; }
+
+/* Orbitron has no dot and no cross — those two buttons take a system face. */
+.sub-tool.tool-c1, .sub-tool.tool-c2, .sub-tool.tool-c3, .sub-tool.tool-off {
+    font-family: system-ui, -apple-system, sans-serif;
+}
+
+.sub-tool.tool-c1, .sub-tool.tool-c2, .sub-tool.tool-c3 {
+    font-size: 0.8rem;
+    padding: 2px 4px;
+    opacity: 0.9;
+}
+
+.sub-tool.tool-c1 { color: var(--lambda); }
+.sub-tool.tool-c2 { color: var(--ypsilon); }
+.sub-tool.tool-c3 { color: var(--phi); }
+/* the cross sits low on its own baseline — lift it back onto the row */
+.sub-tool.tool-off { font-size: 0.7rem; position: relative; top: -2px; }
+
 .notes-body {
     margin-left: 34px;
     padding: 4px 6px;
@@ -2088,6 +2145,13 @@ footer.page-foot a:hover { text-decoration: underline; }
     #svp-export .x-inh ul { margin: 1.2mm 0 0.5mm 4mm; padding: 0; }
     #svp-export .x-inh li { font-size: 8pt; color: #444; padding: 0.3mm 0; }
     #svp-export .x-inh li::marker { color: #999; }
+
+    /* Hervorhebungen aus den Stichpunkten: auf Papier die Drucktöne der
+       Palette — das Orange des dunklen Themes wäre auf Weiß fast unsichtbar.
+       Gilt für beide Exporte und für den direkten Ausdruck der Seite. */
+    .hl-l { color: #b0800c; }
+    .hl-y { color: #b02418; }
+    .hl-p { color: #5c7a20; }
 
     /* colored spine per week row (type color, print-safe tones) */
     #svp-export .x-week td:first-child { border-left: 1mm solid transparent; padding-left: 1.5mm; }
