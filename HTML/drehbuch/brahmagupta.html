@@ -1,0 +1,982 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+
+<style>
+/* minimal reset - the artifact host used to provide this */
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; min-height: 100vh; }
+img, canvas, svg { display: block; max-width: 100%; }
+button, input { font: inherit; }
+:focus-visible { outline: 2px solid #00d2ff; outline-offset: 2px; }
+</style>
+<title>Die Kette, die hält</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&family=Outfit:wght@200;300;400;600&display=swap">
+
+<style>
+/* Palette and faces are the lab's own (bb84.html): Orbitron + Outfit,
+   deep blue ground, cyan = the image under A, orange/green = the two
+   principal axes. Single-theme on purpose - this is the lab's world. */
+:root {
+    --ground:      #081428;
+    --ground-deep: #050e1c;
+    --surface:     #0c1c3a;
+    --surface-2:   #0e244e;
+    --line:        #1c3565;
+    --line-soft:   #16294d;
+
+    --ink:         #e6eefa;
+    --ink-dim:     #b3c5de;
+    --ink-faint:   #8ba1c0;
+
+    --cyan:        #00d2ff;
+    --lambda:      #f5c242;
+    --phi:         #799e31;
+    --violet:      #c07fe8;
+    --red:         #b02418;
+
+    --step: clamp(0.9rem, 0.55rem + 1.1vw, 1.5rem);
+}
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    background: var(--ground);
+    background-image:
+        radial-gradient(1100px 620px at 12% -8%, #0f2a55 0%, transparent 62%),
+        radial-gradient(900px 520px at 92% 4%, #10203f 0%, transparent 58%);
+    background-attachment: fixed;
+    color: var(--ink);
+    font-family: 'Outfit', system-ui, sans-serif;
+    font-weight: 300;
+    font-size: 1.1rem;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+}
+
+.wrap {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: clamp(1.6rem, 4vw, 4rem) clamp(1.1rem, 4vw, 2.6rem) 6rem;
+}
+
+/* ---------- shared type ---------- */
+.eyebrow {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+}
+
+h1, h2, h3 { font-family: 'Orbitron', sans-serif; text-wrap: balance; margin: 0; }
+
+h1 {
+    font-size: clamp(2rem, 1.2rem + 3.4vw, 3.4rem);
+    font-weight: 700;
+    line-height: 1.08;
+    letter-spacing: -0.01em;
+    margin: 0.5rem 0 0;
+}
+
+h2 {
+    font-size: clamp(1.05rem, 0.9rem + 0.6vw, 1.32rem);
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    color: var(--ink);
+}
+
+p { margin: 0; }
+
+em { font-style: italic; color: #eaf2fd; }
+strong { font-weight: 600; color: #f2f7ff; }
+
+/* mathematical symbols, set apart without a formula engine */
+.m {
+    font-family: 'Outfit', system-ui, sans-serif;
+    font-style: italic;
+    font-weight: 400;
+    color: var(--cyan);
+    white-space: nowrap;
+}
+.m.l { color: var(--lambda); }
+.m.g { color: var(--phi); }
+
+/* ---------- header ---------- */
+header { margin-bottom: clamp(1.8rem, 4vw, 3rem); }
+
+.status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.74rem;
+    font-weight: 500;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--lambda);
+    border: 1px solid #4a3a15;
+    background: #1b1607;
+    border-radius: 2px;
+    padding: 0.34rem 0.7rem;
+    margin-top: 1.1rem;
+}
+.status::before {
+    content: "";
+    width: 5px; height: 5px;
+    background: var(--lambda);
+    border-radius: 50%;
+}
+
+.lede {
+    margin-top: 1.1rem;
+    max-width: 60ch;
+    color: var(--ink-dim);
+    font-size: 1.18rem;
+}
+
+.meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 2rem;
+    margin-top: 1.6rem;
+    padding-top: 1.2rem;
+    border-top: 1px solid var(--line-soft);
+}
+.meta div { display: flex; flex-direction: column; gap: 0.15rem; padding: 0.4rem 0; }
+.meta dt {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.74rem;
+    font-weight: 500;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+}
+.meta dd { margin: 0; font-size: 1.02rem; color: var(--ink); }
+.meta a { color: var(--cyan); text-decoration: none; border-bottom: 1px solid #05506b; }
+.meta a:hover, .meta a:focus-visible { border-bottom-color: var(--cyan); }
+
+/* ---------- hero canvas + thesis ---------- */
+.thesis {
+    display: grid;
+    grid-template-columns: minmax(0, 300px) minmax(0, 1fr);
+    gap: clamp(1.2rem, 3vw, 2.6rem);
+    align-items: center;
+    margin: clamp(1.6rem, 4vw, 2.6rem) 0 clamp(2.4rem, 6vw, 4rem);
+    padding: clamp(1.2rem, 3vw, 2rem);
+    background: linear-gradient(160deg, var(--surface) 0%, var(--ground-deep) 100%);
+    border: 1px solid var(--line);
+    border-radius: 3px;
+}
+@media (max-width: 700px) { .thesis { grid-template-columns: 1fr; } }
+
+#stage {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    display: block;
+    border-radius: 2px;
+    background: #04101f;
+}
+
+.thesis blockquote {
+    margin: 0;
+    font-size: clamp(1.15rem, 0.95rem + 1vw, 1.6rem);
+    line-height: 1.42;
+    font-weight: 200;
+    color: #eef4fd;
+    text-wrap: balance;
+}
+.thesis blockquote strong { font-weight: 600; }
+.thesis .after {
+    margin-top: 1.1rem;
+    color: var(--ink-dim);
+    font-size: 1.06rem;
+    max-width: 54ch;
+}
+
+/* ---------- section frame ---------- */
+section { margin-top: clamp(2.6rem, 6vw, 4.4rem); }
+
+.head {
+    display: flex;
+    align-items: baseline;
+    gap: 0.9rem;
+    padding-bottom: 0.7rem;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 1.5rem;
+}
+.head .n {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.84rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: var(--cyan);
+}
+.head .note { margin-left: auto; font-size: 0.9rem; color: var(--ink-faint); }
+
+.prose { max-width: 66ch; color: var(--ink-dim); display: grid; gap: 0.85rem; }
+.prose strong { color: #eaf2fd; }
+
+/* ---------- the arc ---------- */
+.arc {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    align-items: stretch;
+    margin-bottom: 1.5rem;
+}
+.arc span {
+    flex: 1 1 auto;
+    min-width: 92px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.76rem;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    text-align: center;
+    padding: 0.85rem 0.5rem;
+    background: var(--surface);
+    border: 1px solid var(--line-soft);
+    border-top: 2px solid var(--stop, var(--line));
+    color: var(--ink-dim);
+    text-wrap: balance;
+    line-height: 1.4;
+}
+.arc span.key { color: #eef4fd; background: var(--surface-2); }
+
+/* ---------- timeline ---------- */
+.timeline {
+    display: flex;
+    width: 100%;
+    height: 54px;
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-bottom: 0.7rem;
+}
+.timeline i {
+    position: relative;
+    display: block;
+    border-right: 1px solid var(--ground-deep);
+    background: var(--lambda);
+    font-style: normal;
+    transition: background 0.15s;
+}
+.timeline i:last-child { border-right: 0; }
+.timeline i.core { background: var(--phi); }
+.timeline i.cut  { background: var(--red); }
+.timeline i::after {
+    content: attr(data-n);
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.74rem;
+    font-weight: 700;
+    color: #1a1305;
+}
+.timeline i.core::after { color: #0d1a06; }
+.timeline i.cut::after  { color: #ffdcd7; font-weight: 700; }
+
+.legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.4rem;
+    font-size: 0.87rem;
+    color: var(--ink-faint);
+}
+.legend b { font-weight: 400; color: var(--ink-dim); }
+.legend span { display: inline-flex; align-items: center; gap: 0.42rem; }
+.legend s { width: 11px; height: 11px; border-radius: 2px; text-decoration: none; display: inline-block; }
+
+/* ---------- scenes ---------- */
+.scenes { display: grid; gap: 0.7rem; }
+
+.scene {
+    display: grid;
+    grid-template-columns: 3.6rem minmax(0, 1fr);
+    gap: 0 1.1rem;
+    padding: 1.4rem 1.55rem 1.5rem;
+    background: var(--surface);
+    border: 1px solid var(--line-soft);
+    border-left: 2px solid var(--lambda);
+    border-radius: 2px;
+}
+.scene.core { border-left-color: var(--phi); background: linear-gradient(90deg, #16240f 0%, var(--surface) 34%); }
+.scene.cut  { border-left-color: var(--red); }
+
+.scene .idx {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--lambda);
+    font-variant-numeric: tabular-nums;
+    padding-top: 0.1rem;
+}
+.scene.core .idx { color: var(--phi); }
+.scene.cut .idx  { color: #c9503f; }
+
+.scene .top {
+    display: flex;
+    align-items: baseline;
+    gap: 0.8rem;
+    flex-wrap: wrap;
+    margin-bottom: 0.7rem;
+}
+.scene h3 { font-size: 1.16rem; font-weight: 700; letter-spacing: 0.01em; color: #f0f6ff; }
+
+.tag {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.68rem;
+    font-weight: 500;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    padding: 0.2rem 0.45rem;
+    border-radius: 2px;
+    border: 1px solid;
+}
+.tag.core { color: #0d1a06; border-color: var(--phi); background: var(--phi); }
+.tag.cut  { color: #ffdcd7; border-color: var(--red); background: var(--red); }
+
+.secs {
+    margin-left: auto;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: var(--ink-faint);
+    font-variant-numeric: tabular-nums;
+}
+
+.body {
+    display: grid;
+    grid-template-columns: minmax(0, 1.08fr) minmax(0, 1fr);
+    gap: 0.6rem 1.6rem;
+}
+@media (max-width: 720px) { .body { grid-template-columns: 1fr; gap: 1rem; } }
+
+.body > div { display: grid; gap: 0.34rem; align-content: start; }
+.body h4 {
+    margin: 0;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.84rem;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+}
+.body p { font-size: 1.06rem; line-height: 1.66; color: var(--ink-dim); }
+.body .aha { border-left: 1px solid var(--line); padding-left: 1.6rem; }
+@media (max-width: 720px) { .body .aha { border-left: 0; padding-left: 0; border-top: 1px solid var(--line); padding-top: 0.9rem; } }
+.body .aha p { color: var(--ink); }
+
+/* what Solita actually says - generated from narration.mjs, never hand-edited */
+.say {
+    margin-top: 1.1rem;
+    padding: 0.95rem 1.2rem;
+    background: #0a1830;
+    border: 1px solid var(--line-soft);
+    border-left: 2px solid var(--cyan);
+    border-radius: 2px;
+}
+.say h4 {
+    margin: 0 0 0.45rem;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.64rem;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--cyan);
+}
+.say p {
+    margin: 0;
+    font-size: 1.06rem;
+    line-height: 1.62;
+    color: var(--ink);
+}
+.say .pause {
+    display: inline-block;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.66rem;
+    font-weight: 500;
+    color: var(--lambda);
+    background: #241c07;
+    border: 1px solid #4a3a15;
+    border-radius: 2px;
+    padding: 0.05rem 0.4rem;
+    margin: 0 0.22rem;
+    vertical-align: 0.08em;
+    white-space: nowrap;
+}
+.say .beat {
+    display: inline-block;
+    width: 0.5em;
+    height: 0.5em;
+    margin: 0 0.1em;
+    background: radial-gradient(circle, var(--cyan) 1.6px, transparent 1.8px);
+    vertical-align: 0.05em;
+    opacity: 0.55;
+}
+.say .spell {
+    border-bottom: 1px dotted var(--ink-faint);
+    letter-spacing: 0.12em;
+}
+
+/* ---------- rules / lists ---------- */
+.rules { display: grid; gap: 0.6rem; counter-reset: r; max-width: 74ch; }
+/* the number is positioned, not a grid cell - as a grid item the bare text
+   after the bold lead-in became its own item and fell into the 1.8rem column */
+.rules li {
+    list-style: none;
+    position: relative;
+    padding-left: 2.8rem;
+    font-size: 1.05rem;
+    color: var(--ink-dim);
+}
+.rules li::before {
+    counter-increment: r;
+    content: counter(r, decimal-leading-zero);
+    position: absolute;
+    left: 0;
+    top: 0.28rem;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.84rem;
+    font-weight: 500;
+    color: var(--violet);
+}
+.rules { padding: 0; margin: 0; }
+
+.notes { display: grid; gap: 0.75rem; max-width: 74ch; padding: 0; margin: 0; }
+.notes li {
+    list-style: none;
+    font-size: 1.05rem;
+    color: var(--ink-dim);
+    padding-left: 1.1rem;
+    border-left: 1px solid var(--line);
+}
+.notes strong { color: #eaf2fd; }
+
+code {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 0.85em;
+    color: var(--cyan);
+    background: #0a1a33;
+    border: 1px solid var(--line-soft);
+    border-radius: 2px;
+    padding: 0.06em 0.34em;
+}
+
+/* ---------- budget ---------- */
+.budget {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1px;
+    background: var(--line-soft);
+    border: 1px solid var(--line-soft);
+    border-radius: 2px;
+    margin-bottom: 1.5rem;
+}
+.budget div { background: var(--surface); padding: 1rem 1.1rem; display: grid; gap: 0.28rem; }
+.budget dt {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.74rem;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+}
+.budget dd {
+    margin: 0;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--cyan);
+    font-variant-numeric: tabular-nums;
+}
+.budget dd small { display: block; font-family: 'Outfit', sans-serif; font-size: 0.78rem; font-weight: 300; color: var(--ink-faint); letter-spacing: 0; margin-top: 0.2rem; }
+
+.solved { color: var(--phi); }
+
+/* ---------- footer ---------- */
+footer {
+    margin-top: clamp(2.6rem, 6vw, 4.4rem);
+    padding-top: 1.6rem;
+    border-top: 1px solid var(--line);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem 2rem;
+    align-items: baseline;
+}
+footer p { font-size: 1.05rem; color: var(--ink-dim); max-width: 58ch; }
+footer .sig { margin-left: auto; }
+
+@media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+}
+</style>
+    <link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+</head>
+<body>
+<div class="wrap">
+
+<header>
+    <p class="eyebrow">Doc Alvers Mathe-Labor · Videopipeline</p>
+    <h1>Die Kette, die hält</h1>
+    <p class="lede">Der Plot für den Film zum Satz von Brahmagupta: wie aus einer
+        Beobachtung, die man nur nachmisst, ein Beweis wird, den man nachlaufen kann —
+        und was passiert, wenn man ihm eine Voraussetzung wegnimmt.</p>
+    <p class="status">Plot — Runde 1, wartet auf Freigabe</p>
+
+    <dl class="meta">
+        <div><dt>Lab</dt><dd><a href="https://docalvers.de/brahmagupta.html">brahmagupta.html</a> · Modus BEWEIS</dd></div>
+        <div><dt>Sprecherin</dt><dd>Solita · de-DE-Studio</dd></div>
+        <div><dt>Aufnahme</dt><dd>1440p · Playwright · dsf 2</dd></div>
+        <div><dt>Szenen</dt><dd>15</dd></div>
+        <div><dt>Laufzeit</dt><dd>~5:00</dd></div>
+    </dl>
+</header>
+
+<div class="thesis">
+    <canvas id="stage" width="600" height="600" role="img"
+            aria-label="Ein Sehnenviereck mit senkrechten Diagonalen: das Lot vom Schnittpunkt M auf die Seite BC trifft die Gegenseite AD im Punkt F, und F halbiert sie. Klick zeichnet eine neue Lage."></canvas>
+    <div>
+        <blockquote>Ein Beweis ist keine bessere Behauptung — er ist eine
+            <strong>Kette</strong>, und jedes einzelne Glied kann man im Bild
+            nachmessen.</blockquote>
+        <p class="after">Der ganze Film ist die Antwort auf eine einzige Frage:
+            <em>Wieso weiß ich, dass etwas für <strong>alle</strong> Lagen gilt,
+            wenn ich immer nur <strong>eine</strong> sehen kann?</em></p>
+    </div>
+</div>
+
+<section>
+    <div class="head"><span class="n">A</span><h2>Der dramaturgische Bogen</h2></div>
+    <div class="arc" id="arc"></div>
+    <div class="prose">
+        <p>Die ersten drei Szenen bauen auf: eine Figur, eine Behauptung, und eine
+           Zahl, die beim Ziehen einfach nicht kaputtgeht. Szene 4 dreht um — genau
+           dort, wo die meisten aufhören: <strong>zehn Beispiele sind zehn Beispiele.</strong>
+           Die Szenen 5 bis 12 laufen die Kette Glied für Glied ab, jedes Glied
+           einmal im Bild und einmal als Satz, bis aus einer Aussage über Winkel eine
+           über Längen wird. Die letzten beiden Szenen machen kaputt: erst fällt der
+           rechte Winkel weg, dann der Kreis — und man <em>sieht</em>, welches Glied
+           zuerst reißt. <strong>Das ist der lehrreichste Teil:</strong> eine
+           Voraussetzung ist kein Vorspann, sie ist ein tragendes Glied.</p>
+    </div>
+</section>
+
+<section>
+    <div class="head"><span class="n">B</span><h2>Die fünfzehn Szenen</h2>
+        <span class="note" id="tl-note">Breite = Sprechzeit</span></div>
+    <div class="timeline" id="timeline"></div>
+    <div class="legend">
+        <span><s style="background:#799e31"></s><b>Kernszene — wird nicht gekürzt</b></span>
+        <span><s style="background:#b02418"></s><b>Notbremse, falls der Schnitt zäh wirkt</b></span>
+        <span><s style="background:#f5c242"></s><b>Regelszene</b></span>
+    </div>
+    <div class="scenes" id="scenes" style="margin-top:1.5rem"></div>
+</section>
+
+<section>
+    <div class="head"><span class="n">C</span><h2>Didaktische Leitplanken</h2>
+        <span class="note">bindend für den Sprechertext</span></div>
+    <ol class="rules">
+        <li><strong>Nie eine Formel ohne vorher gezeigtes Bild.</strong> Erst sieht
+            man es, dann heißt es so.</li>
+        <li><strong>Ein neuer Begriff pro Szene.</strong> Maximal. Lieber eine Szene mehr.</li>
+        <li><strong>Verbotene Vokabeln:</strong> <em>offensichtlich</em>, <em>trivial</em>,
+            <em>man sieht leicht</em> — genau diese drei Wörter sind es, an denen
+            Lernende aus einem Beweis herausfallen. Ebenso verboten:
+            <em>Wechselwinkel</em> für die Winkel in Szene 8. Das sind
+            <strong>Scheitelwinkel</strong>; Wechselwinkel bräuchten zwei Parallelen.
+            Im Umlaufmaterial steht es falsch, der Film macht es richtig.</li>
+        <li><strong>Zahlen nur relational.</strong> Die Gradzahlen ändern sich beim
+            Ziehen — Solita sagt nie <em>fünfundfünfzig Grad</em>, sondern
+            <em>überall dieselbe Zahl</em>. Einzige Ausnahme: die Differenz
+            |AF| − |FD|, die steht auf 0,000 und wird auch so genannt.</li>
+        <li><strong>Ein Buchstabe, eine Bedeutung.</strong> M ist der Schnittpunkt der
+            Diagonalen, E der Lotfußpunkt auf BC, F der Punkt auf AD — wie im
+            Unterrichtsmaterial. Die Namen aus dem SATZ-Modus (dort heißt der
+            Schnittpunkt P) kommen im Film nicht vor.</li>
+        <li><strong>Nichts behaupten, was das Bild nicht hergibt.</strong> Dafür sind
+            Szene 4 und die beiden Kaputtmach-Szenen da: Szene 4 sagt ausdrücklich,
+            dass das Ziehen nichts beweist, und 13/14 zeigen die Voraussetzungen,
+            statt sie zu behaupten.</li>
+    </ol>
+</section>
+
+<section>
+    <div class="head"><span class="n">D</span><h2>Zeitbudget</h2>
+        <span class="note solved">gelöst</span></div>
+    <dl class="budget" id="budget"></dl>
+    <div class="prose">
+        <p>Fünfzehn Szenen, geplant 280 s Sprache plus 1,6 s Luft je Szene — rund
+           <strong>5:04</strong>. Das ist für einen Beweisfilm eher lang; die beiden
+           Notbremsen (Szene 8 und 11) bringen zusammen 32 s und drücken ihn unter
+           4:30, ohne die Kette zu zerreißen. Teil 1 von
+           <code>Infinity_6min.m4a</code> ist <strong>nahtlos loopbar</strong>
+           (loopStart 21,220 s, loopEnd 163,998 s) — das Bett lässt sich auf jede
+           Länge rendern, die 360 s der Datei sind keine Obergrenze.</p>
+    </div>
+</section>
+
+<section>
+    <div class="head"><span class="n">E</span><h2>Choreografie-Notizen</h2>
+        <span class="note">für die Aufnahme</span></div>
+    <ul class="notes">
+        <li><strong>Startzustand fixieren:</strong>
+            <code>brahmagupta.html?lang=de</code>, Modus <strong>BEWEIS</strong>,
+            Schritt 0, Figur im Reset-Zustand
+            (<code>a0 = −125°, u = 70°, v = 160°</code>). Das Lab selbst legt nichts in
+            <code>localStorage</code> ab, die Shell aber schon: Sprache
+            (<code>cyber-lab-lang</code>) und der eingeklappte Zustand der Coach-Box.
+            Ein frischer Browser-Context räumt beides weg.</li>
+        <li><strong>Die Coach-Box verdeckt bei 1280×720 die Ecke A.</strong> Vor der
+            Aufnahme entscheiden: entweder Box eingeklappt und der Text lebt nur in
+            Solitas Stimme, oder die Figur wird für den Film ein Stück nach rechts
+            gerückt. <strong>Als erstes proben.</strong></li>
+        <li><strong>Mauskritisch ist Szene 4</strong> — das Ziehen über acht bis zehn
+            Lagen. Langsam, ohne Ruck, und am Ende zwei Sekunden stehenbleiben, damit
+            die Zahlen zur Ruhe kommen. Szene 11 braucht einen sichtbaren Klick auf die
+            Checkbox <kbd>LÖSUNG ZEIGEN</kbd>: Cursor einblenden.</li>
+        <li><strong>Schrittwechsel immer über den sichtbaren Knopf</strong>
+            <kbd>▶</kbd>, nie über die Pfeiltaste — der Zuschauer soll sehen, dass er
+            das selbst tun kann.</li>
+        <li><strong>Nachlauf:</strong> Nach jedem Schrittwechsel rendert das Lab sofort,
+            es läuft nichts nach. Die einzige Ausnahme ist das Ziehen in Szene 4 und
+            13 — dort 1,5 s stehen lassen, bevor geschnitten wird.</li>
+        <li><strong>Aufnahme:</strong> <code>lib/record-cdp.mjs</code> mit
+            <code>{ dsf: 2, upscale: 1 }</code>. Der Default <code>upscale: 2</code>
+            rechnet 1280×720 hoch und sieht matschig aus, obwohl <code>ffprobe</code>
+            2560×1440 meldet. Vor dem Hochladen einen 1:1-Ausschnitt ansehen.</li>
+        <li><strong>Nie auf Schwarz enden:</strong> Der Abbinder bleibt auf dem
+            Dunkelblau des Labors stehen, die Figur zieht ruhig weiter.</li>
+        <li>Der lokale Server klebt ein rotes <strong>LOCAL</strong>-Schild in die Seite.
+            Die Aufnahme muss <code>#local-badge</code> vor dem ersten Bild entfernen.</li>
+    </ul>
+</section>
+
+<section>
+    <div class="head"><span class="n">F</span><h2>Bewusst weggelassen</h2>
+        <span class="note">Kandidaten für Teil 2</span></div>
+    <div class="prose">
+        <p><strong>Die Flächenformel</strong> K = √((s−a)(s−b)(s−c)(s−d)) bleibt
+           draußen, obwohl sie im selben Lab sitzt und denselben Namen trägt. Sie hat
+           mit diesem Satz nichts zu tun außer dem Erfinder — sie wäre ein zweiter
+           Film, kein zweiter Teil dieses Films.</p>
+        <p><strong>Der kurze Beweis</strong> über den Umkreismittelpunkt der Hypotenuse
+           (das ist der, der im SATZ-Modus schon steckt: das Dreieck aus M und der
+           Gegenseite ist bei M rechtwinklig, also liegt F auf halber Hypotenuse)
+           bleibt ebenfalls draußen. Er ist zwei Sätze kurz — und genau deshalb
+           ungeeignet: Der Film handelt davon, wie eine <em>Kette</em> funktioniert,
+           nicht davon, wie man sie abkürzt. Kandidat für einen Nachschlag von
+           90 Sekunden.</p>
+        <p><strong>Brahmagupta selbst</strong> — Ujjain, 7. Jahrhundert, das
+           Brahmasphutasiddhanta, die erste bekannte Rechenregel mit der Null — kommt
+           nur als ein Halbsatz im Abbinder vor. Biografie bremst einen Beweisfilm aus.</p>
+    </div>
+</section>
+
+<footer>
+    <p><strong>Nächster Schritt:</strong> Freigabe des Plots. Danach zwei Dinge, in
+       dieser Reihenfolge: (1) <strong>Entscheidung zu den Szenen 13 und 14</strong> —
+       dafür braucht der Beweis-Modus eine kleine Erweiterung, eine Karte
+       <em>Voraussetzung aufheben</em> mit zwei Haken (<em>rechter Winkel</em> und
+       <em>Kreis</em>), die die Kette sichtbar reißen lässt. Ohne sie fällt der ganze
+       dritte Akt weg, und der Film endet mit q.e.d. statt mit der Einsicht.
+       (2) Erst dann <code>videopipeline/brahmagupta/narration.mjs</code> — Solitas
+       Wortlaut, der über <code>sync-drehbuch.mjs</code> in diese Seite zurückläuft.</p>
+    <p class="eyebrow sig">Doc Alvers Mathe-Labor</p>
+</footer>
+
+</div>
+
+<script>
+/* ---------------------------------------------------------------
+   One source of truth: the scene list feeds both the timeline and
+   the cards below it.
+   --------------------------------------------------------------- */
+const SCENES = [
+    /* n = Nummer · s = geplante Sekunden (nach der Vertonung von SPOKEN ueberschrieben)
+       t = Titel · img = was im Bild passiert · aha = der Gedanke, der fallen soll
+       core: true = Kernszene · cut: true = Notbremse · card: true = eigene Karte */
+    { n: 1, s: 18, t: 'Etwas bleibt stehen', core: true,
+      img: 'Der Beweis-Modus in Schritt 0. Die Maus greift die Ecke C und zieht sie langsam über den Kreis — acht, neun Lagen. Alles bewegt sich: das Viereck kippt, die Diagonalen drehen sich, der Punkt E wandert die Seite BC entlang. Nur zwei Zahlen links tun nichts. <code>|AF|</code> und <code>|FD|</code> zeigen bis auf die dritte Stelle denselben Wert.',
+      aha: 'Noch bevor ein Begriff fällt: <strong>Da bleibt etwas gleich, während alles andere sich bewegt.</strong> Genau in diesem Moment wird ein Mathematiker misstrauisch.' },
+
+    { n: 2, s: 20, t: 'Drei Zutaten, mehr nicht', core: true,
+      img: 'Die Figur wird aufgebaut statt gezeigt: erst der gestrichelte Kreis mit vier Punkten darauf, dann das Viereck ABCD, dann die beiden Diagonalen — und in ihrem Schnittpunkt M das kleine weiße Quadrat des rechten Winkels.',
+      aha: 'Drei Voraussetzungen, und alle drei stehen im Bild: <strong>vier Ecken auf einem Kreis, zwei Diagonalen, ein rechter Winkel.</strong> Was jetzt kommt, darf nur noch daraus folgen.' },
+
+    { n: 3, s: 16, t: 'Die Behauptung',
+      img: 'Vom Punkt M wächst das Lot auf die Seite BC, trifft sie im Punkt E, läuft weiter durch die Figur und schneidet die Gegenseite AD im Punkt F. Die beiden Hälften AF und FD bekommen je ein weißes Häkchen.',
+      aha: 'Die Behauptung heißt nicht <em>ungefähr die Mitte</em>. Sie heißt: <strong>exakt die Mitte, in jeder Lage.</strong> An diesem einen Wort entscheidet sich alles Weitere.' },
+
+    { n: 4, s: 22, t: 'Zehn Beispiele sind zehn Beispiele', core: true,
+      img: 'Noch einmal ziehen, diesmal zügig: zehn völlig verschiedene Vierecke in zwölf Sekunden — flach, spitz, fast quadratisch. In der Messwerte-Tabelle steht die Differenz |AF| − |FD| die ganze Zeit auf 0,000, in Grün.',
+      aha: 'Und jetzt der Bruch: <strong>Das beweist nichts.</strong> Zehn Lagen sind zehn Lagen, tausend wären tausend. Ein Beweis ist eine Aussage über <em>alle</em> Lagen — auch über die, die nie jemand zieht.' },
+
+    { n: 5, s: 22, t: 'Zwei Winkel, ein Grund', core: true,
+      img: 'Schritt 1. Die Sehne DC leuchtet rot auf. An der Ecke A und an der Ecke B erscheint je ein oranger Bogen mit seiner Gradzahl — und die beiden Zahlen sind dieselbe. Beim Ziehen ändern sie sich, aber immer gemeinsam.',
+      aha: 'Der Peripheriewinkelsatz: <strong>Wer von irgendwo auf dem Kreis auf dieselbe Sehne schaut, sieht denselben Winkel.</strong> Diese Gleichheit ist nicht gemessen, sie ist geerbt — vom Kreis.' },
+
+    { n: 6, s: 20, t: 'Zweimal neunzig Grad zu verteilen',
+      img: 'Schritt 2. Zwei Dreiecke leuchten übereinander auf, CMB in Violett und CME in Orange. Jedes hat einen rechten Winkel — das eine bei M, das andere bei E. Für die zwei übrigen Winkel bleiben also jedes Mal neunzig Grad.',
+      aha: 'Nichts Neues, nur der Innenwinkelsatz: <strong>In einem rechtwinkligen Dreieck teilen sich die beiden anderen Winkel die restlichen neunzig Grad.</strong> Zweimal dieselbe Buchhaltung, in zwei verschiedenen Dreiecken.' },
+
+    { n: 7, s: 18, t: 'Derselbe Rest', core: true,
+      img: 'Der grüne Bogen an der Ecke C bleibt stehen, während die beiden Dreiecke abwechselnd aufleuchten. In beiden ist es derselbe Winkel — E liegt ja auf der Strecke BC.',
+      aha: 'Zwei Winkel, die <em>denselben</em> Winkel zu neunzig Grad ergänzen, sind gleich. <strong>Hier hängt zum ersten Mal nichts mehr am Bild</strong>, sondern an einer Rechnung, gegen die man nicht argumentieren kann.' },
+
+    { n: 8, s: 14, t: 'Über Kreuz', cut: true,
+      img: 'Schritt 4. An M liegen sich zwei Doppelbögen gegenüber: einer zwischen MC und ME, einer zwischen MA und MF. Zwei Geraden kreuzen sich, mehr passiert nicht.',
+      aha: 'Scheitelwinkel — nicht Wechselwinkel. <strong>Für dieses Glied braucht es weder Kreis noch rechten Winkel</strong>, nur zwei Geraden, die sich schneiden. Das billigste Glied der Kette, und trotzdem unverzichtbar.' },
+
+    { n: 9, s: 18, t: 'Die Kette schließt sich', core: true,
+      img: 'Schritt 5. Alle vier Bögen stehen gleichzeitig im Bild — an A, an B und zweimal an M — und alle vier zeigen denselben Wert. Links in den Kacheln stehen sie noch einmal nebeneinander.',
+      aha: 'Vier Winkel, vier verschiedene Gründe, ein Wert. <strong>Der Anfang der Kette hängt jetzt an ihrem Ende:</strong> der Winkel bei A ist derselbe wie der bei M.' },
+
+    { n: 10, s: 20, t: 'Aus Winkeln werden Längen', core: true,
+      img: 'Schritt 6. Das Dreieck AFM leuchtet auf, die gleichen Winkel bei A und bei M sind markiert, die Seiten FA und FM bekommen je ein Häkchen. Beim Ziehen ändern sich die Winkel — die Häkchen bleiben.',
+      aha: 'Gleiche Winkel, gleiche Schenkel. <strong>Das ist der Übergang, um den es die ganze Zeit ging:</strong> aus einer Aussage über Winkel wird eine über Längen. Ab hier ist der Beweis fast fertig.' },
+
+    { n: 11, s: 18, t: 'Die andere Hälfte gehört Dir', cut: true,
+      img: 'Schritt 7. Diesmal steht nur das Dreieck DFM da, ohne Winkelbögen, und der Text stellt eine Aufgabe. Dann ein sichtbarer Klick auf die Checkbox <kbd>LÖSUNG ZEIGEN</kbd> — und die zweite Kette erscheint, diesmal über der Sehne AB.',
+      aha: 'Dieselbe Kette noch einmal, gespiegelt. <strong>Einen Beweis nachvollziehen und einen Beweis führen sind zwei verschiedene Dinge</strong> — der Knopf hält den Unterschied offen, statt ihn zuzukleben.' },
+
+    { n: 12, s: 16, t: 'q.e.d.', core: true,
+      img: 'Schritt 8. Von den Hilfslinien bleiben nur die beiden Hälften AF und FD, beide orange, beide mit einem Häkchen, F genau dazwischen. Die Zahlen links stehen auf demselben Wert.',
+      aha: 'Jetzt gilt es für jede Lage — <strong>nicht weil wir viele probiert haben, sondern weil keine andere möglich ist.</strong> Das ist der ganze Unterschied zu Szene 4.' },
+
+    { n: 13, s: 22, t: 'Welches Glied reißt zuerst', core: true,
+      img: '<strong>Braucht die Lab-Erweiterung</strong> (Karte <em>Voraussetzung aufheben</em>). Der Haken <em>rechter Winkel</em> wird gelöst, D läuft frei. Die Diagonalen kreuzen sich schief; die vier Winkelzahlen, die eben noch alle gleich waren, laufen auseinander, und die Differenz |AF| − |FD| wird rot. Zurück auf Schritt 2: dort ist der rechte Winkel bei M verschwunden, das Dreieck CMB hat keine neunzig Grad mehr zu verteilen.',
+      aha: 'Man sieht, <strong>welches Glied reißt und an welcher Stelle:</strong> Schritt 2 stirbt zuerst, alles danach fällt nach. Eine Voraussetzung ist kein Vorspann — sie ist ein tragendes Glied.' },
+
+    { n: 14, s: 20, t: 'Und ohne Kreis?',
+      img: '<strong>Braucht dieselbe Erweiterung.</strong> Zweiter Haken: <em>Kreis</em>. Die Ecken lösen sich von der gestrichelten Linie, das Viereck bleibt, die Diagonalen bleiben senkrecht. Zurück auf Schritt 1: die beiden orangen Bögen über der Sehne DC zeigen jetzt verschiedene Zahlen.',
+      aha: 'Diesmal reißt das <strong>erste</strong> Glied. Zwei Voraussetzungen, zwei verschiedene Bruchstellen — <strong>und der Satz gilt genau so lange, wie beide halten.</strong>' },
+
+    { n: 15, s: 16, t: 'Vierzehnhundert Jahre alt',
+      img: 'Alle Haken zurück, Schritt 0, die Figur zieht ruhig weiter. Ein Halbsatz zu Brahmagupta, Ujjain, siebtes Jahrhundert. Das Bild bleibt auf dem Dunkelblau des Labors stehen — nicht auf Schwarz.',
+      aha: 'Die Figur ist vierzehnhundert Jahre alt, die Kette auch. <strong>Neu ist nur, dass man sie selbst nachlaufen kann</strong> — Schritt für Schritt, im Labor.' }
+];
+
+/* SAY:START - generated by videopipeline/brahmagupta/sync-drehbuch.mjs, do not edit */
+const SAY = {};
+const SPOKEN = {};
+/* SAY:END */
+
+const ARC = [
+    { t: 'eine Zahl,<br>die nicht wackelt', c: '#93a8c6' },
+    { t: 'zehn Beispiele<br>beweisen nichts', c: '#f5c242', key: true },
+    { t: 'die Kette,<br>Glied für Glied',    c: '#00d2ff', key: true },
+    { t: 'q.e.d.',                           c: '#799e31' },
+    { t: 'die Voraussetzung<br>wegnehmen',   c: '#b02418', key: true }
+];
+
+/* --- the arc --- */
+document.getElementById('arc').innerHTML = ARC.map(a =>
+    `<span class="${a.key ? 'key' : ''}" style="--stop:${a.c}">${a.t}</span>`).join('');
+
+/* --- timeline: each scene as wide as it is long --- */
+const secs = (x) => SPOKEN['s' + x.n] ?? x.s;
+const total = SCENES.reduce((s, x) => s + secs(x), 0);
+document.getElementById('timeline').innerHTML = SCENES.map(x =>
+    `<i class="${x.core ? 'core' : x.cut ? 'cut' : ''}" data-n="${x.n}"
+        style="flex:0 0 ${(secs(x) / total * 100).toFixed(3)}%"
+        title="Szene ${x.n} · ${secs(x).toFixed(1)} s"></i>`).join('');
+
+/* --- budget, from the measured durations when they exist --- */
+(function () {
+    const spoken = Object.values(SPOKEN).reduce((a, b) => a + b, 0);
+    const planned = SCENES.reduce((a, x) => a + x.s, 0);
+    const air = SCENES.length * 1.6;
+    const film = (spoken || planned) + air;
+    const mmss = (t) => Math.floor(t / 60) + ':' + String(Math.round(t % 60)).padStart(2, '0');
+    const cell = (dt, dd, sub) => `<div><dt>${dt}</dt><dd>${dd}<small>${sub}</small></dd></div>`;
+    document.getElementById('budget').innerHTML =
+        cell('Sprache', (spoken || planned).toFixed(0) + ' s',
+             spoken ? 'gemessen' : 'geplant') +
+        cell('Luft', '~' + air.toFixed(0) + ' s', '1,6 s je Szene') +
+        cell('Film', mmss(film), spoken ? 'nach der Vertonung' : 'geschätzt') +
+        cell('Bett-Loop', '142,778 s', '64 Takte · 107,58 BPM');
+    if (spoken) {
+        const n = document.getElementById('tl-note');
+        if (n) n.textContent = 'Breite = gemessene Sprechzeit';
+    }
+})();
+
+/* --- scene cards --- */
+document.getElementById('scenes').innerHTML = SCENES.map(x => `
+    <article class="scene ${x.core ? 'core' : x.cut ? 'cut' : ''}">
+        <div class="idx">${String(x.n).padStart(2, '0')}</div>
+        <div>
+            <div class="top">
+                <h3>${x.t}</h3>
+                ${x.core ? '<span class="tag core">Kernszene</span>' : ''}
+                ${x.cut ? '<span class="tag cut">Notbremse</span>' : ''}
+                <span class="secs">${secs(x).toFixed(1)} s</span>
+            </div>
+            <div class="body">
+                <div><h4>Was im Bild passiert</h4><p>${x.img}</p></div>
+                <div class="aha"><h4>Der Aha</h4><p>${x.aha}</p></div>
+            </div>
+            ${SAY['s' + x.n] ? `<div class="say"><h4>Solita sagt</h4><p>${SAY['s' + x.n]}</p></div>` : ''}
+        </div>
+    </article>`).join('');
+
+/* ---------------------------------------------------------------
+   Hero: the film's own subject, really computed. A random cyclic
+   quadrilateral whose diagonals cross at a right angle - built with
+   the lab's own parametrisation, arc(A,B) + arc(C,D) = 180 degrees -
+   plus M, E, F and the two halves of AD. A click rolls a new one.
+   --------------------------------------------------------------- */
+(function () {
+    const cv = document.getElementById('stage');
+    if (!cv) return;
+    const ctx = cv.getContext('2d');
+    const rad = d => d * Math.PI / 180;
+    const R = 230, CX = 300, CY = 300;
+    let S = null;
+
+    /* Same constraints as the lab: every arc stays above the 14 degree gap. */
+    function roll() {
+        const u = 30 + Math.random() * 120;
+        S = { a0: Math.random() * 360, u: u, v: u + 28 + Math.random() * (150 - u * 0.15) };
+    }
+
+    function corners() {
+        const a = [S.a0, S.a0 + S.u, S.a0 + S.v, S.a0 + S.v - S.u + 180];
+        return a.map(t => ({ x: CX + R * Math.cos(rad(t)), y: CY - R * Math.sin(rad(t)) }));
+    }
+
+    function cross(p1, p2, p3, p4) {
+        const d = (p1.x - p2.x) * (p3.y - p4.y) - (p1.y - p2.y) * (p3.x - p4.x);
+        if (Math.abs(d) < 1e-9) return null;
+        const k = p1.x * p2.y - p1.y * p2.x, l = p3.x * p4.y - p3.y * p4.x;
+        return { x: (k * (p3.x - p4.x) - (p1.x - p2.x) * l) / d,
+                 y: (k * (p3.y - p4.y) - (p1.y - p2.y) * l) / d };
+    }
+
+    function foot(P, S1, S2) {
+        const dx = S2.x - S1.x, dy = S2.y - S1.y, l2 = dx * dx + dy * dy || 1;
+        const t = ((P.x - S1.x) * dx + (P.y - S1.y) * dy) / l2;
+        return { x: S1.x + t * dx, y: S1.y + t * dy };
+    }
+
+    const uv = (V, P) => { const dx = P.x - V.x, dy = P.y - V.y, l = Math.hypot(dx, dy) || 1;
+                           return { x: dx / l, y: dy / l }; };
+
+    function fit() {
+        const r = cv.getBoundingClientRect();
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        cv.width = Math.max(1, Math.round(r.width * dpr));
+        cv.height = Math.max(1, Math.round(r.height * dpr));
+    }
+
+    function draw() {
+        fit();
+        if (!S) roll();
+        const W = cv.width, H = cv.height, px = W / 600;
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.fillStyle = '#04101f';
+        ctx.fillRect(0, 0, W, H);
+        ctx.setTransform(px, 0, 0, px, 0, 0);
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+
+        const c = corners(), A = c[0], B = c[1], C = c[2], D = c[3];
+        const M = cross(A, C, B, D);
+        if (!M) return;
+        const E = foot(M, B, C);
+        const F = cross(M, E, D, A);
+        if (!F) return;
+
+        const seg = (p, q) => { ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(q.x, q.y); ctx.stroke(); };
+
+        ctx.setLineDash([5, 6]); ctx.lineWidth = 1.5;
+        ctx.strokeStyle = 'rgba(0,210,255,0.28)';
+        ctx.beginPath(); ctx.arc(CX, CY, R, 0, 2 * Math.PI); ctx.stroke();
+
+        ctx.setLineDash([7, 5]); ctx.lineWidth = 2;
+        ctx.strokeStyle = 'rgba(255,255,255,0.42)';
+        seg(A, C); seg(B, D);
+        ctx.setLineDash([]);
+
+        ctx.lineWidth = 3; ctx.strokeStyle = '#00d2ff';
+        ctx.beginPath(); ctx.moveTo(A.x, A.y);
+        [B, C, D].forEach(p => ctx.lineTo(p.x, p.y));
+        ctx.closePath(); ctx.stroke();
+
+        ctx.lineWidth = 5;
+        ctx.strokeStyle = '#f5c242'; seg(B, C);   // the side the perpendicular hits
+        ctx.strokeStyle = '#799e31'; seg(D, A);   // the side that gets halved
+
+        ctx.lineWidth = 2; ctx.strokeStyle = '#be78ff'; seg(E, F);
+
+        /* right angle where the diagonals cross */
+        (function () {
+            const u1 = uv(M, A), u2 = uv(M, B), k = 15;
+            const q1 = { x: M.x + u1.x * k, y: M.y + u1.y * k };
+            const q2 = { x: M.x + u2.x * k, y: M.y + u2.y * k };
+            const q3 = { x: q1.x + u2.x * k, y: q1.y + u2.y * k };
+            ctx.lineWidth = 1.5; ctx.strokeStyle = 'rgba(255,255,255,0.6)';
+            ctx.beginPath(); ctx.moveTo(q1.x, q1.y); ctx.lineTo(q3.x, q3.y); ctx.lineTo(q2.x, q2.y); ctx.stroke();
+        })();
+
+        /* the claim: both halves of AD carry one mark */
+        ctx.lineWidth = 3; ctx.strokeStyle = '#fff';
+        [[A, F], [F, D]].forEach(function (pair) {
+            const m = { x: (pair[0].x + pair[1].x) / 2, y: (pair[0].y + pair[1].y) / 2 };
+            const t = uv(pair[0], pair[1]);
+            seg({ x: m.x - t.y * 8, y: m.y + t.x * 8 }, { x: m.x + t.y * 8, y: m.y - t.x * 8 });
+        });
+
+        const dot = (p, fill, r) => {
+            ctx.beginPath(); ctx.arc(p.x, p.y, r, 0, 2 * Math.PI);
+            ctx.fillStyle = fill; ctx.fill();
+            ctx.lineWidth = 2; ctx.strokeStyle = '#fff'; ctx.stroke();
+        };
+        c.forEach(p => dot(p, 'rgba(0,210,255,0.35)', 9));
+        dot(E, '#f5c242', 7);
+        dot(F, '#799e31', 8);
+        dot(M, '#be78ff', 8);
+
+        ctx.font = '700 24px Orbitron, system-ui, sans-serif';
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        const label = (p, dir, txt, fill, d) => {
+            const x = p.x + dir.x * d, y = p.y + dir.y * d;
+            ctx.lineWidth = 4; ctx.strokeStyle = 'rgba(4,16,31,0.95)';
+            ctx.strokeText(txt, x, y); ctx.fillStyle = fill; ctx.fillText(txt, x, y);
+        };
+        ['A', 'B', 'C', 'D'].forEach((n, i) =>
+            label(c[i], uv({ x: CX, y: CY }, c[i]), n, '#fff', 32));
+        label(E, uv(M, E), 'E', '#f5c242', 26);
+        label(F, uv(M, F), 'F', '#799e31', 26);
+        (function () {
+            const a1 = uv(M, C), a2 = uv(M, D);
+            const b = { x: a1.x + a2.x, y: a1.y + a2.y };
+            const l = Math.hypot(b.x, b.y) || 1;
+            label(M, { x: b.x / l, y: b.y / l }, 'M', '#be78ff', 30);
+        })();
+    }
+
+    roll();
+    draw();
+    addEventListener('resize', draw, { passive: true });
+    cv.style.cursor = 'pointer';
+    cv.addEventListener('click', () => { roll(); draw(); });
+    document.fonts.ready.then(draw);
+})();
+</script>
+</body>
+</html>
