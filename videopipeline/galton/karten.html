@@ -8,7 +8,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&family=Outfit:wght@300;400;500&display=swap">
 <style>
   html, body { margin: 0; padding: 0; background: #030616; overflow: hidden; }
-  canvas { display: block; }
+  canvas { display: block; width: 1280px; height: 720px; }
 </style>
 </head>
 <body>
@@ -35,7 +35,15 @@ const DUR = parseFloat(P.get('dur') || '20');
 
 const c = document.getElementById('c');
 const g = c.getContext('2d');
-const W = c.width, H = c.height;
+/* The design grid stays 1280 x 720 and every coordinate below is in those units,
+   but the backing store is raised to the real device resolution. The recorder runs
+   the page at a device pixel ratio of 2, and a fixed 1280-wide canvas was simply
+   stretched to 2560 - the cards went into the film at half resolution. */
+const W = 1280, H = 720;
+const DPR = Math.max(1, Math.min(window.devicePixelRatio || 1, 3));
+c.width = Math.round(W * DPR);
+c.height = Math.round(H * DPR);
+g.setTransform(DPR, 0, 0, DPR, 0, 0);
 
 const COL = {
   ground: '#030616', panel: '#0b1430', panel2: '#121e42', edge: '#1f3060', edgeSoft: '#16224a',
