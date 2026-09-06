@@ -108,6 +108,32 @@ def add_countdown(root):
     return len(labels)
 
 
+def hide_header(root, report, tag):
+    """The slide-length caption is a working aid: it tells the 26 near-identical slides apart
+    while editing. In the show it is noise, so it gets a Disappear at 0 s - visible on the
+    thumbnail and the canvas, gone the instant the slide comes up."""
+    spid = None
+    for cnv in root.iter(q('cNvPr')):
+        if cnv.get('name') == 'SLIDE_LENGTH':
+            spid = cnv.get('id')
+    if spid is None:
+        return
+    host = None
+    for seq in root.iter(q('seq')):
+        ctn = seq.find(q('cTn'))
+        if ctn is not None and ctn.get('nodeType') == 'mainSeq':
+            host = effect_host(ctn.find(q('childTnLst'))[0])
+    if host is None:
+        return
+    next_id = max(int(c.get('id')) for c in root.iter(q('cTn')) if c.get('id')) + 1
+    host.append(visibility_effect(spid, 0, False, next_id, 2))
+    bld = root.find(q('timing')).find(q('bldLst'))
+    if bld is None:
+        bld = etree.SubElement(root.find(q('timing')), q('bldLst'))
+    etree.SubElement(bld, q('bldP'), spid=str(spid), grpId='2', animBg='1')
+    report.append('%s: length caption hidden once the show starts' % tag)
+
+
 def audio_spid_of(root):
     """The audio shape's id, looked up by name so it survives shapes being added or removed."""
     A = 'http://schemas.openxmlformats.org/drawingml/2006/main'
@@ -147,6 +173,8 @@ def fix_slide(root, report, name):
     n = add_countdown(root)
     if n:
         report.append('%s: %d countdown numbers timed' % (tag, n))
+
+    hide_header(root, report, tag)
 
     if main is not None:
         merge_groups(main, report, tag)
