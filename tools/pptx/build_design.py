@@ -221,7 +221,41 @@ rebuild(L[8], "Bild links", HEAD_BLOCK + [
                 prompt="Inhalt"),
 ])
 
-for extra in L[9:]:
+# 9 - Begruessung (dunkle Auftaktfolie: Bild randlos links, Gruss und Zitat rechts)
+GREET_IMG_W = 312.0
+GREET_X = GREET_IMG_W + 24            # 336 - linke Kante des Textbereichs
+GREET_W = W - GREET_X - MARGIN        # bis zum rechten Satzspiegel
+greet_fld = ('<a:p><a:pPr algn="r"><a:buNone/></a:pPr>'
+             f'<a:fld id="{{{str(uuid.uuid4()).upper()}}}" type="slidenum">'
+             f'<a:rPr lang="de-DE" sz="1100" b="1" spc="100">{fill(CODE_MUTED)}'
+             f'<a:latin typeface="{FONT_H}"/></a:rPr><a:t>1</a:t></a:fld></a:p>')
+rebuild(L[9], "Begrüßung", [
+    shape(100, "greet-ground", 0, 0, W, H, fill(GREET_BG)),
+    placeholder(102, "Bild", '<p:ph type="pic" idx="2"/>', 0, 0, GREET_IMG_W, H),
+    # Gruss linksbuendig, Zitat mittig, Urheber rechts - eine Diagonale nach unten rechts
+    placeholder(105, "Gruß", TITLE_PH, GREET_X + 57, 168, GREET_W - 57, 76,
+                lst_style=lvl(1, 46, FONT_B_LIGHT, ORANGE, line_spacing=1.05,
+                              spc=-0.5, align="l"),
+                prompt="Good morning!"),
+    placeholder(106, "Zitat", body_ph(1), GREET_X + 110, 368, GREET_W - 110, 32,
+                lst_style=lvl(1, 17, FONT_B_LIGHT, ORANGE, line_spacing=1.2,
+                              align="ctr"),
+                prompt="Zitat"),
+    # Urheber sitzt rechts unter dem Zitatende, nicht mittig darunter
+    placeholder(107, "Urheber", body_ph(3), GREET_X + 220, 404, GREET_W - 220, 20,
+                lst_style=lvl(1, 11, FONT_B, CODE_MUTED, line_spacing=1.0, align="ctr"),
+                prompt="Urheber"),
+    # unser Footer, nur hell statt dunkel - der Master ist auf dieser Folie ausgeblendet
+    shape(108, "footer-rule", GREET_X, FOOT_Y, GREET_W, 0.75, fill(CODE_INK, 20)),
+    shape(109, "footer-text", GREET_X, FOOT_Y + 8, 480, 18, body=para(
+        run(FOOTER_TEXT, FONT_B, 10, CODE_MUTED, spc=1.2)),
+        body_pr='<a:bodyPr wrap="none" anchor="t" lIns="0" tIns="0" rIns="0" bIns="0"/>'),
+    shape(110, "slide-number", W - MARGIN - 120, FOOT_Y + 6, 120, 20, body=greet_fld,
+          body_pr='<a:bodyPr anchor="t" lIns="0" tIns="0" rIns="0" bIns="0"/>'),
+])
+L[9]._element.set("showMasterSp", "0")   # heller Master-Footer wuerde auf Dunkel verschwinden
+
+for extra in L[10:]:
     prs.slide_layouts.remove(extra)
 
 prs.save(OUT)

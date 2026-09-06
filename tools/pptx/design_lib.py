@@ -16,6 +16,7 @@ MUTED   = "6E7E9F"
 STROKE  = "0E244E"         # hairlines and outlines on the light ground
 CARD    = "FFFFFF"
 CODE_BG = "0E244E"         # code stays dark on the light page
+GREET_BG = "000028"        # Auftaktfolie: dunkler als der Code-Grund, rgb(0,0,40)
 CODE_INK = "E6ECF8"
 CODE_MUTED = "7E8FB5"
 ORANGE  = "F5C242"         # lambda
@@ -24,12 +25,14 @@ GREEN   = "799E31"         # phi
 PANEL   = "FFFFFF"
 
 FONT_H, FONT_B, FONT_M = "Orbitron", "Raleway", "Menlo"
+FONT_B_LIGHT = "Raleway Light"     # eigene Schnitte - PowerPoint fuehrt sie als
+FONT_B_MEDIUM = "Raleway Medium"   # eigenstaendige Schriften, nicht als b="1"
 
 # Identity of this design. Every deck built from it carries these two values as
 # an invisible custom property (stamp.py), which is how restyle.py finds the
 # decks again later. Bump TEMPLATE_VERSION whenever the master changes.
 TEMPLATE_ID = "informatik-hell"
-TEMPLATE_VERSION = 2
+TEMPLATE_VERSION = 4
 BU_FONT, BU_CHAR = "Wingdings", "n"   # measured: the only square PowerPoint really draws
 
 # ------------------------------------------------------------- geometry (pt) -
@@ -148,14 +151,14 @@ def placeholder(sid, name, ph_xml, x, y, w, h, lst_style="", anchor="t", prompt=
 
 
 def lvl(n, size, font=FONT_B, color=BODY, bold=False, bullet=None, marL=0, indent=0,
-        space_before=0, line_spacing=None, spc=0, caps=False):
+        space_before=0, line_spacing=None, spc=0, caps=False, align="l"):
     ln = f'<a:lnSpc><a:spcPct val="{int(line_spacing * 100000)}"/></a:lnSpc>' if line_spacing else ""
     sb = f'<a:spcBef><a:spcPts val="{int(space_before * 100)}"/></a:spcBef>'
     bu = ('<a:buNone/>' if bullet is None else
           f'<a:buClr><a:srgbClr val="{bullet[1]}"/></a:buClr><a:buSzPct val="55000"/>'
           f'<a:buFont typeface="{BU_FONT}"/><a:buChar char="{BU_CHAR}"/>')
     cap = ' cap="all"' if caps else ""
-    return (f'<a:lvl{n}pPr marL="{emu(marL)}" indent="{emu(indent)}" algn="l">{ln}{sb}{bu}'
+    return (f'<a:lvl{n}pPr marL="{emu(marL)}" indent="{emu(indent)}" algn="{align}">{ln}{sb}{bu}'
             f'<a:defRPr sz="{int(size * 100)}" b="{1 if bold else 0}" spc="{int(spc * 100)}"{cap}>'
             f'{fill(color)}<a:latin typeface="{font}"/><a:cs typeface="{font}"/></a:defRPr>'
             f'</a:lvl{n}pPr>')

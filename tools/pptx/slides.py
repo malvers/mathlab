@@ -5,16 +5,20 @@ Deck(name) opens the template; every method adds one slide with the click build
 from feedback_pptx_deck_standard (one click per level-0 bullet, native fade).
 Coordinates in points. Tables are native (tables.py), pictures come from Pillow.
 """
+import collections
+import glob
+import json
 import os, re, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from design_lib import (ORANGE, GREEN, RED, CODE_INK, CODE_MUTED, FONT_M,
                         MARGIN, BODY_Y, BODY_H, CONTENT_W, W, FOOT_Y, emu)
-from deck_util import fill_ph, drop_ph, add_click_build, save_deck
+from deck_util import fill_ph, drop_ph, fill_picture, add_click_build, save_deck
 from tables import add_table, check_fit, text_width_pt
 from design_lib import FONT_H, FONT_B
 import math
 from pptx import Presentation
 from pptx.util import Pt
+from pptx.oxml.ns import qn
 from pptx.dml.color import RGBColor
 from PIL import Image
 
@@ -78,11 +82,83 @@ def sql_parts(line):
     return merged
 
 
+# ------------------------------------------------------------- Begruessung ---
+# Die Auftaktfolie vor jedem Deck: randloses Motiv links, Gruss und Zitat rechts.
+# Die Motive liegen in img/morning/ (extract_morning.py) - fremdes Material, deshalb
+# nicht im oeffentlichen Repo. Jedes Deck bekommt ueber seinen Namen stabil dasselbe.
+MORNING_DIR = os.path.join(IMG, "morning")
+GREET_TEXT = "Good morning!"
+GREET_QUOTE = "Nur das Schöne wird die Welt retten!"
+GREET_AUTHOR = "Fjodor Dostojewski"
+
+
+MORNING_MAP = os.path.join(HERE, "morning-zuordnung.json")
+
+
+def morning_image(key):
+    """Welches Motiv gehoert zu welchem Deck.
+
+    Die Zuordnung steht in morning-zuordnung.json und bleibt damit ueber Rebuilds
+    stabil - ein Deck behaelt sein Bild. Neue Decks bekommen automatisch das am
+    seltensten benutzte Motiv, damit sich nichts haeuft. Zum Tauschen einfach die
+    Zeile in der JSON aendern (oder loeschen, dann wird neu gezogen).
+    """
+    pool = sorted(os.path.basename(f) for f in glob.glob(os.path.join(MORNING_DIR, "*.jpg")))
+    if not pool:
+        return None
+    try:
+        with open(MORNING_MAP, encoding="utf-8") as f:
+            table = json.load(f)
+    except (OSError, ValueError):
+        table = {}
+    if table.get(key) not in pool:
+        used = collections.Counter(v for v in table.values() if v in pool)
+        table[key] = min(pool, key=lambda name: (used[name], name))
+        with open(MORNING_MAP, "w", encoding="utf-8") as f:
+            json.dump(dict(sorted(table.items())), f, indent=2, ensure_ascii=False)
+            f.write("\n")
+    return os.path.join(MORNING_DIR, table[key])
+
+
+def move_slide(prs, index):
+    """Die zuletzt angelegte Folie an Position `index` schieben."""
+    ids = prs.slides._sldIdLst
+    el = list(ids)[-1]
+    ids.remove(el)
+    ids.insert(index, el)
+
+
+def add_greeting(prs, layouts, key, text=GREET_TEXT, quote=GREET_QUOTE,
+                 author=GREET_AUTHOR, image=None, index=0):
+    """Begruessungsfolie anlegen und nach vorn schieben. Gibt die Folie zurueck."""
+    s = prs.slides.add_slide(layouts["Begrüßung"])
+    img = image or morning_image(key)
+    if img:
+        fill_picture(s, 2, img)
+    else:
+        drop_ph(s, 2)
+        print("  WARN kein Motiv in img/morning - erst extract_morning.py laufen lassen")
+    s.shapes.title.text_frame.text = text
+    fill_ph(s, 1, [(quote, 0)])
+    fill_ph(s, 3, [(author, 0)])
+    move_slide(prs, index)
+    return s
+
+
 class Deck:
-    def __init__(self, out_name):
+    def __init__(self, out_name, greeting=True, greet_text=GREET_TEXT,
+                 greet_quote=GREET_QUOTE, greet_author=GREET_AUTHOR, greet_image=None):
         self.out = os.path.join(OUT, out_name)
         self.prs = Presentation(os.path.join(OUT, "informatik-vorlage.pptx"))
         self.lay = {l.name: l for l in self.prs.slide_layouts}
+        if greeting:
+            self.greeting(greet_text, greet_quote, greet_author, greet_image)
+
+    def greeting(self, text=GREET_TEXT, quote=GREET_QUOTE, author=GREET_AUTHOR,
+                 image=None, index=0):
+        """Die Auftaktfolie - steht als Folie 0 vor allem anderen."""
+        return add_greeting(self.prs, self.lay, os.path.basename(self.out),
+                            text, quote, author, image, index)
 
     # ------------------------------------------------------------ basics ---
     def _add(self, layout):

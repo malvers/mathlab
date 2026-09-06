@@ -3,6 +3,7 @@
 import os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from design_lib import ORANGE, GREEN, MUTED, BODY, CODE_INK, FONT_M
+from slides import add_greeting
 from deck_util import save_deck
 from pptx import Presentation
 from pptx.util import Pt
@@ -13,6 +14,8 @@ src = sys.argv[1] if len(sys.argv) > 1 else os.path.join(HERE, "out", "informati
 dst = sys.argv[2] if len(sys.argv) > 2 else os.path.join(HERE, "out", "informatik-design.pptx")
 prs = Presentation(src)
 LAY = {l.name: l for l in prs.slide_layouts}
+
+add_greeting(prs, LAY, "informatik-design.pptx")   # Auftaktfolie als Folie 0
 
 
 def fill_ph(slide, idx, lines):

@@ -3,6 +3,7 @@
 import os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from design_lib import ORANGE, GREEN, RED, CODE_INK, FONT_M, MARGIN, BODY_Y, CONTENT_W, W
+from slides import add_greeting
 from deck_util import (fill_ph, drop_ph, fill_picture, fit_picture, add_click_build, save_deck)
 from pptx import Presentation
 from pptx.util import Pt
@@ -13,6 +14,8 @@ IMG = os.path.join(HERE, "img")
 prs = Presentation(os.path.join(HERE, "out", "informatik-vorlage.pptx"))
 LAY = {l.name: l for l in prs.slide_layouts}
 add = lambda name: prs.slides.add_slide(LAY[name])
+
+add_greeting(prs, LAY, "webstuhl-algorithmus.pptx")   # Auftaktfolie als Folie 0
 
 CC_LOOM = "Foto: Stephencdickson, CC BY-SA 4.0, Wikimedia Commons"
 CC_CARDS = "Foto: Robert-brook, CC0, Wikimedia Commons"
