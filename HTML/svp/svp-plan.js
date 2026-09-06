@@ -123,11 +123,17 @@
         '3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 ' +
         '12l-6.273 3.568z';
 
+    // Praesentation (Leinwand mit Pfeil) — Strichsymbol fuer "in der App oeffnen",
+    // damit der Menuepunkt zu den getippten Zeichen passt statt zum bunten Logo.
+    const PRESENT_PATH = 'M3.5 4.5h17v11h-17z M12 15.5v3.5 M8.7 21.5 12 19l3.3 2.5';
+
     // Plain link: drawn, not typed — the \u2197 character sits too high in its
     // line in most fonts, an SVG is centred by construction.
     const LINK_PATH = 'M14 3h7v7h-2V6.41l-9.29 9.3-1.42-1.42 9.3-9.29H14V3zM5 5h5v2H7v10h10v-3h2v5H5V5z';
 
-    function drawnIcon(cls, d, fill) {
+    // fill = Farbe fuer eine Flaeche; strichbreite > 0 zeichnet stattdessen eine
+    // Linie - so passt ein Symbol zu den duennen getippten Zeichen im Menue.
+    function drawnIcon(cls, d, fill, strichbreite) {
         const ns = 'http://www.w3.org/2000/svg';
         const svg = document.createElementNS(ns, 'svg');
         svg.setAttribute('class', 'mat-ico ' + cls);
@@ -135,7 +141,15 @@
         svg.setAttribute('aria-hidden', 'true');
         const path = document.createElementNS(ns, 'path');
         path.setAttribute('d', d);
-        path.setAttribute('fill', fill);
+        if (strichbreite) {
+            path.setAttribute('fill', 'none');
+            path.setAttribute('stroke', fill);
+            path.setAttribute('stroke-width', strichbreite);
+            path.setAttribute('stroke-linecap', 'round');
+            path.setAttribute('stroke-linejoin', 'round');
+        } else {
+            path.setAttribute('fill', fill);
+        }
         svg.appendChild(path);
         return svg;
     }
@@ -170,6 +184,23 @@
     function isUploadEntry(en) { return UPLOAD_LABEL.test(en.label || ''); }
 
     // Default pill label when none was typed: derived from the link type.
+    // Ein Office-Dokument in der Desktop-App oeffnen. Office registriert dafuer
+    // eigene Protokolle; "ofe" heisst "open for edit", "u" leitet die Adresse ein.
+    // Klappt mit einem Freigabelink genauso wie mit einem Pfad - Office loest ihn
+    // selbst auf. Fuer alles ausser Word/Excel/PowerPoint gibt es kein Protokoll.
+    const OFFICE_APP = {
+        ppt: ['ms-powerpoint', 'PowerPoint'],
+        doc: ['ms-word', 'Word'],
+        xls: ['ms-excel', 'Excel']
+    };
+    function officeEdit(url, label, datei) {
+        const app = OFFICE_APP[matKind(url, label)];
+        /* Ohne Dateipfad geht es nicht: Office kann einen Freigabelink nicht
+           aufloesen und meldet dann "Internetverbindung erforderlich". */
+        if (!app || !datei) return null;
+        return { href: app[0] + ':ofe|u|https://' + datei.replace(/^https?:\/\//, ''), name: app[1] };
+    }
+
     function matDefaultLabel(url) {
         const l = url.toLowerCase();
         if (url.indexOf('/:p:/') >= 0 || l.indexOf('ppt') >= 0) return 'PPT';
@@ -182,17 +213,17 @@
 
     // PowerPoint share links open as slideshow, not in the edit view:
     // Office for the web starts the deck (with animations) on &action=embedview.
-    // action=embedview is OneDrive's own embed switch and only bites on a SHARE
-    // link (/:p:/…), which carries its own token. A plain PATH link has none.
+    // action=embedview is OneDrive's own embed switch. It only works on a SHARE
+    // link (/:p:/…) and lands on the WOPI frame — the one page in the redirect
+    // chain that sets no frame-ancestors (the 302s before it do, so measure the
+    // LAST response, not the first). A plain path into the drive is a download,
+    // and with web=1 it opens SharePoint's own UI, which answers SAMEORIGIN —
+    // both were tried on 06.09.2026, neither can be framed. Hence: share links.
     function matHref(url) {
         const isPpt = url.indexOf('/:p:/') >= 0 || /\.pptx?(\?|#|$)/i.test(url);
-        if (!isPpt || !isShareLink(url) || /[?&]action=/.test(url)) return url;
+        if (!isPpt || /[?&]action=/.test(url)) return url;
         return url + (url.indexOf('?') >= 0 ? '&' : '?') + 'action=embedview';
     }
-
-    // A SharePoint share link carries its permission in the path: /:p:/, /:w:/,
-    // /:x:/, /:b:/, /:f:/ … A link without one is a plain path into the drive.
-    function isShareLink(url) { return /\/:[a-z]:\//i.test(url); }
 
     // A browser popup always keeps its address bar (anti-phishing, cannot be
     // switched off), so Office material is shown in an in-page viewer instead
@@ -217,13 +248,12 @@
     //   _layouts/… is the interactive web UI, never an embed;
     //   /:f:/ is a FOLDER share — it opens the same UI, and an upload needs
     //   the full window anyway.
-    //   a PATH link (/personal/…/Documents/…/x.pptx) carries no share token, so
-    //   SharePoint sends it through an interactive sign-in first — and
-    //   login.microsoftonline.com refuses to be framed (Doc, 05.09.2026:
-    //   "refused to connect"). It needs its own window.
+    // And the share link must be scoped "anyone with the link": inside an iframe
+    // the SharePoint cookie is third-party and gets blocked, so an org-internal
+    // link lands on login.microsoftonline.com — which refuses framing, however
+    // well signed in the viewer is (Doc, 06.09.2026, "refused to connect").
     function matEmbeddable(url) {
         if (/\/_layouts\//i.test(url) || /\/:f:\//.test(url)) return false;
-        if (/sharepoint\.com/i.test(url) && !isShareLink(url)) return false;
         return /\/:[pwxb]:\//.test(url) || /sharepoint\.com|officeapps\.live\.com/i.test(url);
     }
 
@@ -280,6 +310,18 @@
            so the deck starts right under our title row. */
         const stage = document.createElement('div');
         stage.className = 'mv-stage';
+        /* Die Office-Oberflaeche laedt nach dem Dokument noch von einem guten
+           Dutzend Microsoft-Hosts nach; ohne Anzeige sieht das aus, als haenge
+           es (Doc, 06.09.2026). Die Anzeige verschwindet, sobald der Rahmen
+           laedt - auch im Fehlerfall, damit nie ein Kringel stehen bleibt. */
+        const laedt = document.createElement('div');
+        laedt.className = 'mv-laedt';
+        laedt.textContent = 'Wird geladen …';
+        stage.appendChild(laedt);
+        const fertig = function () { laedt.remove(); };
+        frame.addEventListener('load', fertig);
+        frame.addEventListener('error', fertig);
+        setTimeout(fertig, 20000);
         stage.appendChild(frame);
         box.appendChild(stage);
 
@@ -402,7 +444,7 @@
                 /* Single pill actions live in a context menu: right-click on
                    the desktop, long press on a tablet. Only while editing, so a
                    normal right-click still gets the browser's own menu. */
-                wirePillMenu(a, ref, url, label);
+                wirePillMenu(a, ref, url, label, en.datei);
                 wirePillTouch(a, ref, en, true);
                 wrap.appendChild(a);
                 wrap.appendChild(x);
@@ -425,10 +467,12 @@
     // The native title is tiny and would show the URL as well; this one shows
     // only the description, larger, in the panel look of the context menu.
     let matTip = null;
+    let pillMenu = null;   /* hier oben, damit showMatTip es ohne TDZ lesen kann */
     function hideMatTip() {
         if (matTip) { matTip.remove(); matTip = null; }
     }
     function showMatTip(anchor, text, key) {
+        if (pillMenu) return;  /* bei offenem Kontextmenue keine Beschreibung darueber */
         hideMatTip();
         const tip = document.createElement('div');
         tip.className = 'mat-tip';
@@ -714,21 +758,49 @@
     // The description follows its URL in guillemets, so old plans without
     // one still parse and the raw text stays readable in mails and notes.
     const DESC_RE = /^\s*«([^»]*)»\s*/;
+    /* Optionaler Anhang hinter einem Link: der Pfad der Datei im Laufwerk, ohne
+       Schema - "https://" davor waere ein zweiter Link und damit eine zweite
+       Pille. Damit kann das Kontextmenue die Datei in der Desktop-App oeffnen;
+       ein Freigabelink taugt dafuer nicht, den kann Office nicht aufloesen. */
+    const DATEI_RE = /^\s*\[\[datei:([^\]]*)\]\]\s*/;
+
+    /* Frisst fuehrende «Beschreibung» und [[datei:…]] in beliebiger Reihenfolge. */
+    function nimmAnhang(text) {
+        const a = { desc: '', datei: '', rest: text };
+        for (let i = 0; i < 2; i++) {
+            let m = a.rest.match(DESC_RE);
+            if (m) { a.desc = m[1].trim(); a.rest = a.rest.slice(m[0].length); continue; }
+            m = a.rest.match(DATEI_RE);
+            if (m) { a.datei = m[1].trim(); a.rest = a.rest.slice(m[0].length); continue; }
+            break;
+        }
+        return a;
+    }
     function parseMat(src) {
         const out = [];
         const parts = (src || '').split(/(https?:\/\/[^\s]+)/);
         for (let k = 1; k < parts.length; k += 2) {
             let pre = parts[k - 1];
-            const m = pre.match(DESC_RE);
-            if (m && out.length) { out[out.length - 1].desc = m[1].trim(); pre = pre.slice(m[0].length); }
+            if (out.length) {
+                const a = nimmAnhang(pre);
+                const vor = out[out.length - 1];
+                if (a.desc) vor.desc = a.desc;
+                if (a.datei) vor.datei = a.datei;
+                pre = a.rest;
+            }
             out.push({
                 label: pre.replace(/[\s|:,;·–-]+$/, '').trim(),
                 url: parts[k],
-                desc: ''
+                desc: '',
+                datei: ''
             });
         }
-        const tail = parts.length > 1 ? parts[parts.length - 1].match(DESC_RE) : null;
-        if (tail && out.length) out[out.length - 1].desc = tail[1].trim();
+        if (parts.length > 1 && out.length) {
+            const a = nimmAnhang(parts[parts.length - 1]);
+            const letzt = out[out.length - 1];
+            if (a.desc) letzt.desc = a.desc;
+            if (a.datei) letzt.datei = a.datei;
+        }
         return out;
     }
 
@@ -736,12 +808,13 @@
     function matTail(src) {
         const parts = (src || '').split(/(https?:\/\/[^\s]+)/);
         if (parts.length === 1) return '';
-        return parts[parts.length - 1].replace(DESC_RE, '').trim();
+        return nimmAnhang(parts[parts.length - 1]).rest.trim();
     }
 
     function matToSrc(entries) {
         return entries.map(en => (en.label ? en.label + ' ' : '') + en.url +
-            (en.desc ? ' «' + en.desc.replace(/[«»]/g, '') + '»' : '')).join(' ');
+            (en.desc ? ' «' + en.desc.replace(/[«»]/g, '') + '»' : '') +
+            (en.datei ? ' [[datei:' + en.datei.replace(/[\[\]]/g, '') + ']]' : '')).join(' ');
     }
 
     function readClip() {
@@ -797,32 +870,44 @@
         refreshMatButtons();
     }
 
-    let pillMenu = null;
     function closePillMenu() {
         if (pillMenu && pillMenu.parentNode) pillMenu.parentNode.removeChild(pillMenu);
         pillMenu = null;
     }
 
-    function openPillMenu(x, y, ref, url, label) {
+    function openPillMenu(x, y, ref, url, label, datei) {
         closePillMenu();
+        hideMatTip();          /* sonst steht die Beschreibung im Menue (Doc, 06.09.2026) */
         const menu = document.createElement('div');
         menu.className = 'mat-ctx';
         const titel = document.createElement('div');
         titel.className = 'mat-ctx-title';
         titel.textContent = label || matDefaultLabel(url);
         menu.appendChild(titel);
-        [['⧉', 'Kopieren', function () { copyOneMat(ref, url, label); }, 'ctx-ico-gross'],
-         ['↗', 'Öffnen', function () { openMat(url, label); }, ''],
-         ['✎', 'Bearbeiten', function () { openMatModal(ref, url); }, ''],
-         ['✕', 'Entfernen', function () { removeMatEntry(ref, url); }, '']
-        ].forEach(function (def) {
+        const desktop = officeEdit(url, label, datei);
+        const punkte = [
+            ['⧉', 'Kopieren', function () { copyOneMat(ref, url, label); }, 'ctx-ico-gross'],
+            ['↗', 'Öffnen', function () { openMat(url, label); }, '']];
+        if (desktop) punkte.push([drawnIcon('ctx-ico-svg', PRESENT_PATH, 'currentColor', 1.7),
+            'Bearbeiten in ' + desktop.name,
+            function () { location.href = desktop.href; }, '']);
+        punkte.push(['✎', 'Bearbeiten', function () { openMatModal(ref, url); }, '']);
+        punkte.push(['✕', 'Entfernen', function () { removeMatEntry(ref, url); }, '']);
+        punkte.forEach(function (def) {
             const b = document.createElement('button');
             b.type = 'button';
             b.className = 'mat-ctx-item';
-            const ico = document.createElement('span');
-            ico.className = 'ctx-ico ' + (def[3] || '');
-            ico.textContent = def[0];      /* same glyphs as the row toolbar */
-            b.appendChild(ico);
+            if (typeof def[0] === 'string') {
+                const ico = document.createElement('span');
+                ico.className = 'ctx-ico ' + (def[3] || '');
+                ico.textContent = def[0];  /* same glyphs as the row toolbar */
+                b.appendChild(ico);
+            } else {
+                const ico = document.createElement('span');
+                ico.className = 'ctx-ico ' + (def[3] || '');
+                ico.appendChild(def[0]);   /* App-Symbol statt Zeichen */
+                b.appendChild(ico);
+            }
             b.appendChild(document.createTextNode(def[1]));
             b.addEventListener('click', function (e) {
                 e.preventDefault();
@@ -848,12 +933,12 @@
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closePillMenu(); });
     window.addEventListener('scroll', closePillMenu, true);
 
-    function wirePillMenu(a, ref, url, label) {
+    function wirePillMenu(a, ref, url, label, datei) {
         a.addEventListener('contextmenu', function (e) {
             if (!document.body.classList.contains('editing')) return; /* native menu */
             e.preventDefault();
             e.stopPropagation();
-            openPillMenu(e.clientX, e.clientY, ref, url, label);
+            openPillMenu(e.clientX, e.clientY, ref, url, label, datei);
         });
     }
 
@@ -872,7 +957,7 @@
                 fired = true;
                 hideMatTip();
                 if (editable && document.body.classList.contains('editing'))
-                    openPillMenu(t.clientX, t.clientY, ref, en.url, en.label);
+                    openPillMenu(t.clientX, t.clientY, ref, en.url, en.label, en.datei);
                 else openMat(en.url, en.label);
             }, 500);
         }, { passive: true });

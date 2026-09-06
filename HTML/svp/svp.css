@@ -577,6 +577,43 @@ body.shifting #plan-table .shift-col { display: table-cell; }
 }
 /* ⧉ wirkt bei gleicher Schriftgröße kleiner als ↗ und ✕ — daher extra */
 .mat-ctx-item .ctx-ico.ctx-ico-gross { font-size: 22px; }
+/* Gezeichnetes Strichsymbol im Kontextmenue: nimmt die Textfarbe an und bleibt
+   so gross wie die getippten Zeichen daneben. */
+/* Ladeanzeige im Material-Viewer: liegt hinter dem Rahmen auf der Buehne und
+   wird entfernt, sobald der Rahmen geladen hat. */
+.mv-laedt {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6em;
+    font-size: 15px;
+    letter-spacing: 0.04em;
+    color: #8fa6c8;
+    pointer-events: none;
+}
+.mv-laedt::before {
+    content: "";
+    width: 18px;
+    height: 18px;
+    border: 2px solid currentColor;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: mv-dreht 0.9s linear infinite;
+}
+@keyframes mv-dreht { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+    .mv-laedt::before { animation: none; }
+}
+
+.mat-ctx-item .ctx-ico .ctx-ico-svg {
+    width: 18px;
+    height: 18px;
+    margin: 0;
+    display: block;
+    padding: 0;
+}
 .mat-ctx-item .ctx-ico {
     display: inline-block;
     width: 22px;
@@ -2739,6 +2776,7 @@ body.form-preview #svp-form {
    hides the same amount again, so it costs no slide. */
 .mat-view .mv-stage {
     flex: none;
+    position: relative;   /* Bezug fuer die Ladeanzeige darin */
     width: 100%;
     height: calc(var(--mv-w) * 9 / 16 + var(--mv-bar));
     overflow: hidden;
