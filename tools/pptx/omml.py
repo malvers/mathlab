@@ -42,10 +42,12 @@ SYMBOL = {
     "cdots": "\u22ef", "circ": "\u2218", "angle": "\u2222", "perp": "\u22a5",
     "parallel": "\u2225", "sum": "\u2211", "prod": "\u220f", "int": "\u222b",
     "partial": "\u2202", "sqrtsign": "\u221a", "degree": "\u00b0", "prime": "\u2032",
-    "quad": "\u2003", "qquad": "\u2003\u2003", "%": "%", "$": "$", "#": "#", "&": "&",
+    "quad": "\u2003", "qquad": "\u2003\u2003", "mid": "\u2223", "%": "%", "$": "$", "#": "#", "&": "&",
     "{": "{", "}": "}", "_": "_", "^": "^", ",": "\u2009", ";": "\u2009", "!": "",
     " ": " ",
 }
+
+_BB = {"N": "\u2115", "Z": "\u2124", "Q": "\u211a", "R": "\u211d", "C": "\u2102"}
 
 # Function names that are set upright, like PowerPoint does it.
 UPRIGHT_WORDS = {"sin", "cos", "tan", "log", "ln", "lg", "exp", "max", "min",
@@ -65,6 +67,47 @@ def _run(text, italic):
     else:
         rpr = '<m:rPr><m:sty m:val="p"/></m:rPr><a:rPr lang="de-DE" b="0" i="0"/>'
     return f'<m:r>{rpr}<m:t xml:space="preserve">{_esc(text)}</m:t></m:r>'
+
+
+_DELIM = {"pmatrix": ("(", ")"), "bmatrix": ("[", "]"), "Bmatrix": ("{", "}"),
+          "vmatrix": ("|", "|"), "Vmatrix": ("\u2016", "\u2016"), "matrix": ("", "")}
+
+
+def _matrix(toks, i, env):
+    """\\begin{pmatrix} a & b \\\\ c & d \\end{pmatrix} -> echte OMML-Matrix."""
+    rows, row, cell = [], [], []
+    while i < len(toks):
+        k, v, _raw = toks[i]
+        if k == "cmd" and v == "end":
+            _, i = _raw_arg(toks, i + 1)
+            break
+        if k == "cmd" and v == "\\":                 # Zeilenende
+            row.append("".join(cell)); cell = []
+            rows.append(row); row = []
+            i += 1
+            continue
+        if k == "chr" and v == "&":                 # Spaltentrenner
+            row.append("".join(cell)); cell = []
+            i += 1
+            continue
+        node, i = _atom(toks, i)
+        if node:
+            cell.append(node)
+    row.append("".join(cell))
+    rows.append(row)
+    rows = [r for r in rows if any(c.strip() for c in r)]
+    if not rows:
+        return "", i
+    ncols = max(len(r) for r in rows)
+    mcs = (f'<m:mPr><m:mcs><m:mc><m:mcPr><m:count m:val="{ncols}"/>'
+           f'<m:mcJc m:val="center"/></m:mcPr></m:mc></m:mcs></m:mPr>')
+    body = "".join("<m:mr>" + "".join(f"<m:e>{c}</m:e>" for c in r) + "</m:mr>"
+                   for r in rows)
+    beg, end = _DELIM.get(env, ("(", ")"))
+    dpr = ((f'<m:begChr m:val="{_esc(beg)}"/>' if beg else '<m:begChr m:val=""/>')
+           + (f'<m:endChr m:val="{_esc(end)}"/>' if end else '<m:endChr m:val=""/>'))
+    return (f'<m:d><m:dPr>{dpr}<m:grow m:val="1"/></m:dPr>'
+            f'<m:e><m:m>{mcs}{body}</m:m></m:e></m:d>'), i
 
 
 # ------------------------------------------------------------------ lexer ---
@@ -178,6 +221,15 @@ def _cmd(toks, i):
         end = "" if closer == "." else f'<m:endChr m:val="{_esc(closer)}"/>'
         return (f'<m:d><m:dPr>{beg}{end}<m:grow m:val="1"/></m:dPr>'
                 f'<m:e>{"".join(body)}</m:e></m:d>'), i
+    if name == "vec":
+        raw, i = _raw_arg(toks, i)
+        return _run(raw + "\u20d7", True), i
+    if name == "begin":                         # Matrixumgebungen
+        env, i = _raw_arg(toks, i)
+        return _matrix(toks, i, env)
+    if name == "mathbb":                        # Zahlbereiche: R -> doppelt gestrichen
+        raw, i = _raw_arg(toks, i)
+        return _run("".join(_BB.get(c, c) for c in raw), False), i
     if name in GREEK:
         return _run(GREEK[name], False), i
     if name in SYMBOL:
@@ -297,11 +349,13 @@ def set_runs_math(p, text):
 
 # ------------------------------------------------------------- measuring ----
 _PLAIN = {"\\left": "", "\\right": "", "\\,": "\u2009", "\\;": "\u2009", "\\!": "",
+          "\\%": "%", "\\$": "$", "\\&": "&", "\\#": "#",
           "\\cdot": "\u00b7", "\\times": "\u00d7", "\\pm": "\u00b1", "\\to": "\u2192",
           "\\pi": "\u03c0", "\\neq": "\u2260", "\\leq": "\u2264", "\\geq": "\u2265",
-          "\\Rightarrow": "\u21d2", "\\infty": "\u221e", "\\quad": "  "}
+          "\\Rightarrow": "\u21d2", "\\mid": "\u2223", "\\infty": "\u221e", "\\quad": "  "}
 
-_SUP = str.maketrans("0123456789+-=()n", "\u2070\u00b9\u00b2\u00b3\u2074\u2075\u2076\u2077"
+_SUP_SRC = "0123456789+-=()n"
+_SUP = str.maketrans(_SUP_SRC, "\u2070\u00b9\u00b2\u00b3\u2074\u2075\u2076\u2077"
                                          "\u2078\u2079\u207a\u207b\u207c\u207d\u207e\u207f")
 
 
@@ -314,10 +368,9 @@ def _supers(s):
     """x^2 -> x2 as a real superscript, so the fallback still reads like maths."""
     def one(m):
         body = m.group(1) or m.group(2)
-        try:
+        if body and all(c in _SUP_SRC for c in body):
             return body.translate(_SUP)
-        except Exception:
-            return "^" + body
+        return "^" + (body if len(body) == 1 else "(" + body + ")")
     return re.sub(r"\^\{([^{}]*)\}|\^(-?[0-9A-Za-z])", one, s)
 
 
@@ -326,6 +379,11 @@ def math_plain(text):
     (the mc:Fallback) and what the line measurement runs on."""
     def one(m):
         s = m.group(0)[1:-1]
+        s = re.sub(r"\\begin\{[A-Za-z]*matrix\}(.*?)\\end\{[A-Za-z]*matrix\}",
+                   lambda mm: "(" + " ".join(mm.group(1).replace("\\\\", ";").replace("&", " ").split()).replace(" ;", ";") + ")",
+                   s, flags=re.S)
+        s = s.replace("{,}", ",").replace("{.}", ".")   # Dezimaltrenner: erst weg,
+        # sonst scheitert die Bruch-Regex an den inneren Klammern und der Strich faellt weg
         s = re.sub(r"\\(?:text|mathrm|operatorname)\s*\{([^{}]*)\}", r"\1", s)
         for _ in range(4):                                    # nested fractions
             s2 = re.sub(r"\\[dt]?frac\s*\{([^{}]*)\}\s*\{([^{}]*)\}",
@@ -339,7 +397,6 @@ def math_plain(text):
             s = s.replace(k, v)
         s = re.sub(r"\\[a-zA-Z]+", "", s)
         s = _supers(s)
-        s = s.replace("{,}", ",")
         return re.sub(r"[{}_]", "", s)
     return re.sub(r"\$[^$]*\$", one, text)
 
