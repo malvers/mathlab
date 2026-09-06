@@ -43,30 +43,30 @@ s.shapes.title.text_frame.text = "Der Jacquard-Webstuhl"
 fill_ph(s, 1, [("Lyon, 1805: die erste Maschine, die ihr Programm einliest", 0)])
 
 # 3 - Webstuhl (Foto)
-L3 = [("Joseph-Marie Jacquard baut 1804/05 in Lyon einen Webstuhl, der sein Muster von Lochkarten liest", 0),
-      ("Loch = Faden wird gehoben, kein Loch = Faden bleibt unten", 0),
-      ("Ein neues Muster heißt: neuer Kartenstapel. Die Maschine selbst bleibt unverändert", 0),
-      ("Damit trennt Jacquard zum ersten Mal Maschine und Programm", 0)]
+L3 = [("**Jacquard**, Lyon 1804/05: Webstuhl liest sein Muster von **Lochkarten**", 0),
+      ("**Loch** = Faden hoch, **kein Loch** = Faden unten", 0),
+      ("Neues Muster = neuer **Kartenstapel**, Maschine bleibt gleich", 0),
+      ("Erstmals getrennt: **Maschine** und **Programm**", 0)]
 s, body = content("Bild rechts", "Die erste programmierbare Maschine", L3)
 fill_picture(s, 2, os.path.join(IMG, "loom.jpg"))
 fill_ph(s, 11, [(CC_LOOM, 0)])
 add_click_build(s, [(body, L3)])
 
 # 4 - Lochkarten (Foto)
-L4 = [("Die Karten sind zu einer Endlosschleife vernäht und laufen im Takt durch die Maschine", 0),
-      ("Ein aufwendiges Muster braucht Tausende Karten — gestanzt von Hand", 0),
-      ("Ein Fehler in einer Karte ist ein Fehler im Stoff: Debugging mit Nadel und Faden", 0),
-      ("Rechnen oder verzweigen kann der Webstuhl nicht — programmierbar heißt noch nicht Computer", 0)]
+L4 = [("Karten als **Endlosschleife** vernäht, laufen im Takt", 0),
+      ("Aufwendiges Muster: **Tausende Karten**, von Hand gestanzt", 0),
+      ("Fehler in der Karte = Fehler im Stoff: **Debugging** mit Nadel und Faden", 0),
+      ("Kein Rechnen, kein Verzweigen: **programmierbar** ist noch kein **Computer**", 0)]
 s, body = content("Bild links", "Das Programm besteht aus Pappe", L4)
 fill_picture(s, 2, os.path.join(IMG, "cards.jpg"))
 fill_ph(s, 11, [(CC_CARDS, 0)])
 add_click_build(s, [(body, L4)])
 
 # 5 - Gewebtes Porträt (Fun Fact)
-L5 = [("1839 weben Lyoner Seidenweber ein Porträt Jacquards — gesteuert von rund 24.000 Lochkarten", 0),
-      ("Das Bild ist gewebt, nicht gedruckt: jede Zeile des Bildes steckt in einer Karte", 0),
-      ("Charles Babbage besaß ein Exemplar und zeigte es seinen Gästen als Kuriosität", 0),
-      ("Fun Fact: das erste Bild aus Daten hing im Salon — rund 150 Jahre vor dem ersten JPEG", 0)]
+L5 = [("1839: gewebtes **Porträt Jacquards** aus rund **24.000 Lochkarten**", 0),
+      ("**Gewebt, nicht gedruckt**: jede Bildzeile steckt in einer Karte", 0),
+      ("**Charles Babbage** zeigte sein Exemplar als Kuriosität", 0),
+      ("Fun Fact: das erste **Bild aus Daten**, 150 Jahre vor dem **JPEG**", 0)]
 s, body = content("Bild links", "24.000 Karten für ein einziges Bild", L5)
 fit_picture(s, 2, os.path.join(IMG, "portrait.jpg"))
 fill_ph(s, 11, [(CC_PD, 0)])
@@ -78,10 +78,10 @@ fill_ph(s, 1, [("Die Analytical Engine webt algebraische Muster, so wie der Jacq
 fill_ph(s, 2, [("Ada Lovelace, 1843", 0)])
 
 # 7 - Hollerith / IBM
-L7 = [("Herman Hollerith überträgt die Lochkarte 1890 auf die US-Volkszählung", 0),
-      ("Aus seiner Firma wird später IBM; die Lochkarte bleibt bis in die 1970er ein Standard-Speicher", 0),
-      ("Erst wurden Muster gesteuert, dann Menschen gezählt — dieselbe Technik, neue Frage", 0),
-      ("Genau an dieser Stelle beginnt unser Thema: Wer sammelt was über wen?", 0)]
+L7 = [("**Herman Hollerith**, 1890: Lochkarte für die **US-Volkszählung**", 0),
+      ("Aus seiner Firma wird **IBM**; Lochkarte bis in die 1970er Standard", 0),
+      ("Erst **Muster** gesteuert, dann **Menschen** gezählt", 0),
+      ("Unsere Frage: **Wer sammelt was über wen?**", 0)]
 s, body = content("Bild rechts", "Von der Karte zur Volkszählung", L7)
 # the card is very wide - crop a squarer piece so it fills the frame
 from PIL import Image as _IMG
@@ -98,13 +98,13 @@ s.shapes.title.text_frame.text = "Deine Spuren im eigenen Gerät"
 fill_ph(s, 1, [("Browserverlauf, Cookies, Standortverlauf — selbst nachsehen", 0)])
 
 # 9 - Selbst nachsehen
-L9 = [("Browserverlauf öffnen — Chrome: Cmd + Y (Mac) bzw. Strg + H (Windows)", 0),
-      ("Wie weit zurück reicht er? Wie viele Einträge stehen allein von heute darin?", 1),
-      ("Cookies ansehen — Einstellungen → Datenschutz und Sicherheit → Cookies und andere Websitedaten", 0),
-      ("Wie viele Websites haben Daten gespeichert? Kennst du alle Namen?", 1),
-      ("Standortverlauf prüfen — Google Maps → Zeitachse, iPhone → Ortungsdienste → Systemdienste → Wichtige Orte", 0),
-      ("Seit wann wird das gespeichert? Erkennst du deinen gestrigen Weg wieder?", 1),
-      ("Notiert drei Dinge, die euch überrascht haben — die brauchen wir gleich noch", 0)]
+L9 = [("**Browserverlauf**: Chrome Cmd + Y (Mac) bzw. Strg + H (Windows)", 0),
+      ("Wie weit zurück? Wie viele Einträge von heute?", 1),
+      ("**Cookies**: Einstellungen → Datenschutz und Sicherheit → Websitedaten", 0),
+      ("Wie viele Websites? Kennst du alle Namen?", 1),
+      ("**Standortverlauf**: Google Maps → Zeitachse; iPhone → Wichtige Orte", 0),
+      ("Seit wann? Erkennst du deinen gestrigen Weg?", 1),
+      ("Notiert **drei Überraschungen**, die brauchen wir gleich", 0)]
 s, body = content("Inhalt", "Selbst nachsehen: zehn Minuten", L9)
 add_click_build(s, [(body, L9)])
 
@@ -136,10 +136,10 @@ for i, parts in enumerate(CODE):
         r.font.color.rgb = RGBColor.from_string(color)
 
 # 11 - Fun Facts Cookies
-L11 = [("Das Cookie entsteht 1994 bei Netscape — Lou Montulli baut es, damit ein Warenkorb den Seitenwechsel überlebt", 0),
-       ("Der Name kommt vom „magic cookie“ aus der Unix-Welt: ein kleines Datenpaket, das unverändert zurückkommt", 0),
-       ("Ein Cookie erkennt dich nur wieder, solange du es behältst — Löschen wirkt sofort", 0),
-       ("Google hat das Aus für Third-Party-Cookies in Chrome mehrfach verschoben und 2025 abgesagt; Safari und Firefox blockieren sie längst", 0)]
+L11 = [("**1994, Netscape**: Lou Montulli erfindet es, damit der **Warenkorb** den Seitenwechsel überlebt", 0),
+       ("Name vom Unix-**„magic cookie“**: kleines Datenpaket, kommt unverändert zurück", 0),
+       ("Erkennt dich nur, solange du es behältst: **Löschen wirkt sofort**", 0),
+       ("**Third-Party-Cookies**: Safari und Firefox blockieren, Chrome hat das Aus 2025 abgesagt", 0)]
 s, body = content("Inhalt", "Fun Facts: das Cookie", L11)
 add_click_build(s, [(body, L11)])
 
@@ -150,20 +150,20 @@ s.shapes.title.text_frame.text = "Wie KI-Systeme Daten sammeln"
 fill_ph(s, 1, [("Empfehlungsalgorithmen bei YouTube und TikTok", 0)])
 
 # 13 - Kreislauf (eigene Grafik)
-L13 = [("Gezählt wird nicht nur der Klick: Verweildauer, erneutes Ansehen, Weiterschicken, Wegwischen", 0),
-       ("Das Modell schätzt für jedes Video, wie lange du bleibst — und sortiert danach", 0),
-       ("Auch Nichts-Tun ist ein Signal: wie schnell du weiterwischst, sagt oft am meisten", 0),
-       ("Du trainierst das System bei jeder Nutzung mit — ohne je etwas einzutippen", 0)]
+L13 = [("Mehr als der Klick zählt: **Verweildauer**, Teilen, Wegwischen", 0),
+       ("Das **Modell** schätzt, wie lange du bleibst, und sortiert danach", 0),
+       ("Auch **Nichts-Tun** ist ein Signal: Wie schnell wischst du weiter?", 0),
+       ("Du **trainierst** das System mit, ohne etwas einzutippen", 0)]
 s, body = content("Bild rechts", "Der Kreislauf hinter dem Feed", L13)
 fill_picture(s, 2, os.path.join(IMG, "loop.png"))
 fill_ph(s, 11, [(CC_OWN, 0)])
 add_click_build(s, [(body, L13)])
 
 # 14 - Fun Facts Empfehlungen
-L14 = [("YouTube gab 2018 an, dass über 70 % der Wiedergabezeit aus Empfehlungen stammt", 0),
-       ("Netflix nannte 2016 rund 80 % der gesehenen Titel als Ergebnis der Empfehlungen", 0),
-       ("Aus einem 2021 an die New York Times gelangten TikTok-Papier: der Score addiert gewichtete Wahrscheinlichkeiten für Like, Kommentar und Wiedergabezeit", 0),
-       ("Kaltstart: neuen Konten zeigt das System bewusst Streuung — es sucht erst deine Vorlieben", 0)]
+L14 = [("**YouTube** 2018: über **70 %** der Wiedergabezeit aus Empfehlungen", 0),
+       ("**Netflix** 2016: rund **80 %** der gesehenen Titel empfohlen", 0),
+       ("**TikTok**-Papier 2021: Score = gewichtete Chancen für Like, Kommentar, Wiedergabezeit", 0),
+       ("**Kaltstart**: neue Konten bekommen bewusst Streuung", 0)]
 s, body = content("Inhalt", "Fun Facts: Empfehlungen", L14)
 add_click_build(s, [(body, L14)])
 
@@ -189,15 +189,15 @@ s.shapes.add_picture(os.path.join(IMG, "tracking.png"),
 s = add("Zwei Spalten")
 s.shapes.title.text_frame.text = "Nutzen und Preis"
 LL = [("Nutzen", 0),
-      ("Vorschläge, ohne lange zu suchen", 1),
-      ("Karten, Routen und Wetter am richtigen Ort", 1),
-      ("Dienste ohne Rechnung", 1),
-      ("Betrugserkennung: auffällige Muster fallen auf", 1)]
+      ("**Vorschläge** ohne langes Suchen", 1),
+      ("**Karten, Routen, Wetter** am richtigen Ort", 1),
+      ("Dienste **ohne Rechnung**", 1),
+      ("**Betrugserkennung** durch auffällige Muster", 1)]
 LR = [("Preis", 0),
-      ("Profile, die genauer sind als das Selbstbild", 1),
-      ("Daten überleben den Anlass ihrer Erhebung", 1),
-      ("Wer misst, kann auch lenken", 1),
-      ("Du kennst die Regeln nicht, nach denen sortiert wird", 1)]
+      ("**Profile**, genauer als das Selbstbild", 1),
+      ("Daten **überleben** den Anlass ihrer Erhebung", 1),
+      ("Wer **misst**, kann auch **lenken**", 1),
+      ("Du kennst die **Sortier-Regeln** nicht", 1)]
 left = fill_ph(s, 1, LL)
 right = fill_ph(s, 2, LR)
 add_click_build(s, [(left, LL), (right, LR)])
@@ -208,10 +208,10 @@ fill_ph(s, 1, [("Jede Empfehlung ist eine Messung — und jede Messung hinterlä
 fill_ph(s, 2, [("Merksatz", 0)])
 
 # 19 - Positionierung
-L19 = [("Stellt euch auf einer Linie auf: von „ist mir egal“ bis „das geht zu weit“", 0),
-       ("Begründet euren Platz mit genau einem Beispiel aus eurem eigenen Gerät", 0),
-       ("Wechselt die Seite, wenn euch ein Argument überzeugt hat — und sagt, welches es war", 0),
-       ("Am Ende: Welche eine Einstellung ändert ihr heute noch?", 0)]
+L19 = [("**Linie**: von „ist mir egal“ bis „das geht zu weit“", 0),
+       ("**Ein Beispiel** aus dem eigenen Gerät als Begründung", 0),
+       ("**Seite wechseln**, wenn ein Argument überzeugt, und sagen welches", 0),
+       ("Zum Schluss: Welche **eine Einstellung** ändert ihr heute noch?", 0)]
 s, body = content("Inhalt", "Deine Positionierung", L19)
 add_click_build(s, [(body, L19)])
 
