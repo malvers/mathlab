@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DOC ALVERS MATHE-LABORE | Fokus-Timer</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+    <link rel="stylesheet" href="js/cyber-layout.css">
+    <link rel="stylesheet" href="js/buttons-ultra.css">
+    <link rel="stylesheet" href="js/cyber-lab-overrides.css">
+    <link rel="stylesheet" href="js/branding.styles.extracted.css">
+    <link rel="stylesheet" href="js/lab-shell-minimal.css">
+    <style>
+        /* Focus mode: on start everything but the clock steps aside. */
+        /* #cyber-left-chrome is the wrapper around rail and panel and paints its own dark
+           background at z-index 2100 - hiding only its children left that bar standing. */
+        body.focus-mode #cyber-left-chrome,
+        body.focus-mode #mini-rail,
+        body.focus-mode #side-panel,
+        body.focus-mode #math-coach-box,
+        body.focus-mode .canvas-branding,
+        body.focus-mode .cyber-grid,
+        body.focus-mode #local-badge { display: none !important; }
+        /* Hiding the panels leaves their grid columns behind, so the stage steps out of the
+           grid entirely rather than trying to span it. */
+        body.focus-mode #main-content {
+            position: fixed !important;
+            inset: 0 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            z-index: 30;
+        }
+        body.focus-mode #canvas-container canvas { cursor: none; }
+
+        #clock-widget {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            justify-content: center !important;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        /* The player sits out of the way and steps further back once the clock is alone. */
+        #yt-corner {
+            position: fixed;
+            right: 14px;
+            bottom: 14px;
+            width: 216px;
+            height: 122px;
+            z-index: 40;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 6px 22px rgba(4, 10, 24, 0.55);
+            opacity: 0.85;
+            transition: opacity 0.35s ease;
+        }
+        #yt-corner iframe { width: 100%; height: 100%; border: 0; display: block; }
+        #yt-corner:hover { opacity: 1; }
+        body.focus-mode #yt-corner { opacity: 0.22; }
+        body.focus-mode #yt-corner:hover { opacity: 1; }
+
+        @media (max-width: 700px) {
+            #yt-corner { width: 148px; height: 84px; }
+        }
+    </style>
+</head>
+
+<body>
+    <nav id="mini-rail">
+        <div class="nav-btn" onclick="toggleSidebar()" title="Toggle Menu">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </div>
+    </nav>
+
+    <aside id="side-panel">
+        <header id="sidebar-header"></header>
+        <div id="ui-container"></div>
+    </aside>
+
+    <main id="main-content">
+        <div id="canvas-container">
+            <div class="cyber-grid"></div>
+            <div id="math-coach-box">
+                <div class="coach-title" id="coach-title-slot"></div>
+                <div id="coach-content" class="coach-message"></div>
+            </div>
+            <canvas id="canvas"></canvas>
+            <!-- Orbitron digits have different widths, so plain text shifts on every tick.
+                 CyberUI's digit widget puts each glyph in a fixed cell instead. -->
+            <div id="clock-widget" class="cyber-number-widget"></div>
+        </div>
+    </main>
+
+    <!-- The soundtrack stays on YouTube. Embedding it keeps a track we do not own out of a
+         public repository, and the viewer still gets its own volume and pause controls. -->
+    <div id="yt-corner" title="Deep Work Music - Focus Pulse"><div id="yt-player"></div></div>
+
+    <script src="https://www.youtube.com/iframe_api"></script>
+    <script src="js/cyber-left-chrome.js"></script>
+    <script src="js/branding/briefings.js"></script>
+    <script src="js/branding/overlays.js"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/branding/nav.js"></script>
+    <script src="js/branding.js"></script>
+    <script src="js/ui.js"></script>
+    <script>
+        function toggleSidebar() {
+            const panel = document.getElementById('side-panel');
+            panel.classList.toggle('collapsed');
+            if (window.CyberLeftChrome && typeof CyberLeftChrome.publishResolvedScale === 'function') {
+                CyberLeftChrome.publishResolvedScale();
+            }
+            setTimeout(() => {
+                window.dispatchEvent(new Event('resize'));
+                if (window.CyberLeftChrome && typeof CyberLeftChrome.publishResolvedScale === 'function') {
+                    CyberLeftChrome.publishResolvedScale();
+                }
+            }, 400);
+        }
+
+        window.addEventListener('load', () => {
+            const T = (k, fb) => (typeof CyberI18n !== 'undefined' && CyberI18n.getOr)
+                ? CyberI18n.getOr('fokus.' + k, fb)
+                : fb;
+
+            CyberBranding.init({
+                useExternalStyles: true,
+                title: CyberI18n.get('ui.coach_title'),
+                subtitle: T('title', 'FOKUS-TIMER')
+            });
+            CyberUI.init();
+
+            (function setCoachTitleFromI18n() {
+                const el = document.getElementById('coach-title-slot');
+                if (el && typeof CyberI18n !== 'undefined' && typeof CyberI18n.get === 'function') {
+                    el.textContent = CyberI18n.get('ui.description');
+                }
+            })();
+
+            if (window.CyberLeftChrome && typeof CyberLeftChrome.configure === 'function') {
+                CyberLeftChrome.configure({ viewportOnlyZoom: true });
+            }
+
+            const DEBUG = new URLSearchParams(location.search).has('debug');
+            const dbg = (msg) => { if (DEBUG) console.log('[fokus] ' + msg); };
+
+            /* ————— Stage ————— */
+            const canvas = document.getElementById('canvas');
+            const ctx = canvas.getContext('2d');
+            const container = document.getElementById('canvas-container');
+            let ytPlayer = null;        // filled in by the IFrame API callback
+
+            const LAMBDA = '245, 194, 66';        // lab palette, the orange of the pie
+            const KEN_BURNS_LOOP = 24;            // seconds for one full breathing cycle
+            const KEN_BURNS_ZOOM = 0.06;
+            const DRIFT_FRAC = 0.012;     // sideways travel, as a fraction of the stage width
+
+            const photo = new Image();
+            let photoReady = false;
+            photo.onload = () => { photoReady = true; dbg('photo ready'); };
+            photo.src = 'resources/lake-tahoe.jpg';
+
+            /* ————— Timer state ————— */
+            const state = {
+                duration: 10 * 60,                // seconds on the clock
+                remaining: 10 * 60,
+                running: false,
+                lastTick: 0
+            };
+
+            let musicVolume = 70;        // hoisted here: the restore below writes into it
+            const clampMinutes = (m) => Math.min(90, Math.max(1, Math.round(m)));
+            const clampNum = (v, max) => (Number.isFinite(v) ? Math.min(max, Math.max(0, v)) : max);
+
+            /* ————— Persistence —————
+               Duration and the music switch survive a reload, and so does a running clock:
+               endsAt is wall-clock, so an accidental Cmd-Shift-R does not cost you the round.
+               Every read and write is guarded - private windows and blocked site data throw. */
+            const STORE_KEY = 'fokus-timer';
+
+            function storeRead() {
+                try { return JSON.parse(localStorage.getItem(STORE_KEY) || 'null'); }
+                catch (e) { dbg('store unreadable'); return null; }
+            }
+
+            function storeWrite() {
+                try {
+                    localStorage.setItem(STORE_KEY, JSON.stringify({
+                        minutes: state.duration / 60,
+                        remaining: state.remaining,
+                        endsAt: state.running ? Date.now() + state.remaining * 1000 : 0,
+                        volume: musicVolume,
+                        ytTime: ytTime()
+                    }));
+                } catch (e) { dbg('store unwritable'); }
+            }
+
+            const saved = storeRead();
+            if (saved && Number.isFinite(saved.minutes)) {
+                state.duration = clampMinutes(saved.minutes) * 60;
+                if (Number.isFinite(saved.volume)) musicVolume = clampNum(saved.volume, 100);
+                if (saved.endsAt > Date.now()) {
+                    // the clock kept running while the tab was away
+                    state.remaining = Math.min(state.duration, (saved.endsAt - Date.now()) / 1000);
+                    state.running = true;
+                } else {
+                    state.remaining = saved.endsAt ? 0 : clampNum(saved.remaining, state.duration);
+                }
+                dbg('restored ' + (state.duration / 60) + ' min, running=' + state.running);
+            }
+
+            const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
+            const mmss = (sec) => {
+                const s = Math.max(0, Math.ceil(sec));
+                return String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0');
+            };
+
+            /* ————— Drawing ————— */
+            let stageW = 0, stageH = 0;      // last size the backing store was built for
+            let lastFit = null;              // what the cover fit worked out, for ?debug
+
+            function resizeCanvasToContainer() {
+                const dpr = window.devicePixelRatio || 1;
+                const rect = container.getBoundingClientRect();
+                stageW = Math.max(1, rect.width);
+                stageH = Math.max(1, rect.height);
+                canvas.width = Math.floor(stageW * dpr);
+                canvas.height = Math.floor(stageH * dpr);
+                ctx.setTransform(1, 0, 0, 1, 0, 0);
+                ctx.scale(dpr, dpr);
+                dbg('stage ' + Math.round(stageW) + 'x' + Math.round(stageH) + ' dpr ' + dpr);
+            }
+
+            // Cover-fit the photograph and breathe it slowly. Zoom and drift are cosine and sine
+            // of one full cycle, so the motion never jumps and never drifts away.
+            function drawBackground(w, h, t) {
+                ctx.fillStyle = '#101c33';
+                ctx.fillRect(0, 0, w, h);
+                if (!photoReady) return;
+
+                const ph = 2 * Math.PI * (t / KEN_BURNS_LOOP);
+                const zoom = 1 + KEN_BURNS_ZOOM * (1 - Math.cos(ph)) / 2;
+                // At zoom 1 a cover fit is exact, so the drift would expose a bare edge - the
+                // wider the screen the wider the gap. Overscan by more than the drift can move.
+                const driftMax = DRIFT_FRAC * w;
+                const overscan = 1 + 2 * driftMax / w + 0.01;
+                const cover = Math.max(w / photo.width, h / photo.height) * zoom * overscan;
+                const dw = photo.width * cover, dh = photo.height * cover;
+                const dx = (w - dw) / 2 + driftMax * Math.sin(ph);
+                ctx.drawImage(photo, dx, (h - dh) / 2, dw, dh);
+                lastFit = { cover, dw, dh, dx, dy: (h - dh) / 2, driftMax, zoom };
+
+                // hold the middle back so the translucent pie stays readable
+                const r = Math.min(w, h) * 0.55;
+                const cg = ctx.createRadialGradient(w / 2, h / 2, 0, w / 2, h / 2, r);
+                cg.addColorStop(0, 'rgba(9, 19, 38, 0.30)');
+                cg.addColorStop(0.72, 'rgba(9, 19, 38, 0.16)');
+                cg.addColorStop(1, 'rgba(9, 19, 38, 0)');
+                ctx.fillStyle = cg;
+                ctx.fillRect(0, 0, w, h);
+
+                const vg = ctx.createRadialGradient(w / 2, h / 2, Math.min(w, h) * 0.34,
+                    w / 2, h / 2, Math.max(w, h) * 0.72);
+                vg.addColorStop(0, 'rgba(7, 15, 32, 0)');
+                vg.addColorStop(1, 'rgba(7, 15, 32, 0.46)');
+                ctx.fillStyle = vg;
+                ctx.fillRect(0, 0, w, h);
+            }
+
+            // The Pac-Man: a full disc at the start, its mouth opening clockwise from twelve.
+            function drawPie(w, h) {
+                const R = Math.min(w, h) * 0.29;
+                const cx = w / 2, cy = h / 2;
+                const left = state.duration > 0 ? clamp(state.remaining / state.duration, 0, 1) : 0;
+                const start = -Math.PI / 2;
+
+                if (left > 0.0001) {
+                    ctx.beginPath();
+                    ctx.moveTo(cx, cy);
+                    ctx.arc(cx, cy, R, start + 2 * Math.PI * (1 - left), start + 2 * Math.PI);
+                    ctx.closePath();
+                    ctx.fillStyle = 'rgba(' + LAMBDA + ', 0.88)';
+                    ctx.fill();
+                }
+
+                ctx.beginPath();
+                ctx.arc(cx, cy, R - R * 0.011, 0, 2 * Math.PI);
+                ctx.lineWidth = Math.max(1.5, R * 0.022);
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.60)';
+                ctx.stroke();
+
+                updateClock(R);
+            }
+
+            let clockKey = '';
+            const cellCache = new Map();
+
+            // Orbitron is a wide face - guessed cell widths made the glyphs run into each other.
+            // Measure the real advance of the widest digit instead and give it room.
+            function cellWidths(size) {
+                if (cellCache.has(size)) return cellCache.get(size);
+                const m = document.createElement('canvas').getContext('2d');
+                m.font = '700 ' + size + "px Orbitron, sans-serif";
+                let widest = 0;
+                for (const d of '0123456789') widest = Math.max(widest, m.measureText(d).width);
+                const out = {
+                    digit: Math.ceil(widest + size * 0.10),
+                    sep: Math.ceil(m.measureText(':').width + size * 0.10)
+                };
+                cellCache.set(size, out);
+                return out;
+            }
+
+            // Redraw the digits only when the text or the stage size actually changed - the
+            // widget rebuilds its DOM on every call, and that has no business running at 60 fps.
+            function updateClock(R) {
+                const text = mmss(state.remaining);
+                const size = Math.round(R * 0.30);
+                const key = text + '|' + size;
+                if (key === clockKey) return;
+                clockKey = key;
+                const cells = cellWidths(size);
+                CyberUI.updateNumberWidget('clock-widget', text, 0, 1, {
+                    fontSize: size + 'px',
+                    digitWidth: cells.digit + 'px',
+                    digitHeight: Math.round(size * 1.18) + 'px',
+                    separatorWidth: cells.sep + 'px',
+                    color: 'rgba(255, 255, 255, 0.96)',
+                    textShadow: '0 0 ' + Math.round(size * 0.16) + 'px rgba(7, 15, 32, 0.9)'
+                });
+                // The shared stylesheet pins .separator to width:10px !important, which the
+                // widget's own separatorWidth cannot beat - at this size the colon gets crushed.
+                // Overriding it here keeps the fix local instead of editing shared CSS.
+                const box = document.getElementById('clock-widget');
+                box.querySelectorAll('.cyber-digit-box').forEach((el) => {
+                    el.style.setProperty('height', Math.round(size * 1.18) + 'px', 'important');
+                    el.style.setProperty('line-height', '1', 'important');
+                    if (el.classList.contains('separator')) {
+                        el.style.setProperty('width', cells.sep + 'px', 'important');
+                        el.style.setProperty('opacity', '1', 'important');
+                    }
+                });
+            }
+
+            // CC BY obliges us to name the photographer wherever the picture is shown.
+            // For the first seconds of focus mode, say quietly how to get back out.
+            function drawHint(w, h, now) {
+                if (!focusMode) return;
+                const age = (now - focusSince) / 1000;
+                if (age > 5) return;
+                const a = 0.55 * Math.min(1, age / 0.4) * Math.max(0, Math.min(1, (5 - age) / 1.5));
+                ctx.font = '400 13px Outfit, system-ui, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'alphabetic';
+                ctx.fillStyle = 'rgba(255, 255, 255, ' + a.toFixed(3) + ')';
+                ctx.fillText('ESC oder Klick beendet das Vollbild - Leertaste pausiert', w / 2, h - 40);
+            }
+
+            // ?debug prints the numbers that decide whether the photo reaches the edges.
+            // Arial on purpose: debug text should not be dressed up.
+            function drawDebug(w, h) {
+                if (!DEBUG || !lastFit) return;
+                const f = lastFit;
+                const lines = [
+                    'stage    ' + Math.round(w) + ' x ' + Math.round(h) + '   dpr ' + (window.devicePixelRatio || 1),
+                    'stageAt  ' + Math.round(container.getBoundingClientRect().x) + ' , ' +
+                        Math.round(container.getBoundingClientRect().y),
+                    'window   ' + window.innerWidth + ' x ' + window.innerHeight +
+                        '   at ' + window.screenX + ' , ' + window.screenY,
+                    'backing  ' + canvas.width + ' x ' + canvas.height,
+                    'screen   ' + screen.width + ' x ' + screen.height + '   fs=' + !!document.fullscreenElement,
+                    'photo    ' + photo.width + ' x ' + photo.height + '   ready=' + photoReady,
+                    'cover    ' + f.cover.toFixed(4) + '   zoom ' + f.zoom.toFixed(4),
+                    'drawn    ' + Math.round(f.dw) + ' x ' + Math.round(f.dh) +
+                        '   at ' + Math.round(f.dx) + ' , ' + Math.round(f.dy),
+                    'gapLeft  ' + Math.round(f.dx) + '   gapRight ' + Math.round(w - (f.dx + f.dw)),
+                    'drift    +-' + Math.round(f.driftMax) + '   focus=' + focusMode
+                ];
+                ctx.font = '13px Arial, sans-serif';
+                ctx.textAlign = 'left';
+                ctx.textBaseline = 'top';
+                const bw = 320, bh = lines.length * 17 + 12;
+                ctx.fillStyle = 'rgba(4, 10, 24, 0.78)';
+                ctx.fillRect(10, 10, bw, bh);
+                ctx.fillStyle = '#7CFC9B';
+                lines.forEach((ln, i) => ctx.fillText(ln, 20, 18 + i * 17));
+            }
+
+            function drawCredit(w, h) {
+                ctx.font = '400 11px Outfit, system-ui, sans-serif';
+                ctx.textAlign = 'left';
+                ctx.textBaseline = 'alphabetic';
+                ctx.fillStyle = focusMode ? 'rgba(255, 255, 255, 0.18)' : 'rgba(255, 255, 255, 0.28)';
+                ctx.fillText('Foto: John D. · Lake Tahoe · CC BY 2.0 · Wikimedia Commons', 14, h - 12);
+            }
+
+            function frame(now) {
+                const rect = container.getBoundingClientRect();
+                if (Math.abs(rect.width - stageW) > 0.5 || Math.abs(rect.height - stageH) > 0.5) {
+                    resizeCanvasToContainer();
+                }
+                const w = rect.width, h = rect.height;
+
+                if (state.running) {
+                    const dt = (now - state.lastTick) / 1000;
+                    state.remaining = Math.max(0, state.remaining - dt);
+                    if (state.remaining <= 0) {
+                        state.running = false;
+                        stopMusic(7000);        // the round is over - let it drift away
+                        storeWrite();
+                        syncControls();
+                        dbg('timer finished');
+                    }
+                }
+                state.lastTick = now;
+
+                ctx.clearRect(0, 0, w, h);
+                drawBackground(w, h, now / 1000);
+                drawPie(w, h);
+                drawCredit(w, h);
+                drawHint(w, h, now);
+                drawDebug(w, h);
+                requestAnimationFrame(frame);
+            }
+
+            /* ————— Focus mode ————— */
+            let focusMode = false;
+            let focusSince = 0;          // for the fade-out hint on how to get back
+
+            function setFocusMode(on) {
+                focusMode = on;
+                document.body.classList.toggle('focus-mode', on);
+                const isFs = !!document.fullscreenElement;
+                // CyberBranding owns the fullscreen toggle - do not roll a second one
+                if (on !== isFs && typeof CyberBranding.toggleFullscreen === 'function') {
+                    CyberBranding.toggleFullscreen();
+                }
+                if (on) focusSince = performance.now();
+                setTimeout(resizeCanvasToContainer, 140);
+                dbg('focus mode ' + on);
+            }
+
+            document.addEventListener('fullscreenchange', () => {
+                // Esc leaves fullscreen without asking us - follow it back out
+                if (!document.fullscreenElement && focusMode) {
+                    focusMode = false;
+                    document.body.classList.remove('focus-mode');
+                }
+                setTimeout(resizeCanvasToContainer, 140);
+            });
+
+            document.addEventListener('keydown', (e) => {
+                // Escape leaves focus mode even if fullscreen never engaged - without this a
+                // browser that refuses fullscreen would trap the page with no way back.
+                if (e.key === 'Escape' && focusMode) { setFocusMode(false); return; }
+                if (e.code !== 'Space') return;         // r stays free, it is the hard-reload
+                e.preventDefault();
+                toggleRun();
+            });
+
+            canvas.addEventListener('click', () => { if (focusMode) setFocusMode(false); });
+
+            /* ————— Music ————— */
+            // The API may already be loaded by the time this runs, in which case its callback
+            // has fired into the void - so register it AND check whether it is there already.
+            function createYtPlayer() {
+                if (ytPlayer) return;
+                ytPlayer = new YT.Player('yt-player', {
+                    videoId: 'DNqQnV4V4o8',
+                    playerVars: {
+                        autoplay: 0, controls: 1, modestbranding: 1, rel: 0, playsinline: 1,
+                        // pick the track up where it was left, not back at the intro
+                        start: Math.max(0, Math.round((saved && saved.ytTime) || 20))
+                    },
+                    events: {
+                        onReady: () => {
+                            dbg('yt ready at ' + Math.round(ytTime()) + ' s');
+                            try { ytPlayer.setVolume(musicVolume); } catch (e) { }
+                            if (state.running) startMusic();
+                        }
+                    }
+                });
+            }
+            window.onYouTubeIframeAPIReady = createYtPlayer;
+            if (window.YT && window.YT.Player) createYtPlayer();
+
+            function ytTime() {
+                try { return ytPlayer && ytPlayer.getCurrentTime ? ytPlayer.getCurrentTime() : 0; }
+                catch (e) { return 0; }
+            }
+            let fadeRaf = 0;
+
+            // Ramps the player's volume rather than cutting it. A hard stop on ambient music is
+            // the one moment everybody notices.
+            function fadeTo(target, ms, then) {
+                if (!ytPlayer || typeof ytPlayer.setVolume !== 'function') { if (then) then(); return; }
+                let from = 0;
+                try { from = ytPlayer.getVolume(); } catch (e) { from = musicVolume; }
+                const t0 = performance.now();
+                cancelAnimationFrame(fadeRaf);
+                const step = (now) => {
+                    const k = Math.min(1, (now - t0) / ms);
+                    try { ytPlayer.setVolume(Math.round(from + (target - from) * k)); } catch (e) { }
+                    if (k < 1) fadeRaf = requestAnimationFrame(step);
+                    else if (then) then();
+                };
+                fadeRaf = requestAnimationFrame(step);
+            }
+
+            function startMusic() {
+                if (musicVolume <= 0 || !ytPlayer || !ytPlayer.playVideo) return;
+                try {
+                    ytPlayer.setVolume(0);
+                    ytPlayer.playVideo();
+                    fadeTo(musicVolume, 3000);
+                } catch (e) { dbg('yt play failed: ' + e); }
+            }
+
+            function stopMusic(ms) {
+                if (!ytPlayer || !ytPlayer.pauseVideo) return;
+                fadeTo(0, ms || 2000, () => {
+                    try { ytPlayer.pauseVideo(); ytPlayer.setVolume(musicVolume); }
+                    catch (e) { dbg('yt pause failed: ' + e); }
+                });
+            }
+
+            /* ————— Controls ————— */
+            function syncControls() {
+                const btn = document.getElementById('btn-start');
+                if (btn) btn.textContent = state.running ? T('pause', 'PAUSE') : T('start', 'START');
+            }
+
+
+            function setDuration(minutes) {
+                state.duration = minutes * 60;
+                state.remaining = state.duration;
+                state.running = false;
+                stopMusic();
+                storeWrite();
+                syncControls();
+                dbg('duration ' + minutes + ' min');
+            }
+
+            CyberUI.createCard('ui-container', '', `
+                <div id="mount-minutes"></div>
+            `, 'var(--neon-blue)');
+
+            CyberUI.createSlider('mount-minutes', T('minutes', 'Dauer'), 1, 90, state.duration / 60, 1,
+                (val) => setDuration(Number(val)), 'var(--neon-blue)', (v) => v + ' min');
+
+            CyberUI.createCard('ui-container', '', `
+                <div style="display:flex; gap:8px;">
+                    <button id="btn-start" class="cyber-btn" style="flex:1;">START</button>
+                    <button id="btn-reset" class="cyber-btn"
+                            style="flex:1; border-color:#ffcc00; color:#ffcc00;">RESET</button>
+                </div>
+                <div id="mount-volume" style="margin-top:12px;"></div>
+            `, 'rgb(245, 194, 66)');
+
+
+
+            function toggleRun() {
+                if (state.remaining <= 0) state.remaining = state.duration;
+                state.running = !state.running;
+                // the click is the gesture browsers require before audio may play
+                if (state.running) startMusic(); else stopMusic();
+                if (state.running && !focusMode) setFocusMode(true);
+                storeWrite();
+                syncControls();
+                dbg(state.running ? 'running' : 'paused');
+            }
+
+            CyberUI.createSlider('mount-volume', T('volume', 'Lautstärke'), 0, 100, musicVolume, 1,
+                (val) => {
+                    const was = musicVolume;
+                    musicVolume = Number(val);
+                    cancelAnimationFrame(fadeRaf);       // a drag beats a running fade
+                    try {
+                        if (ytPlayer && ytPlayer.setVolume) ytPlayer.setVolume(musicVolume);
+                        // fully left is off; coming back up while the clock runs starts it again
+                        if (musicVolume === 0) stopMusic(400);
+                        else if (was === 0 && state.running) startMusic();
+                    } catch (e) { dbg('volume failed'); }
+                    storeWrite();
+                }, 'rgb(245, 194, 66)', (v) => v + ' %');
+
+            document.getElementById('btn-start').addEventListener('click', toggleRun);
+
+            document.getElementById('btn-reset').addEventListener('click', () => {
+                state.running = false;
+                state.remaining = state.duration;
+                stopMusic();
+                storeWrite();
+                if (focusMode) setFocusMode(false);
+                syncControls();
+            });
+
+            window.addEventListener('pagehide', storeWrite);
+            setInterval(() => { if (state.running) storeWrite(); }, 15000);
+            syncControls();
+            resizeCanvasToContainer();
+            window.addEventListener('resize', resizeCanvasToContainer);
+            document.fonts.ready.then(() => {
+                cellCache.clear();
+                clockKey = '';            // force a re-measure now that Orbitron is really here
+                resizeCanvasToContainer();
+            });
+            requestAnimationFrame((t) => { state.lastTick = t; requestAnimationFrame(frame); });
+        });
+    </script>
+</body>
+
+</html>

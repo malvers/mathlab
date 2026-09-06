@@ -1,0 +1,43 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>ken burns loop</title>
+<style>html,body{margin:0;background:#0d1b33;overflow:hidden}canvas{display:block}</style>
+<canvas id="c" width="1920" height="1080"></canvas>
+<script>
+// Very slow breathing zoom over the still photograph. Both zoom and drift are cosine/sine of
+// one full cycle, so the motion is periodic AND its derivative is zero at the seam - the clip
+// loops without a visible jolt.
+const W = 1920, H = 1080, LOOP = 20;
+window.LOOP = LOOP;
+const ZOOM = 0.05, DRIFT = 26;                 // max zoom-in, max horizontal drift in output px
+
+const ctx = document.getElementById('c').getContext('2d');
+const img = new Image();
+window.ready = new Promise(res => { img.onload = res; img.src = 'photo_src.jpg'; });
+
+window.renderFrame = (t) => {
+  const ph = 6.283185307 * t / LOOP;
+  const scale = 1 + ZOOM * (1 - Math.cos(ph)) / 2;
+  const drift = DRIFT * Math.sin(ph);
+
+  // widest 16:9 crop the source allows, then shrunk by the zoom around its own centre
+  const cropW = Math.min(img.width, img.height * 16 / 9);
+  const cropH = cropW * 9 / 16;
+  const sw = cropW / scale, sh = cropH / scale;
+  const k = img.width / W;                      // source px per output px
+  const scx = img.width / 2 + drift * k;
+  const scy = img.height / 2;
+  ctx.drawImage(img, scx - sw / 2, scy - sh / 2, sw, sh, 0, 0, W, H);
+
+  // hold the middle back a touch so a translucent ring stays legible over any photo
+  const cg = ctx.createRadialGradient(W / 2, H / 2, 0, W / 2, H / 2, 560);
+  cg.addColorStop(0, 'rgba(9,19,38,0.30)');
+  cg.addColorStop(0.72, 'rgba(9,19,38,0.16)');
+  cg.addColorStop(1, 'rgba(9,19,38,0)');
+  ctx.fillStyle = cg; ctx.fillRect(0, 0, W, H);
+  const vg = ctx.createRadialGradient(W / 2, H / 2, H * 0.34, W / 2, H / 2, H * 1.05);
+  vg.addColorStop(0, 'rgba(7,15,32,0)');
+  vg.addColorStop(1, 'rgba(7,15,32,0.46)');
+  ctx.fillStyle = vg; ctx.fillRect(0, 0, W, H);
+};
+</script>

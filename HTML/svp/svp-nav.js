@@ -48,6 +48,8 @@
         ['konzepte.html', 'Konzepte', 'b-grey', 'Konzepte'],
         ['operatoren.html', 'Operatoren', 'b-grey', 'Operatoren'],
         ['punktetabelle.html', 'Punkte BGY', 'b-grey', 'Punktetabelle - Notenspiegel BGY'],
+        /* the lab lives one level up, in HTML/ - base + href resolves the '..' */
+        ['../fokus.html', 'Fokus', 'b-grey', 'Fokus-Timer - stiller Countdown mit Musik'],
         [PLAN_HREF, 'Stundenplan', 'b-grey', PLAN_TITLE],
     ];
 
@@ -74,7 +76,7 @@
 
     // These open in a new tab so the current plan stays put.
     const NEW_TAB = new Set(['notes.html', 'konzepte.html', 'operatoren.html',
-        'punktetabelle.html', PLAN_HREF]);
+        'punktetabelle.html', '../fokus.html', PLAN_HREF]);
 
     // The pill row only carries Home, Notizen and one dropdown per Schulart —
     // everything else lives inside those. [pill label, [[caption|null, hrefs]],
@@ -103,7 +105,7 @@
            pill at the right end of the row, one click instead of two. */
         ['Mehr', [
             [null, ['notes.html', 'mathe/uebung.html', 'konzepte.html', 'operatoren.html',
-                    'punktetabelle.html']]
+                    'punktetabelle.html', '../fokus.html']]
         ], true, true]
     ];
 
