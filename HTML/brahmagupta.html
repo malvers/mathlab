@@ -204,11 +204,11 @@
             width: 100%;
             border-collapse: collapse;
             font-family: 'Orbitron';
-            font-size: 0.68rem;
+            font-size: 0.98rem;
         }
 
         .measure-table td {
-            padding: 4px 2px;
+            padding: 7px 3px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.06);
             color: rgba(255, 255, 255, 0.7);
         }
@@ -218,15 +218,23 @@
             color: #00d2ff;
         }
 
+        /* The formula card carries nothing but the formula — it does not need a
+           card's full vertical padding. */
+        #ui-container .instrument-card:has(> .card-content > .formula-box) {
+            /* the shared card padding is !important, so this has to be too */
+            padding-top: 4px !important;
+            padding-bottom: 6px !important;
+        }
+
         .formula-box {
-            padding: 6px 2px;
+            padding: 2px 2px;
             text-align: center;
             color: rgba(255, 255, 255, 0.9);
             overflow-x: auto;
         }
 
         .formula-box .katex {
-            font-size: 0.86em;
+            font-size: 1.25em;
         }
 
         .formula-box .katex-display {
@@ -456,6 +464,9 @@
             let onCircle = true;         // formula: keep the vertices on the circle
             let step = 0;                // proof: current step, 0 .. PROOF_LAST
             let showSolution = false;    // proof: reveal the step that is left as an exercise
+            let cPerp = true;            // proof: keep the diagonals perpendicular
+            let cCirc = true;            // proof: keep the vertices on one circle
+            let rel = null;              // proof: relaxed model, built when a rule is dropped
 
             /* Theorem mode is parametrised so that AC is always perpendicular to BD.
                With A at a0 and arcs u = arc(A,B), v = arc(A,C), the fourth vertex is
@@ -472,7 +483,83 @@
                 return [S.a0, S.a0 + S.u, S.a0 + S.v, S.a0 + S.v - S.u + 180];
             }
 
+            /* ————— Relaxed proof model —————————————————————————————————————
+               Once a precondition is dropped, the four vertices hang on two rays
+               through M instead of on the fixed circle:
+
+                   A = M + a·dir(th)        C = M − c·dir(th)
+                   B = M + b·dir(th+phi)    D = M − d·dir(th+phi)
+
+               Diagonals perpendicular  ⟺  phi = 90°
+               Vertices concyclic       ⟺  a·c = b·d   (intersecting chords)
+
+               Two rules, two independent knobs — which is exactly what the two
+               checkboxes switch. The model is built from the current figure, so
+               nothing jumps at the moment a rule is dropped. */
+            const dir = a => ({ x: Math.cos(rad(a)), y: Math.sin(rad(a)) });   // screen space
+            const R_MIN = 45, R_MAX = 268;
+
+            function relaxFrom(P4, Pi) {
+                const [A, B, C, D] = P4;
+                const ang = q => deg(Math.atan2(q.y - Pi.y, q.x - Pi.x));
+                const len = q => Math.hypot(q.x - Pi.x, q.y - Pi.y);
+                return {
+                    M: { x: Pi.x, y: Pi.y },
+                    th: ang(A), phi: n360(ang(B) - ang(A)),
+                    a: len(A), b: len(B), c: len(C), d: len(D)
+                };
+            }
+
+            function relaxPoints() {
+                const M = rel.M, u = dir(rel.th), w = dir(rel.th + rel.phi);
+                return [
+                    { x: M.x + u.x * rel.a, y: M.y + u.y * rel.a },
+                    { x: M.x + w.x * rel.b, y: M.y + w.y * rel.b },
+                    { x: M.x - u.x * rel.c, y: M.y - u.y * rel.c },
+                    { x: M.x - w.x * rel.d, y: M.y - w.y * rel.d }
+                ];
+            }
+
+            /* Keep the product a·c = b·d exact by adjusting the partner on the same
+               diagonal, then pulling the dragged one back if the partner ran out. */
+            function keepConcyclic(dragged) {
+                if (!cCirc) return;
+                if (dragged === 'a') { rel.c = clamp(rel.b * rel.d / rel.a, R_MIN, R_MAX); rel.a = rel.b * rel.d / rel.c; }
+                if (dragged === 'c') { rel.a = clamp(rel.b * rel.d / rel.c, R_MIN, R_MAX); rel.c = rel.b * rel.d / rel.a; }
+                if (dragged === 'b') { rel.d = clamp(rel.a * rel.c / rel.b, R_MIN, R_MAX); rel.b = rel.a * rel.c / rel.d; }
+                if (dragged === 'd') { rel.b = clamp(rel.a * rel.c / rel.d, R_MIN, R_MAX); rel.d = rel.a * rel.c / rel.b; }
+            }
+
+            function setPhi(v) {
+                if (cPerp) return;                       // locked on the right angle
+                rel.phi = (rel.phi < 180) ? clamp(n360(v), 30, 150) : clamp(n360(v), 210, 330);
+            }
+
+            /* Build the relaxed model on the first dropped rule; drop it again once
+               both rules are back on, so the clean figure returns unchanged. */
+            function syncRules() {
+                if (cPerp && cCirc) { rel = null; return; }
+                if (!rel) {
+                    const P4 = currentPoints();
+                    const Pi = lineIntersect(P4[0], P4[2], P4[1], P4[3]);
+                    if (!Pi) return;
+                    rel = relaxFrom(P4, Pi);
+                }
+                if (cPerp) rel.phi = (rel.phi < 180) ? 90 : 270;
+                keepConcyclic('a');
+            }
+
+            function circumcircle(A, B, C) {
+                const d = 2 * (A.x * (B.y - C.y) + B.x * (C.y - A.y) + C.x * (A.y - B.y));
+                if (Math.abs(d) < 1e-9) return null;
+                const sa = A.x * A.x + A.y * A.y, sb = B.x * B.x + B.y * B.y, sc = C.x * C.x + C.y * C.y;
+                const x = (sa * (B.y - C.y) + sb * (C.y - A.y) + sc * (A.y - B.y)) / d;
+                const y = (sa * (C.x - B.x) + sb * (A.x - C.x) + sc * (B.x - A.x)) / d;
+                return { x: x, y: y, r: Math.hypot(A.x - x, A.y - y) };
+            }
+
             function currentPoints() {
+                if (mode === 'beweis' && rel) return relaxPoints();
                 /* Theorem and proof share the perpendicular-diagonal parametrisation. */
                 if (mode !== 'formel') return satzAngles().map(ptAt);
                 if (!onCircle && free) return free.map(p => ({ ...p }));
@@ -511,10 +598,14 @@
                 const P4 = currentPoints();
                 const [A, B, C, D] = P4;
 
-                /* Circumcircle */
+                /* Circumcircle — through A, B, C once the figure left the fixed one,
+                   so a vertex that is no longer concyclic is visibly off it. */
+                let circ = { x: CX, y: CY, r: R };
+                if (mode === 'beweis' && rel) circ = circumcircle(A, B, C) || circ;
+                const loose = (mode === 'formel' && !onCircle) || (mode === 'beweis' && !cCirc);
                 layers.back.appendChild(el('circle', {
-                    cx: CX, cy: CY, r: R,
-                    class: 'circum' + ((mode === 'formel' && !onCircle) ? ' faded' : '')
+                    cx: circ.x, cy: circ.y, r: circ.r,
+                    class: 'circum' + (loose ? ' faded' : '')
                 }));
 
                 /* Quadrilateral */
@@ -538,7 +629,8 @@
                 P4.forEach((p, i) => {
                     const node = el('circle', { cx: p.x, cy: p.y, r: 8, class: 'vertex', 'data-idx': i });
                     layers.nodes.appendChild(node);
-                    const ref = (mode === 'formel' && !onCircle) ? cen : { x: CX, y: CY };
+                    const ref = ((mode === 'formel' && !onCircle) || (mode === 'beweis' && rel))
+                        ? cen : { x: CX, y: CY };
                     const dx = p.x - ref.x, dy = p.y - ref.y;
                     const l = Math.hypot(dx, dy) || 1;
                     layers.hud.appendChild(el('text', {
@@ -617,14 +709,14 @@
             }
 
             /* Right-angle square at V, opening towards P1 and P2. */
-            function rightAngleMark(parent, V, P1, P2, k) {
+            function rightAngleMark(parent, V, P1, P2, k, cls) {
                 const u = uvec(V, P1), w = uvec(V, P2);
                 const q1 = { x: V.x + u.x * k, y: V.y + u.y * k };
                 const q2 = { x: V.x + w.x * k, y: V.y + w.y * k };
                 const q3 = { x: q1.x + w.x * k, y: q1.y + w.y * k };
                 parent.appendChild(el('polyline', {
                     points: q1.x + ',' + q1.y + ' ' + q3.x + ',' + q3.y + ' ' + q2.x + ',' + q2.y,
-                    class: 'right-angle'
+                    class: 'right-angle' + (cls ? ' ' + cls : '')
                 }));
             }
 
@@ -698,8 +790,9 @@
                 line(main, B, C, 'quad-side-hot');
                 line(main, D, A, 'quad-side-opp');
                 line(main, E, F, 'perp');
-                rightAngleMark(hud, M, A, B, 14);
-                rightAngleMark(hud, E, M, C, 11);
+                /* Never draw a right angle that is not one. */
+                if (Math.abs(90 - vertexAngle(A, M, B)) < 0.05) rightAngleMark(hud, M, A, B, 14);
+                rightAngleMark(hud, E, M, C, 11, 'mark-e');
 
                 if (step === 1 || step === 5) line(main, D, C, 'chord-hi');
                 if (step === 7 && solved) line(main, A, B, 'chord-hi');
@@ -755,13 +848,15 @@
                 const ua = uvec(M, C), ub = uvec(M, D);
                 const mb = { x: ua.x + ub.x, y: ua.y + ub.y };
                 const mbl = Math.hypot(mb.x, mb.y) || 1;
-                const lbl = (x, y, txt, color) => hud.appendChild(el('text', {
-                    x: x, y: y + 5, class: 'node-label', 'text-anchor': 'middle',
+                /* The extra class is a hook for the film: run2 fades single parts of
+                   the construction in one after another. */
+                const lbl = (x, y, txt, color, cls) => hud.appendChild(el('text', {
+                    x: x, y: y + 5, class: 'node-label ' + cls, 'text-anchor': 'middle',
                     style: 'fill:' + color
                 }, txt));
-                lbl(M.x + mb.x / mbl * 24, M.y + mb.y / mbl * 24, 'M', 'var(--neon-purple)');
-                lbl(E.x + outE.x * 20, E.y + outE.y * 20, 'E', C_HOT);
-                lbl(F.x + outF.x * 20, F.y + outF.y * 20, 'F', C_OPP);
+                lbl(M.x + mb.x / mbl * 24, M.y + mb.y / mbl * 24, 'M', 'var(--neon-purple)', 'lbl-m');
+                lbl(E.x + outE.x * 20, E.y + outE.y * 20, 'E', C_HOT, 'lbl-e');
+                lbl(F.x + outF.x * 20, F.y + outF.y * 20, 'F', C_OPP, 'lbl-f');
             }
 
             function proofReadout(P4, Pi) {
@@ -981,6 +1076,17 @@
             }
 
             function applyDrag(idx, p) {
+                if (mode === 'beweis' && rel) {
+                    const M = rel.M;
+                    const r = clamp(Math.hypot(p.x - M.x, p.y - M.y), R_MIN, R_MAX);
+                    const a = deg(Math.atan2(p.y - M.y, p.x - M.x));
+                    if (idx === 0) { rel.th = a; rel.a = r; keepConcyclic('a'); }
+                    else if (idx === 2) { rel.th = n360(a + 180); rel.c = r; keepConcyclic('c'); }
+                    else if (idx === 1) { setPhi(a - rel.th); rel.b = r; keepConcyclic('b'); }
+                    else { setPhi(a - 180 - rel.th); rel.d = r; keepConcyclic('d'); }
+                    return;
+                }
+
                 if (mode === 'formel' && !onCircle) {
                     const cand = free.map(q => ({ ...q }));
                     cand[idx] = { x: clamp(p.x, 30, 570), y: clamp(p.y, 30, 570) };
@@ -1159,6 +1265,14 @@
                         CyberUI.createCheckbox('step-extra', T('show_solution', 'LÖSUNG ZEIGEN'), showSolution,
                             v => { showSolution = v; buildSidebar(); draw(); }, 'rgb(121,158,49)');
                     }
+
+                    /* Drop a precondition and watch which link of the chain snaps. */
+                    CyberUI.createCard('ui-container', T('rules_card', 'VORAUSSETZUNGEN'),
+                        '<div id="rule-slot"></div>', 'rgb(176,36,24)');
+                    CyberUI.createCheckbox('rule-slot', T('rule_perp', 'DIAGONALEN SENKRECHT'), cPerp,
+                        v => { cPerp = v; syncRules(); buildSidebar(); draw(); }, 'rgb(176,36,24)');
+                    CyberUI.createCheckbox('rule-slot', T('rule_circ', 'ECKEN AUF DEM KREIS'), cCirc,
+                        v => { cCirc = v; syncRules(); buildSidebar(); draw(); }, 'rgb(176,36,24)');
                 } else if (mode === 'satz') {
                     CyberUI.createCard('ui-container', T('options', 'KONSTRUKTION'),
                         '<div id="opt-slot"></div>', 'rgb(245,194,66)');
@@ -1199,12 +1313,15 @@
                     hotSide = 1;
                     step = 0;
                     showSolution = false;
+                    cPerp = true;
+                    cCirc = true;
+                    rel = null;
                     buildSidebar();
                     draw();
                 };
 
                 /* Link to this lab's shooting script - opens in its own tab. */
-                CyberUI.createCard('ui-container', 'Drehbuch', '<div id="doc-slot"></div>', 'rgb(245,194,66)');
+                CyberUI.createCard('ui-container', null, '<div id="doc-slot"></div>', 'rgb(245,194,66)');
                 document.getElementById('doc-slot').insertAdjacentHTML('beforeend',
                     '<a class="cyber-btn" href="drehbuch/brahmagupta.html" target="_blank" rel="noopener"' +
                     ' style="text-decoration:none">DREHBUCH \u00d6FFNEN</a>');
