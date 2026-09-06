@@ -103,6 +103,27 @@ def build_slide(prs, video, audio, poster, credit, minutes):
     rim.adjustments[0] = RIM_ADJ
     translucent(rim, 'FFFFFF', RIM_ALPHA)
 
+    # the slide's length, top centre. With 26 near-identical slides there is otherwise no way
+    # to tell them apart before the countdown starts (Doc, 06.09.2026). Raleway on request.
+    secs = int(round(minutes * 60))
+    if secs % 60 == 0:
+        label = '1 Minute' if secs == 60 else '%d Minuten' % (secs // 60)
+    else:
+        label = '%d Sekunden' % secs
+    hbox = slide.shapes.add_textbox(0, Emu(int(0.30 * EMU_IN)), SLIDE_W, Emu(int(0.55 * EMU_IN)))
+    hbox.name = 'SLIDE_LENGTH'
+    hbox.text_frame.word_wrap = False
+    hpara = hbox.text_frame.paragraphs[0]
+    hpara.alignment = PP_ALIGN.CENTER
+    hrun = hpara.add_run()
+    hrun.text = label
+    hrun.font.size = Pt(22)
+    hrun.font.name = 'Raleway'
+    hrun.font.color.rgb = RGBColor.from_string('FFFFFF')
+    hclr = hrun.font.color._xFill.find(q('a:srgbClr'))
+    etree.SubElement(hclr, q('a:alpha')).set('val', '62000')
+    shadow(hrun)
+
     # the countdown numerals; post_fix.py reads the two times back out of the shape name
     total_ms = int(round(minutes * 60_000))
     step_ms = step_for(minutes) * 1000
