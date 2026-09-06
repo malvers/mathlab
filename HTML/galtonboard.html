@@ -213,6 +213,8 @@
             const sim = {
                 running: true,
                 rows: 18,
+                w: 0,                    // logical canvas size in CSS pixels; the
+                h: 0,                    // backing store is dpr times this
                 spawnIntervalMs: 50,
                 flightSpeed: 1.0,
                 ballRadius: 4.3,
@@ -291,14 +293,24 @@
 
             function resizeCanvas() {
                 const rect = canvas.getBoundingClientRect();
-                canvas.width = Math.max(640, Math.floor(rect.width));
-                canvas.height = Math.max(420, Math.floor(rect.height));
+                // Draw in CSS pixels, but keep the backing store at the display's REAL
+                // resolution. Without this the board was rendered at CSS size and then
+                // stretched by the device pixel ratio - soft pegs and bars on every
+                // retina screen, and visibly mushy in a 1440p recording, where the page
+                // runs at ratio 2. sim.w/sim.h stay the logical size everything else
+                // computes with, so the drawing code below is unchanged.
+                const dpr = Math.max(1, Math.min(window.devicePixelRatio || 1, 3));
+                sim.w = Math.max(640, Math.floor(rect.width));
+                sim.h = Math.max(420, Math.floor(rect.height));
+                canvas.width = Math.round(sim.w * dpr);
+                canvas.height = Math.round(sim.h * dpr);
+                ctx.setTransform(dpr, 0, 0, dpr, 0, 0);   // width= resets the context
                 rebuildBoard();
             }
 
             function rebuildBoard() {
-                const w = canvas.width;
-                const h = canvas.height;
+                const w = sim.w;
+                const h = sim.h;
                 const rows = sim.rows;
                 const binBaseY = h - 40; // 40px above bottom edge
                 const binHeight = h * 0.25; // 25% of total height
@@ -358,7 +370,7 @@
             function spawnBall(targetTurns = null) {
                 if (sim.balls.length >= sim.maxBalls) return;
                 sim.balls.push({
-                    x: canvas.width * 0.5 + (Math.random() - 0.5) * 8,
+                    x: sim.w * 0.5 + (Math.random() - 0.5) * 8,
                     y: -sim.ballRadius * 3,
                     vx: 0,
                     vy: 0,
@@ -370,7 +382,7 @@
                     binIndex: -1,
                     rowIndex: 0,
                     rightTurns: 0,
-                    targetX: canvas.width * 0.5,
+                    targetX: sim.w * 0.5,
                     targetTurns,
                     segment: null
                 });
@@ -426,8 +438,8 @@
                 if (ball.x < sim.ballRadius) {
                     ball.x = sim.ballRadius;
                     ball.vx = Math.abs(ball.vx) * 0.6;
-                } else if (ball.x > canvas.width - sim.ballRadius) {
-                    ball.x = canvas.width - sim.ballRadius;
+                } else if (ball.x > sim.w - sim.ballRadius) {
+                    ball.x = sim.w - sim.ballRadius;
                     ball.vx = -Math.abs(ball.vx) * 0.6;
                 }
 
@@ -525,8 +537,8 @@
             }
 
             function draw() {
-                const w = canvas.width;
-                const h = canvas.height;
+                const w = sim.w;
+                const h = sim.h;
                 ctx.clearRect(0, 0, w, h);
 
                 // Pegs.
