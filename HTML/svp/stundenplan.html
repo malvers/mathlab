@@ -300,6 +300,11 @@
             return { hard, site, newOverlap: 0, moved };
         }
 
+        /* Stunden, die im WebUntis-Klassenbuch schon Stoff tragen (untis-written.json, weiter
+           unten geladen). Hier oben deklariert, damit render() sie in jedem Fall kennt. */
+        const UNTIS_WRITTEN = new Set();
+        const untisKey = (l) => l.date + '|' + hhmm(l.startTime) + '|' + (l.classes || []).join(',');
+
         // The conflict chip next to "Optimieren" - fed by render() and live by the optimizer run
         function setConfChip(n) {
             const cc = document.getElementById('confcount');
@@ -619,6 +624,8 @@
                     if (l.ghost) parts.push('<div class="tt-tag">alt</div>');
                     else if (l.moved) parts.push('<div class="tt-tag">neu</div>');
                     el.innerHTML = parts.join('');
+                    /* Orange U, sobald im Klassenbuch Stoff steht. */
+                    if (!l.ghost && UNTIS_WRITTEN.has(untisKey(l))) markUntis(el);
                     if (clash.has(it.i)) {
                         const flag = document.createElement('div');
                         // big warning sign when the tile has room for it, small on slim tiles
@@ -1460,6 +1467,51 @@
             .then(r => r.ok ? r.json() : null)
             .then(m => { SVP_MAP = m; })
             .catch(() => { });
+
+        /* Welche Stunde traegt schon Stoff im WebUntis-Klassenbuch? Erzeugt von
+           tools/webuntis.js status als untis-written.json - nur die gefuellten Stunden, also
+           eine kurze Liste. Ist sie da, bekommt die Kachel oben links ein oranges U
+           (Doc, 06.09.2026). Fehlt sie, sieht der Plan aus wie vorher. */
+        fetch('untis-written.json?v=' + Date.now())
+            .then(r => r.ok ? r.json() : null)
+            .then(m => {
+                if (!m || !m.written) return;
+                for (const k of m.written) UNTIS_WRITTEN.add(k);
+                /* Die Datei kommt meist NACH dem ersten Zeichnen an - dann die schon
+                   gebauten Kacheln nachtraeglich markieren, statt alles neu zu rendern. */
+                for (const tile of document.querySelectorAll('.tt-lesson[data-idx]')) {
+                    const l = PLAN && PLAN.lessons[+tile.dataset.idx];
+                    if (l && UNTIS_WRITTEN.has(untisKey(l))) markUntis(tile);
+                }
+            })
+            .catch(() => { });
+
+        /* Das Untis-U als kleine Marke oben links. Nur der Buchstabe, keine Strahlen - bei
+           11 px waeren sie Matsch.
+           ACHTUNG Ausschnitt: der Bogen des U reicht deutlich tiefer als der Ansatz der
+           Senkrechten, und die Strichstaerke ragt nochmal ueber beide hinaus. Ein zu enger
+           viewBox schneidet den Bogen ab, und uebrig bleiben zwei Striche (06.09.2026). Diese
+           Geometrie ist so gewaehlt, dass alles in 0..100 liegt: Senkrechte bei x 23 und 77,
+           Bogen r=27 um y 57, also unten 84 - plus die halbe Strichstaerke 9 macht 93. */
+        function markUntis(tile) {
+            if (tile.querySelector('.tt-untis')) return;
+            const NS = 'http://www.w3.org/2000/svg';
+            const svg = document.createElementNS(NS, 'svg');
+            svg.setAttribute('class', 'tt-untis');
+            svg.setAttribute('viewBox', '0 0 100 100');
+            /* Der Kasten fuellt die ganze Zeile (flex-basis 100%), das Zeichen soll aber links
+               kleben - sonst zentriert es die Vorgabe xMidYMid mitten auf der Kachel. */
+            svg.setAttribute('preserveAspectRatio', 'xMinYMid meet');
+            svg.setAttribute('aria-hidden', 'true');
+            const path = document.createElementNS(NS, 'path');
+            path.setAttribute('d', 'M23 20V57a27 27 0 0 0 54 0V20');
+            svg.appendChild(path);
+            svg.appendChild(document.createElementNS(NS, 'title')).textContent
+                = 'Stundeninhalt steht im WebUntis-Klassenbuch';
+            /* Als ERSTES Kind: die Marke bekommt eine eigene Zeile GANZ OBEN, der Text darunter
+               bleibt unveraendert (Doc, 06.09.2026). */
+            tile.insertBefore(svg, tile.firstChild);
+        }
 
         function svpPageFor(l) {
             if (!SVP_MAP || !SVP_MAP.pages) return null;

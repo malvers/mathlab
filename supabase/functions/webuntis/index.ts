@@ -168,31 +168,37 @@ async function myLessons(u: Untis, userData: any, from: string, to: string) {
     .sort((a: any, b: any) => Number(a.date) - Number(b.date) || a.start.localeCompare(b.start));
 }
 
-/* Stored topic + this lesson's own rights. `can` is the honest way to know whether a write is
-   allowed (own lesson: WRITE_LESSONTOPIC; a colleague's: read only) instead of trying it out. */
-// STILLGELEGT am 02.09.2026 (Doc): getPeriodData2017 liefert neben Stundeninhalt
-// und Rechten auch `referencedStudents` — Klarnamen und Geburtsdaten, auch bei
-// fremden Stunden. Nichts davon wurde je gespeichert, aber der Aufruf holt es
-// ueber die Leitung; das genuegt als Grund, ihn zu lassen.
-// Folge: der Klassenbuch-Schreibweg dieser Function ist ohne ihn blind (kein
-// Ueberschreibschutz, keine `can`-Pruefung) und meldet das ehrlich, statt still
-// weiterzuschreiben. Zum Reaktivieren: Original unten einkommentieren.
-async function periodState(_u: Untis, _ttIds: number[]): Promise<Record<string, { topic: string; can: string[] }>> {
-  throw new Error('periodState ist stillgelegt (Datenschutz, 02.09.2026): getPeriodData2017 liefert Schuelerdaten mit.');
+/* The stored classbook text of ONE period - the clean way, measured 06.09.2026.
+   `getPeriodData2017` used to do this and was switched off on 02.09.2026 because it also carries
+   `referencedStudents` (full names, dates of birth, even for foreign lessons). This endpoint
+   answers with nothing but the lesson's own data:
+     {"data":{"lessonTopic":{id,date,startTime,endTime,subject,teacher,klasse,text,attachments}}}
+   HTTP 500 is not an error here, it is how WebUntis says "no entry for this period"; an entry
+   with an empty text comes back as 200 with text:"". A single GET per period, so the caller
+   paces them. This restores BOTH the overwrite protection and the read-back verification. */
+async function readTopic(u: Untis, ttId: number): Promise<string | null> {
+  const res = await fetch(`${BASE}/WebUntis/api/classreg/lessontopic?periodId=${ttId}`, {
+    headers: { Cookie: u.cookies, Accept: 'application/json' },
+  });
+  const text = await res.text();
+  /* Belt and braces: should this endpoint ever start carrying student data, stop rather than
+     quietly pass it on (Doc, 02.09.2026). */
+  if (/"(referencedStudents|students|studentIds)"/.test(text)) {
+    throw new Error('Unerwartete Schuelerdaten in der Antwort - Abbruch.');
+  }
+  if (res.status !== 200) return null;
+  try { return JSON.parse(text)?.data?.lessonTopic?.text ?? ''; } catch { return null; }
 }
-/* ORIGINAL - nicht loeschen, nur stillgelegt:
-async function periodState(u: Untis, ttIds: number[]) {
-  const out: Record<string, { topic: string; can: string[] }> = {};
-  for (let i = 0; i < ttIds.length; i += 50) {
-    const r = await u.intern('getPeriodData2017', { ttIds: ttIds.slice(i, i + 50) });
-    if (r.error) throw new Error(`${r.error.message} (code ${r.error.code})`);
-    for (const [id, d] of Object.entries<any>(r.result?.dataByTTId || {})) {
-      out[id] = { topic: d?.topic?.text || '', can: Array.isArray(d?.can) ? d.can : [] };
-    }
+
+/* Same for a list of periods, gently paced. Returns '' for "no entry". */
+async function readTopics(u: Untis, ttIds: number[]): Promise<Record<string, string>> {
+  const out: Record<string, string> = {};
+  for (const id of ttIds) {
+    out[String(id)] = (await readTopic(u, id)) ?? '';
+    await new Promise(r => setTimeout(r, 110));
   }
   return out;
 }
-*/
 
 // ---------- handler ----------
 
@@ -238,13 +244,14 @@ Deno.serve(async (req) => {
       const to = /^\d{8}$/.test(String(b.to)) ? String(b.to) : from;
       if (!from) return json({ error: 'from/to als YYYYMMDD erwartet' }, 400);
       const lessons = await myLessons(u, userData, from, to);
-      /* Ohne periodState (Datenschutz, 02.09.2026) kennen wir weder den schon
-         eingetragenen Text noch das `can` der Stunde. myLessons liefert
-         ohnehin nur DOCS EIGENE Stunden - in denen darf er schreiben, das ist
-         die Annahme statt der Rueckfrage. `topic` bleibt leer: der Dialog
-         zeigt dann seinen Textvorschlag, nicht den Stand aus WebUntis. */
+      /* Der Stand aus WebUntis, wieder ohne Schuelerdaten (readTopic, 06.09.2026). Damit sieht
+         der Dialog erneut, wo schon etwas steht, und der Ueberschreibschutz greift.
+         `writable` bleibt true: myLessons liefert nur DOCS EIGENE Stunden, und das `can` der
+         Stunde kam nur aus getPeriodData2017. Fehlt das Recht doch, antwortet WebUntis beim
+         Schreiben selbst mit einem Fehler. */
+      const topics = await readTopics(u, lessons.map((l: any) => l.ttId));
       return json({
-        lessons: lessons.map((l: any) => ({ ...l, topic: '', writable: true })),
+        lessons: lessons.map((l: any) => ({ ...l, topic: topics[String(l.ttId)] || '', writable: true })),
       });
     }
 
@@ -256,17 +263,26 @@ Deno.serve(async (req) => {
       if (!Number.isInteger(ttId) || ttId <= 0) return json({ error: 'ttId fehlt' }, 400);
       if (!topic) return json({ error: 'Text ist leer' }, 400);
 
-      /* Direkt schreiben. Die Vorab-Pruefung (steht schon was drin? darf ich?)
-         und das Zurueckelesen liefen ueber periodState - und das brachte die
-         Schuelerdaten mit (Doc, 02.09.2026). Beides ist damit weg:
-         - kein Ueberschreibschutz mehr: was hier gesendet wird, gewinnt. Wer in
-           WebUntis von Hand korrigiert hat, muss die Stunde also auslassen.
-         - keine Rechtepruefung noetig: es sind Docs eigene Stunden. Fehlt das
-           Recht doch, antwortet WebUntis selbst mit einem Fehler.
-         - keine Lesebestaetigung: es gilt das {"success":true} des Servers. */
+      /* Ueberschreibschutz: steht schon ein ANDERER Text drin, gewinnt die Handkorrektur -
+         geschrieben wird dann nur mit force. Wieder moeglich seit dem sauberen Leseweg
+         (06.09.2026); zwischen dem 02. und dem 06.09. war dieser Schutz weg. */
+      const before = await readTopic(u, ttId);
+      if (before !== null && before.trim() && before.trim() !== topic && !b.force) {
+        return json({ ok: false, conflict: true, ttId, topic, stored: before,
+          error: 'In WebUntis steht bereits ein anderer Text.' });
+      }
+      if (before !== null && before.trim() === topic) {
+        return json({ ok: true, ttId, topic, stored: before, unchanged: true });
+      }
+
       const w = await u.intern('submitLessonTopic', { ttId, lessonTopic: topic });
       if (w.error) return json({ error: `${w.error.message} (code ${w.error.code})` }, 502);
-      return json({ ok: w.result?.success !== false, ttId, topic, stored: topic, unverified: true });
+
+      /* Zurueckelesen statt glauben: WebUntis antwortet auch dann success, wenn es den Text
+         verwirft oder kappt. Was hier als `stored` zurueckgeht, steht wirklich drin. */
+      const after = await readTopic(u, ttId);
+      const stored = after ?? '';
+      return json({ ok: stored.trim() === topic.trim(), ttId, topic, stored });
     }
 
     return json({ error: 'unbekannte action' }, 400);

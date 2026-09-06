@@ -2579,8 +2579,15 @@
             const d = String(e.date);
             const day = d.slice(6, 8) + '.' + d.slice(4, 6) + '.';
             return (e.klasse || '') + ' ' + day + ' ' + e.start + ' — ' +
-                (e.written ? 'eingetragen: ' + e.text : 'noch nichts im Klassenbuch');
+                (e.code === 'cancelled' ? 'entfällt'
+                    : e.written ? 'eingetragen: ' + e.text : 'noch nichts im Klassenbuch');
         });
+        /* Die Zahl zuerst: bei fuenf Lerngruppen sagt "2 von 10" mehr als zehn Zeilen, und der
+           Chip selbst kann nur drei Zustaende zeigen (Doc, 06.09.2026 - eine Zeile leuchtete
+           orange, obwohl drei Gruppen leer waren). */
+        const due = entries.filter(e => e.code !== 'cancelled');
+        const done = due.filter(e => e.written).length;
+        lines.unshift(done + ' von ' + due.length + ' Stunden eingetragen');
         if (generated) {
             const g = new Date(generated);
             lines.push('Stand ' + g.toLocaleDateString('de-DE') + ' ' +
@@ -2588,6 +2595,16 @@
                 ' — im Bearbeiten-Modus klicken: Stundeninhalt eintragen');
         }
         return lines.join('\n');
+    }
+
+    /* Der Chip-Zustand aus den Eintraegen einer Zeile. Ausgefallene Stunden zaehlen nicht mit -
+       sie sind nicht "offen", sie fanden nicht statt. Voll wird der Chip nur, wenn WIRKLICH
+       jede faellige Stunde steht; vorher war "1 von 10" optisch dasselbe wie "10 von 10". */
+    function untisChipClass(entries) {
+        const due = entries.filter(e => e.code !== 'cancelled');
+        if (!due.length) return 'is-none';
+        const done = due.filter(e => e.written).length;
+        return done === due.length ? 'is-full' : done ? 'is-part' : 'is-none';
     }
 
     /* Untis-Logo statt des Kuerzels "WU": weisses U mit Strahlenkranz, die
@@ -3166,30 +3183,44 @@
                 const l = b.l;
                 const text = b.box.value.replace(/\s+/g, ' ').trim();
                 try {
-                    /* Alle Perioden des Blocks, gleicher Text. Gespiegelte
-                       Partner antworten 'unchanged', ungespiegelte werden so
-                       ueberhaupt erst gefuellt - beides korrekt. */
-                    let res = null;
-                    for (const per of (l.periods || [l])) {
-                        res = await untisCall({
+                    /* Jede Periode des Blocks einzeln, gleicher Text - und JEDE Antwort zaehlt.
+                       Frueher ueberschrieb die letzte Antwort die vorige, ein Fehlschlag der
+                       ersten Periode verschwand also hinter dem Erfolg der zweiten
+                       (Doc, 06.09.2026). Gemessen am selben Tag: WebUntis spiegelt einen
+                       Stundeninhalt nur ueber lueckenlose Perioden, ueber die Pause hinweg
+                       nicht - beide Haelften eines Tages sind zwei echte Eintraege. */
+                    const periods = l.periods || [l];
+                    const results = [];
+                    for (const per of periods) {
+                        results.push(await untisCall({
                             action: 'write', ttId: per.ttId, topic: text, force: !!l.topic.trim()
-                        });
+                        }));
                     }
-                    l.topic = (res && res.stored) || text;
-                    if (l._state) {
-                        if (res.ok === false) {
-                            l._state.textContent = 'gespeichert, aber WebUntis hat daraus gemacht: ' + l.topic;
-                            l._state.className = 'untis-state is-set';
-                        } else {
-                            l._state.textContent = 'eingetragen ✓';
-                            l._state.className = 'untis-state is-ok';
+                    /* Was WIRKLICH drinsteht, sagt die Function nach dem Zuruecklesen. Ein
+                       Eintrag gilt nur als geschrieben, wenn jede Periode ok gemeldet hat -
+                       sonst leuchtet der Chip gruen fuer ein leeres Klassenbuch. */
+                    const bad = results.find(r => r && r.ok === false);
+                    l.topic = (results[0] && results[0].stored) || text;
+                    if (bad) {
+                        const msg = bad.conflict
+                            ? 'nicht geschrieben, in WebUntis steht: ' + (bad.stored || '')
+                            : 'WebUntis hat daraus gemacht: ' + (bad.stored || '(nichts)');
+                        if (l._state) {
+                            l._state.textContent = msg;
+                            l._state.className = 'untis-state is-bad';
                         }
+                        failed.push(label(l) + ': ' + msg);
+                        continue;   /* kein Haken, kein Echo, kein gruener Chip */
+                    }
+                    if (l._state) {
+                        l._state.textContent = 'eingetragen ✓';
+                        l._state.className = 'untis-state is-ok';
                     }
                     if (b.cb) { b.cb.checked = false; b.cb.disabled = true; }
                     b.box.disabled = true;
-                    /* Chip-Stand mitziehen - fuer JEDE Periode des Blocks,
-                       WebUntis hat sie ja alle gefuellt. */
-                    for (const per of (l.periods || [l])) {
+                    /* Chip-Stand mitziehen - fuer JEDE Periode des Blocks, alle sind
+                       zurueckgelesen bestaetigt. */
+                    for (const per of periods) {
                         const hit = entries.find(e => e.date === per.date && e.start === per.start);
                         if (hit) { hit.written = true; hit.text = l.topic; }
                         untisEchoPut(per.date, per.start, l.topic);
@@ -3202,9 +3233,7 @@
             sending = false;
             cancelBtn.disabled = false;
             boxes = boxes.filter(b => !b.box.disabled);
-            const anyWritten = entries.some(e => e.written);
-            chip.className = 'untis-chip ' +
-                (entries.every(e => e.written) ? 'is-full' : anyWritten ? 'is-part' : 'is-none');
+            chip.className = 'untis-chip ' + untisChipClass(entries);
             chip.title = untisTitle(entries, data.generated);
             if (failed.length) { err.textContent = failed.join(' | '); go.disabled = false; return; }
             err.textContent = done + ' Stunde' + (done === 1 ? '' : 'n') + ' eingetragen ✓';
@@ -3259,10 +3288,8 @@
             if (!r.lbTd) continue;
             const entries = termine ? untisEntriesFor(termine, r.i) : weeks[String(r.kw)];
             if (!entries || !entries.length) continue;
-            const done = entries.filter(e => e.written).length;
             const chip = document.createElement('span');
-            chip.className = 'untis-chip ' +
-                (done === entries.length ? 'is-full' : done ? 'is-part' : 'is-none');
+            chip.className = 'untis-chip ' + untisChipClass(entries);
             chip.appendChild(untisMark());
             chip.title = untisTitle(entries, data.generated);
             chip.addEventListener('click', function (ev) {

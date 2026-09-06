@@ -1537,10 +1537,11 @@ tr.kw-jump > td { animation: kw-jump-pulse 1.3s ease-in-out 2; }
     font-weight: 700;
 }
 
-/* Nur im Bearbeiten-Modus sichtbar (Doc, 31.08.2026): der Chip ist ein
-   Werkzeug zum Eintragen, im Lesemodus ist er Rauschen. */
+/* Immer sichtbar (Doc, 06.09.2026 - vorher nur im Bearbeiten-Modus, weil der Chip als reines
+   Eintrage-Werkzeug gedacht war). Er sagt jetzt auch im Lesemodus, ob der Stoff im Klassenbuch
+   steht; geklickt und geschrieben wird weiterhin nur beim Bearbeiten. */
 .untis-chip {
-    display: none;
+    display: flex;
     align-items: center;
     justify-content: center;
     gap: 5px;
@@ -1581,18 +1582,34 @@ tr.kw-jump > td { animation: kw-jump-pulse 1.3s ease-in-out 2; }
 .untis-chip .u-mark .u-rays-minor { stroke-width: 5; }
 .untis-chip .u-mark .u-letter { stroke-width: 19.5; }
 
-body.editing .untis-chip { display: flex; cursor: pointer; }
+body.editing .untis-chip { cursor: pointer; }
 
-.untis-chip.is-full,
-.untis-chip.is-part {
+/* Vollstaendig eingetragen: satt gefuellt. */
+.untis-chip.is-full {
     color: #fff;
     background: var(--untis);
     border-color: var(--untis);
     opacity: 1;
 }
 
+/* Teilweise eingetragen MUSS anders aussehen als fertig (Doc, 06.09.2026): eine Zeile im
+   Termin-Modus buendelt bis zu fuenf Lerngruppen, und mit gleicher Optik sah "1 von 10"
+   aus wie "10 von 10" - genau daran sind drei Gruppen leer geblieben. Also nur der Rand in
+   Untis-Orange und ein diagonal gestreifter Grund: von weitem als "angefangen" lesbar,
+   ohne den Chip lauter zu machen als die Pille darueber. Die Zahl steht im Tooltip. */
+.untis-chip.is-part {
+    color: var(--untis);
+    border-color: var(--untis);
+    opacity: 1;
+    background: repeating-linear-gradient(-45deg,
+        color-mix(in srgb, var(--untis) 26%, transparent) 0 4px,
+        transparent 4px 8px);
+}
+
 /* Auch aus dem Bearbeiten-Modus heraus gedruckt bleibt er weg - sonst
    gewaenne body.editing die Spezifitaet gegen diese Regel. */
+/* Gedruckt gehoert er nicht aufs Blatt - der Plan geht an Kolleg:innen, der Klassenbuchstand
+   ist Docs eigene Arbeitsanzeige. */
 @media print { .untis-chip, body.editing .untis-chip { display: none; } }
 
 /* WebUntis-Schreibdialog (svp-plan.js untisDialog). Breiter als die
