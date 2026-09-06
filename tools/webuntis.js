@@ -112,33 +112,42 @@ async function writeTopic(ttId, text) {
   return r.result;
 }
 
-// STILLGELEGT am 02.09.2026 auf Docs Ansage ("Schuelernamen? Neeee").
-// getPeriodData2017 ist die EINZIGE Stelle, die je Schuelerdaten zu Gesicht
-// bekommen hat: die Antwort enthaelt neben dem Stundeninhalt auch
-// `referencedStudents` mit Klarnamen und Geburtsdatum - auch bei fremden
-// Stunden. Gespeichert wurde davon nie etwas (die Funktion nahm nur
-// topic.text), aber die Daten kamen ueber die Leitung, und das reicht als
-// Grund, den Aufruf gar nicht erst zu machen.
-//
-// Es haengt daran: der Ueberschreibschutz beim Klassenbuch-Schreiben und die
-// `written`-Punkte des WU-Chips. Beides ist ohne diesen Aufruf blind - deshalb
-// wirft die Funktion, statt still leere Ergebnisse zu liefern.
-// Zum Reaktivieren: den Block unten wieder einkommentieren, diesen ersetzen.
-async function readTopics(ttIds) {
-  throw new Error('readTopics ist stillgelegt (Datenschutz, 02.09.2026): getPeriodData2017 '
-    + 'liefert Schuelernamen mit. Siehe Kommentar in tools/webuntis.js.');
+// Read the stored classbook text of one period - WITHOUT any student data.
+// History: this used to be getPeriodData2017, switched off on 02.09.2026 on Doc's call
+// ("Schuelernamen? Neeee") because that answer also carries `referencedStudents` with full names
+// and dates of birth, even for a colleague's lessons. Nothing of it was ever stored, but it came
+// over the wire, and that was reason enough. The overwrite protection and the WU chip's dots hung
+// on it, so both went blind between 02.09. and 06.09.
+// Measured 06.09.2026, the clean replacement - one plain web-API GET per period:
+//   GET /WebUntis/api/classreg/lessontopic?periodId=<ttId>
+//   200 -> {"data":{"lessonTopic":{id,date,startTime,endTime,subject,teacher,klasse,text,...}}}
+//   500 -> this period has no entry at all (NOT a failure); an empty entry is 200 with text:''.
+// Session cookies from the app-secret login are enough; no student field in sight.
+async function readTopic(ttId) {
+  const res = await fetch(`${BASE}/WebUntis/api/classreg/lessontopic?periodId=${ttId}`,
+    { headers: { Cookie: cookies, Accept: 'application/json' } });
+  const text = await res.text();
+  // Belt and braces: if this endpoint ever starts carrying student data, stop instead of
+  // quietly passing it on.
+  if (/"(referencedStudents|students|studentIds)"/.test(text)) {
+    throw new Error('Unerwartete Schuelerdaten in der Antwort von /api/classreg/lessontopic - Abbruch.');
+  }
+  if (res.status !== 200) return null;                 // no entry
+  try { return JSON.parse(text)?.data?.lessonTopic?.text ?? ''; } catch (e) { return null; }
 }
-/* ORIGINAL - nicht loeschen, nur stillgelegt:
+
+// Same for many periods. One request each, gently paced - 110 ms is enough for a whole school
+// year (about 700 lessons, roughly two minutes).
 async function readTopics(ttIds) {
   const out = {};
-  for (let i = 0; i < ttIds.length; i += 50) {
-    const r = await intern('getPeriodData2017', { ttIds: ttIds.slice(i, i + 50) });
-    if (r.error) throw new Error(`${r.error.message} (code ${r.error.code})`);
-    for (const [id, d] of Object.entries(r.result?.dataByTTId || {})) out[id] = (d.topic?.text || '');
+  let i = 0;
+  for (const id of ttIds) {
+    out[String(id)] = (await readTopic(id)) ?? '';
+    if (++i % 100 === 0) process.stderr.write(`  ... ${i}/${ttIds.length} Stundeninhalte gelesen\n`);
+    await new Promise(r => setTimeout(r, 110));
   }
   return out;
 }
-*/
 
 // ---------- login ----------
 
@@ -231,6 +240,61 @@ function extractLiteral(src, name, open, close) {
     }
   }
   return null;
+}
+
+// Lift a named top-level function out of svp-plan.js by brace counting - same trick as
+// extractLiteral, and for the same reason: the text a lesson gets must be built by ONE piece of
+// code, not by two that drift apart. The abbreviation table was already read from there; since
+// 06.09.2026 the text builders are too, so the button and this tool write character-identical
+// lines and neither mistakes the other's output for a hand correction.
+function extractFunction(src, name) {
+  const at = src.search(new RegExp('\\bfunction\\s+' + name + '\\s*\\('));
+  if (at < 0) return null;
+  const start = src.indexOf('{', at);
+  if (start < 0) return null;
+  let depth = 0, inStr = null, esc = false, inLine = false, inBlock = false;
+  for (let i = start; i < src.length; i++) {
+    const c = src[i], next = src[i + 1];
+    if (inLine) { if (c === '\n') inLine = false; continue; }
+    if (inBlock) { if (c === '*' && next === '/') { inBlock = false; i++; } continue; }
+    if (inStr) {
+      if (esc) esc = false;
+      else if (c === '\\') esc = true;
+      else if (c === inStr) inStr = null;
+      continue;
+    }
+    if (c === '/' && next === '/') { inLine = true; i++; continue; }
+    if (c === '/' && next === '*') { inBlock = true; i++; continue; }
+    if (c === '"' || c === "'" || c === '`') { inStr = c; continue; }
+    if (c === '{') depth++;
+    else if (c === '}' && --depth === 0) return src.slice(at, i + 1);
+  }
+  return null;
+}
+
+// The browser's own text builders, evaluated straight out of svp-plan.js.
+// untisPlain  - LaTeX to readable plain text (WebUntis cannot render $...$)
+// untisFit    - fit to 250 chars in three stages (full / abbreviated / drop whole steps)
+// untisSpread - one step per lesson, per learning group, "Festigung: ..." for the rest
+// untisBlocks - fold gapless periods of one lesson into ONE classbook entry
+let browserFns = null;
+function browser() {
+  if (browserFns) return browserFns;
+  const src = fs.readFileSync(ABBREV_SRC, 'utf8');
+  const names = ['untisAbbrev', 'untisPlain', 'untisFit', 'untisSpread', 'untisBlocks'];
+  const parts = names.map(n => {
+    const f = extractFunction(src, n);
+    if (!f) throw new Error(`${n}() nicht in ${path.relative(REPO, ABBREV_SRC)} gefunden - Namen geaendert?`);
+    return f;
+  });
+  const table = extractLiteral(src, 'SVP_ABBREV', '[', ']') || [];
+  browserFns = new Function('SVP_ABBREV', 'UNTIS_MAX', `
+    const window = { SVP_ABBREV };
+    let abbrevRules = null;
+    ${parts.join('\n')}
+    return { untisPlain, untisFit, untisSpread, untisBlocks };
+  `)(table, TOPIC_MAX);
+  return browserFns;
 }
 
 // The published plan state: the HTML is only the base - once a page has been
@@ -336,9 +400,94 @@ async function myLessons(from, to, session) {
   } });
   return (tt || [])
     .filter(l => (l.kl || []).length && l.su?.[0])
-    .map(l => ({ ttId: l.id, date: String(l.date), start: hhmm(l.startTime),
-                 subject: l.su[0].name, klassen: l.kl.map(k => k.name), code: l.code || '' }))
+    .map(l => ({ ttId: l.id, date: String(l.date), start: hhmm(l.startTime), end: hhmm(l.endTime),
+                 subject: l.su[0].name, klassen: l.kl.map(k => k.name), code: l.code || '',
+                 lsnumber: l.lsnumber ?? null }))
     .sort((a, b) => a.date - b.date || a.start.localeCompare(b.start));
+}
+
+// ---------- what belongs in which lesson ----------
+// The one place that decides which plan line a lesson gets, for BOTH kinds of page. Everything
+// here mirrors HTML/svp/svp-plan.js; the text builders are literally that file's functions
+// (see browser()), so there is nothing left to drift.
+
+const groupKey = (l) => (l.klassen || []).slice().sort().join(',');
+
+// Topic and steps of one plan row, ready for untisFit - the CLI twin of untisTopicParts().
+function topicParts(row, badge) {
+  const B = browser();
+  const lb = (badge[row.type] || [])[1];
+  const head = [lb, row.u].filter(Boolean).join(', ');
+  // A placeholder topic means "propose nothing" - better an empty lesson than a dash in the
+  // classbook.
+  const topic = (row.topic === '\u2014' || row.topic === '-') ? '' : (row.topic || '');
+  return {
+    base: topic ? B.untisPlain(topic + (head ? ` (${head})` : '')).replace(/\s+/g, ' ').trim() : '',
+    details: (row.details || []).filter(Boolean).map(d => B.untisPlain(d).replace(/\s+/g, ' ').trim()),
+  };
+}
+
+// Termin mode (block teaching, see the comment on TERMIN in svp-plan.js): a group comes every
+// other week for four periods, so the plan row is NOT chosen by calendar week but by which
+// appointment it is for THAT group. Row 2k carries the first Doppelstunde, row 2k+1 the second.
+// Measured 06.09.2026: WebUntis mirrors a topic only across gapless periods, so the two halves
+// of a day really are two separate entries.
+function terminRowIndex(rows, block, half) {
+  let n = 0;
+  for (let i = 0; i < rows.length; i++) {
+    if (rows[i].ferien) continue;
+    if (n === block * 2 + half) return i;
+    n++;
+  }
+  return -1;
+}
+
+// For every lesson in `lessons`: which plan row, and what would be written.
+// `all` is the whole school year of my lessons - needed to count a group's appointments and to
+// spread a week's steps over its lessons. Returns one entry per lesson, `text` null when the
+// plan has nothing to say for it (the reason is then in `why`).
+async function proposals(lessons, all, pages, plans) {
+  const B = browser();
+  const out = [];
+  for (const l of lessons) {
+    const page = pageFor(l, pages);
+    if (!page) { out.push({ l, page: null, text: null, why: 'keine Planseite' }); continue; }
+    if (!plans[page]) plans[page] = await loadPlan(page);
+    const { rows, badge, termin } = plans[page];
+    let text = null, why = '';
+    if (termin) {
+      const key = groupKey(l);
+      const group = all.filter(x => groupKey(x) === key && x.subject === l.subject);
+      const days = [...new Set(group.map(x => x.date))].sort();
+      const block = days.indexOf(l.date);
+      const day = group.filter(x => x.date === l.date).sort((a, b) => a.start.localeCompare(b.start));
+      // Fewer than four periods (a cancellation): everything goes to the first half rather than
+      // guessing - no proposal is better than the wrong one.
+      const half = day.length >= 4 ? (day.findIndex(x => x.ttId === l.ttId) >= 2 ? 1 : 0) : 0;
+      const ri = terminRowIndex(rows, block, half);
+      if (ri < 0) { out.push({ l, page, text: null, why: `kein Termin-Slot (Termin ${block + 1})` }); continue; }
+      const p = topicParts(rows[ri], badge);
+      text = B.untisFit(p.base, p.details);
+      why = `Termin ${block + 1}, ${half ? '2.' : '1.'} Doppelstunde -> Zeile ${rows[ri].nr}`;
+    } else {
+      const kw = isoWeek(parseYmd(l.date));
+      const ri = rows.findIndex(r => !r.ferien && Number(r.kw) === kw);
+      if (ri < 0) { out.push({ l, page, text: null, why: `keine Planzeile fuer KW ${kw}` }); continue; }
+      const p = topicParts(rows[ri], badge);
+      // Week mode: the dialog spreads the week's steps over that group's blocks, one step each,
+      // so five lessons do not all get the same lump of text.
+      const week = all.filter(x => isoWeek(parseYmd(x.date)) === kw && pageFor(x, pages) === page
+                                   && x.code !== 'cancelled');
+      const blocks = B.untisBlocks(week.map(x => ({ ...x, writable: true, topic: '' })));
+      const mine = blocks.find(bl => bl.periods.some(x => x.ttId === l.ttId));
+      const spread = B.untisSpread(p.base, p.details, blocks);
+      text = mine ? spread.get(mine) : B.untisFit(p.base, p.details);
+      why = `KW ${kw} -> Zeile ${rows[ri].nr}`;
+    }
+    if (!text || !text.trim()) { out.push({ l, page, text: null, why: 'Planzeile ohne Thema' }); continue; }
+    out.push({ l, page, text, why });
+  }
+  return out;
 }
 
 // Regenerate the <plan>.untis.json files the SVP badges read. Runs as its own
@@ -360,6 +509,10 @@ async function runStatus(session) {
     const b = (byPage[page] ||= { weeks: {} });
     (b.weeks[kw] ||= []).push({
       date: l.date, start: l.start, klasse: l.klassen.join(','), subject: l.subject || '',
+      /* The page needs the code: a cancelled lesson must not count as "still to write", and in
+         Termin mode a day that fell away entirely must not eat an appointment (Doc's rule
+         "a holiday only shifts the group it hits" only works if the page can see it). */
+      code: l.code || '',
       written: !!(topics[String(l.ttId)] || '').trim(),
       text: topics[String(l.ttId)] || '',
     });
@@ -387,6 +540,24 @@ async function runStatus(session) {
     }, null, 1));
     console.log(`${path.relative(REPO, out)}: ${done}/${n} Stunden eingetragen, ${Object.keys(data.weeks).length} Wochen`);
     mapIndex.push({ page: '/' + page.replace(/^HTML\//, ''), classes, subjects });
+  }
+
+  /* Zweiter kleiner Index fuer stundenplan.html: WELCHE Stunde traegt schon Stoff.
+     Der Stundenplan soll ein orangenes U zeigen, sobald im Klassenbuch etwas steht (Doc,
+     06.09.2026) - er kann die sechs <plan>.untis.json nicht einzeln laden und wuesste auch
+     nicht welche. Nur die gefuellten Stunden stehen drin, das sind wenige; Schluessel ist
+     Datum|Beginn|Klassen, damit zwei parallele Stunden nicht verwechselt werden. */
+  {
+    const written = [];
+    for (const data of Object.values(byPage)) {
+      for (const list of Object.values(data.weeks)) {
+        for (const e of list) if (e.written) written.push(`${e.date}|${e.start}|${e.klasse}`);
+      }
+    }
+    written.sort();
+    const outW = path.join(REPO, 'HTML', 'svp', 'untis-written.json');
+    fs.writeFileSync(outW, JSON.stringify({ generated: new Date().toISOString(), written }, null, 1));
+    console.log(`${path.relative(REPO, outW)}: ${written.length} Stunden mit Stoff`);
   }
 
   /* Kleiner Index fuer stundenplan.html: welche Stunde gehoert zu welchem
@@ -662,51 +833,118 @@ async function main() {
   }
 
   if (cmd === 'plan') {
-    // Carry the SVP over into the classbook: webuntis.js plan [YYYYMMDD] [--dry] [--force]
+    // Carry the SVP over into the classbook.
+    //   plan [YYYYMMDD]            one day (default: today)
+    //   plan --bis YYYYMMDD        a range, starting at the given day
+    //   plan --offen               school year start .. today - "what is still missing"
+    //   --dry    report only, write nothing
+    //   --force  overwrite a DIFFERENT existing text (a hand correction) as well
+    //   --line   one summary line plus exit code 1 when something is open (for the app)
+    // Since 06.09.2026 this also handles Termin-mode pages (block teaching, fos12) and builds
+    // its text with the browser's own functions, so both ways write the same line.
     const args = process.argv.slice(3);
     const dry = args.includes('--dry');
     const force = args.includes('--force');
-    const day = args.find(a => /^\d{8}$/.test(a)) || ymd(new Date());
-    const pages = loadMap();
-    const lessons = await myLessons(day, day, session);
-    if (!lessons.length) { console.log(`Keine Stunden am ${day}.`); return; }
-    const plans = {};   // page -> loaded plan, one fetch per page
-    const unmapped = new Set();
-    let written = 0;
-    for (const l of lessons) {
-      const page = pageFor(l, pages);
-      if (!page) { unmapped.add(`${l.subject} ${l.klassen.join(',')}`); continue; }
-      if (!plans[page]) plans[page] = await loadPlan(page);
-      const { rows, badge, termin } = plans[page];
-      if (termin) {
-        if (!plans[page]._warned) {
-          console.log(`${page}: Termin-Modus (Blockunterricht) - hier bitte den WebUntis-Knopf auf der Planseite benutzen, die Kalenderwoche trifft die falsche Zeile.`);
-          plans[page]._warned = true;
-        }
-        continue;
-      }
-      const kw = isoWeek(parseYmd(l.date));
-      const row = rows.find(r => !r.ferien && Number(r.kw) === kw);
-      const label = `${l.date} ${l.start} ${l.subject} ${l.klassen.join(',')}`;
-      if (!row) { console.log(`${label}: keine Planzeile fuer KW ${kw} in ${page}`); continue; }
-      const text = topicText(row, badge);
-      if (!text) { console.log(`${label}: Planzeile KW ${kw} hat kein Thema`); continue; }
-      const current = (await readTopics([l.ttId]))[String(l.ttId)] || '';
-      if (current && current !== text && !force) {
-        console.log(`${label}: STEHT SCHON ANDERS DRIN, nicht angefasst (--force ueberschreibt)`);
-        console.log(`    ist:  ${current}`);
-        console.log(`    waer: ${text}`);
-        continue;
-      }
-      if (current === text) { console.log(`${label}: schon eingetragen`); continue; }
-      if (dry) { console.log(`${label}: WUERDE schreiben -> ${text}`); continue; }
-      await writeTopic(l.ttId, text);
-      const back = (await readTopics([l.ttId]))[String(l.ttId)] || '';
-      if (back === text) written++;
-      console.log(`${label}: ${back === text ? 'eingetragen' : 'FEHLER, Rueckgelesenes weicht ab'} -> ${back}`);
+    const line = args.includes('--line');
+    const offen = args.includes('--offen');
+    const say = (...a) => { if (!line) console.log(...a); };
+
+    const years = await rpc('getSchoolyears');
+    const todayN = Number(ymd(new Date()));
+    const year = years.find(y => Number(y.startDate) <= todayN && Number(y.endDate) >= todayN)
+      || years[years.length - 1];
+
+    const days = args.filter(a => /^\d{8}$/.test(a));
+    const bisAt = args.indexOf('--bis');
+    let from, to;
+    if (offen) { from = String(year.startDate); to = ymd(new Date()); }
+    else {
+      from = days[0] || ymd(new Date());
+      to = bisAt >= 0 ? (args[bisAt + 1] || from) : (days[1] || from);
     }
-    if (unmapped.size) console.log(`Ohne Planseite (in ${path.basename(MAP_FILE)} nachtragen): ${[...unmapped].join(', ')}`);
-    if (written) { console.log('Badge-Daten aktualisieren:'); await runStatus(session); }
+    if (Number(to) < Number(from)) { console.error('--bis liegt vor dem Startdatum.'); process.exit(2); }
+
+    const pages = loadMap();
+    const plans = {};
+    // The whole year is needed anyway: Termin mode counts a group's appointments from it, and
+    // week mode spreads the steps over the week's lessons.
+    const all = (await myLessons(year.startDate, year.endDate, session)).filter(l => pageFor(l, pages));
+    const lessons = all.filter(l => Number(l.date) >= Number(from) && Number(l.date) <= Number(to));
+    if (!lessons.length) {
+      if (line) console.log('KLASSENBUCH: keine eigenen Stunden im Zeitraum');
+      else console.log(`Keine Stunden mit Planseite zwischen ${from} und ${to}.`);
+      return;
+    }
+    say(`${lessons.length} Stunden ${from}..${to} (Schuljahr ${year.name})`);
+
+    const props = await proposals(lessons, all, pages, plans);
+    const unmapped = new Set(props.filter(p => !p.page).map(p => `${p.l.subject} ${p.l.klassen.join(',')}`));
+
+    // Read the current classbook state in ONE pass - the clean way, no student data.
+    const askable = props.filter(p => p.text && p.l.code !== 'cancelled');
+    const current = await readTopics(askable.map(p => p.l.ttId));
+
+    const open = [], conflicts = [];
+    for (const p of askable) {
+      const now = current[String(p.l.ttId)] || '';
+      if (now.trim() === p.text.trim()) continue;              // already exactly this
+      if (now.trim() && !force) { conflicts.push({ ...p, now }); continue; }
+      open.push(p);
+    }
+
+    if (line) {
+      // One line for "WebUntis holen" - and the exit code says whether anything is open.
+      // Only EMPTY lessons belong in this line. A lesson whose text differs from today's plan is
+      // not a gap - it has content, usually because the plan was edited afterwards - and would
+      // otherwise nag every single day for the rest of the school year.
+      const groups = [...new Set(open.map(p => p.l.klassen.join(',')))];
+      if (dry || !open.length) {
+        console.log('KLASSENBUCH: ' + (open.length
+          ? `${open.length} Stunde${open.length === 1 ? '' : 'n'} ohne Lernstoff` + (groups.length ? ' \u00b7 ' + groups.join(', ') : '')
+          : 'alles eingetragen'));
+        process.exitCode = open.length ? 1 : 0;
+        return;
+      }
+      // Writing: report AFTER the fact, otherwise the caller shows the state from before its own
+      // click. Every entry is read back; only a confirmed one counts.
+      let done = 0; const bad = [];
+      for (const p of open) {
+        const label = `${p.l.date.slice(6)}.${p.l.date.slice(4, 6)}. ${p.l.start} ${p.l.klassen.join(',')}`;
+        try {
+          await writeTopic(p.l.ttId, p.text);
+          const back = (await readTopics([p.l.ttId]))[String(p.l.ttId)] || '';
+          if (back.trim() === p.text.trim()) done++; else bad.push(label);
+        } catch (e) { bad.push(`${label} (${e.message})`); }
+      }
+      await runStatus(session);
+      console.log('KLASSENBUCH: ' + `${done} Stunde${done === 1 ? '' : 'n'} eingetragen`
+        + (bad.length ? ` \u00b7 ${bad.length} FEHLGESCHLAGEN: ${bad.join(', ')}` : ''));
+      process.exitCode = bad.length ? 1 : 0;
+      return;
+    }
+
+    for (const p of props.filter(p => p.page && !p.text)) {
+      say(`${p.l.date} ${p.l.start} ${p.l.subject} ${p.l.klassen.join(',')}: ${p.why}`);
+    }
+    for (const c of conflicts) {
+      say(`${c.l.date} ${c.l.start} ${c.l.subject} ${c.l.klassen.join(',')}: STEHT SCHON ANDERS DRIN, nicht angefasst (--force ueberschreibt)`);
+      say(`    ist:  ${c.now}`);
+      say(`    waer: ${c.text}`);
+    }
+
+    let written = 0;
+    for (const p of open) {
+      const label = `${p.l.date} ${p.l.start} ${p.l.subject} ${p.l.klassen.join(',')}`;
+      if (dry) { say(`${label}: WUERDE schreiben (${p.why}) -> ${p.text}`); continue; }
+      await writeTopic(p.l.ttId, p.text);
+      const back = (await readTopics([p.l.ttId]))[String(p.l.ttId)] || '';
+      const ok = back.trim() === p.text.trim();
+      if (ok) written++;
+      say(`${label}: ${ok ? 'eingetragen' : 'FEHLER, Rueckgelesenes weicht ab'} -> ${back}`);
+    }
+    if (!open.length) say('Nichts offen - alles steht schon im Klassenbuch.');
+    if (unmapped.size) say(`Ohne Planseite (in ${path.basename(MAP_FILE)} nachtragen): ${[...unmapped].join(', ')}`);
+    if (written) { say('Badge-Daten aktualisieren:'); await runStatus(session); }
     return;
   }
 

@@ -121,6 +121,10 @@
     /* two text columns + Jahrgang side by side (Doc, 03.09.2026) */
     display: flex;
     align-items: center;
+    /* Umbruch, damit das Untis-U eine eigene erste Zeile bekommen kann (Doc, 06.09.2026);
+       ohne Marke bleibt es eine einzige Zeile wie bisher. */
+    flex-wrap: wrap;
+    align-content: center;
     gap: 6px;
     container-type: inline-size;
 }
@@ -132,9 +136,22 @@
     gap: 8px;
 }
 
-.tt-col {
+.tt-cols > .tt-col {
     flex: 1 1 0;
     min-width: 0;
+}
+
+/* Optischer Ausgleich (Doc, 06.09.2026): die beiden Spalten tragen verschieden grosse Schrift
+   (links Fach 1.1rem + Klasse 1rem, rechts Raum 1rem + Zeit 0.9rem), ihre ZWEITEN Zeilen lagen
+   deshalb nicht auf einer Linie. Die rechte Spalte geht 4 px runter, die linke bleibt stehen -
+   ihr groesserer Satz bringt sie von allein auf dieselbe Grundlinie. `position: relative`
+   verschiebt nur die Darstellung, die Kachelhoehe bleibt, wie sie ist. */
+.tt-cols > .tt-col:last-child { position: relative; top: 4px; }
+
+/* Steht die Kachel schmal und die Spalten stapeln sich, wuerde der Versatz nur eine Luecke
+   zwischen sie reissen. */
+@container (max-width: 190px) {
+    .tt-cols > .tt-col:last-child { top: 0; }
 }
 
 /* Jahrgang, big and in Orbitron, as the third column */
@@ -149,6 +166,7 @@
     opacity: 0.4;                 /* Doc: JG darf nur mitlaufen, nicht rufen */
 }
 
+/* Narrow tile (two lessons sharing a day column): drop back to stacked lines. */
 /* Narrow tile (two lessons sharing a day column): drop back to stacked lines. */
 @container (max-width: 190px) {
     .tt-jg { font-size: 1.1rem; }
@@ -189,6 +207,12 @@
     color: var(--muted);
     opacity: 0.75;
 }
+
+/* Die jeweils ZWEITE Zeile beider Spalten (Klasse links, Zeit rechts) sitzt 2 px hoeher -
+   der Zeilenabstand zur Kopfzeile darueber wirkt sonst zu luftig (Doc, 06.09.2026).
+   Beide gleich, damit die gemeinsame Grundlinie erhalten bleibt. */
+.tt-lesson .tt-who,
+.tt-lesson .tt-time { position: relative; top: -2px; }
 
 /* Cancelled / substituted, straight from the WebUntis code field. */
 .tt-lesson.code-cancelled {
@@ -1493,3 +1517,24 @@ body.is-dragging .tt-lesson { cursor: grabbing; }
    separated by white space instead of a middle dot (Doc). */
 #sub .tt-sub-tail { margin-left: 2.4em; }
 #sub .tt-sub-gap { display: inline-block; width: 2.4em; }
+
+/* Untis-U oben links auf der Kachel: im Klassenbuch steht schon Stoff (Doc, 06.09.2026).
+   Nur der Buchstabe in Untis-Orange, ohne Strahlenkranz - bei dieser Groesse waere der
+   Kranz nur Schmutz. Es sitzt in der Ecke ueber dem Text, aber unter dem Konflikt-Zeichen,
+   und faengt keine Klicks ab: der Klick auf die Kachel gehoert dem Stoffverteilungsplan. */
+/* Es bekommt eine EIGENE Zeile ganz oben (Doc, 06.09.2026) - der Text darunter bleibt so,
+   wie er war. Die Kachel ist eine Flex-Zeile (Spalten + Jahrgang); flex-basis 100% zwingt die
+   Marke deshalb in eine erste Zeile fuer sich, alles andere umbricht darunter. */
+.tt-lesson .tt-untis {
+    flex: 0 0 100%;
+    height: 12px;
+    margin: 0 0 1px;
+    pointer-events: none;
+    fill: none;
+    stroke: rgb(246, 93, 49);
+    stroke-width: 18;
+    stroke-linecap: butt;
+    opacity: 0.95;
+}
+
+@media print { .tt-lesson .tt-untis { stroke: rgb(120, 120, 120); } }
