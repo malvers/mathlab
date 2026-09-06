@@ -8,6 +8,7 @@ import os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from design_lib import (ORANGE, GREEN, RED, INK, BODY, MUTED, CODE_INK, CODE_MUTED,
                         FONT_M, MARGIN, BODY_Y, BODY_H, CONTENT_W, W, emu)
+from slides import add_greeting
 from deck_util import fill_ph, drop_ph, add_click_build, save_deck
 from tables import add_table, check_fit, TINT_ORANGE, TINT_RED, TINT_GREEN, TINT_BLUE
 from diagrams import box, centered, arrow, font, hexrgb, NAVY, MUTED as MUTED_RGB, WHITE
@@ -22,6 +23,8 @@ os.makedirs(IMG, exist_ok=True)
 prs = Presentation(os.path.join(HERE, "out", "informatik-vorlage.pptx"))
 LAY = {l.name: l for l in prs.slide_layouts}
 add = lambda name: prs.slides.add_slide(LAY[name])
+
+add_greeting(prs, LAY, "datenbanken-anforderungen.pptx")   # Auftaktfolie als Folie 0
 ORA, RD, GRN = hexrgb(ORANGE), hexrgb(RED), hexrgb(GREEN)
 
 

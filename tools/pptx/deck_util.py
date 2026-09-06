@@ -24,7 +24,11 @@ def fill_ph(slide, idx, lines):
 
 
 def set_runs(p, text):
-    """Replace the runs of paragraph p by `text`; **word** becomes a bold run."""
+    """Replace the runs of paragraph p by `text`; **word** becomes a bold run,
+    $...$ becomes a real (editable) PowerPoint formula - see omml.py."""
+    if "$" in text:
+        from omml import set_runs_math
+        return set_runs_math(p, text)
     for r in list(p.runs):
         p._p.remove(r._r)
     for part in re.split(r"(\*\*[^*]+\*\*)", text):
