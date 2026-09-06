@@ -199,7 +199,7 @@ const CyberBranding = {
         'bb84.html': 'https://youtu.be/fAkbF8RsaRM',
         'irisvis.html': 'https://youtu.be/XFCK0uRRUU4',
         'galtonboard.html': 'https://youtu.be/L8XKYIEx8Ig',
-        'brahmagupta.html': 'https://youtu.be/dOK3OalrbUs',
+        'brahmagupta.html': 'https://youtu.be/K-QYfEjO4Ms',
     },
 
     injectLabVideo() {
