@@ -232,6 +232,82 @@
         .formula-box .katex-display {
             margin: 0;
         }
+
+        /* ————— Proof mode ————— */
+        .angle-arc {
+            fill: none;
+            stroke-width: 3;
+            stroke-linecap: round;
+        }
+
+        .angle-arc.dim {
+            stroke-width: 2;
+            opacity: 0.4;
+        }
+
+        .angle-label {
+            font-family: 'Orbitron';
+            font-size: 12px;
+            font-weight: bold;
+            pointer-events: none;
+            user-select: none;
+            text-shadow: 0 0 5px #000, 0 0 9px #000;
+        }
+
+        .tri-hi {
+            stroke-width: 2;
+            fill-opacity: 0.16;
+            stroke-opacity: 0.75;
+        }
+
+        .chord-hi {
+            stroke: rgb(176, 36, 24);
+            stroke-width: 6;
+            stroke-linecap: round;
+            fill: none;
+            opacity: 0.85;
+        }
+
+        .seg-eq {
+            stroke-width: 6;
+            stroke-linecap: round;
+            fill: none;
+            opacity: 0.95;
+        }
+
+        .eq-tick {
+            stroke-width: 3;
+            stroke-linecap: round;
+        }
+
+        .step-nav {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* buttons-ultra makes every .cyber-btn full width — inside the step row
+           they have to sit next to each other instead. */
+        .step-nav .cyber-btn {
+            flex: 0 0 auto;
+            width: auto;
+            min-width: 60px;
+            min-height: 44px;
+            padding: 8px 18px !important;
+            font-size: 0.9rem !important;
+            letter-spacing: 0 !important;
+            line-height: 1;
+        }
+
+        .step-count {
+            flex: 1 1 auto;
+            text-align: center;
+            font-family: 'Orbitron';
+            font-size: 0.72rem;
+            letter-spacing: 1px;
+            color: rgba(255, 255, 255, 0.75);
+        }
+
     </style>
 </head>
 
@@ -374,10 +450,12 @@
             }
 
             /* ————— State ————— */
-            let mode = 'satz';           // satz | formel
+            let mode = 'satz';           // satz | beweis | formel
             let showAll = false;         // theorem: draw all four perpendiculars
             let hotSide = 1;             // theorem: highlighted side index (0..3)
             let onCircle = true;         // formula: keep the vertices on the circle
+            let step = 0;                // proof: current step, 0 .. PROOF_LAST
+            let showSolution = false;    // proof: reveal the step that is left as an exercise
 
             /* Theorem mode is parametrised so that AC is always perpendicular to BD.
                With A at a0 and arcs u = arc(A,B), v = arc(A,C), the fourth vertex is
@@ -395,7 +473,8 @@
             }
 
             function currentPoints() {
-                if (mode === 'satz') return satzAngles().map(ptAt);
+                /* Theorem and proof share the perpendicular-diagonal parametrisation. */
+                if (mode !== 'formel') return satzAngles().map(ptAt);
                 if (!onCircle && free) return free.map(p => ({ ...p }));
                 return ang.map(ptAt);
             }
@@ -451,6 +530,7 @@
                 const Pi = lineIntersect(A, C, B, D);
 
                 if (mode === 'satz' && Pi) drawTheorem(P4, Pi);
+                if (mode === 'beweis' && Pi) drawProof(P4, Pi);
                 if (mode === 'formel') drawFormula(P4);
 
                 /* Vertex handles + labels */
@@ -519,6 +599,271 @@
                 }, 'P'));
             }
 
+            /* ————— Proof mode ————————————————————————————————————————
+               Labels follow the classroom handout: M is the crossing of the
+               diagonals, E the foot of the perpendicular on BC, F its second
+               intersection with the opposite side AD. */
+            const PROOF_LAST = 8;
+            const C_HOT = 'rgb(245,194,66)';
+            const C_OPP = 'rgb(121,158,49)';
+            const C_PUR = '#be78ff';
+
+            const degTxt = v => v.toFixed(1) + '°';
+
+            function uvec(V, P) {
+                const dx = P.x - V.x, dy = P.y - V.y;
+                const l = Math.hypot(dx, dy) || 1;
+                return { x: dx / l, y: dy / l };
+            }
+
+            /* Right-angle square at V, opening towards P1 and P2. */
+            function rightAngleMark(parent, V, P1, P2, k) {
+                const u = uvec(V, P1), w = uvec(V, P2);
+                const q1 = { x: V.x + u.x * k, y: V.y + u.y * k };
+                const q2 = { x: V.x + w.x * k, y: V.y + w.y * k };
+                const q3 = { x: q1.x + w.x * k, y: q1.y + w.y * k };
+                parent.appendChild(el('polyline', {
+                    points: q1.x + ',' + q1.y + ' ' + q3.x + ',' + q3.y + ' ' + q2.x + ',' + q2.y,
+                    class: 'right-angle'
+                }));
+            }
+
+            /* Arc marking the angle at V between the rays V->P1 and V->P2. */
+            function angleArc(parent, V, P1, P2, r, color, opts) {
+                opts = opts || {};
+                const u1 = uvec(V, P1), u2 = uvec(V, P2);
+                const sweep = (u1.x * u2.y - u1.y * u2.x) > 0 ? 1 : 0;
+                const radii = opts.double ? [r, r + 5] : [r];
+                radii.forEach(rr => {
+                    const a = { x: V.x + u1.x * rr, y: V.y + u1.y * rr };
+                    const b = { x: V.x + u2.x * rr, y: V.y + u2.y * rr };
+                    parent.appendChild(el('path', {
+                        d: 'M ' + a.x + ' ' + a.y + ' A ' + rr + ' ' + rr + ' 0 0 ' + sweep + ' ' + b.x + ' ' + b.y,
+                        class: 'angle-arc' + (opts.dim ? ' dim' : ''),
+                        style: 'stroke:' + color
+                    }));
+                });
+                if (opts.label) {
+                    const bx = u1.x + u2.x, by = u1.y + u2.y;
+                    const bl = Math.hypot(bx, by) || 1;
+                    const d = r + (opts.double ? 22 : 17);
+                    parent.appendChild(el('text', {
+                        x: V.x + bx / bl * d, y: V.y + by / bl * d + 4,
+                        class: 'angle-label', 'text-anchor': 'middle',
+                        style: 'fill:' + color, opacity: opts.dim ? 0.5 : 1
+                    }, opts.label));
+                }
+            }
+
+            function triFill(parent, p, q, r, color) {
+                parent.appendChild(el('polygon', {
+                    points: [p, q, r].map(z => z.x + ',' + z.y).join(' '),
+                    class: 'tri-hi', style: 'fill:' + color + ';stroke:' + color
+                }));
+            }
+
+            /* Thick overlay plus a single hash mark — segments carrying the same
+               colour and mark are the ones just proven equal. */
+            function segEq(parent, hud, p, q, color) {
+                parent.appendChild(el('line', {
+                    x1: p.x, y1: p.y, x2: q.x, y2: q.y,
+                    class: 'seg-eq', style: 'stroke:' + color
+                }));
+                const m = mid(p, q);
+                const u = uvec(p, q);
+                const n = { x: -u.y, y: u.x };
+                hud.appendChild(el('line', {
+                    x1: m.x + n.x * 8, y1: m.y + n.y * 8,
+                    x2: m.x - n.x * 8, y2: m.y - n.y * 8,
+                    class: 'eq-tick', style: 'stroke:#fff'
+                }));
+            }
+
+            /* M, E, F for the current configuration; F is null in degenerate cases. */
+            function proofPoints(P4, Pi) {
+                const [A, B, C, D] = P4;
+                const E = footOfPerp(Pi, B, C);
+                const F = lineIntersect(Pi, E, D, A);
+                return { A: A, B: B, C: C, D: D, M: Pi, E: E, F: F };
+            }
+
+            function drawProof(P4, Pi) {
+                const g = proofPoints(P4, Pi);
+                if (!g.F) return;
+                const A = g.A, B = g.B, C = g.C, D = g.D, M = g.M, E = g.E, F = g.F;
+                const main = layers.main, hud = layers.hud;
+                const solved = (step !== 7) || showSolution;
+
+                /* The construction itself — visible on every step. */
+                line(main, B, C, 'quad-side-hot');
+                line(main, D, A, 'quad-side-opp');
+                line(main, E, F, 'perp');
+                rightAngleMark(hud, M, A, B, 14);
+                rightAngleMark(hud, E, M, C, 11);
+
+                if (step === 1 || step === 5) line(main, D, C, 'chord-hi');
+                if (step === 7 && solved) line(main, A, B, 'chord-hi');
+
+                if (step === 1) {
+                    angleArc(hud, A, D, C, 36, C_HOT, { label: degTxt(vertexAngle(D, A, C)) });
+                    angleArc(hud, B, D, C, 36, C_HOT, { label: degTxt(vertexAngle(D, B, C)) });
+                } else if (step === 2) {
+                    triFill(main, C, M, B, C_PUR);
+                    triFill(main, C, M, E, C_HOT);
+                    angleArc(hud, B, D, C, 34, C_HOT, { label: degTxt(vertexAngle(D, B, C)) });
+                    angleArc(hud, M, C, E, 26, C_HOT, { label: degTxt(vertexAngle(C, M, E)) });
+                    angleArc(hud, C, M, B, 42, C_OPP, { label: degTxt(vertexAngle(M, C, B)) });
+                } else if (step === 3) {
+                    angleArc(hud, C, M, B, 42, C_OPP, { label: degTxt(vertexAngle(M, C, B)) });
+                    angleArc(hud, B, D, C, 34, C_HOT, { label: degTxt(vertexAngle(D, B, C)), double: true });
+                    angleArc(hud, M, C, E, 26, C_HOT, { label: degTxt(vertexAngle(C, M, E)), double: true });
+                } else if (step === 4) {
+                    angleArc(hud, M, C, E, 26, C_HOT, { label: degTxt(vertexAngle(C, M, E)), double: true });
+                    angleArc(hud, M, A, F, 26, C_HOT, { label: degTxt(vertexAngle(A, M, F)), double: true });
+                } else if (step === 5) {
+                    angleArc(hud, A, D, C, 36, C_HOT, { label: degTxt(vertexAngle(D, A, C)) });
+                    angleArc(hud, B, D, C, 34, C_HOT, { label: degTxt(vertexAngle(D, B, C)), dim: true });
+                    angleArc(hud, M, C, E, 26, C_HOT, { label: degTxt(vertexAngle(C, M, E)), dim: true });
+                    angleArc(hud, M, A, F, 26, C_HOT, { label: degTxt(vertexAngle(A, M, F)) });
+                } else if (step === 6) {
+                    triFill(main, A, F, M, C_HOT);
+                    angleArc(hud, A, D, C, 36, C_HOT, { label: degTxt(vertexAngle(D, A, C)) });
+                    angleArc(hud, M, A, F, 26, C_HOT, { label: degTxt(vertexAngle(A, M, F)) });
+                    segEq(main, hud, F, A, C_HOT);
+                    segEq(main, hud, F, M, C_HOT);
+                } else if (step === 7) {
+                    triFill(main, D, F, M, C_OPP);
+                    if (solved) {
+                        angleArc(hud, D, A, B, 36, C_OPP, { label: degTxt(vertexAngle(A, D, B)) });
+                        angleArc(hud, M, F, D, 26, C_OPP, { label: degTxt(vertexAngle(F, M, D)) });
+                        segEq(main, hud, F, D, C_OPP);
+                        segEq(main, hud, F, M, C_OPP);
+                    }
+                } else if (step === 8) {
+                    segEq(main, hud, A, F, C_HOT);
+                    segEq(main, hud, F, D, C_HOT);
+                }
+
+                /* Construction points, drawn last so nothing covers them. */
+                hud.appendChild(el('circle', { cx: E.x, cy: E.y, r: 5, class: 'foot-dot' }));
+                hud.appendChild(el('circle', { cx: F.x, cy: F.y, r: 6, class: 'mid-dot' }));
+                hud.appendChild(el('circle', { cx: M.x, cy: M.y, r: 6, class: 'p-dot' }));
+
+                const outE = uvec(M, E), outF = uvec(M, F);
+                /* The label goes into the quadrant between MC and MD — the angle
+                   arcs live in the other two, the right-angle square in the fourth. */
+                const ua = uvec(M, C), ub = uvec(M, D);
+                const mb = { x: ua.x + ub.x, y: ua.y + ub.y };
+                const mbl = Math.hypot(mb.x, mb.y) || 1;
+                const lbl = (x, y, txt, color) => hud.appendChild(el('text', {
+                    x: x, y: y + 5, class: 'node-label', 'text-anchor': 'middle',
+                    style: 'fill:' + color
+                }, txt));
+                lbl(M.x + mb.x / mbl * 24, M.y + mb.y / mbl * 24, 'M', 'var(--neon-purple)');
+                lbl(E.x + outE.x * 20, E.y + outE.y * 20, 'E', C_HOT);
+                lbl(F.x + outF.x * 20, F.y + outF.y * 20, 'F', C_OPP);
+            }
+
+            function proofReadout(P4, Pi) {
+                const g = proofPoints(P4, Pi);
+                if (!g.F) return;
+                const A = g.A, B = g.B, C = g.C, D = g.D, M = g.M, F = g.F, E = g.E;
+                const AF = dist(A, F) * UNIT, FD = dist(F, D) * UNIT, FM = dist(F, M) * UNIT;
+                const d = AF - FD;
+                CyberUI.updateStatsGrid('data-container', [
+                    { value: degTxt(vertexAngle(D, A, C)) },
+                    { value: degTxt(vertexAngle(D, B, C)) },
+                    { value: degTxt(vertexAngle(C, M, E)) },
+                    { value: degTxt(vertexAngle(A, M, F)) },
+                    { value: AF.toFixed(3) },
+                    { value: FD.toFixed(3) }
+                ]);
+                const rows = document.getElementById('measure-rows');
+                if (rows) {
+                    rows.innerHTML =
+                        '<tr><td>|FM|</td><td>' + FM.toFixed(3) + '</td></tr>' +
+                        '<tr><td>|AF|</td><td>' + AF.toFixed(3) + '</td></tr>' +
+                        '<tr><td>|FD|</td><td>' + FD.toFixed(3) + '</td></tr>' +
+                        '<tr><td>|AD|</td><td>' + (dist(A, D) * UNIT).toFixed(3) + '</td></tr>' +
+                        '<tr><td>|AF| − |FD|</td><td style="color:' +
+                        (Math.abs(d) < 5e-4 ? 'rgb(121,158,49)' : 'rgb(176,36,24)') + '">' +
+                        (Math.abs(d) < 5e-4 ? '0.000' : d.toFixed(3)) + '</td></tr>';
+                }
+            }
+
+            /* Step texts. German is the fallback; translations live in brahma.* */
+            const PROOF_DE = [
+                {
+                    short: 'VORAUSSETZUNG',
+                    title: 'VORAUSSETZUNG & BEHAUPTUNG',
+                    body: 'Das Viereck ABCD liegt auf einem Kreis, und seine Diagonalen AC und BD stehen im Punkt <b>M</b> senkrecht aufeinander. Von M aus fällen wir das Lot auf die Seite <b>BC</b> — es trifft sie in <b>E</b> und läuft weiter bis zur Gegenseite <b>AD</b>, die es in <b>F</b> schneidet.<br><br><b>Behauptung:</b> F ist die Mitte von AD, also |AF| = |FD|. Zieh an den Ecken — die Behauptung hält in jeder Lage.'
+                },
+                {
+                    short: 'PERIPHERIEWINKEL',
+                    title: 'SCHRITT 1 • PERIPHERIEWINKEL',
+                    body: 'Die Winkel ∠FAM und ∠MBC stehen beide über der Sehne <b>DC</b>: ∠FAM = ∠DAC, denn F liegt auf AD und M auf AC — ebenso ∠MBC = ∠DBC. Nach dem <b>Peripheriewinkelsatz</b> sind alle Winkel über derselben Sehne gleich groß, also <b>∠FAM = ∠MBC</b>. Links stehen beide Messwerte: sie bleiben beim Ziehen gleich.'
+                },
+                {
+                    short: 'INNENWINKELSATZ',
+                    title: 'SCHRITT 2 • INNENWINKELSATZ',
+                    body: 'Zwei rechtwinklige Dreiecke: In <b>△CMB</b> ist der Winkel bei M ein rechter, nach dem Innenwinkelsatz bleibt für die beiden anderen ∠MBC + ∠MCB = 90°. In <b>△CME</b> ist der Winkel bei E ein rechter, also ∠CME + ∠MCE = 90°.'
+                },
+                {
+                    short: 'GLEICHE ERGÄNZUNG',
+                    title: 'SCHRITT 3 • GLEICHE ERGÄNZUNG',
+                    body: '∠MCB und ∠MCE sind <b>derselbe</b> Winkel — E liegt ja auf der Strecke BC. Er ergänzt einmal ∠MBC und einmal ∠CME zu 90°. Zwei Winkel, die denselben Winkel zu 90° ergänzen, sind gleich groß: <b>∠MBC = ∠CME</b>.'
+                },
+                {
+                    short: 'SCHEITELWINKEL',
+                    title: 'SCHRITT 4 • SCHEITELWINKEL',
+                    body: 'In M kreuzen sich zwei Geraden: die Diagonale AC und das Lot EF. Die Winkel ∠CME und ∠FMA liegen sich dort gegenüber — sie sind <b>Scheitelwinkel</b> und damit gleich groß.'
+                },
+                {
+                    short: 'DIE KETTE',
+                    title: 'SCHRITT 5 • DIE KETTE',
+                    body: 'Jetzt schließt sich die Kette: ∠FAM = ∠MBC (Schritt 1) = ∠CME (Schritt 3) = ∠FMA (Schritt 4). Übrig bleibt <b>∠FAM = ∠FMA</b> — und das sind genau die Winkel des Dreiecks AFM bei A und bei M.'
+                },
+                {
+                    short: 'GLEICHSCHENKLIG',
+                    title: 'SCHRITT 6 • GLEICHSCHENKLIG',
+                    body: 'Im Dreieck <b>△AFM</b> sind die Winkel bei A und bei M gleich groß. Ein Dreieck mit zwei gleichen Winkeln ist <b>gleichschenklig</b>, und die den gleichen Winkeln gegenüberliegenden Seiten sind gleich lang: <b>|FA| = |FM|</b>.'
+                },
+                {
+                    short: 'DIE ANDERE SEITE',
+                    title: 'SCHRITT 7 • DIE ANDERE SEITE',
+                    body: 'Jetzt Du: dieselbe Kette noch einmal für das Dreieck <b>△DFM</b>. Zeige, dass auch dort die Winkel bei D und bei M gleich groß sind, dass also <b>|FD| = |FM|</b> gilt.<br><br>Tipp: Peripheriewinkel über der Sehne AB — und in M stehen die Diagonalen senkrecht.',
+                    solution: 'Über der Sehne <b>AB</b> gilt ∠FDM = ∠ADB = ∠ACB = ∠MCB (Peripheriewinkelsatz). Weil die Diagonalen in M senkrecht stehen, ist ∠FMD = 90° − ∠FMA; nach Schritt 2 ist ∠MCB = 90° − ∠MBC. Mit ∠MBC = ∠FMA aus Schritt 5 folgt <b>∠FDM = ∠FMD</b> — auch △DFM ist gleichschenklig: <b>|FD| = |FM|</b>.'
+                },
+                {
+                    short: 'q.e.d.',
+                    title: 'q.e.d.',
+                    body: '|AF| = |FM| aus Schritt 6 und |FD| = |FM| aus Schritt 7 — zusammen <b>|AF| = |FD|</b>. F ist die Mitte von AD.<br><br>Das Lot vom Schnittpunkt der Diagonalen auf eine Seite halbiert also die Gegenseite. <b>q.e.d.</b>'
+                }
+            ];
+
+            const PROOF_TEX = [
+                '\\begin{aligned} AC &\\perp BD \\;\\text{in } M \\\\ EF &\\perp BC,\\; M \\in EF \\\\ \\Rightarrow\\; |AF| &\\overset{?}{=} |FD| \\end{aligned}',
+                '\\angle FAM = \\angle DAC = \\angle DBC = \\angle MBC',
+                '\\begin{aligned} \\angle MBC + \\angle MCB &= 90^\\circ \\\\ \\angle CME + \\angle MCE &= 90^\\circ \\end{aligned}',
+                '\\angle MCB = \\angle MCE \\;\\Rightarrow\\; \\angle MBC = \\angle CME',
+                '\\angle CME = \\angle FMA',
+                '\\angle FAM = \\angle MBC = \\angle CME = \\angle FMA',
+                '\\angle FAM = \\angle FMA \\;\\Rightarrow\\; |FA| = |FM|',
+                '\\angle FDM = \\angle FMD \\;\\Rightarrow\\; |FD| = |FM|',
+                '|AF| = |FM| = |FD| \\quad \\square'
+            ];
+
+            const proofText = (i, field) => T('proof_' + field + '_' + i, PROOF_DE[i][field]);
+
+            function gotoStep(i) {
+                const next = clamp(i, 0, PROOF_LAST);
+                if (next === step) return;
+                step = next;
+                if (step !== 7) showSolution = false;
+                buildSidebar();
+                draw();
+            }
+
             function drawFormula(P4) {
                 const letters = ['a', 'b', 'c', 'd'];
                 const ref = onCircle
@@ -558,6 +903,11 @@
             function updateReadout(P4, Pi) {
                 const f2 = x => x.toFixed(2);
                 const f3 = x => x.toFixed(3);
+
+                if (mode === 'beweis') {
+                    if (Pi) proofReadout(P4, Pi);
+                    return;
+                }
 
                 if (mode === 'satz') {
                     if (!Pi) return;
@@ -706,6 +1056,16 @@
                         { label: T('stat_opp', 'GEGENSEITE'), value: '0.00', color: 'rgb(121,158,49)' }
                     ];
                 }
+                if (mode === 'beweis') {
+                    return [
+                        { label: '∠FAM', value: '0.0°', color: 'rgb(245,194,66)' },
+                        { label: '∠MBC', value: '0.0°', color: 'rgb(245,194,66)' },
+                        { label: '∠CME', value: '0.0°', color: 'rgb(245,194,66)' },
+                        { label: '∠FMA', value: '0.0°', color: 'rgb(245,194,66)' },
+                        { label: '|AF|', value: '0.000', color: 'rgb(121,158,49)' },
+                        { label: '|FD|', value: '0.000', color: 'rgb(121,158,49)' }
+                    ];
+                }
                 return [
                     { label: T('stat_k', 'K (BRAHMAGUPTA)'), value: '0.000', color: 'rgb(245,194,66)' },
                     { label: T('stat_area', 'FLÄCHE (GAUSS)'), value: '0.000', color: 'var(--neon-blue)' },
@@ -721,10 +1081,17 @@
                 if (!box || typeof katex === 'undefined') return;
                 const s1 = NAMES[hotSide] + NAMES[(hotSide + 1) % 4];
                 const m1 = NAMES[(hotSide + 2) % 4], m2 = NAMES[(hotSide + 3) % 4];
-                const tex = (mode === 'satz')
-                    ? '\\begin{aligned} AC &\\perp BD \\\\ \\Longrightarrow\\; PM &\\perp ' + s1 +
-                      ' \\\\ |M' + m1 + '| &= |MP| = |M' + m2 + '| \\end{aligned}'
-                    : '\\begin{aligned} K &= \\sqrt{(s-a)(s-b)(s-c)(s-d)} \\\\ s &= \\tfrac{a+b+c+d}{2} \\end{aligned}';
+                let tex;
+                if (mode === 'satz') {
+                    tex = '\\begin{aligned} AC &\\perp BD \\\\ \\Longrightarrow\\; PM &\\perp ' + s1 +
+                        ' \\\\ |M' + m1 + '| &= |MP| = |M' + m2 + '| \\end{aligned}';
+                } else if (mode === 'beweis') {
+                    tex = (step === 7 && !showSolution)
+                        ? '\\angle FDM \\overset{?}{=} \\angle FMD \\;\\Rightarrow\\; |FD| \\overset{?}{=} |FM|'
+                        : PROOF_TEX[step];
+                } else {
+                    tex = '\\begin{aligned} K &= \\sqrt{(s-a)(s-b)(s-c)(s-d)} \\\\ s &= \\tfrac{a+b+c+d}{2} \\end{aligned}';
+                }
                 try { katex.render(tex, box, { throwOnError: false, displayMode: true }); } catch (err) { box.textContent = tex; }
             }
 
@@ -732,9 +1099,19 @@
                 const title = document.getElementById('coach-title-slot');
                 const body = document.getElementById('coach-content');
                 if (title) {
-                    title.textContent = (mode === 'satz')
-                        ? T('coach_title_satz', 'SATZ VON BRAHMAGUPTA')
-                        : T('coach_title_formel', 'FORMEL VON BRAHMAGUPTA');
+                    title.textContent = (mode === 'beweis')
+                        ? proofText(step, 'title')
+                        : (mode === 'satz')
+                            ? T('coach_title_satz', 'SATZ VON BRAHMAGUPTA')
+                            : T('coach_title_formel', 'FORMEL VON BRAHMAGUPTA');
+                }
+                if (mode === 'beweis' && body) {
+                    body.innerHTML = (step === 7 && showSolution)
+                        ? proofText(7, 'solution')
+                        : proofText(step, 'body');
+                    const bx = document.getElementById('math-coach-box');
+                    if (bx) bx.classList.add('visible');
+                    return;
                 }
                 if (body) {
                     body.innerHTML = (mode === 'satz')
@@ -755,10 +1132,34 @@
                     '<div id="mode-slot"></div>', 'var(--neon-blue)');
                 CyberUI.createRadioGroup('mode-slot', null, [
                     { label: T('mode_satz', 'SATZ (LOT & MITTE)'), value: 'satz' },
+                    { label: T('mode_beweis', 'BEWEIS (SCHRITT FÜR SCHRITT)'), value: 'beweis' },
                     { label: T('mode_formel', 'FORMEL (FLÄCHE)'), value: 'formel' }
                 ], mode, val => { mode = val; buildSidebar(); draw(); });
 
-                if (mode === 'satz') {
+                if (mode === 'beweis') {
+                    CyberUI.createCard('ui-container', T('proof', 'BEWEIS'),
+                        '<div class="step-nav">' +
+                        '<button class="cyber-btn" id="step-prev" title="' + T('prev', 'Zurück') + '">◀</button>' +
+                        '<div class="step-count" id="step-count"></div>' +
+                        '<button class="cyber-btn" id="step-next" title="' + T('next', 'Weiter') + '">▶</button>' +
+                        '</div>' +
+                        '<div id="step-jump" style="margin-top:12px"></div>' +
+                        '<div id="step-extra"></div>', 'rgb(245,194,66)');
+                    document.getElementById('step-count').textContent =
+                        (step + 1) + ' / ' + (PROOF_LAST + 1);
+                    document.getElementById('step-prev').onclick = () => gotoStep(step - 1);
+                    document.getElementById('step-next').onclick = () => gotoStep(step + 1);
+                    CyberUI.createDropdown('step-jump',
+                        PROOF_DE.map((s, i) => ({
+                            id: String(i),
+                            label: i + ' • ' + proofText(i, 'short')
+                        })),
+                        id => gotoStep(parseInt(id, 10)), String(step));
+                    if (step === 7) {
+                        CyberUI.createCheckbox('step-extra', T('show_solution', 'LÖSUNG ZEIGEN'), showSolution,
+                            v => { showSolution = v; buildSidebar(); draw(); }, 'rgb(121,158,49)');
+                    }
+                } else if (mode === 'satz') {
                     CyberUI.createCard('ui-container', T('options', 'KONSTRUKTION'),
                         '<div id="opt-slot"></div>', 'rgb(245,194,66)');
                     CyberUI.createDropdown('opt-slot',
@@ -796,6 +1197,8 @@
                     onCircle = true;
                     showAll = false;
                     hotSide = 1;
+                    step = 0;
+                    showSolution = false;
                     buildSidebar();
                     draw();
                 };
@@ -803,6 +1206,17 @@
                 renderFormula();
                 renderCoach();
             }
+
+            /* Arrow keys step through the proof. Modifiers stay untouched so that
+               Cmd-Shift-R keeps reloading the page. */
+            window.addEventListener('keydown', e => {
+                if (mode !== 'beweis') return;
+                if (e.metaKey || e.ctrlKey || e.altKey || e.shiftKey) return;
+                const tag = ((e.target && e.target.tagName) || '').toLowerCase();
+                if (tag === 'input' || tag === 'textarea' || tag === 'select') return;
+                if (e.key === 'ArrowRight') { gotoStep(step + 1); e.preventDefault(); }
+                else if (e.key === 'ArrowLeft') { gotoStep(step - 1); e.preventDefault(); }
+            });
 
             buildSidebar();
             draw();

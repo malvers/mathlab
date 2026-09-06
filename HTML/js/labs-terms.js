@@ -5,7 +5,7 @@
  * matches against these so a lab is found by any word it contains.
  *
  * Rebuild after changing a lab's wording:  node tools/build-labs-terms.mjs
- * 62 labs, 1054 terms, 2026-09-04
+ * 62 labs, 1073 terms, 2026-09-06
  */
 const LABS_TERMS = {
     "addition": ["SCHRIFTLICHE ADDITION", "Summand"],
@@ -16,7 +16,7 @@ const LABS_TERMS = {
     "bb84": ["Basentreffer einfärben", "LAUSCHERIN", "LEHRMODUS", "NEUER LAUF", "Öffentlich verglichen", "Photonen", "Photonenzeile", "PROTOKOLL", "Schlüsselzeile", "SIFTING UND TEST", "Spaltennummern", "VIELE LÄUFE", "Zufallsausgang zeigen"],
     "beweisinwinkellsumme": ["Am Pivot-Punkt", "BEWEIS INNENWINKELSATZ", "Innenwinkel im Dreieck", "MATHEMATISCHER BEWEIS", "Parallele durch Punkt"],
     "binomischeslabor": ["AUFTEILUNG", "Beweis 1. Binomische Formel", "GESAMT", "P-WERT", "Tipp: Ziehe den Mittelpunkt im Quadrat!"],
-    "brahmagupta": ["ABWEICHUNG VON 90°", "ALLE VIER LOTE", "Bogen", "BRETSCHNEIDER", "DIFFERENZ", "ECKEN AUF DEM KREIS", "FLÄCHE (GAUSS)", "FORMEL (FLÄCHE)", "FORMEL VON BRAHMAGUPTA", "GEGENSEITE", "K (BRAHMAGUPTA)", "KONSTRUKTION", "M ↔ MITTE", "MESSWERTE", "SATZ (LOT & MITTE)", "SATZ VON BRAHMAGUPTA", "SEITE", "Summe", "Umfang"],
+    "brahmagupta": ["ABWEICHUNG VON 90°", "ALLE VIER LOTE", "BEWEIS", "BEWEIS (SCHRITT FÜR SCHRITT)", "Bogen", "BRETSCHNEIDER", "DIE ANDERE SEITE", "DIE KETTE", "DIFFERENZ", "ECKEN AUF DEM KREIS", "FLÄCHE (GAUSS)", "FORMEL (FLÄCHE)", "FORMEL VON BRAHMAGUPTA", "GEGENSEITE", "GLEICHE ERGÄNZUNG", "GLEICHSCHENKLIG", "INNENWINKELSATZ", "K (BRAHMAGUPTA)", "KONSTRUKTION", "LÖSUNG ZEIGEN", "M ↔ MITTE", "MESSWERTE", "PERIPHERIEWINKEL", "SATZ (LOT & MITTE)", "SATZ VON BRAHMAGUPTA", "SCHEITELWINKEL", "SCHRITT 1 • PERIPHERIEWINKEL", "SCHRITT 2 • INNENWINKELSATZ", "SCHRITT 3 • GLEICHE ERGÄNZUNG", "SCHRITT 4 • SCHEITELWINKEL", "SCHRITT 5 • DIE KETTE", "SCHRITT 6 • GLEICHSCHENKLIG", "SCHRITT 7 • DIE ANDERE SEITE", "SEITE", "Summe", "Umfang", "VORAUSSETZUNG", "VORAUSSETZUNG & BEHAUPTUNG"],
     "burningship": ["Burning Ship", "Detail", "Fraktal-Explorer", "Iterationen", "NAVIGATION", "Zoom", "Zurücksetzen"],
     "butterfly": ["ANIMATION ENGINE", "Animation zurücksetzen", "Basis-Farbton", "Cos Amp", "Cos Freq", "Exp Amp", "GLOW", "Glow Effekt AN/AUS", "KURVEN-PARAMETER", "MESSWERTE", "SCHMETTERLINGS-LABOR", "Sin Amp", "Sin Div"],
     "cmaes": ["EVOLUTIONSDATEN", "FITNESS", "FLÄCHE", "FLÄCHENOPTIMIERUNG", "GENERATION", "MAX 5000", "OPTIMIERUNG KREIS", "OPTIMIERUNG LINSE", "OPTIMIERUNG: KREIS", "STEP 1", "STEP 10", "UMFANG"],
