@@ -79,7 +79,10 @@
             const t = th.textContent.trim();
             if (t === 'Nr.' || t === 'KW') th.classList.add('num-col');
             if (t === 'Woche') th.classList.add('date-col');
-            if (t === 'Bemerkungen') th.classList.add('remark-col');
+            /* Bemerkungen-Spalte entfaellt (Doc, 07.09.2026: "ganz raus") - sie war
+               das Letzte, was Wochenzeilen noch mehrzeilig machte. Der Text bleibt in
+               PLAN bzw. in den Overrides stehen, er wird nur nicht mehr angezeigt. */
+            if (t === 'Bemerkungen') { th.remove(); return; }
             if (/^Ustd/.test(t)) th.classList.add('ustd-col');
             if (/^Thema/.test(t)) th.classList.add('topic-col');
         });
@@ -676,27 +679,21 @@
         const ex = alle.filter(isExerciseEntry);
         renderMaterial(ref.matBlock, text, ref, isExerciseEntry);
         ref.matTd.textContent = '';
+        /* Doc, 07.09.2026: "die nach unten ziehen" - Aufgaben-Pille und Material
+           stehen zusammen im Streifen der Aufklappzeile, die Wochenzeile bleibt
+           frei. Der Pfeil links zeigt weiter an, dass es dort etwas gibt. */
+        /* updateMaterial laeuft mehrfach (Rendern, danach der Abgleich mit der
+           Datenbank) - die alte Pille muss weg, sonst sammeln sie sich im
+           Streifen (gemessen: 76 statt 39). */
+        if (ref.aufgCell) ref.aufgCell.remove();
         const aufg = buildAufgabenCell(ref, ex);
-        if (aufg) ref.matTd.appendChild(aufg);
-        /* what is left for the sub-row once the sheets sit in the pill */
+        ref.aufgCell = aufg;
         const n = alle.length - ex.length;
+        /* Doc, 07.09.2026: die Aufgaben-Pille steht wieder in der Wochenzeile - dort
+           ist sie erreichbar, ohne die Woche aufzuklappen. */
+        if (aufg) ref.matTd.appendChild(aufg);
         if (text && (n > 0 || !alle.length || matTail(text))) {
             if (!ref.matBlock.parentNode) ref.ensureSubRow().side.appendChild(ref.matBlock);
-            /* A collapsed week hid its material completely and nothing in the
-               row said there was any - it looked like the material was gone
-               (Doc, 31.08.2026). A compact marker with the count now sits in
-               the Material column and unfolds the week when clicked. */
-            if (n > 0) {
-                const mark = document.createElement('span');
-                mark.className = 'mat-mark';
-                mark.textContent = n > 1 ? '\ud83d\udcce ' + n : '\ud83d\udcce';
-                mark.title = (n === 1 ? '1 Material' : n + ' Materialien') + ' — klicken zum Aufklappen';
-                mark.addEventListener('click', function (e) {
-                    e.stopPropagation();
-                    ref.openSubRow();
-                });
-                ref.matTd.appendChild(mark);
-            }
         } else if (ref.matBlock.parentNode) {
             ref.matBlock.remove();
         }
@@ -2594,7 +2591,7 @@
         if (row.ferien) {
             tr.className = 'ferien';
             const td = document.createElement('td');
-            td.colSpan = 8;
+            td.colSpan = 7;
             td.textContent = ov.ferien || row.ferien;
             tr.appendChild(td);
             tbody.appendChild(tr);
@@ -2649,9 +2646,8 @@
                 span.className = 'badge ' + badgeClass;
                 span.textContent = badgeLabel;
                 linkBadge(span, rowType);
-                /* Pille und WebUntis-Chip stecken in einem inline-grid, damit
-                   beide exakt gleich breit sind - das Grid ist so breit wie
-                   sein breitestes Kind, und beide Kinder fuellen es aus. */
+                /* Pille und WebUntis-Chip stehen nebeneinander in einer Zeile
+                   (Doc, 07.09.2026) - siehe .lb-cell in svp.css. */
                 const cell = document.createElement('div');
                 cell.className = 'lb-cell';
                 cell.appendChild(span);
@@ -2666,7 +2662,7 @@
                 td.textContent = text;
             }
             tds.push(td);
-            tr.appendChild(td);
+            if (idx !== 6) tr.appendChild(td);   /* 6 = Bemerkungen, nicht mehr sichtbar */
         });
         setMathText(tds[6], values[6][1]);
 
@@ -2700,12 +2696,33 @@
             /* ref.ul / ref.notesEl are created below, together with the tabs */
             detailTr = document.createElement('tr');
             detailTr.className = 'detail-row';
-            // Empty spacer under columns 1-5 so the content sits under the topic column.
-            const spacer = document.createElement('td');
-            spacer.colSpan = 5;
-            detailTr.appendChild(spacer);
             subMain = document.createElement('td');
-            subMain.colSpan = 1;
+            /* Doc, 07.09.2026: the week row shows the topic on one line, so the full
+               title stands here - and the whole row width is used: the old layout kept
+               an empty 370 px block under Nr/KW/Woche and squeezed the materials into
+               a 298 px side cell, where five pills stacked into five lines. */
+            subMain.colSpan = 7;
+            /* Doc, 07.09.2026: Text links auf 60 % der Breite, das Material wieder
+               rechts daneben statt darunter - der Platz rechts der Stichpunkte lag
+               sonst brach. Die Aufgaben-Pille bleibt direktes Kind der Zelle, sie
+               haengt absolut oben rechts. */
+            /* Kopfzeile ueber beide Haelften: links die Reiter, rechts "Zusatzmaterial"
+               (Doc, 07.09.2026). Jede Haelfte traegt ihre eigene Linie, dazwischen
+               bleibt derselbe Abstand wie zwischen den Spalten darunter. */
+            const subHead = document.createElement('div');
+            subHead.className = 'sub-head';
+            const subHeadL = document.createElement('div');
+            subHeadL.className = 'sub-head-l';
+            const subHeadR = document.createElement('div');
+            subHeadR.className = 'sub-head-r';
+            subHead.appendChild(subHeadL);
+            subHead.appendChild(subHeadR);
+            subMain.appendChild(subHead);
+            const subBody = document.createElement('div');
+            subBody.className = 'sub-body';
+            const subLeft = document.createElement('div');
+            subLeft.className = 'sub-left';
+            subBody.appendChild(subLeft);
             ref.ul = document.createElement('ul');
             /* Two tabs in the sub-row (Doc, 03.09.2026): "Inhalt" holds the
                bullet list as before, "Notizen" a free text field that Doc
@@ -2714,11 +2731,18 @@
                Logged out there is no tab strip and no Notizen element at all,
                so a visitor's DOM looks exactly as it did before. */
             if (!notesAllowed()) {
-                subMain.appendChild(ref.ul);
+                /* Ohne Anmeldung gibt es keine Reiter. Dann steht links dieselbe
+                   gemalte Beschriftung wie rechts, sonst haengt da eine nackte
+                   Linie und beide Haelften sehen ungleich aus (Doc, 07.09.2026). */
+                const inhLabel = document.createElement('span');
+                inhLabel.className = 'sub-tab sub-tab-mat';
+                inhLabel.textContent = 'Inhalt';
+                subHeadL.appendChild(inhLabel);
+                subLeft.appendChild(ref.ul);
             } else {
                 const tabs = document.createElement('div');
                 tabs.className = 'sub-tabs';
-                subMain.appendChild(tabs);
+                subHeadL.appendChild(tabs);
                 const panes = {};
                 const showPane = function (name) {
                     for (const k in panes) {
@@ -2739,7 +2763,7 @@
                     pane.className = 'sub-pane';
                     pane.dataset.pane = t[0];
                     pane.hidden = !!k;
-                    subMain.appendChild(pane);
+                    subLeft.appendChild(pane);
                     panes[t[0]] = { btn: b, pane: pane };
                 });
                 panes.inhalt.pane.appendChild(ref.ul);
@@ -2750,6 +2774,13 @@
                 notesEl.className = 'notes-body';
                 notesEl.dataset.ph = 'Notizen …';
                 setNotesText(notesEl, noteOf(i));
+                /* Doc, 07.09.2026: "wenn es Notizen gibt, schreib Notizen in Gruen" -
+                   so sieht man einer zugeklappten Woche an, dass dort etwas steht. */
+                ref.markNotes = function () {
+                    panes.notizen.btn.classList.toggle('has-notes',
+                        notesTextOf(notesEl).length > 0);
+                };
+                ref.markNotes();
                 /* Doc, 03.09.2026: "die Anforderung nur in Bearbeiten ist
                    hinfaellig" - the field is live as soon as he is logged in,
                    saving itself like the notes page does. The Bearbeiten mode
@@ -2763,6 +2794,7 @@
                     pushNotes();
                 };
                 notesEl.addEventListener('input', function () {
+                    ref.markNotes();
                     clearTimeout(noteTimer);
                     noteTimer = setTimeout(stashNote, 700);
                 });
@@ -2776,11 +2808,17 @@
                 ref.notesEl = notesEl;
                 ref.showPane = showPane;
             }
-            detailTr.appendChild(subMain);
-            subSide = document.createElement('td');
-            subSide.colSpan = 2;
+            /* Rechte Haelfte der Kopfzeile - beschriftet wie ein Reiter, damit die
+               Linie durchlaeuft und das Material sichtbar darunter haengt. */
+            const matLabel = document.createElement('span');
+            matLabel.className = 'sub-tab sub-tab-mat';
+            matLabel.textContent = 'Zusatzmaterial';
+            subHeadR.appendChild(matLabel);
+            subSide = document.createElement('div');
             subSide.className = 'sub-side';
-            detailTr.appendChild(subSide);
+            subBody.appendChild(subSide);
+            subMain.appendChild(subBody);
+            detailTr.appendChild(subMain);
             tr.after(detailTr);
             tr.classList.add('expandable');
             chev = document.createElement('span');
@@ -2794,7 +2832,9 @@
                 ev.stopPropagation();
                 toggleSubRow();
             });
-            tds[5].insertBefore(chev, topicSpan);
+            /* Doc, 07.09.2026: "mach die Chevis ganz nach vorn" - der Pfeil steht
+               jetzt vor der Wochennummer, nicht mehr vor dem Thema. */
+            tds[0].insertBefore(chev, tds[0].firstChild);
             return { main: subMain, side: subSide };
         }
         function toggleSubRow() {
@@ -2855,10 +2895,16 @@
     function equalizeLbCells() {
         const cells = Object.keys(lbCells).map(k => lbCells[k]);
         if (!cells.length) return;
-        cells.forEach(c => { c.style.width = ''; });
+        /* Doc, 07.09.2026: "alle Pillen so breit wie ORGA" - Bereichspille und
+           Untis-Chip bekommen dieselbe Breite. Gemessen statt fest verdrahtet,
+           denn Orbitron laedt spaeter als das erste Layout und veraendert sie. */
+        const pills = [];
+        cells.forEach(c => { c.style.width = ''; for (const k of c.children) pills.push(k); });
+        if (!pills.length) return;
+        pills.forEach(p => { p.style.width = ''; });
         let w = 0;
-        cells.forEach(c => { w = Math.max(w, c.getBoundingClientRect().width); });
-        if (w) cells.forEach(c => { c.style.width = w + 'px'; });
+        pills.forEach(p => { w = Math.max(w, p.getBoundingClientRect().width); });
+        if (w) pills.forEach(p => { p.style.width = w + 'px'; });
     }
 
     if (document.fonts && document.fonts.ready) {
@@ -3861,6 +3907,10 @@
         setEditable(editing);
         if (editing) setAllDetails(true);
         if (!editing) setShiftMode(false); /* the arrows belong to edit mode */
+        /* Der Untis-Chip zeigt sich nur im Bearbeiten (Doc, 07.09.2026) - er
+           taucht also gerade erst auf oder verschwindet, und die gemeinsame
+           Pillenbreite muss neu gemessen werden. */
+        equalizeLbCells();
         if (btn) btn.textContent = editing ? '✔ Speichern' : '✎ Bearbeiten';
         if (cancelBtn) cancelBtn.hidden = !editing;
     };
@@ -4231,9 +4281,9 @@
         shiftMode = !!on;
         document.body.classList.toggle('shifting', shiftMode);
         document.querySelectorAll('#plan-table tr.ferien > td')
-            .forEach(function (td) { td.colSpan = shiftMode ? 9 : 8; });
+            .forEach(function (td) { td.colSpan = shiftMode ? 8 : 7; });
         document.querySelectorAll('#plan-table tr.detail-row > td:first-child')
-            .forEach(function (td) { td.colSpan = shiftMode ? 6 : 5; });
+            .forEach(function (td) { td.colSpan = shiftMode ? 8 : 7; });
         rendered.forEach(function (r) {
             if (r.upBtn) r.upBtn.hidden = !(shiftMode && freeSlotBefore(r.i));
         });
@@ -4454,6 +4504,7 @@
             const t = noteOf(r.i);
             if (!r.notesEl && t && r.ensureSubRow) r.ensureSubRow();
             if (r.notesEl) setNotesText(r.notesEl, t);
+            if (r.markNotes) r.markNotes();
             if (r.refreshExpandable) r.refreshExpandable();
         }
     }

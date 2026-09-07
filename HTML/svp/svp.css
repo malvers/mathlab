@@ -366,7 +366,54 @@ body.editing .mat-block a.mat-pill:has(> .mat-ico) { padding-right: 26px; }
 @media print { .mat-pill-wrap .mat-x { display: none; } }
 
 /* Sub-row side zone (under Bemerkungen/Material) + section label */
-#plan-table .detail-row td.sub-side { vertical-align: top; }
+/* Material als ein Streifen unter den Stichpunkten (Doc, 07.09.2026): in der
+   alten schmalen Seitenzelle stapelten sich fuenf Pillen auf fuenf Zeilen,
+   ueber Thema + Bemerkungen + Zusatzmaterial passen sie auf eine. */
+/* Zwei Spalten in der Aufklappzeile (Doc, 07.09.2026): Stichpunkte links,
+   Material rechts daneben, je zur Haelfte. */
+#plan-table .detail-row .sub-head,
+#plan-table .detail-row .sub-body {
+    display: flex;
+    align-items: flex-start;
+    gap: 18px;
+}
+/* Jede Haelfte der Kopfzeile hat ihre eigene Linie - dazwischen der Abstand
+   der Spalten (Doc, 07.09.2026: "da kann ruhig ein Gap sein"). */
+#plan-table .detail-row .sub-head-l,
+#plan-table .detail-row .sub-head-r {
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 6px;
+    min-height: 26px;
+}
+#plan-table .detail-row .sub-head-l { flex: 0 0 50%; min-width: 0; }
+#plan-table .detail-row .sub-head-r { flex: 1 1 auto; min-width: 0; }
+/* Gemalte Beschriftung der beiden Haelften - sieht aus wie ein Reiter, laesst
+   sich aber nicht anklicken. Farbe wie die grosse Tabellenkopfzeile (Doc,
+   07.09.2026), damit es als Spaltenueberschrift gelesen wird. */
+/* .sub-tab kommt weiter unten in der Datei und wuerde sonst gewinnen - deshalb
+   beide Klassen zusammen. */
+.sub-tab.sub-tab-mat { display: inline-block; cursor: default; color: var(--head); }
+.sub-tab.sub-tab-mat:hover { color: var(--head); }
+#plan-table .detail-row .sub-left { flex: 0 0 50%; min-width: 0; }
+#plan-table .detail-row .sub-side { flex: 1 1 auto; min-width: 0; padding-top: 2px; }
+#plan-table .detail-row .sub-side .mat-block {
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 8px;
+    text-align: left;
+}
+/* Material-Pillen flacher und durchscheinend (Doc, 07.09.2026) - sie sind eine
+   Liste, keine Knoepfe; Rand und Symbol reichen als Kontur. */
+#plan-table .detail-row .sub-side .mat-block a.mat-pill {
+    margin: 0;
+    padding-top: 1px;
+    padding-bottom: 1px;
+    /* eine Spur Farbe bleibt - ganz durchsichtig war zu wenig. currentColor
+       heisst: jede Pille toent in ihrer eigenen Farbe, in hell wie in dunkel. */
+    background: color-mix(in srgb, currentColor 7%, transparent);
+}
 .sub-label {
     display: inline-block;
     font-family: 'Orbitron', sans-serif;
@@ -440,18 +487,18 @@ body.editing #plan-table td.mat .mat-act[hidden] { display: none; }
 #plan-table tr.open td.mat .mat-mark { opacity: 0.45; }
 #plan-table td.mat .mat-act.done { color: rgb(121, 158, 49); }
 
-/* Exercise button in the material column (svp-plan.js builds it from
-   row.quiz). It sits left of the paperclip marker; the note behind it
-   names the exercise set. */
-#plan-table td.mat .quiz-cell {
+/* Aufgaben-Knopf: steht seit 07.09.2026 im Streifen der Aufklappzeile, nicht
+   mehr in der Wochenzeile (Doc: "die nach unten ziehen"). Die Regeln gelten
+   deshalb fuer die ganze Tabelle, nicht nur fuer die Material-Spalte. */
+/* Die Aufgaben-Pille steht wieder in der Wochenzeile (Doc, 07.09.2026). */
+#plan-table .quiz-cell {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    margin-right: 8px;
     vertical-align: middle;
 }
 
-#plan-table td.mat a.quiz-btn {
+#plan-table a.quiz-btn {
     display: inline-block;
     padding: 1px 10px;
     border-radius: 999px;
@@ -464,22 +511,22 @@ body.editing #plan-table td.mat .mat-act[hidden] { display: none; }
     white-space: nowrap;
 }
 
-#plan-table td.mat a.quiz-btn:hover { background: rgba(245, 194, 66, 0.3); }
-#plan-table td.mat .quiz-note { font-size: 0.72rem; color: var(--muted); white-space: nowrap; }
+#plan-table a.quiz-btn:hover { background: rgba(245, 194, 66, 0.3); }
+#plan-table .quiz-note { font-size: 0.72rem; color: var(--muted); white-space: nowrap; }
 
 /* narrow screens: the button stays, its caption would break the row */
-@media (max-width: 1100px) { #plan-table td.mat .quiz-note { display: none; } }
-@media print { #plan-table td.mat .quiz-cell { display: none; } }
+@media (max-width: 1100px) { #plan-table .quiz-note { display: none; } }
+@media print { #plan-table .quiz-cell { display: none; } }
 
 /* "Aufgaben" pill (svp-plan.js buildAufgabenCell): quiz set and Textaufgaben
    sheet in one dropdown, same pill look as the button, menu in the panel style
    of .badge-drop. position:fixed - the table-wrap scrolls sideways and would
    clip an absolute menu on the last rows; the script places it under the pill. */
-#plan-table td.mat .aufg-drop { position: relative; display: inline-block; }
-#plan-table td.mat .aufg-drop > a.quiz-btn { cursor: pointer; }
-#plan-table td.mat .aufg-drop .drop-menu { position: fixed; top: auto; left: auto; gap: 5px; }
-#plan-table td.mat .aufg-drop .drop-menu a.quiz-btn { display: block; text-align: center; }
-#plan-table td.mat .aufg-drop .drop-menu .mat-pill-wrap { display: flex; align-items: center; gap: 4px; }
+#plan-table .aufg-drop { position: relative; display: inline-block; }
+#plan-table .aufg-drop > a.quiz-btn { cursor: pointer; }
+#plan-table .aufg-drop .drop-menu { position: fixed; top: auto; left: auto; gap: 5px; }
+#plan-table .aufg-drop .drop-menu a.quiz-btn { display: block; text-align: center; }
+#plan-table .aufg-drop .drop-menu .mat-pill-wrap { display: flex; align-items: center; gap: 4px; }
 
 /* short explanation line above the pill list in the paste dialog */
 .mat-modal .mm-info {
@@ -1454,6 +1501,10 @@ td.date { white-space: nowrap; color: var(--muted); font-variant-numeric: tabula
 /* … außer bei Nicht-Datumstexten wie „→ nächstes Schuljahr": die dürfen
    umbrechen, damit sie die Spalte nicht für alle Wochen aufblähen. */
 td.date.date-wrap { white-space: normal; }
+/* Seit die Thema-Spalte einzeilig ist, ist Platz fuer das Datum am Stueck
+   (Doc, 07.09.2026). setDateText setzt den Umbruch weiter, CSS hebt ihn auf -
+   so bleibt textContent unveraendert und das Speichern der Zelle wie gehabt. */
+td.date br { display: none; }
 #plan-table td.date, #plan-table th.date-col { width: 1%; }
 /* Bemerkungen sind Randnotizen — sie dürfen umbrechen, damit die
    Thema-Spalte den Platz bekommt */
@@ -1471,6 +1522,20 @@ td.date.date-wrap { white-space: normal; }
 /* die Kopfzeile ist hier der Engpass, nicht der Inhalt ("1/13") */
 #plan-table th.ustd-col { letter-spacing: 0; }
 td.topic { font-weight: 400; min-width: 220px; }
+/* Eine Zeile je Woche (Doc, 07.09.2026): der Rest wird abgeschnitten, der volle
+   Titel steht in der aufgeklappten Zeile. Kein nowrap - das wuerde die Spalte
+   aufblaehen; die Klammer schneidet ohne Einfluss auf die Spaltenbreite. */
+#plan-table td.topic .topic-text {
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+/* beim Bearbeiten muss der ganze Text sichtbar bleiben */
+body.editing #plan-table td.topic .topic-text {
+    display: block;
+    overflow: visible;
+}
 td.remark { color: var(--muted); font-size: 0.88rem; min-width: 160px; }
 
 .badge {
@@ -1484,25 +1549,24 @@ td.remark { color: var(--muted); font-size: 0.88rem; min-width: 160px; }
     white-space: nowrap;
 }
 
-/* Bereich-Spalte: Pille und WebUntis-Chip untereinander, linksbuendig.
-   inline-grid ist so breit wie sein breitestes Kind, justify-items: stretch
-   zieht beide Kinder auf genau diese Breite - deshalb sind Pille und Chip
-   immer gleich breit, ohne feste Masse. */
-#plan-table td.lb { text-align: left; }
+/* Bereich-Spalte: Pille und WebUntis-Chip NEBENEINANDER (Doc, 07.09.2026:
+   „alles in einer Zeile"). Vorher lagen sie per inline-grid untereinander und
+   gleich breit - das kostete jede Woche mit Chip eine zweite Zeile. */
+#plan-table td.lb { text-align: left; white-space: nowrap; }
 
 .lb-cell {
-    display: inline-grid;
-    justify-items: stretch;
-    gap: 8px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
 }
 
 .lb-cell .badge {
-    /* gleiche Hoehe wie der Chip darunter, Inhalt mittig */
-    display: flex;
+    /* gleiche Hoehe wie der Chip daneben, Inhalt mittig */
+    display: inline-flex;
     align-items: center;
     justify-content: center;
     min-height: 22px;
-    width: 100%;
+    width: auto;
 }
 
 /* Untis-Orange, aus dem Logo abgegriffen - nicht die Laborfarbe --lambda,
@@ -1511,7 +1575,8 @@ td.remark { color: var(--muted); font-size: 0.88rem; min-width: 160px; }
 
 /* WebUntis-Status: zeigt, ob der Stundeninhalt der Woche im Klassenbuch steht.
    Gespeist aus <plan>.untis.json, erzeugt von tools/webuntis.js status.
-   Immer sichtbar - nur der Klick (Schreibdialog) haengt am Bearbeiten-Modus.
+   Nur im Bearbeiten sichtbar (Doc, 07.09.2026) - fuer Besucher ist er ohne Sinn,
+   und die Wochenzeile bleibt ruhig.
    Alle Grundregeln bewusst einklassig, damit .is-full/.is-part die Farbe
    sicher ueberschreiben. */
 /* Kurzes Aufleuchten der Woche, die aus dem Stundenplan angesprungen wurde
@@ -1554,27 +1619,29 @@ tr.kw-jump > td { animation: kw-jump-pulse 1.3s ease-in-out 2; }
 /* Immer sichtbar (Doc, 06.09.2026 - vorher nur im Bearbeiten-Modus, weil der Chip als reines
    Eintrage-Werkzeug gedacht war). Er sagt jetzt auch im Lesemodus, ob der Stoff im Klassenbuch
    steht; geklickt und geschrieben wird weiterhin nur beim Bearbeiten. */
-.untis-chip {
-    display: flex;
+/* Der Chip sieht aus wie eine Bereich-Pille (Doc, 07.09.2026: "mach den Untis-
+   Button so wie Leistung und die LB-Pillen auch") - gleiche Hoehe, gleiche Ecke,
+   gleiche Polsterung. Die Breite setzt equalizeLbCells() fuer alle gemeinsam. */
+.untis-chip { display: none; }
+body.editing .untis-chip {
+    display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 5px;
-    width: 100%;
-    min-height: 18px;
-    padding: 0 7px;
-    /* gleiche Ecke wie die Bereich-Pille darueber - beide sollen als ein
-       Block gelesen werden, nicht als Pille plus Kapsel. */
+    width: auto;
+    min-height: 22px;
+    padding: 3px 8px;
     border-radius: 6px;
     border: 1px solid var(--line);
     background: transparent;
     color: var(--muted);
     font-family: 'Orbitron', sans-serif;
-    font-size: 0.48rem;
-    letter-spacing: 0.14em;
+    font-size: 0.6rem;
+    letter-spacing: 0.05em;
     line-height: 1;
     white-space: nowrap;
     cursor: default;
-    opacity: 0.75;
+    opacity: 1;
     transition: opacity 0.15s ease, border-color 0.15s ease;
 }
 
@@ -1583,8 +1650,8 @@ tr.kw-jump > td { animation: kw-jump-pulse 1.3s ease-in-out 2; }
    orange Kachel ist der Chip. Die Strichstaerken stehen in viewBox-Einheiten
    (Original-Raster, Rahmen 272x114) und sind am Original gemessen. */
 .untis-chip .u-mark {
-    width: 43px;
-    height: 18px;
+    width: 38px;
+    height: 16px;
     flex: none;
     display: block;
     fill: none;
@@ -1890,17 +1957,16 @@ a.link-card.row-break { grid-column: 1; }
 /* Expandable week rows with detail bullet lists */
 tr.expandable { cursor: pointer; }
 
-/* Chevron sits out of the text flow (absolute) — it can never wrap onto its own line,
-   and wrapped topic lines all align at the same left edge. */
-tr.expandable td.topic {
-    position: relative;
-    padding-left: 34px;
-}
+/* Der Pfeil steht ganz vorn, vor der Wochennummer (Doc, 07.09.2026). Inline statt
+   absolut: die Zeile ist einzeilig, er kann also nicht mehr umbrechen, und die
+   Nr-Spalte waechst einfach um seine Breite mit. */
+tr.expandable td.num:first-of-type { white-space: nowrap; }
 
 tr.expandable .chev {
-    position: absolute;
-    left: 11px;
-    top: 10px;
+    display: inline-block;
+    width: 12px;
+    margin-right: 4px;
+    text-align: center;
     color: var(--muted);
     font-size: 0.95rem;
     transition: transform 0.15s;
@@ -1916,9 +1982,9 @@ tr.detail-row td {
     padding: 4px 6px 12px 6px;
 }
 
-/* Bullets cell starts at the topic column; zero left padding so the list text
-   (padding-left 34px = chevron indent) aligns flush with the topic text above. */
-tr.detail-row td:last-child { padding-left: 0; }
+/* Die Aufklappzeile nutzt die ganze Breite (Doc, 07.09.2026: „links ist soviel
+   Platz!") - eine Zelle ueber alle Spalten, Inhalt am linken Tabellenrand. */
+tr.detail-row td { padding-left: 14px; padding-right: 14px; }
 
 tr.detail-row ul {
     margin: 6px 0 2px 0;
@@ -1939,8 +2005,7 @@ tr.detail-row li::marker { color: var(--lambda); }
 .sub-tabs {
     display: flex;
     gap: 2px;
-    margin: 2px 0 4px 34px;
-    border-bottom: 1px solid var(--line);
+    margin: 0;
 }
 
 .sub-tab {
@@ -1957,7 +2022,13 @@ tr.detail-row li::marker { color: var(--lambda); }
 }
 
 .sub-tab:hover { color: var(--text); }
-.sub-tab.on { color: var(--lambda); border-bottom-color: var(--lambda); }
+/* Aktiver Reiter in der Farbe der Tabellenkopfzeile, Unterstrich ebenso
+   (Doc, 07.09.2026) - er ist 2 px stark und hebt sich dadurch von der
+   1-px-Linie der Kopfhaelfte ab. */
+.sub-tab.on { color: var(--head); border-bottom-color: var(--head); }
+/* Traegt die Woche eine Notiz, steht der Reiter gruen - auch wenn gerade
+   INHALT offen ist (Doc, 07.09.2026). Steht nach .on, gewinnt also. */
+.sub-tab.has-notes { color: var(--phi); }
 
 /* --- Hervorhebungen in den Inhalt-Stichpunkten ---------------------------
    Set with the little strip right of the tabs; stored as <b>/<i>/<c1..3> in
@@ -2017,7 +2088,9 @@ body.editing .sub-tabs:not(.on-notizen) .sub-tools { display: inline-flex; }
 .sub-tool.tool-off { font-size: 0.7rem; position: relative; top: -2px; }
 
 .notes-body {
-    margin-left: 34px;
+    /* linksbuendig mit den Reitern darueber (Doc, 07.09.2026) - die frueheren
+       34 px richteten sich nach dem Chevron, der jetzt ganz vorn steht. */
+    margin-left: 0;
     padding: 4px 6px;
     min-height: 1.6em;
     font-size: 0.92rem;
