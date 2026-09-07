@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Textaufgaben: Denkfallen und Knobeleien — Doc Alvers Mathe-Labor</title>
+<meta name="description" content="Drei Textaufgaben mit Lösungen zu „Denkfallen und Knobeleien“, KW 26: je eine Aufgabe für die Anforderungsbereiche I, II und III.">
+<link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+<link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+<link rel="stylesheet" href="../morpheus/vendor/katex/katex.min.css">
+<script defer src="../morpheus/vendor/katex/katex.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Raleway:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* Palette and type follow the deck generator (tools/pptx/design_lib.py) - one look for
+   slides, quizzes and worksheets. Light page on purpose: this sheet gets printed. */
+:root{
+  --ink:#0E244E; --body:#2C3C60; --muted:#6E7E9F; --card:#FFFFFF;
+  --orange:#F5C242; --red:#B02418; --green:#799E31; --page:#EEF2F8;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{background:var(--page)}
+body{font-family:Raleway,system-ui,sans-serif;color:var(--body);background:var(--page);
+  line-height:1.45;font-size:17px}
+h1,h2,h3,.afb,.brand,.btn{font-family:Orbitron,system-ui,sans-serif}
+.sheet{max-width:820px;margin:0 auto;padding:32px 22px 60px}
+
+/* header */
+.brand{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--red);font-weight:700}
+h1{font-size:clamp(22px,4.2vw,32px);color:var(--ink);line-height:1.12;margin:10px 0 6px;letter-spacing:-.3px}
+.sub{color:var(--muted);font-size:15px}
+.rules{width:64px;height:3px;margin:16px 0 26px;position:relative}
+.rules::before,.rules::after{content:"";position:absolute;top:0;height:3px}
+.rules::before{left:0;width:44px;background:var(--orange)}
+.rules::after{left:50px;width:14px;background:var(--green)}
+.tools{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 28px}
+.btn{font-size:11px;letter-spacing:1px;color:var(--ink);background:var(--card);cursor:pointer;
+  border:.75px solid rgba(14,36,78,.22);border-radius:4px;padding:8px 12px;text-decoration:none}
+.btn:hover{border-color:var(--red);color:var(--red)}
+
+/* tasks */
+.task{background:var(--card);border:.75px solid rgba(14,36,78,.12);padding:22px 24px 20px;
+  margin:0 0 18px;position:relative}
+.task::before{content:"";position:absolute;left:0;top:0;right:0;height:3px;background:var(--orange)}
+.task.afb2::before{background:var(--green)}
+.task.afb3::before{background:var(--red)}
+.task-head{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:10px}
+.task h2{font-size:17px;color:var(--ink);font-weight:700}
+.afb{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);font-weight:700}
+.afb b{color:var(--ink)}
+.task p{margin:0 0 8px}
+ol.parts{margin:10px 0 0 0;padding-left:0;list-style:none;counter-reset:part}
+ol.parts>li{position:relative;padding-left:30px;margin:0 0 7px;counter-increment:part}
+ol.parts>li::before{content:counter(part,lower-alpha) ")";position:absolute;left:0;top:0;
+  color:var(--red);font-weight:700}
+.hint{color:var(--muted);font-size:15px;margin-top:8px}
+b{font-weight:700;color:var(--ink)}
+
+/* solutions */
+#sol{margin-top:36px}
+#sol[hidden]{display:none}
+#sol h2.big{font-size:20px;color:var(--ink);margin-bottom:14px}
+.sol{background:rgba(255,255,255,.6);border-left:3px solid var(--green);padding:16px 20px;margin:0 0 14px}
+.sol h3{font-size:14px;color:var(--ink);margin-bottom:8px}
+.sol p{margin:0 0 6px}
+.sol .why{color:var(--muted);font-size:15px}
+.katex{font-size:1.02em}
+
+/* print: A4, solutions on their own page so the sheet works without them */
+@media print{
+  @page{size:A4;margin:16mm 16mm 18mm}
+  html,body{background:#fff}
+  .sheet{max-width:none;padding:0}
+  .tools{display:none}
+  body{font-size:14.5px;line-height:1.38}
+  h1{font-size:24px}
+  .rules{margin:12px 0 18px}
+  .task{break-inside:avoid;page-break-inside:avoid;padding:16px 20px 14px;margin-bottom:12px}
+  ol.parts>li{margin-bottom:4px}
+  .hint,.sol .why{font-size:13px}
+  .sol{break-inside:avoid;page-break-inside:avoid;background:#fff;padding:12px 18px;margin-bottom:10px}
+  #sol{display:block!important;break-before:page;page-break-before:always;margin-top:0}
+}
+</style>
+</head>
+<body>
+<main class="sheet">
+  <div class="brand">Doc Alvers Mathe-Labor</div>
+  <h1>Textaufgaben: Denkfallen und Knobeleien</h1>
+  <div class="sub">Berufliches Gymnasium · Klasse 11 · KW 26 · drei Aufgaben, Anforderungsbereiche I bis III</div>
+  <div class="rules"></div>
+  <div class="tools">
+    <button class="btn" id="toggle" type="button">Lösungen anzeigen</button>
+    <a class="btn" href="../svp/mathe/mathe11.html">Zum Plan</a>
+  </div>
+
+  <section class="task afb1">
+    <div class="task-head"><h2>Drei Fragen, drei schnelle Antworten</h2><span class="afb">AFB <b>I</b> · Reproduzieren</span></div>
+    <p>Erst schätzen, dann rechnen. <b>(1)</b> Ein Schläger und ein Ball kosten zusammen $1{,}10$ €, der Schläger kostet $1$ € <b>mehr</b> als der Ball. <b>(2)</b> $5$ Maschinen brauchen $5$ Minuten für $5$ Teile. <b>(3)</b> Seerosen auf einem See verdoppeln ihre Fläche täglich; nach $48$ Tagen ist der See voll bedeckt.</p>
+    <ol class="parts">
+      <li>Was kostet der Ball? Stelle eine Gleichung auf.</li>
+      <li>Wie lange brauchen $100$ Maschinen für $100$ Teile?</li>
+      <li>Nach wie vielen Tagen ist der See zur Hälfte bedeckt?</li>
+      <li>Was haben die drei Fehlschlüsse gemeinsam?</li>
+    </ol>
+  </section>
+
+  <section class="task afb2">
+    <div class="task-head"><h2>Zählen und Kombinieren</h2><span class="afb">AFB <b>II</b> · Zusammenhänge herstellen</span></div>
+    <p>Beim Abschlussfest sind $12$ Personen anwesend.</p>
+    <ol class="parts">
+      <li>Jede begrüßt jede andere mit einem Handschlag. Wie viele Handschläge gibt es?</li>
+      <li>Aus den $12$ soll ein Team aus $2$ Personen gebildet werden. Wie viele Möglichkeiten gibt es, und wie hängt das mit a) zusammen?</li>
+      <li>Auf wie viele verschiedene Arten können sich $5$ Personen in einer Reihe aufstellen?</li>
+      <li>Wie groß ist die Wahrscheinlichkeit, dass unter $23$ zufällig gewählten Personen mindestens zwei am selben Tag Geburtstag haben? Beschreibe den Rechenweg und beurteile das Ergebnis.</li>
+    </ol>
+  </section>
+
+  <section class="task afb3">
+    <div class="task-head"><h2>Soll ich wechseln?</h2><span class="afb">AFB <b>III</b> · Reflektieren und Beurteilen</span></div>
+    <p>In einer Spielshow stehen drei Türen. Hinter einer steht ein Auto, hinter den beiden anderen je eine Ziege. Der Kandidat wählt eine Tür. Der Moderator, der <b>weiß</b>, wo das Auto steht, öffnet daraufhin eine der beiden übrigen Türen — immer eine mit einer Ziege — und fragt: „Wollen Sie wechseln?“ Ein Mitschüler sagt: <b>„Jetzt sind noch zwei Türen übrig, also fifty-fifty. Wechseln bringt nichts.“</b></p>
+    <ol class="parts">
+      <li>Mit welcher Wahrscheinlichkeit steht das Auto hinter der zuerst gewählten Tür?</li>
+      <li>Berechne die Gewinnwahrscheinlichkeit beim Wechseln. Begründe über die beiden Fälle „zuerst richtig gewählt“ und „zuerst falsch gewählt“.</li>
+      <li>Eine Simulation über $300$ Spiele ergibt beim Bleiben $104$ und beim Wechseln $196$ Gewinne. Passt das zu deiner Rechnung?</li>
+      <li>Beurteile die Aussage. Welche Rolle spielt es, dass der Moderator weiß, wo das Auto steht?</li>
+    </ol>
+  </section>
+
+  <section id="sol" hidden>
+    <h2 class="big">Lösungen</h2>
+
+    <div class="sol">
+      <h3>1 · Drei Fragen, drei schnelle Antworten</h3>
+      <p><b>a)</b> Ball $x$, Schläger $x + 1$. Gleichung: $x + (x + 1) = 1{,}10$, also $2x = 0{,}10$ und $x = 0{,}05$. Der Ball kostet <b>$5$ Cent</b>, der Schläger $1{,}05$ €. Probe: Summe $1{,}10$ €, Differenz genau $1$ €. Die schnelle Antwort $10$ Cent ergäbe eine Differenz von nur $90$ Cent.</p>
+      <p><b>b)</b> Eine Maschine braucht für <b>ein</b> Teil $5$ Minuten — die $5$ Maschinen arbeiten ja gleichzeitig. Also brauchen $100$ Maschinen für $100$ Teile ebenfalls <b>$5$ Minuten</b>. Nicht die Anzahl entscheidet, sondern das Verhältnis von Maschinen zu Teilen.</p>
+      <p><b>c)</b> Weil sich die Fläche täglich <b>verdoppelt</b>, war sie am Vortag halb so groß. Der See ist also nach <b>$47$ Tagen</b> zur Hälfte bedeckt — nicht nach $24$. Bis Tag $47$ sieht es lange harmlos aus, und am letzten Tag kippt alles.</p>
+      <p><b>d)</b> Alle drei verführen zu einer Antwort, die durch einfaches Teilen oder Halbieren entsteht: $1{,}10$ zerlegt in $1$ und $0{,}10$; $100$ Maschinen als das $20$-fache von $5$; $48$ Tage halbiert zu $24$. In Wahrheit steckt in (1) eine <b>Differenz</b>bedingung, in (2) eine <b>Proportionalität</b> in zwei Größen zugleich und in (3) <b>exponentielles</b> Wachstum. Das Bauchgefühl rechnet immer linear.</p>
+      <p class="why">Der Fehler entsteht nicht beim Rechnen, sondern beim <b>Aufstellen</b>. Wer die Bedingung als Gleichung hinschreibt, statt sie zu überfliegen, fällt auf keine dieser Fallen herein.</p>
+    </div>
+
+    <div class="sol">
+      <h3>2 · Zählen und Kombinieren</h3>
+      <p><b>a)</b> Jede der $12$ Personen schüttelt $11$ Hände, das ergibt $12 \cdot 11 = 132$ — dabei ist jeder Handschlag von beiden Seiten gezählt. Also gibt es $\dfrac{132}{2} = 66$ Handschläge.</p>
+      <p><b>b)</b> Genau $66$ — dieselbe Zahl. Ein Handschlag ist nichts anderes als die Auswahl von zwei Personen aus zwölf, und auf die Reihenfolge kommt es in beiden Fällen nicht an. Allgemein gibt es $\dfrac{n(n - 1)}{2}$ Möglichkeiten.</p>
+      <p><b>c)</b> Für den ersten Platz gibt es $5$ Möglichkeiten, für den zweiten noch $4$, dann $3$, $2$ und $1$. Zusammen $5 \cdot 4 \cdot 3 \cdot 2 \cdot 1 = 120$ Reihenfolgen. Hier zählt die Reihenfolge — anders als in b).</p>
+      <p><b>d)</b> Man rechnet über das Gegenereignis „alle haben an verschiedenen Tagen Geburtstag“: die zweite Person hat $\dfrac{364}{365}$ freie Tage, die dritte $\dfrac{363}{365}$ und so weiter bis $\dfrac{343}{365}$. Das Produkt ergibt rund $0{,}4927$, also ist $P(\text{mindestens zwei gleich}) \approx 1 - 0{,}4927 = 0{,}5073$ — gut <b>$50\,\%$</b>. Das überrascht, weil man an die eigenen $22$ Vergleiche denkt; tatsächlich gibt es aber $\dfrac{23 \cdot 22}{2} = 253$ <b>Paare</b>, die alle zusammenpassen könnten.</p>
+      <p class="why">„Auswahl“ und „Reihenfolge“ sind zwei verschiedene Fragen. Bei $5$ Personen gibt es $10$ Zweiergruppen, aber $120$ Aufstellungen — wer beides verwechselt, liegt um den Faktor $12$ daneben.</p>
+    </div>
+
+    <div class="sol">
+      <h3>3 · Soll ich wechseln?</h3>
+      <p><b>a)</b> Vor dem Öffnen sind alle drei Türen gleichwertig, also $P = \dfrac{1}{3}$. Diese Wahrscheinlichkeit ändert sich nicht dadurch, dass der Moderator anschließend eine Ziegentür öffnet — er hätte immer eine öffnen können.</p>
+      <p><b>b)</b> Fall 1: Der Kandidat hat zuerst das <b>Auto</b> gewählt, Wahrscheinlichkeit $\dfrac{1}{3}$. Dann führt Wechseln zur Ziege. Fall 2: Er hat zuerst eine <b>Ziege</b> gewählt, Wahrscheinlichkeit $\dfrac{2}{3}$. Dann steht hinter der einen verbleibenden Tür zwangsläufig das Auto, denn der Moderator hat die andere Ziege gezeigt — Wechseln gewinnt. Also $P(\text{Gewinn beim Wechseln}) = \dfrac{2}{3} \approx 0{,}667$, gegenüber $\dfrac{1}{3}$ beim Bleiben.</p>
+      <p><b>c)</b> Erwartet werden beim Bleiben $\dfrac{300}{3} = 100$ und beim Wechseln $\dfrac{2 \cdot 300}{3} = 200$ Gewinne. Beobachtet sind $104$ und $196$ — die Abweichung liegt bei $4$ Spielen und damit gut im Rahmen der Zufallsschwankung, die bei $300$ Versuchen etwa $\pm 300 \cdot \dfrac{1}{\sqrt{300}} \approx 17$ Spiele beträgt. Die Simulation bestätigt die Rechnung.</p>
+      <p><b>d)</b> Die Aussage ist falsch. Zwei übrig gebliebene Möglichkeiten heißen nicht, dass beide gleich wahrscheinlich sind — die Wahrscheinlichkeiten stammen aus der <b>ersten</b> Wahl und bleiben an ihr hängen. Entscheidend ist das Wissen des Moderators: weil er nie das Auto zeigt, überträgt er die gesamte Wahrscheinlichkeit von $\dfrac{2}{3}$ auf die eine verbleibende Tür. Öffnete er dagegen zufällig und träfe manchmal das Auto, wäre es in den verbleibenden Fällen tatsächlich fifty-fifty. Sein Wissen ist die zusätzliche Information, die das Wechseln lohnend macht.</p>
+      <p class="why">„Zwei Möglichkeiten“ heißt nie automatisch „je $50\,\%$“. Gleiche Wahrscheinlichkeiten müssen begründet werden — hier durch die Frage, wie die Situation überhaupt zustande kam.</p>
+    </div>
+  </section>
+</main>
+
+<script>
+// Formulas: every $...$ in the text is rendered by KaTeX, once the vendor script is in.
+addEventListener('load', () => {
+  if (!window.katex) return;
+  const walker = document.createTreeWalker(document.querySelector('.sheet'), NodeFilter.SHOW_TEXT);
+  const nodes = [];
+  while (walker.nextNode()) if (walker.currentNode.nodeValue.includes('$')) nodes.push(walker.currentNode);
+  nodes.forEach(node => {
+    const parts = node.nodeValue.split(/\$([^$]+)\$/);
+    if (parts.length < 3) return;
+    const frag = document.createDocumentFragment();
+    parts.forEach((part, i) => {
+      if (i % 2 === 0) { if (part) frag.appendChild(document.createTextNode(part)); return; }
+      const span = document.createElement('span');
+      try { katex.render(part, span, { throwOnError: false, displayMode: false }); }
+      catch (err) { span.textContent = part; }
+      frag.appendChild(span);
+    });
+    node.parentNode.replaceChild(frag, node);
+  });
+});
+
+// Solutions stay hidden until asked - in print they are always on, on their own page.
+const sol = document.getElementById('sol'), toggle = document.getElementById('toggle');
+toggle.onclick = () => {
+  sol.hidden = !sol.hidden;
+  toggle.textContent = sol.hidden ? 'Lösungen anzeigen' : 'Lösungen verbergen';
+  if (!sol.hidden) sol.scrollIntoView({ behavior: 'smooth', block: 'start' });
+};
+</script>
+</body>
+</html>

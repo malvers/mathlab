@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Textaufgaben: Modellieren — Doc Alvers Mathe-Labor</title>
+<meta name="description" content="Drei Textaufgaben mit Lösungen zu „Modellieren“, KW 9: je eine Aufgabe für die Anforderungsbereiche I, II und III.">
+<link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+<link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+<link rel="stylesheet" href="../morpheus/vendor/katex/katex.min.css">
+<script defer src="../morpheus/vendor/katex/katex.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Raleway:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* Palette and type follow the deck generator (tools/pptx/design_lib.py) - one look for
+   slides, quizzes and worksheets. Light page on purpose: this sheet gets printed. */
+:root{
+  --ink:#0E244E; --body:#2C3C60; --muted:#6E7E9F; --card:#FFFFFF;
+  --orange:#F5C242; --red:#B02418; --green:#799E31; --page:#EEF2F8;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{background:var(--page)}
+body{font-family:Raleway,system-ui,sans-serif;color:var(--body);background:var(--page);
+  line-height:1.45;font-size:17px}
+h1,h2,h3,.afb,.brand,.btn{font-family:Orbitron,system-ui,sans-serif}
+.sheet{max-width:820px;margin:0 auto;padding:32px 22px 60px}
+
+/* header */
+.brand{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--red);font-weight:700}
+h1{font-size:clamp(22px,4.2vw,32px);color:var(--ink);line-height:1.12;margin:10px 0 6px;letter-spacing:-.3px}
+.sub{color:var(--muted);font-size:15px}
+.rules{width:64px;height:3px;margin:16px 0 26px;position:relative}
+.rules::before,.rules::after{content:"";position:absolute;top:0;height:3px}
+.rules::before{left:0;width:44px;background:var(--orange)}
+.rules::after{left:50px;width:14px;background:var(--green)}
+.tools{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 28px}
+.btn{font-size:11px;letter-spacing:1px;color:var(--ink);background:var(--card);cursor:pointer;
+  border:.75px solid rgba(14,36,78,.22);border-radius:4px;padding:8px 12px;text-decoration:none}
+.btn:hover{border-color:var(--red);color:var(--red)}
+
+/* tasks */
+.task{background:var(--card);border:.75px solid rgba(14,36,78,.12);padding:22px 24px 20px;
+  margin:0 0 18px;position:relative}
+.task::before{content:"";position:absolute;left:0;top:0;right:0;height:3px;background:var(--orange)}
+.task.afb2::before{background:var(--green)}
+.task.afb3::before{background:var(--red)}
+.task-head{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:10px}
+.task h2{font-size:17px;color:var(--ink);font-weight:700}
+.afb{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);font-weight:700}
+.afb b{color:var(--ink)}
+.task p{margin:0 0 8px}
+ol.parts{margin:10px 0 0 0;padding-left:0;list-style:none;counter-reset:part}
+ol.parts>li{position:relative;padding-left:30px;margin:0 0 7px;counter-increment:part}
+ol.parts>li::before{content:counter(part,lower-alpha) ")";position:absolute;left:0;top:0;
+  color:var(--red);font-weight:700}
+.hint{color:var(--muted);font-size:15px;margin-top:8px}
+b{font-weight:700;color:var(--ink)}
+
+/* solutions */
+#sol{margin-top:36px}
+#sol[hidden]{display:none}
+#sol h2.big{font-size:20px;color:var(--ink);margin-bottom:14px}
+.sol{background:rgba(255,255,255,.6);border-left:3px solid var(--green);padding:16px 20px;margin:0 0 14px}
+.sol h3{font-size:14px;color:var(--ink);margin-bottom:8px}
+.sol p{margin:0 0 6px}
+.sol .why{color:var(--muted);font-size:15px}
+.katex{font-size:1.02em}
+
+/* print: A4, solutions on their own page so the sheet works without them */
+@media print{
+  @page{size:A4;margin:16mm 16mm 18mm}
+  html,body{background:#fff}
+  .sheet{max-width:none;padding:0}
+  .tools{display:none}
+  body{font-size:14.5px;line-height:1.38}
+  h1{font-size:24px}
+  .rules{margin:12px 0 18px}
+  .task{break-inside:avoid;page-break-inside:avoid;padding:16px 20px 14px;margin-bottom:12px}
+  ol.parts>li{margin-bottom:4px}
+  .hint,.sol .why{font-size:13px}
+  .sol{break-inside:avoid;page-break-inside:avoid;background:#fff;padding:12px 18px;margin-bottom:10px}
+  #sol{display:block!important;break-before:page;page-break-before:always;margin-top:0}
+}
+</style>
+</head>
+<body>
+<main class="sheet">
+  <div class="brand">Doc Alvers Mathe-Labor</div>
+  <h1>Textaufgaben: Modellieren</h1>
+  <div class="sub">Berufliches Gymnasium · Klasse 11 · KW 9 · drei Aufgaben, Anforderungsbereiche I bis III</div>
+  <div class="rules"></div>
+  <div class="tools">
+    <button class="btn" id="toggle" type="button">Lösungen anzeigen</button>
+    <a class="btn" href="../svp/mathe/mathe11.html">Zum Plan</a>
+  </div>
+
+  <section class="task afb1">
+    <div class="task-head"><h2>Die Handwerkerrechnung</h2><span class="afb">AFB <b>I</b> · Reproduzieren</span></div>
+    <p>Ein Elektrobetrieb berechnet je Einsatz eine <b>Anfahrtspauschale von $40$ €</b> und einen <b>Arbeitslohn von $56$ € je Stunde</b>, angefangene Stunden anteilig. Die Arbeitszeit heißt $t$ (in Stunden), die Kosten $K$ (in Euro).</p>
+    <ol class="parts">
+      <li>Stelle den Term $K(t)$ auf und begründe den Funktionstyp. Was kostet ein Einsatz von $2{,}5$ Stunden?</li>
+      <li>Eine Rechnung lautet auf $264$ €. Wie lange hat die Elektrikerin gearbeitet?</li>
+      <li>Was bedeuten Achsenabschnitt und Anstieg des Graphen im Sachzusammenhang? Gib die Einheit des Anstiegs an.</li>
+      <li>Ein Konkurrenzbetrieb verlangt keine Anfahrtspauschale, aber $66$ € je Stunde. Ab welcher Einsatzdauer ist der erste Betrieb günstiger?</li>
+    </ol>
+  </section>
+
+  <section class="task afb2">
+    <div class="task-head"><h2>Wirkstoff im Blut</h2><span class="afb">AFB <b>II</b> · Zusammenhänge herstellen</span></div>
+    <p>Nach einer Tablette befinden sich $200$ mg eines Wirkstoffs im Körper. Der Körper baut <b>stündlich $20\,\%$ der jeweils vorhandenen Menge</b> ab. Die Menge heißt $m(t)$ in mg, $t$ in Stunden nach der Einnahme.</p>
+    <ol class="parts">
+      <li>Begründe, warum hier ein exponentielles und kein lineares Modell passt, und stelle $m(t)$ auf.</li>
+      <li>Ein Patient rechnet: „$20\,\%$ pro Stunde, nach $5$ Stunden ist alles weg.“ Berechne $m(3)$ und $m(5)$ und nimm Stellung.</li>
+      <li>Die Tablette wirkt, solange mindestens $50$ mg im Körper sind. Nach wie vielen Stunden muss die nächste genommen werden?</li>
+      <li>Im Beipackzettel steht: „Halbwertszeit etwa $3$ Stunden.“ Passt das zum Modell? Nenne außerdem zwei Annahmen des Modells, die in Wirklichkeit nur näherungsweise gelten.</li>
+    </ol>
+  </section>
+
+  <section class="task afb3">
+    <div class="task-head"><h2>Zwei Modelle, eine Stadt</h2><span class="afb">AFB <b>III</b> · Reflektieren und Beurteilen</span></div>
+    <p>Eine Kleinstadt hatte $2010$ genau $40\,000$ Einwohner und $2020$ genau $48\,000$. Zwei Modelle beschreiben die Einwohnerzahl $E(t)$, $t$ in Jahren seit $2010$: Modell <b>A</b> ist linear, Modell <b>B</b> ist exponentiell. Ein Mitschüler behauptet: <b>„Beide Modelle treffen die Daten exakt, also sind beide gleich gut, und die Stadt hat $2050$ genau $72\,000$ Einwohner.“</b></p>
+    <ol class="parts">
+      <li>Stelle beide Modelle auf und zeige, dass beide die Werte von $2010$ und $2020$ treffen.</li>
+      <li>Berechne die Prognose beider Modelle für $2050$. Wie weit liegen sie auseinander?</li>
+      <li>Beurteile die Behauptung. Berechne dazu auch, was beide Modelle für $2015$ liefern, und erkläre, warum zwei Datenpunkte nicht zwischen den Modellen entscheiden können.</li>
+      <li>Wende beide Modelle auf das Jahr $1960$ an und nenne für jedes Modell eine Grenze seines Gültigkeitsbereichs.</li>
+    </ol>
+  </section>
+
+  <section id="sol" hidden>
+    <h2 class="big">Lösungen</h2>
+
+    <div class="sol">
+      <h3>1 · Die Handwerkerrechnung</h3>
+      <p><b>a)</b> Fester Sockel plus feste Rate je Stunde, das ist <b>linear</b>: $K(t) = 40 + 56\,t$. Für $t = 2{,}5$: $K(2{,}5) = 40 + 56 \cdot 2{,}5 = 40 + 140 = 180$ €.</p>
+      <p><b>b)</b> $40 + 56\,t = 264$, also $56\,t = 224$ und $t = \dfrac{224}{56} = 4$. Sie hat $4$ Stunden gearbeitet. Probe: $40 + 56 \cdot 4 = 264$.</p>
+      <p><b>c)</b> Der Achsenabschnitt $40$ ist der Betrag, der schon bei $t = 0$ anfällt: die Anfahrt. Der Anstieg $56$ ist die Änderungsrate, jede weitere Stunde kostet $56$ € mehr. Einheit: Euro je Stunde, also €/h.</p>
+      <p><b>d)</b> Konkurrenz: $K_2(t) = 66\,t$. Der erste Betrieb ist günstiger, wenn $40 + 56\,t &lt; 66\,t$, also $40 &lt; 10\,t$ und $t &gt; 4$. Ab mehr als $4$ Stunden lohnt sich die Pauschale, bei genau $4$ Stunden kosten beide $264$ €. Probe: $66 \cdot 4 = 264$.</p>
+      <p class="why">Falle in b): wer $264$ direkt durch $56$ teilt, erhält $4{,}7$ Stunden und hat die Anfahrt mitbezahlt. Erst den Sockel abziehen, dann durch die Rate teilen.</p>
+    </div>
+
+    <div class="sol">
+      <h3>2 · Wirkstoff im Blut</h3>
+      <p><b>a)</b> Es wird nicht jede Stunde eine <b>feste Menge</b> abgebaut, sondern ein <b>fester Prozentsatz</b> der vorhandenen Menge. Fester Prozentsatz heißt fester Faktor: $m(t) = 200 \cdot 0{,}8^t$.</p>
+      <p><b>b)</b> $m(3) = 200 \cdot 0{,}8^3 = 200 \cdot 0{,}512 = 102{,}4$ mg. $m(5) = 200 \cdot 0{,}8^5 = 200 \cdot 0{,}32768 \approx 65{,}5$ mg. Nach $5$ Stunden ist also noch fast ein Drittel da. Der Patient rechnet linear ($5 \cdot 20\,\% = 100\,\%$), aber die $20\,\%$ beziehen sich jede Stunde auf eine kleinere Menge. Exponentieller Abbau erreicht die Null nie.</p>
+      <p><b>c)</b> $200 \cdot 0{,}8^t = 50$, also $0{,}8^t = 0{,}25$ und $t = \dfrac{\lg 0{,}25}{\lg 0{,}8} \approx 6{,}2$. Nach gut $6$ Stunden ist die Grenze erreicht, die nächste Tablette also <b>nach $6$ Stunden</b>, denn bei $6{,}5$ Stunden wäre man schon darunter. Probe: $200 \cdot 0{,}8^6 \approx 52{,}4$ mg, das reicht noch; $200 \cdot 0{,}8^7 \approx 41{,}9$ mg, das nicht.</p>
+      <p><b>d)</b> Halbwertszeit: $0{,}8^t = 0{,}5$, also $t = \dfrac{\lg 0{,}5}{\lg 0{,}8} \approx 3{,}1$ Stunden. Das passt zu „etwa $3$ Stunden“. Annahmen: die ganzen $200$ mg sind sofort bei $t = 0$ im Blut (tatsächlich braucht die Aufnahme Zeit), und der Abbau ist Stunde für Stunde exakt $20\,\%$ (tatsächlich hängt er von Leber, Alter, Gewicht ab). Das Modell gilt außerdem nur für $t \ge 0$.</p>
+      <p class="why">Falle in c): „$50$ mg von $200$ mg sind $25\,\%$, also $75\,\%$ abgebaut, also $3{,}75$ Stunden“ rechnet wieder linear. Der Weg führt über $0{,}8^t = 0{,}25$ und den Logarithmus.</p>
+    </div>
+
+    <div class="sol">
+      <h3>3 · Zwei Modelle, eine Stadt</h3>
+      <p><b>a)</b> A: gleicher Zuwachs je Jahr, $\dfrac{48\,000 - 40\,000}{10} = 800$ Einwohner pro Jahr, also $E_A(t) = 40\,000 + 800\,t$. B: gleicher Faktor je Jahrzehnt, $\dfrac{48\,000}{40\,000} = 1{,}2$, also $E_B(t) = 40\,000 \cdot 1{,}2^{t/10}$. Probe: $E_A(0) = E_B(0) = 40\,000$; $E_A(10) = 48\,000$ und $E_B(10) = 40\,000 \cdot 1{,}2 = 48\,000$.</p>
+      <p><b>b)</b> $t = 40$: $E_A(40) = 40\,000 + 32\,000 = 72\,000$. $E_B(40) = 40\,000 \cdot 1{,}2^4 = 40\,000 \cdot 2{,}0736 = 82\,944$. Unterschied $10\,944$ Einwohner, mehr als ein Viertel der heutigen Stadt.</p>
+      <p><b>c)</b> Die Behauptung ist nicht haltbar. Zwei Datenpunkte legen bei <b>jedem</b> Modell mit zwei Parametern (Startwert und Rate bzw. Faktor) die Parameter fest, deshalb treffen beide exakt. Das sagt nichts darüber, welches Modell den Vorgang richtig beschreibt. Für $2015$ liefert A $44\,000$ und B $40\,000 \cdot \sqrt{1{,}2} \approx 43\,818$: ein Unterschied von $182$ Einwohnern, im Rauschen einer Stadt nicht zu sehen. Über kurze Zeiträume sind die Modelle kaum unterscheidbar, über $30$ Jahre laufen sie auseinander. Eine Prognose für $2050$ ist deshalb <b>unsicher</b>, und „genau $72\,000$“ täuscht eine Genauigkeit vor, die kein Modell hat. Ehrlich wäre eine Spanne von etwa $72\,000$ bis $83\,000$, mit Nennung der Annahme.</p>
+      <p><b>d)</b> $t = -50$: $E_A(-50) = 40\,000 - 40\,000 = 0$ Einwohner, die Stadt hätte $1960$ nicht existiert. $E_B(-50) = 40\,000 \cdot 1{,}2^{-5} \approx 16\,075$, das ist wenigstens plausibel. Grenzen: A liefert für $t &lt; -50$ negative Einwohnerzahlen und kann keine Stadt beschreiben, die je geschrumpft ist. B wächst ohne Ende, aber Wohnraum, Fläche und Arbeitsplätze setzen Grenzen; nach oben hin muss sich das Wachstum abflachen. Beide Modelle gelten nur für einen Zeitraum, in dem sich die Bedingungen nicht wesentlich ändern.</p>
+      <p class="why">Ein Modell, das die vorhandenen Daten exakt trifft, ist deshalb nicht richtig. Mit zwei Punkten trifft jedes Modell mit zwei Parametern exakt, die Entscheidung fällt erst mit weiteren Daten.</p>
+    </div>
+  </section>
+</main>
+
+<script>
+// Formulas: every $...$ in the text is rendered by KaTeX, once the vendor script is in.
+addEventListener('load', () => {
+  if (!window.katex) return;
+  const walker = document.createTreeWalker(document.querySelector('.sheet'), NodeFilter.SHOW_TEXT);
+  const nodes = [];
+  while (walker.nextNode()) if (walker.currentNode.nodeValue.includes('$')) nodes.push(walker.currentNode);
+  nodes.forEach(node => {
+    const parts = node.nodeValue.split(/\$([^$]+)\$/);
+    if (parts.length < 3) return;
+    const frag = document.createDocumentFragment();
+    parts.forEach((part, i) => {
+      if (i % 2 === 0) { if (part) frag.appendChild(document.createTextNode(part)); return; }
+      const span = document.createElement('span');
+      try { katex.render(part, span, { throwOnError: false, displayMode: false }); }
+      catch (err) { span.textContent = part; }
+      frag.appendChild(span);
+    });
+    node.parentNode.replaceChild(frag, node);
+  });
+});
+
+// Solutions stay hidden until asked - in print they are always on, on their own page.
+const sol = document.getElementById('sol'), toggle = document.getElementById('toggle');
+toggle.onclick = () => {
+  sol.hidden = !sol.hidden;
+  toggle.textContent = sol.hidden ? 'Lösungen anzeigen' : 'Lösungen verbergen';
+  if (!sol.hidden) sol.scrollIntoView({ behavior: 'smooth', block: 'start' });
+};
+</script>
+</body>
+</html>

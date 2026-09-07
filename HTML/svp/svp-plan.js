@@ -183,6 +183,12 @@
     const UPLOAD_LABEL = /^\s*(upload|abgabe)\b/i;
     function isUploadEntry(en) { return UPLOAD_LABEL.test(en.label || ''); }
 
+    /* Textaufgaben-Blatt: liegt unter /aufgaben/ und wandert nicht in die
+       Material-Zeile, sondern in die "Aufgaben"-Pille neben das Wochenquiz
+       (Doc, 07.09.2026: "ein Drop wo drauf steht Aufgaben"). Erkennung an der
+       URL - das Label darf der Plan frei benennen ("3 Textaufgaben"). */
+    function isExerciseEntry(en) { return /\/aufgaben\//i.test(en.url || ''); }
+
     // Default pill label when none was typed: derived from the link type.
     // Ein Office-Dokument in der Desktop-App oeffnen. Office registriert dafuer
     // eigene Protokolle; "ofe" heisst "open for edit", "u" leitet die Adresse ein.
@@ -358,13 +364,14 @@
         else openMatWindow(url);
     }
 
-    function renderMaterial(el, text, ref) {
+    function renderMaterial(el, text, ref, skip) {
         text = text == null ? '' : String(text).trim();
         el.dataset.src = text;
         el.textContent = '';
         const entries = parseMat(text);
         if (!entries.length) { el.textContent = text; return; }
         entries.forEach(function (en) {
+            if (skip && skip(en)) return;   /* drawn elsewhere (Aufgaben-Pille) */
             const label = en.label;
             const a = document.createElement('a');
             /* Der Abgabe-Knopf oeffnet IMMER einen echten Tab: der Upload
@@ -543,31 +550,153 @@
         return wrap;
     }
 
+    // --- "Aufgaben" pill: quiz set + Textaufgaben sheet in one dropdown ----
+    // One pill in the material column that opens a menu with the week's
+    // exercise set ("20 Aufgaben", from row.quiz) and every Textaufgaben sheet
+    // from the material (URL under /aufgaben/). ALWAYS the dropdown, even with
+    // the quiz alone - one look in every week and every plan, Mathe and
+    // Informatik alike (Doc, 07.09.2026: "das soll immer so sein").
+    // The menu is position:fixed: the table-wrap scrolls sideways
+    // (overflow-x:auto) and would clip an absolute menu on the last rows.
+    let aufgDropWired = false;
+    function closeAufgDrops() {
+        document.querySelectorAll('.aufg-drop.open').forEach(function (d) {
+            d.classList.remove('open');
+            const pill = d.querySelector('a.quiz-btn');
+            if (pill) pill.setAttribute('aria-expanded', 'false');
+        });
+    }
+    /* Scrolling does NOT close the menu: the browser may scroll the pill into
+       view right after the click, and that scroll event arrives after the menu
+       opened (measured 04.09.2026 on the Vortraege menu). The menu follows the
+       pill instead, which also covers the sideways scroll of the table-wrap. */
+    function placeAufgDrops() {
+        document.querySelectorAll('.aufg-drop.open').forEach(function (d) { if (d._place) d._place(); });
+    }
+    function wireAufgDrops() {
+        if (aufgDropWired) return;
+        aufgDropWired = true;
+        document.addEventListener('click', closeAufgDrops);
+        document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeAufgDrops(); });
+        window.addEventListener('scroll', placeAufgDrops, true);
+        window.addEventListener('resize', placeAufgDrops);
+    }
+    function aufgLink(item) {
+        const a = document.createElement('a');
+        a.className = 'quiz-btn';
+        a.href = item.href;
+        a.target = '_blank';
+        a.rel = 'noopener';
+        a.textContent = item.label;
+        a.title = item.title || '';
+        a.addEventListener('click', function (e) { e.stopPropagation(); closeAufgDrops(); });
+        return a;
+    }
+    function buildAufgabenCell(ref, ex) {
+        const q = ref.quizBtn ? ref.quizBtn.querySelector('a.quiz-btn') : null;
+        if (!q && !ex.length) return null;
+        const items = [];
+        if (q) items.push({ label: q.textContent, href: q.getAttribute('href'), title: q.title });
+        ex.forEach(function (en) {
+            items.push({ label: en.label || 'Textaufgaben', href: en.url,
+                         title: en.desc || 'Textaufgaben zum Thema dieser Woche', url: en.url });
+        });
+        const cell = document.createElement('span');
+        cell.className = 'quiz-cell';
+
+        wireAufgDrops();
+        const wrap = document.createElement('span');
+        wrap.className = 'badge-drop aufg-drop';
+        const pill = document.createElement('a');
+        pill.className = 'quiz-btn';
+        pill.href = '#';
+        pill.setAttribute('role', 'button');
+        pill.setAttribute('aria-haspopup', 'true');
+        pill.setAttribute('aria-expanded', 'false');
+        pill.textContent = 'Aufgaben \u25BE';
+        pill.title = items.length + ' Aufgabensätze zum Thema dieser Woche';
+        const menu = document.createElement('div');
+        menu.className = 'drop-menu';
+        wrap._place = function () {
+            const r = pill.getBoundingClientRect();
+            menu.style.left = Math.round(r.left) + 'px';
+            menu.style.top = Math.round(r.bottom + 6) + 'px';
+        };
+        pill.addEventListener('click', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const wasOpen = wrap.classList.contains('open');
+            closeAufgDrops();
+            if (wasOpen) return;
+            wrap._place();
+            wrap.classList.add('open');
+            pill.setAttribute('aria-expanded', 'true');
+        });
+        menu.addEventListener('click', function (e) { e.stopPropagation(); });
+        items.forEach(function (item) {
+            const a = aufgLink(item);
+            /* Owner: the sheet entries carry the same ✕ as every material pill. */
+            if (item.url && ref && CAN_EDIT_MAT) {
+                const w = document.createElement('span');
+                w.className = 'mat-pill-wrap';
+                const x = document.createElement('button');
+                x.type = 'button';
+                x.className = 'mat-x';
+                x.textContent = '✕';
+                x.title = 'Aus dieser Woche entfernen';
+                x.setAttribute('aria-label', 'Entfernen: ' + item.label);
+                x.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    removeMatEntry(ref, item.url);
+                });
+                w.appendChild(a);
+                w.appendChild(x);
+                menu.appendChild(w);
+                return;
+            }
+            menu.appendChild(a);
+        });
+        wrap.appendChild(pill);
+        wrap.appendChild(menu);
+        cell.appendChild(wrap);
+        /* the caption behind the old button (row.quiz.text) stays behind the pill */
+        const note = ref.quizBtn ? ref.quizBtn.querySelector('.quiz-note') : null;
+        if (note) cell.appendChild(note.cloneNode(true));
+        return cell;
+    }
+
     // Renders a ref's material state: pills into the sub-row block, a compact
     // Material lives in the expandable sub-row; the week row itself stays
     // clean (the ▸ chevron already shows there is something to unfold).
     function updateMaterial(ref, text) {
         text = text == null ? '' : String(text).trim();
         ref.matTd.dataset.src = text;
-        renderMaterial(ref.matBlock, text, ref);
+        const alle = parseMat(text);
+        const ex = alle.filter(isExerciseEntry);
+        renderMaterial(ref.matBlock, text, ref, isExerciseEntry);
         ref.matTd.textContent = '';
-        if (ref.quizBtn) ref.matTd.appendChild(ref.quizBtn);
-        if (text) {
+        const aufg = buildAufgabenCell(ref, ex);
+        if (aufg) ref.matTd.appendChild(aufg);
+        /* what is left for the sub-row once the sheets sit in the pill */
+        const n = alle.length - ex.length;
+        if (text && (n > 0 || !alle.length || matTail(text))) {
             if (!ref.matBlock.parentNode) ref.ensureSubRow().side.appendChild(ref.matBlock);
             /* A collapsed week hid its material completely and nothing in the
                row said there was any - it looked like the material was gone
                (Doc, 31.08.2026). A compact marker with the count now sits in
                the Material column and unfolds the week when clicked. */
-            const n = parseMat(text).length;
-            const mark = document.createElement('span');
-            mark.className = 'mat-mark';
-            mark.textContent = n > 1 ? '\ud83d\udcce ' + n : '\ud83d\udcce';
-            mark.title = (n === 1 ? '1 Material' : n + ' Materialien') + ' — klicken zum Aufklappen';
-            mark.addEventListener('click', function (e) {
-                e.stopPropagation();
-                ref.openSubRow();
-            });
-            ref.matTd.appendChild(mark);
+            if (n > 0) {
+                const mark = document.createElement('span');
+                mark.className = 'mat-mark';
+                mark.textContent = n > 1 ? '\ud83d\udcce ' + n : '\ud83d\udcce';
+                mark.title = (n === 1 ? '1 Material' : n + ' Materialien') + ' — klicken zum Aufklappen';
+                mark.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    ref.openSubRow();
+                });
+                ref.matTd.appendChild(mark);
+            }
         } else if (ref.matBlock.parentNode) {
             ref.matBlock.remove();
         }

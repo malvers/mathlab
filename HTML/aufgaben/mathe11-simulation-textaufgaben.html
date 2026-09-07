@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Textaufgaben: Simulieren statt rechnen — Doc Alvers Mathe-Labor</title>
+<meta name="description" content="Drei Textaufgaben mit Lösungen zu „Simulieren statt rechnen“, KW 17: je eine Aufgabe für die Anforderungsbereiche I, II und III.">
+<link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+<link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+<link rel="stylesheet" href="../morpheus/vendor/katex/katex.min.css">
+<script defer src="../morpheus/vendor/katex/katex.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Raleway:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* Palette and type follow the deck generator (tools/pptx/design_lib.py) - one look for
+   slides, quizzes and worksheets. Light page on purpose: this sheet gets printed. */
+:root{
+  --ink:#0E244E; --body:#2C3C60; --muted:#6E7E9F; --card:#FFFFFF;
+  --orange:#F5C242; --red:#B02418; --green:#799E31; --page:#EEF2F8;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{background:var(--page)}
+body{font-family:Raleway,system-ui,sans-serif;color:var(--body);background:var(--page);
+  line-height:1.45;font-size:17px}
+h1,h2,h3,.afb,.brand,.btn{font-family:Orbitron,system-ui,sans-serif}
+.sheet{max-width:820px;margin:0 auto;padding:32px 22px 60px}
+
+/* header */
+.brand{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--red);font-weight:700}
+h1{font-size:clamp(22px,4.2vw,32px);color:var(--ink);line-height:1.12;margin:10px 0 6px;letter-spacing:-.3px}
+.sub{color:var(--muted);font-size:15px}
+.rules{width:64px;height:3px;margin:16px 0 26px;position:relative}
+.rules::before,.rules::after{content:"";position:absolute;top:0;height:3px}
+.rules::before{left:0;width:44px;background:var(--orange)}
+.rules::after{left:50px;width:14px;background:var(--green)}
+.tools{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 28px}
+.btn{font-size:11px;letter-spacing:1px;color:var(--ink);background:var(--card);cursor:pointer;
+  border:.75px solid rgba(14,36,78,.22);border-radius:4px;padding:8px 12px;text-decoration:none}
+.btn:hover{border-color:var(--red);color:var(--red)}
+
+/* tasks */
+.task{background:var(--card);border:.75px solid rgba(14,36,78,.12);padding:22px 24px 20px;
+  margin:0 0 18px;position:relative}
+.task::before{content:"";position:absolute;left:0;top:0;right:0;height:3px;background:var(--orange)}
+.task.afb2::before{background:var(--green)}
+.task.afb3::before{background:var(--red)}
+.task-head{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:10px}
+.task h2{font-size:17px;color:var(--ink);font-weight:700}
+.afb{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);font-weight:700}
+.afb b{color:var(--ink)}
+.task p{margin:0 0 8px}
+ol.parts{margin:10px 0 0 0;padding-left:0;list-style:none;counter-reset:part}
+ol.parts>li{position:relative;padding-left:30px;margin:0 0 7px;counter-increment:part}
+ol.parts>li::before{content:counter(part,lower-alpha) ")";position:absolute;left:0;top:0;
+  color:var(--red);font-weight:700}
+.hint{color:var(--muted);font-size:15px;margin-top:8px}
+b{font-weight:700;color:var(--ink)}
+
+/* solutions */
+#sol{margin-top:36px}
+#sol[hidden]{display:none}
+#sol h2.big{font-size:20px;color:var(--ink);margin-bottom:14px}
+.sol{background:rgba(255,255,255,.6);border-left:3px solid var(--green);padding:16px 20px;margin:0 0 14px}
+.sol h3{font-size:14px;color:var(--ink);margin-bottom:8px}
+.sol p{margin:0 0 6px}
+.sol .why{color:var(--muted);font-size:15px}
+.katex{font-size:1.02em}
+
+/* print: A4, solutions on their own page so the sheet works without them */
+@media print{
+  @page{size:A4;margin:16mm 16mm 18mm}
+  html,body{background:#fff}
+  .sheet{max-width:none;padding:0}
+  .tools{display:none}
+  body{font-size:14.5px;line-height:1.38}
+  h1{font-size:24px}
+  .rules{margin:12px 0 18px}
+  .task{break-inside:avoid;page-break-inside:avoid;padding:16px 20px 14px;margin-bottom:12px}
+  ol.parts>li{margin-bottom:4px}
+  .hint,.sol .why{font-size:13px}
+  .sol{break-inside:avoid;page-break-inside:avoid;background:#fff;padding:12px 18px;margin-bottom:10px}
+  #sol{display:block!important;break-before:page;page-break-before:always;margin-top:0}
+}
+</style>
+</head>
+<body>
+<main class="sheet">
+  <div class="brand">Doc Alvers Mathe-Labor</div>
+  <h1>Textaufgaben: Simulieren statt rechnen</h1>
+  <div class="sub">Berufliches Gymnasium · Klasse 11 · KW 17 · drei Aufgaben, Anforderungsbereiche I bis III</div>
+  <div class="rules"></div>
+  <div class="tools">
+    <button class="btn" id="toggle" type="button">Lösungen anzeigen</button>
+    <a class="btn" href="../svp/mathe/mathe11.html">Zum Plan</a>
+  </div>
+
+  <section class="task afb1">
+    <div class="task-head"><h2>Der Würfel in drei Versuchsreihen</h2><span class="afb">AFB <b>I</b> · Reproduzieren</span></div>
+    <p>Ein Würfel wurde in drei Reihen geworfen und die Sechsen gezählt: bei $60$ Würfen $14$ Sechsen, bei $600$ Würfen $112$ und bei $6\,000$ Würfen $1\,005$.</p>
+    <ol class="parts">
+      <li>Berechne für jede Reihe die relative Häufigkeit der Sechs auf vier Nachkommastellen.</li>
+      <li>Vergleiche mit der theoretischen Wahrscheinlichkeit. Wie groß ist der Abstand jeweils?</li>
+      <li>Berechne für jede Reihe die <b>erwartete</b> Anzahl Sechsen und die absolute Abweichung davon. Was fällt im Vergleich zu b) auf?</li>
+      <li>Formuliere, was das Gesetz der großen Zahlen aussagt — und was es nicht aussagt.</li>
+    </ol>
+  </section>
+
+  <section class="task afb2">
+    <div class="task-head"><h2>Das Glücksrad simulieren</h2><span class="afb">AFB <b>II</b> · Zusammenhänge herstellen</span></div>
+    <p>Ein Glücksrad hat $8$ gleich große Felder, $3$ davon sind Gewinnfelder. Statt zu rechnen, soll das Spiel in einer Tabellenkalkulation simuliert werden.</p>
+    <ol class="parts">
+      <li>Berechne die theoretische Gewinnwahrscheinlichkeit.</li>
+      <li>Beschreibe, wie du einen einzelnen Dreh mit Zufallszahlen nachbildest und wie du daraus einen Treffer erkennst.</li>
+      <li>Die Simulation ergibt bei $1\,000$ Durchläufen $361$ Gewinne. Berechne die relative Häufigkeit und den Abstand zum theoretischen Wert.</li>
+      <li>Die Genauigkeit einer Simulation wächst etwa mit $\dfrac{1}{\sqrt{n}}$. Wie viele Durchläufe braucht man ungefähr, um auf zwei Nachkommastellen genau zu sein?</li>
+    </ol>
+  </section>
+
+  <section class="task afb3">
+    <div class="task-head"><h2>Jetzt muss Zahl aufholen</h2><span class="afb">AFB <b>III</b> · Reflektieren und Beurteilen</span></div>
+    <p>Beim Münzwurf kam in $100$ Würfen $60$-mal Kopf. Ein Mitschüler sagt: <b>„Das Gesetz der großen Zahlen sorgt für Ausgleich. Jetzt muss Zahl aufholen, damit am Ende wieder die Hälfte herauskommt.“</b></p>
+    <ol class="parts">
+      <li>Berechne die relative Häufigkeit von Kopf nach den $100$ Würfen und den Überschuss an Kopf-Würfen.</li>
+      <li>Angenommen, in den nächsten $900$ Würfen fällt genau $450$-mal Kopf. Berechne relative Häufigkeit und Überschuss nach allen $1\,000$ Würfen.</li>
+      <li>Setze die Rechnung mit weiteren $9\,000$ ausgeglichenen Würfen fort. Was passiert mit den beiden Größen?</li>
+      <li>Beurteile die Aussage und benenne den Denkfehler.</li>
+    </ol>
+  </section>
+
+  <section id="sol" hidden>
+    <h2 class="big">Lösungen</h2>
+
+    <div class="sol">
+      <h3>1 · Der Würfel in drei Versuchsreihen</h3>
+      <p><b>a)</b> $\dfrac{14}{60} \approx 0{,}2333$; $\dfrac{112}{600} \approx 0{,}1867$; $\dfrac{1\,005}{6\,000} = 0{,}1675$.</p>
+      <p><b>b)</b> Theoretisch ist $P(6) = \dfrac{1}{6} \approx 0{,}1667$. Abstände: $0{,}0667$, dann $0{,}0200$, dann $0{,}0008$. Mit wachsender Versuchszahl wird die relative Häufigkeit der Wahrscheinlichkeit immer ähnlicher.</p>
+      <p><b>c)</b> Erwartet werden $10$, $100$ und $1\,000$ Sechsen. Absolute Abweichungen: $4$, $12$ und $5$. Sie werden <b>nicht</b> kleiner, sondern schwanken. Nur die <b>relative</b> Abweichung geht zurück — das ist der entscheidende Unterschied.</p>
+      <p><b>d)</b> Das Gesetz der großen Zahlen sagt: bei wachsender Versuchszahl nähert sich die <b>relative Häufigkeit</b> der Wahrscheinlichkeit an. Es sagt <b>nicht</b>, dass die absolute Anzahl der Sechsen dem Erwartungswert näher kommt, und es sagt erst recht nichts über einen einzelnen Wurf. Der Würfel hat kein Gedächtnis.</p>
+      <p class="why">Aus $1\,005$ statt $1\,000$ Sechsen folgt nicht, dass der Würfel besser geworden ist. Bei $6\,000$ Würfen sind Abweichungen von einigen Dutzend völlig normal — die Rechnung muss immer relativ erfolgen.</p>
+    </div>
+
+    <div class="sol">
+      <h3>2 · Das Glücksrad simulieren</h3>
+      <p><b>a)</b> $P(\text{Gewinn}) = \dfrac{3}{8} = 0{,}375$.</p>
+      <p><b>b)</b> Man erzeugt je Durchlauf eine ganze Zufallszahl zwischen $1$ und $8$, in einer Tabellenkalkulation etwa mit `ZUFALLSBEREICH(1;8)`. Alle acht Zahlen sind gleich wahrscheinlich, genau wie die acht Felder. Als Treffer zählt man die Zahlen $1$, $2$ und $3$, also alle Werte kleiner oder gleich $3$. Das Ergebnis wird als $1$ oder $0$ notiert und am Ende aufsummiert.</p>
+      <p><b>c)</b> $\dfrac{361}{1\,000} = 0{,}361$. Der Abstand zum theoretischen Wert beträgt $0{,}375 - 0{,}361 = 0{,}014$, also $1{,}4$ Prozentpunkte.</p>
+      <p><b>d)</b> Bei $n = 1\,000$ ist $\dfrac{1}{\sqrt{1\,000}} \approx 0{,}032$ — die beobachtete Abweichung von $0{,}014$ passt gut in diese Größenordnung. Für eine Genauigkeit von $0{,}01$ braucht man $\dfrac{1}{\sqrt{n}} \approx 0{,}01$, also $\sqrt{n} \approx 100$ und damit $n \approx 10\,000$ Durchläufe. Zehnfache Genauigkeit kostet die <b>hundertfache</b> Zahl an Versuchen.</p>
+      <p class="why">Eine Simulation liefert nie den exakten Wert, sondern eine Schätzung mit Streuung. Wer aus $0{,}361$ schließt, das Rad sei manipuliert, verwechselt Zufallsschwankung mit einem Befund.</p>
+    </div>
+
+    <div class="sol">
+      <h3>3 · Jetzt muss Zahl aufholen</h3>
+      <p><b>a)</b> Relative Häufigkeit: $\dfrac{60}{100} = 0{,}60$. Der Überschuss beträgt $60 - 40 = 20$ Würfe zugunsten von Kopf.</p>
+      <p><b>b)</b> Insgesamt $60 + 450 = 510$ Kopf bei $1\,000$ Würfen: $\dfrac{510}{1\,000} = 0{,}51$. Der Überschuss ist $510 - 490 = 20$ — er hat sich <b>überhaupt nicht</b> verändert.</p>
+      <p><b>c)</b> Nach weiteren $9\,000$ ausgeglichenen Würfen: $510 + 4\,500 = 5\,010$ Kopf bei $10\,000$ Würfen, also $\dfrac{5\,010}{10\,000} = 0{,}501$. Der Überschuss bleibt bei $20$. Die relative Häufigkeit nähert sich $0{,}5$ immer weiter an, obwohl der absolute Vorsprung gar nicht abgebaut wird.</p>
+      <p><b>d)</b> Die Aussage ist falsch. Der Ausgleich entsteht nicht dadurch, dass Zahl aufholt, sondern dadurch, dass der feste Überschuss von $20$ neben immer größeren Gesamtzahlen <b>immer weniger ins Gewicht fällt</b>. Die Münze hat kein Gedächtnis: jede Wahrscheinlichkeit bleibt $\dfrac{1}{2}$, unabhängig davon, was vorher fiel. Der Denkfehler heißt Spielerfehlschluss — er unterstellt dem Zufall ein Bestreben, frühere Abweichungen auszugleichen.</p>
+      <p class="why">„Ausgleich“ bedeutet Verdünnung, nicht Rückzahlung. Wer auf eine Aufholjagd wettet, setzt auf eine Eigenschaft, die der Zufall nicht hat.</p>
+    </div>
+  </section>
+</main>
+
+<script>
+// Formulas: every $...$ in the text is rendered by KaTeX, once the vendor script is in.
+addEventListener('load', () => {
+  if (!window.katex) return;
+  const walker = document.createTreeWalker(document.querySelector('.sheet'), NodeFilter.SHOW_TEXT);
+  const nodes = [];
+  while (walker.nextNode()) if (walker.currentNode.nodeValue.includes('$')) nodes.push(walker.currentNode);
+  nodes.forEach(node => {
+    const parts = node.nodeValue.split(/\$([^$]+)\$/);
+    if (parts.length < 3) return;
+    const frag = document.createDocumentFragment();
+    parts.forEach((part, i) => {
+      if (i % 2 === 0) { if (part) frag.appendChild(document.createTextNode(part)); return; }
+      const span = document.createElement('span');
+      try { katex.render(part, span, { throwOnError: false, displayMode: false }); }
+      catch (err) { span.textContent = part; }
+      frag.appendChild(span);
+    });
+    node.parentNode.replaceChild(frag, node);
+  });
+});
+
+// Solutions stay hidden until asked - in print they are always on, on their own page.
+const sol = document.getElementById('sol'), toggle = document.getElementById('toggle');
+toggle.onclick = () => {
+  sol.hidden = !sol.hidden;
+  toggle.textContent = sol.hidden ? 'Lösungen anzeigen' : 'Lösungen verbergen';
+  if (!sol.hidden) sol.scrollIntoView({ behavior: 'smooth', block: 'start' });
+};
+</script>
+</body>
+</html>

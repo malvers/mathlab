@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Textaufgaben: Wiederholung vor Klassenarbeit 1 — Doc Alvers Mathe-Labor</title>
+<meta name="description" content="Drei Textaufgaben mit Lösungen zu „Wiederholung vor Klassenarbeit 1“, KW 45: je eine Aufgabe für die Anforderungsbereiche I, II und III.">
+<link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+<link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+<link rel="stylesheet" href="../morpheus/vendor/katex/katex.min.css">
+<script defer src="../morpheus/vendor/katex/katex.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Raleway:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* Palette and type follow the deck generator (tools/pptx/design_lib.py) - one look for
+   slides, quizzes and worksheets. Light page on purpose: this sheet gets printed. */
+:root{
+  --ink:#0E244E; --body:#2C3C60; --muted:#6E7E9F; --card:#FFFFFF;
+  --orange:#F5C242; --red:#B02418; --green:#799E31; --page:#EEF2F8;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{background:var(--page)}
+body{font-family:Raleway,system-ui,sans-serif;color:var(--body);background:var(--page);
+  line-height:1.45;font-size:17px}
+h1,h2,h3,.afb,.brand,.btn{font-family:Orbitron,system-ui,sans-serif}
+.sheet{max-width:820px;margin:0 auto;padding:32px 22px 60px}
+
+/* header */
+.brand{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--red);font-weight:700}
+h1{font-size:clamp(22px,4.2vw,32px);color:var(--ink);line-height:1.12;margin:10px 0 6px;letter-spacing:-.3px}
+.sub{color:var(--muted);font-size:15px}
+.rules{width:64px;height:3px;margin:16px 0 26px;position:relative}
+.rules::before,.rules::after{content:"";position:absolute;top:0;height:3px}
+.rules::before{left:0;width:44px;background:var(--orange)}
+.rules::after{left:50px;width:14px;background:var(--green)}
+.tools{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 28px}
+.btn{font-size:11px;letter-spacing:1px;color:var(--ink);background:var(--card);cursor:pointer;
+  border:.75px solid rgba(14,36,78,.22);border-radius:4px;padding:8px 12px;text-decoration:none}
+.btn:hover{border-color:var(--red);color:var(--red)}
+
+/* tasks */
+.task{background:var(--card);border:.75px solid rgba(14,36,78,.12);padding:22px 24px 20px;
+  margin:0 0 18px;position:relative}
+.task::before{content:"";position:absolute;left:0;top:0;right:0;height:3px;background:var(--orange)}
+.task.afb2::before{background:var(--green)}
+.task.afb3::before{background:var(--red)}
+.task-head{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:10px}
+.task h2{font-size:17px;color:var(--ink);font-weight:700}
+.afb{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);font-weight:700}
+.afb b{color:var(--ink)}
+.task p{margin:0 0 8px}
+ol.parts{margin:10px 0 0 0;padding-left:0;list-style:none;counter-reset:part}
+ol.parts>li{position:relative;padding-left:30px;margin:0 0 7px;counter-increment:part}
+ol.parts>li::before{content:counter(part,lower-alpha) ")";position:absolute;left:0;top:0;
+  color:var(--red);font-weight:700}
+.hint{color:var(--muted);font-size:15px;margin-top:8px}
+b{font-weight:700;color:var(--ink)}
+
+/* solutions */
+#sol{margin-top:36px}
+#sol[hidden]{display:none}
+#sol h2.big{font-size:20px;color:var(--ink);margin-bottom:14px}
+.sol{background:rgba(255,255,255,.6);border-left:3px solid var(--green);padding:16px 20px;margin:0 0 14px}
+.sol h3{font-size:14px;color:var(--ink);margin-bottom:8px}
+.sol p{margin:0 0 6px}
+.sol .why{color:var(--muted);font-size:15px}
+.katex{font-size:1.02em}
+
+/* print: A4, solutions on their own page so the sheet works without them */
+@media print{
+  @page{size:A4;margin:16mm 16mm 18mm}
+  html,body{background:#fff}
+  .sheet{max-width:none;padding:0}
+  .tools{display:none}
+  body{font-size:14.5px;line-height:1.38}
+  h1{font-size:24px}
+  .rules{margin:12px 0 18px}
+  .task{break-inside:avoid;page-break-inside:avoid;padding:16px 20px 14px;margin-bottom:12px}
+  ol.parts>li{margin-bottom:4px}
+  .hint,.sol .why{font-size:13px}
+  .sol{break-inside:avoid;page-break-inside:avoid;background:#fff;padding:12px 18px;margin-bottom:10px}
+  #sol{display:block!important;break-before:page;page-break-before:always;margin-top:0}
+}
+</style>
+</head>
+<body>
+<main class="sheet">
+  <div class="brand">Doc Alvers Mathe-Labor</div>
+  <h1>Textaufgaben: Wiederholung vor Klassenarbeit 1</h1>
+  <div class="sub">Berufliches Gymnasium · Klasse 11 · KW 45 · drei Aufgaben, Anforderungsbereiche I bis III</div>
+  <div class="rules"></div>
+  <div class="tools">
+    <button class="btn" id="toggle" type="button">Lösungen anzeigen</button>
+    <a class="btn" href="../svp/mathe/mathe11.html">Zum Plan</a>
+  </div>
+
+  <section class="task afb1">
+    <div class="task-head"><h2>Das Beet am Zaun</h2><span class="afb">AFB <b>I</b> · Reproduzieren</span></div>
+    <p>Ein rechteckiges Beet soll eingefasst werden. Die Einfassung ist $36$ m lang, und das Beet soll <b>dreimal so lang wie breit</b> werden. Die Breite heißt $b$.</p>
+    <ol class="parts">
+      <li>Stelle eine Gleichung für $b$ auf und löse sie ohne Taschenrechner.</li>
+      <li>Berechne die Fläche des Beetes.</li>
+      <li>Stelle $A = a \cdot b$ nach $b$ um und prüfe damit dein Ergebnis aus a).</li>
+      <li>Ein quadratisches Beet mit derselben Einfassung: Wie lang ist seine Seite, wie groß seine Fläche? Vergleiche.</li>
+    </ol>
+  </section>
+
+  <section class="task afb2">
+    <div class="task-head"><h2>Zwei Vereine werben Mitglieder</h2><span class="afb">AFB <b>II</b> · Zusammenhänge herstellen</span></div>
+    <p>Der Sportverein hat heute $240$ Mitglieder und gewinnt jedes Jahr $15$ dazu. Der neu gegründete Kletterverein hat $180$ Mitglieder und wächst jedes Jahr um $8\,\%$.</p>
+    <ol class="parts">
+      <li>Stelle für beide Vereine die Funktionsgleichung auf und benenne die Art des Wachstums.</li>
+      <li>Berechne die Mitgliederzahlen nach $5$ Jahren.</li>
+      <li>In welchem Jahr überholt der Kletterverein den Sportverein? Grenze durch Probieren ein.</li>
+      <li>Die Formel liefert für den Kletterverein Werte wie $264{,}48$. Erkläre, was daran unpassend ist, und wie man damit umgeht.</li>
+    </ol>
+  </section>
+
+  <section class="task afb3">
+    <div class="task-head"><h2>Die große Dose ist immer günstiger?</h2><span class="afb">AFB <b>III</b> · Reflektieren und Beurteilen</span></div>
+    <p>Im Regal stehen zwei zylindrische Dosen. <b>Dose A</b>: Radius $4$ cm, Höhe $10$ cm, Preis $1{,}20$ €. <b>Dose B</b>: Radius $5$ cm, Höhe $12$ cm, Preis $2{,}40$ €. Ein Mitschüler sagt: <b>„Die große Dose ist immer die günstigere — Großpackungen lohnen sich ja bekanntlich.“</b></p>
+    <ol class="parts">
+      <li>Berechne beide Volumen exakt als Vielfaches von $\pi$ und gerundet in $\mathrm{cm^3}$.</li>
+      <li>Berechne für beide Dosen den Preis je $100\ \mathrm{cm^3}$ und entscheide, welche günstiger ist.</li>
+      <li>Was dürfte Dose B höchstens kosten, damit sie gleich günstig ist wie A? Rechne exakt.</li>
+      <li>Beurteile die Behauptung. Welche Angabe im Laden beantwortet die Frage sofort, und warum wirkt die große Dose trotzdem oft günstiger?</li>
+    </ol>
+  </section>
+
+  <section id="sol" hidden>
+    <h2 class="big">Lösungen</h2>
+
+    <div class="sol">
+      <h3>1 · Das Beet am Zaun</h3>
+      <p><b>a)</b> Bei Breite $b$ ist die Länge $3b$. Umfang: $2(3b + b) = 36$, also $2 \cdot 4b = 36$ und $8b = 36$. Damit $b = 4{,}5$ m und $a = 13{,}5$ m. Probe: $2(13{,}5 + 4{,}5) = 2 \cdot 18 = 36$ m.</p>
+      <p><b>b)</b> $A = 13{,}5 \cdot 4{,}5 = 60{,}75\ \mathrm{m^2}$.</p>
+      <p><b>c)</b> Aus $A = a \cdot b$ folgt durch Teilen durch $a$: $b = \dfrac{A}{a}$. Einsetzen: $b = \dfrac{60{,}75}{13{,}5} = 4{,}5$ m — das bestätigt a).</p>
+      <p><b>d)</b> Beim Quadrat sind alle vier Seiten gleich: $4s = 36$, also $s = 9$ m und $A = 81\ \mathrm{m^2}$. Mit <b>derselben</b> Einfassung sind das $20{,}25\ \mathrm{m^2}$ mehr Beet. Bei festem Umfang liefert das Quadrat die größte Rechteckfläche.</p>
+      <p class="why">„Dreimal so lang wie breit“ heißt $a = 3b$, nicht $b = 3a$. Wer es vertauscht, erhält $b = 13{,}5$ m und ein Beet, das breiter als lang ist.</p>
+    </div>
+
+    <div class="sol">
+      <h3>2 · Zwei Vereine werben Mitglieder</h3>
+      <p><b>a)</b> Sportverein: $S(t) = 240 + 15t$ — <b>lineares</b> Wachstum, jedes Jahr derselbe Zuwachs. Kletterverein: $K(t) = 180 \cdot 1{,}08^t$ — <b>exponentielles</b> Wachstum, jedes Jahr derselbe Faktor.</p>
+      <p><b>b)</b> $S(5) = 240 + 75 = 315$ Mitglieder. $K(5) = 180 \cdot 1{,}08^5 \approx 180 \cdot 1{,}46933 \approx 264{,}5$, also rund $264$ Mitglieder.</p>
+      <p><b>c)</b> Nach $10$ Jahren: $S(10) = 390$ und $K(10) \approx 388{,}6$ — der Sportverein liegt noch knapp vorn. Nach $11$ Jahren: $S(11) = 405$ und $K(11) \approx 419{,}7$. Im <b>elften Jahr</b> zieht der Kletterverein vorbei.</p>
+      <p><b>d)</b> Mitglieder sind ganze Menschen, das Modell rechnet aber mit reellen Zahlen. Der Wert $264{,}48$ ist eine <b>Prognose</b>, kein Bestand; man rundet ihn für die Antwort auf $264$ und rechnet trotzdem mit dem ungerundeten Wert weiter, damit sich Rundungsfehler nicht aufschaukeln. Der Definitionsbereich des Modells ist sachlich $t \geq 0$, und auch dort gilt es nur so lange, wie die Werbung so weiterläuft.</p>
+      <p class="why">$8\,\%$ Wachstum sind nicht $8$ Mitglieder im Jahr. Im ersten Jahr sind es $14{,}4$, im zehnten schon rund $28{,}8$ — der Zuwachs wächst mit.</p>
+    </div>
+
+    <div class="sol">
+      <h3>3 · Die große Dose ist immer günstiger?</h3>
+      <p><b>a)</b> $V_A = \pi \cdot 4^2 \cdot 10 = 160\pi\ \mathrm{cm^3} \approx 502{,}7\ \mathrm{cm^3}$. $V_B = \pi \cdot 5^2 \cdot 12 = 300\pi\ \mathrm{cm^3} \approx 942{,}5\ \mathrm{cm^3}$. Dose B fasst also fast das Doppelte.</p>
+      <p><b>b)</b> Dose A: $\dfrac{120\ \text{ct}}{502{,}7} \approx 0{,}2387$ ct je $\mathrm{cm^3}$, das sind rund $23{,}9$ ct je $100\ \mathrm{cm^3}$. Dose B: $\dfrac{240}{942{,}5} \approx 0{,}2546$ ct je $\mathrm{cm^3}$, also rund $25{,}5$ ct je $100\ \mathrm{cm^3}$. <b>Dose A ist günstiger</b>, obwohl sie kleiner ist.</p>
+      <p><b>c)</b> Gleicher Grundpreis heißt $\dfrac{p_B}{300\pi} = \dfrac{120}{160\pi}$. Das $\pi$ kürzt sich heraus: $p_B = \dfrac{120 \cdot 300}{160} = 225$ ct, also <b>$2{,}25$ €</b>. Dose B ist mit $2{,}40$ € um $15$ Cent zu teuer.</p>
+      <p><b>d)</b> Die Behauptung ist falsch — sie stimmt oft, aber eben nicht immer. Die Frage beantwortet der <b>Grundpreis</b> je Liter oder je $100$ Milliliter, der auf dem Preisschild stehen muss. Die große Dose wirkt günstiger, weil das Volumen mit $r^2 \cdot h$ stark wächst und man den Preisaufschlag daneben unterschätzt; nur der Quotient aus Preis und Volumen entscheidet.</p>
+      <p class="why">Die Radien zu vergleichen genügt nicht. Von A nach B wächst der Radius um $25\,\%$, das Volumen aber um $87{,}5\,\%$ — Preisvergleiche brauchen immer dieselbe Bezugsgröße.</p>
+    </div>
+  </section>
+</main>
+
+<script>
+// Formulas: every $...$ in the text is rendered by KaTeX, once the vendor script is in.
+addEventListener('load', () => {
+  if (!window.katex) return;
+  const walker = document.createTreeWalker(document.querySelector('.sheet'), NodeFilter.SHOW_TEXT);
+  const nodes = [];
+  while (walker.nextNode()) if (walker.currentNode.nodeValue.includes('$')) nodes.push(walker.currentNode);
+  nodes.forEach(node => {
+    const parts = node.nodeValue.split(/\$([^$]+)\$/);
+    if (parts.length < 3) return;
+    const frag = document.createDocumentFragment();
+    parts.forEach((part, i) => {
+      if (i % 2 === 0) { if (part) frag.appendChild(document.createTextNode(part)); return; }
+      const span = document.createElement('span');
+      try { katex.render(part, span, { throwOnError: false, displayMode: false }); }
+      catch (err) { span.textContent = part; }
+      frag.appendChild(span);
+    });
+    node.parentNode.replaceChild(frag, node);
+  });
+});
+
+// Solutions stay hidden until asked - in print they are always on, on their own page.
+const sol = document.getElementById('sol'), toggle = document.getElementById('toggle');
+toggle.onclick = () => {
+  sol.hidden = !sol.hidden;
+  toggle.textContent = sol.hidden ? 'Lösungen anzeigen' : 'Lösungen verbergen';
+  if (!sol.hidden) sol.scrollIntoView({ behavior: 'smooth', block: 'start' });
+};
+</script>
+</body>
+</html>

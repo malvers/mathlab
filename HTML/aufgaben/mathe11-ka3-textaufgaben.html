@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Textaufgaben: Wiederholung: Gleichungssysteme und Stochastik — Doc Alvers Mathe-Labor</title>
+<meta name="description" content="Drei Textaufgaben mit Lösungen zu „Wiederholung: Gleichungssysteme und Stochastik“, KW 19: je eine Aufgabe für die Anforderungsbereiche I, II und III.">
+<link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+<link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+<link rel="stylesheet" href="../morpheus/vendor/katex/katex.min.css">
+<script defer src="../morpheus/vendor/katex/katex.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Raleway:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* Palette and type follow the deck generator (tools/pptx/design_lib.py) - one look for
+   slides, quizzes and worksheets. Light page on purpose: this sheet gets printed. */
+:root{
+  --ink:#0E244E; --body:#2C3C60; --muted:#6E7E9F; --card:#FFFFFF;
+  --orange:#F5C242; --red:#B02418; --green:#799E31; --page:#EEF2F8;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{background:var(--page)}
+body{font-family:Raleway,system-ui,sans-serif;color:var(--body);background:var(--page);
+  line-height:1.45;font-size:17px}
+h1,h2,h3,.afb,.brand,.btn{font-family:Orbitron,system-ui,sans-serif}
+.sheet{max-width:820px;margin:0 auto;padding:32px 22px 60px}
+
+/* header */
+.brand{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--red);font-weight:700}
+h1{font-size:clamp(22px,4.2vw,32px);color:var(--ink);line-height:1.12;margin:10px 0 6px;letter-spacing:-.3px}
+.sub{color:var(--muted);font-size:15px}
+.rules{width:64px;height:3px;margin:16px 0 26px;position:relative}
+.rules::before,.rules::after{content:"";position:absolute;top:0;height:3px}
+.rules::before{left:0;width:44px;background:var(--orange)}
+.rules::after{left:50px;width:14px;background:var(--green)}
+.tools{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 28px}
+.btn{font-size:11px;letter-spacing:1px;color:var(--ink);background:var(--card);cursor:pointer;
+  border:.75px solid rgba(14,36,78,.22);border-radius:4px;padding:8px 12px;text-decoration:none}
+.btn:hover{border-color:var(--red);color:var(--red)}
+
+/* tasks */
+.task{background:var(--card);border:.75px solid rgba(14,36,78,.12);padding:22px 24px 20px;
+  margin:0 0 18px;position:relative}
+.task::before{content:"";position:absolute;left:0;top:0;right:0;height:3px;background:var(--orange)}
+.task.afb2::before{background:var(--green)}
+.task.afb3::before{background:var(--red)}
+.task-head{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:10px}
+.task h2{font-size:17px;color:var(--ink);font-weight:700}
+.afb{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);font-weight:700}
+.afb b{color:var(--ink)}
+.task p{margin:0 0 8px}
+ol.parts{margin:10px 0 0 0;padding-left:0;list-style:none;counter-reset:part}
+ol.parts>li{position:relative;padding-left:30px;margin:0 0 7px;counter-increment:part}
+ol.parts>li::before{content:counter(part,lower-alpha) ")";position:absolute;left:0;top:0;
+  color:var(--red);font-weight:700}
+.hint{color:var(--muted);font-size:15px;margin-top:8px}
+b{font-weight:700;color:var(--ink)}
+
+/* solutions */
+#sol{margin-top:36px}
+#sol[hidden]{display:none}
+#sol h2.big{font-size:20px;color:var(--ink);margin-bottom:14px}
+.sol{background:rgba(255,255,255,.6);border-left:3px solid var(--green);padding:16px 20px;margin:0 0 14px}
+.sol h3{font-size:14px;color:var(--ink);margin-bottom:8px}
+.sol p{margin:0 0 6px}
+.sol .why{color:var(--muted);font-size:15px}
+.katex{font-size:1.02em}
+
+/* print: A4, solutions on their own page so the sheet works without them */
+@media print{
+  @page{size:A4;margin:16mm 16mm 18mm}
+  html,body{background:#fff}
+  .sheet{max-width:none;padding:0}
+  .tools{display:none}
+  body{font-size:14.5px;line-height:1.38}
+  h1{font-size:24px}
+  .rules{margin:12px 0 18px}
+  .task{break-inside:avoid;page-break-inside:avoid;padding:16px 20px 14px;margin-bottom:12px}
+  ol.parts>li{margin-bottom:4px}
+  .hint,.sol .why{font-size:13px}
+  .sol{break-inside:avoid;page-break-inside:avoid;background:#fff;padding:12px 18px;margin-bottom:10px}
+  #sol{display:block!important;break-before:page;page-break-before:always;margin-top:0}
+}
+</style>
+</head>
+<body>
+<main class="sheet">
+  <div class="brand">Doc Alvers Mathe-Labor</div>
+  <h1>Textaufgaben: Wiederholung: Gleichungssysteme und Stochastik</h1>
+  <div class="sub">Berufliches Gymnasium · Klasse 11 · KW 19 · drei Aufgaben, Anforderungsbereiche I bis III</div>
+  <div class="rules"></div>
+  <div class="tools">
+    <button class="btn" id="toggle" type="button">Lösungen anzeigen</button>
+    <a class="btn" href="../svp/mathe/mathe11.html">Zum Plan</a>
+  </div>
+
+  <section class="task afb1">
+    <div class="task-head"><h2>Der Kinoabend</h2><span class="afb">AFB <b>I</b> · Reproduzieren</span></div>
+    <p>Familie Berger zahlt an der Kinokasse für $2$ Karten und $3$ Portionen Popcorn $33$ €. Die Nachbarn zahlen für $4$ Karten und $1$ Portion Popcorn $41$ €. Der Kartenpreis heißt $k$, der Popcornpreis $p$.</p>
+    <ol class="parts">
+      <li>Stelle das lineare Gleichungssystem auf.</li>
+      <li>Schreibe die Koeffizientenmatrix und die erweiterte Koeffizientenmatrix auf und gib ihr Format an.</li>
+      <li>Löse das System mit dem Additionsverfahren.</li>
+      <li>Mache die Probe in <b>beiden</b> Gleichungen und berechne, was $3$ Karten mit $2$ Portionen Popcorn kosten.</li>
+    </ol>
+  </section>
+
+  <section class="task afb2">
+    <div class="task-head"><h2>Zwei Paketdienste</h2><span class="afb">AFB <b>II</b> · Zusammenhänge herstellen</span></div>
+    <p>Ein Onlineshop verschickt $70\,\%$ seiner Pakete mit Dienst A, den Rest mit Dienst B. Bei A kommen $90\,\%$ der Pakete pünktlich an, bei B nur $80\,\%$.</p>
+    <ol class="parts">
+      <li>Zeichne das Baumdiagramm und berechne die Wahrscheinlichkeiten aller vier Pfade. Prüfe ihre Summe.</li>
+      <li>Wie groß ist die Wahrscheinlichkeit, dass ein zufällig gewähltes Paket pünktlich ankommt?</li>
+      <li>Ein Kunde beschwert sich über ein verspätetes Paket. Mit welcher Wahrscheinlichkeit hat es Dienst A befördert? Deute das Ergebnis, obwohl A der zuverlässigere Dienst ist.</li>
+      <li>Sind „Dienst A“ und „pünktlich“ unabhängige Ereignisse? Was würde Unabhängigkeit hier inhaltlich bedeuten?</li>
+    </ol>
+  </section>
+
+  <section class="task afb3">
+    <div class="task-head"><h2>Drei Tage am Saftstand</h2><span class="afb">AFB <b>III</b> · Reflektieren und Beurteilen</span></div>
+    <p>Am Saftstand werden $10$ Liter Mischsaft aus Apfelsaft ($x$ Liter, $2$ € je Liter) und Orangensaft ($y$ Liter, $3$ € je Liter) angesetzt. Ein Mitschüler behauptet: <b>„Zwei Gleichungen mit zwei Unbekannten haben immer genau eine Lösung.“</b></p>
+    <ol class="parts">
+      <li>Montag: Die $10$ Liter kosten $24$ €. Stelle das Gleichungssystem auf und löse es.</li>
+      <li>Dienstag: Orangensaft ist im Angebot und kostet ebenfalls $2$ € je Liter, die $10$ Liter kosten $20$ €. Was passiert beim Lösen? Deute das Ergebnis am Stand.</li>
+      <li>Mittwoch: Wieder beide Sorten zu $2$ € je Liter, aber auf der Rechnung stehen $24$ €. Löse und deute.</li>
+      <li>Beurteile die Behauptung. Beschreibe die drei Fälle auch geometrisch, wenn man jede Gleichung als Gerade zeichnet.</li>
+    </ol>
+  </section>
+
+  <section id="sol" hidden>
+    <h2 class="big">Lösungen</h2>
+
+    <div class="sol">
+      <h3>1 · Der Kinoabend</h3>
+      <p><b>a)</b> Gleichung I: $2k + 3p = 33$. Gleichung II: $4k + p = 41$.</p>
+      <p><b>b)</b> Koeffizientenmatrix $\begin{pmatrix} 2 &amp; 3 \\ 4 &amp; 1 \end{pmatrix}$, Format $2 \times 2$ (zwei Gleichungen, zwei Unbekannte). Erweitert um die rechte Seite: $\begin{pmatrix} 2 &amp; 3 &amp; 33 \\ 4 &amp; 1 &amp; 41 \end{pmatrix}$, Format $2 \times 3$.</p>
+      <p><b>c)</b> II mal $(-3)$: $-12k - 3p = -123$. Dazu I addieren: $-10k = -90$, also $k = 9$. In II: $36 + p = 41$, also $p = 5$. Eine Karte kostet $9$ €, das Popcorn $5$ €.</p>
+      <p><b>d)</b> I: $2 \cdot 9 + 3 \cdot 5 = 18 + 15 = 33$, stimmt. II: $4 \cdot 9 + 5 = 41$, stimmt. Erst jetzt ist die Lösung sicher. Dann: $3 \cdot 9 + 2 \cdot 5 = 27 + 10 = 37$ €.</p>
+      <p class="why">Falle in c): beim Addieren der Zeilen das Vorzeichen nur beim $k$ umdrehen, nicht beim $p$ und nicht bei der rechten Seite. Der Faktor $-3$ gilt für die ganze Zeile.</p>
+    </div>
+
+    <div class="sol">
+      <h3>2 · Zwei Paketdienste</h3>
+      <p><b>a)</b> Erste Stufe A mit $0{,}7$ und B mit $0{,}3$, zweite Stufe pünktlich oder verspätet. Pfadregel: $P(\text{A} \cap \text{pünktlich}) = 0{,}7 \cdot 0{,}9 = 0{,}63$, $P(\text{A} \cap \text{verspätet}) = 0{,}7 \cdot 0{,}1 = 0{,}07$, $P(\text{B} \cap \text{pünktlich}) = 0{,}3 \cdot 0{,}8 = 0{,}24$, $P(\text{B} \cap \text{verspätet}) = 0{,}3 \cdot 0{,}2 = 0{,}06$. Summe $0{,}63 + 0{,}07 + 0{,}24 + 0{,}06 = 1$.</p>
+      <p><b>b)</b> Beide Pünktlich-Pfade addieren: $P(\text{pünktlich}) = 0{,}63 + 0{,}24 = 0{,}87$, also $87\,\%$. Entsprechend sind $13\,\%$ der Pakete verspätet.</p>
+      <p><b>c)</b> Bedingung „verspätet“: Teilmenge durch Bedingung, $P(\text{A} \mid \text{verspätet}) = \dfrac{0{,}07}{0{,}13} = \dfrac{7}{13} \approx 0{,}54$. Gut jeder zweite Verspätungsfall geht auf A zurück, obwohl A pro Paket seltener zu spät ist ($10\,\%$ gegen $20\,\%$). Der Grund ist die Menge: A befördert mehr als doppelt so viele Pakete, dadurch kommen absolut mehr Verspätungen zusammen ($0{,}07$ gegen $0{,}06$).</p>
+      <p><b>d)</b> Unabhängig hieße $P(\text{A} \cap \text{pünktlich}) = P(\text{A}) \cdot P(\text{pünktlich})$. Rechts: $0{,}7 \cdot 0{,}87 = 0{,}609$, links $0{,}63$. Ungleich, also <b>abhängig</b>. Inhaltlich hieße Unabhängigkeit: Die Pünktlichkeit hängt nicht vom Dienst ab, beide hätten dieselbe Quote von $87\,\%$. Genau das ist hier nicht der Fall.</p>
+      <p class="why">Falle in c): $P(\text{verspätet} \mid \text{A}) = 0{,}1$ als Antwort geben. Gefragt ist die Umkehrung, der Dienst unter der Bedingung „verspätet“, mit dem Nenner $0{,}13$.</p>
+    </div>
+
+    <div class="sol">
+      <h3>3 · Drei Tage am Saftstand</h3>
+      <p><b>a)</b> I: $x + y = 10$, II: $2x + 3y = 24$. I mal $(-2)$ zu II addieren: $y = 4$, dann $x = 6$. Probe: $6 + 4 = 10$ und $12 + 12 = 24$. Also $6$ Liter Apfel- und $4$ Liter Orangensaft, <b>genau eine</b> Lösung.</p>
+      <p><b>b)</b> I: $x + y = 10$, II: $2x + 2y = 20$. I mal $(-2)$ zu II addieren: $0 = 0$. Die zweite Gleichung sagt nichts Neues, sie ist das Doppelte der ersten. <b>Unendlich viele</b> Lösungen: Jede Mischung mit $x + y = 10$ kostet $20$ €, etwa $(5 \mid 5)$ oder $(8 \mid 2)$. Sinnvoll sind nur $0 \le x \le 10$, denn negative Liter gibt es nicht. Aus dem Preis lässt sich das Mischverhältnis nicht mehr ablesen, weil beide Sorten gleich viel kosten.</p>
+      <p><b>c)</b> I: $x + y = 10$, II: $2x + 2y = 24$. Dieselbe Umformung ergibt $0 = 4$, ein Widerspruch: <b>keine</b> Lösung. Deutung: Wenn jeder Liter $2$ € kostet, kosten $10$ Liter genau $20$ €. Die Rechnung über $24$ € kann so nicht stimmen, es steckt ein Tippfehler oder ein weiterer Posten darin.</p>
+      <p><b>d)</b> Die Behauptung ist falsch, es gibt drei Fälle: genau eine Lösung (Montag), unendlich viele (Dienstag), keine (Mittwoch). Geometrisch: Zwei Geraden schneiden sich in einem Punkt, oder sie sind identisch, oder sie sind parallel und verschieden. Dienstag und Mittwoch haben dieselbe Steigung $-1$ (gleiches Verhältnis der Koeffizienten), nur der Achsenabschnitt entscheidet zwischen „identisch“ und „parallel“. Der Regelfall ist der Schnittpunkt, die beiden anderen treten auf, sobald eine Gleichung ein Vielfaches der anderen ist.</p>
+      <p class="why">Falle in b): Die Zeile $0 = 0$ als „$x = 0$ und $y = 0$“ lesen. Sie bedeutet nur, dass eine Gleichung wegfällt, und $(0 \mid 0)$ erfüllt $x + y = 10$ gerade nicht.</p>
+    </div>
+  </section>
+</main>
+
+<script>
+// Formulas: every $...$ in the text is rendered by KaTeX, once the vendor script is in.
+addEventListener('load', () => {
+  if (!window.katex) return;
+  const walker = document.createTreeWalker(document.querySelector('.sheet'), NodeFilter.SHOW_TEXT);
+  const nodes = [];
+  while (walker.nextNode()) if (walker.currentNode.nodeValue.includes('$')) nodes.push(walker.currentNode);
+  nodes.forEach(node => {
+    const parts = node.nodeValue.split(/\$([^$]+)\$/);
+    if (parts.length < 3) return;
+    const frag = document.createDocumentFragment();
+    parts.forEach((part, i) => {
+      if (i % 2 === 0) { if (part) frag.appendChild(document.createTextNode(part)); return; }
+      const span = document.createElement('span');
+      try { katex.render(part, span, { throwOnError: false, displayMode: false }); }
+      catch (err) { span.textContent = part; }
+      frag.appendChild(span);
+    });
+    node.parentNode.replaceChild(frag, node);
+  });
+});
+
+// Solutions stay hidden until asked - in print they are always on, on their own page.
+const sol = document.getElementById('sol'), toggle = document.getElementById('toggle');
+toggle.onclick = () => {
+  sol.hidden = !sol.hidden;
+  toggle.textContent = sol.hidden ? 'Lösungen anzeigen' : 'Lösungen verbergen';
+  if (!sol.hidden) sol.scrollIntoView({ behavior: 'smooth', block: 'start' });
+};
+</script>
+</body>
+</html>

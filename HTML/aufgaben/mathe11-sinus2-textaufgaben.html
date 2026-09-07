@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Textaufgaben: Amplitude, Periode, Verschiebung — Doc Alvers Mathe-Labor</title>
+<meta name="description" content="Drei Textaufgaben mit Lösungen zu „Amplitude, Periode, Verschiebung“, KW 50: je eine Aufgabe für die Anforderungsbereiche I, II und III.">
+<link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+<link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+<link rel="stylesheet" href="../morpheus/vendor/katex/katex.min.css">
+<script defer src="../morpheus/vendor/katex/katex.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Raleway:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* Palette and type follow the deck generator (tools/pptx/design_lib.py) - one look for
+   slides, quizzes and worksheets. Light page on purpose: this sheet gets printed. */
+:root{
+  --ink:#0E244E; --body:#2C3C60; --muted:#6E7E9F; --card:#FFFFFF;
+  --orange:#F5C242; --red:#B02418; --green:#799E31; --page:#EEF2F8;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{background:var(--page)}
+body{font-family:Raleway,system-ui,sans-serif;color:var(--body);background:var(--page);
+  line-height:1.45;font-size:17px}
+h1,h2,h3,.afb,.brand,.btn{font-family:Orbitron,system-ui,sans-serif}
+.sheet{max-width:820px;margin:0 auto;padding:32px 22px 60px}
+
+/* header */
+.brand{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--red);font-weight:700}
+h1{font-size:clamp(22px,4.2vw,32px);color:var(--ink);line-height:1.12;margin:10px 0 6px;letter-spacing:-.3px}
+.sub{color:var(--muted);font-size:15px}
+.rules{width:64px;height:3px;margin:16px 0 26px;position:relative}
+.rules::before,.rules::after{content:"";position:absolute;top:0;height:3px}
+.rules::before{left:0;width:44px;background:var(--orange)}
+.rules::after{left:50px;width:14px;background:var(--green)}
+.tools{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 28px}
+.btn{font-size:11px;letter-spacing:1px;color:var(--ink);background:var(--card);cursor:pointer;
+  border:.75px solid rgba(14,36,78,.22);border-radius:4px;padding:8px 12px;text-decoration:none}
+.btn:hover{border-color:var(--red);color:var(--red)}
+
+/* tasks */
+.task{background:var(--card);border:.75px solid rgba(14,36,78,.12);padding:22px 24px 20px;
+  margin:0 0 18px;position:relative}
+.task::before{content:"";position:absolute;left:0;top:0;right:0;height:3px;background:var(--orange)}
+.task.afb2::before{background:var(--green)}
+.task.afb3::before{background:var(--red)}
+.task-head{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:10px}
+.task h2{font-size:17px;color:var(--ink);font-weight:700}
+.afb{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);font-weight:700}
+.afb b{color:var(--ink)}
+.task p{margin:0 0 8px}
+ol.parts{margin:10px 0 0 0;padding-left:0;list-style:none;counter-reset:part}
+ol.parts>li{position:relative;padding-left:30px;margin:0 0 7px;counter-increment:part}
+ol.parts>li::before{content:counter(part,lower-alpha) ")";position:absolute;left:0;top:0;
+  color:var(--red);font-weight:700}
+.hint{color:var(--muted);font-size:15px;margin-top:8px}
+b{font-weight:700;color:var(--ink)}
+
+/* solutions */
+#sol{margin-top:36px}
+#sol[hidden]{display:none}
+#sol h2.big{font-size:20px;color:var(--ink);margin-bottom:14px}
+.sol{background:rgba(255,255,255,.6);border-left:3px solid var(--green);padding:16px 20px;margin:0 0 14px}
+.sol h3{font-size:14px;color:var(--ink);margin-bottom:8px}
+.sol p{margin:0 0 6px}
+.sol .why{color:var(--muted);font-size:15px}
+.katex{font-size:1.02em}
+
+/* print: A4, solutions on their own page so the sheet works without them */
+@media print{
+  @page{size:A4;margin:16mm 16mm 18mm}
+  html,body{background:#fff}
+  .sheet{max-width:none;padding:0}
+  .tools{display:none}
+  body{font-size:14.5px;line-height:1.38}
+  h1{font-size:24px}
+  .rules{margin:12px 0 18px}
+  .task{break-inside:avoid;page-break-inside:avoid;padding:16px 20px 14px;margin-bottom:12px}
+  ol.parts>li{margin-bottom:4px}
+  .hint,.sol .why{font-size:13px}
+  .sol{break-inside:avoid;page-break-inside:avoid;background:#fff;padding:12px 18px;margin-bottom:10px}
+  #sol{display:block!important;break-before:page;page-break-before:always;margin-top:0}
+}
+</style>
+</head>
+<body>
+<main class="sheet">
+  <div class="brand">Doc Alvers Mathe-Labor</div>
+  <h1>Textaufgaben: Amplitude, Periode, Verschiebung</h1>
+  <div class="sub">Berufliches Gymnasium · Klasse 11 · KW 50 · drei Aufgaben, Anforderungsbereiche I bis III</div>
+  <div class="rules"></div>
+  <div class="tools">
+    <button class="btn" id="toggle" type="button">Lösungen anzeigen</button>
+    <a class="btn" href="../svp/mathe/mathe11.html">Zum Plan</a>
+  </div>
+
+  <section class="task afb1">
+    <div class="task-head"><h2>Der Pegel im Hafen</h2><span class="afb">AFB <b>I</b> · Reproduzieren</span></div>
+    <p>Der Wasserstand in einem Hafen schwankt mit den Gezeiten. Er wird beschrieben durch $h(t) = 1{,}5 \cdot \sin\left(\dfrac{\pi}{6}t\right) + 4$, mit $t$ in Stunden nach Mitternacht und $h$ in Metern.</p>
+    <ol class="parts">
+      <li>Gib Amplitude und Mittellage an. Zwischen welchen Werten schwankt der Pegel?</li>
+      <li>Berechne die Periode. Was bedeutet sie für den Hafen?</li>
+      <li>Berechne $h(0)$, $h(3)$ und $h(9)$ und benenne, was jeder Wert beschreibt.</li>
+      <li>Wie lange dauert es vom Hoch- zum Niedrigwasser, und um wie viel sinkt der Pegel dabei?</li>
+    </ol>
+  </section>
+
+  <section class="task afb2">
+    <div class="task-head"><h2>Wie lang ist der Tag?</h2><span class="afb">AFB <b>II</b> · Zusammenhänge herstellen</span></div>
+    <p>Die Tageslänge an einem Ort in Deutschland lässt sich näherungsweise beschreiben durch $L(t) = 4 \cdot \sin\left(\dfrac{2\pi}{365}(t - 80)\right) + 12$. Dabei zählt $t$ die Tage ab dem $1$. Januar, und $L$ ist die Tageslänge in Stunden.</p>
+    <ol class="parts">
+      <li>Bestimme Amplitude, Mittellage und Periode und deute alle drei im Sachzusammenhang.</li>
+      <li>Wie lang ist der längste, wie lang der kürzeste Tag nach diesem Modell?</li>
+      <li>An welchen Tagen ist die Tageslänge genau $12$ Stunden? Rechne die Werte in Kalenderdaten um.</li>
+      <li>Berechne die Tageslänge am $21$. Juni, also für $t = 172$. Passt das Ergebnis zu b)?</li>
+    </ol>
+  </section>
+
+  <section class="task afb3">
+    <div class="task-head"><h2>Größeres b, längere Periode?</h2><span class="afb">AFB <b>III</b> · Reflektieren und Beurteilen</span></div>
+    <p>Ein Mitschüler behauptet: <b>„In $f(x) = \sin(bx)$ macht ein größeres $b$ die Periode größer — mehr $b$, mehr Welle.“</b> Außerdem meint er, $g(x) = -4\sin x$ habe die Amplitude $-4$.</p>
+    <ol class="parts">
+      <li>Vergleiche $\sin x$ und $\sin(2x)$: Wo liegen jeweils die ersten drei Nullstellen, und wie groß ist die Periode?</li>
+      <li>Begründe die Formel $T = \dfrac{2\pi}{b}$ und erkläre, was $b$ mit dem Graphen macht.</li>
+      <li>Wechselstrom aus der Steckdose wird durch $u(t) = 325 \cdot \sin(100\pi t)$ beschrieben, $t$ in Sekunden. Bestimme Amplitude, Periode und Frequenz. Warum spricht man trotzdem von $230$ Volt?</li>
+      <li>Beurteile beide Behauptungen und formuliere je einen Merksatz zu $a$ und zu $b$.</li>
+    </ol>
+  </section>
+
+  <section id="sol" hidden>
+    <h2 class="big">Lösungen</h2>
+
+    <div class="sol">
+      <h3>1 · Der Pegel im Hafen</h3>
+      <p><b>a)</b> Der Faktor vor dem Sinus ist die <b>Amplitude</b>: $a = 1{,}5$ m. Die angehängte $4$ ist die <b>Mittellage</b>. Der Sinus läuft zwischen $-1$ und $1$, also schwankt der Pegel zwischen $4 - 1{,}5 = 2{,}5$ m und $4 + 1{,}5 = 5{,}5$ m.</p>
+      <p><b>b)</b> Periode $T = \dfrac{2\pi}{b}$ mit $b = \dfrac{\pi}{6}$, also $T = \dfrac{2\pi \cdot 6}{\pi} = 12$ Stunden. Alle $12$ Stunden wiederholt sich der Pegelverlauf — im Hafen gibt es also zweimal am Tag Hoch- und Niedrigwasser.</p>
+      <p><b>c)</b> $h(0) = 1{,}5 \cdot \sin 0 + 4 = 4$ m: um Mitternacht steht der Pegel in der Mittellage. $h(3) = 1{,}5 \cdot \sin\dfrac{\pi}{2} + 4 = 1{,}5 + 4 = 5{,}5$ m: um $3$ Uhr ist <b>Hochwasser</b>. $h(9) = 1{,}5 \cdot \sin\dfrac{3\pi}{2} + 4 = -1{,}5 + 4 = 2{,}5$ m: um $9$ Uhr ist <b>Niedrigwasser</b>.</p>
+      <p><b>d)</b> Vom Hoch- zum Niedrigwasser vergeht eine <b>halbe</b> Periode, also $6$ Stunden. Der Pegel sinkt dabei von $5{,}5$ m auf $2{,}5$ m, das sind $3$ m — genau die <b>doppelte Amplitude</b>.</p>
+      <p class="why">Die Amplitude ist der Abstand zur Mittellage, nicht der gesamte Hub. Zwischen tiefstem und höchstem Stand liegen $2a = 3$ m, die Amplitude ist aber $1{,}5$ m.</p>
+    </div>
+
+    <div class="sol">
+      <h3>2 · Wie lang ist der Tag?</h3>
+      <p><b>a)</b> Amplitude $a = 4$ Stunden: so weit weicht die Tageslänge höchstens vom Mittel ab. Mittellage $d = 12$ Stunden: das ist die mittlere Tageslänge über das Jahr. Periode $T = \dfrac{2\pi}{2\pi/365} = 365$ Tage — der Verlauf wiederholt sich jährlich.</p>
+      <p><b>b)</b> Der Sinus wird höchstens $1$ und mindestens $-1$. Längster Tag: $12 + 4 = 16$ Stunden. Kürzester Tag: $12 - 4 = 8$ Stunden.</p>
+      <p><b>c)</b> $L(t) = 12$ verlangt $\sin\left(\dfrac{2\pi}{365}(t - 80)\right) = 0$, also $\dfrac{2\pi}{365}(t - 80) = 0$ oder $= \pi$. Daraus $t = 80$ und $t - 80 = 182{,}5$, also $t = 262{,}5$. Der Tag $80$ ist der $21$. März, der Tag $262$ bis $263$ der $20$. bis $21$. September — die beiden <b>Tagundnachtgleichen</b>.</p>
+      <p><b>d)</b> $\dfrac{2\pi}{365}(172 - 80) = \dfrac{2\pi \cdot 92}{365} \approx 1{,}5837$. Der Sinus davon ist $\approx 0{,}9999$, also $L(172) \approx 4 \cdot 0{,}9999 + 12 \approx 16{,}0$ Stunden. Das passt zu b): der $21$. Juni ist praktisch genau der längste Tag, denn $80 + \dfrac{365}{4} \approx 171$.</p>
+      <p class="why">Die $80$ steht im Term mit Minus und verschiebt nach <b>rechts</b>, also in den März. Wer sie als Verschiebung nach links liest, legt den längsten Tag in den Winter.</p>
+    </div>
+
+    <div class="sol">
+      <h3>3 · Größeres b, längere Periode?</h3>
+      <p><b>a)</b> $\sin x$ hat Nullstellen bei $0$, $\pi$, $2\pi$ und die Periode $2\pi$. $\sin(2x)$ wird null, wenn $2x = 0$, $\pi$, $2\pi$ ist, also bei $0$, $\dfrac{\pi}{2}$, $\pi$ — die Periode ist $\pi$. Das größere $b$ <b>halbiert</b> die Periode, die Behauptung ist falsch.</p>
+      <p><b>b)</b> Der Sinus durchläuft eine volle Schwingung, während sein Argument von $0$ bis $2\pi$ läuft. Hier ist das Argument $bx$, also muss $bx$ den Wert $2\pi$ erreichen: $x = \dfrac{2\pi}{b}$. Ein großes $b$ lässt das Argument schneller wachsen und <b>staucht</b> den Graphen in $x$-Richtung; ein $b$ zwischen $0$ und $1$ zieht ihn auseinander.</p>
+      <p><b>c)</b> Amplitude $325$ Volt, das ist der Scheitelwert. Periode: $T = \dfrac{2\pi}{100\pi} = 0{,}02$ s. Frequenz: $f = \dfrac{1}{T} = 50$ Hertz, also $50$ Schwingungen je Sekunde. Die $230$ Volt sind nicht der Scheitelwert, sondern der <b>Effektivwert</b> $\dfrac{325}{\sqrt{2}} \approx 229{,}8$ Volt — die Spannung, die als Gleichspannung dieselbe Leistung brächte.</p>
+      <p><b>d)</b> Beide Behauptungen sind falsch. Merksatz zu $a$: <b>$a$ streckt in der Höhe</b>, die Amplitude ist $|a|$; ein negatives $a$ spiegelt den Graphen an der Mittellage, macht ihn aber nicht kleiner. Merksatz zu $b$: <b>$b$ staucht in der Breite</b>, und zwar umgekehrt proportional — doppeltes $b$ heißt halbe Periode.</p>
+      <p class="why">$a$ und $b$ wirken in verschiedene Richtungen und gegenläufig. $a$ wirkt direkt auf die Höhe, $b$ <b>umgekehrt</b> auf die Breite — deshalb steht $b$ im Nenner der Periodenformel.</p>
+    </div>
+  </section>
+</main>
+
+<script>
+// Formulas: every $...$ in the text is rendered by KaTeX, once the vendor script is in.
+addEventListener('load', () => {
+  if (!window.katex) return;
+  const walker = document.createTreeWalker(document.querySelector('.sheet'), NodeFilter.SHOW_TEXT);
+  const nodes = [];
+  while (walker.nextNode()) if (walker.currentNode.nodeValue.includes('$')) nodes.push(walker.currentNode);
+  nodes.forEach(node => {
+    const parts = node.nodeValue.split(/\$([^$]+)\$/);
+    if (parts.length < 3) return;
+    const frag = document.createDocumentFragment();
+    parts.forEach((part, i) => {
+      if (i % 2 === 0) { if (part) frag.appendChild(document.createTextNode(part)); return; }
+      const span = document.createElement('span');
+      try { katex.render(part, span, { throwOnError: false, displayMode: false }); }
+      catch (err) { span.textContent = part; }
+      frag.appendChild(span);
+    });
+    node.parentNode.replaceChild(frag, node);
+  });
+});
+
+// Solutions stay hidden until asked - in print they are always on, on their own page.
+const sol = document.getElementById('sol'), toggle = document.getElementById('toggle');
+toggle.onclick = () => {
+  sol.hidden = !sol.hidden;
+  toggle.textContent = sol.hidden ? 'Lösungen anzeigen' : 'Lösungen verbergen';
+  if (!sol.hidden) sol.scrollIntoView({ behavior: 'smooth', block: 'start' });
+};
+</script>
+</body>
+</html>
