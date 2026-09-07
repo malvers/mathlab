@@ -1,0 +1,1069 @@
+<!doctype html>
+<!-- =====================================================================
+     DREHBUCH-TEMPLATE  —  so entsteht jede Drehbuchseite
+
+     Verbindlich seit dem Kovarianz-Film (29.08.2026). NICHT von vorn bauen:
+     diese Datei kopieren, ausraeumen, fuellen.
+
+         cp HTML/drehbuch/_template.html HTML/drehbuch/<lab>.html
+
+     Warum in HTML/drehbuch/ und nicht als Markdown: serve.py liefert nur HTML/
+     aus. Nur so ist das Drehbuch unter
+     http://localhost:8765/drehbuch/<lab>.html erreichbar und wird wie jedes Lab
+     hart neu geladen.
+
+     WAS ZU ERSETZEN IST, in dieser Reihenfolge — alles ist mit TODO markiert:
+
+      1  <title> und <h1>    kurzer, poetischer Titel; kein Untertitel
+      2  .lede + .status     ein Satz, was das ist; Stand der Produktion
+      3  <dl class="meta">   Lab · Sprecherin · Aufnahme · Szenen · Laufzeit
+      4  .thesis             DER HERO. Ein kleiner, ruhiger Canvas, der das Sujet
+                             des Films zeigt — echt gerechnet, nicht gemalt.
+                             Daneben das Blockquote: die Leitidee in EINEM Satz,
+                             darunter die eine Frage, die der Film beantwortet.
+      5  ARC (im Script)     der dramaturgische Bogen als Kette von Stationen:
+                             aufbauen -> umdrehen -> brechen. Kaputtmachen gehoert
+                             ans Ende und ist der lehrreichste Teil.
+                             key: true = die tragenden Stationen.
+      6  SCENES (im Script)  EINE Datenquelle fuer Zeitleiste, Karten und
+                             Sprechertext. Pro Szene: n, s (geplante Sekunden),
+                             t (Titel), img (was im Bild passiert), aha (der
+                             Gedanke, der fallen soll — noch nicht der Wortlaut).
+                             core: true = Kernszene, wird nicht gekuerzt.
+                             cut:  true = Notbremse, Kuerzungskandidat.
+                             card: true = laeuft nicht im Lab, sondern auf einer
+                             eigenen Karte.
+      7  <ol class="rules">  didaktische Leitplanken, bindend fuer den
+                             Sprechertext. Immer dabei: nie eine Formel ohne
+                             vorher gezeigtes Bild; ein neuer Begriff pro Szene;
+                             verbotene Vokabeln beim Namen nennen; nichts
+                             behaupten, was das Bild nicht hergibt.
+      8  Zeitbudget-Prosa    ehrlich rechnen und das Musikbett dagegenhalten.
+      9  <ul class="notes">  Choreografie: Startzustand, localStorage loeschen,
+                             Nachlaufzeiten, welche Szene maus- oder
+                             timing-kritisch ist.
+     10  Abschnitt F         bewusst weggelassen — was ein Teil 2 koennte.
+     11  Hero-Canvas         das Sujet zeichnen. Klick = neuer Wurf.
+     12  SAY:START/SAY:END   NICHT von Hand fuellen. Der Wortlaut kommt aus
+                             videopipeline/<lab>/narration.mjs ueber
+                             videopipeline/<lab>/sync-drehbuch.mjs — dort den Pfad
+                             auf die eigene Seite setzen und nach JEDER
+                             Textaenderung neu laufen lassen. Damit bleibt
+                             narration.mjs die einzige Quelle fuer den Wortlaut,
+                             und die gemessenen Sekunden aus durs.json
+                             ueberschreiben die geplanten in der Zeitleiste.
+
+     REGELN, die man beim Fuellen leicht vergisst:
+     - Schriften und Farben aus dem LAB uebernehmen, nicht aus einem Fremddesign.
+       Die Akzentfarben muessen dieselbe Bedeutung tragen wie im Lab.
+     - Szenen als Karten mit zwei Spalten (Bild | Aha), nie als Tabelle.
+     - In der Zeitleiste ist jede Szene so breit, wie sie lang ist.
+     - Schrift eher zu gross als zu klein. Auch die Orbitron-Kleinlabels.
+     - Statusfarben satt, nicht als gedaempfter Wash.
+     - Runde 1 ist der Plot allein. Doc liest und gibt frei. Erst DANACH entstehen
+       Solitas Saetze. Nie beides auf einmal liefern.
+     ===================================================================== -->
+
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+
+<style>
+/* minimal reset - the artifact host used to provide this */
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; min-height: 100vh; }
+img, canvas, svg { display: block; max-width: 100%; }
+button, input { font: inherit; }
+:focus-visible { outline: 2px solid #00d2ff; outline-offset: 2px; }
+</style>
+<title>Niemand hat das gezeichnet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&family=Outfit:wght@200;300;400;600&display=swap">
+
+<style>
+/* Palette and faces are the lab's own (reaction-diffusion.html): Orbitron +
+   Outfit on the lab's near-black ground #000616, cyan for every control the
+   film touches, and --fire for the pattern itself - the lab paints v with its
+   "Feuer" ramp, so orange means "there is something here" on both pages.
+   Single-theme on purpose - this is the lab's world. */
+:root {
+    --ground:      #081428;
+    --ground-deep: #050e1c;
+    --surface:     #0c1c3a;
+    --surface-2:   #0e244e;
+    --line:        #1c3565;
+    --line-soft:   #16294d;
+
+    --ink:         #e6eefa;
+    --ink-dim:     #b3c5de;
+    --ink-faint:   #8ba1c0;
+
+    --cyan:        #00d2ff;
+    --lambda:      #f5c242;
+    --phi:         #799e31;
+    --violet:      #c07fe8;
+    --red:         #b02418;
+    --fire:        #ff7a14;
+
+    --step: clamp(0.9rem, 0.55rem + 1.1vw, 1.5rem);
+}
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    background: var(--ground);
+    background-image:
+        radial-gradient(1100px 620px at 12% -8%, #0f2a55 0%, transparent 62%),
+        radial-gradient(900px 520px at 92% 4%, #10203f 0%, transparent 58%);
+    background-attachment: fixed;
+    color: var(--ink);
+    font-family: 'Outfit', system-ui, sans-serif;
+    font-weight: 300;
+    font-size: 1.1rem;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+}
+
+.wrap {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: clamp(1.6rem, 4vw, 4rem) clamp(1.1rem, 4vw, 2.6rem) 6rem;
+}
+
+/* ---------- shared type ---------- */
+.eyebrow {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+}
+
+h1, h2, h3 { font-family: 'Orbitron', sans-serif; text-wrap: balance; margin: 0; }
+
+h1 {
+    font-size: clamp(2rem, 1.2rem + 3.4vw, 3.4rem);
+    font-weight: 700;
+    line-height: 1.08;
+    letter-spacing: -0.01em;
+    margin: 0.5rem 0 0;
+}
+
+h2 {
+    font-size: clamp(1.05rem, 0.9rem + 0.6vw, 1.32rem);
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    color: var(--ink);
+}
+
+p { margin: 0; }
+
+em { font-style: italic; color: #eaf2fd; }
+strong { font-weight: 600; color: #f2f7ff; }
+
+/* mathematical symbols, set apart without a formula engine */
+.m {
+    font-family: 'Outfit', system-ui, sans-serif;
+    font-style: italic;
+    font-weight: 400;
+    color: var(--cyan);
+    white-space: nowrap;
+}
+.m.l { color: var(--lambda); }
+.m.g { color: var(--phi); }
+
+/* ---------- header ---------- */
+header { margin-bottom: clamp(1.8rem, 4vw, 3rem); }
+
+.status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.74rem;
+    font-weight: 500;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--lambda);
+    border: 1px solid #4a3a15;
+    background: #1b1607;
+    border-radius: 2px;
+    padding: 0.34rem 0.7rem;
+    margin-top: 1.1rem;
+}
+.status::before {
+    content: "";
+    width: 5px; height: 5px;
+    background: var(--lambda);
+    border-radius: 50%;
+}
+
+.lede {
+    margin-top: 1.1rem;
+    max-width: 60ch;
+    color: var(--ink-dim);
+    font-size: 1.18rem;
+}
+
+.meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 2rem;
+    margin-top: 1.6rem;
+    padding-top: 1.2rem;
+    border-top: 1px solid var(--line-soft);
+}
+.meta div { display: flex; flex-direction: column; gap: 0.15rem; padding: 0.4rem 0; }
+.meta dt {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.74rem;
+    font-weight: 500;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+}
+.meta dd { margin: 0; font-size: 1.02rem; color: var(--ink); }
+.meta a { color: var(--cyan); text-decoration: none; border-bottom: 1px solid #05506b; }
+.meta a:hover, .meta a:focus-visible { border-bottom-color: var(--cyan); }
+
+/* ---------- hero canvas + thesis ---------- */
+.thesis {
+    display: grid;
+    grid-template-columns: minmax(0, 300px) minmax(0, 1fr);
+    gap: clamp(1.2rem, 3vw, 2.6rem);
+    align-items: center;
+    margin: clamp(1.6rem, 4vw, 2.6rem) 0 clamp(2.4rem, 6vw, 4rem);
+    padding: clamp(1.2rem, 3vw, 2rem);
+    background: linear-gradient(160deg, var(--surface) 0%, var(--ground-deep) 100%);
+    border: 1px solid var(--line);
+    border-radius: 3px;
+}
+@media (max-width: 700px) { .thesis { grid-template-columns: 1fr; } }
+
+#stage {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    display: block;
+    border-radius: 2px;
+    background: #04101f;
+}
+
+.thesis blockquote {
+    margin: 0;
+    font-size: clamp(1.15rem, 0.95rem + 1vw, 1.6rem);
+    line-height: 1.42;
+    font-weight: 200;
+    color: #eef4fd;
+    text-wrap: balance;
+}
+.thesis blockquote strong { font-weight: 600; }
+.thesis .after {
+    margin-top: 1.1rem;
+    color: var(--ink-dim);
+    font-size: 1.06rem;
+    max-width: 54ch;
+}
+
+/* ---------- section frame ---------- */
+section { margin-top: clamp(2.6rem, 6vw, 4.4rem); }
+
+.head {
+    display: flex;
+    align-items: baseline;
+    gap: 0.9rem;
+    padding-bottom: 0.7rem;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 1.5rem;
+}
+.head .n {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.84rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: var(--cyan);
+}
+.head .note { margin-left: auto; font-size: 0.9rem; color: var(--ink-faint); }
+
+.prose { max-width: 66ch; color: var(--ink-dim); display: grid; gap: 0.85rem; }
+.prose strong { color: #eaf2fd; }
+
+/* ---------- the arc ---------- */
+.arc {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    align-items: stretch;
+    margin-bottom: 1.5rem;
+}
+.arc span {
+    flex: 1 1 auto;
+    min-width: 92px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.76rem;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    text-align: center;
+    padding: 0.85rem 0.5rem;
+    background: var(--surface);
+    border: 1px solid var(--line-soft);
+    border-top: 2px solid var(--stop, var(--line));
+    color: var(--ink-dim);
+    text-wrap: balance;
+    line-height: 1.4;
+}
+.arc span.key { color: #eef4fd; background: var(--surface-2); }
+
+/* ---------- timeline ---------- */
+.timeline {
+    display: flex;
+    width: 100%;
+    height: 54px;
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-bottom: 0.7rem;
+}
+.timeline i {
+    position: relative;
+    display: block;
+    border-right: 1px solid var(--ground-deep);
+    background: var(--lambda);
+    font-style: normal;
+    transition: background 0.15s;
+}
+.timeline i:last-child { border-right: 0; }
+.timeline i.core { background: var(--phi); }
+.timeline i.cut  { background: var(--red); }
+.timeline i::after {
+    content: attr(data-n);
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.74rem;
+    font-weight: 700;
+    color: #1a1305;
+}
+.timeline i.core::after { color: #0d1a06; }
+.timeline i.cut::after  { color: #ffdcd7; font-weight: 700; }
+
+.legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.4rem;
+    font-size: 0.87rem;
+    color: var(--ink-faint);
+}
+.legend b { font-weight: 400; color: var(--ink-dim); }
+.legend span { display: inline-flex; align-items: center; gap: 0.42rem; }
+.legend s { width: 11px; height: 11px; border-radius: 2px; text-decoration: none; display: inline-block; }
+
+/* ---------- scenes ---------- */
+.scenes { display: grid; gap: 0.7rem; }
+
+.scene {
+    display: grid;
+    grid-template-columns: 3.6rem minmax(0, 1fr);
+    gap: 0 1.1rem;
+    padding: 1.4rem 1.55rem 1.5rem;
+    background: var(--surface);
+    border: 1px solid var(--line-soft);
+    border-left: 2px solid var(--lambda);
+    border-radius: 2px;
+}
+.scene.core { border-left-color: var(--phi); background: linear-gradient(90deg, #16240f 0%, var(--surface) 34%); }
+.scene.cut  { border-left-color: var(--red); }
+
+.scene .idx {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--lambda);
+    font-variant-numeric: tabular-nums;
+    padding-top: 0.1rem;
+}
+.scene.core .idx { color: var(--phi); }
+.scene.cut .idx  { color: #c9503f; }
+
+.scene .top {
+    display: flex;
+    align-items: baseline;
+    gap: 0.8rem;
+    flex-wrap: wrap;
+    margin-bottom: 0.7rem;
+}
+.scene h3 { font-size: 1.16rem; font-weight: 700; letter-spacing: 0.01em; color: #f0f6ff; }
+
+.tag {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.68rem;
+    font-weight: 500;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    padding: 0.2rem 0.45rem;
+    border-radius: 2px;
+    border: 1px solid;
+}
+.tag.core { color: #0d1a06; border-color: var(--phi); background: var(--phi); }
+.tag.cut  { color: #ffdcd7; border-color: var(--red); background: var(--red); }
+
+.secs {
+    margin-left: auto;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: var(--ink-faint);
+    font-variant-numeric: tabular-nums;
+}
+
+.body {
+    display: grid;
+    grid-template-columns: minmax(0, 1.08fr) minmax(0, 1fr);
+    gap: 0.6rem 1.6rem;
+}
+@media (max-width: 720px) { .body { grid-template-columns: 1fr; gap: 1rem; } }
+
+.body > div { display: grid; gap: 0.34rem; align-content: start; }
+.body h4 {
+    margin: 0;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.84rem;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+}
+.body p { font-size: 1.06rem; line-height: 1.66; color: var(--ink-dim); }
+.body .aha { border-left: 1px solid var(--line); padding-left: 1.6rem; }
+@media (max-width: 720px) { .body .aha { border-left: 0; padding-left: 0; border-top: 1px solid var(--line); padding-top: 0.9rem; } }
+.body .aha p { color: var(--ink); }
+
+/* what Solita actually says - generated from narration.mjs, never hand-edited */
+.say {
+    margin-top: 1.1rem;
+    padding: 0.95rem 1.2rem;
+    background: #0a1830;
+    border: 1px solid var(--line-soft);
+    border-left: 2px solid var(--cyan);
+    border-radius: 2px;
+}
+.say h4 {
+    margin: 0 0 0.45rem;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.64rem;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--cyan);
+}
+.say p {
+    margin: 0;
+    font-size: 1.06rem;
+    line-height: 1.62;
+    color: var(--ink);
+}
+.say .pause {
+    display: inline-block;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.66rem;
+    font-weight: 500;
+    color: var(--lambda);
+    background: #241c07;
+    border: 1px solid #4a3a15;
+    border-radius: 2px;
+    padding: 0.05rem 0.4rem;
+    margin: 0 0.22rem;
+    vertical-align: 0.08em;
+    white-space: nowrap;
+}
+.say .beat {
+    display: inline-block;
+    width: 0.5em;
+    height: 0.5em;
+    margin: 0 0.1em;
+    background: radial-gradient(circle, var(--cyan) 1.6px, transparent 1.8px);
+    vertical-align: 0.05em;
+    opacity: 0.55;
+}
+.say .spell {
+    border-bottom: 1px dotted var(--ink-faint);
+    letter-spacing: 0.12em;
+}
+
+/* ---------- rules / lists ---------- */
+.rules { display: grid; gap: 0.6rem; counter-reset: r; max-width: 74ch; }
+/* the number is positioned, not a grid cell - as a grid item the bare text
+   after the bold lead-in became its own item and fell into the 1.8rem column */
+.rules li {
+    list-style: none;
+    position: relative;
+    padding-left: 2.8rem;
+    font-size: 1.05rem;
+    color: var(--ink-dim);
+}
+.rules li::before {
+    counter-increment: r;
+    content: counter(r, decimal-leading-zero);
+    position: absolute;
+    left: 0;
+    top: 0.28rem;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.84rem;
+    font-weight: 500;
+    color: var(--violet);
+}
+.rules { padding: 0; margin: 0; }
+
+.notes { display: grid; gap: 0.75rem; max-width: 74ch; padding: 0; margin: 0; }
+.notes li {
+    list-style: none;
+    font-size: 1.05rem;
+    color: var(--ink-dim);
+    padding-left: 1.1rem;
+    border-left: 1px solid var(--line);
+}
+.notes strong { color: #eaf2fd; }
+
+code {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 0.85em;
+    color: var(--cyan);
+    background: #0a1a33;
+    border: 1px solid var(--line-soft);
+    border-radius: 2px;
+    padding: 0.06em 0.34em;
+}
+
+/* ---------- budget ---------- */
+.budget {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1px;
+    background: var(--line-soft);
+    border: 1px solid var(--line-soft);
+    border-radius: 2px;
+    margin-bottom: 1.5rem;
+}
+.budget div { background: var(--surface); padding: 1rem 1.1rem; display: grid; gap: 0.28rem; }
+.budget dt {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.74rem;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+}
+.budget dd {
+    margin: 0;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--cyan);
+    font-variant-numeric: tabular-nums;
+}
+.budget dd small { display: block; font-family: 'Outfit', sans-serif; font-size: 0.78rem; font-weight: 300; color: var(--ink-faint); letter-spacing: 0; margin-top: 0.2rem; }
+
+.solved { color: var(--phi); }
+
+/* ---------- footer ---------- */
+footer {
+    margin-top: clamp(2.6rem, 6vw, 4.4rem);
+    padding-top: 1.6rem;
+    border-top: 1px solid var(--line);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem 2rem;
+    align-items: baseline;
+}
+footer p { font-size: 1.05rem; color: var(--ink-dim); max-width: 58ch; }
+footer .sig { margin-left: auto; }
+
+@media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+}
+</style>
+    <link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+</head>
+<body>
+<div class="wrap">
+
+<header>
+    <p class="eyebrow">Doc Alvers Mathe-Labor · Videopipeline</p>
+    <h1>Niemand hat das gezeichnet</h1>
+    <p class="lede">Der Plot für das Demovideo zum Reaction-Diffusion-Labor:
+        ein Tropfen, vier Regeln, und ein Muster, das sich selbst baut — bis wir
+        ihm die eine Bedingung wegnehmen, an der alles hängt.</p>
+    <p class="status">Gedreht · 14 Szenen · 5:32 · 1440p</p>
+
+    <dl class="meta">
+        <div><dt>Lab</dt><dd><a href="https://docalvers.de/reaction-diffusion.html">reaction-diffusion.html</a></dd></div>
+        <div><dt>Sprecherin</dt><dd>Solita · de-DE-Studio</dd></div>
+        <div><dt>Aufnahme</dt><dd>1440p · Playwright</dd></div>
+        <div><dt>Szenen</dt><dd>14 gedreht · eine gestrichen</dd></div>
+        <div><dt>Laufzeit</dt><dd>5:32 · gemessen</dd></div>
+    </dl>
+</header>
+
+<div class="thesis">
+    <canvas id="stage" width="600" height="600" role="img"
+            aria-label="Ein kleines Gray-Scott-System, das live rechnet: aus einem Tropfen in der Mitte wächst ein Labyrinth aus orangen Adern."></canvas>
+    <div>
+        <blockquote>Ein Muster braucht keinen Bauplan. Es braucht zwei Stoffe,
+            die <strong>verschieden schnell</strong> wandern.</blockquote>
+        <p class="after">Der ganze Film ist die Antwort auf eine einzige Frage:
+            <em>Woher weiß eine Zelle in der Haut eines Leoparden, dass sie
+            dunkel werden soll?</em></p>
+    </div>
+</div>
+
+<section>
+    <div class="head"><span class="n">A</span><h2>Der dramaturgische Bogen</h2></div>
+    <div class="arc" id="arc"></div>
+    <div class="prose">
+        <p>Die ersten beiden Szenen zeigen nur, <em>dass</em> es passiert: aus einem
+           Tropfen wird ein Labyrinth, und niemand hat es gezeichnet. Szenen 3 bis 5
+           räumen auf, wie wenig dahintersteckt — zwei Stoffe, vier Regeln, zwei
+           Regler. Szene 6 dreht um: dieselben vier Regeln, zwei Zahlen anders, und
+           man steht in einer anderen Welt. Ab Szene 10 wird gefragt, warum es
+           überhaupt Muster gibt statt Einheitsbrei.</p>
+        <p>Und dann wird es kaputtgemacht. <strong>Szene 11 nimmt genau die eine
+           Bedingung weg, von der die Antwort handelt</strong> — den
+           Geschwindigkeitsunterschied zwischen den beiden Stoffen. Das Muster hält bei 0,100, hält noch bei 0,110, und stirbt bei 0,115 innerhalb von zwei
+           Sekunden. Die Grenze ist scharf, und man sieht sie. Erst danach darf der
+           Name Turing fallen.</p>
+    </div>
+</section>
+
+<section>
+    <div class="head"><span class="n">B</span><h2>Die 15 Szenen</h2>
+        <span class="note" id="tl-note">Breite = Sprechzeit</span></div>
+    <div class="timeline" id="timeline"></div>
+    <div class="legend">
+        <span><s style="background:#799e31"></s><b>Kernszene — wird nicht gekürzt</b></span>
+        <span><s style="background:#b02418"></s><b>Notbremse, falls der Schnitt zäh wirkt</b></span>
+        <span><s style="background:#f5c242"></s><b>Regelszene</b></span>
+    </div>
+    <div class="scenes" id="scenes" style="margin-top:1.5rem"></div>
+</section>
+
+<section>
+    <div class="head"><span class="n">C</span><h2>Didaktische Leitplanken</h2>
+        <span class="note">bindend für den Sprechertext</span></div>
+    <ol class="rules">
+        <li><strong>Nie eine Formel ohne vorher gezeigtes Bild.</strong> Erst sieht
+            man es, dann heißt es so.</li>
+        <li><strong>Ein neuer Begriff pro Szene.</strong> Maximal. Lieber eine Szene mehr.</li>
+        <li><strong>Drei Fachwörter im ganzen Film, mehr nicht:</strong>
+            <em>Diffusion</em> (Szene 3), <em>Autokatalyse</em> (Szene 4),
+            <em>Aktivator</em> (Szene 10). Jedes fällt erst, nachdem man die Sache
+            gesehen hat.</li>
+        <li><strong>Verbotene Vokabeln.</strong> <em>Turing-Muster</em> erst ab
+            Szene 13 — vorher hat das Ding keinen Namen verdient, sonst klingt
+            Szene 2 wie ein Zitat statt wie eine Entdeckung. Nie <em>die Natur
+            rechnet</em>. Nie <em>Chemikalie A und B</em>: es sind <span class="m">u</span>
+            und <span class="m">v</span>, und die heißen im Film <em>Nahrung</em>
+            und <em>Farbe</em>.</li>
+        <li><strong>Zahlen nur, wo die Aussage an ihnen hängt.</strong> FEED und KILL
+            werden beim Ziehen nie vorgelesen — sie springen zu schnell. Vorgelesen
+            werden genau zwei Werte, die aus Szene 11: <strong>0,110 hält, 0,115
+            stirbt.</strong></li>
+        <li><strong>Der Bremser ist kein zweiter Stoff.</strong> Gebremst wird durch
+            <em>aufgebrauchte</em> Nahrung. Also nie „der Hemmstoff wandert
+            schneller“, sondern: <strong>die Nahrung wandert schneller als das, was
+            sie verbraucht.</strong> In diesem Modell ist es doppelt so schnell.</li>
+        <li><strong>Das Labor rechnet Gray-Scott, nicht Turings eigenes Modell.</strong>
+            Das gehört in Szene 13 gesagt, in einem Halbsatz: Turing hat das Prinzip
+            hergeleitet, Gray und Scott haben dreißig Jahre später eine konkrete
+            Reaktion angegeben, die es zeigt. Wer das unterschlägt, verkauft eine
+            Simulation als historisches Dokument.</li>
+        <li><strong>Nichts behaupten, was das Bild nicht hergibt.</strong> Szene 11
+            ist die Szene dafür: Die Aussage „ohne Geschwindigkeitsunterschied kein
+            Muster“ wird nicht gesagt, sondern vorgeführt. Und Szene 14 sagt <em>das
+            Modell sagt voraus</em> — nicht <em>es gilt immer</em>.</li>
+    </ol>
+</section>
+
+<section>
+    <div class="head"><span class="n">D</span><h2>Zeitbudget</h2>
+        <span class="note solved">gelöst</span></div>
+    <dl class="budget" id="budget"></dl>
+    <div class="prose">
+        <p>Fünfzehn Szenen, 280 s geplante Sprache, dazu 1,6 s Luft je Szene:
+           <strong>rund 5:04</strong>. Das ist für ein Demovideo an der oberen
+           Kante. Die beiden Notbremsen — Szene 8 (Pinsel) und Szene 9 (Rand) —
+           tragen zusammen 30 s; fallen sie, landet der Film bei
+           <strong>4:34</strong>, und keine Kernaussage fehlt.</p>
+        <p>Teil 1 von <code>Infinity_6min.m4a</code> ist <strong>nahtlos
+           loopbar</strong> (loopStart 21,220 s, loopEnd 163,998 s) — das Bett
+           lässt sich auf jede Länge rendern, die 360 s der Datei sind keine
+           Obergrenze. Beide Varianten passen also ohne Schnitt am Ton.</p>
+    </div>
+</section>
+
+<section>
+    <div class="head"><span class="n">E</span><h2>Choreografie-Notizen</h2>
+        <span class="note">für die Aufnahme</span></div>
+    <ul class="notes">
+        <li><strong>Startzustand:</strong> RESET, Preset <em>Wirbel</em>, Farbe
+            <em>Feuer</em>, PINSEL 8. Dieses Lab legt nichts in
+            <code>localStorage</code> ab — geprüft, es startet immer gleich. Ein
+            frischer Context genügt trotzdem, wegen des Zoom-Zustands der Leiste.</li>
+
+        <li><strong>GESCHWINDIGKEIT ist die wichtigste Einstellung der ganzen
+            Aufnahme.</strong> Auf 1 braucht <em>Wirbel</em> 5.050 Rechenschritte,
+            bis die halbe Fläche bedeckt ist — das sind bei 60 Bildern je Sekunde
+            <strong>84 Sekunden Leerlauf</strong>. Auf 10 sind es 8,4 s. Der ganze
+            Film läuft auf <strong>10</strong>, mit genau einer Ausnahme (Szene 11).
+            Gemessen auf dem 160×120-Gitter, das ein Canvas von rund 640×480 ergibt.</li>
+
+        <li><strong>Anlaufzeiten je Preset</strong>, Schritte bis zur halben Fläche
+            und daraus Sekunden bei GESCHWINDIGKEIT 10 — für Szene 6 die schnellen
+            nehmen, sonst steht das Bild:<br>
+            Schlangen 1.800 / <strong>3,0 s</strong> · Koralle 2.650 / <strong>4,4 s</strong> ·
+            Chaos 2.750 / <strong>4,6 s</strong> · Pulsierend 4.400 / 7,3 s ·
+            Wellen 5.000 / 8,3 s · Wirbel 5.050 / 8,4 s ·
+            Nebel 6.100 / 10,2 s · Flecken 6.150 / 10,3 s.</li>
+
+        <li><strong>Szene 11 läuft zwingend auf GESCHWINDIGKEIT 1.</strong> Bei 10
+            dauert der Zusammenbruch <strong>0,2 s</strong> und ist im Schnitt nicht
+            zu sehen. Bei 1 sind es 2,3 s, und sie haben eine Dramaturgie: eine
+            Sekunde lang hält das Muster (die Deckung steigt sogar noch von 66,7 auf
+            69,1 %), dann fällt sie zwischen Sekunde 1,3 und 2,0 von 64 % auf 3 %.
+            <strong>Diese eine Sekunde Stille vor dem Einsturz ist die Szene.</strong>
+            Nicht wegschneiden.</li>
+
+        <li><strong>Die Schwelle ist einen Rasterschritt breit.</strong> Bei
+            DIFFUSION U = 0,160 hält ein fertiges Muster bis DIFFUSION V =
+            <strong>0,110</strong> und stirbt bei <strong>0,115</strong>. Der Regler
+            hat Schrittweite 0,005 — dichter kommt man nicht heran. Vorher einzeln
+            0,090 und 0,100 anfahren und je zwei Sekunden stehen lassen: erst dadurch
+            wird sichtbar, dass die Grenze scharf ist und nicht ausgeblendet wird.</li>
+
+        <li><strong>Ein fertiges Muster ist zäher als ein neues.</strong> Aus dem
+            Tropfen heraus entsteht schon ab DIFFUSION V = 0,100 gar nichts mehr,
+            während ein bestehendes Muster bei demselben Wert weiterlebt. Falls die
+            Szene knapp wird: <em>das</em> wäre der Halbsatz, der sie rettet — aber
+            nur, wenn Zeit ist, sonst weglassen.</li>
+
+        <li><strong>Szene 12, zurück:</strong> DIFFUSION V auf 0,080, dann
+            <kbd>SÄEN</kbd>. Gemessen ab dem Klick: nach 2.373 Schritten wieder 10 %
+            Fläche, nach 5.809 Schritten 50 % — bei GESCHWINDIGKEIT 10 also
+            <strong>4,0 s und 9,7 s</strong>. Solita darf über die ersten vier
+            Sekunden sprechen, das Bild ist so lange fast leer.</li>
+
+        <li><strong>Nachlauf:</strong> In Szene 2, 6 und 15 läuft das Bild weiter,
+            wenn schon nichts mehr gesagt wird — das ist Absicht, die Simulation ist
+            nie fertig. Am Ende auf dem Dunkelblau des Labors stehen bleiben,
+            <strong>nie auf Schwarz</strong>.</li>
+
+        <li><strong>Mauskritisch ist nur Szene 8</strong> (mit dem Pinsel mitten ins
+            Muster malen). <strong>Als erstes proben.</strong> Szene 11 ist
+            timingkritisch, aber nur am Regler — das lässt sich wiederholen.</li>
+
+        <li>Der Schrittzähler unten rechts steht bei 25 % Deckkraft im Bild. In
+            Szene 2 ist er das Beweisstück (er läuft auf über 5.000), sonst fällt er
+            nicht auf. Nicht ausblenden.</li>
+
+        <li><strong>Vor dem Dreh Cmd-Shift-R.</strong> Sechs der sechzehn Presets
+            waren leer und sind neu gesetzt — mit altem Cache klickt der Film in
+            Szene 6 ins Nichts.</li>
+
+        <li>Der lokale Server klebt ein rotes <strong>LOCAL</strong>-Schild in die Seite.
+            Die Aufnahme muss <code>#local-badge</code> vor dem ersten Bild entfernen.</li>
+    </ul>
+</section>
+
+<section>
+    <div class="head"><span class="n">F</span><h2>Bewusst weggelassen</h2>
+        <span class="note">Kandidaten für Teil 2</span></div>
+    <div class="prose">
+        <p><strong>Die beiden Differentialgleichungen.</strong> Sie stehen im Code
+           und passen in zwei Zeilen, und genau deshalb wäre die Versuchung groß.
+           Aber der Film verkauft die These, dass <em>vier Sätze auf Deutsch</em>
+           reichen — eine Formel daneben würde sie widerlegen, ohne etwas zu
+           erklären.</p>
+        <p><strong>Der Laplace-Operator</strong> und das 3×3-Gewicht, mit dem das Lab
+           „verlaufen“ rechnet. Interessant, aber es beantwortet eine Frage, die im
+           Film niemand stellt.</p>
+        <p><strong>Die Belousov-Zhabotinsky-Reaktion.</strong> Der berühmteste
+           Farbwechsel der Chemie — nur oszilliert er in der Zeit, statt Muster im
+           Raum zu bilden. Er gehört in einen Film, nicht in diesen.</p>
+        <p><strong>Kondos Kaiserfische.</strong> Dass man an einem lebenden Tier
+           zusehen kann, wie die Streifen beim Wachsen umgeordnet werden, ist der
+           schönste Beleg überhaupt — und ein eigener Film. Hier wäre es die zweite
+           Pointe nach der Pointe.</p>
+        <p><strong>Die Stabilitätsanalyse</strong>, aus der Turings Bedingung
+           tatsächlich folgt. Der Film zeigt die Bedingung, statt sie herzuleiten.
+           Das ist der ehrliche Verzicht: Wir haben sie gemessen, nicht bewiesen.</p>
+    </div>
+</section>
+
+<footer>
+    <p><strong>Nächster Schritt:</strong> Doc liest den Plot und gibt frei. Erst
+       danach entsteht Solitas Wortlaut in
+       <code>videopipeline/reaction-diffusion/narration.mjs</code> und wird über
+       <code>sync-drehbuch.mjs</code> hier eingespielt — nie beides auf einmal.</p>
+    <p class="eyebrow sig">Doc Alvers Mathe-Labor</p>
+</footer>
+
+</div>
+
+<script>
+/* ---------------------------------------------------------------
+   One source of truth: the scene list feeds both the timeline and
+   the cards below it.
+   --------------------------------------------------------------- */
+const SCENES = [
+    /* n = Nummer · s = geplante Sekunden (nach der Vertonung von SPOKEN ueberschrieben)
+       t = Titel · img = was im Bild passiert · aha = der Gedanke, der fallen soll
+       core: true = Kernszene · cut: true = Notbremse · card: true = eigene Karte */
+
+    { n: 1, s: 16, t: 'Ein Tropfen, sonst nichts',
+      img: 'Fast schwarze Fläche, in der Mitte ein einzelner runder Fleck in Orange, keine zwanzig Pixel breit. Sonst ist das Bild leer. Der Fleck wird langsam größer, seine Mitte wird dunkel, aus dem Fleck wird ein Ring. Der Ring beginnt auszubeulen — nicht gleichmäßig, sondern an vier, fünf Stellen.',
+      aha: 'Das ist der ganze Startzustand: <strong>ein Tropfen in der Mitte, und sonst nichts.</strong> Was gleich passiert, steckt nicht im Bild. Es steckt in den Regeln.' },
+
+    { n: 2, s: 20, t: 'Es kommt von selbst', core: true,
+      img: 'Zeitraffer, GESCHWINDIGKEIT 10. Aus den Ausbeulungen werden Finger, die Finger teilen sich, biegen umeinander herum und weichen sich aus. In acht Sekunden füllt ein orangefarbenes Labyrinth den ganzen Rahmen. Unten rechts läuft der Schrittzähler auf über 5.000.',
+      aha: 'Niemand hat das gezeichnet. <strong>Es gibt keine Vorlage, kein Ziel und keine Stelle im Programm, an der steht, wie das Ergebnis aussehen soll.</strong> Und trotzdem sieht es jedes Mal so aus.' },
+
+    { n: 3, s: 18, t: 'Zwei Stoffe, einer unsichtbar', core: true,
+      img: 'Das Bild friert ein. Zwei Wörter erscheinen: <em>Nahrung</em> und <em>Farbe</em>. Dann wird gezeigt, dass die orangen Adern nur die Farbe sind — dazwischen, im Dunklen, liegt die Nahrung, und die sieht man nicht. Zum Schluss ein Wort für das, was beide tun: sie verlaufen. Diffusion.',
+      aha: 'Man sieht immer nur die Hälfte. <strong>Das Dunkle ist nicht leer, es ist voll Nahrung</strong> — und die orangen Adern sind genau dort, wo sie schon aufgefressen wurde.' },
+
+    { n: 4, s: 22, t: 'Vier Regeln, mehr nicht', core: true, card: true,
+      img: 'Eine eigene Karte, keine Formel im Bild. Vier Zeilen erscheinen nacheinander, jede mit einem winzigen Standbild aus der Simulation daneben: <em>Farbe frisst Nahrung und macht daraus mehr Farbe.</em> — <em>Farbe zerfällt.</em> — <em>Nahrung wird nachgefüllt.</em> — <em>Beide verlaufen.</em>',
+      aha: 'Die erste Regel ist der Motor: <strong>Farbe macht mehr von sich selbst.</strong> Dafür gibt es ein Wort, Autokatalyse — und es ist das einzige Fachwort, das diese Szene braucht. Vier Sätze. Mehr steht nicht im Programm.' },
+
+    { n: 5, s: 18, t: 'Die zwei Regler',
+      img: 'Die Seitenleiste rückt ins Bild. Der Mauszeiger fährt FEED an und zieht ihn ein Stück, dann KILL. Die Zahlen daneben springen mit. Beide zurück auf den Ausgangswert, das Muster läuft unbeirrt weiter.',
+      aha: 'Nachschub und Zerfall. <strong>Zwei Zahlen, und beide sind winzig</strong> — die eine steht auf 0,026, die andere auf 0,058. An diesen zwei Zahlen hängt gleich alles.' },
+
+    { n: 6, s: 24, t: 'Zwei Zahlen, sechzehn Welten', core: true,
+      img: 'Durch die Preset-Liste klicken, 4,2 s je Stufe: <em>Schlangen</em>, <em>Koralle</em>, <em>Gitter</em>, <em>Pulsierend</em>, <em>Flocken</em>. Jedes Mal wandelt sich das <strong>bestehende</strong> Feld um, es wird nicht neu gestartet.',
+      aha: 'Es ist jedes Mal <strong>dasselbe Programm mit denselben vier Regeln</strong>. Verändert wurden nur die zwei Zahlen von eben. <strong>Ein Fingerbreit auf dem Regler trennt Punkte von Streifen.</strong><br><br><em>Gemessen, nachdem der erste Take daran scheiterte:</em> Ein Preset-Wechsel setzt das Gitter nicht zurück, das Feld wandelt sich um — und ein Preset mit niedriger Zufuhr (Tupfen, Nebel, Chaos) <strong>tötet ein gesättigtes Feld</strong>. Die ursprüngliche Kette Koralle→Tupfen→Gitter→Labyrinth→Chaos brach bei Tupfen auf 5,7 % ein. Diese Reihenfolge fällt nie unter 88 %.' },
+
+    { n: 7, s: 18, t: 'Und meistens passiert gar nichts',
+      img: 'Zurück auf <em>Wirbel</em>, dann FEED langsam nach unten ziehen. Das Muster wird blasser, die Adern werden dünn, reißen, und die Fläche ist leer. Weiterziehen — es bleibt leer. Dann zurück nach oben: ab einem bestimmten Punkt kommt die Struktur wieder.',
+      aha: 'Der viel größere Teil der Reglerskala macht überhaupt nichts. <strong>Muster sind die Ausnahme, nicht die Regel</strong> — sie leben in einem schmalen Band, und außerhalb davon ist die Fläche einfach tot.' },
+
+    { n: 8, s: 16, t: 'Man kann es nicht kaputtmalen', cut: true,
+      img: 'Preset <em>Wirbel</em>, das Muster steht. Mit gedrückter Maus quer durch das Bild fahren — eine breite orange Schmierspur, die das Labyrinth zerstört. Loslassen. Die Spur zerfällt von den Rändern her, und binnen Sekunden ist dort wieder dasselbe Adernmuster wie überall.',
+      aha: 'Die Störung wird nicht überdeckt, sie wird <strong>eingebaut</strong>. Das Muster hat keine richtige Form, die man treffen könnte — es hat nur eine Art, wie es aussieht.' },
+
+    { n: 9, s: 14, t: 'Der Rand ist keiner', cut: true,
+      img: 'Nah an den oberen Bildrand. Eine Ader läuft oben aus dem Bild — und im selben Moment kommt sie unten wieder herein, an genau der passenden Stelle.',
+      aha: 'Die Fläche hat keinen Rand: <strong>oben ist unten, links ist rechts.</strong> Ein ehrlicher Hinweis, dass hier gerechnet und nicht gefilmt wird — und der Grund, warum das Muster nirgends anstößt.' },
+
+    { n: 10, s: 22, t: 'Warum überhaupt Muster?', core: true, card: true,
+      img: 'Eigene Karte, das Kernbild des Films. Zwei Pfeile von einem Punkt aus: ein kurzer, dicker für die Farbe, die sich selbst nachmacht — und ein langer, dünner für die Nahrung, die aus der weiteren Umgebung nachfließt. Daneben in Zahlen: die Nahrung verläuft mit 0,160, die Farbe nur mit 0,080. <strong>Doppelt so schnell.</strong>',
+      aha: 'Da, wo Farbe entsteht, entsteht gleich noch mehr davon — das ist der Aktivator, und er wirkt nur auf kurze Strecke. Gleichzeitig saugt die Stelle Nahrung aus einem viel größeren Umkreis ab und nimmt sie damit allen Nachbarn weg. <strong>Nah verstärken, weit bremsen: Daraus wird ein Abstand. Und ein Abstand, der sich überall wiederholt, ist ein Muster.</strong>' },
+
+    { n: 11, s: 24, t: 'Die Probe: den Unterschied wegnehmen', core: true,
+      img: 'GESCHWINDIGKEIT auf 1 — ab hier läuft alles in Echtzeit. Das fertige Muster steht. Dann <strong>ein einziger Sprung</strong>: DIFFUSION V von 0,080 direkt auf 0,110. Eine Sekunde passiert nichts, das Bild steht völlig still. Dann werden die Adern dünn, reißen, und die Fläche ist leer.',
+      aha: 'Das ist die Antwort, und sie ist nicht behauptet, sondern vorgeführt: <strong>Sind beide Stoffe zu ähnlich schnell, gibt es kein Muster.</strong><br><br><em>Und der Nachtrag, der den ersten Take gekostet hat:</em> Ich hatte den Kipppunkt für einen <strong>Sprung</strong> gemessen, im Film aber eine <strong>Rampe</strong> gefahren — 0,090, 0,100, 0,110, 0,115. Dabei gewöhnt sich das Muster an und überlebt bis über 0,140. Vor der Kamera weigerte es sich zu sterben. <strong>Kaputt geht es nur, wenn man es überrascht.</strong> Das steht jetzt im Film, statt versteckt zu werden.' },
+
+    { n: 12, s: 16, t: 'Und zurück',
+      img: 'DIFFUSION V zurück auf 0,080, GESCHWINDIGKEIT wieder auf 10, dann <kbd>SÄEN</kbd>. Vier Sekunden bleibt das Bild fast leer. Dann wächst aus der Mitte wieder ein Ring, Finger, ein Labyrinth — nach zehn Sekunden ist der Rahmen wieder voll.',
+      aha: 'Nichts daran war ein Unfall. <strong>Dieselbe Bedingung wieder hergestellt, dasselbe Muster wieder da</strong> — nur nicht dasselbe im Detail. Die Sorte wiederholt sich, die Zeichnung nie.' },
+
+    { n: 13, s: 20, t: '1952', core: true, card: true,
+      img: 'Karte. Alan Turing, eine Jahreszahl, der Titel seiner Arbeit: <em>The Chemical Basis of Morphogenesis</em>. Daneben in einem Halbsatz die ehrliche Einordnung — was hier rechnet, ist nicht Turings eigenes Modell, sondern eine konkrete Reaktion, die Gray und Scott dreißig Jahre später angegeben haben.',
+      aha: 'Turing hat nicht beobachtet, er hat <strong>hergeleitet</strong>: dass zwei verschieden schnell wandernde Stoffe von allein Struktur machen müssen. Zu dem Zeitpunkt hatte das niemand je gesehen. <strong>Bis eine solche Reaktion tatsächlich im Labor gelang, vergingen achtunddreißig Jahre.</strong>' },
+
+    { n: 14, s: 0, t: 'Draußen nachsehen — GESTRICHEN', cut: true,
+      img: '<strong>Nicht gedreht.</strong> Geplant war: dieselben Regeln auf einem schmalen Streifen, aus Flecken werden Querstreifen — das Argument hinter dem gefleckten Tier mit geringeltem Schwanz.',
+      aha: '<strong>Gemessen bei Streifenbreite 8, 10, 12 und 14 Zellen — das Modell liefert es nicht.</strong> Im Punkte-Regime stirbt der schmale Streifen, im Adern-Regime entsteht eine Reihe verbundener Zellen, keine sauberen Querstreifen. Die Aussage ist aus diesem Labor heraus nicht filmbar, <strong>also wurde sie nicht gefilmt</strong> — vor dem Dreh gestrichen, nicht danach. Der Film beantwortet seine Leitfrage in den Szenen 10 und 11.' },
+
+    { n: 15, s: 14, t: 'Zum Selberzüchten',
+      img: 'Preset <em>Koralle</em>, GESCHWINDIGKEIT 10, die Struktur wächst ruhig weiter und wird nicht angehalten. Das Bild bleibt auf dem Dunkelblau des Labors stehen — nicht auf Schwarz.',
+      aha: 'Zwei Regler, sechzehn Welten, und dazwischen alles, was niemand ausprobiert hat. <strong>Der interessanteste Teil des Labors ist der, den es noch nicht gibt.</strong>' }
+];
+
+/* SAY:START - generated by videopipeline/reaction-diffusion/sync-drehbuch.mjs, do not edit */
+const SAY = {
+    s1: 'Ein dunkles Feld, und in der Mitte ein einziger Tropfen. Mehr ist nicht da. <span class="pause">0,7 s</span> Und jetzt sieh zu, was er tut. Er wächst. Seine Mitte wird leer, aus dem Tropfen wird ein Ring. <span class="beat"></span> Und der Ring bleibt nicht rund.',
+    s2: 'Aus den Beulen werden Finger, die Finger teilen sich, biegen umeinander herum und weichen einander aus. <span class="pause">2,5 s</span> In ein paar Sekunden füllt ein Labyrinth den ganzen Rahmen. <span class="pause">0,9 s</span> Niemand hat das gezeichnet. Es gibt keine Vorlage und keine Stelle im Programm, an der steht, wie das Ergebnis aussehen soll. Und trotzdem sieht es jedes Mal so aus.',
+    s3: 'Dahinter stecken zwei Stoffe. Nennen wir sie Nahrung und Farbe. <span class="pause">0,7 s</span> Orange siehst du nur die Farbe. Das Dunkle dazwischen ist aber nicht leer — dort liegt die Nahrung, und die sieht man nie. <span class="beat"></span> Beide tun dasselbe: Sie verlaufen, langsam, in alle Richtungen. Dafür gibt es ein Wort. Diffusion.',
+    s4: 'Und es gibt genau vier Regeln. <span class="pause">0,9 s</span> Erstens: Farbe frisst Nahrung und macht daraus mehr Farbe. <span class="pause">1,1 s</span> Zweitens: Farbe zerfällt von allein. <span class="pause">1,1 s</span> Drittens: Nahrung wird ständig nachgefüllt. <span class="pause">1,1 s</span> Viertens: Beide verlaufen. <span class="pause">1,0 s</span> Die erste Regel ist der Motor. Farbe macht mehr von sich selbst — dafür gibt es auch ein Wort: Autokatalyse. <span class="beat"></span> Vier Sätze. Mehr steht nicht im Programm.',
+    s5: 'Zwei davon kannst du einstellen. <span class="pause">0,9 s</span> Der Regler für die Zufuhr bestimmt, wie schnell Nahrung nachkommt. <span class="pause">1,3 s</span> Der darunter, wie schnell Farbe wieder zerfällt. <span class="pause">0,9 s</span> Beide Zahlen sind winzig. Und an ihnen hängt gleich alles.',
+    s6: 'Sieh dir an, was diese zwei Zahlen anrichten. <span class="pause">1,0 s</span> Schlangen. <span class="pause">4,2 s</span> Koralle. <span class="pause">4,2 s</span> Gitter. <span class="pause">4,2 s</span> Pulsierend. <span class="pause">4,2 s</span> Flocken. <span class="pause">3,5 s</span> Jedes Mal dieselben vier Regeln. Verändert wurden nur die zwei Zahlen von eben. <span class="beat"></span> Ein Fingerbreit auf dem Regler trennt Punkte von Streifen.',
+    s7: 'Nur taugen die meisten Zahlen gar nichts. <span class="pause">0,8 s</span> Ich ziehe die Zufuhr langsam herunter. <span class="pause">2,5 s</span> Das Muster wird blass, die Adern werden dünn, reißen — und das Feld ist leer. <span class="pause">1,8 s</span> Und leer bleibt es. Der weitaus größere Teil dieser Skala macht überhaupt nichts. <span class="beat"></span> Muster sind die Ausnahme, nicht die Regel.',
+    s8: 'Kaputtmachen kann man so ein Muster übrigens auch nicht. <span class="pause">0,7 s</span> Ich male mit der Maus quer hindurch. <span class="pause">2,5 s</span> Und lasse los. <span class="pause">1,5 s</span> Die Spur wird nicht überdeckt, sie wird eingebaut. Nach ein paar Sekunden liegt dort wieder dasselbe Adernmuster wie überall.',
+    s9: 'Und noch etwas Ehrliches: Dieses Feld hat gar keinen Rand. <span class="pause">0,8 s</span> Was oben hinausläuft, kommt unten wieder herein. Links ist rechts. Das Muster stößt nirgends an.',
+    s10: 'Bleibt die eigentliche Frage. Warum wird daraus überhaupt ein Muster, und nicht überall dasselbe Einerlei? <span class="pause">0,9 s</span> Dort, wo Farbe entsteht, entsteht sofort noch mehr davon. Das ist der Aktivator, und er wirkt nur auf ganz kurze Strecke. <span class="pause">0,8 s</span> Gleichzeitig saugt genau diese Stelle Nahrung aus einem viel größeren Umkreis ab — und nimmt sie damit allen Nachbarn weg. Denn die Nahrung wandert doppelt so schnell wie das, was sie verbraucht. <span class="pause">0,9 s</span> Nah verstärken, weit bremsen. <span class="beat"></span> Daraus wird ein Abstand. Und ein Abstand, der sich überall wiederholt, ist ein Muster.',
+    s11: 'Wenn das stimmt, dann muss ich dieses Muster töten können, indem ich den Unterschied wegnehme. Also mache ich die Farbe schneller — und zwar plötzlich, in einem einzigen Schritt. <span class="pause">2,2 s</span> Von null Komma null acht auf null Komma eins eins. <span class="pause">2,6 s</span> Eine Sekunde passiert nichts. <span class="pause">1,6 s</span> Und dann fällt alles in sich zusammen. <span class="pause">1,4 s</span> Und eine Merkwürdigkeit dazu, die ich selbst erst nachmessen musste: Schiebt man den Regler langsam höher statt plötzlich, gewöhnt sich das Muster daran und hält noch weit darüber aus. Kaputt geht es nur, wenn man es überrascht.',
+    s12: 'Zurück auf den alten Wert. Und noch einmal säen. <span class="pause">3,0 s</span> Vier Sekunden bleibt das Feld fast leer. <span class="pause">2,5 s</span> Dann kommt es wieder. Dieselbe Bedingung, dasselbe Muster — nur nicht dieselbe Zeichnung. Die Sorte wiederholt sich, das Bild nie.',
+    s13: 'Der Mann, der das vorhergesagt hat, hat es selbst nie gesehen. <span class="pause">0,8 s</span> Alan Turing, neunzehnhundertzweiundfünfzig, in einer Arbeit über die chemische Grundlage der Formbildung. Er hat nicht beobachtet, er hat hergeleitet: dass zwei verschieden schnell wandernde Stoffe von allein Struktur machen müssen. <span class="pause">0,8 s</span> Was hier rechnet, ist nicht sein eigenes Modell, sondern eine Reaktion von Gray und Scott, dreißig Jahre jünger. Bis so etwas wirklich im Reagenzglas gelang, vergingen achtunddreißig Jahre. <span class="beat"></span> Seitdem heißen solche Bilder Turing-Muster.',
+    s15: 'Zwei Regler, sechzehn Welten — und dazwischen alles, was noch niemand ausprobiert hat. <span class="pause">0,7 s</span> Der interessanteste Teil dieses Labors ist der, den es noch nicht gibt. Probier ihn aus, im Doc Alvers Mathe-Labor auf doc alvers punkt <span class="spell">de</span>.'
+};
+const SPOKEN = {"s1":11.376,"s2":22.008,"s3":16.584,"s4":24.48,"s5":13.992,"s6":35.52,"s7":20.544,"s8":17.76,"s9":9.048,"s10":32.136,"s11":35.688,"s12":17.328,"s13":31.92,"s14":24.192,"s15":13.08};
+/* SAY:END */
+
+const ARC = [
+    { t: 'ein Tropfen,<br>sonst nichts',    c: '#93a8c6' },
+    { t: 'vier Regeln,<br>keine Vorlage',   c: '#f5c242', key: true },
+    { t: 'zwei Zahlen,<br>sechzehn Welten', c: '#ff7a14', key: true },
+    { t: 'nah verstärken,<br>weit bremsen', c: '#00d2ff', key: true },
+    { t: 'den Unterschied<br>wegnehmen',    c: '#b02418', key: true }
+];
+
+/* --- the arc --- */
+document.getElementById('arc').innerHTML = ARC.map(a =>
+    `<span class="${a.key ? 'key' : ''}" style="--stop:${a.c}">${a.t}</span>`).join('');
+
+/* --- timeline: each scene as wide as it is long --- */
+const secs = (x) => SPOKEN['s' + x.n] ?? x.s;
+const total = SCENES.reduce((s, x) => s + secs(x), 0);
+document.getElementById('timeline').innerHTML = SCENES.map(x =>
+    `<i class="${x.core ? 'core' : x.cut ? 'cut' : ''}" data-n="${x.n}"
+        style="flex:0 0 ${(secs(x) / total * 100).toFixed(3)}%"
+        title="Szene ${x.n} · ${secs(x).toFixed(1)} s"></i>`).join('');
+
+/* --- budget, from the measured durations when they exist --- */
+(function () {
+    const spoken = Object.values(SPOKEN).reduce((a, b) => a + b, 0);
+    const planned = SCENES.reduce((a, x) => a + x.s, 0);
+    const air = SCENES.length * 1.6;
+    const film = (spoken || planned) + air;
+    const mmss = (t) => Math.floor(t / 60) + ':' + String(Math.round(t % 60)).padStart(2, '0');
+    const cell = (dt, dd, sub) => `<div><dt>${dt}</dt><dd>${dd}<small>${sub}</small></dd></div>`;
+    document.getElementById('budget').innerHTML =
+        cell('Sprache', (spoken || planned).toFixed(0) + ' s',
+             spoken ? 'gemessen' : 'geplant') +
+        cell('Luft', '~' + air.toFixed(0) + ' s', '1,6 s je Szene') +
+        cell('Film', mmss(film), spoken ? 'nach der Vertonung' : 'geschätzt') +
+        cell('Bett-Loop', '142,778 s', '64 Takte · 107,58 BPM');
+    if (spoken) {
+        const n = document.getElementById('tl-note');
+        if (n) n.textContent = 'Breite = gemessene Sprechzeit';
+    }
+})();
+
+/* --- scene cards --- */
+document.getElementById('scenes').innerHTML = SCENES.map(x => `
+    <article class="scene ${x.core ? 'core' : x.cut ? 'cut' : ''}">
+        <div class="idx">${String(x.n).padStart(2, '0')}</div>
+        <div>
+            <div class="top">
+                <h3>${x.t}</h3>
+                ${x.core ? '<span class="tag core">Kernszene</span>' : ''}
+                ${x.cut ? '<span class="tag cut">Notbremse</span>' : ''}
+                <span class="secs">${secs(x).toFixed(1)} s</span>
+            </div>
+            <div class="body">
+                <div><h4>Was im Bild passiert</h4><p>${x.img}</p></div>
+                <div class="aha"><h4>Der Aha</h4><p>${x.aha}</p></div>
+            </div>
+            ${SAY['s' + x.n] ? `<div class="say"><h4>Solita sagt</h4><p>${SAY['s' + x.n]}</p></div>` : ''}
+        </div>
+    </article>`).join('');
+
+(function () {
+    const cv = document.getElementById('stage');
+    if (!cv) return;
+    const ctx = cv.getContext('2d');
+
+    /* The film's subject, really running: Gray-Scott on a small torus, the same
+       arithmetic and the same "Feuer" ramp the lab uses. Preset Wirbel. */
+    const G = 132, LEN = G * G;
+    const Du = 0.16, Dv = 0.08, feed = 0.026, kill = 0.058;
+    let u, v, nu, nv;
+
+    const off = document.createElement('canvas');
+    off.width = off.height = G;
+    const octx = off.getContext('2d');
+    const img = octx.createImageData(G, G);
+
+    function seed() {
+        n = 0;
+        u = new Float32Array(LEN).fill(1);
+        v = new Float32Array(LEN);
+        nu = new Float32Array(LEN);
+        nv = new Float32Array(LEN);
+        const cx = (G >> 1) + ((Math.random() * 20) | 0) - 10;
+        const cy = (G >> 1) + ((Math.random() * 20) | 0) - 10;
+        const r = 7;
+        for (let y = -r; y <= r; y++) for (let x = -r; x <= r; x++) {
+            if (x * x + y * y > r * r) continue;
+            const i = ((cy + y + G) % G) * G + ((cx + x + G) % G);
+            v[i] = 1; u[i] = 0;
+        }
+    }
+
+    function step() {
+        for (let y = 0; y < G; y++) {
+            const ym = ((y - 1 + G) % G) * G, yp = ((y + 1) % G) * G, yc = y * G;
+            for (let x = 0; x < G; x++) {
+                const xm = (x - 1 + G) % G, xp = (x + 1) % G, i = yc + x;
+                const lu = -u[i] + 0.2 * (u[ym + x] + u[yp + x] + u[yc + xm] + u[yc + xp])
+                    + 0.05 * (u[ym + xm] + u[ym + xp] + u[yp + xm] + u[yp + xp]);
+                const lv = -v[i] + 0.2 * (v[ym + x] + v[yp + x] + v[yc + xm] + v[yc + xp])
+                    + 0.05 * (v[ym + xm] + v[ym + xp] + v[yp + xm] + v[yp + xp]);
+                const uv = u[i] * v[i] * v[i];
+                let a = u[i] + (Du * lu - uv + feed * (1 - u[i]));
+                let b = v[i] + (Dv * lv + uv - (feed + kill) * v[i]);
+                nu[i] = a < 0 ? 0 : a > 1 ? 1 : a;
+                nv[i] = b < 0 ? 0 : b > 1 ? 1 : b;
+            }
+        }
+        let t = u; u = nu; nu = t;
+        t = v; v = nv; nv = t;
+    }
+
+    function paint() {
+        const d = img.data;
+        for (let i = 0; i < LEN; i++) {
+            const val = v[i], o = i << 2;
+            if (val < 0.01) { d[o] = 4; d[o + 1] = 16; d[o + 2] = 31; d[o + 3] = 255; continue; }
+            const t = Math.pow(val, 0.6);
+            d[o] = 255 * t;
+            d[o + 1] = 120 * t * (1 - t * 0.5);
+            d[o + 2] = 20 * t * (1 - t);
+            d[o + 3] = 255;
+        }
+        octx.putImageData(img, 0, 0);
+        const r = cv.getBoundingClientRect();
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        const w = Math.max(1, Math.round(r.width * dpr));
+        if (cv.width !== w) { cv.width = w; cv.height = w; }
+        ctx.imageSmoothingEnabled = true;
+        ctx.drawImage(off, 0, 0, cv.width, cv.height);
+    }
+
+    /* A fresh drop needs about 5000 steps before it fills the frame. Racing
+       through those in the first second beats showing an empty box for half a
+       minute; afterwards it ticks over slowly, so it stays a quiet hero. */
+    let raf = null, n = 0;
+    const WARM = 5200;
+    function frame() {
+        const burst = n < WARM ? 90 : 3;
+        for (let k = 0; k < burst; k++) step();
+        n += burst;
+        paint();
+        raf = requestAnimationFrame(frame);
+    }
+
+    seed();
+    frame();
+    cv.style.cursor = 'pointer';
+    cv.title = 'Klick: neuer Tropfen';
+    cv.addEventListener('click', seed);
+
+    /* be a good citizen: stop computing when the page is not looked at */
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) { cancelAnimationFrame(raf); raf = null; }
+        else if (raf === null) frame();
+    });
+})();
+</script>
+</body>
+</html>

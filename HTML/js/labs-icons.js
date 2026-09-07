@@ -4,6 +4,32 @@
  */
 
 const LAB_ICONS = {
+    "kreisteilung": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="50" cy="50" r="34" fill="rgba(0, 210, 255, 0.06)" stroke="#00D2FF" stroke-width="2.2" />
+            <!-- all fifteen chords of the regular hexagon -->
+            <g stroke="rgba(255, 255, 255, 0.5)" stroke-width="1.1">
+                <line x1="50" y1="16" x2="79.4" y2="33" /><line x1="50" y1="16" x2="79.4" y2="67" />
+                <line x1="50" y1="16" x2="50" y2="84" /><line x1="50" y1="16" x2="20.6" y2="67" />
+                <line x1="50" y1="16" x2="20.6" y2="33" /><line x1="79.4" y1="33" x2="79.4" y2="67" />
+                <line x1="79.4" y1="33" x2="50" y2="84" /><line x1="79.4" y1="33" x2="20.6" y2="67" />
+                <line x1="79.4" y1="33" x2="20.6" y2="33" /><line x1="79.4" y1="67" x2="50" y2="84" />
+                <line x1="79.4" y1="67" x2="20.6" y2="67" /><line x1="79.4" y1="67" x2="20.6" y2="33" />
+                <line x1="50" y1="84" x2="20.6" y2="67" /><line x1="50" y1="84" x2="20.6" y2="33" />
+                <line x1="20.6" y1="67" x2="20.6" y2="33" />
+            </g>
+            <!-- the twelve honest crossings ... -->
+            <g fill="#F5C242">
+                <circle cx="69.6" cy="50" r="1.9" /><circle cx="64.7" cy="41.5" r="1.9" /><circle cx="59.8" cy="33" r="1.9" /><circle cx="50" cy="33" r="1.9" />
+                <circle cx="50" cy="67" r="1.9" /><circle cx="40.2" cy="33" r="1.9" /><circle cx="35.3" cy="41.5" r="1.9" /><circle cx="30.4" cy="50" r="1.9" />
+                <circle cx="59.8" cy="67" r="1.9" /><circle cx="64.7" cy="58.5" r="1.9" /><circle cx="35.3" cy="58.5" r="1.9" /><circle cx="40.2" cy="67" r="1.9" />
+            </g>
+            <!-- ... and the centre, where three diagonals meet: that one costs the 31st region -->
+            <circle cx="50" cy="50" r="3.6" fill="#B02418" stroke="#F5C242" stroke-width="1.5" />
+            <g fill="#B02418" stroke="rgba(255, 255, 255, 0.85)" stroke-width="1.2">
+                <circle cx="50" cy="16" r="3.2" /><circle cx="79.4" cy="33" r="3.2" /><circle cx="79.4" cy="67" r="3.2" />
+                <circle cx="50" cy="84" r="3.2" /><circle cx="20.6" cy="67" r="3.2" /><circle cx="20.6" cy="33" r="3.2" />
+            </g>
+        </svg>`,
     "brahmagupta": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
             <!-- circumcircle -->
             <circle cx="50" cy="50" r="36" fill="none" stroke="rgb(128, 128, 128)" stroke-width="1.2" opacity="0.7" />
