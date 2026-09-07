@@ -350,6 +350,50 @@
     editWrap.appendChild(panel);
     navRight.appendChild(editWrap);
 
+    // Fullscreen pill, directly right of the gear (Doc, 07.09.2026): the plan tables
+    // are wide, and the browser chrome costs two rows of lessons. Icon-only like the
+    // QR pill so the row stays short. Safari still needs the webkit spelling, and
+    // some kiosk setups refuse the request outright - then the pill hides itself
+    // rather than sitting there doing nothing.
+    const fsPill = document.createElement('a');
+    fsPill.className = 'badge b-grey nav-fs';
+    fsPill.href = '#';
+    const ICON_ENTER = '<path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/>'
+        + '<path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/>';
+    const ICON_EXIT = '<path d="M3 8h3a2 2 0 0 0 2-2V3"/><path d="M21 8h-3a2 2 0 0 1-2-2V3"/>'
+        + '<path d="M3 16h3a2 2 0 0 1 2 2v3"/><path d="M21 16h-3a2 2 0 0 0-2 2v3"/>';
+    const svgWrap = (d) => '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" '
+        + 'stroke="currentColor" stroke-width="1.7" stroke-linecap="round" '
+        + 'stroke-linejoin="round" aria-hidden="true">' + d + '</svg>';
+
+    const fsOn = () => !!(document.fullscreenElement || document.webkitFullscreenElement);
+    function paintFs() {
+        const on = fsOn();
+        fsPill.innerHTML = svgWrap(on ? ICON_EXIT : ICON_ENTER);
+        const label = on ? 'Vollbild verlassen (Esc)' : 'Vollbild';
+        fsPill.title = label;
+        fsPill.setAttribute('aria-label', label);
+        fsPill.setAttribute('aria-pressed', on ? 'true' : 'false');
+    }
+    paintFs();
+
+    fsPill.addEventListener('click', function (e) {
+        e.preventDefault();
+        const el = document.documentElement;
+        if (fsOn()) {
+            (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+        } else {
+            const req = el.requestFullscreen || el.webkitRequestFullscreen;
+            if (req) Promise.resolve(req.call(el)).catch(function () { /* refused - leave it */ });
+        }
+    });
+    document.addEventListener('fullscreenchange', paintFs);
+    document.addEventListener('webkitfullscreenchange', paintFs);
+
+    if (document.documentElement.requestFullscreen || document.documentElement.webkitRequestFullscreen) {
+        navRight.appendChild(fsPill);
+    }
+
     // Separated auth pill at the right end of the row: "Login" links to the
     // notes page (shared svp-session login for all svp pages), "Logout"
     // clears the session in this browser. Reads localStorage directly so it
