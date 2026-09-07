@@ -1,0 +1,390 @@
+% Satz von Brahmagupta - ein nachvollziehbarer Beweis fuer JG 12/13
+% Compile: tectonic satz-von-brahmagupta-beweis.tex
+\documentclass[11pt,a4paper]{article}
+\usepackage[a4paper,margin=2.2cm,top=2cm,bottom=2.2cm]{geometry}
+\usepackage{fontspec}
+\usepackage{polyglossia}
+\setdefaultlanguage{german}
+\usepackage{amsmath,amssymb}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{calc,angles,quotes,intersections}
+\usepackage{tcolorbox}
+\tcbuselibrary{skins,breakable}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{fancyhdr}
+\usepackage{needspace}
+
+% ---------- fonts ----------
+\setmainfont{Helvetica Neue}[Ligatures=TeX]
+\newfontfamily\orbitron{Orbitron}[Extension=.ttf,Path=/Library/Fonts/,UprightFont=*-Regular,BoldFont=*-Bold,Ligatures=TeX]
+
+% ---------- colours (Doc's palette) ----------
+\definecolor{lam}{RGB}{245,194,66}   % orange  - angle alpha
+\definecolor{ups}{RGB}{176,36,24}    % red     - quadrilateral
+\definecolor{phi}{RGB}{121,158,49}   % green   - angle 90 - alpha
+\definecolor{navy}{RGB}{20,35,70}    % dark blue - text/lines
+\definecolor{paleblue}{RGB}{232,238,250}
+\definecolor{ink}{RGB}{30,30,40}
+\color{ink}
+
+\hypersetup{colorlinks=true,linkcolor=navy,urlcolor=navy}
+
+% ---------- headings ----------
+\usepackage{titlesec}
+\titleformat{\section}{\orbitron\bfseries\large\color{navy}}{\thesection}{0.8em}{}
+\titleformat{\subsection}{\orbitron\bfseries\normalsize\color{navy}}{\thesubsection}{0.8em}{}
+\titlespacing*{\section}{0pt}{1.6em}{0.7em}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\orbitron\small\color{navy}Satz von Brahmagupta}
+\fancyhead[R]{\small Doc Alvers Mathe-Labor}
+\fancyfoot[C]{\small\thepage}
+\renewcommand{\headrulewidth}{0.3pt}
+
+% ---------- boxes ----------
+\newtcolorbox{satzbox}{enhanced,colback=paleblue,colframe=navy,boxrule=0.8pt,arc=3pt,
+  left=8pt,right=8pt,top=6pt,bottom=6pt,fonttitle=\orbitron\bfseries,title=Satz von Brahmagupta}
+\newtcolorbox{werkzeug}[1]{enhanced,breakable,colback=white,colframe=phi!70!black,boxrule=0.6pt,arc=3pt,
+  left=8pt,right=8pt,top=5pt,bottom=5pt,fonttitle=\orbitron\bfseries\small,title={#1}}
+\newtcolorbox{schritt}[1]{enhanced,breakable,colback=white,colframe=navy!60,boxrule=0.6pt,arc=3pt,
+  left=8pt,right=8pt,top=5pt,bottom=5pt,fonttitle=\orbitron\bfseries\small,title={#1}}
+\newtcolorbox{hinweis}{enhanced,colback=lam!15,colframe=lam!80!black,boxrule=0.6pt,arc=3pt,
+  left=8pt,right=8pt,top=5pt,bottom=5pt,fonttitle=\orbitron\bfseries\small,title=Aha-Moment}
+
+\newcommand{\ang}[1]{\angle #1}
+\newcommand{\seg}[1]{\overline{#1}}
+
+% ---------- the main figure as a macro ----------
+% #1 = extra TikZ code drawn on top (angle marks etc.)
+\newcommand{\brahmafig}[2][1]{%
+\begin{tikzpicture}[scale=#1,line cap=round,line join=round,>=stealth]
+  \def\R{3}
+  % M is the intersection of the diagonals; AC horizontal, BD vertical
+  \coordinate (M) at (0.6,-0.4);
+  \coordinate (A) at (-2.9732,-0.4);
+  \coordinate (C) at ( 2.9732,-0.4);
+  \coordinate (B) at (0.6,-2.9394);
+  \coordinate (D) at (0.6, 2.9394);
+  % E = foot of the perpendicular from M onto BC, F = hit on AD
+  \coordinate (E) at ($(B)!(M)!(C)$);
+  \coordinate (F) at (intersection of E--M and A--D);
+  % circle
+  \draw[navy!60,thick] (0,0) circle (\R);
+  % quadrilateral
+  \draw[ups,very thick] (A) -- (B) -- (C) -- (D) -- cycle;
+  % diagonals
+  \draw[navy,thick] (A) -- (C);
+  \draw[navy,thick] (B) -- (D);
+  % the perpendicular
+  \draw[phi!80!black,very thick] (F) -- (E);
+  % right angle marks
+  \draw[navy] ($(M)+(0.22,0)$) -- ($(M)+(0.22,0.22)$) -- ($(M)+(0,0.22)$);
+  \pic[draw=phi!80!black,angle radius=0.22cm] {right angle=M--E--B};
+  #2
+  % points
+  \foreach \p in {A,B,C,D,M,E,F}{\fill[ink] (\p) circle (1.6pt);}
+  \node[left]  at (A) {$A$};
+  \node[below] at (B) {$B$};
+  \node[right] at (C) {$C$};
+  \node[above] at (D) {$D$};
+  \node[below left=-1pt] at (M) {$M$};
+  \node[below right=-1pt] at (E) {$E$};
+  \node[above left=-1pt] at (F) {$F$};
+\end{tikzpicture}}
+
+\begin{document}
+
+% ================= TITLE =================
+\begin{center}
+  {\orbitron\bfseries\LARGE\color{navy} Der Satz von Brahmagupta}\\[6pt]
+  {\orbitron\small\color{navy} Ein Beweis zum Mitdenken -- Jahrgang 12/13, Berufliches Gymnasium}\\[4pt]
+  {\small Doc Alvers Mathe-Labor \quad$\cdot$\quad \today}
+\end{center}
+
+\vspace{4pt}
+\noindent Brahmagupta (598--668) war ein indischer Mathematiker und Astronom. Er hat als einer der
+Ersten mit der Null und mit negativen Zahlen gerechnet -- und er hat einen h\"ubschen Satz \"uber
+Vierecke im Kreis gefunden. Den beweisen wir hier. Ihr braucht daf\"ur nur vier Dinge aus der
+Mittelstufe; die wiederholen wir vorher.
+
+% ================= STATEMENT =================
+\section{Worum geht es?}
+
+\begin{satzbox}
+Ein Viereck $ABCD$ liegt mit allen vier Ecken auf einem Kreis (ein \emph{Sehnenviereck}).
+Seine Diagonalen $AC$ und $BD$ schneiden sich im Punkt $M$ \emph{rechtwinklig}.\\[4pt]
+Zeichnet man durch $M$ das Lot auf die Seite $BC$ und verl\"angert es \"uber $M$ hinaus bis zur
+gegen\"uberliegenden Seite $AD$, dann trifft es diese \textbf{genau in der Mitte}:
+\[
+  \seg{AF} = \seg{FD}.
+\]
+\end{satzbox}
+
+\begin{center}
+\brahmafig[1.05]{}
+\end{center}
+
+\noindent\textbf{Die Bezeichnungen} (sie gelten f\"ur das ganze Dokument):
+\begin{itemize}[leftmargin=1.6em,itemsep=1pt]
+  \item $A$, $B$, $C$, $D$: die Ecken, gegen den Uhrzeigersinn benannt, alle auf dem Kreis.
+  \item $M$: Schnittpunkt der Diagonalen; dort ist ein rechter Winkel.
+  \item $E$: der Fu\ss punkt des Lots von $M$ auf $BC$ (bei $E$ ist ein rechter Winkel).
+  \item $F$: der Punkt, in dem die Gerade $EM$ die Seite $AD$ trifft. \textbf{Behauptung:} $F$ ist die Mitte von $AD$.
+\end{itemize}
+
+\noindent\textbf{Was ist gegeben, was ist zu zeigen?} Das ist bei jedem Beweis der erste Schritt.
+\begin{center}
+\begin{tabular}{@{}ll@{}}
+\textbf{Voraussetzung} & $A,B,C,D$ liegen auf einem Kreis;\; $AC \perp BD$;\; $EF \perp BC$ \\
+\textbf{Behauptung}    & $\seg{AF} = \seg{FD}$
+\end{tabular}
+\end{center}
+
+% ================= TOOLBOX =================
+\section{Der Werkzeugkasten: vier S\"atze aus der Mittelstufe}
+
+\begin{werkzeug}{Werkzeug 1 -- Winkelsumme im Dreieck}
+In jedem Dreieck ist die Winkelsumme $180^\circ$. Hat das Dreieck einen rechten Winkel, bleiben f\"ur
+die beiden anderen Winkel zusammen $90^\circ$ \"ubrig. Ist einer davon $\alpha$, dann ist der andere
+$90^\circ - \alpha$. Die beiden \emph{erg\"anzen sich zu} $90^\circ$.
+\end{werkzeug}
+
+\begin{werkzeug}{Werkzeug 2 -- Scheitelwinkel}
+Schneiden sich zwei Geraden, dann sind die beiden gegen\"uberliegenden Winkel gleich gro\ss.
+\begin{center}
+\begin{tikzpicture}[scale=0.7]
+  \coordinate (O) at (0,0);
+  \coordinate (P) at (2.4,0.9); \coordinate (Q) at (-2.4,-0.9);
+  \coordinate (R) at (2.4,-0.9); \coordinate (S) at (-2.4,0.9);
+  \draw[navy,thick] (P) -- (Q); \draw[navy,thick] (R) -- (S);
+  \pic[draw=lam!80!black,fill=lam!40,angle radius=0.6cm,pic text=$\alpha$,angle eccentricity=1.45] {angle=R--O--P};
+  \pic[draw=lam!80!black,fill=lam!40,angle radius=0.6cm,pic text=$\alpha$,angle eccentricity=1.45] {angle=S--O--Q};
+\end{tikzpicture}
+\end{center}
+\end{werkzeug}
+
+\begin{werkzeug}{Werkzeug 3 -- Basiswinkelsatz (und seine Umkehrung)}
+In einem gleichschenkligen Dreieck sind die beiden Basiswinkel gleich gro\ss.
+Wir brauchen die \textbf{Umkehrung}: Hat ein Dreieck zwei gleich gro\ss e Winkel, dann sind die beiden
+Seiten, die diesen Winkeln gegen\"uberliegen, gleich lang -- das Dreieck ist gleichschenklig.
+\begin{center}
+\begin{tikzpicture}[scale=0.7]
+  \coordinate (X) at (0,0); \coordinate (Y) at (4,0); \coordinate (Z) at (2,2.2);
+  \draw[navy,thick] (X) -- (Y) -- (Z) -- cycle;
+  \pic[draw=lam!80!black,fill=lam!40,angle radius=0.55cm,pic text=$\alpha$,angle eccentricity=1.45] {angle=Y--X--Z};
+  \pic[draw=lam!80!black,fill=lam!40,angle radius=0.55cm,pic text=$\alpha$,angle eccentricity=1.45] {angle=Z--Y--X};
+  \node[above left] at ($(X)!0.5!(Z)$) {$\textcolor{ups}{s}$};
+  \node[above right] at ($(Y)!0.5!(Z)$) {$\textcolor{ups}{s}$};
+  \node[below] at ($(X)!0.5!(Y)$) {\small zwei gleiche Winkel $\Rightarrow$ zwei gleiche Seiten};
+\end{tikzpicture}
+\end{center}
+\end{werkzeug}
+
+\begin{werkzeug}{Werkzeug 4 -- Umfangswinkelsatz (Peripheriewinkelsatz)}
+Alle Punkte auf dem Kreis, die auf \emph{derselben Seite} einer Sehne liegen, sehen diese Sehne unter
+demselben Winkel. Anders gesagt: Verschiebt man die Spitze eines Dreiecks auf dem Kreis entlang,
+w\"ahrend die Grundseite (die Sehne) fest bleibt, \"andert sich der Winkel an der Spitze nicht.
+\begin{center}
+\begin{tikzpicture}[scale=0.75]
+  \draw[navy!60,thick] (0,0) circle (2.2);
+  \coordinate (P) at (-1.3,-1.775); \coordinate (Q) at (1.6,-1.51);
+  \coordinate (S1) at (-2.05,0.8); \coordinate (S2) at (0.3,2.18); \coordinate (S3) at (2.1,0.66);
+  \draw[ups,very thick] (P) -- (Q);
+  \foreach \s in {S1,S2,S3}{\draw[navy,thin] (P) -- (\s) -- (Q);}
+  \pic[draw=lam!80!black,fill=lam!40,angle radius=0.45cm] {angle=P--S1--Q};
+  \pic[draw=lam!80!black,fill=lam!40,angle radius=0.45cm] {angle=P--S2--Q};
+  \pic[draw=lam!80!black,fill=lam!40,angle radius=0.45cm] {angle=P--S3--Q};
+  \foreach \p in {P,Q,S1,S2,S3}{\fill[ink] (\p) circle (1.4pt);}
+  \node[below left] at (P) {$P$}; \node[below right] at (Q) {$Q$};
+\end{tikzpicture}\\[2pt]
+{\small Alle drei Winkel \"uber der Sehne $PQ$ sind gleich gro\ss.}
+\end{center}
+Genau dieses Werkzeug ist der Grund, warum die Ecken \emph{auf einem Kreis} liegen m\"ussen. Ohne
+Kreis gibt es diesen Satz nicht -- und ohne ihn bricht der Beweis zusammen.
+\end{werkzeug}
+
+% ================= IDEA =================
+\section{Die Beweisidee}
+
+Wir sollen zeigen, dass $F$ die Mitte von $AD$ ist, also $\seg{AF} = \seg{FD}$.
+Direkt sieht man das nicht. Der Trick: Wir vergleichen \emph{beide} Strecken mit einer dritten,
+n\"amlich mit $\seg{FM}$.
+
+\[
+  \underbrace{\seg{AF} = \seg{FM}}_{\text{Teil 1}}
+  \qquad\text{und}\qquad
+  \underbrace{\seg{FD} = \seg{FM}}_{\text{Teil 2}}
+  \qquad\Longrightarrow\qquad \seg{AF} = \seg{FD}.
+\]
+
+\Needspace{5\baselineskip}
+\noindent Daf\"ur zeigen wir, dass die Dreiecke $AFM$ und $DFM$ gleichschenklig sind, und zwar mit
+Werkzeug 3: Wir suchen in jedem der beiden Dreiecke zwei gleich gro\ss e Winkel.
+Wir nennen den Winkel bei $A$ im Dreieck $AFM$ einfach $\alpha$ und „jagen“ diesen Winkel einmal
+durch die Figur.
+
+% ================= PROOF PART 1 =================
+\section{Teil 1: Dreieck $AFM$ ist gleichschenklig}
+
+Schaut beim Lesen immer wieder auf die Figur -- jeder Schritt f\"arbt einen weiteren Winkel ein.
+\begin{center}\begin{minipage}{\textwidth}\centering
+\brahmafig[0.9]{%
+  \pic[draw=lam!80!black,fill=lam!50,angle radius=0.55cm,pic text=$\alpha$,angle eccentricity=1.45] {angle=C--A--D};
+  \pic[draw=lam!80!black,fill=lam!50,angle radius=0.55cm,pic text=$\alpha$,angle eccentricity=1.45] {angle=C--B--D};
+  \pic[draw=lam!80!black,fill=lam!50,angle radius=0.5cm,pic text=$\alpha$,angle eccentricity=1.45] {angle=E--M--C};
+  \pic[draw=lam!80!black,fill=lam!50,angle radius=0.5cm,pic text=$\alpha$,angle eccentricity=1.45] {angle=F--M--A};
+  \pic[draw=phi!80!black,fill=phi!40,angle radius=0.65cm,pic text=$\beta$,angle eccentricity=1.45] {angle=A--C--B};
+  \draw[lam!80!black,line width=2.2pt] (A) -- (F);
+  \draw[lam!80!black,line width=2.2pt] (F) -- (M);
+}\\[4pt]
+{\small Teil 1: Der Winkel $\alpha$ (orange) wandert von $A$ \"uber $B$ und $C$ nach $M$; $\beta = 90^\circ - \alpha$ (gr\"un). Am Ende sind die beiden orangen Strecken gleich lang.}
+\end{minipage}\end{center}
+
+\begin{schritt}{Schritt 1 -- Der Winkel $\alpha$ taucht bei $B$ noch einmal auf (Werkzeug 4)}
+Wir setzen $\alpha := \ang{MAF} = \ang{CAD}$. Die Punkte $A$ und $B$ liegen beide auf dem Kreis
+und beide auf derselben Seite der Sehne $CD$. Nach dem Umfangswinkelsatz sehen sie die Sehne $CD$
+unter demselben Winkel:
+\[
+  \ang{CBD} = \ang{CAD} = \alpha, \qquad\text{also auch}\qquad \ang{MBC} = \alpha .
+\]
+\end{schritt}
+
+\begin{schritt}{Schritt 2 -- Der Winkel bei $C$ im Dreieck $BMC$ (Werkzeug 1)}
+Das Dreieck $BMC$ hat bei $M$ einen rechten Winkel (die Diagonalen stehen senkrecht).
+Bei $B$ liegt $\alpha$, also bleibt f\"ur $C$:
+\[
+  \ang{MCB} = 90^\circ - \alpha =: \beta .
+\]
+Diesen zweiten Winkel nennen wir ab jetzt $\beta$. Merkt euch nur: $\alpha + \beta = 90^\circ$.
+\end{schritt}
+
+\begin{schritt}{Schritt 3 -- Der Winkel $\alpha$ kommt bei $M$ wieder heraus (Werkzeug 1)}
+Jetzt das kleine Dreieck $MEC$. Bei $E$ ist ein rechter Winkel (das Lot!), bei $C$ liegt
+$\beta$ aus Schritt 2. Also bleibt f\"ur den Winkel bei $M$:
+\[
+  \ang{CME} = 90^\circ - \beta = 90^\circ - (90^\circ - \alpha) = \alpha .
+\]
+\end{schritt}
+
+\begin{schritt}{Schritt 4 -- \"Uber den Scheitel auf die andere Seite (Werkzeug 2)}
+Die Geraden $AC$ und $EF$ schneiden sich in $M$. Der Winkel $\ang{CME}$ und der Winkel
+$\ang{AMF}$ liegen sich gegen\"uber, sie sind Scheitelwinkel:
+\[
+  \ang{AMF} = \ang{CME} = \alpha .
+\]
+\end{schritt}
+
+\begin{schritt}{Schritt 5 -- Zwei gleiche Winkel, also gleichschenklig (Werkzeug 3)}
+Im Dreieck $AFM$ gilt nun $\ang{FAM} = \alpha$ (so haben wir $\alpha$ definiert) und
+$\ang{AMF} = \alpha$ (Schritt 4). Zwei gleiche Winkel, also sind die gegen\"uberliegenden Seiten gleich lang:
+\[
+  \boxed{\;\seg{FA} = \seg{FM}\;}
+\]
+\end{schritt}
+
+
+% ================= PROOF PART 2 =================
+\section{Teil 2: Dreieck $DFM$ ist gleichschenklig}
+
+Genau dasselbe Spiel, nur mit dem anderen Winkel $\beta = 90^\circ - \alpha$ und der anderen Sehne.
+Versucht erst selbst, die f\"unf Schritte zu \"ubertragen -- dann lest weiter.
+\begin{center}\begin{minipage}{\textwidth}\centering
+\brahmafig[0.9]{%
+  \pic[draw=phi!80!black,fill=phi!40,angle radius=0.55cm,pic text=$\beta$,angle eccentricity=1.45] {angle=A--D--B};
+  \pic[draw=phi!80!black,fill=phi!40,angle radius=0.65cm,pic text=$\beta$,angle eccentricity=1.45] {angle=A--C--B};
+  \pic[draw=phi!80!black,fill=phi!40,angle radius=0.5cm,pic text=$\beta$,angle eccentricity=1.45] {angle=B--M--E};
+  \pic[draw=phi!80!black,fill=phi!40,angle radius=0.5cm,pic text=$\beta$,angle eccentricity=1.45] {angle=D--M--F};
+  \draw[phi!80!black,line width=2.2pt] (D) -- (F);
+  \draw[phi!80!black,line width=2.2pt] (F) -- (M);
+}\\[4pt]
+{\small Teil 2: Diesmal wandert $\beta = 90^\circ - \alpha$ (gr\"un) von $C$ nach $D$ und nach $M$. Die gr\"unen Strecken sind gleich lang.}
+\end{minipage}\end{center}
+
+\begin{schritt}{Schritt 6 -- Der Winkel bei $D$ (Werkzeug 4)}
+$C$ und $D$ liegen auf dem Kreis auf derselben Seite der Sehne $AB$. Nach dem Umfangswinkelsatz:
+\[
+  \ang{ADB} = \ang{ACB} = \beta \qquad(\text{Schritt 2}),
+  \qquad\text{also}\qquad \ang{MDF} = \beta .
+\]
+\end{schritt}
+
+\begin{schritt}{Schritt 7 -- Der Winkel bei $M$ (Werkzeug 1 und 2)}
+Bei $M$ ist $\ang{BMC} = 90^\circ$ und darin liegt $\ang{CME} = \alpha$ (Schritt 3). Der Rest ist
+\[
+  \ang{BME} = 90^\circ - \alpha = \beta .
+\]
+Scheitelwinkel dazu ist $\ang{DMF}$ (die Geraden $BD$ und $EF$ schneiden sich in $M$), also
+\[
+  \ang{DMF} = \beta .
+\]
+\end{schritt}
+
+\begin{schritt}{Schritt 8 -- Wieder gleichschenklig (Werkzeug 3)}
+Im Dreieck $DFM$ sind die Winkel bei $D$ und bei $M$ beide gleich $\beta$. Also:
+\[
+  \boxed{\;\seg{FD} = \seg{FM}\;}
+\]
+\end{schritt}
+
+
+% ================= CONCLUSION =================
+\section{Schluss}
+
+\begin{schritt}{Schritt 9 -- Zusammensetzen}
+Aus Teil 1 und Teil 2 folgt
+\[
+  \seg{AF} = \seg{FM} = \seg{FD}, \qquad\text{insbesondere}\qquad \boxed{\;\seg{AF} = \seg{FD}\;}.
+\]
+$F$ ist also die Mitte von $AD$. \hfill $\square$ \quad (q.\,e.\,d. -- \emph{quod erat demonstrandum}, „was zu beweisen war“)
+\end{schritt}
+
+\begin{hinweis}
+Wir haben nebenbei mehr bewiesen als verlangt: $F$ hat von $A$, $M$ \emph{und} $D$ denselben Abstand.
+$F$ ist also der Mittelpunkt des Kreises durch $A$, $M$ und $D$. Das passt zum \textbf{Satz des Thales}:
+Das Dreieck $AMD$ hat bei $M$ einen rechten Winkel, und bei einem rechtwinkligen Dreieck ist die Mitte
+der Hypotenuse immer der Umkreismittelpunkt. Der Satz von Brahmagupta sagt also: Das Lot von $M$ auf $BC$
+zielt genau auf den Thales-Mittelpunkt der gegen\"uberliegenden Seite.
+\end{hinweis}
+
+% ================= CHECKLIST =================
+\section{Wo haben wir welche Voraussetzung benutzt?}
+
+Ein guter Beweis benutzt jede Voraussetzung. Pr\"uft das nach:
+\begin{center}
+\begin{tabular}{@{}lll@{}}
+\textbf{Voraussetzung} & \textbf{benutzt in} & \textbf{wof\"ur} \\ \hline
+Ecken auf einem Kreis & Schritt 1, 6 & Umfangswinkelsatz \\
+$AC \perp BD$ (rechter Winkel bei $M$) & Schritt 2, 7 & Winkelsumme im Dreieck $BMC$ \\
+$EF \perp BC$ (rechter Winkel bei $E$) & Schritt 3 & Winkelsumme im Dreieck $MEC$ \\
+\end{tabular}
+\end{center}
+
+% ================= EXERCISES =================
+\section{Aufgaben}
+
+\begin{enumerate}[leftmargin=1.8em,itemsep=4pt]
+  \item Schreibt Teil 2 (Schritte 6 bis 8) vollst\"andig auf, \emph{ohne} in den Text zu schauen.
+        Zeichnet dazu die Figur und markiert alle Winkel $\alpha$ orange und alle Winkel
+        $\beta = 90^\circ - \alpha$ gr\"un.
+  \item Der Satz gilt auch f\"ur die anderen drei Seiten: Das Lot von $M$ auf $AB$ halbiert $CD$,
+        das Lot auf $CD$ halbiert $AB$, das Lot auf $DA$ halbiert $BC$. Warum muss man daf\"ur
+        nichts Neues beweisen?
+  \item Was passiert, wenn die Ecken \emph{nicht} auf einem Kreis liegen, die Diagonalen aber trotzdem
+        senkrecht stehen? Welcher Schritt geht dann kaputt? Probiert es im Labor aus
+        (Modus \textsc{Satz}, Punkte ziehen, Abst\"ande in der Seitenleiste beobachten):\\
+        \href{https://docalvers.de/brahmagupta.html}{docalvers.de/brahmagupta.html}
+  \item Zeichnet ein Quadrat in einen Kreis. Wo liegen $M$, $E$ und $F$? Pr\"uft den Satz an diesem
+        Spezialfall nach -- warum ist er hier „offensichtlich“?
+  \item F\"ur Schnelle: Man kann sich Teil 2 komplett sparen. Begr\"undet mit dem Satz des Thales
+        (siehe Aha-Moment), warum aus $\seg{FA} = \seg{FM}$ (Schritt 5) \emph{schon} $\seg{AF} = \seg{FD}$ folgt.
+        Tipp: Welche Punkte auf der Strecke $AD$ haben von $A$ und von $M$ denselben Abstand -- und wie viele sind das?
+\end{enumerate}
+
+\vspace{1em}
+\noindent{\small\textit{Quellen:} Wikipedia, „Satz von Brahmagupta“ (de) und „Brahmagupta theorem“ (en);
+H.\,S.\,M. Coxeter, S.\,L. Greitzer: \emph{Zeitlose Geometrie}.}
+
+\end{document}
