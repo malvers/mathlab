@@ -664,9 +664,12 @@
     if (submitBtn) submitBtn.addEventListener('click', submit);
     render();
     QuizCollapse.init(quizEl);
-    placeEvalButton();   /* nach init, damit die .qbar schon steht */
+    /* Uebungsmodus (submit:false): es wird nie etwas abgegeben, also fuehren
+       die beiden Lehrer-Pillen - Live-Auswertung und QR-Code-Zettel - ins
+       Leere und bleiben weg (Doc, 07.09.2026). */
+    if (CFG.submit !== false) placeEvalButton();   /* nach init, damit die .qbar schon steht */
     placePlanButton();
-    placeSlipButton();   /* zuletzt: braucht den Plan-Knopf schon in der Leiste */
+    if (CFG.submit !== false) placeSlipButton();   /* zuletzt: braucht den Plan-Knopf schon in der Leiste */
     updateSubmitState();
     tagSubline();
     /* Demo helper (?test): key r fills a random answer set, ~95% correct. */

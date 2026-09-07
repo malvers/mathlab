@@ -65,12 +65,25 @@ b{font-weight:700;color:var(--ink)}
 .sol .why{color:var(--muted);font-size:15px}
 .katex{font-size:1.02em}
 
+/* per-task solution: button under the task, the solution opens right there
+   (Doc, 07.09.2026). The copy is built by JS from the solutions section, so
+   the sheet keeps exactly one source for every solution text. */
+.solbtn{font-family:Orbitron,system-ui,sans-serif;font-size:11px;letter-spacing:1px;
+  color:var(--green);background:transparent;cursor:pointer;margin-top:14px;
+  border:.75px solid rgba(121,158,49,.5);border-radius:4px;padding:7px 12px}
+.solbtn:hover{border-color:var(--green);background:rgba(121,158,49,.08)}
+.solinline{margin:14px 0 0;background:rgba(121,158,49,.07)}
+.solinline h3{display:none}
+.solinline[hidden]{display:none}
+
 /* print: A4, solutions on their own page so the sheet works without them */
 @media print{
   @page{size:A4;margin:16mm 16mm 18mm}
   html,body{background:#fff}
   .sheet{max-width:none;padding:0}
   .tools{display:none}
+  /* the inline copies stay out of print - the solutions keep their own page */
+  .solbtn,.solinline{display:none!important}
   body{font-size:14.5px;line-height:1.38}
   h1{font-size:24px}
   .rules{margin:12px 0 18px}
@@ -102,6 +115,7 @@ b{font-weight:700;color:var(--ink)}
       <li>Berechne $1{,}5 \cdot A$. In welcher Situation wäre diese Rechnung sinnvoll?</li>
       <li>Warum lässt sich $A$ nicht zu einer Matrix mit drei Spalten addieren?</li>
     </ol>
+    <button class="solbtn" type="button">Lösung anzeigen</button>
   </section>
 
   <section class="task afb2">
@@ -113,6 +127,7 @@ b{font-weight:700;color:var(--ink)}
       <li>Deute die Lösung: Welche Komponente dominiert, und wie teuer ist die Mischung je Kilogramm?</li>
       <li>Der Kunde fordert nun $25$ kg Protein statt $24$ kg, alles andere bleibt. Das CAS gibt $a = -10$, $b = 90$, $c = 10$, $d = 10$ aus. Prüfe und beurteile.</li>
     </ol>
+    <button class="solbtn" type="button">Lösung anzeigen</button>
   </section>
 
   <section class="task afb3">
@@ -124,6 +139,7 @@ b{font-weight:700;color:var(--ink)}
       <li>In der Computergrafik beschreiben Matrizen Drehungen und Verschiebungen. Was folgt aus deinem Ergebnis für die Reihenfolge solcher Schritte?</li>
       <li>Beurteile die Behauptung. Welche Rechengesetze gelten für Matrizen trotzdem?</li>
     </ol>
+    <button class="solbtn" type="button">Lösung anzeigen</button>
   </section>
 
   <section id="sol" hidden>
@@ -187,6 +203,26 @@ toggle.onclick = () => {
   toggle.textContent = sol.hidden ? 'Lösungen anzeigen' : 'Lösungen verbergen';
   if (!sol.hidden) sol.scrollIntoView({ behavior: 'smooth', block: 'start' });
 };
+
+// Per task its own solution, right under the task (Doc, 07.09.2026). The block
+// is copied from the solutions section on first click - after KaTeX has run, so
+// the formulas come along rendered. The original stays where it is: the
+// solutions page in print and the big toggle above keep working unchanged.
+document.querySelectorAll('.task .solbtn').forEach((btn, i) => {
+  let box = null;
+  btn.onclick = () => {
+    if (!box) {
+      const src = document.querySelectorAll('#sol .sol')[i];
+      if (!src) return;
+      box = src.cloneNode(true);
+      box.className = 'sol solinline';
+      box.hidden = true;
+      btn.after(box);
+    }
+    box.hidden = !box.hidden;
+    btn.textContent = box.hidden ? 'Lösung anzeigen' : 'Lösung verbergen';
+  };
+});
 </script>
 </body>
 </html>

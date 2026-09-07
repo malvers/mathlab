@@ -110,13 +110,17 @@
     padding: 3px 11px;
     cursor: pointer;
   }
-  .solbtn:hover:not(:disabled) { background: rgba(121, 158, 49, 0.14); }
+  /* only the closed button gets the pale hover - on the open (solid green)
+     button it used to win over the green and left white text on a pale
+     ground: unreadable (Doc, 07.09.2026). Open hovers a shade darker. */
+  .solbtn:hover:not(:disabled):not([aria-expanded="true"]) { background: rgba(121, 158, 49, 0.14); }
   .solbtn:disabled {
     color: rgba(14, 36, 78, 0.35);
     border-color: rgba(14, 36, 78, 0.18);
     cursor: default;
   }
   .solbtn[aria-expanded="true"] { background: var(--green); border-color: var(--green); color: #fff; }
+  .solbtn[aria-expanded="true"]:hover { background: var(--green-dark); border-color: var(--green-dark); }
   .solution {
     background: rgba(121, 158, 49, 0.08);
     border-left: 3px solid var(--green);
